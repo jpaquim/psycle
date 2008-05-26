@@ -253,9 +253,16 @@ namespace qpsycle {
 		psy::core::Player::Instance()->setPlayPos( newXPos / beatPxLength_ );
 	}
 
+	/**
+	 * Moves all the currently selected items.
+	 *
+	 * Note: vertical constraint to parent line is handled in SequencerItem::itemChange().
+	 */
 	void SequencerDraw::onItemMoved( SequencerItem* item, QPointF diff ) 
 	{
 		Q_UNUSED( item );
+
+		// Determine how much to move all the items.
 		if ( gridSnap() ) {
 			int beatDiff = static_cast<int>( diff.x() ) / beatPxLength_;
 			int snappedBeatDiff = beatDiff * beatPxLength_;
@@ -277,9 +284,10 @@ namespace qpsycle {
 		if ( leftMostX + diff.x() < 0 ) {
 			xMoveBy = -leftMostX;
 		} else {
-			xMoveBy = (int)diff.x();
+			xMoveBy = static_cast<int>( diff.x() );
 		}
 
+		// Move each selected item.
 		foreach ( QGraphicsItem *uncastItem, selectedItems )
 		{
 			if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 

@@ -53,7 +53,6 @@ namespace qpsycle {
 
 		void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
 		psy::core::SequenceEntry *sequenceEntry() const; 
-		void constrainToParent();
 
 		// Enable the use of qgraphicsitem_cast with this item.
 		enum { Type = UserType + 5 };

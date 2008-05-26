@@ -117,20 +117,6 @@ namespace qpsycle {
 		}
 	}
 
-	void SequencerItem::constrainToParent() 
-	{
-		int currentLeftPos = pos().x();
-		int newLeftPos = std::max( 0, currentLeftPos );
-
-		setPos( newLeftPos, 0 );                 
-	
-		if ( true /*gridSnap()*/ ) {
-			int beatPos = pos().x() / seqDraw_->beatPxLength();
-			int snappedLeftPos = beatPos * seqDraw_->beatPxLength();
-			setPos( snappedLeftPos, 0 );
-		}
-	}
-
 	void SequencerItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 	{
 		QGraphicsItem::mousePressEvent( event ); // Do normal business...
