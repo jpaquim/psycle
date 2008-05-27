@@ -29,29 +29,23 @@ class QComboBox;
 class QPushButton;
 class QCheckBox;
 
+#include "ui_behaviourpage.h"
+
 namespace qpsycle {
 
-class Configuration;
+	class Configuration;
 
-class BehaviourPage : public QWidget {
-Q_OBJECT
-public:
-	BehaviourPage( QWidget *parent = 0 );
+	class BehaviourPage : public QWidget, private Ui::BehaviourPage {
+		Q_OBJECT
+		public:
+		BehaviourPage( QWidget *parent = 0 );
 
-public slots:
-	void onSaveButtonClicked();
-	void onSettingsChanged();
+	public slots:
+		void onSaveButtonClicked();
+		void onSettingsChanged();
 
-private:
-	QComboBox *knobBehaviourCombo_;
-	QPushButton *saveBtn_;
-	QPushButton *closeBtn_;
-
-	QCheckBox *homeEndChk;
-	QCheckBox *shiftChk;
-	QCheckBox *wrapChk;
-	QCheckBox *centerCursorChk;
-};
+	private:
+	};
 
 } // namespace qpsycle
 
