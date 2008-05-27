@@ -39,87 +39,32 @@ namespace qpsycle {
 	DirsPage::DirsPage( QWidget *parent )
 		: QWidget( parent )
 	{
-		QVBoxLayout *mainLay = new QVBoxLayout();
-		mainLay->setAlignment( Qt::AlignTop );
+		setupUi( this );
 
-		QGroupBox *dirsGroup = new QGroupBox( this );
-		QVBoxLayout *dirsLay = new QVBoxLayout();
-		dirsGroup->setLayout( dirsLay );
-
-		dirsLay->addWidget( new QLabel("Song Directory") );
-		songPathEdit_ = new QLineEdit();
 		songPathEdit_->setReadOnly( true );
 		QString songPathString = settings.value( "paths/songPath", "." ).toString();
 		songPathEdit_->setText( songPathString );
-		dirsLay->addWidget( songPathEdit_ );
-		
-		QPushButton *songBrowse = new QPushButton( "Browse..." );
-		dirsLay->addWidget( songBrowse );
 		connect( songBrowse, SIGNAL( clicked() ), this, SLOT( onSongBrowse() ) );
 
-
-
-
-
-		dirsLay->addWidget( new QLabel("Psycle Plugins Directory") );
-		pluginsPathEdit_ = new QLineEdit();
 		pluginsPathEdit_->setReadOnly( true );
 		QString pluginsPathString = settings.value( "paths/pluginsPath", "." ).toString();
 		pluginsPathEdit_->setText( pluginsPathString );
-		dirsLay->addWidget( pluginsPathEdit_ );
-
-		QPushButton *pluginsBrowse = new QPushButton( "Browse..." );
-		dirsLay->addWidget( pluginsBrowse );
-
 		connect( pluginsBrowse, SIGNAL( clicked() ), this, SLOT( onPluginsBrowse() ) );
 
-
-		dirsLay->addWidget( new QLabel("Psycle Presets Directory") );
-		presetsPathEdit_ = new QLineEdit();
 		presetsPathEdit_->setReadOnly( true );
 		QString presetsPathString = settings.value( "paths/presetsPath", "." ).toString();
 		presetsPathEdit_->setText( presetsPathString );
-		dirsLay->addWidget( presetsPathEdit_ );
-
-		QPushButton *presetsBrowse = new QPushButton( "Browse..." );
-		dirsLay->addWidget( presetsBrowse );
-
 		connect( presetsBrowse, SIGNAL( clicked() ), this, SLOT( onPresetsBrowse() ) );
 
-
-
-
-		dirsLay->addWidget( new QLabel("Ladspa Plugins Directory") );
-		ladspaPathEdit_ = new QLineEdit();
 		ladspaPathEdit_->setReadOnly( true );
 		QString ladspaPathString = settings.value( "paths/ladspaPath", "/usr/lib/ladspa" ).toString();
 		ladspaPathEdit_->setText( ladspaPathString );
-		dirsLay->addWidget( ladspaPathEdit_ );
-
-		QPushButton *ladspaBrowse = new QPushButton( "Browse..." );
-		dirsLay->addWidget( ladspaBrowse );
-
 		connect( ladspaBrowse, SIGNAL( clicked() ), this, SLOT( onLadspaBrowse() ) );
 
-		dirsLay->addWidget( new QLabel("Samples Directory") );
-		samplesPathEdit_ = new QLineEdit();
 		samplesPathEdit_->setReadOnly( true );
 		QString samplesPathString = settings.value( "paths/samplesPath", "/home/samples" ).toString();
 		samplesPathEdit_->setText( samplesPathString );
-		dirsLay->addWidget( samplesPathEdit_ );
-
-		QPushButton *samplesBrowse = new QPushButton( "Browse..." );
-		dirsLay->addWidget( samplesBrowse );
-
 		connect( samplesBrowse, SIGNAL( clicked() ), this, SLOT( onSamplesBrowse() ) );
-
-
-
-
-
-		mainLay->addWidget( dirsGroup );
-
-		setLayout( mainLay );
 	}
 
 	void DirsPage::onSongBrowse()
