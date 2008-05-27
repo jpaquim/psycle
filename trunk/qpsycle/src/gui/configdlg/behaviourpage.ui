@@ -39,7 +39,7 @@
           <item>
            <widget class="QLabel" name="knobBehaviourLabel_" >
             <property name="text" >
-             <string>&amp;Knob behaviour:</string>
+             <string>K&amp;nob behaviour:</string>
             </property>
             <property name="buddy" >
              <cstring>knobBehaviourCombo_</cstring>
@@ -63,28 +63,28 @@
         <item>
          <widget class="QCheckBox" name="homeEndChk_" >
           <property name="text" >
-           <string>FT2 Home/End Behaviour</string>
+           <string>FT2 &amp;Home/End Behaviour</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="shiftChk_" >
           <property name="text" >
-           <string>Shift Keys For Select</string>
+           <string>Shift &amp;Keys For Select</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="wrapChk_" >
           <property name="text" >
-           <string>Wrap Around</string>
+           <string>&amp;Wrap Around</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="centerCursorChk_" >
           <property name="text" >
-           <string>Center Cursor</string>
+           <string>&amp;Center Cursor</string>
           </property>
          </widget>
         </item>
