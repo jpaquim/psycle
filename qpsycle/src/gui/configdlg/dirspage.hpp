@@ -31,11 +31,13 @@ class QPushButton;
 class QCheckBox;
 class QLineEdit;
 
+#include "ui_dirspage.h"
+
 namespace qpsycle {
 
 class Configuration;
 
-class DirsPage : public QWidget {
+	class DirsPage : public QWidget, private Ui::DirsPage {
 Q_OBJECT
 public:
 	DirsPage( QWidget *parent = 0 );
@@ -49,12 +51,6 @@ private slots:
 
 private:
 	Configuration *config_;
-
-	QLineEdit *songPathEdit_;
-	QLineEdit *pluginsPathEdit_;
-	QLineEdit *presetsPathEdit_;
-	QLineEdit *ladspaPathEdit_;
-	QLineEdit *samplesPathEdit_;
 
 	QSettings settings;
 };
