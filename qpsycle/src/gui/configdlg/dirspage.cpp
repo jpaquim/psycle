@@ -73,8 +73,10 @@ namespace qpsycle {
 			this, "Choose song directory",
 			songPathEdit_->text() );
 
-		settings.setValue( "paths/songPath", newSongPath );
-		songPathEdit_->setText( newSongPath );
+		if ( !newSongPath.isEmpty() ) {
+			settings.setValue( "paths/songPath", newSongPath );
+			songPathEdit_->setText( newSongPath );
+		}
 	}
 
 	void DirsPage::onPluginsBrowse()
@@ -83,8 +85,10 @@ namespace qpsycle {
 			this, "Choose plugins directory",
 			pluginsPathEdit_->text() );
 
-		settings.setValue( "paths/pluginsPath", newPluginsPath );
-		pluginsPathEdit_->setText( newPluginsPath );
+		if ( !newPluginsPath.isEmpty() ) {
+			settings.setValue( "paths/pluginsPath", newPluginsPath );
+			pluginsPathEdit_->setText( newPluginsPath );
+		}
 	}
 
 
@@ -94,8 +98,10 @@ namespace qpsycle {
 			this, "Choose presets directory",
 			presetsPathEdit_->text() );
 
-		settings.setValue( "paths/presetsPath", newPresetsPath );
-		presetsPathEdit_->setText( newPresetsPath );
+		if ( !newPresetsPath.isEmpty() ) {
+			settings.setValue( "paths/presetsPath", newPresetsPath );
+			presetsPathEdit_->setText( newPresetsPath );
+		}
 	}
 
 	void DirsPage::onLadspaBrowse()
@@ -104,8 +110,10 @@ namespace qpsycle {
 			this, "Choose ladspa directory",
 			ladspaPathEdit_->text() );
 
-		settings.setValue( "paths/ladspaPath", newLadspaPath );
-		ladspaPathEdit_->setText( newLadspaPath );
+		if ( !newLadspaPath.isEmpty() ) {
+			settings.setValue( "paths/ladspaPath", newLadspaPath );
+			ladspaPathEdit_->setText( newLadspaPath );
+		}
 	}
 
 	void DirsPage::onSamplesBrowse()
@@ -114,8 +122,10 @@ namespace qpsycle {
 			this, "Choose Samples directory",
 			samplesPathEdit_->text() );
 
-		settings.setValue( "paths/samplesPath", newSamplesPath );
-		samplesPathEdit_->setText( newSamplesPath );
+		if ( !newSamplesPath.isEmpty() ) {
+			settings.setValue( "paths/samplesPath", newSamplesPath );
+			samplesPathEdit_->setText( newSamplesPath );
+		}
 	}
 
 
