@@ -271,72 +271,85 @@ namespace qpsycle {
 
 	void MainWindow::onNewSongRequest()
 	{
+		if ( okToContinue() )
+		{
+			psy::core::Song *blankSong = createBlankSong();
+			loadSong( blankSong );
+			updateWindowTitleSongName( "Untitled.psy" );
+			curFile.clear();
+			
+			statusBar()->showMessage( "New song loaded", 2000 );
+		}
+	}
+
+	/**
+	 * Called to determine whether a potentially destructive action
+	 * (i.e. something that could lose changes to a song) should be
+	 * allowed to continue.
+	 */
+	bool MainWindow::okToContinue()
+	{
 		if ( songHasChanged() )
 		{
-			int response = QMessageBox::warning( this, "Save changes?", "The song has been modified.\n Do you wish to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save ) ;
+			int response = QMessageBox::warning(
+				this, "Save changes?",
+				"The song has been modified.\n Do you wish to save your changes?",
+				QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save
+				);
 
-			if ( response == QMessageBox::Save )
-				onSaveSongRequest();
-
-			if ( response == QMessageBox::Cancel )
-				return;
+			if ( response == QMessageBox::Save ) {
+				return onSaveSongRequest();
+			} else if ( response == QMessageBox::Cancel ) {
+				return false;
+			}
 		}
 	
-		psy::core::Song *blankSong = createBlankSong();
-		loadSong( blankSong );
-		updateWindowTitleSongName( "Untitled.psy" );
-		curFile.clear();
+		return true; // If the song hasn't changed, we don't need to worry.
 	}
 
 	void MainWindow::onOpenSongRequest()
 	{
-		if ( songHasChanged() )
+		if ( okToContinue() )
 		{
-			int response = QMessageBox::warning( this, "Save changes?", "The song has been modified.\n Do you wish to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save ) ;
-
-			if ( response == QMessageBox::Save )
-				onSaveSongRequest();
-
-			if ( response == QMessageBox::Cancel )
-				return;
-		}
-
-		QString songPath;
-		if ( currentSongDir_.isEmpty() )
-			songPath = settings.value( "paths/songPath", "." ).toString();
-		else
-			songPath = currentSongDir_;
-			
-		QString fileName = QFileDialog::getOpenFileName( this, "Open Song", songPath, "Psycle Songs (*.psy)" );
-
-		if ( !fileName.isEmpty() ) 
-		{
-			psy::core::Player::Instance()->stop();
-			psy::core::Song *song = new psy::core::Song();
-			QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-			if ( song->load( fileName.toStdString() ) )
-			{
-				loadSong( song );
-				setCurrentFile( fileName );
-			}
+			QString songPath;
+			if ( currentSongDir_.isEmpty() )
+				songPath = settings.value( "paths/songPath", "." ).toString();
 			else
+				songPath = currentSongDir_;
+			
+			QString fileName = QFileDialog::getOpenFileName(
+				this, "Open Song",
+				songPath, "Psycle Songs (*.psy)" );
+			
+			if ( !fileName.isEmpty() ) 
 			{
-				///\Show some error message.
+				psy::core::Player::Instance()->stop();
+				psy::core::Song *song = new psy::core::Song();
+				QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+				if ( song->load( fileName.toStdString() ) )
+				{
+					loadSong( song );
+					setCurrentFile( fileName );
+				}
+				else
+				{
+					///\Show some error message.
+				}
 			}
 		}
 	}
 
-	void MainWindow::onSaveSongRequest()
+	bool MainWindow::onSaveSongRequest()
 	{
 		if ( curFile.isEmpty() ) {
-			onSaveSongAsRequest();
+			return onSaveSongAsRequest();
 		}
 		else {
-			saveSong( curFile );
+			return saveSong( curFile );
 		}
 	}
 
-	void MainWindow::onSaveSongAsRequest()
+	bool MainWindow::onSaveSongAsRequest()
 	{
 		QString songPath;
 		if ( currentSongDir_.isEmpty() )
@@ -348,13 +361,13 @@ namespace qpsycle {
 								tr("Choose a file name"), songPath,
 								tr("Psycle Songs (*.psy)"));
 		if ( fileName.isEmpty() ) {
-			return;
+			return false;
 		}
 
 		if ( !fileName.endsWith(".psy") )
 			fileName.append(".psy");
 
-		saveSong( fileName );
+		return saveSong( fileName );
 	}
 
 	bool MainWindow::songHasChanged()
@@ -375,7 +388,7 @@ namespace qpsycle {
 		return blankSong;
 	}
 
-	void MainWindow::saveSong( const QString & fileName )
+	bool MainWindow::saveSong( const QString & fileName )
 	{
 		qDebug( "Saving song." );
 
@@ -386,12 +399,17 @@ namespace qpsycle {
 		QApplication::restoreOverrideCursor();
 		
 		if (!success) {
-			QMessageBox::critical(this, tr("Saving Failed!"), tr("Could not save song, for some reason!"), QMessageBox::Ok, QMessageBox::NoButton);
+			QMessageBox::critical(
+				this, tr("Saving Failed!"),
+				tr("Could not save song, for some reason!"),
+				QMessageBox::Ok, QMessageBox::NoButton );
+			return false;
 		}
 		else {
 			setCurrentFile( fileName );
 			statusBar()->showMessage( tr("Song saved."), 5000 );
 			logConsole_->AddSuccessText("Song Saved");
+			return true;
 		}
 	}
 
@@ -440,6 +458,8 @@ namespace qpsycle {
 		setupSignals();
 		// enable audio driver
 		psy::core::Player::Instance()->driver().Enable(true);
+
+		statusBar()->showMessage( "Song loaded.", 5000 );
 		logConsole_->AddSuccessText("Song Loaded Successfuly");
 
 		QApplication::restoreOverrideCursor();
