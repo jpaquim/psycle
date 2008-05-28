@@ -249,6 +249,254 @@ namespace qpsycle {
 		updateWindowTitleSongName( "Untitled.psy" );
 	}
 
+	void MainWindow::createActions()
+	{
+		newAct = new QAction(QIcon(":/images/new.png"), tr("&New Song"), this);
+		newAct->setShortcut(tr("Ctrl+N"));
+		newAct->setStatusTip(tr("Create a new song"));
+		connect( newAct, SIGNAL( triggered() ), this, SLOT( onNewSongRequest() ) );
+
+		openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
+		openAct->setShortcut(tr("Ctrl+O"));
+		openAct->setStatusTip(tr("Open an existing song"));
+		connect(openAct, SIGNAL(triggered()), this, SLOT(onOpenSongRequest()));
+
+		saveAct = new QAction(QIcon(":/images/save.png"), tr("&Save..."), this);
+		saveAct->setShortcut(tr("Ctrl+S"));
+		saveAct->setStatusTip(tr("Save the current song"));
+		connect(saveAct, SIGNAL(triggered()), this, SLOT(onSaveSongRequest()));
+
+		saveAsAct = new QAction(QIcon(":/images/saveAs.png"), tr("Save As..."), this);
+		saveAsAct->setShortcut(tr("Ctrl+Shift+S"));
+		saveAsAct->setStatusTip( tr("Save the current song with a new name") );
+		connect( saveAsAct, SIGNAL( triggered() ), this, SLOT( onSaveSongAsRequest() ) );
+
+		songPropsAct_ = new QAction( tr("Song &Properties"), this );
+		songPropsAct_->setStatusTip(tr("View/edit song properties"));
+		connect( songPropsAct_, SIGNAL(triggered()), this, SLOT(showSongPropertiesDialog()) );
+
+		undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
+		undoAct->setShortcut(tr("Ctrl+Z"));
+		undoAct->setStatusTip(tr("Undo the last action"));
+		connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
+
+		redoAct = new QAction(QIcon(":/images/redo.png"), tr("&Redo"), this);
+		redoAct->setShortcut(tr("Ctrl+Y"));
+		redoAct->setStatusTip(tr("Redo the last undone action"));
+		connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
+	
+		showUnReAct = new QAction(tr("&Undo List"), this);
+		showUnReAct->setStatusTip(tr("Shows/Hides the Undo/Redo Window"));
+		connect(showUnReAct, SIGNAL(triggered()), this, SLOT(showUndoView()));
+	
+		showLogConsAct = new QAction(tr("&Logging Console"), this);
+		showLogConsAct->setStatusTip(tr("Shows/Hides Logging Console"));
+		connect(showLogConsAct, SIGNAL(triggered()), this, SLOT(showLogCons()));
+
+		quitAct = new QAction(tr("&Quit"), this);
+		quitAct->setShortcut(tr("Ctrl+Q"));
+		quitAct->setStatusTip(tr("Quit the application"));
+		connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+		settingsConfAct = new QAction( tr("&Settings..."), this );
+		connect( settingsConfAct, SIGNAL( triggered() ), this, SLOT( showSettingsDlg() ) );
+
+
+		for (int i = 0; i < 4; ++i) 
+		{
+			recentSongsActs[i] = new QAction(this);
+			recentSongsActs[i]->setVisible(false);
+			connect( recentSongsActs[i], SIGNAL( triggered() ), this, SLOT( openRecentFile() ) );
+		}
+
+		aboutAct = new QAction(tr("&About qpsycle"), this);
+		aboutAct->setStatusTip(tr("About qpsycle"));
+		connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutQpsycle()));
+
+		// View actions.
+		QByteArray showPatternBoxSetting = settings.value( "keys/showPatternBox", "F1" ).toByteArray();
+		QByteArray showMachineViewSetting = settings.value( "keys/showMachineView", "F2" ).toByteArray();
+		QByteArray showPatternViewSetting = settings.value( "keys/showPatternView", "F3" ).toByteArray();
+		QByteArray showWaveEditorSetting = settings.value( "keys/showWaveEditor", "F4" ).toByteArray();
+		QByteArray showSequencerViewSetting = settings.value( "keys/showSequencerView", "F5" ).toByteArray();
+
+		showPatternBoxAct_ = new QAction( tr("Pattern &Box"), this );
+		showPatternBoxAct_->setShortcut( tr( showPatternBoxSetting.data() ) );
+		connect( showPatternBoxAct_, SIGNAL( triggered() ), this, SLOT( showPatternBox() ) );
+
+		showMachineViewAct_ = new QAction( tr("&Machine view"), this );
+		showMachineViewAct_->setShortcut( tr( showMachineViewSetting.data() ) );
+		connect( showMachineViewAct_, SIGNAL( triggered() ), this, SLOT( showMachineView() ) );
+
+		showPatternViewAct_ = new QAction( tr("&Pattern view"), this );
+		showPatternViewAct_->setShortcut( tr( showPatternViewSetting.data() ) );
+		connect( showPatternViewAct_, SIGNAL( triggered() ), this, SLOT( showPatternView() ) );
+
+		showWaveEditorAct_ = new QAction( tr("&Wave editor"), this );
+		showWaveEditorAct_->setShortcut( tr( showWaveEditorSetting.data() ) );
+		connect( showWaveEditorAct_, SIGNAL( triggered() ), this, SLOT( showWaveEditor() ) );
+
+		showSequencerViewAct_ = new QAction( tr("&Sequencer view"), this );
+		showSequencerViewAct_->setShortcut( tr( showSequencerViewSetting.data() ) );
+		connect( showSequencerViewAct_, SIGNAL( triggered() ), this, SLOT( showSequencerView() ) );
+
+		QByteArray instrumentIncSetting = settings.value( "keys/instrumentIncrement", "Ctrl+Up" ).toByteArray();
+		QByteArray instrumentDecSetting = settings.value( "keys/instrumentDecrement", "Ctrl+Down" ).toByteArray();
+		///\todo How to use * and / from the keypad only?  (not working at present.)
+		QByteArray octaveIncSetting = settings.value( "keys/octaveIncrement", "Keypad+*" ).toByteArray();
+		QByteArray octaveDecSetting = settings.value( "keys/octaveDecrement", "Keypad+/" ).toByteArray();
+		QByteArray machineIncSetting = settings.value( "keys/machineIncrement", "Ctrl+Right" ).toByteArray();
+		QByteArray machineDecSetting = settings.value( "keys/machineDecrement", "Ctrl+Left" ).toByteArray();
+
+
+		instrumentIncAct_ = new QAction( tr( "Instrument up" ), this );
+		instrumentIncAct_->setShortcut( tr( instrumentIncSetting.data() ) );
+		connect( instrumentIncAct_, SIGNAL( triggered() ), this, SLOT( instrumentIncrement() ) );
+
+		instrumentDecAct_ = new QAction( tr( "Instrument down" ), this );
+		instrumentDecAct_->setShortcut( tr( instrumentDecSetting.data() ) );
+		connect( instrumentDecAct_, SIGNAL( triggered() ), this, SLOT( instrumentDecrement() ) );
+
+		octaveIncAct_ = new QAction( tr("Octave up"), this );
+		octaveIncAct_->setShortcut( tr( octaveIncSetting.data() ) );
+		connect( octaveIncAct_, SIGNAL( triggered() ), this, SLOT( octaveIncrement() ) );
+
+		octaveDecAct_ = new QAction( tr("Octave down"), this );
+		octaveDecAct_->setShortcut( tr( octaveDecSetting.data() ) );
+		connect( octaveDecAct_, SIGNAL( triggered() ), this, SLOT( octaveDecrement() ) );
+
+		machineDecAct_ = new QAction( tr("Machine down"), this );
+		machineDecAct_->setShortcut( tr( machineDecSetting.data() ) );
+		connect( machineDecAct_, SIGNAL( triggered() ), this, SLOT( machineDecrement() ) );
+
+		machineIncAct_ = new QAction( tr("Machine down"), this );
+		machineIncAct_->setShortcut( tr( machineIncSetting.data() ) );
+		connect( machineIncAct_, SIGNAL( triggered() ), this, SLOT( machineIncrement() ) );
+	
+
+		// Playback actions.
+
+		QByteArray playFromStartSetting = settings.value( "keys/playFromStart", "Shift+F6" ).toByteArray();
+		QByteArray playFromSeqPosSetting = settings.value( "keys/playFromSeqPos", "F6" ).toByteArray();
+		QByteArray playStopSetting = settings.value( "keys/playStop", "F8" ).toByteArray();
+		QByteArray playPatSetting = settings.value( "keys/playPattern", "Shift+F6" ).toByteArray();
+
+		playFromStartAct = new QAction(QIcon(":/images/playstart.png"), tr("&Play from start"), this);
+		playFromStartAct->setShortcut( tr( playFromStartSetting.data() ) );
+		connect( playFromStartAct, SIGNAL( triggered() ), this, SLOT( playFromStart() ) );
+
+		playFromSeqPosAct = new QAction(QIcon(":/images/play.png"), tr("Play from &sequencer position"), this);
+		playFromSeqPosAct->setShortcut( tr( playFromSeqPosSetting.data() ) );
+		connect( playFromSeqPosAct, SIGNAL( triggered() ), this, SLOT( playFromSeqPos() ) );
+		playFromSeqPosAct->setCheckable(true);
+
+		playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
+		playStopAct->setShortcut( tr( playStopSetting.data() ) );
+		connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
+
+		///\todo Doesn't do anything yet.
+		playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
+	}
+
+	void MainWindow::createMenus()
+	{
+		fileMenu = menuBar()->addMenu(tr("&File"));
+		fileMenu->addAction(newAct);
+		fileMenu->addAction(openAct);
+		fileMenu->addAction(saveAct);
+		fileMenu->addAction(saveAsAct);
+		fileMenu->addSeparator();
+		fileMenu->addAction( songPropsAct_ );
+		fileMenu->addSeparator();
+
+		recentMenu = fileMenu->addMenu( tr( "Recent songs" ) );
+		for (int i = 0; i < 4; ++i) {
+			recentMenu->addAction( recentSongsActs[i] );
+		}
+		updateRecentSongsActions();
+		fileMenu->addSeparator();
+		fileMenu->addAction(quitAct);
+
+		editMenu = menuBar()->addMenu(tr("&Edit"));
+		editMenu->addAction(undoAct);
+		editMenu->addAction(redoAct);
+		editMenu->addSeparator();
+		editMenu->addAction( instrumentIncAct_ );
+		editMenu->addAction( instrumentDecAct_ );
+		editMenu->addAction( octaveIncAct_ );
+		editMenu->addAction( octaveDecAct_ );
+		editMenu->addAction( machineIncAct_ );
+		editMenu->addAction( machineDecAct_ );
+
+		viewMenu = menuBar()->addMenu(tr("&View"));
+		viewMenu->addAction( showPatternBoxAct_ );
+		viewMenu->addAction( showMachineViewAct_ );
+		viewMenu->addAction( showPatternViewAct_ );
+		viewMenu->addAction( showWaveEditorAct_ );
+		viewMenu->addAction( showSequencerViewAct_ );
+		viewMenu->addSeparator();
+		viewMenu->addAction( showUnReAct );
+		viewMenu->addAction( showLogConsAct );
+	
+		configMenu = menuBar()->addMenu(tr("&Configuration"));
+		configMenu->addAction( settingsConfAct );
+
+		performMenu = menuBar()->addMenu(tr("&Performance"));
+
+		menuBar()->addSeparator();
+
+		helpMenu = menuBar()->addMenu(tr("&Help"));
+		helpMenu->addAction(aboutAct);
+	}
+
+	void MainWindow::createToolBars()
+	{
+		fileToolBar = addToolBar(tr("File"));
+		fileToolBar->addAction(newAct);
+		fileToolBar->addAction(openAct);
+		fileToolBar->addAction(saveAct);
+
+		editToolBar = addToolBar(tr("Edit"));
+		editToolBar->addAction(undoAct);
+		editToolBar->addAction(redoAct);
+
+		playToolBar = addToolBar(tr("Play"));
+		playToolBar->addAction(playFromStartAct);
+		playToolBar->addAction(playFromSeqPosAct);
+		playToolBar->addAction(playPatAct);
+		playToolBar->addAction(playStopAct);
+
+		machToolBar = addToolBar(tr("Machines"));
+		macCombo_ = new QComboBox();
+		macCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+		sampCombo_ = new QComboBox();
+		sampCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+		sampCombo_->setMaxVisibleItems( 20 );
+		octCombo_ = new QComboBox();
+
+		QLabel *macLabel = new QLabel(" Machines: ");
+		QLabel *sampLabel = new QLabel(" Samples: ");
+		machToolBar->addWidget(macLabel);
+		machToolBar->addWidget( macCombo_ );
+		machToolBar->addWidget(sampLabel);
+		machToolBar->addWidget( sampCombo_ );
+
+		octToolBar_ = addToolBar( "Octave" );
+		octToolBar_->addWidget( new QLabel( "Octave: " ) );
+		octToolBar_->addWidget( octCombo_ );
+		for ( int i = 0; i < 9; i++ ) {
+			octCombo_->addItem( QString::number( i ) );
+		}
+		connect( octCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
+		octCombo_->setCurrentIndex( 4 );
+	}
+
+	void MainWindow::createStatusBar()
+	{
+		statusBar()->showMessage(tr("Ready"));
+		statusBar()->addPermanentWidget( new QLabel( "hi" ) );
+	}
+
 	void MainWindow::setupSignals()
 	{
 		connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ), this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
@@ -484,210 +732,76 @@ namespace qpsycle {
 	
 	}
 
-	void MainWindow::createActions()
+	void MainWindow::openRecentFile()
 	{
-		newAct = new QAction(QIcon(":/images/new.png"), tr("&New Song"), this);
-		newAct->setShortcut(tr("Ctrl+N"));
-		newAct->setStatusTip(tr("Create a new song"));
-		connect( newAct, SIGNAL( triggered() ), this, SLOT( onNewSongRequest() ) );
-
-		openAct = new QAction(QIcon(":/images/open.png"), tr("&Open..."), this);
-		openAct->setShortcut(tr("Ctrl+O"));
-		openAct->setStatusTip(tr("Open an existing song"));
-		connect(openAct, SIGNAL(triggered()), this, SLOT(onOpenSongRequest()));
-
-		saveAct = new QAction(QIcon(":/images/save.png"), tr("&Save..."), this);
-		saveAct->setShortcut(tr("Ctrl+S"));
-		saveAct->setStatusTip(tr("Save the current song"));
-		connect(saveAct, SIGNAL(triggered()), this, SLOT(onSaveSongRequest()));
-
-		saveAsAct = new QAction(QIcon(":/images/saveAs.png"), tr("Save As..."), this);
-		saveAsAct->setShortcut(tr("Ctrl+Shift+S"));
-		saveAsAct->setStatusTip( tr("Save the current song with a new name") );
-		connect( saveAsAct, SIGNAL( triggered() ), this, SLOT( onSaveSongAsRequest() ) );
-
-		songPropsAct_ = new QAction( tr("Song &Properties"), this );
-		songPropsAct_->setStatusTip(tr("View/edit song properties"));
-		connect( songPropsAct_, SIGNAL(triggered()), this, SLOT(showSongPropertiesDialog()) );
-
-		undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
-		undoAct->setShortcut(tr("Ctrl+Z"));
-		undoAct->setStatusTip(tr("Undo the last action"));
-		connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
-
-		redoAct = new QAction(QIcon(":/images/redo.png"), tr("&Redo"), this);
-		redoAct->setShortcut(tr("Ctrl+Y"));
-		redoAct->setStatusTip(tr("Redo the last undone action"));
-		connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
-	
-		showUnReAct = new QAction(tr("&Undo List"), this);
-		showUnReAct->setStatusTip(tr("Shows/Hides the Undo/Redo Window"));
-		connect(showUnReAct, SIGNAL(triggered()), this, SLOT(showUndoView()));
-	
-		showLogConsAct = new QAction(tr("&Logging Console"), this);
-		showLogConsAct->setStatusTip(tr("Shows/Hides Logging Console"));
-		connect(showLogConsAct, SIGNAL(triggered()), this, SLOT(showLogCons()));
-
-		quitAct = new QAction(tr("&Quit"), this);
-		quitAct->setShortcut(tr("Ctrl+Q"));
-		quitAct->setStatusTip(tr("Quit the application"));
-		connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
-
-		settingsConfAct = new QAction( tr("&Settings..."), this );
-		connect( settingsConfAct, SIGNAL( triggered() ), this, SLOT( showSettingsDlg() ) );
-
-
-		for (int i = 0; i < 4; ++i) 
+		if ( okToContinue() )
 		{
-			recentSongsActs[i] = new QAction(this);
-			recentSongsActs[i]->setVisible(false);
-			connect( recentSongsActs[i], SIGNAL( triggered() ), this, SLOT( openRecentFile() ) );
+			QAction *action = qobject_cast<QAction *>( sender() );
+			if ( action != 0 )
+			{
+				QString fileName = action->data().toString();
+
+				if ( !fileName.isEmpty() ) 
+				{
+					psy::core::Player::Instance()->stop();
+					psy::core::Song *song = new psy::core::Song();
+					QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+					if ( song->load( fileName.toStdString() ) )
+					{
+						loadSong( song );
+						setCurrentFile( fileName );
+					}
+					else
+					{
+						///\Show some error message.
+					}
+				}
+			}
 		}
-
-		aboutAct = new QAction(tr("&About qpsycle"), this);
-		aboutAct->setStatusTip(tr("About qpsycle"));
-		connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutQpsycle()));
-
-		// View actions.
-		QByteArray showPatternBoxSetting = settings.value( "keys/showPatternBox", "F1" ).toByteArray();
-		QByteArray showMachineViewSetting = settings.value( "keys/showMachineView", "F2" ).toByteArray();
-		QByteArray showPatternViewSetting = settings.value( "keys/showPatternView", "F3" ).toByteArray();
-		QByteArray showWaveEditorSetting = settings.value( "keys/showWaveEditor", "F4" ).toByteArray();
-		QByteArray showSequencerViewSetting = settings.value( "keys/showSequencerView", "F5" ).toByteArray();
-
-		showPatternBoxAct_ = new QAction( tr("Pattern &Box"), this );
-		showPatternBoxAct_->setShortcut( tr( showPatternBoxSetting.data() ) );
-		connect( showPatternBoxAct_, SIGNAL( triggered() ), this, SLOT( showPatternBox() ) );
-
-		showMachineViewAct_ = new QAction( tr("&Machine view"), this );
-		showMachineViewAct_->setShortcut( tr( showMachineViewSetting.data() ) );
-		connect( showMachineViewAct_, SIGNAL( triggered() ), this, SLOT( showMachineView() ) );
-
-		showPatternViewAct_ = new QAction( tr("&Pattern view"), this );
-		showPatternViewAct_->setShortcut( tr( showPatternViewSetting.data() ) );
-		connect( showPatternViewAct_, SIGNAL( triggered() ), this, SLOT( showPatternView() ) );
-
-		showWaveEditorAct_ = new QAction( tr("&Wave editor"), this );
-		showWaveEditorAct_->setShortcut( tr( showWaveEditorSetting.data() ) );
-		connect( showWaveEditorAct_, SIGNAL( triggered() ), this, SLOT( showWaveEditor() ) );
-
-		showSequencerViewAct_ = new QAction( tr("&Sequencer view"), this );
-		showSequencerViewAct_->setShortcut( tr( showSequencerViewSetting.data() ) );
-		connect( showSequencerViewAct_, SIGNAL( triggered() ), this, SLOT( showSequencerView() ) );
-
-		QByteArray instrumentIncSetting = settings.value( "keys/instrumentIncrement", "Ctrl+Up" ).toByteArray();
-		QByteArray instrumentDecSetting = settings.value( "keys/instrumentDecrement", "Ctrl+Down" ).toByteArray();
-		///\todo How to use * and / from the keypad only?  (not working at present.)
-		QByteArray octaveIncSetting = settings.value( "keys/octaveIncrement", "Keypad+*" ).toByteArray();
-		QByteArray octaveDecSetting = settings.value( "keys/octaveDecrement", "Keypad+/" ).toByteArray();
-		QByteArray machineIncSetting = settings.value( "keys/machineIncrement", "Ctrl+Right" ).toByteArray();
-		QByteArray machineDecSetting = settings.value( "keys/machineDecrement", "Ctrl+Left" ).toByteArray();
-
-
-		instrumentIncAct_ = new QAction( tr( "Instrument up" ), this );
-		instrumentIncAct_->setShortcut( tr( instrumentIncSetting.data() ) );
-		connect( instrumentIncAct_, SIGNAL( triggered() ), this, SLOT( instrumentIncrement() ) );
-
-		instrumentDecAct_ = new QAction( tr( "Instrument down" ), this );
-		instrumentDecAct_->setShortcut( tr( instrumentDecSetting.data() ) );
-		connect( instrumentDecAct_, SIGNAL( triggered() ), this, SLOT( instrumentDecrement() ) );
-
-		octaveIncAct_ = new QAction( tr("Octave up"), this );
-		octaveIncAct_->setShortcut( tr( octaveIncSetting.data() ) );
-		connect( octaveIncAct_, SIGNAL( triggered() ), this, SLOT( octaveIncrement() ) );
-
-		octaveDecAct_ = new QAction( tr("Octave down"), this );
-		octaveDecAct_->setShortcut( tr( octaveDecSetting.data() ) );
-		connect( octaveDecAct_, SIGNAL( triggered() ), this, SLOT( octaveDecrement() ) );
-
-		machineDecAct_ = new QAction( tr("Machine down"), this );
-		machineDecAct_->setShortcut( tr( machineDecSetting.data() ) );
-		connect( machineDecAct_, SIGNAL( triggered() ), this, SLOT( machineDecrement() ) );
-
-		machineIncAct_ = new QAction( tr("Machine down"), this );
-		machineIncAct_->setShortcut( tr( machineIncSetting.data() ) );
-		connect( machineIncAct_, SIGNAL( triggered() ), this, SLOT( machineIncrement() ) );
-	
-
-		// Playback actions.
-
-		QByteArray playFromStartSetting = settings.value( "keys/playFromStart", "Shift+F6" ).toByteArray();
-		QByteArray playFromSeqPosSetting = settings.value( "keys/playFromSeqPos", "F6" ).toByteArray();
-		QByteArray playStopSetting = settings.value( "keys/playStop", "F8" ).toByteArray();
-		QByteArray playPatSetting = settings.value( "keys/playPattern", "Shift+F6" ).toByteArray();
-
-		playFromStartAct = new QAction(QIcon(":/images/playstart.png"), tr("&Play from start"), this);
-		playFromStartAct->setShortcut( tr( playFromStartSetting.data() ) );
-		connect( playFromStartAct, SIGNAL( triggered() ), this, SLOT( playFromStart() ) );
-
-		playFromSeqPosAct = new QAction(QIcon(":/images/play.png"), tr("Play from &sequencer position"), this);
-		playFromSeqPosAct->setShortcut( tr( playFromSeqPosSetting.data() ) );
-		connect( playFromSeqPosAct, SIGNAL( triggered() ), this, SLOT( playFromSeqPos() ) );
-		playFromSeqPosAct->setCheckable(true);
-
-		playStopAct = new QAction(QIcon(":images/stop.png"), tr("&Stop playback"), this);
-		playStopAct->setShortcut( tr( playStopSetting.data() ) );
-		connect( playStopAct, SIGNAL( triggered() ), this, SLOT( playStop() ) );
-
-		///\todo Doesn't do anything yet.
-		playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
 	}
 
-	void MainWindow::createMenus()
-	{
-		fileMenu = menuBar()->addMenu(tr("&File"));
-		fileMenu->addAction(newAct);
-		fileMenu->addAction(openAct);
-		fileMenu->addAction(saveAct);
-		fileMenu->addAction(saveAsAct);
-		fileMenu->addSeparator();
-		fileMenu->addAction( songPropsAct_ );
-		fileMenu->addSeparator();
-
-		recentMenu = fileMenu->addMenu( tr( "Recent songs" ) );
-		for (int i = 0; i < 4; ++i) {
-			recentMenu->addAction( recentSongsActs[i] );
-		}
-		updateRecentSongsActions();
-		fileMenu->addSeparator();
-		fileMenu->addAction(quitAct);
-
-		editMenu = menuBar()->addMenu(tr("&Edit"));
-		editMenu->addAction(undoAct);
-		editMenu->addAction(redoAct);
-		editMenu->addSeparator();
-		editMenu->addAction( instrumentIncAct_ );
-		editMenu->addAction( instrumentDecAct_ );
-		editMenu->addAction( octaveIncAct_ );
-		editMenu->addAction( octaveDecAct_ );
-		editMenu->addAction( machineIncAct_ );
-		editMenu->addAction( machineDecAct_ );
-
-		viewMenu = menuBar()->addMenu(tr("&View"));
-		viewMenu->addAction( showPatternBoxAct_ );
-		viewMenu->addAction( showMachineViewAct_ );
-		viewMenu->addAction( showPatternViewAct_ );
-		viewMenu->addAction( showWaveEditorAct_ );
-		viewMenu->addAction( showSequencerViewAct_ );
-		viewMenu->addSeparator();
-		viewMenu->addAction( showUnReAct );
-		viewMenu->addAction( showLogConsAct );
+	/** This is called whenever a file is loaded (be it new or old.)
+	 *
+	 * It updates the window title and updates the recent songs list
+	 * and current song directory.
+	 */
 	
-		configMenu = menuBar()->addMenu(tr("&Configuration"));
-		configMenu->addAction( settingsConfAct );
+	void MainWindow::setCurrentFile( const QString &fileName )
+	{
+		curFile = fileName;
+		///\todo when undo/redo is in place, at this point we signal that the
+		/// file is now "clean", i.e. has no outstanding changes to be saved.
+		currentSongDir_ = QFileInfo( fileName ).absolutePath();
 
-		performMenu = menuBar()->addMenu(tr("&Performance"));
-
-		menuBar()->addSeparator();
-
-		helpMenu = menuBar()->addMenu(tr("&Help"));
-		helpMenu->addAction(aboutAct);
+		QString shownName = tr( "Untitled" );
+		if ( !curFile.isEmpty() )
+		{
+			shownName = curFile;
+			QSettings settings;
+			QStringList recentSongs = settings.value("recentSongsList").toStringList();
+			recentSongs.removeAll( curFile );
+			recentSongs.prepend( curFile );
+			while ( recentSongs.size() > 4 )
+				recentSongs.removeLast();
+			
+			settings.setValue( "recentSongsList", recentSongs );
+			updateRecentSongsActions();
+		}
+		
+		updateWindowTitleSongName( curFile );
 	}
 
 	void MainWindow::updateRecentSongsActions()
 	{
 		QSettings settings;
 		QStringList recentSongs = settings.value("recentSongsList").toStringList();
+
+		QMutableStringListIterator itr( recentSongs );
+
+		while ( itr.hasNext() ) { // Clear no-longer-existing songs from the recent songs list.
+			if( !QFile::exists( itr.next() ) )
+				itr.remove();
+		}
 		
 		int numRecentSongs = std::min( recentSongs.size(), 4 );
 		
@@ -705,110 +819,9 @@ namespace qpsycle {
 		}
 	}
 
-	void MainWindow::openRecentFile()
+	void MainWindow::updateWindowTitleSongName( const QString & newSongName )
 	{
-		QAction *action = qobject_cast<QAction *>( sender() );
-		if ( action )
-		{
-			if ( songHasChanged() )
-			{
-				int response = QMessageBox::warning( this, "Save changes?", "The song has been modified.\n Do you wish to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save ) ;
-
-				if ( response == QMessageBox::Save )
-					onSaveSongRequest();
-
-				if ( response == QMessageBox::Cancel )
-					return;
-			}
-
-			QString fileName = action->data().toString();
-
-			if ( !fileName.isEmpty() ) 
-			{
-				psy::core::Player::Instance()->stop();
-				psy::core::Song *song = new psy::core::Song();
-				QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-				if ( song->load( fileName.toStdString() ) )
-				{
-					loadSong( song );
-					setCurrentFile( fileName );
-				}
-				else
-				{
-					///\Show some error message.
-				}
-			}
-		}
-	}
-
-	void MainWindow::setCurrentFile(const QString &fileName)
-	{
-		curFile = fileName;
-		currentSongDir_ = QFileInfo( fileName ).absolutePath();
-
-		if ( curFile.isEmpty() )
-			setWindowTitle( QPSYCLE_TITLE );
-		else
-			updateWindowTitleSongName( curFile );
-
-		QSettings settings;
-		QStringList recentSongs = settings.value("recentSongsList").toStringList();
-		recentSongs.removeAll( fileName );
-		recentSongs.prepend( fileName );
-		while ( recentSongs.size() > 4 )
-			recentSongs.removeLast();
-
-		settings.setValue( "recentSongsList", recentSongs );
-
-		updateRecentSongsActions();
-	}
-
-	void MainWindow::createToolBars()
-	{
-		fileToolBar = addToolBar(tr("File"));
-		fileToolBar->addAction(newAct);
-		fileToolBar->addAction(openAct);
-		fileToolBar->addAction(saveAct);
-
-		editToolBar = addToolBar(tr("Edit"));
-		editToolBar->addAction(undoAct);
-		editToolBar->addAction(redoAct);
-
-		playToolBar = addToolBar(tr("Play"));
-		playToolBar->addAction(playFromStartAct);
-		playToolBar->addAction(playFromSeqPosAct);
-		playToolBar->addAction(playPatAct);
-		playToolBar->addAction(playStopAct);
-
-		machToolBar = addToolBar(tr("Machines"));
-		macCombo_ = new QComboBox();
-		macCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-		sampCombo_ = new QComboBox();
-		sampCombo_->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-		sampCombo_->setMaxVisibleItems( 20 );
-		octCombo_ = new QComboBox();
-
-		QLabel *macLabel = new QLabel(" Machines: ");
-		QLabel *sampLabel = new QLabel(" Samples: ");
-		machToolBar->addWidget(macLabel);
-		machToolBar->addWidget( macCombo_ );
-		machToolBar->addWidget(sampLabel);
-		machToolBar->addWidget( sampCombo_ );
-
-		octToolBar_ = addToolBar( "Octave" );
-		octToolBar_->addWidget( new QLabel( "Octave: " ) );
-		octToolBar_->addWidget( octCombo_ );
-		for ( int i = 0; i < 9; i++ ) {
-			octCombo_->addItem( QString::number( i ) );
-		}
-		connect( octCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onOctaveComboBoxIndexChanged( int ) ) );
-		octCombo_->setCurrentIndex( 4 );
-	}
-
-	void MainWindow::createStatusBar()
-	{
-		statusBar()->showMessage(tr("Ready"));
-		statusBar()->addPermanentWidget( new QLabel( "hi" ) );
+		setWindowTitle( QString("[%1] - %2").arg( newSongName ).arg( QPSYCLE_TITLE ) );
 	}
 
 	void MainWindow::populateMachineCombo()
@@ -1153,11 +1166,6 @@ namespace qpsycle {
 					patView_->onTick( psy::core::Player::Instance()->playPos() - entryStart ) ;
 			}
 		}
-	}
-
-	void MainWindow::updateWindowTitleSongName( const QString & newSongName )
-	{
-		setWindowTitle( QString("[%1] - %2").arg( newSongName ).arg( QPSYCLE_TITLE ) );
 	}
 
 } // namespace qpsycle
