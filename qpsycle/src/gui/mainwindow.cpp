@@ -307,6 +307,11 @@ namespace qpsycle {
 		return true; // If the song hasn't changed, we don't need to worry.
 	}
 
+	bool MainWindow::songHasChanged()
+	{
+		return true; ///\todo Can implement this once undo/redo is implemented.
+	}
+
 	void MainWindow::onOpenSongRequest()
 	{
 		if ( okToContinue() )
@@ -369,12 +374,6 @@ namespace qpsycle {
 
 		return saveSong( fileName );
 	}
-
-	bool MainWindow::songHasChanged()
-	{
-		return true; ///\todo Can implement this once undo/redo is implemented.
-	}
-
 
 	psy::core::Song *MainWindow::createBlankSong()
 	{
@@ -464,6 +463,16 @@ namespace qpsycle {
 
 		QApplication::restoreOverrideCursor();
 	}
+
+	void MainWindow::closeEvent( QCloseEvent *event )
+	{
+		if ( okToContinue() ) {
+			event->accept();
+		} else {
+			event->ignore();
+		}
+	}
+
 
 	void MainWindow::undo()
 	{
