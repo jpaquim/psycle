@@ -28,8 +28,6 @@
 #include <iomanip>
 #include <sstream>
 
-namespace qpsycle {
-
 // The InstrumentsModel provides an interface to the
 // Instrument data in the CoreSong.  This model can be
 // loaded by Qt widgets and changes made by one widget will be
@@ -39,87 +37,92 @@ namespace qpsycle {
 // You can still access the CoreSong instrument data directly in the GUI if
 // you want to, but you'll probably need to manually alert
 // any widgets that are supposed to be watching it.
-InstrumentsModel::InstrumentsModel( psy::core::Song *song )
-	: QStandardItemModel(),
-	song_( song )
-{
-	// Buffer stuff is to get hex notation for instrument indexes.
-	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);
+// InstrumentsModel::InstrumentsModel( psy::core::Song *song )
 
-	// Fill the model up with the instrument data from the CoreSong.
-	// Note that we read info about all instrumuent slots in, even
-	// if they're empty.  No particular reason for this I don't think,
-	// so feel free to change it!
-	for (int row = 0; row < psy::core::MAX_INSTRUMENTS; ++row) 
+namespace qpsycle {
+
+	InstrumentsModel::InstrumentsModel( psy::core::Song *song )
+		: song_( song )
 	{
-		buffer.str("");
-		buffer << std::setfill('0') << std::hex << std::setw(2);
-		buffer << row << ": " << song_->_pInstrument[row]->_sName;
-		QString name = QString::fromStdString( buffer.str() );
-		QStandardItem *item = new QStandardItem( name );
-		appendRow( item );
 	}
-}
 
-InstrumentsModel::~InstrumentsModel()
-{}
+	InstrumentsModel::~InstrumentsModel()
+	{}
 
-void InstrumentsModel::setName( int index, const QString & newname )
-{
-	if (
-		index < 0 || index >= psy::core::MAX_INSTRUMENTS ||
-		slotIsEmpty( index )
-	)
-		return;
-
-	psy::core::Instrument *inst = song_->_pInstrument[index];
-	QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-	inst->setName( newname.toStdString() );
-
-	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);
-	buffer.str("");
-	buffer << std::setfill('0') << std::hex << std::setw(2);
-	buffer << index << ": " << song_->_pInstrument[index]->_sName;
-	QString name = QString::fromStdString( buffer.str() );
-	QStandardItem *item = new QStandardItem( name );
-	setItem(index, item);
-}
-
-/**
- * Loads a wave file into the CoreSong, and updates the
- * model accordingly.
- */
-bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
-{
-	// WavAlloc tries to load the wav into the CoreSong.
-	QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-	if ( song_->WavAlloc( instrIndex, pathToWavfile.toStdString().c_str() ) )
+	int InstrumentsModel::rowCount( const QModelIndex & /* parent */ ) const
 	{
-		QStandardItem *tempItem = item( instrIndex );
-		std::ostringstream buffer;
-		buffer.setf(std::ios::uppercase);
-		buffer.str("");
-		buffer << std::setfill('0') << std::hex << std::setw(2);
-		buffer << instrIndex << ": " << song_->_pInstrument[instrIndex]->_sName;
-		QString name = QString::fromStdString( buffer.str() );
-		tempItem->setText( name );
-
-		emit selectedInstrumentChanged(instrIndex);
-		return true;
+		return psy::core::MAX_INSTRUMENTS;
 	}
-	return false;
-}
 
+	QVariant InstrumentsModel::data( const QModelIndex & index, int role ) const
+	{
+		if ( !index.isValid() )
+			return QVariant();
+
+		if ( role == Qt::DisplayRole )
+		{
+			std::ostringstream buffer;
+			int instIndex = index.row();
+			buffer.setf(std::ios::uppercase);
+			buffer.str("");
+			buffer << std::setfill('0') << std::hex << std::setw(2);
+			buffer << instIndex << ": ";
+			if ( slotIsEmpty( instIndex ) ) {
+				buffer << "empty";
+			}
+			else {
+				buffer << song_->_pInstrument[instIndex]->_sName;
+			}
+			return QString::fromStdString( buffer.str() );
+		}
+
+		return QVariant();
+	}
+
+	void InstrumentsModel::setName( int instrIndex, const QString & newname )
+	{
+		if (
+			instrIndex < 0 || instrIndex >= psy::core::MAX_INSTRUMENTS ||
+			slotIsEmpty( instrIndex )
+			)
+			return;
+
+		psy::core::Instrument *inst = song_->_pInstrument[instrIndex];
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+		inst->setName( newname.toStdString() );
+
+		// Let interested views know that something happenened.
+		dataChanged( index( instrIndex ), index( instrIndex ) );
+	}
+
+	/**
+	 * Loads a wave file into the CoreSong, and updates the
+	 * model accordingly.
+	 */
+	bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
+	{
+		// WavAlloc tries to load the wav into the CoreSong.
+		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+		if ( song_->WavAlloc( instrIndex, pathToWavfile.toStdString().c_str() ) )
+		{
+			emit selectedInstrumentChanged(instrIndex);
+
+			// Let interested views know that something happenened.
+			dataChanged( index( instrIndex ), index( instrIndex ) );
+
+			return true;
+		}
+
+		return false;
+	}
 
 /**
  * Returns an instrument from the CoreSong.
  */
-psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
-{
-	return song_->_pInstrument[instrIndex];
-}
+	psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
+	{
+		return song_->_pInstrument[instrIndex];
+	}
 
 
 /**
@@ -128,44 +131,42 @@ psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
  * automatically alerts any widgets using the model, so
  * we don't need to send signals out.
  */
-void InstrumentsModel::clearInstrument( int instrIndex )
-{
-	// Clear the instrument from the CoreSong.
-	song_->DeleteInstrument( instrIndex );
+	void InstrumentsModel::clearInstrument( int instrIndex )
+	{
+		assert( instrIndex >= 0 );
+		assert( instrIndex < psy::core::MAX_INSTRUMENTS );
+		assert( !slotIsEmpty( instrIndex ) );
+		
+		// Clear the instrument from the CoreSong.
+		song_->DeleteInstrument( instrIndex );
 
-	// Refresh the name in this model.
-	std::ostringstream buffer;
-	buffer.setf(std::ios::uppercase);
-	buffer.str("");
-	buffer << std::setfill('0') << std::hex << std::setw(2);
-	buffer << instrIndex << ": " << song_->_pInstrument[instrIndex]->_sName;
-	QString name = QString::fromStdString( buffer.str() );
-	item( instrIndex )->setText( name );
-}
+		// Let interested views know that something happenened.
+		dataChanged( index( instrIndex ), index( instrIndex ) );
+	}
 
-int InstrumentsModel::selectedInstrumentIndex()
-{
-	return song_->instSelected();
-}
+	int InstrumentsModel::selectedInstrumentIndex()
+	{
+		return song_->instSelected();
+	}
 
-void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
-{
-	assert(newIndex >= 0);
-	assert(newIndex < psy::core::MAX_INSTRUMENTS);
-	assert(song_->_pInstrument[newIndex] != NULL);
+	void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
+	{
+		assert( newIndex >= 0 );
+		assert( newIndex < psy::core::MAX_INSTRUMENTS );
+		assert( song_->_pInstrument[newIndex] != NULL );
 
-	song_->instSelected(newIndex);
-	song_->auxcolSelected = newIndex;
+		song_->instSelected( newIndex );
+		song_->auxcolSelected = newIndex;
 
-	emit selectedInstrumentChanged(newIndex);
-}
+		emit selectedInstrumentChanged(newIndex);
+	}
 
-// Find out if a particular slot is free in the CoreSong.
-bool InstrumentsModel::slotIsEmpty( int instrIndex )
-{
-	assert(instrIndex >= 0);
-	assert(instrIndex < psy::core::MAX_INSTRUMENTS);
-	return song_->_pInstrument[instrIndex]->Empty();
-}
+	// Find out if a particular slot is free in the CoreSong.
+	bool InstrumentsModel::slotIsEmpty( int instrIndex ) const
+	{
+		assert( instrIndex >= 0 );
+		assert( instrIndex < psy::core::MAX_INSTRUMENTS );
+		return song_->_pInstrument[instrIndex]->Empty();
+	}
 
 }

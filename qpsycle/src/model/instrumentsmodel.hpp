@@ -27,7 +27,7 @@ namespace psy { namespace core {
 		class Instrument;
 	}}
 
-#include <QStandardItemModel>
+#include <QAbstractListModel>
 
 namespace qpsycle {
 
@@ -39,11 +39,15 @@ namespace qpsycle {
 	* Try to use this interface rather than accessing the CoreSong
 	* array directly.
 	*/
-class InstrumentsModel : public QStandardItemModel {
+class InstrumentsModel : public QAbstractListModel {
 Q_OBJECT
 public:
 	InstrumentsModel( psy::core::Song *song );
 	~InstrumentsModel();
+
+
+	virtual int rowCount( const QModelIndex &parent ) const;
+	virtual QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const;
 
 	bool loadInstrument( int instrIndex, QString pathToWavfile );
 	psy::core::Instrument *getInstrument( int instrIndex );
@@ -53,13 +57,13 @@ public:
 	void setSelectedInstrumentIndex( int newIndex );
 	void setName( int index, const QString & newname );
 
-	bool slotIsEmpty( int instrIndex );
+	bool slotIsEmpty( int instrIndex ) const;
 
 signals:
 	void selectedInstrumentChanged(int);
 
 private:
-	psy::core::Song *song_;
+ 	psy::core::Song *song_;
 };
 
 }
