@@ -28,22 +28,22 @@
 #include <iomanip>
 #include <sstream>
 
-// The InstrumentsModel provides an interface to the
-// Instrument data in the CoreSong.  This model can be
-// loaded by Qt widgets and changes made by one widget will be
-// automatically propagated to the other widgets using the 
-// same model.
-//
-// You can still access the CoreSong instrument data directly in the GUI if
-// you want to, but you'll probably need to manually alert
-// any widgets that are supposed to be watching it.
-
+/** 
+ * The InstrumentsModel provides an interface to the
+ * Instrument data in the CoreSong.  This model can be
+ * loaded by Qt widgets and changes made by one widget will be
+ * automatically propagated to the other widgets using the 
+ * same model.
+ *
+ * You can still access the CoreSong instrument data directly in the GUI if
+ * you want to, but you'll probably need to manually alert
+ * any widgets that are supposed to be watching it.
+ */
 namespace qpsycle {
 
 	InstrumentsModel::InstrumentsModel( psy::core::Song *song )
 		: song_( song )
-	{
-	}
+	{}
 
 	InstrumentsModel::~InstrumentsModel()
 	{}
@@ -115,21 +115,21 @@ namespace qpsycle {
 		return false;
 	}
 
-/**
- * Returns an instrument from the CoreSong.
- */
+	/**
+	 * Returns an instrument from the CoreSong.
+	 */
 	psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
 	{
 		return song_->_pInstrument[instrIndex];
 	}
 
 
-/**
- * Clears the instrument from the CoreSong, and updates
- * the model accordingly.  Note that updating the model
- * automatically alerts any widgets using the model, so
- * we don't need to send signals out.
- */
+	/**
+	 * Clears the instrument from the CoreSong, and updates
+	 * the model accordingly.  Note that updating the model
+	 * automatically alerts any widgets using the model, so
+	 * we don't need to send signals out.
+	 */
 	void InstrumentsModel::clearInstrument( int instrIndex )
 	{
 		assert( instrIndex >= 0 );
