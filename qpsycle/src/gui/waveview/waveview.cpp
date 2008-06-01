@@ -262,6 +262,9 @@ WaveView::WaveView( InstrumentsModel *instrumentsModel, QWidget *parent)
 		instrumentsModel_, SIGNAL( selectedInstrumentChanged(int) ),
 		this, SLOT( reset() )
 	);
+	connect(
+		instrumentsModel_, SIGNAL( dataChanged( const QModelIndex &, const QModelIndex & ) ),
+		this, SLOT( reset() ) );
 
 	instIndexSpin_->setValue( instrumentsModel_->selectedInstrumentIndex() );
 	reset();

@@ -81,6 +81,11 @@ WaveItem::WaveItem( WaveDisplay *disp, InstrumentsModel *instModel, QGraphicsSce
 		instModel, SIGNAL(selectedInstrumentChanged(int)),
 		this, SLOT( resetInstrument() )
 	);
+	connect (
+		instModel, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+		this, SLOT( resetInstrument() )
+	);
+
 
 	nodata_ = new QGraphicsTextItem( tr("No wave data."), this, this->scene() );
 	nodata_->setDefaultTextColor( Qt::white );
