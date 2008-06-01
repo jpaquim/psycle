@@ -37,7 +37,6 @@
 // You can still access the CoreSong instrument data directly in the GUI if
 // you want to, but you'll probably need to manually alert
 // any widgets that are supposed to be watching it.
-// InstrumentsModel::InstrumentsModel( psy::core::Song *song )
 
 namespace qpsycle {
 
@@ -135,7 +134,6 @@ namespace qpsycle {
 	{
 		assert( instrIndex >= 0 );
 		assert( instrIndex < psy::core::MAX_INSTRUMENTS );
-		assert( !slotIsEmpty( instrIndex ) );
 		
 		// Clear the instrument from the CoreSong.
 		song_->DeleteInstrument( instrIndex );
