@@ -32,22 +32,22 @@ namespace psy { namespace core {
 namespace qpsycle {
 
 /**
-	* InstrumentModel models the instruments array of a CoreSong.
-	* It provides a single point of entry for any GUI classes that
-	* need access to the song's instruments.
-	*
-	* Try to use this interface rather than accessing the CoreSong
-	* array directly.
-	*/
+ * InstrumentModel models the instruments array of a CoreSong.
+ * It provides a single point of entry for any GUI classes that
+ * need access to the song's instruments.
+ *
+ * Try to use this interface rather than accessing the CoreSong
+ * array directly.
+ */
 class InstrumentsModel : public QAbstractListModel {
 Q_OBJECT
 public:
 	InstrumentsModel( psy::core::Song *song );
 	~InstrumentsModel();
 
-
 	virtual int rowCount( const QModelIndex &parent ) const;
 	virtual QVariant data( const QModelIndex &index, int role = Qt::DisplayRole ) const;
+
 
 	bool loadInstrument( int instrIndex, QString pathToWavfile );
 	psy::core::Instrument *getInstrument( int instrIndex );
@@ -63,7 +63,7 @@ signals:
 	void selectedInstrumentChanged(int);
 
 private:
- 	psy::core::Song *song_;
+	psy::core::Song *song_;
 };
 
 }
