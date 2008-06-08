@@ -17,6 +17,7 @@
 #include "SaveWavDlg.hpp"
 #include "SongpDlg.hpp"
 #include "XMSongLoader.hpp"
+#include "XMSongExport.hpp"
 #include "ITModule2.h"
 #include "MasterDlg.hpp"
 #include "NativeGui.hpp"
@@ -644,7 +645,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "FastTracker 2 Song (*.xm)\0*.psy\0All (*.*)\0*.*\0";
+			ofn.lpstrFilter = "FastTracker 2 Song (*.xm)\0*.xm\0All (*.*)\0*.*\0";
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -661,7 +662,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CString str2 = str.Right(3);
 				if ( str2.CompareNoCase(".xm") != 0 ) str.Insert(str.GetLength(),".xm");
 				int index = str.ReverseFind('\\');
-				OldPsyFile file;
+				XMSongExport file;
 
 				if (index != -1)
 				{
@@ -678,11 +679,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					MessageBox("Error creating file!", "Error!", MB_OK);
 					return FALSE;
 				}
-				if (!_pSong->ExportXM(&file))
-				{
-					MessageBox("Error saving file!", "Error!", MB_OK);
-					bResult = FALSE;
-				}
+				file.exportsong(*Global::_pSong);
+				file.Close();
 			}
 			else
 			{
