@@ -141,6 +141,14 @@ namespace psycle{ namespace host{
 		char trkname[20];	// FastTracker v2.00
 		std::uint16_t shsize;		// 0x0102
 	};
+	struct XMPATTERNHEADER
+	{
+		std::uint32_t size;
+		std::uint8_t packingtype;
+		std::uint16_t rows;
+		std::uint16_t packedsize;
+
+	};
 	struct XMINSTRUMENTHEADER
 	{
 		std::uint32_t size;
