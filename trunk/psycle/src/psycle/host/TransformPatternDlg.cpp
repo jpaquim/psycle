@@ -124,7 +124,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				Song* pSong = _pChildView->_pSong;
 
-				int lastPatternUsed = pSong->GetLastPatternUsed();
+				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
 				int columnCount = MAX_TRACKS;
 				int lineCount;
 
@@ -139,7 +139,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
-					if (pSong->IsPatternUsed(currentPattern))
+					if (!pSong->IsPatternEmpty(currentPattern))
 					{				
 						patternEntry = (PatternEntry*) pSong->_ppattern(currentPattern);
 						lineCount = pSong->patternLines[currentPattern];

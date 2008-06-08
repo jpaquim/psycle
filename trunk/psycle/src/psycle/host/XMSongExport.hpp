@@ -23,11 +23,12 @@ namespace psycle { namespace host {
 		void SaveSinglePattern(Song & song, const int patIdx);
 		
 		void SaveInstruments(Song & song);
-		/*const LONG SaveInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
-		const LONG SaveSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
-		const LONG SaveSampleData(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
-		void SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader);		
-		*/
+		void SaveEmptyInstrument();
+		void SaveInstrument(Song& song, int instIdx);
+		void SaveSampleHeader(Song & song, const int instrIdx);
+		void SaveSampleData(Song & song, const int instrIdx);
+		void SetEnvelopes(Song & song, int instIdx, XMSAMPLEHEADER & sampleHeader);		
+		
 		XMFILEHEADER m_Header;
 		int lastMachine;
 		std::map<int,int> isSampler;

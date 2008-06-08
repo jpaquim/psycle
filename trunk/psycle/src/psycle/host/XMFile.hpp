@@ -11,7 +11,7 @@
 
 namespace psycle{ namespace host{
 
-	static const char XM_HEADER [] = "extended module: ";
+	static const char XM_HEADER [] = "Extended module: ";
 
 	struct XMCMD
 	{
@@ -154,8 +154,7 @@ namespace psycle{ namespace host{
 		std::uint32_t size;
 		char name[22];
 		std::uint8_t type;
-		std::uint8_t samples;
-		std::uint8_t samplesh;
+		std::uint16_t samples;
 	};
 	struct XMSAMPLEFILEHEADER
 	{
@@ -167,8 +166,7 @@ namespace psycle{ namespace host{
 		std::uint8_t vtype, ptype;
 		std::uint8_t vibtype, vibsweep, vibdepth, vibrate;
 		std::uint16_t volfade;
-		std::uint16_t res;
-		std::uint8_t reserved1[20];
+		std::uint16_t reserved[11];
 		std::uint16_t reserved2;
 	};
 	struct XMSAMPLEHEADER
@@ -182,8 +180,7 @@ namespace psycle{ namespace host{
 		std::uint8_t vtype, ptype;
 		std::uint8_t vibtype, vibsweep, vibdepth, vibrate;
 		std::uint16_t volfade;
-		std::uint16_t res;
-		std::uint8_t reserved1[20];
+		std::uint16_t reserved[11];
 	};
 
 	struct XMSAMPLESTRUCT

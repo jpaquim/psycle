@@ -118,12 +118,16 @@ namespace psycle
 			void DestroyMachine(int mac, bool write_locked = false);
 			/// destroys all the machines of this song.
 			void DestroyAllMachines(bool write_locked = false);
-			//the index off the last instrument containing data
-			int GetLastInstrumentUsed();
-			//the index of the last pattern containing data
-			int GetLastPatternUsed();
+
+			// the highest index of the instruments used
+			int GetHighestInstrumentIndex();
+			// the highest index of the patterns used
+			int GetHighestPatternIndexInSequence();
+			// the number of instruments used.
+			int GetNumInstruments();
 			/// the number of pattern used in this song.
-			int GetNumPatternsUsed();
+			int GetNumPatterns();
+
 			/// creates a new connection between two machines. returns index in the dest machine, or -1 if error.
 			int InsertConnection(Machine* srcMac,Machine* dstMac,int srctype=0, int dsttype=0,float value = 1.0f);
 			int InsertConnection(int srcMac,int dstMac,int srctype=0, int dsttype=0,float value = 1.0f)
@@ -173,8 +177,10 @@ namespace psycle
 			bool Load(RiffFile* pFile, bool fullopen=true);
 			/// saves this song to a file.
 			bool Save(RiffFile* pFile,bool autosave=false);
-			/// Used to detect if an especific pattern index contains any data.
+			/// Used to detect if an especific pattern index is used in the sequence.
 			bool IsPatternUsed(int i);
+			//Used to check the contents of the pattern.
+			bool IsPatternEmpty(int i);
 			///\name wave file previewing
 			///\todo shouldn't belong to the song class.
 			///\{

@@ -809,36 +809,43 @@ namespace psycle
 			std::sprintf(patternName[pattern], name);
 			return true;
 		}
-		int Song::GetLastInstrumentUsed()
-		{
-			return 0;
-		}
 
-		int Song::GetLastPatternUsed()
+		int Song::GetHighestInstrumentIndex()
 		{
-			int patternsUsedCount = GetNumPatternsUsed();
-			int patternsFound = 0;
-			int patternIndex = -1;
-
-			while (patternsFound < patternsUsedCount)
+			int i;
+			for(i=MAX_INSTRUMENTS-1;i>0;i--)
 			{
-				patternIndex++;
-				if (IsPatternUsed(patternIndex))
-					patternsFound++;
+				if(! this->_pInstrument[i]->Empty()) {
+					break;
+				}
 			}
-
-			return patternIndex;
+			return i;
+		}
+		int Song::GetNumInstruments()
+		{
+			int used=0;
+			for( int i=0; i<MAX_INSTRUMENTS;i++) {
+				if (!this->_pInstrument[i]->Empty()) {
+					used++;
+				}
+			}
+			return used;
 		}
 
-		int Song::GetNumPatternsUsed()
+		int Song::GetHighestPatternIndexInSequence()
 		{
 			int rval(0);
 			for(int c(0) ; c < playLength ; ++c) if(rval < playOrder[c]) rval = playOrder[c];
-			++rval;
-			if(rval > MAX_PATTERNS - 1) rval = MAX_PATTERNS - 1;
 			return rval;
 		}
 
+		int Song::GetNumPatterns() {
+			int used=0;
+			for(int i =0; i < MAX_PATTERNS; i++) {
+				if(!IsPatternEmpty(i)) used++;
+			}
+			return used;
+		}
 
 		int Song::GetBlankPatternUnused(int rval)
 		{
@@ -3037,7 +3044,7 @@ namespace psycle
 
 		bool Song::IsPatternUsed(int i)
 		{
-			bool bUsed = FALSE;
+			bool bUsed = false;
 			if (ppPatternData[i])
 			{
 				// we could also check to see if pattern is unused AND blank.
@@ -3052,21 +3059,26 @@ namespace psycle
 
 				if (!bUsed)
 				{
-					// check to see if it is empty
-					PatternEntry blank;
-					unsigned char * pData = ppPatternData[i];
-					for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
-					{
-						if (memcmp(pData+j,&blank,EVENT_SIZE) != 0 )
-						{
-							bUsed = TRUE;
-							j = MULTIPLY2;
-							break;
-						}
-					}
+					bUsed = !IsPatternEmpty(i);
 				}
 			}
 			return bUsed;
+		}
+
+		bool Song::IsPatternEmpty(int i) {
+			if (!ppPatternData[i]) {
+				return true;
+			}
+			PatternEntry blank;
+			unsigned char * pData = ppPatternData[i];
+			for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
+			{
+				if (memcmp(pData+j,&blank,EVENT_SIZE) != 0 )
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 }
