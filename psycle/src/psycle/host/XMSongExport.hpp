@@ -16,14 +16,14 @@ namespace psycle { namespace host {
 		XMSongExport(void);
 		virtual ~XMSongExport(void);
 		/// RIFF 
-		virtual void exportsong(Song& song,const bool fullopen = true);
+		virtual void exportsong(Song& song);
 	private:
 		void writeSongHeader(Song &song);
 		void SavePatterns(Song & song);
 		void SaveSinglePattern(Song & song, const int patIdx);
-		/*
-		const bool SaveInstruments(XMSampler & sampler, LONG iInstrStart);
-		const LONG SaveInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
+		
+		void SaveInstruments(Song & song);
+		/*const LONG SaveInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
 		const LONG SaveSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
 		const LONG SaveSampleData(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
 		void SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader);		
