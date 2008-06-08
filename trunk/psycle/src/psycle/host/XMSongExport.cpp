@@ -55,7 +55,7 @@ namespace host{
 		m_Header.restartpos = 0;
 		m_Header.channels = song.SONGTRACKS;
 		m_Header.patterns = song.GetLastPatternUsed();
-		m_Header.instruments = 
+		m_Header.instruments = song.GetLastInstrumentUsed();
 		m_Header.flags = 0x0001; //Linear frequency.
 		m_Header.speed = 24/song.LinesPerBeat();
 		m_Header.tempo =  song.BeatsPerMin();
@@ -75,7 +75,7 @@ namespace host{
 		lastMachine++;
 
 		for (int i=0; i<lastMachine; i++) {
-			if (song._pMachine[0] != 0 && 
+			if (song._pMachine[i] != 0 && 
 				song._pMachine[i]->_type == MACH_SAMPLER ) {
 					isSampler[i] = 1;
 			}
@@ -146,7 +146,7 @@ namespace host{
 					unsigned char instr=0;
 					
 					//Very simple method for now:
-					if (song._pMachine[pData->_mach] != 0 ) {
+					if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != 0 ) {
 						if (isSampler[pData->_mach] != 0) instr = lastMachine +  pData->_inst +1;
 						else instr = pData->_mach + 1;
 					}
@@ -207,7 +207,8 @@ namespace host{
 
 					char compressed = 0x80 + bWriteNote + (bWriteInstr << 1) + (bWriteVol << 2)
 										+ (bWriteType << 3) + ( bWriteParam << 4);
-					Write(&compressed,1);
+
+					if (compressed !=  0x9F ) Write(&compressed,1); // 0x9F means to write everything.
 					if (bWriteNote) Write(&note,1);
 					if (bWriteInstr) Write(&instr,1);
 					if (bWriteVol) Write(&vol,1);

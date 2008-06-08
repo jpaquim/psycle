@@ -809,6 +809,10 @@ namespace psycle
 			std::sprintf(patternName[pattern], name);
 			return true;
 		}
+		int Song::GetLastInstrumentUsed()
+		{
+			return 0;
+		}
 
 		int Song::GetLastPatternUsed()
 		{

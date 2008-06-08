@@ -118,6 +118,8 @@ namespace psycle
 			void DestroyMachine(int mac, bool write_locked = false);
 			/// destroys all the machines of this song.
 			void DestroyAllMachines(bool write_locked = false);
+			//the index off the last instrument containing data
+			int GetLastInstrumentUsed();
 			//the index of the last pattern containing data
 			int GetLastPatternUsed();
 			/// the number of pattern used in this song.
