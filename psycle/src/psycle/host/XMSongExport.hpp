@@ -23,7 +23,7 @@ namespace psycle { namespace host {
 		void SaveSinglePattern(Song & song, const int patIdx);
 		
 		void SaveInstruments(Song & song);
-		void SaveEmptyInstrument();
+		void SaveEmptyInstrument(std::string name);
 		void SaveInstrument(Song& song, int instIdx);
 		void SaveSampleHeader(Song & song, const int instrIdx);
 		void SaveSampleData(Song & song, const int instrIdx);

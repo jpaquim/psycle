@@ -94,7 +94,12 @@ namespace host{
 	void XMSongExport::SaveInstruments(Song& song)
 	{
 		for (int i = 0; i < lastMachine ; i++ ) {
-			SaveEmptyInstrument();
+			if ( song._pMachine[i] != 0 ) {
+				SaveEmptyInstrument(song._pMachine[i]->_editName);
+			}
+			else {
+				SaveEmptyInstrument("");
+			}
 		}
 		for (int i = 0; i < m_Header.instruments; i++ ){
 			SaveInstrument(song,i);
@@ -143,7 +148,7 @@ namespace host{
 					
 					//Very simple method for now:
 					if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != 0 ) {
-						if (isSampler[pData->_mach] != 0) instr = lastMachine +  pData->_inst +1;
+						if (isSampler[pData->_mach] != 0 && pData->_inst != 0xFF) instr = lastMachine +  pData->_inst +1;
 						else instr = pData->_mach + 1;
 					}
 
@@ -222,12 +227,13 @@ namespace host{
 			Write(&ptHeader,sizeof(ptHeader));
 		}
 	}
-	void XMSongExport::SaveEmptyInstrument()
+	void XMSongExport::SaveEmptyInstrument(std::string name)
 	{
 		XMINSTRUMENTHEADER insHeader;
 		memset(&insHeader,0,sizeof(insHeader));
 		//insHeader.type = 0; Implicit by memset
 		insHeader.size = sizeof(insHeader);
+		strncpy(insHeader.name,name.c_str(),21);
 		//insHeader.samples = 0; Implicit by memset
 		Write(&insHeader,sizeof(insHeader));
 	}
