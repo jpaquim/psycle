@@ -2324,6 +2324,116 @@ namespace psycle
 			return false;
 		}
 
+		bool Song::ExportXM(RiffFile* pFile)
+		{
+			CProgressDialog Progress;
+
+			Progress.Create();
+			Progress.SetWindowText("Exporting...");
+			Progress.ShowWindow(SW_SHOW);		
+			
+			int temp;
+
+			//xm header
+			
+			pFile->Write("Extended module: ", 17);//ID text
+			pFile->Write("Psycle Exported     ", 20);//Module name
+			temp = 0x1A;
+			pFile->Write(&temp, 1);							
+			pFile->Write("FastTracker v2.00   ", 20);//Tracker name
+			temp = 0x0104;
+			pFile->Write(&temp, 2);//Version number
+			temp = 0x00000150;
+			pFile->Write(&temp, 4);//Header size
+			temp = playLength;
+			pFile->Write(&temp, 2); // Song length
+			temp = 0x0000;
+			pFile->Write(&temp, 2);//Restart position
+			temp = SONGTRACKS;
+			pFile->Write(&temp, 2);//Number of channels
+
+			int patternCount = 0;
+
+			for (int i = 0; i < MAX_PATTERNS; i++)
+			{			
+				if (IsPatternUsed(i))
+					patternCount++;
+			}
+
+			temp = patternCount;
+			pFile->Write(&temp, 2);//Number of patterns
+			temp = 0x0000;
+			pFile->Write(&temp, 2);//Number of instruments
+			temp = 0x0001;
+			pFile->Write(&temp, 2);//Flags
+			temp = m_LinesPerBeat;
+			pFile->Write(&temp, 2);//Default tempo
+			temp = m_BeatsPerMin;
+			pFile->Write(&temp, 2);//Default bpm
+
+			//Pattern order table
+			for (int i = 0; i < playLength; i++) {
+				temp = playOrder[i];
+				pFile->Write(&temp, 1);							
+			}
+			//padding zeroes
+			for (int i = playLength; i < 255; i++) {
+				temp = 0x00;
+				pFile->Write(&temp, 1);							
+			}
+			
+			//patterns
+
+			for (int i = 0; i < MAX_PATTERNS; i++)
+			{
+				// check every pattern for validity
+				if (IsPatternUsed(i))
+				{
+					temp = 0x00000009;
+					pFile->Write(&temp, 4);//Pattern header length
+					temp = 0x00;
+					pFile->Write(&temp, 1);//Packing type
+					temp = patternLines[i];
+					pFile->Write(&temp, 2);//Number of rows in pattern
+					temp = patternLines[i] * SONGTRACKS;
+					pFile->Write(&temp, 2);//Packed pattern data size
+
+			/*
+					// ok save it
+					byte* pSource=new byte[SONGTRACKS*patternLines[i]*EVENT_SIZE];
+					byte* pCopy = pSource;
+
+					for (int y = 0; y < patternLines[i]; y++)
+					{
+						unsigned char* pData = ppPatternData[i]+(y*MULTIPLY);
+						memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
+						pCopy+=EVENT_SIZE*SONGTRACKS;
+					}
+					
+					int sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
+*/
+					//Packed pattern data			
+					for (int j = 0; j < 64; j++) {
+						for (int i = 0; i < SONGTRACKS; i++) {
+							temp = 0x00;
+							pFile->Write(&temp, 1);//note
+							temp = 0x00;
+							pFile->Write(&temp, 1);//instrument
+							temp = 0x00;
+							pFile->Write(&temp, 1);//Volume column byte
+							temp = 0x00;
+							pFile->Write(&temp, 1);//Effect type
+							temp = 0x00;
+							pFile->Write(&temp, 1);//Effect parameter
+						}
+					}
+				}
+			}
+
+			//instruments
+
+			return true;
+		}
 
 		bool Song::Save(RiffFile* pFile,bool autosave)
 		{

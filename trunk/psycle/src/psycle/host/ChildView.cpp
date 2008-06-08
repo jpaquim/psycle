@@ -169,6 +169,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_WM_TIMER()
 			ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordWav)
 			ON_COMMAND(ID_FILE_NEW, OnFileNew)
+			ON_COMMAND_EX(ID_EXPORT, OnExport)
 			ON_COMMAND_EX(ID_FILE_SAVE, OnFileSave)
 			ON_COMMAND_EX(ID_FILE_SAVE_AS, OnFileSaveAs)
 			ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
@@ -620,6 +621,74 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				RecalcMetrics();
 			}
 			Repaint();
+		}
+
+		/// "Save Song" Function
+		BOOL CChildView::OnExport(UINT id) 
+		{
+			//MessageBox("Saving Disabled");
+			//return false;
+			OPENFILENAME ofn; // common dialog box structure
+			//std::string ifile = Global::_pSong->fileName;
+			std::string ifile = "test.xm";
+			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
+			
+			char szFile[_MAX_PATH];
+
+			szFile[_MAX_PATH-1]=0;
+			strncpy(szFile,if2.c_str(),_MAX_PATH-1);
+			
+			// Initialize OPENFILENAME
+			ZeroMemory(&ofn, sizeof(OPENFILENAME));
+			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.hwndOwner = GetParent()->m_hWnd;
+			ofn.lpstrFile = szFile;
+			ofn.nMaxFile = sizeof(szFile);
+			ofn.lpstrFilter = "FastTracker 2 Song (*.xm)\0*.psy\0All (*.*)\0*.*\0";
+			ofn.nFilterIndex = 1;
+			ofn.lpstrFileTitle = NULL;
+			ofn.nMaxFileTitle = 0;
+			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
+			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
+			BOOL bResult = TRUE;
+			
+			// Display the Open dialog box. 
+			if (GetSaveFileName(&ofn) == TRUE)
+			{
+				CString str = ofn.lpstrFile;
+
+				CString str2 = str.Right(3);
+				if ( str2.CompareNoCase(".xm") != 0 ) str.Insert(str.GetLength(),".xm");
+				int index = str.ReverseFind('\\');
+				OldPsyFile file;
+
+				if (index != -1)
+				{
+					Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
+					Global::_pSong->fileName = str.Mid(index+1);
+				}
+				else
+				{
+					Global::_pSong->fileName = str;
+				}
+				
+				if (!file.Create(str.GetBuffer(1), true))
+				{
+					MessageBox("Error creating file!", "Error!", MB_OK);
+					return FALSE;
+				}
+				if (!_pSong->ExportXM(&file))
+				{
+					MessageBox("Error saving file!", "Error!", MB_OK);
+					bResult = FALSE;
+				}
+			}
+			else
+			{
+				return FALSE;
+			}
+			return bResult;
 		}
 
 		/// "Save Song" Function

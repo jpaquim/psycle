@@ -1210,6 +1210,8 @@
 #define ID__TRANSFORMPATTERN            34207
 #define ID_TRANSFORMPATTERN             34208
 #define ID_POP_TRANSFORMPATTERN         34209
+#define ID_Menu34210                    34210
+#define ID_EXPORT                       34211
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1219,7 +1221,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        279
-#define _APS_NEXT_COMMAND_VALUE         34210
+#define _APS_NEXT_COMMAND_VALUE         34212
 #define _APS_NEXT_CONTROL_VALUE         1805
 #define _APS_NEXT_SYMED_VALUE           61
 #endif

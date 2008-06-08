@@ -169,6 +169,8 @@ namespace psycle
 			///  loads a file into this song object.
 			///\param fullopen  used in context of the winamp/foobar player plugins, where it allows to get the info of the file, without needing to open it completely.
 			bool Load(RiffFile* pFile, bool fullopen=true);
+			/// exports this song to XM.
+			bool ExportXM(RiffFile* pFile);
 			/// saves this song to a file.
 			bool Save(RiffFile* pFile,bool autosave=false);
 			/// Used to detect if an especific pattern index contains any data.

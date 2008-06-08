@@ -551,6 +551,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnTimer( UINT nIDEvent );
 			afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 			afx_msg void OnFileNew();
+			afx_msg BOOL OnExport(UINT id);
 			afx_msg BOOL OnFileSave(UINT id);
 			afx_msg BOOL OnFileSaveAs(UINT id);
 			afx_msg void OnFileLoadsong();
