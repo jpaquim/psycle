@@ -1005,6 +1005,7 @@ XMSampler::Channel::PerformFX().
 	void CalcBPMAndTick();
 */
 	int Speed2LPB(int speed) { return 24/((speed==0)?6:speed); }
+	int LPB2Speed(int lpb) { return 24/lpb; }
 	Voice* GetCurrentVoice(int channelNum)
 	{
 		for(int current = 0;current < _numVoices;current++)

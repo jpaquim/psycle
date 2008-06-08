@@ -520,8 +520,8 @@ namespace host{
 								e._parameter = 0;
 								break;
 							case XMCMD_E::E_PATTERN_LOOP:
-								e._cmd = PatternCmd::PATTERN_LOOP;
-								e._parameter = param & 0xf;
+								e._cmd = PatternCmd::EXTENDED;
+								e._parameter = PatternCmd::PATTERN_LOOP + (param & 0xf);
 								break;
 							case XMCMD_E::E_TREMOLO_WAVE:
 								e._cmd = XMSampler::CMD::EXTENDED;
