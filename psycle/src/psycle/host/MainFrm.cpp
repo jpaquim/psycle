@@ -2201,10 +2201,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 
 		// Part one, Read patterns from sequence and assign them a new ordered number.
-			unsigned char freep=0;
+			unsigned unsigned char freep=0;
 			for ( int i=0 ; i<_pSong->playLength ; i++ )
 			{
-				const char cp=_pSong->playOrder[i];
+				const unsigned char cp=_pSong->playOrder[i];
 				if ( oldtonew[cp] == 255 ) // else, we have processed it already
 				{
 					oldtonew[cp]=freep;
