@@ -28,13 +28,13 @@ namespace host{
 
 	}
 
-	void XMSongExport::exportsong(Song& song,const bool fullopen)
+	void XMSongExport::exportsong(Song& song)
 	{
 
 		writeSongHeader(song);
 
 		SavePatterns(song);
-		//WriteInstruments(*m_pSampler,iInstrStart);
+		SaveInstruments(song);
 
 	}
 
@@ -49,19 +49,12 @@ namespace host{
 		temp = 0x0104;
 		Write(&temp, 2);//Version number
 
-		int patternCount = 0;
-		for (int i = 0; i < MAX_PATTERNS; i++)
-		{			
-			if (song.IsPatternUsed(i))
-				patternCount++;
-		}
-
 		memset(&m_Header,0,sizeof(m_Header));
 		m_Header.size = sizeof(m_Header);
 		m_Header.norder = song.playLength;
 		m_Header.restartpos = 0;
 		m_Header.channels = song.SONGTRACKS;
-		m_Header.patterns = patternCount;
+		m_Header.patterns = song.GetLastPatternUsed();
 		m_Header.instruments = 
 		m_Header.flags = 0x0001; //Linear frequency.
 		m_Header.speed = 24/song.LinesPerBeat();
@@ -82,25 +75,26 @@ namespace host{
 		lastMachine++;
 
 		for (int i=0; i<lastMachine; i++) {
-			if (song._pMachine[i]->_type == MACH_SAMPLER ) {
-				isSampler[i] = 1;
-//				isSampler.insert(i,1);
+			if (song._pMachine[0] != 0 && 
+				song._pMachine[i]->_type == MACH_SAMPLER ) {
+					isSampler[i] = 1;
 			}
 			else {
 				isSampler[i] = 0;
-//				isSampler.insert(i,0);
 			}
 		}
-
-		for (int i = 0; i < MAX_PATTERNS; i++)
+		int numpatterns = song.GetLastPatternUsed();
+		numpatterns++;
+		for (int i = 0; i < numpatterns ; i++)
 		{
 			SaveSinglePattern(song,i);
 		}
 	}
-/*
+
 	// Load instruments
-	const bool XMSongExport::SaveInstruments(XMSampler & sampler, std::int32_t iInstrStart)
-	{	
+	void XMSongExport::SaveInstruments(Song& song)
+	{
+/*
 		int currentSample=0;
 		for(int i = 1;i <= m_iInstrCnt;i++){
 			iInstrStart = LoadInstrument(sampler,iInstrStart,i,currentSample);
@@ -108,8 +102,9 @@ namespace host{
 		}
 
 		return true;
+*/
 	}
-	*/
+
 
 	// return address of next pattern, 0 for invalid
 	void XMSongExport::SaveSinglePattern(Song & song, const int patIdx)
@@ -151,8 +146,10 @@ namespace host{
 					unsigned char instr=0;
 					
 					//Very simple method for now:
-					if (isSampler[pData->_mach] != 0) instr = lastMachine +  pData->_inst +1;
-					else instr = pData->_mach + 1;
+					if (song._pMachine[pData->_mach] != 0 ) {
+						if (isSampler[pData->_mach] != 0) instr = lastMachine +  pData->_inst +1;
+						else instr = pData->_mach + 1;
+					}
 
 					unsigned char vol=0;
 					unsigned char type=0;
@@ -208,8 +205,8 @@ namespace host{
 					unsigned char bWriteType = type!=0;
 					unsigned char bWriteParam  = param!=0;
 
-					char compressed = 0x80 + bWriteNote + (bWriteInstr <<0x2) + (bWriteVol << 0x4) +
-										+ (bWriteType << 0x8) + ( bWriteType << 0x10);
+					char compressed = 0x80 + bWriteNote + (bWriteInstr << 1) + (bWriteVol << 2)
+										+ (bWriteType << 3) + ( bWriteParam << 4);
 					Write(&compressed,1);
 					if (bWriteNote) Write(&note,1);
 					if (bWriteInstr) Write(&instr,1);
