@@ -133,7 +133,13 @@ namespace host{
 					unsigned char note;
 					if (pData->_note <= notecommands::b9) {
 						if (pData->_note >= 12 && pData->_note < 108 ) {
-							note = pData->_note - 11;
+							if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != 0 
+								&& isSampler[pData->_mach] != 0)
+							{ // The sampler machine uses C-4 as middle C.
+								note = pData->_note +1;
+							} else {
+								note = pData->_note - 11;
+							}
 						} else {
 							note = 0x00;
 						}
@@ -290,10 +296,10 @@ namespace host{
 		stheader.loopstart = instr.waveLoopStart * 2;
 		stheader.looplen = (instr.waveLoopEnd - instr.waveLoopStart) * 2;
 		stheader.vol = std::min(64,instr.waveVolume*64/100);
-		stheader.finetune = (instr.waveFinetune/2) & 0xFF ;
+		stheader.finetune = ((instr.waveFinetune/2) + 82) & 0xFF ;
 		stheader.type = instr._loop?1:0 + 0x10; // 0x10 -> 16bits
 		stheader.pan = instr._pan &0xFF;
-		stheader.relnote = instr.waveTune + 41;
+		stheader.relnote = instr.waveTune + 30;
 
 		Write(&stheader,sizeof(stheader));
 	}

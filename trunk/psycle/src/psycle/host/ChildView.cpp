@@ -627,11 +627,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		/// "Save Song" Function
 		BOOL CChildView::OnExport(UINT id) 
 		{
-			//MessageBox("Saving Disabled");
-			//return false;
 			OPENFILENAME ofn; // common dialog box structure
-			//std::string ifile = Global::_pSong->fileName;
-			std::string ifile = "test.xm";
+			std::string ifile = Global::_pSong->fileName;
 			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
@@ -667,11 +664,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (index != -1)
 				{
 					Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
-					Global::_pSong->fileName = str.Mid(index+1);
-				}
-				else
-				{
-					Global::_pSong->fileName = str;
 				}
 				
 				if (!file.Create(str.GetBuffer(1), true))
