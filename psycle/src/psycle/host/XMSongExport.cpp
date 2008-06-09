@@ -164,47 +164,72 @@ namespace host{
 
 
 				//Putting just a few commands for now.
-					switch(pData->_cmd) {
-						case 0x0C:
-							vol = 0x10 + (pData->_parameter/4);
-							break;
-						case PatternCmd::SET_TEMPO:
-							if (pData->_parameter > 32) {
-								type = XMCMD::SETSPEED;
-								param = pData->_parameter;
-							}
-							break;
-						case PatternCmd::EXTENDED:
-							switch(pData->_parameter&0xF0) {
-							case PatternCmd::SET_LINESPERBEAT0:
-							case PatternCmd::SET_LINESPERBEAT1:
-								type = XMCMD::SETSPEED;
+			
+					bool foundEffect = true;
+					int singleEffectCharacter = (pData->_cmd & 0xF0);					
+
+					if (singleEffectCharacter == 0xE0) { //slide up
+						int slideAmount = (pData->_cmd & 0x0F);
+						type = XMCMD::PORTAUP;
+						param = pData->_parameter;
+					}
+					else if (singleEffectCharacter == 0xD0) { //slide down
+						int slideAmount = (pData->_cmd & 0x0F);
+						type = XMCMD::PORTADOWN;
+						param = pData->_parameter;
+					}
+					else {
+						switch(pData->_cmd) {
+							case 0xC3:
+								type = XMCMD::PORTA2NOTE;
 								param = pData->_parameter;
 								break;
-							case PatternCmd::PATTERN_LOOP:
-								type = XMCMD::EXTENDED;
-								param = XMCMD_E::E_PATTERN_LOOP + (pData->_parameter & 0x0F);
+							case 0x0C:
+								vol = 0x10 + (pData->_parameter/4);
 								break;
-							case PatternCmd::PATTERN_DELAY:
-								type = XMCMD::EXTENDED;
-								param = XMCMD_E::E_PATTERN_DELAY + (pData->_parameter & 0x0F);
+							case PatternCmd::SET_TEMPO:
+								if (pData->_parameter > 32) {
+									type = XMCMD::SETSPEED;
+									param = pData->_parameter;
+								}
+								break;
+							case PatternCmd::EXTENDED:
+								switch(pData->_parameter&0xF0) {
+								case PatternCmd::SET_LINESPERBEAT0:
+								case PatternCmd::SET_LINESPERBEAT1:
+									type = XMCMD::SETSPEED;
+									param = pData->_parameter;
+									break;
+								case PatternCmd::PATTERN_LOOP:
+									type = XMCMD::EXTENDED;
+									param = XMCMD_E::E_PATTERN_LOOP + (pData->_parameter & 0x0F);
+									break;
+								case PatternCmd::PATTERN_DELAY:
+									type = XMCMD::EXTENDED;
+									param = XMCMD_E::E_PATTERN_DELAY + (pData->_parameter & 0x0F);
+									break;
+								default:
+									break;
+								}
+								break;							
+							case PatternCmd::BREAK_TO_LINE:
+								type = XMCMD::PATTERN_BREAK;
+								param = (pData->_parameter/10)<<4 + (pData->_parameter%10);
+								break;
+							case PatternCmd::SET_VOLUME:
+								type = XMCMD::SET_GLOBAL_VOLUME;
+								param = param/2;
 								break;
 							default:
+								foundEffect = false;
 								break;
-							}
-							break;							
-						case PatternCmd::BREAK_TO_LINE:
-							type = XMCMD::PATTERN_BREAK;
-							param = (pData->_parameter/10)<<4 + (pData->_parameter%10);
-							break;
-						case PatternCmd::SET_VOLUME:
-							type = XMCMD::SET_GLOBAL_VOLUME;
-							param = param/2;
-							break;
-						default:
-							break;
+						}
 					}
 
+					if ((foundEffect == false) & (pData->_cmd > 0)) {
+						type = XMCMD::ARPEGGIO;
+						param = pData->_cmd;
+					}
 
 					unsigned char bWriteNote = note!=0;
 					unsigned char bWriteInstr = instr!=0;
