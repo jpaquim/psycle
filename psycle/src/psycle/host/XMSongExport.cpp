@@ -298,15 +298,16 @@ namespace host{
 		std::memset(&_samph, 0, sizeof(_samph));
 		//For now, everything zeroed. Later on we can convert the ADSR curves to envelopes.
 		//SetEnvelopes(instIdx,_samph);
-		_samph.volfade=0xFFFF;
+		_samph.volfade=0x400;
 		int filepos = GetPos();
+		_samph.shsize = sizeof(XMSAMPLESTRUCT);
 		Write(&_samph,sizeof(_samph));
 
 		SaveSampleHeader(song, instIdx);
-		_samph.shsize = static_cast<std::uint32_t>(GetPos() - filepos);
-		Seek(filepos);
-		Write(&_samph,sizeof(_samph));
-		Skip(_samph.shsize-sizeof(_samph));
+		//_samph.shsize = static_cast<std::uint32_t>(GetPos() - filepos);
+		//Seek(filepos);
+		//Write(&_samph,sizeof(_samph));
+		//Skip(_samph.shsize-sizeof(_samph));
 
 		SaveSampleData(song, instIdx);
 

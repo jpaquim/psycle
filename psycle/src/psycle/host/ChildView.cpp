@@ -2045,7 +2045,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//pRootMenuBar = this->GetParent()->GetMenu();
 			//hRootMenuBar = HMENU (*pRootMenuBar);
 			hFileMenu = GetSubMenu(hRootMenuBar, 0);
-			hRecentMenu = GetSubMenu(hFileMenu, 10);
+			hRecentMenu = GetSubMenu(hFileMenu, 11);
 			// Remove initial empty element, if present.
 			if(GetMenuItemID(hRecentMenu, 0) == ID_FILE_RECENT_NONE)
 			{
