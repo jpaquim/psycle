@@ -813,7 +813,7 @@ namespace psycle
 		int Song::GetHighestInstrumentIndex()
 		{
 			int i;
-			for(i=MAX_INSTRUMENTS-1;i>0;i--)
+			for(i=MAX_INSTRUMENTS-1;i>=0;i--)
 			{
 				if(! this->_pInstrument[i]->Empty()) {
 					break;

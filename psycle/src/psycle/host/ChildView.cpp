@@ -628,7 +628,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CChildView::OnExport(UINT id) 
 		{
 			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = Global::_pSong->fileName;
+			std::string ifile = Global::_pSong->fileName.substr(0,Global::_pSong->fileName.length()-4) + ".xm";
 			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
