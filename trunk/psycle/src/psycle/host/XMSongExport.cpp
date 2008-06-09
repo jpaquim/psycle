@@ -42,7 +42,7 @@ namespace host{
 	{
 		//We find the last index of machine, to use as first index of instruments
 		lastMachine=63;
-		while (song._pMachine[lastMachine] == 0 && lastMachine > 0) lastMachine--;
+		while (lastMachine >= 0 && song._pMachine[lastMachine] == 0) lastMachine--;
 		lastMachine++;
 
 		for (int i=0; i<lastMachine; i++) {
@@ -101,7 +101,8 @@ namespace host{
 				SaveEmptyInstrument("");
 			}
 		}
-		for (int i = 0; i < m_Header.instruments; i++ ){
+		int remaining = m_Header.instruments - lastMachine;
+		for (int i = 0 ; i < remaining; i++ ){
 			SaveInstrument(song,i);
 		}
 	}
@@ -153,8 +154,11 @@ namespace host{
 					unsigned char instr=0;
 					
 					//Very simple method for now:
-					if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != 0 ) {
-						if (isSampler[pData->_mach] != 0 && pData->_inst != 0xFF) instr = lastMachine +  pData->_inst +1;
+					if (pData->_mach < MAX_MACHINES) {
+						if ( song._pMachine[pData->_mach] != 0 && isSampler[pData->_mach] != 0)
+						{
+							if (pData->_inst != 0xFF) instr = lastMachine +  pData->_inst +1;
+						}
 						else instr = pData->_mach + 1;
 					}
 
@@ -294,6 +298,7 @@ namespace host{
 		std::memset(&_samph, 0, sizeof(_samph));
 		//For now, everything zeroed. Later on we can convert the ADSR curves to envelopes.
 		//SetEnvelopes(instIdx,_samph);
+		_samph.volfade=0xFFFF;
 		int filepos = GetPos();
 		Write(&_samph,sizeof(_samph));
 
@@ -321,10 +326,10 @@ namespace host{
 		stheader.loopstart = instr.waveLoopStart * 2;
 		stheader.looplen = (instr.waveLoopEnd - instr.waveLoopStart) * 2;
 		stheader.vol = std::min(64,instr.waveVolume*64/100);
-		stheader.finetune = ((instr.waveFinetune/2) + 82) & 0xFF ;
+		stheader.finetune = ((instr.waveFinetune/2)-28) & 0xFF ;
 		stheader.type = instr._loop?1:0 + 0x10; // 0x10 -> 16bits
 		stheader.pan = instr._pan &0xFF;
-		stheader.relnote = instr.waveTune + 30;
+		stheader.relnote = instr.waveTune + 29;
 
 		Write(&stheader,sizeof(stheader));
 	}
