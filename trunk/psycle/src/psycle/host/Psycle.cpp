@@ -218,7 +218,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			::HMENU hRootMenuBar, hFileMenu;
 			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
 			hFileMenu = ::GetSubMenu(hRootMenuBar, 0);
-			pFrame->m_wndView.hRecentMenu = ::GetSubMenu(hFileMenu, 10);
+			pFrame->m_wndView.hRecentMenu = ::GetSubMenu(hFileMenu, 11);
 
 			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
 			key += "\\recent-files";
@@ -279,7 +279,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			HMENU hRootMenuBar, hFileMenu;
 			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
 			hFileMenu = GetSubMenu(hRootMenuBar, 0);
-			pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 10);
+			pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 11);
 
 			{
 				HKEY RegKey;
