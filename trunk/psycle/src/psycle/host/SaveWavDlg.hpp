@@ -115,7 +115,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bool saving;
 			bool dither;
 
-			void SaveWav(std::string file, int bits, int rate, int channelmode);
+			void SaveWav(std::string file, int bits, int rate, int channelmode, bool isFloat);
 			
 			// Generated message map functions
 			//{{AFX_MSG(CSaveWavDlg)

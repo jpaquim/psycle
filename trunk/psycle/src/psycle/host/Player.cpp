@@ -684,7 +684,7 @@ namespace psycle
 			return ClipboardWriteMono(right);
 		}
 
-		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool dodither, int ditherpdf, int noiseshape, std::vector<char*> *clipboardmem)
+		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool isFloat, bool dodither, int ditherpdf, int noiseshape, std::vector<char*> *clipboardmem)
 		{
 #if !defined WINAMP_PLUGIN
 			if(!_recording)
@@ -709,10 +709,11 @@ namespace psycle
 				Stop();
 				if (!psFilename.empty())
 				{
-					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels) == DDC_SUCCESS)
+					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels, isFloat) == DDC_SUCCESS)
 						_recording = true;
 					else
 					{
+						_recording = true;
 						StopRecording(false);
 					}
 				}
@@ -727,7 +728,10 @@ namespace psycle
 						clipbufferindex = 1;
 						_recording = true;
 					}
-					else StopRecording(false);
+					else {
+						_recording = true;
+						StopRecording(false);
+					}
 				}
 			}
 #endif //!defined WINAMP_PLUGIN
