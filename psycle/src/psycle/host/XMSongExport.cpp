@@ -222,7 +222,7 @@ namespace host{
 								break;
 							case PatternCmd::SET_VOLUME:
 								type = XMCMD::SET_GLOBAL_VOLUME;
-								param = param/2;
+								param = pData->_parameter/2;
 								break;
 							default:
 								foundEffect = false;
@@ -304,10 +304,7 @@ namespace host{
 		Write(&_samph,sizeof(_samph));
 
 		SaveSampleHeader(song, instIdx);
-		//_samph.shsize = static_cast<std::uint32_t>(GetPos() - filepos);
-		//Seek(filepos);
-		//Write(&_samph,sizeof(_samph));
-		//Skip(_samph.shsize-sizeof(_samph));
+
 
 		SaveSampleData(song, instIdx);
 
