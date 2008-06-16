@@ -573,7 +573,8 @@ namespace host{
 							break;
 						case XMCMD::SET_GLOBAL_VOLUME:
 							e._cmd = XMSampler::CMD::SET_GLOBAL_VOLUME;
-							e._parameter = param*2;
+							if (param >= 0x80) e._parameter = 0xFF;
+							else e._parameter = param*2;
 							break;
 						case XMCMD::GLOBAL_VOLUME_SLIDE:
 							e._cmd = XMSampler::CMD::GLOBAL_VOLUME_SLIDE;
