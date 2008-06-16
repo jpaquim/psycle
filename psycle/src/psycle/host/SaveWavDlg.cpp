@@ -217,14 +217,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 32)
 				{
-					bits = 3;
+					bits = 4;
 				}
 			}
 
 			m_bits.AddString("8 bit");
 			m_bits.AddString("16 bit");
 			m_bits.AddString("24 bit");
-			m_bits.AddString("32 bit");
+			m_bits.AddString("32 bit (int)");
+			m_bits.AddString("32 bit (float)");
 
 			m_bits.SetCurSel(bits);
 
@@ -404,7 +405,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				std::max(std::string::size_type(0),rootname.length()-4));
 
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-			const int real_bits[]={8,16,24,32};
+			const int real_bits[]={8,16,24,32,32};
+			bool isFloat = (bits == 4);
 
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
@@ -467,7 +469,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							filename << rootname;
 							filename << "-track "
 								<< std::setprecision(2) << (unsigned)i;
-							SaveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode);
+							SaveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode,isFloat);
 	/*
 	'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
 	'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
@@ -519,7 +521,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							// now save the song
 							char filename[MAX_PATH];
 							sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
-							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 							return;
 						}
 					}
@@ -565,7 +567,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							// now save the song
 							char filename[MAX_PATH];
 							sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
-							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 							return;
 						}
 					}
@@ -574,7 +576,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode);
+					SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode,isFloat);
 				}
 			}
 			else if (m_outputtype == 1 || m_outputtype == 2)
@@ -593,11 +595,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				memset(size,0,4);
 				clipboardmem.push_back(size);
 				// No name -> record to clipboard.
-				SaveWav("",real_bits[bits],real_rate[rate],channelmode);
+				SaveWav("",real_bits[bits],real_rate[rate],channelmode,isFloat);
 			}
 		}
 
-		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode)
+		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
 		{
 			saving=true;
 			Player *pPlayer = Global::pPlayer;
@@ -617,7 +619,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_text.SetWindowText(file.substr(pos+1).c_str());
 			}
 
-			pPlayer->StartRecording(file,bits,rate,channelmode,
+			pPlayer->StartRecording(file,bits,rate,channelmode,isFloat,
 									m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape,&clipboardmem);
 
 			int tmp;
@@ -807,7 +809,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Song *pSong = Global::_pSong;
 
 				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-				const int real_bits[]={8,16,24,32};
+				const int real_bits[]={8,16,24,32,32};
+				const bool isFloat = (bits == 4);
 
 				for (int i = current+1; i < pSong->SONGTRACKS; i++)
 				{
@@ -828,7 +831,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						// now save the song
 						char filename[MAX_PATH];
 						sprintf(filename,"%s-track %.2u.wav",rootname.c_str(),i);
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
 				}
@@ -840,7 +843,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Song *pSong = Global::_pSong;
 
 				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-				const int real_bits[]={8,16,24,32};
+				const int real_bits[]={8,16,24,32,32};
+				const bool isFloat = (bits == 4);
 
 				for (int i = current+1; i < MAX_CONNECTIONS; i++)
 				{
@@ -864,7 +868,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						// now save the song
 						char filename[MAX_PATH];
 						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[pSong->_pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
 				}
@@ -883,7 +887,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Song *pSong = Global::_pSong;
 
 				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-				const int real_bits[]={8,16,24,32};
+				const int real_bits[]={8,16,24,32,32};
+				const bool isFloat = (bits == 4);
 
 				for (int i = current+1; i < MAX_BUSES; i++)
 				{
@@ -907,7 +912,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						// now save the song
 						char filename[MAX_PATH];
 						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->_pMachine[i]->_editName);
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode);
+						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
 				}
