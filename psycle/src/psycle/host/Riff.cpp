@@ -120,7 +120,6 @@ namespace psycle
 			}
 			return retcode;
 		}
-
 		DDCRET ExtRiffFile::Write(const void *Data, unsigned NumBytes)
 		{
 			if(fmode != RFM_WRITE) return DDC_INVALID_CALL;
@@ -269,7 +268,7 @@ namespace psycle
 			return retcode;
 		}
 
-		DDCRET WaveFile::OpenForWrite (const char * Filename, UINT32 SamplingRate, UINT16 BitsPerSample, UINT16 NumChannels)
+		DDCRET WaveFile::OpenForWrite (const char * Filename, UINT32 SamplingRate, UINT16 BitsPerSample, UINT16 NumChannels, bool isFloat)
 		{
 			// Verify parameters...
 			if
@@ -279,7 +278,7 @@ namespace psycle
 					NumChannels < 1 || NumChannels > 2
 				)
 				return DDC_INVALID_CALL;
-			wave_format.data.Config(SamplingRate, BitsPerSample, NumChannels);
+			wave_format.data.Config(SamplingRate, BitsPerSample, NumChannels, isFloat);
 			DDCRET retcode = Open ( Filename, RFM_WRITE );
 			if( retcode == DDC_SUCCESS)
 			{
@@ -362,28 +361,45 @@ namespace psycle
 		DDCRET WaveFile::WriteMonoSample(float SampleData)
 		{
 			int d;
-			if(SampleData > 32767.0f) SampleData = 32767.0f;
-			else if(SampleData < -32768.0f) SampleData = -32768.0f;
-			switch( wave_format.data.nBitsPerSample)
+			switch( wave_format.data.wFormatTag )
 			{
-			case 8:
-				pcm_data.ckSize += 1;
-				d = int(SampleData/256.0f);
-				d += 128;
-				return Write ( &d, 1 );
-			case 16:
-				pcm_data.ckSize += 2;
-				d = int(SampleData);
-				return Write ( &d, 2 );
-			case 24:
-				pcm_data.ckSize += 3;
-				d = int(SampleData * 256.0f);
-				return Write ( &d, 3 );
-			case 32:
-				pcm_data.ckSize += 4;
-				d = int(SampleData * 65536.0f);
-				return Write ( &d, 4 );
+			case 1: // Integer PCM
+				if(SampleData > 32767.0f) SampleData = 32767.0f;
+				else if(SampleData < -32768.0f) SampleData = -32768.0f;
+				switch( wave_format.data.nBitsPerSample)
+				{
+				case 8:
+					pcm_data.ckSize += 1;
+					d = int(SampleData/256.0f);
+					d += 128;
+					return Write ( &d, 1 );
+				case 16:
+					pcm_data.ckSize += 2;
+					d = int(SampleData);
+					return Write ( &d, 2 );
+				case 24:
+					pcm_data.ckSize += 3;
+					d = int(SampleData * 256.0f);
+					return Write ( &d, 3 );
+				case 32:
+					pcm_data.ckSize += 4;
+					d = int(SampleData * 65536.0f);
+					return Write ( &d, 4 );
+				default:
+					break;
+				}
+				break;
+			case 3: // IEEE float PCM
+				if( wave_format.data.nBitsPerSample == 32)
+				{
+					pcm_data.ckSize += 4;
+					const float f = SampleData * 0.000030517578125f;
+					return Write ( &f, 4 );
+				}
+			default:
+				break;
 			}
+
 			return DDC_INVALID_CALL;
 		}
 
@@ -391,56 +407,77 @@ namespace psycle
 		{
 			DDCRET retcode = DDC_SUCCESS;
 			int l, r;
-			if(LeftSample > 32767.0f) LeftSample = 32767.0f;
-			else if (LeftSample < -32768.0f) LeftSample = -32768.0f;
-			if(RightSample > 32767.0f) RightSample = 32767.0f;
-			else if(RightSample < -32768.0f) RightSample = -32768.0f;
-			switch( wave_format.data.nBitsPerSample)
+			float f;
+			switch( wave_format.data.wFormatTag )
 			{
-			case 8:
-				l = int(LeftSample/256.0f);
-				r = int(RightSample/256.0f);
-				l+= 128;
-				r+= 128;
-				retcode = Write ( &l, 1 );
-				if( retcode == DDC_SUCCESS)
+			case 1: // Integer PCM
+				if(LeftSample > 32767.0f) LeftSample = 32767.0f;
+				else if (LeftSample < -32768.0f) LeftSample = -32768.0f;
+				if(RightSample > 32767.0f) RightSample = 32767.0f;
+				else if(RightSample < -32768.0f) RightSample = -32768.0f;
+				switch( wave_format.data.nBitsPerSample)
 				{
-					retcode = Write(&r, 1);
-					if(retcode == DDC_SUCCESS) pcm_data.ckSize += 2;
+				case 8:
+					l = int(LeftSample/256.0f);
+					r = int(RightSample/256.0f);
+					l+= 128;
+					r+= 128;
+					retcode = Write ( &l, 1 );
+					if( retcode == DDC_SUCCESS)
+					{
+						retcode = Write(&r, 1);
+						if(retcode == DDC_SUCCESS) pcm_data.ckSize += 2;
+					}
+					break;
+				case 16:
+					l = int(LeftSample);
+					r = int(RightSample);
+					retcode = Write ( &l, 2 );
+					if( retcode == DDC_SUCCESS)
+					{
+						retcode = Write(&r, 2);
+						if(retcode == DDC_SUCCESS) pcm_data.ckSize += 4;
+					}
+					break;
+				case 24:
+					l = int(LeftSample*256.0f);
+					r = int(RightSample*256.0f);
+					retcode = Write(&l, 3);
+					if(retcode == DDC_SUCCESS)
+					{
+						retcode = Write(&r, 3);
+						if(retcode == DDC_SUCCESS) pcm_data.ckSize += 6;
+					}
+					break;
+				case 32:
+					l = int(LeftSample*65536.0f);
+					r = int(RightSample*65536.0f);
+					retcode = Write(&l, 4);
+					if(retcode == DDC_SUCCESS)
+					{
+						retcode = Write ( &r, 4 );
+						if( retcode == DDC_SUCCESS) pcm_data.ckSize += 8;
+					}
+					break;
+				default:
+					retcode = DDC_INVALID_CALL;
 				}
 				break;
-			case 16:
-				l = int(LeftSample);
-				r = int(RightSample);
-				retcode = Write ( &l, 2 );
-				if( retcode == DDC_SUCCESS)
+			case 3: // IEEE float PCM
+				if( wave_format.data.nBitsPerSample == 32)
 				{
-					retcode = Write(&r, 2);
-					if(retcode == DDC_SUCCESS) pcm_data.ckSize += 4;
+					pcm_data.ckSize += 4;
+					f = LeftSample * 0.000030517578125f;
+					retcode = Write ( &f, 4 );
+					if(retcode == DDC_SUCCESS)
+					{
+						f = RightSample * 0.000030517578125f;
+						retcode = Write ( &f, 4 );
+						if( retcode == DDC_SUCCESS) pcm_data.ckSize += 8;
+					}
 				}
-				break;
-			case 24:
-				l = int(LeftSample*256.0f);
-				r = int(RightSample*256.0f);
-				retcode = Write(&l, 3);
-				if(retcode == DDC_SUCCESS)
-				{
-					retcode = Write(&r, 3);
-					if(retcode == DDC_SUCCESS) pcm_data.ckSize += 6;
-				}
-				break;
-			case 32:
-				l = int(LeftSample*65536.0f);
-				r = int(RightSample*65536.0f);
-				retcode = Write(&l, 4);
-				if(retcode == DDC_SUCCESS)
-				{
-					retcode = Write ( &r, 4 );
-					if( retcode == DDC_SUCCESS) pcm_data.ckSize += 8;
-				}
-				break;
 			default:
-				retcode = DDC_INVALID_CALL;
+				break;
 			}
 			return retcode;
 		}

@@ -91,9 +91,16 @@ namespace psycle
 				(
 					UINT32 NewSamplingRate = 44100,
 					UINT16 NewBitsPerSample = 16,
-					UINT16 NewNumChannels = 2
+					UINT16 NewNumChannels = 2,
+					bool isFloat = false
 				)
 			{
+				if (isFloat) {
+					wFormatTag = 3; // IEEE float
+				}
+				else {
+					wFormatTag = 1; // PCM
+				}
 				nSamplesPerSec = NewSamplingRate;
 				nChannels = NewNumChannels;
 				nBitsPerSample = NewBitsPerSample;
@@ -102,7 +109,6 @@ namespace psycle
 			}
 			WaveFormat_ChunkData()
 			{
-				wFormatTag = 1; // PCM
 				Config();
 			}
 		};
@@ -153,7 +159,8 @@ namespace psycle
 			DDCRET OpenForWrite ( const char  *Filename,
 									UINT32       SamplingRate   = 44100,
 									UINT16       BitsPerSample  =    16,
-									UINT16       NumChannels    =     2 );
+									UINT16       NumChannels    =     2 ,
+									bool		 isFloat		=	false);
 
 			DDCRET OpenForRead ( const char *Filename );
 
