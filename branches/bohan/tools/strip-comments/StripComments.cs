@@ -1,4 +1,4 @@
-using System; using System.IO; using System.Text;
+using System; using System.Text; using System.IO; //using System.IO.Compression;
 
 class StripComments {
 	static void Main(String[] args) {
@@ -59,7 +59,15 @@ class StripComments {
 			}
 			prev = c; prevState = state; state = newState; if(output) { sb.Append(c); prevOutput = c; }
 		}
-		using(StreamWriter sw = new StreamWriter(filename, false, encoding)) { sw.Write(sb.ToString()); }
-		//Console.Write(sb.ToString());
+		s = sb.ToString();
+		using(StreamWriter sw = new StreamWriter(filename, false, encoding)) { sw.Write(s); }
+		/*
+			using(FileStream fs = new FileStream(filename + ".gz", FileMode.Create, FileAccess.Write)) {
+				using(GZipStream gzs = new GZipStream(fs, CompressionMode.Compress)) {
+					using(StreamWriter sw = new StreamWriter(gzs, encoding)) { sw.Write(s); }
+				}
+			}
+		*/
+		//Console.Write(sb);
 	}
 }
