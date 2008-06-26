@@ -3,7 +3,7 @@ using System; using System.IO; using System.Text;
 class StripComments {
 	static void Main(String[] args) {
 		if(args.Length == 0) args = new String[] {"."};
-		foreach(String arg in args) StripComments.StripDir(arg);
+		foreach(String arg in args) StripDir(arg);
 	}
 
 	static void StripDir(String dir) {
@@ -12,40 +12,53 @@ class StripComments {
 		foreach(String subdir in Directory.GetDirectories(dir)) StripDir(subdir);
 	}
 
+	private static Encoding encoding = Encoding.Default; // or Encoding.UTF8
+
 	private enum State { Normal, SingleLineComment, MultiLineComment, SingleQuotedString, DoubleQuotedString }
 
 	static void StripFile(String filename) {
 		Console.WriteLine("parsing " + filename);
 		StringBuilder sb = new StringBuilder();
-		//String s = File.ReadAllText(filename);
-		using(StreamReader sr = new StreamReader(filename)) { String l; while((l = sr.ReadLine()) != null) sb.Append(l).Append('\n'); }
-		String s = sb.ToString();
-		sb = new StringBuilder(); char prev = '\0'; State state = State.Normal, prevState = state;
+		using(StreamReader sr = new StreamReader(filename, encoding)) { String l; while((l = sr.ReadLine()) != null) sb.Append(l).Append('\n'); }
+		String s = sb.ToString(); sb = new StringBuilder(); char prev = '\0', prevOutput = prev; State state = State.Normal, prevState = state;
 		foreach(char c in s) {
-			State newState = state;
+			bool output = false; State newState = state;
 			switch(state) {
-				case State.SingleLineComment:  if(                c == '\n') newState = State.Normal; break;
-				case State.MultiLineComment:   if(prev == '*'  && c == '/' ) newState = State.Normal; break;
-				case State.SingleQuotedString: if(prev != '\\' && c == '\'') newState = State.Normal; sb.Append(c); break;
-				case State.DoubleQuotedString: if(prev != '\\' && c == '"' ) newState = State.Normal; sb.Append(c); break;
+				case State.SingleLineComment: if(c == '\n') { if(prevOutput != '\n') output = true; newState = State.Normal; } break;
+				case State.MultiLineComment:                  if(prev == '*'  && c == '/' )         newState = State.Normal;   break;
+				case State.SingleQuotedString: output = true; if(prev != '\\' && c == '\'')         newState = State.Normal;   break;
+				case State.DoubleQuotedString: output = true; if(prev != '\\' && c == '"' )         newState = State.Normal;   break;
 				case State.Normal: switch(prev) {
-						case '\\': sb.Append(c); break;
+						case '\\': output = true; break;
 						case '/': switch(c) {
 								case '/': newState = State.SingleLineComment; break;
 								case '*': newState = State.MultiLineComment;  break;
-								default: if(prevState != State.MultiLineComment) sb.Append(prev); sb.Append(c); break;
+								default:
+									if(prevState != State.MultiLineComment) { sb.Append('/'); output = true; }
+									else switch(c) {
+										case '\t': case ' ': case '\n': switch(prevOutput) {
+												case '\t': case ' ': case '\n': break;
+												default: output = true; break;
+											} break;
+										default: output = true; break;
+									} break;
 							} break;
 						default: switch(c) {
-								case '\'': newState = State.SingleQuotedString; sb.Append(c); break;
-								case '"':  newState = State.DoubleQuotedString; sb.Append(c); break;
 								case '/': break;
-								default: sb.Append(c); break;
-							}
-							break;
+								case '\'': output = true; newState = State.SingleQuotedString; break;
+								case '"':  output = true; newState = State.DoubleQuotedString; break;
+								case '\n': if(prevOutput != '\n') output = true; break;
+								case '\t': case ' ': switch(prevOutput) {
+										case '\t': case ' ': case '\n': break;
+										default: output = true; break;
+									} break;
+								default: output = true; break;
+							} break;
 					} break;
 			}
-			prev = c; prevState = state; state = newState;
+			prev = c; prevState = state; state = newState; if(output) { sb.Append(c); prevOutput = c; }
 		}
-		Console.Write(sb.ToString());
+		using(StreamWriter sw = new StreamWriter(filename, false, encoding)) { sw.Write(sb.ToString()); }
+		//Console.Write(sb.ToString());
 	}
 }
