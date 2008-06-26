@@ -36,7 +36,8 @@ class StripComments {
 								default:
 									if(prevState != State.MultiLineComment) { sb.Append('/'); output = true; }
 									else switch(c) {
-										case '\t': case ' ': case '\n': switch(prevOutput) {
+										case '\n': if(prevOutput != '\n') output = true; break;
+										case '\t': case ' ': switch(prevOutput) {
 												case '\t': case ' ': case '\n': break;
 												default: output = true; break;
 											} break;
