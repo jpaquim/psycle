@@ -13,7 +13,7 @@ namespace universalis { namespace operating_system {
 /// generic exception thrown by functions of the namespace universalis::operating_system.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::exception {
 	public:
-		inline exception(int const & code, compiler::location const & location) throw() : universalis::exception(location), code_(code) {}
+		inline exception(int const & code, compiler::location const & location) throw() : universalis::exception(location), code_(code), what_() {}
 
 	public:
 		int const code() const throw() { return code_; }
