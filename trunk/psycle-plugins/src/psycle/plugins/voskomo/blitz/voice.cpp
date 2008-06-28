@@ -462,7 +462,7 @@ void CSynthTrack::updateTuning() {
 		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
 		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
 		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		else
@@ -484,7 +484,7 @@ void CSynthTrack::updateTuning() {
 		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
 		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
 		else
-		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
+		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
 		break;
 	}
 	rdco1Pitch=freqChange(dco1Pitch);
