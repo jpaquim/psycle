@@ -938,10 +938,21 @@ namespace psycle
 		ULONGINV Samplength	// length of the sample. It is in bytes, not in Samples.
 		ULONGINV loopstart	// Start point for the loop. It is in bytes, not in Samples.
 		ULONGINV loopLength	// Length of the loop (so loopEnd = loopstart+looplength) In bytes.
-		unsigned char unknown2[5]; //Always $20 $AB $01 $00 //
+		unsigned char sampRateHiByte; samples per second.  (Unsigned 16-bit quantity.)
+		unsigned char sampRateLoByte;
+		unsigned char numOctaves; //number of octaves of waveforms in sample. (Multisample?)
+		unsigned char compressMode; // data compression (0=none, 1=Fibonacci-delta encoding).
 		unsigned char volumeHiByte;
 		unsigned char volumeLoByte;
-		unsigned char unknown3;
+		unsigned char volumeHiBytePoint;
+		unsigned char volumeLoBytePoint; (FIXED) = volume.  (The number 65536 means 1.0 or full volume.)
+
+		//A Voice holds waveform data for one or more octaves. 
+		//The one-shot part is played once and the repeat part is looped.
+		//The sum of oneShotHiSamples and repeatHiSamples is the full length
+		// of the highest octave waveform. Each following octave waveform is twice
+		// as long as the previous one. 
+
 
 		char body_Id[4]		// "BODY"
 		ULONGINV hlength	// of the data contained in the file. It is the sample length as well (in bytes)
