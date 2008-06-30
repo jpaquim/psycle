@@ -41,7 +41,17 @@ namespace qpsycle {
 
 		layout_ = new QVBoxLayout();
 		setLayout( layout_ );
-	
+
+		//TODO: These three lines are here and not inside setupToolbar due to a chicken-and-egg problem
+		// on creating the SequenceDraw.
+		//Concretely, the call to makeSequencerLine, ends calling SequencerLine::addEntry, which triggers SequencerItem::itemChange()
+		//which then asks for the value of the snapCheckbox.
+		//There should either be a way to tell not to check that (parameter), or to not call that function.
+		toolBar_ = new QToolBar();
+		snapCheckbox_ = new QCheckBox( "Snap to beat", toolBar_ );
+		snapCheckbox_->setCheckState( Qt::Checked );
+
+
 		seqDraw_ = new SequencerDraw( this );
 		seqDraw_->setCacheMode( QGraphicsView::CacheBackground );
 
@@ -53,7 +63,6 @@ namespace qpsycle {
 
 	void SequencerView::setupToolbar()
 	{
-		toolBar_ = new QToolBar();
 		toolBar_->setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed ) );
 
 		QAction *insTrkAct = toolBar_->addAction( QIcon(":images/seq-add-track.png" ), "Insert Track" );
@@ -83,27 +92,25 @@ namespace qpsycle {
 		cTrkAct->setStatusTip( "Shrins a Track");
 		connect( cTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( onCollapseButtonCliked() ) );
 		toolBar_->addAction (cTrkAct);
-	
+
 		QAction *eTrkAct = toolBar_->addAction( QIcon(":images/seq-expand.png" ),
 							"Expand");
 		eTrkAct->setStatusTip( "Expand a Track");
 		connect( eTrkAct, SIGNAL( triggered() ), seqDraw_, SLOT( onExpandButtonCliked() ) );
-		toolBar_->addAction (eTrkAct); 
-	
+		toolBar_->addAction (eTrkAct);
+
 		toolBar_->addSeparator();
 
 		QAction *zoomOutAct_ = toolBar_->addAction( QIcon(":/images/zoom-out.png"), "Zoom Out" );
 		zoomOutAct_->setStatusTip( "Zoom Out" );
 		connect( zoomOutAct_, SIGNAL( triggered() ), this, SLOT( zoomOut() ) );
-		
+
 		QAction *zoomInAct_ = toolBar_->addAction( QIcon(":/images/zoom-in.png"), "Zoom In" );
 		zoomInAct_->setStatusTip( "Zoom In" );
 		connect( zoomInAct_, SIGNAL( triggered() ), this, SLOT( zoomIn() ) );
 
 		toolBar_->addSeparator();
 
-		snapCheckbox_ = new QCheckBox( "Snap to beat", toolBar_ );
-		snapCheckbox_->setCheckState( Qt::Checked );
 		toolBar_->addWidget( snapCheckbox_ );
 	}
 
@@ -114,9 +121,9 @@ namespace qpsycle {
 		}
 	}
 
-	void SequencerView::updatePlayPos() 
+	void SequencerView::updatePlayPos()
 	{
-		if ( song()->patternSequence() ) 
+		if ( song()->patternSequence() )
 		{
 			int beatPxLength = seqDraw_->beatPxLength();
 			int xPos =  std::min(song()->patternSequence()->tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
