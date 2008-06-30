@@ -528,9 +528,9 @@ namespace psy {
 		//   <JosepMa> About the "before any audio", the player can support this right now in two different ways:
 		//   One is in the "Machine::preWork" function, currently only used for buffer cleanup and generation of the wire visual data.
 		//   The second one is in the "Player::NotifyNewLine" function or in "Player::ExecuteGlobalCommands"
+		//   processing.  this should also eliminate the need for the lfo to be connected to something to work.
 		//   Also, note that currently, work does NOT mean 256 samples. It means *at much* 256, and quite frequently, it is a smaller
 		//   value (each line). This will change with the event based player.
-		//   processing.  this should also eliminate the need for the lfo to be connected to something to work.
 		//  - respond to pulse width knob.. consider using it as a 'skew' control for sine/tri waves as in dw-tremolo?
 		//  - now that we have a gui, keeping the 'position' display knob as an un-controllable control is just silly
 		//  - prettify gui

@@ -34,6 +34,7 @@ namespace psy { namespace core {
 class PatternLine {
 	public:
 		PatternLine() : sequencerTrack_(0) {}
+		virtual ~PatternLine() {}
 
 		void setSequenceTrack(int track) { sequencerTrack_ = track; }
 		int sequenceTrack() const { return sequencerTrack_; }
