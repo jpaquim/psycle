@@ -812,6 +812,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			entry->_note = note;
 			entry->_mach = _pSong->seqBus;
 
+			if ( _pSong->seqBus < MAX_MACHINES && _pSong->_pMachine[_pSong->seqBus] != 0 ) 
+			{
+
 					// implement lock sample to machine here.
 					// if the current machine is a sampler, check 
 					// if current sample is locked to a machine.
@@ -824,7 +827,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							entry->_mach = _pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine;
 						}
 					}
-
+			}
 			if ( note < notecommands::release)
 			{
 				if (Global::pConfig->_RecordTweaks)

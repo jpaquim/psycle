@@ -1012,6 +1012,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	}
 	void CFrameMixerMachine::OnSetFocus(CWnd* pOldWnd) 
 	{
+		//beware, if overloaded, needs to change the index.
 		CFrameMachine::OnSetFocus(pOldWnd);
 	}
 

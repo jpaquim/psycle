@@ -354,41 +354,44 @@ namespace psycle
 
 			void plugin::SaveSpecificChunk(RiffFile * pFile) 
 			{
-				UINT count(numParams());
-				unsigned char _program=0;
-				UINT size(sizeof _program + sizeof count);
-				UINT chunksize(0);
-				char * pData(0);
-				bool b = ProgramIsChunk();
-				if(b)
-				{
-					// can't do this! we have  a thing called "autosave" and everything is stopped then.
-//					MainsChanged(false);
-					count=0;
-					chunksize = GetChunk((void**)&pData);
-					size+=chunksize;
-//					MainsChanged(true);
-				}
-				else
-				{
-					 size+=sizeof(float) * count;
-				}
-				pFile->Write(&size, sizeof size);
-				_program = static_cast<unsigned char>(GetProgram());
-				pFile->Write(&_program, sizeof _program);
-				pFile->Write(&count, sizeof count);
-
-				if(b)
-				{
-					pFile->Write(pData, chunksize);
-				}
-				else
-				{
-					for(UINT i(0); i < count; ++i)
+				try {
+					UINT count(numParams());
+					unsigned char _program=0;
+					UINT size(sizeof _program + sizeof count);
+					UINT chunksize(0);
+					char * pData(0);
+					bool b = ProgramIsChunk();
+					if(b)
 					{
-						float temp = GetParameter(i);
-						pFile->Write(&temp, sizeof temp);
+						// can't do this! we have  a thing called "autosave" and everything is stopped then.
+		//					MainsChanged(false);
+						count=0;
+						chunksize = GetChunk((void**)&pData);
+						size+=chunksize;
+		//					MainsChanged(true);
 					}
+					else
+					{
+						 size+=sizeof(float) * count;
+					}
+					pFile->Write(&size, sizeof size);
+					_program = static_cast<unsigned char>(GetProgram());
+					pFile->Write(&_program, sizeof _program);
+					pFile->Write(&count, sizeof count);
+
+					if(b)
+					{
+						pFile->Write(pData, chunksize);
+					}
+					else
+					{
+						for(UINT i(0); i < count; ++i)
+						{
+							float temp = GetParameter(i);
+							pFile->Write(&temp, sizeof temp);
+						}
+					}
+				} catch(...) {
 				}
 			}
 

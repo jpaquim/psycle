@@ -87,7 +87,22 @@ namespace psycle
 			cdefKeyFS2,
 			cdefKeyG_2,
 			cdefKeyGS2,
-			cdefKeyA_2,	
+			cdefKeyA_2,
+			cdefKeyAS2,
+			cdefKeyB_2,
+			cdefKeyC_3, ///< 36
+			cdefKeyCS3,
+			cdefKeyD_3,
+			cdefKeyDS3,
+			cdefKeyE_3,
+			cdefKeyF_3,
+			cdefKeyFS3,
+			cdefKeyG_3,
+			cdefKeyGS3,
+			cdefKeyA_3,
+			cdefKeyAS3,
+			cdefKeyB_3,
+
 
 			cdefKeyStop = 120,	///< NOTE STOP
 			cdefTweakM = 121,	///< tweak
@@ -309,6 +324,20 @@ namespace psycle
 				case cdefKeyG_2: return "Key (Oct.2) G";
 				case cdefKeyGS2: return "Key (Oct.2)-G#";
 				case cdefKeyA_2: return "Key (Oct.2)-A";
+				case cdefKeyAS2: return "Key (Oct.2)-A#";
+				case cdefKeyB_2: return "Key (Oct.2)-B";
+				case cdefKeyC_3: return "Key (Oct.3) C";
+				case cdefKeyCS3: return "Key (Oct.3) C#";
+				case cdefKeyD_3: return "Key (Oct.3) D";
+				case cdefKeyDS3: return "Key (Oct.3) D#";
+				case cdefKeyE_3: return "Key (Oct.3) E";
+				case cdefKeyF_3: return "Key (Oct.3) F";
+				case cdefKeyFS3: return "Key (Oct.3) F#";
+				case cdefKeyG_3: return "Key (Oct.3) G";
+				case cdefKeyGS3: return "Key (Oct.3)-G#";
+				case cdefKeyA_3: return "Key (Oct.3)-A";
+				case cdefKeyAS3: return "Key (Oct.3)-A#";
+				case cdefKeyB_3: return "Key (Oct.3)-B";
 
 				case cdefKeyStop: return "Key Stop";
 				case cdefKeyStopAny: return "Key Stop Current";

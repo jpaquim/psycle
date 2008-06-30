@@ -26,10 +26,10 @@ namespace psycle
 		{
 		public:
 			IffChunkHeader header;
-			IffChunkId data;
+			IffChunkId contentId;
 		};
 
-		/*********  IFF file reader conforming to EA's specifications ****/
+		/*********  IFF file reader comforming to EA's specifications ****/
 		class EaIff : public AbstractIff
 		{
 		public:
@@ -43,10 +43,14 @@ namespace psycle
 			virtual void close();
 			virtual bool Eof();
 
-			virtual void addNewChunk(const IffChunkHeader& header);
+			virtual void addFormChunk(IffChunkId id);
+			virtual void addCatChunk(IffChunkId id, bool endprevious=true);
+			virtual void addListChunk(IffChunkId id, bool endprevious=true);
+			virtual void addListProperty(IffChunkId contentId, IffChunkId propId);
+			virtual void addListProperty(IffChunkId contentId, IffChunkId propId, void const *data, std::uint32_t dataSize);
 
 			virtual const IffChunkHeader& readHeader();
-			virtual const IffChunkHeader& findChunk(IffChunkId id);
+			virtual const IffChunkHeader& findChunk(IffChunkId id, bool allowWrap=false);
 			virtual void skipThisChunk();
 
 			inline void Read(std::uint8_t & x) { AbstractIff::Read(x); }
@@ -67,8 +71,11 @@ namespace psycle
 			inline void Write(const char & x) { AbstractIff::Write(x); }
 			inline void Write(const bool & x) { AbstractIff::Write(x); }
 
+			static const IffChunkId grabbag;
 
 		protected:
+			void WriteChunkHeader(const IffChunkHeader& header);
+			void WriteChunkId(IffChunkId id);
 
 			IffChunkHeader currentHeader;
 			std::uint32_t headerPosition;
