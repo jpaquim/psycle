@@ -265,7 +265,7 @@ CMachineParameter const paraOsc1FuncType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	53,																																												// MaxValue
+	54,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -425,7 +425,7 @@ CMachineParameter const paraOsc2FuncType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	53,																																												// MaxValue
+	54,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -586,7 +586,7 @@ CMachineParameter const paraOsc3FuncType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	53,																																												// MaxValue
+	54,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -747,7 +747,7 @@ CMachineParameter const paraOsc4FuncType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	53,																																												// MaxValue
+	54,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -1750,6 +1750,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 			case 51:sprintf(txt,"Y Rotator");return true;break;
 			case 52:sprintf(txt,"Boost II (Wrap)");return true;break;
 			case 53:sprintf(txt,"Sync & Fade");return true;break;
+			case 54:sprintf(txt,"Forward & Backward");return true;break;
 		}
 	}
 
