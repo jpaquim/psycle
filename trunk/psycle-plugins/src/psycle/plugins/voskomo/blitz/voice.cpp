@@ -1211,7 +1211,14 @@ void CSynthTrack::calcWaves(int mask){
 						if (float1 > 2047) float1-=2048;
 					}
 					break;
-
+				case 54: // Forward & Backward
+					for(c=0;c<1024;c++){
+						WaveBuffer[buf][c]=sourceWave[(pos+c+c)&2047];
+						WaveBuffer[buf][2047-c]=WaveBuffer[buf][c];
+					}
+					break;
+				default: // nothing
+					break;
 				}
 				// a new buffer is now present
 				nextBuf[i]=1;
