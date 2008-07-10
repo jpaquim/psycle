@@ -16,6 +16,7 @@
 #include <sstream>
 #include <iomanip>
 #include <stdexcept>
+#include <cstring> // strcpy
 namespace psycle { namespace plugin {
 
 /// the plugin class used by the host hence to which all plugins must conform.
