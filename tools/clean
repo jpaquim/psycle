@@ -1,1 +1,2 @@
-find .. -name "++build" | xargs rm -rf
+#! /bin/sh
+find $(dirname $0)/.. -name ++\* -exec rm -Rf {} \;
