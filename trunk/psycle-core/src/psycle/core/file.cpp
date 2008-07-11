@@ -204,10 +204,10 @@ namespace psy { namespace core {
 	}
 	
 	bool File::setEnvPath(std::string const & new_path) {
-		// append the plugin dir to the path env var
-		std::string pathToSet = path_env_var_name;
-		pathToSet += "=" + new_path;
-		if(::putenv(const_cast<char*>(pathToSet.c_str()))) {
+		// setenv is better than putenv because putenv
+		// is not well-standardized and has different
+		// memory ownership policies on different systems. / Magnus
+		if(::setenv(path_env_var_name,new_path.c_str(),1)) {
 			std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
 			return false;
 		}
@@ -215,12 +215,9 @@ namespace psy { namespace core {
 	}
 	
 	std::string File::getEnvPath() {
-		std::string path;
 		char const * const env(std::getenv(path_env_var_name));
 
-		if(env) path = env;
-
-		return path;
+		return env ? std::string(env) : "";
 	}
 
 	std::string File::parentWorkingDir() {
