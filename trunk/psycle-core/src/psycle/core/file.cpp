@@ -182,42 +182,50 @@ namespace psy { namespace core {
 	
 	
 	std::string File::appendDirToEnvPath(std::string const & path) {
-
-		// append the plugin dir to the path env var
-		std::string new_path(getEnvPath());
-		if(new_path.length()) {
-			new_path +=
-				#if defined __unix__ || defined __APPLE__
-					":";
-				#elif defined _WIN64 || defined _WIN32
-					";";
-				#else
-					#error unknown path list separator
-				#endif
-		}
+		// append the given path to the path env var
+		std::string const old_path(getEnvPath());
+		std::string new_path(old_path);
+		if(new_path.length()) new_path +=
+			#if defined __unix__ || defined __APPLE__
+				":";
+			#elif defined _WIN64 || defined _WIN32
+				";";
+			#else
+				#error unknown path list separator
+			#endif
 		new_path += path;
-		if ( setEnvPath(new_path) == true ) {
-			return new_path;
-		} else {
-			return getEnvPath();
-		}
+		return setEnvPath(new_path) ? new_path : old_path;
 	}
 	
 	bool File::setEnvPath(std::string const & new_path) {
 		// setenv is better than putenv because putenv
 		// is not well-standardized and has different
 		// memory ownership policies on different systems. / Magnus
-		if(::setenv(path_env_var_name,new_path.c_str(),1)) {
-			std::cerr << "psycle: plugin: warning: could not alter " << path_env_var_name << " env var.\n";
-			return false;
-		}
+
+		// On mswindows, only putenv exists (with same memory ownership issue),
+		// so we have to use the winapi instead.
+
+		#if defined _WIN64 || defined _WIN32
+			if(!::SetEnvironmentVariable(path_env_var_name, new_path.c_str()) {
+				int const e(::GetLastError());
+				std::cerr << "psycle: core: warning: could not alter " << path_env_var_name << " env var (winapi error =" << e << ").\n";
+				return false;
+			}
+		#else
+			if(::setenv(path_env_var_name, new_path.c_str(), 1 /* overwrite */)) {
+				int const e(errno);
+				std::cerr << "psycle: core: warning: could not alter " << path_env_var_name << " env var (errno =" << e << ").\n";
+				return false;
+			}
+		#endif
 		return true;
 	}
 	
 	std::string File::getEnvPath() {
+		std::string path; // named-return-value optimisation
 		char const * const env(std::getenv(path_env_var_name));
-
-		return env ? std::string(env) : "";
+		if(env) path = env;
+		return path;
 	}
 
 	std::string File::parentWorkingDir() {
