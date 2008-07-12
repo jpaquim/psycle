@@ -207,7 +207,7 @@ namespace psy { namespace core {
 		// so we have to use the winapi instead.
 
 		#if defined _WIN64 || defined _WIN32
-			if(!::SetEnvironmentVariable(path_env_var_name, new_path.c_str()) {
+			if(!::SetEnvironmentVariableA(path_env_var_name, new_path.c_str())) {
 				int const e(::GetLastError());
 				std::cerr << "psycle: core: warning: could not alter " << path_env_var_name << " env var (winapi error =" << e << ").\n";
 				return false;
