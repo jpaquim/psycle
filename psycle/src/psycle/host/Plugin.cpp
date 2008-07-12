@@ -138,12 +138,34 @@ namespace psycle
 					new_path << old_path;
 				}
 				// set the new path env var
-				if(::putenv((path_env_var_name + ("="+ new_path.str())).c_str())) throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
+				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					if(!::SetEnvironmentVariable(path_env_var_name, new_path.str().c_str())) {
+						//int const e(::GetLastError());
+						throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
+					}
+				#else
+					///\todo use ::setenv (and not ::putenv!)
+					if(::setenv(path_env_var_name, new_path.str().c_str()) {
+						int const e(errno);
+						throw ...
+					}
+				#endif
 				loggers::trace(path_env_var_name + (" env var: " + new_path.str()));
 				// load the library passing just the base file name and relying on the search path env var
 				_dll = ::LoadLibrary(base_name.c_str());
 				// set the path env var back to its original value
-				if(::putenv((path_env_var_name + ("=" + old_path)).c_str())) throw exceptions::library_errors::loading_error("Could not set PATH env var back to its original value.");
+				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					if(!::SetEnvironmentVariable(path_env_var_name, old_path.str().c_str())) {
+						//int const e(::GetLastError());
+						throw exceptions::library_errors::loading_error("Could not set PATH env var back to its original value.");
+					}
+				#else
+					///\todo use ::setenv (and not ::putenv!)
+					if(::setenv(path_env_var_name, old_path.str().c_str()) {
+						int const e(errno);
+						throw ...
+					}
+				#endif		
 			}
 			if(!_dll)
 			{
