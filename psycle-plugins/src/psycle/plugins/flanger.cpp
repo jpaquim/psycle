@@ -106,13 +106,13 @@ class Flanger : public Plugin {
 	protected:
 		virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
 		virtual void samples_per_second_changed();
-		inline void process(math::sine_sequence &, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
+		inline void process(math::sine_sequence<true> &, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
 		inline void resize(const Real & delay);
 		enum Channels { left, right, channels };
 		std::vector<Real> buffers_[channels];
 		int delay_in_samples_, writes_[channels];
 		Real modulation_amplitude_in_samples_, modulation_radians_per_sample_, modulation_phase_;
-		math::sine_sequence sin_sequences_[channels];
+		math::sine_sequence<true> sin_sequences_[channels];
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(Flanger)
@@ -180,7 +180,7 @@ void Flanger::process(Sample l[], Sample r[], int samples, int) {
 }
 
 inline void Flanger::process(
-	math::sine_sequence & sine_sequence, std::vector<Real> & buffer,
+	math::sine_sequence<true> & sine_sequence, std::vector<Real> & buffer,
 	int & write, Sample input [], const int & samples, const Real & feedback
 ) throw() {
 	const int size(static_cast<int>(buffer.size()));
