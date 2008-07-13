@@ -20,4 +20,4 @@
 #include <psycle/helpers/math/round.hpp>
 #include <psycle/helpers/math/truncate.hpp>
 #include <psycle/helpers/math/log.hpp>
-
+#include <psycle/helpers/math/sine.hpp>
