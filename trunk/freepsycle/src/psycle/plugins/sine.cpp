@@ -56,7 +56,7 @@ void sine::do_process_template() throw(engine::exception) {
 	) {
 		if(phase_flag == channel::flags::continuous || phase_flag != channel::flags::empty &&
 			phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event
-		) this->phase_ = phase_channel()[phase_event++].sample();
+		) this->phase_ = std::fmod(phase_channel()[phase_event++].sample() + engine::math::pi, 2 * engine::math::pi) - engine::math::pi;
 
 		switch(frequency_flag) {
 			case channel::flags::continuous:
@@ -80,9 +80,9 @@ void sine::do_process_template() throw(engine::exception) {
 			case channel::flags::empty: default: /* nothing */ ;
 		}
 
-		if(std::abs(phase_) > engine::math::pi) phase_ = std::fmod(phase_ + engine::math::pi, 2 * engine::math::pi) - engine::math::pi;
 		out_channel()[out_event](out_event, amplitude_ * helpers::math::fast_sin<2>(phase_));
 		phase_ += step_;
+		if(phase_ > engine::math::pi) phase_ -= 2 * engine::math::pi;
 	}
 	out_channel().flag(channel::flags::continuous);
 }
