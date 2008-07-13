@@ -6,7 +6,7 @@
 ///\interface psycle::plugins::sine - oscillator with a sinusoidal wave form
 #pragma once
 #include "plugin.hpp"
-#include <psycle/helpers/math/sinus_sequence.hpp>
+#include <psycle/helpers/math/sine_sequence.hpp>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__SINE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins {
