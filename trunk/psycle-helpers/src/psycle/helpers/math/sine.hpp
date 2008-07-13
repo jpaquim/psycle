@@ -4,8 +4,8 @@
 
 #pragma once
 #include <cmath>
+#include "pi.hpp"
 #if defined BOOST_AUTO_TEST_CASE
-	#include "pi.hpp"
 	#include <universalis/operating_system/clocks.hpp>
 	#include <sstream>
 #endif
@@ -20,26 +20,29 @@ namespace psycle { namespace helpers { namespace math {
 /// input range: [-pi, pi]
 /// output range: [0, 1]
 /// constraints applied: sin(0) = 0, sin(pi / 2) = 1, sin(pi) = 0
-/// THD = 3.8% with only odd harmonics (in the accurate variant THD is only 0.078% with Q = 0.775, P = 0.225)
-template<unsigned int degree, typename T>
-T fast_sin(T const & theta) {
-	//assert(-pi <= theta && theta <= pi);
-	const float PI     = 3.14159265358979323846264338327950288f;
-	const float PI_SQR = 9.86960440108935861883449099987615114f;
-	const T B = 4 / PI;
-	const T C = -4 / PI_SQR;
-	T y = B * theta + C * theta * std::abs(theta);
-	if(degree > 2) {
-		// Q + P = 1
-		// Q = 0.775991821224, P = 0.224008178776 for minimal absolute error (0.0919%)
-		// Q = 0.782, P = 0.218 for minimal relative error
-		// Q = ?, P = ? for minimal THD error
+/// THD = 3.8% with only odd harmonics (in the accurate variant THD is only 0.078% with q = 0.775, p = 0.225)
+template<unsigned int polynomial_degree, typename Real>
+Real fast_sin(Real const & radians) {
+	//assert(-pi <= radians && radians <= pi);
+	// we solve:
+	// y(x) = a + b x + c x^2
+	// with the constraints: y(0) = 0, y(pi / 2) = 1, y(pi) = 0
+	// this gives, a = 0, b = 4 / pi, c = -4 / pi^2
+	Real const b(4 / pi);
+	Real const c(-b / pi); // pi^2 = 9.86960440108935861883449099987615114
+	// we use absolute values to mirror the parabola around the orign 
+	Real y(b * radians + c * radians * std::abs(radians));
+	if(polynomial_degree > 2) {
+		// q + p = 1
+		// q = 0.775991821224, p = 0.224008178776 for minimal absolute error (0.0919%)
+		// q = 0.782, p = 0.218 for minimal relative error
+		// q = ?, p = ? for minimal THD error
 		#if 1
-			const T P = 0.225;
-			y = P * (y * std::abs(y) - y) + y;
+			Real const p(0.224008178776);
+			y = p * (y * std::abs(y) - y) + y;
 		#else
-			const float Q = 0.775;
-			y = Q * y + P * y * std::abs(y);
+			Real const q(0.775991821224);
+			y = q * y + p * y * std::abs(y);
 		#endif
 	}
 	//assert(-1 <= y && y <= 1);
@@ -54,17 +57,19 @@ T fast_sin(T const & theta) {
 		int const iterations(1000000);
 		std::nanoseconds const t1(clock::current());
 		typedef double real;
-		real f1(1);
+		real const step(pi / 1000);
+		real f1(1), ff1(0);
 		for(int i(0); i < iterations; ++i) {
-			f1 = std::fmod(f1 + pi, 2 * pi) - pi;
-			f1 += fast_sin<2>(f1);
-			f1 -= fast_sin<2>(f1);
+			//too slow: f1 = std::fmod(f1 + pi, 2 * pi) - pi;
+			f1 += fast_sin<2>(ff1);
+			ff1 += step;
+			if(ff1 > pi) ff1 -= 2 * pi;
 		}
 		std::nanoseconds const t2(clock::current());
-		float f2(1);
+		real f2(1), ff2(0);
 		for(int i(0); i < iterations; ++i) {
-			f2 += std::sin(f2);
-			f2 -= std::sin(f2);
+			f2 += std::sin(ff2);
+			ff2 += step;
 		}
 		std::nanoseconds const t3(clock::current());
 		{
