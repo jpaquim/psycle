@@ -16,6 +16,6 @@ double const pi(
 );
 
 /// the pi constant as a 32-bit floating point number
-float const pi_f(float(pi));
+float const pi_f = float(pi);
 
 }}}

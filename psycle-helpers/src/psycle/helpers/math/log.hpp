@@ -126,7 +126,7 @@ namespace psycle
 						10000000.f,
 						1000000000.f
 					};
-					for(int i(0); i < sizeof input_values / sizeof *input_values; ++i) {
+					for(unsigned int i(0); i < sizeof input_values / sizeof *input_values; ++i) {
 						float const f(input_values[i]);
 						double tolerance;
 						if(0.6 < f && f < 1.7) tolerance = 0.60;

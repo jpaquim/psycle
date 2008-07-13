@@ -11,21 +11,19 @@ namespace psycle { namespace helpers { namespace math {
 // http://www.devmaster.net/forums/showthread.php?t=5784
 
 /// polynomial approximation of the sin function.
-/// two variants: inaccurate using a 2nd degree positive polynomial (parabola), and accurate using a 4th degree polynomial (square of the same parabola).
+/// two variants: 2nd degree positive polynomial (parabola), 4th degree polynomial (square of the same parabola).
 /// input range: [-pi, pi]
 /// output range: [0, 1]
 /// constraints applied: sin(0) = 0, sin(pi / 2) = 1, sin(pi) = 0
 /// THD = 3.8% with only odd harmonics (in the accurate variant THD is only 0.078% with Q = 0.775, P = 0.225)
-template<typename T, bool accurate = false>
+template<unsigned int degree, typename T>
 T fast_sin(T const & theta) {
 	const float PI     = 3.14159265358979323846264338327950288f;
-	const float PI2    = 6.28318530717958647692528676655900577f;
-	const float PID2   = 1.57079632679489661923132169163975144f;
 	const float PI_SQR = 9.86960440108935861883449099987615114f;
 	const T B = 4 / PI;
 	const T C = -4 / PI_SQR;
 	T y = B * theta + C * theta * std::abs(theta);
-	if(accurate) {
+	if(degree > 2) {
 		// Q + P = 1
 		// Q = 0.775991821224, P = 0.224008178776 for minimal absolute error (0.0919%)
 		// Q = 0.782, P = 0.218 for minimal relative error
