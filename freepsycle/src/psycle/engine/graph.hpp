@@ -289,7 +289,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 					};
 			};
 			typedef typenames::buffer buffer;
-			typedef typenames::buffer::channel channel;
+			typedef typenames::channel channel;
 			typedef typenames::event event;
 	///\}
 		

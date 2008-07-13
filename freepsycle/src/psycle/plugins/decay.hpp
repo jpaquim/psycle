@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2008-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2008-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::decay - a decaying pulse
 #pragma once
@@ -28,7 +28,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK decay : public engine::node {
 		void do_process() throw(engine::exception) /*override*/;
 
 	private:
-		template<bool, bool>
+		template<channel::flags::type, channel::flags::type>
 		void do_process_template() throw(engine::exception);
 		
 		real current_;
@@ -38,11 +38,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK decay : public engine::node {
 		bool have_decay() { return *single_input_ports()[1]; }
 		bool have_out()   { return *output_ports()[0]; }
 
-		buffer::channel & pulse_channel() { return single_input_ports()[0]->buffer()[0]; }
-		buffer::channel & decay_channel() { return single_input_ports()[1]->buffer()[0]; }
-		buffer::channel & out_channel()   { return output_ports()[0]->buffer()[0]; }
+		channel & pulse_channel() { return single_input_ports()[0]->buffer()[0]; }
+		channel & decay_channel() { return single_input_ports()[1]->buffer()[0]; }
+		channel & out_channel()   { return output_ports()[0]->buffer()[0]; }
 };
 
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
-

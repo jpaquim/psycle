@@ -60,4 +60,3 @@ void sequence_iterator::process(buffer & out, real events_per_second, std::size_
 }
 
 }}
-

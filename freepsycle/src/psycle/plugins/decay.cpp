@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2008-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2008-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::decay
 #include <packageneric/pre-compiled.private.hpp>
@@ -31,28 +31,12 @@ void decay::seconds_per_event_change_notification_from_port(engine::port const &
 
 void decay::do_process() throw(engine::exception) {
 	if(!have_out()) return;
-	PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(do_process_template, have_pulse(), have_decay());
+	PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(do_process_template,
+		have_pulse() ? pulse_channel().flag() : channel::flags::empty,
+		have_decay() ? decay_channel().flag() : channel::flags::empty
+	);
 }
 
-#if 1
-template<bool use_pulse, bool use_decay>
-void decay::do_process_template() throw(engine::exception) {
-	for(std::size_t
-		pulse_event(0),
-		decay_event(0),
-		out_event(0); out_event < out_channel().size(); ++out_event
-	) {
-		if(use_pulse && pulse_event < pulse_channel().size() && pulse_channel()[pulse_event].index() == out_event)
-			this->current_ = pulse_channel()[pulse_event++].sample();
-		if(use_decay && decay_event < decay_channel().size() && decay_channel()[decay_event].index() == out_event)
-			this->decay_per_second(decay_channel()[decay_event++].sample());
-		out_channel()[out_event](out_event, current_);
-		current_ *= decay_;
-	}
-	if(current_) out_channel().flag(channel::flags::continuous);
-	else out_channel().flag(channel::flags::empty);
-}
-#else
 template<engine::channel::flags::type pulse_flag, engine::channel::flags::type decay_flag>
 void decay::do_process_template() throw(engine::exception) {
 	for(std::size_t
@@ -61,22 +45,24 @@ void decay::do_process_template() throw(engine::exception) {
 		out_event(0); out_event < out_channel().size(); ++out_event
 	) {
 		switch(pulse_flag) {
-			channel::flags::continuous:
+			case channel::flags::continuous:
 				this->current_ = pulse_channel()[out_event].sample();
 			break;
-			channel::flags::discrete:
+			case channel::flags::discrete:
 				if(pulse_event < pulse_channel().size() && pulse_channel()[pulse_event].index() == out_event)
 					this->current_ = pulse_channel()[pulse_event++].sample();
-			default: /* nothing */ ;
+			break;
+			case channel::flags::empty: default: /* nothing */ ;
 		}
 		switch(decay_flag) {
-			channel::flags::continuous:
-				this->decay_per_second(decay_channel()[decay_event++].sample());
+			case channel::flags::continuous:
+				this->decay_per_second(decay_channel()[out_event].sample());
 			break;
-			channel::flags::discrete:
+			case channel::flags::discrete:
 				if(decay_event < decay_channel().size() && decay_channel()[decay_event].index() == out_event)
 					this->decay_per_second(decay_channel()[decay_event++].sample());
-			default: /* nothing */ ;
+			break;
+			case channel::flags::empty: default: /* nothing */ ;
 		}
 		out_channel()[out_event](out_event, current_);
 		current_ *= decay_;
@@ -84,6 +70,5 @@ void decay::do_process_template() throw(engine::exception) {
 	if(current_) out_channel().flag(channel::flags::continuous);
 	else out_channel().flag(channel::flags::empty);
 }
-#endif
 
 }}
