@@ -15,6 +15,7 @@
 namespace psycle { namespace engine {
 
 /// mathematical operations on floating point numbers
+///\todo merge with psycle::helpers
 namespace math {
 	template<typename Real>
 	Real inline deci_bell_to_linear(Real const & deci_bell) throw() {
