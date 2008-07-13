@@ -7,6 +7,10 @@ namespace psycle
 	{
 		namespace math
 		{
+			// worth seeing
+			// http://www.audiomulch.com/~rossb/code/sinusoids/
+			// http://www.devmaster.net/forums/showthread.php?t=5784
+			
 			class sinus_sequence
 			{
 				public:
