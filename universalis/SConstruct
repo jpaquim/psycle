@@ -130,8 +130,8 @@ unit_test_module = base_module(source_package,
 			dependencies = [pkg_config_package.local_package(), boost_test],
 			target_type = base_module.target_types.program
 )
-from packageneric.generic.scons.find import find
 unit_test_module.contexes().source().compilers().cxx().paths().add(['src'])
+from packageneric.generic.scons.find import find
 unit_test_module.add_sources(find(project, 'src', [os.path.join(os.curdir, 'unit_tests.cpp')]))
 
 ###
