@@ -13,7 +13,7 @@ namespace psycle
 				#if defined M_PI
 					M_PI
 				#else
-					3.14159265358979323846
+					3.14159265358979323846264338327950288
 				#endif
 			);
 
