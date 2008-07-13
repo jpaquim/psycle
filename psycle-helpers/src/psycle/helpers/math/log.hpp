@@ -12,7 +12,6 @@
 	#include <universalis/operating_system/clocks.hpp>
 	#include <cmath>
 	#include <sstream>
-	#include <iomanip>
 #endif
 namespace psycle
 {

@@ -4,6 +4,11 @@
 
 #pragma once
 #include <cmath>
+#if defined BOOST_AUTO_TEST_CASE
+	#include "pi.hpp"
+	#include <universalis/operating_system/clocks.hpp>
+	#include <sstream>
+#endif
 namespace psycle { namespace helpers { namespace math {
 
 // worth reading
@@ -18,6 +23,7 @@ namespace psycle { namespace helpers { namespace math {
 /// THD = 3.8% with only odd harmonics (in the accurate variant THD is only 0.078% with Q = 0.775, P = 0.225)
 template<unsigned int degree, typename T>
 T fast_sin(T const & theta) {
+	//assert(-pi <= theta && theta <= pi);
 	const float PI     = 3.14159265358979323846264338327950288f;
 	const float PI_SQR = 9.86960440108935861883449099987615114f;
 	const T B = 4 / PI;
@@ -36,7 +42,42 @@ T fast_sin(T const & theta) {
 			y = Q * y + P * y * std::abs(y);
 		#endif
 	}
+	//assert(-1 <= y && y <= 1);
 	return y;
 }
+
+#if defined BOOST_AUTO_TEST_CASE
+	BOOST_AUTO_TEST_CASE(fast_sin_test) {
+		using namespace universalis::operating_system::clocks;
+		//typedef thread clock;
+		typedef monotonic clock;
+		int const iterations(1000000);
+		std::nanoseconds const t1(clock::current());
+		typedef double real;
+		real f1(1);
+		for(int i(0); i < iterations; ++i) {
+			f1 = std::fmod(f1 + pi, 2 * pi) - pi;
+			f1 += fast_sin<2>(f1);
+		}
+		std::nanoseconds const t2(clock::current());
+		float f2(1);
+		for(int i(0); i < iterations; ++i) f2 += std::sin(f2);
+		std::nanoseconds const t3(clock::current());
+		{
+			std::ostringstream s; s << "fast_sin: " << f1;
+			BOOST_MESSAGE(s.str());
+		}
+		{
+			std::ostringstream s; s << "std::sin: " << f2;
+			BOOST_MESSAGE(s.str());
+		}
+		{
+			std::ostringstream s;
+			s << (t2 - t1).get_count() * 1e-9 << "s < " << (t3 - t2).get_count() * 1e-9 << "s";
+			BOOST_MESSAGE(s.str());
+		}
+		BOOST_CHECK(t2 - t1 < t3 - t2);
+	}
+#endif
 
 }}}
