@@ -58,10 +58,14 @@ T fast_sin(T const & theta) {
 		for(int i(0); i < iterations; ++i) {
 			f1 = std::fmod(f1 + pi, 2 * pi) - pi;
 			f1 += fast_sin<2>(f1);
+			f1 -= fast_sin<2>(f1);
 		}
 		std::nanoseconds const t2(clock::current());
 		float f2(1);
-		for(int i(0); i < iterations; ++i) f2 += std::sin(f2);
+		for(int i(0); i < iterations; ++i) {
+			f2 += std::sin(f2);
+			f2 -= std::sin(f2);
+		}
 		std::nanoseconds const t3(clock::current());
 		{
 			std::ostringstream s; s << "fast_sin: " << f1;
