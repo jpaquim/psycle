@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2002-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2002-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::event
 #pragma once
@@ -24,9 +24,6 @@ class event {
 			/// sets the value of the sample.
 			///\param the value of the sample
 			void sample(real const & sample) throw() { sample_ = sample; }
-			/// compares the logical indexes of two events.
-			/// The value of the sample is not taken into account.
-			///\return true if both events have the same logical index
 		private:
 			real sample_;
 	///\}

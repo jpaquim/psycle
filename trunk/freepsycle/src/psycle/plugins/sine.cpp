@@ -38,10 +38,14 @@ void sine::seconds_per_event_change_notification_from_port(engine::port const & 
 
 void sine::do_process() throw(engine::exception) {
 	if(!out_port()) return;
-	PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(do_process_template, phase_port(), frequency_port(), amplitude_port());
+	PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(do_process_template,
+		phase_port()     ?     phase_channel().flag() : channel::flags::empty,
+		frequency_port() ? frequency_channel().flag() : channel::flags::empty,
+		amplitude_port() ? amplitude_channel().flag() : channel::flags::empty
+	);
 }
 
-template<bool use_phase, bool use_frequency, bool use_amplitude>
+template<engine::channel::flags::type phase_flag, engine::channel::flags::type frequency_flag, engine::channel::flags::type amplitude_flag>
 void sine::do_process_template() throw(engine::exception) {
 	for(std::size_t
 		phase_event(0),
@@ -49,12 +53,36 @@ void sine::do_process_template() throw(engine::exception) {
 		amplitude_event(0),
 		out_event(0); out_event < out_channel().size(); ++out_event
 	) {
-		if(use_phase && phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
-			this->phase_ = phase_channel()[phase_event++].sample();
-		if(use_frequency && frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
-			this->frequency(frequency_channel()[frequency_event++].sample());
-		if(use_amplitude && amplitude_event < amplitude_channel().size() && amplitude_channel()[amplitude_event].index() == out_event)
-			this->amplitude_ = amplitude_channel()[amplitude_event++].sample();
+		switch(phase_flag) {
+			case channel::flags::continuous:
+				this->phase_ = phase_channel()[out_event].sample();
+			break;
+			case channel::flags::discrete:
+				if(phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
+					this->phase_ = phase_channel()[phase_event++].sample();
+			break;
+			case channel::flags::empty: default: /* nothing */ ;
+		}
+		switch(frequency_flag) {
+			case channel::flags::continuous:
+				this->frequency(frequency_channel()[out_event].sample());
+			break;
+			case channel::flags::discrete:
+				if(frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
+					this->frequency(frequency_channel()[frequency_event++].sample());
+			break;
+			case channel::flags::empty: default: /* nothing */ ;
+		}
+		switch(amplitude_flag) {
+			case channel::flags::continuous:
+				this->amplitude_ = amplitude_channel()[out_event].sample();
+			break;
+			case channel::flags::discrete:
+				if(amplitude_event < amplitude_channel().size() && amplitude_channel()[amplitude_event].index() == out_event)
+					this->amplitude_ = amplitude_channel()[amplitude_event++].sample();
+			break;
+			case channel::flags::empty: default: /* nothing */ ;
+		}
 		out_channel()[out_event](out_event, amplitude_ * std::sin(phase_)); // \todo optimize with a cordic algorithm
 		phase_ += step_;
 	}

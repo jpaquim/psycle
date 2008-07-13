@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2007 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::bipolar_filter - a node with one multiple input port named "in" and one output port named "out".
 #pragma once
@@ -30,4 +29,3 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK bipolar_filter : public engine::node {
 
 }}
 #include <universalis/compiler/dynamic_link/end.hpp>
-

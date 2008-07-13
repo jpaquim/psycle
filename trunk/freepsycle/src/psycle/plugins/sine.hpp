@@ -24,7 +24,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		void do_process() throw(engine::exception) /*override*/;
 
 	private:
-		template<bool, bool, bool>
+		template<channel::flags::type, channel::flags::type, channel::flags::type>
 		void do_process_template() throw(engine::exception);
 		
 		real phase_;
@@ -36,10 +36,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		engine::ports::inputs::single & amplitude_port() { return *single_input_ports()[2]; }
 		engine::ports::output         & out_port()       { return *output_ports()[0]; }
 
-		buffer::channel & phase_channel()     { return phase_port().buffer()[0]; }
-		buffer::channel & frequency_channel() { return frequency_port().buffer()[0]; }
-		buffer::channel & amplitude_channel() { return amplitude_port().buffer()[0]; }
-		buffer::channel & out_channel()       { return out_port().buffer()[0]; }
+		channel & phase_channel()     { return phase_port().buffer()[0]; }
+		channel & frequency_channel() { return frequency_port().buffer()[0]; }
+		channel & amplitude_channel() { return amplitude_port().buffer()[0]; }
+		channel & out_channel()       { return out_port().buffer()[0]; }
 };
 
 }}
