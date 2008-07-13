@@ -53,16 +53,10 @@ void sine::do_process_template() throw(engine::exception) {
 		amplitude_event(0),
 		out_event(0); out_event < out_channel().size(); ++out_event
 	) {
-		switch(phase_flag) {
-			case channel::flags::continuous:
-				this->phase_ = phase_channel()[out_event].sample();
-			break;
-			case channel::flags::discrete:
-				if(phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event)
-					this->phase_ = phase_channel()[phase_event++].sample();
-			break;
-			case channel::flags::empty: default: /* nothing */ ;
-		}
+		if(phase_flag == channel::flags::continuous || phase_flag != channel::flags::empty &&
+			phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event
+		) this->phase_ = phase_channel()[phase_event++].sample();
+
 		switch(frequency_flag) {
 			case channel::flags::continuous:
 				this->frequency(frequency_channel()[out_event].sample());
@@ -73,6 +67,7 @@ void sine::do_process_template() throw(engine::exception) {
 			break;
 			case channel::flags::empty: default: /* nothing */ ;
 		}
+
 		switch(amplitude_flag) {
 			case channel::flags::continuous:
 				this->amplitude_ = amplitude_channel()[out_event].sample();
@@ -83,6 +78,7 @@ void sine::do_process_template() throw(engine::exception) {
 			break;
 			case channel::flags::empty: default: /* nothing */ ;
 		}
+
 		out_channel()[out_event](out_event, amplitude_ * std::sin(phase_)); // \todo optimize with a cordic algorithm
 		phase_ += step_;
 	}
