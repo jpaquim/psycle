@@ -49,28 +49,37 @@ else:
 		dependencies = [pkg_config_check(project, name = 'universalis >= 0')]
 	)
 
-from packageneric.pool.boost import boost
-boost_test = boost(project, 103300, ['unit_test_framework'])
-
-# modules and pkg-config packages
+# modules
 
 from packageneric.generic.scons.module import module
-from packageneric.generic.scons.find import find
-from packageneric.generic.scons.pkg_config_package import pkg_config_package
 
-modules = []
+# pkg-config packages
+
+from packageneric.generic.scons.pkg_config_package import pkg_config_package
+pkg_config_package = pkg_config_package(project,
+	name = source_package.name(),
+	version = source_package.version(),
+	description = source_package.description(),
+	dependencies = [universalis],
+	modules = []
+)
+pkg_config_package.uninstalled_env().compilers().cxx().paths().add(['src'])
+
+# unit tests
+
+from packageneric.pool.boost import boost
+boost_test = boost(project, 103300, ['unit_test_framework'])
 
 unit_test_module = module(source_package,
 			name = source_package.name() + '_unit_tests',
 			version = source_package.version(),
-			dependencies = [universalis, boost_test],
+			dependencies = [pkg_config_package.local_package(), universalis, boost_test], # todo universalis should be a brought by pkg_config_package
 			target_type = module.target_types.program
 )
 unit_test_module.contexes().source().compilers().cxx().paths().add(['src'])
+from packageneric.generic.scons.find import find
 unit_test_module.add_sources(find(project, 'src', [os.path.join(os.curdir, 'unit_tests.cpp')]))
 
-modules.append(unit_test_module)
-
-project.default_targets(modules)
-
-Return('modules')
+###
+project.default_targets([pkg_config_package, unit_test_module])
+Return('pkg_config_package')

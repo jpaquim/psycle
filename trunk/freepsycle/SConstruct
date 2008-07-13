@@ -46,6 +46,20 @@ else:
 		dependencies = [pkg_config_check(project, name = 'universalis >= 0')]
 	)
 
+helpers = os.path.join(os.pardir, 'psycle-helpers', 'SConstruct')
+if os.path.exists(helpers): helpers = project.subscript(helpers).local_package()
+else:
+	helpers = external_package_check(project, name = 'psycle-helpers', url = 'http://psycle.sourceforge.net',
+		distribution_packages = {
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/psycle-helpers-dev.xml',
+			'debian and ubuntu': 'lib-psycle-helpers-dev (>= 0)',
+			'gentoo': '...',
+			'fedora': '...',
+			'cygwin': '...'
+		},
+		dependencies = [pkg_config_check(project, name = 'psycle-helpers >= 0')]
+	)
+
 gstreamer = external_package_check(project, name = 'gstreamer', url = 'http://gstreamer.net',
 	distribution_packages = {
 		'zero-install': '...',
@@ -197,6 +211,7 @@ class plugin_uniform_module(uniform_module):
 	def __init__(self, name, *args, **kw):
 		if 'dependencies' in kw: dependencies = kw['dependencies']
 		else: dependencies = kw['dependencies'] = []
+		dependencies.append(helpers)
 		dependencies.append(resource_module.as_dependency()) # todo why resource?
 		uniform_module.__init__(self,
 			path = os.path.join('plugins', name),
