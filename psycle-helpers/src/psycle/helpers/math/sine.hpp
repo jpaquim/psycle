@@ -7,6 +7,7 @@
 #include "pi.hpp"
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/operating_system/clocks.hpp>
+	#include <universalis/compiler/typenameof.hpp>
 	#include <sstream>
 #endif
 namespace psycle { namespace helpers { namespace math {
@@ -21,7 +22,7 @@ namespace psycle { namespace helpers { namespace math {
 /// output range: [0, 1]
 /// constraints applied: sin(0) = 0, sin(pi / 2) = 1, sin(pi) = 0
 /// THD = 3.8% with only odd harmonics (in the accurate variant THD is only 0.078% with q = 0.775, p = 0.225)
-template<unsigned int polynomial_degree, typename Real>
+template<unsigned int Polynomial_Degree, typename Real>
 Real fast_sin(Real const & radians) {
 	//assert(-pi <= radians && radians <= pi);
 	// we solve:
@@ -32,7 +33,7 @@ Real fast_sin(Real const & radians) {
 	Real const c(-b / pi); // pi^2 = 9.86960440108935861883449099987615114
 	// we use absolute values to mirror the parabola around the orign 
 	Real y(b * radians + c * radians * std::abs(radians));
-	if(polynomial_degree > 2) {
+	if(Polynomial_Degree > 2) {
 		// q + p = 1
 		// q = 0.775991821224, p = 0.224008178776 for minimal absolute error (0.0919%)
 		// q = 0.782, p = 0.218 for minimal relative error
@@ -50,15 +51,15 @@ Real fast_sin(Real const & radians) {
 }
 
 #if defined BOOST_AUTO_TEST_CASE
-	BOOST_AUTO_TEST_CASE(fast_sin_test) {
+	template<unsigned int Polynomial_Degree, typename Real>
+	void fast_sin_test_template() {
 		using namespace universalis::operating_system::clocks;
 		//typedef thread clock;
 		typedef monotonic clock;
 		int const iterations(1000000);
 		std::nanoseconds const t1(clock::current());
-		typedef double real;
-		real const step(pi / 1000);
-		real f1(1), ff1(0);
+		Real const step(pi / 1000);
+		Real f1(1), ff1(0);
 		for(int i(0); i < iterations; ++i) {
 			//too slow: f1 = std::fmod(f1 + pi, 2 * pi) - pi;
 			f1 += fast_sin<2>(ff1);
@@ -66,14 +67,14 @@ Real fast_sin(Real const & radians) {
 			if(ff1 > pi) ff1 -= 2 * pi;
 		}
 		std::nanoseconds const t2(clock::current());
-		real f2(1), ff2(0);
+		Real f2(1), ff2(0);
 		for(int i(0); i < iterations; ++i) {
 			f2 += std::sin(ff2);
 			ff2 += step;
 		}
 		std::nanoseconds const t3(clock::current());
 		{
-			std::ostringstream s; s << "fast_sin: " << f1;
+			std::ostringstream s; s << "fast_sin<Polynomial_Degree = " << Polynomial_Degree << ", Real = " << universalis::compiler::typenameof(f1) << ">: " << f1;
 			BOOST_MESSAGE(s.str());
 		}
 		{
@@ -86,6 +87,12 @@ Real fast_sin(Real const & radians) {
 			BOOST_MESSAGE(s.str());
 		}
 		BOOST_CHECK(t2 - t1 < t3 - t2);
+	}
+	BOOST_AUTO_TEST_CASE(fast_sin_test) {
+		fast_sin_test_template<2, float>();
+		fast_sin_test_template<4, float>();
+		fast_sin_test_template<2, double>();
+		fast_sin_test_template<4, double>();
 	}
 #endif
 
