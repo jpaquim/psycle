@@ -80,7 +80,7 @@ void sine::do_process_template() throw(engine::exception) {
 			case channel::flags::empty: default: /* nothing */ ;
 		}
 
-		phase_ = std::fmod(phase_ + engine::math::pi, 2 * engine::math::pi) - engine::math::pi;
+		if(std::abs(phase_) > engine::math::pi) phase_ = std::fmod(phase_ + engine::math::pi, 2 * engine::math::pi) - engine::math::pi;
 		out_channel()[out_event](out_event, amplitude_ * helpers::math::fast_sin<2>(phase_));
 		phase_ += step_;
 	}
