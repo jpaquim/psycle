@@ -8,6 +8,7 @@
 #include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "sine.hpp"
+#include <psycle/helpers/math/sine.hpp>
 namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(sine)
@@ -79,7 +80,7 @@ void sine::do_process_template() throw(engine::exception) {
 			case channel::flags::empty: default: /* nothing */ ;
 		}
 
-		out_channel()[out_event](out_event, amplitude_ * std::sin(phase_)); // \todo optimize with a cordic algorithm
+		out_channel()[out_event](out_event, amplitude_ * helpers::math::fast_sin<2>(phase_));
 		phase_ += step_;
 	}
 	out_channel().flag(channel::flags::continuous);
