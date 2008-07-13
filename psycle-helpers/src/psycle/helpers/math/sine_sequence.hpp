@@ -11,12 +11,12 @@ namespace psycle
 			// http://www.audiomulch.com/~rossb/code/sinusoids/
 			// http://www.devmaster.net/forums/showthread.php?t=5784
 			
-			class sinus_sequence
+			class sine_sequence
 			{
 				public:
 					/// [bohan] use 64-bit floating point numbers or else accuracy is not sufficient
 					typedef double real;
-					inline sinus_sequence() : index_(0) {}
+					inline sine_sequence() : index_(0) {}
 					inline void operator()(real phase, real radians_per_sample) throw()
 					{
 						step_ = (2 * std::cos(radians_per_sample));

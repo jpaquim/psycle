@@ -575,7 +575,7 @@ V1.6RC1
 
 ! Fixed Noise with Flanger Effect at high speeds (mainly everything higher than 1/4th)
   Note: CPU usage increased by a factor of 1.5 and RAM usage decreased (no relation within them).
-  Note2: Used some code from http://www.smartelectronix.com/musicdsp for FAST sinus calculation
+  Note2: Used some code from http://www.smartelectronix.com/musicdsp for FAST sine calculation
 ! Fixed (possible) Crash bug when specifying a machine number bigger than 40 (hex). This even
   prevented from being able to change wire volume (FCxx) for effects. (Reported by Pikari)
 ! Fixed bug: Wave editor amplify changed only the left channel on stereo wavs (Reported by Kris)

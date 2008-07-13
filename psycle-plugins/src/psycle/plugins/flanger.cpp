@@ -7,7 +7,7 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "plugin.hpp"
 #include <psycle/helpers/math/round.hpp>
-#include <psycle/helpers/math/sinus_sequence.hpp>
+#include <psycle/helpers/math/sine_sequence.hpp>
 #include <psycle/helpers/math/pi.hpp>
 #include <psycle/helpers/math/remainder.hpp>
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
@@ -106,13 +106,13 @@ class Flanger : public Plugin {
 	protected:
 		virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
 		virtual void samples_per_second_changed();
-		inline void process(math::sinus_sequence &, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
+		inline void process(math::sine_sequence &, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
 		inline void resize(const Real & delay);
 		enum Channels { left, right, channels };
 		std::vector<Real> buffers_[channels];
 		int delay_in_samples_, writes_[channels];
 		Real modulation_amplitude_in_samples_, modulation_radians_per_sample_, modulation_phase_;
-		math::sinus_sequence sin_sequences_[channels];
+		math::sine_sequence sin_sequences_[channels];
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(Flanger)
@@ -180,14 +180,14 @@ void Flanger::process(Sample l[], Sample r[], int samples, int) {
 }
 
 inline void Flanger::process(
-	math::sinus_sequence & sinus_sequence, std::vector<Real> & buffer,
+	math::sine_sequence & sine_sequence, std::vector<Real> & buffer,
 	int & write, Sample input [], const int & samples, const Real & feedback
 ) throw() {
 	const int size(static_cast<int>(buffer.size()));
 	switch((*this)[interpolation]) {
 		case yes:
 			for(int sample(0) ; sample < samples ; ++sample) {
-				const Real sin(sinus_sequence()); // [bohan] this uses 64-bit floating point numbers or else accuracy is not sufficient
+				const Real sin(sine_sequence()); // [bohan] this uses 64-bit floating point numbers or else accuracy is not sufficient
 				
 				#if 1
 					Real fraction_part = modulation_amplitude_in_samples_ * sin;
@@ -236,14 +236,14 @@ inline void Flanger::process(
 		default:
 				for(int sample(0) ; sample < samples ; ++sample) {
 					#if 0
-						// test without optimized sinus sequence...
+						// test without optimized sine sequence...
 						Real sin;
 						if(&sin_sequence == &sin_sequences_[left])
 							sin = std::sin(modulation_phase_);
 						else
 							sin = std::sin(modulation_phase_ + (*this)(modulation_stereo_dephase));
 					#else
-						const Real sin(sinus_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
+						const Real sin(sine_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
 					#endif
 					
 

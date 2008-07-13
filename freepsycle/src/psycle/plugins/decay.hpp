@@ -9,7 +9,7 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins {
 
-/// oscillator with a sinusoidal wave form
+/// a decaying pulse
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK decay : public engine::node {
 
 	public:

@@ -77,7 +77,7 @@ namespace psy
 							const float is2=pSamplesR[s];
 							pSamplesL[s] = IS_DENORMAL(is1) ? 0 : is1;
 							pSamplesR[s] = IS_DENORMAL(is2) ? 0 : is2;
-						#else // 1-bit "sinus" dither
+						#else // 1-bit "sine" dither
 							pSamplesL[s] += id;
 							pSamplesR[s] += id;
 							id = - id;

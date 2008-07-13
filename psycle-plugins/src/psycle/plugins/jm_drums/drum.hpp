@@ -49,7 +49,7 @@ class Drum
 	int DecLength;								// Decrement lenght in samples
 	int ThumpLength;
 
-	float SinVol;								// Volume of sinus signal
+	float SinVol;								// Volume of sine signal
 	int VolChangePos;
 	int VolDecay;								// position up to which do decay
 
