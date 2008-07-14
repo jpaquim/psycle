@@ -24,7 +24,7 @@ class sine_sequence {
 			index_ = 0;
 		}
 		real inline operator()() throw() {
-			int const swapped_index((index_ + 1) % 2);
+			int const swapped_index(index_ ^ 1);
 			real sin;
 			//if(Clipped) sin = real(0.999999) * (sequence_[index_] * step_ - sequence_[swapped_index]);
 			if(Clipped) sin = clipped<real>(-1, sequence_[index_] * step_ - sequence_[swapped_index], +1);
