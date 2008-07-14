@@ -95,7 +95,7 @@ namespace psycle { namespace helpers { namespace math {
 			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 				///\todo not always the fastest when using sse(2)
 				///\todo the double "2^51 + 2^52" version might be faster.
-				///\todo the rounding mode is UNSPECIFIED! (potential bug some code changes the FPU's rounding mode)...
+				///\todo the rounding mode is UNSPECIFIED! (potential bug if some code changes the FPU's rounding mode, e.g. with fesetround)...
 				std::int32_t i;
 				__asm
 				{ 
@@ -142,5 +142,6 @@ namespace psycle { namespace helpers { namespace math {
 			fesetround(initial_feround);
 			throw;
 		}
+		fesetround(initial_feround);
 	}
 #endif
