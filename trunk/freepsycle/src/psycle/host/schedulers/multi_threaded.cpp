@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::host::schedulers::multi_threaded
 #include <packageneric/pre-compiled.private.hpp>
@@ -223,7 +223,7 @@ void scheduler::start() throw(engine::exception) {
 	} catch(...) {
 		{ scoped_lock lock(mutex_);
 			stop_requested_ = true;
-			on_io_ready_signal_connection.block();
+			on_io_ready_signal_connection.disconnect();
 		}
 		condition_.notify_all();
 		for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
@@ -389,8 +389,9 @@ void scheduler::process_loop() throw(std::exception) {
 			// on_io_ready will readd it to the processing queue.
 			if(!node.underlying().io_ready()) {
 				if(!loggers::trace()()) loggers::trace()("node io not ready: "  + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
+				// signal the node we want to be notified when it's eventually ready to be processed
 				node.waiting_for_io_ready_signal(true);
-				continue;
+				continue; // continue with other nodes in the queue
 			}
 			
 			if(false && !loggers::trace()()) {
@@ -403,7 +404,7 @@ void scheduler::process_loop() throw(std::exception) {
 
 		//if(node.processed()) throw /*logic_error*/runtime_error("bug: node already processed: " + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
 
-		process(node);
+		process(node); // note: the node's do_process() is supposed to wait until io_ready()
 
 		bool notify(false);
 		{ scoped_lock lock(mutex_);
