@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2002-2008 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2002-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::generic::basic
 #pragma once
@@ -19,9 +19,9 @@
 #include <algorithm>
 namespace psycle { namespace generic { namespace basic {
 
-// use the same miminum arity as in universalis
+/// the minimum arity for the template constructors used in the virtual factory patterns
 #define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM \
-	UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
+	UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM // use the same miminum arity as in universalis
 	
 // ensure a minimum arity
 #if \
@@ -29,6 +29,7 @@ namespace psycle { namespace generic { namespace basic {
 	PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
 	#undef \
 		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+	/// the arity for the template constructors used in the virtual factory patterns
 	#define \
 		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY \
 		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
@@ -128,15 +129,11 @@ class node
 			child_of<typename Typenames::graph>(graph),
 			multiple_input_port_()
 		{
-			if(loggers::trace()()) {
-				loggers::trace()("new generic node", UNIVERSALIS__COMPILER__LOCATION);
-			}
+			if(loggers::trace()()) loggers::trace()("new generic node", UNIVERSALIS__COMPILER__LOCATION);
 		}
 
 		void after_construction() /*override*/ {
-			if(loggers::trace()()) {
-				loggers::trace()("generic node init", UNIVERSALIS__COMPILER__LOCATION);
-			}
+			if(loggers::trace()()) loggers::trace()("generic node init", UNIVERSALIS__COMPILER__LOCATION);
 			this->parent().insert(&this->derived_this());
 			// emit the new_node signal to the wrappers
 			this->parent().new_node_signal()(*this);
@@ -559,4 +556,3 @@ namespace ports {
 }
 
 }}}
-
