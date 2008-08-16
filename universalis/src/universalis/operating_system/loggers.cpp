@@ -97,7 +97,7 @@ void stream_logger::do_log(int const level, std::string const & message, compile
 void stream_logger::do_log(int const level, std::string const & string) throw() {
 	int const static levels [] = {'T', 'I', 'W', 'E', 'C'};
 	int const static colors [] = {0, 2, 6, 1, 5, 3, 4, 7};
-	char const level_char(levels[std::min(static_cast<unsigned int>(level), sizeof levels)]);
+	char const level_char(levels[std::min(static_cast<std::size_t>(level), sizeof levels)]);
 	try {
 		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << "mlogger: " << level_char << ": \033[0m" << string << '\n';
 		else ostream() << "logger: " << level_char << ": " << string << '\n';
