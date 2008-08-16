@@ -246,6 +246,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 				virtual ~buffer_pool() throw();
 				/// gets a buffer from the pool.
 				buffer & operator()() {
+					scoped_lock lock(mutex_);
 					if(false && loggers::trace()()) {
 						std::ostringstream s;
 						s << "buffer requested, pool size before: " << size();
@@ -254,7 +255,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 					if(empty()) return *new buffer(channels_, events_);
 					buffer & result(*back());
 					assert("reference count is zero: " && !result.reference_count());
-					pop_back(); // note: on most implementations, this will not realloc memory, so it's realtime-safe.
+					pop_back(); // note: on most implementations, this will not realloc memory, so might be realtime-safe. (looks like it's not on gnu libstdc++)
 					return result;
 				}
 				/// recycles a buffer in the pool.
@@ -263,6 +264,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 					assert("reference count is zero: " && !buffer.reference_count());
 					assert(buffer.channels() >= this->channels_);
 					assert(buffer.events() >= this->events_);
+					scoped_lock lock(mutex_);
 					if(false && loggers::trace()()) {
 						std::ostringstream s;
 						s << "buffer " << &buffer << " given back, pool size before: " << size();
@@ -272,6 +274,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 				}
 			private:
 				std::size_t channels_, events_;
+				typedef std::scoped_lock<std::mutex> scoped_lock;
+				std::mutex mutable mutex_;
+
 		} * buffer_pool_instance_;
 		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 		
