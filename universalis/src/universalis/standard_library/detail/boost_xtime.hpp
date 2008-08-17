@@ -12,9 +12,10 @@ namespace universalis { namespace standard_library { namespace detail {
 	template<typename Elapsed_Time>
 	boost::xtime make_boost_xtime(Elapsed_Time const & elapsed_time) {
 		std::nanoseconds const ns(elapsed_time);
+		std::seconds const s(ns.get_count() / (1000 * 1000 * 1000));
 		boost::xtime xtime;
-		xtime.sec  = static_cast<boost::xtime::xtime_sec_t>(ns.get_count() / (1000 * 1000 * 1000));
-		xtime.nsec = static_cast<boost::xtime::xtime_nsec_t>((ns - std::seconds(xtime.sec)).get_count());
+		xtime.sec  = static_cast<boost::xtime::xtime_sec_t>(s.get_count());
+		xtime.nsec = static_cast<boost::xtime::xtime_nsec_t>((ns - s).get_count());
 		return xtime;
 	}
 	
