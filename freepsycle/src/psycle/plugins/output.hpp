@@ -16,7 +16,7 @@
 #elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DUMMY
 	#include "outputs/dummy.hpp"
 #else
-	#error "no default output"
+	#error no default output
 #endif
 
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUT
@@ -33,7 +33,7 @@ typedef outputs::
 	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DUMMY
 		dummy
 	#else
-		#error "no default output"
+		#error no default output
 	#endif
 	output_base;
 	
