@@ -262,14 +262,6 @@ class output_plugin_uniform_module(uniform_module):
 
 default_output_plugin_module = None
 
-if alsa.result():
-	alsa_output_plugin_module = output_plugin_uniform_module(
-		name = 'alsa',
-		description = 'alsa output plugin',
-		dependencies = [alsa, stream_module.as_dependency()]
-	)
-	if not default_output_plugin_module: default_output_plugin_module = alsa_output_plugin_module
-
 if microsoft_direct_sound.result():
 	microsoft_direct_sound_output_plugin_module = output_plugin_uniform_module(
 		name = 'direct_sound',
@@ -285,6 +277,14 @@ if gstreamer.result():
 		dependencies = [gstreamer, stream_module.as_dependency()]
 	)
 	if not default_output_plugin_module: default_output_plugin_module = gstreamer_output_plugin_module
+
+if alsa.result():
+	alsa_output_plugin_module = output_plugin_uniform_module(
+		name = 'alsa',
+		description = 'alsa output plugin',
+		dependencies = [alsa, stream_module.as_dependency()]
+	)
+	if not default_output_plugin_module: default_output_plugin_module = alsa_output_plugin_module
 
 dummy_output_plugin_module = output_plugin_uniform_module(
 	name = 'dummy',

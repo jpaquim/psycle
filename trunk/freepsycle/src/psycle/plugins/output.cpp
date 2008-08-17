@@ -18,4 +18,3 @@ output::output(engine::plugin_library_reference & plugin_library_reference, engi
 {}
 
 }}
-
