@@ -1298,7 +1298,7 @@ CMachineInfo const MacInfo =
 	GENERATOR,																																// flags
 	112,																																				// numParameters
 	pParameters,																												// Pointer to parameters
-#ifdef _DEBUG
+#ifndef NDEBUG
 	"Blitz (Debug build)",																				// name
 #else
 	"Blitz 1.2",																												// name
