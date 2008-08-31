@@ -6,11 +6,11 @@ bin:
 	mkdir $@
 
 bin/strip-comments.exe: StripComments.cs
-	mcs -t:exe -out:$@ $^
+	gmcs -t:exe -out:$@ $^
 
 test: all
 	rm -Rf test-files.out
-	cp -R test-files.{in,out}
+	cp -R test-files.in test-files.out
 	./bin/strip-comments.exe test-files.out
 
 clean:
