@@ -67,7 +67,7 @@ pkg_config_package.uninstalled_env().compilers().cxx().paths().add(['src'])
 
 # unit tests
 
-from packageneric.pool.boost import boost
+from packageneric.std_checks.boost import boost
 boost_test = boost(project, 103300, ['unit_test_framework'])
 
 unit_test_module = module(source_package,
