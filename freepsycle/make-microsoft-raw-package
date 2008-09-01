@@ -9,7 +9,7 @@ all:
 	rm -Rf $(INSTALL_DIR)
 	mkdir -p $(INSTALL_DIR)/bin
 	cp -f $(BUILD_DIR)/bin/*.exe $(BUILD_DIR)/bin/*.dll $(INSTALL_DIR)/bin
-	../packageneric/generic/microsoft-dll-collector $(INSTALL_DIR) $(TAR_NAME)
+	../packageneric/microsoft-dll-collector $(INSTALL_DIR) $(TAR_NAME)
 	echo subversion revision "$$(svnversion)" > $(INSTALL_DIR)/$(TAR_NAME)/version.text
 	tar cvjf $(INSTALL_DIR)/$(TAR_NAME).tar.bz2 --directory=$(INSTALL_DIR) $(TAR_NAME)
 	ls -lh $(INSTALL_DIR)/$(TAR_NAME).tar.bz2

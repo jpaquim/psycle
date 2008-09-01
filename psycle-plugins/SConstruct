@@ -9,13 +9,13 @@ import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always m
 
 # project
 
-from packageneric.generic.scons.project import project
+from packageneric.scons.project import project
 project = project(name = 'psycle-plugins')
 
 # source package
 
-from packageneric.generic.scons.source_package import source_package
-from packageneric.generic.scons.version import version
+from packageneric.scons.source_package import source_package
+from packageneric.scons.version import version
 source_package = source_package(project,
 	name = project.name(),
 	version = version(1, 9),
@@ -29,9 +29,9 @@ source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', '
 
 # external packages
 
-from packageneric.generic.scons.check.external_package import external_package as external_package_check
-from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
-from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
+from packageneric.scons.check.external_package import external_package as external_package_check
+from packageneric.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.scons.check.cxx_build import cxx_build as cxx_build_check
 
 import os.path
 universalis = os.path.join(os.pardir, 'universalis', 'SConstruct')
@@ -53,9 +53,9 @@ else:
 
 # modules and pkg-config packages
 
-from packageneric.generic.scons.module import module
-from packageneric.generic.scons.find import find
-from packageneric.generic.scons.pkg_config_package import pkg_config_package
+from packageneric.scons.module import module
+from packageneric.scons.find import find
+from packageneric.scons.pkg_config_package import pkg_config_package
 
 modules = []
 plugin_modules = []
