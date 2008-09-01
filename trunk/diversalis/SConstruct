@@ -9,13 +9,13 @@ import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always m
 
 # project
 
-from packageneric.generic.scons.project import project
+from packageneric.scons.project import project
 project = project(name = 'diversalis')
 
 # source package
 
-from packageneric.generic.scons.source_package import source_package
-from packageneric.generic.scons.version import version
+from packageneric.scons.source_package import source_package
+from packageneric.scons.version import version
 
 source_package = source_package(project,
 	name = project.name(),
@@ -27,7 +27,7 @@ source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', '
 
 # pkg-config packages
 
-from packageneric.generic.scons.pkg_config_package import pkg_config_package
+from packageneric.scons.pkg_config_package import pkg_config_package
 pkg_config_package = pkg_config_package(project,
 	name = source_package.name(),
 	version = source_package.version(),
