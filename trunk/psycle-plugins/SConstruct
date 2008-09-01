@@ -292,7 +292,7 @@ project.trace('plugins time ' + str(t() - t0)) # a bit long?
 
 modules.extend(plugin_modules)
 
-from packageneric.pool.dlfcn import dlfcn
+from packageneric.std_checks.dlfcn import dlfcn
 dlfcn = dlfcn(project)
 if dlfcn.result():
 	# whoops, it uses the posix api!
