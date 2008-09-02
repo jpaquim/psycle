@@ -573,10 +573,8 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 		{
 			// PSY3 Format saves the postfix, so we have to remove it before creating the key.
 			std::string dllName = sDllName;
-			unsigned int pos = dllName.find(".dll");
-			if (pos != std::string::npos) {
-				dllName = dllName.substr(0,pos);
-			}
+			std::string::size_type const pos(dllName.find(".dll"));
+			if(pos != std::string::npos) dllName = dllName.substr(0,pos);
 
 			mac = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName,0),id);
 			break;
