@@ -86,23 +86,29 @@ namespace psy
 
 
 		const std::string MachineKey::preprocessName(std::string dllName) {
-		#if defined __unix__ || defined __APPLE__
-			unsigned int pos = dllName.find(".so");
-		#else
-			unsigned int pos = dllName.find(".dll");
-		#endif
-			if (pos != std::string::npos) {
-				dllName = dllName.substr(0,pos);
+			{ // 1) remove extension
+				std::string::size_type const pos(dllName.find(
+					#if defined __unix__ || defined __APPLE__
+						".so"
+					#else
+						".dll"
+					#endif
+				));
+				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
 			}
 
+			// 2) ensure lower case
 			std::transform(dllName.begin(),dllName.end(),dllName.begin(),ToLower());
+			
+			// 3) replace spaces with underscores
 			std::replace(dllName.begin(),dllName.end(),' ','_');
 
-			std::string prefix = "lib-xpsycle.plugin.";
-			pos = dllName.find(prefix);
-			if (pos!=std::string::npos) {
-				dllName.erase(pos, prefix.length());
+			{ // 4) remove prefix
+				std::string const prefix("lib-xpsycle.plugin.");
+				std::string::size_type const pos(dllName.find(prefix));
+				if(pos == 0) dllName.erase(pos, prefix.length());
 			}
+
 			return dllName;
 		}
 

@@ -232,7 +232,7 @@ namespace psy
 					{ 
 						//Skip (wave_format.header.ckSize);// read each block until we find the correct one
 						// we didn't find our header, so move back and try again
-						Skip(1 - sizeof wave_format.header);
+						Skip(1 - static_cast<unsigned int>(sizeof wave_format.header));
 							retcode = Read ( &wave_format.header, sizeof(wave_format.header) );
 						if(retcode != DDC_SUCCESS) return retcode;
 					}
@@ -253,7 +253,7 @@ namespace psy
 						{
 							// Skip (pcm_data.ckSize);// read each block until we find the correct one
 							// this is not our block, so move back and search for our header
-							Skip(1 - sizeof pcm_data);
+							Skip(1 - static_cast<unsigned int>(sizeof pcm_data));
 							pcm_data_offset = CurrentFilePosition();
 							retcode = Read(&pcm_data, sizeof pcm_data);
 							if( retcode != DDC_SUCCESS) return retcode;
