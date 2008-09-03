@@ -17,8 +17,7 @@
 *  Free Software Foundation, Inc.,                                            *
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
-#ifndef PSYCLE__AUDIODRIVERS__ALSA_OUT__INCLUDED
-#define PSYCLE__AUDIODRIVERS__ALSA_OUT__INCLUDED
+#pragma once
 #if defined PSYCLE__ALSA_AVAILABLE
 #include "audiodriver.h"
 #include <alsa/asoundlib.h>
@@ -31,8 +30,7 @@
 */
 namespace psy { namespace core {
 
-class AlsaOut : public AudioDriver
-{
+class AlsaOut : public AudioDriver {
 	public:
 		AlsaOut();
 		~AlsaOut();
@@ -112,5 +110,4 @@ class AlsaOut : public AudioDriver
 
 }}
 #endif // defined PSYCLE__ALSA_AVAILABLE
-#endif // !defined PSYCLE__AUDIODRIVERS__ALSA_OUT__INCLUDED
 
