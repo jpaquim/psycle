@@ -116,7 +116,7 @@ bool AlsaOut::Start() {
 	}
 	
 	std::cout << "psycle: alsa: playback device is: " << settings().deviceName() << '\n';
-	std::cout << "psycle: alsa: stream parameters are; " << rate << "Hz, " << snd_pcm_format_name(format) << ", " << channels << " channels\n";
+	std::cout << "psycle: alsa: stream parameters are: " << rate << "Hz, " << snd_pcm_format_name(format) << ", " << channels << " channels\n";
 	std::cout << "psycle: alsa: using transfer method: " << "write" << '\n'; ///\todo parametrable?
 	
 	if((err = snd_pcm_open(&handle, settings().deviceName().c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
