@@ -96,7 +96,7 @@ int main(int argument_count, char * arguments[]) {
 				else if(s == "-odev" || s == "--output-device") token = tokens::output_device_name;
 				else if(s == "-of" || s == "--output-file") token = tokens::output_file_name;
 				else if(s == "-if" || s == "--input-file") token = tokens::input_file_name;
-				else if(s == "--wait") { wait = true; token = tokens::none; }
+				else if(s == "-w" || s == "--wait") { wait = true; token = tokens::none; }
 				else if(s == "--help") {
 					usage();
 					return 0;
