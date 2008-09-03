@@ -140,13 +140,16 @@ int main(int argument_count, char * arguments[]) {
 	}
 	psy::core::AudioDriver & output_driver(*configuration._pOutputDriver); ///\todo needs a getter
 
+	player.setDriver(output_driver);
+
+	///\todo it seems player.setDriver resets the settings to their default, so we need to set the settings after.
 	if(output_device_name.length()) {
 		std::cout << "psycle: player: setting output driver device name to: " << output_device_name << std::endl;
-		psy::core::AudioDriverSettings settings(output_driver.settings()); ///\todo why do we do a copy?
+		// since driver is cloned, we cannot use output_driver!!!!
+		psy::core::AudioDriverSettings settings(player.driver().settings()); ///\todo why do we do a copy?
 		settings.setDeviceName(output_device_name);
-		output_driver.setSettings(settings); ///\todo why do we copy?
+		player.driver().setSettings(settings); ///\todo why do we copy?
 	}
-	player.setDriver(output_driver);
 
 	if(output_file_name.length()) {
 		std::cout << "psycle: player: setting output file name to: " << output_file_name <<  std::endl;
