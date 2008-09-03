@@ -8,9 +8,15 @@
 #include <sstream>
 
 #if defined _WIN32   
-	#include <windows.h> // for Sleep(ms)   
+	#include <windows.h> // for Sleep(ms)
 #else   
-	#include <unistd.h> // for sleep(s)   
+	#include <unistd.h> // for sleep(s)
+#endif 
+
+#if defined _WIN32   
+	#define PSYCLE__PLAYER__EOF "z" // ctrl+z == EOF
+#else   
+	#define PSYCLE__PLAYER__EOF "d" // ctrl+d == EOF
 #endif 
 
 using namespace psy::core;
@@ -35,6 +41,8 @@ void usage() {
 			" -if,   --input-file <song file name>" << std::endl <<
 			"                                 name of the song file to play." << std::endl <<
 			"" << std::endl <<
+			" -w     --wait                   play until enter or ctrl+" PSYCLE__PLAYER__EOF " (EOF) is pressed" << std::endl <<
+			"" << std::endl <<
 			"        --help                   display this help and exit." << std::endl <<
 			"        --version                output version information and exit." << std::endl <<
 			"" << std::endl <<
@@ -51,6 +59,7 @@ int main(int argument_count, char * arguments[]) {
 	std::string output_driver_name;
 	std::string output_device_name;
 	std::string output_file_name;
+	bool wait(false);
 	
 	struct tokens { enum type {
 		none,
@@ -87,6 +96,7 @@ int main(int argument_count, char * arguments[]) {
 				else if(s == "-odev" || s == "--output-device") token = tokens::output_device_name;
 				else if(s == "-of" || s == "--output-file") token = tokens::output_file_name;
 				else if(s == "-if" || s == "--input-file") token = tokens::input_file_name;
+				else if(s == "--wait") { wait = true; token = tokens::none; }
 				else if(s == "--help") {
 					usage();
 					return 0;
@@ -162,9 +172,15 @@ int main(int argument_count, char * arguments[]) {
 		player.driver().Enable(true);
 		player.start(0);
 		std::cout << "psycle: player: playing..." << std::endl;
-		std::cout << "psycle: player: press any letter and enter to stop" << std::endl;
 
-		std::string s; std::cin >> s;
+		if(wait) {
+			std::cout << "psycle: player: press enter or ctrl+" PSYCLE__PLAYER__EOF " (EOF) to stop." << std::endl;
+			std::string s; std::getline(std::cin, s);
+		} else {
+			///\todo we need to find a way to wait until the song is finished with the sequence.
+			std::cout << "psycle: player: currently, we have no way find out when the song is finished with the sequence... for now, please press enter or ctrl+" PSYCLE__PLAYER__EOF " (EOF) to stop." << std::endl;
+			std::string s; std::getline(std::cin, s);
+		}
 		
 		std::cout << std::endl << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
