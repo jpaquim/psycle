@@ -331,17 +331,17 @@ float * Player::Work(int numSamples) {
 
 		// processing of each buffer is subdivided into chunks, determined by the placement of any global events.
 		
-		/// end beat position of the current chunk-- i.e., the next global event's position.
+		// end beat position of the current chunk-- i.e., the next global event's position.
 		double chunkBeatEnd;
-		/// number of beats in the chunk.
+		// number of beats in the chunk.
 		double chunkBeatSize;
-		/// number of samples needed to process for this chunk.
+		// number of samples needed to process for this chunk.
 		int chunkSampleSize;
-		/// this is used to counter rounding errors of sample/beat conversions
+		// this is used to counter rounding errors of sample/beat conversions
 		int processedSamples(0);
-		/// whether this is the first time through the loop.  this is passed to GetNextGlobalEvents()
-		/// to specify that we're including events at exactly playPos -only- on the first iteration--
-		/// otherwise we'll get the first event over and over again.
+		// whether this is the first time through the loop.  this is passed to GetNextGlobalEvents()
+		// to specify that we're including events at exactly playPos -only- on the first iteration--
+		// otherwise we'll get the first event over and over again.
 		bool bFirst(true);
 		do {
 			// get the next round of global events.  we need to repopulate the list of globals and patternlines
