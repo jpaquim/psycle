@@ -253,7 +253,7 @@ void Player::execute_notes(double beat_offset, PatternLine & line) {
 						line.sequenceTrack() * 1024 + track, entry
 					);
 					delaysamples += delay;
-				}	
+				}
 			} break;
 			case commandtypes::RETR_CONT: {
 				///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
