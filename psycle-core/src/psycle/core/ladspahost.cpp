@@ -180,8 +180,7 @@ void * LadspaHost::dlopenLADSPA(const char * pcFilename, int iFlag) const {
 		if(filename_.c_str()[0] == '\\') {
 	#endif
 			
-		/* The filename is absolute. Assume the user knows what he/she is
-		 doing and simply dlopen() it. */
+		// The filename is absolute. Assume the user knows what he/she is doing and simply dlopen() it.
 		#if defined __unix__ || defined __APPLE__
 			pvResult = dlopen(filename_.c_str(), iFlag);
 		#else
