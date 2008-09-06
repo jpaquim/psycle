@@ -205,7 +205,7 @@ void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
 		PatternEvent entry = trackItr->second;
 		int track = trackItr->first;
 		// Is it not muted and is a note?
-		if((!song().patternSequence()->trackMuted(track)) && (entry.note() < notetypes::tweak || entry.note() == 255)) {
+		if((!song().patternSequence().trackMuted(track)) && (entry.note() < notetypes::tweak || entry.note() == 255)) {
 			int mac = entry.machine();
 			if(mac != 255) prevMachines[track] = mac; else mac = prevMachines[track];
 			// is there a machine number and it is either a note or a command?
@@ -295,7 +295,7 @@ float * Player::Work(int numSamples) {
 	
 	///\todo CSingleLock crit(&song().door, true);
 
-	if(autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength()) stopRecording();
+	if(autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence().tickLength()) stopRecording();
 
 	if(_playing) {
 		if(loopSequenceEntry()) {
@@ -305,7 +305,7 @@ float * Player::Work(int numSamples) {
 				timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition()
 			)
 				setPlayPos( loopSequenceEntry()->tickPosition() );
-		} else if(loopSong() && timeInfo_.playBeatPos() >= song().patternSequence()->tickLength())
+		} else if(loopSong() && timeInfo_.playBeatPos() >= song().patternSequence().tickLength())
 			setPlayPos( 0.0 );
 
 		std::multimap<double, PatternLine> events;
@@ -329,13 +329,13 @@ float * Player::Work(int numSamples) {
 			// get the next round of global events.  we need to repopulate the list of globals and patternlines
 			// each time through the loop because global events can potentially move the song's beatposition elsewhere.
 			globals.clear();
-			chunkBeatEnd = song().patternSequence()->GetNextGlobalEvents(timeInfo_.playBeatPos(), beatsToWork, globals, bFirst);
+			chunkBeatEnd = song().patternSequence().GetNextGlobalEvents(timeInfo_.playBeatPos(), beatsToWork, globals, bFirst);
 			if(loopSequenceEntry()) {
 				// Don't go further than the sequenceEnd.
 				if(chunkBeatEnd >= loopSequenceEntry()->tickEndPosition())
 					chunkBeatEnd = loopSequenceEntry()->tickEndPosition();
-			} else if(loopSong() && chunkBeatEnd >= song().patternSequence()->tickLength())
-				chunkBeatEnd = song().patternSequence()->tickLength();
+			} else if(loopSong() && chunkBeatEnd >= song().patternSequence().tickLength())
+				chunkBeatEnd = song().patternSequence().tickLength();
 
 			// determine chunk length in beats and samples.
 			chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
@@ -348,7 +348,7 @@ float * Player::Work(int numSamples) {
 			events.clear();
 			
 			///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-			song().patternSequence()->GetLinesInRange(timeInfo_.playBeatPos(), chunkBeatSize, events);
+			song().patternSequence().GetLinesInRange(timeInfo_.playBeatPos(), chunkBeatSize, events);
 			
 			for(
 				std::multimap<double, PatternLine>::iterator lineIt = events.begin();

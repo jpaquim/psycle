@@ -141,9 +141,9 @@ class CoreSong {
 	///\{
 		public:
 			/// pattern sequence
-			PatternSequence const & patternSequence() const { return patternSequence_; }
+			PatternSequence const & patternSequence() const throw() { return patternSequence_; }
 			/// pattern sequence
-			PatternSequence * patternSequence() { return &patternSequence_; }
+			PatternSequence & patternSequence() throw() { return patternSequence_; }
 		private:
 			PatternSequence patternSequence_;
 	///\}
