@@ -132,7 +132,7 @@ namespace qpsycle {
 		QMenu menu;
 
 		replaceWithCloneAction_ = new QAction( "Replace with clone", this );
-		if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
+		if ( psy::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
 			loopEntryAction_ = new QAction( "Unloop Entry", this );
 		} else {
 			loopEntryAction_ = new QAction( "Loop Entry", this );
@@ -169,10 +169,10 @@ namespace qpsycle {
 
 	void SequencerItem::onLoopEntryActionTriggered()
 	{
-		if ( psy::core::Player::Instance()->loopSequenceEntry() == sequenceEntry() ) {
-			psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
+		if ( psy::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
+			psy::core::Player::singleton().setLoopSequenceEntry( 0 );
 		} else {
-			psy::core::Player::Instance()->setLoopSequenceEntry( sequenceEntry() );
+			psy::core::Player::singleton().setLoopSequenceEntry( sequenceEntry() );
 		}
 	}
 

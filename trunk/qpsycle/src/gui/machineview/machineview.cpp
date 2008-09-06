@@ -279,7 +279,7 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui )
 	*/
 void MachineView::deleteConnection( WireGui *wireGui )
 {
-	psy::core::Player::Instance()->lock();
+	psy::core::Player::singleton().lock();
 
 	psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
 	psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
@@ -308,7 +308,7 @@ void MachineView::deleteConnection( WireGui *wireGui )
 	// Delete the connection in the song file.
 	srcMac->Disconnect( *dstMac );
 
-	psy::core::Player::Instance()->unlock();
+	psy::core::Player::singleton().unlock();
 }
 
 /**

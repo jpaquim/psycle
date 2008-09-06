@@ -124,12 +124,12 @@ namespace qpsycle {
 	void SequencerView::updatePlayPos()
 	{
 		int beatPxLength = seqDraw_->beatPxLength();
-		int  xPos = std::min(song()->patternSequence().tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
+		int  xPos = std::min(song()->patternSequence().tickLength()* beatPxLength, psy::core::Player::singleton().playPos() * beatPxLength);
 		int oxPos = std::min(song()->patternSequence().tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
 		if (oxPos != xPos) {
 			seqDraw_->pLine()->setPos( xPos, 0 );
 		}
-		oldPlayPos_ = psy::core::Player::Instance()->playPos();
+		oldPlayPos_ = psy::core::Player::singleton().playPos();
 	}
 
 	void SequencerView::onPatternNameChanged()

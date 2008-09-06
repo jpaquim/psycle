@@ -36,13 +36,12 @@ class Player : public MachineCallbacks {
 		Player();
 		~Player();
 
-		///\todo change pointer to reference since it's never null.
-		static Player * Instance() {
+		Player static & singleton() {
 			// note: keep sure a player instance is created from the gui
 			// before starting audiothread
 			// or use single threaded only
-			static Player s;
-			return &s; 
+			static Player player;
+			return player; 
 		}
 
 	public:

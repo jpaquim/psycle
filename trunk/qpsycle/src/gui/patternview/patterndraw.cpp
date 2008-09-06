@@ -271,7 +271,7 @@ namespace qpsycle {
 		for (int line = startLineNum; line <= endLineNum; line++ ) 
 		{
 			float position = line / (float) patternView()->beatZoom();
-			if (!(line == patternView()->playPos() ) || !psy::core::Player::Instance()->playing() ) 
+			if (!(line == patternView()->playPos() ) || !psy::core::Player::singleton().playing() ) 
 			{
 				if ( !(line % patternView()->beatZoom() ) ) 
 				{

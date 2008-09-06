@@ -59,7 +59,7 @@ WireGui::WireGui(MachineGui *sourceMacGui, MachineGui *destMacGui, MachineView *
 
 	connect(delConnAct_, SIGNAL(triggered()), this, SLOT(deleteConnectionRequest()));
 	connect(this, SIGNAL(deleteConnectionRequest( WireGui * )), machineView, SLOT(deleteConnection( WireGui * ) ) );
-	///\todo FIXME: the above lines seem not the best way of doing things.
+	///\todo the above lines seem not the best way of doing things.
 	// (i.e. should delete signal go direct to the machineView? )
 }
 
@@ -196,10 +196,10 @@ bool WireGui::rewireDest( MachineGui *newDestGui )
 	// Update song connection.
 	psy::core::Machine *srcMac = sourceMacGui()->mac();
 	psy::core::Machine *newDstMac = newDestGui->mac();
-	psy::core::Player::Instance()->lock();
+	psy::core::Player::singleton().lock();
 	int oldDstWireIndex = srcMac->FindOutputWire( oldDestGui->mac()->id() );
 	machineView->song()->ChangeWireDestMac( *srcMac, *newDstMac, 0,oldDstWireIndex,0 );
-	psy::core::Player::Instance()->unlock();
+	psy::core::Player::singleton().unlock();
 
 	if(wiredlg) {
 		wiredlg->wireChanged();
@@ -239,14 +239,13 @@ bool WireGui::rewireSource( MachineGui *newSrcGui )
 	// Update song connection.
 	psy::core::Machine *newSrcMac = newSrcGui->mac();
 	psy::core::Machine *dstMac = destMacGui()->mac();
-	psy::core::Player::Instance()->lock();
+	psy::core::Player::singleton().lock();
 	int oldSrcWireIndex = dstMac->FindInputWire( oldSrcGui->mac()->id() );
 	machineView->song()->ChangeWireSourceMac( *newSrcMac, *dstMac, 0, oldSrcWireIndex,0 );
-	psy::core::Player::Instance()->unlock();
+	psy::core::Player::singleton().unlock();
 
-	if(wiredlg) {
-		wiredlg->wireChanged();
-	}
+	if(wiredlg) wiredlg->wireChanged();
+
 	return true;
 }
 
