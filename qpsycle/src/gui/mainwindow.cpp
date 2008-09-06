@@ -118,7 +118,7 @@ namespace qpsycle {
 
 		
 		Global::Instance();
-		psy::core::Player &player = *psy::core::Player::Instance();
+		psy::core::Player & player = psy::core::Player::singleton();
 		// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
 		psy::core::MachineFactory& mfactory = psy::core::MachineFactory::getInstance();
 		mfactory.Initialize(&player);
@@ -128,7 +128,7 @@ namespace qpsycle {
 
 		song_ = createBlankSong();
 		setupSound();
-		psy::core::Player::Instance()->setLoopSong( true ); ///\todo: should this option should perhaps be a GUI setting, not something the player cares about?
+		psy::core::Player::singleton().setLoopSong( true ); ///\todo: should this option should perhaps be a GUI setting, not something the player cares about?
 
 		instrumentsModel_ = new InstrumentsModel( song_ );
 
@@ -194,9 +194,9 @@ namespace qpsycle {
 
 	void MainWindow::setupSound()
 	{
-		psy::core::Player::Instance()->song( song_ );
+		psy::core::Player::singleton().song( song_ );
 		psy::core::AudioDriver *outDriver = Global::configuration()._pOutputDriver;
-		psy::core::Player::Instance()->setDriver( *outDriver );
+		psy::core::Player::singleton().setDriver( *outDriver );
 	}
 
 	void MainWindow::setupGui()
@@ -576,7 +576,7 @@ namespace qpsycle {
 			
 			if ( !fileName.isEmpty() ) 
 			{
-				psy::core::Player::Instance()->stop();
+				psy::core::Player::singleton().stop();
 				psy::core::Song *song = new psy::core::Song();
 				QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 				if ( song->load( fileName.toStdString() ) )
@@ -664,7 +664,7 @@ namespace qpsycle {
 	{
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 
-		psy::core::Player::Instance()->driver().Enable(false);
+		psy::core::Player::singleton().driver().Enable(false);
 		if ( song_ ) delete song_;
 		song_ = song;
 		// Update gui to new song 
@@ -679,7 +679,7 @@ namespace qpsycle {
 	
 		logConsole_->Clear();
 
-		psy::core::Player::Instance()->song( song_ );
+		psy::core::Player::singleton().song( song_ );
 
 		instrumentsModel_ = new InstrumentsModel( song_ );
 		macView_ = new MachineView( song_ );
@@ -704,7 +704,7 @@ namespace qpsycle {
 		createActions();
 		setupSignals();
 		// enable audio driver
-		psy::core::Player::Instance()->driver().Enable(true);
+		psy::core::Player::singleton().driver().Enable(true);
 
 		statusBar()->showMessage( "Song loaded.", 5000 );
 		logConsole_->AddSuccessText("Song Loaded Successfuly");
@@ -743,7 +743,7 @@ namespace qpsycle {
 
 				if ( !fileName.isEmpty() ) 
 				{
-					psy::core::Player::Instance()->stop();
+					psy::core::Player::singleton().stop();
 					psy::core::Song *song = new psy::core::Song();
 					QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 					if ( song->load( fileName.toStdString() ) )
@@ -953,8 +953,8 @@ namespace qpsycle {
 		playbackTimer_->start( 10 );
 
 		playFromSeqPosAct->setChecked(true);
-		psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
-		psy::core::Player::Instance()->start( 0.0 );
+		psy::core::Player::singleton().setLoopSequenceEntry( 0 );
+		psy::core::Player::singleton().start( 0.0 );
 	}
 
 	void MainWindow::playFromSeqPos()
@@ -962,7 +962,7 @@ namespace qpsycle {
 		playbackTimer_->start( 10 );
 
 		playFromSeqPosAct->setChecked(true);
-		psy::core::Player::Instance()->start( psy::core::Player::Instance()->playPos() );
+		psy::core::Player::singleton().start( psy::core::Player::singleton().playPos() );
 	}
 
 	void MainWindow::playStop()
@@ -970,7 +970,7 @@ namespace qpsycle {
 		playbackTimer_->stop();
 
 		playFromSeqPosAct->setChecked(false);
-		psy::core::Player::Instance()->stop();
+		psy::core::Player::singleton().stop();
 	}
 
 	void MainWindow::showMachineView()
@@ -1151,7 +1151,7 @@ namespace qpsycle {
 
 	void MainWindow::updatePlaybackGraphics()
 	{
-		if ( psy::core::Player::Instance()->playing() )
+		if ( psy::core::Player::singleton().playing() )
 		{
 			seqView_->updatePlayPos();
 
@@ -1160,10 +1160,10 @@ namespace qpsycle {
 			if ( visiblePattern ) 
 			{
 				double entryStart = 0;
-				bool isPlayPattern = song_->patternSequence().getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
+				bool isPlayPattern = song_->patternSequence().getPlayInfo( visiblePattern, psy::core::Player::singleton().playPos() , 4 , entryStart );
 
 				if ( isPlayPattern )
-					patView_->onTick( psy::core::Player::Instance()->playPos() - entryStart ) ;
+					patView_->onTick( psy::core::Player::singleton().playPos() - entryStart ) ;
 			}
 		}
 	}

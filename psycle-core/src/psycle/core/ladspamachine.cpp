@@ -61,7 +61,7 @@ namespace psy {
 				}
 				else maxVal_ = 1;
 				if (LADSPA_IS_HINT_SAMPLE_RATE(hint.HintDescriptor)) {
-					maxVal_*=Player::Instance()->timeInfo().sampleRate();
+					maxVal_*=Player::singleton().timeInfo().sampleRate();
 				}
 
 				if ( LADSPA_IS_HINT_LOGARITHMIC(hint.HintDescriptor) ){
@@ -86,46 +86,46 @@ namespace psy {
 			case LADSPA_HINT_DEFAULT_NONE:
 				break;
 			case LADSPA_HINT_DEFAULT_MINIMUM:
-				fDefault = hint_.LowerBound * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+				fDefault = hint_.LowerBound * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::singleton().timeInfo().sampleRate() : 1.0f);
 				break;
 			case LADSPA_HINT_DEFAULT_LOW:
 				if (LADSPA_IS_HINT_LOGARITHMIC(hint_.HintDescriptor)) {
 					fDefault 
 					= exp(log(hint_.LowerBound) * 0.75
-					+ log(hint_.UpperBound) * 0.25) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					+ log(hint_.UpperBound) * 0.25) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::singleton().timeInfo().sampleRate() : 1.0f);
 				}
 				else {
 					fDefault 
 					= (hint_.LowerBound * 0.75
-					+ hint_.UpperBound * 0.25)* (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					+ hint_.UpperBound * 0.25)* (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::singleton().timeInfo().sampleRate() : 1.0f);
 				}
 				break;
 			case LADSPA_HINT_DEFAULT_MIDDLE:
 				if (LADSPA_IS_HINT_LOGARITHMIC(hint_.HintDescriptor)) {
 					fDefault 
 					= sqrt(hint_.LowerBound
-					* hint_.UpperBound) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					* hint_.UpperBound) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::singleton().timeInfo().sampleRate() : 1.0f);
 				}
 				else {
 					fDefault 
 					= 0.5 * (hint_.LowerBound
-					+ hint_.UpperBound) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					+ hint_.UpperBound) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::singleton().timeInfo().sampleRate() : 1.0f);
 				}
 				break;
 			case LADSPA_HINT_DEFAULT_HIGH:
 				if (LADSPA_IS_HINT_LOGARITHMIC(hint_.HintDescriptor)) {
 					fDefault 
 					= exp(log(hint_.LowerBound) * 0.25
-					+ log(hint_.UpperBound) * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					+ log(hint_.UpperBound) * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::singleton().timeInfo().sampleRate() : 1.0f);
 				}
 				else {
 					fDefault 
 					= (hint_.LowerBound * 0.25
-					+ hint_.UpperBound * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+					+ hint_.UpperBound * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::singleton().timeInfo().sampleRate() : 1.0f);
 				}
 				break;
 			case LADSPA_HINT_DEFAULT_MAXIMUM:
-				fDefault = hint_.UpperBound* (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::Instance()->timeInfo().sampleRate() : 1.0f);
+				fDefault = hint_.UpperBound* (float)((LADSPA_IS_HINT_SAMPLE_RATE(hint_.HintDescriptor)) ? (float)Player::singleton().timeInfo().sampleRate() : 1.0f);
 				break;
 			case LADSPA_HINT_DEFAULT_0:
 				fDefault=0.0f;

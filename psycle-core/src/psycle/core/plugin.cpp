@@ -45,10 +45,10 @@ void PluginFxCallback::MessBox(char const * /*ptxt*/, char const * /*caption*/, 
 	//MessageBox(hWnd,ptxt,caption,type); 
 }
 
-int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::Instance()->timeInfo().samplesPerTick()); }
-int PluginFxCallback::GetSamplingRate() { return Player::Instance()->timeInfo().sampleRate(); }
-int PluginFxCallback::GetBPM() { return static_cast<int>(Player::Instance()->timeInfo().bpm()); }
-int PluginFxCallback::GetTPB() { return Player::Instance()->timeInfo().ticksSpeed(); }
+int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::singleton().timeInfo().samplesPerTick()); }
+int PluginFxCallback::GetSamplingRate() { return Player::singleton().timeInfo().sampleRate(); }
+int PluginFxCallback::GetBPM() { return static_cast<int>(Player::singleton().timeInfo().bpm()); }
+int PluginFxCallback::GetTPB() { return Player::singleton().timeInfo().ticksSpeed(); }
 
 // dummy body
 int PluginFxCallback::CallbackFunc(int, int, int, int) { return 0; }
@@ -355,8 +355,8 @@ void Plugin::Tick( )
 
 void Plugin::Tick( int channel, const PatternEvent & pData )
 {
-	const PlayerTimeInfo & timeInfo = Player::Instance()->timeInfo();
-///FIXME: Add the Information about the tweaks.
+	const PlayerTimeInfo & timeInfo = Player::singleton().timeInfo();
+	///\todo Add the Information about the tweaks.
 
 	if(pData.note() == notetypes::tweak)
 	{
@@ -374,7 +374,7 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			catch(const std::exception &)
 			{
 			}
-			Player::Instance()->Tweaker = true;
+			Player::singleton().Tweaker = true;
 		}
 	}
 	else if(pData.note() == notetypes::tweak_slide)
@@ -452,23 +452,13 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 				}
 			}
 		}
-		Player::Instance()->Tweaker = true;
-	}
-	else
-	{
-		try
-		{
+		Player::singleton().Tweaker = true;
+	} else try {
 			proxy().SeqTick(channel, pData.note(), pData.instrument(), pData.command(), pData.parameter());
-		}
-		catch(const std::exception &)
-		{
-			return;
-		}
-	}
+	} catch(const std::exception &) { }
 }
 
-void Plugin::Stop( )
-{
+void Plugin::Stop() {
 	try {
 		proxy().Stop();
 	} catch(const std::exception &) {
@@ -477,16 +467,14 @@ void Plugin::Stop( )
 	Machine::Stop();
 }
 
-void Plugin::GetParamName(int numparam, char * name) const
-{
-	if( numparam < info_->numParameters ) std::strcpy(name,info_->Parameters[numparam]->Name);
+void Plugin::GetParamName(int numparam, char * name) const {
+	if(numparam < info_->numParameters ) std::strcpy(name,info_->Parameters[numparam]->Name);
 	else std::strcpy(name, "Out of Range");
 
 }
 
-void Plugin::GetParamRange(int numparam,int &minval,int &maxval) const
-{
-	if( numparam < info_->numParameters ) {
+void Plugin::GetParamRange(int numparam,int &minval,int &maxval) const {
+	if(numparam < info_->numParameters ) {
 		if(GetInfo().Parameters[numparam]->Flags & MPF_STATE) {
 			minval = GetInfo().Parameters[numparam]->MinValue;
 			maxval = GetInfo().Parameters[numparam]->MaxValue;
@@ -494,8 +482,7 @@ void Plugin::GetParamRange(int numparam,int &minval,int &maxval) const
 	} else minval = maxval = 0;
 }
 
-int Plugin::GetParamValue(int numparam) const
-{
+int Plugin::GetParamValue(int numparam) const {
 	if(numparam < info_->numParameters) {
 		try {
 			return proxy().Vals()[numparam];
@@ -505,51 +492,41 @@ int Plugin::GetParamValue(int numparam) const
 	} else return -1; // hmm
 }
 
-void Plugin::GetParamValue(int numparam, char * parval) const
-{
+void Plugin::GetParamValue(int numparam, char * parval) const {
 	if(numparam < info_->numParameters) {
 		try {
 			if(!proxy().DescribeValue(parval, numparam, proxy().Vals()[numparam]))
 				std::sprintf(parval, "%i", proxy().Vals()[numparam]);
 		}
-		catch(const std::exception &)
-		{}
-		catch (...)
-		{}
+		catch(const std::exception &) {}
+		catch (...) {}
 	}
 	else std::strcpy(parval,"Out of Range");
 }
 
-bool Plugin::SetParameter(int numparam,int value)
-{
+bool Plugin::SetParameter(int numparam,int value) {
 	if(numparam < info_->numParameters) {
 		try {
 			proxy().ParameterTweak(numparam,value);
-		}
-		catch(const std::exception &) {
+		} catch(const std::exception &) {
 			return false;
 		}
 		return true;
 	} else return false;
 }
 
-bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
-{
+bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
 	std::uint32_t size;
 	pFile->Read(size); // size of whole structure
-	if(size)
-	{
-		if(version > CURRENT_FILE_VERSION_MACD)
-		{
+	if(size) {
+		if(version > CURRENT_FILE_VERSION_MACD) {
 			pFile->Skip(size);
 			std::ostringstream s; s
 				<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
 				<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
 			//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 			return false;
-		}
-		else
-		{
+		} else {
 			std::uint32_t count;
 			pFile->Read(count);  // size of vars
 			/*
@@ -558,23 +535,18 @@ bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
 			pFile->ReadChunk(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
 			}
 			*/
-			for(unsigned int i(0) ; i < count ; ++i)
-			{
+			for(unsigned int i(0) ; i < count ; ++i) {
 				std::uint32_t temp;
 				pFile->Read(temp);
 				SetParameter(i, temp);
 			}
 			size -= sizeof(count) + sizeof(std::uint32_t) * count;
-			if(size)
-			{
+			if(size) {
 				char * pData = new char[size];
 				pFile->ReadArray(pData, size); // Number of parameters
-				try
-				{
+				try {
 					proxy().PutData(pData); // Internal load
-				}
-				catch(std::exception const &)
-				{
+				} catch(std::exception const &) {
 					delete pData;
 					return false;
 				}
@@ -586,16 +558,13 @@ bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version)
 	return true;
 };
 
-void Plugin::SaveSpecificChunk(RiffFile* pFile) const
-{
+void Plugin::SaveSpecificChunk(RiffFile* pFile) const {
 	std::uint32_t count = GetNumParams();
 	std::uint32_t size2(0);
-	try
-	{
+	try {
 		size2 = proxy().GetDataSize();
 	}
-	catch(std::exception const &)
-	{
+	catch(std::exception const &) {
 		// data won't be saved
 	}
 	std::uint32_t size = size2 + sizeof count  + sizeof(std::uint32_t) * count;
@@ -605,15 +574,12 @@ void Plugin::SaveSpecificChunk(RiffFile* pFile) const
 		std::uint32_t temp = GetParamValue(i);
 		pFile->Write(temp);
 	}
-	if(size2)
-	{
+	if(size2) {
 		char * pData = new char[size2];
-		try
-		{
+		try {
 			proxy().GetData(pData); // Internal save
 		}
-		catch(std::exception const &)
-		{
+		catch(std::exception const &) {
 			// this sucks because we already wrote the size,
 			// so now we have to write the data, even if they are corrupted.
 		}

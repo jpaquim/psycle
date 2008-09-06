@@ -812,7 +812,7 @@ namespace psy {
 			}
 
 			if(bRedraw)
-				Player::Instance()->Tweaker=true;
+				Player::singleton().Tweaker=true;
 			bRedraw=false;
 
 			float minms = callbacks->timeInfo().sampleRate() /1000.0f * 100.0f; // 100ms in samples

@@ -125,7 +125,7 @@ int main(int argument_count, char * arguments[]) {
 		std::cout << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath() << std::endl;
 	}
 
-	Player &player = *Player::Instance();
+	Player & player = Player::singleton();
 	// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
 	MachineFactory& mfactory = MachineFactory::getInstance();
 	mfactory.Initialize(&player);

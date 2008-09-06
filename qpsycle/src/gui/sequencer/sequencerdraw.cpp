@@ -171,8 +171,8 @@ namespace qpsycle {
 	void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
 	{
 		psy::core::SequenceEntry *entry = item->sequenceEntry();
-		if ( psy::core::Player::Instance()->loopSequenceEntry() == entry ) {
-			psy::core::Player::Instance()->setLoopSequenceEntry( 0 );
+		if ( psy::core::Player::singleton().loopSequenceEntry() == entry ) {
+			psy::core::Player::singleton().setLoopSequenceEntry( 0 );
 		}
 		entry->track()->removeEntry(entry); // Remove from the core song's pattern sequence.
 		// Note: Removing the entry from the core song triggers a (boost) signal in the core,
@@ -249,8 +249,8 @@ namespace qpsycle {
 
 	void SequencerDraw::onPlayLineMoved( double newXPos )
 	{
-		psy::core::Player::Instance()->stop();
-		psy::core::Player::Instance()->setPlayPos( newXPos / beatPxLength_ );
+		psy::core::Player::singleton().stop();
+		psy::core::Player::singleton().setPlayPos( newXPos / beatPxLength_ );
 	}
 
 	/**
