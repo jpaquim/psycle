@@ -60,10 +60,10 @@ namespace qpsycle {
 		scene_->addItem( seqArea_ );
 		seqArea_->setPos( 0, 0 );
 
-		psy::core::PatternSequence* patternSequence = sequencerView()->song()->patternSequence();
+		psy::core::PatternSequence & patternSequence = sequencerView()->song()->patternSequence();
 
-		std::vector<psy::core::SequenceLine*>::iterator it = patternSequence->begin();
-		for ( ; it < patternSequence->end(); it++) {
+		std::vector<psy::core::SequenceLine*>::iterator it = patternSequence.begin();
+		for ( ; it < patternSequence.end(); it++) {
 			psy::core::SequenceLine* seqLine = *it;
 			onNewLineCreated(seqLine);
 		}
@@ -71,9 +71,9 @@ namespace qpsycle {
 		if(!lines_.empty()) {
 			setSelectedLine(lines_[0]);
 
-			patternSequence->newLineCreated.connect
+			patternSequence.newLineCreated.connect
 				(boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
-			patternSequence->newLineInserted.connect
+			patternSequence.newLineInserted.connect
 				(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
 			#if 0
 				/*
@@ -83,10 +83,10 @@ namespace qpsycle {
 					makeSequencerLine instead.
 					/ Magnus
 				*/
-				patternSequence->lineRemoved.connect
+				patternSequence.lineRemoved.connect
 				(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 			#endif
-			patternSequence->linesSwapped.connect
+			patternSequence.linesSwapped.connect
 				(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
 		}
 
@@ -112,27 +112,27 @@ namespace qpsycle {
 			//    addSequencerLine();
 		} else if ( selectedLine() ) {
 			// will cause onNewLineInserted to be fired:
-			seqView_->song()->patternSequence()->insertNewLine( selectedLine()->sequenceLine() );
+			seqView_->song()->patternSequence().insertNewLine( selectedLine()->sequenceLine() );
 		}
 	}
 
 	void SequencerDraw::deleteTrack() {
 		if(selectedLine()) {
 			// will trigger onLineRemoved
-			seqView_->song()->patternSequence()->removeLine(selectedLine()->sequenceLine());
+			seqView_->song()->patternSequence().removeLine(selectedLine()->sequenceLine());
 		}
 	}
 
 	void SequencerDraw::moveDownTrack() {
 		if(selectedLine()) {
 			// will trigger onLinesSwapped
-			seqView_->song()->patternSequence()->moveDownLine(selectedLine()->sequenceLine());
+			seqView_->song()->patternSequence().moveDownLine(selectedLine()->sequenceLine());
 		}
 	}
 	void SequencerDraw::moveUpTrack() {
 		if(selectedLine()) {
 			// will trigger onLinesSwapped
-			seqView_->song()->patternSequence()->moveUpLine(selectedLine()->sequenceLine());
+			seqView_->song()->patternSequence().moveUpLine(selectedLine()->sequenceLine());
 		}
 	}
 

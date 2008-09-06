@@ -626,10 +626,10 @@ namespace qpsycle {
 	psy::core::Song *MainWindow::createBlankSong()
 	{
 		psy::core::Song *blankSong = new psy::core::Song( );
-		psy::core::PatternCategory* category0 = blankSong->patternSequence()->patternPool()->createNewCategory("New Category");
+		psy::core::PatternCategory* category0 = blankSong->patternSequence().patternPool()->createNewCategory("New Category");
 		psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
 
-		psy::core::SequenceLine *seqLine = blankSong->patternSequence()->createNewLine();
+		psy::core::SequenceLine *seqLine = blankSong->patternSequence().createNewLine();
 		seqLine->createEntry( pattern0, 0 );
 
 		return blankSong;
@@ -1160,7 +1160,7 @@ namespace qpsycle {
 			if ( visiblePattern ) 
 			{
 				double entryStart = 0;
-				bool isPlayPattern = song_->patternSequence()->getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
+				bool isPlayPattern = song_->patternSequence().getPlayInfo( visiblePattern, psy::core::Player::Instance()->playPos() , 4 , entryStart );
 
 				if ( isPlayPattern )
 					patView_->onTick( psy::core::Player::Instance()->playPos() - entryStart ) ;

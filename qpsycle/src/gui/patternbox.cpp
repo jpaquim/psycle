@@ -83,8 +83,8 @@ namespace qpsycle {
 
 		bool isFirst = true;
 
-		std::vector<psy::core::PatternCategory*>::iterator it = song_->patternSequence()->patternPool()->begin();
-		for ( ; it < song_->patternSequence()->patternPool()->end(); ++it) {
+		std::vector<psy::core::PatternCategory*>::iterator it = song_->patternSequence().patternPool()->begin();
+		for ( ; it < song_->patternSequence().patternPool()->end(); ++it) {
 			psy::core::PatternCategory* category = *it;
 			CategoryItem *categoryItem = new CategoryItem();
 			patternTree()->addTopLevelItem( categoryItem );
@@ -111,7 +111,7 @@ namespace qpsycle {
 
 	void PatternBox::newCategory() 
 	{ 
-		psy::core::PatternCategory* category = song()->patternSequence()->patternPool()->createNewCategory("New Category");
+		psy::core::PatternCategory* category = song()->patternSequence().patternPool()->createNewCategory("New Category");
 		long defaultColor = 0x29D6DE;
 		category->setColor( defaultColor );
 
@@ -241,7 +241,7 @@ when the pattern selected changes.
 				psy::core::SinglePattern* pattern = patItr->second;
 				patternMap.erase( patItr );
 
-				song()->patternSequence()->removeSinglePattern( pattern );
+				song()->patternSequence().removeSinglePattern( pattern );
 				emit patternDeleted();
 
 				CategoryItem* parentCatItem = (CategoryItem*)patItem->parent();

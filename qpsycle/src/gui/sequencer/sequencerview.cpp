@@ -123,27 +123,24 @@ namespace qpsycle {
 
 	void SequencerView::updatePlayPos()
 	{
-		if ( song()->patternSequence() )
-		{
-			int beatPxLength = seqDraw_->beatPxLength();
-			int xPos =  std::min(song()->patternSequence()->tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
-			int oxPos = std::min(song()->patternSequence()->tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
-			if (oxPos != xPos) {
-				seqDraw_->pLine()->setPos( xPos, 0 );
-			}
-			oldPlayPos_ = psy::core::Player::Instance()->playPos();
+		int beatPxLength = seqDraw_->beatPxLength();
+		int  xPos = std::min(song()->patternSequence().tickLength()* beatPxLength, psy::core::Player::Instance()->playPos() * beatPxLength);
+		int oxPos = std::min(song()->patternSequence().tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
+		if (oxPos != xPos) {
+			seqDraw_->pLine()->setPos( xPos, 0 );
 		}
+		oldPlayPos_ = psy::core::Player::Instance()->playPos();
 	}
 
 	void SequencerView::onPatternNameChanged()
 	{
-		// FIXME: not efficient.
+		///\todo: inefficient
 		sequencerDraw()->scene()->update( sequencerDraw()->scene()->itemsBoundingRect() );
 	}
 
 	void SequencerView::onCategoryColorChanged()
 	{
-		// FIXME: not efficient.
+		///\todo: inefficient
 		sequencerDraw()->scene()->update( sequencerDraw()->scene()->itemsBoundingRect() );
 	}
 
