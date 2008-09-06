@@ -64,8 +64,12 @@ class Player : public MachineCallbacks {
 			AudioDriver * driver_;
 	///\}
 
-	public:
-		void SampleRate(const int sampleRate);
+	///\name sample rate
+	///\{
+		public:
+			/// samples per second
+			void samples_per_second(int samples_per_second);
+	///\}
 
 	///\name recording
 	///\todo missplaced?
@@ -114,7 +118,7 @@ class Player : public MachineCallbacks {
 			/// wether the recording device has been started.
 			bool recording_;
 			/// whether to apply dither to recording
-			bool _doDither;
+			bool recording_with_dither_;
 			/// wave render filename
 			std::string fileName_;
 			/// file to which to output signal.
@@ -125,8 +129,8 @@ class Player : public MachineCallbacks {
 	///\name time info
 	///\{
 		public:
-			PlayerTimeInfo & timeInfo() { return timeInfo_; }
-			PlayerTimeInfo const & timeInfo() const { return timeInfo_; }
+			PlayerTimeInfo & timeInfo() throw() { return timeInfo_; }
+			PlayerTimeInfo const & timeInfo() const throw() { return timeInfo_; }
 		private:
 			PlayerTimeInfo timeInfo_;
 	///\}
@@ -155,9 +159,9 @@ class Player : public MachineCallbacks {
 			/// stops playing.
 			void stop();
 			/// is the player in playmode.
-			bool playing() const { return _playing; }
+			bool playing() const { return playing_; }
 		private:
-			bool _playing;
+			bool playing_;
 	///\}
 	
 	///\name loop
@@ -190,31 +194,22 @@ class Player : public MachineCallbacks {
 			///\todo here we need some real mutexes
 			bool lock_;
 			///\todo here we need some real mutexes
-			bool inWork_;
+			bool in_work_;
 	///\}
 
 	private:
 		/// Final Loop. Read new line for notes to send to the Machines
-		void ExecuteNotes(double beatOffset, PatternLine & line);
-		void ProcessGlobalEvent(const GlobalEvent & event);
-		void Process(int nsamples);
+		void execute_notes(double beat_offset, PatternLine & line);
+		void process_global_event(const GlobalEvent & event);
+		void process(int samples);
 
-		/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
-		Machine::id_type prevMachines[MAX_TRACKS];
-		/// Stores the samplerate of playback when recording to wave offline (non-realtime), since it can be changed.
-		int backup_rate;
-		/// Stores the bitdepth of playback when recording to wave offline (non-realtime), since it can be changed.
-		int backup_bits;
-		/// Stores the channel mode (mono/stereo) of playback when recording to wave offline (non-realtime), since it can be changed.
-		int backup_channelmode;
-		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
-		float _pBuffer[MAX_DELAY_BUFFER];
+		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
+		Machine::id_type prev_machines_[MAX_TRACKS];
+		/// temporary buffer to get all the audio from master (which work in small chunks), and send it to the soundcard after converting it to float.
+		float buffer_[MAX_DELAY_BUFFER];
 
 		/// dither handler
 		dsp::Dither dither;
-
-		/// Contains the number of samples until a line change comes in.
-		//int _samplesRemaining;
 };
 
 }}

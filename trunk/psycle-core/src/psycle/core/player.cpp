@@ -43,18 +43,21 @@ Player::Player()
 	autoRecord_(),
 	song_(),
 	recording_(),
-	_doDither(),
-	_playing(),
+	recording_with_dither_(),
+	playing_(),
 	loopSequenceEntry_(),
 	autoStopMachines_(),
 	lock_(),
-	inWork_()
+	in_work_()
 {
-	for(int i(0); i < MAX_TRACKS; ++i) prevMachines[i] = 255;
+	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
 }
 
 Player::~Player() {
-	if(driver_) delete driver_; ///\todo [bohan] i don't see why the player owns the driver.
+	if(driver_) {
+		std::cerr << "psycle: core: player: deleting audio driver!\n";
+		delete driver_; ///\todo [bohan] i don't see why the player owns the driver.
+	}
 }
 
 void Player::start(double pos) {
@@ -75,33 +78,33 @@ void Player::start(double pos) {
 	master._clip = false;
 	master.sampleCount = 0;
 	
-	for(int i(0); i < MAX_TRACKS; ++i) prevMachines[i] = 255;
-	_playing = true;
+	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
+	playing_ = true;
 	timeInfo_.setPlayBeatPos(pos);
 	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
 }
 
 void Player::stop() {
 	if(!song_ || !driver_) return;
-	_playing = false;
+	playing_ = false;
 	for(int i(0); i < MAX_MACHINES; ++i) if(song().machine(i)) {
 		song().machine(i)->Stop();
 		for(int c(0); c < MAX_TRACKS; ++c) song().machine(i)->TriggerDelay[c].setCommand(0);
 	}
 	setBpm(song().bpm());
 	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
-	SampleRate(driver_->settings().samplesPerSec());
+	samples_per_second(driver_->settings().samplesPerSec());
 	if(autoRecord_) stopRecording();
 }
 
-void Player::SampleRate(int const sampleRate) {
+void Player::samples_per_second(int samples_per_second) {
+	timeInfo_.setSampleRate(samples_per_second);
 	if(!song_) return;
-	timeInfo_.setSampleRate(sampleRate);
 	///\todo update the source code of the plugins...
-	for(int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(sampleRate);
+	for(int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(samples_per_second);
 }
 
-void Player::ProcessGlobalEvent(GlobalEvent const & event) {
+void Player::process_global_event(GlobalEvent const & event) {
 	Machine::id_type mIndex;
 	switch(event.type()) {
 		case GlobalEvent::BPM_CHANGE:
@@ -155,7 +158,7 @@ void Player::ProcessGlobalEvent(GlobalEvent const & event) {
 }
 
 /// Final Loop. Read new line for notes to send to the Machines
-void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
+void Player::execute_notes(double beat_offset, PatternLine & line) {
 	// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modifiable)
 
 	// Step 1: Process all tweaks.
@@ -176,7 +179,7 @@ void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
 					entry.setCommand(origin >> 8);
 					entry.setParameter(origin & 0xff);
 					machine.AddEvent(
-						beatOffset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
 						line.sequenceTrack() * 1024 + track, entry
 					);
 					previous = origin;
@@ -188,14 +191,14 @@ void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
 							entry.setCommand(origin >> 8);
 							entry.setParameter(origin & 0xff);
 							machine.AddEvent(
-								beatOffset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+								beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
 								line.sequenceTrack() * 1024 + track, entry
 							);
 							previous = origin;
 						}
 						delaysamples += delay;
 					}
-			} else machine.AddEvent(beatOffset, line.sequenceTrack() * 1024 + track, entry);
+			} else machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
 		}
 	}
 
@@ -207,7 +210,7 @@ void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
 		// Is it not muted and is a note?
 		if((!song().patternSequence().trackMuted(track)) && (entry.note() < notetypes::tweak || entry.note() == 255)) {
 			int mac = entry.machine();
-			if(mac != 255) prevMachines[track] = mac; else mac = prevMachines[track];
+			if(mac != 255) prev_machines_[track] = mac; else mac = prev_machines_[track];
 			// is there a machine number and it is either a note or a command?
 			//if(mac != 255 && (pEntry->_note != 255 || pEntry->_cmd))
 			// is there a machine number and it is either a note or a command?
@@ -220,18 +223,18 @@ void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
 						double delayoffset(entry.parameter() / 256.0);
 						// At least Plucked String works erroneously if the command is not ommited.
 						entry.setCommand(0); entry.setParameter(0);
-						machine.AddEvent(beatOffset + delayoffset, line.sequenceTrack() * 1024 + track, entry);
+						machine.AddEvent(beat_offset + delayoffset, line.sequenceTrack() * 1024 + track, entry);
 					} else if(entry.command() == commandtypes::RETRIGGER) {
 						///\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
 						int delaysamples(0);
 						int rate = entry.parameter() + 1;
 						int delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
 						entry.setCommand(0); entry.setParameter(0);
-						machine.AddEvent(beatOffset, line.sequenceTrack() * 1024 + track, entry);
+						machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
 						delaysamples += delay;
 						while(delaysamples < timeInfo().samplesPerTick()) {
 							machine.AddEvent(
-								beatOffset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+								beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
 								line.sequenceTrack() * 1024 + track, entry
 							);
 							delaysamples += delay;
@@ -246,13 +249,13 @@ void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
 						delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
 						entry.setCommand(0); entry.setParameter(0);
 						machine.AddEvent(
-							beatOffset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+							beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
 							line.sequenceTrack() * 1024 + track, entry
 						);
 						delaysamples += delay;
 						while(delaysamples < timeInfo().samplesPerTick()) {
 							machine.AddEvent(
-								beatOffset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+								beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
 								line.sequenceTrack() * 1024 + track, entry
 							);
 
@@ -273,7 +276,7 @@ void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
 						#endif
 					} else {
 						machine.TriggerDelay[track].setCommand(0);
-						machine.AddEvent(beatOffset, line.sequenceTrack() * 1024 + track, entry);
+						machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
 						machine.TriggerDelayCounter[track] = 0;
 						machine.ArpeggioCount[track] = 0;
 					}
@@ -284,20 +287,20 @@ void Player::ExecuteNotes(double beatOffset, PatternLine & line) {
 }
 
 float * Player::Work(int numSamples) {
-	if(!song_) return _pBuffer;
-	if(lock_) return _pBuffer;
+	if(!song_) return buffer_;
+	if(lock_) return buffer_;
 
-	inWork_ = true;
+	in_work_ = true;
 
 	// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
-	Master::_pMasterSamples = _pBuffer;
+	Master::_pMasterSamples = buffer_;
 	double beatsToWork = numSamples/ static_cast<double>(timeInfo_.samplesPerBeat());
 	
 	///\todo CSingleLock crit(&song().door, true);
 
 	if(autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence().tickLength()) stopRecording();
 
-	if(_playing) {
+	if(playing_) {
 		if(loopSequenceEntry()) {
 			// Maintan the cursor inside the loop sequence
 			if(
@@ -354,11 +357,11 @@ float * Player::Work(int numSamples) {
 				std::multimap<double, PatternLine>::iterator lineIt = events.begin();
 				lineIt!= events.end();
 				++lineIt
-			) ExecuteNotes(lineIt->first - timeInfo_.playBeatPos(), lineIt->second);
+			) execute_notes(lineIt->first - timeInfo_.playBeatPos(), lineIt->second);
 
 			if(chunkSampleSize > 0) {
-				Process(chunkSampleSize);
-				processedSamples+=chunkSampleSize;
+				process(chunkSampleSize);
+				processedSamples += chunkSampleSize;
 			}
 			
 			beatsToWork -= chunkBeatSize;
@@ -368,25 +371,25 @@ float * Player::Work(int numSamples) {
 				std::vector<GlobalEvent*>::iterator globIt = globals.begin();
 				globIt!=globals.end();
 				++globIt
-			) ProcessGlobalEvent(*(*globIt));
+			) process_global_event(**globIt);
 
 			bFirst = false;
 		} while(!globals.empty()); // if globals is empty, then we've processed through to the end of the buffer.
 	} else {
 		///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-		Process(numSamples);
+		process(numSamples);
 		//playPos += beatLength;
 		//if(playPos> "signumerator") playPos -= signumerator;
 	}
 	
-	inWork_ = false;
-	return _pBuffer;
+	in_work_ = false;
+	return buffer_;
 }
 
-void Player::Process(int numSamples) {
-	int remainingsamples = numSamples;
-	while(remainingsamples) {
-		int amount = std::min(remainingsamples,STREAM_SIZE);
+void Player::process(int samples) {
+	int remaining_samples = samples;
+	while(remaining_samples) {
+		int amount = std::min(remaining_samples, STREAM_SIZE);
 		// Reset all machine buffers
 		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c))
 			song().machine(c)->PreWork(amount);
@@ -397,12 +400,12 @@ void Player::Process(int numSamples) {
 		// write samples to file
 		if(
 			recording_ && !autoRecord_ || // controlled by record button
-			recording_ && _playing && autoRecord_ // controlled by play
+			recording_ && playing_ && autoRecord_ // controlled by play
 		) writeSamplesToFile(amount); 
 
 		// Move the pointer forward for the next Master::Work() iteration.
 		Master::_pMasterSamples += amount * 2;
-		remainingsamples -= amount;
+		remaining_samples -= amount;
 		// increase playPos
 		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
 	}
@@ -424,7 +427,7 @@ void Player::setDriver(AudioDriver const & driver) {
 	if(!driver_->Configured()) {
 		std::cout << "psycle: core: player: asking driver to configure itself\n";
 		driver_->Configure();
-		//SampleRate(driver_->_samplesPerSec);
+		//samples_per_seconds(driver_->_samplesPerSec);
 		//_outputActive = true;
 	}
 	std::cout << "psycle: core: player: driver configured\n";
@@ -436,14 +439,14 @@ void Player::setDriver(AudioDriver const & driver) {
 		if(driver_) delete driver_;
 		driver_ = new AudioDriver();
 	}
-	SampleRate(driver_->settings().samplesPerSec());
+	samples_per_second(driver_->settings().samplesPerSec());
 }
 
 void psy::core::Player::lock() {
 	///\todo this is bad
 	lock_ = true;
 	#if defined __unix__ || defined __APPLE__
-		while(inWork_) usleep(200);
+		while(in_work_) usleep(200);
 	#endif
 }
 
@@ -459,7 +462,7 @@ void Player::writeSamplesToFile(int amount) {
 	if(!song_ || !driver_) return;
 	float * pL(song().machine(MASTER_INDEX)->_pSamplesL);
 	float * pR(song().machine(MASTER_INDEX)->_pSamplesR);
-	if(_doDither) {
+	if(recording_with_dither_) {
 		dither.Process(pL, amount);
 		dither.Process(pR, amount);
 	}
