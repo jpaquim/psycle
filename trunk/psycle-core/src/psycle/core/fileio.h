@@ -1,7 +1,16 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-///\interface psy::core::RiffFile
-#pragma once
 
+/***************************************************************************************
+ Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+ This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+***************************************************************************************/
+
+///\interface psy::core::RiffFile
+
+#pragma once
 #include <diversalis/compiler.hpp>
 #include <cstdio>
 #include <cstddef>
@@ -213,26 +222,25 @@ class RiffFile {
 };
 
 
-class MemoryFile : public RiffFile
-{
-public:
-	MemoryFile();
-	virtual ~MemoryFile();
+class MemoryFile : public RiffFile {
+	public:
+		MemoryFile();
+		virtual ~MemoryFile();
 
-	bool OpenMem(std::ptrdiff_t blocksize);
-	bool CloseMem();
-	virtual std::size_t FileSize();
-	virtual std::size_t GetPos();
-	virtual int Seek(std::ptrdiff_t const & bytes);
-	virtual int Skip(std::ptrdiff_t const & bytes);
-	virtual bool ReadString(char *, std::size_t const & max_length);
-protected:
-	virtual bool WriteChunk(void const *, std::size_t const &);
-	virtual bool ReadChunk (void       *, std::size_t const &);
-	virtual bool Expect    (void       *, std::size_t const &);
+		bool OpenMem(std::ptrdiff_t blocksize);
+		bool CloseMem();
+		virtual std::size_t FileSize();
+		virtual std::size_t GetPos();
+		virtual int Seek(std::ptrdiff_t const & bytes);
+		virtual int Skip(std::ptrdiff_t const & bytes);
+		virtual bool ReadString(char *, std::size_t const & max_length);
+	protected:
+		virtual bool WriteChunk(void const *, std::size_t const &);
+		virtual bool ReadChunk (void       *, std::size_t const &);
+		virtual bool Expect    (void       *, std::size_t const &);
 
-	std::vector<void*> memoryblocks_;
-	int blocksize_;
+		std::vector<void*> memoryblocks_;
+		int blocksize_;
 };
 
 }}

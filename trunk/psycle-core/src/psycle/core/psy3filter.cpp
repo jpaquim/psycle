@@ -1,34 +1,20 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-/**************************************************************************
-*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-*   This program is distributed in the hope that it will be useful,       *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-*   GNU General Public License for more details.                          *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the                         *
-*   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-***************************************************************************/
 
+/***************************************************************************************
+ Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+ This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+***************************************************************************************/
 
 #include "psy3filter.h"
-
 #include "commands.h"
 #include "datacompression.h"
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
-
 #include "mixer.h"
-
 #include <sstream>
 #include <iostream>
 
@@ -57,8 +43,8 @@ std::uint32_t const Psy3Filter::FILE_VERSION =
 	Psy3Filter::VERSION_INSD +
 	Psy3Filter::VERSION_WAVE;
 
-Psy3Filter* Psy3Filter::getInstance() {
-	// don`t use multithreaded
+Psy3Filter * Psy3Filter::getInstance() {
+	///\todo
 	static Psy3Filter s;
 	return &s; 
 }
@@ -69,21 +55,18 @@ Psy3Filter::Psy3Filter()
 	singleLine()
 {}
 
-bool Psy3Filter::testFormat( const std::string & fileName )
-{
+bool Psy3Filter::testFormat(const std::string & fileName) {
 	RiffFile file;
 	file.Open(fileName);
-	char Header[9];
-	file.ReadArray(Header, 8);
-	Header[8]=0;
-	file.Close();
-	if (strcmp(Header,"PSY3SONG")==0) return true;
-	return false;
+	char header[9];
+	file.ReadArray(header, 8);
+	header[8] = 0;
+	file.Close(); ///\todo RiffFile's dtor doesn't close!!!
+	return !strcmp(header, "PSY3SONG");
 }
 
 
-void Psy3Filter::preparePatternSequence( CoreSong & song )
-{
+void Psy3Filter::preparePatternSequence(CoreSong & song) {
 	seqList.clear();
 	song.patternSequence().removeAll();
 	// creatse a single Pattern Category
@@ -92,13 +75,13 @@ void Psy3Filter::preparePatternSequence( CoreSong & song )
 	singleLine = song.patternSequence().createNewLine();
 }
 
-bool Psy3Filter::load(const std::string & fileName, CoreSong & song)
-{
-	RiffFile file;
-	file.Open(fileName);
+bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	//progress.emit(1,0,"");
 	//progress.emit(2,0,"Loading... psycle song fileformat version 3...");
-	std::cout << "PSY3 format"<< std::endl;
+	std::cout << "psycle: core: psy3 loader: loading psycle song fileformat version 3: " << fileName << '\n';
+
+	RiffFile file;
+	file.Open(fileName);
 	
 	// skip header
 	file.Skip(8);
@@ -117,90 +100,61 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song)
 	std::uint32_t chunkcount = LoadSONGv0(&file,song);
 	/* chunk_loop: */
 
-	while(file.ReadArray(header, 4) && chunkcount)
-	{
+	while(file.ReadArray(header, 4) && chunkcount) {
 		file.Read(version);
 		file.Read(size);
 
 		int fileposition = file.GetPos();
-		//song.progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
+		//song.progress.emit(4, static_cast<int>(fileposition * 16384.0f / filesize), "");
 
-		if(std::strcmp(header,"INFO") == 0)
-		{
-			//song.progress.emit(2,0,"Loading... Song authorship information...");
-			if ((version&0xFF00) == 0x0000) // chunkformat v0
-			{
-				LoadINFOv0(&file,song,version&0x00FF);
+		if(!std::strcmp(header,"INFO")) {
+			//song.progress.emit(2, 0, "Loading... Song authorship information...");
+			if((version & 0xff00) == 0) { // chunkformat v0
+				LoadINFOv0(&file, song, version & 0xff);
 				//bug in psycle 1.8.5, writes size as 12bytes more!
-				if ( version == 0x0000 ) size = song.name().length()+song.author().length()+song.comment().length() + 3;
-			}
-			//else if ( (version&0xFF00) == 0x0100 ) //and so on
-		}
-		else if(std::strcmp(header,"SNGI")==0)
-		{
-			//song.progress.emit(2,0,"Loading... Song properties information...");
-			if ((version&0xFF00) == 0x0000) // chunkformat v0
-			{
-				LoadSNGIv0(&file,song,version&0x00FF);
+				if(version == 0) size = song.name().length()+song.author().length()+song.comment().length() + 3;
+			} //else if((version & 0xff00) == 0x0100) // and so on
+		} else if(!std::strcmp(header,"SNGI")) {
+			//song.progress.emit(2, 0, "Loading... Song properties information...");
+			if((version & 0xff00) == 0) { // chunkformat v0
+				LoadSNGIv0(&file, song, version & 0xff);
+				// fix for a bug existing in the song saver in the 1.7.x series
+				if(version == 0) size = 11 * sizeof(std::uint32_t) + song.tracks() * 2 * sizeof(bool); 
+			} //else if((version & 0xff00) == 0x0100) // and so on
+		} else if(!std::strcmp(header,"SEQD")) {
+			//song.progress.emit(2, 0, "Loading... Song sequence...");
+			if ((version & 0xff00) == 0) // chunkformat v0
+				LoadSEQDv0(&file, song, version & 0xff);
+			//else if((version & 0xff00) == 0x0100) // and so on
+		} else if(!std::strcmp(header,"PATD")) {
+			//progress.emit(2, 0, "Loading... Song patterns...");
+			if((version  & 0xff00) == 0) { // chunkformat v0
+				LoadPATDv0(&file, song, version & 0xff);
 				//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-				if (version == 0x0000) size = 11*sizeof(std::uint32_t)+song.tracks()*2*sizeof(bool); 
-			}
-			//else if ( (version&0xFF00) == 0x0100 ) //and so on
-		}
-		else if(std::strcmp(header,"SEQD")==0)
-		{
-			//song.progress.emit(2,0,"Loading... Song sequence...");
-			if ((version&0xFF00) == 0x0000) // chunkformat v0
-			{
-				LoadSEQDv0(&file,song,version&0x00FF);
-			}
-			//else if ( (version&0xFF00) == 0x0100 ) //and so on
-		}
-		else if(std::strcmp(header,"PATD") == 0)
-		{
-			//progress.emit(2,0,"Loading... Song patterns...");
-			if ((version&0xFF00) == 0x0000) // chunkformat v0
-			{
-				LoadPATDv0(&file,song,version&0x00FF);
-				//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-				if ((version == 0x0000) &&( file.GetPos() == fileposition+size+4)) size += 4; 
-			}
-			//else if ( (version&0xFF00) == 0x0100 ) //and so on
-		}
-		else if(std::strcmp(header,"MACD") == 0)
-		{
-			//song.progress.emit(2,0,"Loading... Song machines...");
-			if ((version&0xFF00) == 0x0000) // chunkformat v0
-			{
-				LoadMACDv0(&file,song,version&0x00FF);
-			}
-			//else if ( (version&0xFF00) == 0x0100 ) //and so on
-		}
-		else if(std::strcmp(header,"INSD") == 0)
-		{
-			//song.progress.emit(2,0,"Loading... Song instruments...");
-			if ((version&0xFF00) == 0x0000) // chunkformat v0
-			{
+				if((version == 0x0000) &&( file.GetPos() == fileposition+size+4)) size += 4; 
+			} //else if((version & 0xff00) == 0x0100) // and so on
+		} else if(!std::strcmp(header,"MACD")) {
+			//song.progress.emit(2, 0, "Loading... Song machines...");
+			if((version & 0xff00) == 0) // chunkformat v0
+				LoadMACDv0(&file, song, version & 0xff);
+			//else if((version & 0xff00) == 0x0100 ) //and so on
+		} else if(!std::strcmp(header,"INSD")) {
+			//song.progress.emit(2, 0, "Loading... Song instruments...");
+			if((version & 0xff00) == 0) // chunkformat v0
 				LoadINSDv0(&file,song,version&0x00FF);
-			}
-			//else if ( (version&0xFF00) == 0x0100 ) //and so on
-		}
-		else
-		{
+			//else if((version & 0xff00) == 0x0100) // and so on
+		} else {
 			//loggers::warning("foreign chunk found. skipping it.");
-			//song.progress.emit(2,0,"Loading... foreign chunk found. skipping it...");
+			//song.progress.emit(2, 0, "Loading... foreign chunk found. skipping it...");
 			std::ostringstream s;
 			s << "foreign chunk: version: " << version << ", size: " << size;
 			//loggers::trace(s.str());
-			if(size && size < filesize-fileposition)
-			{
-				file.Skip(size);
-			}
+			std::cerr << "psycle: core: psy3 loader: " << s << '\n';
+			if(size && size < filesize-fileposition) file.Skip(size);
 		}
 
 		// For invalid version chunks, or chunks that haven't been read correctly/completely.
-		if  (file.GetPos() != fileposition+size)
-		{
+		if(file.GetPos() != fileposition+size) {
 			///\todo: verify how it works with invalid data.
 			//if (file.GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
 			//else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
@@ -216,81 +170,51 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song)
 	// now that we have loaded all the patterns, time to prepare them.
 	double pos = 0;
 	std::vector<int>::iterator it = seqList.begin();
-	for ( ; it < seqList.end(); ++it)
-	{
+	for(; it < seqList.end(); ++it) {
 		#if 0
-		Pattern* pat = song.patternSequence().PatternPool()->findById(*it);
+			Pattern* pat = song.patternSequence().PatternPool()->findById(*it);
 		#else
-		SinglePattern* pat = song.patternSequence().patternPool()->findById(*it);
+			SinglePattern* pat = song.patternSequence().patternPool()->findById(*it);
 		#endif
 		singleLine->createEntry(pat,pos);
 		pos+=pat->beats();
 	}
 
 	// test all connections for invalid machines. disconnect invalid machines.
-	for(int i(0) ; i < MAX_MACHINES ; ++i)
-	{
-		if(song.machine(i))
-		{
-			Machine* mac = song.machine(i);
-			mac->_connectedInputs = 0;
-			mac->_connectedOutputs = 0;
-			for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
-			{
-				if(mac->_connection[c])
+	for(int i(0) ; i < MAX_MACHINES ; ++i) if(song.machine(i)) {
+		Machine* mac = song.machine(i);
+		mac->_connectedInputs = 0;
+		mac->_connectedOutputs = 0;
+		for(int c(0) ; c < MAX_CONNECTIONS ; ++c) {
+			if(mac->_connection[c]) {
+				if(mac->_outputMachines[c] < 0 || mac->_outputMachines[c] >= MAX_MACHINES)
 				{
-					if(mac->_outputMachines[c] < 0 || mac->_outputMachines[c] >= MAX_MACHINES)
-					{
-						mac->_connection[c] = false;
-						mac->_outputMachines[c] = -1;
-					}
-					else if(!song.machine(mac->_outputMachines[c]))
-					{
-						mac->_connection[c] = false;
-						mac->_outputMachines[c] = -1;
-					}
-					else 
-					{
-						mac->_connectedOutputs++;
-
-					}
-				}
-				else
-				{
+					mac->_connection[c] = false;
 					mac->_outputMachines[c] = -1;
-				}
+				} else if(!song.machine(mac->_outputMachines[c])) {
+					mac->_connection[c] = false;
+					mac->_outputMachines[c] = -1;
+				} else mac->_connectedOutputs++;
+			} else mac->_outputMachines[c] = -1;
 
-				if (mac->_inputCon[c])
-				{
-					if (mac->_inputMachines[c] < 0 || mac->_inputMachines[c] >= MAX_MACHINES)
-					{
-						mac->_inputCon[c] = false;
-						mac->_inputMachines[c] = -1;
-					}
-					else if (!song.machine(mac->_inputMachines[c]))
-					{
-						mac->_inputCon[c] = false;
-						mac->_inputMachines[c] = -1;
-					}
-					else
-					{
-						mac->_connectedInputs++;
-						mac->_wireMultiplier[c]=song.machine(mac->_inputMachines[c])->GetAudioRange()/mac->GetAudioRange();
-					}
+			if(mac->_inputCon[c]) {
+				if(mac->_inputMachines[c] < 0 || mac->_inputMachines[c] >= MAX_MACHINES) {
+					mac->_inputCon[c] = false;
+					mac->_inputMachines[c] = -1;
+				} else if (!song.machine(mac->_inputMachines[c])) {
+					mac->_inputCon[c] = false;
+					mac->_inputMachines[c] = -1;
+				} else {
+					mac->_connectedInputs++;
+					mac->_wireMultiplier[c]=song.machine(mac->_inputMachines[c])->GetAudioRange()/mac->GetAudioRange();
 				}
-				else
-				{
-					song.machine(i)->_inputMachines[c] = -1;
-				}
-			}
+			} else song.machine(i)->_inputMachines[c] = -1;
 		}
 	}
 	RestoreMixerSendFlags(song);
 	//song.progress.emit(5,0,"");
-	if(chunkcount)
-	{
-		if (!song.machine(MASTER_INDEX) )
-		{
+	if(chunkcount) {
+		if(!song.machine(MASTER_INDEX)) {
 			Machine* mac = MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX);
 			mac->Init();
 			song.AddMachine(mac);
@@ -298,58 +222,52 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song)
 		std::ostringstream s;
 		s << "Error reading from file '" << file.file_name() << "'" << std::endl;
 		s << "some chunks were missing in the file";
+		//loggers::trace(s.str());
+		std::cerr << "psycle: core: psy3 loader: " << s << '\n';
 		//report.emit(s.str(), "Song Load Error.");
 	}
 	///\todo:
 	return true;
 }
 
-int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
-{
+int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/) {
 	std::int32_t fileversion = 0;
 	std::uint32_t size = 0;
 	std::uint32_t chunkcount = 0;
 
 	file->Read(fileversion);
 	file->Read(size);
-	if(fileversion > CURRENT_FILE_VERSION)
-	{
+	if(fileversion > CURRENT_FILE_VERSION) {
 		//report.emit("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
 	}
 
 	file->Read(chunkcount);
-	const int bytesread=4;
-	if ( size > 4)
-	{
+	int const bytesread(4);
+	if(size > 4) {
 		// This is left here if someday, extra data is added to the file version chunk.
 		// update "bytesread" accordingly.
 		
 		//file->Read(chunkversion);
-		//if (chunkversion == x)
-		//{}
-		//else if (...)
-		//{}
+		//if(chunkversion == x) {} else if(...) {}
 
 		file->Skip(size - bytesread);// Size of the current header DATA // This ensures that any extra data is skipped.
 	}
 	return chunkcount;
 }
 
-bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
-{
-		char Name[129]; char Author[65]; char Comment[65536];
-		
-		file->ReadString(Name, 128);
-		song.setName(Name);
-		file->ReadString(Author, 64);
-		song.setAuthor(Author);
-		bool result = file->ReadString(Comment, 65535);
-		song.setComment(Comment);
-		return result;
+bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/) {
+	char Name[129]; char Author[65]; char Comment[65536];
+	
+	file->ReadString(Name, 128);
+	song.setName(Name);
+	file->ReadString(Author, 64);
+	song.setAuthor(Author);
+	bool result = file->ReadString(Comment, 65535);
+	song.setComment(Comment);
+	return result;
 }
 
-bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
-{
+bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) {
 	MachineCallbacks* callbacks = MachineFactory::getInstance().getCallbacks();
 	std::int32_t temp(0);
 	std::int16_t temp16(0);
@@ -363,13 +281,12 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 	file->Read(temp);
 	song.setTracks(temp);
 	// bpm
-	///\todo: This was a hack added in 1.9alpha to allow decimal BPM values
-	//{
+	{ ///\todo: This was a hack added in 1.9alpha to allow decimal BPM values
 		file->Read(temp16);
 		int BPMCoarse = temp16;
 		file->Read(temp16);
-		song.setBpm( BPMCoarse + temp16/100.0f );
-	//}
+		song.setBpm(BPMCoarse + temp16 / 100.0f );
+	}
 	// linesperbeat
 	file->Read(temp);
 	song.setTicksSpeed(temp);
@@ -389,8 +306,7 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 	
 	// sequence width, for multipattern
 	file->Read(temp);
-	for(unsigned int i(0) ; i < song.tracks(); ++i)
-	{
+	for(unsigned int i(0) ; i < song.tracks(); ++i) {
 		bool tmp;
 		file->Read(tmp);
 		song.patternSequence().setMutedTrack(i,tmp);
@@ -402,23 +318,20 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 	return fileread;
 }
 
-bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& /*song*/,int /*minorversion*/)
-{
+bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& /*song*/,int /*minorversion*/) {
 	std::int32_t index = 0;
 	std::uint32_t temp;
 	bool fileread = false;
 	// index, for multipattern - for now always 0
 	file->Read(index);
-	if (index < MAX_SEQUENCES)
-	{
+	if(index < MAX_SEQUENCES) {
 		char pTemp[256];
 		// play length for this sequence
 		file->Read(temp);
 		int playLength = temp;
 		// name, for multipattern, for now unused
 		file->ReadString(pTemp, sizeof pTemp);
-		for (int i(0) ; i < playLength; ++i)
-		{
+		for(int i(0) ; i < playLength; ++i) {
 			fileread = file->Read(temp);
 			seqList.push_back(temp);
 		}
@@ -426,8 +339,7 @@ bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& /*song*/,int /*minorversion
 	return fileread;
 }
 
-PatternEvent Psy3Filter::convertEntry( unsigned char * data ) const
-{
+PatternEvent Psy3Filter::convertEntry(unsigned char * data) const {
 	PatternEvent event;
 	event.setNote(*data); data++;
 	event.setInstrument(*data); data++;
@@ -437,8 +349,7 @@ PatternEvent Psy3Filter::convertEntry( unsigned char * data ) const
 	return event;
 }
 
-bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
-{
+bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) {
 	std::int32_t index = 0;
 	std::uint32_t temp;
 	std::uint32_t size;
@@ -446,8 +357,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 
 	// index
 	file->Read(index);
-	if(index < MAX_PATTERNS)
-	{
+	if(index < MAX_PATTERNS) {
 		// num lines
 		file->Read(temp);
 		// clear it out if it already exists
@@ -465,75 +375,63 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/)
 		// create a Pattern
 		std::string indexStr;
 		std::ostringstream o;
-		if (!(o << index))
+		if(!(o << index))
 			indexStr = "error";
 		else
 			indexStr = o.str();
 		#if 0
-		Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		#else
-		SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+			SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		#endif
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		float beatpos=0;
-		for(int y(0) ; y < numLines ; ++y) // lines
-		{
-			for (unsigned int x = 0; x < song.tracks(); x++) {
+		for(int y(0) ; y < numLines ; ++y) { // lines
+			for (unsigned int x = 0; x < song.tracks(); ++x) {
 				unsigned char entry[5] ;
 				std::memcpy( &entry, pSource, 5);
 				PatternEvent event = convertEntry(entry);
-				if (!event.empty()) {
-					if (event.note() == notetypes::tweak) {
+				if(!event.empty()) {
+					if(event.note() == notetypes::tweak) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
-					}
-					else if (event.note() == notetypes::tweak_slide) {
+					} else if(event.note() == notetypes::tweak_slide) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
-					}
-					else if (event.note() == notetypes::midi_cc) {
+					} else if(event.note() == notetypes::midi_cc) {
 						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
-					}
-					else {
+					} else {
 						if(event.command() == commandtypes::NOTE_DELAY)
-						{
 							/// Convert old value (part of line) to new value (part of beat)
 							event.setParameter(event.parameter()/linesPerBeat);
-						}
 						(*pat)[beatpos].notes()[x] = event;
 					}
-
-					if ( (event.note() <= notetypes::release || event.note() == notetypes::empty) && (event.command() == 0xFE) && (event.parameter() < 0x20 ))
-					{
-						linesPerBeat= event.parameter()&0x1F;
-					}
+					if((event.note() <= notetypes::release || event.note() == notetypes::empty) && event.command() == 0xfe && event.parameter() < 0x20)
+						linesPerBeat= event.parameter() & 0x1f;
 				}
 				pSource += EVENT_SIZE;
 			}
-			beatpos += 1 / (float) linesPerBeat;
+			beatpos += 1 / static_cast<float>(linesPerBeat);
 		}
 		delete[] pDest; pDest = 0;
 		TimeSignature & sig =  pat->timeSignatures().back();
-		sig.setCount((int) (beatpos / 4) );
-		float uebertrag = beatpos - ((int) beatpos);
-		if ( uebertrag != 0) {
+		sig.setCount(static_cast<int>(beatpos / 4));
+		float uebertrag = beatpos - static_cast<int>(beatpos);
+		if(uebertrag) {
 			TimeSignature uebertragSig(uebertrag);
-			if ( sig.count() == 0 ) pat->timeSignatures().pop_back();
+			if(!sig.count()) pat->timeSignatures().pop_back();
 			pat->addBar(uebertragSig);
 		}
-
 	}
 	return fileread;
 }
 
-bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
-{
+bool Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) {
 	MachineFactory& factory = MachineFactory::getInstance();
 	std::int32_t index = 0;
 
 	file->Read(index);
-	if(index < MAX_MACHINES)
-	{
+	if(index < MAX_MACHINES) {
 		Machine::id_type const id(index);
 		// assume version 0 for now
 		std::int32_t type;
@@ -544,101 +442,80 @@ bool Psy3Filter::LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion)
 		bool failedLoad=false;
 		switch (type)
 		{
-		case MACH_MASTER:
-			mac = factory.CreateMachine(MachineKey::master(),MASTER_INDEX);
-			break;
-		case MACH_SAMPLER:
-			mac = factory.CreateMachine(MachineKey::sampler(),id);
-			break;
-		case MACH_MIXER:
-			mac = factory.CreateMachine(MachineKey::mixer(),id);
-			break;
-		case MACH_XMSAMPLER:
-			mac = factory.CreateMachine(MachineKey::sampulse(),id);
-			break;
-		case MACH_DUPLICATOR:
-			mac = factory.CreateMachine(MachineKey::duplicator(),id);
-			break;
-		case MACH_AUDIOINPUT:
-			mac = factory.CreateMachine(MachineKey::audioinput(),id);
-			break;
-		//case MACH_LFO:
-			//mac = factory.CreateMachine(MachineKey::lfo(),id);
-			//break;
-		//case MACH_SCOPE:
-		case MACH_DUMMY:
-			mac = factory.CreateMachine(MachineKey::dummy(),id);
-			break;
-		case MACH_PLUGIN:
-		{
-			// PSY3 Format saves the postfix, so we have to remove it before creating the key.
-			std::string dllName = sDllName;
-			std::string::size_type const pos(dllName.find(".dll"));
-			if(pos != std::string::npos) dllName = dllName.substr(0,pos);
-
-			mac = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName,0),id);
-			break;
+			case MACH_MASTER:
+				mac = factory.CreateMachine(MachineKey::master(), MASTER_INDEX);
+				break;
+			case MACH_SAMPLER:
+				mac = factory.CreateMachine(MachineKey::sampler(), id);
+				break;
+			case MACH_MIXER:
+				mac = factory.CreateMachine(MachineKey::mixer(), id);
+				break;
+			case MACH_XMSAMPLER:
+				mac = factory.CreateMachine(MachineKey::sampulse(), id);
+				break;
+			case MACH_DUPLICATOR:
+				mac = factory.CreateMachine(MachineKey::duplicator(), id);
+				break;
+			case MACH_AUDIOINPUT:
+				mac = factory.CreateMachine(MachineKey::audioinput(), id);
+				break;
+			//case MACH_LFO:
+				//mac = factory.CreateMachine(MachineKey::lfo(), id);
+				//break;
+			//case MACH_SCOPE:
+			case MACH_DUMMY:
+				mac = factory.CreateMachine(MachineKey::dummy(), id);
+				break;
+			case MACH_PLUGIN:
+			{
+				// PSY3 Format saves the postfix, so we have to remove it before creating the key.
+				std::string dllName = sDllName;
+				std::string::size_type const pos(dllName.find(".dll"));
+				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName, 0), id);
+				break;
+			}
+			case MACH_VST:
+			//case MACH_VSTFX:
+			{
+				//std::string::size_type const pos = dllName.find(".dll");
+				//if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+				//if(type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+				//else if(type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
+				break;
+			}
+			default: ;
 		}
-		case MACH_VST:
-		//case MACH_VSTFX:
-		{
-			//unsigned int pos = dllName.find(".dll");
-			//if (pos != std::string::npos) {
-				//dllName = dllName.substr(0,pos);
-			//}
-			//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
-			//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
-			break;
-		}
-		default:
-			break;
-		}
-		if (!mac) 
+		if(!mac) 
 		{
 			std::ostringstream s;
 			s << "Problem loading machine!" << std::endl << "type: " << type << ", dllName: " << sDllName;
 			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
-			failedLoad=true;
+			failedLoad = true;
 		}
 		song.AddMachine(mac);
 		mac->LoadFileChunk(file,minorversion);
-		if (failedLoad) mac->SetEditName(mac->GetEditName() + " (replaced)");
+		if(failedLoad) mac->SetEditName(mac->GetEditName() + " (replaced)");
 	}
 	return song.machine(index) != 0;
 }
 
-bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion)
-{
+bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion) {
 	std::int32_t index = 0;
 	file->Read(index);
-	if(index < MAX_INSTRUMENTS)
-	{
-		song._pInstrument[index]->LoadFileChunk(file, minorversion, true);
-	}
+	if(index < MAX_INSTRUMENTS) song._pInstrument[index]->LoadFileChunk(file, minorversion, true);
 	///\todo:
 	return true;
 }
 
-void Psy3Filter::RestoreMixerSendFlags(CoreSong& song)
-{
-	for (int i(0);i < MAX_MACHINES; ++i)
-	{
-		if (song.machine(i))
-		{
-			if (song.machine(i)->getMachineKey() == MachineKey::mixer())
-			{
-				Mixer* mac = static_cast<Mixer*>(song.machine(i));
-				for (int j(0); j<mac->numreturns(); ++j)
-				{
-					if ( mac->Return(j).IsValid())
-					{
-						song.machine(mac->Return(j).Wire().machine_)->SetMixerSendFlag(&song);
-					}
-				}
-			}
-		}
+void Psy3Filter::RestoreMixerSendFlags(CoreSong& song) {
+	for(int i(0);i < MAX_MACHINES; ++i) if(song.machine(i) && song.machine(i)->getMachineKey() == MachineKey::mixer()) {
+		Mixer & mac = static_cast<Mixer&>(*song.machine(i));
+		for(int j(0); j < mac.numreturns(); ++j) if(mac.Return(j).IsValid())
+			song.machine(mac.Return(j).Wire().machine_)->SetMixerSendFlag(&song);
 	}
 }
-}}
 
+}}
