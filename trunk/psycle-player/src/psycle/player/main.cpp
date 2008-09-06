@@ -7,17 +7,17 @@
 #include <string>
 #include <sstream>
 
-#if defined _WIN32   
+#if defined _WIN32
 	#include <windows.h> // for Sleep(ms)
-#else   
+#else
 	#include <unistd.h> // for sleep(s)
-#endif 
+#endif
 
-#if defined _WIN32   
+#if defined _WIN32
 	#define PSYCLE__PLAYER__EOF "z" // ctrl+z == EOF
-#else   
+#else
 	#define PSYCLE__PLAYER__EOF "d" // ctrl+d == EOF
-#endif 
+#endif
 
 using namespace psy::core;
 void usage() {
@@ -41,7 +41,7 @@ void usage() {
 			" -if,   --input-file <song file name>" << std::endl <<
 			"                                 name of the song file to play." << std::endl <<
 			"" << std::endl <<
-			" -w     --wait                   play until enter or ctrl+" PSYCLE__PLAYER__EOF " (EOF) is pressed" << std::endl <<
+			" -w,    --wait                   play until enter or ctrl+" PSYCLE__PLAYER__EOF " (EOF) is pressed." << std::endl <<
 			"" << std::endl <<
 			"        --help                   display this help and exit." << std::endl <<
 			"        --version                output version information and exit." << std::endl <<
@@ -54,13 +54,13 @@ int main(int argument_count, char * arguments[]) {
 		usage();
 		return 1;
 	}
-	
+
 	std::string input_file_name;
 	std::string output_driver_name;
 	std::string output_device_name;
 	std::string output_file_name;
 	bool wait(false);
-	
+
 	struct tokens { enum type {
 		none,
 		input_file_name,
@@ -68,9 +68,9 @@ int main(int argument_count, char * arguments[]) {
 		output_device_name,
 		output_file_name
 	};};
-	
+
 	tokens::type token(tokens::none);
-	
+
 	for(int i(1); i < argument_count; ++i) {
 		std::ostringstream ss; ss << arguments[i];
 		std::string s = ss.str();
@@ -109,11 +109,9 @@ int main(int argument_count, char * arguments[]) {
 					return 1;
 				} else {
 					input_file_name = s;
-					
 					token = tokens::none;
 				}
 		}
-	
 	}
 	Configuration configuration;
 	if(!configuration.pluginPath().length()) {
@@ -133,7 +131,7 @@ int main(int argument_count, char * arguments[]) {
 	mfactory.Initialize(&player);
 	mfactory.setPsyclePath(configuration.pluginPath());
 	mfactory.setLadspaPath(configuration.ladspaPath());
-	
+
 	if(output_driver_name.length()) {
 		std::cout << "psycle: player: setting output driver name to: " << output_driver_name <<  std::endl;
 		configuration.setDriverByName(output_driver_name);
@@ -157,7 +155,7 @@ int main(int argument_count, char * arguments[]) {
 	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
-	
+
 	CoreSong song;
 	if(input_file_name.length()) {
 		std::cout << "psycle: player: loading song file: " << input_file_name <<  std::endl;
@@ -184,21 +182,21 @@ int main(int argument_count, char * arguments[]) {
 			std::cout << "psycle: player: currently, we have no way find out when the song is finished with the sequence... for now, please press enter or ctrl+" PSYCLE__PLAYER__EOF " (EOF) to stop." << std::endl;
 			std::string s; std::getline(std::cin, s);
 		}
-		
+
 		std::cout << std::endl << "psycle: player: stopping at position " << player.playPos() << "." << std::endl;
 		player.stop();
 		if(output_file_name.length()) player.stopRecording();
 	}
 	// since driver is cloned, we cannot use output_driver!!!!
 	player.driver().Enable(false);
-	#if defined _WIN32 
+	#if defined _WIN32
 		Sleep(1000);
 	#else
 		sleep(1);
 	#endif
-	
+
 	//configuration.setDriverByName("silent");
 	//player.setDriver(*configuration._pOutputDriver);
-	
+
 	return 0;
 }
