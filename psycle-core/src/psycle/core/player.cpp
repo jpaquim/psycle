@@ -82,8 +82,7 @@ void Player::start(double pos) {
 }
 
 void Player::stop() {
-	if(!song_) return;
-	if(!driver_) return;
+	if(!song_ || !driver_) return;
 	_playing = false;
 	for(int i(0); i < MAX_MACHINES; ++i) if(song().machine(i)) {
 		song().machine(i)->Stop();
@@ -96,10 +95,10 @@ void Player::stop() {
 }
 
 void Player::SampleRate(int const sampleRate) {
-	if(!song_ ) return;
+	if(!song_) return;
+	timeInfo_.setSampleRate(sampleRate);
 	///\todo update the source code of the plugins...
-	timeInfo_.setSampleRate( sampleRate );
-	for(int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate( sampleRate );
+	for(int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(sampleRate);
 }
 
 void Player::ProcessGlobalEvent(GlobalEvent const & event) {
@@ -410,30 +409,30 @@ void Player::Process(int numSamples) {
 }
 
 void Player::setDriver(AudioDriver const & driver) {
-	std::cout << "psycle: player: setting driver\n";
+	std::cout << "psycle: core: player: setting driver\n";
 	if(driver_) {
 		driver_->Enable(false);
 		delete driver_;
 	}
 	///\todo: This is a dangerous thing. It's scheduled to be changed
 	driver_ = driver.clone();
-	std::cout << "psycle: player: cloned driver\n";
+	std::cout << "psycle: core: player: cloned driver\n";
 	if(!driver_->Initialized()) {
 		driver_->Initialize(Work, this);
 	}
-	std::cout << "psycle: player: driver initialized\n";
+	std::cout << "psycle: core: player: driver initialized\n";
 	if(!driver_->Configured()) {
-		std::cout << "psycle: player: asking driver to configure itself\n";
+		std::cout << "psycle: core: player: asking driver to configure itself\n";
 		driver_->Configure();
 		//SampleRate(driver_->_samplesPerSec);
 		//_outputActive = true;
 	}
-	std::cout << "psycle: player: driver configured\n";
+	std::cout << "psycle: core: player: driver configured\n";
 	if(driver_->Enable(true)) {
-		std::cout << "psycle: player: driver enabled: " << driver_->info().name() << '\n';
+		std::cout << "psycle: core: player: driver enabled: " << driver_->info().name() << '\n';
 		//_outputActive = true;
 	} else {
-		std::cerr << "psycle: player: driver failed to enable. setting null driver\n";
+		std::cerr << "psycle: core: player: driver failed to enable. setting null driver\n";
 		if(driver_) delete driver_;
 		driver_ = new AudioDriver();
 	}
@@ -444,7 +443,7 @@ void psy::core::Player::lock() {
 	///\todo this is bad
 	lock_ = true;
 	#if defined __unix__ || defined __APPLE__
-		while ( inWork_) usleep( 200 );
+		while(inWork_) usleep(200);
 	#endif
 }
 
