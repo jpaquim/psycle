@@ -103,7 +103,7 @@ void Player::process_global_event(GlobalEvent const & event) {
 			std::cout << "psycle: core: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter() << '\n';
 			break;
 		case GlobalEvent::JUMP_TO:
-			timeInfo_.setPlayBeatPos( event.parameter() );
+			timeInfo_.setPlayBeatPos(event.parameter());
 			break;
 		case GlobalEvent::SET_BYPASS:
 			mIndex = event.target();
@@ -152,15 +152,22 @@ void Player::process_global_event(GlobalEvent const & event) {
 void Player::execute_notes(double beat_offset, PatternLine & line) {
 	// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modifiable)
 
-	// Step 1: Process all tweaks.
-	std::map<int, PatternEvent>::iterator trackItr = line.tweaks().begin();
-	for(; trackItr != line.tweaks().end(); ++trackItr) {
-		PatternEvent & entry(trackItr->second);
+	// step 1: process all tweaks.
+	for(
+		std::map<int, PatternEvent>::iterator trackItr = line.tweaks().begin();
+		trackItr != line.tweaks().end(); ++trackItr
+	) {
 		int track = trackItr->first;
+		PatternEvent & entry(trackItr->second);
 		int mac = entry.machine();
-		if(mac < MAX_MACHINES && song().machine(mac)) { // valid machine index
-			Machine & machine = *song().machine(mac);
-			if(entry.note() == notetypes::tweak_slide) {
+
+		// not a valid machine id?
+		if(mac >= MAX_MACHINES || !song().machine(mac)) continue;
+			
+		Machine & machine = *song().machine(mac);
+		
+		switch(entry.note()) {
+			case notetypes::tweak_slide: {
 				int const delay(64);
 				int delaysamples(0), origin(machine.GetParamValue(entry.instrument()));
 				float increment(origin);
@@ -189,90 +196,107 @@ void Player::execute_notes(double beat_offset, PatternLine & line) {
 						}
 						delaysamples += delay;
 					}
-			} else machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
+			} break;
+			default: machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
 		}
 	}
 
-	// Step 2: Process all notes.
-	trackItr = line.notes().begin();
-	for(; trackItr != line.notes().end() ; ++trackItr) {
-		PatternEvent entry = trackItr->second;
+	// step 2: process all notes.
+	for(
+		std::map<int, PatternEvent>::iterator trackItr = line.notes().begin();
+		trackItr != line.notes().end(); ++trackItr
+	) {
 		int track = trackItr->first;
-		// Is it not muted and is a note?
-		if((!song().patternSequence().trackMuted(track)) && (entry.note() < notetypes::tweak || entry.note() == 255)) {
-			int mac = entry.machine();
-			if(mac != 255) prev_machines_[track] = mac; else mac = prev_machines_[track];
-			// is there a machine number and it is either a note or a command?
-			//if(mac != 255 && (pEntry->_note != 255 || pEntry->_cmd))
-			// is there a machine number and it is either a note or a command?
-			// looks like a valid machine index?
-			if(mac != 255 && mac < MAX_MACHINES) {
-				// Does this machine really exist and is not muted?
-				if(song().machine(mac) && !(song().machine(mac)->_mute)) {
-					Machine &machine = *song().machine(mac);
-					if(entry.command() == commandtypes::NOTE_DELAY) {
-						double delayoffset(entry.parameter() / 256.0);
-						// At least Plucked String works erroneously if the command is not ommited.
-						entry.setCommand(0); entry.setParameter(0);
-						machine.AddEvent(beat_offset + delayoffset, line.sequenceTrack() * 1024 + track, entry);
-					} else if(entry.command() == commandtypes::RETRIGGER) {
-						///\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
-						int delaysamples(0);
-						int rate = entry.parameter() + 1;
-						int delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
-						entry.setCommand(0); entry.setParameter(0);
-						machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
-						delaysamples += delay;
-						while(delaysamples < timeInfo().samplesPerTick()) {
-							machine.AddEvent(
-								beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
-								line.sequenceTrack() * 1024 + track, entry
-							);
-							delaysamples += delay;
-						}
-					} else if(entry.command() == commandtypes::RETR_CONT) {
-						///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
-						///\todo: verify that using ints for rate and variation is enough, or has to be float.
-						int delaysamples(0), rate(0), delay(0), variation(0);
-						int parameter = entry.parameter()&0x0f;
-						variation = (parameter < 9) ? (4 * parameter) : (-2 * (16 - parameter));
-						if(entry.parameter() & 0xf0) rate = entry.parameter() & 0xf0;
-						delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
-						entry.setCommand(0); entry.setParameter(0);
-						machine.AddEvent(
-							beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
-							line.sequenceTrack() * 1024 + track, entry
-						);
-						delaysamples += delay;
-						while(delaysamples < timeInfo().samplesPerTick()) {
-							machine.AddEvent(
-								beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
-								line.sequenceTrack() * 1024 + track, entry
-							);
+		
+		// track muted?
+		if(song().patternSequence().trackMuted(track)) continue;
+			
+		PatternEvent entry = trackItr->second;
 
-							rate += variation;
-							if(rate < 16) rate = 16;
-							delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
-							delaysamples += delay;
-						}
-					} else if(entry.command() == commandtypes::ARPEGGIO) {
-						///\todo : Add Memory.
-						///\todo : This won't work... What about sampler's NNA's?
-						#if 0
-							if(entry.parameter()) {
-								machine.TriggerDelay[track] = entry;
-								machine.ArpeggioCount[track] = 1;
-							}
-							machine.RetriggerRate[track] = static_cast<int>(timeInfo_.samplesPerTick() * timeInfo_.linesPerBeat() / 24);
-						#endif
-					} else {
-						machine.TriggerDelay[track].setCommand(0);
-						machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
-						machine.TriggerDelayCounter[track] = 0;
-						machine.ArpeggioCount[track] = 0;
-					}
+		// not a note ?
+		if(entry.note() >= notetypes::tweak && entry.note() != 255) continue;
+
+		int mac = entry.machine();
+		if(mac != 255) prev_machines_[track] = mac;
+		else mac = prev_machines_[track];
+
+		// not a valid machine id?
+		if(mac == 255 || mac >= MAX_MACHINES) continue;
+			
+		// no machine with this id?
+		if(!song().machine(mac)) continue;
+		
+		Machine & machine = *song().machine(mac);
+
+		// machine muted?
+		if(machine._mute) continue;
+
+		switch(entry.command()) {
+			case commandtypes::NOTE_DELAY: {
+				double delayoffset(entry.parameter() / 256.0);
+				// At least Plucked String works erroneously if the command is not ommited.
+				entry.setCommand(0); entry.setParameter(0);
+				machine.AddEvent(beat_offset + delayoffset, line.sequenceTrack() * 1024 + track, entry);
+				
+			} break;
+			case commandtypes::RETRIGGER: {
+				///\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
+				int delaysamples(0);
+				int rate = entry.parameter() + 1;
+				int delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
+				entry.setCommand(0); entry.setParameter(0);
+				machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
+				delaysamples += delay;
+				while(delaysamples < timeInfo().samplesPerTick()) {
+					machine.AddEvent(
+						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+						line.sequenceTrack() * 1024 + track, entry
+					);
+					delaysamples += delay;
+				}	
+			} break;
+			case commandtypes::RETR_CONT: {
+				///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
+				///\todo: verify that using ints for rate and variation is enough, or has to be float.
+				int delaysamples(0), rate(0), delay(0), variation(0);
+				int parameter = entry.parameter()&0x0f;
+				variation = (parameter < 9) ? (4 * parameter) : (-2 * (16 - parameter));
+				if(entry.parameter() & 0xf0) rate = entry.parameter() & 0xf0;
+				delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
+				entry.setCommand(0); entry.setParameter(0);
+				machine.AddEvent(
+					beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+					line.sequenceTrack() * 1024 + track, entry
+				);
+				delaysamples += delay;
+				while(delaysamples < timeInfo().samplesPerTick()) {
+					machine.AddEvent(
+						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+						line.sequenceTrack() * 1024 + track, entry
+					);
+
+					rate += variation;
+					if(rate < 16) rate = 16;
+					delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
+					delaysamples += delay;
 				}
-			}
+			} break;
+			case commandtypes::ARPEGGIO: {
+				///\todo : Add Memory.
+				///\todo : This won't work... What about sampler's NNA's?
+				#if 0
+					if(entry.parameter()) {
+						machine.TriggerDelay[track] = entry;
+						machine.ArpeggioCount[track] = 1;
+					}
+					machine.RetriggerRate[track] = static_cast<int>(timeInfo_.samplesPerTick() * timeInfo_.linesPerBeat() / 24);
+				#endif
+			} break;
+			default:
+				machine.TriggerDelay[track].setCommand(0);
+				machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
+				machine.TriggerDelayCounter[track] = 0;
+				machine.ArpeggioCount[track] = 0;
 		}
 	}
 }
@@ -283,9 +307,9 @@ float * Player::Work(int numSamples) {
 
 	in_work_ = true;
 
-	// Prepare the buffer that the Master Machine writes to.It is done here because Process() can be called several times.
+	// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
 	Master::_pMasterSamples = buffer_;
-	double beatsToWork = numSamples/ static_cast<double>(timeInfo_.samplesPerBeat());
+	double beatsToWork = numSamples / static_cast<double>(timeInfo_.samplesPerBeat());
 	
 	///\todo CSingleLock crit(&song().door, true);
 
@@ -293,14 +317,14 @@ float * Player::Work(int numSamples) {
 
 	if(playing_) {
 		if(loopSequenceEntry()) {
-			// Maintan the cursor inside the loop sequence
+			// Maintain the cursor inside the loop sequence
 			if(
 				timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition() ||
 				timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition()
 			)
-				setPlayPos( loopSequenceEntry()->tickPosition() );
+				setPlayPos(loopSequenceEntry()->tickPosition());
 		} else if(loopSong() && timeInfo_.playBeatPos() >= song().patternSequence().tickLength())
-			setPlayPos( 0.0 );
+			setPlayPos(0);
 
 		std::multimap<double, PatternLine> events;
 		std::vector<GlobalEvent*> globals;
@@ -403,30 +427,31 @@ void Player::process(int samples) {
 }
 
 void Player::setDriver(AudioDriver const & driver) {
-	std::cout << "psycle: core: player: setting driver\n";
+	std::cout << "psycle: core: player: setting audio driver\n";
 	if(driver_) {
 		driver_->Enable(false);
+		std::cerr << "psycle: core: player: deleting audio driver!\n";
 		delete driver_;
 	}
 	///\todo: This is a dangerous thing. It's scheduled to be changed
 	driver_ = driver.clone();
-	std::cout << "psycle: core: player: cloned driver\n";
+	std::cout << "psycle: core: player: cloned audio driver\n";
 	if(!driver_->Initialized()) {
 		driver_->Initialize(Work, this);
 	}
-	std::cout << "psycle: core: player: driver initialized\n";
+	std::cout << "psycle: core: player: audio driver initialized\n";
 	if(!driver_->Configured()) {
-		std::cout << "psycle: core: player: asking driver to configure itself\n";
+		std::cout << "psycle: core: player: asking audio driver to configure itself\n";
 		driver_->Configure();
 		//samples_per_seconds(driver_->_samplesPerSec);
 		//_outputActive = true;
 	}
-	std::cout << "psycle: core: player: driver configured\n";
+	std::cout << "psycle: core: player: audio driver configured\n";
 	if(driver_->Enable(true)) {
-		std::cout << "psycle: core: player: driver enabled: " << driver_->info().name() << '\n';
+		std::cout << "psycle: core: player: audio driver enabled: " << driver_->info().name() << '\n';
 		//_outputActive = true;
 	} else {
-		std::cerr << "psycle: core: player: driver failed to enable. setting null driver\n";
+		std::cerr << "psycle: core: player: audio driver failed to enable. setting null driver\n";
 		if(driver_) delete driver_;
 		driver_ = new AudioDriver();
 	}
@@ -486,7 +511,7 @@ void Player::startRecording() {
 }
 
 void Player::stopRecording() {
-	if (recording_) {
+	if(recording_) {
 		_outputWaveFile.Close();
 		recording_ = false;
 	}
