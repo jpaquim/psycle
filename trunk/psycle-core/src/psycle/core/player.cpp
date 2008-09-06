@@ -319,15 +319,14 @@ float * Player::Work(int numSamples) {
 		///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
 		process(numSamples);
 		//playPos += beatLength;
-		//if(playPos> "signumerator") playPos -= signumerator;
+		//if(playPos > "signumerator") playPos -= signumerator;
 	} else {
 		if(loopSequenceEntry()) {
 			// Maintain the cursor inside the loop sequence
 			if(
 				timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition() ||
 				timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition()
-			)
-				setPlayPos(loopSequenceEntry()->tickPosition());
+			) setPlayPos(loopSequenceEntry()->tickPosition());
 		} else if(loopSong() && timeInfo_.playBeatPos() >= song().patternSequence().tickLength())
 			setPlayPos(0);
 
@@ -413,10 +412,7 @@ void Player::process(int samples) {
 		song().machine(MASTER_INDEX)->Work(amount);
 
 		// write samples to file
-		if(
-			recording_ && !autoRecord_ || // controlled by record button
-			recording_ && playing_ && autoRecord_ // controlled by play
-		) writeSamplesToFile(amount); 
+		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
 
 		// Move the pointer forward for the next Master::Work() iteration.
 		Master::_pMasterSamples += amount * 2;
