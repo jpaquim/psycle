@@ -315,7 +315,12 @@ float * Player::Work(int numSamples) {
 
 	if(autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence().tickLength()) stopRecording();
 
-	if(playing_) {
+	if(!playing_) {
+		///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
+		process(numSamples);
+		//playPos += beatLength;
+		//if(playPos> "signumerator") playPos -= signumerator;
+	} else {
 		if(loopSequenceEntry()) {
 			// Maintain the cursor inside the loop sequence
 			if(
@@ -390,11 +395,6 @@ float * Player::Work(int numSamples) {
 
 			bFirst = false;
 		} while(!globals.empty()); // if globals is empty, then we've processed through to the end of the buffer.
-	} else {
-		///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-		process(numSamples);
-		//playPos += beatLength;
-		//if(playPos> "signumerator") playPos -= signumerator;
 	}
 	
 	in_work_ = false;
