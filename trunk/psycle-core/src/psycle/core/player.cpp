@@ -17,6 +17,11 @@
 #include "sampler.h"
 #include "song.h"
 #include <psycle/audiodrivers/audiodriver.h>
+
+///\todo needs link against libuniversalis
+//#include <universalis/operating_system/cpu_affinity.hpp>
+
+#include <boost/bind.hpp>
 #include <iostream> // only for debug output
 #if defined __unix__ || defined __APPLE__
 	#include <unistd.h> // for OpenBSD usleep()
@@ -39,12 +44,62 @@ Player::Player()
 	in_work_()
 {
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
-}
 
-Player::~Player() {
-	if(driver_) {
-		std::cerr << "psycle: core: player: deleting audio driver!\n";
-		delete driver_; ///\todo [bohan] i don't see why the player owns the driver.
+	///\todo starting the threads needs to be done elsewhere?
+
+	std::cout << "psycle: core: player: starting scheduler threads\n";
+	//if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(threads_.size()) {
+		//if(loggers::information()()) loggers::information()("scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
+		return;
+	}
+
+	// normally, we would compute the scheduling plan here,
+	// but we haven't yet implemented signals that notifies when connections are changed or nodes added/removed.
+	// so it's actually done every time in the processing loop
+	//compute_plan();
+
+	stop_requested_ = suspend_requested_ = false;
+	processed_node_count_ = suspended_ = 0;
+
+	///\todo needs link against libuniversalis
+	//thread_count_ = universalis::operating_system::cpu_affinity::cpu_count();
+	thread_count_ = 0;
+	{ // thread count env var
+		char const * const env(std::getenv("PSYCLE__THREADS"));
+		if(env) {
+			std::stringstream s;
+			s << env;
+			s >> thread_count_;
+		}
+	}
+	
+	if(!thread_count_) return; // don't create any thread, will use a single-threaded, recursive processing
+
+	try {
+		// start the scheduling threads
+		std::cout << "psycle: core: player: using " << thread_count_ << " threads\n";
+		#if 0
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "using " << thread_count_ << " threads";
+			loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		#endif
+		for(std::size_t i(0); i < thread_count_; ++i)
+			threads_.push_back(new std::thread(boost::bind(&Player::thread_function, this, i)));
+	} catch(...) {
+		{ scoped_lock lock(mutex_);
+			stop_requested_ = true;
+		}
+		condition_.notify_all();
+		for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
+			(**i).join();
+			delete *i;
+		}
+		threads_.clear();
+		clear_plan();
+		throw;
 	}
 }
 
@@ -72,6 +127,197 @@ void Player::start(double pos) {
 	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
 }
 
+void Player::suspend_and_compute_plan() {
+	if(!playing_) {
+		compute_plan();
+		return;
+	}
+	{ scoped_lock lock(mutex_);
+		suspend_requested_ = true;
+	}
+	condition_.notify_all();
+	{ scoped_lock lock(mutex_);
+		while(suspended_ != threads_.size()) condition_.wait(lock);
+		compute_plan();
+		suspend_requested_ = false;
+	}
+	condition_.notify_all();
+}
+
+void Player::compute_plan() {
+	graph_size_ = 0;
+	terminal_nodes_.clear();
+
+	// iterate over all the nodes
+	for(int m(0); m < MAX_MACHINES; ++m) if(song().machine(m)) {
+		++graph_size_;
+		node & n(*song().machine(m));
+		// find the terminal nodes in the graph (nodes with no connected input ports)
+		if(!n._connectedInputs) terminal_nodes_.push_back(&n);
+	}
+
+	// copy the initial processing queue
+	nodes_queue_ = terminal_nodes_;
+}
+
+void Player::clear_plan() {
+	nodes_queue_.clear();
+	terminal_nodes_.clear();
+}
+
+void Player::thread_function(std::size_t thread_number) {
+	std::cout << "psycle: core: player: scheduler thread #" << thread_number << " started\n";
+	#if 0
+	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
+
+	{ // set thread name and install cpu/os exception handler/translator
+		std::ostringstream s;
+		s << universalis::compiler::typenameof(*this) << '#' << graph().underlying().name() << '#' << thread_number;
+		universalis::processor::exception::install_handler_in_thread(s.str());
+	}
+	#endif
+
+	try {
+		try {
+			process_loop();
+		} catch(...) {
+			//loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
+			throw;
+		}
+	} catch(std::exception const & e) {
+		#if 0
+		if(loggers::exception()()) {
+			std::ostringstream s;
+			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		#endif
+		throw;
+	} catch(...) {
+		#if 0
+		if(loggers::exception()()) {
+			std::ostringstream s;
+			s << "exception: " << universalis::compiler::exceptions::ellipsis();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		#endif
+		throw;
+	}
+	//loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
+	std::cout << "psycle: core: player: scheduler thread #" << thread_number << " terminated\n";
+}
+
+void Player::process_loop() throw(std::exception) {
+	while(true) {
+		Player::node * node_;
+		{ scoped_lock lock(mutex_);
+			while(
+				!nodes_queue_.size() &&
+				!suspend_requested_ &&
+				!stop_requested_
+			) condition_.wait(lock);
+
+			if(stop_requested_) break;
+
+			if(suspend_requested_) {
+				++suspended_; ///\todo spurious wakeups will make the counter bogus! need a tls flag to do the inc only once per thread
+				condition_.notify_all();
+				continue;
+			}
+			suspended_ = 0;
+			// There are nodes waiting in the queue. We pop the first one.
+			node_ = nodes_queue_.front();
+			nodes_queue_.pop_front();
+		}
+		Player::node & node(*node_);
+
+		process(node);
+	
+		bool notify(false);
+		{ scoped_lock lock(mutex_);
+			node.processed_by_multithreaded_scheduler_ = true;
+			// check whether all nodes have been processed
+			if(++processed_node_count_ == graph_size_) notify = true; // wake up the main processing loop
+			else // check whether successors of the node we processed are now ready.
+				// iterate over all the outputs of the node we processed
+				if(node._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(node._connection[c]) {
+					Player::node & output_node(*song().machine(node._outputMachines[c]));
+					bool output_node_ready(true);
+					// iterate over all the inputs connected to our output
+					if(output_node._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(output_node._inputCon[c]) {
+						Player::node & input_node(*song().machine(output_node._inputMachines[c]));
+						if(!input_node.processed_by_multithreaded_scheduler_) {
+							output_node_ready = false;
+							break;
+						}
+					}
+					if(output_node_ready) {
+							// All the dependencies of the node have been processed.
+							// We add the node to the processing queue.
+							// (note: for the first node, we could reserve it for ourselves)
+							nodes_queue_.push_back(&output_node);
+							notify = true;
+					}
+				}
+		}
+		if(notify) condition_.notify_all(); // notify all threads that we added nodes to the queue
+	}
+}
+
+void Player::process(Player::node & node) throw(std::exception) {
+	#if 0
+	{ scoped_lock lock(mutex_);
+		std::cout << "psycle: core: player: processing node: " << node.GetEditName() << '\n';
+	}
+	#endif
+
+	///\todo the mixer machine needs this to be set to false
+	bool const mix(true);
+
+	if(node._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(node._inputCon[i]) {
+		Player::node & input_node(*song().machine(node._inputMachines[i]));
+		if(!input_node.Standby()) node.Standby(false);
+		if(!node._mute && !node.Standby() && mix) {
+			dsp::Add(input_node._pSamplesL, node._pSamplesL, samples_to_process_, input_node.lVol() * node._inputConVol[i]);
+			dsp::Add(input_node._pSamplesR, node._pSamplesR, samples_to_process_, input_node.rVol() * node._inputConVol[i]);
+		}
+	}
+	dsp::Undenormalize(node._pSamplesL, node._pSamplesR, samples_to_process_);
+	node.GenerateAudio(samples_to_process_);
+}
+
+void Player::process(int samples) {
+	int remaining_samples = samples;
+	while(remaining_samples) {
+		int const amount(std::min(remaining_samples, STREAM_SIZE));
+		// reset all machine buffers
+		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
+		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
+		if(!threads_.size()) // single-threaded, recursive processing
+			song().machine(MASTER_INDEX)->Work(amount);
+		else { // multi-threaded scheduling
+			// we push all the terminal nodes to the processing queue
+			{ scoped_lock lock(mutex_);
+				compute_plan(); // it's overkill, but we haven't yet implemented signals that notifies when connections are changed or nodes added/removed.
+				processed_node_count_ = 0;
+				samples_to_process_ = amount;
+			}
+			condition_.notify_all(); // notify all threads that we added nodes to the queue
+			// wait until all nodes have been processed
+			{ scoped_lock lock(mutex_);
+				while(processed_node_count_ != graph_size_) condition_.wait(lock);
+			}
+		}
+		// write samples to file
+		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
+		// move the pointer forward for the next Master::Work() iteration.
+		Master::_pMasterSamples += amount * 2;
+		remaining_samples -= amount;
+		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
+		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
+	}
+}
+
 void Player::stop() {
 	if(!song_ || !driver_) return;
 	playing_ = false;
@@ -83,6 +329,32 @@ void Player::stop() {
 	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
 	samples_per_second(driver_->settings().samplesPerSec());
 	if(autoRecord_) stopRecording();
+}
+
+Player::~Player() {
+	if(driver_) {
+		std::cerr << "psycle: core: player: deleting audio driver!\n";
+		delete driver_; ///\todo [bohan] i don't see why the player owns the driver.
+	}
+
+	///\todo stopping the threads needs to be done elsewhere?
+	
+	//if(loggers::information()()) loggers::information()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(!threads_.size()) {
+		//if(loggers::information()()) loggers::information()("scheduler threads were not running", UNIVERSALIS__COMPILER__LOCATION);
+		return;
+	}
+	{ scoped_lock lock(mutex_);
+		stop_requested_ = true;
+	}
+	condition_.notify_all();
+	for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
+		(**i).join();
+		delete *i;
+	}
+	//if(loggers::information()()) loggers::information()("scheduler threads joined", UNIVERSALIS__COMPILER__LOCATION);
+	threads_.clear();
+	clear_plan();
 }
 
 void Player::samples_per_second(int samples_per_second) {
@@ -395,116 +667,6 @@ float * Player::Work(int numSamples) {
 	
 	in_work_ = false;
 	return buffer_;
-}
-
-void Player::process(int samples) {
-	int remaining_samples = samples;
-	while(remaining_samples) {
-		int const amount(std::min(remaining_samples, STREAM_SIZE));
-		// reset all machine buffers
-		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
-		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
-		#if 0 // flat (non-recursive) processing is not yet correctly implemented
-			flat_process(amount);
-		#else
-			song().machine(MASTER_INDEX)->Work(amount);
-		#endif
-		// write samples to file
-		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
-		// move the pointer forward for the next Master::Work() iteration.
-		Master::_pMasterSamples += amount * 2;
-		remaining_samples -= amount;
-		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
-		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
-	}
-}
-
-/// process in a flat (non-recursive) way.
-/// a flat processing algorithm can be executed concurrently by multiple threads.
-/// a processing queue is shared amongst the threads to let each of them pick an element to process.
-void Player::flat_process(int samples) {
-	/**************************************/
-	// initialisation part
-	///\todo to be moved to a place where it's executed only once
-	
-	typedef Machine node;
-	
-	typedef std::list<node*> nodes_queue_type;
-	
-	/// nodes with no dependency.
-	nodes_queue_type terminal_nodes_;
-	
-	/// nodes ready to be processed, just waiting for a free thread
-	nodes_queue_type nodes_queue_;
-
-	std::size_t graph_size(0);
-	
-	// iterate over all the nodes
-	for(int m(0); m < MAX_MACHINES; ++m) if(song().machine(m)) {
-		++graph_size;
-		node & n(*song().machine(m));
-		// find the terminal nodes in the graph (nodes with no connected input ports)
-		if(!n._connectedInputs) terminal_nodes_.push_back(&n);
-	}
-	
-	// compute plan
-	// copy the initial processing queue
-	nodes_queue_ = terminal_nodes_;
-	
-	// end of initialisation part
-	/**************************************/
-
-	/**************************************/
-	// future thread main loop
-	// [bohan] the code has no thread-synchronisation yet. that's the next thing i'll add once it works fine with a single thread.
-
-	std::size_t processed_node_count_(0);
-	
-	while(true) {
-		// There are nodes waiting in the queue. We pop the first one.
-		node & n(*nodes_queue_.front());
-		nodes_queue_.pop_front();
-		
-		///\todo the mixer machine needs this to be set to false
-		bool const mix(true);
-		
-		// process the node
-		//std::cout << n.GetEditName() << '\n';
-		if(n._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(n._inputCon[i]) {
-			node & n_in(*song().machine(n._inputMachines[i]));
-			if(!n_in.Standby()) n.Standby(false);
-			if(!n._mute && !n.Standby() && mix) {
-				dsp::Add(n_in._pSamplesL, n._pSamplesL, samples, n_in.lVol() * n._inputConVol[i]);
-				dsp::Add(n_in._pSamplesR, n._pSamplesR, samples, n_in.rVol() * n._inputConVol[i]);
-			}
-		}
-		dsp::Undenormalize(n._pSamplesL, n._pSamplesR, samples);
-		n.GenerateAudio(samples);
-		
-		// check whether all nodes have been processed
-		if(++processed_node_count_ == graph_size) break;
-		
-		// check whether successors of the node we processed are now ready.
-		// iterate over all the outputs of the node we processed
-		if(n._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(n._connection[c]) {
-			node & n_out(*song().machine(n._outputMachines[c]));
-			bool n_out_ready(true);
-			// iterate over all the inputs connected to our output
-			if(n_out._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(n_out._inputCon[c]) {
-				node & n_in(*song().machine(n_out._inputMachines[c]));
-				if(!n_in._worked) {
-					n_out_ready = false;
-					break;
-				}
-			}
-			if(n_out_ready) {
-					// All the dependencies of the node have been processed.
-					// We add the node to the processing queue.
-					// (note: for the first node, we could reserve it for ourselves)
-					nodes_queue_.push_back(&n_out);
-			}
-		}
-	}
 }
 
 void Player::setDriver(AudioDriver const & driver) {

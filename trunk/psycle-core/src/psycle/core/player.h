@@ -12,11 +12,17 @@
 ///\brief interface file for psy::core::Player.
 
 #pragma once
-
 #include "song.h"
 #include "dither.h"
 #include "machine.h"
 #include "riff.h"
+#include <thread>
+#include <date_time>
+#include <mutex>
+#include <condition>
+#include <list>
+#include <cstdint>
+#include <stdexcept>
 
 namespace psy { namespace core {
 class AudioDriver; ///\todo doesn't belong in psycore
@@ -193,7 +199,6 @@ class Player : public MachineCallbacks {
 		void execute_notes(double beat_offset, PatternLine & line);
 		void process_global_event(const GlobalEvent & event);
 		void process(int samples);
-		void flat_process(int samples);
 
 		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 		Machine::id_type prev_machines_[MAX_TRACKS];
@@ -202,6 +207,42 @@ class Player : public MachineCallbacks {
 
 		/// dither handler
 		dsp::Dither dither;
+
+	///\name multithreaded scheduler
+	///\{
+		private:
+			typedef Machine node;
+
+			std::size_t thread_count_;
+			typedef std::list<std::thread *> threads_type;
+			threads_type threads_;
+			void thread_function(std::size_t thread_number);
+
+			typedef std::scoped_lock<std::mutex> scoped_lock;
+			std::mutex mutable mutex_;
+			std::condition<scoped_lock> mutable condition_;
+	
+			void start_threads();
+			bool stop_requested_;
+			bool suspend_requested_;
+			std::size_t suspended_;
+
+			typedef std::list<node*> nodes_queue_type;
+			/// nodes with no dependency.
+			nodes_queue_type terminal_nodes_;
+			/// nodes ready to be processed, just waiting for a free thread
+			nodes_queue_type nodes_queue_;
+
+			std::size_t graph_size_, processed_node_count_;
+
+			void suspend_and_compute_plan();
+			void compute_plan();
+			void clear_plan();
+
+			void process_loop() throw(std::exception);
+			void process(node &) throw(std::exception);
+			int samples_to_process_;
+	///\}
 };
 
 }}
