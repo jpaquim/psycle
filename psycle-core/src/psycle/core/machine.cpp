@@ -627,6 +627,7 @@ bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireInd
 }
 
 void Machine::PreWork(int numSamples, bool clear) {
+	processed_by_multithreaded_scheduler_ = false;
 	_worked = false;
 	_waitingForSound = false;
 	//PSYCLE__CPU_COST__INIT(cost);

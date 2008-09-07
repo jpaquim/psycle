@@ -552,6 +552,11 @@ class Machine {
 
 			bool _waitingForSound;
 			bool _worked;
+			/// [bohan] the multi-threaded scheduler cannot use _worked because it's not thread-synchronised,
+			///         so, we define another boolean that's modified only by the multi-threaded scheduler,
+			///         with proper thread synchronisations.
+			///         the multi-threaded scheduler doesn't use _worked nor _waitingForSound.
+			bool processed_by_multithreaded_scheduler_;
 	///\}
 
 	protected:
