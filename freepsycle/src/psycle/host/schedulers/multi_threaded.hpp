@@ -296,8 +296,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		typedef std::list<node*> nodes_queue_type;
 		/// nodes ready to be processed, just waiting for a free thread
 		nodes_queue_type nodes_queue_;
-		/// nodes ready to be processed initially (leaves), just waiting for a free thread
-		nodes_queue_type initial_nodes_queue_;
 		
 		std::size_t processed_node_count_;
 
