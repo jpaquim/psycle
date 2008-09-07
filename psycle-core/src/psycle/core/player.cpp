@@ -460,7 +460,7 @@ void Player::flat_process(int samples) {
 
 	std::size_t processed_node_count_(0);
 	
-	while(nodes_queue_.size()) {
+	while(true) {
 		// There are nodes waiting in the queue. We pop the first one.
 		node & n(*nodes_queue_.front());
 		nodes_queue_.pop_front();
@@ -469,17 +469,12 @@ void Player::flat_process(int samples) {
 		bool const mix(true);
 		
 		// process the node
-		for(int i(0); i < MAX_CONNECTIONS; ++i) {
-			if(n._inputCon[i]) {
-				node * p_n_in(song().machine(n._inputMachines[i]));
-				if(p_n_in) {
-					node & n_in(*p_n_in);
-					if(!n_in.Standby()) n.Standby(false);
-					if(!n._mute && !n.Standby() && mix) {
-						dsp::Add(n_in._pSamplesL, n._pSamplesL, samples, n_in.lVol() * n._inputConVol[i]);
-						dsp::Add(n_in._pSamplesR, n._pSamplesR, samples, n_in.rVol() * n._inputConVol[i]);
-					}
-				}
+		if(n._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(n._inputCon[i]) {
+			node & n_in(*song().machine(n._inputMachines[i]));
+			if(!n_in.Standby()) n.Standby(false);
+			if(!n._mute && !n.Standby() && mix) {
+				dsp::Add(n_in._pSamplesL, n._pSamplesL, samples, n_in.lVol() * n._inputConVol[i]);
+				dsp::Add(n_in._pSamplesR, n._pSamplesR, samples, n_in.rVol() * n._inputConVol[i]);
 			}
 		}
 		dsp::Undenormalize(n._pSamplesL, n._pSamplesR, samples);
