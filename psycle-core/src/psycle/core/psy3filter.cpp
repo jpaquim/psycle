@@ -176,8 +176,8 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		#else
 			SinglePattern* pat = song.patternSequence().patternPool()->findById(*it);
 		#endif
-		singleLine->createEntry(pat,pos);
-		pos+=pat->beats();
+		singleLine->createEntry(pat, pos);
+		pos += pat->beats();
 	}
 
 	// test all connections for invalid machines. disconnect invalid machines.
@@ -187,14 +187,13 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		mac->_connectedOutputs = 0;
 		for(int c(0) ; c < MAX_CONNECTIONS ; ++c) {
 			if(mac->_connection[c]) {
-				if(mac->_outputMachines[c] < 0 || mac->_outputMachines[c] >= MAX_MACHINES)
-				{
+				if(mac->_outputMachines[c] < 0 || mac->_outputMachines[c] >= MAX_MACHINES) {
 					mac->_connection[c] = false;
 					mac->_outputMachines[c] = -1;
 				} else if(!song.machine(mac->_outputMachines[c])) {
 					mac->_connection[c] = false;
 					mac->_outputMachines[c] = -1;
-				} else mac->_connectedOutputs++;
+				} else ++mac->_connectedOutputs;
 			} else mac->_outputMachines[c] = -1;
 
 			if(mac->_inputCon[c]) {
@@ -205,8 +204,8 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 					mac->_inputCon[c] = false;
 					mac->_inputMachines[c] = -1;
 				} else {
-					mac->_connectedInputs++;
-					mac->_wireMultiplier[c]=song.machine(mac->_inputMachines[c])->GetAudioRange()/mac->GetAudioRange();
+					++mac->_connectedInputs;
+					mac->_wireMultiplier[c]=song.machine(mac->_inputMachines[c])->GetAudioRange() / mac->GetAudioRange();
 				}
 			} else song.machine(i)->_inputMachines[c] = -1;
 		}
@@ -215,7 +214,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	//song.progress.emit(5,0,"");
 	if(chunkcount) {
 		if(!song.machine(MASTER_INDEX)) {
-			Machine* mac = MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX);
+			Machine* mac = MachineFactory::getInstance().CreateMachine(MachineKey::master(), MASTER_INDEX);
 			mac->Init();
 			song.AddMachine(mac);
 		}
@@ -438,10 +437,9 @@ bool Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) 
 		Machine* mac=0;
 		char sDllName[256];
 		file->Read(type);
-		file->ReadString(sDllName,256);
-		bool failedLoad=false;
-		switch (type)
-		{
+		file->ReadString(sDllName, 256);
+		bool failedLoad = false;
+		switch(type) {
 			case MACH_MASTER:
 				mac = factory.CreateMachine(MachineKey::master(), MASTER_INDEX);
 				break;
@@ -469,11 +467,11 @@ bool Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) 
 				break;
 			case MACH_PLUGIN:
 			{
-				// PSY3 Format saves the postfix, so we have to remove it before creating the key.
+				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
 				std::string dllName = sDllName;
 				std::string::size_type const pos(dllName.find(".dll"));
 				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
-				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE,dllName, 0), id);
+				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, dllName, 0), id);
 				break;
 			}
 			case MACH_VST:
@@ -487,8 +485,7 @@ bool Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) 
 			}
 			default: ;
 		}
-		if(!mac) 
-		{
+		if(!mac) {
 			std::ostringstream s;
 			s << "Problem loading machine!" << std::endl << "type: " << type << ", dllName: " << sDllName;
 			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
