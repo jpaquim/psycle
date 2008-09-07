@@ -469,6 +469,7 @@ void Player::flat_process(int samples) {
 		bool const mix(true);
 		
 		// process the node
+		//std::cout << n.GetEditName() << '\n';
 		if(n._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(n._inputCon[i]) {
 			node & n_in(*song().machine(n._inputMachines[i]));
 			if(!n_in.Standby()) n.Standby(false);
@@ -489,7 +490,7 @@ void Player::flat_process(int samples) {
 			node & n_out(*song().machine(n._outputMachines[c]));
 			bool n_out_ready(true);
 			// iterate over all the inputs connected to our output
-			if(n._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(n_out._inputCon[c]) {
+			if(n_out._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(n_out._inputCon[c]) {
 				node & n_in(*song().machine(n_out._inputMachines[c]));
 				if(!n_in._worked) {
 					n_out_ready = false;
