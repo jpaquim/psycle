@@ -177,6 +177,7 @@ void OutPort::CollectData(int /*numSamples*/) {
 ///\todo: This is the official panning formula for MIDI. Implement it in psycle?
 // Left Channel Gain [dB] = 20*log (cos (Pi/2* max(0,CC#10 – 1)/126)
 // Right Channel Gain [dB] = 20*log (sin (Pi /2* max(0,CC#10 – 1)/126)
+
 void Machine::crashed(std::exception const & e) throw() {
 	bool minor_problem(false);
 	bool crash(false);
@@ -362,6 +363,7 @@ void Machine::CloneFrom(Machine & src) {
 	LoadSpecificChunk(&file, 0);
 	file.CloseMem();
 }
+
 void Machine::Init() {
 	// Standard gear initalization
 	//work_cpu_cost(0);
@@ -608,7 +610,7 @@ bool Machine::SetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireInd
 	return false;
 }
 
-bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex,float &value) const {
+bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireIndex, float &value) const {
 	// Get reference to the destination machine
 	if(WireIndex > MAX_CONNECTIONS || !_connection[WireIndex]) return false;
 	const Machine *_pDstMachine = callbacks->song().machine(_outputMachines[WireIndex]);
@@ -624,7 +626,7 @@ bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireInd
 	return false;
 }
 
-void Machine::PreWork(int numSamples,bool clear) {
+void Machine::PreWork(int numSamples, bool clear) {
 	_worked = false;
 	_waitingForSound = false;
 	//PSYCLE__CPU_COST__INIT(cost);
@@ -682,8 +684,8 @@ void Machine::WorkWires(int numSamples, bool mix) {
 				if(!pInMachine->Standby()) Standby(false);
 				if(!_mute && !Standby() && mix) {
 					//PSYCLE__CPU_COST__INIT(wcost);
-					dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
-					dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
+					dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol * _inputConVol[i]);
+					dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol * _inputConVol[i]);
 					//PSYCLE__CPU_COST__CALCULATE(wcost, numSamples);
 					//wire_cpu_cost(wire_cpu_cost() + wcost);
 				}
@@ -860,19 +862,19 @@ int Machine::GenerateAudio(int numsamples) {
 	// position [0.0, 1.0] inside the current beat.
 	const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
 	// position [0.0, linesperbeat] converted to "Tick()" lines
-	const double positionInLines = positionInBeat*timeInfo.ticksSpeed();
+	const double positionInLines = positionInBeat * timeInfo.ticksSpeed();
 	// position in samples of the next "Tick()" Line
-	int nextLineInSamples = static_cast<int>( (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerTick() );
+	int nextLineInSamples = static_cast<int>((1 - positionInLines + static_cast<int>(positionInLines)) * timeInfo.samplesPerTick() );
 	assert(nextLineInSamples >= 0);
 	// next event, initialized to "out of scope".
 	int nextevent = numsamples + 1;
 	int previousline = nextLineInSamples;
-	std::map<int,int>::iterator colsIt;
+	std::map<int /* track */, int /* channel */>::iterator colsIt;
 
 	// check for next event.
 	if(!workEvents.empty()) {
 		WorkEvent & workEvent = workEvents.front();
-		nextevent = static_cast<int>( workEvent.beatOffset() * timeInfo.samplesPerBeat() );
+		nextevent = static_cast<int>(workEvent.beatOffset() * timeInfo.samplesPerBeat());
 		assert(nextevent >= 0);
 		// correcting rounding errors.
 		if(nextevent == nextLineInSamples + 1) nextLineInSamples = nextevent;
@@ -896,20 +898,21 @@ int Machine::GenerateAudio(int numsamples) {
 					playCol[workEvent.track()] = playColIndex++;
 					colsIt = playCol.find(workEvent.track());
 				}
-				Tick(colsIt->second, workEvent.event());
+				Tick(/* channel */ colsIt->second, workEvent.event());
 				workEvents.pop_front();
-				if(!workEvents.empty()) {
+				if(workEvents.empty()) nextevent = numsamples + 1;
+				else {
 					WorkEvent & workEvent1 = *workEvents.begin();
-					nextevent = static_cast<int>( workEvent1.beatOffset() * timeInfo.samplesPerBeat() );
+					nextevent = static_cast<int>(workEvent1.beatOffset() * timeInfo.samplesPerBeat());
 					assert(nextevent >= processedsamples);
-				} else nextevent = numsamples + 1;
+				} 
 			} 
 		}
 		assert(nextLineInSamples >= processedsamples);
 		assert(nextevent >= processedsamples);
 
 		//minimum between remaining samples, next "Tick()" and next event
-		samplestoprocess= std::min(numsamples, std::min(nextLineInSamples, nextevent)) - processedsamples;
+		samplestoprocess = std::min(numsamples, std::min(nextLineInSamples, nextevent)) - processedsamples;
 		assert(samplestoprocess >= 0);
 		GenerateAudioInTicks(processedsamples, samplestoprocess);
 	}
@@ -922,7 +925,7 @@ int Machine::GenerateAudio(int numsamples) {
 void Machine::reallocateRemainingEvents(double beatOffset) {
 	std::deque<WorkEvent>::iterator it = workEvents.begin();
 	while(it != workEvents.end()) {
-		it->changeposition(it->beatOffset()-beatOffset);
+		it->changeposition(it->beatOffset() - beatOffset);
 		++it;
 	}
 }

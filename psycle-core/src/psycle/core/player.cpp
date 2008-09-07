@@ -404,7 +404,11 @@ void Player::process(int samples) {
 		// reset all machine buffers
 		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
 		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
-		song().machine(MASTER_INDEX)->Work(amount);
+		#if 0 // flat (non-recursive) processing is not yet correctly implemented
+			flat_process(amount);
+		#else
+			song().machine(MASTER_INDEX)->Work(amount);
+		#endif
 		// write samples to file
 		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
 		// move the pointer forward for the next Master::Work() iteration.
@@ -412,6 +416,99 @@ void Player::process(int samples) {
 		remaining_samples -= amount;
 		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
 		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
+	}
+}
+
+/// process in a flat (non-recursive) way.
+/// a flat processing algorithm can be executed concurrently by multiple threads.
+/// a processing queue is shared amongst the threads to let each of them pick an element to process.
+void Player::flat_process(int samples) {
+	/**************************************/
+	// initialisation part
+	///\todo to be moved to a place where it's executed only once
+	
+	typedef Machine node;
+	
+	typedef std::list<node*> nodes_queue_type;
+	
+	/// nodes with no dependency.
+	nodes_queue_type terminal_nodes_;
+	
+	/// nodes ready to be processed, just waiting for a free thread
+	nodes_queue_type nodes_queue_;
+
+	std::size_t graph_size(0);
+	
+	// iterate over all the nodes
+	std::vector<Machine*> leaves;
+	for(int m(0); m < MAX_MACHINES; ++m) if(song().machine(m)) {
+		++graph_size;
+		node & n(*song().machine(m));
+		// find the terminal nodes in the graph (nodes with no connected input ports)
+		if(!n._connectedInputs) terminal_nodes_.push_back(&n);
+	}
+	
+	// compute plan
+	// copy the initial processing queue
+	nodes_queue_ = terminal_nodes_;
+	
+	// end of initialisation part
+	/**************************************/
+
+	/**************************************/
+	// future thread main loop
+	// [bohan] the code has no thread-synchronisation yet. that's the next thing i'll add once it works fine with a single thread.
+
+	std::size_t processed_node_count_(0);
+	
+	while(nodes_queue_.size()) {
+		// There are nodes waiting in the queue. We pop the first one.
+		node & n(*nodes_queue_.front());
+		nodes_queue_.pop_front();
+		
+		///\todo the mixer machine needs this to be set to false
+		bool const mix(true);
+		
+		// process the node
+		for(int i(0); i < MAX_CONNECTIONS; ++i) {
+			if(n._inputCon[i]) {
+				node * p_n_in(song().machine(n._inputMachines[i]));
+				if(p_n_in) {
+					node & n_in(*p_n_in);
+					if(!n_in.Standby()) n.Standby(false);
+					if(!n._mute && !n.Standby() && mix) {
+						dsp::Add(n_in._pSamplesL, n._pSamplesL, samples, n_in.lVol() * n._inputConVol[i]);
+						dsp::Add(n_in._pSamplesR, n._pSamplesR, samples, n_in.rVol() * n._inputConVol[i]);
+					}
+				}
+			}
+		}
+		dsp::Undenormalize(n._pSamplesL, n._pSamplesR, samples);
+		n.GenerateAudio(samples);
+		
+		// check whether all nodes have been processed
+		if(++processed_node_count_ == graph_size) break;
+		
+		// check whether successors of the node we processed are now ready.
+		// iterate over all the outputs of the node we processed
+		if(n._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(n._connection[c]) {
+			node & n_out(*song().machine(n._outputMachines[c]));
+			bool n_out_ready(true);
+			// iterate over all the inputs connected to our output
+			if(n._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(n_out._inputCon[c]) {
+				node & n_in(*song().machine(n_out._inputMachines[c]));
+				if(!n_in._worked) {
+					n_out_ready = false;
+					break;
+				}
+			}
+			if(n_out_ready) {
+					// All the dependencies of the node have been processed.
+					// We add the node to the processing queue.
+					// (note: for the first node, we could reserve it for ourselves)
+					nodes_queue_.push_back(&n_out);
+			}
+		}
 	}
 }
 
