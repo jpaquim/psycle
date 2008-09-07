@@ -165,8 +165,9 @@ int main(int argument_count, char * arguments[]) {
 		}
 		player.song(&song);
 
-		int itmp=256;
-		player.Work(&player,itmp);
+		// [JosepMa] workaround some "bugs" where machines are not well setup until a call to work is issued
+		// [JosepMa] (i.e. some machines read the samplerate in the work call, or similar things)
+		{ int samples = 256; player.Work(&player, samples); }
 
 		if(output_file_name.length()) player.startRecording();
 		// since driver is cloned, we cannot use output_driver!!!!
