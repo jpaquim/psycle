@@ -47,7 +47,7 @@ void graph::compute_plan() {
 
 		node.compute_plan();
 
-		// find the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
+		// find the terminal nodes in the graph (nodes with no connected input ports)
 		if(node.is_ready_to_process()) {
 			if(loggers::trace()()) {
 				std::ostringstream s;
