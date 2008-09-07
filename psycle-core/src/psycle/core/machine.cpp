@@ -63,27 +63,6 @@ void aligned_dealloc(X *& address) {
 }
 
 /********************************************************************************************/
-// WorkEvent
-
-WorkEvent::WorkEvent() {}
-
-WorkEvent::WorkEvent(double beatOffset, int track, PatternEvent const & patternEvent)
-: offset_(beatOffset), track_(track), event_(patternEvent)
-{}
-
-PatternEvent const & WorkEvent::event() const {
-	return event_;
-}
-
-double WorkEvent::beatOffset( ) const {
-	return offset_;
-}
-
-int WorkEvent::track( ) const {
-	return track_;
-}
-
-/********************************************************************************************/
 // AudioBuffer
 
 AudioBuffer::AudioBuffer(int numChannels, int numSamples)

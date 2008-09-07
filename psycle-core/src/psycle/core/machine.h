@@ -276,16 +276,35 @@ enum MachineMode {
 
 class WorkEvent {
 	public:
-		WorkEvent();
-		WorkEvent(double beatOffset, int track, const PatternEvent & patternEvent);
-		const PatternEvent &  event() const;
-		double beatOffset() const;
-		int track() const;
-		void changeposition(double beatOffset) { offset_ = beatOffset; }
-	private:
-		double offset_;
-		int track_;
-		PatternEvent event_;
+		WorkEvent() {}
+		
+		WorkEvent(double beatOffset, int track, const PatternEvent & patternEvent)
+			: offset_(beatOffset), track_(track), event_(patternEvent) {}
+
+	///\name beat
+	///\{
+		public:
+			double beatOffset() const { return offset_; }
+			void changeposition(double beatOffset) { offset_ = beatOffset; }
+		private:
+			double offset_;
+	///\}
+	
+	///\name track
+	///\{
+		public:
+			int track() const { return track_; }
+		private:
+			int track_;
+	///\}
+
+	///\name event
+	///\{
+		public:
+			const PatternEvent & event() const { return event_; }
+		private:
+			PatternEvent event_;
+	///\}
 };
 
 class Song;
