@@ -411,7 +411,7 @@ void scheduler::process_loop() throw(std::exception) {
 			// check whether all nodes have been processed
 			if(++processed_node_count_ == graph().size()) {
 				processed_node_count_ = 0;
-				// reset the queue to the terminal nodes in the graph (nodes with no connected input ports, i.e. leaves)
+				// reset the queue to the terminal nodes in the graph (nodes with no connected input ports)
 				nodes_queue_ = graph().terminal_nodes();
 				notify = true;
 			} else // check whether successors of the node we processed are now ready.
