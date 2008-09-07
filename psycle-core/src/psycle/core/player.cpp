@@ -12,15 +12,12 @@
 ///\brief implementation file for psy::core::Player
 
 #include "player.h"
-
 #include "internal_machines.h"
 #include "machine.h"
 #include "sampler.h"
 #include "song.h"
 #include <psycle/audiodrivers/audiodriver.h>
-
 #include <iostream> // only for debug output
-
 #if defined __unix__ || defined __APPLE__
 	#include <unistd.h> // for OpenBSD usleep()
 #endif
@@ -403,21 +400,17 @@ float * Player::Work(int numSamples) {
 void Player::process(int samples) {
 	int remaining_samples = samples;
 	while(remaining_samples) {
-		int amount = std::min(remaining_samples, STREAM_SIZE);
-		// Reset all machine buffers
-		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c))
-			song().machine(c)->PreWork(amount);
-
+		int const amount(std::min(remaining_samples, STREAM_SIZE));
+		// reset all machine buffers
+		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
 		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
 		song().machine(MASTER_INDEX)->Work(amount);
-
 		// write samples to file
 		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
-
-		// Move the pointer forward for the next Master::Work() iteration.
+		// move the pointer forward for the next Master::Work() iteration.
 		Master::_pMasterSamples += amount * 2;
 		remaining_samples -= amount;
-		// increase playPos
+		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
 		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
 	}
 }
@@ -432,23 +425,20 @@ void Player::setDriver(AudioDriver const & driver) {
 	///\todo: This is a dangerous thing. It's scheduled to be changed
 	driver_ = driver.clone();
 	std::cout << "psycle: core: player: cloned audio driver\n";
-	if(!driver_->Initialized()) {
-		driver_->Initialize(Work, this);
-	}
+	if(!driver_->Initialized()) driver_->Initialize(Work, this);
 	std::cout << "psycle: core: player: audio driver initialized\n";
 	if(!driver_->Configured()) {
 		std::cout << "psycle: core: player: asking audio driver to configure itself\n";
 		driver_->Configure();
 		//samples_per_seconds(driver_->_samplesPerSec);
-		//_outputActive = true;
 	}
 	std::cout << "psycle: core: player: audio driver configured\n";
 	if(driver_->Enable(true)) {
 		std::cout << "psycle: core: player: audio driver enabled: " << driver_->info().name() << '\n';
-		//_outputActive = true;
 	} else {
 		std::cerr << "psycle: core: player: audio driver failed to enable. setting null driver\n";
-		if(driver_) delete driver_;
+		std::cerr << "psycle: core: player: deleting audio driver!\n";
+		delete driver_;
 		driver_ = new AudioDriver();
 	}
 	samples_per_second(driver_->settings().samplesPerSec());
@@ -482,24 +472,25 @@ void Player::writeSamplesToFile(int amount) {
 		case 0: // mono mix
 			for(int i(0); i < amount; ++i)
 				//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-				if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) stopRecording();
+				if(_outputWaveFile.WriteMonoSample((*pL++ + *pR++) / 2) != DDC_SUCCESS) stopRecording();
 			break;
 		case 1: // mono L
 			for(int i(0); i < amount; ++i)
-				if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) stopRecording();
+				if(_outputWaveFile.WriteMonoSample(*pL++) != DDC_SUCCESS) stopRecording();
 			break;
 		case 2: // mono R
 			for(int i(0); i < amount; ++i)
-				if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) stopRecording();
+				if(_outputWaveFile.WriteMonoSample(*pR++) != DDC_SUCCESS) stopRecording();
 			break;
 		default: // stereo
 			for(int i(0); i < amount; ++i)
-				if(_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) stopRecording();
+				if(_outputWaveFile.WriteStereoSample(*pL++, *pR++) != DDC_SUCCESS) stopRecording();
 			break;
 	}
 }
 
 void Player::startRecording() {
+	if(recording_) return;
 	if(!song_ && !driver_) return;
 	int channels(2);
 	if(driver_->settings().channelMode() != 3) channels = 1;
@@ -507,10 +498,9 @@ void Player::startRecording() {
 }
 
 void Player::stopRecording() {
-	if(recording_) {
-		_outputWaveFile.Close();
-		recording_ = false;
-	}
+	if(!recording_) return;
+	_outputWaveFile.Close();
+	recording_ = false;
 }
 
 }}
