@@ -278,14 +278,14 @@ class WorkEvent {
 	public:
 		WorkEvent() {}
 		
-		WorkEvent(double beatOffset, int track, const PatternEvent & patternEvent)
+		WorkEvent(double beatOffset, int track, PatternEvent const & patternEvent)
 			: offset_(beatOffset), track_(track), event_(patternEvent) {}
 
 	///\name beat
 	///\{
 		public:
-			double beatOffset() const { return offset_; }
-			void changeposition(double beatOffset) { offset_ = beatOffset; }
+			double beatOffset() const throw() { return offset_; }
+			void changeposition(double beatOffset) throw() { offset_ = beatOffset; }
 		private:
 			double offset_;
 	///\}
@@ -293,7 +293,7 @@ class WorkEvent {
 	///\name track
 	///\{
 		public:
-			int track() const { return track_; }
+			int track() const throw() { return track_; }
 		private:
 			int track_;
 	///\}
@@ -301,7 +301,7 @@ class WorkEvent {
 	///\name event
 	///\{
 		public:
-			const PatternEvent & event() const { return event_; }
+			PatternEvent const & event() const throw() { return event_; }
 		private:
 			PatternEvent event_;
 	///\}
@@ -450,23 +450,28 @@ class Machine {
 
 	///\name the life cycle of a machine
 	///\{
-	public:
-		virtual void Init();
-		virtual void Work(int numSamples);
-		virtual void PreWork(int numSamples, bool clear = true);
-		virtual void AddEvent(double offset, int track, const PatternEvent & event);
-		virtual void Tick( ) {}
-		virtual void Tick(int /*channel*/, const PatternEvent &) {}
-		virtual void Stop() { playCol.clear(); playColIndex =0; }
-	protected:
-		virtual void WorkWires(int numSamples, bool mix = true);
-		virtual int GenerateAudioInTicks(int startSample, int numsamples);
-		virtual int GenerateAudio(int numsamples);
-		virtual void reallocateRemainingEvents(double beatOffset);
-	protected:
-		std::deque<WorkEvent> workEvents;
-		std::map<int, int> playCol;
-		int playColIndex;
+		public:
+			virtual void Init();
+			
+			/// virtual because the mixer machine has its own implementation
+			virtual void Work(int numSamples);
+
+			/// [bohan] this used to be protected, but it needs to be public for flat (non-recursive) processing (and Work() will disappear)
+			virtual int GenerateAudio(int numsamples);
+			
+			virtual void PreWork(int numSamples, bool clear = true);
+			virtual void AddEvent(double offset, int track, const PatternEvent & event);
+			virtual void Tick() {}
+			virtual void Tick(int /*channel*/, const PatternEvent &) {}
+			virtual void Stop() { playCol.clear(); playColIndex =0; }
+		protected:
+			virtual void WorkWires(int numSamples, bool mix = true);
+			virtual int GenerateAudioInTicks(int startSample, int numsamples);
+			virtual void reallocateRemainingEvents(double beatOffset);
+		protected:
+			std::deque<WorkEvent> workEvents;
+			std::map<int /* track */, int /* channel */> playCol;
+			int playColIndex;
 	///\}
 
 	///\name (de)serialization
@@ -555,11 +560,11 @@ class Machine {
 	public:
 		virtual void SetSampleRate(int /*hertz*/) {
 			#if defined PSYCLE__CONFIGURATION__RMS_VUS
-				rms.count=0;
-				rms.AccumLeft=0.;
-				rms.AccumRight=0.;
-				rms.previousLeft=0.;
-				rms.previousRight=0.;
+				rms.count = 0;
+				rms.AccumLeft = 0.;
+				rms.AccumRight = 0.;
+				rms.previousLeft = 0.;
+				rms.previousRight = 0.;
 			#endif
 		}
 
@@ -576,28 +581,28 @@ class Machine {
 
 	///\name ports
 	///\{
-	public:
-		void defineInputAsStereo(int numports=1);
-		void defineOutputAsStereo(int numports=1);
-		bool acceptsConnections() const { return numInPorts>0; }
-		bool emitsConnections() const { return numOutPorts>0; }
+		public:
+			void defineInputAsStereo(int numports=1);
+			void defineOutputAsStereo(int numports=1);
+			bool acceptsConnections() const { return numInPorts>0; }
+			bool emitsConnections() const { return numOutPorts>0; }
 
-		virtual unsigned int GetInPorts() const { return numInPorts; }
-		virtual unsigned int GetOutPorts() const { return numOutPorts; }
-		virtual AudioPort& GetInPort(InPort::id_type i) const { assert(i<numInPorts); return inports[i]; }
-		virtual AudioPort& GetOutPort(OutPort::id_type i) const  { assert(i<numOutPorts); return inports[i]; }
-		virtual std::string GetPortInputName(InPort::id_type /*port*/) const { std::string rettxt = "Stereo Input"; return rettxt; }
-		virtual std::string GetPortOutputName(OutPort::id_type /*port*/)  const { std::string rettxt = "Stereo Output"; return rettxt; }
+			virtual unsigned int GetInPorts() const { return numInPorts; }
+			virtual unsigned int GetOutPorts() const { return numOutPorts; }
+			virtual AudioPort& GetInPort(InPort::id_type i) const { assert(i<numInPorts); return inports[i]; }
+			virtual AudioPort& GetOutPort(OutPort::id_type i) const  { assert(i<numOutPorts); return inports[i]; }
+			virtual std::string GetPortInputName(InPort::id_type /*port*/) const { std::string rettxt = "Stereo Input"; return rettxt; }
+			virtual std::string GetPortOutputName(OutPort::id_type /*port*/)  const { std::string rettxt = "Stereo Output"; return rettxt; }
 
-		virtual int GetAudioInputs() const { return MAX_CONNECTIONS; }
-		virtual int GetAudioOutputs() const { return MAX_CONNECTIONS; }
-	protected:
-		int numInPorts;
-		int numOutPorts;
-		InPort *inports;
-		OutPort *outports;
-		/// this machine is used by a send/return mixer. (Some things cannot be done on these machines)
-		bool _isMixerSend;
+			virtual int GetAudioInputs() const { return MAX_CONNECTIONS; }
+			virtual int GetAudioOutputs() const { return MAX_CONNECTIONS; }
+		protected:
+			int numInPorts;
+			int numOutPorts;
+			InPort *inports;
+			OutPort *outports;
+			/// this machine is used by a send/return mixer. (Some things cannot be done on these machines)
+			bool _isMixerSend;
 	///\}
 
 	///\name input ports legacy mode.

@@ -193,6 +193,7 @@ class Player : public MachineCallbacks {
 		void execute_notes(double beat_offset, PatternLine & line);
 		void process_global_event(const GlobalEvent & event);
 		void process(int samples);
+		void flat_process(int samples);
 
 		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 		Machine::id_type prev_machines_[MAX_TRACKS];
