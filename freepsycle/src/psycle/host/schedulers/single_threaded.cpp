@@ -46,7 +46,7 @@ void graph::compute_plan() {
 
 		node.compute_plan();
 
-		// find the terminal nodes in the graph (nodes with no connected output ports, i.e. leaves)
+		// find the terminal nodes in the graph (nodes with no connected output ports)
 		// determine whether the node is a terminal one (i.e. whether some output ports are connected).
 		bool has_connected_output_ports(false);
 		for(typenames::node::output_ports_type::const_iterator
