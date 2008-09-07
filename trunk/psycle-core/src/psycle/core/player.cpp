@@ -440,7 +440,6 @@ void Player::flat_process(int samples) {
 	std::size_t graph_size(0);
 	
 	// iterate over all the nodes
-	std::vector<Machine*> leaves;
 	for(int m(0); m < MAX_MACHINES; ++m) if(song().machine(m)) {
 		++graph_size;
 		node & n(*song().machine(m));
