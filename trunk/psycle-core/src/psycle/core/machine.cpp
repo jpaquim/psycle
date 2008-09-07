@@ -62,23 +62,152 @@ void aligned_dealloc(X *& address) {
 	#endif
 }
 
+/********************************************************************************************/
+// WorkEvent
+
+WorkEvent::WorkEvent() {}
+
+WorkEvent::WorkEvent(double beatOffset, int track, PatternEvent const & patternEvent)
+: offset_(beatOffset), track_(track), event_(patternEvent)
+{}
+
+PatternEvent const & WorkEvent::event() const {
+	return event_;
+}
+
+double WorkEvent::beatOffset( ) const {
+	return offset_;
+}
+
+int WorkEvent::track( ) const {
+	return track_;
+}
+
+/********************************************************************************************/
+// AudioBuffer
+
+AudioBuffer::AudioBuffer(int numChannels, int numSamples)
+: numchannels_(numChannels),numsamples_(numSamples)
+{
+	aligned_malloc(16, buffer_, numChannels * numSamples);
+}
+
+AudioBuffer::~AudioBuffer() {
+	aligned_dealloc(buffer_);
+}
+
+void AudioBuffer::Clear() {
+	dsp::Clear(buffer_,numsamples_*numchannels_);
+}
+
+/********************************************************************************************/
+// Wire
+
+void Wire::Connect(AudioPort *senderp,AudioPort *receiverp) {
+	senderport = senderp;
+	receiverport = receiverp;
+	multiplier = receiverport->GetMachine().GetAudioRange() / senderport->GetMachine().GetAudioRange();
+	SetVolume(volume);
+	senderport->Connected(this);
+	receiverport->Connected(this);
+}
+
+void Wire::ChangeSource(AudioPort* newsource) {
+	assert(senderport);
+	Disconnect(senderport);
+	senderport = newsource;
+	multiplier = receiverport->GetMachine().GetAudioRange() / senderport->GetMachine().GetAudioRange();
+	SetVolume(volume);
+	senderport->Connected(this);
+}
+
+void Wire::ChangeDestination(AudioPort* newdest) {
+	assert(receiverport);
+	Disconnect(receiverport);
+	receiverport = newdest;
+	multiplier = receiverport->GetMachine().GetAudioRange() / senderport->GetMachine().GetAudioRange();
+	SetVolume(volume);
+	receiverport->Connected(this);
+}
+
+void Wire::CollectData(int numSamples) {
+	senderport->CollectData(numSamples);
+	///\todo : apply volume, panning and mapping.
+	// Check if the Wire is working "inplace" or not, so that it does not
+	// need to copy the contents of the output buffer into its intermediate buffer.
+}
+
+void Wire::SetVolume(float newvol) {
+	volume = newvol;
+	if(pan > 0.0f) {
+		rvol = newvol * multiplier;
+		lvol = rvol * (1.0f - pan); // lvol = volume * multiplier * (1.0f - pan);
+	} else {
+		lvol = newvol * multiplier;
+		rvol = lvol * (1.0f + pan); // rvol = volume * multiplier * (1.0f + pan);
+	}
+}
+
+void Wire::SetPan(float newpan) {
+	pan = newpan;
+	SetVolume(volume);
+}
+
+void Wire::Disconnect(AudioPort * port) {
+	if(port == senderport) senderport = 0; else receiverport = 0;
+	port->Disconnected(this);
+}
+
+/********************************************************************************************/
+// AudioPort
+
+void AudioPort::Connected(Wire * wire) {
+	wires_.push_back(wire);
+}
+
+void AudioPort::Disconnected(Wire * wire) {
+	wires_type::iterator i(std::find(wires_.begin(), wires_.end(), wire));
+	assert(i != wires_.end());
+	wires_.erase(i);
+	///\todo : may want to notify to the parent that this wire is now free.
+}
+
+/********************************************************************************************/
+// InPort
+
+void InPort::CollectData(int numSamples) {
+	///wire(0)processreplacing() while(wires) wire(1+).processadding() ?
+	for(wires_type::const_iterator i(wires_.begin()); i != wires_.end(); ++i) {
+		(**i).CollectData(numSamples);
+		// do something with (**i).getBuffer().getBuffer()
+		// check if the wire is working in "in-place", since maybe the 
+		// buffer is shared with ours.
+	}
+}
+
+/********************************************************************************************/
+// OutPort
+
+void OutPort::CollectData(int /*numSamples*/) {
+	//An outport, by default, does nothing.
+}
+
+/********************************************************************************************/
+// Machine
+
 ///\todo: This is the official panning formula for MIDI. Implement it in psycle?
 // Left Channel Gain [dB] = 20*log (cos (Pi/2* max(0,CC#10 – 1)/126)
 // Right Channel Gain [dB] = 20*log (sin (Pi /2* max(0,CC#10 – 1)/126)
-
 void Machine::crashed(std::exception const & e) throw() {
 	bool minor_problem(false);
 	bool crash(false);
 	{
 		#if 0 ///\todo
-		if(function_error)
-		{
+		if(function_error) {
 			universalis::processor::exception const * const translated(dynamic_cast<universalis::processor::exception const * const>(function_error->exception()));
-			if(translated)
-			{
+			if(translated) {
 				crash = true;
-				switch(translated->code())
-				{
+				switch(translated->code()) {
 					// grows the fpu exception mask so that each type of exception is only reported once
 					case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
 					case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
@@ -122,98 +251,6 @@ void Machine::crashed(std::exception const & e) throw() {
 	//MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
 	//std::cerr << (crash) ? "Exception (Crash)" : "Exception (Software)" << std::endl;
 	///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
-}
-
-AudioBuffer::AudioBuffer(int numChannels,int numSamples)
-: numchannels_(numChannels),numsamples_(numSamples)
-{
-	aligned_malloc(16, buffer_, numChannels*numSamples);
-}
-
-AudioBuffer::~AudioBuffer() {
-	aligned_dealloc(buffer_);
-}
-
-void AudioBuffer::Clear() {
-	dsp::Clear(buffer_,numsamples_*numchannels_);
-}
-
-void Wire::Connect(AudioPort *senderp,AudioPort *receiverp) {
-	senderport=senderp;
-	receiverport=receiverp;
-	multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
-	SetVolume(volume);
-	senderport->Connected(this);
-	receiverport->Connected(this);
-}
-
-void Wire::ChangeSource(AudioPort* newsource) {
-	assert(senderport); Disconnect(senderport);
-	senderport=newsource;
-	multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
-	SetVolume(volume);
-	senderport->Connected(this);
-}
-
-void Wire::ChangeDestination(AudioPort* newdest) {
-	assert(receiverport); Disconnect(receiverport);
-	receiverport=newdest;
-	multiplier=receiverport->GetMachine().GetAudioRange()/senderport->GetMachine().GetAudioRange();
-	SetVolume(volume);
-	receiverport->Connected(this);
-}
-
-void Wire::CollectData(int numSamples) {
-	senderport->CollectData(numSamples);
-	///\todo : apply volume, panning and mapping.
-	// Check if the Wire is working "inplace" or not, so that it does not
-	// need to copy the contents of the output buffer into its intermediate buffer.
-}
-
-void Wire::SetVolume(float newvol) {
-	volume=newvol;
-	if(pan > 0.0f) {
-		rvol = newvol * multiplier;
-		lvol = rvol * (1.0f - pan); // lvol = volume * multiplier * (1.0f - pan);
-	} else {
-		lvol = newvol * multiplier;
-		rvol = lvol * (1.0f + pan); // rvol = volume * multiplier * (1.0f + pan);
-	}
-}
-
-void Wire::SetPan(float newpan) {
-	pan=newpan;
-	SetVolume(volume);
-}
-
-void Wire::Disconnect(AudioPort * port) {
-	if(port == senderport) senderport = 0; else receiverport = 0;
-	port->Disconnected(this);
-}
-
-void AudioPort::Connected(Wire * wire) {
-	wires_.push_back(wire);
-}
-
-void AudioPort::Disconnected(Wire * wire) {
-	wires_type::iterator i(std::find(wires_.begin(), wires_.end(), wire));
-	assert(i != wires_.end());
-	wires_.erase(i);
-	///\todo : may want to notify to the parent that this wire is now free.
-}
-
-void InPort::CollectData(int numSamples) {
-	///wire(0)processreplacing() while(wires) wire(1+).processadding() ?
-	for(wires_type::const_iterator i(wires_.begin()); i != wires_.end(); ++i) {
-		(**i).CollectData(numSamples);
-		// do something with (**i).getBuffer().getBuffer()
-		// check if the wire is working in "in-place", since maybe the 
-		// buffer is shared with ours.
-	}
-}
-
-void OutPort::CollectData(int /*numSamples*/) {
-	//An outport, by default, does nothing.
 }
 
 Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
@@ -269,9 +306,9 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 		#else
 			TriggerDelay[c].setCommand(0);
 		#endif
-		TriggerDelayCounter[c]=0;
-		RetriggerRate[c]=256;
-		ArpeggioCount[c]=0;
+		TriggerDelayCounter[c] = 0;
+		RetriggerRate[c] = 256;
+		ArpeggioCount[c] = 0;
 	}
 	for(int c(0); c < MAX_TWS; ++c) {
 		TWSInst[c] = 0;
@@ -280,12 +317,12 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 		TWSDestination[c] = 0;
 	}
 	for(int i(0); i < MAX_CONNECTIONS; ++i) {
-		_inputMachines[i]=-1;
-		_outputMachines[i]=-1;
-		_inputConVol[i]=0.0f;
-		_wireMultiplier[i]=0.0f;
-		_connection[i]=false;
-		_inputCon[i]=false;
+		_inputMachines[i] = -1;
+		_outputMachines[i] = -1;
+		_inputConVol[i] = 0.0f;
+		_wireMultiplier[i] = 0.0f;
+		_connection[i] = false;
+		_inputCon[i] = false;
 	}
 }
 
@@ -298,8 +335,8 @@ void Machine::CloneFrom(Machine & src) {
 	// Only allow to copy from a machine of the same type.
 	if(getMachineKey() != src.getMachineKey()) return;
 	SetPan(src.Pan());
-	SetPosX(src.GetPosX()+32);
-	SetPosY(src.GetPosY()+16);
+	SetPosX(src.GetPosX() + 32);
+	SetPosY(src.GetPosY() + 16);
 	#if 1
 	{
 		std::stringstream s;
@@ -313,7 +350,7 @@ void Machine::CloneFrom(Machine & src) {
 		char * ps = std::strrchr(buf, ' ');
 		if(ps) {
 			number = atoi(ps);
-			if(number < 1) number =1;
+			if(number < 1) number = 1;
 			else {
 				ps[0] = 0;
 				ps = std::strchr(machine_[dst]->_editName, ' ');
@@ -343,7 +380,7 @@ void Machine::CloneFrom(Machine & src) {
 	file.OpenMem(1000);
 	///\todo FIXME: Version anyone?! 
 	src.SaveSpecificChunk(&file);
-	LoadSpecificChunk(&file,0);
+	LoadSpecificChunk(&file, 0);
 	file.CloseMem();
 }
 void Machine::Init() {
@@ -360,8 +397,8 @@ void Machine::Init() {
 	for(int i(0); i < MAX_CONNECTIONS; ++i) {
 		_inputConVol[i] = 1.0f;
 		_wireMultiplier[i] = 1.0f;
-		_inputMachines[i]=-1;
-		_outputMachines[i]=-1;
+		_inputMachines[i] = -1;
+		_outputMachines[i] = -1;
 		_inputCon[i] = false;
 		_connection[i] = false;
 	}
@@ -373,7 +410,7 @@ void Machine::SetPan(int newPan) {
 	if(newPan < 0) newPan = 0;
 	else if(newPan > 128) newPan = 128;
 	_rVol = newPan * 0.015625f;
-	_lVol = 2.0f-_rVol;
+	_lVol = 2.0f - _rVol;
 	if(_lVol > 1.0f) _lVol = 1.0f;
 	if(_rVol > 1.0f) _rVol = 1.0f;
 	_panning = newPan;
@@ -381,11 +418,11 @@ void Machine::SetPan(int newPan) {
 
 Wire::id_type Machine::ConnectTo(Machine & dstMac, InPort::id_type dsttype, OutPort::id_type srctype, float volume) {
 	// Try to get free indexes from each machine
-	Wire::id_type freebus=GetFreeOutputWire(srctype);
-	Wire::id_type dfreebus=dstMac.GetFreeInputWire(dsttype);
+	Wire::id_type freebus = GetFreeOutputWire(srctype);
+	Wire::id_type dfreebus = dstMac.GetFreeInputWire(dsttype);
 	if(freebus == -1 || dfreebus == -1) return -1;
-	InsertOutputWire(dstMac,freebus,srctype);
-	dstMac.InsertInputWire(*this, dfreebus,dsttype,volume);
+	InsertOutputWire(dstMac, freebus, srctype);
+	dstMac.InsertInputWire(*this, dfreebus, dsttype, volume);
 	return dfreebus;
 }
 
@@ -398,7 +435,7 @@ bool Machine::MoveWireDestTo(Machine& dstMac, OutPort::id_type srctype, Wire::id
 }
 
 bool Machine::MoveWireDestTo(Machine& dstMac, OutPort::id_type srctype, Wire::id_type srcwire, InPort::id_type dsttype, Machine& oldDst) {
-	Wire::id_type oldwire,dstwire;
+	Wire::id_type oldwire, dstwire;
 	if((oldwire = oldDst.FindInputWire(id())) == -1) return false;
 	if((dstwire = dstMac.GetFreeInputWire(dsttype)) == -1) return false;
 	float volume = 1.0f;
@@ -442,7 +479,7 @@ bool Machine::Disconnect(Machine & dstMac) {
 }
 
 void Machine::DeleteWires() {
-	Machine *iMac;
+	Machine * iMac;
 	// Deleting the connections to/from other machines
 	for(Wire::id_type w = 0; w < MAX_CONNECTIONS; ++w) {
 		// Checking In-Wires
@@ -454,7 +491,7 @@ void Machine::DeleteWires() {
 					if(wix >= 0) iMac->DeleteOutputWire(wix,0);
 				}
 			}
-			DeleteInputWire(w,0);
+			DeleteInputWire(w, 0);
 		}
 		// Checking Out-Wires
 		if(_connection[w]) {
@@ -465,7 +502,7 @@ void Machine::DeleteWires() {
 					if(wix >= 0) iMac->DeleteInputWire(wix,0);
 				}
 			}
-			DeleteOutputWire(w,0);
+			DeleteOutputWire(w, 0);
 		}
 	}
 }
@@ -482,7 +519,7 @@ void Machine::InsertInputWire(Machine& srcMac, Wire::id_type dstWire,InPort::id_
 	_inputCon[dstWire] = true;
 	_wireMultiplier[dstWire] = srcMac.GetAudioRange()/GetAudioRange();
 	SetWireVolume(dstWire,initialVol);
-	if(_isMixerSend) NotifyNewSendtoMixer(*this,srcMac);
+	if(_isMixerSend) NotifyNewSendtoMixer(*this, srcMac);
 }
 
 void Machine::DeleteOutputWire(Wire::id_type wireIndex, OutPort::id_type /*srctype*/) {
@@ -498,14 +535,14 @@ void Machine::DeleteInputWire(Wire::id_type wireIndex, InPort::id_type /*dsttype
 	--_connectedInputs;
 	if( _isMixerSend) {
 		// Chain is broken, notify the mixer so that it replaces the send machine of the send/return.
-		NotifyNewSendtoMixer(*this,*this);
+		NotifyNewSendtoMixer(*this, *this);
 	}
 }
 
 void Machine::NotifyNewSendtoMixer(Machine & /*callerMac*/, Machine & senderMac) {
 	//Work down the connection wires until finding the mixer.
 	for(int i(0); i < MAX_CONNECTIONS; ++i)
-		if(_connection[i]) callbacks->song().machine(_outputMachines[i])->NotifyNewSendtoMixer(*this,senderMac);
+		if(_connection[i]) callbacks->song().machine(_outputMachines[i])->NotifyNewSendtoMixer(*this, senderMac);
 }
 
 void Machine::SetMixerSendFlag(CoreSong * song) {
@@ -526,30 +563,30 @@ void Machine::ClearMixerSendFlag() {
 
 void Machine::ExchangeInputWires(Wire::id_type first, Wire::id_type second, InPort::id_type /*firstType*/, InPort::id_type /*secondType*/) {
 	int tmp = _inputMachines[first];
-	_inputMachines[first]=_inputMachines[second];
-	_inputMachines[second]=tmp;
+	_inputMachines[first] = _inputMachines[second];
+	_inputMachines[second] = tmp;
 
 	float tmp2 = _inputConVol[first];
-	_inputConVol[first]=_inputConVol[second];
-	_inputConVol[second]=tmp2;
+	_inputConVol[first] = _inputConVol[second];
+	_inputConVol[second] = tmp2;
 
 	tmp2 = _wireMultiplier[first];
-	_wireMultiplier[first]=_wireMultiplier[second];
-	_wireMultiplier[second]=tmp2;
+	_wireMultiplier[first] = _wireMultiplier[second];
+	_wireMultiplier[second] = tmp2;
 
 	bool tmp3 = _inputCon[first];
 	_inputCon[first]=_inputCon[second];
-	_inputCon[second]=tmp3;
+	_inputCon[second] = tmp3;
 }
 
 void Machine::ExchangeOutputWires(Wire::id_type first,Wire::id_type second, OutPort::id_type /*firstType*/, InPort::id_type /*secondType*/) {
 	int tmp = _outputMachines[first];
-	_outputMachines[first]=_outputMachines[second];
-	_outputMachines[second]=tmp;
+	_outputMachines[first] =_outputMachines[second];
+	_outputMachines[second] = tmp;
 
 	bool tmp3 = _connection[first];
-	_connection[first]=_connection[second];
-	_connection[second]=tmp3;
+	_connection[first] = _connection[second];
+	_connection[second] = tmp3;
 }
 
 Wire::id_type Machine::FindInputWire(Machine::id_type id) const {
@@ -564,7 +601,7 @@ Wire::id_type Machine::FindOutputWire(Machine::id_type id) const {
 	for(Wire::id_type c(0); c < MAX_CONNECTIONS; ++c)
 		if(_connection[c])
 			if(_outputMachines[c] == id)
-			return c;
+				return c;
 	return Wire::id_type(-1);
 }
 
@@ -610,7 +647,7 @@ bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireInd
 
 void Machine::PreWork(int numSamples,bool clear) {
 	_worked = false;
-	_waitingForSound= false;
+	_waitingForSound = false;
 	//PSYCLE__CPU_COST__INIT(cost);
 	if(_pScopeBufferL && _pScopeBufferR) {
 		float *pSamplesL = _pSamplesL;   
@@ -645,11 +682,11 @@ void Machine::PreWork(int numSamples,bool clear) {
 // Each machine is expected to produce its output in its own _pSamplesX buffers.
 void Machine::Work(int numSamples) {
 	WorkWires(numSamples);
-	GenerateAudio( numSamples );
+	GenerateAudio(numSamples);
 }
 
 void Machine::WorkWires(int numSamples, bool mix) {
-	// Variable to avoid feedback loops. Probably, it is not worth implement feedbacks.
+	// Variable to avoid feedback loops.
 	_waitingForSound = true;
 	for(int i(0); i < MAX_CONNECTIONS; ++i) {
 		if(_inputCon[i]) {
@@ -660,7 +697,7 @@ void Machine::WorkWires(int numSamples, bool mix) {
 						#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 							universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 						#endif
-						pInMachine->Work( numSamples );
+						pInMachine->Work(numSamples);
 					}
 				}
 				if(!pInMachine->Standby()) Standby(false);
@@ -668,7 +705,7 @@ void Machine::WorkWires(int numSamples, bool mix) {
 					//PSYCLE__CPU_COST__INIT(wcost);
 					dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
 					dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-					//PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+					//PSYCLE__CPU_COST__CALCULATE(wcost, numSamples);
 					//wire_cpu_cost(wire_cpu_cost() + wcost);
 				}
 			}
@@ -686,29 +723,27 @@ void Machine::defineInputAsStereo(int numports) {
 	numInPorts = numports;
 	#if 0
 		///\todo: ArraY!!!!
-		inports = new InPort(*this,0,"Stereo In");
+		inports = new InPort(*this, 0, "Stereo In");
 	#endif
 }
 
 void Machine::defineOutputAsStereo(int numports) {
-	numOutPorts=numports;
+	numOutPorts = numports;
 	#if 0
 		///\todo: ArraY!!!!
-		outports = new OutPort(*this,0,"Stereo Out");
+		outports = new OutPort(*this, 0, "Stereo Out");
 	#endif
 }
 
 void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 	#if defined PSYCLE__CONFIGURATION__RMS_VUS
 		_volumeCounter = dsp::GetRMSVol(rms, _pSamplesL, _pSamplesR, numSamples) * (1.f / GetAudioRange());
-		// Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+		// transpose scale from [-40, 0] dB to [0, 97] pixels (actually 100 pixels)
 		int temp(common::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
 		// clip values
 		if(temp > 97) temp = 97;
-	
 		if(temp > 0) _volumeDisplay = temp;
 		else if(_volumeDisplay > 1) _volumeDisplay -= 2;
-	
 		if(callbacks->autoStopMachines()) {
 			if(rms.AccumLeft < 0.00024 * GetAudioRange() && rms.count >= numSamples) {
 				rms.count = 0;
@@ -723,7 +758,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 		}
 	#else
 		_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples) * (1.f / GetAudioRange());
-		// Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+		// transpose scale from [-40, 0] dB to [0, 97] pixels (actually 100 pixels)
 		int temp(common::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
 		// clip values
 		if(temp > 97) temp = 97;
@@ -763,7 +798,7 @@ bool Machine::LoadFileChunk(RiffFile* pFile,int version) {
 		//it's still necessary to limit editname length, but i'm inclined to think 128 is plenty..
 		std::vector<char> nametemp(128);
 		pFile->ReadString(&nametemp[0], nametemp.size());
-		editName_.assign( nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
+		editName_.assign(nametemp.begin(), std::find(nametemp.begin(), nametemp.end(), 0));
 	}
 	bool success = LoadSpecificChunk(pFile,version);
 	if(success) {
@@ -820,7 +855,7 @@ void Machine::SaveSpecificChunk(RiffFile * pFile) const {
 	}
 }
 
-void Machine::AddEvent( double offset, int track, const PatternEvent & event) {
+void Machine::AddEvent(double offset, int track, const PatternEvent & event) {
 	if(!workEvents.empty()) {
 		if(workEvents.back().beatOffset() > offset) {
 			// New event needs to be sorted in the queue
@@ -833,27 +868,9 @@ void Machine::AddEvent( double offset, int track, const PatternEvent & event) {
 	else workEvents.push_back(WorkEvent(offset, track, event));
 }
 
-WorkEvent::WorkEvent() {}
-
-WorkEvent::WorkEvent(double beatOffset, int track, PatternEvent const & patternEvent)
-: offset_(beatOffset), track_(track), event_(patternEvent)
-{}
-
-PatternEvent const & WorkEvent::event() const {
-	return event_;
-}
-
-double WorkEvent::beatOffset( ) const {
-	return offset_;
-}
-
-int WorkEvent::track( ) const {
-	return track_;
-}
-
 int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 	assert(numsamples >= 0);
-	std::cerr << "ERROR!!!! Machine::GenerateAudioInTicks() called!" <<std::endl;
+	std::cerr << "ERROR!!!! Machine::GenerateAudioInTicks() called!" << std::endl;
 	workEvents.clear();
 	return 0;
 }
@@ -861,15 +878,15 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 int Machine::GenerateAudio(int numsamples) {
 	assert(numsamples >= 0);
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-	//position [0.0-1.0] inside the current beat.
+	// position [0.0, 1.0] inside the current beat.
 	const double positionInBeat = timeInfo.playBeatPos() - static_cast<int>(timeInfo.playBeatPos()); 
-	//position [0.0-linesperbeat] converted to "Tick()" lines
+	// position [0.0, linesperbeat] converted to "Tick()" lines
 	const double positionInLines = positionInBeat*timeInfo.ticksSpeed();
-	//position in samples of the next "Tick()" Line
+	// position in samples of the next "Tick()" Line
 	int nextLineInSamples = static_cast<int>( (1.0-(positionInLines-static_cast<int>(positionInLines)))* timeInfo.samplesPerTick() );
 	assert(nextLineInSamples >= 0);
-	//Next event, initialized to "out of scope".
-	int nextevent = numsamples+1;
+	// next event, initialized to "out of scope".
+	int nextevent = numsamples + 1;
 	int previousline = nextLineInSamples;
 	std::map<int,int>::iterator colsIt;
 
@@ -883,16 +900,18 @@ int Machine::GenerateAudio(int numsamples) {
 	}
 	int samplestoprocess = 0;
 	int processedsamples = 0;
-	for(;processedsamples < numsamples; processedsamples += samplestoprocess) {
+	for(; processedsamples < numsamples; processedsamples += samplestoprocess) {
 		if(processedsamples == nextLineInSamples) {
 			Tick();
 			previousline = nextLineInSamples;
 			nextLineInSamples += static_cast<int>(timeInfo.samplesPerTick());
 		}
 		while(processedsamples == nextevent) {
-			if(!workEvents.empty()) {
+			if(workEvents.empty()) nextevent = numsamples + 1;
+			else {
 				WorkEvent & workEvent = *workEvents.begin();
-				///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list, but until that, playColIndex keeps increasing.
+				///\todo: beware of using more than MAX_TRACKS. "Stop()" resets the list,
+				// but until that, playColIndex keeps increasing.
 				colsIt = playCol.find(workEvent.track());
 				if(colsIt == playCol.end()) {
 					playCol[workEvent.track()] = playColIndex++;
@@ -905,7 +924,7 @@ int Machine::GenerateAudio(int numsamples) {
 					nextevent = static_cast<int>( workEvent1.beatOffset() * timeInfo.samplesPerBeat() );
 					assert(nextevent >= processedsamples);
 				} else nextevent = numsamples + 1;
-			} else nextevent = numsamples + 1;
+			} 
 		}
 		assert(nextLineInSamples >= processedsamples);
 		assert(nextevent >= processedsamples);
