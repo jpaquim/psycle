@@ -10,6 +10,7 @@
 
 #include "riff.h"
 namespace psy { namespace core {
+
 std::uint32_t FourCC(const char * ChunkName) {
 	std::int32_t retbuf = 0x20202020;   // four spaces (padding)
 	char *p = ((char *)&retbuf);
