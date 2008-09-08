@@ -166,7 +166,9 @@ void Player::clear_plan() {
 }
 
 void Player::thread_function(std::size_t thread_number) {
-	std::cout << "psycle: core: player: scheduler thread #" << thread_number << " started\n";
+	{ scoped_lock lock(mutex_);
+		std::cout << "psycle: core: player: scheduler thread #" << thread_number << " started\n";
+	}
 	#if 0
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 
@@ -204,7 +206,9 @@ void Player::thread_function(std::size_t thread_number) {
 		throw;
 	}
 	//loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
-	std::cout << "psycle: core: player: scheduler thread #" << thread_number << " terminated\n";
+	{ scoped_lock lock(mutex_);
+		std::cout << "psycle: core: player: scheduler thread #" << thread_number << " terminated\n";
+	}
 }
 
 void Player::process_loop() throw(std::exception) {

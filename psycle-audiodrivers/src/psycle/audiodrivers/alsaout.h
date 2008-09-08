@@ -1,22 +1,13 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-/******************************************************************************
-*  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
-*                                                                             *
-*  This program is free software; you can redistribute it and/or modify       *
-*  it under the terms of the GNU General Public License as published by       *
-*  the Free Software Foundation; either version 2 of the License, or          *
-*  (at your option) any later version.                                        *
-*                                                                             *
-*  This program is distributed in the hope that it will be useful,            *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
-*  GNU General Public License for more details.                               *
-*                                                                             *
-*  You should have received a copy of the GNU General Public License          *
-*  along with this program; if not, write to the                              *
-*  Free Software Foundation, Inc.,                                            *
-*  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
-******************************************************************************/
+
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #pragma once
 #if defined PSYCLE__ALSA_AVAILABLE
 #include "audiodriver.h"
@@ -24,10 +15,6 @@
 #include <mutex>
 #include <condition>
 #include <cstdint>
-
-/**
-@author Psycledelics
-*/
 namespace psy { namespace core {
 
 class AlsaOut : public AudioDriver {
@@ -35,7 +22,7 @@ class AlsaOut : public AudioDriver {
 		AlsaOut();
 		~AlsaOut();
 		/// uses the copy constructor
-		virtual AlsaOut* clone() const;
+		virtual AlsaOut * clone() const;
 		virtual AudioDriverInfo info() const;
 
 		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
@@ -44,7 +31,7 @@ class AlsaOut : public AudioDriver {
 		virtual bool Enable(bool e) { return e ? Start() : Stop(); }
 
 	private:
-		void* _callbackContext;
+		void * _callbackContext;
 		AUDIODRIVERWORKFN _pCallback;
 
 		bool _initialized;
@@ -103,11 +90,11 @@ class AlsaOut : public AudioDriver {
 			bool stop_requested_;
 			/// a mutex to synchronise accesses to running_ and stop_requested_
 			std::mutex mutex_;
+			typedef std::scoped_lock<std::mutex> scoped_lock;
 			/// a condition variable to wait until notified that the value of running_ has changed
-			std::condition<std::scoped_lock<std::mutex> > condition_;
+			std::condition<scoped_lock> condition_;
 		///\}
 };
 
 }}
 #endif // defined PSYCLE__ALSA_AVAILABLE
-

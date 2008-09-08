@@ -26,14 +26,51 @@ void usage() {
 			"Plays a Psycle song file." << std::endl <<
 			"" << std::endl <<
 			" -odrv, --output-driver <name>   name of the output driver to use." << std::endl <<
-			"                                 examples: silent, alsa, jack, esd, dsound, mmewaveout" << std::endl <<
+			"                                 available: dummy"
+				///\todo simply use configuration.driver_map() to build the list
+				#if defined PSYCLE__SYDNEY_AVAILABLE
+					", sydney"
+				#endif
+				#if defined PSYCLE__GSTREAMER_AVAILABLE
+					", gstreamer"
+				#endif
+				#if defined PSYCLE__JACK_AVAILABLE
+					", jack"
+				#endif
+				#if defined PSYCLE__ALSA_AVAILABLE
+					", alsa"
+				#endif
+				#if defined PSYCLE__ESOUND_AVAILABLE
+					", esd"
+				#endif
+				#if defined PSYCLE__NET_AUDIO_AVAILABLE
+					", netaudio"
+				#endif
+				#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
+					", dsound"
+				#endif
+				#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
+					", mmewaveout"
+				#endif
+				#if defined PSYCLE__STEINBERG_ASIO_AVAILABLE
+					", asio"
+				#endif
+			<< std::endl <<
 			"" << std::endl <<
 			" -odev, --output-device <name>   name of the output device the driver should use." << std::endl <<
 			"                                 The default device will be used if this option is not specified." << std::endl <<
+				#if defined PSYCLE__SYDNEY_AVAILABLE
+			"                                 examples for sydney: hostname:port" << std::endl <<
+				#endif
+				#if defined PSYCLE__GSTREAMER_AVAILABLE
+			"                                 examples for gstreamer: autoaudiosink, gconfaudiosink." << std::endl <<
+				#endif
+				#if defined PSYCLE__ALSA_AVAILABLE
 			"                                 examples for alsa: default, hw:0, plughw:0, pulse." << std::endl <<
-			//"                                 examples for gstreamer: autoaudiosink, gconfaudiosink." << std::endl <<
-			//"                                 examples for pulseaudio: hostname:port" << std::endl <<
-			//"                                 examples for esound: hostname:port" << std::endl <<
+				#endif
+				#if defined PSYCLE__ESOUND_AVAILABLE
+			"                                 examples for esound: hostname:port" << std::endl <<
+				#endif
 			"" << std::endl <<
 			" -of,   --output-file <riff wave file name>" << std::endl <<
 			"                                 name of the output file to render to in riff-wave format." << std::endl <<
@@ -134,9 +171,9 @@ int main(int argument_count, char * arguments[]) {
 
 	if(output_driver_name.length()) {
 		std::cout << "psycle: player: setting output driver name to: " << output_driver_name <<  std::endl;
-		configuration.setDriverByName(output_driver_name);
+		configuration.set_driver_by_name(output_driver_name);
 	}
-	psy::core::AudioDriver & output_driver(*configuration._pOutputDriver); ///\todo needs a getter
+	psy::core::AudioDriver & output_driver(configuration.output_driver());
 
 	player.setDriver(output_driver);
 
