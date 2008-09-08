@@ -1,26 +1,18 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-/******************************************************************************
-*  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
-*                                                                             *
-*  This program is free software; you can redistribute it and/or modify       *
-*  it under the terms of the GNU General Public License as published by       *
-*  the Free Software Foundation; either version 2 of the License, or          *
-*  (at your option) any later version.                                        *
-*                                                                             *
-*  This program is distributed in the hope that it will be useful,            *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
-*  GNU General Public License for more details.                               *
-*                                                                             *
-*  You should have received a copy of the GNU General Public License          *
-*  along with this program; if not, write to the                              *
-*  Free Software Foundation, Inc.,                                            *
-*  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
-******************************************************************************/
+
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #pragma once
 #include <string>
+#include <mutex>
+#include <condition>
 #include <cstdint>
-
 namespace psy { namespace core {
 
 /// typedef for work callback
@@ -30,20 +22,43 @@ typedef float * (*AUDIODRIVERWORKFN) (void * context, int & numSamples);
 class AudioDriverInfo {
 	public:
 		AudioDriverInfo(const std::string & name, const std::string & header, const std::string & description, bool show);
-		/// the driver name, used e.g in the configuration for the driver map.
-		/// As convention, please use only lower case names here.
-		const std::string& name() const { return name_; }
-		/// short description
-		const std::string& header() const { return header_; }
-		/// deeper explanation
-		const std::string& description() const { return description_; }
-		/// hint, if audiodialog should list the driver
-		bool show() const { return show_; }
-	private:
-		std::string name_;
-		std::string header_;
-		std::string description_;
-		bool show_;
+		
+	///\name name
+	///\{
+		public:
+			/// the driver name, used e.g in the configuration for the driver map.
+			/// As convention, please use only lower case names here.
+			std::string const & name() const { return name_; }
+		private:
+			std::string name_;
+	///\}
+		
+	///\name header title (short description)
+	///\{
+		public:
+			/// short description
+			std::string const & header() const { return header_; }
+		private:
+			std::string header_;
+	///\}
+
+	///\name long description
+	///\{
+		public:
+			/// deeper explanation
+			std::string const & description() const { return description_; }
+		private:
+			std::string description_;
+	///\}
+
+	///\name hint, if audio dialog should list the driver
+	///\{
+		public:
+			/// hint, if audio dialog should list the driver
+			bool show() const { return show_; }
+		private:
+			bool show_;
+	///\}
 };
 
 /// holds the info about sample rate, bit depth, etc
@@ -54,7 +69,7 @@ class AudioDriverSettings {
 	///\name getter/setter for device name  ( hw:0 and others )
 	///\{
 		public:
-			const std::string& deviceName() const { return deviceName_; }
+			std::string const & deviceName() const { return deviceName_; }
 			void setDeviceName(const std::string & name) { deviceName_ = name; }
 		private:
 			std::string deviceName_;
@@ -122,30 +137,30 @@ class AudioDriverSettings {
 	///\}
 };
 
-///\todo doc
+/// base class for all audio drivers
 class AudioDriver {
 	public:
 		virtual ~AudioDriver() {}
 
 		/// clones the driver using the copy ctor
-		virtual AudioDriver* clone()  const;
+		virtual AudioDriver * clone() const;
 
 		/// gives the driver information
 		virtual AudioDriverInfo info() const;
 
-		virtual void Reset(void) {}
-		/// enable will start the driver and the calling for the work player function
-		virtual bool Enable(bool /*e*/) {return true;}
+		virtual void Reset() {}
+		/// enable will start the driver and the calls to the work player function
+		virtual bool Enable(bool /*e*/) { return true; }
 		/// initialize has nothing to do with the driver, it sets only the pointer for a later player work call
-		virtual void Initialize(AUDIODRIVERWORKFN /*pCallback*/, void * /*context*/) {;}
-		virtual void Configure(void){};
-		virtual bool Initialized(void) { return true; }
-		virtual bool Configured(void) { return true; }
+		virtual void Initialize(AUDIODRIVERWORKFN /*pCallback*/, void * /*context*/) {}
+		virtual void Configure() {}
+		virtual bool Initialized() { return true; }
+		virtual bool Configured() { return true; }
 		static double frand();
-		static void Quantize16WithDither(float const *pin, std::int16_t *piout, int c);
-		static void Quantize16(float const *pin, std::int16_t *piout, int c);
-		static void Quantize16AndDeinterlace(float const *pin, std::int16_t *pileft, int strideleft, std::int16_t *piright, int strideright, int c);
-		static void DeQuantize16AndDeinterlace(int const *pin, float *poutleft,float *poutright,int c);
+		static void Quantize16WithDither(float const * pin, std::int16_t * piout, int c);
+		static void Quantize16(float const * pin, std::int16_t * piout, int c);
+		static void Quantize16AndDeinterlace(float const * pin, std::int16_t * pileft, int strideleft, std::int16_t * piright, int strideright, int c);
+		static void DeQuantize16AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
 
 	///\name settings
 	///\{
@@ -160,6 +175,40 @@ class AudioDriver {
 			/// holds the sample rate, bit depth, etc
 			AudioDriverSettings settings_; 
 	///\}
+};
+
+/// a dummy, silent driver
+class DummyDriver : public AudioDriver {
+	public:
+		DummyDriver();
+		~DummyDriver();
+		virtual DummyDriver * clone() const;
+		virtual AudioDriverInfo info() const;
+		virtual void Initialize(AUDIODRIVERWORKFN callback_function, void * callback_context);
+		virtual bool Initialized() { return initialized_; }
+		virtual bool Enable(bool e) { if(e) start(); else stop(); return true; }
+
+	private:
+		AUDIODRIVERWORKFN callback_function_;
+		void * callback_context_;
+		bool initialized_;
+		void start();
+		void stop();
+
+		///\name thread
+		///\{
+			/// the function executed by the alsa thread
+			void thread_function();
+			/// whether the thread is running
+			bool running_;
+			/// whether the thread is asked to terminate
+			bool stop_requested_;
+			/// a mutex to synchronise accesses to running_ and stop_requested_
+			std::mutex mutex_;
+			typedef std::scoped_lock<std::mutex> scoped_lock;
+			/// a condition variable to wait until notified that the value of running_ has changed
+			std::condition<scoped_lock> condition_;
+		///\}
 };
 
 }}
