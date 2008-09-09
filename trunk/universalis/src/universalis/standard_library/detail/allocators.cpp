@@ -9,36 +9,25 @@
 #include "allocators.hpp"
 #include <diversalis/compiler.hpp>
 #include <memory>
-namespace universalis
-{
-	namespace standard_library
-	{
-		namespace allocators
-		{
-			namespace process
-			{
-				namespace detail
-				{
-					namespace
-					{
-						static std::allocator<char> allocator;
-					}
+namespace universalis { namespace standard_library { namespace allocators { namespace process {
 
-					#if 0 && !defined DIVERSALIS__COMPILER__SHARED
-						#error "This translation unit must be linked into a shared library (linux/*bsd/darwin), or bundle (darwin), or DLL (mswindows)."
-					#endif
+namespace detail {
 
-					void * allocate(std::size_t const & size)
-					{
-						return allocator.allocate(size);
-					}
+	#if 0 && !defined DIVERSALIS__COMPILER__SHARED
+		#error "This translation unit must be linked into a shared library (linux/*bsd/darwin), or bundle (darwin), or DLL (mswindows)."
+	#endif
 
-					void deallocate(void * pointer, std::size_t const & size)
-					{
-						allocator.deallocate(reinterpret_cast<char*>(pointer), size);
-					}
-				}
-			}
-		}
+	namespace {
+		std::allocator<char> static allocator;
+	}
+
+	void * allocate(std::size_t const & size) {
+		return allocator.allocate(size);
+	}
+
+	void deallocate(void * pointer, std::size_t const & size) {
+		allocator.deallocate(reinterpret_cast<char*>(pointer), size);
 	}
 }
+
+}}}}
