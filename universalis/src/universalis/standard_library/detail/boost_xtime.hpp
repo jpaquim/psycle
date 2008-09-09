@@ -31,7 +31,7 @@ namespace universalis { namespace standard_library { namespace detail {
 		boost::xtime xtime;
 		// get the current date.
 		boost::xtime_clock_types const clock(boost::TIME_UTC);
-		if(!boost::xtime_get(&xtime, clock)) throw exceptions::runtime_error("failed to get current time", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		if(!boost::xtime_get(&xtime, clock)) throw universalis::exceptions::runtime_error("failed to get current time", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		// convert the elapsed_time to boost::xtime
 		boost::xtime xtime2(make_boost_xtime(elapsed_time));
 		// add the delta

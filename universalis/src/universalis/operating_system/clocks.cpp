@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::operating_system::clocks
 #include <packageneric/pre-compiled.private.hpp>
@@ -16,8 +16,6 @@
 #include <iostream>
 #include <sstream>
 namespace universalis { namespace operating_system { namespace clocks {
-
-// recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
 
 /******************************************************************************************/
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
@@ -42,7 +40,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 			/// TIMERS
 			#if !_POSIX_TIMERS && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning will use posix sysconf at runtime to determine whether this OS supports timers: !_POSIX_TIMERS
+				//#warning will use posix sysconf at runtime to determine whether this OS supports timers: !_POSIX_TIMERS
 			#elif _POSIX_TIMERS == -1 && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 				#warning this OS does not support posix timers: _POSIX_TIMERS == -1
 				clock_gettime_supported = clock_getres_supported = false;
@@ -67,7 +65,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 			
 			// MONOTONIC_CLOCK
 			#if !_POSIX_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning will use posix sysconf at runtime to determine whether this OS supports monotonic clock: !_POSIX_MONOTONIC_CLOCK
+				//#warning will use posix sysconf at runtime to determine whether this OS supports monotonic clock: !_POSIX_MONOTONIC_CLOCK
 			#elif _POSIX_MONOTONIC_CLOCK == -1 && defined DIVERSALIS__COMPILER__GNU
 				#warning this OS does not support posix monotonic clock: _POSIX_MONOTONIC_CLOCK == -1
 				monotonic_clock_supported = false;
@@ -84,7 +82,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 			// CPUTIME
 			#if !_POSIX_CPUTIME && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning will use posix sysconf at runtime to determine whether this OS supports cpu time: !_POSIX_CPUTIME
+				//#warning will use posix sysconf at runtime to determine whether this OS supports cpu time: !_POSIX_CPUTIME
 			#elif _POSIX_CPUTIME == -1 && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 				#warning this OS does not support posix cpu time: _POSIX_CPUTIME == -1
 				cputime_supported = false;
