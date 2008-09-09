@@ -145,7 +145,7 @@ namespace psycle
 					}
 				#else
 					///\todo use ::setenv (and not ::putenv!)
-					if(::setenv(path_env_var_name, new_path.str().c_str()) {
+					if(::setenv(path_env_var_name, new_path.str().c_str())) {
 						int const e(errno);
 						throw ...
 					}
@@ -155,13 +155,13 @@ namespace psycle
 				_dll = ::LoadLibrary(base_name.c_str());
 				// set the path env var back to its original value
 				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					if(!::SetEnvironmentVariable(path_env_var_name, old_path.str().c_str())) {
+					if(!::SetEnvironmentVariable(path_env_var_name, old_path.c_str())) {
 						//int const e(::GetLastError());
 						throw exceptions::library_errors::loading_error("Could not set PATH env var back to its original value.");
 					}
 				#else
 					///\todo use ::setenv (and not ::putenv!)
-					if(::setenv(path_env_var_name, old_path.str().c_str()) {
+					if(::setenv(path_env_var_name, old_path.c_str())) {
 						int const e(errno);
 						throw ...
 					}
