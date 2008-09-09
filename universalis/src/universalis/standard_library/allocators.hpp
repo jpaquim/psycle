@@ -8,39 +8,13 @@
 #include <universalis/detail/project.hpp>
 #include "detail/allocators.hpp"
 #include <cstddef>
-namespace universalis
-{
-	namespace standard_library
-	{
-		namespace allocators
-		{
-			namespace process
-			{
-				template<typename X>
-				class allocator
-				{
-					public:
-						X inline * allocate(std::size_t const &);
-						void inline deallocate(X *, std::size_t const &);
-				};
-			}
-		}
-	}
-}
-namespace universalis
-{
-	namespace standard_library
-	{
-		namespace allocators
-		{
-			namespace process
-			{
-				template<typename X>
-				X inline * allocator<X>::allocate(std::size_t const & size) { return reinterpret_cast<X*>(detail::allocate(size * sizeof(X))); }
+namespace universalis { namespace standard_library { namespace allocators { namespace process {
 
-				template<typename X>
-				void inline allocator<X>::deallocate(X * x, std::size_t const & size) { detail::deallocate(x, size * sizeof(X)); }
-			}
-		}
-	}
-}
+template<typename X>
+class allocator {
+	public:
+		X * allocate(std::size_t const &) { return reinterpret_cast<X*>(detail::allocate(size * sizeof(X))); }
+		void deallocate(X *, std::size_t const &) { detail::deallocate(x, size * sizeof(X)); }
+};
+
+}}}}

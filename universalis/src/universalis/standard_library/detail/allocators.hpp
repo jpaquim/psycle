@@ -8,22 +8,13 @@
 #include <cstddef>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__STANDARD_LIBRARY__DETAIL__ALLOCATORS
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace universalis
-{
-	namespace standard_library
-	{
-		namespace allocators
-		{
-			namespace process
-			{
-				///\internal
-				namespace detail
-				{
-					UNIVERSALIS__COMPILER__DYNAMIC_LINK void * allocate(std::size_t const &);
-					UNIVERSALIS__COMPILER__DYNAMIC_LINK void deallocate(void *, std::size_t const &);
-				}
-			}
-		}
-	}
+namespace universalis { namespace standard_library { namespace allocators { namespace process {
+
+///\internal
+namespace detail {
+	UNIVERSALIS__COMPILER__DYNAMIC_LINK void * allocate(std::size_t const &);
+	UNIVERSALIS__COMPILER__DYNAMIC_LINK void deallocate(void *, std::size_t const &);
 }
+
+}}}}
 #include <universalis/compiler/dynamic_link/end.hpp>
