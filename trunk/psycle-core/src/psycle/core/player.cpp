@@ -66,7 +66,7 @@ Player::Player()
 	//thread_count_ = universalis::operating_system::cpu_affinity::cpu_count();
 	thread_count_ = 0;
 	{ // thread count env var
-		char const * const env(std::getenv("PSYCLE__THREADS"));
+		char const * const env(std::getenv("PSYCLE_THREADS"));
 		if(env) {
 			std::stringstream s;
 			s << env;
