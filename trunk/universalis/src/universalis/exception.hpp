@@ -30,7 +30,7 @@ namespace exceptions {
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK causality {
 		public:
 			causality(void const * cause = 0) throw() : cause_(cause) {}
-			void const inline * cause() const throw() { return this->cause_; }
+			void const * cause() const throw() { return this->cause_; }
 		private:
 			void const * cause_;
 	};
@@ -72,15 +72,11 @@ namespace exceptions {
 				: locatable(location), causality(cause), from_(from), to_(to) {}
 				virtual ~bad_cast() throw() {}
 
-			public:
-				std::type_info const inline & from() const throw() { return this->from_; }
-			private:
-				std::type_info const & from_;
+			public:  std::type_info const & from() const throw() { return this->from_; }
+			private: std::type_info const & from_;
 
-			public:
-				std::type_info const inline & to() const throw() { return this->to_  ; }
-			private:
-				std::type_info const & to_;
+			public:  std::type_info const & to() const throw() { return this->to_  ; }
+			private: std::type_info const & to_;
 		};
 	#endif
 
