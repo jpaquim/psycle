@@ -26,8 +26,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::operat
 				#else
 					;
 				#endif
-				
-		char const * what() const throw() /*override*/;
 };
 
 }}
