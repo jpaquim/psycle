@@ -23,6 +23,7 @@
 #include "nativehost.hpp"
 #include "pluginfinder.h"
 #include "plugin.h"
+#include "file.h"
 
 #include <iostream>
 #include <sstream>

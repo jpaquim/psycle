@@ -42,6 +42,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cstdlib>
+#include <iostream>
 
 namespace psy { namespace core {
 	using namespace std;

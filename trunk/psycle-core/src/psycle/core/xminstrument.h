@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <string>
+#include <cassert>
 
 namespace psy { namespace core {
 
