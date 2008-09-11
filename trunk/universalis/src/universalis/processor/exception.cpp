@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::processor::exception
 #include <packageneric/pre-compiled.private.hpp>
@@ -88,7 +88,8 @@ namespace {
 			#endif
 		}
 		
-		::LPTOP_LEVEL_EXCEPTION_FILTER static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE thread_unhandled_exception_previous_filter(0);
+		static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
+		::LPTOP_LEVEL_EXCEPTION_FILTER thread_unhandled_exception_previous_filter(0);
 
 		::LONG WINAPI unhandled_exception_filter(EXCEPTION_POINTERS * exception_pointers) throw(exception)
 		{
@@ -103,7 +104,8 @@ namespace {
 	#endif
 
 	/// thread name
-	std::string const static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE * thread_name(0);
+	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
+	std::string const * thread_name(0);
 }
 
 void exception::install_handler_in_thread(std::string const & name) {
