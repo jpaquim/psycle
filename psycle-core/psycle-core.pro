@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 CONFIG *= ordered
-SUBDIRS *= ../universalis ../psycle-audiodrivers qmake
+SUBDIRS *= ../psycle-audiodrivers qmake

@@ -18,12 +18,14 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-	#ifndef SEQUENCERVIEW_H
-	#define SEQUENCERVIEW_H
+#ifndef SEQUENCERVIEW_H
+#define SEQUENCERVIEW_H
+
+#include <QWidget>
 
 namespace psy { namespace core {
-class Song;
-class SinglePattern;
+	class Song;
+	class SinglePattern;
 }}
 
 #include <QtGui/QVBoxLayout>
