@@ -28,6 +28,8 @@ namespace {
 			return universalis::operating_system::clocks::monotonic::current();
 		#endif
 	}
+
+	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
 }
 
 /**********************************************************************************************************************/
@@ -372,11 +374,17 @@ void scheduler::process_loop() throw(std::exception) {
 			if(stop_requested_) break;
 
 			if(suspend_requested_) {
-				++suspended_; ///\todo spurious wakeups will make the counter bogus! need a tls flag to do the inc only once per thread
-				condition_.notify_all();
+				if(!this_thread_suspended_) {
+					this_thread_suspended_ = true;
+					++suspended_;
+					condition_.notify_all();
+				}
 				continue;
 			}
-			suspended_ = 0;
+			if(this_thread_suspended_) {
+				this_thread_suspended_ = false;
+				--suspended_;
+			}
 
 			// There are nodes waiting in the queue. We pop the first one.
 			node_ = nodes_queue_.front();
