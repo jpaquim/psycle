@@ -22,6 +22,8 @@
 
 #include "machinekey.hpp"
 
+#include <algorithm>
+
 namespace psy
 {
 	namespace core
