@@ -41,7 +41,7 @@
 		#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 		#undef DIVERSALIS__COMPILER__FEATURE__PRE_COMPILTION // was just defined to insert documentation.
 	
-		/// indicates the compiler supports auto-linking.
+		/// indicates the compiler supports auto-linking. e.g.: #pragma comment(lib, "foo")
 		#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 		#undef DIVERSALIS__COMPILER__FEATURE__AUTO_LINK // was just defined to insert documentation.
 
