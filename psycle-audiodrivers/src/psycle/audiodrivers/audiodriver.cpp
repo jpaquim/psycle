@@ -170,7 +170,7 @@ void DummyDriver::Initialize(AUDIODRIVERWORKFN callback_function, void * callbac
 
 void DummyDriver::start() {
 	// return immediatly if the thread is already running
-	if(running_);
+	if(running_) return;
 	
 	std::thread t(boost::bind(&DummyDriver::thread_function, this));
 	// wait for the thread to be running
