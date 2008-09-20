@@ -9,6 +9,7 @@
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
 #include <universalis/processor/exception.hpp>
+#include <universalis/operating_system/thread_name.hpp>
 #include <process.h>
 namespace psycle
 {
@@ -290,7 +291,8 @@ namespace psycle
 
 		void WaveOut::PollerThread(void * pWaveOut)
 		{
-			universalis::processor::exception::install_handler_in_thread("mme wave out");
+			universalis::operating_system::thread_name thread_name("mme wave out");
+			universalis::processor::exception::install_handler_in_thread();
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);

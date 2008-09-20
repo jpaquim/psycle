@@ -11,6 +11,7 @@
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <universalis/operating_system/clocks.hpp>
+#include <universalis/operating_system/thread_name.hpp>
 #include <sstream>
 #include <limits>
 namespace psycle { namespace host { namespace schedulers { namespace multi_threaded {
@@ -320,11 +321,14 @@ void scheduler::stop() {
 void scheduler::thread_function(std::size_t thread_number) {
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 
-	{ // set thread name and install cpu/os exception handler/translator
+	universalis::operating_system::thread_name thread_name;
+	{ // set thread name
 		std::ostringstream s;
 		s << universalis::compiler::typenameof(*this) << '#' << graph().underlying().name() << '#' << thread_number;
-		universalis::processor::exception::install_handler_in_thread(s.str());
+		thread_name.set(s.str());
 	}
+	// install cpu/os exception handler/translator
+	universalis::processor::exception::install_handler_in_thread();
 
 	try {
 		try {
