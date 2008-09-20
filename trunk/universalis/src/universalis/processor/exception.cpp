@@ -130,6 +130,7 @@ void exception::install_handler_in_thread(std::string const & name) {
 		operating_system::loggers::information()(s.str());
 	}
 
+	///\todo copy the name instead of just storing the address
 	thread_name = &name;
 
 	{ // sets the hardware exception handler for the thread
@@ -145,10 +146,7 @@ void exception::install_handler_in_thread(std::string const & name) {
 				// Thus, each thread is in charge of its own translation handling.
 				// There is no default translator function.
 				// [bohan] This requires compilation with the asynchronous exception handling model (/EHa)
-				// [bohan] warning C4535: calling ::_set_se_translator() requires /EHa; the command line options /EHc and /GX are insufficient
-				#if 1 // DIVERSALIS__COMPILER__VERSION__MAJOR >= 8 || defined NDEBUG // causes problems with the debugger in msvc7.1
-					::_set_se_translator(structured_exception_translator);
-				#endif
+				::_set_se_translator(structured_exception_translator);
 			#else
 				static bool once(false);
 				if(!once) {
