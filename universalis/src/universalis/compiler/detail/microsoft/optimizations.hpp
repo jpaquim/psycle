@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file
 #pragma once
@@ -27,7 +26,7 @@
 			// [bohan] this means we must not have the /RTC option enabled to enable optimizations, even if we disable runtime checks here.
 		#pragma optimize("s", off) // favors small code
 		#pragma optimize("t", on) // favors fast code
-		#if DIVERSALIS__COMPILER__VERSION__MAJOR < 8
+		#if DIVERSALIS__COMPILER__VERSION < 1400
 			#pragma optimize("p", off) // improves floating-point consistency (this is for iso conformance, slower and less precise)
 			#pragma optimize("a", on) // assumes no aliasing, see also: the restrict iso keyword
 			#pragma optimize("w", off) // assumes that aliasing can occur across function calls

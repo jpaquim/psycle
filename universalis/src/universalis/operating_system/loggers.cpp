@@ -15,7 +15,7 @@ namespace universalis { namespace operating_system {
 // logger
 
 void logger::log(int const level, std::string const & message, compiler::location const & location) throw() {
-	#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7
+	#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1310
 		///\todo this is crashing here at runtime with msvc7.1 ... some static var doesn't seem to get initialized properly
 		///\todo test again on msvc7.1 since the code has been redesigned.
 		boost::mutex::scoped_lock lock(mutex());
@@ -24,7 +24,7 @@ void logger::log(int const level, std::string const & message, compiler::locatio
 }
 
 void logger::log(int const level, std::string const & string) throw() {
-	#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION__MAJOR > 7
+	#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1310
 		///\todo this is crashing here at runtime with msvc7.1 ... some static var doesn't seem to get initialized properly
 		///\todo test again on msvc7.1 since the code has been redesigned.
 		boost::mutex::scoped_lock lock(mutex());

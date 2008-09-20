@@ -7,7 +7,7 @@
 #pragma once
 #include <universalis/detail/project.hpp>
 #if defined __STDC_SECURE_LIB__
-	#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION__MAJOR == 8
+	#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION >= 1400
 		#include <cstdio>
 		#include <cwchar>
 		#include <cstdarg>

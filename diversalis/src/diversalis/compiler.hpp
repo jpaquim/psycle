@@ -8,80 +8,102 @@
 #pragma once
 #include <diversalis/detail/project.hpp>
 
-/**********************************************************************************/
-// documentation about what is defined in this file
-
 #if defined DIVERSALIS__COMPILER__DOXYGEN
-	#undef DIVERSALIS__COMPILER__DOXYGEN // redefine to insert documentation.
-	/// doxygen documentation compiler, manually defined in configuration file.
-	#define DIVERSALIS__COMPILER__DOXYGEN
 
-	/// compiler version, major number.
-	#define DIVERSALIS__COMPILER__VERSION__MAJOR 1
-	/// compiler version, minor number.
-	#define DIVERSALIS__COMPILER__VERSION__MINOR 4
-	/// compiler version, patch number.
-	#define DIVERSALIS__COMPILER__VERSION__PATCH 0
-	/// compiler version, application binary interface number.
-	#define DIVERSALIS__COMPILER__VERSION__ABI 0
+	/**********************************************************************************/
+	// documentation about what is defined in this file
 
-	/// resource compiler (only relevant on microsoft's operating system), autodetected via RC_INVOKED.
-	#define DIVERSALIS__COMPILER__RESOURCE
-	#undef DIVERSALIS__COMPILER__RESOURCE // was just defined to insert documentation.
+	///\name meta-information about the compiler's version
+	///\{
+		/// compiler version, as a string.
+		#define DIVERSALIS__COMPILER__VERSION__STRING <string>
 
-	/// eclipse cdt c++ indexer, manually defined in project settings.
-	#define DIVERSALIS__COMPILER__ECLIPSE
-	#undef DIVERSALIS__COMPILER__ECLIPSE // was just defined to insert documentation.
+		/// compiler version, as an integral number.
+		/// This combines the major, minor and patch numbers into a single integral number.
+		#define DIVERSALIS__COMPILER__VERSION <number>
 
-	/// a compiler feature description, set for compilers which don't generate code for a processor
-	/// (e.g. the eclipse cdt c++ indexer, the doxygen documentation compiler, resource compilers, etc ...).
-	/// [bohan] msvc7.1's resource compiler freaked out: warning RC4011: identifier truncated to 'DIVERSALIS__COMPILER__FEATURE__'
-	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#undef DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // was just defined to insert documentation.
+		/// compiler version, major number.
+		#define DIVERSALIS__COMPILER__VERSION__MAJOR <number>
+
+		/// compiler version, minor number.
+		#define DIVERSALIS__COMPILER__VERSION__MINOR <number>
+
+		/// compiler version, patch number.
+		#define DIVERSALIS__COMPILER__VERSION__PATCH <number>
+
+		/// compiler version, application binary interface number.
+		#define DIVERSALIS__COMPILER__VERSION__ABI <number>
+	///\}
+
+	///\name meta-information about the compiler's features
+	///\{
+		/// indicates the compiler supports pre-compilation.
+		#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
+		#undef DIVERSALIS__COMPILER__FEATURE__PRE_COMPILTION // was just defined to insert documentation.
 	
-	/// a compiler feature description, set for compilers which support pre-compilation.
-	#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
-	#undef DIVERSALIS__COMPILER__FEATURE__PRE_COMPILTION // was just defined to insert documentation.
-	
-	/// a compiler feature description, set for compilers which support auto-link.
-	#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#undef DIVERSALIS__COMPILER__FEATURE__AUTO_LINK // was just defined to insert documentation.
+		/// indicates the compiler supports auto-linking.
+		#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#undef DIVERSALIS__COMPILER__FEATURE__AUTO_LINK // was just defined to insert documentation.
 
-	/// a compiler feature description, set for compilers which support the warning preprocessor directive.
-	#define DIVERSALIS__COMPILER__FEATURE__WARNING
-	#undef DIVERSALIS__COMPILER__FEATURE__WARNING // was just defined to insert documentation.
+		/// indicates the compiler supports the #warning preprocessor directive.
+		#define DIVERSALIS__COMPILER__FEATURE__WARNING
+		#undef DIVERSALIS__COMPILER__FEATURE__WARNING // was just defined to insert documentation.
 
-	/// gnu g++/gcc, g++, autodetected via __GNUG__ (equivalent to __GNUC__ && __cplusplus).
-	// http://gcc.gnu.org/onlinedocs/gcc
-	/// to see the predefined macros, run:
-	///\verbatim
-	/// g++ -xc++ -std=c++98 -dM -E /dev/null
-	///\endverbatim
-	/// version autodetected.
-	#define DIVERSALIS__COMPILER__GNU
-	#undef DIVERSALIS__COMPILER__GNU // was just defined to insert documentation.
+		/// indicates the compiler does not generate code for a processor.
+		/// e.g.: the eclipse cdt c++ indexer, the doxygen documentation compiler, resource compilers, etc.
+		#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+		#undef DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // was just defined to insert documentation.
 
-	/// bcc (c++builder or zero-cost version).
-	/// version 5.6
-	#define DIVERSALIS__COMPILER__BORLAND
-	#undef DIVERSALIS__COMPILER__BORLAND // was just defined to insert documentation.
+		/// indicates the compiler supports some assembler language.
+		#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
+		#undef DIVERSALIS__COMPILER__FEATURE__ASSEMBLER // was just defined to insert documentation.
 
-	/// msvc, autodetected via _MSC_VER.\n
-	/// msvc 6.? detected via _MSC_VER < 1300, we don't test for service pack 5 nor processor pack.\n
-	/// msvc 7.0 detected via _MSC_VER < 1310.\n
-	/// msvc 7.1 detected via _MSC_VER < 1400.\n
-	/// msvc 8.0 detected via _MSC_VER >= 1400.
-	///
-	/// command line options: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vccore/html/vcrefcompilerOptionsListedAlphabetically.asp
-	///
-	/// attributes: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclang/html/_pluslang_Extended_Attribute_Syntax.asp
-	///
-	/// pragma: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclang/html/_predir_pragma_directives.asp
-	///
-	/// exception handling: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclang/html/_core_exception_handling_topics_.28.c.2b2b29.asp
-	#define DIVERSALIS__COMPILER__MICROSOFT
-	#undef DIVERSALIS__COMPILER__MICROSOFT // was just defined to insert documentation.
+		///\todo doc
+		#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		#undef DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS // was just defined to insert documentation.
+	///\}
+
+	///\name meta-information about the compiler's assembler language syntax
+	///\{
+		/// indicates the compiler's assembler language has at&t's syntax.
+		#define DIVERSALIS__COMPILER__ASSEMBLER__ATT
+		#undef DIVERSALIS__COMPILER__ASSEMBLER__ATT // was just defined to insert documentation.
+
+		/// indicates the compiler's assembler language has intel's syntax.
+		#define DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		#undef DIVERSALIS__COMPILER__ASSEMBLER__INTEL // was just defined to insert documentation.
+	///\}
+
+	///\name meta-information about the compiler's brand
+	///\{
+		/// gnu g++/gcc, g++, autodetected via __GNUG__ (equivalent to __GNUC__ && __cplusplus).
+		/// To see the predefined macros, run: g++ -xc++ -std=c++98 -dM -E /dev/null
+		#define DIVERSALIS__COMPILER__GNU
+		#undef DIVERSALIS__COMPILER__GNU // was just defined to insert documentation.
+
+		/// bcc, autodetected via __BORLAND__.
+		#define DIVERSALIS__COMPILER__BORLAND
+		#undef DIVERSALIS__COMPILER__BORLAND // was just defined to insert documentation.
+
+		/// msvc, autodetected via _MSC_VER.
+		#define DIVERSALIS__COMPILER__MICROSOFT
+		#undef DIVERSALIS__COMPILER__MICROSOFT // was just defined to insert documentation.
+
+		#undef DIVERSALIS__COMPILER__DOXYGEN // redefine to insert documentation.
+		/// doxygen documentation compiler. This is not autodetected and has to be manually defined.
+		#define DIVERSALIS__COMPILER__DOXYGEN
+
+		/// eclipse cdt c++ indexer. This is not autodetected and has to be manually defined.
+		#define DIVERSALIS__COMPILER__ECLIPSE
+		#undef DIVERSALIS__COMPILER__ECLIPSE // was just defined to insert documentation.
+
+		/// resource compiler (only relevant on microsoft's operating system), autodetected via RC_INVOKED.
+		#define DIVERSALIS__COMPILER__RESOURCE
+		#undef DIVERSALIS__COMPILER__RESOURCE // was just defined to insert documentation.
+	///\}
 #endif
+
+
 
 /**********************************************************************************/
 // now the real work
@@ -91,11 +113,10 @@
 
 // RC_INVOKED is defined by resource compilers (only relevant on microsoft's operating system).
 #if defined RC_INVOKED
-	//#define DIVERSALIS__COMPILER
-		// don't #define DIVERSALIS__COMPILER ; we can determine the real preprocessor used for parsing.
+	// don't #define DIVERSALIS__COMPILER ; we can determine the real preprocessor used for parsing.
 	#define DIVERSALIS__COMPILER__RESOURCE
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-#endif // DIVERSALIS__COMPILER is not #defined
+#endif
 
 //////////////////////////////////
 // doxygen documentation compiler
@@ -103,7 +124,6 @@
 #if defined DIVERSALIS__COMPILER__DOXYGEN
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	// version is defined above.
 	#if !defined __cplusplus
 		#define __cplusplus
 	#endif
@@ -131,24 +151,26 @@
 			#error "please invoke gcc with the language option set to c++ (or invoke gcc via the g++ driver)"
 		#endif
 	#endif
-	#define DIVERSALIS__COMPILER__VERSION __VERSION__
+	#define DIVERSALIS__COMPILER__VERSION__STRING __VERSION__
+	#define DIVERSALIS__COMPILER__VERSION  __GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__
 	#define DIVERSALIS__COMPILER__VERSION__MAJOR __GNUC__
 	#define DIVERSALIS__COMPILER__VERSION__MINOR __GNUC_MINOR__
 	#define DIVERSALIS__COMPILER__VERSION__PATCH __GNUC_PATCHLEVEL__
 	#define DIVERSALIS__COMPILER__VERSION__ABI __GXX_ABI_VERSION
-	// check if version is recent enough__
-	#if DIVERSALIS__COMPILER__VERSION__MAJOR < 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR < 3)
-		#error "compiler too old... better giving up now."
-	#endif
+
+	#define DIVERSALIS__COMPILER__FEATURE__WARNING
+
+	#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
+	#define DIVERSALIS__COMPILER__ASSEMBLER__ATT
+
+	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+
 	// check if version supports pre-compilation. gcc < 3.4 does not support pre-compilation.
-	#if DIVERSALIS__COMPILER__VERSION__MAJOR > 3 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 3 && DIVERSALIS__COMPILER__VERSION__MINOR >= 4)
+	#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
 		#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 	#endif
-	#define DIVERSALIS__COMPILER__FEATURE__WARNING
-	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
-	#define DIVERSALIS__COMPILER__ASSEMBLER__ATT
 	
-/////////////////////
+//////////////////////
 // borland's compiler
 
 #elif defined __BORLAND__
@@ -160,24 +182,17 @@
 ////////////////////////
 // microsoft's compiler
 
-// TODO:
-// These things are mostly bogus. 1200 means version 12.0 of the compiler. The 
-// artificial versions assigned to them only refer to the versions of some IDE
-// these compilers have been shipped with, and even that is not all of it. Some
-// were shipped with freely downloadable SDKs, others as crosscompilers in eVC.
-// IOW, you can't use these 'versions' in any sensible way. Sorry.
 #elif defined _MSC_VER
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__MICROSOFT
+	#define DIVERSALIS__COMPILER__VERSION _MSC_VER
 	#if defined _MSC_FULL_VER
-		#define DIVERSALIS__COMPILER__VERSION _MSC_FULL_VER
-	#else
-		#define DIVERSALIS__COMPILER__VERSION _MSC_VER
+		#define DIVERSALIS__COMPILER__VERSION__FULL _MSC_FULL_VER
 	#endif
-	#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
-	#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#if _MSC_VER < 1300
-		#define DIVERSALIS__COMPILER__VERSION__MAJOR 0 // just purge it
+		#define DIVERSALIS__COMPILER__VERSION__MAJOR 6
+		#define DIVERSALIS__COMPILER__VERSION__MINOR 0
+		#define DIVERSALIS__COMPILER__VERSION__MINOR 0
 	#elif _MSC_VER < 1400
 		#define DIVERSALIS__COMPILER__VERSION__MAJOR 7
 		#if _MSC_VER < 1310
@@ -185,19 +200,21 @@
 		#else
 			#define DIVERSALIS__COMPILER__VERSION__MINOR 1
 		#endif
-	#else
+	#elif _MSC_VER < 1500
 		#define DIVERSALIS__COMPILER__VERSION__MAJOR 8
+		#define DIVERSALIS__COMPILER__VERSION__MINOR 0
+		#define DIVERSALIS__COMPILER__VERSION__MINOR 0
+	#else
+		#define DIVERSALIS__COMPILER__VERSION__MAJOR 9
 		#define DIVERSALIS__COMPILER__VERSION__MINOR 0
 		#define DIVERSALIS__COMPILER__VERSION__PATCH 0
 	#endif
-	#if DIVERSALIS__COMPILER__VERSION__MAJOR < 7 || (DIVERSALIS__COMPILER__VERSION__MAJOR == 7 && DIVERSALIS__COMPILER__VERSION__MINOR < 1)
-		#error "Compiler is too old ... better giving up now."
-	#elif DIVERSALIS__COMPILER__VERSION__MAJOR < 8
-		//#pragma message(__FILE__ "(" DIVERSALIS__STRINGIZED(__LINE__) ") : warning: compiler is too old ... some problems are to be expected.")
-	#endif
 	#pragma conform(forScope, on) // ISO conformance of the scope of variables declared inside the parenthesis of a loop instruction.
-	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+	#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
+	#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
 	#define DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 #endif
 
 

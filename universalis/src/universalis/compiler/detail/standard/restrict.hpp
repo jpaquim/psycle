@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file
 /// the restrict keyword has been introduced in the iso 1999 standard.
@@ -17,7 +16,7 @@
 	// restrict is a keyword
 	#define restrict __restrict__
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
-	#if DIVERSALIS__COMPILER__VERSION__MAJOR >= 8
+	#if DIVERSALIS__COMPILER__VERSION >= 1400
 		// restrict is a keyword
 	#else
 		// unsupported?
