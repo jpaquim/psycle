@@ -14,8 +14,11 @@ namespace universalis { namespace processor {
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::operating_system::exception {
 	public:
 		/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
-		/// Note: A reference to the name is kept, so don't pass a temporary object.
-		void static install_handler_in_thread(std::string const & name);
+		void static install_handler_in_thread();
+
+		/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
+		UNIVERSALIS__COMPILER__DEPRECATED("set the thread name using universalis::operating_system::thread_name");
+		void static inline install_handler_in_thread(std::string const &) { install_handler_in_thread(); }
 
 		#if defined NBEBUG
 			inline

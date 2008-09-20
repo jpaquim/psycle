@@ -173,14 +173,19 @@ void Player::thread_function(std::size_t thread_number) {
 	{ scoped_lock lock(mutex_);
 		std::cout << "psycle: core: player: scheduler thread #" << thread_number << " started\n";
 	}
+
 	#if 0
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
-
-	{ // set thread name and install cpu/os exception handler/translator
+	
+	universalis::operating_system::thread_name thread_name;
+	{ // set thread name
 		std::ostringstream s;
 		s << universalis::compiler::typenameof(*this) << '#' << graph().underlying().name() << '#' << thread_number;
-		universalis::processor::exception::install_handler_in_thread(s.str());
+		thread_name.set(s.str());
 	}
+
+	// install cpu/os exception handler/translator
+	universalis::processor::exception::install_handler_in_thread();
 	#endif
 
 	try {

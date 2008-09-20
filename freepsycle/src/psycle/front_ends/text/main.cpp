@@ -13,6 +13,7 @@
 #include <psycle/host/host.hpp>
 #include <universalis/processor/exception.hpp>
 #include <universalis/operating_system/loggers.hpp>
+#include <universalis/operating_system/thread_name.hpp>
 #include <universalis/operating_system/cpu_affinity.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
@@ -220,7 +221,8 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	try {
 		try {
 			universalis::operating_system::loggers::multiplex_logger::singleton().add(universalis::operating_system::loggers::stream_logger::default_logger());
-			universalis::processor::exception::install_handler_in_thread("psycle.text");
+			universalis::operating_system::thread_name thread_name("main");
+			universalis::processor::exception::install_handler_in_thread();
 			if(universalis::operating_system::loggers::information()()) {
 				std::ostringstream s;
 				s << paths::package::name() << " " << paths::package::version::string();
