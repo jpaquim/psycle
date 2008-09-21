@@ -3,6 +3,7 @@
 #include <diversalis/processor.hpp>
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
+#include <cmath>
 #include <cstdint>
 namespace psycle { namespace helpers { namespace math {
 

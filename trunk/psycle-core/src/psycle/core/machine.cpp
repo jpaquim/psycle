@@ -13,8 +13,8 @@
 #include "machine.h"
 #include "song.h"
 #include "dsp.h"
-#include "helpers/math/round.hpp"
 #include "fileio.h"
+#include <psycle/helpers/math/round.hpp>
 #include <cstddef>
 #include <cstdlib> // for posix_memalign
 #include <iostream> // only for debug output
@@ -721,7 +721,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 	#if defined PSYCLE__CONFIGURATION__RMS_VUS
 		_volumeCounter = dsp::GetRMSVol(rms, _pSamplesL, _pSamplesR, numSamples) * (1.f / GetAudioRange());
 		// transpose scale from [-40, 0] dB to [0, 97] pixels (actually 100 pixels)
-		int temp(common::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
+		int temp(psycle::helpers::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
 		// clip values
 		if(temp > 97) temp = 97;
 		if(temp > 0) _volumeDisplay = temp;
@@ -741,7 +741,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 	#else
 		_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples) * (1.f / GetAudioRange());
 		// transpose scale from [-40, 0] dB to [0, 97] pixels (actually 100 pixels)
-		int temp(common::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
+		int temp(psycle::helpers::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
 		// clip values
 		if(temp > 97) temp = 97;
 		if(temp > _volumeDisplay) _volumeDisplay = temp;

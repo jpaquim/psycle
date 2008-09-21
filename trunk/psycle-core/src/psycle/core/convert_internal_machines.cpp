@@ -4,15 +4,16 @@
 #include "machinefactory.h"
 #include "fileio.h"
 #include "plugin.h"
-#include "helpers/scale.hpp"
-#include "helpers/math/pi.hpp"
 #include "player.h"
 #include "song.h"
+#include <psycle/helpers/scale.hpp>
+#include <psycle/helpers/math/pi.hpp>
 
 namespace psy { namespace core { namespace convert_internal_machines {
 
-namespace math = common::math;
-typedef common::Scale::Real Real;
+namespace math = psycle::helpers::math;
+namespace scale = psycle::helpers::scale;
+typedef psycle::helpers::Scale::Real Real;
 
 Converter::Converter() {}
 
@@ -314,7 +315,7 @@ void Converter::retweak(const int & type, int & parameter, int & integral_value)
 				switch(parameter) {
 					case gain:
 						if( value < 1.0f) value = 0;
-						else value = common::scale::Exponential(maximum, exp(-4.), exp(+4.)).apply_inverse(value / 0x100);
+						else value = scale::Exponential(maximum, exp(-4.), exp(+4.)).apply_inverse(value / 0x100);
 						break;
 				}
 			}
@@ -370,7 +371,7 @@ void Converter::retweak(const int & type, int & parameter, int & integral_value)
 						break;
 					case modulation_radians_per_second:
 						if(value < 1.0f) value = 0;
-						else value = common::scale::Exponential(maximum, 0.0001 * common::math::pi * 2, 100 * common::math::pi * 2).apply_inverse(value * 3e-9 * Player::singleton().timeInfo().sampleRate());
+						else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 3e-9 * Player::singleton().timeInfo().sampleRate());
 						break;
 					case left_feedback:
 					case right_feedback:
@@ -394,11 +395,11 @@ void Converter::retweak(const int & type, int & parameter, int & integral_value)
 				switch(parameter) {
 					case cutoff_frequency:
 						if(value < 1.0f) value = 0;
-						else value = common::scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Player::singleton().timeInfo().sampleRate());
+						else value = scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Player::singleton().timeInfo().sampleRate());
 						break;
 					case modulation_sequencer_ticks:
 						if(value < 1.0f) value = 0;
-						else value = common::scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Player::singleton().timeInfo().samplesPerTick());
+						else value = scale::Exponential(maximum, math::pi * 2 / 10000, math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Player::singleton().timeInfo().samplesPerTick());
 						break;
 					case resonance:
 					case modulation_amplitude:
@@ -416,19 +417,19 @@ void Converter::retweak(const int & type, int & parameter, int & integral_value)
 				switch(parameter) {
 					case am_radians_per_second:
 						if(value < 1.0f) value = 0;
-						else value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 2.5e-3 * Player::singleton().timeInfo().sampleRate());
+						else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 2.5e-3 * Player::singleton().timeInfo().sampleRate());
 						break;
 					case am_glide:
 						if(value < 1.0f) value = 0;
-						else value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 15 * 22050 * math::pi * 2).apply_inverse(value * 5e-6 * Player::singleton().timeInfo().sampleRate()) * Player::singleton().timeInfo().sampleRate();
+						else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 15 * 22050 * math::pi * 2).apply_inverse(value * 5e-6 * Player::singleton().timeInfo().sampleRate()) * Player::singleton().timeInfo().sampleRate();
 						break;
 					case fm_radians_per_second:
 						if(value < 1.0f) value = 0;
-						else value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 2.5e-5 * Player::singleton().timeInfo().sampleRate());
+						else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 100 * math::pi * 2).apply_inverse(value * 2.5e-5 * Player::singleton().timeInfo().sampleRate());
 						break;
 					case fm_bandwidth:
 						if(value < 1.0f) value = 0;
-						else value = common::scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 5e-4 * Player::singleton().timeInfo().sampleRate());
+						else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 5e-4 * Player::singleton().timeInfo().sampleRate());
 						break;
 				}
 			}

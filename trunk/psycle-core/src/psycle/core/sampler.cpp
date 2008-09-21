@@ -294,7 +294,7 @@ namespace psy
 					if (pVoice->_filter._type < dsp::F_NONE)
 					{
 						TickFilterEnvelope( voice );
-						pVoice->_filter._cutoff = pVoice->_cutoff + common::math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
+						pVoice->_filter._cutoff = pVoice->_cutoff + psycle::helpers::math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (pVoice->_filter._cutoff < 0)
 						{
 							pVoice->_filter._cutoff = 0;

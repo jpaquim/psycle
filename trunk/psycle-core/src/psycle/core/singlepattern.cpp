@@ -20,7 +20,7 @@
 
 #include "singlepattern.h"
 #include "patternpool.h"
-#include "helpers/xml.h"
+#include "xml.h"
 
 #include <sstream>
 
