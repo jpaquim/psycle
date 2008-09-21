@@ -64,6 +64,7 @@ done
 if echo "$OS" | grep -i windows --silent; then
 	# On windows, files are sometimes erroneously set as executable.
 	# So we don't do the "svn propset svn:executable" on this platform.
+	true
 else
 	# We're on a unix system.
 	# find all executable files and do svn propset svn:executable on them.
