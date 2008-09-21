@@ -1,8 +1,8 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 ///\todo This file should be moved to the common psycle/helpers
 
-#include "helpers.h"
 #include "xml.h"
+#include "misc.h"
 namespace psy { namespace core {
 
 std::string replaceIllegalXmlChr(const std::string & text, bool strict) {

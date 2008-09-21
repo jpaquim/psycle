@@ -15,7 +15,7 @@
 #include "cstdint.h"
 //#include "dsp.h"
 //#include "fileio.h"
-#include "helpers.h"
+#include "misc.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
 #include "machinekey.hpp"

@@ -1,7 +1,7 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 ///\file \brief various signal processing utility functions and classes, psy::core::Cubic amongst others. based on revison  2663
 #pragma once
-#include "helpers.h"
+#include "misc.h"
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <psycle/helpers/math/truncate.hpp>
 #include <psycle/helpers/math/round.hpp>
