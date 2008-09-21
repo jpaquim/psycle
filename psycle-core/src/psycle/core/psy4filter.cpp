@@ -29,7 +29,7 @@
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
-#include "helpers/xml.h"
+#include "xml.h"
 
 #include "signalslib.h"
 

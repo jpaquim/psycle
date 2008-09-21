@@ -19,7 +19,7 @@
 ***************************************************************************/
 //
 #include "patternpool.h"
-#include "helpers/xml.h"
+#include "xml.h"
 #include "singlepattern.h"
 #include <sstream>
 
