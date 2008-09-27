@@ -195,7 +195,7 @@ namespace detail {
 			typedef std::nanoseconds (*clock_function) ();
 
 			/// measures the resolution of a clock and displays the result
-			void measure_clock_resolution(std::string const & clock_name, clock_function clock, unsigned int count = 6) {
+			void measure_clock_resolution(std::string const & clock_name, clock_function clock, unsigned int count = 10000000) {
 				std::nanoseconds min(std::days(1)), avg, max;
 				for(unsigned int i(0); i < count; ++i) {
 					unsigned long long int timeout(0);
@@ -240,11 +240,11 @@ namespace detail {
 			
 			BOOST_AUTO_TEST_CASE(clocks_test) {
 				measure_clock_resolution("std::time", iso_std_time, 1);
-				measure_clock_resolution("std::clock", iso_std_clock);
+				measure_clock_resolution("std::clock", iso_std_clock, 100);
 				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 					BOOST_MESSAGE("posix clocks");
 					using namespace posix;
-					bool static once = false; if(!once) config();
+					config();
 					measure_clock_resolution("CLOCK_REALTIME", realtime);
 					if(monotonic_clock_supported) measure_clock_resolution("CLOCK_MONOTONIC", monotonic);
 					if(cputime_supported) {
@@ -276,7 +276,7 @@ namespace detail {
 						BOOST_MESSAGE(s.str());
 					}
 					try {
-						measure_clock_resolution("QueryPerformanceCounter", performance_counter, 10000);
+						measure_clock_resolution("QueryPerformanceCounter", performance_counter);
 					} catch(std::runtime_error const & e) {
 						BOOST_MESSAGE(e.what());
 					}
