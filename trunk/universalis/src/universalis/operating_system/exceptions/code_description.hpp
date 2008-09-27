@@ -20,7 +20,7 @@ namespace universalis { namespace operating_system { namespace exceptions {
 namespace detail {
 	std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK code_description(
 		#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			int const = errno
+			int const code = errno
 		#else
 			::DWORD /* or ::HRESULT in some cases */ const /*= ::GetLastError()*/,
 			bool from_processor = false
