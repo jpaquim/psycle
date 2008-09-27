@@ -34,8 +34,11 @@ namespace universalis { namespace operating_system { namespace clocks {
 				return result > 0;
 			}
 		}
-
+		
 		void config() {
+			bool static once = false;
+			if(once) return;
+
 			monotonic_clock_id = process_cputime_clock_id = thread_cputime_clock_id = CLOCK_REALTIME;
 
 			/// TIMERS
@@ -107,6 +110,8 @@ namespace universalis { namespace operating_system { namespace clocks {
 					}
 				}
 			#endif
+
+			once = true;
 		}
 	}}
 #endif // defined DIVERSALIS__OPERATING_SYSTEM__POSIX
@@ -328,7 +333,7 @@ std::nanoseconds utc_since_epoch::current() {
 
 std::nanoseconds monotonic::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix::config();
+		detail::posix::config();
 		if(detail::posix::monotonic_clock_supported) return detail::posix::monotonic();
 		else return detail::posix::realtime();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
@@ -340,7 +345,7 @@ std::nanoseconds monotonic::current() {
 
 std::nanoseconds process::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix::config();
+		detail::posix::config();
 		if(detail::posix::cputime_supported) return detail::posix::process_cpu_time();
 		else return monotonic::current();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
@@ -352,7 +357,7 @@ std::nanoseconds process::current() {
 
 std::nanoseconds thread::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
-		bool static once = false; if(!once) detail::posix::config();
+		detail::posix::config();
 		if(detail::posix::cputime_supported) return detail::posix::thread_cpu_time();
 		else return process::current();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
