@@ -244,6 +244,7 @@ namespace std {
 		BOOST_AUTO_TEST_CASE(std_condition_speed_test) {
 			condition_speed_test_class test;
 			test.test(2);
+			test.test(4);
 			test.test(8);
 		}
 	}}}}
