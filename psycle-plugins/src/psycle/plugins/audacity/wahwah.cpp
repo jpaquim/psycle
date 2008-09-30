@@ -222,6 +222,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 	float frequency, omega, sn, cs, alpha;
 	static float anti_denormal = 1.0e-20f;
+	static const float depth_mul_1_minus_freqofs = depth * (1.f - freqofs) * .5f;
 
 		do
 			{
@@ -230,12 +231,14 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			float in_r = *psamplesright * 0.000030517578125f; 
 
 			if ((skipcount++) % lfoskipsamples == 0) {
-				frequency = (1.f + cos(float(skipcount) * lfoskip + phase)) * .5f; // Left channel
-				frequency = frequency * depth * (1.f - freqofs) + freqofs;
+				float calc_1_time = float(skipcount) * lfoskip + phase; // :-)
+
+				frequency = 1.f + std::cos(calc_1_time); // Left channel
+				frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
-				sn = sin(omega);
-				cs = cos(omega);
+				sn = std::sin(omega);
+				cs = std::cos(omega);
 				alpha = sn * res;
 				//b0_l = (1 - cs) * .5f;
 				b1_l = 1.f - cs;
@@ -244,12 +247,12 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				a1_l = -2.f * cs;
 				a2_l = 1.f - alpha;
 				
-				frequency = (1.f + cos(float(skipcount) * lfoskip + phase + M_PI)) * .5f; // Right channel
-				frequency = frequency * depth * (1.f - freqofs) + freqofs;
+				frequency = 1.f + std::cos(calc_1_time + M_PI); // Right channel
+				frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
-				sn = sin(omega);
-				cs = cos(omega);
+				sn = std::sin(omega);
+				cs = std::cos(omega);
 				alpha = sn * res;
 				//b0_r = (1 - cs) * .5f;
 				b1_r = 1.f - cs;
