@@ -363,14 +363,24 @@ void XMInstrument::Envelope::Load(RiffFile& riffFile,const std::uint32_t version
 {
 	riffFile.Read(m_Enabled);
 	riffFile.Read(m_Carry);
-	riffFile.Read(m_LoopStart);
-	riffFile.Read(m_LoopEnd);
-	riffFile.Read(m_SustainBegin);
-	riffFile.Read(m_SustainEnd);
 
-	std::int32_t num_of_points;
+	std::int32_t i32;
+
+	riffFile.Read(i32);
+	m_LoopStart = i32;
+	
+	riffFile.Read(i32);
+	m_LoopEnd = i32;
+	
+	riffFile.Read(i32);
+	m_SustainBegin = i32;
+	
+	riffFile.Read(i32);
+	m_SustainEnd = i32;
+
+	std::uint32_t num_of_points;
 	riffFile.Read(num_of_points);
-	for(int i = 0; i < num_of_points; i++)
+	for(std::size_t i = 0; i < num_of_points; ++i)
 	{
 		PointValue value;
 		riffFile.Read(value.first); // point
@@ -385,13 +395,13 @@ void XMInstrument::Envelope::Save(RiffFile& riffFile, const std::uint32_t versio
 	// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 	riffFile.Write(m_Enabled);
 	riffFile.Write(m_Carry);
-	riffFile.Write(m_LoopStart);
-	riffFile.Write(m_LoopEnd);
-	riffFile.Write(m_SustainBegin);
-	riffFile.Write(m_SustainEnd);
+	riffFile.Write(static_cast<std::int32_t>(m_LoopStart));
+	riffFile.Write(static_cast<std::int32_t>(m_LoopEnd));
+	riffFile.Write(static_cast<std::int32_t>(m_SustainBegin));
+	riffFile.Write(static_cast<std::int32_t>(m_SustainEnd));
 	riffFile.Write(static_cast<std::uint32_t>(m_Points.size()));
 
-	for(unsigned int i = 0; i < m_Points.size(); i++)
+	for(std::size_t i = 0; i < m_Points.size(); ++i)
 	{
 		riffFile.Write(m_Points[i].first); // point
 		riffFile.Write(m_Points[i].second); // value
