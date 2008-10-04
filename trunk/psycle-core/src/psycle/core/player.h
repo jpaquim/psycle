@@ -34,13 +34,18 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 		Player();
 		~Player();
 
-		Player static & singleton() {
-			// note: keep sure a player instance is created from the gui
-			// before starting audiothread
-			// or use single threaded only
-			static Player player;
-			return player; 
-		}
+	///\name singleton
+	///\{
+		public:
+			Player static & singleton() {
+				// note: keep sure a player instance is created from the gui
+				// before starting audiothread
+				// or use single threaded only
+				return singleton_; 
+			}
+		private:
+			Player static singleton_;
+	///\}
 
 	public:
 		/// used by the plugins to indicate that they need redraw.
