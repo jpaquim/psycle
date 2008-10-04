@@ -32,7 +32,7 @@ class SequenceLine;
 class PatternEvent;
 
 /**
-@author  Psycledelics  
+@author  Psycledelics
 */
 class Psy3Filter : public PsyFilterBase
 {
@@ -61,7 +61,7 @@ class Psy3Filter : public PsyFilterBase
 				_cmd(0),
 				_parameter(0)
 			{}
-			
+
 			std::uint8_t _note;
 			std::uint8_t _inst;
 			std::uint8_t _mach;
@@ -72,7 +72,7 @@ class Psy3Filter : public PsyFilterBase
 	///\name Singleton Pattern
 	///\{
 	protected:
-		Psy3Filter(); 
+		Psy3Filter();
 	private:
 		Psy3Filter( Psy3Filter const & );
 		Psy3Filter& operator=(Psy3Filter const&);
@@ -96,6 +96,7 @@ class Psy3Filter : public PsyFilterBase
 		virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
+		virtual bool LoadEINSv1(RiffFile* file,CoreSong& song,int minorversion);
 
 	protected:
 		static std::string const FILE_FOURCC;

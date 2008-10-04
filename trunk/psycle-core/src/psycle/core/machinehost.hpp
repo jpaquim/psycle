@@ -38,12 +38,13 @@ class MachineHost
 protected:
 	MachineHost(MachineCallbacks*);
 public:
+	virtual ~MachineHost() {}
 	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type) = 0;
 	virtual void FillFinderData(PluginFinder&, bool clearfirst=false);
-	
+
 	virtual const Hosts::type hostCode() const = 0;
 	virtual const std::string hostName() const = 0;
-	
+
 	virtual std::string const & getPluginPath(int) const { static std::string ret = ""; return ret; };
 	virtual int getNumPluginPaths() const { return 0; }
 	virtual void setPluginPath(std::string ) {};

@@ -26,6 +26,7 @@
 #include "songserializer.h"
 #include "machine.h"
 #include "instrument.h"
+#include "xminstrument.h"
 #include <cstdint>
 
 namespace psy { namespace core {
@@ -39,9 +40,9 @@ class MachineFactory;
 /// and their initial parameters
 class CoreSong {
 	public:
-		CoreSong(); 
+		CoreSong();
 		virtual ~CoreSong();
-		
+
 		/// clears all song data
 		virtual void clear();
 
@@ -105,11 +106,11 @@ class CoreSong {
 		private:
 			float bpm_;
 	///\}
-	
+
 	///\name the initial ticks per beat (TPB) when the song starts to play.
 	/// With multisequence, ticksSpeed helps on syncronization and timing.
 	/// Concretely, it helps to send the legacy "SequencerTick()" events to native plugins,
-	/// helps in knowing for how much a command is going to be tick'ed ( tws, as well as 
+	/// helps in knowing for how much a command is going to be tick'ed ( tws, as well as
 	/// retrigger code need to know how much they last ) as well as helping Sampulse
 	/// to get ticks according to legacy speed command of Modules.
 	/// isTicks is used to identify if the value in ticksPerBeat_ means ticks, or speed.
@@ -176,10 +177,15 @@ class CoreSong {
 	///\name instruments
 	///\{
 		public:
+			XMInstrument & rInstrument(const int index){return m_Instruments[index];}
+			XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];}
 			///\todo doc
 			///\todo hardcoded limits and wastes
-			///\todo XMInstrument
 			Instrument * _pInstrument[MAX_INSTRUMENTS];
+		private:
+			XMInstrument m_Instruments[MAX_INSTRUMENTS];
+			XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENTS];
+
 	///\}
 
 	#if 0 ///\todo Rethink about cpu measurements, and reenable/recode what's needed
@@ -231,7 +237,7 @@ class CoreSong {
 
 			/// Changes the destination of a wire connection.
 			///\param wiresource source mac index
-	
+
 			//\param wiredest new dest mac index
 			///\param wireindex index of the wire in wiresource to change
 			bool ChangeWireDestMac(Machine& srcMac, Machine &newDstMac, OutPort::id_type srctype, Wire::id_type wiretochange, InPort::id_type dsttype);
@@ -309,7 +315,7 @@ class Song : public UISong {
 	public:
 		Song();
 		virtual ~Song() {}
-		
+
 		virtual void clear();
 		virtual void DeleteMachine(Machine* mac, bool write_locked = false);
 	private:

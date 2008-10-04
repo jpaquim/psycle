@@ -39,7 +39,7 @@ class NativeHost : public MachineHost
 protected:
 	NativeHost(MachineCallbacks*);
 public:
-	~NativeHost();
+	virtual ~NativeHost();
 	static NativeHost& getInstance(MachineCallbacks*);
 
 	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);

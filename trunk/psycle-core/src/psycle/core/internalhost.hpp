@@ -32,7 +32,7 @@ class InternalHost : public MachineHost
 protected:
 	InternalHost(MachineCallbacks*);
 public:
-	~InternalHost();
+	virtual ~InternalHost();
 	static InternalHost& getInstance(MachineCallbacks*);
 
 	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);
