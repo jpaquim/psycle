@@ -16,7 +16,6 @@
 #include "dither.h"
 #include "machine.h"
 #include "riff.h"
-#include <boost/noncopyable.hpp>
 #include <thread>
 #include <date_time>
 #include <mutex>
@@ -34,17 +33,8 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 		Player();
 		~Player();
 
-	///\name singleton
-	///\{
-		public:
-			Player static & singleton() {
-				// note: keep sure a player instance is created from the gui
-				// before starting audiothread
-				// or use single threaded only
-				return singleton_; 
-			}
-		private:
-			Player static singleton_;
+		Player static & singleton();
+
 	///\}
 
 	public:
