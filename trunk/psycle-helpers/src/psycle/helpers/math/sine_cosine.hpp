@@ -10,7 +10,7 @@ namespace psycle { namespace helpers { namespace math {
 
 	/// computes both the sine and the cosine at the same time
 	template<typename Real> UNIVERSALIS__COMPILER__CONST
-	void inline sin_cos(Real const & restrict x, Real & restrict sine, Real & restrict cosine) {
+	void inline sin_cos(Real x, Real & restrict sine, Real & restrict cosine) {
 		// some compilers are able to optimise those two calls into one.
 		sine = std::sin(x);
 		cosine = std::cos(x);
@@ -30,17 +30,17 @@ namespace psycle { namespace helpers { namespace math {
 		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
 		
 		template<> UNIVERSALIS__COMPILER__CONST
-		void inline sin_cos<>(long double const & restrict x, long double & restrict sine, long double & restrict cosine) {
+		void inline sin_cos<>(long double const x, long double & restrict sine, long double & restrict cosine) {
 			::sincosl(x, &sine, &cosine);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		void inline sin_cos<>(double const & restrict x, double & restrict sine, double & restrict cosine) {
+		void inline sin_cos<>(double const x, double & restrict sine, double & restrict cosine) {
 			::sincos(x, &sine, &cosine);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		void inline sin_cos<>(float const & restrict x, float & restrict sine, float & restrict cosine) {
+		void inline sin_cos<>(float const x, float & restrict sine, float & restrict cosine) {
 			::sincosf(x, &sine, &cosine);
 		}
 
