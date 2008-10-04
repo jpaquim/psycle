@@ -52,105 +52,101 @@ XMSampler::Channel::PerformFX().
 */
 	struct CMD {
 		enum Type {
-		NONE				=	0x00,
-		PORTAMENTO_UP		=	0x01,// Portamento Up , Fine porta (0x01fx, and Extra fine porta 01ex )	(*t)
-		PORTAMENTO_DOWN		=	0x02,// Portamento Down, Fine porta (0x02fx, and Extra fine porta 02ex ) (*t)
-		PORTA2NOTE			=	0x03,// Tone Portamento						(*tn)
-		VIBRATO				=	0x04,// Do Vibrato							(*t)
-		TONEPORTAVOL		=	0x05,// Tone Portament & Volume Slide		(*t)
-		VIBRATOVOL			=	0x06,// Vibrato & Volume Slide				(*t)
-		TREMOLO				=	0x07,// Tremolo								(*t)
-		PANNING				=	0x08,// Set Panning Position				(p)
-		PANNINGSLIDE		=	0x09,// PANNING SLIDE						(*t)
-		SET_CHANNEL_VOLUME	=	0x0A,// Set channel's volume				(p)
-		CHANNEL_VOLUME_SLIDE=	0x0B,// channel Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx)	 (*tp)
-		VOLUME				=	0x0C,// Set Volume
-		VOLUMESLIDE			=	0x0D,// Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx)	 (*t)
-		EXTENDED			=	0x0E,// Extend Command
-		MIDI_MACRO			=	0x0F,// Impulse Tracker MIDI macro			(p)
-		ARPEGGIO			=	0x10,//	Arpeggio							(*t)
-		RETRIG				=	0x11,// Retrigger Note						(*t)
-		SET_GLOBAL_VOLUME	=	0x12,// Sets Global Volume
-		GLOBAL_VOLUME_SLIDE =	0x13,// Slides Global Volume				(*t)
-		FINE_VIBRATO		=	0x14,// Vibrato 4 times finer				(*t)
-		SET_ENV_POSITION	=	0x15,// Set Envelope Position
-							//0x16
-		TREMOR				=	0x17,// Tremor								(*t)
-		PANBRELLO			=	0x18,// Panbrello							(*t)
-		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
+			NONE                 = 0x00,
+			PORTAMENTO_UP        = 0x01, ///< Portamento Up , Fine porta (0x01fx, and Extra fine porta 01ex ) (*t)
+			PORTAMENTO_DOWN      = 0x02, ///< Portamento Down, Fine porta (0x02fx, and Extra fine porta 02ex ) (*t)
+			PORTA2NOTE           = 0x03, ///< Tone Portamento (*tn)
+			VIBRATO              = 0x04, ///< Do Vibrato (*t)
+			TONEPORTAVOL         = 0x05, ///< Tone Portament & Volume Slide (*t)
+			VIBRATOVOL           = 0x06, ///< Vibrato & Volume Slide (*t)
+			TREMOLO              = 0x07, ///< Tremolo (*t)
+			PANNING              = 0x08, ///< Set Panning Position (p)
+			PANNINGSLIDE         = 0x09, ///< Panning slide (*t)
+			SET_CHANNEL_VOLUME   = 0x0A, ///< Set channel's volume (p)
+			CHANNEL_VOLUME_SLIDE = 0x0B, ///< channel Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx) (*tp)
+			VOLUME               = 0x0C, ///< Set Volume
+			VOLUMESLIDE          = 0x0D, ///< Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx) (*t)
+			EXTENDED             = 0x0E, ///< Extend Command
+			MIDI_MACRO           = 0x0F, ///< Impulse Tracker MIDI macro (p)
+			ARPEGGIO             = 0x10, ///< Arpeggio (*t)
+			RETRIG               = 0x11, ///< Retrigger Note (*t)
+			SET_GLOBAL_VOLUME    = 0x12, ///< Sets Global Volume
+			GLOBAL_VOLUME_SLIDE  = 0x13, ///< Slides Global Volume (*t)
+			FINE_VIBRATO         = 0x14, ///< Vibrato 4 times finer (*t)
+			SET_ENV_POSITION     = 0x15, ///< Set Envelope Position
+			//0x16
+			TREMOR               = 0x17, ///< Tremor (*t)
+			PANBRELLO            = 0x18, ///< Panbrello (*t)
+			OFFSET               = 0x90  ///< Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
 		};
 	};
-	struct CMD_E
-	{
+	struct CMD_E {
 		enum Type {
-		E_GLISSANDO_TYPE	=	0x30, //E3     Set gliss control			(p)
-		E_VIBRATO_WAVE		=	0x40, //E4     Set vibrato control			(p)
-								//0x50
-		E_PANBRELLO_WAVE	=	0x60, //									(p)
-		E_TREMOLO_WAVE		=	0x70, //E7     Set tremolo control			(p)
-		E_SET_PAN			=	0x80,									//	(p)
-		E9					=	0x90,
-								//0xA0,
-								//0xB0,
-		E_DELAYED_NOTECUT	=	0xC0, //EC     Note cut						(t)
-		E_NOTE_DELAY		=	0xD0, //ED     Note delay					(tn)
-		EE					=	0xE0,
-		E_SET_MIDI_MACRO	=	0xF0//										(p)
+			E_GLISSANDO_TYPE  = 0x30, ///< E3 Set gliss control (p)
+			E_VIBRATO_WAVE    = 0x40, ///< E4 Set vibrato control (p)
+			//0x50
+			E_PANBRELLO_WAVE  = 0x60, ///< (p)
+			E_TREMOLO_WAVE    = 0x70, ///< E7 Set tremolo control (p)
+			E_SET_PAN         = 0x80, ///< (p)
+			E9                = 0x90,
+			//0xA0,
+			//0xB0,
+			E_DELAYED_NOTECUT = 0xC0, ///< EC Note cut (t)
+			E_NOTE_DELAY      = 0xD0, ///< ED Note delay (tn)
+			EE                = 0xE0,
+			E_SET_MIDI_MACRO  = 0xF0  ///< (p)
 		};
 	};
-	struct CMD_E9
-	{
+	struct CMD_E9 {
 		enum Type {
-		E9_SURROUND_OFF		=	0x00,//										(p)
-		E9_SURROUND_ON		=	0x01,//										(p)
-		E9_REVERB_OFF		=	0x08,//										(p)
-		E9_REVERB_FORCE		=	0x09,//										(p)
-		E9_STANDARD_SURROUND=	0x0A,//										(p)
-		E9_QUAD_SURROUND	=	0x0B,// (p)Select quad surround mode: this allows you to pan in the rear channels, especially useful for 4-speakers playback. Note that S9A and S9B do not activate the surround for the current channel, it is a global setting that will affect the behavior of the surround for all channels. You can enable or disable the surround for individual channels by using the S90 and S91 effects. In quad surround mode, the channel surround will stay active until explicitely disabled by a S90 effect
-		E9_GLOBAL_FILTER	=	0x0C,// (p)Select global filter mode (IT compatibility). This is the default, when resonant filters are enabled with a Zxx effect, they will stay active until explicitely disabled by setting the cutoff frequency to the maximum (Z7F), and the resonance to the minimum (Z80).
-		E9_LOCAL_FILTER		=	0x0D,// (p)Select local filter mode (MPT beta compatibility): when this mode is selected, the resonant filter will only affect the current note. It will be deactivated when a new note is being played.
-		E9_PLAY_FORWARD		=	0x0E,// Play forward. You may use this to temporarily force the direction of a bidirectional loop to go forward.
-		E9_PLAY_BACKWARD	=	0x0F // Play backward. The current instrument will be played backwards, or it will temporarily set the direction of a loop to go backward.
+			E9_SURROUND_OFF      = 0x00, ///< (p)
+			E9_SURROUND_ON       = 0x01, ///< (p)
+			E9_REVERB_OFF        = 0x08, ///< (p)
+			E9_REVERB_FORCE      = 0x09, ///< (p)
+			E9_STANDARD_SURROUND = 0x0A, ///< (p)
+			E9_QUAD_SURROUND     = 0x0B, ///< (p) Select quad surround mode: this allows you to pan in the rear channels, especially useful for 4-speakers playback. Note that S9A and S9B do not activate the surround for the current channel, it is a global setting that will affect the behavior of the surround for all channels. You can enable or disable the surround for individual channels by using the S90 and S91 effects. In quad surround mode, the channel surround will stay active until explicitely disabled by a S90 effect
+			E9_GLOBAL_FILTER     = 0x0C, ///< (p) Select global filter mode (IT compatibility). This is the default, when resonant filters are enabled with a Zxx effect, they will stay active until explicitely disabled by setting the cutoff frequency to the maximum (Z7F), and the resonance to the minimum (Z80).
+			E9_LOCAL_FILTER      = 0x0D, ///< (p)Select local filter mode (MPT beta compatibility): when this mode is selected, the resonant filter will only affect the current note. It will be deactivated when a new note is being played.
+			E9_PLAY_FORWARD      = 0x0E, ///< Play forward. You may use this to temporarily force the direction of a bidirectional loop to go forward.
+			E9_PLAY_BACKWARD     = 0x0F  ///< Play backward. The current instrument will be played backwards, or it will temporarily set the direction of a loop to go backward.
 		};
 	};
-	struct CMD_EE
-	{
+	struct CMD_EE {
 		enum Type {
-		EE_BACKGROUNDNOTECUT	=	0x00,
-		EE_BACKGROUNDNOTEOFF	=	0x01,
-		EE_BACKGROUNDNOTEFADE	=	0x02,
-		EE_SETNOTECUT			=	0x03,
-		EE_SETNOTECONTINUE		=	0x04,
-		EE_SETNOTEOFF			=	0x05,
-		EE_SETNOTEFADE			=	0x06,
-		EE_VOLENVOFF			=	0x07,
-		EE_VOLENVON				=	0x08,
-		EE_PANENVOFF			=	0x09,
-		EE_PANENVON				=	0x0A,
-		EE_PITCHENVON			=	0x0B,
-		EE_PITCHENVOFF			=	0x0C
+			EE_BACKGROUNDNOTECUT  = 0x00,
+			EE_BACKGROUNDNOTEOFF  = 0x01,
+			EE_BACKGROUNDNOTEFADE = 0x02,
+			EE_SETNOTECUT         = 0x03,
+			EE_SETNOTECONTINUE    = 0x04,
+			EE_SETNOTEOFF         = 0x05,
+			EE_SETNOTEFADE        = 0x06,
+			EE_VOLENVOFF          = 0x07,
+			EE_VOLENVON           = 0x08,
+			EE_PANENVOFF          = 0x09,
+			EE_PANENVON           = 0x0A,
+			EE_PITCHENVON         = 0x0B,
+			EE_PITCHENVOFF        = 0x0C
 		};
 	};
 
-	struct CMD_VOL
-	{
+	struct CMD_VOL {
 		enum Type {
-		VOL_VOLUME0			=	0x00, // 0x00..0x0F (63)  ||
-		VOL_VOLUME1			=	0x10, // 0x10..0x1F (63)  || All are the same command.
-		VOL_VOLUME2			=	0x20, // 0x20..0x2F (63)  ||
-		VOL_VOLUME3			=	0x30, // 0x30..0x3F (63)  ||
-		VOL_VOLSLIDEUP		=	0x40, // 0x40..0x4F (16)
-		VOL_VOLSLIDEDOWN	=	0x50, // 0x50..0x5F (16)
-		VOL_FINEVOLSLIDEUP	=	0x60, // 0x60..0x6F (16)
-		VOL_FINEVOLSLIDEDOWN=	0x70, // 0x70..0x7F (16)
-		VOL_PANNING			=	0x80, // 0x80..0x8F (16)
-		VOL_PANSLIDELEFT	=	0x90, // 0x90..0x9F (16)
-		VOL_PANSLIDERIGHT	=	0xA0, // 0xA0..0xAF (16)
-		VOL_VIBRATO			=	0xB0, // 0xB0..0xBF (16) Linked to Vibrato Vy = 4xy
-		VOL_TONEPORTAMENTO	=	0xC0, // 0xC0..0xCF (16) Linked to Porta2Note
-		VOL_PITCH_SLIDE_UP	=	0xD0, // 0xD0..0xDF (16)
-		VOL_PITCH_SLIDE_DOWN=	0xE0, // 0xE0..0xEF (16)
-		// 0xFF -> Blank.
+			VOL_VOLUME0          = 0x00, ///< 0x00..0x0F (63)  ||
+			VOL_VOLUME1          = 0x10, ///< 0x10..0x1F (63)  || All are the same command.
+			VOL_VOLUME2          = 0x20, ///< 0x20..0x2F (63)  ||
+			VOL_VOLUME3          = 0x30, ///< 0x30..0x3F (63)  ||
+			VOL_VOLSLIDEUP       = 0x40, ///< 0x40..0x4F (16)
+			VOL_VOLSLIDEDOWN     = 0x50, ///< 0x50..0x5F (16)
+			VOL_FINEVOLSLIDEUP   = 0x60, ///< 0x60..0x6F (16)
+			VOL_FINEVOLSLIDEDOWN = 0x70, ///< 0x70..0x7F (16)
+			VOL_PANNING          = 0x80, ///< 0x80..0x8F (16)
+			VOL_PANSLIDELEFT     = 0x90, ///< 0x90..0x9F (16)
+			VOL_PANSLIDERIGHT    = 0xA0, ///< 0xA0..0xAF (16)
+			VOL_VIBRATO          = 0xB0, ///< 0xB0..0xBF (16) Linked to Vibrato Vy = 4xy
+			VOL_TONEPORTAMENTO   = 0xC0, ///< 0xC0..0xCF (16) Linked to Porta2Note
+			VOL_PITCH_SLIDE_UP   = 0xD0, ///< 0xD0..0xDF (16)
+			VOL_PITCH_SLIDE_DOWN = 0xE0, ///< 0xE0..0xEF (16)
+			// 0xFF -> Blank.
 		};
 	};
 
@@ -257,7 +253,7 @@ XMSampler::Channel::PerformFX().
 
 		// Current sample position
 		virtual const std::uint32_t  Position(){ return m_Position >>32;}
-		virtual void Position(const	std::uint32_t value){
+		virtual void Position(const std::uint32_t value){
 			if ( value < Length()) m_Position = value << 32;
 			else m_Position = (Length()-1)<<32;
 		}
@@ -327,29 +323,31 @@ XMSampler::Channel::PerformFX().
 	public:
 		struct EnvelopeStage {
 			enum Type {
-				OFF		= 0,
-				DOSTEP	= 1, // normal operation, follow the steps.
-				HASLOOP	= 2, // Indicates that the envelope *has* a (normal) loop (not that it is playing it)
-				HASSUSTAIN	= 4, // This indicates that the envelope *has* a sustain (not that it is playing it)
-				RELEASE = 8  // Indicates that a Note-Off has been issued.
+				OFF        = 0,
+				DOSTEP     = 1, ///< normal operation, follow the steps.
+				HASLOOP    = 2, ///< Indicates that the envelope *has* a (normal) loop (not that it is playing it)
+				HASSUSTAIN = 4, ///< This indicates that the envelope *has* a sustain (not that it is playing it)
+				RELEASE    = 8  ///< Indicates that a Note-Off has been issued.
 			};
 		};
-		// EnvelopeMode defines what the first value of a PointValue means
-		// TICK = one tracker tick ( speed depends on the BPM )
-		// MILIS = a millisecond. (independant of BPM).
-/*		struct EnvelopeMode {
-			enum Type {
-				TICK=0,
-				MILIS
+		#if 0
+			// EnvelopeMode defines what the first value of a PointValue means
+			// TICK = one tracker tick ( speed depends on the BPM )
+			// MILIS = a millisecond. (independant of BPM).
+			struct EnvelopeMode {
+				enum Type {
+					TICK=0,
+					MILIS
+				};
 			};
-		};*/
+		#endif
 		EnvelopeController(){};
 		~EnvelopeController(){};
 
 		void Init(XMInstrument::Envelope *pEnvelope = NULL, MachineCallbacks * callbacks = NULL);
 
-//		const EnvelopeMode Mode() { return m_Mode; }
-//		const Mode(EnvelopeMode _mode){ m_Mode=_mode; }
+		//const EnvelopeMode Mode() { return m_Mode; }
+		//const Mode(EnvelopeMode _mode){ m_Mode=_mode; }
 
 		void NoteOn();
 		void NoteOff();
@@ -439,8 +437,8 @@ XMSampler::Channel::PerformFX().
 
 
 /////////////////////////////////////////////////////////////////////////////////////
-//  XMSampler::Voice Declaration
-//	(This class could be called XMInstrumentController too, but "Voice" describes better how it is used.)
+// XMSampler::Voice Declaration
+// (This class could be called XMInstrumentController too, but "Voice" describes better how it is used.)
 
 	class Voice
 	{
@@ -568,20 +566,22 @@ XMSampler::Channel::PerformFX().
 		const int CutOff() { return m_CutOff; }
 		void CutOff(int co)
 		{
-/*			m_CutOff = co;	m_Filter._cutoff = co;
-			if ( m_Filter._type == dsp::F_NONE) { m_Filter._type =dsp::F_LOWPASS12; }
-				m_Filter.Update();
-*/
+			#if 0
+				m_CutOff = co; m_Filter._cutoff = co;
+				if ( m_Filter._type == dsp::F_NONE) { m_Filter._type =dsp::F_LOWPASS12; }
+					m_Filter.Update();
+			#endif
 			m_CutOff = co; m_Filter.Cutoff(co);
 		}
 
 		const int Ressonance() { return m_Ressonance; }
 		void Ressonance(int res)
 		{
-/*			m_Ressonance = res; m_Filter._q = res;
-			if ( m_Filter._type == dsp::F_NONE) { m_Filter._type =dsp::F_LOWPASS12; }
-			m_Filter.Update();
-*/
+			#if 0
+				m_Ressonance = res; m_Filter._q = res;
+				if ( m_Filter._type == dsp::F_NONE) { m_Filter._type =dsp::F_LOWPASS12; }
+				m_Filter.Update();
+			#endif
 			m_Ressonance = res; m_Filter.Ressonance(res);
 		}
 
@@ -622,7 +622,7 @@ XMSampler::Channel::PerformFX().
 		EnvelopeController m_PitchEnvelope;
 
 		WaveDataController m_WaveDataController;
-//		XDSPWaveController m_WaveDataController;
+		//XDSPWaveController m_WaveDataController;
 
 		dsp::ITFilter m_Filter;
 		int m_CutOff;
@@ -692,20 +692,20 @@ XMSampler::Channel::PerformFX().
 	public:
 		struct EffectFlag
 		{
-			static const int VIBRATO		=	0x00000001;
-			static const int PITCHSLIDE		=	0x00000002;
-			static const int CHANNELVOLSLIDE =	0x00000004;
-			static const int SLIDE2NOTE		=	0x00000008;
-			static const int VOLUMESLIDE	=	0x00000010;
-			static const int PANSLIDE		=	0x00000020;
-			static const int TREMOLO		=	0x00000040;
-			static const int ARPEGGIO		=	0x00000080;
-			static const int NOTECUT		=	0x00000100;
-			static const int PANBRELLO		=	0x00000200;
-			static const int RETRIG 		=   0x00000400;
-			static const int TREMOR			=	0x00000800;
-			static const int NOTEDELAY		=	0x00001000;
-			static const int GLOBALVOLSLIDE	=	0x00002000;
+			static const int VIBRATO         = 0x00000001;
+			static const int PITCHSLIDE      = 0x00000002;
+			static const int CHANNELVOLSLIDE = 0x00000004;
+			static const int SLIDE2NOTE      = 0x00000008;
+			static const int VOLUMESLIDE     = 0x00000010;
+			static const int PANSLIDE        = 0x00000020;
+			static const int TREMOLO         = 0x00000040;
+			static const int ARPEGGIO        = 0x00000080;
+			static const int NOTECUT         = 0x00000100;
+			static const int PANBRELLO       = 0x00000200;
+			static const int RETRIG          = 0x00000400;
+			static const int TREMOR          = 0x00000800;
+			static const int NOTEDELAY       = 0x00001000;
+			static const int GLOBALVOLSLIDE  = 0x00002000;
 		};
 
 		Channel()
@@ -776,9 +776,9 @@ XMSampler::Channel::PerformFX().
 		void ForegroundVoice(XMSampler::Voice* pVoice) { m_pForegroundVoice = pVoice; }
 
 		const int Note(){ return m_Note;}
-		void Note(const int note)
-		{	m_Note = note;
-			if (ForegroundVoice()) m_Period = ForegroundVoice()->NoteToPeriod(note);
+		void Note(const int note) {
+			m_Note = note;
+			if(ForegroundVoice()) m_Period = ForegroundVoice()->NoteToPeriod(note);
 		}
 		const double Period(){return m_Period;}
 		void Period(const double value){m_Period = value;}
@@ -806,7 +806,7 @@ XMSampler::Channel::PerformFX().
 		const int LastVoiceVolume(){return m_LastVoiceVolume;}
 		void LastVoiceVolume(const int value){m_LastVoiceVolume = value;}
 
-		const float PanFactor(){return 	m_PanFactor;}
+		const float PanFactor() { return m_PanFactor; }
 		void PanFactor(const float value){
 			m_PanFactor = value;
 			if ( ForegroundVoice()) ForegroundVoice()->PanFactor(value);
@@ -878,7 +878,7 @@ XMSampler::Channel::PerformFX().
 
 		const bool IsGrissando(){return m_bGrissando;}
 		void IsGrissando(const bool value){m_bGrissando = value;}
-		void VibratoType(const int value){	m_VibratoType = value;}
+		void VibratoType(const int value) { m_VibratoType = value;}
 		const int VibratoType() {return m_VibratoType;}
 		void TremoloType(const int type){m_TremoloType = type;}
 		const int TremoloType(){return m_TremoloType;}
@@ -887,13 +887,10 @@ XMSampler::Channel::PerformFX().
 
 		const bool IsArpeggio() { return ((m_EffectFlags & EffectFlag::ARPEGGIO) != 0); }
 		const bool IsVibrato(){return (m_EffectFlags & EffectFlag::VIBRATO) != 0;}
-/*		void VibratoAmount(const double value){m_VibratoAmount = value;}
-		const double VibratoAmount(){return m_VibratoAmount;}
-*/
+		//void VibratoAmount(const double value){m_VibratoAmount = value;}
+		//const double VibratoAmount(){return m_VibratoAmount;}
 
 	private:
-
-
 		int m_Index;// Channel Index.
 		XMSampler *m_pSampler;
 		int m_InstrumentNo;///< ( 0 .. 255 )
@@ -925,7 +922,7 @@ XMSampler::Channel::PerformFX().
 
 		int m_EffectFlags;
 
-		int	m_PitchSlideSpeed;
+		int m_PitchSlideSpeed;
 
 		/// Global Volume Slide Speed
 		float m_GlobalVolSlideSpeed;
@@ -1014,19 +1011,19 @@ XMSampler::Channel::PerformFX().
 
 	MachineCallbacks* pCallbacks() { return callbacks; }
 
-/*	Deprecated. See why in the body of "CalcBPMAndTick()"
+	#if 0 // Deprecated. See why in the body of "CalcBPMAndTick()"
+		//Beats Per Minute
+		void BPM (const int value){m_BPM = value;}
+		const int BPM (){return m_BPM;}
 
-	//Beats Per Minute
-	void BPM (const int value){m_BPM = value;}
-	const int BPM (){return m_BPM;}
+		// MOD Tick
+		void TicksPerRow(const int value){m_TicksPerRow = value;}
+		const int TicksPerRow(){ return m_TicksPerRow;}
 
-	// MOD Tick
-	void TicksPerRow(const int value){m_TicksPerRow = value;}
-	const int TicksPerRow(){ return m_TicksPerRow;}
-
-	/// BPM Speed
-	void CalcBPMAndTick();
-*/
+		/// BPM Speed
+		void CalcBPMAndTick();
+	#endif
+	
 	int Speed2LPB(int speed) { return 24/((speed==0)?6:speed); }
 	int LPB2Speed(int lpb) { return 24/lpb; }
 	Voice* GetCurrentVoice(int channelNum)
@@ -1129,18 +1126,27 @@ protected:
 	void WorkVoices(int sampleOffset, int numsamples);
 
 private:
+	/// Using Linear or Amiga Slides.
+	bool m_bAmigaSlides;
 
-	bool m_bAmigaSlides;// Using Linear or Amiga Slides.
 	bool m_UseFilters;
 	int m_GlobalVolume;
 	int m_PanningMode;
-/*	int m_BPM;
-	int m_TicksPerRow;	// Tracker Ticks. Also called "speed".
-*/
-	int m_TickCount;	// Current Tick number.
-	int m_DeltaTick;	// Duration in Samples of a tracker tick.
-	int m_NextSampleTick;// The sample position of the next Tracker Tick
-	int _sampleCounter;	// Number of Samples since note start
+	
+	#if 0
+		int m_BPM;
+		/// Tracker Ticks. Also called "speed".
+		int m_TicksPerRow;
+	#endif
+	
+	/// Current Tick number.
+	int m_TickCount;
+	/// Duration in Samples of a tracker tick.
+	int m_DeltaTick;
+	/// The sample position of the next Tracker Tick
+	int m_NextSampleTick;
+	/// Number of Samples since note start
+	int _sampleCounter;
 
 	typedef std::scoped_lock<std::mutex> scoped_lock;
 	std::mutex mutable m_Mutex;

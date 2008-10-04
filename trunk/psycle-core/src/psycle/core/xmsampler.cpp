@@ -67,7 +67,7 @@ const int XMSampler::Voice::m_FineRampDownData[256] = {
 	-48,-49,-49,-50,-50,-51,-51,-52,-52,-53,-53,-54,-54,-55,-55,-56,
 	-56,-57,-57,-58,-58,-59,-59,-60,-60,-61,-61,-62,-62,-63,-63,-64
 };
-const int XMSampler::Voice::m_FineSquareTable[256] =	{
+const int XMSampler::Voice::m_FineSquareTable[256] = {
 	64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
 	64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
 	64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,64 ,
@@ -88,23 +88,23 @@ const int XMSampler::Voice::m_FineSquareTable[256] =	{
 
 
 // Random wave table (randomly choosen values. Not official)
-const int XMSampler::Voice::m_RandomTable[256] =	{
-	 48,-64,-21, 45, 51, 20,-32,-57, 62, 13,-35,-43,-33,-16, -8,-48,
-	  8, 36, 52, -3, 58,-34,-31,-20,  5,-30, 32, 54, -9,-19, -6,-38,
+const int XMSampler::Voice::m_RandomTable[256] = {
+	48,-64,-21, 45, 51, 20,-32,-57, 62, 13,-35,-43,-33,-16, -8,-48,
+	8, 36, 52, -3, 58,-34,-31,-20,  5,-30, 32, 54, -9,-19, -6,-38,
 	-11, 43, 10,-47,  2, 53, 11,-56,  3, 55,  9,-44,-15,  4,-63, 59,
-     21,-17, 44, -2,-25,-36, 12,-14, 56, 61, 42,-50,-46, 49,-27,-45,
-	 30, 63,-28, 29, 33, 22,-41, 57, 47, 19,-51,-54,-42,-22, -7,-61,
-	 14, 25, 34, -4, 40,-49,-40,-26,  7,-39, 24, 37, -10,-24, -5,-53,
-	 -12, 27, 16,-59,  0, 35, 17, 50,  1, 38, 15,-55,-18,  6, 60, 41,
-	 23,-23, 28, -1,-29,-52, 18,-13, 39, 46, 26,-62,-58, 31,-37,-59,
-	 30, 63,-28, 29, 33, 22,-41, 57, 47, 19,-51,-54,-42,-22, -7,-61,
-	 21,-17, 44, -2,-25,-36, 12,-14, 56, 61, 42,-50,-46, 49,-27,-45,
-	 14, 25, 34, -4, 40,-49,-40,-26,  7,-39, 24, 37, -10,-24, -5,-53,
-	 -11, 43, 10,-47,  2, 53, 11,-56,  3, 55,  9,-44,-15,  4,-63, 59,
-	 -12, 27, 16,-59,  0, 35, 17, 50,  1, 38, 15,-55,-18,  6, 60, 41,
-	 8, 36, 52, -3, 58,-34,-31,-20,  5,-30, 32, 54, -9,-19, -6,-38,
-	 23,-23, 28, -1,-29,-52, 18,-13, 39, 46, 26,-62,-58, 31,-37,-59,
-	 48,-64,-21, 45, 51, 20,-32,-57, 62, 13,-35,-43,-33,-16, -8,-48,
+	21,-17, 44, -2,-25,-36, 12,-14, 56, 61, 42,-50,-46, 49,-27,-45,
+	30, 63,-28, 29, 33, 22,-41, 57, 47, 19,-51,-54,-42,-22, -7,-61,
+	14, 25, 34, -4, 40,-49,-40,-26,  7,-39, 24, 37, -10,-24, -5,-53,
+	-12, 27, 16,-59,  0, 35, 17, 50,  1, 38, 15,-55,-18,  6, 60, 41,
+	23,-23, 28, -1,-29,-52, 18,-13, 39, 46, 26,-62,-58, 31,-37,-59,
+	30, 63,-28, 29, 33, 22,-41, 57, 47, 19,-51,-54,-42,-22, -7,-61,
+	21,-17, 44, -2,-25,-36, 12,-14, 56, 61, 42,-50,-46, 49,-27,-45,
+	14, 25, 34, -4, 40,-49,-40,-26,  7,-39, 24, 37, -10,-24, -5,-53,
+	-11, 43, 10,-47,  2, 53, 11,-56,  3, 55,  9,-44,-15,  4,-63, 59,
+	-12, 27, 16,-59,  0, 35, 17, 50,  1, 38, 15,-55,-18,  6, 60, 41,
+	8, 36, 52, -3, 58,-34,-31,-20,  5,-30, 32, 54, -9,-19, -6,-38,
+	23,-23, 28, -1,-29,-52, 18,-13, 39, 46, 26,-62,-58, 31,-37,-59,
+	48,-64,-21, 45, 51, 20,-32,-57, 62, 13,-35,-43,-33,-16, -8,-48,
 };
 
 
@@ -117,35 +117,36 @@ const int XMSampler::Voice::m_RandomTable[256] =	{
 // This doesn't take care of the roundings of the values.
 
 const float XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
-	54787,	51712,	48809,	46070,	43484,	41044,	38740,	36566,	34514,	32576,	30748,	29022,
-	27393,	25856,	24405,	23035,	21742,	20522,	19370,	18283,	17257,	16288,	15374,	14511,
-	13697,	12928,	12202,	11517,	10871,	10261,	9685,	9141,	8628,	8144,	7687,	7256,
-	6848,	6464,	6101,	5759,	5436,	5130,	4843,	4571,	4314,	4072,	3844,	3628,
-	3424,	3232,	3051,	2879,	2718,	2565,	2421,	2285,	2157,	2036,	1922,	1814,
-	1712,	1616,	1525,	1440,	1359,	1283,	1211,	1143,	1079,	1018,	961,	907,
-	856,	808,	763,	720,	679,	641,	605,	571,	539,	509,	480,	453,
-	428,	404,	381,	360,	340,	321,	303,	286,	270,	255,	240,	227,
-	214,	202,	191,	180,	170,	160,	151,	143,	135,	127,	120,	113,
-	107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		57
+	54787, 51712, 48809, 46070, 43484, 41044, 38740, 36566, 34514, 32576, 30748, 29022,
+	27393, 25856, 24405, 23035, 21742, 20522, 19370, 18283, 17257, 16288, 15374, 14511,
+	13697, 12928, 12202, 11517, 10871, 10261,  9685,  9141,  8628,  8144,  7687,  7256,
+	6848,   6464,  6101,  5759,  5436,  5130,  4843,  4571,  4314,  4072,  3844,  3628,
+	3424,   3232,  3051,  2879,  2718,  2565,  2421,  2285,  2157,  2036,  1922,  1814,
+	1712,   1616,  1525,  1440,  1359,  1283,  1211,  1143,  1079,  1018,   961,   907,
+	856,     808,   763,   720,   679,   641,   605,   571,   539,   509,   480,   453,
+	428,     404,   381,   360,   340,   321,   303,   286,   270,   255,   240,   227,
+	214,     202,   191,   180,   170,   160,   151,   143,   135,   127,   120,   113,
+	107,     101,    95,    90,    85,    80,    75,    71,    67,    63,    60,    57
 
 };
+#if 0
 // Original table
-/*		const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
-	54784,	51712,	48768,	46080,	43392,	40960,	38656,	36480,	34432,	32512,	30720,	29008,
-	27392,	25856,	24384,	23040,	21696,	20480,	19328,	18240,	17216,	16256,	15360,	14504,
-	13696,	12928,	12192,	11520,	10848,	10240,	9664,	9120,	8608,	8128,	7680,	7252,
-	6848,	6464,	6096,	5760,	5424,	5120,	4832,	4560,	4304,	4064,	3840,	3626,
-	3424,	3232,	3048,	2880,	2712,	2560,	2416,	2280,	2152,	2032,	1920,	1813,
-	1712,	1616,	1524,	1440,	1356,	1280,	1208,	1140,	1076,	1016,	960,	906,
-	856,	808,	762,	720,	678,	640,	604,	570,	538,	508,	480,	453,
-	428,	404,	381,	360,	339,	320,	302,	285,	269,	254,	240,	226,
-	214,	202,	190,	180,	170,	160,	151,	143,	135,	127,	120,	113,
-	107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		56
+const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
+	54784, 51712, 48768, 46080, 43392, 40960, 38656, 36480, 34432, 32512, 30720, 29008,
+	27392, 25856, 24384, 23040, 21696, 20480, 19328, 18240, 17216, 16256, 15360, 14504,
+	13696, 12928, 12192, 11520, 10848, 10240,  9664,  9120,  8608,  8128,  7680,  7252,
+	6848,   6464,  6096,  5760,  5424,  5120,  4832,  4560,  4304,  4064,  3840,  3626,
+	3424,   3232,  3048,  2880,  2712,  2560,  2416,  2280,  2152,  2032,  1920,  1813,
+	1712,   1616,  1524,  1440,  1356,  1280,  1208,  1140,  1076,  1016,   960,   906,
+	856,     808,   762,   720,   678,   640,   604,   570,   538,   508,   480,   453,
+	428,     404,   381,   360,   339,   320,   302,   285,   269,   254,   240,   226,
+	214,     202,   190,   180,   170,   160,   151,   143,   135,   127,   120,   113,
+	107,     101,    95,    90,    85,    80,    75,    71,    67,    63,    60,    56
 };
-*/
+#endif
 
 //////////////////////////////////////////////////////////////////////////
-//	XMSampler::WaveDataController Implementation
+// XMSampler::WaveDataController Implementation
 void XMSampler::WaveDataController::Init(XMInstrument::WaveData* wave, const int layer)
 {
 	m_Layer = layer;
@@ -228,7 +229,7 @@ void XMSampler::XDSPWaveController::RecreateResampler(void)
 	CXResamplerFilter *prf = xdsp.CreateKaiserSincFilter(m_Speed1x,Global::pPlayer->SampleRate(), 32, 0.5f, 1.0f);
 
 	pFilter = xdsp.PrepareResamplerFilter(prf, m_pWave->IsWaveStereo()?2:1);
-	delete prf;	// original filter is no longer needed
+	delete prf; // original filter is no longer needed
 
 	pResampler = xdsp.ResamplerCreate(pFilter, ResamplerCB, this, 10480);
 }
@@ -249,7 +250,7 @@ void XMSampler::EnvelopeController::Init(XMInstrument::Envelope *pEnvelope, Mach
 		m_pCallbacks = callbacks;
 	}
 	m_Samples = 0;
-//			m_Mode = EnvelopeMode::TICK;
+	//m_Mode = EnvelopeMode::TICK;
 	m_PositionIndex = 0;
 	m_ModulationAmount = 0;
 	m_Step = 0;
@@ -259,10 +260,10 @@ void XMSampler::EnvelopeController::Init(XMInstrument::Envelope *pEnvelope, Mach
 }
 
 /// NoteOn EnvelopeStage
-// Explanation:
-//	First, the stage is set to off. Then, if the envelope is enabled and there are points,
-//  we check if it has sustain or normal loop points, enabling the corresponding flags in m_Stage
-//  Second, if there are more points in the envelope, let's enable the joy!
+/// Explanation:
+/// First, the stage is set to off. Then, if the envelope is enabled and there are points,
+/// we check if it has sustain or normal loop points, enabling the corresponding flags in m_Stage
+/// Second, if there are more points in the envelope, let's enable the joy!
 void XMSampler::EnvelopeController::NoteOn()
 {
 	m_Samples = -1;
@@ -320,12 +321,12 @@ void XMSampler::EnvelopeController::NoteOff()
 
 void XMSampler::EnvelopeController::RecalcDeviation()
 {
-//			if ( m_Mode == EnvelopeMode::TICK )
-//			{
-	m_sRateDeviation = (m_pCallbacks->timeInfo().sampleRate() *60) / (24 * m_pCallbacks->timeInfo().bpm());
-//			} else if ( m_Mode == EnvelopeMode::MILIS ) {
-//				m_sRateDeviation = (Global::pPlayer->SampleRate() / 1000.0f;
-//			}
+	//if ( m_Mode == EnvelopeMode::TICK )
+	//{
+		m_sRateDeviation = (m_pCallbacks->timeInfo().sampleRate() *60) / (24 * m_pCallbacks->timeInfo().bpm());
+	//} else if ( m_Mode == EnvelopeMode::MILIS ) {
+		//m_sRateDeviation = (Global::pPlayer->SampleRate() / 1000.0f;
+	//}
 }
 
 void XMSampler::EnvelopeController::CalcStep(const int start,const int  end)
@@ -353,22 +354,21 @@ void XMSampler::EnvelopeController::SetPositionInSamples(const int samplePos)
 	m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
 	Work();
 	m_Samples=samplePos;//and this sets the real position, once all vars are setup.
-//			TRACE("ModAmount Before:%f.",m_ModulationAmount);
+	//TRACE("ModAmount Before:%f.",m_ModulationAmount);
 	m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetTime(m_PositionIndex)* SRateDeviation());
-//			TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
-//			TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
-
+	//TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
+	//TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
 }
 int XMSampler::EnvelopeController::GetPositionInSamples()
 {
 	//TRACE("Requested Pos:%d. Idx:%d, Current Amount:%f\n",m_Samples,m_PositionIndex,m_ModulationAmount);
-//			TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
+	//TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
 	return m_Samples;
 }
 
 
 //////////////////////////////////////////////////////////////////////////
-//	XMSampler::Voice  Implementation
+// XMSampler::Voice  Implementation
 void XMSampler::Voice::Reset()
 {
 	m_ChannelNum = -1;
@@ -459,45 +459,50 @@ void XMSampler::Voice::VoiceInit(int channelNum, int instrumentNum)
 	m_PitchEnvelope.Init(_inst.PitchEnvelope(),pSampler()->pCallbacks());
 	m_FilterEnvelope.Init(_inst.FilterEnvelope(),pSampler()->pCallbacks());
 
-//			m_Filter.Init();
+	//m_Filter.Init();
 	m_Filter.Reset();
 	m_Filter.SampleRate(pSampler()->pCallbacks()->timeInfo().sampleRate());
 
 	//\todo: add the missing  Random options
-/*			if (_inst.RandomCutoff())
+	#if 0
+	if (_inst.RandomCutoff())
 	{
 		CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
 	}
-	else*/ if (_inst.FilterCutoff() < 127)
+	else
+	#endif
+	if (_inst.FilterCutoff() < 127)
 	{
 		CutOff(_inst.FilterCutoff());
-//				Ressonance(_inst.FilterResonance());
+		//Ressonance(_inst.FilterResonance());
 		FilterType(_inst.FilterType());
 	} else if ( rChannel().Cutoff() < 127)
 	{
 		FilterType(rChannel().FilterType());
 		CutOff(rChannel().Cutoff());
-//				Ressonance(rChannel().Ressonance());
+		//Ressonance(rChannel().Ressonance());
 	}
 	else
 	{
 		CutOff(127);
 	}
 
-
-/*			if (_inst.RandomResonance())
+	#if 0
+	if (_inst.RandomResonance())
 	{
 		m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
 	}
-	else */ if (_inst.FilterResonance() > 0)
+	else
+	#endif
+	if (_inst.FilterResonance() > 0)
 	{
-//				CutOff(_inst.FilterCutoff());
+		//CutOff(_inst.FilterCutoff());
 		Ressonance(_inst.FilterResonance());
 		FilterType(_inst.FilterType());
 	} else if ( rChannel().Ressonance() > 0)
 	{
 		FilterType(rChannel().FilterType());
-//				CutOff(rChannel().Cutoff());
+		//CutOff(rChannel().Cutoff());
 		Ressonance(rChannel().Ressonance());
 	}
 	else
@@ -523,17 +528,16 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 		IsPlaying(false);
 		return;
 	}
-//			m_WaveDataController.Workxdsp(numSamples);
-//			int tmpcount=0;
+	//m_WaveDataController.Workxdsp(numSamples);
+	//int tmpcount=0;
 	while (numSamples)
 	{
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 1 : Get the unprocessed wave data.
 
 		m_WaveDataController.Work(&left_output,&right_output,pResamplerWork);
-/*				left_output=xdspFloatBuffer[tmpcount++];
-		if ( m_WaveDataController.IsStereo()) right_output=xdspFloatBuffer[tmpcount++];
-*/
+		//left_output=xdspFloatBuffer[tmpcount++];
+		//if ( m_WaveDataController.IsStereo()) right_output=xdspFloatBuffer[tmpcount++];
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 2 : Process the Envelopes.
@@ -625,7 +629,7 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 3: Add the processed data to the sampler's buffer.
 		if(!m_WaveDataController.IsStereo()){
-		// Monoaural output‚ copy left to right output.
+		// Monoaural output copy left to right output.
 			right_output = left_output;
 		}
 
@@ -706,7 +710,7 @@ void XMSampler::Voice::ResetVolAndPan(std::int16_t playvol,bool reset)
 	} else {
 		Volume(rWave().Wave().WaveVolume());
 	}
-		// Impulse Tracker panning had the following pan controls. All these are bypassed if
+	// Impulse Tracker panning had the following pan controls. All these are bypassed if
 	// a panning command is explicitely put in a channel.
 	// Note : m_pChannel->PanFactor() returns the panFactor of the last panning command (if any) or
 	// in its absence, the pan position of the channel.
@@ -716,22 +720,20 @@ void XMSampler::Voice::ResetVolAndPan(std::int16_t playvol,bool reset)
 
 		if ( fpan > 1)
 		{
-		//\todo :
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//				Check the whole panning system. Concretely, what is related to surround.
-//				Question is about using a specific "IsSurround" for wave, instrument, channel and voice
-//				or use an extended range ( pan >= SURROUND ) in wave, instrument and channel, while using
-//				the IsSurround in Voice.
-//				Channel is the special case, because effects modify the m_PanFactor variable.
-//				Do not forget to check the IT loading when this is solved.
-//				In a related note, check range of Panbrello.
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-
+			//\todo :
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			// Check the whole panning system. Concretely, what is related to surround.
+			// Question is about using a specific "IsSurround" for wave, instrument, channel and voice
+			// or use an extended range ( pan >= SURROUND ) in wave, instrument and channel, while using
+			// the IsSurround in Voice.
+			// Channel is the special case, because effects modify the m_PanFactor variable.
+			// Do not forget to check the IT loading when this is solved.
+			// In a related note, check range of Panbrello.
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
+			//////////////////////////////////////////////////////////////////////////
 		}
 
 		//NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
@@ -848,7 +850,8 @@ void XMSampler::Voice::Slide2Note()
 		UpdateSpeed();
 	}
 	else if(m_Slide2NoteDestPeriod < m_Period)
-	{	// m_PitchSlide is signed. (+/-)
+	{
+		// m_PitchSlide is signed. (+/-)
 		m_Period += m_PitchSlideSpeed;
 		if(m_Period < m_Slide2NoteDestPeriod){
 			m_Period = m_Slide2NoteDestPeriod;
@@ -1017,7 +1020,7 @@ void XMSampler::Voice::UpdateSpeed()
 	const double speed=PeriodToSpeed(_period);
 	rWave().Speed(speed);
 	// Attempt at Self-filtered samples. It filters too much.
-//			m_Filter.SampleSpeed(speed*(double)Global::player().SampleRate());
+	//m_Filter.SampleSpeed(speed*(double)Global::player().SampleRate());
 }
 
 double XMSampler::Voice::PeriodToSpeed(int period)
@@ -1034,11 +1037,11 @@ double XMSampler::Voice::PeriodToSpeed(int period)
 		// 8363=Hz for Middle-C note
 		// 12*64 = 12 notes * 64 finetune steps.
 		// 7 = 12-middle_C ( if C-4 is middle_C, then, 8*12*64, if C-3, then 9*12*64, etc..) (12 "12-middle_C" is number of octaves)
-		return	pow(2.0,
-					((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
-					 /768.0)
-				)
-				* 8363 / (double)pSampler()->pCallbacks()->timeInfo().sampleRate();
+		return std::pow(2.0,
+				((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
+				/768.0)
+			)
+			* 8363 / (double)pSampler()->pCallbacks()->timeInfo().sampleRate();
 	}
 }
 
@@ -1050,7 +1053,7 @@ const double XMSampler::Voice::NoteToPeriod(const int note)
 	{
 		// Amiga Period . Nonstandard table, but *maybe* more accurate.
 		double speedfactor =  pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()/256.0))/12.0);
-//				double c5speed =  8363.0*speedfactor;
+		//double c5speed =  8363.0*speedfactor;
 		return AmigaPeriod[note]/speedfactor;
 	} else {
 		// 9216 = 12notes*12octaves*64fine.
@@ -1078,7 +1081,7 @@ const int XMSampler::Voice::PeriodToNote(const double period)
 		return _note+12;
 	} else {
 		// period = ((12.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)
-		//	- (_wave.WaveFineTune() / 256.0) * 64.0);
+		//          - (_wave.WaveFineTune() / 256.0) * 64.0);
 		// period / 64.0 = 12.0 * 12.0  - ((double)note + (double)_wave.WaveTune()) - _wave.WaveFineTune() / 256.0;
 		// note = (int)(12.0 * 12.0  - (double)_wave.WaveTune() - _wave.WaveFineTune() / 256.0 - period / 64.0 + 0.5);
 
@@ -1169,13 +1172,14 @@ void XMSampler::Channel::Init()
 
 void XMSampler::Channel::EffectInit()
 {
-/*			m_VibratoPos = 0;
-	m_TremoloPos = 0;
-	m_TremoloDepth = 0;
-	m_VibratoAmount = 0;
-	m_AutoVibratoAmount = 0;
-	m_PanbrelloPos = 0;
-*/
+	#if 0
+		m_VibratoPos = 0;
+		m_TremoloPos = 0;
+		m_TremoloDepth = 0;
+		m_VibratoAmount = 0;
+		m_AutoVibratoAmount = 0;
+		m_PanbrelloPos = 0;
+	#endif
 }
 void XMSampler::Channel::Restore()
 {
@@ -1210,7 +1214,7 @@ void XMSampler::Channel::Restore()
 void XMSampler::Channel::SetEffect(Voice* voice,int volcmd,int cmd,int parameter)
 {
 	int realSet=0;
-	int	realValue=0;
+	int realValue=0;
 
 	//1st check: Channel ( They can appear without an existing playing note and are persistent when a new one comes)
 	switch(volcmd&0xF0)
@@ -1366,10 +1370,9 @@ void XMSampler::Channel::SetEffect(Voice* voice,int volcmd,int cmd,int parameter
 			voice->m_VolumeSlideSpeed = -((volcmd & 0x0F)<<1);
 			voice->VolumeSlide();
 			break;
-/*				case CMD_VOL::VOL_VIBRATO_SPEED:
-			Vibrato(volcmd&0x0F,0); //\todo: vibrato_speed does not activate the vibrato if it isn't running.
-			break;
-*/
+		//case CMD_VOL::VOL_VIBRATO_SPEED:
+			//Vibrato(volcmd&0x0F,0); //\todo: vibrato_speed does not activate the vibrato if it isn't running.
+			//break;
 		case CMD_VOL::VOL_VIBRATO:
 			Vibrato(0,(volcmd & 0x0F)<<2);
 			break;
@@ -1422,8 +1425,8 @@ void XMSampler::Channel::SetEffect(Voice* voice,int volcmd,int cmd,int parameter
 					break;
 				case CMD_E9::E9_PLAY_BACKWARD:
 					if (voice->rWave().LoopType() == XMInstrument::WaveData::LoopType::DO_NOT &&
-						voice->rWave().Position() == 0)
-					{
+						voice->rWave().Position() == 0
+					) {
 						voice->rWave().Position(voice->rWave().Length());
 					}
 					voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::BACKWARD);
@@ -1731,13 +1734,13 @@ void XMSampler::Channel::PitchSlide(bool bUp,int speed,int note)
 	}
 	else m_PitchSlideMem = speed &0xff;
 
-	if ( speed < 0xE0 || note !=notetypes::empty)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
-	{									// Porta to note does not have Fine.
+	if ( speed < 0xE0 || note !=notetypes::empty) // Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
+	{ // Porta to note does not have Fine.
 		speed<<=2;
 		if ( ForegroundVoice()) { ForegroundVoice()->m_PitchSlideSpeed= bUp?-speed:speed; }
 		if ( note != notetypes::empty )
 		{
-			if ( ForegroundVoice())	{ ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
+			if ( ForegroundVoice()) { ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
 			m_EffectFlags |= EffectFlag::SLIDE2NOTE;
 		}
 		else m_EffectFlags |= EffectFlag::PITCHSLIDE;
@@ -1915,8 +1918,8 @@ void XMSampler::Channel::Retrigger(const int parameter)
 	case 3:
 	case 4:
 	case 5: effretVol = -(int)std::pow(2.,volumeModifier-1); effretMode=1; break;
-	case 6: effretVol = 0.66666666f;	 effretMode=2; break;
-	case 7: effretVol = 0.5f;			 effretMode=2; break;
+	case 6: effretVol = 0.66666666f; effretMode = 2; break;
+	case 7: effretVol = 0.5f; effretMode = 2; break;
 	case 9:
 	case 10:
 	case 11:
@@ -1958,13 +1961,13 @@ void XMSampler::Channel::DelayedNote(PatternEvent data)
 
 void XMSampler::Channel::PanningSlide(){
 	m_PanFactor += m_PanSlideSpeed;
-	if(m_PanFactor < 0.0f) {	m_PanFactor = 0.0f;}
+	if(m_PanFactor < 0.0f) { m_PanFactor = 0.0f;}
 	else if(m_PanFactor > 1.0f){m_PanFactor = 1.0f;}
 	if (ForegroundVoice()) ForegroundVoice()->PanFactor(m_PanFactor);
 }
 void XMSampler::Channel::ChannelVolumeSlide(){
 	m_Volume += m_ChanVolSlideSpeed;
-	if(m_Volume < 0.0f){	m_Volume = 0.0f;}
+	if(m_Volume < 0.0f){ m_Volume = 0.0f;}
 	else if(m_Volume > 1.0f){m_Volume = 1.0f;}
 }
 void XMSampler::Channel::NoteCut()
@@ -2068,7 +2071,7 @@ XMSampler::XMSampler(MachineCallbacks* callb,Machine::id_type id)
 		zxxMap[i].mode=0;
 		zxxMap[i].value=0;
 	}
-//			xdsp.Init(Global::pPlayer->SampleRate(), 1.0 / (1 << 20));
+	//xdsp.Init(Global::pPlayer->SampleRate(), 1.0 / (1 << 20));
 }
 
 
@@ -2210,8 +2213,7 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 			}
 			if ( bPorta2Note )
 			{
-				//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
-				//		  and the position reset to 0.
+				///\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed and the position reset to 0.
 				thisChannel.Note(event.note());
 			}
 		}
@@ -2235,9 +2237,9 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 			newVoice = GetFreeVoice();
 			if ( newVoice )
 			{
-				if(thisChannel.InstrumentNo() == 255)
-				{	//this is a note to an undefined instrument. we can't continue.
-					//\todo : actually, we should check for commands!
+				if(thisChannel.InstrumentNo() == 255) {
+					// this is a note to an undefined instrument. we can't continue.
+					///\todo : actually, we should check for commands!
 					return;
 				}
 
@@ -2289,7 +2291,7 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 						{
 							newVoice->rWave().Position(offset);
 						}
-						else { newVoice->rWave().Position(twlength);	}
+						else { newVoice->rWave().Position(twlength); }
 					}else{ newVoice->rWave().Position(0); }
 				}
 				else
@@ -2530,33 +2532,34 @@ void XMSampler::Stop(void)
 	}
 }// XMSampler::Stop(void)
 
-/*		// Deprecated function.
-While this allows a good reproduction of the files that use arbitrary Speed values ( TicksPerRow()),
-it does so messing with the BeatsPerMin. Since the objective of importing a Module is to modify and
-"Modularize" it, this trick could potentially mess with delays or other sincronized plugins, so the only
-good thing to do is let the user fix it by himself and just approximate it to LinesPerBeat.
+#if 0 // Deprecated function.
+	// While this allows a good reproduction of the files that use arbitrary Speed values ( TicksPerRow()),
+	// it does so messing with the BeatsPerMin. Since the objective of importing a Module is to modify and
+	// "Modularize" it, this trick could potentially mess with delays or other sincronized plugins, so the only
+	// good thing to do is let the user fix it by himself and just approximate it to LinesPerBeat.
 
-void XMSampler::CalcBPMAndTick()
-{
-	int tmp = 24 / ((TicksPerRow() == 0)?6:TicksPerRow());
-	if (tmp*TicksPerRow() == 24)
+	void XMSampler::CalcBPMAndTick()
 	{
-		Global::_pSong->LinesPerBeat(tmp);
-		Global::_pSong->BeatsPerMin(BPM());
-	}
-	else
-	{
-		Global::_pSong->LinesPerBeat(4);
-		Global::_pSong->BeatsPerMin(6 * BPM() / TicksPerRow() );
-	}
+		int tmp = 24 / ((TicksPerRow() == 0)?6:TicksPerRow());
+		if (tmp*TicksPerRow() == 24)
+		{
+			Global::_pSong->LinesPerBeat(tmp);
+			Global::_pSong->BeatsPerMin(BPM());
+		}
+		else
+		{
+			Global::_pSong->LinesPerBeat(4);
+			Global::_pSong->BeatsPerMin(6 * BPM() / TicksPerRow() );
+		}
 
-	int t= Global::pConfig->_pOutputDriver->_samplesPerSec * 60;
-	int v=Global::_pSong->BeatsPerMin();
-	int z=Global::_pSong->LinesPerBeat();
-	Global::pPlayer->SamplesPerRow(	t / (v * z) );
-	m_DeltaTick = t / (Global::_pSong->BeatsPerMin() * 24);
-}
-*/
+		int t= Global::pConfig->_pOutputDriver->_samplesPerSec * 60;
+		int v=Global::_pSong->BeatsPerMin();
+		int z=Global::_pSong->LinesPerBeat();
+		Global::pPlayer->SamplesPerRow(t / (v * z) );
+		m_DeltaTick = t / (Global::_pSong->BeatsPerMin() * 24);
+	}
+#endif
+
 bool XMSampler::LoadPsy2FileFormat(RiffFile* riffFile)
 {
 	assert(false);
@@ -2663,9 +2666,9 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 
 		switch (temp)
 		{
-			case 2:	_resampler.SetQuality(dsp::R_SPLINE); break;
-			case 3:	_resampler.SetQuality(dsp::R_BANDLIM); break;
-			case 0:	_resampler.SetQuality(dsp::R_NONE); break;
+			case 2:  _resampler.SetQuality(dsp::R_SPLINE); break;
+			case 3:  _resampler.SetQuality(dsp::R_BANDLIM); break;
+			case 0:  _resampler.SetQuality(dsp::R_NONE); break;
 			case 1:
 			default: _resampler.SetQuality(dsp::R_LINEAR);
 		}
@@ -2681,29 +2684,29 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 		riffFile->Read(m_PanningMode);
 
 		for(int i = 0;i < MAX_TRACKS;i++) m_Channel[i].Load(*riffFile);
-	#if 0
-		// Instrument Data Load
-		int numInstruments;
-		riffFile->Read(numInstruments);
-		int idx;
-		for(int i = 0;i < numInstruments;i++)
-		{
-			riffFile->Read(idx);
-			if (!m_Instruments[idx].Load(*riffFile)) { wrongState=true; break; }
-			//m_Instruments[idx].IsEnabled(true); // done in the loader.
-		}
-		if (!wrongState)
-		{
-			int numSamples;
-			riffFile->Read(numSamples);
+		#if 0
+			// Instrument Data Load
+			int numInstruments;
+			riffFile->Read(numInstruments);
 			int idx;
-			for(int i = 0;i < numSamples;i++)
+			for(int i = 0;i < numInstruments;i++)
 			{
 				riffFile->Read(idx);
-				if (![idx].Load(*riffFile)) { wrongState=true; break; }
+				if (!m_Instruments[idx].Load(*riffFile)) { wrongState=true; break; }
+				//m_Instruments[idx].IsEnabled(true); // done in the loader.
 			}
-		}
-	#endif
+			if (!wrongState)
+			{
+				int numSamples;
+				riffFile->Read(numSamples);
+				int idx;
+				for(int i = 0;i < numSamples;i++)
+				{
+					riffFile->Read(idx);
+					if (![idx].Load(*riffFile)) { wrongState=true; break; }
+				}
+			}
+		#endif
 	}
 	else wrongState = true;
 

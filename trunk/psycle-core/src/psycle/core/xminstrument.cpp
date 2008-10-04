@@ -268,9 +268,9 @@ const int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,
 	return INVALID;
 }
 /**
-* @param pointTime  : Point Time.
-* @param value		: Point Value.
-* @return			: New point index.
+* @param pointTime Point Time.
+* @param value Point Value.
+* @return New point index.
 */
 const unsigned int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
 {
@@ -535,11 +535,11 @@ void XMInstrument::Save(RiffFile& riffFile)
 
 	riffFile.WriteArray("INST",4);
 	riffFile.Write(size);
-	//\todo : add version.
+	///\todo : add version.
 
 	riffFile.WriteArray(m_Name.c_str(),m_Name.length() + 1);
 
-//			riffFile.Write(m_bEnabled);
+	//riffFile.Write(m_bEnabled);
 
 	riffFile.Write(m_Lines);
 

@@ -48,29 +48,29 @@ public:
 	/// do this on the currently playing note:
 	struct NewNoteAction {
 		enum Type {
-		STOP = 0x0,		///  [Note Cut]	(This one actually does a very fast fadeout)
-		CONTINUE = 0x1,	///  [Ignore]
-		NOTEOFF = 0x2,		///  [Note off]
-		FADEOUT = 0x3		///  [Note fade]
+			STOP = 0,///< [Note Cut] (This one actually does a very fast fadeout)
+			CONTINUE = 1, ///< [Ignore]
+			NOTEOFF = 2, ///< [Note off]
+			FADEOUT = 3 ///< [Note fade]
 		};
 	};
 
 	/// ?
-	struct DCType	{
+	struct DCType {
 		enum Type {
-		 DCT_NONE=0x0,
-		 DCT_NOTE,
-		 DCT_SAMPLE,
-		 DCT_INSTRUMENT
+			DCT_NONE = 0,
+			DCT_NOTE,
+			DCT_SAMPLE,
+			DCT_INSTRUMENT
 		};
 	};
 /*
 	Using NewNoteAction so that we can convert easily from DCA to NNA.
 	struct DCAction {
 		enum Type {
-		DCA_STOP=0x0,
-		DCA_NOTEOFF,
-		DCA_FADEOUT
+			DCA_STOP = 0,
+			DCA_NOTEOFF,
+			DCA_FADEOUT
 		};
 	};
 */
@@ -83,20 +83,20 @@ public:
 		/// Wave Loop Types
 		struct LoopType {
 			enum Type {
-			DO_NOT = 0x0, ///< Do Nothing
-			NORMAL = 0x1, ///< normal Start --> End ,Start --> End ...
-			BIDI = 0x2	  ///< bidirectional Start --> End, End --> Start ...
+				DO_NOT = 0, ///< Do Nothing
+				NORMAL = 1, ///< normal Start --> End ,Start --> End ...
+				BIDI = 2 ///< bidirectional Start --> End, End --> Start ...
 			};
 		};
 
 		/// Wave Form Types
 		struct WaveForms {
 			enum Type {
-			SINUS = 0x0,
-			SQUARE = 0x1,
-			SAWUP = 0x2,
-			SAWDOWN = 0x3,
-			RANDOM = 0x4
+				SINUS = 0,
+				SQUARE = 1,
+				SAWUP = 2,
+				SAWDOWN = 3,
+				RANDOM = 4
 			};
 		};
 
@@ -135,7 +135,7 @@ public:
 			DeleteWaveData();
 		}
 
-		//	Object Functions
+		// Object Functions
 
 		void DeleteWaveData(){
 			if ( m_pWaveDataL)
@@ -306,8 +306,8 @@ public:
 		typedef std::vector< PointValue > Points;
 
 		/// constructor
-		explicit Envelope()
-		{	Init();
+		explicit Envelope() {
+			Init();
 		}
 
 		/// copy Constructor
@@ -319,8 +319,8 @@ public:
 		~Envelope(){}
 
 		/// Init
-		void Init()
-		{	m_Enabled = false;
+		void Init() {
+			m_Enabled = false;
 			m_Carry = false;
 			m_SustainBegin = INVALID;
 			m_SustainEnd = INVALID;
