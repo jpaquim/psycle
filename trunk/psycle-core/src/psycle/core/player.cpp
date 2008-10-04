@@ -50,7 +50,10 @@ Player::Player()
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
 
 	///\todo starting the threads needs to be done elsewhere?
+	start_threads();
+}
 
+void Player::start_threads() {
 	std::cout << "psycle: core: player: starting scheduler threads\n";
 	//if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(threads_.size()) {
@@ -357,7 +360,10 @@ Player::~Player() {
 	}
 
 	///\todo stopping the threads needs to be done elsewhere?
-	
+	stop_threads();
+}
+
+void Player::stop_threads() {
 	//if(loggers::information()()) loggers::information()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(!threads_.size()) {
 		//if(loggers::information()()) loggers::information()("scheduler threads were not running", UNIVERSALIS__COMPILER__LOCATION);
