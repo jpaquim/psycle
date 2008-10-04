@@ -22,6 +22,11 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
 
+		void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value){
+			//todo: Readapt Tune and FineTune, respect of the new SampleRate.
+			m_WaveSampleRate = value;
+		}
+
 		bool XMInstrument::WaveData::Load(RiffFile& riffFile)
 		{	
 			std::uint32_t size1,size2;
@@ -153,10 +158,10 @@ namespace psycle
 		* @param value		: Desired point Value.
 		* @return			: New point index.
 		*/
-		const int XMInstrument::Envelope::SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal)
+		const int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
 		{
-			assert(pointIndex < (int)m_Points.size());
-			if(pointIndex < (int)m_Points.size())
+			assert(pointIndex < m_Points.size());
+			if(pointIndex < m_Points.size())
 			{
 				int prevtime,nextime;
 				m_Points[pointIndex].first = pointTime;
@@ -175,7 +180,7 @@ namespace psycle
 				}
 
 				// Else, we have some work to do.
-				int	new_index = pointIndex;
+				unsigned int new_index = pointIndex;
 
 				// If we have to move it backwards:
 				if (pointTime < prevtime)
@@ -206,7 +211,7 @@ namespace psycle
 							new_index--;
 							break;
 						}
-					} while(new_index<(int)m_Points.size()-1);
+					} while(new_index<m_Points.size()-1);
 
 					// We have reached the end, either because of the "break", or because of the loop.
 					// In any case, the new_index has the point where the new point should go, so move it.
@@ -269,9 +274,9 @@ namespace psycle
 		* @param value		: Point Value.
 		* @return			: New point index.
 		*/
-		const int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
+		const unsigned int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
 		{
-			int _new_index;
+			unsigned int _new_index;
 			for(_new_index = 0;_new_index < (int)m_Points.size();_new_index++)
 			{
 				if(pointTime < m_Points[_new_index].first)
@@ -303,7 +308,7 @@ namespace psycle
 			}
 			// If we have reached the end without finding a suitable point to insert, then this
 			// one should go at the end.
-			if(_new_index == (int)(m_Points.size()))
+			if(_new_index == m_Points.size())
 			{
 				PointValue _point;
 				_point.first = pointTime;
@@ -315,7 +320,7 @@ namespace psycle
 		/** 
 		* @param pointIndex : point index to be deleted.
 		*/
-		void XMInstrument::Envelope::Delete(const int pointIndex)
+		void XMInstrument::Envelope::Delete(const unsigned int pointIndex)
 		{
 			assert(pointIndex < m_Points.size());
 			if(pointIndex < m_Points.size())
@@ -388,7 +393,7 @@ namespace psycle
 			riffFile.Write(m_SustainEnd);
 			riffFile.Write(m_Points.size());
 
-			for(int i = 0; i < m_Points.size(); i++)
+			for(unsigned int i = 0; i < m_Points.size(); i++)
 			{
 				riffFile.Write(m_Points[i].first); // point
 				riffFile.Write(m_Points[i].second); // value
@@ -503,8 +508,8 @@ namespace psycle
 			int version = 0;
 			m_AmpEnvelope.Load(riffFile,version);
 			m_PanEnvelope.Load(riffFile,version);
-			m_PitchEnvelope.Load(riffFile,version);
 			m_FilterEnvelope.Load(riffFile,version);
+			m_PitchEnvelope.Load(riffFile,version);
 			return true;
 		}
 
@@ -561,8 +566,8 @@ namespace psycle
 
 			int version = 0;
 			m_AmpEnvelope.Save(riffFile,version);
-			m_FilterEnvelope.Save(riffFile,version);
 			m_PanEnvelope.Save(riffFile,version);
+			m_FilterEnvelope.Save(riffFile,version);
 			m_PitchEnvelope.Save(riffFile,version);
 		}
 

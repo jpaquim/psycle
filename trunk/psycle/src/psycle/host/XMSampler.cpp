@@ -105,7 +105,7 @@ namespace psycle
 		// period =  pow(2.0,double(5-(note/12.0f))) * (2*7159090.5/8363);
 		// being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
 		// so (2*7159090.5/8363) ~ 1712 ( middle C period )
-		// Why multiplied by 2? well.. I really don't know, but it's on the docs.
+		// Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
 		// The original table takes the lower octave values and multiplies them by two. 
 		// This doesn't take care of the roundings of the values.
 
@@ -1965,7 +1965,7 @@ namespace psycle
 
 			}
 		}
-		void XMSampler::Channel::StopBackgroundNotes(XMInstrument::NewNoteAction action)
+		void XMSampler::Channel::StopBackgroundNotes(XMInstrument::NewNoteAction::Type action)
 		{
 			for(int current = 0;current < m_pSampler->NumVoices();current++)
 			{
@@ -2588,8 +2588,8 @@ namespace psycle
 			int temp;
 			// we cannot calculate the size previous to save, so we write a placeholder
 			// and seek back to write the correct value.
-			UINT size = 0;
-			UINT filepos = riffFile->GetPos();
+			unsigned int size = 0;
+			unsigned int filepos = riffFile->GetPos();
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Write(VERSION);
 			riffFile->Write(_numVoices); // numSubtracks
@@ -2649,7 +2649,7 @@ namespace psycle
 				}
 			#endif
 			
-			int endpos = riffFile->GetPos();
+			unsigned int endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
 			size = endpos - filepos -sizeof(size);
 			riffFile->Write(&size,sizeof(size));
@@ -2662,7 +2662,7 @@ namespace psycle
 			int temp;
 			bool wrongState=false;
 			std::uint32_t filevers;
-			long filepos;
+			unsigned long filepos;
 			int size=0;
 			riffFile->Read(&size,sizeof(size));
 			filepos=riffFile->GetPos();
@@ -2692,8 +2692,8 @@ namespace psycle
 				riffFile->Read(m_PanningMode);
 
 				for(int i = 0;i < MAX_TRACKS;i++) m_Channel[i].Load(*riffFile);
-
-/*				// Instrument Data Load
+			#if 0
+				// Instrument Data Load
 				int numInstruments;
 				riffFile->Read(numInstruments);
 				int idx;
@@ -2714,7 +2714,7 @@ namespace psycle
 						if (!m_rWaveLayer[idx].Load(*riffFile)) { wrongState=true; break; }
 					}
 				}
-*/
+			#endif
 			}
 			else wrongState = true;
 
