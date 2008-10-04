@@ -16,6 +16,7 @@
 #include "dither.h"
 #include "machine.h"
 #include "riff.h"
+#include <boost/noncopyable.hpp>
 #include <thread>
 #include <date_time>
 #include <mutex>
@@ -28,7 +29,7 @@ namespace psy { namespace core {
 class AudioDriver; ///\todo doesn't belong in psycore
 
 /// schedules the processing of machines, sends signal buffers and sequence events to them, ...
-class Player : public MachineCallbacks {
+class Player : public MachineCallbacks, private boost::noncopyable {
 	public:
 		Player();
 		~Player();
