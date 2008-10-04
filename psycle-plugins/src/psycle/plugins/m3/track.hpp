@@ -4,6 +4,7 @@
 // Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.
 #include <cstdlib>
 #include <cmath>
+#include <cstdint>
 
 // CTrack Declaration file (M3Track.h)
 
@@ -12,66 +13,64 @@ extern float coefsTab[4*128*128*8];
 extern float LFOOscTab[0x10000];
 extern signed short WaveTable[5][2100];
 
-#define MAX_SIMUL_TRACKS				8
+#define MAX_SIMUL_TRACKS 8
 
 
-#define EGS_NONE                                0
-#define EGS_ATTACK                              1
-#define EGS_SUSTAIN                             2
-#define EGS_RELEASE                             3
+#define EGS_NONE 0
+#define EGS_ATTACK 1
+#define EGS_SUSTAIN 2
+#define EGS_RELEASE 3
 
 
 
-class tvals
-{
-public:
-		uint8 Note;
-		uint8 Wave1;
-		uint8 PulseWidth1;
-		uint8 Wave2;
-		uint8 PulseWidth2;
-		uint8 DetuneSemi;
-		uint8 DetuneFine;
-		uint8 Sync;
-		uint8 MixType;
-		uint8 Mix;
-		uint8 SubOscWave;
-		uint8 SubOscVol;
-		uint8 PEGAttackTime;
-		uint8 PEGDecayTime;
-		uint8 PEnvMod;
-		uint8 Glide;
+class tvals {
+	public:
+		std::uint8_t Note;
+		std::uint8_t Wave1;
+		std::uint8_t PulseWidth1;
+		std::uint8_t Wave2;
+		std::uint8_t PulseWidth2;
+		std::uint8_t DetuneSemi;
+		std::uint8_t DetuneFine;
+		std::uint8_t Sync;
+		std::uint8_t MixType;
+		std::uint8_t Mix;
+		std::uint8_t SubOscWave;
+		std::uint8_t SubOscVol;
+		std::uint8_t PEGAttackTime;
+		std::uint8_t PEGDecayTime;
+		std::uint8_t PEnvMod;
+		std::uint8_t Glide;
 
-		uint8 Volume;
-		uint8 AEGAttackTime;
-		uint8 AEGSustainTime;
-		uint8 AEGReleaseTime;
+		std::uint8_t Volume;
+		std::uint8_t AEGAttackTime;
+		std::uint8_t AEGSustainTime;
+		std::uint8_t AEGReleaseTime;
 
-		uint8 FilterType;
-		uint8 Cutoff;
-		uint8 Resonance;
-		uint8 FEGAttackTime;
-		uint8 FEGSustainTime;
-		uint8 FEGReleaseTime;
-		uint8 FEnvMod;
+		std::uint8_t FilterType;
+		std::uint8_t Cutoff;
+		std::uint8_t Resonance;
+		std::uint8_t FEGAttackTime;
+		std::uint8_t FEGSustainTime;
+		std::uint8_t FEGReleaseTime;
+		std::uint8_t FEnvMod;
 
-		uint8 LFO1Dest;
-		uint8 LFO1Wave;
-		uint8 LFO1Freq;
-		uint8 LFO1Amount;
-		uint8 LFO2Dest;
-		uint8 LFO2Wave;
-		uint8 LFO2Freq;
-		uint8 LFO2Amount;
+		std::uint8_t LFO1Dest;
+		std::uint8_t LFO1Wave;
+		std::uint8_t LFO1Freq;
+		std::uint8_t LFO1Amount;
+		std::uint8_t LFO2Dest;
+		std::uint8_t LFO2Wave;
+		std::uint8_t LFO2Freq;
+		std::uint8_t LFO2Amount;
 };
 
 
 
 class mi;
 
-class CTrack
-{
-public:
+class CTrack {
+	public:
 		void Tick(tvals const &tv);
 		void Stop();
 		void Init();
@@ -82,11 +81,11 @@ public:
 		void NewPhases();
 		int MSToSamples(double const ms);
 
-public:
+	public:
 		int _channel;
 
 		// ......Osc......
-		uint8 Note;
+		std::uint8_t Note;
 		const short *pwavetab1, *pwavetab2, *pwavetabsub;
 		int SubOscVol;
 		bool noise1, noise2;
@@ -178,61 +177,56 @@ public:
 
 };
 
-class mi : public CMachineInterface
-{
-public:
-	mi();
-	virtual ~mi();
+class mi : public CMachineInterface {
+	public:
+		mi();
+		virtual ~mi();
 
-	virtual void Init();
-	virtual void SequencerTick();
-	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples,int tracks);
-	virtual bool DescribeValue(char* txt,int const param, int const value);
-	virtual void Command();
-	virtual void ParameterTweak(int par, int val);
-	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
-	virtual void Stop();
+		virtual void Init();
+		virtual void SequencerTick();
+		virtual void Work(float *psamplesleft, float* psamplesright, int numsamples,int tracks);
+		virtual bool DescribeValue(char* txt,int const param, int const value);
+		virtual void Command();
+		virtual void ParameterTweak(int par, int val);
+		virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
+		virtual void Stop();
 
-	void ComputeCoefs( float *coefs, int f, int r, int t);
-	// skalefuncs
-	inline float LFOFreq( int v);
-	inline float EnvTime( int v);
-	inline float Cutoff( int v);
-	inline float Resonance( float v);
-	inline float Bandwidth( int v);
+		void ComputeCoefs( float *coefs, int f, int r, int t);
+		// skalefuncs
+		inline float LFOFreq( int v);
+		inline float EnvTime( int v);
+		inline float Cutoff( int v);
+		inline float Resonance( float v);
+		inline float Bandwidth( int v);
 
-	float TabSizeDivSampleFreq;
+		float TabSizeDivSampleFreq;
 
-private:
+	private:
 
-	void SetNoValue(tvals &tv);
-	
-	CTrack Tracks[MAX_SIMUL_TRACKS];
-
+		void SetNoValue(tvals &tv);
+		CTrack Tracks[MAX_SIMUL_TRACKS];
 };
 
-// Skalierungsmethoden
-inline float mi::Cutoff( int v)
-{
-		return pow( (v+5)/(127.0+5), 1.7)*13000+30;
-}
-inline float mi::Resonance( float v)
-{
-		return pow( v/127.0, 4)*150+0.1;
-}
-inline float mi::Bandwidth( int v)
-{
-		return pow( v/127.0, 4)*4+0.1;
+// scale functions
+
+inline float mi::Cutoff(int v) {
+	return std::pow((v + 5) / (127.0 + 5), 1.7) * 13000 + 30;
 }
 
-inline float mi::LFOFreq( int v)
-{
-		return (pow( (v+8)/(116.0+8), 4)-0.000017324998565270)*40.00072;
+inline float mi::Resonance(float v) {
+	return std::pow(v / 127.0, 4) * 150 + 0.1;
 }
 
-inline float mi::EnvTime( int v)
-{
-		return pow( (v+2)/(127.0+2), 3)*10000;
+inline float mi::Bandwidth(int v) {
+	return std::pow(v / 127.0, 4) * 4 + 0.1;
+}
+
+inline float mi::LFOFreq(int v) {
+	return (std::pow((v + 8) / (116.0 + 8), 4) - 0.000017324998565270) * 40.00072;
+}
+
+inline float mi::EnvTime(int v) {
+	return std::pow((v + 2) / (127.0 + 2), 3) * 10000;
 }
 
 
@@ -240,345 +234,275 @@ inline float mi::EnvTime( int v)
 ////////////////////////////////
 ////////////////////////////////
 
-inline int CTrack::MSToSamples(double const ms)
-{
-		return (int)(pmi->pCB->GetSamplingRate() * ms * (1.0 / 1000.0)) + 1; // +1 wg. div durch 0
+inline int CTrack::MSToSamples(double const ms) {
+	return (int)(pmi->pCB->GetSamplingRate() * ms * (1.0 / 1000.0)) + 1; // +1 wg. div durch 0
 }
 
 
-inline float CTrack::Osc()
-{
-		float o, o2;
-		int B1, B2;
-		if( LFO_Mix)
-		{
-			B2 = Bal2 + ((pwavetabLFO2[((unsigned)PhaseLFO2)>>21]*LFO2Amount)>>15);
-	
-			if( B2<0) B2 = 0;
-			else if( B2>127) B2 = 127;
+inline float CTrack::Osc() {
+	float o, o2;
+	int B1, B2;
+	if(LFO_Mix) {
+		B2 = Bal2 + ((pwavetabLFO2[((unsigned int) PhaseLFO2) >> 21] * LFO2Amount) >> 15);
+		if(B2 < 0) B2 = 0;
+		else if(B2 > 127) B2 = 127;
+		B1 = 127-B2;
+	} else {
+		B1 = Bal1;
+		B2 = Bal2;
+	}
 
-			B1 = 127-B2;
-		}
-		else {
-				B1 = Bal1;
-				B2 = Bal2;
-		}
+	// osc1
+	if(noise1) {
+		short t = (r1 + r2 + r3 + r4) & 0xFFFF;
+		r1 = r2; r2 = r3; r3 = r4; r4 = t;
+		o = float((t * B1) >> 7);
+	} else
+		o = float((pwavetab1[Ph1 >> 16] * B1) >> 7);
 
-		// osc1
-		if( noise1) {
-				short t = (r1+r2+r3+r4)&0xFFFF;
-				r1=r2; r2=r3; r3=r4; r4=t;
-				o = (float)((t*B1)>>7);
-		}
-		else
-				o = (float)((pwavetab1[Ph1>>16]*B1)>>7);
-
-		// osc2
-		if( noise2) {
-				short u = (r1+r2+r3+r4)&0xFFFF;
-				r1=r2; r2=r3; r3=r4; r4=u;
-				o2 = (u*B2)>>7;
-		}
-		else
-				o2 = (pwavetab2[Ph2>>16]*B2)>>7;
+	// osc2
+	if(noise2) {
+		short u = (r1 + r2 + r3 + r4) & 0xFFFF;
+		r1=r2; r2=r3; r3=r4; r4=u;
+		o2 = (u * B2) >> 7;
+	}
+	else
+		o2 = (pwavetab2[Ph2 >> 16] * B2) >> 7;
 
 
-		switch( MixType)
-		{
+	switch( MixType) {
 		case 0: //ADD
-				o += o2;
-				break;
+			o += o2;
+		break;
 		case 1: // ABS
-				o = fabs(o-o2)*2-0x8000;
-				break;
+			o = fabs(o-o2)*2-0x8000;
+		break;
 		case 2: // MUL
-				o *= o2*(1.0/0x4000);
-				break;
+			o *= o2*(1.0/0x4000);
+		break;
 		case 3: // highest amp
-				if( fabs(o) < fabs(o2))
-						o = o2;
-				break;
+			if(std::fabs(o) < std::fabs(o2)) o = o2;
+		break;
 		case 4: // lowest amp
-				if( fabs(o) > fabs(o2))
-						o = o2;
-				break;
+			if(std::fabs(o) > std::fabs(o2)) o = o2;
+		break;
 		case 5: // AND
-				o = (int)o & (int)o2;
-				break;
+			o = (int)o & (int)o2;
+		break;
 		case 6: // OR
-				o = (int)o | (int)o2;
-				break;
+			o = (int)o | (int)o2;
+		break;
 		case 7: // XOR
-				o = (int)o ^ (int)o2;
-				break;
-		}
-		return o + ((pwavetabsub[PhaseSub>>16]*SubOscVol)>>7);
+			o = (int)o ^ (int)o2;
+		break;
+	}
+	return o + ((pwavetabsub[PhaseSub >> 16] * SubOscVol) >> 7);
 }
 
-inline float CTrack::VCA()
-{
-		// EG...
-		if( !AEGCount--)
-				switch( ++AEGState)
-				{
+inline float CTrack::VCA() {
+	// EG...
+	if(!AEGCount--)
+		switch( ++AEGState) {
+			case EGS_SUSTAIN:
+				AEGCount = AEGSustainTime;
+				Amp = Volume;
+				AmpAdd = 0.0;
+			break;
+			case EGS_RELEASE:
+				AEGCount = AEGReleaseTime-1;
+				AmpAdd = -Amp/AEGReleaseTime;
+			break;
+			case EGS_RELEASE + 1:
+				AEGState = EGS_NONE;
+				AEGCount = -1;
+				AmpAdd = 0.0;
+				Amp = 0.0;
+			break;
+		}
+
+	Amp += AmpAdd;
+	if(LFO_Amp) {
+		float a = Amp + (pwavetabLFO1[((unsigned)PhaseLFO1)>>21]*LFO1Amount)/(127.0*0x8000);
+		if(a < 0) a = 0;
+		return a;
+	} else return Amp;
+}
+
+inline float CTrack::Filter( float x) {
+	float y;
+
+	// Envelope
+	if(FEGState) {
+		if(!FEGCount--)
+			switch( ++FEGState) {
 				case EGS_SUSTAIN:
-						AEGCount = AEGSustainTime;
-						Amp = Volume;
-						AmpAdd = 0.0;
-						break;
+					FEGCount = FEGSustainTime;
+					Cut = (float)FEnvMod;
+					CutAdd = 0.0;
+				break;
 				case EGS_RELEASE:
-						AEGCount = AEGReleaseTime-1;
-						AmpAdd = -Amp/AEGReleaseTime;
-						break;
+					FEGCount = FEGReleaseTime;
+					CutAdd = ((float)-FEnvMod)/FEGReleaseTime;
+				break;
 				case EGS_RELEASE + 1:
-						AEGState = EGS_NONE;
-						AEGCount = -1;
-						AmpAdd = 0.0;
-						Amp = 0.0;
-						break;
-				}
+					FEGState = EGS_NONE; // false
+					FEGCount = -1;
+					Cut = 0.0;
+					CutAdd = 0.0;
+				break;
+			}
+			Cut += CutAdd;
+	}
 
-		Amp +=AmpAdd;
-		if( LFO_Amp)
-		{
-				float a = Amp + (pwavetabLFO1[((unsigned)PhaseLFO1)>>21]*LFO1Amount)/(127.0*0x8000);
-					
-				if( a<0) a = 0;
+	// LFO
+	// Cut
+	int c, r;
+	if(LFO_Cut) {
+		c = Cutoff + Cut + // Cut = EnvMod
+		((pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount) >> (7 + 8));
+	}
+	else c = Cutoff + Cut; // Cut = EnvMod
 
-				return( a);
-		}
-		else
-				return Amp;
+	if(c < 0) c = 0;
+	else if(c > 127) c = 127;
+
+	// Reso
+	if(LFO_Reso) {
+		r = Resonance +
+		((pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount) >> (7 + 8));
+		if(r < 0) r = 0;
+		else if(r > 127) r = 127;
+	} else r = Resonance;
+
+
+	int ofs = ((c << 7) + r) << 3;
+	y =
+		coefsTabOffs[ofs    ] * x +
+		coefsTabOffs[ofs + 1] * x1 +
+		coefsTabOffs[ofs + 2] * x2 +
+		coefsTabOffs[ofs + 3] * y1 +
+		coefsTabOffs[ofs + 4] * y2;
+
+	y2 = y1; y1 = y;
+	x2 = x1; x1 = x;
+	return y;
 }
 
+inline void CTrack::NewPhases() {
+	if(PitchModActive) {
+		if(GlideActive) {
+			if(LFO_Osc1) {
+				float pf = LFOOscTab[(pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount >> 7) + 0x8000];
+				Phase1 += PhaseAdd1 * GlideFactor*PitchFactor * pf;
+				PhaseSub += PhaseAdd1 * GlideFactor*PitchFactor * pf / 2;
+			} else {
+				Phase1 += PhaseAdd1 * GlideFactor * PitchFactor;
+				PhaseSub += PhaseAdd1 * GlideFactor * PitchFactor / 2;
+			}
+			if(LFO_Osc2) {
+				Phase2 += PhaseAdd2 * GlideFactor * PitchFactor
+				*LFOOscTab[(pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount >> 7) + 0x8000];
+			} else Phase2 += PhaseAdd2 * GlideFactor * PitchFactor;
 
-inline float CTrack::Filter( float x)
-{
-		float y;
-
-		// Envelope
-		if( FEGState) {
-				if( !FEGCount--)
-						switch( ++FEGState)
-						{
-						case EGS_SUSTAIN:
-								FEGCount = FEGSustainTime;
-								Cut = (float)FEnvMod;
-								CutAdd = 0.0;
-								break;
-						case EGS_RELEASE:
-								FEGCount = FEGReleaseTime;
-								CutAdd = ((float)-FEnvMod)/FEGReleaseTime;
-								break;
-						case EGS_RELEASE + 1:
-								FEGState = EGS_NONE; // false
-								FEGCount = -1;
-								Cut = 0.0;
-								CutAdd = 0.0;
-								break;
-						}
-				Cut += CutAdd;
+			GlideFactor *= GlideMul;
+			if(!GlideCount--) {
+				GlideActive = false;
+				PhaseAdd1 = (int)(Frequency * pmi->TabSizeDivSampleFreq * 0x10000);
+				PhaseAdd2 = (int)(Frequency * DetuneSemi * DetuneFine * pmi->TabSizeDivSampleFreq * 0x10000);
+			}
+		} else { // no glide
+			if(LFO_Osc1) {
+				float pf = LFOOscTab[(pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount >> 7) + 0x8000];
+				Phase1 += PhaseAdd1 * PitchFactor * pf;
+				PhaseSub += PhaseAdd1 * PitchFactor * pf / 2;
+			} else {
+				Phase1 += PhaseAdd1 * PitchFactor;
+				PhaseSub += PhaseAdd1 * PitchFactor / 2;
+			}
+			if(LFO_Osc2) Phase2 += PhaseAdd2 * PitchFactor * LFOOscTab[(pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount >> 7) + 0x8000];
+			else Phase2 += PhaseAdd2 * PitchFactor;
 		}
 
-		// LFO
-		// Cut
-		int c, r;
-		if( LFO_Cut)
-		{
-				c = Cutoff + Cut + // Cut = EnvMod
-				((pwavetabLFO1[((unsigned)PhaseLFO1)>>21]*LFO1Amount)>>(7+8));
+		PitchFactor *= PitchMul;
+
+		if(!PEGCount--)
+			if(++PEGState == 2) { // DECAY-PHASE begin
+				PEGCount = PEGDecayTime;
+				PitchMul = std::pow(std::pow(1 / 1.01, PEnvMod), 1.0 / PEGDecayTime);
+			} else // AD-curve is at end
+				PitchModActive = false;
+	} else { // no pitch mod
+		if(GlideActive) {
+			if(LFO_Osc1) {
+				float pf = LFOOscTab[(pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount >> 7) + 0x8000];
+				Phase1 += PhaseAdd1 * GlideFactor * pf;
+				PhaseSub += PhaseAdd1 * GlideFactor * pf / 2;
+			} else {
+				Phase1 += PhaseAdd1 * GlideFactor;
+				PhaseSub += PhaseAdd1 * GlideFactor / 2;
+			}
+			if(LFO_Osc2) {
+				Phase2 += PhaseAdd2 * GlideFactor * LFOOscTab[(pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount >> 7) + 0x8000];
+			} else Phase2 += PhaseAdd2*GlideFactor;
+
+			GlideFactor *= GlideMul;
+			if(!GlideCount--) {
+				GlideActive = false;
+				PhaseAdd1 = (int)(Frequency * pmi->TabSizeDivSampleFreq * 0x10000);
+				PhaseAdd2 = (int)(Frequency * DetuneSemi * DetuneFine * pmi->TabSizeDivSampleFreq * 0x10000);
+			}
+		} else {
+			if(LFO_Osc1) {
+					float pf = LFOOscTab[(pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount >> 7) + 0x8000];
+					Phase1 += PhaseAdd1 * pf;
+					PhaseSub += PhaseAdd1 * pf / 2;
+			} else {
+					Phase1 += PhaseAdd1;
+					PhaseSub += PhaseAdd1 / 2;
+			}
+			if(LFO_Osc2) Phase2 += PhaseAdd2 * LFOOscTab[(pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount >> 7) + 0x8000];
+			else Phase2 += PhaseAdd2;
 		}
-		else c = Cutoff + Cut; // Cut = EnvMod
+	}
 
-		if( c < 0)  c = 0;
-		else if( c > 127) c = 127;
+	if(Phase1 & 0xf8000000) { // new durchlauf ??
+		// PW1
+		if(LFO_PW1) { // LFO_PW_Mod
+			currentcenter1 = Center1 + (float)pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount / (127.0 * 0x8000);
+			if(currentcenter1 < 0) currentcenter1 = 0;
+			else if(currentcenter1 > 1) currentcenter1 = 1;
+		} else // No LFO
+			currentcenter1 = Center1;
+			PhScale1A = 0.5 / currentcenter1;
+			PhScale1B = 0.5 / (1 - currentcenter1);
+			currentcenter1 *= 0x8000000;
+			// PW2
+			if(LFO_PW2) { //LFO_PW_Mod
+				currentcenter2 = Center2 + (float)pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount / (127.0 * 0x8000);
+				if(currentcenter2 < 0) currentcenter2 = 0;
+				else if(currentcenter2 > 1) currentcenter2 = 1;
+			} else // No LFO
+				currentcenter2 = Center2;
+				
+			PhScale2A = 0.5 / currentcenter2;
+			PhScale2B = 0.5 / (1 - currentcenter2);
+			currentcenter2 *= 0x8000000;
 
-		// Reso
-		if( LFO_Reso)
-		{
-				r = Resonance +
-				((pwavetabLFO2[((unsigned)PhaseLFO2)>>21]*LFO2Amount)>>(7+8));
+			// SYNC
+			if(Sync) Phase2 = Phase1; // !!!!!
+	}
 
-			if( r < 0)								  r = 0;
-			else if( r > 127) r = 127;
-		}
-		else r = Resonance;
+	Phase1 &= 0x7ffffff;
+	Phase2 &= 0x7ffffff;
+	PhaseSub &= 0x7ffffff;
 
+	if(Phase1 < currentcenter1) Ph1 = Phase1*PhScale1A;
+	else Ph1 = (Phase1 - currentcenter1) * PhScale1B + 0x4000000;
 
-		int ofs = ((c<<7)+r)<<3;
-		y = coefsTabOffs[ofs]*x +
-				coefsTabOffs[ofs+1]*x1 +
-				coefsTabOffs[ofs+2]*x2 +
-				coefsTabOffs[ofs+3]*y1 +
-				coefsTabOffs[ofs+4]*y2;
+	if(Phase2 < currentcenter2) Ph2 = Phase2 * PhScale2A;
+	else Ph2 = (Phase2 - currentcenter2) * PhScale2B + 0x4000000;
 
-		y2=y1;
-		y1=y;
-		x2=x1;
-		x1=x;
-		return y;
-}
-
-inline void CTrack::NewPhases()
-{
-		if( PitchModActive) {
-				if( GlideActive) {
-						if( LFO_Osc1)
-						{
-							float pf = LFOOscTab[(pwavetabLFO1[((unsigned)PhaseLFO1)>>21]*LFO1Amount>>7) + 0x8000];
-							Phase1 += PhaseAdd1*GlideFactor*PitchFactor*pf;
-							PhaseSub += PhaseAdd1*GlideFactor*PitchFactor*pf/2;
-						}
-						else
-						{
-								Phase1 += PhaseAdd1*GlideFactor*PitchFactor;
-								PhaseSub += PhaseAdd1*GlideFactor*PitchFactor/2;
-						}
-						if( LFO_Osc2)
-						{
-							Phase2 += PhaseAdd2*GlideFactor*PitchFactor
-									*LFOOscTab[(pwavetabLFO2[((unsigned)PhaseLFO2)>>21]*LFO2Amount>>7) + 0x8000];
-						}
-						else
-								Phase2 += PhaseAdd2*GlideFactor*PitchFactor;
-
-						GlideFactor *= GlideMul;
-						if( !GlideCount--) {
-								GlideActive = false;
-								PhaseAdd1 = (int)(Frequency*pmi->TabSizeDivSampleFreq*0x10000);
-								PhaseAdd2 = (int)(Frequency*DetuneSemi*DetuneFine*pmi->TabSizeDivSampleFreq*0x10000);
-						}
-				}
-				else { // kein Glide
-						if( LFO_Osc1)
-						{
-							float pf= LFOOscTab[(pwavetabLFO1[((unsigned)PhaseLFO1)>>21]*LFO1Amount>>7) + 0x8000];
-							Phase1 += PhaseAdd1*PitchFactor*pf;
-							PhaseSub += PhaseAdd1*PitchFactor*pf/2;
-						}
-						else {
-								Phase1 += PhaseAdd1*PitchFactor;
-								PhaseSub += PhaseAdd1*PitchFactor/2;
-						}
-						if( LFO_Osc2)
-						{
-							Phase2 += PhaseAdd2*PitchFactor
-								*LFOOscTab[(pwavetabLFO2[((unsigned)PhaseLFO2)>>21]*LFO2Amount>>7) + 0x8000];
-						}
-						else
-								Phase2 += PhaseAdd2*PitchFactor;
-				}
-
-				PitchFactor *= PitchMul;
-
-				if( !PEGCount--)
-						if( ++PEGState == 2) {// DECAY-PHASE beginnt
-								PEGCount = PEGDecayTime;
-								PitchMul = pow( pow( 1/1.01, PEnvMod), 1.0/PEGDecayTime);
-						}
-						else  // AD-Kurve ist zu Ende
-								PitchModActive = false;
-		}
-
-		else { // kein PitchMod
-				if( GlideActive) {
-						if( LFO_Osc1)
-						{
-							float pf= LFOOscTab[(pwavetabLFO1[((unsigned)PhaseLFO1)>>21]*LFO1Amount>>7) + 0x8000];
-							Phase1 += PhaseAdd1*GlideFactor*pf;
-							PhaseSub += PhaseAdd1*GlideFactor*pf/2;
-						}
-						else
-						{
-								Phase1 += PhaseAdd1*GlideFactor;
-								PhaseSub += PhaseAdd1*GlideFactor/2;
-						}
-						if( LFO_Osc2)
-						{
-							Phase2 += PhaseAdd2*GlideFactor
-									*LFOOscTab[(pwavetabLFO2[((unsigned)PhaseLFO2)>>21]*LFO2Amount>>7) + 0x8000];
-						}
-						else
-								Phase2 += PhaseAdd2*GlideFactor;
-						GlideFactor *= GlideMul;
-						if( !GlideCount--) {
-								GlideActive = false;
-								PhaseAdd1 = (int)(Frequency*pmi->TabSizeDivSampleFreq*0x10000);
-								PhaseAdd2 = (int)(Frequency*DetuneSemi*DetuneFine*pmi->TabSizeDivSampleFreq*0x10000);
-						}
-				}
-				else {
-						if( LFO_Osc1)
-						{
-							float pf= LFOOscTab[(pwavetabLFO1[((unsigned)PhaseLFO1)>>21]*LFO1Amount>>7) + 0x8000];
-							Phase1 += PhaseAdd1*pf;
-							PhaseSub += PhaseAdd1*pf/2;
-						}
-						else {
-								Phase1 += PhaseAdd1;
-								PhaseSub += PhaseAdd1/2;
-						}
-						if( LFO_Osc2)
-						{
-							Phase2 += PhaseAdd2
-								*LFOOscTab[(pwavetabLFO2[((unsigned)PhaseLFO2)>>21]*LFO2Amount>>7) + 0x8000];
-						}
-						else
-								Phase2 += PhaseAdd2;
-				}
-		}
-
-
-		if( Phase1 & 0xf8000000) { // neuer durchlauf ??
-				// PW1
-				if( LFO_PW1) //LFO_PW_Mod
-				{
-					currentcenter1 = Center1 + (float)pwavetabLFO1[((unsigned)PhaseLFO1)>>21]*
-								LFO1Amount/(127.0*0x8000);
-					
-					if( currentcenter1 < 0)				 currentcenter1 = 0;
-					else if( currentcenter1 > 1) currentcenter1 = 1;
-				}
-				else  // No LFO
-						currentcenter1 = Center1;
-				PhScale1A = 0.5/currentcenter1;
-				PhScale1B = 0.5/(1-currentcenter1);
-				currentcenter1 *= 0x8000000;
-				// PW2
-				if( LFO_PW2) //LFO_PW_Mod
-				{
-					currentcenter2 = Center2 + (float)pwavetabLFO2[((unsigned)PhaseLFO2)>>21]*
-									LFO2Amount/(127.0*0x8000);
-
-					if( currentcenter2 < 0)      currentcenter2 = 0;
-					else if( currentcenter2 > 1) currentcenter2 = 1;
-				}
-				else  // No LFO
-						currentcenter2 = Center2;
-				PhScale2A = 0.5/currentcenter2;
-				PhScale2B = 0.5/(1-currentcenter2);
-				currentcenter2 *= 0x8000000;
-
-				// SYNC
-				if( Sync)
-						Phase2 = Phase1; // !!!!!
-		}
-
-		Phase1 &= 0x7ffffff;
-		Phase2 &= 0x7ffffff;
-		PhaseSub &= 0x7ffffff;
-
-		if( Phase1 < currentcenter1)
-				Ph1 = Phase1*PhScale1A;
-		else
-				Ph1 = (Phase1 - currentcenter1)*PhScale1B + 0x4000000;
-
-		if( Phase2 < currentcenter2)
-				Ph2 = Phase2*PhScale2A;
-		else
-				Ph2 = (Phase2 - currentcenter2)*PhScale2B + 0x4000000;
-
-		// LFOs
-		PhaseLFO1 += PhaseAddLFO1;
-		PhaseLFO2 += PhaseAddLFO2;
+	// LFOs
+	PhaseLFO1 += PhaseAddLFO1;
+	PhaseLFO2 += PhaseAddLFO2;
 }
