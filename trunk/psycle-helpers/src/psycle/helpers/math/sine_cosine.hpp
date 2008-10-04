@@ -3,6 +3,7 @@
 // copyright 1999-2008 members of the music-dsp mailing list http://www.music.columbia.edu/cmc/music-dsp and of the psycle project http://psycle.sourceforge.net 
 
 #pragma once
+#include <diversalis/compiler.hpp>
 #include <cmath>
 namespace psycle { namespace helpers { namespace math {
 
