@@ -67,7 +67,7 @@ InternalHost& InternalHost::getInstance(MachineCallbacks* callb) {
 	return instance;
 }
 
-Machine* InternalHost::CreateMachine(PluginFinder& /*finder */, MachineKey key,Machine::id_type id) 
+Machine* InternalHost::CreateMachine(PluginFinder& /*finder */, MachineKey key,Machine::id_type id)
 {
 	Machine* mac=0;
 
@@ -83,8 +83,7 @@ Machine* InternalHost::CreateMachine(PluginFinder& /*finder */, MachineKey key,M
 		mac = new Sampler(mcallback_, id);
 		break;
 	case InternalMacs::XMSAMPLER:
-		//TODO:
-		//mac = new XMSampler(mcallback_, id);
+		mac = new XMSampler(mcallback_, id);
 		break;
 	case InternalMacs::DUPLICATOR:
 		mac = new DuplicatorMac(mcallback_, id);
@@ -110,7 +109,7 @@ void InternalHost::FillFinderData(PluginFinder& finder, bool /*clearfirst*/)
 {
 	//InternalHost always regenerates its pluginInfo.
 	finder.ClearMap(hostCode());
-	
+
 	// Master machine is skipped because it is never created by the user.
 	for(int  i=InternalMacs::type(1); i < InternalMacs::NUM_MACS; i++) {
 		finder.AddInfo(InternalMacs::keys[i], InternalMacs::infos[i]);

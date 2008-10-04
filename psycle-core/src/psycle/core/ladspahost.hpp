@@ -34,7 +34,7 @@ class LadspaHost : public MachineHost
 protected:
 	LadspaHost(MachineCallbacks*);
 public:
-	~LadspaHost();
+	virtual ~LadspaHost();
 	static LadspaHost& getInstance(MachineCallbacks*);
 
 	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);

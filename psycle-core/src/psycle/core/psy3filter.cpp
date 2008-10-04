@@ -38,7 +38,7 @@ std::uint32_t const Psy3Filter::FILE_VERSION =
 	Psy3Filter::VERSION_SNGI +
 	Psy3Filter::VERSION_SEQD +
 	Psy3Filter::VERSION_PATD +
-	Psy3Filter::VERSION_PATD + 
+	Psy3Filter::VERSION_PATD +
 	Psy3Filter::VERSION_MACD +
 	Psy3Filter::VERSION_INSD +
 	Psy3Filter::VERSION_WAVE;
@@ -46,7 +46,7 @@ std::uint32_t const Psy3Filter::FILE_VERSION =
 Psy3Filter * Psy3Filter::getInstance() {
 	///\todo
 	static Psy3Filter s;
-	return &s; 
+	return &s;
 }
 
 Psy3Filter::Psy3Filter()
@@ -82,7 +82,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 
 	RiffFile file;
 	file.Open(fileName);
-	
+
 	// skip header
 	file.Skip(8);
 	//char Header[9];
@@ -119,7 +119,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			if((version & 0xff00) == 0) { // chunkformat v0
 				LoadSNGIv0(&file, song, version & 0xff);
 				// fix for a bug existing in the song saver in the 1.7.x series
-				if(version == 0) size = 11 * sizeof(std::uint32_t) + song.tracks() * 2 * sizeof(bool); 
+				if(version == 0) size = 11 * sizeof(std::uint32_t) + song.tracks() * 2 * sizeof(bool);
 			} //else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"SEQD")) {
 			//song.progress.emit(2, 0, "Loading... Song sequence...");
@@ -131,7 +131,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			if((version  & 0xff00) == 0) { // chunkformat v0
 				LoadPATDv0(&file, song, version & 0xff);
 				//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-				if((version == 0x0000) &&( file.GetPos() == fileposition+size+4)) size += 4; 
+				if((version == 0x0000) &&( file.GetPos() == fileposition+size+4)) size += 4;
 			} //else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"MACD")) {
 			//song.progress.emit(2, 0, "Loading... Song machines...");
@@ -142,6 +142,11 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			//song.progress.emit(2, 0, "Loading... Song instruments...");
 			if((version & 0xff00) == 0) // chunkformat v0
 				LoadINSDv0(&file,song,version&0x00FF);
+			//else if((version & 0xff00) == 0x0100) // and so on
+		} else if(!std::strcmp(header,"EINS")) {
+			//song.progress.emit(2, 0, "Loading... Extended Song instruments...");
+			if((version & 0xffff0000)>>16 == 1) // chunkformat v1
+				LoadEINSv1(&file,song,version&0xFFFF);
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else {
 			//loggers::warning("foreign chunk found. skipping it.");
@@ -165,7 +170,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 
 	//song.progress.emit(4,16384,"");
 
-	///\todo: Move this to something like "song.validate()" 
+	///\todo: Move this to something like "song.validate()"
 
 	// now that we have loaded all the patterns, time to prepare them.
 	double pos = 0;
@@ -245,7 +250,7 @@ int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/) {
 	if(size > 4) {
 		// This is left here if someday, extra data is added to the file version chunk.
 		// update "bytesread" accordingly.
-		
+
 		//file->Read(chunkversion);
 		//if(chunkversion == x) {} else if(...) {}
 
@@ -256,7 +261,7 @@ int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/) {
 
 bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/) {
 	char Name[129]; char Author[65]; char Comment[65536];
-	
+
 	file->ReadString(Name, 128);
 	song.setName(Name);
 	file->ReadString(Author, 64);
@@ -273,7 +278,7 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 	bool fileread = false;
 
 	// why all these temps?  to make sure if someone changes the defs of
-	// any of these members, the rest of the file reads ok.  assume 
+	// any of these members, the rest of the file reads ok.  assume
 	// everything is 32-bit, when we write we do the same thing.
 
 	// # of tracks for whole song
@@ -302,7 +307,7 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 	file->Read(midiSelected);
 	file->Read(auxcolSelected);
 	file->Read(instSelected);
-	
+
 	// sequence width, for multipattern
 	file->Read(temp);
 	for(unsigned int i(0) ; i < song.tracks(); ++i) {
@@ -505,6 +510,34 @@ bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion) {
 	if(index < MAX_INSTRUMENTS) song._pInstrument[index]->LoadFileChunk(file, minorversion, true);
 	///\todo:
 	return true;
+}
+
+bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion) {
+
+	bool wrongState=false;
+	// Instrument Data Load
+	int numInstruments;
+	file->Read(numInstruments);
+	int idx;
+	for(int i = 0;i < numInstruments;i++)
+	{
+		file->Read(idx);
+		if (!song.rInstrument(idx).Load(*file)) { wrongState=true; break; }
+		//m_Instruments[idx].IsEnabled(true); // done in the loader.
+	}
+	if (!wrongState)
+	{
+		int numSamples;
+		file->Read(numSamples);
+		int idx;
+		for(int i = 0;i < numSamples;i++)
+		{
+			file->Read(idx);
+			if (!song.SampleData(idx).Load(*file)) { wrongState=true; break; }
+		}
+	}
+	return !wrongState;
+
 }
 
 void Psy3Filter::RestoreMixerSendFlags(CoreSong& song) {
