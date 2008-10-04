@@ -11,7 +11,8 @@
 #if defined DIVERSALIS__COMPILER__GNU
 	namespace universalis { namespace operating_system { namespace dynamic_link {
 		namespace init {
-			void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__HIDDEN {
+			void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__HIDDEN;
+			void constructor() {
 				// if this library owns the logger, then it's not yet initialized and cannot be used yet.
 				#if !defined UNIVERSALIS__OPERATING_SYSTEM__LOGGER__OWNED
 					if(loggers::information()())
@@ -23,7 +24,8 @@
 				#endif
 			}
 		
-			void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__HIDDEN {
+			void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__HIDDEN;
+			void destructor() {
 				// if this library owns the logger, then it's already destroyed and cannot be used anymore.
 				#if !defined UNIVERSALIS__OPERATING_SYSTEM__LOGGER__OWNED
 					if(loggers::information()())
