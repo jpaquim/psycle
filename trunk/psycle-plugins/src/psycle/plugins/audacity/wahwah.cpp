@@ -23,6 +23,7 @@
 
 #include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
+#include <psycle/helpers/math/sine_cosine.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -237,8 +238,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
-				sn = std::sin(omega);
-				cs = std::cos(omega);
+
+				psycle::helpers::math::sin_cos(omega, sn, cs);
+				//sn = std::sin(omega);
+				//cs = std::cos(omega);
+
 				alpha = sn * res;
 				//b0_l = (1 - cs) * .5f;
 				b1_l = 1.f - cs;
@@ -251,8 +255,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
-				sn = std::sin(omega);
-				cs = std::cos(omega);
+
+				psycle::helpers::math::sin_cos(omega, sn, cs);
+				//sn = std::sin(omega);
+				//cs = std::cos(omega);
+
 				alpha = sn * res;
 				//b0_r = (1 - cs) * .5f;
 				b1_r = 1.f - cs;
