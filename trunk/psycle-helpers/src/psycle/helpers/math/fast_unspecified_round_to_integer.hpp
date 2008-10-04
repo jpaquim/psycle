@@ -9,9 +9,14 @@ namespace psycle { namespace helpers { namespace math {
 
 	/// converts a floating point number to an integer by rounding in an unspecified way
 	template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
-	Integer inline fast_unspecified_round_to_integer(Real x)
-	{
+	Integer inline fast_unspecified_round_to_integer(Real x) {
 		return x;
+	}
+	
+	/// shorter name for fast_unspecified_round_to_integer
+	template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
+	Integer inline furti(Real x) {
+		return fast_unspecified_round_to_integer(x);
 	}
 }}}
 
@@ -22,64 +27,54 @@ namespace psycle { namespace helpers { namespace math {
 		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
 		
 		template<> UNIVERSALIS__COMPILER__CONST
-		long long int inline fast_unspecified_round_to_integer<>(long double ld)
-		{
+		long long int inline fast_unspecified_round_to_integer<>(long double ld) {
 			return ::llrintl(ld);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		long long int inline fast_unspecified_round_to_integer<>(double d)
-		{
+		long long int inline fast_unspecified_round_to_integer<>(double d) {
 			return ::llrint(d);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		long long int inline fast_unspecified_round_to_integer<>(float f)
-		{
+		long long int inline fast_unspecified_round_to_integer<>(float f) {
 			return ::llrintf(f);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		long int inline fast_unspecified_round_to_integer<>(long double ld)
-		{
+		long int inline fast_unspecified_round_to_integer<>(long double ld) {
 			return ::lrintl(ld);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		long int inline fast_unspecified_round_to_integer<>(double d)
-		{
+		long int inline fast_unspecified_round_to_integer<>(double d) {
 			return ::lrint(d);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		long int inline fast_unspecified_round_to_integer<>(float f)
-		{
+		long int inline fast_unspecified_round_to_integer<>(float f) {
 			return ::lrintf(f);
 		}
 		
 		template<> UNIVERSALIS__COMPILER__CONST
-		int inline fast_unspecified_round_to_integer<>(long double ld)
-		{
+		int inline fast_unspecified_round_to_integer<>(long double ld) {
 			return ::lrintl(ld);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		int inline fast_unspecified_round_to_integer<>(double d)
-		{
+		int inline fast_unspecified_round_to_integer<>(double d) {
 			return ::lrint(d);
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		int inline fast_unspecified_round_to_integer<>(float f)
-		{
+		int inline fast_unspecified_round_to_integer<>(float f) {
 			return ::lrintf(f);
 		}
 		
 	#else
 	
 		template<> UNIVERSALIS__COMPILER__CONST
-		std::int32_t inline fast_unspecified_round_to_integer<>(double d)
-		{
+		std::int32_t inline fast_unspecified_round_to_integer<>(double d) {
 			BOOST_STATIC_ASSERT((sizeof d == 8));
 			union result_union
 			{
@@ -91,8 +86,7 @@ namespace psycle { namespace helpers { namespace math {
 		}
 
 		template<> UNIVERSALIS__COMPILER__CONST
-		std::int32_t inline fast_unspecified_round_to_integer<>(float f)
-		{
+		std::int32_t inline fast_unspecified_round_to_integer<>(float f) {
 			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 				///\todo not always the fastest when using sse(2)
 				///\todo the double "2^51 + 2^52" version might be faster.
@@ -115,8 +109,7 @@ namespace psycle { namespace helpers { namespace math {
 #if defined BOOST_AUTO_TEST_CASE && __STDC_VERSION__ >= 199901 // some test of C1999's features
 	#include <cmath>
 	#include <fenv.h>
-	BOOST_AUTO_TEST_CASE(lrint_test)
-	{
+	BOOST_AUTO_TEST_CASE(lrint_test) {
 		int const initial_feround(fegetround());
 		try {
 			fesetround(FE_TONEAREST);

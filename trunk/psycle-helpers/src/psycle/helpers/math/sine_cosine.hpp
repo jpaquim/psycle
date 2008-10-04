@@ -4,12 +4,13 @@
 
 #pragma once
 #include <diversalis/compiler.hpp>
+#include <universalis/compiler.hpp>
 #include <cmath>
 namespace psycle { namespace helpers { namespace math {
 
 	/// computes both the sine and the cosine at the same time
-	template<typename Real>
-	void inline sin_cos(Real const & x, Real & sine, Real & cosine) {
+	template<typename Real> UNIVERSALIS__COMPILER__CONST
+	void inline sin_cos(Real const & restrict x, Real & restrict sine, Real & restrict cosine) {
 		// some compilers are able to optimise those two calls into one.
 		sine = std::sin(x);
 		cosine = std::cos(x);
@@ -18,8 +19,7 @@ namespace psycle { namespace helpers { namespace math {
 			sine = std::sin(x);
 			cosine = std::sqrt(1 - sine * sine);
 			// we need to do cosine = -cosine for some values of x
-		#endif
-	
+		#endif	
 	}
 }}}
 
@@ -29,18 +29,18 @@ namespace psycle { namespace helpers { namespace math {
 	#if __STDC__VERSION__ >= 199901 || \
 		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
 		
-		template<>
-		void inline sin_cos<>(long double const & x, long double & sine, long double & cosine) {
+		template<> UNIVERSALIS__COMPILER__CONST
+		void inline sin_cos<>(long double const & restrict x, long double & restrict sine, long double & restrict cosine) {
 			::sincosl(x, &sine, &cosine);
 		}
 
-		template<>
-		void inline sin_cos<>(double const & x, double & sine, double & cosine) {
+		template<> UNIVERSALIS__COMPILER__CONST
+		void inline sin_cos<>(double const & restrict x, double & restrict sine, double & restrict cosine) {
 			::sincos(x, &sine, &cosine);
 		}
 
-		template<>
-		void inline sin_cos<>(float const & x, float & sine, float & cosine) {
+		template<> UNIVERSALIS__COMPILER__CONST
+		void inline sin_cos<>(float const & restrict x, float & restrict sine, float & restrict cosine) {
 			::sincosf(x, &sine, &cosine);
 		}
 
