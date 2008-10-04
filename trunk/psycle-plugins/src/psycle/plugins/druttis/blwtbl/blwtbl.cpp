@@ -556,6 +556,7 @@ bool UpdateWaveforms(int sr)
 	return true;
 }
 
+#include <diversalis/operating_system.hpp>
 #include <universalis/compiler.hpp>
 // [bohan] Note: i do the test on the operating system, but it might be possible that mingw handle attribute(constructor) and attribute(destructor) ;
 //               i haven't checked ; but in this case, we could use a test on COMPILER__GNU instead.

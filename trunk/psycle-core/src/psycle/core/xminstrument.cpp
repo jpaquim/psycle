@@ -151,10 +151,10 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 //  XMInstrument::Envelope Implementation.
 
 /**
-* @param pointIndex : Current point index.
-* @param pointTime  : Desired point Time.
-* @param value		: Desired point Value.
-* @return			: New point index.
+* @param pointIndex Current point index.
+* @param pointTime Desired point Time.
+* @param value Desired point Value.
+* @return New point index.
 */
 const int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
 {
