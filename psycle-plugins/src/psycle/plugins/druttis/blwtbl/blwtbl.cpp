@@ -557,26 +557,20 @@ bool UpdateWaveforms(int sr)
 }
 
 #include <diversalis/operating_system.hpp>
+#include <diversalis/compiler.hpp>
 #include <universalis/compiler.hpp>
-// [bohan] Note: i do the test on the operating system, but it might be possible that mingw handle attribute(constructor) and attribute(destructor) ;
-//               i haven't checked ; but in this case, we could use a test on COMPILER__GNU instead.
 #if defined DIVERSALIS__COMPILER__GNU
-	namespace init
-	{
-		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__DYNAMIC_LINK__HIDDEN;
-		void constructor()
-		{
+	namespace init {
+		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__DYNAMIC_LINK__HIDDEN {
 			InitWaveforms();
 			UpdateWaveforms(44100);
 		}
 		
-		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__DYNAMIC_LINK__HIDDEN;
-		void destructor()
-		{
+		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__DYNAMIC_LINK__HIDDEN {
 			CleanupWaveforms();
 		}
 	}
-#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <windows.h>
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/dynamic_link_library_functions.asp
 	::BOOL APIENTRY DllMain(::HMODULE module, ::DWORD reason_for_call, ::LPVOID)
