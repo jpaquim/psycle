@@ -590,7 +590,7 @@ void CSynthTrack::GetSample(float* slr)
 		if (tuningChange) updateTuning();
 		int c = 0;
 		if ( vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 || vpar->oscOptions[1]==8 || (vpar->oscFuncType[0]>=44) & (vpar->oscFuncType[0]!=47) || (vpar->oscFuncType[0]>=46) & (vpar->oscFuncType[0]!=49)){
-			for (c=0; c<4; c++){
+			for (c=0; c<OVERSAMPLING; c++){
 				output1 += WaveBuffer[curBuf[0]][f2i(dco1Position+dco1Last+fmData4)];
 				dco1Last=(float)(0.00000001f+output1)*(0.00000001f+vpar->oscFeedback[0])*(0.00000001f+fbCtl[0]);
 				dco1Position+=rdco1Pitch;
@@ -623,11 +623,11 @@ void CSynthTrack::GetSample(float* slr)
 					}												
 				}
 			}
-			output1 *= 0.25f;
+			output1 *= FREQDIV;
 		}
 
 		if ( vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2 || vpar->oscOptions[2]==8 || (vpar->oscFuncType[1]>=44) & (vpar->oscFuncType[1]!=47) || (vpar->oscFuncType[1]>=46) & (vpar->oscFuncType[1]!=49)){
-			for (c=0; c<4; c++){
+			for (c=0; c<OVERSAMPLING; c++){
 				output2 += WaveBuffer[1+curBuf[1]][f2i(dco2Position+dco2Last+fmData1)];
 				dco2Last=(float)(0.00000001f+output2)*(0.00000001f+vpar->oscFeedback[1])*(0.00000001f+fbCtl[1]);
 				dco2Position+=rdco2Pitch;
@@ -660,11 +660,11 @@ void CSynthTrack::GetSample(float* slr)
 					}
 				}
 			}
-			output2 *= 0.25f;
+			output2 *= FREQDIV;
 		}
 
 		if ( vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 || vpar->oscOptions[3]==8 || (vpar->oscFuncType[2]>=44) & (vpar->oscFuncType[2]!=47)|| (vpar->oscFuncType[2]>=46) & (vpar->oscFuncType[2]!=49)){
-			for (c=0; c<4; c++){
+			for (c=0; c<OVERSAMPLING; c++){
 				output3 += WaveBuffer[2+curBuf[2]][f2i(dco3Position+dco3Last+fmData2)];
 				dco3Last=(float)(0.00000001f+output3)*(0.00000001f+vpar->oscFeedback[2])*(0.00000001f+fbCtl[2]);
 				dco3Position+=rdco3Pitch;
@@ -697,11 +697,11 @@ void CSynthTrack::GetSample(float* slr)
 					}
 				}
 			}
-			output3 *= 0.25f;
+			output3 *= FREQDIV;
 		}
 
 		if ( vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 || vpar->oscOptions[0]==8 || (vpar->oscFuncType[3]>=44) & (vpar->oscFuncType[3]!=47) || (vpar->oscFuncType[3]>=46) & (vpar->oscFuncType[3]!=49)){
-			for (c=0; c<4; c++){
+			for (c=0; c<OVERSAMPLING; c++){
 				output4 += WaveBuffer[3+curBuf[3]][f2i(dco4Position+dco4Last+fmData3)];
 				dco4Last=(float)(0.00000001f+output4)*(0.00000001f+vpar->oscFeedback[3])*(0.00000001f+fbCtl[3]);
 				dco4Position+=rdco4Pitch;
@@ -734,7 +734,7 @@ void CSynthTrack::GetSample(float* slr)
 					}
 				}
 			}
-			output4 *= 0.25f;
+			output4 *= FREQDIV;
 		}
 
 		fmData1=(0.00000001f+fmCtl[oldBuf[0]][0])*(0.00000001f+output1)+(0.00000001f+fmCtl2[oldBuf[2]][2])*(0.00000001f+output3);
@@ -761,15 +761,27 @@ void CSynthTrack::GetSample(float* slr)
 
 		GetEnvFlt();
 		if (vpar->fltType){
-			if(!timetocompute--) {
+			//if(!timetocompute--) {
 				int realcutoff=int(vpar->fltCutoff+(vpar->filtvibe*0.005)+(rbasenote*0.1*vpar->fltTrack)+(fltEnvValue*vpar->fltEnvAmount*((1-vpar->fltVelocity)+(voiceVol*vpar->fltVelocity))));
 				if(realcutoff<1)realcutoff=1;
 				if(realcutoff>250)realcutoff=250;
 				rcCut+=(realcutoff-50-rcCut)*rcCutCutoff;
 				int cf = rcCut+cutmod;
-				m_filter.setfilter(vpar->fltType, cf, vpar->fltResonance);
+				
+				// old filter
+				if (vpar->fltType <= 10) m_filter.setfilter(vpar->fltType, cf, vpar->fltResonance);
 				timetocompute=FILTER_CALC_TIME;
-			} output = m_filter.res(output);
+
+				// atlantis sid filter
+				if (cf > 256.0f) cf = 256.0f;
+				if (cf < 0.0f) cf = 0.0f;
+				if (vpar->fltType > 10) a_filter.setAlgorithm((eAlgorithm)(vpar->fltType - 10));
+				a_filter.recalculateCoeffs(((float)cf)/256.0f, (float)vpar->fltResonance/256.0f);
+			//}
+
+			if (vpar->fltType <= 10) output = m_filter.res(output); // old filter
+			else a_filter.process(&output); // atlantis sid filter
+			
 		}
 
 		rcVol+=(((GetEnvAmp()*((1-vpar->ampVelocity)+(voiceVol*vpar->ampVelocity))*softenHighNotes)-rcVol)*rcVolCutoff);

@@ -997,7 +997,7 @@ CMachineParameter const paraFltType =
 	"Type",
 	"Type",																																								// description
 	0,																																												// MinValue				
-	10,																																												// MaxValue
+	17,																																												// MaxValue
 	MPF_STATE,																																				// Flags
 	0
 };
@@ -1690,6 +1690,13 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 		case 8:sprintf(txt,"EQ2-");return true;break;
 		case 9:sprintf(txt,"EQ3+");return true;break;
 		case 10:sprintf(txt,"EQ3-");return true;break;
+		case 11:sprintf(txt,"Atlantis SID LPF");return true;break;
+		case 12:sprintf(txt,"Atlantis SID HPF");return true;break;
+		case 13:sprintf(txt,"Atlantis SID BPF");return true;break;
+		case 14:sprintf(txt,"Atlantis SID LPF/HPF");return true;break;
+		case 15:sprintf(txt,"Atlantis SID LPF/BPF");return true;break;
+		case 16:sprintf(txt,"Atlantis SID LPF/BPF/HPF");return true;break;
+		case 17:sprintf(txt,"Atlantis SID BPF/HPF");return true;break;
 		}
 	}
 
