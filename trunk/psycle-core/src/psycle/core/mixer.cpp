@@ -55,14 +55,14 @@ namespace psy {
 			if( thetweaktype  == notetypes::tweak)
 			{
 				SetParameter(thetweakparameter, pData.tweak(0).value());
-				Player::Instance()->Tweaker = true;
+				Player::singleton().Tweaker = true;
 			}
 			else if( thetweaktype == notetypes::tweak_slide)
 			{
 				///\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 				// doing simply "tweak" for now..
 				SetParameter(thetweakparameter, pData.tweak(0).value());
-				Player::Instance()->Tweaker = true;
+				Player::singleton().Tweaker = true;
 			}
 		#endif
 		}
