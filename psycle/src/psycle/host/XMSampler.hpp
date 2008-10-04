@@ -451,8 +451,8 @@ XMSampler::Channel::PerformFX().
 		void NoteOffFast();
 		void NoteFadeout();
 		void UpdateFadeout();
-		const XMInstrument::NewNoteAction NNA() { return m_NNA;}
-		void NNA(const XMInstrument::NewNoteAction value){ m_NNA = value;}
+		const XMInstrument::NewNoteAction::Type NNA() { return m_NNA;}
+		void NNA(const XMInstrument::NewNoteAction::Type value){ m_NNA = value;}
 		
 		void ResetVolAndPan(std::int16_t playvol,bool reset=true);
 		void UpdateSpeed();
@@ -541,7 +541,7 @@ XMSampler::Channel::PerformFX().
 		void PanFactor(float pan)
 		{
 			m_PanFactor = pan;
-			m_PanRange = 1.0f -(fabs(0.5-m_PanFactor)*2);
+			m_PanRange = 0.5f -(fabs(0.5-m_PanFactor)*2);
 		}
 		float PanFactor() { return m_PanFactor; }
 
@@ -592,7 +592,8 @@ XMSampler::Channel::PerformFX().
 
 		int _instrument;// Instrument
 		XMInstrument *m_pInstrument;
-		XMInstrument::NewNoteAction m_NNA;
+		XMInstrument::NewNoteAction::Type m_NNA;
+
 
 		// Todo: do we need 4 controllers? wouldn't it be better 1 controller for all 4 envelopes?
 		EnvelopeController m_FilterEnvelope;
@@ -729,7 +730,7 @@ XMSampler::Channel::PerformFX().
 		void PanningSlide();
 		void ChannelVolumeSlide();
 		void NoteCut();
-		void StopBackgroundNotes(XMInstrument::NewNoteAction action);
+		void StopBackgroundNotes(XMInstrument::NewNoteAction::Type action);
 
 		const double ArpeggioPeriod()
 		{

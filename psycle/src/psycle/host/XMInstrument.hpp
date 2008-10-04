@@ -16,27 +16,33 @@ namespace psycle { namespace host {
 		
 		/// When a note starts to play in a channel, and there is still a note playing in it,
 		/// do this on the currently playing note:
-		enum NewNoteAction {
+		struct NewNoteAction {
+			enum Type {
 			STOP = 0x0,		///  [Note Cut]	(This one actually does a very fast fadeout)
 			CONTINUE = 0x1,	///  [Ignore]
 			NOTEOFF = 0x2,		///  [Note off]
 			FADEOUT = 0x3		///  [Note fade]
 			};
+		};
 
 		/// ?
-		enum DCType	{
+		struct DCType	{
+			enum Type {
 			 DCT_NONE=0x0,
 			 DCT_NOTE,
 			 DCT_SAMPLE,
 			 DCT_INSTRUMENT
 			};
+		};
 /*
 		Using NewNoteAction so that we can convert easily from DCA to NNA.
-		enum DCAction {
+		struct DCAction {
+			enum Type {
 			DCA_STOP=0x0,
 			DCA_NOTEOFF,
 			DCA_FADEOUT
 			};
+		};
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -45,19 +51,23 @@ namespace psycle { namespace host {
 		class WaveData {
 		public:
 			/// Wave Loop Types
-			enum LoopType {
+			struct LoopType {
+				enum Type {
 				DO_NOT = 0x0, ///< Do Nothing
 				NORMAL = 0x1, ///< normal Start --> End ,Start --> End ...
 				BIDI = 0x2	  ///< bidirectional Start --> End, End --> Start ...
+				};
 			};
 
 			/// Wave Form Types
-			enum WaveForms {
+			struct WaveForms {
+				enum Type {
 				SINUS = 0x0,
 				SQUARE = 0x1,
 				SAWUP = 0x2,
 				SAWDOWN = 0x3,
 				RANDOM = 0x4
+				};
 			};
 
 			/// Constructor
@@ -72,10 +82,10 @@ namespace psycle { namespace host {
 				m_WaveDefVolume = 128; // Default volume ( volume at which it starts to play. corresponds to 0Cxx/volume command )
 				m_WaveLoopStart = 0;
 				m_WaveLoopEnd = 0;
-				m_WaveLoopType = DO_NOT;
+				m_WaveLoopType = LoopType::DO_NOT;
 				m_WaveSusLoopStart = 0;
 				m_WaveSusLoopEnd = 0;
-				m_WaveSusLoopType = DO_NOT;
+				m_WaveSusLoopType = LoopType::DO_NOT;
 				//todo: Add SampleRate functionality, and change WaveTune's one.
 				// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
 				m_WaveSampleRate = 8363;
@@ -176,22 +186,22 @@ namespace psycle { namespace host {
 			void WaveLoopStart(const std::uint32_t value){m_WaveLoopStart = value;}
 			const std::uint32_t WaveLoopEnd(){ return m_WaveLoopEnd;}
 			void WaveLoopEnd(const std::uint32_t value){m_WaveLoopEnd = value;}
-			const LoopType WaveLoopType(){ return m_WaveLoopType;}
-			void WaveLoopType(const LoopType value){ m_WaveLoopType = value;}
+			const LoopType::Type WaveLoopType(){ return m_WaveLoopType;}
+			void WaveLoopType(const LoopType::Type value){ m_WaveLoopType = value;}
 
 			const std::uint32_t WaveSusLoopStart(){ return m_WaveSusLoopStart;}
 			void WaveSusLoopStart(const std::uint32_t value){m_WaveSusLoopStart = value;}
 			const std::uint32_t WaveSusLoopEnd(){ return m_WaveSusLoopEnd;}
 			void WaveSusLoopEnd(const std::uint32_t value){m_WaveSusLoopEnd = value;}
-			const LoopType WaveSusLoopType(){ return m_WaveSusLoopType;}
-			void WaveSusLoopType(const LoopType value){ m_WaveSusLoopType = value;}
+			const LoopType::Type WaveSusLoopType(){ return m_WaveSusLoopType;}
+			void WaveSusLoopType(const LoopType::Type value){ m_WaveSusLoopType = value;}
 
 			const std::int16_t WaveTune(){return m_WaveTune;}
 			void WaveTune(const std::int16_t value){m_WaveTune = value;}
 			const std::int16_t WaveFineTune(){return m_WaveFineTune;}
 			void WaveFineTune(const std::int16_t value){m_WaveFineTune = value;}
 			const std::uint32_t WaveSampleRate(){return m_WaveSampleRate;}
-			void WaveSampleRate(const std::uint32_t value){m_WaveSampleRate = value;}
+			void WaveSampleRate(const std::uint32_t value);
 
 			const bool IsWaveStereo(){ return m_WaveStereo;}
 			void IsWaveStereo(const bool value){ m_WaveStereo = value;}
@@ -226,10 +236,10 @@ namespace psycle { namespace host {
 			std::uint16_t m_WaveDefVolume;
 			std::uint32_t m_WaveLoopStart;
 			std::uint32_t m_WaveLoopEnd;
-			LoopType m_WaveLoopType;
+			LoopType::Type m_WaveLoopType;
 			std::uint32_t m_WaveSusLoopStart;
 			std::uint32_t m_WaveSusLoopEnd;
-			LoopType m_WaveSusLoopType;
+			LoopType::Type m_WaveSusLoopType;
 			std::uint32_t m_WaveSampleRate;
 			std::int16_t m_WaveTune;
 			/// [ -256 .. 256] full range = -/+ 1 seminote
@@ -327,13 +337,13 @@ namespace psycle { namespace host {
 			}
 
 			/// Helper to set a new time for an existing index.
-			const int SetTimeAndValue(const int pointIndex,const int pointTime,const ValueType pointVal);
+			const int SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal);
 
 			/// Inserts a new point to the points Array.
-			const int Insert(const int pointIndex,const ValueType pointVal);
+			const unsigned int Insert(const int pointIndex,const ValueType pointVal);
 
 			/// Removes a point from the points Array.
-			void Delete(const int pointIndex);
+			void Delete(const unsigned int pointIndex);
 
 			/// Clears the points Array
 			void Clear()
@@ -343,21 +353,21 @@ namespace psycle { namespace host {
 			/// Set or Get the point Index for Sustain and Loop.
 			const int SustainBegin(){ return m_SustainBegin;}
 			/// value has to be an existing point!
-			void SustainBegin(const int value){m_SustainBegin = value;}
+			void SustainBegin(const unsigned int value){m_SustainBegin = value;}
 
 			const int SustainEnd(){ return m_SustainEnd;}
 			/// value has to be an existing point!
-			void SustainEnd(const int value){m_SustainEnd = value;}
+			void SustainEnd(const unsigned int value){m_SustainEnd = value;}
 
 			const int LoopStart(){return m_LoopStart;}
 			/// value has to be an existing point!
-			void LoopStart(const int value){m_LoopStart = value;}
+			void LoopStart(const unsigned int value){m_LoopStart = value;}
 
 			const int LoopEnd(){return m_LoopEnd;}
 			/// value has to be an existing point!
-			void LoopEnd(const int value){m_LoopEnd = value;}
+			void LoopEnd(const unsigned int value){m_LoopEnd = value;}
 
-			const int NumOfPoints(){ return m_Points.size();}
+			const unsigned int NumOfPoints(){ return m_Points.size();}
 
 			void Load(RiffFile& riffFile,const std::uint32_t version);
 			void Save(RiffFile& riffFile,const std::uint32_t version);
@@ -518,12 +528,12 @@ namespace psycle { namespace host {
 		const float RandomResonance(){return m_RandomResonance;}
 		void RandomResonance(const float value){m_RandomResonance = value;}
 
-		const NewNoteAction NNA() { return m_NNA;}
-		void NNA(const NewNoteAction value){ m_NNA = value;}
-		const DCType DCT() { return m_DCT;}
-		void DCT(const DCType value){ m_DCT = value;}
-		const NewNoteAction DCA() { return m_DCA;}
-		void DCA(const NewNoteAction value){ m_DCA = value;}
+		const NewNoteAction::Type NNA() { return m_NNA;}
+		void NNA(const NewNoteAction::Type value){ m_NNA = value;}
+		const DCType::Type DCT() { return m_DCT;}
+		void DCT(const DCType::Type value){ m_DCT = value;}
+		const NewNoteAction::Type DCA() { return m_DCA;}
+		void DCA(const NewNoteAction::Type value){ m_DCA = value;}
 
 		const NotePair NoteToSample(const int note){return m_AssignNoteToSample[note];}
 		void NoteToSample(const int note,const NotePair npair){m_AssignNoteToSample[note] = npair;}
@@ -581,12 +591,12 @@ namespace psycle { namespace host {
 		float m_RandomResonance;
 
 		/// Action to take on the playing voice when any new note comes in the same channel.
-		NewNoteAction m_NNA;
+		NewNoteAction::Type m_NNA;
 		/// ?
-		DCType m_DCT;
+		DCType::Type m_DCT;
 		/// Action to take on the playing voice when a new note comes in the same channel 
 		/// and the element defined by m_DCT is the same. (like the same note value).
-		NewNoteAction m_DCA;
+		NewNoteAction::Type m_DCA;
 
 		/// Table of mapped notes to samples
 		/// (note number=first, sample number=second)
