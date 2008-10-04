@@ -31,19 +31,19 @@ namespace psycle { namespace helpers { namespace math {
 		template<>
 		void sin_cos<>(long double const & x, long double & sine, long double & cosine) {
 			// some compilers are able to optimise those two calls into one.
-			sincosl(x, &sine, &cosine);
+			::sincosl(x, &sine, &cosine);
 		}
 
 		template<>
 		void sin_cos<>(double const & x, double & sine, double & cosine) {
 			// some compilers are able to optimise those two calls into one.
-			sincos(x, &sine, &cosine);
+			::sincos(x, &sine, &cosine);
 		}
 
 		template<>
 		void sin_cos<>(float const & x, float & sine, float & cosine) {
 			// some compilers are able to optimise those two calls into one.
-			sincosf(x, &sine, &cosine);
+			::sincosf(x, &sine, &cosine);
 		}
 
 	#endif
