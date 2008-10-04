@@ -211,6 +211,9 @@ class Player : public MachineCallbacks {
 	///\name multithreaded scheduler
 	///\{
 		private:
+			void start_threads();
+			void stop_threads();
+			
 			typedef Machine node;
 
 			std::size_t thread_count_;
@@ -222,7 +225,6 @@ class Player : public MachineCallbacks {
 			std::mutex mutable mutex_;
 			std::condition<scoped_lock> mutable condition_;
 	
-			void start_threads();
 			bool stop_requested_;
 			bool suspend_requested_;
 			std::size_t suspended_;
