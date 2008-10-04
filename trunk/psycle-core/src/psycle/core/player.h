@@ -33,6 +33,7 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 		Player();
 		~Player();
 
+	public:
 		Player static & singleton();
 
 	///\}
@@ -82,7 +83,7 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 			/// entrance for the callback function (audiodriver)
 			float * Work(int samples);
 	///\}
-		
+
 	///\name song
 	///\{
 		public:
@@ -136,14 +137,14 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 			/// sets the current play position
 			void setPlayPos(double pos) { timeInfo_.setPlayBeatPos(pos); }
 	///\}
-	
+
 	///\name time info ... bpm
 	///\{
 		public:
 			double bpm() const { return timeInfo_.bpm(); }
 			void setBpm(double bpm) { timeInfo_.setBpm(bpm); }
 	///\}
-	
+
 	///\name start/stop
 	///\{
 		public:
@@ -156,7 +157,7 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 		private:
 			bool playing_;
 	///\}
-	
+
 	///\name loop
 	///\{
 		public:
@@ -177,7 +178,7 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 		private:
 			bool autoStopMachines_;
 	///\}
-	
+
 	///\name multithreading locking
 	///\{
 		public:
@@ -209,7 +210,7 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 		private:
 			void start_threads();
 			void stop_threads();
-			
+
 			typedef Machine node;
 
 			std::size_t thread_count_;
@@ -220,7 +221,7 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 			typedef std::scoped_lock<std::mutex> scoped_lock;
 			std::mutex mutable mutex_;
 			std::condition<scoped_lock> mutable condition_;
-	
+
 			bool stop_requested_;
 			bool suspend_requested_;
 			std::size_t suspended_;
