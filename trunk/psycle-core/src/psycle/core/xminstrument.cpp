@@ -1,27 +1,12 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-/***************************************************************************
-	*   Copyright (C) 2007 by Psycledelics     *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   xxxxxxxxxxxxxxxxxxxxxxx
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	*   WRONG ADDRESS
-	*   xxxxxxxxxxxxxxxxxxxxxxx
-	***************************************************************************/
-//
+
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
 
 #include "xminstrument.h"
 #include "datacompression.h"
@@ -404,7 +389,7 @@ void XMInstrument::Envelope::Save(RiffFile& riffFile, const std::uint32_t versio
 	riffFile.Write(m_LoopEnd);
 	riffFile.Write(m_SustainBegin);
 	riffFile.Write(m_SustainEnd);
-	riffFile.Write(m_Points.size());
+	riffFile.Write(static_cast<std::uint32_t>(m_Points.size()));
 
 	for(unsigned int i = 0; i < m_Points.size(); i++)
 	{
