@@ -288,7 +288,7 @@ void CTrack::Tick( tvals const &tv)
 	if( tv.Note != NOTE_OFF) // neuer wert
 	{
 		Note = tv.Note;
-		if( (Note >= 0) && (Note <= 119)) // neue note gesetzt
+		if(Note <= 119) // neue note gesetzt
 		{
 			FrequencyFrom = Frequency;
 			Frequency = freqTab[Note];
