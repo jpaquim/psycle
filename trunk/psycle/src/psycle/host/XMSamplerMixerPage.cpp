@@ -41,6 +41,11 @@ const int XMSamplerMixerPage::dlgMute[8] = {
 	IDC_CH_MUTE5,IDC_CH_MUTE6,IDC_CH_MUTE7,IDC_CH_MUTE8
 };
 
+int const XMSamplerMixerPage::volumeRange = 200;
+int const XMSamplerMixerPage::panningRange = 200;
+int const XMSamplerMixerPage::resRange = 127;
+int const XMSamplerMixerPage::cutoffRange = 127;
+
 
 IMPLEMENT_DYNAMIC(XMSamplerMixerPage, CPropertyPage)
 XMSamplerMixerPage::XMSamplerMixerPage()
@@ -123,10 +128,10 @@ BOOL XMSamplerMixerPage::OnSetActive()
 	if ( ((CButton*)GetDlgItem(IDC_R_SHOWVOICE))->GetCheck() == 0 ) { ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->SetCheck(1); }
 	for (int i=0;i<8;i++)
 	{
-		((CSliderCtrl*)GetDlgItem(dlgVol[i]))->SetRangeMax(200);
-		((CSliderCtrl*)GetDlgItem(dlgPan[i]))->SetRangeMax(200);
-		((CSliderCtrl*)GetDlgItem(dlgRes[i]))->SetRangeMax(127);
-		((CSliderCtrl*)GetDlgItem(dlgCut[i]))->SetRangeMax(127);
+		((CSliderCtrl*)GetDlgItem(dlgVol[i]))->SetRangeMax(volumeRange);
+		((CSliderCtrl*)GetDlgItem(dlgPan[i]))->SetRangeMax(panningRange);
+		((CSliderCtrl*)GetDlgItem(dlgRes[i]))->SetRangeMax(resRange);
+		((CSliderCtrl*)GetDlgItem(dlgCut[i]))->SetRangeMax(cutoffRange);
 		UpdateChannel(i);
 	}
 	((CSliderCtrl*)GetDlgItem(IDC_SL_VOL_MASTER))->SetRangeMax(128);
@@ -158,7 +163,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		sprintf(chname,"%d",index+m_ChannelOffset);
 		name->SetWindowText(chname);
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
-		sld->SetPos(200-(rChan.DefaultVolumeFloat()*200.0f));
+		sld->SetPos(volumeRange-(rChan.DefaultVolumeFloat()*volumeRange));
 		CButton* mute = (CButton*)GetDlgItem(dlgMute[index]);
 		if ( rChan.DefaultIsMute() )
 		{
@@ -169,7 +174,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 			mute->SetCheck(false);
 		}
 		sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
-		int defpos = int(rChan.DefaultPanFactorFloat()*200.0f);
+		int defpos = rChan.DefaultPanFactorFloat()*panningRange;
 		sld->SetPos(defpos);
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
 		if ( rChan.DefaultIsSurround())
@@ -192,8 +197,8 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		{
 			sprintf(chname,"(%d)",index+m_ChannelOffset);
 			name->SetWindowText(chname);
-			sld->SetPos(64);
-			defpos = int(rChan.PanFactor()*64.0f);
+			sld->SetPos(volumeRange);
+			defpos = int(rChan.PanFactor()*panningRange);
 			sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
 			sld->SetPos(rChan.Ressonance());
 			sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
@@ -202,8 +207,8 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 			std::string tmpstr = voice->rInstrument().Name();
 			sprintf(chname,"%02X:%s",voice->InstrumentNum(),tmpstr.c_str());
 			name->SetWindowText(chname);
-			sld->SetPos(64-int(voice->RealVolume()*64.0f));
-			defpos = int(voice->PanFactor()*64.0f);
+			sld->SetPos(volumeRange-(voice->RealVolume()*volumeRange));
+			defpos = int(voice->PanFactor()*panningRange);
 			sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
 			sld->SetPos(voice->Ressonance());
 			sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
@@ -299,7 +304,7 @@ void XMSamplerMixerPage::SliderPanning(NMHDR *pNMHDR, LRESULT *pResult, int offs
 		{
 			CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(dlgPan[offset]);
 			XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-			rChan.DefaultPanFactorFloat(slid->GetPos()/200.0f);
+			rChan.DefaultPanFactorFloat(slid->GetPos()/(float)panningRange);
 			*pResult = 0;
 		}
 	}
@@ -366,7 +371,7 @@ void XMSamplerMixerPage::SliderVolume(NMHDR *pNMHDR, LRESULT *pResult, int offse
 		{
 			CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(dlgVol[offset]);
 			XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-			rChan.DefaultVolumeFloat((200-slid->GetPos())/200.0f);
+			rChan.DefaultVolumeFloat((volumeRange-slid->GetPos())/(float)volumeRange);
 		}
 	}
 	*pResult = 0;

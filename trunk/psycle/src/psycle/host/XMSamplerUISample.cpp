@@ -271,40 +271,50 @@ END_MESSAGE_MAP()
 // Controladores de mensajes de XMSamplerUISample
 BOOL XMSamplerUISample::OnSetActive()
 {
-	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetRangeMax(128);
-	((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetRangeMax(128);
-	((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetRangeMax(128);
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMin(-59);
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMax(59);
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(1);
-	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMax(256);
-	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMin(-256);
-	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(26);
-	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetRangeMax(255);
-	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetRangeMax(64);
-	((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetRangeMax(32);
-	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->AddString("Sinus");
-	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->AddString("Square");
-	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->AddString("RampUp");
-	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->AddString("RampDown");
-	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->AddString("Random");
-	((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP))->AddString("Disabled");
-	((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP))->AddString("Forward");
-	((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP))->AddString("Bidirection");
-	((CComboBox*)GetDlgItem(IDC_LOOP))->AddString("Disabled");
-	((CComboBox*)GetDlgItem(IDC_LOOP))->AddString("Forward");
-	((CComboBox*)GetDlgItem(IDC_LOOP))->AddString("Bidirection");
-
-	
-	if (!m_Init ) for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
-	{
-		char line[48];
-		XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
-		sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
-		strcat(line,wave.WaveName().c_str());
-		m_SampleList.AddString(line);
+	if (!m_Init ) {
+		((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetRangeMax(128);
+		((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetRangeMax(128);
+		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetRangeMax(128);
+		((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMin(-59);
+		((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMax(59);
+		((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(1);
+		((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMax(256);
+		((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMin(-256);
+		((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(26);
+		((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetRangeMax(255);
+		((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetRangeMax(64);
+		((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetRangeMax(32);
+		CComboBox* vibratoType = ((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE));
+		vibratoType->ResetContent();
+		vibratoType->AddString("Sinus");
+		vibratoType->AddString("Square");
+		vibratoType->AddString("RampUp");
+		vibratoType->AddString("RampDown");
+		vibratoType->AddString("Random");
+		CComboBox* sustainLoop = ((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP));
+		sustainLoop->ResetContent();
+		sustainLoop->AddString("Disabled");
+		sustainLoop->AddString("Forward");
+		sustainLoop->AddString("Bidirection");
+		CComboBox* loop =  ((CComboBox*)GetDlgItem(IDC_LOOP));
+		loop->ResetContent();
+		loop->AddString("Disabled");
+		loop->AddString("Forward");
+		loop->AddString("Bidirection");
+		m_SampleList.SetCurSel(0);
+		m_SampleList.ResetContent();
+		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
+		{
+			char line[48];
+			XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
+			sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
+			strcat(line,wave.WaveName().c_str());
+			m_SampleList.AddString(line);
+		}
 	}
-	m_SampleList.SetCurSel(0);
+	if ( m_SampleList.GetCurSel() == -1 ) {
+		m_SampleList.SetCurSel(0);
+	}
 	OnLbnSelchangeSamplelist();
 	m_Init=true;
 
@@ -338,7 +348,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	else
 	{
 		const int panpos=wave.PanFactor()*128.0f;
-	((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
+		((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
 		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(panpos);
 		char tmp[40];
 		switch(panpos)
@@ -500,9 +510,10 @@ void XMSamplerUISample::OnDeltaposSpinsamplerate(NMHDR *pNMHDR, LRESULT *pResult
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	if ( pNMUpDown->iDelta > 0 )
 	{
-		//\todo : increase one semitone/octave
+		rWave().WaveSampleRate(rWave().WaveSampleRate()*2);
+
 	} else {
-		//\todo : decrease one semitone/octave
+		rWave().WaveSampleRate(rWave().WaveSampleRate()*0.5f);
 	}
 	*pResult = 0;
 }

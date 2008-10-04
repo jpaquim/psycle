@@ -9,20 +9,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 class XMSampler;
-	
+
 class XMSamplerUIInst : public CPropertyPage
 {
 public:
 	class CEnvelopeEditor : public CStatic
-		{
-		public:
-			// constant
+	{
+	public:
+		// constant
 		static const int POINT_SIZE = 6;///< Envelope Point size, in pixels.
-			
+
 		CEnvelopeEditor();
 		virtual ~CEnvelopeEditor();
-		
-			void Initialize(XMSampler * const pSampler,XMInstrument::Envelope * const pEnvelope);
+
+		void Initialize(XMSampler * const pSampler,XMInstrument::Envelope * const pEnvelope);
 		virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
 
 	protected:
@@ -44,53 +44,54 @@ public:
 
 	protected:
 
-			/**  */
+		/**  */
 		const int GetEnvelopePointIndexAtPoint(const int x,const int y)
-			{
+		{
 			std::size_t const _points = m_pEnvelope->NumOfPoints();
 			for(unsigned int i = 0;i < _points ;i++)
-				{
-					CPoint _pt_env;
+			{
+				CPoint _pt_env;
 				_pt_env.y = (int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
 				_pt_env.x = (int)(m_Zoom * (float)m_pEnvelope->GetTime(i));
-					if(((_pt_env.x - POINT_SIZE / 2) <= x) & ((_pt_env.x + POINT_SIZE / 2) >= x) &
-						((_pt_env.y - POINT_SIZE / 2) <= y) & ((_pt_env.y + POINT_SIZE / 2) >= y))
-					{
+
+				if(((_pt_env.x - POINT_SIZE / 2) <= x) & ((_pt_env.x + POINT_SIZE / 2) >= x) &
+					((_pt_env.y - POINT_SIZE / 2) <= y) & ((_pt_env.y + POINT_SIZE / 2) >= y))
+				{
 					return i;
-					}
 				}
+			}
 
 			return _points; // return == _points -> Point not found.
-			}
+		}
 
 		XMInstrument::Envelope* m_pEnvelope;
 		XMSampler * m_pXMSampler;
 		bool m_bInitialized;
-			float m_Zoom;///< Zoom
+		float m_Zoom;///< Zoom
 		int m_WindowHeight;
 		int m_WindowWidth;
-			
-			bool m_bPointEditing;///< EnvelopePoint 
-		 int m_EditPoint;///< ***** Envelope Point Index
-			int m_EditPointX;///< Envelope Point
-			int m_EditPointY;///< Envelope Point
+
+		bool m_bPointEditing;///< EnvelopePoint 
+		int m_EditPoint;///< ***** Envelope Point Index
+		int m_EditPointX;///< Envelope Point
+		int m_EditPointY;///< Envelope Point
 
 		CPen _line_pen;
 		CPen _gridpen;
 		CPen _gridpen1;
 //		CBrush brush;
 		CBrush _point_brush;
-		};
-		
+	};
+
 	class CSampleAssignEditor : public CStatic
-		{
+	{
 		friend class XMSamplerUIInst;
-		public:
+	public:
 		enum TNoteKey
-			{
+		{
 			NaturalKey=0,
 			SharpKey
-			};
+		};
 		CSampleAssignEditor();
 		virtual ~CSampleAssignEditor();
 
@@ -131,30 +132,30 @@ public:
 		int m_FocusKeyIndex;///< 
 		CRect m_FocusKeyRect;///<
 		CScrollBar m_scBar;
-			
-			};
+
+	};
 
 
 
 
 
-DECLARE_DYNAMIC(XMSamplerUIInst)
+	DECLARE_DYNAMIC(XMSamplerUIInst)
 
 public:
-		XMSamplerUIInst();
-		virtual ~XMSamplerUIInst();
+	XMSamplerUIInst();
+	virtual ~XMSamplerUIInst();
 
-		/// Dialog ID
-		enum { IDD = IDD_XMSAMPLERUIINST };
-		
+	/// Dialog ID
+	enum { IDD = IDD_XMSAMPLERUIINST };
+
 protected:
-		virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
+	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 
-		DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 
 public:
-		void pMachine(XMSampler * const p){m_pMachine = p;};
-		XMSampler * const pMachine(){return m_pMachine;};
+	void pMachine(XMSampler * const p){m_pMachine = p;};
+	XMSampler * const pMachine(){return m_pMachine;};
 
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult);
@@ -163,7 +164,7 @@ public:
 	afx_msg void OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawNoteMod(NMHDR *pNMHDR, LRESULT *pResult);
-	
+
 	afx_msg void OnNMCustomdrawADSRBase(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawADSRMod(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawADSRAttack(NMHDR *pNMHDR, LRESULT *pResult);
@@ -191,7 +192,7 @@ public:
 	afx_msg void OnBnClickedEnvfreeform();
 
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-		
+
 private:
 
 	void SetInstrumentData(const int instno);
@@ -200,20 +201,21 @@ private:
 	void AssignPanningValues(XMInstrument& inst);
 	void AssignFilterValues(XMInstrument& inst);
 	void AssignPitchValues(XMInstrument& inst);
-		
 
-		XMSampler *m_pMachine;
-		bool m_bInitialized;
-	
+
+	XMSampler *m_pMachine;
+	bool m_bInitialized;
+	int		m_iCurrentSelected;
+
 protected:
 	enum TabPage
-		{
+	{
 		general=0,
 		amplitude,
 		panning,
 		filter,
 		pitch
-		};
+	};
 
 	CListBox m_InstrumentList;
 	CComboBox m_FilterType;
