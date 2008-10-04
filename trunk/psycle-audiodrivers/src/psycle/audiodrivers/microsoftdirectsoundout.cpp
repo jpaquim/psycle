@@ -352,7 +352,7 @@ namespace psy
 			//_bitDepth = 16;
 			//_channelmode = 3;
 			//_samplesPerSec = 44100;
-			_bufferSize = 4096;
+			_bufferSize = 8192;
 			_numBuffers = 4;
 			_configured = true;
 
