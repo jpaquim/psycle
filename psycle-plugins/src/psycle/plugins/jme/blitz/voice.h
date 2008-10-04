@@ -19,6 +19,7 @@
 
 #pragma once
 #include "filter.h"
+#include "atlantisfilter.h"
 #include "lfo.h"
 #include "pwm.h"
 
@@ -60,7 +61,8 @@
 #define WAVE_OSC2WORKBUFFER			35
 #define WAVE_OSC3WORKBUFFER			36
 #define WAVE_OSC4WORKBUFFER			37
-
+#define OVERSAMPLING				8
+#define FREQDIV						1.0f/(float)OVERSAMPLING
 #define BufferTemp					8
 
 
@@ -230,6 +232,7 @@ private:
 	float lfoViberSample;
 	float lfoViberLast;
 	filter m_filter;
+	CSIDFilter a_filter;
 
 	int updateCount;
 	short timetocompute;
@@ -303,7 +306,7 @@ private:
 	inline float freqChange(float freq)
 	{
 		if (freq > 666.0f) freq = 666.0f;
-		return freq*0.25f; //4x oversampling
+		return freq*FREQDIV;
 	};
 };
 
