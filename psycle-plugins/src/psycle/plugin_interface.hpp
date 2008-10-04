@@ -119,16 +119,16 @@ namespace psycle
 		class CFxCallback
 		{
 			public:
-				virtual void MessBox(char const * message, char const * caption, unsigned int type) {}
-				virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
+				virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) {}
+				virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, int /*par3*/) { return 0; }
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-				virtual float * unused0(int, int){return 0;}
+				virtual float * unused0(int, int) { return 0; }
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-				virtual float * unused1(int, int){return 0;}
-				virtual int GetTickLength(){return 2048;}
-				virtual int GetSamplingRate(){return 44100;}
-				virtual int GetBPM(){return 125;}
-				virtual int GetTPB(){return 4;}
+				virtual float * unused1(int, int) { return 0; }
+				virtual int GetTickLength() { return 2048; }
+				virtual int GetSamplingRate() { return 44100; }
+				virtual int GetBPM() { return 125; }
+				virtual int GetTPB() { return 4; }
 				// Don't get fooled by the above return values.
 				// You get a pointer to a subclass of this one that returns the correct ones.
 				virtual inline ~CFxCallback() throw() {}
@@ -146,10 +146,10 @@ namespace psycle
 				///\todo doc
 				virtual void SequencerTick() {}
 				///\todo doc
-				virtual void ParameterTweak(int par, int val) {}
+				virtual void ParameterTweak(int /*par*/, int /*val*/) {}
 
 				/// Work function
-				virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {}
+				virtual void Work(float * /*psamplesleft*/, float * /*psamplesright*/, int /*numsamples*/, int /*tracks*/) {}
 
 				///\todo doc
 				virtual void Stop() {}
@@ -157,9 +157,9 @@ namespace psycle
 				///\name Export / Import
 				///\{
 					///\todo doc
-					virtual void PutData(void * pData) {}
+					virtual void PutData(void * /*pData*/) {}
 					///\todo doc
-					virtual void GetData(void * pData) {}
+					virtual void GetData(void * /*pData*/) {}
 					///\todo doc
 					virtual int GetDataSize() { return 0; }
 				///\}
@@ -167,19 +167,19 @@ namespace psycle
 				///\todo doc
 				virtual void Command() {}
 				///\todo doc. not used (yet?)
-				virtual void MuteTrack(int const i) {}
+				virtual void MuteTrack(int const) {}
 				///\todo doc. not used (yet?)
-				virtual bool IsTrackMuted(int const i) const { return false; }
+				virtual bool IsTrackMuted(int const) const { return false; }
 				///\todo doc. not used (yet?)
-				virtual void MidiNote(int const channel, int const value, int const velocity) {}
+				virtual void MidiNote(int const /*channel*/, int const /*value*/, int const /*velocity*/) {}
 				///\todo doc. not used (yet?)
-				virtual void Event(uint32 const data) {}
+				virtual void Event(uint32 const /*data*/) {}
 				///\todo doc
-				virtual bool DescribeValue(char* txt,int const param, int const value) { return false; }
+				virtual bool DescribeValue(char * /*txt*/, int const /*param*/, int const /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
-				virtual bool PlayWave(int const wave, int const note, float const volume) { return false; }
+				virtual bool PlayWave(int const /*wave*/, int const /*note*/, float const /*volume*/) { return false; }
 				///\todo doc
-				virtual void SeqTick(int channel, int note, int ins, int cmd, int val) {}
+				virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
 				///\todo doc. not used (prolly never)
 				virtual void StopWave() {}
 
