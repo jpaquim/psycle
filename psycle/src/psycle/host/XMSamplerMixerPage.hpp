@@ -92,6 +92,11 @@ private:
 	static const int dlgCut[8];
 	static const int dlgMute[8];
 
+	static int const volumeRange;
+	static int const panningRange;
+	static int const resRange;
+	static int const cutoffRange;
+
 	XMSampler *sampler;
 	// Indicates the index of the first channel shown (controlled by IDC_SL_CHANNELS)
 	int m_ChannelOffset;
@@ -99,7 +104,7 @@ private:
 public:
 	// Refreshes the values of all the controls of the dialog, except IDC_SL_CHANNELS, IDC_LEFTVU and IDC_RIGHTVU
 	void UpdateAllChannels(void);
-	// Refreshes the values of the controls of a specific channel. channel 0 is the Master channel.
+	// Refreshes the values of the controls of a specific channel.
 	void UpdateChannel(int index);
 	// Refreshes the values of the controls of the master channel.
 	void UpdateMaster(void);

@@ -23,6 +23,7 @@ IMPLEMENT_DYNAMIC(XMSamplerUIInst, CPropertyPage)
 XMSamplerUIInst::XMSamplerUIInst()
 : CPropertyPage(XMSamplerUIInst::IDD)
 , m_bInitialized(false)
+, m_iCurrentSelected(0)
 {
 }
 
@@ -105,8 +106,9 @@ END_MESSAGE_MAP()
 
 void XMSamplerUIInst::SetInstrumentData(const int instno)
 {
-	m_bInitialized = false;
+	TRACE("in setInstrumentData\n");
 	XMInstrument& inst = m_pMachine->rInstrument(instno);
+	m_iCurrentSelected=instno;
 
 	m_InstrumentName.SetWindowText(inst.Name().c_str());
 	SetNewNoteAction(inst.NNA(),inst.DCT(),inst.DCA());
@@ -123,7 +125,6 @@ void XMSamplerUIInst::SetInstrumentData(const int instno)
 	else if (((CButton*)GetDlgItem(IDC_INS_TPITCH))->GetCheck())
 		AssignPitchValues(inst);
 
-	m_bInitialized = true;
 }
 
 void XMSamplerUIInst::SetNewNoteAction(const int nna,const int dct,const int dca)
@@ -135,11 +136,12 @@ void XMSamplerUIInst::SetNewNoteAction(const int nna,const int dct,const int dca
 
 void XMSamplerUIInst::AssignAmplitudeValues(XMInstrument& inst)
 {
+	TRACE("in assingamplvals, reading globvol\n");
 	m_SlVolCutoffPan.SetPos(inst.GlobVol()*128.0f);
 	m_SlFadeoutRes.SetPos(inst.VolumeFadeSpeed()*1024.0f);
 	m_SlSwing1Glide.SetPos(inst.RandomVolume()*100.0f);
-	//m_SlNoteModNote.SetPos(inst.NoteModVolCenter());
-	//m_SlNoteMod.SetPos(inst.NoteModVolSep());
+//	m_SlNoteModNote.SetPos(inst.NoteModVolCenter());
+//	m_SlNoteMod.SetPos(inst.NoteModVolSep());
 
 	m_EnvelopeEditor.Initialize(m_pMachine,inst.AmpEnvelope());
 	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_SHOW); //ENVADSR
@@ -165,6 +167,8 @@ void XMSamplerUIInst::AssignPanningValues(XMInstrument& inst)
 {
 	m_cutoffPan.SetCheck(inst.PanEnabled());
 	m_SlVolCutoffPan.SetPos((inst.Pan()*128.0f)-64.0f);
+	//FIXME: This is not showing the correct value. Should check if randompanning
+	//is erroneous or is not the value to check.
 	m_SlSwing1Glide.SetPos(inst.RandomPanning()*100.0f);
 	m_SlNoteModNote.SetPos(inst.NoteModPanCenter());
 	m_SlNoteMod.SetPos(inst.NoteModPanSep());
@@ -200,8 +204,8 @@ void XMSamplerUIInst::AssignFilterValues(XMInstrument& inst)
 	else m_Ressonance.SetCheck(0);
 	m_SlSwing1Glide.SetPos(inst.RandomCutoff()*100.0f);
 	m_SlSwing2.SetPos(inst.RandomResonance()*100.0f);
-	//m_SlNoteModNote.SetPos(inst.NoteModFilterCenter());
-	//m_SlNoteMod.SetPos(inst.NoteModFilterSep());
+//	m_SlNoteModNote.SetPos(inst.NoteModFilterCenter());
+//	m_SlNoteMod.SetPos(inst.NoteModFilterSep());
 
 	m_EnvelopeEditor.Initialize(m_pMachine,inst.FilterEnvelope());
 	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_SHOW); //ENVADSR
@@ -225,8 +229,8 @@ void XMSamplerUIInst::AssignFilterValues(XMInstrument& inst)
 }
 void XMSamplerUIInst::AssignPitchValues(XMInstrument& inst)
 {
-	//m_SlVolCutoffPan.SetPos(inst.Tune());
-	//m_SlSwing1Glide.SetPos(inst.Glide());
+//	m_SlVolCutoffPan.SetPos(inst.Tune());
+//	m_SlSwing1Glide.SetPos(inst.Glide());
 	m_SlNoteMod.SetPos(inst.Lines());
 
 	m_EnvelopeEditor.Initialize(m_pMachine,inst.PitchEnvelope());
@@ -254,6 +258,7 @@ void XMSamplerUIInst::AssignPitchValues(XMInstrument& inst)
 // Controladores de mensajes de XMSamplerUISample
 BOOL XMSamplerUIInst::OnSetActive()
 {
+	TRACE("in setActive\n");
 	if ( m_bInitialized == false )
 	{
 		((CEdit*)GetDlgItem(IDC_INS_NAME))->SetLimitText(31);
@@ -389,8 +394,9 @@ void XMSamplerUIInst::OnBnClickedInsTgeneral()
 }
 void XMSamplerUIInst::OnBnClickedInsTamp()
 {
+	TRACE("inbtninsTamp\n");
 	m_bInitialized = false;
-	int i= m_InstrumentList.GetCurSel();
+	int i= m_iCurrentSelected;
 	XMInstrument& inst = m_pMachine->rInstrument(i);
 
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
@@ -450,7 +456,7 @@ void XMSamplerUIInst::OnBnClickedInsTamp()
 void XMSamplerUIInst::OnBnClickedInsTpan()
 {
 	m_bInitialized = false;
-	int i= m_InstrumentList.GetCurSel();
+	int i= m_iCurrentSelected;
 	XMInstrument& inst = m_pMachine->rInstrument(i);
 
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
@@ -508,7 +514,7 @@ void XMSamplerUIInst::OnBnClickedInsTpan()
 void XMSamplerUIInst::OnBnClickedInsTfilter()
 {
 	m_bInitialized = false;
-	int i= m_InstrumentList.GetCurSel();
+	int i= m_iCurrentSelected;
 	XMInstrument& inst = m_pMachine->rInstrument(i);
 	
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
@@ -567,7 +573,7 @@ void XMSamplerUIInst::OnBnClickedInsTfilter()
 void XMSamplerUIInst::OnBnClickedInsTpitch()
 {
 	m_bInitialized = false;
-	int i= m_InstrumentList.GetCurSel();
+	int i= m_iCurrentSelected;
 	XMInstrument& inst = m_pMachine->rInstrument(i);
 	
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
@@ -624,7 +630,7 @@ void XMSamplerUIInst::OnBnClickedInsTpitch()
 
 void XMSamplerUIInst::OnCbnSelendokFiltertype()
 {
-	int i= m_InstrumentList.GetCurSel();
+	int i= m_iCurrentSelected;
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
 
 	_inst.FilterType((dsp::FilterType)m_FilterType.GetCurSel());
@@ -634,16 +640,20 @@ void XMSamplerUIInst::OnCbnSelendokFiltertype()
 void XMSamplerUIInst::OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	
-	int i= m_InstrumentList.GetCurSel();
+	TRACE("incustomdraw\n");
+
+	int i= m_iCurrentSelected;
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
 	char tmp[64];
 	
 	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
-		{
+	{
 		sprintf(tmp,"%d",m_SlVolCutoffPan.GetPos());
-		_inst.GlobVol(m_SlVolCutoffPan.GetPos()/128.0f);
+		if (m_bInitialized) {
+			TRACE("setting globvol for %d",i);
+			_inst.GlobVol(m_SlVolCutoffPan.GetPos()/128.0f);
 		}
+	}
 	else if (((CButton*)GetDlgItem(IDC_INS_TPAN))->GetCheck())
 	{
 		switch(m_SlVolCutoffPan.GetPos()+64)
@@ -658,12 +668,16 @@ void XMSamplerUIInst::OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult
 			else sprintf(tmp,"  %02d>>",m_SlVolCutoffPan.GetPos());
 			break;
 		}
-		_inst.Pan((m_SlVolCutoffPan.GetPos()+64)/128.0f);
+		if (m_bInitialized) {
+			_inst.Pan((m_SlVolCutoffPan.GetPos()+64)/128.0f);
+		}
 	}
 	else if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
 	{
 		sprintf(tmp,"%d",m_SlVolCutoffPan.GetPos());
-		_inst.FilterCutoff(m_SlVolCutoffPan.GetPos());
+		if (m_bInitialized) {
+			_inst.FilterCutoff(m_SlVolCutoffPan.GetPos());
+		}
 	}
 	else if (((CButton*)GetDlgItem(IDC_INS_TPITCH))->GetCheck())
 	{
@@ -678,8 +692,7 @@ void XMSamplerUIInst::OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult
 void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-
-	int i= m_InstrumentList.GetCurSel();
+	int i= m_iCurrentSelected;
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
 	char tmp[64];
 
@@ -691,21 +704,28 @@ void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 		if (m_SlFadeoutRes.GetPos() == 0) strcpy(tmp,"off");
 		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::pPlayer->bpm *m_SlFadeoutRes.GetPos()) );
 
-		_inst.VolumeFadeSpeed(m_SlFadeoutRes.GetPos()/1024.0f);
+		if (m_bInitialized)
+		{
+			_inst.VolumeFadeSpeed(m_SlFadeoutRes.GetPos()/1024.0f);
+		}
 	}
 	else if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
 	{
 		sprintf(tmp,"%d",m_SlFadeoutRes.GetPos());
-		_inst.FilterResonance(m_SlFadeoutRes.GetPos());
+		if (m_bInitialized)
+		{
+			_inst.FilterResonance(m_SlFadeoutRes.GetPos());
+		}
 	}
 
 	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->SetWindowText(tmp);
+
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	int i= m_InstrumentList.GetCurSel();
+	int i= m_iCurrentSelected;
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
 
 	char tmp[64];
@@ -713,22 +733,34 @@ void XMSamplerUIInst::OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult)
 	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
 	{
 		sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
-		_inst.RandomVolume(m_SlSwing1Glide.GetPos()/100.0f);
+		if (m_bInitialized)
+		{
+			_inst.RandomVolume(m_SlSwing1Glide.GetPos()/100.0f);
+		}
 	}
 	else if (((CButton*)GetDlgItem(IDC_INS_TPAN))->GetCheck())
-		{
+	{
 		sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
-		_inst.RandomPanning(m_SlSwing1Glide.GetPos()/100.0f);
+		if (m_bInitialized)
+		{
+			_inst.RandomPanning(m_SlSwing1Glide.GetPos()/100.0f);
 		}
+	}
 	else if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
 	{
 		sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
-		_inst.RandomCutoff(m_SlSwing1Glide.GetPos()/100.0f);
+		if (m_bInitialized)
+		{
+			_inst.RandomCutoff(m_SlSwing1Glide.GetPos()/100.0f);
+		}
 	}
 	else if (((CButton*)GetDlgItem(IDC_INS_TPITCH))->GetCheck())
 	{
 		sprintf(tmp,"%d",m_SlSwing1Glide.GetPos());
-		//_inst.Glide(m_SlVolCutoffPan.GetPos());
+		if (m_bInitialized)
+		{
+			//_inst.Glide(m_SlVolCutoffPan.GetPos());
+		}
 	}
 
 	((CStatic*)GetDlgItem(IDC_LSWING))->SetWindowText(tmp);
@@ -738,14 +770,17 @@ void XMSamplerUIInst::OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult)
 void XMSamplerUIInst::OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	int i= m_InstrumentList.GetCurSel();
+	int i= m_iCurrentSelected;
 	XMInstrument& _inst = m_pMachine->rInstrument(i);
 	
 	char tmp[64];
 	if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
 	{
 		sprintf(tmp,"%d%",m_SlSwing2.GetPos());
-		_inst.RandomResonance(m_SlSwing2.GetPos()/100.0f);
+		if (m_bInitialized)
+		{
+			_inst.RandomResonance(m_SlSwing2.GetPos()/100.0f);
+		}
 	}
 
 	((CStatic*)GetDlgItem(IDC_LSWING2))->SetWindowText(tmp);
@@ -755,23 +790,20 @@ void XMSamplerUIInst::OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult)
 void XMSamplerUIInst::OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SLNOTEMODNOTE);
 
-	/*
-	if ()
+	int i= m_iCurrentSelected;
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
+	if (m_bInitialized)
 	{
+		_inst.NoteModPanCenter(slid->GetPos());
 	}
-	else
-	{
-	}
-	*/
+
 	char tmp[40], tmp2[40];
 	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
 	sprintf(tmp,"%s",notes[slid->GetPos()%12]);
 	sprintf(tmp2,"%s%d",tmp,(slid->GetPos()/12));
 	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->SetWindowText(tmp2);
-	
 	
 	*pResult = 0;
 }
@@ -779,21 +811,18 @@ void XMSamplerUIInst::OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult)
 void XMSamplerUIInst::OnNMCustomdrawNoteMod(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-		
-	/*
-	if ()
+	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_NOTEMOD);
+
+	int i= m_iCurrentSelected;
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
+	if (m_bInitialized)
 	{
+		_inst.NoteModPanSep(slid->GetPos());
 	}
-	else
-	{
-	}
-	*/
   
 	char tmp[40];
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_NOTEMOD);
 	sprintf(tmp,"%.02f%%",(slid->GetPos()/2.56f));
 	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->SetWindowText(tmp);
-
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnBnClickedEnvcheck()
@@ -815,45 +844,66 @@ void XMSamplerUIInst::OnNMCustomdrawADSRBase(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	///\todo Agregue aquí su código de controlador de notificación de control
+	if (m_bInitialized)
+	{
+	}
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRMod(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	///\todo Agregue aquí su código de controlador de notificación de control
+	if (m_bInitialized)
+	{
+	}
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRAttack(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	///\todo Agregue aquí su código de controlador de notificación de control
+	if (m_bInitialized)
+	{
+	}
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRDecay(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	///\todo Agregue aquí su código de controlador de notificación de control
+	if (m_bInitialized)
+	{
+	}
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRSustain(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	///\todo Agregue aquí su código de controlador de notificación de control
+	if (m_bInitialized)
+	{
+	}
 	*pResult = 0;
 }
 void XMSamplerUIInst::OnNMCustomdrawADSRRelease(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	///\todo Agregue aquí su código de controlador de notificación de control
+	if (m_bInitialized)
+	{
+	}
 	*pResult = 0;
 }
 
 	
 void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
 {
+	TRACE("inselchangeinstlist\n");
 	if(m_bInitialized)
 	{
+		m_bInitialized = false;
 		SetInstrumentData(m_InstrumentList.GetCurSel());
+		m_bInitialized = true;
 	}
 }
 
@@ -861,7 +911,7 @@ void XMSamplerUIInst::OnEnChangeInsName()
 {
 	if(m_bInitialized)
 	{
-		int i= m_InstrumentList.GetCurSel();
+		int i= m_iCurrentSelected;
 		XMInstrument& _inst = m_pMachine->rInstrument(i);
 		TCHAR _buf[256];
 		m_InstrumentName.GetWindowText(_buf,sizeof(_buf));
@@ -920,14 +970,14 @@ void XMSamplerUIInst::OnBnClickedLoadins()
 			{
 				XMSongLoader xmsong;
 				xmsong.Open(ofn.lpstrFile);
-				xmsong.LoadInstrumentFromFile(*pMachine(),m_InstrumentList.GetCurSel());
+				xmsong.LoadInstrumentFromFile(*pMachine(),m_iCurrentSelected);
 				xmsong.Close();
 			}
 			else if (ext.CompareNoCase("ITI") == 0)
 			{
 				ITModule2 itsong;
 				itsong.Open(ofn.lpstrFile);
-				itsong.LoadInstrumentFromFile(*pMachine(),m_InstrumentList.GetCurSel());
+				itsong.LoadInstrumentFromFile(*pMachine(),m_iCurrentSelected);
 			}
 		}
 	}
