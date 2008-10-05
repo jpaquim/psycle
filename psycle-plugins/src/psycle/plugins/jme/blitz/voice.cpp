@@ -780,7 +780,7 @@ void CSynthTrack::GetSample(float* slr)
 			//}
 
 			if (vpar->fltType <= 10) output = m_filter.res(output); // old filter
-			else a_filter.process(&output); // atlantis sid filter
+			else a_filter.process(output); // atlantis sid filter
 			
 		}
 

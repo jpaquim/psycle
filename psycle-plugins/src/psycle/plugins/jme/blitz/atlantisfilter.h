@@ -1,7 +1,6 @@
 // CSIDFilter by Jeremy Evers - ripped from Atlantis which is available at 
 // http:://jeremyevers.com
 
-#define sampleRate 44100;
 #define PIf	3.1415926535897932384626433832795f;
 
 #pragma once
@@ -21,7 +20,7 @@ public:
 
 	void setAlgorithm(eAlgorithm a_algo);
 	void reset();
-	void process(float *sample);
+	void process(float& sample);
 	void recalculateCoeffs(const float a_fFrequency, const float a_fFeedback);
 private:
 

@@ -27,13 +27,13 @@ void CSIDFilter::setAlgorithm(eAlgorithm a_algo)
 void CSIDFilter::recalculateCoeffs(const float a_fFrequency, const float a_fFeedback)
 {
 	//m_f = (200.0f+(17800.0f*6*a_fFrequency))*44100/sampleRate*2*PIf/985248.0f;
-	m_f = (200.0f+(17800.0f*6*a_fFrequency))*piX2/985248.0f;
+	m_f =(1.0f+(534.0f*a_fFrequency))*0.00127545253726566f; 
 	float f2 = 2.0f*(a_fFeedback-(a_fFrequency*a_fFrequency)); 
 	if (f2 < 0.0f) f2 = 0.0f;
 	m_fb = 1.0f/(0.707f+f2);
 }
 
-void CSIDFilter::process(float *sample)
+void CSIDFilter::process(float& sample)
 {
 	const float f = m_f;
 	const float fb = m_fb;
@@ -41,57 +41,49 @@ void CSIDFilter::process(float *sample)
 	float band = m_band;
 	float high = m_high;
 
+	low -= (f*band);
+	band -= (f*high);
+	high = (band*fb) - low - sample + ANTIDENORMAL;
+
 	switch (m_Algorithm)
 	{
 		case FILTER_ALGO_SID_LPF:
 		{
-				low -= (f*band);
-				band -= (f*high);
-				high = (band*fb) - low - *sample + ANTIDENORMAL;
-				*sample = low;
+			sample = low;
+			break;
 		}
 		case FILTER_ALGO_SID_HPF:
 		{
-				low -= (f*band);
-				band -= (f*high);
-				high = (band*fb) - low - *sample + ANTIDENORMAL;
-				*sample = high;
+			sample = high;
+			break;
 		}
 		case FILTER_ALGO_SID_BPF:
 		{
-				low -= (f*band);
-				band -= (f*high);
-				high = (band*fb) - low - *sample + ANTIDENORMAL;
-				*sample = band;
+			sample = band;
+			break;
 		}
 		case FILTER_ALGO_SID_LPF_HPF:
 		{
-				low -= (f*band);
-				band -= (f*high);
-				high = (band*fb) - low - *sample + ANTIDENORMAL;
-				*sample = low + high;
+			sample = low + high;
+			break;
 		}
 		case FILTER_ALGO_SID_LPF_BPF:
 		{
-				low -= (f*band);
-				band -= (f*high);
-				high = (band*fb) - low - *sample + ANTIDENORMAL;
-				*sample = low + band;
+			sample = low + band;
+			break;
 		}
 		case FILTER_ALGO_SID_LPF_HPF_BPF:
 		{
-				low -= (f*band);
-				band -= (f*high);
-				high = (band*fb) - low - *sample + ANTIDENORMAL;
-				*sample = low + band + high;
+			sample = low + band + high;
+			break;
 		}
 		case FILTER_ALGO_SID_HPF_BPF:
 		{
-				low -= (f*band);
-				band -= (f*high);
-				high = (band*fb) - low - *sample + ANTIDENORMAL;
-				*sample = band + high;
+			sample = band + high;
+			break;
 		}
+		default:
+			break;
 	}
 	m_low = low;
 	m_band = band;
