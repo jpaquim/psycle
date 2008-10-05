@@ -180,8 +180,8 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 	///\name multithreading locking
 	///\{
 		public:
-			void lock();
-			void unlock();
+			//void lock();
+			//void unlock();
 		private:
 			///\todo here we need some real mutexes
 			bool lock_;
