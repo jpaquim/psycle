@@ -37,11 +37,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				s << "format: " << format.description();
 				loggers::information()(s.str());
 			}
-			#if 1
-				samples_per_buffer_ = parent().events_per_buffer();
-			#else
-				samples_per_buffer_ = 8192; /// \todo parametrable
-			#endif
+			samples_per_buffer_ = parent().events_per_buffer();
 			buffers_ = 4; /// \todo parametrable
 			write_primary_ = false; /// \todo parametrable
 			if(write_primary_) {
@@ -133,7 +129,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void direct_sound::do_process() throw(universalis::operating_system::exception) {
 		bool const ultra_trace(false);
-		for(;;) {
+		while(true) {
 			unsigned long int position;
 			if(HRESULT error = buffer().GetCurrentPosition(&position, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer get current position: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			if(ultra_trace && loggers::trace()()) {
@@ -141,8 +137,8 @@ namespace psycle { namespace plugins { namespace outputs {
 				s << "position: " << position;
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			if(position < current_position_ * buffer_size_) break;
-			if(position > current_position_ * buffer_size_ + buffer_size_) break;
+			if(position <  current_position_ * buffer_size_) break;
+			if(position >= current_position_ * buffer_size_ + buffer_size_) break;
 			// beware: using a sleep time of 0 will freeze the system if process has real time priority class and thread has time critical priority!
 			//std::this_thread::sleep(std::milliseconds(1));
 			std::this_thread::yield();
