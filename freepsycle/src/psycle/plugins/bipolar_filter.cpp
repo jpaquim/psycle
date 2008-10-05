@@ -18,13 +18,13 @@ bipolar_filter::bipolar_filter(engine::plugin_library_reference & plugin_library
 	engine::ports::output::create_on_heap(*this, "out");
 }
 
-void bipolar_filter::channel_change_notification_from_port(const engine::port & port) throw(engine::exception) {
+void bipolar_filter::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
 	if(&port == output_ports()[0]) multiple_input_port()->propagate_channels(port.channels());
 	else if(&port == multiple_input_port()) output_ports()[0]->propagate_channels(port.channels());
 	assert(multiple_input_port()->channels() == output_ports()[0]->channels());
 }
 
-void bipolar_filter::seconds_per_event_change_notification_from_port(const engine::port & port) {
+void bipolar_filter::seconds_per_event_change_notification_from_port(engine::port const & port) {
 	if(&port == output_ports()[0]) multiple_input_port()->propagate_seconds_per_event(port.seconds_per_event());
 	else if(&port == multiple_input_port()) output_ports()[0]->propagate_seconds_per_event(port.seconds_per_event());
 	assert(engine::math::roughly_equals(multiple_input_port()->seconds_per_event(), output_ports()[0]->seconds_per_event()));

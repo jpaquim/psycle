@@ -27,6 +27,11 @@ namespace psycle { namespace plugins { namespace outputs {
 		engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
 	}
 
+	void direct_sound::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
+		if(&port == &in_port()) last_samples_.resize(port.channels());
+		resource::channel_change_notification_from_port(port);
+	}
+
 	void direct_sound::do_open() throw(universalis::operating_system::exception) {
 		HRESULT error(0);
 		try {
@@ -162,6 +167,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		if(bytes2) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock unaligned", UNIVERSALIS__COMPILER__LOCATION);
 		engine::buffer & in = in_port().buffer();
+		assert(last_samples.size() == in.channels());
 		for(int channel(0) ; channel < in.channels() ; ++channel) {
 			int spread(0);
 			for(int event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event) {
@@ -177,15 +183,15 @@ namespace psycle { namespace plugins { namespace outputs {
 					else if(sample > std::numeric_limits<output_sample_type>::max()) sample = std::numeric_limits<output_sample_type>::max();
 					assert(std::numeric_limits<output_sample_type>::min() <= sample && sample <= std::numeric_limits<output_sample_type>::max());
 				}
-				last_sample_ = static_cast<output_sample_type>(sample);
-				for( ; spread <= in[channel][event].index() ; ++spread) samples[spread + channel] = last_sample_;
+				last_samples_[channel] = static_cast<output_sample_type>(sample);
+				for( ; spread <= in[channel][event].index() ; ++spread) samples[spread + channel] = last_samples_[channel];
 				if(ultra_trace && loggers::trace()()) {
 					std::ostringstream s;
-					s << "spread: " << spread << ", sample: " << last_sample_;
+					s << "spread: " << spread << ", sample: " << last_samples_[channel];
 					loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
 			}
-			for( ; spread < samples_per_buffer_ ; ++spread) samples[spread + channel] = last_sample_;
+			for( ; spread < samples_per_buffer_ ; ++spread) samples[spread + channel] = last_samples_[channel];
 		}
 		if(HRESULT error = buffer().Unlock(samples, bytes, samples2, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer unlock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 		if(restored) buffer().Play(0, 0, DSBPLAY_LOOPING); // may return DSERR_BUFFERLOST
