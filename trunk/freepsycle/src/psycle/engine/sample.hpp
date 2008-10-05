@@ -29,9 +29,7 @@ namespace math {
 	
 	template<typename Real>
 	Real inline limited(Real const & min, Real const & input, Real const & max) throw() {
-		if(input < min) return min;
-		else if(input > max) return max;
-		else return input;
+		return input < min ? min : input > max ? max : input;
 	}
 	
 	template<typename Real>
