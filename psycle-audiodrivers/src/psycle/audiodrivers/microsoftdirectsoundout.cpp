@@ -403,7 +403,7 @@ namespace psy { namespace core {
 				if(r < SHORT_MIN) r = SHORT_MIN;
 				else if(r > SHORT_MAX) r = SHORT_MAX;
 
-				*piout++ = (r << 16) | (l && 0xffff0000) static_cast<std::uint16_t>(l);
+				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
 				pin += 2;
 			} while(--c);
 		}
