@@ -68,7 +68,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			::IDirectSoundBuffer inline  & buffer()       throw() { assert(buffer_); return *buffer_; }
 			::IDirectSoundBuffer inline  & buffer() const throw() { assert(buffer_); return *buffer_; }
 
-			bool write_primary_;
+			bool write_primary_, started_;
 			unsigned int buffers_, buffer_size_, total_buffer_size_;
 			/// position in byte offset
 			unsigned int current_position_;
