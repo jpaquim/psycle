@@ -12,55 +12,64 @@
 CMachineParameter const paraThreshold = 
 { 
 	"Threshold",
-	"Threshold level",																								// description
-	1,																																																// MinValue				
-	32768,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Threshold level", // description
+	1,  // MinValue				
+	32768, // MaxValue
+	MPF_STATE, // Flags
 	0x200,
 };
 
 CMachineParameter const paraGain = 
 { 
 	"Gain",
-	"Gain",																																												// description
-	1,																																																// MinValue				
-	2048,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Gain", // description
+	1, // MinValue				
+	2048, // MaxValue
+	MPF_STATE, // Flags
 	1024,
 };
 
 CMachineParameter const paraInvert = 
 { 
 	"Phase inversor",
-	"Inversor",																																								// description
-	0,																																																// MinValue				
-	1,																																																// MaxValue
-	MPF_STATE,																																								// Flags
+	"Stereo phase inversor", // description
+	0, // MinValue
+	1, // MaxValue
+	MPF_STATE, // Flags
 	0,
 };
-
+CMachineParameter const paraMode = 
+{ 
+	"Mode",
+	"Operational mode", // description
+	0, // MinValue
+	1, // MaxValue
+	MPF_STATE, // Flags
+	0,
+};
 CMachineParameter const *pParameters[] = 
 { 
 	// global
 	&paraThreshold,
 	&paraGain,
-	&paraInvert
+	&paraInvert,
+	&paraMode
 };
 
 CMachineInfo const MacInfo = 
 {
 	MI_VERSION,				
-	0,																																								// flags
-	3,																																								// numParameters
-	pParameters,																												// Pointer to parameters
+	0, // flags
+	4, // numParameters
+	pParameters, // Pointer to parameters
 #ifdef _DEBUG
-	"Arguru Distortion (Debug build)",								// name
+	"Arguru Distortion (Debug build)", // name
 #else
-	"Arguru Distortion",																				// name
+	"Arguru Distortion", // name
 #endif
-	"Distortion",																												// short name
-	"J. Arguelles",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	"Distortion", // short name
+	"J. Arguelles", // author
+	"About", // A command, that could be use for open an editor, etc...
 	3
 };
 
@@ -79,14 +88,17 @@ public:
 	virtual void ParameterTweak(int par, int val);
 
 private:
+	float leftLim;
+	float rightLim;
+
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
-mi::mi()
+mi::mi():leftLim(1.0f), rightLim(1.0f)
 {
 	// The constructor zone
-	Vals = new int[3];
+	Vals = new int[4];
 }
 
 mi::~mi()
@@ -122,38 +134,72 @@ void mi::ParameterTweak(int par, int val)
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 
-	float const threshold								=(float)(Vals[0]);
-	float const negthreshold				=-(float)(Vals[0]);
+	float const threshold = (float)(Vals[0]);
+	float const negthreshold = -(float)(Vals[0]);
 
-	float const wet =(float)Vals[1]*0.00390625f;
+	float const wet = (float)Vals[1]*0.00390625f;
 
 	if(Vals[2]==0)
 	{
 		// No Phase inversion
+		if (Vals[3]==0) {
+			// Clip.
+			do
+			{
+			float sl = *psamplesleft;
+			float sr = *psamplesright;
 
-		do
+			if (sl > threshold)sl = threshold;
+			if (sl <= negthreshold)sl = negthreshold;
+
+			if (sr >= threshold)sr = threshold;
+			if (sr <= negthreshold)sr = negthreshold;
+
+			*psamplesleft=sl*wet;
+			*psamplesright=sr*wet;
+
+			++psamplesleft;
+			++psamplesright;
+				
+			} while(--numsamples);
+		}
+		else 
 		{
-		float sl = *psamplesleft;
-		float sr = *psamplesright;
+			//Saturate
+			do
+			{
+			float sl = (*psamplesleft)*leftLim;
+			float sr = (*psamplesright)*rightLim;
 
-		if (sl > threshold)sl = threshold;
-		if (sl <= negthreshold)sl = negthreshold;
+			if (sl > threshold) {
+				leftLim -= (sl-threshold)*0.1f/(*psamplesleft);
+			} else if (sl <= negthreshold) {
+				leftLim -= (sl-negthreshold)*0.1f/(*psamplesleft); //psamplesleft is already negative, so no need to multiply by -1
+			} else if (leftLim > 1.0f){
+				leftLim = 1.0f;
+			} else leftLim = 0.01f +(leftLim*0.99f);
 
-		if (sr >= threshold)sr = threshold;
-		if (sr <= negthreshold)sr = negthreshold;
+			if (sr > threshold) {
+				rightLim -= (sr-threshold)*0.1f/(*psamplesright);
+			} else if (sr <= negthreshold) {
+				rightLim -= (sr-negthreshold)*0.1f/(*psamplesright); //psamplesright is already negative, so no need to multiply by -1
+			} else if (rightLim > 1.0f){
+				rightLim = 1.0f;
+			} else rightLim = 0.01f +(rightLim*0.99f);
 
-		*psamplesleft=sl*wet;
-		*psamplesright=sr*wet;
 
-		++psamplesleft;
-		++psamplesright;
-			
-		} while(--numsamples);
+			*psamplesleft=sl*wet;
+			*psamplesright=sr*wet;
+
+			++psamplesleft;
+			++psamplesright;
+				
+			} while(--numsamples);
+		}
 	}
 	else
 	{
 		// Phase inversion
-
 		do
 		{
 		float sl = *psamplesleft;
