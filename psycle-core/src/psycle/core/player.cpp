@@ -698,8 +698,10 @@ void Player::setDriver(AudioDriver & driver) {
 
 	if(driver_) driver_->Enable(false);
 
-	if(!driver.Initialized()) driver.Initialize(Work, this);
-	std::cout << "psycle: core: player: audio driver initialized\n";
+	if(!driver.Initialized()) {
+		driver.Initialize(Work, this);
+		std::cout << "psycle: core: player: audio driver initialized\n";
+	}
 	
 	if(!driver.Configured()) {
 		std::cout << "psycle: core: player: asking audio driver to configure itself\n";
