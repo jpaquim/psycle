@@ -19,11 +19,10 @@
 ******************************************************************************/
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "microsoftdirectsoundout.h"
+#include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
 #include <cstdint>
 #pragma comment(lib, "dsound")
 namespace psy { namespace core {
-		int const SHORT_MIN = -32768;
-		int const SHORT_MAX =  32767;      
 
 		AudioDriverInfo MsDirectSound::info( ) const {
 			return AudioDriverInfo("dsound","Microsoft DirectSound Driver","Microsoft output driver",true);
@@ -346,7 +345,6 @@ namespace psy { namespace core {
 
 		void MsDirectSound::WriteConfig()
 		{
-
 		}
 
 		void MsDirectSound::Configure()
@@ -389,36 +387,25 @@ namespace psy { namespace core {
 			return e ? Start() : Stop();
 		}
 
-		void MsDirectSound::quantize(float *pin, int *piout, int c)
-		{
-			do
-			{
-				int r = static_cast<int>( (pin[1]) );
+		void MsDirectSound::quantize(float *pin, int *piout, int c) {
+			///\todo use the functions already available in the base class.
+			
+			using psycle::helpers::math::furti;
 
-				if (r < SHORT_MIN)
-				{
-					r = SHORT_MIN;
-				}
-				else if (r > SHORT_MAX)
-				{
-					r = SHORT_MAX;
-				}
+			int const SHORT_MIN = -32768;
+			int const SHORT_MAX = +32767;
+			do {
+				int l = furti<int>((pin[0]));
+				if(l < SHORT_MIN) l = SHORT_MIN;
+				else if(l > SHORT_MAX) l = SHORT_MAX;
 
-				int l = static_cast<int>( (pin[0]) );
+				int r = furti<int>((pin[1]));
+				if(r < SHORT_MIN) r = SHORT_MIN;
+				else if(r > SHORT_MAX) r = SHORT_MAX;
 
-				if (l < SHORT_MIN)
-				{
-					l = SHORT_MIN;
-				}
-				else if (l > SHORT_MAX)
-				{
-					l = SHORT_MAX;
-				}
-
-				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
+				*piout++ = (r << 16) | (l && 0xffff0000) static_cast<std::uint16_t>(l);
 				pin += 2;
-			}
-			while(--c);
+			} while(--c);
 		}
 }}
 #endif // defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
