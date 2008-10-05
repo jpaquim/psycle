@@ -20,11 +20,11 @@
 #if defined PSYCLE__JACK_AVAILABLE
 #include "jackout.h"
 #include <iostream>
-namespace psy {
-	namespace core {
+namespace psy { namespace core {
 
-JackOut::JackOut() :
-	_initialized( false )
+JackOut::JackOut()
+:
+	_initialized()
 {
 	clientName_ = "xpsycle";
 	serverName_ = ""; // maybe not needed
@@ -32,47 +32,36 @@ JackOut::JackOut() :
 }
 
 JackOut::~JackOut() {
-
 }
 
-AudioDriverInfo JackOut::info( ) const
-{
+AudioDriverInfo JackOut::info( ) const {
 	return AudioDriverInfo("jack","Jack Audio Connection Kit Driver","Low Latency audio driver",true);
 }
 
-JackOut * JackOut::clone( ) const
-{
-	return new JackOut(*this);
-}
-
-void JackOut::Initialize( AUDIODRIVERWORKFN pCallback, void * context )
-{
+void JackOut::Initialize( AUDIODRIVERWORKFN pCallback, void * context ) {
 	_pCallback = pCallback;
 	_callbackContext = context;
 	_initialized = true;
 }
 
 void JackOut::configure() {
-
 }
 
-bool JackOut::Initialized( )
-{
+bool JackOut::Initialized() {
 	return _initialized;
 }
 
-bool JackOut::Enable( bool e )
-{
-	if ( e && !running_ ) {
+bool JackOut::Enable(bool e) {
+	if(e && !running_) {
 		running_ = registerToJackServer();
-	} else 
-	if ( running_ ) {
-		jack_client_close (client);
+	} else if(running_) {
+		jack_client_close(client);
 		running_ = false;
 	}
 	return running_;
 }
 
+/***********************************************************/
 // Jack special functions
 
 bool JackOut::registerToJackServer() {
@@ -147,15 +136,13 @@ bool JackOut::registerToJackServer() {
 	return 1;
 }
 
-int JackOut::process (jack_nframes_t nframes, void *arg)
-	{
+int JackOut::process (jack_nframes_t nframes, void *arg) {
 	JackOut* driver = static_cast<JackOut*> (arg);
 	driver->fillBuffer( nframes );
 	return 0;      
-	}
+}
 
-int JackOut::fillBuffer( jack_nframes_t nframes )
-{
+int JackOut::fillBuffer( jack_nframes_t nframes ) {
 	jack_default_audio_sample_t *out_1 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_1, nframes);
 	jack_default_audio_sample_t *out_2 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_2, nframes);
 
@@ -171,6 +158,5 @@ int JackOut::fillBuffer( jack_nframes_t nframes )
 	return 0;
 }
 
-	} // namespace core
-} // namespace psy
+}}
 #endif // defined PSYCLE__JACK_AVAILABLE

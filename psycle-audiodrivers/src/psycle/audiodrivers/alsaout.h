@@ -21,8 +21,6 @@ class AlsaOut : public AudioDriver {
 	public:
 		AlsaOut();
 		~AlsaOut();
-		/// uses the copy constructor
-		virtual AlsaOut * clone() const;
 		virtual AudioDriverInfo info() const;
 
 		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);

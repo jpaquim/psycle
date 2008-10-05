@@ -16,7 +16,7 @@ namespace psycle { namespace helpers { namespace math {
 	/// shorter name for fast_unspecified_round_to_integer
 	template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
 	Integer inline furti(Real x) {
-		return fast_unspecified_round_to_integer(x);
+		return fast_unspecified_round_to_integer<Integer>(x);
 	}
 }}}
 

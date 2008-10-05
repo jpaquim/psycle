@@ -19,10 +19,7 @@
 ******************************************************************************/
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "microsoftmmewaveout.h"
-namespace psy
-{
-	namespace core
-	{
+namespace psy { namespace core {
 		int const SHORT_MIN = -32768;
 		int const SHORT_MAX =  32767;
 
@@ -32,27 +29,19 @@ namespace psy
 		volatile int     MsWaveOut::waveFreeBlockCount;
 		int              MsWaveOut::waveCurrentBlock;
 
-		AudioDriverInfo MsWaveOut::info( ) const
-		{
+		AudioDriverInfo MsWaveOut::info( ) const {
 			return AudioDriverInfo("mmewaveout","Microsoft MME WaveOut Driver","Microsoft legacy output driver",true);
 		}      
 
-		MsWaveOut::MsWaveOut()
-		{
+		MsWaveOut::MsWaveOut() {
 			_pCallback = 0;
 			hWaveOut = 0; // use this audio handle to detect if the driver is working
 			_running = 0; // running condition for the thread loop
 			_initialized = 0;
 		}
 
-		MsWaveOut::~MsWaveOut()
-		{
+		MsWaveOut::~MsWaveOut() {
 			if ( hWaveOut ) stop( );
-		}
-
-		MsWaveOut * MsWaveOut::clone( ) const
-		{
-			return new MsWaveOut(*this);
 		}
 
 		void MsWaveOut::Initialize( AUDIODRIVERWORKFN pCallback, void * context )

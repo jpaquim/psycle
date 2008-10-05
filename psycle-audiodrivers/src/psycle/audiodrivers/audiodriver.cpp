@@ -12,27 +12,11 @@
 #include <diversalis/processor.hpp>
 #include <boost/bind.hpp>
 #include <thread>
+#include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
 #if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 	#include <cmath>
 #endif
 namespace psy { namespace core {
-
-namespace {
-	///\todo move that to psycle-helpers (maybe it's even already there)
-	inline int d2i(double d) {
-		#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
-			union u {
-				double d;
-				int i;
-			} result;
-			double static /* or not static? */ const magic(1.5 * (1 << 26) * (1 << 26));
-			result.d = d + magic;
-			return result.i;
-		#else
-			return ::lrintf(d); // C1999 function
-		#endif
-	}
-}
 
 /*******************************************************************************************/
 // AudioDriverInfo
@@ -62,26 +46,24 @@ int AudioDriverSettings::sampleSize() const {
 /*******************************************************************************************/
 // AudioDriver
 
-AudioDriver * AudioDriver::clone() const {
-	return new AudioDriver(*this);
-}
-
 AudioDriverInfo AudioDriver::info() const {
 	return AudioDriverInfo("silent", "null output driver", "no sound output", true);
 }
 
 double AudioDriver::frand() {
-	static long stat = 0x16BA2118;
+	static std::int32_t stat = 0x16BA2118;
 	stat = (stat * 1103515245 + 12345) & 0x7fffffff;
 	return static_cast<double>(stat) * (1.0 / 0x7fffffff);
 }
 
+using psycle::helpers::math::furti;
+
 void AudioDriver::Quantize16WithDither(float const * pin, std::int16_t * piout, int c) {
 	do {
-		int r = d2i(pin[1] + frand());
+		int r = furti<int>(pin[1] + frand());
 		if(r < -32768) r = -32768;
 		else if(r > 32767) r = 32767;
-		int l = d2i(pin[0] + frand());
+		int l = furti<int>(pin[0] + frand());
 		if(l < -32768) l = -32768;
 		else if(l > 32767) l = 32767;
 		*piout++ = static_cast<std::int16_t>(l);
@@ -92,10 +74,10 @@ void AudioDriver::Quantize16WithDither(float const * pin, std::int16_t * piout, 
 
 void AudioDriver::Quantize16(float const * pin, std::int16_t * piout, int c) {
 	do {
-		int r = d2i(pin[1]);
+		int r = furti<int>(pin[1]);
 		if(r < -32768) r = -32768;
 		else if(r > 32767) r = 32767;
-		int l = d2i((double)pin[0]);
+		int l = furti<int>(pin[0]);
 		if(l < -32768) l = -32768;
 		else if(l > 32767) l = 32767;
 		*piout++ = static_cast<std::int16_t>(l);
@@ -106,12 +88,12 @@ void AudioDriver::Quantize16(float const * pin, std::int16_t * piout, int c) {
 
 void AudioDriver::Quantize16AndDeinterlace(float const * pin, std::int16_t * pileft, int strideleft, std::int16_t * piright, int strideright, int c) {
 	do {
-		int r = d2i(pin[1]);
+		int r = furti<int>(pin[1]);
 		if(r < -32768) r = -32768;
 		else if(r > 32767) r = 32767;
 		*piright = static_cast<std::int16_t>(r);
 		piright += strideright;
-		int l = d2i(pin[0]);
+		int l = furti<int>(pin[0]);
 		if(l < -32768) l = -32768;
 		else if(l > 32767) l = 32767;
 		*pileft = static_cast<std::int16_t>(l);
@@ -143,19 +125,6 @@ DummyDriver::DummyDriver()
 	
 DummyDriver::~DummyDriver() {
 	stop();
-}
-
-DummyDriver * DummyDriver::clone() const {
-	// we need a hand-written version because not everything can/must be cloned:
-	// e.g., we don't clone the mutex, the condition, nor the thread state.
-	DummyDriver & r(*new DummyDriver);
-	r.callback_function_ = callback_function_;
-	r.callback_context_ = callback_context_;
-	r.initialized_ = initialized_;
-	// doesn't make sense to copy the thread state since we don't clone the thread!
-	r.running_ = false;
-	r.stop_requested_ = false;
-	return &r;
 }
 
 AudioDriverInfo DummyDriver::info() const {

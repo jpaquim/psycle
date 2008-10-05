@@ -73,10 +73,6 @@ void NetAudioOut::setDefaults() {
 	///\todo?
 }
 
-AudioDriver* NetAudioOut::clone() const {
-	return new NetAudioOut(*this);
-}
-
 bool NetAudioOut::Enable(bool e) {
 	#if !defined NDEBUG
 		std::cout << "psycle: netaudio: " << (e ? "en" : "dis") << "abling\n";

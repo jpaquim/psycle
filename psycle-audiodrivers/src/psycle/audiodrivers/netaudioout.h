@@ -17,17 +17,13 @@
 *  Free Software Foundation, Inc.,                                            *
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
-#ifndef PSYCLE__AUDIO_DRIVERS__NET_AUDIO_OUT
-#define PSYCLE__AUDIO_DRIVERS__NET_AUDIO_OUT
+#pragma once
 #if defined PSYCLE__NET_AUDIO_AVAILABLE
 #include "audiodriver.h"
 #include <audio/audiolib.h>
 #include <pthread.h>
 #include <exception>
-namespace psy
-{
-	namespace core
-	{
+namespace psy { namespace core {
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -175,61 +171,59 @@ namespace psy
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-		class NetAudioOut : public AudioDriver
-		{
-			public:
-				NetAudioOut();
-				~NetAudioOut();
-				
-				virtual AudioDriverInfo info() const;
+class NetAudioOut : public AudioDriver {
+	public:
+		NetAudioOut();
+		~NetAudioOut();
+		
+		virtual AudioDriverInfo info() const;
 
-			public:
-				virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-				virtual bool Initialized();
-			private:
-				bool initialized_;
-				
-			public:
-				virtual void Configure();
-				virtual bool Enable(bool e);
-				virtual AudioDriver* clone() const;
+	public:
+		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+		virtual bool Initialized();
+	private:
+		bool initialized_;
+		
+	public:
+		virtual void Configure();
+		virtual bool Enable(bool e);
+		virtual AudioDriver* clone() const;
 
-				
-			private:
-				
-				void setDefaults();
-				bool open();
-				bool close();
+		
+	private:
+		
+		void setDefaults();
+		bool open();
+		bool close();
 
-				std::string hostPort();
-				std::string host_;
-				int port_;
-				AuServer* aud_;
-				AuFlowID flow_;
-				AuDeviceID device_;
-				AuEventHandlerRec* handler_;
-				AuElement nas_elements[3];
+		std::string hostPort();
+		std::string host_;
+		int port_;
+		AuServer* aud_;
+		AuFlowID flow_;
+		AuDeviceID device_;
+		AuEventHandlerRec* handler_;
+		AuElement nas_elements[3];
 
-				static AuBool EventHandlerFunc(AuServer *aud, AuEvent *ev, AuEventHandlerRec *handler);
-				static int audioOutThreadStatic(void*);
-				void audioOutThread();
-				pthread_t threadId_;
-				bool threadRunning_;
-				bool killThread_;
+		static AuBool EventHandlerFunc(AuServer *aud, AuEvent *ev, AuEventHandlerRec *handler);
+		static int audioOutThreadStatic(void*);
+		void audioOutThread();
+		pthread_t threadId_;
+		bool threadRunning_;
+		bool killThread_;
 
-				//int writeBuffer(char * buffer, long size);
-				AUDIODRIVERWORKFN callback_;
-				void* callbackContext_; // Player callback
-				short buf[48000];
+		//int writeBuffer(char * buffer, long size);
+		AUDIODRIVERWORKFN callback_;
+		void* callbackContext_; // Player callback
+		short buf[48000];
 
-				int latencyInBytes();
-				int latency_; // in samples
+		int latencyInBytes();
+		int latency_; // in samples
 
-				static char *nas_error(AuServer* aud,AuStatus status);
-				unsigned char toNasFormat();
-			
-		};
-	}
-}
+		static char *nas_error(AuServer* aud,AuStatus status);
+		unsigned char toNasFormat();
+	
+};
+
+}}
 #endif // defined PSYCLE__NET_AUDIO_AVAILABLE
-#endif
