@@ -170,7 +170,7 @@ void mi::ParameterTweak(int par, int val)
 		sl.setThreshold(val);
 		sl.setGainDB();
 		sr.setThreshold(val);
-		sl.setGainDB();
+		sr.setGainDB();
 		break;
 	case 1: 
 		sl.setRatio(val*.01);
