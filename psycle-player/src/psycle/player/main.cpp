@@ -214,7 +214,7 @@ int main(int argument_count, char * arguments[]) {
 	}
 	player.driver().Enable(false);
 	
-	///\todo klugde
+	///\todo kluge
 	std::this_thread::sleep(std::seconds(1));
 
 	return 0;
