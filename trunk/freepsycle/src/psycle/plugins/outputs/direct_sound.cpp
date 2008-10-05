@@ -73,7 +73,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				s << "warning: create sound buffer: " << universalis::operating_system::exceptions::code_description(error);
 				loggers::warning()(s.str());
 			}
-			last_sample_ = 0; 
+			for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0; 
 			if(write_primary_) {
 				buffer().Stop(); // o_O`
 				if(error = buffer().SetFormat(&format.wave_format_ex())) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer set format: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
@@ -167,7 +167,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		if(bytes2) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock unaligned", UNIVERSALIS__COMPILER__LOCATION);
 		engine::buffer & in = in_port().buffer();
-		assert(last_samples.size() == in.channels());
+		assert(last_samples_.size() == in.channels());
 		for(int channel(0) ; channel < in.channels() ; ++channel) {
 			int spread(0);
 			for(int event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event) {
