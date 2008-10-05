@@ -19,7 +19,7 @@ namespace psycle { namespace helpers { namespace math {
 			sine = std::sin(x);
 			cosine = std::sqrt(1 - sine * sine);
 			// we need to do cosine = -cosine for some values of x
-		#endif	
+		#endif
 	}
 }}}
 
