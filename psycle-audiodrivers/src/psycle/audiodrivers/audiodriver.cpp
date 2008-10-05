@@ -13,9 +13,6 @@
 #include <boost/bind.hpp>
 #include <thread>
 #include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
-#if !defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
-	#include <cmath>
-#endif
 namespace psy { namespace core {
 
 /*******************************************************************************************/
