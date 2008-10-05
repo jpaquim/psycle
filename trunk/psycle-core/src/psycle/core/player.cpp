@@ -23,9 +23,6 @@
 
 #include <boost/bind.hpp>
 #include <iostream> // only for debug output
-#if defined __unix__ || defined __APPLE__
-	#include <unistd.h> // for OpenBSD usleep()
-#endif
 
 namespace psy { namespace core {
 
