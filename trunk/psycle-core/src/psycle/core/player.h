@@ -36,8 +36,6 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 	public:
 		Player static & singleton();
 
-	///\}
-
 	public:
 		/// used by the plugins to indicate that they need redraw.
 		///\todo private access
