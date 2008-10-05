@@ -761,7 +761,7 @@ void CSynthTrack::GetSample(float* slr)
 
 		GetEnvFlt();
 		if (vpar->fltType){
-			//if(!timetocompute--) {
+			if(!timetocompute--) {
 				int realcutoff=int(vpar->fltCutoff+(vpar->filtvibe*0.005)+(rbasenote*0.1*vpar->fltTrack)+(fltEnvValue*vpar->fltEnvAmount*((1-vpar->fltVelocity)+(voiceVol*vpar->fltVelocity))));
 				if(realcutoff<1)realcutoff=1;
 				if(realcutoff>250)realcutoff=250;
@@ -775,12 +775,14 @@ void CSynthTrack::GetSample(float* slr)
 				// atlantis sid filter
 				if (cf > 256.0f) cf = 256.0f;
 				if (cf < 0.0f) cf = 0.0f;
-				if (vpar->fltType > 10) a_filter.setAlgorithm((eAlgorithm)(vpar->fltType - 10));
-				a_filter.recalculateCoeffs(((float)cf)/256.0f, (float)vpar->fltResonance/256.0f);
-			//}
 
+				a_filter.recalculateCoeffs(((float)cf)/256.0f, (float)vpar->fltResonance/256.0f);
+			}
 			if (vpar->fltType <= 10) output = m_filter.res(output); // old filter
-			else a_filter.process(output); // atlantis sid filter
+			else {
+				a_filter.setAlgorithm((eAlgorithm)(vpar->fltType - 11));
+				a_filter.process(output); // atlantis sid filter
+			}
 			
 		}
 
