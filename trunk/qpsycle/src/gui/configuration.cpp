@@ -110,6 +110,11 @@ namespace qpsycle {
 		loadConfig();
 	}
 
+	Configuration::~Configuration() {
+		for(std::map<std::string, psy::core::AudioDriver*>::iterator i(driverMap().begin()), e(driverMap().end()); i != e; ++i)
+			delete i->second;
+	}
+	
 	void Configuration::addAudioDriver(AudioDriver* driver) {
 		std::cout << "psycle: configuration: audio driver registered: " <<  driver->info().name() << std::endl;
 		driverMap_[ driver->info().name() ] = driver;

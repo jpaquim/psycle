@@ -142,9 +142,6 @@ class AudioDriver {
 	public:
 		virtual ~AudioDriver() {}
 
-		/// clones the driver using the copy ctor
-		virtual AudioDriver * clone() const;
-
 		/// gives the driver information
 		virtual AudioDriverInfo info() const;
 
@@ -182,7 +179,6 @@ class DummyDriver : public AudioDriver {
 	public:
 		DummyDriver();
 		~DummyDriver();
-		virtual DummyDriver * clone() const;
 		virtual AudioDriverInfo info() const;
 		virtual void Initialize(AUDIODRIVERWORKFN callback_function, void * callback_context);
 		virtual bool Initialized() { return initialized_; }

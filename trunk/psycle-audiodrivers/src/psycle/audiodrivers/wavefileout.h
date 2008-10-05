@@ -17,63 +17,48 @@
 *  Free Software Foundation, Inc.,                                            *
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
-#ifndef WAVEFILEOUT_H
-#define WAVEFILEOUT_H
+#pragma once
 #include "audiodriver.h"
 #if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 #else
 	#include "windows.h"
 #endif
-namespace psy
-{
-	namespace core
-	{
+namespace psy { namespace core {
 
-		/**
-		@author Psycledelics  
-		*/
+class WaveFileOut : public AudioDriver {
+	public:
+		WaveFileOut();
+		~WaveFileOut();
 
-		class WaveFileOut : public AudioDriver
-		{
-		public:
-			WaveFileOut();
+		virtual AudioDriverInfo info() const;
+		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+		virtual bool Initialized();
 
-			~WaveFileOut();
+		// starts stops file writing
+		virtual bool Enable(bool e);
 
-			virtual WaveFileOut* clone()  const;   // Uses the copy constructor
+	private:
+		void* _callbackContext; // Player callback
+		AUDIODRIVERWORKFN _pCallback;
 
-			virtual AudioDriverInfo info() const;
-
-			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-
-			virtual bool Initialized();
-
-			// starts stops file writing
-			virtual bool Enable(bool e);
-
-
-		private:
-
-			void* _callbackContext; // Player callback
-			AUDIODRIVERWORKFN _pCallback;
-
-#if defined __unix__ || defined __APPLE__
+		///\todo use std::thread
+		#if defined __unix__ || defined __APPLE__
 			pthread_t threadid;
-#else
+		#else
 			DWORD threadid;
-#endif
+		#endif
 
-			static volatile int kill_thread;
-			static volatile int threadOpen;
-			bool _initialized;
+		///\todo bad
+		static volatile int kill_thread;
+		///\todo bad
+		static volatile int threadOpen;
 
-			static int audioOutThread(void * ptr);
+		bool _initialized;
 
-			void writeBuffer();
+		static int audioOutThread(void * ptr);
 
-		};
+		void writeBuffer();
+};
 
-	}
-}
-#endif
+}}

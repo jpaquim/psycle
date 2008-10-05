@@ -22,112 +22,100 @@
 #if defined _WIN64 || defined _WIN32
 	#include "windows.h"
 #endif
-namespace psy
+namespace psy { namespace core {
+
+volatile int WaveFileOut::kill_thread = 0;
+volatile int WaveFileOut::threadOpen = 0;
+
+WaveFileOut::WaveFileOut()
+: AudioDriver()
 {
-	namespace core
-	{
-		volatile int WaveFileOut::kill_thread = 0;
-		volatile int WaveFileOut::threadOpen = 0;
+	kill_thread = 0;
+	threadOpen = 0;
+	_initialized = false;
+}
 
-		WaveFileOut::WaveFileOut()
-			: AudioDriver()
-		{
-			kill_thread = 0;
-			threadOpen = 0;
-			_initialized = false;
-		}
+WaveFileOut::~WaveFileOut() {
+	///\todo use proper synchronisation mecanisms
+	while ( threadOpen ) {
+		kill_thread = 1;
+		#if defined __unix__ || defined __APPLE__
+			usleep(200);
+		#else
+			Sleep(1);
+		#endif
+	}
+}
 
-		WaveFileOut::~WaveFileOut()
-		{
-			///\todo use proper synchronisation mecanisms
+AudioDriverInfo WaveFileOut::info( ) const {
+	return AudioDriverInfo("wavefileout","Wave to File Driver","Recording a wav to a file",false);
+}
+
+void WaveFileOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context ) {
+	_pCallback = pCallback;
+	_callbackContext = context;
+	_initialized = true;
+}
+
+bool WaveFileOut::Initialized(void) {
+	return _initialized;
+}
+
+bool WaveFileOut::Enable( bool e ) {
+	bool threadStarted = false;
+	if (e && !threadOpen) {
+		kill_thread = 0;
+		///\todo use std::thread
+		#if defined __unix__ || defined __APPLE__
+			pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
+		#else
+			CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)audioOutThread, this, 0, &threadid);
+		#endif
+		threadStarted = true;
+	} else
+		if (!e && threadOpen) {
+			kill_thread = 1;
+			threadStarted = false;
 			while ( threadOpen ) {
-				kill_thread = 1;
+				///\todo bad
 				#if defined __unix__ || defined __APPLE__
-					usleep(200);
+					usleep(10); // give thread time to close
 				#else
 					Sleep(1);
 				#endif
 			}
 		}
+		return threadStarted;
+}
 
-		WaveFileOut * WaveFileOut::clone( ) const
-		{
-			return new WaveFileOut(*this);
-		}
+int WaveFileOut::audioOutThread(void * ptr) {
+	WaveFileOut* waveFileOut = (WaveFileOut*) ptr;
+	waveFileOut->writeBuffer();
+	return 0;
+}
 
-		AudioDriverInfo WaveFileOut::info( ) const
-		{
-			return AudioDriverInfo("wavefileout","Wave to File Driver","Recording a wav to a file",false);
-		}
+void WaveFileOut::writeBuffer() {
+	threadOpen = 1;
+	int count = 441;
 
-		void WaveFileOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context )
-		{
-			_pCallback = pCallback;
-			_callbackContext = context;
-			_initialized = true;
-		}
+	while(!(kill_thread)) {
+		///\todo bad
+		#if defined __unix__ || defined __APPLE__
+			usleep(50); // give cpu time to breath, and not too much :)
+		#else
+			Sleep(1);
+		#endif
+		float const * input(_pCallback(_callbackContext, count));
+		///\todo well, the real job, i.e. output to a file
+	}
 
-		bool WaveFileOut::Initialized(void) {
-			return _initialized;
-		}
-
-		bool WaveFileOut::Enable( bool e )
-		{
-			bool threadStarted = false;
-			if (e && !threadOpen) {
-				kill_thread = 0;
-#if defined __unix__ || defined __APPLE__
-				pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
-#else
-				CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)audioOutThread, this, 0, &threadid);
-#endif
-				threadStarted = true;
-			} else
-				if (!e && threadOpen) {
-					kill_thread = 1;
-					threadStarted = false;
-					while ( threadOpen ) {
-#if defined __unix__ || defined __APPLE__
-						usleep(10); // give thread time to close
-#else
-						Sleep(1);
-#endif
-					}
-				}
-				return threadStarted;
-		}
-
-		int WaveFileOut::audioOutThread( void * ptr )
-		{
-			WaveFileOut* waveFileOut = (WaveFileOut*) ptr;
-			waveFileOut->writeBuffer();
-			return 0;
-		}
-
-		void WaveFileOut::writeBuffer( )
-		{
-			threadOpen = 1;
-			int count = 441;
-
-			while(!(kill_thread))
-			{
-#if defined __unix__ || defined __APPLE__
-				usleep(50); // give cpu time to breath, and not too much :)
-#else
-				Sleep(1);
-#endif
-				float const * input(_pCallback(_callbackContext, count));
-				///\todo well, the real job, i.e. output to a file
-			}
-
-			threadOpen = 0;
-			std::cout << "closing thread" << std::endl;
-#if defined __unix__ || defined __APPLE__
-			pthread_exit(0);
-#else
-			ExitThread(0);
-#endif
-		}
-
-	} // end of core namespace
-} // end of psycle namespace
+	threadOpen = 0;
+	std::cout << "closing thread" << std::endl;
+	///\todo use std::thread.join
+	#if defined __unix__ || defined __APPLE__
+		pthread_exit(0);
+	#else
+		ExitThread(0);
+	#endif
+}
+}}

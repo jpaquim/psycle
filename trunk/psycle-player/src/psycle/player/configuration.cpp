@@ -105,11 +105,8 @@ Configuration::Configuration() {
 }
 
 Configuration::~Configuration() {
-	std::map< std::string, AudioDriver*>::iterator it = driver_map_.begin();
-	while(it != driver_map_.end()) {
-		delete(it->second);
-		++it;
-	}
+	for(std::map<std::string, psy::core::AudioDriver*>::iterator i(driver_map_.begin()), e(driver_map_.end()); i != e; ++i)
+		delete i->second;
 }
 
 void Configuration::add_driver(AudioDriver & driver) {

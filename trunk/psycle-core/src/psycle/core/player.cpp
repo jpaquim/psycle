@@ -114,6 +114,9 @@ void Player::start_threads() {
 }
 
 void Player::start(double pos) {
+	stop(); // This causes all machines to reset, and samplesperRow to init.
+
+	std::cout << "psycle: core: player: starting\n";
 	if(!song_) {
 		std::cerr << "psycle: core: player: no song to play\n";
 		return;
@@ -122,8 +125,6 @@ void Player::start(double pos) {
 		std::cerr << "psycle: core: player: no audio driver to output the song to\n";
 		return;
 	}
-
-	stop(); // This causes all machines to reset, and samplesperRow to init.
 
 	if(autoRecord_) startRecording();
 
@@ -347,6 +348,7 @@ void Player::process(Player::node & node) throw(std::exception) {
 }
 
 void Player::stop() {
+	std::cout << "psycle: core: player: stopping\n";
 	if(!song_ || !driver_) return;
 	playing_ = false;
 	for(int i(0); i < MAX_MACHINES; ++i) if(song().machine(i)) {
@@ -360,11 +362,6 @@ void Player::stop() {
 }
 
 Player::~Player() {
-	if(driver_) {
-		std::cerr << "psycle: core: player: deleting audio driver!\n";
-		delete driver_; ///\todo [bohan] i don't see why the player owns the driver.
-	}
-
 	///\todo stopping the threads needs to be done elsewhere?
 	stop_threads();
 }
@@ -443,8 +440,7 @@ void Player::process_global_event(GlobalEvent const & event) {
 			if(mIndex < MAX_MACHINES && song().machine(mIndex))
 				song().machine(mIndex)->SetPan(static_cast<int>( event.parameter()));
 			break;
-		default:
-			break;
+		default: ;
 	}
 }
 
@@ -559,7 +555,7 @@ void Player::execute_notes(double beat_offset, PatternLine & line) {
 				///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
 				///\todo: verify that using ints for rate and variation is enough, or has to be float.
 				int delaysamples(0), rate(0), delay(0), variation(0);
-				int parameter = entry.parameter()&0x0f;
+				int parameter = entry.parameter() & 0x0f;
 				variation = (parameter < 9) ? (4 * parameter) : (-2 * (16 - parameter));
 				if(entry.parameter() & 0xf0) rate = entry.parameter() & 0xf0;
 				delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
@@ -697,33 +693,28 @@ float * Player::Work(int numSamples) {
 	return buffer_;
 }
 
-void Player::setDriver(AudioDriver const & driver) {
-	std::cout << "psycle: core: player: setting audio driver\n";
-	if(driver_) {
-		driver_->Enable(false);
-		std::cerr << "psycle: core: player: deleting audio driver!\n";
-		delete driver_;
-	}
-	///\todo: This is a dangerous thing. It's scheduled to be changed
-	driver_ = driver.clone();
-	std::cout << "psycle: core: player: cloned audio driver\n";
-	if(!driver_->Initialized()) driver_->Initialize(Work, this);
+void Player::setDriver(AudioDriver & driver) {
+	std::cout << "psycle: core: player: setting audio driver to: " << driver.info().name() << '\n';
+
+	if(driver_) driver_->Enable(false);
+
+	if(!driver.Initialized()) driver.Initialize(Work, this);
 	std::cout << "psycle: core: player: audio driver initialized\n";
-	if(!driver_->Configured()) {
+	
+	if(!driver.Configured()) {
 		std::cout << "psycle: core: player: asking audio driver to configure itself\n";
-		driver_->Configure();
-		//samples_per_seconds(driver_->_samplesPerSec);
+		driver.Configure();
 	}
 	std::cout << "psycle: core: player: audio driver configured\n";
-	if(driver_->Enable(true)) {
-		std::cout << "psycle: core: player: audio driver enabled: " << driver_->info().name() << '\n';
+	
+	if(driver.Enable(true)) {
+		std::cout << "psycle: core: player: audio driver enabled: " << driver.info().name() << '\n';
+		samples_per_second(driver.settings().samplesPerSec());
+		driver_ = &driver;
 	} else {
-		std::cerr << "psycle: core: player: audio driver failed to enable. setting null driver\n";
-		std::cerr << "psycle: core: player: deleting audio driver!\n";
-		delete driver_;
-		driver_ = new AudioDriver();
+		std::cerr << "psycle: core: player: audio driver failed to enable. setting back previous driver\n";
+		if(driver_) driver_->Enable(true);
 	}
-	samples_per_second(driver_->settings().samplesPerSec());
 }
 
 /*****************************************************************************/

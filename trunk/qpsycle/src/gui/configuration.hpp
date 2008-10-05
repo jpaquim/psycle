@@ -29,6 +29,7 @@ namespace qpsycle {
 	class Configuration {
 		public:
 			Configuration();
+			~Configuration();
 	
 		///\name configuration file
 		///\{

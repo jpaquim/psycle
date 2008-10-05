@@ -31,7 +31,6 @@ namespace psy {
 			public:
 				ESoundOut();
 				~ESoundOut();
-				/*override*/ ESoundOut* clone()  const;
 				/*override*/ AudioDriverInfo info() const;
 				/*override*/ void Configure();
 				/*override*/ bool Enable(bool e);

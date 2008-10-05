@@ -69,34 +69,31 @@
 namespace qpsycle {
 
 	TabWidget::TabWidget( QWidget *parent )
-		: QTabWidget( parent )
+	: QTabWidget( parent )
 	{}
 
 	// <nmather> I overrode this as by default a QTabWidget uses 1,2,3,4, etc.
 	// to switch to the 1st,2nd,3rd,4th etc. tab.  We don't want this behaviour,
 	// as we use the numeric keys (for example, in the pattern view.) There might
 	// be a better way to get around this if anyone can think of one.
-	bool TabWidget::event( QEvent *event )
-	{
-
+	bool TabWidget::event( QEvent *event ) {
 		switch (event->type()) {
-		case QEvent::KeyPress: {
-			QKeyEvent *k = (QKeyEvent *)event;
-			if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2 || k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
-			{
-				return true;
-			} else {
-				QTabWidget::keyPressEvent(k);
-				return true;
+			case QEvent::KeyPress: {
+				QKeyEvent *k = (QKeyEvent *)event;
+				if (k->key() == Qt::Key_1 || k->key() == Qt::Key_2 || k->key() == Qt::Key_3 || k->key() == Qt::Key_4 )
+				{
+					return true;
+				} else {
+					QTabWidget::keyPressEvent(k);
+					return true;
+				}
 			}
-		}
-		default:
-			return QTabWidget::event( event );
+			default:
+				return QTabWidget::event( event );
 		}
 	}
 
-	MainWindow::MainWindow()
-	{
+	MainWindow::MainWindow() {
 		fileMenu = editMenu = viewMenu = configMenu = performMenu = communityMenu = helpMenu = 0;
 		fileToolBar = editToolBar = playToolBar = machToolBar = octToolBar_ = 0;
 		newAct = openAct = saveAct = undoAct = redoAct = aboutAct = quitAct = showUnReAct = showLogConsAct = playFromStartAct = playFromSeqPosAct = playPatAct = playStopAct = togglePatBox_ = audioConfAct = 0;
@@ -169,13 +166,11 @@ namespace qpsycle {
 		createUndoView();
 	}
 
-	MainWindow::~MainWindow()
-	{
+	MainWindow::~MainWindow() {
 		//std::cout << "~MainWindow() " << this << "\n";
 	}
 
-	void MainWindow::keyPressEvent( QKeyEvent * event )
-	{
+	void MainWindow::keyPressEvent( QKeyEvent * event ) {
 		// <nmather> IIRC, this is here to stop the default Qt behaviour for a tab press
 		// (namely, cycling through focus on the widgets.)  We want to use tab for other
 		// things (e.g. moving around in the pattern view.)
@@ -192,15 +187,12 @@ namespace qpsycle {
 		}
 	}
 
-	void MainWindow::setupSound()
-	{
-		psy::core::Player::singleton().song( song_ );
-		psy::core::AudioDriver *outDriver = Global::configuration()._pOutputDriver;
-		psy::core::Player::singleton().setDriver( *outDriver );
+	void MainWindow::setupSound() {
+		psy::core::Player::singleton().song(song_);
+		psy::core::Player::singleton().setDriver(*Global::configuration()._pOutputDriver);
 	}
 
-	void MainWindow::setupGui()
-	{
+	void MainWindow::setupGui() {
 		QByteArray sheetName = settings.value( "looks/sheet", "default.qss" ).toByteArray();
 		QFile file( ":/colorschemes/" + sheetName.toLower() );
 		file.open( QFile::ReadOnly );
@@ -218,14 +210,13 @@ namespace qpsycle {
 		dock_->setWidget(patternBox_);
 		addDockWidget(Qt::LeftDockWidgetArea, dock_);
 	
-#if 0
-		///\todo
-		dockL_ = new QDockWidget("Logging Console", this);
-		dockL_->setAllowedAreas(Qt::BottomDockWidgetArea);
-		dockL_->setWidget(logConsole_);
-		dockL_->setAttribute(Qt::WA_QuitOnClose, false);
-		addDockWidget(Qt::BottomDockWidgetArea, dockL_);
-#endif
+		#if 0 ///\todo
+			dockL_ = new QDockWidget("Logging Console", this);
+			dockL_->setAllowedAreas(Qt::BottomDockWidgetArea);
+			dockL_->setWidget(logConsole_);
+			dockL_->setAttribute(Qt::WA_QuitOnClose, false);
+			addDockWidget(Qt::BottomDockWidgetArea, dockL_);
+		#endif
 	
 		views_ = new TabWidget();
 		views_->addTab( macView_, QIcon(":images/machines.png"), "Machine View" );
@@ -249,8 +240,7 @@ namespace qpsycle {
 		updateWindowTitleSongName( "Untitled.psy" );
 	}
 
-	void MainWindow::createActions()
-	{
+	void MainWindow::createActions() {
 		newAct = new QAction(QIcon(":/images/new.png"), tr("&New Song"), this);
 		newAct->setShortcut(tr("Ctrl+N"));
 		newAct->setStatusTip(tr("Create a new song"));
@@ -302,8 +292,7 @@ namespace qpsycle {
 		connect( settingsConfAct, SIGNAL( triggered() ), this, SLOT( showSettingsDlg() ) );
 
 
-		for (int i = 0; i < 4; ++i) 
-		{
+		for(int i = 0; i < 4; ++i) {
 			recentSongsActs[i] = new QAction(this);
 			recentSongsActs[i]->setVisible(false);
 			connect( recentSongsActs[i], SIGNAL( triggered() ), this, SLOT( openRecentFile() ) );
@@ -398,8 +387,7 @@ namespace qpsycle {
 		playPatAct = new QAction(QIcon(":/images/playselpattern.png"), tr("Play selected p&attern"), this);
 	}
 
-	void MainWindow::createMenus()
-	{
+	void MainWindow::createMenus() {
 		fileMenu = menuBar()->addMenu(tr("&File"));
 		fileMenu->addAction(newAct);
 		fileMenu->addAction(openAct);
@@ -449,8 +437,7 @@ namespace qpsycle {
 		helpMenu->addAction(aboutAct);
 	}
 
-	void MainWindow::createToolBars()
-	{
+	void MainWindow::createToolBars() {
 		fileToolBar = addToolBar(tr("File"));
 		fileToolBar->addAction(newAct);
 		fileToolBar->addAction(openAct);
@@ -491,14 +478,12 @@ namespace qpsycle {
 		octCombo_->setCurrentIndex( 4 );
 	}
 
-	void MainWindow::createStatusBar()
-	{
+	void MainWindow::createStatusBar() {
 		statusBar()->showMessage(tr("Ready"));
 		statusBar()->addPermanentWidget( new QLabel( "hi" ) );
 	}
 
-	void MainWindow::setupSignals()
-	{
+	void MainWindow::setupSignals() {
 		connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ), this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
 		connect( patternBox_, SIGNAL( patternDeleted() ), this, SLOT( onPatternDeleted() ) );
 		connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ), this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
@@ -517,10 +502,8 @@ namespace qpsycle {
 		connect( seqView_->sequencerDraw(), SIGNAL( newPatternCreated( psy::core::SinglePattern* ) ), patternBox_, SLOT( onNewPatternCreated( psy::core::SinglePattern* ) ) );
 	}
 
-	void MainWindow::onNewSongRequest()
-	{
-		if ( okToContinue() )
-		{
+	void MainWindow::onNewSongRequest() {
+		if(okToContinue()) {
 			psy::core::Song *blankSong = createBlankSong();
 			loadSong( blankSong );
 			updateWindowTitleSongName( "Untitled.psy" );
@@ -535,10 +518,8 @@ namespace qpsycle {
 	 * (i.e. something that could lose changes to a song) should be
 	 * allowed to continue.
 	 */
-	bool MainWindow::okToContinue()
-	{
-		if ( songHasChanged() )
-		{
+	bool MainWindow::okToContinue() {
+		if(songHasChanged()) {
 			int response = QMessageBox::warning(
 				this, "Save changes?",
 				"The song has been modified.\n Do you wish to save your changes?",
@@ -551,19 +532,15 @@ namespace qpsycle {
 				return false;
 			}
 		}
-	
 		return true; // If the song hasn't changed, we don't need to worry.
 	}
 
-	bool MainWindow::songHasChanged()
-	{
+	bool MainWindow::songHasChanged() {
 		return true; ///\todo Can implement this once undo/redo is implemented.
 	}
 
-	void MainWindow::onOpenSongRequest()
-	{
-		if ( okToContinue() )
-		{
+	void MainWindow::onOpenSongRequest() {
+		if(okToContinue()) {
 			QString songPath;
 			if ( currentSongDir_.isEmpty() )
 				songPath = settings.value( "paths/songPath", "." ).toString();
@@ -592,18 +569,12 @@ namespace qpsycle {
 		}
 	}
 
-	bool MainWindow::onSaveSongRequest()
-	{
-		if ( curFile.isEmpty() ) {
-			return onSaveSongAsRequest();
-		}
-		else {
-			return saveSong( curFile );
-		}
+	bool MainWindow::onSaveSongRequest() {
+		if(curFile.isEmpty()) return onSaveSongAsRequest();
+		else return saveSong(curFile);
 	}
 
-	bool MainWindow::onSaveSongAsRequest()
-	{
+	bool MainWindow::onSaveSongAsRequest() {
 		QString songPath;
 		if ( currentSongDir_.isEmpty() )
 			songPath = settings.value( "paths/songPath", "." ).toString();
@@ -623,8 +594,7 @@ namespace qpsycle {
 		return saveSong( fileName );
 	}
 
-	psy::core::Song *MainWindow::createBlankSong()
-	{
+	psy::core::Song *MainWindow::createBlankSong() {
 		psy::core::Song *blankSong = new psy::core::Song( );
 		psy::core::PatternCategory* category0 = blankSong->patternSequence().patternPool()->createNewCategory("New Category");
 		psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
@@ -635,8 +605,7 @@ namespace qpsycle {
 		return blankSong;
 	}
 
-	bool MainWindow::saveSong( const QString & fileName )
-	{
+	bool MainWindow::saveSong( const QString & fileName ) {
 		qDebug( "Saving song." );
 
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
@@ -660,8 +629,7 @@ namespace qpsycle {
 		}
 	}
 
-	void MainWindow::loadSong( psy::core::Song *song )
-	{
+	void MainWindow::loadSong( psy::core::Song *song ) {
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 
 		psy::core::Player::singleton().driver().Enable(false);
@@ -712,48 +680,32 @@ namespace qpsycle {
 		QApplication::restoreOverrideCursor();
 	}
 
-	void MainWindow::closeEvent( QCloseEvent *event )
-	{
-		if ( okToContinue() ) {
-			event->accept();
-		} else {
-			event->ignore();
-		}
+	void MainWindow::closeEvent( QCloseEvent *event ) {
+		if(okToContinue()) event->accept();
+		else event->ignore();
 	}
 
 
-	void MainWindow::undo()
-	{
-	
+	void MainWindow::undo() {
 	}
 
-	void MainWindow::redo()
-	{
-	
+	void MainWindow::redo() {
 	}
 
-	void MainWindow::openRecentFile()
-	{
-		if ( okToContinue() )
-		{
+	void MainWindow::openRecentFile() {
+		if(okToContinue()) {
 			QAction *action = qobject_cast<QAction *>( sender() );
-			if ( action != 0 )
-			{
+			if(action) {
 				QString fileName = action->data().toString();
-
-				if ( !fileName.isEmpty() ) 
-				{
+				if(!fileName.isEmpty()) {
 					psy::core::Player::singleton().stop();
 					psy::core::Song *song = new psy::core::Song();
 					QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-					if ( song->load( fileName.toStdString() ) )
-					{
+					if(song->load(fileName.toStdString())) {
 						loadSong( song );
 						setCurrentFile( fileName );
-					}
-					else
-					{
-						///\Show some error message.
+					} else {
+						///\todo show some error message.
 					}
 				}
 			}
@@ -766,8 +718,7 @@ namespace qpsycle {
 	 * and current song directory.
 	 */
 	
-	void MainWindow::setCurrentFile( const QString &fileName )
-	{
+	void MainWindow::setCurrentFile( const QString &fileName ) {
 		curFile = fileName;
 		///\todo when undo/redo is in place, at this point we signal that the
 		/// file is now "clean", i.e. has no outstanding changes to be saved.
@@ -791,8 +742,7 @@ namespace qpsycle {
 		updateWindowTitleSongName( curFile );
 	}
 
-	void MainWindow::updateRecentSongsActions()
-	{
+	void MainWindow::updateRecentSongsActions() {
 		QSettings settings;
 		QStringList recentSongs = settings.value("recentSongsList").toStringList();
 
@@ -819,13 +769,11 @@ namespace qpsycle {
 		}
 	}
 
-	void MainWindow::updateWindowTitleSongName( const QString & newSongName )
-	{
+	void MainWindow::updateWindowTitleSongName( const QString & newSongName ) {
 		setWindowTitle( QString("[%1] - %2").arg( newSongName ).arg( QPSYCLE_TITLE ) );
 	}
 
-	void MainWindow::populateMachineCombo()
-	{
+	void MainWindow::populateMachineCombo() {
 		// <nmather> I think it would be preferable to populate
 		// this from a machines model that can be shared with other widgets,
 		// rather than directly accessing the CoreSong.
@@ -872,14 +820,12 @@ namespace qpsycle {
 		macCombo_->update();
 	}
 
-	void MainWindow::initSampleCombo()
-	{
+	void MainWindow::initSampleCombo() {
 		sampCombo_->setModel( instrumentsModel_ );
 		connect ( instrumentsModel_, SIGNAL(selectedInstrumentChanged(int)), sampCombo_, SLOT(setCurrentIndex(int)) );
 	}
 
-	void MainWindow::onMachineComboBoxIndexChanged( int newIndex )
-	{
+	void MainWindow::onMachineComboBoxIndexChanged( int newIndex ) {
 		song_->seqBus = newIndex;
 
 		// Choose the necessary MachineGui in the MachineView.
@@ -888,68 +834,56 @@ namespace qpsycle {
 		macView_->update();
 	}
 
-	void MainWindow::onSampleComboBoxIndexChanged( int newIndex )
-	{
+	void MainWindow::onSampleComboBoxIndexChanged( int newIndex ) {
 		instrumentsModel_->setSelectedInstrumentIndex( newIndex );
 	}
 
-	void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern )
-	{
+	void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern ) {
 		patView_->setPattern( selectedPattern );
 	}
 
-	void MainWindow::onNewMachineCreated( psy::core::Machine *mac )
-	{
+	void MainWindow::onNewMachineCreated( psy::core::Machine *mac ) {
 		populateMachineCombo();
 		//if ( mac->mode() == psy::core::MACHMODE_GENERATOR )
 		//macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
 		logConsole_->AddSuccessText("Machine Created Successfuly");
 	}
 
-	void MainWindow::onMachineChosen( MachineGui *macGui )
-	{
+	void MainWindow::onMachineChosen( MachineGui *macGui ) {
 		int comboIdx = macCombo_->findData( macGui->mac()->id() );
 		macCombo_->setCurrentIndex( comboIdx );
 	}
 
-	void MainWindow::onMachineDeleted()
-	{
+	void MainWindow::onMachineDeleted() {
 		populateMachineCombo(); ///\todo: perhaps a bit unnecessary to repopulate the whole thing.
 	}
 
-	void MainWindow::onMachineRenamed()
-	{
+	void MainWindow::onMachineRenamed() {
 		populateMachineCombo(); ///\todo: perhaps a bit unnecessary to repopulate the whole thing.
 	}
 
-	void MainWindow::onPatternDeleted()
-	{
+	void MainWindow::onPatternDeleted() {
 		patView_->setPattern( 0 );
 	}
 
-	void MainWindow::onPatternNameChanged()
-	{
+	void MainWindow::onPatternNameChanged() {
 		seqView_->onPatternNameChanged();
 	}
 
-	void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *pattern )
-	{
+	void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *pattern ) {
 		seqView_->addPattern( pattern );
 	}
 
-	void MainWindow::onCategoryColorChanged()
-	{
+	void MainWindow::onCategoryColorChanged() {
 		seqView_->onCategoryColorChanged();
 	}
 
-	void MainWindow::onOctaveComboBoxIndexChanged( int newIndex )
-	{
+	void MainWindow::onOctaveComboBoxIndexChanged( int newIndex ) {
 		patView_->setOctave( newIndex );
 		macView_->setOctave( newIndex );
 	}
 
-	void MainWindow::playFromStart()
-	{
+	void MainWindow::playFromStart() {
 		playbackTimer_->start( 10 );
 
 		playFromSeqPosAct->setChecked(true);
@@ -957,49 +891,42 @@ namespace qpsycle {
 		psy::core::Player::singleton().start( 0.0 );
 	}
 
-	void MainWindow::playFromSeqPos()
-	{
+	void MainWindow::playFromSeqPos() {
 		playbackTimer_->start( 10 );
 
 		playFromSeqPosAct->setChecked(true);
 		psy::core::Player::singleton().start( psy::core::Player::singleton().playPos() );
 	}
 
-	void MainWindow::playStop()
-	{
+	void MainWindow::playStop() {
 		playbackTimer_->stop();
 
 		playFromSeqPosAct->setChecked(false);
 		psy::core::Player::singleton().stop();
 	}
 
-	void MainWindow::showMachineView()
-	{
+	void MainWindow::showMachineView() {
 		views_->setCurrentWidget( macView_ );
 	}
 
-	void MainWindow::showPatternView()
-	{
+	void MainWindow::showPatternView() {
 		views_->setCurrentWidget( patView_ );
 	}
-	void MainWindow::showWaveEditor()
-	{
+	
+	void MainWindow::showWaveEditor() {
 		views_->setCurrentWidget( wavView_ );
 	}
-	void MainWindow::showSequencerView()
-	{
+	
+	void MainWindow::showSequencerView() {
 		views_->setCurrentWidget( seqView_ );
 	}
 
-	void MainWindow::showSettingsDlg()
-	{
+	void MainWindow::showSettingsDlg() {
 		ConfigDialog configDlg;
 		configDlg.exec();
 	}
 
-
-	void MainWindow::createUndoView()
-	{
+	void MainWindow::createUndoView() {
 		undoView = new QUndoView( undoStack );
 		undoView->setWindowTitle(tr("Undo List"));
 		undoView->setAttribute(Qt::WA_QuitOnClose, false);
@@ -1007,19 +934,16 @@ namespace qpsycle {
 		undoView->setWindowFlags(Qt::WindowStaysOnTopHint);
 	}
 
-	void MainWindow::showUndoView() 
-	{
+	void MainWindow::showUndoView() {
 		undoView->setVisible(!undoView->isVisible());
 	}
 
-	void MainWindow::showLogCons()
-	{
+	void MainWindow::showLogCons() {
 		dockL_->setVisible(!dockL_->isVisible());
 	}
 
 	// Toggles through states : focus pattern box, hide pattern box, show pattern box.
-	void MainWindow::showPatternBox()
-	{
+	void MainWindow::showPatternBox() {
 		if ( !dock_->isVisible() ) {
 			dock_->setVisible( true );
 			patternBox_->patternTree()->setFocus();
@@ -1032,44 +956,37 @@ namespace qpsycle {
 		}
 	}
 
-	void MainWindow::machineIncrement()
-	{
+	void MainWindow::machineIncrement() {
 		if ( macCombo_->currentIndex() + 1 > macCombo_->count()-1 )
 			macCombo_->setCurrentIndex( 0 );
 		else
 			macCombo_->setCurrentIndex( macCombo_->currentIndex() + 1 );
 	}
 
-	void MainWindow::machineDecrement()
-	{
+	void MainWindow::machineDecrement() {
 		if ( macCombo_->currentIndex() - 1 < 0  )
 			macCombo_->setCurrentIndex( macCombo_->count()-1 );
 		else
 			macCombo_->setCurrentIndex( macCombo_->currentIndex() - 1 );
 	}
 
-	void MainWindow::instrumentDecrement()
-	{
+	void MainWindow::instrumentDecrement() {
 		sampCombo_->setCurrentIndex( std::max( 0, sampCombo_->currentIndex() - 1 ) );
 	}
 
-	void MainWindow::instrumentIncrement()
-	{
+	void MainWindow::instrumentIncrement() {
 		sampCombo_->setCurrentIndex( std::min( sampCombo_->currentIndex() + 1, psy::core::MAX_INSTRUMENTS-1 ) );
 	}
 
-	void MainWindow::octaveDecrement()
-	{
+	void MainWindow::octaveDecrement() {
 		octCombo_->setCurrentIndex( std::max( 0, octCombo_->currentIndex() - 1 ) );
 	}
 
-	void MainWindow::octaveIncrement()
-	{
+	void MainWindow::octaveIncrement() {
 		octCombo_->setCurrentIndex( std::min( octCombo_->currentIndex() + 1 , 8 ) );
 	}
 
-	void MainWindow::aboutQpsycle() 
-	{
+	void MainWindow::aboutQpsycle() {
 		QDialog aboutDialog( this );
 		aboutDialog.setWindowTitle( "About qpsycle" );
 
@@ -1093,8 +1010,7 @@ namespace qpsycle {
 		// is definitely removed from memory here.
 	}
 
-	void MainWindow::showSongPropertiesDialog()
-	{
+	void MainWindow::showSongPropertiesDialog() {
 		QDialog songPropsDlg( this );
 		songPropsDlg.setWindowTitle( "Song properties" );
 
@@ -1149,16 +1065,13 @@ namespace qpsycle {
 		// is definitely removed from memory here.
 	}
 
-	void MainWindow::updatePlaybackGraphics()
-	{
-		if ( psy::core::Player::singleton().playing() )
-		{
+	void MainWindow::updatePlaybackGraphics() {
+		if ( psy::core::Player::singleton().playing() ) {
 			seqView_->updatePlayPos();
 
 			psy::core::SinglePattern* visiblePattern = 0;
 			visiblePattern = patView_->pattern();
-			if ( visiblePattern ) 
-			{
+			if ( visiblePattern ) {
 				double entryStart = 0;
 				bool isPlayPattern = song_->patternSequence().getPlayInfo( visiblePattern, psy::core::Player::singleton().playPos() , 4 , entryStart );
 
@@ -1169,4 +1082,3 @@ namespace qpsycle {
 	}
 
 } // namespace qpsycle
-

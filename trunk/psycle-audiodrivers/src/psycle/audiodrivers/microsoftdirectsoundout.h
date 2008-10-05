@@ -23,75 +23,67 @@
 #include "windows.h"
 #include <mmsystem.h>
 #include "dsound.h"
-namespace psy
-{
-	namespace core
-	{
+namespace psy { namespace core {
 
-		///\todo  this driver is (over)filling the buffer to fast
+/// output device interface implemented by direct sound.
+///\todo this driver is (over)filling the buffer to fast!
+class MsDirectSound : public AudioDriver {
+	public:
 
-		/// output device interface implemented by direct sound.
-		class MsDirectSound : public AudioDriver
-		{
-		public:
+		MsDirectSound();
+		~MsDirectSound();
 
-			MsDirectSound();
+		AudioDriverInfo info( ) const;
 
-			~MsDirectSound();
+		virtual void Initialize( AUDIODRIVERWORKFN pCallback, void * context );
+		virtual void Reset();
+		virtual bool Enable( bool );
+		virtual int GetWritePos();
+		virtual int GetPlayPos();
+		int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
+		virtual void Configure();
+		virtual bool Initialized() { return _initialized; }
+		virtual bool Configured() { return _configured; }
 
-			AudioDriverInfo info( ) const;
-			MsDirectSound * clone( ) const;
+	private:
+		bool _initialized;
+		bool _configured;
 
-			virtual void Initialize( AUDIODRIVERWORKFN pCallback, void * context );
-			virtual void Reset();
-			virtual bool Enable( bool );
-			virtual int GetWritePos();
-			virtual int GetPlayPos();
-			int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
-			virtual void Configure();
-			virtual bool Initialized() { return _initialized; }
-			virtual bool Configured() { return _configured; }
+		bool _running;
+		bool _playing;
+		bool _timerActive;
+		//static AudioDriverEvent _event;
+		//CCriticalSection _lock;
 
+		GUID device_guid;
+		bool _exclusive;
+		bool _dither;
+		int _bytesPerSample;
+		int _bufferSize;
+		int _numBuffers;
 
-		private:
-			bool _initialized;
-			bool _configured;
+		int _dsBufferSize;
+		int _currentOffset;
+		int _lowMark;
+		int _highMark;
+		int _buffersToDo;
 
-			bool _running;
-			bool _playing;
-			bool _timerActive;
-			//static AudioDriverEvent _event;
-			//CCriticalSection _lock;
+		LPDIRECTSOUND _pDs;
+		LPDIRECTSOUNDBUFFER _pBuffer;
+		void* _callbackContext;
+		AUDIODRIVERWORKFN _pCallback;
 
-			GUID device_guid;
-			bool _exclusive;
-			bool _dither;
-			int _bytesPerSample;
-			int _bufferSize;
-			int _numBuffers;
+		static DWORD WINAPI PollerThread(void* pDirectSound);
+		//static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
+		void ReadConfig();
+		void WriteConfig();
+		void Error(const WCHAR msg[]);
+		void DoBlocks();
+		bool Start();
+		bool Stop();
 
-			int _dsBufferSize;
-			int _currentOffset;
-			int _lowMark;
-			int _highMark;
-			int _buffersToDo;
+		void quantize(float *pin, int *piout, int c);
+};
 
-			LPDIRECTSOUND _pDs;
-			LPDIRECTSOUNDBUFFER _pBuffer;
-			void* _callbackContext;
-			AUDIODRIVERWORKFN _pCallback;
-
-			static DWORD WINAPI PollerThread(void* pDirectSound);
-			//static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
-			void ReadConfig();
-			void WriteConfig();
-			void Error(const WCHAR msg[]);
-			void DoBlocks();
-			bool Start();
-			bool Stop();
-
-			void quantize(float *pin, int *piout, int c);
-		};
-	}
-}
+}}
 #endif

@@ -17,57 +17,47 @@
 *  Free Software Foundation, Inc.,                                            *
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
-#ifndef JACKOUT_H
-#define JACKOUT_H
+#pragma once
 #if defined PSYCLE__JACK_AVAILABLE
 #include "audiodriver.h"
 #include <jack/jack.h>
 #include <string>
-namespace psy {
-	namespace core {
+namespace psy { namespace core {
 
 class JackOut : public AudioDriver {
-public:
+	public:
+		JackOut();
+		~JackOut();
 
-	JackOut();
+		virtual AudioDriverInfo info() const;
 
-	~JackOut();
+		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
+				virtual bool Initialized();
+				virtual void configure();
+				virtual bool Enable(bool e);
 
-	virtual AudioDriverInfo info() const;
+	private:
+		// psycle variables
+		bool _initialized;
+		void* _callbackContext;
+		AUDIODRIVERWORKFN _pCallback;
+		bool running_;
 
-	virtual JackOut* clone()  const;   // Uses the copy constructor
+		// jack variables
+		jack_port_t *output_port_1;
+		jack_port_t *output_port_2;
 
-	virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-			virtual bool Initialized();
-			virtual void configure();
-			virtual bool Enable(bool e);
+		jack_client_t *client;
+		const char **ports;
 
-private:
+		std::string clientName_;
+		std::string serverName_;
 
-	// psycle variables
-	bool _initialized;
-	void* _callbackContext;
-	AUDIODRIVERWORKFN _pCallback;
-	bool running_;
+		bool registerToJackServer();
 
-	// jack variables
-	jack_port_t *output_port_1;
-	jack_port_t *output_port_2;
-
-	jack_client_t *client;
-	const char **ports;
-
-	std::string clientName_;
-	std::string serverName_;
-
-	bool registerToJackServer();
-
-	static int process (jack_nframes_t nframes, void *arg);
-	int fillBuffer( jack_nframes_t nframes );
-
+		static int process (jack_nframes_t nframes, void *arg);
+		int fillBuffer( jack_nframes_t nframes );
 };
 
-	} // namespace core
-} // namespace psy
+}}
 #endif // defined PSYCLE__JACK_AVAILABLE
-#endif

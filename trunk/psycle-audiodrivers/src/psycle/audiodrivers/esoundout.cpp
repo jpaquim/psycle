@@ -49,11 +49,6 @@ namespace psy {
 			Enable(false);
 		}
 
-		ESoundOut * ESoundOut::clone( ) const
-		{
-			return new ESoundOut(*this);
-		}
-
 		AudioDriverInfo ESoundOut::info( ) const
 		{
 			return AudioDriverInfo("esd", "ESound Driver", "Driver with optional network capabilities (high latency)",true);

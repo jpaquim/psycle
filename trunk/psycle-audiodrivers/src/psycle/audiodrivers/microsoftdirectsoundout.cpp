@@ -21,20 +21,15 @@
 #include "microsoftdirectsoundout.h"
 #include <cstdint>
 #pragma comment(lib, "dsound")
-namespace psy
-{
-	namespace core
-	{
+namespace psy { namespace core {
 		int const SHORT_MIN = -32768;
 		int const SHORT_MAX =  32767;      
 
-		AudioDriverInfo MsDirectSound::info( ) const
-		{
+		AudioDriverInfo MsDirectSound::info( ) const {
 			return AudioDriverInfo("dsound","Microsoft DirectSound Driver","Microsoft output driver",true);
 		}      
 
-		void MsDirectSound::Error(const WCHAR msg[])
-		{
+		void MsDirectSound::Error(const WCHAR msg[]) {
 			MessageBoxW(0, msg, L"DirectSound Output driver", MB_OK | MB_ICONERROR);
 		}
 
@@ -49,16 +44,9 @@ namespace psy
 			_pDs(),
 			_pBuffer(),
 			_pCallback()
-		{
-		}
+		{}
 
-		MsDirectSound * MsDirectSound::clone( ) const
-		{
-			return new MsDirectSound(*this);
-		}
-
-		void MsDirectSound::Initialize( AUDIODRIVERWORKFN pCallback, void * context )
-		{
+		void MsDirectSound::Initialize( AUDIODRIVERWORKFN pCallback, void * context ) {
 			_callbackContext = context;
 			_pCallback = pCallback;
 			_running = false;
@@ -67,18 +55,15 @@ namespace psy
 			_initialized = true;
 		}
 
-		void MsDirectSound::Reset()
-		{
+		void MsDirectSound::Reset() {
 			Stop();
 		}
 
-		MsDirectSound::~MsDirectSound()
-		{
+		MsDirectSound::~MsDirectSound() {
 			Reset();
 		}
 
-		bool MsDirectSound::Start()
-		{
+		bool MsDirectSound::Start() {
 			//CSingleLock lock(&_lock, true);
 			if(_running) return true;
 			if(!_pCallback) return false;
@@ -435,6 +420,5 @@ namespace psy
 			}
 			while(--c);
 		}
-	}
-}
-#endif
+}}
+#endif // defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE

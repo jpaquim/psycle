@@ -50,7 +50,7 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
 			AudioDriver const & driver() const { return *driver_; }
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			void setDriver(AudioDriver const & driver);
+			void setDriver(AudioDriver & driver);
 		private:
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
 			AudioDriver * driver_;
