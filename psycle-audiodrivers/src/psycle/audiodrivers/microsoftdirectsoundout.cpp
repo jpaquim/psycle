@@ -217,14 +217,14 @@ namespace psy { namespace core {
 
 		void MsDirectSound::DoBlocks()
 		{
-			int pos;
+			DWORD pos;
 			HRESULT hr;
 			bool playing = _playing;
 			while(true)
 			{
 				while(true)
 				{
-					hr = _pBuffer->GetCurrentPosition((DWORD*)&pos, 0);
+					hr = _pBuffer->GetCurrentPosition(&pos, 0);
 					if(FAILED(hr))
 					{
 						if(hr == DSERR_BUFFERLOST)
@@ -252,17 +252,17 @@ namespace psy { namespace core {
 				}
 				else if((pos > _lowMark) && (pos < _highMark)) return;
 				int* pBlock1;
-				int blockSize1;
+				DWORD blockSize1;
 				int* pBlock2;
-				int blockSize2;
+				DWORD blockSize2;
 				int currentOffset = _currentOffset;
 				while (_buffersToDo != 0)
 				{
 					while(true)
 					{
 						hr = _pBuffer->Lock((DWORD)currentOffset, (DWORD)_bufferSize,
-							(void**)&pBlock1, (DWORD*)&blockSize1,
-							(void**)&pBlock2, (DWORD*)&blockSize2,
+							(void**)&pBlock1, &blockSize1,
+							(void**)&pBlock2, &blockSize2,
 							0);
 						if(FAILED(hr))
 						{
@@ -361,8 +361,8 @@ namespace psy { namespace core {
 		int MsDirectSound::GetPlayPos()
 		{
 			if(!_running) return 0;
-			int playPos;
-			if(FAILED(_pBuffer->GetCurrentPosition((DWORD*)&playPos, 0)))
+			DWORD playPos;
+			if(FAILED(_pBuffer->GetCurrentPosition(&playPos, 0)))
 			{
 				Error(L"DirectSoundBuffer::GetCurrentPosition failed");
 				return 0;
@@ -373,8 +373,8 @@ namespace psy { namespace core {
 		int MsDirectSound::GetWritePos()
 		{
 			if(!_running) return 0;
-			int writePos;
-			if(FAILED(_pBuffer->GetCurrentPosition(0, (DWORD*)&writePos)))
+			DWORD writePos;
+			if(FAILED(_pBuffer->GetCurrentPosition(0, &writePos)))
 			{
 				Error(L"DirectSoundBuffer::GetCurrentPosition failed");
 				return 0;
