@@ -264,7 +264,7 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui ) {
 	directly, or a machine gets deleted and its connections have to go too.
 */
 void MachineView::deleteConnection( WireGui *wireGui ) {
-	psy::core::Player::singleton().lock();
+	psy::core::Player::scoped_lock lock(psy::core::Player::singleton().work_mutex());
 
 	psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
 	psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
@@ -292,8 +292,6 @@ void MachineView::deleteConnection( WireGui *wireGui ) {
 
 	// Delete the connection in the song file.
 	srcMac->Disconnect( *dstMac );
-
-	psy::core::Player::singleton().unlock();
 }
 
 /**

@@ -196,14 +196,11 @@ bool WireGui::rewireDest( MachineGui *newDestGui )
 	// Update song connection.
 	psy::core::Machine *srcMac = sourceMacGui()->mac();
 	psy::core::Machine *newDstMac = newDestGui->mac();
-	psy::core::Player::singleton().lock();
-	int oldDstWireIndex = srcMac->FindOutputWire( oldDestGui->mac()->id() );
-	machineView->song()->ChangeWireDestMac( *srcMac, *newDstMac, 0,oldDstWireIndex,0 );
-	psy::core::Player::singleton().unlock();
-
-	if(wiredlg) {
-		wiredlg->wireChanged();
+	{ psy::core::Player::scoped_lock lock(psy::core::Player::singleton().work_mutex());
+		int oldDstWireIndex = srcMac->FindOutputWire( oldDestGui->mac()->id() );
+		machineView->song()->ChangeWireDestMac( *srcMac, *newDstMac, 0,oldDstWireIndex,0 );
 	}
+	if(wiredlg) wiredlg->wireChanged();
 	return true;
 }
 
@@ -239,13 +236,11 @@ bool WireGui::rewireSource( MachineGui *newSrcGui )
 	// Update song connection.
 	psy::core::Machine *newSrcMac = newSrcGui->mac();
 	psy::core::Machine *dstMac = destMacGui()->mac();
-	psy::core::Player::singleton().lock();
-	int oldSrcWireIndex = dstMac->FindInputWire( oldSrcGui->mac()->id() );
-	machineView->song()->ChangeWireSourceMac( *newSrcMac, *dstMac, 0, oldSrcWireIndex,0 );
-	psy::core::Player::singleton().unlock();
-
+	{ psy::core::Player::scoped_lock lock(psy::core::Player::singleton().work_mutex());
+		int oldSrcWireIndex = dstMac->FindInputWire( oldSrcGui->mac()->id() );
+		machineView->song()->ChangeWireSourceMac( *newSrcMac, *dstMac, 0, oldSrcWireIndex,0 );
+	}
 	if(wiredlg) wiredlg->wireChanged();
-
 	return true;
 }
 

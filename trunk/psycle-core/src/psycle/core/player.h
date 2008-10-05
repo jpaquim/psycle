@@ -180,13 +180,10 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 	///\name multithreading locking
 	///\{
 		public:
-			void lock();
-			void unlock();
+			typedef std::scoped_lock<std::mutex> scoped_lock;
+			std::mutex & work_mutex() { return mutex_; }
 		private:
-			///\todo here we need some real mutexes
-			bool lock_;
-			///\todo here we need some real mutexes
-			bool in_work_;
+			std::mutex mutable work_mutex_;
 	///\}
 
 	private:
@@ -216,7 +213,6 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 			threads_type threads_;
 			void thread_function(std::size_t thread_number);
 
-			typedef std::scoped_lock<std::mutex> scoped_lock;
 			std::mutex mutable mutex_;
 			std::condition<scoped_lock> mutable condition_;
 

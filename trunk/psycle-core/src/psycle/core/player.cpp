@@ -51,9 +51,7 @@ Player::Player()
 	recording_with_dither_(),
 	playing_(),
 	loopSequenceEntry_(),
-	autoStopMachines_(),
-	lock_(),
-	in_work_()
+	autoStopMachines_()
 {
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
 
@@ -608,9 +606,8 @@ void Player::execute_notes(double beat_offset, PatternLine & line) {
 
 float * Player::Work(int numSamples) {
 	if(!song_) return buffer_;
-	if(lock_) return buffer_;
 
-	in_work_ = true;
+	scoped_lock lock(work_mutex());
 
 	// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
 	Master::_pMasterSamples = buffer_;
@@ -700,8 +697,6 @@ float * Player::Work(int numSamples) {
 			bFirst = false;
 		} while(!globals.empty()); // if globals is empty, then we've processed through to the end of the buffer.
 	}
-	
-	in_work_ = false;
 	return buffer_;
 }
 
@@ -733,7 +728,7 @@ void Player::setDriver(AudioDriver const & driver) {
 	}
 	samples_per_second(driver_->settings().samplesPerSec());
 }
-
+/*
 void psy::core::Player::lock() {
 	///\todo this is bad
 	lock_ = true;
@@ -746,7 +741,7 @@ void psy::core::Player::unlock() {
 	///\todo this is bad
 	lock_ = false;
 }
-
+*/
 /*****************************************************************************/
 // buffer to riff wav file methods
 
