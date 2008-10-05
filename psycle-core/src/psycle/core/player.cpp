@@ -144,19 +144,22 @@ void Player::start(double pos) {
 
 void Player::suspend_and_compute_plan() {
 	if(!playing_) {
+		// no threads running, so no nothing to suspend; simply compute the plan and return.
 		compute_plan();
 		return;
 	}
+	// before we compute the plan, we need to suspend all the threads.
 	{ scoped_lock lock(mutex_);
 		suspend_requested_ = true;
 	}
-	condition_.notify_all();
+	condition_.notify_all();  // notify all threads they must suspend
 	{ scoped_lock lock(mutex_);
+		// wait until all threads are suspended
 		while(suspended_ != threads_.size()) condition_.wait(lock);
 		compute_plan();
 		suspend_requested_ = false;
 	}
-	condition_.notify_all();
+	condition_.notify_all(); // notify all threads they can resume
 }
 
 void Player::compute_plan() {
@@ -178,6 +181,38 @@ void Player::compute_plan() {
 void Player::clear_plan() {
 	nodes_queue_.clear();
 	terminal_nodes_.clear();
+}
+
+void Player::process(int samples) {
+	int remaining_samples = samples;
+	while(remaining_samples) {
+		int const amount(std::min(remaining_samples, STREAM_SIZE));
+		// reset all machine buffers
+		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
+		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
+		if(!threads_.size()) // single-threaded, recursive processing
+			song().machine(MASTER_INDEX)->Work(amount);
+		else { // multi-threaded scheduling
+			// we push all the terminal nodes to the processing queue
+			{ scoped_lock lock(mutex_);
+				compute_plan(); // it's overkill, but we haven't yet implemented signals that notifies when connections are changed or nodes added/removed.
+				processed_node_count_ = 0;
+				samples_to_process_ = amount;
+			}
+			condition_.notify_all(); // notify all threads that we added nodes to the queue
+			// wait until all nodes have been processed
+			{ scoped_lock lock(mutex_);
+				while(processed_node_count_ != graph_size_) condition_.wait(lock);
+			}
+		}
+		// write samples to file
+		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
+		// move the pointer forward for the next Master::Work() iteration.
+		Master::_pMasterSamples += amount * 2;
+		remaining_samples -= amount;
+		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
+		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
+	}
 }
 
 void Player::thread_function(std::size_t thread_number) {
@@ -314,38 +349,6 @@ void Player::process(Player::node & node) throw(std::exception) {
 	}
 	dsp::Undenormalize(node._pSamplesL, node._pSamplesR, samples_to_process_);
 	node.GenerateAudio(samples_to_process_);
-}
-
-void Player::process(int samples) {
-	int remaining_samples = samples;
-	while(remaining_samples) {
-		int const amount(std::min(remaining_samples, STREAM_SIZE));
-		// reset all machine buffers
-		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
-		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
-		if(!threads_.size()) // single-threaded, recursive processing
-			song().machine(MASTER_INDEX)->Work(amount);
-		else { // multi-threaded scheduling
-			// we push all the terminal nodes to the processing queue
-			{ scoped_lock lock(mutex_);
-				compute_plan(); // it's overkill, but we haven't yet implemented signals that notifies when connections are changed or nodes added/removed.
-				processed_node_count_ = 0;
-				samples_to_process_ = amount;
-			}
-			condition_.notify_all(); // notify all threads that we added nodes to the queue
-			// wait until all nodes have been processed
-			{ scoped_lock lock(mutex_);
-				while(processed_node_count_ != graph_size_) condition_.wait(lock);
-			}
-		}
-		// write samples to file
-		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
-		// move the pointer forward for the next Master::Work() iteration.
-		Master::_pMasterSamples += amount * 2;
-		remaining_samples -= amount;
-		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
-		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
-	}
 }
 
 void Player::stop() {
