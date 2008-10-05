@@ -48,123 +48,126 @@ class MachineGui;
 class WireGui;
 
 class MachineView : public QGraphicsView {
-Q_OBJECT
+	Q_OBJECT
 
-public:
-	MachineView( psy::core::Song *song_ );
+	public:
+		MachineView( psy::core::Song *song_ );
 
-	void addNewMachineGui( psy::core::Machine *mac );
+		void addNewMachineGui( psy::core::Machine *mac );
 
-	MachineGui* findMachineGuiByCoreMachineIndex( int index ) const;
-	MachineGui* findMachineGuiByCoreMachine( psy::core::Machine *mac ) const;
-	MachineGui *machineGuiAtPoint( QPointF point ) const;
+		MachineGui* findMachineGuiByCoreMachineIndex( int index ) const;
+		MachineGui* findMachineGuiByCoreMachine( psy::core::Machine *mac ) const;
+		MachineGui *machineGuiAtPoint( QPointF point ) const;
 
-	void playNote( int note, int velocity, bool bTranspose, psy::core::Machine*pMachine);
-	void stopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
-public slots:
-	void onNotePress( int note, psy::core::Machine* mac );
-	void onNoteRelease( int note, psy::core::Machine* mac );
+		void playNote( int note, int velocity, bool bTranspose, psy::core::Machine*pMachine);
+		void stopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
 
-public:
-	psy::core::Song *song() const;
-	void setSong( psy::core::Song *song ) { song_ = song; }
-	void setChosenMachine( MachineGui* macGui );
-	MachineGui* chosenMachine() const { return chosenMachine_; }
-	int octave() const;
-	void setOctave( int newOctave );
-	bool isCreatingWire() const { return creatingWire_; }
+	public slots:
+		void onNotePress( int note, psy::core::Machine* mac );
+		void onNoteRelease( int note, psy::core::Machine* mac );
 
-protected:
-	void keyPressEvent(QKeyEvent *event);
-	void scaleView(qreal scaleFactor);
+	public:
+		psy::core::Song *song() const { return song_; }
+		void setSong( psy::core::Song *song ) { song_ = song; }
+		
+		void setChosenMachine( MachineGui* macGui ) { chosenMachine_ = macGui; }
+		MachineGui* chosenMachine() const { return chosenMachine_; }
 
-public slots:
-	void startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
-	void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
-	void deleteConnection( WireGui *wireGui );
-	void onMachineChosen( MachineGui *macGui );
-	void onDeleteMachineRequest( MachineGui *macGui );
-	void onMachineRenamed();
-	void onCloneMachine( MachineGui *macGui );
+		int octave() const { return octave_; }
+		void setOctave( int newOctave ) { octave_ = newOctave; }
 
-signals:
-	void machineChosen( MachineGui *macGui );
-	void machineDeleted( int macIndex );
-	void machineRenamed();
-	void newMachineCreated( psy::core::Machine* mac );
+		bool isCreatingWire() const { return creatingWire_; }
 
-private:
-	void createMachineGuis();
-	void createWireGuis();
-	void createTempLine();
-	void initKeyjazzSettings();
+	protected:
+		void keyPressEvent(QKeyEvent *event);
+		void scaleView(qreal scaleFactor);
 
-	void connectMachines(MachineGui *srcMacGui, MachineGui *dstMacGui );
-	WireGui* createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui );
-	MachineGui * createMachineGui( psy::core::Machine *mac );
+	public slots:
+		void startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
+		void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
+		void deleteConnection( WireGui *wireGui );
+		void onMachineChosen( MachineGui *macGui );
+		void onDeleteMachineRequest( MachineGui *macGui );
+		void onMachineRenamed();
+		void onCloneMachine( MachineGui *macGui );
 
-	MachineGui *chosenMachine_;
+	signals:
+		void machineChosen( MachineGui *macGui );
+		void machineDeleted( int macIndex );
+		void machineRenamed();
+		void newMachineCreated( psy::core::Machine* mac );
 
-	psy::core::Song *song_;
-	std::vector<MachineGui*> machineGuis;
+	private:
+		void createMachineGuis();
+		void createWireGuis();
+		void createTempLine();
+		void initKeyjazzSettings();
 
-	int octave_;
+		void connectMachines(MachineGui *srcMacGui, MachineGui *dstMacGui );
+		WireGui* createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui );
+		MachineGui * createMachineGui( psy::core::Machine *mac );
+
+		MachineGui *chosenMachine_;
+
+		psy::core::Song *song_;
+		std::vector<MachineGui*> machineGuis;
+
+		int octave_;
 	
-	QGraphicsScene *scene_;
-	QGraphicsLineItem *tempLine_;
+		QGraphicsScene *scene_;
+		QGraphicsLineItem *tempLine_;
 
-	bool creatingWire_;
+		bool creatingWire_;
 	
-	/// For multi-key playback state.
-	int notetrack[psy::core::MAX_TRACKS];
-	int outtrack;
+		/// For multi-key playback state.
+		int notetrack[psy::core::MAX_TRACKS];
+		int outtrack;
 };
 
 class QPortButton : public QPushButton {
-Q_OBJECT
-public:
-	QPortButton( const QString & text, QWidget * parent = 0 ):QPushButton(text,parent) {}
+	Q_OBJECT
+	public:
+		QPortButton( const QString & text, QWidget * parent = 0 ):QPushButton(text,parent) {}
 
-	void setIndex(int index) { myindex = index; }
-	int getIndex() { return myindex; }
+		void setIndex(int index) { myindex = index; }
+		int getIndex() { return myindex; }
 
-public slots:
-	void iamclicked() { emit myclicked(myindex); }
-signals:
-	void myclicked(int index);
-protected:
-	int myindex;
+	public slots:
+		void iamclicked() { emit myclicked(myindex); }
+	signals:
+		void myclicked(int index);
+	protected:
+		int myindex;
 };
 
 class QPortsDialog : public QDialog {
-Q_OBJECT
-public:
-	QPortsDialog(QWidget *parent = 0);
+	Q_OBJECT
+	public:
+		QPortsDialog(QWidget *parent = 0);
 
-	psy::core::InPort::id_type GetInPort(psy::core::Machine* mac);
-	psy::core::OutPort::id_type GetOutPort(psy::core::Machine* mac);
+		psy::core::InPort::id_type GetInPort(psy::core::Machine* mac);
+		psy::core::OutPort::id_type GetOutPort(psy::core::Machine* mac);
 
-public slots:
-	void buttonClicked(int portidx);
-private:
-	void addNewButton(std::string message,int portidx);
+	public slots:
+		void buttonClicked(int portidx);
+	private:
+		void addNewButton(std::string message,int portidx);
 
-	int numButtons;
-
+		int numButtons;
 };
 
 class MachineScene : public QGraphicsScene {
-Q_OBJECT
-public:
-	MachineScene( MachineView *macView );
-protected:
-	void keyPressEvent( QKeyEvent *event );
-	void keyReleaseEvent( QKeyEvent *event );
-	void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+	Q_OBJECT
+	public:
+		MachineScene( MachineView *macView );
+	protected:
+		void keyPressEvent( QKeyEvent *event );
+		void keyReleaseEvent( QKeyEvent *event );
+		void mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
 
-private:
-	MachineView *macView_;
-	NewMachineDlg *newMachineDlg;
+	private:
+		MachineView *macView_;
+		NewMachineDlg *newMachineDlg;
 };
 
 } // namespace qpsycle
