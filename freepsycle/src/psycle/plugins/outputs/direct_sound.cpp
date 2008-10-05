@@ -87,7 +87,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				s << "total buffer size: " << total_buffer_size_ << " bytes";
 				loggers::information()(s.str());
 			}
-			buffer_size_ = static_cast<unsigned long int>(samples_per_buffer_ * format.bytes_per_sample());
+			buffer_size_ = static_cast<unsigned int>(samples_per_buffer_ * format.bytes_per_sample());
 			if(loggers::information()()) {
 				std::ostringstream s;
 				s << "buffer size: " << buffer_size_ << " bytes";
@@ -122,7 +122,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	bool direct_sound::started() const {
 		if(!opened()) return false;
-		unsigned long int status;
+		DWORD status;
 		if(HRESULT error = buffer().GetStatus(&status)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer get status: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 		return status & DSBSTATUS_PLAYING;
 	}
@@ -130,7 +130,7 @@ namespace psycle { namespace plugins { namespace outputs {
 	void direct_sound::do_process() throw(universalis::operating_system::exception) {
 		bool const ultra_trace(false);
 		while(true) {
-			unsigned long int position;
+			DWORD position;
 			if(HRESULT error = buffer().GetCurrentPosition(&position, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer get current position: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			if(ultra_trace && loggers::trace()()) {
 				std::ostringstream s;
@@ -148,7 +148,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			std::cout << ' ' << c[current_position_ % sizeof c] << '\r' << std::flush;
 		}
 		output_sample_type * samples(0), * samples2(0);
-		unsigned long int bytes(0), bytes2(0);
+		DWORD bytes(0), bytes2(0);
 		while(HRESULT error = buffer().Lock(current_position_ * buffer_size_, buffer_size_, reinterpret_cast<void**>(&samples), &bytes, reinterpret_cast<void**>(&samples2), &bytes2, 0)) {
 			if(error != DSERR_BUFFERLOST) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			while(true) if(!buffer().Restore()) break;
@@ -187,7 +187,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			}
 			for( ; spread < samples_per_buffer_ ; ++spread) samples[spread + channel] = last_sample_;
 		}
-		if(unsigned long int error = buffer().Unlock(samples, bytes, samples2, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer unlock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+		if(HRESULT error = buffer().Unlock(samples, bytes, samples2, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer unlock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 		++current_position_ %= buffers_;
 	}
 
@@ -212,4 +212,3 @@ namespace psycle { namespace plugins { namespace outputs {
 		resource::do_close();
 	}
 }}}
-
