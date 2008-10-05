@@ -69,9 +69,11 @@ namespace math {
 	///\internal template specialisation for compile-time factorial of 0.
 	template<> struct compile_time_factorial<0> { unsigned int const static value = 1; };
 
-	/// compares two floating point numbers for rough equality (difference less than epsilon).
+	/// compares two floating point numbers for rough equality (difference less than epsilon by default).
 	template<typename Real>
-	bool roughly_equals(Real const & a, Real const & b) { return std::abs(a - b) < std::numeric_limits<Real>::epsilon(); }
+	bool roughly_equals(Real const & a, Real const & b, Real const & tolerance = std::numeric_limits<Real>::epsilon()) {
+		return std::abs(a - b) < tolerance;
+	}
 }
 
 /// double (64-bit ieee-754 format) by default.
