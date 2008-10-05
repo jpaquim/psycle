@@ -149,14 +149,16 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		output_sample_type * samples(0), * samples2(0);
 		unsigned long int bytes(0), bytes2(0);
-		if(HRESULT error = buffer().Lock(current_position_ * buffer_size_, buffer_size_, reinterpret_cast<void**>(&samples), &bytes, reinterpret_cast<void**>(&samples2), &bytes2, 0)) {
+		while(HRESULT error = buffer().Lock(current_position_ * buffer_size_, buffer_size_, reinterpret_cast<void**>(&samples), &bytes, reinterpret_cast<void**>(&samples2), &bytes2, 0)) {
 			if(error != DSERR_BUFFERLOST) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
-			buffer().Restore(); /// \todo may fail again and again!
+			while(true) if(!buffer().Restore()) break;
 			if(loggers::information()()) {
 				std::ostringstream s;
 				s << "buffer restored";
 				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
+			current_position_ = 0;
+			buffer().Play(0, 0, DSBPLAY_LOOPING);
 		}
 		if(bytes2) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock unaligned", UNIVERSALIS__COMPILER__LOCATION);
 		engine::buffer & in = in_port().buffer();
