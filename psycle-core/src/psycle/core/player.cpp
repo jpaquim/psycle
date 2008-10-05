@@ -728,20 +728,7 @@ void Player::setDriver(AudioDriver const & driver) {
 	}
 	samples_per_second(driver_->settings().samplesPerSec());
 }
-/*
-void psy::core::Player::lock() {
-	///\todo this is bad
-	lock_ = true;
-	#if defined __unix__ || defined __APPLE__
-		while(in_work_) usleep(200);
-	#endif
-}
 
-void psy::core::Player::unlock() {
-	///\todo this is bad
-	lock_ = false;
-}
-*/
 /*****************************************************************************/
 // buffer to riff wav file methods
 
