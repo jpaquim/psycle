@@ -57,12 +57,13 @@ namespace psycle { namespace plugins { namespace outputs {
 			void do_process() throw(universalis::operating_system::exception) /*override*/;
 			void do_stop()    throw(universalis::operating_system::exception) /*override*/;
 			void do_close()   throw(universalis::operating_system::exception) /*override*/;
+			void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
 		private:
 			::IDirectSound        * direct_sound_;
 			::IDirectSound inline & direct_sound_implementation() throw() { assert(direct_sound_); return *direct_sound_; }
 
 			typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
-			output_sample_type last_sample_;
+			std::vector<output_sample_type> last_samples_;
 
 			::IDirectSoundBuffer mutable * buffer_;
 			::IDirectSoundBuffer inline  & buffer()       throw() { assert(buffer_); return *buffer_; }
