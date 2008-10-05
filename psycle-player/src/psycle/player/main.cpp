@@ -3,17 +3,13 @@
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
+#include <diversalis/operating_system.hpp>
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <thread>
 
-#if defined _WIN32
-	#include <windows.h> // for Sleep(ms)
-#else
-	#include <unistd.h> // for sleep(s)
-#endif
-
-#if defined _WIN32
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#define PSYCLE__PLAYER__EOF "z" // ctrl+z == EOF
 #else
 	#define PSYCLE__PLAYER__EOF "d" // ctrl+d == EOF
@@ -217,11 +213,9 @@ int main(int argument_count, char * arguments[]) {
 		if(output_file_name.length()) player.stopRecording();
 	}
 	player.driver().Enable(false);
-	#if defined _WIN32
-		Sleep(1000);
-	#else
-		sleep(1);
-	#endif
+	
+	///\todo klugde
+	std::this_thread::sleep(std::seconds(1));
 
 	return 0;
 }
