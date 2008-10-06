@@ -403,7 +403,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		{ scoped_lock lock(mutex_);
 			++current_read_position_ %= buffers_;
-			if(loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
+			if(false && loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
 			io_ready(true);
 		}
 		condition_.notify_one();
@@ -421,7 +421,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		{ // fill the buffer (this could be done in the handoff)
 			unsigned const samples_per_buffer(parent().events_per_buffer());
-			assert(last_samples_.size() == in_port.channels());
+			assert(last_samples_.size() == in_port().channels());
 			for(unsigned int c(0); c < in_port().channels(); ++c) {
 				engine::buffer::channel & in(in_port().buffer()[c]);
 				output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer);

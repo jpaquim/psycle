@@ -490,6 +490,10 @@ void alsa::poll_loop() throw(engine::exception) {
 	while(true) {
 		bool loop(false);
 		int const timeout_ms(1000);
+		// poll() returns the number of descriptors that are ready for I/O, or -1 if an error occurred.
+		// If the time limit expires, poll() returns 0.
+		// If poll() returns with an error, including one due to an interrupted call,
+		// the fds array will be unmodified and the global variable errno will be set to indicate the error.
 		if(0 > (error = ::poll(fds, nfds, timeout_ms)))
 			if(errno == EAGAIN || errno == EINTR) loop = true;
 			else throw engine::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
@@ -509,7 +513,7 @@ void alsa::poll_loop() throw(engine::exception) {
 		if(revents & POLLERR) throw engine::exceptions::runtime_error("error condition in poll", UNIVERSALIS__COMPILER__LOCATION);
 		if(loggers::warning()() && revents & POLLNVAL) loggers::warning()("invalid file descriptor in poll (could have been asynchronously closed)", UNIVERSALIS__COMPILER__LOCATION);
 		if(revents & POLLOUT) {
-			if(loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
+			if(false && loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
 			io_ready(true);
 			condition_.notify_one();
 		}
