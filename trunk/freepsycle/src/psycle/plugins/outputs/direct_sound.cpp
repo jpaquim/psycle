@@ -73,7 +73,6 @@ namespace psycle { namespace plugins { namespace outputs {
 				s << "warning: create sound buffer: " << universalis::operating_system::exceptions::code_description(error);
 				loggers::warning()(s.str());
 			}
-			for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0; 
 			if(write_primary_) {
 				buffer().Stop(); // o_O`
 				if(error = buffer().SetFormat(&format.wave_format_ex())) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer set format: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
@@ -122,6 +121,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void direct_sound::do_start() throw(universalis::operating_system::exception) {
 		resource::do_start();
+		for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0; 
 		current_position_ = 0;
 		buffer().Play(0, 0, DSBPLAY_LOOPING); // may return DSERR_BUFFERLOST
 		started_ = true;
