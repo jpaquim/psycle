@@ -356,7 +356,7 @@ void scheduler::thread_function(std::size_t thread_number) {
 }
 
 void scheduler::on_io_ready(node & node) {
-	if(loggers::trace()()) loggers::trace()("io ready slot, node: "  + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::trace()()) loggers::trace()("io ready slot, node: " + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
 	{ scoped_lock lock(mutex_);
 		if(!node.waiting_for_io_ready_signal()) return;
 		node.waiting_for_io_ready_signal(false);
