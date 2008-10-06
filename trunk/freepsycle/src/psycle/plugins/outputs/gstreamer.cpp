@@ -40,6 +40,14 @@ namespace psycle { namespace plugins { namespace outputs {
 		ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
 	}
 
+	void gstreamer::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
+		if(&port == &in_port()) {
+			last_samples_.resize(port.channels());
+			for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0;
+		}
+		resource::channel_change_notification_from_port(port);
+	}
+
 	void gstreamer::do_name(std::string const & name) {
 		resource::do_name(name);
 		if(pipeline_) ::gst_element_set_name(pipeline_, (name + "-pipeline").c_str());
@@ -418,19 +426,22 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		{ // fill the buffer (this could be done in the handoff)
 			unsigned const samples_per_buffer(parent().events_per_buffer());
+			assert(last_samples_.size() == in_port.channels());
 			for(unsigned int c(0); c < in_port().channels(); ++c) {
 				engine::buffer::channel & in(in_port().buffer()[c]);
 				output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer);
+				unsigned int spread(0);
 				for(std::size_t e(0), s(in.size()); e < s; ++e) {
-					real s(in[e].sample()); ///\todo support for sparse stream
+					real s(in[e].sample());
 					{
 						s *= std::numeric_limits<output_sample_type>::max();
 						if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
 						else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
 					}
-					out[c] = static_cast<output_sample_type>(s);
-					++out; ///\todo interleaved channels?
+					last_samples_[c] = static_cast<output_sample_type>(s);
+					for( ; spread <= in[e].index() ; ++spread, ++out) out[c] = last_samples_[c];
 				}
+				for( ; spread < samples_per_buffer ; ++spread, ++out) out[c] = last_samples_[c];
 			}
 		}
 		{ scoped_lock lock(mutex_);

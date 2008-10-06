@@ -6,6 +6,7 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include "../resource.hpp"
+#include <universalis/compiler/numeric.hpp>
 #include <gst/gstelement.h>
 #include <condition>
 #include <mutex>
@@ -28,6 +29,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			void do_process() throw(engine::exception) /*override*/;
 			void do_stop()    throw(engine::exception) /*override*/;
 			void do_close()   throw(engine::exception) /*override*/;
+			void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
 		private:
 			::GstElement * pipeline_, * source_, /** queue_,*/ * caps_filter_, * sink_;
 
@@ -46,6 +48,9 @@ namespace psycle { namespace plugins { namespace outputs {
 
 			char * buffer_;
 			unsigned int buffers_, buffer_size_, current_read_position_, current_write_position_;
+
+			typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
+			std::vector<output_sample_type> last_samples_;
 	};
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>
