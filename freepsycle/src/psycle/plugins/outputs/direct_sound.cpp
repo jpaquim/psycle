@@ -28,7 +28,10 @@ namespace psycle { namespace plugins { namespace outputs {
 	}
 
 	void direct_sound::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
-		if(&port == &in_port()) last_samples_.resize(port.channels());
+		if(&port == &in_port()) {
+			last_samples_.resize(port.channels());
+			for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0;
+		}
 		resource::channel_change_notification_from_port(port);
 	}
 
@@ -121,7 +124,6 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	void direct_sound::do_start() throw(universalis::operating_system::exception) {
 		resource::do_start();
-		for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0; 
 		current_position_ = 0;
 		buffer().Play(0, 0, DSBPLAY_LOOPING); // may return DSERR_BUFFERLOST
 		started_ = true;
