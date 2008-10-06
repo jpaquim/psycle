@@ -403,7 +403,6 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		{ scoped_lock lock(mutex_);
 			++current_read_position_ %= buffers_;
-			if(false && loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
 			io_ready(true);
 		}
 		condition_.notify_one();
@@ -441,10 +440,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		}
 		{ scoped_lock lock(mutex_);
 			++current_write_position_ %= buffers_;
-			if(current_read_position_ == current_write_position_) {
-				if(loggers::trace()()) loggers::trace()("io ready: false", UNIVERSALIS__COMPILER__LOCATION);
-				io_ready(false);
-			}
+			if(current_read_position_ == current_write_position_) io_ready(false);
 		}
 		condition_.notify_one();
 	}

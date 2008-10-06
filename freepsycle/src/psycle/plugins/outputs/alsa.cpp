@@ -474,6 +474,10 @@ void alsa::thread_function() {
 	loggers::information()("poller thread " + qualified_name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 }
 
+bool b_ = false;
+std::mutex m_;
+std::condition<std::scoped_lock<std::mutex> > c_;
+
 void alsa::poll_loop() throw(engine::exception) {
 	// get number of file descriptors to poll
 	::nfds_t nfds;
@@ -513,7 +517,7 @@ void alsa::poll_loop() throw(engine::exception) {
 		if(revents & POLLERR) throw engine::exceptions::runtime_error("error condition in poll", UNIVERSALIS__COMPILER__LOCATION);
 		if(loggers::warning()() && revents & POLLNVAL) loggers::warning()("invalid file descriptor in poll (could have been asynchronously closed)", UNIVERSALIS__COMPILER__LOCATION);
 		if(revents & POLLOUT) {
-			if(false && loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
+			write_to_device(); // beware: this code must be executed by the poller thread
 			io_ready(true);
 			condition_.notify_one();
 		}
@@ -527,8 +531,7 @@ void alsa::do_process() throw(engine::exception) {
 		while(!io_ready()) condition_.wait(lock);
 	}
 	fill_buffer();
-	write_to_device();
-	if(loggers::trace()()) loggers::trace()("io ready: false", UNIVERSALIS__COMPILER__LOCATION);
+	// We don't call write_to_device() here, because it must be executed by the poller thread.
 	io_ready(false);
 }
 
@@ -560,6 +563,8 @@ void alsa::fill_buffer() throw(engine::exception) {
 }
 
 void alsa::write_to_device() throw(engine::exception) {
+	// beware: this code must be executed by the poller thread
+	
 	unsigned int const channels(in_port().channels());
 	output_sample_type * samples(reinterpret_cast<output_sample_type*>(buffer_));
 	::snd_pcm_uframes_t frames_to_write(parent().events_per_buffer());
