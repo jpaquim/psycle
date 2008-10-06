@@ -18,11 +18,6 @@ namespace psycle { namespace plugins { namespace outputs {
 	using engine::exceptions::runtime_error;
 	using stream::formats::riff_wave::format;
 
-	namespace {
-		///\todo parametrable
-		typedef std::int16_t output_sample_type;
-	}
-
 	PSYCLE__PLUGINS__NODE_INSTANTIATOR(gstreamer)
 
 	gstreamer::gstreamer(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(engine::exception)
