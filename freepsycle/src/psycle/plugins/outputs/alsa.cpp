@@ -631,6 +631,10 @@ void alsa::write_to_device() throw(engine::exception) {
 		next:
 		in += frames_written * channels;
 		frames_to_write -= frames_written;
+		if(loggers::warning()() && frames_to_write) {
+			std::ostringstream s; s << "overrun: " << frames_to_write << " frames";
+			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
 	} while(frames_to_write);
 }
 
