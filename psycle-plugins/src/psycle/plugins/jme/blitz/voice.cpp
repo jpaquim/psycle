@@ -596,7 +596,8 @@ void CSynthTrack::GetSample(float* slr)
 		if ( vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 || vpar->oscOptions[1]==8 || (vpar->oscFuncType[0]>=44) & (vpar->oscFuncType[0]!=47) || (vpar->oscFuncType[0]>=46) & (vpar->oscFuncType[0]!=49)){
 			for (c=0; c<OVERSAMPLING; c++){
 				phase = dco1Position+dco1Last+fmData4;
-				while (phase >= 2048.0f) phase -= 2048;
+				while (phase >= 2048.0f) phase -= 2048.0f;
+				while (phase < 0.0f) phase += 2048.0f;
 				pos = (int)phase;
 				sample = WaveBuffer[curBuf[0]][pos];
 				output1 += (WaveBuffer[curBuf[0]][pos+1] - sample) * (phase - (float)pos) + sample;
@@ -637,7 +638,8 @@ void CSynthTrack::GetSample(float* slr)
 		if ( vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2 || vpar->oscOptions[2]==8 || (vpar->oscFuncType[1]>=44) & (vpar->oscFuncType[1]!=47) || (vpar->oscFuncType[1]>=46) & (vpar->oscFuncType[1]!=49)){
 			for (c=0; c<OVERSAMPLING; c++){
 				phase = dco2Position+dco2Last+fmData1;
-				while (phase >= 2048.0f) phase -= 2048;
+				while (phase >= 2048.0f) phase -= 2048.0f;
+				while (phase < 0.0f) phase += 2048.0f;
 				pos = (int)phase;
 				sample = WaveBuffer[1+curBuf[1]][pos];
 				output2 += (WaveBuffer[1+curBuf[1]][pos+1] - sample) * (phase - (float)pos) + sample;
@@ -678,7 +680,8 @@ void CSynthTrack::GetSample(float* slr)
 		if ( vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 || vpar->oscOptions[3]==8 || (vpar->oscFuncType[2]>=44) & (vpar->oscFuncType[2]!=47)|| (vpar->oscFuncType[2]>=46) & (vpar->oscFuncType[2]!=49)){
 			for (c=0; c<OVERSAMPLING; c++){
 				phase = dco3Position+dco3Last+fmData2;
-				while (phase >= 2048.0f) phase -= 2048;
+				while (phase >= 2048.0f) phase -= 2048.0f;
+				while (phase < 0.0f) phase += 2048.0f;
 				pos = (int)phase;
 				sample = WaveBuffer[2+curBuf[2]][pos];
 				output3 += (WaveBuffer[2+curBuf[2]][pos+1] - sample) * (phase - (float)pos) + sample;
@@ -719,7 +722,8 @@ void CSynthTrack::GetSample(float* slr)
 		if ( vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 || vpar->oscOptions[0]==8 || (vpar->oscFuncType[3]>=44) & (vpar->oscFuncType[3]!=47) || (vpar->oscFuncType[3]>=46) & (vpar->oscFuncType[3]!=49)){
 			for (c=0; c<OVERSAMPLING; c++){
 				phase = dco4Position+dco4Last+fmData3;
-				while (phase >= 2048.0f) phase -= 2048;
+				while (phase >= 2048.0f) phase -= 2048.0f;
+				while (phase < 0.0f) phase += 2048.0f;
 				pos = (int)phase;
 				sample = WaveBuffer[3+curBuf[3]][pos];
 				output4 += (WaveBuffer[3+curBuf[3]][pos+1] - sample) * (phase - (float)pos) + sample;
