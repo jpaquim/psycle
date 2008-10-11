@@ -518,13 +518,7 @@ void CSynthTrack::Retrig(){
 
 void CSynthTrack::GetSample(float* slr)
 {
-	float output=0.0f;
-	float output1=0.0f;
-	float output2=0.0f;
-	float output3=0.0f;
-	float output4=0.0f;
-	//float outputRM1=0.0f;
-	//float outputRM2=0.0f;
+;
 
 	updateCount--;
 	if (updateCount < 1){
@@ -587,20 +581,31 @@ void CSynthTrack::GetSample(float* slr)
 		oldBuf[2]=curBuf[2]>>2;
 		oldBuf[3]=curBuf[3]>>2;
 
+		float output=0.0f;
+		float output1=0.0f;
+		float output2=0.0f;
+		float output3=0.0f;
+		float output4=0.0f;
+		float decOutput1 = 0.0f;
+		float decOutput2 = 0.0f;
+		float decOutput3 = 0.0f;
+		float decOutput4 = 0.0f;
+
 		float sample = 0.0f;
 		float phase = 0.0f;
 		int pos = 0;
 
 		if (tuningChange) updateTuning();
 		int c = 0;
-		if ( vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 || vpar->oscOptions[1]==8 || (vpar->oscFuncType[0]>=44) & (vpar->oscFuncType[0]!=47) || (vpar->oscFuncType[0]>=46) & (vpar->oscFuncType[0]!=49)){
-			for (c=0; c<OVERSAMPLING; c++){
+
+		for (c=0; c<OVERSAMPLING; c++){
+			if ( vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 || vpar->oscOptions[1]==8 || (vpar->oscFuncType[0]>=44) & (vpar->oscFuncType[0]!=47) || (vpar->oscFuncType[0]>=46) & (vpar->oscFuncType[0]!=49)){
 				phase = dco1Position+dco1Last+fmData4;
 				while (phase >= 2048.0f) phase -= 2048.0f;
 				while (phase < 0.0f) phase += 2048.0f;
 				pos = (int)phase;
 				sample = WaveBuffer[curBuf[0]][pos];
-				output1 += (WaveBuffer[curBuf[0]][pos+1] - sample) * (phase - (float)pos) + sample;
+				output1 = aaf1.process((WaveBuffer[curBuf[0]][pos+1] - sample) * (phase - (float)pos) + sample);
 				dco1Last=(float)(0.00000001f+output1)*(0.00000001f+vpar->oscFeedback[0])*(0.00000001f+fbCtl[0]);
 				dco1Position+=rdco1Pitch;
 				if(dco1Position>=2048.0f){
@@ -632,17 +637,14 @@ void CSynthTrack::GetSample(float* slr)
 					}												
 				}
 			}
-			output1 *= FREQDIV;
-		}
 
-		if ( vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2 || vpar->oscOptions[2]==8 || (vpar->oscFuncType[1]>=44) & (vpar->oscFuncType[1]!=47) || (vpar->oscFuncType[1]>=46) & (vpar->oscFuncType[1]!=49)){
-			for (c=0; c<OVERSAMPLING; c++){
+			if ( vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2 || vpar->oscOptions[2]==8 || (vpar->oscFuncType[1]>=44) & (vpar->oscFuncType[1]!=47) || (vpar->oscFuncType[1]>=46) & (vpar->oscFuncType[1]!=49)){
 				phase = dco2Position+dco2Last+fmData1;
 				while (phase >= 2048.0f) phase -= 2048.0f;
 				while (phase < 0.0f) phase += 2048.0f;
 				pos = (int)phase;
 				sample = WaveBuffer[1+curBuf[1]][pos];
-				output2 += (WaveBuffer[1+curBuf[1]][pos+1] - sample) * (phase - (float)pos) + sample;
+				output2 = aaf2.process((WaveBuffer[1+curBuf[1]][pos+1] - sample) * (phase - (float)pos) + sample);
 				dco2Last=(float)(0.00000001f+output2)*(0.00000001f+vpar->oscFeedback[1])*(0.00000001f+fbCtl[1]);
 				dco2Position+=rdco2Pitch;
 				if(dco2Position>=2048.0f){
@@ -674,17 +676,14 @@ void CSynthTrack::GetSample(float* slr)
 					}
 				}
 			}
-			output2 *= FREQDIV;
-		}
 
-		if ( vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 || vpar->oscOptions[3]==8 || (vpar->oscFuncType[2]>=44) & (vpar->oscFuncType[2]!=47)|| (vpar->oscFuncType[2]>=46) & (vpar->oscFuncType[2]!=49)){
-			for (c=0; c<OVERSAMPLING; c++){
+			if ( vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 || vpar->oscOptions[3]==8 || (vpar->oscFuncType[2]>=44) & (vpar->oscFuncType[2]!=47)|| (vpar->oscFuncType[2]>=46) & (vpar->oscFuncType[2]!=49)){
 				phase = dco3Position+dco3Last+fmData2;
 				while (phase >= 2048.0f) phase -= 2048.0f;
 				while (phase < 0.0f) phase += 2048.0f;
 				pos = (int)phase;
 				sample = WaveBuffer[2+curBuf[2]][pos];
-				output3 += (WaveBuffer[2+curBuf[2]][pos+1] - sample) * (phase - (float)pos) + sample;
+				output3 = aaf3.process((WaveBuffer[2+curBuf[2]][pos+1] - sample) * (phase - (float)pos) + sample);
 				dco3Last=(float)(0.00000001f+output3)*(0.00000001f+vpar->oscFeedback[2])*(0.00000001f+fbCtl[2]);
 				dco3Position+=rdco3Pitch;
 				if(dco3Position>=2048.0f){
@@ -716,17 +715,14 @@ void CSynthTrack::GetSample(float* slr)
 					}
 				}
 			}
-			output3 *= FREQDIV;
-		}
 
-		if ( vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 || vpar->oscOptions[0]==8 || (vpar->oscFuncType[3]>=44) & (vpar->oscFuncType[3]!=47) || (vpar->oscFuncType[3]>=46) & (vpar->oscFuncType[3]!=49)){
-			for (c=0; c<OVERSAMPLING; c++){
+			if ( vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 || vpar->oscOptions[0]==8 || (vpar->oscFuncType[3]>=44) & (vpar->oscFuncType[3]!=47) || (vpar->oscFuncType[3]>=46) & (vpar->oscFuncType[3]!=49)){
 				phase = dco4Position+dco4Last+fmData3;
 				while (phase >= 2048.0f) phase -= 2048.0f;
 				while (phase < 0.0f) phase += 2048.0f;
 				pos = (int)phase;
 				sample = WaveBuffer[3+curBuf[3]][pos];
-				output4 += (WaveBuffer[3+curBuf[3]][pos+1] - sample) * (phase - (float)pos) + sample;
+				output4 = aaf4.process((WaveBuffer[3+curBuf[3]][pos+1] - sample) * (phase - (float)pos) + sample);
 				dco4Last=(float)(0.00000001f+output4)*(0.00000001f+vpar->oscFeedback[3])*(0.00000001f+fbCtl[3]);
 				dco4Position+=rdco4Pitch;
 				if(dco4Position>=2048.0f){
@@ -758,13 +754,22 @@ void CSynthTrack::GetSample(float* slr)
 					}
 				}
 			}
-			output4 *= FREQDIV;
+
+			fmData1=(0.00000001f+fmCtl[oldBuf[0]][0])*(0.00000001f+output1)+(0.00000001f+fmCtl2[oldBuf[2]][2])*(0.00000001f+output3);
+			fmData2=(0.00000001f+fmCtl[oldBuf[1]][1])*(0.00000001f+output2)+(0.00000001f+fmCtl2[oldBuf[3]][3])*(0.00000001f+output4);
+			fmData3=(0.00000001f+fmCtl[oldBuf[2]][2])*(0.00000001f+output3)+(0.00000001f+fmCtl2[oldBuf[0]][0])*(0.00000001f+output1);
+			fmData4=(0.00000001f+fmCtl[oldBuf[3]][3])*(0.00000001f+output4)+(0.00000001f+fmCtl2[oldBuf[1]][1])*(0.00000001f+output2);
+
+			decOutput1 += output1;
+			decOutput2 += output2;
+			decOutput3 += output3;
+			decOutput4 += output4;
 		}
 
-		fmData1=(0.00000001f+fmCtl[oldBuf[0]][0])*(0.00000001f+output1)+(0.00000001f+fmCtl2[oldBuf[2]][2])*(0.00000001f+output3);
-		fmData2=(0.00000001f+fmCtl[oldBuf[1]][1])*(0.00000001f+output2)+(0.00000001f+fmCtl2[oldBuf[3]][3])*(0.00000001f+output4);
-		fmData3=(0.00000001f+fmCtl[oldBuf[2]][2])*(0.00000001f+output3)+(0.00000001f+fmCtl2[oldBuf[0]][0])*(0.00000001f+output1);
-		fmData4=(0.00000001f+fmCtl[oldBuf[3]][3])*(0.00000001f+output4)+(0.00000001f+fmCtl2[oldBuf[1]][1])*(0.00000001f+output2);
+		output1 = decOutput1 * FREQDIV;
+		output2 = decOutput2 * FREQDIV;
+		output3 = decOutput3 * FREQDIV;
+		output4 = decOutput4 * FREQDIV;
 
 		output=((0.00000001f+output1)*(0.00000001f+osc1Vol))+((0.00000001f+output2)*(0.00000001f+osc2Vol))+((0.00000001f+output3)*(0.00000001f+osc3Vol))+((0.00000001f+output4)*(0.00000001f+osc4Vol))+((0.00000001f+output1)*(0.00000001f+output2)*(0.00000001f+rm1Vol))+((0.00000001f+output3)*(0.00000001f+output4)*(0.00000001f+rm2Vol));				
 
