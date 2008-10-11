@@ -64,7 +64,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource {
 		std::thread * thread_;
 		void thread_function();
 		void poll_loop() throw(engine::exception);
-		void write_to_device() throw(engine::exception);
 	
 		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;

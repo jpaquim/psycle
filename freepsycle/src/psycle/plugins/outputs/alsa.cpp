@@ -417,16 +417,18 @@ void alsa::do_start() throw(engine::exception) {
 		std::ostringstream s; s << "could not initialize software parameters: " << ::snd_strerror(error);
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	// start the transfer when the buffer is almost full: buffer_size / avail_min * avail_min
-	if(0 > (error = ::snd_pcm_sw_params_set_start_threshold(pcm_, pcm_sw_params, buffer_frames_ / period_frames_ * period_frames_))) {
-		std::ostringstream s; s << "could not set start threshold: " << ::snd_strerror(error);
-		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	// allow the transfer when at least period_frames samples can be processed
-	if(0 > (error = ::snd_pcm_sw_params_set_avail_min(pcm_, pcm_sw_params, period_frames_))) {
-		std::ostringstream s; s << "could not set available minimum: " << ::snd_strerror(error);
-		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
+	{
+		// wake up the application when at least xxx samples can be written
+		if(0 > (error = ::snd_pcm_sw_params_set_avail_min(pcm_, pcm_sw_params, period_frames_))) {
+			std::ostringstream s; s << "could not set available minimum: " << ::snd_strerror(error);
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		// start the transfer when at least xxx samples have been written to the ring buffer
+		if(0 > (error = ::snd_pcm_sw_params_set_start_threshold(pcm_, pcm_sw_params, buffer_frames_ / 2))) {
+			std::ostringstream s; s << "could not set start threshold: " << ::snd_strerror(error);
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+	}	
 	#if SND_LIB_VERSION >= 0x10010 // 1.0.16
 		// snd_pcm_sw_params_set_xfer_align() is deprecated, alignment is always 1
 	#else
@@ -545,7 +547,89 @@ void alsa::poll_loop() throw(engine::exception) {
 				) condition_.wait(lock);
 			}
 			if(stop_requested_) return; 
-			write_to_device(); // beware: this code must be executed by the poller thread
+			{ // copy the intermediate buffer to the alsa buffer
+				// beware: this code must be executed by the poller thread
+				
+				unsigned int const channels(in_port().channels());
+				::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
+	
+				output_sample_type * in(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + current_read_period_ * samples_per_buffer);
+	
+				::snd_pcm_uframes_t frames_to_write(samples_per_buffer);
+				do {
+					///\todo support for non-blocking mode
+					///\todo support for non-interleaved channels
+					::snd_pcm_sframes_t const frames_written(::snd_pcm_writei(pcm_, in, frames_to_write));
+					int error(frames_written);
+					if(0 > error) switch(error) {
+						case -EAGAIN: // for non-blocking mode
+							if(false && loggers::trace()()) {
+								std::ostringstream s; s << "again: " << ::snd_strerror(error);
+								loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+							}
+							std::this_thread::yield();
+							{ scoped_lock lock(mutex_);
+								if(stop_requested_) return;
+							}
+							continue;
+						case -EPIPE: // an underrun occured
+							if(loggers::warning()()) {
+								std::ostringstream s; s << "underrun: " << ::snd_strerror(error);
+								loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+							}
+							if(0 > (error = ::snd_pcm_prepare(pcm_))) {
+								if(loggers::warning()()) {
+									std::ostringstream s; s << "could not prepare device for use: " << ::snd_strerror(error);
+									loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+								}
+								goto next; // skip rest of period
+							}
+							break;
+						case -ESTRPIPE: // a suspend event occurred (stream is suspended and waiting for an application recovery)
+							// wait until device is resumed
+							while(-EAGAIN == (error = ::snd_pcm_resume(pcm_))) {
+								// resume cannot be proceeded immediately (the device is still suspended)
+								if(loggers::trace()()) {
+									std::ostringstream s; s << "waiting for device to resume: " << ::snd_strerror(error);
+									loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+								}
+								// sleep a bit before retrying to resume
+								std::this_thread::sleep(std::seconds(1));
+								{ scoped_lock lock(mutex_);
+									if(stop_requested_) return;
+								}
+							}
+							if(0 > error) switch(error) {
+								case -ENOSYS: // the device is no longer suspended, but it does not fully support resuming
+									if(0 > (error = ::snd_pcm_prepare(pcm_))) {
+										if(loggers::warning()()) {
+											std::ostringstream s; s << "could not prepare device for resume: " << ::snd_strerror(error);
+											loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+										}
+										goto next; // skip rest of period
+									}
+									break;
+								default: {
+									std::ostringstream s; s << "could not resume device: " << ::snd_strerror(error);
+									throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+								}
+							}
+							break;
+						case -EBADFD: // pcm device is not in the right state (::SND_PCM_STATE_PREPARED or ::SND_PCM_STATE_RUNNING)
+						default: {
+							std::ostringstream s; s << "write error: " << ::snd_strerror(error);
+							throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						}
+					}
+					next:
+					in += frames_written * channels;
+					frames_to_write -= frames_written;
+					if(false && loggers::trace()() && frames_to_write) {
+						std::ostringstream s; s << "overrun: " << frames_to_write << " frames";
+						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
+				} while(frames_to_write);
+			}
 			{ scoped_lock lock(mutex_);
 				++current_read_period_ %= periods_;
 				io_ready(true);
@@ -553,90 +637,6 @@ void alsa::poll_loop() throw(engine::exception) {
 			condition_.notify_one();
 		}
 	}
-}
-
-void alsa::write_to_device() throw(engine::exception) {
-	// beware: this code must be executed by the poller thread
-	
-	unsigned int const channels(in_port().channels());
-	::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
-	
-	output_sample_type * in(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + current_read_period_ * samples_per_buffer);
-	
-	::snd_pcm_uframes_t frames_to_write(samples_per_buffer);
-	do {
-		///\todo support for non-blocking mode
-		///\todo support for non-interleaved channels
-		::snd_pcm_sframes_t const frames_written(::snd_pcm_writei(pcm_, in, frames_to_write));
-		int error(frames_written);
-		if(0 > error) switch(error) {
-			case -EAGAIN: // for non-blocking mode
-				if(loggers::warning()()) {
-					std::ostringstream s; s << "blocked: " << ::snd_strerror(error);
-					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				}
-				std::this_thread::yield();
-				{ scoped_lock lock(mutex_);
-					if(stop_requested_) return;
-				}
-				continue;
-			case -EPIPE: // an underrun occured
-				if(loggers::warning()()) {
-					std::ostringstream s; s << "underrun: " << ::snd_strerror(error);
-					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				}
-				if(0 > (error = ::snd_pcm_prepare(pcm_))) {
-					if(loggers::warning()()) {
-						std::ostringstream s; s << "could not prepare device for use: " << ::snd_strerror(error);
-						loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-					goto next; // skip rest of period
-				}
-				break;
-			case -ESTRPIPE: // a suspend event occurred (stream is suspended and waiting for an application recovery)
-				// wait until device is resumed
-				while(-EAGAIN == (error = ::snd_pcm_resume(pcm_))) {
-					// resume cannot be proceeded immediately (the device is still suspended)
-					if(loggers::trace()()) {
-						std::ostringstream s; s << "waiting for device to resume: " << ::snd_strerror(error);
-						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-					// sleep a bit before retrying to resume
-					std::this_thread::sleep(std::seconds(1));
-					{ scoped_lock lock(mutex_);
-						if(stop_requested_) return;
-					}
-				}
-				if(0 > error) switch(error) {
-					case -ENOSYS: // the device is no longer suspended, but it does not fully support resuming
-						if(0 > (error = ::snd_pcm_prepare(pcm_))) {
-							if(loggers::warning()()) {
-								std::ostringstream s; s << "could not prepare device for resume: " << ::snd_strerror(error);
-								loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-							}
-							goto next; // skip rest of period
-						}
-						break;
-					default: {
-						std::ostringstream s; s << "could not resume device: " << ::snd_strerror(error);
-						throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-				}
-				break;
-			case -EBADFD: // pcm device is not in the right state (::SND_PCM_STATE_PREPARED or ::SND_PCM_STATE_RUNNING)
-			default: {
-				std::ostringstream s; s << "write error: " << ::snd_strerror(error);
-				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-		}
-		next:
-		in += frames_written * channels;
-		frames_to_write -= frames_written;
-		if(loggers::warning()() && frames_to_write) {
-			std::ostringstream s; s << "overrun: " << frames_to_write << " frames";
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-	} while(frames_to_write);
 }
 
 void alsa::do_process() throw(engine::exception) {
@@ -659,7 +659,7 @@ void alsa::do_process() throw(engine::exception) {
 		
 			// retrieve the last sample written on this channel
 			// sss: sparse spread sample
-			output_sample_type sss(out[samples_per_buffer * channels - 1 - c]); ///\todo support for non-interleaved channels
+			output_sample_type sss(0); ///\todo support for non-interleaved channels
 			// ssi: sparse spread index
 			unsigned int ssi(0);
 			for(std::size_t e(0), s(in.size()); e < s && in[e].index() < samples_per_buffer; ++e) {
