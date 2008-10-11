@@ -46,18 +46,15 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 		bool handoff_called_;
 		bool stop_requested_;
 
-		/// intermediate buffer for format conversion in write access method
+		/// intermediate buffer between do_process() and the routine that writes to the gstreamer buffer
 		char * intermediate_buffer_;
-
-		/// number of subdivisions for the intermediate buffer
-		unsigned int periods_;
-
-		/// read period within the intermediate bufer
-		unsigned int current_read_period_;
 		
-		/// write period within the intermediate bufer
-		unsigned int current_write_period_;
-
+		/// pointer to current gstreamer read position in the intermediate buffer
+		char * intermediate_buffer_current_read_pointer_;
+		
+		/// pointer to end of intermediate buffer
+		char * intermediate_buffer_end_;
+		
 		typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
 		std::vector<output_sample_type> last_samples_;
 };

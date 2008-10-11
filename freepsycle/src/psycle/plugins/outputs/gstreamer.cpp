@@ -29,8 +29,7 @@ gstreamer::gstreamer(engine::plugin_library_reference & plugin_library_reference
 	caps_filter_(),
 	sink_(),
 	caps_(),
-	intermediate_buffer_(),
-	current_read_period_(), current_write_period_()
+	intermediate_buffer_()
 {
 	ports::inputs::single::create_on_heap(*this, "in");
 	ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
@@ -280,15 +279,16 @@ void gstreamer::do_open() throw(engine::exception) {
 
 	// buffer settings
 
-	periods_ = 4; ///\todo parametrable
-	unsigned int const period_size = static_cast<unsigned int>(parent().events_per_buffer() * format.bytes_per_sample());
+	unsigned int const periods(4); ///\todo parametrable
+	unsigned int const period_frames(1024); ///\todo parametrable
+	unsigned int const period_size(static_cast<unsigned int>(period_frames * format.bytes_per_sample()));
 	if(loggers::information()()) {
 		real const latency(static_cast<real>(parent().events_per_buffer()) / format.samples_per_second());
 		std::ostringstream s;
 		s
 			<< "period size: " << period_size << " bytes\n"
-			<< periods_ << " periods; total buffer size: " << periods_ * period_size << " bytes\n"
-			"latency: between " << latency << " and " << latency * periods_ << " seconds ";
+			<< periods << " periods; total buffer size: " << periods * period_size << " bytes\n"
+			"latency: between " << latency << " and " << latency * periods << " seconds ";
 		loggers::information()(s.str());
 	}
 	if(loggers::information()()) {
@@ -301,19 +301,21 @@ void gstreamer::do_open() throw(engine::exception) {
 		G_OBJECT(source_),
 		"signal-handoffs", ::gboolean(true),
 		"data"           , ::gint(/*FAKE_SRC_DATA_SUBBUFFER*/ 2), // data allocation method
-		"parentsize"     , ::gint(period_size * periods_),
+		"parentsize"     , ::gint(period_size * periods),
 		"sizemax"        , ::gint(period_size),
 		"sizetype"       , ::gint(/*FAKE_SRC_SIZETYPE_FIXED*/ 2), // fixed to sizemax
 		"filltype"       , ::gint(/*FAKE_SRC_FILLTYPE_NOTHING*/ 1),
 		(void*)0
 	);
 
-	{ // allocate a buffer
-		std::size_t const bytes(period_size * periods_);
+	{ // allocate the intermediate buffer
+		// note: period_frames may be different from parent().events_per_buffer()
+		std::size_t const bytes(static_cast<std::size_t>(parent().events_per_buffer() * format.bytes_per_sample()));
 		if(!(intermediate_buffer_ = new char[bytes])) {
 			std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+		intermediate_buffer_end_ = intermediate_buffer_ + bytes;
 	}
 
 	// set the pipeline state to ready
@@ -333,7 +335,7 @@ bool gstreamer::opened() const {
 
 void gstreamer::do_start() throw(engine::exception) {
 	resource::do_start();
-	current_read_period_ = current_write_period_;
+	intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 	stop_requested_ = handoff_called_ = false;
 	wait_for_state_to_become_playing_ = true;
 	// register our callback to the handoff signal of the fakesrc element
@@ -365,16 +367,12 @@ void gstreamer::handoff_static(::GstElement * source, ::GstBuffer * buffer, ::Gs
 
 void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	if(false && loggers::trace()) {
-		std::ostringstream s; s << "handoff " << current_read_period_;
+		std::ostringstream s; s << "handoff";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	{ scoped_lock lock(mutex_);
-		while(
-			io_ready() && current_read_period_ == current_write_period_ &&
-			!stop_requested_ &&
-			!wait_for_state_to_become_playing_
-		) condition_.wait(lock);
-		if(stop_requested_) return; 
+		while(io_ready() && !stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
+		if(stop_requested_) return;
 		// Handoff is called before state is changed to playing.
 		if(wait_for_state_to_become_playing_) {
 			if(loggers::trace()()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
@@ -383,26 +381,36 @@ void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 			while(wait_for_state_to_become_playing_) condition_.wait(lock);
 		}
 	}
-	{ // copy the intermediate buffer to the gstreamer buffer
-		output_sample_type * in (reinterpret_cast<output_sample_type*>(intermediate_buffer_) + current_read_period_ * parent().events_per_buffer());
-		output_sample_type * out(reinterpret_cast<output_sample_type*>(GST_BUFFER_DATA(&buffer)));
-		std::size_t const size(GST_BUFFER_SIZE(&buffer));
-		if(false && loggers::trace()) {
-			std::ostringstream s; s << "buffer size: " << size << ", data address: " << out;
-			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	::guint8 * out(GST_BUFFER_DATA(&buffer));
+	std::size_t out_size(GST_BUFFER_SIZE(&buffer));
+	while(true) { // copy the intermediate buffer to the gstreamer buffer
+		std::size_t const in_size(intermediate_buffer_end_ - intermediate_buffer_current_read_pointer_);
+		std::size_t const copy_size(std::min(in_size, out_size));
+		std::memcpy(out, intermediate_buffer_current_read_pointer_, copy_size);
+		intermediate_buffer_current_read_pointer_ += copy_size;
+		out_size -= copy_size;
+		if(!out_size) break;
+		{ scoped_lock lock(mutex_);
+			io_ready(true);
 		}
-		std::memcpy(out, in, size);
+		condition_.notify_one();
+		{ scoped_lock lock(mutex_);
+			while(io_ready() && !stop_requested_) condition_.wait(lock);
+		}
+		if(stop_requested_) return;
+		out += copy_size;
 	}
-	{ scoped_lock lock(mutex_);
-		++current_read_period_ %= periods_;
-		io_ready(true);
+	if(intermediate_buffer_current_read_pointer_ == intermediate_buffer_end_) {
+		{ scoped_lock lock(mutex_);
+			io_ready(true);
+		}
+		condition_.notify_one();
 	}
-	condition_.notify_one();
 }
 
 void gstreamer::do_process() throw(engine::exception) {
 	if(false && loggers::trace()) {
-		std::ostringstream s; s << "process " << current_write_period_;
+		std::ostringstream s; s << "process";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(!in_port()) return;
@@ -410,12 +418,12 @@ void gstreamer::do_process() throw(engine::exception) {
 		if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 		while(!io_ready()) condition_.wait(lock);
 	}
-	{ // fill a period of the intermediate buffer
+	{ // fill the intermediate buffer
 		unsigned int const samples_per_buffer(parent().events_per_buffer());
 		assert(last_samples_.size() == in_port().channels());
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + current_write_period_ * samples_per_buffer);
+			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_));
 			unsigned int spread(0);
 			for(std::size_t e(0), s(in.size()); e < s; ++e) {
 				real s(in[e].sample());
@@ -431,8 +439,8 @@ void gstreamer::do_process() throw(engine::exception) {
 		}
 	}
 	{ scoped_lock lock(mutex_);
-		++current_write_period_ %= periods_;
-		if(current_read_period_ == current_write_period_) io_ready(false);
+		intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
+		io_ready(false);
 	}
 	condition_.notify_one();
 }
