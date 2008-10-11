@@ -305,8 +305,9 @@ private:
 
 	inline float freqChange(float freq)
 	{
-		if (freq > 666.0f) freq = 666.0f;
-		return freq*FREQDIV;
+		freq *= FREQDIV;
+		if (freq >= 2048.0f) freq = 2047.0f;
+		return freq;
 	};
 };
 
