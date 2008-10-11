@@ -428,7 +428,7 @@ void alsa::do_start() throw(engine::exception) {
 			std::ostringstream s; s << "could not set start threshold: " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-	}	
+	}
 	#if SND_LIB_VERSION >= 0x10010 // 1.0.16
 		// snd_pcm_sw_params_set_xfer_align() is deprecated, alignment is always 1
 	#else
