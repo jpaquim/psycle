@@ -71,7 +71,8 @@ void alsa::do_open() throw(engine::exception) {
 
 	::snd_pcm_stream_t const direction(::SND_PCM_STREAM_PLAYBACK);
 
-	int const open_mode(0); // 0: block, ::SND_PCM_NONBLOCK: non-block, ::SND_PCM_ASYNC: asynchronous
+	int const open_mode(SND_PCM_NONBLOCK); // 0: block, SND_PCM_NONBLOCK: non-block, SND_PCM_ASYNC: asynchronous
+	// note: with SND_PCM_NONBLOCK, ::snd_pcm_open can return -EBUSY if the device is not free.
 
 	if(0 > (error = ::snd_pcm_open(&pcm_, pcm_device_name.c_str(), direction, open_mode))) {
 		std::ostringstream s;
