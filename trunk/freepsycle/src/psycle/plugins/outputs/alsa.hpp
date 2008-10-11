@@ -33,41 +33,44 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource {
 	private:
 		/// pcm device handle
 		::snd_pcm_t * pcm_;
+
 		/// attached to std output
 		::snd_output_t * output_;
-		/// intermediate buffer for format conversion in write access method
-
-		char * buffer_;
-
-		/// pointers to areas within the buffer
-		//::snd_pcm_channel_area_t * areas_;
-		
-		/// buffer size in samples
-		::snd_pcm_uframes_t buffer_frames_;
-		
-		/// samples per period
-		::snd_pcm_uframes_t period_frames_;
 
 		/// number of periods
 		unsigned int periods_;
 		
-		unsigned int current_read_position_, current_write_position_;
+		/// samples per period
+		::snd_pcm_uframes_t period_frames_;
+
+		/// buffer size in samples (near period_frames_ * periods_)
+		::snd_pcm_uframes_t buffer_frames_;
+
+		/// intermediate buffer for format conversion in write access method
+		char * intermediate_buffer_;
+
+		/// read period within the intermediate bufer
+		unsigned int current_read_period_;
+		
+		/// write period within the intermediate bufer
+		unsigned int current_write_period_;
+
+		/// pointers to areas within the buffer in memory-mapped access method
+		//::snd_pcm_channel_area_t * areas_;
 
 		/// bits per channel sample
 		unsigned int bits_per_channel_sample_;
-		
+
 		std::thread * thread_;
 		void thread_function();
+		void poll_loop() throw(engine::exception);
+		void write_to_device() throw(engine::exception);
 	
 		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;
 		std::condition<scoped_lock> mutable condition_;
 
 		bool stop_requested_;
-
-		void poll_loop() throw(engine::exception);
-		void fill_buffer() throw(engine::exception);
-		void write_to_device() throw(engine::exception);
 };
 
 }}}
