@@ -223,8 +223,8 @@ void alsa::do_open() throw(engine::exception) {
 		/**************************************************************/
 		// set the period size and the number of periods
 
-		unsigned int periods = 4; ///\todo parametrable
-		period_frames_ = parent().events_per_buffer();
+		unsigned int periods(4); ///\todo parametrable
+		period_frames_ = 1024; ///\todo parametrable
 		
 		#if 1
 			{ // set the period size in frames
@@ -357,7 +357,7 @@ void alsa::do_open() throw(engine::exception) {
 		// and hence ::snd_pcm_state(pcm_) was brought to ::SND_PCM_STATE_PREPARED state.
 		
 		/**************************************************************/
-		// allocate a buffer
+		// allocate the intermediate buffer
 		{ 
 			// note: period_frames may be different from parent().events_per_buffer()
 			std::size_t const bytes(parent().events_per_buffer() * in_port().channels() * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
@@ -535,8 +535,6 @@ void alsa::poll_loop() throw(engine::exception) {
 			}
 			if(stop_requested_) return; 
 			{ // copy the intermediate buffer to the alsa buffer
-				// beware: this code must be executed by the poller thread
-				
 				unsigned int const channels(in_port().channels());
 				::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
 	
@@ -544,7 +542,6 @@ void alsa::poll_loop() throw(engine::exception) {
 	
 				::snd_pcm_uframes_t frames_to_write(samples_per_buffer);
 				do {
-					///\todo support for non-blocking mode
 					///\todo support for non-interleaved channels
 					::snd_pcm_sframes_t const frames_written(::snd_pcm_writei(pcm_, in, frames_to_write));
 					int error(frames_written);
@@ -635,7 +632,7 @@ void alsa::do_process() throw(engine::exception) {
 		if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 		while(!io_ready()) condition_.wait(lock);
 	}
-	{ // fill a period of the intermediate buffer
+	{ // fill the intermediate buffer
 		unsigned int const channels(in_port().channels());
 		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
 
@@ -645,6 +642,7 @@ void alsa::do_process() throw(engine::exception) {
 		
 			// retrieve the last sample written on this channel
 			// sss: sparse spread sample
+			///\todo last_samples_
 			output_sample_type sss(0); ///\todo support for non-interleaved channels
 			// ssi: sparse spread index
 			unsigned int ssi(0);
@@ -662,7 +660,7 @@ void alsa::do_process() throw(engine::exception) {
 			for( ; ssi < samples_per_buffer; ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
 		}
 	}
-	// We don't call write_to_device() here, because it must be executed by the poller thread.
+	// We don't write to the device here, because it must be done by the poller thread or libasound crashes.
 	{ scoped_lock lock(mutex_);
 		io_ready(false);
 	}
