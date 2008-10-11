@@ -20,6 +20,7 @@
 #pragma once
 #include "filter.h"
 #include "atlantisfilter.h"
+#include "aaf.h"
 #include "lfo.h"
 #include "pwm.h"
 
@@ -61,7 +62,7 @@
 #define WAVE_OSC2WORKBUFFER			35
 #define WAVE_OSC3WORKBUFFER			36
 #define WAVE_OSC4WORKBUFFER			37
-#define OVERSAMPLING				8
+#define OVERSAMPLING				16
 #define FREQDIV						1.0f/(float)OVERSAMPLING
 #define BufferTemp					8
 
@@ -233,6 +234,10 @@ private:
 	float lfoViberLast;
 	filter m_filter;
 	CSIDFilter a_filter;
+	AAF16 aaf1;
+	AAF16 aaf2;
+	AAF16 aaf3;
+	AAF16 aaf4;
 
 	int updateCount;
 	short timetocompute;
