@@ -361,7 +361,10 @@ void alsa::do_open() throw(engine::exception) {
 		// allocate a buffer
 		{ 
 			// note: period_frames_ may be different from parent().events_per_buffer()
-			std::size_t const bytes(periods_ * parent().events_per_buffer() * in_port().channels() * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
+			std::size_t const period_bytes(parent().events_per_buffer() * in_port().channels() * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
+			if(parent().events_per_buffer() > period_frames_) periods_ = 2;
+			std::size_t const bytes(periods_ * period_bytes);
+
 			if(!(intermediate_buffer_ = new char[bytes])) {
 				std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
