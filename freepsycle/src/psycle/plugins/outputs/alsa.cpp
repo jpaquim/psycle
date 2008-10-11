@@ -38,9 +38,9 @@ alsa::alsa(engine::plugin_library_reference & plugin_library_reference, engine::
 	resource(plugin_library_reference, graph, name),
 	pcm_(),
 	output_(),
-	buffer_(),
+	intermediate_buffer_(),
+	current_read_period_(), current_write_period_(),
 	//areas_(),
-	current_read_position_(), current_write_position_(),
 	thread_()
 {
 	engine::ports::inputs::single::create_on_heap(*this, "in");
@@ -52,24 +52,16 @@ void alsa::do_open() throw(engine::exception) {
 	
 	int error;
 
+	/**************************************************************/
 	// attach to std output
+	
 	if(0 > (error = ::snd_output_stdio_attach(&output_, ::stdout, 0))) {
 		std::ostringstream s; s << "could not attach to stdio output: " << ::snd_strerror(error);
 		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
-	unsigned int rate(::lround(in_port().events_per_second()));
-	bool const allow_resample(true);
-
-	unsigned int const channels(in_port().channels());
-
-	::snd_pcm_format_t format(::SND_PCM_FORMAT_S16); ///\todo parametrable
-	{ // get format from env
-		char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__FORMAT"));
-		if(env) format = ::snd_pcm_format_value(env);
-	}
-	// get the sample width
-	bits_per_channel_sample_ = ::snd_pcm_format_width(format);
+	/**************************************************************/
+	// open the pcm device (device name, stream direction, open mode)
 
 	std::string pcm_device_name("default"); ///\todo parametrable
 	{ // get device name from env
@@ -78,27 +70,9 @@ void alsa::do_open() throw(engine::exception) {
 	}
 
 	::snd_pcm_stream_t const direction(::SND_PCM_STREAM_PLAYBACK);
+
 	int const open_mode(0); // 0: block, ::SND_PCM_NONBLOCK: non-block, ::SND_PCM_ASYNC: asynchronous
-	bool const work_mode_is_non_blocking(false);
-	::snd_pcm_access_t const access(::SND_PCM_ACCESS_RW_INTERLEAVED);
 
-	if(loggers::information()()) {
-		std::ostringstream s;
-		s <<
-			"alsa pcm device: about to setup:\n"
-			"\t" "device name: " << pcm_device_name << "\n"
-			"\t" "stream direction: " << ::snd_pcm_stream_name(direction) << "\n"
-			"\t" "stream parameters: "
-				"rate: " << rate << "Hz (resampling " << (allow_resample ? "allowed" : "disallowed") << "), "
-				"format: " << ::snd_pcm_format_description(format) << ", "
-				"channels: " << channels << "\n"
-			"\t" "open mode: " << open_mode_description(open_mode) << "\n"
-			"\t" "work mode: " << (work_mode_is_non_blocking ? "non-blocking" : "blocking") << "\n"
-			"\t" "access method: " << ::snd_pcm_access_name(access);
-		loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-
-	// open the pcm device
 	if(0 > (error = ::snd_pcm_open(&pcm_, pcm_device_name.c_str(), direction, open_mode))) {
 		std::ostringstream s;
 		s <<
@@ -137,7 +111,12 @@ void alsa::do_open() throw(engine::exception) {
 			}
 		}
 	}
+
+	/**************************************************************/
 	// set the work mode
+
+	bool const work_mode_is_non_blocking(false);
+
 	if(0 > (error = ::snd_pcm_nonblock(pcm_, work_mode_is_non_blocking))) {
 		std::ostringstream s;
 		s <<
@@ -146,14 +125,25 @@ void alsa::do_open() throw(engine::exception) {
 			": " << ::snd_strerror(error);
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
+
+	/**************************************************************/
+	// setup hardware parameters (resampling, access method, sample format, channels, rate, periods, period and buffer size)
+	
 	try {
 		// allocate hardware parameters on the stack
 		::snd_pcm_hw_params_t * pcm_hw_params; snd_pcm_hw_params_alloca(&pcm_hw_params);
+		
 		// make the configuration space full
 		if(0 > (error = ::snd_pcm_hw_params_any(pcm_, pcm_hw_params))) {
 			std::ostringstream s; s << "could not initialize hardware parameters: " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+
+		/**************************************************************/
+		// set the resampling setting
+		
+		bool const allow_resample(true);
+
 		#if SND_LIB_VERSION >= 0x10009 // 1.0.9
 			// If allow_resample is false, we will only allow sample format conversion,
 			// by disabling the resampling feature in the "plug" plugin, hence restricting
@@ -164,13 +154,27 @@ void alsa::do_open() throw(engine::exception) {
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		#endif
+		
+		/**************************************************************/
 		// set the access method
+		
+		::snd_pcm_access_t const access(::SND_PCM_ACCESS_RW_INTERLEAVED);
+		
 		if(0 > (error = ::snd_pcm_hw_params_set_access(pcm_, pcm_hw_params, access))) {
 			std::ostringstream s;
 			s << "could not set access method to: " << ::snd_pcm_access_name(access) << ": " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+		
+		/**************************************************************/
 		// set the sample format
+
+		::snd_pcm_format_t format(::SND_PCM_FORMAT_S16); ///\todo parametrable
+		{ // get format from env
+			char const * const env(std::getenv("PSYCLE__PLUGINS__OUTPUTS__ALSA__FORMAT"));
+			if(env) format = ::snd_pcm_format_value(env);
+		}
+		
 		if(0 > (error = ::snd_pcm_hw_params_set_format(pcm_, pcm_hw_params, format))) {
 			std::ostringstream s;
 			s <<
@@ -178,15 +182,25 @@ void alsa::do_open() throw(engine::exception) {
 				": " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+		
+		// get the sample width
+		bits_per_channel_sample_ = ::snd_pcm_format_width(format);
+
+		/**************************************************************/
 		// set the channel count
-		if(0 > (error = ::snd_pcm_hw_params_set_channels(pcm_, pcm_hw_params, channels))) {
+
+		if(0 > (error = ::snd_pcm_hw_params_set_channels(pcm_, pcm_hw_params, in_port().channels()))) {
 			std::ostringstream s;
 			s <<
-				"could not set channel count to: " << channels <<
+				"could not set channel count to: " << in_port().channels() <<
 				": " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		{ // set the sample rate
+		
+		/**************************************************************/
+		// set the sample rate
+		{ 
+			unsigned int rate(::lround(in_port().events_per_second()));
 			unsigned int rate_accepted(rate);
 			int direction(0);
 			if(0 > (error = ::snd_pcm_hw_params_set_rate_near(pcm_, pcm_hw_params, &rate_accepted, &direction))) {
@@ -201,10 +215,13 @@ void alsa::do_open() throw(engine::exception) {
 					"accepted: " << rate_accepted << "Hz";
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				rate = rate_accepted;
+				///\todo we need to take this into account!
+				//in_port().events_per_second(rate);
 			}
 		}
 		
-		// buffer settings
+		/**************************************************************/
+		// set the period size and the number of periods
 
 		periods_ = 4; ///\todo parametrable
 		period_frames_ = parent().events_per_buffer();
@@ -275,6 +292,10 @@ void alsa::do_open() throw(engine::exception) {
 				}
 			}
 		#endif
+
+		/**************************************************************/
+		// set the buffer size
+
 		#if 1
 			{ // set the buffer size in frames
 				buffer_frames_ = period_frames_ * periods_;
@@ -321,7 +342,9 @@ void alsa::do_open() throw(engine::exception) {
 			}
 		#endif
 
+		/**************************************************************/
 		// apply hw parameter settings to the pcm device and prepare it
+
 		if(0 > (error = ::snd_pcm_hw_params(pcm_, pcm_hw_params))) {
 			std::ostringstream s; s << "could not set hardware parameters: " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -333,9 +356,12 @@ void alsa::do_open() throw(engine::exception) {
 		// At this point ::snd_pcm_prepare(pcm_) was called automatically,
 		// and hence ::snd_pcm_state(pcm_) was brought to ::SND_PCM_STATE_PREPARED state.
 		
-		{ // allocate a buffer
-			std::size_t const bytes(periods_ * period_frames_ * channels * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
-			if(!(buffer_ = new char[bytes])) {
+		/**************************************************************/
+		// allocate a buffer
+		{ 
+			// note: period_frames_ may be different from parent().events_per_buffer()
+			std::size_t const bytes(periods_ * parent().events_per_buffer() * in_port().channels() * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
+			if(!(intermediate_buffer_ = new char[bytes])) {
 				std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
@@ -349,18 +375,18 @@ void alsa::do_open() throw(engine::exception) {
 			// nothing needed for write method
 		#else
 			// setup areas within buffer
-			if(!(areas_ = new ::snd_pcm_channel_area_t[channels])) {
-				std::ostringstream s; s << "not enough memory to allocate " << (channels * sizeof *areas_) << " bytes on heap";
+			if(!(areas_ = new ::snd_pcm_channel_area_t[in_port().channels()])) {
+				std::ostringstream s; s << "not enough memory to allocate " << (in_port().channels() * sizeof *areas_) << " bytes on heap";
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			for(unsigned int i(0); i < channels; ++i) {
+			for(unsigned int i(0); i < in_port().channels(); ++i) {
 				areas_[i].addr = buffer_;
 				areas_[i].first = i * bits_per_channel_sample_;
-				areas_[i].step = channels * bits_per_channel_sample_;
+				areas_[i].step = in_port().channels() * bits_per_channel_sample_;
 			}
 		#endif
 	} catch(...) {
-		delete[] buffer_; buffer_ = 0;
+		delete[] intermediate_buffer_; intermediate_buffer_ = 0;
 		#if 1
 			// nothing needed for write method
 		#else
@@ -378,7 +404,7 @@ bool alsa::opened() const {
 void alsa::do_start() throw(engine::exception) {
 	resource::do_start();
 
-	current_read_position_ = current_write_position_;
+	current_read_period_ = current_write_period_;
 	
 	// allocate software parameters on the stack
 	::snd_pcm_sw_params_t * pcm_sw_params; snd_pcm_sw_params_alloca(&pcm_sw_params);
@@ -423,7 +449,6 @@ void alsa::do_start() throw(engine::exception) {
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
-	io_ready(false);
 	stop_requested_ = false;
 	// start the poller thread
 	thread_ = new std::thread(boost::bind(&alsa::thread_function, this));
@@ -473,10 +498,6 @@ void alsa::thread_function() {
 	loggers::information()("poller thread " + qualified_name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 }
 
-bool b_ = false;
-std::mutex m_;
-std::condition<std::scoped_lock<std::mutex> > c_;
-
 void alsa::poll_loop() throw(engine::exception) {
 	// get number of file descriptors to poll
 	::nfds_t nfds;
@@ -518,65 +539,18 @@ void alsa::poll_loop() throw(engine::exception) {
 		if(revents & POLLOUT) {
 			{ scoped_lock lock(mutex_);
 				while(
-					io_ready() && current_read_position_ == current_write_position_ &&
+					io_ready() && current_read_period_ == current_write_period_ &&
 					!stop_requested_
 				) condition_.wait(lock);
 			}
 			if(stop_requested_) return; 
 			write_to_device(); // beware: this code must be executed by the poller thread
 			{ scoped_lock lock(mutex_);
-				++current_read_position_ %= periods_;
+				++current_read_period_ %= periods_;
 				io_ready(true);
 			}
 			condition_.notify_one();
 		}
-	}
-}
-
-void alsa::do_process() throw(engine::exception) {
-	if(false && loggers::trace()) {
-		std::ostringstream s; s << "process " << current_write_position_;
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	if(!in_port()) return;
-	{ scoped_lock lock(mutex_);
-		if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
-		while(!io_ready()) condition_.wait(lock);
-	}
-	fill_buffer();
-	// We don't call write_to_device() here, because it must be executed by the poller thread.
-	{ scoped_lock lock(mutex_);
-		++current_write_position_ %= periods_;
-		if(current_read_position_ == current_write_position_) io_ready(false);
-	}
-	condition_.notify_one();
-}
-
-void alsa::fill_buffer() throw(engine::exception) {
-	unsigned int const channels(in_port().channels());
-	::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
-
-	for(unsigned int c(0); c < channels; ++c) {
-		engine::buffer::channel & in(in_port().buffer()[c]);
-		output_sample_type * out(reinterpret_cast<output_sample_type*>(buffer_) + current_write_position_ * samples_per_buffer);
-		
-		// retrieve the last sample written on this channel
-		// sss: sparse spread sample
-		output_sample_type sss(out[samples_per_buffer * channels - 1 - c]); ///\todo support for non-interleaved channels
-		// ssi: sparse spread index
-		unsigned int ssi(0);
-		for(std::size_t e(0), s(in.size()); e < s && in[e].index() < samples_per_buffer; ++e) {
-			real s(in[e].sample());
-			{
-				///\todo use bits_per_channel_sample_;
-				s *= std::numeric_limits<output_sample_type>::max();
-				if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
-				else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
-			}
-			sss = ::lrint(s);
-			for( ; ssi <= in[e].index(); ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
-		}
-		for( ; ssi < samples_per_buffer; ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
 	}
 }
 
@@ -586,7 +560,7 @@ void alsa::write_to_device() throw(engine::exception) {
 	unsigned int const channels(in_port().channels());
 	::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
 	
-	output_sample_type * in(reinterpret_cast<output_sample_type*>(buffer_) + current_read_position_ * samples_per_buffer);
+	output_sample_type * in(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + current_read_period_ * samples_per_buffer);
 	
 	::snd_pcm_uframes_t frames_to_write(samples_per_buffer);
 	do {
@@ -596,10 +570,13 @@ void alsa::write_to_device() throw(engine::exception) {
 		int error(frames_written);
 		if(0 > error) switch(error) {
 			case -EAGAIN: // for non-blocking mode
-				//io_ready(false);
 				if(loggers::warning()()) {
 					std::ostringstream s; s << "blocked: " << ::snd_strerror(error);
 					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				}
+				std::this_thread::yield();
+				{ scoped_lock lock(mutex_);
+					if(stop_requested_) return;
 				}
 				continue;
 			case -EPIPE: // an underrun occured
@@ -625,6 +602,9 @@ void alsa::write_to_device() throw(engine::exception) {
 					}
 					// sleep a bit before retrying to resume
 					std::this_thread::sleep(std::seconds(1));
+					{ scoped_lock lock(mutex_);
+						if(stop_requested_) return;
+					}
 				}
 				if(0 > error) switch(error) {
 					case -ENOSYS: // the device is no longer suspended, but it does not fully support resuming
@@ -654,6 +634,51 @@ void alsa::write_to_device() throw(engine::exception) {
 	} while(frames_to_write);
 }
 
+void alsa::do_process() throw(engine::exception) {
+	if(false && loggers::trace()) {
+		std::ostringstream s; s << "process " << current_write_period_;
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	if(!in_port()) return;
+	{ scoped_lock lock(mutex_);
+		if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
+		while(!io_ready()) condition_.wait(lock);
+	}
+	{ // fill a period of the intermediate buffer
+		unsigned int const channels(in_port().channels());
+		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
+
+		for(unsigned int c(0); c < channels; ++c) {
+			engine::buffer::channel & in(in_port().buffer()[c]);
+			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + current_write_period_ * samples_per_buffer);
+		
+			// retrieve the last sample written on this channel
+			// sss: sparse spread sample
+			output_sample_type sss(out[samples_per_buffer * channels - 1 - c]); ///\todo support for non-interleaved channels
+			// ssi: sparse spread index
+			unsigned int ssi(0);
+			for(std::size_t e(0), s(in.size()); e < s && in[e].index() < samples_per_buffer; ++e) {
+				real s(in[e].sample());
+				{
+					///\todo use bits_per_channel_sample_;
+					s *= std::numeric_limits<output_sample_type>::max();
+					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
+					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
+				}
+				sss = ::lrint(s);
+				for( ; ssi <= in[e].index(); ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
+			}
+			for( ; ssi < samples_per_buffer; ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
+		}
+	}
+	// We don't call write_to_device() here, because it must be executed by the poller thread.
+	{ scoped_lock lock(mutex_);
+		++current_write_period_ %= periods_;
+		if(current_read_period_ == current_write_period_) io_ready(false);
+	}
+	condition_.notify_one();
+}
+
 void alsa::do_stop() throw(engine::exception) {
 	if(loggers::information()()) loggers::information()("terminating and joining poller thread ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(!thread_) {
@@ -677,7 +702,7 @@ void alsa::do_close() throw(engine::exception) {
 	#else
 		delete[] areas_; areas_ = 0;
 	#endif
-	delete[] buffer_; buffer_ = 0;
+	delete[] intermediate_buffer_; intermediate_buffer_ = 0;
 	resource::do_close();
 }
 

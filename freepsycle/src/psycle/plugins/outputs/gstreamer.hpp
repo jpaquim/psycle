@@ -46,8 +46,17 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 		bool handoff_called_;
 		bool stop_requested_;
 
-		char * buffer_;
-		unsigned int buffers_, current_read_position_, current_write_position_;
+		/// intermediate buffer for format conversion in write access method
+		char * intermediate_buffer_;
+
+		/// number of subdivisions for the intermediate buffer
+		unsigned int periods_;
+
+		/// read period within the intermediate bufer
+		unsigned int current_read_period_;
+		
+		/// write period within the intermediate bufer
+		unsigned int current_write_period_;
 
 		typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
 		std::vector<output_sample_type> last_samples_;
