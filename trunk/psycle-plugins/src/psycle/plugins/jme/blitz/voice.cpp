@@ -22,6 +22,8 @@
 #include <cmath>
 #define FILTER_CALC_TIME				64
 #define TWOPI																6.28318530717958647692528676655901f
+#define ANTIDENORMAL					1e-15f
+#define HUGEANTIDENORMAL				0.0001f
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -188,7 +190,7 @@ void CSynthTrack::NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity){
 	vpar=voicePar;
 	nextNote=note;
 	nextSpd=spd;
-	nextVol=velocity+0.00000001f;
+	nextVol=velocity+HUGEANTIDENORMAL;
 	ampEnvSustainLevel=(float)vpar->ampS*0.0039062f;
 	if(ampEnvStage==0){
 		RealNoteOn(true); // THIS LINE DIFFERS FROM RETRIG()
@@ -606,7 +608,7 @@ void CSynthTrack::GetSample(float* slr)
 				pos = (int)phase;
 				sample = WaveBuffer[curBuf[0]][pos];
 				output1 = aaf1.process((WaveBuffer[curBuf[0]][pos+1] - sample) * (phase - (float)pos) + sample);
-				dco1Last=(float)(0.00000001f+output1)*(0.00000001f+vpar->oscFeedback[0])*(0.00000001f+fbCtl[0]);
+				dco1Last=(float)(HUGEANTIDENORMAL+output1)*(HUGEANTIDENORMAL+vpar->oscFeedback[0])*(HUGEANTIDENORMAL+fbCtl[0]);
 				dco1Position+=rdco1Pitch;
 				if(dco1Position>=2048.0f){
 					dco1Position-=2048.0f;
@@ -645,7 +647,7 @@ void CSynthTrack::GetSample(float* slr)
 				pos = (int)phase;
 				sample = WaveBuffer[1+curBuf[1]][pos];
 				output2 = aaf2.process((WaveBuffer[1+curBuf[1]][pos+1] - sample) * (phase - (float)pos) + sample);
-				dco2Last=(float)(0.00000001f+output2)*(0.00000001f+vpar->oscFeedback[1])*(0.00000001f+fbCtl[1]);
+				dco2Last=(float)(HUGEANTIDENORMAL+output2)*(HUGEANTIDENORMAL+vpar->oscFeedback[1])*(HUGEANTIDENORMAL+fbCtl[1]);
 				dco2Position+=rdco2Pitch;
 				if(dco2Position>=2048.0f){
 					dco2Position-=2048.0f;
@@ -684,7 +686,7 @@ void CSynthTrack::GetSample(float* slr)
 				pos = (int)phase;
 				sample = WaveBuffer[2+curBuf[2]][pos];
 				output3 = aaf3.process((WaveBuffer[2+curBuf[2]][pos+1] - sample) * (phase - (float)pos) + sample);
-				dco3Last=(float)(0.00000001f+output3)*(0.00000001f+vpar->oscFeedback[2])*(0.00000001f+fbCtl[2]);
+				dco3Last=(float)(HUGEANTIDENORMAL+output3)*(HUGEANTIDENORMAL+vpar->oscFeedback[2])*(HUGEANTIDENORMAL+fbCtl[2]);
 				dco3Position+=rdco3Pitch;
 				if(dco3Position>=2048.0f){
 					dco3Position-=2048.0f;
@@ -723,7 +725,7 @@ void CSynthTrack::GetSample(float* slr)
 				pos = (int)phase;
 				sample = WaveBuffer[3+curBuf[3]][pos];
 				output4 = aaf4.process((WaveBuffer[3+curBuf[3]][pos+1] - sample) * (phase - (float)pos) + sample);
-				dco4Last=(float)(0.00000001f+output4)*(0.00000001f+vpar->oscFeedback[3])*(0.00000001f+fbCtl[3]);
+				dco4Last=(float)(HUGEANTIDENORMAL+output4)*(HUGEANTIDENORMAL+vpar->oscFeedback[3])*(HUGEANTIDENORMAL+fbCtl[3]);
 				dco4Position+=rdco4Pitch;
 				if(dco4Position>=2048.0f){
 					dco4Position-=2048.0f;
@@ -755,10 +757,10 @@ void CSynthTrack::GetSample(float* slr)
 				}
 			}
 
-			fmData1=(0.00000001f+fmCtl[oldBuf[0]][0])*(0.00000001f+output1)+(0.00000001f+fmCtl2[oldBuf[2]][2])*(0.00000001f+output3);
-			fmData2=(0.00000001f+fmCtl[oldBuf[1]][1])*(0.00000001f+output2)+(0.00000001f+fmCtl2[oldBuf[3]][3])*(0.00000001f+output4);
-			fmData3=(0.00000001f+fmCtl[oldBuf[2]][2])*(0.00000001f+output3)+(0.00000001f+fmCtl2[oldBuf[0]][0])*(0.00000001f+output1);
-			fmData4=(0.00000001f+fmCtl[oldBuf[3]][3])*(0.00000001f+output4)+(0.00000001f+fmCtl2[oldBuf[1]][1])*(0.00000001f+output2);
+			fmData1=(ANTIDENORMAL+fmCtl[oldBuf[0]][0])*(ANTIDENORMAL+output1)+(ANTIDENORMAL+fmCtl2[oldBuf[2]][2])*(ANTIDENORMAL+output3);
+			fmData2=(ANTIDENORMAL+fmCtl[oldBuf[1]][1])*(ANTIDENORMAL+output2)+(ANTIDENORMAL+fmCtl2[oldBuf[3]][3])*(ANTIDENORMAL+output4);
+			fmData3=(ANTIDENORMAL+fmCtl[oldBuf[2]][2])*(ANTIDENORMAL+output3)+(ANTIDENORMAL+fmCtl2[oldBuf[0]][0])*(ANTIDENORMAL+output1);
+			fmData4=(ANTIDENORMAL+fmCtl[oldBuf[3]][3])*(ANTIDENORMAL+output4)+(ANTIDENORMAL+fmCtl2[oldBuf[1]][1])*(ANTIDENORMAL+output2);
 
 			decOutput1 += output1;
 			decOutput2 += output2;
@@ -771,11 +773,11 @@ void CSynthTrack::GetSample(float* slr)
 		output3 = decOutput3 * FREQDIV;
 		output4 = decOutput4 * FREQDIV;
 
-		output=((0.00000001f+output1)*(0.00000001f+osc1Vol))+((0.00000001f+output2)*(0.00000001f+osc2Vol))+((0.00000001f+output3)*(0.00000001f+osc3Vol))+((0.00000001f+output4)*(0.00000001f+osc4Vol))+((0.00000001f+output1)*(0.00000001f+output2)*(0.00000001f+rm1Vol))+((0.00000001f+output3)*(0.00000001f+output4)*(0.00000001f+rm2Vol));				
+		output=((ANTIDENORMAL+output1)*(ANTIDENORMAL+osc1Vol))+((ANTIDENORMAL+output2)*(ANTIDENORMAL+osc2Vol))+((ANTIDENORMAL+output3)*(ANTIDENORMAL+osc3Vol))+((ANTIDENORMAL+output4)*(ANTIDENORMAL+osc4Vol))+((ANTIDENORMAL+output1)*(ANTIDENORMAL+output2)*(ANTIDENORMAL+rm1Vol))+((ANTIDENORMAL+output3)*(ANTIDENORMAL+output4)*(ANTIDENORMAL+rm2Vol));				
 
 		//master sat
 		if ((vpar->oscFuncType[0]==47)||(vpar->oscFuncType[1]==47)||(vpar->oscFuncType[2]==47)||(vpar->oscFuncType[3]==47)){
-			long long1 = (0.00000001f+output)*(0.00000001f+satClip);
+			long long1 = (ANTIDENORMAL+output)*(ANTIDENORMAL+satClip);
 			if (long1 > 16384) long1=16384;
 			if (long1 < -16384) long1=-16384;
 			output=long1;
@@ -783,10 +785,10 @@ void CSynthTrack::GetSample(float* slr)
 
 		//cutoff mod
 		float cutmod = 0.0f;
-		if (vpar->oscFuncType[0]==46) cutmod+=((output1+16384)*(0.00000001f+cmCtl[0]));
-		if (vpar->oscFuncType[1]==46) cutmod+=((output2+16384)*(0.00000001f+cmCtl[1]));
-		if (vpar->oscFuncType[2]==46) cutmod+=((output3+16384)*(0.00000001f+cmCtl[2]));
-		if (vpar->oscFuncType[3]==46) cutmod+=((output4+16384)*(0.00000001f+cmCtl[3]));
+		if (vpar->oscFuncType[0]==46) cutmod+=((output1+16384)*(ANTIDENORMAL+cmCtl[0]));
+		if (vpar->oscFuncType[1]==46) cutmod+=((output2+16384)*(ANTIDENORMAL+cmCtl[1]));
+		if (vpar->oscFuncType[2]==46) cutmod+=((output3+16384)*(ANTIDENORMAL+cmCtl[2]));
+		if (vpar->oscFuncType[3]==46) cutmod+=((output4+16384)*(ANTIDENORMAL+cmCtl[3]));
 
 		GetEnvFlt();
 		if (vpar->fltType){
@@ -859,6 +861,9 @@ void CSynthTrack::calcWaves(int mask){
 		bit = 1<<i;
 		if (bit & mask){
 			int pos = (synbase[i]+synfx[i].getPosition()+vpar->oscFuncSym[i])&2047;
+			float fpos = (float)pos;
+			float adpos = fpos;
+			if (adpos < HUGEANTIDENORMAL) adpos = HUGEANTIDENORMAL;
 			if (vpar->oscFuncType[i] != 43) fbCtl[i]=1.0f;
 			if ((vpar->oscFuncType[i] < 44) || (vpar->oscFuncType[i] > 45)){
 				fmCtl[0][i]=0.0f;
@@ -884,18 +889,20 @@ void CSynthTrack::calcWaves(int mask){
 				}
 				break;
 				case 1: // stretch&squash
-					size1 = float(pos+1); size2 = float(2048.0f-size1);
-					if (size1!=0.0f) { step1 = 1024.0f/(size1); phase=0.0f;} else { phase=1024.0f; }
-					if (size2!=0.0f) { step2 = 1024.0f/(size2); } else { step2 = 0.0f; }
+					size1 = fpos+1.0f;
+					size2 = 2048.0f-size1;
+					if (size1!=0.0f) { step1 = 1024.0f/size1; phase=0.0f;} else { phase=1024.0f; }
+					if (size2!=0.0f) { step2 = 1024.0f/size2; } else { step2 = 0.0f; }
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=sourceWave[int(phase)];
 						if (phase < 1023.0f) phase+=step1; else phase+=step2;
 					}
 					break;
 				case 2: // stretch&squash 2
-					size1 = float(pos+1); size2 = float(2048.0f-size1);
-					if (size1!=0.0f) { step1 = 1024.0f/(size1); phase = 0.0f; } else { phase=1024.0f; }
-					if (size2!=0.0f) { step2 = 1024.0f/(size2); } else { step2 = 0.0f; }
+					size1 = fpos+1.0f;
+					size2 = 2048.0f-size1;
+					if (size1!=0.0f) { step1 = 1024.0f/size1; phase = 0.0f; } else { phase=1024.0f; }
+					if (size2!=0.0f) { step2 = 1024.0f/size2; } else { step2 = 0.0f; }
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=sourceWave[int(phase+phase)];
 						if (phase < 1023.0f) phase+=step1; else phase+=step2;
@@ -908,15 +915,15 @@ void CSynthTrack::calcWaves(int mask){
 					}
 					break;
 				case 4: // squash&squash
-					float1 = 0;
-					float2 = 0;
-					float4 = (2047-pos)/2.0f;   // 1st halve size in byte
-					float5 = 1024-float4;								// 2nd halve size in byte
-					if (float4!=0) float1 = 1024/float4; // 1st halve step
-					else float1 = 1024;
-					if (float5!=0) float2 = 1024/float5; // 2nd halve step
-					else float2 = 0;
-					float3 = 0;																				//source phase
+					float1 = 0.0f;
+					float2 = 0.0f;
+					float4 = (2047.0f - fpos)/2.0f;   // 1st halve size in byte
+					float5 = 1024.0f-float4;				// 2nd halve size in byte
+					if (float4!=0.0f) float1 = 1024.0f/float4;	// 1st halve step
+					else float1 = 1024.0f;
+					if (float5!=0.0f) float2 = 1024.0f/float5;	// 2nd halve step
+					else float2 = 0.0f;
+					float3 = 0.0f;																				//source phase
 					for(c=0;c<2100;c++){
 						if (c<1024) {
 							if (float3<1024) {
@@ -924,45 +931,45 @@ void CSynthTrack::calcWaves(int mask){
 									WaveBuffer[buf][c]=sourceWave[(int)float3];
 									float3+=float1;
 								} else {
-									WaveBuffer[buf][c]=0;
-									float3=1024;
+									WaveBuffer[buf][c]=0.0f;
+									float3=1024.0f;
 								}
 							} else {
 								if (float5) {
-									WaveBuffer[buf][c]=0;
-									float3=1024;
+									WaveBuffer[buf][c]=0.0f;
+									float3=1024.0f;
 								}
 							}
 						} else {
-							if (float3<2048) {
-								if (float4 != 0) {
+							if (float3<2048.0f) {
+								if (float4 != 0.0f) {
 								WaveBuffer[buf][c]=sourceWave[(int)float3];
 								float3+=float1;
-								} else WaveBuffer[buf][c]=0;
+								} else WaveBuffer[buf][c]=0.0f;
 							} else {
-								if (float5 != 0) WaveBuffer[buf][c]=0;
+								if (float5 != 0.0f) WaveBuffer[buf][c]=0.0f;
 							}
 						}
 					}
 					break;
 				case 5: // Muted Sync
-					float1 = 0;
-					float2 = float(pos*6)/2047+1;
+					float1 = 0.0f;
+					float2 = adpos*6.0f/2047.0f+1.0f;
 					for(c=0;c<2048;c++){
-						if (float1<2047){
+						if (float1<2047.0f){
 							WaveBuffer[buf][c]=sourceWave[(int)float1];
 							float1+=float2;
-						if (float1 > 2047) float1=2048;
-						} else WaveBuffer[buf][c]=0;
+						if (float1 > 2047.0f) float1=2048.0f;
+						} else WaveBuffer[buf][c]=0.0f;
 					}
 					break;
 				case 6: // Syncfake
-					float1 = 0;
-					float2 = float(pos*6)/2047+1;
+					float1 = 0.0f;
+					float2 = adpos*6.0f/2047.0f+1.0f;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=sourceWave[(int)float1];
 						float1+=float2;
-						if (float1 > 2047) float1-=2048;
+						if (float1 > 2047.0f) float1-=2048.0f;
 					}
 					break;
 				case 7: // Restart
@@ -998,8 +1005,10 @@ void CSynthTrack::calcWaves(int mask){
 					}
 					break;
 				case 11: // Octaving
-					float1 = (2047-float(pos))/2047;
-					float2 = float(pos)/2047;
+					float1 = (2047.0f-adpos)/2047.0f;
+					float2 = adpos/2047.0f;
+					if (float1 < HUGEANTIDENORMAL) float1 = HUGEANTIDENORMAL;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for (c=0;c<2048;c++){
 						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*float1)+(sourceWave[(c+c)&2047]*float2));
 					}
@@ -1025,7 +1034,7 @@ void CSynthTrack::calcWaves(int mask){
 					break;
 				case 14: // Dual Mixer
 					for (c=0;c<2048;c++){
-						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*0.3333333)+(sourceWave[(c+pos)&2047]*0.3333333)+(sourceWave[(c-pos)&2047]*0.3333333));
+						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*0.3333333f)+(sourceWave[(c+pos)&2047]*0.3333333f)+(sourceWave[(c-pos)&2047]*0.3333333f));
 					}
 					break;
 				case 15: // Fbk.Mixer
@@ -1039,15 +1048,19 @@ void CSynthTrack::calcWaves(int mask){
 					}
 					break;
 				case 17: // TriMix
-					float1 = (2047-float(pos))/2047;
-					float2 = float(pos)/2047;
+					float1 = (2047.0f-adpos)/2047.0f;
+					float2 = adpos/2047.0f;
+					if (float1 < HUGEANTIDENORMAL) float1 = HUGEANTIDENORMAL;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*float1)+(vpar->WaveTable[WAVE_TRIANGLE][c]*float2));
 					}
 					break;
 				case 18: // SawMix
-					float1 = (2047-float(pos))/2047;
-					float2 = float(pos)/2047;
+					float1 = (2047.0f-adpos)/2047.0f;
+					float2 = adpos/2047.0f;
+					if (float1 < HUGEANTIDENORMAL) float1 = HUGEANTIDENORMAL;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					work1 = 0;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*float1)+((work1-16384)*float2));
@@ -1055,104 +1068,122 @@ void CSynthTrack::calcWaves(int mask){
 					}
 					break;
 				case 19: // SqrMix
-					float1 = (2047-float(pos))/2047;
-					float2 = float(pos)/2047;
+					float1 = (2047.0f-adpos)/2047.0f;
+					float2 = adpos/2047.0f;
+					if (float1 < HUGEANTIDENORMAL) float1 = HUGEANTIDENORMAL;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=(signed short)((sourceWave[c]*float1)+(vpar->WaveTable[WAVE_SQUARE][c]*float2));
 					}
 					break;
-				case 20: // Tremelo
-					float1 = (2047-float(pos))/2047;
+				case 20: // Tremolo
+					float1 = (2047.0f-adpos)/2047.0f;
+					if (float1 < HUGEANTIDENORMAL) float1 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=(signed short)((float)sourceWave[c]*float1);
 					}
 					break;
 				case 21: // PM Sine 1
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 22: // PM Sine 2
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 23: // PM Sine 3
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_SINE][2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;
 				case 24: // PM Adlib2 1
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 25: // PM Adlib2 2
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 26: // PM Adlib2 3
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB2][2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;
 				case 27: // PM Adlib3 1
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 28: // PM Adlib3 2
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 29: // PM Adlib3 3
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB3][2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;
 				case 30: // PM Adlib4 1
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 31: // PM Adlib4 2
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 32: // PM Adlib4 3
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=vpar->WaveTable[WAVE_ADLIB4][2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
 					break;												
 				case 33: // PM Wave 1
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=sourceWave[2047&(int)(c+(sourceWave[c]*float2))];
 					}
 					break;
 				case 34: // PM Wave 2
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=sourceWave[2047&(int)(c+(sourceWave[(c+c)&2047]*float2))];
 					}
 					break;
 				case 35: // PM Wave 3
-					float2 = float(pos)*0.00025f;
+					float2 = adpos*0.00025f;
+					if (float2 < HUGEANTIDENORMAL) float2 = HUGEANTIDENORMAL;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=sourceWave[2047&(int)(c+(sourceWave[(c+c+c)&2047]*float2))];
 					}
@@ -1181,42 +1212,42 @@ void CSynthTrack::calcWaves(int mask){
 					}
 					break;
 				case 41: // RM to AM (Upright)
-					float1 = (2047-float(pos))/2047*16384;
-					float2 = float(pos)/2047*0.5f;
+					float1 = (2047.0f-fpos)/2047.0f*16384.0f;
+					float2 = fpos/2047.0f*0.5f;
 					for (c=0;c<2048;c++) WaveBuffer[buf][c]=(sourceWave[c]+16384)*float2+float1;
 					break;
 				case 42: // RM to AM (Down)
-					float1 = (2047-float(pos))/2047*16384;
-					float2 = float(pos)/2047*0.5f;
+					float1 = (2047.0f-fpos)/2047*16384;
+					float2 = fpos/2047*0.5f;
 					for (c=0;c<2048;c++) WaveBuffer[buf][c]=float1-((sourceWave[c]-16384)*float2);
 					break;
 				case 43: // Feedback Ctrl
 					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
-					fbCtl[i]=(pos-1024)*0.0009765625;
+					fbCtl[i]=(fpos-1024.0f)*0.0009765625f;
 					break;
 				case 44: // FM next +
 					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
-					fmCtl[buf>>2][i]=pos*0.00048828125;
+					fmCtl[buf>>2][i]=adpos*0.00048828125f;
 					break;
 				case 45: // FM next -
 					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
-					fmCtl[buf>>2][i]=0-(pos*0.00048828125);
+					fmCtl[buf>>2][i]=0.0f-(adpos*0.00048828125f);
 					break;
 				case 46: // Filter Mod
 					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
-					cmCtl[i]=pos*0.0000048828125;
+					cmCtl[i]=adpos*0.0000048828125f;
 					break;
 				case 47: // Chan Sat
 					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
-					satClip = pos*pos*0.000000015*pos+1.0f;
+					satClip = adpos*adpos*0.000000015f*adpos+1.0f;
 					break;
 				case 48: // FM last +
 					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
-					fmCtl2[buf>>2][i]=pos*0.00048828125;
+					fmCtl2[buf>>2][i]=adpos*0.00048828125f;
 					break;
 				case 49: // FM last -
 					for(c=0;c<2048;c++)				WaveBuffer[buf][c]=sourceWave[c];
-					fmCtl2[buf>>2][i]=0-(pos*0.00048828125);
+					fmCtl2[buf>>2][i]=0.0f-(adpos*0.00048828125f);
 					break;
 				case 50: // X Rotator
 					for (c=0;c<2048;c++){
@@ -1224,7 +1255,7 @@ void CSynthTrack::calcWaves(int mask){
 					}
 					break;
 				case 51: // Y Rotator
-					long2 = pos/2046.0f*32768.0f;
+					long2 = adpos/2046.0f*32768.0f;
 					for (c=0;c<2048;c++){
 						long1=sourceWave[c]+long2;
 						if (long1 > 16384) long1-=32768;
@@ -1233,7 +1264,7 @@ void CSynthTrack::calcWaves(int mask){
 					}
 					break;
 				case 52: // Boost II (Wrap)
-					float1 = pos/2047.0f;
+					float1 = adpos/2047.0f;
 					float1 += float1+1.0f;
 					for (c=0;c<2048;c++){
 						long1=sourceWave[c]*float1;
@@ -1244,14 +1275,14 @@ void CSynthTrack::calcWaves(int mask){
 					break;
 				case 53: // Sync & Fade
 					float1 = 0;
-					float2 = float(pos*96)/2047+1;
+					float2 = adpos*96.0f/2047.0f+1.0f;
 					float3 = 1.0f;
 					float4 = 1.0f/2048.0f;
 					for(c=0;c<2048;c++){
 						WaveBuffer[buf][c]=sourceWave[(int)float1]*float3;
 						float1+=float2;
 						float3-=float4;
-						if (float1 > 2047) float1-=2048;
+						if (float1 > 2047.0f) float1-=2048.0f;
 					}
 					break;
 				case 54: // Forward & Backward
@@ -1902,5 +1933,5 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	if (cmd == 0xC6) { arpLen=1; arpCount=-1; }
 	// Touchtaping with Retrig
 	if (cmd == 0xC7) { Retrig(); arpLen=1; arpCount=-1; }
-	if (cmd == 0xCC ||cmd == 0x0C) voiceVol=(float)val/255.0f+0.00000001f;
+	if (cmd == 0xCC ||cmd == 0x0C) voiceVol=(float)val/255.0f+HUGEANTIDENORMAL;
 }
