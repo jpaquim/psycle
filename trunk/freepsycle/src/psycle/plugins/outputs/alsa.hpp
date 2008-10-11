@@ -37,24 +37,15 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource {
 		/// attached to std output
 		::snd_output_t * output_;
 
-		/// number of periods
-		unsigned int periods_;
-		
-		/// samples per period
+		/// samples per period (member data because set in do_open and read in do_start)
 		::snd_pcm_uframes_t period_frames_;
 
-		/// buffer size in samples (near period_frames_ * periods_)
+		/// buffer size in samples (near period_frames_ * periods_) (member data because set in do_open and read in do_start)
 		::snd_pcm_uframes_t buffer_frames_;
 
 		/// intermediate buffer for format conversion in write access method
 		char * intermediate_buffer_;
-
-		/// read period within the intermediate bufer
-		unsigned int current_read_period_;
 		
-		/// write period within the intermediate bufer
-		unsigned int current_write_period_;
-
 		/// pointers to areas within the buffer in memory-mapped access method
 		//::snd_pcm_channel_area_t * areas_;
 

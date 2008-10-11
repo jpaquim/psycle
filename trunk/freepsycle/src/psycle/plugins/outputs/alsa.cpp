@@ -39,7 +39,6 @@ alsa::alsa(engine::plugin_library_reference & plugin_library_reference, engine::
 	pcm_(),
 	output_(),
 	intermediate_buffer_(),
-	current_read_period_(), current_write_period_(),
 	//areas_(),
 	thread_()
 {
@@ -224,7 +223,7 @@ void alsa::do_open() throw(engine::exception) {
 		/**************************************************************/
 		// set the period size and the number of periods
 
-		periods_ = 4; ///\todo parametrable
+		unsigned int periods = 4; ///\todo parametrable
 		period_frames_ = parent().events_per_buffer();
 		
 		#if 1
@@ -247,21 +246,21 @@ void alsa::do_open() throw(engine::exception) {
 				}
 			}
 			{ // set the period count
-				unsigned int periods_accepted(periods_);
+				unsigned int periods_accepted(periods);
 				int direction(0);
 				if(0 > (error = ::snd_pcm_hw_params_set_periods_near(pcm_, pcm_hw_params, &periods_accepted, &direction))) {
 					std::ostringstream s;
-					s << "could not set period count to: " << periods_ << ": " << ::snd_strerror(error);
+					s << "could not set period count to: " << periods << ": " << ::snd_strerror(error);
 					throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				}
-				if(periods_accepted != periods_) {
+				if(periods_accepted != periods) {
 					std::ostringstream s;
 					s <<
 						"periods: "
-						"requested: " << periods_ << ", "
+						"requested: " << periods << ", "
 						"accepted: " << periods_accepted;
 					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					periods_ = periods_accepted;
+					periods = periods_accepted;
 				}
 			}
 		#else
@@ -299,7 +298,7 @@ void alsa::do_open() throw(engine::exception) {
 
 		#if 1
 			{ // set the buffer size in frames
-				buffer_frames_ = period_frames_ * periods_;
+				buffer_frames_ = period_frames_ * periods;
 				::snd_pcm_uframes_t buffer_frames_accepted(buffer_frames_);
 				if(0 > (error = ::snd_pcm_hw_params_set_buffer_size_near(pcm_, pcm_hw_params, &buffer_frames_accepted))) {
 					std::ostringstream s;
@@ -360,19 +359,11 @@ void alsa::do_open() throw(engine::exception) {
 		/**************************************************************/
 		// allocate a buffer
 		{ 
-			// note: period_frames_ may be different from parent().events_per_buffer()
-			std::size_t const period_bytes(parent().events_per_buffer() * in_port().channels() * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
-			if(parent().events_per_buffer() > period_frames_) periods_ = 2;
-			std::size_t const bytes(periods_ * period_bytes);
-
+			// note: period_frames may be different from parent().events_per_buffer()
+			std::size_t const bytes(parent().events_per_buffer() * in_port().channels() * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
 			if(!(intermediate_buffer_ = new char[bytes])) {
 				std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			if(loggers::information()()) {
-				std::ostringstream s;
-				s << "total buffer size: " << bytes << " bytes";
-				loggers::information()(s.str());
 			}
 		}
 		#if 1
@@ -408,8 +399,6 @@ bool alsa::opened() const {
 void alsa::do_start() throw(engine::exception) {
 	resource::do_start();
 
-	current_read_period_ = current_write_period_;
-	
 	// allocate software parameters on the stack
 	::snd_pcm_sw_params_t * pcm_sw_params; snd_pcm_sw_params_alloca(&pcm_sw_params);
 
@@ -420,17 +409,15 @@ void alsa::do_start() throw(engine::exception) {
 		std::ostringstream s; s << "could not initialize software parameters: " << ::snd_strerror(error);
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	{
-		// wake up the application when at least xxx samples can be written
-		if(0 > (error = ::snd_pcm_sw_params_set_avail_min(pcm_, pcm_sw_params, period_frames_))) {
-			std::ostringstream s; s << "could not set available minimum: " << ::snd_strerror(error);
-			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		// start the transfer when at least xxx samples have been written to the ring buffer
-		if(0 > (error = ::snd_pcm_sw_params_set_start_threshold(pcm_, pcm_sw_params, buffer_frames_ / 2))) {
-			std::ostringstream s; s << "could not set start threshold: " << ::snd_strerror(error);
-			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
+	// wake up the application when at least xxx samples can be written to the ring buffer
+	if(0 > (error = ::snd_pcm_sw_params_set_avail_min(pcm_, pcm_sw_params, period_frames_))) {
+		std::ostringstream s; s << "could not set available minimum: " << ::snd_strerror(error);
+		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	// start the transfer when at least xxx samples have been written to the ring buffer
+	if(0 > (error = ::snd_pcm_sw_params_set_start_threshold(pcm_, pcm_sw_params, buffer_frames_ / 2))) {
+		std::ostringstream s; s << "could not set start threshold: " << ::snd_strerror(error);
+		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	#if SND_LIB_VERSION >= 0x10010 // 1.0.16
 		// snd_pcm_sw_params_set_xfer_align() is deprecated, alignment is always 1
@@ -544,10 +531,7 @@ void alsa::poll_loop() throw(engine::exception) {
 		if(loggers::warning()() && revents & POLLNVAL) loggers::warning()("invalid file descriptor in poll (could have been asynchronously closed)", UNIVERSALIS__COMPILER__LOCATION);
 		if(revents & POLLOUT) {
 			{ scoped_lock lock(mutex_);
-				while(
-					io_ready() && current_read_period_ == current_write_period_ &&
-					!stop_requested_
-				) condition_.wait(lock);
+				while(io_ready() && !stop_requested_) condition_.wait(lock);
 			}
 			if(stop_requested_) return; 
 			{ // copy the intermediate buffer to the alsa buffer
@@ -556,7 +540,7 @@ void alsa::poll_loop() throw(engine::exception) {
 				unsigned int const channels(in_port().channels());
 				::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
 	
-				output_sample_type * in(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + current_read_period_ * samples_per_buffer);
+				output_sample_type * in(reinterpret_cast<output_sample_type*>(intermediate_buffer_));
 	
 				::snd_pcm_uframes_t frames_to_write(samples_per_buffer);
 				do {
@@ -634,7 +618,6 @@ void alsa::poll_loop() throw(engine::exception) {
 				} while(frames_to_write);
 			}
 			{ scoped_lock lock(mutex_);
-				++current_read_period_ %= periods_;
 				io_ready(true);
 			}
 			condition_.notify_one();
@@ -644,7 +627,7 @@ void alsa::poll_loop() throw(engine::exception) {
 
 void alsa::do_process() throw(engine::exception) {
 	if(false && loggers::trace()) {
-		std::ostringstream s; s << "process " << current_write_period_;
+		std::ostringstream s; s << "process";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(!in_port()) return;
@@ -658,7 +641,7 @@ void alsa::do_process() throw(engine::exception) {
 
 		for(unsigned int c(0); c < channels; ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + current_write_period_ * samples_per_buffer);
+			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_));
 		
 			// retrieve the last sample written on this channel
 			// sss: sparse spread sample
@@ -681,8 +664,7 @@ void alsa::do_process() throw(engine::exception) {
 	}
 	// We don't call write_to_device() here, because it must be executed by the poller thread.
 	{ scoped_lock lock(mutex_);
-		++current_write_period_ %= periods_;
-		if(current_read_period_ == current_write_period_) io_ready(false);
+		io_ready(false);
 	}
 	condition_.notify_one();
 }
