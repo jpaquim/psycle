@@ -40,7 +40,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource {
 		/// samples per period (member data because set in do_open and read in do_start)
 		::snd_pcm_uframes_t period_frames_;
 
-		/// buffer size in samples (near period_frames_ * periods_) (member data because set in do_open and read in do_start)
+		/// buffer size in samples (member data because set in do_open and read in do_start)
 		::snd_pcm_uframes_t buffer_frames_;
 
 		/// intermediate buffer between do_process() and the routine that writes to the alsa device
