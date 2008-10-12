@@ -418,14 +418,14 @@ void scheduler::process_loop() throw(std::exception) {
 
 		process(node); // note: the node's do_process() is supposed to wait until io_ready()
 
-		bool notify(false);
+		unsigned int notify(0);
 		{ scoped_lock lock(mutex_);
 			// check whether all nodes have been processed
 			if(++processed_node_count_ == graph().size()) {
 				processed_node_count_ = 0;
 				// reset the queue to the terminal nodes in the graph (nodes with no connected input ports)
 				nodes_queue_ = graph().terminal_nodes();
-				notify = true;
+				notify = 2;
 			} else // check whether successors of the node we processed are now ready.
 				// iterate over all the output ports of the node we processed
 				for(typenames::node::output_ports_type::const_iterator
@@ -444,14 +444,14 @@ void scheduler::process_loop() throw(std::exception) {
 						if(node.is_ready_to_process()) {
 							// All the dependencies of the node have been processed.
 							// We add the node to the processing queue.
-							// (note: for the first node, we could reserve it for ourselves)
 							nodes_queue_.push_back(&node);
-							notify = true;
+							++notify;
 						}
 					}
 				}
 		}
-		if(notify) condition_.notify_all(); // notify all threads that we added nodes to the queue
+		// If there's only one successor ready, we don't notify since it can be processed in the same thread.
+		if(notify > 1) condition_.notify_all(); // notify all threads that we added nodes to the queue
 	}
 }
 

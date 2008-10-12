@@ -294,11 +294,11 @@ void Player::process_loop() throw(std::exception) {
 
 		process(node);
 	
-		bool notify(false);
+		unsigned int notify(0);
 		{ scoped_lock lock(mutex_);
 			node.processed_by_multithreaded_scheduler_ = true;
 			// check whether all nodes have been processed
-			if(++processed_node_count_ == graph_size_) notify = true; // wake up the main processing loop
+			if(++processed_node_count_ == graph_size_) notify = 2; // wake up the main processing loop
 			else // check whether successors of the node we processed are now ready.
 				// iterate over all the outputs of the node we processed
 				if(node._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(node._connection[c]) {
@@ -313,15 +313,15 @@ void Player::process_loop() throw(std::exception) {
 						}
 					}
 					if(output_node_ready) {
-							// All the dependencies of the node have been processed.
-							// We add the node to the processing queue.
-							// (note: for the first node, we could reserve it for ourselves)
-							nodes_queue_.push_back(&output_node);
-							notify = true;
+						// All the dependencies of the node have been processed.
+						// We add the node to the processing queue.
+						nodes_queue_.push_back(&output_node);
+						++notify;
 					}
 				}
 		}
-		if(notify) condition_.notify_all(); // notify all threads that we added nodes to the queue
+		// If there's only one successor ready, we don't notify since it can be processed in the same thread.
+		if(notify > 1) condition_.notify_all(); // notify all threads that we added nodes to the queue
 	}
 }
 
