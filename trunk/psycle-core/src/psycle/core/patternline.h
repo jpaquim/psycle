@@ -47,8 +47,7 @@ class PatternLine {
 		std::map<int, PatternEvent> & tweaks() { return tweakMap; }
 		const std::map<int, PatternEvent> & tweaks() const { return tweakMap; }
 
-		///\todo why is this virtual?
-		virtual bool empty() const { return noteMap.empty() && tweakMap.empty(); }
+		bool empty() const { return noteMap.empty() && tweakMap.empty(); }
 
 	private:
 
