@@ -8,13 +8,6 @@
 #include <packageneric/module.private.hpp>
 #include "paths.hpp"
 #include "paths/implementation.hpp"
-namespace universalis
-{
-	namespace operating_system
-	{
-		namespace paths
-		{
-			#include "paths/injection/implementation.hpp"
-		}
-	}
-}
+namespace universalis { namespace operating_system { namespace paths {
+	#include "paths/injection/implementation.hpp"
+}}}
