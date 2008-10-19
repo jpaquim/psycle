@@ -280,11 +280,11 @@ namespace detail {
 					} catch(std::runtime_error const & e) {
 						BOOST_MESSAGE(e.what());
 					}
-					measure_clock_resolution("mmsystem timeGetTime", mme_system_time, 10000);
-					measure_clock_resolution("GetTickCount", tick_count, 10000);
-					measure_clock_resolution("GetSystemTimeAsFileTime", system_time_as_file_time_since_epoch, 10000);
-					measure_clock_resolution("GetProcessTimes", process_time, 10000);
-					measure_clock_resolution("GetThreadTimes", thread_time, 10000);
+					measure_clock_resolution("mmsystem timeGetTime", mme_system_time, 1000);
+					measure_clock_resolution("GetTickCount", tick_count, 1000);
+					measure_clock_resolution("GetSystemTimeAsFileTime", system_time_as_file_time_since_epoch, 1000);
+					measure_clock_resolution("GetProcessTimes", process_time, 1000);
+					measure_clock_resolution("GetThreadTimes", thread_time, 1000);
 				#endif
 			}
 		} // namespace test
