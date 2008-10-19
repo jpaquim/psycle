@@ -56,7 +56,7 @@ inline int f2i(double d)
 //////////////////////////////////////////////////////////////////////
 inline int floor2i(float x)
 {
-	#if defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
+	#if defined _MSC_VER && defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
 	__asm
 	{
 		FLD								DWORD PTR [x]
@@ -95,7 +95,7 @@ inline float fand(float val, int mask)
 #endif
 inline float fastexp(double x)
 {
-	#if defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
+	#if defined _MSC_VER && defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
 	__asm
 	{
 		FLDL2E
