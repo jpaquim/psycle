@@ -14,7 +14,7 @@ namespace {
 						throw
 							///\todo the following is making link error on mingw
 							//universalis::operating_system::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-							0;
+							std::runtime_error("could not get filename of program module");
 					return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 				#else
 					///\todo use binreloc instead
@@ -96,7 +96,10 @@ boost::filesystem::path const & home() {
 			char const * const path(std::getenv(env_var));
 			if(!path) {
 				std::ostringstream s; s << "The user has no defined home directory: the environment variable " << env_var << " is not set.";
-				throw universalis::operating_system::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+						throw
+							///\todo the following is making link error on mingw
+							//universalis::operating_system::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+							std::runtime_error(s.str());
 			}
 			return boost::filesystem::path(path, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 		}
