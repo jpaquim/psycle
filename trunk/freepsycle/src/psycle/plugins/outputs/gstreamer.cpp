@@ -361,10 +361,12 @@ bool gstreamer::started() const {
 	}
 }
 
+/// this is called from within gstreamer's processing thread.
 void gstreamer::handoff_static(::GstElement * source, ::GstBuffer * buffer, ::GstPad * pad, gstreamer * instance) {
 	instance->handoff(*buffer, *pad);
 }
 
+/// this is called from within gstreamer's processing thread.
 void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	if(false && loggers::trace()) {
 		std::ostringstream s; s << "handoff";
@@ -408,6 +410,7 @@ void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	}
 }
 
+/// this is called from within psycle's host's processing thread.
 void gstreamer::do_process() throw(engine::exception) {
 	if(false && loggers::trace()) {
 		std::ostringstream s; s << "process";

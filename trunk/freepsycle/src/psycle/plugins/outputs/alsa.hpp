@@ -18,7 +18,7 @@ namespace psycle { namespace plugins { namespace outputs {
 /// outputs to a soundcard device via alsa output implementation.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource {
 	protected: friend class virtual_factory_access;
-		alsa(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
+		alsa(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 		virtual ~alsa() throw();
 	public:
 		engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }

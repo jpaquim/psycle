@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2008 members of the psycle project http://psycle.sourceforge.net ; erodix ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::output
 #pragma once
@@ -9,6 +8,8 @@
 
 #if defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__GSTREAMER
 	#include "outputs/gstreamer.hpp"
+#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__JACK
+	#include "outputs/jack.hpp"
 #elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__ALSA
 	#include "outputs/alsa.hpp"
 #elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DIRECT_SOUND
@@ -26,6 +27,8 @@ namespace psycle { namespace plugins {
 typedef outputs::
 	#if defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__GSTREAMER
 		gstreamer
+	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__JACK
+		jack
 	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__ALSA
 		alsa
 	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DIRECT_SOUND
