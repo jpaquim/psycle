@@ -9,14 +9,7 @@
 #include "paths/interface.hpp"
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__PATHS
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace universalis
-{
-	namespace operating_system
-	{
-		namespace paths
-		{
-			#include "paths/injection/interface.hpp"
-		}
-	}
-}
+namespace universalis { namespace operating_system { namespace paths {
+	#include "paths/injection/interface.hpp"
+}}}
 #include <universalis/compiler/dynamic_link/end.hpp>

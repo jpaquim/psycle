@@ -12,11 +12,9 @@ path const UNIVERSALIS__COMPILER__DYNAMIC_LINK & share();
 path const UNIVERSALIS__COMPILER__DYNAMIC_LINK & var();
 path const UNIVERSALIS__COMPILER__DYNAMIC_LINK & etc();
 path const UNIVERSALIS__COMPILER__DYNAMIC_LINK & home();
-namespace package
-{
+namespace package {
 	std::string const UNIVERSALIS__COMPILER__DYNAMIC_LINK & name();
-	namespace version
-	{
+	namespace version {
 		std::string const UNIVERSALIS__COMPILER__DYNAMIC_LINK & string();
 		/// it couldn't be named just 'major', because 'major' is a #define in <sys/sysmacros.h> used for device nodes and <cstdint> includes it.
 		unsigned int UNIVERSALIS__COMPILER__DYNAMIC_LINK major_number() throw();
