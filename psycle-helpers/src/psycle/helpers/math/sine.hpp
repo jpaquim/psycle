@@ -50,50 +50,53 @@ Real fast_sin(Real const & radians) {
 	return y;
 }
 
-#if defined BOOST_AUTO_TEST_CASE && 0 ///\todo fail at runtime on old mingw
-	template<unsigned int Polynomial_Degree, typename Real>
-	void fast_sin_test_template() {
-		using namespace universalis::operating_system::clocks;
-		//typedef thread clock;
-		typedef monotonic clock;
-		int const iterations(1000000);
-		std::nanoseconds const t1(clock::current());
-		Real const step(pi / 1000);
-		Real f1(1), ff1(0);
-		for(int i(0); i < iterations; ++i) {
-			//too slow: f1 = std::fmod(f1 + pi, 2 * pi) - pi;
-			f1 += fast_sin<2>(ff1);
-			ff1 += step;
-			if(ff1 > pi) ff1 -= 2 * pi;
+#if defined BOOST_AUTO_TEST_CASE
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR < 4
+		///\todo fail at runtime on old mingw
+	#else
+		template<unsigned int Polynomial_Degree, typename Real>
+		void fast_sin_test_template() {
+			using namespace universalis::operating_system::clocks;
+			//typedef thread clock;
+			typedef monotonic clock;
+			int const iterations(1000000);
+			std::nanoseconds const t1(clock::current());
+			Real const step(pi / 1000);
+			Real f1(1), ff1(0);
+			for(int i(0); i < iterations; ++i) {
+				//too slow: f1 = std::fmod(f1 + pi, 2 * pi) - pi;
+				f1 += fast_sin<2>(ff1);
+				ff1 += step;
+				if(ff1 > pi) ff1 -= 2 * pi;
+			}
+			std::nanoseconds const t2(clock::current());
+			Real f2(1), ff2(0);
+			for(int i(0); i < iterations; ++i) {
+				f2 += std::sin(ff2);
+				ff2 += step;
+			}
+			std::nanoseconds const t3(clock::current());
+			{
+				std::ostringstream s; s << "fast_sin<Polynomial_Degree = " << Polynomial_Degree << ", Real = " << universalis::compiler::typenameof(f1) << ">: " << f1;
+				BOOST_MESSAGE(s.str());
+			}
+			{
+				std::ostringstream s; s << "std::sin: " << f2;
+				BOOST_MESSAGE(s.str());
+			}
+			{
+				std::ostringstream s;
+				s << (t2 - t1).get_count() * 1e-9 << "s < " << (t3 - t2).get_count() * 1e-9 << "s";
+				BOOST_MESSAGE(s.str());
+			}
+			BOOST_CHECK(t2 - t1 < t3 - t2);
 		}
-		std::nanoseconds const t2(clock::current());
-		Real f2(1), ff2(0);
-		for(int i(0); i < iterations; ++i) {
-			f2 += std::sin(ff2);
-			ff2 += step;
+		BOOST_AUTO_TEST_CASE(fast_sin_test) {
+			fast_sin_test_template<2, float>();
+			fast_sin_test_template<4, float>();
+			fast_sin_test_template<2, double>();
+			fast_sin_test_template<4, double>();
 		}
-		std::nanoseconds const t3(clock::current());
-		{
-			std::ostringstream s; s << "fast_sin<Polynomial_Degree = " << Polynomial_Degree << ", Real = " << universalis::compiler::typenameof(f1) << ">: " << f1;
-			BOOST_MESSAGE(s.str());
-		}
-		{
-			std::ostringstream s; s << "std::sin: " << f2;
-			BOOST_MESSAGE(s.str());
-		}
-		{
-			std::ostringstream s;
-			s << (t2 - t1).get_count() * 1e-9 << "s < " << (t3 - t2).get_count() * 1e-9 << "s";
-			BOOST_MESSAGE(s.str());
-		}
-		BOOST_CHECK(t2 - t1 < t3 - t2);
-	}
-	BOOST_AUTO_TEST_CASE(fast_sin_test) {
-		fast_sin_test_template<2, float>();
-		fast_sin_test_template<4, float>();
-		fast_sin_test_template<2, double>();
-		fast_sin_test_template<4, double>();
-	}
+	#endif
 #endif
-
 }}}
