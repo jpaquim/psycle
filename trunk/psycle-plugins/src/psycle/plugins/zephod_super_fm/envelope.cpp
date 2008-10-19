@@ -1,5 +1,4 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-#include <packageneric/pre-compiled.private.hpp>
 #include "envelope.hpp"
 
 envelope::envelope()

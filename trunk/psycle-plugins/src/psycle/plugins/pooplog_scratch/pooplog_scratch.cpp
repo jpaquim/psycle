@@ -36,7 +36,6 @@ v0.01b
 // a wet/dry for signal coming in to buffer - this will work like resonance
 /////////////////////////////////////////////////////////////////////
 	*/
-#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cstdlib>

@@ -3,7 +3,6 @@
 // Dmitry "Sartorius" Kulikov FluidSynth plugin for PSYCLE
 //
 
-//#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/project.private.hpp>
 
 #include <psycle/plugin_interface.hpp>

@@ -2,7 +2,6 @@
 // filter.cpp: implementation of the filter class.
 //
 //////////////////////////////////////////////////////////////////////
-#include <packageneric/pre-compiled.private.hpp>
 
 #include "filter.h"
 

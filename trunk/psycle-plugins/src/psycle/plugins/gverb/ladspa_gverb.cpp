@@ -13,7 +13,6 @@ Comments and suggestions should be mailed to Juhana Sadeharju
 
 */
 
-#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cstring>

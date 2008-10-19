@@ -1,5 +1,4 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <string.h>
 #include <stdlib.h>
@@ -183,7 +182,6 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 // following is an unfinished port to the new plugin interface
 #if 0
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "plugin.hpp"
 ///\file
 ///\brief arguru simple distortion/saturator plugin

@@ -5,7 +5,6 @@
 
 /// \file
 /// \brief just a multiplier
-#include <packageneric/pre-compiled.private.hpp>
 #include "plugin.hpp"
 namespace psycle { namespace plugin {
 

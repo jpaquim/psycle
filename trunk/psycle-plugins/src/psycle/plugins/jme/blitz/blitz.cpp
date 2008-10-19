@@ -17,7 +17,6 @@
 		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "blitz.h"
 
 CMachineParameter const paraGlobal = 

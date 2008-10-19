@@ -5,7 +5,6 @@
 
 /// \file
 /// \brief Haas stereo time delay spatial localization
-#include <packageneric/pre-compiled.private.hpp>
 #include "plugin.hpp"
 #include <cassert>
 #include <vector>

@@ -1,5 +1,4 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-#include <packageneric/pre-compiled.private.hpp>
 #include "AllPass.hpp"
 
 // Allpass filter implementation

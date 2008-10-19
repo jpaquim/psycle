@@ -1,5 +1,4 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-#include <packageneric/pre-compiled.private.hpp>
 #include <cassert>
 #include "oscillator.hpp"
 

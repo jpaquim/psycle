@@ -5,7 +5,6 @@
 
 /// \file
 /// \brief ring modulator with frequency modulation of the amplitude modulation
-#include <packageneric/pre-compiled.private.hpp>
 #include "plugin.hpp"
 #include <psycle/helpers/math/pi.hpp>
 #include <psycle/helpers/math/remainder.hpp>

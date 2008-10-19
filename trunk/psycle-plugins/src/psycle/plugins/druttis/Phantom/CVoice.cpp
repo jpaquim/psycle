@@ -6,7 +6,6 @@
 //				druttis@darkface.pp.se
 //
 //============================================================================
-#include <packageneric/pre-compiled.private.hpp>
 #include "CVoice.h"
 
 double coeff[5][11] = {

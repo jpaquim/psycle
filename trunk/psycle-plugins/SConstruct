@@ -61,6 +61,8 @@ modules = []
 plugin_modules = []
 
 project.contexes().source().compilers().cxx().paths().add(['src'])
+#project.contexes().compilers().cxx().paths().add([os.path.join(os.pardir, 'diversalis', 'src')])
+#project.contexes().compilers().cxx().paths().add([os.path.join(os.pardir, 'universalis', 'src')])
 project.contexes().compilers().cxx().paths().add([os.path.join(os.pardir, 'psycle-helpers', 'src')])
 
 # todo we fucking need to agree on a naming convention here!

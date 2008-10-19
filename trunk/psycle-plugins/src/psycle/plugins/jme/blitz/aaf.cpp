@@ -22,7 +22,6 @@
 // Samplerate: 705KHz (44KHz x 16)
 // 3dB Pass Band Ripple
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "aaf.h"
 
 AAF16::AAF16(){

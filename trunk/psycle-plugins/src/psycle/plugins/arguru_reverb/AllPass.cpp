@@ -1,9 +1,13 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-#include <packageneric/pre-compiled.private.hpp>
+#include "AllPass.hpp"
+#include <diversalis/diversalis.hpp>
 #if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <xmmintrin.h>
 #endif
-#include "AllPass.hpp"
+#include <cstdlib>
+#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	extern "C" int posix_memalign(void **, std::size_t, std::size_t) throw();
+#endif
 
 CAllPass::CAllPass()
 {
