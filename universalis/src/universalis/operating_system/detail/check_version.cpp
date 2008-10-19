@@ -94,7 +94,7 @@ namespace universalis
 									std::ostringstream s;
 									s << "Your operating system did not want to report its version. Bailing out.";
 									loggers::exception()("error: " + s.str());
-									::MessageBox(0, s.str().c_str(), "Operating system version error", MB_ICONERROR);
+									::MessageBoxA(0, s.str().c_str(), "Operating system version error", MB_ICONERROR);
 									throw exceptions::runtime_error(s.str() + exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 								}
 								if(loggers::information()())
