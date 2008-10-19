@@ -1,6 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::operating_system::loggers
 #include <packageneric/pre-compiled.private.hpp>
@@ -15,21 +15,13 @@ namespace universalis { namespace operating_system {
 // logger
 
 void logger::log(int const level, std::string const & message, compiler::location const & location) throw() {
-	#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1310
-		///\todo this is crashing here at runtime with msvc7.1 ... some static var doesn't seem to get initialized properly
-		///\todo test again on msvc7.1 since the code has been redesigned.
-		boost::mutex::scoped_lock lock(mutex());
-		do_log(level, message, location);
-	#endif
+	boost::mutex::scoped_lock lock(mutex());
+	do_log(level, message, location);
 }
 
 void logger::log(int const level, std::string const & string) throw() {
-	#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1310
-		///\todo this is crashing here at runtime with msvc7.1 ... some static var doesn't seem to get initialized properly
-		///\todo test again on msvc7.1 since the code has been redesigned.
-		boost::mutex::scoped_lock lock(mutex());
-		do_log(level, string);
-	#endif
+	boost::mutex::scoped_lock lock(mutex());
+	do_log(level, string);
 }
 
 namespace loggers {
@@ -93,7 +85,6 @@ void stream_logger::do_log(int const level, std::string const & message, compile
 	do_log(level, s.str());
 }
 
-// [bohan] msvc-7.1 crashes if we put this function in the implementation file instead of inlined in the header.
 void stream_logger::do_log(int const level, std::string const & string) throw() {
 	int const static levels [] = {'T', 'I', 'W', 'E', 'C'};
 	int const static colors [] = {0, 2, 6, 1, 5, 3, 4, 7};
