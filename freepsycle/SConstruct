@@ -1,8 +1,7 @@
 #! /usr/bin/env scons
 
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-# copyright 2006-2007 johan boule <bohan@jabber.org>
-# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
+# copyright 2006-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
 import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
@@ -69,6 +68,17 @@ gstreamer = external_package_check(project, name = 'gstreamer', url = 'http://gs
 		'cygwin': '...'
 	},
 	dependencies = [pkg_config_check(project, name = 'gstreamer-0.10 >= 0.10 gstreamer-plugins-base-0.10 >= 0.10')]
+)
+
+jack = external_package_check(project, name = 'jack', url = 'http://jackaudio.org',
+	distribution_packages = {
+		'zero-install': '...',
+		'debian and ubuntu': 'libjack-dev (>= 0.100)',
+		'gentoo': '...',
+		'fedora': '...',
+		'cygwin': '...'
+	},
+	dependencies = [pkg_config_check(project, name = 'jack >= 0.100')]
 )
 
 alsa = external_package_check(project, name = 'alsa', url = 'http://alsa-project.org',
@@ -285,6 +295,14 @@ if alsa.result():
 		dependencies = [alsa, stream_module.as_dependency()]
 	)
 	if not default_output_plugin_module: default_output_plugin_module = alsa_output_plugin_module
+
+if jack.result():
+	jack_output_plugin_module = output_plugin_uniform_module(
+		name = 'jack',
+		description = 'jack output plugin',
+		dependencies = [jack, stream_module.as_dependency()]
+	)
+	if not default_output_plugin_module: default_output_plugin_module = jack_output_plugin_module
 
 dummy_output_plugin_module = output_plugin_uniform_module(
 	name = 'dummy',
