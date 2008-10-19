@@ -16,7 +16,7 @@ namespace {
 					///\todo use binreloc instead
 					return boost::filesystem::path(".") /
 						#if defined PACKAGENERIC__MODULE__NAME
-							 PACKAGENERIC__MODULE__NAME;
+							PACKAGENERIC__MODULE__NAME;
 						#else
 							"unknown-module";
 						#endif
