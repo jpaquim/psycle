@@ -133,7 +133,7 @@ namespace universalis
 						std::ostringstream s;
 						s << "Your operating system reported itself as being a derivation of MSDOS. This program will only run on derivations of NT. Bailing out.";
 						loggers::exception()("error: " + s.str());
-						::MessageBox(0, s.str().c_str(), "Operating system version error: MSDOS", MB_ICONERROR);
+						::MessageBoxA(0, s.str().c_str(), "Operating system version error: MSDOS", MB_ICONERROR);
 						throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					}
 				#endif
