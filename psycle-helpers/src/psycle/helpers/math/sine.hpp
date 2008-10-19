@@ -51,7 +51,7 @@ Real fast_sin(Real const & radians) {
 }
 
 #if defined BOOST_AUTO_TEST_CASE
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR < 4
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR < 4
 		///\todo fail at runtime on old mingw
 	#else
 		template<unsigned int Polynomial_Degree, typename Real>
