@@ -74,7 +74,6 @@ CSynthTrack::CSynthTrack()
 	VcfEnvValue=0.0f;
 
 	fltMode=1;
-	m_filter.init(44100);
 }
 
 CSynthTrack::~CSynthTrack()
@@ -142,7 +141,6 @@ float CSynthTrack::GetSample()
 	VcfEnvMod=(float)vpar->EnvMod;
 	VcfCutoff=(float)vpar->Cutoff;
 	VcfResonance=(float)vpar->Resonance/256.0f;
-	float output=0;
 	if (trigger==false)				voicevol=nextvoicevol;
 	replaycount--;
 	if (replaycount <= 0){
@@ -168,14 +166,19 @@ float CSynthTrack::GetSample()
 			switch(cur_command){
 				case 3: cur_realnote=(cur_realnote+cur_parameter)&127; if (cur_realnote>95) cur_realnote-=32; break;
 				case 4: cur_realnote=(cur_realnote-cur_parameter)&127; if (cur_realnote>95) cur_realnote-=32; break;
-				case 5: cur_pw=cur_parameter<<2; break;
-				case 6: cur_pw=(cur_pw+(cur_parameter<<2))&2047; break;
-				case 7: cur_pw=(cur_pw-(cur_parameter<<2))&2047; break;
+				case 5: cur_pw=cur_parameter<<3; break;
+				case 6: cur_pw=(cur_pw+(cur_parameter<<3))&2047; break;
+				case 7: cur_pw=(cur_pw-(cur_parameter<<3))&2047; break;
 				case 8: OSCPosition=cur_parameter<<4; break;
 				case 9: fltMode=0; break;
 				case 10: fltMode=1; break;
 				case 11: fltMode=2; break;
-				case 15: if(stopsend==false) { stopsend=true; NoteOff(); } break;
+				case 12: fltMode=3; break;
+				case 13: fltMode=4; break;
+				case 14: fltMode=5; break;
+				case 15: fltMode=6; break;
+				case 16: fltMode=7; break;
+				case 17: if(stopsend==false) { stopsend=true; NoteOff(); } break;
 			}
 			if (vpar->Speed[perf_index]) {
 				cur_speed=vpar->Speed[perf_index];
@@ -194,35 +197,52 @@ float CSynthTrack::GetSample()
 		OSCSpeed*=0.0625;
 	}
 
-	for (int i = 0; i<16; i++){
-		switch(cur_waveform)
-		{
-			case 5:								output+=vpar->Wavetable[cur_waveform]
-				[psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition+cur_pw-0.5)]; break;
-			case 8:								output+=vpar->shortnoise; break;
-			default:				output+=vpar->Wavetable[cur_waveform]
-				[psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition-0.5)]; break;
-		}
-		OSCPosition+=OOSCSpeed;
-		if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
+	int pos;
+	float sample;
+	float output=0.0f;
+
+
+	switch(cur_waveform)
+	{
+		case 5:	{	// pulse
+					for (int i = 0; i<16; i++){
+						OSCPosition+=OOSCSpeed;
+						if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
+						pos = psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition-0.5f);
+						sample=vpar->Wavetable[cur_waveform][pos+cur_pw];
+						output+=aaf1.process((vpar->Wavetable[cur_waveform][((pos+1)&2047)+cur_pw] - sample) * (OSCPosition - (float)pos) + sample);
+					}
+					break;
+				}
+		case 8: {	// low noise
+					for (int i = 0; i<16; i++) output+=vpar->shortnoise;
+					break;
+				}
+		default: {  // static waves
+					for (int i = 0; i<16; i++){
+						OSCPosition+=OOSCSpeed;
+						if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
+						pos = psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition-0.5f);
+						sample=vpar->Wavetable[cur_waveform][pos];
+						output+=aaf1.process((vpar->Wavetable[cur_waveform][(pos+1)&2047] - sample) * (OSCPosition - (float)pos) + sample);
+					}
+					break;
+				}
 	}
-	output*=0.0625;
+	output*=0.0625f;
 	if (cur_waveform > 6) vpar->noiseused=true;
 	GetEnvVcf();
 
-	if(!timetocompute--)
-	{
-		if ((fltMode == 1) || (fltMode == 2)){
-			int realcutoff=VcfCutoff+VcfEnvMod*VcfEnvValue;
-			if(realcutoff<1)realcutoff=1;
-			if(realcutoff>250)realcutoff=250;
-			m_filter.setfilter(fltMode-1,realcutoff,vpar->Resonance);
-			timetocompute=FILTER_CALC_TIME;
-		}
+	if (fltMode != 0){
+		int realcutoff=VcfCutoff+VcfEnvMod*VcfEnvValue;
+		if(realcutoff<0.0f)realcutoff=0.0f;
+		if(realcutoff>256.0f)realcutoff=256.0f;
+		filter.setAlgorithm((eAlgorithm)(fltMode - 1));
+		filter.recalculateCoeffs(((float)realcutoff)/256.0f, (float)vpar->Resonance/256.0f);
+		filter.process(output); 
 	}
 	rcVol+=(((GetEnvAmp()*OSCVol*voicevol)-rcVol)*rcVolCutoff);
-	if (fltMode) return m_filter.res(output)*rcVol;
-	else return output*rcVol;
+	return output*rcVol;
 }
 
 float CSynthTrack::GetEnvAmp()

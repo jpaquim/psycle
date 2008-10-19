@@ -1,69 +1,106 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
+/*		CSIDFilter (C)2008 Jeremy Evers, http:://jeremyevers.com
+
+		This program is free software; you can redistribute it and/or modify
+		it under the terms of the GNU General Public License as published by
+		the Free Software Foundation; either version 2 of the License, or
+		(at your option) any later version.\n"\
+
+		This plugin is distributed in the hope that it will be useful,
+		but WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+		GNU General Public License for more details.
+
+		You should have received a copy of the GNU General Public License
+		along with this program; if not, write to the Free Software
+		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+
 #include <packageneric/pre-compiled.private.hpp>
 #include "filter.h"
+#define piX2		 6.283185307179586476925286766559f
+#define ANTIDENORMAL 1e-15f // could be 1e-18f, but this is still way below audible noise threshold
 
-#define INTERPOLATE(pos,start,end) ((start)+(pos)*((end)-(start)))
 
-void filter::SetFilter_4PoleLP(int CurCutoff, int Resonance)
+CSIDFilter::CSIDFilter()
 {
-	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
-	float cf=(float)CutoffFreq;
-	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
-	if (cf<11) cf=(float)(11.0);
-	float ScaleResonance=1.0;
-	float fQ=(float)sqrt(1.01+14*Resonance*ScaleResonance/240.0);
+	m_f = m_fb = 0;
+	reset();
+};
 
-	float fB=(float)sqrt(fQ*fQ-1)/fQ;
-	float fA=(float)(2*fB*(1-fB));
 
-	float A,B;
+void CSIDFilter::reset()
+{
+	m_low=m_high=m_band=0;
+};
 
-	float ncf=(float)(1.0/tan(3.1415926*cf/(double)sr));
-	A=fA*ncf;      // denormalizacja i uwzglêdnienie czêstotliwoœci próbkowania
-	B=fB*ncf*ncf;
-	float a0=float(1/(1+A+B));
-	Biquad.m_b1=2*(Biquad.m_b2=Biquad.m_b0=a0);// obliczenie wspó³czynników filtru cyfrowego (przekszta³cenie dwuliniowe)
-	Biquad.m_a1=a0*(2-B-B);
-	Biquad.m_a2=a0*(1-A+B);
+void CSIDFilter::setAlgorithm(eAlgorithm a_algo)
+{
+	m_Algorithm = a_algo;
 }
 
-void filter::SetFilter_4PoleEQ1(int CurCutoff, int Resonance)
+void CSIDFilter::recalculateCoeffs(const float a_fFrequency, const float a_fFeedback)
 {
-	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
-	float cf=(float)CutoffFreq;
-	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
-	if (cf<33) cf=(float)(33.0);
-	Biquad.SetParametricEQ(cf,(float)(1.0+Resonance/12.0),float(6+Resonance/30.0),sr,0.4f/(1+(240-Resonance)/120.0f));
+	//m_f = (200.0f+(17800.0f*6*a_fFrequency))*44100/sampleRate*2*PIf/985248.0f;
+	m_f =(1.0f+(534.0f*a_fFrequency))*0.00127545253726566f; 
+	float f2 = 2.0f*(a_fFeedback-(a_fFrequency*a_fFrequency)); 
+	if (f2 < 0.0f) f2 = 0.0f;
+	m_fb = 1.0f/(0.707f+f2);
 }
 
-void filter::SetFilter_4PoleEQ2(int CurCutoff, int Resonance)
+void CSIDFilter::process(float& sample)
 {
-	float CutoffFreq=(float)(564*std::pow(32.,CurCutoff/240.0));
-	float cf=(float)CutoffFreq;
-	if (cf>=sr/2) cf=sr/2; // próba wprowadzenia nieliniowoœci przy koñcu charakterystyki
-	if (cf<33) cf=(float)(33.0);
-	Biquad.SetParametricEQ(cf,8.0f,9.0f,sr,0.5f);
-}
+	const float f = m_f;
+	const float fb = m_fb;
+	float low = m_low;
+	float band = m_band;
+	float high = m_high;
 
-#define THREESEL(sel,a,b,c) ((sel)<120)?((a)+((b)-(a))*(sel)/120):((b)+((c)-(b))*((sel)-120)/120)
+	low -= (f*band);
+	band -= (f*high);
+	high = (band*fb) - low - sample + ANTIDENORMAL;
 
-void filter::SetFilter_Vocal1(int CurCutoff, int Resonance)
-{
-	float CutoffFreq=CurCutoff;
-	float Cutoff1=THREESEL(CutoffFreq,270,400,800);
-	Biquad.SetParametricEQ(Cutoff1,2.0f+Resonance/48.0f,6.0f+Resonance/24.0f,sr,0.3f);
+	switch (m_Algorithm)
+	{
+		case FILTER_ALGO_SID_LPF:
+		{
+			sample = low;
+			break;
+		}
+		case FILTER_ALGO_SID_HPF:
+		{
+			sample = high;
+			break;
+		}
+		case FILTER_ALGO_SID_BPF:
+		{
+			sample = band;
+			break;
+		}
+		case FILTER_ALGO_SID_LPF_HPF:
+		{
+			sample = low + high;
+			break;
+		}
+		case FILTER_ALGO_SID_LPF_BPF:
+		{
+			sample = low + band;
+			break;
+		}
+		case FILTER_ALGO_SID_LPF_HPF_BPF:
+		{
+			sample = low + band + high;
+			break;
+		}
+		case FILTER_ALGO_SID_HPF_BPF:
+		{
+			sample = band + high;
+			break;
+		}
+		default:
+			break;
+	}
+	m_low = low;
+	m_band = band;
+	m_high = high;
 }
-
-void filter::SetFilter_Vocal2(int CurCutoff, int Resonance)
-{
-	float CutoffFreq=CurCutoff;
-	float Cutoff1=THREESEL(CutoffFreq,270,400,650);
-	Biquad.SetParametricEQ(Cutoff1,2.0f+Resonance/56.0f,6.0f+Resonance/16.0f,sr,0.3f);
-}
-
-/*
-void filter::SetFilter_ResonantHiPass(int CurCutoff, int Resonance)
-{
-	Biquad.SetResonantHP(float dCutoff, float Q, float dSampleRate)
-}
-*/

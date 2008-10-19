@@ -678,7 +678,7 @@ CMachineParameter const paraCommand1 =
 	"Command 1",
 	"Command 1",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -688,7 +688,7 @@ CMachineParameter const paraCommand2 =
 	"Command 2",
 	"Command 2",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -698,7 +698,7 @@ CMachineParameter const paraCommand3 =
 	"Command 3",
 	"Command 3",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -707,7 +707,7 @@ CMachineParameter const paraCommand4 =
 	"Command 4",
 	"Command 4",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -716,7 +716,7 @@ CMachineParameter const paraCommand5 =
 	"Command 5",
 	"Command 5",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -725,7 +725,7 @@ CMachineParameter const paraCommand6 =
 	"Command 6",
 	"Command 6",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -734,7 +734,7 @@ CMachineParameter const paraCommand7 =
 	"Command 7",
 	"Command 7",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -743,7 +743,7 @@ CMachineParameter const paraCommand8 =
 	"Command 8",
 	"Command 8",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -752,7 +752,7 @@ CMachineParameter const paraCommand9 =
 	"Command 9",
 	"Command 9",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -761,7 +761,7 @@ CMachineParameter const paraCommand10 =
 	"Command 10",
 	"Command 10",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -770,7 +770,7 @@ CMachineParameter const paraCommand11 =
 	"Command 11",
 	"Command 11",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -779,7 +779,7 @@ CMachineParameter const paraCommand12 =
 	"Command 12",
 	"Command 12",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -788,7 +788,7 @@ CMachineParameter const paraCommand13 =
 	"Command 13",
 	"Command 13",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -797,7 +797,7 @@ CMachineParameter const paraCommand14 =
 	"Command 14",
 	"Command 14",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -806,7 +806,7 @@ CMachineParameter const paraCommand15 =
 	"Command 15",
 	"Command 15",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -815,7 +815,7 @@ CMachineParameter const paraCommand16 =
 	"Command 16",
 	"Command 16",
 	0,
-	15,				
+	17,				
 	MPF_STATE,
 	0
 };
@@ -1450,7 +1450,7 @@ CMachineInfo const MacInfo =
 	#ifndef NDEBUG
 		"GameFX (Debug build)",
 	#else
-		"GameFX 1.3",
+		"GameFX 1.4",
 	#endif
 	"GameFX",
 	"jme",
@@ -1890,9 +1890,14 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			case 7:sprintf(txt,"Dec Pulse Width");return true;break;
 			case 8:sprintf(txt,"Set Osc Phase");return true;break;
 			case 9:sprintf(txt,"Filter: Off");return true;break;
-			case 10:sprintf(txt,"Filter: Lowpass (Default)");return true;break;
-			case 11:sprintf(txt,"Filter: Highpass");return true;break;
-			case 15:sprintf(txt,"Gate Off (Release)");return true;break;
+			case 10:sprintf(txt,"Filter: LPF (Default)");return true;break;
+			case 11:sprintf(txt,"Filter: HPF");return true;break;
+			case 12:sprintf(txt,"Filter: BPF");return true;break;
+			case 13:sprintf(txt,"Filter: LPF/HPF");return true;break;
+			case 14:sprintf(txt,"Filter: LPF/BPF");return true;break;
+			case 15:sprintf(txt,"Filter: LPF/BPF/HPF");return true;break;
+			case 16:sprintf(txt,"Filter: BPF/HPF");return true;break;
+			case 17:sprintf(txt,"Gate Off (Release)");return true;break;
 			default: sprintf(txt,"Reserved");return true;break;
 		}
 	}
