@@ -146,7 +146,7 @@ void exception::install_handler_in_thread() {
 					// http://jrfonseca.dyndns.org/projects/gnu-win32/software/drmingw/index.html#exchndl
 					// loads dr mingw's unhandled exception handler.
 					// it does not matter if the library fails to load, we just won't have this intermediate handler.
-					if(::LoadLibrary("exchndl")) operating_system::loggers::information()("unhandled exception filter loaded");
+					if(::LoadLibraryA("exchndl")) operating_system::loggers::information()("unhandled exception filter loaded");
 					else operating_system::loggers::information()("unhandled exception filter has not been loaded");
 				#endif
 			}
