@@ -1,7 +1,7 @@
 // generate the .png image file with: dot dependencies.dot -Tpng > dependencies.png
 digraph dependencies {
 	label = "module dependencies, transitive graph"
-	//rankdir = TB
+	rankdir = BT
 	//rankdir = LR
 	labelloc = t
 	fontname = verdana

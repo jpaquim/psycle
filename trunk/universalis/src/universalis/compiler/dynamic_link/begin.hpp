@@ -1,7 +1,6 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
 ///\brief handling of shared dynamic-link libraries for microsoft's dll format
@@ -14,7 +13,8 @@
 #if defined DIVERSALIS__COMPILER__DOXYGEN
 	#undef  UNIVERSALIS__COMPILER__DYNAMIC_LINK
 	/// handling of shared dynamic-link libraries in microsoft's dll format.
-	/// either UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT or UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT.
+	/// defined either to UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT or UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT for dynamic link,
+	/// or nothing for static link.
 	/// Note that the gcc/mingw compiler handles dll transparently thanks to automatic import and runtime pseudo-relocations :-)
 	#define UNIVERSALIS__COMPILER__DYNAMIC_LINK
 #else
@@ -23,7 +23,7 @@
 		#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
 	#elif UNIVERSALIS__COMPILER__DYNAMIC_LINK < 0 || UNIVERSALIS__COMPILER__CONCATENATED(PACKAGENERIC__MODULE__SOURCE__, UNIVERSALIS__COMPILER__DYNAMIC_LINK) < 0
 		#undef  UNIVERSALIS__COMPILER__DYNAMIC_LINK
-		#define UNIVERSALIS__COMPILER__DYNAMIC_LINK /* static link */
+		#define UNIVERSALIS__COMPILER__DYNAMIC_LINK // nothing needed for static link
 	#else
 		#undef  UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT

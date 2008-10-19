@@ -6,19 +6,22 @@
 
 namespace {
 	boost::filesystem::path const & process_executable_file_path() {
-		class once {
-			public:
-				boost::filesystem::path const static path() throw(std::exception) {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-						char module_file_name[UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
-						if(!::GetModuleFileName(0, module_file_name, sizeof module_file_name)) throw universalis::operating_system::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-						return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
-					#else
-						///\todo use main's argument #0 instead <- not! ... use binreloc instead
-						///\todo and distinguish symlinks
-						return boost::filesystem::path(".") / PACKAGENERIC__MODULE__NAME;
-					#endif
-				}
+		struct once {
+			boost::filesystem::path const static path() throw(std::exception) {
+				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					char module_file_name[UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
+					if(!::GetModuleFileName(0, module_file_name, sizeof module_file_name)) throw universalis::operating_system::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+					return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
+				#else
+					///\todo use binreloc instead
+					return boost::filesystem::path(".") /
+						#if defined PACKAGENERIC__MODULE__NAME
+							 PACKAGENERIC__MODULE__NAME;
+						#else
+							"unknown-module";
+						#endif
+				#endif
+			}
 		};
 		boost::filesystem::path const static once(once::path());
 		return once;
@@ -26,94 +29,73 @@ namespace {
 }
 			
 boost::filesystem::path const & bin() {
+	boost::filesystem::path const static once(process_executable_file_path().branch_path());
+	return once;
+}
+
+boost::filesystem::path const & lib() {
 	boost::filesystem::path const static once(
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			process_executable_file_path().branch_path()
-		#else
-			///\todo and distinguish symlinks
-			process_executable_file_path().branch_path()
+		bin()
+		#if defined PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_LIB
+			/ PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_LIB
 		#endif
 	);
 	return once;
 }
 
-#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-	namespace {
-		bool const stage() throw(std::exception) {
-			char const stage [] = {
-				#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD
-					PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD
-				#else
-					".libs"
-				#endif
-			};
-			return bin().leaf() == stage;
-		}
-	}
-#endif
-
-boost::filesystem::path const & lib() {
-	class once {
-		public:
-			boost::filesystem::path const static path() throw(std::exception) {
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					return bin();
-				#else
-					#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-						if(stage()) return bin();
-						else
-					#endif
-					return bin() / PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_LIB;
-				#endif
-			}
-	};
-	boost::filesystem::path const static once(once::path());
-	return once;
-}
-
 boost::filesystem::path const & share() {
-	class once {
-		public:
-			boost::filesystem::path const static path() throw(std::exception) {
-				#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-					if(stage()) return bin() / boost::filesystem::path(PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
-					else
-				#endif
-					return bin() / PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_SHARE;
-			}
-	};
-	boost::filesystem::path const static once(once::path());
+	boost::filesystem::path const static once(
+		bin() /
+		#if defined PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_SHARE
+			PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_SHARE
+		#else
+			"../share"
+		#endif
+	);
 	return once;
 }
 
 boost::filesystem::path const & var() {
-	boost::filesystem::path const static once(bin() / PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_VAR);
+	boost::filesystem::path const static once(
+		bin() /
+		#if defined PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_VAR
+			PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_VAR
+		#else
+			"../var"
+		#endif
+	);
 	return once;
 }
 
 boost::filesystem::path const & etc() {
-	boost::filesystem::path const static once(bin() / PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_ETC);
+	boost::filesystem::path const static once(
+		bin() /
+		#if defined PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_ETC
+			PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_ETC
+		#else
+			"../etc"
+		#endif
+	);
 	return once;
 }
 
 boost::filesystem::path const & home() {
-	class once {
-		public:
-			boost::filesystem::path const static path() throw(std::exception) {
-				char const env_var [] = {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-						"USERPROFILE"
-					#else
-						"HOME"
-					#endif
-				};
-				char const * const path(std::getenv(env_var));
-				if(!path) {
-					std::ostringstream s; s << "The user has no defined home directory: the environment variable " << env_var << " is not set.";
-					throw universalis::operating_system::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-				}
-				return boost::filesystem::path(path, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
+	struct once {
+		boost::filesystem::path const static path() {
+			char const env_var [] = {
+				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					"USERPROFILE"
+				#else
+					"HOME"
+				#endif
+			};
+			char const * const path(std::getenv(env_var));
+			if(!path) {
+				std::ostringstream s; s << "The user has no defined home directory: the environment variable " << env_var << " is not set.";
+				throw universalis::operating_system::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
+			return boost::filesystem::path(path, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
+		}
 	};
 	boost::filesystem::path const static once(once::path());
 	return once;
@@ -121,14 +103,30 @@ boost::filesystem::path const & home() {
 
 namespace package {
 	const std::string & name() {
-		static std::string once(PACKAGENERIC__PACKAGE__NAME);
+		static std::string once(
+			#if defined PACKAGENERIC__PACKAGE__NAME
+				PACKAGENERIC__PACKAGE__NAME
+			#else
+				"unknown-package"
+			#endif
+		);
 		return once;
 	}
 	
 	namespace version {
 		std::string const & string() {
-			static std::string once(
-				PACKAGENERIC__PACKAGE__VERSION " " PACKAGENERIC__CONFIGURATION__COMPILER__HOST
+			static const std::string once(
+				#if defined PACKAGENERIC__PACKAGE__VERSION
+					PACKAGENERIC__PACKAGE__VERSION
+				#else
+					"unknown-version"
+				#endif
+				" "
+				#if defined PACKAGENERIC__CONFIGURATION__COMPILER__HOST
+					PACKAGENERIC__CONFIGURATION__COMPILER__HOST
+				#else
+					"unknown-compiler"
+				#endif
 				#if !defined NDEBUG
 					" debug"
 				#endif
@@ -137,122 +135,58 @@ namespace package {
 		}
 
 		unsigned int major_number() throw() {
-			return PACKAGENERIC__PACKAGE__VERSION__MAJOR;
+			#if defined PACKAGENERIC__PACKAGE__VERSION__MAJOR
+				return PACKAGENERIC__PACKAGE__VERSION__MAJOR;
+			#else
+				return -1;
+			#endif
 		}
 
 		unsigned int minor_number() throw() {
-			return PACKAGENERIC__PACKAGE__VERSION__MINOR;
+			#if defined PACKAGENERIC__PACKAGE__VERSION__MINOR
+				return PACKAGENERIC__PACKAGE__VERSION__MINOR;
+			#else
+				return -1;
+			#endif
 		}
 
 		unsigned int patch_number() throw() {
-			return PACKAGENERIC__PACKAGE__VERSION__PATCH;
+			#if defined PACKAGENERIC__PACKAGE__VERSION__PATCH
+				return PACKAGENERIC__PACKAGE__VERSION__PATCH;
+			#else
+				return -1;
+			#endif
 		}
 	}
 	
 	boost::filesystem::path const & lib() {
-		class once {
-			public:
-				boost::filesystem::path const static path() throw(std::exception) {
-					#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-						#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-							if(stage()) return paths::lib();
-							else
-						#endif
-						return paths::lib() / name();
-					#else
-						return bin();
-					#endif
-				}
-		};
-		boost::filesystem::path const static once(once::path());
+		boost::filesystem::path const static once(
+			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				lib()
+			#else
+				paths::lib() / name()
+			#endif
+		);
 		return once;
 	}
 	
 	boost::filesystem::path const & share() {
-		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION <= 1300
-			using namespace paths; // work around msvc7 name lookup bug
-		#endif
-		class once {
-			public:
-				boost::filesystem::path const static path() throw(std::exception) {
-					#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-						if(stage())
-							return
-								#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1300 // work around msvc7 name lookup bug
-									paths::
-								#endif
-								share();
-						else
-					#endif
-					return
-						#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1300 // work around msvc7.1 name lookup bug
-							paths::
-						#endif
-						share() / name();
-				}
-		};
-		boost::filesystem::path const static once(once::path());
+		boost::filesystem::path const static once(paths::share() / name());
 		return once;
 	}
 	
 	boost::filesystem::path const & pixmaps() {
-		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION <= 1300
-			using namespace paths; // work around msvc7 name lookup bug
-		#endif
-		class once {
-			public:
-				boost::filesystem::path const static path() throw(std::exception) {
-					char const pixmaps [] = {"pixmaps"};
-					#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-						if(stage())
-							return
-								#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1300 // work around msvc7 name lookup bug
-									paths::
-								#endif
-								share() / pixmaps;
-						else
-					#endif
-					return
-						#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1300 // work around msvc7 name lookup bug
-							paths::
-						#endif
-						share() / pixmaps / name();
-				}
-		};
-		boost::filesystem::path const static once(once::path());
+		boost::filesystem::path const static once(paths::share() / "pixmaps" / name());
 		return once;
 	}
 
 	boost::filesystem::path const & doc() {
-		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION <= 1300
-			using namespace paths; // work around msvc7 name lookup bug
-		#endif
-		class once {
-			public:
-				boost::filesystem::path const static path() throw(std::exception) {
-					char const doc [] = {"doc"};
-					#if defined PACKAGENERIC__CONFIGURATION__STAGE_PATH__BUILD_TO_SOURCE
-						if(stage())
-							return
-								#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1300 // work around msvc7 name lookup bug
-									paths::
-								#endif
-								share() / doc;
-						else
-					#endif
-					return
-						#if !defined DIVERSALIS__COMPILER__MICROSOFT || DIVERSALIS__COMPILER__VERSION > 1300 // work around msvc7 name lookup bug
-							paths::
-						#endif
-						share() / doc / name(); ///\todo name().string() + "-doc"
-				}
-		};
-		boost::filesystem::path const static once(once::path());
+		boost::filesystem::path const static once(paths::share() / "doc" / name());
 		return once;
 	}
 
 	boost::filesystem::path const & var() {
-		boost::filesystem::path const static once(bin() / PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_VAR / name());
+		boost::filesystem::path const static once(paths::var() / name());
 		return once;
 	}
 	
@@ -262,7 +196,7 @@ namespace package {
 	}
 	
 	boost::filesystem::path const & etc() {
-		boost::filesystem::path const static once(bin() / PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_ETC / name());
+		boost::filesystem::path const static once(paths::etc() / name());
 		return once;
 	}
 
