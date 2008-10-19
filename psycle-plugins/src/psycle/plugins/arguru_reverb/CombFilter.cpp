@@ -16,8 +16,8 @@ CCombFilter::CCombFilter()
 	rightBuffer = static_cast<float*>(_aligned_malloc(MAX_COMB_DELAY*sizeof(float),16));
 #elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
 	///\todo mingw
-	leftBuffer= new float[MAX_ALLPASS_DELAY];
-	rightBuffer = new float[MAX_ALLPASS_DELAY];
+	leftBuffer= new float[MAX_COMB_DELAY];
+	rightBuffer = new float[MAX_COMB_DELAY];
 #elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	posix_memalign(reinterpret_cast<void**>(&leftBuffer),16,MAX_COMB_DELAY*sizeof(float));
 	posix_memalign(reinterpret_cast<void**>(&rightBuffer),16,MAX_COMB_DELAY*sizeof(float));

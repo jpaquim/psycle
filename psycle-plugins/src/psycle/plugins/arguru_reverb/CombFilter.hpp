@@ -1,7 +1,7 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 
-#define MAX_COMB_DELAY												88200
+#define MAX_COMB_DELAY 88200
 
 class CCombFilter  
 {
