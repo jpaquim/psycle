@@ -79,10 +79,10 @@ std::string code_description(
 				);
 				char * error_message_pointer(0);
 				::HMODULE module(0);
-				if(from_processor) module = ::LoadLibraryEx("ntdll", 0, LOAD_LIBRARY_AS_DATAFILE);
+				if(from_processor) module = ::LoadLibraryExA("ntdll", 0, LOAD_LIBRARY_AS_DATAFILE);
 				try {
 					if(module) flags |= FORMAT_MESSAGE_FROM_HMODULE;
-					if(::FormatMessage( // ouch! plain old c api style, this is ugly...
+					if(::FormatMessageA( // ouch! plain old c api style, this is ugly...
 							flags, module, code,
 							MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL),
 							reinterpret_cast<char*>(&error_message_pointer), // we *must* hard-cast! this seems to be a hack to extend an originally badly designed api... there is no other way to do it
@@ -101,4 +101,3 @@ std::string code_description(
 }
 
 }}}}
-
