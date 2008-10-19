@@ -12,7 +12,7 @@ goto HELP
 
 :DEBUG
 echo Running QMake
-qmake -recursive
+qmake -recursive CONFIG+=debug CONFIG-=release
 echo QMake Complete
 echo Compiling Debug Version
 mingw32-make debug
@@ -21,7 +21,7 @@ pause
 
 :RELEASE
 echo Running QMake
-qmake -recursive
+qmake -recursive CONFIG+=release CONFIG-=debug
 echo QMake Complete
 echo Compiling Release Version
 mingw32-make release
@@ -36,7 +36,7 @@ echo Cleaning Complete
 pause
 
 :HELP
-echo [automaker.bat] release : compiles release version.
-echo [automaker.bat] debug   : compiles debug version.
-echo [automaker.bat] help 	 : shows this prompt.
+echo [automaker.cmd] release : compiles release version.
+echo [automaker.cmd] debug   : compiles debug version.
+echo [automaker.cmd] help    : shows this help.
 pause
