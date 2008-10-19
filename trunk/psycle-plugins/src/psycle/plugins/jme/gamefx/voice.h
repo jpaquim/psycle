@@ -20,6 +20,7 @@
 
 #pragma once
 #include "filter.h"
+#include "aaf.h"
 
 struct PERFORMANCE
 {
@@ -75,7 +76,8 @@ public:
 	virtual ~CSynthTrack();
 	int AmpEnvStage;
 	
-	filter m_filter;
+	CSIDFilter filter;
+	AAF16 aaf1;
 
 private:
 	int fltMode;
