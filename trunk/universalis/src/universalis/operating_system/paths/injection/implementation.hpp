@@ -10,7 +10,7 @@ namespace {
 			boost::filesystem::path const static path() throw(std::exception) {
 				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					char module_file_name[UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
-					if(!::GetModuleFileName(0, module_file_name, sizeof module_file_name)) throw universalis::operating_system::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+					if(!::GetModuleFileNameA(0, module_file_name, sizeof module_file_name)) throw universalis::operating_system::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 				#else
 					///\todo use binreloc instead

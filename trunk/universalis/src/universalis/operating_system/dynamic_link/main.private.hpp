@@ -48,7 +48,7 @@
 			s << "library: ";
 			{
 				char file_name[DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
-				::GetModuleFileName(module, file_name, sizeof file_name);
+				::GetModuleFileNameA(module, file_name, sizeof file_name);
 				s << file_name << ": ";
 			}
 			s << "dll entry point: reason for call: ";

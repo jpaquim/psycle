@@ -79,7 +79,7 @@ namespace {
 			///\todo add more information using ::EXCEPTION_POINTERS * exception_pointers
 			#if 0
 				// The GetModuleBase function retrieves the base address of the module that contains the specified address. 
-				::DWORD static GetModuleBase(::DWORD dwAddress)
+				::DWORD static GetModuleBaseA(::DWORD dwAddress)
 				{
 					::MEMORY_BASIC_INFORMATION Buffer;
 					return ::VirtualQuery((::LPCVOID) dwAddress, &Buffer, sizeof Buffer) ? (::DWORD) Buffer.AllocationBase : 0;
@@ -87,7 +87,7 @@ namespace {
 
 				// Now print information about where the fault occured
 				rprintf(_T(" at location %08x"), (::DWORD) pExceptionRecord->ExceptionAddress);
-				if((hModule = (::HMODULE) ::GetModuleBase((::DWORD) pExceptionRecord->ExceptionAddress)) && ::GetModuleFileName(hModule, szModule, sizeof szModule))
+				if((hModule = (::HMODULE) ::GetModuleBaseA((::DWORD) pExceptionRecord->ExceptionAddress)) && ::GetModuleFileNameA(hModule, szModule, sizeof szModule))
 					rprintf(_T(" in module %s"), szModule);
 				
 				// If the exception was an access violation, print out some additional information, to the error log and the debugger.

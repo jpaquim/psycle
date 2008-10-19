@@ -173,7 +173,7 @@ boost::filesystem::path resolver::path() const throw() {
 		return path_;
 	#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		char module_file_name[UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
-		::GetModuleFileName(underlying_, module_file_name, sizeof module_file_name);
+		::GetModuleFileNameA(underlying_, module_file_name, sizeof module_file_name);
 		return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
 	#else
 		return boost::filesystem::path(underlying_->get_name(), boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
