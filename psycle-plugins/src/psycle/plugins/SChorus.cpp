@@ -9,7 +9,6 @@
 // and Toby Kurien's Audio Effects Algorithms
 // http://toby.za.net/dsp/index.htm
 
-#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cstring>

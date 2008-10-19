@@ -4,7 +4,6 @@
 
 ///\file
 ///\brief delay modulated by a sine
-#include <packageneric/pre-compiled.private.hpp>
 #include "plugin.hpp"
 #include <psycle/helpers/math/round.hpp>
 #include <psycle/helpers/math/sine_sequence.hpp>

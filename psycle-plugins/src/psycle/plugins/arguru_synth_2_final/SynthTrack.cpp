@@ -1,5 +1,4 @@
 // -*- mode:c++; indent-tabs-mode:t -*-
-#include <packageneric/pre-compiled.private.hpp>
 #include "SynthTrack.hpp"
 #include <math.h> ///\todo should be <cmath>
 ///\file arguru_synth_2_final/SynthTrack.cpp

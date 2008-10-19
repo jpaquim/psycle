@@ -2,7 +2,6 @@
 // SynthTrack.cpp: implementation of the CSynthTrack class.
 //
 //////////////////////////////////////////////////////////////////////
-#include <packageneric/pre-compiled.private.hpp>
 #include <cmath>
 #include "SynthTrack.h"
 

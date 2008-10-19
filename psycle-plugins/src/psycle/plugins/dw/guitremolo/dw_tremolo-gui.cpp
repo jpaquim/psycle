@@ -8,7 +8,6 @@
 // -not- pre_compiled_headers.pch.  also, the pdb should be changed to pre_compiled_headers.mfc.pdb
 //it won't compile if you don't do this!!
 
-#include <packageneric/pre-compiled.private.hpp>
 //#include <psycle/plugin_interface.hpp> //plugin_gui.hpp includes plugin_interface, so it's no longer necessary
 #include <psycle/plugin_gui.hpp>
 #include "resources.hpp"

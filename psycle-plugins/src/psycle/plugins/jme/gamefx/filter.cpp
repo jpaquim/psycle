@@ -16,7 +16,6 @@
 */
 
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "filter.h"
 #define piX2		 6.283185307179586476925286766559f
 #define ANTIDENORMAL 1e-15f // could be 1e-18f, but this is still way below audible noise threshold

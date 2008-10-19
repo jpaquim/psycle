@@ -21,7 +21,6 @@ v0.01b
 
 /////////////////////////////////////////////////////////////////////
 	*/
-#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cstdlib>

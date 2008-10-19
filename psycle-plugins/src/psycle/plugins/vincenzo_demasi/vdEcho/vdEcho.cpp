@@ -18,7 +18,6 @@
 		Vincenzo Demasi. E-Mail: <v.demasi@tiscali.it>
 */
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "vdEcho.hpp"
 #include <stdio.h>
 

@@ -18,7 +18,6 @@
 	*   (at your option) any later version.                                   *
 	*                                                                         *
 	***************************************************************************/
-#include <packageneric/pre-compiled.private.hpp>
 #include "voice.h"
 
 #include <cmath>

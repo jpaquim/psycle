@@ -16,7 +16,6 @@
 
 **********************************************************************/
 
-#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cstring>

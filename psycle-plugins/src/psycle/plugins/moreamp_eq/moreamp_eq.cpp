@@ -45,7 +45,6 @@
 	*
 	*   $Id: moreamp_eq.cpp 3616 2006-12-17 20:15:14Z johan-boule $$
 	*/
-#include <packageneric/pre-compiled.private.hpp>
 #include <psycle/plugin_interface.hpp>
 #include <cstdlib>
 #include <cmath>
