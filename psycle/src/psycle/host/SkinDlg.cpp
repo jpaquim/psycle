@@ -769,11 +769,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				while(std::fgets(buf, sizeof buf, hfile))
 				{
 					using helpers::hexstring_to_integer;
-					#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION <= 1300
-						// msvc 7.1 crashes because of the number of 'else if' statements
-						// so, we can't use 'else'
-						#define else
-					#endif
 					// this is a horror of repetitive code :-(
 					if (std::strstr(buf,"\"pattern_fontface\"=\""))
 					{
@@ -1367,11 +1362,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							hexstring_to_integer(q+1, _effect_font_point);
 						}
 					}
-					#if defined else // this is the case for DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION <= 1300
-						// msvc 7.1 crashes because of the number of 'else if' statements
-						// so, we can't use 'else'
-						#undef else
-					#endif
 				}
 				std::fclose(hfile);
 				//m_linenumbers.SetCheck(_linenumbers);

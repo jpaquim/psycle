@@ -37,9 +37,6 @@
 		// "A function is declared using exception specification, which Visual C++ accepts but does not implement.
 		// Code with exception specifications that are ignored during compilation may need to be
 		// recompiled and linked to be reused in future versions supporting exception specifications."
-	#if DIVERSALIS__COMPILER__VERSION < 1300
-		#pragma warning(disable:4786) // identifier was truncated to '255' characters in the debug information ; this is ultra shiatz.
-	#endif
 
 	//////////
 	// stupid
