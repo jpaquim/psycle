@@ -53,7 +53,10 @@ bool jack::opened() const {
 
 void jack::do_start() throw(engine::exception) {
 	resource::do_start();
-	if(::jack_activate(client_)) throw engine::exceptions::runtime_error("cannot activate client", UNIVERSALIS__COMPILER__LOCATION);
+	if(int err = ::jack_activate(client_)) {
+		std::ostringstream s; s << "cannot activate client: " << err;
+		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
 	char const ** ports;
 	if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput))) throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
 	try {
@@ -163,6 +166,10 @@ void jack::do_process() throw(engine::exception) {
 }
 
 void jack::do_stop() throw(engine::exception) {
+	if(int err = ::jack_deactivate(client_)) {
+		std::ostringstream s; s << "cannot deactivate client: " << err;
+		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
 	resource::do_stop();
 }
 
