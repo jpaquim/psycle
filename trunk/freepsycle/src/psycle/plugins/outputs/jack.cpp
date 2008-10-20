@@ -29,7 +29,7 @@ void jack::do_open() throw(engine::exception) {
 			"psycle"
 		#endif
 	);
-	int const client_name_max_lengh(::jack_client_name_size());
+	std::size_t const client_name_max_lengh(::jack_client_name_size());
 	if(client_name.length() > client_name_max_lengh) client_name = client_name.substr(0, client_name_max_lengh);
 	::JackStatus status;
 	if(!(client_ = ::jack_client_open(client_name.c_str(), ::JackNullOption, &status, server_name
