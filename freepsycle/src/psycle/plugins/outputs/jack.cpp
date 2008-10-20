@@ -54,7 +54,7 @@ void jack::do_start() throw(engine::exception) {
 	char const ** ports;
 	if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput))) throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
 	try {
-		//if(::jack_connect(client_, ::jack_port_name(playback_port_), ports)) throw engine::exceptions::runtime_error("could not connect output port", UNIVERSALIS__COMPILER__LOCATION);
+		if(::jack_connect(client_, ports[0], ::jack_port_name(playback_port_))) throw engine::exceptions::runtime_error("could not connect output port", UNIVERSALIS__COMPILER__LOCATION);
 	} catch(...) {
 		std::free(ports);
 		throw;
