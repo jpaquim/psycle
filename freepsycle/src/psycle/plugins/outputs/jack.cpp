@@ -22,14 +22,17 @@ jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::
 void jack::do_open() throw(engine::exception) {
 	resource::do_open();
 	char const * server_name(0);
-	::JackStatus status;
-	if(!(client_ = ::jack_client_open(
+	std::string client_name(
 		#if defined PACKAGENERIC__MODULE__NAME
 			PACKAGENERIC__MODULE__NAME
 		#else
 			"psycle"
 		#endif
-		, ::JackNullOption, &status, server_name
+	);
+	int const client_name_max_lengh(::jack_client_name_size());
+	if(client_name.length() > client_name_max_lengh) client_name = client_name.substr(0, client_name_max_lengh);
+	::JackStatus status;
+	if(!(client_ = ::jack_client_open(client_name.c_str(), ::JackNullOption, &status, server_name
 	))) {
 		std::ostringstream s; s << "could not open client: status: " << status;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
