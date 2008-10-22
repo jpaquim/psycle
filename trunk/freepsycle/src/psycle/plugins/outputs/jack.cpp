@@ -59,7 +59,7 @@ void jack::do_open() throw(engine::exception) {
 	stop_requested_ = process_callback_called_ = false;
 
 	::jack_set_process_callback(client_, process_callback_static, (void*)this);
-	if(!(playback_port_ = ::jack_port_register(client_, (client_name + "-in").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsInput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
+	if(!(playback_port_ = ::jack_port_register(client_, (client_name + "-in").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
 }
 
 bool jack::opened() const {
