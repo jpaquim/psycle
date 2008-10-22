@@ -30,7 +30,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		void do_close()   throw(engine::exception) /*override*/;
 	private:
 		::jack_client_t * client_;
-		::jack_port_t * playback_port_;
+		::jack_port_t * output_port_;
 
 		int static process_callback_static(::jack_nframes_t, void*);
 		int        process_callback(::jack_nframes_t);
