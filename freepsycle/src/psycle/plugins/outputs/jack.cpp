@@ -38,7 +38,7 @@ void jack::do_open() throw(engine::exception) {
 		std::ostringstream s; s << "could not open client: status: " << status;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	if(status & ::JackServerStarted) loggers::information()("jack server started", UNIVERSALIS__COMPILER__LOCATION);
+	if(status & ::JackServerStarted) loggers::information()("jack server was not running, so it has been started", UNIVERSALIS__COMPILER__LOCATION);
 	if(status & ::JackNameNotUnique) {
 		client_name = ::jack_get_client_name(client_);
 		std::ostringstream s; s << "unique client name assigned: " << client_name;
@@ -95,36 +95,33 @@ int jack::process_callback_static(::jack_nframes_t frames, void * data) {
 
 /// this is called from within jack's processing thread.
 int jack::process_callback(::jack_nframes_t frames) {
-	if(false && loggers::trace()) {
+	if(true || loggers::trace()) {
 		std::ostringstream s; s << "process_callback";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		std::exit(1);
 	}
 	{ scoped_lock lock(mutex_);
 		while(io_ready() && !stop_requested_) condition_.wait(lock);
 		if(stop_requested_) return 0;
 	}
-	#if 1
-	#else
-	::guint8 * out(GST_BUFFER_DATA(&buffer));
-	std::size_t out_size(GST_BUFFER_SIZE(&buffer));
-	while(true) { // copy the intermediate buffer to the gstreamer buffer
-		std::size_t const in_size(intermediate_buffer_end_ - intermediate_buffer_current_read_pointer_);
-		std::size_t const copy_size(std::min(in_size, out_size));
-		std::memcpy(out, intermediate_buffer_current_read_pointer_, copy_size);
-		intermediate_buffer_current_read_pointer_ += copy_size;
-		out_size -= copy_size;
-		if(!out_size) break;
-		{ scoped_lock lock(mutex_);
-			io_ready(true);
+	::jack_transport_state_t ts = jack_transport_query(client_, 0);
+	if(ts == ::JackTransportRolling) {
+		if(!process_callback_called_) {
+			process_callback_called_= true;
+			condition_.notify_one();
 		}
-		condition_.notify_one();
-		{ scoped_lock lock(mutex_);
-			while(io_ready() && !stop_requested_) condition_.wait(lock);
+		// copy the intermediate buffer to the jack buffer
+		::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(playback_port_, frames)));
+		for(std::size_t i(0); i << frames; ++i) {
+			out[i] = intermediate_buffer_current_read_pointer_[i];
+			++intermediate_buffer_current_read_pointer_;
 		}
-		if(stop_requested_) return;
-		out += copy_size;
+	} else if(ts == ::JackTransportStopped) {
+		if(process_callback_called_) {
+			process_callback_called_= false;
+			condition_.notify_one();
+		}
 	}
-	#endif
 	if(intermediate_buffer_current_read_pointer_ == intermediate_buffer_end_) {
 		{ scoped_lock lock(mutex_);
 			io_ready(true);
@@ -136,7 +133,7 @@ int jack::process_callback(::jack_nframes_t frames) {
 
 /// this is called from within psycle's host's processing thread.
 void jack::do_process() throw(engine::exception) {
-	if(false && loggers::trace()) {
+	if(loggers::trace()) {
 		std::ostringstream s; s << "process";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
