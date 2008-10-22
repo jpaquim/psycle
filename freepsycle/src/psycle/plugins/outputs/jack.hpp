@@ -7,6 +7,8 @@
 #include <psycle/detail/project.hpp>
 #include "../resource.hpp"
 #include <jack/jack.h>
+#include <condition>
+#include <mutex>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__JACK
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins { namespace outputs {
@@ -32,6 +34,26 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 
 		int static process_callback_static(::jack_nframes_t, void*);
 		int        process_callback(::jack_nframes_t);
+
+		typedef std::scoped_lock<std::mutex> scoped_lock;
+		std::mutex mutable mutex_;
+		std::condition<scoped_lock> mutable condition_;
+
+		bool wait_for_state_to_become_playing_;
+		bool process_callback_called_;
+		bool stop_requested_;
+
+		/// intermediate buffer between do_process() and the routine that writes to the gstreamer buffer
+		char * intermediate_buffer_;
+		
+		/// pointer to current gstreamer read position in the intermediate buffer
+		char * intermediate_buffer_current_read_pointer_;
+		
+		/// pointer to end of intermediate buffer
+		char * intermediate_buffer_end_;
+		
+		typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
+		std::vector<output_sample_type> last_samples_;
 };
 
 }}}
