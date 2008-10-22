@@ -214,9 +214,7 @@ void alsa::do_open() throw(engine::exception) {
 					"requested: " << rate << "Hz, "
 					"accepted: " << rate_accepted << "Hz";
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				rate = rate_accepted;
-				///\todo we need to take this into account!
-				//in_port().events_per_second(rate);
+				in_port().events_per_second(rate_accepted);
 			}
 		}
 		
