@@ -21,6 +21,14 @@ jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::
 	engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
 }
 
+void jack::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
+	if(&port == &in_port()) {
+		last_samples_.resize(port.channels());
+		for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0;
+	}
+	resource::channel_change_notification_from_port(port);
+}
+
 void jack::do_open() throw(engine::exception) {
 	resource::do_open();
 	char const * server_name(0);
@@ -116,20 +124,13 @@ int jack::process_callback(::jack_nframes_t frames) {
 		// copy the intermediate buffer to the jack buffer
 		::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_port_, frames)));
 		for(std::size_t i(0); i << frames; ++i) {
-			out[i] = intermediate_buffer_current_read_pointer_[i];
-			++intermediate_buffer_current_read_pointer_;
+			out[i] = std::sin(i);
 		}
 	} else if(ts == ::JackTransportStopped) {
 		if(process_callback_called_) {
 			process_callback_called_= false;
 			condition_.notify_one();
 		}
-	}
-	if(intermediate_buffer_current_read_pointer_ == intermediate_buffer_end_) {
-		{ scoped_lock lock(mutex_);
-			io_ready(true);
-		}
-		condition_.notify_one();
 	}
 	return 0;
 }
