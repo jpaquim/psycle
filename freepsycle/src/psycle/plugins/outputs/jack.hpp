@@ -39,6 +39,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		std::mutex mutable mutex_;
 		std::condition<scoped_lock> mutable condition_;
 
+		bool started_;
 		bool process_callback_called_;
 		bool stop_requested_;
 
