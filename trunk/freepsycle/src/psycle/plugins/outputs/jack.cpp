@@ -39,12 +39,12 @@ void jack::do_open() throw(engine::exception) {
 	}
 	if(status & ::JackServerStarted) loggers::information()("jack server started", UNIVERSALIS__COMPILER__LOCATION);
 	if(status & ::JackNameNotUnique) {
-		char const * client_name(::jack_get_client_name(client_));
+		client_name = ::jack_get_client_name(client_);
 		std::ostringstream s; s << "unique client name assigned: " << client_name;
 		loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	::jack_set_process_callback(client_, process_callback_static, (void*)this);
-	if(!(playback_port_ = ::jack_port_register(client_, name().c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsInput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
+	if(!(playback_port_ = ::jack_port_register(client_, (client_name + "-in").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsInput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
 }
 
 bool jack::opened() const {
