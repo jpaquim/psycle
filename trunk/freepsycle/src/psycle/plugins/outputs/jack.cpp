@@ -14,6 +14,7 @@ jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::
 	resource(plugin_library_reference, graph, name),
 	client_(),
 	playback_port_(),
+	started_(),
 	intermediate_buffer_()
 {
 	engine::ports::inputs::single::create_on_heap(*this, "in");
@@ -59,7 +60,7 @@ void jack::do_open() throw(engine::exception) {
 	stop_requested_ = process_callback_called_ = false;
 
 	::jack_set_process_callback(client_, process_callback_static, (void*)this);
-	if(!(playback_port_ = ::jack_port_register(client_, (client_name + "-in").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
+	if(!(playback_port_ = ::jack_port_register(client_, (client_name + "-out").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
 }
 
 bool jack::opened() const {
@@ -81,11 +82,11 @@ void jack::do_start() throw(engine::exception) {
 		throw;
 	}
 	std::free(ports);
+	started_ = true;
 }
 
 bool jack::started() const {
-	if(!opened()) return false;
-	return true;
+	return started_;
 }
 
 /// this is called from within jack's processing thread.
@@ -95,10 +96,9 @@ int jack::process_callback_static(::jack_nframes_t frames, void * data) {
 
 /// this is called from within jack's processing thread.
 int jack::process_callback(::jack_nframes_t frames) {
-	if(true || loggers::trace()) {
+	if(loggers::trace()) {
 		std::ostringstream s; s << "process_callback";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		std::exit(1);
 	}
 	{ scoped_lock lock(mutex_);
 		while(io_ready() && !stop_requested_) condition_.wait(lock);
@@ -175,6 +175,7 @@ void jack::do_stop() throw(engine::exception) {
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	resource::do_stop();
+	started_ = false;
 }
 
 void jack::do_close() throw(engine::exception) {
