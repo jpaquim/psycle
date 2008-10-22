@@ -12,8 +12,9 @@ PSYCLE__PLUGINS__NODE_INSTANTIATOR(jack)
 jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name) throw(engine::exception)
 :
 	resource(plugin_library_reference, graph, name),
-	client_(0),
-	playback_port_(0)
+	client_(),
+	playback_port_(),
+	intermediate_buffer_()
 {
 	engine::ports::inputs::single::create_on_heap(*this, "in");
 	engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
@@ -43,8 +44,32 @@ void jack::do_open() throw(engine::exception) {
 		std::ostringstream s; s << "unique client name assigned: " << client_name;
 		loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
+
+	{ // allocate the intermediate buffer
+		std::size_t const bytes_per_sample(32); ///\todo corresponds to JACK_DEFAULT_AUDIO_TYPE, which normally is 32-bit float.
+		std::size_t const bytes(static_cast<std::size_t>(parent().events_per_buffer() * bytes_per_sample));
+		if(!(intermediate_buffer_ = new char[bytes])) {
+			std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		intermediate_buffer_end_ = intermediate_buffer_ + bytes;
+	}
+
+	// set to false so that started() returns false
+	wait_for_state_to_become_playing_ = false;
+
+	intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
+	stop_requested_ = process_callback_called_ = false;
+	wait_for_state_to_become_playing_ = true;
+
 	::jack_set_process_callback(client_, process_callback_static, (void*)this);
 	if(!(playback_port_ = ::jack_port_register(client_, (client_name + "-in").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsInput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
+
+	{ scoped_lock lock(mutex_);
+		while(!process_callback_called_) condition_.wait(lock);
+		wait_for_state_to_become_playing_ = false;
+	}
+	condition_.notify_one();
 }
 
 bool jack::opened() const {
@@ -80,22 +105,23 @@ int jack::process_callback_static(::jack_nframes_t frames, void * data) {
 
 /// this is called from within jack's processing thread.
 int jack::process_callback(::jack_nframes_t frames) {
-#if 0 ///\todo
 	if(false && loggers::trace()) {
-		std::ostringstream s; s << "handoff";
+		std::ostringstream s; s << "process_callback";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	{ scoped_lock lock(mutex_);
 		while(io_ready() && !stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
-		if(stop_requested_) return;
-		// Handoff is called before state is changed to playing.
+		if(stop_requested_) return 0;
+		// process_callback is called before state is changed to playing.
 		if(wait_for_state_to_become_playing_) {
-			if(loggers::trace()()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
-			handoff_called_ = true;
+			if(loggers::trace()()) loggers::trace()("process_callback called", UNIVERSALIS__COMPILER__LOCATION);
+			process_callback_called_ = true;
 			condition_.notify_one();
 			while(wait_for_state_to_become_playing_) condition_.wait(lock);
 		}
 	}
+	#if 1
+	#else
 	::guint8 * out(GST_BUFFER_DATA(&buffer));
 	std::size_t out_size(GST_BUFFER_SIZE(&buffer));
 	while(true) { // copy the intermediate buffer to the gstreamer buffer
@@ -115,6 +141,7 @@ int jack::process_callback(::jack_nframes_t frames) {
 		if(stop_requested_) return;
 		out += copy_size;
 	}
+	#endif
 	if(intermediate_buffer_current_read_pointer_ == intermediate_buffer_end_) {
 		{ scoped_lock lock(mutex_);
 			io_ready(true);
@@ -122,12 +149,10 @@ int jack::process_callback(::jack_nframes_t frames) {
 		condition_.notify_one();
 	}
 	return 0;
-#endif
 }
 
 /// this is called from within psycle's host's processing thread.
 void jack::do_process() throw(engine::exception) {
-#if 0 ///\todo
 	if(false && loggers::trace()) {
 		std::ostringstream s; s << "process";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -162,7 +187,6 @@ void jack::do_process() throw(engine::exception) {
 		io_ready(false);
 	}
 	condition_.notify_one();
-#endif
 }
 
 void jack::do_stop() throw(engine::exception) {
