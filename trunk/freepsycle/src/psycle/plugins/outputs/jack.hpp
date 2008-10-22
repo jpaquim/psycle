@@ -28,6 +28,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		void do_process() throw(engine::exception) /*override*/;
 		void do_stop()    throw(engine::exception) /*override*/;
 		void do_close()   throw(engine::exception) /*override*/;
+		void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
 	private:
 		::jack_client_t * client_;
 		::jack_port_t * output_port_;
