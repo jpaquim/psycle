@@ -13,7 +13,7 @@ jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::
 :
 	resource(plugin_library_reference, graph, name),
 	client_(),
-	playback_port_(),
+	output_port_(),
 	started_(),
 	intermediate_buffer_()
 {
@@ -60,7 +60,7 @@ void jack::do_open() throw(engine::exception) {
 	stop_requested_ = process_callback_called_ = false;
 
 	::jack_set_process_callback(client_, process_callback_static, (void*)this);
-	if(!(playback_port_ = ::jack_port_register(client_, (client_name + "-out").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
+	if(!(output_port_ = ::jack_port_register(client_, (client_name + "-out").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
 }
 
 bool jack::opened() const {
@@ -76,7 +76,10 @@ void jack::do_start() throw(engine::exception) {
 	char const ** ports;
 	if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput))) throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
 	try {
-		if(::jack_connect(client_, ports[0], ::jack_port_name(playback_port_))) throw engine::exceptions::runtime_error("could not connect output port", UNIVERSALIS__COMPILER__LOCATION);
+		int i(0);
+		while(ports[i]) std::cerr << "xxxx " << ports[i++] << '\n';
+		//if(::jack_connect(client_, ports[0], ::jack_port_name(output_port_))) throw engine::exceptions::runtime_error("could not connect output port", UNIVERSALIS__COMPILER__LOCATION);
+		if(::jack_connect(client_, ::jack_port_name(output_port_), ports[0])) throw engine::exceptions::runtime_error("could not connect output port", UNIVERSALIS__COMPILER__LOCATION);
 	} catch(...) {
 		std::free(ports);
 		throw;
@@ -111,7 +114,7 @@ int jack::process_callback(::jack_nframes_t frames) {
 			condition_.notify_one();
 		}
 		// copy the intermediate buffer to the jack buffer
-		::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(playback_port_, frames)));
+		::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_port_, frames)));
 		for(std::size_t i(0); i << frames; ++i) {
 			out[i] = intermediate_buffer_current_read_pointer_[i];
 			++intermediate_buffer_current_read_pointer_;
