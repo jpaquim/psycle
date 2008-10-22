@@ -55,21 +55,11 @@ void jack::do_open() throw(engine::exception) {
 		intermediate_buffer_end_ = intermediate_buffer_ + bytes;
 	}
 
-	// set to false so that started() returns false
-	wait_for_state_to_become_playing_ = false;
-
 	intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 	stop_requested_ = process_callback_called_ = false;
-	wait_for_state_to_become_playing_ = true;
 
 	::jack_set_process_callback(client_, process_callback_static, (void*)this);
 	if(!(playback_port_ = ::jack_port_register(client_, (client_name + "-in").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsInput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
-
-	{ scoped_lock lock(mutex_);
-		while(!process_callback_called_) condition_.wait(lock);
-		wait_for_state_to_become_playing_ = false;
-	}
-	condition_.notify_one();
 }
 
 bool jack::opened() const {
@@ -110,15 +100,8 @@ int jack::process_callback(::jack_nframes_t frames) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	{ scoped_lock lock(mutex_);
-		while(io_ready() && !stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
+		while(io_ready() && !stop_requested_) condition_.wait(lock);
 		if(stop_requested_) return 0;
-		// process_callback is called before state is changed to playing.
-		if(wait_for_state_to_become_playing_) {
-			if(loggers::trace()()) loggers::trace()("process_callback called", UNIVERSALIS__COMPILER__LOCATION);
-			process_callback_called_ = true;
-			condition_.notify_one();
-			while(wait_for_state_to_become_playing_) condition_.wait(lock);
-		}
 	}
 	#if 1
 	#else
@@ -207,4 +190,3 @@ jack::~jack() throw() {
 }
 
 }}}
-
