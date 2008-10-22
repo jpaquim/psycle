@@ -213,7 +213,7 @@ void alsa::do_open() throw(engine::exception) {
 					"sample rate: "
 					"requested: " << rate << "Hz, "
 					"accepted: " << rate_accepted << "Hz";
-				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				in_port().events_per_second(rate_accepted);
 			}
 		}
