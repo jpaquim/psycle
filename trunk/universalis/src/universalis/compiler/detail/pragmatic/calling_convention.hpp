@@ -6,6 +6,8 @@
 ///\file
 /// function calling conventions
 
+// see http://www.programmersheaven.com/2/Calling-conventions
+
 // calling convention | modifier keyword | parameters stack push            | parameters stack pop | extern "C" symbol name mangling                   | extern "C++" symbol name mangling
 // register           | fastcall         | 3 registers then pushed on stack | callee               | '@' and arguments' byte size in decimal prepended | no standard
 // pascal             | pascal           | left to right                    | callee               | uppercase                                         | no standard
