@@ -33,8 +33,8 @@
 	#define __msfastcall
 	#define __thiscall
 #elif defined DIVERSALIS__COMPILER__GNU
-	// on gcc, cdecl is only meaningful on the x86 target (exclude x86_64)
-	#if defined DIVERSALIS__PROCESSOR__X86 && DIVERSALIS__PROCESSOR__X86 < 9
+	// cdecl is only meaningful on the 32-bit x86 targets (excludes x86_64)
+	#if defined DIVERSALIS__PROCESSOR__X86 && DIVERSALIS__PROCESSOR__WORD_SIZE < 64
 		#define UNIVERSALIS__COMPILER__CALLING_CONVENTION__C UNIVERSALIS__COMPILER__ATTRIBUTE(__cdecl__)
 	#else
 		#define UNIVERSALIS__COMPILER__CALLING_CONVENTION__C
