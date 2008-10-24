@@ -154,6 +154,9 @@
 	#if defined __powerpc__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__POWER_PC
+	#elif defined __x86_64__
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__X86 9
 	#elif defined __k8__ || defined __nocona__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 8
