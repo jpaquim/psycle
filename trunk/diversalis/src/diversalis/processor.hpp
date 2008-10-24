@@ -154,7 +154,8 @@
 	#if defined __powerpc__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__POWER_PC
-	#elif defined __x86_64__ ///\todo test for __LP64__ instead
+	#elif defined __x86_64__ // as tested in #include <bits/wordsize.h> to #define __WORDSIZE 64
+		///\todo test for __LP64__ instead
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 9
 	#elif defined __k8__ || defined __nocona__
