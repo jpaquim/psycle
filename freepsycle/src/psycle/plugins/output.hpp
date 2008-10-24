@@ -24,6 +24,10 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins {
 
+///\internal
+/// plugins driving an underlying output device.
+namespace outputs {}
+
 typedef outputs::
 	#if defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__GSTREAMER
 		gstreamer

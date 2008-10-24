@@ -18,10 +18,6 @@ namespace plugins {
 
 typedef engine::real real;
 
-///\internal
-/// plugins driving an underlying output device.
-namespace outputs {}
-
 #define PSYCLE__PLUGINS__CALLING_CONVENTION  UNIVERSALIS__COMPILER__CALLING_CONVENTION__C
 
 #define PSYCLE__PLUGINS__NODE_INSTANTIATOR(typename) \
