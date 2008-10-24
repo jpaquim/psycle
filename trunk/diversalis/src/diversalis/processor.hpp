@@ -151,13 +151,15 @@
 	// There are so many processors supported ...
 	// gcc -E -dM -x c++ -std=c++98 -march=k8 -ffast-math -msse2 /dev/null
 
+	#if defined __LP64__
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
+	#else
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 32
+	#endif
+
 	#if defined __powerpc__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__POWER_PC
-	#elif defined __x86_64__ // as tested in #include <bits/wordsize.h> to #define __WORDSIZE 64
-		///\todo test for __LP64__ instead
-		#define DIVERSALIS__PROCESSOR
-		#define DIVERSALIS__PROCESSOR__X86 9
 	#elif defined __k8__ || defined __nocona__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 8
