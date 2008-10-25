@@ -73,12 +73,12 @@ gstreamer = external_package_check(project, name = 'gstreamer', url = 'http://gs
 jack = external_package_check(project, name = 'jack', url = 'http://jackaudio.org',
 	distribution_packages = {
 		'zero-install': '...',
-		'debian and ubuntu': 'libjack-dev (>= 0.100)',
+		'debian and ubuntu': 'libjack-dev (>= 0.101.1)',
 		'gentoo': '...',
 		'fedora': '...',
 		'cygwin': '...'
 	},
-	dependencies = [pkg_config_check(project, name = 'jack >= 0.100')]
+	dependencies = [pkg_config_check(project, name = 'jack >= 0.101.1')]
 )
 
 alsa = external_package_check(project, name = 'alsa', url = 'http://alsa-project.org',
