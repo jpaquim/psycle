@@ -41,7 +41,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		std::condition<scoped_lock> mutable condition_;
 
 		bool started_;
-		bool process_callback_called_;
 		bool stop_requested_;
 
 		/// intermediate buffer between do_process() and the routine that writes to the jack buffer
