@@ -31,7 +31,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
 	private:
 		::jack_client_t * client_;
-		::jack_port_t * output_port_;
+		std::vector< ::jack_port_t*> output_ports_;
 
 		int static process_callback_static(::jack_nframes_t, void*);
 		int        process_callback(::jack_nframes_t);
@@ -44,17 +44,13 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		bool process_callback_called_;
 		bool stop_requested_;
 
-		/// intermediate buffer between do_process() and the routine that writes to the gstreamer buffer
-		char * intermediate_buffer_;
+		/// intermediate buffer between do_process() and the routine that writes to the jack buffer
+		std::vector< ::jack_default_audio_sample_t> intermediate_buffer_;
 		
-		/// pointer to current gstreamer read position in the intermediate buffer
-		char * intermediate_buffer_current_read_pointer_;
+		/// pointer to current jack read position in the intermediate buffer
+		unsigned int intermediate_buffer_current_read_pointer_;
 		
-		/// pointer to end of intermediate buffer
-		char * intermediate_buffer_end_;
-		
-		typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
-		std::vector<output_sample_type> last_samples_;
+		std::vector< ::jack_default_audio_sample_t> last_samples_;
 };
 
 }}}

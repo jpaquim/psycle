@@ -26,7 +26,34 @@ namespace psycle { namespace plugins {
 
 ///\internal
 /// plugins driving an underlying output device.
-namespace outputs {}
+namespace outputs {
+
+	class settings_capabilities {
+		std::list<std::string> device_names;
+		bool buffer_frames;
+		bool period_frames;
+		bool channels;
+		bool bit_per_channel_sample;
+		bool samples_per_seconds;
+	};
+	
+	class settings {
+		unsigned int buffer_frames;
+		unsigned int period_frames;
+
+		unsigned int channels;
+		unsigned int bits_per_channel_sample;
+		real samples_per_second;
+	};
+
+	class requested_settings : public settings {
+		std::string device_name;
+	};
+
+	class actual_settings : public settings {
+		unsigned int significant_bits_per_channel_sample;
+	};
+}
 
 typedef outputs::
 	#if defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__GSTREAMER
