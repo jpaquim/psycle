@@ -36,6 +36,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		int static process_callback_static(::jack_nframes_t, void*);
 		int        process_callback(::jack_nframes_t);
 
+		int static set_sample_rate_callback_static(::jack_nframes_t, void*);
+		int        set_sample_rate_callback(::jack_nframes_t);
+
 		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;
 		std::condition<scoped_lock> mutable condition_;

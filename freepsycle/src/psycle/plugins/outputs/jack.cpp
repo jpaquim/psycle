@@ -28,8 +28,19 @@ void jack::channel_change_notification_from_port(engine::port const & port) thro
 	resource::channel_change_notification_from_port(port);
 }
 
+int jack::set_sample_rate_callback_static(::jack_nframes_t sample_rate, void * data) {
+	return reinterpret_cast<jack*>(data)->set_sample_rate_callback(sample_rate);
+}
+
+int jack::set_sample_rate_callback(::jack_nframes_t sample_rate) {
+	in_port().events_per_second(sample_rate);
+	return 0;
+}
+
 void jack::do_open() throw(engine::exception) {
 	resource::do_open();
+	
+	// open a client
 	char const * server_name(0);
 	std::string client_name(
 		#if defined PACKAGENERIC__MODULE__NAME
@@ -53,6 +64,7 @@ void jack::do_open() throw(engine::exception) {
 		loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
+	// get the sample rate
 	{
 		::jack_nframes_t const sample_rate(::jack_get_sample_rate(client_));
 		if(sample_rate != static_cast< ::jack_nframes_t>(in_port().events_per_second())) {
@@ -64,20 +76,24 @@ void jack::do_open() throw(engine::exception) {
 			in_port().events_per_second(sample_rate);
 		}
 	}
-		
-	// allocate the intermediate buffer
-	intermediate_buffer_.resize(parent().events_per_buffer() * in_port().channels());
-	//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
-
-	stop_requested_ = false;
-	::jack_set_process_callback(client_, process_callback_static, (void*)this);
-
+	::jack_set_sample_rate_callback(client_, set_sample_rate_callback_static, (void*)this);
+	
+	// register some output ports
 	output_ports_.resize(in_port().channels());
 	for(unsigned int i(0); i < in_port().channels(); ++i) {
 		std::ostringstream port_name; port_name << "output_" << i + 1;
 		if(!(output_ports_[i] = ::jack_port_register(client_, port_name.str().c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0)))
 			throw engine::exceptions::runtime_error("could not register output port", UNIVERSALIS__COMPILER__LOCATION);
 	}
+
+	// allocate the intermediate buffer
+	intermediate_buffer_.resize(parent().events_per_buffer() * in_port().channels());
+	//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
+
+	// set the process callback
+	stop_requested_ = false;
+	::jack_set_process_callback(client_, process_callback_static, (void*)this);
+
 }
 
 bool jack::opened() const {
@@ -86,6 +102,7 @@ bool jack::opened() const {
 
 void jack::do_start() throw(engine::exception) {
 	resource::do_start();
+	// activate the client
 	if(int err = ::jack_activate(client_)) {
 		std::ostringstream s; s << "cannot activate client: " << err;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
