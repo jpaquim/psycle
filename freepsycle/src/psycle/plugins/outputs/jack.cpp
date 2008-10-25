@@ -118,7 +118,7 @@ int jack::process_callback_static(::jack_nframes_t frames, void * data) {
 int jack::process_callback(::jack_nframes_t frames) {
 	if(false && loggers::trace()) loggers::trace()("process_callback", UNIVERSALIS__COMPILER__LOCATION);
 	::jack_transport_state_t ts = ::jack_transport_query(client_, /* ::jack_position_t* */ 0);
-	if(ts != ::JackTransportRolling) {
+	if(false && ts != ::JackTransportRolling) {
 		// emit silence
 		if(loggers::trace()) loggers::trace()("transport not rolling => emitting silence", UNIVERSALIS__COMPILER__LOCATION);
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
@@ -128,11 +128,10 @@ int jack::process_callback(::jack_nframes_t frames) {
 	} else // copy the intermediate buffer to the jack buffer
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
 			::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
-			for(std::size_t i(0); i << frames; ++i) {
+			for(std::size_t i(0); i < frames; ++i) {
 				#if 1 // basic 440Hz sine wave test
 					double static x(0);
-					std::cout << x << ' ';
-					out[i] = std::sin(x);
+					out[i] = 0.2 * std::sin(x);
 					x += 2 * 3.14 * 440 / 44100;
 				#else
 					out[i] = intermediate_buffer_[i + c];
