@@ -78,28 +78,30 @@ void jack::do_start() throw(engine::exception) {
 		std::ostringstream s; s << "cannot activate client: " << err;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	char const ** ports;
-	if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput)))
-		throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
-	try {
-		if(loggers::trace()) {
-			std::ostringstream s; s << "input ports:";
-			for(unsigned int i(0); ports[i]; ++i) s << ' ' << ports[i];
-			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		for(unsigned int i(0); i < in_port().channels(); ++i) {
-			if(!ports[i]) {
-				loggers::warning()("cannot connect every port: less input ports than output ports");
-				break;
+	#if 1 // automatically connect the ports
+		char const ** ports;
+		if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput)))
+			throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
+		try {
+			if(loggers::trace()) {
+				std::ostringstream s; s << "input ports:";
+				for(unsigned int i(0); ports[i]; ++i) s << ' ' << ports[i];
+				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), ports[i]))
-				throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
+			for(unsigned int i(0); i < in_port().channels(); ++i) {
+				if(!ports[i]) {
+					loggers::warning()("cannot connect every port: less input ports than output ports");
+					break;
+				}
+				if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), ports[i]))
+					throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
+			}
+		} catch(...) {
+			std::free(ports);
+			throw;
 		}
-	} catch(...) {
 		std::free(ports);
-		throw;
-	}
-	std::free(ports);
+	#endif
 	started_ = true;
 }
 
