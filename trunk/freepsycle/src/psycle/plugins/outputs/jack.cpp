@@ -13,7 +13,6 @@ jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::
 :
 	resource(plugin_library_reference, graph, name),
 	client_(),
-	output_port_(),
 	started_(),
 	intermediate_buffer_()
 {
@@ -54,21 +53,19 @@ void jack::do_open() throw(engine::exception) {
 		loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
-	{ // allocate the intermediate buffer
-		std::size_t const bytes_per_sample(32); ///\todo corresponds to JACK_DEFAULT_AUDIO_TYPE, which normally is 32-bit float.
-		std::size_t const bytes(static_cast<std::size_t>(parent().events_per_buffer() * bytes_per_sample));
-		if(!(intermediate_buffer_ = new char[bytes])) {
-			std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
-			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		intermediate_buffer_end_ = intermediate_buffer_ + bytes;
-	}
+	// allocate the intermediate buffer
+	intermediate_buffer_.resize(parent().events_per_buffer() * in_port().channels());
+	//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 
-	intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 	stop_requested_ = process_callback_called_ = false;
-
 	::jack_set_process_callback(client_, process_callback_static, (void*)this);
-	if(!(output_port_ = ::jack_port_register(client_, (client_name + "-out").c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0))) throw engine::exceptions::runtime_error("could not create output port in jack client", UNIVERSALIS__COMPILER__LOCATION);
+
+	output_ports_.resize(in_port().channels());
+	for(unsigned int i(0); i < in_port().channels(); ++i) {
+		std::ostringstream port_name; port_name << client_name << '-' << i;
+		if(!(output_ports_[i] = ::jack_port_register(client_, port_name.str().c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0)))
+			throw engine::exceptions::runtime_error("could not register output port", UNIVERSALIS__COMPILER__LOCATION);
+	}
 }
 
 bool jack::opened() const {
@@ -82,12 +79,22 @@ void jack::do_start() throw(engine::exception) {
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	char const ** ports;
-	if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput))) throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
+	if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput)))
+		throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
 	try {
-		int i(0);
-		while(ports[i]) std::cerr << "xxxx " << ports[i++] << '\n';
-		//if(::jack_connect(client_, ports[0], ::jack_port_name(output_port_))) throw engine::exceptions::runtime_error("could not connect output port", UNIVERSALIS__COMPILER__LOCATION);
-		if(::jack_connect(client_, ::jack_port_name(output_port_), ports[0])) throw engine::exceptions::runtime_error("could not connect output port", UNIVERSALIS__COMPILER__LOCATION);
+		if(loggers::trace()()) {
+			std::ostringstream s; s << "input ports:";
+			for(unsigned int i(0); ports[i]; ++i) s << ' ' << ports[i];
+			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		for(unsigned int i(0); i < in_port().channels(); ++i) {
+			if(!ports[i]) {
+				loggers::warning()("cannot connect every port: less input ports than output ports");
+				break;
+			}
+			if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), ports[i]))
+				throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
+		}
 	} catch(...) {
 		std::free(ports);
 		throw;
@@ -122,9 +129,11 @@ int jack::process_callback(::jack_nframes_t frames) {
 			condition_.notify_one();
 		}
 		// copy the intermediate buffer to the jack buffer
-		::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_port_, frames)));
-		for(std::size_t i(0); i << frames; ++i) {
-			out[i] = std::sin(i);
+		for(unsigned int c(0); c < in_port().channels(); ++c) {
+			::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
+			for(std::size_t i(0); i << frames; ++i) {
+				out[i] = intermediate_buffer_[i + c];
+			}
 		}
 	} else if(ts == ::JackTransportStopped) {
 		if(process_callback_called_) {
@@ -151,23 +160,16 @@ void jack::do_process() throw(engine::exception) {
 		assert(last_samples_.size() == in_port().channels());
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_));
 			unsigned int spread(0);
 			for(std::size_t e(0), s(in.size()); e < s; ++e) {
-				real s(in[e].sample());
-				{
-					s *= std::numeric_limits<output_sample_type>::max();
-					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
-					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
-				}
-				last_samples_[c] = static_cast<output_sample_type>(s);
-				for( ; spread <= in[e].index() ; ++spread, ++out) out[c] = last_samples_[c];
+				last_samples_[c] = in[e].sample();
+				for( ; spread <= in[e].index() ; ++spread) intermediate_buffer_[spread + c] = last_samples_[c];
 			}
-			for( ; spread < samples_per_buffer ; ++spread, ++out) out[c] = last_samples_[c];
+			for( ; spread < samples_per_buffer ; ++spread) intermediate_buffer_[spread + c] = last_samples_[c];
 		}
 	}
 	{ scoped_lock lock(mutex_);
-		intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
+		//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 		io_ready(false);
 	}
 	condition_.notify_one();
