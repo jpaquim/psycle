@@ -83,7 +83,7 @@ void alsa::do_open() throw(engine::exception) {
 			": " << ::snd_strerror(error);
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		{ // display type
 			std::ostringstream s;
 			s << "alsa pcm device: type: " << ::snd_pcm_type_name(::snd_pcm_type(pcm_)); 
@@ -99,7 +99,7 @@ void alsa::do_open() throw(engine::exception) {
 					"could not get static info for opened device named: " << pcm_device_name <<
 					": " << ::snd_strerror(error);
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			} else if(loggers::information()()) {
+			} else if(loggers::information()) {
 				std::ostringstream s;
 				s <<
 					"alsa pcm device: info:\n"
@@ -208,12 +208,14 @@ void alsa::do_open() throw(engine::exception) {
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 			if(rate_accepted != rate) {
-				std::ostringstream s;
-				s <<
-					"sample rate: "
-					"requested: " << rate << "Hz, "
-					"accepted: " << rate_accepted << "Hz";
-				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				if(loggers::information()) {
+					std::ostringstream s;
+					s <<
+						"sample rate: "
+						"requested: " << rate << "Hz, "
+						"accepted: " << rate_accepted << "Hz";
+					loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				}
 				in_port().events_per_second(rate_accepted);
 			}
 		}
@@ -347,7 +349,7 @@ void alsa::do_open() throw(engine::exception) {
 			std::ostringstream s; s << "could not set hardware parameters: " << ::snd_strerror(error);
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		if(loggers::information()()) {
+		if(loggers::information()) {
 			std::ostringstream s; s << "alsa pcm device: name: " << pcm_device_name << ": setup successful";
 			loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
@@ -456,7 +458,7 @@ bool alsa::started() const {
 }
 
 void alsa::thread_function() {
-	if(loggers::information()()) loggers::information()("poller thread started", UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::information()) loggers::information()("poller thread started", UNIVERSALIS__COMPILER__LOCATION);
 
 	// set thread name
 	universalis::operating_system::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + qualified_name());
@@ -472,14 +474,14 @@ void alsa::thread_function() {
 			throw;
 		}
 	} catch(std::exception const & e) {
-		if(loggers::exception()()) {
+		if(loggers::exception()) {
 			std::ostringstream s;
 			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		throw;
 	} catch(...) {
-		if(loggers::exception()()) {
+		if(loggers::exception()) {
 			std::ostringstream s;
 			s << "exception: " << universalis::compiler::exceptions::ellipsis();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -513,7 +515,7 @@ void alsa::poll_loop() throw(engine::exception) {
 			if(errno == EAGAIN || errno == EINTR) loop = true;
 			else throw engine::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 		if(!error) {
-			if(loggers::warning()()) loggers::warning()("timed out", UNIVERSALIS__COMPILER__LOCATION);
+			if(loggers::warning()) loggers::warning()("timed out", UNIVERSALIS__COMPILER__LOCATION);
 			loop = true;
 		}
 		{ scoped_lock lock(mutex_);
@@ -526,7 +528,7 @@ void alsa::poll_loop() throw(engine::exception) {
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		if(revents & POLLERR) throw engine::exceptions::runtime_error("error condition in poll", UNIVERSALIS__COMPILER__LOCATION);
-		if(loggers::warning()() && revents & POLLNVAL) loggers::warning()("invalid file descriptor in poll (could have been asynchronously closed)", UNIVERSALIS__COMPILER__LOCATION);
+		if(loggers::warning() && revents & POLLNVAL) loggers::warning()("invalid file descriptor in poll (could have been asynchronously closed)", UNIVERSALIS__COMPILER__LOCATION);
 		if(revents & POLLOUT) {
 			{ scoped_lock lock(mutex_);
 				while(io_ready() && !stop_requested_) condition_.wait(lock);
@@ -545,7 +547,7 @@ void alsa::poll_loop() throw(engine::exception) {
 					int error(frames_written);
 					if(0 > error) switch(error) {
 						case -EAGAIN: // for non-blocking mode
-							if(false && loggers::trace()()) {
+							if(false && loggers::trace()) {
 								std::ostringstream s; s << "again: " << ::snd_strerror(error);
 								loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 							}
@@ -555,12 +557,12 @@ void alsa::poll_loop() throw(engine::exception) {
 							}
 							continue;
 						case -EPIPE: // an underrun occured
-							if(loggers::warning()()) {
+							if(loggers::warning()) {
 								std::ostringstream s; s << "underrun: " << ::snd_strerror(error);
 								loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 							}
 							if(0 > (error = ::snd_pcm_prepare(pcm_))) {
-								if(loggers::warning()()) {
+								if(loggers::warning()) {
 									std::ostringstream s; s << "could not prepare device for use: " << ::snd_strerror(error);
 									loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 								}
@@ -571,7 +573,7 @@ void alsa::poll_loop() throw(engine::exception) {
 							// wait until device is resumed
 							while(-EAGAIN == (error = ::snd_pcm_resume(pcm_))) {
 								// resume cannot be proceeded immediately (the device is still suspended)
-								if(loggers::trace()()) {
+								if(loggers::trace()) {
 									std::ostringstream s; s << "waiting for device to resume: " << ::snd_strerror(error);
 									loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 								}
@@ -584,7 +586,7 @@ void alsa::poll_loop() throw(engine::exception) {
 							if(0 > error) switch(error) {
 								case -ENOSYS: // the device is no longer suspended, but it does not fully support resuming
 									if(0 > (error = ::snd_pcm_prepare(pcm_))) {
-										if(loggers::warning()()) {
+										if(loggers::warning()) {
 											std::ostringstream s; s << "could not prepare device for resume: " << ::snd_strerror(error);
 											loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 										}
@@ -606,7 +608,7 @@ void alsa::poll_loop() throw(engine::exception) {
 					next:
 					in += frames_written * channels;
 					frames_to_write -= frames_written;
-					if(false && loggers::trace()() && frames_to_write) {
+					if(false && loggers::trace() && frames_to_write) {
 						std::ostringstream s; s << "overrun: " << frames_to_write << " frames";
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
@@ -627,7 +629,7 @@ void alsa::do_process() throw(engine::exception) {
 	}
 	if(!in_port()) return;
 	{ scoped_lock lock(mutex_);
-		if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
+		if(false && loggers::warning() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 		while(!io_ready()) condition_.wait(lock);
 	}
 	{ // fill the intermediate buffer
@@ -666,9 +668,9 @@ void alsa::do_process() throw(engine::exception) {
 }
 
 void alsa::do_stop() throw(engine::exception) {
-	if(loggers::information()()) loggers::information()("terminating and joining poller thread ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::information()) loggers::information()("terminating and joining poller thread ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(!thread_) {
-		if(loggers::information()()) loggers::information()("poller thread was not running", UNIVERSALIS__COMPILER__LOCATION);
+		if(loggers::information()) loggers::information()("poller thread was not running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
 	{ scoped_lock lock(mutex_);
@@ -676,7 +678,7 @@ void alsa::do_stop() throw(engine::exception) {
 	}
 	condition_.notify_one();
 	thread_->join();
-	if(loggers::information()()) loggers::information()("poller thread joined", UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::information()) loggers::information()("poller thread joined", UNIVERSALIS__COMPILER__LOCATION);
 	delete thread_; thread_ = 0;
 	resource::do_stop();
 }
