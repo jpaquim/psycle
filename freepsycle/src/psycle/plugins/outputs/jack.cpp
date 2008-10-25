@@ -52,7 +52,19 @@ void jack::do_open() throw(engine::exception) {
 		std::ostringstream s; s << "unique client name assigned: " << client_name;
 		loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-
+	
+	{
+		::jack_nframes_t const sample_rate(::jack_get_sample_rate(client_));
+		if(sample_rate != static_cast< ::jack_nframes_t>(in_port().events_per_second())) {
+			if(loggers::information()) {
+				std::ostringstream s;
+				s << "samples rate: " << sample_rate << "Hz";
+				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			in_port().events_per_second(sample_rate);
+		}
+	}
+		
 	// allocate the intermediate buffer
 	intermediate_buffer_.resize(parent().events_per_buffer() * in_port().channels());
 	//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
@@ -118,7 +130,7 @@ int jack::process_callback_static(::jack_nframes_t frames, void * data) {
 int jack::process_callback(::jack_nframes_t frames) {
 	if(false && loggers::trace()) loggers::trace()("process_callback", UNIVERSALIS__COMPILER__LOCATION);
 	::jack_transport_state_t ts = ::jack_transport_query(client_, /* ::jack_position_t* */ 0);
-	if(false && ts != ::JackTransportRolling) {
+	if(false /* always plays, doesn't support rolling */ && ts != ::JackTransportRolling) {
 		// emit silence
 		if(loggers::trace()) loggers::trace()("transport not rolling => emitting silence", UNIVERSALIS__COMPILER__LOCATION);
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
