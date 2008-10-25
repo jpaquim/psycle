@@ -53,7 +53,7 @@ void gstreamer::do_name(std::string const & name) {
 namespace {
 	::GstElement & instantiate(std::string const & type, std::string const & name) throw(universalis::exception) {
 		try {
-			if(loggers::information()()) {
+			if(loggers::information()) {
 				std::ostringstream s; s << "instantiating " << type << " " << name;
 				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
@@ -63,7 +63,7 @@ namespace {
 				s << "could not find element type: " << type;
 				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			if(loggers::information()()) {
+			if(loggers::information()) {
 				std::ostringstream s;
 				s
 					<< "The element type " << ::gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory))
@@ -231,7 +231,7 @@ void gstreamer::do_open() throw(engine::exception) {
 
 	// audio format
 	format format(in_port().channels(), in_port().events_per_second(), /*significant_bits_per_channel_sample*/ 16); ///\todo parametrable
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		std::ostringstream s;
 		s << "format: " << format.description();
 		loggers::information()(s.str());
@@ -282,7 +282,7 @@ void gstreamer::do_open() throw(engine::exception) {
 	unsigned int const periods(4); ///\todo parametrable
 	unsigned int const period_frames(1024); ///\todo parametrable
 	unsigned int const period_size(static_cast<unsigned int>(period_frames * format.bytes_per_sample()));
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		real const latency(static_cast<real>(parent().events_per_buffer()) / format.samples_per_second());
 		std::ostringstream s;
 		s
@@ -291,7 +291,7 @@ void gstreamer::do_open() throw(engine::exception) {
 			"latency: between " << latency << " and " << latency * periods << " seconds ";
 		loggers::information()(s.str());
 	}
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		std::ostringstream s;
 		loggers::information()(s.str());
 	}
@@ -368,16 +368,13 @@ void gstreamer::handoff_static(::GstElement * source, ::GstBuffer * buffer, ::Gs
 
 /// this is called from within gstreamer's processing thread.
 void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
-	if(false && loggers::trace()) {
-		std::ostringstream s; s << "handoff";
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
+	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
 	{ scoped_lock lock(mutex_);
 		while(io_ready() && !stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
 		if(stop_requested_) return;
 		// Handoff is called before state is changed to playing.
 		if(wait_for_state_to_become_playing_) {
-			if(loggers::trace()()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
+			if(loggers::trace()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
 			handoff_called_ = true;
 			condition_.notify_one();
 			while(wait_for_state_to_become_playing_) condition_.wait(lock);
@@ -412,13 +409,10 @@ void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 
 /// this is called from within psycle's host's processing thread.
 void gstreamer::do_process() throw(engine::exception) {
-	if(false && loggers::trace()) {
-		std::ostringstream s; s << "process";
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
+	if(false && loggers::trace()) loggers::trace()("process", UNIVERSALIS__COMPILER__LOCATION);
 	if(!in_port()) return;
 	{ scoped_lock lock(mutex_);
-		if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
+		if(false && loggers::warning() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 		while(!io_ready()) condition_.wait(lock);
 	}
 	{ // fill the intermediate buffer

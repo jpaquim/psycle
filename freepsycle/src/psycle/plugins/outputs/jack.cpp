@@ -57,12 +57,12 @@ void jack::do_open() throw(engine::exception) {
 	intermediate_buffer_.resize(parent().events_per_buffer() * in_port().channels());
 	//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 
-	stop_requested_ = process_callback_called_ = false;
+	stop_requested_ = false;
 	::jack_set_process_callback(client_, process_callback_static, (void*)this);
 
 	output_ports_.resize(in_port().channels());
 	for(unsigned int i(0); i < in_port().channels(); ++i) {
-		std::ostringstream port_name; port_name << client_name << '-' << i;
+		std::ostringstream port_name; port_name << "output_" << i + 1;
 		if(!(output_ports_[i] = ::jack_port_register(client_, port_name.str().c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0)))
 			throw engine::exceptions::runtime_error("could not register output port", UNIVERSALIS__COMPILER__LOCATION);
 	}
@@ -82,7 +82,7 @@ void jack::do_start() throw(engine::exception) {
 	if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput)))
 		throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
 	try {
-		if(loggers::trace()()) {
+		if(loggers::trace()) {
 			std::ostringstream s; s << "input ports:";
 			for(unsigned int i(0); ports[i]; ++i) s << ' ' << ports[i];
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -114,45 +114,38 @@ int jack::process_callback_static(::jack_nframes_t frames, void * data) {
 
 /// this is called from within jack's processing thread.
 int jack::process_callback(::jack_nframes_t frames) {
-	if(loggers::trace()) {
-		std::ostringstream s; s << "process_callback";
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	{ scoped_lock lock(mutex_);
-		while(io_ready() && !stop_requested_) condition_.wait(lock);
-		if(stop_requested_) return 0;
-	}
-	::jack_transport_state_t ts = jack_transport_query(client_, 0);
-	if(ts == ::JackTransportRolling) {
-		if(!process_callback_called_) {
-			process_callback_called_= true;
-			condition_.notify_one();
+	if(false && loggers::trace()) loggers::trace()("process_callback", UNIVERSALIS__COMPILER__LOCATION);
+	::jack_transport_state_t ts = ::jack_transport_query(client_, /* ::jack_position_t* */ 0);
+	if(ts != ::JackTransportRolling) {
+		// emit silence
+		if(loggers::trace()) loggers::trace()("transport not rolling => emitting silence", UNIVERSALIS__COMPILER__LOCATION);
+		for(unsigned int c(0); c < in_port().channels(); ++c) {
+			::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
+			std::memset(out, 0, sizeof *out * frames);
 		}
-		// copy the intermediate buffer to the jack buffer
+	} else // copy the intermediate buffer to the jack buffer
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
 			::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
 			for(std::size_t i(0); i << frames; ++i) {
-				out[i] = intermediate_buffer_[i + c];
+				#if 1 // basic 440Hz sine wave test
+					double static x(0);
+					std::cout << x << ' ';
+					out[i] = std::sin(x);
+					x += 2 * 3.14 * 440 / 44100;
+				#else
+					out[i] = intermediate_buffer_[i + c];
+				#endif
 			}
 		}
-	} else if(ts == ::JackTransportStopped) {
-		if(process_callback_called_) {
-			process_callback_called_= false;
-			condition_.notify_one();
-		}
-	}
 	return 0;
 }
 
 /// this is called from within psycle's host's processing thread.
 void jack::do_process() throw(engine::exception) {
-	if(loggers::trace()) {
-		std::ostringstream s; s << "process";
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
+	if(loggers::trace()) loggers::trace()("process", UNIVERSALIS__COMPILER__LOCATION);
 	if(!in_port()) return;
 	{ scoped_lock lock(mutex_);
-		if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
+		if(false && loggers::warning() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 		while(!io_ready()) condition_.wait(lock);
 	}
 	{ // fill the intermediate buffer
