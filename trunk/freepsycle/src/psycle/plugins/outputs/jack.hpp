@@ -51,12 +51,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		bool started_;
 		bool stop_requested_;
 
-		/// intermediate buffer between do_process() and the routine that writes to the jack buffer
-		std::vector< ::jack_default_audio_sample_t> intermediate_buffer_;
-		
-		/// pointer to current jack read position in the intermediate buffer
-		unsigned int intermediate_buffer_current_read_pointer_;
-		
 		std::vector< ::jack_default_audio_sample_t> last_samples_;
 };
 

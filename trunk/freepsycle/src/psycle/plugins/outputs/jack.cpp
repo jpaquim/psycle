@@ -33,6 +33,7 @@ int jack::set_sample_rate_callback_static(::jack_nframes_t sample_rate, void * d
 }
 
 int jack::set_sample_rate_callback(::jack_nframes_t sample_rate) {
+	///\todo thread sync
 	in_port().events_per_second(sample_rate);
 	return 0;
 }
@@ -63,8 +64,7 @@ void jack::do_open() throw(engine::exception) {
 		loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
-	// get the sample rate
-	{
+	{ // get the sample rate
 		::jack_nframes_t const sample_rate(::jack_get_sample_rate(client_));
 		if(sample_rate != static_cast< ::jack_nframes_t>(in_port().events_per_second())) {
 			if(loggers::information()) {
@@ -81,7 +81,7 @@ void jack::do_open() throw(engine::exception) {
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
-	// register some output ports
+	// register the output ports
 	output_ports_.resize(in_port().channels());
 	for(unsigned int i(0); i < in_port().channels(); ++i) {
 		std::ostringstream port_name; port_name << "output_" << i + 1;
@@ -89,9 +89,16 @@ void jack::do_open() throw(engine::exception) {
 			throw engine::exceptions::runtime_error("could not register output port", UNIVERSALIS__COMPILER__LOCATION);
 	}
 
-	// allocate the intermediate buffer
-	intermediate_buffer_.resize(parent().events_per_buffer() * in_port().channels());
-	//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
+	{ // allocate a ring buffer
+		std::size_t const bytes(parent().events_per_buffer() * in_port().channels() * sizeof(::jack_default_audio_sample_t));
+		#if 0
+		if(!(ringbuffer_ = ::jack_ringbuffer_create(bytes))) {
+			std::ostringstream s;
+			s << "could create ring buffer of " << bytes << " bytes";
+			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		#endif
+	}
 
 	// set the thread init callback
 	if(int error = ::jack_set_thread_init_callback(client_, thread_init_callback_static, (void*)this)) {
@@ -105,7 +112,6 @@ void jack::do_open() throw(engine::exception) {
 		std::ostringstream s; s << "could not set process callback: " << error;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-
 }
 
 bool jack::opened() const {
@@ -187,27 +193,43 @@ int jack::process_callback_static(::jack_nframes_t frames, void * data) {
 /// this is called from within jack's processing thread.
 int jack::process_callback(::jack_nframes_t frames) {
 	if(false && loggers::trace()) loggers::trace()("process_callback", UNIVERSALIS__COMPILER__LOCATION);
-	::jack_transport_state_t ts = ::jack_transport_query(client_, /* ::jack_position_t* */ 0);
-	if(false /* always plays, doesn't support rolling */ && ts != ::JackTransportRolling) {
+	if(false /* always plays, doesn't support rolling */ && ::jack_transport_query(client_, /* ::jack_position_t* */ 0) != ::JackTransportRolling) {
 		// emit silence
 		if(loggers::trace()) loggers::trace()("transport not rolling => emitting silence", UNIVERSALIS__COMPILER__LOCATION);
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
 			::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
 			std::memset(out, 0, sizeof *out * frames);
 		}
-	} else // copy the intermediate buffer to the jack buffer
-		for(unsigned int c(0); c < in_port().channels(); ++c) {
-			::jack_default_audio_sample_t * const out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
-			for(std::size_t i(0); i < frames; ++i) {
-				#if 1 // basic 440Hz sine wave test
-					double static x(0);
-					out[i] = 0.1 * std::sin(x);
-					x += 2 * 3.14 * 440 / 44100;
-				#else
-					out[i] = intermediate_buffer_[i + c];
-				#endif
+	} else { // copy the ring buffer to the jack buffer
+		std::size_t out_size(frames * sizeof(::jack_default_audio_sample_t));
+		#if 0
+		while(true) {
+			::jack_ringbuffer_data_t vec[2];
+			::jack_ringbuffer_get_read_vector(ringbuffer_, vec);
+			if(vec[0].len) {
+				std::size_t const copy_size(std::min(vec[0].len, out_size));
+				for(unsigned int c(0); c < in_port().channels(); ++c) {
+					::jack_default_audio_sample_t * out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
+					std::memcpy(out, vec[0].buf, copy_size);
+				}
+				out_size -= copy_size;
+				if(!out_size) break;
+				out += copy_size;
+				if(vec[1].len) {
+					std::size_t const copy_size(std::min(vec[1].len, out_size));
+					for(unsigned int c(0); c < in_port().channels(); ++c) {
+						::jack_default_audio_sample_t * out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
+						std::memcpy(out, vec[1].buf, copy_size);
+					}
+					out_size -= copy_size;
+					if(!out_size) break;
+					out += copy_size;
+					::jack_ringbuffer_read_advance(ringbuffer_, vec[0].len + vec[1].len);
+				} else ::jack_ringbuffer_read_advance(ringbuffer_, vec[0].len);
 			}
 		}
+		#endif
+	}
 	return 0;
 }
 
@@ -219,21 +241,25 @@ void jack::do_process() throw(engine::exception) {
 		if(false && loggers::warning() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
 		while(!io_ready()) condition_.wait(lock);
 	}
-	{ // fill the intermediate buffer
+	{ // fill the ring buffer
 		unsigned int const samples_per_buffer(parent().events_per_buffer());
 		assert(last_samples_.size() == in_port().channels());
 		for(unsigned int c(0); c < in_port().channels(); ++c) {
+		#if 0
+			::jack_ringbuffer_data_t vec[2];
+			::jack_ringbuffer_get_read_vector(ringbuffer_, vec);
+
 			engine::buffer::channel & in(in_port().buffer()[c]);
 			unsigned int spread(0);
 			for(std::size_t e(0), s(in.size()); e < s; ++e) {
 				last_samples_[c] = in[e].sample();
-				for( ; spread <= in[e].index() ; ++spread) intermediate_buffer_[spread + c] = last_samples_[c];
+				for( ; spread <= in[e].index() ; ++spread) ringbuffer_[spread + c] = last_samples_[c];
 			}
-			for( ; spread < samples_per_buffer ; ++spread) intermediate_buffer_[spread + c] = last_samples_[c];
+			for( ; spread < samples_per_buffer ; ++spread) ringbuffer_[spread + c] = last_samples_[c];
+		#endif
 		}
 	}
 	{ scoped_lock lock(mutex_);
-		//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 		io_ready(false);
 	}
 	condition_.notify_one();
