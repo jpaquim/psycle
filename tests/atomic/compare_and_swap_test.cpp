@@ -16,7 +16,7 @@ bool inline compare_and_swap(Value * const address, Value const old_value, Value
 	#if defined USE_GCC
 		return __sync_bool_compare_and_swap(address, old_value, new_value);
 	#else
-		// no return statement, on purpose, to use the sfinae rule
+		// no return statement to error on purpose -- see template specialisations below
 	#endif
 }
 
