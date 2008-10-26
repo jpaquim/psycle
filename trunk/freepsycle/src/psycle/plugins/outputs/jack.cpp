@@ -5,6 +5,7 @@
 ///\implementation psycle::plugins::outputs::jack
 #include <psycle/detail/project.private.hpp>
 #include "jack.hpp"
+#include <universalis/processor/exception.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(jack)
@@ -74,6 +75,7 @@ void jack::do_open() throw(engine::exception) {
 			in_port().events_per_second(sample_rate);
 		}
 	}
+	// set the sample rate change callback
 	if(int error = ::jack_set_sample_rate_callback(client_, set_sample_rate_callback_static, (void*)this)) {
 		std::ostringstream s; s << "could not set sample rate callback: " << error;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -90,6 +92,12 @@ void jack::do_open() throw(engine::exception) {
 	// allocate the intermediate buffer
 	intermediate_buffer_.resize(parent().events_per_buffer() * in_port().channels());
 	//intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
+
+	// set the thread init callback
+	if(int error = ::jack_set_thread_init_callback(client_, thread_init_callback_static, (void*)this)) {
+		std::ostringstream s; s << "could not set thread init callback: " << error;
+		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
 
 	// set the process callback
 	stop_requested_ = false;
@@ -140,6 +148,22 @@ void jack::do_start() throw(engine::exception) {
 
 bool jack::started() const {
 	return started_;
+}
+
+/// this is called from within jack's processing thread.
+void jack::thread_init_callback_static(void * data) {
+	reinterpret_cast<jack*>(data)->thread_init_callback();
+}
+
+/// this is called from within jack's processing thread.
+void jack::thread_init_callback() {
+	if(loggers::information()) loggers::information()("jack thread started", UNIVERSALIS__COMPILER__LOCATION);
+
+	// set thread name
+	thread_name_.set(universalis::compiler::typenameof(*this) + "#" + qualified_name());
+
+	// install cpu/os exception handler/translator
+	universalis::processor::exception::install_handler_in_thread();
 }
 
 /// this is called from within jack's processing thread.
