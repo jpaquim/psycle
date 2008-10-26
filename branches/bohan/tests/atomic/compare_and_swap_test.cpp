@@ -31,6 +31,7 @@ void loop(int thread, int flip, int flop) {
 }
 
 int main() {
+	for(int t(0); t < threads; ++t) for(int i(0); i < iterations; ++i) results[t][i] = 0;
 	boost::thread thread1(boost::bind(&loop, 0, 0, 1));
 	boost::thread thread2(boost::bind(&loop, 1, 1, 2));
 	boost::thread thread3(boost::bind(&loop, 2, 2, 3));
