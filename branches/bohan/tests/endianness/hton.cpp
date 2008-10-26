@@ -10,8 +10,6 @@ int main() {
 
 		uint8_t c[4];
 		std::memcpy(c, &i, sizeof c);
-	
-
 		std::cout << ", physical layout: ";
 		for(int i = 0; i < sizeof c; ++i) std::cout << (unsigned int)(c[i]);
 	
