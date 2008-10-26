@@ -200,6 +200,13 @@
 	#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
 	#define DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+	
+	////////////////////
+	// intel's compiler
+	// they also define _MSC_VER !
+	
+	#if defined __INTEL_COMPILER
+		#define DIVERSALIS__COMPILER__INTEL
 #endif
 
 
