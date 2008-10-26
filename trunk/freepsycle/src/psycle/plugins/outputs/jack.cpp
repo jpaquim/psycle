@@ -13,8 +13,7 @@ jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::
 :
 	resource(plugin_library_reference, graph, name),
 	client_(),
-	started_(),
-	intermediate_buffer_()
+	started_()
 {
 	engine::ports::inputs::single::create_on_heap(*this, "in");
 	engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
@@ -52,8 +51,7 @@ void jack::do_open() throw(engine::exception) {
 	std::size_t const client_name_max_lengh(::jack_client_name_size());
 	if(client_name.length() > client_name_max_lengh) client_name = client_name.substr(0, client_name_max_lengh);
 	::JackStatus status;
-	if(!(client_ = ::jack_client_open(client_name.c_str(), ::JackNullOption, &status, server_name
-	))) {
+	if(!(client_ = ::jack_client_open(client_name.c_str(), ::JackNullOption, &status, server_name))) {
 		std::ostringstream s; s << "could not open client: status: " << status;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
@@ -76,13 +74,16 @@ void jack::do_open() throw(engine::exception) {
 			in_port().events_per_second(sample_rate);
 		}
 	}
-	::jack_set_sample_rate_callback(client_, set_sample_rate_callback_static, (void*)this);
+	if(int error = ::jack_set_sample_rate_callback(client_, set_sample_rate_callback_static, (void*)this)) {
+		std::ostringstream s; s << "could not set sample rate callback: " << error;
+		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
 	
 	// register some output ports
 	output_ports_.resize(in_port().channels());
 	for(unsigned int i(0); i < in_port().channels(); ++i) {
 		std::ostringstream port_name; port_name << "output_" << i + 1;
-		if(!(output_ports_[i] = ::jack_port_register(client_, port_name.str().c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, 0)))
+		if(!(output_ports_[i] = ::jack_port_register(client_, port_name.str().c_str(), JACK_DEFAULT_AUDIO_TYPE, ::JackPortIsOutput, /* buffer size ignored for built-in types */ 0)))
 			throw engine::exceptions::runtime_error("could not register output port", UNIVERSALIS__COMPILER__LOCATION);
 	}
 
@@ -92,7 +93,10 @@ void jack::do_open() throw(engine::exception) {
 
 	// set the process callback
 	stop_requested_ = false;
-	::jack_set_process_callback(client_, process_callback_static, (void*)this);
+	if(int error = ::jack_set_process_callback(client_, process_callback_static, (void*)this)) {
+		std::ostringstream s; s << "could not set process callback: " << error;
+		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
 
 }
 
@@ -103,17 +107,17 @@ bool jack::opened() const {
 void jack::do_start() throw(engine::exception) {
 	resource::do_start();
 	// activate the client
-	if(int err = ::jack_activate(client_)) {
-		std::ostringstream s; s << "cannot activate client: " << err;
+	if(int error = ::jack_activate(client_)) {
+		std::ostringstream s; s << "could not activate client: " << error;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	#if 1 // automatically connect the ports
 		char const ** ports;
 		if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput)))
-			throw engine::exceptions::runtime_error("could not find any physical playback ports", UNIVERSALIS__COMPILER__LOCATION);
+			throw engine::exceptions::runtime_error("could not find any physical playback/input ports", UNIVERSALIS__COMPILER__LOCATION);
 		try {
 			if(loggers::trace()) {
-				std::ostringstream s; s << "input ports:";
+				std::ostringstream s; s << "physical playback/input ports:";
 				for(unsigned int i(0); ports[i]; ++i) s << ' ' << ports[i];
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
@@ -199,8 +203,8 @@ void jack::do_process() throw(engine::exception) {
 }
 
 void jack::do_stop() throw(engine::exception) {
-	if(int err = ::jack_deactivate(client_)) {
-		std::ostringstream s; s << "cannot deactivate client: " << err;
+	if(int error = ::jack_deactivate(client_)) {
+		std::ostringstream s; s << "could not deactivate client: " << error;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	resource::do_stop();
@@ -208,7 +212,11 @@ void jack::do_stop() throw(engine::exception) {
 }
 
 void jack::do_close() throw(engine::exception) {
-	::jack_client_close(client_); client_ = 0;
+	if(int error = ::jack_client_close(client_)) {
+		std::ostringstream s; s << "could not close client: " << error;
+		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	client_ = 0;
 	resource::do_close();
 }
 
