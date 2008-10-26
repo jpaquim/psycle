@@ -14,11 +14,11 @@ namespace universalis { namespace operating_system {
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread_name {
 	public:
 		/// create an instance without setting any name yet
-		thread_name() {}
+		thread_name() : thread_name_() {}
 
 		/// sets a name for the current thread
 		///\post the name is copied
-		thread_name(std::string const & name) { set(name); }
+		thread_name(std::string const & name) : thread_name_() { set(name); }
 
 		/// sets a name for the current thread
 		///\post the name is copied
@@ -27,8 +27,12 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread_name {
 		/// gets the name of the current thread
 		std::string static get();
 
-		/// unsets the name of the current thread
+		/// unsets the name of the thread that set it.
+		/// There is no problem if the destructor is invoked from another thread
+		/// than the one that set the name.
 		~thread_name();
+	private:
+		std::string const * thread_name_;
 };
 
 }}

@@ -9,31 +9,33 @@
 #include "thread_name.hpp"
 #include "loggers.hpp"
 #include <thread>
+#include <cassert>
 
 namespace universalis { namespace operating_system {
 
 namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
-	std::string const * thread_name_(0);
+	std::string const * tls_thread_name_(0);
 }
 
 void thread_name::set(std::string const & name) {
-	if(operating_system::loggers::trace()()) {
+	if(operating_system::loggers::trace()) {
 		std::ostringstream s;
 		s << "setting name for thread: id: " << std::this_thread::id() << ", name: " << name;
 		operating_system::loggers::trace()(s.str());
 	}
-
-	delete thread_name_;
-	thread_name_ = new std::string(name);
+	assert(!thread_name_ || thread_name_ == tls_thread_name_);
+	delete tls_thread_name_;
+	thread_name_ = tls_thread_name_ = new std::string(name);
 }
 
 std::string thread_name::get() {
-	std::string nvr(thread_name_ ? *thread_name_ : "<unknown>");
+	std::string nvr(tls_thread_name_ ? *tls_thread_name_ : "<unknown>");
 	return nvr;
 }
 
 thread_name::~thread_name() {
+	if(thread_name_ == tls_thread_name_) tls_thread_name_ = 0;
 	delete thread_name_;
 }
 

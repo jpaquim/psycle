@@ -481,4 +481,3 @@ void gstreamer::do_close() throw(engine::exception) {
 }
 
 }}}
-

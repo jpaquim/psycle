@@ -6,6 +6,7 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include "../resource.hpp"
+#include <universalis/operating_system/thread_name.hpp>
 #include <jack/jack.h>
 #include <condition>
 #include <mutex>
@@ -39,6 +40,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 		int static set_sample_rate_callback_static(::jack_nframes_t, void*);
 		int        set_sample_rate_callback(::jack_nframes_t);
 
+		void static thread_init_callback_static(void*);
+		void        thread_init_callback();
+		universalis::operating_system::thread_name thread_name_;
+		
 		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;
 		std::condition<scoped_lock> mutable condition_;
