@@ -17,6 +17,7 @@ namespace universalis { namespace processor { namespace atomic {
 // see http://tech.groups.yahoo.com/group/liblf-dev
 // see http://www.audiomulch.com/~rossb/code/lockfree/liblfds
 // see http://portaudio.com/trac/browser/portaudio/trunk/src/common/pa_memorybarrier.h
+// see http://webcvs.freedesktop.org/gstreamer/gst-plugins-base/gst-libs/gst/audio/gstringbuffer.c?view=markup
 // see http://svn.gnome.org/viewvc/glib/trunk/glib/gatomic.c?view=markup
 
 /// atomic compare and swap.
