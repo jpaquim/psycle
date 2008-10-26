@@ -207,6 +207,7 @@
 	
 	#if defined __INTEL_COMPILER
 		#define DIVERSALIS__COMPILER__INTEL
+	#endif
 #endif
 
 
