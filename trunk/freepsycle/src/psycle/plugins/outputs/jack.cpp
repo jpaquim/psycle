@@ -120,41 +120,41 @@ void jack::do_start() throw(engine::exception) {
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	#if 1 // automatically connect the ports
-		char const ** ports;
-		if(!(ports = ::jack_get_ports(client_, /* port name regexp */ 0, /* type name regexp */ 0, ::JackPortIsPhysical | ::JackPortIsInput)))
+		char const ** input_ports;
+		if(!(input_ports = ::jack_get_ports(client_, /* port name regexp */ 0, /* type name regexp */ 0, ::JackPortIsPhysical | ::JackPortIsInput)))
 			throw engine::exceptions::runtime_error("could not find any physical playback/input ports", UNIVERSALIS__COMPILER__LOCATION);
 		try {
 			if(loggers::trace()) {
 				std::ostringstream s; s << "physical playback/input ports:";
-				for(unsigned int i(0); ports[i]; ++i) s << ' ' << ports[i];
+				for(unsigned int i(0); input_ports[i]; ++i) s << ' ' << input_ports[i];
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			if(in_port().channels() == 1 && ports[0] && ports[1]) {
+			if(in_port().channels() == 1 && input_ports[0] && input_ports[1]) {
 				// connect mono to stereo
-				if(::jack_connect(client_, ::jack_port_name(output_ports_[0]), ports[0]))
+				if(::jack_connect(client_, ::jack_port_name(output_ports_[0]), input_ports[0]))
 					throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
-				if(::jack_connect(client_, ::jack_port_name(output_ports_[0]), ports[1]))
+				if(::jack_connect(client_, ::jack_port_name(output_ports_[0]), input_ports[1]))
 					throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
-			} else if(in_port().channels() > 1 && ports[0] && !ports[1])
+			} else if(in_port().channels() > 1 && input_ports[0] && !input_ports[1])
 				// connect many to mono
 				for(unsigned int i(0); i < in_port().channels(); ++i) {
-					if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), ports[0]))
+					if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), input_ports[0]))
 						throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
 				}
 			else // connect many to many
 				for(unsigned int i(0); i < in_port().channels(); ++i) {
-					if(!ports[i]) {
+					if(!input_ports[i]) {
 						loggers::warning()("cannot connect every port: less input ports than output ports");
 						break;
 					}
-					if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), ports[i]))
+					if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), input_ports[i]))
 						throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
 				}
 		} catch(...) {
-			std::free(ports);
+			std::free(input_ports);
 			throw;
 		}
-		std::free(ports);
+		std::free(input_ports);
 	#endif
 	started_ = true;
 }
