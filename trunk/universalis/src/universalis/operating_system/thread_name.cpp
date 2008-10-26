@@ -18,25 +18,28 @@ namespace {
 	std::string const * tls_thread_name_(0);
 }
 
-void thread_name::set(std::string const & name) {
-	if(operating_system::loggers::trace()) {
-		std::ostringstream s;
-		s << "setting name for thread: id: " << std::this_thread::id() << ", name: " << name;
-		operating_system::loggers::trace()(s.str());
-	}
-	assert(!thread_name_ || thread_name_ == tls_thread_name_);
-	delete tls_thread_name_;
-	thread_name_ = tls_thread_name_ = new std::string(name);
-}
-
 std::string thread_name::get() {
 	std::string nvr(tls_thread_name_ ? *tls_thread_name_ : "<unknown>");
 	return nvr;
 }
 
+void thread_name::set(std::string const & name) {
+	assert(!thread_name_.length() || &thread_name_ == tls_thread_name_);
+	thread_name_ = name;
+	set_tls();
+}
+
+void thread_name::set_tls() {
+	if(operating_system::loggers::trace()) {
+		std::ostringstream s;
+		s << "setting name for thread: id: " << std::this_thread::id() << ", name: " << thread_name_;
+		operating_system::loggers::trace()(s.str());
+	}
+	tls_thread_name_ = &thread_name_;
+}
+
 thread_name::~thread_name() {
-	if(thread_name_ == tls_thread_name_) tls_thread_name_ = 0;
-	delete thread_name_;
+	if(&thread_name_ == tls_thread_name_) tls_thread_name_ = 0;
 }
 
 }}

@@ -18,7 +18,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread_name {
 
 		/// sets a name for the current thread
 		///\post the name is copied
-		thread_name(std::string const & name) : thread_name_() { set(name); }
+		thread_name(std::string const & name) : thread_name_(name) { set_tls(); }
 
 		/// sets a name for the current thread
 		///\post the name is copied
@@ -32,7 +32,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread_name {
 		/// than the one that set the name.
 		~thread_name();
 	private:
-		std::string const * thread_name_;
+		std::string thread_name_;
+		void set_tls();
 };
 
 }}
