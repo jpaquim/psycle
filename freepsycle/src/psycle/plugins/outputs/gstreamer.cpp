@@ -309,6 +309,7 @@ void gstreamer::do_open() throw(engine::exception) {
 	);
 
 	{ // allocate the intermediate buffer
+		///\todo use gstreamer's lock-free ringbuffer
 		// note: period_frames may be different from parent().events_per_buffer()
 		std::size_t const bytes(static_cast<std::size_t>(parent().events_per_buffer() * format.bytes_per_sample()));
 		if(!(intermediate_buffer_ = new char[bytes])) {
