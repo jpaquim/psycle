@@ -5,7 +5,7 @@
 int main() {
 	std::cout << std::hex;
 	{
-		uint32_t i(0x11223344);
+		uint32_t i(0x44332211);
 		std::cout << "logical value: " << i;
 
 		uint8_t c[4];
@@ -17,11 +17,11 @@ int main() {
 	
 		// reverse the byte order if it's a little endian machine
 		// this actually does nothing on a big endian machine.
-		i = c[3] << 24 | c[2] << 16 | c[1] << 8 | c[0];
+		i = c[0] << 24 | c[1] << 16 | c[2] << 8 | c[3];
 		std::cout << ", hton: " << i << '\n';
 	}
 	{
-		uint64_t i(0x1122334455667788);
+		uint64_t i(0x8877665544332211UL);
 		std::cout << "logical value: " << i;
 
 		uint8_t c[8];
@@ -32,14 +32,14 @@ int main() {
 		// reverse the byte order if it's a little endian machine
 		// this actually does nothing on a big endian machine.
 		i =
-			uint64_t(c[7]) << 56 |
-			uint64_t(c[6]) << 48 |
-			uint64_t(c[5]) << 40 |
-			uint64_t(c[4]) << 32 |
-			c[3] << 24 |
-			c[2] << 16 |
-			c[1] << 8 |
-			c[0];
+			uint64_t(c[0]) << 56 |
+			uint64_t(c[1]) << 48 |
+			uint64_t(c[2]) << 40 |
+			uint64_t(c[3]) << 32 |
+			c[4] << 24 |
+			c[5] << 16 |
+			c[6] << 8 |
+			c[7];
 		std::cout << ", hton: " << i << '\n';
 	}
 }
