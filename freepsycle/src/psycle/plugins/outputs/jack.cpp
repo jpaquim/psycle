@@ -121,7 +121,7 @@ void jack::do_start() throw(engine::exception) {
 	}
 	#if 1 // automatically connect the ports
 		char const ** ports;
-		if(!(ports = ::jack_get_ports(client_, 0, 0, ::JackPortIsPhysical | ::JackPortIsInput)))
+		if(!(ports = ::jack_get_ports(client_, /* port name regexp */ 0, /* type name regexp */ 0, ::JackPortIsPhysical | ::JackPortIsInput)))
 			throw engine::exceptions::runtime_error("could not find any physical playback/input ports", UNIVERSALIS__COMPILER__LOCATION);
 		try {
 			if(loggers::trace()) {
@@ -129,14 +129,27 @@ void jack::do_start() throw(engine::exception) {
 				for(unsigned int i(0); ports[i]; ++i) s << ' ' << ports[i];
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			for(unsigned int i(0); i < in_port().channels(); ++i) {
-				if(!ports[i]) {
-					loggers::warning()("cannot connect every port: less input ports than output ports");
-					break;
-				}
-				if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), ports[i]))
+			if(in_port().channels() == 1 && ports[0] && ports[1]) {
+				// connect mono to stereo
+				if(::jack_connect(client_, ::jack_port_name(output_ports_[0]), ports[0]))
 					throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
-			}
+				if(::jack_connect(client_, ::jack_port_name(output_ports_[0]), ports[1]))
+					throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
+			} else if(in_port().channels() > 1 && ports[0] && !ports[1])
+				// connect many to mono
+				for(unsigned int i(0); i < in_port().channels(); ++i) {
+					if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), ports[0]))
+						throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
+				}
+			else // connect many to many
+				for(unsigned int i(0); i < in_port().channels(); ++i) {
+					if(!ports[i]) {
+						loggers::warning()("cannot connect every port: less input ports than output ports");
+						break;
+					}
+					if(::jack_connect(client_, ::jack_port_name(output_ports_[i]), ports[i]))
+						throw engine::exceptions::runtime_error("could not connect ports", UNIVERSALIS__COMPILER__LOCATION);
+				}
 		} catch(...) {
 			std::free(ports);
 			throw;
@@ -188,7 +201,7 @@ int jack::process_callback(::jack_nframes_t frames) {
 			for(std::size_t i(0); i < frames; ++i) {
 				#if 1 // basic 440Hz sine wave test
 					double static x(0);
-					out[i] = 0.2 * std::sin(x);
+					out[i] = 0.1 * std::sin(x);
 					x += 2 * 3.14 * 440 / 44100;
 				#else
 					out[i] = intermediate_buffer_[i + c];
