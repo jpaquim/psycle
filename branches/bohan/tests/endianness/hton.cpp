@@ -6,11 +6,11 @@ int main() {
 	std::cout << std::hex;
 	{
 		std::cout << "32-bit\n";
-		
 		union u {
 			uint32_t i;
 			uint8_t c[sizeof(uint32_t)];
 		} x;
+		
 		x.i = 0x44332211;
 		std::cout << "\t       logical value: 0x" << x.i;
 
@@ -27,11 +27,11 @@ int main() {
 	}
 	{
 		std::cout << "64-bit\n";
-
 		union u {
 			uint64_t i;
 			uint8_t c[sizeof(uint64_t)];
 		} x;
+		
 		x.i = 0x8877665544332211ULL;
 		std::cout << "\t       logical value: 0x" << x.i;
 
