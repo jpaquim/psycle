@@ -5,26 +5,34 @@
 int main() {
 	std::cout << std::hex;
 	{
+		std::cout << "32-bit\n";
+		
 		uint32_t i(0x44332211);
-		std::cout << "logical value: " << i;
+		std::cout << "\t       logical value: " << i;
 
 		uint8_t c[4];
 		std::memcpy(c, &i, sizeof c);
-		std::cout << ", physical layout: ";
+		std::cout << "\n\t     physical layout: ";
 		for(int i = 0; i < sizeof c; ++i) std::cout << (unsigned int)(c[i]);
 	
 		// reverse the byte order if it's a little endian machine
 		// this actually does nothing on a big endian machine.
 		i = c[0] << 24 | c[1] << 16 | c[2] << 8 | c[3];
-		std::cout << ", hton: " << i << '\n';
+
+		std::cout << "\n\thton physical layout: ";
+		std::memcpy(c, &i, sizeof c);
+		for(int i = 0; i < sizeof c; ++i) std::cout << (unsigned int)(c[i]);
+		std::cout << '\n';
 	}
 	{
-		uint64_t i(0x8877665544332211UL);
-		std::cout << "logical value: " << i;
+		std::cout << "64-bit\n";
+
+		uint64_t i(0x8877665544332211ULL);
+		std::cout << "\t       logical value: " << i;
 
 		uint8_t c[8];
 		std::memcpy(c, &i, sizeof c);
-		std::cout << ", physical layout: ";
+		std::cout << "\n\t     physical layout: ";
 		for(int i = 0; i < sizeof c; ++i) std::cout << (unsigned int)(c[i]);
 	
 		// reverse the byte order if it's a little endian machine
@@ -38,6 +46,10 @@ int main() {
 			c[5] << 16 |
 			c[6] << 8 |
 			c[7];
-		std::cout << ", hton: " << i << '\n';
+
+		std::cout << "\n\thton physical layout: ";
+		std::memcpy(c, &i, sizeof c);
+		for(int i = 0; i < sizeof c; ++i) std::cout << (unsigned int)(c[i]);
+		std::cout << '\n';
 	}
 }
