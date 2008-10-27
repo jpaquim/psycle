@@ -25,7 +25,7 @@ namespace universalis { namespace processor { namespace atomic {
 /// atomic compare and swap with full memory barrier.
 /// does not fail spuriously.
 template<typename Value>
-bool inline compare_and_swap(Value * const address, Value const old_value, Value const new_value) {
+bool inline compare_and_swap(Value * address, Value old_value, Value new_value) {
 	#if defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION >= 40100 // 4.1.0
 		return __sync_bool_compare_and_swap(address, old_value, new_value);
 	#else
@@ -35,12 +35,12 @@ bool inline compare_and_swap(Value * const address, Value const old_value, Value
 
 #if !defined DIVERSALIS__COMPILER__GNU || DIVERSALIS__COMPILER__VERSION < 40100 // 4.1.0
 	template<>
-	bool inline compare_and_swap< ::gpointer>(::gpointer * const address, ::gpointer const old_value, ::gpointer const new_value) {
+	bool inline compare_and_swap< ::gpointer>(::gpointer * address, ::gpointer old_value, ::gpointer new_value) {
 		return ::g_atomic_pointer_compare_and_exchange(address, old_value, new_value);
 	}
 
 	template<>
-	bool inline compare_and_swap< ::gint>(::gint * const address, ::gint const old_value, ::gint const new_value) {
+	bool inline compare_and_swap< ::gint>(::gint * address, ::gint old_value, ::gint new_value) {
 		return ::g_atomic_int_compare_and_exchange(address, old_value, new_value);
 	}
 #endif

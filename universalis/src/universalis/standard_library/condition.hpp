@@ -114,38 +114,38 @@ namespace std {
 				condition<scoped_lock_type> c;
 				int i;
 
-			void thread_function() {
-				{ scoped_lock_type l(m);
-					i = 1;
-				}
-				c.notify_one();
-				{ scoped_lock<mutex> l(m);
-					while(i != 2) c.wait(l); 
-				}
-				#if 0 ///\todo strange bug...
-				{ // timeout in the future
-					scoped_lock_type l(m);
-					utc_time const timeout(hiresolution_clock<utc_time>::universal_time() + seconds(1));
-					while(c.timed_wait(l, timeout)) {
-						utc_time const now(hiresolution_clock<utc_time>::universal_time() - milliseconds(500));
-						//BOOST_MESSAGE(timeout.nanoseconds_since_epoch().get_count());
-						//BOOST_MESSAGE(now.nanoseconds_since_epoch().get_count());
-						BOOST_CHECK(now < timeout);
-						if(now >= timeout) break;
+				void thread_function() {
+					{ scoped_lock_type l(m);
+						i = 1;
 					}
-				}
-				{ // timeout in the past
-					scoped_lock_type l(m);
-					utc_time const timeout(hiresolution_clock<utc_time>::universal_time() - days(1));
-					while(c.timed_wait(l, timeout)) {
-						utc_time const now(hiresolution_clock<utc_time>::universal_time() - milliseconds(500));
-						//BOOST_MESSAGE(timeout.nanoseconds_since_epoch().get_count());
-						//BOOST_MESSAGE(now.nanoseconds_since_epoch().get_count());
-						BOOST_CHECK(now < timeout);
-						if(now >= timeout) break;
+					c.notify_one();
+					{ scoped_lock<mutex> l(m);
+						while(i != 2) c.wait(l); 
 					}
-				}
-				#endif
+					#if 0 ///\todo strange bug...
+					{ // timeout in the future
+						scoped_lock_type l(m);
+						utc_time const timeout(hiresolution_clock<utc_time>::universal_time() + seconds(1));
+						while(c.timed_wait(l, timeout)) {
+							utc_time const now(hiresolution_clock<utc_time>::universal_time() - milliseconds(500));
+							//BOOST_MESSAGE(timeout.nanoseconds_since_epoch().get_count());
+							//BOOST_MESSAGE(now.nanoseconds_since_epoch().get_count());
+							BOOST_CHECK(now < timeout);
+							if(now >= timeout) break;
+						}
+					}
+					{ // timeout in the past
+						scoped_lock_type l(m);
+						utc_time const timeout(hiresolution_clock<utc_time>::universal_time() - days(1));
+						while(c.timed_wait(l, timeout)) {
+							utc_time const now(hiresolution_clock<utc_time>::universal_time() - milliseconds(500));
+							//BOOST_MESSAGE(timeout.nanoseconds_since_epoch().get_count());
+							//BOOST_MESSAGE(now.nanoseconds_since_epoch().get_count());
+							BOOST_CHECK(now < timeout);
+							if(now >= timeout) break;
+						}
+					}
+					#endif
 			}
 		};
 
