@@ -7,6 +7,7 @@
 #include <universalis/processor/compare_and_swap.hpp>
 namespace psycle { namespace helpers {
 
+/// lock-free ring buffer
 class ring_buffer {
 	public:
 		typedef unsigned int size_type;
@@ -14,7 +15,7 @@ class ring_buffer {
 		ring_buffer(size_type size) : size_(size), read_position_(), write_position_() {}
 
 	///\name size
-	///\{		
+	///\{
 		public:
 			size_type size() const { return size_; }
 		private:
@@ -22,7 +23,7 @@ class ring_buffer {
 	///\}
 
 	///\name read position
-	///\{		
+	///\{
 		public:
 			size_type read_position() const { return read_position_; }
 			void advance_read_position(size_type amount) { add(read_position_, amount); }
@@ -31,7 +32,7 @@ class ring_buffer {
 	///\}
 
 	///\name write position
-	///\{		
+	///\{
 		public:
 			size_type write_position() const { return write_position_; }
 			void advance_write_position(size_type amount) { add(write_position_, amount); }
