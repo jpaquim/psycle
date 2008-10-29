@@ -4,8 +4,8 @@
 
 ///\interface psycle::plugins::outputs::jack
 #pragma once
-#include <psycle/detail/project.hpp>
 #include "../resource.hpp"
+//#include <psycle/helpers/ring_buffer.hpp>
 #include <universalis/operating_system/thread_name.hpp>
 #include <jack/jack.h>
 #include <condition>

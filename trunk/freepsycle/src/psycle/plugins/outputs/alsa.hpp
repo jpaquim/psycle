@@ -4,7 +4,6 @@
 
 ///\interface psycle::plugins::outputs::alsa
 #pragma once
-#include <psycle/detail/project.hpp>
 #include "../resource.hpp"
 #include <alsa/asoundlib.h>
 #include <cstdint>

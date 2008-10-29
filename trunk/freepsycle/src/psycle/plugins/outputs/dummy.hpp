@@ -4,7 +4,6 @@
 
 ///\interface psycle::plugins::outputs::dummy
 #pragma once
-#include <psycle/detail/project.hpp>
 #include "../resource.hpp"
 #include <thread>
 #include <mutex>
