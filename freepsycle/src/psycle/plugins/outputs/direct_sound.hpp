@@ -4,7 +4,7 @@
 
 ///\interface psycle::plugins::devices::outputs::direct_sound
 #pragma once
-#include <psycle/detail/project.hpp>
+#include "../resource.hpp"
 #include <universalis/operating_system/exception.hpp>
 #include <universalis/compiler/numeric.hpp>
 
@@ -36,8 +36,6 @@
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "dsound")
 #endif
-
-#include "../resource.hpp"
 
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__DIRECT_SOUND
 #include <universalis/compiler/dynamic_link/begin.hpp>

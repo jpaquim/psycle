@@ -4,7 +4,6 @@
 
 ///\interface psycle::plugins::outputs::gstreamer
 #pragma once
-#include <psycle/detail/project.hpp>
 #include "../resource.hpp"
 #include <universalis/compiler/numeric.hpp>
 #include <gst/gstelement.h>

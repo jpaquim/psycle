@@ -5,7 +5,6 @@
 
 ///\interface psycle::plugins::resource - an abstract plugin for resources.
 #pragma once
-#include <psycle/detail/project.hpp>
 #include "plugin.hpp"
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__RESOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
