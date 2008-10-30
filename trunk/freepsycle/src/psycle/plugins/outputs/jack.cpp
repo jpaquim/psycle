@@ -204,28 +204,28 @@ int jack::process_callback(::jack_nframes_t frames) {
 		std::size_t out_size(frames * sizeof(::jack_default_audio_sample_t));
 		#if 0
 		while(true) {
-			::jack_ringbuffer_data_t vec[2];
-			::jack_ringbuffer_get_read_vector(ringbuffer_, vec);
-			if(vec[0].len) {
-				std::size_t const copy_size(std::min(vec[0].len, out_size));
+			ring_buffer_type::size_type position, size1, size2;
+			ring_buffer_.read_position_and_sizes(position, size1, size2);
+			if(size1) {
+				std::size_t const copy_size(std::min(size1, out_size));
 				for(unsigned int c(0); c < in_port().channels(); ++c) {
 					::jack_default_audio_sample_t * out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
-					std::memcpy(out, vec[0].buf, copy_size);
+					std::memcpy(out, intermediate_buffer_ + position, copy_size);
 				}
 				out_size -= copy_size;
 				if(!out_size) break;
 				out += copy_size;
-				if(vec[1].len) {
-					std::size_t const copy_size(std::min(vec[1].len, out_size));
+				if(size2) {
+					std::size_t const copy_size(std::min(size2, out_size));
 					for(unsigned int c(0); c < in_port().channels(); ++c) {
 						::jack_default_audio_sample_t * out(reinterpret_cast< ::jack_default_audio_sample_t*>(jack_port_get_buffer(output_ports_[c], frames)));
-						std::memcpy(out, vec[1].buf, copy_size);
+						std::memcpy(out, intermediate_buffer_, copy_size);
 					}
 					out_size -= copy_size;
 					if(!out_size) break;
 					out += copy_size;
-					::jack_ringbuffer_read_advance(ringbuffer_, vec[0].len + vec[1].len);
-				} else ::jack_ringbuffer_read_advance(ringbuffer_, vec[0].len);
+					ring_buffer_.advance_read_position(size1 + size2);
+				} else ring_buffer_.advance_read_position(size1);
 			}
 		}
 		#endif
