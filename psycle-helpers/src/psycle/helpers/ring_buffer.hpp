@@ -57,7 +57,7 @@ class ring_buffer {
 			return universalis::processor::atomic::compare_and_swap(address, old_value, new_value);
 		}
 
-		bool add(size_type & var, size_type amount) {
+		void add(size_type & var, size_type amount) {
 			while(!compare_and_swap(&var, var, var + amount));
 		}
 };
