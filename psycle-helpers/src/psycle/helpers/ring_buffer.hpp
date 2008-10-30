@@ -5,12 +5,22 @@
 ///\interface psycle::helpers::ring_buffer
 #pragma once
 #include <universalis/processor/compare_and_swap.hpp>
+#include <cstddefs>
 namespace psycle { namespace helpers {
 
-/// lock-free ring buffer
+/// lock-free ring buffer.
+///
+/// This ring buffer is useful for push-based multi-threaded processing.
+/// It helps optimising thread-synchronisation by using lock-free atomic primitives
+/// (normally implemented with specific CPU instructions),
+/// instead of relying on OS-based synchronisation facilities.
+///
+/// This class does not store the actual buffer data, but only a read index and a write index.
+/// This separation of concerns makes it possible to use this class with any kind of data access interface for the buffer.
+template<typename Size_Type = std::size_t>
 class ring_buffer {
 	public:
-		typedef unsigned int size_type;
+		typedef Size_Type size_type;
 		
 		ring_buffer(size_type size) : size_(size), read_position_(), write_position_() {}
 
