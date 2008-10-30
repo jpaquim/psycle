@@ -13,7 +13,8 @@ jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::
 :
 	resource(plugin_library_reference, graph, name),
 	client_(),
-	started_()
+	started_(),
+	intermediate_buffer_()
 {
 	engine::ports::inputs::single::create_on_heap(*this, "in");
 	engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
@@ -90,13 +91,11 @@ void jack::do_open() throw(engine::exception) {
 
 	{ // allocate a ring buffer
 		std::size_t const bytes(parent().events_per_buffer() * in_port().channels() * sizeof(::jack_default_audio_sample_t));
-		#if 0
-		if(!(ringbuffer_ = ::jack_ringbuffer_create(bytes))) {
-			std::ostringstream s;
-			s << "could create ring buffer of " << bytes << " bytes";
+		ring_buffer_.size(bytes);
+		if(!(intermediate_buffer_ = new char[bytes])) {
+			std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		#endif
 	}
 
 	// set the thread init callback
@@ -119,6 +118,8 @@ bool jack::opened() const {
 
 void jack::do_start() throw(engine::exception) {
 	resource::do_start();
+	ring_buffer_.reset();
+	ring_buffer_.advance_read_position(ring_buffer_.size() - 1);
 	// activate the client
 	if(int error = ::jack_activate(client_)) {
 		std::ostringstream s; s << "could not activate client: " << error;
@@ -274,6 +275,7 @@ void jack::do_stop() throw(engine::exception) {
 }
 
 void jack::do_close() throw(engine::exception) {
+	delete[] intermediate_buffer_; intermediate_buffer_ = 0;
 	if(int error = ::jack_client_close(client_)) {
 		std::ostringstream s; s << "could not close client: " << error;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
