@@ -52,9 +52,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 
 		/// intermediate buffer between do_process() and the routine that writes to the gstreamer buffer
 		char * intermediate_buffer_;
-		
+
+		typedef helpers::ring_buffer<> ring_buffer_type;
 		/// read and write positions within the intermediate buffer
-		helpers::ring_buffer<unsigned int> ring_buffer_;
+		ring_buffer_type ring_buffer_;
 
 		std::vector< ::jack_default_audio_sample_t> last_samples_;
 };
