@@ -4,7 +4,7 @@
 ///\interface psycle::helpers::ring_buffer
 #pragma once
 #include <universalis/processor/atomic/compare_and_swap.hpp>
-#include <cstddefs>
+#include <cstddef>
 namespace psycle { namespace helpers {
 
 /// lock-free ring buffer.
@@ -14,19 +14,22 @@ namespace psycle { namespace helpers {
 /// (normally implemented with specific CPU instructions),
 /// instead of relying on OS-based synchronisation facilities.
 ///
-/// This class does not store the actual buffer data, but only a read index and a write index.
+/// This class does not store the actual buffer data, but only a read position and a write position.
 /// This separation of concerns makes it possible to use this class with any kind of data access interface for the buffer.
 template<typename Size_Type = std::size_t>
 class ring_buffer {
 	public:
 		typedef Size_Type size_type;
 		
-		ring_buffer(size_type size) : size_(size), read_position_(), write_position_() {}
+		ring_buffer(size_type size = 0) : size_(size), read_position_(), write_position_() {}
+
+		void reset() { read_position_ = write_position_ = 0; }
 
 	///\name size
 	///\{
 		public:
 			size_type size() const { return size_; }
+			void size(size_type size) { size_ = size; reset(); }
 		private:
 			size_type size_;
 	///\}
@@ -51,7 +54,7 @@ class ring_buffer {
 
 	private:
 		bool compare_and_swap(size_type * address, size_type old_value, size_type new_value) {
-			return universalis::processor::compare_and_swap(address, old_value, new_value);
+			return universalis::processor::atomic::compare_and_swap(address, old_value, new_value);
 		}
 
 		bool add(size_type & var, size_type amount) {
