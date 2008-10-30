@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 // Constants used by psycle
 #ifndef PSYCLE__CONSTANTS
 #define PSYCLE__CONSTANTS

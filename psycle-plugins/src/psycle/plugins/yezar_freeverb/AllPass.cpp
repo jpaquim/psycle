@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include "AllPass.hpp"
 
 // Allpass filter implementation

@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /**
 	\file
 	interface file for psycle::host::ExtRiffFile and psycle::host::WaveFile.

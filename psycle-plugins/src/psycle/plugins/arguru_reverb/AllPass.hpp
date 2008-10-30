@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 
 #define MAX_ALLPASS_DELAY 8192

@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include "../../songstructs.hpp"
 #include <iostream>
 #include <typeinfo>

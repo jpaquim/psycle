@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\interface psycle::host::DirectSound.
 #pragma once

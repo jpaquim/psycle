@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #ifndef PSYCLE_CORE_FWD_HPP
 #define PSYCLE_CORE_FWD_HPP
 

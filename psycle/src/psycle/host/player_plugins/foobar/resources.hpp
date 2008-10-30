@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
 // Used by resources.rc

@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief interface file for psy::core::Filter. Revision 2078
 #pragma once

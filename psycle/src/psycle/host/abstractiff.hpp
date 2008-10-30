@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /**
 	\file
 	interface file for psycle::host::abstractIff psycle::Host::BaseChunkHeader, and the different big-endian and little-endian types.

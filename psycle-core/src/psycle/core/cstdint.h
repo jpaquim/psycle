@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #ifdef _MSC_VER ///\todo check whether other scons and/or qmake projects use universalis
 #include <universalis/standard_library/stdint.hpp>
 #else

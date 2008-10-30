@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /*
 Module : SINSTANCE.H
 Purpose: Defines the interface for an MFC wrapper class to do instance checking

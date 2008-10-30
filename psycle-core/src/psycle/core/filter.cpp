@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief implementation file for psy::core::Filter. based on Revision 2623
 

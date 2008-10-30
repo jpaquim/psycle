@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\interface psycle::helpers::dsp::Dither
 #include <psycle/helpers/mersennetwister.hpp>
 namespace psycle { namespace helpers { namespace dsp {

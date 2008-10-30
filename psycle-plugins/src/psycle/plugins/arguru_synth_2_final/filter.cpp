@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include "filter.hpp"
 ///\file arguru_synth_2_final/filter.cpp
 ///\brief implementation of the filter class.

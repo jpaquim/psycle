@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include "envelope.hpp"
 
 envelope::envelope()

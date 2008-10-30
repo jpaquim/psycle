@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 #include <psycle/plugin_interface.hpp>
 // Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.

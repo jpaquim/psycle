@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include <project.private.hpp>
 
 // Configure the Foobar2000 SDK $PATH before compiling 

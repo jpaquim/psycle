@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include <psycle/project.private.hpp>
 #include "XMSamplerUISample.hpp"
 #include "Psycle.hpp"

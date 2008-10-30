@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\interface psycle::host::CLoggingWindow.
 #pragma once
 #include <project.hpp>

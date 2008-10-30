@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief implementation file for psycle::host::Filter.
 #include <psycle/project.private.hpp>

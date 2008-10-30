@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include "y_midi.hpp"
 #include "gmnames.h"
 

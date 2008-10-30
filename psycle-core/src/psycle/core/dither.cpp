@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\implementation psycle::helpers::dsp::Dither
 #include "dither.h"
 namespace psy { namespace core { namespace dsp {

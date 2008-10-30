@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 // /******************************************************************************
 // *  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
 // *                                                                             *

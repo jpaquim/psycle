@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 #include <universalis/compiler.hpp>
 #define PSYCLE__MFC__NAMESPACE__BEGIN(x)  UNIVERSALIS__COMPILER__NAMESPACE__BEGIN(x)

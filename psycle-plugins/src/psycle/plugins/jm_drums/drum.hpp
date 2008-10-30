@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 #include <math.h>
 #include "oscillator.hpp"

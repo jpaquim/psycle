@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include <psycle/detail/project.private.hpp>
 #include <boost/spirit/core.hpp>
 #include <vector>

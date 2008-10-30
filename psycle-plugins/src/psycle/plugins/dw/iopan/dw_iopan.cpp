@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include <psycle/plugin_interface.hpp>
 
 #define LCHAN 0

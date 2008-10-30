@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 // For the raison d'etre of this file,
 // see the boost signals faq question number 3.
 // http://www.boost.org/doc/html/signals/s04.html

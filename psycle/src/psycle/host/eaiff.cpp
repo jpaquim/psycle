@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /**
 	\file
 	implementation file for psycle::host::eaiff

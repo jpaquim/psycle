@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /*
 
 		Copyright (C) 1999 Juhana Sadeharju

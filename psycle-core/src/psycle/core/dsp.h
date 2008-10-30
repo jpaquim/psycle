@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file \brief various signal processing utility functions and classes, psy::core::Cubic amongst others. based on revison  2663
 #pragma once
 #include "misc.h"

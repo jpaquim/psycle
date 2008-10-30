@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 // ExListBox.h : header file
 // Code originally from ran wainstein:
