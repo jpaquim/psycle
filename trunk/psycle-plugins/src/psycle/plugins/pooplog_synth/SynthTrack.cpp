@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 // SynthTrack.cpp: implementation of the CSynthTrack class.
 //
 //////////////////////////////////////////////////////////////////////

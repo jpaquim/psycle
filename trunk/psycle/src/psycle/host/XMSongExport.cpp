@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /** @file 
  *  @brief implementation file
  *  $Date: 2008-02-12 00:44:11 +0100 (mar, 12 feb 2008) $

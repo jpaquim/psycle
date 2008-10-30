@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include <psycle/plugin_interface.hpp>
 #include "AllPass.hpp"
 #include "CombFilter.hpp"

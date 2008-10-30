@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 //============================================================================
 //
 //				DLineA (AllPass Interpolating Delay Line)

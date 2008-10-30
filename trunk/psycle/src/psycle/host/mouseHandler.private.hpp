@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief pointer handler for psycle::host::CChildView, private header
 #include "internal_machines.hpp"

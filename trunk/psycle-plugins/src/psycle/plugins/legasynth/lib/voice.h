@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /////////////////////////////////////////////////////////////////////
 // Dmitry "Sartorius" Kulikov LegaSynth plugins for PSYCLE
 

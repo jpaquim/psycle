@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #ifndef PSY__CORE__COMMANDS_H
 #define PSY__CORE__COMMANDS_H
 #pragma once

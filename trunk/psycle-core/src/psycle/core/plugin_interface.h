@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\interface psycle native plugin interface api
 
 #ifndef PSYCLE__PLUGIN_INTERFACE_H

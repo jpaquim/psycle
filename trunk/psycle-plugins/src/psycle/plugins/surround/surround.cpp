@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include <psycle/plugin_interface.hpp>
 #include "biquad.hpp"
 #include <string.h>

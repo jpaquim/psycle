@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 /// forward declarations for the namespace psycle::front_ends::gui.
 /// This file is used to avoid mutually recursive dependencies in declarations.

@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 //////////////////////////////////////////////////////////////////////
 // AudaCity WahWah effect plugin for PSYCLE by Sartorius
 //

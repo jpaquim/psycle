@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 //============================================================================
 //
 //				DLineN (Non-Interpolating Delay Line)

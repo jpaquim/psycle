@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief interface file for psycle::host::CGearRackDlg.
 #pragma once

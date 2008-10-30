@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 //
 // File: alsaseqin.h
 // Created by: User <Email>

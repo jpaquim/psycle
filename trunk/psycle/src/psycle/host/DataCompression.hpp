@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #pragma once
 ///\file
 ///\brief interface file for beerz77-2 algorithm.

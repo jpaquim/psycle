@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include <psycle/plugins/plugin.hpp>
 #include "../dw_filter.hpp"
 

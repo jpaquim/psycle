@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 
 #include "convert_internal_machines.private.hpp"
 #include "machinefactory.h"

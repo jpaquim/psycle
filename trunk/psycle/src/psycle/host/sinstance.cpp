@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 /*
 Module : SINSTANCE.CPP
 Purpose: Defines the implementation for an MFC wrapper classe

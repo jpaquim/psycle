@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 #include "RevModel.hpp"
 
 // Reverb model implementation

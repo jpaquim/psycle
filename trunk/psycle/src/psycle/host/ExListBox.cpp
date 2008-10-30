@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 // ExListBox.cpp : implementation file
 // Code originally from ran wainstein:
 // http://www.codeproject.com/combobox/cexlistboc.asp

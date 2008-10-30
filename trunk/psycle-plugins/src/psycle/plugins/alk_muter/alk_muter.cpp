@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief Alk muter plugin for PSYCLE
 #include <psycle/plugin_interface.hpp>

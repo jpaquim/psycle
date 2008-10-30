@@ -1,4 +1,3 @@
-// -*- mode:c++; indent-tabs-mode:t -*-
 ///\file
 ///\brief implementation file for psycle::host::CWaveOutDialog.
 #include <psycle/project.private.hpp>
