@@ -48,7 +48,7 @@ namespace universalis { namespace processor { namespace memory_barriers {
 		#else
 			// As a fallback, GCC understands volatile asm and "memory"
 			// to mean it should not reorder memory read/writes.
-			#if defined DIVERSALIS__PROCESSOR__POWER_PC // defined  __ppc__ || defined __powerpc__
+			#if defined DIVERSALIS__PROCESSOR__POWER_PC
 				void inline  full() { asm volatile("sync":::"memory"); }
 				void inline  read() { full(); }
 				void inline write() { full(); }
