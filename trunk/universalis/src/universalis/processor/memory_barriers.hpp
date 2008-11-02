@@ -34,6 +34,7 @@
 		void inline  read() { full(); }
 		void inline write() { full(); }
 	}}}
+	#define universalis__processor__memory_barriers__defined
 #elif defined DIVERSALIS__COMPILER__GNU
 	#if DIVERSALIS__COMPILER__VERSION >= 40100 // 4.1.0
 		// GCC >= 4.1 has built-in intrinsics. We'll use those.
@@ -42,6 +43,7 @@
 			void inline  read() { full(); }
 			void inline write() { full(); }
 		}}}
+		#define universalis__processor__memory_barriers__defined
 	#else
 		// As a fallback, GCC understands volatile asm and "memory"
 		// to mean it should not reorder memory read/writes.
@@ -51,20 +53,14 @@
 				void inline  read() { full(); }
 				void inline write() { full(); }
 			}}}
+			#define universalis__processor__memory_barriers__defined
 		#elif defined DIVERSALIS__PROCESSOR__X86
 			namespace universalis { namespace processor { namespace memory_barriers {
 				void inline  full() { asm volatile("mfence":::"memory"); }
 				void inline  read() { asm volatile("lfence":::"memory"); }
 				void inline write() { asm volatile("sfence":::"memory"); }
 			}}}
-		#else
-			#warning Memory barriers are not defined on this system. Will use compare_and_swap to emulate.
-			#include <universalis/processor/atomic/compare_and_swap.hpp>
-			namespace universalis { namespace processor { namespace memory_barriers {
-				void inline  full() { static int dummy_; compare_and_swap(&dummy_, 0, 1); }
-				void inline  read() { full(); }
-				void inline write() { full(); }
-			}}}
+			#define universalis__processor__memory_barriers__defined
 		#endif
 	#endif
 #elif defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION >= 1400
@@ -77,14 +73,18 @@
 		void inline  read() { _ReadBarrier(); }
 		void inline write() { _WriteBarrier(); }
 	}}}
+	#define universalis__processor__memory_barriers__defined
 #elif defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__BORLAND
 	namespace universalis { namespace processor { namespace memory_barriers {
 		void inline  full() { _asm { lock add [esp], 0}; }
 		void inline  read() { full(); }
 		void inline write() { full(); }
 	}}}
-#else
-	#warning Memory barriers are not defined on this system. Will use compare_and_swap to emulate.
+	#define universalis__processor__memory_barriers__defined
+#endif
+
+#if !defined universalis__processor__memory_barriers__defined
+	#warning Memory barriers are not defined for this system. Will use compare_and_swap to emulate.
 	#include <universalis/processor/atomic/compare_and_swap.hpp>
 	namespace universalis { namespace processor { namespace memory_barriers {
 		void inline  full() { static int dummy_; compare_and_swap(&dummy_, 0, 1); }
@@ -92,3 +92,4 @@
 		void inline write() {}
 	}}}
 #endif
+#undef universalis__processor__memory_barriers__defined
