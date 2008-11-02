@@ -3,10 +3,12 @@
 // copyright ????-???? Bjorn Roche, XO Audio, LLC
 // copyright 2008-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 //
-// This source code is based on the pa_memorybarrier.h header of PortAudio (Portable Audio I/O Library)
+// This source code is partially base on Apache Harmony.
+// see apache harmony barrier http://svn.apache.org/viewvc/harmony/enhanced/drlvm/trunk/vm/port/include/port_barriers.h
+//
+// This source code partially based on the pa_memorybarrier.h header of PortAudio (Portable Audio I/O Library).
 // See portaudio memory barrier http://portaudio.com/trac/browser/portaudio/trunk/src/common/pa_memorybarrier.h
 // For more information on PortAudio, see http://www.portaudio.com
-//
 // The PortAudio community makes the following non-binding requests:
 // Any person wishing to distribute modifications to the Software
 // is requested to send the modifications to the original developer
@@ -49,46 +51,99 @@
 		// to mean it should not reorder memory read/writes.
 		#if defined DIVERSALIS__PROCESSOR__POWER_PC
 			namespace universalis { namespace processor { namespace memory_barriers {
-				void inline  full() { asm volatile("sync":::"memory"); }
+				void inline  full() { asm volatile("sync" ::: "memory"); }
 				void inline  read() { full(); }
 				void inline write() { full(); }
 			}}}
 			#define universalis__processor__memory_barriers__defined
-		#elif defined DIVERSALIS__PROCESSOR__X86 /// \todo [bohan] need SSE1, SSE2? It seems mfence needs SSE3.
+		#elif defined DIVERSALIS__PROCESSOR__X86
 			// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
 			//         which is a cache-coherent, write-through one, except for SSE instructions!
 			namespace universalis { namespace processor { namespace memory_barriers {
-				void inline  full() { asm volatile("mfence":::"memory"); }
-				void inline  read() { asm volatile("lfence":::"memory"); }
-				void inline write() { asm volatile("sfence":::"memory"); }
+				void inline  full() {
+					/// [bohan] It seems mfence needs SSE3.
+					#if DIVERSALIS__PROCESSOR__WORD_SIZE >= 64 ///\todo DIVERSALIS__PROCESSOR__X86__SSE >= 3
+						asm volatile("mfence" ::: "memory");
+					#else
+						// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
+						asm volatile ("lock; addl $0, 0(%%esp)" ::: "memory");
+					#endif
+				}
+				///\todo [bohan] needs SSE1, SSE2?
+				void inline  read() { asm volatile("lfence" ::: "memory"); }
+				void inline write() { asm volatile("sfence" ::: "memory"); }
 			}}}
 			#define universalis__processor__memory_barriers__defined
 		#endif
 	#endif
-#elif defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION >= 1400
-	#include <intrin.h>
-	#pragma intrinsic(_ReadWriteBarrier)
-	#pragma intrinsic(_ReadBarrier)
-	#pragma intrinsic(_WriteBarrier)
+#elif defined DIVERSALIS__COMPILER__MICROSOFT
+	#if DIVERSALIS__COMPILER__VERSION >= 1400
+		#include <intrin.h>
+		#include <emmintrin.h>
+	#else
+		#if !defined DIVERSALIS__COMPILER__INTEL
+			void _ReadWriteBarrier();
+			void _ReadBarrier();
+			void _WriteBarrier();
+		#endif
+		void _mm_mfence();
+		void _mm_lfence();
+		void _mm_sfence();
+	#endif
+	#if !defined DIVERSALIS__COMPILER__INTEL
+		#pragma intrinsic(_ReadWriteBarrier)
+		#pragma intrinsic(_ReadBarrier)
+		#pragma intrinsic(_WriteBarrier)
+	#endif
 	namespace universalis { namespace processor { namespace memory_barriers {
 		// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
 		//         which is a cache-coherent, write-through one, except for SSE instructions!
-		//         So on x86 these instrinsics might be for the compiler only (i.e. do the same as what the volatile keyword does),
-		//         and don't emit any extra cpu instructions!
+		//         So on x86 the _Read/WriteBarrier and __memory_barrier instrinsics might be for the compiler only,
+		//         i.e. do the same as what the volatile keyword does, and don't emit any extra cpu instructions!
 		//         But on other CPU targets, like PowerPC and Itanium, they ought to emit the needed extra CPU instructions.
-		void inline  full() { _ReadWriteBarrier(); }
-		void inline  read() { _ReadBarrier(); }
-		void inline write() { _WriteBarrier(); }
+		//         Hence, we also add _mm_*fence() to emit the needed CPU instructions.
+		//         What has not been checked is whether we would end up with doubled hardware fences on non-x86 targets.
+		void inline  full() {
+			/// [bohan] It seems mfence needs SSE3.
+			#if DIVERSALIS__PROCESSOR__WORD_SIZE >= 64 ///\todo DIVERSALIS__PROCESSOR__X86__SSE >= 3
+				_mm_mfence();
+			#elif defined DIVERSALIS__PROCESSOR__X86
+				// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
+				__asm {lock add [esp], 0 }
+			#endif
+			#if defined DIVERSALIS__COMPILER__INTEL
+				__memory_barrier
+			#else
+				_ReadWriteBarrier();
+			#endif
+		}
+		void inline  read() {
+			_mm_lfence();
+			#if defined DIVERSALIS__COMPILER__INTEL
+				__memory_barrier
+			#else
+				_ReadBarrier();
+			#endif
+		}
+		void inline write() {
+			_mm_sfence();
+			#if defined DIVERSALIS__COMPILER__INTEL
+				__memory_barrier
+			#else
+				_WriteBarrier();
+			#endif
+		}
 	}}}
 	#define universalis__processor__memory_barriers__defined
-#elif defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__BORLAND
+#elif defined DIVERSALIS__COMPILER__BORLAND && 0 ///\todo needs hardware fence
 	namespace universalis { namespace processor { namespace memory_barriers {
 		// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
 		//         which is a cache-coherent, write-through one, except for SSE instructions!
 		//         I'm not sure whether these instructions are for the cpu only or if the compiler sees them,
 		//         but we do need to tell the compiler not to reorder memory read/writes,
 		//         (i.e. do the same as what the volatile keyword does).
-		void inline  full() { _asm { lock add [esp], 0}; }
+		// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
+		void inline  full() { _asm { lock add [esp], 0} }
 		void inline  read() { full(); }
 		void inline write() { full(); }
 	}}}
