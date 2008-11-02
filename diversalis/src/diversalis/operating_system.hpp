@@ -44,7 +44,7 @@
 	#define DIVERSALIS__OPERATING_SYSTEM__DARWIN
 	#undef DIVERSALIS__OPERATING_SYSTEM__DARWIN // was just defined to insert documentation.   
 
-	/// apple's macosx darwin mach/bsd kernel, autodetected via __APPLE__ and __MACH__, \see DIVERSALIS__OPERATING_SYSTEM__DARWIN.
+	/// apple's macosx darwin mach/bsd kernel. \see DIVERSALIS__OPERATING_SYSTEM__DARWIN.
 	#define DIVERSALIS__OPERATING_SYSTEM__APPLE
 	#undef DIVERSALIS__OPERATING_SYSTEM__APPLE // was just defined to insert documentation.
 
@@ -60,17 +60,7 @@
 	#define DIVERSALIS__OPERATING_SYSTEM__X_WINDOW
 	#undef DIVERSALIS__OPERATING_SYSTEM__X_WINDOW // was just defined to insert documentation.
 
-	/// microsoft's windows, autodetected via _WIN64 and _WIN32 (and __MINGW32__).
-	///
-	/// ?.? is vista\n
-	/// ?.? is longhorn\n
-	/// ?.? is 2003\n
-	/// 5.1 is xp\n
-	/// 5.0 is 2000\n
-	/// 4.1 is 1998 nt or msdos!\n
-	/// 4.0 is 1995 nt or msdos!\n
-	/// 3.5 is nt\n
-	///
+	/// microsoft's windows.
 	/// note: on cygwin, DIVERSALIS__OPERATING_SYSTEM__MICROSOFT is not defined, as it's considered to be in the unix family.
 	#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT // was just defined to insert documentation.
@@ -95,9 +85,11 @@
 	///\name operating system version ... microsoft's branch mess
 	///\{
 		/// indicates the target microsoft's windows operating system branch is nt.
+		/// "2000" is v5.0, "xp" is v5.1, "2003" is v?.?, "vista" is v?.?
 		#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
 		#undef DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT // was just defined to insert documentation.
-		/// indicates the target microsoft's windows operating system branch is msdos.
+		/// indicates the target microsoft's windows operating system branch is msdos-based (branded "'95", "'98", "millenium").
+		/// "'95" is v4.0 (conflicts with nt!), "'98" is v4.1, "millenium" is v?.?
 		#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__DOS
 		#undef DIVERSALIS__OPERATING_SYSTEM__BRANCH__DOS // was just defined to insert documentation.
 	///\}

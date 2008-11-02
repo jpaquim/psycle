@@ -150,7 +150,7 @@
 	// There are so many processors supported ...
 	// gcc -E -dM -x c++ -std=c++98 -march=k8 -ffast-math -msse2 /dev/null
 
-	#if defined __LP64__
+	#if defined __LP64__ ///\todo check whether that's the OS or the processor!
 		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
 	#else
 		#define DIVERSALIS__PROCESSOR__WORD_SIZE 32
@@ -198,12 +198,20 @@
 	#endif
 			
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
+
+	#if defined _WIN64 ///\todo that's the OS, not the processor!
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
+	#else
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 32
+	#endif
+
 	#if defined _M_IA64
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__IA 2
 	#elif defined _M_IX86
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 _M_IX86 / 100
+		///\todo detect SSE3 and SSE4
 		#if DIVERSALIS__PROCESSOR__X86 >= 7
 			#define DIVERSALIS__PROCESSOR__X86__SSE 2
 		#elif DIVERSALIS__PROCESSOR__X86 >= 6
