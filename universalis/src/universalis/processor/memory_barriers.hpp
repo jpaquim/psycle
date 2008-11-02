@@ -54,7 +54,9 @@
 				void inline write() { full(); }
 			}}}
 			#define universalis__processor__memory_barriers__defined
-		#elif defined DIVERSALIS__PROCESSOR__X86
+		#elif defined DIVERSALIS__PROCESSOR__X86 /// \todo [bohan] need SSE1, SSE2? It seems mfence needs SSE3.
+			// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
+			//         which is a cache-coherent, write-through one, except for SSE instructions!
 			namespace universalis { namespace processor { namespace memory_barriers {
 				void inline  full() { asm volatile("mfence":::"memory"); }
 				void inline  read() { asm volatile("lfence":::"memory"); }
@@ -69,6 +71,11 @@
 	#pragma intrinsic(_ReadBarrier)
 	#pragma intrinsic(_WriteBarrier)
 	namespace universalis { namespace processor { namespace memory_barriers {
+		// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
+		//         which is a cache-coherent, write-through one, except for SSE instructions!
+		//         So on x86 these instrinsics might be for the compiler only (i.e. do the same as what the volatile keyword does),
+		//         and don't emit any extra cpu instructions!
+		//         But on other CPU targets, like PowerPC and Itanium, they ought to emit the needed extra CPU instructions.
 		void inline  full() { _ReadWriteBarrier(); }
 		void inline  read() { _ReadBarrier(); }
 		void inline write() { _WriteBarrier(); }
@@ -76,6 +83,11 @@
 	#define universalis__processor__memory_barriers__defined
 #elif defined DIVERSALIS__COMPILER__MICROSOFT || defined DIVERSALIS__COMPILER__BORLAND
 	namespace universalis { namespace processor { namespace memory_barriers {
+		// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
+		//         which is a cache-coherent, write-through one, except for SSE instructions!
+		//         I'm not sure whether these instructions are for the cpu only or if the compiler sees them,
+		//         but we do need to tell the compiler not to reorder memory read/writes,
+		//         (i.e. do the same as what the volatile keyword does).
 		void inline  full() { _asm { lock add [esp], 0}; }
 		void inline  read() { full(); }
 		void inline write() { full(); }

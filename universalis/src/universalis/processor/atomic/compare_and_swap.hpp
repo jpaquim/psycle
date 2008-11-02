@@ -12,6 +12,7 @@
 namespace universalis { namespace processor { namespace atomic {
 
 // see c++ standard http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2047.html
+// see apache portable runtime http://svn.apache.org/viewvc/apr/apr/trunk/atomic
 // see glibc */bits/atomic.h at http://sources.redhat.com/cgi-bin/cvsweb.cgi/libc/sysdeps/?cvsroot=glibc
 // see glib atomic http://svn.gnome.org/viewvc/glib/trunk/glib/gatomic.c?view=markup
 // see glib/gstreamer ring buffer http://webcvs.freedesktop.org/gstreamer/gst-plugins-base/gst-libs/gst/audio/gstringbuffer.c?view=markup
