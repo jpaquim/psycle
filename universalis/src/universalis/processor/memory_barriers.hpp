@@ -82,13 +82,17 @@
 		#include <emmintrin.h>
 	#else
 		#if !defined DIVERSALIS__COMPILER__INTEL
-			void _ReadWriteBarrier();
-			void _ReadBarrier();
-			void _WriteBarrier();
+			extern "C" {
+				void _ReadWriteBarrier();
+				void _ReadBarrier();
+				void _WriteBarrier();
+			}
 		#endif
-		void _mm_mfence();
-		void _mm_lfence();
-		void _mm_sfence();
+		extern "C" {
+			void _mm_mfence();
+			void _mm_lfence();
+			void _mm_sfence();
+		}
 	#endif
 	#if !defined DIVERSALIS__COMPILER__INTEL
 		#pragma intrinsic(_ReadWriteBarrier)
