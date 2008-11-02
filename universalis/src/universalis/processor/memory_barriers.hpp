@@ -154,7 +154,7 @@
 	#warning Memory barriers are not defined for this system. Will use compare_and_swap to emulate.
 	#include <universalis/processor/atomic/compare_and_swap.hpp>
 	namespace universalis { namespace processor { namespace memory_barriers {
-		void inline  full() { static int dummy_; compare_and_swap(&dummy_, 0, 1); }
+		void inline  full() { static int dummy; compare_and_swap(&dummy, 0, 1); }
 		void inline  read() {}
 		void inline write() {}
 	}}}
