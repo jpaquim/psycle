@@ -98,7 +98,7 @@
 	namespace universalis { namespace processor { namespace memory_barriers {
 		// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
 		//         which is a cache-coherent, write-through one, except for SSE instructions!
-		//         So on x86 the _Read/WriteBarrier and __memory_barrier instrinsics might be for the compiler only,
+		//         So on x86 the _Read/WriteBarrier() and __memory_barrier() instrinsics might be for the compiler only,
 		//         i.e. do the same as what the volatile keyword does, and don't emit any extra cpu instructions!
 		//         But on other CPU targets, like PowerPC and Itanium, they ought to emit the needed extra CPU instructions.
 		//         Hence, we also add _mm_*fence() to emit the needed CPU instructions.
@@ -109,10 +109,10 @@
 				_mm_mfence();
 			#elif defined DIVERSALIS__PROCESSOR__X86
 				// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
-				__asm {lock add [esp], 0 }
+				__asm { lock add [esp], 0 }
 			#endif
 			#if defined DIVERSALIS__COMPILER__INTEL
-				__memory_barrier
+				__memory_barrier();
 			#else
 				_ReadWriteBarrier();
 			#endif
@@ -120,7 +120,7 @@
 		void inline  read() {
 			_mm_lfence();
 			#if defined DIVERSALIS__COMPILER__INTEL
-				__memory_barrier
+				__memory_barrier();
 			#else
 				_ReadBarrier();
 			#endif
@@ -128,7 +128,7 @@
 		void inline write() {
 			_mm_sfence();
 			#if defined DIVERSALIS__COMPILER__INTEL
-				__memory_barrier
+				__memory_barrier();
 			#else
 				_WriteBarrier();
 			#endif
@@ -143,7 +143,7 @@
 		//         but we do need to tell the compiler not to reorder memory read/writes,
 		//         (i.e. do the same as what the volatile keyword does).
 		// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
-		void inline  full() { _asm { lock add [esp], 0} }
+		void inline  full() { _asm { lock add [esp], 0 } }
 		void inline  read() { full(); }
 		void inline write() { full(); }
 	}}}
