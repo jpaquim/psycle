@@ -40,7 +40,7 @@
 		#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 		#undef DIVERSALIS__COMPILER__FEATURE__PRE_COMPILTION // was just defined to insert documentation.
 	
-		/// indicates the compiler supports auto-linking. e.g.: #pragma comment(lib, "foo")
+		/// indicates the compiler supports auto-linking. i.e.: #pragma comment(lib, "foo")
 		#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 		#undef DIVERSALIS__COMPILER__FEATURE__AUTO_LINK // was just defined to insert documentation.
 
@@ -53,13 +53,22 @@
 		#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 		#undef DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // was just defined to insert documentation.
 
-		/// indicates the compiler supports some assembler language.
-		#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
-		#undef DIVERSALIS__COMPILER__FEATURE__ASSEMBLER // was just defined to insert documentation.
-
 		///\todo doc
 		#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 		#undef DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS // was just defined to insert documentation.
+
+		/// indicates the compiler supports run-time type information. i.e.: typeid, dynamic_cast<>
+		#define DIVERSALIS__COMPILER__FEATURE__RTTI
+
+		/// indicates the compiler supports exception handling. i.e.: try, catch, throw
+		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
+
+		/// indicates the compiler supports open-mp.
+		#define DIVERSALIS__COMPILER__FEATURE__OPEN_MP _OPENMP
+
+		/// indicates the compiler supports some assembler language.
+		#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
+		#undef DIVERSALIS__COMPILER__FEATURE__ASSEMBLER // was just defined to insert documentation.
 	///\}
 
 	///\name meta-information about the compiler's assembler language syntax
@@ -182,15 +191,20 @@
 // microsoft's compiler
 
 #elif defined _MSC_VER
+	// see http://msdn.microsoft.com/en-us/library/b0084kay.aspx
+	
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__MICROSOFT
 	
-	#define DIVERSALIS__COMPILER__VERSION _MSC_VER
+	#define DIVERSALIS__COMPILER__VERSION _MSC_VER // first 2 components, e.g. 15.00.20706.01 -> 1500
 	#define DIVERSALIS__COMPILER__VERSION__MAJOR (_MSC_VER / 100)
 	#define DIVERSALIS__COMPILER__VERSION__MINOR ((_MSC_VER - _MSC_VER / 100 * 100) / 10)
 	#define DIVERSALIS__COMPILER__VERSION__PATCH (_MSC_VER - _MSC_VER / 10 * 10)
 	#if defined _MSC_FULL_VER
-		#define DIVERSALIS__COMPILER__VERSION__FULL _MSC_FULL_VER
+		#define DIVERSALIS__COMPILER__VERSION__FULL  _MSC_FULL_VER // first 3 components, e.g. 15.00.20706.01 -> 150020706
+		#if defined _MSC_BUILD
+			#define DIVERSALIS__COMPILER__VERSION__BUILD _MSC_BUILD // last, 4th, component, e.g. 15.00.20706.01 -> 1
+		#endif
 	#endif
 
 	#pragma conform(forScope, on) // ISO conformance of the scope of variables declared inside the parenthesis of a loop instruction.
@@ -200,6 +214,22 @@
 	#define DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	
+	#if defined _OPENMP // defined when compiling with -openmp, returns an integer representing the date of the OpenMP specification implemented
+		#define DIVERSALIS__COMPILER__FEATURE__OPEN_MP _OPENMP
+	#endif
+
+	#if defined _CPPRTTI // defined for code compiled with -GR (Enable Run-Time Type Information).
+		#define DIVERSALIS__COMPILER__FEATURE__RTTI
+	#else
+		#error please enable rtti
+	#endif
+
+	#if defined _CPPUNWIND // defined for code compiled with -GX (Enable Exception Handling).
+		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
+	#else
+		#error please enable exception handling
+	#endif
+
 	////////////////////
 	// intel's compiler
 	// they also define _MSC_VER !
