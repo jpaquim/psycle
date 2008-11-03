@@ -236,7 +236,7 @@
 		#define DIVERSALIS__PROCESSOR__WORD_SIZE 32
 	#endif
 	
-	#if defined _M_X64 // the only doc says "defined for x64 processors." ... not sure what's that suppose to mean :-(
+	#if defined _M_X64 // the only doc says "defined for x64 processors." ... not sure what's that supposed to mean :-(
 		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
 	#endif
 
