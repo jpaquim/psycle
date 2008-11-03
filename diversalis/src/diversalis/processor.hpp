@@ -28,6 +28,10 @@
 		#undef DIVERSALIS__PROCESSOR__ENDIAN__BOTH // was just defined to insert documentation.
 	///\}
 
+	/// indicates the compiler's target processor native word size in bits.
+	#define DIVERSALIS__PROCESSOR__WORD_SIZE <number>
+	#undef DIVERSALIS__PROCESSOR__WORD_SIZE // was just defined to insert documentation.
+
 	///\name processor brand
 	///\{
 		/// power-pc instruction set (ibm/motorola).\n
@@ -109,15 +113,16 @@
 		#undef DIVERSALIS__PROCESSOR__IA // was just defined to insert documentation.
 
 		/// x86 instruction set.\n
-		/// 8 == amd64, intel emt64 "nocona".\n
-		/// 7 == sse2, from late duron, atlhon-xp, intel pentium-iv.\n
-		/// 6 == sse1, from pentium-pro to pentium-iii, early duron.\n
-		/// 5 == i80586 aka "pentium"-i.\n
-		/// 4 == i80486+487.\n
-		/// 3 == i80386dx+387 (excluding the bridled i386sx).\n
-		/// 2 == i80286.\n
-		/// 1 == i8086 (excluding the bridled i8088).\n
-		/// 0 == i8080/i8085.\n
+		/// 9 == 64-bit amd k8/opteron/athlon64/athlon-fx (sse2), 64-bit intel nocona/emt64.\n
+		/// 8 == 32-bit intel prescott (sse3).\n
+		/// 7 == 32-bit intel pentium-4 (sse2).\n
+		/// 6 == 32-bit i80686 pentium-m (sse2), pentium3/athlon-4/athlon-xp/athlon-mp (sse1), althon/athlon-thunderbird (sse1 prefetch, enhanced 3d-now), k6-2/3 (3d-now), k6 (mmx), pentium2 (mmx), pentium-pro (no mmx).\n
+		/// 5 == 32-bit i80586 pentium1, pentium-mmx.\n
+		/// 4 == 32-bit i80486+487.\n
+		/// 3 == 32-bit i80386dx+387 (excluding the bridled i386sx).\n
+		/// 2 == 16-bit i80286.\n
+		/// 1 == 16-bit i8086 (excluding the bridled i8088).\n
+		/// 0 == 08-bit i8080/i8085.\n
 		#define DIVERSALIS__PROCESSOR__X86 <number>
 		#undef DIVERSALIS__PROCESSOR__X86 // was just defined to insert documentation.
 	///\}
@@ -125,14 +130,22 @@
 	///\name extra instruction sets for x86 processors
 	///\{
 		/// indicates which version of the sse instruction set the compiler's target x86 processor supports (undefined if no sse).
+		/// 1 == sse1 (pentium3/athlon-4/athlon-xp/athlon-mp)
+		/// 2 == sse2 (intel pentium-4, amd k8/opteron/athlon64/athlon-fx)
+		/// 3 == sse3 (intel prescott)
 		#define DIVERSALIS__PROCESSOR__X86__SSE <number>
 		#undef DIVERSALIS__PROCESSOR__X86__SSE // was just defined to insert documentation.
 		
 		/// indicates the compiler's target x86 processor supports the 3d-now instruction set.
-		#define DIVERSALIS__PROCESSOR__X86__3DNOW
-		#undef DIVERSALIS__PROCESSOR__X86__3DNOW // was just defined to insert documentation.
+		/// Only amd chips have 3d-now support.
+		/// 1 == 3d-now (k6-2/3)
+		/// 2 == enhanced 3d-now (althon/athlon-thunderbird)
+		#define DIVERSALIS__PROCESSOR__X86__3D_NOW <number>
+		#undef DIVERSALIS__PROCESSOR__X86__3D_NOW // was just defined to insert documentation.
 		
 		/// indicates the compiler's target x86 processor supports the mmx instruction set.
+		/// All i686 but pentium-pro have mmx support (the first having it are intel pentium2 and amd k6).
+		/// One i586 has mmx support, the pentium-mmx.
 		#define DIVERSALIS__PROCESSOR__X86__MMX
 		#undef DIVERSALIS__PROCESSOR__X86__MMX // was just defined to insert documentation.
 	///\}
@@ -148,27 +161,36 @@
 
 #if defined DIVERSALIS__COMPILER__GNU
 	// There are so many processors supported ...
-	// gcc -E -dM -x c++ -std=c++98 -march=k8 -ffast-math -msse2 /dev/null
+	// gcc -E -dM -x c++ -std=c++98 -march=<xxx> -ffast-math -msse2 /dev/null
+	// where <xxx> in -march=<xxx> may be native, k8, nocona, ...
 
 	#if defined __LP64__ ///\todo check whether that's the OS or the processor!
 		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
-	#else
-		#define DIVERSALIS__PROCESSOR__WORD_SIZE 32
 	#endif
-
+	
 	#if defined __powerpc__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__POWER_PC
-	#elif defined __k8__ || defined __nocona__ // __x86_64__
+	#elif defined __x86_64__ // amd k8/opteron/athlon64/athlon-fx (sse2), intel nocona/emt64 (sse3)
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__X86 9
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
+	#elif \
+		defined __k8__     /* amd k8/opteron/athlon64/athlon-fx (sse2) */ || \
+		defined __nocona__ /* intel prescott/nocona/emt64 (sse3) */
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 8
-	#elif defined __pentium4__
+	#elif defined __pentium4__ // <= intel pentium-4 (sse2)
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 7
-	#elif defined __i686__
+	#elif \
+		defined __i686__   /* intel 'pentium-m' (sse2), __pentium3__ (sse1), __pentium2__ (mmx), __pentium_pro__ (no mmx) */ || \
+		defined __athlon__ /* amd althon-4/athlon-xp/athlon-mp (full sse1), athlon/athlon-thunderbird (sse1 prefetch, enhanced 3d-now) */ || \
+		defined __k6__     /* amd __k6_3__/__k6_2__ (3d-now), __k6__ (mmx) */
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 6
-	#elif defined __i586__
+	#elif \
+		defined __i586__ /* intel __pentium_mmx__, __pentium__ */
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 5
 	#elif defined __i486__
@@ -183,14 +205,22 @@
 		#define DIVERSALIS__PROCESSOR__X86__SSE 4
 	#elif defined __SSE3__
 		#define DIVERSALIS__PROCESSOR__X86__SSE 3
+		#if defined __SSE3_MATH__
+			#define DIVERSALIS__PROCESSOR__X86__SSE__MATH 3
+		#endif
 	#elif defined __SSE2__
 		#define DIVERSALIS__PROCESSOR__X86__SSE 2
+		#if defined __SSE2_MATH__
+			#define DIVERSALIS__PROCESSOR__X86__SSE__MATH 2
+		#endif
 	#elif defined __SSE__
 		#define DIVERSALIS__PROCESSOR__X86__SSE 1
 	#endif
 
-	#if defined __3dNOW__
-		#define DIVERSALIS__PROCESSOR__X86__3DNOW
+	#if defined __3dNOW_A__
+		#define DIVERSALIS__PROCESSOR__X86__3D_NOW 2
+	#elif defined __3dNOW__
+		#define DIVERSALIS__PROCESSOR__X86__3D_NOW 1
 	#endif
 
 	#if defined __MMX__
@@ -198,31 +228,55 @@
 	#endif
 			
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
+	// see http://msdn.microsoft.com/en-us/library/b0084kay.aspx
 
 	#if defined _WIN64 ///\todo that's the OS, not the processor!
 		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
-	#else
+	#elif defined _WIN32
 		#define DIVERSALIS__PROCESSOR__WORD_SIZE 32
+	#endif
+	
+	#if defined _M_X64 // the only doc says "defined for x64 processors." ... not sure what's that suppose to mean :-(
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
 	#endif
 
 	#if defined _M_IA64
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__IA 2
-	#elif defined _M_IX86
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
+	#elif defined _EMT64_ // 64-bit x86 amd or intel
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__X86 8
+		#define DIVERSALIS__PROCESSOR__X86__SSE 2 ///\todo detect SSE3
+		///\todo detect 3d-now
+		#define DIVERSALIS__PROCESSOR__X86__MMX
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
+	#elif defined _M_IX86 // according to the only doc, it doesn't seem to go above 600 (i686)
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 _M_IX86 / 100
-		///\todo detect SSE3 and SSE4
-		#if DIVERSALIS__PROCESSOR__X86 >= 7
-			#define DIVERSALIS__PROCESSOR__X86__SSE 2
-		#elif DIVERSALIS__PROCESSOR__X86 >= 6
-			#define DIVERSALIS__PROCESSOR__X86__SSE 1
+		
+		#if _M_IX86_FP // expands to a value indicating which -arch compiler option was used:
+			// 0 if -arch was not used.
+			// 1 if -arch:SSE was used.
+			// 2 if -arch:SSE2 was used.
+			///\todo detect SSE3 (prescott, nocona)
+			#define DIVERSALIS__PROCESSOR__X86__SSE _M_IX86_FP
+		#endif
+
+		///\todo detect 3d-now
+
+		#if DIVERSALIS__PROCESSOR__X86 >= 6
+			#define DIVERSALIS__PROCESSOR__X86__MMX
 		#endif
 	#elif defined _M_ALPHA
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__ALPHA_AXP _M_ALPHA
-	#elif defined _M_MRX000
+	#elif defined _M_MRX000 // mips
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__MRX _M_MRX000
+	#elif defined _M_PPC // xbox 360?
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__POWER_PC _M_PPC
 	#endif
 #endif
 

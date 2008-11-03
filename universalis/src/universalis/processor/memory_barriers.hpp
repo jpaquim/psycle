@@ -57,12 +57,12 @@
 			}}}
 			#define universalis__processor__memory_barriers__defined
 		#elif defined DIVERSALIS__PROCESSOR__X86
-			// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
+			// [bohan] hardware fences are not always needed on x86 >= i686 memory model,
 			//         which is a cache-coherent, write-through one, except for SSE instructions!
 			namespace universalis { namespace processor { namespace memory_barriers {
 				void inline  full() {
-					/// [bohan] It seems mfence needs SSE3.
-					#if DIVERSALIS__PROCESSOR__WORD_SIZE >= 64 ///\todo DIVERSALIS__PROCESSOR__X86__SSE >= 3
+					///\todo it seems mfence needs SSE2/3(?).
+					#if DIVERSALIS__PROCESSOR__X86__SSE >= 3
 						asm volatile("mfence" ::: "memory");
 					#else
 						// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
@@ -74,33 +74,20 @@
 				void inline write() { asm volatile("sfence" ::: "memory"); }
 			}}}
 			#define universalis__processor__memory_barriers__defined
+		#elif defined DIVERSALIS__PROCESSOR__IA
+			// asm volatile("mf" ::: "memory");
 		#endif
 	#endif
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
-	#if DIVERSALIS__COMPILER__VERSION >= 1400
-		#include <intrin.h>
-		#include <emmintrin.h>
-	#else
-		#if !defined DIVERSALIS__COMPILER__INTEL
-			extern "C" {
-				void _ReadWriteBarrier();
-				void _ReadBarrier();
-				void _WriteBarrier();
-			}
-		#endif
-		extern "C" {
-			void _mm_mfence();
-			void _mm_lfence();
-			void _mm_sfence();
-		}
-	#endif
+	#include <intrin.h>
+	#include <emmintrin.h>
 	#if !defined DIVERSALIS__COMPILER__INTEL
 		#pragma intrinsic(_ReadWriteBarrier)
 		#pragma intrinsic(_ReadBarrier)
 		#pragma intrinsic(_WriteBarrier)
 	#endif
 	namespace universalis { namespace processor { namespace memory_barriers {
-		// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
+		// [bohan] hardware fences are not always needed on x86 >= i686 memory model,
 		//         which is a cache-coherent, write-through one, except for SSE instructions!
 		//         So on x86 the _Read/WriteBarrier() and __memory_barrier() instrinsics might be for the compiler only,
 		//         i.e. do the same as what the volatile keyword does, and don't emit any extra cpu instructions!
@@ -108,12 +95,14 @@
 		//         Hence, we also add _mm_*fence() to emit the needed CPU instructions.
 		//         What has not been checked is whether we would end up with doubled hardware fences on non-x86 targets.
 		void inline  full() {
-			/// [bohan] It seems mfence needs SSE3.
-			#if DIVERSALIS__PROCESSOR__WORD_SIZE >= 64 ///\todo DIVERSALIS__PROCESSOR__X86__SSE >= 3
+			///\todo it seems mfence needs SSE2/3(?).
+			#if DIVERSALIS__PROCESSOR__X86__SSE >= 3
 				_mm_mfence();
 			#elif defined DIVERSALIS__PROCESSOR__X86
 				// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
 				__asm { lock add [esp], 0 }
+			#else
+				#error sorry
 			#endif
 			#if defined DIVERSALIS__COMPILER__INTEL
 				__memory_barrier();
@@ -141,13 +130,19 @@
 	#define universalis__processor__memory_barriers__defined
 #elif defined DIVERSALIS__COMPILER__BORLAND && 0 ///\todo needs hardware fence
 	namespace universalis { namespace processor { namespace memory_barriers {
-		// [bohan] hardware fences are not always needed on x86 >= p6 memory model,
+		// [bohan] hardware fences are not always needed on x86 >= i686 memory model,
 		//         which is a cache-coherent, write-through one, except for SSE instructions!
 		//         I'm not sure whether these instructions are for the cpu only or if the compiler sees them,
 		//         but we do need to tell the compiler not to reorder memory read/writes,
 		//         (i.e. do the same as what the volatile keyword does).
 		// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
-		void inline  full() { _asm { lock add [esp], 0 } }
+		void inline  full() {
+			#if defined DIVERSALIS__PROCESSOR__X86
+				_asm { lock add [esp], 0 }
+			#else
+				#error sorry
+			#endif
+		}
 		void inline  read() { full(); }
 		void inline write() { full(); }
 	}}}
