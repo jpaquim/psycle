@@ -12,13 +12,14 @@
 	#if defined _MT // defined when -MD or -MDd (multithreaded dll) or -MT or -MTd (multithreaded static) is specified.
 		#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__MULTITHREADED
 	#endif
-	
-	 #if defined _DLL // defined when -MD or -MDd (multithread dll) is specified.
-	 	#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DYNAMIC_LINK
-	 #endif
+
+	#if defined _DLL // defined when -MD or -MDd (multithread dll) is specified.
+		#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DYNAMIC_LINK
+	#endif
 
 	#if defined _DEBUG // defined when compiling with -LDd, -MDd, and -MTd.
 		#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DEBUG
 	#endif
+#endif
 
 #endif // !defined DIVERSALIS__STANDARD_LIBRARY__INCLUDED
