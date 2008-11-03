@@ -1474,6 +1474,8 @@ sprintf(
 		"\nC7xx : Touchtaping with Retrig",
 		"\nC8xx : Init Strobe (+1:Drift, +2:SyncVib, +4:FltVib)",
 		"\nCCxx : Set Volume (obsolete)",
+		"\nCDxx : Interval Bend Down",
+		"\nCExx : Interval Bend Up",
 		"\nDxyy : Semi Portamento (x tones down with rate yy)",
 		"\nExyy : Semi Portamento (x tones up with rate yy)",
 		"\nBFFF and lower: Arpeggio (xyzz, x=2nd, y=3rd, zz=optional 4th tone)\n"

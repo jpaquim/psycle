@@ -287,16 +287,16 @@ void CSynthTrack::RealNoteOn(bool arpClear){
 	arpCount=0;
 	arpLen=1;
 	arpIndex=-1;
-	curArp=0;
+	curArp=0.0f;
 	if (arpClear){
-		arpInput[1]=0;arpInput[2]=0;arpInput[3]=0;
-		arpList[0]=0;arpList[1]=0;arpList[2]=0;
-		arpList[3]=0;arpList[4]=0;arpList[5]=0;arpList[6]=0;arpList[7]=0;arpList[8]=0;arpList[9]=0;arpList[10]=0;arpList[11]=0;arpList[12]=0;
-		arpList[13]=0;arpList[14]=0;arpList[15]=0;arpList[16]=0;arpList[17]=0;arpList[18]=0;arpList[19]=0;arpList[20]=0;arpList[21]=0;
-		oscArpTranspose[0]=0;
-		oscArpTranspose[1]=0;
-		oscArpTranspose[2]=0;
-		oscArpTranspose[3]=0;
+		arpInput[1]=0.0f;arpInput[2]=0.0f;arpInput[3]=0.0f;
+		arpList[0]=0.0f;arpList[1]=0.0f;arpList[2]=0.0f;
+		arpList[3]=0.0f;arpList[4]=0.0f;arpList[5]=0.0f;arpList[6]=0.0f;arpList[7]=0.0f;arpList[8]=0.0f;arpList[9]=0.0f;arpList[10]=0.0f;arpList[11]=0.0f;arpList[12]=0.0f;
+		arpList[13]=0.0f;arpList[14]=0.0f;arpList[15]=0.0f;arpList[16]=0.0f;arpList[17]=0.0f;arpList[18]=0.0f;arpList[19]=0.0f;arpList[20]=0.0f;arpList[21]=0.0f;
+		oscArpTranspose[0]=0.0f;
+		oscArpTranspose[1]=0.0f;
+		oscArpTranspose[2]=0.0f;
+		oscArpTranspose[3]=0.0f;
 	}
 	float spdcoef;
 
@@ -1385,7 +1385,7 @@ float CSynthTrack::GetEnvAmp(){
 
 		if(ampEnvValue<0.0f)
 		{
-			RealNoteOn(false);
+			RealNoteOn(true);
 			ampEnvValue=0.0f;
 			ampEnvStage=1;
 			ampEnvCoef=(1.0f/(float)vpar->ampA)*speedup;
@@ -1553,306 +1553,306 @@ void CSynthTrack::PerformFx()
 			arpInput[3] = sp_val;
 			switch (vpar->arpPattern) {
 			case 0: // 1oct Up
-				arpList[0]=arpInput[0];
-				arpList[1]=arpInput[1];
-				arpList[2]=arpInput[2];
-				if (arpInput[3] == 0) {
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				if ((float)arpInput[3] == 0) {
 					arpLen=3;
 				} else {
 					arpLen=4;
-					arpList[3]=arpInput[3];
+					arpList[3]=(float)arpInput[3];
 				}
 				break;
 			case 1: // 2oct Up
-				arpList[0]=arpInput[0];
-				arpList[1]=arpInput[1];
-				arpList[2]=arpInput[2];
-				if (arpInput[3] == 0) {
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				if ((float)arpInput[3] == 0) {
 					arpLen=6;
-					arpList[3]=arpInput[0]+12;
-					arpList[4]=arpInput[1]+12;
-					arpList[5]=arpInput[2]+12;
+					arpList[3]=(float)arpInput[0]+12.0f;
+					arpList[4]=(float)arpInput[1]+12.0f;
+					arpList[5]=(float)arpInput[2]+12.0f;
 				} else {
 					arpLen=8;
-					arpList[3]=arpInput[3];
-					arpList[4]=arpInput[0]+12;
-					arpList[5]=arpInput[1]+12;
-					arpList[6]=arpInput[2]+12;
-					arpList[7]=arpInput[3]+12;
+					arpList[3]=(float)arpInput[3];
+					arpList[4]=(float)arpInput[0]+12.0f;
+					arpList[5]=(float)arpInput[1]+12.0f;
+					arpList[6]=(float)arpInput[2]+12.0f;
+					arpList[7]=(float)arpInput[3]+12.0f;
 				}
 				break;
 			case 2: // 3oct Up
-				arpList[0]=arpInput[0];
-				arpList[1]=arpInput[1];
-				arpList[2]=arpInput[2];
-				if (arpInput[3] == 0) {
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				if ((float)arpInput[3] == 0) {
 					arpLen=9;
-					arpList[3]=arpInput[0]+12;
-					arpList[4]=arpInput[1]+12;
-					arpList[5]=arpInput[2]+12;
-					arpList[6]=arpInput[0]+24;
-					arpList[7]=arpInput[1]+24;
-					arpList[8]=arpInput[2]+24;
+					arpList[3]=(float)arpInput[0]+12.0f;
+					arpList[4]=(float)arpInput[1]+12.0f;
+					arpList[5]=(float)arpInput[2]+12.0f;
+					arpList[6]=(float)arpInput[0]+24.0f;
+					arpList[7]=(float)arpInput[1]+24.0f;
+					arpList[8]=(float)arpInput[2]+24.0f;
 				} else {
 					arpLen=12;
-					arpList[3]=arpInput[3];
-					arpList[4]=arpInput[0]+12;
-					arpList[5]=arpInput[1]+12;
-					arpList[6]=arpInput[2]+12;
-					arpList[7]=arpInput[3]+12;
-					arpList[8]=arpInput[0]+24;
-					arpList[9]=arpInput[1]+24;
-					arpList[10]=arpInput[2]+24;
-					arpList[11]=arpInput[3]+24;
+					arpList[3]=(float)arpInput[3];
+					arpList[4]=(float)arpInput[0]+12.0f;
+					arpList[5]=(float)arpInput[1]+12.0f;
+					arpList[6]=(float)arpInput[2]+12.0f;
+					arpList[7]=(float)arpInput[3]+12.0f;
+					arpList[8]=(float)arpInput[0]+24.0f;
+					arpList[9]=(float)arpInput[1]+24.0f;
+					arpList[10]=(float)arpInput[2]+24.0f;
+					arpList[11]=(float)arpInput[3]+24.0f;
 				}
 				break;
 			case 3: // 1oct Down
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=3;
-					arpList[0]=arpInput[2];
-					arpList[1]=arpInput[1];
-					arpList[2]=arpInput[0];
+					arpList[0]=(float)arpInput[2];
+					arpList[1]=(float)arpInput[1];
+					arpList[2]=(float)arpInput[0];
 				} else {
 					arpLen=4;
-					arpList[0]=arpInput[3];
-					arpList[1]=arpInput[2];
-					arpList[2]=arpInput[1];
-					arpList[3]=arpInput[0];
+					arpList[0]=(float)arpInput[3];
+					arpList[1]=(float)arpInput[2];
+					arpList[2]=(float)arpInput[1];
+					arpList[3]=(float)arpInput[0];
 				}												
 				break;
 			case 4: // 2oct Down
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=6;
-					arpList[0]=arpInput[2]+12;
-					arpList[1]=arpInput[1]+12;
-					arpList[2]=arpInput[0]+12;
-					arpList[3]=arpInput[2];
-					arpList[4]=arpInput[1];
-					arpList[5]=arpInput[0];
+					arpList[0]=(float)arpInput[2]+12.0f;
+					arpList[1]=(float)arpInput[1]+12.0f;
+					arpList[2]=(float)arpInput[0]+12.0f;
+					arpList[3]=(float)arpInput[2];
+					arpList[4]=(float)arpInput[1];
+					arpList[5]=(float)arpInput[0];
 				} else {
 					arpLen=8;
-					arpList[0]=arpInput[3]+12;
-					arpList[1]=arpInput[2]+12;
-					arpList[2]=arpInput[1]+12;
-					arpList[3]=arpInput[0]+12;
-					arpList[4]=arpInput[3];
-					arpList[5]=arpInput[2];
-					arpList[6]=arpInput[1];
-					arpList[7]=arpInput[0];
+					arpList[0]=(float)arpInput[3]+12.0f;
+					arpList[1]=(float)arpInput[2]+12.0f;
+					arpList[2]=(float)arpInput[1]+12.0f;
+					arpList[3]=(float)arpInput[0]+12.0f;
+					arpList[4]=(float)arpInput[3];
+					arpList[5]=(float)arpInput[2];
+					arpList[6]=(float)arpInput[1];
+					arpList[7]=(float)arpInput[0];
 				}												
 				break;
 			case 5: // 3oct Down
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=9;
-					arpList[0]=arpInput[2]+24;
-					arpList[1]=arpInput[1]+24;
-					arpList[2]=arpInput[0]+24;
-					arpList[3]=arpInput[2]+12;
-					arpList[4]=arpInput[1]+12;
-					arpList[5]=arpInput[0]+12;
-					arpList[6]=arpInput[2];
-					arpList[7]=arpInput[1];
-					arpList[8]=arpInput[0];
+					arpList[0]=(float)arpInput[2]+24.0f;
+					arpList[1]=(float)arpInput[1]+24.0f;
+					arpList[2]=(float)arpInput[0]+24.0f;
+					arpList[3]=(float)arpInput[2]+12.0f;
+					arpList[4]=(float)arpInput[1]+12.0f;
+					arpList[5]=(float)arpInput[0]+12.0f;
+					arpList[6]=(float)arpInput[2];
+					arpList[7]=(float)arpInput[1];
+					arpList[8]=(float)arpInput[0];
 				} else {
 					arpLen=12;
-					arpList[0]=arpInput[3]+24;
-					arpList[1]=arpInput[2]+24;
-					arpList[2]=arpInput[1]+24;
-					arpList[3]=arpInput[0]+24;
-					arpList[4]=arpInput[3]+12;
-					arpList[5]=arpInput[2]+12;
-					arpList[6]=arpInput[1]+12;
-					arpList[7]=arpInput[0]+12;
-					arpList[8]=arpInput[3];
-					arpList[9]=arpInput[2];
-					arpList[10]=arpInput[1];
-					arpList[11]=arpInput[0];
+					arpList[0]=(float)arpInput[3]+24.0f;
+					arpList[1]=(float)arpInput[2]+24.0f;
+					arpList[2]=(float)arpInput[1]+24.0f;
+					arpList[3]=(float)arpInput[0]+24.0f;
+					arpList[4]=(float)arpInput[3]+12.0f;
+					arpList[5]=(float)arpInput[2]+12.0f;
+					arpList[6]=(float)arpInput[1]+12.0f;
+					arpList[7]=(float)arpInput[0]+12.0f;
+					arpList[8]=(float)arpInput[3];
+					arpList[9]=(float)arpInput[2];
+					arpList[10]=(float)arpInput[1];
+					arpList[11]=(float)arpInput[0];
 				}												
 				break;
 			case 6: // 1oct Up/Down
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=4;
-					arpList[0]=arpInput[0];
-					arpList[1]=arpInput[1];
-					arpList[2]=arpInput[2];
-					arpList[3]=arpInput[1];
+					arpList[0]=(float)arpInput[0];
+					arpList[1]=(float)arpInput[1];
+					arpList[2]=(float)arpInput[2];
+					arpList[3]=(float)arpInput[1];
 				} else {
 					arpLen=6;
-					arpList[0]=arpInput[0];
-					arpList[1]=arpInput[1];
-					arpList[2]=arpInput[2];
-					arpList[3]=arpInput[3];
-					arpList[4]=arpInput[2];
-					arpList[5]=arpInput[1];
+					arpList[0]=(float)arpInput[0];
+					arpList[1]=(float)arpInput[1];
+					arpList[2]=(float)arpInput[2];
+					arpList[3]=(float)arpInput[3];
+					arpList[4]=(float)arpInput[2];
+					arpList[5]=(float)arpInput[1];
 				}												
 				break;
 			case 7: // 2oct Up/Down
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=10;
-					arpList[0]=arpInput[0];
-					arpList[1]=arpInput[1];
-					arpList[2]=arpInput[2];
-					arpList[3]=arpInput[0]+12;
-					arpList[4]=arpInput[1]+12;
-					arpList[5]=arpInput[2]+12;
-					arpList[6]=arpInput[1]+12;
-					arpList[7]=arpInput[0]+12;
-					arpList[8]=arpInput[2];
-					arpList[9]=arpInput[1];
+					arpList[0]=(float)arpInput[0];
+					arpList[1]=(float)arpInput[1];
+					arpList[2]=(float)arpInput[2];
+					arpList[3]=(float)arpInput[0]+12.0f;
+					arpList[4]=(float)arpInput[1]+12.0f;
+					arpList[5]=(float)arpInput[2]+12.0f;
+					arpList[6]=(float)arpInput[1]+12.0f;
+					arpList[7]=(float)arpInput[0]+12.0f;
+					arpList[8]=(float)arpInput[2];
+					arpList[9]=(float)arpInput[1];
 				} else {
 					arpLen=14;
-					arpList[0]=arpInput[0];
-					arpList[1]=arpInput[1];
-					arpList[2]=arpInput[2];
-					arpList[3]=arpInput[3];
-					arpList[4]=arpInput[0]+12;
-					arpList[5]=arpInput[1]+12;
-					arpList[6]=arpInput[2]+12;
-					arpList[7]=arpInput[3]+12;
-					arpList[8]=arpInput[2]+12;
-					arpList[9]=arpInput[1]+12;
-					arpList[10]=arpInput[0]+12;
-					arpList[11]=arpInput[3];
-					arpList[12]=arpInput[2];
-					arpList[13]=arpInput[1];
+					arpList[0]=(float)arpInput[0];
+					arpList[1]=(float)arpInput[1];
+					arpList[2]=(float)arpInput[2];
+					arpList[3]=(float)arpInput[3];
+					arpList[4]=(float)arpInput[0]+12.0f;
+					arpList[5]=(float)arpInput[1]+12.0f;
+					arpList[6]=(float)arpInput[2]+12.0f;
+					arpList[7]=(float)arpInput[3]+12.0f;
+					arpList[8]=(float)arpInput[2]+12.0f;
+					arpList[9]=(float)arpInput[1]+12.0f;
+					arpList[10]=(float)arpInput[0]+12.0f;
+					arpList[11]=(float)arpInput[3];
+					arpList[12]=(float)arpInput[2];
+					arpList[13]=(float)arpInput[1];
 				}												
 				break;
 			case 8: // 3oct Up/Down
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=16;
-					arpList[0]=arpInput[0];
-					arpList[1]=arpInput[1];
-					arpList[2]=arpInput[2];
-					arpList[3]=arpInput[0]+12;
-					arpList[4]=arpInput[1]+12;
-					arpList[5]=arpInput[2]+12;
-					arpList[6]=arpInput[0]+24;
-					arpList[7]=arpInput[1]+24;
-					arpList[8]=arpInput[2]+24;
-					arpList[9]=arpInput[1]+24;
-					arpList[10]=arpInput[0]+24;
-					arpList[11]=arpInput[2]+12;
-					arpList[12]=arpInput[1]+12;
-					arpList[13]=arpInput[0]+12;
-					arpList[14]=arpInput[2];
-					arpList[15]=arpInput[1];
+					arpList[0]=(float)arpInput[0];
+					arpList[1]=(float)arpInput[1];
+					arpList[2]=(float)arpInput[2];
+					arpList[3]=(float)arpInput[0]+12.0f;
+					arpList[4]=(float)arpInput[1]+12.0f;
+					arpList[5]=(float)arpInput[2]+12.0f;
+					arpList[6]=(float)arpInput[0]+24.0f;
+					arpList[7]=(float)arpInput[1]+24.0f;
+					arpList[8]=(float)arpInput[2]+24.0f;
+					arpList[9]=(float)arpInput[1]+24.0f;
+					arpList[10]=(float)arpInput[0]+24.0f;
+					arpList[11]=(float)arpInput[2]+12.0f;
+					arpList[12]=(float)arpInput[1]+12.0f;
+					arpList[13]=(float)arpInput[0]+12.0f;
+					arpList[14]=(float)arpInput[2];
+					arpList[15]=(float)arpInput[1];
 				} else {
 					arpLen=22;
-					arpList[0]=arpInput[0];
-					arpList[1]=arpInput[1];
-					arpList[2]=arpInput[2];
-					arpList[3]=arpInput[3];
-					arpList[4]=arpInput[0]+12;
-					arpList[5]=arpInput[1]+12;
-					arpList[6]=arpInput[2]+12;
-					arpList[7]=arpInput[3]+12;
-					arpList[8]=arpInput[0]+24;
-					arpList[9]=arpInput[1]+24;
-					arpList[10]=arpInput[2]+24;
-					arpList[11]=arpInput[3]+24;
-					arpList[12]=arpInput[2]+24;
-					arpList[13]=arpInput[1]+24;
-					arpList[14]=arpInput[0]+24;
-					arpList[15]=arpInput[3]+12;
-					arpList[16]=arpInput[2]+12;
-					arpList[17]=arpInput[1]+12;
-					arpList[18]=arpInput[0]+12;
-					arpList[19]=arpInput[3];
-					arpList[20]=arpInput[2];
-					arpList[21]=arpInput[1];
+					arpList[0]=(float)arpInput[0];
+					arpList[1]=(float)arpInput[1];
+					arpList[2]=(float)arpInput[2];
+					arpList[3]=(float)arpInput[3];
+					arpList[4]=(float)arpInput[0]+12.0f;
+					arpList[5]=(float)arpInput[1]+12.0f;
+					arpList[6]=(float)arpInput[2]+12.0f;
+					arpList[7]=(float)arpInput[3]+12.0f;
+					arpList[8]=(float)arpInput[0]+24.0f;
+					arpList[9]=(float)arpInput[1]+24.0f;
+					arpList[10]=(float)arpInput[2]+24.0f;
+					arpList[11]=(float)arpInput[3]+24.0f;
+					arpList[12]=(float)arpInput[2]+24.0f;
+					arpList[13]=(float)arpInput[1]+24.0f;
+					arpList[14]=(float)arpInput[0]+24.0f;
+					arpList[15]=(float)arpInput[3]+12.0f;
+					arpList[16]=(float)arpInput[2]+12.0f;
+					arpList[17]=(float)arpInput[1]+12.0f;
+					arpList[18]=(float)arpInput[0]+12.0f;
+					arpList[19]=(float)arpInput[3];
+					arpList[20]=(float)arpInput[2];
+					arpList[21]=(float)arpInput[1];
 				}												
 				break;
 			case 9: //1oct Down/Up
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=4;
-					arpList[0]=arpInput[2];
-					arpList[1]=arpInput[1];
-					arpList[2]=arpInput[0];
-					arpList[3]=arpInput[1];
+					arpList[0]=(float)arpInput[2];
+					arpList[1]=(float)arpInput[1];
+					arpList[2]=(float)arpInput[0];
+					arpList[3]=(float)arpInput[1];
 				} else {
 					arpLen=6;
-					arpList[0]=arpInput[3];
-					arpList[1]=arpInput[2];
-					arpList[2]=arpInput[1];
-					arpList[3]=arpInput[0];
-					arpList[4]=arpInput[1];
-					arpList[5]=arpInput[2];
+					arpList[0]=(float)arpInput[3];
+					arpList[1]=(float)arpInput[2];
+					arpList[2]=(float)arpInput[1];
+					arpList[3]=(float)arpInput[0];
+					arpList[4]=(float)arpInput[1];
+					arpList[5]=(float)arpInput[2];
 				}												
 				break;
 			case 10: //2oct Down/Up
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=10;
-					arpList[0]=arpInput[2]+12;
-					arpList[1]=arpInput[1]+12;
-					arpList[2]=arpInput[0]+12;
-					arpList[3]=arpInput[2];
-					arpList[4]=arpInput[1];
-					arpList[5]=arpInput[0];
-					arpList[6]=arpInput[1];
-					arpList[7]=arpInput[2];
-					arpList[8]=arpInput[0]+12;
-					arpList[9]=arpInput[1]+12;
+					arpList[0]=(float)arpInput[2]+12.0f;
+					arpList[1]=(float)arpInput[1]+12.0f;
+					arpList[2]=(float)arpInput[0]+12.0f;
+					arpList[3]=(float)arpInput[2];
+					arpList[4]=(float)arpInput[1];
+					arpList[5]=(float)arpInput[0];
+					arpList[6]=(float)arpInput[1];
+					arpList[7]=(float)arpInput[2];
+					arpList[8]=(float)arpInput[0]+12.0f;
+					arpList[9]=(float)arpInput[1]+12.0f;
 				} else {
 					arpLen=14;
-					arpList[0]=arpInput[3]+12;
-					arpList[1]=arpInput[2]+12;
-					arpList[2]=arpInput[1]+12;
-					arpList[3]=arpInput[0]+12;
-					arpList[4]=arpInput[3];
-					arpList[5]=arpInput[2];
-					arpList[6]=arpInput[1];
-					arpList[7]=arpInput[0];
-					arpList[8]=arpInput[1];
-					arpList[9]=arpInput[2];
-					arpList[10]=arpInput[3];
-					arpList[11]=arpInput[0]+12;
-					arpList[12]=arpInput[1]+12;
-					arpList[13]=arpInput[2]+12;
+					arpList[0]=(float)arpInput[3]+12.0f;
+					arpList[1]=(float)arpInput[2]+12.0f;
+					arpList[2]=(float)arpInput[1]+12.0f;
+					arpList[3]=(float)arpInput[0]+12.0f;
+					arpList[4]=(float)arpInput[3];
+					arpList[5]=(float)arpInput[2];
+					arpList[6]=(float)arpInput[1];
+					arpList[7]=(float)arpInput[0];
+					arpList[8]=(float)arpInput[1];
+					arpList[9]=(float)arpInput[2];
+					arpList[10]=(float)arpInput[3];
+					arpList[11]=(float)arpInput[0]+12.0f;
+					arpList[12]=(float)arpInput[1]+12.0f;
+					arpList[13]=(float)arpInput[2]+12.0f;
 				}												
 				break;
 			case 11: //3oct Down/Up
-				if (arpInput[3] == 0) {
+				if ((float)arpInput[3] == 0) {
 					arpLen=16;
-					arpList[0]=arpInput[2]+24;
-					arpList[1]=arpInput[1]+24;
-					arpList[2]=arpInput[0]+24;
-					arpList[3]=arpInput[2]+12;
-					arpList[4]=arpInput[1]+12;
-					arpList[5]=arpInput[0]+12;
-					arpList[6]=arpInput[2];
-					arpList[7]=arpInput[1];
-					arpList[8]=arpInput[0];
-					arpList[9]=arpInput[1];
-					arpList[10]=arpInput[2];
-					arpList[11]=arpInput[0]+12;
-					arpList[12]=arpInput[1]+12;
-					arpList[13]=arpInput[2]+12;
-					arpList[14]=arpInput[0]+24;
-					arpList[15]=arpInput[1]+24;
+					arpList[0]=(float)arpInput[2]+24.0f;
+					arpList[1]=(float)arpInput[1]+24.0f;
+					arpList[2]=(float)arpInput[0]+24.0f;
+					arpList[3]=(float)arpInput[2]+12.0f;
+					arpList[4]=(float)arpInput[1]+12.0f;
+					arpList[5]=(float)arpInput[0]+12.0f;
+					arpList[6]=(float)arpInput[2];
+					arpList[7]=(float)arpInput[1];
+					arpList[8]=(float)arpInput[0];
+					arpList[9]=(float)arpInput[1];
+					arpList[10]=(float)arpInput[2];
+					arpList[11]=(float)arpInput[0]+12.0f;
+					arpList[12]=(float)arpInput[1]+12.0f;
+					arpList[13]=(float)arpInput[2]+12.0f;
+					arpList[14]=(float)arpInput[0]+24.0f;
+					arpList[15]=(float)arpInput[1]+24.0f;
 				} else {
 					arpLen=6;
-					arpList[0]=arpInput[3]+24;
-					arpList[1]=arpInput[2]+24;
-					arpList[2]=arpInput[1]+24;
-					arpList[3]=arpInput[0]+24;
-					arpList[4]=arpInput[3]+12;
-					arpList[5]=arpInput[2]+12;
-					arpList[6]=arpInput[1]+12;
-					arpList[7]=arpInput[0]+12;
-					arpList[8]=arpInput[3];
-					arpList[9]=arpInput[2];
-					arpList[10]=arpInput[1];
-					arpList[11]=arpInput[0];
-					arpList[12]=arpInput[1];
-					arpList[13]=arpInput[2];
-					arpList[14]=arpInput[3];
-					arpList[15]=arpInput[0]+12;
-					arpList[16]=arpInput[1]+12;
-					arpList[17]=arpInput[2]+12;
-					arpList[18]=arpInput[3]+12;
-					arpList[19]=arpInput[0]+24;
-					arpList[20]=arpInput[1]+25;
-					arpList[21]=arpInput[2]+24;
+					arpList[0]=(float)arpInput[3]+24.0f;
+					arpList[1]=(float)arpInput[2]+24.0f;
+					arpList[2]=(float)arpInput[1]+24.0f;
+					arpList[3]=(float)arpInput[0]+24.0f;
+					arpList[4]=(float)arpInput[3]+12.0f;
+					arpList[5]=(float)arpInput[2]+12.0f;
+					arpList[6]=(float)arpInput[1]+12.0f;
+					arpList[7]=(float)arpInput[0]+12.0f;
+					arpList[8]=(float)arpInput[3];
+					arpList[9]=(float)arpInput[2];
+					arpList[10]=(float)arpInput[1];
+					arpList[11]=(float)arpInput[0];
+					arpList[12]=(float)arpInput[1];
+					arpList[13]=(float)arpInput[2];
+					arpList[14]=(float)arpInput[3];
+					arpList[15]=(float)arpInput[0]+12.0f;
+					arpList[16]=(float)arpInput[1]+12.0f;
+					arpList[17]=(float)arpInput[2]+12.0f;
+					arpList[18]=(float)arpInput[3]+12.0f;
+					arpList[19]=(float)arpInput[0]+24.0f;
+					arpList[20]=(float)arpInput[1]+24.0f;
+					arpList[21]=(float)arpInput[2]+24.0f;
 				}												
 				break;
 			}
@@ -1896,6 +1896,18 @@ void CSynthTrack::PerformFx()
 					curArp=arpList[0];
 					updateTuning();
 				}
+			break;
+			/* 0xCD Interval Bend Down */
+			case 0xCD:	
+				arpLen=2;
+				shift=(float)sp_val*0.001f;
+				arpList[1]-=shift;
+			break;
+			/* 0xCE Interval Bend Up */
+			case 0xCE:
+				arpLen=2;
+				shift=(float)sp_val*0.001f;
+				arpList[1]+=shift;
 			break;
 		}
 	}
