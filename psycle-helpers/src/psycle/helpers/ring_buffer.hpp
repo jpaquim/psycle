@@ -3,7 +3,7 @@
 
 ///\interface psycle::helpers::ring_buffer
 #pragma once
-#include <universalis/processor/atomic/compare_and_swap.hpp>
+#include <universalis/processor/memory_barriers.hpp>
 #include <cstddef>
 namespace psycle { namespace helpers {
 
@@ -15,7 +15,8 @@ namespace psycle { namespace helpers {
 /// This ring buffer is useful for push-based multi-threaded processing.
 /// It helps optimising thread-synchronisation by using lock-free atomic primitives
 /// (normally implemented with specific CPU instructions),
-/// instead of relying on OS-based synchronisation facilities.
+/// instead of relying on OS-based synchronisation facilities,
+/// which incur the overhead of context switching and re-scheduling delay.
 ///
 /// This class does not store the actual buffer data, but only a read position and a write position.
 /// This separation of concerns makes it possible to use this class with any kind of data access interface for the buffer.
@@ -32,7 +33,18 @@ class ring_buffer {
 	///\{
 		public:
 			size_type size() const { return size_; }
-			void size(size_type size) { to_power_of_2(size); reset(); }
+			void size(size_type size) {
+				if(!size) {
+					size_ = size;
+					size_mask_ = 0;
+				} else {
+					size_type power_of_2 = 1;
+					while(1 << power_of_2 < size) ++power_of_2;
+					size_ = 1 << power_of_2;
+					size_mask_ = size - 1;
+				}
+				reset();
+			}
 		private:
 			size_type size_, size_mask_;
 	///\}
@@ -40,7 +52,13 @@ class ring_buffer {
 	///\name read position
 	///\{
 		public:
-			void read_position_and_sizes(size_type & position, size_type & size1, size_type & size2) const {
+			void wait_for_read_avail(size_type wanted_size, size_type & restrict position, size_type & restrict size1, size_type & restrict size2) {
+				do get_read_position_and_sizes(position, size1, size2);
+				while(size1 + size2 < wanted_size);
+			}
+			
+			void get_read_position_and_sizes(size_type & restrict position, size_type & restrict size1, size_type & restrict size2) const {
+				universalis::processor::memory_barriers::read();
 				size_type const r(read_position_), w(write_position_);
 				position = r;
 				if(r < w) {
@@ -48,10 +66,15 @@ class ring_buffer {
 					size2 = 0;
 				} else {
 					size1 = size_ - r;
-					size2 = w - 1;
+					size2 = w;
 				}
 			}
-			void advance_read_position(size_type amount) { add(read_position_, amount); }
+			
+			void advance_read_position(size_type amount) {
+				universalis::processor::memory_barriers::write();
+				read_position_ += amount;
+				read_position_ &= size_mask_;
+			}
 		private:
 			size_type read_position_;
 	///\}
@@ -59,7 +82,13 @@ class ring_buffer {
 	///\name write position
 	///\{
 		public:
-			void write_position_and_sizes(size_type & position, size_type & size1, size_type & size2) const {
+			void wait_for_write_avail(size_type wanted_size, size_type & restrict position, size_type & restrict size1, size_type & restrict size2) {
+				do get_write_position_and_sizes(position, size1, size2);
+				while(size1 + size2 < wanted_size);
+			}
+
+			void get_write_position_and_sizes(size_type & restrict position, size_type & restrict size1, size_type & restrict size2) const {
+				universalis::processor::memory_barriers::read();
 				size_type const r(read_position_), w(write_position_);
 				position = w;
 				if(w < r) {
@@ -67,34 +96,18 @@ class ring_buffer {
 					size2 = 0;
 				} else {
 					size1 = size_ - w;
-					size2 = r - 1;
+					size2 = r;
 				}
 			}
-			void advance_write_position(size_type amount) { add(write_position_, amount); }
+			
+			void advance_write_position(size_type amount) {
+				universalis::processor::memory_barriers::write();
+				write_position_ += amount;
+				write_position_ &= size_mask_;
+			}
 		private:
 			size_type write_position_;
 	///\}
-
-	private:
-		void to_power_of_2(size_type size) {
-			if(!size) {
-				size_ = size;
-				size_mask_ = 0;
-			} else {
-				size_type power_of_2 = 1;
-				while(1 << power_of_2 < size) ++power_of_2;
-				size_ = 1 << power_of_2;
-				size_mask_ = size - 1;
-			}
-		}
-		
-		bool static compare_and_swap(size_type * address, size_type old_value, size_type new_value) {
-			return universalis::processor::atomic::compare_and_swap(address, old_value, new_value);
-		}
-
-		void add(size_type & var, size_type amount) {
-			while(!compare_and_swap(&var, var, (var + amount) & size_mask_));
-		}
 };
 
 }}
