@@ -9,7 +9,7 @@ namespace psycle { namespace helpers { namespace math {
 
 	/// computes both the sine and the cosine at the same time
 	template<typename Real> UNIVERSALIS__COMPILER__CONST
-	void inline sin_cos(Real x, Real & restrict sine, Real & restrict cosine) {
+	void inline sin_cos(Real x, Real & __restrict sine, Real & __restrict cosine) {
 		// some compilers are able to optimise those two calls into one.
 		sine = std::sin(x);
 		cosine = std::cos(x);
