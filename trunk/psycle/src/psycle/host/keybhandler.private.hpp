@@ -2463,7 +2463,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pUndoList = pNew;
 			// fill data
 			// count used patterns
-			unsigned char count = 0;
+			unsigned short count = 0;
 			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
 			{
 				if (_pSong->ppPatternData[i])
