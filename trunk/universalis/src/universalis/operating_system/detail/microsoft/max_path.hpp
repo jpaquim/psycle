@@ -9,7 +9,7 @@
 //#region UNIVERSALIS
 	//#region OPERATING_SYSTEM
 		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			#include <windows.h>
+			//#include <windows.h>
 			/// microsoft's MAX_PATH has too low value for ntfs
 			///\see <cstdio>'s FILENAME_MAX
 			#define UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH (MAX_PATH < (1 << 12) ? (1 << 12) : MAX_PATH)
