@@ -327,7 +327,7 @@ void Player::process_loop() throw(std::exception) {
 				// If there's only one successor ready, we don't notify since it can be processed in the same thread.
 			break;
 			case 2:
-				condition_.notify(); // notify one thread that we added nodes to the queue
+				condition_.notify_one(); // notify one thread that we added nodes to the queue
 			break;
 			default:
 				condition_.notify_all(); // notify all threads that we added nodes to the queue
