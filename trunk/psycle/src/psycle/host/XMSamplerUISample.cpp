@@ -646,7 +646,7 @@ void XMSamplerUISample::OnBnClickedOpenwaveeditor()
 void XMSamplerUISample::OnCbnSelendokVibratotype()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_VIBRATOTYPE);
-	rWave().VibratoType(XMInstrument::WaveData::WaveForms(cbox->GetCurSel()));
+	rWave().VibratoType((XMInstrument::WaveData::WaveForms::Type)cbox->GetCurSel());
 }
 
 void XMSamplerUISample::OnNMCustomdrawVibratoAttack(NMHDR *pNMHDR, LRESULT *pResult)
@@ -695,14 +695,14 @@ void XMSamplerUISample::OnNMCustomdrawVibratodepth(NMHDR *pNMHDR, LRESULT *pResu
 void XMSamplerUISample::OnCbnSelendokLoop()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_LOOP);
-	rWave().WaveLoopType(XMInstrument::WaveData::LoopType(cbox->GetCurSel()));
+	rWave().WaveLoopType((XMInstrument::WaveData::LoopType::Type)cbox->GetCurSel());
 	DrawScope();
 }
 
 void XMSamplerUISample::OnCbnSelendokSustainloop()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_SUSTAINLOOP);
-	rWave().WaveSusLoopType(XMInstrument::WaveData::LoopType(cbox->GetCurSel()));
+	rWave().WaveSusLoopType((XMInstrument::WaveData::LoopType::Type)cbox->GetCurSel());
 	DrawScope();
 }
 

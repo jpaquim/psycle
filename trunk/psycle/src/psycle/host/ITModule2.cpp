@@ -326,7 +326,7 @@ Special:  Bit 0: On = song message attached.
 
 			xins.VolumeFadeSpeed(curH.fadeout/512.0f);
 
-			xins.NNA(XMInstrument::NewNoteAction(curH.NNA));
+			xins.NNA((XMInstrument::NewNoteAction::Type)curH.NNA);
 			if ( curH.DNC )
 			{	
 				xins.DCT(XMInstrument::DCType::DCT_NOTE);
@@ -392,8 +392,8 @@ Special:  Bit 0: On = song message attached.
 			std::string itname(curH.sName);
 			xins.Name(itname);
 
-			xins.NNA(XMInstrument::NewNoteAction(curH.NNA));
-			xins.DCT(XMInstrument::DCType(curH.DCT));
+			xins.NNA((XMInstrument::NewNoteAction::Type)curH.NNA);
+			xins.DCT((XMInstrument::DCType::Type)curH.DCT);
 			switch (curH.DCA)
 			{
 			case 1:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF);break;
@@ -401,7 +401,7 @@ Special:  Bit 0: On = song message attached.
 			case 0:
 			default:xins.DCA(XMInstrument::NewNoteAction::STOP);break;
 			}
-			xins.DCA(XMInstrument::NewNoteAction(curH.DCA));
+			xins.DCA((XMInstrument::NewNoteAction::Type)curH.DCA);
 
 			xins.Pan((curH.defPan & 0x7F)/64.0f);
 			xins.PanEnabled((curH.defPan & 0x80)?false:true);
