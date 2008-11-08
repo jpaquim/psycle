@@ -27,7 +27,7 @@ namespace psycle
 
 			public:
 				///\todo mswindows! humpf! mswindows!
-				inline virtual void MessBox(char* ptxt,char *caption,unsigned int type) { MessageBox(hWnd,ptxt,caption,type); }
+				inline virtual void MessBox(char const* ptxt,char const* caption,unsigned int type) { MessageBox(hWnd,ptxt,caption,type); }
 			public: ///\todo private:
 				///\todo mswindows! humpf! mswindows!
 				HWND hWnd;
