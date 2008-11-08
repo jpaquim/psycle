@@ -190,7 +190,7 @@ namespace psycle
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_MUTE )
 							{
 								mIndex = pEntry->_mach;
-								if ( mIndex < MAX_MACHINES && pSong->_pMachine[mIndex] && pSong->_pMachine[mIndex]->_mode == MACHMODE_FX )
+								if ( mIndex < MAX_MACHINES && pSong->_pMachine[mIndex] && pSong->_pMachine[mIndex]->_mode != MACHMODE_MASTER )
 								{
 									if ( pEntry->_parameter&0x0F )
 										pSong->_pMachine[mIndex]->_mute = true;
