@@ -284,7 +284,7 @@ namespace psycle
 					_point.first = pointTime;
 					_point.second = pointVal;
 
-					m_Points.insert(m_Points.begin() + (UINT)_new_index,_point);
+					m_Points.insert(m_Points.begin() + _new_index,_point);
 
 					if(m_SustainBegin >= _new_index)
 					{
