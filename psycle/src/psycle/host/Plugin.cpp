@@ -13,8 +13,8 @@
 	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
 
-#include "loggers.hpp"
-#include "zap.hpp"
+#include "Loggers.hpp"
+#include "Zap.hpp"
 #include <diversalis/operating_system.hpp>
 #include <universalis/operating_system/exceptions/code_description.hpp>
 #include <boost/filesystem/path.hpp>

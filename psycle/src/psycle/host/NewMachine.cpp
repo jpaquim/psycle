@@ -4,16 +4,16 @@
 #include <universalis/operating_system/paths.hpp>
 #include <direct.h>
 #include "NewMachine.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
 #include "ProgressDialog.hpp"
-#include "loggers.hpp"
+#include "Loggers.hpp"
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <algorithm> //std::transform
-#include <cctype>	// std::tolower
+#include <algorithm> // for std::transform
+#include <cctype> // for std::tolower
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)

@@ -12,7 +12,7 @@
 	#include "MainFrm.hpp"
 	// These two are included to update the buffers that wiredlg uses for display. 
 	// Find a way to manage these buffers without its inclusion
-	#include "psycle.hpp"
+	#include "Psycle.hpp"
 	#include "WireDlg.hpp"
 	// Included due to the plugin caching, which should be separated from the dialog.
 	#include "NewMachine.hpp"
@@ -29,7 +29,7 @@
 #include "Plugin.hpp"
 #include "VSTHost24.hpp"
 
-#include "loggers.hpp"
+#include "Loggers.hpp"
 #include "configuration_options.hpp"
 #if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
