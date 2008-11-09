@@ -19,9 +19,9 @@
 #pragma once
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "audiodriver.h"
-#include "windows.h"
+#include <windows.h>
 #include <mmsystem.h>
-#include "dsound.h"
+#include <dsound.h>
 namespace psy { namespace core {
 
 /// output device interface implemented by direct sound.
