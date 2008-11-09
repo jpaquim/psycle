@@ -4,8 +4,8 @@ import sys
 
 def do_one_file(path):
 	f = file(path, 'r')
-	lines = f.readlines()
-	f.close()
+	try: lines = f.readlines()
+	finally: f.close()
 	chars = []
 	replaced = False
 	for line in lines:
@@ -14,8 +14,9 @@ def do_one_file(path):
 			else: replaced = True
 	if replaced:
 		f = file(path, 'w')
-		for char in chars: f.write(char)
-		f.close()
+		try:
+			for char in chars: f.write(char)
+		finally: f.close()
 		print 'removed carriage return characters in', path
 
 if __name__ == '__main__':
