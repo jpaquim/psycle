@@ -6,9 +6,6 @@
 #else
 	#include <universalis/operating_system/clocks.hpp>
 #endif
-#if defined BOOST_AUTO_TEST_CASE
-	#include <universalis/operating_system/threads/sleep.hpp>
-#endif
 #include <cstdint>
 namespace psycle
 {
@@ -56,17 +53,6 @@ namespace psycle
 					return universalis::operating_system::clocks::thread::frequency();
 				#endif
 			}
-
-			#if defined BOOST_AUTO_TEST_CASE
-				BOOST_AUTO_TEST_CASE(cycles_test)
-				{
-					double const sleep_seconds(0.25);
-					cycles_type const start(cycles());
-					universalis::operating_system::threads::sleep(sleep_seconds);
-					double const ratio((cycles() - start) / cycles_per_second() / sleep_seconds);
-					BOOST_CHECK(0.75 < ratio && ratio < 1.25);
-				}
-			#endif
 		}
 
 		class Global
