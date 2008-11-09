@@ -6,7 +6,6 @@
 #include "inputhandler.hpp"
 #include "Configuration.hpp"
 #include "SpecialKeys.hpp"
-#include ".\keyconfigdlg.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

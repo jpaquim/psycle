@@ -4,7 +4,6 @@
 #include "InterpolateCurveDlg.hpp"
 #include "psycle.hpp"
 #include "Helpers.hpp"
-#include ".\interpolatecurvedlg.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)

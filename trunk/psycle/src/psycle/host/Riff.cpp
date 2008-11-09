@@ -9,8 +9,8 @@
 			Contains code for reading/writing ExtRiff files, including .WAV files!
 
 			See also:
-				..\include\ExtRiff.h
-				..\include\ddc.h
+				../include/ExtRiff.h
+				../include/ddc.h
 
 			Revision history:
 

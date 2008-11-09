@@ -11,7 +11,7 @@
 			the Microsoft Windows SDK.
 
 			See also:
-				..\source\ExtRiff.cpp
+				../source/ExtRiff.cpp
 				ddc.h
 
 		===========================================================================

@@ -3,7 +3,6 @@
 #include <psycle/project.private.hpp>
 #include "DirectoryDlg.hpp"
 #include "Psycle.hpp"
-#include ".\directorydlg.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
