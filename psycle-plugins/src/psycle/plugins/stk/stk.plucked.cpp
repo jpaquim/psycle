@@ -10,6 +10,7 @@
 #include <stk/stk.h>
 #include <stk/Plucked.h>
 #include <stk/ADSR.h>
+#include <cmath>
 
 #define NUMPARAMETERS 5
 
