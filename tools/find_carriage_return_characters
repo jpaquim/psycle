@@ -4,8 +4,8 @@ import os, sys
 
 def do_one_file(path):
 	f = file(path, 'r')
-	lines = f.readlines()
-	f.close()
+	try: lines = f.readlines()
+	finally: f.close()
 	replaced = False
 	for line in lines:
 		for char in line:

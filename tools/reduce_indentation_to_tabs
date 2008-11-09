@@ -4,8 +4,8 @@ import sys
 
 def do_one_file(path, spaces_to_tab):
 	f = file(path, 'r')
-	lines = f.readlines()
-	f.close()
+	try: lines = f.readlines()
+	finally: f.close()
 	chars = []
 	space_found = False
 	line_number = 0
@@ -39,9 +39,9 @@ def do_one_file(path, spaces_to_tab):
 		if True: #not inconsistent:
 			print sys.argv[0] + ':', 'found space or tab missuse in file:', path, '; replacing ...'
 			f = file(path, 'w')
-			for char in chars:
-				f.write(char)
-			f.close()
+			try:
+				for char in chars: f.write(char)
+			finally: f.close()
 
 if __name__ == '__main__':
 	for path in sys.argv[1:]:
