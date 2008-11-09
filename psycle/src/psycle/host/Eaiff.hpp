@@ -4,7 +4,7 @@
 	based on information from http://www.borg.com/~jglatt/tech/aboutiff.htm
 */
 #pragma once
-#include "abstractiff.hpp"
+#include "AbstractIff.hpp"
 namespace psycle
 {
 	namespace host

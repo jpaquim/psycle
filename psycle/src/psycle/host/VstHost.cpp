@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::plugin
 #include <project.private.hpp>
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "MainFrm.hpp"
 #include "VstEditorDlg.hpp"
 #include "VstHost.hpp"
-#include "song.hpp"
+#include "Song.hpp"
 //#include "Configuration.hpp"
 #include "Player.hpp"
 #include "InputHandler.hpp"

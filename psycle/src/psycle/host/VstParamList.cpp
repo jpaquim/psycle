@@ -3,9 +3,9 @@
 #include <psycle/project.private.hpp>
 #include "VstParamList.hpp"
 #include "Psycle.hpp"
-#include "vsthost24.hpp"
+#include "VstHost24.hpp"
 //#include "Helpers.hpp"
-//#include "configuration.hpp"
+//#include "Configuration.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "MainFrm.hpp"
 #include "ChildView.hpp"

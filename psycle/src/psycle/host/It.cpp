@@ -22,7 +22,7 @@
 
 #include <project.private.hpp>
 #include <stdio.h>
-#include "it.hpp"
+#include "It.hpp"
 namespace psycle
 	{
 	namespace host

@@ -4,7 +4,7 @@
 #include "FrameMachine.hpp"
 #include "Psycle.hpp"
 #include "NativeGui.hpp"
-#include "Childview.hpp"
+#include "ChildView.hpp"
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
 #include "Plugin.hpp"

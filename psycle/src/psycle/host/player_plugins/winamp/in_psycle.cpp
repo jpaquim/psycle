@@ -10,17 +10,17 @@
 
 #include <psycle/project.private.hpp>
 //#include "mfc_wrapped_classes.hpp"
-#include "../../version.hpp"
-#include "../../global.hpp"
-#include "../../configuration.hpp"
+#include "../../Version.hpp"
+#include "../../Global.hpp"
+#include "../../Configuration.hpp"
 #include "../../Song.hpp"
-#include "../../player.hpp"
-#include "../../machine.hpp"
+#include "../../Player.hpp"
+#include "../../Machine.hpp"
 #include "../../internal_machines.hpp"
-#include "../../helpers.hpp"
+#include "../../Helpers.hpp"
 #include "shrunk_newmachine.hpp"
 #include "resources.hpp"
-#include "winampdriver.hpp"
+#include "WinampDriver.hpp"
 #include <psycle/helpers/math.hpp>
 
 #include <winamp-2/in2.h>	// Winamp Input plugin header file

@@ -2,8 +2,8 @@
 #include "FrameMixerMachine.hpp"
 #include "Psycle.hpp"
 #include "NativeGui.hpp"
-#include "configuration.hpp"
-#include "song.hpp"
+#include "Configuration.hpp"
+#include "Song.hpp"
 #include "internal_machines.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "ChildView.hpp"

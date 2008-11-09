@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CInterpolateCurve.
 #include <psycle/project.private.hpp>
 #include "InterpolateCurveDlg.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "Helpers.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

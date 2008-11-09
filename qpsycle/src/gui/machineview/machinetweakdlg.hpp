@@ -34,7 +34,7 @@ namespace psy { namespace core {
 
 #include <psycle/core/preset.h>
 
-#include "configuration.hpp"
+#include "../configuration.hpp"
 
 #include <map>
 

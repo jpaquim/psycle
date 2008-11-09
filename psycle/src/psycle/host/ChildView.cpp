@@ -2,14 +2,14 @@
 ///\brief implementation file for psycle::host::CChildView.
 #include <psycle/project.private.hpp>
 #include "ChildView.hpp"
-#include "version.hpp"
+#include "Version.hpp"
 #include "Psycle.hpp"
 #include "Configuration.hpp"
 #include "Player.hpp"
 //#include "Helpers.hpp"
 #include "MainFrm.hpp"
 //#include "Bitmap.hpp"
-#include "Inputhandler.hpp"
+#include "InputHandler.hpp"
 #include "MidiInput.hpp"
 #include "ConfigDlg.hpp"
 #include "GreetDialog.hpp"
@@ -27,7 +27,7 @@
 #include "NewMachine.hpp"
 #include "TransformPatternDlg.hpp"
 #include "PatDlg.hpp"
-#include "vsthost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
+#include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include <cmath> // SwingFill
 #include "SwingFillDlg.hpp"
 #include "InterpolateCurveDlg.hpp"
@@ -3635,11 +3635,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
 
-// graphics operations, private headers
-#include "machineview.private.hpp"
-#include "patviewnew.private.hpp"
-#include "seqview.private.hpp"
+// graphics operations, private headers included only by this translation unit
+#include "MachineView.private.hpp"
+#include "PatViewNew.private.hpp"
+#include "SeqView.private.hpp"
 
-// User/Mouse Responses, private headers
-#include "keybhandler.private.hpp"
-#include "mouseHandler.private.hpp"
+// User/Mouse Responses, private headers included only by this translation unit
+#include "KeybHandler.private.hpp"
+#include "MouseHandler.private.hpp"

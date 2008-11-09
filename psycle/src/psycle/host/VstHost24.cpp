@@ -6,17 +6,17 @@
 #include "Psycle.hpp"
 #include "Player.hpp"
 #include "Zap.hpp"
-#include <psycle/host/loggers.hpp>
+#include "Loggers.hpp"
 
 ///\todo: these are required by the GetIn/OutLatency() functions. They should instead ask the player.
 #include "Configuration.hpp"
 #include "AudioDriver.hpp"
 
 //This is so wrong. It's needed because of the loop inside the code for retrigger that it's in the Work() function.
-#include "song.hpp"
+#include "Song.hpp"
 
-///\todo:  When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
-//		(LiveSlice is a good example of what happens if it isn't correct)
+///\todo: When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
+//        (LiveSlice is a good example of what happens if it isn't correct)
 
 namespace psycle
 {

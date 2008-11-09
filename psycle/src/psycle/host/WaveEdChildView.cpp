@@ -2,10 +2,10 @@
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 #include <psycle/project.private.hpp>
 #include "WaveEdChildView.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "Helpers.hpp"
 #include "MainFrm.hpp"
-#include "zap.hpp"
+#include "Zap.hpp"
 #include <mmreg.h>
 #include <math.h>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

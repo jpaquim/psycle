@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // with the plugins. To use your own, replace 
 // PSYCLE__HOST__CATCH_ALL(*this) by whatever you find appropiate, like
 // catch(...) {} 
-#include <psycle/host/machine.hpp> // for throw.
+#include <psycle/host/Machine.hpp> // for throw.
 //////////////////////////////////////////////////////////////////////////
 
 namespace seib {

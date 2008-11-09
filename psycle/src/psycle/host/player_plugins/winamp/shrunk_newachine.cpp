@@ -5,12 +5,12 @@
 #include "../../Plugin.hpp"
 #include "../../VstHost24.hpp"
 #include "../../ProgressDialog.hpp"
-#include "../../loggers.hpp"
+#include "../../Loggers.hpp"
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <algorithm> //std::transform
-#include <cctype>	// std::tolower
+#include <algorithm> // for std::transform
+#include <cctype> // for std::tolower
 
 namespace psycle
 {

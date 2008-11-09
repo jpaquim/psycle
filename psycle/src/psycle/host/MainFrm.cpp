@@ -2,10 +2,10 @@
 ///\brief implementation file for psycle::host::CMainFrame.
 #include <psycle/project.private.hpp>
 #include "MainFrm.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "WavFileDlg.hpp"
 #include "MasterDlg.hpp"
-#include "gearTracker.hpp"
+#include "GearTracker.hpp"
 #include "XMSamplerUI.hpp"
 #include "FrameMachine.hpp"
 //#include "VstEditorDlg.hpp"
@@ -18,10 +18,10 @@
 #include "WaveEdFrame.hpp"
 #include "Player.hpp"
 #include "MidiInput.hpp"
-#include "inputhandler.hpp"
+#include "InputHandler.hpp"
 #include "KeyConfigDlg.hpp"
 #include "Plugin.hpp"
-#include "vsthost24.hpp"
+#include "VstHost24.hpp"
 #include "XMSampler.hpp"
 #include <HtmlHelp.h>
 #include <cmath>

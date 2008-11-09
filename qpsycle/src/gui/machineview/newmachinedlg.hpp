@@ -20,8 +20,8 @@
 #ifndef NEWMACHINEDLG_H
 #define NEWMACHINEDLG_H
 
-#include "psycle/core/fwd.hpp"
-#include "psycle/core/machinekey.hpp"
+#include <psycle/core/fwd.hpp>
+#include <psycle/core/machinekey.hpp>
 
 #include <QWidget>
 #include <QDialog>

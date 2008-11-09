@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CWaveEdCrossfadeDialog.
 #include <psycle/project.private.hpp>
 #include "WaveEdCrossfadeDialog.hpp"
-#include "psycle.hpp"
-#include "helpers.hpp"
+#include "Psycle.hpp"
+#include "Helpers.hpp"
 #include <iomanip>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)

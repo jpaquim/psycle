@@ -14,7 +14,6 @@
 #include <diversalis/compiler.hpp>
 #include <sstream>
 #include <comdef.h>
-
 #include <wbemidl.h>
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	# pragma comment(lib, "wbemuuid")

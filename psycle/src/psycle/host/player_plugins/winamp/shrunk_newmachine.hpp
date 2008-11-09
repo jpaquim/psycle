@@ -1,4 +1,4 @@
-#include "../../songstructs.hpp"
+#include "../../SongStructs.hpp"
 #include <iostream>
 #include <typeinfo>
 #include <map>

@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CNativeGui.
 #include <psycle/project.private.hpp>
 #include "NativeGui.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "Machine.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
