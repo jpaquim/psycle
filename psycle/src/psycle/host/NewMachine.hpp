@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CNewMachine.
 #pragma once
 #include "resources/resources.hpp"
-#include "machine.hpp"
+#include "Machine.hpp"
 #include "ProgressDialog.hpp"
 #include <afxwin.h>
 #include <afxcoll.h>

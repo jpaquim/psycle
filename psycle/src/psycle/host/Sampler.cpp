@@ -6,7 +6,7 @@
 #include "Player.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
-#include "global.hpp"
+#include "Global.hpp"
 namespace psycle
 {
 	namespace host

@@ -3,7 +3,7 @@
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
-#include "constants.hpp"
+#include "Constants.hpp"
 #include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)

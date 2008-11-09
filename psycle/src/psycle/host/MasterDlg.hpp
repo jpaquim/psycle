@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CMasterDlg.
 #pragma once
 #include "Machine.hpp"
-#include "constants.hpp"
+#include "Constants.hpp"
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

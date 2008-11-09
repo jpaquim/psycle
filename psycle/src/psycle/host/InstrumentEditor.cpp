@@ -5,7 +5,7 @@
 #include "Psycle.hpp"
 #include "MainFrm.hpp"
 #include "EnvDialog.hpp"
-#include "constants.hpp"
+#include "Constants.hpp"
 #include "Helpers.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)

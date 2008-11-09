@@ -1,5 +1,5 @@
 #pragma once
-#include "constants.hpp"
+#include "Constants.hpp"
 #include "resources/resources.hpp"
 #include <afxwin.h>
 #include "mfc_namespace.hpp"
