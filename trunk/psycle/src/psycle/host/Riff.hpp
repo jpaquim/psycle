@@ -18,7 +18,7 @@
 	\endverbatim
 */
 #pragma once
-#include "ddc.hpp"
+#include "Ddc.hpp"
 namespace psycle
 {
 	namespace host
