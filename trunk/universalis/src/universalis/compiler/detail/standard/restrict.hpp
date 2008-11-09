@@ -12,16 +12,9 @@
 #include <universalis/detail/project.hpp>
 ///\todo test __STDC_VERSION
 #if defined DIVERSALIS__COMPILER__GNU
-	// restrict is a keyword
 	#define restrict __restrict__
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
-	#if DIVERSALIS__COMPILER__VERSION >= 1400
-		// restrict is a keyword
-	#else
-		// unsupported?
-		// see also: #pragma optimize("a", on) // assumes no aliasing
-		#define restrict
-	#endif
+	#define restrict __restrict
 #else
 	#define restrict
 #endif
