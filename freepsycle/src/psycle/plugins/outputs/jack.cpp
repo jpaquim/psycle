@@ -201,6 +201,7 @@ int jack::process_callback(::jack_nframes_t frames) {
 			std::memset(out, 0, sizeof *out * frames);
 		}
 	} else { // copy the ring buffer to the jack buffer
+#if 0
 		std::size_t out_size(frames * sizeof(::jack_default_audio_sample_t));
 		while(true) {
 			ring_buffer_type::size_type position, size1, size2;
@@ -225,6 +226,7 @@ int jack::process_callback(::jack_nframes_t frames) {
 				ring_buffer_.advance_read_position(size1 + size2);
 			} else ring_buffer_.advance_read_position(size1);
 		}
+#endif
 	}
 	return 0;
 }
@@ -238,6 +240,7 @@ void jack::do_process() throw(engine::exception) {
 		while(!io_ready()) condition_.wait(lock);
 	}
 	{ // fill the ring buffer
+#if 0
 		unsigned int const channels(in_port().channels());
 		unsigned int const samples_per_buffer(parent().events_per_buffer());
 		assert(last_samples_.size() == in_port().channels());
@@ -273,6 +276,7 @@ void jack::do_process() throw(engine::exception) {
 			}
 			for( ; spread < samples_per_buffer ; ++spread) ringbuffer_[spread + c] = last_samples_[c];
 		}
+#endif
 	}
 	{ scoped_lock lock(mutex_);
 		io_ready(false);
