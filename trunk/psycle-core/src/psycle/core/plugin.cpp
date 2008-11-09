@@ -515,7 +515,7 @@ bool Plugin::SetParameter(int numparam,int value) {
 }
 
 bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
-	std::uint32_t size;
+	std::uint32_t size=0;
 	pFile->Read(size); // size of whole structure
 	if(size) {
 		if(version > CURRENT_FILE_VERSION_MACD) {
@@ -526,7 +526,7 @@ bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
 			//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 			return false;
 		} else {
-			std::uint32_t count;
+			std::uint32_t count=0;
 			pFile->Read(count);  // size of vars
 			/*
 			if (count)
@@ -535,7 +535,7 @@ bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
 			}
 			*/
 			for(unsigned int i(0) ; i < count ; ++i) {
-				std::uint32_t temp;
+				std::uint32_t temp=0;
 				pFile->Read(temp);
 				SetParameter(i, temp);
 			}

@@ -54,7 +54,7 @@ int Dummy::GenerateAudio(int numSamples) {
 // its "LoadSpecificChunk" skips the data of the chunk so that the
 // song loader can continue the sequence.
 bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version) {
-	std::uint32_t size;
+	std::uint32_t size=0;
 	pFile->Read(size); // size of this part params to load
 	pFile->Skip(size);
 	return true;

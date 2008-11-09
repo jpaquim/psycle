@@ -19,6 +19,7 @@
 ***************************************************************************/
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
+//#include <psycle/core/signalslib.h>
 
 #include "sequencerview.hpp"
 #include "sequencerdraw.hpp"

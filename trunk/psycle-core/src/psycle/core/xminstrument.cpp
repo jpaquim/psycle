@@ -26,7 +26,7 @@ void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value){
 
 bool XMInstrument::WaveData::Load(RiffFile& riffFile)
 {
-	std::uint32_t size1,size2;
+	std::uint32_t size1 =0 ,size2 = 0;
 
 	char temp[6];
 	int size=0;
@@ -377,7 +377,7 @@ void XMInstrument::Envelope::Load(RiffFile& riffFile,const std::uint32_t version
 	riffFile.Read(i32);
 	m_SustainEnd = i32;
 
-	std::uint32_t num_of_points;
+	std::uint32_t num_of_points = 0;
 	riffFile.Read(num_of_points);
 	for(std::size_t i = 0; i < num_of_points; ++i)
 	{

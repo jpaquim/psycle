@@ -756,7 +756,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 }
 
 bool Machine::LoadFileChunk(RiffFile* pFile,int version) {
-	std::uint32_t temp;
+	std::uint32_t temp=0;
 	pFile->Read(_bypass);
 	pFile->Read(_mute);
 	pFile->Read(_panning);

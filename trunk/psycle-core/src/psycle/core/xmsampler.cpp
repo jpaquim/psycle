@@ -2462,6 +2462,7 @@ int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 	else Standby(true);
 	//_cpuCost += cpu::cycles() - cost;
 	_worked = true;
+	return numSamples;
 }// XMSampler::Work()
 
 void XMSampler::WorkVoices(int startSample, int numsamples)
@@ -2649,7 +2650,7 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 {
 	int temp;
 	bool wrongState=false;
-	std::uint32_t filevers;
+	std::uint32_t filevers= 0;
 	unsigned long filepos;
 	int size=0;
 	riffFile->Read(size);

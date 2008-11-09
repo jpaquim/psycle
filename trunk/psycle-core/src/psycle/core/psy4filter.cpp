@@ -131,7 +131,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 	song.patternSequence().removeAll();
 	song.clear();
 	
-	float lastPatternPos;
+	float lastPatternPos = 0;
 	PatternCategory* lastCategory = 0;
 	SinglePattern* lastPattern  = 0;
 	SequenceLine* lastSeqLine  = 0;
@@ -716,7 +716,7 @@ bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong& song )
 bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 {
 	MachineFactory& factory = MachineFactory::getInstance();
-	std::uint32_t index, host, keyindex;
+	std::uint32_t index=0, host=0, keyindex=0;
 	char sDllName[256];
 
 	// chunk data

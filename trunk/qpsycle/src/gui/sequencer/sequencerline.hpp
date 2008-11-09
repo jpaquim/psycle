@@ -27,7 +27,6 @@ namespace psy { namespace core {
 }}
 
 #include <psycle/core/signalslib.h>
-
 #include <QGraphicsItem>
 
 
