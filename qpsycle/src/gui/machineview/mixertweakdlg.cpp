@@ -34,7 +34,7 @@
 #include "../inputhandler.hpp"
 #include "machinegui.hpp"
 #include <cmath>
-
+#include <cstring>
 
 #include <QVBoxLayout>
 #include <QLabel>

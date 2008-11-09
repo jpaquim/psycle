@@ -275,7 +275,7 @@ bool Psy2Filter::LoadWAVD(RiffFile * file, CoreSong & song) {
 	file->Skip(4);
 	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i) {
 		for(int w = 0; w<PSY2_MAX_WAVES; ++w) {
-			std::uint32_t wltemp;
+			std::uint32_t wltemp=0;
 			file->Read(wltemp);
 			if(wltemp > 0) {
 				if(w == 0) {
@@ -299,7 +299,7 @@ bool Psy2Filter::LoadWAVD(RiffFile * file, CoreSong & song) {
 				} else {
 					//skip info
 					file->Skip(42 + sizeof(bool));
-					bool stereo;
+					bool stereo=false;
 					file->Read(stereo);
 					//skip data.
 					file->Skip(wltemp * 2);

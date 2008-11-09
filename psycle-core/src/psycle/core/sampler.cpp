@@ -475,7 +475,7 @@ namespace psy
 
 		bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t size;
+			std::uint32_t size = 0;
 			pFile->Read(size);
 			if (size) {
 				if (version > CURRENT_FILE_VERSION_MACD) {
@@ -484,7 +484,7 @@ namespace psy
 					return false;
 				}
 				else {
-					std::int32_t temp;
+					std::int32_t temp = 0;
 					pFile->Read(temp); // numSubtracks
 					_numVoices=temp;
 					pFile->Read(temp); // quality

@@ -316,7 +316,7 @@ namespace psy {
 		
 		bool LADSPAMachine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t size;
+			std::uint32_t size=0;
 			pFile->Read(size); // size of whole structure
 			if(size)
 			{
@@ -331,11 +331,11 @@ namespace psy {
 				}
 				else
 				{
-					std::uint32_t count;
+					std::uint32_t count=0;
 					pFile->Read(count);  // size of vars
 					for(unsigned int i(0) ; i < count ; ++i)
 					{
-						float temp;
+						float temp=0;
 						pFile->Read(temp);
 						values_[i].setrawvalue(temp);
 					}

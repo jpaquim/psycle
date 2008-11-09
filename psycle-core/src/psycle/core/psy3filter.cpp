@@ -310,7 +310,7 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 	// sequence width, for multipattern
 	file->Read(temp);
 	for(unsigned int i(0) ; i < song.tracks(); ++i) {
-		bool tmp;
+		bool tmp=0;
 		file->Read(tmp);
 		song.patternSequence().setMutedTrack(i,tmp);
 		fileread = file->Read(tmp);
@@ -354,8 +354,8 @@ PatternEvent Psy3Filter::convertEntry(unsigned char * data) const {
 
 bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) {
 	std::int32_t index = 0;
-	std::uint32_t temp;
-	std::uint32_t size;
+	std::uint32_t temp = 0;
+	std::uint32_t size = 0;
 	bool fileread=false;
 
 	// index
