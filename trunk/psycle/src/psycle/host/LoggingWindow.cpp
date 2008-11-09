@@ -1,8 +1,8 @@
 ///\implementation psycle::host::CLoggingWindow.
 #include <project.private.hpp>
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "MainFrm.hpp"
-#include "constants.hpp"
+#include "Constants.hpp"
 #include "LoggingWindow.hpp"
 #include <cstring>
 NAMESPACE__BEGIN(psycle) NAMESPACE__BEGIN(host)

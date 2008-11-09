@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CGearTracker.
 #pragma once
 #include "Sampler.hpp"
-#include "constants.hpp"
+#include "Constants.hpp"
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

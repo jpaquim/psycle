@@ -2,10 +2,10 @@
 ///\brief implementation file for psycle::host::CMidiMonitorDlg.
 #include <psycle/project.private.hpp>
 #include "MidiMonitorDlg.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "MidiInput.hpp"
-#include "song.hpp"
-#include "machine.hpp"
+#include "Song.hpp"
+#include "Machine.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)

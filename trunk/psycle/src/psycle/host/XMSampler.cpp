@@ -5,7 +5,7 @@
 #include "Song.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
-#include "global.hpp"
+#include "Global.hpp"
 #include <cstdint>
 #include <algorithm>
 namespace psycle

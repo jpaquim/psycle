@@ -1,11 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::Player.
 #pragma once
-#include "constants.hpp"
+#include "Constants.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "Riff.hpp"
-	#include "dither.hpp"
+	#include "Dither.hpp"
 #endif //!defined WINAMP_PLUGIN
 namespace psycle
 {

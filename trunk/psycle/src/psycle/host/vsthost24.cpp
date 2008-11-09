@@ -1,11 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 #include <psycle/project.private.hpp>
-#include "vsthost24.hpp"
-#include "global.hpp"
-#include "psycle.hpp"
-#include "player.hpp"
-#include "zap.hpp"
+#include "VstHost24.hpp"
+#include "Global.hpp"
+#include "Psycle.hpp"
+#include "Player.hpp"
+#include "Zap.hpp"
 #include <psycle/host/loggers.hpp>
 
 ///\todo: these are required by the GetIn/OutLatency() functions. They should instead ask the player.

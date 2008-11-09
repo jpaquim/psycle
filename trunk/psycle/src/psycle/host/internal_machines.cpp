@@ -4,7 +4,7 @@
 #include "Song.hpp"
 #include "Player.hpp"
 #include "AudioDriver.hpp"
-#include "global.hpp"
+#include "Global.hpp"
 #include <cstdint>
 namespace psycle
 {

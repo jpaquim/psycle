@@ -5,7 +5,7 @@
 #include <psycle/plugin_interface.hpp>
 #include "Configuration.hpp"
 #include "Player.hpp"
-#include "global.hpp"
+#include "Global.hpp"
 #include <diversalis/compiler.hpp>
 #include <cstdint>
 namespace psycle

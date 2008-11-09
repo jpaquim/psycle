@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::AudioDriver.
 #include <psycle/project.private.hpp>
 #include "AudioDriver.hpp"
-#include "helpers.hpp"
-#include "constants.hpp"
+#include "Helpers.hpp"
+#include "Constants.hpp"
 namespace psycle
 {
 	namespace host

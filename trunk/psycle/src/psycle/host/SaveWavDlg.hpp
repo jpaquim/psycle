@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CSaveWavDlg.
 #pragma once
-#include "constants.hpp"
+#include "Constants.hpp"
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
 #include <mmreg.h>

@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::vsthost
 #pragma once
-#include "machine.hpp"
+#include "Machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
 #include <cstring>
 /*

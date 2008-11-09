@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CPsycleApp.
 #pragma once
 #include "resources/resources.hpp" // main symbols
-#include "global.hpp"
-#include "loggers.hpp"
+#include "Global.hpp"
+#include "Loggers.hpp"
 #include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
