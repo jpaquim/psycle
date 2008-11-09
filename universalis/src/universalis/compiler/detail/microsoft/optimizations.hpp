@@ -25,11 +25,6 @@
 			// [bohan] this means we must not have the /RTC option enabled to enable optimizations, even if we disable runtime checks here.
 		#pragma optimize("s", off) // favors small code
 		#pragma optimize("t", on) // favors fast code
-		#if DIVERSALIS__COMPILER__VERSION < 1400
-			#pragma optimize("p", off) // improves floating-point consistency (this is for iso conformance, slower and less precise)
-			#pragma optimize("a", on) // assumes no aliasing, see also: the restrict iso keyword
-			#pragma optimize("w", off) // assumes that aliasing can occur across function calls
-		#endif
 		#pragma optimize("y", off) // generates frame pointers on the program stack
 		#pragma optimize("g", on) // global optimization
 			// [bohan] note: there is a bug in msvc 6 concerning global optimization ... disable it locally where necessary
