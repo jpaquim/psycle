@@ -2,14 +2,14 @@
 ///\brief implementation file for psycle::host::CPsycleApp.
 #define _WIN32_DCOM
 #include <psycle/project.private.hpp>
-#include "psycle.hpp"
-#include "version.hpp"
+#include "Psycle.hpp"
+#include "Version.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
-#include "midiinput.hpp"
+#include "MidiInput.hpp"
 #include "NewMachine.hpp"
-#include "sinstance.h"
-#include "loggers.hpp"
+#include "SInstance.h"
+#include "Loggers.hpp"
 #include <universalis/processor/exception.hpp>
 #include <diversalis/compiler.hpp>
 #include <sstream>

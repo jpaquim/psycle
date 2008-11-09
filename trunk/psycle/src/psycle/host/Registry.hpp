@@ -3,7 +3,7 @@
 #pragma once
 #include <string>
 #include <boost/static_assert.hpp>
-#include "loggers.hpp"
+#include "Loggers.hpp"
 namespace psycle
 {
 	namespace host

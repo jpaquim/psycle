@@ -2,15 +2,15 @@
 ///\brief implementation file for psycle::host::CSaveWavDlg.
 #include <psycle/project.private.hpp>
 #include "SaveWavDlg.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "Song.hpp"
-#include "configuration.hpp"
+#include "Configuration.hpp"
 #include "MidiInput.hpp"
 #include "Player.hpp"
 #include "Machine.hpp"
-#include "helpers.hpp"
+#include "Helpers.hpp"
 #include "MainFrm.hpp"
-#include "childview.hpp"
+#include "ChildView.hpp"
 #include <iostream>
 #include <iomanip>
 #include "mfc_namespace.hpp"
