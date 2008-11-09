@@ -28,7 +28,7 @@ class QComboBox;
 class QPushButton;
 class QCheckBox;
 
-#include "ui_behaviourpage.h"
+#include <ui_behaviourpage.h>
 
 namespace qpsycle {
 

@@ -30,7 +30,7 @@ class QPushButton;
 class QCheckBox;
 class QLineEdit;
 
-#include "ui_dirspage.h"
+#include <ui_dirspage.h>
 
 namespace qpsycle {
 
