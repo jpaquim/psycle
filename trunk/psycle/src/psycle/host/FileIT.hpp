@@ -4,7 +4,7 @@
 
 #include "SongStructs.hpp"
 #include "FileIO.hpp"
-#include "it.hpp"
+#include "It.hpp"
 namespace psycle
 	{
 	namespace host

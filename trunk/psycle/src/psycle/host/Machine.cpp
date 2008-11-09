@@ -27,7 +27,7 @@
 #include "Sampler.hpp"
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
-#include "VSTHost24.hpp"
+#include "VstHost24.hpp"
 
 #include "Loggers.hpp"
 #include "configuration_options.hpp"

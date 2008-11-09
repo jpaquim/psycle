@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CKeyConfigDlg.
 #include <psycle/project.private.hpp>
 #include "KeyConfigDlg.hpp"
-#include "psycle.hpp"
-#include "inputhandler.hpp"
+#include "Psycle.hpp"
+#include "InputHandler.hpp"
 #include "Configuration.hpp"
 #include "SpecialKeys.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

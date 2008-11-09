@@ -257,22 +257,17 @@ void gstreamer::do_open() throw(engine::exception) {
 	// create a fakesrc
 	source_ = &instantiate("fakesrc", name() + "-src");
 
-	// create a queue (note that this used to work without a queue in the past)
-	//queue_ = &instantiate("queue", name() + "-queue");
-	
 	// create a pipeline
 	if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
 	
 	// add the elements to the pipeline
 	//::gst_bin_add_many(GST_BIN(pipeline), source_, caps_filter_, sink_, (void*)0);
 	if(!::gst_bin_add(GST_BIN(pipeline_), source_     )) throw runtime_error("could not add source element to pipeline",      UNIVERSALIS__COMPILER__LOCATION);
-	//if(!::gst_bin_add(GST_BIN(pipeline_), queue_      )) throw runtime_error("could not add queue element to pipeline",       UNIVERSALIS__COMPILER__LOCATION);
 	if(!::gst_bin_add(GST_BIN(pipeline_), caps_filter_)) throw runtime_error("could not add caps filter element to pipeline", UNIVERSALIS__COMPILER__LOCATION);
 	if(!::gst_bin_add(GST_BIN(pipeline_), sink_       )) throw runtime_error("could not add sink element to pipeline",        UNIVERSALIS__COMPILER__LOCATION);
 	
 	// link the element pads together
 	if(!::gst_element_link_many(source_, caps_filter_, sink_, (void*)0)) throw runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
-	//if(!::gst_element_link_many(source_, queue_, caps_filter_, sink_, (void*)0)) throw runtime_error("could not link element pads", UNIVERSALIS__COMPILER__LOCATION);
 	//if(!::gst_element_link_pads(source_,      "sink", caps_filter_, "src")) throw runtime_error("could not link source element sink pad to caps filter element src pad", UNIVERSALIS__COMPILER__LOCATION);
 	//if(!::gst_element_link_pads(caps_filter_, "sink", sink_,        "src")) throw runtime_error("could not link caps filter element sink pad to sink element src pad",   UNIVERSALIS__COMPILER__LOCATION);
 
@@ -407,7 +402,7 @@ void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	}
 }
 
-/// this is called from within psycle's host's processing thread.
+/// this is called from within psycle's host's processing thread(s).
 void gstreamer::do_process() throw(engine::exception) {
 	if(false && loggers::trace()) loggers::trace()("process", UNIVERSALIS__COMPILER__LOCATION);
 	if(!in_port()) return;
@@ -416,11 +411,12 @@ void gstreamer::do_process() throw(engine::exception) {
 		while(!io_ready()) condition_.wait(lock);
 	}
 	{ // fill the intermediate buffer
+		unsigned int const channels(in_port().channels());
 		unsigned int const samples_per_buffer(parent().events_per_buffer());
-		assert(last_samples_.size() == in_port().channels());
-		for(unsigned int c(0); c < in_port().channels(); ++c) {
+		assert(last_samples_.size() == channels);
+		for(unsigned int c(0); c < channels; ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_));
+			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + c);
 			unsigned int spread(0);
 			for(std::size_t e(0), s(in.size()); e < s; ++e) {
 				real s(in[e].sample());
@@ -430,9 +426,9 @@ void gstreamer::do_process() throw(engine::exception) {
 					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
 				}
 				last_samples_[c] = static_cast<output_sample_type>(s);
-				for( ; spread <= in[e].index() ; ++spread, ++out) out[c] = last_samples_[c];
+				for( ; spread <= in[e].index() ; ++spread, ++out) *out = last_samples_[c];
 			}
-			for( ; spread < samples_per_buffer ; ++spread, ++out) out[c] = last_samples_[c];
+			for( ; spread < samples_per_buffer ; ++spread, ++out) *out = last_samples_[c];
 		}
 	}
 	{ scoped_lock lock(mutex_);
@@ -465,7 +461,6 @@ void gstreamer::do_close() throw(engine::exception) {
 	if(false) { // seems the pipeline owns its element. need to check the doc.
 		if(sink_) ::gst_object_unref(GST_OBJECT(sink_)); sink_ = 0;
 		if(caps_filter_) ::gst_object_unref(GST_OBJECT(caps_filter_)); caps_filter_ = 0;
-		//if(queue_) ::gst_object_unref(GST_OBJECT(queue_)); queue_ = 0;
 		if(source_) ::gst_object_unref(GST_OBJECT(source_)); source_ = 0;
 		if(caps_) ::gst_caps_unref(caps_); caps_ = 0;
 	} else sink_ = caps_filter_ = /*queue_ =*/ source_ = 0; caps_ = 0;

@@ -10,7 +10,7 @@
 	#include "InputHandler.hpp"
 #endif //!defined WINAMP_PLUGIN
 
-#include "vsthost24.hpp"
+#include "VstHost24.hpp"
 #include <psycle/helpers/dsp.hpp>
 namespace psycle
 {

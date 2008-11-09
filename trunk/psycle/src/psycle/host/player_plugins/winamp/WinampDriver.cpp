@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::WinampDriver.
 #include <psycle/project.private.hpp>
 #include "WinampDriver.hpp"
-#include "../../player.hpp"
+#include "../../Player.hpp"
 #include "../../Helpers.hpp"
 #include <winamp-2/in2.h>
 

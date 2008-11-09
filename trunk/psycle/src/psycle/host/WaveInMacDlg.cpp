@@ -1,12 +1,12 @@
 #include <psycle/project.private.hpp>
 #include "WaveInMacDlg.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "Global.hpp"
 #include "ChildView.hpp"
 #include "AudioDriver.hpp"
 #include "Configuration.hpp"
 #include "internal_machines.hpp"
-#include "dsp.hpp"
+#include "Dsp.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)

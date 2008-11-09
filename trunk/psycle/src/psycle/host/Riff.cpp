@@ -31,7 +31,7 @@
 	\endverbatim
 */
 #include <psycle/project.private.hpp>
-#include "riff.hpp"
+#include "Riff.hpp"
 #include <io.h>
 #include <stdio.h>
 #include <stdlib.h>

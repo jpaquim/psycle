@@ -634,7 +634,7 @@ void alsa::do_process() throw(engine::exception) {
 	{ // fill the intermediate buffer
 		unsigned int const channels(in_port().channels());
 		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
-
+		//assert(last_samples_.size() == channels); ///\todo last_samples_
 		for(unsigned int c(0); c < channels; ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_));

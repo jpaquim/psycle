@@ -8,7 +8,7 @@
 #include <universalis/processor/exception.hpp>
 #include <universalis/operating_system/thread_name.hpp>
 #include <process.h>
-#include "dsp.hpp"
+#include "Dsp.hpp"
 namespace psycle
 {
 	namespace host

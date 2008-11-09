@@ -12,7 +12,7 @@
 #endif //!defined WINAMP_PLUGIN
 
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
-#include "global.hpp"
+#include "Global.hpp"
 namespace psycle
 {
 	namespace host

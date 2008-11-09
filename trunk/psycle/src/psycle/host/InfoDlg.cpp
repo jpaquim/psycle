@@ -3,7 +3,7 @@
 #include <psycle/project.private.hpp>
 #include "InfoDlg.hpp"
 #include "Psycle.hpp"
-#include "configuration.hpp"
+#include "Configuration.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

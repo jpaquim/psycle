@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CProgressDialog.
 #include <psycle/project.private.hpp>
 #include "ProgressDialog.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CProgressDialog::CProgressDialog(CWnd* pParent) : CDialog(CProgressDialog::IDD, pParent)

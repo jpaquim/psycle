@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CSkinDlg.
 #include <psycle/project.private.hpp>
 #include "SkinDlg.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "Helpers.hpp"
 #include "Configuration.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

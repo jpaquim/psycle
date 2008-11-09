@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::CPresetsDlg.
 #include <psycle/project.private.hpp>
 #include "PresetsDlg.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "Plugin.hpp"
-#include "VSTHost24.hpp"
+#include "VstHost24.hpp"
 #include "FrameMachine.hpp"
 #include "FileIO.hpp"
 #include <cstring>

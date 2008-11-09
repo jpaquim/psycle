@@ -1,5 +1,5 @@
 #pragma once
-#include "version.hpp"
+#include "Version.hpp"
 #include <psycle/plugin_interface.hpp>
 namespace psycle
 {

@@ -1,5 +1,5 @@
 #include <psycle/project.private.hpp>
-#include "specialkeys.hpp"
+#include "SpecialKeys.hpp"
 #include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)

@@ -25,7 +25,7 @@ namespace psy { namespace core {
 	class Machine;
 }}
 
-#include "configuration.hpp"
+#include "../configuration.hpp"
 #include "machinetweakdlg.hpp"
 
 #include <map>

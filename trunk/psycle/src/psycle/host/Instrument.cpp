@@ -3,8 +3,8 @@
 #include <psycle/project.private.hpp>
 #include "Instrument.hpp"
 #include "DataCompression.hpp"
-#include "filter.hpp"
-#include "zap.hpp"
+#include "Filter.hpp"
+#include "Zap.hpp"
 namespace psycle
 {
 	namespace host

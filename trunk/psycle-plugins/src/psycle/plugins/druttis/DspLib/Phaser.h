@@ -9,7 +9,7 @@
 #pragma once
 
 #include "AllPass.h"
-#include "dspalgs.h"
+#include "DspAlgs.h"
 
 //////////////////////////////////////////////////////////////////////
 //				Phaser class

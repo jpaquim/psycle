@@ -7,7 +7,7 @@
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
-#include "helpers.hpp"
+#include "Helpers.hpp"
 #include "Dsp.hpp"
 #include <universalis/processor/exception.hpp>
 #include "Configuration.hpp"

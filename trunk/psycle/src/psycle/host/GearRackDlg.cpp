@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CGearRackDlg.
 #include <psycle/project.private.hpp>
 #include "GearRackDlg.hpp"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "WaveEdFrame.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"

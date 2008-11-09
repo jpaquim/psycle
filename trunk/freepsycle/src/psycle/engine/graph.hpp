@@ -347,8 +347,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 			/// called by schedulers
 			bool io_ready() const throw() { scoped_lock lock(mutex_); return io_ready_; }
 		protected:
-			/// Derived classes that drives an underlying device should call this setter.
-			/// When changed from false to true, the io_ready_signal will be emitted.
+			/// Derived classes that drive an underlying device should call this setter.
+			/// When changed from false to true, the io_ready_signal is emitted.
 			void io_ready(bool io_ready);
 		private:
 			bool io_ready_;

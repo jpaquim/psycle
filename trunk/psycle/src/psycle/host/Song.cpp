@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
 #include <psycle/project.private.hpp>
-#include "psycle.hpp"
+#include "Psycle.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "NewMachine.hpp"
@@ -9,7 +9,7 @@
 	#include "ChildView.hpp"
 	#include "ProgressDialog.hpp"
 #else
-	#include "player_plugins/winamp/fake_progressdialog.hpp"
+	#include "player_plugins/winamp/fake_progressDialog.hpp"
 	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
 
@@ -19,7 +19,7 @@
 #include "Sampler.hpp"
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
-#include "VSTHost24.hpp"
+#include "VstHost24.hpp"
 
 #include "DataCompression.hpp"
 #include "convert_internal_machines.hpp"
@@ -28,7 +28,7 @@
 	#include "Riff.hpp" // for Wave file loading.
 #endif //!defined WINAMP_PLUGIN
 
-#include "zap.hpp"
+#include "Zap.hpp"
 
 namespace psycle
 {

@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CFileXM.
 #include <project.private.hpp>
 #include "FileXM.hpp"
-#include "song.hpp"
+#include "Song.hpp"
 namespace psycle
 {
 	namespace host

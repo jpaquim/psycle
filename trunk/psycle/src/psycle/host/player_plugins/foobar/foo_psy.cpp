@@ -3,19 +3,15 @@
 // Configure the Foobar2000 SDK $PATH before compiling 
 #include <foobarSDK/foobar2000/SDK/foobar2000.h>
 
-#include <math.h> // should be <cmath>
+#include <math.h> ///\todo should be <cmath>
 #include <shlobj.h>
 
 // psycle
-#include <psycle/host/configuration.hpp>
-#include <psycle/host/song.hpp>
-#include <psycle/host/player.hpp>
-#include <psycle/host/machine.hpp>
-#include <psycle/host/helpers.hpp>
-
-
-
-
+#include <psycle/host/Configuration.hpp>
+#include <psycle/host/Song.hpp>
+#include <psycle/host/Player.hpp>
+#include <psycle/host/Machine.hpp>
+#include <psycle/host/Helpers.hpp>
 
 Global _global;
 

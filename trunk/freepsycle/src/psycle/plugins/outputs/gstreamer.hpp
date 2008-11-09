@@ -29,7 +29,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 		void do_close()   throw(engine::exception) /*override*/;
 		void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
 	private:
-		::GstElement * pipeline_, * source_, /** queue_,*/ * caps_filter_, * sink_;
+		::GstElement * pipeline_, * source_, * caps_filter_, * sink_;
 
 		::GstCaps * caps_;
 

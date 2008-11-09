@@ -5,7 +5,7 @@
 
 #include <psycle/project.private.hpp>
 #include "ExListBox.h"
-#include "psycle.hpp"
+#include "Psycle.hpp"
 #include "MainFrm.hpp"
 #include "Global.hpp"
 #include "Song.hpp"
