@@ -14,7 +14,7 @@
 #include <iostream>
 #include <iomanip>
 #include "mfc_namespace.hpp"
-#include ".\savewavdlg.hpp"
+#include "SaveWavDlg.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
