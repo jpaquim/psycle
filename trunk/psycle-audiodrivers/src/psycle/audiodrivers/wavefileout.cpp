@@ -19,7 +19,7 @@
 #include "wavefileout.h"
 #include <iostream>
 #if defined _WIN64 || defined _WIN32
-	#include "windows.h"
+	#include <windows.h>
 #endif
 namespace psy { namespace core {
 
