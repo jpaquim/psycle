@@ -21,7 +21,7 @@
 #if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 #else
-	#include "windows.h"
+	#include <windows.h>
 #endif
 namespace psy { namespace core {
 
