@@ -25,56 +25,14 @@
 	#define M_PI 3.14159265359f // note that's supposed to be a double!
 #endif
 
-CMachineParameter const paraLFOFreq = { 
-	"LFO Freq",
-	"LFOFreq",																								// description
-	1,																																																// MinValue				
-	40,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	4,
-};
-CMachineParameter const paraLFOStartPhase = { 
-	"LFO start phase",
-	"LFOStartPhase",																								// description
-	0,																																																// MinValue				
-	359,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-CMachineParameter const paraDepth = { 
-	"Depth",
-	"Depth",																								// description
-	0,																																																// MinValue				
-	100,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	70,
-};
-CMachineParameter const paraStages = { 
-	"Stages",
-	"Stages",																																												// description
-	2,																																																// MinValue				
-	24,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	2,
-};
-CMachineParameter const paraDryWet = { 
-	"Dry/Wet",
-	"Dry/Wet",																																												// description
-	0,																																																// MinValue				
-	100,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	50,
-};
-CMachineParameter const paraFB = { 
-	"Feedback",
-	"Feedback",																																												// description
-	-100,																																																// MinValue				
-	100,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-CMachineParameter const *pParameters[] = { 
-	// global
+CMachineParameter const paraLFOFreq       = { "LFO Freq"       , "LFOFreq"      ,    1,  40, MPF_STATE,  4 };
+CMachineParameter const paraLFOStartPhase = { "LFO start phase", "LFOStartPhase",    0, 359, MPF_STATE,  0 };
+CMachineParameter const paraDepth         = { "Depth"          , "Depth"        ,    0, 100, MPF_STATE, 70 };
+CMachineParameter const paraStages        = { "Stages"         , "Stages"       ,    2,  24, MPF_STATE,  2 };
+CMachineParameter const paraDryWet        = { "Dry/Wet"        , "Dry/Wet"      ,    0, 100, MPF_STATE, 50 };
+CMachineParameter const paraFB            = { "Feedback"       , "Feedback"     , -100, 100, MPF_STATE,  0 };
+
+CMachineParameter const * audacity_phaser_parameters[] = { 
 	&paraLFOFreq,
 	&paraLFOStartPhase,
 	&paraDepth,
@@ -82,11 +40,12 @@ CMachineParameter const *pParameters[] = {
 	&paraDryWet,
 	&paraFB
 };
-CMachineInfo const MacInfo = {
+
+CMachineInfo const audacity_phaser_info = {
 	MI_VERSION,
 	EFFECT,
-	PARAMETER_COUNT,
-	pParameters,
+	sizeof audacity_phaser_parameters / sizeof *audacity_phaser_parameters,
+	audacity_phaser_parameters,
 	"Audacity Phaser" // long name
 		#ifndef NDEBUG
 			" (debug build)"
@@ -98,15 +57,15 @@ CMachineInfo const MacInfo = {
 	1 // columns
 };
 
-class mi : public CMachineInterface {
+class audacity_phaser : public CMachineInterface {
 	public:
-		mi();
-		virtual ~mi();
+		audacity_phaser();
+		virtual ~audacity_phaser();
 
 		virtual void Init();
 		virtual void SequencerTick();
-		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
-		virtual bool DescribeValue(char* txt,int const param, int const value);
+		virtual void Work(float * samplesleft, float * samplesright, int numsamples, int tracks);
+		virtual bool DescribeValue(char * txt, int const param, int const value);
 		virtual void Command();
 		virtual void ParameterTweak(int par, int val);
 
@@ -115,7 +74,6 @@ class mi : public CMachineInterface {
 		float const phaser_lfo_shape = 4.0f;
 		/// how many samples are processed before compute the lfo value again
 		unsigned int const lfo_skip_samples = 20;
-		unsigned int const PARAMETER_COUNT = 6;
 		
 		float freq;
 		float startphase;
@@ -133,17 +91,17 @@ class mi : public CMachineInterface {
 		float phase_l, phase_r;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(audacity_phaser, audacity_phaser_info)
 
-mi::mi() {
-	Vals = new int[PARAMETER_COUNT];
+audacity_phaser::audacity_phaser() {
+	Vals = new int[sizeof audacity_phaser_parameters / sizeof *audacity_phaser_parameters];
 }
 
-mi::~mi() {
+audacity_phaser::~audacity_phaser() {
 	delete Vals;
 }
 
-void mi::Init() {
+void audacity_phaser::Init() {
 	freq = 0.4f;
 	startphase = 0;
 	depth = .7f;
@@ -161,16 +119,16 @@ void mi::Init() {
 	}
 }
 
-void mi::SequencerTick() {
+void audacity_phaser::SequencerTick() {
 	// called on each tick while sequencer is playing
 }
 
-void mi::Command() {
+void audacity_phaser::Command() {
 	// called when user presses editor button
 	pCB->MessBox("Audacity Phaser", "APhaser", 0);
 }
 
-void mi::ParameterTweak(int par, int val) {
+void audacity_phaser::ParameterTweak(int par, int val) {
 	Vals[par]=val;
 	switch(par) {
 		case 0: freq = (float)val * .1f; lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate(); break;
@@ -184,33 +142,20 @@ void mi::ParameterTweak(int par, int val) {
 }
 
 // Function that describes value on client's displaying
-bool mi::DescribeValue(char* txt,int const param, int const value) {
+bool audacity_phaser::DescribeValue(char * txt, int const param, int const value) {
 	switch(param) {
-		case 0:
-			std::sprintf(txt,"%.1f Hz",(float)value*.1f);
-			return true;
-		case 1:
-			std::sprintf(txt,"%i°",value);
-			return true;
-		case 2:
-			std::sprintf(txt,"%i%%",value);
-			return true;
-		case 3:
-			std::sprintf(txt,"%i",(value%2==1)?value-1:value);
-			return true;
-		case 4:
-			std::sprintf(txt,"%i%%:%i%%",(100-value),value);
-			return true;
-		case 5:
-			std::sprintf(txt,"%.2f",(float)value*0.01f);
-			return true;
-		default:
-			return false;
+		case 0: std::sprintf(txt,"%.1f Hz",(float)value*.1f); return true;
+		case 1: std::sprintf(txt,"%i°",value); return true;
+		case 2: std::sprintf(txt,"%i%%",value); return true;
+		case 3: std::sprintf(txt,"%i",(value%2==1)?value-1:value); return true;
+		case 4: std::sprintf(txt,"%i%%:%i%%",(100-value),value); return true;
+		case 5: std::sprintf(txt,"%.2f",(float)value*0.01f); return true;
+		default: return false;
 	}
 }
 
 // Work... where all is cooked
-void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
+void audacity_phaser::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
 	float static anti_denormal = 1.0e-20f;
 
 	do {
