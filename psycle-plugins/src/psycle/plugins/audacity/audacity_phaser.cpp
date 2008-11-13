@@ -70,10 +70,10 @@ class audacity_phaser : public CMachineInterface {
 		virtual void ParameterTweak(int par, int val);
 
 	private:
-		unsigned int const MAX_STAGES = 24;
-		float const phaser_lfo_shape = 4.0f;
+		unsigned int const static MAX_STAGES = 24;
+		float const static phaser_lfo_shape = 4.0f;
 		/// how many samples are processed before compute the lfo value again
-		unsigned int const lfo_skip_samples = 20;
+		unsigned int const static lfo_skip_samples = 20;
 		
 		float freq;
 		float startphase;
