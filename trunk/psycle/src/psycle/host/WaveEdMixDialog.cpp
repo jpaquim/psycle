@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdMixDialog.
-#include <psycle/project.private.hpp>
+
 #include "WaveEdMixDialog.hpp"
 #include "Psycle.hpp"
 #include "Helpers.hpp"

@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CConfigDlg.
-#include <psycle/project.private.hpp>
+
 #include "ConfigDlg.hpp"
 #include "Psycle.hpp"
 #include "MainFrm.hpp"

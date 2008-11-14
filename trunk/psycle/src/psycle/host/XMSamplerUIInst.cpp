@@ -4,7 +4,7 @@
  *  $Date$
  *  $Revision$
  */
-#include <psycle/project.private.hpp>
+
 #include "XMSamplerUIInst.hpp"
 #include "Psycle.hpp"
 #include "Player.hpp"

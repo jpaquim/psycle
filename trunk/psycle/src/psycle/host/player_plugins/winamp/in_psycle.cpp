@@ -8,7 +8,7 @@
 
 */
 
-#include <psycle/project.private.hpp>
+
 //#include "mfc_wrapped_classes.hpp"
 #include "../../Version.hpp"
 #include "../../Global.hpp"

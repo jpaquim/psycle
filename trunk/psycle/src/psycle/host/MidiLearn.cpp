@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiLearn.
-#include <psycle/project.private.hpp>
+
 #include "MidiLearn.hpp"
 #include "Psycle.hpp"
 #include "OutputDlg.hpp"

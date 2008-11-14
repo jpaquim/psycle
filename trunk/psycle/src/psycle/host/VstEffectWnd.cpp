@@ -1,6 +1,6 @@
 //\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
-#include <psycle/project.private.hpp>
+
 #include "VstEffectWnd.hpp"
 #include "Psycle.hpp"
 #include "VstHost24.hpp"

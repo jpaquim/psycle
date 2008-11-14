@@ -2,7 +2,7 @@
 	\file
 	implementation file for psycle::host::abstractIff
 */
-#include <psycle/project.private.hpp>
+
 #include "AbstractIff.hpp"
 #include <cstdio>
 #include <cstdlib>

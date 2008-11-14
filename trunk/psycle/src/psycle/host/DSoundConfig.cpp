@@ -1,6 +1,6 @@
 ///\file
 ///\implementation psycle::host::CDSoundConfig.
-#include <psycle/project.private.hpp>
+
 #include "DSoundConfig.hpp"
 #include <diversalis/compiler.hpp>
 

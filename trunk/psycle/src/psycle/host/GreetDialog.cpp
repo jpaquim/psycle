@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CGreetDialog.
-#include <psycle/project.private.hpp>
+
 #include "GreetDialog.hpp"
 #include "Psycle.hpp"
 #include "mfc_namespace.hpp"

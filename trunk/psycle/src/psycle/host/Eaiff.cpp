@@ -2,7 +2,7 @@
 	\file
 	implementation file for psycle::host::eaiff
 */
-#include <psycle/project.private.hpp>
+
 #include "Eaiff.hpp"
 #include <cstdio>
 #include <cstdlib>

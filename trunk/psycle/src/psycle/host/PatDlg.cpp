@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CPatDlg.
-#include <psycle/project.private.hpp>
+
 #include "PatDlg.hpp"
 #include "Psycle.hpp"
 #include "Constants.hpp"

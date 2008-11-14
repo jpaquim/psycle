@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::AudioDriver.
-#include <psycle/project.private.hpp>
+
 #include "AudioDriver.hpp"
 #include "Helpers.hpp"
 #include "Constants.hpp"

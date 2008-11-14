@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CInterpolateCurve.
-#include <psycle/project.private.hpp>
+
 #include "InterpolateCurveDlg.hpp"
 #include "Psycle.hpp"
 #include "Helpers.hpp"

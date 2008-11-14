@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveOutDialog.
-#include <psycle/project.private.hpp>
+
 #include "WaveOutDialog.hpp"
 #include "Psycle.hpp"
 #include <diversalis/compiler.hpp>

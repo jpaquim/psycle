@@ -1,4 +1,4 @@
-#include <psycle/project.private.hpp>
+
 #include "XMSamplerUISample.hpp"
 #include "Psycle.hpp"
 #include "XMSampler.hpp"

@@ -1,4 +1,4 @@
-#include <psycle/project.private.hpp>
+
 #include "internal_machines.hpp"
 #include "Configuration.hpp"
 #include "Song.hpp"

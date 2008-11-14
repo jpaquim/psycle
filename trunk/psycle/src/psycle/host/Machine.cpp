@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
-#include <psycle/project.private.hpp>
+
 #include "Machine.hpp"
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
 // in a different way

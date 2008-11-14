@@ -3,7 +3,7 @@
 // http://www.codeproject.com/combobox/cexlistboc.asp
 //
 
-#include <psycle/project.private.hpp>
+
 #include "ExListBox.h"
 #include "Psycle.hpp"
 #include "MainFrm.hpp"
