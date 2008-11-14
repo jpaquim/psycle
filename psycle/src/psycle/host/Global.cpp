@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Global.
-#include <psycle/project.private.hpp>
+
 #include "Global.hpp"
 #include "Song.hpp"
 #include "Player.hpp"

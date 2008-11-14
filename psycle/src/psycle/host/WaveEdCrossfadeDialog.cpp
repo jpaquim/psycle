@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdCrossfadeDialog.
-#include <psycle/project.private.hpp>
+
 #include "WaveEdCrossfadeDialog.hpp"
 #include "Psycle.hpp"
 #include "Helpers.hpp"

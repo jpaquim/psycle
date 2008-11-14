@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
-#include <psycle/project.private.hpp>
+
 #include "Psycle.hpp"
 
 #if !defined WINAMP_PLUGIN

@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::WinampDriver.
-#include <psycle/project.private.hpp>
+
 #include "WinampDriver.hpp"
 #include "../../Player.hpp"
 #include "../../Helpers.hpp"

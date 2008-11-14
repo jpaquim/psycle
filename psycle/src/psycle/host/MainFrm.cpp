@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
-#include <psycle/project.private.hpp>
+
 #include "MainFrm.hpp"
 #include "Psycle.hpp"
 #include "WavFileDlg.hpp"

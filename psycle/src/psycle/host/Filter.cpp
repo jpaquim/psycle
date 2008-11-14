@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Filter.
-#include <psycle/project.private.hpp>
+
 #include "Filter.hpp"
 namespace psycle
 {

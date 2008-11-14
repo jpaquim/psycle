@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
-#include <psycle/project.private.hpp>
+
 #include <universalis/operating_system/paths.hpp>
 #include <direct.h>
 #include "NewMachine.hpp"

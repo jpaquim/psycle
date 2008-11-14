@@ -3,7 +3,7 @@
  *  $Date: 2008-02-12 00:44:11 +0100 (mar, 12 feb 2008) $
  *  $Revision: 6303 $
  */
-#include <psycle/project.private.hpp>
+
 #include "XMSongExport.hpp"
 //#include "ProgressDialog.hpp"
 #include "Song.hpp"

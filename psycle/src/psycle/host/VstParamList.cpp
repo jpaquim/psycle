@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstParamList.
-#include <psycle/project.private.hpp>
+
 #include "VstParamList.hpp"
 #include "Psycle.hpp"
 #include "VstHost24.hpp"

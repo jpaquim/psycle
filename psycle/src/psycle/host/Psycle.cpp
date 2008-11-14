@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
 #define _WIN32_DCOM
-#include <psycle/project.private.hpp>
+
 #include "Psycle.hpp"
 #include "Version.hpp"
 #include "ConfigDlg.hpp"

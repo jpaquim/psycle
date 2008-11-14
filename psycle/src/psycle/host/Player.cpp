@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::Player.
-#include <psycle/project.private.hpp>
+
 #include "Player.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"

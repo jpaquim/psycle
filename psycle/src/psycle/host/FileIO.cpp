@@ -26,7 +26,7 @@
 
 ///\file
 ///\brief implementation file for psycle::host::RiffFile.
-#include <psycle/project.private.hpp>
+
 #include "FileIO.hpp"
 namespace psycle
 {

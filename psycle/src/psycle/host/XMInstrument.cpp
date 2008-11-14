@@ -4,7 +4,7 @@
  *  $Revision$
  */
 
-#include <psycle/project.private.hpp>
+
 #include "XMInstrument.hpp"
 #include "Configuration.hpp"
 //#include "IPsySongLoader.h"

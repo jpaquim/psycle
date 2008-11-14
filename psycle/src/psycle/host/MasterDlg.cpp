@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CMasterDlg.
-#include <psycle/project.private.hpp>
+
 #include "MasterDlg.hpp"
 #include "Psycle.hpp"
 #include "ChildView.hpp"

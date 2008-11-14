@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
-#include <psycle/project.private.hpp>
+
 #include "ChildView.hpp"
 #include "Version.hpp"
 #include "Psycle.hpp"

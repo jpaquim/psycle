@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdAmplifyDialog.
-#include <psycle/project.private.hpp>
+
 #include "WaveEdAmplifyDialog.hpp"
 #include "Psycle.hpp"
 #include "Helpers.hpp"

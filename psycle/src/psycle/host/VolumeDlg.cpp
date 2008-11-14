@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CVolumeDlg.
-#include <psycle/project.private.hpp>
+
 #include "VolumeDlg.hpp"
 #include "Psycle.hpp"
 #include <cmath>

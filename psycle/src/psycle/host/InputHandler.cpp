@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::InputHandler.
-#include <psycle/project.private.hpp>
+
 #include "InputHandler.hpp"
 #include "Version.hpp"
 #include "MainFrm.hpp"
