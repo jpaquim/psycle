@@ -54,25 +54,21 @@ namespace psycle
 			Free();
 		}
 
-		// tmp hack
-		// we might have DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT wrongly defined
-		// we need to undefine it for w98-compatibility
-		#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-			namespace boost
-			{
-				namespace filesystem
-				{
+		#if 1 /* <bohan> i'm really not sure about the origin of the problem so i prefer to add the work around unconditionally */ || \
+			defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && \
+			defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__MSDOS
+			
+			// dos/win9x needs a work around for boost::filesystem::equivalent
+			// Or could that actually simply be due to FAT filesystems?
+			// If that's FAT that's not working, we may encounter problems even on NT (or unices?)
+			// since people still use FAT partitions on USB keys etc.
+			
+			namespace boost { namespace filesystem {
 					using namespace ::boost::filesystem;
-					/// blergh, dos/win9x needs a work around for boost::filesystem::equivalent
-					bool equivalent(path const & path1, path const & path2)
-					{
-						class unique
-						{
+					bool equivalent(path const & path1, path const & path2) {
+						class unique {
 							public:
-								path operator()(path const & input)
-								{
+								path operator()(path const & input) {
 									std::string s((input.is_complete() ? input : current_path() / input).string());
 									std::transform(s.begin(), s.end(), s.begin(), std::tolower);
 									return path(s, no_check);
@@ -80,8 +76,7 @@ namespace psycle
 						} unique;
 						return unique(path1) == unique(path2);
 					}
-				}
-			}
+			}}
 		#endif
 
 		void Plugin::Instance(std::string file_name)

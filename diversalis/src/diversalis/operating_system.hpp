@@ -19,19 +19,19 @@
 	/// the posix standard, autodetected.
 	#define DIVERSALIS__OPERATING_SYSTEM__POSIX
 	#undef DIVERSALIS__OPERATING_SYSTEM__POSIX // was just defined to insert documentation.
-	
+
 	/// gnu operating system, autodetected.
 	#define DIVERSALIS__OPERATING_SYSTEM__GNU
 	#undef DIVERSALIS__OPERATING_SYSTEM__GNU // was just defined to insert documentation.
 
 	/// mach kernel.
 	#define DIVERSALIS__OPERATING_SYSTEM__MACH
-	#undef DIVERSALIS__OPERATING_SYSTEM__MACH // was just defined to insert documentation.   
+	#undef DIVERSALIS__OPERATING_SYSTEM__MACH // was just defined to insert documentation.
 
 	/// hurd kernel, \see DIVERSALIS__OPERATING_SYSTEM__MACH.
 	#define DIVERSALIS__OPERATING_SYSTEM__HURD
 	#undef DIVERSALIS__OPERATING_SYSTEM__HURD // was just defined to insert documentation.
-	
+
 	/// linux kernel, autodetected via __linux__.
 	#define DIVERSALIS__OPERATING_SYSTEM__LINUX
 	#undef DIVERSALIS__OPERATING_SYSTEM__LINUX // was just defined to insert documentation.
@@ -42,7 +42,7 @@
 
 	/// darwin/mach kernel, \see DIVERSALIS__OPERATING_SYSTEM__MACH and \see DIVERSALIS__OPERATING_SYSTEM__BSD, and for apple's darwin/macos \see DIVERSALIS__OPERATING_SYSTEM__APPLE.
 	#define DIVERSALIS__OPERATING_SYSTEM__DARWIN
-	#undef DIVERSALIS__OPERATING_SYSTEM__DARWIN // was just defined to insert documentation.   
+	#undef DIVERSALIS__OPERATING_SYSTEM__DARWIN // was just defined to insert documentation.
 
 	/// apple's macosx darwin mach/bsd kernel. \see DIVERSALIS__OPERATING_SYSTEM__DARWIN.
 	#define DIVERSALIS__OPERATING_SYSTEM__APPLE
@@ -86,12 +86,12 @@
 	///\{
 		/// indicates the target microsoft's windows operating system branch is nt.
 		/// "2000" is v5.0, "xp" is v5.1, "2003" is v?.?, "vista" is v?.?
-		#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
-		#undef DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT // was just defined to insert documentation.
+		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+		#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT // was just defined to insert documentation.
 		/// indicates the target microsoft's windows operating system branch is msdos-based (branded "'95", "'98", "millenium").
 		/// "'95" is v4.0 (conflicts with nt!), "'98" is v4.1, "millenium" is v?.?
-		#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__DOS
-		#undef DIVERSALIS__OPERATING_SYSTEM__BRANCH__DOS // was just defined to insert documentation.
+		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__DOS
+		#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__DOS // was just defined to insert documentation.
 	///\}
 
 	/// If defined, prefers to use crossplatforms libraries when choice is available.
@@ -196,35 +196,53 @@
 #elif defined _WIN64 || defined _WIN32
 	#define DIVERSALIS__OPERATING_SYSTEM
 	#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+
 	//////////////////
 	// WINVER
 	// _WIN32_WINDOWS
 	// _WIN32_NT
 	//////////////////
 
+	//////////////////
 	// read the configuration
 
-	#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH
-		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-	#endif
-	// patch => minor
+	// logic constraint: if patch is defined, minor must be defined too.
 	#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH
 		#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
 			#error "if you set the patch number, you must also set the minor number."
 		#endif
 	#endif
-	// minor => major
+
+	// logic constraint: if minor is defined, major must be defined too.
 	#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
 		#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
 			#error "if you set the minor number, you must also set the major number."
 		#endif
 	#endif
-	// set version 5 by default
+
+	// default version: set version 5 by default
 	#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
 		#define DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR 5
 	#endif
 
-	// set the compatibility selection macro accordingly
+	// branch: nt or msdos
+	#if \
+		defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT && \
+		defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__MSDOS
+		#error "you must choose either the nt or the msdos branch, you can't have both!
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__MSDOS
+		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH
+	#else
+		// default branch: choose nt by default
+		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH
+		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
+	#endif
+
+
+	//////////////////
+	// set the compatibility selection macros (WINVER, _WIN32_WINDOWS, _WIN32_NT) accordingly
 
 	#if defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR
 		#if !defined DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR
@@ -235,34 +253,32 @@
 			#define DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH 0
 		#endif
 
-		#define DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW \
+		#define DIVERSALIS__OPERATING_SYSTEM__VERSION \
 			( \
 				DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR * 0x100 + \
 				DIVERSALIS__OPERATING_SYSTEM__VERSION__MINOR * 0x10 + \
 				DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH \
 			)
 
+		// WINVER
 		#if !defined WINVER
-			#define WINVER DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW
-		#elif WINVER < DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW
+			#define WINVER DIVERSALIS__OPERATING_SYSTEM__VERSION
+		#elif WINVER < DIVERSALIS__OPERATING_SYSTEM__VERSION
 			#error "WINVER too low."
 		#endif
 
+		// _WIN32_WINDOWS
 		#if !defined _WIN32_WINDOWS
 			#define _WIN32_WINDOWS WINVER
-		#elif _WIN32_WINDOWS < DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW
+		#elif _WIN32_WINDOWS < DIVERSALIS__OPERATING_SYSTEM__VERSION
 			#error "_WIN32_WINDOWS too low."
 		#endif
 
-		#if !defined DIVERSALIS__OPERATING_SYSTEM__BRANCH && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-			#define DIVERSALIS__OPERATING_SYSTEM__BRANCH
-			#define DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
-		#endif
-
-		#if 1 || defined DIVERSALIS__OPERATING_SYSTEM__BRANCH__NT
+		// _WIN32_WINNT
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 			#if !defined _WIN32_WINNT
 				#define _WIN32_WINNT WINVER
-			#elif _WIN32_WINNT < DIVERSALIS__OPERATING_SYSTEM__VERSION__WANTED_RAW
+			#elif _WIN32_WINNT < DIVERSALIS__OPERATING_SYSTEM__VERSION
 				#error "_WIN32_WINNT too low."
 			#endif
 		#endif
