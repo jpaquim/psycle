@@ -1,13 +1,13 @@
 ///\interface psycle native plugin interface api
 
+#ifndef PSYCLE__PLUGIN_INTERFACE_HPP
+#define PSYCLE__PLUGIN_INTERFACE_HPP
 #pragma once
 
 // *** Note ***
 // Because this file may be used outside of the psycle project itself,
 // we should not introduce any dependency by including
 // anything that is not part of the c++ standard library.
-
-#include <cstdio> // This is NOT part of the interface. It would be better if plugins that want it included it themselves.
 
 namespace psycle
 {
@@ -115,6 +115,7 @@ namespace psycle
 		/*////////////////////////////////////////////////////////////////////////*/
 
 		/// callback functions to let plugins communicate with the host.
+		/// DO NOT CHANGE the order of the functions. This is an exported class!
 		class CFxCallback
 		{
 			public:
@@ -130,16 +131,18 @@ namespace psycle
 				virtual int GetTPB() { return 4; }
 				// Don't get fooled by the above return values.
 				// You get a pointer to a subclass of this one that returns the correct ones.
-				virtual inline ~CFxCallback() throw() {}
+				virtual ~CFxCallback() throw() {}
 		};
 
 		/*////////////////////////////////////////////////////////////////////////*/
 		
-		/// base machine class
+		/// base machine class from which plugins derived.
+		/// Note: We keep empty definitions of the functions in the header so that
+		/// plugins don't need to implement everything nor link with a default implementation.
 		class CMachineInterface
 		{
 			public:
-				virtual inline ~CMachineInterface() {}
+				virtual ~CMachineInterface() {}
 				///\todo doc
 				virtual void Init() {}
 				///\todo doc
@@ -166,17 +169,17 @@ namespace psycle
 				///\todo doc
 				virtual void Command() {}
 				///\todo doc. not used (yet?)
-				virtual void MuteTrack(int const) {}
+				virtual void MuteTrack(int /*track*/) {}
 				///\todo doc. not used (yet?)
-				virtual bool IsTrackMuted(int const) const { return false; }
+				virtual bool IsTrackMuted(int /*track*/) const { return false; }
 				///\todo doc. not used (yet?)
-				virtual void MidiNote(int const /*channel*/, int const /*value*/, int const /*velocity*/) {}
+				virtual void MidiNote(int /*channel*/, int /*value*/, int /*velocity*/) {}
 				///\todo doc. not used (yet?)
 				virtual void Event(uint32 const /*data*/) {}
 				///\todo doc
-				virtual bool DescribeValue(char * /*txt*/, int const /*param*/, int const /*value*/) { return false; }
+				virtual bool DescribeValue(char * /*txt*/, int /*param*/, int /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
-				virtual bool PlayWave(int const /*wave*/, int const /*note*/, float const /*volume*/) { return false; }
+				virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
 				///\todo doc
 				virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
 				///\todo doc. not used (prolly never)
@@ -184,7 +187,7 @@ namespace psycle
 
 			public:
 				/// initialize these members in the constructor
-				int *Vals;
+				int * Vals;
 
 				/// callback.
 				/// This member is initialized by the engine right after it calls CreateMachine().
@@ -280,3 +283,5 @@ using psycle::plugin_interface::CFxCallback;
 using psycle::plugin_interface::uint8; // deprecated anyway
 using psycle::plugin_interface::uint16; // deprecated anyway
 using psycle::plugin_interface::uint32; // deprecated anyway
+#endif
+#include <cstdio> // This is NOT part of the interface. It would be better if plugins that want it included it themselves.
