@@ -221,7 +221,8 @@
 	#if defined _CPPRTTI // defined for code compiled with -GR (Enable Run-Time Type Information).
 		#define DIVERSALIS__COMPILER__FEATURE__RTTI
 	#else
-		#error please enable rtti
+		// is _CPPRTTI defined in msvc8?
+		//#error please enable rtti
 	#endif
 
 	#if defined _CPPUNWIND // defined for code compiled with -GX (Enable Exception Handling).
