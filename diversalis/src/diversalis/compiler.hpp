@@ -228,7 +228,8 @@
 	#if defined _CPPUNWIND // defined for code compiled with -GX (Enable Exception Handling).
 		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
 	#else
-		#error please enable exception handling
+		// is _CPPUNWIND defined in msvc8?
+		//#error please enable exception handling
 	#endif
 
 	////////////////////
