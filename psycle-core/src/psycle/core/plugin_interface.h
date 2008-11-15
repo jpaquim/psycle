@@ -1,7 +1,7 @@
 ///\interface psycle native plugin interface api
 
-#ifndef PSYCLE__PLUGIN_INTERFACE_H
-#define PSYCLE__PLUGIN_INTERFACE_H
+#ifndef PSYCLE__PLUGIN_INTERFACE_HPP
+#define PSYCLE__PLUGIN_INTERFACE_HPP
 #pragma once
 
 // *** Note ***
@@ -83,18 +83,22 @@ namespace psycle
 		class CMachineInfo
 		{
 		public:
-			int Version;
-			int Flags;
-			int numParameters;
-			CMachineParameter const **Parameters;
+			/// ...
+			int const Version;
+			/// ...
+			int const Flags;
+			/// number of parameters
+			int const numParameters;
+			/// a pointer to an array of pointers to parameter infos
+			CMachineParameter const * const * const Parameters;
 			/// "Rambo Delay"
-			char const *Name;
+			char const * const Name;
 			/// "Delay"
-			char const *ShortName;
+			char const * const ShortName;
 			/// "John Rambo"
-			char const *Author;
+			char const * const Author;
 			/// "About"
-			char const *Command;
+			char const * const Command;
 			/// number of columns
 			int numCols;
 		};
@@ -115,8 +119,8 @@ namespace psycle
 		class CFxCallback
 		{
 			public:
-				virtual void MessBox(char const * ptxt, char const * caption, unsigned int type) = 0;
-				virtual int CallbackFunc(int cbkID,int par1,int par2,int par3) = 0;
+				virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) = 0;
+				virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, int /*par3*/) = 0;
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
 				virtual float * unused0(int, int) = 0;
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
@@ -128,7 +132,7 @@ namespace psycle
 				virtual ~CFxCallback() throw() {} // a dtor cannot be made pure virtual
 		};
 
-		/* //////////////////////////////////////////////////////////////////////// */
+		/*////////////////////////////////////////////////////////////////////////*/
 		
 		/// base machine class from which plugins derived.
 		/// Note: We keep empty definitions of the functions in the header so that
@@ -145,7 +149,7 @@ namespace psycle
 				virtual void ParameterTweak(int /*par*/, int /*val*/) {}
 
 				/// Work function
-				virtual void Work(float* /*psamplesleft*/, float* /*psamplesright*/ , int /*numsamples*/, int /*tracks*/) {}
+				virtual void Work(float * /*psamplesleft*/, float * /*psamplesright*/, int /*numsamples*/, int /*tracks*/) {}
 
 				///\todo doc
 				virtual void Stop() {}
@@ -167,11 +171,11 @@ namespace psycle
 				///\todo doc. not used (yet?)
 				virtual bool IsTrackMuted(int /*track*/) const { return false; }
 				///\todo doc. not used (yet?)
-				virtual void MidiNote(int const /*channel*/, int /*value*/, int /*velocity*/) {}
+				virtual void MidiNote(int /*channel*/, int /*value*/, int /*velocity*/) {}
 				///\todo doc. not used (yet?)
 				virtual void Event(uint32 const /*data*/) {}
 				///\todo doc
-				virtual bool DescribeValue(char* /*txt*/, int /*param*/, int /*value*/) { return false; }
+				virtual bool DescribeValue(char * /*txt*/, int /*param*/, int /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
 				virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
 				///\todo doc
@@ -210,7 +214,7 @@ namespace psycle
 					PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
 					void \
 					PSYCLE__PLUGIN__CALLING_CONVENTION \
-					PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE(::CMachineInterface & plugin) { delete &plugin; } \
+					PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE(psycle::plugin_interface::CMachineInterface & plugin) { delete &plugin; } \
 				}
 
 			#define PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO GetInfo
@@ -239,14 +243,14 @@ namespace psycle
 			typedef
 				psycle::plugin_interface::CMachineInfo const * const
 				(PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
-				();
+				(void);
 			
 			const char create_machine_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE);
 			typedef
 				psycle::plugin_interface::CMachineInterface *
 				(PSYCLE__PLUGIN__CALLING_CONVENTION * create_machine_function)
-				();
+				(void);
 
 			const char delete_machine_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE);
@@ -260,19 +264,11 @@ namespace psycle
 
 // for plugins that aren't namespace-aware
 using psycle::plugin_interface::MI_VERSION;
-#if !defined(PSYCLE__CONSTANTS)
-	using psycle::plugin_interface::MAX_TRACKS;
-#else
-	using psy::core::MAX_TRACKS;
-#endif
+using psycle::plugin_interface::MAX_TRACKS;
 using psycle::plugin_interface::NOTE_MAX;
 using psycle::plugin_interface::NOTE_NO;
 using psycle::plugin_interface::NOTE_OFF;
-#if !defined(PSYCLE__CONSTANTS)
-	using psycle::plugin_interface::MAX_BUFFER_LENGTH;
-#else
-	using psy::core::MAX_BUFFER_LENGTH;
-#endif
+using psycle::plugin_interface::MAX_BUFFER_LENGTH;
 using psycle::plugin_interface::CMachineInfo;
 using psycle::plugin_interface::GENERATOR;
 using psycle::plugin_interface::EFFECT;
@@ -286,4 +282,3 @@ using psycle::plugin_interface::uint8; // deprecated anyway
 using psycle::plugin_interface::uint16; // deprecated anyway
 using psycle::plugin_interface::uint32; // deprecated anyway
 #endif
-
