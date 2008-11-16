@@ -71,9 +71,9 @@ class audacity_phaser : public CMachineInterface {
 
 	private:
 		unsigned int const static MAX_STAGES = 24;
-		float const static phaser_lfo_shape = 4.0f;
+		float const static phaser_lfo_shape;
 		/// how many samples are processed before compute the lfo value again
-		unsigned int const static lfo_skip_samples = 20;
+		unsigned int const static lfo_skip_samples;
 		
 		float freq;
 		float startphase;
@@ -84,7 +84,8 @@ class audacity_phaser : public CMachineInterface {
 
 		// state variables
 		unsigned long skipcount;
-		float old_l[MAX_STAGES], old_r[MAX_STAGES];
+		float old_l[MAX_STAGES];
+		float old_r[MAX_STAGES];
 		float gain_l, gain_r;
 		float fbout_l, fbout_r;
 		float lfoskip;
@@ -92,6 +93,10 @@ class audacity_phaser : public CMachineInterface {
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(audacity_phaser, audacity_phaser_info)
+
+float const audacity_phaser::phaser_lfo_shape = 4.0f;
+/// how many samples are processed before compute the lfo value again
+unsigned int const audacity_phaser::lfo_skip_samples = 20;
 
 audacity_phaser::audacity_phaser() {
 	Vals = new int[sizeof audacity_phaser_parameters / sizeof *audacity_phaser_parameters];
