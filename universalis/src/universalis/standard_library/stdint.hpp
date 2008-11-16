@@ -18,7 +18,10 @@
 	#if defined DIVERSALIS__OPERATING_SYSTEM__UNIX
 		#include <inttypes.h>
 	#endif
+
 #else
+	// see also http://www.azillionmonkeys.com/qed/pstdint.h
+
 	// boost takes care of all the mess for us
 	#include <boost/cstdint.hpp>
 	namespace std {
