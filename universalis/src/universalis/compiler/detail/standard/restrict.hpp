@@ -14,7 +14,7 @@
 #if defined DIVERSALIS__COMPILER__GNU
 	#define restrict __restrict__
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
-	// does this really work on msvc8?
+	// With msvc, the __restrict keyword works on pointers, but not on C++ references :-(
 	#define restrict //__restrict
 #else
 	#define restrict
