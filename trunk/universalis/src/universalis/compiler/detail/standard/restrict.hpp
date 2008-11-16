@@ -14,7 +14,8 @@
 #if defined DIVERSALIS__COMPILER__GNU
 	#define restrict __restrict__
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
-	#define restrict __restrict
+	// does this really work on msvc8?
+	#define restrict //__restrict
 #else
 	#define restrict
 #endif
