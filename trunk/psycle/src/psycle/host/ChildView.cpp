@@ -98,6 +98,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,UndoMacSaved(0)
 			,patBufferLines(0)
 			,patBufferCopy(false)
+#ifdef use_test_canvas
+			,machine_view_(this, Global::_pSong)
+#endif
 		{
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
@@ -119,6 +122,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
+#ifdef use_test_canvas
+			machine_view_.Rebuild();
+#endif
 		}
 
 		CChildView::~CChildView()
@@ -501,6 +507,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				oldbmp = bufDC.SelectObject(bmpDC);
 				if (viewMode==view_modes::machine)	// Machine view paint handler
 				{
+#ifdef use_test_canvas
+					CRect rc;
+					GetClientRect(&rc);
+					machine_view_.Draw(&bufDC, rc); 
+#else
 					switch (updateMode)
 					{
 					case draw_modes::all:
@@ -523,6 +534,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						DrawAllMachineVumeters(&bufDC);
 						break;
 					}
+#endif
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{
@@ -2194,6 +2206,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
 */
 			}
+#ifdef use_test_canvas
+			machine_view_.Rebuild();
+#endif
 		}
 
 		void CChildView::CallOpenRecent(int pos)

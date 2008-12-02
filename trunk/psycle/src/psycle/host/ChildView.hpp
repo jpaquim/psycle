@@ -1,10 +1,19 @@
 ///\file
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
+
+//#define use_test_canvas
+
 #include "Song.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
+#include "machineview.hpp"
+#include "machinegui.hpp"
 #include "mfc_namespace.hpp"
+
+
+
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -133,22 +142,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int drawLineStart;
 			int drawLineEnd;
 		};
-
-		class SSkinSource
-		{
-		public:
-			int x;
-			int y;
-			int width;
-			int height;
-		};
-
-		class SSkinDest
-		{
-		public:
-			int x;
-			int y;
-		};
+	
 
 		class SPatternHeaderCoords
 		{
@@ -167,36 +161,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			COLORREF cTransparency;
 		};
 
-		class SMachineCoords
-		{
-		public:
-			SSkinSource sMaster;
-			SSkinSource sGenerator;
-			SSkinSource sGeneratorVu0;
-			SSkinSource sGeneratorVuPeak;
-			SSkinSource sGeneratorPan;
-			SSkinSource sGeneratorMute;
-			SSkinSource sGeneratorSolo;
-			SSkinSource sEffect;
-			SSkinSource sEffectVu0;
-			SSkinSource sEffectVuPeak;
-			SSkinSource sEffectPan;
-			SSkinSource sEffectMute;
-			SSkinSource sEffectBypass;
-			SSkinSource dGeneratorVu;
-			SSkinSource dGeneratorPan;
-			SSkinDest dGeneratorMute;
-			SSkinDest dGeneratorSolo;
-			SSkinDest dGeneratorName;
-			SSkinSource dEffectVu;
-			SSkinSource dEffectPan;
-			SSkinDest dEffectMute;
-			SSkinDest dEffectBypass;
-			SSkinDest dEffectName;
-			BOOL bHasTransparency;
-			COLORREF cTransparency;
-		};
-
+		
 		/// child view window
 		class CChildView : public CWnd
 		{
@@ -416,6 +381,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 
 		private:
+#ifdef use_test_canvas
+			MachineView machine_view_;
+#endif
+
 			// GDI Stuff
 			CBitmap patternheader;
 			CBitmap patternheadermask;
@@ -424,9 +393,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CBitmap machineskinmask;
 			CBitmap machinebkg;
 			HBITMAP hbmMachineSkin;
-			HBITMAP hbmMachineBkg;
-
-			
+			HBITMAP hbmMachineBkg;	
 			HBITMAP hbmMachineDial;
 
 			CBitmap* bmpDC;
