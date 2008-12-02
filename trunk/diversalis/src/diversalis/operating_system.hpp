@@ -229,7 +229,7 @@
 	#if \
 		defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT && \
 		defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__MSDOS
-		#error "you must choose either the nt or the msdos branch, you can't have both!
+		#error "you must choose either the nt or the msdos branch, you can't have both!"
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
 		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__MSDOS
