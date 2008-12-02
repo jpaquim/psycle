@@ -1,5 +1,5 @@
-#include "wiregui.hpp"
-#include "machinegui.hpp"
+#include "WireGui.hpp"
+#include "MachineGui.hpp"
 
 namespace psycle {
 	namespace host {

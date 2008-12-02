@@ -1,7 +1,7 @@
-#include "machinegui.hpp"
-#include "machine.hpp"
-#include "machineview.hpp"
-#include "wiregui.hpp"
+#include "MachineGui.hpp"
+#include "Machine.hpp"
+#include "MachineView.hpp"
+#include "WireGui.hpp"
 
 namespace psycle {
 	namespace host {

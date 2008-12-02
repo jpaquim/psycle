@@ -1,14 +1,11 @@
-#include "machineview.hpp"
+#include "MachineView.hpp"
 #include "Global.hpp"
 #include "Configuration.hpp"
 #include "Song.hpp"
 #include "NativeGui.hpp"
-#include "machine.hpp"
-#include "wiregui.hpp"
-
+#include "Machine.hpp"
+#include "WireGui.hpp"
 #include "MainFrm.hpp"
-
-
 
 namespace psycle {
 	namespace host {
