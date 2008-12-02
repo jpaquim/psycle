@@ -239,6 +239,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (_pSong->_machineLock) return;
 
+#ifdef use_test_canvas
+				TestCanvas::Event ev;
+				ev.type = TestCanvas::Event::BUTTON_PRESS;
+				ev.x = point.x;
+				ev.y = point.y;
+				ev.button = 0;
+				machine_view_.OnEvent(&ev);
+				return;
+#endif
+
 				smac = -1;		smacmode = smac_modes::move;
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
@@ -524,6 +534,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			if (viewMode == view_modes::machine )
 			{
+#ifdef use_test_canvas
+				TestCanvas::Event ev;
+				ev.type = TestCanvas::Event::BUTTON_RELEASE;
+				ev.x = point.x;
+				ev.y = point.y;
+				ev.button = 0;
+				machine_view_.OnEvent(&ev);
+				return;
+#endif
+
 				int propMac = GetMachine(point);
 				if ( propMac != -1)
 				{
@@ -678,6 +698,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (viewMode == view_modes::machine)
 			{
+#ifdef use_test_canvas
+				TestCanvas::Event ev;
+				ev.type = TestCanvas::Event::BUTTON_MOTION;
+				ev.x = point.x;
+				ev.y = point.y;
+				ev.button = 0;
+				machine_view_.OnEvent(&ev);
+				return;
+#endif
+
 				if (smac > -1 && (nFlags & MK_LBUTTON))
 				{
 					if (_pSong->_pMachine[smac])
