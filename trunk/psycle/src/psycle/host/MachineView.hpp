@@ -1,7 +1,7 @@
 #pragma once
 
-#include "canvas.hpp"
-#include "machinegui.hpp"
+#include "Canvas.hpp"
+#include "MachineGui.hpp"
 
 namespace psycle {
 	namespace host {

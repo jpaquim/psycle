@@ -7,8 +7,8 @@
 #include "Song.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
-#include "machineview.hpp"
-#include "machinegui.hpp"
+#include "MachineView.hpp"
+#include "MachineGui.hpp"
 #include "mfc_namespace.hpp"
 
 
