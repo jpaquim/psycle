@@ -68,10 +68,15 @@ namespace psycle {
 						 CBitmap* machinebkg,
 						 HBITMAP hbmMachineSkin,
 						 HBITMAP hbmMachineBkg,
-						 HBITMAP hbmMachineDial);
+						 HBITMAP hbmMachineDial,
+						 const CFont& generator_font,
+						 COLORREF generator_font_color,
+						 const CFont& effect_font,
+						 COLORREF effect_font_color);
 
 			void SetMute(bool mute);
 			void SetSolo(bool mute);
+			void UpdateVU();
 
 			void AttachWire(class WireGui* gui, int point);
 
@@ -88,12 +93,19 @@ namespace psycle {
 			bool TestMute(double x, double y);
 			bool TestSolo(double x, double y);
 			void OnMove();
+			void UpdatePan();
+			void UpdateText();
 			
 			Machine* mac_;
 			//TestCanvas::Rect rect_;
 			TestCanvas::PixBuf pixbuf_;
 			TestCanvas::PixBuf mute_pixbuf_;
 			TestCanvas::PixBuf solo_pixbuf_;
+			TestCanvas::PixBuf pan_pixbuf_;
+			TestCanvas::PixBuf vu_bg_pixbuf_;
+			TestCanvas::PixBuf vu_peak_pixbuf_;
+			TestCanvas::PixBuf vu_led_pixbuf_;
+			TestCanvas::Text text_;
 			double dragging_x_;
 			double dragging_y_;
 			bool dragging_;

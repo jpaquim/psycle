@@ -169,6 +169,7 @@ namespace TestCanvas {
   class PixBuf : public Item {
 	public:
 		PixBuf();
+		PixBuf(Group* parent);
 		PixBuf(Group* parent, double x, double y, CBitmap* image);
 		~PixBuf();
 
@@ -257,9 +258,12 @@ namespace TestCanvas {
     double y() const { return y_; }
 
     void SetColor(double r, double g, double b, double alpha);
-    //void SetFont(const Pango::FontDescription& font) {
-    //  font_ = font;
-    //}
+    void SetFont(const CFont& font) {
+ 	  LOGFONT lf;
+	  const_cast<CFont&>(font).GetLogFont(&lf);
+	  font_.DeleteObject();
+      font_.CreateFontIndirect(&lf);
+    }
 
     virtual void Draw(CDC* cr,
                       const CRgn& repaint_region,
@@ -274,7 +278,7 @@ namespace TestCanvas {
     std::string text_;
     double x_, y_;
     double r_, g_, b_, alpha_;
-    //Pango::FontDescription font_;
+    CFont font_;
     mutable int text_w, text_h;
     mutable bool update_;
     mutable CRgn rgn_;

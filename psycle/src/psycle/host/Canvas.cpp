@@ -16,7 +16,10 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     }
   }
 
-  Item::Item(Group* parent) : parent_(parent), managed_(0), visible_(1) { }
+  Item::Item(Group* parent) : parent_(parent), managed_(0), visible_(1) {
+	assert(parent);
+    parent->Add(this);
+  }
 
   void Item::Draw(CDC* cr,
                   const CRgn& repaint_region,
@@ -51,8 +54,13 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     Group* group = this->parent();
     while ( group && group->parent() )
       group = group->parent();
-      if (group->widget() ) 
-		  group->widget()->parent_->Invalidate(1);
+	if (group && group->widget() ) {
+	  CRgn rgn;
+	  rgn.CreateRectRgn(0, 0, 0, 0);
+	  rgn.CombineRgn(&rgn, &region(), RGN_OR);
+	  rgn.OffsetRgn(parent()->absx(), parent()->absy());
+	  group->widget()->parent_->InvalidateRgn(&rgn,1);
+	}
   }
 
   void Item::InvalidateRegion(CRgn* region) {
@@ -95,9 +103,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
         widget_(0),
         x_(x),
         y_(y) {
-    assert(parent);
-    parent->Add(this);
-	rgn_.CreateRectRgn(0,0,0,0);
+    rgn_.CreateRectRgn(0,0,0,0);
   }
   
   Group::~Group() {
@@ -238,8 +244,10 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     for ( ; it != items_.end(); ++it ) {
       Item* item = *it;
 	  int nCombineResult = rgn.CombineRgn(&rgn, &item->region(), RGN_OR);
-	  if ( nCombineResult == NULLREGION )
+	  if ( nCombineResult == NULLREGION ) {
+	    rgn.DeleteObject();
 		rgn.CreateRectRgn(0, 0, 0, 0);
+	  }
 	}
     rgn.OffsetRgn(x_, y_);
 	rgn_.CopyRgn(&rgn);
@@ -309,8 +317,6 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     g_outline_(0),
     b_outline_(0),
     alpha_outline_(0) {
-    assert(parent);
-    parent->Add(this);
     set_name("rect");
 	rgn_.CreateRectRgn(0,0,0,0);
   }
@@ -329,8 +335,6 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
        b_outline_(0),
        alpha_outline_(0),
        update_(1) {
-    assert(parent);
-    parent->Add(this);
     set_name("rect");
 	rgn_.CreateRectRgn(0,0,0,0);
   }
@@ -428,9 +432,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
         b_(0),
         alpha_(1),
         update_(1) {
-    assert(parent);
-    parent->Add(this);
-	rgn_.CreateRectRgn(0,0,0,0);
+    rgn_.CreateRectRgn(0,0,0,0);
   }
 
   
@@ -442,8 +444,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     for ( ; it != pts_.end(); ++it ) {
       const std::pair<double, double>& pt = (*it);
       if ( first) {
-        //cr->set_source_rgba(r_, g_, b_, alpha_);  
-		COLORREF cref = RGB(r_ * 255, g_* 255, b_ * 255); 
+        COLORREF cref = RGB(r_ * 255, g_* 255, b_ * 255); 
 		cr->SetDCPenColor(cref);
 		cr->MoveTo(pt.first, pt.second);
         first = false;
@@ -589,37 +590,49 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
         g_(0),
         b_(0),
         alpha_(1),
-//        font_("Tahoma 8"),
         update_(true) {
-    set_name("text");
+	LOGFONT lfLogFont;
+	memset(&lfLogFont, 0, sizeof(lfLogFont));
+	lfLogFont.lfHeight = 12;
+	strcpy(lfLogFont.lfFaceName, "Arial");
+	font_.CreateFontIndirect(&lfLogFont);
+	rgn_.CreateRectRgn(0, 0, 0, 0);
   }
 
   Text::Text(Group* parent)
-      : x_(0),
+      : Item(parent),
+        x_(0),
         y_(0),
         r_(0),
         g_(0),
         b_(0),
         alpha_(1),
-//        font_("Tahoma 8"),
-	update_(true) {
+		update_(true) {
     set_name("text");
-    assert(parent);
-    parent->Add(this);
+	LOGFONT lfLogFont;
+	memset(&lfLogFont, 0, sizeof(lfLogFont));
+	lfLogFont.lfHeight = 12;
+	strcpy(lfLogFont.lfFaceName, "Arial");
+	font_.CreateFontIndirect(&lfLogFont);
+	rgn_.CreateRectRgn(0, 0, 0, 0);
   }
 
   Text::Text(Group* parent, const std::string& text)
-       : text_(text),
+       : Item(parent),
+		 text_(text),
          x_(0),
          y_(0),
          r_(0),
          g_(0),
          b_(0),
          alpha_(1),
-//         font_("Tahoma 8"),
-    update_(true) {
-    assert(parent);
-    parent->Add(this);
+		 update_(true) {
+	LOGFONT lfLogFont;
+	memset(&lfLogFont, 0, sizeof(lfLogFont));
+	lfLogFont.lfHeight = 12;
+	strcpy(lfLogFont.lfFaceName, "Arial");
+	font_.CreateFontIndirect(&lfLogFont);
+	rgn_.CreateRectRgn(0, 0, 0, 0);
   }
 
   void Text::SetColor(double r, double g, double b, double alpha) {
@@ -635,17 +648,24 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   }
 
   void Text::UpdateValues() const {
-  /*  const Group* group = this->parent();
+   const Group* group = this->parent();
     while ( group && group->parent() )
       group = group->parent();
     if (group->widget() ) {
-      Canvas* tmp = const_cast<Canvas*>(group->widget());
-      Glib::RefPtr<Pango::Layout> pangolayout = tmp->create_pango_layout(text_);
-      pangolayout->set_font_description(font_);
-      pangolayout->get_pixel_size(text_w, text_h);
-      rgn_ = Gdk::Region(Gdk::Rectangle(x_,y_,text_w,text_h));
+	  HDC dc = GetDC(0);
+	  SIZE extents = {0};
+	  HFONT old_font =
+      reinterpret_cast<HFONT>(SelectObject(dc, font_));
+      GetTextExtentPoint32(dc, text_.c_str(), text_.length(),
+						   &extents); 
+	  SelectObject(dc, old_font);
+	  ReleaseDC(0,dc);
+	  text_w = extents.cx;
+	  text_h = extents.cy;
+	  rgn_.DeleteObject();
+	  rgn_.CreateRectRgn(x_, y_, x_ + text_w, y_ + text_h);
       update_ = false;
-    }*/
+    }
   }
 
   void Text::GetBounds(double& x1, double& y1, double& x2, double& y2) const {
@@ -663,21 +683,33 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     return rgn_;
   }
 
-  void Text::Draw(CDC* cr,                      
+  void Text::Draw(CDC* devc,                      
                   const CRgn& repaint_region,
                   Canvas* widget) {
-    /*Glib::RefPtr<Pango::Layout> pangolayout;
-    pangolayout = widget->create_pango_layout(text_);
-    pangolayout->set_font_description(font_);
-    int text_w, text_h;
-    pangolayout->get_pixel_size(text_w, text_h);
-    cr->move_to(x_, y_);
-    cr->set_source_rgba(r_, g_, b_, alpha_);
-    pango_cairo_show_layout(cr->cobj(), pangolayout->gobj());*/
+    CFont* oldFont= devc->SelectObject(&font_);
+	devc->SetBkMode(TRANSPARENT);
+    COLORREF cref = RGB(r_ * 255, g_* 255, b_ * 255); 
+	devc->SetTextColor(cref);
+	devc->TextOut(x_, y_, text_.c_str());
+	devc->SetBkMode(OPAQUE);
+	devc->SelectObject(oldFont);
   }
 
   PixBuf::PixBuf()
 	  : image_(0),
+		x_(0),
+		y_(0),
+		width_(0),
+		height_(0),
+		xsrc_(0),
+		ysrc_(0)
+  {
+	  rgn_.CreateRectRgn(0, 0, 0, 0);
+  }
+
+  PixBuf::PixBuf(Group* parent)
+	  : Item(parent),
+		image_(0),
 		x_(0),
 		y_(0),
 		width_(0),
