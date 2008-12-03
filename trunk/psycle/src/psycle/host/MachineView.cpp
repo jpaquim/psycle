@@ -25,6 +25,14 @@ namespace psycle {
 		void MachineView::SetSolo(Machine* tmac) {
 		}
 
+		void MachineView::UpdateVUs()
+		{
+			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
+			for ( ; it != gui_map_.end(); ++it ) {
+				(*it).second->UpdateVU();
+			}
+		}
+
 		void MachineView::Rebuild()
 		{
 			root()->Clear();
@@ -40,7 +48,11 @@ namespace psycle {
 								 &machinebkg,
 								 hbmMachineSkin,
 								 hbmMachineBkg,
-								 hbmMachineDial );
+								 hbmMachineDial,
+								 Global::pConfig->generatorFont,
+								 Global::pConfig->mv_generator_fontcolour,
+								 Global::pConfig->effectFont,
+								 Global::pConfig->mv_effect_fontcolour);
 					if ( song_->_pMachine[idx]->_mute )
 						gui->SetMute(true);
 					else if (song_->machineSoloed == idx)

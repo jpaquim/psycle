@@ -14,6 +14,7 @@ namespace psycle {
 
 			void Rebuild();
 			void SetSolo(Machine* mac);
+			void UpdateVUs();
 
 		private:
 			void InitSkin();
