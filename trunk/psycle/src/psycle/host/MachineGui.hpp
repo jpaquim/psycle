@@ -80,6 +80,9 @@ namespace psycle {
 
 			void AttachWire(class WireGui* gui, int point);
 
+			MachineView* view();
+			Machine* mac() { return mac_; };
+
 		private:		
 			void dragging_start(double x, double y);
 			void dragging(double x, double y);
@@ -97,6 +100,7 @@ namespace psycle {
 			void UpdateText();
 			
 			Machine* mac_;
+			MachineView* view_;
 			//TestCanvas::Rect rect_;
 			TestCanvas::PixBuf pixbuf_;
 			TestCanvas::PixBuf mute_pixbuf_;
@@ -120,7 +124,7 @@ namespace psycle {
 			HBITMAP hbmMachineDial_;	
 			SMachineCoords	MachineCoords_;
 		};
+		
 
-	}
-}
-
+	}  // namespace host
+}  // namespace psycle
