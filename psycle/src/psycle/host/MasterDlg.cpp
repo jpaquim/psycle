@@ -32,6 +32,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			memset(macname,0,sizeof(macname));
 		}
 
+
+		CMasterDlg::~CMasterDlg()
+		{
+#ifdef use_test_canvas
+			m_pParent->MasterMachineDialog = NULL;
+			m_back.DeleteObject();
+			m_numbers.DeleteObject();
+			m_sliderknob.DeleteObject();
+#endif
+		}
+
+
+
+
 		void CMasterDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
@@ -260,12 +274,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMasterDlg::OnCancel()
 		{
+#ifdef use_test_canvas
+			CDialog::OnCancel();
+#else
 			m_pParent->MasterMachineDialog = NULL;
 			m_back.DeleteObject();
 			m_numbers.DeleteObject();
 			m_sliderknob.DeleteObject();
 			DestroyWindow();
 			delete this;
+#endif
 		}
 
 		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 

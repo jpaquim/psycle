@@ -10,6 +10,7 @@ namespace psycle {
 							   Machine* mac) :
 			dragging_(false),
 			TestCanvas::Group(view->root(), mac->_x, mac->_y),
+			view_(view),
 			mac_(mac),
 			pixbuf_(this),
 			mute_pixbuf_(this),
@@ -26,6 +27,11 @@ namespace psycle {
 
 		MachineGui::~MachineGui()
 		{
+		}
+
+		MachineView* MachineGui::view()
+		{
+			return view_;
 		}
 
 		bool MachineGui::OnEvent(TestCanvas::Event* ev)
@@ -326,5 +332,7 @@ namespace psycle {
 				;
 			}
 		}
-	}
-}
+		
+
+	}  // namespace host
+}  // namespace psycle

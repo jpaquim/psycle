@@ -28,6 +28,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			CMasterDlg(CChildView * pParent);
+			~CMasterDlg();
 			BOOL Create();
 			void PaintNumbers(float val, int x, int y);
 			void PaintNumbersDC(CDC* dc,CDC* memDC,float val,int x,int y);

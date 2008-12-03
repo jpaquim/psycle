@@ -1000,7 +1000,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			switch (viewMode)
 			{
 				case view_modes::machine: // User is in machine view mode
-				
+#ifdef use_test_canvas
+				TestCanvas::Event ev;
+				ev.type = TestCanvas::Event::BUTTON_2PRESS;
+				ev.x = point.x;
+				ev.y = point.y;
+				ev.button = 0;
+				machine_view_.OnEvent(&ev);				
+#else
 					tmac = GetMachine(point);
 
 					if(tmac>-1)
@@ -1161,7 +1168,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				
 					break;
-
+#endif
 					////////////////////////////////////////////////////////////////
 
 				case view_modes::pattern: // User is in pattern view mode

@@ -875,7 +875,19 @@ void Canvas::OnEvent(Event* ev) {
 			event.y = ev->y - (parent ? parent->absy() : 0);
 			DelegateEvent(&event, item);
 		}
-	}	
+	}	else
+	if ( ev->type == Event::BUTTON_2PRESS ) {
+		Item* item = button_press_item_ ? button_press_item_ : root_.intersect(ev->x, ev->y);
+		if (item) {
+			Event event;
+			event.type = ev->type;
+			event.button = ev->button;
+		    Group* parent = item->parent();
+			event.x = ev->x - (parent ? parent->absx() : 0);
+			event.y = ev->y - (parent ? parent->absy() : 0);
+			DelegateEvent(&event, item);
+		}
+	}
 }
 
 bool Canvas::DelegateEvent(Event* ev, Item* item) {

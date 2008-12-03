@@ -6,12 +6,15 @@
 #include "Machine.hpp"
 #include "WireGui.hpp"
 #include "MainFrm.hpp"
+#include "NewMachine.hpp"
+#include "Mastergui.hpp"
 
 namespace psycle {
 	namespace host {
 
-		MachineView::MachineView(CWnd* parent, Song* song)
+		MachineView::MachineView(CChildView* parent, Song* song)
 			: TestCanvas::Canvas(parent),
+			  parent_(parent),
 			  song_(song)
 		{
 			set_bg_color(Global::pConfig->mv_colour);
@@ -33,34 +36,92 @@ namespace psycle {
 			}
 		}
 
+		void MachineView::OnEvent(TestCanvas::Event* ev)
+		{
+			TestCanvas::Canvas::OnEvent(ev);
+			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
+				if ( !root()->intersect(ev->x, ev->y) ) {
+					ShowNewMachineDlg();
+				}
+			}
+		}
+
+		void MachineView::ShowNewMachineDlg()
+		{
+			CNewMachine dlg;
+			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0)) {
+				// AddMacViewUndo();
+				int fb,xs,ys;
+				if (dlg.selectedMode == modegen)  {
+					fb = Global::_pSong->GetFreeBus();
+					xs = MachineCoords.sGenerator.width;
+					ys = MachineCoords.sGenerator.height;
+				}	else {
+					fb = Global::_pSong->GetFreeFxBus();
+					xs = MachineCoords.sEffect.width;
+					ys = MachineCoords.sEffect.height;
+				}
+				if ( fb == -1) {
+					// MessageBox("Machine Creation Failed","Error!",MB_OK);
+				}
+				int CW = 1024;
+				int CH = 768;
+				int x = (rand())%(CW-xs);
+				int y = (rand())%(CH-ys);
+				bool created=false;
+				if (Global::_pSong->_pMachine[fb] ) {
+					created = Global::_pSong->ReplaceMachine(Global::_pSong->_pMachine[fb],(MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+				}
+				else  {
+					created = Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+				}
+				if (!created) {
+					// MessageBox("Machine Creation Failed","Error!",MB_OK);
+				} else {
+					Machine* mac = song_->_pMachine[fb];					
+					CreateMachineGui(mac);
+				}
+			}
+		}
+
 		void MachineView::Rebuild()
 		{
 			root()->Clear();
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
 				if (song_->_pMachine[idx]) {
-					MachineGui* gui = new MachineGui(
-					                           this,
-											   song_->_pMachine[idx]);
-					gui_map_[song_->_pMachine[idx]] = gui;
-					gui->SetSkin(MachineCoords,
-								 &machineskin,
-								 &machineskinmask,
-								 &machinebkg,
-								 hbmMachineSkin,
-								 hbmMachineBkg,
-								 hbmMachineDial,
-								 Global::pConfig->generatorFont,
-								 Global::pConfig->mv_generator_fontcolour,
-								 Global::pConfig->effectFont,
-								 Global::pConfig->mv_effect_fontcolour);
-					if ( song_->_pMachine[idx]->_mute )
-						gui->SetMute(true);
-					else if (song_->machineSoloed == idx)
-						gui->SetSolo(true);
-					gui->set_manage(true);
+					CreateMachineGui(song_->_pMachine[idx]);
 				}
 			}
 			BuildWires();
+		}
+
+		void MachineView::CreateMachineGui(Machine* mac) {
+			assert(mac);
+			MachineGui* gui;
+			switch ( mac->_mode ) {
+				case MACHMODE_MASTER:
+					gui = new MasterGui(this, mac);
+				break;
+				default:
+					gui = new MachineGui(this, mac);
+			}
+			gui_map_[mac] = gui;
+			gui->SetSkin(MachineCoords,
+						 &machineskin,
+						 &machineskinmask,
+						 &machinebkg,
+						 hbmMachineSkin,
+						 hbmMachineBkg,
+						 hbmMachineDial,
+						 Global::pConfig->generatorFont,
+						 Global::pConfig->mv_generator_fontcolour,
+						 Global::pConfig->effectFont,
+						 Global::pConfig->mv_effect_fontcolour);
+			if ( mac->_mute )
+				gui->SetMute(true);
+			else if (song_->machineSoloed == mac->_macIndex)
+				gui->SetSolo(true);
+			gui->set_manage(true);
 		}
 
 		void MachineView::BuildWires()

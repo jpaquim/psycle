@@ -5,6 +5,7 @@ namespace TestCanvas {
   struct Event {
 	  enum Type {
 		  BUTTON_PRESS,
+		  BUTTON_2PRESS,
 		  BUTTON_RELEASE,
 		  BUTTON_MOTION
 	  };		
@@ -302,7 +303,7 @@ class Canvas
 
 		void StealFocus(Item* item);
 
-		void OnEvent(Event* ev);
+		virtual void OnEvent(Event* ev);
 
 	private:
 		bool DelegateEvent(Event* event, Item* item);
