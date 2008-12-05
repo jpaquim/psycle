@@ -1,13 +1,17 @@
 #include "WireGui.hpp"
 #include "MachineGui.hpp"
+#include "MachineView.hpp"
 
 namespace psycle {
 	namespace host {
 
-		WireGui::WireGui()	:
+		WireGui::WireGui(MachineView* view)	:
+			TestCanvas::Line(view->root()),
+			view_(view),
 			fromGUI_(0),
 			toGUI_(0),
-			start_(0)
+			start_(0),
+			dragging_(0)
 		{
 			TestCanvas::Line::Points m_points;
 			m_points.push_back(std::pair<double,double>(0, 0));
@@ -19,21 +23,6 @@ namespace psycle {
 		{
 		}
 
-		MachineGui* WireGui::fromGUI() const
-		{
-			return fromGUI_;
-		}
-
-		MachineGui* WireGui::toGUI() const
-		{
-			return toGUI_;
-		}
-
-		MachineGui* WireGui::start() const
-		{
-		  return start_;
-		}
-
 		void WireGui::setGuiConnectors(MachineGui* from,
 									   MachineGui* to,
 									   MachineGui* start)  {
@@ -42,6 +31,50 @@ namespace psycle {
 			start_ = start;
 		}
 
+		void WireGui::dragging_start(int pickpoint)
+		{
+			dragging_ = true;
+			drag_picker_ = pickpoint;
+			GetFocus();
+		}
+
+		void WireGui::dragging(double x, double y) {
+			TestCanvas::Line::Points points(2);
+			if ( drag_picker_ == 1 ) {
+				points[0] = PointAt(0);
+				points[1] = std::pair<double,double>(x, y);
+			} else
+			if ( drag_picker_ == 0 ) {
+				points[1] = PointAt(1);
+				points[0] = std::pair<double,double>(x, y);
+			}
+			SetPoints(points);
+		}
+
+		void WireGui::dragging_stop()
+		{
+			dragging_ = false;
+		}
+
+		bool WireGui::OnEvent(TestCanvas::Event* ev)
+		{
+			switch(ev->type) {
+				case TestCanvas::Event::MOTION_NOTIFY:
+					if(dragging_) {
+						dragging(ev->x, ev->y);
+					}
+				break;
+				case TestCanvas::Event::BUTTON_RELEASE:
+					if(dragging_) {
+ 				       dragging_stop();
+					   view_->OnRewireEnd(this, ev->x, ev->y, drag_picker_);
+					}
+				break;
+				default:
+					;
+			}
+			return true;
+		}
 
 		void WireGui::UpdatePosition()
 		{

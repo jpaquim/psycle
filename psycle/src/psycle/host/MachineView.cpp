@@ -138,7 +138,7 @@ namespace psycle {
 									gui_map_.find(mac);
 								std::map<Machine*, MachineGui*>::iterator toIt = 
 									gui_map_.find(pout);
-								WireGui* wireUi = new WireGui();
+								WireGui* wireUi = new WireGui(this);
 								wireUi->set_manage(true);
 								fromIt->second->AttachWire(wireUi,0);
 								toIt->second->AttachWire(wireUi,1);
@@ -152,6 +152,64 @@ namespace psycle {
 					}
 				}
 			}
+		}
+
+		void MachineView::OnNewConnection(MachineGui* sender)
+		{
+			WireGui* line = new WireGui(this);
+			line->SetStart(sender);
+			double x1, y1, x2, y2;
+			sender->GetBounds( x1, y1, x2, y2);
+			double midW = (x2 - x1) / 2;
+			double midH = (y2 - y1) / 2;
+			TestCanvas::Group* fromParent = sender->parent();
+			double x3, y3, x4, y4;
+			fromParent->GetBounds(x3, y3, x4, y4);
+			double x = x1+x3;
+			double y = y1+y3;
+			TestCanvas::Line::Points points(2);
+			points[0] = std::pair<double, double>(x + midW, y + midH);
+			points[1] = std::pair<double, double>(x + midW, y + midH);
+			line->SetPoints(points);
+			line->dragging_start(1);
+		}
+
+		void MachineView::OnRewireEnd(WireGui* sender,
+									  double x,
+									  double y,
+									  int picker)
+		{
+			MachineGui* connect_to_gui = 0;
+			std::map<Machine*,MachineGui*>::iterator it = gui_map_.begin();
+			for ( ; it != gui_map_.end(); ++it ) {
+				MachineGui* gui = (*it).second;
+				if ( gui->intersect(x, y) ) {
+					connect_to_gui = gui;
+					break;
+				}
+			}
+			WireUp(sender, connect_to_gui, x, y, picker);
+		}
+
+		void MachineView::WireUp(WireGui* sender,
+								 MachineGui* connect_to_gui,
+								 double x,
+								 double y,
+								 int picker)
+		{
+			MachineGui* connect_from_gui = sender->start();
+			Machine* tmac = connect_from_gui->mac();
+			Machine* dmac = connect_to_gui->mac();
+			int dsttype=0;
+			if (song_->InsertConnection(tmac, dmac,0,dsttype)== -1) {
+				//MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
+			} else {
+				connect_from_gui->AttachWire(sender,0);
+				connect_to_gui->AttachWire(sender,1);
+				sender->setGuiConnectors(connect_from_gui, connect_to_gui, 0);
+				sender->set_manage(true);
+				sender->UpdatePosition();
+			}			
 		}
 
 		void MachineView::InitSkin()

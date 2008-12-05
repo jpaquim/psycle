@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
 
-// #define use_test_canvas
+#define use_test_canvas
 
 #include "Song.hpp"
 #include "Configuration.hpp"

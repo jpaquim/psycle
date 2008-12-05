@@ -22,9 +22,20 @@ namespace psycle {
 			CChildView* child_view() { return parent_; }
 			Song* song() { return song_; }
 
+			void OnNewConnection(MachineGui* sender);
+			void OnRewireEnd(WireGui* sender,
+							 double x,
+							 double y,
+							 int picker);
+
 		private:
 			void InitSkin();
 			void BuildWires();
+			void WireUp(WireGui* sender,
+						MachineGui* connect_to_gui,
+						double x,
+						double y,
+						int picker);
 			void CreateMachineGui(Machine* mac);
 			
 			CChildView* parent_;
