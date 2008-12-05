@@ -9,11 +9,21 @@
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
 #include "Zap.hpp"
+#include "WireGui.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
-		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
+		CWireDlg::CWireDlg(CChildView* pParent)
+			: CDialog(CWireDlg::IDD, pParent),
+			  m_pParent(pParent),
+			  wire_gui_(0)
 		{
-			m_pParent = pParent;
+		}
+
+		CWireDlg::CWireDlg(CChildView* pParent, WireGui* wire_gui)
+			: CDialog(CWireDlg::IDD, pParent),
+			  m_pParent(pParent),
+			  wire_gui_(wire_gui)
+		{
 		}
 
 		void CWireDlg::DoDataExchange(CDataExchange* pDX)
@@ -109,7 +119,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			_pSrcMachine->_pScopeBufferL = NULL;
 			_pSrcMachine->_pScopeBufferR = NULL;
 			_pSrcMachine->_scopeBufferIndex = 0;
+#ifdef use_test_canvas
+			if (wire_gui_)
+				wire_gui_->BeforeWireDeletion();
+#else
 			m_pParent->WireDialog[this_index] = NULL;
+#endif
 			DestroyWindow();
 			font.DeleteObject();
 			bufBM->DeleteObject();

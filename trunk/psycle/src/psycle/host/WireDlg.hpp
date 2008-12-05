@@ -21,6 +21,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			CWireDlg(CChildView* pParent);
+			CWireDlg(CChildView* pParent, class WireGui* wire_gui);
+		private:
+			WireGui* wire_gui_;
+
+		public:
+	
 			BOOL Create();
 			afx_msg void OnCancel();
 			UINT this_index;

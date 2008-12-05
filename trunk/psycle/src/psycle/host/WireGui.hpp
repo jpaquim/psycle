@@ -5,6 +5,8 @@
 namespace psycle {
 	namespace host {
 
+		class CWireDlg;
+
 		class WireGui : public TestCanvas::Line {
 		public:
 			WireGui(class MachineView* view);
@@ -30,15 +32,17 @@ namespace psycle {
 
 			virtual bool OnEvent(TestCanvas::Event* ev);
 
+			void BeforeWireDeletion();
+
 		private:
 
 			class MachineView* view_;
 			MachineGui* fromGUI_;
 			MachineGui* toGUI_;
 			MachineGui* start_;
-
 			int drag_picker_;
 			bool dragging_;
+			CWireDlg* wire_dlg_;
 		};
 
 	}
