@@ -455,7 +455,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   }
 
   Item* Line::intersect(double x, double y) {
-    /*double distance_ = 5;
+    double distance_ = 5;
     std::pair<double, double>  p1 = PointAt(0);
     std::pair<double, double>  p2 = PointAt(1);
 
@@ -472,8 +472,8 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     int dx = static_cast<int> ( -sin*distance_);
     int dy = static_cast<int> ( -cos*distance_);
  
-    std::vector<GdkPoint> pts;
-    GdkPoint p;
+    std::vector<CPoint> pts;
+    CPoint p;
     p.x = p1.first + dx; p.y = p1.second - dy;
     pts.push_back(p);
     p.x = p2.first + dx; p.y = p2.second - dy;
@@ -483,13 +483,9 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     p.x = p1.first - dx; p.y = p1.second + dy;
     pts.push_back(p);
 
-    /*CRgn* rgn;
-    rgn = gdk_region_polygon(&pts[0], pts.size(), GDK_EVEN_ODD_RULE);
-    if (rgn) {
-      Gdk::Region region(rgn);
-      return region.point_in(x,y) ? this : 0;
-    }*/
-    return 0;
+    CRgn rgn;
+	int err = rgn.CreatePolygonRgn(&pts[0],pts.size(), WINDING);
+    return rgn.PtInRegion(x,y) ? this : 0;
   }
 
   void Line::SetPoints( const Points& pts ) {

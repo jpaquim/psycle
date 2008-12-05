@@ -1,6 +1,7 @@
 #include "WireGui.hpp"
 #include "MachineGui.hpp"
 #include "MachineView.hpp"
+#include "WireDlg.hpp"
 
 namespace psycle {
 	namespace host {
@@ -11,7 +12,8 @@ namespace psycle {
 			fromGUI_(0),
 			toGUI_(0),
 			start_(0),
-			dragging_(0)
+			dragging_(0),
+			wire_dlg_(0)
 		{
 			TestCanvas::Line::Points m_points;
 			m_points.push_back(std::pair<double,double>(0, 0));
@@ -56,9 +58,27 @@ namespace psycle {
 			dragging_ = false;
 		}
 
+		void WireGui::BeforeWireDeletion()
+		{
+			wire_dlg_ = 0;
+		}
+
 		bool WireGui::OnEvent(TestCanvas::Event* ev)
 		{
 			switch(ev->type) {
+				case TestCanvas::Event::BUTTON_2PRESS:
+					if (!wire_dlg_) {			
+						wire_dlg_ = new CWireDlg(fromGUI_->view()->child_view(), this);
+						wire_dlg_->this_index = 0;
+						wire_dlg_->wireIndex = 0;
+						wire_dlg_->isrcMac = fromGUI_->mac()->_macIndex;
+						wire_dlg_->_pSrcMachine = fromGUI_->mac();
+						wire_dlg_->_pDstMachine = toGUI_->mac();
+						wire_dlg_->Create();
+						//pParentMain->CenterWindowOnPoint(wdlg, point);
+						wire_dlg_->ShowWindow(SW_SHOW);
+					}
+				break;
 				case TestCanvas::Event::MOTION_NOTIFY:
 					if(dragging_) {
 						dragging(ev->x, ev->y);

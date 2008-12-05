@@ -26,7 +26,8 @@ namespace psycle {
 		{
 		}
 
-		void MachineView::SetSolo(Machine* tmac) {
+		void MachineView::SetSolo(Machine* tmac)
+		{
 		}
 
 		void MachineView::UpdateVUs()
