@@ -37,10 +37,15 @@ namespace psycle {
 		bool MachineGui::OnEvent(TestCanvas::Event* ev)
 		{
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
-				TestMute(ev->x, ev->y);
-				dragging_start(ev->x, ev->y);
+				if ( ev->button == 1 ) {
+					TestMute(ev->x, ev->y);
+					dragging_start(ev->x, ev->y);
+				} else
+				if ( ev->button == 3 ) {
+					view_->OnNewConnection(this);
+				}
 			} else
-			if ( ev->type == TestCanvas::Event::BUTTON_MOTION ) {
+			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
 			  if (dragging_)
 				dragging(ev->x, ev->y);
 			} else

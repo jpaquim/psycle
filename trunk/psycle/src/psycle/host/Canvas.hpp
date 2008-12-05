@@ -7,7 +7,7 @@ namespace TestCanvas {
 		  BUTTON_PRESS,
 		  BUTTON_2PRESS,
 		  BUTTON_RELEASE,
-		  BUTTON_MOTION
+		  MOTION_NOTIFY
 	  };		
 	  Type type;
 	  double x, y;

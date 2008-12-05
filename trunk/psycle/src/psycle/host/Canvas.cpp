@@ -46,7 +46,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     Group* group = this->parent();
     while ( group && group->parent() )
       group = group->parent();
-    if (group->widget() ) 
+    if (group && group->widget() ) 
        group->widget()->StealFocus(this);
   }
 
@@ -864,7 +864,7 @@ void Canvas::OnEvent(Event* ev) {
 		}
 		button_press_item_ = 0;
 	} else
-		if ( ev->type == Event::BUTTON_MOTION ) {
+		if ( ev->type == Event::MOTION_NOTIFY ) {
 		Item* item = button_press_item_ ? button_press_item_ : root_.intersect(ev->x, ev->y);
 		if (item) {
 			Event event;
