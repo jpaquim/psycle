@@ -15,7 +15,8 @@ namespace psycle {
 		MachineView::MachineView(CChildView* parent, Song* song)
 			: TestCanvas::Canvas(parent),
 			  parent_(parent),
-			  song_(song)
+			  song_(song),
+			  del_line_(0)
 		{
 			set_bg_color(Global::pConfig->mv_colour);
 			InitSkin();
@@ -43,6 +44,10 @@ namespace psycle {
 				if ( !root()->intersect(ev->x, ev->y) ) {
 					ShowNewMachineDlg();
 				}
+			}
+			if ( del_line_ ) {
+				delete del_line_;
+				del_line_ = 0;
 			}
 		}
 
@@ -197,19 +202,24 @@ namespace psycle {
 								 double y,
 								 int picker)
 		{
-			MachineGui* connect_from_gui = sender->start();
-			Machine* tmac = connect_from_gui->mac();
-			Machine* dmac = connect_to_gui->mac();
-			int dsttype=0;
-			if (song_->InsertConnection(tmac, dmac,0,dsttype)== -1) {
-				//MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
+			if ( connect_to_gui ) {
+				MachineGui* connect_from_gui = sender->start();
+				Machine* tmac = connect_from_gui->mac();
+				Machine* dmac = connect_to_gui->mac();
+				int dsttype=0;
+				if (song_->InsertConnection(tmac, dmac,0,dsttype)== -1) {
+					//MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
+				} else {
+					connect_from_gui->AttachWire(sender,0);
+					connect_to_gui->AttachWire(sender,1);
+					sender->setGuiConnectors(connect_from_gui, connect_to_gui, 0);
+					sender->set_manage(true);
+					sender->UpdatePosition();
+				}			
 			} else {
-				connect_from_gui->AttachWire(sender,0);
-				connect_to_gui->AttachWire(sender,1);
-				sender->setGuiConnectors(connect_from_gui, connect_to_gui, 0);
-				sender->set_manage(true);
-				sender->UpdatePosition();
-			}			
+				del_line_ = sender; // set wire for deletion
+				parent_->Invalidate();
+			}
 		}
 
 		void MachineView::InitSkin()

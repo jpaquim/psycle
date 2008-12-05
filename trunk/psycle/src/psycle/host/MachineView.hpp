@@ -40,7 +40,8 @@ namespace psycle {
 			
 			CChildView* parent_;
 			std::map<Machine*, MachineGui*> gui_map_;
-			Song* song_;			
+			Song* song_;
+			WireGui* del_line_;
 			CBitmap machineskin;
 			CBitmap machineskinmask;
 			CBitmap machinebkg;
