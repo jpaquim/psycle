@@ -32,7 +32,8 @@ namespace psycle {
 
 			virtual bool OnEvent(TestCanvas::Event* ev);
 
-			void BeforeWireDeletion();
+			void BeforeWireDlgDeletion();
+			void RemoveWire();
 
 		private:
 

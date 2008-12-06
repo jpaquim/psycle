@@ -121,7 +121,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			_pSrcMachine->_scopeBufferIndex = 0;
 #ifdef use_test_canvas
 			if (wire_gui_)
-				wire_gui_->BeforeWireDeletion();
+				wire_gui_->BeforeWireDlgDeletion();
 #else
 			m_pParent->WireDialog[this_index] = NULL;
 #endif
@@ -188,6 +188,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CSingleLock lock(&Global::_pSong->door,TRUE);
 			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
 			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
+#ifdef use_test_canvas
+			wire_gui_->RemoveWire();
+			wire_gui_ = 0;
+#endif
 			OnCancel();
 		}
 

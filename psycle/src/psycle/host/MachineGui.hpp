@@ -79,6 +79,7 @@ namespace psycle {
 			void UpdateVU();
 
 			void AttachWire(class WireGui* gui, int point);
+			void DetachWire(class WireGui* gui);
 
 			MachineView* view();
 			Machine* mac() { return mac_; };
