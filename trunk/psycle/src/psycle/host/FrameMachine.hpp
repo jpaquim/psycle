@@ -23,8 +23,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Attributes
 		public:
 			CFrameMachine(int dum){MachineIndex = dum;};
+			CFrameMachine(int dum, class MachineGui* gen_gui);
+				
 		protected:
 			Machine* _pMachine;
+			MachineGui* gen_gui_;
 			//CBitmap b_knob;
 			CFont	b_font;
 			CFont	b_font_bold;

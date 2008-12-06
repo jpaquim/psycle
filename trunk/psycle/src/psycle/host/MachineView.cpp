@@ -8,6 +8,7 @@
 #include "MainFrm.hpp"
 #include "NewMachine.hpp"
 #include "Mastergui.hpp"
+#include "GeneratorGui.hpp"
 
 namespace psycle {
 	namespace host {
@@ -108,6 +109,12 @@ namespace psycle {
 				case MACHMODE_MASTER:
 					gui = new MasterGui(this, mac);
 				break;
+				case MACHMODE_GENERATOR:
+					gui = new GeneratorGui(this, mac);
+				break;
+				case MACHMODE_FX:
+					gui = new GeneratorGui(this, mac);
+				break;
 				default:
 					gui = new MachineGui(this, mac);
 			}
@@ -148,7 +155,7 @@ namespace psycle {
 								wireUi->set_manage(true);
 								fromIt->second->AttachWire(wireUi,0);
 								toIt->second->AttachWire(wireUi,1);
-								wireUi->setGuiConnectors(fromIt->second,
+								wireUi->SetGuiConnectors(fromIt->second,
 														 toIt->second,
 														 0);
 								root()->Add(wireUi);
@@ -213,7 +220,7 @@ namespace psycle {
 				} else {
 					connect_from_gui->AttachWire(sender,0);
 					connect_to_gui->AttachWire(sender,1);
-					sender->setGuiConnectors(connect_from_gui, connect_to_gui, 0);
+					sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
 					sender->set_manage(true);
 					sender->UpdatePosition();
 				}			

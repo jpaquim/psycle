@@ -25,19 +25,11 @@ namespace psycle {
 		{
 			// do not delete wire_dlg_, cause it is deleting itself in OnCancel
 			if ( toGUI_ ) {
-				toGUI_->DetachWire( this );
+				toGUI_->DetachWire(this);
 			}
 			if ( fromGUI_ ) {
-				fromGUI_->DetachWire( this );
+				fromGUI_->DetachWire(this);
 			}
-		}
-
-		void WireGui::setGuiConnectors(MachineGui* from,
-									   MachineGui* to,
-									   MachineGui* start)  {
-			fromGUI_ = from;
-			toGUI_ = to;
-			start_ = start;
 		}
 
 		void WireGui::dragging_start(int pickpoint)

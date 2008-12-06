@@ -84,6 +84,8 @@ namespace psycle {
 			MachineView* view();
 			Machine* mac() { return mac_; };
 
+			virtual void BeforeDeleteDlg();
+
 		private:		
 			void dragging_start(double x, double y);
 			void dragging(double x, double y);
