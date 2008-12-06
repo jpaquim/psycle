@@ -149,6 +149,17 @@ namespace psycle {
 			wire_uis_.push_back(std::pair<WireGui*,int>(gui, point));
 		}
 
+		void MachineGui::DetachWire(WireGui* wire_gui)
+		{
+			std::vector<std::pair<WireGui*,int> >::iterator it = wire_uis_.begin();
+			for ( ; it != wire_uis_.end(); ++it ) {
+				if ((*it).first == wire_gui) {
+					wire_uis_.erase(it);
+					break;
+				}
+			}
+		}
+
 		void MachineGui::UpdatePan()
 		{
 			if ( mac_->_mode == MACHMODE_GENERATOR ) {

@@ -23,6 +23,13 @@ namespace psycle {
 
 		WireGui::~WireGui()
 		{
+			// do not delete wire_dlg_, cause it is deleting itself in OnCancel
+			if ( toGUI_ ) {
+				toGUI_->DetachWire( this );
+			}
+			if ( fromGUI_ ) {
+				fromGUI_->DetachWire( this );
+			}
 		}
 
 		void WireGui::setGuiConnectors(MachineGui* from,
@@ -58,9 +65,15 @@ namespace psycle {
 			dragging_ = false;
 		}
 
-		void WireGui::BeforeWireDeletion()
+		void WireGui::BeforeWireDlgDeletion()
 		{
 			wire_dlg_ = 0;
+		}
+
+		void WireGui::RemoveWire()
+		{
+			set_manage(false); // this causes an unparent
+			delete this;
 		}
 
 		bool WireGui::OnEvent(TestCanvas::Event* ev)
