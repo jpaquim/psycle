@@ -13,10 +13,12 @@ namespace psycle {
 
 			virtual bool OnEvent(TestCanvas::Event* ev);
 
+			virtual void BeforeDeleteDlg();
+
 		private:
 			void ShowDialog();
 
-			class CMasterDlg* dialog_;
+			class CFrameMachine* dialog_;
 		};
 	}
 }

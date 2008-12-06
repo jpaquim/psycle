@@ -12,6 +12,8 @@
 #include "Helpers.hpp"
 #include "MainFrm.hpp"
 #include "Machine.hpp"
+#include "MachineGui.hpp"
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -42,8 +44,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		END_MESSAGE_MAP()
 
 		CFrameMachine::CFrameMachine()
+			: gen_gui_(0)
 		{
 			//do not use! Use OnCreate Instead.
+		}
+
+		CFrameMachine::CFrameMachine(int dum, MachineGui* gen_gui) :
+				MachineIndex(dum),
+				gen_gui_(gen_gui) {
+
+			wndView = gen_gui->view()->child_view();
+			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->_macIndex);				
+			LoadFrame(IDR_MACHINEFRAME, 
+			  	      WS_POPUPWINDOW | WS_CAPTION,
+					  gen_gui->view()->child_view()->pParentFrame);
+			Generate();
+			SelectMachine(gen_gui_->mac());
+			char winname[32];
+			sprintf(winname,"%.2X : %s",MachineIndex
+									   ,gen_gui->mac()->_editName);
+			SetWindowText(winname);
 		}
 
 		CFrameMachine::~CFrameMachine()
@@ -89,7 +109,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnDestroy() 
 		{
+#ifdef use_test_canvas
+			assert(gen_gui_);
+			gen_gui_->BeforeDeleteDlg();
+#else
 			if ( _pActive != NULL ) *_pActive = false;
+#endif
 			b_font.DeleteObject();
 			b_font_bold.DeleteObject();
 			KillTimer(2104+MachineIndex);

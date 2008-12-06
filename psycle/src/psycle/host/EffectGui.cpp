@@ -2,6 +2,8 @@
 #include "Song.hpp"
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
+#include "FrameMachine.hpp"
+#include "ChildView.hpp"
 
 namespace psycle {
 	namespace host {
@@ -15,8 +17,6 @@ namespace psycle {
 
 		EffectGui::~EffectGui()
 		{
-			if ( dialog_ )
-				delete dialog_;
 		}
 
 		bool EffectGui::OnEvent(TestCanvas::Event* ev)
@@ -28,27 +28,16 @@ namespace psycle {
 			return true;
 		}
 
+		void EffectGui::BeforeDeleteDlg()
+		{
+			dialog_ = 0;
+		}
+
 		void EffectGui::ShowDialog()
 		{
 			if ( !dialog_ ) {
-				dialog_ = new CMasterDlg(view()->child_view());
-				dialog_->_pMachine = (Master*)mac();
-				for (int i=0;i<MAX_CONNECTIONS; i++)
-				{
-					if (mac()->_inputCon[i])
-					{
-						if (view()->song()->_pMachine[mac()->_inputMachines[i]])
-						{
-							strcpy(dialog_->macname[i],view()->song()->_pMachine[mac()->_inputMachines[i]]->_editName);
-						}
-					}
-				}
-				dialog_->Create();
-//				CPoint point(-1,-1);
-//				CenterWindowOnPoint(dialog_, point);
-				dialog_->ShowWindow(SW_SHOW);
-			} else {
-				dialog_->ShowWindow(SW_SHOW);
+				dialog_ = new CFrameMachine(mac()->_macIndex, this);
+				//CenterWindowOnPoint(m_pWndMac[tmac], point);
 			}
 		}
 

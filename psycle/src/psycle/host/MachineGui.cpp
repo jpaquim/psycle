@@ -259,6 +259,9 @@ namespace psycle {
 			}
 		}
 
+		void MachineGui::BeforeDeleteDlg() {
+		}
+
 		void MachineGui::SetSkin(const SMachineCoords& MachineCoords,
 								 CBitmap* machineskin,
 								 CBitmap* machineskinmask,

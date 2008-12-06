@@ -18,8 +18,12 @@ namespace psycle {
 				start_ = start;
 			}
 
-			void setGuiConnectors(MachineGui* from, MachineGui* to,
-								  MachineGui* start);
+			void SetGuiConnectors(MachineGui* from, MachineGui* to,
+								  MachineGui* start) {
+				fromGUI_ = from;
+				toGUI_ = to;
+				start_ = start;
+			}
 
 			MachineGui* fromGUI() const { return fromGUI_; }
 			MachineGui* toGUI() const { return toGUI_; }
