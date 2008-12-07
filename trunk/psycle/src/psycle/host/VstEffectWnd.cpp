@@ -11,10 +11,12 @@
 #include "Configuration.hpp"
 
 #include "PresetsDlg.hpp"
+#include "MachineGui.hpp"
 
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
+
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -87,8 +89,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_SHOWTOOLBAR, OnUpdateViewsShowtoolbar)
 		END_MESSAGE_MAP()
 
-		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
-		, pView(0) , _machine(effect) , pParamGui(0)
+		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect)
+			: CEffectWnd(effect),
+			  gui_(0),
+			  pView(0),
+			_machine(effect),
+			pParamGui(0)
+		{
+		}
+
+		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect, MachineGui* gui)
+			:CEffectWnd(effect),
+			gui_(gui),
+			pView(0),
+			_machine(effect),
+			pParamGui(0)
 		{
 		}
 
@@ -158,7 +173,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DockControlBar(&toolBar);
 			if (!Global::pConfig->_toolbarOnVsts) ShowControlBar(&toolBar,FALSE,FALSE);
 			machine().SetEditWnd(this);
+#ifdef use_test_canvas
+#else
 			*_pActive=true;
+#endif
 			SetTimer(449, 25, 0);
 			return 0;
 		}
@@ -175,7 +193,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				::SendMessage(*it, WM_CLOSE, 0, 0);
 				++it;
 			}
-			*_pActive=false;
+#ifdef use_test_canvas
+			if (gui_)
+				gui_->BeforeDeleteDlg();
+#else
+			*_pActive=false;			
+#endif
 			CFrameWnd::OnClose();
 		}
 
