@@ -39,7 +39,13 @@ namespace psycle {
 			void BeforeWireDlgDeletion();
 			void RemoveWire();
 
+			virtual void Draw(CDC* cr,
+							  const CRgn& repaint_region,
+							  TestCanvas::Canvas* widget);
+
 		private:
+
+			void AmosDraw(CDC *devc, int oX, int oY,int dX, int dY);
 
 			class MachineView* view_;
 			MachineGui* fromGUI_;
@@ -48,6 +54,11 @@ namespace psycle {
 			int drag_picker_;
 			bool dragging_;
 			CWireDlg* wire_dlg_;
+			int triangle_size_tall;
+			int triangle_size_center;
+			int triangle_size_wide;
+			int triangle_size_indent;
+
 		};
 
 	}

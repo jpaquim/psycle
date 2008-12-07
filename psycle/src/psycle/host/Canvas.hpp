@@ -223,7 +223,7 @@ namespace TestCanvas {
      void SetPoints(const Points& pts);
     
      const Points& points() const {
-       pts_;
+       return pts_;
      }
 
      const std::pair<double,double>& PointAt(int index) const {
