@@ -8,7 +8,10 @@
 #include "MainFrm.hpp"
 #include "NewMachine.hpp"
 #include "Mastergui.hpp"
+#include "EffectGui.hpp"
 #include "GeneratorGui.hpp"
+#include "MixerGui.hpp"
+#include "VstFxGui.hpp"
 
 namespace psycle {
 	namespace host {
@@ -105,7 +108,7 @@ namespace psycle {
 		void MachineView::CreateMachineGui(Machine* mac) {
 			assert(mac);
 			MachineGui* gui;
-			switch ( mac->_mode ) {
+			switch ( mac->_type ) {
 				case MACHMODE_MASTER:
 					gui = new MasterGui(this, mac);
 				break;
@@ -113,7 +116,16 @@ namespace psycle {
 					gui = new GeneratorGui(this, mac);
 				break;
 				case MACHMODE_FX:
-					gui = new GeneratorGui(this, mac);
+					gui = new EffectGui(this, mac);
+				break;
+				case MACH_MIXER:
+					gui = new MixerGui(this, mac);
+				break;
+				case MACH_VST:
+					gui = new VstFxGui(this, mac);
+				break;
+				case MACH_VSTFX:
+					gui = new VstFxGui(this, mac);
 				break;
 				default:
 					gui = new MachineGui(this, mac);

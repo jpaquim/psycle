@@ -32,7 +32,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DECLARE_DYNAMIC(CVstEffectWnd)
 		public: 
 			CVstEffectWnd(vst::plugin* effect);
+			CVstEffectWnd(vst::plugin* effect, class MachineGui* gui);
 			virtual ~CVstEffectWnd(){};
+
+		private:
+			MachineGui* gui_;
+
 		protected:
 			CVstEffectWnd(){}; // protected constructor used by dynamic creation
 
