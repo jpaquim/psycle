@@ -12,9 +12,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent)
-: CDialog(CWaveInMacDlg::IDD, pParent)
+	: CDialog(CWaveInMacDlg::IDD, pParent),
+	  gui_(0)
 {
 	m_pParent = pParent;
+}
+
+CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent, MachineGui* gui)
+	: CDialog(CWaveInMacDlg::IDD, pParent),
+	  m_pParent(pParent),
+	  gui_(gui)
+{
 }
 
 void CWaveInMacDlg::DoDataExchange(CDataExchange* pDX)
@@ -69,7 +77,13 @@ void CWaveInMacDlg::OnCbnSelendokCombo1()
 
 void CWaveInMacDlg::OnCancel()
 {
+#ifdef use_test_canvas
+	if (gui_)
+		gui_->BeforeDeleteDlg();
+#else
 	m_pParent->WaveInMachineDialog = NULL;
+#endif
+
 	DestroyWindow();
 	delete this;
 }

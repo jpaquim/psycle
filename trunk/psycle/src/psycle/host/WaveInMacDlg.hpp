@@ -15,6 +15,8 @@ class CWaveInMacDlg : public CDialog
 {
 public:
 	CWaveInMacDlg(CChildView* pParent);
+	CWaveInMacDlg(CChildView* pParent, class MachineGui* gui);
+
 	CChildView* m_pParent;
 	void RedrawList();
 	BOOL Create();
@@ -35,6 +37,8 @@ public:
 	CStatic m_vollabel;
 	afx_msg void OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult);
 	CSliderCtrl m_volslider;
+private:
+	MachineGui* gui_;
 };
 
 PSYCLE__MFC__NAMESPACE__END

@@ -12,6 +12,7 @@
 #include "GeneratorGui.hpp"
 #include "MixerGui.hpp"
 #include "VstFxGui.hpp"
+#include "RecorderGui.hpp"
 
 namespace psycle {
 	namespace host {
@@ -126,6 +127,9 @@ namespace psycle {
 				break;
 				case MACH_VSTFX:
 					gui = new VstFxGui(this, mac);
+				break;
+				case MACH_RECORDER:
+					gui = new RecorderGui(this, mac);
 				break;
 				default:
 					gui = new MachineGui(this, mac);
