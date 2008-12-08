@@ -4,6 +4,8 @@
 #include "GearTracker.hpp"
 #include "Psycle.hpp"
 #include "ChildView.hpp"
+#include "MachineGui.hpp"
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -11,6 +13,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			: CDialog(CGearTracker::IDD, pParent)
 		{
 			m_pParent = pParent;
+			//{{AFX_DATA_INIT(CGearTracker)
+				// NOTE: the ClassWizard will add member initialization here
+			//}}AFX_DATA_INIT
+		}
+
+		CGearTracker::CGearTracker(MachineGui* gui)
+			: CDialog(CGearTracker::IDD, gui->view()->child_view()),
+			  gui_(gui),
+			  m_pParent(gui->view()->child_view())
+		{
+
 			//{{AFX_DATA_INIT(CGearTracker)
 				// NOTE: the ClassWizard will add member initialization here
 			//}}AFX_DATA_INIT
@@ -87,7 +100,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CGearTracker::OnCancel()
 		{
+#ifdef use_test_canvas
+			if (gui_)
+			  gui_->BeforeDeleteDlg();
+#else
 			m_pParent->SamplerMachineDialog = NULL;
+#endif
 			DestroyWindow();
 			delete this;
 		}

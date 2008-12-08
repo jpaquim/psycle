@@ -58,7 +58,13 @@ namespace psycle {
 			int triangle_size_center;
 			int triangle_size_wide;
 			int triangle_size_indent;
-
+			float deltaColR;
+			float deltaColG;
+			float deltaColB;
+			CPen linepen1;
+			CPen linepen2;
+			CPen linepen3;
+			CPen polyInnardsPen;
 		};
 
 	}

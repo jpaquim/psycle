@@ -15,7 +15,16 @@ namespace psycle {
 			toGUI_(0),
 			start_(0),
 			dragging_(0),
-			wire_dlg_(0)
+			wire_dlg_(0),
+			// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
+  			// polygon color stated in the config.
+			deltaColR(((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45),
+			deltaColG(((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45),
+			deltaColB(((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45),
+			linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa*2), Global::pConfig->mv_wireaacolour),
+			linepen2( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa), Global::pConfig->mv_wireaacolour2),
+			linepen3( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour), 
+			polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB))
 		{
 			TestCanvas::Line::Points m_points;
 			m_points.push_back(std::pair<double,double>(0, 0));
@@ -78,17 +87,7 @@ namespace psycle {
 					  	   const CRgn& repaint_region,
 						   TestCanvas::Canvas* widget) {
 			if (Global::pConfig->mv_wireaa)
-			{			
-				// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
-				// polygon color stated in the config.
-				float deltaColR = ((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45;
-				float deltaColG = ((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45;
-				float deltaColB = ((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45;
-			
-				CPen linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa*2), Global::pConfig->mv_wireaacolour);
-				CPen linepen2( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa), Global::pConfig->mv_wireaacolour2); 
-				CPen linepen3( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
-	 			CPen polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB));
+			{				
 				CPen *oldpen = devc->SelectObject(&linepen1);
 				CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
 

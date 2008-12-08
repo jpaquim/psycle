@@ -103,7 +103,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
         widget_(0),
         x_(x),
         y_(y) {
-    rgn_.CreateRectRgn(0,0,0,0);
+    rgn_.CreateRectRgn(0, 0, 0, 0);
   }
   
   Group::~Group() {
