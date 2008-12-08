@@ -305,6 +305,10 @@ class Canvas
 
 		virtual void OnEvent(Event* ev);
 
+		// void lock();
+		// void unlock();
+		// void flush();
+
 	private:
 		bool DelegateEvent(Event* event, Item* item);
 

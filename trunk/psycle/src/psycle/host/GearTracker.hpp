@@ -15,6 +15,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			CGearTracker(CChildView* pParent = 0);
+			CGearTracker(class MachineGui* gui);
+		private:
+			MachineGui* gui_;
+		public:
 			Sampler* _pMachine;
 			BOOL Create();
 			afx_msg void OnCancel();

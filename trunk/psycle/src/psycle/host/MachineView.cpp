@@ -13,6 +13,7 @@
 #include "MixerGui.hpp"
 #include "VstFxGui.hpp"
 #include "RecorderGui.hpp"
+#include "SamplerGui.hpp"
 
 namespace psycle {
 	namespace host {
@@ -96,7 +97,7 @@ namespace psycle {
 		}
 
 		void MachineView::Rebuild()
-		{
+		{			
 			root()->Clear();
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
 				if (song_->_pMachine[idx]) {
@@ -130,6 +131,9 @@ namespace psycle {
 				break;
 				case MACH_RECORDER:
 					gui = new RecorderGui(this, mac);
+				break;
+				case MACH_SAMPLER:
+					gui = new SamplerGui(this, mac);
 				break;
 				default:
 					gui = new MachineGui(this, mac);
@@ -174,7 +178,8 @@ namespace psycle {
 								wireUi->SetGuiConnectors(fromIt->second,
 														 toIt->second,
 														 0);
-								root()->Add(wireUi);
+
+								root()->Insert(root()->begin(),wireUi);
 								wireUi->UpdatePosition();
 							}
 						}
