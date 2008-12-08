@@ -19,8 +19,9 @@ class XMSamplerUI : public CPropertySheet
 	public:
 		XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 		XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
+		XMSamplerUI(LPCTSTR pszCaption, class MachineGui* gui, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 
-				enum { IDD = IDD_XM_SAMPLER };
+		enum { IDD = IDD_XM_SAMPLER };
 
 	private:
 		XMSampler* _pMachine;
@@ -29,6 +30,7 @@ class XMSamplerUI : public CPropertySheet
 		XMSamplerUISample m_Sample;
 		XMSamplerMixerPage m_Mixer;
 		bool init;
+		MachineGui* gui_;
 
 	public:
 		void Init(XMSampler* pMachine);

@@ -14,6 +14,7 @@
 #include "VstFxGui.hpp"
 #include "RecorderGui.hpp"
 #include "SamplerGui.hpp"
+#include "XmSamplerGui.hpp"
 
 namespace psycle {
 	namespace host {
@@ -134,6 +135,9 @@ namespace psycle {
 				break;
 				case MACH_SAMPLER:
 					gui = new SamplerGui(this, mac);
+				break;
+				case MACH_XMSAMPLER:
+					gui = new XmSamplerGui(this, mac);
 				break;
 				default:
 					gui = new MachineGui(this, mac);

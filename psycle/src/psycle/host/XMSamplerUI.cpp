@@ -3,6 +3,7 @@
 #include "Psycle.hpp"
 #include "XMSampler.hpp"
 #include "ChildView.hpp"
+#include "MachineGui.hpp"
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
@@ -25,6 +26,13 @@ XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 	{
 	}
 
+XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, MachineGui* gui, CWnd* pParentWnd, UINT iSelectPage)
+:CPropertySheet(pszCaption, pParentWnd, iSelectPage),
+gui_(gui)
+, init(false)
+	{
+	}
+
 BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
 	//{{AFX_MSG_MAP(XMSamplerUI)
 	ON_WM_DESTROY()
@@ -34,7 +42,11 @@ END_MESSAGE_MAP()
 ///void XMSamplerUI::OnClose()
 void XMSamplerUI::OnDestroy()
 {
+#ifdef use_test_canvas
+	gui_->BeforeDeleteDlg();
+#else
 	((CChildView*)m_pParentWnd)->XMSamplerMachineDialog = NULL;
+#endif
 	CPropertySheet::OnDestroy();
 }
 
