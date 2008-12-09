@@ -176,6 +176,7 @@ namespace psycle {
 								std::map<Machine*, MachineGui*>::iterator toIt = 
 									gui_map_.find(pout);
 								WireGui* wireUi = new WireGui(this);
+								root()->Insert(root()->begin(), wireUi);
 								wireUi->set_manage(true);
 								fromIt->second->AttachWire(wireUi,0);
 								toIt->second->AttachWire(wireUi,1);
@@ -195,6 +196,7 @@ namespace psycle {
 		void MachineView::OnNewConnection(MachineGui* sender)
 		{
 			WireGui* line = new WireGui(this);
+			root()->Add(line);
 			line->SetStart(sender);
 			double x1, y1, x2, y2;
 			sender->GetBounds( x1, y1, x2, y2);
@@ -227,6 +229,16 @@ namespace psycle {
 				}
 			}
 			WireUp(sender, connect_to_gui, x, y, picker);
+			RaiseMachinesToTop();
+		}
+
+		void MachineView::RaiseMachinesToTop()
+		{
+			std::map<Machine*,MachineGui*>::iterator it = gui_map_.begin();
+			for ( ; it != gui_map_.end(); ++it ) {
+				MachineGui* gui = (*it).second;
+				root()->RaiseToTop(gui);
+			}
 		}
 
 		void MachineView::WireUp(WireGui* sender,

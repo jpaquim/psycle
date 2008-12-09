@@ -9,7 +9,6 @@ namespace psycle {
 	namespace host {
 
 		WireGui::WireGui(MachineView* view)	:
-			TestCanvas::Line(view->root()),
 			view_(view),
 			fromGUI_(0),
 			toGUI_(0),
@@ -86,6 +85,9 @@ namespace psycle {
 		void WireGui::Draw(CDC* devc,
 					  	   const CRgn& repaint_region,
 						   TestCanvas::Canvas* widget) {
+			if (dragging_)
+				TestCanvas::Line::Draw(devc, repaint_region, widget);
+			else
 			if (Global::pConfig->mv_wireaa)
 			{				
 				CPen *oldpen = devc->SelectObject(&linepen1);
@@ -212,6 +214,11 @@ namespace psycle {
 			}
 			devc->MoveTo(oX, oY);
 			devc->LineTo(dX, dY);	
+		}
+
+		const CRgn& WireGui::region() const
+		{
+			return TestCanvas::Line::region();
 		}
 
      	bool WireGui::OnEvent(TestCanvas::Event* ev)
