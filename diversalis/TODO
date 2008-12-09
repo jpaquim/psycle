@@ -2,4 +2,4 @@
 
 *	#if tests for major.minor.patch version numbers using "cond ? then : else" ternary operator
 
-*	aniversalis
+*	have a look at http://sourceforge.net/projects/predef
