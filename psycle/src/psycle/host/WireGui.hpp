@@ -43,6 +43,8 @@ namespace psycle {
 							  const CRgn& repaint_region,
 							  TestCanvas::Canvas* widget);
 
+			virtual const CRgn& region() const;
+
 		private:
 
 			void AmosDraw(CDC *devc, int oX, int oY,int dX, int dY);

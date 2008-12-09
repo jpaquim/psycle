@@ -37,6 +37,7 @@ namespace psycle {
 						double y,
 						int picker);
 			void CreateMachineGui(Machine* mac);
+			void RaiseMachinesToTop();
 			
 			CChildView* parent_;
 			std::map<Machine*, MachineGui*> gui_map_;
