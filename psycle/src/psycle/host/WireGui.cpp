@@ -25,6 +25,7 @@ namespace psycle {
 			linepen3( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour), 
 			polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB))
 		{
+			rgn_.CreateRectRgn(0, 0, 0, 0);
 			TestCanvas::Line::Points m_points;
 			m_points.push_back(std::pair<double,double>(0, 0));
 			m_points.push_back(std::pair<double,double>(100, 100));
@@ -32,7 +33,7 @@ namespace psycle {
 			triangle_size_tall = Global::pConfig->mv_triangle_size+((23*Global::pConfig->mv_wirewidth)/16);
 			triangle_size_center = triangle_size_tall/2;
 			triangle_size_wide = triangle_size_tall/2;
-			triangle_size_indent = triangle_size_tall/6;
+			triangle_size_indent = triangle_size_tall/6;			
 		}
 
 		WireGui::~WireGui()
@@ -85,6 +86,7 @@ namespace psycle {
 		void WireGui::Draw(CDC* devc,
 					  	   const CRgn& repaint_region,
 						   TestCanvas::Canvas* widget) {
+
 			if (dragging_)
 				TestCanvas::Line::Draw(devc, repaint_region, widget);
 			else
@@ -218,7 +220,39 @@ namespace psycle {
 
 		const CRgn& WireGui::region() const
 		{
-			return TestCanvas::Line::region();
+			if ( !points().size() )
+				return rgn_;
+			double distance_ = 30;
+			std::pair<double, double>  p1 = PointAt(0);
+			std::pair<double, double>  p2 = PointAt(1);
+
+			double  ankathede    = p1.first - p2.first;
+			double  gegenkathede = p1.second - p2.second;
+			double  hypetenuse   = sqrt( ankathede*ankathede + gegenkathede*gegenkathede);
+
+			if (hypetenuse == 0)
+				return rgn_;
+
+			double cos = ankathede    / hypetenuse;
+			double sin = gegenkathede / hypetenuse;
+
+			int dx = static_cast<int> ( -sin*distance_);
+			int dy = static_cast<int> ( -cos*distance_);
+ 
+			std::vector<CPoint> pts;
+			CPoint p;
+			p.x = p1.first + dx; p.y = p1.second - dy;
+			pts.push_back(p);
+			p.x = p2.first + dx; p.y = p2.second - dy;
+			pts.push_back(p);
+			p.x = p2.first - dx; p.y = p2.second + dy;
+			pts.push_back(p);
+			p.x = p1.first - dx; p.y = p1.second + dy;
+			pts.push_back(p);
+			
+			rgn_.DeleteObject();
+			int err = rgn_.CreatePolygonRgn(&pts[0],pts.size(), WINDING);
+			return rgn_;
 		}
 
      	bool WireGui::OnEvent(TestCanvas::Event* ev)

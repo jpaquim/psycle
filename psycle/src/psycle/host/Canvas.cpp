@@ -67,7 +67,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     Group* group = parent();
     while ( group && group->parent() )
 		group = group->parent();
-    if (group->widget() ) {
+    if (group && group->widget() ) {
 		group->widget()->parent_->InvalidateRgn(region, 1);
     }
   }
@@ -493,54 +493,12 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     update_ = true;
     CRgn old_rect;
 	old_rect.CreateRectRgn(0,0,0,0);
-    if ( pts_.size() >= 2 ) {
-      std::pair<double, double>  p1 = PointAt(0);
-      std::pair<double, double>  p2 = PointAt(1);
-      double x1, y1, x2, y2;
-      x1 = p1.first;
-      y1 = p1.second;
-      x2 = p2.first;
-      y2 = p2.second;
-      swap_smallest(x1,x2);
-      swap_smallest(y1,y2);
-      x1 -= d;
-      y1 -= d;
-      x2 += d;
-      y2 += d;
-	  old_rect.DeleteObject();
-	  old_rect.CreateRectRgn(x1, y1, x2-x1, y2-y1);
-    }
+	old_rect.CombineRgn(&old_rect, &region(), RGN_OR);
     pts_ = pts;
-    CRect new_rect(0,0,0,0);	
-    if ( pts_.size() >= 2 ) {
-      double distance_ = 5;
-      std::pair<double, double>  p1 = PointAt(0);
-      std::pair<double, double>  p2 = PointAt(1);
-      double x1, y1, x2, y2;
-      x1 = p1.first;
-      y1 = p1.second;
-      x2 = p2.first;
-      y2 = p2.second;
-      swap_smallest(x1,x2);
-      swap_smallest(y1,y2);
-      x1 -= d;
-      y1 -= d;
-      x2 += d;
-      y2 += d;
-	  new_rect.SetRect(x1, y1, x2, y2);
-    }
-    Group* group = this->parent();
-    while ( group && group->parent() )
-      group = group->parent();
-    if (group && group->widget() ) {
-	  CRgn rgn;
-	  rgn.CreateRectRgn(new_rect.left,
-						new_rect.top,
-						new_rect.right,
-						new_rect.bottom);
-	  rgn.CombineRgn(&rgn, &old_rect, RGN_OR);
-      InvalidateRegion(&rgn);
-    }
+    CRgn new_rect;
+	new_rect.CreateRectRgn(0, 0, 0, 0);
+	new_rect.CombineRgn(&old_rect, &region(), RGN_OR);
+	this->InvalidateRegion(&new_rect);    
   }
 
   void Line::SetColor(double r, double g, double b, double alpha) {

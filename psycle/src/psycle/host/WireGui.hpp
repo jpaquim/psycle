@@ -67,6 +67,8 @@ namespace psycle {
 			CPen linepen2;
 			CPen linepen3;
 			CPen polyInnardsPen;
+			mutable CRgn rgn_;
+
 		};
 
 	}
