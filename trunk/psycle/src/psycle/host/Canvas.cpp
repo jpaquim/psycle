@@ -72,6 +72,10 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     }
   }
 
+  void Item::SetVisible(bool on) {
+	   visible_ = on;
+   }
+
   void Item::RectToRegion(CRgn* region,
                           double x1,
                           double y1,

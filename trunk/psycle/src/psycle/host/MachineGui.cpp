@@ -21,7 +21,8 @@ namespace psycle {
 			text_(this)
 			
 			//rect_(this, 0, 0, 200, 100)
-		{					
+		{		
+			assert(mac_);
 			UpdateText();
 		}
 
@@ -32,6 +33,15 @@ namespace psycle {
 		MachineView* MachineGui::view()
 		{
 			return view_;
+		}
+
+		void MachineGui::SetSelected(bool on)
+		{
+		}
+
+		bool MachineGui::IsSelected() const
+		{
+			return false;
 		}
 
 		bool MachineGui::OnEvent(TestCanvas::Event* ev)
@@ -260,6 +270,16 @@ namespace psycle {
 		}
 
 		void MachineGui::BeforeDeleteDlg() {
+		}
+
+		int MachineGui::preferredWidth() const
+		{
+			return pixbuf_.width();
+		}
+
+		int MachineGui::preferredHeight() const
+		{
+			return pixbuf_.height();
 		}
 
 		void MachineGui::SetSkin(const SMachineCoords& MachineCoords,

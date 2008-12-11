@@ -16,6 +16,7 @@ namespace psycle {
 			void SetSolo(Machine* mac);
 			void UpdateVUs();
 			void ShowNewMachineDlg();
+			void SelectMachine(MachineGui* gui);
 
 			virtual void OnEvent(TestCanvas::Event* ev);
 

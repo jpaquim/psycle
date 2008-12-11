@@ -86,6 +86,12 @@ namespace psycle {
 
 			virtual void BeforeDeleteDlg();
 
+			virtual void SetSelected(bool on);
+			virtual bool IsSelected() const;
+
+			int preferredWidth() const;
+			int preferredHeight() const;
+
 		private:		
 			void dragging_start(double x, double y);
 			void dragging(double x, double y);
