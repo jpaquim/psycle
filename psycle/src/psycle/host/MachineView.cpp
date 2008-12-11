@@ -108,19 +108,28 @@ namespace psycle {
 			BuildWires();
 		}
 
+		void MachineView::SelectMachine(MachineGui* gui)
+		{
+			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
+			for ( ; it != gui_map_.end(); ++it ) {
+			   (*it).second->SetSelected(gui == (*it).second);
+			}
+		}
+
 		void MachineView::CreateMachineGui(Machine* mac) {
 			assert(mac);
 			MachineGui* gui;
 			switch ( mac->_type ) {
-				case MACHMODE_MASTER:
+				case MACH_MASTER:
 					gui = new MasterGui(this, mac);
 				break;
-				case MACHMODE_GENERATOR:
-					gui = new GeneratorGui(this, mac);
-				break;
-				case MACHMODE_FX:
-					gui = new EffectGui(this, mac);
-				break;
+				case MACH_PLUGIN:
+					if ( mac->_mode == MACHMODE_GENERATOR)
+						gui = new GeneratorGui(this, mac);
+					else
+					if ( mac->_mode == MACHMODE_FX)
+						gui = new EffectGui(this, mac);
+				break;				
 				case MACH_MIXER:
 					gui = new MixerGui(this, mac);
 				break;

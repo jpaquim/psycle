@@ -74,9 +74,7 @@ namespace TestCanvas {
   //    const Glib::RefPtr<Gdk::DragContext>& context, int, int,
   //    const Gtk::SelectionData& selection_data, guint, guint time);
 
-   void SetVisible(bool on) {
-	   visible_ = on;
-   }
+   virtual void SetVisible(bool on);
 
    bool visible() const { return visible_; }
 
@@ -192,6 +190,9 @@ namespace TestCanvas {
 		virtual Item* intersect(double x, double y);
 
 		void GetBounds(double& x1, double& y1, double& x2, double& y2) const;
+
+		int width() const { return width_; }
+		int height() const { return height_; }
 
 	private:
 		CBitmap* image_;
