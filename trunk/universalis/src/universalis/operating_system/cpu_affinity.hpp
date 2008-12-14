@@ -25,6 +25,8 @@ namespace universalis { namespace operating_system { namespace cpu_affinity {
 unsigned int inline cpu_count() throw(std::runtime_error) {
 	unsigned int result(0);
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		///\todo also try using os.sysconf('SC_NPROCESSORS_ONLN') // SC_NPROCESSORS_CONF
+		
 		cpu_set_t set;
 		CPU_ZERO(&set);
 		if(
@@ -41,6 +43,8 @@ unsigned int inline cpu_count() throw(std::runtime_error) {
 		}
 		for(unsigned int i(0); i < CPU_SETSIZE; ++i) if(CPU_ISSET(i, &set)) ++result;
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		///\todo also try using int(os.environ.get('NUMBER_OF_PROCESSORS', 1))
+
 		DWORD process, system;
 		if(!GetProcessAffinityMask(GetCurrentProcess(), &process, &system)) {
 			//throw exception(UNIVERSALIS__COMPILER__LOCATION);
