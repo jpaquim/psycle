@@ -166,7 +166,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		class CChildView : public CWnd
 		{
 		public:
-			CChildView();
+			CChildView(CMainFrame* main_frame);
 			virtual ~CChildView();
 
 			void InitTimer();

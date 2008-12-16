@@ -45,7 +45,7 @@ namespace TestCanvas {
     // sigc::signal<bool, GdkEvent*>& signal_event() { return m_signal_event_; }
 
     void GetFocus();
-    void QueueDraw();
+    virtual void QueueDraw();
     void InvalidateRegion(CRgn* region);
 
     void set_manage(bool on) {
@@ -113,6 +113,7 @@ namespace TestCanvas {
 	void Clear();
     void Insert(iterator it, Item* item);
     void RaiseToTop(Item* item);
+	virtual void QueueDraw();
    
     double x() const { return x_; }
     double y() const { return y_; }
@@ -234,6 +235,8 @@ namespace TestCanvas {
      void SetColor(double r, double g, double b, double alpha);
      virtual const CRgn& region() const;
 
+	 virtual void SetVisible(bool on);
+
    private:
      Points pts_;
      double r_, g_, b_, alpha_;
@@ -309,6 +312,7 @@ class Canvas
 		// void lock();
 		// void unlock();
 		// void flush();
+		CWnd* parent() { return parent_; }
 
 	private:
 		bool DelegateEvent(Event* event, Item* item);

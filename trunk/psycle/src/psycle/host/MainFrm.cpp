@@ -129,6 +129,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		};
 
 		CMainFrame::CMainFrame()
+			: m_wndView(this)
 		{
 			Global::pInputHandler->SetMainFrame(this);
 			vuprevR = 0;
