@@ -15,13 +15,15 @@
 #include "RecorderGui.hpp"
 #include "SamplerGui.hpp"
 #include "XmSamplerGui.hpp"
+#include "MainFrm.hpp"
 
 namespace psycle {
 	namespace host {
 
-		MachineView::MachineView(CChildView* parent, Song* song)
+		MachineView::MachineView(CChildView* parent, CMainFrame* main, Song* song)
 			: TestCanvas::Canvas(parent),
 			  parent_(parent),
+			  main_(main),
 			  song_(song),
 			  del_line_(0)
 		{
@@ -31,6 +33,11 @@ namespace psycle {
 
 		MachineView::~MachineView()
 		{
+		}
+
+		CMainFrame* MachineView::main()
+		{
+			return main_;
 		}
 
 		void MachineView::SetSolo(Machine* tmac)
@@ -113,7 +120,7 @@ namespace psycle {
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
 			for ( ; it != gui_map_.end(); ++it ) {
 			   (*it).second->SetSelected(gui == (*it).second);
-			}
+			}			
 		}
 
 		void MachineView::CreateMachineGui(Machine* mac) {

@@ -9,7 +9,7 @@ namespace psycle {
 		class MachineView : public TestCanvas::Canvas
 		{
 		public:
-			MachineView(class CChildView* parent, class Song* song);
+			MachineView(class CChildView* parent, class CMainFrame* main, class Song* song);
 			~MachineView();
 
 			void Rebuild();
@@ -21,6 +21,7 @@ namespace psycle {
 			virtual void OnEvent(TestCanvas::Event* ev);
 
 			CChildView* child_view() { return parent_; }
+			CMainFrame* main();
 			Song* song() { return song_; }
 
 			void OnNewConnection(MachineGui* sender);
@@ -41,6 +42,7 @@ namespace psycle {
 			void RaiseMachinesToTop();
 			
 			CChildView* parent_;
+			CMainFrame* main_;
 			std::map<Machine*, MachineGui*> gui_map_;
 			Song* song_;
 			WireGui* del_line_;

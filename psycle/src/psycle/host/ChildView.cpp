@@ -36,7 +36,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		CMainFrame		*pParentMain;
 
-		CChildView::CChildView()
+		CChildView::CChildView(CMainFrame* main_frame)
 			:pParentFrame(0)
 			,MasterMachineDialog(NULL)
 			,SamplerMachineDialog(NULL)
@@ -99,7 +99,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,patBufferLines(0)
 			,patBufferCopy(false)
 #ifdef use_test_canvas
-			,machine_view_(this, Global::_pSong)
+			,machine_view_(this, main_frame, Global::_pSong)
 #endif
 		{
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)

@@ -50,10 +50,11 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
        group->widget()->StealFocus(this);
   }
 
-  void Item::QueueDraw() {
-    Group* group = this->parent();
-    while ( group && group->parent() )
-      group = group->parent();
+  void Item::QueueDraw() {	
+	Group* group = this->parent();
+	while (group && group->parent()) {
+		group = group->parent();
+	}	
 	if (group && group->widget() ) {
 	  CRgn rgn;
 	  rgn.CreateRectRgn(0, 0, 0, 0);
@@ -98,9 +99,13 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     return 0;
   }*/
 
-  Group::Group() : widget_(0), x_(0), y_(0) { }
+  Group::Group() : widget_(0), x_(0), y_(0) {
+	  rgn_.CreateRectRgn(0, 0, 0, 0);
+  }
 
-  Group::Group(Canvas* widget) : widget_(widget), x_(0), y_(0) { }
+  Group::Group(Canvas* widget) : widget_(widget), x_(0), y_(0) {
+	  rgn_.CreateRectRgn(0, 0, 0, 0);
+  }
 
   Group::Group(Group* parent, double x, double y)
       : Item(parent),
@@ -128,6 +133,20 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 		delete item;      
 	}
 	items_.clear();
+  }
+
+  void Group::QueueDraw() {	
+	Group* group = this;
+	while (group && group->parent()) {
+		group = group->parent();
+	}	
+	if (group && group->widget() ) {
+	  CRgn rgn;
+	  rgn.CreateRectRgn(0, 0, 0, 0);
+	  rgn.CombineRgn(&rgn, &region(), RGN_OR);
+	  rgn.OffsetRgn(parent() ? parent()->absx() : x(), parent() ? parent()->absy() : y() );
+	  group->widget()->parent()->InvalidateRgn(&rgn,1);
+	}
   }
 
   void Group::SetXY(double x, double y) {
@@ -247,10 +266,12 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 	std::vector<Item*>::const_iterator it = items_.begin();
     for ( ; it != items_.end(); ++it ) {
       Item* item = *it;
-	  int nCombineResult = rgn.CombineRgn(&rgn, &item->region(), RGN_OR);
-	  if ( nCombineResult == NULLREGION ) {
-	    rgn.DeleteObject();
-		rgn.CreateRectRgn(0, 0, 0, 0);
+	  if ( item->visible() ) {
+	    int nCombineResult = rgn.CombineRgn(&rgn, &item->region(), RGN_OR);
+	    if ( nCombineResult == NULLREGION ) {
+	      rgn.DeleteObject();
+		  rgn.CreateRectRgn(0, 0, 0, 0);
+	    }
 	  }
 	}
     rgn.OffsetRgn(x_, y_);
@@ -425,7 +446,8 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
       : r_(0),
         g_(0),
         b_(0),
-        alpha_(1) {
+        alpha_(1),
+		update_(1){
 	rgn_.CreateRectRgn(0,0,0,0);
   }
 
@@ -527,6 +549,12 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
       swap_smallest(x1,x2);
       swap_smallest(y1,y2);
     }
+  }
+
+  void Line::SetVisible(bool on)
+  {
+	  Item::SetVisible(on);
+	  update_ = 1;
   }
 
   const CRgn& Line::region() const {

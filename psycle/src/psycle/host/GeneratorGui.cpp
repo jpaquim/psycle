@@ -4,6 +4,7 @@
 #include "MachineView.hpp"
 #include "FrameMachine.hpp"
 #include "ChildView.hpp"
+#include "MainFrm.hpp"
 
 namespace psycle {
 	namespace host {
@@ -49,62 +50,68 @@ namespace psycle {
 
 		void GeneratorGui::SetSelected(bool on)
 		{
+			if ( on && !IsSelected() ) {
+				view()->song()->seqBus = view()->song()->FindBusFromIndex(mac()->_macIndex);
+				view()->main()->UpdateComboGen();
+				view()->child_view()->Invalidate(1);
+			}
+			int size = 5;
 			TestCanvas::Line::Points pts;
-			pts.push_back(std::pair<double,double>(-10, -10));
-			pts.push_back(std::pair<double,double>(-10, 10));
+			pts.push_back(std::pair<double,double>(-size, -size));
+			pts.push_back(std::pair<double,double>(-size, size));
 			sel_line_left_top_1.SetPoints(pts);
 			sel_line_left_top_1.SetVisible(on);
 			pts.clear();
-			pts.push_back(std::pair<double,double>(-10, -10));
-			pts.push_back(std::pair<double,double>(10, -10));
+			pts.push_back(std::pair<double,double>(-size, -size));
+			pts.push_back(std::pair<double,double>(size, -size));
 			sel_line_left_top_2.SetPoints(pts);
 			sel_line_left_top_2.SetVisible(on);
 			pts.clear();
-			pts.push_back(std::pair<double,double>(preferredWidth()-10, -10));
-			pts.push_back(std::pair<double,double>(preferredWidth()+10, -10));
+			pts.push_back(std::pair<double,double>(preferredWidth()-size, -size));
+			pts.push_back(std::pair<double,double>(preferredWidth()+size, -size));
 			sel_line_right_top_1.SetPoints(pts);
 			sel_line_right_top_1.SetVisible(on);
 			pts.clear();
-			pts.push_back(std::pair<double,double>(preferredWidth()+10, -10));
-			pts.push_back(std::pair<double,double>(preferredWidth()+10, +10));
+			pts.push_back(std::pair<double,double>(preferredWidth()+size, -size));
+			pts.push_back(std::pair<double,double>(preferredWidth()+size, +size));
 			sel_line_right_top_2.SetPoints(pts);
 			sel_line_right_top_2.SetVisible(on);
 			pts.clear();
-			pts.push_back(std::pair<double,double>(-10, preferredHeight()-10));
-			pts.push_back(std::pair<double,double>(-10, preferredHeight()+10));
+			pts.push_back(std::pair<double,double>(-size, preferredHeight()-size));
+			pts.push_back(std::pair<double,double>(-size, preferredHeight()+size));
 			sel_line_left_bottom_1.SetPoints(pts);
 			sel_line_left_bottom_1.SetVisible(on);
 			pts.clear();
-			pts.push_back(std::pair<double,double>(-10, preferredHeight()+10));
-			pts.push_back(std::pair<double,double>(+10, preferredHeight()+10));
+			pts.push_back(std::pair<double,double>(-size, preferredHeight()+size));
+			pts.push_back(std::pair<double,double>(+size, preferredHeight()+size));
 			sel_line_left_bottom_2.SetPoints(pts);
 			sel_line_left_bottom_2.SetVisible(on);
 			pts.clear();
-			pts.push_back(std::pair<double,double>(preferredWidth()+10, preferredHeight()-10));
-			pts.push_back(std::pair<double,double>(preferredWidth()+10, preferredHeight()+10));
+			pts.push_back(std::pair<double,double>(preferredWidth()+size, preferredHeight()-size));
+			pts.push_back(std::pair<double,double>(preferredWidth()+size, preferredHeight()+size));
 			sel_line_right_bottom_1.SetPoints(pts);
 			sel_line_right_bottom_1.SetVisible(on);
 			pts.clear();
-			pts.push_back(std::pair<double,double>(preferredWidth()-10, preferredHeight()+10));
-			pts.push_back(std::pair<double,double>(preferredWidth()+10, preferredHeight()+10));
+			pts.push_back(std::pair<double,double>(preferredWidth()-size, preferredHeight()+size));
+			pts.push_back(std::pair<double,double>(preferredWidth()+size, preferredHeight()+size));
 			sel_line_right_bottom_2.SetPoints(pts);
-			sel_line_right_bottom_2.SetVisible(on);
+			sel_line_right_bottom_2.SetVisible(on);			
 		}
 
 		bool GeneratorGui::IsSelected() const
 		{
-			return false;
+			return sel_line_left_top_1.visible();
 		}
 
 		bool GeneratorGui::OnEvent(TestCanvas::Event* ev)
 		{
-			MachineGui::OnEvent(ev);
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
 				view()->SelectMachine(this);
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
 				ShowDialog();		
 			}
+			MachineGui::OnEvent(ev);
 			return true;
 		}
 
