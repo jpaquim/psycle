@@ -76,6 +76,7 @@ namespace psycle {
 			if ( del_line_ ) {
 				delete del_line_;
 				del_line_ = 0;
+				parent_->Invalidate();
 			}
 		}
 
@@ -312,6 +313,7 @@ namespace psycle {
 				Machine* dmac = connect_to_gui->mac();
 				int dsttype=0;
 				if (song_->InsertConnection(tmac, dmac,0,dsttype)== -1) {
+					del_line_ = sender;
 					//MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
 				} else {
 					connect_from_gui->AttachWire(sender,0);

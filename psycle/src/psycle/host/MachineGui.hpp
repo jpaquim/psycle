@@ -99,6 +99,7 @@ namespace psycle {
 			void dragging_start(double x, double y);
 			void dragging(double x, double y);
 			void dragging_stop();			
+			void DoMacPropDialog();
 			//bool TestMute(double x, double y);
 			//bool TestSolo(double x, double y);
 			void OnMove();
@@ -110,6 +111,7 @@ namespace psycle {
 						
 			double dragging_x_;
 			double dragging_y_;
+			bool new_con_;
 			bool dragging_;
 			std::vector< std::pair<WireGui*, int> > wire_uis_;
 						
