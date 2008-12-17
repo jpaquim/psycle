@@ -4,6 +4,8 @@
 #include "MacProp.hpp"
 #include "Psycle.hpp"
 #include "MainFrm.hpp"
+#include "MachineGui.hpp"
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -11,6 +13,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		CMacProp::CMacProp(CWnd* pParent)
 			: CDialog(CMacProp::IDD, pParent)
+		{
+			m_view=NULL;
+		}
+
+		CMacProp::CMacProp(MachineGui* gui)
+			: CDialog(CMacProp::IDD, 0),
+			  gui_(gui)
 		{
 			m_view=NULL;
 		}

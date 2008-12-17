@@ -26,6 +26,7 @@ namespace psycle {
 			  main_(main),
 			  song_(song),
 			  del_line_(0),
+			  del_machine_(0),
 			  is_locked_(false)
 		{
 			set_bg_color(Global::pConfig->mv_colour);
@@ -76,6 +77,16 @@ namespace psycle {
 			if ( del_line_ ) {
 				delete del_line_;
 				del_line_ = 0;
+				parent_->Invalidate();
+			}
+			if ( del_machine_) {
+				std::map<Machine*, MachineGui*>::iterator it;
+				it = gui_map_.find(del_machine_->mac());
+				assert(it != gui_map_.end());
+				gui_map_.erase(it);
+				del_machine_->set_manage(false);
+				delete del_machine_;
+				del_machine_ = 0;
 				parent_->Invalidate();
 			}
 		}
