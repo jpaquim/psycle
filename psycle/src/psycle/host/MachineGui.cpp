@@ -72,7 +72,7 @@ namespace psycle {
 		void MachineGui::DoMacPropDialog()
 		{
 			int propMac = mac()->_macIndex;
-			CMacProp dlg;
+			CMacProp dlg(this);
 			//dlg.m_view=this;
 			dlg.pMachine = Global::_pSong->_pMachine[propMac];
 			dlg.pSong = view()->song();
@@ -90,14 +90,14 @@ namespace psycle {
 			}
 			if(dlg.deleted)
 			{
-				/*view()->main()->CloseMacGui(propMac);
-				Global::_pSong->DestroyMachine(propMac);
-				pParentMain->UpdateEnvInfo();
-				pParentMain->UpdateComboGen();
-				if (pParentMain->pGearRackDialog)
+				view()->song()->DestroyMachine(propMac);
+				view()->main()->UpdateEnvInfo();
+				view()->main()->UpdateComboGen();
+				if (view()->main()->pGearRackDialog)
 				{
-					pParentMain->RedrawGearRackList();
-				}*/
+					view()->main()->RedrawGearRackList();
+				}
+				view()->SetDeleteMachineGui(this);
 			}
 		}
 

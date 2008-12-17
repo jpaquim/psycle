@@ -16,6 +16,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		public:
 			CChildView *m_view;
 			CMacProp(CWnd* pParent = 0);
+			CMacProp(class MachineGui* gui);
+		private:
+			MachineGui* gui_;
+		public:
 			Machine *pMachine;
 			Song* pSong;
 			int thisMac;

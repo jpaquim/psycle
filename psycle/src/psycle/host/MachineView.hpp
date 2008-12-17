@@ -33,6 +33,10 @@ namespace psycle {
 			void LockVu();
 			void UnlockVu();
 
+			void SetDeleteMachineGui(MachineGui* gui) {
+				del_machine_ = gui;
+			}
+
 		private:
 			void InitSkin();
 			void BuildWires();
@@ -49,6 +53,7 @@ namespace psycle {
 			std::map<Machine*, MachineGui*> gui_map_;
 			Song* song_;
 			WireGui* del_line_;
+			MachineGui* del_machine_;
 			bool is_locked_;
 			CBitmap machineskin;
 			CBitmap machineskinmask;
