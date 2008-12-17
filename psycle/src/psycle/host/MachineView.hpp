@@ -30,6 +30,9 @@ namespace psycle {
 							 double y,
 							 int picker);
 
+			void LockVu();
+			void UnlockVu();
+
 		private:
 			void InitSkin();
 			void BuildWires();
@@ -46,6 +49,7 @@ namespace psycle {
 			std::map<Machine*, MachineGui*> gui_map_;
 			Song* song_;
 			WireGui* del_line_;
+			bool is_locked_;
 			CBitmap machineskin;
 			CBitmap machineskinmask;
 			CBitmap machinebkg;

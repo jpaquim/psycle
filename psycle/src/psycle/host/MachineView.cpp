@@ -25,7 +25,8 @@ namespace psycle {
 			  parent_(parent),
 			  main_(main),
 			  song_(song),
-			  del_line_(0)
+			  del_line_(0),
+			  is_locked_(false)
 		{
 			set_bg_color(Global::pConfig->mv_colour);
 			InitSkin();
@@ -46,10 +47,22 @@ namespace psycle {
 
 		void MachineView::UpdateVUs()
 		{
+			if (!is_locked_) {
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
-			for ( ; it != gui_map_.end(); ++it ) {
+			  for ( ; it != gui_map_.end(); ++it ) {
 				(*it).second->UpdateVU();
+			  }
 			}
+		}
+
+		void MachineView::LockVu()
+		{
+			is_locked_ = true;
+		}
+
+		void MachineView::UnlockVu()
+		{
+			is_locked_ = false;
 		}
 
 		void MachineView::OnEvent(TestCanvas::Event* ev)
@@ -106,13 +119,16 @@ namespace psycle {
 
 		void MachineView::Rebuild()
 		{			
+			LockVu();
 			root()->Clear();
+			gui_map_.clear();
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
 				if (song_->_pMachine[idx]) {
 					CreateMachineGui(song_->_pMachine[idx]);
 				}
 			}
 			BuildWires();
+			UnlockVu();
 		}
 
 		void MachineView::SelectMachine(MachineGui* gui)
@@ -136,7 +152,14 @@ namespace psycle {
 					else
 					if ( mac->_mode == MACHMODE_FX)
 						gui = new EffectGui(this, mac);
-				break;				
+				break;
+				case MACH_DUMMY:
+					if ( mac->_mode == MACHMODE_GENERATOR)
+						gui = new GeneratorGui(this, mac);
+					else
+					if ( mac->_mode == MACHMODE_FX)
+						gui = new EffectGui(this, mac);
+				break;
 				case MACH_MIXER:
 					gui = new MixerGui(this, mac);
 				break;
@@ -159,17 +182,37 @@ namespace psycle {
 					gui = new MachineGui(this, mac);
 			}
 			gui_map_[mac] = gui;
-			gui->SetSkin(MachineCoords,
-						 &machineskin,
-						 &machineskinmask,
-						 &machinebkg,
-						 hbmMachineSkin,
-						 hbmMachineBkg,
-						 hbmMachineDial,
-						 Global::pConfig->generatorFont,
-						 Global::pConfig->mv_generator_fontcolour,
-						 Global::pConfig->effectFont,
-						 Global::pConfig->mv_effect_fontcolour);
+			if ( mac->_mode == MACHMODE_GENERATOR ) {
+				gui->SetSkin(MachineCoords,
+							 &machineskin,
+							 &machineskinmask,
+							 &machinebkg,
+							hbmMachineSkin,
+							hbmMachineBkg,
+							hbmMachineDial,
+							Global::pConfig->generatorFont,
+							Global::pConfig->mv_generator_fontcolour);
+			} else if ( mac->_mode == MACHMODE_FX) {
+				gui->SetSkin(MachineCoords,
+							 &machineskin,
+							 &machineskinmask,
+							 &machinebkg,
+				 			 hbmMachineSkin,
+							 hbmMachineBkg,
+							 hbmMachineDial,
+							 Global::pConfig->effectFont,
+							 Global::pConfig->mv_effect_fontcolour);
+			} else {
+				gui->SetSkin(MachineCoords,
+							 &machineskin,
+							 &machineskinmask,
+							 &machinebkg,
+		  					 hbmMachineSkin,
+							 hbmMachineBkg,
+							 hbmMachineDial,
+							 Global::pConfig->generatorFont,
+							 Global::pConfig->mv_generator_fontcolour);
+			}
 			if ( mac->_mute )
 				gui->SetMute(true);
 			else if (song_->machineSoloed == mac->_macIndex)

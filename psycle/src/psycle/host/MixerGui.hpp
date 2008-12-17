@@ -12,7 +12,6 @@ namespace psycle {
 			~MixerGui();
 
 			virtual bool OnEvent(TestCanvas::Event* ev);
-
 			virtual void BeforeDeleteDlg();
 
 		private:

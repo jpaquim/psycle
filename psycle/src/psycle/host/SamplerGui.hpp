@@ -1,11 +1,11 @@
 #pragma once
 
-#include "MachineGui.hpp"
+#include "GeneratorGui.hpp"
 
 namespace psycle {
 	namespace host {
 
-		class SamplerGui : public MachineGui {
+		class SamplerGui : public GeneratorGui {
 		public:
 			SamplerGui(class MachineView* view,
 					   class Machine* mac);

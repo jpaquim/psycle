@@ -1,4 +1,4 @@
-#include "VstFxGui.hpp"
+#include "VstGenGui.hpp"
 #include "Song.hpp"
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
@@ -9,18 +9,18 @@
 namespace psycle {
 	namespace host {
 
-		VstFxGui::VstFxGui(class MachineView* view,
-						   class Machine* mac)
-			: EffectGui(view, mac),
+		VstGenGui::VstGenGui(class MachineView* view,
+							 class Machine* mac)
+			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{
 		}
 
-		VstFxGui::~VstFxGui()
+		VstGenGui::~VstGenGui()
 		{		
 		}
 
-		bool VstFxGui::OnEvent(TestCanvas::Event* ev)
+		bool VstGenGui::OnEvent(TestCanvas::Event* ev)
 		{
 			MachineGui::OnEvent(ev);
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
@@ -29,12 +29,12 @@ namespace psycle {
 			return true;
 		}
 
-		void VstFxGui::BeforeDeleteDlg()
+		void VstGenGui::BeforeDeleteDlg()
 		{
 			dialog_ = 0;
 		}
 
-		void VstFxGui::ShowDialog()
+		void VstGenGui::ShowDialog()
 		{
 			if ( !dialog_ ) {
 				dialog_ = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(mac()), this);
