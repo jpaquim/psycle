@@ -11,19 +11,9 @@ namespace psycle {
 			dragging_(false),
 			TestCanvas::Group(view->root(), mac->_x, mac->_y),
 			view_(view),
-			mac_(mac),
-			pixbuf_(this),
-			mute_pixbuf_(this),
-			pan_pixbuf_(this),
-			vu_bg_pixbuf_(this),
-			vu_peak_pixbuf_(this),
-			vu_led_pixbuf_(this),
-			text_(this)
-			
-			//rect_(this, 0, 0, 200, 100)
+			mac_(mac)						
 		{		
 			assert(mac_);
-			UpdateText();
 		}
 
 		MachineGui::~MachineGui()
@@ -48,7 +38,7 @@ namespace psycle {
 		{
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
 				if ( ev->button == 1 ) {
-					TestMute(ev->x, ev->y);
+//					TestMute(ev->x, ev->y);
 					dragging_start(ev->x, ev->y);
 				} else
 				if ( ev->button == 3 ) {
@@ -80,7 +70,7 @@ namespace psycle {
 			}
 		}
 
-		bool MachineGui::TestMute(double x, double y)
+		/*bool MachineGui::TestMute(double x, double y)
 		{
 			if(InRect(x,
 					  y,
@@ -114,7 +104,7 @@ namespace psycle {
 			} else {
 				return false;
 			}
-		}
+		}*/
 
 		void MachineGui::dragging_start(double x, double y)
 		{
@@ -143,15 +133,15 @@ namespace psycle {
 
 		void MachineGui::SetMute(bool mute)
 		{			
-			mac_->_mute = mute;
+/*			mac_->_mute = mute;
 			mute_pixbuf_.SetVisible(mute);
-			solo_pixbuf_.SetVisible(false);
+			solo_pixbuf_.SetVisible(false);*/
 		}
 
 		void MachineGui::SetSolo(bool mute)
 		{
-			mute_pixbuf_.SetVisible(false);
-			solo_pixbuf_.SetVisible(true);
+/*			mute_pixbuf_.SetVisible(false);
+			solo_pixbuf_.SetVisible(true);*/
 		}
 
 		void MachineGui::AttachWire(WireGui* gui, int point) 
@@ -169,30 +159,7 @@ namespace psycle {
 				}
 			}
 		}
-
-		void MachineGui::UpdatePan()
-		{
-			if ( mac_->_mode == MACHMODE_GENERATOR ) {
-				int panning = mac_->_panning*MachineCoords_.dGeneratorPan.width;
-				panning /= 128;
-				pan_pixbuf_.SetXY(panning+MachineCoords_.dGeneratorPan.x, 
-							  MachineCoords_.dGeneratorPan.y);
-			} else
-			if ( mac_->_mode == MACHMODE_FX ) {
-				int panning = mac_->_panning*MachineCoords_.dEffectPan.width;
-				panning /= 128;
-				pan_pixbuf_.SetXY(panning+MachineCoords_.dEffectPan.x, 
-							  MachineCoords_.dEffectPan.y);
-			}
-		}
-
-		void MachineGui::UpdateText()
-		{
-			char name[sizeof(mac_->_editName)+6+3];
-			sprintf(name,"%.2X:%s",mac_->_macIndex,mac_->_editName);
-			text_.SetText(name);
-		}
-		
+	
 		void MachineGui::OnMove()
 		{
 			std::vector< std::pair<WireGui*, int> >::iterator it;
@@ -204,7 +171,13 @@ namespace psycle {
 
 		void MachineGui::UpdateVU()
 		{
-			mac_->_volumeMaxCounterLife--;
+			mac()->_volumeMaxCounterLife--;
+			if ((mac()->_volumeDisplay > mac()->_volumeMaxDisplay)
+				||	(mac()->_volumeMaxCounterLife <= 0)) {
+				mac()->_volumeMaxDisplay = mac()->_volumeDisplay-1;
+				mac()->_volumeMaxCounterLife = 60;
+			}
+/*			mac_->_volumeMaxCounterLife--;
 			if ((mac_->_volumeDisplay > mac_->_volumeMaxDisplay)
 				||	(mac_->_volumeMaxCounterLife <= 0)) {
 				mac_->_volumeMaxDisplay = mac_->_volumeDisplay-1;
@@ -266,20 +239,11 @@ namespace psycle {
 									  MachineCoords_.sEffectVu0.y);
 				vu_led_pixbuf_.QueueDraw();
 
-			}
+			}*/
 		}
 
-		void MachineGui::BeforeDeleteDlg() {
-		}
-
-		int MachineGui::preferredWidth() const
+		void MachineGui::BeforeDeleteDlg()
 		{
-			return pixbuf_.width();
-		}
-
-		int MachineGui::preferredHeight() const
-		{
-			return pixbuf_.height();
 		}
 
 		void MachineGui::SetSkin(const SMachineCoords& MachineCoords,
@@ -289,87 +253,9 @@ namespace psycle {
 								 HBITMAP hbmMachineSkin,
 								 HBITMAP hbmMachineBkg,
 								 HBITMAP hbmMachineDial,
-								 const CFont& generator_font,
-								 COLORREF generator_font_color,
-								 const CFont& effect_font,
-								 COLORREF effect_font_color)
+								 const CFont& font,
+								 COLORREF font_color)
 		{
-			machineskin_ = machineskin;
-			machineskinmask_ = machineskinmask;
-			machinebkg_ = machinebkg;
-			hbmMachineSkin_ = hbmMachineSkin;
-			hbmMachineBkg_ = hbmMachineBkg;
-			hbmMachineDial = hbmMachineDial;
-			MachineCoords_ = MachineCoords;
-
-			pixbuf_.SetImage(machineskin);
-			mute_pixbuf_.SetImage(machineskin);
-			solo_pixbuf_.SetImage(machineskin);
-			vu_bg_pixbuf_.SetImage(machineskin);
-			vu_peak_pixbuf_.SetImage(machineskin);
-			vu_led_pixbuf_.SetImage(machineskin);
-			switch (mac_->_mode) {
-				case MACHMODE_GENERATOR: 
-					pixbuf_.SetSize(MachineCoords.sGenerator.width, 
-									MachineCoords.sGenerator.height);
-									pixbuf_.SetSource(MachineCoords.sGenerator.x, 
-									MachineCoords.sGenerator.y);
-					mute_pixbuf_.SetXY(MachineCoords.dGeneratorMute.x, 
-									   MachineCoords.dGeneratorMute.y);
-					mute_pixbuf_.SetSize(MachineCoords.sGeneratorMute.width, 
-									     MachineCoords.sGeneratorMute.height);
-					mute_pixbuf_.SetSource(MachineCoords.sGeneratorMute.x, 
-										   MachineCoords.sGeneratorMute.y);
-					mute_pixbuf_.SetVisible(false);
-					solo_pixbuf_.SetXY(MachineCoords.dGeneratorSolo.x,
-									   MachineCoords.dGeneratorSolo.y);
-					solo_pixbuf_.SetSize(MachineCoords.sGeneratorSolo.width, 
-										 MachineCoords.sGeneratorSolo.height);
-					solo_pixbuf_.SetSource(MachineCoords.sGeneratorSolo.x, 
-										   MachineCoords.sGeneratorSolo.y);
-					solo_pixbuf_.SetVisible(false);
-					UpdatePan();
-					pan_pixbuf_.SetSize(MachineCoords.sGeneratorPan.width, 
-										MachineCoords.sGeneratorPan.height);
-					pan_pixbuf_.SetSource(MachineCoords.sGeneratorPan.x, 
-										  MachineCoords.sGeneratorPan.y);
-					text_.SetXY(MachineCoords.dGeneratorName.x,
-							    MachineCoords.dGeneratorName.y);			
-					text_.SetFont(generator_font);
-					text_.SetColor(GetRValue(generator_font_color) / 255.0,
-								   GetGValue(generator_font_color) / 255.0,
-								   GetBValue(generator_font_color) / 255.0,
-								   1.0);
-				break;
-				case MACHMODE_FX:
-					pixbuf_.SetSize(MachineCoords.sEffect.width, 
-									MachineCoords.sEffect.height);
-									pixbuf_.SetSource(MachineCoords.sEffect.x, 
-									MachineCoords.sEffect.y);
-					UpdatePan();
-					pan_pixbuf_.SetSize(MachineCoords.sEffectPan.width, 
-										MachineCoords.sEffectPan.height);
-					pan_pixbuf_.SetSource(MachineCoords.sEffectPan.x, 
-										  MachineCoords.sEffectPan.y);
-					text_.SetXY(MachineCoords.dEffectName.x,
-							    MachineCoords.dEffectName.y);
-					text_.SetFont(effect_font);
-					text_.SetColor(GetRValue(effect_font_color) / 255.0,
-								   GetGValue(effect_font_color) / 255.0,
-								   GetBValue(effect_font_color) / 255.0,
-								   1.0);
-				break;
-				case MACHMODE_MASTER:
-					pixbuf_.SetSize(MachineCoords.sMaster.width, 
-									MachineCoords.sMaster.height);
-									pixbuf_.SetSource(MachineCoords.sMaster.x, 
-									MachineCoords.sMaster.y);					
-					text_.SetVisible(false);
-			
-				break;
-				default:
-				;
-			}
 		}
 		
 

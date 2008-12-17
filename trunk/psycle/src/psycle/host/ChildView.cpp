@@ -2136,7 +2136,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::FileLoadsongNamed(std::string fName)
 		{
 			pParentMain->CloseAllMacGuis();
-			Global::pPlayer->Stop();
+			Global::pPlayer->Stop();			
 			///\todo lock/unlock
 			Sleep(256);
 			_outputActive = false;

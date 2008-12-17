@@ -11,7 +11,7 @@ namespace psycle {
 
 		SamplerGui::SamplerGui(class MachineView* view,
 						       class Machine* mac)
-			: MachineGui(view, mac),
+			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{
 		}

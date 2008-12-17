@@ -1,15 +1,15 @@
 #pragma once
 
-#include "EffectGui.hpp"
+#include "GeneratorGui.hpp"
 
 namespace psycle {
 	namespace host {
 
-		class VstFxGui : public EffectGui {
+		class VstGenGui : public GeneratorGui {
 		public:
-			VstFxGui(class MachineView* view,
-				     class Machine* mac);
-			~VstFxGui();
+			VstGenGui(class MachineView* view,
+				      class Machine* mac);
+			~VstGenGui();
 
 			virtual bool OnEvent(TestCanvas::Event* ev);
 
@@ -17,7 +17,6 @@ namespace psycle {
 
 		private:
 			void ShowDialog();
-
 			class CVstEffectWnd* dialog_;
 		};
 	}
