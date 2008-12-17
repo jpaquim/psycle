@@ -722,7 +722,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.type = TestCanvas::Event::MOTION_NOTIFY;
 				ev.x = point.x;
 				ev.y = point.y;
-				ev.button = 0;
+				if ( nFlags & MK_LBUTTON )
+					ev.button = 1;
+				else if ( nFlags & MK_RBUTTON )
+					ev.button = 3;
+				else
+					ev.button = 0;
 				machine_view_.OnEvent(&ev);
 				return;
 #endif

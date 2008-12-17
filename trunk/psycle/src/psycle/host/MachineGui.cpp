@@ -1,7 +1,9 @@
 #include "MachineGui.hpp"
 #include "Machine.hpp"
 #include "MachineView.hpp"
+#include "MacProp.hpp"
 #include "WireGui.hpp"
+#include "MainFrm.hpp"
 
 namespace psycle {
 	namespace host {
@@ -42,17 +44,61 @@ namespace psycle {
 					dragging_start(ev->x, ev->y);
 				} else
 				if ( ev->button == 3 ) {
-					view_->OnNewConnection(this);
+					new_con_ = false;
+					dragging_x_ = ev->x;
+					dragging_y_ = ev->y;
 				}
 			} else
 			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
-			  if (dragging_)
+				if (dragging_) {
 				dragging(ev->x, ev->y);
+				} else if (ev->button == 3) {
+					if (!new_con_ && (dragging_x_ != ev->x || dragging_y_ != ev->y)) {
+						view_->OnNewConnection(this);
+						new_con_ = true;
+					}
+				}
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
-				dragging_stop();
+				if (ev->button == 3) {
+					DoMacPropDialog();
+				} else {
+					dragging_stop();
+				}
 			}
 			return true;
+		}
+
+		void MachineGui::DoMacPropDialog()
+		{
+			int propMac = mac()->_macIndex;
+			CMacProp dlg;
+			//dlg.m_view=this;
+			dlg.pMachine = Global::_pSong->_pMachine[propMac];
+			dlg.pSong = view()->song();
+			dlg.thisMac = propMac;
+			if(dlg.DoModal() == IDOK)
+			{
+				sprintf(dlg.pMachine->_editName, dlg.txt);
+				view()->main()->StatusBarText(dlg.txt);
+				view()->main()->UpdateEnvInfo();
+				view()->main()->UpdateComboGen();
+				if (view()->main()->pGearRackDialog)
+				{
+					view()->main()->RedrawGearRackList();
+				}
+			}
+			if(dlg.deleted)
+			{
+				/*view()->main()->CloseMacGui(propMac);
+				Global::_pSong->DestroyMachine(propMac);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				if (pParentMain->pGearRackDialog)
+				{
+					pParentMain->RedrawGearRackList();
+				}*/
+			}
 		}
 
 		bool MachineGui::InRect(double x, double y, double x1, double y1, double x2,
@@ -108,7 +154,7 @@ namespace psycle {
 
 		void MachineGui::dragging_start(double x, double y)
 		{
-			dragging_ = true;
+			dragging_ = true;			
 			dragging_x_ = x;
 			dragging_y_ = y;
 		}
@@ -177,69 +223,6 @@ namespace psycle {
 				mac()->_volumeMaxDisplay = mac()->_volumeDisplay-1;
 				mac()->_volumeMaxCounterLife = 60;
 			}
-/*			mac_->_volumeMaxCounterLife--;
-			if ((mac_->_volumeDisplay > mac_->_volumeMaxDisplay)
-				||	(mac_->_volumeMaxCounterLife <= 0)) {
-				mac_->_volumeMaxDisplay = mac_->_volumeDisplay-1;
-				mac_->_volumeMaxCounterLife = 60;
-			}
-			int vol = mac_->_volumeDisplay;
-			int max = mac_->_volumeMaxDisplay;
-			if ( mac_->_mode == MACHMODE_GENERATOR) {
-				vol *= MachineCoords_.dGeneratorVu.width;
-				vol /= 96;
-				max *= MachineCoords_.dGeneratorVu.width;
-				max /= 96;
-				vu_bg_pixbuf_.SetXY(vol+MachineCoords_.dGeneratorVu.x,
-									MachineCoords_.dGeneratorVu.y);
-				vu_bg_pixbuf_.SetSize(MachineCoords_.dGeneratorVu.width-vol,
-								  MachineCoords_.sGeneratorVu0.height);
-				vu_bg_pixbuf_.SetSource(MachineCoords_.sGenerator.x+MachineCoords_.dGeneratorVu.x+vol,
-										MachineCoords_.sGenerator.y+MachineCoords_.dGeneratorVu.y);
-				vu_bg_pixbuf_.QueueDraw();
-				vu_peak_pixbuf_.SetXY(max + MachineCoords_.dGeneratorVu.x, 
-									  MachineCoords_.dGeneratorVu.y);
-				vu_peak_pixbuf_.SetSize(MachineCoords_.sGeneratorVuPeak.width, 
-										MachineCoords_.sGeneratorVuPeak.height);
-				vu_peak_pixbuf_.SetSource(MachineCoords_.sGeneratorVuPeak.x, 
-										  MachineCoords_.sGeneratorVuPeak.y);
-				vu_peak_pixbuf_.QueueDraw();
-				vu_led_pixbuf_.SetXY(MachineCoords_.dGeneratorVu.x, 
-									 MachineCoords_.dGeneratorVu.y);
-				vu_led_pixbuf_.SetSize(vol,
-									MachineCoords_.sGeneratorVu0.height);
-				vu_led_pixbuf_.SetSource(MachineCoords_.sGeneratorVu0.x, 
-									  MachineCoords_.sGeneratorVu0.y);
-				vu_led_pixbuf_.QueueDraw();
-			} else
-			if ( mac_->_mode == MACHMODE_FX) {
-				vol *= MachineCoords_.dEffectVu.width;
-				vol /= 96;
-				max *= MachineCoords_.dEffectVu.width;
-				max /= 96;
-				vu_bg_pixbuf_.SetXY(vol+MachineCoords_.dEffectVu.x,
-									MachineCoords_.dEffectVu.y);
-				vu_bg_pixbuf_.SetSize(MachineCoords_.dEffectVu.width-vol,
-								  MachineCoords_.sEffectVu0.height);
-				vu_bg_pixbuf_.SetSource(MachineCoords_.sEffect.x+MachineCoords_.dGeneratorVu.x+vol,
-										MachineCoords_.sEffect.y+MachineCoords_.dGeneratorVu.y);
-				vu_bg_pixbuf_.QueueDraw();
-				vu_peak_pixbuf_.SetXY(max + MachineCoords_.dEffectVu.x, 
-									  MachineCoords_.dEffectVu.y);
-				vu_peak_pixbuf_.SetSize(MachineCoords_.sEffectVuPeak.width, 
-										MachineCoords_.sEffectVuPeak.height);
-				vu_peak_pixbuf_.SetSource(MachineCoords_.sEffectVuPeak.x, 
-										  MachineCoords_.sEffectVuPeak.y);
-				vu_peak_pixbuf_.QueueDraw();
-				vu_led_pixbuf_.SetXY(MachineCoords_.dEffectVu.x, 
-									 MachineCoords_.dEffectVu.y);
-				vu_led_pixbuf_.SetSize(vol,
-									MachineCoords_.sEffectVu0.height);
-				vu_led_pixbuf_.SetSource(MachineCoords_.sEffectVu0.x, 
-									  MachineCoords_.sEffectVu0.y);
-				vu_led_pixbuf_.QueueDraw();
-
-			}*/
 		}
 
 		void MachineGui::BeforeDeleteDlg()

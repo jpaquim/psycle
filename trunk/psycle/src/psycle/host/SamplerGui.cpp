@@ -22,7 +22,7 @@ namespace psycle {
 
 		bool SamplerGui::OnEvent(TestCanvas::Event* ev)
 		{
-			MachineGui::OnEvent(ev);
+			GeneratorGui::OnEvent(ev);
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
 				ShowDialog();		
 			}
