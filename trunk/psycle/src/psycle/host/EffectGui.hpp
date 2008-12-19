@@ -29,7 +29,10 @@ namespace psycle {
 			void ShowDialog();
 			void UpdateText();
 			void UpdatePan();
+			bool TestPan(double x, double y);
+			void DoPanDragging(double x, double y);
 
+			bool pan_dragging_;
 			class CFrameMachine* dialog_;
 			//skin elements
 			TestCanvas::PixBuf pixbuf_;

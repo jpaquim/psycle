@@ -19,7 +19,8 @@ namespace psycle {
 			  vu_bg_pixbuf_(this),
 			  vu_peak_pixbuf_(this),
 			  vu_led_pixbuf_(this),
-			  text_(this)
+			  text_(this),
+			  pan_dragging_(false)
 		{
 			TestCanvas::Line::Points pts;
 			pts.push_back(std::pair<double,double>(0, 0));
@@ -96,9 +97,9 @@ namespace psycle {
 
 		void GeneratorGui::UpdatePan()
 		{
-			int panning = mac()->_panning*MachineCoords_.dGeneratorPan.width;
+			int panning = mac()->_panning * MachineCoords_.dGeneratorPan.width;
 			panning /= 128;
-			pan_pixbuf_.SetXY(panning+MachineCoords_.dGeneratorPan.x, 
+			pan_pixbuf_.SetXY(panning + MachineCoords_.dGeneratorPan.x, 
 		 	  			      MachineCoords_.dGeneratorPan.y);
 		}
 
@@ -126,6 +127,7 @@ namespace psycle {
 			vu_bg_pixbuf_.SetImage(machineskin);
 			vu_peak_pixbuf_.SetImage(machineskin);
 			vu_led_pixbuf_.SetImage(machineskin);
+			pan_pixbuf_.SetImage(machineskin);
 			pixbuf_.SetSize(MachineCoords.sGenerator.width, 
 							MachineCoords.sGenerator.height);
 							pixbuf_.SetSource(MachineCoords.sGenerator.x, 
@@ -149,6 +151,7 @@ namespace psycle {
 								MachineCoords.sGeneratorPan.height);
 			pan_pixbuf_.SetSource(MachineCoords.sGeneratorPan.x, 
 								  MachineCoords.sGeneratorPan.y);
+
 			text_.SetXY(MachineCoords.dGeneratorName.x,
 					    MachineCoords.dGeneratorName.y);			
 			text_.SetFont(font);
@@ -213,10 +216,82 @@ namespace psycle {
 			return sel_line_left_top_1.visible();
 		}
 
+		bool GeneratorGui::TestPan(double x, double y)
+		{				
+			int panning = mac()->_panning*MachineCoords_.dGeneratorPan.width;
+			panning /= 128;
+			if (InRect(x,
+				       y,
+					   MachineCoords_.dGeneratorPan.x + panning,
+					   MachineCoords_.dGeneratorPan.y,
+					   MachineCoords_.dGeneratorPan.x +
+					   panning +
+					   MachineCoords_.sGeneratorPan.width,
+					   MachineCoords_.dGeneratorPan.y +
+					   MachineCoords_.sGeneratorPan.height)) {
+				pan_dragging_ = true;
+				return true;
+			}
+			return false;
+		}
+
+		void GeneratorGui::DoPanDragging(double x, double y)
+		{
+			int newpan = (x  - MachineCoords_.dGeneratorPan.x - (MachineCoords_.sGeneratorPan.width/2))*128;
+			if (MachineCoords_.dGeneratorPan.width) {
+				newpan /= MachineCoords_.dGeneratorPan.width;
+				mac()->SetPan(newpan);
+				UpdatePan();
+				QueueDraw();
+			}
+		}
+
+		bool GeneratorGui::TestMute(double x, double y)
+		{			
+			if(InRect(x,
+					  y,
+					  MachineCoords_.dGeneratorMute.x,
+					  MachineCoords_.dGeneratorMute.y,
+					  MachineCoords_.dGeneratorMute.x + 
+					  MachineCoords_.sGeneratorMute.width,
+					  MachineCoords_.dGeneratorMute.y + 
+					  MachineCoords_.sGeneratorMute.height)) {
+			  SetMute(!mac()->_mute);
+			  QueueDraw();
+			  return true;
+			} else {
+			  return false;
+			}
+		}
+
+		void GeneratorGui::SetMute(bool mute)
+		{			
+			mac()->_mute = mute;
+			mute_pixbuf_.SetVisible(mute);
+			solo_pixbuf_.SetVisible(false);
+		}
+
+		void GeneratorGui::SetSolo(bool mute)
+		{
+			mute_pixbuf_.SetVisible(false);
+			solo_pixbuf_.SetVisible(true);
+		}
+
 		bool GeneratorGui::OnEvent(TestCanvas::Event* ev)
 		{
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
 				view()->SelectMachine(this);
+				if ( !TestMute(ev->x, ev->y) )
+					TestPan(ev->x, ev->y);
+			} else
+			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
+				if ( pan_dragging_ ) {
+					DoPanDragging(ev->x, ev->y);
+					return true;
+				}
+			} else
+			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
+				pan_dragging_ = false;
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
 				ShowDialog();		
