@@ -11,6 +11,7 @@ namespace psycle {
 		EffectGui::EffectGui(class MachineView* view,
 							 class Machine* mac)
 			: MachineGui(view, mac),
+			  pan_dragging_(false),
 			  dialog_(0),
 			  pixbuf_(this),
 			  mute_pixbuf_(this),
@@ -26,6 +27,37 @@ namespace psycle {
 		EffectGui::~EffectGui()
 		{
 		}
+
+		bool EffectGui::TestPan(double x, double y)
+		{				
+			int panning = mac()->_panning*MachineCoords_.dGeneratorPan.width;
+			panning /= 128;
+			if (InRect(x,
+				       y,
+					   MachineCoords_.dGeneratorPan.x + panning,
+					   MachineCoords_.dGeneratorPan.y,
+					   MachineCoords_.dGeneratorPan.x +
+					   panning +
+					   MachineCoords_.sGeneratorPan.width,
+					   MachineCoords_.dGeneratorPan.y +
+					   MachineCoords_.sGeneratorPan.height)) {
+				pan_dragging_ = true;
+				return true;
+			}
+			return false;
+		}
+
+		void EffectGui::DoPanDragging(double x, double y)
+		{
+			int newpan = (x  - MachineCoords_.dGeneratorPan.x - (MachineCoords_.sGeneratorPan.width/2))*128;
+			if (MachineCoords_.dGeneratorPan.width) {
+				newpan /= MachineCoords_.dGeneratorPan.width;
+				mac()->SetPan(newpan);
+				UpdatePan();
+				QueueDraw();
+			}
+		}
+
 
 		void EffectGui::UpdateVU() 
 		{
@@ -98,6 +130,7 @@ namespace psycle {
 			vu_bg_pixbuf_.SetImage(machineskin);
 			vu_peak_pixbuf_.SetImage(machineskin);
 			vu_led_pixbuf_.SetImage(machineskin);
+			pan_pixbuf_.SetImage(machineskin);
 			pixbuf_.SetSize(MachineCoords.sEffect.width, 
 							MachineCoords.sEffect.height);
 							pixbuf_.SetSource(MachineCoords.sEffect.x, 
@@ -117,12 +150,24 @@ namespace psycle {
 		}
 
 		bool EffectGui::OnEvent(TestCanvas::Event* ev)
-		{
-			MachineGui::OnEvent(ev);
+		{			
+			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {				
+				//if ( !TestMute(ev->x, ev->y) )
+					TestPan(ev->x, ev->y);
+			} else
+			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
+				if ( pan_dragging_ ) {
+					DoPanDragging(ev->x, ev->y);
+					return true;
+				}
+			} else
+			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
+				pan_dragging_ = false;
+			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
 				ShowDialog();		
 			}
-			return true;
+			return MachineGui::OnEvent(ev);
 		}
 
 		void EffectGui::BeforeDeleteDlg()

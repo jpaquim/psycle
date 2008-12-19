@@ -26,12 +26,18 @@ namespace psycle {
 						 HBITMAP hbmMachineDial,
 						 const CFont& font,
 						 COLORREF font_color);
+			virtual void SetMute(bool mute);
+			virtual void SetSolo(bool mute);
 
 		private:
 			void ShowDialog();
 			void UpdateText();
 			void UpdatePan();
+			bool TestMute(double x, double y);
+			bool TestPan(double x, double y);
+			void DoPanDragging(double x, double y);
 
+			bool pan_dragging_;
 			class CFrameMachine* dialog_;
 			TestCanvas::Line sel_line_left_top_1;
 			TestCanvas::Line sel_line_left_top_2;
