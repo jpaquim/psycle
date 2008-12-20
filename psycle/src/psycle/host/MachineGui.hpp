@@ -74,6 +74,7 @@ namespace psycle {
 
 			virtual void SetMute(bool mute);
 			virtual void SetSolo(bool mute);
+			virtual void SetBypass(bool mute);
 			virtual void UpdateVU();
 
 			void AttachWire(class WireGui* gui, int point);

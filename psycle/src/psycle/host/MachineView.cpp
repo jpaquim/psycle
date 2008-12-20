@@ -72,17 +72,18 @@ namespace psycle {
 				tmac->_mute = false;
 				song()->machineSoloed = smac;
 			}
-			UpdateSoloMute();
+			UpdateSoloMuteBypass();
 			parent_->Invalidate();
 		}
 
-		void MachineView::UpdateSoloMute()
+		void MachineView::UpdateSoloMuteBypass()
 		{
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
 			for ( ; it != gui_map_.end(); ++it ) {
 				MachineGui* mac_gui = (*it).second;
 				mac_gui->SetMute(mac_gui->mac()->_mute);
 				mac_gui->SetSolo(mac_gui->mac()->_macIndex == song()->machineSoloed);
+				mac_gui->SetBypass(mac_gui->mac()->Bypass());
 			}
 		}
 
@@ -180,6 +181,7 @@ namespace psycle {
 				}
 			}
 			BuildWires();
+			UpdateSoloMuteBypass();
 			UnlockVu();
 		}
 

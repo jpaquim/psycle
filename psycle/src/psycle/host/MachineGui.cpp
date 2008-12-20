@@ -116,42 +116,6 @@ namespace psycle {
 			}
 		}
 
-		/*bool MachineGui::TestMute(double x, double y)
-		{
-			if(InRect(x,
-					  y,
-					  MachineCoords_.dGeneratorMute.x,
-					  MachineCoords_.dGeneratorMute.y,
-					  MachineCoords_.dGeneratorMute.x + 
-					  MachineCoords_.sGeneratorMute.width,
-					  MachineCoords_.dGeneratorMute.y + 
-					  MachineCoords_.sGeneratorMute.height)) {
-			  SetMute(!mac_->_mute);
-			  QueueDraw();
-			  return true;
-			} else {
-				return false;
-			}
-		}
-
-		bool MachineGui::TestSolo(double x, double y)
-		{
-			if(InRect(x,
-					  y,
-					  MachineCoords_.dGeneratorSolo.x,
-					  MachineCoords_.dGeneratorSolo.y,
-					  MachineCoords_.dGeneratorSolo.x + 
-					  MachineCoords_.sGeneratorSolo.width,
-					  MachineCoords_.dGeneratorSolo.y + 
-					  MachineCoords_.sGeneratorSolo.height)) {
-			  SetMute(!mac_->_mute);
-			  QueueDraw();
-			  return true;
-			} else {
-				return false;
-			}
-		}*/
-
 		void MachineGui::dragging_start(double x, double y)
 		{
 			dragging_ = true;			
@@ -182,6 +146,10 @@ namespace psycle {
 		}
 
 		void MachineGui::SetSolo(bool mute)
+		{
+		}
+
+		void MachineGui::SetBypass(bool mute)
 		{
 		}
 

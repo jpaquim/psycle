@@ -15,6 +15,7 @@ namespace psycle {
 			  dialog_(0),
 			  pixbuf_(this),
 			  mute_pixbuf_(this),
+			  bypass_pixbuf_(this),
 			  pan_pixbuf_(this),
 			  vu_bg_pixbuf_(this),
 			  vu_peak_pixbuf_(this),
@@ -45,6 +46,33 @@ namespace psycle {
 				return true;
 			}
 			return false;
+		}
+
+		bool EffectGui::InBypass(double x, double y)
+		{
+			if(InRect(x,
+					  y,
+					  MachineCoords_.dEffectBypass.x,
+					  MachineCoords_.dEffectBypass.y,
+					  MachineCoords_.dEffectBypass.x + 
+					  MachineCoords_.sEffectBypass.width,
+					  MachineCoords_.dEffectBypass.y + 
+					  MachineCoords_.sEffectBypass.height)) {			 
+			  return true;
+			} else {
+				return false;
+			}
+		}
+
+		void EffectGui::SetBypass(bool on)
+		{
+			mac()->Bypass(on);
+			if (mac()->Bypass())
+			{
+				mac()->_volumeCounter=0.0f;
+				mac()->_volumeDisplay=0;
+			}			
+			bypass_pixbuf_.SetVisible(on);
 		}
 
 		void EffectGui::DoPanDragging(double x, double y)
@@ -126,7 +154,7 @@ namespace psycle {
 
 			pixbuf_.SetImage(machineskin);
 			mute_pixbuf_.SetImage(machineskin);
-			solo_pixbuf_.SetImage(machineskin);
+			bypass_pixbuf_.SetImage(machineskin);
 			vu_bg_pixbuf_.SetImage(machineskin);
 			vu_peak_pixbuf_.SetImage(machineskin);
 			vu_led_pixbuf_.SetImage(machineskin);
@@ -140,6 +168,13 @@ namespace psycle {
 								MachineCoords.sEffectPan.height);
 			pan_pixbuf_.SetSource(MachineCoords.sEffectPan.x, 
 								  MachineCoords.sEffectPan.y);
+			bypass_pixbuf_.SetXY(MachineCoords.dEffectBypass.x,
+								 MachineCoords.dEffectBypass.y);
+			bypass_pixbuf_.SetSize(MachineCoords.sEffectBypass.width, 
+								   MachineCoords.sEffectBypass.height);
+			bypass_pixbuf_.SetSource(MachineCoords.sEffectBypass.x, 
+									 MachineCoords.sEffectBypass.y);
+			bypass_pixbuf_.SetVisible(false);
 			text_.SetXY(MachineCoords.dEffectName.x,
 					    MachineCoords.dEffectName.y);
 			text_.SetFont(font);
@@ -150,9 +185,19 @@ namespace psycle {
 		}
 
 		bool EffectGui::OnEvent(TestCanvas::Event* ev)
-		{			
+		{		
+			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS) {
+				if (InBypass(ev->x, ev->y))
+					return true;
+			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {				
 				//if ( !TestMute(ev->x, ev->y) )
+				if (InBypass(ev->x, ev->y)) {
+					SetBypass(!mac()->Bypass());
+					QueueDraw();
+					return true;
+				}
+				else
 					TestPan(ev->x, ev->y);
 			} else
 			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
