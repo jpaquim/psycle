@@ -15,6 +15,7 @@ namespace psycle {
 			  dialog_(0),
 			  pixbuf_(this),
 			  mute_pixbuf_(this),
+			  solo_pixbuf_(this),
 			  pan_pixbuf_(this),
 			  vu_bg_pixbuf_(this),
 			  vu_peak_pixbuf_(this),
@@ -264,25 +265,49 @@ namespace psycle {
 			}
 		}
 
+		bool GeneratorGui::TestSolo(double x, double y)
+		{
+			if(InRect(x,
+					  y,
+					  MachineCoords_.dGeneratorSolo.x,
+					  MachineCoords_.dGeneratorSolo.y,
+					  MachineCoords_.dGeneratorSolo.x + 
+					  MachineCoords_.sGeneratorSolo.width,
+					  MachineCoords_.dGeneratorSolo.y + 
+					  MachineCoords_.sGeneratorSolo.height)) {
+			  view()->SetSolo(mac());			  
+			  return true;
+			} else {
+				return false;
+			}
+		}
+
 		void GeneratorGui::SetMute(bool mute)
 		{			
 			mac()->_mute = mute;
+			if (mac()->_mute) {
+				mac()->_volumeCounter=0.0f;
+				mac()->_volumeDisplay=0;
+				if (view()->song()->machineSoloed == mac()->_macIndex) {
+					view()->song()->machineSoloed = -1;
+				}									
+			}
 			mute_pixbuf_.SetVisible(mute);
 			solo_pixbuf_.SetVisible(false);
 		}
 
-		void GeneratorGui::SetSolo(bool mute)
-		{
-			mute_pixbuf_.SetVisible(false);
-			solo_pixbuf_.SetVisible(true);
+		void GeneratorGui::SetSolo(bool on)
+		{			
+			solo_pixbuf_.SetVisible(on);
 		}
 
 		bool GeneratorGui::OnEvent(TestCanvas::Event* ev)
 		{
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
 				view()->SelectMachine(this);
-				if ( !TestMute(ev->x, ev->y) )
-					TestPan(ev->x, ev->y);
+				if ( !TestSolo(ev->x, ev->y) )
+					if ( !TestMute(ev->x, ev->y) )
+						TestPan(ev->x, ev->y);
 			} else
 			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
 				if ( pan_dragging_ ) {

@@ -72,8 +72,8 @@ namespace psycle {
 						 const CFont& font,
 						 COLORREF font_color);
 
-			void SetMute(bool mute);
-			void SetSolo(bool mute);
+			virtual void SetMute(bool mute);
+			virtual void SetSolo(bool mute);
 			virtual void UpdateVU();
 
 			void AttachWire(class WireGui* gui, int point);

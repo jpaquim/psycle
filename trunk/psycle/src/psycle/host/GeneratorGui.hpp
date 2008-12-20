@@ -36,6 +36,7 @@ namespace psycle {
 			bool TestMute(double x, double y);
 			bool TestPan(double x, double y);
 			void DoPanDragging(double x, double y);
+			bool TestSolo(double x, double y);
 
 			bool pan_dragging_;
 			class CFrameMachine* dialog_;
