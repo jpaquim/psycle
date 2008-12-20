@@ -125,6 +125,7 @@ namespace psycle {
 				it = gui_map_.find(del_machine_->mac());
 				assert(it != gui_map_.end());
 				gui_map_.erase(it);
+				del_machine_->RemoveWires();
 				del_machine_->set_manage(false);
 				delete del_machine_;
 				del_machine_ = 0;
