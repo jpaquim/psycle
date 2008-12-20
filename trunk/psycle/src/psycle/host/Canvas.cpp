@@ -683,12 +683,14 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 
   PixBuf::PixBuf()
 	  : image_(0),
+		mask_(0),
 		x_(0),
 		y_(0),
 		width_(0),
 		height_(0),
 		xsrc_(0),
-		ysrc_(0)
+		ysrc_(0),
+		transparent_(false)
   {
 	  rgn_.CreateRectRgn(0, 0, 0, 0);
   }
@@ -696,12 +698,14 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   PixBuf::PixBuf(Group* parent)
 	  : Item(parent),
 		image_(0),
+		mask_(0),
 		x_(0),
 		y_(0),
 		width_(0),
 		height_(0),
 		xsrc_(0),
-		ysrc_(0)
+		ysrc_(0),
+		transparent_(false)
   {
 	  rgn_.CreateRectRgn(0, 0, 0, 0);
   }
@@ -709,12 +713,14 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   PixBuf::PixBuf(Group* parent, double x, double y, CBitmap* image)
 	  : Item(parent),
 		image_(image),
+		mask_(0),
 		x_(x),
 		y_(y),
 		width_(0),
 		height_(0),
 		xsrc_(0),
-		ysrc_(0)
+		ysrc_(0),
+		transparent_(false)
   {
 	CSize size = image_->GetBitmapDimension();
 	width_ = size.cx;
@@ -726,16 +732,53 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   {
   }
 
+  void PixBuf::TransparentBlt(CDC* pDC,
+							  int xStart,
+							  int yStart,
+							  int wWidth,
+							  int wHeight,
+							  CDC* pTmpDC,
+							  CBitmap* bmpMask,
+							  int xSource, // = 0
+							  int ySource) // = 0)
+  { 
+	// We are going to paint the two DDB's in sequence to the destination.
+	// 1st the monochrome bitmap will be blitted using an AND operation to
+	// cut a hole in the destination. The color image will then be ORed
+	// with the destination, filling it into the hole, but leaving the
+	// surrounding area untouched.
+	CDC hdcMem;
+	hdcMem.CreateCompatibleDC(pDC);
+	CBitmap* hbmT = hdcMem.SelectObject(bmpMask);
+	pDC->SetTextColor(RGB(0,0,0));
+	pDC->SetBkColor(RGB(255,255,255));
+	if (!pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource, 
+		SRCAND)) {
+		TRACE("Transparent Blit failure SRCAND");
+	}
+	// Also note the use of SRCPAINT rather than SRCCOPY.
+	if (!pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
+		SRCPAINT)) {
+		TRACE("Transparent Blit failure SRCPAINT");
+	}
+	// Now, clean up.
+	hdcMem.SelectObject(hbmT);
+	hdcMem.DeleteDC(); 
+ }
+
   void PixBuf::Draw(CDC* devc,
                   const CRgn& repaint_region,
                   class Canvas* widget) {
 	CDC memDC;
 	CBitmap* oldbmp;
 	memDC.CreateCompatibleDC(devc);
-	oldbmp=memDC.SelectObject(image_);
-	devc->BitBlt(x(), y(), width_, height_, &memDC, xsrc_, ysrc_, SRCCOPY);
+	oldbmp=memDC.SelectObject(image_);	
+	if (!transparent_) 
+		devc->BitBlt(x(), y(), width_, height_, &memDC, xsrc_, ysrc_, SRCCOPY);
+	else
+		TransparentBlt(devc, x(),  y(), width_, height_, &memDC, mask_, xsrc_, ysrc_);
 	memDC.SelectObject(oldbmp);
-	memDC.DeleteDC();
+	memDC.DeleteDC(); 
   }
   
   void PixBuf::GetBounds(double& x1, double& y1, double& x2, double& y2) const {
@@ -771,10 +814,20 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 	height_ = size.cy;
   }
 
+  void PixBuf::SetMask(CBitmap* mask)
+  {
+	  mask_ = mask;
+  }
+
   const CRgn& PixBuf::region() const {
     rgn_.DeleteObject();
     rgn_.CreateRectRgn(x_, y_, x_ + width_, y_ + height_);
     return rgn_;
+  }
+
+  void PixBuf::SetTransparent(bool on)
+  {
+	  transparent_ = on;
   }
 
   Item* PixBuf::intersect(double x, double y) {
@@ -889,5 +942,6 @@ bool Canvas::DelegateEvent(Event* ev, Item* item) {
     }
     return erg;
 }
+
 
 }

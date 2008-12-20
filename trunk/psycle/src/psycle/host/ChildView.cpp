@@ -123,7 +123,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
 #ifdef use_test_canvas
-			machine_view_.Rebuild();
+			// machine_view_.Rebuild();
+			// its done in psycle.cpp, todo check config load order
 #endif
 		}
 

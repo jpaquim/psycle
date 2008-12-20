@@ -37,8 +37,9 @@ namespace psycle {
 				del_machine_ = gui;
 			}
 
-		private:
 			void InitSkin();
+
+		private:			
 			void BuildWires();
 			void WireUp(WireGui* sender,
 						MachineGui* connect_to_gui,
@@ -48,6 +49,9 @@ namespace psycle {
 			void CreateMachineGui(Machine* mac);
 			void RaiseMachinesToTop();
 			void UpdateSoloMuteBypass();
+			void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
+			void LoadMachineBackground();
+			void FindMachineSkin(CString findDir, CString findName, BOOL *result);
 			
 			CChildView* parent_;
 			CMainFrame* main_;
@@ -63,6 +67,8 @@ namespace psycle {
 			HBITMAP hbmMachineBkg;	
 			HBITMAP hbmMachineDial;	
 			SMachineCoords	MachineCoords;
+			int bkgx;
+			int bkgy;
 		};
 	}
 }

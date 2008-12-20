@@ -6,6 +6,7 @@
 #include "Version.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
+#include "ChildView.hpp"
 #include "MidiInput.hpp"
 #include "NewMachine.hpp"
 #include "SInstance.h"
@@ -111,6 +112,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->SetIcon(tIcon, false);
 			
 			pFrame->m_wndView.LoadMachineSkin();
+#ifdef use_test_canvas					
+			pFrame->m_wndView.machine_view()->InitSkin();
+			pFrame->m_wndView.machine_view()->Rebuild();
+#endif
 			pFrame->m_wndView.LoadPatternHeaderSkin();
 			pFrame->m_wndView.LoadMachineBackground();
 			pFrame->m_wndView.RecalcMetrics();

@@ -263,6 +263,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void DoMacPropDialog(int propMac);
 			void FileLoadsongNamed(std::string fName);
 			void OnFileLoadsongNamed(std::string fName, int fType);
+
+#ifdef use_test_canvas
+			MachineView* machine_view() { return &machine_view_; }
+#endif
 			
 		public:
 			//RECENT!!!//
@@ -378,7 +382,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			unsigned char * _ppattern(int ps);
 			unsigned char * _ppattern();
 			int _xtoCol(int pointpos);
-
+			
 
 		private:
 #ifdef use_test_canvas
