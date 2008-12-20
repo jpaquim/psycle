@@ -51,8 +51,8 @@ namespace psycle {
 			vu_led_pixbuf_.SetImage(machineskin);
 			pixbuf_.SetSize(MachineCoords.sMaster.width, 
 							MachineCoords.sMaster.height);
-							pixbuf_.SetSource(MachineCoords.sMaster.x, 
-							MachineCoords.sMaster.y);					
+			pixbuf_.SetSource(MachineCoords.sMaster.x, 
+							  MachineCoords.sMaster.y);					
 			text_.SetVisible(false);
 		}
 

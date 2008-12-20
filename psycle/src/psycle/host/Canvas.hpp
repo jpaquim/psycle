@@ -187,6 +187,7 @@ namespace TestCanvas {
 		void SetSize(int width, int height);
 		void SetSource(int xsrc, int ysrc);
 		void SetImage(CBitmap* image);
+		void SetMask(CBitmap* mask);
 
 		virtual Item* intersect(double x, double y);
 
@@ -194,18 +195,29 @@ namespace TestCanvas {
 
 		int width() const { return width_; }
 		int height() const { return height_; }
+		
+		void SetTransparent(bool on);
 
 	private:
+		void TransparentBlt(CDC* pDC,
+						    int xStart,
+							int yStart,
+							int wWidth,
+							int wHeight,
+							CDC* pTmpDC,
+							CBitmap* bmpMask,
+							int xSource = 0,
+							int ySource = 0);		
 		CBitmap* image_;
+		CBitmap* mask_;
 		double x_;
 		double y_;
 		int width_;
 		int height_;
 		int xsrc_;
 		int ysrc_;
-
 		mutable CRgn rgn_;
-
+		bool transparent_;
   };
 
   class Line : public Item {

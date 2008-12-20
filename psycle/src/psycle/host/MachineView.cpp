@@ -30,7 +30,7 @@ namespace psycle {
 			  is_locked_(false)
 		{
 			set_bg_color(Global::pConfig->mv_colour);
-			InitSkin();
+			// InitSkin();
 		}
 
 		MachineView::~MachineView()
@@ -380,6 +380,76 @@ namespace psycle {
 			}
 		}
 
+		void MachineView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
+		{
+			BITMAP bm;
+			// Get the dimensions of the source bitmap
+			pBmpSource->GetObject(sizeof(BITMAP), &bm);
+			// Create the mask bitmap
+			pBmpMask->DeleteObject();
+			pBmpMask->CreateBitmap( bm.bmWidth, bm.bmHeight, 1, 1, NULL);
+			// We will need two DCs to work with. One to hold the Image
+			// (the source), and one to hold the mask (destination).
+			// When blitting onto a monochrome bitmap from a color, pixels
+			// in the source color bitmap that are equal to the background
+			// color are blitted as white. All the remaining pixels are
+			// blitted as black.
+			CDC hdcSrc, hdcDst;
+			hdcSrc.CreateCompatibleDC(NULL);
+			hdcDst.CreateCompatibleDC(NULL);
+			// Load the bitmaps into memory DC
+			CBitmap* hbmSrcT = (CBitmap*) hdcSrc.SelectObject(pBmpSource);
+			CBitmap* hbmDstT = (CBitmap*) hdcDst.SelectObject(pBmpMask);
+			// Change the background to trans color
+			hdcSrc.SetBkColor(clrTrans);
+			// This call sets up the mask bitmap.
+			hdcDst.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcSrc,0,0,SRCCOPY);
+			// Now, we need to paint onto the original image, making
+			// sure that the "transparent" area is set to black. What
+			// we do is AND the monochrome image onto the color Image
+			// first. When blitting from mono to color, the monochrome
+			// pixel is first transformed as follows:
+			// if  1 (black) it is mapped to the color set by SetTextColor().
+			// if  0 (white) is is mapped to the color set by SetBkColor().
+			// Only then is the raster operation performed.
+			hdcSrc.SetTextColor(RGB(255,255,255));
+			hdcSrc.SetBkColor(RGB(0,0,0));
+			hdcSrc.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcDst,0,0,SRCAND);
+			// Clean up by deselecting any objects, and delete the
+			// DC's.
+			hdcSrc.SelectObject(hbmSrcT);
+			hdcDst.SelectObject(hbmDstT);
+			hdcSrc.DeleteDC();
+			hdcDst.DeleteDC();
+		}
+
+		void MachineView::LoadMachineBackground()
+		{
+			machinebkg.DeleteObject();
+			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
+			if (Global::pConfig->bBmpBkg)
+			{
+				Global::pConfig->bBmpBkg=FALSE;
+				hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+				if (hbmMachineBkg)
+				{
+					if (machinebkg.Attach(hbmMachineBkg))
+					{	
+						BITMAP bm;
+						GetObject(hbmMachineBkg,sizeof(BITMAP),&bm);
+
+						bkgx=bm.bmWidth;
+						bkgy=bm.bmHeight;
+
+						if ((bkgx > 0) && (bkgy > 0))
+						{
+							Global::pConfig->bBmpBkg=TRUE;
+						}
+					}
+				}
+			}
+		}
+
 		void MachineView::InitSkin()
 		{
 			std::string szOld;
@@ -387,6 +457,17 @@ namespace psycle {
 			if (!Global::pConfig->machine_skin.empty())
 			{
 				szOld = Global::pConfig->machine_skin;
+				if (szOld != PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
+				{
+					BOOL result = FALSE;
+					FindMachineSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
+					if(result)
+					{
+						return;
+					}
+				}
+				// load defaults
+				szOld = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
 				#if defined PSYCLE__CONFIGURATION__SKIN__UGLY_DEFAULT
 					MachineCoords.sMaster.x = 0;
 					MachineCoords.sMaster.y = 0;
@@ -567,5 +648,547 @@ namespace psycle {
 			}
 		}
 
-	}
-}
+		void MachineView::FindMachineSkin(CString findDir, CString findName, BOOL *result)
+		{
+			CFileFind finder;
+			int loop = finder.FindFile(findDir + "\\*"); // check for subfolders.
+			while (loop) 
+			{								
+				loop = finder.FindNextFile();
+				if (finder.IsDirectory() && !finder.IsDots())
+				{
+					FindMachineSkin(finder.GetFilePath(),findName,result);
+					if ( *result == TRUE) return;
+				}
+			}
+			finder.Close();
+			loop = finder.FindFile(findDir + "\\" + findName + ".psm"); // check if the directory is empty
+			while (loop)
+			{
+				loop = finder.FindNextFile();
+				if (!finder.IsDirectory())
+				{
+					CString sName, tmpPath;
+					sName = finder.GetFileName();
+					// ok so we have a .psm, does it have a valid matching .bmp?
+					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
+					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
+					pExt[0]=0;
+					char szOpenName[MAX_PATH];
+					sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
+
+					machineskin.DeleteObject();
+					if( hbmMachineSkin) DeleteObject(hbmMachineSkin);
+					machineskinmask.DeleteObject();
+					hbmMachineSkin = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+					if (hbmMachineSkin)
+					{
+						if (machineskin.Attach(hbmMachineSkin))
+						{	
+							memset(&MachineCoords,0,sizeof(MachineCoords));
+							// load settings
+							FILE* hfile;
+							sprintf(szOpenName,"%s\\%s.psm",findDir,sName);
+							if(!(hfile=fopen(szOpenName,"rb")))
+							{
+								parent()->MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
+								return;
+							}
+							char buf[512];
+							while (fgets(buf, 512, hfile))
+							{
+								if (strstr(buf,"\"master_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sMaster.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sMaster.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sMaster.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sMaster.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sGenerator.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sGenerator.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sGenerator.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sGenerator.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_vu0_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sGeneratorVu0.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sGeneratorVu0.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sGeneratorVu0.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sGeneratorVu0.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_vu_peak_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sGeneratorVuPeak.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sGeneratorVuPeak.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sGeneratorVuPeak.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sGeneratorVuPeak.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_pan_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sGeneratorPan.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sGeneratorPan.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sGeneratorPan.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sGeneratorPan.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_mute_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sGeneratorMute.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sGeneratorMute.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sGeneratorMute.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sGeneratorMute.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_solo_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sGeneratorSolo.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sGeneratorSolo.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sGeneratorSolo.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sGeneratorSolo.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sEffect.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sEffect.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sEffect.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sEffect.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_vu0_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sEffectVu0.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sEffectVu0.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sEffectVu0.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sEffectVu0.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_vu_peak_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sEffectVuPeak.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sEffectVuPeak.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sEffectVuPeak.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sEffectVuPeak.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_pan_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sEffectPan.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sEffectPan.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sEffectPan.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sEffectPan.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_mute_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sEffectMute.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sEffectMute.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sEffectMute.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sEffectMute.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_bypass_source\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.sEffectBypass.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.sEffectBypass.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.sEffectBypass.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.sEffectBypass.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_vu_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dGeneratorVu.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dGeneratorVu.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.dGeneratorVu.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.dGeneratorVu.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_pan_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dGeneratorPan.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dGeneratorPan.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.dGeneratorPan.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.dGeneratorPan.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_mute_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dGeneratorMute.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dGeneratorMute.y = atoi(q+1);
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_solo_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dGeneratorSolo.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dGeneratorSolo.y = atoi(q+1);
+										}
+									}
+								}
+								else if (strstr(buf,"\"generator_name_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dGeneratorName.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dGeneratorName.y = atoi(q+1);
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_vu_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dEffectVu.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dEffectVu.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.dEffectVu.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.dEffectVu.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_pan_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dEffectPan.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dEffectPan.y = atoi(q+1);
+											q = strchr(q+1,44); // ,
+											if (q)
+											{
+												MachineCoords.dEffectPan.width = atoi(q+1);
+												q = strchr(q+1,44); // ,
+												if (q)
+												{
+													MachineCoords.dEffectPan.height = atoi(q+1);
+												}
+											}
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_mute_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dEffectMute.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dEffectMute.y = atoi(q+1);
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_bypass_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dEffectBypass.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dEffectBypass.y = atoi(q+1);
+										}
+									}
+								}
+								else if (strstr(buf,"\"effect_name_dest\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										MachineCoords.dEffectName.x = atoi(q+1);
+										q = strchr(q+1,44); // ,
+										if (q)
+										{
+											MachineCoords.dEffectName.y = atoi(q+1);
+										}
+									}
+								}
+								else if (strstr(buf,"\"transparency\"="))
+								{
+									char *q = strchr(buf,61); // =
+									if (q)
+									{
+										helpers::hexstring_to_integer(q+1, MachineCoords.cTransparency);
+										MachineCoords.bHasTransparency = TRUE;
+									}
+								}
+							}
+							if (MachineCoords.bHasTransparency)
+							{
+								PrepareMask(&machineskin,&machineskinmask,MachineCoords.cTransparency);
+							}
+							fclose(hfile);
+							*result = TRUE;
+							break;
+						}
+					}
+				}
+			}
+			finder.Close();
+		}
+
+	}  // namespace host
+}  // namespace psycle

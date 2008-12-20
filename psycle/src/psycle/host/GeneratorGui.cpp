@@ -131,7 +131,7 @@ namespace psycle {
 			pan_pixbuf_.SetImage(machineskin);
 			pixbuf_.SetSize(MachineCoords.sGenerator.width, 
 							MachineCoords.sGenerator.height);
-							pixbuf_.SetSource(MachineCoords.sGenerator.x, 
+			pixbuf_.SetSource(MachineCoords.sGenerator.x, 
 							MachineCoords.sGenerator.y);
 			mute_pixbuf_.SetXY(MachineCoords.dGeneratorMute.x, 
 							   MachineCoords.dGeneratorMute.y);
