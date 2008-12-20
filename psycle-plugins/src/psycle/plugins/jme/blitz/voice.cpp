@@ -16,6 +16,7 @@
 		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "voice.h"
 #include <cmath>
 #define FILTER_CALC_TIME				64
@@ -284,11 +285,11 @@ void CSynthTrack::RealNoteOn(bool arpClear){
 	modEnvLast=0.0f;
 
 	arpShuffle=0;
-	arpCount=0;
+	arpCount=0;  // means arpeggio code has to be executed
 	arpLen=1;
-	arpIndex=-1;
-	curArp=0.0f;
+	arpIndex=-1; // next arp position is position 0
 	if (arpClear){
+		curArp=0.0f; // current transpose
 		arpInput[1]=0.0f;arpInput[2]=0.0f;arpInput[3]=0.0f;
 		arpList[0]=0.0f;arpList[1]=0.0f;arpList[2]=0.0f;
 		arpList[3]=0.0f;arpList[4]=0.0f;arpList[5]=0.0f;arpList[6]=0.0f;arpList[7]=0.0f;arpList[8]=0.0f;arpList[9]=0.0f;arpList[10]=0.0f;arpList[11]=0.0f;arpList[12]=0.0f;
@@ -1385,7 +1386,7 @@ float CSynthTrack::GetEnvAmp(){
 
 		if(ampEnvValue<0.0f)
 		{
-			RealNoteOn(true);
+			RealNoteOn((sp_cmd == 0xCD) || (sp_cmd == 0xCE));
 			ampEnvValue=0.0f;
 			ampEnvStage=1;
 			ampEnvCoef=(1.0f/(float)vpar->ampA)*speedup;
