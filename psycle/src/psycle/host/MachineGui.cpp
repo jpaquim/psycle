@@ -179,15 +179,10 @@ namespace psycle {
 
 		void MachineGui::SetMute(bool mute)
 		{			
-/*			mac_->_mute = mute;
-			mute_pixbuf_.SetVisible(mute);
-			solo_pixbuf_.SetVisible(false);*/
 		}
 
 		void MachineGui::SetSolo(bool mute)
 		{
-/*			mute_pixbuf_.SetVisible(false);
-			solo_pixbuf_.SetVisible(true);*/
 		}
 
 		void MachineGui::AttachWire(WireGui* gui, int point) 

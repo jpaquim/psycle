@@ -14,7 +14,7 @@ namespace psycle {
 
 			void Rebuild();
 			void SetSolo(Machine* mac);
-			void UpdateVUs();
+			void UpdateVUs();			
 			void ShowNewMachineDlg();
 			void SelectMachine(MachineGui* gui);
 
@@ -47,6 +47,7 @@ namespace psycle {
 						int picker);
 			void CreateMachineGui(Machine* mac);
 			void RaiseMachinesToTop();
+			void UpdateSoloMute();
 			
 			CChildView* parent_;
 			CMainFrame* main_;

@@ -44,6 +44,46 @@ namespace psycle {
 
 		void MachineView::SetSolo(Machine* tmac)
 		{
+			int smac = tmac->_macIndex;
+			if (song()->machineSoloed == smac ){
+				song()->machineSoloed = -1;
+				for ( int i=0;i<MAX_MACHINES;i++ )
+				{
+					if (song()->_pMachine[i]) {
+						if (( song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ))
+						{
+							song()->_pMachine[i]->_mute = false;
+						}
+					}
+				}
+			} else {
+				for ( int i=0;i<MAX_MACHINES;i++ )
+				{
+					if ( song()->_pMachine[i] )
+					{
+						if (( song()->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != smac))
+						{
+							song()->_pMachine[i]->_mute = true;
+							song()->_pMachine[i]->_volumeCounter=0.0f;
+							song()->_pMachine[i]->_volumeDisplay=0;
+						}
+					}
+				}
+				tmac->_mute = false;
+				song()->machineSoloed = smac;
+			}
+			UpdateSoloMute();
+			parent_->Invalidate();
+		}
+
+		void MachineView::UpdateSoloMute()
+		{
+			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
+			for ( ; it != gui_map_.end(); ++it ) {
+				MachineGui* mac_gui = (*it).second;
+				mac_gui->SetMute(mac_gui->mac()->_mute);
+				mac_gui->SetSolo(mac_gui->mac()->_macIndex == song()->machineSoloed);
+			}
 		}
 
 		void MachineView::UpdateVUs()
@@ -254,8 +294,6 @@ namespace psycle {
 								wireUi->SetGuiConnectors(fromIt->second,
 														 toIt->second,
 														 0);
-
-								root()->Insert(root()->begin(),wireUi);
 								wireUi->UpdatePosition();
 							}
 						}
