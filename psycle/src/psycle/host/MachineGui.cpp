@@ -168,6 +168,22 @@ namespace psycle {
 				}
 			}
 		}
+
+		void MachineGui::RemoveWires()
+		{
+			std::vector<std::pair<WireGui*,int> >::iterator it = wire_uis_.begin();
+			for ( ; it != wire_uis_.end(); ++it ) {
+				WireGui* wire_ui = (*it).first;
+				if (wire_ui->toGUI() && (wire_ui->toGUI() != this ) )
+					wire_ui->toGUI()->DetachWire(wire_ui);
+				if (wire_ui->fromGUI() && (wire_ui->fromGUI() != this ))
+					wire_ui->fromGUI()->DetachWire(wire_ui);
+				wire_ui->set_manage(false);
+				wire_ui->SetGuiConnectors(0,0,0);
+				delete wire_ui;
+			}
+			wire_uis_.clear();
+		}		
 	
 		void MachineGui::OnMove()
 		{

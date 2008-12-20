@@ -76,9 +76,10 @@ namespace psycle {
 			virtual void SetSolo(bool mute);
 			virtual void SetBypass(bool mute);
 			virtual void UpdateVU();
-
+			
 			void AttachWire(class WireGui* gui, int point);
 			void DetachWire(class WireGui* gui);
+			void RemoveWires();
 
 			MachineView* view();
 			Machine* mac() { return mac_; };
