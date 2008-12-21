@@ -123,12 +123,26 @@ namespace psycle {
 			MachineCoords_ = MachineCoords;
 
 			pixbuf_.SetImage(machineskin);
+			pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
+			pixbuf_.SetMask(machineskinmask);
 			mute_pixbuf_.SetImage(machineskin);
+			mute_pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
+			mute_pixbuf_.SetMask(machineskinmask);
 			solo_pixbuf_.SetImage(machineskin);
+			solo_pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
+			solo_pixbuf_.SetMask(machineskinmask);
 			vu_bg_pixbuf_.SetImage(machineskin);
+			vu_bg_pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
+			vu_bg_pixbuf_.SetMask(machineskinmask);
 			vu_peak_pixbuf_.SetImage(machineskin);
+			vu_peak_pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
+			vu_peak_pixbuf_.SetMask(machineskinmask);
 			vu_led_pixbuf_.SetImage(machineskin);
+			vu_led_pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
+			vu_led_pixbuf_.SetMask(machineskinmask);
 			pan_pixbuf_.SetImage(machineskin);
+			pan_pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
+			pan_pixbuf_.SetMask(machineskinmask);
 			pixbuf_.SetSize(MachineCoords.sGenerator.width, 
 							MachineCoords.sGenerator.height);
 			pixbuf_.SetSource(MachineCoords.sGenerator.x, 

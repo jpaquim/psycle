@@ -618,6 +618,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CWnd ::OnSize(nType, cx, cy);
 
+#ifdef use_test_canvas
+			machine_view_.OnSize(cx, cy);
+#endif
+
 			CW = cx;
 			CH = cy;
 			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.

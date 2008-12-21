@@ -317,9 +317,16 @@ class Canvas
 		  bg_color_ = color;
 		}
 
+		void set_bg_image(CBitmap* bg_image, int width, int height) {
+			bg_image_ = bg_image;
+			bg_width_ = width;
+			bg_height_ = width;
+		}
+
 		void StealFocus(Item* item);
 
 		virtual void OnEvent(Event* ev);
+		virtual void OnSize(int cx, int cy);
 
 		// void lock();
 		// void unlock();
@@ -334,6 +341,11 @@ class Canvas
 		Group root_;
 		Item* button_press_item_;
 		bool steal_focus_;
+		CBitmap* bg_image_;
+		int bg_width_;
+		int bg_height_;
+		int cw_;
+		int ch_;
 };
 
 }

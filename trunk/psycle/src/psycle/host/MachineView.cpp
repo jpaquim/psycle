@@ -29,7 +29,7 @@ namespace psycle {
 			  del_machine_(0),
 			  is_locked_(false)
 		{
-			set_bg_color(Global::pConfig->mv_colour);
+			// set_bg_color(Global::pConfig->mv_colour);
 			// InitSkin();
 		}
 
@@ -452,6 +452,7 @@ namespace psycle {
 
 		void MachineView::InitSkin()
 		{
+			bool has_skin = false;
 			std::string szOld;
 			CNativeGui::uiSetting().LoadMachineDial();
 			if (!Global::pConfig->machine_skin.empty())
@@ -462,13 +463,14 @@ namespace psycle {
 					BOOL result = FALSE;
 					FindMachineSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
 					if(result)
-					{
-						return;
+					{						
+						has_skin = true;
 					}
 				}
-				// load defaults
-				szOld = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
-				#if defined PSYCLE__CONFIGURATION__SKIN__UGLY_DEFAULT
+				if ( !has_skin) {
+					// load defaults
+					szOld = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
+#if defined PSYCLE__CONFIGURATION__SKIN__UGLY_DEFAULT
 					MachineCoords.sMaster.x = 0;
 					MachineCoords.sMaster.y = 0;
 					MachineCoords.sMaster.width = 148;
@@ -554,7 +556,7 @@ namespace psycle {
 					MachineCoords.dEffectName.x = 10;
 					MachineCoords.dEffectName.y = 12;
 					MachineCoords.bHasTransparency = FALSE;
-				#else
+#else
 					MachineCoords.sMaster.x = 0;
 					MachineCoords.sMaster.y = 0;
 					MachineCoords.sMaster.width = 148;
@@ -640,11 +642,17 @@ namespace psycle {
 					MachineCoords.dEffectName.x = 49;//10;
 					MachineCoords.dEffectName.y = 7;//12;
 					MachineCoords.bHasTransparency = FALSE;
-				#endif
-				machineskin.DeleteObject();
-				DeleteObject(hbmMachineSkin);
-				machineskinmask.DeleteObject();
-				machineskin.LoadBitmap(IDB_MACHINE_SKIN);
+#endif
+					machineskin.DeleteObject();
+					DeleteObject(hbmMachineSkin);
+					machineskinmask.DeleteObject();
+					machineskin.LoadBitmap(IDB_MACHINE_SKIN);
+				} 
+				set_bg_color(Global::pConfig->mv_colour);
+				if (Global::pConfig->bBmpBkg)
+				{
+					set_bg_image(&machinebkg, bkgx, bkgy);
+				}
 			}
 		}
 
