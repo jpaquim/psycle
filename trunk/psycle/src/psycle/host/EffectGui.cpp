@@ -31,17 +31,17 @@ namespace psycle {
 
 		bool EffectGui::TestPan(double x, double y)
 		{				
-			int panning = mac()->_panning*MachineCoords_.dGeneratorPan.width;
+			int panning = mac()->_panning*MachineCoords_.dEffectPan.width;
 			panning /= 128;
 			if (InRect(x,
 				       y,
-					   MachineCoords_.dGeneratorPan.x + panning,
-					   MachineCoords_.dGeneratorPan.y,
-					   MachineCoords_.dGeneratorPan.x +
+					   MachineCoords_.dEffectPan.x + panning,
+					   MachineCoords_.dEffectPan.y,
+					   MachineCoords_.dEffectPan.x +
 					   panning +
-					   MachineCoords_.sGeneratorPan.width,
-					   MachineCoords_.dGeneratorPan.y +
-					   MachineCoords_.sGeneratorPan.height)) {
+					   MachineCoords_.sEffectPan.width,
+					   MachineCoords_.dEffectPan.y +
+					   MachineCoords_.sEffectPan.height)) {
 				pan_dragging_ = true;
 				return true;
 			}
@@ -50,18 +50,14 @@ namespace psycle {
 
 		bool EffectGui::InBypass(double x, double y)
 		{
-			if(InRect(x,
-					  y,
-					  MachineCoords_.dEffectBypass.x,
-					  MachineCoords_.dEffectBypass.y,
-					  MachineCoords_.dEffectBypass.x + 
-					  MachineCoords_.sEffectBypass.width,
-					  MachineCoords_.dEffectBypass.y + 
-					  MachineCoords_.sEffectBypass.height)) {			 
-			  return true;
-			} else {
-				return false;
-			}
+			return (InRect(x,
+						   y,
+						   MachineCoords_.dEffectBypass.x,
+						   MachineCoords_.dEffectBypass.y,
+					       MachineCoords_.dEffectBypass.x + 
+					       MachineCoords_.sEffectBypass.width,
+					       MachineCoords_.dEffectBypass.y + 
+					       MachineCoords_.sEffectBypass.height));
 		}
 
 		void EffectGui::SetBypass(bool on)
@@ -73,6 +69,31 @@ namespace psycle {
 				mac()->_volumeDisplay=0;
 			}			
 			bypass_pixbuf_.SetVisible(on);
+		}
+
+		void EffectGui::SetMute(bool on)
+		{
+			mac()->_mute = on;
+			if (mac()->_mute) {
+				mac()->_volumeCounter=0.0f;
+				mac()->_volumeDisplay=0;
+				if (view()->song()->machineSoloed == mac()->_macIndex) {
+					view()->song()->machineSoloed = -1;
+				}									
+			}
+			mute_pixbuf_.SetVisible(on);
+		}
+
+		bool EffectGui::InMute(double x, double y)
+		{			
+			return (InRect(x,
+						   y,
+						   MachineCoords_.dEffectMute.x,
+						   MachineCoords_.dEffectMute.y,
+						   MachineCoords_.dEffectMute.x + 
+					       MachineCoords_.sEffectMute.width,
+					       MachineCoords_.dEffectMute.y + 
+					       MachineCoords_.sEffectMute.height));
 		}
 
 		void EffectGui::DoPanDragging(double x, double y)
@@ -175,6 +196,13 @@ namespace psycle {
 			bypass_pixbuf_.SetSource(MachineCoords.sEffectBypass.x, 
 									 MachineCoords.sEffectBypass.y);
 			bypass_pixbuf_.SetVisible(false);
+			mute_pixbuf_.SetXY(MachineCoords.dEffectMute.x, 
+							   MachineCoords.dEffectMute.y);
+			mute_pixbuf_.SetSize(MachineCoords.sEffectMute.width, 
+							     MachineCoords.sEffectMute.height);
+			mute_pixbuf_.SetSource(MachineCoords.sEffectMute.x, 
+								   MachineCoords.sEffectMute.y);
+			mute_pixbuf_.SetVisible(false);
 			text_.SetXY(MachineCoords.dEffectName.x,
 					    MachineCoords.dEffectName.y);
 			text_.SetFont(font);
@@ -187,11 +215,18 @@ namespace psycle {
 		bool EffectGui::OnEvent(TestCanvas::Event* ev)
 		{		
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS) {
-				if (InBypass(ev->x, ev->y))
+				if (InMute(ev->x, ev->y)) {					
 					return true;
+				} else if (InBypass(ev->x, ev->y)) {
+					return true;
+				}
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {				
 				//if ( !TestMute(ev->x, ev->y) )
+				if (InMute(ev->x, ev->y)) {
+				  SetMute(!mac()->_mute);
+				  QueueDraw();
+				} else
 				if (InBypass(ev->x, ev->y)) {
 					SetBypass(!mac()->Bypass());
 					QueueDraw();

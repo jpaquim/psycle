@@ -14,7 +14,8 @@ namespace psycle {
 			virtual bool OnEvent(TestCanvas::Event* ev);
 			virtual void BeforeDeleteDlg();
 			virtual void UpdateVU();
-			virtual void SetBypass(bool mute);
+			virtual void SetBypass(bool on);
+			virtual void SetMute(bool on);
 
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,
 						 CBitmap* machineskin,
@@ -29,8 +30,9 @@ namespace psycle {
 		private:
 			void ShowDialog();
 			void UpdateText();
-			void UpdatePan();
+			void UpdatePan();			
 			bool TestPan(double x, double y);
+			bool InMute(double x, double y);
 			bool InBypass(double x, double y);
 			void DoPanDragging(double x, double y);
 

@@ -292,8 +292,7 @@ namespace psycle {
 					view()->song()->machineSoloed = -1;
 				}									
 			}
-			mute_pixbuf_.SetVisible(mute);
-			solo_pixbuf_.SetVisible(false);
+			mute_pixbuf_.SetVisible(mute);			
 		}
 
 		void GeneratorGui::SetSolo(bool on)
