@@ -854,7 +854,12 @@ Canvas::Canvas(CWnd* parent) :
     parent_(parent),
 	root_(this),
     button_press_item_(0),
-    steal_focus_(0)
+    steal_focus_(0),
+	bg_image_(0),
+	bg_width_(0),
+	bg_height_(0),
+	cw_(300),
+	ch_(200)
 {
 }
 
@@ -862,15 +867,40 @@ Canvas::~Canvas()
 {
 }
 
+void Canvas::OnSize(int cx, int cy) 
+{	
+	cw_ = cx;
+	ch_ = cy;
+}
+
 void Canvas::Draw(CDC *devc, const CRect& repaint_region)
 {
-  devc->FillSolidRect(&repaint_region, bg_color_);
-  CRgn rgn;
-  rgn.CreateRectRgn(repaint_region.top,
+	if (bg_image_)	{
+		CDC memDC;
+		CBitmap* oldbmp;
+		memDC.CreateCompatibleDC(devc);
+		oldbmp=memDC.SelectObject(bg_image_);
+		if ((cw_ > bg_width_) || (ch_ > bg_height_)) {
+			for (int cx=0; cx<cw_; cx+=bg_width_) {
+				for (int cy=0; cy<ch_; cy+=bg_height_) {
+					devc->BitBlt(cx,cy,bg_width_,bg_height_,&memDC,0,0,SRCCOPY);
+				}
+			}
+		}
+		else {
+			devc->BitBlt(0,0,cw_,ch_,&memDC,0,0,SRCCOPY);
+		}
+		memDC.SelectObject(oldbmp);
+		memDC.DeleteDC();
+	} else {		
+		devc->FillSolidRect(&repaint_region, bg_color_);
+	}
+	CRgn rgn;
+	rgn.CreateRectRgn(repaint_region.top,
 					repaint_region.left,
 					repaint_region.right,
 					repaint_region.bottom);
-  root_.Draw(devc, rgn, this);
+	root_.Draw(devc, rgn, this);
 }
 
 void Canvas::StealFocus(Item* item) {
