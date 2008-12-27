@@ -23,7 +23,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Attributes
 		public:
 			CFrameMachine(int dum){MachineIndex = dum;};
-			CFrameMachine(int dum, class MachineGui* gen_gui);
+			CFrameMachine(int dum, class MachineGui* gen_gui, double x, double y);
 				
 		protected:
 			Machine* _pMachine;
@@ -32,7 +32,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CFont	b_font;
 			CFont	b_font_bold;
 
-		// Enviroment
+		// Environment
 			int numParameters;
 
 			bool istweak;
@@ -51,8 +51,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Operations
 		public:
 			virtual void SelectMachine(Machine* pMachine);
-			virtual void Generate();
+			virtual void Generate(double x, double y);
 			virtual int ConvertXYtoParam(int x, int y);
+			virtual void centerWindowOnPoint(int x, int y);
 			CChildView *wndView;
 			UINT MachineIndex;
 			bool* _pActive;	// It is used to help the program know if this window is open or not.

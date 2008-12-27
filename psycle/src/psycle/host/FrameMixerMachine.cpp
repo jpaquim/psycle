@@ -247,6 +247,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	int CFrameMixerMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 	{
+
 		int retVal = CFrameMachine::OnCreate(lpCreateStruct);
 		if ( retVal >= 0 )
 		{
@@ -294,6 +295,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		_pMixer=(Mixer*)(_pMachine = pMachine);
 		numParameters = _pMixer->GetNumParams();
 		UpdateSendsandChans();
+	}
+	void CFrameMixerMachine::Generate(double x, double y) {
 
 		int winh = InfoLabel::height + ((_pMixer->numsends()+3) * Knob::height) + GraphSlider::height; // + 3 -> pan, gain, mix
 		int winw = (_pMixer->numinputs()+_pMixer->numreturns()+2) * (Knob::width+InfoLabel::width); // +2 -> labels column, plus master column.

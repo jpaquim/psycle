@@ -181,7 +181,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		// Operations
 	public:
 		virtual void SelectMachine(Machine* pMachine);
-		virtual void Generate(){};
+		virtual void Generate(double x, double y);
 		virtual int ConvertXYtoParam(int x, int y);
 		// Overrides
 		// Implementation

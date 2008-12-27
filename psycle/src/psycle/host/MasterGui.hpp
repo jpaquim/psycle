@@ -23,7 +23,7 @@ namespace psycle {
 						 COLORREF font_color);
 
 		private:
-			void ShowDialog();
+			void ShowDialog(double x, double y);
 
 			class CMasterDlg* dialog_;
 			//skin elements

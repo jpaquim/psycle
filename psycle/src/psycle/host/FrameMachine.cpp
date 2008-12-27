@@ -49,7 +49,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//do not use! Use OnCreate Instead.
 		}
 
-		CFrameMachine::CFrameMachine(int dum, MachineGui* gen_gui) :
+		CFrameMachine::CFrameMachine(int dum, MachineGui* gen_gui, double x, double y) :
 				MachineIndex(dum),
 				gen_gui_(gen_gui) {
 
@@ -58,8 +58,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			LoadFrame(IDR_MACHINEFRAME, 
 			  	      WS_POPUPWINDOW | WS_CAPTION,
 					  gen_gui->view()->child_view()->pParentFrame);
-			Generate();
 			SelectMachine(gen_gui_->mac());
+			Generate(x, y);
 			char winname[32];
 			sprintf(winname,"%.2X : %s",MachineIndex
 									   ,gen_gui->mac()->_editName);
@@ -136,17 +136,55 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//((CMainFrame*)wndView->pParentFrame)->ChangeGen(_pMachine->_macIndex);
 			Invalidate(false);
 		}
-		void CFrameMachine::Generate()
+		void CFrameMachine::Generate(double x, double y)
 		{
-
-			
 /*			if (Global::pConfig->bBmpDial)
 				wndView->LoadMachineDial();
 			else
 				wndView->machinedial.LoadBitmap(IDB_KNOB);
 */
-
 			UpdateWindow();
+
+			int const winh = parspercol*K_YSIZE;
+
+
+			CRect rect,rect2;
+			//Show the window in the usual way, without worrying about the exact sizes.
+			SetWindowPos
+				(0, 
+				x,
+				y,
+				W_ROWWIDTH * ncol,
+				winh + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYEDGE),
+				SWP_NOZORDER | SWP_SHOWWINDOW
+			);
+			//Get the coordinates (sizes) of the client area, and the frame.
+			GetClientRect(&rect);
+			GetWindowRect(&rect2);
+			//Using the previous values, resize the window to the desired sizes.
+			MoveWindow
+				(x,
+				y,
+				(rect2.right-rect2.left)+((W_ROWWIDTH*ncol)-rect.right),
+				(rect2.bottom-rect2.top)+(winh-rect.bottom),
+				true
+			);
+			centerWindowOnPoint(x, y);
+		}
+		void CFrameMachine::centerWindowOnPoint(int x, int y) {
+			CRect r;
+			GetWindowRect(&r);
+
+			x -= ((r.right-r.left)/2);
+			y -= ((r.bottom-r.top)/2);
+
+			if (x < 0) {
+				x = 0;
+			}
+			if (y < 0) {
+				y = 0;
+			}
+			SetWindowPos( 0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE );
 		}
 
 		void CFrameMachine::SelectMachine(Machine* pMachine)
@@ -179,35 +217,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
 			
-			int const winh = parspercol*K_YSIZE;
-
-			CWnd *dsk = GetDesktopWindow();
-			CRect rClient;
-			dsk->GetClientRect(&rClient);
-
-			CRect rect,rect2;
-			//Show the window in the usual way, without worrying about the exact sizes.
-			MoveWindow
-				(
-				rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
-				rClient.Height() / 2 - winh / 2,
-				W_ROWWIDTH * ncol,
-				winh + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYEDGE),
-				false
-				);
-			ShowWindow(SW_SHOW);
-			//Get the coordinates (sizes) of the client area, and the frame.
-			GetClientRect(&rect);
-			GetWindowRect(&rect2);
-			//Using the previous values, resize the window to the desired sizes.
-			MoveWindow
-				(
-				0,
-				0,
-				(rect2.right-rect2.left)+((W_ROWWIDTH*ncol)-rect.right),
-				(rect2.bottom-rect2.top)+(winh-rect.bottom),
-				true
-				);
 		}
 
 

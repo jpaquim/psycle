@@ -28,7 +28,7 @@ namespace psycle {
 						 COLORREF font_color);
 
 		private:
-			void ShowDialog();
+			void ShowDialog(double x, double y);
 			void UpdateText();
 			void UpdatePan();			
 			bool TestPan(double x, double y);
