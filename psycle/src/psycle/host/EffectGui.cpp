@@ -234,12 +234,10 @@ namespace psycle {
 					return true;
 				} else if (InBypass(ev->x, ev->y)) {
 					return true;
-				}
-
-				else {
+				} else {
 					ShowDialog(ev->x, ev->y);
 					return true;
-<<
+				}
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {				
 				//if ( !TestMute(ev->x, ev->y) )
