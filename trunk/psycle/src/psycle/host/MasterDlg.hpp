@@ -36,6 +36,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void PaintNames(char* name,int x,int y);
 			void SetSliderValues();
 			void UpdateUI(void);
+			void CenterWindowOnPoint(int x, int y);
 			CBitmap m_numbers;
 			CBitmap m_sliderknob;
 			CBitmap m_back;

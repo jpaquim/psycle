@@ -30,7 +30,7 @@ namespace psycle {
 			virtual void SetSolo(bool mute);
 
 		private:
-			void ShowDialog();
+			void ShowDialog(double x, double y);
 			void UpdateText();
 			void UpdatePan();
 			bool TestMute(double x, double y);

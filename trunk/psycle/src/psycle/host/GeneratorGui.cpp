@@ -3,7 +3,6 @@
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
 #include "FrameMachine.hpp"
-#include "ChildView.hpp"
 #include "MainFrm.hpp"
 
 namespace psycle {
@@ -335,7 +334,7 @@ namespace psycle {
 				pan_dragging_ = false;
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();		
+				ShowDialog(ev->x, ev->y);
 			}
 			MachineGui::OnEvent(ev);
 			return true;
@@ -346,10 +345,12 @@ namespace psycle {
 			dialog_ = 0;
 		}
 
-		void GeneratorGui::ShowDialog()
+		void GeneratorGui::ShowDialog(double x, double y)
 		{
 			if ( !dialog_ ) {
-				dialog_ = new CFrameMachine(mac()->_macIndex, this);
+				CRect rc;
+				view()->parent()->GetWindowRect(rc);
+				dialog_ = new CFrameMachine(mac()->_macIndex, this, rc.left + absx() + x, rc.top + absy() + y);
 				//CenterWindowOnPoint(m_pWndMac[tmac], point);
 			}
 		}

@@ -3,7 +3,6 @@
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
 #include "FrameMachine.hpp"
-#include "ChildView.hpp"
 
 namespace psycle {
 	namespace host {
@@ -236,7 +235,11 @@ namespace psycle {
 				} else if (InBypass(ev->x, ev->y)) {
 					return true;
 				}
-				ShowDialog();
+
+				else {
+					ShowDialog(ev->x, ev->y);
+					return true;
+<<
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {				
 				//if ( !TestMute(ev->x, ev->y) )
@@ -260,9 +263,6 @@ namespace psycle {
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
 				pan_dragging_ = false;
-			} else
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();		
 			}
 			return MachineGui::OnEvent(ev);
 		}
@@ -272,10 +272,12 @@ namespace psycle {
 			dialog_ = 0;
 		}
 
-		void EffectGui::ShowDialog()
+		void EffectGui::ShowDialog(double x, double y)
 		{
+			CRect rc;
+			view()->parent()->GetWindowRect(rc);
 			if ( !dialog_ ) {
-				dialog_ = new CFrameMachine(mac()->_macIndex, this);
+				dialog_ = new CFrameMachine(mac()->_macIndex, this, rc.left + absx() + x, rc.top + absy() + y);
 				//CenterWindowOnPoint(m_pWndMac[tmac], point);
 			}
 		}

@@ -131,7 +131,41 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetSliderValues();
 			if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
 			else m_autodec.SetCheck(0);
+
+/*
+			CWnd *dsk = GetDesktopWindow();
+			CRect rClient, rect, rect2;
+			dsk->GetClientRect(&rClient);
+
+			GetClientRect(&rect);
+			GetWindowRect(&rect2);
+			//Using the previous values, resize the window to the desired sizes.
+			MoveWindow
+				(
+				rClient.Width() / 2 - (rect2.right-rect2.left) / 2,
+				rClient.Height() / 2 - (rect2.bottom-rect2.top) / 2,
+				(rect2.right-rect2.left),
+				(rect2.bottom-rect2.top),
+				true
+				);
+*/
 			return TRUE;
+		}
+
+		void CMasterDlg::CenterWindowOnPoint(int x, int y) {
+			CRect r;
+			GetWindowRect(&r);
+
+			x -= ((r.right-r.left)/2);
+			y -= ((r.bottom-r.top)/2);
+
+			if (x < 0) {
+				x = 0;
+			}
+			if (y < 0) {
+				y = 0;
+			}
+			SetWindowPos( 0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE );
 		}
 
 		void CMasterDlg::SetSliderValues()

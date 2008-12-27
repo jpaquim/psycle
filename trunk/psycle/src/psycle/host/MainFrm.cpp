@@ -1532,8 +1532,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								IDR_MACHINEFRAME, 
 								WS_POPUPWINDOW | WS_CAPTION,
 								this);
-							((CFrameMachine*)m_pWndMac[tmac])->Generate();
 							((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
+							((CFrameMachine*)m_pWndMac[tmac])->Generate(point.x, point.y);
 							char winname[32];
 							sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->MachineIndex
 													,ma->_editName);
@@ -1553,8 +1553,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								IDR_MACHINEFRAME, 
 								WS_POPUPWINDOW | WS_CAPTION,
 								this);
-							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate();
 							((CFrameMixerMachine*)m_pWndMac[tmac])->SelectMachine(ma);
+							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate(point.x, point.y);
 							std::ostringstream winname;
 							winname<<std::setfill('0') << std::setw(2) << std::hex;
 							winname << ((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex << " : " << ma->_editName;
