@@ -112,7 +112,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->SetIcon(tIcon, false);
 			
 			pFrame->m_wndView.LoadMachineSkin();
-#ifdef use_test_canvas					
+#ifdef use_test_canvas	
 			pFrame->m_wndView.machine_view()->InitSkin();
 			pFrame->m_wndView.machine_view()->Rebuild();
 #endif
