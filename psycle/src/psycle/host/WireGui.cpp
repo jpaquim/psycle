@@ -19,7 +19,7 @@ namespace psycle {
   			// polygon color stated in the config.
 			deltaColR(((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45),
 			deltaColG(((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45),
-			deltaColB(((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45),
+			deltaColB(((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45),			
 			linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa*2), Global::pConfig->mv_wireaacolour),
 			linepen2( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa), Global::pConfig->mv_wireaacolour2),
 			linepen3( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour), 
@@ -87,14 +87,9 @@ namespace psycle {
 					  	   const CRgn& repaint_region,
 						   TestCanvas::Canvas* widget) {
 
-			if (dragging_)
+			if (dragging_) {
 				TestCanvas::Line::Draw(devc, repaint_region, widget);
-			else
-			if (Global::pConfig->mv_wireaa)
-			{				
-				CPen *oldpen = devc->SelectObject(&linepen1);
-				CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
-
+			} else {
 				int oriX = points().at(0).first;
 				int oriY = points().at(0).second;
 
@@ -103,6 +98,10 @@ namespace psycle {
 
 				int const f1 = (desX+oriX)/2;
 				int const f2 = (desY+oriY)/2;
+
+				if ( !Global::pConfig->mv_wireaa) {
+					AmosDraw(devc, oriX, oriY, desX, desY);
+				}
 
 				double modX = double(desX-oriX);
 				double modY = double(desY-oriY);
@@ -138,6 +137,14 @@ namespace psycle {
 								   btcol * deltaColG,
 								   btcol * deltaColB));
 
+				CPen *oldpen = 0;
+				if (Global::pConfig->mv_wireaa) {				
+					oldpen = devc->SelectObject(&linepen1);
+				} else {
+					oldpen = devc->SelectObject(&linepen3);				
+				}
+				CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
+
 				CPoint pol[5];
 				CPoint fillpoly[7];
 								
@@ -151,17 +158,20 @@ namespace psycle {
 				pol[3].y = pol[0].y + helpers::math::rounded(modY*triangle_size_indent);
 				pol[4].x = pol[0].x + helpers::math::rounded(modY*triangle_size_wide);
 				pol[4].y = pol[0].y - helpers::math::rounded(modX*triangle_size_wide);
-
-				devc->SelectObject(&linepen1);
-				AmosDraw(devc, oriX, oriY, desX, desY);
-				devc->Polygon(&pol[1], 4);
-				devc->SelectObject(&linepen2);
-				AmosDraw(devc, oriX, oriY, desX, desY);
-				devc->Polygon(&pol[1], 4);
-				devc->SelectObject(&linepen3);
-				AmosDraw(devc, oriX, oriY, desX, desY);
-				devc->Polygon(&pol[1], 4);
-
+				if (Global::pConfig->mv_wireaa)
+				{				
+					devc->SelectObject(&linepen1);
+					AmosDraw(devc, oriX, oriY, desX, desY);
+					devc->Polygon(&pol[1], 4);
+					devc->SelectObject(&linepen2);
+					AmosDraw(devc, oriX, oriY, desX, desY);
+					devc->Polygon(&pol[1], 4);
+					devc->SelectObject(&linepen3);
+					AmosDraw(devc, oriX, oriY, desX, desY);
+					devc->Polygon(&pol[1], 4);
+				} else {
+					devc->Polygon(&pol[1], 4);
+				}
 				fillpoly[2].x = pol[0].x + helpers::math::rounded(2*modX*triangle_size_indent);
 				fillpoly[2].y = pol[0].y + helpers::math::rounded(2*modY*triangle_size_indent);
 				fillpoly[6].x = fillpoly[2].x;    
@@ -176,13 +186,12 @@ namespace psycle {
 				fillpoly[4].y = pol[3].y;
 				fillpoly[3].x = pol[4].x;
 				fillpoly[3].y = pol[4].y;
-
 				// fillpoly: (when pointed straight up)
 				// top - [1]
 				// bottom right corner - [0] and [5]
 				// center - [2] and [6] <-- where the three colors meet
 				// bottom left corner - [3]
-								
+							
 				// so the three sides are defined as 0-1-2 (rt), 1-2-3 (lt), and 3-4-5-6 (bt)
 
 				devc->SelectObject(&polyInnardsPen);
@@ -200,9 +209,6 @@ namespace psycle {
 				rtBrush.DeleteObject();
 				ltBrush.DeleteObject();
 				btBrush.DeleteObject();
-
-				//mac()->_connectionPoint[w].x = f1-triangle_size_center;
-				//tmac->_connectionPoint[w].y = f2-triangle_size_center;
 			}
 		}
 

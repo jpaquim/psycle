@@ -452,6 +452,7 @@ namespace psycle {
 
 		void MachineView::InitSkin()
 		{
+			LoadMachineBackground();
 			bool has_skin = false;
 			std::string szOld;
 			CNativeGui::uiSetting().LoadMachineDial();
