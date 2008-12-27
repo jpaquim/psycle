@@ -27,6 +27,8 @@ namespace psycle {
 
 		EffectGui::~EffectGui()
 		{
+			if ( dialog_ )
+				dialog_->DestroyWindow();
 		}
 
 		bool EffectGui::TestPan(double x, double y)
@@ -234,6 +236,7 @@ namespace psycle {
 				} else if (InBypass(ev->x, ev->y)) {
 					return true;
 				}
+				ShowDialog();
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {				
 				//if ( !TestMute(ev->x, ev->y) )
