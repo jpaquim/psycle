@@ -112,7 +112,7 @@ namespace psycle {
 			TestCanvas::Canvas::OnEvent(ev);
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
 				if ( !root()->intersect(ev->x, ev->y) ) {
-					ShowNewMachineDlg();
+					ShowNewMachineDlg(ev->x, ev->y);
 				}
 			}
 			if ( del_line_ ) {
@@ -133,7 +133,7 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::ShowNewMachineDlg()
+		void MachineView::ShowNewMachineDlg(double x, double y)
 		{
 			CNewMachine dlg;
 			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0)) {
@@ -151,16 +151,14 @@ namespace psycle {
 				if ( fb == -1) {
 					// MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
-				int CW = 1024;
-				int CH = 768;
-				int x = (rand())%(CW-xs);
-				int y = (rand())%(CH-ys);
+				x -= xs/2;
+				y -= ys/2;
 				bool created=false;
 				if (Global::_pSong->_pMachine[fb] ) {
-					created = Global::_pSong->ReplaceMachine(Global::_pSong->_pMachine[fb],(MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+					created = Global::_pSong->ReplaceMachine(Global::_pSong->_pMachine[fb],(MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 				}
 				else  {
-					created = Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+					created = Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 				}
 				if (!created) {
 					// MessageBox("Machine Creation Failed","Error!",MB_OK);
