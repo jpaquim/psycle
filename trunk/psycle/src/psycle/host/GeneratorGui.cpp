@@ -55,6 +55,9 @@ namespace psycle {
 
 		GeneratorGui::~GeneratorGui()
 		{		
+			if ( dialog_ )
+				dialog_->DestroyWindow();
+
 		}
 
 		void GeneratorGui::UpdateVU() 
