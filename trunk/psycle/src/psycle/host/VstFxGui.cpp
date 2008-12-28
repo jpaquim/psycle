@@ -23,12 +23,12 @@ namespace psycle {
 		}
 
 		bool VstFxGui::OnEvent(TestCanvas::Event* ev)
-		{
-			MachineGui::OnEvent(ev);
+		{			
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
 				ShowDialog();		
+				return true;
 			}
-			return true;
+			return EffectGui::OnEvent(ev);			
 		}
 
 		void VstFxGui::BeforeDeleteDlg()
