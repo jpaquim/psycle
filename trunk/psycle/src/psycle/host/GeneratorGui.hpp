@@ -11,12 +11,6 @@ namespace psycle {
 					  class Machine* mac);
 			~GeneratorGui();
 
-			virtual bool OnEvent(TestCanvas::Event* ev);
-			virtual void BeforeDeleteDlg();
-			virtual void SetSelected(bool on);
-			virtual bool IsSelected() const;
-			virtual void UpdateVU();
-
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,
 						 CBitmap* machineskin,
 						 CBitmap* machineskinmask,
@@ -26,20 +20,30 @@ namespace psycle {
 						 HBITMAP hbmMachineDial,
 						 const CFont& font,
 						 COLORREF font_color);
-			virtual void SetMute(bool mute);
-			virtual void SetSolo(bool mute);
+			virtual void UpdateVU();
 
+			virtual void BeforeDeleteDlg();
+			virtual bool OnEvent(TestCanvas::Event* ev);
+
+			virtual void SetSelected(bool on);
+			virtual bool IsSelected() const;
+			void SetMute(bool mute);
+			void SetSolo(bool mute);
+			void SetBypass(bool mute){}
+
+		protected:
+			virtual void ShowDialog(double x, double y);
 		private:
-			void ShowDialog(double x, double y);
 			void UpdateText();
 			void UpdatePan();
 			bool TestMute(double x, double y);
+			bool TestSolo(double x, double y);
 			bool TestPan(double x, double y);
 			void DoPanDragging(double x, double y);
-			bool TestSolo(double x, double y);
 
-			bool pan_dragging_;
 			class CFrameMachine* dialog_;
+			bool pan_dragging_;
+			
 			TestCanvas::Line sel_line_left_top_1;
 			TestCanvas::Line sel_line_left_top_2;
 			TestCanvas::Line sel_line_right_top_1;
@@ -58,12 +62,13 @@ namespace psycle {
 			TestCanvas::PixBuf vu_led_pixbuf_;
 			TestCanvas::Text text_;
 			// skin
-			CBitmap* machineskin_;
+/*			CBitmap* machineskin_;
 			CBitmap* machineskinmask_;
 			CBitmap* machinebkg_;
 			HBITMAP hbmMachineSkin_;
 			HBITMAP hbmMachineBkg_;	
-			HBITMAP hbmMachineDial_;	
+			HBITMAP hbmMachineDial_;
+*/
 			SMachineCoords	MachineCoords_;
 		};
 	}

@@ -7,7 +7,6 @@
 namespace psycle {
 	namespace host {
 		
-
 		class SSkinSource
 		{
 		public:
@@ -50,7 +49,7 @@ namespace psycle {
 			SSkinDest dEffectMute;
 			SSkinDest dEffectBypass;
 			SSkinDest dEffectName;
-			BOOL bHasTransparency;
+			bool bHasTransparency;
 			COLORREF cTransparency;
 		};
 
@@ -58,10 +57,11 @@ namespace psycle {
 		public:
 			MachineGui(class MachineView* view,
 			           class Machine* mac);
-			~MachineGui();
+			virtual ~MachineGui();
 
-			virtual bool OnEvent(TestCanvas::Event* ev);
-
+			virtual void AttachWire(class WireGui* gui, int point);
+			virtual void DetachWire(class WireGui* gui);
+			virtual void RemoveWires();
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,
 						 CBitmap* machineskin,
 						 CBitmap* machineskinmask,
@@ -70,24 +70,21 @@ namespace psycle {
 						 HBITMAP hbmMachineBkg,
 						 HBITMAP hbmMachineDial,
 						 const CFont& font,
-						 COLORREF font_color);
+						 COLORREF font_color) = 0;
 
-			virtual void SetMute(bool mute);
-			virtual void SetSolo(bool mute);
-			virtual void SetBypass(bool mute);
+			virtual void SetMute(bool mute) = 0;
+			virtual void SetSolo(bool mute) = 0;
+			virtual void SetBypass(bool mute) = 0;
 			virtual void UpdateVU();
 			
-			void AttachWire(class WireGui* gui, int point);
-			void DetachWire(class WireGui* gui);
-			void RemoveWires();
-
-			MachineView* view();
-			Machine* mac() { return mac_; };
-
 			virtual void BeforeDeleteDlg();
+			virtual bool OnEvent(TestCanvas::Event* ev);
 
-			virtual void SetSelected(bool on);
-			virtual bool IsSelected() const;
+			virtual void SetSelected(bool on) = 0;
+			virtual bool IsSelected() const = 0;
+
+			MachineView* view() { return view_; }
+			Machine* mac() { return mac_; };
 
 		protected:
 			// helper
@@ -97,16 +94,14 @@ namespace psycle {
 						double y1,
 						double x2,
 						double y2) const;
+
+			virtual void ShowDialog(double x, double y) = 0;
 		private:		
 			void dragging_start(double x, double y);
 			void dragging(double x, double y);
 			void dragging_stop();			
 			void DoMacPropDialog();
-			//bool TestMute(double x, double y);
-			//bool TestSolo(double x, double y);
 			void OnMove();
-			void UpdatePan();
-			
 			
 			Machine* mac_;
 			MachineView* view_;

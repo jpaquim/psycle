@@ -22,21 +22,12 @@ namespace psycle {
 				dialog_->DestroyWindow();
 		}
 
-		bool VstGenGui::OnEvent(TestCanvas::Event* ev)
-		{			
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();
-				return true;
-			}
-			return GeneratorGui::OnEvent(ev);
-		}
-
 		void VstGenGui::BeforeDeleteDlg()
 		{
 			dialog_ = 0;
 		}
 
-		void VstGenGui::ShowDialog()
+		void VstGenGui::ShowDialog(double x, double y)
 		{
 			if ( !dialog_ ) {
 				dialog_ = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(mac()), this);

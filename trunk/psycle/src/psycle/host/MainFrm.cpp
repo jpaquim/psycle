@@ -1427,7 +1427,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			helppath +=  "Docs\\psycle.chm";
 			::HtmlHelp(::GetDesktopWindow(),helppath, HH_DISPLAY_TOPIC, 0);
 		}
-
+		// Legacy Function. Now executed from the xxxxGui classes via an Event from MachineView.
 		void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 		{
 			Machine *ma = _pSong->_pMachine[tmac];
@@ -1523,42 +1523,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
 						{
-							m_pWndMac[tmac] = new CFrameMachine(tmac);
-							((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
-							((CFrameMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
-							((CFrameMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
-
+							m_pWndMac[tmac] = new CFrameMachine(tmac, &isguiopen[tmac], &m_wndView);
 							m_pWndMac[tmac]->LoadFrame(
 								IDR_MACHINEFRAME, 
 								WS_POPUPWINDOW | WS_CAPTION,
 								this);
 							((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
 							((CFrameMachine*)m_pWndMac[tmac])->Generate(point.x, point.y);
-							char winname[32];
-							sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->MachineIndex
-													,ma->_editName);
-							((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
 							isguiopen[tmac] = true;
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}
 						break;
 					case MACH_MIXER:
 						{
-							m_pWndMac[tmac] = new CFrameMixerMachine(tmac);
-							((CFrameMixerMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
-							((CFrameMixerMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
-							((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
-
+							m_pWndMac[tmac] = new CFrameMixerMachine(tmac, &isguiopen[tmac], &m_wndView);
 							m_pWndMac[tmac]->LoadFrame(
 								IDR_MACHINEFRAME, 
 								WS_POPUPWINDOW | WS_CAPTION,
 								this);
 							((CFrameMixerMachine*)m_pWndMac[tmac])->SelectMachine(ma);
 							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate(point.x, point.y);
-							std::ostringstream winname;
-							winname<<std::setfill('0') << std::setw(2) << std::hex;
-							winname << ((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex << " : " << ma->_editName;
-							((CFrameMixerMachine*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
 							isguiopen[tmac] = true;
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}

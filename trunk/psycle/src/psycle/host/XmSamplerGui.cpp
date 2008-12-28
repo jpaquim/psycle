@@ -21,21 +21,12 @@ namespace psycle {
 				dialog_->DestroyWindow();
 		}
 
-		bool XmSamplerGui::OnEvent(TestCanvas::Event* ev)
-		{
-			MachineGui::OnEvent(ev);
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();		
-			}
-			return true;
-		}
-
 		void XmSamplerGui::BeforeDeleteDlg()
 		{
 			dialog_ = 0;
 		}
 
-		void XmSamplerGui::ShowDialog()
+		void XmSamplerGui::ShowDialog(double x, double y)
 		{
 			if ( !dialog_ ) {
 				dialog_ = new XMSamplerUI(mac()->GetEditName(), this, view()->child_view());

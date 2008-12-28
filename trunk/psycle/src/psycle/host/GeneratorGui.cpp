@@ -116,13 +116,13 @@ namespace psycle {
 								   const CFont& font,
 								   COLORREF font_color)
 		{
-			machineskin_ = machineskin;
+/*			machineskin_ = machineskin;
 			machineskinmask_ = machineskinmask;
 			machinebkg_ = machinebkg;
 			hbmMachineSkin_ = hbmMachineSkin;
 			hbmMachineBkg_ = hbmMachineBkg;
 			hbmMachineDial = hbmMachineDial;
-			MachineCoords_ = MachineCoords;
+*/			MachineCoords_ = MachineCoords;
 
 			pixbuf_.SetImage(machineskin);
 			pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
@@ -332,12 +332,8 @@ namespace psycle {
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
 				pan_dragging_ = false;
-			} else
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog(ev->x, ev->y);
 			}
-			MachineGui::OnEvent(ev);
-			return true;
+			return MachineGui::OnEvent(ev);
 		}
 
 		void GeneratorGui::BeforeDeleteDlg()

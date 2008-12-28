@@ -22,21 +22,12 @@ namespace psycle {
 				dialog_->DestroyWindow();
 		}
 
-		bool VstFxGui::OnEvent(TestCanvas::Event* ev)
-		{			
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();		
-				return true;
-			}
-			return EffectGui::OnEvent(ev);			
-		}
-
 		void VstFxGui::BeforeDeleteDlg()
 		{
 			dialog_ = 0;
 		}
 
-		void VstFxGui::ShowDialog()
+		void VstFxGui::ShowDialog(double x, double y)
 		{
 			if ( !dialog_ ) {
 				dialog_ = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(mac()), this);
@@ -49,9 +40,9 @@ namespace psycle {
 				winname << std::hex << std::setw(2)
 					<< view()->song()->FindBusFromIndex(mac()->_macIndex)
 						<< " : " << mac()->_editName;
-						dialog_->SetTitleText(winname.str().c_str());
-							// C_Tuner.dll crashes if asking size before opening.
-//							newwin->ResizeWindow(0);
+				dialog_->SetTitleText(winname.str().c_str());
+				// C_Tuner.dll crashes if asking size before opening.
+//				newwin->ResizeWindow(0);
 				dialog_->ShowWindow(SW_SHOWNORMAL);
 				dialog_->PostOpenWnd();
 //				CenterWindowOnPoint(m_pWndMac[tmac], point);

@@ -11,12 +11,6 @@ namespace psycle {
 					  class Machine* mac);
 			~EffectGui();
 
-			virtual bool OnEvent(TestCanvas::Event* ev);
-			virtual void BeforeDeleteDlg();
-			virtual void UpdateVU();
-			virtual void SetBypass(bool on);
-			virtual void SetMute(bool on);
-
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,
 						 CBitmap* machineskin,
 						 CBitmap* machineskinmask,
@@ -27,8 +21,18 @@ namespace psycle {
 						 const CFont& font,
 						 COLORREF font_color);
 
+			virtual void BeforeDeleteDlg();
+			virtual bool OnEvent(TestCanvas::Event* ev);
+			virtual void SetSelected(bool on) {}
+			virtual bool IsSelected() const{return false;}
+
+			virtual void UpdateVU();
+			virtual void SetBypass(bool on);
+			virtual void SetMute(bool on);
+			virtual void SetSolo(bool on){}
+		protected:
+			virtual void ShowDialog(double x, double y);
 		private:
-			void ShowDialog(double x, double y);
 			void UpdateText();
 			void UpdatePan();			
 			bool TestPan(double x, double y);
@@ -48,12 +52,13 @@ namespace psycle {
 			TestCanvas::PixBuf vu_led_pixbuf_;
 			TestCanvas::Text text_;
 			// skin
-			CBitmap* machineskin_;
+/*			CBitmap* machineskin_;
 			CBitmap* machineskinmask_;
 			CBitmap* machinebkg_;
 			HBITMAP hbmMachineSkin_;
 			HBITMAP hbmMachineBkg_;	
-			HBITMAP hbmMachineDial_;	
+			HBITMAP hbmMachineDial_;
+*/
 			SMachineCoords	MachineCoords_;
 		};
 	}

@@ -22,7 +22,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.button = 3;
 				machine_view_.OnEvent(&ev);
 				return;
-#endif
+#else
 				
 				smac = -1; 		smacmode = smac_modes::move;
 				wiresource = -1; wiredest = -1;
@@ -100,6 +100,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 //						OnMouseMove(nFlags,point);
 					}
 				} // End nFlags & MK_RBUTTON
+#endif
 			}
 			CWnd::OnRButtonDown(nFlags,point);
 		}
@@ -118,7 +119,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.button = 3;
 				machine_view_.OnEvent(&ev);
 				return;
-#endif
+#else
 				int propMac = GetMachine(point);
 
 				if (propMac != -1) // Is the mouse pointer over a machine?
@@ -226,6 +227,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						}
 					}			
 				}
+#endif
 			}
 			wiresource = -1;
 			wiredest = -1;
@@ -266,7 +268,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.button = 1;
 				machine_view_.OnEvent(&ev);
 				return;
-#endif
+#else
 
 				smac = -1;		smacmode = smac_modes::move;
 				wiresource = -1;wiredest = -1;
@@ -466,6 +468,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						}
 					}
 				}// No Shift
+#endif
 			}	
 
 			else if ( viewMode==view_modes::pattern)
@@ -561,7 +564,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.button = 1;
 				machine_view_.OnEvent(&ev);
 				return;
-#endif
+#else
 
 				int propMac = GetMachine(point);
 				if ( propMac != -1)
@@ -658,7 +661,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;
 				Repaint();
-
+#endif
 			}
 			else if (viewMode == view_modes::pattern)
 			{
@@ -730,7 +733,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					ev.button = 0;
 				machine_view_.OnEvent(&ev);
 				return;
-#endif
+#else
 
 				if (smac > -1 && (nFlags & MK_LBUTTON))
 				{
@@ -802,6 +805,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					wireSY = point.y;
 					Repaint();
 				}
+#endif
 			}
 
 			else if (viewMode == view_modes::pattern)
