@@ -347,11 +347,9 @@ namespace psycle {
 
 		void GeneratorGui::ShowDialog(double x, double y)
 		{
-			if ( !dialog_ ) {
-				CRect rc;
-				view()->parent()->GetWindowRect(rc);
-				dialog_ = new CFrameMachine(mac()->_macIndex, this, rc.left + absx() + x, rc.top + absy() + y);
-				//CenterWindowOnPoint(m_pWndMac[tmac], point);
+			if ( !dialog_ ) {				
+				dialog_ = new CFrameMachine(this);
+				dialog_->Init(x, y);				
 			}
 		}
 

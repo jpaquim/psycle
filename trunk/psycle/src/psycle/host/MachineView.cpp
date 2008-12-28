@@ -10,6 +10,7 @@
 #include "Mastergui.hpp"
 #include "EffectGui.hpp"
 #include "GeneratorGui.hpp"
+#include "DummyGui.hpp"
 #include "MixerGui.hpp"
 #include "VstFxGui.hpp"
 #include "RecorderGui.hpp"
@@ -206,12 +207,15 @@ namespace psycle {
 					if ( mac->_mode == MACHMODE_FX)
 						gui = new EffectGui(this, mac);
 				break;
+				case MACH_DUPLICATOR:
+					gui = new GeneratorGui(this, mac);
+				break;
 				case MACH_DUMMY:
 					if ( mac->_mode == MACHMODE_GENERATOR)
-						gui = new GeneratorGui(this, mac);
+						gui = new DummyGenGui(this, mac);
 					else
 					if ( mac->_mode == MACHMODE_FX)
-						gui = new EffectGui(this, mac);
+						gui = new DummyEffectGui(this, mac);
 				break;
 				case MACH_MIXER:
 					gui = new MixerGui(this, mac);
@@ -1197,5 +1201,6 @@ namespace psycle {
 			finder.Close();
 		}
 
+		
 	}  // namespace host
 }  // namespace psycle

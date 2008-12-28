@@ -10,13 +10,15 @@ namespace psycle {
 
 		XmSamplerGui::XmSamplerGui(class MachineView* view,
 							       class Machine* mac)
-			: MachineGui(view, mac),
+			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{
 		}
 
 		XmSamplerGui::~XmSamplerGui()
-		{		
+		{
+			if (dialog_)
+				dialog_->DestroyWindow();
 		}
 
 		bool XmSamplerGui::OnEvent(TestCanvas::Event* ev)

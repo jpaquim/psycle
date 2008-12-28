@@ -2,7 +2,7 @@
 #include "Song.hpp"
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
-#include "FrameMachine.hpp"
+#include "FrameMixerMachine.hpp"
 #include "ChildView.hpp"
 
 namespace psycle {
@@ -10,22 +10,24 @@ namespace psycle {
 
 		MixerGui::MixerGui(class MachineView* view,
 					       class Machine* mac)
-			: MachineGui(view, mac),
+			: EffectGui(view, mac),
 			  dialog_(0)
 		{
 		}
 
 		MixerGui::~MixerGui()
-		{		
+		{
+			if (dialog_)
+				dialog_->DestroyWindow();
 		}
 
 		bool MixerGui::OnEvent(TestCanvas::Event* ev)
-		{
-			MachineGui::OnEvent(ev);
+		{			
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();		
+				ShowDialog(ev->x, ev->y);
+				return true;
 			}
-			return true;
+			return EffectGui::OnEvent(ev);
 		}
 
 		void MixerGui::BeforeDeleteDlg()
@@ -33,11 +35,23 @@ namespace psycle {
 			dialog_ = 0;
 		}
 
-		void MixerGui::ShowDialog()
+		void MixerGui::ShowDialog(double x, double y)
 		{
 			if ( !dialog_ ) {
-			//	dialog_ = new CFrameMachine(mac()->_macIndex, this);
-				//CenterWindowOnPoint(m_pWndMac[tmac], point);
+				CRect rc;
+				view()->parent()->GetWindowRect(rc);
+				dialog_ = new CFrameMixerMachine(this);
+				dialog_->LoadFrame(
+								IDR_MACHINEFRAME, 
+								WS_POPUPWINDOW | WS_CAPTION,
+								view()->child_view());
+				dialog_->SelectMachine(mac());
+				dialog_->Generate(rc.left + absx() + x, rc.top + absy() + y);			
+				char winname[32];
+				sprintf(winname,"%.2X : %s",dialog_->MachineIndex
+									   ,mac()->_editName);
+				dialog_->SetWindowText(winname);
+				dialog_->centerWindowOnPoint(rc.left + absx() + x, rc.top + absy() + y);
 			}
 		}
 

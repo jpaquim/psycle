@@ -17,7 +17,9 @@ namespace psycle {
 		}
 
 		VstGenGui::~VstGenGui()
-		{		
+		{
+			if (dialog_)
+				dialog_->DestroyWindow();
 		}
 
 		bool VstGenGui::OnEvent(TestCanvas::Event* ev)

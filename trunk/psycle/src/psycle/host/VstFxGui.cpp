@@ -18,6 +18,8 @@ namespace psycle {
 
 		VstFxGui::~VstFxGui()
 		{		
+			if (dialog_)
+				dialog_->DestroyWindow();
 		}
 
 		bool VstFxGui::OnEvent(TestCanvas::Event* ev)

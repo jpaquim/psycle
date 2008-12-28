@@ -20,6 +20,7 @@ public:
 	CChildView* m_pParent;
 	void RedrawList();
 	BOOL Create();
+	void Show(int x, int y);
 	afx_msg void OnCancel();
 
 	CComboBox m_listbox;
@@ -39,6 +40,7 @@ public:
 	CSliderCtrl m_volslider;
 private:
 	MachineGui* gui_;
+	void centerWindowOnPoint(int x, int y);
 };
 
 PSYCLE__MFC__NAMESPACE__END

@@ -49,26 +49,32 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//do not use! Use OnCreate Instead.
 		}
 
-		CFrameMachine::CFrameMachine(int dum, MachineGui* gen_gui, double x, double y) :
-				MachineIndex(dum),
-				gen_gui_(gen_gui) {
-
+		CFrameMachine::CFrameMachine(MachineGui* gen_gui)
+			:	gen_gui_(gen_gui) {
+			assert(gen_gui);
 			wndView = gen_gui->view()->child_view();
-			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->_macIndex);				
-			LoadFrame(IDR_MACHINEFRAME, 
-			  	      WS_POPUPWINDOW | WS_CAPTION,
-					  gen_gui->view()->child_view()->pParentFrame);
-			SelectMachine(gen_gui_->mac());
-			Generate(x, y);
-			char winname[32];
-			sprintf(winname,"%.2X : %s",MachineIndex
-									   ,gen_gui->mac()->_editName);
-			SetWindowText(winname);
+			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->_macIndex);			
 		}
 
 		CFrameMachine::~CFrameMachine()
 		{
 			//do not use! Use OnDestroy Instead.
+		}
+
+		void CFrameMachine::Init(int x, int y)
+		{
+			LoadFrame(
+				IDR_MACHINEFRAME, 
+								WS_POPUPWINDOW | WS_CAPTION,
+								gen_gui_->view()->child_view());
+				SelectMachine(gen_gui_->mac());
+				CRect rc;
+				gen_gui_->view()->parent()->GetWindowRect(rc);
+				Generate(rc.left + gen_gui_->absx() + x, rc.top + gen_gui_->absy() + y);			
+				char winname[32];
+				sprintf(winname,"%.2X : %s",MachineIndex
+									   ,gen_gui_->mac()->_editName);
+				SetWindowText(winname);
 		}
 
 		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
