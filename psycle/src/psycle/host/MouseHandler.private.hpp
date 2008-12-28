@@ -266,6 +266,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.x = point.x;
 				ev.y = point.y;
 				ev.button = 1;
+				ev.shift = nFlags;
 				machine_view_.OnEvent(&ev);
 				return;
 #else

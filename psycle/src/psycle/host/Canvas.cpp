@@ -240,19 +240,21 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     std::vector<Item*>::const_iterator it = items_.begin();
     for ( ; it != items_.end(); ++it ) {
       const Item* item = *it;
-      double item_x1, item_y1, item_x2, item_y2;
-      item->GetBounds(item_x1, item_y1, item_x2, item_y2);
-      if ( first ) {
-        x1 = item_x1;
-        y1 = item_y1;
-        x2 = item_x2;
-        y2 = item_y2;
-      } else {
-        x1 = std::min(item_x1, x1);
-        y1 = std::min(item_y1, y1);
-        x2 = std::max(item_x2, x2);
-        y2 = std::max(item_y2, y2);
-      }
+	  if ( item->visible() ) {
+		double item_x1, item_y1, item_x2, item_y2;
+		item->GetBounds(item_x1, item_y1, item_x2, item_y2);
+		if ( first ) {
+			x1 = item_x1;
+			y1 = item_y1;
+			x2 = item_x2;
+			y2 = item_y2;
+		} else {
+			x1 = std::min(item_x1, x1);
+			y1 = std::min(item_y1, y1);
+			x2 = std::max(item_x2, x2);
+			y2 = std::max(item_y2, y2);
+		}
+	  }
     }
     x1 += x();
     y1 += y();
@@ -915,6 +917,7 @@ void Canvas::OnEvent(Event* ev) {
 			Event event;
 			event.type = ev->type;
 			event.button = ev->button;
+			event.shift = ev->shift;
 		    Group* parent = button_press_item_->parent();
 			event.x = ev->x - (parent ? parent->absx() : 0);
 			event.y = ev->y - (parent ? parent->absy() : 0);
@@ -929,6 +932,7 @@ void Canvas::OnEvent(Event* ev) {
 		    Group* parent = button_press_item_->parent();
 			event.x = ev->x - (parent ? parent->absx() : 0);
 			event.y = ev->y - (parent ? parent->absy() : 0);
+			event.shift = ev->shift;
 			DelegateEvent(&event, button_press_item_);
 		}
 		button_press_item_ = 0;
@@ -938,6 +942,7 @@ void Canvas::OnEvent(Event* ev) {
 		if (item) {
 			Event event;
 			event.type = ev->type;
+			event.shift = ev->shift;
 			event.button = ev->button;
 		    Group* parent = item->parent();
 			event.x = ev->x - (parent ? parent->absx() : 0);
@@ -950,6 +955,7 @@ void Canvas::OnEvent(Event* ev) {
 		if (item) {
 			Event event;
 			event.type = ev->type;
+			event.shift = ev->shift;
 			event.button = ev->button;
 		    Group* parent = item->parent();
 			event.x = ev->x - (parent ? parent->absx() : 0);

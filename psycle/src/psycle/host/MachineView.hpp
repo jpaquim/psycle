@@ -29,6 +29,8 @@ namespace psycle {
 							 double x,
 							 double y,
 							 int picker);
+			void OnWireRewire(WireGui* sender, int pick_point);
+
 
 			void LockVu();
 			void UnlockVu();
@@ -59,6 +61,7 @@ namespace psycle {
 			std::map<Machine*, MachineGui*> gui_map_;
 			Song* song_;
 			WireGui* del_line_;
+			WireGui* rewire_line_;
 			MachineGui* del_machine_;
 			bool is_locked_;
 			CBitmap machineskin;

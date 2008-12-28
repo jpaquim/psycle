@@ -12,6 +12,7 @@ namespace TestCanvas {
 	  Type type;
 	  double x, y;
 	  int button;
+	  unsigned int shift;
   };
 
   class Item {

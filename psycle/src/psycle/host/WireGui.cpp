@@ -13,6 +13,8 @@ namespace psycle {
 			fromGUI_(0),
 			toGUI_(0),
 			start_(0),
+			wire_source_point_(-1),
+			wire_dest_point_(-1),
 			dragging_(0),
 			wire_dlg_(0),
 			// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
@@ -264,6 +266,14 @@ namespace psycle {
      	bool WireGui::OnEvent(TestCanvas::Event* ev)
 		{
 			switch(ev->type) {
+				case TestCanvas::Event::BUTTON_PRESS:
+					if (ev->shift & MK_SHIFT) {
+						view_->OnWireRewire(this, 0);
+					} else
+					if (ev->shift & MK_CONTROL) {
+						view_->OnWireRewire(this, 1);
+					}
+				break;
 				case TestCanvas::Event::BUTTON_2PRESS:
 					if (!wire_dlg_) {			
 						wire_dlg_ = new CWireDlg(fromGUI_->view()->child_view(), this);
@@ -299,9 +309,9 @@ namespace psycle {
 			TestCanvas::Group* parentGroup = parent();
 			double xp1, yp1, xp2, yp2;
 			parentGroup->GetBounds(xp1, yp1, xp2, yp2);
-			if ( fromGUI_ ) {
+			if ( fromGUI_ ) {				
 				double x1, y1, x2, y2;
-				fromGUI_->GetBounds( x1, y1, x2, y2);
+				fromGUI_->GetBounds( x1, y1, x2, y2);			
 				double midW = (x2 - x1) / 2;
 				double midH = (y2 - y1) / 2;
 				TestCanvas::Group* fromParent = fromGUI_->parent();

@@ -25,6 +25,14 @@ namespace psycle {
 				start_ = start;
 			}
 
+			void SetWirePoints(int source, int dest) {
+				wire_source_point_ = source;
+				wire_dest_point_ = source;
+			}
+
+			int wire_source() const { return wire_source_point_; }
+			int wire_dest() const { return wire_dest_point_; }
+
 			MachineGui* fromGUI() const { return fromGUI_; }
 			MachineGui* toGUI() const { return toGUI_; }
 			MachineGui* start() const { return start_; }
@@ -53,6 +61,10 @@ namespace psycle {
 			MachineGui* fromGUI_;
 			MachineGui* toGUI_;
 			MachineGui* start_;
+			// this could be a mapping in a future Wire class
+			int wire_source_point_;
+			int wire_dest_point_;
+
 			int drag_picker_;
 			bool dragging_;
 			CWireDlg* wire_dlg_;
