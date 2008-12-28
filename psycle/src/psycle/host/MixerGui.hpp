@@ -1,11 +1,11 @@
 #pragma once
 
-#include "MachineGui.hpp"
+#include "EffectGui.hpp"
 
 namespace psycle {
 	namespace host {
 
-		class MixerGui : public MachineGui {
+		class MixerGui : public EffectGui {
 		public:
 			MixerGui(class MachineView* view,
 				     class Machine* mac);
@@ -15,7 +15,7 @@ namespace psycle {
 			virtual void BeforeDeleteDlg();
 
 		private:
-			void ShowDialog();
+			void ShowDialog(double x, double y);
 
 			class CFrameMixerMachine* dialog_;
 		};

@@ -106,5 +106,27 @@ void CWaveInMacDlg::OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
+void CWaveInMacDlg::Show(int x, int y)
+{	
+	centerWindowOnPoint(x, y);
+}
+
+void CWaveInMacDlg::centerWindowOnPoint(int x, int y) {
+	CRect r;
+	GetWindowRect(&r);
+
+	x -= ((r.right-r.left)/2);
+	y -= ((r.bottom-r.top)/2);
+
+	if (x < 0) {
+		x = 0;
+	}
+	if (y < 0) {
+		y = 0;
+	}
+	SetWindowPos( 0, x,	y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+}
+
+
 PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END

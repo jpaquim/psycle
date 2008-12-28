@@ -154,9 +154,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		// Attributes
 	public:
 		CFrameMixerMachine(int dum);
+		CFrameMixerMachine(class MachineGui* gui);
 	private:
 		Mixer* _pMixer;
-
 		// graphics
 		bool updateBuffer;
 

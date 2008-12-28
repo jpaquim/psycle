@@ -1,11 +1,11 @@
 #pragma once
 
-#include "MachineGui.hpp"
+#include "GeneratorGui.hpp"
 
 namespace psycle {
 	namespace host {
 
-		class RecorderGui : public MachineGui {
+		class RecorderGui : public GeneratorGui {
 		public:
 			RecorderGui(class MachineView* view,
 					    class Machine* mac);
@@ -16,7 +16,7 @@ namespace psycle {
 			virtual void BeforeDeleteDlg();
 
 		private:
-			void ShowDialog();
+			void ShowDialog(double x, double y);
 
 			class CWaveInMacDlg* dialog_;
 		};

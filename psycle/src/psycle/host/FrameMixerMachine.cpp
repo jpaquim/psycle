@@ -240,6 +240,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	{
 		MachineIndex = dum;
 	}
+
+	CFrameMixerMachine::CFrameMixerMachine(MachineGui* gui)		
+		: CFrameMachine(gui)
+		,_pMixer(0)
+		,bmpDC(0)
+		,numSends(0)
+		,numChans(0)
+		,updateBuffer(false)
+		,_swapstart(-1)
+		,_swapend(-1)
+		,isslider(false)
+		,refreshheaders(false)
+	{
+		MachineIndex = gui->mac()->_macIndex;		
+	}
+
 	CFrameMixerMachine::~CFrameMixerMachine()
 	{
 		if ( bmpDC ) { bmpDC->DeleteObject(); delete bmpDC; }

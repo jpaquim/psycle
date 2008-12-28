@@ -22,8 +22,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CFrameMachine(); // protected constructor used by dynamic creation
 		// Attributes
 		public:
-			CFrameMachine(int dum){MachineIndex = dum;};
-			CFrameMachine(int dum, class MachineGui* gen_gui, double x, double y);
+			CFrameMachine(int dum){MachineIndex = dum;};			
+			CFrameMachine(class MachineGui* gen_gui);
+			void Init(int x, int y);
 				
 		protected:
 			Machine* _pMachine;

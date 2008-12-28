@@ -10,22 +10,25 @@ namespace psycle {
 
 		RecorderGui::RecorderGui(class MachineView* view,
 							     class Machine* mac)
-			: MachineGui(view, mac),
+			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{
 		}
 
 		RecorderGui::~RecorderGui()
-		{		
+		{	
+			if (dialog_)
+				dialog_->DestroyWindow();
 		}
 
 		bool RecorderGui::OnEvent(TestCanvas::Event* ev)
-		{
-			MachineGui::OnEvent(ev);
+		{			
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();		
+				ShowDialog(ev->x, ev->y);
+				return true;
 			}
-			return true;
+			return GeneratorGui::OnEvent(ev);
+			
 		}
 
 		void RecorderGui::BeforeDeleteDlg()
@@ -33,15 +36,15 @@ namespace psycle {
 			dialog_ = 0;
 		}
 
-		void RecorderGui::ShowDialog()
+		void RecorderGui::ShowDialog(double x, double y)
 		{
 			if ( !dialog_ ) {
 				dialog_ = new CWaveInMacDlg(view()->child_view(), this);
 				dialog_->pRecorder = (AudioRecorder*)mac();
 				dialog_->Create();
-				//CenterWindowOnPoint(m_wndView.WaveInMachineDialog, point);
-				//dialog_ = new CFrameMachine(mac()->_macIndex, this);
-				//CenterWindowOnPoint(m_pWndMac[tmac], point);
+				CRect rc;
+				view()->parent()->GetWindowRect(rc);
+				dialog_->Show(rc.left + absx() + x, rc.top + absy() + y);			
 			}
 		}
 
