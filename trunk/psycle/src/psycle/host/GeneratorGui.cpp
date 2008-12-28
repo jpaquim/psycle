@@ -24,7 +24,7 @@ namespace psycle {
 		{
 			TestCanvas::Line::Points pts;
 			pts.push_back(std::pair<double,double>(0, 0));
-			pts.push_back(std::pair<double,double>(100, 100));
+			pts.push_back(std::pair<double,double>(0, 100));
 			sel_line_left_top_1.SetPoints(pts);
 			sel_line_left_top_1.SetVisible(false);
 			Add(&sel_line_left_top_1);

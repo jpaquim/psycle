@@ -28,6 +28,7 @@ namespace psycle {
 			  main_(main),
 			  song_(song),
 			  del_line_(0),
+			  rewire_line_(0),
 			  del_machine_(0),
 			  is_locked_(false)
 		{
@@ -328,6 +329,16 @@ namespace psycle {
 			line->dragging_start(1);
 		}
 
+		void MachineView::OnWireRewire(WireGui* sender, int pick_point)
+		{
+			rewire_line_ = sender;
+			if (pick_point == 0) {
+				OnNewConnection(sender->fromGUI());
+			} else {
+				OnNewConnection(sender->toGUI());
+			}
+		}
+
 		void MachineView::OnRewireEnd(WireGui* sender,
 									  double x,
 									  double y,
@@ -365,17 +376,24 @@ namespace psycle {
 				MachineGui* connect_from_gui = sender->start();
 				Machine* tmac = connect_from_gui->mac();
 				Machine* dmac = connect_to_gui->mac();
-				int dsttype=0;
-				if (song_->InsertConnection(tmac, dmac,0,dsttype)== -1) {
-					del_line_ = sender;
-					//MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
+				if (!rewire_line_) {				   
+				   int dsttype=0;
+				   if (song_->InsertConnection(tmac, dmac,0,dsttype)== -1) {
+				   	  del_line_ = sender;
+					  //MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
+				   } else {
+				  	  connect_from_gui->AttachWire(sender,0);
+					  connect_to_gui->AttachWire(sender,1);
+					  sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
+					  sender->set_manage(true);
+					  sender->UpdatePosition();					  
+				   }
 				} else {
-					connect_from_gui->AttachWire(sender,0);
-					connect_to_gui->AttachWire(sender,1);
-					sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
-					sender->set_manage(true);
-					sender->UpdatePosition();
-				}			
+					// todo rewire in engine
+					del_line_ = rewire_line_;
+					del_line_->set_manage(false);
+					rewire_line_ = 0;
+				}				
 			} else {
 				del_line_ = sender; // set wire for deletion
 				parent_->Invalidate();
