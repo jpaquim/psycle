@@ -23,12 +23,12 @@ namespace psycle {
 		}
 
 		bool VstGenGui::OnEvent(TestCanvas::Event* ev)
-		{
-			MachineGui::OnEvent(ev);
+		{			
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();		
+				ShowDialog();
+				return true;
 			}
-			return true;
+			return GeneratorGui::OnEvent(ev);
 		}
 
 		void VstGenGui::BeforeDeleteDlg()
