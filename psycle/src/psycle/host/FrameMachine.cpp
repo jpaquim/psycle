@@ -49,6 +49,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//do not use! Use OnCreate Instead.
 		}
 
+		CFrameMachine::CFrameMachine(int index, bool* pActive, CWnd* wndView_ ) : 
+			MachineIndex(index),
+			_pActive(pActive),
+			wndView(wndView)
+		{
+		}
+
 		CFrameMachine::CFrameMachine(MachineGui* gen_gui)
 			:	gen_gui_(gen_gui) {
 			assert(gen_gui);
@@ -65,16 +72,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			LoadFrame(
 				IDR_MACHINEFRAME, 
-								WS_POPUPWINDOW | WS_CAPTION,
-								gen_gui_->view()->child_view());
-				SelectMachine(gen_gui_->mac());
-				CRect rc;
-				gen_gui_->view()->parent()->GetWindowRect(rc);
-				Generate(rc.left + gen_gui_->absx() + x, rc.top + gen_gui_->absy() + y);			
-				char winname[32];
-				sprintf(winname,"%.2X : %s",MachineIndex
-									   ,gen_gui_->mac()->_editName);
-				SetWindowText(winname);
+				WS_POPUPWINDOW | WS_CAPTION,
+				gen_gui_->view()->child_view());
+
+			SelectMachine(gen_gui_->mac());
+			CRect rc;
+			gen_gui_->view()->parent()->GetWindowRect(rc);
+			Generate(x, y);			
+			std::ostringstream winname;
+			winname<<std::setfill('0') << std::setw(2) << std::hex;
+			winname << MachineIndex << " : " << _pMachine->_editName;
+			SetWindowText(winname.str().c_str());
 		}
 
 		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 

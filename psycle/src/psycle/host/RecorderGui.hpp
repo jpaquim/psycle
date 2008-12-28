@@ -11,12 +11,10 @@ namespace psycle {
 					    class Machine* mac);
 			~RecorderGui();
 
-			virtual bool OnEvent(TestCanvas::Event* ev);
-
 			virtual void BeforeDeleteDlg();
-
+		protected:
+			virtual void ShowDialog(double x, double y);
 		private:
-			void ShowDialog(double x, double y);
 
 			class CWaveInMacDlg* dialog_;
 		};

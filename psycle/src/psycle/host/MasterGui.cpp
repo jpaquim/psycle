@@ -56,20 +56,8 @@ namespace psycle {
 			text_.SetVisible(false);
 		}
 
-		bool MasterGui::OnEvent(TestCanvas::Event* ev)
-		{
-			MachineGui::OnEvent(ev);
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog(ev->x, ev->y);
-			}
-			return true;
-		}
-
 		void MasterGui::ShowDialog(double x, double y)
 		{
-			CRect rc;
-			view()->parent()->GetWindowRect(rc);
-
 			if ( !dialog_ ) {
 				dialog_ = new CMasterDlg(view()->child_view());
 				dialog_->_pMachine = (Master*)mac();
@@ -85,12 +73,12 @@ namespace psycle {
 				}
 				dialog_->Create();
 //				CPoint point(-1,-1);
-				dialog_->CenterWindowOnPoint(rc.left + absx() + x, rc.top + absy() + y);
+				dialog_->CenterWindowOnPoint( x,  y);
 
 				dialog_->ShowWindow(SW_SHOW);
 			} else {
 				dialog_->ShowWindow(SW_SHOW);
-				dialog_->CenterWindowOnPoint(rc.left + absx() + x, rc.top + absy() + y);
+				dialog_->CenterWindowOnPoint( x, y);
 			}
 		}
 	}  // namespace host

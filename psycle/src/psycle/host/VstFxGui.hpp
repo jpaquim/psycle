@@ -11,12 +11,11 @@ namespace psycle {
 				     class Machine* mac);
 			~VstFxGui();
 
-			virtual bool OnEvent(TestCanvas::Event* ev);
-
 			virtual void BeforeDeleteDlg();
 
+		protected:
+			virtual void ShowDialog(double x, double y);
 		private:
-			void ShowDialog();
 
 			class CVstEffectWnd* dialog_;
 		};

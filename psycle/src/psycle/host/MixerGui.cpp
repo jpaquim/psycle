@@ -21,15 +21,6 @@ namespace psycle {
 				dialog_->DestroyWindow();
 		}
 
-		bool MixerGui::OnEvent(TestCanvas::Event* ev)
-		{			
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog(ev->x, ev->y);
-				return true;
-			}
-			return EffectGui::OnEvent(ev);
-		}
-
 		void MixerGui::BeforeDeleteDlg()
 		{
 			dialog_ = 0;
@@ -46,12 +37,8 @@ namespace psycle {
 								WS_POPUPWINDOW | WS_CAPTION,
 								view()->child_view());
 				dialog_->SelectMachine(mac());
-				dialog_->Generate(rc.left + absx() + x, rc.top + absy() + y);			
-				char winname[32];
-				sprintf(winname,"%.2X : %s",dialog_->MachineIndex
-									   ,mac()->_editName);
-				dialog_->SetWindowText(winname);
-				dialog_->centerWindowOnPoint(rc.left + absx() + x, rc.top + absy() + y);
+				dialog_->Generate(x, y);			
+				dialog_->centerWindowOnPoint( x, y);
 			}
 		}
 

@@ -22,21 +22,12 @@ namespace psycle {
 				dialog_->DestroyWindow();
 		}
 
-		bool SamplerGui::OnEvent(TestCanvas::Event* ev)
-		{			
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
-				ShowDialog();
-				return true;
-			}
-			return GeneratorGui::OnEvent(ev);			
-		}
-
 		void SamplerGui::BeforeDeleteDlg()
 		{
 			dialog_ = 0;
 		}
 
-		void SamplerGui::ShowDialog()
+		void SamplerGui::ShowDialog(double x, double y)
 		{
 			if ( !dialog_ ) {
 				dialog_ = new CGearTracker(this);

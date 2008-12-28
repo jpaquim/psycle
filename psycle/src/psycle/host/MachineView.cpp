@@ -12,6 +12,7 @@
 #include "GeneratorGui.hpp"
 #include "DummyGui.hpp"
 #include "MixerGui.hpp"
+#include "VstGenGui.hpp"
 #include "VstFxGui.hpp"
 #include "RecorderGui.hpp"
 #include "SamplerGui.hpp"
@@ -210,18 +211,11 @@ namespace psycle {
 				case MACH_DUPLICATOR:
 					gui = new GeneratorGui(this, mac);
 				break;
-				case MACH_DUMMY:
-					if ( mac->_mode == MACHMODE_GENERATOR)
-						gui = new DummyGenGui(this, mac);
-					else
-					if ( mac->_mode == MACHMODE_FX)
-						gui = new DummyEffectGui(this, mac);
-				break;
 				case MACH_MIXER:
 					gui = new MixerGui(this, mac);
 				break;
 				case MACH_VST:
-					gui = new VstFxGui(this, mac);
+					gui = new VstGenGui(this, mac);
 				break;
 				case MACH_VSTFX:
 					gui = new VstFxGui(this, mac);
@@ -235,8 +229,14 @@ namespace psycle {
 				case MACH_XMSAMPLER:
 					gui = new XmSamplerGui(this, mac);
 				break;
+				case MACH_DUMMY: //fallback.
 				default:
-					gui = new MachineGui(this, mac);
+					if ( mac->_mode == MACHMODE_GENERATOR)
+						gui = new DummyGenGui(this, mac);
+					else
+						if ( mac->_mode == MACHMODE_FX)
+							gui = new DummyEffectGui(this, mac);
+					break;
 			}
 			gui_map_[mac] = gui;
 			if ( mac->_mode == MACHMODE_GENERATOR ) {
@@ -558,7 +558,7 @@ namespace psycle {
 					MachineCoords.dEffectBypass.y = 15;
 					MachineCoords.dEffectName.x = 10;
 					MachineCoords.dEffectName.y = 12;
-					MachineCoords.bHasTransparency = FALSE;
+					MachineCoords.bHasTransparency = false;
 #else
 					MachineCoords.sMaster.x = 0;
 					MachineCoords.sMaster.y = 0;
@@ -644,7 +644,7 @@ namespace psycle {
 					MachineCoords.dEffectBypass.y = 5;//15;
 					MachineCoords.dEffectName.x = 49;//10;
 					MachineCoords.dEffectName.y = 7;//12;
-					MachineCoords.bHasTransparency = FALSE;
+					MachineCoords.bHasTransparency = false;
 #endif
 					machineskin.DeleteObject();
 					DeleteObject(hbmMachineSkin);
@@ -1183,7 +1183,7 @@ namespace psycle {
 									if (q)
 									{
 										helpers::hexstring_to_integer(q+1, MachineCoords.cTransparency);
-										MachineCoords.bHasTransparency = TRUE;
+										MachineCoords.bHasTransparency = true;
 									}
 								}
 							}

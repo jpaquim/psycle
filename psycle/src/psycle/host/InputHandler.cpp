@@ -1007,7 +1007,7 @@ namespace psycle
 						CPoint point;
 						point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_x;
 						point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_y;
-						pMainFrame->ShowMachineGui(Global::_pSong->seqBus, point);//, Global::_pSong->seqBus);
+						pMainFrame->ShowMachineGui(Global::_pSong->seqBus, point);
 					}
 				}
 				break;

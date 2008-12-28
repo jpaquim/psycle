@@ -83,6 +83,10 @@ namespace psycle
 		class CMachineInfo
 		{
 		public:
+			CMachineInfo(int version_, int flags_, int numParameters_, CMachineParameter **parameters_,
+				char* name_, char * shortName_, char* author_, char* command_, int numCols_):
+			Version(version_), Flags(flags_), numParameters(numParameters_), Parameters(parameters_),
+			Name(name_), ShortName(shortName_), Author(author_), Command(command_), numCols(numCols_){}
 			/// ...
 			int const Version;
 			/// ...
