@@ -293,6 +293,7 @@ namespace psycle {
 								std::map<Machine*, MachineGui*>::iterator toIt = 
 									gui_map_.find(pout);
 								WireGui* wireUi = new WireGui(this);
+								wireUi->set_wires(w, pout->FindInputWire(mac->_macIndex));
 								root()->Insert(root()->begin(), wireUi);
 								wireUi->set_manage(true);
 								fromIt->second->AttachWire(wireUi,0);
@@ -380,8 +381,11 @@ namespace psycle {
 				   int dsttype=0;
 				   if (song_->InsertConnection(tmac, dmac,0,dsttype)== -1) {
 				   	  del_line_ = sender;
-					  //MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
+					  child_view()->MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
 				   } else {
+					  // a new connection has been inserted
+					  sender->set_wires(tmac->FindOutputWire(dmac->_macIndex),
+										dmac->FindInputWire(tmac->_macIndex));
 				  	  connect_from_gui->AttachWire(sender,0);
 					  connect_to_gui->AttachWire(sender,1);
 					  sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
@@ -389,15 +393,69 @@ namespace psycle {
 					  sender->UpdatePosition();					  
 				   }
 				} else {
-					// todo rewire in engine
-					del_line_ = rewire_line_;
-					del_line_->set_manage(false);
+					bool rewired = false;
+					if (picker == 0) {						
+						rewired = RewireSrc(tmac, dmac);
+					} else 
+					if (picker == 1) {					
+						rewired = RewireDest(tmac, dmac);						
+					}					
+					if ( rewired) {
+						del_line_ = rewire_line_;
+						del_line_->set_manage(false);
+						sender->set_wires(tmac->FindOutputWire(dmac->_macIndex),
+						dmac->FindInputWire(tmac->_macIndex));
+				  		connect_from_gui->AttachWire(sender,0);
+						connect_to_gui->AttachWire(sender,1);
+						sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
+						sender->set_manage(true);
+						sender->UpdatePosition();	
+					} else {
+						del_line_ = sender;
+					}
 					rewire_line_ = 0;
 				}				
 			} else {
 				del_line_ = sender; // set wire for deletion
 				parent_->Invalidate();
 			}
+		}
+
+		bool MachineView::RewireSrc(Machine* tmac, Machine* dmac)
+		{			
+			int srctype=0;
+			///\todo: for multi-io.
+			//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
+			if (!song()->ChangeWireSourceMac(tmac,dmac,tmac->GetFreeOutputWire(srctype),rewire_line_->wiredest()))
+			{
+				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
+				return false;
+			}
+			return true;
+		}
+
+		bool MachineView::RewireDest(Machine* tmac, Machine* dmac)
+		{
+			// rewire dest;
+			int w(-1);
+			///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
+			if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
+			{
+				if (child_view()->MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES ) {
+					w = dmac->GetFreeInputWire(1);
+				}
+				else { 
+					w = dmac->GetFreeInputWire(0);
+				}
+			}
+			else {
+					w = dmac->GetFreeInputWire(0);
+			}
+			if (!song()->ChangeWireDestMac(tmac,dmac,rewire_line_->wiresrc(), w)) {
+				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
+				return false;
+			}
+			return true;
 		}
 
 		void MachineView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)

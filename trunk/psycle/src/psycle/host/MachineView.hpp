@@ -49,6 +49,8 @@ namespace psycle {
 						double x,
 						double y,
 						int picker);
+			bool RewireSrc(Machine* tmac, Machine* dmac);
+			bool RewireDest(Machine* tmac, Machine* dmac);
 			void CreateMachineGui(Machine* mac);
 			void RaiseMachinesToTop();
 			void UpdateSoloMuteBypass();

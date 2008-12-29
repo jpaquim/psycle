@@ -13,8 +13,8 @@ namespace psycle {
 			fromGUI_(0),
 			toGUI_(0),
 			start_(0),
-			wire_source_point_(-1),
-			wire_dest_point_(-1),
+			wiresrc_(-1),
+			wiredest_(-1),
 			dragging_(0),
 			wire_dlg_(0),
 			// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
