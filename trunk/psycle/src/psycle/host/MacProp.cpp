@@ -5,6 +5,7 @@
 #include "Psycle.hpp"
 #include "MainFrm.hpp"
 #include "MachineGui.hpp"
+#include "MachineView.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -103,6 +104,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_view->updatePar=thisMac;
 				m_view->Repaint(draw_modes::machine);
 			}
+#ifdef use_test_canvas
+			gui_->SetMute(pMachine->_mute);
+			gui_->QueueDraw();
+#endif
 		}
 		void CMacProp::OnBypass() 
 		{
@@ -117,6 +122,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMacProp::OnSolo() 
 		{
+#ifdef use_test_canvas
+			gui_->view()->SetSolo(pMachine);
+			gui_->QueueDraw();
+#else
 			m_view->AddMacViewUndo();
 			if (m_soloCheck.GetCheck() == 1)
 			{
@@ -152,6 +161,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_view->Repaint(draw_modes::all_machines);
 			}
+#endif
 		}
 
 		void CMacProp::OnClone() 
@@ -173,6 +183,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					MessageBox("Cloning failed","Cloning failed");
 				}
+#ifdef use_test_canvas
+				else {
+					gui_->view()->CreateMachineGui(gui_->view()->song()->_pMachine[dst]);
+				}
+#endif
 				if ( m_view != NULL )
 				{
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);

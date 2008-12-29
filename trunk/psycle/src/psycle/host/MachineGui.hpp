@@ -76,6 +76,7 @@ namespace psycle {
 			virtual void SetSolo(bool mute) = 0;
 			virtual void SetBypass(bool mute) = 0;
 			virtual void UpdateVU();
+			virtual void UpdateText();
 			
 			virtual void BeforeDeleteDlg();
 			virtual bool OnEvent(TestCanvas::Event* ev);

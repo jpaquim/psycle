@@ -21,6 +21,7 @@ namespace psycle {
 						 const CFont& font,
 						 COLORREF font_color);
 			virtual void UpdateVU();
+			virtual void UpdateText();
 
 			virtual void BeforeDeleteDlg();
 			virtual bool OnEvent(TestCanvas::Event* ev);
@@ -33,8 +34,7 @@ namespace psycle {
 
 		protected:
 			virtual void ShowDialog(double x, double y);
-		private:
-			void UpdateText();
+		private:			
 			void UpdatePan();
 			bool TestMute(double x, double y);
 			bool TestSolo(double x, double y);

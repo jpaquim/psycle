@@ -27,13 +27,15 @@ namespace psycle {
 			virtual bool IsSelected() const{return false;}
 
 			virtual void UpdateVU();
+			virtual void UpdateText();
 			virtual void SetBypass(bool on);
 			virtual void SetMute(bool on);
 			virtual void SetSolo(bool on){}
+
 		protected:
 			virtual void ShowDialog(double x, double y);
-		private:
-			void UpdateText();
+
+		private:			
 			void UpdatePan();			
 			bool TestPan(double x, double y);
 			bool InMute(double x, double y);

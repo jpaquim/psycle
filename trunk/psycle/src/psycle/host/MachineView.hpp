@@ -40,6 +40,7 @@ namespace psycle {
 			}
 
 			void InitSkin();
+			void CreateMachineGui(Machine* mac);
 						
 
 		private:			
@@ -50,8 +51,7 @@ namespace psycle {
 						double y,
 						int picker);
 			bool RewireSrc(Machine* tmac, Machine* dmac);
-			bool RewireDest(Machine* tmac, Machine* dmac);
-			void CreateMachineGui(Machine* mac);
+			bool RewireDest(Machine* tmac, Machine* dmac);			
 			void RaiseMachinesToTop();
 			void UpdateSoloMuteBypass();
 			void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
