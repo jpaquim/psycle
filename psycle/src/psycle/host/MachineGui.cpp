@@ -64,6 +64,10 @@ namespace psycle {
 			}
 		}
 
+		void MachineGui::UpdateText()
+		{
+		}
+
 		void MachineGui::BeforeDeleteDlg()
 		{
 		}
@@ -122,7 +126,8 @@ namespace psycle {
 				if (view()->main()->pGearRackDialog)
 				{
 					view()->main()->RedrawGearRackList();
-				}
+				}	
+				UpdateText();
 			}
 			if(dlg.deleted)
 			{
