@@ -91,12 +91,8 @@ void machine::ParameterTweak(int parameter, int value) {
 }
 
 void machine::Work(float * left_samples, float * right_samples, int sample_count, int /*tracks*/) {
-	try {
 	if (!change) {
 		if(!Vals[0]) return;
-		if (sample_count < 0 ) {
-			int i = 1;
-		}
 		while(sample_count--) *left_samples++ = *right_samples++ = 0;
 	} else if (!Vals[0]){ // mute disabled
 		while(volume<0.99f && sample_count--) {
@@ -118,9 +114,6 @@ void machine::Work(float * left_samples, float * right_samples, int sample_count
 		if (volume<=0.01f) {
 			change=false;
 		}
-	}
-	}catch(std::exception e) {
-		int i =1;
 	}
 }
 
