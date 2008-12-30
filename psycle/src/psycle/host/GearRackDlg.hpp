@@ -12,6 +12,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			CGearRackDlg(CChildView* pParent, CMainFrame* pMain);
+			CGearRackDlg(class MachineView* mac_view);
+		private:
+			MachineView* view_;
+		public:
 			CChildView* m_pParent;
 			CMainFrame* pParentMain;
 			void RedrawList();

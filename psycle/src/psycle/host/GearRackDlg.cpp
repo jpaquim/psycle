@@ -7,18 +7,31 @@
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "MainFrm.hpp"
+#include "MachineView.hpp"
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		int CGearRackDlg::DisplayMode = 0;
 
 		CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain)
-			: CDialog(CGearRackDlg::IDD, pParent)
+			: CDialog(CGearRackDlg::IDD, pParent),
+			view_(0)
 		{
 			//{{AFX_DATA_INIT(CGearRackDlg)
 			//}}AFX_DATA_INIT
 			m_pParent = pParent;
 			pParentMain = pMain;
+		}
+
+		CGearRackDlg::CGearRackDlg(MachineView* view)
+			: CDialog(CGearRackDlg::IDD, view->child_view()),
+			  view_(view)
+		{
+			//{{AFX_DATA_INIT(CGearRackDlg)
+			//}}AFX_DATA_INIT
+			m_pParent = view->child_view();
+			pParentMain = view->main();
 		}
 
 		void CGearRackDlg::DoDataExchange(CDataExchange* pDX)
@@ -254,7 +267,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (Global::_pSong->_pMachine[tmac])
 					{
+#ifdef use_test_canvas
+						view_->DeleteMachineGui(view_->song()->_pMachine[tmac]);
+#else
 						pParentMain->CloseMacGui(tmac);
+#endif
 						Global::_pSong->DestroyMachine(tmac);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
@@ -270,7 +287,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 					{
+#ifdef use_test_canvas
+						view_->DeleteMachineGui(view_->song()->_pMachine[tmac+MAX_BUSES]);
+#else
 						pParentMain->CloseMacGui(tmac+MAX_BUSES);
+#endif						
 						Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
@@ -471,7 +492,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 				return;
 			}
-
 			// now lets do the actual work...
 			switch (DisplayMode) // should be necessary to rename opened parameter windows.
 			{
@@ -487,6 +507,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
 					}
+#ifdef use_test_canvas
+					else {
+						view_->CreateMachineGui(view_->song()->_pMachine[tmac2]);
+					}
+#endif
 				}
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)

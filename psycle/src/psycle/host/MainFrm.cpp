@@ -1332,8 +1332,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (pGearRackDialog == NULL)
 			{
+#ifdef use_test_canvas
+				pGearRackDialog = new CGearRackDlg(m_wndView.machine_view());				
+#else
 				pGearRackDialog = new CGearRackDlg(&m_wndView, this);
+#endif
 				pGearRackDialog->Create();
+
 				pGearRackDialog->ShowWindow(SW_SHOW);
 			}
 		}
