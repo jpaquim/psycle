@@ -140,6 +140,7 @@ namespace psycle {
 				}
 				view()->SetDeleteMachineGui(this);
 			}
+			view()->child_view()->Invalidate(1);
 		}
 
 		bool MachineGui::InRect(double x, double y, double x1, double y1, double x2,
