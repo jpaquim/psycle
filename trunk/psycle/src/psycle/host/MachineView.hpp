@@ -35,6 +35,12 @@ namespace psycle {
 			void LockVu();
 			void UnlockVu();
 
+			// use this, if you want to delete a gui not called from 
+			// the machinegui event, that will be deleted
+			// (used e.g. in CGearRack)
+			void DeleteMachineGui(Machine* mac);
+			// use this, if you want to delete a machingui itself from
+			// inside a machingui event (like used in macprop dialog)
 			void SetDeleteMachineGui(MachineGui* gui) {
 				del_machine_ = gui;
 			}

@@ -45,6 +45,19 @@ namespace psycle {
 			return main_;
 		}
 
+		void MachineView::DeleteMachineGui(Machine* mac)
+		{
+			std::map<Machine*, MachineGui*>::iterator it;
+			it = gui_map_.find(mac);
+			assert(it != gui_map_.end());
+			MachineGui* del_machine_ = it->second;
+			gui_map_.erase(it);
+			del_machine_->RemoveWires();
+			del_machine_->set_manage(false);
+			delete del_machine_;			
+			parent_->Invalidate();
+		}
+
 		void MachineView::SetSolo(Machine* tmac)
 		{
 			int smac = tmac->_macIndex;
