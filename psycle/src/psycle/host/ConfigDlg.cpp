@@ -288,6 +288,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
 				}
 				_pConfig->Write();
+#ifdef use_test_canvas
+				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->InitSkin();
+				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->Rebuild();
+#endif
 			}
 			return retVal;
 		}
