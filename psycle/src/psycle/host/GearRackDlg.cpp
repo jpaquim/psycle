@@ -331,6 +331,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (Global::_pSong->_pMachine[tmac])
 				{
+#ifdef use_test_canvas
+					view_->DoMacPropDialog(view_->song()->_pMachine[tmac]);
+#else
 					m_pParent->DoMacPropDialog(tmac);
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
@@ -338,6 +341,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						m_pParent->Repaint();
 					}
+#endif
 				}
 				break;
 			case 1:
@@ -378,13 +382,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (Global::_pSong->_pMachine[tmac])
 				{
+#ifdef use_test_canvas
+					view_->ShowDialog(view_->song()->_pMachine[tmac],
+									  point.x,
+									  point.y);
+#else
 					pParentMain->ShowMachineGui(tmac,point);
+#endif
 				}
 				break;
 			case 1:
 				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 				{
+#ifdef use_test_canvas
+					view_->ShowDialog(view_->song()->_pMachine[tmac+MAX_BUSES],
+									  point.x,
+									  point.y);
+
+#else
 					pParentMain->ShowMachineGui(tmac+MAX_BUSES,point);
+#endif
 				}
 				break;
 			case 2:

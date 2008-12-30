@@ -58,6 +58,22 @@ namespace psycle {
 			parent_->Invalidate();
 		}
 
+		void MachineView::DoMacPropDialog(Machine* mac)
+		{
+			std::map<Machine*, MachineGui*>::iterator it;
+			it = gui_map_.find(mac);
+			assert(it != gui_map_.end());
+			it->second->DoMacPropDialog();
+		}
+
+		void MachineView::ShowDialog(Machine* mac, double x, double y)
+		{
+			std::map<Machine*, MachineGui*>::iterator it;
+			it = gui_map_.find(mac);
+			assert(it != gui_map_.end());
+			it->second->ShowDialog(x, y);
+		}
+
 		void MachineView::SetSolo(Machine* tmac)
 		{
 			int smac = tmac->_macIndex;

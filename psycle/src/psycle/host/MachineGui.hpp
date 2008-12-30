@@ -77,15 +77,18 @@ namespace psycle {
 			virtual void SetBypass(bool mute) = 0;
 			virtual void UpdateVU();
 			virtual void UpdateText();
-			
+						
 			virtual void BeforeDeleteDlg();
 			virtual bool OnEvent(TestCanvas::Event* ev);
 
 			virtual void SetSelected(bool on) = 0;
 			virtual bool IsSelected() const = 0;
+			void DoMacPropDialog();
 
 			MachineView* view() { return view_; }
 			Machine* mac() { return mac_; };
+			
+			virtual void ShowDialog(double x, double y) = 0;
 
 		protected:
 			// helper
@@ -95,13 +98,11 @@ namespace psycle {
 						double y1,
 						double x2,
 						double y2) const;
-
-			virtual void ShowDialog(double x, double y) = 0;
+			
 		private:		
 			void dragging_start(double x, double y);
 			void dragging(double x, double y);
-			void dragging_stop();			
-			void DoMacPropDialog();
+			void dragging_stop();						
 			void OnMove();
 			
 			Machine* mac_;

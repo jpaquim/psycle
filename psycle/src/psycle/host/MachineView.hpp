@@ -47,6 +47,8 @@ namespace psycle {
 
 			void InitSkin();
 			void CreateMachineGui(Machine* mac);
+			void DoMacPropDialog(Machine* mac);
+			void ShowDialog(Machine* mac, double x, double y);
 						
 
 		private:			
