@@ -83,10 +83,12 @@ namespace psycle
 		class CMachineInfo
 		{
 		public:
-			CMachineInfo(int version_, int flags_, int numParameters_, CMachineParameter **parameters_,
-				char* name_, char * shortName_, char* author_, char* command_, int numCols_):
-			Version(version_), Flags(flags_), numParameters(numParameters_), Parameters(parameters_),
-			Name(name_), ShortName(shortName_), Author(author_), Command(command_), numCols(numCols_){}
+			/* TODO we need to edit each plugin to call this ctor
+			CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const * parameters,
+				char const * name, char const * shortName, char const * author, char const * command, int numCols)
+			: Version(version), Flags(flags), numParameters(numParameters), Parameters(parameters),
+			Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
+			*/
 			/// ...
 			int const Version;
 			/// ...
