@@ -2011,7 +2011,7 @@ bool XMSampler::Channel::Load(RiffFile& riffFile)
 	riffFile.Read(m_DefaultPanFactor);
 	riffFile.Read(m_DefaultCutoff);
 	riffFile.Read(m_DefaultRessonance);
-	riffFile.Read((uint32_t&)m_DefaultFilterType);
+	riffFile.Read((std::uint32_t&)m_DefaultFilterType);
 
 	return true;
 }
@@ -2024,7 +2024,7 @@ void XMSampler::Channel::Save(RiffFile& riffFile)
 	riffFile.Write(m_DefaultPanFactor);
 	riffFile.Write(m_DefaultCutoff);
 	riffFile.Write(m_DefaultRessonance);
-	riffFile.Write((uint32_t&)m_DefaultFilterType);
+	riffFile.Write((std::uint32_t&)m_DefaultFilterType);
 }
 
 

@@ -170,8 +170,7 @@ CMachineParameter const *pParameters[] =
 	&prThumpFreq,
 };
 
-CMachineInfo const MacInfo =
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,
 	GENERATOR,
 	NUMPARAMETERS,
@@ -185,7 +184,7 @@ CMachineInfo const MacInfo =
 	"[JAZ] on " __DATE__,
 	"Command Help",
 	4
-};
+);
 
 class mi : public CMachineInterface
 {

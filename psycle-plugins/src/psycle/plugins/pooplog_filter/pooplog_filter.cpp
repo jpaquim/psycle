@@ -307,8 +307,7 @@ CMachineParameter const *pParameters[] =
 	&paraRoute,
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,				
 	0,																																								// flags
 	e_numVALS,																																								// numParameters
@@ -318,7 +317,7 @@ CMachineInfo const MacInfo =
 	"Jeremy Evers",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	4
-};
+);
 
 struct INERTIA
 {

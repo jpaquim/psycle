@@ -47,11 +47,11 @@ bool XMInstrument::WaveData::Load(RiffFile& riffFile)
 
 	riffFile.Read(m_WaveLoopStart);
 	riffFile.Read(m_WaveLoopEnd);
-	riffFile.Read((uint32_t&) m_WaveLoopType);
+	riffFile.Read((std::uint32_t&) m_WaveLoopType);
 
 	riffFile.Read(m_WaveSusLoopStart);
 	riffFile.Read(m_WaveSusLoopEnd);
-	riffFile.Read((uint32_t&) m_WaveSusLoopType);
+	riffFile.Read((std::uint32_t&) m_WaveSusLoopType);
 
 	riffFile.Read(m_WaveTune);
 	riffFile.Read(m_WaveFineTune);
@@ -115,11 +115,11 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 
 	riffFile.Write(m_WaveLoopStart);
 	riffFile.Write(m_WaveLoopEnd);
-	riffFile.Write((uint32_t&)m_WaveLoopType);
+	riffFile.Write((std::uint32_t&)m_WaveLoopType);
 
 	riffFile.Write(m_WaveSusLoopStart);
 	riffFile.Write(m_WaveSusLoopEnd);
-	riffFile.Write((uint32_t&)m_WaveSusLoopType);
+	riffFile.Write((std::uint32_t&)m_WaveSusLoopType);
 
 	riffFile.Write(m_WaveTune);
 	riffFile.Write(m_WaveFineTune);
@@ -494,16 +494,16 @@ bool XMInstrument::Load(RiffFile& riffFile)
 	riffFile.Read(m_FilterCutoff);
 	riffFile.Read(m_FilterResonance);
 	riffFile.Read(m_FilterEnvAmount);
-	riffFile.Read((uint32_t&)m_FilterType);
+	riffFile.Read((std::uint32_t&)m_FilterType);
 
 	riffFile.Read(m_RandomVolume);
 	riffFile.Read(m_RandomPanning);
 	riffFile.Read(m_RandomCutoff);
 	riffFile.Read(m_RandomResonance);
 
-	riffFile.Read((uint32_t&)m_NNA);
-	riffFile.Read((uint32_t&)m_DCT);
-	riffFile.Read((uint32_t&)m_DCA);
+	riffFile.Read((std::uint32_t&)m_NNA);
+	riffFile.Read((std::uint32_t&)m_DCT);
+	riffFile.Read((std::uint32_t&)m_DCA);
 
 	NotePair npair;
 	for(int i = 0;i < NOTE_MAP_SIZE;i++){
@@ -553,15 +553,15 @@ void XMInstrument::Save(RiffFile& riffFile)
 	riffFile.Write(m_FilterCutoff);
 	riffFile.Write(m_FilterResonance);
 	riffFile.Write(m_FilterEnvAmount);
-	riffFile.Write((uint32_t&)m_FilterType);
+	riffFile.Write((std::uint32_t&)m_FilterType);
 
 	riffFile.Write(m_RandomVolume);
 	riffFile.Write(m_RandomPanning);
 	riffFile.Write(m_RandomCutoff);
 	riffFile.Write(m_RandomResonance);
-	riffFile.Write((uint32_t&)m_NNA);
-	riffFile.Write((uint32_t&)m_DCT);
-	riffFile.Write((uint32_t&)m_DCA);
+	riffFile.Write((std::uint32_t&)m_NNA);
+	riffFile.Write((std::uint32_t&)m_DCT);
+	riffFile.Write((std::uint32_t&)m_DCA);
 
 	NotePair npair;
 	for(i = 0;i < NOTE_MAP_SIZE;i++){

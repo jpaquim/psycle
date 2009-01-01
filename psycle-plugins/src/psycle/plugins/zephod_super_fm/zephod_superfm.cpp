@@ -307,8 +307,7 @@ class CTrack
 		float Mot1dv,Mot2dv,Mot3dv;
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	20,																																								// numParameters
@@ -322,7 +321,7 @@ CMachineInfo const MacInfo =
 	"Zephod / Arguru",																								// author
 	"Help",																																				// A command, that could be use for open an editor, etc...
 	2
-};
+);
 
 class mi : public CMachineInterface
 {

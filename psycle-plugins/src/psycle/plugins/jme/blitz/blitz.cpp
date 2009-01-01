@@ -1291,8 +1291,7 @@ CMachineParameter const *pParameters[] =
 
 #pragma pack()
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	112,																																				// numParameters
@@ -1306,7 +1305,7 @@ CMachineInfo const MacInfo =
 	"jme",																																				// author
 	"Help",																																				// A command, that could be use for open an editor, etc...
 	7
-};
+);
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo) // To export DLL functions to host
 

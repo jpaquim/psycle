@@ -118,8 +118,7 @@ CMachineParameter const *pParameters[] =
 	&prPatch16,
 };
 
-CMachineInfo const MacInfo =
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,
 	GENERATOR,
 	NUMPARAMETERS,
@@ -134,7 +133,7 @@ CMachineInfo const MacInfo =
 	"YanniS and JosepMa on " __DATE__,
 	"Command Help",
 	1
-};
+);
 
 // =====================================
 // mi plugin class

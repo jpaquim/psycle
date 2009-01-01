@@ -80,8 +80,7 @@ CMachineParameter const *pParameters[] =
 	&paraTicktweak
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,				
 	0,																																								// flags
 	6,																																								// numParameters
@@ -95,7 +94,7 @@ CMachineInfo const MacInfo =
 	"J. Arguelles",																												// author
 	"About",																																				// A command, that could be use for open an editor, etc...
 	1
-};
+);
 
 class mi : public CMachineInterface
 {
