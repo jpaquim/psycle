@@ -4,6 +4,12 @@
 #include "WireGui.hpp"
 #include "MainFrm.hpp"
 
+#ifdef _MSC_VER
+#undef min
+#undef max
+#endif
+
+
 namespace psycle {
 	namespace host {
 
@@ -133,14 +139,17 @@ namespace psycle {
 
 		void MachineGui::dragging(double x, double y)
 		{
-			double delta_x = x - dragging_x_;
-			double delta_y = y - dragging_y_;
+			double new_x = this->x() + x - dragging_x_;
+			double new_y = this->y() + y - dragging_y_;
 			// limit to greater/equal 0,0
-			if (absx() + delta_x < 0)
-				delta_x = -this->x();
-			if (absy() + delta_y < 0)
-				delta_y = -this->y();	
-			Move(delta_x, delta_y);
+			new_x = std::max(0.0, new_x);
+			new_y = std::max(0.0, new_y);
+			// limit to screensize
+			double x1, y1, x2, y2;
+			GetBounds(x1,y1,x2,y2);
+			new_x = std::min(new_x, view()->cw() - (x2 - x1));
+			new_y = std::min(new_y, view()->ch() - (y2 - y1));
+			SetXY(new_x, new_y);
 			OnMove(); 
 		}
 

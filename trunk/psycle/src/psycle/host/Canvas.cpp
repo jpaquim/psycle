@@ -153,10 +153,12 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     double delta_x = x - x_;
     double delta_y = y - y_;
     CRgn old_rgn;
+	old_rgn.CreateRectRgn(0,0,0,0);
 	old_rgn.CopyRgn(&region());
     x_ = x;
     y_ = y;
     CRgn rgn;
+	rgn.CreateRectRgn(0,0,0,0);
 	rgn.CopyRgn(&old_rgn);
 	rgn.OffsetRgn(delta_x, delta_y);
 	rgn.CombineRgn(&rgn,&old_rgn, RGN_OR);

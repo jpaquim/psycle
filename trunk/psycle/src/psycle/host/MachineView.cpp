@@ -20,6 +20,11 @@
 #include "MainFrm.hpp"
 #include "MacProp.hpp"
 
+#ifdef _MSC_VER
+#undef min
+#undef max
+#endif
+
 namespace psycle {
 	namespace host {
 
@@ -39,6 +44,11 @@ namespace psycle {
 
 		MachineView::~MachineView()
 		{
+			machineskin.DeleteObject();
+			DeleteObject(hbmMachineSkin);
+			machineskinmask.DeleteObject();
+			machinebkg.DeleteObject();
+			DeleteObject(hbmMachineBkg);
 		}
 
 		CMainFrame* MachineView::main()
@@ -324,7 +334,15 @@ namespace psycle {
 			gui_map_.clear();
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
 				if (song_->_pMachine[idx]) {
-					CreateMachineGui(song_->_pMachine[idx]);
+					MachineGui* gui = CreateMachineGui(song_->_pMachine[idx]);
+					assert(gui);
+					double x = gui->x();
+					double y = gui->y();
+					double x1, y1, x2, y2;
+					gui->GetBounds(x1, y1, x2, y2);
+					x = std::min(x, cw()- (x2-x1));
+					y = std::min(y, ch()- (y2-y1));
+					gui->SetXY(x,y);
 				}
 			}
 			BuildWires();
@@ -340,7 +358,17 @@ namespace psycle {
 			}			
 		}
 
-		void MachineView::CreateMachineGui(Machine* mac) {
+		void MachineView::UpdatePosition(Machine* mac)
+		{
+			assert(mac);
+			std::map<Machine*, MachineGui*>::iterator it;
+			it = gui_map_.find(mac);
+			assert(it != gui_map_.end());
+			MachineGui* gui = it->second;
+			gui->SetXY(mac->_x, mac->_y);
+		}
+
+		MachineGui* MachineView::CreateMachineGui(Machine* mac) {
 			assert(mac);
 			MachineGui* gui;
 			switch ( mac->_type ) {
@@ -421,6 +449,7 @@ namespace psycle {
 			else if (song_->machineSoloed == mac->_macIndex)
 				gui->SetSolo(true);
 			gui->set_manage(true);
+			return gui;
 		}
 
 		void MachineView::BuildWires()
