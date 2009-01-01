@@ -334,6 +334,9 @@ class Canvas
 		// void flush();
 		CWnd* parent() { return parent_; }
 
+		int cw() const { return cw_; }
+		int ch() const { return ch_; }
+
 	private:
 		bool DelegateEvent(Event* event, Item* item);
 

@@ -49,6 +49,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 
 			deleted=false;
+			replaced=false;
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
@@ -202,6 +203,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMacProp::OnBnClickedReplacemac()
 		{
 			int index = pMachine->_macIndex;
+#ifdef use_test_canvas
+			replaced = true;
+#else
 			m_view->NewMachine(pMachine->_x,pMachine->_y,index);
 			strcpy(txt,Global::_pSong->_pMachine[index]->_editName);
 
@@ -212,6 +216,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_view->Repaint();
 			}
+#endif
 			OnCancel();
 		}
 

@@ -231,6 +231,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				tmac += MAX_BUSES;
 			case 0:
 				{
+#ifdef use_test_canvas
+					view_->ShowNewMachineDlg(-1,-1,view_->song()->_pMachine[tmac], false);
+#else
 					m_pParent->NewMachine(-1,-1,tmac);
 
 					pParentMain->UpdateEnvInfo();
@@ -239,6 +242,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						m_pParent->Repaint();
 					}
+#endif
 				}
 				break;
 			case 2:
@@ -332,7 +336,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (Global::_pSong->_pMachine[tmac])
 				{
 #ifdef use_test_canvas
-					view_->DoMacPropDialog(view_->song()->_pMachine[tmac]);
+					view_->DoMacPropDialog(view_->song()->_pMachine[tmac], false);
 #else
 					m_pParent->DoMacPropDialog(tmac);
 					pParentMain->UpdateEnvInfo();

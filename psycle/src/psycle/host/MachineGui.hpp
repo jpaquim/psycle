@@ -82,8 +82,7 @@ namespace psycle {
 			virtual bool OnEvent(TestCanvas::Event* ev);
 
 			virtual void SetSelected(bool on) = 0;
-			virtual bool IsSelected() const = 0;
-			void DoMacPropDialog();
+			virtual bool IsSelected() const = 0;			
 
 			MachineView* view() { return view_; }
 			Machine* mac() { return mac_; };

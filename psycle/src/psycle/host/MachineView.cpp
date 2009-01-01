@@ -18,6 +18,7 @@
 #include "SamplerGui.hpp"
 #include "XmSamplerGui.hpp"
 #include "MainFrm.hpp"
+#include "MacProp.hpp"
 
 namespace psycle {
 	namespace host {
@@ -58,12 +59,52 @@ namespace psycle {
 			parent_->Invalidate();
 		}
 
-		void MachineView::DoMacPropDialog(Machine* mac)
+		void MachineView::SetDeleteMachineGui(Machine* mac)
 		{
 			std::map<Machine*, MachineGui*>::iterator it;
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
-			it->second->DoMacPropDialog();
+			del_machine_ = it->second;			
+		}
+
+		void MachineView::DoMacPropDialog(Machine* mac, bool from_event)
+		{
+			std::map<Machine*, MachineGui*>::iterator it;
+			it = gui_map_.find(mac);
+			assert(it != gui_map_.end());
+			MachineGui* gui = it->second;
+			int propMac = mac->_macIndex;
+			CMacProp dlg(gui);			
+			dlg.pMachine = mac;
+			dlg.pSong = song();
+			dlg.thisMac = propMac;
+			if(dlg.DoModal() == IDOK)
+			{
+				sprintf(dlg.pMachine->_editName, dlg.txt);
+				main()->StatusBarText(dlg.txt);
+				main()->UpdateEnvInfo();
+				main()->UpdateComboGen();
+				if (main()->pGearRackDialog)
+				{
+					main()->RedrawGearRackList();
+				}	
+				gui->UpdateText();
+			}
+			if (dlg.deleted) {
+				song()->DestroyMachine(propMac);
+				main()->UpdateEnvInfo();
+				main()->UpdateComboGen();
+				if (main()->pGearRackDialog)
+				{
+					main()->RedrawGearRackList();
+				}
+				SetDeleteMachineGui(gui);
+			} else if (dlg.replaced) {
+				int index = mac->_macIndex;
+				ShowNewMachineDlg(mac->_x, mac->_y, mac, from_event);
+				strcpy(dlg.txt, song()->_pMachine[index]->_editName);
+			}
+			child_view()->Invalidate(1);
 		}
 
 		void MachineView::ShowDialog(Machine* mac, double x, double y)
@@ -144,7 +185,7 @@ namespace psycle {
 			TestCanvas::Canvas::OnEvent(ev);
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
 				if ( !root()->intersect(ev->x, ev->y) ) {
-					ShowNewMachineDlg(ev->x, ev->y);
+					ShowNewMachineDlg(ev->x, ev->y, 0, false);
 				}
 			}
 			if ( del_line_ ) {
@@ -165,38 +206,113 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::ShowNewMachineDlg(double x, double y)
+		void MachineView::ShowNewMachineDlg(double x, double y, Machine* mac, bool from_event)
 		{
 			CNewMachine dlg;
+			if(mac)
+			{
+				if (mac->_macIndex < MAX_BUSES)
+				{
+					dlg.selectedMode = modegen;
+				}
+				else
+				{
+					dlg.selectedMode = modefx;
+				}
+			}
 			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0)) {
 				// AddMacViewUndo();
 				int fb,xs,ys;
-				if (dlg.selectedMode == modegen)  {
-					fb = Global::_pSong->GetFreeBus();
-					xs = MachineCoords.sGenerator.width;
-					ys = MachineCoords.sGenerator.height;
-				}	else {
-					fb = Global::_pSong->GetFreeFxBus();
-					xs = MachineCoords.sEffect.width;
-					ys = MachineCoords.sEffect.height;
+				if (!mac) {					
+					if (dlg.selectedMode == modegen)  {
+						fb = song()->GetFreeBus();
+						xs = MachineCoords.sGenerator.width;
+						ys = MachineCoords.sGenerator.height;
+					}	else {
+						fb = song()->GetFreeFxBus();
+						xs = MachineCoords.sEffect.width;
+						ys = MachineCoords.sEffect.height;
+					}
+				} else {
+					if (mac->_macIndex >= MAX_BUSES && dlg.selectedMode != modegen)
+					{
+						// AddMacViewUndo();
+						fb = mac->_macIndex;
+						xs = MachineCoords.sEffect.width;
+						ys = MachineCoords.sEffect.height;
+						// delete machine if it already exists
+						if (song()->_pMachine[fb])
+						{
+							x = song()->_pMachine[fb]->_x;
+							y = song()->_pMachine[fb]->_y;
+							if (!from_event)
+								DeleteMachineGui(song()->_pMachine[fb]);
+							else 
+								SetDeleteMachineGui(song()->_pMachine[fb]);							
+						}
+					}
+					else if (mac->_macIndex < MAX_BUSES && dlg.selectedMode == modegen)
+					{
+						child_view()->AddMacViewUndo();
+						fb = mac->_macIndex;
+						xs = MachineCoords.sGenerator.width;
+						ys = MachineCoords.sGenerator.height;
+						// delete machine if it already exists
+						if (song()->_pMachine[fb])
+						{
+							x = song()->_pMachine[fb]->_x;
+							y = song()->_pMachine[fb]->_y;
+							if (!from_event)
+								DeleteMachineGui(song()->_pMachine[fb]);
+							else 
+								SetDeleteMachineGui(song()->_pMachine[fb]);
+						}
+					}
+					else
+					{
+						child_view()->MessageBox("Wrong Class of Machine!");
+						return;
+					}
+				}
+				// random position
+				if ((x < 0) || (y < 0))
+				{
+					bool bCovered = TRUE;
+					while (bCovered)
+					{
+						x = (rand())%(cw()-xs);
+						y = (rand())%(ch()-ys);
+						bCovered = FALSE;
+						for (int i=0; i < MAX_MACHINES; i++)
+						{
+							if (Global::_pSong->_pMachine[i])
+							{
+								if ((abs(song()->_pMachine[i]->_x - x) < 32) &&
+									(abs(song()->_pMachine[i]->_y - y) < 32))
+								{
+									bCovered = TRUE;
+									i = MAX_MACHINES;
+								}
+							}
+						}
+					}
 				}
 				if ( fb == -1) {
-					// MessageBox("Machine Creation Failed","Error!",MB_OK);
+					child_view()->MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
 				x -= xs/2;
 				y -= ys/2;
 				bool created=false;
-				if (Global::_pSong->_pMachine[fb] ) {
-					created = Global::_pSong->ReplaceMachine(Global::_pSong->_pMachine[fb],(MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+				if (song()->_pMachine[fb] ) {
+					created = song()->ReplaceMachine(song()->_pMachine[fb],(MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 				}
 				else  {
-					created = Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+					created = song()->CreateMachine((MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 				}
 				if (!created) {
-					// MessageBox("Machine Creation Failed","Error!",MB_OK);
+					child_view()->MessageBox("Machine Creation Failed","Error!",MB_OK);
 				} else {
-					Machine* mac = song_->_pMachine[fb];					
-					CreateMachineGui(mac);
+					CreateMachineGui(song()->_pMachine[fb]);
 				}
 			}
 		}
