@@ -464,6 +464,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_pParent->AddMacViewUndo();
 				Global::_pSong->ExchangeMachines(sel[0],sel[1]);
 				pParentMain->UpdateComboGen(true);
+#ifdef use_test_canvas
+				view_->Rebuild();				
+#endif
 				if (m_pParent->viewMode==view_modes::machine)
 				{
 					m_pParent->Repaint();
@@ -473,6 +476,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_pParent->AddMacViewUndo();
 				Global::_pSong->ExchangeMachines(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
 				pParentMain->UpdateComboGen(true);
+#ifdef use_test_canvas
+				view_->Rebuild();				
+#endif
+
 				if (m_pParent->viewMode==view_modes::machine)
 				{
 					m_pParent->Repaint();
