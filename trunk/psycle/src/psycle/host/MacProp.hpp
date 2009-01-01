@@ -25,6 +25,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int thisMac;
 			char txt[32];
 			bool deleted;
+			bool replaced;
 		// Dialog Data
 			//{{AFX_DATA(CMacProp)
 			enum { IDD = IDD_MACPROP };

@@ -15,7 +15,9 @@ namespace psycle {
 			void Rebuild();
 			void SetSolo(Machine* mac);			
 			void UpdateVUs();			
-			void ShowNewMachineDlg(double x , double y);
+			// from_event has to be set to true, if you show the macprop dialog from inside
+			// the machinegui OnEvent. In case of replace and delete this is important
+			void ShowNewMachineDlg(double x , double y, Machine* mac, bool from_event);
 			void SelectMachine(MachineGui* gui);
 
 			virtual void OnEvent(TestCanvas::Event* ev);
@@ -39,15 +41,16 @@ namespace psycle {
 			// the machinegui event, that will be deleted
 			// (used e.g. in CGearRack)
 			void DeleteMachineGui(Machine* mac);
-			// use this, if you want to delete a machingui itself from
+			// use the next both, if you want to delete a machingui itself from
 			// inside a machingui event (like used in macprop dialog)
 			void SetDeleteMachineGui(MachineGui* gui) {
-				del_machine_ = gui;
+				del_machine_ = gui;			
 			}
+			void SetDeleteMachineGui(Machine* mac);
 
 			void InitSkin();
 			void CreateMachineGui(Machine* mac);
-			void DoMacPropDialog(Machine* mac);
+			void DoMacPropDialog(Machine* mac, bool from_event);
 			void ShowDialog(Machine* mac, double x, double y);
 						
 

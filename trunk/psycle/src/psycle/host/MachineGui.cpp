@@ -1,7 +1,6 @@
 #include "MachineGui.hpp"
 #include "Machine.hpp"
 #include "MachineView.hpp"
-#include "MacProp.hpp"
 #include "WireGui.hpp"
 #include "MainFrm.hpp"
 
@@ -96,7 +95,7 @@ namespace psycle {
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
 				if (ev->button == 3) {
-					DoMacPropDialog();
+					view()->DoMacPropDialog(mac(), true);
 				} else {
 					dragging_stop();
 				}
@@ -109,40 +108,7 @@ namespace psycle {
 			return true;
 		}
 
-		void MachineGui::DoMacPropDialog()
-		{
-			int propMac = mac()->_macIndex;
-			CMacProp dlg(this);
-			//dlg.m_view=this;
-			dlg.pMachine = Global::_pSong->_pMachine[propMac];
-			dlg.pSong = view()->song();
-			dlg.thisMac = propMac;
-			if(dlg.DoModal() == IDOK)
-			{
-				sprintf(dlg.pMachine->_editName, dlg.txt);
-				view()->main()->StatusBarText(dlg.txt);
-				view()->main()->UpdateEnvInfo();
-				view()->main()->UpdateComboGen();
-				if (view()->main()->pGearRackDialog)
-				{
-					view()->main()->RedrawGearRackList();
-				}	
-				UpdateText();
-			}
-			if(dlg.deleted)
-			{
-				view()->song()->DestroyMachine(propMac);
-				view()->main()->UpdateEnvInfo();
-				view()->main()->UpdateComboGen();
-				if (view()->main()->pGearRackDialog)
-				{
-					view()->main()->RedrawGearRackList();
-				}
-				view()->SetDeleteMachineGui(this);
-			}
-			view()->child_view()->Invalidate(1);
-		}
-
+		
 		bool MachineGui::InRect(double x, double y, double x1, double y1, double x2,
 			double y2 ) const {
 			if ( x1 < x2 ) {
@@ -190,6 +156,8 @@ namespace psycle {
 			for ( ; it != wire_uis_.end(); ++it ) {
 				(*it).first->UpdatePosition();
 			}
+			mac()->_x = x();
+			mac()->_y = y();
 		}
 
 	}  // namespace host
