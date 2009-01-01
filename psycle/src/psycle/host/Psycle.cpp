@@ -129,6 +129,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// center master machine
 			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
 			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+#ifdef use_test_canvas
+			pFrame->m_wndView.machine_view()->UpdatePosition(pFrame->m_wndView.machine_view()->song()->_pMachine[MASTER_INDEX]);
+#endif
 			
 			pFrame->UpdateWindow();
 			

@@ -965,6 +965,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				//pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
 				RecalculateColourGrid();
 				Repaint();
+#ifdef use_test_canvas
+			machine_view_.Rebuild();
+#endif
+
 			}
 			pParentMain->StatusBarIdle();
 		}

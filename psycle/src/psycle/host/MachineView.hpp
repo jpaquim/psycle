@@ -49,9 +49,10 @@ namespace psycle {
 			void SetDeleteMachineGui(Machine* mac);
 
 			void InitSkin();
-			void CreateMachineGui(Machine* mac);
+			MachineGui* CreateMachineGui(Machine* mac);
 			void DoMacPropDialog(Machine* mac, bool from_event);
 			void ShowDialog(Machine* mac, double x, double y);
+			void UpdatePosition(Machine* mac);
 						
 
 		private:			

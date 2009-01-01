@@ -12,8 +12,6 @@
 #include "mfc_namespace.hpp"
 
 
-
-
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
