@@ -83,12 +83,10 @@ namespace psycle
 		class CMachineInfo
 		{
 		public:
-			/* TODO we need to edit each plugin to call this ctor
 			CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const * parameters,
 				char const * name, char const * shortName, char const * author, char const * command, int numCols)
 			: Version(version), Flags(flags), numParameters(numParameters), Parameters(parameters),
 			Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
-			*/
 			/// ...
 			int const Version;
 			/// ...
@@ -183,7 +181,7 @@ namespace psycle
 				///\todo doc. not used (yet?)
 				virtual void Event(uint32 const /*data*/) {}
 				///\todo doc
-				virtual bool DescribeValue(char * /*txt*/, int /*param*/, int /*value*/) { return false; }
+				virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
 				virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
 				///\todo doc

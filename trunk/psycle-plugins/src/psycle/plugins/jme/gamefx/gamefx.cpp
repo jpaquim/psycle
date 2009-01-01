@@ -1439,8 +1439,7 @@ CMachineParameter const *pParameters[] =
 	&paraFinetune,
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,				
 	GENERATOR,
 	128,
@@ -1454,7 +1453,7 @@ CMachineInfo const MacInfo =
 	"jme",
 	"Help",
 	8
-};
+);
 
 class mi : public CMachineInterface
 {

@@ -41,7 +41,7 @@ CMachineParameter const * audacity_phaser_parameters[] = {
 	&paraFB
 };
 
-CMachineInfo const audacity_phaser_info = {
+CMachineInfo const audacity_phaser_info (
 	MI_VERSION,
 	EFFECT,
 	sizeof audacity_phaser_parameters / sizeof *audacity_phaser_parameters,
@@ -55,7 +55,7 @@ CMachineInfo const audacity_phaser_info = {
 	"Nasca Octavian Paul/Sartorius", // author
 	"About", // A command, that could be use for opening an editor, etc...
 	1 // columns
-};
+);
 
 class audacity_phaser : public CMachineInterface {
 	public:

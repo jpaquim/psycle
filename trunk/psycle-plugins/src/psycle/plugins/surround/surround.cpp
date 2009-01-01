@@ -36,8 +36,7 @@ CMachineParameter const *pParameters[] =
 	&paraMode
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,				
 	EFFECT,																																				// flags
 	2,																																								// numParameters
@@ -51,7 +50,7 @@ CMachineInfo const MacInfo =
 	"Saïd Bougribate",																								// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	2																																								// must be 2 else we can't see the knob (??)
-};
+);
 
 class mi : public CMachineInterface
 {

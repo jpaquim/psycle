@@ -703,8 +703,7 @@ CMachineParameter const *pParameters[] =
 	&paraTRACKTempo
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,				
 	0,																																								// flags
 	e_numVALS,																																								// numParameters
@@ -714,7 +713,7 @@ CMachineInfo const MacInfo =
 	"Jeremy Evers",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	5
-};
+);
 
 #else
 
@@ -783,8 +782,7 @@ CMachineParameter const *pParameters[] =
 	&paraInertia,
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo (
 	MI_VERSION,				
 	0,																																								// flags
 	e_numVALS,																																								// numParameters
@@ -794,7 +792,7 @@ CMachineInfo const MacInfo =
 	"Jeremy Evers",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	4
-};
+);
 
 #endif
 
