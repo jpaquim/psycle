@@ -230,7 +230,7 @@ namespace psycle {
 		{
 			if ( !points().size() )
 				return rgn_;
-			double distance_ = 30;
+			double distance_ = 20;
 			std::pair<double, double>  p1 = PointAt(0);
 			std::pair<double, double>  p2 = PointAt(1);
 
@@ -308,17 +308,18 @@ namespace psycle {
 		{
 			TestCanvas::Group* parentGroup = parent();
 			double xp1, yp1, xp2, yp2;
-			parentGroup->GetBounds(xp1, yp1, xp2, yp2);
+			xp1 = 0;
+			xp2 = 0; //parentGroup->GetBounds(xp1, yp1, xp2, yp2);
 			if ( fromGUI_ ) {				
 				double x1, y1, x2, y2;
 				fromGUI_->GetBounds( x1, y1, x2, y2);			
 				double midW = (x2 - x1) / 2;
 				double midH = (y2 - y1) / 2;
-				TestCanvas::Group* fromParent = fromGUI_->parent();
+				/*TestCanvas::Group* fromParent = fromGUI_->parent();
 				double x3, y3, x4, y4;
-				fromParent->GetBounds(x3,y3,x4,y4);
-				double x = x1+x3 - xp1;
-				double y = y1+y3 - yp1;
+				fromParent->GetBounds(x3,y3,x4,y4);*/
+				double x = x1; //+x3 - xp1;
+				double y = y1; //+y3 - yp1;
 
 				TestCanvas::Line::Points points(2);
 				points[0] = std::pair<double,double>(x + midW, y + midH);
@@ -330,11 +331,11 @@ namespace psycle {
 				toGUI_->GetBounds( x1, y1, x2, y2);
 				double midW = (x2 - x1) / 2;
 				double midH = (y2 - y1) / 2;
-				TestCanvas::Group* toParent = toGUI_->parent();
+				/*TestCanvas::Group* toParent = toGUI_->parent();
 				double x3, y3, x4, y4;
-				toParent->GetBounds(x3,y3,x4,y4);
-				double x = x1+x3 - xp1;
-				double y = y1+y3 - yp1;
+				toParent->GetBounds(x3,y3,x4,y4);*/
+				double x = x1; //+x3 - xp1;
+				double y = y1; // +y3 - yp1;
 				TestCanvas::Line::Points points(2);
 				points[0] = PointAt(0);
 				points[1] = std::pair<double,double>(x + midW, y + midH);

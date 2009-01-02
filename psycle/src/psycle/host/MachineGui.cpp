@@ -149,8 +149,12 @@ namespace psycle {
 			GetBounds(x1,y1,x2,y2);
 			new_x = std::min(new_x, view()->cw() - (x2 - x1));
 			new_y = std::min(new_y, view()->ch() - (y2 - y1));
+			view()->SetSave(true);
 			SetXY(new_x, new_y);
 			OnMove(); 
+			view()->SetSave(false);
+			view()->Flush();
+
 		}
 
 		void MachineGui::dragging_stop()
