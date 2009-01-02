@@ -59,7 +59,7 @@ namespace psycle {
 			           class Machine* mac);
 			virtual ~MachineGui();
 
-			virtual void AttachWire(class WireGui* gui, int point);
+			virtual void AttachWire(class WireGui* gui);
 			virtual void DetachWire(class WireGui* gui);
 			virtual void RemoveWires();
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,
@@ -111,7 +111,7 @@ namespace psycle {
 			double dragging_y_;
 			bool new_con_;
 			bool dragging_;
-			std::vector< std::pair<WireGui*, int> > wire_uis_;
+			std::vector<WireGui*> wire_uis_;
 						
 		};
 		

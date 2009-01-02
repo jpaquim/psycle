@@ -473,8 +473,8 @@ namespace psycle {
 								wireUi->set_wires(w, pout->FindInputWire(mac->_macIndex));
 								root()->Insert(root()->begin(), wireUi);
 								wireUi->set_manage(true);
-								fromIt->second->AttachWire(wireUi,0);
-								toIt->second->AttachWire(wireUi,1);
+								fromIt->second->AttachWire(wireUi);
+								toIt->second->AttachWire(wireUi);
 								wireUi->SetGuiConnectors(fromIt->second,
 														 toIt->second,
 														 0);
@@ -563,8 +563,8 @@ namespace psycle {
 					  // a new connection has been inserted
 					  sender->set_wires(tmac->FindOutputWire(dmac->_macIndex),
 										dmac->FindInputWire(tmac->_macIndex));
-				  	  connect_from_gui->AttachWire(sender,0);
-					  connect_to_gui->AttachWire(sender,1);
+				  	  connect_from_gui->AttachWire(sender);
+					  connect_to_gui->AttachWire(sender);
 					  sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
 					  sender->set_manage(true);
 					  sender->UpdatePosition();					  
@@ -582,8 +582,8 @@ namespace psycle {
 						del_line_->set_manage(false);
 						sender->set_wires(tmac->FindOutputWire(dmac->_macIndex),
 						dmac->FindInputWire(tmac->_macIndex));
-				  		connect_from_gui->AttachWire(sender,0);
-						connect_to_gui->AttachWire(sender,1);
+				  		connect_from_gui->AttachWire(sender);
+						connect_to_gui->AttachWire(sender);
 						sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
 						sender->set_manage(true);
 						sender->UpdatePosition();	

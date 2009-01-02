@@ -3,6 +3,7 @@
 #include "MachineView.hpp"
 #include "WireGui.hpp"
 #include "MainFrm.hpp"
+#include <algorithm>
 
 #ifdef _MSC_VER
 #undef min
@@ -27,27 +28,24 @@ namespace psycle {
 		{
 		}
 
-		void MachineGui::AttachWire(WireGui* gui, int point) 
+		void MachineGui::AttachWire(WireGui* gui) 
 		{
-			wire_uis_.push_back(std::pair<WireGui*,int>(gui, point));
+			wire_uis_.push_back(gui);
 		}
 
 		void MachineGui::DetachWire(WireGui* wire_gui)
 		{
-			std::vector<std::pair<WireGui*,int> >::iterator it = wire_uis_.begin();
-			for ( ; it != wire_uis_.end(); ++it ) {
-				if ((*it).first == wire_gui) {
-					wire_uis_.erase(it);
-					break;
-				}
-			}
+			std::vector<WireGui*>::iterator it;
+			it = std::find(wire_uis_.begin(), wire_uis_.end(), wire_gui);
+			assert(it != wire_uis_.end());
+			wire_uis_.erase(it);			
 		}
 
 		void MachineGui::RemoveWires()
 		{
-			std::vector<std::pair<WireGui*,int> >::iterator it = wire_uis_.begin();
+			std::vector<WireGui*>::iterator it = wire_uis_.begin();
 			for ( ; it != wire_uis_.end(); ++it ) {
-				WireGui* wire_ui = (*it).first;
+				WireGui* wire_ui = (*it);
 				if (wire_ui->toGUI() && (wire_ui->toGUI() != this ) )
 					wire_ui->toGUI()->DetachWire(wire_ui);
 				if (wire_ui->fromGUI() && (wire_ui->fromGUI() != this ))
@@ -164,10 +162,9 @@ namespace psycle {
 	
 		void MachineGui::OnMove()
 		{
-			std::vector< std::pair<WireGui*, int> >::iterator it;
-			it = wire_uis_.begin();
+			std::vector<WireGui*>::iterator it = wire_uis_.begin();
 			for ( ; it != wire_uis_.end(); ++it ) {
-				(*it).first->UpdatePosition();
+				(*it)->UpdatePosition();
 			}
 			mac()->_x = x();
 			mac()->_y = y();
