@@ -334,6 +334,13 @@ class Canvas
 		}		
 		bool IsSaving() const { return save_; }
 		void Flush();
+		void SetAutomaticDraw(bool on) {
+			has_draw_ = on;
+		}
+		bool HasAutomaticDraw() const {
+			return has_draw_;
+		}
+
 		CWnd* parent() { return parent_; }
 
 		int cw() const { return cw_; }
@@ -346,6 +353,7 @@ class Canvas
 		COLORREF bg_color_;
 		Group root_;
 		bool save_;
+		bool has_draw_;
 		Item* button_press_item_;
 		bool steal_focus_;
 		CBitmap* bg_image_;

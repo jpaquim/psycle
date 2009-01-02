@@ -72,10 +72,15 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     Group* group = parent();
     while ( group && group->parent() )
 		group = group->parent();
-    if (group && group->widget() ) {		
-		group->widget()->parent_->InvalidateRgn(region, 0);
-    }
-  }
+	Canvas* canvas = 0;
+    if (group && (canvas=group->widget())) {
+		if (canvas->IsSaving() ) {
+			canvas->save_rgn_.CombineRgn(&canvas->save_rgn_,region,RGN_OR);
+		} else {
+		  canvas->parent_->InvalidateRgn(region, 0);
+		}
+	}
+  } 
 
   void Item::SetVisible(bool on) {
 	   visible_ = on;
@@ -187,32 +192,45 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 
   void Group::Draw(CDC* cr,
                    const CRgn& repaint_region,
-                   class Canvas* widget) {
+                   class Canvas* canvas) {
     std::vector<Item*>::iterator it = items_.begin();
     for ( ; it != items_.end(); ++it ) {
       Item* item = *it;
 	  if ( !item->visible() )
 		  continue;
-	  CRgn item_rgn;
-	  item_rgn.CreateRectRgn(0, 0, 0, 0);
-	  item_rgn.CopyRgn(&item->region());
-	  if (parent())
-		item_rgn.OffsetRgn(absx(), absy());
-	  CRect rc;
-	  item_rgn.GetRgnBox(&rc);	  
-	  int erg = item_rgn.CombineRgn(&item_rgn, &repaint_region, RGN_AND);
-	  if (erg != NULLREGION) {		
-        XFORM rXform;
-	    cr->GetWorldTransform(&rXform);
-		XFORM rXform_new = rXform;
-		rXform_new.eDx = x();
-		rXform_new.eDy = y();
-		cr->SetGraphicsMode(GM_ADVANCED);
-		cr->SetWorldTransform(&rXform_new);
-        item->Draw(cr, repaint_region, widget);
-		cr->SetGraphicsMode(GM_ADVANCED);
-		cr->SetWorldTransform(&rXform);
-      }
+	  if (canvas && !canvas->HasAutomaticDraw()) {
+		  XFORM rXform;
+		  cr->GetWorldTransform(&rXform);
+		  XFORM rXform_new = rXform;
+		  rXform_new.eDx = x();
+		  rXform_new.eDy = y();
+		  cr->SetGraphicsMode(GM_ADVANCED);
+		  cr->SetWorldTransform(&rXform_new);
+		  item->Draw(cr, repaint_region, canvas);
+		  cr->SetGraphicsMode(GM_ADVANCED);
+		  cr->SetWorldTransform(&rXform);
+	  } else {
+		CRgn item_rgn;
+		item_rgn.CreateRectRgn(0, 0, 0, 0);
+		item_rgn.CopyRgn(&item->region());
+		if (parent())
+			item_rgn.OffsetRgn(absx(), absy());
+		CRect rc;
+		item_rgn.GetRgnBox(&rc);	  
+		int erg = item_rgn.CombineRgn(&item_rgn, &repaint_region, RGN_AND);
+		if (erg != NULLREGION) {		
+			XFORM rXform;
+			cr->GetWorldTransform(&rXform);
+			XFORM rXform_new = rXform;
+			rXform_new.eDx = x();
+			rXform_new.eDy = y();
+			cr->SetGraphicsMode(GM_ADVANCED);
+			cr->SetWorldTransform(&rXform_new);
+			item->Draw(cr, repaint_region, canvas);
+			cr->SetGraphicsMode(GM_ADVANCED);
+			cr->SetWorldTransform(&rXform);
+		}
+	  }
 	}
   }
 
@@ -528,16 +546,26 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   }
 
   void Line::SetPoints( const Points& pts ) {
+    Group* group = parent();
+	Canvas* canvas = 0;
+    while ( group && group->parent() )
+      group = group->parent();
+    if (group && group->widget() ) 
+		canvas = group->widget();
     double d = 2;
     update_ = true;
     CRgn old_rect;
-	old_rect.CreateRectRgn(0,0,0,0);
-	old_rect.CombineRgn(&old_rect, &region(), RGN_OR);
+	if (canvas && canvas->HasAutomaticDraw()) {
+		old_rect.CreateRectRgn(0,0,0,0);
+		old_rect.CombineRgn(&old_rect, &region(), RGN_OR);
+	}
     pts_ = pts;
-    CRgn new_rect;
-	new_rect.CreateRectRgn(0, 0, 0, 0);
-	new_rect.CombineRgn(&old_rect, &region(), RGN_OR);
-	this->InvalidateRegion(&new_rect);    
+	if (canvas && canvas->HasAutomaticDraw()) {
+		CRgn new_rect;
+		new_rect.CreateRectRgn(0, 0, 0, 0);
+		new_rect.CombineRgn(&old_rect, &region(), RGN_OR);
+		this->InvalidateRegion(&new_rect);    
+	}
   }
 
   void Line::SetColor(double r, double g, double b, double alpha) {
@@ -867,6 +895,7 @@ Canvas::Canvas(CWnd* parent) :
     parent_(parent),
 	root_(this),
 	save_(false),
+	has_draw_(true),
     button_press_item_(0),
     steal_focus_(0),
 	bg_image_(0),
