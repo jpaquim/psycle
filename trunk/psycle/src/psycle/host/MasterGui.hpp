@@ -40,7 +40,7 @@ namespace psycle {
 			TestCanvas::PixBuf vu_bg_pixbuf_;
 			TestCanvas::PixBuf vu_peak_pixbuf_;
 			TestCanvas::PixBuf vu_led_pixbuf_;
-			TestCanvas::Text text_;
+			TestCanvas::Text text_;			
 			// skin
 			CBitmap* machineskin_;
 			CBitmap* machineskinmask_;

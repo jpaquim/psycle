@@ -18,7 +18,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
 		{
 #ifdef use_test_canvas
-			machine_view_.UpdateVUs();
+			machine_view_.UpdateVUs(devc);
 #else
 			if (Global::pConfig->draw_vus)
 			{

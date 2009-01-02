@@ -51,7 +51,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		BOOL CPsycleApp::InitInstance()
-		{
+		{			
 			// Allow only one instance of the program
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
 			CInstanceChecker instanceChecker;

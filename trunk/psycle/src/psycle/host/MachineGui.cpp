@@ -59,7 +59,7 @@ namespace psycle {
 			wire_uis_.clear();
 		}		
 
-		void MachineGui::UpdateVU()
+		void MachineGui::UpdateVU(CDC* devc)
 		{
 			mac()->_volumeMaxCounterLife--;
 			if ((mac()->_volumeDisplay > mac()->_volumeMaxDisplay)

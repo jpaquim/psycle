@@ -170,14 +170,17 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::UpdateVUs()
+		void MachineView::UpdateVUs(CDC* devc)
 		{
-			if (!is_locked_) {
+		  if (!is_locked_) {
+		    SetSave(true);
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
 			  for ( ; it != gui_map_.end(); ++it ) {
-				(*it).second->UpdateVU();
+				(*it).second->UpdateVU(devc);
 			  }
 			}
+		    Flush();
+			SetSave(false);
 		}
 
 		void MachineView::LockVu()

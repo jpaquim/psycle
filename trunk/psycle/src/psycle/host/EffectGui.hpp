@@ -26,7 +26,7 @@ namespace psycle {
 			virtual void SetSelected(bool on) {}
 			virtual bool IsSelected() const{return false;}
 
-			virtual void UpdateVU();
+			virtual void UpdateVU(CDC* devc);
 			virtual void UpdateText();
 			virtual void SetBypass(bool on);
 			virtual void SetMute(bool on);
