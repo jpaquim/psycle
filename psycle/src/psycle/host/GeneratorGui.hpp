@@ -20,7 +20,7 @@ namespace psycle {
 						 HBITMAP hbmMachineDial,
 						 const CFont& font,
 						 COLORREF font_color);
-			virtual void UpdateVU();
+			virtual void UpdateVU(CDC* devc);
 			virtual void UpdateText();
 
 			virtual void BeforeDeleteDlg();

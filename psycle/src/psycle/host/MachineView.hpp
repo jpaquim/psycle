@@ -14,7 +14,7 @@ namespace psycle {
 
 			void Rebuild();
 			void SetSolo(Machine* mac);			
-			void UpdateVUs();			
+			void UpdateVUs(CDC* devc);			
 			// from_event has to be set to true, if you show the macprop dialog from inside
 			// the machinegui OnEvent. In case of replace and delete this is important
 			void ShowNewMachineDlg(double x , double y, Machine* mac, bool from_event);

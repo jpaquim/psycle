@@ -312,7 +312,7 @@ class Canvas
 
 		Group* root() { return &root_; } 
 
-		void Draw(CDC *devc, const CRect& repaint_region);
+		void Draw(CDC *devc, const CRgn& rgn);
 
 		void set_bg_color(const COLORREF& color) {
 		  bg_color_ = color;
@@ -329,9 +329,11 @@ class Canvas
 		virtual void OnEvent(Event* ev);
 		virtual void OnSize(int cx, int cy);
 
-		// void lock();
-		// void unlock();
-		// void flush();
+		void SetSave(bool on) {
+			save_ = on;
+		}		
+		bool IsSaving() const { return save_; }
+		void Flush();
 		CWnd* parent() { return parent_; }
 
 		int cw() const { return cw_; }
@@ -343,6 +345,7 @@ class Canvas
 		CWnd* parent_;
 		COLORREF bg_color_;
 		Group root_;
+		bool save_;
 		Item* button_press_item_;
 		bool steal_focus_;
 		CBitmap* bg_image_;
@@ -350,6 +353,7 @@ class Canvas
 		int bg_height_;
 		int cw_;
 		int ch_;
+		CRgn save_rgn_;
 };
 
 }

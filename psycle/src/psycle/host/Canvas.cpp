@@ -55,12 +55,16 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 	while (group && group->parent()) {
 		group = group->parent();
 	}	
-	if (group && group->widget() ) {
+	Canvas* canvas = 0;
+	if (group && (canvas=group->widget()) ) {
 	  CRgn rgn;
 	  rgn.CreateRectRgn(0, 0, 0, 0);
 	  rgn.CombineRgn(&rgn, &region(), RGN_OR);
 	  rgn.OffsetRgn(parent()->absx(), parent()->absy());
-	  group->widget()->parent_->InvalidateRgn(&rgn,1);
+	  if (canvas->IsSaving() ) {
+		  canvas->save_rgn_.CombineRgn(&canvas->save_rgn_,&rgn,RGN_OR);
+	  } else
+	  canvas->parent_->InvalidateRgn(&rgn,0);
 	}
   }
 
@@ -68,8 +72,8 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     Group* group = parent();
     while ( group && group->parent() )
 		group = group->parent();
-    if (group && group->widget() ) {
-		group->widget()->parent_->InvalidateRgn(region, 1);
+    if (group && group->widget() ) {		
+		group->widget()->parent_->InvalidateRgn(region, 0);
     }
   }
 
@@ -145,7 +149,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 	  rgn.CreateRectRgn(0, 0, 0, 0);
 	  rgn.CombineRgn(&rgn, &region(), RGN_OR);
 	  rgn.OffsetRgn(parent() ? parent()->absx() : x(), parent() ? parent()->absy() : y() );
-	  group->widget()->parent()->InvalidateRgn(&rgn,1);
+	  group->widget()->parent()->InvalidateRgn(&rgn,0);
 	}
   }
 
@@ -192,18 +196,21 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 	  CRgn item_rgn;
 	  item_rgn.CreateRectRgn(0, 0, 0, 0);
 	  item_rgn.CopyRgn(&item->region());
-	  item_rgn.OffsetRgn(absx(), absy());
+	  if (parent())
+		item_rgn.OffsetRgn(absx(), absy());
+	  CRect rc;
+	  item_rgn.GetRgnBox(&rc);	  
 	  int erg = item_rgn.CombineRgn(&item_rgn, &repaint_region, RGN_AND);
-	  if ( erg != NULLREGION ) {
+	  if (erg != NULLREGION) {		
         XFORM rXform;
 	    cr->GetWorldTransform(&rXform);
 		XFORM rXform_new = rXform;
 		rXform_new.eDx = x();
 		rXform_new.eDy = y();
-		cr->SetGraphicsMode( GM_ADVANCED );
+		cr->SetGraphicsMode(GM_ADVANCED);
 		cr->SetWorldTransform(&rXform_new);
         item->Draw(cr, repaint_region, widget);
-		cr->SetGraphicsMode( GM_ADVANCED );
+		cr->SetGraphicsMode(GM_ADVANCED);
 		cr->SetWorldTransform(&rXform);
       }
 	}
@@ -270,7 +277,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 	std::vector<Item*>::const_iterator it = items_.begin();
     for ( ; it != items_.end(); ++it ) {
       Item* item = *it;
-	  if ( item->visible() ) {
+	  if (item->visible()) {
 	    int nCombineResult = rgn.CombineRgn(&rgn, &item->region(), RGN_OR);
 	    if ( nCombineResult == NULLREGION ) {
 	      rgn.DeleteObject();
@@ -317,7 +324,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
     return found;
   }
 
-  Rect::Rect() : 
+  Rect::Rect() : 	
     x1_(0),
     y1_(0),
     x2_(0),
@@ -334,6 +341,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   }
 
   Rect::Rect(Group* parent) :
+	Item(parent),
     x1_(0),
     y1_(0),
     x2_(0),
@@ -351,7 +359,8 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   }
 
   Rect::Rect(Group* parent, double x1, double y1, double x2, double y2) 
-     : x1_(x1),
+     : Item(parent),
+		x1_(x1),
        y1_(y1),
        x2_(x2),
        y2_(y2),
@@ -857,6 +866,7 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 Canvas::Canvas(CWnd* parent) :
     parent_(parent),
 	root_(this),
+	save_(false),
     button_press_item_(0),
     steal_focus_(0),
 	bg_image_(0),
@@ -865,6 +875,7 @@ Canvas::Canvas(CWnd* parent) :
 	cw_(300),
 	ch_(200)
 {
+	save_rgn_.CreateRectRgn(0, 0, 0, 0);
 }
 
 Canvas::~Canvas()
@@ -877,7 +888,7 @@ void Canvas::OnSize(int cx, int cy)
 	ch_ = cy;
 }
 
-void Canvas::Draw(CDC *devc, const CRect& repaint_region)
+void Canvas::Draw(CDC *devc, const CRgn& rgn)
 {
 	if (bg_image_)	{
 		CDC memDC;
@@ -897,13 +908,10 @@ void Canvas::Draw(CDC *devc, const CRect& repaint_region)
 		memDC.SelectObject(oldbmp);
 		memDC.DeleteDC();
 	} else {		
-		devc->FillSolidRect(&repaint_region, bg_color_);
+		CRect rect;
+		rgn.GetRgnBox(&rect);
+		devc->FillSolidRect(&rect, bg_color_);
 	}
-	CRgn rgn;
-	rgn.CreateRectRgn(repaint_region.top,
-					repaint_region.left,
-					repaint_region.right,
-					repaint_region.bottom);
 	root_.Draw(devc, rgn, this);
 }
 
@@ -981,5 +989,11 @@ bool Canvas::DelegateEvent(Event* ev, Item* item) {
     return erg;
 }
 
+void Canvas::Flush()
+{
+	parent_->InvalidateRgn(&save_rgn_,0);
+	save_rgn_.DeleteObject();
+	save_rgn_.CreateRectRgn(0, 0, 0, 0);
+}
 
 }

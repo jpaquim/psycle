@@ -56,39 +56,61 @@ namespace psycle {
 		{		
 			if ( dialog_ )
 				dialog_->DestroyWindow();
-
 		}
 
-		void GeneratorGui::UpdateVU() 
+		void GeneratorGui::UpdateVU(CDC* devc) 
 		{
-			MachineGui::UpdateVU();
+			MachineGui::UpdateVU(devc);
 			int vol = mac()->_volumeDisplay;
 			int max = mac()->_volumeMaxDisplay;
 			vol *= MachineCoords_.dGeneratorVu.width;
 			vol /= 96;
 			max *= MachineCoords_.dGeneratorVu.width;
 			max /= 96;
+			if (vol > 0) {
+				if (MachineCoords_.sGeneratorVu0.width) {
+					vol /= MachineCoords_.sGeneratorVu0.width;// restrict to leds
+					vol *= MachineCoords_.sGeneratorVu0.width;
+				}
+			} else {
+				vol = 0;
+			}
 			vu_bg_pixbuf_.SetXY(vol+MachineCoords_.dGeneratorVu.x,
 								MachineCoords_.dGeneratorVu.y);
 			vu_bg_pixbuf_.SetSize(MachineCoords_.dGeneratorVu.width-vol,
 								  MachineCoords_.sGeneratorVu0.height);
 			vu_bg_pixbuf_.SetSource(MachineCoords_.sGenerator.x+MachineCoords_.dGeneratorVu.x+vol,
 									MachineCoords_.sGenerator.y+MachineCoords_.dGeneratorVu.y);
-			vu_bg_pixbuf_.QueueDraw();
-			vu_peak_pixbuf_.SetXY(max + MachineCoords_.dGeneratorVu.x, 
-								  MachineCoords_.dGeneratorVu.y);
-			vu_peak_pixbuf_.SetSize(MachineCoords_.sGeneratorVuPeak.width, 
-									MachineCoords_.sGeneratorVuPeak.height);
-			vu_peak_pixbuf_.SetSource(MachineCoords_.sGeneratorVuPeak.x, 
-									  MachineCoords_.sGeneratorVuPeak.y);
-			vu_peak_pixbuf_.QueueDraw();
-			vu_led_pixbuf_.SetXY(MachineCoords_.dGeneratorVu.x, 
-								 MachineCoords_.dGeneratorVu.y);
-			vu_led_pixbuf_.SetSize(vol,
-								   MachineCoords_.sGeneratorVu0.height);
-			vu_led_pixbuf_.SetSource(MachineCoords_.sGeneratorVu0.x, 
-			 					     MachineCoords_.sGeneratorVu0.y);
-			vu_led_pixbuf_.QueueDraw();
+			CRgn dummy;
+			XFORM rXform;
+			devc->GetWorldTransform(&rXform);
+			XFORM rXform_new = rXform;
+			rXform_new.eDx = x();
+			rXform_new.eDy = y();
+			devc->SetGraphicsMode(GM_ADVANCED);
+			devc->SetWorldTransform(&rXform_new);					
+			vu_bg_pixbuf_.Draw(devc,dummy,view());
+			vu_bg_pixbuf_.Draw(devc,dummy,view());
+			if (max > 0) {
+				vu_peak_pixbuf_.SetXY(max + MachineCoords_.dGeneratorVu.x, 
+									  MachineCoords_.dGeneratorVu.y);
+				vu_peak_pixbuf_.SetSize(MachineCoords_.sGeneratorVuPeak.width, 
+										MachineCoords_.sGeneratorVuPeak.height);
+				vu_peak_pixbuf_.SetSource(MachineCoords_.sGeneratorVuPeak.x, 
+										  MachineCoords_.sGeneratorVuPeak.y);
+				vu_peak_pixbuf_.Draw(devc,dummy,view());
+			}
+			if ( vol > 0 ) {
+				vu_led_pixbuf_.SetXY(MachineCoords_.dGeneratorVu.x, 
+									 MachineCoords_.dGeneratorVu.y);
+				vu_led_pixbuf_.SetSize(vol,
+									   MachineCoords_.sGeneratorVu0.height);
+				vu_led_pixbuf_.SetSource(MachineCoords_.sGeneratorVu0.x, 
+			 						     MachineCoords_.sGeneratorVu0.y);
+				vu_led_pixbuf_.Draw(devc,dummy,view());
+			}
+			devc->SetGraphicsMode(GM_ADVANCED);
+			devc->SetWorldTransform(&rXform);
 		}
 
 		void GeneratorGui::UpdateText()

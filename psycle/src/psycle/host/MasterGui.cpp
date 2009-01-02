@@ -16,7 +16,7 @@ namespace psycle {
 			  vu_bg_pixbuf_(this),
 			  vu_peak_pixbuf_(this),
 			  vu_led_pixbuf_(this),
-			  text_(this)
+			  text_(this)			  
 		{
 		}
 
@@ -35,7 +35,7 @@ namespace psycle {
 								HBITMAP hbmMachineDial,
 								const CFont& font,
 								COLORREF font_color)
-		{
+		{			
 			machineskin_ = machineskin;
 			machineskinmask_ = machineskinmask;
 			machinebkg_ = machinebkg;

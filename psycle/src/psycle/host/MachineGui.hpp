@@ -75,7 +75,7 @@ namespace psycle {
 			virtual void SetMute(bool mute) = 0;
 			virtual void SetSolo(bool mute) = 0;
 			virtual void SetBypass(bool mute) = 0;
-			virtual void UpdateVU();
+			virtual void UpdateVU(CDC* devc);
 			virtual void UpdateText();
 						
 			virtual void BeforeDeleteDlg();

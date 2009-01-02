@@ -478,9 +478,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CChildView::OnPaint() 
-		{
-			if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
-			CPaintDC dc(this);
+		{		
+			if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.	
+			CRgn pRgn;
+			pRgn.CreateRectRgn(0, 0, 0, 0);
+			GetUpdateRgn(&pRgn, FALSE);
+			CPaintDC dc(this);		
 
 			if ( bmpDC == NULL && Global::pConfig->useDoubleBuffer ) // buffer creation
 			{
@@ -508,10 +511,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				oldbmp = bufDC.SelectObject(bmpDC);
 				if (viewMode==view_modes::machine)	// Machine view paint handler
 				{
-#ifdef use_test_canvas
-					CRect rc;
-					GetClientRect(&rc);
-					machine_view_.Draw(&bufDC, rc); 
+#ifdef use_test_canvas					
+					machine_view_.Draw(&bufDC, pRgn); 
 #else
 					switch (updateMode)
 					{
@@ -556,6 +557,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (viewMode==view_modes::machine) // Machine view paint handler
 				{
+
+#ifdef use_test_canvas					
+					machine_view_.Draw(&dc, pRgn);
+#else
 					switch (updateMode)
 					{
 					case draw_modes::all:
@@ -579,6 +584,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						updateMode=draw_modes::all;
 						break;
 					}
+#endif
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{

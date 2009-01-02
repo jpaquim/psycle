@@ -109,36 +109,58 @@ namespace psycle {
 		}
 
 
-		void EffectGui::UpdateVU() 
+		void EffectGui::UpdateVU(CDC* devc) 
 		{
-			MachineGui::UpdateVU();
+			MachineGui::UpdateVU(devc);
 			int vol = mac()->_volumeDisplay;
 			int max = mac()->_volumeMaxDisplay;
 			vol *= MachineCoords_.dEffectVu.width;
 			vol /= 96;
 			max *= MachineCoords_.dEffectVu.width;
 			max /= 96;
+			if (vol > 0) {
+				if (MachineCoords_.sGeneratorVu0.width) {
+					vol /= MachineCoords_.sEffectVu0.width;// restrict to leds
+					vol *= MachineCoords_.sEffectVu0.width;
+				}
+			} else {
+				vol = 0;
+			}
 			vu_bg_pixbuf_.SetXY(vol+MachineCoords_.dEffectVu.x,
 								MachineCoords_.dEffectVu.y);
 			vu_bg_pixbuf_.SetSize(MachineCoords_.dEffectVu.width-vol,
 								  MachineCoords_.sEffectVu0.height);
 			vu_bg_pixbuf_.SetSource(MachineCoords_.sEffect.x+MachineCoords_.dGeneratorVu.x+vol,
 									MachineCoords_.sEffect.y+MachineCoords_.dGeneratorVu.y);
-			vu_bg_pixbuf_.QueueDraw();
-			vu_peak_pixbuf_.SetXY(max + MachineCoords_.dEffectVu.x, 
-								  MachineCoords_.dEffectVu.y);
-			vu_peak_pixbuf_.SetSize(MachineCoords_.sEffectVuPeak.width, 
-									MachineCoords_.sEffectVuPeak.height);
-			vu_peak_pixbuf_.SetSource(MachineCoords_.sEffectVuPeak.x, 
-									  MachineCoords_.sEffectVuPeak.y);
-			vu_peak_pixbuf_.QueueDraw();
-			vu_led_pixbuf_.SetXY(MachineCoords_.dEffectVu.x, 
-								 MachineCoords_.dEffectVu.y);
-			vu_led_pixbuf_.SetSize(vol,
-								   MachineCoords_.sEffectVu0.height);
-			vu_led_pixbuf_.SetSource(MachineCoords_.sEffectVu0.x, 
-			 					     MachineCoords_.sEffectVu0.y);
-			vu_led_pixbuf_.QueueDraw();
+			CRgn dummy;
+			XFORM rXform;
+			devc->GetWorldTransform(&rXform);
+			XFORM rXform_new = rXform;
+			rXform_new.eDx = x();
+			rXform_new.eDy = y();
+			devc->SetGraphicsMode(GM_ADVANCED);
+			devc->SetWorldTransform(&rXform_new);					
+			vu_bg_pixbuf_.Draw(devc,dummy,view());
+			if (max >0) {
+				vu_peak_pixbuf_.SetXY(max + MachineCoords_.dEffectVu.x, 
+									  MachineCoords_.dEffectVu.y);
+				vu_peak_pixbuf_.SetSize(MachineCoords_.sEffectVuPeak.width, 
+										MachineCoords_.sEffectVuPeak.height);
+				vu_peak_pixbuf_.SetSource(MachineCoords_.sEffectVuPeak.x, 
+										  MachineCoords_.sEffectVuPeak.y);
+				vu_peak_pixbuf_.Draw(devc,dummy,view());
+			}
+			if (vol > 0) {
+				vu_led_pixbuf_.SetXY(MachineCoords_.dEffectVu.x, 
+									 MachineCoords_.dEffectVu.y);
+				vu_led_pixbuf_.SetSize(vol,
+									   MachineCoords_.sEffectVu0.height);
+				vu_led_pixbuf_.SetSource(MachineCoords_.sEffectVu0.x, 
+			 						     MachineCoords_.sEffectVu0.y);
+				vu_led_pixbuf_.Draw(devc,dummy,view());
+			}
+			devc->SetGraphicsMode(GM_ADVANCED);
+			devc->SetWorldTransform(&rXform);
 		}
 
 		void EffectGui::UpdateText()
