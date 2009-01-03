@@ -71,24 +71,20 @@ namespace psycle {
 						 HBITMAP hbmMachineDial,
 						 const CFont& font,
 						 COLORREF font_color) = 0;
-
 			virtual void SetMute(bool mute) = 0;
 			virtual void SetSolo(bool mute) = 0;
 			virtual void SetBypass(bool mute) = 0;
+			virtual void ShowDialog(double x, double y) = 0;
 			virtual void UpdateVU(CDC* devc);
-			virtual void UpdateText();
-						
+			virtual void UpdateText();								
 			virtual void BeforeDeleteDlg();
 			virtual bool OnEvent(TestCanvas::Event* ev);
-
 			virtual void SetSelected(bool on) = 0;
 			virtual bool IsSelected() const = 0;			
 
 			MachineView* view() { return view_; }
 			Machine* mac() { return mac_; };
-			
-			virtual void ShowDialog(double x, double y) = 0;
-
+						
 		protected:
 			// helper
 			bool InRect(double x,
@@ -99,9 +95,9 @@ namespace psycle {
 						double y2) const;
 			
 		private:		
-			void dragging_start(double x, double y);
-			void dragging(double x, double y);
-			void dragging_stop();						
+			void StartDragging(double x, double y);
+			void DoDragging(double x, double y);
+			void StopDragging();						
 			void OnMove();
 			
 			Machine* mac_;
@@ -111,10 +107,8 @@ namespace psycle {
 			double dragging_y_;
 			bool new_con_;
 			bool dragging_;
-			std::vector<WireGui*> wire_uis_;
-						
-		};
-		
+			std::vector<WireGui*> wire_uis_;						
+		};		
 
 	}  // namespace host
 }  // namespace psycle

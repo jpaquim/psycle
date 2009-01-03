@@ -65,7 +65,7 @@ namespace psycle {
 					mac()->_volumeMaxDisplay = mac()->_volumeDisplay-1;
 					mac()->_volumeMaxCounterLife = 60;
 			}
-		}
+		}		
 
 		void MachineGui::UpdateText()
 		{
@@ -79,7 +79,7 @@ namespace psycle {
 		{
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
 				if ( ev->button == 1 ) {
-					dragging_start(ev->x, ev->y);
+					StartDragging(ev->x, ev->y);
 				} else
 				if ( ev->button == 3 ) {
 					new_con_ = false;
@@ -89,7 +89,7 @@ namespace psycle {
 			} else
 			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
 				if (dragging_) {
-					dragging(ev->x, ev->y);
+					DoDragging(ev->x, ev->y);
 				} else if (ev->button == 3) {
 					if (!new_con_ && (dragging_x_ != ev->x || dragging_y_ != ev->y)) {
 						view_->OnNewConnection(this);
@@ -101,7 +101,7 @@ namespace psycle {
 				if (ev->button == 3) {
 					view()->DoMacPropDialog(mac(), true);
 				} else {
-					dragging_stop();
+					StopDragging();
 				}
 			}
 			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
@@ -128,14 +128,14 @@ namespace psycle {
 			}
 		}
 
-		void MachineGui::dragging_start(double x, double y)
+		void MachineGui::StartDragging(double x, double y)
 		{
 			dragging_ = true;			
 			dragging_x_ = x;
 			dragging_y_ = y;
 		}
 
-		void MachineGui::dragging(double x, double y)
+		void MachineGui::DoDragging(double x, double y)
 		{
 			double new_x = this->x() + x - dragging_x_;
 			double new_y = this->y() + y - dragging_y_;
@@ -152,10 +152,12 @@ namespace psycle {
 			OnMove(); 
 			view()->SetSave(false);
 			view()->Flush();
-
+			char buf[128];
+			sprintf(buf, "%s (%d,%d)", mac()->_editName, static_cast<int>(new_x), static_cast<int>(new_y));
+			view()->WriteStatusBar(std::string(buf));
 		}
 
-		void MachineGui::dragging_stop()
+		void MachineGui::StopDragging()
 		{
 			dragging_ = false;
 		}

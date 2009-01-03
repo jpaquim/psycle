@@ -31,12 +31,12 @@ namespace psycle {
 			virtual void SetBypass(bool on);
 			virtual void SetMute(bool on);
 			virtual void SetSolo(bool on){}
+			virtual void UpdatePan();
 
 		protected:
 			virtual void ShowDialog(double x, double y);
 
-		private:			
-			void UpdatePan();			
+		private:						
 			bool TestPan(double x, double y);
 			bool InMute(double x, double y);
 			bool InBypass(double x, double y);
@@ -53,14 +53,6 @@ namespace psycle {
 			TestCanvas::PixBuf vu_peak_pixbuf_;
 			TestCanvas::PixBuf vu_led_pixbuf_;
 			TestCanvas::Text text_;
-			// skin
-/*			CBitmap* machineskin_;
-			CBitmap* machineskinmask_;
-			CBitmap* machinebkg_;
-			HBITMAP hbmMachineSkin_;
-			HBITMAP hbmMachineBkg_;	
-			HBITMAP hbmMachineDial_;
-*/
 			SMachineCoords	MachineCoords_;
 		};
 	}

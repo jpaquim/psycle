@@ -54,6 +54,7 @@ namespace psycle {
 			void ShowDialog(Machine* mac, double x, double y);
 			void UpdatePosition(Machine* mac);
 						
+			void WriteStatusBar(const std::string& text);
 
 		private:			
 			void BuildWires();
