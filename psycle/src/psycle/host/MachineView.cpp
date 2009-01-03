@@ -106,14 +106,18 @@ namespace psycle {
 				gui->UpdateText();
 			}
 			if (dlg.deleted) {
-				song()->DestroyMachine(propMac);
-				main()->UpdateEnvInfo();
-				main()->UpdateComboGen();
-				if (main()->pGearRackDialog)
-				{
+				if ( from_event) {
+					SetDeleteMachineGui(gui);				
+				} else {
+					int mac_prop = gui->mac()->_macIndex;
+					DeleteMachineGui(gui->mac());
+					song()->DestroyMachine(mac_prop);
+					main()->UpdateEnvInfo();
+					main()->UpdateComboGen();
+					if (main()->pGearRackDialog) {
 					main()->RedrawGearRackList();
-				}
-				SetDeleteMachineGui(gui);
+				}								
+			}
 			} else if (dlg.replaced) {
 				int index = mac->_macIndex;
 				ShowNewMachineDlg(mac->_x, mac->_y, mac, from_event);
@@ -216,10 +220,17 @@ namespace psycle {
 				it = gui_map_.find(del_machine_->mac());
 				assert(it != gui_map_.end());
 				gui_map_.erase(it);
+				int prop_mac = del_machine_->mac()->_macIndex;
 				del_machine_->RemoveWires();
 				del_machine_->set_manage(false);
 				delete del_machine_;
 				del_machine_ = 0;
+				song()->DestroyMachine(prop_mac);
+				main()->UpdateEnvInfo();
+				main()->UpdateComboGen();
+				if (main()->pGearRackDialog) {
+				main()->RedrawGearRackList();
+				}								
 				parent_->Invalidate();
 			}
 		}
