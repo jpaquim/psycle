@@ -36,13 +36,6 @@ namespace psycle {
 								const CFont& font,
 								COLORREF font_color)
 		{			
-			machineskin_ = machineskin;
-			machineskinmask_ = machineskinmask;
-			machinebkg_ = machinebkg;
-			hbmMachineSkin_ = hbmMachineSkin;
-			hbmMachineBkg_ = hbmMachineBkg;
-			hbmMachineDial = hbmMachineDial;
-			MachineCoords_ = MachineCoords;
 			pixbuf_.SetImage(machineskin);
 			mute_pixbuf_.SetImage(machineskin);
 			solo_pixbuf_.SetImage(machineskin);

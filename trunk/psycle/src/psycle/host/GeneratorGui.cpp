@@ -138,13 +138,7 @@ namespace psycle {
 								   const CFont& font,
 								   COLORREF font_color)
 		{
-/*			machineskin_ = machineskin;
-			machineskinmask_ = machineskinmask;
-			machinebkg_ = machinebkg;
-			hbmMachineSkin_ = hbmMachineSkin;
-			hbmMachineBkg_ = hbmMachineBkg;
-			hbmMachineDial = hbmMachineDial;
-*/			MachineCoords_ = MachineCoords;
+			MachineCoords_ = MachineCoords;
 
 			pixbuf_.SetImage(machineskin);
 			pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
@@ -280,8 +274,16 @@ namespace psycle {
 			if (MachineCoords_.dGeneratorPan.width) {
 				newpan /= MachineCoords_.dGeneratorPan.width;
 				mac()->SetPan(newpan);
+				newpan= mac()->_panning;
 				UpdatePan();
 				QueueDraw();
+				char buf[128];
+				if (newpan != 64) {
+					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", mac()->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+				} else {
+					sprintf(buf, "%s Pan: Center", mac()->_editName);
+				}
+				view()->WriteStatusBar(std::string(buf));
 			}
 		}
 

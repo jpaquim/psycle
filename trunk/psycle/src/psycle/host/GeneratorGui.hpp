@@ -62,13 +62,6 @@ namespace psycle {
 			TestCanvas::PixBuf vu_led_pixbuf_;
 			TestCanvas::Text text_;
 			// skin
-/*			CBitmap* machineskin_;
-			CBitmap* machineskinmask_;
-			CBitmap* machinebkg_;
-			HBITMAP hbmMachineSkin_;
-			HBITMAP hbmMachineBkg_;	
-			HBITMAP hbmMachineDial_;
-*/
 			SMachineCoords	MachineCoords_;
 		};
 	}

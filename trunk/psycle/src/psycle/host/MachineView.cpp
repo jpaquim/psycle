@@ -56,6 +56,11 @@ namespace psycle {
 			return main_;
 		}
 
+		void MachineView::WriteStatusBar(const std::string& text)
+		{
+			main()->StatusBarText(text.c_str());
+		}
+
 		void MachineView::DeleteMachineGui(Machine* mac)
 		{
 			std::map<Machine*, MachineGui*>::iterator it;
@@ -249,7 +254,7 @@ namespace psycle {
 				} else {
 					if (mac->_macIndex >= MAX_BUSES && dlg.selectedMode != modegen)
 					{
-						// AddMacViewUndo();
+						child_view()->AddMacViewUndo();
 						fb = mac->_macIndex;
 						xs = MachineCoords.sEffect.width;
 						ys = MachineCoords.sEffect.height;
