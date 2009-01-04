@@ -22,9 +22,7 @@ namespace psycle {
 						 COLORREF font_color);
 
 			virtual void BeforeDeleteDlg();
-			virtual bool OnEvent(TestCanvas::Event* ev);
-			virtual void SetSelected(bool on) {}
-			virtual bool IsSelected() const{return false;}
+			virtual bool OnEvent(TestCanvas::Event* ev);			
 
 			virtual void UpdateVU(CDC* devc);
 			virtual void UpdateText();
@@ -32,6 +30,9 @@ namespace psycle {
 			virtual void SetMute(bool on);
 			virtual void SetSolo(bool on){}
 			virtual void UpdatePan();
+
+			virtual int preferred_width() const;
+			virtual int preferred_height() const;
 
 		protected:
 			virtual void ShowDialog(double x, double y);

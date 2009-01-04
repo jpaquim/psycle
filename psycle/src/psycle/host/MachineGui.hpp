@@ -79,11 +79,14 @@ namespace psycle {
 			virtual void UpdateText();								
 			virtual void BeforeDeleteDlg();
 			virtual bool OnEvent(TestCanvas::Event* ev);
-			virtual void SetSelected(bool on) = 0;
-			virtual bool IsSelected() const = 0;			
+			virtual void SetSelected(bool on);
+			virtual bool IsSelected();			
 
 			MachineView* view() { return view_; }
 			Machine* mac() { return mac_; };
+
+			virtual int preferred_width() const;
+			virtual int preferred_height() const;
 						
 		protected:
 			// helper
@@ -107,7 +110,17 @@ namespace psycle {
 			double dragging_y_;
 			bool new_con_;
 			bool dragging_;
-			std::vector<WireGui*> wire_uis_;						
+			std::vector<WireGui*> wire_uis_;
+
+			// selection border
+			TestCanvas::Line sel_line_left_top_1;
+			TestCanvas::Line sel_line_left_top_2;
+			TestCanvas::Line sel_line_right_top_1;
+			TestCanvas::Line sel_line_right_top_2;
+			TestCanvas::Line sel_line_left_bottom_1;
+			TestCanvas::Line sel_line_left_bottom_2;
+			TestCanvas::Line sel_line_right_bottom_1;
+			TestCanvas::Line sel_line_right_bottom_2;
 		};		
 
 	}  // namespace host

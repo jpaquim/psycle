@@ -260,7 +260,9 @@ namespace psycle {
 				}
 				// else, fallback to machineGui:OnEvent.
 			} else
-			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {				
+			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
+				if ( ev->button == 1 && ev->shift & MK_CONTROL )
+					view()->SelectMachine(this);
 				//if ( !TestMute(ev->x, ev->y) )
 				if (InMute(ev->x, ev->y)) {
 				  SetMute(!mac()->_mute);
@@ -299,6 +301,16 @@ namespace psycle {
 				dialog_ = new CFrameMachine(this);
 				dialog_->Init(x, y);
 			}
+		}
+
+		int EffectGui::preferred_width() const
+		{
+			return pixbuf_.width();
+		}
+
+		int EffectGui::preferred_height() const
+		{
+			 return pixbuf_.height();
 		}
 
 	}  // namespace host
