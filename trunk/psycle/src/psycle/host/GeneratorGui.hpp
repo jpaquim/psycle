@@ -26,11 +26,12 @@ namespace psycle {
 			virtual void BeforeDeleteDlg();
 			virtual bool OnEvent(TestCanvas::Event* ev);
 
-			virtual void SetSelected(bool on);
-			virtual bool IsSelected() const;
 			void SetMute(bool mute);
 			void SetSolo(bool mute);
 			void SetBypass(bool mute){}
+
+			virtual int preferred_width() const;
+			virtual int preferred_height() const;
 
 		protected:
 			virtual void ShowDialog(double x, double y);
@@ -44,14 +45,7 @@ namespace psycle {
 			class CFrameMachine* dialog_;
 			bool pan_dragging_;
 			
-			TestCanvas::Line sel_line_left_top_1;
-			TestCanvas::Line sel_line_left_top_2;
-			TestCanvas::Line sel_line_right_top_1;
-			TestCanvas::Line sel_line_right_top_2;
-			TestCanvas::Line sel_line_left_bottom_1;
-			TestCanvas::Line sel_line_left_bottom_2;
-			TestCanvas::Line sel_line_right_bottom_1;
-			TestCanvas::Line sel_line_right_bottom_2;
+			
 			//skin elements
 			TestCanvas::PixBuf pixbuf_;
 			TestCanvas::PixBuf mute_pixbuf_;

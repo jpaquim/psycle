@@ -3,6 +3,7 @@
 #include "MachineView.hpp"
 #include "WireGui.hpp"
 #include "MainFrm.hpp"
+#include "Song.hpp"
 #include <algorithm>
 
 #ifdef _MSC_VER
@@ -22,6 +23,33 @@ namespace psycle {
 			dragging_(false)
 		{		
 			assert(mac_);
+			TestCanvas::Line::Points pts;
+			pts.push_back(std::pair<double,double>(0, 0));
+			pts.push_back(std::pair<double,double>(0, 100));
+			sel_line_left_top_1.SetPoints(pts);
+			sel_line_left_top_1.SetVisible(false);
+			Add(&sel_line_left_top_1);
+			sel_line_left_top_2.SetPoints(pts);
+			sel_line_left_top_2.SetVisible(false);
+			Add(&sel_line_left_top_2);
+			sel_line_right_top_1.SetPoints(pts);
+			sel_line_right_top_1.SetVisible(false);
+			Add(&sel_line_right_top_1);
+			sel_line_right_top_2.SetPoints(pts);
+			sel_line_right_top_2.SetVisible(false);
+			Add(&sel_line_right_top_2);
+			sel_line_left_bottom_1.SetPoints(pts);
+			sel_line_left_bottom_1.SetVisible(false);
+			Add(&sel_line_left_bottom_1);
+			sel_line_left_bottom_2.SetPoints(pts);
+			sel_line_left_bottom_2.SetVisible(false);
+			Add(&sel_line_left_bottom_2);
+			sel_line_right_bottom_1.SetPoints(pts);
+			sel_line_right_bottom_1.SetVisible(false);
+			Add(&sel_line_right_bottom_1);
+			sel_line_right_bottom_2.SetPoints(pts);
+			sel_line_right_bottom_2.SetVisible(false);
+			Add(&sel_line_right_bottom_2);
 		}
 
 		MachineGui::~MachineGui()
@@ -145,8 +173,8 @@ namespace psycle {
 			// limit to screensize
 			double x1, y1, x2, y2;
 			GetBounds(x1,y1,x2,y2);
-			new_x = std::min(new_x, view()->cw() - (x2 - x1));
-			new_y = std::min(new_y, view()->ch() - (y2 - y1));
+			new_x = std::min(new_x, static_cast<double>(view()->cw() - preferred_width()));
+			new_y = std::min(new_y, static_cast<double>(view()->ch() - preferred_height()));
 			view()->SetSave(true);
 			SetXY(new_x, new_y);
 			OnMove(); 
@@ -172,5 +200,69 @@ namespace psycle {
 			mac()->_y = y();
 		}
 
+		void MachineGui::SetSelected(bool on)
+		{
+			if ( on && !IsSelected() ) {
+				view()->song()->seqBus = view()->song()->FindBusFromIndex(mac()->_macIndex);
+				view()->main()->UpdateComboGen();
+				view()->child_view()->Invalidate(1);
+			}	
+			int size = 5;
+			TestCanvas::Line::Points pts;
+			pts.push_back(std::pair<double,double>(-size, -size));
+			pts.push_back(std::pair<double,double>(-size, size));
+			sel_line_left_top_1.SetPoints(pts);
+			sel_line_left_top_1.SetVisible(on);
+			pts.clear();
+			pts.push_back(std::pair<double,double>(-size, -size));
+			pts.push_back(std::pair<double,double>(size, -size));
+			sel_line_left_top_2.SetPoints(pts);
+			sel_line_left_top_2.SetVisible(on);
+			pts.clear();
+			pts.push_back(std::pair<double,double>(preferred_width()-size, -size));
+			pts.push_back(std::pair<double,double>(preferred_width()+size, -size));
+			sel_line_right_top_1.SetPoints(pts);
+			sel_line_right_top_1.SetVisible(on);
+			pts.clear();
+			pts.push_back(std::pair<double,double>(preferred_width()+size, -size));
+			pts.push_back(std::pair<double,double>(preferred_width()+size, +size));
+			sel_line_right_top_2.SetPoints(pts);
+			sel_line_right_top_2.SetVisible(on);
+			pts.clear();
+			pts.push_back(std::pair<double,double>(-size, preferred_height() - size));
+			pts.push_back(std::pair<double,double>(-size, preferred_height() + size));
+			sel_line_left_bottom_1.SetPoints(pts);
+			sel_line_left_bottom_1.SetVisible(on);
+			pts.clear();
+			pts.push_back(std::pair<double,double>(-size, preferred_height() + size));
+			pts.push_back(std::pair<double,double>(+size, preferred_height() + size));
+			sel_line_left_bottom_2.SetPoints(pts);
+			sel_line_left_bottom_2.SetVisible(on);
+			pts.clear();
+			pts.push_back(std::pair<double,double>(preferred_width() + size, preferred_height() - size));
+			pts.push_back(std::pair<double,double>(preferred_width() + size, preferred_height() + size));
+			sel_line_right_bottom_1.SetPoints(pts);
+			sel_line_right_bottom_1.SetVisible(on);
+			pts.clear();
+			pts.push_back(std::pair<double,double>(preferred_width() - size, preferred_height() + size));
+			pts.push_back(std::pair<double,double>(preferred_width() + size, preferred_height() + size));
+			sel_line_right_bottom_2.SetPoints(pts);
+			sel_line_right_bottom_2.SetVisible(on);
+		}
+
+		bool MachineGui::IsSelected()
+		{			
+			return (view()->song()->seqBus == mac()->_macIndex);
+		}
+
+		int MachineGui::preferred_width() const
+		{
+			return 100;
+		}
+
+		int MachineGui::preferred_height() const
+		{
+			 return 20;
+		}
 	}  // namespace host
 }  // namespace psycle

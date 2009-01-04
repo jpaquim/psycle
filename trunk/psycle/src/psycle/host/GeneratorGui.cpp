@@ -21,34 +21,7 @@ namespace psycle {
 			  vu_led_pixbuf_(this),
 			  text_(this),
 			  pan_dragging_(false)
-		{
-			TestCanvas::Line::Points pts;
-			pts.push_back(std::pair<double,double>(0, 0));
-			pts.push_back(std::pair<double,double>(0, 100));
-			sel_line_left_top_1.SetPoints(pts);
-			sel_line_left_top_1.SetVisible(false);
-			Add(&sel_line_left_top_1);
-			sel_line_left_top_2.SetPoints(pts);
-			sel_line_left_top_2.SetVisible(false);
-			Add(&sel_line_left_top_2);
-			sel_line_right_top_1.SetPoints(pts);
-			sel_line_right_top_1.SetVisible(false);
-			Add(&sel_line_right_top_1);
-			sel_line_right_top_2.SetPoints(pts);
-			sel_line_right_top_2.SetVisible(false);
-			Add(&sel_line_right_top_2);
-			sel_line_left_bottom_1.SetPoints(pts);
-			sel_line_left_bottom_1.SetVisible(false);
-			Add(&sel_line_left_bottom_1);
-			sel_line_left_bottom_2.SetPoints(pts);
-			sel_line_left_bottom_2.SetVisible(false);
-			Add(&sel_line_left_bottom_2);
-			sel_line_right_bottom_1.SetPoints(pts);
-			sel_line_right_bottom_1.SetVisible(false);
-			Add(&sel_line_right_bottom_1);
-			sel_line_right_bottom_2.SetPoints(pts);
-			sel_line_right_bottom_2.SetVisible(false);
-			Add(&sel_line_right_bottom_2);
+		{			
 			UpdateText();
 		}
 
@@ -194,61 +167,7 @@ namespace psycle {
 						   1.0);
 		}
 
-		void GeneratorGui::SetSelected(bool on)
-		{
-			if ( on && !IsSelected() ) {
-				view()->song()->seqBus = view()->song()->FindBusFromIndex(mac()->_macIndex);
-				view()->main()->UpdateComboGen();
-				view()->child_view()->Invalidate(1);
-			}
-			int size = 5;
-			TestCanvas::Line::Points pts;
-			pts.push_back(std::pair<double,double>(-size, -size));
-			pts.push_back(std::pair<double,double>(-size, size));
-			sel_line_left_top_1.SetPoints(pts);
-			sel_line_left_top_1.SetVisible(on);
-			pts.clear();
-			pts.push_back(std::pair<double,double>(-size, -size));
-			pts.push_back(std::pair<double,double>(size, -size));
-			sel_line_left_top_2.SetPoints(pts);
-			sel_line_left_top_2.SetVisible(on);
-			pts.clear();
-			pts.push_back(std::pair<double,double>(pixbuf_.width()-size, -size));
-			pts.push_back(std::pair<double,double>(pixbuf_.width()+size, -size));
-			sel_line_right_top_1.SetPoints(pts);
-			sel_line_right_top_1.SetVisible(on);
-			pts.clear();
-			pts.push_back(std::pair<double,double>(pixbuf_.width()+size, -size));
-			pts.push_back(std::pair<double,double>(pixbuf_.width()+size, +size));
-			sel_line_right_top_2.SetPoints(pts);
-			sel_line_right_top_2.SetVisible(on);
-			pts.clear();
-			pts.push_back(std::pair<double,double>(-size, pixbuf_.height() - size));
-			pts.push_back(std::pair<double,double>(-size, pixbuf_.height() + size));
-			sel_line_left_bottom_1.SetPoints(pts);
-			sel_line_left_bottom_1.SetVisible(on);
-			pts.clear();
-			pts.push_back(std::pair<double,double>(-size, pixbuf_.height() + size));
-			pts.push_back(std::pair<double,double>(+size, pixbuf_.height() + size));
-			sel_line_left_bottom_2.SetPoints(pts);
-			sel_line_left_bottom_2.SetVisible(on);
-			pts.clear();
-			pts.push_back(std::pair<double,double>(pixbuf_.width() + size, pixbuf_.height() - size));
-			pts.push_back(std::pair<double,double>(pixbuf_.width() + size, pixbuf_.height() + size));
-			sel_line_right_bottom_1.SetPoints(pts);
-			sel_line_right_bottom_1.SetVisible(on);
-			pts.clear();
-			pts.push_back(std::pair<double,double>(pixbuf_.width() - size, pixbuf_.height() + size));
-			pts.push_back(std::pair<double,double>(pixbuf_.width() + size, pixbuf_.height() + size));
-			sel_line_right_bottom_2.SetPoints(pts);
-			sel_line_right_bottom_2.SetVisible(on);			
-		}
-
-		bool GeneratorGui::IsSelected() const
-		{
-			return sel_line_left_top_1.visible();
-		}
-
+		
 		bool GeneratorGui::TestPan(double x, double y)
 		{				
 			int panning = mac()->_panning*MachineCoords_.dGeneratorPan.width;
@@ -371,6 +290,16 @@ namespace psycle {
 				dialog_ = new CFrameMachine(this);
 				dialog_->Init(x, y);				
 			}
+		}
+
+		int GeneratorGui::preferred_width() const
+		{
+			return pixbuf_.width();
+		}
+
+		int GeneratorGui::preferred_height() const
+		{
+			 return pixbuf_.height();
 		}
 
 	}  // namespace host

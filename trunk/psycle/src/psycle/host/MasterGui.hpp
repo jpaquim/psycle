@@ -27,6 +27,9 @@ namespace psycle {
 			virtual void SetMute(bool on){}
 			virtual void SetSolo(bool on){}
 
+			virtual int preferred_width() const;
+			virtual int preferred_height() const;
+
 		protected:
 			virtual void ShowDialog(double x, double y);
 		private:

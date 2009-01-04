@@ -74,5 +74,15 @@ namespace psycle {
 				dialog_->CenterWindowOnPoint( x, y);
 			}
 		}
+
+		int MasterGui::preferred_width() const
+		{
+			return pixbuf_.width();
+		}
+
+		int MasterGui::preferred_height() const
+		{
+			 return pixbuf_.height();
+		}
 	}  // namespace host
 }  // namespace psycle
