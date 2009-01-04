@@ -524,7 +524,14 @@ namespace psycle {
 			points[0] = std::pair<double, double>(x + midW, y + midH);
 			points[1] = std::pair<double, double>(x + midW, y + midH);
 			line->SetPoints(points);
-			line->dragging_start(1);
+			if (rewire_line_) {		
+				if (sender == rewire_line_->fromGUI())
+					line->dragging_start(0);
+				else
+					line->dragging_start(1);
+			} else {
+				line->dragging_start(1);
+			}
 		}
 
 		void MachineView::OnWireRewire(WireGui* sender, int pick_point)
@@ -592,19 +599,25 @@ namespace psycle {
 				} else {
 					bool rewired = false;
 					if (picker == 0) {						
-						rewired = RewireSrc(tmac, dmac);
+						rewired = RewireDest(tmac, dmac);
 					} else 
 					if (picker == 1) {					
-						rewired = RewireDest(tmac, dmac);						
+						rewired = RewireSrc(tmac, dmac);						
 					}					
 					if ( rewired) {
 						del_line_ = rewire_line_;
-						del_line_->set_manage(false);
-						sender->set_wires(tmac->FindOutputWire(dmac->_macIndex),
-						dmac->FindInputWire(tmac->_macIndex));
-				  		connect_from_gui->AttachWire(sender);
+						del_line_->set_manage(false);						
+						connect_from_gui->AttachWire(sender);
 						connect_to_gui->AttachWire(sender);
-						sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
+						if (picker == 0) {				  			
+							sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
+							sender->set_wires(tmac->FindOutputWire(dmac->_macIndex),
+											  dmac->FindInputWire(tmac->_macIndex));
+						} else {
+							sender->SetGuiConnectors(connect_to_gui, connect_from_gui, 0);
+							sender->set_wires(dmac->FindOutputWire(tmac->_macIndex),
+											  tmac->FindInputWire(dmac->_macIndex));
+						}						
 						sender->set_manage(true);
 						sender->UpdatePosition();	
 					} else {
@@ -623,7 +636,7 @@ namespace psycle {
 			int srctype=0;
 			///\todo: for multi-io.
 			//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
-			if (!song()->ChangeWireSourceMac(tmac,dmac,tmac->GetFreeOutputWire(srctype),rewire_line_->wiredest()))
+			if (!song()->ChangeWireSourceMac(dmac,tmac,dmac->GetFreeOutputWire(srctype),rewire_line_->wiredest()))
 			{
 				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 				return false;
