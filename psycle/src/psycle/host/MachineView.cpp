@@ -36,7 +36,8 @@ namespace psycle {
 			  del_line_(0),
 			  rewire_line_(0),
 			  del_machine_(0),
-			  is_locked_(false)
+			  is_locked_(false),
+			  del_in_engine_(false)
 		{
 			// set_bg_color(Global::pConfig->mv_colour);
 			// InitSkin();
@@ -74,12 +75,13 @@ namespace psycle {
 			parent_->Invalidate();
 		}
 
-		void MachineView::SetDeleteMachineGui(Machine* mac)
+		void MachineView::SetDeleteMachineGui(Machine* mac, bool in_engine)
 		{
 			std::map<Machine*, MachineGui*>::iterator it;
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
-			del_machine_ = it->second;			
+			del_machine_ = it->second;
+			del_in_engine_ = in_engine;
 		}
 
 		void MachineView::DoMacPropDialog(Machine* mac, bool from_event)
@@ -107,7 +109,7 @@ namespace psycle {
 			}
 			if (dlg.deleted) {
 				if ( from_event) {
-					SetDeleteMachineGui(gui);				
+					SetDeleteMachineGui(gui, true);				
 				} else {
 					int mac_prop = gui->mac()->_macIndex;
 					DeleteMachineGui(gui->mac());
@@ -225,12 +227,14 @@ namespace psycle {
 				del_machine_->set_manage(false);
 				delete del_machine_;
 				del_machine_ = 0;
-				song()->DestroyMachine(prop_mac);
-				main()->UpdateEnvInfo();
-				main()->UpdateComboGen();
-				if (main()->pGearRackDialog) {
-				main()->RedrawGearRackList();
-				}								
+				if (del_in_engine_) {
+					song()->DestroyMachine(prop_mac);
+					main()->UpdateEnvInfo();
+					main()->UpdateComboGen();				
+					if (main()->pGearRackDialog) {
+						main()->RedrawGearRackList();
+					}						
+				}
 				parent_->Invalidate();
 			}
 		}
@@ -277,7 +281,7 @@ namespace psycle {
 							if (!from_event)
 								DeleteMachineGui(song()->_pMachine[fb]);
 							else 
-								SetDeleteMachineGui(song()->_pMachine[fb]);							
+								SetDeleteMachineGui(song()->_pMachine[fb], false);							
 						}
 					}
 					else if (mac->_macIndex < MAX_BUSES && dlg.selectedMode == modegen)
@@ -294,7 +298,7 @@ namespace psycle {
 							if (!from_event)
 								DeleteMachineGui(song()->_pMachine[fb]);
 							else 
-								SetDeleteMachineGui(song()->_pMachine[fb]);
+								SetDeleteMachineGui(song()->_pMachine[fb], false);
 						}
 					}
 					else
