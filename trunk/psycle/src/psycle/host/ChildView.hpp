@@ -8,6 +8,7 @@
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
 #include "MachineView.hpp"
+#include "PatternView.hpp"
 #include "MachineGui.hpp"
 #include "mfc_namespace.hpp"
 
@@ -386,6 +387,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #ifdef use_test_canvas
 			MachineView machine_view_;
 #endif
+			PatternView pattern_view_;
 
 			// GDI Stuff
 			CBitmap patternheader;

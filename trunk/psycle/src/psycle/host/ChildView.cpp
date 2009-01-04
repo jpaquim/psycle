@@ -101,6 +101,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #ifdef use_test_canvas
 			,machine_view_(this, main_frame, Global::_pSong)
 #endif
+			,pattern_view_(this, main_frame, Global::_pSong)
 		{
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
