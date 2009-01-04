@@ -43,10 +43,11 @@ namespace psycle {
 			void DeleteMachineGui(Machine* mac);
 			// use the next both, if you want to delete a machingui itself from
 			// inside a machingui event (like used in macprop dialog)
-			void SetDeleteMachineGui(MachineGui* gui) {
-				del_machine_ = gui;			
+			void SetDeleteMachineGui(MachineGui* gui, bool in_engine) {
+				del_machine_ = gui;
+				del_in_engine_ = in_engine;
 			}
-			void SetDeleteMachineGui(Machine* mac);
+			void SetDeleteMachineGui(Machine* mac, bool in_engine);
 
 			void InitSkin();
 			MachineGui* CreateMachineGui(Machine* mac);
@@ -79,6 +80,7 @@ namespace psycle {
 			WireGui* rewire_line_;
 			MachineGui* del_machine_;
 			bool is_locked_;
+			bool del_in_engine_;
 			CBitmap machineskin;
 			CBitmap machineskinmask;
 			CBitmap machinebkg;
