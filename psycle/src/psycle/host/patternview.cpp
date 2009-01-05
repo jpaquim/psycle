@@ -5627,6 +5627,552 @@ namespace psycle {
 			editcur.col = 0;
 		}
 
+		void PatternView::OnRButtonDown(UINT nFlags, CPoint point)
+		{	
+		}
+		
+		void PatternView::OnRButtonUp( UINT nFlags, CPoint point )
+		{
+		}
+		void PatternView::OnContextMenu(CWnd* pWnd, CPoint point) 
+		{
+				CMenu menu;
+				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
+				CMenu* pPopup = menu.GetSubMenu(0);
+				ASSERT(pPopup != NULL);
+				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
+				
+				menu.DestroyMenu();
+		//		Repaint(draw_modes::cursor);
+		}
+
+
+		void PatternView::OnLButtonDown(UINT nFlags, CPoint point)
+		{			
+				int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
+				if ( ttm >= song()->SONGTRACKS ) ttm = song()->SONGTRACKS-1;
+				else if ( ttm < 0 ) ttm = 0;
+				
+				if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
+				{	
+					int pointpos= ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
+
+					if (child_view()->InRect(pointpos,point.y,PatHeaderCoords.dRecordOn,PatHeaderCoords.sRecordOn))
+					{
+						song()->_trackArmed[ttm] = !song()->_trackArmed[ttm];
+						song()->_trackArmedCount = 0;
+						for ( int i=0;i<MAX_TRACKS;i++ )
+						{
+							if (song()->_trackArmed[i])
+							{
+								song()->_trackArmedCount++;
+							}
+						}
+					}
+					else if (child_view()->InRect(pointpos,point.y,PatHeaderCoords.dMuteOn,PatHeaderCoords.sMuteOn))
+					{
+						song()->_trackMuted[ttm] = !song()->_trackMuted[ttm];
+					}
+					else if (child_view()->InRect(pointpos,point.y,PatHeaderCoords.dSoloOn,PatHeaderCoords.sSoloOn))
+					{
+						if (song()->_trackSoloed != ttm )
+						{
+							for ( int i=0;i<MAX_TRACKS;i++ )
+							{
+								song()->_trackMuted[i] = true;
+							}
+							song()->_trackMuted[ttm] = false;
+							song()->_trackSoloed = ttm;
+						}
+						else
+						{
+							for ( int i=0;i<MAX_TRACKS;i++ )
+							{
+								song()->_trackMuted[i] = false;
+							}
+							song()->_trackSoloed = -1;
+						}
+					}
+					oldm.track = -1;
+					child_view()->Repaint(draw_modes::track_header);
+				}
+				else if ( point.y >= YOFFSET )
+				{
+					oldm.track=ttm;
+
+					int plines = song()->patternLines[_ps()];
+					oldm.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
+					if ( oldm.line >= plines ) { oldm.line = plines - 1; }
+					else if ( oldm.line < 0 ) oldm.line = 0;
+
+					oldm.col=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
+
+					if (blockSelected
+						&& oldm.track >=blockSel.start.track && oldm.track <= blockSel.end.track
+						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line && Global::pConfig->_windowsBlocks)
+					{
+						blockswitch=true;
+						blockLastOrigin = blockSel;
+						editcur = oldm;
+					}
+					else blockStart = true;
+					if (nFlags & MK_SHIFT)
+					{
+						editcur = oldm;
+						child_view()->Repaint(draw_modes::cursor);
+					}
+				}
+		}
+
+		void PatternView::OnLButtonUp(UINT nFlags, CPoint point)
+		{
+			if ( (blockStart) &&
+					( point.y > YOFFSET && point.y < YOFFSET+(maxl*ROWHEIGHT)) &&
+					(point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
+				{
+					editcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
+		//			if ( editcur.track >= song()->SONGTRACKS ) editcur.track = song()->SONGTRACKS-1;
+		//			else if ( editcur.track < 0 ) editcur.track = 0;
+
+		//			int plines = song()->patternLines[_ps()];
+					editcur.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
+		//			if ( editcur.line >= plines ) {  editcur.line = plines - 1; }
+		//			else if ( editcur.line < 0 ) editcur.line = 0;
+
+					editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
+					child_view()->Repaint(draw_modes::cursor);
+					main()->StatusBarIdle();
+					if (!(nFlags & MK_SHIFT) && Global::pConfig->_windowsBlocks)
+					{
+						blockSelected=false;
+						blockSel.end.line=0;
+						blockSel.end.track=0;
+						ChordModeOffs = 0;
+						bScrollDetatch=false;
+						child_view()->Repaint(draw_modes::selection);
+					}
+				}
+				else if (blockswitch)
+				{
+					if (blockSel.start.track != blockLastOrigin.start.track ||
+						blockSel.start.line != blockLastOrigin.start.line)
+					{
+						CSelection dest = blockSel;
+						blockSel = blockLastOrigin;
+						if ( nFlags & MK_CONTROL ) 
+						{
+							CopyBlock(false);
+							PasteBlock(dest.start.track,dest.start.line,false);
+						}
+						else SwitchBlock(dest.start.track,dest.start.line);
+						blockSel = dest;
+					}
+					else blockSelected=false; 
+					blockswitch=false;
+					child_view()->Repaint(draw_modes::selection);
+				}
+		}
+
+
+		void PatternView::OnMouseMove( UINT nFlags, CPoint point )
+		{
+				if ((nFlags & MK_LBUTTON) && oldm.track != -1)
+				{
+					ntOff = tOff;
+					nlOff = lOff;
+					draw_modes::draw_mode paintmode = draw_modes::all;
+
+					int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
+					if ( point.x < XOFFSET ) ttm--; // 1/2 = 0 , -1/2 = 0 too!
+					int ccm;
+					if ( ttm < tOff ) // Exceeded from left
+					{
+						ccm=0;
+						if ( ttm < 0 ) { ttm = 0; } // Out of Range
+						// and Scroll
+						ntOff = ttm;
+						if (ntOff != tOff) paintmode=draw_modes::horizontal_scroll;
+					}
+					else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
+					{
+						ccm=8;
+						if ( ttm >= song()->SONGTRACKS ) // Out of Range
+						{	
+							ttm = song()->SONGTRACKS-1;
+							if ( tOff != ttm-VISTRACKS ) 
+							{ 
+								ntOff = ttm-VISTRACKS+1; 
+								paintmode=draw_modes::horizontal_scroll; 
+							}
+						}
+						else	//scroll
+						{	
+							ntOff = ttm-VISTRACKS+1;
+							if ( ntOff != tOff ) 
+								paintmode=draw_modes::horizontal_scroll;
+						}
+					}
+					else // Not exceeded
+					{
+						ccm=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
+					}
+
+					int plines = song()->patternLines[_ps()];
+					int llm = lOff + (point.y-YOFFSET)/ROWHEIGHT;
+					if ( point.y < YOFFSET ) llm--; // 1/2 = 0 , -1/2 = 0 too!
+
+					if ( llm < lOff ) // Exceeded from top
+					{
+						if ( llm < 0 ) // Out of range
+						{	
+							llm = 0;
+							if ( lOff != 0 ) 
+							{ 
+								nlOff = 0; 
+								paintmode=draw_modes::vertical_scroll; 
+							}
+						}
+						else	//scroll
+						{	
+							nlOff = llm;
+							if ( nlOff != lOff ) 
+								paintmode=draw_modes::vertical_scroll;
+						}
+					}
+					else if ( llm - lOff >= VISLINES ) // Exceeded from bottom
+					{
+						if ( llm >= plines ) //Out of Range
+						{	
+							llm = plines-1;
+							if ( lOff != llm-VISLINES) 
+							{ 
+								nlOff = llm-VISLINES+1; 
+								paintmode=draw_modes::vertical_scroll; 
+							}
+						}
+						else	//scroll
+						{	
+							nlOff = llm-VISLINES+1;
+							if ( nlOff != lOff ) 
+								paintmode=draw_modes::vertical_scroll;
+						}
+					}
+					
+					else if ( llm >= plines ) { llm = plines-1; } //Out of Range
+
+					if ((ttm != oldm.track ) || (llm != oldm.line) || (ccm != oldm.col))
+					{
+						if (blockStart) 
+						{
+							blockStart = false;
+							blockSelected=false;
+							blockSel.end.line=0;
+							blockSel.end.track=0;
+							StartBlock(oldm.track,oldm.line,oldm.col);
+						}
+						else if ( blockswitch ) 
+						{
+							blockSelectBarState = 1;
+
+							int tstart = (blockLastOrigin.start.track+(ttm-editcur.track) >= 0)?(ttm-editcur.track):-blockLastOrigin.start.track;
+							int lstart = (blockLastOrigin.start.line+(llm-editcur.line) >= 0)?(llm-editcur.line):-blockLastOrigin.start.line;
+							if (blockLastOrigin.end.track+(ttm-editcur.track) >= song()->SONGTRACKS) tstart = song()->SONGTRACKS-blockLastOrigin.end.track-1;
+							if (blockLastOrigin.end.line+(llm-editcur.line) >= plines) lstart = plines - blockLastOrigin.end.line-1;
+
+							blockSel.start.track=blockLastOrigin.start.track+(tstart);
+							blockSel.start.line=blockLastOrigin.start.line+(lstart);
+							iniSelec = blockSel.start;
+							int tend = blockLastOrigin.end.track+(tstart);
+							int lend = blockLastOrigin.end.line+(lstart);
+							ChangeBlock(tend,lend,ccm);
+						}
+						else ChangeBlock(ttm,llm,ccm);
+						oldm.track=ttm;
+						oldm.line=llm;
+						oldm.col=ccm;
+						paintmode=draw_modes::selection;
+					}
+
+					bScrollDetatch=true;
+					detatchpoint.track = ttm;
+					detatchpoint.line = llm;
+					detatchpoint.col = ccm;
+					if (nFlags & MK_SHIFT)
+					{
+						editcur = detatchpoint;
+						if (!paintmode)
+						{
+							paintmode=draw_modes::cursor;
+						}
+					}
+
+					if (paintmode)
+					{
+						child_view()->Repaint(paintmode);
+					}
+				}
+				else if (nFlags == MK_MBUTTON)
+				{
+					// scrolling
+					if (abs(point.y - MBStart.y) > ROWHEIGHT)
+					{
+						int nlines = song()->patternLines[_ps()];
+						int delta = (point.y - MBStart.y)/ROWHEIGHT;
+						int nPos = lOff - delta;
+						if (nPos > lOff )
+						{
+							if (nPos < 0)
+								nPos = 0;
+							else if (nPos > nlines-VISLINES)
+								nlOff = nlines-VISLINES;
+							else
+								nlOff=nPos;
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::vertical_scroll);
+						}
+						else if (nPos < lOff )
+						{
+							if (nPos < 0)
+								nlOff = 0;
+							else if (nPos > nlines-VISLINES)
+								nlOff = nlines-VISLINES;
+							else
+								nlOff=nPos;
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::vertical_scroll);
+						}
+						MBStart.y += delta*ROWHEIGHT;
+					}
+					// switching tracks
+					if (abs(point.x - MBStart.x) > (ROWWIDTH))
+					{
+						int delta = (point.x - MBStart.x)/(ROWWIDTH);
+						int nPos = tOff - delta;
+						if (nPos > tOff)
+						{
+							if (nPos < 0)
+								ntOff= 0;
+							else if (nPos>song()->SONGTRACKS-VISTRACKS)
+								ntOff=song()->SONGTRACKS-VISTRACKS;
+							else
+								ntOff=nPos;
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::horizontal_scroll);
+						}
+						else if (nPos < tOff)
+						{
+							if (nPos < 0)
+								ntOff= 0;
+							else if (nPos>song()->SONGTRACKS-VISTRACKS)
+								ntOff=song()->SONGTRACKS-VISTRACKS;
+							else
+								ntOff=nPos;
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::horizontal_scroll);
+						}
+						MBStart.x += delta*ROWWIDTH;
+					}
+				}
+		}
+
+
+
+		void PatternView::OnLButtonDblClk( UINT nFlags, CPoint point )
+		{
+			if (( point.y >= YOFFSET ) && (point.x >= XOFFSET)) {
+				const int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
+				const int nl = song()->patternLines[song()->playOrder[editPosition]];
+				StartBlock(ttm,0,0);
+				EndBlock(ttm,nl-1,8);
+				blockStart = false;
+			}
+		}
+
+
+		void PatternView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
+		{
+			int nlines = song()->patternLines[_ps()];
+			int nPos = lOff - (zDelta/30);
+			if (nPos > lOff) {
+				if (nPos < 0)
+				  nPos = 0;
+				else if (nPos > nlines-VISLINES)
+						nlOff = nlines-VISLINES;
+					else
+						nlOff=nPos;
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					child_view()->Repaint(draw_modes::vertical_scroll);
+				}
+				else if (nPos < lOff )
+				{
+					if (nPos < 0)
+						nlOff = 0;
+					else if (nPos > nlines-VISLINES)
+						nlOff = nlines-VISLINES;
+					else
+						nlOff=nPos;
+					bScrollDetatch=true;
+					detatchpoint.track = ntOff+1;
+					detatchpoint.line = nlOff+1;
+					child_view()->Repaint(draw_modes::vertical_scroll);
+				}
+		}
+
+		void PatternView::OnMButtonDown( UINT nFlags, CPoint point )
+		{
+			MBStart.x = point.x;
+			MBStart.y = point.y;
+		}
+
+		void PatternView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+		{
+			switch(nSBCode)
+			{
+				case SB_LINEDOWN:
+					if ( lOff<song()->patternLines[_ps()]-VISLINES)
+						{
+							nlOff=lOff+1;
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::vertical_scroll);
+						}
+						break;
+					case SB_LINEUP:
+						if ( lOff>0 )
+						{
+							nlOff=lOff-1;
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::vertical_scroll);
+						}
+						break;
+					case SB_PAGEDOWN:
+						if ( lOff<song()->patternLines[_ps()]-VISLINES)
+						{
+							const int nl = song()->patternLines[_ps()]-VISLINES;
+							nlOff=lOff+16;
+							if (nlOff > nl)
+							{
+								nlOff = nl;
+							}
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::vertical_scroll);
+						}
+						break;
+					case SB_PAGEUP:
+						if ( lOff>0)
+						{
+							nlOff=lOff-16;
+							if (nlOff < 0)
+							{
+								nlOff = 0;
+							}
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::vertical_scroll);
+						}
+						break;
+					case SB_THUMBPOSITION:
+					case SB_THUMBTRACK:
+						if (nlOff!=(int)nPos)
+						{
+							const int nl = song()->patternLines[_ps()]-VISLINES;
+							nlOff=(int)nPos;
+							if (nlOff > nl)
+							{
+								nlOff = nl;
+							}
+							else if (nlOff < 0)
+							{
+								nlOff = 0;
+							}
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::vertical_scroll);
+						}
+						break;
+					default: 
+						break;
+			}
+		}
+
+
+		void PatternView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+		{
+				switch(nSBCode)
+				{
+					case SB_LINERIGHT:
+					case SB_PAGERIGHT:
+						if ( tOff<song()->SONGTRACKS-VISTRACKS)
+						{
+							ntOff=tOff+1;
+//	Disabled, since people find it as a bug, not as a feature.
+//  Reenabled, because else, when the cursor jumps to next line, it gets redrawn 
+//   and the scrollbar position reseted.
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::horizontal_scroll);
+						}
+						break;
+					case SB_LINELEFT:
+					case SB_PAGELEFT:
+						if ( tOff>0 )
+						{
+							ntOff=tOff-1;
+//	Disabled, since people find it as a bug, not as a feature.
+//  Reenabled, because else, when the cursor jumps to next line, it gets redrawn 
+//   and the scrollbar position reseted.
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::horizontal_scroll);
+						}
+						else PrevTrack(1,false);
+						break;
+					case SB_THUMBPOSITION:
+					case SB_THUMBTRACK:
+						if (ntOff!=(int)nPos)
+						{
+							const int nt = song()->SONGTRACKS;
+							ntOff=(int)nPos;
+							if (ntOff >= nt)
+							{
+								ntOff = nt-1;
+							}
+							else if (ntOff < 0)
+							{
+								ntOff = 0;
+							}
+//	Disabled, since people find it as a bug, not as a feature.
+//  Reenabled, because else, when the cursor jumps to next line, it gets redrawn 
+//   and the scrollbar position reseted.
+							bScrollDetatch=true;
+							detatchpoint.track = ntOff+1;
+							detatchpoint.line = nlOff+1;
+							child_view()->Repaint(draw_modes::horizontal_scroll);
+						}
+						break;
+					default: 
+						break;
+				}
+		}
 	
 	}  // namespace host
 }  // namespace psycle

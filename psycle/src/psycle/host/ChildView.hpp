@@ -260,6 +260,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bool maxView;	//maximise pattern state
 			int textLeftEdge;
 
+			inline bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0);
+
 		// Overrides
 			protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -295,7 +297,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
 			int GetMachine(CPoint point);
 			int GetWire(CPoint point,int&wiresource);
-			inline bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0);
+			
 			void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
 			COLORREF ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
@@ -881,7 +883,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		*/
 
 		}
-
+	
 		inline bool CChildView::InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs)
 		{
 			return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
