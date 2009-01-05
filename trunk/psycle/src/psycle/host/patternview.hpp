@@ -93,6 +93,67 @@ namespace psycle {
 			void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 			void OnSize(UINT nType, int cx, int cy);
 
+			void ShowTransformPatternDlg(void);
+			void ShowPatternDlg(void);
+			void BlockInsChange(int x);
+			void BlockGenChange(int x);
+			void ShowSwingFillDlg(bool bTrackMode);
+			void MidiPatternNote(int outnote , int velocity);	// called by the MIDI input to insert pattern notes
+			void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
+			void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
+			void MidiPatternTweakSlide(int command, int value); // called by midi to insert pattern commands
+			void MidiPatternMidiCommand(int command, int value); // called by midi to insert midi pattern commands
+			void MidiPatternInstrument(int value); // called by midi to insert pattern commands
+			void MousePatternTweak(int machine, int command, int value);
+			void MousePatternTweakSlide(int machine, int command, int value);
+			void EnterNote(int note, int velocity=127, bool bTranspose=true);
+			void EnterNoteoffAny();
+			bool MSBPut(int nChar);
+			void PrevTrack(int x,bool wrap,bool updateDisplay=true);
+			void AdvanceTrack(int x,bool wrap,bool updateDisplay=true);
+			void PrevCol(bool wrap,bool updateDisplay=true);
+			void NextCol(bool wrap,bool updateDisplay=true);
+			void PrevLine(int x,bool wrap,bool updateDisplay=true);
+			void AdvanceLine(int x,bool wrap,bool updateDisplay=true);
+			void DeleteCurr();
+			void InsertCurr();
+			void ClearCurr();
+			void SelectNextTrack(); 
+			void KillRedo();
+			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void PlayCurrentRow();
+			void PlayCurrentNote();
+			void patCopy();
+			void patPaste();
+			void patMixPaste();
+			void patCut();
+			void patDelete();
+			void patTranspose(int trp);
+			void HalveLength();
+			void DoubleLength();
+			void BlockTranspose(int trp);
+			void BlockParamInterpolate(int *points=0,int twktype=notecommands::empty);
+			void StartBlock(int track,int line, int col);
+			void ChangeBlock(int track,int line, int col);	// This function allows a handier usage for Shift+Arrows and MouseSelection
+												// Params: current track, line and col
+												// Result: Update the selected region depending on the new and old values.
+			void EndBlock(int track,int line, int col);
+			void CopyBlock(bool cutit);
+			void PasteBlock(int tx,int lx,bool mix,bool save=true);
+			void SwitchBlock(int tx, int lx);
+			void DeleteBlock();
+			void BlockUnmark(void);
+			void SaveBlock(FILE* file);
+			void LoadBlock(FILE* file);
+			void DecCurPattern();
+			void IncCurPattern();
+			void IncPosition(bool bRepeat=false);
+			void DecPosition();
+			void SelectMachineUnderCursor(void);
+
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main() { return main_; }
 			Song* song() { return song_; }
