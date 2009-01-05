@@ -91,6 +91,7 @@ namespace psycle {
 			void Draw(CDC *devc, const CRgn& rgn);
 			void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 			void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+			void OnSize(UINT nType, int cx, int cy);
 
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main() { return main_; }

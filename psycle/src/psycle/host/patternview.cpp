@@ -72,6 +72,13 @@ namespace psycle {
 			DrawPatEditor(devc);
 		}
 
+		void PatternView::OnSize(UINT nType, int cx, int cy)
+		{
+			CW = cx;
+			CH = cy;
+			RecalcMetrics();
+		}
+
 		void PatternView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		{
 		}
