@@ -645,6 +645,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			CW = cx;
 			CH = cy;
+
 			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
 			_pSong->viewSize.y=cy;
 			
@@ -657,7 +658,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (viewMode == view_modes::pattern)
 			{
 #ifdef use_patternview
-				pattern_view()->RecalcMetrics();
+				pattern_view()->OnSize(nType, cx, cy);				
 #else
 				RecalcMetrics();
 #endif
