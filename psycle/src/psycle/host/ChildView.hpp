@@ -3,6 +3,7 @@
 #pragma once
 
 #define use_test_canvas
+//#define use_patternview
 
 #include "Song.hpp"
 #include "Configuration.hpp"
@@ -22,9 +23,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		class XMSamplerUI;
 		class CWaveInMacDlg;
 
-		#define MAX_WIRE_DIALOGS 16
+		#define MAX_WIRE_DIALOGS 16		
 
 		#define MAX_DRAW_MESSAGES 32
+
+
 
 		struct draw_modes
 		{
@@ -88,78 +91,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				sequence
 			};
 		};
-
-		class CCursor
-		{
-		public:
-			int line;
-			char col;
-			char track;
-
-			CCursor() { line=0; col=0; track=0; }
-		};
-
-		class CSelection
-		{
-		public:
-			CCursor start;	// Column not used. (It was harder to select!!!)
-			CCursor end;	//
-		};
-
-		class SPatternUndo
-		{
-		public:
-			int type;
-			SPatternUndo* pPrev;
-			unsigned char* pData;
-			int pattern;
-			int x;
-			int y;
-			int	tracks;
-			int	lines;
-			// store positional data plz
-			int edittrack;
-			int editline;
-			int editcol;
-			int seqpos;
-			// counter for tracking, works like ID
-			int counter;
-		};
-
-		enum {
-			UNDO_PATTERN,
-			UNDO_LENGTH,
-			UNDO_SEQUENCE,
-			UNDO_SONG,
-		};
-
-		class SPatternDraw
-		{
-		public:
-			int drawTrackStart;
-			int drawTrackEnd;
-			int drawLineStart;
-			int drawLineEnd;
-		};
-	
-
-		class SPatternHeaderCoords
-		{
-		public:
-			SSkinSource sBackground;
-			SSkinSource sNumber0;
-			SSkinSource sRecordOn;
-			SSkinSource sMuteOn;
-			SSkinSource sSoloOn;
-			SSkinDest dDigitX0;
-			SSkinDest dDigit0X;
-			SSkinDest dRecordOn;
-			SSkinDest dMuteOn;
-			SSkinDest dSoloOn;
-			BOOL bHasTransparency;
-			COLORREF cTransparency;
-		};
-
 		
 		/// child view window
 		class CChildView : public CWnd
@@ -265,6 +196,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 #ifdef use_test_canvas
 			MachineView* machine_view() { return &machine_view_; }
+#endif
+#ifdef use_patternview
+			PatternView* pattern_view() { return &pattern_view_; }
 #endif
 			
 		public:
@@ -387,7 +321,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #ifdef use_test_canvas
 			MachineView machine_view_;
 #endif
+#ifdef use_patternview
 			PatternView pattern_view_;
+#endif
 
 			// GDI Stuff
 			CBitmap patternheader;
