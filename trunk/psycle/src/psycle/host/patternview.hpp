@@ -89,9 +89,24 @@ namespace psycle {
 			~PatternView();
 
 			void Draw(CDC *devc, const CRgn& rgn);
+			void OnSize(UINT nType, int cx, int cy);
+			// key events
 			void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 			void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-			void OnSize(UINT nType, int cx, int cy);
+			// mouse events
+			void OnLButtonDown( UINT nFlags, CPoint point );
+			void OnRButtonDown( UINT nFlags, CPoint point );
+			void OnRButtonUp( UINT nFlags, CPoint point );
+			void OnLButtonUp( UINT nFlags, CPoint point );
+			void OnMouseMove( UINT nFlags, CPoint point );
+			void OnLButtonDblClk( UINT nFlags, CPoint point );
+			void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+			void OnMButtonDown( UINT nFlags, CPoint point );
+			void OnContextMenu(CWnd* pWnd, CPoint point);
+			void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+			void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+			
+			
 
 			void ShowTransformPatternDlg(void);
 			void ShowPatternDlg(void);
@@ -651,6 +666,6 @@ namespace psycle {
 
 		};
 
-	}
-}
+	}  //namespace host
+}  // namespace psycle
 
