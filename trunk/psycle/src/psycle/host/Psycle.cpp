@@ -116,6 +116,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->m_wndView.machine_view()->InitSkin();
 			pFrame->m_wndView.machine_view()->Rebuild();
 #endif
+/*#ifdef use_patternview
+			pFrame->m_wndView.pattern_view()->LoadPatternHeaderSkin();
+			pFrame->m_wndView.pattern_view()->RecalcMetrics();
+			pFrame->m_wndView.pattern_view()->RecalculateColourGrid();
+#endif*/
+
 			pFrame->m_wndView.LoadPatternHeaderSkin();
 			pFrame->m_wndView.LoadMachineBackground();
 			pFrame->m_wndView.RecalcMetrics();

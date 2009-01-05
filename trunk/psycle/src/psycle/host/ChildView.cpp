@@ -101,7 +101,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #ifdef use_test_canvas
 			,machine_view_(this, main_frame, Global::_pSong)
 #endif
+#ifdef use_patternview
 			,pattern_view_(this, main_frame, Global::_pSong)
+#endif
 		{
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
@@ -541,7 +543,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{
+#ifdef use_patternview
+					pattern_view_.Draw(&bufDC, pRgn);
+#else
 					DrawPatEditor(&bufDC);
+#endif
 				}
 				else if ( viewMode == view_modes::sequence)
 				{
@@ -589,7 +595,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{
+#ifdef use_patternview
+					pattern_view_.Draw(&dc, pRgn);
+#else
 					DrawPatEditor(&dc);
+#endif
 				}
 				else if ( viewMode == view_modes::sequence)
 				{
@@ -612,7 +622,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (drawMode >= draw_modes::pattern || drawMode == draw_modes::all )	
 				{
+#ifdef use_patternview
+					pattern_view()->PreparePatternRefresh(drawMode);
+#else
 					PreparePatternRefresh(drawMode);
+#endif
 				}
 			}
 			if ( viewMode == view_modes::sequence )
@@ -642,7 +656,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			if (viewMode == view_modes::pattern)
 			{
+#ifdef use_patternview
+				pattern_view()->RecalcMetrics();
+#else
 				RecalcMetrics();
+#endif
 			}
 			Repaint();
 		}
