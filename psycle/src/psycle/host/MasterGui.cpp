@@ -22,8 +22,20 @@ namespace psycle {
 
 		MasterGui::~MasterGui()
 		{
-			if ( dialog_ )
+			if (dialog_)
 				delete dialog_;
+		}
+
+		bool MasterGui::OnEvent(TestCanvas::Event* ev)
+		{
+			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
+				if (ev->button == 3) {
+					// do not allow for master to be deleted etc..
+					return true;
+				}
+			}
+			// else fallback to machinegui events
+			return MachineGui::OnEvent(ev);
 		}
 
 		void MasterGui::SetSkin(const SMachineCoords& MachineCoords,
@@ -84,5 +96,6 @@ namespace psycle {
 		{
 			 return pixbuf_.height();
 		}
+
 	}  // namespace host
 }  // namespace psycle

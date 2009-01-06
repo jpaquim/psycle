@@ -37,10 +37,9 @@ namespace psycle {
 			MachineGui* toGUI() const { return toGUI_; }
 			MachineGui* start() const { return start_; }
 
-			void dragging_start(int pickpoint);
-			void dragging(double x, double y);
-			void dragging_stop();
-			bool dragging() const { return dragging_; }
+			void StartDragging(int pickpoint);
+			void DoDragging(double x, double y);
+			void StopDragging();			
 
 			virtual bool OnEvent(TestCanvas::Event* ev);
 
@@ -56,6 +55,7 @@ namespace psycle {
 		private:
 
 			void AmosDraw(CDC *devc, int oX, int oY,int dX, int dY);
+			void ShowDialog(double x, double y);
 
 			class MachineView* view_;
 			MachineGui* fromGUI_;

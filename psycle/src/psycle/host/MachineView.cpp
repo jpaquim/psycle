@@ -526,11 +526,11 @@ namespace psycle {
 			line->SetPoints(points);
 			if (rewire_line_) {		
 				if (sender == rewire_line_->fromGUI())
-					line->dragging_start(0);
+					line->StartDragging(0);
 				else
-					line->dragging_start(1);
+					line->StartDragging(1);
 			} else {
-				line->dragging_start(1);
+				line->StartDragging(1);
 			}
 		}
 

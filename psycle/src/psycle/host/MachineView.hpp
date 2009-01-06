@@ -19,9 +19,7 @@ namespace psycle {
 			// the machinegui OnEvent. In case of replace and delete this is important
 			void ShowNewMachineDlg(double x , double y, Machine* mac, bool from_event);
 			void SelectMachine(MachineGui* gui);
-
 			virtual void OnEvent(TestCanvas::Event* ev);
-
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main();
 			Song* song() { return song_; }
@@ -32,11 +30,8 @@ namespace psycle {
 							 double y,
 							 int picker);
 			void OnWireRewire(WireGui* sender, int pick_point);
-
-
 			void LockVu();
 			void UnlockVu();
-
 			// use this, if you want to delete a gui not called from 
 			// the machinegui event, that will be deleted
 			// (used e.g. in CGearRack)
@@ -48,13 +43,11 @@ namespace psycle {
 				del_in_engine_ = in_engine;
 			}
 			void SetDeleteMachineGui(Machine* mac, bool in_engine);
-
 			void InitSkin();
 			MachineGui* CreateMachineGui(Machine* mac);
 			void DoMacPropDialog(Machine* mac, bool from_event);
 			void ShowDialog(Machine* mac, double x, double y);
 			void UpdatePosition(Machine* mac);
-						
 			void WriteStatusBar(const std::string& text);
 
 		private:			

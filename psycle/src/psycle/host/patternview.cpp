@@ -110,8 +110,17 @@ namespace psycle {
 
 		}
 
-		void PatternView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+		bool PatternView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		{
+			BOOL bRepeat = nFlags&0x4000;
+				if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
+				{
+					bool success;
+					// add data
+					success = Global::pInputHandler->EnterData(nChar,nFlags);
+					return success;
+				}
+				return false;
 		}
 
 		void PatternView::PreparePatternRefresh(int drawMode)
@@ -3414,7 +3423,7 @@ namespace psycle {
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						child_view()->Repaint(draw_modes::data);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -3495,7 +3504,7 @@ namespace psycle {
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						child_view()->Repaint(draw_modes::data);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -3571,7 +3580,7 @@ namespace psycle {
 					pentry->_inst = entry._inst;
 
 					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-					child_view()->Repaint(draw_modes::data);
+					Repaint(draw_modes::data);
 				}
 			}
 		//	else
@@ -3647,7 +3656,7 @@ namespace psycle {
 						pentry->_note = entry._note;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						child_view()->Repaint(draw_modes::data);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -3719,7 +3728,7 @@ namespace psycle {
 					pentry->_inst = entry._inst;
 
 					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-					child_view()->Repaint(draw_modes::data);
+					Repaint(draw_modes::data);
 				}
 			}
 		//	else
@@ -3778,7 +3787,7 @@ namespace psycle {
 						entry->_note = notecommands::tweak;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						child_view()->Repaint(draw_modes::data);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -3827,7 +3836,7 @@ namespace psycle {
 						entry->_note = notecommands::tweakslide;
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						child_view()->Repaint(draw_modes::data);
+						Repaint(draw_modes::data);
 					}
 				}
 			}
@@ -4090,7 +4099,7 @@ namespace psycle {
 
 			bScrollDetatch=false;
 			Global::pInputHandler->bDoingSelection = false;
-			child_view()->Repaint(draw_modes::data);
+			Repaint(draw_modes::data);
 		}
 
 		void PatternView::EnterNoteoffAny()
@@ -4126,7 +4135,7 @@ namespace psycle {
 
 				bScrollDetatch=false;
 				Global::pInputHandler->bDoingSelection = false;
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -4191,7 +4200,7 @@ namespace psycle {
 			bScrollDetatch=false;
 			Global::pInputHandler->bDoingSelection = false;
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-			child_view()->Repaint(draw_modes::data);
+			Repaint(draw_modes::data);
 			return true;
 		}
 
@@ -4219,7 +4228,7 @@ namespace psycle {
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			child_view()->Repaint(draw_modes::data);
+			Repaint(draw_modes::data);
 		}
 
 		void PatternView::DeleteCurr()
@@ -4251,7 +4260,7 @@ namespace psycle {
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			child_view()->Repaint(draw_modes::data);
+			Repaint(draw_modes::data);
 		}
 
 		void PatternView::InsertCurr()
@@ -4275,7 +4284,7 @@ namespace psycle {
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-			child_view()->Repaint(draw_modes::data);
+			Repaint(draw_modes::data);
 		}
 
 
@@ -4353,7 +4362,7 @@ namespace psycle {
 			}
 			if (updateDisplay) 
 			{
-				child_view()->Repaint(draw_modes::cursor);
+				Repaint(draw_modes::cursor);
 			}
 		}
 
@@ -4378,7 +4387,7 @@ namespace psycle {
 			}
 			if (updateDisplay) 
 			{
-				child_view()->Repaint(draw_modes::cursor);
+				Repaint(draw_modes::cursor);
 			}
 		}
 
@@ -4404,7 +4413,7 @@ namespace psycle {
 			}
 			main()->StatusBarIdle();
 			if (updateDisplay)
-				child_view()->Repaint(draw_modes::cursor);
+				Repaint(draw_modes::cursor);
 		}
 
 		void PatternView::AdvanceLine(int x,bool wrap,bool updateDisplay)
@@ -4441,7 +4450,7 @@ namespace psycle {
 
 			main()->StatusBarIdle();
 			if (updateDisplay)
-				child_view()->Repaint(draw_modes::cursor);
+				Repaint(draw_modes::cursor);
 		}
 
 		void PatternView::AdvanceTrack(int x,bool wrap,bool updateDisplay)
@@ -4460,7 +4469,7 @@ namespace psycle {
 			
 			main()->StatusBarIdle();
 			if (updateDisplay)
-				child_view()->Repaint(draw_modes::cursor);
+				Repaint(draw_modes::cursor);
 		}
 
 		void PatternView::PrevTrack(int x,bool wrap,bool updateDisplay)
@@ -4479,7 +4488,7 @@ namespace psycle {
 			
 			main()->StatusBarIdle();
 			if (updateDisplay)
-				child_view()->Repaint(draw_modes::cursor);
+				Repaint(draw_modes::cursor);
 		}
 
 
@@ -4509,7 +4518,7 @@ namespace psycle {
 				patBufferCopy = true;
 
 				NewPatternDraw(0,song()->SONGTRACKS,0,patBufferLines-1);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -4545,7 +4554,7 @@ namespace psycle {
 				}
 				memcpy(soffset,patBufferData,patBufferLines*EVENT_SIZE*MAX_TRACKS);
 
-				child_view()->Repaint(draw_modes::pattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
@@ -4576,7 +4585,7 @@ namespace psycle {
 					offset_source+= EVENT_SIZE;
 				}
 				
-				child_view()->Repaint(draw_modes::pattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
@@ -4601,7 +4610,7 @@ namespace psycle {
 				}
 
 				NewPatternDraw(0,song()->SONGTRACKS,0,patBufferLines-1);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -4631,7 +4640,7 @@ namespace psycle {
 				}
 				NewPatternDraw(0,song()->SONGTRACKS,editcur.line,pLines-1);
 
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -4660,7 +4669,7 @@ namespace psycle {
 			}
 			blockSelected=true;
 
-			child_view()->Repaint(draw_modes::selection);
+			Repaint(draw_modes::selection);
 		}
 		void PatternView::ChangeBlock(int track,int line, int col)
 		{
@@ -4697,7 +4706,7 @@ namespace psycle {
 			}
 			blockSelected=true;
 
-			child_view()->Repaint(draw_modes::selection);
+			Repaint(draw_modes::selection);
 		}
 
 		void PatternView::EndBlock(int track,int line, int col)
@@ -4734,7 +4743,7 @@ namespace psycle {
 			}
 			blockSelected=true;
 
-			child_view()->Repaint(draw_modes::selection);
+			Repaint(draw_modes::selection);
 		}
 
 		void PatternView::BlockUnmark()
@@ -4744,7 +4753,7 @@ namespace psycle {
 			//reinitialise the select bar state
 			blockSelectBarState = 1;
 
-			child_view()->Repaint(draw_modes::selection);
+			Repaint(draw_modes::selection);
 		}
 
 		void PatternView::CopyBlock(bool cutit)
@@ -4787,7 +4796,7 @@ namespace psycle {
 				{
 					NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 
-					child_view()->Repaint(draw_modes::data);
+					Repaint(draw_modes::data);
 				}
 			}
 		}
@@ -4810,7 +4819,7 @@ namespace psycle {
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -4868,7 +4877,7 @@ namespace psycle {
 
 				bScrollDetatch=false;
 				NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -5023,7 +5032,7 @@ namespace psycle {
 				PasteBlock(destt, destl, false,false);
 				
 				NewPatternDraw(0,song()->SONGTRACKS-1,0,nl-1);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -5087,7 +5096,7 @@ namespace psycle {
 						memcpy(offset_target,&blank,EVENT_SIZE);
 					}
 				}
-				child_view()->Repaint(draw_modes::pattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
@@ -5131,7 +5140,7 @@ namespace psycle {
 			}
 
 			NewPatternDraw(st,et,sl,el);
-			child_view()->Repaint(draw_modes::data);
+			Repaint(draw_modes::data);
 		}
 
 		void PatternView::HalveLength()
@@ -5178,7 +5187,7 @@ namespace psycle {
 			}
 
 			NewPatternDraw(st,et,sl,nl+sl);
-			child_view()->Repaint(draw_modes::data);
+			Repaint(draw_modes::data);
 		}
 
 
@@ -5208,7 +5217,7 @@ namespace psycle {
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -5239,7 +5248,7 @@ namespace psycle {
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -5270,7 +5279,7 @@ namespace psycle {
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -5325,7 +5334,7 @@ namespace psycle {
 					}
 				}
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				child_view()->Repaint(draw_modes::data);
+				Repaint(draw_modes::data);
 			}
 		}
 
@@ -5337,7 +5346,7 @@ namespace psycle {
 				AddUndoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				++song()->playOrder[editPosition];
 				main()->UpdatePlayOrder(true);
-				child_view()->Repaint(draw_modes::pattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
@@ -5349,7 +5358,7 @@ namespace psycle {
 				AddUndoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				--song()->playOrder[editPosition];
 				main()->UpdatePlayOrder(true);
-				child_view()->Repaint(draw_modes::pattern);
+				Repaint(draw_modes::pattern);
 			}
 		}
 
@@ -5387,9 +5396,9 @@ namespace psycle {
 				song()->playOrderSel[editPosition]=true;
 
 				main()->UpdatePlayOrder(true);
-				child_view()->Repaint(draw_modes::pattern);
+				Repaint(draw_modes::pattern);
 				if (Global::pPlayer->_playing) {
-					child_view()->Repaint(draw_modes::playback);
+					Repaint(draw_modes::playback);
 				}
 			}
 		}
@@ -5444,9 +5453,9 @@ namespace psycle {
 				song()->playOrderSel[editPosition]=true;
 
 				main()->UpdatePlayOrder(true);
-				child_view()->Repaint(draw_modes::pattern);
+				Repaint(draw_modes::pattern);
 				if (Global::pPlayer->_playing) {
-					child_view()->Repaint(draw_modes::playback);
+					Repaint(draw_modes::playback);
 				}
 			}
 		}
@@ -5694,7 +5703,7 @@ namespace psycle {
 						}
 					}
 					oldm.track = -1;
-					child_view()->Repaint(draw_modes::track_header);
+					Repaint(draw_modes::track_header);
 				}
 				else if ( point.y >= YOFFSET )
 				{
@@ -5719,7 +5728,7 @@ namespace psycle {
 					if (nFlags & MK_SHIFT)
 					{
 						editcur = oldm;
-						child_view()->Repaint(draw_modes::cursor);
+						Repaint(draw_modes::cursor);
 					}
 				}
 		}
@@ -5740,7 +5749,7 @@ namespace psycle {
 		//			else if ( editcur.line < 0 ) editcur.line = 0;
 
 					editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
-					child_view()->Repaint(draw_modes::cursor);
+					Repaint(draw_modes::cursor);
 					main()->StatusBarIdle();
 					if (!(nFlags & MK_SHIFT) && Global::pConfig->_windowsBlocks)
 					{
@@ -5749,7 +5758,7 @@ namespace psycle {
 						blockSel.end.track=0;
 						ChordModeOffs = 0;
 						bScrollDetatch=false;
-						child_view()->Repaint(draw_modes::selection);
+						Repaint(draw_modes::selection);
 					}
 				}
 				else if (blockswitch)
@@ -5769,7 +5778,7 @@ namespace psycle {
 					}
 					else blockSelected=false; 
 					blockswitch=false;
-					child_view()->Repaint(draw_modes::selection);
+					Repaint(draw_modes::selection);
 				}
 		}
 
@@ -5908,7 +5917,7 @@ namespace psycle {
 
 					if (paintmode)
 					{
-						child_view()->Repaint(paintmode);
+						Repaint(paintmode);
 					}
 				}
 				else if (nFlags == MK_MBUTTON)
@@ -5930,7 +5939,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::vertical_scroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						else if (nPos < lOff )
 						{
@@ -5943,7 +5952,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::vertical_scroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						MBStart.y += delta*ROWHEIGHT;
 					}
@@ -5963,7 +5972,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::horizontal_scroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						else if (nPos < tOff)
 						{
@@ -5976,7 +5985,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::horizontal_scroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						MBStart.x += delta*ROWWIDTH;
 					}
@@ -6011,7 +6020,7 @@ namespace psycle {
 					bScrollDetatch=true;
 					detatchpoint.track = ntOff+1;
 					detatchpoint.line = nlOff+1;
-					child_view()->Repaint(draw_modes::vertical_scroll);
+					Repaint(draw_modes::vertical_scroll);
 				}
 				else if (nPos < lOff )
 				{
@@ -6024,7 +6033,7 @@ namespace psycle {
 					bScrollDetatch=true;
 					detatchpoint.track = ntOff+1;
 					detatchpoint.line = nlOff+1;
-					child_view()->Repaint(draw_modes::vertical_scroll);
+					Repaint(draw_modes::vertical_scroll);
 				}
 		}
 
@@ -6045,7 +6054,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::vertical_scroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					case SB_LINEUP:
@@ -6055,7 +6064,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::vertical_scroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					case SB_PAGEDOWN:
@@ -6070,7 +6079,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::vertical_scroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					case SB_PAGEUP:
@@ -6084,7 +6093,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::vertical_scroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					case SB_THUMBPOSITION:
@@ -6104,7 +6113,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::vertical_scroll);
+							Repaint(draw_modes::vertical_scroll);
 						}
 						break;
 					default: 
@@ -6128,7 +6137,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::horizontal_scroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						break;
 					case SB_LINELEFT:
@@ -6142,7 +6151,7 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::horizontal_scroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						else PrevTrack(1,false);
 						break;
@@ -6166,12 +6175,20 @@ namespace psycle {
 							bScrollDetatch=true;
 							detatchpoint.track = ntOff+1;
 							detatchpoint.line = nlOff+1;
-							child_view()->Repaint(draw_modes::horizontal_scroll);
+							Repaint(draw_modes::horizontal_scroll);
 						}
 						break;
 					default: 
 						break;
 				}
+		}
+
+		void PatternView::Repaint(draw_modes::draw_mode drawMode)
+		{
+			if (drawMode >= draw_modes::pattern || drawMode == draw_modes::all )	
+			{
+				PreparePatternRefresh(drawMode);				
+			}
 		}
 	
 	}  // namespace host
