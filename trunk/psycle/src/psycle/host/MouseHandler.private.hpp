@@ -236,9 +236,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CWnd::OnRButtonUp(nFlags,point);
 		}
 		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
-		{
+		{			
 			if (viewMode == view_modes::pattern)
 			{
+#ifdef use_patternview
+				pattern_view_.OnContextMenu(pWnd, point);
+#else
+
 				CMenu menu;
 				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
 				CMenu* pPopup = menu.GetSubMenu(0);
@@ -247,6 +251,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				
 				menu.DestroyMenu();
 		//		Repaint(draw_modes::cursor);
+#endif
 			}
 			CWnd::OnContextMenu(pWnd,point);
 		}
@@ -474,6 +479,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			else if ( viewMode==view_modes::pattern)
 			{			
+#ifdef use_patternview
+				pattern_view_.OnLButtonDown(nFlags, point);
+#else
 				int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
 				if ( ttm >= _pSong->SONGTRACKS ) ttm = _pSong->SONGTRACKS-1;
 				else if ( ttm < 0 ) ttm = 0;
@@ -547,6 +555,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						Repaint(draw_modes::cursor);
 					}
 				}
+#endif
 			}//<-- End LBUTTONPRESING/VIEWMODE if statement
 			CWnd::OnLButtonDown(nFlags,point);
 		}
@@ -666,7 +675,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else if (viewMode == view_modes::pattern)
 			{
-				
+#ifdef use_patternview
+				pattern_view_.OnLButtonUp(nFlags, point);
+#else
 				if ( (blockStart) &&
 					( point.y > YOFFSET && point.y < YOFFSET+(maxl*ROWHEIGHT)) &&
 					(point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
@@ -712,6 +723,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					blockswitch=false;
 					Repaint(draw_modes::selection);
 				}
+#endif
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 			CWnd::OnLButtonUp(nFlags,point);
 		}
@@ -811,6 +823,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			else if (viewMode == view_modes::pattern)
 			{
+#ifdef use_patternview
+				pattern_view_.OnMouseMove(nFlags, point);
+#else
 				if ((nFlags & MK_LBUTTON) && oldm.track != -1)
 				{
 					ntOff = tOff;
@@ -1016,6 +1031,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						MBStart.x += delta*ROWWIDTH;
 					}
 				}
+#endif
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 			CWnd::OnMouseMove(nFlags,point);
 		}
@@ -1201,6 +1217,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					////////////////////////////////////////////////////////////////
 
 				case view_modes::pattern: // User is in pattern view mode
+#ifdef use_patternview
+#else
 					if (( point.y >= YOFFSET ) && (point.x >= XOFFSET))
 					{
 						const int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
@@ -1210,6 +1228,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						EndBlock(ttm,nl-1,8);
 						blockStart = false;
 					}
+#endif
 
 					break;
 
@@ -1224,6 +1243,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if ( viewMode == view_modes::pattern )
 			{
+#ifdef use_patternview
+				pattern_view_.OnMouseWheel(nFlags, zDelta, pt);
+#else
 				int nlines = _pSong->patternLines[_ps()];
 				int nPos = lOff - (zDelta/30);
 				if (nPos > lOff )
@@ -1252,21 +1274,29 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					detatchpoint.line = nlOff+1;
 					Repaint(draw_modes::vertical_scroll);
 				}
+#endif
 			}
 			return CWnd ::OnMouseWheel(nFlags, zDelta, pt);
 		}
 
-		void CChildView::OnMButtonDown( UINT nFlags, CPoint point )
+		void CChildView::OnMButtonDown(UINT nFlags, CPoint point)
 		{
+#ifdef use_patternview
+			pattern_view_.OnMButtonDown(nFlags, point);
+#else
 			MBStart.x = point.x;
 			MBStart.y = point.y;
 			CWnd ::OnMButtonDown(nFlags, point);
+#endif
 		}
 
 		void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{
 			if ( viewMode == view_modes::pattern )
 			{
+#ifdef use_patternview
+				pattern_view_.OnVScroll(nSBCode, nPos, pScrollBar);
+#else
 				switch(nSBCode)
 				{
 					case SB_LINEDOWN:
@@ -1341,6 +1371,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					default: 
 						break;
 				}
+#endif
 			}
 			CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
 		}
@@ -1350,6 +1381,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if ( viewMode == view_modes::pattern )
 			{
+#ifdef use_patternview
+				pattern_view_.OnHScroll(nSBCode, nPos, pScrollBar);
+#else
 				switch(nSBCode)
 				{
 					case SB_LINERIGHT:
@@ -1406,7 +1440,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						break;
 					default: 
 						break;
+
 				}
+#endif
 			}
 
 			CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
