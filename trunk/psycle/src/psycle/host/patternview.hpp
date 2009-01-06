@@ -85,6 +85,59 @@ namespace psycle {
 		class PatternView {
 		public:
 
+			struct draw_modes
+			{
+				enum draw_mode
+				{
+					all, ///< Repaints everything (means, slow). Used when switching views, or when a
+					///< whole update is needed (For example, when changing pattern Properties, or TPB)
+
+					all_machines, ///< Used to refresh all the machines, without refreshing the background/wires
+
+					machine, ///< Used to refresh the image of one machine (mac num in "updatePar")
+
+					pattern, ///< Use this when switching Patterns (changing from one to another)
+
+					data, ///< Data has Changed. Which data to update is indicated with DrawLineStart/End
+					///< and DrawTrackStart/End
+					///< Use it when editing and copy/pasting
+
+					horizontal_scroll, ///< Refresh called by the scrollbars or by mouse scrolling (when selecting).
+					///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+
+					vertical_scroll, ///< Refresh called by the scrollbars or by mouse scrolling (when selecting).
+					///< New values in ntOff and nlOff variables ( new_track_offset and new_line_offset);
+
+					//resize, ///< Indicates the Refresh is called from the "OnSize()" event.
+
+					playback, ///< Indicates it needs a refresh caused by Playback (update playback cursor)
+
+					playback_change, ///< Indicates that while playing, a pattern switch is needed.
+
+					cursor, ///< Indicates a movement of the cursor. update the values to "editcur" directly
+					///< and call this function.
+					///< this is arbitrary message as cursor is checked
+
+					selection, ///< The selection has changed. use "blockSel" to indicate the values.
+
+					track_header, ///< Track header refresh (mute/solo, Record updating)
+
+					//pattern_header, ///< Octave, Pattern name, Edit Mode on/off
+
+					none ///< Do not use this one directly. It is used to detect refresh calls from the OS.
+
+					// If you add any new method, please, add the proper code to "PreparePatternRefresh()" and to
+					// "DrawPatternEditor()".
+					// Note: Modes are sorted by priority. (although it is not really used)
+
+					// !!!BIG ADVISE!!! : The execution of Repaint(mode) does not imply an instant refresh of
+					//						the Screen, and what's worse, you might end calling Repaint(anothermode)
+					//						previous of the first refresh. In PreparePatternRefresh() there's code
+					//						to avoid problems when two modes do completely different things. On
+					//						other cases, it still ends to wrong content being shown.
+				};		
+			};
+
 			PatternView(class CChildView* parent, class CMainFrame* main, class Song* song);
 			~PatternView();
 
@@ -92,7 +145,7 @@ namespace psycle {
 			void OnSize(UINT nType, int cx, int cy);
 			// key events
 			void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-			void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+			bool OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 			// mouse events
 			void OnLButtonDown( UINT nFlags, CPoint point );
 			void OnRButtonDown( UINT nFlags, CPoint point );
@@ -187,6 +240,7 @@ namespace psycle {
 			void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);						
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
 			COLORREF ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
+			void Repaint(draw_modes::draw_mode drawMode);
 
 			CChildView* parent_;
 			CMainFrame* main_;			

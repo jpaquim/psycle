@@ -39,24 +39,26 @@ namespace psycle {
 		}
 
 		WireGui::~WireGui()
-		{
-			// do not delete wire_dlg_, cause it is deleting itself in OnCancel
-			if ( toGUI_ ) {
+		{			
+			if (wire_dlg_) {
+				wire_dlg_->DestroyWindow();
+			}
+			if (toGUI_) {
 				toGUI_->DetachWire(this);
 			}
-			if ( fromGUI_ ) {
+			if (fromGUI_) {
 				fromGUI_->DetachWire(this);
 			}
 		}
 
-		void WireGui::dragging_start(int pickpoint)
+		void WireGui::StartDragging(int pickpoint)
 		{
 			dragging_ = true;
 			drag_picker_ = pickpoint;
 			GetFocus();
 		}
 
-		void WireGui::dragging(double x, double y) {
+		void WireGui::DoDragging(double x, double y) {
 			TestCanvas::Line::Points points(2);
 			if ( drag_picker_ == 1 ) {
 				points[0] = PointAt(0);
@@ -69,7 +71,7 @@ namespace psycle {
 			SetPoints(points);
 		}
 
-		void WireGui::dragging_stop()
+		void WireGui::StopDragging()
 		{
 			dragging_ = false;
 		}
@@ -267,6 +269,9 @@ namespace psycle {
 		{
 			switch(ev->type) {
 				case TestCanvas::Event::BUTTON_PRESS:
+					if (ev->button == 3) {
+						ShowDialog(ev->x, ev->y);
+					} else
 					if (ev->shift & MK_SHIFT) {
 						view_->OnWireRewire(this, 0);
 					} else
@@ -275,26 +280,16 @@ namespace psycle {
 					}
 				break;
 				case TestCanvas::Event::BUTTON_2PRESS:
-					if (!wire_dlg_) {			
-						wire_dlg_ = new CWireDlg(fromGUI_->view()->child_view(), this);
-						wire_dlg_->this_index = 0;
-						wire_dlg_->wireIndex = 0;
-						wire_dlg_->isrcMac = fromGUI_->mac()->_macIndex;
-						wire_dlg_->_pSrcMachine = fromGUI_->mac();
-						wire_dlg_->_pDstMachine = toGUI_->mac();
-						wire_dlg_->Create();
-						//pParentMain->CenterWindowOnPoint(wdlg, point);
-						wire_dlg_->ShowWindow(SW_SHOW);
-					}
+					ShowDialog(ev->x, ev->y);				
 				break;
 				case TestCanvas::Event::MOTION_NOTIFY:
 					if(dragging_) {
-						dragging(ev->x, ev->y);
+						DoDragging(ev->x, ev->y);
 					}
 				break;
 				case TestCanvas::Event::BUTTON_RELEASE:
 					if(dragging_) {
- 				       dragging_stop();
+ 				       StopDragging();
 					   view_->OnRewireEnd(this, ev->x, ev->y, drag_picker_);
 					}
 				break;
@@ -302,6 +297,21 @@ namespace psycle {
 					;
 			}
 			return true;
+		}
+
+		void WireGui::ShowDialog(double x, double y)
+		{
+			if (!wire_dlg_) {			
+				wire_dlg_ = new CWireDlg(fromGUI_->view()->child_view(), this);
+				wire_dlg_->this_index = 0;
+				wire_dlg_->wireIndex = 0;
+				wire_dlg_->isrcMac = fromGUI_->mac()->_macIndex;
+				wire_dlg_->_pSrcMachine = fromGUI_->mac();
+				wire_dlg_->_pDstMachine = toGUI_->mac();
+				wire_dlg_->Create();
+				//pParentMain->CenterWindowOnPoint(wdlg, point);
+				wire_dlg_->ShowWindow(SW_SHOW);
+			}
 		}
 
 		void WireGui::UpdatePosition()

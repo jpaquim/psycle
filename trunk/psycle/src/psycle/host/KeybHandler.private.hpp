@@ -5,13 +5,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
+#ifdef use_patternview
+			pattern_view_.OnKeyUp(nChar, nRepCnt, nFlags);
+#else
 			// undo code not required, enter note handles it
 			CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
 			if (cmd.GetType() == CT_Note)
 			{
 				const int outnote = cmd.GetNote();
 				if(viewMode == view_modes::pattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
-				{ 
+				{					
 					EnterNote(outnote,0,true);	// note end
 				}
 				else
@@ -29,6 +32,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//		pParentMain->StatusBarIdle();
 		//		Repaint(draw_modes::cursor);
 			}
+#endif
 		}
 
 		void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -45,6 +49,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{
+#ifdef use_patternview
+			bool success = pattern_view_.OnKeyDown(nChar, nRepCnt, nFlags);
+			if ( success )
+			{
+				CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+				return;
+			}
+#else
+
 				if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
 				{
 					bool success;
@@ -57,6 +70,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						return;
 					}
 				}
+#endif
 			}
 			else if (viewMode == view_modes::sequence && bEditMode)
 			{
@@ -83,7 +97,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if((cmd.GetType() == CT_Immediate) ||
 				(cmd.GetType() == CT_Editor && viewMode == view_modes::pattern) ) 
 				{			
+#ifdef use_test_canvas
+					if ( cmd == cdefInfoMachine) {
+						if (Global::_pSong->seqBus < MAX_MACHINES)
+						{
+							if (Global::_pSong->_pMachine[Global::_pSong->seqBus])
+							{
+								CPoint point;
+								point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_x;
+								point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_y;
+								machine_view_.ShowDialog(Global::_pSong->_pMachine[Global::_pSong->seqBus], point.x, point.y);
+							}
+						}
+					}
+#else
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+#endif
 				}
 				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
 				{

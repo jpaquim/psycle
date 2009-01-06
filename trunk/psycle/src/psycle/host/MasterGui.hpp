@@ -29,11 +29,12 @@ namespace psycle {
 
 			virtual int preferred_width() const;
 			virtual int preferred_height() const;
-
+			
 		protected:
 			virtual void ShowDialog(double x, double y);
-		private:
+			bool OnEvent(TestCanvas::Event* ev);
 
+		private:
 			class CMasterDlg* dialog_;
 			//skin elements
 			TestCanvas::PixBuf pixbuf_;
