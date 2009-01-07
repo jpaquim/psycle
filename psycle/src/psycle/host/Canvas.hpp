@@ -364,4 +364,4 @@ class Canvas
 		CRgn save_rgn_;
 };
 
-}
+}  // namespace TestCanvas

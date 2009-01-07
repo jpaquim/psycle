@@ -122,7 +122,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 //			Gdiplus::GdiplusStartupInput gdiplusStartupInput; // GDI+ stuff
 //			ULONG_PTR gdiplusToken; // GDI+ stuff
 
-		protected:
+		public:
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnSetFocus(CWnd *pOldWnd);
 			afx_msg void OnBarButton1();
@@ -164,8 +164,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnSeqduplicate();
 			afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 			afx_msg void OnDecTPB();
-			afx_msg void OnIncTPB();
-			afx_msg void OnFollowSong();
+			afx_msg void OnIncTPB();			
+			afx_msg void OnFollowSong();			
 			afx_msg void OnSeqclr();
 			afx_msg void OnSeqsort();
 			afx_msg void OnMultichannelAudition();

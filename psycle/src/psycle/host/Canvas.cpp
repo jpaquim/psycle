@@ -247,12 +247,14 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   }
 
   void Group::Erase(Item* item) {
+	assert(item);
     std::vector<Item*>::iterator it = find(items_.begin(), items_.end(), item);
     assert(it != items_.end());
     items_.erase(it);
   }
 
   void Group::RaiseToTop(Item* item) {
+    assert(item);
     Erase(item);
     Add(item);
   }
