@@ -63,6 +63,7 @@ namespace psycle {
 			// this could be a mapping in a future Wire class
 			int wiresrc_;
 			int wiredest_;
+			bool newcon_;
 
 			int drag_picker_;
 			bool dragging_;
