@@ -53,7 +53,6 @@ namespace psycle {
 			virtual const CRgn& region() const;
 
 		private:
-
 			void AmosDraw(CDC *devc, int oX, int oY,int dX, int dY);
 			void ShowDialog(double x, double y);
 
@@ -80,8 +79,7 @@ namespace psycle {
 			CPen linepen3;
 			CPen polyInnardsPen;
 			mutable CRgn rgn_;
-
 		};
 
-	}
-}
+	}  // namespace host
+}  // namespace psycle

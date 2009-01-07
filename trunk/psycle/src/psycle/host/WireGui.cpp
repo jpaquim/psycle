@@ -42,7 +42,7 @@ namespace psycle {
 		{			
 			if (wire_dlg_) {
 				wire_dlg_->DestroyWindow();
-			}
+			}			
 			if (toGUI_) {
 				toGUI_->DetachWire(this);
 			}
@@ -84,7 +84,8 @@ namespace psycle {
 		void WireGui::RemoveWire()
 		{
 			set_manage(false); // this causes an unparent
-			delete this;
+			wire_dlg_ = 0;
+			delete this;			
 		}
 
 		void WireGui::Draw(CDC* devc,

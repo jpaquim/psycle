@@ -221,6 +221,8 @@ namespace psycle {
 			void IncPosition(bool bRepeat=false);
 			void DecPosition();
 			void SelectMachineUnderCursor(void);
+			bool EnterData(UINT nChar,UINT nFlags);
+
 
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main() { return main_; }
@@ -231,6 +233,11 @@ namespace psycle {
 			void RecalcMetrics();
 			void PreparePatternRefresh(int drawMode);
 			void RecalculateColourGrid();
+
+			void PerformCmd(class CmdDef &cmd, BOOL brepeat);
+			void patTrackMute();
+			void patTrackSolo();
+			void patTrackRecord();
 
 		private:
 			void DrawPatEditor(CDC *devc);
@@ -245,6 +252,10 @@ namespace psycle {
 			CChildView* parent_;
 			CMainFrame* main_;			
 			Song* song_;
+
+			bool bFT2HomeBehaviour;
+			bool bShiftArrowsDoSelect;
+			bool bDoingSelection;
 
 			bool blockSelected;
 			bool blockStart;
@@ -263,8 +274,7 @@ namespace psycle {
 			int ChordModeLine;
 			int ChordModeTrack;
 			int updateMode;
-			int updatePar;			// view_modes::pattern: Display update mode. view_modes::machine: Machine number to update.
-			int viewMode;
+			int updatePar;			// view_modes::pattern: Display update mode. view_modes::machine: Machine number to update.			
 			int XOFFSET;
 			int YOFFSET;
 			int ROWWIDTH;

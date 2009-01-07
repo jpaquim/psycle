@@ -109,9 +109,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								machine_view_.ShowDialog(Global::_pSong->_pMachine[Global::_pSong->seqBus], point.x, point.y);
 							}
 						}
-					}
+					} else
+#ifdef use_patternview
+					pattern_view_.PerformCmd(cmd, bRepeat);
 #else
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+#endif
+#else
+#ifdef use_patternview
+					pattern_view_.PerformCmd(cmd, bRepeat);
+#else
+					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+#endif
 #endif
 				}
 				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
