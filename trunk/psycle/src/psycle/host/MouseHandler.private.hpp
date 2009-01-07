@@ -20,6 +20,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.x = point.x;
 				ev.y = point.y;
 				ev.button = 3;
+				ev.shift = nFlags;
 				machine_view_.OnEvent(&ev);
 				return;
 #else
@@ -117,6 +118,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.x = point.x;
 				ev.y = point.y;
 				ev.button = 3;
+				ev.shift = nFlags;
 				machine_view_.OnEvent(&ev);
 				return;
 #else
@@ -572,6 +574,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.x = point.x;
 				ev.y = point.y;
 				ev.button = 1;
+				ev.shift = nFlags;
 				machine_view_.OnEvent(&ev);
 				return;
 #else
@@ -744,6 +747,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					ev.button = 3;
 				else
 					ev.button = 0;
+				ev.shift = nFlags;
 				machine_view_.OnEvent(&ev);
 				return;
 #else
@@ -1051,6 +1055,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.x = point.x;
 				ev.y = point.y;
 				ev.button = 0;
+				ev.shift = nFlags;
 				machine_view_.OnEvent(&ev);				
 #else
 					tmac = GetMachine(point);

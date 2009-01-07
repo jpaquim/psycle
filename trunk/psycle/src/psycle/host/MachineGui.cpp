@@ -106,11 +106,9 @@ namespace psycle {
 		bool MachineGui::OnEvent(TestCanvas::Event* ev)
 		{
 			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
-				if ( ev->button == 1 ) {
-					StartDragging(ev->x, ev->y);
-				} else
-				if ( ev->button == 3 ) {
 					new_con_ = false;
+				//else
+				if ( ev->button == 3 ) {
 					dragging_x_ = ev->x;
 					dragging_y_ = ev->y;
 				}
@@ -118,11 +116,15 @@ namespace psycle {
 			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
 				if (dragging_) {
 					DoDragging(ev->x, ev->y);
-				} else if (ev->button == 3) {
+				} else
+				if (ev->button == 3 || (ev->button == 1 && (ev->shift & MK_SHIFT))) {
 					if (!new_con_ && (dragging_x_ != ev->x || dragging_y_ != ev->y)) {
 						view_->OnNewConnection(this);
 						new_con_ = true;
 					}
+				} else
+				if ( ev->button == 1) {
+					StartDragging(ev->x, ev->y);
 				}
 			} else
 			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {

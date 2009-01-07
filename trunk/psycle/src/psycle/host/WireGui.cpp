@@ -15,6 +15,7 @@ namespace psycle {
 			start_(0),
 			wiresrc_(-1),
 			wiredest_(-1),
+			newcon_(false),
 			dragging_(0),
 			wire_dlg_(0),
 			// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
@@ -270,14 +271,16 @@ namespace psycle {
 		{
 			switch(ev->type) {
 				case TestCanvas::Event::BUTTON_PRESS:
-					if (ev->button == 3) {
-						ShowDialog(ev->x, ev->y);
-					} else
-					if (ev->shift & MK_SHIFT) {
+					if ((ev->button == 1 || ev->button == 3) && (ev->shift & MK_SHIFT)) {
 						view_->OnWireRewire(this, 0);
+						newcon_ = true;
 					} else
 					if (ev->shift & MK_CONTROL) {
 						view_->OnWireRewire(this, 1);
+						newcon_ = true;
+					} else 
+					if (ev->button == 3) {
+						newcon_ = false;
 					}
 				break;
 				case TestCanvas::Event::BUTTON_2PRESS:
@@ -286,6 +289,9 @@ namespace psycle {
 				case TestCanvas::Event::MOTION_NOTIFY:
 					if(dragging_) {
 						DoDragging(ev->x, ev->y);
+					} else if (ev->button == 3 && !newcon_) {
+						view_->OnWireRewire(this, 0);
+						newcon_ = true;
 					}
 				break;
 				case TestCanvas::Event::BUTTON_RELEASE:
@@ -293,7 +299,10 @@ namespace psycle {
  				       StopDragging();
 					   view_->OnRewireEnd(this, ev->x, ev->y, drag_picker_);
 					}
-				break;
+					else if (ev->button == 3 && !newcon_) {
+						ShowDialog(ev->x, ev->y);
+					}
+					break;
 				default:
 					;
 			}
