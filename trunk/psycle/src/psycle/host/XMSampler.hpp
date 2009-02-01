@@ -5,7 +5,6 @@
 #include "Filter.hpp"
 #include "XMInstrument.hpp"
 #include <cstdint>
-//#include "../../../include/xdsp/xdsp.h"
 
 namespace psycle
 {
@@ -177,17 +176,17 @@ XMSampler::Channel::PerformFX().
 			if(CurrentLoopDirection() == LoopDirection::FORWARD)
 			{
 				m_Position.QuadPart+=Speed();
-			const int curIntPos = m_Position.HighPart;
-			switch(m_CurrentLoopType)
-			{
-			case XMInstrument::WaveData::LoopType::NORMAL:
-
-				if(curIntPos >= m_CurrentLoopEnd)
+				const int curIntPos = m_Position.HighPart;
+				switch(m_CurrentLoopType)
 				{
-					Position(m_CurrentLoopStart+(curIntPos-m_CurrentLoopEnd));
-				}
-				break;
-			case XMInstrument::WaveData::LoopType::BIDI:
+				case XMInstrument::WaveData::LoopType::NORMAL:
+
+					if(curIntPos >= m_CurrentLoopEnd)
+					{
+						Position(m_CurrentLoopStart+(curIntPos-m_CurrentLoopEnd));
+					}
+					break;
+				case XMInstrument::WaveData::LoopType::BIDI:
 
 					if(curIntPos  >= m_CurrentLoopEnd)
 					{
@@ -204,7 +203,7 @@ XMSampler::Channel::PerformFX().
 				default:
 					break;
 				}
-				} else {
+			} else {
 				m_Position.QuadPart-=Speed();
 				const int curIntPos = m_Position.HighPart;
 				switch(m_CurrentLoopType)

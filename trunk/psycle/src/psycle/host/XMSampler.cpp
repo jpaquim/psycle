@@ -104,7 +104,7 @@ namespace psycle
 		// period =  pow(2.0,double(5-(note/12.0f))) * (2*7159090.5/8363);
 		// being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
 		// so (2*7159090.5/8363) ~ 1712 ( middle C period )
-		// Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
+		// The original middle C period was 856, but it was multiplied by two on PC's to add fine pitch slide.
 		// The original table takes the lower octave values and multiplies them by two. 
 		// This doesn't take care of the roundings of the values.
 
