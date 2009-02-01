@@ -2171,6 +2171,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::FileLoadsongNamed(std::string fName)
 		{
 			pParentMain->CloseAllMacGuis();
+#ifdef use_test_canvas
+			machine_view_.LockVu();
+#endif
 			Global::pPlayer->Stop();			
 			///\todo lock/unlock
 			Sleep(256);
@@ -2227,6 +2230,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			KillUndo();
 			KillRedo();
 			SetTitleBarText();
+#ifdef use_test_canvas
+			machine_view_.Rebuild();
+			machine_view_.UnlockVu();
+#endif
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
 				CSongpDlg dlg(Global::_pSong);
@@ -2241,9 +2248,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
 */
 			}
-#ifdef use_test_canvas
-			machine_view_.Rebuild();
-#endif
 		}
 
 		void CChildView::CallOpenRecent(int pos)
