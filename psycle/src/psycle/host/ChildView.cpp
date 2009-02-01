@@ -957,6 +957,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				KillUndo();
 				KillRedo();
 				pParentMain->CloseAllMacGuis();
+#ifdef use_test_canvas
+				machine_view_.LockVu();
+#endif
 				Global::pPlayer->Stop();
 				///\todo lock/unlock
 				Sleep(256);
@@ -993,6 +996,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Repaint();
 #ifdef use_test_canvas
 			machine_view_.Rebuild();
+			machine_view_.UnlockVu();
 #endif
 
 			}
@@ -1925,6 +1929,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				KillUndo();
 				KillRedo();
+#ifdef use_test_canvas
+				machine_view_.LockVu();
+#endif
 				pParentMain->CloseAllMacGuis();
 				Global::pPlayer->Stop();
 				///\todo lock/unlock
@@ -1949,6 +1956,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						editPosition=0;
 						xmfile.Load(*_pSong);
 						xmfile.Close();
+#ifdef use_test_canvas
+			machine_view_.Rebuild();
+#endif
 						CSongpDlg dlg(Global::_pSong);
 						dlg.SetReadOnly();
 						dlg.DoModal();
@@ -1976,6 +1986,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							return;
 						}
 						it.Close();
+#ifdef use_test_canvas
+			machine_view_.Rebuild();
+#endif
 						CSongpDlg dlg(Global::_pSong);
 						dlg.SetReadOnly();
 						dlg.DoModal();
@@ -2003,6 +2016,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							return;
 						}
 						s3m.Close();
+#ifdef use_test_canvas
+			machine_view_.Rebuild();
+#endif
 						CSongpDlg dlg(Global::_pSong);
 						dlg.SetReadOnly();
 						dlg.DoModal();
@@ -2024,6 +2040,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						editPosition=0;
 						modfile.Load(*_pSong);
 						modfile.Close();
+#ifdef use_test_canvas
+			machine_view_.Rebuild();
+#endif
 						CSongpDlg dlg(Global::_pSong);
 						dlg.SetReadOnly();
 						dlg.DoModal();
@@ -2069,6 +2088,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->UpdatePlayOrder(false);
 				RecalculateColourGrid();
 				Repaint();
+#ifdef use_test_canvas
+			machine_view_.UnlockVu();
+#endif
 			}
 			SetTitleBarText();
 		}
