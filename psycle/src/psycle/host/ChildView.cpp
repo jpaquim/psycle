@@ -954,8 +954,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (CheckUnsavedSong("New Song"))
 			{
+#ifdef use_patternview
+				pattern_view()->KillUndo();
+				pattern_view()->KillRedo();
+#else
 				KillUndo();
 				KillRedo();
+#endif
 				pParentMain->CloseAllMacGuis();
 #ifdef use_test_canvas
 				machine_view_.LockVu();
@@ -1723,7 +1728,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		//// Right Click Popup Menu
-		void CChildView::OnPopCut() { CopyBlock(true); }
+		void CChildView::OnPopCut() { 
+#ifdef use_patternview
+			pattern_view()->CopyBlock(true);
+#else
+			CopyBlock(true);
+#endif
+		}
 
 		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
 		{
@@ -1731,9 +1742,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else pCmdUI->Enable(FALSE);
 		}
 
-		void CChildView::OnPopCopy() { CopyBlock(false); }
+		void CChildView::OnPopCopy() {
+#ifdef use_patternview
+			pattern_view()->CopyBlock(false);
+#else
+			CopyBlock(false);
+#endif
+		}
 
-		void CChildView::OnPopPaste() { PasteBlock(editcur.track,editcur.line,false); }
+		void CChildView::OnPopPaste() {
+#ifdef use_patternview
+			pattern_view()->PasteBlock(editcur.track,editcur.line,false);
+#else
+			PasteBlock(editcur.track,editcur.line,false);
+#endif
+		}
 		void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 		{
 			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
@@ -1744,7 +1767,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnPopBlockswitch()
 		{
+#ifdef use_patternview
+			pattern_view()->SwitchBlock(editcur.track,editcur.line);
+#else
 			SwitchBlock(editcur.track,editcur.line);
+#endif
 		}
 
 		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
@@ -1753,9 +1780,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else  pCmdUI->Enable(false);
 		}
 
-		void CChildView::OnPopDelete() { DeleteBlock(); }
+		void CChildView::OnPopDelete() {
+#ifdef use_patternview
+			pattern_view()->DeleteBlock();
+#else
+			DeleteBlock();
+#endif
+		}
 
-		void CChildView::OnPopInterpolate() { BlockParamInterpolate(); }
+		void CChildView::OnPopInterpolate() {
+#ifdef use_patternview
+			pattern_view()->BlockParamInterpolate();
+#else
+			BlockParamInterpolate();
+#endif
+		}
 
 		void CChildView::OnPopInterpolateCurve()
 		{
@@ -1791,42 +1830,92 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 
-		void CChildView::OnPopChangegenerator() { BlockGenChange(_pSong->seqBus); }
+		void CChildView::OnPopChangegenerator() {
+#ifdef use_patternview
+			pattern_view()->BlockGenChange(_pSong->seqBus);
+#else
+			BlockGenChange(_pSong->seqBus);
+#endif
+		}
 
 		void CChildView::OnPopChangeinstrument() { BlockInsChange(_pSong->auxcolSelected); }
 
-		void CChildView::OnPopTranspose1() { BlockTranspose(1); }
+		void CChildView::OnPopTranspose1() {
+#ifdef use_patternview
+			pattern_view()->BlockTranspose(1);
+#else
+			BlockTranspose(1);
+#endif
+		}
 
-		void CChildView::OnPopTranspose12() { BlockTranspose(12); }
+		void CChildView::OnPopTranspose12() {
+#ifdef use_patternview
+			pattern_view()->BlockTranspose(12);
+#else
+			BlockTranspose(12);
+#endif
+		}
 
-		void CChildView::OnPopTranspose_1() { BlockTranspose(-1); }
+		void CChildView::OnPopTranspose_1() {
+#ifdef use_patternview
+			pattern_view()->BlockTranspose(-1);
+#else
+			BlockTranspose(-1);
+#endif
+		}
 
-		void CChildView::OnPopTranspose_12() { BlockTranspose(-12); }
+		void CChildView::OnPopTranspose_12() {
+#ifdef use_patternview
+			pattern_view()->BlockTranspose(-12);
+#else
+			BlockTranspose(-12);
+#endif
+		}
 
 		void CChildView::OnPopTransformpattern() 
 		{
+#ifdef use_patternview
+			pattern_view()->ShowTransformPatternDlg();			
+#else
 			ShowTransformPatternDlg();			
+#endif
 		}
 
 		void CChildView::OnPopPattenproperties() 
 		{
+#ifdef use_patternview
+			pattern_view()->ShowPatternDlg();
+#else
 			ShowPatternDlg();
+#endif
+
 		}
 
 		/// fill block
 		void CChildView::OnPopBlockSwingfill()
 		{
+#ifdef use_patternview
+			pattern_view()->ShowSwingFillDlg(FALSE);
+#else
 			ShowSwingFillDlg(FALSE);
+#endif
 		}
 
 		/// fill track
 		void CChildView::OnPopTrackSwingfill()
 		{
+#ifdef use_patternview
+			pattern_view()->ShowSwingFillDlg(TRUE);
+#else
 			ShowSwingFillDlg(TRUE);
+#endif
 		}
 
 		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
+#ifdef use_patternview
+			pattern_view()->OnUpdateUndo(pCmdUI);
+#else
 			if(pUndoList) 
 			{
 				switch (pUndoList->type)
@@ -1854,10 +1943,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pCmdUI->SetText("Undo");
 				pCmdUI->Enable(FALSE);
 			}
+#endif
 		}
 
 		void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
 		{
+#ifdef use_patternview
+			pattern_view()->OnUpdateRedo(pCmdUI);
+#else
 			if(pRedoList) 
 			{
 				switch (pRedoList->type)
@@ -1885,6 +1978,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pCmdUI->Enable(FALSE);
 				pCmdUI->SetText("Redo");
 			}
+#endif
 		}
 
 		void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) 
@@ -1927,8 +2021,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Display the Open dialog box. 
 			if (GetOpenFileName(&ofn)==TRUE)
 			{
+#ifdef use_patternview
+				pattern_view()->KillUndo();
+				pattern_view()->KillRedo();
+#else
 				KillUndo();
 				KillRedo();
+#endif
 #ifdef use_test_canvas
 				machine_view_.LockVu();
 #endif
@@ -2249,8 +2348,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
 			RecalculateColourGrid();
 			Repaint();
+#ifdef use_patternview
+			pattern_view()->KillUndo();
+			pattern_view()->KillRedo();
+#else
 			KillUndo();
 			KillRedo();
+
+#endif
 			SetTitleBarText();
 #ifdef use_test_canvas
 			machine_view_.Rebuild();

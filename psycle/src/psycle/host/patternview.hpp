@@ -187,11 +187,7 @@ namespace psycle {
 			void InsertCurr();
 			void ClearCurr();
 			void SelectNextTrack(); 
-			void KillRedo();
-			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-			void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			
 			void PlayCurrentRow();
 			void PlayCurrentNote();
 			void patCopy();
@@ -238,6 +234,26 @@ namespace psycle {
 			void patTrackMute();
 			void patTrackSolo();
 			void patTrackRecord();
+
+			void Stop();
+			void PlaySong();
+			void PlayFromCur();
+
+			void OnEditUndo();
+			void OnEditRedo();
+			void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter);
+			void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+			void AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter);
+			void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+			void KillRedo();
+			void KillUndo();
+			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+
+			void OnUpdateUndo(CCmdUI* pCmdUI);
+			void OnUpdateRedo(CCmdUI* pCmdUI);
 
 		private:
 			void DrawPatEditor(CDC *devc);
