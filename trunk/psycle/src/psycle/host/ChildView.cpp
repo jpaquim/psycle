@@ -1763,7 +1763,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else  pCmdUI->Enable(FALSE);
 		}
 
-		void CChildView::OnPopMixpaste() { PasteBlock(editcur.track,editcur.line,true); }
+		void CChildView::OnPopMixpaste() { 
+#ifdef use_patternview
+			pattern_view()->PasteBlock(editcur.track,editcur.line,true);
+#else
+			PasteBlock(editcur.track,editcur.line,true);
+#endif
+		}
 
 		void CChildView::OnPopBlockswitch()
 		{
