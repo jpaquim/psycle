@@ -255,6 +255,11 @@ namespace psycle {
 			void OnUpdateUndo(CCmdUI* pCmdUI);
 			void OnUpdateRedo(CCmdUI* pCmdUI);
 
+			void OnPopMixpaste();
+			void OnPopBlockswitch();
+			void OnPopPaste();
+			void OnPopInterpolateCurve();
+
 		private:
 			void DrawPatEditor(CDC *devc);
 			void DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
@@ -272,8 +277,9 @@ namespace psycle {
 			bool bFT2HomeBehaviour;
 			bool bShiftArrowsDoSelect;
 			bool bDoingSelection;
-
+public:
 			bool blockSelected;
+private:
 			bool blockStart;
 			bool blockswitch;
 			int blockSelectBarState; //This is used to remember the state of the select bar function
@@ -348,8 +354,9 @@ namespace psycle {
 			CSelection blockSel;
 			CCursor oldm;	// Indicates the previous track/line/col when selecting (used for mouse)
 			CPoint MBStart; 
-
+public:
 			bool isBlockCopied;
+private:
 			unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int	blockNTracks;
 			int	blockNLines;
@@ -357,8 +364,9 @@ namespace psycle {
 			
 			unsigned char patBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int patBufferLines;
+public:
 			bool patBufferCopy;
-
+private:
 			SPatternUndo * pUndoList;
 			SPatternUndo * pRedoList;
 
