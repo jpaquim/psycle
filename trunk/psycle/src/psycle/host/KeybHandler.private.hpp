@@ -2655,6 +2655,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnEditUndo() 
 		{
+#ifdef use_patternview
+			pattern_view()->OnEditUndo();
+#else
 			if (pUndoList)
 			{
 				switch (pUndoList->type)
@@ -2788,11 +2791,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				SetTitleBarText();
 			}
+#endif
 		}
 
 
 		void CChildView::OnEditRedo() 
 		{
+#ifdef use_patternview
+			pattern_view()->OnEditRedo();
+#else
 			if (pRedoList)
 			{
 				switch (pRedoList->type)
@@ -2926,6 +2933,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				SetTitleBarText();
 			}
+#endif
 		}
 
 		void CChildView::KillRedo()
