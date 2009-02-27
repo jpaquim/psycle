@@ -14,9 +14,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		private:
 			CChildView* _pChildView;
+			PatternView* pattern_view_;
 
 		public:
 			CTransformPatternDlg(CChildView* pChildView, CWnd* pParent = NULL);   // standard constructor
+			CTransformPatternDlg(PatternView* pattern_view, CWnd* pParent = NULL);
 			virtual ~CTransformPatternDlg();
 
 		// Dialog Data

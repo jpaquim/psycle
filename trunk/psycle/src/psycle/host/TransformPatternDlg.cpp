@@ -16,6 +16,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_applyto = 0;
 		}
 
+		CTransformPatternDlg::CTransformPatternDlg(PatternView* pattern_view, CWnd* pParent /*=NULL*/)
+			: CDialog(CTransformPatternDlg::IDD, pParent),
+			  pattern_view_(pattern_view),
+			  m_applyto(0)
+		{			
+		}
+
 		CTransformPatternDlg::~CTransformPatternDlg()
 		{
 		}
@@ -121,7 +128,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int currentColumn;
 				int currentLine;
 
-				Song* pSong = _pChildView->_pSong;
+				Song* pSong = 0;
+#ifdef use_patternview				
+				pSong = pattern_view_->song();
+#else
+				pSong = _pChildView->_pSong;				
+#endif
 
 				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
 				int columnCount = MAX_TRACKS;
