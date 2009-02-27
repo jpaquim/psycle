@@ -1738,9 +1738,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
 		{
+#ifdef use_patternview
+			if (pattern_view()->blockSelected && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
+			else pCmdUI->Enable(FALSE);
+
+#else			
 			if (blockSelected && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
 			else pCmdUI->Enable(FALSE);
+#endif
 		}
+
 
 		void CChildView::OnPopCopy() {
 #ifdef use_patternview
@@ -1752,20 +1759,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnPopPaste() {
 #ifdef use_patternview
-			pattern_view()->PasteBlock(editcur.track,editcur.line,false);
+			pattern_view()->OnPopPaste();
 #else
 			PasteBlock(editcur.track,editcur.line,false);
 #endif
 		}
 		void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 		{
+#ifdef use_patternview
+			if (pattern_view()->isBlockCopied  && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
+			else  pCmdUI->Enable(FALSE);
+#else
 			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
 			else  pCmdUI->Enable(FALSE);
+
+#endif
 		}
 
 		void CChildView::OnPopMixpaste() { 
 #ifdef use_patternview
-			pattern_view()->PasteBlock(editcur.track,editcur.line,true);
+			pattern_view()->OnPopMixpaste();
 #else
 			PasteBlock(editcur.track,editcur.line,true);
 #endif
@@ -1774,7 +1787,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnPopBlockswitch()
 		{
 #ifdef use_patternview
-			pattern_view()->SwitchBlock(editcur.track,editcur.line);
+			pattern_view()->OnPopBlockswitch();
 #else
 			SwitchBlock(editcur.track,editcur.line);
 #endif
@@ -1782,8 +1795,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
 		{
+#ifdef use_patternview
+			if (pattern_view()->isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
+			else  pCmdUI->Enable(false);
+#else
 			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
 			else  pCmdUI->Enable(false);
+
+#endif
 		}
 
 		void CChildView::OnPopDelete() {
@@ -1804,6 +1823,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnPopInterpolateCurve()
 		{
+#ifdef use_patternview
+			pattern_view()->OnPopInterpolateCurve();
+#else
 			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
 			
 			int *valuearray = new int[blockSel.end.line-blockSel.start.line+1];
@@ -1833,6 +1855,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				BlockParamInterpolate(dlg.kfresult,twktype);
 			}
 			delete valuearray;
+#endif
 		}
 
 
@@ -1844,7 +1867,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #endif
 		}
 
-		void CChildView::OnPopChangeinstrument() { BlockInsChange(_pSong->auxcolSelected); }
+		void CChildView::OnPopChangeinstrument() { 
+			BlockInsChange(_pSong->auxcolSelected);
+		}
 
 		void CChildView::OnPopTranspose1() {
 #ifdef use_patternview
@@ -1995,8 +2020,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 
 		{
+#ifdef use_patternview
+			if(pattern_view()->patBufferCopy&&(viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
+			else pCmdUI->Enable(FALSE);
+#else
 			if(patBufferCopy&&(viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
 			else pCmdUI->Enable(FALSE);
+#endif
 		}
 
 		void CChildView::OnFileImportModulefile() 

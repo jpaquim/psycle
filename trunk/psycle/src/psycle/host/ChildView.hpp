@@ -3,7 +3,7 @@
 #pragma once
 
 #define use_test_canvas
-// #define use_patternview
+#define use_patternview
 
 #include "Song.hpp"
 #include "Configuration.hpp"

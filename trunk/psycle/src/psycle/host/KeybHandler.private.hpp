@@ -1327,6 +1327,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::patCut()
 		{
+#ifdef use_patternview
+			if(viewMode == view_modes::pattern)
+			{
+				pattern_view()->patCut();
+			}
+#else
 			if(viewMode == view_modes::pattern)
 			{
 				// UNDO CODE PATT CUT
@@ -1350,10 +1356,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
+#endif
 		}
 
 		void CChildView::patCopy()
 		{
+#ifdef use_patternview
+			if(viewMode == view_modes::pattern)
+			{	
+				pattern_view()->patCopy();
+			}
+#else
 			if(viewMode == view_modes::pattern)
 			{
 				const int ps = _ps();
@@ -1366,10 +1379,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				
 				patBufferCopy=true;
 			}
+#endif
 		}
 
 		void CChildView::patPaste()
 		{
+#ifdef use_patternview
+			pattern_view()->patPaste();
+#else
 			// UNDO CODE PATT PASTE
 			if(patBufferCopy && viewMode == view_modes::pattern)
 			{
@@ -1386,10 +1403,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				Repaint(draw_modes::pattern);
 			}
+#endif
 		}
 
 		void CChildView::patMixPaste()
 		{
+#ifdef use_patternview
+			pattern_view()->patMixPaste();
+#else
 			// UNDO CODE PATT PASTE
 			if(patBufferCopy && viewMode == view_modes::pattern)
 			{
@@ -1417,10 +1438,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				
 				Repaint(draw_modes::pattern);
 			}
+#endif
 		}
 
 		void CChildView::patDelete()
 		{
+#ifdef use_patternview
+			if(viewMode == view_modes::pattern)
+			{
+				pattern_view()->patDelete();
+			}
+#else
 			if(viewMode == view_modes::pattern)
 			{
 				// UNDO CODE PATT CUT
@@ -1442,10 +1470,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
+#endif
 		}
 
 		void CChildView::patTranspose(int trp)
 		{
+#ifdef use_patternview
+			pattern_view()->patTranspose(trp);
+#else
 			// UNDO CODE PATT TRANSPOSE
 			const int ps = _ps();
 			unsigned char *soffset = _ppattern(ps);
@@ -1472,6 +1504,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				Repaint(draw_modes::data);
 			}
+#endif
 		}
 
 		void CChildView::StartBlock(int track,int line, int col)
