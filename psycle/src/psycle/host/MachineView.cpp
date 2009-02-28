@@ -278,7 +278,7 @@ namespace psycle {
 				} else {
 					if (mac->_macIndex >= MAX_BUSES && dlg.selectedMode != modegen)
 					{
-						child_view()->AddMacViewUndo();
+//						child_view()->AddMacViewUndo(); maybe todo
 						fb = mac->_macIndex;
 						xs = MachineCoords.sEffect.width;
 						ys = MachineCoords.sEffect.height;
@@ -295,7 +295,7 @@ namespace psycle {
 					}
 					else if (mac->_macIndex < MAX_BUSES && dlg.selectedMode == modegen)
 					{
-						child_view()->AddMacViewUndo();
+//						child_view()->AddMacViewUndo(); maybe todo
 						fb = mac->_macIndex;
 						xs = MachineCoords.sGenerator.width;
 						ys = MachineCoords.sGenerator.height;

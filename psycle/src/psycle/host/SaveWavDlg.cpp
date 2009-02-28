@@ -121,17 +121,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_patnumber2.EnableWindow(false);
 
 			char num[3];
-			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
+			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->editPosition]);
 			m_patnumber.SetWindowText(num);
 			sprintf(num,"%02x",0);
 			m_rangestart.SetWindowText(num);
 			sprintf(num,"%02x",pSong->playLength-1);
 			m_rangeend.SetWindowText(num);			
 
-			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
+			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->editPosition]);
 			m_patnumber2.SetWindowText(num);
 
-			if (pChildView->blockSelected)
+
+			if (pChildView->pattern_view()->blockSelected)
 			{
 				sprintf(num,"%02x",pBlockSel->start.line);
 				m_linestart.SetWindowText(num);

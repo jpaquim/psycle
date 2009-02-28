@@ -129,12 +129,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int currentLine;
 
 				Song* pSong = 0;
-#ifdef use_patternview				
 				pSong = pattern_view_->song();
-#else
-				pSong = _pChildView->_pSong;				
-#endif
-
 				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
 				int columnCount = MAX_TRACKS;
 				int lineCount;

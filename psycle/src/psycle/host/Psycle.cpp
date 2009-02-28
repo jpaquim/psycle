@@ -115,16 +115,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->m_wndView.machine_view()->InitSkin();
 			pFrame->m_wndView.machine_view()->Rebuild();
 
-#ifdef use_patternview
 			pFrame->m_wndView.pattern_view()->LoadPatternHeaderSkin();
 			pFrame->m_wndView.pattern_view()->RecalcMetrics();
-			pFrame->m_wndView.pattern_view()->RecalculateColourGrid();
-#endif
-
-			pFrame->m_wndView.LoadPatternHeaderSkin();			
-			pFrame->m_wndView.RecalcMetrics();
-			pFrame->m_wndView.RecalculateColourGrid();
-
+			pFrame->m_wndView.pattern_view()->RecalculateColourGrid();	
 
 			// The one and only window has been initialized, so show and update it.
 

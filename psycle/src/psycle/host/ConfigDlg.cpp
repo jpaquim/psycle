@@ -222,7 +222,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (_pConfig->pattern_header_skin != _skinDlg._pattern_header_skin)
 				{
 					_pConfig->pattern_header_skin = _skinDlg._pattern_header_skin;
-					if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
+					if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->LoadPatternHeaderSkin();
 				}
 
 				_pConfig->pattern_font_point = _skinDlg._pattern_font_point;
@@ -267,7 +267,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (_pConfig->Initialized() ) 
 				{
 					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial();
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->RecalcMetrics();
 				}
 
 				_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
@@ -285,8 +285,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				if (_pConfig->Initialized() ) 
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->RecalculateColourGrid();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->Repaint(PatternView::draw_modes::all);
 				}
 				_pConfig->Write();
 				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->InitSkin();

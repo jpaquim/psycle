@@ -266,7 +266,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						pParentMain->UpdateComboGen();
 						if (m_pParent->viewMode==view_modes::machine)
 						{
-							m_pParent->Repaint();
+							m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
 						}
 					}
 				}
@@ -282,7 +282,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						pParentMain->UpdateComboGen();
 						if (m_pParent->viewMode==view_modes::machine)
 						{
-							m_pParent->Repaint();
+							m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
 						}
 					}
 				}
@@ -326,7 +326,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pParentMain->UpdateComboGen();
 					if (m_pParent->viewMode==view_modes::machine)
 					{
-						m_pParent->Repaint();
+						m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
 					}
 				}
 				break;
@@ -428,7 +428,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				view_->Rebuild();				
 				if (m_pParent->viewMode==view_modes::machine)
 				{
-					m_pParent->Repaint();
+					m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
 				}
 				break;
 			case 1:
@@ -438,7 +438,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				view_->Rebuild();				
 				if (m_pParent->viewMode==view_modes::machine)
 				{
-					m_pParent->Repaint();
+					m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
 				}
 				break;
 			case 2:
@@ -498,7 +498,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
-					m_pParent->Repaint();
+					m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
 				}
 				break;
 			case 1:
@@ -522,7 +522,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
-					m_pParent->Repaint();
+					m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
 				}
 				break;
 			case 2:
