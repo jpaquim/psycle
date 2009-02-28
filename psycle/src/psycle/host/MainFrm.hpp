@@ -47,8 +47,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Implementation
 		public:			
 			bool macComboInitialized;
-			int seqcopybuffer[MAX_SONG_POSITIONS];
-			int seqcopybufferlength;
 
 			void ClosePsycle();
 			void CheckForAutosave();
