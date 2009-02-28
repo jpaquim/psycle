@@ -1135,7 +1135,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if ( Global::pConfig->_followSong && blk)
 				{
 					pattern_view()->editPosition=pattern_view()->prevEditPosition;
-					pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
+					pParentMain->m_wndSeq.UpdatePlayOrder(false); // <- This restores the selected block
 					Repaint(draw_modes::pattern);
 				}
 				else

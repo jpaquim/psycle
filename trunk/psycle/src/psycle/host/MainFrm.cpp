@@ -366,7 +366,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCLEN);
 			hi = (HBITMAP)bmore; cb->SetBitmap(hi);
 			
-			UpdatePlayOrder(true);
+			m_wndSeq.UpdatePlayOrder(true);
 			
 			DragAcceptFiles(true);
 

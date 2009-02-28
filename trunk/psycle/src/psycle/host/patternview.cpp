@@ -5385,7 +5385,7 @@ namespace psycle {
 			{
 				AddUndoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				++song()->playOrder[editPosition];
-				main()->UpdatePlayOrder(true);
+				main()->m_wndSeq.UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
 			}
 		}
@@ -5397,7 +5397,7 @@ namespace psycle {
 			{
 				AddUndoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				--song()->playOrder[editPosition];
-				main()->UpdatePlayOrder(true);
+				main()->m_wndSeq.UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
 			}
 		}
@@ -5435,7 +5435,7 @@ namespace psycle {
 				memset(song()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 				song()->playOrderSel[editPosition]=true;
 
-				main()->UpdatePlayOrder(true);
+				main()->m_wndSeq.UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
 				if (Global::pPlayer->_playing) {
 					Repaint(draw_modes::playback);
@@ -5492,7 +5492,7 @@ namespace psycle {
 				memset(song()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 				song()->playOrderSel[editPosition]=true;
 
-				main()->UpdatePlayOrder(true);
+				main()->m_wndSeq.UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
 				if (Global::pPlayer->_playing) {
 					Repaint(draw_modes::playback);
@@ -6990,7 +6990,7 @@ namespace psycle {
 						else
 						{
 							editPosition = pRedoList->seqpos;
-							main()->UpdatePlayOrder(true);
+							main()->m_wndSeq.UpdatePlayOrder(true);
 							Repaint(draw_modes::pattern);
 							
 						}
@@ -7014,7 +7014,7 @@ namespace psycle {
 						if (pRedoList->seqpos != editPosition)
 						{
 							editPosition = pRedoList->seqpos;
-							main()->UpdatePlayOrder(true);
+							main()->m_wndSeq.UpdatePlayOrder(true);
 						}
 						// display changes
 						Repaint(draw_modes::pattern);
@@ -7184,7 +7184,7 @@ namespace psycle {
 						else
 						{
 							editPosition = pUndoList->seqpos;
-							main()->UpdatePlayOrder(true);
+							main()->m_wndSeq.UpdatePlayOrder(true);
 							Repaint(draw_modes::pattern);
 							
 						}
@@ -7208,7 +7208,7 @@ namespace psycle {
 						if (pUndoList->seqpos != editPosition)
 						{
 							editPosition = pUndoList->seqpos;
-							main()->UpdatePlayOrder(true);
+							main()->m_wndSeq.UpdatePlayOrder(true);
 						}
 						// display changes
 						Repaint(draw_modes::pattern);
