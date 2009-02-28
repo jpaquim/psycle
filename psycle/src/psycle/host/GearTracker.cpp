@@ -100,12 +100,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CGearTracker::OnCancel()
 		{
-#ifdef use_test_canvas
 			if (gui_)
 			  gui_->BeforeDeleteDlg();
-#else
-			m_pParent->SamplerMachineDialog = NULL;
-#endif
 			DestroyWindow();
 			delete this;
 		}

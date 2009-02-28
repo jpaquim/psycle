@@ -152,8 +152,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	protected:
 		CFrameMixerMachine(); // protected constructor used by dynamic creation
 		// Attributes
-	public:
-		CFrameMixerMachine(int index, bool* pActive, CWnd* wndView_);
+	public:		
 		CFrameMixerMachine(class MachineGui* gui);
 	private:
 		Mixer* _pMixer;

@@ -1,6 +1,6 @@
 #include "Canvas.hpp"
 
-namespace TestCanvas {
+namespace PsycleCanvas {
 
 Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 

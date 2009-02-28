@@ -53,7 +53,7 @@ namespace psycle {
 			COLORREF cTransparency;
 		};
 
-		class MachineGui : public TestCanvas::Group {
+		class MachineGui : public PsycleCanvas::Group {
 		public:
 			MachineGui(class MachineView* view,
 			           class Machine* mac);
@@ -78,7 +78,7 @@ namespace psycle {
 			virtual void UpdateVU(CDC* devc);
 			virtual void UpdateText();								
 			virtual void BeforeDeleteDlg();
-			virtual bool OnEvent(TestCanvas::Event* ev);
+			virtual bool OnEvent(PsycleCanvas::Event* ev);
 			virtual void SetSelected(bool on);
 			virtual bool IsSelected();			
 
@@ -113,14 +113,14 @@ namespace psycle {
 			std::vector<WireGui*> wire_uis_;
 
 			// selection border
-			TestCanvas::Line sel_line_left_top_1;
-			TestCanvas::Line sel_line_left_top_2;
-			TestCanvas::Line sel_line_right_top_1;
-			TestCanvas::Line sel_line_right_top_2;
-			TestCanvas::Line sel_line_left_bottom_1;
-			TestCanvas::Line sel_line_left_bottom_2;
-			TestCanvas::Line sel_line_right_bottom_1;
-			TestCanvas::Line sel_line_right_bottom_2;
+			PsycleCanvas::Line sel_line_left_top_1;
+			PsycleCanvas::Line sel_line_left_top_2;
+			PsycleCanvas::Line sel_line_right_top_1;
+			PsycleCanvas::Line sel_line_right_top_2;
+			PsycleCanvas::Line sel_line_left_bottom_1;
+			PsycleCanvas::Line sel_line_left_bottom_2;
+			PsycleCanvas::Line sel_line_right_bottom_1;
+			PsycleCanvas::Line sel_line_right_bottom_2;
 		};		
 
 	}  // namespace host

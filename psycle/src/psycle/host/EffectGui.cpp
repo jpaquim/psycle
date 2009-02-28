@@ -250,9 +250,9 @@ namespace psycle {
 						   1.0);
 		}
 
-		bool EffectGui::OnEvent(TestCanvas::Event* ev)
+		bool EffectGui::OnEvent(PsycleCanvas::Event* ev)
 		{		
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_2PRESS) {
 				if (InMute(ev->x, ev->y)) {					
 					return true;
 				} else if (InBypass(ev->x, ev->y)) {
@@ -260,7 +260,7 @@ namespace psycle {
 				}
 				// else, fallback to machineGui:OnEvent.
 			} else
-			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_PRESS ) {
 				if ( ev->button == 1 && ev->shift & MK_CONTROL )
 					view()->SelectMachine(this);
 				//if ( !TestMute(ev->x, ev->y) )
@@ -276,13 +276,13 @@ namespace psycle {
 				else
 					TestPan(ev->x, ev->y);
 			} else
-			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
+			if ( ev->type == PsycleCanvas::Event::MOTION_NOTIFY ) {
 				if ( pan_dragging_ ) {
 					DoPanDragging(ev->x, ev->y);
 					return true;
 				}
 			} else
-			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_RELEASE ) {
 				pan_dragging_ = false;
 			}
 			return MachineGui::OnEvent(ev);

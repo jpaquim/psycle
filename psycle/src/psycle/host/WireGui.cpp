@@ -29,7 +29,7 @@ namespace psycle {
 			polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB))
 		{
 			rgn_.CreateRectRgn(0, 0, 0, 0);
-			TestCanvas::Line::Points m_points;
+			PsycleCanvas::Line::Points m_points;
 			m_points.push_back(std::pair<double,double>(0, 0));
 			m_points.push_back(std::pair<double,double>(100, 100));
 			SetPoints( m_points);
@@ -60,7 +60,7 @@ namespace psycle {
 		}
 
 		void WireGui::DoDragging(double x, double y) {
-			TestCanvas::Line::Points points(2);
+			PsycleCanvas::Line::Points points(2);
 			if ( drag_picker_ == 1 ) {
 				points[0] = PointAt(0);
 				points[1] = std::pair<double,double>(x, y);
@@ -91,10 +91,10 @@ namespace psycle {
 
 		void WireGui::Draw(CDC* devc,
 					  	   const CRgn& repaint_region,
-						   TestCanvas::Canvas* widget) {
+						   PsycleCanvas::Canvas* widget) {
 
 			if (dragging_) {
-				TestCanvas::Line::Draw(devc, repaint_region, widget);
+				PsycleCanvas::Line::Draw(devc, repaint_region, widget);
 			} else {
 				int oriX = points().at(0).first;
 				int oriY = points().at(0).second;
@@ -267,10 +267,10 @@ namespace psycle {
 			return rgn_;
 		}
 
-     	bool WireGui::OnEvent(TestCanvas::Event* ev)
+     	bool WireGui::OnEvent(PsycleCanvas::Event* ev)
 		{
 			switch(ev->type) {
-				case TestCanvas::Event::BUTTON_PRESS:
+				case PsycleCanvas::Event::BUTTON_PRESS:
 					if ((ev->button == 1 || ev->button == 3) && (ev->shift & MK_SHIFT)) {
 						view_->OnWireRewire(this, 0);
 						newcon_ = true;
@@ -283,10 +283,10 @@ namespace psycle {
 						newcon_ = false;
 					}
 				break;
-				case TestCanvas::Event::BUTTON_2PRESS:
+				case PsycleCanvas::Event::BUTTON_2PRESS:
 					ShowDialog(ev->x, ev->y);				
 				break;
-				case TestCanvas::Event::MOTION_NOTIFY:
+				case PsycleCanvas::Event::MOTION_NOTIFY:
 					if(dragging_) {
 						DoDragging(ev->x, ev->y);
 					} else if (ev->button == 3 && !newcon_) {
@@ -294,7 +294,7 @@ namespace psycle {
 						newcon_ = true;
 					}
 				break;
-				case TestCanvas::Event::BUTTON_RELEASE:
+				case PsycleCanvas::Event::BUTTON_RELEASE:
 					if(dragging_) {
  				       StopDragging();
 					   view_->OnRewireEnd(this, ev->x, ev->y, drag_picker_);
@@ -326,7 +326,7 @@ namespace psycle {
 
 		void WireGui::UpdatePosition()
 		{
-			TestCanvas::Group* parentGroup = parent();
+			PsycleCanvas::Group* parentGroup = parent();
 			double xp1, yp1, xp2, yp2;
 			xp1 = 0;
 			xp2 = 0; //parentGroup->GetBounds(xp1, yp1, xp2, yp2);
@@ -335,13 +335,13 @@ namespace psycle {
 				fromGUI_->GetBounds( x1, y1, x2, y2);			
 				double midW = (x2 - x1) / 2;
 				double midH = (y2 - y1) / 2;
-				/*TestCanvas::Group* fromParent = fromGUI_->parent();
+				/*PsycleCanvas::Group* fromParent = fromGUI_->parent();
 				double x3, y3, x4, y4;
 				fromParent->GetBounds(x3,y3,x4,y4);*/
 				double x = x1; //+x3 - xp1;
 				double y = y1; //+y3 - yp1;
 
-				TestCanvas::Line::Points points(2);
+				PsycleCanvas::Line::Points points(2);
 				points[0] = std::pair<double,double>(x + midW, y + midH);
 				points[1] = PointAt(1);
 				SetPoints(points);
@@ -351,12 +351,12 @@ namespace psycle {
 				toGUI_->GetBounds( x1, y1, x2, y2);
 				double midW = (x2 - x1) / 2;
 				double midH = (y2 - y1) / 2;
-				/*TestCanvas::Group* toParent = toGUI_->parent();
+				/*PsycleCanvas::Group* toParent = toGUI_->parent();
 				double x3, y3, x4, y4;
 				toParent->GetBounds(x3,y3,x4,y4);*/
 				double x = x1; //+x3 - xp1;
 				double y = y1; // +y3 - yp1;
-				TestCanvas::Line::Points points(2);
+				PsycleCanvas::Line::Points points(2);
 				points[0] = PointAt(0);
 				points[1] = std::pair<double,double>(x + midW, y + midH);
 				SetPoints(points);

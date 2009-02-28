@@ -38,7 +38,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void SetAppSongBpm(int x);
 			void SetAppSongTpb(int x);
 			void UpdatePlayOrder(bool mode);
-			void CenterWindowOnPoint(CWnd* pWnd, POINT point);
+			//void CenterWindowOnPoint(CWnd* pWnd, POINT point);
 		// Overrides
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
@@ -46,18 +46,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Implementation
 		public:
 			void UpdateSequencer(int bottom = -1);
-			bool isguiopen[MAX_MACHINES];
-			CFrameWnd	*m_pWndMac[MAX_MACHINES];
 			bool macComboInitialized;
 			int seqcopybuffer[MAX_SONG_POSITIONS];
 			int seqcopybufferlength;
 
 			void ClosePsycle();
 			void CheckForAutosave();
-			void WaveEditorBackUpdate();
-			void CloseMacGui(int mac,bool closewiredialogs=true);
-			void CloseAllMacGuis();
-			void ShowMachineGui(int tmac, CPoint point);
+			void WaveEditorBackUpdate();									
 			void UpdateEnvInfo();
 			void HidePerformanceDlg();
 			void ShowPerformanceDlg();

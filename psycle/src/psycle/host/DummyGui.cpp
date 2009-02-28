@@ -12,9 +12,9 @@ namespace psycle {
 
 		DummyGenGui::~DummyGenGui() {}
 
-		bool DummyGenGui::OnEvent(TestCanvas::Event* ev)
+		bool DummyGenGui::OnEvent(PsycleCanvas::Event* ev)
 		{
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS)
+			if ( ev->type == PsycleCanvas::Event::BUTTON_2PRESS)
 				return true;
 			return GeneratorGui::OnEvent(ev);					
 		}
@@ -27,9 +27,9 @@ namespace psycle {
 
 		DummyEffectGui::~DummyEffectGui() {}
 
-		bool DummyEffectGui::OnEvent(TestCanvas::Event* ev)
+		bool DummyEffectGui::OnEvent(PsycleCanvas::Event* ev)
 		{
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS)
+			if ( ev->type == PsycleCanvas::Event::BUTTON_2PRESS)
 				return true;
 			return EffectGui::OnEvent(ev);					
 		}

@@ -151,9 +151,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			m_wndView.pParentFrame = this;
 			macComboInitialized = false;
-			
-			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
-			
+				
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
 			// create a view to occupy the client area of the frame
@@ -436,7 +434,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (m_wndView.CheckUnsavedSong("Exit Psycle"))
 			{
-				CloseAllMacGuis();
 				m_wndView._outputActive = false;
 				Global::pPlayer->Stop();
 				Global::pConfig->_pOutputDriver->Enable(false);
@@ -1222,7 +1219,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if ( tmac->_type == MACH_XMSAMPLER)
 				{
 					CPoint point(-1,-1);
-					ShowMachineGui(nmac,point);
+					// ShowMachineGui(nmac,point); maybe a todo
 					return;
 				}
 			}
@@ -1332,13 +1329,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (pGearRackDialog == NULL)
 			{
-#ifdef use_test_canvas
 				pGearRackDialog = new CGearRackDlg(m_wndView.machine_view());				
-#else
-				pGearRackDialog = new CGearRackDlg(&m_wndView, this);
-#endif
 				pGearRackDialog->Create();
-
 				pGearRackDialog->ShowWindow(SW_SHOW);
 			}
 		}
@@ -1352,7 +1344,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if ( tmac->_type == MACH_XMSAMPLER)
 				{
 					CPoint point(-1,-1);
-					ShowMachineGui(nmac,point);
+//					ShowMachineGui(nmac,point); maybe a todo
 					return;
 				}
 			}
@@ -1432,279 +1424,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			helppath +=  "Docs\\psycle.chm";
 			::HtmlHelp(::GetDesktopWindow(),helppath, HH_DISPLAY_TOPIC, 0);
 		}
-		// Legacy Function. Now executed from the xxxxGui classes via an Event from MachineView.
-		void CMainFrame::ShowMachineGui(int tmac, CPoint point)
-		{
-			Machine *ma = _pSong->_pMachine[tmac];
 
-			if (ma)
-			{
-				if (isguiopen[tmac])
-				{
-					m_pWndMac[tmac]->SetActiveWindow();
-				}
-				else
-				{
-					m_wndView.AddMacViewUndo();
-
-					switch (ma->_type)
-					{
-					case MACH_MASTER:
-						if (!m_wndView.MasterMachineDialog)
-						{
-							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView);
-							m_wndView.MasterMachineDialog->_pMachine = (Master*)ma;
-							for (int i=0;i<MAX_CONNECTIONS; i++)
-							{
-								if ( ma->_inputCon[i])
-								{
-									if (_pSong->_pMachine[ma->_inputMachines[i]])
-									{
-										strcpy(m_wndView.MasterMachineDialog->macname[i],_pSong->_pMachine[ma->_inputMachines[i]]->_editName);
-									}
-								}
-							}
-							m_wndView.MasterMachineDialog->Create();
-							CenterWindowOnPoint(m_wndView.MasterMachineDialog, point);
-							m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
-						}
-						break;
-					case MACH_SAMPLER:
-						if (m_wndView.SamplerMachineDialog)
-						{
-							if (m_wndView.SamplerMachineDialog->_pMachine != (Sampler*)ma)
-							{
-								m_wndView.SamplerMachineDialog->OnCancel();
-								m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
-								m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
-								m_wndView.SamplerMachineDialog->Create();
-								CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
-								m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
-							}
-						}
-						else
-						{
-							m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
-							m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
-							m_wndView.SamplerMachineDialog->Create();
-							CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
-							m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
-						}
-						break;
-					case MACH_XMSAMPLER:
-						{
-						if (m_wndView.XMSamplerMachineDialog)
-						{
-							if (m_wndView.XMSamplerMachineDialog->GetMachine() != (XMSampler*)ma)
-							{
-								m_wndView.XMSamplerMachineDialog->DestroyWindow();
-							}
-							else return;
-						}
-						//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
-						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName(),&m_wndView);
-						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma);
-						m_wndView.XMSamplerMachineDialog->Create(&m_wndView);
-						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
-						}
-						break;
-					case MACH_RECORDER:
-						{
-							if (m_wndView.WaveInMachineDialog)
-							{
-								if (m_wndView.WaveInMachineDialog->pRecorder != (AudioRecorder*)ma)
-								{
-									m_wndView.WaveInMachineDialog->DestroyWindow();
-								}
-								else return;
-							}
-							//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
-							m_wndView.WaveInMachineDialog = new CWaveInMacDlg(&m_wndView);
-							m_wndView.WaveInMachineDialog->pRecorder = (AudioRecorder*)ma;
-							m_wndView.WaveInMachineDialog->Create();
-							CenterWindowOnPoint(m_wndView.WaveInMachineDialog, point);
-						}
-						break;
-					case MACH_PLUGIN:
-					case MACH_DUPLICATOR:
-						{
-							m_pWndMac[tmac] = new CFrameMachine(tmac, &isguiopen[tmac], &m_wndView);
-							m_pWndMac[tmac]->LoadFrame(
-								IDR_MACHINEFRAME, 
-								WS_POPUPWINDOW | WS_CAPTION,
-								this);
-							((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
-							((CFrameMachine*)m_pWndMac[tmac])->Generate(point.x, point.y);
-							isguiopen[tmac] = true;
-							CenterWindowOnPoint(m_pWndMac[tmac], point);
-						}
-						break;
-					case MACH_MIXER:
-						{
-							m_pWndMac[tmac] = new CFrameMixerMachine(tmac, &isguiopen[tmac], &m_wndView);
-							m_pWndMac[tmac]->LoadFrame(
-								IDR_MACHINEFRAME, 
-								WS_POPUPWINDOW | WS_CAPTION,
-								this);
-							((CFrameMixerMachine*)m_pWndMac[tmac])->SelectMachine(ma);
-							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate(point.x, point.y);
-							isguiopen[tmac] = true;
-							CenterWindowOnPoint(m_pWndMac[tmac], point);
-						}
-						break;
-					case MACH_VST:
-					case MACH_VSTFX:
-						{
-							CVstEffectWnd* newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
-							newwin->_pActive = &isguiopen[tmac];
-							newwin->LoadFrame(IDR_VSTFRAME, 
-//							WS_OVERLAPPEDWINDOW,
-								WS_POPUPWINDOW | WS_CAPTION,
-								this);
-							std::ostringstream winname;
-							winname << std::hex << std::setw(2)
-								<< _pSong->FindBusFromIndex(tmac)
-								<< " : " << ma->_editName;
-							newwin->SetTitleText(winname.str().c_str());
-							// C_Tuner.dll crashes if asking size before opening.
-//							newwin->ResizeWindow(0);
-							m_pWndMac[tmac] = newwin;
-							newwin->ShowWindow(SW_SHOWNORMAL);
-							newwin->PostOpenWnd();
-							CenterWindowOnPoint(m_pWndMac[tmac], point);
-						break;
-						}
-					}
-				}
-			}
-		}
-
-		void CMainFrame::CenterWindowOnPoint(CWnd* pWnd, POINT point)
-		{
-			RECT r,rw;
-			WINDOWPLACEMENT w1;
-			pWnd->GetWindowRect(&r);
-			m_wndView.GetWindowPlacement(&w1);
-
-			if ( point.x == -1 || point.y == -1)
-			{
-				point.x = r.right/2;
-				point.y = r.bottom/2;
-			}
-			/*
-			WINDOWPLACEMENT w2;
-			GetWindowPlacement(&w2);
-			if (w2.showCmd & SW_SHOWMAXIMIZED)
-			{
-			*/
-				rw.top = w1.rcNormalPosition.top;
-				rw.left = w1.rcNormalPosition.left;
-				rw.right = w1.rcNormalPosition.right;
-				rw.bottom = w1.rcNormalPosition.bottom+64;
-				/*
-			}
-			else
-			{
-				rw.top = w1.rcNormalPosition.top + w2.rcNormalPosition.top;
-				rw.left = w1.rcNormalPosition.left + w2.rcNormalPosition.left;
-				rw.bottom = w1.rcNormalPosition.bottom + w2.rcNormalPosition.top;
-				rw.right = w1.rcNormalPosition.right + w2.rcNormalPosition.left;
-			}
-			*/
-
-			int x = rw.left+point.x-((r.right-r.left)/2);
-			int y = rw.top+point.y-((r.bottom-r.top)/2);
-
-			if (x+(r.right-r.left) > (rw.right))
-			{
-				x = rw.right-(r.right-r.left);
-			}
-			// no else incase window is bigger than screen
-			if (x < rw.left)
-			{
-				x = rw.left;
-			}
-
-			if (y+(r.bottom-r.top) > (rw.bottom))
-			{
-				y = rw.bottom-(r.bottom-r.top);
-			}
-			// no else incase window is bigger than screen
-			if (y < rw.top)
-			{
-				y = rw.top;
-			}
-
-			pWnd->SetWindowPos(NULL,x,y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-		}
-
-		void CMainFrame::CloseAllMacGuis()
-		{
-			for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
-			{
-				if (m_wndView.WireDialog[i])
-				{
-					m_wndView.WireDialog[i]->OnCancel();
-				}
-			}
-			for (int c=0; c<MAX_MACHINES; c++)
-			{
-				if ( _pSong->_pMachine[c] ) CloseMacGui(c,false);
-			}
-		}
-
-		void CMainFrame::CloseMacGui(int mac,bool closewiredialogs)
-		{
-			if (closewiredialogs ) 
-			{
-				for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
-				{
-					if (m_wndView.WireDialog[i])
-					{
-						if ((m_wndView.WireDialog[i]->_pSrcMachine == _pSong->_pMachine[mac]) ||
-							(m_wndView.WireDialog[i]->_pDstMachine == _pSong->_pMachine[mac]))
-						{
-							m_wndView.WireDialog[i]->OnCancel();
-						}
-					}
-				}
-			}
-			if (_pSong->_pMachine[mac])
-			{
-				switch (_pSong->_pMachine[mac]->_type)
-				{
-					case MACH_MASTER:
-						if (m_wndView.MasterMachineDialog) m_wndView.MasterMachineDialog->OnCancel();
-						break;
-					case MACH_SAMPLER:
-						if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->OnCancel();
-						break;
-					case MACH_XMSAMPLER:
-						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->DestroyWindow();
-						break;
-					case MACH_DUPLICATOR:
-//					case MACH_LFO:
-//					case MACH_AUTOMATOR:
-					case MACH_MIXER:
-					case MACH_PLUGIN:
-					case MACH_VST:
-					case MACH_VSTFX:
-						if (isguiopen[mac])
-						{
-							m_pWndMac[mac]->DestroyWindow();
-							isguiopen[mac] = false;
-						}
-						break;
-					default:break;
-				}
-			}
-		}
-
-
-		////////////////////
 		//////////////////// Sequencer Dialog
-		////////////////////
-
 
 		void CMainFrame::UpdateSequencer(int selectedpos)
 		{

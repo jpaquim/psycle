@@ -26,9 +26,9 @@ namespace psycle {
 				delete dialog_;
 		}
 
-		bool MasterGui::OnEvent(TestCanvas::Event* ev)
+		bool MasterGui::OnEvent(PsycleCanvas::Event* ev)
 		{
-			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_RELEASE ) {
 				if (ev->button == 3) {
 					// do not allow for master to be deleted etc..
 					return true;

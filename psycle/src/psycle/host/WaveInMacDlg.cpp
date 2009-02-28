@@ -77,12 +77,8 @@ void CWaveInMacDlg::OnCbnSelendokCombo1()
 
 void CWaveInMacDlg::OnCancel()
 {
-#ifdef use_test_canvas
 	if (gui_)
 		gui_->BeforeDeleteDlg();
-#else
-	m_pParent->WaveInMachineDialog = NULL;
-#endif
 
 	DestroyWindow();
 	delete this;

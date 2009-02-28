@@ -49,13 +49,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//do not use! Use OnCreate Instead.
 		}
 
-		CFrameMachine::CFrameMachine(int index, bool* pActive, CWnd* wndView_ ) : 
-			MachineIndex(index),
-			_pActive(pActive),
-			wndView(wndView)
-		{
-		}
-
 		CFrameMachine::CFrameMachine(MachineGui* gen_gui)
 			:	gen_gui_(gen_gui) {
 			assert(gen_gui);
@@ -123,12 +116,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnDestroy() 
 		{
-#ifdef use_test_canvas
 			assert(gen_gui_);
 			gen_gui_->BeforeDeleteDlg();
-#else
-			if ( _pActive != NULL ) *_pActive = false;
-#endif
 			b_font.DeleteObject();
 			b_font_bold.DeleteObject();
 			KillTimer(2104+MachineIndex);

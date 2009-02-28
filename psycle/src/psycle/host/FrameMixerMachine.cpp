@@ -224,24 +224,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	CFrameMixerMachine::CFrameMixerMachine()
 	{
 		//do not use. use CFrameMixerMachine(int dum)
-	}
-	CFrameMixerMachine::CFrameMixerMachine(int index, bool* pActive, CWnd* wndView_)
-		///\todo: this line doesn't work. why?
-//		:CFrameMachine::CFrameMachine(index)
-		:_pMixer(0)
-		,bmpDC(0)
-		,numSends(0)
-		,numChans(0)
-		,updateBuffer(false)
-		,_swapstart(-1)
-		,_swapend(-1)
-		,isslider(false)
-		,refreshheaders(false)
-	{
-		MachineIndex = index;
-		_pActive = pActive;
-		wndView = (CChildView*)wndView_;
-	}
+	}	
 
 	CFrameMixerMachine::CFrameMixerMachine(MachineGui* gui)		
 		: CFrameMachine(gui)
