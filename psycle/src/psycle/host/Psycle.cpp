@@ -111,7 +111,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->SetIcon(tIcon, true);
 			pFrame->SetIcon(tIcon, false);
 		
-			pFrame->m_wndView.LoadMachineSkin();
 			pFrame->m_wndView.machine_view()->InitSkin();
 			pFrame->m_wndView.machine_view()->Rebuild();
 
@@ -124,9 +123,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->ShowWindow(SW_MAXIMIZE);
 			
 			// center master machine
-			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
-			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
-			pFrame->m_wndView.machine_view()->UpdatePosition(pFrame->m_wndView.machine_view()->song()->_pMachine[MASTER_INDEX]);		
+			pFrame->m_wndView.machine_view()->CenterMaster();
 			pFrame->UpdateWindow();
 			
 			CNewMachine::LoadPluginInfo(false);

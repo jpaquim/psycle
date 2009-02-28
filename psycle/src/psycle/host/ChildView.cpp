@@ -6,10 +6,7 @@
 #include "Psycle.hpp"
 #include "Configuration.hpp"
 #include "Player.hpp"
-//#include "Helpers.hpp"
 #include "MainFrm.hpp"
-//#include "Bitmap.hpp"
-#include "InputHandler.hpp"
 #include "MidiInput.hpp"
 #include "ConfigDlg.hpp"
 #include "GreetDialog.hpp"
@@ -21,8 +18,6 @@
 #include "NativeGui.hpp"
 #include "XMSamplerUI.hpp"
 //#include "VstEditorDlg.hpp"
-#include "WireDlg.hpp"
-#include "NewMachine.hpp"
 #include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include <cmath>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -35,8 +30,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,SamplerMachineDialog(NULL)
 			,XMSamplerMachineDialog(NULL)
 			,WaveInMachineDialog(NULL)
-			,blockSelectBarState(1)
-			,bScrollDetatch(false)			
 			,updateMode(0)
 			,updatePar(0)
 			,viewMode(view_modes::machine)
@@ -44,25 +37,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,CW(300)
 			,CH(200)
 			,textLeftEdge(2)
-			,hbmMachineSkin(0)
-			,hbmMachineDial(0)
 			,bmpDC(NULL)
 			,UndoMacCounter(0)
 			,UndoMacSaved(0)			
 			,machine_view_(this, main_frame, Global::_pSong)
 			,pattern_view_(this, main_frame, Global::_pSong)
 		{			
-			for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }	
-
+			for (int c=0; c<256; c++) { 
+				FLATSIZES[c]=8;
+			}	
 			Global::pInputHandler->SetChildView(this);
-
 			// Creates a new song object. The application Song.
 			Global::_pSong->New();
-
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
-
 			// machine_view_.Rebuild();
 			// its done in psycle.cpp, todo check config load order
 		}
@@ -80,9 +69,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-			machineskin.DeleteObject();
-			DeleteObject(hbmMachineSkin);
-			machineskinmask.DeleteObject();			
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -184,13 +170,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_1, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_12, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_BLOCK_SWINGFILL, OnUpdateCutCopy)
-			ON_COMMAND(ID_EDIT_CUT, patCut)
-			ON_COMMAND(ID_EDIT_COPY, patCopy)
-			ON_COMMAND(ID_EDIT_PASTE, patPaste)
-			ON_COMMAND(ID_EDIT_MIXPASTE, patMixPaste)
+			ON_COMMAND(ID_EDIT_CUT, OnPatCut)
+			ON_COMMAND(ID_EDIT_COPY, OnPatCopy)
+			ON_COMMAND(ID_EDIT_PASTE, OnPatPaste)
+			ON_COMMAND(ID_EDIT_MIXPASTE, OnPatMixPaste)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternPaste)
-			ON_COMMAND(ID_EDIT_DELETE, patDelete)
+			ON_COMMAND(ID_EDIT_DELETE, OnPatDelete)
 			ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopy)
 			ON_COMMAND(ID_SHOWPSEQ, OnShowPatternSeq)
 			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
@@ -504,12 +490,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnSize(UINT nType, int cx, int cy) 
 		{
 			CWnd ::OnSize(nType, cx, cy);
-
 			machine_view_.OnSize(cx, cy);
-
 			CW = cx;
 			CH = cy;
-
 			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
 			_pSong->viewSize.y=cy;
 			
@@ -967,10 +950,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateMachineview(CCmdUI* pCmdUI) 
 		{
-			if (viewMode==view_modes::machine)
-				pCmdUI->SetCheck(1);
-			else
-				pCmdUI->SetCheck(0);
+			pCmdUI->SetCheck(viewMode==view_modes::machine);
 		}
 
 		void CChildView::OnPatternView() 
@@ -1003,11 +983,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI) 
-		{
-			if(viewMode == view_modes::pattern)
-				pCmdUI->SetCheck(1);
-			else
-				pCmdUI->SetCheck(0);
+		{			
+			pCmdUI->SetCheck(viewMode == view_modes::pattern);		
 		}
 
 		void CChildView::OnShowPatternSeq() 
@@ -1041,7 +1018,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (Global::pConfig->_followSong)
 			{
-				bScrollDetatch=false;
+				pattern_view()->bScrollDetatch=false;
 			}
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			Global::pPlayer->Start(pattern_view()->editPosition,0);
@@ -1052,7 +1029,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (Global::pConfig->_followSong)
 			{
-				bScrollDetatch=false;
+				pattern_view()->bScrollDetatch=false;
 			}
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			Global::pPlayer->Start(0,0);
@@ -1100,7 +1077,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (Global::pConfig->_followSong)
 			{
-				bScrollDetatch=false;
+				pattern_view()->bScrollDetatch=false;
 			}
 
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
@@ -1214,7 +1191,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			pParentMain->ShowInstrumentEditor();
 		}
-
 
 		/// Show the CPU Performance dialog
 		void CChildView::OnHelpPsycleenviromentinfo() 
@@ -1810,827 +1786,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
-		void CChildView::LoadMachineSkin()
-		{
-			std::string szOld;
-			LoadMachineDial();
-			if (!Global::pConfig->machine_skin.empty())
-			{
-				szOld = Global::pConfig->machine_skin;
-				if (szOld != PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
-				{
-					BOOL result = FALSE;
-					FindMachineSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
-					if(result)
-					{
-						return;
-					}
-				}
-				// load defaults
-				szOld = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
-				// and coords
-			#if defined PSYCLE__CONFIGURATION__SKIN__UGLY_DEFAULT
-				MachineCoords.sMaster.x = 0;
-				MachineCoords.sMaster.y = 0;
-				MachineCoords.sMaster.width = 148;
-				MachineCoords.sMaster.height = 48;
-
-				MachineCoords.sGenerator.x = 0;
-				MachineCoords.sGenerator.y = 48;
-				MachineCoords.sGenerator.width = 148;
-				MachineCoords.sGenerator.height = 48;
-				MachineCoords.sGeneratorVu0.x = 0;
-				MachineCoords.sGeneratorVu0.y = 144;
-				MachineCoords.sGeneratorVu0.width = 6;
-				MachineCoords.sGeneratorVu0.height = 5;
-				MachineCoords.sGeneratorVuPeak.x = 96;
-				MachineCoords.sGeneratorVuPeak.y = 144;
-				MachineCoords.sGeneratorVuPeak.width = 6;
-				MachineCoords.sGeneratorVuPeak.height = 5;
-				MachineCoords.sGeneratorPan.x = 21;
-				MachineCoords.sGeneratorPan.y = 149;
-				MachineCoords.sGeneratorPan.width = 24;
-				MachineCoords.sGeneratorPan.height = 9;
-				MachineCoords.sGeneratorMute.x = 7;
-				MachineCoords.sGeneratorMute.y = 149;
-				MachineCoords.sGeneratorMute.width = 7;
-				MachineCoords.sGeneratorMute.height = 7;
-				MachineCoords.sGeneratorSolo.x = 14;
-				MachineCoords.sGeneratorSolo.y = 149;
-				MachineCoords.sGeneratorSolo.width = 7;
-				MachineCoords.sGeneratorSolo.height = 7;
-
-				MachineCoords.sEffect.x = 0;
-				MachineCoords.sEffect.y = 96;
-				MachineCoords.sEffect.width = 148;
-				MachineCoords.sEffect.height = 48;
-				MachineCoords.sEffectVu0.x = 0;
-				MachineCoords.sEffectVu0.y = 144;
-				MachineCoords.sEffectVu0.width = 6;
-				MachineCoords.sEffectVu0.height = 5;
-				MachineCoords.sEffectVuPeak.x = 96;
-				MachineCoords.sEffectVuPeak.y = 144;
-				MachineCoords.sEffectVuPeak.width = 6;
-				MachineCoords.sEffectVuPeak.height = 5;
-				MachineCoords.sEffectPan.x = 21;
-				MachineCoords.sEffectPan.y = 149;
-				MachineCoords.sEffectPan.width = 24;
-				MachineCoords.sEffectPan.height = 9;
-				MachineCoords.sEffectMute.x = 7;
-				MachineCoords.sEffectMute.y = 149;
-				MachineCoords.sEffectMute.width = 7;
-				MachineCoords.sEffectMute.height = 7;
-				MachineCoords.sEffectBypass.x = 0;
-				MachineCoords.sEffectBypass.y = 149;
-				MachineCoords.sEffectBypass.width = 7;
-				MachineCoords.sEffectBypass.height = 12;
-
-				MachineCoords.dGeneratorVu.x = 8;
-				MachineCoords.dGeneratorVu.y = 3;
-				MachineCoords.dGeneratorVu.width = 96;
-				MachineCoords.dGeneratorVu.height = 0;
-				MachineCoords.dGeneratorPan.x = 3;
-				MachineCoords.dGeneratorPan.y = 35;
-				MachineCoords.dGeneratorPan.width = 117;
-				MachineCoords.dGeneratorPan.height = 0;
-				MachineCoords.dGeneratorMute.x = 137;
-				MachineCoords.dGeneratorMute.y = 4;
-				MachineCoords.dGeneratorSolo.x = 137;
-				MachineCoords.dGeneratorSolo.y = 17;
-				MachineCoords.dGeneratorName.x = 10;
-				MachineCoords.dGeneratorName.y = 12;
-
-				MachineCoords.dEffectVu.x = 8;
-				MachineCoords.dEffectVu.y = 3;
-				MachineCoords.dEffectVu.width = 96;
-				MachineCoords.dEffectVu.height = 0;
-				MachineCoords.dEffectPan.x = 3;
-				MachineCoords.dEffectPan.y = 35;
-				MachineCoords.dEffectPan.width = 117;
-				MachineCoords.dEffectPan.height = 0;
-				MachineCoords.dEffectMute.x = 137;
-				MachineCoords.dEffectMute.y = 4;
-				MachineCoords.dEffectBypass.x = 137;
-				MachineCoords.dEffectBypass.y = 15;
-				MachineCoords.dEffectName.x = 10;
-				MachineCoords.dEffectName.y = 12;
-				MachineCoords.bHasTransparency = false;
-			#else
-				MachineCoords.sMaster.x = 0;
-				MachineCoords.sMaster.y = 0;
-				MachineCoords.sMaster.width = 148;
-				MachineCoords.sMaster.height = 47;//48;
-
-				MachineCoords.sGenerator.x = 0;
-				MachineCoords.sGenerator.y = 47;//48;
-				MachineCoords.sGenerator.width = 148;
-				MachineCoords.sGenerator.height = 47;//48;
-				MachineCoords.sGeneratorVu0.x = 0;
-				MachineCoords.sGeneratorVu0.y = 141;//144;
-				MachineCoords.sGeneratorVu0.width = 7;//6;
-				MachineCoords.sGeneratorVu0.height = 4;//5;
-				MachineCoords.sGeneratorVuPeak.x = 128;//96;
-				MachineCoords.sGeneratorVuPeak.y = 141;//144;
-				MachineCoords.sGeneratorVuPeak.width = 2;//6;
-				MachineCoords.sGeneratorVuPeak.height = 4;//5;
-				MachineCoords.sGeneratorPan.x = 45;//102;
-				MachineCoords.sGeneratorPan.y = 145;//144;
-				MachineCoords.sGeneratorPan.width = 16;//24;
-				MachineCoords.sGeneratorPan.height = 5;//9;
-				MachineCoords.sGeneratorMute.x = 0;//133;
-				MachineCoords.sGeneratorMute.y = 145;//144;
-				MachineCoords.sGeneratorMute.width = 15;//7;
-				MachineCoords.sGeneratorMute.height = 14;//7;
-				MachineCoords.sGeneratorSolo.x = 15;//140;
-				MachineCoords.sGeneratorSolo.y = 145;//144;
-				MachineCoords.sGeneratorSolo.width = 15;//7;
-				MachineCoords.sGeneratorSolo.height = 14;//7;
-
-				MachineCoords.sEffect.x = 0;
-				MachineCoords.sEffect.y = 94;//96;
-				MachineCoords.sEffect.width = 148;
-				MachineCoords.sEffect.height = 47;//48;
-				MachineCoords.sEffectVu0.x = 0;
-				MachineCoords.sEffectVu0.y = 141;//144;
-				MachineCoords.sEffectVu0.width = 7;//6;
-				MachineCoords.sEffectVu0.height = 4;//5;
-				MachineCoords.sEffectVuPeak.x = 128;//96;
-				MachineCoords.sEffectVuPeak.y = 141;//144;
-				MachineCoords.sEffectVuPeak.width = 2;//6;
-				MachineCoords.sEffectVuPeak.height = 4;//5;
-				MachineCoords.sEffectPan.x = 45;//102;
-				MachineCoords.sEffectPan.y = 145;//144;
-				MachineCoords.sEffectPan.width = 16;//24;
-				MachineCoords.sEffectPan.height = 5;//9;
-				MachineCoords.sEffectMute.x = 0;//133;
-				MachineCoords.sEffectMute.y = 145;//144;
-				MachineCoords.sEffectMute.width = 15;//7;
-				MachineCoords.sEffectMute.height = 14;//7;
-				MachineCoords.sEffectBypass.x = 30;//126;
-				MachineCoords.sEffectBypass.y = 145;//144;
-				MachineCoords.sEffectBypass.width = 15;//7;
-				MachineCoords.sEffectBypass.height = 14;//13;
-
-				MachineCoords.dGeneratorVu.x = 10;//8;
-				MachineCoords.dGeneratorVu.y = 35;//3;
-				MachineCoords.dGeneratorVu.width = 130;//96;
-				MachineCoords.dGeneratorVu.height = 0;
-				MachineCoords.dGeneratorPan.x = 39;//3;
-				MachineCoords.dGeneratorPan.y = 26;//35;
-				MachineCoords.dGeneratorPan.width = 91;//117;
-				MachineCoords.dGeneratorPan.height = 0;
-				MachineCoords.dGeneratorMute.x = 11;//137;
-				MachineCoords.dGeneratorMute.y = 5;//4;
-				MachineCoords.dGeneratorSolo.x = 26;//137;
-				MachineCoords.dGeneratorSolo.y = 5;//17;
-				MachineCoords.dGeneratorName.x = 49;//10;
-				MachineCoords.dGeneratorName.y = 7;//12;
-
-				MachineCoords.dEffectVu.x = 10;//8;
-				MachineCoords.dEffectVu.y = 35;//3;
-				MachineCoords.dEffectVu.width = 130;//96;
-				MachineCoords.dEffectVu.height = 0;
-				MachineCoords.dEffectPan.x = 39;//3;
-				MachineCoords.dEffectPan.y = 26;//35;
-				MachineCoords.dEffectPan.width = 91;//117;
-				MachineCoords.dEffectPan.height = 0;
-				MachineCoords.dEffectMute.x = 11;//137;
-				MachineCoords.dEffectMute.y = 5;//4;
-				MachineCoords.dEffectBypass.x = 26;//137;
-				MachineCoords.dEffectBypass.y = 5;//15;
-				MachineCoords.dEffectName.x = 49;//10;
-				MachineCoords.dEffectName.y = 7;//12;
-				MachineCoords.bHasTransparency = false;
-			#endif
-				machineskin.DeleteObject();
-				DeleteObject(hbmMachineSkin);
-				machineskinmask.DeleteObject();
-				machineskin.LoadBitmap(IDB_MACHINE_SKIN);
-			}
-		}
-
-		void CChildView::FindMachineSkin(CString findDir, CString findName, BOOL *result)
-		{
-			CFileFind finder;
-			int loop = finder.FindFile(findDir + "\\*"); // check for subfolders.
-			while (loop) 
-			{								
-				loop = finder.FindNextFile();
-				if (finder.IsDirectory() && !finder.IsDots())
-				{
-					FindMachineSkin(finder.GetFilePath(),findName,result);
-					if ( *result == TRUE) return;
-				}
-			}
-			finder.Close();
-			loop = finder.FindFile(findDir + "\\" + findName + ".psm"); // check if the directory is empty
-			while (loop)
-			{
-				loop = finder.FindNextFile();
-				if (!finder.IsDirectory())
-				{
-					CString sName, tmpPath;
-					sName = finder.GetFileName();
-					// ok so we have a .psm, does it have a valid matching .bmp?
-					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
-					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
-					pExt[0]=0;
-					char szOpenName[MAX_PATH];
-					sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
-
-					machineskin.DeleteObject();
-					if( hbmMachineSkin) DeleteObject(hbmMachineSkin);
-					machineskinmask.DeleteObject();
-					hbmMachineSkin = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-					if (hbmMachineSkin)
-					{
-						if (machineskin.Attach(hbmMachineSkin))
-						{	
-							memset(&MachineCoords,0,sizeof(MachineCoords));
-							// load settings
-							FILE* hfile;
-							sprintf(szOpenName,"%s\\%s.psm",findDir,sName);
-							if(!(hfile=fopen(szOpenName,"rb")))
-							{
-								MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
-								return;
-							}
-							char buf[512];
-							while (fgets(buf, 512, hfile))
-							{
-								if (strstr(buf,"\"master_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sMaster.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sMaster.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sMaster.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sMaster.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGenerator.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGenerator.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGenerator.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGenerator.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_vu0_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorVu0.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorVu0.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorVu0.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorVu0.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_vu_peak_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorVuPeak.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorVuPeak.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorVuPeak.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorVuPeak.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_pan_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorPan.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorPan.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorPan.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorPan.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_mute_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorMute.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorMute.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorMute.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorMute.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_solo_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorSolo.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorSolo.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorSolo.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorSolo.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffect.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffect.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffect.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffect.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_vu0_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectVu0.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectVu0.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectVu0.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectVu0.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_vu_peak_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectVuPeak.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectVuPeak.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectVuPeak.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectVuPeak.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_pan_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectPan.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectPan.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectPan.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectPan.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_mute_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectMute.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectMute.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectMute.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectMute.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_bypass_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectBypass.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectBypass.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectBypass.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectBypass.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_vu_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorVu.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorVu.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.dGeneratorVu.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.dGeneratorVu.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_pan_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorPan.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorPan.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.dGeneratorPan.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.dGeneratorPan.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_mute_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorMute.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorMute.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_solo_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorSolo.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorSolo.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_name_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorName.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorName.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_vu_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectVu.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectVu.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.dEffectVu.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.dEffectVu.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_pan_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectPan.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectPan.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.dEffectPan.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.dEffectPan.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_mute_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectMute.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectMute.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_bypass_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectBypass.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectBypass.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_name_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectName.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectName.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"transparency\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										helpers::hexstring_to_integer(q+1, MachineCoords.cTransparency);
-										MachineCoords.bHasTransparency = true;
-									}
-								}
-							}
-							if (MachineCoords.bHasTransparency)
-							{
-								PrepareMask(&machineskin,&machineskinmask,MachineCoords.cTransparency);
-							}
-							fclose(hfile);
-							*result = TRUE;
-							break;
-						}
-					}
-				}
-			}
-			finder.Close();
-		}
-
-		void CChildView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
-		{
-			BITMAP bm;
-			// Get the dimensions of the source bitmap
-			pBmpSource->GetObject(sizeof(BITMAP), &bm);
-			// Create the mask bitmap
-			pBmpMask->DeleteObject();
-			pBmpMask->CreateBitmap( bm.bmWidth, bm.bmHeight, 1, 1, NULL);
-			// We will need two DCs to work with. One to hold the Image
-			// (the source), and one to hold the mask (destination).
-			// When blitting onto a monochrome bitmap from a color, pixels
-			// in the source color bitmap that are equal to the background
-			// color are blitted as white. All the remaining pixels are
-			// blitted as black.
-			CDC hdcSrc, hdcDst;
-			hdcSrc.CreateCompatibleDC(NULL);
-			hdcDst.CreateCompatibleDC(NULL);
-			// Load the bitmaps into memory DC
-			CBitmap* hbmSrcT = (CBitmap*) hdcSrc.SelectObject(pBmpSource);
-			CBitmap* hbmDstT = (CBitmap*) hdcDst.SelectObject(pBmpMask);
-			// Change the background to trans color
-			hdcSrc.SetBkColor(clrTrans);
-			// This call sets up the mask bitmap.
-			hdcDst.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcSrc,0,0,SRCCOPY);
-			// Now, we need to paint onto the original image, making
-			// sure that the "transparent" area is set to black. What
-			// we do is AND the monochrome image onto the color Image
-			// first. When blitting from mono to color, the monochrome
-			// pixel is first transformed as follows:
-			// if  1 (black) it is mapped to the color set by SetTextColor().
-			// if  0 (white) is is mapped to the color set by SetBkColor().
-			// Only then is the raster operation performed.
-			hdcSrc.SetTextColor(RGB(255,255,255));
-			hdcSrc.SetBkColor(RGB(0,0,0));
-			hdcSrc.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcDst,0,0,SRCAND);
-			// Clean up by deselecting any objects, and delete the
-			// DC's.
-			hdcSrc.SelectObject(hbmSrcT);
-			hdcDst.SelectObject(hbmDstT);
-			hdcSrc.DeleteDC();
-			hdcDst.DeleteDC();
-		}
-
-		void CChildView::TransparentBlt
-			(
-				CDC* pDC,
-				int xStart,  int yStart,
-				int wWidth,  int wHeight,
-				CDC* pTmpDC,
-				CBitmap* bmpMask,
-				int xSource, // = 0
-				int ySource // = 0
-			)
-		{
-			// We are going to paint the two DDB's in sequence to the destination.
-			// 1st the monochrome bitmap will be blitted using an AND operation to
-			// cut a hole in the destination. The color image will then be ORed
-			// with the destination, filling it into the hole, but leaving the
-			// surrounding area untouched.
-			CDC hdcMem;
-			hdcMem.CreateCompatibleDC(pDC);
-			CBitmap* hbmT = hdcMem.SelectObject(bmpMask);
-			pDC->SetTextColor(RGB(0,0,0));
-			pDC->SetBkColor(RGB(255,255,255));
-			if (!pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource, 
-				SRCAND))
-			{
-				TRACE("Transparent Blit failure SRCAND");
-			}
-			// Also note the use of SRCPAINT rather than SRCCOPY.
-			if (!pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
-				SRCPAINT))
-			{
-				TRACE("Transparent Blit failure SRCPAINT");
-			}
-			// Now, clean up.
-			hdcMem.SelectObject(hbmT);
-			hdcMem.DeleteDC();
-		}
-
 		void CChildView::patTrackMute()
 		{
 			if (viewMode == view_modes::pattern)
@@ -2701,12 +1856,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				machine_view_.UpdateVUs(devc);
 		}
 
-
-		void CChildView::LoadMachineDial()
-		{
-			CNativeGui::uiSetting().LoadMachineDial();
-		}		
-
 		void CChildView::AddMacViewUndo()
 		{
 			// i have not written the undo code yet for machine and instruments
@@ -2715,6 +1864,54 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetTitleBarText();
 		}
 
+		//////////////////////////////////////////////////////////////////////
+		// Pattern Modifier functions ( Copy&paste , Transpose, ... )
+
+		void CChildView::OnPatCut()
+		{
+			if (viewMode == view_modes::pattern) {
+				pattern_view()->patCut();
+			}
+		}
+
+		void CChildView::OnPatCopy()
+		{
+			if (viewMode == view_modes::pattern) {	
+				pattern_view()->patCopy();
+			}
+		}
+
+		void CChildView::OnPatPaste()
+		{
+			pattern_view()->patPaste();
+		}
+
+		void CChildView::OnPatMixPaste()
+		{
+			pattern_view()->patMixPaste();
+		}
+
+		void CChildView::OnPatDelete()
+		{
+			if (viewMode == view_modes::pattern) {
+				pattern_view()->patDelete();
+			}
+		}
+
+		void CChildView::patTranspose(int trp)
+		{
+			pattern_view()->patTranspose(trp);
+		}
+
+		void CChildView::OnEditUndo() 
+		{
+			pattern_view()->OnEditUndo();
+		}
+
+		void CChildView::OnEditRedo() 
+		{
+			pattern_view()->OnEditRedo();
+		}
 
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END

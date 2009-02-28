@@ -244,7 +244,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					_pConfig->machine_skin = _skinDlg._machine_skin;
 					if (_pConfig->Initialized() ) 
 					{
-						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
+//						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin(); maybe a todo
 					}
 				}
 
@@ -266,7 +266,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				if (_pConfig->Initialized() ) 
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial();
+//					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial(); maybe a todo
 					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->RecalcMetrics();
 				}
 

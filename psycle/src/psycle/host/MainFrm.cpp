@@ -1489,7 +1489,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if  ( Global::pPlayer->_playing )
 				{
 					m_wndView.pattern_view()->ChordModeOffs = 0;
-					m_wndView.bScrollDetatch=false;
+					m_wndView.pattern_view()->bScrollDetatch=false;
 					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
@@ -1749,25 +1749,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetForegroundWindow();
 		}
 
-
 		// void CMainFrame::LoadFonts() - removed, use Configuration::CreateFonts
 
 		void CMainFrame::OnViewSongbar() 
 		{
-			if (m_wndControl.IsWindowVisible())
-			{
+			if (m_wndControl.IsWindowVisible()) {
 				ShowControlBar(&m_wndControl,FALSE,FALSE);
+			} else {
+				ShowControlBar(&m_wndControl,TRUE,FALSE);
 			}
-			else {	ShowControlBar(&m_wndControl,TRUE,FALSE);	}
 		}
 
 		void CMainFrame::OnViewMachinebar() 
 		{
-			if (m_wndControl2.IsWindowVisible())
-			{
+			if (m_wndControl2.IsWindowVisible()) {
 				ShowControlBar(&m_wndControl2,FALSE,FALSE);
+			}  else { 
+				ShowControlBar(&m_wndControl2,TRUE,FALSE);
 			}
-			else {	ShowControlBar(&m_wndControl2,TRUE,FALSE);	}
 		}
 
 		void CMainFrame::OnViewSequencerbar() 
@@ -1781,22 +1780,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnUpdateViewSongbar(CCmdUI* pCmdUI) 
 		{
-			if ( m_wndControl.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
-			
+			pCmdUI->SetCheck(m_wndControl.IsWindowVisible());			
 		}
 
 		void CMainFrame::OnUpdateViewMachinebar(CCmdUI* pCmdUI) 
 		{
-			if ( m_wndControl2.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
-			
+			pCmdUI->SetCheck(m_wndControl2.IsWindowVisible());			
 		}
 
 		void CMainFrame::OnUpdateViewSequencerbar(CCmdUI* pCmdUI) 
 		{
-			if ( m_wndSeq.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
+			pCmdUI->SetCheck(m_wndSeq.IsWindowVisible());			
 		}
 
 

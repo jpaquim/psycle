@@ -150,56 +150,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pattern_view()->PlayCurrentNote();
 		}
 
-		//////////////////////////////////////////////////////////////////////
-		// Pattern Modifier functions ( Copy&paste , Transpose, ... )
-
-		void CChildView::patCut()
-		{
-			if (viewMode == view_modes::pattern) {
-				pattern_view()->patCut();
-			}
-		}
-
-		void CChildView::patCopy()
-		{
-			if (viewMode == view_modes::pattern) {	
-				pattern_view()->patCopy();
-			}
-		}
-
-		void CChildView::patPaste()
-		{
-			pattern_view()->patPaste();
-		}
-
-		void CChildView::patMixPaste()
-		{
-			pattern_view()->patMixPaste();
-		}
-
-		void CChildView::patDelete()
-		{
-			if (viewMode == view_modes::pattern) {
-				pattern_view()->patDelete();
-			}
-		}
-
-		void CChildView::patTranspose(int trp)
-		{
-			pattern_view()->patTranspose(trp);
-		}
-
-		void CChildView::OnEditUndo() 
-		{
-			pattern_view()->OnEditUndo();
-		}
-
-
-		void CChildView::OnEditRedo() 
-		{
-			pattern_view()->OnEditRedo();
-		}
-
 
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END

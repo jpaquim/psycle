@@ -46,7 +46,7 @@ namespace psycle {
 			  rewire_line_(0),
 			  del_machine_(0),
 			  is_locked_(false),
-			  del_in_engine_(false)
+			  del_in_engine_(false)  			
 		{
 			// set_bg_color(Global::pConfig->mv_colour);
 			// InitSkin();
@@ -1494,6 +1494,14 @@ namespace psycle {
 				}
 			}
 			finder.Close();
+		}
+
+
+		void MachineView::CenterMaster()
+		{
+			song()->_pMachine[MASTER_INDEX]->_x = (child_view()->CW - MachineCoords.sMaster.width) / 2;			
+			song()->_pMachine[MASTER_INDEX]->_y = (child_view()->CH - MachineCoords.sMaster.width) / 2;
+			UpdatePosition(song()->_pMachine[MASTER_INDEX]);				
 		}
 
 		

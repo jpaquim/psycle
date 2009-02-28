@@ -49,6 +49,8 @@ namespace psycle {
 			void ShowDialog(Machine* mac, double x, double y);
 			void UpdatePosition(Machine* mac);
 			void WriteStatusBar(const std::string& text);
+			void AddMacViewUndo(); // place holder
+			void CenterMaster();
 
 		private:			
 			void BuildWires();
@@ -80,9 +82,12 @@ namespace psycle {
 			HBITMAP hbmMachineSkin;
 			HBITMAP hbmMachineBkg;	
 			HBITMAP hbmMachineDial;	
+		public:
 			SMachineCoords	MachineCoords;
+		private:
 			int bkgx;
 			int bkgy;
+
 		};
 	}
 }
