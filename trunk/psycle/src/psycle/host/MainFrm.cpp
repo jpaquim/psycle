@@ -137,7 +137,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_wndSeq.SetProject(&project_);
 			vuprevR = 0;
 			vuprevL = 0;
-			seqcopybufferlength = 0;
 			_pSong = 0;
 			pGearRackDialog = 0;
 //			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
