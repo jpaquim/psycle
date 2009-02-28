@@ -103,16 +103,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void MousePatternTweak(int machine, int command, int value);
 			void MousePatternTweakSlide(int machine, int command, int value);													
 
-			void PlayCurrentRow(void);
-			void PlayCurrentNote(void);
-
 			afx_msg void OnPatCopy();
 			afx_msg void OnPatPaste();
 			afx_msg void OnPatMixPaste();
 			afx_msg void OnPatCut();
 			afx_msg void OnPatDelete();
-			void patTranspose(int trp);
-			
+						
 			void AddMacViewUndo(); // place holder
 			
 			void SetTitleBarText();

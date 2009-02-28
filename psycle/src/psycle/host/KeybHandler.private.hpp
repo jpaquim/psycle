@@ -137,19 +137,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pattern_view()->MousePatternTweakSlide(machine, command, value);
 		}
 
-		//////////////////////////////////////////////////////////////////////
-		// Plays entire row of the pattern
-
-		void CChildView::PlayCurrentRow(void)
-		{
-			pattern_view()->PlayCurrentRow();
-		}
-
-		void CChildView::PlayCurrentNote(void)
-		{
-			pattern_view()->PlayCurrentNote();
-		}
-
-
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
