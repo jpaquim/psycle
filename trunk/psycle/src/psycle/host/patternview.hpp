@@ -745,8 +745,8 @@ public:
 		*/
 
 		}
-
-		bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs)
+		
+		bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0)
 		{
 			return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
 				(_y >= _src.y) && (_y < _src.y+_src2.height);

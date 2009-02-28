@@ -1008,10 +1008,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePatternSeq(CCmdUI* pCmdUI) 
 		{
-			if (viewMode==view_modes::sequence)
-				pCmdUI->SetCheck(1);
-			else
-				pCmdUI->SetCheck(0);	
+			pCmdUI->SetCheck(viewMode==view_modes::sequence);
 		}
 
 		void CChildView::OnBarplay() 
@@ -1038,10 +1035,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 		{
-			if (Global::pPlayer->_playing)
-				pCmdUI->SetCheck(1);
-			else
-				pCmdUI->SetCheck(0);
+			pCmdUI->SetCheck(Global::pPlayer->_playing);		
 		}
 
 		void CChildView::OnUpdateBarplayFromStart(CCmdUI* pCmdUI) 
@@ -1066,11 +1060,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
-		{
-			if (Global::pConfig->_followSong && pattern_view()->bEditMode)
-				pCmdUI->SetCheck(1);
-			else
-				pCmdUI->SetCheck(0);
+		{			
+			pCmdUI->SetCheck(Global::pConfig->_followSong && pattern_view()->bEditMode);			
 		}
 
 		void CChildView::OnButtonplayseqblock() 
@@ -1095,8 +1086,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 		{
-			if ( Global::pPlayer->_playBlock == true ) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
+			pCmdUI->SetCheck(Global::pPlayer->_playBlock == true);			
 		}
 
 		void CChildView::OnBarstop()
@@ -1148,14 +1138,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateRecordWav(CCmdUI* pCmdUI) 
 		{
-			if (Global::pPlayer->_recording)
-			{
-				pCmdUI->SetCheck(1);
-			}
-			else
-			{
-				pCmdUI->SetCheck(0);
-			}
+			pCmdUI->SetCheck(Global::pPlayer->_recording);
 		}
 
 		void CChildView::OnAutostop() 
