@@ -38,16 +38,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Operations
 		public:
 			void SetAppSongBpm(int x);
-			void SetAppSongTpb(int x);
-			void UpdatePlayOrder(bool mode);
-			//void CenterWindowOnPoint(CWnd* pWnd, POINT point);
+			void SetAppSongTpb(int x);			
+			
 		// Overrides
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 			friend class InputHandler;
 		// Implementation
-		public:
-			void UpdateSequencer(int bottom = -1);
+		public:			
 			bool macComboInitialized;
 			int seqcopybuffer[MAX_SONG_POSITIONS];
 			int seqcopybufferlength;
@@ -149,6 +147,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnClose();
 			afx_msg void OnSelchangeSeqlist();
 			afx_msg void OnDblclkSeqlist();
+			afx_msg	void OnInclen();
+			afx_msg void OnDeclen();
 			afx_msg void OnIncshort();
 			afx_msg void OnDecshort();
 			afx_msg void OnSeqins();

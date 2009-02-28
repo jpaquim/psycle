@@ -5486,7 +5486,7 @@ namespace psycle {
 					++editPosition;
 					song()->playOrder[editPosition]=patternum;
 					
-					main()->UpdateSequencer();
+					main()->m_wndSeq.UpdateSequencer();
 				}
 
 				memset(song()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
@@ -7036,8 +7036,8 @@ namespace psycle {
 					editcur.line = pRedoList->editline;
 					editcur.col = pRedoList->editcol;
 					editPosition = pRedoList->seqpos;
-					main()->UpdatePlayOrder(true);
-					main()->UpdateSequencer();
+					main()->m_wndSeq.UpdatePlayOrder(true);
+					main()->m_wndSeq.UpdateSequencer();
 					// display changes
 					Repaint(draw_modes::pattern);
 					
@@ -7072,8 +7072,8 @@ namespace psycle {
 					editcur.line = pRedoList->editline;
 					editcur.col = pRedoList->editcol;
 					editPosition = pRedoList->seqpos;
-					main()->UpdatePlayOrder(true);
-					main()->UpdateSequencer();
+					main()->m_wndSeq.UpdatePlayOrder(true);
+					main()->m_wndSeq.UpdateSequencer();
 					// display changes
 					Repaint(draw_modes::pattern);
 					
@@ -7230,8 +7230,8 @@ namespace psycle {
 					editcur.line = pUndoList->editline;
 					editcur.col = pUndoList->editcol;
 					editPosition = pUndoList->seqpos;
-					main()->UpdatePlayOrder(true);
-					main()->UpdateSequencer();
+					main()->m_wndSeq.UpdatePlayOrder(true);
+					main()->m_wndSeq.UpdateSequencer();
 					// display changes
 					Repaint(draw_modes::pattern);
 					
@@ -7266,8 +7266,8 @@ namespace psycle {
 					editcur.line = pUndoList->editline;
 					editcur.col = pUndoList->editcol;
 					editPosition = pUndoList->seqpos;
-					main()->UpdatePlayOrder(true);
-					main()->UpdateSequencer();
+					main()->m_wndSeq.UpdatePlayOrder(true);
+					main()->m_wndSeq.UpdateSequencer();
 					// display changes
 					Repaint(draw_modes::pattern);
 					
@@ -7581,7 +7581,7 @@ namespace psycle {
 
 			dlg.patLines= nlines;
 			strcpy(dlg.patName,name);
-			main()->UpdateSequencer();
+			main()->m_wndSeq.UpdateSequencer();
 			
 			if (dlg.DoModal() == IDOK)
 			{
@@ -7600,8 +7600,8 @@ namespace psycle {
 				else if ( strcmp(name,dlg.patName) != 0 )
 				{
 					strcpy(song()->patternName[patNum],dlg.patName);
-					main()->UpdateSequencer();
-					main()->StatusBarIdle();
+					main()->m_wndSeq.UpdatePlayOrder(true);
+					main()->m_wndSeq.UpdateSequencer();
 					//Repaint(draw_modes::patternHeader);
 				}
 			}

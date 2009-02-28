@@ -86,7 +86,7 @@ void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
 }
 void CExListBox::OnKillFocusPatternName()
 {
-	((CMainFrame*)GetParentFrame())->UpdateSequencer();
+	((CMainFrame*)GetParentFrame())->m_wndSeq.UpdateSequencer();
 	myedit.DestroyWindow();
 }
 
