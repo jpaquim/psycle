@@ -148,10 +148,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			int textLeftEdge;
 
-			inline bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0);
-
 		// Overrides
-			protected:
+		protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
 		//////////////////////////////////////////////////////////////////////
@@ -296,11 +294,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,NULL);
 		}
 			
-		inline bool CChildView::InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs)
-		{
-			return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
-				(_y >= _src.y) && (_y < _src.y+_src2.height);
-		}
-
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END

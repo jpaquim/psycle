@@ -5775,7 +5775,7 @@ namespace psycle {
 				{	
 					int pointpos= ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
 
-					if (child_view()->InRect(pointpos,point.y,PatHeaderCoords.dRecordOn,PatHeaderCoords.sRecordOn))
+					if (InRect(pointpos,point.y,PatHeaderCoords.dRecordOn,PatHeaderCoords.sRecordOn))
 					{
 						song()->_trackArmed[ttm] = !song()->_trackArmed[ttm];
 						song()->_trackArmedCount = 0;
@@ -5787,11 +5787,11 @@ namespace psycle {
 							}
 						}
 					}
-					else if (child_view()->InRect(pointpos,point.y,PatHeaderCoords.dMuteOn,PatHeaderCoords.sMuteOn))
+					else if (InRect(pointpos,point.y,PatHeaderCoords.dMuteOn,PatHeaderCoords.sMuteOn))
 					{
 						song()->_trackMuted[ttm] = !song()->_trackMuted[ttm];
 					}
-					else if (child_view()->InRect(pointpos,point.y,PatHeaderCoords.dSoloOn,PatHeaderCoords.sSoloOn))
+					else if (InRect(pointpos,point.y,PatHeaderCoords.dSoloOn,PatHeaderCoords.sSoloOn))
 					{
 						if (song()->_trackSoloed != ttm )
 						{
