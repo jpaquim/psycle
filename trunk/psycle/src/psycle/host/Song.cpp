@@ -523,8 +523,10 @@ namespace psycle
 				CreateMachine
 					(
 						MACH_MASTER, 
-						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
-						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
+						300,
+						200,
+//						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
+//						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
 						0,
 						MASTER_INDEX
 					);
@@ -1994,7 +1996,7 @@ namespace psycle
 						}
 
 #if !defined WINAMP_PLUGIN
-						switch (pMac[i]->_mode)
+/*						switch (pMac[i]->_mode)
 						{
 						case MACHMODE_GENERATOR:
 							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
@@ -2009,7 +2011,7 @@ namespace psycle
 							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
 							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 							break;
-						}
+						}*/
 #endif //!defined WINAMP_PLUGIN
 
 						pMac[i]->_x = x;
@@ -2866,13 +2868,13 @@ namespace psycle
 			int xs,ys,x,y;
 			if (src >= MAX_BUSES)
 			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->MachineCoords.sEffect.width;
+				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->MachineCoords.sEffect.height;
 			}
 			else 
 			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->MachineCoords.sGenerator.width;
+				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->MachineCoords.sGenerator.height;
 			}
 			x=_pMachine[dst]->_x+32;
 			y=_pMachine[dst]->_y+ys+8;

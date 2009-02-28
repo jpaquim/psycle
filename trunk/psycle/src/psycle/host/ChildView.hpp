@@ -106,18 +106,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void PlayCurrentRow(void);
 			void PlayCurrentNote(void);
 
-			void patCopy();
-			void patPaste();
-			void patMixPaste();
-			void patCut();
-			void patDelete();
+			afx_msg void OnPatCopy();
+			afx_msg void OnPatPaste();
+			afx_msg void OnPatMixPaste();
+			afx_msg void OnPatCut();
+			afx_msg void OnPatDelete();
 			void patTranspose(int trp);
 			
 			void AddMacViewUndo(); // place holder
 			
 			void SetTitleBarText();
-			void LoadMachineSkin();			
-			void LoadMachineDial();
 			void patTrackMute();
 			void patTrackSolo();
 			void patTrackRecord();
@@ -140,10 +138,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//	bool multiPattern;			
 			CGearTracker * SamplerMachineDialog;
 			XMSamplerUI* XMSamplerMachineDialog;
-			CWaveInMacDlg* WaveInMachineDialog;			
-
-			int blockSelectBarState; //This is used to remember the state of the select bar function
-			bool bScrollDetatch;
+			CWaveInMacDlg* WaveInMachineDialog;						
 
 			int updateMode;
 			int updatePar;			// view_modes::pattern: Display update mode. view_modes::machine: Machine number to update.
@@ -153,10 +148,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
 								// Its function is to prevent audio (and midi) operations while it is not
 								// initialized, or while song is being modified (New(),Load()..).
-								// 
-
-			SPatternHeaderCoords PatHeaderCoords;
-			SMachineCoords	MachineCoords;
+								// 			
 
 			int textLeftEdge;
 
@@ -179,10 +171,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			inline void TXT(CDC *devc,char const *txt, int x,int y,int w,int h);
 			inline void TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h);
 			
-			void DrawAllMachineVumeters(CDC *devc);													
-			void FindMachineSkin(CString findDir, CString findName, BOOL *result);
-			void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
-			void TransparentBlt(CDC* pDC, int xStart,  int yStart, int wWidth,  int wHeight, CDC* pTmpDC, CBitmap* bmpMask, int xSource = 0, int ySource = 0);
+			void DrawAllMachineVumeters(CDC *devc);																						
 			void DrawSeqEditor(CDC *devc);
 				
 		private:
@@ -190,23 +179,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			PatternView pattern_view_;
 
 			// GDI Stuff		
-			CBitmap machineskin;
-			CBitmap machineskinmask;			
-			HBITMAP hbmMachineSkin;			
-			HBITMAP hbmMachineDial;
-
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
-
-			int bkgx;
-			int bkgy;				
-			
 			int UndoMacCounter;
 			int UndoMacSaved;
 
-		public:
-			
-			void SelectMachineUnderCursor(void);
+		public:			
 			BOOL CheckUnsavedSong(std::string szTitle);
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
@@ -302,9 +280,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 
 		/////////////////////////////////////////////////////////////////////////////
-
-
-
 		inline void CChildView::TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h)
 		{
 			CRect Rect;
@@ -324,7 +299,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Rect.bottom=y+h;
 			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,NULL);
 		}
-
 			
 		inline bool CChildView::InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs)
 		{
