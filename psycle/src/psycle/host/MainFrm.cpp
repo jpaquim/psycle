@@ -64,8 +64,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_WM_CLOSE()
 			ON_LBN_SELCHANGE(IDC_SEQLIST, OnSelchangeSeqlist)
 			ON_LBN_DBLCLK(IDC_SEQLIST, OnDblclkSeqlist)
-			ON_BN_CLICKED(IDC_DECLEN, OnDeclen)
-			ON_BN_CLICKED(IDC_INCLEN, OnInclen)
 			ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
 			ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
 			ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
@@ -129,9 +127,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		};
 
 		CMainFrame::CMainFrame()
-			: m_wndView(this)
+			: m_wndView(this),
+			  m_wndSeq(this),
+			  project_(m_wndView.pattern_view())
 		{
 			Global::pInputHandler->SetMainFrame(this);
+			m_wndSeq.SetProject(&project_);
 			vuprevR = 0;
 			vuprevL = 0;
 			seqcopybufferlength = 0;
@@ -2053,42 +2054,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 
-		void CMainFrame::OnInclen() 
-		{
-			PatternView* pat_view = m_wndView.pattern_view();
-			pat_view->AddUndoSequence(_pSong->playLength,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);
-			
-			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
-			{
-				++_pSong->playLength;
-				UpdatePlayOrder(false);
-				UpdateSequencer();
-			}
-			m_wndView.SetFocus();
-		}
-
-		void CMainFrame::OnDeclen() 
-		{
-			PatternView* pat_view = m_wndView.pattern_view();
-			pat_view->AddUndoSequence(_pSong->playLength,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);
-						
-			if(_pSong->playLength>1)
-			{
-				--_pSong->playLength;
-				_pSong->playOrder[_pSong->playLength]=0;
-				UpdatePlayOrder(false);
-				UpdateSequencer();
-			}
-			m_wndView.SetFocus();	
-		}
 		void CMainFrame::OnSeqShowpattername()
 		{
 			

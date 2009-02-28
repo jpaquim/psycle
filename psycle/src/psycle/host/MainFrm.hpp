@@ -6,6 +6,8 @@
 #include "InfoDlg.hpp"
 #include "MidiMonitorDlg.hpp"
 #include "ExListBox.h"
+#include "Project.hpp"
+#include "SeqView.hpp"
 #include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -92,10 +94,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CChildView  m_wndView;
 			CDialogBar	m_wndControl;
 			CDialogBar	m_wndControl2;
-			CDialogBar	m_wndSeq;
+			SequencerView m_wndSeq;
 			CReBar      m_wndReBar;
 			std::string		szStatusIdle;
 			CExListBox	m_seqListbox;
+			Project project_;
 			
 			CInstrumentEditor	m_wndInst;
 			CInfoDlg	m_wndInfo;
@@ -146,8 +149,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnClose();
 			afx_msg void OnSelchangeSeqlist();
 			afx_msg void OnDblclkSeqlist();
-			afx_msg void OnDeclen();
-			afx_msg void OnInclen();
 			afx_msg void OnIncshort();
 			afx_msg void OnDecshort();
 			afx_msg void OnSeqins();

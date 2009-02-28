@@ -444,7 +444,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				oldbmp = bufDC.SelectObject(bmpDC);
 				if (viewMode==view_modes::machine)	// Machine view paint handler
 				{
-
 					machine_view_.Draw(&bufDC, pRgn); 
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
