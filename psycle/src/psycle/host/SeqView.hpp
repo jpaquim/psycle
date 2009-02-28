@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Constants.hpp"
+
 namespace psycle {
 	namespace host {
 
@@ -11,19 +13,34 @@ namespace psycle {
 
 			void SetProject(class Project* project);
 
-		protected:
-			afx_msg void OnInclen();
-			afx_msg void OnDeclen();
-			DECLARE_MESSAGE_MAP();
-
-		private:
+			void OnInclen();
+			void OnDeclen();
+			void OnDeclong();
+			void OnInclong();			
+			void OnSelchangeSeqlist();
+			void OnDblclkSeqlist();
+			void OnIncshort();
+			void OnDecshort();
+			void OnSeqins();
+			void OnSeqnew();
+			void OnSeqcut();
+			void OnSeqcopy();
+			void OnSeqpaste();
+			void OnSeqdelete();
+			void OnSeqduplicate();
+			void OnSeqclr();
+			void OnSeqsort();
+			void OnSeqShowpattername();
+		
 			void UpdateSequencer(int bottom = -1);
 			void UpdatePlayOrder(bool mode);
 
+		private:
 			CMainFrame* main_frame_;
 			Project* project_;
+			int seqcopybuffer[MAX_SONG_POSITIONS];
+			int seqcopybufferlength;
 		};
 
 	}
 }
-

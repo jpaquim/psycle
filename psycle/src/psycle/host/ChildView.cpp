@@ -846,8 +846,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();
 				pParentMain->RedrawGearRackList();
-				pParentMain->UpdateSequencer();
-				pParentMain->UpdatePlayOrder(false); // should be done always after updatesequencer
+				pParentMain->m_wndSeq.UpdateSequencer();
+				pParentMain->m_wndSeq.UpdatePlayOrder(false); // should be done always after updatesequencer
 				//pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
 				pattern_view()->RecalculateColourGrid();
 				Repaint();
@@ -1557,8 +1557,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();
 				pParentMain->RedrawGearRackList();
-				pParentMain->UpdateSequencer();
-				pParentMain->UpdatePlayOrder(false);
+				pParentMain->m_wndSeq.UpdateSequencer();
+				pParentMain->m_wndSeq.UpdatePlayOrder(false);
 				pattern_view()->RecalculateColourGrid();
 				Repaint();
 				machine_view_.UnlockVu();
@@ -1712,8 +1712,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pParentMain->WaveEditorBackUpdate();
 			pParentMain->m_wndInst.WaveUpdate();
 			pParentMain->RedrawGearRackList();
-			pParentMain->UpdateSequencer();
-			pParentMain->UpdatePlayOrder(false);
+			pParentMain->m_wndSeq.UpdateSequencer();
+			pParentMain->m_wndSeq.UpdatePlayOrder(false);
 			//pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
 			pattern_view()->RecalculateColourGrid();
 			Repaint();
