@@ -1232,10 +1232,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CGreetDialog dlg;
 			dlg.DoModal();
 			//Repaint();
-		}
-
-		///\todo extemely toxic pollution
-		#define TWOPI_F (2.0f*3.141592665f)
+		}	
 
 		//// Right Click Popup Menu
 		void CChildView::OnPopCut() { 
@@ -1247,7 +1244,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (pattern_view()->blockSelected && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
 			else pCmdUI->Enable(FALSE);
 		}
-
 
 		void CChildView::OnPopCopy() {
 			pattern_view()->CopyBlock(false);
@@ -1289,7 +1285,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			pattern_view()->OnPopInterpolateCurve();
 		}
-
 
 		void CChildView::OnPopChangegenerator() {
 			pattern_view()->BlockGenChange(_pSong->seqBus);
@@ -1355,8 +1350,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 
 		{
-			if(pattern_view()->patBufferCopy&&(viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
-			else pCmdUI->Enable(FALSE);
+			pCmdUI->Enable(pattern_view()->patBufferCopy&&(viewMode == view_modes::pattern));			
 		}
 
 		void CChildView::OnFileImportModulefile() 
@@ -1896,12 +1890,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (viewMode == view_modes::pattern) {
 				pattern_view()->patDelete();
 			}
-		}
-
-		void CChildView::patTranspose(int trp)
-		{
-			pattern_view()->patTranspose(trp);
-		}
+		}	
 
 		void CChildView::OnEditUndo() 
 		{
