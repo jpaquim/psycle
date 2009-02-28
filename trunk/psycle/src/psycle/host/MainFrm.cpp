@@ -500,7 +500,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetAppSongTpb(0);
 
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
-			cc2->SetCurSel(m_wndView.patStep);
+			cc2->SetCurSel(m_wndView.pattern_view()->patStep);
 			
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
 			cc2->SetCurSel(_pSong->SONGTRACKS-4);
@@ -521,10 +521,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
 			_pSong->SONGTRACKS=cc2->GetCurSel()+4;
-			if (m_wndView.editcur.track >= _pSong->SONGTRACKS )
-				m_wndView.editcur.track= _pSong->SONGTRACKS-1;
+			if (m_wndView.pattern_view()->editcur.track >= _pSong->SONGTRACKS )
+				m_wndView.pattern_view()->editcur.track= _pSong->SONGTRACKS-1;
 
-			m_wndView.RecalculateColourGrid();
+			m_wndView.pattern_view()->RecalculateColourGrid();
 			m_wndView.Repaint();
 			m_wndView.SetFocus();
 		}
@@ -784,7 +784,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
 			int sel=cc->GetCurSel();
-			m_wndView.patStep=sel;
+			m_wndView.pattern_view()->patStep=sel;
 			m_wndView.SetFocus();
 		}
 
@@ -799,7 +799,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int total = cc->GetCount();
 			const int nextsel = (total + cc->GetCurSel() + diff) % total;
 			cc->SetCurSel(nextsel);
-			m_wndView.patStep=nextsel;
+			m_wndView.pattern_view()->patStep=nextsel;
 		}
 
 		void CMainFrame::OnBDecgen() // called by Button and Hotkey.
@@ -1370,9 +1370,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cc2->SetCurSel(AUX_WAVES);
 			_pSong->auxcolSelected=_pSong->instSelected;
 			UpdateComboIns();
-
 			m_wndView.AddMacViewUndo();
-
 			m_wndInst.WaveUpdate();
 			m_wndInst.ShowWindow(SW_SHOWNORMAL);
 			m_wndInst.SetActiveWindow();
@@ -1472,8 +1470,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int maxitems=cc->GetCount();
 			int const ep=cc->GetCurSel();
-			if(m_wndView.editPosition<0) m_wndView.editPosition = 0; // DAN FIXME
-			int const cpid=_pSong->playOrder[m_wndView.editPosition];
+			if(m_wndView.pattern_view()->editPosition<0) m_wndView.pattern_view()->editPosition = 0; // DAN FIXME
+			int const cpid=_pSong->playOrder[m_wndView.pattern_view()->editPosition];
 
 			memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 			for (int c=0;c<maxitems;c++) 
@@ -1481,7 +1479,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if ( cc->GetSel(c) != 0) _pSong->playOrderSel[c]=true;
 			}
 			
-			if((ep!=m_wndView.editPosition))// && ( cc->GetSelCount() == 1))
+			if((ep!=m_wndView.pattern_view()->editPosition))// && ( cc->GetSelCount() == 1))
 			{
 				if ((Global::pPlayer->_playing) && (Global::pConfig->_followSong))
 				{
@@ -1489,8 +1487,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					Global::pPlayer->Start(ep,0,false);
 					Global::pPlayer->_playBlock = b;
 				}
-				m_wndView.editPosition=ep;
-				m_wndView.prevEditPosition=ep;
+				m_wndView.pattern_view()->editPosition=ep;
+				m_wndView.pattern_view()->prevEditPosition=ep;
 				UpdatePlayOrder(false);
 				
 				if(cpid!=_pSong->playOrder[ep])
@@ -1532,7 +1530,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				Global::pPlayer->Start(ep,0);
 			}
-			m_wndView.editPosition=ep;
+			m_wndView.pattern_view()->editPosition=ep;
 			//Following two lines by alk to disable view change to pattern mode when 
 			//double clicking on a pattern in the sequencer list
 			//m_wndView.OnPatternView();
@@ -1540,9 +1538,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CMainFrame::OnIncshort() 
-		{
+		{			
 			int indexes[MAX_SONG_POSITIONS];
-			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
 
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int const num= cc->GetSelCount();
@@ -1563,8 +1566,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnDecshort() 
 		{
+			
 			int indexes[MAX_SONG_POSITIONS];
-			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+
 
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int const num= cc->GetSelCount();
@@ -1585,8 +1595,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnInclong() 
 		{
+			
 			int indexes[MAX_SONG_POSITIONS];
-			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
 
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int const num= cc->GetSelCount();
@@ -1606,13 +1622,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			UpdatePlayOrder(false);
 			UpdateSequencer();
 			m_wndView.Repaint(draw_modes::pattern);
-			m_wndView.SetFocus();
+			m_wndView.SetFocus();			
 		}
 
 		void CMainFrame::OnDeclong() 
-		{
+		{  
 			int indexes[MAX_SONG_POSITIONS];
-			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+
 
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int const num= cc->GetSelCount();
@@ -1639,26 +1661,32 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 			{
-				m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+				PatternView* pat_view = m_wndView.pattern_view();
+				pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+
 				++_pSong->playLength;
 
-				m_wndView.editPosition++;
-				int const pop=m_wndView.editPosition;
+				m_wndView.pattern_view()->editPosition++;
+				int const pop=m_wndView.pattern_view()->editPosition;
 				for(int c=(_pSong->playLength-1);c>=pop;c--)
 				{
 					_pSong->playOrder[c]=_pSong->playOrder[c-1];
 				}
-				_pSong->playOrder[m_wndView.editPosition]=_pSong->GetBlankPatternUnused();
+				_pSong->playOrder[m_wndView.pattern_view()->editPosition]=_pSong->GetBlankPatternUnused();
 				
-				if ( _pSong->playOrder[m_wndView.editPosition]>= MAX_PATTERNS )
+				if ( _pSong->playOrder[m_wndView.pattern_view()->editPosition]>= MAX_PATTERNS )
 				{
-					_pSong->playOrder[m_wndView.editPosition]=MAX_PATTERNS-1;
+					_pSong->playOrder[m_wndView.pattern_view()->editPosition]=MAX_PATTERNS-1;
 				}
 
-				_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.editPosition],"",Global::pConfig->defaultPatLines,FALSE);
+				_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.pattern_view()->editPosition],"",Global::pConfig->defaultPatLines,FALSE);
 
 				UpdatePlayOrder(true);
-				UpdateSequencer(m_wndView.editPosition);
+				UpdateSequencer(m_wndView.pattern_view()->editPosition);
 
 				m_wndView.Repaint(draw_modes::pattern);
 			}
@@ -1667,20 +1695,27 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnSeqins() 
 		{
+			// TODO!!
 			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 			{
-				m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+				PatternView* pat_view = m_wndView.pattern_view();
+				pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+
 				++_pSong->playLength;
 
-				m_wndView.editPosition++;
-				int const pop=m_wndView.editPosition;
+				m_wndView.pattern_view()->editPosition++;
+				int const pop=m_wndView.pattern_view()->editPosition;
 				for(int c=(_pSong->playLength-1);c>=pop;c--)
 				{
 					_pSong->playOrder[c]=_pSong->playOrder[c-1];
 				}
 
 				UpdatePlayOrder(true);
-				UpdateSequencer(m_wndView.editPosition);
+				UpdateSequencer(m_wndView.pattern_view()->editPosition);
 
 				m_wndView.Repaint(draw_modes::pattern);
 			}
@@ -1689,6 +1724,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnSeqduplicate() 
 		{
+			// TODO!!
+
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int selcount = cc->GetSelCount();
 			if (selcount == 0) return;
@@ -1698,7 +1735,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_wndView.SetFocus();
 				return;
 			}
-			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+
 			// Moves all patterns after the selection, to make space.
 			int* litems = new int[selcount];
 			cc->GetSelItems(selcount,litems);
@@ -1735,9 +1778,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
 			}
-			m_wndView.editPosition=litems[selcount-1]+1;
+			m_wndView.pattern_view()->editPosition=litems[selcount-1]+1;
 			UpdatePlayOrder(true);
-			UpdateSequencer(m_wndView.editPosition);
+			UpdateSequencer(m_wndView.pattern_view()->editPosition);
 			m_wndView.Repaint(draw_modes::pattern);
 
 			delete [] litems; litems = 0;
@@ -1752,8 +1795,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnSeqdelete() 
 		{
+			// TODO!!
 			int indexes[MAX_SONG_POSITIONS];
-			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
 
 			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			int const num= cc->GetSelCount();
@@ -1786,19 +1835,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					smallest = indexes[i];
 				}
 			}
-			m_wndView.editPosition = smallest-1;
+			m_wndView.pattern_view()->editPosition = smallest-1;
 
-			if (m_wndView.editPosition<0)
+			if (m_wndView.pattern_view()->editPosition<0)
 			{
-				m_wndView.editPosition = 0;
+				m_wndView.pattern_view()->editPosition = 0;
 			}
-			else if (m_wndView.editPosition>=_pSong->playLength)
+			else if (m_wndView.pattern_view()->editPosition>=_pSong->playLength)
 			{
-				m_wndView.editPosition=_pSong->playLength-1;
+				m_wndView.pattern_view()->editPosition=_pSong->playLength-1;
 			}
 
 			UpdatePlayOrder(true);
-			UpdateSequencer(m_wndView.editPosition);
+			UpdateSequencer(m_wndView.pattern_view()->editPosition);
 			m_wndView.Repaint(draw_modes::pattern);
 			m_wndView.SetFocus();
 		}
@@ -1827,12 +1876,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CMainFrame::OnSeqpaste() 
-		{
+		{			
 			if (seqcopybufferlength > 0)
 			{
 				if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 				{
-					m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+					PatternView* pat_view = m_wndView.pattern_view();
+					pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);					
 
 					// we will do this in a loop to easily handle an error if we run out of space
 
@@ -1844,10 +1898,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						{
 							++_pSong->playLength;
 
-							m_wndView.editPosition++;
+							m_wndView.pattern_view()->editPosition++;
 							pastedcount++;
 							int c;
-							for(c = _pSong->playLength - 1 ; c >= m_wndView.editPosition ; --c)
+							for(c = _pSong->playLength - 1 ; c >= m_wndView.pattern_view()->editPosition ; --c)
 							{
 								_pSong->playOrder[c]=_pSong->playOrder[c-1];
 							}
@@ -1858,11 +1912,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (pastedcount>0)
 					{
 						UpdatePlayOrder(true);
-						for(int i(m_wndView.editPosition + 1 - pastedcount) ; i < m_wndView.editPosition ; ++i)
+						for(int i(m_wndView.pattern_view()->editPosition + 1 - pastedcount) ; i < m_wndView.pattern_view()->editPosition ; ++i)
 						{
 							_pSong->playOrderSel[i] = true;
 						}
-						UpdateSequencer(m_wndView.editPosition);
+						UpdateSequencer(m_wndView.pattern_view()->editPosition);
 						m_wndView.Repaint(draw_modes::pattern);
 
 					}
@@ -1876,7 +1930,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
 			{
-				m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+				PatternView* pat_view = m_wndView.pattern_view();
+				pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+				
 				// clear sequence
 				for(int c=0;c<MAX_SONG_POSITIONS;c++)
 				{
@@ -1887,18 +1947,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// init a pattern for #0
 				_pSong->_ppattern(0);
 
-				m_wndView.editPosition=0;
+				m_wndView.pattern_view()->editPosition=0;
 				_pSong->playLength=1;
 				UpdatePlayOrder(true);
 				UpdateSequencer();
 				m_wndView.Repaint(draw_modes::pattern);
 			}
-			m_wndView.SetFocus();
-			
+			m_wndView.SetFocus();			
 		}
 		void CMainFrame::OnSeqsort()
 		{
-			m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+				
+
 			unsigned char oldtonew[MAX_PATTERNS];
 			unsigned char newtoold[MAX_PATTERNS];
 			memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
@@ -1989,7 +2055,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnInclen() 
 		{
-			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+			
 			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 			{
 				++_pSong->playLength;
@@ -2001,7 +2073,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnDeclen() 
 		{
-			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			PatternView* pat_view = m_wndView.pattern_view();
+			pat_view->AddUndoSequence(_pSong->playLength,
+									  pat_view->editcur.track,
+									  pat_view->editcur.line,
+									  pat_view->editcur.col,
+									  pat_view->editPosition);
+						
 			if(_pSong->playLength>1)
 			{
 				--_pSong->playLength;
@@ -2013,6 +2091,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CMainFrame::OnSeqShowpattername()
 		{
+			
 			Global::pConfig->_bShowPatternNames=((CButton*)m_wndSeq.GetDlgItem(IDC_SHOWPATTERNAME))->GetCheck();
 			
 			/*
@@ -2036,10 +2115,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 			pls->SetSel(Global::pPlayer->_playPosition,true);
 
-			int top = ((Global::pPlayer->_playing)?Global::pPlayer->_playPosition:m_wndView.editPosition) - 0xC;
+			int top = ((Global::pPlayer->_playing)?Global::pPlayer->_playPosition:m_wndView.pattern_view()->editPosition) - 0xC;
 			if (top < 0) top = 0;
 			pls->SetTopIndex(top);
-			m_wndView.SetFocus();
+			m_wndView.SetFocus();			
 		}
 
 
@@ -2086,16 +2165,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if  ( Global::pPlayer->_playing )
 				{
-					m_wndView.ChordModeOffs = 0;
+					m_wndView.pattern_view()->ChordModeOffs = 0;
 					m_wndView.bScrollDetatch=false;
 					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
 						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
 					}
-					if ( m_wndView.editPosition  != Global::pPlayer->_playPosition )
+					if ( m_wndView.pattern_view()->editPosition  != Global::pPlayer->_playPosition )
 					{
-						m_wndView.editPosition=Global::pPlayer->_playPosition;
+						m_wndView.pattern_view()->editPosition=Global::pPlayer->_playPosition;
 						m_wndView.Repaint(draw_modes::pattern);
 					}
 					int top = Global::pPlayer->_playPosition - 0xC;
@@ -2109,7 +2188,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						if (_pSong->playOrderSel[i]) pSeqList->SetSel(i,true);
 					}
-					int top = m_wndView.editPosition - 0xC;
+					int top = m_wndView.pattern_view()->editPosition - 0xC;
 					if (top < 0) top = 0;
 					pSeqList->SetTopIndex(top);
 				}
@@ -2188,7 +2267,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			if (mode)
 			{
-				const int ls=m_wndView.editPosition;
+				const int ls=m_wndView.pattern_view()->editPosition;
 				const int le=_pSong->playOrder[ls];
 				pls->DeleteString(ls);
 
@@ -2229,7 +2308,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				str.Format("Pos %.2X", m_wndView.editPosition); 
+				str.Format("Pos %.2X", m_wndView.pattern_view()->editPosition); 
 			}
 			pCmdUI->SetText(str); 
 		}
@@ -2244,7 +2323,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				str.Format("Pat %.2X", Global::_pSong->playOrder[m_wndView.editPosition]); 
+				str.Format("Pat %.2X", Global::_pSong->playOrder[m_wndView.pattern_view()->editPosition]); 
 			}
 			pCmdUI->SetText(str); 
 		}
@@ -2259,7 +2338,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				str.Format("Line %u", m_wndView.editcur.line); 
+				str.Format("Line %u", m_wndView.pattern_view()->editcur.line); 
 			}
 			pCmdUI->SetText(str); 
 		}
@@ -2277,7 +2356,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnUpdateIndicatorEdit(CCmdUI *pCmdUI) 
 		{
-			if (m_wndView.bEditMode)
+			if (m_wndView.pattern_view()->bEditMode)
 			{
 				pCmdUI->Enable(); 
 			}
@@ -2369,11 +2448,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				std::ostringstream oss;
 				oss << _pSong->name
-					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.editPosition]];
+					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.pattern_view()->editPosition]];
 
 				if ((m_wndView.viewMode==view_modes::pattern)	&& (!Global::pPlayer->_playing))
 				{
-					unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
+					unsigned char *toffset=_pSong->_ptrackline(m_wndView.pattern_view()->editPosition,m_wndView.pattern_view()->editcur.track,m_wndView.pattern_view()->editcur.line);
 					int machine = toffset[2];
 					if (machine<MAX_MACHINES)
 					{

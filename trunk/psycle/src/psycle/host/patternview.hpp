@@ -260,6 +260,8 @@ namespace psycle {
 			void OnPopPaste();
 			void OnPopInterpolateCurve();
 
+			void Repaint(draw_modes::draw_mode drawMode);
+
 		private:
 			void DrawPatEditor(CDC *devc);
 			void DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
@@ -268,7 +270,7 @@ namespace psycle {
 			void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);						
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
 			COLORREF ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
-			void Repaint(draw_modes::draw_mode drawMode);
+			
 
 			CChildView* parent_;
 			CMainFrame* main_;			
@@ -279,7 +281,6 @@ namespace psycle {
 			bool bDoingSelection;
 public:
 			bool blockSelected;
-private:
 			bool blockStart;
 			bool blockswitch;
 			int blockSelectBarState; //This is used to remember the state of the select bar function
@@ -366,7 +367,7 @@ private:
 			int patBufferLines;
 public:
 			bool patBufferCopy;
-private:
+
 			SPatternUndo * pUndoList;
 			SPatternUndo * pRedoList;
 

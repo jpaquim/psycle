@@ -18,19 +18,13 @@
 #include "XMSongLoader.hpp"
 #include "XMSongExport.hpp"
 #include "ITModule2.h"
-#include "MasterDlg.hpp"
 #include "NativeGui.hpp"
 #include "XMSamplerUI.hpp"
 //#include "VstEditorDlg.hpp"
 #include "WireDlg.hpp"
-#include "MacProp.hpp"
 #include "NewMachine.hpp"
-#include "TransformPatternDlg.hpp"
-#include "PatDlg.hpp"
 #include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
-#include <cmath> // SwingFill
-#include "SwingFillDlg.hpp"
-#include "InterpolateCurveDlg.hpp"
+#include <cmath>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -41,64 +35,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,SamplerMachineDialog(NULL)
 			,XMSamplerMachineDialog(NULL)
 			,WaveInMachineDialog(NULL)
-			,blockSelected(false)
-			,blockStart(false)
-			,blockswitch(false)
 			,blockSelectBarState(1)
-			,bScrollDetatch(false)
-			,bEditMode(true)
-			,patStep(1)
-			,editPosition(0)
-			,prevEditPosition(0)
-			,ChordModeOffs(0)
+			,bScrollDetatch(false)			
 			,updateMode(0)
 			,updatePar(0)
 			,viewMode(view_modes::machine)
 			,_outputActive(false)
 			,CW(300)
 			,CH(200)
-			,maxView(false)
 			,textLeftEdge(2)
-			,hbmPatHeader(0)
 			,hbmMachineSkin(0)
 			,hbmMachineDial(0)
 			,bmpDC(NULL)
-			,playpos(-1)
-			,newplaypos(-1) 
-			,numPatternDraw(0)
-			,maxt(1)
-			,maxl(1)
-			,tOff(0)
-			,lOff(0)
-			,ntOff(0)
-			,nlOff(0)
-			,rntOff(0)
-			,rnlOff(0)
-			,isBlockCopied(false)
-			,blockNTracks(0)
-			,blockNLines(0)
-			,mcd_x(0)
-			,mcd_y(0)
-			,pUndoList(NULL)
-			,pRedoList(NULL)
-			,UndoCounter(0)
-			,UndoSaved(0)
 			,UndoMacCounter(0)
-			,UndoMacSaved(0)
-			,patBufferLines(0)
-			,patBufferCopy(false)
+			,UndoMacSaved(0)			
 			,machine_view_(this, main_frame, Global::_pSong)
-#ifdef use_patternview
 			,pattern_view_(this, main_frame, Global::_pSong)
-#endif
 		{			
-			for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
-			selpos.bottom=0;
-			newselpos.bottom=0;
-			szBlankParam[0]='\0';
-			szBlankNote[0]='\0';
-			MBStart.x=0;
-			MBStart.y=0;
+			for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }	
 
 			Global::pInputHandler->SetChildView(this);
 
@@ -116,8 +70,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CChildView::~CChildView()
 		{
 			Global::pInputHandler->SetChildView(NULL);
-			KillRedo();
-			KillUndo();
+
 
 			if ( bmpDC != NULL )
 			{
@@ -127,11 +80,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-			patternheader.DeleteObject();
-			DeleteObject(hbmPatHeader);
 			machineskin.DeleteObject();
 			DeleteObject(hbmMachineSkin);
-			patternheadermask.DeleteObject();
 			machineskinmask.DeleteObject();			
 		}
 
@@ -369,8 +319,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						if (Global::pConfig->_followSong)
 						{
 							CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
-							editcur.line=Global::pPlayer->_lineCounter;
-							if (editPosition != Global::pPlayer->_playPosition)
+							pattern_view()->editcur.line=Global::pPlayer->_lineCounter;
+							if (pattern_view()->editPosition != Global::pPlayer->_playPosition)
 							//if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 							{
 								pSeqList->SelItemRange(false,0,pSeqList->GetCount());
@@ -378,7 +328,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								int top = Global::pPlayer->_playPosition - 0xC;
 								if (top < 0) top = 0;
 								pSeqList->SetTopIndex(top);
-								editPosition=Global::pPlayer->_playPosition;
+								pattern_view()->editPosition=Global::pPlayer->_playPosition;
 								if ( viewMode == view_modes::pattern ) 
 								{ 
 									Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
@@ -520,11 +470,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{
-#ifdef use_patternview
 					pattern_view_.Draw(&dc, pRgn);
-#else
-					DrawPatEditor(&dc);
-#endif
 				}
 				else if ( viewMode == view_modes::sequence)
 				{
@@ -547,11 +493,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (drawMode >= draw_modes::pattern || drawMode == draw_modes::all )	
 				{
-#ifdef use_patternview
 					pattern_view()->PreparePatternRefresh(drawMode);
-#else
-					PreparePatternRefresh(drawMode);
-#endif
 				}
 			}
 			if ( viewMode == view_modes::sequence )
@@ -580,11 +522,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			if (viewMode == view_modes::pattern)
 			{
-#ifdef use_patternview
 				pattern_view()->OnSize(nType, cx, cy);				
-#else
-				RecalcMetrics();
-#endif
 			}
 			Repaint();
 		}
@@ -674,13 +612,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					else 
 					{
 						_pSong->_saved=true;
-						if (pUndoList)
+						if (pattern_view()->pUndoList)
 						{
-							UndoSaved = pUndoList->counter;
+							pattern_view()->UndoSaved = pattern_view()->pUndoList->counter;
 						}
 						else
 						{
-							UndoSaved = 0;
+							pattern_view()->UndoSaved = 0;
 						}
 						UndoMacSaved = UndoMacCounter;
 						SetTitleBarText();
@@ -740,7 +678,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if ( str2.CompareNoCase(".psb") != 0 ) str.Insert(str.GetLength(),".psb");
 					sprintf(szFile,str);
 					FILE* hFile=fopen(szFile,"wb");
-					SaveBlock(hFile);
+					pattern_view()->SaveBlock(hFile);
 					fflush(hFile);
 					fclose(hFile);
 				}
@@ -776,13 +714,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						_pSong->_saved=true;
 						AppendToRecent(str.GetBuffer(1));
 						
-						if (pUndoList)
+						if (pattern_view()->pUndoList)
 						{
-							UndoSaved = pUndoList->counter;
+							pattern_view()->UndoSaved = pattern_view()->pUndoList->counter;
 						}
 						else
 						{
-							UndoSaved = 0;
+							pattern_view()->UndoSaved = 0;
 						}
 						UndoMacSaved = UndoMacCounter;
 						SetTitleBarText();
@@ -877,13 +815,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (CheckUnsavedSong("New Song"))
 			{
-#ifdef use_patternview
 				pattern_view()->KillUndo();
 				pattern_view()->KillRedo();
-#else
-				KillUndo();
-				KillRedo();
-#endif
 				machine_view_.LockVu();
 				Global::pPlayer->Stop();
 				///\todo lock/unlock
@@ -908,7 +841,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 				SetTitleBarText();
-				editPosition=0;
+				pattern_view()->editPosition=0;
 				Global::_pSong->seqBus=0;
 				pParentMain->PsybarsUpdate(); // Updates all values of the bars
 				pParentMain->WaveEditorBackUpdate();
@@ -917,7 +850,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->UpdateSequencer();
 				pParentMain->UpdatePlayOrder(false); // should be done always after updatesequencer
 				//pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
-				RecalculateColourGrid();
+				pattern_view()->RecalculateColourGrid();
 				Repaint();
 				machine_view_.Rebuild();
 				machine_view_.UnlockVu();
@@ -932,7 +865,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			KillTimer(31);
 			KillTimer(159);
 			OnTimer(159); // Autosave
-			CSaveWavDlg dlg(this, &blockSel);
+			CSaveWavDlg dlg(this, &pattern_view()->blockSel);
 			dlg.DoModal();
 			InitTimer();
 		}
@@ -942,9 +875,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CChildView::CheckUnsavedSong(std::string szTitle)
 		{
 			BOOL bChecked = TRUE;
-			if (pUndoList)
+			if (pattern_view()->pUndoList)
 			{
-				if (UndoSaved != pUndoList->counter)
+				if (pattern_view()->UndoSaved != pattern_view()->pUndoList->counter)
 				{
 					bChecked = FALSE;
 				}
@@ -955,7 +888,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				if (UndoSaved != 0)
+				if (pattern_view()->UndoSaved != 0)
 				{
 					bChecked = FALSE;
 				}
@@ -1045,7 +978,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (viewMode != view_modes::pattern)
 			{
-				RecalcMetrics();
+				pattern_view()->RecalcMetrics();
 
 				viewMode = view_modes::pattern;
 				//ShowScrollBar(SB_BOTH,FALSE);
@@ -1058,11 +991,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if
 					(
 						Global::pConfig->_followSong &&
-						editPosition  != Global::pPlayer->_playPosition &&
+						pattern_view()->editPosition  != Global::pPlayer->_playPosition &&
 						Global::pPlayer->_playing
 					)
 				{
-					editPosition=Global::pPlayer->_playPosition;
+					pattern_view()->editPosition=Global::pPlayer->_playPosition;
 				}
 				Repaint();
 				pParentMain->StatusBarIdle();
@@ -1111,8 +1044,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				bScrollDetatch=false;
 			}
-			prevEditPosition=editPosition;
-			Global::pPlayer->Start(editPosition,0);
+			pattern_view()->prevEditPosition=pattern_view()->editPosition;
+			Global::pPlayer->Start(pattern_view()->editPosition,0);
 			pParentMain->StatusBarIdle();
 		}
 
@@ -1122,7 +1055,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				bScrollDetatch=false;
 			}
-			prevEditPosition=editPosition;
+			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			Global::pPlayer->Start(0,0);
 			pParentMain->StatusBarIdle();
 		}
@@ -1142,14 +1075,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnBarrec() 
 		{
-			if (Global::pConfig->_followSong && bEditMode)
+			if (Global::pConfig->_followSong && pattern_view()->bEditMode)
 			{
-				bEditMode = FALSE;
+				pattern_view()->bEditMode = FALSE;
 			}
 			else
 			{
 				Global::pConfig->_followSong = TRUE;
-				bEditMode = TRUE;
+				pattern_view()->bEditMode = TRUE;
 				CButton*cb=(CButton*)pParentMain->m_wndSeq.GetDlgItem(IDC_FOLLOW);
 				cb->SetCheck(1);
 			}
@@ -1158,7 +1091,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
 		{
-			if (Global::pConfig->_followSong && bEditMode)
+			if (Global::pConfig->_followSong && pattern_view()->bEditMode)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);
@@ -1171,7 +1104,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bScrollDetatch=false;
 			}
 
-			prevEditPosition=editPosition;
+			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			int i=0;
 			while ( Global::_pSong->playOrderSel[i] == false ) i++;
 			
@@ -1202,14 +1135,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if ( Global::pConfig->_followSong && blk)
 				{
-					editPosition=prevEditPosition;
+					pattern_view()->editPosition=pattern_view()->prevEditPosition;
 					pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
 					Repaint(draw_modes::pattern);
 				}
 				else
 				{
 					memset(Global::_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-					Global::_pSong->playOrderSel[editPosition] = true;
+					Global::_pSong->playOrderSel[pattern_view()->editPosition] = true;
 					Repaint(draw_modes::cursor); 
 				}
 			}
@@ -1295,53 +1228,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			pParentMain->ShowMidiMonitorDlg();
 		}
-
-		void CChildView::ShowTransformPatternDlg(void)
-		{
-			CTransformPatternDlg dlg(this);
-
-			if (dlg.DoModal() == IDOK)
-			{
-
-			}
-		}
-
-		void CChildView::ShowPatternDlg(void)
-		{
-			CPatDlg dlg;
-			int patNum = _pSong->playOrder[editPosition];
-			int nlines = _pSong->patternLines[patNum];
-			char name[32];
-			strcpy(name,_pSong->patternName[patNum]);
-
-			dlg.patLines= nlines;
-			strcpy(dlg.patName,name);
-			pParentMain->UpdateSequencer();
-			
-			if (dlg.DoModal() == IDOK)
-			{
-				if ( nlines != dlg.patLines )
-				{
-					AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-					AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-					_pSong->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
-					if ( strcmp(name,dlg.patName) != 0 )
-					{
-						strcpy(_pSong->patternName[patNum],dlg.patName);
-						pParentMain->StatusBarIdle();
-					}
-					Repaint();
-				}
-				else if ( strcmp(name,dlg.patName) != 0 )
-				{
-					strcpy(_pSong->patternName[patNum],dlg.patName);
-					pParentMain->UpdateSequencer();
-					pParentMain->StatusBarIdle();
-					//Repaint(draw_modes::patternHeader);
-				}
-			}
-		}
-
+		
 		void CChildView::OnNewmachine() 
 		{
 			machine_view()->ShowNewMachineDlg(-1, -1, 0, false);
@@ -1375,382 +1262,114 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		///\todo extemely toxic pollution
 		#define TWOPI_F (2.0f*3.141592665f)
 
-		void CChildView::ShowSwingFillDlg(bool bTrackMode)
-		{
-			int st = Global::_pSong->BeatsPerMin();
-			static int sw = 2;
-			static float sv = 13.0f;
-			static float sp = -90.0f;
-			static BOOL of = true;
-			CSwingFillDlg dlg;
-			dlg.tempo = st;
-			dlg.width = sw;
-			dlg.variance = sv;
-			dlg.phase = sp;
-			dlg.offset = true;
-
-			dlg.DoModal();
-			if (dlg.bGo)
-			{
-				st = dlg.tempo;
-				sw = dlg.width;
-				sv = dlg.variance;
-				sp = dlg.phase;
-				of = dlg.offset;
-				float var = (sv/100.0f);
-
-				// time to do our fill
-				// first some math
-				// our range has to go from spd+var to spd-var and back in width+1 lines
-				float step = TWOPI_F/(sw);
-				float index = sp*TWOPI_F/360;
-
-				int l;
-				int x;
-				int y;
-				int ny;
-				if (bTrackMode)
-				{
-					x = editcur.track;
-					y = 0;
-					ny = _pSong->patternLines[_ps()];
-				}
-				else
-				{
-					x = blockSel.start.track;
-					y = blockSel.start.line;
-					ny = 1+blockSel.end.line-blockSel.start.line;
-				}
-
-				// remember we are at each speed for the length of time it takes to do one tick
-				// this approximately calculates the offset
-				float dcoffs = 0;
-				if (of)
-				{
-					float swing=0;
-					for (l=0;l<sw;l++)
-					{
-						float val = ((sinf(index)*var*st)+st);
-						swing += (val/st)*(val/st);
-						index+=step;
-					}
-					dcoffs = ((swing-sw)*st)/sw;
-				}
-
-				// now fill the pattern
-				unsigned char *base = _ppattern();
-				if (base)
-				{
-					AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
-					for (l=y;l<y+ny;l++)
-					{
-						int const displace=x*EVENT_SIZE+l*MULTIPLY;
-						
-						unsigned char *offset=base+displace;
-						
-						PatternEntry *entry = (PatternEntry*) offset;
-						entry->_cmd = 0xff;
-						int val = helpers::math::rounded(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
-						if (val < 1)
-						{
-							val = 1;
-						}
-						else if (val > 255)
-						{
-							val = 255;
-						}
-						entry->_parameter = unsigned char (val);
-						index+=step;
-					}
-					NewPatternDraw(x,x,y,y+ny);	
-					Repaint(draw_modes::data);
-				}
-			}
-		}
-
 		//// Right Click Popup Menu
 		void CChildView::OnPopCut() { 
-#ifdef use_patternview
 			pattern_view()->CopyBlock(true);
-#else
-			CopyBlock(true);
-#endif
 		}
 
 		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
 		{
-#ifdef use_patternview
 			if (pattern_view()->blockSelected && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
 			else pCmdUI->Enable(FALSE);
-
-#else			
-			if (blockSelected && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
-			else pCmdUI->Enable(FALSE);
-#endif
 		}
 
 
 		void CChildView::OnPopCopy() {
-#ifdef use_patternview
 			pattern_view()->CopyBlock(false);
-#else
-			CopyBlock(false);
-#endif
 		}
 
 		void CChildView::OnPopPaste() {
-#ifdef use_patternview
 			pattern_view()->OnPopPaste();
-#else
-			PasteBlock(editcur.track,editcur.line,false);
-#endif
 		}
 		void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 		{
-#ifdef use_patternview
 			if (pattern_view()->isBlockCopied  && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
 			else  pCmdUI->Enable(FALSE);
-#else
-			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
-			else  pCmdUI->Enable(FALSE);
-
-#endif
 		}
 
 		void CChildView::OnPopMixpaste() { 
-#ifdef use_patternview
 			pattern_view()->OnPopMixpaste();
-#else
-			PasteBlock(editcur.track,editcur.line,true);
-#endif
 		}
 
 		void CChildView::OnPopBlockswitch()
 		{
-#ifdef use_patternview
 			pattern_view()->OnPopBlockswitch();
-#else
-			SwitchBlock(editcur.track,editcur.line);
-#endif
 		}
 
 		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
 		{
-#ifdef use_patternview
 			if (pattern_view()->isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
 			else  pCmdUI->Enable(false);
-#else
-			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
-			else  pCmdUI->Enable(false);
-
-#endif
 		}
 
 		void CChildView::OnPopDelete() {
-#ifdef use_patternview
 			pattern_view()->DeleteBlock();
-#else
-			DeleteBlock();
-#endif
 		}
 
 		void CChildView::OnPopInterpolate() {
-#ifdef use_patternview
 			pattern_view()->BlockParamInterpolate();
-#else
-			BlockParamInterpolate();
-#endif
 		}
 
 		void CChildView::OnPopInterpolateCurve()
 		{
-#ifdef use_patternview
 			pattern_view()->OnPopInterpolateCurve();
-#else
-			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
-			
-			int *valuearray = new int[blockSel.end.line-blockSel.start.line+1];
-			int ps=_pSong->playOrder[editPosition];
-			for (int i=0; i<=blockSel.end.line-blockSel.start.line; i++)
-			{
-				unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,i+blockSel.start.line);
-				if (*offset_target <= notecommands::release || *offset_target == notecommands::empty)
-				{
-					if ( *(offset_target+3) == 0 && *(offset_target+4) == 0 ) valuearray[i]=-1;
-					else valuearray[i]= *(offset_target+3)*0x100 + *(offset_target+4);
-				}
-				else valuearray[i] = *(offset_target+3)*0x100 + *(offset_target+4);
-			}
-			unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,blockSel.start.line);
-			if ( *offset_target == notecommands::tweak ) dlg.AssignInitialValues(valuearray,0);
-			else if ( *offset_target == notecommands::tweakslide ) dlg.AssignInitialValues(valuearray,1);
-			else if ( *offset_target == notecommands::midicc ) dlg.AssignInitialValues(valuearray,2);
-			else dlg.AssignInitialValues(valuearray,-1);
-			
-			if (dlg.DoModal() == IDOK )
-			{
-				int twktype(255);
-				if ( dlg.kftwk == 0 ) twktype = notecommands::tweak;
-				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweakslide;
-				else if ( dlg.kftwk == 2 ) twktype = notecommands::midicc;
-				BlockParamInterpolate(dlg.kfresult,twktype);
-			}
-			delete valuearray;
-#endif
 		}
 
 
 		void CChildView::OnPopChangegenerator() {
-#ifdef use_patternview
 			pattern_view()->BlockGenChange(_pSong->seqBus);
-#else
-			BlockGenChange(_pSong->seqBus);
-#endif
 		}
 
 		void CChildView::OnPopChangeinstrument() { 
-			BlockInsChange(_pSong->auxcolSelected);
+			pattern_view()->BlockInsChange(_pSong->auxcolSelected);
 		}
 
 		void CChildView::OnPopTranspose1() {
-#ifdef use_patternview
 			pattern_view()->BlockTranspose(1);
-#else
-			BlockTranspose(1);
-#endif
 		}
 
 		void CChildView::OnPopTranspose12() {
-#ifdef use_patternview
 			pattern_view()->BlockTranspose(12);
-#else
-			BlockTranspose(12);
-#endif
 		}
 
 		void CChildView::OnPopTranspose_1() {
-#ifdef use_patternview
 			pattern_view()->BlockTranspose(-1);
-#else
-			BlockTranspose(-1);
-#endif
 		}
 
 		void CChildView::OnPopTranspose_12() {
-#ifdef use_patternview
 			pattern_view()->BlockTranspose(-12);
-#else
-			BlockTranspose(-12);
-#endif
 		}
 
 		void CChildView::OnPopTransformpattern() 
 		{
-#ifdef use_patternview
 			pattern_view()->ShowTransformPatternDlg();			
-#else
-			ShowTransformPatternDlg();			
-#endif
 		}
 
 		void CChildView::OnPopPattenproperties() 
 		{
-#ifdef use_patternview
 			pattern_view()->ShowPatternDlg();
-#else
-			ShowPatternDlg();
-#endif
-
 		}
 
 		/// fill block
 		void CChildView::OnPopBlockSwingfill()
 		{
-#ifdef use_patternview
 			pattern_view()->ShowSwingFillDlg(FALSE);
-#else
-			ShowSwingFillDlg(FALSE);
-#endif
 		}
 
 		/// fill track
 		void CChildView::OnPopTrackSwingfill()
 		{
-#ifdef use_patternview
 			pattern_view()->ShowSwingFillDlg(TRUE);
-#else
-			ShowSwingFillDlg(TRUE);
-#endif
 		}
 
 		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
-#ifdef use_patternview
 			pattern_view()->OnUpdateUndo(pCmdUI);
-#else
-			if(pUndoList) 
-			{
-				switch (pUndoList->type)
-				{
-				case UNDO_SEQUENCE:
-					pCmdUI->Enable(TRUE);
-					pCmdUI->SetText("Undo");
-					break;
-				default:
-					if(viewMode == view_modes::pattern)// && bEditMode)
-					{
-						pCmdUI->Enable(TRUE);
-						pCmdUI->SetText("Undo");
-					}
-					else
-					{
-						pCmdUI->Enable(FALSE);
-						pCmdUI->SetText("Undo in Pattern View");
-					}
-					break;
-				}
-			}
-			else
-			{
-				pCmdUI->SetText("Undo");
-				pCmdUI->Enable(FALSE);
-			}
-#endif
 		}
 
 		void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
 		{
-#ifdef use_patternview
 			pattern_view()->OnUpdateRedo(pCmdUI);
-#else
-			if(pRedoList) 
-			{
-				switch (pRedoList->type)
-				{
-				case UNDO_SEQUENCE:
-					pCmdUI->Enable(TRUE);
-					pCmdUI->SetText("Redo");
-					break;
-				default:
-					if(viewMode == view_modes::pattern)// && bEditMode)
-					{
-						pCmdUI->Enable(TRUE);
-						pCmdUI->SetText("Redo");
-					}
-					else
-					{
-						pCmdUI->Enable(FALSE);
-						pCmdUI->SetText("Redo in Pattern View");
-					}
-					break;
-				}
-			}
-			else
-			{
-				pCmdUI->Enable(FALSE);
-				pCmdUI->SetText("Redo");
-			}
-#endif
 		}
 
 		void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) 
@@ -1761,13 +1380,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 
 		{
-#ifdef use_patternview
 			if(pattern_view()->patBufferCopy&&(viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
 			else pCmdUI->Enable(FALSE);
-#else
-			if(patBufferCopy&&(viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
-			else pCmdUI->Enable(FALSE);
-#endif
 		}
 
 		void CChildView::OnFileImportModulefile() 
@@ -1798,13 +1412,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Display the Open dialog box. 
 			if (GetOpenFileName(&ofn)==TRUE)
 			{
-#ifdef use_patternview
 				pattern_view()->KillUndo();
 				pattern_view()->KillRedo();
-#else
-				KillUndo();
-				KillRedo();
-#endif
 				machine_view_.LockVu();
 				Global::pPlayer->Stop();
 				///\todo lock/unlock
@@ -1826,7 +1435,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						XMSongLoader xmfile;
 						xmfile.Open(ofn.lpstrFile);
 						Global::_pSong->New();
-						editPosition=0;
+						pattern_view()->editPosition=0;
 						xmfile.Load(*_pSong);
 						xmfile.Close();
 						machine_view_.Rebuild();
@@ -1848,7 +1457,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						ITModule2 it;
 						it.Open(ofn.lpstrFile);
 						Global::_pSong->New();
-						editPosition=0;
+						pattern_view()->editPosition=0;
 						if(!it.LoadITModule(_pSong))
 						{			
 							MessageBox("Load failed");
@@ -1876,7 +1485,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						ITModule2 s3m;
 						s3m.Open(ofn.lpstrFile);
 						Global::_pSong->New();
-						editPosition=0;
+						pattern_view()->editPosition=0;
 						if(!s3m.LoadS3MModuleX(_pSong))
 						{			
 							MessageBox("Load failed");
@@ -1904,7 +1513,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						MODSongLoader modfile;
 						modfile.Open(ofn.lpstrFile);
 						Global::_pSong->New();
-						editPosition=0;
+						pattern_view()->editPosition=0;
 						modfile.Load(*_pSong);
 						modfile.Close();
 						machine_view_.Rebuild();
@@ -1951,7 +1560,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->RedrawGearRackList();
 				pParentMain->UpdateSequencer();
 				pParentMain->UpdatePlayOrder(false);
-				RecalculateColourGrid();
+				pattern_view()->RecalculateColourGrid();
 				Repaint();
 				machine_view_.UnlockVu();
 			}
@@ -2041,7 +1650,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if( fType == 2 )
 			{
 				FILE* hFile=fopen(fName.c_str(),"rb");
-				LoadBlock(hFile);
+				pattern_view()->LoadBlock(hFile);
 				fclose(hFile);
 			}
 			else
@@ -2072,7 +1681,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 				return;
 			}
-			editPosition = 0;
+			pattern_view()->editPosition = 0;
 			_pSong->Load(&file);
 			//file.Close(); <- load handles this
 			_pSong->_saved=true;
@@ -2107,16 +1716,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pParentMain->UpdateSequencer();
 			pParentMain->UpdatePlayOrder(false);
 			//pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
-			RecalculateColourGrid();
+			pattern_view()->RecalculateColourGrid();
 			Repaint();
-#ifdef use_patternview
 			pattern_view()->KillUndo();
 			pattern_view()->KillRedo();
-#else
-			KillUndo();
-			KillRedo();
-
-#endif
 			SetTitleBarText();
 			machine_view_.Rebuild();
 			machine_view_.UnlockVu();
@@ -2157,9 +1760,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			*/ 
-			if(pUndoList)
+			if(pattern_view()->pUndoList)
 			{
-				if (UndoSaved != pUndoList->counter)
+				if (pattern_view()->UndoSaved != pattern_view()->pUndoList->counter)
 				{
 					titlename+=" *";
 				}
@@ -2170,7 +1773,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				if (UndoSaved != 0)
+				if (pattern_view()->UndoSaved != 0)
 				{
 					titlename+=" *";
 				}
@@ -2949,417 +2552,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			finder.Close();
 		}
 
-		void CChildView::LoadPatternHeaderSkin()
-		{
-			std::string szOld;
-			if (!Global::pConfig->pattern_header_skin.empty())
-			{
-				szOld = Global::pConfig->pattern_header_skin;
-				// ok so...
-				if (szOld != std::string(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN))
-				{
-					BOOL result = FALSE;
-					FindPatternHeaderSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->pattern_header_skin.c_str(), &result);
-					if (result)
-					{
-						return;
-					}
-				}
-				// load defaults
-				szOld = PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN;
-				// and coords
-			#if defined PSYCLE__PATH__CONFIGURATION__SKIN__UGLY_DEFAULT
-				PatHeaderCoords.sBackground.x=0;
-				PatHeaderCoords.sBackground.y=0;
-				PatHeaderCoords.sBackground.width=109;
-				PatHeaderCoords.sBackground.height=16;
-				PatHeaderCoords.sNumber0.x = 0;
-				PatHeaderCoords.sNumber0.y = 16;
-				PatHeaderCoords.sNumber0.width = 7;
-				PatHeaderCoords.sNumber0.height = 12;
-				PatHeaderCoords.sRecordOn.x = 70;
-				PatHeaderCoords.sRecordOn.y = 16;
-				PatHeaderCoords.sRecordOn.width = 7;
-				PatHeaderCoords.sRecordOn.height = 7;
-				PatHeaderCoords.sMuteOn.x = 77;
-				PatHeaderCoords.sMuteOn.y = 16;
-				PatHeaderCoords.sMuteOn.width = 7;
-				PatHeaderCoords.sMuteOn.height = 7;
-				PatHeaderCoords.sSoloOn.x = 84;
-				PatHeaderCoords.sSoloOn.y = 16;
-				PatHeaderCoords.sSoloOn.width = 7;
-				PatHeaderCoords.sSoloOn.height = 7;
-				PatHeaderCoords.dDigitX0.x = 23;
-				PatHeaderCoords.dDigitX0.y = 2;
-				PatHeaderCoords.dDigit0X.x = 30;
-				PatHeaderCoords.dDigit0X.y = 2;
-				PatHeaderCoords.dRecordOn.x = 52;
-				PatHeaderCoords.dRecordOn.y = 5;
-				PatHeaderCoords.dMuteOn.x = 75;
-				PatHeaderCoords.dMuteOn.y = 5;
-				PatHeaderCoords.dSoloOn.x = 96;
-				PatHeaderCoords.dSoloOn.y = 5;
-				PatHeaderCoords.bHasTransparency = false;
-			#else
-				PatHeaderCoords.sBackground.x=0;
-				PatHeaderCoords.sBackground.y=0;
-				PatHeaderCoords.sBackground.width=109;
-				PatHeaderCoords.sBackground.height=18;//16
-				PatHeaderCoords.sNumber0.x = 0;
-				PatHeaderCoords.sNumber0.y = 18;//16
-				PatHeaderCoords.sNumber0.width = 7;
-				PatHeaderCoords.sNumber0.height = 12;
-				PatHeaderCoords.sRecordOn.x = 70;
-				PatHeaderCoords.sRecordOn.y = 18;//16
-				PatHeaderCoords.sRecordOn.width = 11;//7;
-				PatHeaderCoords.sRecordOn.height = 11;//7;
-				PatHeaderCoords.sMuteOn.x = 81;//77;
-				PatHeaderCoords.sMuteOn.y = 18;//16;
-				PatHeaderCoords.sMuteOn.width = 11;//7;
-				PatHeaderCoords.sMuteOn.height = 11;//7;
-				PatHeaderCoords.sSoloOn.x = 92;//84;
-				PatHeaderCoords.sSoloOn.y = 18;//16;
-				PatHeaderCoords.sSoloOn.width = 11;//7;
-				PatHeaderCoords.sSoloOn.height = 11;//7;
-				PatHeaderCoords.dDigitX0.x = 24;//22;
-				PatHeaderCoords.dDigitX0.y = 3;//2;
-				PatHeaderCoords.dDigit0X.x = 31;//29;
-				PatHeaderCoords.dDigit0X.y = 3;//2;
-				PatHeaderCoords.dRecordOn.x = 52;
-				PatHeaderCoords.dRecordOn.y = 3;//5;
-				PatHeaderCoords.dMuteOn.x = 75;
-				PatHeaderCoords.dMuteOn.y = 3;//5;
-				PatHeaderCoords.dSoloOn.x = 97;//96;
-				PatHeaderCoords.dSoloOn.y = 3;//5;
-				PatHeaderCoords.bHasTransparency = false;
-			#endif
-				patternheader.DeleteObject();
-				DeleteObject(hbmPatHeader);
-				patternheadermask.DeleteObject();
-				patternheader.LoadBitmap(IDB_PATTERN_HEADER_SKIN);
-			}
-		}
-
-		void CChildView::FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result)
-		{
-			CFileFind finder;
-			int loop = finder.FindFile(findDir + "\\*");	// check for subfolders.
-			while (loop) 
-			{		
-				loop = finder.FindNextFile();
-				if (finder.IsDirectory() && !finder.IsDots())
-				{
-					FindPatternHeaderSkin(finder.GetFilePath(),findName,result);
-				}
-			}
-			finder.Close();
-			loop = finder.FindFile(findDir + "\\" + findName + ".psh"); // check if the directory is empty
-			while (loop)
-			{
-				loop = finder.FindNextFile();
-				if (!finder.IsDirectory())
-				{
-					CString sName, tmpPath;
-					sName = finder.GetFileName();
-					// ok so we have a .psh, does it have a valid matching .bmp?
-					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
-					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
-					pExt[0]=0;
-					char szOpenName[MAX_PATH];
-					std::sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
-					patternheader.DeleteObject();
-					if (hbmPatHeader)DeleteObject(hbmPatHeader);
-					patternheadermask.DeleteObject();
-					hbmPatHeader = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-					if (hbmPatHeader)
-					{
-						if (patternheader.Attach(hbmPatHeader))
-						{	
-							memset(&PatHeaderCoords,0,sizeof(PatHeaderCoords));
-							// load settings
-							FILE* hfile;
-							sprintf(szOpenName,"%s\\%s.psh",findDir,sName);
-							if(!(hfile=fopen(szOpenName,"rb")))
-							{
-								MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
-								return;
-							}
-							char buf[512];
-							while (fgets(buf, 512, hfile))
-							{
-								if (strstr(buf,"\"background_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sBackground.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sBackground.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sBackground.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sBackground.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"number_0_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sNumber0.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sNumber0.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sNumber0.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sNumber0.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"record_on_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sRecordOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sRecordOn.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sRecordOn.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sRecordOn.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"mute_on_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sMuteOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sMuteOn.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sMuteOn.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sMuteOn.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"solo_on_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sSoloOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sSoloOn.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sSoloOn.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sSoloOn.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"digit_x0_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dDigitX0.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dDigitX0.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"digit_0x_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dDigit0X.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dDigit0X.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"record_on_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dRecordOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dRecordOn.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"mute_on_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dMuteOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dMuteOn.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"solo_on_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dSoloOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dSoloOn.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"transparency\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										helpers::hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
-										PatHeaderCoords.bHasTransparency = TRUE;
-									}
-								}
-							}
-							if (PatHeaderCoords.bHasTransparency)
-							{
-								PrepareMask(&patternheader,&patternheadermask,PatHeaderCoords.cTransparency);
-							}
-							fclose(hfile);
-							*result = TRUE;
-							break;
-						}
-					}
-				}
-			}
-			finder.Close();
-		}
-
-
-		void CChildView::RecalcMetrics()
-		{
-			if (Global::pConfig->pattern_draw_empty_data)
-			{
-				strcpy(szBlankParam,".");
-				strcpy(szBlankNote,"---");
-			}
-			else
-			{
-				strcpy(szBlankParam," ");
-				strcpy(szBlankNote,"   ");
-			}
-			TEXTHEIGHT = Global::pConfig->pattern_font_y;
-			ROWHEIGHT = TEXTHEIGHT+1;
-			TEXTWIDTH = Global::pConfig->pattern_font_x;
-			for (int c=0; c<256; c++)	
-			{ 
-				FLATSIZES[c]=Global::pConfig->pattern_font_x; 
-			}
-			COLX[0] = 0;
-			COLX[1] = (TEXTWIDTH*3)+2;
-			COLX[2] = COLX[1]+TEXTWIDTH;
-			COLX[3] = COLX[2]+TEXTWIDTH+1;
-			COLX[4] = COLX[3]+TEXTWIDTH;
-			COLX[5] = COLX[4]+TEXTWIDTH+1;
-			COLX[6] = COLX[5]+TEXTWIDTH;
-			COLX[7] = COLX[6]+TEXTWIDTH;
-			COLX[8] = COLX[7]+TEXTWIDTH;
-			COLX[9] = COLX[8]+TEXTWIDTH+1;
-			ROWWIDTH = COLX[9];
-			HEADER_ROWWIDTH = PatHeaderCoords.sBackground.width+1;
-			HEADER_HEIGHT = PatHeaderCoords.sBackground.height+2;
-			if (ROWWIDTH < HEADER_ROWWIDTH)
-			{
-				int temp = (HEADER_ROWWIDTH-ROWWIDTH)/2;
-				ROWWIDTH = HEADER_ROWWIDTH;
-				for (int i = 0; i < 10; i++)
-				{
-					COLX[i] += temp;
-				}
-			}
-			HEADER_INDENT = (ROWWIDTH - HEADER_ROWWIDTH)/2;
-			if (Global::pConfig->_linenumbers)
-			{
-				XOFFSET = (4*TEXTWIDTH);
-				YOFFSET = TEXTHEIGHT+2;
-				if (YOFFSET < HEADER_HEIGHT)
-				{
-					YOFFSET = HEADER_HEIGHT;
-				}
-			}
-			else
-			{
-				XOFFSET = 1;
-				YOFFSET = HEADER_HEIGHT;
-			}
-			VISTRACKS = (CW-XOFFSET)/ROWWIDTH;
-			VISLINES = (CH-YOFFSET)/ROWHEIGHT;
-			if (VISLINES < 1) 
-			{ 
-				VISLINES = 1; 
-			}
-			if (VISTRACKS < 1) 
-			{ 
-				VISTRACKS = 1; 
-			}			
-		}
-
 		void CChildView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
 		{
 			BITMAP bm;
@@ -3444,7 +2636,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				_pSong->_trackMuted[editcur.track] = !_pSong->_trackMuted[editcur.track];
+				_pSong->_trackMuted[pattern_view()->editcur.track] = !_pSong->_trackMuted[pattern_view()->editcur.track];
 				Repaint(draw_modes::track_header);
 			}
 		}
@@ -3453,7 +2645,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				if (_pSong->_trackSoloed == editcur.track)
+				if (_pSong->_trackSoloed == pattern_view()->editcur.track)
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
@@ -3467,8 +2659,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						_pSong->_trackMuted[i] = TRUE;
 					}
-					_pSong->_trackMuted[editcur.track] = FALSE;
-					_pSong->_trackSoloed = editcur.track;
+					_pSong->_trackMuted[pattern_view()->editcur.track] = FALSE;
+					_pSong->_trackSoloed = pattern_view()->editcur.track;
 				}
 				Repaint(draw_modes::track_header);
 			}
@@ -3478,7 +2670,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				_pSong->_trackArmed[editcur.track] = !_pSong->_trackArmed[editcur.track];
+				_pSong->_trackArmed[pattern_view()->editcur.track] = !_pSong->_trackArmed[pattern_view()->editcur.track];
 				_pSong->_trackArmedCount = 0;
 				for ( int i=0;i<MAX_TRACKS;i++ )
 				{
@@ -3516,11 +2708,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CNativeGui::uiSetting().LoadMachineDial();
 		}		
 
+		void CChildView::AddMacViewUndo()
+		{
+			// i have not written the undo code yet for machine and instruments
+			// however, for now it at least tracks changes for save/new/open/close warnings
+			UndoMacCounter++;
+			SetTitleBarText();
+		}
+
+
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
 
 // graphics operations, private headers included only by this translation unit
-#include "PatViewNew.private.hpp"
 #include "SeqView.private.hpp"
 
 // User/Mouse Responses, private headers included only by this translation unit

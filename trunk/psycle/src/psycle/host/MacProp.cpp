@@ -96,8 +96,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if ( m_view != NULL )
 			{
 				m_view->AddMacViewUndo();
-				m_view->updatePar=thisMac;
-				m_view->Repaint(draw_modes::machine);
+				m_view->updatePar=thisMac;				
 			}
 			gui_->SetMute(pMachine->_mute);
 			gui_->QueueDraw();
@@ -108,8 +107,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if ( m_view != NULL )
 			{
 				m_view->AddMacViewUndo();
-				m_view->updatePar=thisMac;
-				m_view->Repaint(draw_modes::machine);
+				m_view->updatePar=thisMac;				
+				gui_->QueueDraw();
 			}
 		}
 
@@ -147,7 +146,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
 					if (m_view->viewMode==view_modes::machine)
 					{
-						m_view->Repaint();
+						m_view->Invalidate();
 					}
 				}
 			}

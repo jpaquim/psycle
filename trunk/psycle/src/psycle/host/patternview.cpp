@@ -66,7 +66,8 @@ namespace psycle {
 			   patBufferCopy(false),
 			   bFT2HomeBehaviour(true),
 			   bShiftArrowsDoSelect(false),
-			   bDoingSelection(false)
+			   bDoingSelection(false),
+			   maxView(false)
 		{
 			selpos.bottom=0;
 			newselpos.bottom=0;
