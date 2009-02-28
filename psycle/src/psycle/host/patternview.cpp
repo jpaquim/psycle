@@ -22,7 +22,7 @@ namespace psycle {
 
 		///\todo extemely toxic pollution
 		#define TWOPI_F (2.0f*3.141592665f)
-
+	
 
 		PatternView::PatternView(CChildView* parent, CMainFrame* main, Song* song)						
 			:  parent_(parent),
