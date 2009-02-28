@@ -24,7 +24,7 @@ namespace psycle {
 			virtual void UpdateText();
 
 			virtual void BeforeDeleteDlg();
-			virtual bool OnEvent(TestCanvas::Event* ev);
+			virtual bool OnEvent(PsycleCanvas::Event* ev);
 
 			void SetMute(bool mute);
 			void SetSolo(bool mute);
@@ -47,14 +47,14 @@ namespace psycle {
 			
 			
 			//skin elements
-			TestCanvas::PixBuf pixbuf_;
-			TestCanvas::PixBuf mute_pixbuf_;
-			TestCanvas::PixBuf solo_pixbuf_;
-			TestCanvas::PixBuf pan_pixbuf_;
-			TestCanvas::PixBuf vu_bg_pixbuf_;
-			TestCanvas::PixBuf vu_peak_pixbuf_;
-			TestCanvas::PixBuf vu_led_pixbuf_;
-			TestCanvas::Text text_;
+			PsycleCanvas::PixBuf pixbuf_;
+			PsycleCanvas::PixBuf mute_pixbuf_;
+			PsycleCanvas::PixBuf solo_pixbuf_;
+			PsycleCanvas::PixBuf pan_pixbuf_;
+			PsycleCanvas::PixBuf vu_bg_pixbuf_;
+			PsycleCanvas::PixBuf vu_peak_pixbuf_;
+			PsycleCanvas::PixBuf vu_led_pixbuf_;
+			PsycleCanvas::Text text_;
 			// skin
 			SMachineCoords	MachineCoords_;
 		};

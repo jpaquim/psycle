@@ -97,7 +97,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if((cmd.GetType() == CT_Immediate) ||
 				(cmd.GetType() == CT_Editor && viewMode == view_modes::pattern) ) 
 				{			
-#ifdef use_test_canvas
 					if ( cmd == cdefInfoMachine) {
 						if (Global::_pSong->seqBus < MAX_MACHINES)
 						{
@@ -114,13 +113,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pattern_view_.PerformCmd(cmd, bRepeat);
 #else
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
-#endif
-#else
-#ifdef use_patternview
-					pattern_view_.PerformCmd(cmd, bRepeat);
-#else
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
-#endif
 #endif
 				}
 				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)

@@ -997,25 +997,7 @@ namespace psycle
 					pChildView->OnPopPattenproperties();
 				}
 				break;
-
-			case cdefInfoMachine:
-
-				if (Global::_pSong->seqBus < MAX_MACHINES)
-				{
-					if (Global::_pSong->_pMachine[Global::_pSong->seqBus])
-					{
-						CPoint point;
-						point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_x;
-						point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_y;
-						pMainFrame->ShowMachineGui(Global::_pSong->seqBus, point);
-					}
-				}
-				break;
-
-			case cdefEditMachine:
-				pChildView->OnMachineview();
-				break;
-
+			
 			case cdefEditPattern:
 				pChildView->OnPatternView();
 				pChildView->ChordModeOffs = 0;

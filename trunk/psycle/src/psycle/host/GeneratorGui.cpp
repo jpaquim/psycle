@@ -259,21 +259,21 @@ namespace psycle {
 			solo_pixbuf_.SetVisible(on);
 		}
 
-		bool GeneratorGui::OnEvent(TestCanvas::Event* ev)
+		bool GeneratorGui::OnEvent(PsycleCanvas::Event* ev)
 		{
-			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_PRESS ) {
 				view()->SelectMachine(this);
 				if ( !TestSolo(ev->x, ev->y) )
 					if ( !TestMute(ev->x, ev->y) )
 						TestPan(ev->x, ev->y);
 			} else
-			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
+			if ( ev->type == PsycleCanvas::Event::MOTION_NOTIFY ) {
 				if ( pan_dragging_ ) {
 					DoPanDragging(ev->x, ev->y);
 					return true;
 				}
 			} else
-			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_RELEASE ) {
 				pan_dragging_ = false;
 			}
 			return MachineGui::OnEvent(ev);

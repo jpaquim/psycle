@@ -173,10 +173,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DockControlBar(&toolBar);
 			if (!Global::pConfig->_toolbarOnVsts) ShowControlBar(&toolBar,FALSE,FALSE);
 			machine().SetEditWnd(this);
-#ifdef use_test_canvas
-#else
-			*_pActive=true;
-#endif
 			SetTimer(449, 25, 0);
 			return 0;
 		}
@@ -193,12 +189,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				::SendMessage(*it, WM_CLOSE, 0, 0);
 				++it;
 			}
-#ifdef use_test_canvas
 			if (gui_)
 				gui_->BeforeDeleteDlg();
-#else
-			*_pActive=false;			
-#endif
 			CFrameWnd::OnClose();
 		}
 

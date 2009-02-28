@@ -12,12 +12,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		extern CPsycleApp theApp;
 
-		CMacProp::CMacProp(CWnd* pParent)
-			: CDialog(CMacProp::IDD, pParent)
-		{
-			m_view=NULL;
-		}
-
 		CMacProp::CMacProp(MachineGui* gui)
 			: CDialog(CMacProp::IDD, 0),
 			  gui_(gui)
@@ -105,10 +99,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_view->updatePar=thisMac;
 				m_view->Repaint(draw_modes::machine);
 			}
-#ifdef use_test_canvas
 			gui_->SetMute(pMachine->_mute);
 			gui_->QueueDraw();
-#endif
 		}
 		void CMacProp::OnBypass() 
 		{
@@ -123,46 +115,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMacProp::OnSolo() 
 		{
-#ifdef use_test_canvas
 			gui_->view()->SetSolo(pMachine);
 			gui_->QueueDraw();
-#else
-			m_view->AddMacViewUndo();
-			if (m_soloCheck.GetCheck() == 1)
-			{
-				for ( int i=0;i<MAX_MACHINES;i++ )
-				{
-					if (pSong->_pMachine[i])
-					{
-						if ( pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR )
-						{
-							pSong->_pMachine[i]->_mute = true;
-							pSong->_pMachine[i]->_volumeCounter=0.0f;
-							pSong->_pMachine[i]->_volumeDisplay =0;
-						}
-					}
-				}
-				pMachine->_mute = false;
-				if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
-				pSong->machineSoloed = thisMac;
-			}
-			else
-			{
-				pSong->machineSoloed = -1;
-				for ( int i=0;i<MAX_BUSES;i++ )
-				{
-					if (pSong->_pMachine[i])
-					{
-						pSong->_pMachine[i]->_mute = false;
-					}
-				}
-				if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
-			}
-			if ( m_view != NULL )
-			{
-				m_view->Repaint(draw_modes::all_machines);
-			}
-#endif
 		}
 
 		void CMacProp::OnClone() 
@@ -184,11 +138,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					MessageBox("Cloning failed","Cloning failed");
 				}
-#ifdef use_test_canvas
 				else {
 					gui_->view()->CreateMachineGui(gui_->view()->song()->_pMachine[dst]);
 				}
-#endif
+
 				if ( m_view != NULL )
 				{
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
@@ -203,20 +156,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMacProp::OnBnClickedReplacemac()
 		{
 			int index = pMachine->_macIndex;
-#ifdef use_test_canvas
 			replaced = true;
-#else
-			m_view->NewMachine(pMachine->_x,pMachine->_y,index);
-			strcpy(txt,Global::_pSong->_pMachine[index]->_editName);
-
-			CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
-			pParentMain->UpdateEnvInfo();
-			pParentMain->UpdateComboGen();
-			if (m_view->viewMode==view_modes::machine)
-			{
-				m_view->Repaint();
-			}
-#endif
 			OnCancel();
 		}
 

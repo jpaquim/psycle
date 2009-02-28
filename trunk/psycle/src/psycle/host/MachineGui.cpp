@@ -17,13 +17,13 @@ namespace psycle {
 
 		MachineGui::MachineGui(MachineView* view,
 							   Machine* mac) :
-			TestCanvas::Group(view->root(), mac->_x, mac->_y),
+			PsycleCanvas::Group(view->root(), mac->_x, mac->_y),
 			view_(view),
 			mac_(mac),
 			dragging_(false)
 		{		
 			assert(mac_);
-			TestCanvas::Line::Points pts;
+			PsycleCanvas::Line::Points pts;
 			pts.push_back(std::pair<double,double>(0, 0));
 			pts.push_back(std::pair<double,double>(0, 100));
 			sel_line_left_top_1.SetPoints(pts);
@@ -103,9 +103,9 @@ namespace psycle {
 		{
 		}
 
-		bool MachineGui::OnEvent(TestCanvas::Event* ev)
+		bool MachineGui::OnEvent(PsycleCanvas::Event* ev)
 		{
-			if ( ev->type == TestCanvas::Event::BUTTON_PRESS ) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_PRESS ) {
 					new_con_ = false;
 				//else
 				if ( ev->button == 3 ) {
@@ -113,7 +113,7 @@ namespace psycle {
 					dragging_y_ = ev->y;
 				}
 			} else
-			if ( ev->type == TestCanvas::Event::MOTION_NOTIFY ) {
+			if ( ev->type == PsycleCanvas::Event::MOTION_NOTIFY ) {
 				if (dragging_) {
 					DoDragging(ev->x, ev->y);
 				} else
@@ -127,14 +127,14 @@ namespace psycle {
 					StartDragging(ev->x, ev->y);
 				}
 			} else
-			if ( ev->type == TestCanvas::Event::BUTTON_RELEASE ) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_RELEASE ) {
 				if (ev->button == 3) {
 					view()->DoMacPropDialog(mac(), true);
 				} else {
 					StopDragging();
 				}
 			}
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
+			if ( ev->type == PsycleCanvas::Event::BUTTON_2PRESS ) {
 				CRect rc;
 				view()->parent()->GetWindowRect(rc);
 				ShowDialog(rc.left + absx() + ev->x,  rc.top + absy() + ev->y);
@@ -210,7 +210,7 @@ namespace psycle {
 				view()->child_view()->Invalidate(1);
 			}	
 			int size = 5;
-			TestCanvas::Line::Points pts;
+			PsycleCanvas::Line::Points pts;
 			pts.push_back(std::pair<double,double>(-size, -size));
 			pts.push_back(std::pair<double,double>(-size, size));
 			sel_line_left_top_1.SetPoints(pts);

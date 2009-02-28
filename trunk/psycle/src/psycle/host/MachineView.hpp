@@ -6,7 +6,7 @@
 namespace psycle {
 	namespace host {
 
-		class MachineView : public TestCanvas::Canvas
+		class MachineView : public PsycleCanvas::Canvas
 		{
 		public:
 			MachineView(class CChildView* parent, class CMainFrame* main, class Song* song);
@@ -19,7 +19,7 @@ namespace psycle {
 			// the machinegui OnEvent. In case of replace and delete this is important
 			void ShowNewMachineDlg(double x , double y, Machine* mac, bool from_event);
 			void SelectMachine(MachineGui* gui);
-			virtual void OnEvent(TestCanvas::Event* ev);
+			virtual void OnEvent(PsycleCanvas::Event* ev);
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main();
 			Song* song() { return song_; }

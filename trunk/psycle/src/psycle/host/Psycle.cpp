@@ -110,20 +110,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			tIcon=LoadIcon(IDR_MAINFRAME);
 			pFrame->SetIcon(tIcon, true);
 			pFrame->SetIcon(tIcon, false);
-			
+		
 			pFrame->m_wndView.LoadMachineSkin();
-#ifdef use_test_canvas	
 			pFrame->m_wndView.machine_view()->InitSkin();
 			pFrame->m_wndView.machine_view()->Rebuild();
-#endif
+
 #ifdef use_patternview
 			pFrame->m_wndView.pattern_view()->LoadPatternHeaderSkin();
 			pFrame->m_wndView.pattern_view()->RecalcMetrics();
 			pFrame->m_wndView.pattern_view()->RecalculateColourGrid();
 #endif
 
-			pFrame->m_wndView.LoadPatternHeaderSkin();
-			pFrame->m_wndView.LoadMachineBackground();
+			pFrame->m_wndView.LoadPatternHeaderSkin();			
 			pFrame->m_wndView.RecalcMetrics();
 			pFrame->m_wndView.RecalculateColourGrid();
 
@@ -135,10 +133,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// center master machine
 			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
 			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
-#ifdef use_test_canvas
-			pFrame->m_wndView.machine_view()->UpdatePosition(pFrame->m_wndView.machine_view()->song()->_pMachine[MASTER_INDEX]);
-#endif
-			
+			pFrame->m_wndView.machine_view()->UpdatePosition(pFrame->m_wndView.machine_view()->song()->_pMachine[MASTER_INDEX]);		
 			pFrame->UpdateWindow();
 			
 			CNewMachine::LoadPluginInfo(false);

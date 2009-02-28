@@ -28,8 +28,17 @@
 namespace psycle {
 	namespace host {
 
+		namespace {
+			COLORREF inline rgb(int r, int g, int b) {
+				return RGB(
+					std::max(0, std::min(r, 255)),
+					std::max(0, std::min(g, 255)),
+					std::max(0, std::min(b, 255)));
+			}
+		}
+
 		MachineView::MachineView(CChildView* parent, CMainFrame* main, Song* song)
-			: TestCanvas::Canvas(parent),
+			: PsycleCanvas::Canvas(parent),
 			  parent_(parent),
 			  main_(main),
 			  song_(song),
@@ -204,10 +213,10 @@ namespace psycle {
 			is_locked_ = false;
 		}
 
-		void MachineView::OnEvent(TestCanvas::Event* ev)
+		void MachineView::OnEvent(PsycleCanvas::Event* ev)
 		{
-			TestCanvas::Canvas::OnEvent(ev);
-			if ( ev->type == TestCanvas::Event::BUTTON_2PRESS ) {
+			PsycleCanvas::Canvas::OnEvent(ev);
+			if ( ev->type == PsycleCanvas::Event::BUTTON_2PRESS ) {
 				if ( !root()->intersect(ev->x, ev->y) ) {
 					ShowNewMachineDlg(ev->x, ev->y, 0, false);
 				}
@@ -515,12 +524,12 @@ namespace psycle {
 			sender->GetBounds( x1, y1, x2, y2);
 			double midW = (x2 - x1) / 2;
 			double midH = (y2 - y1) / 2;
-			TestCanvas::Group* fromParent = sender->parent();
+			PsycleCanvas::Group* fromParent = sender->parent();
 			double x3, y3, x4, y4;
 			fromParent->GetBounds(x3, y3, x4, y4);
 			double x = x1+x3;
 			double y = y1+y3;
-			TestCanvas::Line::Points points(2);
+			PsycleCanvas::Line::Points points(2);
 			points[0] = std::pair<double, double>(x + midW, y + midH);
 			points[1] = std::pair<double, double>(x + midW, y + midH);
 			line->SetPoints(points);

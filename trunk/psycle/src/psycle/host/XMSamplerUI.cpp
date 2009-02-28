@@ -42,11 +42,7 @@ END_MESSAGE_MAP()
 ///void XMSamplerUI::OnClose()
 void XMSamplerUI::OnDestroy()
 {
-#ifdef use_test_canvas
 	gui_->BeforeDeleteDlg();
-#else
-	((CChildView*)m_pParentWnd)->XMSamplerMachineDialog = NULL;
-#endif
 	CPropertySheet::OnDestroy();
 }
 

@@ -34,13 +34,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 
 		CMasterDlg::~CMasterDlg()
-		{
-#ifdef use_test_canvas
-			m_pParent->MasterMachineDialog = NULL;
+		{		
 			m_back.DeleteObject();
 			m_numbers.DeleteObject();
 			m_sliderknob.DeleteObject();
-#endif
 		}
 
 
@@ -308,16 +305,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMasterDlg::OnCancel()
 		{
-#ifdef use_test_canvas
 			CDialog::OnCancel();
-#else
-			m_pParent->MasterMachineDialog = NULL;
-			m_back.DeleteObject();
-			m_numbers.DeleteObject();
-			m_sliderknob.DeleteObject();
-			DestroyWindow();
-			delete this;
-#endif
 		}
 
 		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 

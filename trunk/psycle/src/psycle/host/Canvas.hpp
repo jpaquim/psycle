@@ -1,6 +1,6 @@
 #pragma once
 
-namespace TestCanvas {
+namespace PsycleCanvas {	
 
   struct Event {
 	  enum Type {
@@ -364,4 +364,4 @@ class Canvas
 		CRgn save_rgn_;
 };
 
-}  // namespace TestCanvas
+}  // namespace PsycleCanvas

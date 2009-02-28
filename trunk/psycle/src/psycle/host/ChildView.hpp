@@ -2,7 +2,6 @@
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
 
-#define use_test_canvas
 #define use_patternview
 
 #include "Song.hpp"
@@ -17,17 +16,11 @@
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		class CMasterDlg;
-		class CWireDlg;
 		class CGearTracker;
 		class XMSamplerUI;
 		class CWaveInMacDlg;
-
-		#define MAX_WIRE_DIALOGS 16		
-
+	
 		#define MAX_DRAW_MESSAGES 32
-
-
 
 		struct draw_modes
 		{
@@ -180,23 +173,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void RecalculateColourGrid();
 			void RecalcMetrics();
 			void LoadPatternHeaderSkin();
-			void LoadMachineSkin();
-			void LoadMachineBackground();
+			void LoadMachineSkin();			
 			void LoadMachineDial();
 			void KillWireDialogs();
 			void patTrackMute();
 			void patTrackSolo();
 			void patTrackRecord();
 			void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
-			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
-			void NewMachine(int x = -1, int y = -1, int mac = -1);
-			void DoMacPropDialog(int propMac);
+			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );			
 			void FileLoadsongNamed(std::string fName);
 			void OnFileLoadsongNamed(std::string fName, int fType);
 
-#ifdef use_test_canvas
 			MachineView* machine_view() { return &machine_view_; }
-#endif
+
 #ifdef use_patternview
 			PatternView* pattern_view() { return &pattern_view_; }
 #endif
@@ -209,12 +198,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			CFrameWnd* pParentFrame;
 			Song* _pSong;
-		//	bool multiPattern;
-			CMasterDlg * MasterMachineDialog;
+		//	bool multiPattern;			
 			CGearTracker * SamplerMachineDialog;
 			XMSamplerUI* XMSamplerMachineDialog;
-			CWaveInMacDlg* WaveInMachineDialog;
-			CWireDlg * WireDialog[MAX_WIRE_DIALOGS];
+			CWaveInMacDlg* WaveInMachineDialog;			
 
 			bool blockSelected;
 			bool blockStart;
@@ -287,16 +274,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			inline void TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h);
 			inline void BOX(CDC *devc,int x,int y, int w, int h);
 			inline void BOX(CDC *devc,CRect rect);
-			void DrawMachineVol(int c, CDC *devc);
-			void DrawMachineVumeters(int c, CDC *devc);	
-			void DrawAllMachineVumeters(CDC *devc);	
-			void DrawMachineEditor(CDC *devc);
-			void DrawMachineHighlight(int macnum, CDC *devc, Machine *mac, int x, int y);
-			void DrawMachine(int macnum, CDC *devc);
-			void ClearMachineSpace(int macnum, CDC *devc);
-			void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
-			int GetMachine(CPoint point);
-			int GetWire(CPoint point,int&wiresource);
+			
+			void DrawAllMachineVumeters(CDC *devc);				
 			
 			void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
@@ -320,9 +299,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 
 		private:
-#ifdef use_test_canvas
 			MachineView machine_view_;
-#endif
+
 #ifdef use_patternview
 			PatternView pattern_view_;
 #endif
@@ -332,10 +310,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CBitmap patternheadermask;
 			HBITMAP hbmPatHeader;
 			CBitmap machineskin;
-			CBitmap machineskinmask;
-			CBitmap machinebkg;
-			HBITMAP hbmMachineSkin;
-			HBITMAP hbmMachineBkg;	
+			CBitmap machineskinmask;			
+			HBITMAP hbmMachineSkin;			
 			HBITMAP hbmMachineDial;
 
 			CBitmap* bmpDC;
@@ -343,12 +319,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			int bkgx;
 			int bkgy;
-
-			int triangle_size_tall;
-			int triangle_size_center;
-			int triangle_size_wide;
-			int triangle_size_indent;
-			
+					
 			int playpos;		// Play Cursor Position in Screen // left and right are unused
 			int newplaypos;		// Play Cursor Position in Screen that is gonna be drawn.
 			CRect selpos;		// Selection Block in Screen
@@ -357,26 +328,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			SPatternDraw pPatternDraw[MAX_DRAW_MESSAGES];
 			int numPatternDraw;
-
-			// Enviroment variables
-			int smac;
-			struct smac_modes
-			{
-				enum smac_mode
-				{
-					move, //< moving a machine
-					panning //< panning on a machine
-				};
-			};
-			smac_modes::smac_mode smacmode;
-			int wiresource;
-			int wiredest;
-			int wiremove;
-			int wireSX;
-			int wireSY;
-			int wireDX;
-			int wireDY;
-
+			
 			int maxt;		// num of tracks shown
 			int maxl;		// num of lines shown
 			int tOff;		// Track Offset (first track shown)

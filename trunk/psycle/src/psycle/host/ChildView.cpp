@@ -37,8 +37,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CMainFrame		*pParentMain;
 
 		CChildView::CChildView(CMainFrame* main_frame)
-			:pParentFrame(0)
-			,MasterMachineDialog(NULL)
+			:pParentFrame(0)			
 			,SamplerMachineDialog(NULL)
 			,XMSamplerMachineDialog(NULL)
 			,WaveInMachineDialog(NULL)
@@ -62,21 +61,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,textLeftEdge(2)
 			,hbmPatHeader(0)
 			,hbmMachineSkin(0)
-			,hbmMachineBkg(0)
 			,hbmMachineDial(0)
 			,bmpDC(NULL)
 			,playpos(-1)
 			,newplaypos(-1) 
 			,numPatternDraw(0)
-			,smac(-1)
-			,smacmode(smac_modes::move)
-			,wiresource(-1)
-			,wiredest(-1)
-			,wiremove(-1)
-			,wireSX(0)
-			,wireSY(0)
-			,wireDX(0)
-			,wireDY(0)
 			,maxt(1)
 			,maxl(1)
 			,tOff(0)
@@ -98,17 +87,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,UndoMacSaved(0)
 			,patBufferLines(0)
 			,patBufferCopy(false)
-#ifdef use_test_canvas
 			,machine_view_(this, main_frame, Global::_pSong)
-#endif
 #ifdef use_patternview
 			,pattern_view_(this, main_frame, Global::_pSong)
 #endif
-		{
-			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
-			{
-				WireDialog[c] = NULL;
-			}
+		{			
 			for (int c=0; c<256; c++)	{ FLATSIZES[c]=8; }
 			selpos.bottom=0;
 			newselpos.bottom=0;
@@ -125,10 +108,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
-#ifdef use_test_canvas
+
 			// machine_view_.Rebuild();
 			// its done in psycle.cpp, todo check config load order
-#endif
 		}
 
 		CChildView::~CChildView()
@@ -150,9 +132,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			machineskin.DeleteObject();
 			DeleteObject(hbmMachineSkin);
 			patternheadermask.DeleteObject();
-			machineskinmask.DeleteObject();
-			machinebkg.DeleteObject();
-			DeleteObject(hbmMachineBkg);
+			machineskinmask.DeleteObject();			
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -339,8 +319,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip
 						);
 					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
-					if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI();
-					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
+					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
+					//((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 				}
 				if (viewMode == view_modes::machine)
 				{
@@ -363,8 +343,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
 						{
-							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
-								pParentMain->m_pWndMac[c]->Invalidate(false);
+							//if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker) maybe a todo
+							//	pParentMain->m_pWndMac[c]->Invalidate(false);
 						}
 						else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
 								_pSong->_pMachine[c]->_type == MACH_VSTFX )
@@ -514,40 +494,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				oldbmp = bufDC.SelectObject(bmpDC);
 				if (viewMode==view_modes::machine)	// Machine view paint handler
 				{
-#ifdef use_test_canvas					
+
 					machine_view_.Draw(&bufDC, pRgn); 
-#else
-					switch (updateMode)
-					{
-					case draw_modes::all:
-						DrawMachineEditor(&bufDC);
-						break;
-					case draw_modes::machine:
-						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
-						DrawMachine(updatePar, &bufDC);
-						DrawMachineVumeters(updatePar, &bufDC);
-						updateMode=draw_modes::all;
-						break;
-					case draw_modes::all_machines:
-						for (int i=0;i<MAX_MACHINES;i++)
-						{
-							if (_pSong->_pMachine[i])
-							{
-								DrawMachine(i, &bufDC);
-							}
-						}
-						DrawAllMachineVumeters(&bufDC);
-						break;
-					}
-#endif
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{
-#ifdef use_patternview
 					pattern_view_.Draw(&bufDC, pRgn);
-#else
-					DrawPatEditor(&bufDC);
-#endif
 				}
 				else if ( viewMode == view_modes::sequence)
 				{
@@ -564,34 +516,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (viewMode==view_modes::machine) // Machine view paint handler
 				{
-
-#ifdef use_test_canvas					
 					machine_view_.Draw(&dc, pRgn);
-#else
-					switch (updateMode)
-					{
-					case draw_modes::all:
-						DrawMachineEditor(&dc);
-						break;
-					case draw_modes::machine:
-						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
-						DrawMachine(updatePar, &dc);
-						DrawMachineVumeters(updatePar, &dc);
-						updateMode=draw_modes::all;
-						break;
-					case draw_modes::all_machines:
-						for (int i=0;i<MAX_MACHINES;i++)
-						{
-							if (_pSong->_pMachine[i]) 
-							{
-								DrawMachine(i, &dc);
-							}
-						}
-						DrawAllMachineVumeters(&dc);
-						updateMode=draw_modes::all;
-						break;
-					}
-#endif
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{
@@ -639,9 +564,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CWnd ::OnSize(nType, cx, cy);
 
-#ifdef use_test_canvas
 			machine_view_.OnSize(cx, cy);
-#endif
 
 			CW = cx;
 			CH = cy;
@@ -961,10 +884,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				KillUndo();
 				KillRedo();
 #endif
-				pParentMain->CloseAllMacGuis();
-#ifdef use_test_canvas
 				machine_view_.LockVu();
-#endif
 				Global::pPlayer->Stop();
 				///\todo lock/unlock
 				Sleep(256);
@@ -999,11 +919,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				//pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
 				RecalculateColourGrid();
 				Repaint();
-#ifdef use_test_canvas
-			machine_view_.Rebuild();
-			machine_view_.UnlockVu();
-#endif
-
+				machine_view_.Rebuild();
+				machine_view_.UnlockVu();
 			}
 			pParentMain->StatusBarIdle();
 		}
@@ -1427,184 +1344,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnNewmachine() 
 		{
-			NewMachine();
-		}
-
-		/// Show new machine dialog
-		void CChildView::NewMachine(int x, int y, int mac) 
-		{
-			CNewMachine dlg;
-			if(mac >= 0)
-			{
-				if (mac < MAX_BUSES)
-				{
-					dlg.selectedMode = modegen;
-				}
-				else
-				{
-					dlg.selectedMode = modefx;
-				}
-			}
-			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))
-			{
-				int fb,xs,ys;
-				if (mac < 0)
-				{
-					AddMacViewUndo();
-					if (dlg.selectedMode == modegen) 
-					{
-						fb = Global::_pSong->GetFreeBus();
-						xs = MachineCoords.sGenerator.width;
-						ys = MachineCoords.sGenerator.height;
-					}
-					else 
-					{
-						fb = Global::_pSong->GetFreeFxBus();
-						xs = MachineCoords.sEffect.width;
-						ys = MachineCoords.sEffect.height;
-					}
-				}
-				else
-				{
-					if (mac >= MAX_BUSES && dlg.selectedMode != modegen)
-					{
-						AddMacViewUndo();
-						fb = mac;
-						xs = MachineCoords.sEffect.width;
-						ys = MachineCoords.sEffect.height;
-						// delete machine if it already exists
-						if (Global::_pSong->_pMachine[fb])
-						{
-							x = Global::_pSong->_pMachine[fb]->_x;
-							y = Global::_pSong->_pMachine[fb]->_y;
-							pParentMain->CloseMacGui(fb);
-						}
-					}
-					else if (mac < MAX_BUSES && dlg.selectedMode == modegen)
-					{
-						AddMacViewUndo();
-						fb = mac;
-						xs = MachineCoords.sGenerator.width;
-						ys = MachineCoords.sGenerator.height;
-						// delete machine if it already exists
-						if (Global::_pSong->_pMachine[fb])
-						{
-							x = Global::_pSong->_pMachine[fb]->_x;
-							y = Global::_pSong->_pMachine[fb]->_y;
-							pParentMain->CloseMacGui(fb);
-						}
-					}
-					else
-					{
-						MessageBox("Wrong Class of Machine!");
-						return;
-					}
-				}
-				// random position
-				if ((x < 0) || (y < 0))
-				{
-					bool bCovered = TRUE;
-					while (bCovered)
-					{
-						x = (rand())%(CW-xs);
-						y = (rand())%(CH-ys);
-						bCovered = FALSE;
-						for (int i=0; i < MAX_MACHINES; i++)
-						{
-							if (Global::_pSong->_pMachine[i])
-							{
-								if ((abs(Global::_pSong->_pMachine[i]->_x - x) < 32) &&
-									(abs(Global::_pSong->_pMachine[i]->_y - y) < 32))
-								{
-									bCovered = TRUE;
-									i = MAX_MACHINES;
-								}
-							}
-						}
-					}
-				}
-				// Stop driver to handle possible conflicts between threads.
-				// should be no conflicts because last thing create machine does is set active machine flag.
-				// busses are set last, so no messages will be sent until after machine is created anyway
-				/*
-				_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Close();
-				*/
-
-				if ( fb == -1)
-				{
-					MessageBox("Machine Creation Failed","Error!",MB_OK);
-				}
-				else
-				{
-					bool created=false;
-					if (Global::_pSong->_pMachine[fb] )
-					{
-						created = Global::_pSong->ReplaceMachine(Global::_pSong->_pMachine[fb],(MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
-					}
-					else 
-					{
-						created = Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
-					}
-					if (created)
-					{
-						if ( dlg.selectedMode == modegen)
-						{
-							Global::_pSong->seqBus = fb;
-						}
-
-						// make sure that no 2 machines have the same name, because that is irritating
-
-						int number = 1;
-						char buf[sizeof(_pSong->_pMachine[fb]->_editName)+4];
-						strcpy (buf,_pSong->_pMachine[fb]->_editName);
-
-						for (int i = 0; i < MAX_MACHINES-1; i++)
-						{
-							if (i!=fb)
-							{
-								if (_pSong->_pMachine[i])
-								{
-									if (strcmp(_pSong->_pMachine[i]->_editName,buf)==0)
-									{
-										number++;
-										sprintf(buf,"%s %d",_pSong->_pMachine[fb]->_editName,number);
-										i = -1;
-									}
-								}
-							}
-						}
-
-						buf[sizeof(_pSong->_pMachine[fb]->_editName)-1] = 0;
-						strcpy(_pSong->_pMachine[fb]->_editName,buf);
-
-						pParentMain->UpdateComboGen();
-						Repaint(draw_modes::all);
-						//Repaint(draw_modes::all_machines); // Seems that this doesn't always work (multiple calls to Repaint?)
-					}
-					else MessageBox("Machine Creation Failed","Error!",MB_OK);
-				}
-				
-				/*
-				// Restarting the driver...
-				pParentMain->UpdateEnvInfo();
-				_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-				{
-					_outputActive = false;
-				}
-				else
-				{
-					// MIDI IMPLEMENTATION
-					Global::pConfig->_pMidiInput->Open();
-				}
-				*/
-			}
-			//Repaint();
-			pParentMain->RedrawGearRackList();
-		}
+			machine_view()->ShowNewMachineDlg(-1, -1, 0, false);
+		}	
 
 		void CChildView::OnConfigurationSettings() 
 		{
@@ -2064,10 +1805,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				KillUndo();
 				KillRedo();
 #endif
-#ifdef use_test_canvas
 				machine_view_.LockVu();
-#endif
-				pParentMain->CloseAllMacGuis();
 				Global::pPlayer->Stop();
 				///\todo lock/unlock
 				Sleep(256);
@@ -2091,9 +1829,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						editPosition=0;
 						xmfile.Load(*_pSong);
 						xmfile.Close();
-#ifdef use_test_canvas
-			machine_view_.Rebuild();
-#endif
+						machine_view_.Rebuild();
 						CSongpDlg dlg(Global::_pSong);
 						dlg.SetReadOnly();
 						dlg.DoModal();
@@ -2121,9 +1857,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							return;
 						}
 						it.Close();
-#ifdef use_test_canvas
-			machine_view_.Rebuild();
-#endif
+						machine_view_.Rebuild();
 						CSongpDlg dlg(Global::_pSong);
 						dlg.SetReadOnly();
 						dlg.DoModal();
@@ -2151,9 +1885,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							return;
 						}
 						s3m.Close();
-#ifdef use_test_canvas
-			machine_view_.Rebuild();
-#endif
+						machine_view_.Rebuild();
 						CSongpDlg dlg(Global::_pSong);
 						dlg.SetReadOnly();
 						dlg.DoModal();
@@ -2175,9 +1907,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						editPosition=0;
 						modfile.Load(*_pSong);
 						modfile.Close();
-#ifdef use_test_canvas
-			machine_view_.Rebuild();
-#endif
+						machine_view_.Rebuild();
 						CSongpDlg dlg(Global::_pSong);
 						dlg.SetReadOnly();
 						dlg.DoModal();
@@ -2223,9 +1953,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->UpdatePlayOrder(false);
 				RecalculateColourGrid();
 				Repaint();
-#ifdef use_test_canvas
-			machine_view_.UnlockVu();
-#endif
+				machine_view_.UnlockVu();
 			}
 			SetTitleBarText();
 		}
@@ -2327,10 +2055,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::FileLoadsongNamed(std::string fName)
 		{
-			pParentMain->CloseAllMacGuis();
-#ifdef use_test_canvas
 			machine_view_.LockVu();
-#endif
 			Global::pPlayer->Stop();			
 			///\todo lock/unlock
 			Sleep(256);
@@ -2393,10 +2118,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 #endif
 			SetTitleBarText();
-#ifdef use_test_canvas
 			machine_view_.Rebuild();
 			machine_view_.UnlockVu();
-#endif
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
 				CSongpDlg dlg(Global::_pSong);
@@ -3634,12 +3357,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (VISTRACKS < 1) 
 			{ 
 				VISTRACKS = 1; 
-			}
-			triangle_size_tall = Global::pConfig->mv_triangle_size+((23*Global::pConfig->mv_wirewidth)/16);
-
-			triangle_size_center = triangle_size_tall/2;
-			triangle_size_wide = triangle_size_tall/2;
-			triangle_size_indent = triangle_size_tall/6;
+			}			
 		}
 
 		void CChildView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
@@ -3772,39 +3490,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Repaint(draw_modes::track_header);
 			}
 		}
-
-		void CChildView::DoMacPropDialog(int propMac)
-		{
-			if((propMac < 0 ) || (propMac >= MAX_MACHINES-1)) return;
-			CMacProp dlg;
-			dlg.m_view=this;
-			dlg.pMachine = Global::_pSong->_pMachine[propMac];
-			dlg.pSong = Global::_pSong;
-			dlg.thisMac = propMac;
-			if(dlg.DoModal() == IDOK)
-			{
-				sprintf(dlg.pMachine->_editName, dlg.txt);
-				pParentMain->StatusBarText(dlg.txt);
-				pParentMain->UpdateEnvInfo();
-				pParentMain->UpdateComboGen();
-				if (pParentMain->pGearRackDialog)
-				{
-					pParentMain->RedrawGearRackList();
-				}
-			}
-			if(dlg.deleted)
-			{
-				pParentMain->CloseMacGui(propMac);
-				Global::_pSong->DestroyMachine(propMac);
-				pParentMain->UpdateEnvInfo();
-				pParentMain->UpdateComboGen();
-				if (pParentMain->pGearRackDialog)
-				{
-					pParentMain->RedrawGearRackList();
-				}
-			}
-		}
-
+		
 		void CChildView::OnConfigurationLoopplayback() 
 		{
 			Global::pPlayer->_loopSong = !Global::pPlayer->_loopSong;
@@ -3817,43 +3503,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else
 				pCmdUI->SetCheck(0);	
 		}
+
+		void CChildView::DrawAllMachineVumeters(CDC *devc)
+		{
+			if (Global::pConfig->draw_vus)
+				machine_view_.UpdateVUs(devc);
+		}
+
+
 		void CChildView::LoadMachineDial()
 		{
 			CNativeGui::uiSetting().LoadMachineDial();
-		}
-
-		void CChildView::LoadMachineBackground()
-		{
-			machinebkg.DeleteObject();
-			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
-			if (Global::pConfig->bBmpBkg)
-			{
-				Global::pConfig->bBmpBkg=FALSE;
-				hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-				if (hbmMachineBkg)
-				{
-					if (machinebkg.Attach(hbmMachineBkg))
-					{	
-						BITMAP bm;
-						GetObject(hbmMachineBkg,sizeof(BITMAP),&bm);
-
-						bkgx=bm.bmWidth;
-						bkgy=bm.bmHeight;
-
-						if ((bkgx > 0) && (bkgy > 0))
-						{
-							Global::pConfig->bBmpBkg=TRUE;
-						}
-					}
-				}
-			}
-		}
+		}		
 
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
 
 // graphics operations, private headers included only by this translation unit
-#include "MachineView.private.hpp"
 #include "PatViewNew.private.hpp"
 #include "SeqView.private.hpp"
 

@@ -231,18 +231,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				tmac += MAX_BUSES;
 			case 0:
 				{
-#ifdef use_test_canvas
 					view_->ShowNewMachineDlg(-1,-1,view_->song()->_pMachine[tmac], false);
-#else
-					m_pParent->NewMachine(-1,-1,tmac);
-
-					pParentMain->UpdateEnvInfo();
-					pParentMain->UpdateComboGen();
-					if (m_pParent->viewMode==view_modes::machine)
-					{
-						m_pParent->Repaint();
-					}
-#endif
 				}
 				break;
 			case 2:
@@ -271,11 +260,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (Global::_pSong->_pMachine[tmac])
 					{
-#ifdef use_test_canvas
 						view_->DeleteMachineGui(view_->song()->_pMachine[tmac]);
-#else
-						pParentMain->CloseMacGui(tmac);
-#endif
 						Global::_pSong->DestroyMachine(tmac);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
@@ -291,11 +276,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 					{
-#ifdef use_test_canvas
 						view_->DeleteMachineGui(view_->song()->_pMachine[tmac+MAX_BUSES]);
-#else
-						pParentMain->CloseMacGui(tmac+MAX_BUSES);
-#endif						
 						Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
@@ -335,23 +316,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (Global::_pSong->_pMachine[tmac])
 				{
-#ifdef use_test_canvas
 					view_->DoMacPropDialog(view_->song()->_pMachine[tmac], false);
-#else
-					m_pParent->DoMacPropDialog(tmac);
-					pParentMain->UpdateEnvInfo();
-					pParentMain->UpdateComboGen();
-					if (m_pParent->viewMode==view_modes::machine)
-					{
-						m_pParent->Repaint();
-					}
-#endif
 				}
 				break;
 			case 1:
 				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 				{
-					m_pParent->DoMacPropDialog(tmac+MAX_BUSES);
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
 					if (m_pParent->viewMode==view_modes::machine)
@@ -386,26 +356,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (Global::_pSong->_pMachine[tmac])
 				{
-#ifdef use_test_canvas
 					view_->ShowDialog(view_->song()->_pMachine[tmac],
 									  point.x,
 									  point.y);
-#else
-					pParentMain->ShowMachineGui(tmac,point);
-#endif
 				}
 				break;
 			case 1:
 				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 				{
-#ifdef use_test_canvas
 					view_->ShowDialog(view_->song()->_pMachine[tmac+MAX_BUSES],
 									  point.x,
 									  point.y);
-
-#else
-					pParentMain->ShowMachineGui(tmac+MAX_BUSES,point);
-#endif
 				}
 				break;
 			case 2:
@@ -464,9 +425,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_pParent->AddMacViewUndo();
 				Global::_pSong->ExchangeMachines(sel[0],sel[1]);
 				pParentMain->UpdateComboGen(true);
-#ifdef use_test_canvas
 				view_->Rebuild();				
-#endif
 				if (m_pParent->viewMode==view_modes::machine)
 				{
 					m_pParent->Repaint();
@@ -476,10 +435,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_pParent->AddMacViewUndo();
 				Global::_pSong->ExchangeMachines(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
 				pParentMain->UpdateComboGen(true);
-#ifdef use_test_canvas
 				view_->Rebuild();				
-#endif
-
 				if (m_pParent->viewMode==view_modes::machine)
 				{
 					m_pParent->Repaint();
@@ -535,11 +491,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
 					}
-#ifdef use_test_canvas
 					else {
 						view_->CreateMachineGui(view_->song()->_pMachine[tmac2]);
 					}
-#endif
 				}
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)

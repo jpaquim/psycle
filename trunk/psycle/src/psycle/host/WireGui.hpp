@@ -7,7 +7,7 @@ namespace psycle {
 
 		class CWireDlg;
 
-		class WireGui : public TestCanvas::Line {
+		class WireGui : public PsycleCanvas::Line {
 		public:
 			WireGui(class MachineView* view);
 			~WireGui();
@@ -41,14 +41,14 @@ namespace psycle {
 			void DoDragging(double x, double y);
 			void StopDragging();			
 
-			virtual bool OnEvent(TestCanvas::Event* ev);
+			virtual bool OnEvent(PsycleCanvas::Event* ev);
 
 			void BeforeWireDlgDeletion();
 			void RemoveWire();
 
 			virtual void Draw(CDC* cr,
 							  const CRgn& repaint_region,
-							  TestCanvas::Canvas* widget);
+							  PsycleCanvas::Canvas* widget);
 
 			virtual const CRgn& region() const;
 

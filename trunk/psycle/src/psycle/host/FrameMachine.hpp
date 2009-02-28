@@ -21,8 +21,7 @@ protected:
 	CFrameMachine(); // protected constructor used by dynamic creation
 	virtual ~CFrameMachine();
 public:
-	//Legacy Constructor
-	CFrameMachine(int index, bool* pActive, CWnd* wndView_);
+	//Legacy Constructor	
 	CFrameMachine(class MachineGui* gen_gui);
 	void Init(int x, int y);		
 // Operations

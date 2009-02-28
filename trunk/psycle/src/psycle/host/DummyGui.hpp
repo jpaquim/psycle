@@ -12,7 +12,7 @@ namespace psycle {
 						class Machine* mac);
 			~DummyGenGui();
 
-			virtual bool OnEvent(TestCanvas::Event* ev);
+			virtual bool OnEvent(PsycleCanvas::Event* ev);
 		};
 
 		class DummyEffectGui : public EffectGui {
@@ -21,7 +21,7 @@ namespace psycle {
 						class Machine* mac);
 			~DummyEffectGui();
 
-			virtual bool OnEvent(TestCanvas::Event* ev);
+			virtual bool OnEvent(PsycleCanvas::Event* ev);
 		};
 	}
 }
