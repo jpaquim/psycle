@@ -6,7 +6,7 @@
 #include "InfoDlg.hpp"
 #include "MidiMonitorDlg.hpp"
 #include "ExListBox.h"
-#include "Project.hpp"
+#include "ProjectData.hpp"
 #include "SeqView.hpp"
 #include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -84,6 +84,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void EditQuantizeChange(int diff);
 			void ShiftOctave(int x);
 			void UpdateMasterValue(int newvalue);
+			void SetUpStartProject();
 			
 			CStatusBar  m_wndStatusBar;
 			CToolBar    m_wndToolBar;
@@ -94,7 +95,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CReBar      m_wndReBar;
 			std::string		szStatusIdle;
 			CExListBox	m_seqListbox;
-			Project project_;
+			ProjectData projects_;
 			
 			CInstrumentEditor	m_wndInst;
 			CInfoDlg	m_wndInfo;

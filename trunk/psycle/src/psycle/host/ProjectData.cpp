@@ -12,6 +12,10 @@ namespace psycle {
 
 		ProjectData::~ProjectData()
 		{
+			SetActiveProject(0);
+			std::vector<Project*>::iterator it = projects_.begin();
+			for (; it < projects_.end(); ++it )
+				delete *it;
 		}
 
 		void ProjectData::Add(Project* project)
