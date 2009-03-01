@@ -51,6 +51,7 @@ namespace psycle {
 			void WriteStatusBar(const std::string& text);
 			void AddMacViewUndo(); // place holder
 			void CenterMaster();
+			bool CheckUnsavedSong();
 
 		private:			
 			void BuildWires();

@@ -219,6 +219,7 @@ namespace psycle {
 			void SelectMachineUnderCursor(void);
 			bool EnterData(UINT nChar,UINT nFlags);
 
+			bool CheckUnsavedSong();
 
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main() { return main_; }

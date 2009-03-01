@@ -86,7 +86,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		class CChildView : public CWnd
 		{
 		public:
-			CChildView(CMainFrame* main_frame);
+			CChildView(CMainFrame* main_frame, class ProjectData* projects);
 			virtual ~CChildView();
 
 			void InitTimer();
@@ -116,9 +116,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void patTrackSolo();
 			void patTrackRecord();
 			void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
-			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );			
-			void FileLoadsongNamed(std::string fName);
-			void OnFileLoadsongNamed(std::string fName, int fType);
+			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );								
 
 			MachineView* machine_view() { return &machine_view_; }
 			PatternView* pattern_view() { return &pattern_view_; }
@@ -130,6 +128,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 //			CBitmap machinedial; //the machine dial bitmap
 
 			CFrameWnd* pParentFrame;
+			ProjectData* projects_;
 			Song* _pSong;
 		//	bool multiPattern;			
 			CGearTracker * SamplerMachineDialog;
@@ -158,7 +157,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		private:
 
 			//Recent Files!!!!//
-			void AppendToRecent(std::string fName);
 			void CallOpenRecent(int pos);
 			//Recent Files!!!!//
 
@@ -166,7 +164,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			inline void TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h);
 			
 			void DrawAllMachineVumeters(CDC *devc);																						
-			void DrawSeqEditor(CDC *devc);
 				
 		private:
 			MachineView machine_view_;
@@ -175,11 +172,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// GDI Stuff		
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
-			int UndoMacCounter;
-			int UndoMacSaved;
 
 		public:			
-			BOOL CheckUnsavedSong(std::string szTitle);
+			int UndoMacCounter; // todo transfer this two variables into machineview
+			int UndoMacSaved;
+
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 			afx_msg void OnRButtonDown( UINT nFlags, CPoint point );
@@ -271,28 +268,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnPopInterpolateCurve();
 			DECLARE_MESSAGE_MAP()
 };
-
-
-		/////////////////////////////////////////////////////////////////////////////
-		inline void CChildView::TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h)
-		{
-			CRect Rect;
-			Rect.left=x;
-			Rect.top=y;
-			Rect.right=x+w;
-			Rect.bottom=y+h;
-			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,FLATSIZES);
-		}
-
-		inline void CChildView::TXT(CDC *devc,char const *txt, int x,int y,int w,int h)
-		{
-			CRect Rect;
-			Rect.left=x;
-			Rect.top=y;
-			Rect.right=x+w;
-			Rect.bottom=y+h;
-			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,NULL);
-		}
 			
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END

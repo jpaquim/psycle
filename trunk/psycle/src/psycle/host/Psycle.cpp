@@ -196,7 +196,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				char tmpName [257];
 				std::strncpy(tmpName, m_lpCmdLine+1, 256 );
 				tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
-				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
+				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.projects_->active_project()->OnFileLoadsongNamed(tmpName, 1);
 			}
 		}
 

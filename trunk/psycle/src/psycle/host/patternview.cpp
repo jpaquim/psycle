@@ -95,6 +95,23 @@ namespace psycle {
 			RecalcMetrics();
 		}
 
+		bool PatternView::CheckUnsavedSong()
+		{
+			bool checked = true;
+			if (pUndoList)
+			{
+				if (UndoSaved != pUndoList->counter)
+				{
+					checked = false;
+				}
+			} else
+			if (UndoSaved != 0)
+			{
+				checked = false;
+			}
+			return checked;
+		}
+
 		void PatternView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		{
 			// undo code not required, enter note handles it
