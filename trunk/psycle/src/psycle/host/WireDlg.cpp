@@ -440,23 +440,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						float inr[SCOPE_SPEC_SAMPLES];
 						memset (aal,0,sizeof(aal));
 						memset (aar,0,sizeof(aar));
-						int amount = SCOPE_BUF_SIZE - _pSrcMachine->_scopeBufferIndex - SCOPE_SPEC_SAMPLES;
-						float vucorrection= invol*mult/32768.0f;
+						int amount = SCOPE_BUF_SIZE - _pSrcMachine->_scopeBufferIndex;
+						float vucorrection= invol*mult/6553500.0f;
 						if (amount >= SCOPE_SPEC_SAMPLES) {
-							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, SCOPE_SPEC_SAMPLES, vucorrection);
-							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, SCOPE_SPEC_SAMPLES, vucorrection);
+							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, SCOPE_SPEC_SAMPLES, vucorrection*_pSrcMachine->_lVol);
+							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, SCOPE_SPEC_SAMPLES, vucorrection*_pSrcMachine->_rVol);
 						} else {
-							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, amount, vucorrection);
-							psycle::helpers::dsp::MovMul(pSamplesL, inl+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection);
-							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, amount, vucorrection);
-							psycle::helpers::dsp::MovMul(pSamplesR, inr+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection);
+							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, amount, vucorrection*_pSrcMachine->_lVol);
+							psycle::helpers::dsp::MovMul(pSamplesL, inl+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection*_pSrcMachine->_rVol);
+							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, amount, vucorrection*_pSrcMachine->_lVol);
+							psycle::helpers::dsp::MovMul(pSamplesR, inr+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection*_pSrcMachine->_rVol);
 						}
 
 						psycle::host::dsp::WindowFunc(3,SCOPE_SPEC_SAMPLES,inl);
 						psycle::host::dsp::WindowFunc(3,SCOPE_SPEC_SAMPLES,inr);
 						psycle::host::dsp::PowerSpectrum(SCOPE_SPEC_SAMPLES,inl,aal);
 						psycle::host::dsp::PowerSpectrum(SCOPE_SPEC_SAMPLES,inr,aar);
-						psycle::helpers::dsp::Undenormalize(aal,aar,MAX_SCOPE_BANDS);
+						psycle::helpers::dsp::Undenormalize(aal,aar,SCOPE_SPEC_SAMPLES>>1);
 						
 						COLORREF cl = 0x402020;
 						COLORREF cr = 0x204020;
@@ -468,7 +468,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 						for (int i = 0; i < MAX_SCOPE_BANDS; i++)
 						{
-							int aml = - psycle::helpers::dsp::dB(aal[i]+0.0000001f);
+							//TODO: change this code to be logarithmic
+							int aml = - psycle::helpers::dsp::dB(aal[(int)((i/(float)MAX_SCOPE_BANDS)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
 							if (aml < 0)
 							{
 								aml = 0;
@@ -491,8 +492,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bufDC.FillSolidRect(&rect,cl+0x804040);
 
 							rect.left+=width;
-
-							int amr = - psycle::helpers::dsp::dB(aar[i]+0.0000001f);
+							//TODO: change this code to be logarithmic
+							int amr = - psycle::helpers::dsp::dB(aar[(int)((i/(float)MAX_SCOPE_BANDS)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
 							if (amr < 0)
 							{
 								amr = 0;
