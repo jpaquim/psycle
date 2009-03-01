@@ -102,13 +102,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void MidiPatternInstrument(int value); // called by midi to insert pattern commands
 			void MousePatternTweak(int machine, int command, int value);
 			void MousePatternTweakSlide(int machine, int command, int value);													
-
-			afx_msg void OnPatCopy();
-			afx_msg void OnPatPaste();
-			afx_msg void OnPatMixPaste();
-			afx_msg void OnPatCut();
-			afx_msg void OnPatDelete();
-						
+		
 			void AddMacViewUndo(); // place holder
 			
 			void SetTitleBarText();
@@ -159,13 +153,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//Recent Files!!!!//
 			void CallOpenRecent(int pos);
 			//Recent Files!!!!//
-
-			inline void TXT(CDC *devc,char const *txt, int x,int y,int w,int h);
-			inline void TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h);
-			
 			void DrawAllMachineVumeters(CDC *devc);																						
 				
-		private:
 			MachineView machine_view_;
 			PatternView pattern_view_;
 
@@ -266,6 +255,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnPopBlockswitch();
 			afx_msg void OnUpdatePopBlockswitch(CCmdUI *pCmdUI);
 			afx_msg void OnPopInterpolateCurve();
+			afx_msg void OnPatCopy();
+			afx_msg void OnPatPaste();
+			afx_msg void OnPatMixPaste();
+			afx_msg void OnPatCut();
+			afx_msg void OnPatDelete();
+
 			DECLARE_MESSAGE_MAP()
 };
 			

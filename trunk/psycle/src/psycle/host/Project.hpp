@@ -3,6 +3,10 @@
 #include "Global.hpp"
 #include <cassert>
 
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#endif
+
 namespace psycle {
 	namespace host {
 
@@ -17,6 +21,10 @@ namespace psycle {
 			~Project();
 
 			Song& song() { assert(Global::_pSong); return *Global::_pSong; }
+#ifdef use_psycore
+			psy::core::CoreSong& psy_song() { return song_; }
+#endif
+
 
 			// modules
 			PatternView* pat_view();
@@ -41,6 +49,10 @@ namespace psycle {
 			PatternView* pat_view_;
 			MachineView* mac_view_;
 			ProjectData* parent_;
+
+#ifdef use_psycore
+			psy::core::Song song_;
+#endif
 
 		};
 	}
