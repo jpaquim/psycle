@@ -86,7 +86,13 @@ namespace psycle {
 				dialog_->CenterWindowOnPoint( x, y);
 			}
 		}
-
+		void MasterGui::UpdateVU(CDC* devc)
+		{
+			MachineGui::UpdateVU(devc);
+			if ( dialog_ ) {
+				dialog_->UpdateUI();
+			}
+		}
 		int MasterGui::preferred_width() const
 		{
 			return pixbuf_.width();

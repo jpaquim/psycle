@@ -41,6 +41,13 @@ namespace psycle {
 				dialog_->centerWindowOnPoint( x, y);
 			}
 		}
+		void MixerGui::UpdateVU(CDC* devc)
+		{
+			EffectGui::UpdateVU(devc);
+			if ( dialog_ ) {
+				dialog_->UpdateUI();
+			}
+		}	
 
 	}  // namespace host
 }  // namespace psycle

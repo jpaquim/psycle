@@ -10,6 +10,7 @@
 #include "VolumeDlg.hpp"
 #include "Zap.hpp"
 #include "WireGui.hpp"
+#include "FFT.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CWireDlg::CWireDlg(CChildView* pParent)
@@ -208,14 +209,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWireDlg::InitSpectrum()
 		{
-			int constant2 = MAX_SCOPE_BANDS/scope_spec_bands;
+			int constant2 = (SCOPE_SPEC_SAMPLES*0.5f)/scope_spec_bands;
 			for (int i=0;i<SCOPE_SPEC_SAMPLES;i++)
 			{ 
 				float constant = (helpers::math::pi_f/(SCOPE_SPEC_SAMPLES/2))*(i-(SCOPE_SPEC_SAMPLES/2)); 
 				int j=0;
 				for(int h=0;h<scope_spec_bands;h++)
 				{ 
-					float th=((float(j*j)/MAX_SCOPE_BANDS)+1.0f)*constant; 
+					float th=((float(j*j)/SCOPE_SPEC_SAMPLES*2)+1.0f)*constant; 
 					cth[i][h] = cosf(th);
 					sth[i][h] = sinf(th);
 					j+=constant2;
@@ -432,43 +433,31 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				case 2: // spectrum analyzer
 					{
-						int width = 128/scope_spec_bands;
-						float aal[MAX_SCOPE_BANDS]; 
-						float aar[MAX_SCOPE_BANDS]; 
-						float bbl[MAX_SCOPE_BANDS]; 
-						float bbr[MAX_SCOPE_BANDS]; 
-						float ampl[MAX_SCOPE_BANDS];
-						float ampr[MAX_SCOPE_BANDS];
+						int width = 1;
+						float aal[SCOPE_SPEC_SAMPLES>>1];
+						float aar[SCOPE_SPEC_SAMPLES>>1];
+						float inl[SCOPE_SPEC_SAMPLES];
+						float inr[SCOPE_SPEC_SAMPLES];
 						memset (aal,0,sizeof(aal));
-						memset (bbl,0,sizeof(bbl));
 						memset (aar,0,sizeof(aar));
-						memset (bbr,0,sizeof(bbr));
-
-						const float mult2=9.0f*mult/32768.0f;
-					// calculate our bands using same buffer chasing technique
-
-					int index = _pSrcMachine->_scopeBufferIndex;
-					for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
-					{ 
-							index--;
-							index&=(SCOPE_BUF_SIZE-1);
-							float wl=(pSamplesL[index]*invol*mult2*_pSrcMachine->_lVol);///+-9.0f, to be used with a log10()
-							float wr=(pSamplesR[index]*invol*mult2*_pSrcMachine->_rVol);///+-9.0f, to be used with a log10()
-							for(int h=0;h<scope_spec_bands;h++) 
-							{ 
-								aal[h]+=wl*cth[i][h];
-								bbl[h]+=wl*sth[i][h];
-								aar[h]+=wr*cth[i][h];
-								bbr[h]+=wr*sth[i][h];
-							} 
-						} 
-
-						for (int h=0;h<scope_spec_bands;h++) 
-						{
-							ampl[h]= sqrtf(aal[h]*aal[h]+bbl[h]*bbl[h])/(SCOPE_SPEC_SAMPLES/2); 
-							ampr[h]= sqrtf(aar[h]*aar[h]+bbr[h]*bbr[h])/(SCOPE_SPEC_SAMPLES/2); 
+						int amount = SCOPE_BUF_SIZE - _pSrcMachine->_scopeBufferIndex - SCOPE_SPEC_SAMPLES;
+						float vucorrection= invol*mult/32768.0f;
+						if (amount >= SCOPE_SPEC_SAMPLES) {
+							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, SCOPE_SPEC_SAMPLES, vucorrection);
+							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, SCOPE_SPEC_SAMPLES, vucorrection);
+						} else {
+							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, amount, vucorrection);
+							psycle::helpers::dsp::MovMul(pSamplesL, inl+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection);
+							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, amount, vucorrection);
+							psycle::helpers::dsp::MovMul(pSamplesR, inr+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection);
 						}
 
+						psycle::host::dsp::WindowFunc(3,SCOPE_SPEC_SAMPLES,inl);
+						psycle::host::dsp::WindowFunc(3,SCOPE_SPEC_SAMPLES,inr);
+						psycle::host::dsp::PowerSpectrum(SCOPE_SPEC_SAMPLES,inl,aal);
+						psycle::host::dsp::PowerSpectrum(SCOPE_SPEC_SAMPLES,inr,aar);
+						psycle::helpers::dsp::Undenormalize(aal,aar,MAX_SCOPE_BANDS);
+						
 						COLORREF cl = 0x402020;
 						COLORREF cr = 0x204020;
 
@@ -477,13 +466,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 						// draw our bands
 
-						for (int i = 0; i < scope_spec_bands; i++)
+						for (int i = 0; i < MAX_SCOPE_BANDS; i++)
 						{
-							int aml = 128 - (log(1+ampl[i])*heightcompensation[i]);
-//							int aml = 128-helpers::math::rounded(sqrtf(ampl[i]));
+							int aml = - psycle::helpers::dsp::dB(aal[i]+0.0000001f);
 							if (aml < 0)
 							{
 								aml = 0;
+							}
+							if (aml > 128) {
+								aml = 128;
 							}
 							if (aml < bar_heightsl[i])
 							{
@@ -498,14 +489,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							rect.top = rect.bottom;
 							rect.bottom = 128;
 							bufDC.FillSolidRect(&rect,cl+0x804040);
-							
+
 							rect.left+=width;
 
-							int amr = 128 - (log(1+ampr[i])*heightcompensation[i]);
-//							int amr = 128-helpers::math::rounded(sqrtf(ampr[i]));
+							int amr = - psycle::helpers::dsp::dB(aar[i]+0.0000001f);
 							if (amr < 0)
 							{
 								amr = 0;
+							}
+							if (amr > 128) {
+								amr = 128;
 							}
 							if (amr < bar_heightsr[i])
 							{
@@ -544,6 +537,133 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						bufDC.SetTextColor(0x505050);
 						bufDC.TextOut(4, 128-14, buf);
 						bufDC.SelectObject(oldFont);
+
+/*
+
+						int width = 128/scope_spec_bands;
+						float aal[MAX_SCOPE_BANDS]; 
+						float aar[MAX_SCOPE_BANDS]; 
+						float bbl[MAX_SCOPE_BANDS]; 
+						float bbr[MAX_SCOPE_BANDS]; 
+						float ampl[MAX_SCOPE_BANDS];
+						float ampr[MAX_SCOPE_BANDS];
+						memset (aal,0,sizeof(aal));
+						memset (bbl,0,sizeof(bbl));
+						memset (aar,0,sizeof(aar));
+						memset (bbr,0,sizeof(bbr));
+
+						const float mult2=9.0f*mult/32768.0f;
+						// calculate our bands using same buffer chasing technique
+
+						int index = _pSrcMachine->_scopeBufferIndex;
+						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
+						{ 
+							index--;
+							index&=(SCOPE_BUF_SIZE-1);
+							float wl=(pSamplesL[index]*invol*mult2*_pSrcMachine->_lVol);///+-9.0f, to be used with a log10()
+							float wr=(pSamplesR[index]*invol*mult2*_pSrcMachine->_rVol);///+-9.0f, to be used with a log10()
+							// Hanning Window.
+							wl *= 0.50 - 0.50 * cosf(2.0f * M_PI * i / (SCOPE_SPEC_SAMPLES - 1));
+							wr *= 0.50 - 0.50 * cosf(2.0f * M_PI * i / (SCOPE_SPEC_SAMPLES - 1));
+							for(int h=0;h<scope_spec_bands;h++) 
+							{ 
+								aal[h]+=wl*cth[i][h];
+								bbl[h]+=wl*sth[i][h];
+								aar[h]+=wr*cth[i][h];
+								bbr[h]+=wr*sth[i][h];
+							} 
+						} 
+
+						for (int h=0;h<scope_spec_bands;h++) 
+						{
+							ampl[h]= sqrtf(aal[h]*aal[h]+bbl[h]*bbl[h])/(SCOPE_SPEC_SAMPLES/2); 
+							ampr[h]= sqrtf(aar[h]*aar[h]+bbr[h]*bbr[h])/(SCOPE_SPEC_SAMPLES/2);
+						}
+
+						COLORREF cl = 0x402020;
+						COLORREF cr = 0x204020;
+
+						RECT rect;
+						rect.left = 0;
+
+						// draw our bands
+
+						for (int i = 0; i < scope_spec_bands; i++)
+						{
+							//int aml = 128 - (log(1+ampl[i])*heightcompensation[i]);
+							int aml = - psycle::helpers::dsp::dB(ampl[i]+0.0000001f);
+//							int aml = 128-helpers::math::rounded(sqrtf(ampl[i]));
+							if (aml < 0)
+							{
+								aml = 0;
+							}
+							if (aml > 128) {
+								aml = 128;
+							}
+							if (aml < bar_heightsl[i])
+							{
+								bar_heightsl[i]=aml;
+							}
+
+							rect.right = rect.left+width;
+							rect.top = bar_heightsl[i];
+							rect.bottom = aml;
+							bufDC.FillSolidRect(&rect,cl);
+
+							rect.top = rect.bottom;
+							rect.bottom = 128;
+							bufDC.FillSolidRect(&rect,cl+0x804040);
+							
+							rect.left+=width;
+
+							//int amr = 128 - (log(1+ampr[i])*heightcompensation[i]);
+							int amr = - psycle::helpers::dsp::dB(ampr[i]+0.0000001f);
+//							int amr = 128-helpers::math::rounded(sqrtf(ampr[i]));
+							if (amr < 0)
+							{
+								amr = 0;
+							}
+							if (amr > 128) {
+								amr = 128;
+							}
+							if (amr < bar_heightsr[i])
+							{
+								bar_heightsr[i]=amr;
+							}
+
+							rect.right = rect.left+width;
+							rect.top = bar_heightsr[i];
+							rect.bottom = amr;
+							bufDC.FillSolidRect(&rect,cr);
+
+							rect.top = rect.bottom;
+							rect.bottom = 128;
+							bufDC.FillSolidRect(&rect,cr+0x408040);
+
+							rect.left+=width;
+
+							if (!hold)
+							{
+								bar_heightsl[i]+=6;
+								if (bar_heightsl[i] > 128)
+								{
+									bar_heightsl[i] = 128;
+								}
+								bar_heightsr[i]+=6;
+								if (bar_heightsr[i] > 128)
+								{
+									bar_heightsr[i] = 128;
+								}
+							}
+						}
+						char buf[64];
+						sprintf(buf,"%d Bands Refresh %.2fhz",scope_spec_bands,1000.0f/scope_spec_rate);
+						CFont* oldFont= bufDC.SelectObject(&font);
+						bufDC.SetBkMode(TRANSPARENT);
+						bufDC.SetTextColor(0x505050);
+						bufDC.TextOut(4, 128-14, buf);
+						bufDC.SelectObject(oldFont);
+*/
 					}
 					break;
 				case 3: // phase scope

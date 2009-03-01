@@ -12,6 +12,7 @@ namespace psycle {
 			~MixerGui();
 
 			virtual void BeforeDeleteDlg();
+			void UpdateVU(CDC* devc);
 
 		protected:
 			virtual void ShowDialog(double x, double y);

@@ -182,6 +182,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		virtual void SelectMachine(Machine* pMachine);
 		virtual void Generate(double x, double y);
 		virtual int ConvertXYtoParam(int x, int y);
+		void UpdateUI();
 		// Overrides
 		// Implementation
 	protected:
@@ -201,7 +202,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnDestroy();
 		afx_msg void OnSetFocus(CWnd* pOldWnd);
-		afx_msg void OnTimer(UINT nIDEvent);
 		afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 		afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 		DECLARE_MESSAGE_MAP()
