@@ -52,7 +52,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if((cmd.GetType() == CT_Immediate) ||
 				(cmd.GetType() == CT_Editor && viewMode == view_modes::pattern) ) 
 				{			
+					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					if ( cmd == cdefInfoMachine) {
+						// maybe this should handeld in the machine view
 						if (Global::_pSong->seqBus < MAX_MACHINES)
 						{
 							if (Global::_pSong->_pMachine[Global::_pSong->seqBus])

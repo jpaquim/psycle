@@ -6800,32 +6800,7 @@ namespace psycle {
 			case cdefOctaveDn:
 				main()->ShiftOctave(-1);
 				break;
-
-			case cdefPlaySong:
-//				PlaySong();
-				break;
-
-			case cdefPlayFromPos:
-//				PlayFromCur();
-				break;
-
-			case cdefPlayStart:
-//				OnBarplayFromStart();
-				break;
-
-			case cdefPlayRowTrack:
-				PlayCurrentNote();
-				AdvanceLine(1,Global::pConfig->_wrapAround);
-				break;
-
-			case cdefPlayRowPattern:
-//				PlayCurrentRow();
-				AdvanceLine(1,Global::pConfig->_wrapAround);
-				break;
-
-			case cdefPlayBlock:
-//				OnButtonplayseqblock();
-				break;
+		
 
 			case cdefEditToggle:
 				bEditMode = !bEditMode;
@@ -6835,29 +6810,7 @@ namespace psycle {
 				
 		//		pChildView->Repaint(draw_modes::patternHeader);
 				break;
-
-			case cdefPlayStop:
-//				Stop();
-				break;
-			
-			case cdefSelectMachine:
-				SelectMachineUnderCursor();
-				break;
-			case cdefMachineInc:
-				main()->OnBIncgen();
-				break;
-
-			case cdefMachineDec:
-				main()->OnBDecgen();
-				break;
-
-			case cdefInstrInc:
-				main()->OnBIncwav();
-				break;
-
-			case cdefInstrDec:
-				main()->OnBDecwav();
-				break;
+				
 
 			case cdefInfoPattern:
 				if ( child_view()->viewMode == view_modes::pattern )
@@ -6867,62 +6820,6 @@ namespace psycle {
 				break;
 
 			
-			case cdefEditMachine:
-				child_view()->OnMachineview();
-				break;
-
-			case cdefEditPattern:
-				child_view()->OnPatternView();
-				ChordModeOffs = 0;
-				break;
-
-			case cdefEditInstr:
-				main()->ShowInstrumentEditor();
-				break;
-
-			case cdefAddMachine:
-				//OnNewmachine();
-				break;
-
-			case cdefMaxPattern:		
-				if (maxView == true) 
-				{
-					maxView = false;
-					main()->ShowControlBar(&main()->m_wndSeq,TRUE,FALSE);
-					main()->ShowControlBar(&main()->m_wndControl,TRUE,FALSE);
-					main()->ShowControlBar(&main()->m_wndToolBar,TRUE,FALSE);
-				} 
-				else
-				{			
-					maxView = true;
-					main()->ShowControlBar(&main()->m_wndSeq,FALSE,FALSE);
-					main()->ShowControlBar(&main()->m_wndControl,FALSE,FALSE);
-					main()->ShowControlBar(&main()->m_wndToolBar,FALSE,FALSE);
-				}
-				break;
-
-			case cdefPatternInc:
-				ChordModeOffs = 0;
-				IncCurPattern();
-				break;
-
-			case cdefPatternDec:
-				ChordModeOffs = 0;
-				DecCurPattern();
-				break;
-
-			case cdefSongPosInc:
-				ChordModeOffs = 0;
-				IncPosition(brepeat?true:false);
-				main()->StatusBarIdle(); 
-				break;
-
-			case cdefSongPosDec:
-				ChordModeOffs = 0;
-				DecPosition();
-				main()->StatusBarIdle(); 
-				break;
-
 			case cdefUndo:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;

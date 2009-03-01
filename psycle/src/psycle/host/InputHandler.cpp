@@ -442,6 +442,112 @@ namespace psycle
 		///\todo move to a callback system... this is disgustingly messy
 		void InputHandler::PerformCmd(CmdDef &cmd, BOOL brepeat)
 		{
+			switch(cmd.GetID())
+			{
+
+			case cdefPlaySong:
+				PlaySong();
+				break;
+
+			case cdefPlayFromPos:
+				PlayFromCur();
+				break;
+
+			case cdefPlayStart:
+				pChildView->OnBarplayFromStart();
+				break;
+
+			case cdefPlayRowTrack:
+				pChildView->pattern_view()->PlayCurrentNote();
+				pChildView->pattern_view()->AdvanceLine(1,Global::pConfig->_wrapAround);
+				break;
+
+			case cdefPlayRowPattern:
+				pChildView->pattern_view()->PlayCurrentRow();
+				pChildView->pattern_view()->AdvanceLine(1,Global::pConfig->_wrapAround);
+				break;
+
+			case cdefPlayBlock:
+				pChildView->OnButtonplayseqblock();
+				break;
+
+			case cdefPlayStop:
+				pChildView->pattern_view()->Stop();
+				break;
+			
+			case cdefMachineInc:
+				pMainFrame->OnBIncgen();
+				break;
+
+			case cdefMachineDec:
+				pMainFrame->OnBDecgen();
+				break;
+
+			case cdefInstrInc:
+				pMainFrame->OnBIncwav();
+				break;
+
+			case cdefInstrDec:
+				pMainFrame->OnBDecwav();
+				break;
+
+			case cdefEditMachine:
+				pChildView->OnMachineview();
+				break;
+
+			case cdefEditPattern:
+				pChildView->OnPatternView();
+				pChildView->pattern_view()->ChordModeOffs = 0;
+				break;
+
+			case cdefEditInstr:
+				pMainFrame->ShowInstrumentEditor();
+				break;
+
+			case cdefAddMachine:
+				pChildView->OnNewmachine();
+				break;
+
+			case cdefMaxPattern:		
+				if (pChildView->pattern_view()->maxView == true) 
+				{
+					pChildView->pattern_view()->maxView = false;
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,TRUE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,TRUE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,TRUE,FALSE);
+				} 
+				else
+				{			
+					pChildView->pattern_view()->maxView = true;
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,FALSE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,FALSE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,FALSE,FALSE);
+				}
+				break;
+
+			case cdefPatternInc:
+				pChildView->pattern_view()->ChordModeOffs = 0;
+				pChildView->pattern_view()->IncCurPattern();
+				break;
+
+			case cdefPatternDec:
+				pChildView->pattern_view()->ChordModeOffs = 0;
+				pChildView->pattern_view()->DecCurPattern();
+				break;
+
+			case cdefSongPosInc:
+				pChildView->pattern_view()->ChordModeOffs = 0;
+				pChildView->pattern_view()->IncPosition(brepeat?true:false);
+				pMainFrame->StatusBarIdle(); 
+				break;
+
+			case cdefSongPosDec:
+				pChildView->pattern_view()->ChordModeOffs = 0;
+				pChildView->pattern_view()->DecPosition();
+				pMainFrame->StatusBarIdle(); 
+				break;
+			default:;
+			}
 		}
 
 		void InputHandler::Stop()

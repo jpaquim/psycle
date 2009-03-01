@@ -21,6 +21,7 @@
 #include "InputHandler.hpp"
 #include "KeyConfigDlg.hpp"
 #include "Plugin.hpp"
+#include "Project.hpp"
 #include "VstHost24.hpp"
 #include "XMSampler.hpp"
 #include <HtmlHelp.h>
@@ -130,15 +131,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		CMainFrame::CMainFrame()
 			: m_wndView(this),
-			  m_wndSeq(this),
-			  project_(m_wndView.pattern_view())
+			  m_wndSeq(this)
 		{
-			Global::pInputHandler->SetMainFrame(this);
-			m_wndSeq.SetProject(&project_);
+			Global::pInputHandler->SetMainFrame(this);			
 			vuprevR = 0;
 			vuprevL = 0;
 			_pSong = 0;
 			pGearRackDialog = 0;
+			SetUpStartProject();
 //			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
 		}
 
@@ -392,6 +392,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 			cs.lpszClass = AfxRegisterWndClass(0);
 			return TRUE;
+		}
+
+		void CMainFrame::SetUpStartProject()
+		{
+			Project* prj = new Project(&projects_, m_wndView.pattern_view());
+			projects_.Add(prj);
+			m_wndSeq.SetProject(prj);
 		}
 
 		#if !defined NDEBUG
