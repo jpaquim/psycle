@@ -130,7 +130,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		};
 
 		CMainFrame::CMainFrame()
-			: m_wndView(this),
+			: m_wndView(this, &projects_),
 			  m_wndSeq(this)
 		{
 			Global::pInputHandler->SetMainFrame(this);			
@@ -396,7 +396,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::SetUpStartProject()
 		{
-			Project* prj = new Project(&projects_, m_wndView.pattern_view());
+			Project* prj = new Project(&projects_,
+									   m_wndView.pattern_view(),
+									   m_wndView.machine_view());
 			projects_.Add(prj);
 			m_wndSeq.SetProject(prj);
 		}
@@ -441,7 +443,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnClose() 
 		{
-			if (m_wndView.CheckUnsavedSong("Exit Psycle"))
+			if (projects_.active_project()->CheckUnsavedSong("Exit Psycle"))
 			{
 				m_wndView._outputActive = false;
 				Global::pPlayer->Stop();
@@ -472,7 +474,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				file.Close();
 				int val = MessageBox("An autosave.psy file has been found in the root song dir. Do you want to reload it? (Press \"No\" to delete it)","Song Recovery",MB_YESNOCANCEL);
 
-				if (val == IDYES ) m_wndView.FileLoadsongNamed(filepath.GetBuffer(1));
+				if (val == IDYES ) projects_.active_project()->FileLoadsongNamed(filepath.GetBuffer(1));
 				else if (val == IDNO ) DeleteFile(filepath);
 			}
 		}
@@ -1744,7 +1746,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (!strcmpi(szExtension, ".psy")) // compare to ".psy"
 					{
 						SetForegroundWindow();
-						m_wndView.OnFileLoadsongNamed(szFileName, 1);
+						projects_.active_project()->OnFileLoadsongNamed(szFileName, 1);
 						DragFinish((HDROP)  hDropInfo);	// handle of structure for dropped files
 						return;
 					}

@@ -10,6 +10,7 @@
 #include "MidiInput.hpp"
 #include "ConfigDlg.hpp"
 #include "GreetDialog.hpp"
+#include "ProjectData.hpp"
 #include "SaveWavDlg.hpp"
 #include "SongpDlg.hpp"
 #include "XMSongLoader.hpp"
@@ -20,13 +21,16 @@
 //#include "VstEditorDlg.hpp"
 #include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include <cmath>
+#include <cderr.h>
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		CMainFrame		*pParentMain;
 
-		CChildView::CChildView(CMainFrame* main_frame)
-			:pParentFrame(0)			
+		CChildView::CChildView(CMainFrame* main_frame, ProjectData* projects)
+			:pParentFrame(0)
+			,projects_(projects)
 			,SamplerMachineDialog(NULL)
 			,XMSamplerMachineDialog(NULL)
 			,WaveInMachineDialog(NULL)
@@ -59,8 +63,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CChildView::~CChildView()
 		{
 			Global::pInputHandler->SetChildView(NULL);
-
-
 			if ( bmpDC != NULL )
 			{
 				char buf[100];
@@ -438,7 +440,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if ( viewMode == view_modes::sequence)
 				{
-					DrawSeqEditor(&bufDC);
+					// todo create a derived Canvas class and add the Draw method here
 				}
 
 				CRect rc;
@@ -459,7 +461,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if ( viewMode == view_modes::sequence)
 				{
-					DrawSeqEditor(&dc);
+					// todo create a derived Canvas class and add the Draw method here
 				}
 			}
 		}
@@ -509,215 +511,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Repaint();
 		}
 
-		/// "Save Song" Function
+		// "Save Song" Function
 		BOOL CChildView::OnExport(UINT id) 
 		{
-			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = Global::_pSong->fileName.substr(0,Global::_pSong->fileName.length()-4) + ".xm";
-			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
-			
-			char szFile[_MAX_PATH];
-
-			szFile[_MAX_PATH-1]=0;
-			strncpy(szFile,if2.c_str(),_MAX_PATH-1);
-			
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "FastTracker 2 Song (*.xm)\0*.xm\0All (*.*)\0*.*\0";
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-			BOOL bResult = TRUE;
-			
-			// Display the Open dialog box. 
-			if (GetSaveFileName(&ofn) == TRUE)
-			{
-				CString str = ofn.lpstrFile;
-
-				CString str2 = str.Right(3);
-				if ( str2.CompareNoCase(".xm") != 0 ) str.Insert(str.GetLength(),".xm");
-				int index = str.ReverseFind('\\');
-				XMSongExport file;
-
-				if (index != -1)
-				{
-					Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
-				}
-				
-				if (!file.Create(str.GetBuffer(1), true))
-				{
-					MessageBox("Error creating file!", "Error!", MB_OK);
-					return FALSE;
-				}
-				file.exportsong(*Global::_pSong);
-				file.Close();
-			}
-			else
-			{
-				return FALSE;
-			}
-			return bResult;
+			return projects_->active_project()->Export(id);
 		}
 
-		/// "Save Song" Function
+		// "Save Song" Function
 		BOOL CChildView::OnFileSave(UINT id) 
 		{
-			//MessageBox("Saving Disabled");
-			//return false;
-			BOOL bResult = TRUE;
-			if ( Global::_pSong->_saved )
-			{
-				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
-				{
-					std::string filepath = Global::pConfig->GetCurrentSongDir();
-					filepath += '\\';
-					filepath += Global::_pSong->fileName;
-					
-					OldPsyFile file;
-					if (!file.Create((char*)filepath.c_str(), true))
-					{
-						MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
-					}
-					if (!_pSong->Save(&file))
-					{
-						MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
-					}
-					else 
-					{
-						_pSong->_saved=true;
-						if (pattern_view()->pUndoList)
-						{
-							pattern_view()->UndoSaved = pattern_view()->pUndoList->counter;
-						}
-						else
-						{
-							pattern_view()->UndoSaved = 0;
-						}
-						UndoMacSaved = UndoMacCounter;
-						SetTitleBarText();
-					}				
-					//file.Close();  <- save handles this 
-				}
-				else 
-				{
-					return FALSE;
-				}
-			}
-			else 
-			{
-				return OnFileSaveAs(0);
-			}
-			return bResult;
+			return projects_->active_project()->OnFileSave(id);
 		}
 
-		//////////////////////////////////////////////////////////////////////
 		// "Save Song As" Function
-
 		BOOL CChildView::OnFileSaveAs(UINT id) 
 		{
-			//MessageBox("Saving Disabled");
-			//return false;
-			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = Global::_pSong->fileName;
-			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
-			
-			char szFile[_MAX_PATH];
-
-			szFile[_MAX_PATH-1]=0;
-			strncpy(szFile,if2.c_str(),_MAX_PATH-1);
-			
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-			BOOL bResult = TRUE;
-			
-			// Display the Open dialog box. 
-			if (GetSaveFileName(&ofn) == TRUE)
-			{
-				CString str = ofn.lpstrFile;
-				if ( ofn.nFilterIndex == 2 ) 
-				{
-					CString str2 = str.Right(4);
-					if ( str2.CompareNoCase(".psb") != 0 ) str.Insert(str.GetLength(),".psb");
-					sprintf(szFile,str);
-					FILE* hFile=fopen(szFile,"wb");
-					pattern_view()->SaveBlock(hFile);
-					fflush(hFile);
-					fclose(hFile);
-				}
-				else 
-				{ 
-					CString str2 = str.Right(4);
-					if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
-					int index = str.ReverseFind('\\');
-					OldPsyFile file;
-
-					if (index != -1)
-					{
-						Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
-						Global::_pSong->fileName = str.Mid(index+1);
-					}
-					else
-					{
-						Global::_pSong->fileName = str;
-					}
-					
-					if (!file.Create(str.GetBuffer(1), true))
-					{
-						MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
-					}
-					if (!_pSong->Save(&file))
-					{
-						MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
-					}
-					else 
-					{
-						_pSong->_saved=true;
-						AppendToRecent(str.GetBuffer(1));
-						
-						if (pattern_view()->pUndoList)
-						{
-							pattern_view()->UndoSaved = pattern_view()->pUndoList->counter;
-						}
-						else
-						{
-							pattern_view()->UndoSaved = 0;
-						}
-						UndoMacSaved = UndoMacCounter;
-						SetTitleBarText();
-					}
-					//file.Close(); <- save handles this
-				}
-			}
-			else
-			{
-				return FALSE;
-			}
-			return bResult;
+			return projects_->active_project()->OnFileSaveAs(id);
 		}
-
-		#include <cderr.h>
 
 		void CChildView::OnFileLoadsong()
 		{
@@ -742,7 +552,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Display the Open dialog box. 
 			if(::GetOpenFileName(&ofn)==TRUE)
 			{
-				OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
+				projects_->active_project()->OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
 			}
 			else
 			{
@@ -794,52 +604,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CChildView::OnFileNew() 
-		{
-			if (CheckUnsavedSong("New Song"))
-			{
-				pattern_view()->KillUndo();
-				pattern_view()->KillRedo();
-				machine_view_.LockVu();
-				Global::pPlayer->Stop();
-				///\todo lock/unlock
-				Sleep(256);
-				_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// midi implementation
-				Global::pConfig->_pMidiInput->Close();
-				///\todo lock/unlock
-				Sleep(256);
-
-				Global::_pSong->New();
-				_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-				{
-					_outputActive = false;
-				}
-				else
-				{
-					// midi implementation
-					Global::pConfig->_pMidiInput->Open();
-				}
-				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
-				SetTitleBarText();
-				pattern_view()->editPosition=0;
-				Global::_pSong->seqBus=0;
-				pParentMain->PsybarsUpdate(); // Updates all values of the bars
-				pParentMain->WaveEditorBackUpdate();
-				pParentMain->m_wndInst.WaveUpdate();
-				pParentMain->RedrawGearRackList();
-				pParentMain->m_wndSeq.UpdateSequencer();
-				pParentMain->m_wndSeq.UpdatePlayOrder(false); // should be done always after updatesequencer
-				//pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
-				pattern_view()->RecalculateColourGrid();
-				Repaint();
-				machine_view_.Rebuild();
-				machine_view_.UnlockVu();
-			}
-			pParentMain->StatusBarIdle();
+		{			
+			projects_->FileNew();
 		}
-
 
 		void CChildView::OnFileSaveaudio() 
 		{
@@ -852,67 +619,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			InitTimer();
 		}
 
-		///\todo that method does not take machine changes into account  
-		//  <JosepMa> is this still the case? or what does "machine changes" mean?
-		BOOL CChildView::CheckUnsavedSong(std::string szTitle)
-		{
-			BOOL bChecked = TRUE;
-			if (pattern_view()->pUndoList)
-			{
-				if (pattern_view()->UndoSaved != pattern_view()->pUndoList->counter)
-				{
-					bChecked = FALSE;
-				}
-			}
-			else if (UndoMacSaved != UndoMacCounter)
-			{
-				bChecked = FALSE;
-			}
-			else
-			{
-				if (pattern_view()->UndoSaved != 0)
-				{
-					bChecked = FALSE;
-				}
-			}
-			if (!bChecked)
-			{
-				if (Global::pConfig->bFileSaveReminders)
-				{
-					std::string filepath = Global::pConfig->GetCurrentSongDir();
-					filepath += '\\';
-					filepath += Global::_pSong->fileName;
-					OldPsyFile file;
-					std::ostringstream szText;
-					szText << "Save changes to \"" << Global::_pSong->fileName
-						<< "\"?";
-					int result = MessageBox(szText.str().c_str(),szTitle.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
-					switch (result)
-					{
-					case IDYES:
-						if (!file.Create((char*)filepath.c_str(), true))
-						{
-							std::ostringstream szText;
-							szText << "Error writing to \"" << filepath << "\"!!!";
-							MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
-							return FALSE;
-						}
-						_pSong->Save(&file);
-						//file.Close(); <- save handles this
-						return TRUE;
-						break;
-					case IDNO:
-						return TRUE;
-						break;
-					case IDCANCEL:
-						return FALSE;
-						break;
-					}
-				}
-			}
-			return TRUE;
-		}
-
 		void CChildView::OnFileRevert()
 		{
 			if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
@@ -922,7 +628,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					std::ostringstream fullpath;
 					fullpath << Global::pConfig->GetCurrentSongDir().c_str()
 						<< '\\' << Global::_pSong->fileName.c_str();
-					FileLoadsongNamed(fullpath.str());
+					projects_->active_project()->FileLoadsongNamed(fullpath.str());
 				}
 			}
 			pParentMain->StatusBarIdle();
@@ -958,15 +664,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (viewMode != view_modes::pattern)
 			{
 				pattern_view()->RecalcMetrics();
-
 				viewMode = view_modes::pattern;
 				//ShowScrollBar(SB_BOTH,FALSE);
-				
+			
 				// set midi input mode to step insert
-				CMidiInput::Instance()->m_midiMode = MODE_STEP;
-				
+				CMidiInput::Instance()->m_midiMode = MODE_STEP;			
 				GetParent()->SetActiveWindow();
-
 				if
 					(
 						Global::pConfig->_followSong &&
@@ -1338,243 +1041,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnFileImportModulefile() 
 		{
-			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
-			szFile[0]='\0';
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter =
-				"All Module Songs (*.xm *.it *.s3m *.mod)" "\0" "*.xm;*.it;*.s3m;*.mod" "\0"
-				"FastTracker II Songs (*.xm)"              "\0" "*.xm"                  "\0"
-				"Impulse Tracker Songs (*.it)"             "\0" "*.it"                  "\0"
-				"Scream Tracker Songs (*.s3m)"             "\0" "*.s3m"                 "\0"
-				"Original Mod Format Songs (*.mod)"        "\0" "*.mod"                 "\0"
-				"All (*)"                                  "\0" "*"                     "\0"
-				;
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			// Display the Open dialog box. 
-			if (GetOpenFileName(&ofn)==TRUE)
-			{
-				pattern_view()->KillUndo();
-				pattern_view()->KillRedo();
-				machine_view_.LockVu();
-				Global::pPlayer->Stop();
-				///\todo lock/unlock
-				Sleep(256);
-				_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Close();
-				///\todo lock/unlock
-				Sleep(256);
-
-				CString str = ofn.lpstrFile;
-				int index = str.ReverseFind('.');
-				if (index != -1)
-				{
-					CString ext = str.Mid(index+1);
-					if (ext.CompareNoCase("XM") == 0)
-					{
-						XMSongLoader xmfile;
-						xmfile.Open(ofn.lpstrFile);
-						Global::_pSong->New();
-						pattern_view()->editPosition=0;
-						xmfile.Load(*_pSong);
-						xmfile.Close();
-						machine_view_.Rebuild();
-						CSongpDlg dlg(Global::_pSong);
-						dlg.SetReadOnly();
-						dlg.DoModal();
-/*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "XM file imported", MB_OK);
-*/
-					} else if (ext.CompareNoCase("IT") == 0)
-					{
-						ITModule2 it;
-						it.Open(ofn.lpstrFile);
-						Global::_pSong->New();
-						pattern_view()->editPosition=0;
-						if(!it.LoadITModule(_pSong))
-						{			
-							MessageBox("Load failed");
-							Global::_pSong->New();
-							it.Close();
-							return;
-						}
-						it.Close();
-						machine_view_.Rebuild();
-						CSongpDlg dlg(Global::_pSong);
-						dlg.SetReadOnly();
-						dlg.DoModal();
-/*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "IT file imported", MB_OK);
-*/
-					} else if (ext.CompareNoCase("S3M") == 0)
-					{
-						ITModule2 s3m;
-						s3m.Open(ofn.lpstrFile);
-						Global::_pSong->New();
-						pattern_view()->editPosition=0;
-						if(!s3m.LoadS3MModuleX(_pSong))
-						{			
-							MessageBox("Load failed");
-							Global::_pSong->New();
-							s3m.Close();
-							return;
-						}
-						s3m.Close();
-						machine_view_.Rebuild();
-						CSongpDlg dlg(Global::_pSong);
-						dlg.SetReadOnly();
-						dlg.DoModal();
-/*						char buffer[512];
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "S3M file imported", MB_OK);
-*/
-					} else if (ext.CompareNoCase("MOD") == 0)
-					{
-						MODSongLoader modfile;
-						modfile.Open(ofn.lpstrFile);
-						Global::_pSong->New();
-						pattern_view()->editPosition=0;
-						modfile.Load(*_pSong);
-						modfile.Close();
-						machine_view_.Rebuild();
-						CSongpDlg dlg(Global::_pSong);
-						dlg.SetReadOnly();
-						dlg.DoModal();
-/*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "MOD file imported", MB_OK);
-*/
-					}
-				}
-
-				str = ofn.lpstrFile;
-				index = str.ReverseFind('\\');
-				if (index != -1)
-				{
-					Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
-					Global::_pSong->fileName = str.Mid(index+1)+".psy";
-				}
-				else
-				{
-					Global::_pSong->fileName = str+".psy";
-				}
-				_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-				{
-					_outputActive = false;
-				}
-				else
-				{
-					// MIDI IMPLEMENTATION
-					Global::pConfig->_pMidiInput->Open();
-				}
-				pParentMain->PsybarsUpdate();
-				pParentMain->WaveEditorBackUpdate();
-				pParentMain->m_wndInst.WaveUpdate();
-				pParentMain->RedrawGearRackList();
-				pParentMain->m_wndSeq.UpdateSequencer();
-				pParentMain->m_wndSeq.UpdatePlayOrder(false);
-				pattern_view()->RecalculateColourGrid();
-				Repaint();
-				machine_view_.UnlockVu();
-			}
-			SetTitleBarText();
-		}
-
-		void CChildView::AppendToRecent(std::string fName)
-		{
-			int iCount;
-			char* nameBuff;
-			UINT nameSize;
-			HMENU hFileMenu, hRootMenuBar;
-			UINT ids[] =
-				{
-					ID_FILE_RECENT_01,
-					ID_FILE_RECENT_02,
-					ID_FILE_RECENT_03,
-					ID_FILE_RECENT_04
-				};
-			MENUITEMINFO hNewItemInfo, hTempItemInfo;
-			hRootMenuBar = ::GetMenu(this->GetParent()->m_hWnd);
-			//pRootMenuBar = this->GetParent()->GetMenu();
-			//hRootMenuBar = HMENU (*pRootMenuBar);
-			hFileMenu = GetSubMenu(hRootMenuBar, 0);
-			hRecentMenu = GetSubMenu(hFileMenu, 11);
-			// Remove initial empty element, if present.
-			if(GetMenuItemID(hRecentMenu, 0) == ID_FILE_RECENT_NONE)
-			{
-				DeleteMenu(hRecentMenu, 0, MF_BYPOSITION);
-			}
-			// Check for duplicates and eventually remove.
-			for(iCount = 0; iCount<GetMenuItemCount(hRecentMenu);iCount++)
-			{
-				nameSize = GetMenuString(hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
-				nameBuff = new char[nameSize];
-				GetMenuString(hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-				if ( !strcmp(nameBuff, fName.c_str()) )
-				{
-					DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
-				}
-				delete[] nameBuff;
-			}
-			// Ensure menu size doesn't exceed 4 positions.
-			if (GetMenuItemCount(hRecentMenu) == 4)
-			{
-				DeleteMenu(hRecentMenu, 4-1, MF_BYPOSITION);
-			}
-			hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);
-			hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
-			hNewItemInfo.fType		= MFT_STRING;
-			hNewItemInfo.wID		= ids[0];
-			hNewItemInfo.cch		= fName.length();
-			hNewItemInfo.dwTypeData = (LPSTR)fName.c_str();
-			InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
-			// Update identifiers.
-			for(iCount = 1;iCount < GetMenuItemCount(hRecentMenu);iCount++)
-			{
-				hTempItemInfo.cbSize	= sizeof(MENUITEMINFO);
-				hTempItemInfo.fMask		= MIIM_ID;
-				hTempItemInfo.wID		= ids[iCount];
-				SetMenuItemInfo(hRecentMenu, iCount, true, &hTempItemInfo);
-			}
+			projects_->active_project()->FileImportModulefile();
 		}
 
 		void CChildView::OnFileRecent_01()
@@ -1597,107 +1064,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CallOpenRecent(3);
 		}
 
-		void CChildView::OnFileLoadsongNamed(std::string fName, int fType)
-		{
-			if( fType == 2 )
-			{
-				FILE* hFile=fopen(fName.c_str(),"rb");
-				pattern_view()->LoadBlock(hFile);
-				fclose(hFile);
-			}
-			else
-			{
-				if (CheckUnsavedSong("Load Song"))
-				{
-					FileLoadsongNamed(fName);
-				}
-			}
-		}
-
-		void CChildView::FileLoadsongNamed(std::string fName)
-		{
-			machine_view_.LockVu();
-			Global::pPlayer->Stop();			
-			///\todo lock/unlock
-			Sleep(256);
-			_outputActive = false;
-			Global::pConfig->_pOutputDriver->Enable(false);
-			// MIDI IMPLEMENTATION
-			Global::pConfig->_pMidiInput->Close();
-			///\todo lock/unlock
-			Sleep(256);
-			
-			OldPsyFile file;
-			if (!file.Open(fName.c_str()))
-			{
-				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
-				return;
-			}
-			pattern_view()->editPosition = 0;
-			_pSong->Load(&file);
-			//file.Close(); <- load handles this
-			_pSong->_saved=true;
-			AppendToRecent(fName);
-			std::string::size_type index = fName.rfind('\\');
-			if (index != std::string::npos)
-			{
-				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
-				Global::_pSong->fileName = fName.substr(index+1);
-			}
-			else
-			{
-				Global::_pSong->fileName = fName;
-			}
-			Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->LinesPerBeat());
-			_outputActive = true;
-			if (!Global::pConfig->_pOutputDriver->Enable(true))
-			{
-				_outputActive = false;
-			}
-			else
-			{
-				// MIDI IMPLEMENTATION
-				
-				Global::pConfig->_pMidiInput->Open();
-			}
-
-			pParentMain->PsybarsUpdate();
-			pParentMain->WaveEditorBackUpdate();
-			pParentMain->m_wndInst.WaveUpdate();
-			pParentMain->RedrawGearRackList();
-			pParentMain->m_wndSeq.UpdateSequencer();
-			pParentMain->m_wndSeq.UpdatePlayOrder(false);
-			//pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
-			pattern_view()->RecalculateColourGrid();
-			Repaint();
-			pattern_view()->KillUndo();
-			pattern_view()->KillRedo();
-			SetTitleBarText();
-			machine_view_.Rebuild();
-			machine_view_.UnlockVu();
-			if (Global::pConfig->bShowSongInfoOnLoad)
-			{
-				CSongpDlg dlg(Global::_pSong);
-				dlg.SetReadOnly();
-				dlg.DoModal();
-/*				std::ostringstream songLoaded;
-				songLoaded << '\'' << _pSong->name << '\'' << std::endl
-					<< std::endl
-					<< _pSong->author << std::endl
-					<< std::endl
-					<< _pSong->comments;
-				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
-*/
-			}
-		}
-
 		void CChildView::CallOpenRecent(int pos)
 		{
 			UINT nameSize;
 			nameSize = GetMenuString(hRecentMenu, pos, 0, 0, MF_BYPOSITION) + 1;
 			char* nameBuff = new char[nameSize];
 			GetMenuString(hRecentMenu, pos, nameBuff, nameSize, MF_BYPOSITION);
-			OnFileLoadsongNamed(nameBuff, 1);
+			projects_->active_project()->OnFileLoadsongNamed(nameBuff, 1);
 			delete [] nameBuff; nameBuff = 0;
 		}
 
@@ -1888,8 +1261,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
 
-// graphics operations, private headers included only by this translation unit
-#include "SeqView.private.hpp"
 
 // User/Mouse Responses, private headers included only by this translation unit
 #include "KeybHandler.private.hpp"

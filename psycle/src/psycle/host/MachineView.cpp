@@ -1504,6 +1504,15 @@ namespace psycle {
 			UpdatePosition(song()->_pMachine[MASTER_INDEX]);				
 		}
 
+		bool MachineView::CheckUnsavedSong()
+		{
+			bool checked = true;
+			if (child_view()->UndoMacSaved != child_view()->UndoMacCounter)
+			{
+				checked = false;
+			}
+			return checked;
+		}
 		
 	}  // namespace host
 }  // namespace psycle

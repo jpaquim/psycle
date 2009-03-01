@@ -2,6 +2,11 @@
 //#include "Global.hpp"
 //#include "Configuration.hpp"
 
+#include "PatternView.hpp"
+#include "MachineView.hpp"
+#include "MainFrm.hpp"
+#include "Player.hpp"
+
 namespace psycle {
 	namespace host {
 
@@ -32,6 +37,16 @@ namespace psycle {
 		void ProjectData::SetActiveProject(Project* project)
 		{
 			active_project_ = project;
+		}
+
+		void ProjectData::FileNew()
+		{
+			assert(active_project_);
+			if (active_project_->CheckUnsavedSong("New Song"))
+			{
+				active_project_->Clear();
+			}
+			active_project_->mac_view()->main()->StatusBarIdle();
 		}
 
 	}
