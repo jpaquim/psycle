@@ -440,7 +440,7 @@ namespace psycle {
 					if ( mac->_mode == MACHMODE_GENERATOR)
 						gui = new DummyGenGui(this, mac);
 					else
-						if ( mac->_mode == MACHMODE_FX)
+						/*if ( mac->_mode == MACHMODE_FX)*/
 							gui = new DummyEffectGui(this, mac);
 					break;
 			}

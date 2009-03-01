@@ -425,10 +425,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		}
 	}
 
-	void CFrameMixerMachine::OnTimer(UINT nIDEvent) 
+	void CFrameMixerMachine::UpdateUI()
 	{
-		if ( nIDEvent == 2104+MachineIndex )
-		{
 			if (UpdateSendsandChans())
 			{
 				updateBuffer=true;
@@ -448,8 +446,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 					);
 			}
 			else Invalidate(false);
-		}
-		CFrameWnd::OnTimer(nIDEvent);
 	}
 	void CFrameMixerMachine::OnPaint() 
 	{

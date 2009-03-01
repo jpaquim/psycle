@@ -11,8 +11,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		class CChildView;
 
 		#define MAX_SCOPE_BANDS 128
-		#define SCOPE_BUF_SIZE 4096
-		#define SCOPE_SPEC_SAMPLES	256
+		#define SCOPE_BUF_SIZE 8192
+		#define SCOPE_SPEC_SAMPLES	1024
 
 		class Song;
 

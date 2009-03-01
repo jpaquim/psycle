@@ -258,7 +258,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						);
 					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
-					//((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
+					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 				}
 				if (viewMode == view_modes::machine)
 				{

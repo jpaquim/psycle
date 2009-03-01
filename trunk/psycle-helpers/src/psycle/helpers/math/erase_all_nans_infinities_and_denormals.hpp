@@ -32,7 +32,14 @@ void inline erase_all_nans_infinities_and_denormals(float & sample) {
 		// exponent > 0 is 0 if denormalized, otherwise 1
 		std::uint32_t const not_denormal(exponent > 0);
 
-		sample *= not_nan_nor_infinity & not_denormal;
+		// It does not work for nans!
+		//sample *= not_nan_nor_infinity & not_denormal;
+		if (!not_nan_nor_infinity) {
+			sample = 0;
+		}
+		else {
+			sample *= not_denormal;
+		}
 	#endif
 }
 
