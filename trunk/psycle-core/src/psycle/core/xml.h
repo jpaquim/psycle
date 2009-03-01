@@ -1,6 +1,12 @@
+#define no_xml_available 1;
 
+
+#ifdef no_xml_available
+#else
 ///\todo This file should be moved to the common psycle/helpers
 #include <libxml++/parsers/domparser.h>
+#endif
+
 #include <sstream>
 namespace psy { namespace core {
 /// helper function for xml writing.
@@ -36,6 +42,8 @@ T str_hex(const std::string & value) {
 	return result;
 }
 
+#ifdef no_xml_available
+#else
 
 class xml_helper_element_not_found {
 };
@@ -59,4 +67,7 @@ template<class T> T get_attr_hex(xmlpp::Element const& e, std::string attr) {
 	return str_hex<T>(get_attribute(e,attr).get_value());
 }
 
+#endif
+
 }}
+

@@ -38,6 +38,8 @@
 #elif defined _WIN64 || defined _WIN32
 	#include <io.h>
 	#if defined _MSC_VER
+#ifdef no_xml_available
+#else
 		#pragma comment(lib, "xml++-2.6.lib")
 		#pragma comment(lib, "xml2")
 		#pragma comment(lib, "glibmm-2.4.lib")
@@ -46,6 +48,7 @@
 		#pragma comment(lib, "glib-2.0.lib")
 		#pragma comment(lib, "intl")
 		#pragma comment(lib, "iconv")
+#endif
 	#endif
 #endif
 
@@ -113,11 +116,16 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	//close( fd );
 	fclose(file1);
 
+#ifdef no_xml_available
+	return false;
+#else
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
 	if(!parser) return false;
 	xmlpp::Element const & root_element(*parser.get_document()->get_root_node());
 	return root_element.get_name() == "psy4";
+#endif
+
 }
 
 bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
@@ -137,6 +145,8 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 	SequenceLine* lastSeqLine  = 0;
 	std::cout << "psy4filter detected for load" << std::endl;
 
+#ifdef no_xml_available
+#else
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
 	if(!parser) return false;
@@ -568,6 +578,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		///\todo:
 	}
 
+	#endif
 	return true;
 } // load
 
