@@ -22,7 +22,7 @@ namespace psycle {
 
 			Song& song() { assert(Global::_pSong); return *Global::_pSong; }
 #ifdef use_psycore
-			psy::core::CoreSong& psy_song() { return song_; }
+			psy::core::Song& psy_song() { return song_; }
 #endif
 
 
@@ -36,7 +36,6 @@ namespace psycle {
 			bool Export(UINT id);
 			void OnFileLoadsongNamed(const std::string& fName, int fType);
 			void FileLoadsongNamed(const std::string& fName);
-			void AppendToRecent(const std::string& fName);
 			bool CheckUnsavedSong(const std::string& title);
 
 			bool OnFileSave(UINT id);
@@ -45,6 +44,9 @@ namespace psycle {
 			void Clear();
 
 		private:
+
+			void AppendToRecent(const std::string& fName);
+
 			//todo make this both owner of this project
 			PatternView* pat_view_;
 			MachineView* mac_view_;

@@ -9,7 +9,11 @@ namespace psycle {
 	namespace host {
 
 		XmSamplerGui::XmSamplerGui(class MachineView* view,
-							       class Machine* mac)
+#ifdef use_psycore
+								   class psy::core::Machine* mac)
+#else
+								   class Machine* mac)
+#endif
 			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{
@@ -28,11 +32,15 @@ namespace psycle {
 
 		void XmSamplerGui::ShowDialog(double x, double y)
 		{
+#ifdef use_psycore
+			//todo
+#else
 			if ( !dialog_ ) {
 				dialog_ = new XMSamplerUI(mac()->GetEditName(), this, view()->child_view());
 				dialog_->Init((XMSampler*)mac());
 				dialog_->Create(view()->child_view());
 			}
+#endif
 		}
 
 	}  // namespace host

@@ -2,6 +2,12 @@
 ///\brief interface file for psycle::host::MachineGui.
 #pragma once
 
+#include "Global.hpp" // just for the use_psycore define
+
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#endif
+
 #include "canvas.hpp"
 
 namespace psycle {
@@ -55,8 +61,13 @@ namespace psycle {
 
 		class MachineGui : public PsycleCanvas::Group {
 		public:
+#ifdef use_psycore
+			MachineGui(class MachineView* view,
+					   psy::core::Machine* mac);
+#else
 			MachineGui(class MachineView* view,
 			           class Machine* mac);
+#endif
 			virtual ~MachineGui();
 
 			virtual void AttachWire(class WireGui* gui);
@@ -83,7 +94,11 @@ namespace psycle {
 			virtual bool IsSelected();			
 
 			MachineView* view() { return view_; }
-			Machine* mac() { return mac_; };
+#ifdef use_psycore			
+			psy::core::Machine* mac() { return mac_; }
+#else
+			Machine* mac() { return mac_; }
+#endif
 
 			virtual int preferred_width() const;
 			virtual int preferred_height() const;
@@ -103,7 +118,11 @@ namespace psycle {
 			void StopDragging();						
 			void OnMove();
 			
+#ifdef use_psycore			
+			psy::core::Machine* mac_;
+#else
 			Machine* mac_;
+#endif
 			MachineView* view_;
 						
 			double dragging_x_;

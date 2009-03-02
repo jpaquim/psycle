@@ -8,7 +8,11 @@ namespace psycle {
 		class RecorderGui : public GeneratorGui {
 		public:
 			RecorderGui(class MachineView* view,
-					    class Machine* mac);
+#ifdef use_psycore
+			            class psy::core::Machine* mac);
+#else
+				        class Machine* mac);
+#endif
 			~RecorderGui();
 
 			virtual void BeforeDeleteDlg();

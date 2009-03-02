@@ -1,18 +1,34 @@
 ///\file
 ///\brief interface file for psycle::host::CWireDlg.
 #pragma once
+
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#endif
+
+
 #include "Machine.hpp"
 #include "Constants.hpp"
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+
+namespace psy 
+{
+	namespace core
+	{
+		class Machine;
+	}
+}
+
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CChildView;
 
-		#define MAX_SCOPE_BANDS 128
-		#define SCOPE_BUF_SIZE 8192
-		#define SCOPE_SPEC_SAMPLES	1024
+		const int MAX_SCOPE_BANDS = 128;
+		const int SCOPE_BUF_SIZE = 8192;
+		const int SCOPE_SPEC_SAMPLES = 1024;
 
 		class Song;
 
@@ -33,8 +49,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int wireIndex;
 			int isrcMac;
 			bool Inval;
+#ifdef use_psycore
+			psy::core::Machine* _pSrcMachine;
+			psy::core::Machine* _pDstMachine;
+#else
 			Machine* _pSrcMachine;
 			Machine* _pDstMachine;
+#endif
 			int _dstWireIndex;
 			float invol;
 			float mult;

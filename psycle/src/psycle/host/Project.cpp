@@ -1,5 +1,9 @@
 #include "project.hpp"
 
+#ifdef use_psycore
+#include <psycle/core/player.h>
+#endif
+
 #include "ChildView.hpp"
 #include "Configuration.hpp"
 #include "PatternView.hpp"
@@ -23,6 +27,9 @@ namespace psycle {
 		{
 			assert(pat_view_);
 			assert(mac_view_);
+#ifdef use_psycore
+			mac_view_->SetSong(&song_);
+#endif
 		}
 
 		Project::~Project()
@@ -107,6 +114,29 @@ namespace psycle {
 
 		void Project::FileLoadsongNamed(const std::string& fName)
 		{
+#ifdef use_psycore
+			mac_view()->LockVu();
+			pat_view()->editPosition = 0;
+			if(!psy_song().load(fName.c_str())) {
+				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+				return;			
+			}
+			psy::core::Player & player(psy::core::Player::singleton());
+			player.song(&psy_song());
+			AppendToRecent(fName);
+			std::string::size_type index = fName.rfind('\\');
+			if (index != std::string::npos)
+			{
+				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
+				psy_song().fileName = fName.substr(index+1);
+			}
+			else
+			{
+				psy_song().fileName = fName;
+			}
+			mac_view()->Rebuild();
+			mac_view()->UnlockVu();
+#else
 			CMainFrame* pParentMain = mac_view()->main();
 
 			mac_view()->LockVu();
@@ -182,6 +212,7 @@ namespace psycle {
 				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
 */
 			}
+#endif
 		}
 
 		void Project::AppendToRecent(const std::string& fName)

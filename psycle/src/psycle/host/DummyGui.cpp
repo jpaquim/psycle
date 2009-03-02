@@ -5,7 +5,11 @@ namespace psycle {
 	namespace host {
 
 		DummyGenGui::DummyGenGui(class MachineView* view,
-								 class Machine* mac)
+#ifdef use_psycore							 
+			 				     psy::core::Machine* mac)
+#else
+					             class Machine* mac)
+#endif
 			: GeneratorGui(view, mac)
 		{
 		}
@@ -20,7 +24,12 @@ namespace psycle {
 		}
 
 		DummyEffectGui::DummyEffectGui(class MachineView* view,
-									   class Machine* mac)
+#ifdef use_psycore							 
+						     class psy::core::Machine* mac)
+#else
+							 class Machine* mac)
+#endif
+
 			: EffectGui(view, mac)
 		{
 		}

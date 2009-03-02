@@ -7,8 +7,12 @@
 namespace psycle {
 	namespace host {
 
-		EffectGui::EffectGui(class MachineView* view,
+		EffectGui::EffectGui(MachineView* view,
+#ifdef use_psycore							 
+						     psy::core::Machine* mac)
+#else
 							 class Machine* mac)
+#endif
 			: MachineGui(view, mac),
 			  pan_dragging_(false),
 			  dialog_(0),
@@ -32,7 +36,11 @@ namespace psycle {
 
 		bool EffectGui::TestPan(double x, double y)
 		{				
+#ifdef use_psycore
+			int panning = mac()->Pan()*MachineCoords_.dEffectPan.width;
+#else
 			int panning = mac()->_panning*MachineCoords_.dEffectPan.width;
+#endif			
 			panning /= 128;
 			if (InRect(x,
 				       y,
@@ -78,9 +86,17 @@ namespace psycle {
 			if (mac()->_mute) {
 				mac()->_volumeCounter=0.0f;
 				mac()->_volumeDisplay=0;
+#ifdef use_psycore
+				// todo
+//				if (view()->song()->machineSoloed == mac()->_macIndex) {
+//					view()->song()->machineSoloed = -1;
+//				}
+#else
 				if (view()->song()->machineSoloed == mac()->_macIndex) {
 					view()->song()->machineSoloed = -1;
-				}									
+				}
+
+#endif
 			}
 			mute_pixbuf_.SetVisible(on);
 		}
@@ -103,14 +119,27 @@ namespace psycle {
 			if (MachineCoords_.dGeneratorPan.width) {
 				newpan /= MachineCoords_.dGeneratorPan.width;
 				mac()->SetPan(newpan);
+#ifdef use_psycore
+				newpan= mac()->Pan();
+#else
 				newpan= mac()->_panning;
+#endif
 				UpdatePan();
 				char buf[128];
+#ifdef use_psycore
+				if (newpan != 64) {
+					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", mac()->GetEditName(), 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+				} else {
+					sprintf(buf, "%s Pan: Center", mac()->GetEditName());
+				}
+#else
 				if (newpan != 64) {
 					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", mac()->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
 				} else {
 					sprintf(buf, "%s Pan: Center", mac()->_editName);
 				}
+
+#endif
 				view()->WriteStatusBar(std::string(buf));
 				QueueDraw();
 			}
@@ -173,14 +202,24 @@ namespace psycle {
 
 		void EffectGui::UpdateText()
 		{
+#ifdef use_psycore
+			char name[sizeof(mac()->GetEditName())+6+3];
+			sprintf(name,"%.2X:%s",mac()->id(), mac()->GetEditName());
+#else
 			char name[sizeof(mac()->_editName)+6+3];
 			sprintf(name,"%.2X:%s",mac()->_macIndex, mac()->_editName);
 			text_.SetText(name);
+#endif
+
 		}
 
 		void EffectGui::UpdatePan()
 		{
+#ifdef use_psycore
+			int panning = mac()->Pan()*MachineCoords_.dEffectPan.width;
+#else
 			int panning = mac()->_panning*MachineCoords_.dEffectPan.width;
+#endif
 			panning /= 128;
 			pan_pixbuf_.SetXY(panning+MachineCoords_.dEffectPan.x, 
 							  MachineCoords_.dEffectPan.y);

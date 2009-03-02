@@ -87,6 +87,7 @@ namespace psycle
 			bool _machineLock;
 			/// the array of machines.
 			Machine* _pMachine[MAX_MACHINES];
+			Machine * machine(int id) { return _pMachine[id]; }
 			/// Current selected machine number in the GUI
 			/// \todo This is a gui thing... should not be here.
 			int seqBus;

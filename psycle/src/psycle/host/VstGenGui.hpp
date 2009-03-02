@@ -8,7 +8,11 @@ namespace psycle {
 		class VstGenGui : public GeneratorGui {
 		public:
 			VstGenGui(class MachineView* view,
-				      class Machine* mac);
+#ifdef use_psycore
+					  class psy::core::Machine* mac);
+#else
+					  class Machine* mac);
+#endif
 			~VstGenGui();
 
 			virtual void BeforeDeleteDlg();
