@@ -8,7 +8,11 @@ namespace psycle {
 		class MasterGui : public MachineGui {
 		public:
 			MasterGui(class MachineView* view,
+#ifdef use_psycore
+			class psy::core::Machine* mac);
+#else
 					  class Machine* mac);
+#endif
 			~MasterGui();
 
 			virtual void SetSkin(const SMachineCoords& MachineCoords,

@@ -1,4 +1,9 @@
 #include "MasterGui.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/player.h>
+#endif
+
 #include "Song.hpp"
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
@@ -7,7 +12,11 @@ namespace psycle {
 	namespace host {
 
 		MasterGui::MasterGui(class MachineView* view,
+#ifdef use_psycore
+							 class psy::core::Machine* mac)
+#else
 							 class Machine* mac)
+#endif
 			: MachineGui(view, mac),
 			  dialog_(0),
 			  pixbuf_(this),
@@ -70,9 +79,13 @@ namespace psycle {
 				{
 					if (mac()->_inputCon[i])
 					{
-						if (view()->song()->_pMachine[mac()->_inputMachines[i]])
+						if (view()->song()->machine(mac()->_inputMachines[i]))
 						{
-							strcpy(dialog_->macname[i],view()->song()->_pMachine[mac()->_inputMachines[i]]->_editName);
+#ifdef use_psycore
+#else
+							strcpy(dialog_->macname[i],view()->song()->machine(mac()->_inputMachines[i])->_editName);
+#endif
+
 						}
 					}
 				}

@@ -8,7 +8,11 @@ namespace psycle {
 		class SamplerGui : public GeneratorGui {
 		public:
 			SamplerGui(class MachineView* view,
+#ifdef use_psycore
+					   class psy::core::Machine* mac);
+#else
 					   class Machine* mac);
+#endif
 			~SamplerGui();
 
 			virtual void BeforeDeleteDlg();

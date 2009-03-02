@@ -520,7 +520,7 @@ class Machine {
 			virtual void ExchangeOutputWires(Wire::id_type first,Wire::id_type second, OutPort::id_type firstType = OutPort::id_type(0), OutPort::id_type secondType = OutPort::id_type(0));
 			virtual Wire::id_type FindInputWire(id_type) const;
 			virtual Wire::id_type FindOutputWire(id_type) const;
-		protected:
+		
 			virtual Wire::id_type GetFreeInputWire(InPort::id_type slotType=InPort::id_type(0)) const;
 			virtual Wire::id_type GetFreeOutputWire(OutPort::id_type slottype=OutPort::id_type(0)) const;
 	///\}

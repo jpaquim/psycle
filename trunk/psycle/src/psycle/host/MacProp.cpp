@@ -47,14 +47,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
+#ifdef use_psycore
+			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->GetEditName());
+			m_macname.SetWindowText(pMachine->GetEditName().c_str());
+#else
 			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->_editName);
+			m_macname.SetWindowText(pMachine->_editName);
+#endif
 			SetWindowText(buffer);
 
-			m_macname.SetWindowText(pMachine->_editName);
+
 
 			m_muteCheck.SetCheck(pMachine->_mute);
 			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
 			m_bypassCheck.SetCheck(pMachine->Bypass());
+#ifdef use_psycore
+			//todo
+#else
 			if (pMachine->_mode == MACHMODE_GENERATOR ) 
 			{
 				m_bypassCheck.ShowWindow(SW_HIDE);
@@ -63,6 +72,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_soloCheck.ShowWindow(SW_HIDE);
 			}
+#endif
 			return TRUE;
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE
@@ -120,26 +130,30 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMacProp::OnClone() 
 		{
-			int src = pMachine->_macIndex;
+			int src = pMachine->id();
 			int dst = -1;
 
 			if ((src < MAX_BUSES) && (src >=0))
 			{
-				dst = Global::_pSong->GetFreeBus();
+				dst = gui_->view()->song()->GetFreeBus();
 			}
 			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
 			{
-				dst = Global::_pSong->GetFreeFxBus();
+				dst = gui_->view()->song()->GetFreeFxBus();
 			}
 			if (dst >= 0)
 			{
-				if (!Global::_pSong->CloneMac(src,dst))
+#ifdef use_psycore
+				//todo
+#else
+				if (!gui_->view()->song()->CloneMac(src,dst))
 				{
 					MessageBox("Cloning failed","Cloning failed");
 				}
 				else {
 					gui_->view()->CreateMachineGui(gui_->view()->song()->_pMachine[dst]);
 				}
+#endif
 
 				if ( m_view != NULL )
 				{
@@ -154,7 +168,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CMacProp::OnBnClickedReplacemac()
 		{
-			int index = pMachine->_macIndex;
+			int index = pMachine->id();
 			replaced = true;
 			OnCancel();
 		}

@@ -315,7 +315,7 @@ namespace psycle {
 				wire_dlg_ = new CWireDlg(fromGUI_->view()->child_view(), this);
 				wire_dlg_->this_index = 0;
 				wire_dlg_->wireIndex = 0;
-				wire_dlg_->isrcMac = fromGUI_->mac()->_macIndex;
+				wire_dlg_->isrcMac = fromGUI_->mac()->id();
 				wire_dlg_->_pSrcMachine = fromGUI_->mac();
 				wire_dlg_->_pDstMachine = toGUI_->mac();
 				wire_dlg_->Create();

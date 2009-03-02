@@ -231,7 +231,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				tmac += MAX_BUSES;
 			case 0:
 				{
-					view_->ShowNewMachineDlg(-1,-1,view_->song()->_pMachine[tmac], false);
+					view_->ShowNewMachineDlg(-1,-1,view_->song()->machine(tmac), false);
 				}
 				break;
 			case 2:
@@ -260,7 +260,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (Global::_pSong->_pMachine[tmac])
 					{
-						view_->DeleteMachineGui(view_->song()->_pMachine[tmac]);
+						view_->DeleteMachineGui(view_->song()->machine(tmac));
 						Global::_pSong->DestroyMachine(tmac);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
@@ -276,7 +276,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 					{
-						view_->DeleteMachineGui(view_->song()->_pMachine[tmac+MAX_BUSES]);
+						view_->DeleteMachineGui(view_->song()->machine(tmac+MAX_BUSES));
 						Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
@@ -316,7 +316,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (Global::_pSong->_pMachine[tmac])
 				{
-					view_->DoMacPropDialog(view_->song()->_pMachine[tmac], false);
+					view_->DoMacPropDialog(view_->song()->machine(tmac), false);
 				}
 				break;
 			case 1:
@@ -354,17 +354,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			switch (DisplayMode)
 			{
 			case 0:
-				if (Global::_pSong->_pMachine[tmac])
+				if (view_->song()->machine(tmac))
 				{
-					view_->ShowDialog(view_->song()->_pMachine[tmac],
+					view_->ShowDialog(view_->song()->machine(tmac),
 									  point.x,
 									  point.y);
 				}
 				break;
 			case 1:
-				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
+				if (view_->song()->machine(tmac+MAX_BUSES))
 				{
-					view_->ShowDialog(view_->song()->_pMachine[tmac+MAX_BUSES],
+					view_->ShowDialog(view_->song()->machine(tmac+MAX_BUSES),
 									  point.x,
 									  point.y);
 				}
@@ -492,7 +492,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						return;
 					}
 					else {
-						view_->CreateMachineGui(view_->song()->_pMachine[tmac2]);
+						view_->CreateMachineGui(view_->song()->machine(tmac2));
 					}
 				}
 				pParentMain->UpdateComboGen(true);

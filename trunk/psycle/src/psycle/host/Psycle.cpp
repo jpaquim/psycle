@@ -16,6 +16,12 @@
 #include <sstream>
 #include <comdef.h>
 #include <wbemidl.h>
+
+#ifdef use_psycore
+#include <psycle/core/machinefactory.h>
+#include <psycle/core/player.h>
+#endif
+
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	# pragma comment(lib, "wbemuuid")
 #endif
@@ -51,7 +57,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		BOOL CPsycleApp::InitInstance()
-		{			
+		{		
+#ifdef use_psycore
+			psy::core::Player & player(psy::core::Player::singleton());
+			psy::core::MachineFactory & factory(psy::core::MachineFactory::getInstance());
+			factory.Initialize(&player);
+			factory.setPsyclePath("");
+			factory.setLadspaPath("");
+#endif
+
 			// Allow only one instance of the program
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
 			CInstanceChecker instanceChecker;

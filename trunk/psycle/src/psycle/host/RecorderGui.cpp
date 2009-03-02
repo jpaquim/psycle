@@ -9,7 +9,11 @@ namespace psycle {
 	namespace host {
 
 		RecorderGui::RecorderGui(class MachineView* view,
-							     class Machine* mac)
+#ifdef use_psycore
+								 class psy::core::Machine* mac)
+#else
+								 class Machine* mac)
+#endif
 			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{

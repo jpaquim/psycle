@@ -37,11 +37,19 @@ namespace psycle {
 			}
 		}
 
+#ifdef use_psycore		
+		MachineView::MachineView(CChildView* parent, CMainFrame* main)
+#else
 		MachineView::MachineView(CChildView* parent, CMainFrame* main, Song* song)
+#endif
 			: PsycleCanvas::Canvas(parent),
 			  parent_(parent),
 			  main_(main),
+#ifdef use_psycore		
+			  song_(0),
+#else
 			  song_(song),
+#endif
 			  del_line_(0),
 			  rewire_line_(0),
 			  del_machine_(0),
@@ -51,6 +59,13 @@ namespace psycle {
 			// set_bg_color(Global::pConfig->mv_colour);
 			// InitSkin();
 		}
+
+#ifdef use_psycore
+		void MachineView::SetSong(class psy::core::Song* song)
+		{
+			song_ = song;
+		}
+#endif
 
 		MachineView::~MachineView()
 		{
@@ -71,9 +86,19 @@ namespace psycle {
 			main()->StatusBarText(text.c_str());
 		}
 
-		void MachineView::DeleteMachineGui(Machine* mac)
+
+		void MachineView::DeleteMachineGui(
+#ifdef use_psycore
+			psy::core::Machine* mac)
+#else
+			Machine* mac)
+#endif
 		{
+#ifdef use_psycore
+			std::map<psy::core::Machine*, MachineGui*>::iterator it;
+#else
 			std::map<Machine*, MachineGui*>::iterator it;
+#endif
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
 			MachineGui* del_machine_ = it->second;
@@ -84,29 +109,51 @@ namespace psycle {
 			parent_->Invalidate();
 		}
 
+#ifdef use_psycore
+		void MachineView::SetDeleteMachineGui(psy::core::Machine* mac, bool in_engine)
+#else
 		void MachineView::SetDeleteMachineGui(Machine* mac, bool in_engine)
+#endif
 		{
+#ifdef use_psycore
+			std::map<psy::core::Machine*, MachineGui*>::iterator it;
+#else
 			std::map<Machine*, MachineGui*>::iterator it;
+#endif
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
 			del_machine_ = it->second;
 			del_in_engine_ = in_engine;
 		}
 
+#ifdef use_psycore
+		void MachineView::DoMacPropDialog(psy::core::Machine* mac, bool from_event)
+#else
 		void MachineView::DoMacPropDialog(Machine* mac, bool from_event)
+#endif
 		{
+#ifdef use_psycore
+			std::map<psy::core::Machine*, MachineGui*>::iterator it;
+			int propMac = mac->id();
+#else
 			std::map<Machine*, MachineGui*>::iterator it;
+			int propMac = mac->_macIndex;
+#endif
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
 			MachineGui* gui = it->second;
-			int propMac = mac->_macIndex;
+
 			CMacProp dlg(gui);			
 			dlg.pMachine = mac;
 			dlg.pSong = song();
 			dlg.thisMac = propMac;
 			if(dlg.DoModal() == IDOK)
 			{
+#ifdef use_psycore
+				dlg.pMachine->SetEditName(dlg.txt);
+#else
 				sprintf(dlg.pMachine->_editName, dlg.txt);
+#endif
 				main()->StatusBarText(dlg.txt);
 				main()->UpdateEnvInfo();
 				main()->UpdateComboGen();
@@ -120,9 +167,13 @@ namespace psycle {
 				if ( from_event) {
 					SetDeleteMachineGui(gui, true);				
 				} else {
-					int mac_prop = gui->mac()->_macIndex;
+					int mac_prop = gui->mac()->id();
 					DeleteMachineGui(gui->mac());
+#ifdef use_psycore
+					song()->DeleteMachine(song()->machine(mac_prop));
+#else
 					song()->DestroyMachine(mac_prop);
+#endif
 					main()->UpdateEnvInfo();
 					main()->UpdateComboGen();
 					if (main()->pGearRackDialog) {
@@ -130,23 +181,74 @@ namespace psycle {
 				}								
 			}
 			} else if (dlg.replaced) {
+#ifdef use_psycore
+				int index = mac->id();
+				ShowNewMachineDlg(mac->GetPosX(), mac->GetPosY(), mac, from_event);
+				strcpy(dlg.txt, song()->machine(index)->GetEditName().c_str());
+#else
 				int index = mac->_macIndex;
 				ShowNewMachineDlg(mac->_x, mac->_y, mac, from_event);
 				strcpy(dlg.txt, song()->_pMachine[index]->_editName);
+#endif
 			}
 			child_view()->Invalidate(1);
 		}
 
+#ifdef use_psycore
+		void MachineView::ShowDialog(psy::core::Machine* mac, double x, double y)
+#else
 		void MachineView::ShowDialog(Machine* mac, double x, double y)
+#endif
 		{
+#ifdef use_psycore
+			std::map<psy::core::Machine*, MachineGui*>::iterator it;
+#else
 			std::map<Machine*, MachineGui*>::iterator it;
+#endif
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
 			it->second->ShowDialog(x, y);
 		}
 
+#ifdef use_psycore
+		void MachineView::SetSolo(psy::core::Machine* tmac)
+#else
 		void MachineView::SetSolo(Machine* tmac)
+#endif
 		{
+#ifdef use_psycore
+//			todo
+/*			int smac = tmac->id();
+			if (song()->machineSoloed == smac ){
+				song()->machineSoloed = -1;
+				for ( int i=0;i<MAX_MACHINES;i++ )
+				{
+					if (song()->machine(i)) {
+						if (( song()->machine(i)->_mode == MACHMODE_GENERATOR ))
+						{
+							song()->machine(i)->_mute = false;
+						}
+					}
+				}
+			} else {
+				for ( int i=0;i<MAX_MACHINES;i++ )
+				{
+					if ( song()->machine(i) )
+					{
+						if (( song()->machine(i)->_mode == MACHMODE_GENERATOR ) && (i != smac))
+						{
+							song()->machine(i)->_mute = true;
+							song()->machine(i)->_volumeCounter=0.0f;
+							song()->machine(i)->_volumeDisplay=0;
+						}
+					}
+				}
+				tmac->_mute = false;
+				song()->machineSoloed = smac;
+			}
+*/
+
+#else
 			int smac = tmac->_macIndex;
 			if (song()->machineSoloed == smac ){
 				song()->machineSoloed = -1;
@@ -175,18 +277,30 @@ namespace psycle {
 				tmac->_mute = false;
 				song()->machineSoloed = smac;
 			}
+
+#endif
 			UpdateSoloMuteBypass();
 			parent_->Invalidate();
 		}
 
 		void MachineView::UpdateSoloMuteBypass()
 		{
+#ifdef use_psycore
+			std::map<psy::core::Machine*, MachineGui*>::iterator it = gui_map_.begin();
+#else
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
+#endif
 			for ( ; it != gui_map_.end(); ++it ) {
 				MachineGui* mac_gui = (*it).second;
+#ifdef use_psycore
+				mac_gui->SetMute(mac_gui->mac()->_mute);
+				mac_gui->SetSolo(mac_gui->mac()->id() == song()->machineSoloed);
+				mac_gui->SetBypass(mac_gui->mac()->Bypass());
+#else
 				mac_gui->SetMute(mac_gui->mac()->_mute);
 				mac_gui->SetSolo(mac_gui->mac()->_macIndex == song()->machineSoloed);
 				mac_gui->SetBypass(mac_gui->mac()->Bypass());
+#endif
 			}
 		}
 
@@ -194,7 +308,11 @@ namespace psycle {
 		{
 		  if (!is_locked_) {
 		    SetSave(true);
+#ifdef use_psycore
+			std::map<psy::core::Machine*, MachineGui*>::iterator it = gui_map_.begin();
+#else
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
+#endif
 			  for ( ; it != gui_map_.end(); ++it ) {
 				(*it).second->UpdateVU(devc);
 			  }
@@ -227,17 +345,25 @@ namespace psycle {
 				parent_->Invalidate();
 			}
 			if ( del_machine_) {
+#ifdef use_psycore
+				std::map<psy::core::Machine*, MachineGui*>::iterator it;
+#else
 				std::map<Machine*, MachineGui*>::iterator it;
+#endif
 				it = gui_map_.find(del_machine_->mac());
 				assert(it != gui_map_.end());
 				gui_map_.erase(it);
-				int prop_mac = del_machine_->mac()->_macIndex;
+				int prop_mac = del_machine_->mac()->id();
 				del_machine_->RemoveWires();
 				del_machine_->set_manage(false);
 				delete del_machine_;
 				del_machine_ = 0;
 				if (del_in_engine_) {
+#ifdef use_psycore
+					song()->DeleteMachine(song()->machine(prop_mac));
+#else
 					song()->DestroyMachine(prop_mac);
+#endif
 					main()->UpdateEnvInfo();
 					main()->UpdateComboGen();				
 					if (main()->pGearRackDialog) {
@@ -248,8 +374,124 @@ namespace psycle {
 			}
 		}
 
+#ifdef use_psycore
+		void MachineView::ShowNewMachineDlg(double x, double y, psy::core::Machine* mac, bool from_event)
+#else
 		void MachineView::ShowNewMachineDlg(double x, double y, Machine* mac, bool from_event)
+#endif
 		{
+#ifdef use_psycore
+			CNewMachine dlg;
+			if(mac)
+			{
+				if (mac->id() < MAX_BUSES)
+				{
+					dlg.selectedMode = modegen;
+				}
+				else
+				{
+					dlg.selectedMode = modefx;
+				}
+			}
+			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0)) {
+				// AddMacViewUndo();
+				int fb,xs,ys;
+				if (!mac) {					
+					if (dlg.selectedMode == modegen)  {
+						fb = song()->GetFreeBus();
+						xs = MachineCoords.sGenerator.width;
+						ys = MachineCoords.sGenerator.height;
+					}	else {
+						fb = song()->GetFreeFxBus();
+						xs = MachineCoords.sEffect.width;
+						ys = MachineCoords.sEffect.height;
+					}
+				} else {
+					if (mac->id() >= MAX_BUSES && dlg.selectedMode != modegen)
+					{
+//						child_view()->AddMacViewUndo(); maybe todo
+						fb = mac->id();
+						xs = MachineCoords.sEffect.width;
+						ys = MachineCoords.sEffect.height;
+						// delete machine if it already exists
+						if (song()->machine(fb))
+						{
+							x = song()->machine(fb)->GetPosX();
+							y = song()->machine(fb)->GetPosY();
+							if (!from_event)
+								DeleteMachineGui(song()->machine(fb));
+							else 
+								SetDeleteMachineGui(song()->machine(fb), false);
+						}
+					}
+					else if (mac->id() < MAX_BUSES && dlg.selectedMode == modegen)
+					{
+//						child_view()->AddMacViewUndo(); maybe todo
+						fb = mac->id();
+						xs = MachineCoords.sGenerator.width;
+						ys = MachineCoords.sGenerator.height;
+						// delete machine if it already exists
+						if (song()->machine(fb))
+						{
+							x = song()->machine(fb)->GetPosX();
+							y = song()->machine(fb)->GetPosY();
+							if (!from_event)
+								DeleteMachineGui(song()->machine(fb));
+							else 
+								SetDeleteMachineGui(song()->machine(fb), false);
+						}
+					}
+					else
+					{
+						child_view()->MessageBox("Wrong Class of Machine!");
+						return;
+					}
+				}
+				// random position
+				if ((x < 0) || (y < 0))
+				{
+					bool bCovered = TRUE;
+					while (bCovered)
+					{
+						x = (rand())%(cw()-xs);
+						y = (rand())%(ch()-ys);
+						bCovered = FALSE;
+						for (int i=0; i < MAX_MACHINES; i++)
+						{
+							if (song()->machine(i))
+							{
+								if ((abs(song()->machine(i)->GetPosX() - x) < 32) &&
+									(abs(song()->machine(i)->GetPosY() - y) < 32))
+								{
+									bCovered = TRUE;
+									i = MAX_MACHINES;
+								}
+							}
+						}
+					}
+				}
+				if ( fb == -1) {
+					child_view()->MessageBox("Machine Creation Failed","Error!",MB_OK);
+				}
+				x -= xs/2;
+				y -= ys/2;
+				bool created=false;
+/*
+todo!!
+				if (song()->machine(fb)) {
+					created = song()->ReplaceMachine(song()->machine(fb),(MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+				}
+				else  {
+					created = song()->CreateMachine((MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+				}
+*/
+				if (!created) {
+					child_view()->MessageBox("Machine Creation Failed","Error!",MB_OK);
+				} else {
+					CreateMachineGui(song()->machine(fb));
+				}
+			}
+#else
 			CNewMachine dlg;
 			if(mac)
 			{
@@ -290,7 +532,7 @@ namespace psycle {
 							if (!from_event)
 								DeleteMachineGui(song()->_pMachine[fb]);
 							else 
-								SetDeleteMachineGui(song()->_pMachine[fb], false);							
+								SetDeleteMachineGui(song()->_pMachine[fb], false);
 						}
 					}
 					else if (mac->_macIndex < MAX_BUSES && dlg.selectedMode == modegen)
@@ -327,7 +569,7 @@ namespace psycle {
 						bCovered = FALSE;
 						for (int i=0; i < MAX_MACHINES; i++)
 						{
-							if (Global::_pSong->_pMachine[i])
+							if (song()->_pMachine[i])
 							{
 								if ((abs(song()->_pMachine[i]->_x - x) < 32) &&
 									(abs(song()->_pMachine[i]->_y - y) < 32))
@@ -357,6 +599,7 @@ namespace psycle {
 					CreateMachineGui(song()->_pMachine[fb]);
 				}
 			}
+#endif
 		}
 
 		void MachineView::Rebuild()
@@ -365,8 +608,8 @@ namespace psycle {
 			root()->Clear();
 			gui_map_.clear();
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
-				if (song_->_pMachine[idx]) {
-					MachineGui* gui = CreateMachineGui(song_->_pMachine[idx]);
+				if (song()->machine(idx)) {
+					MachineGui* gui = CreateMachineGui(song()->machine(idx));
 					assert(gui);
 					double x = gui->x();
 					double y = gui->y();
@@ -384,35 +627,92 @@ namespace psycle {
 
 		void MachineView::SelectMachine(MachineGui* gui)
 		{
+#ifdef use_psycore
+			std::map<psy::core::Machine*, MachineGui*>::iterator it = gui_map_.begin();
+#else
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
+#endif
 			for ( ; it != gui_map_.end(); ++it ) {
 			   (*it).second->SetSelected(gui == (*it).second);
 			}			
 		}
 
+#ifdef use_psycore
+		void MachineView::UpdatePosition(psy::core::Machine* mac)
+#else
 		void MachineView::UpdatePosition(Machine* mac)
+#endif
 		{
 			assert(mac);
+#ifdef use_psycore
+			std::map<psy::core::Machine*, MachineGui*>::iterator it;
+			it = gui_map_.find(mac);
+			assert(it != gui_map_.end());
+			MachineGui* gui = it->second;
+			gui->SetXY(mac->GetPosX(), mac->GetPosY());
+#else
 			std::map<Machine*, MachineGui*>::iterator it;
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
 			MachineGui* gui = it->second;
 			gui->SetXY(mac->_x, mac->_y);
+#endif
 		}
 
-		MachineGui* MachineView::CreateMachineGui(Machine* mac) {
+#ifdef use_psycore
+		MachineGui* MachineView::CreateMachineGui(psy::core::Machine* mac)
+#else
+		MachineGui* MachineView::CreateMachineGui(Machine* mac)
+#endif
+		{
 			assert(mac);
 			MachineGui* gui;
+#ifdef use_psycore
+			if (!mac->acceptsConnections()) {
+				gui = new GeneratorGui(this, mac);
+			} else
+			if (!mac->emitsConnections()) {
+				gui = new MasterGui(this, mac);
+			} else {
+				gui = new EffectGui(this, mac);
+			}
+			gui_map_[mac] = gui;
+			if ( (!mac->acceptsConnections()) ) {
+				gui->SetSkin(MachineCoords,
+							 &machineskin,
+							 &machineskinmask,
+							 &machinebkg,
+							 hbmMachineSkin,
+							 hbmMachineBkg,
+							 hbmMachineDial,
+							 Global::pConfig->generatorFont,
+							 Global::pConfig->mv_generator_fontcolour);
+			} else  {
+				gui->SetSkin(MachineCoords,
+							 &machineskin,
+							 &machineskinmask,
+							 &machinebkg,
+				 			 hbmMachineSkin,
+							 hbmMachineBkg,
+							 hbmMachineDial,
+							 Global::pConfig->effectFont,
+							 Global::pConfig->mv_effect_fontcolour);
+			}
+			if ( mac->_mute )
+				gui->SetMute(true);
+			else if (song_->machineSoloed == mac->id())
+				gui->SetSolo(true);
+#else
 			switch ( mac->_type ) {
 				case MACH_MASTER:
-					gui = new MasterGui(this, mac);
+  					gui = new MasterGui(this, mac);
 				break;
 				case MACH_PLUGIN:
 					if ( mac->_mode == MACHMODE_GENERATOR)
 						gui = new GeneratorGui(this, mac);
 					else
-					if ( mac->_mode == MACHMODE_FX)
-						gui = new EffectGui(this, mac);
+				if ( mac->_mode == MACHMODE_FX)
+					gui = new EffectGui(this, mac);
 				break;
 				case MACH_DUPLICATOR:
 					gui = new GeneratorGui(this, mac);
@@ -421,7 +721,7 @@ namespace psycle {
 					gui = new MixerGui(this, mac);
 				break;
 				case MACH_VST:
-					gui = new VstGenGui(this, mac);
+				gui = new VstGenGui(this, mac);
 				break;
 				case MACH_VSTFX:
 					gui = new VstFxGui(this, mac);
@@ -438,13 +738,13 @@ namespace psycle {
 				case MACH_DUMMY: //fallback.
 				default:
 					if ( mac->_mode == MACHMODE_GENERATOR)
-						gui = new DummyGenGui(this, mac);
+					gui = new DummyGenGui(this, mac);
 					else
-						/*if ( mac->_mode == MACHMODE_FX)*/
-							gui = new DummyEffectGui(this, mac);
-					break;
+					/*if ( mac->_mode == MACHMODE_FX)*/
+					gui = new DummyEffectGui(this, mac);
+				break;
 			}
-			gui_map_[mac] = gui;
+						gui_map_[mac] = gui;
 			if ( mac->_mode == MACHMODE_GENERATOR ) {
 				gui->SetSkin(MachineCoords,
 							 &machineskin,
@@ -480,12 +780,43 @@ namespace psycle {
 				gui->SetMute(true);
 			else if (song_->machineSoloed == mac->_macIndex)
 				gui->SetSolo(true);
+#endif
 			gui->set_manage(true);
 			return gui;
 		}
 
 		void MachineView::BuildWires()
 		{
+#ifdef use_psycore
+			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
+			psy::core::Machine* mac = (song()->machine(idx));
+			if (mac) {
+					for (int w=0; w<MAX_CONNECTIONS; w++) {
+						if (mac->_connection[w]) {
+							psy::core::Machine* pout = song()->machine(mac->_outputMachines[w]);
+							if (pout)
+							{
+								std::map<psy::core::Machine*, MachineGui*>::iterator fromIt = 
+									gui_map_.find(mac);
+								std::map<psy::core::Machine*, MachineGui*>::iterator toIt = 
+									gui_map_.find(pout);
+								WireGui* wireUi = new WireGui(this);
+								wireUi->set_wires(w, pout->FindInputWire(mac->id()));
+								root()->Insert(root()->begin(), wireUi);
+								wireUi->set_manage(true);
+								fromIt->second->AttachWire(wireUi);
+								toIt->second->AttachWire(wireUi);
+								wireUi->SetGuiConnectors(fromIt->second,
+														 toIt->second,
+														 0);
+								wireUi->UpdatePosition();
+							}
+						}
+					}
+				}
+			}
+
+#else
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
 				Machine* mac = (song_->_pMachine[idx]);
 				if (mac) {
@@ -513,6 +844,7 @@ namespace psycle {
 					}
 				}
 			}
+#endif
 		}
 
 		void MachineView::OnNewConnection(MachineGui* sender)
@@ -559,7 +891,11 @@ namespace psycle {
 									  int picker)
 		{
 			MachineGui* connect_to_gui = 0;
+#ifdef use_psycore
+			std::map<psy::core::Machine*,MachineGui*>::iterator it = gui_map_.begin();
+#else
 			std::map<Machine*,MachineGui*>::iterator it = gui_map_.begin();
+#endif
 			for ( ; it != gui_map_.end(); ++it ) {
 				MachineGui* gui = (*it).second;
 				if ( gui->intersect(x, y) ) {
@@ -573,7 +909,11 @@ namespace psycle {
 
 		void MachineView::RaiseMachinesToTop()
 		{
+#ifdef use_psycore
+			std::map<psy::core::Machine*,MachineGui*>::iterator it = gui_map_.begin();
+#else
 			std::map<Machine*,MachineGui*>::iterator it = gui_map_.begin();
+#endif
 			for ( ; it != gui_map_.end(); ++it ) {
 				MachineGui* gui = (*it).second;
 				root()->RaiseToTop(gui);
@@ -588,17 +928,26 @@ namespace psycle {
 		{
 			if ( connect_to_gui ) {
 				MachineGui* connect_from_gui = sender->start();
+#ifdef use_psycore
+				psy::core::Machine* tmac = connect_from_gui->mac();
+				psy::core::Machine* dmac = connect_to_gui->mac();
+#else
 				Machine* tmac = connect_from_gui->mac();
 				Machine* dmac = connect_to_gui->mac();
+#endif
 				if (!rewire_line_) {				   
 				   int dsttype=0;
-				   if (song_->InsertConnection(tmac, dmac,0,dsttype)== -1) {
+#ifdef use_psycore
+				   if (song()->InsertConnection(*tmac, *dmac,0,dsttype)== -1) {
+#else
+				   if (song()->InsertConnection(tmac, dmac,0,dsttype)== -1) {
+#endif
 				   	  del_line_ = sender;
 					  child_view()->MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);				
 				   } else {
 					  // a new connection has been inserted
-					  sender->set_wires(tmac->FindOutputWire(dmac->_macIndex),
-										dmac->FindInputWire(tmac->_macIndex));
+   					  sender->set_wires(tmac->FindOutputWire(dmac->id()),
+										dmac->FindInputWire(tmac->id()));
 				  	  connect_from_gui->AttachWire(sender);
 					  connect_to_gui->AttachWire(sender);
 					  sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
@@ -620,12 +969,12 @@ namespace psycle {
 						connect_to_gui->AttachWire(sender);
 						if (picker == 0) {				  			
 							sender->SetGuiConnectors(connect_from_gui, connect_to_gui, 0);
-							sender->set_wires(tmac->FindOutputWire(dmac->_macIndex),
-											  dmac->FindInputWire(tmac->_macIndex));
+							sender->set_wires(tmac->FindOutputWire(dmac->id()),
+											  dmac->FindInputWire(tmac->id()));
 						} else {
 							sender->SetGuiConnectors(connect_to_gui, connect_from_gui, 0);
-							sender->set_wires(dmac->FindOutputWire(tmac->_macIndex),
-											  tmac->FindInputWire(dmac->_macIndex));
+							sender->set_wires(dmac->FindOutputWire(tmac->id()),
+											  tmac->FindInputWire(dmac->id()));
 						}						
 						sender->set_manage(true);
 						sender->UpdatePosition();	
@@ -640,24 +989,39 @@ namespace psycle {
 			}
 		}
 
+#ifdef use_psycore
+		bool MachineView::RewireSrc(psy::core::Machine* tmac, psy::core::Machine* dmac)
+#else
 		bool MachineView::RewireSrc(Machine* tmac, Machine* dmac)
+#endif
 		{			
 			int srctype=0;
 			///\todo: for multi-io.
 			//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
+#ifdef use_psycore
+			//todo
+#else
 			if (!song()->ChangeWireSourceMac(dmac,tmac,dmac->GetFreeOutputWire(srctype),rewire_line_->wiredest()))
 			{
 				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 				return false;
 			}
+#endif
 			return true;
 		}
 
+#ifdef use_psycore
+		bool MachineView::RewireDest(psy::core::Machine* tmac, psy::core::Machine* dmac)
+#else
 		bool MachineView::RewireDest(Machine* tmac, Machine* dmac)
+#endif
 		{
 			// rewire dest;
 			int w(-1);
 			///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
+#ifdef use_psycore
+			//todo
+#else
 			if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
 			{
 				if (child_view()->MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES ) {
@@ -674,6 +1038,7 @@ namespace psycle {
 				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 				return false;
 			}
+#endif
 			return true;
 		}
 
@@ -1499,9 +1864,14 @@ namespace psycle {
 
 		void MachineView::CenterMaster()
 		{
+#ifdef use_psycore
+			song()->machine(MASTER_INDEX)->SetPosX((child_view()->CW - MachineCoords.sMaster.width) / 2);			
+			song()->machine(MASTER_INDEX)->SetPosY((child_view()->CH - MachineCoords.sMaster.width) / 2);
+#else
 			song()->_pMachine[MASTER_INDEX]->_x = (child_view()->CW - MachineCoords.sMaster.width) / 2;			
 			song()->_pMachine[MASTER_INDEX]->_y = (child_view()->CH - MachineCoords.sMaster.width) / 2;
-			UpdatePosition(song()->_pMachine[MASTER_INDEX]);				
+#endif
+			UpdatePosition(song()->machine(MASTER_INDEX));				
 		}
 
 		bool MachineView::CheckUnsavedSong()

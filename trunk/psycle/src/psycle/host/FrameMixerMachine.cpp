@@ -238,7 +238,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		,isslider(false)
 		,refreshheaders(false)
 	{
-		MachineIndex = gui->mac()->_macIndex;		
+		MachineIndex = gui->mac()->id();		
 	}
 
 	CFrameMixerMachine::~CFrameMixerMachine()

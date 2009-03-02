@@ -9,7 +9,12 @@ namespace psycle {
 		class DummyGenGui : public GeneratorGui {
 		public:
 			DummyGenGui(class MachineView* view,
+#ifdef use_psycore							 
+  				        class psy::core::Machine* mac);
+#else
 						class Machine* mac);
+#endif
+
 			~DummyGenGui();
 
 			virtual bool OnEvent(PsycleCanvas::Event* ev);
@@ -18,7 +23,11 @@ namespace psycle {
 		class DummyEffectGui : public EffectGui {
 		public:
 			DummyEffectGui(class MachineView* view,
-						class Machine* mac);
+#ifdef use_psycore							 
+  	  			           class psy::core::Machine* mac);
+#else
+						   class Machine* mac);
+#endif
 			~DummyEffectGui();
 
 			virtual bool OnEvent(PsycleCanvas::Event* ev);

@@ -75,7 +75,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_volslider.SetPos(256*4-t);
 
 			char buf[128];
+#ifdef use_psycore
+			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->GetEditName().c_str(), _pDstMachine->GetEditName().c_str());
+#else
 			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
+#endif
 			SetWindowText(buf);
 
 			hold = FALSE;
@@ -98,6 +102,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetMode();
 			pos = 1;
 
+#ifdef use_psycore
+#else
 			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
 			{
 				mult = 32768.0f;
@@ -106,6 +112,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				mult = 1.0f;
 			}	
+#endif
 			return TRUE;
 		}
 
@@ -180,11 +187,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWireDlg::OnButton1() 
 		{
+#ifdef use_psycore
+			// todo
+#else
 			m_pParent->AddMacViewUndo();
 			Inval = true;
 			CSingleLock lock(&Global::_pSong->door,TRUE);
 			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
 			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
+#endif
 			wire_gui_->RemoveWire();
 			wire_gui_ = 0;
 			OnCancel();
@@ -232,6 +243,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWireDlg::OnTimer(UINT nIDEvent) 
 		{
+#ifdef use_psycore
+			//todo
+#else
 			if ( nIDEvent == 2304+this_index )
 			{
 				CClientDC dc(this);
@@ -898,7 +912,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bufDC.SelectObject(oldbmp);
 				bufDC.DeleteDC();
 			}
-			
+
+#endif
 			CDialog::OnTimer(nIDEvent);
 		}
 

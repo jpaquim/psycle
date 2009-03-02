@@ -12,7 +12,11 @@ namespace psycle {
 	namespace host {
 
 		VstGenGui::VstGenGui(class MachineView* view,
+#ifdef use_psycore
+							 class psy::core::Machine* mac)
+#else
 							 class Machine* mac)
+#endif
 			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{
@@ -41,8 +45,12 @@ namespace psycle {
 					view()->child_view());
 				std::ostringstream winname;
 				winname << std::hex << std::setw(2)
-					<< view()->song()->FindBusFromIndex(mac()->_macIndex)
+					<< view()->song()->FindBusFromIndex(mac()->id())
+#ifdef use_psycore
+						<< " : " << mac()->GetEditName();
+#else
 						<< " : " << mac()->_editName;
+#endif
 						dialog_->SetTitleText(winname.str().c_str());
 							// C_Tuner.dll crashes if asking size before opening.
 //							newwin->ResizeWindow(0);*/

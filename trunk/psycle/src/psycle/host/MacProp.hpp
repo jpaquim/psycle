@@ -19,8 +19,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		private:
 			MachineGui* gui_;
 		public:
+#ifdef use_psycore
+			psy::core::Machine *pMachine;
+			psy::core::Song* pSong;
+#else
 			Machine *pMachine;
 			Song* pSong;
+#endif
 			int thisMac;
 			char txt[32];
 			bool deleted;

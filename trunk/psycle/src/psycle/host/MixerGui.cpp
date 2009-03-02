@@ -9,7 +9,11 @@ namespace psycle {
 	namespace host {
 
 		MixerGui::MixerGui(class MachineView* view,
-					       class Machine* mac)
+#ifdef use_psycore
+						   class psy::core::Machine* mac)
+#else
+						   class Machine* mac)
+#endif
 			: EffectGui(view, mac),
 			  dialog_(0)
 		{
@@ -28,6 +32,9 @@ namespace psycle {
 
 		void MixerGui::ShowDialog(double x, double y)
 		{
+#ifdef use_psycore
+			// todo
+#else
 			if ( !dialog_ ) {
 				CRect rc;
 				view()->parent()->GetWindowRect(rc);
@@ -40,7 +47,9 @@ namespace psycle {
 				dialog_->Generate(x, y);			
 				dialog_->centerWindowOnPoint( x, y);
 			}
+#endif
 		}
+
 		void MixerGui::UpdateVU(CDC* devc)
 		{
 			EffectGui::UpdateVU(devc);

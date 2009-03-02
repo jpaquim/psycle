@@ -10,7 +10,11 @@ namespace psycle {
 	namespace host {
 
 		VstFxGui::VstFxGui(class MachineView* view,
+#ifdef use_psycore
+						   class psy::core::Machine* mac)
+#else
 						   class Machine* mac)
+#endif
 			: EffectGui(view, mac),
 			  dialog_(0)
 		{
@@ -29,6 +33,8 @@ namespace psycle {
 
 		void VstFxGui::ShowDialog(double x, double y)
 		{
+#ifdef use_psycore
+#else
 			if ( !dialog_ ) {
 				dialog_ = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(mac()), this);
 				// newwin->_pActive = &isguiopen[tmac];
@@ -47,6 +53,7 @@ namespace psycle {
 				dialog_->PostOpenWnd();
 //				CenterWindowOnPoint(m_pWndMac[tmac], point);
 			}
+#endif
 		}
 
 	}  // namespace host

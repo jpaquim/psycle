@@ -8,7 +8,11 @@ namespace psycle {
 		class GeneratorGui : public MachineGui {
 		public:
 			GeneratorGui(class MachineView* view,
-					  class Machine* mac);
+#ifdef use_psycore							 
+			 				     psy::core::Machine* mac);
+#else
+					             class Machine* mac);
+#endif
 			~GeneratorGui();
 
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,

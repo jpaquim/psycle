@@ -215,8 +215,7 @@ class CoreSong {
 			}
 			/// destroys all the machines of this song.
 			virtual void DeleteAllMachines(bool write_locked = false);
-
-		protected:
+		
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 			Machine::id_type GetFreeBus();
 			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)

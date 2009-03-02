@@ -246,6 +246,7 @@ namespace psycle
 #else
 			public:///\todo private
 				int _macIndex;
+				int id() const  { return _macIndex; }
 				MachineType _type;
 				MachineMode _mode;
 #endif

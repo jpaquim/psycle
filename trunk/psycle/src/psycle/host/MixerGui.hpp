@@ -8,7 +8,11 @@ namespace psycle {
 		class MixerGui : public EffectGui {
 		public:
 			MixerGui(class MachineView* view,
-				     class Machine* mac);
+#ifdef use_psycore
+					 class psy::core::Machine* mac);
+#else
+					 class Machine* mac);
+#endif
 			~MixerGui();
 
 			virtual void BeforeDeleteDlg();

@@ -43,8 +43,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,textLeftEdge(2)
 			,bmpDC(NULL)
 			,UndoMacCounter(0)
-			,UndoMacSaved(0)			
+			,UndoMacSaved(0)
+#ifdef use_psycore
+			,machine_view_(this, main_frame)
+#else
 			,machine_view_(this, main_frame, Global::_pSong)
+#endif
 			,pattern_view_(this, main_frame, Global::_pSong)
 		{			
 			for (int c=0; c<256; c++) { 

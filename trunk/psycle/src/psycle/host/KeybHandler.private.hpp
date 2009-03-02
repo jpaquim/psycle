@@ -54,17 +54,34 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{			
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					if ( cmd == cdefInfoMachine) {
+#ifdef use_psycore
+						psy::core::Song* song = &projects_->active_project()->psy_song();
 						// maybe this should handeld in the machine view
-						if (Global::_pSong->seqBus < MAX_MACHINES)
+						if (song->seqBus < MAX_MACHINES)
 						{
-							if (Global::_pSong->_pMachine[Global::_pSong->seqBus])
+							if (song->machine(song->seqBus))
 							{
 								CPoint point;
-								point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_x;
-								point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_y;
-								machine_view_.ShowDialog(Global::_pSong->_pMachine[Global::_pSong->seqBus], point.x, point.y);
+								point.x = song->machine(song->seqBus)->GetPosX();
+								point.y = song->machine(song->seqBus)->GetPosY();
+								machine_view_.ShowDialog(song->machine(song->seqBus), point.x, point.y);
 							}
 						}
+
+#else
+						Song* song = &projects_->active_project()->song();
+						// maybe this should handeld in the machine view
+						if (song->seqBus < MAX_MACHINES)
+						{
+							if (song->_pMachine[song->seqBus])
+							{
+								CPoint point;
+								point.x = song->_pMachine[song->seqBus]->_x;
+								point.y = song->_pMachine[song->seqBus]->_y;
+								machine_view_.ShowDialog(song->_pMachine[song->seqBus], point.x, point.y);
+							}
+						}
+#endif
 					} else
 					pattern_view_.PerformCmd(cmd, bRepeat);
 				}

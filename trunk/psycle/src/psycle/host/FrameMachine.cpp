@@ -53,7 +53,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			:	gen_gui_(gen_gui) {
 			assert(gen_gui);
 			wndView = gen_gui->view()->child_view();
+#ifdef use_psycore
+			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->id());
+#else
 			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->_macIndex);			
+#endif
 		}
 
 		CFrameMachine::~CFrameMachine()
@@ -67,7 +71,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				IDR_MACHINEFRAME, 
 				WS_POPUPWINDOW | WS_CAPTION,
 				gen_gui_->view()->child_view());
-
+#ifdef use_psycore
+			// todo
+#else
 			SelectMachine(gen_gui_->mac());
 			CRect rc;
 			gen_gui_->view()->parent()->GetWindowRect(rc);
@@ -76,6 +82,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			winname<<std::setfill('0') << std::setw(2) << std::hex;
 			winname << MachineIndex << " : " << _pMachine->_editName;
 			SetWindowText(winname.str().c_str());
+#endif
 		}
 
 		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
