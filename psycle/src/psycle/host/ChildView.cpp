@@ -2,6 +2,11 @@
 ///\brief implementation file for psycle::host::CChildView.
 
 #include "ChildView.hpp"
+
+#ifdef use_psycore
+#include <psycle/audiodrivers/microsoftmmewaveout.h>
+#endif
+
 #include "Version.hpp"
 #include "Psycle.hpp"
 #include "Configuration.hpp"
@@ -351,6 +356,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::EnableSound()
 		{
+#ifdef use_psycore
+			// psy::core::AudioDriver* pOut = new psy::core::MsWaveOut();
+			// use dsound by default
+#else
 			if (_outputActive)
 			{
 				AudioDriver* pOut = Global::pConfig->_pOutputDriver;
@@ -383,6 +392,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			}
+#endif
 		}
 
 

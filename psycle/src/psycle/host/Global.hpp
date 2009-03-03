@@ -8,7 +8,7 @@
 #endif
 #include <cstdint>
 
-// #define use_psycore 1
+#define use_psycore 1
 // todo check xml library in psy-core
 
 namespace psycle
