@@ -1,5 +1,8 @@
-#define no_xml_available 1;
+#pragma once
 
+#ifdef _MSC_VER
+	#define no_xml_available 1;
+#endif
 
 #ifdef no_xml_available
 #else

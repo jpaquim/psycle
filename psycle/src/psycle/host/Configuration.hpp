@@ -5,6 +5,7 @@
 #include "Version.hpp"
 #include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 #include <cstddef>
+
 namespace psycle
 {
 	namespace host

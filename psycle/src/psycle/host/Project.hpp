@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Global.hpp"
+#include "Global.hpp" 
+#include "configuration_options.hpp" // just for the use_psycore define
 #include <cassert>
 
 #ifdef use_psycore
