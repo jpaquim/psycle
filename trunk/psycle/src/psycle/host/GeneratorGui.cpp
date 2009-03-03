@@ -94,9 +94,9 @@ namespace psycle {
 		void GeneratorGui::UpdateText()
 		{
 #ifdef use_psycore
-			char name[sizeof(mac()->GetEditName())+6+3];
-			sprintf(name,"%.2X:%s",mac()->id(), mac()->GetEditName());
-			text_.SetText(name);
+			//char name[sizeof(mac()->GetEditName())+6+3];
+			//sprintf(name,"%.2X:%s",mac()->id(), mac()->GetEditName());
+			text_.SetText(mac()->GetEditName()); //name);
 #else
 			char name[sizeof(mac()->_editName)+6+3];
 			sprintf(name,"%.2X:%s",mac()->_macIndex, mac()->_editName);

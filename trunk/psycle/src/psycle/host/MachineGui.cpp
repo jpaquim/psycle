@@ -23,7 +23,7 @@ namespace psycle {
 				              Machine* mac) :						
 #endif
 #ifdef use_psycore
-			PsycleCanvas::Group(view->root(), mac->GetPosX(), mac->GetPosX()),
+			PsycleCanvas::Group(view->root(), mac->GetPosX(), mac->GetPosY()),
 #else
 			PsycleCanvas::Group(view->root(), mac->_x, mac->_y),
 #endif
