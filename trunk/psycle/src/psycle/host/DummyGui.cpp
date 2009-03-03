@@ -1,6 +1,10 @@
 #include "DummyGui.hpp"
 #include "Song.hpp"
 
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#endif
+
 namespace psycle {
 	namespace host {
 

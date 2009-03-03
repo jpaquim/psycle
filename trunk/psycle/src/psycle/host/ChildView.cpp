@@ -357,8 +357,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::EnableSound()
 		{
 #ifdef use_psycore
-			// psy::core::AudioDriver* pOut = new psy::core::MsWaveOut();
-			// use dsound by default
+			psy::core::AudioDriver* pOut = new psy::core::MsWaveOut();			
 #else
 			if (_outputActive)
 			{

@@ -2,7 +2,8 @@
 ///\brief interface file for psycle::host::MachineGui.
 #pragma once
 
-#include "Global.hpp" // just for the use_psycore define
+#include "configuration_options.hpp" // just for the use_psycore define
+
 
 #ifdef use_psycore
 #include <psycle/core/machine.h>

@@ -564,7 +564,8 @@ class Machine {
 	public:
 		virtual void SetSampleRate(int /*hertz*/) {
 			#if defined PSYCLE__CONFIGURATION__RMS_VUS
-/*				rms.count = 0;
+			// todo broken ..  'rms' : undeclared identifier
+				/*rms.count = 0;
 				rms.AccumLeft = 0.;
 				rms.AccumRight = 0.;
 				rms.previousLeft = 0.;
