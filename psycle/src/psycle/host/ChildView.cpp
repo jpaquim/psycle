@@ -5,6 +5,8 @@
 
 #ifdef use_psycore
 #include <psycle/audiodrivers/microsoftmmewaveout.h>
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
 #endif
 
 #include "Version.hpp"
@@ -51,6 +53,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,UndoMacSaved(0)
 #ifdef use_psycore
 			,machine_view_(this, main_frame)
+			,output_driver_(0)
 #else
 			,machine_view_(this, main_frame, Global::_pSong)
 #endif
@@ -80,6 +83,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
+#ifdef use_psycore
+			if (output_driver_)
+				output_driver_->Enable(false);
+#endif
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -356,8 +363,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::EnableSound()
 		{
-#ifdef use_psycore
-			psy::core::AudioDriver* pOut = new psy::core::MsWaveOut();			
+#ifdef use_psycore						
+			psy::core::Player & player(psy::core::Player::singleton());
+			player.song(&projects_->active_project()->psy_song());
+			output_driver_ = new psy::core::MsWaveOut();
+			player.setDriver(*output_driver_);
+			player.driver().Enable(true);
 #else
 			if (_outputActive)
 			{
@@ -734,18 +745,28 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pattern_view()->bScrollDetatch=false;
 			}
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
+#ifdef use_psycore
+			psy::core::Player & player(psy::core::Player::singleton());
+			player.start(0); // todo
+#else			
 			Global::pPlayer->Start(pattern_view()->editPosition,0);
+#endif
 			pParentMain->StatusBarIdle();
 		}
 
 		void CChildView::OnBarplayFromStart() 
 		{
+#ifdef use_psycore
+			psy::core::Player & player(psy::core::Player::singleton());
+			player.start(0);
+#else
 			if (Global::pConfig->_followSong)
 			{
 				pattern_view()->bScrollDetatch=false;
 			}
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			Global::pPlayer->Start(0,0);
+#endif
 			pParentMain->StatusBarIdle();
 		}
 
@@ -807,6 +828,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnBarstop()
 		{
+#ifdef use_psycore
+			psy::core::Player & player(psy::core::Player::singleton());
+			player.stop();
+#else
 			bool pl = Global::pPlayer->_playing;
 			bool blk = Global::pPlayer->_playBlock;
 			Global::pPlayer->Stop();
@@ -828,6 +853,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					Repaint(draw_modes::cursor); 
 				}
 			}
+#endif
 		}
 
 		void CChildView::OnRecordWav() 

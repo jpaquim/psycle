@@ -155,6 +155,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				pFrame->CheckForAutosave();
 			}
+
+#ifdef use_psycore
+			factory.setPsyclePath(Global::pConfig->GetPluginDir());
+#endif
+
 			return TRUE;
 		}
 

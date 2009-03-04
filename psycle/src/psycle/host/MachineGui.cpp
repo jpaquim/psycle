@@ -1,16 +1,19 @@
 #include "MachineGui.hpp"
 
-#include "Machine.hpp"
-#include "MachineView.hpp"
-#include "WireGui.hpp"
-#include "MainFrm.hpp"
-#include "Song.hpp"
 #include <algorithm>
+
+#include "Machine.hpp"
+#include "MainFrm.hpp"
+#include "MachineView.hpp"
+#include "Song.hpp"
+#include "WireGui.hpp"
+
 
 #ifdef _MSC_VER
 #undef min
 #undef max
 #endif
+
 
 
 namespace psycle {
@@ -22,11 +25,8 @@ namespace psycle {
 #else
 				              Machine* mac) :						
 #endif
-#ifdef use_psycore
+
 			PsycleCanvas::Group(view->root(), mac->GetPosX(), mac->GetPosY()),
-#else
-			PsycleCanvas::Group(view->root(), mac->_x, mac->_y),
-#endif
 			view_(view),
 			mac_(mac),
 			dragging_(false)
@@ -212,24 +212,14 @@ namespace psycle {
 			for ( ; it != wire_uis_.end(); ++it ) {
 				(*it)->UpdatePosition();
 			}
-#ifdef use_psycore
 			mac()->SetPosX(x());
 			mac()->SetPosY(y());
-
-#else
-			mac()->_x = x();
-			mac()->_y = y();
-#endif
 		}
 
 		void MachineGui::SetSelected(bool on)
 		{
 			if ( on && !IsSelected() ) {
-#ifdef use_psycore
 				view()->song()->seqBus = view()->song()->FindBusFromIndex(mac()->id());
-#else
-				view()->song()->seqBus = view()->song()->FindBusFromIndex(mac()->_macIndex);
-#endif
 				view()->main()->UpdateComboGen();
 				view()->child_view()->Invalidate(1);
 			}	
@@ -278,11 +268,7 @@ namespace psycle {
 
 		bool MachineGui::IsSelected()
 		{			
-#ifdef use_psycore
-			return (view()->song()->seqBus == mac()->id());
-#else
-			return (view()->song()->seqBus == mac()->_macIndex);
-#endif
+			return view()->song()->seqBus == mac()->id();
 		}
 
 		int MachineGui::preferred_width() const

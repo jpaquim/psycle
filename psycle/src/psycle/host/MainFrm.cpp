@@ -401,6 +401,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									   m_wndView.machine_view());
 			projects_.Add(prj);
 			m_wndSeq.SetProject(prj);
+#ifdef use_psycore
+			m_wndView.pattern_view()->SetPsySong(&prj->psy_song());
+#endif
 		}
 
 		#if !defined NDEBUG

@@ -29,6 +29,10 @@ namespace psycle {
 			assert(mac_view_);
 #ifdef use_psycore
 			mac_view_->SetSong(&song_);
+			psy::core::SequenceLine* line = song_.patternSequence().createNewLine();
+			psy::core::SinglePattern* pattern= new psy::core::SinglePattern();
+			pattern->setName("Untitled");
+			line->createEntry(pattern,0);
 #endif
 		}
 
@@ -134,6 +138,8 @@ namespace psycle {
 			{
 				psy_song().fileName = fName;
 			}
+			CMainFrame* pParentMain = mac_view()->main();
+			pParentMain->m_wndSeq.UpdateSequencer();
 			mac_view()->Rebuild();
 			mac_view()->UnlockVu();
 #else
