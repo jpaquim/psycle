@@ -202,15 +202,9 @@ namespace psycle {
 
 		void EffectGui::UpdateText()
 		{
-#ifdef use_psycore
-			char name[sizeof(mac()->GetEditName())+6+3];
-			sprintf(name,"%.2X:%s",mac()->id(), mac()->GetEditName());
-#else
-			char name[sizeof(mac()->_editName)+6+3];
-			sprintf(name,"%.2X:%s",mac()->_macIndex, mac()->_editName);
-			text_.SetText(name);
-#endif
-
+			std::ostringstream str;
+			str << std::hex << std::setfill('0') << std::setw(2) << mac()->id() << ":" << mac()->GetEditName();		
+			text_.SetText(str.str());
 		}
 
 		void EffectGui::UpdatePan()
