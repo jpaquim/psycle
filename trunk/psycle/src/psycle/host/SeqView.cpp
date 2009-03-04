@@ -745,12 +745,38 @@ namespace psycle {
 			if (!project_)
 				return;
 
+
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			char buf[16];
 
 			int top = cc->GetTopIndex();
 			cc->ResetContent();
 			
+#ifdef use_psycore
+			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
+			psy::core::SequenceLine* line = *(sequence->begin());
+			// Iterate the sequence entries and add them.
+			psy::core::SequenceLine::iterator it = line->begin();
+			for(int n = 0 ; it != line->end(); ++it, ++n) {
+				psy::core::SequenceEntry* entry = it->second;
+				if (Global::pConfig->_bShowPatternNames) {
+					sprintf(buf,"%.2X:%s",n, entry->pattern()->name().c_str());
+				} else {
+					sprintf(buf,"%.2X: %.2X",n,entry->pattern()->id());
+				}
+				cc->AddString(buf);
+			}	
+			cc->SelItemRange(false,0,cc->GetCount()-1);
+			if (selectedpos >= 0)
+			{
+				cc->SetSel(selectedpos);
+				top = selectedpos - 0xC;
+				if (top < 0) top = 0;
+			}
+			cc->SetTopIndex(top);
+			main_frame_->StatusBarIdle();
+#else
+
 			if (Global::pConfig->_bShowPatternNames)
 			{
 				for(int n=0;n< project_->song().playLength;n++)
@@ -781,6 +807,7 @@ namespace psycle {
 			}
 			cc->SetTopIndex(top);
 			main_frame_->StatusBarIdle();
+#endif
 		}
 
 
@@ -788,6 +815,8 @@ namespace psycle {
 		{
 			if (!project_)
 				return;
+#ifdef use_psycore
+#else
 
 			PatternView* pat_view = project_->pat_view();
 			Song* _pSong = &project_->song();
@@ -888,8 +917,10 @@ namespace psycle {
 				}
 				pls->SetTopIndex(top);
 			}
-			
+
+#endif
 		}
 
-	}
-}
+
+	} // namespace host
+} // namespace psycle

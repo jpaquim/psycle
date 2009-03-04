@@ -3,9 +3,7 @@
 #pragma once
 #include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 
-#define use_psycore 0
-
-
+// #define use_psycore 1
 // todo check xml library in psy-core
 
 /// JAZ: Define to 1 to enable the volume column for XMSampler. It will also make the machine column in the pattern to show

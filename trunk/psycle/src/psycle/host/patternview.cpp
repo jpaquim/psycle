@@ -69,6 +69,9 @@ namespace psycle {
 			   bDoingSelection(false),
 			   maxView(false)
 		{
+#ifdef use_psycore
+			psy_song_ = 0;
+#endif
 			selpos.bottom=0;
 			newselpos.bottom=0;
 			szBlankParam[0]='\0';
@@ -2482,7 +2485,11 @@ namespace psycle {
 				// ADVISE! [lOff+lstart..lOff+lend] and [tOff+tstart..tOff+tend] HAVE TO be valid!
 		void PatternView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend)
 		{
+#ifdef use_psycore
+		// find start iterator
+		// psy::core::SinglePattern::iterator it = pattern()->find_lower_nearest(startLine);
 
+#else
 		#ifdef _DEBUG_PATVIEW
 			TRACE("DrawPatternData\n");
 		#endif
@@ -2760,6 +2767,7 @@ namespace psycle {
 				linecount++;
 				yOffset+=ROWHEIGHT;
 			}
+#endif
 		}
 
 		void PatternView::NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd)

@@ -10,6 +10,15 @@
 #include "mfc_namespace.hpp"
 
 
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class AudioDriver;
+	}
+}
+#endif
+
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -161,6 +170,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// GDI Stuff		
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
+
+#ifdef use_psycore
+			psy::core::AudioDriver* output_driver_;
+#endif
 
 		public:			
 			int UndoMacCounter; // todo transfer this two variables into machineview

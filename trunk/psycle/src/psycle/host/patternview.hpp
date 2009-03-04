@@ -141,6 +141,16 @@ namespace psycle {
 			PatternView(class CChildView* parent, class CMainFrame* main, class Song* song);
 			~PatternView();
 
+#ifdef use_psycore
+			void SetPsySong( psy::core::Song* song ) {
+				psy_song_ = song;
+			}
+			psy::core::Song* psy_song() { return psy_song_; }
+		private:
+			psy::core::Song* psy_song_;
+		public:
+#endif
+
 			void Draw(CDC *devc, const CRgn& rgn);
 			void OnSize(UINT nType, int cx, int cy);
 			// key events

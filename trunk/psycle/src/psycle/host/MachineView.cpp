@@ -25,6 +25,11 @@
 #undef max
 #endif
 
+#ifdef use_psycore
+// helps for now to reduce #ifdef mania
+using namespace psy::core;
+#endif
+
 namespace psycle {
 	namespace host {
 
