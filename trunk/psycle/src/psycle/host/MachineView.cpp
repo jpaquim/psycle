@@ -28,6 +28,7 @@
 #ifdef use_psycore
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/player.h>
+#include <psycle/core/file.h>
 #endif
 
 
@@ -513,6 +514,7 @@ namespace psycle {
 							std::string dllName = dlg.psOutputDll.c_str();
 							std::string::size_type const pos(dllName.find(".dll"));
 							if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+							dllName = psy::core::File::extractFileNameFromPath(dllName);
 							key = psy::core::MachineKey(psy::core::Hosts::NATIVE, dllName, 0);
 						}
 						break;
