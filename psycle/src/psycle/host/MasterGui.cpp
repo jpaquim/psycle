@@ -74,7 +74,11 @@ namespace psycle {
 		{
 			if ( !dialog_ ) {
 				dialog_ = new CMasterDlg(view()->child_view());
+#ifdef use_psycore
+				dialog_->_pMachine = (psy::core::Master*)mac();
+#else
 				dialog_->_pMachine = (Master*)mac();
+#endif
 				for (int i=0;i<MAX_CONNECTIONS; i++)
 				{
 					if (mac()->_inputCon[i])
@@ -82,6 +86,7 @@ namespace psycle {
 						if (view()->song()->machine(mac()->_inputMachines[i]))
 						{
 #ifdef use_psycore
+							strcpy(dialog_->macname[i],view()->song()->machine(mac()->_inputMachines[i])->GetEditName().c_str());
 #else
 							strcpy(dialog_->macname[i],view()->song()->machine(mac()->_inputMachines[i])->_editName);
 #endif

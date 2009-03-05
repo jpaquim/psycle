@@ -906,7 +906,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CChildView::OnFileSongproperties() 
-		{	CSongpDlg dlg(Global::_pSong);
+		{
+#ifdef use_psycore
+			CSongpDlg dlg(&projects_->active_project()->psy_song());
+#else
+			CSongpDlg dlg(Global::_pSong);
+#endif
 			dlg.DoModal();
 			pParentMain->StatusBarIdle();
 			//Repaint();

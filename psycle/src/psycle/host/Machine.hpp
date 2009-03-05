@@ -381,6 +381,7 @@ namespace psycle
 					///\todo int GetPan() { return _panning; }
 					///\todo 3 dimensional?
 					virtual void SetPan(int newpan);
+					int Pan() const { return _panning; }
 				public:///\todo private:
 					/// numerical value of panning
 					int _panning;							

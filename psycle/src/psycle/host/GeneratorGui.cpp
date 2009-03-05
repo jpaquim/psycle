@@ -1,4 +1,9 @@
 #include "GeneratorGui.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#endif
+
 #include "Song.hpp"
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
@@ -100,11 +105,7 @@ namespace psycle {
 
 		void GeneratorGui::UpdatePan()
 		{
-#ifdef use_psycore
 			int panning = mac()->Pan() * MachineCoords_.dGeneratorPan.width;
-#else
-			int panning = mac()->_panning * MachineCoords_.dGeneratorPan.width;
-#endif
 			panning /= 128;
 			pan_pixbuf_.SetXY(panning + MachineCoords_.dGeneratorPan.x, 
 		 	  			      MachineCoords_.dGeneratorPan.y);
@@ -179,11 +180,7 @@ namespace psycle {
 		
 		bool GeneratorGui::TestPan(double x, double y)
 		{				
-#ifdef use_psycore
 			int panning = mac()->Pan()*MachineCoords_.dGeneratorPan.width;
-#else
-			int panning = mac()->_panning*MachineCoords_.dGeneratorPan.width;
-#endif
 			panning /= 128;
 			if (InRect(x,
 				       y,
@@ -206,30 +203,18 @@ namespace psycle {
 			if (MachineCoords_.dGeneratorPan.width) {
 				newpan /= MachineCoords_.dGeneratorPan.width;
 				mac()->SetPan(newpan);
-
-#ifdef use_psycore
 				newpan= mac()->Pan();
-#else
-				newpan= mac()->_panning;
-#endif
 				UpdatePan();
-				QueueDraw();
-				char buf[128];
-#ifdef use_psycore
+				QueueDraw();				
+				std::ostringstream str;
 				if (newpan != 64) {
-					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", mac()->GetEditName(), 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+					str << mac()->GetEditName() << " Pan: "
+					<< (int) ( 100.0f - ((float)newpan*0.78125f)) << "% Left / " 
+					<< (int) ((float)newpan*0.78125f) << "% Right";
 				} else {
-					sprintf(buf, "%s Pan: Center", mac()->GetEditName());
+					str << mac()->GetEditName() << " Pan: Center";
 				}
-
-#else
-				if (newpan != 64) {
-					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", mac()->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
-				} else {
-					sprintf(buf, "%s Pan: Center", mac()->_editName);
-				}
-#endif
-				view()->WriteStatusBar(std::string(buf));
+				view()->WriteStatusBar(str.str());			
 			}
 		}
 
@@ -274,16 +259,9 @@ namespace psycle {
 			if (mac()->_mute) {
 				mac()->_volumeCounter=0.0f;
 				mac()->_volumeDisplay=0;
-#ifdef use_psycore
 				if (view()->song()->machineSoloed == mac()->id()) {
 					view()->song()->machineSoloed = -1;
 				}
-
-#else
-				if (view()->song()->machineSoloed == mac()->_macIndex) {
-					view()->song()->machineSoloed = -1;
-				}
-#endif
 			}
 			mute_pixbuf_.SetVisible(mute);			
 		}
