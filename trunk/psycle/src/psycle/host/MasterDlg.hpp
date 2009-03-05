@@ -5,6 +5,16 @@
 #include "Constants.hpp"
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class Master;
+	}
+}
+#endif
+
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -41,7 +51,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CBitmap m_sliderknob;
 			CBitmap m_back;
 			CFont namesFont;
-			Master* _pMachine;
+#ifdef use_psycore
+			psy::core::Master* _pMachine;
+#else
+			Master* _pMachine;			
+#endif
 			char macname[MAX_CONNECTIONS][32];
 			afx_msg void OnCancel();
 		// Dialog Data

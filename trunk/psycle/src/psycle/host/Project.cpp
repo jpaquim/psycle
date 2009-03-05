@@ -2,6 +2,7 @@
 
 #ifdef use_psycore
 #include <psycle/core/player.h>
+#include <psycle/audiodrivers/audiodriver.h>
 #endif
 
 #include "ChildView.hpp"
@@ -120,12 +121,16 @@ namespace psycle {
 		{
 #ifdef use_psycore
 			mac_view()->LockVu();
+			psy::core::Player & player(psy::core::Player::singleton());
+			player.stop();
+			///\todo lock/unlock
+			Sleep(256);
+			player.driver().Enable(false);
 			pat_view()->editPosition = 0;
 			if(!psy_song().load(fName.c_str())) {
 				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 				return;			
-			}
-			psy::core::Player & player(psy::core::Player::singleton());
+			}			
 			player.song(&psy_song());
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
@@ -138,6 +143,7 @@ namespace psycle {
 			{
 				psy_song().fileName = fName;
 			}
+			player.driver().Enable(true);
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
 			mac_view()->Rebuild();
@@ -204,9 +210,14 @@ namespace psycle {
 			mac_view()->child_view()->SetTitleBarText();
 			mac_view()->Rebuild();
 			mac_view()->UnlockVu();
+#endif
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
+#if use_psycore				
+				CSongpDlg dlg(&psy_song());
+#else
 				CSongpDlg dlg(&song());
+#endif
 				dlg.SetReadOnly();
 				dlg.DoModal();
 /*				std::ostringstream songLoaded;
@@ -218,7 +229,6 @@ namespace psycle {
 				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
 */
 			}
-#endif
 		}
 
 		void Project::AppendToRecent(const std::string& fName)
@@ -378,7 +388,11 @@ namespace psycle {
 						xmfile.Load(song());
 						xmfile.Close();
 						mac_view()->Rebuild();
+#ifdef use_psycore
+						CSongpDlg dlg(&psy_song());
+#else
 						CSongpDlg dlg(&song());
+#endif
 						dlg.SetReadOnly();
 						dlg.DoModal();
 /*						char buffer[512];		
@@ -406,7 +420,11 @@ namespace psycle {
 						}
 						it.Close();
 						mac_view()->Rebuild();
+#ifdef use_psycore
+						CSongpDlg dlg(&psy_song());
+#else
 						CSongpDlg dlg(&song());
+#endif
 						dlg.SetReadOnly();
 						dlg.DoModal();
 /*						char buffer[512];		
@@ -434,7 +452,11 @@ namespace psycle {
 						}
 						s3m.Close();
 						mac_view()->Rebuild();
+#ifdef use_psycore
+						CSongpDlg dlg(&psy_song());
+#else
 						CSongpDlg dlg(&song());
+#endif						
 						dlg.SetReadOnly();
 						dlg.DoModal();
 /*						char buffer[512];
@@ -456,7 +478,11 @@ namespace psycle {
 						modfile.Load(song());
 						modfile.Close();
 						mac_view()->Rebuild();
+#ifdef use_psycore
+						CSongpDlg dlg(&psy_song());
+#else
 						CSongpDlg dlg(&song());
+#endif
 						dlg.SetReadOnly();
 						dlg.DoModal();
 /*						char buffer[512];		

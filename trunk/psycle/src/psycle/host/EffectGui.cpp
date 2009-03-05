@@ -1,4 +1,9 @@
 #include "EffectGui.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#endif
+
 #include "Song.hpp"
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
@@ -36,11 +41,7 @@ namespace psycle {
 
 		bool EffectGui::TestPan(double x, double y)
 		{				
-#ifdef use_psycore
 			int panning = mac()->Pan()*MachineCoords_.dEffectPan.width;
-#else
-			int panning = mac()->_panning*MachineCoords_.dEffectPan.width;
-#endif			
 			panning /= 128;
 			if (InRect(x,
 				       y,
@@ -72,8 +73,7 @@ namespace psycle {
 		void EffectGui::SetBypass(bool on)
 		{
 			mac()->Bypass(on);
-			if (mac()->Bypass())
-			{
+			if (mac()->Bypass()) {
 				mac()->_volumeCounter=0.0f;
 				mac()->_volumeDisplay=0;
 			}			
@@ -86,17 +86,9 @@ namespace psycle {
 			if (mac()->_mute) {
 				mac()->_volumeCounter=0.0f;
 				mac()->_volumeDisplay=0;
-#ifdef use_psycore
-				// todo
-//				if (view()->song()->machineSoloed == mac()->_macIndex) {
-//					view()->song()->machineSoloed = -1;
-//				}
-#else
-				if (view()->song()->machineSoloed == mac()->_macIndex) {
+				if (view()->song()->machineSoloed == mac()->id()) {
 					view()->song()->machineSoloed = -1;
 				}
-
-#endif
 			}
 			mute_pixbuf_.SetVisible(on);
 		}
@@ -119,32 +111,20 @@ namespace psycle {
 			if (MachineCoords_.dGeneratorPan.width) {
 				newpan /= MachineCoords_.dGeneratorPan.width;
 				mac()->SetPan(newpan);
-#ifdef use_psycore
 				newpan= mac()->Pan();
-#else
-				newpan= mac()->_panning;
-#endif
-				UpdatePan();
-				char buf[128];
-#ifdef use_psycore
+				UpdatePan();				
+				std::ostringstream str;
 				if (newpan != 64) {
-					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", mac()->GetEditName(), 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+					str << mac()->GetEditName() << " Pan: "
+					<< (int) ( 100.0f - ((float)newpan*0.78125f)) << "% Left / " 
+					<< (int) ((float)newpan*0.78125f) << "% Right";
 				} else {
-					sprintf(buf, "%s Pan: Center", mac()->GetEditName());
+					str << mac()->GetEditName() << " Pan: Center";
 				}
-#else
-				if (newpan != 64) {
-					sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", mac()->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
-				} else {
-					sprintf(buf, "%s Pan: Center", mac()->_editName);
-				}
-
-#endif
-				view()->WriteStatusBar(std::string(buf));
+				view()->WriteStatusBar(str.str());
 				QueueDraw();
 			}
 		}
-
 
 		void EffectGui::UpdateVU(CDC* devc) 
 		{
@@ -209,11 +189,7 @@ namespace psycle {
 
 		void EffectGui::UpdatePan()
 		{
-#ifdef use_psycore
 			int panning = mac()->Pan()*MachineCoords_.dEffectPan.width;
-#else
-			int panning = mac()->_panning*MachineCoords_.dEffectPan.width;
-#endif
 			panning /= 128;
 			pan_pixbuf_.SetXY(panning+MachineCoords_.dEffectPan.x, 
 							  MachineCoords_.dEffectPan.y);

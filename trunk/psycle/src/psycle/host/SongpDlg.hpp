@@ -3,6 +3,17 @@
 #pragma once
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+#include "configuration_options.hpp"
+
+#ifdef use_psycore
+		namespace psy {
+			namespace core {
+				class Song;
+			}
+		}
+#endif
+
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -13,8 +24,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			/// mfc compliant constructor.
+#ifdef use_psycore
+			CSongpDlg(psy::core::Song *song, CWnd* pParent = 0);
+			psy::core::Song* _pSong;
+#else
 			CSongpDlg(Song *song, CWnd* pParent = 0);
 			Song* _pSong;
+#endif
 		// Dialog Data
 			enum { IDD = IDD_SONGPROP };
 			CEdit	m_songcomments;

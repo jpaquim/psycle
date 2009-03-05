@@ -2,6 +2,11 @@
 ///\brief implementation file for psycle::host::CMasterDlg.
 
 #include "MasterDlg.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/internal_machines.h>
+#endif
+
 #include "Psycle.hpp"
 #include "ChildView.hpp"
 #include "Dsp.hpp"
