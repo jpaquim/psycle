@@ -129,6 +129,8 @@ namespace psy {
 		protected:
 
 			static std::string _psName;
+
+		public:
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
 			dsp::Cubic _resampler;
