@@ -390,7 +390,7 @@ namespace psycle
 					/// right chan volume
 					float _rVol;							
 			///\}
-
+				
 		public:
 			Machine();
 			Machine(Machine* mac);
@@ -406,6 +406,11 @@ namespace psycle
 				rms.previousRight=0.;
 #endif
 			}
+
+			bool IsGenerator() const {
+				return (_mode == MACHMODE_GENERATOR);
+			}
+
 		protected:
 			void UpdateVuAndStanbyFlag(int numSamples);
 

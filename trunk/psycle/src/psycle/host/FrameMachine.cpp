@@ -2,6 +2,11 @@
 ///\brief implementation file for psycle::host::CFrameMachine.
 
 #include "FrameMachine.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#endif
+
 #include "Psycle.hpp"
 #include "NativeGui.hpp"
 #include "ChildView.hpp"
@@ -71,18 +76,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				IDR_MACHINEFRAME, 
 				WS_POPUPWINDOW | WS_CAPTION,
 				gen_gui_->view()->child_view());
-#ifdef use_psycore
-			// todo
-#else
 			SelectMachine(gen_gui_->mac());
 			CRect rc;
 			gen_gui_->view()->parent()->GetWindowRect(rc);
 			Generate(x, y);			
 			std::ostringstream winname;
 			winname<<std::setfill('0') << std::setw(2) << std::hex;
-			winname << MachineIndex << " : " << _pMachine->_editName;
+			winname << MachineIndex << " : " << _pMachine->GetEditName();
 			SetWindowText(winname.str().c_str());
-#endif
 		}
 
 		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -194,10 +195,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (y < 0) {
 				y = 0;
 			}
-			SetWindowPos( 0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE );
+			SetWindowPos(0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 		}
 
+#ifdef use_psycore		
+		void CFrameMachine::SelectMachine(psy::core::Machine* pMachine)
+#else
 		void CFrameMachine::SelectMachine(Machine* pMachine)
+#endif
 		{
 			_pMachine = pMachine;
 
@@ -568,10 +573,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+#ifdef use_psycore
+#else
+						if ( _pMachine->IsGenerator() || Global::pConfig->_notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
+#endif
 					}
 					break;
 
@@ -595,11 +603,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
+#ifdef use_psycore
+#else
+				if ( _pMachine->IsGenerator() ||Global::pConfig->_notesToEffects)
 				{
 					Global::pInputHandler->StopNote(outnote,true,_pMachine);
 				}
 				else Global::pInputHandler->StopNote(outnote,true,NULL);
+#endif
 			}
 
 			//wndView->KeyUp(nChar, nRepCnt, nFlags);
@@ -681,9 +692,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersShowpreset() 
 		{
+#ifdef use_psycore
+#else
 			CPresetsDlg dlg;
 			dlg._pMachine=_pMachine;
 			dlg.DoModal();
+#endif
 		}
 
 	PSYCLE__MFC__NAMESPACE__END

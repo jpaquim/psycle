@@ -25,9 +25,9 @@ namespace psy { namespace core {
 std::string Dummy::_psName = "Dummy";
 
 Dummy::Dummy(MachineCallbacks* callbacks, Machine::id_type id)
-:
-	Machine(callbacks, id)
+	:	Machine(callbacks, id)
 {
+	_type = MACH_DUMMY;
 	defineInputAsStereo();
 	defineOutputAsStereo();
 	SetEditName(_psName);
@@ -85,8 +85,9 @@ std::string DuplicatorMac::_psName = "Dupe it!";
 
 DuplicatorMac::DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type id)
 :
-	Machine(callbacks, id)
+	Machine(callbacks, id)	
 {
+	_type = MACH_DUPLICATOR;
 	SetEditName(_psName);
 	_numPars = NUM_MACHINES*2;
 	_nCols = 2;
@@ -280,6 +281,7 @@ Master::Master(MachineCallbacks* callbacks, Machine::id_type id)
 	_rMax(0),
 	_outDry(256)
 {
+	_type = MACH_MASTER;
 	defineInputAsStereo();
 	SetEditName(_psName);
 	_outDry = 256;

@@ -65,6 +65,7 @@ Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, 
 	info_(info),
 	proxy_(*this,macIface)
 {
+	_type = MACH_PLUGIN;
 	SetAudioRange(32768.0f);
 
 	//Psy2Filter can generate a plugin without info
