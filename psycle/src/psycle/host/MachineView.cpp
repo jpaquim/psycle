@@ -26,9 +26,10 @@
 #endif
 
 #ifdef use_psycore
-// helps for now to reduce #ifdef mania
-using namespace psy::core;
+#include <psycle/core/machinefactory.h>
+#include <psycle/core/player.h>
 #endif
+
 
 namespace psycle {
 	namespace host {
@@ -481,13 +482,58 @@ namespace psycle {
 				x -= xs/2;
 				y -= ys/2;
 				bool created=false;
+				
+				if (song()->machine(fb)) {
+				} else {
+					psy::core::MachineKey key;
+					switch(dlg.Outputmachine) {
+						case MACH_MASTER:
+							key = psy::core::MachineKey::master();
+						break;
+						case MACH_SAMPLER:
+							key = psy::core::MachineKey::sampler();
+						break;
+						case MACH_MIXER:
+							key = psy::core::MachineKey::mixer();
+						break;
+						case MACH_XMSAMPLER:
+							key = psy::core::MachineKey::sampulse();
+						break;
+						case MACH_DUPLICATOR:
+							key = psy::core::MachineKey::duplicator();
+						break;
+//						case MACH_AUDIOINPUT:
+//							key = psy::core::MachineKey::audioinput();
+//						break;
+						case MACH_DUMMY:
+							key = psy::core::MachineKey::dummy();
+						break;
+						case MACH_PLUGIN:	{					
+							// PSY3 Format saves the suffix, so we have to remove it before creating the key.
+							std::string dllName = dlg.psOutputDll.c_str();
+							std::string::size_type const pos(dllName.find(".dll"));
+							if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+							key = psy::core::MachineKey(psy::core::Hosts::NATIVE, dllName, 0);
+						}
+						break;
+						default: ;
+					}
+
+					psy::core::Machine* mac = psy::core::MachineFactory::getInstance().CreateMachine(key, fb);
+					if (mac) {
+						mac->Init();
+						song()->AddMachine(mac);
+						created = true;
+					}
+				}
+		
+
 /*
 todo!!
 				if (song()->machine(fb)) {
 					created = song()->ReplaceMachine(song()->machine(fb),(MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 				}
-				else  {
-					created = song()->CreateMachine((MachineType)dlg.Outputmachine, (int)x, (int)y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+				else  {					
 				}
 */
 				if (!created) {
