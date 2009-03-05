@@ -35,7 +35,6 @@ namespace psycle {
 		{
 			if ( !dialog_ ) {
 				dialog_ = new CGearTracker(this);
-				dialog_->_pMachine = (Sampler*)mac();
 				dialog_->Create();
 				dialog_->ShowWindow(SW_SHOW);
 			}

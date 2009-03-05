@@ -5,6 +5,15 @@
 #include "Constants.hpp"
 #include "resources/resources.hpp"
 #include "mfc_namespace.hpp"
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class Sampler;
+	}
+}
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -19,7 +28,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		private:
 			MachineGui* gui_;
 		public:
+#ifdef use_psycore
+			psy::core::Sampler* _pMachine;
+#else
 			Sampler* _pMachine;
+#endif
 			BOOL Create();
 			afx_msg void OnCancel();
 		// Dialog Data
