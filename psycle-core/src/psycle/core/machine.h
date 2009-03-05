@@ -630,7 +630,7 @@ class Machine {
 				MACH_RECORDER = 15,
 				MACH_DUMMY = 255
 			};
-			MachineType _type;			
+			MachineType _type;
 
 		protected:
 			int numInPorts;
