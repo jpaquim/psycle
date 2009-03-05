@@ -930,4 +930,9 @@ void Machine::reallocateRemainingEvents(double beatOffset) {
 	}
 }
 
+	bool Machine::IsGenerator() const
+	{
+		return !acceptsConnections();
+	}
+
 }}

@@ -673,13 +673,26 @@ todo!!
 			assert(mac);
 			MachineGui* gui;
 #ifdef use_psycore
-			if (!mac->acceptsConnections()) {
-				gui = new GeneratorGui(this, mac);
-			} else
-			if (!mac->emitsConnections()) {
-				gui = new MasterGui(this, mac);
-			} else {
-				gui = new EffectGui(this, mac);
+			switch ( mac->_type ) {
+				case MACH_MASTER:
+  					gui = new MasterGui(this, mac);
+				break;
+				case MACH_PLUGIN:
+					if (mac->IsGenerator())
+						gui = new GeneratorGui(this, mac);
+					else
+					if (!mac->IsGenerator())
+						gui = new EffectGui(this, mac);
+				break;
+				case MACH_SAMPLER:
+					gui = new SamplerGui(this, mac);
+				break;
+				default:
+					if (mac->IsGenerator())
+						gui = new GeneratorGui(this, mac);
+					else
+					if (!mac->IsGenerator())
+						gui = new EffectGui(this, mac);
 			}
 			gui_map_[mac] = gui;
 			if ( (!mac->acceptsConnections()) ) {

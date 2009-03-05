@@ -293,9 +293,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	}
 	void CFrameMixerMachine::SelectMachine(Machine* pMachine)
 	{
+#ifdef use_psycore
+		// todo
+#else
 		_pMixer=(Mixer*)(_pMachine = pMachine);
 		numParameters = _pMixer->GetNumParams();
 		UpdateSendsandChans();
+#endif
 	}
 	void CFrameMixerMachine::Generate(double x, double y) {
 
@@ -910,9 +914,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 					if(Global::configuration()._RecordTweaks)
 					{
 						if(Global::configuration()._RecordMouseTweaksSmooth)
-							wndView->MousePatternTweakSlide(_pMachine->_macIndex, tweakpar, tweakbase);
+							wndView->MousePatternTweakSlide(_pMachine->id(), tweakpar, tweakbase);
 						else
-							wndView->MousePatternTweak(_pMachine->_macIndex, tweakpar, tweakbase);
+							wndView->MousePatternTweak(_pMachine->id(), tweakpar, tweakbase);
 					}
 				}
 			}
@@ -955,9 +959,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 			if(Global::configuration()._RecordTweaks)
 			{
 				if(Global::configuration()._RecordMouseTweaksSmooth)
-					wndView->MousePatternTweakSlide(_pMachine->_macIndex, tweakpar, prevval);
+					wndView->MousePatternTweakSlide(_pMachine->id(), tweakpar, prevval);
 				else
-					wndView->MousePatternTweak(_pMachine->_macIndex, tweakpar, prevval);
+					wndView->MousePatternTweak(_pMachine->id(), tweakpar, prevval);
 			}
 
 
