@@ -85,6 +85,9 @@ namespace psycle {
 		void WireGui::RemoveWire()
 		{
 			set_manage(false); // this causes an unparent
+#ifdef use_psycore
+			fromGUI_->mac()->Disconnect(*toGUI_->mac()) ;
+#endif
 			wire_dlg_ = 0;
 			delete this;			
 		}
@@ -308,7 +311,34 @@ namespace psycle {
 			}
 			return true;
 		}
+/*
+		TestCanvas::Item* WireGui::intersect(double x, double y)
+		{
+			int oriX = points().at(0).first;
+			int oriY = points().at(0).second;
 
+			int desX = points().at(1).first;
+			int desY = points().at(1).second;
+
+			int const f1 = (desX+oriX)/2;
+			int const f2 = (desY+oriY)/2;
+			CPoint pol[5];
+
+			pol[0].x = f1 - 10;
+			pol[0].y = f2 - 10;
+			pol[1].x = pol[0].x + 20;
+			pol[1].y = pol[0].y;
+			pol[2].x = pol[0].x + 20;
+			pol[2].y = pol[0].y + 20;
+			pol[3].x = pol[0].x ;
+			pol[3].y = pol[0].y + 20;
+			pol[4].x = pol[0].x;
+			pol[4].y = pol[0].y;
+			CRgn rgn;
+			int err = rgn.CreatePolygonRgn(&pol[0],5, WINDING);
+			return rgn.PtInRegion(x,y) ? this : 0;
+		}
+*/
 		void WireGui::ShowDialog(double x, double y)
 		{
 			if (!wire_dlg_) {			

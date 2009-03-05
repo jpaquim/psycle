@@ -29,6 +29,12 @@ namespace psycle {
 		{
 			dialog_ = 0;
 		}
+		void XmSamplerGui::UpdateVU(CDC* devc) {
+			GeneratorGui::UpdateVU(devc);
+			if(dialog_) {
+				dialog_->UpdateUI();
+			}
+		}
 
 		void XmSamplerGui::ShowDialog(double x, double y)
 		{
