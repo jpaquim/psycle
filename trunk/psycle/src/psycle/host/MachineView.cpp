@@ -1057,37 +1057,54 @@ todo!!
 
 #ifdef use_psycore
 		bool MachineView::RewireSrc(psy::core::Machine* tmac, psy::core::Machine* dmac)
+		{
+			///\todo: hardcoded. This needs to be extended with multi-io.
+			psy::core::InPort::id_type portin=psy::core::InPort::id_type(0);
+			psy::core::OutPort::id_type portout=psy::core::OutPort::id_type(0);
+			if(!song()->ChangeWireSourceMac(*dmac, *tmac, portout, psy::core::Wire::id_type(rewire_line_->wiredest()), portin))	{
+				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
+				return false;
+			}
+			return true;
+		}
 #else
 		bool MachineView::RewireSrc(Machine* tmac, Machine* dmac)
-#endif
 		{			
 			int srctype=0;
 			///\todo: for multi-io.
 			//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
-#ifdef use_psycore
-			//todo
-#else
 			if (!song()->ChangeWireSourceMac(dmac,tmac,dmac->GetFreeOutputWire(srctype),rewire_line_->wiredest()))
 			{
 				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 				return false;
 			}
-#endif
 			return true;
 		}
+#endif
 
 #ifdef use_psycore
 		bool MachineView::RewireDest(psy::core::Machine* tmac, psy::core::Machine* dmac)
+		{
+			///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
+			psy::core::InPort::id_type portin=psy::core::InPort::id_type(0);
+			psy::core::OutPort::id_type portout=psy::core::OutPort::id_type(0);
+			if ( dmac->GetInPorts() > 1 ) {
+				if (child_view()->MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES ) {
+					portin=psy::core::InPort::id_type(1);
+				}
+			}
+			if(!song()->ChangeWireDestMac(*tmac, *dmac, portout, psy::core::Wire::id_type(rewire_line_->wiresrc()), portin))	{
+				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
+				return false;
+			}
+			return true;
+		}
 #else
 		bool MachineView::RewireDest(Machine* tmac, Machine* dmac)
-#endif
 		{
 			// rewire dest;
 			int w(-1);
-			///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
-#ifdef use_psycore
-			//todo
-#else
+			//FIXME: tmac?
 			if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
 			{
 				if (child_view()->MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES ) {
@@ -1104,9 +1121,9 @@ todo!!
 				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 				return false;
 			}
-#endif
 			return true;
 		}
+#endif
 
 		void MachineView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
 		{

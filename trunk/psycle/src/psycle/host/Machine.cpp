@@ -610,25 +610,42 @@ namespace psycle
 				float *pSamplesL = _pSamplesL;   
 				float *pSamplesR = _pSamplesR;   
 				int i = _scopePrevNumSamples;
-				while (i > 0)   
+				if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
 				{   
-					if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
-					{   
-						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
-						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
-						pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-						pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-						i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-						_scopeBufferIndex = 0;   
-					}   
-					else   
-					{   
-						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));   
-						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));   
-						_scopeBufferIndex += i;   
-						i = 0;   
-					}   
-				} 
+					//dsp::Mov SSE version needs 16byte (4 samples) aligned data.
+					const int cont = (SCOPE_BUF_SIZE-_scopeBufferIndex)&0x0FFFFFFC;
+					helpers::dsp::Mov(pSamplesL,&_pScopeBufferL[_scopeBufferIndex], cont);
+					helpers::dsp::Mov(pSamplesR,&_pScopeBufferR[_scopeBufferIndex], cont);
+					pSamplesL+=cont;
+					pSamplesR+=cont;
+					i -= cont;
+					_scopeBufferIndex +=cont;
+/*					if (_scopeBufferIndex < SCOPE_BUF_SIZE) {
+						const int cont2 = SCOPE_BUF_SIZE-_scopeBufferIndex;
+						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,cont2);
+						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,cont2);
+						pSamplesL+=cont2;
+						pSamplesR+=cont2;
+						i-=cont2;
+					}
+*/
+					_scopeBufferIndex = 0;  
+				}   
+				//dsp::Mov SSE version needs 16byte (4 samples) aligned data.
+				const int cont = i&0x0FFFFFFC;
+				helpers::dsp::Mov(pSamplesL,&_pScopeBufferL[_scopeBufferIndex], cont);
+				helpers::dsp::Mov(pSamplesR,&_pScopeBufferR[_scopeBufferIndex], cont);
+				pSamplesL+=cont;
+				pSamplesR+=cont;
+				_scopeBufferIndex += cont;
+				i -= cont;
+/*				if (i > 0) {
+					memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));
+					memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));
+					_scopeBufferIndex +=i;
+				}
+*/
+
 			}
 			_scopePrevNumSamples=numSamples;
 #endif //!defined WINAMP_PLUGIN

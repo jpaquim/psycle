@@ -42,6 +42,7 @@ namespace psycle {
 			void StopDragging();			
 
 			virtual bool OnEvent(PsycleCanvas::Event* ev);
+			//virtual TestCanvas::Item* intersect(double x, double y);
 
 			void BeforeWireDlgDeletion();
 			void RemoveWire();

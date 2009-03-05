@@ -16,6 +16,8 @@ namespace psycle {
 			~XmSamplerGui();
 
 			virtual void BeforeDeleteDlg();
+			virtual void UpdateVU(CDC* devc);
+
 
 		protected:
 			virtual void ShowDialog(double x, double y);

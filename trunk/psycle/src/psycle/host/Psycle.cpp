@@ -60,10 +60,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{		
 #ifdef use_psycore
 			psy::core::Player & player(psy::core::Player::singleton());
+			//TODO: Use the pluginCatcher when it's ready.
 			psy::core::MachineFactory & factory(psy::core::MachineFactory::getInstance());
 			factory.Initialize(&player);
-			factory.setPsyclePath("");
-			factory.setLadspaPath("");
 #endif
 
 			// Allow only one instance of the program
@@ -140,7 +139,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->m_wndView.machine_view()->CenterMaster();
 			pFrame->UpdateWindow();
 			
+#ifdef use_psycore
+			factory.setPsyclePath(Global::pConfig->GetPluginDir());
+			factory.setLadspaPath("");
+#else
 			CNewMachine::LoadPluginInfo(false);
+#endif
 
 			LoadRecent(pFrame); // Import recent files from registry.
 
@@ -155,10 +159,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				pFrame->CheckForAutosave();
 			}
-
-#ifdef use_psycore
-			factory.setPsyclePath(Global::pConfig->GetPluginDir());
-#endif
 
 			return TRUE;
 		}

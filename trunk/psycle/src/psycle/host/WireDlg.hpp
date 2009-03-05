@@ -27,7 +27,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		class CChildView;
 
 		const int MAX_SCOPE_BANDS = 128;
-		const int SCOPE_BUF_SIZE = 8192;
+		const int SCOPE_BUF_SIZE = 4096;
 		const int SCOPE_SPEC_SAMPLES = 1024;
 
 		class Song;
@@ -66,6 +66,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int scope_osc_rate;
 			int scope_spec_bands;
 			int scope_spec_rate;
+			int scope_spec_mode;
 			int scope_phase_rate;
 
 			float peakL,peakR;
@@ -74,8 +75,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
 
-			float pSamplesL[SCOPE_BUF_SIZE];
-			float pSamplesR[SCOPE_BUF_SIZE];
+			float *pSamplesL;
+			float *pSamplesR;
+			float *inl;
+			float *inr;
+
 		// Dialog Data
 			enum { IDD = IDD_WIREDIALOG };
 			CSliderCtrl	m_slider;
@@ -110,7 +114,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int bar_heightsr[MAX_SCOPE_BANDS];
 			float sth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
 			float cth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
-			float heightcompensation[MAX_SCOPE_BANDS];
 			// Generated message map functions
 			virtual BOOL OnInitDialog();
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
