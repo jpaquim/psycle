@@ -15,7 +15,6 @@
 #endif
 
 
-
 namespace psycle {
 	namespace host {
 
@@ -83,9 +82,9 @@ namespace psycle {
 			std::vector<WireGui*>::iterator it = wire_uis_.begin();
 			for ( ; it != wire_uis_.end(); ++it ) {
 				WireGui* wire_ui = (*it);
-				if (wire_ui->toGUI() && (wire_ui->toGUI() != this ) )
+				if (wire_ui->toGUI() && (wire_ui->toGUI() != this))
 					wire_ui->toGUI()->DetachWire(wire_ui);
-				if (wire_ui->fromGUI() && (wire_ui->fromGUI() != this ))
+				if (wire_ui->fromGUI() && (wire_ui->fromGUI() != this))
 					wire_ui->fromGUI()->DetachWire(wire_ui);
 				wire_ui->set_manage(false);
 				wire_ui->SetGuiConnectors(0,0,0);
@@ -114,7 +113,7 @@ namespace psycle {
 
 		bool MachineGui::OnEvent(PsycleCanvas::Event* ev)
 		{
-			if ( ev->type == PsycleCanvas::Event::BUTTON_PRESS ) {
+			if (ev->type == PsycleCanvas::Event::BUTTON_PRESS) {
 					new_con_ = false;
 				//else
 				if ( ev->button == 3 ) {
@@ -122,7 +121,7 @@ namespace psycle {
 					dragging_y_ = ev->y;
 				}
 			} else
-			if ( ev->type == PsycleCanvas::Event::MOTION_NOTIFY ) {
+			if (ev->type == PsycleCanvas::Event::MOTION_NOTIFY) {
 				if (dragging_) {
 					DoDragging(ev->x, ev->y);
 				} else
@@ -136,34 +135,37 @@ namespace psycle {
 					StartDragging(ev->x, ev->y);
 				}
 			} else
-			if ( ev->type == PsycleCanvas::Event::BUTTON_RELEASE ) {
+			if (ev->type == PsycleCanvas::Event::BUTTON_RELEASE) {
 				if (ev->button == 3) {
 					view()->DoMacPropDialog(mac(), true);
 				} else {
 					StopDragging();
 				}
 			}
-			if ( ev->type == PsycleCanvas::Event::BUTTON_2PRESS ) {
+			if (ev->type == PsycleCanvas::Event::BUTTON_2PRESS) {
 				CRect rc;
 				view()->parent()->GetWindowRect(rc);
 				ShowDialog(rc.left + absx() + ev->x,  rc.top + absy() + ev->y);
 			}
 			return true;
 		}
-
 		
-		bool MachineGui::InRect(double x, double y, double x1, double y1, double x2,
-			double y2 ) const {
-			if ( x1 < x2 ) {
-				if ( y1 < y2 )
-					return ( x >= x1 && x < x2 && y >= y1 && y < y2 ) ? true : false;
+		bool MachineGui::InRect(double x,
+								double y,
+								double x1,
+								double y1,
+								double x2,
+								double y2) const {
+			if (x1 < x2) {
+				if (y1 < y2)
+					return (x >= x1 && x < x2 && y >= y1 && y < y2) ? true : false;
 				else 
-					return ( x >= x1 && x < x2 && y >= y2 && y < y1 ) ? true : false;
+					return ( x >= x1 && x < x2 && y >= y2 && y < y1) ? true : false;
 			} else {
-				if ( y1 < y2 )
-					return ( x >= x2 && x < x1 && y >= y1 && y < y2 ) ? true : false;
+				if (y1 < y2)
+					return (x >= x2 && x < x1 && y >= y1 && y < y2) ? true : false;
 				else 
-					return ( x >= x2 && x < x1 && y >= y2 && y < y1 ) ? true : false;
+					return (x >= x2 && x < x1 && y >= y2 && y < y1) ? true : false;
 			}
 		}
 
@@ -191,14 +193,12 @@ namespace psycle {
 			OnMove(); 
 			view()->SetSave(false);
 			view()->Flush();
-			char buf[128];
-#ifdef use_psycore
-			sprintf(buf, "%s (%d,%d)", mac()->GetEditName(), static_cast<int>(new_x), static_cast<int>(new_y));
-#else
-			sprintf(buf, "%s (%d,%d)", mac()->_editName, static_cast<int>(new_x), static_cast<int>(new_y));
-#endif
-
-			view()->WriteStatusBar(std::string(buf));
+			std::ostringstream str;
+			str << mac()->GetEditName()
+				<< " (" << static_cast<int>(new_x)
+				<< "," << static_cast<int>(new_y)
+				<< ")";
+			view()->WriteStatusBar(str.str());
 		}
 
 		void MachineGui::StopDragging()
@@ -280,5 +280,6 @@ namespace psycle {
 		{
 			 return 20;
 		}
+
 	}  // namespace host
 }  // namespace psycle

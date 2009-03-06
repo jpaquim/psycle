@@ -86,8 +86,8 @@ namespace psy
 			double tickEndPosition( ) const;
 
 			void setPattern(SinglePattern* pattern);
-			SinglePattern* pattern();
-			SinglePattern* pattern() const;
+			SinglePattern* pattern() { return pattern_; }
+			SinglePattern* pattern() const { return pattern_; }
 
 			float patternBeats() const;
 
@@ -118,19 +118,16 @@ namespace psy
 			float endPos_;
 			/// a transpose offset for the entry
 			int transpose_;
-
-			void init();
-
 		};
 
-		class PatternSequence;
+		class Sequence;
 
-		class SequenceLine : public  std::multimap<double, SequenceEntry*>
+		class SequenceLine
 		{
 
 		public:
 			SequenceLine();
-			SequenceLine(PatternSequence* patSeq);
+			SequenceLine(Sequence* sequence);
 			~SequenceLine();
 
 			boost::signal<void (SequenceLine*)> wasDeleted;
@@ -142,27 +139,79 @@ namespace psy
 
 			double tickLength() const;
 
-			PatternSequence* patternSequence();
+			Sequence* patternSequence() { return sequence_; }
 
 			void MoveEntry(SequenceEntry* entry, double newpos);
 			void removeEntry(SequenceEntry* entry);
 
-			const std::string & name() const;
+			const std::string& name() const;
 			void setName(const std::string & newname);
 
 			std::string toXml() const;
 
+			typedef std::multimap<double, SequenceEntry*>::iterator iterator;
+			typedef std::multimap<double, SequenceEntry*>::const_iterator const_iterator;
+			typedef std::multimap<double, SequenceEntry*>::const_reverse_iterator const_reverse_iterator;
+			typedef std::multimap<double, SequenceEntry*>::reverse_iterator reverse_iterator;
+  
+			iterator begin() { return line_.begin(); }
+			const_iterator begin() const { return line_.begin(); }
+			iterator end() { return line_.end(); }
+			const_iterator end() const { return line_.end(); }
+  
+			reverse_iterator rbegin() { return line_.rbegin(); }
+			const_reverse_iterator rbegin() const { return line_.rbegin(); }
+			reverse_iterator rend() { return line_.rend(); }
+			const_reverse_iterator rend() const { return line_.rend(); }
+  
+			void insert(double pos, SequenceEntry* entry) {
+				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
+				entry->setSequenceLine(this);
+			}
+
+			void erase(iterator it) {
+				line_.erase(it);
+			}
+
+			iterator lower_bound(double pos) {
+				return line_.lower_bound(pos);
+			}
+
+			iterator upper_bound(double pos) {
+				return line_.upper_bound(pos);
+			}
+
+			std::multimap<double, SequenceEntry*>::size_type size() const {
+				return line_.size();
+			}
+
 		private:
 
+			std::multimap<double, SequenceEntry*> line_;
 			std::string name_;
-			PatternSequence* patternSequence_;
+			Sequence* sequence_;
 
 		};
 
-		class PatternSequence : public std::vector<SequenceLine*> {
+		class Sequence {
 		public:
-			PatternSequence();
-			~PatternSequence();
+			Sequence();
+			~Sequence();
+
+			typedef std::vector<SequenceLine*>::iterator iterator;
+			typedef std::vector<SequenceLine*>::const_iterator const_iterator;
+			typedef std::vector<SequenceLine*>::const_reverse_iterator const_reverse_iterator;
+			typedef std::vector<SequenceLine*>::reverse_iterator reverse_iterator;
+
+			iterator begin() { return lines_.begin(); }
+			const_iterator begin() const { return lines_.begin(); }
+			iterator end() { return lines_.end(); }
+			const_iterator end() const { return lines_.end(); }
+  
+			reverse_iterator rbegin() { return lines_.rbegin(); }
+			const_reverse_iterator rbegin() const { return lines_.rbegin(); }
+			reverse_iterator rend() { return lines_.rend(); }
+			const_reverse_iterator rend() const { return lines_.rend(); }
 
 			typedef std::multimap<double, GlobalEvent*> GlobalMap;
 			typedef GlobalMap::iterator GlobalIter;
@@ -229,7 +278,8 @@ namespace psy
 			std::string toXml() const;
 
 		private:
-
+			// sequencer structure
+			std::vector<SequenceLine*> lines_;
 			PatternPool patternPool_;
 
 			int numTracks_;
@@ -242,6 +292,8 @@ namespace psy
 			GlobalMap globalEvents_;
 
 		};
+		typedef Sequence PatternSequence;
+
 	}
 }
 

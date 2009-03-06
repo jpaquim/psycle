@@ -141,11 +141,11 @@ class CoreSong {
 	///\{
 		public:
 			/// pattern sequence
-			PatternSequence const & patternSequence() const throw() { return patternSequence_; }
+			Sequence const& patternSequence() const throw() { return patternSequence_; }
 			/// pattern sequence
-			PatternSequence & patternSequence() throw() { return patternSequence_; }
+			Sequence& patternSequence() throw() { return patternSequence_; }
 		private:
-			PatternSequence patternSequence_;
+			Sequence patternSequence_;
 	///\}
 
 	///\name machines

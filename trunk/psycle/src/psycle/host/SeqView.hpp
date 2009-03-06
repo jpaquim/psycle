@@ -40,6 +40,8 @@ namespace psycle {
 			Project* project_;
 			int seqcopybuffer[MAX_SONG_POSITIONS];
 			int seqcopybufferlength;
+			std::map<int,int> id_map_; // playorder
+			std::map<int,int> sel_map_; // selected
 		};
 
 	}
