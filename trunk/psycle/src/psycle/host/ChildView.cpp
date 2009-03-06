@@ -5,6 +5,7 @@
 
 #ifdef use_psycore
 #include <psycle/audiodrivers/microsoftmmewaveout.h>
+#include <psycle/core/internal_machines.h>
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
 #endif
@@ -259,6 +260,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// It is causing skips on sound when there is a pattern change because
 				// it is not allowing the player to work. Do the same in the one inside Player::Work()
 				CSingleLock lock(&_pSong->door,TRUE);
+#ifdef use_psycore
+				psy::core::Song* song = &projects_->active_project()->psy_song();
+				if (song->machine(MASTER_INDEX))
+				{
+					psy::core::Master* master = (psy::core::Master*) (song->machine(MASTER_INDEX));
+					pParentMain->UpdateVumeters
+						(							
+							master->_lMax,
+							master->_rMax,
+							Global::pConfig->vu1,
+							Global::pConfig->vu2,
+							Global::pConfig->vu3,
+							master->_clip
+						);
+					pParentMain->UpdateMasterValue(master->_outDry);
+					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
+					master->vuupdated = true;
+				}
+#else
 				if (Global::_pSong->_pMachine[MASTER_INDEX])
 				{
 					pParentMain->UpdateVumeters
@@ -276,6 +296,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
 					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
 				}
+#endif
 				if (viewMode == view_modes::machine)
 				{
 					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::pPlayer->Tweaker"
