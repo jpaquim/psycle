@@ -32,6 +32,8 @@ namespace psycle {
 			mac_view_->SetSong(&song_);
 			psy::core::SequenceLine* line = song_.patternSequence().createNewLine();
 			psy::core::SinglePattern* pattern= new psy::core::SinglePattern();
+			pattern->setID(0);
+			song_.patternSequence().Add(pattern);
 			pattern->setName("Untitled");
 			line->createEntry(pattern,0);
 #endif

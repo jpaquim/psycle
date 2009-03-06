@@ -525,6 +525,7 @@ namespace psy {
 			}
 			lines_.clear();
 			patternPool_.removeAll();
+			patterns_.clear();
 		}
 
 		double Sequence::tickLength() const
