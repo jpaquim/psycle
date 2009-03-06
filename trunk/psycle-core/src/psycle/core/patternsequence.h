@@ -277,10 +277,17 @@ namespace psy
 
 			std::string toXml() const;
 
+			void Add(SinglePattern* pattern);
+			void Remove(SinglePattern* pattern);
+			SinglePattern* FindPattern(int id);
+
 		private:
 			// sequencer structure
 			std::vector<SequenceLine*> lines_;
+			// maybe to complicated, but keep it for qpsycle
 			PatternPool patternPool_;
+			// instead .. int id, Pattern
+			std::map<int, SinglePattern*> patterns_;
 
 			int numTracks_;
 			std::vector<bool> mutedTrack_;

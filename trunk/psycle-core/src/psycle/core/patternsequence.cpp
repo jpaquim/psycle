@@ -571,5 +571,35 @@ namespace psy {
 			return xml.str();
 		}
 
+		void Sequence::Add(SinglePattern* pattern)
+		{
+			assert(pattern);
+			std::map<int, SinglePattern*>::iterator it;
+			it = patterns_.find(pattern->id());
+			if (it == patterns_.end()) {
+				patterns_[pattern->id()] = pattern;
+			} else {
+				std::map<int, SinglePattern*>::reverse_iterator rit;
+				rit = patterns_.rbegin();
+				int id = rit->first+1;
+				pattern->setID(id);
+				patterns_[id] = pattern;
+			}
+		}
+
+		SinglePattern* Sequence::FindPattern(int id)
+		{
+			std::map<int, SinglePattern*>::iterator it;
+			it = patterns_.find(id);
+			if (it != patterns_.end())
+				return it->second;
+			else return 0;
+		}
+
+		void Sequence::Remove(SinglePattern* pattern)
+		{
+			// todo
+		}
+
 	}  // namespace core
 }  // namespace psy

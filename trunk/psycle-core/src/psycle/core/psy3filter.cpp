@@ -178,7 +178,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		#if 0
 			Pattern* pat = song.patternSequence().PatternPool()->findById(*it);
 		#else
-			SinglePattern* pat = song.patternSequence().patternPool()->findById(*it);
+		SinglePattern* pat = song.patternSequence().FindPattern(*it);
 		#endif
 		singleLine->createEntry(pat, pos);
 		pos += pat->beats();
@@ -389,6 +389,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 		#endif
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
+		song.patternSequence().Add(pat);
 		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) { // lines
 			for (unsigned int x = 0; x < song.tracks(); ++x) {
