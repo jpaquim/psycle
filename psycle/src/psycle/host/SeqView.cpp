@@ -757,6 +757,7 @@ namespace psycle {
 			psy::core::SequenceLine* line = *(sequence->begin());
 			// Iterate the sequence entries and add them.
 			psy::core::SequenceLine::iterator it = line->begin();
+			id_map_.clear();
 			for(int n = 0 ; it != line->end(); ++it, ++n) {
 				psy::core::SequenceEntry* entry = it->second;
 				if (Global::pConfig->_bShowPatternNames) {
@@ -765,8 +766,13 @@ namespace psycle {
 					sprintf(buf,"%.2X: %.2X",n,entry->pattern()->id());
 				}
 				cc->AddString(buf);
-			}	
+				id_map_[n] = entry->pattern()->id();
+			}
 			cc->SelItemRange(false,0,cc->GetCount()-1);
+			std::map<int,int>::iterator sel_it = sel_map_.begin();
+			for ( ; sel_it != sel_map_.end(); ++sel_it) {
+				if (sel_it->second) cc->SetSel(sel_it->first,true);
+			}
 			if (selectedpos >= 0)
 			{
 				cc->SetSel(selectedpos);
@@ -815,17 +821,21 @@ namespace psycle {
 		{
 			if (!project_)
 				return;
-#ifdef use_psycore
-#else
-
 			PatternView* pat_view = project_->pat_view();
+
+#ifdef use_psycore
+			psy::core::Song* _pSong = &project_->psy_song();
+			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
+			psy::core::SequenceLine* line = *(sequence->begin());
+			int ll = line->tickLength();
+#else
 			Song* _pSong = &project_->song();
+			int ll = _pSong->playLength;
+#endif
 
 			CStatic *ll_l=(CStatic *)GetDlgItem(IDC_SEQ3);
 			CListBox *pls=(CListBox*)GetDlgItem(IDC_SEQLIST);
 			CStatic *pLength = (CStatic*)GetDlgItem(IDC_LENGTH);			
-
-			int ll = _pSong->playLength;
 
 			char buffer[16];
 
@@ -834,6 +844,8 @@ namespace psycle {
 			sprintf(buffer,"%.2X",ll);
 			ll_l->SetWindowText(buffer);
 
+#ifdef use_psycore
+#else
 			/*
 			int songLength = 0;
 			for (int i=0; i <ll; i++)
