@@ -14,16 +14,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		int CGearRackDlg::DisplayMode = 0;
 
-		CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain)
-			: CDialog(CGearRackDlg::IDD, pParent),
-			view_(0)
-		{
-			//{{AFX_DATA_INIT(CGearRackDlg)
-			//}}AFX_DATA_INIT
-			m_pParent = pParent;
-			pParentMain = pMain;
-		}
-
 		CGearRackDlg::CGearRackDlg(MachineView* view)
 			: CDialog(CGearRackDlg::IDD, view->child_view()),
 			  view_(view)
