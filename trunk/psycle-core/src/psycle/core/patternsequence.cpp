@@ -329,6 +329,10 @@ namespace psy {
 			GlobalIter it = globalEvents_.begin();
 			for (; it != globalEvents_.end(); it++)
 				delete it->second;
+			std::map<int, SinglePattern*>::iterator pat_it = patterns_.begin();
+			for(; pat_it != patterns_.end(); ++pat_it) {				
+				delete pat_it->second;
+			}
 		}
 
 		SequenceLine* Sequence::createNewLine()
@@ -360,19 +364,10 @@ namespace psy {
 			}
 		}
 
-		PatternPool* Sequence::patternPool() {
-			return &patternPool_;
-		}
-
-		const PatternPool& Sequence::patternPool() const
-		{
-			return patternPool_;
-		}
-
-		/// returns the PatternLines that are active in the range [start, start+length).
+		/// returns the PatternEvents that are active in the range [start, start+length).
 		///\param start start time in beats since playback begin.
 		///\param length length of the range. start+length is the last position (non inclusive)
-		///\return events : A multimap of lines (multimap of beatposition and PatternLine )
+		///\return events : A vector of sorted events
 		void Sequence::GetEventsInRange(double start, double length, std::vector<PatternEvent*>& events) 
 		{
 			events_.clear();
@@ -585,7 +580,7 @@ namespace psy {
 			for(iterator it = begin(); it != end(); ++it) {
 				(*it)->removeSinglePatternEntries(pattern);
 			}
-			patternPool_.removeSinglePattern(pattern);
+			Remove(pattern);			
 		}
 
 		void Sequence::removeAll( )
@@ -595,7 +590,10 @@ namespace psy {
 				delete *it;
 			}
 			lines_.clear();
-			patternPool_.removeAll();
+			std::map<int, SinglePattern*>::iterator pat_it = patterns_.begin();
+			for(; pat_it != patterns_.end(); ++pat_it) {				
+				delete pat_it->second;
+			}
 			patterns_.clear();
 		}
 

@@ -32,33 +32,6 @@ namespace psy
 	namespace core
 	{
 
-		class PatternCategory;
-
-		class TweakTrackInfo {
-		public:
-
-			enum TweakType { twk, tws, mdi, aut };
-
-			TweakTrackInfo();
-			TweakTrackInfo( int mac, int param, TweakType type );
-
-			~TweakTrackInfo();
-
-			int machineIdx()    const;
-			int parameterIdx()  const;
-			TweakType type()          const;
-
-			bool operator<(const TweakTrackInfo & key) const;
-
-		private:
-
-			int macIdx_;
-			int paramIdx_;
-			TweakType type_;
-
-		};
-
-
 		class SinglePattern {
 		public:
 			typedef std::multimap<double, PatternEvent>::iterator iterator;
@@ -100,8 +73,8 @@ namespace psy
 			void setName(const std::string & name);
 			const std::string & name() const;
 
-			void setCategory(PatternCategory* category);
-			PatternCategory* category();
+			void setCategory(const std::string& category);
+			const std::string& category() const { return category_; };
 
 			float beatsPerLine() const;
 
@@ -136,10 +109,6 @@ namespace psy
 
 			void deleteBlock( int left, int right, int top, int bottom );
 
-			TweakTrackInfo tweakInfo( int track ) const;
-			int tweakTrack( const TweakTrackInfo & info);
-
-
 			iterator begin() { return lines_.begin(); }
 			const_iterator begin() const { return lines_.begin(); }
 			iterator end() { return lines_.end(); }
@@ -165,7 +134,7 @@ namespace psy
 			int beatZoom_;
 			std::string name_;
 
-			PatternCategory* category_;
+			std::string category_;
 			std::vector<TimeSignature> timeSignatures_;
 
 			TimeSignature zeroTime;
@@ -173,8 +142,6 @@ namespace psy
 			int id_;
 			static int idCounter;
 			static int genId();
-
-			std::map<TweakTrackInfo, int> tweakInfoMap;
 
 			std::multimap<double, PatternEvent> lines_;
 

@@ -20,7 +20,6 @@
 #ifndef PATTERNSEQUENCE_H
 #define PATTERNSEQUENCE_H
 
-#include "patternpool.h"
 #include "singlepattern.h"
 
 /**
@@ -235,9 +234,6 @@ namespace psy
 
 			bool getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const;
 
-			PatternPool* patternPool();
-			const PatternPool & patternPool() const;
-
 			void removeSinglePattern(SinglePattern* pattern);
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
@@ -287,9 +283,7 @@ namespace psy
 		private:
 			// sequencer structure
 			std::vector<SequenceLine*> lines_;
-			// maybe to complicated, but keep it for qpsycle
-			PatternPool patternPool_;
-			// instead .. int id, Pattern
+			// pattern pool			
 			std::map<int, SinglePattern*> patterns_;
 
 			int numTracks_;
