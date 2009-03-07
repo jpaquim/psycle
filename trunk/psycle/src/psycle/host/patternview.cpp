@@ -189,10 +189,21 @@ namespace psycle {
 			TRACE("PreparePatternRefresh\n");
 		#endif
 
+#ifdef use_psycore
+			psy::core::Song* song = psy_song();
+#else
+			Song* song = this->song();
+#endif
 			CRect rect;	
 			updateMode=drawMode;					// this is ununsed for patterns
-			const int snt = song()->SONGTRACKS;
-			const int plines = song()->patternLines[song()->playOrder[editPosition]];
+			
+#ifdef use_psycore
+			const int plines = 255;			
+			const int snt = song->tracks();
+#else
+			const int snt = song->SONGTRACKS;
+			const int plines = song->patternLines[song->playOrder[editPosition]];
+#endif
 			if ( editcur.track >= snt ) // This should only happen when changing the song tracks.
 			{							// Else, there is a problem.
 				TRACE("editcur.track out of range in PreparePatternRefresh");
@@ -502,10 +513,12 @@ namespace psycle {
 				}
 				break;
 			case draw_modes::playback: 
+#ifdef use_psycore
+#else
 				{
 					int pos = Global::pPlayer->_lineCounter;
 					if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
-						(song()->playOrder[editPosition] == song()->playOrder[Global::pPlayer->_playPosition]))
+						(song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_playPosition]))
 					{
 						if (pos != playpos)
 						{
@@ -515,7 +528,7 @@ namespace psycle {
 							rect.bottom=rect.top+ROWHEIGHT;	// left never changes and is set at ChildView init.
 							rect.left = 0;
 							rect.right=CW;
-							NewPatternDraw(0, song()->SONGTRACKS, pos, pos);
+							NewPatternDraw(0, song->SONGTRACKS, pos, pos);
 							updatePar |= DRAW_DATA;
 							child_view()->InvalidateRect(rect,false);
 							if ((playpos >= 0) && (playpos != newplaypos))
@@ -524,7 +537,7 @@ namespace psycle {
 								rect.bottom = rect.top+ROWHEIGHT;
 								rect.left = 0;
 								rect.right = CW;
-								NewPatternDraw(0, song()->SONGTRACKS, playpos, playpos);
+								NewPatternDraw(0, song->SONGTRACKS, playpos, playpos);
 								updatePar |= DRAW_DATA;
 								playpos =-1;
 								child_view()->InvalidateRect(rect,false);
@@ -540,16 +553,19 @@ namespace psycle {
 							rect.bottom = rect.top+ROWHEIGHT;
 							rect.left = 0;
 							rect.right = CW;
-							NewPatternDraw(0, song()->SONGTRACKS, playpos, playpos);
+							NewPatternDraw(0, song->SONGTRACKS, playpos, playpos);
 							updatePar |= DRAW_DATA;
 							playpos = -1;
 							child_view()->InvalidateRect(rect,false);
 						}
 					}
 				}
+#endif
 				break;
 			case draw_modes::playback_change: 
-				if (song()->playOrder[editPosition] == song()->playOrder[Global::pPlayer->_playPosition])
+#ifdef use_psycore
+#else
+				if (song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_playPosition])
 				{
 					newplaypos= Global::pPlayer->_lineCounter;
 				}
@@ -583,6 +599,7 @@ namespace psycle {
 				{	
 					child_view()->ShowScrollBar(SB_VERT,FALSE); 
 				}
+#endif
 				break;
 			case draw_modes::selection: 
 				// could optimize to only draw the changes
@@ -1049,7 +1066,11 @@ namespace psycle {
 				rect.bottom = rect.top+ROWHEIGHT;
 				rect.left = 0;
 				rect.right = XOFFSET+(maxt)*ROWWIDTH;
-				NewPatternDraw(0, song()->SONGTRACKS, playpos, playpos);
+#ifdef use_psycore
+				NewPatternDraw(0, song->tracks(), playpos, playpos);
+#else
+				NewPatternDraw(0, song->SONGTRACKS, playpos, playpos);
+#endif
 				playpos =-1;
 				updatePar |= DRAW_DATA;
 				child_view()->InvalidateRect(rect,false);
@@ -2482,40 +2503,111 @@ namespace psycle {
 			updatePar = 0;
 		}
 
-				// ADVISE! [lOff+lstart..lOff+lend] and [tOff+tstart..tOff+tend] HAVE TO be valid!
+		// ADVISE! [lOff+lstart..lOff+lend] and [tOff+tstart..tOff+tend] HAVE TO be valid!
 		void PatternView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend)
 		{
+			if (lstart > VISLINES)
+			if (lstart > maxl)
+			{
+				return;
+			}
+			else if (lstart < 0)
+			{
+				lstart = 0;
+			}
+
+
+			if (lend < 0)
+			{
+				return;
+			}
+			else if (lend > maxl)
+		//	else if (lend > VISLINES+1)
+			{
+		//		lend = VISLINES+1;
+				lend = maxl;
+			}
+
+		//	if (tstart > VISTRACKS)
+			if (tstart > maxt)
+			{
+				return;
+			}
+			else if (tstart < 0)
+			{
+				tstart = 0;
+			}
+
+			if (tend < 0)
+			{
+				return;
+			}
+		//	else if (tend > VISTRACKS+1)
+			else if (tend > maxt)
+			{
+		//		tend = VISTRACKS+1;
+				tend = maxt;
+			}
 #ifdef use_psycore
 			psy::core::Song* song = psy_song();
 			psy::core::PatternSequence* sequence = &song->patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());	
 			psy::core::SequenceLine::iterator sit = line->begin();
-			for (int pos = 0; sit != line->end() && pos <= editPosition; ++sit, ++pos);
+			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
 			assert(sit != line->end());
 			psy::core::SequenceEntry* entry = sit->second;
 			psy::core::SinglePattern* pattern = entry->pattern();
 			
 			double beat_zoom = 4.0;
 			psy::core::SinglePattern::iterator it;
-			double low = (tstart - 0.5) / (double) beat_zoom;
+			double low = (lstart + lOff - 0.5) / (double) beat_zoom;
 			it = pattern->lower_bound(low);			
 			int trackcount = tstart+tOff;
-			COLORREF* pBkg;
+			
 			char tBuf[16];
+
+			int top = (lstart)*ROWHEIGHT+YOFFSET;
+			int height = (lend-lstart)*ROWHEIGHT;
+			COLORREF* pBkg = pvc_row;
+
+			for ( int t = tstart; t < tend; ++t ) {
+				int left= XOFFSET+(t*ROWWIDTH);
+				devc->FillSolidRect(left, top, ROWWIDTH, height, pBkg[t]);
+			}
+			
+			for ( int l = lstart; l < lend; ++l) {
+				// break this up into several more general loops for speed
+				int linecount = l + lOff;
+				if((linecount%(int)(beat_zoom)) == 0) {
+					if ((linecount%(int)(beat_zoom*Global::pConfig->pv_timesig)) == 0) 
+						pBkg = pvc_row4beat;
+					else 
+						pBkg = pvc_rowbeat;
+				} else {
+					continue;
+				}
+				for ( int t = tstart; t < tend; ++t ) {
+					int left= XOFFSET+(t*ROWWIDTH);
+					int top = l*ROWHEIGHT+YOFFSET;
+					devc->FillSolidRect(left, top, ROWWIDTH, ROWHEIGHT, pBkg[t]);
+				}				
+			}
 
 			for ( ; it != pattern->end(); ++it )  {						
 				psy::core::PatternEvent& ev = it->second;
+				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
+					continue;
 				double pos = it->first;
-				int line = static_cast<int>(pos * beat_zoom);
-				int yOffset=line*ROWHEIGHT+YOFFSET;
-				int xOffset= XOFFSET+(ev.track()*ROWWIDTH);
+				int line = static_cast<int>(pos * beat_zoom) - lOff;
+				int yOffset=(line)*ROWHEIGHT+YOFFSET;
+				int xOffset= XOFFSET+((ev.track()-tOff)*ROWWIDTH);
 				OutNote(devc,xOffset+COLX[0],yOffset, ev.note());
-				if (ev.instrument() == 255 ) {
+				if (ev.instrument() == 255) {
 					OutData(devc,xOffset+COLX[1],yOffset,0,true);
 				} else {
 					OutData(devc,xOffset+COLX[1],yOffset,ev.instrument(),false);
 				}
-				if (ev.machine() == 255 ) {
+				if (ev.machine() == 255) {
 					OutData(devc,xOffset+COLX[3],yOffset,0,true);
 				} else  {
 					OutData(devc,xOffset+COLX[3],yOffset,ev.machine(),false);
@@ -2633,48 +2725,6 @@ namespace psycle {
 			TRACE("DrawPatternData\n");
 		#endif
 
-		//	if (lstart > VISLINES)
-			if (lstart > maxl)
-			{
-				return;
-			}
-			else if (lstart < 0)
-			{
-				lstart = 0;
-			}
-
-
-			if (lend < 0)
-			{
-				return;
-			}
-			else if (lend > maxl)
-		//	else if (lend > VISLINES+1)
-			{
-		//		lend = VISLINES+1;
-				lend = maxl;
-			}
-
-		//	if (tstart > VISTRACKS)
-			if (tstart > maxt)
-			{
-				return;
-			}
-			else if (tstart < 0)
-			{
-				tstart = 0;
-			}
-
-			if (tend < 0)
-			{
-				return;
-			}
-		//	else if (tend > VISTRACKS+1)
-			else if (tend > maxt)
-			{
-		//		tend = VISTRACKS+1;
-				tend = maxt;
-			}
 
 			int yOffset=lstart*ROWHEIGHT+YOFFSET;
 			int linecount=lOff+ lstart;
