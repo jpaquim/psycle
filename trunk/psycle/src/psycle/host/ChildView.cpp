@@ -430,10 +430,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
 		{
+#ifdef use_psycore
+			psy::core::Player & player(psy::core::Player::singleton());
+			player.driver().Enable(false);
+#else
 			if (Global::pConfig->_pOutputDriver->Initialized())
 			{
 				Global::pConfig->_pOutputDriver->Reset();
 			}
+#endif
 			KillTimer(31);
 			KillTimer(159);
 		}

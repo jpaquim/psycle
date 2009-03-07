@@ -5,6 +5,10 @@
 
 #ifdef use_psycore
 #include <psycle/core/machine.h>
+#include <psycle/core/plugin.h>
+#else
+#include "Plugin.hpp"
+#include "Machine.hpp"
 #endif
 
 #include "Psycle.hpp"
@@ -12,12 +16,12 @@
 #include "ChildView.hpp"
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
-#include "Plugin.hpp"
 #include "InputHandler.hpp"
 #include "Helpers.hpp"
 #include "MainFrm.hpp"
-#include "Machine.hpp"
 #include "MachineGui.hpp"
+
+using namespace psy::core;
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -214,7 +218,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
+#ifdef use_psycore
+				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo().Command);
+#else
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
+#endif
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
@@ -439,7 +447,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
 				{
 					wndView->AddMacViewUndo();
+#ifdef use_psycore
+					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo().Parameters[par]->DefValue);
+#else
 					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
+#endif
 				}
 			}
 			Invalidate(false);
@@ -645,7 +657,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int numpars = _pMachine->GetNumParams();
 				for (int c=0; c<numpars; c++)
 				{
+#ifdef use_psycore
+					int dv = ((Plugin*)_pMachine)->GetInfo().Parameters[c]->DefValue;
+#else
 					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
+#endif
 					wndView->AddMacViewUndo();
 					_pMachine->SetParameter(c,dv);
 				}
@@ -661,7 +677,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if ( _pMachine->_type == MACH_PLUGIN)
 			{
+#ifdef use_psycore
+				//todo: check.
+#else
 				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
+#endif
 				try
 				{
 					((Plugin*)_pMachine)->proxy().Command();
@@ -683,8 +703,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				MessageBox
 					(
+#ifdef use_psycore
+						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo().Author),
+						"About " + CString(((Plugin*)_pMachine)->GetInfo().Name)
+#else
 						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo()->Author),
 						"About " + CString(((Plugin*)_pMachine)->GetInfo()->Name)
+#endif
 					);
 			}
 		}

@@ -169,6 +169,7 @@ inline bool Proxy::DescribeValue(char * txt, const int param, const int value) c
 inline void Proxy::PutData(void * pData) throw() { assert((*this)()); plugin().PutData(pData);  }
 inline void Proxy::GetData(void * pData) const throw() { assert((*this)()); const_cast<Proxy*>(this)->plugin().GetData(pData); }
 inline int Proxy::GetDataSize() const throw() { assert((*this)()); return const_cast<Proxy*>(this)->plugin().GetDataSize(); }
+inline void Proxy::Command()  throw() { assert((*this)()); plugin().Command(); }
 
 }}
 #endif
