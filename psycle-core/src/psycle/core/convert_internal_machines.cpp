@@ -220,7 +220,8 @@ Machine & Converter::redirect(MachineFactory& factory, int const & index, int co
 }
 
 void Converter::retweak(CoreSong & song) const {
-	// Get the first category (there's only one with imported psy's) and...
+	// todo
+/*	// Get the first category (there's only one with imported psy's) and...
 	std::vector<PatternCategory*>::iterator cit  = song.patternSequence().patternPool()->begin();
 	// ... for all the patterns in this category...
 	for(std::vector<SinglePattern*>::iterator pit  = (*cit)->begin(); pit != (*cit)->end(); ++pit) {
@@ -244,6 +245,7 @@ void Converter::retweak(CoreSong & song) const {
 			}
 		}
 	}
+	*/
 }
 
 Converter::Plugin_Names::Plugin_Names() {

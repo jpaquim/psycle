@@ -226,7 +226,10 @@ namespace psy
 			void removeAll();
 
 			// heart of patternsequence
-			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
+			void GetEventsInRange( double start, double length, std::vector<PatternEvent*>& events );
+			void GetOrderedEvents(std::vector<PatternEvent*>& event_list);
+			void CollectEvent(const PatternEvent& command);
+			int priority(const PatternEvent& cmd, int count) const;
 
 			// playpos info
 
@@ -297,6 +300,8 @@ namespace psy
 			std::vector<bool> armedTrack_;
 
 			GlobalMap globalEvents_;
+
+			std::multimap<double, std::multimap< int, PatternEvent > > events_;
 
 		};
 		typedef Sequence PatternSequence;

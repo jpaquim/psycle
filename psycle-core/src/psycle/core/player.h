@@ -187,7 +187,7 @@ class Player : public MachineCallbacks, private boost::noncopyable {
 
 	private:
 		/// Final Loop. Read new line for notes to send to the Machines
-		void execute_notes(double beat_offset, PatternLine & line);
+		void execute_notes(double beat_offset, PatternEvent& line);
 		void process_global_event(const GlobalEvent & event);
 		void process(int samples);
 

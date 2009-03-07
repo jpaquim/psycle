@@ -19,7 +19,7 @@
 #ifndef SINGLEPATTERN_H
 #define SINGLEPATTERN_H
 
-#include "patternline.h"
+#include "patternevent.h"
 #include "signalslib.h"
 #include "timesignature.h"
 
@@ -59,10 +59,15 @@ namespace psy
 		};
 
 
-		class SinglePattern : public std::map<double, PatternLine> {
+		class SinglePattern {
 		public:
+			typedef std::multimap<double, PatternEvent>::iterator iterator;
+			typedef std::multimap<double, PatternEvent>::const_iterator const_iterator;
+			typedef std::multimap<double, PatternEvent>::const_reverse_iterator const_reverse_iterator;
+			typedef std::multimap<double, PatternEvent>::reverse_iterator reverse_iterator;
+
 			SinglePattern();
-			SinglePattern(SinglePattern const& other);
+			SinglePattern(const SinglePattern& other);
 
 			virtual ~SinglePattern();
 
@@ -104,11 +109,11 @@ namespace psy
 			void clearTweakTrack( int linenr , int tracknr );
 			bool lineIsEmpty( int linenr ) const;
 
-			SinglePattern::iterator find_nearest( int linenr );
-			SinglePattern::const_iterator find_nearest( int linenr ) const;
+/*			iterator find_nearest( int linenr );
+			const_iterator find_nearest( int linenr ) const;
 
-			SinglePattern::iterator find_lower_nearest( int linenr );
-			SinglePattern::const_iterator find_lower_nearest( int linenr ) const;
+			iterator find_lower_nearest( int linenr );
+			const_iterator find_lower_nearest( int linenr ) const;*/
 			
 
 			void clearEmptyLines();
@@ -134,6 +139,27 @@ namespace psy
 			TweakTrackInfo tweakInfo( int track ) const;
 			int tweakTrack( const TweakTrackInfo & info);
 
+
+			iterator begin() { return lines_.begin(); }
+			const_iterator begin() const { return lines_.begin(); }
+			iterator end() { return lines_.end(); }
+			const_iterator end() const { return lines_.end(); }
+  
+			reverse_iterator rbegin() { return lines_.rbegin(); }
+			const_reverse_iterator rbegin() const { return lines_.rbegin();}
+			reverse_iterator rend() { return lines_.rend(); }
+			const_reverse_iterator rend() const { return lines_.rend(); }
+
+			iterator lower_bound(double pos) { return lines_.lower_bound(pos); }
+			iterator upper_bound(double pos) { return lines_.upper_bound(pos); }
+
+			iterator insert(double pos, const PatternEvent& ev) {
+				return lines_.insert(std::pair<double, PatternEvent>(pos, ev));
+			}
+
+			std::map<double, PatternEvent>::size_type size() const { lines_.size(); }
+			
+
 		private:
 
 			int beatZoom_;
@@ -149,6 +175,8 @@ namespace psy
 			static int genId();
 
 			std::map<TweakTrackInfo, int> tweakInfoMap;
+
+			std::multimap<double, PatternEvent> lines_;
 
 		};
 
