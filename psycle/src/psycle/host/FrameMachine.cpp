@@ -21,7 +21,9 @@
 #include "MainFrm.hpp"
 #include "MachineGui.hpp"
 
+#ifdef use_psycore
 using namespace psy::core;
+#endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
