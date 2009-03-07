@@ -28,7 +28,10 @@ PatternEvent::PatternEvent() :
 	mach_(255),
 	cmd_(0),
 	param_(0),
-	volume_(255)
+	volume_(255),
+	track_(0),
+	seq_track_(0),
+	offset_(0)
 {
 	for(int i = 0; i < 10; i++) paraCmdList_.push_back(PcmType());
 }

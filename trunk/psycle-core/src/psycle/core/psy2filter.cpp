@@ -166,7 +166,7 @@ PatternEvent Psy2Filter::convertEntry(unsigned char * data ) const {
 }
 
 bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
-	std::int32_t numLines;
+/*	std::int32_t numLines;
 	char patternName[32];
 	file->Read(numLines);
 	file->ReadArray(patternName, sizeof(patternName)); patternName[31]=0;
@@ -223,6 +223,7 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		RemovePattern(i);
 	}
 	#endif
+*/
 	return true;
 }
 

@@ -2495,15 +2495,15 @@ namespace psycle {
 			psy::core::SequenceEntry* entry = sit->second;
 			psy::core::SinglePattern* pattern = entry->pattern();
 			
-			psy::core::SinglePattern::iterator it = pattern->find_lower_nearest(tstart);
+			// psy::core::SinglePattern::iterator it = pattern->find_lower_nearest(tstart);
 
-			double beatzoom = 4.0;
-			for ( ; it != pattern->end(); ++it )  {				
+			// double beatzoom = 4.0;
+			//for ( ; it != pattern->end(); ++it )  {				
 /*				double pos = it->first;
 				int line = static_cast<int>(pos / beatzoom);
 				psy::core::PatternLine* line = it->second;
 				psy::core::PatternLine::iter*/
-			}
+//			}
 
 #else
 		#ifdef _DEBUG_PATVIEW

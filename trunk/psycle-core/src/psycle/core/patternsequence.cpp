@@ -18,6 +18,7 @@
 ***************************************************************************/
 
 #include "patternsequence.h"
+#include "commands.h"
 #include <sstream>
 
 namespace psy {
@@ -372,8 +373,9 @@ namespace psy {
 		///\param start start time in beats since playback begin.
 		///\param length length of the range. start+length is the last position (non inclusive)
 		///\return events : A multimap of lines (multimap of beatposition and PatternLine )
-		void Sequence::GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events ) 
+		void Sequence::GetEventsInRange(double start, double length, std::vector<PatternEvent*>& events) 
 		{
+			events_.clear();
 			int seqlineidx = 1; // index zero reserved for live events (midi in, or pc keyb)
 			// Iterate over each timeline of the sequence,
 			for( iterator seqIt = begin(); seqIt != end(); ++seqIt )
@@ -399,30 +401,98 @@ namespace psy {
 
 					// and iterate through the lines that are inside the range
 					for( ; patIt != patEnd; ++patIt) {
-						PatternLine *thisline= &(patIt->second);
-						PatternLine tmpline;
+						PatternEvent& ev= patIt->second;
+						ev.set_sequence(seqlineidx);
+						ev.set_time_offset(entryStart + patIt->first - entryStartOffset);
+						CollectEvent(ev);						
+//						PatternLine tmpline;
 
-						std::map<int, PatternEvent>::iterator lineIt = thisline->notes().begin();
+//						std::map<int, PatternEvent>::iterator lineIt = thisline->notes().begin();
 						// Since the player needs to differentiate between tracks of different SequenceEntrys, 
 						// we generate a temporary PatternLine with a special column value.
-						for( ;lineIt != thisline->notes().end() ;lineIt++)
-						{
-							tmpline.notes()[lineIt->first]=lineIt->second;
-							tmpline.notes()[lineIt->first].setNote(tmpline.notes()[lineIt->first].note()+sLineIt->second->transpose() );
-						}
+//						for( ;lineIt != thisline->notes().end() ;lineIt++)
+//						{
+//							tmpline.notes()[lineIt->first]=lineIt->second;
+//							tmpline.notes()[lineIt->first].setNote(tmpline.notes()[lineIt->first].note()+sLineIt->second->transpose() );
+//						}
 				
 						// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
-						tmpline.setSequenceTrack(seqlineidx);
-						tmpline.tweaks()=thisline->tweaks();
-						events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
+//						tmpline.setSequenceTrack(seqlineidx);
+//						tmpline.tweaks()=thisline->tweaks();
+//						events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 						}
 				}
 				++seqlineidx;
 			}
+			GetOrderedEvents(events);
+			// assert test if sorted correct
+			std::vector<PatternEvent*>::iterator it = events.begin();
+			double old_pos = 0;
+			bool has_note = 0;
+			for ( ; it != events.end(); ++it ) {
+				PatternEvent* cmd = *it;
+				double pos = cmd->time_offset();
+				if (old_pos != pos)
+					has_note = 0;
+				old_pos = pos;
+				if (cmd->note() == notetypes::tweak_slide) {				
+					assert(!has_note);
+				} else if (cmd->note() == notetypes::tweak) {
+					assert(!has_note);
+				} else {
+					has_note = 1;
+					// note
+				}
+			}
 		}
 
+		int PatternSequence::priority(const PatternEvent& cmd, int count) const
+		{
+			int p = 8;
+			if (cmd.note() == notetypes::tweak_slide) {
+				p = 1;
+			} else if (cmd.note() == notetypes::tweak) {
+				p = 2;
+			} else {
+				p = 3;
+			}
+
+			return p;
+		}
+
+		void PatternSequence::CollectEvent(const PatternEvent& command) {
+			assert(command.time_offset() >= 0);
+			double delta_frames = command.time_offset();
+			std::multimap<double, std::multimap<int, PatternEvent > >::iterator it;
+			it = events_.find(delta_frames);
+			if ( it == events_.end() ) {
+				std::multimap<int, PatternEvent> map;
+				map.insert(std::pair<int, PatternEvent>(priority(command,0), command))->second.set_time_offset(delta_frames);
+				events_.insert(std::pair<double, std::multimap< int, PatternEvent > >(delta_frames, map ) );
+			} else {
+				std::multimap<int, PatternEvent>& map = it->second;
+				map.insert(std::pair<int, PatternEvent>( priority(command, map.size()), command))->second.set_time_offset(delta_frames);
+			}
+		}
+
+		 void PatternSequence::GetOrderedEvents(std::vector<PatternEvent*>& event_list)
+		 {
+			std::multimap<double, std::multimap< int, PatternEvent > >::iterator event_it = events_.begin();
+			for ( ; event_it != events_.end(); ++event_it ) {
+				std::multimap< int, PatternEvent>& map = event_it->second;
+				std::multimap< int, PatternEvent>::iterator map_it = map.begin();
+				for ( ; map_it != map.end(); ++map_it ) {
+					PatternEvent& command = map_it->second;
+					event_list.push_back( &command );
+				}
+			}
+		 }
+
+
+
 		bool Sequence::getPlayInfo(SinglePattern* pattern, double start, double length, double& entryStart) const {
-			entryStart = 0;
+			// todo
+/*			entryStart = 0;
 			PatternLine* searchLine = 0;
 
 			// Iterate over each timeline of the sequence,
@@ -443,7 +513,8 @@ namespace psy {
 						return true;
 					}		
 				}
-			}
+			}*/
+
 			return false;
 		}
 

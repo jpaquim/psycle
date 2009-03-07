@@ -61,6 +61,23 @@ class PatternEvent
 
 		PcmListType & paraCmdList() { return paraCmdList_; }
 
+		void set_track(int track) {
+			track_ = track;
+		}
+   
+		void set_sequence(int seq_track) {
+			seq_track_ = seq_track;
+		}
+
+		int track() const { return track_; }
+		int sequence_track() const { return seq_track_; }
+
+		void set_time_offset(double offset) {
+			offset_ = offset;
+		}
+		double time_offset() const { return offset_; }
+
+
 	private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.
 		std::uint8_t note_;
 		std::uint8_t inst_;
@@ -69,6 +86,9 @@ class PatternEvent
 		std::uint8_t param_;
 		std::uint8_t volume_;
 		PcmListType paraCmdList_;
+		int track_;
+		int seq_track_;
+		double offset_;
 };
 
 }}

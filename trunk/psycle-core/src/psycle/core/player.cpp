@@ -455,20 +455,19 @@ void Player::process_global_event(GlobalEvent const & event) {
 }
 
 /// Final Loop. Read new line for notes to send to the Machines
-void Player::execute_notes(double beat_offset, PatternLine & line) {
+void Player::execute_notes(double beat_offset, PatternEvent& entry) {
 	// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modifiable)
 
+	int track = entry.track();
+	int sequence_track = entry.sequence_track();
+
 	// step 1: process all tweaks.
-	for(
-		std::map<int, PatternEvent>::iterator trackItr = line.tweaks().begin();
-		trackItr != line.tweaks().end(); ++trackItr
-	) {
-		int track = trackItr->first;
-		PatternEvent & entry(trackItr->second);
+	{
 		int mac = entry.machine();
 
 		// not a valid machine id?
-		if(mac >= MAX_MACHINES || !song().machine(mac)) continue;
+		if(mac >= MAX_MACHINES || !song().machine(mac))
+			return;
 			
 		Machine & machine = *song().machine(mac);
 		
@@ -484,7 +483,7 @@ void Player::execute_notes(double beat_offset, PatternLine & line) {
 					entry.setParameter(origin & 0xff);
 					machine.AddEvent(
 						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
-						line.sequenceTrack() * 1024 + track, entry
+						sequence_track * 1024 + track, entry
 					);
 					previous = origin;
 					delaysamples += delay;
@@ -496,54 +495,54 @@ void Player::execute_notes(double beat_offset, PatternLine & line) {
 							entry.setParameter(origin & 0xff);
 							machine.AddEvent(
 								beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
-								line.sequenceTrack() * 1024 + track, entry
+								sequence_track * 1024 + track, entry
 							);
 							previous = origin;
 						}
 						delaysamples += delay;
 					}
 			} break;
-			default: machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
+			case notetypes::tweak:
+				machine.AddEvent(beat_offset, sequence_track * 1024 + track, entry);
+			break;
+			default: 
+				;
 		}
 	}
-
-	// step 2: process all notes.
-	for(
-		std::map<int, PatternEvent>::iterator trackItr = line.notes().begin();
-		trackItr != line.notes().end(); ++trackItr
-	) {
-		int track = trackItr->first;
-		
+	
+	// step 2: collect note	
+	{
 		// track muted?
-		if(song().patternSequence().trackMuted(track)) continue;
-			
-		PatternEvent entry = trackItr->second;
-
+		if(song().patternSequence().trackMuted(track))
+			return;			
 		// not a note ?
-		if(entry.note() >= notetypes::tweak && entry.note() != 255) continue;
+		if(entry.note() >= notetypes::tweak && entry.note() != 255)
+			return;
 
 		int mac = entry.machine();
 		if(mac != 255) prev_machines_[track] = mac;
-		else mac = prev_machines_[track];
+			else mac = prev_machines_[track];
 
 		// not a valid machine id?
-		if(mac == 255 || mac >= MAX_MACHINES) continue;
+		if(mac == 255 || mac >= MAX_MACHINES)
+			return;
 			
 		// no machine with this id?
-		if(!song().machine(mac)) continue;
+		if(!song().machine(mac))
+			return;
 		
-		Machine & machine = *song().machine(mac);
+		Machine& machine = *song().machine(mac);
 
 		// machine muted?
-		if(machine._mute) continue;
+		if(machine._mute)
+			return;
 
 		switch(entry.command()) {
 			case commandtypes::NOTE_DELAY: {
 				double delayoffset(entry.parameter() / 256.0);
 				// At least Plucked String works erroneously if the command is not ommited.
 				entry.setCommand(0); entry.setParameter(0);
-				machine.AddEvent(beat_offset + delayoffset, line.sequenceTrack() * 1024 + track, entry);
-				
+				machine.AddEvent(beat_offset + delayoffset, sequence_track * 1024 + track, entry);			
 			} break;
 			case commandtypes::RETRIGGER: {
 				///\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
@@ -551,58 +550,57 @@ void Player::execute_notes(double beat_offset, PatternLine & line) {
 				int rate = entry.parameter() + 1;
 				int delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
 				entry.setCommand(0); entry.setParameter(0);
-				machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
+				machine.AddEvent(beat_offset, sequence_track * 1024 + track, entry);
 				delaysamples += delay;
 				while(delaysamples < timeInfo().samplesPerTick()) {
 					machine.AddEvent(
-						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
-						line.sequenceTrack() * 1024 + track, entry
-					);
-					delaysamples += delay;
-				}
-			} break;
-			case commandtypes::RETR_CONT: {
-				///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
-				///\todo: verify that using ints for rate and variation is enough, or has to be float.
-				int delaysamples(0), rate(0), delay(0), variation(0);
-				int parameter = entry.parameter() & 0x0f;
-				variation = (parameter < 9) ? (4 * parameter) : (-2 * (16 - parameter));
-				if(entry.parameter() & 0xf0) rate = entry.parameter() & 0xf0;
-				delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
-				entry.setCommand(0); entry.setParameter(0);
-				machine.AddEvent(
 					beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
-					line.sequenceTrack() * 1024 + track, entry
+					sequence_track * 1024 + track, entry
 				);
 				delaysamples += delay;
-				while(delaysamples < timeInfo().samplesPerTick()) {
-					machine.AddEvent(
-						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
-						line.sequenceTrack() * 1024 + track, entry
-					);
-
-					rate += variation;
-					if(rate < 16) rate = 16;
-					delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
-					delaysamples += delay;
+			}
+		} break;
+		case commandtypes::RETR_CONT: {
+			///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
+			///\todo: verify that using ints for rate and variation is enough, or has to be float.
+			int delaysamples(0), rate(0), delay(0), variation(0);
+			int parameter = entry.parameter() & 0x0f;
+			variation = (parameter < 9) ? (4 * parameter) : (-2 * (16 - parameter));
+			if(entry.parameter() & 0xf0) rate = entry.parameter() & 0xf0;
+			delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
+			entry.setCommand(0); entry.setParameter(0);
+			machine.AddEvent(
+				beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+				sequence_track * 1024 + track, entry
+			);
+			delaysamples += delay;
+			while(delaysamples < timeInfo().samplesPerTick()) {
+				machine.AddEvent(
+					beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+					sequence_track * 1024 + track, entry
+				);
+				rate += variation;
+				if(rate < 16) rate = 16;
+				delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
+				delaysamples += delay;
+			}
+		} break;
+		case commandtypes::ARPEGGIO: {
+			///\todo : Add Memory.
+			///\todo : This won't work... What about sampler's NNA's?
+			#if 0
+				if(entry.parameter()) {
+					machine.TriggerDelay[track] = entry;
+					machine.ArpeggioCount[track] = 1;
 				}
-			} break;
-			case commandtypes::ARPEGGIO: {
-				///\todo : Add Memory.
-				///\todo : This won't work... What about sampler's NNA's?
-				#if 0
-					if(entry.parameter()) {
-						machine.TriggerDelay[track] = entry;
-						machine.ArpeggioCount[track] = 1;
-					}
-					machine.RetriggerRate[track] = static_cast<int>(timeInfo_.samplesPerTick() * timeInfo_.linesPerBeat() / 24);
-				#endif
-			} break;
-			default:
-				machine.TriggerDelay[track].setCommand(0);
-				machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
-				machine.TriggerDelayCounter[track] = 0;
-				machine.ArpeggioCount[track] = 0;
+				machine.RetriggerRate[track] = static_cast<int>(timeInfo_.samplesPerTick() * timeInfo_.linesPerBeat() / 24);
+			#endif
+		} break;
+		default:
+			machine.TriggerDelay[track].setCommand(0);
+			machine.AddEvent(beat_offset, sequence_track * 1024 + track, entry);
+			machine.TriggerDelayCounter[track] = 0;
+			machine.ArpeggioCount[track] = 0;
 		}
 	}
 }
@@ -635,7 +633,7 @@ float * Player::Work(int numSamples) {
 		} else if(loopSong() && timeInfo_.playBeatPos() >= song().patternSequence().tickLength())
 			setPlayPos(0);
 
-		std::multimap<double, PatternLine> events;
+		std::vector<PatternEvent*> events;
 		std::vector<GlobalEvent*> globals;
 
 		// processing of each buffer is subdivided into chunks, determined by the placement of any global events.
@@ -675,13 +673,13 @@ float * Player::Work(int numSamples) {
 			events.clear();
 			
 			///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-			song().patternSequence().GetLinesInRange(timeInfo_.playBeatPos(), chunkBeatSize, events);
-			
-			for(
-				std::multimap<double, PatternLine>::iterator lineIt = events.begin();
-				lineIt!= events.end();
-				++lineIt
-			) execute_notes(lineIt->first - timeInfo_.playBeatPos(), lineIt->second);
+			song().patternSequence().GetEventsInRange(timeInfo_.playBeatPos(), chunkBeatSize, events);
+			std::vector<PatternEvent*>::iterator ev_it = events.begin();
+			for( ; ev_it!= events.end(); ++ev_it ) {
+				PatternEvent* ev = *ev_it;
+				execute_notes(ev->time_offset() - timeInfo_.playBeatPos(),
+							  *ev);
+			}
 
 			if(chunkSampleSize > 0) {
 				process(chunkSampleSize);
