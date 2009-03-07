@@ -18,55 +18,12 @@
 ***************************************************************************/
 
 #include "singlepattern.h"
-#include "patternpool.h"
 #include "xml.h"
 
 #include <sstream>
 
 namespace psy { namespace core {
 
-/**************************************************************************/
-// TweakTrackInfo
-
-TweakTrackInfo::TweakTrackInfo() :
-		macIdx_(0xFF),
-		paramIdx_(0),
-		type_( twk )
-{
-}
-
-TweakTrackInfo::TweakTrackInfo( int mac, int param, TweakType type) :
-		macIdx_( mac),
-		paramIdx_( param),
-		type_( type )
-{
-}
-
-TweakTrackInfo::~TweakTrackInfo() {
-
-}
-
-int TweakTrackInfo::machineIdx() const {
-	return macIdx_;
-}
-
-int TweakTrackInfo::parameterIdx() const {
-	return paramIdx_;
-}
-
-TweakTrackInfo::TweakType TweakTrackInfo::type() const {
-	return type_;
-}
-
-bool TweakTrackInfo::operator<(const TweakTrackInfo & key) const {
-	long key1 = machineIdx() | parameterIdx() << 8;
-	long key2 = key.machineIdx() | key.parameterIdx() <<8;
-	return key1 < key2;
-};
-
-
-/**************************************************************************/
-// SinglePattern
 
 int SinglePattern::idCounter = 0;
 
@@ -80,7 +37,6 @@ SinglePattern::SinglePattern()
 	timeSig.setCount(4);
 	timeSignatures_.push_back( timeSig  );
 	beatZoom_ = 4;
-	category_ = 0;
 	id_ = genId();
 }
 
@@ -91,8 +47,7 @@ SinglePattern::SinglePattern(SinglePattern const& other)
 	  category_(other.category_),
 	  timeSignatures_(other.timeSignatures_),
 	  zeroTime(other.zeroTime),
-	  id_(genId()),
-	  tweakInfoMap(other.tweakInfoMap)
+	  id_(genId())
 {
 }
 
@@ -214,16 +169,10 @@ const std::string & SinglePattern::name( ) const
 	return name_;
 }
 
-void SinglePattern::setCategory( PatternCategory * category )
+void SinglePattern::setCategory(const std::string& category)
 {
 	category_ = category;
 }
-
-PatternCategory * SinglePattern::category( )
-{
-	return category_;
-}
-
 
 float SinglePattern::beatsPerLine() const {
 	return 1 / (float) beatZoom();
@@ -624,30 +573,6 @@ void SinglePattern::deleteBlock( int left, int right, int top, int bottom )
 		else 
 			++lineIt;
 	}*/
-}
-
-TweakTrackInfo SinglePattern::tweakInfo( int track ) const
-{
-	std::map<TweakTrackInfo, int>::const_iterator it = tweakInfoMap.begin();
-	for ( ; it != tweakInfoMap.end(); it++ ) {
-		if ( it->second == track ) return it->first;
-	}
-	return TweakTrackInfo();
-}
-
-int SinglePattern::tweakTrack( const TweakTrackInfo & info )
-{
-	std::map<TweakTrackInfo, int>::const_iterator it = tweakInfoMap.begin();
-	if ( (it = tweakInfoMap.find(info)) != tweakInfoMap.end() ) {
-		return it->second;
-	} else {
-		int maxTrack = 0;
-		for ( it = tweakInfoMap.begin(); it != tweakInfoMap.end(); it++) {
-			maxTrack = std::max( maxTrack, it->second + 1 );
-		}
-		tweakInfoMap[info] = maxTrack;
-		return maxTrack;
-	}
 }
 
 }}

@@ -68,8 +68,6 @@ bool Psy3Filter::testFormat(const std::string & fileName) {
 void Psy3Filter::preparePatternSequence(CoreSong & song) {
 	seqList.clear();
 	song.patternSequence().removeAll();
-	// creatse a single Pattern Category
-	singleCat = song.patternSequence().patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence().createNewLine();
 }
@@ -382,11 +380,8 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 			indexStr = "error";
 		else
 			indexStr = o.str();
-		#if 0
-			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
-		#else
-			SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
-		#endif
+		SinglePattern* pat = new SinglePattern();
+		pat->setName(patternName+indexStr);	
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		song.patternSequence().Add(pat);
@@ -398,16 +393,14 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 				PatternEvent event = convertEntry(entry);
 				if(!event.empty()) {
 					if(event.note() == notetypes::tweak) {
-						//pat->insert(beatpos, 
-						//(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 						event.set_track(x);
 						pat->insert(beatpos, event);
 					} else if(event.note() == notetypes::tweak_slide) {
-						//(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
 						event.set_track(x);
 						pat->insert(beatpos, event);
 					} else if(event.note() == notetypes::midi_cc) {
-						//(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
+						event.set_track(x);
+						pat->insert(beatpos, event);
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
 					} else {
 						if(event.command() == commandtypes::NOTE_DELAY)
@@ -415,7 +408,6 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 							event.setParameter(event.parameter()/linesPerBeat);
 						event.set_track(x);
 						pat->insert(beatpos, event);
-						// (*pat)[beatpos].notes()[x] = event;
 					}
 					if((event.note() <= notetypes::release || event.note() == notetypes::empty) && event.command() == 0xfe && event.parameter() < 0x20)
 						linesPerBeat= event.parameter() & 0x1f;

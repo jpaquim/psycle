@@ -69,8 +69,6 @@ bool Psy2Filter::testFormat(const std::string & fileName) {
 void Psy2Filter::preparePatternSequence( CoreSong & song) {
 	seqList.clear();
 	song.patternSequence().removeAll();
-	// create a single Pattern Category
-	singleCat = song.patternSequence().patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence().createNewLine();
 }
@@ -540,13 +538,9 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	double pos = 0;
 	std::vector<int>::iterator it = seqList.begin();
 	for(; it < seqList.end(); ++it) {
-		#if 0
-			Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
-		#else
-			SinglePattern* pat = song.patternSequence().patternPool()->findById(*it);
-		#endif
-		singleLine->createEntry(pat,pos);
-		pos+=pat->beats();
+		SinglePattern* pat = song.patternSequence().FindPattern(*it);		
+		singleLine->createEntry(pat, pos);
+		pos += pat->beats();
 	}
 
 

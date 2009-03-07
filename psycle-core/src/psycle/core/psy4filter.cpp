@@ -134,8 +134,6 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 
 	std::map<int, SinglePattern*> patMap;
 	patMap.clear();
-
-	song.patternSequence().patternPool()->removeAll();
 	song.patternSequence().removeAll();
 	song.clear();
 	
@@ -611,7 +609,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
 	xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 	xml << "</info>" << std::endl;
-	xml << song.patternSequence().patternPool().toXml();
+	// xml << song.patternSequence().patternPool().toXml(); todo
 	xml << song.patternSequence().toXml();
 	xml << "</psy4>" << std::endl;
 

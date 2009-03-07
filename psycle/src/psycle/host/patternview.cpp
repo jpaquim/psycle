@@ -2495,15 +2495,138 @@ namespace psycle {
 			psy::core::SequenceEntry* entry = sit->second;
 			psy::core::SinglePattern* pattern = entry->pattern();
 			
-			// psy::core::SinglePattern::iterator it = pattern->find_lower_nearest(tstart);
+			double beat_zoom = 4.0;
+			psy::core::SinglePattern::iterator it;
+			double low = (tstart - 0.5) / (double) beat_zoom;
+			it = pattern->lower_bound(low);			
+			int trackcount = tstart+tOff;
+			COLORREF* pBkg;
+			char tBuf[16];
 
-			// double beatzoom = 4.0;
-			//for ( ; it != pattern->end(); ++it )  {				
-/*				double pos = it->first;
-				int line = static_cast<int>(pos / beatzoom);
-				psy::core::PatternLine* line = it->second;
-				psy::core::PatternLine::iter*/
-//			}
+			for ( ; it != pattern->end(); ++it )  {						
+				psy::core::PatternEvent& ev = it->second;
+				double pos = it->first;
+				int line = static_cast<int>(pos * beat_zoom);
+				int yOffset=line*ROWHEIGHT+YOFFSET;
+				int xOffset= XOFFSET+(ev.track()*ROWWIDTH);
+				OutNote(devc,xOffset+COLX[0],yOffset, ev.note());
+				if (ev.instrument() == 255 ) {
+					OutData(devc,xOffset+COLX[1],yOffset,0,true);
+				} else {
+					OutData(devc,xOffset+COLX[1],yOffset,ev.instrument(),false);
+				}
+				if (ev.machine() == 255 ) {
+					OutData(devc,xOffset+COLX[3],yOffset,0,true);
+				} else  {
+					OutData(devc,xOffset+COLX[3],yOffset,ev.machine(),false);
+				}
+
+				if ((ev.command()) == 0 && (ev.parameter()) == 0 && 
+						((ev.machine()) <= notecommands::release || (ev.machine()) == 255 )) {
+					OutData(devc,xOffset+COLX[5],yOffset,0,true);
+					OutData(devc,xOffset+COLX[7],yOffset,0,true);
+				} else {
+					OutData(devc,xOffset+COLX[5],yOffset,ev.command(),false);
+					OutData(devc,xOffset+COLX[7],yOffset,ev.parameter(),false);
+				}
+				// could optimize this check some, make separate loops
+				if ((line == editcur.line) && (trackcount == editcur.track))
+				{
+/*					devc->SetBkColor(pvc_cursor[trackcount]);
+					devc->SetTextColor(pvc_fontCur[trackcount]);
+					switch (editcur.col) {
+						case 0:
+							OutNote(devc,xOffset+COLX[0],yOffset,*(patOffset-4));
+							break;
+						case 1:
+							if (*(patOffset-3) == 255 )
+							{
+								OutData4(devc,xOffset+COLX[1],yOffset,0,true);
+							}
+							else
+							{
+								OutData4(devc,xOffset+COLX[1],yOffset,(*(patOffset-3))>>4,false);
+							}
+							break;
+						case 2:
+							if (*(patOffset-3) == 255 )
+							{
+								OutData4(devc,xOffset+COLX[2],yOffset,0,true);
+							}
+							else
+							{
+								OutData4(devc,xOffset+COLX[2],yOffset,*(patOffset-3),false);
+							}
+							break;
+						case 3:
+							if (*(patOffset-2) == 255 )
+							{
+								OutData4(devc,xOffset+COLX[3],yOffset,0,true);
+							}
+							else
+							{
+								OutData4(devc,xOffset+COLX[3],yOffset,(*(patOffset-2))>>4,false);
+							}
+							break;
+						case 4:
+							if (*(patOffset-2) == 255 )
+							{
+								OutData4(devc,xOffset+COLX[4],yOffset,0,true);
+							}
+							else
+							{
+								OutData4(devc,xOffset+COLX[4],yOffset,*(patOffset-2),false);
+							}
+							break;
+						case 5:
+							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
+								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
+							{
+								OutData4(devc,xOffset+COLX[5],yOffset,0,true);
+							}
+							else
+							{
+								OutData4(devc,xOffset+COLX[5],yOffset,(*(patOffset-1))>>4,false);
+							}
+							break;
+						case 6:
+							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
+								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
+							{
+								OutData4(devc,xOffset+COLX[6],yOffset,0,true);
+							}
+							else
+							{
+								OutData4(devc,xOffset+COLX[6],yOffset,(*(patOffset-1)),false);
+							}
+							break;
+						case 7:
+							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
+								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
+							{
+								OutData4(devc,xOffset+COLX[7],yOffset,0,true);
+							}
+							else
+							{
+								OutData4(devc,xOffset+COLX[7],yOffset,(*(patOffset))>>4,false);
+							}
+							break;
+						case 8:
+							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
+								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
+							{
+								OutData4(devc,xOffset+COLX[8],yOffset,0,true);
+							}
+							else
+							{
+								OutData4(devc,xOffset+COLX[8],yOffset,(*(patOffset)),false);
+							}
+							break;
+						}
+					}*/
+				}
+
+			}
 
 #else
 		#ifdef _DEBUG_PATVIEW
