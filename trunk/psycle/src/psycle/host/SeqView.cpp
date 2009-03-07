@@ -481,7 +481,7 @@ namespace psycle {
 			PatternView* pat_view = project_->pat_view();
 #ifdef use_psycore
 			// todo
-		/*	psy::core::Song* song = &project_->psy_song();
+			psy::core::Song* song = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
 			int len = line->size(); // Length, in patterns, of the sequence.
@@ -503,7 +503,7 @@ namespace psycle {
 			id_map_ = tmp_map;
 			UpdatePlayOrder(true);
 			UpdateSequencer(pat_view->editPosition);
-			main_frame_->m_wndView.Repaint(draw_modes::pattern);*/
+			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 #else
 			Song* _pSong = &project_->song();
 			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))

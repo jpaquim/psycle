@@ -29,6 +29,12 @@
 #include <sstream>
 #include <iomanip>
 #include "mfc_namespace.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/internal_machines.h>
+#include <psycle/core/plugin.h>
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -651,7 +657,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::UpdateMasterValue(int newvalue)
 		{
 			CSliderCtrl *cs;
+#ifdef use_psycore
+			if ( projects_.active_project()->psy_song().machine(MASTER_INDEX))
+#else
 			if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
+#endif
 			{
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
 				if (cs->GetPos() != newvalue) {
@@ -663,14 +673,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			CSliderCtrl *cs;
+#ifdef use_psycore
+			if ( projects_.active_project()->psy_song().machine(MASTER_INDEX))
+#else
 			if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
+#endif
 			{
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
 				//((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
 				///\todo: this causes problems sometimes when loading songs.
 				// customdraw happening before updatemastervalue, so invalid value get set.
 				// Added call to UpdateMasterValue() in PsybarsUpdate() in order to fix this.
+#ifdef use_psycore
+				psy::core::Master* master = (psy::core::Master*)projects_.active_project()->psy_song().machine(MASTER_INDEX);
+				master->_outDry = cs->GetPos();
+#else
 				((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos();
+#endif
 				m_wndView.SetFocus();
 			}
 			
@@ -679,7 +698,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnClipbut() 
 		{
+			// Stefan: what is this ??
+#ifdef use_psycore
+			psy::core::Master* master = (psy::core::Master*)projects_.active_project()->psy_song().machine(MASTER_INDEX);
+			master->_clip = false;
+#else
 			((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
+#endif
 			m_wndView.SetFocus();
 		}
 
@@ -869,6 +894,30 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				cb->ResetContent();
 			}
 			
+#ifdef use_psycore
+			psy::core::Song* song = &projects_.active_project()->psy_song();
+			for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
+			{
+				if( song->machine(b))
+				{
+					if (updatelist)
+					{	
+						sprintf(buffer,"%.2X: %s",b,song->machine(b)->GetEditName().c_str());
+						cb->AddString(buffer);
+						cb->SetItemData(cb->GetCount()-1,b);
+					}
+					if (!found) 
+					{
+						selected++;
+					}
+					if (song->seqBus == b) 
+					{
+						found = true;
+					}
+					filled = true;
+				}
+			}
+#else
 			for (int b=0; b<MAX_BUSES; b++) // Check Generators
 			{
 				if( _pSong->_pMachine[b])
@@ -890,6 +939,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					filled = true;
 				}
 			}
+
+#endif
 			if ( updatelist) 
 			{
 				cb->AddString("----------------------------------------------------");
@@ -901,6 +952,30 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				line = selected;
 			}
 			
+#ifdef use_psycore
+			for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
+			{
+				if(song->machine(b))
+				{
+					if (updatelist)
+					{	
+						sprintf(buffer,"%.2X: %s",b,song->machine(b)->GetEditName().c_str());
+						cb->AddString(buffer);
+						cb->SetItemData(cb->GetCount()-1,b);
+					}
+					if (!found) 
+					{
+						selected++;
+					}
+					if (song->seqBus == b) 
+					{
+						found = true;
+					}
+					filled = true;
+				}
+			}
+
+#else
 			for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 			{
 				if(_pSong->_pMachine[b])
@@ -922,6 +997,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					filled = true;
 				}
 			}
+#endif
 			if (!filled)
 			{
 				cb->ResetContent();
@@ -935,6 +1011,47 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			cb->SetCurSel(selected);
 
+#ifdef use_psycore
+			// Select the appropiate Option in Aux Combobox.
+			if (found) // If found (which also means, if it exists)
+			{
+				if (song->machine(song->seqBus))
+				{
+					if ( song->seqBus < psy::core::MAX_BUSES ) // it's a Generator
+					{
+						if (song->machine(song->seqBus)->_type == MACH_SAMPLER ||song->machine(song->seqBus)->_type == MACH_XMSAMPLER  )
+						{
+							cb2->SetCurSel(AUX_WAVES);
+							song->auxcolSelected = song->instSelected();
+						}
+						else if (song->machine(song->seqBus)->_type == MACH_VST)
+						{
+							if ( cb2->GetCurSel() == AUX_WAVES)
+							{
+								cb2->SetCurSel(AUX_MIDI);
+								song->auxcolSelected = song->midiSelected;
+							}
+						}
+						else
+						{
+							cb2->SetCurSel(AUX_PARAMS);
+							song->auxcolSelected = 0;
+						}
+					}
+					else
+					{
+						cb2->SetCurSel(AUX_PARAMS);
+						song->auxcolSelected = 0;
+					}
+				}
+			}
+			else
+			{
+				cb2->SetCurSel(AUX_WAVES); // WAVES
+				song->auxcolSelected = song->instSelected();
+			}
+
+#else
 			// Select the appropiate Option in Aux Combobox.
 			if (found) // If found (which also means, if it exists)
 			{
@@ -973,6 +1090,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				cb2->SetCurSel(AUX_WAVES); // WAVES
 				_pSong->auxcolSelected = _pSong->instSelected;
 			}
+#endif
 			UpdateComboIns();
 			macComboInitialized = true;
 		}
@@ -1055,6 +1173,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOINS);
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 
+#ifdef use_psycore
+			psy::core::Song* _pSong = &projects_.active_project()->psy_song();
+#endif
+
+
 			int listlen = 0;
 			
 			if (updatelist) 
@@ -1079,7 +1202,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else if ( cc2->GetCurSel() == AUX_PARAMS)	// Params
 			{
 				int nmac = _pSong->seqBus;
-				Machine *tmac = _pSong->_pMachine[nmac];
+#ifdef use_psycore
+				psy::core::Machine *tmac = _pSong->machine(nmac);
+#else
+				Machine *tmac = _pSong->machine(nmac);
+#endif
 				if (tmac) 
 				{
 					int i=0;
@@ -1093,8 +1220,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							bool label(false);
 							if(tmac->_type == MACH_PLUGIN)
 							{
+#ifdef use_psycore
+								if(!(static_cast<psy::core::Plugin*>(tmac)->GetInfo().Parameters[i]->Flags & MPF_STATE))
+									label = true;
+#else
 								if(!(static_cast<Plugin*>(tmac)->GetInfo()->Parameters[i]->Flags & MPF_STATE))
 									label = true;
+#endif
 							}
 							if(label)
 								// just a label
@@ -1125,7 +1257,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (updatelist) 
 				{
 					int nmac = _pSong->seqBus;
-					Machine *tmac = _pSong->_pMachine[nmac];
+#ifdef use_psycore
+					psy::core::Machine *tmac = _pSong->machine(nmac);
+#else
+					Machine *tmac = _pSong->machine(nmac);
+#endif
 					if (tmac) 
 					{
 						if ( tmac->_type == MACH_XMSAMPLER)

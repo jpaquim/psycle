@@ -2486,8 +2486,24 @@ namespace psycle {
 		void PatternView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend)
 		{
 #ifdef use_psycore
-		// find start iterator
-		// psy::core::SinglePattern::iterator it = pattern()->find_lower_nearest(startLine);
+			psy::core::Song* song = psy_song();
+			psy::core::PatternSequence* sequence = &song->patternSequence();
+			psy::core::SequenceLine* line = *(sequence->begin());	
+			psy::core::SequenceLine::iterator sit = line->begin();
+			for (int pos = 0; sit != line->end() && pos <= editPosition; ++sit, ++pos);
+			assert(sit != line->end());
+			psy::core::SequenceEntry* entry = sit->second;
+			psy::core::SinglePattern* pattern = entry->pattern();
+			
+			psy::core::SinglePattern::iterator it = pattern->find_lower_nearest(tstart);
+
+			double beatzoom = 4.0;
+			for ( ; it != pattern->end(); ++it )  {				
+/*				double pos = it->first;
+				int line = static_cast<int>(pos / beatzoom);
+				psy::core::PatternLine* line = it->second;
+				psy::core::PatternLine::iter*/
+			}
 
 #else
 		#ifdef _DEBUG_PATVIEW

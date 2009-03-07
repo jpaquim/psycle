@@ -10,8 +10,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		/// gear rack window.
 		class CGearRackDlg : public CDialog
 		{
-		public:
-			CGearRackDlg(CChildView* pParent, CMainFrame* pMain);
+		public:			
 			CGearRackDlg(class MachineView* mac_view);
 		private:
 			MachineView* view_;
