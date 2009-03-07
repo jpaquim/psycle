@@ -60,8 +60,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{		
 #ifdef use_psycore
 			psy::core::Player & player(psy::core::Player::singleton());
-			//TODO: Use the pluginCatcher when it's ready.
 			psy::core::MachineFactory & factory(psy::core::MachineFactory::getInstance());
+			//TODO: Use the pluginCatcher when it's ready.
 			factory.Initialize(&player);
 #endif
 

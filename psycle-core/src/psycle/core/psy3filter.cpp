@@ -400,12 +400,12 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 					if(event.note() == notetypes::tweak) {
 						//pat->insert(beatpos, 
 						//(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
-						pat->insert(beatpos, event);
 						event.set_track(x);
+						pat->insert(beatpos, event);
 					} else if(event.note() == notetypes::tweak_slide) {
 						//(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
-						pat->insert(beatpos, event);
 						event.set_track(x);
+						pat->insert(beatpos, event);
 					} else if(event.note() == notetypes::midi_cc) {
 						//(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
@@ -413,8 +413,8 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 						if(event.command() == commandtypes::NOTE_DELAY)
 							/// Convert old value (part of line) to new value (part of beat)
 							event.setParameter(event.parameter()/linesPerBeat);
-						pat->insert(beatpos, event);
 						event.set_track(x);
+						pat->insert(beatpos, event);
 						// (*pat)[beatpos].notes()[x] = event;
 					}
 					if((event.note() <= notetypes::release || event.note() == notetypes::empty) && event.command() == 0xfe && event.parameter() < 0x20)
