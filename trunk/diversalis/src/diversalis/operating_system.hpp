@@ -199,6 +199,9 @@
 		#elif WINVER < DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__REQUIRED_VERSION
 			#error "WINVER too low."
 		#endif
+		#if !WINVER
+			#error "WINVER is zero."
+		#endif
 
 		// _WIN32_WINDOWS
 		#if !defined _WIN32_WINDOWS
@@ -206,12 +209,18 @@
 		#elif _WIN32_WINDOWS < DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__REQUIRED_VERSION
 			#error "_WIN32_WINDOWS too low."
 		#endif
+		#if !_WIN32_WINDOWS
+			#error "_WIN32_WINDOWS is zero."
+		#endif
 
 		// _WIN32_WINNT
 		#if !defined _WIN32_WINNT
 			#define _WIN32_WINNT DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__REQUIRED_VERSION
 		#elif _WIN32_WINNT < DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__REQUIRED_VERSION
 			#error "_WIN32_WINNT too low."
+		#endif
+		#if !_WIN32_WINNT
+			#error "_WIN32_WINNT is zero."
 		#endif
 	#endif
 
