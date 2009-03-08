@@ -82,18 +82,6 @@
 		#undef DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH // was just defined to insert documentation.
 	///\}
 
-	///\name operating system version ... microsoft's branch mess
-	///\{
-		/// indicates the target microsoft's windows operating system branch is nt.
-		/// "2000" is v5.0, "xp" is v5.1, "2003" is v?.?, "vista" is v?.?
-		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT
-		#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__NT // was just defined to insert documentation.
-		/// indicates the target microsoft's windows operating system branch is msdos-based (branded "'95", "'98", "millenium").
-		/// "'95" is v4.0 (conflicts with nt!), "'98" is v4.1, "millenium" is v?.?
-		#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__DOS
-		#undef DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__DOS // was just defined to insert documentation.
-	///\}
-
 	/// If defined, prefers to use crossplatforms libraries when choice is available.
 	/// For examples, we may use:\n
 	/// - glib or boost instead of the operating system proprietary/specific api directly.\n
