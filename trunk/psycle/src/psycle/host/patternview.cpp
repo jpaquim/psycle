@@ -11,6 +11,11 @@
 #include "InterpolateCurveDlg.hpp"
 #include "PatDlg.hpp"
 
+#ifdef _MSC_VER
+#undef min
+#undef max
+#endif
+
 namespace psycle {
 	namespace host {
 
@@ -197,8 +202,16 @@ namespace psycle {
 			CRect rect;	
 			updateMode=drawMode;					// this is ununsed for patterns
 			
-#ifdef use_psycore
-			const int plines = 255;			
+#ifdef use_psycore			
+			psy::core::PatternSequence* sequence = &song->patternSequence();
+			psy::core::SequenceLine* line = *(sequence->begin());	
+			psy::core::SequenceLine::iterator sit = line->begin();
+			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
+			assert(sit != line->end());
+			psy::core::SequenceEntry* entry = sit->second;
+			psy::core::SinglePattern* pattern = entry->pattern();
+			int beat_zoom = 4;
+			const int plines = pattern->beats() * beat_zoom;
 			const int snt = song->tracks();
 #else
 			const int snt = song->SONGTRACKS;
@@ -2506,48 +2519,12 @@ namespace psycle {
 		// ADVISE! [lOff+lstart..lOff+lend] and [tOff+tstart..tOff+tend] HAVE TO be valid!
 		void PatternView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend)
 		{
-			if (lstart > VISLINES)
-			if (lstart > maxl)
-			{
+			if ( (lstart > VISLINES && lstart > maxl) || tstart > maxt || tend < 0)
 				return;
-			}
-			else if (lstart < 0)
-			{
-				lstart = 0;
-			}
+			lstart = std::max(lstart,0);
+			lend = std::min( std::max(lend,0), maxl);
 
-
-			if (lend < 0)
-			{
-				return;
-			}
-			else if (lend > maxl)
-		//	else if (lend > VISLINES+1)
-			{
-		//		lend = VISLINES+1;
-				lend = maxl;
-			}
-
-		//	if (tstart > VISTRACKS)
-			if (tstart > maxt)
-			{
-				return;
-			}
-			else if (tstart < 0)
-			{
-				tstart = 0;
-			}
-
-			if (tend < 0)
-			{
-				return;
-			}
-		//	else if (tend > VISTRACKS+1)
-			else if (tend > maxt)
-			{
-		//		tend = VISTRACKS+1;
-				tend = maxt;
-			}
+			tstart = std::min(std::max(0, tstart), maxt);
 #ifdef use_psycore
 			psy::core::Song* song = psy_song();
 			psy::core::PatternSequence* sequence = &song->patternSequence();
@@ -2562,7 +2539,6 @@ namespace psycle {
 			psy::core::SinglePattern::iterator it;
 			double low = (lstart + lOff - 0.5) / (double) beat_zoom;
 			it = pattern->lower_bound(low);			
-			int trackcount = tstart+tOff;
 			
 			char tBuf[16];
 
@@ -2570,37 +2546,190 @@ namespace psycle {
 			int height = (lend-lstart)*ROWHEIGHT;
 			COLORREF* pBkg = pvc_row;
 
-			for ( int t = tstart; t < tend; ++t ) {
-				int left= XOFFSET+(t*ROWWIDTH);
-				devc->FillSolidRect(left, top, ROWWIDTH, height, pBkg[t]);
-			}
-			
 			for ( int l = lstart; l < lend; ++l) {
 				// break this up into several more general loops for speed
 				int linecount = l + lOff;
+				int top = l*ROWHEIGHT+YOFFSET;
 				if((linecount%(int)(beat_zoom)) == 0) {
-					if ((linecount%(int)(beat_zoom*Global::pConfig->pv_timesig)) == 0) 
+					if ((linecount%(int)(beat_zoom*Global::pConfig->pv_timesig)) == 0) {
 						pBkg = pvc_row4beat;
-					else 
+					} else {
 						pBkg = pvc_rowbeat;
+					}
 				} else {
-					continue;
+					pBkg = pvc_row;
 				}
+				if ((linecount == editcur.line) && (Global::pConfig->_linenumbersCursor))
+				{
+					devc->SetBkColor(pvc_cursor[0]);
+					devc->SetTextColor(pvc_fontCur[0]);
+				}
+				else if (linecount == newplaypos)
+				{
+					devc->SetBkColor(pvc_playbar[0]);
+					devc->SetTextColor(pvc_fontPlay[0]);
+				}
+				else
+				{
+					devc->SetBkColor(pBkg[0]);
+					devc->SetTextColor(pvc_font[0]);
+				}
+
+				if (XOFFSET != -1) {
+					int yOffset= l*ROWHEIGHT + YOFFSET;
+					if (Global::pConfig->_linenumbersHex) {
+						sprintf(tBuf," %.2X", linecount);
+						TXTFLAT(devc, tBuf, 1, yOffset, XOFFSET-2, ROWHEIGHT-1);	// Print Line Number.
+					} else {
+						sprintf(tBuf, "%3i", linecount);
+						TXTFLAT(devc, tBuf, 1, yOffset, XOFFSET-2, ROWHEIGHT-1);	// Print Line Number.
+					}
+				}
+				int yOffset= YOFFSET+(l*ROWHEIGHT);
 				for ( int t = tstart; t < tend; ++t ) {
-					int left= XOFFSET+(t*ROWWIDTH);
-					int top = l*ROWHEIGHT+YOFFSET;
-					devc->FillSolidRect(left, top, ROWWIDTH, ROWHEIGHT, pBkg[t]);
-				}				
+					int trackcount = t + tOff;
+					if (linecount == newplaypos)
+					{
+						devc->SetBkColor(pvc_playbar[trackcount]);
+						devc->SetTextColor(pvc_fontPlay[trackcount]);
+					}
+					else if ((linecount >= newselpos.top) &&
+							(linecount < newselpos.bottom) &&
+							(trackcount >= newselpos.left) &&
+							(trackcount < newselpos.right))
+						{
+ 							if (pBkg == pvc_rowbeat)
+							{
+								devc->SetBkColor(pvc_selectionbeat[trackcount]);
+							}
+							else if (pBkg == pvc_row4beat)
+							{
+								devc->SetBkColor(pvc_selection4beat[trackcount]);
+							}
+							else
+							{
+								devc->SetBkColor(pvc_selection[trackcount]);
+							}
+							devc->SetTextColor(pvc_fontSel[trackcount]);
+						}
+						else
+						{
+							devc->SetBkColor(pBkg[trackcount]);
+							devc->SetTextColor(pvc_font[trackcount]);
+						}
+
+					int xOffset= XOFFSET+(t*ROWWIDTH);					
+					OutNote(devc,xOffset+COLX[0],yOffset,255);
+					OutData(devc,xOffset+COLX[1],yOffset,0,true);
+					OutData(devc,xOffset+COLX[3],yOffset,0,true);
+					OutData(devc,xOffset+COLX[5],yOffset,0,true);
+					OutData(devc,xOffset+COLX[7],yOffset,0,true);
+					//
+					// could optimize this check some, make separate loops
+					if ((linecount == editcur.line) && (trackcount == editcur.track))
+					{
+						devc->SetBkColor(pvc_cursor[trackcount]);
+						devc->SetTextColor(pvc_fontCur[trackcount]);
+						switch (editcur.col) {
+						case 0:
+							OutNote(devc,xOffset+COLX[0],yOffset,255);
+							break;
+						case 1:					
+							OutData4(devc,xOffset+COLX[1],yOffset,0,false);							
+							break;
+						case 2:					
+							OutData4(devc,xOffset+COLX[2],yOffset,0,false);							
+							break;
+						case 3:
+							OutData4(devc,xOffset+COLX[3],yOffset,0,false);
+							break;
+						case 4:
+							OutData4(devc,xOffset+COLX[4],yOffset,0,true);
+							break;
+						case 5:
+							OutData4(devc,xOffset+COLX[5],yOffset,0,true);
+							break;
+						case 6:
+							OutData4(devc,xOffset+COLX[6],yOffset,0,true);
+							break;
+						case 7:
+							OutData4(devc,xOffset+COLX[7],yOffset,0,true);
+							break;
+						case 8:
+							OutData4(devc,xOffset+COLX[8],yOffset,0,true);
+							break;
+						}
+					}
+				}
 			}
+
 
 			for ( ; it != pattern->end(); ++it )  {						
 				psy::core::PatternEvent& ev = it->second;
 				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
 					continue;
+				int trackcount = ev.track() + tOff;
 				double pos = it->first;
 				int line = static_cast<int>(pos * beat_zoom) - lOff;
+				int linecount = line + lOff;
+				if((linecount%(int)(beat_zoom)) == 0) {
+				if ((linecount%(int)(beat_zoom*Global::pConfig->pv_timesig)) == 0) {
+						pBkg = pvc_row4beat;
+					} else {
+						pBkg = pvc_rowbeat;
+					}
+				} else {
+					pBkg = pvc_row;
+				}
+				if ((linecount == editcur.line) && (Global::pConfig->_linenumbersCursor))
+				{
+					devc->SetBkColor(pvc_cursor[0]);
+					devc->SetTextColor(pvc_fontCur[0]);
+				}
+				else if (linecount == newplaypos)
+				{
+					devc->SetBkColor(pvc_playbar[0]);
+					devc->SetTextColor(pvc_fontPlay[0]);
+				}
+				else
+				{
+					devc->SetBkColor(pBkg[0]);
+					devc->SetTextColor(pvc_font[0]);
+				}
+
 				int yOffset=(line)*ROWHEIGHT+YOFFSET;
 				int xOffset= XOFFSET+((ev.track()-tOff)*ROWWIDTH);
+
+				if (linecount == newplaypos)
+					{
+						devc->SetBkColor(pvc_playbar[trackcount]);
+						devc->SetTextColor(pvc_fontPlay[trackcount]);
+					}
+					else if ((linecount >= newselpos.top) &&
+							(linecount < newselpos.bottom) &&
+							(trackcount >= newselpos.left) &&
+							(trackcount < newselpos.right))
+						{
+ 							if (pBkg == pvc_rowbeat)
+							{
+								devc->SetBkColor(pvc_selectionbeat[trackcount]);
+							}
+							else if (pBkg == pvc_row4beat)
+							{
+								devc->SetBkColor(pvc_selection4beat[trackcount]);
+							}
+							else
+							{
+								devc->SetBkColor(pvc_selection[trackcount]);
+							}
+							devc->SetTextColor(pvc_fontSel[trackcount]);
+						}
+						else
+						{
+							devc->SetBkColor(pBkg[trackcount]);
+							devc->SetTextColor(pvc_font[trackcount]);
+						}
+
 				OutNote(devc,xOffset+COLX[0],yOffset, ev.note());
 				if (ev.instrument() == 255) {
 					OutData(devc,xOffset+COLX[1],yOffset,0,true);
@@ -2614,7 +2743,7 @@ namespace psycle {
 				}
 
 				if ((ev.command()) == 0 && (ev.parameter()) == 0 && 
-						((ev.machine()) <= notecommands::release || (ev.machine()) == 255 )) {
+						((ev.note()) <= notecommands::release || (ev.note()) == 255 )) {
 					OutData(devc,xOffset+COLX[5],yOffset,0,true);
 					OutData(devc,xOffset+COLX[7],yOffset,0,true);
 				} else {
@@ -2622,103 +2751,89 @@ namespace psycle {
 					OutData(devc,xOffset+COLX[7],yOffset,ev.parameter(),false);
 				}
 				// could optimize this check some, make separate loops
-				if ((line == editcur.line) && (trackcount == editcur.track))
+				if ((linecount == editcur.line) && (trackcount == editcur.track))
 				{
-/*					devc->SetBkColor(pvc_cursor[trackcount]);
+					devc->SetBkColor(pvc_cursor[trackcount]);
 					devc->SetTextColor(pvc_fontCur[trackcount]);
 					switch (editcur.col) {
 						case 0:
-							OutNote(devc,xOffset+COLX[0],yOffset,*(patOffset-4));
+							OutNote(devc,xOffset+COLX[0],yOffset,ev.note());
 							break;
 						case 1:
-							if (*(patOffset-3) == 255 )
-							{
-								OutData4(devc,xOffset+COLX[1],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[1],yOffset,(*(patOffset-3))>>4,false);
+							if (ev.instrument() == 255) {
+								OutData4(devc,xOffset+COLX[1],yOffset,0,false);
+							} else{
+								OutData4(devc,xOffset+COLX[1],yOffset,ev.instrument()>>4,false);
 							}
 							break;
 						case 2:
-							if (*(patOffset-3) == 255 )
-							{
-								OutData4(devc,xOffset+COLX[2],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[2],yOffset,*(patOffset-3),false);
+							if (ev.instrument() == 255 ) {
+								OutData4(devc,xOffset+COLX[2],yOffset,0,false);
+							} else {
+								OutData4(devc,xOffset+COLX[2],yOffset,ev.instrument(),false);
 							}
 							break;
 						case 3:
-							if (*(patOffset-2) == 255 )
-							{
-								OutData4(devc,xOffset+COLX[3],yOffset,0,true);
+							if (ev.machine() == 255 ) {
+								OutData4(devc,xOffset+COLX[3],yOffset,0,false);
 							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[3],yOffset,(*(patOffset-2))>>4,false);
+							else {
+								OutData4(devc,xOffset+COLX[3],yOffset,ev.machine()>>4,false);
 							}
 							break;
 						case 4:
-							if (*(patOffset-2) == 255 )
-							{
+							if (ev.machine() == 255 ) {
 								OutData4(devc,xOffset+COLX[4],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[4],yOffset,*(patOffset-2),false);
+							} else {
+								OutData4(devc,xOffset+COLX[4],yOffset,ev.machine(),false);
 							}
 							break;
 						case 5:
-							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
+							if (ev.command() == 0 && ev.parameter() == 0 && 
+								(ev.note() <= notecommands::release || ev.note() == 255 ))
 							{
 								OutData4(devc,xOffset+COLX[5],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[5],yOffset,(*(patOffset-1))>>4,false);
+							} else {
+								OutData4(devc,xOffset+COLX[5],yOffset,ev.command()>>4,false);
 							}
 							break;
 						case 6:
-							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
+							if (ev.command() == 0 && ev.parameter() == 0 && 
+								(ev.note() <= notecommands::release || ev.note() == 255 ))
 							{
 								OutData4(devc,xOffset+COLX[6],yOffset,0,true);
 							}
 							else
 							{
-								OutData4(devc,xOffset+COLX[6],yOffset,(*(patOffset-1)),false);
+								OutData4(devc,xOffset+COLX[6],yOffset,ev.command(),false);
 							}
 							break;
 						case 7:
-							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
+							if (ev.command() == 0 && ev.parameter() == 0 && 
+								(ev.note() <= notecommands::release || ev.note() == 255 ))
 							{
 								OutData4(devc,xOffset+COLX[7],yOffset,0,true);
 							}
 							else
 							{
-								OutData4(devc,xOffset+COLX[7],yOffset,(*(patOffset))>>4,false);
+								OutData4(devc,xOffset+COLX[7],yOffset,ev.parameter()>>4,false);
 							}
 							break;
 						case 8:
-							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
+							if (ev.command() == 0 && ev.parameter() == 0 && 
+								(ev.note() <= notecommands::release || ev.note() == 255 ))
 							{
 								OutData4(devc,xOffset+COLX[8],yOffset,0,true);
 							}
 							else
 							{
-								OutData4(devc,xOffset+COLX[8],yOffset,(*(patOffset)),false);
+								OutData4(devc,xOffset+COLX[8],yOffset,ev.parameter(),false);
 							}
 							break;
 						}
-					}*/
-				}
-
+					}
 			}
+	
 
 #else
 		#ifdef _DEBUG_PATVIEW
@@ -4099,6 +4214,303 @@ namespace psycle {
 
 		void PatternView::EnterNote(int note, int velocity, bool bTranspose)
 		{
+#ifdef use_psycore
+			int currentOctave = 4;
+			if (note < 0 || note >= notecommands::invalid )
+				return;
+
+			// octave offset
+			if(note<notecommands::release) {
+				if(bTranspose)
+					note += currentOctave*12;
+				note = std::min(note, 119);
+			}
+
+			int line = editcur.line;
+			psy::core::Song* song = psy_song();
+			psy::core::PatternSequence* sequence = &song->patternSequence();
+			psy::core::SequenceLine* sline = *(sequence->begin());	
+			psy::core::SequenceLine::iterator sit = sline->begin();
+			for (int pos = 0; sit != sline->end() && pos < editPosition; ++sit, ++pos);
+			assert(sit != sline->end());
+			psy::core::SequenceEntry* entry = sit->second;
+			psy::core::SinglePattern* pattern = entry->pattern();
+
+			double beat_zoom = 4.0;
+			psy::core::SinglePattern::iterator it;
+			double low = (editcur.line - 0.5) / beat_zoom;
+			double up  = (editcur.line + 0.5) / beat_zoom;
+			double insert_pos = editcur.line / beat_zoom;
+			it = pattern->lower_bound(low);
+			
+			if (it == pattern->end() || 
+				!(it->first >= low && it->first < up)
+				) {
+				// no entry on the beatpos
+				psy::core::PatternEvent ev;
+				ev.setNote(note);
+				ev.set_track(editcur.track);
+				ev.setMachine(song->seqBus);
+				pattern->insert(insert_pos, ev);
+			} else
+			if (it->first >= low && it->first < up)	{
+				psy::core::SinglePattern::iterator track_it = it;
+				bool found = false;
+				for ( ; it != pattern->end() && it->first < up; ++it ) {
+					psy::core::PatternEvent& ev = it->second;
+					if (ev.track() == editcur.track ) {
+						it->second.setNote(note);
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					psy::core::PatternEvent ev;
+					ev.setNote(note);
+					ev.set_track(editcur.track);
+					ev.setMachine(song->seqBus);
+					pattern->insert(insert_pos, ev);
+				}
+			} 
+			NewPatternDraw(editcur.track,editcur.track,line,line);
+			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+
+			// realtime note entering
+/*			if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+			{
+				if(song()->_trackArmedCount)
+				{
+					if (velocity == 0)
+					{
+						int i;
+						for (i = 0; i < song()->SONGTRACKS; i++)
+						{
+							if (song()->_trackArmed[i])
+							{
+								if (Global::pInputHandler->notetrack[i] == note)
+								{
+									editcur.track = i;
+									break;
+								}
+							}
+						}
+						///\todo : errm.. == or !=  ????
+						if (i == song()->SONGTRACKS)
+						{
+							Global::pInputHandler->StopNote(note,false);
+							return;
+						}
+					}
+					else
+					{
+						SelectNextTrack();
+					}
+				}
+				else if (!Global::pConfig->_RecordUnarmed)
+				{
+					// build entry
+					PatternEntry entry;
+					entry._note = note;
+					entry._mach = song()->seqBus;
+
+					if ( note < notecommands::release)
+					{
+						if (Global::pConfig->_RecordTweaks)
+						{
+							if (Global::pConfig->midi().raw())
+							{
+								entry._cmd = 0x0c;
+								entry._parameter = velocity*2;
+							}
+							else if (Global::pConfig->midi().velocity().record())
+							{
+								// command
+								entry._cmd = Global::pConfig->midi().velocity().command();
+								int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+								if (par > 255) 
+								{
+									par = 255;
+								}
+								else if (par < 0) 
+								{
+									par = 0;
+								}
+								entry._parameter = par;
+							}
+						}
+					}
+
+					if (note>notecommands::release)
+					{
+						entry._inst = song()->auxcolSelected;
+					}
+
+					Machine *tmac = song()->_pMachine[entry._mach];
+					// implement lock sample to machine here.
+					// if the current machine is a sampler, check 
+					// if current sample is locked to a machine.
+					// if so, switch entry._mach to that machine number
+
+					if (tmac)
+					{
+						if (((Machine*)song()->_pMachine[song()->seqBus])->_type == MACH_SAMPLER)
+						{
+							if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
+								&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
+							{
+								entry._mach = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
+								tmac = song()->_pMachine[entry._mach];
+								if (!tmac) return;
+							}
+						}
+						if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
+						{
+							entry._inst = song()->auxcolSelected;
+						}
+						else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+						{
+							entry._inst = song()->auxcolSelected;
+						}
+						
+						if ( note < notecommands::release)
+						{
+							tmac->Tick(editcur.track, &entry);
+						}
+					}
+					Global::pInputHandler->notetrack[editcur.track]=note;
+					return;
+				}
+				line = Global::pPlayer->_lineCounter;
+				toffset = _ptrack(ps)+(line*MULTIPLY);
+				ChordModeOffs = 0;
+			}
+			else 
+			{
+				if ((GetKeyState(VK_SHIFT)<0) && (note != notecommands::tweak) && (note != notecommands::tweakeffect) && (note != notecommands::tweakslide) && (note != notecommands::midicc))
+				{
+					if (ChordModeOffs == 0)
+					{
+						ChordModeLine = editcur.line;
+						ChordModeTrack = editcur.track;
+					}
+					editcur.track = (ChordModeTrack+ChordModeOffs)%song()->SONGTRACKS;
+					editcur.line = line = ChordModeLine;
+					toffset = _ptrackline(ps, editcur.track, line);
+					ChordModeOffs++;
+				}
+				else
+				{
+					if (ChordModeOffs) // this should never happen because the shift check should catch it... but..
+					{					// ok pooplog, now it REALLY shouldn't happen (now that the shift check works)
+						editcur.line = ChordModeLine;
+						editcur.track = ChordModeTrack;
+						ChordModeOffs = 0;
+						AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					}
+					line = editcur.line;
+					toffset = _ptrackline(ps);
+				}
+			}
+
+			// build entry
+			PatternEntry *entry = (PatternEntry*) toffset;
+			if (velocity==0)
+			{
+				Global::pInputHandler->StopNote(note,false);
+				if (entry->_note == note)
+				{
+					return;
+				}
+				note = notecommands::release;
+			}
+			AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
+			entry->_note = note;
+			entry->_mach = song()->seqBus;
+
+			if ( song()->seqBus < MAX_MACHINES && song()->_pMachine[song()->seqBus] != 0 ) 
+			{
+
+					// implement lock sample to machine here.
+					// if the current machine is a sampler, check 
+					// if current sample is locked to a machine.
+					// if so, switch entry._mach to that machine number
+					if (((Machine*)song()->_pMachine[song()->seqBus])->_type == MACH_SAMPLER)
+					{
+						if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
+							&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
+						{
+							entry->_mach = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
+						}
+					}
+			}
+			if ( note < notecommands::release)
+			{
+				if (Global::pConfig->_RecordTweaks)
+				{
+					if (Global::pConfig->midi().raw())
+					{
+						entry->_cmd = 0x0c;
+						entry->_parameter = velocity * 2;
+					}
+					else if (Global::pConfig->midi().velocity().record())
+					{
+						// command
+						entry->_cmd = Global::pConfig->midi().velocity().command();
+						int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+						if (par > 255) 
+						{
+							par = 255;
+						}
+						else if (par < 0) 
+						{
+							par = 0;
+						}
+						entry->_parameter = par;
+					}
+				}
+			}
+
+			if (note>notecommands::release)
+			{
+				entry->_inst = song()->auxcolSelected;
+			}
+
+			//Machine *tmac = song()->_pMachine[song()->seqBus];
+//altered for locking sample to machine by alk
+			Machine *tmac = song()->_pMachine[entry->_mach];
+			if (tmac)
+			{
+				if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
+				{
+					entry->_inst = song()->auxcolSelected;
+				}
+				else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+				{
+					entry->_inst = song()->auxcolSelected;
+				}
+				
+				if ( note < notecommands::release)
+				{
+					tmac->Tick(editcur.track, entry);
+				}
+			}
+
+			Global::pInputHandler->notetrack[editcur.track]=note;
+			NewPatternDraw(editcur.track,editcur.track,line,line);
+			if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+			{
+				if (ChordModeOffs)
+				{
+					AdvanceLine(-1,Global::pConfig->_wrapAround,false); //Advance track?
+				}
+				else
+				{
+					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+				}
+			}
+
+*/
+#else
 			int line;
 
 			// UNDO CODE ENTER NOTE
@@ -4351,6 +4763,7 @@ namespace psycle {
 				}
 			}
 
+#endif
 			bScrollDetatch=false;
 			Global::pInputHandler->bDoingSelection = false;
 			Repaint(draw_modes::data);
