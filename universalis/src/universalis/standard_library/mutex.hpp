@@ -34,7 +34,17 @@ namespace detail {
 	template<typename Boost_Mutex, typename Boost_Lock>
 	class boost_mutex_wrapper : private boost::noncopyable {
 		public:
-			boost_mutex_wrapper() : implementation_lock_(implementation_, false) {}
+			boost_mutex_wrapper()
+			:
+				implementation_lock_(implementation_,
+					#if BOOST_VERSION >= 103500
+						boost::defer_lock
+					#else
+						false
+					#endif
+				)
+			{}
+
 			void lock() throw(lock_error) { implementation_lock_.lock(); }
 			void unlock() throw(lock_error) { implementation_lock_.unlock(); }
 		private:
@@ -112,8 +122,30 @@ class scoped_lock : private boost::noncopyable {
 	public:
 		typedef Mutex mutex_type;
 
-		explicit scoped_lock(mutex_type & mutex) : mutex_(mutex), implementation_lock_(mutex.implementation(), true) {}
-		scoped_lock(mutex_type & mutex, detail::accept_ownership_type) : mutex_(mutex), implementation_lock_(mutex.implementation(), false) {}
+		explicit scoped_lock(mutex_type & mutex)
+		:
+			mutex_(mutex),
+			implementation_lock_(mutex.implementation(),
+				#if BOOST_VERSION >= 103500
+					boost::try_to_lock
+				#else
+					true
+				#endif
+			)
+		{}
+
+		scoped_lock(mutex_type & mutex, detail::accept_ownership_type)
+		:
+			mutex_(mutex),
+			implementation_lock_(mutex.implementation(),
+				#if BOOST_VERSION >= 103500
+					boost::defer_lock
+				#else
+					false
+				#endif
+			)
+		{}
+
 		~scoped_lock() { implementation_lock_.unlock(); }
 
 		/*constexpr*/ bool owns() const { return true; }
@@ -133,10 +165,48 @@ class unique_lock : private boost::noncopyable {
 		typedef Mutex mutex_type;
 
 		unique_lock() : mutex_(), owns_() {}
-		explicit unique_lock(mutex_type & mutex) : mutex_(&mutex), implementation_lock_(mutex.implementation(), true), owns_(true) {}
-		unique_lock(mutex_type & mutex, detail::defer_lock_type) : mutex_(&mutex), implementation_lock_(mutex.implementation(), false), owns_(false) {}
+
+		explicit unique_lock(mutex_type & mutex)
+		:
+			mutex_(&mutex),
+			implementation_lock_(mutex.implementation(),
+				#if BOOST_VERSION >= 103500
+					boost::try_to_lock
+				#else
+					true
+				#endif
+			),
+			owns_(true)
+		{}
+
+		unique_lock(mutex_type & mutex, detail::defer_lock_type)
+		:
+			mutex_(&mutex),
+			implementation_lock_(mutex.implementation(),
+				#if BOOST_VERSION >= 103500
+					boost::defer_lock
+				#else
+					false
+				#endif
+			),
+			owns_(false)
+		{}
+
 		unique_lock(mutex_type & mutex, detail::try_lock_type) : mutex_(&mutex), implementation_lock_(mutex.implementation()), owns_(implementation_lock_.locked()) {}
-		unique_lock(mutex_type & mutex, detail::accept_ownership_type) : mutex_(&mutex), implementation_lock_(mutex.implementation(), true), owns_(true) {}
+
+		unique_lock(mutex_type & mutex, detail::accept_ownership_type)
+		:
+			mutex_(&mutex),
+			implementation_lock_(mutex.implementation(),
+				#if BOOST_VERSION >= 103500
+					boost::try_to_lock
+				#else
+					true
+				#endif
+			),
+			owns_(true)
+		{}
+
 		~unique_lock() { if(owns_) implementation_lock_.unlock(); }
 
 		//unique_lock(unique_lock && u);
