@@ -24,7 +24,8 @@ namespace psycle {
 		Project::Project(ProjectData* parent, PatternView* pat_view, MachineView* mac_view)
 			: parent_(parent),
 			  pat_view_(pat_view),
-			  mac_view_(mac_view)
+			  mac_view_(mac_view),
+			  lines_per_beat_(4)
 		{
 			assert(pat_view_);
 			assert(mac_view_);
@@ -145,6 +146,7 @@ namespace psycle {
 			{
 				psy_song().fileName = fName;
 			}
+			set_lines_per_beat(psy_song().ticksSpeed());
 			player.driver().Enable(true);
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
