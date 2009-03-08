@@ -126,6 +126,13 @@ namespace psy
 				return lines_.insert(std::pair<double, PatternEvent>(pos, ev));
 			}
 
+			iterator erase(iterator pos) {
+				iterator temp = pos;
+				temp++;
+				lines_.erase( pos );
+				return temp;
+			}
+
 			std::map<double, PatternEvent>::size_type size() const { lines_.size(); }
 			
 
