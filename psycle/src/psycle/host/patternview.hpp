@@ -7,6 +7,12 @@
 
 #define MAX_DRAW_MESSAGES 32
 
+namespace psy {
+	namespace core {
+		class SinglePattern;
+	}
+}
+
 namespace psycle {
 	namespace host {
 
@@ -148,6 +154,7 @@ namespace psycle {
 			psy::core::Song* psy_song() { return psy_song_; }
 		private:
 			psy::core::Song* psy_song_;
+			psy::core::SinglePattern* pattern();
 		public:
 #endif
 

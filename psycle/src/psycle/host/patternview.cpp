@@ -125,6 +125,18 @@ namespace psycle {
 			return checked;
 		}
 
+#ifdef use_psycore
+		psy::core::SinglePattern* PatternView::pattern() {
+			psy::core::PatternSequence* sequence = &psy_song()->patternSequence();
+			psy::core::SequenceLine* line = *(sequence->begin());	
+			psy::core::SequenceLine::iterator sit = line->begin();
+			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
+			assert(sit != line->end());
+			psy::core::SequenceEntry* entry = sit->second;
+			return entry->pattern();
+		}
+#endif
+
 		void PatternView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		{
 			// undo code not required, enter note handles it
@@ -5043,6 +5055,48 @@ namespace psycle {
 
 		void PatternView::DeleteCurr()
 		{
+#ifdef use_psycore
+			psy::core::SinglePattern* pat = pattern();
+			double beat_zoom = project()->lines_per_beat();
+
+			int patlines = static_cast<int>(beat_zoom * pat->beats());
+			if ( Global::pInputHandler->bFT2DelBehaviour )
+			{
+				if(editcur.line==0)
+					return;
+				else
+					editcur.line--;
+			}
+
+			// todo AddUndo
+			
+			psy::core::SinglePattern::iterator it;
+			double low = (editcur.line - 0.5) / beat_zoom;
+			double up  = (editcur.line + 0.5) / beat_zoom;
+			double insert_pos = editcur.line / beat_zoom;
+			it = pat->lower_bound(low);
+			
+			int track = editcur.track;
+			if (it != pat->end() )	{
+				psy::core::SinglePattern::iterator track_it = it;				
+				for ( ; it != pat->end() && it->first < up; ++it ) {
+					psy::core::PatternEvent& ev = it->second;
+					if (ev.track() == editcur.track ) {						
+						it = pat->erase(it);
+						break;
+					}
+				}
+				for ( ; it != pat->end(); ++it) {
+					psy::core::PatternEvent& ev = it->second;
+					if (ev.track() == editcur.track ) {
+						psy::core::PatternEvent old_event = it->second;
+						double old_pos = it->first;
+						it = pat->erase(it);
+						it = pat->insert(old_pos - 1 / beat_zoom, old_event);
+					}
+				}
+			} 
+#else
 			// UNDO CODE DELETE
 			const int ps = _ps();
 			unsigned char * offset = _ptrack(ps);
@@ -5064,13 +5118,17 @@ namespace psycle {
 
 			PatternEntry blank;
 			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
-
-			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
+#endif
+//			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
+#ifdef use_psycore
+			Repaint(draw_modes::pattern);
+#else
 			Repaint(draw_modes::data);
+#endif
 		}
 
 		void PatternView::InsertCurr()
