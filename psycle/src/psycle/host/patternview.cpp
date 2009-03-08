@@ -5133,6 +5133,36 @@ namespace psycle {
 
 		void PatternView::InsertCurr()
 		{
+#ifdef use_psycore
+			psy::core::SinglePattern* pat = pattern();
+			double beat_zoom = project()->lines_per_beat();
+
+			int patlines = static_cast<int>(beat_zoom * pat->beats());
+			
+			// todo AddUndo
+			
+			psy::core::SinglePattern::iterator it;
+			double low = (editcur.line - 0.5) / beat_zoom;
+			double up  = (editcur.line + 0.5) / beat_zoom;
+			double insert_pos = editcur.line / beat_zoom;
+			
+			psy::core::SinglePattern::reverse_iterator rit = pat->rbegin();
+			for ( ; rit != pat->rend() && rit->first > low ; ++rit) {
+					psy::core::PatternEvent& ev = rit->second;
+					if (ev.track() == editcur.track ) {
+						psy::core::SinglePattern::iterator it = rit.base();
+						--it;
+						psy::core::PatternEvent old_event = it->second;
+						double old_pos = it->first;
+						double new_pos = old_pos + 1 / beat_zoom;
+						it = pat->erase(it);
+						if (new_pos >= pat->beats())
+							break;
+						it = pat->insert(new_pos, old_event);
+					}
+			}
+
+#else
 			// UNDO CODE INSERT
 			const int ps = _ps();
 			unsigned char * offset = _ptrack(ps);
@@ -5148,11 +5178,15 @@ namespace psycle {
 			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
-
+#endif
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
+#ifdef use_psycore
+			Repaint(draw_modes::pattern);
+#else
 			Repaint(draw_modes::data);
+#endif
 		}
 
 
