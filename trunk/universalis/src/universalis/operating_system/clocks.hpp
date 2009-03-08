@@ -275,7 +275,7 @@ namespace detail {
 						BOOST_MESSAGE(s.str());
 					}
 					try {
-						measure_clock_resolution("QueryPerformanceCounter", performance_counter);
+						measure_clock_resolution("QueryPerformanceCounter", performance_counter, 100000);
 					} catch(std::runtime_error const & e) {
 						BOOST_MESSAGE(e.what());
 					}

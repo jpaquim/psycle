@@ -38,10 +38,10 @@ Real fast_sin(Real const & radians) {
 		// q = 0.782, p = 0.218 for minimal relative error
 		// q = ?, p = ? for minimal THD error
 		#if 1
-			Real const p(0.224008178776);
+			Real const p(Real(0.224008178776));
 			y = p * (y * std::abs(y) - y) + y;
 		#else
-			Real const q(0.775991821224);
+			Real const q(Real(0.775991821224));
 			y = q * y + p * y * std::abs(y);
 		#endif
 	}
