@@ -151,6 +151,8 @@ namespace psycle {
 		public:
 #endif
 
+			class Project* project();
+
 			void Draw(CDC *devc, const CRgn& rgn);
 			void OnSize(UINT nType, int cx, int cy);
 			// key events

@@ -79,6 +79,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int GetNumFromCombo(CComboBox* cb);
 			void ChangeIns(int i);
 			void ChangeGen(int i);
+
+			ProjectData* projects() { return &projects_; }
+
 			afx_msg void OnLoadwave();
 			
 			void EditQuantizeChange(int diff);

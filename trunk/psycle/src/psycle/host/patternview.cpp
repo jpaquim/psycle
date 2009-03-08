@@ -91,6 +91,11 @@ namespace psycle {
 			KillUndo();
 		}
 
+		Project* PatternView::project()
+		{
+			return main_->projects()->active_project();
+		}
+
 		void PatternView::Draw(CDC *devc, const CRgn& rgn)
 		{
 			DrawPatEditor(devc);
@@ -210,7 +215,7 @@ namespace psycle {
 			assert(sit != line->end());
 			psy::core::SequenceEntry* entry = sit->second;
 			psy::core::SinglePattern* pattern = entry->pattern();
-			int beat_zoom = 4;
+			int beat_zoom = project()->lines_per_beat();
 			const int plines = pattern->beats() * beat_zoom;
 			const int snt = song->tracks();
 #else
@@ -2535,7 +2540,7 @@ namespace psycle {
 			psy::core::SequenceEntry* entry = sit->second;
 			psy::core::SinglePattern* pattern = entry->pattern();
 			
-			double beat_zoom = 4.0;
+			double beat_zoom = static_cast<int>(project()->lines_per_beat());
 			psy::core::SinglePattern::iterator it;
 			double low = (lstart + lOff - 0.5) / (double) beat_zoom;
 			it = pattern->lower_bound(low);			
@@ -4808,6 +4813,142 @@ namespace psycle {
 
 		bool PatternView::MSBPut(int nChar)
 		{
+#ifdef use_psycore
+
+			int sValue = -1;
+			if	(	nChar>='0'		&&	nChar<='9')			{ sValue = nChar - '0'; }
+			else if(nChar>=VK_NUMPAD0&&nChar<=VK_NUMPAD9)	{ sValue = nChar - VK_NUMPAD0; }
+			else if(nChar>='A'		&&	nChar<='F')			{ sValue = nChar - 'A' + 10; }
+			else											{ return false; }
+
+// 			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+
+			int line = editcur.line;
+			psy::core::Song* song = psy_song();
+			psy::core::PatternSequence* sequence = &song->patternSequence();
+			psy::core::SequenceLine* sline = *(sequence->begin());	
+			psy::core::SequenceLine::iterator sit = sline->begin();
+			for (int pos = 0; sit != sline->end() && pos < editPosition; ++sit, ++pos);
+			assert(sit != sline->end());
+			psy::core::SequenceEntry* entry = sit->second;
+			psy::core::SinglePattern* pattern = entry->pattern();
+
+			double beat_zoom = 4.0;
+			psy::core::SinglePattern::iterator it;
+			double low = (editcur.line - 0.5) / beat_zoom;
+			double up  = (editcur.line + 0.5) / beat_zoom;
+			double insert_pos = editcur.line / beat_zoom;
+			it = pattern->lower_bound(low);
+			
+			if (it == pattern->end() || 
+				!(it->first >= low && it->first < up)
+				) {
+				// no entry on the beatpos
+				psy::core::PatternEvent ev;
+				int old_value = 0;
+				int new_value = 0;
+				switch ((editcur.col+1)%2) {
+					case 0:	
+					new_value = (old_value&0xF)+(sValue<<4); 
+					break;		
+					case 1:	
+					new_value = (old_value&0xF0)+(sValue); 
+					break;
+				}
+				if ( editcur.col == 1 || editcur.col == 2) {
+					ev.setInstrument(new_value);
+				} else
+				if ( editcur.col == 3 || editcur.col == 4) {
+					ev.setMachine(new_value);
+				} else
+				if ( editcur.col == 5 || editcur.col == 6) {
+					ev.setCommand(new_value);
+				} else
+				if ( editcur.col == 7 || editcur.col == 8) {
+					ev.setParameter(new_value);
+				}
+				ev.set_track(editcur.track);				
+				pattern->insert(insert_pos, ev);
+			} else
+			if (it->first >= low && it->first < up)	{
+				psy::core::SinglePattern::iterator track_it = it;
+				bool found = false;
+				for ( ; it != pattern->end() && it->first < up; ++it ) {
+					psy::core::PatternEvent& ev = it->second;
+					if (ev.track() == editcur.track ) {
+						//it->second.setNote(note);
+						// no entry on the beatpos
+						psy::core::PatternEvent& ev = it->second;
+						int old_value = 0;
+						int new_value = 0;
+						if ( editcur.col == 1 || editcur.col == 2) {
+							old_value = ev.instrument();
+						} else
+						if ( editcur.col == 3 || editcur.col == 4) {
+							old_value = ev.machine();
+						} else
+						if ( editcur.col == 5 || editcur.col == 6) {
+							old_value = ev.command();
+						} else
+						if ( editcur.col == 7 || editcur.col == 8) {
+							old_value = ev.parameter();
+						}
+						switch ((editcur.col+1)%2) {
+							case 0:	
+								new_value = (old_value&0xF)+(sValue<<4); 
+							break;		
+							case 1:	
+								new_value = (old_value&0xF0)+(sValue); 
+							break;
+						}
+						if ( editcur.col == 1 || editcur.col == 2) {
+							ev.setInstrument(new_value);
+						} else
+						if ( editcur.col == 3 || editcur.col == 4) {
+							ev.setMachine(new_value);
+						} else
+						if ( editcur.col == 5 || editcur.col == 6) {
+							ev.setCommand(new_value);
+						} else
+						if ( editcur.col == 7 || editcur.col == 8) {
+							ev.setParameter(new_value);
+						}
+						ev.set_track(editcur.track);				
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					// no entry on the beatpos
+					psy::core::PatternEvent ev;
+					int old_value = 0;
+					int new_value = 0;
+					switch ((editcur.col+1)%2) {
+						case 0:	
+						new_value = (old_value&0xF)+(sValue<<4); 
+						break;		
+						case 1:	
+						new_value = (old_value&0xF0)+(sValue); 
+						break;
+					}
+					if ( editcur.col == 1 || editcur.col == 2) {
+						ev.setInstrument(new_value);
+					} else
+					if ( editcur.col == 3 || editcur.col == 4) {
+						ev.setMachine(new_value);
+					} else
+					if ( editcur.col == 5 || editcur.col == 6) {
+						ev.setCommand(new_value);
+					} else
+					if ( editcur.col == 7 || editcur.col == 8) {
+						ev.setParameter(new_value);
+					}
+					ev.set_track(editcur.track);				
+					pattern->insert(insert_pos, ev);
+				}
+			} 
+
+#else
 			// UNDO CODE MSB PUT
 			// init
 			const int ps = _ps();
@@ -4835,6 +4976,8 @@ namespace psycle {
 				*toffset = (oldValue&0xF0)+(sValue); 
 				break;
 			}
+
+#endif
 
 			if (Global::pConfig->_cursorAlwaysDown)
 			{

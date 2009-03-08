@@ -44,6 +44,11 @@ namespace psycle {
 
 			void Clear();
 
+			void set_lines_per_beat(int lines_per_beat) {
+				lines_per_beat_ = lines_per_beat;
+			}
+			int lines_per_beat() const { return lines_per_beat_; }
+
 		private:
 
 			void AppendToRecent(const std::string& fName);
@@ -52,6 +57,8 @@ namespace psycle {
 			PatternView* pat_view_;
 			MachineView* mac_view_;
 			ProjectData* parent_;
+
+			int lines_per_beat_;
 
 #ifdef use_psycore
 			psy::core::Song song_;
