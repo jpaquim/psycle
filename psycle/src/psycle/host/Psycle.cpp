@@ -126,7 +126,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		
 			pFrame->m_wndView.machine_view()->InitSkin();
 			pFrame->m_wndView.machine_view()->Rebuild();
-
 			pFrame->m_wndView.pattern_view()->LoadPatternHeaderSkin();
 			pFrame->m_wndView.pattern_view()->RecalcMetrics();
 			pFrame->m_wndView.pattern_view()->RecalculateColourGrid();	
@@ -134,7 +133,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// The one and only window has been initialized, so show and update it.
 
 			pFrame->ShowWindow(SW_MAXIMIZE);
-			
+						
 			// center master machine
 			pFrame->m_wndView.machine_view()->CenterMaster();
 			pFrame->UpdateWindow();
