@@ -9,10 +9,16 @@
 #pragma once
 
 #ifdef _MSC_VER
-	#ifdef PSYCLE__CORE__SOURCE
-		#define PSYCLE__CORE__DECL __declspec(dllexport)
+	#ifdef PSYCLE__CORE__SHARED
+		#ifdef PSYCLE__CORE__SOURCE
+			#define PSYCLE__CORE__DECL __declspec(dllexport)
+		#else
+			#define PSYCLE__CORE__DECL __declspec(dllimport)
+		#endif
 	#else
-		#define PSYCLE__CORE__DECL __declspec(dllimport)
+		#define PSYCLE__CORE__DECL
+	#endif
+	#ifndef PSYCLE__CORE__SOURCE
 		#pragma comment(lib, "psycle-core")
 	#endif
 #else
