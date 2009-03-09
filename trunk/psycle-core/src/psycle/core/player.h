@@ -10,28 +10,21 @@
 #define PSYCLE__CORE__PLAYER__INCLUDED
 #pragma once
 
-<<<<<<< .mine
-#include <condition>
-#include <cstdint>
-=======
 #include "song.h"
 #include "dither.h"
 #include "machine.h"
-#include "riff.h"
-
-#include <thread>
->>>>>>> .r8048
-#include <date_time>
-#include <list>
-#include <mutex>
-#include <stdexcept>
-#include <thread>
-
-#include "dither.h"
 #include "riff.h"
 #include "sequencer.h"
-#include "song.h"
-#include "machine.h"
+
+#include <thread>
+#include <date_time>
+#include <mutex>
+#include <condition>
+#include <list>
+#include <cstdint>
+#include <stdexcept>
+
+
 
 
 namespace psy { namespace core {
