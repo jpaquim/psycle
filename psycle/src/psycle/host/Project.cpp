@@ -217,7 +217,7 @@ namespace psycle {
 #endif
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
-#if use_psycore				
+#ifdef use_psycore				
 				CSongpDlg dlg(&psy_song());
 #else
 				CSongpDlg dlg(&song());
