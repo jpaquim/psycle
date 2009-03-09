@@ -1,5 +1,3 @@
-///\interface psycle::helpers::dsp::MersenneTwister
-
 /* 
 	A C-program for MT19937, with initialization improved 2002/1/26.
 	Coded by Takuji Nishimura and Makoto Matsumoto.
@@ -46,8 +44,16 @@
 // (c++-ified for psycle by dw aley)
 // (64-bit compatibility by johan boule)
 
+///\interface psycle::helpers::dsp::MersenneTwister
+
+#ifndef PSYCLE__CORE__MERSENNE_TWISTER__INCLUDED
+#define PSYCLE__CORE__MERSENNE_TWISTER__INCLUDED
 #pragma once
+
+#include <psycle/core/config.hpp>
+
 #include <cstdint>
+
 namespace psy { namespace core { namespace dsp {
 
 /// Period parameters
@@ -62,42 +68,43 @@ std::uint32_t const UPPER_MASK = 0x80000000U;
 std::uint32_t const LOWER_MASK = 0x7fffffffU;
 
 /// mt19937 pseudo-random number generator
-class MersenneTwister {
-public:
-	MersenneTwister() {}
-	virtual ~MersenneTwister() {}
+class PSYCLE__CORE__DECL MersenneTwister {
+	public:
+		MersenneTwister() {}
+		virtual ~MersenneTwister() {}
 
-	/// initializes mt[N] with a seed
-	void init_genrand(std::uint32_t s);
+		/// initializes mt[N] with a seed
+		void init_genrand(std::uint32_t s);
 
-	/// initialize by an array with array-length
-	void init_by_array(std::uint32_t init_key[], unsigned int key_length);
+		/// initialize by an array with array-length
+		void init_by_array(std::uint32_t init_key[], unsigned int key_length);
 
-	/// generates a random number on [0,0xffffffff]-interval
-	std::uint32_t genrand_int32();
+		/// generates a random number on [0,0xffffffff]-interval
+		std::uint32_t genrand_int32();
 
-	/// generates a random number on [0,0x7fffffff]-interval
-	std::int32_t genrand_int31();
+		/// generates a random number on [0,0x7fffffff]-interval
+		std::int32_t genrand_int31();
 
-	/// generates a random number on [0,1]-real-interval
-	double genrand_real1();
+		/// generates a random number on [0,1]-real-interval
+		double genrand_real1();
 
-	/// generates a random number on [0,1)-real-interval
-	double genrand_real2();
+		/// generates a random number on [0,1)-real-interval
+		double genrand_real2();
 
-	/// generates a random number on (0,1)-real-interval
-	double genrand_real3();
+		/// generates a random number on (0,1)-real-interval
+		double genrand_real3();
 
-	/// generates a random number on [0,1) with 53-bit resolution
-	double genrand_res53(); 
+		/// generates a random number on [0,1) with 53-bit resolution
+		double genrand_res53(); 
 
-	/// generates two random numbers with gaussian probability distribution and standard deviation of 1
-	void genrand_gaussian(double & out1, double & out2);
+		/// generates two random numbers with gaussian probability distribution and standard deviation of 1
+		void genrand_gaussian(double & out1, double & out2);
 
-private:
-	/// the array for the state vector
-	static std::uint32_t mt[N];
-	static std::int32_t mti;
+	private:
+		/// the array for the state vector
+		static std::uint32_t mt[N];
+		static std::int32_t mti;
 };
 
 }}}
+#endif

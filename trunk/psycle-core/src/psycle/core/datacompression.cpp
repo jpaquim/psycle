@@ -1,5 +1,11 @@
-///\file
-///\brief implementation file for beerz77-2 algorithm.
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2003-2009 members of the psycle project http://psycle.sourceforge.net ; jeremy evers
+
+///\implementation beerz77-2 algorithm.
+///
 /// beerz77-2 algorithm by jeremy evers, loosely based on lz77
 /// -2 designates the smaller window, faster compression version
 /// designed for decompression on gameboy advance
@@ -9,9 +15,12 @@
 /// designed with speed in mind
 /// simple, non adaptave delta predictor, less effective with high frequency content
 
+#include <psycle/core/config.private.hpp>
 #include "datacompression.h"
 #include <cstring>
 #include <cstdint>
+
+namespace psy { namespace core {
 
 namespace {
 	unsigned int const MIN_REDUNDANT_BYTES_2 = 3;
@@ -559,3 +568,5 @@ bool DataCompression::SoundDesquash(std::uint8_t * pSourcePos, signed short ** p
 	}
 	return false;
 }
+
+}}

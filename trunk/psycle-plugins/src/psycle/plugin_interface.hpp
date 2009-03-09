@@ -1,7 +1,7 @@
 ///\interface psycle native plugin interface api
 
-#ifndef PSYCLE__PLUGIN_INTERFACE_HPP
-#define PSYCLE__PLUGIN_INTERFACE_HPP
+#ifndef PSYCLE__PLUGIN_INTERFACE__INCLUDED
+#define PSYCLE__PLUGIN_INTERFACE__INCLUDED
 #pragma once
 
 // *** Note ***

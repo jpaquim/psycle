@@ -1,5 +1,3 @@
-///\implementation psycle::helpers::dsp::MersenneTwister
-
 /* 
 	A C-program for MT19937, with initialization improved 2002/1/26.
 	Coded by Takuji Nishimura and Makoto Matsumoto.
@@ -46,8 +44,13 @@
 // (c++-ified for psycle by dw aley)
 // (64-bit compatibility by johan boule)
 
+///\implementation psycle::helpers::dsp::MersenneTwister.
+
+#include <psycle/core/config.private.hpp>
 #include "mersennetwister.h"
+
 #include <cmath>
+
 namespace psy { namespace core { namespace dsp {
 
 /// the array for the state vector

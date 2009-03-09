@@ -1,23 +1,23 @@
-
-/**********************************************************************************************
-	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
-
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-**********************************************************************************************/
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 ///\interface psy::core::Machine
+
+#ifndef PSYCLE__CORE__MACHINE__INCLUDED
+#define PSYCLE__CORE__MACHINE__INCLUDED
 #pragma once
+
 #include "constants.h"
 #include "commands.h"
 #include "cstdint.h"
-//#include "dsp.h"
-//#include "fileio.h"
 #include "misc.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
 #include "machinekey.hpp"
+
 #include <cassert>
 #include <deque>
 #include <map>
@@ -123,7 +123,7 @@ namespace exceptions {
 	#endif
 }
 
-class AudioBuffer {
+class PSYCLE__CORE__DECL AudioBuffer {
 	public: 
 		AudioBuffer(int numChannels,int numSamples);
 		~AudioBuffer();
@@ -141,7 +141,7 @@ class AudioPort;
 
 // A wire is what interconnects two AudioPorts. Appart from being the graphically representable element,
 // the wire is also responsible of volume changes and even pin reassignation (convert 5.1 to stereo, etc.. not yet)
-class Wire {
+class PSYCLE__CORE__DECL Wire {
 	public:
 		typedef std::int32_t id_type;
 
@@ -182,7 +182,7 @@ class Wire {
 // From this definition, we could have one Stereo Audio Port (one channel, two inputs or outputs),
 // a 5.1 Port, or several Stereo Ports (in the case of a mixer table), between others..
 // Note that several wires can be connected to the same AudioPort (automatic mixing in the case of an input port).
-class AudioPort {
+class PSYCLE__CORE__DECL AudioPort {
 	public:
 		///\todo: Port creation, assign buffers to it (passed via ctor? they might be shared/pooled). 
 		///\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
@@ -210,7 +210,7 @@ class AudioPort {
 		AudioBuffer *audiobuffer_;
 };
 
-class InPort : public AudioPort {
+class PSYCLE__CORE__DECL InPort : public AudioPort {
 	public:
 		typedef std::int32_t id_type;
 		InPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
@@ -218,7 +218,7 @@ class InPort : public AudioPort {
 		virtual void CollectData(int numSamples);
 };
 
-class OutPort : public AudioPort {
+class PSYCLE__CORE__DECL OutPort : public AudioPort {
 	public:
 		typedef std::int32_t id_type;
 		OutPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
@@ -319,7 +319,7 @@ class MachineCallbacks {
 };
 
 /// Base class for "Machines", the audio producing elements.
-class Machine {
+class PSYCLE__CORE__DECL Machine {
 	///\name crash handling
 	///\{
 		public:
@@ -792,3 +792,4 @@ class Machine {
 };
 
 }}
+#endif
