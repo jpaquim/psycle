@@ -111,15 +111,12 @@ namespace psycle {
 		bool PatternView::CheckUnsavedSong()
 		{
 			bool checked = true;
-			if (pUndoList)
-			{
-				if (UndoSaved != pUndoList->counter)
-				{
+			if (pUndoList) {
+				if (UndoSaved != pUndoList->counter) {
 					checked = false;
 				}
 			} else
-			if (UndoSaved != 0)
-			{
+			if (UndoSaved != 0) {
 				checked = false;
 			}
 			return checked;
@@ -220,15 +217,9 @@ namespace psycle {
 			updateMode=drawMode;					// this is ununsed for patterns
 			
 #ifdef use_psycore			
-			psy::core::PatternSequence* sequence = &song->patternSequence();
-			psy::core::SequenceLine* line = *(sequence->begin());	
-			psy::core::SequenceLine::iterator sit = line->begin();
-			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
-			assert(sit != line->end());
-			psy::core::SequenceEntry* entry = sit->second;
-			psy::core::SinglePattern* pattern = entry->pattern();
+			psy::core::SinglePattern* pat = pattern();
 			int beat_zoom = project()->lines_per_beat();
-			const int plines = pattern->beats() * beat_zoom;
+			const int plines = pat->beats() * beat_zoom;
 			const int snt = song->tracks();
 #else
 			const int snt = song->SONGTRACKS;
@@ -2540,29 +2531,18 @@ namespace psycle {
 				return;
 			lstart = std::max(lstart,0);
 			lend = std::min( std::max(lend,0), maxl);
-
 			tstart = std::min(std::max(0, tstart), maxt);
 #ifdef use_psycore
-			psy::core::Song* song = psy_song();
-			psy::core::PatternSequence* sequence = &song->patternSequence();
-			psy::core::SequenceLine* line = *(sequence->begin());	
-			psy::core::SequenceLine::iterator sit = line->begin();
-			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
-			assert(sit != line->end());
-			psy::core::SequenceEntry* entry = sit->second;
-			psy::core::SinglePattern* pattern = entry->pattern();
-			
+			psy::core::SinglePattern* pat = pattern();		
 			double beat_zoom = static_cast<int>(project()->lines_per_beat());
 			psy::core::SinglePattern::iterator it;
 			double low = (lstart + lOff - 0.5) / (double) beat_zoom;
-			it = pattern->lower_bound(low);			
-			
-			char tBuf[16];
+			it = pat->lower_bound(low);						
 
 			int top = (lstart)*ROWHEIGHT+YOFFSET;
 			int height = (lend-lstart)*ROWHEIGHT;
 			COLORREF* pBkg = pvc_row;
-
+			char tBuf[16];
 			for ( int l = lstart; l < lend; ++l) {
 				// break this up into several more general loops for speed
 				int linecount = l + lOff;
@@ -2681,7 +2661,7 @@ namespace psycle {
 			}
 
 
-			for ( ; it != pattern->end(); ++it )  {						
+			for ( ; it != pat->end(); ++it )  {						
 				psy::core::PatternEvent& ev = it->second;
 				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
 					continue;
@@ -3594,8 +3574,11 @@ namespace psycle {
 			float d1 = float((source2>>8)&0xff);
 			float d2 = float(source2&0xff);
 
+#ifdef use_psycore
+			int len = psy_song()->tracks()+1;
+#else
 			int len = song()->SONGTRACKS+1;
-
+#endif
 			float a0=(d0-p0)/(len);
 			float a1=(d1-p1)/(len);
 			float a2=(d2-p2)/(len);
@@ -5028,6 +5011,8 @@ namespace psycle {
 
 		void PatternView::ClearCurr() // delete content at Cursor pos.
 		{
+#ifdef use_psycore
+#else
 			// UNDO CODE CLEAR
 			const int ps = _ps();
 			unsigned char * offset = _ptrack(ps);
@@ -5043,7 +5028,7 @@ namespace psycle {
 			}
 			else if (editcur.col < 5 )	{	*(toffset+(editcur.col+1)/2)= 255; }
 			else						{	*(toffset+(editcur.col+1)/2)= 0; }
-
+#endif
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
@@ -5119,16 +5104,12 @@ namespace psycle {
 			PatternEntry blank;
 			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
 #endif
-//			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
+			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-#ifdef use_psycore
 			Repaint(draw_modes::pattern);
-#else
-			Repaint(draw_modes::data);
-#endif
 		}
 
 		void PatternView::InsertCurr()
@@ -5176,17 +5157,12 @@ namespace psycle {
 
 			PatternEntry blank;
 			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
-
-			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 #endif
+			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-#ifdef use_psycore
-			Repaint(draw_modes::pattern);
-#else
 			Repaint(draw_modes::data);
-#endif
 		}
 
 
@@ -5239,7 +5215,6 @@ namespace psycle {
 				}
 			}
 		}
-
 
 		//////////////////////////////////////////////////////////////////////
 		// Cursor Moving Functions

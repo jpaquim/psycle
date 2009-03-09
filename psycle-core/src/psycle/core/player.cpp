@@ -53,6 +53,11 @@ Player::Player()
 	start_threads();
 }
 
+void Player::SetSong(Song* song) { 
+	song_ = song; 
+	sequencer_.set_song(song);
+}
+
 void Player::start_threads() {
 	std::cout << "psycle: core: player: starting scheduler threads\n";
 	//if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
@@ -630,8 +635,7 @@ float * Player::Work(int numSamples) {
 			) setPlayPos(loopSequenceEntry()->tickPosition());
 		} else if(loopSong() && timeInfo_.playBeatPos() >= song().patternSequence().tickLength())
 			setPlayPos(0);
-
-		std::vector<PatternEvent*> events;
+		
 		std::vector<GlobalEvent*> globals;
 
 		// processing of each buffer is subdivided into chunks, determined by the placement of any global events.
@@ -668,17 +672,8 @@ float * Player::Work(int numSamples) {
 				chunkSampleSize = static_cast<int>(chunkBeatSize * timeInfo_.samplesPerBeat());
 
 			// get all patternlines occuring before the next global event, execute them, and process
-			events.clear();
-			
-			///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-			song().patternSequence().GetEventsInRange(timeInfo_.playBeatPos(), chunkBeatSize, events);
-			std::vector<PatternEvent*>::iterator ev_it = events.begin();
-			for( ; ev_it!= events.end(); ++ev_it ) {
-				PatternEvent* ev = *ev_it;
-				execute_notes(ev->time_offset() - timeInfo_.playBeatPos(),
-							  *ev);
-			}
-
+			sequencer_.set_time_info(&timeInfo_);
+			sequencer_.Work(numSamples);
 			if(chunkSampleSize > 0) {
 				process(chunkSampleSize);
 				processedSamples += chunkSampleSize;

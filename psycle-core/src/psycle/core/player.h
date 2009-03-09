@@ -10,18 +10,29 @@
 #define PSYCLE__CORE__PLAYER__INCLUDED
 #pragma once
 
+<<<<<<< .mine
+#include <condition>
+#include <cstdint>
+=======
 #include "song.h"
 #include "dither.h"
 #include "machine.h"
 #include "riff.h"
 
 #include <thread>
+>>>>>>> .r8048
 #include <date_time>
-#include <mutex>
-#include <condition>
 #include <list>
-#include <cstdint>
+#include <mutex>
 #include <stdexcept>
+#include <thread>
+
+#include "dither.h"
+#include "riff.h"
+#include "sequencer.h"
+#include "song.h"
+#include "machine.h"
+
 
 namespace psy { namespace core {
 
@@ -85,11 +96,12 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\name song
 	///\{
 		public:
-			CoreSong const & song() const { return *song_; }
-			CoreSong & song() { return *song_; }
-			void song(CoreSong * song) { song_ = song; }
+			Song const & song() const { return *song_; }
+			Song & song() { return *song_; }
+			void SetSong(Song * song);
+			
 		private:
-			CoreSong * song_;
+			Song * song_;
 	///\}
 
 	///\name secondary output device, write to a file
@@ -235,6 +247,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void process_loop() throw(std::exception);
 			void process(node &) throw(std::exception);
 			int samples_to_process_;
+
+			Sequencer sequencer_;
 	///\}
 };
 
