@@ -1,11 +1,4 @@
-//\file
-///\brief implementation file for psy::core::Cubic.
-//#include <packageneric/pre-compiled.private.hpp>
-//#include PACKAGENERIC
-
 // code for kaiser window is taken from GNU Radio
-
-/* -*- c++ -*- */
 /*
 * Copyright 2002 Free Software Foundation, Inc.
 *
@@ -27,34 +20,31 @@
 * Boston, MA 02110-1301, USA.
 */
 
+///\implementation psy::core::Cubic.
 
+#include <psycle/core/config.private.hpp>
 #include "dsp.h"
 
-namespace psy
-{
-	namespace core
-	{
-		namespace dsp
-		{
+namespace psy { namespace core { namespace dsp {
+
 			#if 0
-			// GNU Radio's code
-			/// Max error acceptable in Izero
-			double const IzeroEPSILON = 1e-21
-			static double Izero(double x)
-			{
-				double sum, u, halfx, temp;
-				int n;
-				sum = u = n = 1;
-				halfx = x/2.0;
-				do {
-					temp = halfx/(double)n;
-					n += 1;
-					temp *= temp;
-					u *= temp;
-					sum += u;
-				} while (u >= IzeroEPSILON*sum);
-				return(sum);
-			}
+				// GNU Radio's code
+				/// Max error acceptable in Izero
+				double const IzeroEPSILON = 1e-21
+				static double Izero(double x) {
+					double sum, u, halfx, temp;
+					int n;
+					sum = u = n = 1;
+					halfx = x/2.0;
+					do {
+						temp = halfx/(double)n;
+						n += 1;
+						temp *= temp;
+						u *= temp;
+						sum += u;
+					} while (u >= IzeroEPSILON*sum);
+					return(sum);
+				}
 			#endif
 
 			int numRMSSamples=1;
@@ -149,6 +139,7 @@ namespace psy
 					break;
 				}
 			}
+
 			ResamplerQuality Cubic::GetQuality(void) const { return _quality; }
 
 
@@ -223,6 +214,4 @@ namespace psy
 				return newval;
 			}
 
-		}
-	}
-}
+}}}

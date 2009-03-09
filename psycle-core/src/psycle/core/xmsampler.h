@@ -1,38 +1,24 @@
-/***************************************************************************
-	*   Copyright (C) 2007 Psycledelics   *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
-#ifndef XMSAMPLER_H
-#define XMSAMPLER_H
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+
+#ifndef PSYCLE__CORE__XM_SAMPLER__INCLUDED
+#define PSYCLE__CORE__XM_SAMPLER__INCLUDED
+#pragma once
 
 #include "dsp.h"
 #include "filter.h"
 #include "xminstrument.h"
 #include "machine.h"
-#include <mutex>
-/**
-@author  Psycledelics
-*/
-namespace psy { namespace core {
-class XMSampler : public Machine
-{
-public:
 
+#include <mutex>
+
+namespace psy { namespace core {
+
+class PSYCLE__CORE__DECL XMSampler : public Machine {
+public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const std::uint32_t VERSION = 0x00010000;
@@ -1153,4 +1139,3 @@ private:
 
 }}
 #endif
-

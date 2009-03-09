@@ -1,15 +1,18 @@
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-/**********************************************************************************************
-	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
-
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-**********************************************************************************************/
-
+#ifndef PSYCLE__CORE__RIFF__INCLUDED
+#define PSYCLE__CORE__RIFF__INCLUDED
 #pragma once
+
+#include <psycle/core/config.hpp>
+
 #include <cstdio>
 #include <cstdint>
+
 namespace psy { namespace core {
 
 enum DDCRET {
@@ -40,7 +43,7 @@ class ExtRiffChunkHeader {
 
 /// riff file format.
 //UNIVERSALIS__COMPILER__DEPRECATED("c++ iostream for the better")
-class ExtRiffFile {
+class PSYCLE__CORE__DECL ExtRiffFile {
 	private:
 		/// header for whole file
 		ExtRiffChunkHeader   ExtRiff_header;      
@@ -127,7 +130,7 @@ class WaveFileSample {
 /// riff wave file format.
 /// MODIFIED BY [JAZ]. It was "private ExtRiffFile".
 //UNIVERSALIS__COMPILER__DEPRECATED("c++ iostream for the better")
-class WaveFile: public ExtRiffFile {
+class PSYCLE__CORE__DECL WaveFile: public ExtRiffFile {
 	WaveFormat_Chunk wave_format;
 	ExtRiffChunkHeader pcm_data;
 	/// offset of 'pcm_data' in output file
@@ -186,3 +189,4 @@ class WaveFile: public ExtRiffFile {
 };
 
 }}
+#endif

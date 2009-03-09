@@ -1,5 +1,15 @@
-///\file \brief various signal processing utility functions and classes, psy::core::Cubic amongst others. based on revison  2663
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2000-2009 members of the psycle project http://psycle.sourceforge.net
+
+///\interface various signal processing utility functions and classes.
+
+#ifndef PSYCLE__CORE__DSP__INCLUDED
+#define PSYCLE__CORE__DSP__INCLUDED
 #pragma once
+
 #include "misc.h"
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <psycle/helpers/math/truncate.hpp>
@@ -223,7 +233,8 @@ static inline int F2I(double d) {
 	return tmp.i;
 }
 
-extern int numRMSSamples;
+PSYCLE__CORE__DECL extern int numRMSSamples;
+
 struct RMSData {
 	int count;
 	double AccumLeft, AccumRight;
@@ -370,11 +381,11 @@ class Resampler {
 		/// kind of interpolation.
 		ResamplerQuality _quality;
 		/// interpolation work function which does nothing.
-		static float T_None(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);
+		PSYCLE__CORE__DECL static float T_None(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);
 };
 
 /// cubic sample interpolator.
-class Cubic : public Resampler {
+class PSYCLE__CORE__DECL Cubic : public Resampler {
 	public:
 		/// constructor.
 		Cubic();
@@ -423,3 +434,4 @@ class Cubic : public Resampler {
 };
 
 }}}
+#endif

@@ -1,29 +1,18 @@
-/***************************************************************************
-	*   Copyright (C) 2007 by Psycledelics     *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
-#ifndef XMINSTRUMENT_H
-#define XMINSTRUMENT_H
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+
+#ifndef PSYCLE__CORE__XM_INSTRUMENT__INCLUDED
+#define PSYCLE__CORE__XM_INSTRUMENT__INCLUDED
+#pragma once
 
 #include "fileio.h"
 #include "dsp.h"
 #include "filter.h"
 #include "constants.h"
+
 #include <utility>
 #include <cstdint>
 #include <cstdio>
@@ -32,11 +21,7 @@
 
 namespace psy { namespace core {
 
-/**
-@author Psycledelics
-*/
-class XMInstrument
-{
+class PSYCLE__CORE__DECL XMInstrument {
 public:
 	/// Size of the Instrument's note mapping.
 	static const int NOTE_MAP_SIZE = 120; // C-0 .. B-9
@@ -635,61 +620,62 @@ private:
 
 ///\todo : implement the following for inter-XMSampler sharing of instruments.
 class SampleList{
-public:
-	SampleList(){top=0;}
-	~SampleList(){};
-	int AddSample(XMInstrument::WaveData &wave)
-	{
-		if ( top+1<MAX_INSTRUMENTS)
+	public:
+		SampleList(){top=0;}
+		~SampleList(){};
+		int AddSample(XMInstrument::WaveData &wave)
 		{
-			m_waves[top++]=wave;
-			return top-1;
+			if ( top+1<MAX_INSTRUMENTS)
+			{
+				m_waves[top++]=wave;
+				return top-1;
+			}
+			else return -1;
 		}
-		else return -1;
-	}
-	int SetSample(XMInstrument::WaveData &wave,int pos)
-	{
-		assert(pos<MAX_INSTRUMENTS);
-		m_waves[pos]=wave;
-		return pos;
-	}
-	XMInstrument::WaveData &operator[](int pos)
-	{
-		assert(pos<MAX_INSTRUMENTS);
-		return m_waves[pos];
-	}
-private:
-	XMInstrument::WaveData m_waves[MAX_INSTRUMENTS];
-	int top;
+		int SetSample(XMInstrument::WaveData &wave,int pos)
+		{
+			assert(pos<MAX_INSTRUMENTS);
+			m_waves[pos]=wave;
+			return pos;
+		}
+		XMInstrument::WaveData &operator[](int pos)
+		{
+			assert(pos<MAX_INSTRUMENTS);
+			return m_waves[pos];
+		}
+	private:
+		XMInstrument::WaveData m_waves[MAX_INSTRUMENTS];
+		int top;
 };
 
 ///\todo : implement the following for inter-XMSampler sharing of instruments.
 class InstrumentList {
-public:
-	InstrumentList(){top=0;}
-	~InstrumentList(){};
-	int AddIns(XMInstrument &ins)
-	{
-		if ( top+1<MAX_INSTRUMENTS)
+	public:
+		InstrumentList(){top=0;}
+		~InstrumentList(){};
+		int AddIns(XMInstrument &ins)
 		{
-			m_inst[top++]=ins;
-			return top-1;
+			if ( top+1<MAX_INSTRUMENTS)
+			{
+				m_inst[top++]=ins;
+				return top-1;
+			}
+			else return -1;
 		}
-		else return -1;
-	}
-	int SetInst(XMInstrument &inst,int pos)
-	{
-		assert(pos<MAX_INSTRUMENTS);
-		m_inst[pos]=inst;
-		return pos;
-	}
-	XMInstrument &operator[](int pos){
-		assert(pos<MAX_INSTRUMENTS);
-		return m_inst[pos];
-	}
-private:
-	XMInstrument m_inst[MAX_INSTRUMENTS];
-	int top;
+		int SetInst(XMInstrument &inst,int pos)
+		{
+			assert(pos<MAX_INSTRUMENTS);
+			m_inst[pos]=inst;
+			return pos;
+		}
+		XMInstrument &operator[](int pos){
+			assert(pos<MAX_INSTRUMENTS);
+			return m_inst[pos];
+		}
+	private:
+		XMInstrument m_inst[MAX_INSTRUMENTS];
+		int top;
 };
+
 }}
 #endif

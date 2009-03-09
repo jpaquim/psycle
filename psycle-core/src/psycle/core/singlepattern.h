@@ -1,38 +1,20 @@
-/**************************************************************************
-*   Copyright (C) 2007-2008 Psycledelics http://psycle.sourceforge.net    *
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-*   This program is distributed in the hope that it will be useful,       *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-*   GNU General Public License for more details.                          *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the                         *
-*   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-***************************************************************************/
-#ifndef SINGLEPATTERN_H
-#define SINGLEPATTERN_H
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+
+#ifndef PSYCLE__CORE__SINGLE_PATTERN__INCLUDED
+#define PSYCLE__CORE__SINGLE_PATTERN__INCLUDED
+#pragma once
 
 #include "patternevent.h"
 #include "signalslib.h"
 #include "timesignature.h"
 
-/**
-@author  Psycledelics  
-*/
+namespace psy { namespace core {
 
-namespace psy
-{
-	namespace core
-	{
-
-		class SinglePattern {
+	class PSYCLE__CORE__DECL SinglePattern {
 		public:
 			typedef std::multimap<double, PatternEvent>::iterator iterator;
 			typedef std::multimap<double, PatternEvent>::const_iterator const_iterator;
@@ -82,12 +64,13 @@ namespace psy
 			void clearTweakTrack( int linenr , int tracknr );
 			bool lineIsEmpty( int linenr ) const;
 
-/*			iterator find_nearest( int linenr );
+			/*
+			iterator find_nearest( int linenr );
 			const_iterator find_nearest( int linenr ) const;
 
 			iterator find_lower_nearest( int linenr );
-			const_iterator find_lower_nearest( int linenr ) const;*/
-			
+			const_iterator find_lower_nearest( int linenr ) const;
+			*/
 
 			void clearEmptyLines();
 
@@ -133,11 +116,9 @@ namespace psy
 				return temp;
 			}
 
-			std::map<double, PatternEvent>::size_type size() const { lines_.size(); }
-			
+			std::map<double, PatternEvent>::size_type size() const { return lines_.size(); }
 
 		private:
-
 			int beatZoom_;
 			std::string name_;
 
@@ -151,10 +132,7 @@ namespace psy
 			static int genId();
 
 			std::multimap<double, PatternEvent> lines_;
-
 		};
 
-	}
-}
-
+}}
 #endif

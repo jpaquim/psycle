@@ -1,24 +1,10 @@
-/***************************************************************************
-	*   Copyright (C) 2007 Psycledelics   *
-	*   psycle.sf.net   *
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version.                                   *
-	*                                                                         *
-	*   This program is distributed in the hope that it will be useful,       *
-	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-	*   GNU General Public License for more details.                          *
-	*                                                                         *
-	*   You should have received a copy of the GNU General Public License     *
-	*   along with this program; if not, write to the                         *
-	*   Free Software Foundation, Inc.,                                       *
-	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-	***************************************************************************/
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-
+#include <psycle/core/config.private.hpp>
 #include "misc.h"
 
 float CValueMapper::fMap_255_1[257] = 
@@ -47,7 +33,7 @@ float CValueMapper::fMap_255_1[257] =
 			0.91796875, 0.921875, 0.92578125, 0.9296875, 0.93359375, 0.9375, 0.94140625, 0.9453125, 0.94921875, 0.953125, 0.95703125, 
 			0.9609375, 0.96484375, 0.96875, 0.97265625, 0.9765625, 0.98046875, 0.984375, 0.98828125, 0.9921875, 0.99609375,1};
 
-		float CValueMapper::fMap_255_100[257]=
+float CValueMapper::fMap_255_100[257]=
 			{0, 0.390625, 0.78125, 1.171875, 1.5625, 1.953125, 2.34375, 2.734375, 3.125, 3.515625, 3.90625, 4.296875, 4.6875, 
 			5.078125, 5.46875, 5.859375, 6.25, 6.640625, 7.03125, 7.421875, 7.8125, 8.203125, 8.59375, 8.984375, 9.375, 9.765625, 
 			10.15625, 10.546875, 10.9375, 11.328125, 11.71875, 12.109375, 12.5, 12.890625, 13.28125, 13.671875, 14.0625, 14.453125, 

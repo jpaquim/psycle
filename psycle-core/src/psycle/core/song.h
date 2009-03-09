@@ -1,24 +1,13 @@
-
-// Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the
-// Free Software Foundation, Inc.,
-// 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\file
-///\brief interface file for psy::core::Song
+///\interface psy::core::Song
 
+#ifndef PSYCLE__CORE__SONG__INCLUDED
+#define PSYCLE__CORE__SONG__INCLUDED
 #pragma once
 
 #include "patternsequence.h"
@@ -26,6 +15,7 @@
 #include "machine.h"
 #include "instrument.h"
 #include "xminstrument.h"
+
 #include <cstdint>
 
 namespace psy { namespace core {
@@ -37,7 +27,7 @@ class MachineFactory;
 /// songs hold everything comprising a "tracker module",
 /// this include patterns, pattern sequence, machines, wavetables
 /// and their initial parameters
-class CoreSong {
+class PSYCLE__CORE__DECL CoreSong {
 	public:
 		CoreSong();
 		virtual ~CoreSong();
@@ -295,7 +285,7 @@ class CoreSong {
 };
 
 /// UI stuff moved here
-class UISong : public CoreSong {
+class PSYCLE__CORE__DECL UISong : public CoreSong {
 	public:
 		UISong();
 		virtual ~UISong() {}
@@ -303,7 +293,7 @@ class UISong : public CoreSong {
 
 /// the actual song class used by qpsycle. it's simply the UISong class
 /// note that a simple typedef won't work due to the song class being forward-declared, as a class and not a typedef.
-class Song : public UISong {
+class PSYCLE__CORE__DECL Song : public UISong {
 	///\todo: For derived UI machines, the data is hold by Song in a class VisualMachine.
 	// This means that a Song maintans a separate array of VisualMachines for the Non-visual counterparts and gives access
 	// to these with ui-specific methods.
@@ -351,3 +341,4 @@ class Song : public UISong {
 };
 
 }}
+#endif
