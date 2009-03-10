@@ -297,7 +297,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				_snprintf(s,4,"%i",i);
 				cc2->AddString(s);
 			}
-			cc2->SetCurSel(_pSong->SONGTRACKS-4);
+#ifdef use_psycore			
+			cc2->SetCurSel(projects_.active_project()->psy_song().tracks()-4);
+#else
+			cc2->SetCurSel(_pSong->SONGTRACKS-4);			
+#endif
 
 		//	SetAppSongBpm(0);
 		//	SetAppSongTpb(0);
@@ -523,7 +527,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cc2->SetCurSel(m_wndView.pattern_view()->patStep);
 			
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
+#ifdef use_psycore
+			cc2->SetCurSel(projects_.active_project()->psy_song().tracks()-4);
+#else
 			cc2->SetCurSel(_pSong->SONGTRACKS-4);
+#endif
 
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
 			cc2->SetCurSel(_pSong->currentOctave);
@@ -540,9 +548,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnSelchangeTrackcombo() 
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
+#ifdef use_psycore
+			projects_.active_project()->psy_song().setTracks(cc2->GetCurSel()+4);
+			if (m_wndView.pattern_view()->editcur.track >= projects_.active_project()->psy_song().tracks() )
+			m_wndView.pattern_view()->editcur.track = projects_.active_project()->psy_song().tracks()-1;
+
+#else
 			_pSong->SONGTRACKS=cc2->GetCurSel()+4;
-			if (m_wndView.pattern_view()->editcur.track >= _pSong->SONGTRACKS )
-				m_wndView.pattern_view()->editcur.track= _pSong->SONGTRACKS-1;
+		if (m_wndView.pattern_view()->editcur.track >= _pSong->SONGTRACKS )
+		m_wndView.pattern_view()->editcur.track= _pSong->SONGTRACKS-1;
+#endif
 
 			m_wndView.pattern_view()->RecalculateColourGrid();
 			m_wndView.Repaint();

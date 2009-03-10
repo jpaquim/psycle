@@ -2632,13 +2632,13 @@ namespace psycle {
 							OutNote(devc,xOffset+COLX[0],yOffset,255);
 							break;
 						case 1:					
-							OutData4(devc,xOffset+COLX[1],yOffset,0,false);							
+							OutData4(devc,xOffset+COLX[1],yOffset,0,true);							
 							break;
 						case 2:					
-							OutData4(devc,xOffset+COLX[2],yOffset,0,false);							
+							OutData4(devc,xOffset+COLX[2],yOffset,0,true);							
 							break;
 						case 3:
-							OutData4(devc,xOffset+COLX[3],yOffset,0,false);
+							OutData4(devc,xOffset+COLX[3],yOffset,0,true);
 							break;
 						case 4:
 							OutData4(devc,xOffset+COLX[4],yOffset,0,true);
@@ -2758,21 +2758,21 @@ namespace psycle {
 							break;
 						case 1:
 							if (ev.instrument() == 255) {
-								OutData4(devc,xOffset+COLX[1],yOffset,0,false);
+								OutData4(devc,xOffset+COLX[1],yOffset,0,true);
 							} else{
 								OutData4(devc,xOffset+COLX[1],yOffset,ev.instrument()>>4,false);
 							}
 							break;
 						case 2:
 							if (ev.instrument() == 255 ) {
-								OutData4(devc,xOffset+COLX[2],yOffset,0,false);
+								OutData4(devc,xOffset+COLX[2],yOffset,0,true);
 							} else {
 								OutData4(devc,xOffset+COLX[2],yOffset,ev.instrument(),false);
 							}
 							break;
 						case 3:
 							if (ev.machine() == 255 ) {
-								OutData4(devc,xOffset+COLX[3],yOffset,0,false);
+								OutData4(devc,xOffset+COLX[3],yOffset,0,true);
 							}
 							else {
 								OutData4(devc,xOffset+COLX[3],yOffset,ev.machine()>>4,false);
@@ -5030,13 +5030,13 @@ namespace psycle {
 							it = pat->erase(it);
 						else {
 							switch (editcur.col) {
-								case 1: ev.setInstrument(0);
+								case 1: ev.setInstrument(255);
 								break;
-								case 2: ev.setInstrument(0);
+								case 2: ev.setInstrument(255);
 								break;
-								case 3: ev.setMachine(0);
+								case 3: ev.setMachine(255);
 								break;
-								case 4: ev.setMachine(0);
+								case 4: ev.setMachine(255);
 								break;
 								case 5: ev.setCommand(0);
 								break;
@@ -5217,12 +5217,15 @@ namespace psycle {
 				bScrollDetatch=false;
 			}
 			PatternEntry* pEntry = (PatternEntry*)_ptrackline(_ps(),0,editcur.line);
-
+#ifdef use_psycore			
+			for (int i=0; i<psy_song()->tracks(); i++)
+#else
 			for (int i=0; i<song()->SONGTRACKS;i++)
+#endif
 			{
 				if (pEntry->_mach < MAX_MACHINES && !song()->_trackMuted[i])
 				{
-					Machine *pMachine = song()->_pMachine[pEntry->_mach];
+					Machine *pMachine = song()->machine(pEntry->_mach);
 					if (pMachine)
 					{
 						if ( !pMachine->_mute)	
@@ -5245,7 +5248,7 @@ namespace psycle {
 			PatternEntry* pEntry = (PatternEntry*)_ptrackline();
 			if (pEntry->_mach < MAX_MACHINES)
 			{
-				Machine *pMachine = song()->_pMachine[pEntry->_mach];
+				Machine *pMachine = song()->machine(pEntry->_mach);
 				if (pMachine)
 				{
 					if ( !pMachine->_mute)	
@@ -5269,8 +5272,12 @@ namespace psycle {
 				main()->StatusBarIdle();
 				if (editcur.track == 0)
 				{
-					if ( wrap ) 
+					if ( wrap )
+#ifdef use_psycore						
+						editcur.track = psy_song()->tracks()-1;
+#else
 						editcur.track = song()->SONGTRACKS-1;
+#endif
 					else 
 						editcur.col=0;
 				}
@@ -5292,7 +5299,11 @@ namespace psycle {
 			{
 				editcur.col = 0;
 				main()->StatusBarIdle();
+#ifdef use_psycore				
+				if (editcur.track == psy_song()->tracks()-1)
+#else
 				if (editcur.track == song()->SONGTRACKS-1)
+#endif
 				{
 					if ( wrap ) 
 						editcur.track = 0;
@@ -5344,7 +5355,11 @@ namespace psycle {
 			if (x<0) //kind of trick used to advance track (related to chord mode).
 			{
 				editcur.track+=1;
+#ifdef use_psycore				
+				if (editcur.track >= psy_song()->tracks())
+#else
 				if (editcur.track >= song()->SONGTRACKS)
+#endif
 				{
 					editcur.track=0;
 					editcur.line+=1;
@@ -5377,11 +5392,18 @@ namespace psycle {
 
 			editcur.track+=x;
 			editcur.col=0;
-			
+#ifdef use_psycore						
+			if(editcur.track>= psy_song()->tracks())
+#else
 			if(editcur.track>= song()->SONGTRACKS)
+#endif
 			{
 				if ( wrap ) editcur.track=0;
+#ifdef use_psycore										
+				else editcur.track=psy_song()->tracks()-1;
+#else
 				else editcur.track=song()->SONGTRACKS-1;
+#endif
 			}
 			
 			main()->StatusBarIdle();
@@ -5399,7 +5421,11 @@ namespace psycle {
 			
 			if(editcur.track<0)
 			{
+#ifdef use_psycore				
+				if (wrap) editcur.track=psy_song()->tracks()-1;
+#else
 				if (wrap) editcur.track=song()->SONGTRACKS-1;
+#endif
 				else editcur.track=0;
 			}
 			
@@ -6539,7 +6565,11 @@ namespace psycle {
 		void PatternView::SelectNextTrack()
 		{
 			int i;
+#ifdef use_psycore			
+			for (i = editcur.track+1; i < psy_song()->tracks(); i++)
+#else
 			for (i = editcur.track+1; i < song()->SONGTRACKS; i++)
+#endif
 			{
 				if (song()->_trackArmed[i])
 				{
@@ -6549,7 +6579,11 @@ namespace psycle {
 					}
 				}
 			}
+#ifdef use_psycore
+			if (i >= psy_song()->tracks())
+#else
 			if (i >= song()->SONGTRACKS)
+#endif
 			{
 				for (i = 0; i <= editcur.track; i++)
 				{
@@ -6565,7 +6599,11 @@ namespace psycle {
 			editcur.track = i;
 			while(song()->_trackArmed[editcur.track] == 0)
 			{
+#ifdef use_psycore				
+				if(++editcur.track >= psy_song()->tracks())
+#else
 				if(++editcur.track >= song()->SONGTRACKS)
+#endif
 					editcur.track=0;
 			}
 			editcur.col = 0;
@@ -6645,7 +6683,11 @@ namespace psycle {
 		void PatternView::OnLButtonDown(UINT nFlags, CPoint point)
 		{			
 				int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
+#ifdef use_psycore
+				if ( ttm >= psy_song()->tracks() ) ttm = psy_song()->tracks()-1;
+#else
 				if ( ttm >= song()->SONGTRACKS ) ttm = song()->SONGTRACKS-1;
+#endif
 				else if ( ttm < 0 ) ttm = 0;
 				
 				if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
@@ -6791,9 +6833,17 @@ namespace psycle {
 					else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 					{
 						ccm=8;
-						if ( ttm >= song()->SONGTRACKS ) // Out of Range
+#ifdef use_psycore						
+						if ( ttm >= psy_song()->tracks() ) // Out of Range
+#else
+						if ( ttm >= song()->SONGTRACKS ) // Out of Range		
+#endif
 						{	
+#ifdef use_psycore
+							ttm = psy_song()->tracks()-1;
+#else
 							ttm = song()->SONGTRACKS-1;
+#endif
 							if ( tOff != ttm-VISTRACKS ) 
 							{ 
 								ntOff = ttm-VISTRACKS+1; 
@@ -7114,7 +7164,11 @@ namespace psycle {
 				{
 					case SB_LINERIGHT:
 					case SB_PAGERIGHT:
+#ifdef use_psycore
+						if ( tOff<psy_song()->tracks()-VISTRACKS)
+#else
 						if ( tOff<song()->SONGTRACKS-VISTRACKS)
+#endif
 						{
 							ntOff=tOff+1;
 //	Disabled, since people find it as a bug, not as a feature.
@@ -7145,7 +7199,11 @@ namespace psycle {
 					case SB_THUMBTRACK:
 						if (ntOff!=(int)nPos)
 						{
+#ifdef use_psycore
+							const int nt = psy_song()->tracks();
+#else
 							const int nt = song()->SONGTRACKS;
+#endif
 							ntOff=(int)nPos;
 							if (ntOff >= nt)
 							{
