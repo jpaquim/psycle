@@ -502,15 +502,10 @@ namespace psycle
 
 						// tell the FX to work, now that the input is ready.
 						{
-							#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-							#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-							#endif
 							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 							pRetMachine->Work(numSamples);
 							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
-							if(!pRetMachine->Standby())Standby(false);
+							if(!pRetMachine->Standby()) Standby(false);
 						}
 						///todo: why was this here? It is already done in PreWork()
 /*						{
