@@ -17,10 +17,10 @@ namespace psy {
 			Sequencer();
 			~Sequencer();
 			
-			void set_song(class Song* song) {
+			void set_song(class CoreSong* song) {
 				song_ = song;
 			}
-			Song* song() { return song_; }
+			CoreSong* song() { return song_; }
 
 			void Work(unsigned int nframes);
 
@@ -35,7 +35,7 @@ namespace psy {
 		private:
 			void execute_notes(double beat_offset, class PatternEvent& line);
 			PlayerTimeInfo* time_info_;
-			Song* song_;
+			CoreSong* song_;
 			/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 			Machine::id_type prev_machines_[MAX_TRACKS];
 		};
