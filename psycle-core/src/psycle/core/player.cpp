@@ -53,11 +53,6 @@ Player::Player()
 	start_threads();
 }
 
-void Player::SetSong(Song* song) { 
-	song_ = song; 
-	sequencer_.set_song(song);
-}
-
 void Player::start_threads() {
 	std::cout << "psycle: core: player: starting scheduler threads\n";
 	//if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
