@@ -1,8 +1,7 @@
 #! /usr/bin/env scons
 
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-# copyright 2006-2007 johan boule <bohan@jabber.org>
-# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
+# copyright 2006-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 # To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
 import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
@@ -16,6 +15,7 @@ project = project(name = 'psycle-helpers')
 
 from packageneric.scons.source_package import source_package
 from packageneric.scons.version import version
+
 source_package = source_package(project,
 	name = project.name(),
 	version = version(1, 9),
@@ -51,30 +51,42 @@ else:
 
 # modules
 
-from packageneric.scons.module import module
+from packageneric.scons.module import module as base_module
+
+class module(base_module):
+	def __init__(self):
+		base_module.__init__(self, source_package,
+			name = source_package.name(),
+			dependencies = [universalis]
+	)
+
+	def dynamic_dependencies(self):
+		from packageneric.scons.find import find
+		self.add_sources(find(self.project(), 'src', [os.path.join('psycle', 'helpers', '*.cpp')]))
+		self.add_headers(find(self.project(), 'src', [os.path.join('psycle', 'helpers', '*.hpp')]))
+		self.contexes().source().compilers().cxx().paths().add(['src'])
+module = module()
 
 # pkg-config packages
 
 from packageneric.scons.pkg_config_package import pkg_config_package
 pkg_config_package = pkg_config_package(project,
-	name = source_package.name(),
-	version = source_package.version(),
-	description = source_package.description(),
-	dependencies = [universalis],
-	modules = []
+	name = module.name(),
+	version = module.version(),
+	description = module.description(),
+	modules = [module]
 )
-pkg_config_package.uninstalled_env().compilers().cxx().paths().add(['src'])
 
 # unit tests
 
 from packageneric.std_checks.boost import boost
 boost_test = boost(project, 103300, ['unit_test_framework'])
 
-unit_test_module = module(source_package,
+unit_test_module = base_module(source_package,
 			name = source_package.name() + '_unit_tests',
 			version = source_package.version(),
-			dependencies = [pkg_config_package.local_package(), universalis, boost_test], # todo universalis should be a brought by pkg_config_package
-			target_type = module.target_types.program
+			dependencies = [pkg_config_package.local_package(), boost_test],
+			target_type = base_module.target_types.program
 )
 unit_test_module.contexes().source().compilers().cxx().paths().add(['src'])
 from packageneric.scons.find import find
