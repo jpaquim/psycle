@@ -10,36 +10,28 @@
 
 #include "machine.h"
 
-namespace psy {
-	namespace core {
-		class Sequencer {
-		 public:
-			Sequencer();
-			~Sequencer();
+namespace psy { namespace core {
+
+class Sequencer {
+	public:
+		Sequencer();
+		~Sequencer();
 			
-			void set_song(class CoreSong* song) {
-				song_ = song;
-			}
-			CoreSong* song() { return song_; }
+		CoreSong* song() { return song_; }
+		void set_song(class CoreSong* song) { song_ = song; }
 
-			void Work(unsigned int nframes);
+		void Work(unsigned int nframes);
 
-			void set_time_info(class PlayerTimeInfo* info) {
-				time_info_ = info;
-			}
+		PlayerTimeInfo* time_info() { return time_info_; }
+		void set_time_info(class PlayerTimeInfo* info) { time_info_ = info; }
 
-			PlayerTimeInfo* time_info() {
-				return time_info_;
-			}
+	private:
+		void execute_notes(double beat_offset, class PatternEvent& line);
+		PlayerTimeInfo* time_info_;
+		CoreSong* song_;
+		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
+		Machine::id_type prev_machines_[MAX_TRACKS];
+};
 
-		private:
-			void execute_notes(double beat_offset, class PatternEvent& line);
-			PlayerTimeInfo* time_info_;
-			CoreSong* song_;
-			/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
-			Machine::id_type prev_machines_[MAX_TRACKS];
-		};
-	}
-}
-
+}}
 #endif

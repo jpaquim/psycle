@@ -96,7 +96,7 @@ namespace psy { namespace core {
 			const_iterator begin() const { return lines_.begin(); }
 			iterator end() { return lines_.end(); }
 			const_iterator end() const { return lines_.end(); }
-  
+
 			reverse_iterator rbegin() { return lines_.rbegin(); }
 			const_reverse_iterator rbegin() const { return lines_.rbegin();}
 			reverse_iterator rend() { return lines_.rend(); }

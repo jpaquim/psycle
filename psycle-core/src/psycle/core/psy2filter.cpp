@@ -153,7 +153,8 @@ PatternEvent Psy2Filter::convertEntry(unsigned char * data ) const {
 }
 
 bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
-/*	std::int32_t numLines;
+#if 0 ///\todo
+	std::int32_t numLines;
 	char patternName[32];
 	file->Read(numLines);
 	file->ReadArray(patternName, sizeof(patternName)); patternName[31]=0;
@@ -210,7 +211,7 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		RemovePattern(i);
 	}
 	#endif
-*/
+#endif
 	return true;
 }
 
@@ -527,7 +528,7 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	double pos = 0;
 	std::vector<int>::iterator it = seqList.begin();
 	for(; it < seqList.end(); ++it) {
-		SinglePattern* pat = song.patternSequence().FindPattern(*it);		
+		SinglePattern* pat = song.patternSequence().FindPattern(*it);
 		singleLine->createEntry(pat, pos);
 		pos += pat->beats();
 	}
