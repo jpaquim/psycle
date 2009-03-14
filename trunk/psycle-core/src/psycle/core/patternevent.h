@@ -50,7 +50,7 @@ class PSYCLE__CORE__DECL PatternEvent {
 		void set_track(int track) {
 			track_ = track;
 		}
-   
+
 		void set_sequence(int seq_track) {
 			seq_track_ = seq_track;
 		}

@@ -19,8 +19,7 @@ int SinglePattern::genId() {
 	return idCounter++;
 }
 
-SinglePattern::SinglePattern()
-{
+SinglePattern::SinglePattern() {
 	TimeSignature timeSig;
 	timeSig.setCount(4);
 	timeSignatures_.push_back( timeSig  );
@@ -30,32 +29,28 @@ SinglePattern::SinglePattern()
 
 // Explicit copy constructor needed because boost::signal is noncopyable
 SinglePattern::SinglePattern(SinglePattern const& other)
-	: beatZoom_(other.beatZoom_),
-	  name_(other.name_),
-	  category_(other.category_),
-	  timeSignatures_(other.timeSignatures_),
-	  zeroTime(other.zeroTime),
-	  id_(genId())
-{
+:
+	beatZoom_(other.beatZoom_),
+	name_(other.name_),
+	category_(other.category_),
+	timeSignatures_(other.timeSignatures_),
+	zeroTime(other.zeroTime),
+	id_(genId())
+{}
+
+SinglePattern::~SinglePattern() {
+	wasDeleted(this);
 }
 
-SinglePattern::~SinglePattern()
-{
-wasDeleted(this);
-}
-
-void SinglePattern::setBeatZoom( int zoom )
-{
+void SinglePattern::setBeatZoom( int zoom ) {
 	beatZoom_ = zoom;
 }
 
-int SinglePattern::beatZoom( ) const
-{
+int SinglePattern::beatZoom( ) const {
 	return beatZoom_;
 }
 
-void SinglePattern::addBar( const TimeSignature & signature )
-{
+void SinglePattern::addBar( const TimeSignature & signature ) {
 	if ( timeSignatures_.size() > 0 ) {
 		TimeSignature & last = timeSignatures_.back();
 		if (last.numerator()   != signature.numerator() ||
@@ -68,10 +63,9 @@ void SinglePattern::addBar( const TimeSignature & signature )
 			timeSignatures_.push_back(signature);
 }
 
-void SinglePattern::removeBar( float pos )
-{
-	//todo
-/*	float searchPos = 0;
+void SinglePattern::removeBar( float pos ) {
+#if 0 ///\todo
+	float searchPos = 0;
 	std::vector<TimeSignature>::iterator it = timeSignatures_.begin();
 	for (; it < timeSignatures_.end(); it++) {
 		TimeSignature & timeSignature = *it;
@@ -95,7 +89,8 @@ void SinglePattern::removeBar( float pos )
 				}
 				break;
 		}
-	}*/
+	}
+#endif
 }
 
 const TimeSignature & SinglePattern::playPosTimeSignature(double pos) const
@@ -166,22 +161,20 @@ float SinglePattern::beatsPerLine() const {
 	return 1 / (float) beatZoom();
 }
 
-void SinglePattern::clearEmptyLines()
-{
-	// todo
-/*	for( iterator it = begin(); it != end(); )
-	{
+void SinglePattern::clearEmptyLines() {
+#if 0 ///\todo
+	for( iterator it = begin(); it != end(); ) {
 		if(it->second.empty())
 			erase(it++);
 		else
 			++it;
-	}*/
+	}
+#endif
 }
 
-void SinglePattern::scaleBlock(int left, int right, double top, double bottom, float factor)
-{
-	//todo
-/*	double length = bottom - top;
+void SinglePattern::scaleBlock(int left, int right, double top, double bottom, float factor) {
+#if 0 ///\todo
+	double length = bottom - top;
 	
 	if(factor>1) //expanding-- iterate backwards
 	{
@@ -226,12 +219,13 @@ void SinglePattern::scaleBlock(int left, int right, double top, double bottom, f
 				line.notes().erase(entryIt++);
 			}
 		}
-	}*/
+	}
+#endif
 }
 
-void SinglePattern::transposeBlock(int left, int right, double top, double bottom, int trp)
-{
-/*	for( iterator lineIt = lower_bound(top)
+void SinglePattern::transposeBlock(int left, int right, double top, double bottom, int trp) {
+#if 0 ///\todo
+	for( iterator lineIt = lower_bound(top)
 		; lineIt != end() && lineIt->first < bottom
 		; ++lineIt )
 	{
@@ -249,12 +243,13 @@ void SinglePattern::transposeBlock(int left, int right, double top, double botto
 				entry.setNote(note);
 			}
 		}
-	}*/
+	}
+#endif
 }
 
-void SinglePattern::blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t newInstrument )
-{
-/*	for( iterator lineIt = lower_bound(top)
+void SinglePattern::blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t newInstrument ) {
+#if 0 ///\todo
+	for( iterator lineIt = lower_bound(top)
 		; lineIt != end() && lineIt->first < bottom
 		; ++lineIt )
 	{
@@ -266,12 +261,12 @@ void SinglePattern::blockSetInstrument( int left, int right, double top, double 
 			PatternEvent & entry = entryIt->second;
 			entry.setInstrument( newInstrument );
 		}
-	}*/
+	}
+#endif
 }
 
-void SinglePattern::blockSetMachine( int left, int right, double top, double bottom, std::uint8_t newMachine )
-{
-	/*
+void SinglePattern::blockSetMachine( int left, int right, double top, double bottom, std::uint8_t newMachine ) {
+#if 0 ///\todo
 	for( iterator lineIt = lower_bound(top)
 		; lineIt != end() && lineIt->first < bottom
 		; ++lineIt )
@@ -284,13 +279,13 @@ void SinglePattern::blockSetMachine( int left, int right, double top, double bot
 			PatternEvent & entry = entryIt->second;
 			entry.setMachine( newMachine );
 		}
-	}*/
+	}
+#endif
 }
 
 
-void SinglePattern::deleteBlock(int left, int right, double top, double bottom)
-{
-/*
+void SinglePattern::deleteBlock(int left, int right, double top, double bottom) {
+#if 0 ///\todo
 	for( iterator lineIt = lower_bound(top)
 		; lineIt != end() && lineIt->first < bottom
 		; ++lineIt )
@@ -304,55 +299,58 @@ void SinglePattern::deleteBlock(int left, int right, double top, double bottom)
 		}
 	}
 	clearEmptyLines();
-	*/
+#endif
 }
 
 bool SinglePattern::lineIsEmpty( int linenr ) const {
+#if 0 ///\todo
+	return ( find_nearest(linenr) == end() );
+#else
 	return 0;
-	//return ( find_nearest(linenr) == end() );
+#endif
 }
 
 void SinglePattern::clearTrack( int linenr , int tracknr ) {
-	/*iterator it = find_nearest(linenr);
+#if 0 ///\todo
+	iterator it = find_nearest(linenr);
 	PatternLine & line = it->second;
 	if ( it == end() ) return;
 	line.notes().erase(tracknr);
-	if ( line.notes().empty() ) erase(it);*/
+	if ( line.notes().empty() ) erase(it);
+#endif
 }
 
 void SinglePattern::clearTweakTrack( int linenr , int tracknr ) {
-	/*iterator it = find_nearest(linenr);
+#if 0 ///\todo
+	iterator it = find_nearest(linenr);
 	PatternLine & line = it->second;
 	if ( it == end() ) return;
 	line.tweaks().erase(tracknr);
-	if ( line.empty() ) erase(it);*/
+	if ( line.empty() ) erase(it);
+#endif
 }
 
-std::vector<TimeSignature> & SinglePattern::timeSignatures()
-{
+std::vector<TimeSignature> & SinglePattern::timeSignatures() {
 	return timeSignatures_;
 }
 
-const std::vector<TimeSignature> & SinglePattern::timeSignatures() const
-{
+const std::vector<TimeSignature> & SinglePattern::timeSignatures() const {
 	return timeSignatures_;
 }
 
-void SinglePattern::setID( int id )
-{
+void SinglePattern::setID( int id ) {
 	id_ = id;
 	idCounter = std::max(id_,idCounter)+1;
 }
 
-int SinglePattern::id( ) const
-{
+int SinglePattern::id( ) const {
 	return id_;
 }
 
-std::string SinglePattern::toXml( ) const
-{
+std::string SinglePattern::toXml( ) const {
 	std::ostringstream xml;
-/*	xml << "<pattern name='" << replaceIllegalXmlChr(name()) << "' zoom='" << beatZoom() << std::hex << "' id='" << id() << std::hex << "'>" << std::endl;
+#if 0 ///\todo
+	xml << "<pattern name='" << replaceIllegalXmlChr(name()) << "' zoom='" << beatZoom() << std::hex << "' id='" << id() << std::hex << "'>" << std::endl;
 	std::vector<TimeSignature>::const_iterator it = timeSignatures_.begin();
 	for ( ; it < timeSignatures_.end(); it++) {
 		const TimeSignature & sign = *it;
@@ -372,12 +370,13 @@ std::string SinglePattern::toXml( ) const
 		const PatternLine & line = it->second;
 		xml << line.toXml( static_cast<float>(beatPos) );
 	}
-	xml << "</pattern>" << std::endl;*/
+	xml << "</pattern>" << std::endl;
+#endif
 	return xml.str();
 }
 
-/*SinglePattern::iterator SinglePattern::find_nearest( int line )
-{
+#if 0 ///\todo
+SinglePattern::iterator SinglePattern::find_nearest( int line ) {
 	SinglePattern::iterator result;
 	
 	double low = ( (line - 0.5) / (float) beatZoom() );
@@ -391,8 +390,7 @@ std::string SinglePattern::toXml( ) const
 	return end();
 }
 
-SinglePattern::const_iterator SinglePattern::find_nearest( int line ) const
-{
+SinglePattern::const_iterator SinglePattern::find_nearest( int line ) const {
 	SinglePattern::const_iterator result;
 
 	double low = ( (line - 0.499999) / (float) beatZoom() );
@@ -404,9 +402,9 @@ SinglePattern::const_iterator SinglePattern::find_nearest( int line ) const
 		return result;
 	}
 	return end();
-}*/
+}
 
-/*SinglePattern::iterator SinglePattern::find_lower_nearest( int linenr ) {
+SinglePattern::iterator SinglePattern::find_lower_nearest( int linenr ) {
 	SinglePattern::iterator result;
 
 	double low = (linenr - 0.5) / (float) beatZoom();
@@ -433,17 +431,20 @@ SinglePattern::const_iterator SinglePattern::find_lower_nearest( int linenr ) co
 		return result;
 	}
 	return end();
-}*/
+}
+#endif
 
 void SinglePattern::setEvent( int line, int track, const PatternEvent & event ) {
-/*	iterator it = find_nearest( line );
+#if 0 ///\todo
+	iterator it = find_nearest( line );
 	if ( it != end())
 	{
 		it->second.notes()[track] = event;
 	} else {
 		float position = line / (float) beatZoom();
 		(*this)[position].notes()[track] = event;
-	}*/
+	}
+#endif
 }
 
 PatternEvent SinglePattern::event( int line, int track ) {
@@ -455,37 +456,39 @@ PatternEvent SinglePattern::event( int line, int track ) {
 }
 
 void SinglePattern::setTweakEvent( int line, int track, const PatternEvent & event ) {
-/*	iterator it = find_nearest( line );
+#if 0 ///\todo
+	iterator it = find_nearest( line );
 	if ( it != end())
 	{
 		it->second.tweaks()[track] = event;
 	} else {
 		float position = line / (float) beatZoom();
 		(*this)[position].tweaks()[track] = event;
-	}*/
+	}
+#endif
 }
 
 PatternEvent SinglePattern::tweakEvent( int line, int track ) {
-/*	iterator it = find_nearest( line );
+#if 0 ///\todo
+	iterator it = find_nearest( line );
 	if ( it != end())
 		return it->second.tweaks()[track];
-	else*/
+	else
+#endif
 		return PatternEvent();
 }
 
-
-
-std::auto_ptr<SinglePattern> SinglePattern::block( int left, int right, int top, int bottom )
-{
+std::auto_ptr<SinglePattern> SinglePattern::block( int left, int right, int top, int bottom ) {
 	// copies a given block into a new Pattern
 	// the range is:
 	// startTrack >= tracks < endTracks ; startLine >= lines < endLines
 
 	float topBeat = top / (float) beatZoom();
 
-std::auto_ptr<SinglePattern> newPattern(new SinglePattern());
+	std::auto_ptr<SinglePattern> newPattern(new SinglePattern());
 
-/*	for( SinglePattern::iterator lineIt = find_lower_nearest( top )
+#if 0 ///\todo
+	for( SinglePattern::iterator lineIt = find_lower_nearest( top )
 			; lineIt != end() ; ++lineIt )
 	{
 		PatternLine newLine;
@@ -500,12 +503,14 @@ std::auto_ptr<SinglePattern> newPattern(new SinglePattern());
 	newLine.notes().insert(std::map<int, PatternEvent>::value_type( entryIt->first-left, entryIt->second));
 		}   
 		newPattern->insert( SinglePattern::value_type( lineIt->first-topBeat, newLine ) );
-	}*/
+	}
+#endif
 	return newPattern;
 }
 
 void SinglePattern::copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats) {
-	/*float pasteStartPos = top / (float) beatZoom();
+#if 0 ///\todo
+	float pasteStartPos = top / (float) beatZoom();
 	deleteBlock(left,left+tracks, pasteStartPos, pasteStartPos+ maxBeats);
 	for( SinglePattern::const_iterator lineIt = pattern.begin()
 			; lineIt != pattern.end() && lineIt->first < maxBeats; ++lineIt )
@@ -517,11 +522,13 @@ void SinglePattern::copyBlock(int left, int top, const SinglePattern & pattern, 
 		{
 		(*this)[pasteStartPos+lineIt->first].notes()[left+entryIt->first]=entryIt->second;
 		}
-	}*/
+	}
+#endif
 }
 
 void SinglePattern::mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats) {
-	/*float pasteStartPos =  top / (float) beatZoom() ;
+#if 0 ///\todo
+	float pasteStartPos =  top / (float) beatZoom() ;
 	for( SinglePattern::const_iterator lineIt = pattern.begin()
 			; lineIt != pattern.end() && lineIt->first < maxBeats; ++lineIt )
 	{
@@ -532,7 +539,8 @@ void SinglePattern::mixBlock(int left, int top, const SinglePattern & pattern, i
 		{
 		(*this)[pasteStartPos+lineIt->first].notes()[left+entryIt->first]=entryIt->second;
 		}
-	}*/
+	}
+#endif
 }
 
 void SinglePattern::deleteBlock( int left, int right, int top, int bottom )
@@ -541,7 +549,8 @@ void SinglePattern::deleteBlock( int left, int right, int top, int bottom )
 	// the range is:
 	// startTrack >= tracks < endTracks ; startLine >= lines < endLines
 
-	/*SinglePattern newPattern;
+#if 0 ///\todo
+	SinglePattern newPattern;
 
 	for( SinglePattern::iterator lineIt = find_lower_nearest( top )
 			; lineIt != end() ; )
@@ -560,7 +569,8 @@ void SinglePattern::deleteBlock( int left, int right, int top, int bottom )
 			erase(lineIt++);
 		else 
 			++lineIt;
-	}*/
+	}
+#endif
 }
 
 }}

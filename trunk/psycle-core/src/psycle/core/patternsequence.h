@@ -130,17 +130,17 @@ namespace psy { namespace core {
 			typedef std::multimap<double, SequenceEntry*>::const_iterator const_iterator;
 			typedef std::multimap<double, SequenceEntry*>::const_reverse_iterator const_reverse_iterator;
 			typedef std::multimap<double, SequenceEntry*>::reverse_iterator reverse_iterator;
-  
+
 			iterator begin() { return line_.begin(); }
 			const_iterator begin() const { return line_.begin(); }
 			iterator end() { return line_.end(); }
 			const_iterator end() const { return line_.end(); }
-  
+
 			reverse_iterator rbegin() { return line_.rbegin(); }
 			const_reverse_iterator rbegin() const { return line_.rbegin(); }
 			reverse_iterator rend() { return line_.rend(); }
 			const_reverse_iterator rend() const { return line_.rend(); }
-  
+
 			void insert(double pos, SequenceEntry* entry) {
 				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
 				entry->setSequenceLine(this);
@@ -184,7 +184,7 @@ namespace psy { namespace core {
 			const_iterator begin() const { return lines_.begin(); }
 			iterator end() { return lines_.end(); }
 			const_iterator end() const { return lines_.end(); }
-  
+
 			reverse_iterator rbegin() { return lines_.rbegin(); }
 			const_reverse_iterator rbegin() const { return lines_.rbegin(); }
 			reverse_iterator rend() { return lines_.rend(); }
@@ -261,7 +261,7 @@ namespace psy { namespace core {
 		private:
 			// sequencer structure
 			std::vector<SequenceLine*> lines_;
-			// pattern pool			
+			// pattern pool
 			std::map<int, SinglePattern*> patterns_;
 
 			int numTracks_;

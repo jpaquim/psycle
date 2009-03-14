@@ -380,7 +380,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 		else
 			indexStr = o.str();
 		SinglePattern* pat = new SinglePattern();
-		pat->setName(patternName+indexStr);	
+		pat->setName(patternName+indexStr);
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
 		song.patternSequence().Add(pat);

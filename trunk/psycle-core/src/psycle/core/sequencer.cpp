@@ -33,8 +33,7 @@ namespace psy {
 			std::vector<PatternEvent*>::iterator ev_it = events.begin();
 			for( ; ev_it!= events.end(); ++ev_it ) {
 				PatternEvent* ev = *ev_it;
-				execute_notes(ev->time_offset() - time_info()->playBeatPos(),
-							  *ev);
+				execute_notes(ev->time_offset() - time_info()->playBeatPos(), *ev);
 			}
 		}
 
@@ -93,39 +92,35 @@ namespace psy {
 				}
 			}
 	
-			// step 2: collect note	
+			// step 2: collect note
 			{
 				// track muted?
-				if(song()->patternSequence().trackMuted(track))
-					return;			
+				if(song()->patternSequence().trackMuted(track)) return;
+
 				// not a note ?
-				if(entry.note() >= notetypes::tweak && entry.note() != 255)
-					return;
+				if(entry.note() >= notetypes::tweak && entry.note() != 255) return;
 
 				int mac = entry.machine();
 				if(mac != 255) prev_machines_[track] = mac;
-					else mac = prev_machines_[track];
+				else mac = prev_machines_[track];
 
 				// not a valid machine id?
-				if(mac == 255 || mac >= MAX_MACHINES)
-					return;
+				if(mac == 255 || mac >= MAX_MACHINES) return;
 			
 				// no machine with this id?
-				if(!song()->machine(mac))
-					return;
+				if(!song()->machine(mac)) return;
 		
 				Machine& machine = *song()->machine(mac);
 
 				// machine muted?
-				if(machine._mute)
-					return;
+				if(machine._mute) return;
 
 				switch(entry.command()) {
 					case commandtypes::NOTE_DELAY: {
 						double delayoffset(entry.parameter() / 256.0);
 						// At least Plucked String works erroneously if the command is not ommited.
 						entry.setCommand(0); entry.setParameter(0);
-						machine.AddEvent(beat_offset + delayoffset, sequence_track * 1024 + track, entry);			
+						machine.AddEvent(beat_offset + delayoffset, sequence_track * 1024 + track, entry);
 					} break;
 					case commandtypes::RETRIGGER: {
 						///\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
