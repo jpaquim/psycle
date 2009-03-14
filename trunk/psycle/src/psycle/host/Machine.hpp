@@ -10,16 +10,10 @@
 #include "configuration_options.hpp"
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>
-#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-	#include <universalis/processor/exceptions/fpu.hpp>
-#endif
 #include <stdexcept>
-namespace psycle
-{
-	namespace host
-	{
+
+namespace psycle { namespace host {
+
 		class Machine; // forward declaration
 		class RiffFile; // forward declaration
 
@@ -173,18 +167,6 @@ namespace psycle
 					bool const inline & crashed() const throw() { return crashed_; }
 				private:
 					bool                crashed_;
-			///\}
-			///\name crash handling ... fpu exception mask
-			///\{
-				#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-					#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-				#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-					public:
-						universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
-						universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
-					private:
-						universalis::processor::fpu::exceptions::mask::type                fpu_exception_mask_;
-				#endif
 			///\}
 
 #if 0 // v1.9
@@ -548,5 +530,4 @@ namespace psycle
 		protected:
 			static char* _psName;
 		};
-	}
-}
+}}
