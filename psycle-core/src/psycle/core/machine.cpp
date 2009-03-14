@@ -672,14 +672,7 @@ void Machine::WorkWires(int numSamples, bool mix) {
 		if(_inputCon[i]) {
 			Machine * pInMachine = callbacks->song().machine(_inputMachines[i]);
 			if(pInMachine) {
-				if(!pInMachine->_worked && !pInMachine->_waitingForSound) { 
-					{
-						#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-							universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-						#endif
-						pInMachine->Work(numSamples);
-					}
-				}
+				if(!pInMachine->_worked && !pInMachine->_waitingForSound) pInMachine->Work(numSamples);
 				if(!pInMachine->Standby()) Standby(false);
 				if(!_mute && !Standby() && mix) {
 					//PSYCLE__CPU_COST__INIT(wcost);

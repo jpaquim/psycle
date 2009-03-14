@@ -319,10 +319,6 @@ void Master::Tick(int /*channel*/, const PatternEvent & data ) {
 }
 
 int Master::GenerateAudio( int numSamples ) {
-	#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-		universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-	#endif
-
 	//cpu::cycles_type cost(cpu::cycles());
 	
 	//if(!_mute) {
