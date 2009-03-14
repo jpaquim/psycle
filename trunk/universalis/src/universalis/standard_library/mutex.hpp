@@ -2,18 +2,18 @@
 // copyright 2007-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief mutex standard header
-/// This file declares the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
+/// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 #pragma once
 #include "detail/boost_xtime.hpp"
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
-#include <boost/version.hpp>
 namespace std {
 
 class mutex;
 class recursive_mutex;
 class timed_mutex;
 class recursive_timed_mutex;
+
 template<typename Mutex>
 class scoped_lock;
 
@@ -25,10 +25,13 @@ class condition;
 
 typedef boost::lock_error lock_error;
 
+///\internal
 namespace detail {
+	// forward declaration
 	template<typename Boost_Timed_Mutex, typename Boost_Timed_Lock>
 	class boost_timed_mutex_wrapper;
 	
+	// forward declaration
 	template<typename Boost_Try_Mutex, typename Boost_Try_Lock>
 	class boost_try_mutex_wrapper;
 
@@ -49,32 +52,29 @@ namespace detail {
 			void lock() throw(lock_error) { implementation_lock_.lock(); }
 			void unlock() throw(lock_error) { implementation_lock_.unlock(); }
 		private:
-			Boost_Mutex   implementation_;
-			Boost_Mutex & implementation() { return implementation_; }
-
+			Boost_Mutex implementation_;
+			Boost_Lock  implementation_lock_;
 			typedef Boost_Lock implementation_lock_type;
-			implementation_lock_type   implementation_lock_;
-			implementation_lock_type & implementation_lock() { return implementation_lock_; }
-				friend class boost_try_mutex_wrapper<Boost_Mutex, Boost_Lock>;
-				friend class boost_timed_mutex_wrapper<Boost_Mutex, Boost_Lock>;
-				friend class condition<mutex>;
-				friend class condition<recursive_mutex>;
-				friend class condition<timed_mutex>;
-				friend class condition<recursive_timed_mutex>;
-				friend class scoped_lock<mutex>;
-				friend class scoped_lock<recursive_mutex>;
-				friend class scoped_lock<timed_mutex>;
-				friend class scoped_lock<recursive_timed_mutex>;
-				friend class unique_lock<mutex>;
-				friend class unique_lock<recursive_mutex>;
-				friend class unique_lock<timed_mutex>;
-				friend class unique_lock<recursive_timed_mutex>;
+			friend class boost_try_mutex_wrapper<Boost_Mutex, Boost_Lock>;
+			friend class boost_timed_mutex_wrapper<Boost_Mutex, Boost_Lock>;
+			friend class condition<mutex>;
+			friend class condition<recursive_mutex>;
+			friend class condition<timed_mutex>;
+			friend class condition<recursive_timed_mutex>;
+			friend class scoped_lock<mutex>;
+			friend class scoped_lock<recursive_mutex>;
+			friend class scoped_lock<timed_mutex>;
+			friend class scoped_lock<recursive_timed_mutex>;
+			friend class unique_lock<mutex>;
+			friend class unique_lock<recursive_mutex>;
+			friend class unique_lock<timed_mutex>;
+			friend class unique_lock<recursive_timed_mutex>;
 	};
 
 	template<typename Boost_Try_Mutex, typename Boost_Try_Lock>
 	class boost_try_mutex_wrapper : public boost_mutex_wrapper<Boost_Try_Mutex, Boost_Try_Lock> {
 		public:
-			bool try_lock() throw(lock_error) { return this->implementation_lock().try_lock(); }
+			bool try_lock() throw(lock_error) { return this->implementation_lock_.try_lock(); }
 	};
 
 	template<typename Boost_Timed_Mutex, typename Boost_Timed_Lock>
@@ -83,7 +83,7 @@ namespace detail {
 			/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 			template<typename Elapsed_Time>
 			bool timed_lock(Elapsed_Time const & elapsed_time) {
-				return this->implementation_lock().timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
+				return this->implementation_lock_.timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
 			}
 	};
 }
@@ -123,22 +123,22 @@ class scoped_lock : private boost::noncopyable {
 	public:
 		typedef Mutex mutex_type;
 
-		explicit scoped_lock(mutex_type & mutex)
+		explicit scoped_lock(Mutex & mutex)
 		:
-			mutex_(mutex),
-			implementation_lock_(mutex.implementation(),
+			implementation_lock_(mutex.implementation_,
 				#if BOOST_VERSION >= 103500
-					boost::try_to_lock
+					boost::defer_lock
 				#else
-					true
+					false
 				#endif
 			)
-		{}
+		{
+			implementation_lock_.lock();
+		}
 
 		scoped_lock(mutex_type & mutex, detail::accept_ownership_type)
 		:
-			mutex_(mutex),
-			implementation_lock_(mutex.implementation(),
+			implementation_lock_(mutex.implementation_,
 				#if BOOST_VERSION >= 103500
 					boost::defer_lock
 				#else
@@ -147,17 +147,15 @@ class scoped_lock : private boost::noncopyable {
 			)
 		{}
 
-		~scoped_lock() { implementation_lock_.unlock(); }
+		~scoped_lock() {}
 
 		/*constexpr*/ bool owns() const { return true; }
 	private:
-		mutex_type & mutex_;
-		typename mutex_type::implementation_lock_type   implementation_lock_;
-		typename mutex_type::implementation_lock_type & implementation_lock() { return implementation_lock_; }
-			friend class condition<scoped_lock<mutex> >;
-			friend class condition<scoped_lock<recursive_mutex> >;
-			friend class condition<scoped_lock<timed_mutex> >;
-			friend class condition<scoped_lock<recursive_timed_mutex> >;
+		typename Mutex::implementation_lock_type implementation_lock_;
+		friend class condition<scoped_lock<mutex> >;
+		friend class condition<scoped_lock<recursive_mutex> >;
+		friend class condition<scoped_lock<timed_mutex> >;
+		friend class condition<scoped_lock<recursive_timed_mutex> >;
 };
 
 template<typename Mutex>
@@ -170,20 +168,22 @@ class unique_lock : private boost::noncopyable {
 		explicit unique_lock(mutex_type & mutex)
 		:
 			mutex_(&mutex),
-			implementation_lock_(mutex.implementation(),
+			implementation_lock_(mutex.implementation_,
 				#if BOOST_VERSION >= 103500
-					boost::try_to_lock
+					boost::defer_lock
 				#else
-					true
+					false
 				#endif
 			),
 			owns_(true)
-		{}
+		{
+			implementation_lock_.lock();
+		}
 
 		unique_lock(mutex_type & mutex, detail::defer_lock_type)
 		:
 			mutex_(&mutex),
-			implementation_lock_(mutex.implementation(),
+			implementation_lock_(mutex.implementation_,
 				#if BOOST_VERSION >= 103500
 					boost::defer_lock
 				#else
@@ -193,16 +193,20 @@ class unique_lock : private boost::noncopyable {
 			owns_(false)
 		{}
 
-		unique_lock(mutex_type & mutex, detail::try_lock_type) : mutex_(&mutex), implementation_lock_(mutex.implementation()), owns_(implementation_lock_.locked()) {}
+		unique_lock(mutex_type & mutex, detail::try_lock_type)
+		:
+			mutex_(&mutex),
+			implementation_lock_(mutex.implementation_),
+			owns_(implementation_lock_.locked()) {}
 
 		unique_lock(mutex_type & mutex, detail::accept_ownership_type)
 		:
 			mutex_(&mutex),
-			implementation_lock_(mutex.implementation(),
+			implementation_lock_(mutex.implementation_,
 				#if BOOST_VERSION >= 103500
-					boost::try_to_lock
+					boost::defer_lock
 				#else
-					true
+					false
 				#endif
 			),
 			owns_(true)
@@ -247,9 +251,8 @@ class unique_lock : private boost::noncopyable {
 		}
 
 	private:
-		mutex_type * mutex_;
-		typename mutex_type::implementation_lock_type   implementation_lock_;
-		typename mutex_type::implementation_lock_type & implementation_lock() { return implementation_lock_; }
+		Mutex * mutex_;
+		typename Mutex::implementation_lock_type implementation_lock_;
 			friend class condition<unique_lock<std::mutex> >;
 			friend class condition<unique_lock<recursive_mutex> >;
 			friend class condition<unique_lock<timed_mutex> >;

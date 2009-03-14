@@ -5,7 +5,11 @@
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 #pragma once
 #include "detail/boost_xtime.hpp"
-#include <boost/thread/condition.hpp>
+#if BOOST_VERSION >= 103500
+	#include <boost/thread/condition_variable.hpp>
+#else
+	#include <boost/thread/condition.hpp>
+#endif
 #include <date_time>
 namespace std {
 	typedef boost::lock_error lock_error;
@@ -37,8 +41,8 @@ namespace std {
 				/// checking that the predicate state logically associated with the condition has become true.
 				/// The templated overload version encapsulates this loop idiom internally
 				/// and is generally the preferred method.
-				void wait(lock_type & lock) throw(lock_error) {
-					implementation_.wait(lock.implementation_lock());
+				void wait(Lock & lock) throw(lock_error) {
+					implementation_.wait(lock.implementation_lock_);
 				}
 
 				/// unlocks and sleeps until woken up and predicate has become true.
@@ -47,8 +51,8 @@ namespace std {
 				/// while(!predicate()) wait(lock);
 				///\endcode
 				template<typename Predicate>
-				void wait(lock_type & lock, Predicate predicate) throw(lock_error) {
-					implementation_.wait(lock.implementation_lock(), predicate);
+				void wait(Lock & lock, Predicate predicate) throw(lock_error) {
+					implementation_.wait(lock.implementation_lock_, predicate);
 				}
 
 				/// unlocks and sleep until woken up or until timeout is reached.
@@ -56,8 +60,8 @@ namespace std {
 				/// checking that the predicate state logically associated with the condition has become true.
 				/// The templated overload version encapsulates this loop idiom internally
 				/// and is generally the preferred method.
-				bool timed_wait(lock_type & lock, utc_time const & timeout) throw(lock_error) {
-					return implementation_.timed_wait(lock.implementation_lock(),
+				bool timed_wait(Lock & lock, utc_time const & timeout) throw(lock_error) {
+					return implementation_.timed_wait(lock.implementation_lock_,
 						universalis::standard_library::detail::make_boost_xtime(timeout)
 					);
 				}
@@ -68,15 +72,19 @@ namespace std {
 				/// while(!predicate()) if(!timed_wait(lock, timeout) return false; return true;
 				///\endcode
 				template<typename Predicate>
-				bool timed_wait(lock_type & lock, Predicate predicate, utc_time const & timeout) throw(lock_error) {
-					return implementation_.timed_wait(lock.implementation_lock(), predicate,
+				bool timed_wait(Lock & lock, Predicate predicate, utc_time const & timeout) throw(lock_error) {
+					return implementation_.timed_wait(lock.implementation_lock_, predicate,
 						universalis::standard_library::detail::make_boost_xtime(timeout)
 					);
 				}
 			///\}
 
 		private:
-			boost::condition implementation_;
+			#if BOOST_VERSION >= 103500
+				boost::condition_variable_any implementation_;
+			#else
+				boost::condition implementation_;
+			#endif
 	};
 }
 
