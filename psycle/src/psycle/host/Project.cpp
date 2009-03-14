@@ -134,7 +134,7 @@ namespace psycle {
 				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 				return;			
 			}			
-			player.SetSong(&psy_song());
+			player.song(psy_song());
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)

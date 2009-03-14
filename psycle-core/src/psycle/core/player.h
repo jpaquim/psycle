@@ -92,8 +92,6 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			CoreSong const & song() const { return *song_; }
 			CoreSong & song() { return *song_; }
 			void song(CoreSong & song) { song_ = &song; sequencer_.set_song(&song); }
-			// same as the above setter but uses a pointer instead of a ref
-			void SetSong(CoreSong * song) { song_ = song; sequencer_.set_song(song); }
 		private:
 			CoreSong * song_;
 	///\}

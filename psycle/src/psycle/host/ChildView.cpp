@@ -386,7 +386,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 #ifdef use_psycore						
 			psy::core::Player & player(psy::core::Player::singleton());
-			player.SetSong(&projects_->active_project()->psy_song());
+			player.song(projects_->active_project()->psy_song());
 			output_driver_ = new psy::core::MsWaveOut();
 			player.setDriver(*output_driver_);
 			player.driver().Enable(true);
