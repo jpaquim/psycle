@@ -17,7 +17,7 @@
 /// simple bit encoder
 #include <packageneric/pre-compiled.private.hpp>
 #include <packageneric/module.private.hpp>
-#include <psycle/helpers/DataCompression.hpp>
+#include <psycle/helpers/datacompression.hpp>
 #include <cstring>
 #include <cstdint>
 
