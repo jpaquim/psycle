@@ -188,7 +188,7 @@ int main(int argument_count, char * arguments[]) {
 			std::cerr << "psycle: player: could not load song file: " << input_file_name << '\n';
 			return 2;
 		}
-		player.song(&song);
+		player.song(song);
 
 		// [JosepMa] workaround some "bugs" where machines are not well setup until a call to work is issued
 		// [JosepMa] (i.e. some machines read the samplerate in the work call, or similar things)

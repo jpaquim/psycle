@@ -18,7 +18,8 @@ namespace psy { namespace core {
 		SongSerializer::SongSerializer() {
 			filters.push_back( Psy2Filter::getInstance() );
 			filters.push_back( Psy3Filter::getInstance() );
-			filters.push_back( Psy4Filter::getInstance() );
+			///\todo Psy4Filter doesn't build currently
+			//filters.push_back( Psy4Filter::getInstance() );
 		}
 
 		SongSerializer::~SongSerializer() {
