@@ -238,7 +238,7 @@ XMSampler::Channel::PerformFX().
 
 		// Current sample position
 		#if defined DIVERSALIS__COMPILER__GNU
-			#warning __FILE__ ":" UNIVERSALIS__COMPILER__STRINGIZED(__LINE__): " ******************* BUG HERE, WRONG BITSHIFTS *****************"
+			#warning ******************* BUG HERE, WRONG BITSHIFTS *****************
 		#elif defined DIVERSALIS__COMPILER__MICROSOFT
 			#pragma message(__FILE__ "(" UNIVERSALIS__COMPILER__STRINGIZED(__LINE__) ") : ******************* BUG HERE, WRONG BITSHIFTS *****************")
 		#endif
