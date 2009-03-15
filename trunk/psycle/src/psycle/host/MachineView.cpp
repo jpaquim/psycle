@@ -728,9 +728,10 @@ todo!!
 				case MACH_PLUGIN:
 					if (mac->IsGenerator())
 						gui = new GeneratorGui(this, mac);
-					else
-					if (!mac->IsGenerator())
+					else if (!mac->IsGenerator())
 						gui = new EffectGui(this, mac);
+					else
+						throw std::runtime_error("unhandled machine mode");
 				break;
 				case MACH_SAMPLER:
 					gui = new SamplerGui(this, mac);
@@ -776,9 +777,10 @@ todo!!
 				case MACH_PLUGIN:
 					if ( mac->_mode == MACHMODE_GENERATOR)
 						gui = new GeneratorGui(this, mac);
+					else if ( mac->_mode == MACHMODE_FX)
+						gui = new EffectGui(this, mac);
 					else
-				if ( mac->_mode == MACHMODE_FX)
-					gui = new EffectGui(this, mac);
+						throw std::runtime_error("unhandled machine mode");
 				break;
 				case MACH_DUPLICATOR:
 					gui = new GeneratorGui(this, mac);
@@ -804,13 +806,11 @@ todo!!
 				case MACH_DUMMY: //fallback.
 				default:
 					if ( mac->_mode == MACHMODE_GENERATOR)
-					gui = new DummyGenGui(this, mac);
-					else
-					/*if ( mac->_mode == MACHMODE_FX)*/
-					gui = new DummyEffectGui(this, mac);
-				break;
+						gui = new DummyGenGui(this, mac);
+					else //if ( mac->_mode == MACHMODE_FX)
+						gui = new DummyEffectGui(this, mac);
 			}
-						gui_map_[mac] = gui;
+			gui_map_[mac] = gui;
 			if ( mac->_mode == MACHMODE_GENERATOR ) {
 				gui->SetSkin(MachineCoords,
 							 &machineskin,
