@@ -237,10 +237,15 @@ XMSampler::Channel::PerformFX().
 		virtual void Playing(bool play){ m_Playing=play; }
 
 		// Current sample position
-		virtual const std::uint32_t  Position(){ return m_Position >>32;}
-		virtual void Position(const std::uint32_t value){
-			if ( value < Length()) m_Position = value << 32;
-			else m_Position = (Length()-1)<<32;
+		#if defined DIVERSALIS__COMPILER__GNU
+			#warning __FILE__ ":" UNIVERSALIS__COMPILER__STRINGIZED(__LINE__): " ******************* BUG HERE, WRONG BITSHIFTS *****************"
+		#elif defined DIVERSALIS__COMPILER__MICROSOFT
+			#pragma message(__FILE__ "(" UNIVERSALIS__COMPILER__STRINGIZED(__LINE__) ") : ******************* BUG HERE, WRONG BITSHIFTS *****************")
+		#endif
+		virtual const std::uint32_t Position() { return m_Position >> 32; } ///\todo bug
+		virtual void Position(const std::uint32_t value) {
+			if(value < Length()) m_Position = value << 32; ///\todo bug
+			else m_Position = (Length() - 1) << 32; ///\todo bug
 		}
 
 		// Current sample Speed
