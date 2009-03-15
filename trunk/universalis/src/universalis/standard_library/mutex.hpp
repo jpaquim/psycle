@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2007-2009 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief mutex standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
@@ -47,19 +47,14 @@ namespace detail {
 			{}
 
 			void lock() throw(lock_error) { implementation_lock_.lock(); }
-			bool try_lock() throw(lock_error) { return this->implementation_lock_.try_lock(); }
+			bool try_lock() throw(lock_error) { return implementation_lock_.try_lock(); }
 			void unlock() throw(lock_error) { implementation_lock_.unlock(); }
 		private:
 			Boost_Mutex implementation_;
 			Boost_Lock  implementation_lock_;
 			typedef Boost_Lock implementation_lock_type;
 			#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
-				friend class boost_mutex_wrapper<Boost_Mutex, Boost_Lock>;
 				friend class boost_timed_mutex_wrapper<Boost_Mutex, Boost_Lock>;
-				friend class condition<mutex>;
-				friend class condition<recursive_mutex>;
-				friend class condition<timed_mutex>;
-				friend class condition<recursive_timed_mutex>;
 				friend class scoped_lock<mutex>;
 				friend class scoped_lock<recursive_mutex>;
 				friend class scoped_lock<timed_mutex>;
@@ -68,11 +63,15 @@ namespace detail {
 				friend class unique_lock<recursive_mutex>;
 				friend class unique_lock<timed_mutex>;
 				friend class unique_lock<recursive_timed_mutex>;
+				friend class condition<mutex>;
+				friend class condition<recursive_mutex>;
+				friend class condition<timed_mutex>;
+				friend class condition<recursive_timed_mutex>;
 			#else
 				template<typename, typename> friend class boost_timed_mutex_wrapper;
-				template<typename> friend class condition;
 				template<typename> friend class scoped_lock;
 				template<typename> friend class unique_lock;
+				template<typename> friend class condition;
 			#endif
 	};
 
@@ -120,7 +119,7 @@ class scoped_lock : private boost::noncopyable {
 	public:
 		typedef Mutex mutex_type;
 
-		explicit scoped_lock(Mutex & mutex)
+		explicit scoped_lock(mutex_type & mutex)
 		:
 			implementation_lock_(mutex.implementation_,
 				#if BOOST_VERSION >= 103500
@@ -144,19 +143,18 @@ class scoped_lock : private boost::noncopyable {
 			)
 		{}
 
-		~scoped_lock() {}
-
 		/*constexpr*/ bool owns() const { return true; }
 	private:
-		typename Mutex::implementation_lock_type implementation_lock_;
-			#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
-				friend class condition<scoped_lock<mutex> >;
-				friend class condition<scoped_lock<recursive_mutex> >;
-				friend class condition<scoped_lock<timed_mutex> >;
-				friend class condition<scoped_lock<recursive_timed_mutex> >;
-			#else
-				template<typename> friend class condition;
-			#endif
+		typename mutex_type::implementation_lock_type implementation_lock_;
+		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
+			//friend class condition<scoped_lock<mutex_type> >;
+			friend class condition<scoped_lock<mutex> >;
+			friend class condition<scoped_lock<recursive_mutex> >;
+			friend class condition<scoped_lock<timed_mutex> >;
+			friend class condition<scoped_lock<recursive_timed_mutex> >;
+		#else
+			template<typename> friend class condition;
+		#endif
 };
 
 template<typename Mutex>
@@ -219,7 +217,7 @@ class unique_lock : private boost::noncopyable {
 			owns_(true)
 		{}
 
-		~unique_lock() { if(owns_) implementation_lock_.unlock(); }
+		~unique_lock() { if(owns_) implementation_lock_.unlock(); } //?
 
 		bool owns() const { return owns_; }
 		operator void const * () const { return owns_ ? this : 0; }
@@ -254,17 +252,19 @@ class unique_lock : private boost::noncopyable {
 		}
 
 	private:
-		Mutex * mutex_;
-		typename Mutex::implementation_lock_type implementation_lock_;
-			#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
-				friend class condition<unique_lock<std::mutex> >;
-				friend class condition<unique_lock<recursive_mutex> >;
-				friend class condition<unique_lock<timed_mutex> >;
-				friend class condition<unique_lock<recursive_timed_mutex> >;
-			#else
-				template<typename> friend class condition;
-			#endif
+		mutex_type * mutex_;
+		typename mutex_type::implementation_lock_type implementation_lock_;
+		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
+			//friend class condition<unique_lock<mutex_type> >;
+			friend class condition<unique_lock<std::mutex> >;
+			friend class condition<unique_lock<recursive_mutex> >;
+			friend class condition<unique_lock<timed_mutex> >;
+			friend class condition<unique_lock<recursive_timed_mutex> >;
+		#else
+			template<typename> friend class condition;
+		#endif
 		bool owns_;
 };
 
 }
+
