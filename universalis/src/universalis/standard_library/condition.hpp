@@ -16,90 +16,73 @@ namespace std {
 	// system_error
 	// thread_canceled
 
-	///\internal
-	namespace detail {
-		template<typename Boost_Condition, typename Lock>
-		class boost_condition_wrapper : private boost::noncopyable {
-			public:
-				///\name notification
-				///\{
-					/// wakes up one of the threads waiting on the condition.
-					/// Note: consider releasing the locks associated with the condition
-					/// that the threads are waiting for before notifying.
-					void notify_one() { implementation_.notify_one(); }
-
-					/// broadcasts a wake up notification to all the threads waiting on the condition.
-					/// Note: consider releasing the locks associated with the condition
-					/// that the threads are waiting for before notifying.
-					void notify_all() { implementation_.notify_all(); }
-				///\}
-
-				typedef Lock lock_type;
-
-				///\name waiting
-				///\{
-					/// unlocks and sleeps until woken up.
-					/// Beware: due to possible "spurious wake ups", this version should always be used within a loop
-					/// checking that the predicate state logically associated with the condition has become true.
-					/// The templated overload version encapsulates this loop idiom internally
-					/// and is generally the preferred method.
-					void wait(Lock & lock) throw(lock_error) {
-						implementation_.wait(lock.implementation_lock_);
-					}
-
-					/// unlocks and sleeps until woken up and predicate has become true.
-					/// Effect is as if the following was done:
-					///\code
-					/// while(!predicate()) wait(lock);
-					///\endcode
-					template<typename Predicate>
-					void wait(Lock & lock, Predicate predicate) throw(lock_error) {
-						implementation_.wait(lock.implementation_lock_, predicate);
-					}
-
-					/// unlocks and sleep until woken up or until timeout is reached.
-					/// Beware: due to possible "spurious wake ups", this version should always be used within a loop
-					/// checking that the predicate state logically associated with the condition has become true.
-					/// The templated overload version encapsulates this loop idiom internally
-					/// and is generally the preferred method.
-					bool timed_wait(Lock & lock, utc_time const & timeout) throw(lock_error) {
-						return implementation_.timed_wait(lock.implementation_lock_,
-							universalis::standard_library::detail::make_boost_xtime(timeout)
-						);
-					}
-
-					/// unlocks and sleep until woken up and predicate has become true or until timeout is reached.
-					/// Effect is as if the following was done:
-					///\code
-					/// while(!predicate()) if(!timed_wait(lock, timeout) return false; return true;
-					///\endcode
-					template<typename Predicate>
-					bool timed_wait(Lock & lock, Predicate predicate, utc_time const & timeout) throw(lock_error) {
-						return implementation_.timed_wait(lock.implementation_lock_, predicate,
-							universalis::standard_library::detail::make_boost_xtime(timeout)
-						);
-					}
-				///\}
-
-			private:
-				Boost_Condition implementation_;
-		};
-	}
-
 	template<typename Lock>
-	class condition
-		: public detail::boost_condition_wrapper<
-			boost::condition, // same as boost::condition_variable_any since version 1.35
-			Lock> {};
-	
-	#if BOOST_VERSION >= 103500 && 0 ///\todo
-		// optimised specialisation
-		template<>
-		class condition<unique_lock<mutex> >
-			: public detail::boost_condition_wrapper<
-				boost::condition_variable,
-				unique_lock<mutex> > {};
-	#endif
+	class condition : private boost::noncopyable {
+		public:
+			///\name notification
+			///\{
+				/// wakes up one of the threads waiting on the condition.
+				/// Note: consider releasing the locks associated with the condition
+				/// that the threads are waiting for before notifying.
+				void notify_one() { implementation_.notify_one(); }
+
+				/// broadcasts a wake up notification to all the threads waiting on the condition.
+				/// Note: consider releasing the locks associated with the condition
+				/// that the threads are waiting for before notifying.
+				void notify_all() { implementation_.notify_all(); }
+			///\}
+
+			typedef Lock lock_type;
+
+			///\name waiting
+			///\{
+				/// unlocks and sleeps until woken up.
+				/// Beware: due to possible "spurious wake ups", this version should always be used within a loop
+				/// checking that the predicate state logically associated with the condition has become true.
+				/// The templated overload version encapsulates this loop idiom internally
+				/// and is generally the preferred method.
+				void wait(Lock & lock) throw(lock_error) {
+					implementation_.wait(lock.implementation_lock_);
+				}
+
+				/// unlocks and sleeps until woken up and predicate has become true.
+				/// Effect is as if the following was done:
+				///\code
+				/// while(!predicate()) wait(lock);
+				///\endcode
+				template<typename Predicate>
+				void wait(Lock & lock, Predicate predicate) throw(lock_error) {
+					implementation_.wait(lock.implementation_lock_, predicate);
+				}
+
+				/// unlocks and sleep until woken up or until timeout is reached.
+				/// Beware: due to possible "spurious wake ups", this version should always be used within a loop
+				/// checking that the predicate state logically associated with the condition has become true.
+				/// The templated overload version encapsulates this loop idiom internally
+				/// and is generally the preferred method.
+				bool timed_wait(Lock & lock, utc_time const & timeout) throw(lock_error) {
+					return implementation_.timed_wait(lock.implementation_lock_,
+						universalis::standard_library::detail::make_boost_xtime(timeout)
+					);
+				}
+
+				/// unlocks and sleep until woken up and predicate has become true or until timeout is reached.
+				/// Effect is as if the following was done:
+				///\code
+				/// while(!predicate()) if(!timed_wait(lock, timeout) return false; return true;
+				///\endcode
+				template<typename Predicate>
+				bool timed_wait(Lock & lock, Predicate predicate, utc_time const & timeout) throw(lock_error) {
+					return implementation_.timed_wait(lock.implementation_lock_, predicate,
+						universalis::standard_library::detail::make_boost_xtime(timeout)
+					);
+				}
+			///\}
+
+		private:
+			boost::condition implementation_; // same as boost::condition_variable_any since version 1.35
+			///\todo optimised specialisation with boost::condition_variable (using unique_lock<mutex>)
+	};
 }
 
 #include "mutex.hpp"
