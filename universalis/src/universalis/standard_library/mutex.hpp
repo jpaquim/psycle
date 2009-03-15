@@ -24,6 +24,8 @@ typedef boost::lock_error lock_error;
 
 ///\internal
 namespace detail {
+	template<typename, typename> class boost_condition_wrapper;
+	
 	template<typename Boost_Mutex, typename Boost_Lock>
 	class boost_mutex_wrapper : private boost::noncopyable {
 		public:
