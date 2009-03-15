@@ -237,14 +237,14 @@ XMSampler::Channel::PerformFX().
 		virtual void Playing(bool play){ m_Playing=play; }
 
 		// Current sample position 
-		virtual const __int64  Position(){ return m_Position.HighPart;}
-		virtual void Position(const	__int64 value){ 
-			if ( value < Length()) m_Position.HighPart = value;
-			else m_Position.HighPart = Length()-1;
+		virtual const std::int64_t Position(){ return m_Position.HighPart;}
+		virtual void Position(const	std::int64_t value) { 
+			if(value < Length()) m_Position.HighPart = value;
+			else m_Position.HighPart = Length() - 1;
 		}
 		
 		// Current sample Speed
-		virtual const __int64 Speed(){return m_Speed;}
+		virtual const std::int64_t Speed() { return m_Speed; }
 		virtual void Speed(const double value){m_Speed = value * 4294967296.0f;} // 4294967296 is a left shift of 32bits
 
 		virtual void CurrentLoopDirection(const int dir){m_LoopDirection = dir;}

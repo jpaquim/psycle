@@ -428,7 +428,7 @@ namespace psy
 
 				xml << "'>" << std::endl;
 
-				xml << "<waveleft size='">
+				xml << "<waveleft size='";
 				xml << toHex(size1) <<"'>";
 				
 				xml << "<hex v='";
@@ -440,7 +440,7 @@ namespace psy
 				delete[] pData1;
 				if (waveStereo)
 				{
-					xml << "<waveright size='">
+					xml << "<waveright size='";
 					xml << toHex(size2) <<"'>";
 				
 					xml << "<hex v='";
