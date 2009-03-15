@@ -20,21 +20,10 @@ class scoped_lock;
 template<typename Mutex>
 class unique_lock;
 
-template<typename Lock>
-class condition;
-
 typedef boost::lock_error lock_error;
 
 ///\internal
 namespace detail {
-	// forward declaration
-	template<typename Boost_Timed_Mutex, typename Boost_Timed_Lock>
-	class boost_timed_mutex_wrapper;
-	
-	// forward declaration
-	template<typename Boost_Try_Mutex, typename Boost_Try_Lock>
-	class boost_try_mutex_wrapper;
-
 	template<typename Boost_Mutex, typename Boost_Lock>
 	class boost_mutex_wrapper : private boost::noncopyable {
 		public:
@@ -50,35 +39,20 @@ namespace detail {
 			{}
 
 			void lock() throw(lock_error) { implementation_lock_.lock(); }
+			bool try_lock() throw(lock_error) { return this->implementation_lock_.try_lock(); }
 			void unlock() throw(lock_error) { implementation_lock_.unlock(); }
 		private:
 			Boost_Mutex implementation_;
 			Boost_Lock  implementation_lock_;
 			typedef Boost_Lock implementation_lock_type;
-			friend class boost_try_mutex_wrapper<Boost_Mutex, Boost_Lock>;
-			friend class boost_timed_mutex_wrapper<Boost_Mutex, Boost_Lock>;
-			friend class condition<mutex>;
-			friend class condition<recursive_mutex>;
-			friend class condition<timed_mutex>;
-			friend class condition<recursive_timed_mutex>;
-			friend class scoped_lock<mutex>;
-			friend class scoped_lock<recursive_mutex>;
-			friend class scoped_lock<timed_mutex>;
-			friend class scoped_lock<recursive_timed_mutex>;
-			friend class unique_lock<mutex>;
-			friend class unique_lock<recursive_mutex>;
-			friend class unique_lock<timed_mutex>;
-			friend class unique_lock<recursive_timed_mutex>;
-	};
-
-	template<typename Boost_Try_Mutex, typename Boost_Try_Lock>
-	class boost_try_mutex_wrapper : public boost_mutex_wrapper<Boost_Try_Mutex, Boost_Try_Lock> {
-		public:
-			bool try_lock() throw(lock_error) { return this->implementation_lock_.try_lock(); }
+			template<typename, typename> friend class boost_timed_mutex_wrapper;
+			template<typename, typename> friend class boost_condition_wrapper;
+			template<typename> friend class scoped_lock;
+			template<typename> friend class unique_lock;
 	};
 
 	template<typename Boost_Timed_Mutex, typename Boost_Timed_Lock>
-	class boost_timed_mutex_wrapper : public boost_try_mutex_wrapper<Boost_Timed_Mutex, Boost_Timed_Lock> {
+	class boost_timed_mutex_wrapper : public boost_mutex_wrapper<Boost_Timed_Mutex, Boost_Timed_Lock> {
 		public:
 			/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 			template<typename Elapsed_Time>
@@ -89,13 +63,13 @@ namespace detail {
 }
 
 class mutex
-	: public detail::boost_try_mutex_wrapper<
-		boost::try_mutex,
+	: public detail::boost_mutex_wrapper<
+		boost::try_mutex, // same as boost::mutex since version 1.35
 		boost::try_mutex::scoped_try_lock> {};
 
 class recursive_mutex
-	: public detail::boost_try_mutex_wrapper<
-		boost::recursive_try_mutex,
+	: public detail::boost_mutex_wrapper<
+		boost::recursive_try_mutex, // same as boost::recursive_mutex since version 1.35
 		boost::recursive_try_mutex::scoped_try_lock> {};
 
 class timed_mutex
@@ -108,15 +82,13 @@ class recursive_timed_mutex
 		boost::recursive_timed_mutex,
 		boost::recursive_timed_mutex::scoped_timed_lock> {};
 
-namespace detail {
-	class defer_lock_type {};
-	class try_lock_type {};
-	class accept_ownership_type {};
-}
+class defer_lock_type {};
+class try_lock_type {};
+class accept_ownership_type {};
 
-extern detail::defer_lock_type       const defer_lock; // or = {}; without extern
-extern detail::try_lock_type         const try_to_lock; // or = {}; without extern
-extern detail::accept_ownership_type const accept_ownership; // or = {}; without extern
+extern defer_lock_type       const defer_lock;
+extern try_lock_type         const try_to_lock;
+extern accept_ownership_type const accept_ownership;
 
 template<typename Mutex>
 class scoped_lock : private boost::noncopyable {
@@ -136,7 +108,7 @@ class scoped_lock : private boost::noncopyable {
 			implementation_lock_.lock();
 		}
 
-		scoped_lock(mutex_type & mutex, detail::accept_ownership_type)
+		scoped_lock(mutex_type & mutex, accept_ownership_type)
 		:
 			implementation_lock_(mutex.implementation_,
 				#if BOOST_VERSION >= 103500
@@ -152,10 +124,7 @@ class scoped_lock : private boost::noncopyable {
 		/*constexpr*/ bool owns() const { return true; }
 	private:
 		typename Mutex::implementation_lock_type implementation_lock_;
-		friend class condition<scoped_lock<mutex> >;
-		friend class condition<scoped_lock<recursive_mutex> >;
-		friend class condition<scoped_lock<timed_mutex> >;
-		friend class condition<scoped_lock<recursive_timed_mutex> >;
+		template<typename, typename> friend class detail::boost_condition_wrapper;
 };
 
 template<typename Mutex>
@@ -180,7 +149,7 @@ class unique_lock : private boost::noncopyable {
 			implementation_lock_.lock();
 		}
 
-		unique_lock(mutex_type & mutex, detail::defer_lock_type)
+		unique_lock(mutex_type & mutex, defer_lock_type)
 		:
 			mutex_(&mutex),
 			implementation_lock_(mutex.implementation_,
@@ -193,13 +162,19 @@ class unique_lock : private boost::noncopyable {
 			owns_(false)
 		{}
 
-		unique_lock(mutex_type & mutex, detail::try_lock_type)
+		unique_lock(mutex_type & mutex, try_lock_type)
 		:
 			mutex_(&mutex),
-			implementation_lock_(mutex.implementation_),
-			owns_(implementation_lock_.locked()) {}
+			implementation_lock_(mutex.implementation_,
+				#if BOOST_VERSION >= 103500
+					boost::defer_lock
+				#else
+					false
+				#endif
+			),
+			owns_(implementation_lock_.try_lock()) {}
 
-		unique_lock(mutex_type & mutex, detail::accept_ownership_type)
+		unique_lock(mutex_type & mutex, accept_ownership_type)
 		:
 			mutex_(&mutex),
 			implementation_lock_(mutex.implementation_,
@@ -213,10 +188,6 @@ class unique_lock : private boost::noncopyable {
 		{}
 
 		~unique_lock() { if(owns_) implementation_lock_.unlock(); }
-
-		//unique_lock(unique_lock && u);
-		//unique_lock & operator=(unique_lock && u);
-		//void swap(unique_lock && u);
 
 		bool owns() const { return owns_; }
 		operator void const * () const { return owns_ ? this : 0; }
@@ -253,10 +224,7 @@ class unique_lock : private boost::noncopyable {
 	private:
 		Mutex * mutex_;
 		typename Mutex::implementation_lock_type implementation_lock_;
-			friend class condition<unique_lock<std::mutex> >;
-			friend class condition<unique_lock<recursive_mutex> >;
-			friend class condition<unique_lock<timed_mutex> >;
-			friend class condition<unique_lock<recursive_timed_mutex> >;
+			template<typename, typename> friend class detail::boost_condition_wrapper;
 		bool owns_;
 };
 
