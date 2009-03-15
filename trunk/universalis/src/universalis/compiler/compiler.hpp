@@ -29,7 +29,6 @@
 	#include "detail/gnu/typeof.hpp"
 	#include "detail/gnu/diagnostics.hpp"
 	#include "detail/microsoft/assume.hpp"
-	#include "detail/microsoft/super.hpp"
 	#include "detail/microsoft/warnings.hpp"
 	#include "detail/microsoft/optimizations.hpp"
 	#include "detail/microsoft/namespace.hpp"
