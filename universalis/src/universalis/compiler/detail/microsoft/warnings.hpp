@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file
 #pragma once
@@ -85,4 +85,18 @@
 		// in the project settings under C++ / Advanced / Disable Specific Warnings.
 	#pragma warning(disable:4651) // '/DXXX' specified for pre-compiled header but not for current compilation
 		// beware with this ... it is disabled because of /D_WINDLL ... otherwise it could be relevant
+
+	// warnings about __STDC_SECURE_LIB__ and others
+	// see http://www.opengroup.org/platform/single_unix_specification/uploads/40/6355/n1093.pdf
+	#define _SCL_SECURE_NO_WARNINGS
+	#define _CRT_SECURE_NO_WARNINGS
+	#define _CRT_NONSTDC_NO_WARNINGS // posix is okay
+	#define _ATL_SECURE_NO_WARNINGS
+	#define _AFX_SECURE_NO_WARNINGS
+	// old names for the same thing
+	#define _SCL_SECURE_NO_DEPRECATE
+	#define _CRT_SECURE_NO_DEPRECATE
+	#define _CRT_NONSTDC_NO_DEPRECATE // posix is okay
+	#define _ATL_SECURE_NO_DEPRECATE
+	#define _AFX_SECURE_NO_DEPRECATE
 #endif

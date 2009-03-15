@@ -235,9 +235,9 @@ namespace std {
 
 			public:
 				void test(unsigned int threads) {
-					inner_loop = 1000;
-					start = 100;
-					end = start + 100;
+					inner_loop = 250;
+					start = 50;
+					end = start + 50;
 					shared_start = threads;
 					shared = 0;
 
