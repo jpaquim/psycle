@@ -244,7 +244,7 @@
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__IA 2
 		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
-	#elif defined _EMT64_ // 64-bit x86 amd or intel
+	#elif defined _M_X64 // 64-bit x86 amd or intel
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 9
 		#define DIVERSALIS__PROCESSOR__X86__SSE 2 ///\todo detect SSE3
