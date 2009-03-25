@@ -1447,7 +1447,7 @@ CMachineInfo const MacInfo (
 	#ifndef NDEBUG
 		"GameFX (Debug build)",
 	#else
-		"GameFX 1.4",
+		"GameFX 1.5",
 	#endif
 	"GameFX",
 	"jme",
