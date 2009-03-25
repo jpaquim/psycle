@@ -1344,9 +1344,9 @@ float CSynthTrack::GetEnvAmp(){
 	break;
 
 	case 2: // Decay
-		ampEnvValue-=ampEnvCoef;
+		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f);
 
-		if(ampEnvValue<ampEnvSustainLevel)
+		if((ampEnvValue<ampEnvSustainLevel) || (ampEnvValue<0.001f))
 		{
 			ampEnvValue=ampEnvSustainLevel;
 			ampEnvCoef=((ampEnvSustainLevel)/(float)vpar->ampD2)*speedup;
@@ -1362,19 +1362,19 @@ float CSynthTrack::GetEnvAmp(){
 
 	case 3:
 		// Decay 2
-		ampEnvValue-=ampEnvCoef;
+		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f);
 		
-		if(ampEnvValue<=0){
-			ampEnvValue=0;
+		if(ampEnvValue<=0.001f){
+			ampEnvValue=0.0f;
 			ampEnvStage=0;
 		}
 		return ampEnvValue;
 	break;
 
 	case 4: // Release
-		ampEnvValue-=ampEnvCoef;
+		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f);
 
-		if(ampEnvValue<0.0f){
+		if(ampEnvValue<0.001f){
 			ampEnvValue=0.0f;
 			ampEnvStage=0;
 		}
@@ -1384,7 +1384,7 @@ float CSynthTrack::GetEnvAmp(){
 	case 5: // FastRelease
 		ampEnvValue-=ampEnvCoef;
 
-		if(ampEnvValue<0.0f)
+		if(ampEnvValue<0.001f)
 		{
 			RealNoteOn((sp_cmd == 0xCD) || (sp_cmd == 0xCE));
 			ampEnvValue=0.0f;
@@ -1399,7 +1399,7 @@ float CSynthTrack::GetEnvAmp(){
 	case 6: // FastRelease for Arpeggio
 		ampEnvValue-=ampEnvCoef;
 
-		if(ampEnvValue<0.0f)
+		if(ampEnvValue<0.001f)
 		{
 			ampEnvValue=0.0f;
 			ampEnvStage=1;
@@ -1413,6 +1413,7 @@ float CSynthTrack::GetEnvAmp(){
 	}
 
 	return 0;
+
 }
 
 void CSynthTrack::GetEnvFlt()

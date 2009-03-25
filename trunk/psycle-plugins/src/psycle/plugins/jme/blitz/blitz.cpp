@@ -1299,7 +1299,7 @@ CMachineInfo const MacInfo (
 #ifndef NDEBUG
 	"Blitz (Debug build)",																				// name
 #else
-	"Blitz 1.4",																												// name
+	"Blitz 1.5",																												// name
 #endif
 	"Blitz",																																// short name
 	"jme",																																				// author
