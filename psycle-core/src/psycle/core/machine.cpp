@@ -10,7 +10,7 @@
 #include "machine.h"
 
 #include "song.h"
-#include "dsp.h"
+#include <psycle/helpers/dsp.hpp>
 #include "fileio.h"
 #include <psycle/helpers/math/round.hpp>
 #include <cstddef>
@@ -20,6 +20,7 @@
 
 namespace psy { namespace core {
 
+	using namespace psycle::helpers;
 ///\todo general purpose => move this to universalis/operating_system/aligned_malloc.hpp or something
 template<typename X>
 void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {

@@ -10,10 +10,10 @@
 #define PSYCLE__CORE__PLAYER__INCLUDED
 #pragma once
 
+#include <psycle/helpers/dither.hpp>
+#include <psycle/helpers/riff.hpp>
 #include "song.h"
-#include "dither.h"
 #include "machine.h"
-#include "riff.h"
 #include "sequencer.h"
 
 #include <thread>
@@ -30,6 +30,7 @@
 namespace psy { namespace core {
 
 class AudioDriver; ///\todo doesn't belong in psycore
+using namespace psycle::helpers;
 
 /// schedules the processing of machines, sends signal buffers and sequence events to them, ...
 class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncopyable {

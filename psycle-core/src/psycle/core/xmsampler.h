@@ -8,8 +8,8 @@
 #define PSYCLE__CORE__XM_SAMPLER__INCLUDED
 #pragma once
 
-#include "dsp.h"
-#include "filter.h"
+#include <psycle/helpers/dsp.hpp>
+#include <psycle/helpers/filter.hpp>
 #include "xminstrument.h"
 #include "machine.h"
 
@@ -23,6 +23,8 @@ public:
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const std::uint32_t VERSION = 0x00010000;
 	static const float SURROUND_THRESHOLD;
+
+	typedef std::scoped_lock<std::mutex> scoped_lock;
 
 /*
 * = remembers its last value when called with param 00.
@@ -159,7 +161,7 @@ XMSampler::Channel::PerformFX().
 
 		virtual void Init(XMInstrument::WaveData* wave, const int layer);
 		virtual void NoteOff(void);
-		virtual void Work(float *pLeftw,float *pRightw, dsp::PRESAMPLERFN pResamplerWork)
+		virtual void Work(float *pLeftw,float *pRightw, psycle::helpers::dsp::PRESAMPLERFN pResamplerWork)
 		{
 			//Process sample
 			*pLeftw = pResamplerWork(
@@ -237,19 +239,15 @@ XMSampler::Channel::PerformFX().
 		virtual void Playing(bool play){ m_Playing=play; }
 
 		// Current sample position
-		#if defined DIVERSALIS__COMPILER__GNU
-			#warning ******************* BUG HERE, WRONG BITSHIFTS *****************
-		#elif defined DIVERSALIS__COMPILER__MICROSOFT
-			#pragma message(__FILE__ "(" UNIVERSALIS__COMPILER__STRINGIZED(__LINE__) ") : ******************* BUG HERE, WRONG BITSHIFTS *****************")
-		#endif
-		virtual const std::uint32_t Position() { return m_Position >> 32; } ///\todo bug
+		virtual const std::uint32_t Position() { return m_Position >> 32; }
 		virtual void Position(const std::uint32_t value) {
-			if(value < Length()) m_Position = value << 32; ///\todo bug
-			else m_Position = (Length() - 1) << 32; ///\todo bug
+			if(value < Length()) m_Position = value;
+			else m_Position = (Length() - 1);
+			m_Position <<= 32;
 		}
 
 		// Current sample Speed
-		virtual const std::uint64_t Speed(){return m_Speed;}
+		virtual const std::int64_t Speed(){return m_Speed;}
 		virtual void Speed(const double value){m_Speed = value * 4294967296.0f;} // 4294967296 is a left shift of 32bits
 
 		virtual void CurrentLoopDirection(const int dir){m_LoopDirection = dir;}
@@ -445,7 +443,7 @@ XMSampler::Channel::PerformFX().
 		void ResetEffects();
 
 		void VoiceInit(int channelNum,int instrumentNum);
-		void Work(int numSamples,float * pSampleL,float *pSamlpesR, dsp::Cubic& _resampler);
+		void Work(int numSamples,float * pSamplesL,float *pSamplesR, const psycle::helpers::dsp::Resampler& _resampler);
 
 		// This one is Tracker Tick (Mod-tick)
 		void Tick();
@@ -558,7 +556,7 @@ XMSampler::Channel::PerformFX().
 		{
 			#if 0
 				m_CutOff = co; m_Filter._cutoff = co;
-				if ( m_Filter._type == dsp::F_NONE) { m_Filter._type =dsp::F_LOWPASS12; }
+				if ( m_Filter._type == psycle::helpers::dsp::F_NONE) { m_Filter._type =psycle::helpers::dsp::F_LOWPASS12; }
 					m_Filter.Update();
 			#endif
 			m_CutOff = co; m_Filter.Cutoff(co);
@@ -569,13 +567,13 @@ XMSampler::Channel::PerformFX().
 		{
 			#if 0
 				m_Ressonance = res; m_Filter._q = res;
-				if ( m_Filter._type == dsp::F_NONE) { m_Filter._type =dsp::F_LOWPASS12; }
+				if ( m_Filter._type == psycle::helpers::dsp::F_NONE) { m_Filter._type =psycle::helpers::dsp::F_LOWPASS12; }
 				m_Filter.Update();
 			#endif
 			m_Ressonance = res; m_Filter.Ressonance(res);
 		}
 
-		void FilterType(dsp::FilterType ftype) { m_Filter.Type(ftype);}
+		void FilterType(psycle::helpers::dsp::FilterType ftype) { m_Filter.Type(ftype);}
 
 		void Period(int newperiod) { m_Period = newperiod; UpdateSpeed(); }
 		int Period() { return m_Period; }
@@ -614,7 +612,7 @@ XMSampler::Channel::PerformFX().
 		WaveDataController m_WaveDataController;
 		//XDSPWaveController m_WaveDataController;
 
-		dsp::ITFilter m_Filter;
+		psycle::helpers::dsp::ITFilter m_Filter;
 		int m_CutOff;
 		int m_Ressonance;
 		float _coModify;
@@ -857,14 +855,14 @@ XMSampler::Channel::PerformFX().
 		void Cutoff(const int cut) { m_Cutoff =cut;  if ( ForegroundVoice() ) ForegroundVoice()->CutOff(cut); }
 		const int Ressonance() { return m_Ressonance;}
 		void Ressonance(const int res) { m_Ressonance=res; if ( ForegroundVoice() ) ForegroundVoice()->Ressonance(res);}
-		const dsp::FilterType FilterType() { return m_FilterType;}
+		const psycle::helpers::dsp::FilterType FilterType() { return m_FilterType;}
 
 		const int DefaultCutoff(){return m_DefaultCutoff;}
 		void DefaultCutoff(const int value){m_DefaultCutoff = value; Cutoff(value);}
 		const int DefaultRessonance(){return m_DefaultRessonance; }
 		void DefaultRessonance(const int value){m_DefaultRessonance = value; Ressonance(value); }
-		const dsp::FilterType DefaultFilterType(){return m_DefaultFilterType;}
-		void DefaultFilterType(const dsp::FilterType value){m_DefaultFilterType = value; m_FilterType = value; }
+		const psycle::helpers::dsp::FilterType DefaultFilterType(){return m_DefaultFilterType;}
+		void DefaultFilterType(const psycle::helpers::dsp::FilterType value){m_DefaultFilterType = value; m_FilterType = value; }
 
 		const bool IsGrissando(){return m_bGrissando;}
 		void IsGrissando(const bool value){m_bGrissando = value;}
@@ -961,10 +959,10 @@ XMSampler::Channel::PerformFX().
 		int m_MIDI_Set;
 		int m_Cutoff;
 		int m_Ressonance;
-		dsp::FilterType m_FilterType;
+		psycle::helpers::dsp::FilterType m_FilterType;
 		int m_DefaultCutoff;
 		int m_DefaultRessonance;
-		dsp::FilterType m_DefaultFilterType;
+		psycle::helpers::dsp::FilterType m_DefaultFilterType;
 	};
 
 
@@ -1071,11 +1069,11 @@ XMSampler::Channel::PerformFX().
 	}
 
 	/// set resampler quality
-	void ResamplerQuality(const dsp::ResamplerQuality value){
+	void ResamplerQuality(const psycle::helpers::dsp::ResamplerQuality value){
 		_resampler.SetQuality(value);
 	}
 
-	const dsp::ResamplerQuality ResamplerQuality(){
+	const psycle::helpers::dsp::ResamplerQuality ResamplerQuality(){
 		return _resampler.GetQuality();
 	}
 	const bool UseFilters(void) { return m_UseFilters; }
@@ -1107,7 +1105,7 @@ protected:
 
 	Voice m_Voices[MAX_POLYPHONY];
 	XMSampler::Channel m_Channel[MAX_TRACKS];
-	dsp::Cubic _resampler;
+	psycle::helpers::dsp::Cubic _resampler;
 	ZxxMacro zxxMap[128];
 
 
@@ -1138,7 +1136,6 @@ private:
 	/// Number of Samples since note start
 	int _sampleCounter;
 
-	typedef std::scoped_lock<std::mutex> scoped_lock;
 	std::mutex mutable m_Mutex;
 };
 

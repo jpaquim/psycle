@@ -22,7 +22,7 @@
 // plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
 
 namespace psy { namespace core {
-
+	using namespace psycle::plugin_interface;
 /**************************************************************************/
 // PluginFxCallback
 
@@ -55,7 +55,6 @@ Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, 
 	info_(info),
 	proxy_(*this,macIface)
 {
-	_type = MACH_PLUGIN;
 	SetAudioRange(32768.0f);
 
 	//Psy2Filter can generate a plugin without info

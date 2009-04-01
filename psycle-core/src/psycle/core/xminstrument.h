@@ -9,13 +9,11 @@
 #pragma once
 
 #include "fileio.h"
-#include "dsp.h"
-#include "filter.h"
+#include <psycle/helpers/filter.hpp>
 #include "constants.h"
 
 #include <utility>
 #include <cstdint>
-#include <cstdio>
 #include <string>
 #include <cassert>
 
@@ -530,8 +528,8 @@ public:
 	void FilterResonance(const std::uint8_t value){m_FilterResonance = value;}
 	const std::int16_t FilterEnvAmount() { return m_FilterEnvAmount;}
 	void FilterEnvAmount(const std::int16_t value){ m_FilterEnvAmount = value;}
-	const dsp::FilterType FilterType(){ return m_FilterType;}
-	void FilterType(const dsp::FilterType value){ m_FilterType = value;}
+	const psycle::helpers::dsp::FilterType FilterType(){ return m_FilterType;}
+	void FilterType(const psycle::helpers::dsp::FilterType value){ m_FilterType = value;}
 
 	const float RandomVolume(){return  m_RandomVolume;}
 	void RandomVolume(const float value){m_RandomVolume = value;}
@@ -591,7 +589,7 @@ private:
 	/// EnvAmount [-128..128]
 	std::int16_t m_FilterEnvAmount;
 	/// Filter Type [0..4]
-	dsp::FilterType m_FilterType;
+	psycle::helpers::dsp::FilterType m_FilterType;
 
 	// Randomness. Applies on new notes.
 

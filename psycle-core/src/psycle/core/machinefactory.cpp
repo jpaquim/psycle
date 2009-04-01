@@ -10,6 +10,7 @@
 #include "pluginfinder.h"
 #include "internalhost.hpp"
 #include "nativehost.hpp"
+#include "vsthost.h"
 #include "ladspahost.hpp"
 
 namespace psy { namespace core {
@@ -27,7 +28,8 @@ MachineFactory::MachineFactory()
 void MachineFactory::Initialize(MachineCallbacks* callbacks)
 {
 	callbacks_ = callbacks;
-	finder_= &PluginFinder::getInstance();
+	//\todo: probably we need a destructor for this
+	finder_= new PluginFinder();
 	FillHosts();
 }
 void MachineFactory::Initialize(MachineCallbacks* callbacks,PluginFinder* finder)
@@ -38,6 +40,7 @@ void MachineFactory::Initialize(MachineCallbacks* callbacks,PluginFinder* finder
 }
 void MachineFactory::FillHosts()
 {
+	finder_->Initialize();
 	//Please, keep the same order than with the Hosts::type enum. (machinekey.hpp)
 	hosts_.push_back( &InternalHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::INTERNAL);
@@ -50,17 +53,22 @@ void MachineFactory::FillHosts()
 	hosts_.push_back( &LadspaHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::LADSPA);
 
-	//hosts_.push_back( &VstHost::getInstance(callbacks_) );
-	//finder_.addHost(Hosts::VST);
+	hosts_.push_back( &vst::host::getInstance(callbacks_) );
+	finder_->addHost(Hosts::VST);
 }
 
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 {
-	if ( key.host() < 0 || key.host() > Hosts::NUM_HOSTS) {
+	assert(key.host() >= 0 && key.host() < Hosts::NUM_HOSTS);
+
+	if ( !finder_->hasKey(key)) {
 		return 0;
-	} else {
-		return hosts_[key.host()]->CreateMachine(*finder_,key,id);
 	}
+	if ( !finder_->info(key).allow() ) {
+		return hosts_[Hosts::INTERNAL]->CreateMachine(*finder_,MachineKey::dummy(),id);
+	}
+
+	return hosts_[key.host()]->CreateMachine(*finder_,key,id);
 #if 0
 	for (int i=0; i< hosts_.size(); ++i)
 	{
@@ -95,8 +103,16 @@ void MachineFactory::setLadspaPath(std::string path,bool cleardata)
 	LadspaHost::getInstance(0).FillFinderData(*finder_,cleardata);
 }
 
+///\FIXME: This only returns the first path, should regenerate the string
+std::string const & MachineFactory::getVstPath() const { return vst::host::getInstance(0).getPluginPath(0); }
+void MachineFactory::setVstPath(std::string path,bool cleardata)
+{
+	vst::host::getInstance(0).setPluginPath(path);
+	vst::host::getInstance(0).FillFinderData(*finder_,cleardata);
+}
 void MachineFactory::RegenerateFinderData() 
 {
+	finder_->Initialize(true);
 	for (int i=0; i < hosts_.size(); ++i )
 	{
 		hosts_[i]->FillFinderData(*finder_,true);

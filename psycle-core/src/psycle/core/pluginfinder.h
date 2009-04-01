@@ -17,11 +17,13 @@
 namespace psy { namespace core {
 
 class PSYCLE__CORE__DECL PluginFinder {
-	protected:
+	public:
+		typedef std::map<MachineKey, PluginInfo>::const_iterator const_iterator;
+		typedef std::map<MachineKey, PluginInfo>::iterator iterator;
+
 		PluginFinder();
 		virtual ~PluginFinder();
-	public:
-		static PluginFinder& getInstance();
+
 		virtual void addHost(Hosts::type);
 		virtual bool hasHost(Hosts::type) const;
 
@@ -30,9 +32,12 @@ class PSYCLE__CORE__DECL PluginFinder {
 		const PluginInfo& info( const MachineKey & key ) const;
 		bool hasKey( const MachineKey& key ) const;
 		std::string lookupDllName( const MachineKey & key ) const;
+		virtual void EnablePlugin(const MachineKey & key, bool enable);
 	
-		std::map<MachineKey, PluginInfo>::const_iterator begin(Hosts::type) const;
-		std::map<MachineKey, PluginInfo>::const_iterator end(Hosts::type) const;
+		virtual void Initialize(bool clear=false);
+		PluginFinder::const_iterator begin(Hosts::type) const;
+		PluginFinder::const_iterator end(Hosts::type) const;
+		virtual int size(Hosts::type) const;
 		virtual void ClearMap(Hosts::type);
 
 	protected:

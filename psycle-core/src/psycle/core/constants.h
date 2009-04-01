@@ -88,10 +88,10 @@ const int CURRENT_FILE_VERSION = CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_
 
 const int CURRENT_CACHE_MAP_VERSION = 0x0002;
 
-///\todo add real detection of type size
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef unsigned long dword;
+
+
+
+
 
 }}
 #endif

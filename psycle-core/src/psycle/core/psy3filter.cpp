@@ -7,8 +7,7 @@
 #include <psycle/core/config.private.hpp>
 #include "psy3filter.h"
 
-#include "commands.h"
-#include "datacompression.h"
+#include <psycle/helpers/datacompression.hpp>
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
@@ -17,6 +16,8 @@
 #include <iostream>
 
 namespace psy { namespace core {
+
+	using namespace psycle::helpers;
 
 std::string const Psy3Filter::FILE_FOURCC = "PSY3";
 /// Current version of the Song file and its chunks.
@@ -471,19 +472,14 @@ bool Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) 
 			case MACH_PLUGIN:
 			{
 				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
-				std::string dllName = sDllName;
-				std::string::size_type const pos(dllName.find(".dll"));
-				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
-				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, dllName, 0), id);
+				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, MachineKey::preprocessName(sDllName), 0), id);
 				break;
 			}
 			case MACH_VST:
 			//case MACH_VSTFX:
 			{
-				//std::string::size_type const pos = dllName.find(".dll");
-				//if(pos != std::string::npos) dllName = dllName.substr(0, pos);
-				//if(type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
-				//else if(type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
+				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
+				mac = factory.CreateMachine(MachineKey(Hosts::VST, MachineKey::preprocessName(sDllName), 0), id);
 				break;
 			}
 			default: ;

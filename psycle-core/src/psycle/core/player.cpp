@@ -23,6 +23,8 @@
 
 namespace psy { namespace core {
 
+	using namespace psycle::helpers;
+
 namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
 }

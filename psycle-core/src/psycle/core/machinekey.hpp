@@ -28,32 +28,13 @@ namespace Hosts {
 	};
 }
 
-// type InternalMacs::type
-// Allows to differentiate between internal machines.
-// Note: This should be known only to InternalHost, but it is here
-// so that MachineKey can return the keys of internal machines.
-namespace InternalMacs {
-	enum type {
-		MASTER = 0,
-		DUMMY,
-		SAMPLER,
-		XMSAMPLER,
-		DUPLICATOR,
-		MIXER,
-		AUDIOINPUT,
-		LFO,
-		//Keep at Last position.
-		NUM_MACS
-	};
-}
-
 class PSYCLE__CORE__DECL MachineKey {
 	public:
 		MachineKey();
 		MachineKey(const Hosts::type host, const std::string & dllName, const int index = 0 );
 		MachineKey(const MachineKey& key);
 		~MachineKey();
-
+		static const MachineKey invalid();
 		static const MachineKey master();
 		static const MachineKey dummy();
 		static const MachineKey sampler();
@@ -64,6 +45,7 @@ class PSYCLE__CORE__DECL MachineKey {
 		static const MachineKey lfo();
 		//Used by the psy2loader to parse the plugin part of the loader for a plugin that couldn't be loaded.
 		static const MachineKey failednative();
+		static const MachineKey wrapperVst();
 		static const std::string preprocessName(std::string dllName);
 
 		const std::string & dllName() const;

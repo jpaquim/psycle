@@ -8,9 +8,13 @@
 #define PSYCLE__CORE__PRESET__INCLUDED
 #pragma once
 
-#include "binread.h"
+#include <psycle/core/config.hpp>
 
 #include <vector>
+
+namespace psycle { namespace helpers {
+	class BinRead;
+}}
 
 namespace psy { namespace core {
 
@@ -23,7 +27,7 @@ namespace psy { namespace core {
 
 			Preset( int numpars, int dataSize );
 
-			bool read( BinRead& prsIn );
+			bool read( psycle::helpers::BinRead& prsIn );
 
 			const std::string& name() const;
 			const std::vector<int>& parameter() const;

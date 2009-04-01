@@ -7,7 +7,7 @@
 #include <psycle/core/config.private.hpp>
 #include "ladspamachine.h"
 
-#include "dsp.h"
+#include <psycle/helpers/dsp.hpp>
 #include "player.h"
 #include "fileio.h"
 
@@ -22,6 +22,7 @@
 
 namespace psy {
 	namespace core {
+		using namespace psycle::helpers;
 	
 		///\todo: Improve the case where no min/max limit is given by the plugin (Example: the amp.so doesn't have a max value).
 		LadspaParam::LadspaParam(LADSPA_PortDescriptor descriptor,LADSPA_PortRangeHint hint, const char *newname)

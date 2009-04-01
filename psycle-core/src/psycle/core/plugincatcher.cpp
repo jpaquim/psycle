@@ -18,11 +18,20 @@ namespace psy { namespace core {
 PluginFinderCache::PluginFinderCache()
 :_numPlugins(0)
 {
-	loadCache();
 }
 
 PluginFinderCache::~PluginFinderCache()
 {
+}
+void PluginFinderCache::Initialize(bool clear) {
+	if (clear) {
+		deleteCache();
+	}
+	loadCache();
+}
+void PluginFinderCache::EnablePlugin(const MachineKey & key, bool enable) {
+	PluginFinder::EnablePlugin(key, enable);
+	saveCache();
 }
 
 bool PluginFinderCache::loadCache(){

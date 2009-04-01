@@ -17,9 +17,7 @@ PluginFinder::PluginFinder() {
 PluginFinder::~PluginFinder() {
 }
 
-PluginFinder& PluginFinder::getInstance() {
-	static PluginFinder finder;
-	return finder;
+void PluginFinder::Initialize(bool clear) {
 }
 
 void PluginFinder::addHost(Hosts::type type) {
@@ -30,16 +28,20 @@ bool PluginFinder::hasHost(Hosts::type type) const {
 	return (type < maps_.size());
 }
 
-std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::begin(Hosts::type host) const {
+PluginFinder::const_iterator PluginFinder::begin(Hosts::type host) const {
 	assert(host < maps_.size());
 	return maps_[host].begin();
 }
 
-std::map< MachineKey, PluginInfo >::const_iterator PluginFinder::end(Hosts::type host) const {
+PluginFinder::const_iterator PluginFinder::end(Hosts::type host) const {
 	assert(host < maps_.size());
 	return maps_[host].end();
 }
 
+int PluginFinder::size(Hosts::type host) const {
+	assert(host < maps_.size());
+	return maps_[host].size();
+}
 void PluginFinder::AddInfo(const MachineKey & key, const PluginInfo& info) {
 	if(hasHost(key.host())) maps_[key.host()][key]= info;
 }
@@ -47,7 +49,7 @@ void PluginFinder::AddInfo(const MachineKey & key, const PluginInfo& info) {
 const PluginInfo & PluginFinder::info ( const MachineKey & key ) const {
 	if(!hasHost(key.host())) return empty_;
 
-	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
+	PluginFinder::const_iterator it = maps_[key.host()].find( key );
 	if(it != maps_[key.host()].end()) return it->second;
 	else return empty_;
 }
@@ -55,10 +57,19 @@ const PluginInfo & PluginFinder::info ( const MachineKey & key ) const {
 PluginInfo PluginFinder::info( const MachineKey & key ) {
 	if(!hasHost(key.host())) return empty_;
 
-	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
+	PluginFinder::const_iterator it = maps_[key.host()].find( key );
 	if(it != maps_[key.host()].end()) return it->second;
 	else return empty_;
 }
+void PluginFinder::EnablePlugin(const MachineKey & key, bool enable) {
+	if(!hasHost(key.host())) return;
+
+	PluginFinder::iterator it = maps_[key.host()].find( key );
+	if(it != maps_[key.host()].end()) {
+		it->second.setAllow(enable);
+	}
+}
+
 
 std::string PluginFinder::lookupDllName( const MachineKey & key ) const {
 	return info(key).libName();

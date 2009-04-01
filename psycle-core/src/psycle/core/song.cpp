@@ -7,15 +7,17 @@
 #include <psycle/core/config.private.hpp>
 #include "song.h"
 
-#include "datacompression.h"
+#include <psycle/helpers/datacompression.hpp>
+#include <psycle/helpers/riff.hpp>
 #include "fileio.h"
 #include "machine.h"
 #include "machinefactory.h"
-#include "riff.h"
 #include <sstream>
 #include <iostream> // only for debug output
 
 namespace psy { namespace core {
+
+	using namespace psycle::helpers;
 
 SongSerializer CoreSong::serializer;
 
@@ -64,10 +66,18 @@ bool CoreSong::save(std::string const & filename, int version) {
 	return serializer.saveSong(filename, *this, version);
 }
 
-void CoreSong::AddMachine(Machine * pmac) {
-	if(pmac->id() == -1) {
-		if(pmac->acceptsConnections()) pmac->id(GetFreeFxBus());
-		else pmac->id(GetFreeBus());
+void CoreSong::AddMachine(Machine * pmac, Machine::id_type newIdx) {
+	if ( newIdx != -1) {
+		if (!machine(newIdx) ){
+			pmac->id(newIdx);
+		}
+	}
+	else if ( pmac->id() == -1) {
+		if(pmac->IsGenerator()) pmac->id(GetFreeBus());
+		else pmac->id(GetFreeFxBus());
+		if(pmac->id() == -1) {
+			return;
+		}
 	}
 	machine(pmac->id(), pmac);
 }
@@ -75,6 +85,12 @@ void CoreSong::AddMachine(Machine * pmac) {
 void CoreSong::ReplaceMachine(Machine * pmac, Machine::id_type idx) {
 	if(machine(idx)) DeleteMachine(machine(idx));
 	machine(idx, pmac);
+}
+void CoreSong::ExchangeMachines(Machine::id_type macIdx1, Machine::id_type macIdx2) {
+	assert(macIdx1 >= 0 && macIdx2 >= 0 && macIdx1 < MAX_MACHINES && macIdx2 < MAX_MACHINES);
+	Machine* mac1 = machine_[macIdx1];
+	machine_[macIdx1] = machine_[macIdx2];
+	machine_[macIdx2] = mac1;
 }
 void CoreSong::DeleteAllMachines(bool write_locked) {
 	_machineLock = true;
@@ -516,6 +532,14 @@ bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/
 	return true;
 }
 
+void CoreSong::ExchangeInstruments(Instrument::id_type src, Instrument::id_type dst) {
+	
+	assert(src >= 0 && dst >= 0 && src < MAX_INSTRUMENTS && dst < MAX_INSTRUMENTS);
+	Instrument* inst1 = _pInstrument[src];
+	_pInstrument[src] = _pInstrument[dst];
+	_pInstrument[dst] = inst1;
+}
+
 void CoreSong::/*Reset*/DeleteInstrument(Instrument::id_type id) {
 	Invalided = true;
 	_pInstrument[id]->Reset();
@@ -598,7 +622,10 @@ void Song::clear() {
 	UISong::clear();
 	clearMyData();
 }
-
+void SetDefaultPatternLines(int defaultPatLines)
+{
+	//todo
+}
 void Song::clearMyData() {
 	seqBus = 0;
 	machineSoloed = -1;

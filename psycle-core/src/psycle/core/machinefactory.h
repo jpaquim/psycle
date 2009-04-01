@@ -43,6 +43,12 @@ public:
 	std::string const & getLadspaPath() const;
 	void setLadspaPath(std::string path,bool cleardata=false);
 
+	std::string const & getVstPath() const;
+	void setVstPath(std::string path,bool cleardata=false);
+
+	PluginFinder& getFinder() const { return *finder_; }
+
+
 	void RegenerateFinderData();
 
 protected:
