@@ -6,6 +6,7 @@
 
 #include <psycle/core/config.private.hpp>
 #include "machinekey.hpp"
+#include "internalhost.hpp"
 
 #include <algorithm>
 
@@ -18,7 +19,7 @@ namespace psy { namespace core {
 		MachineKey::MachineKey( )
 			:host_(Hosts::INTERNAL)
 			,dllName_(),
-			index_(0) {
+			index_(-1) {
 		}
 		MachineKey::MachineKey( const MachineKey & key)
 			:host_(key.host())
@@ -38,6 +39,9 @@ namespace psy { namespace core {
 		MachineKey::~MachineKey() {
 		}
 
+		const MachineKey MachineKey::invalid() {
+			return MachineKey(Hosts::INTERNAL,"",-1);
+		}
 		const MachineKey MachineKey::master() {
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::MASTER);
 		}
@@ -64,6 +68,9 @@ namespace psy { namespace core {
 		}
 		const MachineKey MachineKey::failednative() {
 			return MachineKey(Hosts::NATIVE,"",0);
+		}
+		const MachineKey MachineKey::wrapperVst() {
+			return MachineKey(Hosts::VST,"",0);
 		}
 
 

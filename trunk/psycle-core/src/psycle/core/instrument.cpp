@@ -9,10 +9,10 @@
 #include <psycle/core/config.private.hpp>
 #include "instrument.h"
 
+#include <psycle/helpers/datacompression.hpp>
+#include <psycle/helpers/filter.hpp>
 #include "constants.h"
-#include "datacompression.h"
 #include "fileio.h"
-#include "filter.h"
 
 #include <iostream> // only for debug output
 #include <sstream>
@@ -49,6 +49,8 @@ namespace psy
 {
 	namespace core
 	{
+		using namespace psycle::helpers;
+
 		Instrument::Instrument()
 		:
 			waveLength(0),
@@ -192,7 +194,7 @@ namespace psy
 						pFile->ReadString(waveName, sizeof waveName);
 						
 						pFile->Read(size);
-						byte* pData;
+						std::uint8_t* pData;
 						
 						if ( fullopen )
 						{

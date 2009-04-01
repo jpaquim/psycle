@@ -191,12 +191,17 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\name actions with machines
 	///\{
 		public:
-			/// add a new machine. The index comes from pmac.
-			///  if machine id is -1, a free index is taken.
-			virtual void AddMachine(Machine * pmac);
+			/// add a new machine. If newIdx is not -1 and a machine
+			/// does not exist in that place, it is taken as the new index
+			/// If a machine exists, or if newIdx is -1, the index is taken from pmac.
+			/// if pmac->id() is -1, then a free index is taken.
+			///
+			virtual void AddMachine(Machine * pmac, Machine::id_type newIdx = -1);
 			/// (add or) replace the machine in index idx.
 			// idx cannot be -1.
 			virtual void ReplaceMachine(Machine * pmac, Machine::id_type idx);
+			/// Exchange the position of two machines
+			virtual void ExchangeMachines(Machine::id_type mac1, Machine::id_type mac2);
 			/// destroy a machine of this song.
 			virtual void DeleteMachine(Machine * machine, bool write_locked = false);
 			/// destroy a machine of this song.
@@ -251,6 +256,8 @@ class PSYCLE__CORE__DECL CoreSong {
 			///\}
 			/// clones an instrument.
 			bool CloneIns(Instrument::id_type src, Instrument::id_type dst);
+			/// Exchanges the positions of two instruments
+			void ExchangeInstruments(Instrument::id_type src, Instrument::id_type dst);
 			/// resets the instrument and delete each sample/layer that it uses.
 			void /*Reset*/DeleteInstrument(Instrument::id_type id);
 			/// resets the instrument and delete each sample/layer that it uses. (all instruments)
@@ -320,6 +327,8 @@ class PSYCLE__CORE__DECL Song : public UISong {
 			Instrument::id_type _instSelected;
 
 		public:
+			void SetDefaultPatternLines(int defaultPatLines);
+
 			Instrument::id_type instSelected() const { return _instSelected; }
 			void instSelected(Instrument::id_type id) {
 				assert(id >= 0);
@@ -337,6 +346,42 @@ class PSYCLE__CORE__DECL Song : public UISong {
 			/// The index of the track which plays in solo.
 			///\todo ok it's saved in psycle "song" files, but that belongs to the player.
 			int _trackSoloed;
+
+			// Compatibility with older psycle::host
+			const int BeatsPerMin(){return bpm();}
+			void BeatsPerMin(const int value)
+			{ 
+				setBpm(value);
+			}
+
+			const int LinesPerBeat(){return ticksSpeed();}
+			void LinesPerBeat(const int value)
+			{
+				setTicksSpeed(value);
+			}
+			void New() { clear(); }
+			//Fake. Just to compile
+			//{
+			inline unsigned char * _ppattern(int ps){
+				return new unsigned char[5];
+			}
+			inline unsigned char * _ptrack(int ps, int track){
+				return new unsigned char[5];
+			}
+			inline unsigned char * _ptrackline(int ps, int track, int line){
+				return new unsigned char[5];
+			}
+			bool _trackArmed[MAX_TRACKS];
+			bool _trackMuted[MAX_TRACKS];
+
+			int playOrder[MAX_SONG_POSITIONS];
+			int playOrderSel[MAX_SONG_POSITIONS];
+			int _trackArmedCount;
+			int patternLines[MAX_PATTERNS];
+			char patternName[MAX_PATTERNS][32];
+			int playLength;
+			unsigned char currentOctave;
+			//}
 	///\}
 };
 

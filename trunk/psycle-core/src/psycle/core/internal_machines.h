@@ -25,8 +25,11 @@ class PSYCLE__CORE__DECL Dummy : public Machine {
 		virtual int GenerateAudio(int numSamples);
 		virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
 		virtual std::string GetName() const { return _psName; }
+		virtual bool isGenerator() const { return generator; }
+		void setGenerator(bool gen) { generator = gen; }
 	protected:
 		static std::string _psName;
+		bool generator;
 };
 
 /****************************************************************************************************/
@@ -96,6 +99,35 @@ class PSYCLE__CORE__DECL Master : public Machine {
 		bool vuupdated;
 	protected:
 		static std::string _psName;
+};
+
+class PSYCLE__CORE__DECL AudioRecorder : public Machine
+{
+	protected:
+		AudioRecorder(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
+	public:
+		virtual ~AudioRecorder() throw();
+		virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
+		virtual void Init(void);
+		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+		virtual void SaveSpecificChunk(RiffFile * pFile);
+		virtual int GenerateAudio(int numSamples);
+		virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
+		virtual std::string GetName() const { return _psName; }
+
+		virtual void ChangePort(int newport);
+		virtual void setGainVol(float gainvol) { _gainvol = gainvol; }
+		virtual float GainVol() const { return _gainvol; }
+		virtual int CaptureIdx() const { return _captureidx; }
+	
+	private:
+		static std::string _psName;
+
+		int _captureidx;
+		bool _initialized;
+		float _gainvol;
+		float* pleftorig;
+		float* prightorig;
 };
 
 /****************************************************************************************************/

@@ -39,6 +39,12 @@ class PlayerTimeInfo {
 			void setSampleRate( int rate );
 			int sampleRate( ) const { return sampleRate_; }
 
+			void setInputLatency( int lat );
+			int inputLatency( ) const { return inputLatency_; }
+			void setOutputLatency( int lat );
+			int outputLatency( ) const { return outputLatency_; }
+
+
 			float samplesPerBeat() const { return samplesPerBeat_; }
 			float samplesPerTick() const { return samplesPerTick_; }
 			
@@ -51,6 +57,8 @@ class PlayerTimeInfo {
 			int sampleRate_;
 			float samplesPerBeat_;
 			float samplesPerTick_;
+			int inputLatency_;
+			int outputLatency_;
 
 			void recalcSPB();
 			void recalcSPT();

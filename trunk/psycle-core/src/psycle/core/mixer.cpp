@@ -8,15 +8,15 @@
 #include "mixer.h"
 
 ///\todo: These two includes need to be replaced by a "host" callback which gives such information.
-#include "commands.h"
 #include "player.h"
 #include "song.h"
-#include "dsp.h"
+#include <psycle/helpers/dsp.hpp>
 #include "fileio.h"
 
 namespace psy {
 	namespace core {
 
+		using namespace psycle::helpers;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Mixer

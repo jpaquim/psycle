@@ -9,9 +9,10 @@
 #include <psycle/core/config.private.hpp>
 #include "xml.h"
 
-#include "misc.h"
+#include <psycle/helpers/helpers.hpp>
 
 namespace psy { namespace core {
+	using namespace psycle::helpers;
 
 std::string replaceIllegalXmlChr(const std::string & text, bool strict) {
 	std::string xml = text;

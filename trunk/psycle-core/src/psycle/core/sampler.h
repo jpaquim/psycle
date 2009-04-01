@@ -9,8 +9,8 @@
 #define PSYCLE__CORE__SAMPLER__INCLUDED
 #pragma once
 
-#include "dsp.h"
-#include "filter.h"
+#include <psycle/helpers/dsp.hpp>
+#include <psycle/helpers/filter.hpp>
 #include "instrument.h"
 #include "instpreview.h"
 #include "machine.h"
@@ -80,7 +80,7 @@ namespace psy { namespace core {
 			int _triggerNoteDelay;
 			int _instrument;
 			WaveData _wave;
-			dsp::Filter _filter;
+			psycle::helpers::dsp::Filter _filter;
 			int _cutoff;
 			float _coModify;
 			int _channel;
@@ -133,7 +133,7 @@ namespace psy { namespace core {
 		public:
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
-			dsp::Cubic _resampler;
+			psycle::helpers::dsp::Cubic _resampler;
 
 			void PerformFx(int voice);
 			void VoiceWork( int startSample, int numsamples, int voice );

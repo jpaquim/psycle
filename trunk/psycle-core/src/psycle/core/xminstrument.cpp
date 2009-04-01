@@ -7,14 +7,14 @@
 #include <psycle/core/config.private.hpp>
 #include "xminstrument.h"
 
-#include "datacompression.h"
+#include <psycle/helpers/datacompression.hpp>
 #include "fileio.h"
-#include "filter.h"
 #include <cassert>
 #include <cstring>
 
 namespace psy { namespace core {
 
+	using namespace psycle::helpers;
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
 

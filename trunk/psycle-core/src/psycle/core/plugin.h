@@ -13,7 +13,7 @@
 
 namespace psy { namespace core {
 
-class PluginFxCallback : public CFxCallback {
+	class PluginFxCallback : public psycle::plugin_interface::CFxCallback {
 	public:
 		/* implement */ ~PluginFxCallback() throw();
 		/* implement */ void MessBox(char const * ptxt, char const * caption, unsigned int type);
@@ -32,14 +32,14 @@ class Plugin; // forward declaration
 class Proxy {
 	private:
 		Plugin & host_;
-		CMachineInterface * plugin_;
+		psycle::plugin_interface::CMachineInterface * plugin_;
 	private:
 		Plugin & host() throw();
 		Plugin const & host() const throw();
-		CMachineInterface & plugin() throw();
-		CMachineInterface const & plugin() const throw();
+		psycle::plugin_interface::CMachineInterface & plugin() throw();
+		psycle::plugin_interface::CMachineInterface const & plugin() const throw();
 	public:
-		Proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
+		Proxy(Plugin & host, psycle::plugin_interface::CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 		~Proxy() throw ()
 		{
 			// Proxy cannot free the interface, since its destructor happens after the destructor of Plugin,
@@ -48,7 +48,7 @@ class Proxy {
 		}
 		
 		const bool operator()() const throw();
-		void operator()(CMachineInterface * plugin) throw(); //exceptions::function_error);
+		void operator()(psycle::plugin_interface::CMachineInterface * plugin) throw(); //exceptions::function_error);
 		void Init() throw(); //std::exceptions::function_error);
 		void SequencerTick() throw(); //exceptions::function_error);
 		void ParameterTweak(int par, int val) throw(); //exceptions::function_error);
@@ -61,7 +61,7 @@ class Proxy {
 		void MuteTrack(const int i) throw(); //exceptions::function_error);
 		bool IsTrackMuted(const int i) throw(); //exceptions::function_error);
 		void MidiNote(const int channel, const int value, const int velocity) throw(); //exceptions::function_error);
-		void Event(const dword data) throw(); //exceptions::function_error);
+		void Event(const std::uint32_t data) throw(); //exceptions::function_error);
 		bool DescribeValue(char * txt, const int param, const int value) const throw(); //exceptions::function_error);
 		bool PlayWave(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
 		void SeqTick(int channel, int note, int ins, int cmd, int val) throw(); //exceptions::function_error);
@@ -74,13 +74,14 @@ class Proxy {
 class NativeHost;
 
 class PSYCLE__CORE__DECL Plugin : public Machine {
+	 friend class NativeHost;
 	private:
 		static PluginFxCallback _callback;
 	public:
 		inline static PluginFxCallback * GetCallback() throw() { return &_callback; }
 	protected:
 		Plugin(MachineCallbacks*, MachineKey, Machine::id_type, void* hInstance,
-			CMachineInfo*, CMachineInterface*); friend class NativeHost;
+			psycle::plugin_interface::CMachineInfo*, psycle::plugin_interface::CMachineInterface*);
 	public:
 		virtual ~Plugin() throw();
 		virtual void Init();
@@ -108,7 +109,7 @@ class PSYCLE__CORE__DECL Plugin : public Machine {
 
 		inline Proxy const & proxy() const { return proxy_; }
 		inline Proxy & proxy() { return proxy_; }
-		CMachineInfo const & GetInfo() const throw() { return *info_; }
+		psycle::plugin_interface::CMachineInfo const & GetInfo() const throw() { return *info_; }
 		
 	private:
 		char _psShortName[16];
@@ -117,20 +118,20 @@ class PSYCLE__CORE__DECL Plugin : public Machine {
 		MachineKey key_;
 		void* libHandle_;
 		bool _isSynth;
-		CMachineInfo * info_;
+		psycle::plugin_interface::CMachineInfo * info_;
 		Proxy proxy_;
 };
 
 inline void Proxy::Init() throw() { assert((*this)()); plugin().Init(); }
-inline CMachineInterface & Proxy::plugin() throw() { return *plugin_; }
-inline CMachineInterface const & Proxy::plugin() const throw() { return *plugin_; }
+inline psycle::plugin_interface::CMachineInterface & Proxy::plugin() throw() { return *plugin_; }
+inline psycle::plugin_interface::CMachineInterface const & Proxy::plugin() const throw() { return *plugin_; }
 inline void Proxy::SequencerTick() throw() { plugin().SequencerTick(); }
 inline void Proxy::ParameterTweak(int par, int val) throw() { assert((*this)()); plugin().ParameterTweak(par, val);  }
 inline Plugin & Proxy::host() throw() { return host_; }
 inline Plugin const & Proxy::host() const throw() { return host_; }
 inline void Proxy::callback() throw() { assert((*this)()); plugin().pCB = host().GetCallback(); }
 inline const bool Proxy::operator()() const throw() { return !!plugin_; }
-inline void Proxy::operator()(CMachineInterface * plugin) throw()//exceptions::function_error)
+inline void Proxy::operator()(psycle::plugin_interface::CMachineInterface * plugin) throw()//exceptions::function_error)
 {
 	delete this->plugin_; this->plugin_ = plugin;
 	if(plugin)

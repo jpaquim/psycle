@@ -7,13 +7,14 @@
 #include <psycle/core/config.private.hpp>
 #include "preset.h"
 
-#include "binread.h"
+#include <psycle/helpers/binread.hpp>
 #include "machine.h"
 #include "plugin.h"
 
 namespace psy { namespace core {
 
 		using namespace std;
+		using namespace psycle::helpers;
 
 		Preset::Preset() {
 		}

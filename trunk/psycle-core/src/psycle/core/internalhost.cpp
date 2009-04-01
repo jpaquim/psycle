@@ -97,7 +97,7 @@ void InternalHost::FillFinderData(PluginFinder& finder, bool /*clearfirst*/)
 	finder.ClearMap(hostCode());
 
 	// Master machine is skipped because it is never created by the user.
-	for(int  i=InternalMacs::type(1); i < InternalMacs::NUM_MACS; i++) {
+	for(int  i=InternalMacs::type_t(1); i < InternalMacs::NUM_MACS; i++) {
 		finder.AddInfo(InternalMacs::keys[i], InternalMacs::infos[i]);
 	}
 }

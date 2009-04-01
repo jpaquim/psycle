@@ -16,6 +16,8 @@ namespace psy
 {
 	namespace core
 	{
+		using namespace psycle::helpers;
+
 		std::string Sampler::_psName = "Sampler";
 		InstPreview Sampler::wavprev;
 		InstPreview Sampler::waved;
@@ -29,7 +31,6 @@ namespace psy
 		:
 			Machine(callbacks, id)
 		{
-			_type = MACH_SAMPLER;
 			SetEditName(_psName);
 			defineOutputAsStereo();
 			SetAudioRange(32768.0f);

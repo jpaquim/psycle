@@ -7,16 +7,18 @@
 #include <psycle/core/config.private.hpp>
 #include "psy2filter.h"
 
-#include "commands.h"
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
+#include "pluginfinder.h"
 #include "convert_internal_machines.private.hpp"
 
 //Needed since the psy2loading source has been moved here
 #include "internal_machines.h"
 #include "sampler.h"
 #include "plugin.h"
+#include "vsthost.h"
+#include "vstplugin.h"
 
 #include <sstream>
 #include <iostream>
@@ -361,6 +363,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 							p->LoadPsy2FileFormat(file);
 							pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
 							((Dummy*)pMac[i])->CopyFrom(p);
+							delete p;
 						} else pMac[i]->LoadPsy2FileFormat(file);
 					}
 					break;
@@ -368,12 +371,49 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 				case MACH_VST:
 				case MACH_VSTFX:
 					{
-						pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
-						pMac[i]->LoadPsy2FileFormat(file);
-						file->Skip(6);
+						char sError[128];
+						bool berror=false;
+						vst::plugin* pVstPlugin;
+						vst::plugin* pTempMac = static_cast<vst::plugin*>(factory.CreateMachine(MachineKey::wrapperVst(),i));
+						// The trick: We need to load the information from the file in order to know the "instance" number
+						// and be able to create a plugin from the corresponding dll. Later, we will set the loaded settings to
+						// the newly created plugin.
+						unsigned char program;
+						int instance;
+						pTempMac->PreLoadPsy2FileFormat(file,program,instance);
+						assert(instance < PSY2_MAX_PLUGINS);
+
+						MachineKey* key = new MachineKey(Hosts::VST,MachineKey::preprocessName(vstL[instance].dllName),0);
+						if( !vstL[instance].valid || !factory.getFinder().hasKey(*key))
+						{
+							berror=true;
+							sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
+						}
+						else try {
+							pMac[i] = pVstPlugin = static_cast<vst::plugin*>(factory.CreateMachine(*key,i));
+
+							if (pVstPlugin)
+							{
+								pVstPlugin->LoadFromMac(pTempMac, program, vstL[instance].numpars, vstL[instance].pars);
+							}
+						}
+						catch(...)
+						{
+							berror=true;
+							sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",key->dllName());
+						}
+						if (berror)
+						{
+							//MessageBox(NULL,sError, "Loading Error", MB_OK);
+							Dummy* dummy;
+							pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(MachineKey::dummy(),i));
+							dummy->CopyFrom(pTempMac);
+							delete pTempMac;
+							if (type == MACH_VST ) dummy->setGenerator(true);
+							else dummy->setGenerator(false);
+						}
+						delete key;
 					}
-					//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
-					//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
 					break;
 				default: {
 					switch(type) {
@@ -882,46 +922,15 @@ bool Plugin::LoadPsy2FileFormat(RiffFile * pFile) {
 
 	return true;
 }
-#if 0
 namespace vst {
-	bool plugin::LoadChunkPsy2FileFormat(RiffFile * pFile) {
-		bool b;
-		try {
-			b = proxy().flags() & effFlagsProgramChunks;
-		}
-		catch(const std::exception &) {
-			b = false;
-		}
-		if(!b) return false;
 
-		// read chunk size
-		std::uint32_t chunk_size;
-		pFile->Read(chunk_size);
-
-		// read chunk data
-		char * chunk(new char[chunk_size]);
-		pFile->ReadChunk(chunk, chunk_size);
-
-		try {
-			proxy().dispatcher(effSetChunk, 0, chunk_size, chunk);
-		}
-		catch(const std::exception &) {
-			// [bohan] hmm, so, data just gets lost?
-			delete[] chunk;
-			return false;
-		}
-
-		delete[] chunk;
-		return true;
-	}
-
-	bool plugin::LoadPsy2FileFormat(RiffFile * pFile) {
+	bool plugin::PreLoadPsy2FileFormat(RiffFile * pFile, unsigned char &_program, int &_instance)
+	{
 		Machine::Init();
-
 		char edName[32];
-		pFile->ReadChunk(edName, 16); edName[15] = 0;
+		pFile->ReadArray(edName, 16); edName[15] = 0;
 		SetEditName(edName);
-
+		
 		pFile->Read(_inputMachines);
 		pFile->Read(_outputMachines);
 		pFile->Read(_inputConVol);
@@ -971,12 +980,73 @@ namespace vst {
 			char mch;
 			pFile->Read(mch);
 			_program = 0;
-		} else {
+		}
+		else {
 			pFile->Read(_program);
 		}
 		return true;
 	}
+
+	bool plugin::LoadFromMac(vst::plugin *pMac, unsigned char program,  int numPars, float* pars)
+	{
+		SetEditName(pMac->GetEditName());
+		memcpy(_inputMachines,pMac->_inputMachines,sizeof(_inputMachines));
+		memcpy(_outputMachines,pMac->_outputMachines,sizeof(_outputMachines));
+		memcpy(_inputConVol,pMac->_inputConVol,sizeof(_inputConVol));
+		memcpy(_connection,pMac->_connection,sizeof(_connection));
+		memcpy(_inputCon,pMac->_inputCon,sizeof(_inputCon));
+		_connectedInputs= pMac->_connectedInputs;
+		_connectedOutputs= pMac->_connectedOutputs;
+		
+		Machine::SetPan(pMac->_panning);
+
+		SetProgram(program);
+		for (int c(0) ; c < numPars; ++c)
+		{
+			try
+			{
+				SetParameter(c, pars[c]);
+			}
+			catch(const std::exception &)
+			{
+				// o_O`
+			}
+		}
+
+		return true;
+	}
+
+	bool plugin::LoadChunkPsy2FileFormat(RiffFile * pFile) {
+		bool b;
+		try {
+			b = ProgramIsChunk();
+		}
+		catch(const std::exception &) {
+			b = false;
+		}
+		if(!b) return false;
+
+		// read chunk size
+		std::uint32_t chunk_size;
+		pFile->Read(chunk_size);
+
+		// read chunk data
+		char * chunk(new char[chunk_size]);
+		pFile->ReadArray(chunk, chunk_size);
+
+		try {
+			SetChunk(chunk,chunk_size);
+		}
+		catch(const std::exception &) {
+			// [bohan] hmm, so, data just gets lost?
+			delete[] chunk;
+			return false;
+		}
+
+		delete[] chunk;
+		return true;
+	}
 }
-#endif
+
 
 }}

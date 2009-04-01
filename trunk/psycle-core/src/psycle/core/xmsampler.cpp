@@ -100,6 +100,7 @@ const int XMSampler::Voice::m_RandomTable[256] = {
 // being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
 // so (2*7159090.5/8363) ~ 1712 ( middle C period )
 // Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
+// The original middle C period was 856, but it was multiplied by two on PC's to add fine pitch slide.
 // The original table takes the lower octave values and multiplies them by two.
 // This doesn't take care of the roundings of the values.
 
@@ -502,7 +503,7 @@ void XMSampler::Voice::VoiceInit(int channelNum, int instrumentNum)
 
 }// XMSampler::Voice::VoiceInit)
 
-void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, dsp::Cubic& _resampler)
+void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, const dsp::Resampler& _resampler)
 {
 	dsp::PRESAMPLERFN pResamplerWork;
 	pResamplerWork = _resampler._pWorkFn;
@@ -616,7 +617,7 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 3: Add the processed data to the sampler's buffer.
 		if(!m_WaveDataController.IsStereo()){
-		// Monoaural output copy left to right output.
+				// Monoaural output‚ copy left to right output.
 			right_output = left_output;
 		}
 
@@ -2611,7 +2612,7 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile)
 		// Sample Data Save
 		int numSamples = 0;
 		for(int i = 0;i < MAX_INSTRUMENT;i++){
-			if([i].WaveLength() != 0){
+			if(m_rWaveLayer[i].WaveLength() != 0){
 				numSamples++;
 			}
 		}
@@ -2619,9 +2620,9 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile)
 		riffFile->Write(numSamples);
 
 		for(int i = 0;i < MAX_INSTRUMENT;i++){
-			if([i].WaveLength() != 0){
+			if(m_rWaveLayer[i].WaveLength() != 0){
 				riffFile->Write(i);
-				[i].Save(*riffFile);
+				m_rWaveLayer[i].Save(*riffFile);
 			}
 		}
 	#endif
@@ -2680,8 +2681,7 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 			for(int i = 0;i < numInstruments;i++)
 			{
 				riffFile->Read(idx);
-				if (!m_Instruments[idx].Load(*riffFile)) { wrongState=true; break; }
-				//m_Instruments[idx].IsEnabled(true); // done in the loader.
+				if (!m_rWaveLayer[idx].Load(*riffFile)) { wrongState=true; break; }
 			}
 			if (!wrongState)
 			{

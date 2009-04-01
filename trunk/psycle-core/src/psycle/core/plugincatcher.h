@@ -14,15 +14,14 @@
 
 namespace psy { namespace core {
 
-//\todo: PluginFinderBase, else we can't have getInstance ?
 class PSYCLE__CORE__DECL PluginFinderCache: public PluginFinder {
-	protected:
+	public:
 		PluginFinderCache();
 		~PluginFinderCache();
-	public:
-		//static PluginFinderCache& getInstance();
+		
+		virtual void Initialize(bool clear=false);
+		virtual void EnablePlugin(const MachineKey & key, bool enable);
 
-		void Rescan();
 
 	protected:
 		std::uint32_t _numPlugins;

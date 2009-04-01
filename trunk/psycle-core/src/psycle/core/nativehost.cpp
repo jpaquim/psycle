@@ -21,6 +21,7 @@
 #endif
 
 namespace psy { namespace core {
+	using namespace psycle::plugin_interface;
 
 typedef CMachineInfo * (* GETINFO) ();
 typedef CMachineInterface * (* CREATEMACHINE) ();
