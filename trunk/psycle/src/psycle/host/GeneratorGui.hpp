@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "MachineGui.hpp"
 
 namespace psycle {
@@ -7,12 +7,7 @@ namespace psycle {
 
 		class GeneratorGui : public MachineGui {
 		public:
-			GeneratorGui(class MachineView* view,
-#ifdef use_psycore							 
-			 				     psy::core::Machine* mac);
-#else
-					             class Machine* mac);
-#endif
+			GeneratorGui(MachineView* view, Machine* mac);
 			~GeneratorGui();
 
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,

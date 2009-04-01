@@ -1,20 +1,36 @@
 ///\file
 ///\brief interface file for psycle::host::CVstEditorDlg.
 #pragma once
+#include "Psycle.hpp"
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		namespace vst {
+			class plugin;
+		}
+	}
+}
+#include <seib/vst/EffectWnd.hpp>
+using namespace psy::core;
+#else
 #include <seib-vsthost/EffectWnd.hpp>
+#endif
+
+
 #include "NativeGui.hpp"
-#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CVstParamList;
 
 		using namespace seib::vst;
+#ifndef use_psycore
 		namespace vst
 		{
 			class plugin;
 		}
-
+#endif
 		class CVstGui : public CBaseGui
 		{
 		public:

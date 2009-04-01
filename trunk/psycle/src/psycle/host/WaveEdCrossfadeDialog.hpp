@@ -1,8 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdCrossfadeDialog.
 #pragma once
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

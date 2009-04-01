@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "EffectGui.hpp"
 #include "GeneratorGui.hpp"
 
@@ -8,13 +8,7 @@ namespace psycle {
 
 		class DummyGenGui : public GeneratorGui {
 		public:
-			DummyGenGui(class MachineView* view,
-#ifdef use_psycore							 
-  				        class psy::core::Machine* mac);
-#else
-						class Machine* mac);
-#endif
-
+			DummyGenGui(MachineView* view, Machine* mac);
 			~DummyGenGui();
 
 			virtual bool OnEvent(PsycleCanvas::Event* ev);
@@ -22,12 +16,7 @@ namespace psycle {
 
 		class DummyEffectGui : public EffectGui {
 		public:
-			DummyEffectGui(class MachineView* view,
-#ifdef use_psycore							 
-  	  			           class psy::core::Machine* mac);
-#else
-						   class Machine* mac);
-#endif
+			DummyEffectGui(MachineView* view, Machine* mac);
 			~DummyEffectGui();
 
 			virtual bool OnEvent(PsycleCanvas::Event* ev);

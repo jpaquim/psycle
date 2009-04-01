@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Player.
 #pragma once
-#include "Constants.hpp"
+#include "Global.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "Riff.hpp"
@@ -50,10 +50,12 @@ namespace psycle
 			int _playTimem;
 			/// the current beats per minute at which to play the song.
 			/// can be changed from the song itself using commands.
-			int bpm;
+			int bpm_;
+			int bpm() { return bpm_; }
 			/// the current ticks per beat at which to play the song.
 			/// can be changed from the song itself using commands.
-			int tpb;
+			int tpb_;
+			int tpb() { return tpb_; }
 			/// Contains the number of samples until a line change comes in.
 			int _samplesRemaining;
 			/// starts to play, also specifying a line to stop playing at.
@@ -62,6 +64,7 @@ namespace psycle
 			void Start(int pos,int line,bool initialize=true);
 			/// wether this player has been started.
 			bool _playing;
+			bool playing() const { return _playing; }
 			/// wether this player should only play the selected block in the sequence.
 			bool _playBlock;
 			/// wheter this player should play the song/block in loop.
@@ -69,13 +72,13 @@ namespace psycle
 			/// Indicates if the player is processing audio right now (It is in work function)
 			bool _isWorking;
 			/// stops playing.
-			void Stop();
+			void stop();
 			/// work function. (Entrance for the callback function (audiodriver)
 			static float * Work(void* context, int nsamples);
 			
 			void SetBPM(int _bpm,int _tpb=0);
 
-			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
+			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm_*tpb_)); }
 
 			/// Returns the number of samples that it takes for each row of the pattern to be played
 			const int SamplesPerRow(){ return m_SamplesPerRow;}

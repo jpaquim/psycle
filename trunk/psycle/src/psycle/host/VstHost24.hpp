@@ -114,7 +114,7 @@ namespace psycle
 				virtual void PreWork(int numSamples,bool clear=true);
 				virtual void Work(int numSamples);
 				virtual void Tick() { Machine::Tick(); }
-				virtual void Tick(int track, PatternEntry * pData);
+				virtual void Tick(int track, PatternEvent * pData);
 				virtual void Stop();
 				// old fileformat {
 				virtual bool PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance);

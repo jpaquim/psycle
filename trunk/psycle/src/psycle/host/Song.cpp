@@ -1,19 +1,20 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
+#include "configuration_options.hpp"
 
-#include "Psycle.hpp"
+#ifndef use_psycore
+#include "Song.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "NewMachine.hpp"
 	#include "MainFrm.hpp"
 	#include "ChildView.hpp"
+	#include "MachineView.hpp"
 	#include "ProgressDialog.hpp"
 #else
 	#include "player_plugins/winamp/fake_progressDialog.hpp"
 	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
-
-#include "Song.hpp"
 
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "Sampler.hpp"
@@ -266,8 +267,8 @@ namespace psycle
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					// Store the volumes of each wire and exchange.
-					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(this,mac1->_macIndex,i,tmp1ovol[i]);	}
-					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(this,mac2->_macIndex,i,tmp2ovol[i]); }				
+					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(this,mac1->id(),i,tmp1ovol[i]);	}
+					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(this,mac2->id(),i,tmp2ovol[i]); }				
 					mac1->GetWireVolume(i,tmp1ivol[i]);
 					mac2->GetWireVolume(i,tmp2ivol[i]);
 
@@ -311,12 +312,12 @@ namespace psycle
 					if (mac1->_inputCon[i])
 					{
 						Machine* macsrc = _pMachine[mac1->_inputMachines[i]];
-						mac1->InsertInputWireIndex(this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
+						mac1->InsertInputWireIndex(this,i,macsrc->id(),macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
 					}
 					if (mac2->_inputCon[i])
 					{
 						Machine* macsrc = _pMachine[mac2->_inputMachines[i]];
-						mac2->InsertInputWireIndex(this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
+						mac2->InsertInputWireIndex(this,i,macsrc->id(),macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
 					}
 
 					if (mac1->_connection[i])
@@ -512,7 +513,7 @@ namespace psycle
 			DeleteAllPatterns();
 			// Clear sequence
 			Reset();
-			instSelected = 0;
+			_instSelected = 0;
 			midiSelected = 0;
 			auxcolSelected = 0;
 			_saved=false;
@@ -593,7 +594,7 @@ namespace psycle
 			// Verify that the destination is not a generator
 			if(dstMac->_mode == MACHMODE_GENERATOR) return -1;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
-			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return -1;
+			if (srcMac->FindOutputWire(dstMac->id()) > -1 || dstMac->FindOutputWire(srcMac->id()) > -1) return -1;
 			// disallow mixer as a sender of another mixer
 			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && dsttype != 0) return -1;
 			// If source is in a mixer chain, dissallow the new connection.
@@ -610,8 +611,8 @@ namespace psycle
 			if(freebus == -1 || dfreebus == -1 ) return -1;
 
 			// If everything went right, connect them.
-			srcMac->InsertOutputWireIndex(this,freebus,dstMac->_macIndex);
-			dstMac->InsertInputWireIndex(this,dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
+			srcMac->InsertOutputWireIndex(this,freebus,dstMac->id());
+			dstMac->InsertInputWireIndex(this,dfreebus,srcMac->id(),srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
 			return dfreebus;
 		}
 		bool Song::ChangeWireDestMac(Machine* srcMac,Machine* dstMac, int wiresrc,int wiredest)
@@ -622,7 +623,7 @@ namespace psycle
 			// Verify that the destination is not a generator
 			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
-			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
+			if (srcMac->FindOutputWire(dstMac->id()) > -1 || dstMac->FindOutputWire(srcMac->id()) > -1) return false;
 			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >=MAX_CONNECTIONS) return false;
 			// If source is in a mixer chain, dissallow the new connection.
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
@@ -641,13 +642,13 @@ namespace psycle
 			Machine *oldmac = _pMachine[srcMac->_outputMachines[wiresrc]];
 			if (oldmac)
 			{
-				if ((w = oldmac->FindInputWire(srcMac->_macIndex))== -1)
+				if ((w = oldmac->FindInputWire(srcMac->id()))== -1)
 					return false;
 
 				oldmac->GetWireVolume(w,volume);
 				oldmac->DeleteInputWireIndex(this,w);
-				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->_macIndex);
-				dstMac->InsertInputWireIndex(this,wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->id());
+				dstMac->InsertInputWireIndex(this,wiredest,srcMac->id(),srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -660,7 +661,7 @@ namespace psycle
 			// Verify that the destination is not a generator
 			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
-			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
+			if (srcMac->FindOutputWire(dstMac->id()) > -1 || dstMac->FindOutputWire(srcMac->id()) > -1) return false;
 			// disallow mixer as a sender of another mixer
 			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS) return false;
 			// If source is in a mixer chain, dissallow the new connection.
@@ -691,13 +692,13 @@ namespace psycle
 			 
 			if (oldmac)
 			{
-				if ((w =oldmac->FindOutputWire(dstMac->_macIndex)) == -1)
+				if ((w =oldmac->FindOutputWire(dstMac->id())) == -1)
 					return false;
 
 				oldmac->DeleteOutputWireIndex(this,w);
-				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->_macIndex);
+				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->id());
 				dstMac->GetWireVolume(wiredest,volume);
-				dstMac->InsertInputWireIndex(this,wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				dstMac->InsertInputWireIndex(this,wiredest,srcMac->id(),srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -734,7 +735,7 @@ namespace psycle
 		{
 			RemovePattern(ps);
 			ppPatternData[ps] = new unsigned char[MULTIPLY2];
-			PatternEntry blank;
+			PatternEvent blank;
 			unsigned char * pData = ppPatternData[ps];
 			for(int i = 0; i < MULTIPLY2; i+= EVENT_SIZE)
 			{
@@ -746,7 +747,7 @@ namespace psycle
 
 		bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 		{
-			PatternEntry blank;
+			PatternEvent blank;
 			unsigned char *toffset;
 			if(adaptsize)
 			{
@@ -811,6 +812,14 @@ namespace psycle
 			return true;
 		}
 
+		void Song::SetDefaultPatternLines(int defaultlines) 
+		{
+			for(int c(0) ; c < MAX_PATTERNS; ++c)
+			{
+				patternLines[c] = defaultlines;
+			}
+		}
+
 		int Song::GetHighestInstrumentIndex()
 		{
 			int i;
@@ -853,7 +862,7 @@ namespace psycle
 			//Check for one unexistant pattern.
 			for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
 			//if none found, try to find an empty used pattern.
-			PatternEntry blank;
+			PatternEvent blank;
 			bool bTryAgain(true);
 			while(bTryAgain && rval < MAX_PATTERNS - 1)
 			{
@@ -1320,7 +1329,7 @@ namespace psycle
 							pFile->Read(&temp, sizeof temp);  
 							auxcolSelected = temp;
 							pFile->Read(&temp, sizeof temp);  
-							instSelected = temp;
+							_instSelected = temp;
 							// sequence width, for multipattern
 							pFile->Read(&temp,sizeof(temp));
 							_trackArmedCount = 0;
@@ -1671,8 +1680,8 @@ namespace psycle
 						unsigned char * pData(CreateNewPattern(i));
 						for(int c(0) ; c < patternLines[i] ; ++c)
 						{
-							pFile->Read(reinterpret_cast<char*>(pData), OLD_MAX_TRACKS * sizeof(PatternEntry));
-							pData += MAX_TRACKS * sizeof(PatternEntry);
+							pFile->Read(reinterpret_cast<char*>(pData), OLD_MAX_TRACKS * sizeof(PatternEvent));
+							pData += MAX_TRACKS * sizeof(PatternEvent);
 						}
 						///\todo: tweak_effect should be converted to normal tweaks!
 					}
@@ -1685,7 +1694,7 @@ namespace psycle
 				Progress.m_Progress.SetPos(2048);
 				::Sleep(1); ///< ???
 				// Instruments
-				pFile->Read(&instSelected, sizeof instSelected);
+				pFile->Read(&_instSelected, sizeof instSelected);
 				for(int i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
 				{
 					pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
@@ -2220,7 +2229,7 @@ namespace psycle
 										val*=32768.0f; // BugFix
 									}
 									// and set the volume.
-									pMac[i]->InsertInputWireIndex(this,c,pOrigMachine->_macIndex,pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
+									pMac[i]->InsertInputWireIndex(this,c,pOrigMachine->id(),pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
 								}
 							}
 							else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
@@ -2491,7 +2500,7 @@ namespace psycle
 			pFile->Write(&temp,sizeof(temp));
 			temp = auxcolSelected;
 			pFile->Write(&temp,sizeof(temp));
-			temp = instSelected;
+			temp = _instSelected;
 			pFile->Write(&temp,sizeof(temp));
 
 			temp = 1; // sequence width
@@ -2690,16 +2699,16 @@ namespace psycle
 				pFile->Write(numInstruments);
 
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(XMSampler::rInstrument(i).IsEnabled()){
+					if(rInstrument(i).IsEnabled()){
 						pFile->Write(i);
-						XMSampler::rInstrument(i).Save(*pFile);
+						rInstrument(i).Save(*pFile);
 					}
 				}
 
 				// Sample Data Save
 				int numSamples = 0;	
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(XMSampler::SampleData(i).WaveLength() != 0){
+					if(SampleData(i).WaveLength() != 0){
 						numSamples++;
 					}
 				}
@@ -2707,9 +2716,9 @@ namespace psycle
 				pFile->Write(numSamples);
 
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(XMSampler::SampleData(i).WaveLength() != 0){
+					if(SampleData(i).WaveLength() != 0){
 						pFile->Write(i);
-						XMSampler::SampleData(i).Save(*pFile);
+						SampleData(i).Save(*pFile);
 					}
 				}
 				long pos2 = pFile->GetPos(); 
@@ -3081,7 +3090,7 @@ namespace psycle
 			if (!ppPatternData[i]) {
 				return true;
 			}
-			PatternEntry blank;
+			PatternEvent blank;
 			unsigned char * pData = ppPatternData[i];
 			for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
 			{
@@ -3094,3 +3103,4 @@ namespace psycle
 		}
 	}
 }
+#endif //#ifndef use_psycore

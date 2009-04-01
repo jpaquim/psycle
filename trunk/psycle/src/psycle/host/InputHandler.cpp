@@ -1,13 +1,24 @@
 ///\file
 ///\brief implementation file for psycle::host::InputHandler.
-
 #include "InputHandler.hpp"
-#include "Version.hpp"
 #include "MainFrm.hpp"
+#include "ChildView.hpp"
+#include "PatternView.hpp"
+#include "Configuration.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Machine.hpp"
 #include "Player.hpp"
+#include "Song.hpp"
+#endif
+
+
 #include "ChildView.hpp"
-#include "Global.hpp"
 namespace psycle
 {
 	namespace host
@@ -112,7 +123,7 @@ namespace psycle
 			}
 			else
 			{
-				if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+				if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::pPlayer->playing()&&Global::pConfig->_followSong))
 				{
 					switch (nChar)
 					{
@@ -585,35 +596,39 @@ namespace psycle
 					note = 119;
 			}
 
-			if(pMachine==NULL)
+			if(!pMachine)
 			{
 				int mgn = Global::_pSong->seqBus;
 
 				if (mgn < MAX_MACHINES)
 				{
-					pMachine = Global::_pSong->_pMachine[mgn];
+					pMachine = Global::_pSong->machine(mgn);
+				}
+				if (!pMachine)
+				{
+					return;
 				}
 			}
 
-			for(int i=0;i<Global::_pSong->SONGTRACKS;i++)
+			for(int i=0;i<Global::_pSong->tracks();i++)
 			{
 				if(notetrack[i]==note)
 				{
 					notetrack[i]=120;
 					// build entry
-					PatternEntry entry;
-					entry._note = 120;
-					entry._inst = Global::_pSong->auxcolSelected;
-					entry._mach = Global::_pSong->seqBus;
-					entry._cmd = 0;
-					entry._parameter = 0;	
+					PatternEvent entry;
+					entry.setNote(notetypes::release);
+					entry.setInstrument(Global::_pSong->auxcolSelected);
+					entry.setMachine(Global::_pSong->seqBus);
+					entry.setCommand(0);
+					entry.setParameter(0);	
 
 					// play it
-
-					if (pMachine)
-					{
-						pMachine->Tick(i,&entry);
-					}
+#ifdef use_psycore
+					pMachine->Tick(i,entry);
+#else
+					pMachine->Tick(i,&entry);
+#endif
 				}
 			}
 		}
@@ -638,10 +653,10 @@ namespace psycle
 			}
 
 			// build entry
-			PatternEntry entry;
-			entry._note = note;
-			entry._inst = Global::_pSong->auxcolSelected;
-			entry._mach = Global::_pSong->seqBus;
+			PatternEvent entry;
+			entry.setNote(note);
+			entry.setInstrument(Global::_pSong->auxcolSelected);
+			entry.setMachine(Global::_pSong->seqBus);
 
 			if(velocity != 127 && Global::pConfig->midi().velocity().record())
 			{
@@ -650,26 +665,26 @@ namespace psycle
 				switch(Global::pConfig->midi().velocity().type())
 				{
 					case 0:
-						entry._cmd = Global::pConfig->midi().velocity().command();
-						entry._parameter = par;
+						entry.setCommand(Global::pConfig->midi().velocity().command());
+						entry.setParameter(par);
 						break;
 					case 3:
-						entry._inst = par;
+						entry.setInstrument(par);
 						break;
 				}
 			}
 			else
 			{
-				entry._cmd=0;
-				entry._parameter=0;
+				entry.setCommand(0);
+				entry.setParameter(0);
 			}
 
 			// play it
 			if(pMachine==NULL)
 			{
-				if (entry._mach < MAX_MACHINES)
+				if (entry.machine() < MAX_MACHINES)
 				{
-					pMachine = Global::_pSong->_pMachine[entry._mach];
+					pMachine = Global::_pSong->machine(entry.machine());
 				}
 			}	
 
@@ -679,13 +694,17 @@ namespace psycle
 				// if the current machine is a sampler, check 
 				// if current sample is locked to a machine.
 				// if so, switch entry._mach to that machine number
+#ifdef use_psycore
+				if (pMachine->getMachineKey() == MachineKey::sampler())
+#else
 				if (pMachine->_type == MACH_SAMPLER)
+#endif
 				{
 					if ((Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
 						&& (Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_LOCKINST == true))
 					{
-						entry._mach = Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine;
-						pMachine = Global::_pSong->_pMachine[entry._mach];
+						entry.setMachine(Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine);
+						pMachine = Global::_pSong->machine(entry.machine());
 						if ( !pMachine) return;
 					}
 				}
@@ -693,14 +712,14 @@ namespace psycle
 				if(bMultiKey)
 				{
 					int i;
-					for (i = outtrack+1; i < Global::_pSong->SONGTRACKS; i++)
+					for (i = outtrack+1; i < Global::_pSong->tracks(); i++)
 					{
 						if (notetrack[i] == 120)
 						{
 							break;
 						}
 					}
-					if (i >= Global::_pSong->SONGTRACKS)
+					if (i >= Global::_pSong->tracks())
 					{
 						for (i = 0; i <= outtrack; i++)
 						{

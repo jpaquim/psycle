@@ -2,10 +2,20 @@
 ///\brief implementation file for psycle::host::CMacProp.
 
 #include "MacProp.hpp"
-#include "Psycle.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#include <psycle/core/machine.h>
+#include <psycle/core/machinefactory.h>
+using namespace psy::core;
+#else
+#include "Machine.hpp"
+#include "Song.hpp"
+#endif
+
 #include "MainFrm.hpp"
-#include "MachineGui.hpp"
 #include "MachineView.hpp"
+#include "MachineGui.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -47,13 +57,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
-#ifdef use_psycore
-			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->GetEditName());
+			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->GetEditName().c_str());
 			m_macname.SetWindowText(pMachine->GetEditName().c_str());
-#else
-			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->_editName);
-			m_macname.SetWindowText(pMachine->_editName);
-#endif
+
 			SetWindowText(buffer);
 
 
@@ -61,10 +67,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_muteCheck.SetCheck(pMachine->_mute);
 			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
 			m_bypassCheck.SetCheck(pMachine->Bypass());
+
 #ifdef use_psycore
-			//todo
+			if (pMachine->IsGenerator() )
 #else
 			if (pMachine->_mode == MACHMODE_GENERATOR ) 
+#endif
 			{
 				m_bypassCheck.ShowWindow(SW_HIDE);
 			}
@@ -72,7 +80,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_soloCheck.ShowWindow(SW_HIDE);
 			}
-#endif
 			return TRUE;
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE
@@ -144,14 +151,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (dst >= 0)
 			{
 #ifdef use_psycore
-				//todo
+				Machine * newMac = MachineFactory::getInstance().CloneMachine(*pMachine);
+				if(!newMac)
+				{
+					MessageBox("Cloning failed","Cloning failed");
+				}
+				else {
+					gui_->view()->song()->AddMachine(newMac);
+					gui_->view()->CreateMachineGui(newMac);
+				}
 #else
 				if (!gui_->view()->song()->CloneMac(src,dst))
 				{
 					MessageBox("Cloning failed","Cloning failed");
 				}
 				else {
-					gui_->view()->CreateMachineGui(gui_->view()->song()->_pMachine[dst]);
+					gui_->view()->CreateMachineGui(gui_->view()->song()->machine(dst));
 				}
 #endif
 

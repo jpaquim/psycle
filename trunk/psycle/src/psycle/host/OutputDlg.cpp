@@ -2,11 +2,16 @@
 ///\brief implementation file for psycle::host::COutputDlg.
 
 #include "OutputDlg.hpp"
-#include "Psycle.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
+#ifdef use_psycore
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Player.hpp"
 #include "Song.hpp"
+#endif
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

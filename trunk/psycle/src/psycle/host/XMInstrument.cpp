@@ -3,7 +3,8 @@
  *  $Date$
  *  $Revision$
  */
-
+#include "configuration_options.hpp"
+#ifndef use_psycore
 
 #include "XMInstrument.hpp"
 #include "Configuration.hpp"
@@ -572,3 +573,4 @@ namespace psycle
 
 	} //namespace host
 }// namespace psycle
+#endif //#ifndef use_psycore

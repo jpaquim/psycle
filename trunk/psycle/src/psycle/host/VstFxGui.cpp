@@ -1,20 +1,20 @@
 #include "VstFxGui.hpp"
+#ifdef use_psycore
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
-#include "MasterDlg.hpp"
+#endif
+
 #include "MachineView.hpp"
-#include "FrameMachine.hpp"
 #include "ChildView.hpp"
 #include "VstEffectWnd.hpp"
 
 namespace psycle {
 	namespace host {
 
-		VstFxGui::VstFxGui(class MachineView* view,
-#ifdef use_psycore
-						   class psy::core::Machine* mac)
-#else
-						   class Machine* mac)
-#endif
+		VstFxGui::VstFxGui(MachineView* view,
+						   Machine* mac)
 			: EffectGui(view, mac),
 			  dialog_(0)
 		{
@@ -33,8 +33,6 @@ namespace psycle {
 
 		void VstFxGui::ShowDialog(double x, double y)
 		{
-#ifdef use_psycore
-#else
 			if ( !dialog_ ) {
 				dialog_ = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(mac()), this);
 				// newwin->_pActive = &isguiopen[tmac];
@@ -44,8 +42,8 @@ namespace psycle {
 					view()->child_view()->pParentFrame);
 				std::ostringstream winname;
 				winname << std::hex << std::setw(2)
-					<< view()->song()->FindBusFromIndex(mac()->_macIndex)
-						<< " : " << mac()->_editName;
+					<< view()->song()->FindBusFromIndex(mac()->id())
+						<< " : " << mac()->GetEditName();
 				dialog_->SetTitleText(winname.str().c_str());
 				// C_Tuner.dll crashes if asking size before opening.
 //				newwin->ResizeWindow(0);
@@ -53,7 +51,6 @@ namespace psycle {
 				dialog_->PostOpenWnd();
 //				CenterWindowOnPoint(m_pWndMac[tmac], point);
 			}
-#endif
 		}
 
 	}  // namespace host

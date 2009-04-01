@@ -1,15 +1,17 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
-
 #include "GearTracker.hpp"
-#include "Psycle.hpp"
 #include "ChildView.hpp"
+#include "MachineView.hpp"
 #include "MachineGui.hpp"
 
 #ifdef use_psycore
 #include <psycle/core/sampler.h>
-#include <psycle/core/dsp.h>
+using namespace psy::core;
+#else
+#include "Sampler.hpp"
 #endif
+#include <psycle/helpers/dsp.hpp>
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -27,11 +29,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			: CDialog(CGearTracker::IDD, gui->view()->child_view()),
 			  gui_(gui),
 			  m_pParent(gui->view()->child_view()),
-#ifdef use_psycore
-				_pMachine((psy::core::Sampler*)gui->mac())
-#else
 				_pMachine((Sampler*)gui->mac())
-#endif
 
 		{
 
@@ -68,11 +66,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			m_interpol.SetCurSel(_pMachine->_resampler.GetQuality());
 
-#ifdef use_psycore
 			SetWindowText(_pMachine->GetEditName().c_str());
-#else
-			SetWindowText(_pMachine->_editName);
-#endif
 
 			m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 			m_polyslider.SetPos(_pMachine->_numVoices);
@@ -105,11 +99,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CGearTracker::OnSelchangeCombo1() 
 		{
-#ifdef use_psycore
-			_pMachine->_resampler.SetQuality((psy::core::dsp::ResamplerQuality)m_interpol.GetCurSel());
-#else
-			_pMachine->_resampler.SetQuality((helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
-#endif
+			_pMachine->_resampler.SetQuality((psycle::helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
 		}
 
 		BOOL CGearTracker::Create()

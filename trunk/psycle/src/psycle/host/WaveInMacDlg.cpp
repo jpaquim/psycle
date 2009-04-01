@@ -1,12 +1,21 @@
 
 #include "WaveInMacDlg.hpp"
-#include "Psycle.hpp"
-#include "Global.hpp"
-#include "ChildView.hpp"
-#include "AudioDriver.hpp"
 #include "Configuration.hpp"
+
+//TODO: AudioRecorder is not defined in psycle-core yet.
+#ifdef use_psycore
+#include <psycle/audiodrivers/audiodriver.h>
+#include <psycle/core/internal_machines.h>
+#include <psycle/helpers/dsp.hpp>
+using namespace psy::core;
+#else
+#include "AudioDriver.hpp"
 #include "internal_machines.hpp"
 #include "Dsp.hpp"
+#endif
+
+#include "ChildView.hpp"
+#include "RecorderGui.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -49,9 +58,9 @@ BOOL CWaveInMacDlg::OnInitDialog()
 	
 	FillCombobox();
 	m_volslider.SetRange(0,1024);
-	m_volslider.SetPos(pRecorder->_gainvol*256);
+	m_volslider.SetPos(pRecorder->GainVol()*256);
 	char label[30];
-	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->_gainvol));
+	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->GainVol()));
 	m_vollabel.SetWindowText(label);
 	return TRUE;
 	// return TRUE unless you set the focus to a control
@@ -67,7 +76,7 @@ void CWaveInMacDlg::FillCombobox()
 		m_listbox.AddString(ports[i].c_str());
 	}
 	if (ports.size()==0) m_listbox.AddString("No Inputs Available");
-	m_listbox.SetCurSel(pRecorder->_captureidx);
+	m_listbox.SetCurSel(pRecorder->CaptureIdx());
 }
 
 void CWaveInMacDlg::OnCbnSelendokCombo1()
@@ -96,8 +105,8 @@ BOOL CWaveInMacDlg::PreTranslateMessage(MSG* pMsg)
 void CWaveInMacDlg::OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	char label[30];
-	pRecorder->_gainvol = m_volslider.GetPos()*0.00390625f;
-	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->_gainvol));
+	pRecorder->setGainVol(m_volslider.GetPos()*0.00390625f);
+	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->GainVol()));
 	m_vollabel.SetWindowText(label);
 	*pResult = 0;
 }

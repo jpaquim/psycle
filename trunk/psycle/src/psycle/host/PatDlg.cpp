@@ -2,8 +2,7 @@
 ///\brief implementation file for psycle::host::CPatDlg.
 
 #include "PatDlg.hpp"
-#include "Psycle.hpp"
-#include "Constants.hpp"
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)

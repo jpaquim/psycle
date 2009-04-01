@@ -1,10 +1,18 @@
 
 #include "FrameMixerMachine.hpp"
-#include "Psycle.hpp"
-#include "NativeGui.hpp"
 #include "Configuration.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#include <psycle/core/mixer.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
 #include "internal_machines.hpp"
+#endif
+
+#include "MachineGui.hpp"
+#include "NativeGui.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "ChildView.hpp"
 
@@ -62,7 +70,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 	//////////////////////////////////////////////////////////////////////////
 	// InfoLabel class
-	void CFrameMixerMachine::InfoLabel::Draw(CDC* dc, int x, int y,const char *parName,const char *parValue)
+	void CFrameMixerMachine::InfoLabel::Draw(CDC* dc, int x, int y, std::string parName, std::string parValue)
 	{
 		const int half = height/2;
 		dc->Draw3dRect(x,y-1,width,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
@@ -71,21 +79,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		dc->SetBkColor(Global::configuration().machineGUITopColor);
 		dc->SetTextColor(Global::configuration().machineGUIFontTopColor);
-		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+half), CString(parName), 0);
+		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+half), CString(parName.c_str()), 0);
 	
 		DrawValue(dc,x,y,parValue);
 	}
-	void CFrameMixerMachine::InfoLabel::DrawValue(CDC* dc, int x, int y,const char *parValue)
+	void CFrameMixerMachine::InfoLabel::DrawValue(CDC* dc, int x, int y, std::string parValue)
 	{
 		const int half = height/2;
 		dc->SetBkColor(Global::configuration().machineGUIBottomColor);
 		dc->SetTextColor(Global::configuration().machineGUIFontBottomColor);
-		dc->ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width-1, y+height-1), CString(parValue), 0);
+		dc->ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width-1, y+height-1), CString(parValue.c_str()), 0);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// HLightInfoLabel class
-	void CFrameMixerMachine::InfoLabel::DrawHLight(CDC* dc, CFont* b_font_bold,int x, int y,const char *parName,const char *parValue)
+	void CFrameMixerMachine::InfoLabel::DrawHLight(CDC* dc, CFont* b_font_bold,int x, int y, std::string parName, std::string parValue)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
@@ -95,13 +103,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		dc->SetBkColor(Global::configuration().machineGUITitleColor);
 		dc->SetTextColor(Global::configuration().machineGUITitleFontColor);
 		CFont *oldfont =dc->SelectObject(b_font_bold);
-		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
+		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName.c_str()), 0);
 		dc->SelectObject(oldfont);
 
 		DrawHLightValue(dc,x,y,parValue);
 		dc->Draw3dRect(x-1,y-1,width+ Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 	}
-	void CFrameMixerMachine::InfoLabel::DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y,const char *parName,const char *parValue)
+	void CFrameMixerMachine::InfoLabel::DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y,std::string parName, std::string parValue)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
@@ -111,24 +119,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		dc->SetBkColor(Global::configuration().machineGUIHTopColor);
 		dc->SetTextColor(Global::configuration().machineGUIHFontBottomColor);
 		CFont *oldfont =dc->SelectObject(b_font_bold);
-		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
+		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName.c_str()), 0);
 		dc->SelectObject(oldfont);
 
 		DrawHLightValue(dc,x,y,parValue);
 		dc->Draw3dRect(x-1,y-1,width+ Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 	}
-	void CFrameMixerMachine::InfoLabel::DrawHLightValue(CDC* dc, int x, int y,const char *parValue)
+	void CFrameMixerMachine::InfoLabel::DrawHLightValue(CDC* dc, int x, int y, std::string parValue)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
 		dc->SetBkColor(Global::configuration().machineGUIBottomColor);
 		dc->SetTextColor(Global::configuration().machineGUIFontBottomColor);
-		dc->ExtTextOut(x+xoffset, y+half,ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue), 0);
+		dc->ExtTextOut(x+xoffset, y+half,ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue.c_str()), 0);
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
 	// HeaderInfoLabel class
-/*	void CFrameMixerMachine::InfoLabel::DrawHeader(CDC* dc, int x, int y,const char *parName, const char *parValue, bool checked)
+/*	void CFrameMixerMachine::InfoLabel::DrawHeader(CDC* dc, int x, int y,std::string parName, std::string parValue, bool checked)
 	{
 		const int half = height/2;
 		const int quarter = height/4;
@@ -141,7 +149,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		dc->SetTextColor(Global::configuration().machineGUITitleFontColor);
 
 		dc->SelectObject(&b_font_bold);
-		dc->ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName), 0);
+		dc->ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName.c_str()), 0);
 		dc->SelectObject(&b_font);
 		dc->Draw3dRect(x-1,y-1,width+Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 
@@ -273,7 +281,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		for (int i=0; i<_pMixer->numreturns(); i++)
 		{
 			if (_pMixer->Return(i).IsValid()) {
-				sendNames[i]=Global::song()._pMachine[_pMixer->Return(i).Wire().machine_]->GetEditName();
+				sendNames[i]=Global::song().machine(_pMixer->Return(i).Wire().machine_)->GetEditName();
 				//sends++;
 			}
 			else sendNames[i]="";
@@ -319,7 +327,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		std::ostringstream winname;
 		winname<<std::setfill('0') << std::setw(2) << std::hex;
-		winname << MachineIndex << " : " << _pMixer->_editName;
+		winname << MachineIndex << " : " << _pMixer->GetEditName();
 		SetWindowText(winname.str().c_str());
 
 		ShowWindow(SW_SHOW);
@@ -338,9 +346,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 			else { sendtxt += '1'; sendtxt += ('0'+i-9); }
 			if ( _pMixer->SendValid(i))
 			{
-				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
+				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,sendNames[i]);
 			}
-			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
+			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,"");
 		}
 		yoffset+=InfoLabel::height;
 		InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,"Mix","");
@@ -356,7 +364,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		xoffset+=InfoLabel::width+Knob::width;
 		yoffset=0;
 		std::string mastertxt = "Master Out";
-		InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,mastertxt.c_str(),"");
+		InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,mastertxt,"");
 
 		yoffset+=(_pMixer->numsends()+1)*InfoLabel::height;
 		InfoLabel::Draw(&bufferDC,xoffset+Knob::width,yoffset,"D/W","");
@@ -380,9 +388,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 			std::string chantxt = _pMixer->GetAudioInputName(int(i+Mixer::chan1));
 			if (_pMixer->ChannelValid(i))
 			{
-				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->_editName);
+				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,Global::song().machine(_pMixer->_inputMachines[i])->GetEditName());
 			}
-			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),"");
+			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,"");
 			yoffset+=InfoLabel::height;
 			for (int j=0; j<_pMixer->numsends(); j++)
 			{
@@ -407,9 +415,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 			std::string sendtxt = _pMixer->GetAudioInputName(int(i+Mixer::return1));
 			if (_pMixer->ReturnValid(i))
 			{
-				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
+				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,sendNames[i].c_str());
 			}
-			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
+			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,"");
 			yoffset+=(2+i)*InfoLabel::height;
 			for (int j=i+1; j<_pMixer->numsends(); j++)
 			{
@@ -526,16 +534,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 				if (_pMixer->ChannelValid(i))
 				{
 					if ( _swapend == i+chan1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->_editName);
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,Global::song().machine(_pMixer->_inputMachines[i])->GetEditName());
 					else 
-						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->_editName);
+						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,Global::song().machine(_pMixer->_inputMachines[i])->GetEditName());
 				}
 				else
 				{
 					if ( _swapend == i+chan1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),"");
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,"");
 					else
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),"");
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,"");
 				}
 			}
 			if (_pMixer->ChannelValid(i))
@@ -611,16 +619,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 				if (_pMixer->ReturnValid(i))
 				{
 					if ( _swapend == i+return1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,sendNames[i]);
 					else 
-						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
+						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,sendNames[i]);
 				}
 				else
 				{
 					if ( _swapend == i+return1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,"");
 					else
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,"");
 				}
 			}
 

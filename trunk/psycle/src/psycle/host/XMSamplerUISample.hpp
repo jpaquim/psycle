@@ -1,12 +1,22 @@
 #pragma once
+#include "Psycle.hpp"
+#ifdef use_psycore
+#include <psycle/core/xminstrument.h>
+namespace psy {
+	namespace core {
+		class XMSampler;
+	}
+}
+using namespace psy::core;
+#else
 #include "XMInstrument.hpp"
-#include "resources/resources.hpp"
+class XMSampler;
+#endif
 #include <afxwin.h>
-#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-class XMSampler;
+
 class CWaveScopeCtrl : public CStatic
 {
 public:

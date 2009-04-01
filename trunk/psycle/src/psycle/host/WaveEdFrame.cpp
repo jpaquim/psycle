@@ -1,9 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
-
 #include "WaveEdFrame.hpp"
-#include "Psycle.hpp"
+#ifdef use_psycore
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
+#endif
+#include "Configuration.hpp"
 #include "MainFrm.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -124,7 +128,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (wavview.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
 			{
-				this->AdjustStatusBar(_pSong->instSelected);
+				this->AdjustStatusBar(_pSong->instSelected());
 				return true;	
 			}
 			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
@@ -156,7 +160,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			char buff[48];
 			int sl=wavview.GetSelectionLength();
-			if(sl==0 || _pSong->_pInstrument[_pSong->instSelected]==NULL)
+			if(sl==0 || _pSong->_pInstrument[_pSong->instSelected()]==NULL)
 				sprintf(buff, "No Data in Selection.");
 			else
 			{
@@ -187,15 +191,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnShowWindow(bShow, nStatus);
 
 			Notify();
-		//	AdjustStatusBar(_pSong->instSelected, _pSong->waveSelected);
+		//	AdjustStatusBar(_pSong->instSelected(), _pSong->waveSelected);
 			UpdateWindow();
 		}
 
 		void CWaveEdFrame::Notify(void)
 		{
-			wavview.SetViewData(_pSong->instSelected);
-			AdjustStatusBar(_pSong->instSelected);
-			wsInstrument = _pSong->instSelected;
+			wavview.SetViewData(_pSong->instSelected());
+			AdjustStatusBar(_pSong->instSelected());
+			wsInstrument = _pSong->instSelected();
 		}
 
 		void CWaveEdFrame::OnPlay() {PlayFrom(wavview.GetCursorPos());}

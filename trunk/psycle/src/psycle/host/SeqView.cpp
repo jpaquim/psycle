@@ -1,12 +1,19 @@
 #include "seqview.hpp"
 
 #include "Configuration.hpp"
-#include "Helpers.hpp"
-#include "Player.hpp"
 #include "Project.hpp"
-#include "Psycle.hpp"
 #include "MainFrm.hpp"
+#include "PatternView.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
+#include "Player.hpp"
 #include "Song.hpp"
+#endif
+#include <psycle/helpers/helpers.hpp>
 
 
 #ifdef _MSC_VER
@@ -272,7 +279,7 @@ namespace psycle {
 			
 			if((ep!=pat_view->editPosition))// && ( cc->GetSelCount() == 1))
 			{
-				if ((Global::pPlayer->_playing) && (Global::pConfig->_followSong))
+				if ((Global::pPlayer->playing()) && (Global::pConfig->_followSong))
 				{
 					bool b = Global::pPlayer->_playBlock;
 					Global::pPlayer->Start(ep,0,false);
@@ -285,7 +292,7 @@ namespace psycle {
 				if(cpid!=_pSong->playOrder[ep])
 				{
 					main_frame_->m_wndView.Repaint(draw_modes::pattern);
-					if (Global::pPlayer->_playing) {
+					if (Global::pPlayer->playing()) {
 						main_frame_->m_wndView.Repaint(draw_modes::playback);
 					}
 				}		
@@ -315,7 +322,7 @@ namespace psycle {
 		//	
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			int const ep=cc->GetCurSel();
-			if (Global::pPlayer->_playing)
+			if (Global::pPlayer->playing())
 			{
 				bool b = Global::pPlayer->_playBlock;
 				Global::pPlayer->Start(ep,0);
@@ -837,9 +844,9 @@ namespace psycle {
 			memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
 			memset(newtoold,255,MAX_PATTERNS*sizeof(char));
 
-			if (Global::pPlayer->_playing)
+			if (Global::pPlayer->playing())
 			{
-				Global::pPlayer->Stop();
+				Global::pPlayer->stop();
 			}
 
 
@@ -949,7 +956,7 @@ namespace psycle {
 			CListBox *pls=(CListBox*)GetDlgItem(IDC_SEQLIST);
 			pls->SetSel(Global::pPlayer->_playPosition,true);
 
-			int top = ((Global::pPlayer->_playing)?Global::pPlayer->_playPosition:pat_view->editPosition) - 0xC;
+			int top = ((Global::pPlayer->playing())?Global::pPlayer->_playPosition:pat_view->editPosition) - 0xC;
 			if (top < 0) top = 0;
 			pls->SetTopIndex(top);
 			main_frame_->m_wndView.SetFocus();			
@@ -1085,22 +1092,22 @@ namespace psycle {
 				unsigned char* const plineOffset = _pSong->_ppattern(pattern);
 				for (int l = 0; l < _pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
 				{
-					for (int t = 0; t < _pSong->SONGTRACKS*EVENT_SIZE; t+=EVENT_SIZE)
+					for (int t = 0; t < _pSong->tracks()*EVENT_SIZE; t+=EVENT_SIZE)
 					{
-						PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
-						switch (pEntry->_cmd)
+						PatternEvent* pEntry = (PatternEvent*)(plineOffset+l+t);
+						switch (pEntry->command())
 						{
 						case 0xFF:
-							if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+							if ( pEntry->parameter() != 0 && pEntry->note() < 121 || pEntry->note() == 255)
 							{
-								bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+								bpm=pEntry->parameter();//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 							}
 							break;
 							
 						case 0xFE:
-							if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+							if ( pEntry->parameter() != 0 && pEntry->note() < 121 || pEntry->note() == 255)
 							{
-								tpb=pEntry->_parameter;
+								tpb=pEntry->parameter();
 							}
 							break;
 						}

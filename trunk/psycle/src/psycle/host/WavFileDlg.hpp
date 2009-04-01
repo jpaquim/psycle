@@ -1,11 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::CWavFileDlg.
 #pragma once
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
-
-		class Song;
 
 		/// wave file dialog window.
 		class CWavFileDlg : public CFileDialog

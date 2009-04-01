@@ -1,10 +1,9 @@
 ///\file
 ///\interface psycle::host::CDSoundConfig
 #pragma once
-#include "resources/resources.hpp"
+#include "Psycle.hpp"
 #include <afxwin.h>
 #include <afxcmn.h> // CSpinButtonCtrl
-#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		/// direct sound config window.

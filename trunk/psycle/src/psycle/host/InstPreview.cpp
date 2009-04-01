@@ -1,6 +1,7 @@
 //\file
 //\brief implementation file for psycle::host::InstPreview.
-
+#include "configuration_options.hpp"
+#ifndef use_psycore
 #include "InstPreview.hpp"
 #include "Instrument.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -68,3 +69,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
+#endif //#ifndef use_psycore

@@ -1,19 +1,20 @@
 ///\file
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
-
-#include "Song.hpp"
-#include "Configuration.hpp"
-#include "MachineView.hpp"
-#include "PatternView.hpp"
-#include "MachineGui.hpp"
-#include "mfc_namespace.hpp"
-
+#include "Psycle.hpp"
 
 #ifdef use_psycore
 namespace psy {
 	namespace core {
 		class AudioDriver;
+		class Song;
+	}
+}
+using namespace psy::core;
+#else
+namespace psycle {
+	namespace host {
+		class Song;
 	}
 }
 #endif
@@ -25,6 +26,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		class CGearTracker;
 		class XMSamplerUI;
 		class CWaveInMacDlg;
+		class MachineView;
+		class PatternView;
 	
 		#define MAX_DRAW_MESSAGES 32
 
@@ -121,8 +124,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );								
 
-			MachineView* machine_view() { return &machine_view_; }
-			PatternView* pattern_view() { return &pattern_view_; }
+			MachineView* machine_view() { return machine_view_; }
+			PatternView* pattern_view() { return pattern_view_; }
 			
 		public:
 			//RECENT!!!//
@@ -164,8 +167,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//Recent Files!!!!//
 			void DrawAllMachineVumeters(CDC *devc);																						
 				
-			MachineView machine_view_;
-			PatternView pattern_view_;
+			MachineView* machine_view_;
+			PatternView* pattern_view_;
 
 			// GDI Stuff		
 			CBitmap* bmpDC;

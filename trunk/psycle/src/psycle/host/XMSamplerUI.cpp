@@ -1,7 +1,11 @@
 
 #include "XMSamplerUI.hpp"
-#include "Psycle.hpp"
+#ifdef use_psycore
+#include <psycle/core/xmsampler.h>
+using namespace psy::core;
+#else
 #include "XMSampler.hpp"
+#endif
 #include "ChildView.hpp"
 #include "MachineGui.hpp"
 

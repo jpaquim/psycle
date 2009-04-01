@@ -22,8 +22,8 @@ namespace psycle
 			public:
 				inline virtual int GetTickLength() { return Global::pPlayer->SamplesPerRow(); }
 				inline virtual int GetSamplingRate() { return Global::pConfig->GetSamplesPerSec(); }
-				inline virtual int GetBPM() { return Global::pPlayer->bpm; }
-				inline virtual int GetTPB() { return Global::pPlayer->tpb; }
+				inline virtual int GetBPM() { return Global::pPlayer->bpm(); }
+				inline virtual int GetTPB() { return Global::pPlayer->tpb(); }
 
 			public:
 				///\todo mswindows! humpf! mswindows!
@@ -176,7 +176,7 @@ namespace psycle
 					virtual void Work(int numSamples);
 					virtual float GetAudioRange(){ return 32768.0f; }
 					virtual void Tick();
-					virtual void Tick(int channel, PatternEntry * pEntry);
+					virtual void Tick(int channel, PatternEvent * pEntry);
 					virtual void Stop();
 			///\}
 

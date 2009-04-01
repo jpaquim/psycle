@@ -1,11 +1,12 @@
 ///\file
 ///\brief keyboard handler for psycle::host::CChildView, private header
+#include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
-			pattern_view_.OnKeyUp(nChar, nRepCnt, nFlags);
+			pattern_view_->OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
 		void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -21,7 +22,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			BOOL bRepeat = nFlags&0x4000;
 			if(viewMode == view_modes::pattern && pattern_view()->bEditMode)
 			{
-				bool success = pattern_view_.OnKeyDown(nChar, nRepCnt, nFlags);
+				bool success = pattern_view_->OnKeyDown(nChar, nRepCnt, nFlags);
 				if (success) {
 					CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 					return;
@@ -64,7 +65,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								CPoint point;
 								point.x = song->machine(song->seqBus)->GetPosX();
 								point.y = song->machine(song->seqBus)->GetPosY();
-								machine_view_.ShowDialog(song->machine(song->seqBus), point.x, point.y);
+								machine_view_->ShowDialog(song->machine(song->seqBus), point.x, point.y);
 							}
 						}
 
@@ -73,17 +74,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						// maybe this should handeld in the machine view
 						if (song->seqBus < MAX_MACHINES)
 						{
-							if (song->_pMachine[song->seqBus])
+							if (song->machine(song->seqBus))
 							{
 								CPoint point;
-								point.x = song->_pMachine[song->seqBus]->_x;
-								point.y = song->_pMachine[song->seqBus]->_y;
-								machine_view_.ShowDialog(song->_pMachine[song->seqBus], point.x, point.y);
+								point.x = song->machine(song->seqBus)->_x;
+								point.y = song->machine(song->seqBus)->_y;
+								machine_view_->ShowDialog(song->machine(song->seqBus), point.x, point.y);
 							}
 						}
 #endif
 					} else
-					pattern_view_.PerformCmd(cmd, bRepeat);
+					pattern_view_->PerformCmd(cmd, bRepeat);
 				}
 				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
 				{

@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::ASIOInterface.
 
 #include "ASIOInterface.hpp"
-#include "resources/resources.hpp"
 #include "Registry.hpp"
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"
@@ -10,12 +9,12 @@
 #include "Helpers.hpp"
 #include "Dsp.hpp"
 #include <universalis/processor/exception.hpp>
-#include "Configuration.hpp"
+
 namespace psycle
 {
 	namespace host
 	{
-		using namespace helpers;
+		using namespace psycle::helpers;
 
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 		#define ALLOW_NON_ASIO

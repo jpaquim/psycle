@@ -1,18 +1,15 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "MachineGui.hpp"
 
 namespace psycle {
 	namespace host {
 
+		class MasterDlg;
+
 		class MasterGui : public MachineGui {
 		public:
-			MasterGui(class MachineView* view,
-#ifdef use_psycore
-			class psy::core::Machine* mac);
-#else
-					  class Machine* mac);
-#endif
+			MasterGui(MachineView* view, Machine* mac);
 			~MasterGui();
 
 			virtual void SetSkin(const SMachineCoords& MachineCoords,

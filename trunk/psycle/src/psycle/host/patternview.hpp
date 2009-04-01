@@ -1,20 +1,38 @@
 #pragma once
-
+#include "Psycle.hpp"
 // this shouldn't be here, it is for SSkin..
 #include "machinegui.hpp"
 
-#include "Song.hpp"
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
 
-#define MAX_DRAW_MESSAGES 32
+//TODO: This is temporary until replaing notecommands with notetypes and patterncmd struct by pattercmd namespace
+//#include "SongStructs.hpp"
 
 namespace psy {
 	namespace core {
 		class SinglePattern;
+		class Song;
 	}
 }
 
+using namespace psy::core;
+#else
+#include "Machine.hpp"
+#include "Song.hpp"
+#endif
+
+#define MAX_DRAW_MESSAGES 32
+
 namespace psycle {
 	namespace host {
+	
+		class CMainFrame;
+		class CChildView;
+	#ifndef use_psycore
+		class Song;
+	#endif
 
 		class CCursor
 		{
@@ -144,17 +162,12 @@ namespace psycle {
 				};		
 			};
 
-			PatternView(class CChildView* parent, class CMainFrame* main, class Song* song);
+			PatternView(CChildView* parent, CMainFrame* main, Song* song);
 			~PatternView();
 
 #ifdef use_psycore
-			void SetPsySong( psy::core::Song* song ) {
-				psy_song_ = song;
-			}
-			psy::core::Song* psy_song() { return psy_song_; }
 		private:
-			psy::core::Song* psy_song_;
-			psy::core::SinglePattern* pattern();
+			SinglePattern* pattern();
 		public:
 #endif
 
@@ -547,9 +560,14 @@ public:
 			case 119: TXTFLAT(devc,"B-9",x,y,srx,sry);break;
 			case notecommands::release: TXTFLAT(devc,"off",x,y,srx,sry);break;
 			case notecommands::tweak: TXTFLAT(devc,"twk",x,y,srx,sry);break;
+#ifdef use_psycore
+			case notecommands::midi_cc: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
+			case notecommands::tweak_slide: TXTFLAT(devc,"tws",x,y,srx,sry);break;
+#else
 			case notecommands::tweakeffect: TXTFLAT(devc,"twf",x,y,srx,sry);break;
 			case notecommands::midicc: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
 			case notecommands::tweakslide: TXTFLAT(devc,"tws",x,y,srx,sry);break;
+#endif
 			}
 		}
 
@@ -777,4 +795,3 @@ public:
 
 	}  //namespace host
 }  // namespace psycle
-

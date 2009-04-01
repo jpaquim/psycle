@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Global.hpp" 
-#include "configuration_options.hpp" // just for the use_psycore define
+#include "Psycle.hpp"
 #include <cassert>
 
 #ifdef use_psycore
 #include <psycle/core/song.h>
+using namespace psy::core;
 #endif
 
 namespace psycle {
@@ -23,9 +23,8 @@ namespace psycle {
 
 			Song& song() { assert(Global::_pSong); return *Global::_pSong; }
 #ifdef use_psycore
-			psy::core::Song& psy_song() { return song_; }
+			Song& psy_song() { return song_; }
 #endif
-
 
 			// modules
 			PatternView* pat_view();
@@ -61,10 +60,9 @@ namespace psycle {
 			int lines_per_beat_;
 
 #ifdef use_psycore
-			psy::core::Song song_;
+			Song song_;
 #endif
 
 		};
 	}
 }
-

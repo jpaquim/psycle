@@ -1,6 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::Filter.
 
+//Psycore includes psycle-helpers for now.
+#include "configuration_options.hpp"
+#ifndef use_psycore
+
 #include "Filter.hpp"
 namespace psycle
 {
@@ -185,3 +189,5 @@ namespace psycle
 		}
 	}
 }
+
+#endif //#ifndef use_psycore

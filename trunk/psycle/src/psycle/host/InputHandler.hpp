@@ -1,7 +1,17 @@
 ///\file
 ///\brief interface file for psycle::host::InputHandler.
 #pragma once
-#include "Constants.hpp"
+#include "Psycle.hpp"
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class Machine;
+	}
+}
+using namespace psy::core;
+#endif
+
 namespace psycle
 {
 	namespace host
@@ -21,7 +31,9 @@ namespace psycle
 		/// ???
 		const int max_cmds = 1024;
 
+#ifndef use_psycore
 		class Machine;
+#endif
 		class CChildView;
 		class CMainFrame;
 

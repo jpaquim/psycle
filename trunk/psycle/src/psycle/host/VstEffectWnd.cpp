@@ -2,17 +2,21 @@
 ///\brief implementation file for psycle::host::CVstEditorDlg.
 
 #include "VstEffectWnd.hpp"
-#include "Psycle.hpp"
-#include "VstHost24.hpp"
-
-#include "VstParamList.hpp"
-
-#include "InputHandler.hpp"
 #include "Configuration.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/vsthost.h>
+#include <psycle/core/vstplugin.h>
+using namespace psy::core;
+#else
+#include "VstHost24.hpp"
+#endif
 
 #include "PresetsDlg.hpp"
 #include "MachineGui.hpp"
+#include "VstParamList.hpp"
 
+#include "InputHandler.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
@@ -220,7 +224,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (!bRepeat)
 					{
 						const int outnote = cmd.GetNote();
+#ifdef use_psycore
+						if ( machine().IsGenerator() || Global::pConfig->_notesToEffects)
+#else
 						if ( machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+#endif
 						{
 							Global::pInputHandler->PlayNote(outnote,127,true,&machine());
 						}
@@ -243,7 +251,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
 			if(outnote != -1) {
+#ifdef use_psycore
+				if(machine().IsGenerator() || Global::pConfig->_notesToEffects)
+#else
 				if(machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+#endif
 					Global::pInputHandler->StopNote(outnote, true, &machine());
 				else
 					Global::pInputHandler->StopNote(outnote, true);
@@ -703,9 +715,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, index, helpers::math::rounded(value * vst::quantization));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), index, helpers::math::rounded(value * vst::AudioMaster::GetQuantization()));
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, helpers::math::rounded(value * vst::quantization));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), index, helpers::math::rounded(value * vst::AudioMaster::GetQuantization()));
 				}
 				if(pParamGui)
 					pParamGui->UpdateNew(index, value);

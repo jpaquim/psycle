@@ -5,11 +5,14 @@
 
 #ifdef use_psycore
 #include <psycle/core/internal_machines.h>
+#include <psycle/helpers/dsp.hpp>
+using namespace psy::core;
+#else
+#include "Machine.hpp"
+#include "Dsp.hpp"
 #endif
 
-#include "Psycle.hpp"
 #include "ChildView.hpp"
-#include "Dsp.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

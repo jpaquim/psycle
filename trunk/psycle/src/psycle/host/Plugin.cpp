@@ -1,5 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Plugin
+#include "configuration_options.hpp"
+#ifndef use_psycore
 
 #include "Plugin.hpp"
 #include "FileIO.hpp"
@@ -405,7 +407,7 @@ namespace psycle
 					while (ns)
 					{
 						int nextevent = (TWSActive)?TWSSamples:ns+1;
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						for (int i=0; i < Global::_pSong->tracks(); i++)
 						{
 							if (TriggerDelay[i]._cmd)
 							{
@@ -421,7 +423,7 @@ namespace psycle
 							{
 								TWSSamples -= ns;
 							}
-							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+							for (int i=0; i < Global::_pSong->tracks(); i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd)
@@ -431,7 +433,7 @@ namespace psycle
 							}
 							try
 							{
-								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->SONGTRACKS);
+								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->tracks());
 							}
 							catch(const std::exception &)
 							{
@@ -445,7 +447,7 @@ namespace psycle
 								ns -= nextevent;
 								try
 								{
-									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
+									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->tracks());
 								}
 								catch(const std::exception &)
 								{
@@ -486,7 +488,7 @@ namespace psycle
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+							for (int i=0; i < Global::_pSong->tracks(); i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -563,7 +565,7 @@ namespace psycle
 								{
 									if (TriggerDelayCounter[i] == nextevent)
 									{
-										PatternEntry entry =TriggerDelay[i];
+										PatternEvent entry =TriggerDelay[i];
 										switch(ArpeggioCount[i])
 										{
 										case 0: 
@@ -577,10 +579,10 @@ namespace psycle
 											ArpeggioCount[i]++;
 											break;
 										case 1:
-											entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
+											entry._note+=((TriggerDelay[i].parameter()&0xF0)>>4);
 											try
 											{
-												proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
+												proxy().SeqTick(i ,entry.note(), entry._inst, 0, 0);
 											}
 											catch(const std::exception &)
 											{
@@ -591,7 +593,7 @@ namespace psycle
 											entry._note+=(TriggerDelay[i]._parameter&0x0F);
 											try
 											{
-												proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
+												proxy().SeqTick(i ,entry.note(), entry.instrument(), 0, 0);
 											}
 											catch(const std::exception &)
 											{
@@ -599,7 +601,7 @@ namespace psycle
 											ArpeggioCount[i]=0;
 											break;
 										}
-										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
+										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb()/24;
 									}
 									else
 									{
@@ -713,28 +715,28 @@ namespace psycle
 			}
 		}
 
-		void Plugin::Tick(int channel, PatternEntry * pData)
+		void Plugin::Tick(int channel, PatternEvent * pData)
 		{
 			try
 			{
-				proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
+				proxy().SeqTick(channel, pData->Note(), pData->Instrument(), pData->Command(), pData->Parameter());
 			}
 			catch(const std::exception &)
 			{
 				return;
 			}
-			if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect)
+			if(pData->Note() == notecommands::tweak || pData->Note() == notecommands::tweakeffect)
 			{
-				if(pData->_inst < _pInfo->numParameters)
+				if(pData->Instrument() < _pInfo->numParameters)
 				{
-					int nv = (pData->_cmd<<8)+pData->_parameter;
-					int const min = _pInfo->Parameters[pData->_inst]->MinValue;
-					int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+					int nv = (pData->Command()<<8)+pData->Parameter();
+					int const min = _pInfo->Parameters[pData->Instrument()]->MinValue;
+					int const max = _pInfo->Parameters[pData->Instrument()]->MaxValue;
 					nv += min;
 					if(nv > max) nv = max;
 					try
 					{
-						proxy().ParameterTweak(pData->_inst, nv);
+						proxy().ParameterTweak(pData->Instrument(), nv);
 					}
 					catch(const std::exception &)
 					{
@@ -742,9 +744,9 @@ namespace psycle
 					Global::pPlayer->Tweaker = true;
 				}
 			}
-			else if(pData->_note == notecommands::tweakslide)
+			else if(pData->Note() == notecommands::tweakslide)
 			{
-				if(pData->_inst < _pInfo->numParameters)
+				if(pData->Instrument() < _pInfo->numParameters)
 				{
 					int i;
 					if(TWSActive)
@@ -752,7 +754,7 @@ namespace psycle
 						// see if a tweak slide for this parameter is already happening
 						for(i = 0; i < MAX_TWS; i++)
 						{
-							if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+							if((TWSInst[i] == pData->Instrument()) && (TWSDelta[i] != 0))
 							{
 								// yes
 								break;
@@ -780,15 +782,15 @@ namespace psycle
 					}
 					if (i < MAX_TWS)
 					{
-						TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
-						float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
-						float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
+						TWSDestination[i] = float(pData->Command()<<8)+pData->Parameter();
+						float min = float(_pInfo->Parameters[pData->Instrument()]->MinValue);
+						float max = float(_pInfo->Parameters[pData->Instrument()]->MaxValue);
 						TWSDestination[i] += min;
 						if (TWSDestination[i] > max)
 						{
 							TWSDestination[i] = max;
 						}
-						TWSInst[i] = pData->_inst;
+						TWSInst[i] = pData->Instrument();
 						try
 						{
 							TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
@@ -803,14 +805,14 @@ namespace psycle
 					else
 					{
 						// we have used all our slots, just send a twk
-						int nv = (pData->_cmd<<8)+pData->_parameter;
-						int const min = _pInfo->Parameters[pData->_inst]->MinValue;
-						int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+						int nv = (pData->Command()<<8)+pData->Parameter();
+						int const min = _pInfo->Parameters[pData->Instrument()]->MinValue;
+						int const max = _pInfo->Parameters[pData->Instrument()]->MaxValue;
 						nv += min;
 						if (nv > max) nv = max;
 						try
 						{
-							proxy().ParameterTweak(pData->_inst, nv);
+							proxy().ParameterTweak(pData->Instrument(), nv);
 						}
 						catch(const std::exception &)
 						{
@@ -1042,3 +1044,4 @@ namespace psycle
 		}
 	}
 }
+#endif //#ifndef use_psycore

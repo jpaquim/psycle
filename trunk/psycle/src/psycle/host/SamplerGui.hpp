@@ -1,18 +1,15 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "GeneratorGui.hpp"
 
 namespace psycle {
 	namespace host {
 
+		class CGearTracker;
+
 		class SamplerGui : public GeneratorGui {
 		public:
-			SamplerGui(class MachineView* view,
-#ifdef use_psycore
-					   class psy::core::Machine* mac);
-#else
-					   class Machine* mac);
-#endif
+			SamplerGui(MachineView* view, Machine* mac);
 			~SamplerGui();
 
 			virtual void BeforeDeleteDlg();

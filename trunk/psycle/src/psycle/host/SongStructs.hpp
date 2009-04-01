@@ -1,5 +1,4 @@
 #pragma once
-#include "configuration_options.hpp"
 #include <cstdint>
 namespace psycle
 {
@@ -7,10 +6,10 @@ namespace psycle
 	{
 		#pragma pack(push, 1)
 
-		class PatternEntry
+		class PatternEvent
 		{
 			public:
-				inline PatternEntry()
+				inline PatternEvent()
 				:
 					_note(255),
 					_inst(255),
@@ -31,9 +30,9 @@ namespace psycle
 #error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 #if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				inline PatternEntry(std::uint8_t note, std::uint8_t inst, std::uint8_t volume, std::uint8_t cmd, std::uint8_t param, std::uint8_t machine)
+				inline PatternEvent(std::uint8_t note, std::uint8_t inst, std::uint8_t volume, std::uint8_t cmd, std::uint8_t param, std::uint8_t machine)
 #else
-				inline PatternEntry(std::uint8_t note, std::uint8_t inst, std::uint8_t machine, std::uint8_t cmd, std::uint8_t param)
+				inline PatternEvent(std::uint8_t note, std::uint8_t inst, std::uint8_t machine, std::uint8_t cmd, std::uint8_t param)
 #endif
 #endif
 				:
@@ -51,6 +50,7 @@ namespace psycle
 					_parameter(param)
 				{
 				}
+		private:
 				std::uint8_t _note;
 				std::uint8_t _inst;
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
@@ -67,17 +67,42 @@ namespace psycle
 				std::uint8_t _parameter;
 	#endif
 #endif
+				void setNote(std::uint8_t value) { note_ = value; }
+				std::uint8_t note() const { return note_; }
+
+				void setInstrument(std::uint8_t instrument) { inst_ = instrument; }
+				std::uint8_t instrument() const { return inst_; }
+
+				void setMachine(std::uint8_t machine) { mach_ = machine; }
+				std::uint8_t machine() const { return mach_; }
+
+				void setCommand(std::uint8_t command) { cmd_ = command; }
+				std::uint8_t command() const { return cmd_; }
+
+				void setParameter(std::uint8_t parameter) { param_ = parameter; }
+				std::uint8_t parameter() const { return param_; }
+
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+				void setVolume(std::uint8_t volume) { volume_ = volume; }
+				std::uint8_t volume() const { return volume_; }
+	#endif
+#endif
+
+
 		};
 
 		// Patterns are organized in rows.
-		// i.e. pattern[rows][tracks], being a row = NUMTRACKS*sizeof(PatternEntry) bytes
+		// i.e. pattern[rows][tracks], being a row = NUMTRACKS*sizeof(PatternEvent) bytes
 		// belong to the first line.
 		#pragma warning(push)
 		#pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
 		class Pattern
 		{
 			public:
-				PatternEntry _data[];
+				PatternEvent _data[];
 		};
 		#pragma warning(pop)
 

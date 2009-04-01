@@ -2,35 +2,33 @@
 ///\brief interface file for psycle::host::CWireDlg.
 #pragma once
 
+#include "Psycle.hpp"
 #ifdef use_psycore
-#include <psycle/core/machine.h>
-#endif
-
-
-#include "Machine.hpp"
-#include "Constants.hpp"
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
-
-namespace psy 
-{
-	namespace core
-	{
+namespace psy {
+	namespace core {
 		class Machine;
+		class Song;
 	}
 }
-
+using namespace psy::core;
+#else
+namespace psycle {
+	namespace host {
+		class Machine;
+		class Song;
+	}
+}
+#endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CChildView;
+		class WireGui;
 
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE = 4096;
 		const int SCOPE_SPEC_SAMPLES = 1024;
-
-		class Song;
 
 		/// wire monitor window.
 		class CWireDlg : public CDialog
@@ -49,13 +47,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int wireIndex;
 			int isrcMac;
 			bool Inval;
-#ifdef use_psycore
-			psy::core::Machine* _pSrcMachine;
-			psy::core::Machine* _pDstMachine;
-#else
+
 			Machine* _pSrcMachine;
 			Machine* _pDstMachine;
-#endif
+
 			int _dstWireIndex;
 			float invol;
 			float mult;

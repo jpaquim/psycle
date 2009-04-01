@@ -1,7 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
+#include "configuration_options.hpp"
+
+#ifndef use_psycore
 
 #include "Instrument.hpp"
+#include "Global.hpp"
 #include "DataCompression.hpp"
 #include "Filter.hpp"
 #include "Zap.hpp"
@@ -300,3 +304,4 @@ namespace psycle
 		}
 	}
 }
+#endif //#ifndef use_psycore

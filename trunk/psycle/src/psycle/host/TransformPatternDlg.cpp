@@ -2,6 +2,7 @@
 //
 
 #include "TransformPatternDlg.hpp"
+#include "PatternView.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -140,22 +141,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				unsigned char * toffset;
 
 				int matchCount;
-				PatternEntry* patternEntry;
+				PatternEvent* patternEntry;
 				int elementIndex;
 
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
 					if (!pSong->IsPatternEmpty(currentPattern))
 					{				
-						patternEntry = (PatternEntry*) pSong->_ppattern(currentPattern);
+						patternEntry = (PatternEvent*) pSong->_ppattern(currentPattern);
 						lineCount = pSong->patternLines[currentPattern];
 						
 						for (currentLine = 0; currentLine < lineCount; currentLine++)
 						{
 							for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
 							{
-								currentins = patternEntry[(currentLine*columnCount)+currentColumn]._inst;
-								currentmac = patternEntry[(currentLine*columnCount)+currentColumn]._mach;																																							
+								currentins = patternEntry[(currentLine*columnCount)+currentColumn].instrument();
+								currentmac = patternEntry[(currentLine*columnCount)+currentColumn].machine();																																							
 
 								matchCount = 0;
 
@@ -173,11 +174,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								{
 									if (filterins != -1)
 									{
-										patternEntry[(currentLine*columnCount)+currentColumn]._inst = replaceins;
+										patternEntry[(currentLine*columnCount)+currentColumn].setInstrument(replaceins);
 									}
 									if (filtermac != -1)
 									{
-										patternEntry[(currentLine*columnCount)+currentColumn]._mach = replacemac;
+										patternEntry[(currentLine*columnCount)+currentColumn].setMachine(replacemac);
 									}
 								}
 							}

@@ -1,36 +1,32 @@
 ///\file
 ///\brief interface file for psycle::host::CSongpDlg.
 #pragma once
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
-#include "configuration_options.hpp"
+#include "Psycle.hpp"
 
 #ifdef use_psycore
-		namespace psy {
-			namespace core {
-				class Song;
-			}
-		}
+namespace psy {
+	namespace core {
+		class Song;
+	}
+}
+using namespace psy::core;
 #endif
 
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		class Song; // forward declaration
+#ifndef use_psycore
+	class Song; // forward declaration
+#endif
 
 		/// song dialog window.
 		class CSongpDlg : public CDialog
 		{
 		public:
 			/// mfc compliant constructor.
-#ifdef use_psycore
-			CSongpDlg(psy::core::Song *song, CWnd* pParent = 0);
-			psy::core::Song* _pSong;
-#else
 			CSongpDlg(Song *song, CWnd* pParent = 0);
 			Song* _pSong;
-#endif
 		// Dialog Data
 			enum { IDD = IDD_SONGPROP };
 			CEdit	m_songcomments;

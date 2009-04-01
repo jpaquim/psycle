@@ -113,7 +113,7 @@ namespace psycle
 				}
 			}
 			virtual void Stop(void);
-			virtual void Tick(int channel, PatternEntry* pData);
+			virtual void Tick(int channel, PatternEvent* pData);
 			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
@@ -196,7 +196,7 @@ namespace psycle
 			void VoiceWork(int numsamples, int voice);
 			void NoteOff(int voice);
 			void NoteOffFast(int voice);
-			int VoiceTick(int channel, PatternEntry* pData);
+			int VoiceTick(int channel, PatternEvent* pData);
 			inline void TickEnvelope(int voice);
 			inline void TickFilterEnvelope(int voice);
 			unsigned char lastInstrument[MAX_TRACKS];

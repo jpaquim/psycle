@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
+#include "Psycle.hpp"
 #include "project.hpp"
+#include <vector>
 
 
 namespace psycle {

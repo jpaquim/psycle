@@ -1,6 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::WaveOut.
 #pragma once
+#include "Global.hpp"
+#include "AudioDriver.hpp"
 #include <diversalis/compiler.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -18,8 +20,8 @@
 	#pragma warning(pop)
 #endif
 
-#include "AudioDriver.hpp"
 #include <map>
+
 namespace psycle
 {
 	namespace host
@@ -83,7 +85,7 @@ namespace psycle
 			void DoBlocks();
 			bool WantsMoreBlocks();
 			void DoBlocksRecording(PortCapt& port);
-			bool Start();
+			bool start();
 			bool Stop();
 
 		private:

@@ -1,19 +1,24 @@
 #include "DummyGui.hpp"
-#include "Song.hpp"
 
 #ifdef use_psycore
-#include <psycle/core/machine.h>
+namespace psy {
+	namespace core {
+		class Machine;
+	}
+}
+using namespace psy::core;
 #endif
 
 namespace psycle {
 	namespace host {
 
-		DummyGenGui::DummyGenGui(class MachineView* view,
-#ifdef use_psycore							 
-			 				     psy::core::Machine* mac)
-#else
-					             class Machine* mac)
+		class MachineView;
+
+#ifndef use_psycore
+		class Machine;
 #endif
+
+		DummyGenGui::DummyGenGui(MachineView* view, Machine* mac)
 			: GeneratorGui(view, mac)
 		{
 		}
@@ -27,13 +32,7 @@ namespace psycle {
 			return GeneratorGui::OnEvent(ev);					
 		}
 
-		DummyEffectGui::DummyEffectGui(class MachineView* view,
-#ifdef use_psycore							 
-						     class psy::core::Machine* mac)
-#else
-							 class Machine* mac)
-#endif
-
+		DummyEffectGui::DummyEffectGui(MachineView* view, Machine* mac)
 			: EffectGui(view, mac)
 		{
 		}
@@ -49,3 +48,4 @@ namespace psycle {
 
 	}  // namespace host
 }  // namespace psycle
+

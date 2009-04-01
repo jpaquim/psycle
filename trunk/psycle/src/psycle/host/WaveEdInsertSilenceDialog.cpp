@@ -1,8 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdInsertSilenceDialog.
-
 #include "WaveEdInsertSilenceDialog.hpp"
-#include "Psycle.hpp"
 #include "Helpers.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)

@@ -1,23 +1,21 @@
 #include "EffectGui.hpp"
 
 #ifdef use_psycore
+#include <psycle/core/machine.h>
 #include <psycle/core/song.h>
+using namespace psy::core;
+#else
+#include "Machine.hpp"
+#include "Song.hpp"
 #endif
 
-#include "Song.hpp"
-#include "MasterDlg.hpp"
 #include "MachineView.hpp"
 #include "FrameMachine.hpp"
 
 namespace psycle {
 	namespace host {
 
-		EffectGui::EffectGui(MachineView* view,
-#ifdef use_psycore							 
-						     psy::core::Machine* mac)
-#else
-							 class Machine* mac)
-#endif
+		EffectGui::EffectGui(MachineView* view, Machine* mac)
 			: MachineGui(view, mac),
 			  pan_dragging_(false),
 			  dialog_(0),

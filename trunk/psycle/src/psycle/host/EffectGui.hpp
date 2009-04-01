@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "MachineGui.hpp"
 
 namespace psycle {
@@ -7,12 +7,7 @@ namespace psycle {
 
 		class EffectGui : public MachineGui {
 		public:
-			EffectGui(class MachineView* view,
-#ifdef use_psycore							 
-					  class psy::core::Machine* mac);
-#else
-					  class Machine* mac);
-#endif
+			EffectGui(MachineView* view, Machine* mac);
 			~EffectGui();
 
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,

@@ -1,4 +1,5 @@
-
+#include "configuration_options.hpp"
+#ifndef use_psycore
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
@@ -19,8 +20,6 @@ namespace psycle
 
 		TCHAR* XMSampler::_psName = _T("Sampulse");
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
-		XMInstrument XMSampler::m_Instruments[MAX_INSTRUMENT+1];
-		XMInstrument::WaveData XMSampler::m_rWaveLayer[MAX_INSTRUMENT+1];
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
 			0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
@@ -104,6 +103,7 @@ namespace psycle
 		// period =  pow(2.0,double(5-(note/12.0f))) * (2*7159090.5/8363);
 		// being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
 		// so (2*7159090.5/8363) ~ 1712 ( middle C period )
+// Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
 		// The original middle C period was 856, but it was multiplied by two on PC's to add fine pitch slide.
 		// The original table takes the lower octave values and multiplies them by two. 
 		// This doesn't take care of the roundings of the values.
@@ -121,8 +121,9 @@ namespace psycle
 			107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		57 
 
 		};
+#if 0
 		// Original table
-/*		const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
+const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			54784,	51712,	48768,	46080,	43392,	40960,	38656,	36480,	34432,	32512,	30720,	29008,
 			27392,	25856,	24384,	23040,	21696,	20480,	19328,	18240,	17216,	16256,	15360,	14504,
 			13696,	12928,	12192,	11520,	10848,	10240,	9664,	9120,	8608,	8128,	7680,	7252,
@@ -134,7 +135,7 @@ namespace psycle
 			214,	202,	190,	180,	170,	160,	151,	143,	135,	127,	120,	113,
 			107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		56 
 		};
-*/
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::WaveDataController Implementation
@@ -142,7 +143,7 @@ namespace psycle
 		{
 			m_Layer = layer;
 			m_pWave = wave;
-			m_Position.QuadPart=0;
+	m_Position=0;
 			m_Speed=0;
 			m_Playing=false;
 
@@ -311,7 +312,7 @@ namespace psycle
 		{
 //			if ( m_Mode == EnvelopeMode::TICK )
 //			{
-			m_sRateDeviation = (Global::pPlayer->SampleRate() *60) / (24 * Global::pPlayer->bpm);
+			m_sRateDeviation = (Global::pPlayer->SampleRate() *60) / (24 * Global::pPlayer->bpm());
 //			} else if ( m_Mode == EnvelopeMode::MILIS ) {
 //				m_sRateDeviation = (Global::pPlayer->SampleRate() / 1000.0f;
 //			}
@@ -439,7 +440,7 @@ namespace psycle
 			m_ChannelNum = channelNum;
 			pChannel(&pSampler()->rChannel(channelNum));
 			InstrumentNum(instrumentNum);
-			XMInstrument & _inst = pSampler()->rInstrument(instrumentNum);
+			XMInstrument & _inst = Global::pSong->rInstrument(instrumentNum);
 			m_pInstrument = &_inst;
 
 			// Envelopes
@@ -453,11 +454,14 @@ namespace psycle
 			m_Filter.SampleRate(Global::pPlayer->SampleRate());
 
 			//\todo: add the missing  Random options
-/*			if (_inst.RandomCutoff())
-			{
-				CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
-			}
-			else*/ if (_inst.FilterCutoff() < 127)
+			#if 0
+			if (_inst.RandomCutoff())
+					{
+						CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
+					}
+			else
+			#endif
+			if (_inst.FilterCutoff() < 127)
 			{
 				CutOff(_inst.FilterCutoff());
 //				Ressonance(_inst.FilterResonance());
@@ -473,12 +477,14 @@ namespace psycle
 				CutOff(127);
 			}
 
-			
-/*			if (_inst.RandomResonance())
-			{
-				m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
-			}
-			else */ if (_inst.FilterResonance() > 0)
+			#if 0
+			if (_inst.RandomResonance())
+					{
+						m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
+					}
+			else
+			#endif
+			if (_inst.FilterResonance() > 0)
 			{
 //				CutOff(_inst.FilterCutoff());
 				Ressonance(_inst.FilterResonance());
@@ -658,9 +664,10 @@ namespace psycle
 		void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol,bool reset)
 		{
 			int wavelayer = rInstrument().NoteToSample(note).second;
-			if ( pSampler()->SampleData(wavelayer).WaveLength() == 0 ) return;
+			XMInstrument::WaveData& wave = Global::pSong->SampleData(wavelayer);
+			if ( wave.WaveLength() == 0 ) return;
 
-			m_WaveDataController.Init(&(pSampler()->SampleData(wavelayer)),wavelayer);
+			m_WaveDataController.Init(&wave,wavelayer);
 			m_Note = note;
 			m_Period=NoteToPeriod(rInstrument().NoteToSample(note).first);
 			m_NNA = rInstrument().NNA();
@@ -1032,7 +1039,7 @@ namespace psycle
 
 		const double XMSampler::Voice::NoteToPeriod(const int note)
 		{
-			XMInstrument::WaveData& _wave = m_pSampler->m_rWaveLayer[rWave().Layer()];
+	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
 			if(m_pSampler->IsAmigaSlides())
 			{
@@ -1049,7 +1056,7 @@ namespace psycle
 
 		const int XMSampler::Voice::PeriodToNote(const double period)
 		{
-			XMInstrument::WaveData& _wave = m_pSampler->m_rWaveLayer[rWave().Layer()];
+	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
 			if(m_pSampler->IsAmigaSlides()){
 				// f1
@@ -1157,13 +1164,14 @@ namespace psycle
 
 		void XMSampler::Channel::EffectInit()
 		{
-/*			m_VibratoPos = 0;
+	#if 0
+		m_VibratoPos = 0;
 			m_TremoloPos = 0;
 			m_TremoloDepth = 0;
 			m_VibratoAmount = 0;
 			m_AutoVibratoAmount = 0;
 			m_PanbrelloPos = 0;
-*/
+	#endif
 		}
 		void XMSampler::Channel::Restore()
 		{
@@ -1501,22 +1509,22 @@ namespace psycle
 				switch(parameter&0x0F)
 				{
 				case CMD_EE::EE_VOLENVOFF:
-					m_pSampler->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(false);
+					Global::pSong->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_VOLENVON:
-					m_pSampler->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(true);
+					Global::pSong->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(true);
 					break;
 				case CMD_EE::EE_PANENVOFF:
-					m_pSampler->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(false);
+					Global::pSong->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_PANENVON:
-					m_pSampler->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(true);
+					Global::pSong->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(true);
 					break;
 				case CMD_EE::EE_PITCHENVON:
-					m_pSampler->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(false);
+					Global::pSong->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_PITCHENVOFF:
-					m_pSampler->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(true);
+					Global::pSong->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(true);
 					break;
 				}
 			}
@@ -1935,7 +1943,7 @@ namespace psycle
 			}
 			m_EffectFlags |= EffectFlag::NOTECUT;
 		}
-		void XMSampler::Channel::DelayedNote(PatternEntry data)
+		void XMSampler::Channel::DelayedNote(PatternEvent data)
 		{
 			m_NoteCutTick=data._parameter&0x0f;
 			data._cmd=XMSampler::CMD::NONE;
@@ -2088,12 +2096,12 @@ namespace psycle
 
 		void XMSampler::Tick()
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
+			scoped_lock lock(m_Mutex);
 			SampleCounter(0);
 			m_TickCount=0;
 
 			m_DeltaTick = Global::pPlayer->SampleRate() * 60
-				/ (Global::pPlayer->bpm * 24/*ticksPerBeat*/);
+				/ (Global::pPlayer->bpm() * 24/*ticksPerBeat*/);
 
 			NextSampleTick(m_DeltaTick+1);// +1 is to avoid one Tick too much at the end, because m_DeltaTick is rounded down.
 
@@ -2109,39 +2117,39 @@ namespace psycle
 		}
 
 
-		void XMSampler::Tick(int channelNum,PatternEntry* pData)
+		void XMSampler::Tick(int channelNum,PatternEvent* pData)
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
+			scoped_lock lock(m_Mutex);
 
 			if (Global::_pSong->IsInvalided()) { return; }
 
 			// don't process twk , twf, Mcm Commands, or empty lines.
-			if ( pData->_note > notecommands::release )
+			if ( pData->Note() > notecommands::release )
 			{
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != notecommands::empty )return; // Return in everything but commands!
+				if ((pData->Command() == 0 && pData->_volume == 255 && pData->Instrument() == 255) || pData->Note() != notecommands::empty )return; // Return in everything but commands!
 	#else
-				if ((pData->_cmd == 0 && pData->_inst == 255 ) || pData->_note != notecommands::empty )return; // Return in everything but commands!
+				if ((pData->Command() == 0 && pData->Instrument() == 255 ) || pData->Note() != notecommands::empty )return; // Return in everything but commands!
 	#endif
 #endif
 			}
 
 			// define some variables to ease the case checking.
-			bool bInstrumentSet = (pData->_inst < 255);
+			bool bInstrumentSet = (pData->Instrument() < 255);
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			bool bPortaEffect = ((pData->_cmd == CMD::PORTA2NOTE) || ((pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO));
+			bool bPortaEffect = ((pData->Command() == CMD::PORTA2NOTE) || ((pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO));
 	#else
-			bool bPortaEffect = (pData->_cmd == CMD::PORTA2NOTE);
+			bool bPortaEffect = (pData->Command() == CMD::PORTA2NOTE);
 	#endif
 #endif
-			bool bPorta2Note = (pData->_note <= notecommands::b9) && bPortaEffect;
-			bool bNoteOn = (pData->_note <= notecommands::b9) && !bPorta2Note;
+			bool bPorta2Note = (pData->Note() <= notecommands::b9) && bPortaEffect;
+			bool bNoteOn = (pData->Note() <= notecommands::b9) && !bPorta2Note;
 
 
 			Voice* currentVoice = NULL;
@@ -2149,11 +2157,11 @@ namespace psycle
 			XMSampler::Channel& thisChannel = rChannel(channelNum);
 			if(bInstrumentSet)
 			{
-				if ( pData->_inst != thisChannel.InstrumentNo() && thisChannel.Note() !=0)
+				if ( pData->Instrument() != thisChannel.InstrumentNo() && thisChannel.Note() !=0)
 				{
 					bNoteOn=true;
 				}
-				thisChannel.InstrumentNo(pData->_inst); // Instrument is always set, even if no new note comes.
+				thisChannel.InstrumentNo(pData->Instrument()); // Instrument is always set, even if no new note comes.
 			}
 
 			// STEP A: Look for an existing (foreground) playing voice in the current channel.
@@ -2166,20 +2174,20 @@ namespace psycle
 					switch (currentVoice->rInstrument().DCT())
 					{
 					case XMInstrument::DCType::DCT_INSTRUMENT:
-						if ( pData->_inst == thisChannel.InstrumentNo())
+						if ( pData->Instrument() == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
 						break;
 					case XMInstrument::DCType::DCT_SAMPLE:
 						//\todo: Implement DCType Sample.
-						if ( pData->_inst == thisChannel.InstrumentNo())
+						if ( pData->Instrument() == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
 						break;
 					case XMInstrument::DCType::DCT_NOTE:
-						if ( pData->_note == thisChannel.Note() && pData->_inst == thisChannel.InstrumentNo())
+						if ( pData->Note() == thisChannel.Note() && pData->Instrument() == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
@@ -2203,7 +2211,7 @@ namespace psycle
 						currentVoice->IsBackground(true);
 						break;
 					}
-				} else if(pData->_note == notecommands::release ){
+				} else if(pData->Note() == notecommands::release ){
 					currentVoice->NoteOff();
 				}
 				else 
@@ -2216,7 +2224,7 @@ namespace psycle
 					{
 						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
 						//		  and the position reset to 0.
-						thisChannel.Note(pData->_note);
+						thisChannel.Note(pData->Note());
 					}
 				}
 			}
@@ -2229,13 +2237,13 @@ namespace psycle
 			// STEP B: Get a Voice to work with, and initialize it if needed.
 			if(bNoteOn)
 			{
-				if (( pData->_cmd == CMD::EXTENDED) && ((pData->_parameter & 0xf0) == CMD_E::E_NOTE_DELAY))
+				if (( pData->Command() == CMD::EXTENDED) && ((pData->Parameter() & 0xf0) == CMD_E::E_NOTE_DELAY))
 				{
 					thisChannel.DelayedNote(*pData);
 				}
 				else
 				{
-					if ( pData->_note != notecommands::empty ) thisChannel.Note(pData->_note); // If instrument set and no note, we don't want to reset the note.
+					if ( pData->Note() != notecommands::empty ) thisChannel.Note(pData->Note()); // If instrument set and no note, we don't want to reset the note.
 					newVoice = GetFreeVoice();
 					if ( newVoice )
 					{
@@ -2245,9 +2253,9 @@ namespace psycle
 							return;
 						}
 
-						XMInstrument & _inst = m_Instruments[thisChannel.InstrumentNo()];
-						int _layer = _inst.NoteToSample(pData->_note).second;
-						int twlength = m_rWaveLayer[_layer].WaveLength();
+						XMInstrument & _inst = Global::pSong->rInstrument(thisChannel.InstrumentNo());
+						int _layer = _inst.NoteToSample(pData->Note()).second;
+						int twlength = Global::pSong->SampleData(_layer).WaveLength();
 						if(twlength > 0)
 						{
 							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
@@ -2289,9 +2297,9 @@ namespace psycle
 
 							// Add Here any command that is limited to the scope of the new note.
 							// An offset is a good candidate, but a volume is not (volume can apply to an existing note)
-							if ((pData->_cmd&0xF0) == CMD::OFFSET)
+							if ((pData->Command()&0xF0) == CMD::OFFSET)
 							{
-								int offset = ((pData->_cmd&0x0F) << 16) +pData->_parameter<<8;
+								int offset = ((pData->Command()&0x0F) << 16) +pData->Parameter()<<8;
 								if ( offset != 0 )
 								{
 									thisChannel.OffsetMem(offset);
@@ -2308,14 +2316,14 @@ namespace psycle
 						{
 							bNoteOn=false;
 							newVoice = NULL;
-							if ( pData->_cmd == 0 ) return;
+							if ( pData->Command() == 0 ) return;
 						}
 					}
 					else
 					{
 						// This is a noteon command, but we are out of voices. We will try to process the effect.
 						bNoteOn=false;
-						if ( pData->_cmd == 0 ) return;
+						if ( pData->Command() == 0 ) return;
 					}
 				}
 				}
@@ -2325,16 +2333,16 @@ namespace psycle
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			thisChannel.SetEffect(newVoice,pData->_volume,pData->_cmd,pData->_parameter);
+			thisChannel.SetEffect(newVoice,pData->_volume,pData->Command(),pData->Parameter());
 	#else
-			thisChannel.SetEffect(newVoice,255,pData->_cmd,pData->_parameter);
+			thisChannel.SetEffect(newVoice,255,pData->Command(),pData->Parameter());
 	#endif
 #endif
 		}
 
 		void XMSampler::Work(int numSamples)
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
+			scoped_lock lock(m_Mutex);
 
 			cpu::cycles_type cost = cpu::cycles();
 			int i;
@@ -2342,7 +2350,7 @@ namespace psycle
 			if (!_mute)
 			{
 				Standby(false);
-				int _songtracks = Global::_pSong->SongTracks();
+				int _songtracks = Global::_pSong->tracks();
 				int ns = numSamples;
 				int nextevent;
 
@@ -2442,7 +2450,7 @@ namespace psycle
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
-									PatternEntry entry =TriggerDelay[i];
+									PatternEvent entry =TriggerDelay[i];
 									switch(ArpeggioCount[i])
 									{
 									case 0: 
@@ -2450,17 +2458,17 @@ namespace psycle
 										ArpeggioCount[i]++;
 										break;
 									case 1:
-										entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
+										entry._note+=((TriggerDelay[i].parameter()&0xF0)>>4);
 										Tick(i,&entry);
 										ArpeggioCount[i]++;
 										break;
 									case 2:
-										entry._note+=(TriggerDelay[i]._parameter&0x0F);
+										entry._note+=(TriggerDelay[i].parameter()&0x0F);
 										Tick(i,&entry);
 										ArpeggioCount[i]=0;
 										break;
 									}
-									TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
+									TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb()/24;
 								}
 								else
 								{
@@ -2726,3 +2734,5 @@ namespace psycle
 		}
 	}
 }
+
+#endif //#ifndef use_psycore

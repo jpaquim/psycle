@@ -1,13 +1,46 @@
 ///\file
 ///\brief interface file for psycle::host::Global.
 #pragma once
-#if defined DIVERSALIS__OPERATING_SYSTEM__WINDOWS
+#include "Version.hpp"
+#ifdef use_psycore
+#include <psycle/core/constants.h>
+#include <psycle/core/commands.h>
+
+typedef unsigned char byte;
+typedef unsigned short word;
+typedef unsigned long dword;
+namespace psycle { namespace host {
+namespace notecommands {
+	using namespace psy::core::notetypes;
+}
+namespace PatternCmd {
+	using namespace psy::core::commandtypes;
+}
+}}
+
+#else
+#include "Constants.hpp"
+#endif
+
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h> // for QueryPerformanceCounter
 #else
 	#include <universalis/operating_system/clocks.hpp>
 #endif
-#include <cstdint>
+//#include <cstdint>
 
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class Song;
+		class Player;
+		namespace vst {
+			class host;
+		}
+	}
+}
+using namespace psy::core;
+#endif
 
 namespace psycle
 {
@@ -20,15 +53,18 @@ namespace psycle
 	}
 	namespace host
 	{
-		class Song;
-		class Player;
 		class Configuration;
 		class InputHandler;
+
+
+#ifndef use_psycore
+		class Song;
+		class Player;
 		namespace vst
 		{
 			class host;
 		}
-
+#endif
 		//\todo: move this source to a better place.
 		namespace cpu
 		{
@@ -81,7 +117,6 @@ namespace psycle
 				static inline Configuration  & configuration(){ return *pConfig; }
 				static inline helpers::dsp::Resampler & resampler(){ return *pResampler; }
 				static inline vst::host		 & vsthost(){ return *pVstHost; }
-
 				static inline cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }
 				//void inline cpu_frequency(cpu::cycles_type const & value) throw() { cpu_frequency_ = value; }
 		};

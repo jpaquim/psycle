@@ -1,18 +1,16 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "GeneratorGui.hpp"
+
 
 namespace psycle {
 	namespace host {
+		
+		class CWaveInMacDlg;
 
 		class RecorderGui : public GeneratorGui {
 		public:
-			RecorderGui(class MachineView* view,
-#ifdef use_psycore
-			            class psy::core::Machine* mac);
-#else
-				        class Machine* mac);
-#endif
+			RecorderGui(MachineView* view, Machine* mac);
 			~RecorderGui();
 
 			virtual void BeforeDeleteDlg();

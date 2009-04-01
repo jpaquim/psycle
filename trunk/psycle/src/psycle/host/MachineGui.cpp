@@ -1,12 +1,19 @@
 #include "MachineGui.hpp"
 
-#include <algorithm>
-
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Machine.hpp"
+#include "Song.hpp"
+#endif
+
 #include "MainFrm.hpp"
 #include "MachineView.hpp"
-#include "Song.hpp"
 #include "WireGui.hpp"
+
+#include <algorithm>
 
 
 #ifdef _MSC_VER
@@ -18,13 +25,7 @@
 namespace psycle {
 	namespace host {
 
-		MachineGui::MachineGui(MachineView* view,
-#ifdef use_psycore
-							  psy::core::Machine* mac) :	   
-#else
-				              Machine* mac) :						
-#endif
-
+		MachineGui::MachineGui(MachineView* view, Machine* mac) :				
 			PsycleCanvas::Group(view->root(), mac->GetPosX(), mac->GetPosY()),
 			view_(view),
 			mac_(mac),
