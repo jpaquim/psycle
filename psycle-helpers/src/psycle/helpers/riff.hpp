@@ -10,7 +10,7 @@
 #pragma once
 #include <cstdio>
 #include <cstdint>
-namespace psycle { namespace host {
+namespace psycle { namespace helpers {
 
 enum DDCRET {
 	DDC_SUCCESS,           ///< operation succeded
@@ -52,7 +52,7 @@ class ExtRiffFile {
 		DDCRET Seek(std::int32_t offset);
 	public:
 		ExtRiffFile();
-		~ExtRiffFile();
+		virtual ~ExtRiffFile();
 		ExtRiffFileMode CurrentFileMode() const { return fmode; }
 		DDCRET Open(const char * Filename, ExtRiffFileMode NewMode);
 		DDCRET Close();
@@ -85,7 +85,13 @@ class WaveFormat_ChunkData {
 		std::uint32_t nAvgBytesPerSec;
 		std::uint16_t nBlockAlign;
 		std::uint16_t nBitsPerSample;
-		void Config(std::uint32_t NewSamplingRate = 44100, std::uint16_t NewBitsPerSample = 16, std::uint16_t NewNumChannels = 2) {
+		void Config(std::uint32_t NewSamplingRate = 44100, std::uint16_t NewBitsPerSample = 16, std::uint16_t NewNumChannels = 2, bool isFloat = false) {
+			if (isFloat) {
+				wFormatTag = 3; // IEEE float
+			}
+			else {
+				wFormatTag = 1; // PCM
+			}
 			nSamplesPerSec = NewSamplingRate;
 			nChannels = NewNumChannels;
 			nBitsPerSample = NewBitsPerSample;
@@ -93,7 +99,6 @@ class WaveFormat_ChunkData {
 			nBlockAlign = nChannels * nBitsPerSample / 8;
 		}
 		WaveFormat_ChunkData() {
-			wFormatTag = 1; // PCM
 			Config();
 		}
 };
@@ -140,8 +145,8 @@ class WaveFile: public ExtRiffFile {
 	DDCRET OpenForWrite(const char * Filename,
 		std::uint32_t SamplingRate = 44100,
 		std::uint16_t BitsPerSample = 16,
-		std::uint16_t NumChannels = 2
-	);
+		std::uint16_t NumChannels = 2,
+		bool isFloat = false);
 
 	DDCRET OpenForRead(const char * Filename);
 

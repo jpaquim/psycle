@@ -32,7 +32,7 @@
 
 namespace psycle
 {
-	namespace host
+	namespace helpers
 	{
 		namespace dsp
 		{

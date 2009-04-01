@@ -369,7 +369,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			PRESAMPLERFN _pWorkFn;
 			/// sets the kind of interpolation.
 			virtual void SetQuality(ResamplerQuality quality) = 0;
-			virtual ResamplerQuality GetQuality() = 0;
+			virtual ResamplerQuality GetQuality() const = 0;
 		protected:
 			/// kind of interpolation.
 			ResamplerQuality _quality;
@@ -387,7 +387,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			/// constructor.
 			Cubic();
 
-			virtual ResamplerQuality GetQuality() { return _quality; }
+			virtual ResamplerQuality GetQuality() const { return _quality; }
 
 			/// refefinition.
 			virtual void SetQuality(ResamplerQuality quality)
