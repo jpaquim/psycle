@@ -3,6 +3,9 @@
 #ifdef use_psycore
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
+using namespace psy::core;
+#else
+#include "Player.hpp"
 #endif
 
 #include "ChildView.hpp"
@@ -11,7 +14,6 @@
 #include "MachineView.hpp"
 #include "MainFrm.hpp"
 #include "MidiInput.hpp"
-#include "Player.hpp"
 #include "ProjectData.hpp"
 #include "SongpDlg.hpp"
 #include "XMSongExport.hpp"
@@ -64,7 +66,7 @@ namespace psycle {
 			pat_view()->KillUndo();
 			pat_view()->KillRedo();
 			mac_view()->LockVu();
-			Global::pPlayer->Stop();
+			Global::pPlayer->stop();
 			///\todo lock/unlock
 			Sleep(256);
 			mac_view()->child_view()->_outputActive = false;
@@ -124,7 +126,7 @@ namespace psycle {
 		{
 #ifdef use_psycore
 			mac_view()->LockVu();
-			psy::core::Player & player(psy::core::Player::singleton());
+			Player & player(Player::singleton());
 			player.stop();
 			///\todo lock/unlock
 			Sleep(256);
@@ -368,7 +370,7 @@ namespace psycle {
 				pat_view()->KillUndo();
 				pat_view()->KillRedo();
 				mac_view()->LockVu();
-				Global::pPlayer->Stop();
+				Global::pPlayer->stop();
 				///\todo lock/unlock
 				Sleep(256);
 				mac_view()->child_view()->_outputActive = false;

@@ -1,8 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::WaveOut.
-
 #include "WaveOut.hpp"
-#include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
@@ -63,7 +61,7 @@ namespace psycle
 			if(_initialized) Reset();
 		}
 
-		bool WaveOut::Start()
+		bool WaveOut::start()
 		{
 //			CSingleLock lock(&_lock, TRUE);
 			if(_running) return true;
@@ -211,7 +209,7 @@ namespace psycle
 			_portMapping[idx]=_capPorts.size()-1;
 			if (isplaying)
 			{
-				return Start();
+				return start();
 			}
 			return true;
 		}
@@ -232,7 +230,7 @@ namespace psycle
 				else newports.push_back(_capPorts[i]);
 			}
 			_capPorts = newports;
-			if (restartplayback) Start();
+			if (restartplayback) start();
 			return true;
 		}
 		bool WaveOut::CreateCapturePort(PortCapt &port)
@@ -525,7 +523,7 @@ namespace psycle
 
 			if(_initialized)
 			{
-				if(Start()) WriteConfig();
+				if(start()) WriteConfig();
 				else
 				{
 					_numBlocks = oldnb;
@@ -533,7 +531,7 @@ namespace psycle
 					_deviceID = olddid;
 					_dither = olddither;
 					_samplesPerSec = oldsps;
-					Start();
+					start();
 				}
 			}
 			else WriteConfig();
@@ -563,7 +561,7 @@ namespace psycle
 
 		bool WaveOut::Enable(bool e)
 		{
-			return e ? Start() : Stop();
+			return e ? start() : Stop();
 		}
 		MMRESULT WaveOut::IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID) 
 		{ 

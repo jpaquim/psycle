@@ -1,10 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CGearTracker.
 #pragma once
-#include "Sampler.hpp"
-#include "Constants.hpp"
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
 
 #ifdef use_psycore
 namespace psy {
@@ -12,12 +9,17 @@ namespace psy {
 		class Sampler;
 	}
 }
+using namespace psy::core;
+
 #endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CChildView;
+#ifndef use_psycore
+		class Sampler;
+#endif
 
 		/// gear tracker window.
 		class CGearTracker : public CDialog
@@ -28,11 +30,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		private:
 			MachineGui* gui_;
 		public:
-#ifdef use_psycore
-			psy::core::Sampler* _pMachine;
-#else
 			Sampler* _pMachine;
-#endif
 			BOOL Create();
 			afx_msg void OnCancel();
 		// Dialog Data

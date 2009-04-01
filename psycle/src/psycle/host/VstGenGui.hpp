@@ -1,18 +1,15 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "GeneratorGui.hpp"
 
 namespace psycle {
 	namespace host {
 
+		class CVstEffectWnd;
+
 		class VstGenGui : public GeneratorGui {
 		public:
-			VstGenGui(class MachineView* view,
-#ifdef use_psycore
-					  class psy::core::Machine* mac);
-#else
-					  class Machine* mac);
-#endif
+			VstGenGui(MachineView* view, Machine* mac);
 			~VstGenGui();
 
 			virtual void BeforeDeleteDlg();

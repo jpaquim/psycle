@@ -6,24 +6,25 @@
 #ifdef use_psycore
 #include <psycle/core/machine.h>
 #include <psycle/core/plugin.h>
+#include <psycle/core/song.h>
+using namespace psy::core;
 #else
-#include "Plugin.hpp"
 #include "Machine.hpp"
+#include "Plugin.hpp"
+#include "Song.hpp"
 #endif
 
-#include "Psycle.hpp"
-#include "NativeGui.hpp"
+#include "MainFrm.hpp"
 #include "ChildView.hpp"
+#include "MachineView.hpp"
+#include "InputHandler.hpp"
+#include "Configuration.hpp"
+
+#include "MachineGui.hpp"
+#include "NativeGui.hpp"
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
-#include "InputHandler.hpp"
-#include "Helpers.hpp"
-#include "MainFrm.hpp"
-#include "MachineGui.hpp"
-
-#ifdef use_psycore
-using namespace psy::core;
-#endif
+#include <psycle/helpers/helpers.hpp>
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -64,11 +65,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			:	gen_gui_(gen_gui) {
 			assert(gen_gui);
 			wndView = gen_gui->view()->child_view();
-#ifdef use_psycore
-			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->id());
-#else
-			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->_macIndex);			
-#endif
+			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->id());			
 		}
 
 		CFrameMachine::~CFrameMachine()
@@ -150,7 +147,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
 		{
 			CFrameWnd::OnSetFocus(pOldWnd);
-			//((CMainFrame*)wndView->pParentFrame)->ChangeGen(_pMachine->_macIndex);
+			//((CMainFrame*)wndView->pParentFrame)->ChangeGen(_pMachine->id());
 			Invalidate(false);
 		}
 		void CFrameMachine::Generate(double x, double y)
@@ -204,11 +201,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetWindowPos(0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 		}
 
-#ifdef use_psycore		
-		void CFrameMachine::SelectMachine(psy::core::Machine* pMachine)
-#else
 		void CFrameMachine::SelectMachine(Machine* pMachine)
-#endif
 		{
 			_pMachine = pMachine;
 
@@ -218,16 +211,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ncol = _pMachine->GetNumCols();
 			parspercol = numParameters/ncol;
 
+#ifdef use_psycore
+			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
+			{
+				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo().Command);
+			}
+			else if ( _pMachine->getMachineKey().host() == Hosts::VST )
+			{
+#else
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
-#ifdef use_psycore
-				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo().Command);
-#else
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
-#endif
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
+#endif
 				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
 				parspercol = numParameters/ncol;
 				if (parspercol>24)	// check for "too big" windows
@@ -443,7 +441,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 	void CFrameMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
 		{
+#ifdef use_psycore
+			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
+#else
 			if( _pMachine->_type == MACH_PLUGIN)
+#endif
 			{
 				int par = ConvertXYtoParam(point.x,point.y);
 				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
@@ -587,13 +589,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
-#ifdef use_psycore
-#else
 						if ( _pMachine->IsGenerator() || Global::pConfig->_notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
-#endif
 					}
 					break;
 
@@ -617,14 +616,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-#ifdef use_psycore
-#else
 				if ( _pMachine->IsGenerator() ||Global::pConfig->_notesToEffects)
 				{
 					Global::pInputHandler->StopNote(outnote,true,_pMachine);
 				}
 				else Global::pInputHandler->StopNote(outnote,true,NULL);
-#endif
 			}
 
 			//wndView->KeyUp(nChar, nRepCnt, nFlags);
@@ -654,7 +650,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersResetparameters() 
 		{
-			if ( _pMachine->_type == MACH_PLUGIN)
+#ifdef use_psycore
+			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
+#else
+			if( _pMachine->_type == MACH_PLUGIN)
+#endif
 			{
 				int numpars = _pMachine->GetNumParams();
 				for (int c=0; c<numpars; c++)
@@ -677,11 +677,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersCommand() 
 		{
-			if ( _pMachine->_type == MACH_PLUGIN)
-			{
 #ifdef use_psycore
-				//todo: check.
+			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
+			{
+				//todo
 #else
+			if( _pMachine->_type == MACH_PLUGIN)
+			{
 				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
 #endif
 				try
@@ -701,7 +703,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				istweak = false;
 			}
-			if ( _pMachine->_type == MACH_PLUGIN)
+#ifdef use_psycore
+			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
+#else
+			if( _pMachine->_type == MACH_PLUGIN)
+#endif
 			{
 				MessageBox
 					(

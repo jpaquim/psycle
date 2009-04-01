@@ -1,13 +1,27 @@
 #pragma once
-
+#include "Global.hpp"
+#ifdef use_psycore
+#include <psycle/core/commands.h>
+#include <psycle/core/patternevent.h>
+namespace psy {
+	namespace core {
+		class Song;
+		class XMSampler;
+	}
+}
+using namespace psy::core;
+#else
 #include "SongStructs.hpp"
+#endif
 #include "FileIO.hpp"
 #include "XMFile.hpp"
 #include <cstdint>
 #include <map>
 
 namespace psycle { namespace host {
-	class Song;
+	#ifndef use_psycore
+		class Song;
+	#endif
 
 	class XMSongExport : public OldPsyFile
 	{

@@ -1,4 +1,6 @@
 #pragma once
+#include "Global.hpp"
+
 ///\file
 ///\brief interface file for beerz77-2 algorithm.
 namespace psycle

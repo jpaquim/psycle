@@ -31,6 +31,9 @@
 	\endverbatim
 */
 
+//Psycore includes psycle-helpers for now.
+#ifndef use_psycore
+
 #include "Riff.hpp"
 #include <io.h>
 #include <stdio.h>
@@ -678,3 +681,4 @@ namespace psycle
 		}
 	}
 }
+#endif

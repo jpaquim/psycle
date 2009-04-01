@@ -2,11 +2,16 @@
 ///\brief implementation file for psycle::host::CInstrumentEditor.
 
 #include "InstrumentEditor.hpp"
-#include "Psycle.hpp"
 #include "MainFrm.hpp"
 #include "EnvDialog.hpp"
-#include "Constants.hpp"
-#include "Helpers.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
+#include "Song.hpp"
+#endif
+#include <psycle/helpers/helpers.hpp>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -101,7 +106,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::WaveUpdate()
 		{
-			const int si = _pSong->instSelected;
+			const int si = _pSong->instSelected();
 
 			char buffer[64];
 			// Set instrument current selected label
@@ -187,7 +192,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnLoopoff() 
 		{
-		int si = _pSong->instSelected;
+		int si = _pSong->instSelected();
 
 			if(_pSong->_pInstrument[si]->waveLoopType)
 			{
@@ -198,7 +203,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnLoopforward() 
 		{
-		int si=_pSong->instSelected;
+		int si=_pSong->instSelected();
 
 			if(!_pSong->_pInstrument[si]->waveLoopType)
 			{
@@ -212,7 +217,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-		int si=_pSong->instSelected;
+		int si=_pSong->instSelected();
 		char buffer[8];
 
 			_pSong->_pInstrument[si]->waveVolume=m_volumebar.GetPos();
@@ -229,7 +234,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			sprintf(buffer,"\0");
 			m_lockinstnumber.GetWindowText(buffer, 16);
 
-			int si = _pSong->instSelected;
+			int si = _pSong->instSelected();
 			
 			using helpers::hexstring_to_integer;
 
@@ -253,7 +258,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnChangeInstname() 
 		{
-			int si = _pSong->instSelected;
+			int si = _pSong->instSelected();
 			m_instname.GetWindowText(_pSong->_pInstrument[si]->_sName, 32);
 			if ( !initializingDialog ) 
 			{
@@ -264,12 +269,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnSelchangeNnaCombo() 
 		{
-			_pSong->_pInstrument[_pSong->instSelected]->_NNA = m_nna_combo.GetCurSel();	
+			_pSong->_pInstrument[_pSong->instSelected()]->_NNA = m_nna_combo.GetCurSel();	
 		}
 
 		void CInstrumentEditor::UpdateCombo() 
 		{
-			switch(_pSong->_pInstrument[_pSong->instSelected]->_NNA)
+			switch(_pSong->_pInstrument[_pSong->instSelected()]->_NNA)
 			{
 			case 0:m_nna_combo.SelectString(0,"Note Cut");break;
 			case 1:m_nna_combo.SelectString(0,"Note Release");break;
@@ -279,7 +284,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnPrevInstrument() 
 		{
-			const int si=_pSong->instSelected;
+			const int si=_pSong->instSelected();
 
 			if(si>0)
 			{
@@ -290,7 +295,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnNextInstrument() 
 		{
-			const int si=_pSong->instSelected;
+			const int si=_pSong->instSelected();
 
 			if(si<254)
 			{
@@ -308,7 +313,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CInstrumentEditor::OnCustomdrawPanslider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			char buffer[8];
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 			_pSong->_pInstrument[si]->_pan = m_panslider.GetPos();
 			
 			sprintf(buffer,"%d%",_pSong->_pInstrument[si]->_pan);
@@ -318,7 +323,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnLockinst()
 		{
-			int si = _pSong->instSelected;
+			int si = _pSong->instSelected();
 			if (m_lockinst.GetCheck())
 			{
 				_pSong->_pInstrument[si]->_LOCKINST = true;				
@@ -340,7 +345,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnRpan() 
 		{
-			int si = _pSong->instSelected;
+			int si = _pSong->instSelected();
 			
 			if (m_rpan_check.GetCheck())
 			{
@@ -354,7 +359,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnRcut() 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 			
 			if (m_rcut_check.GetCheck())
 			{
@@ -368,7 +373,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnRres() 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 			
 			if(m_rres_check.GetCheck())
 			{
@@ -387,7 +392,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnLoopCheck() 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 			
 			if(m_loopcheck.GetCheck())
 			{
@@ -403,7 +408,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnChangeLoopedit() 
 		{
-			int si = _pSong->instSelected;
+			int si = _pSong->instSelected();
 			CString buffer;
 			m_loopedit.GetWindowText(buffer);
 			_pSong->_pInstrument[si]->_lines = atoi(buffer);
@@ -416,7 +421,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 			char buffer[8];
 			
 			if(cando)
@@ -430,7 +435,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnKillInstrument() 
 		{
-			_pSong->DeleteInstrument(_pSong->instSelected);
+			_pSong->DeleteInstrument(_pSong->instSelected());
 			WaveUpdate();
 			pParentMain->UpdateComboIns();
 			pParentMain->RedrawGearRackList();
@@ -438,7 +443,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnInsDecoctave() 
 		{
-			const int si=_pSong->instSelected;
+			const int si=_pSong->instSelected();
 			if ( _pSong->_pInstrument[si]->waveTune>-37)
 				_pSong->_pInstrument[si]->waveTune-=12;
 			else _pSong->_pInstrument[si]->waveTune=-48;
@@ -447,7 +452,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnInsDecnote() 
 		{
-			const int si=_pSong->instSelected;
+			const int si=_pSong->instSelected();
 			if ( _pSong->_pInstrument[si]->waveTune>-47)
 				_pSong->_pInstrument[si]->waveTune-=1;
 			else _pSong->_pInstrument[si]->waveTune=-48;
@@ -456,7 +461,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnInsIncnote() 
 		{
-			const int si=_pSong->instSelected;
+			const int si=_pSong->instSelected();
 			if ( _pSong->_pInstrument[si]->waveTune < 71)
 				_pSong->_pInstrument[si]->waveTune+=1;
 			else _pSong->_pInstrument[si]->waveTune=71;
@@ -465,7 +470,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnInsIncoctave() 
 		{
-			const int si=_pSong->instSelected;
+			const int si=_pSong->instSelected();
 			if ( _pSong->_pInstrument[si]->waveTune < 60)
 				_pSong->_pInstrument[si]->waveTune+=12;
 			else _pSong->_pInstrument[si]->waveTune=71;
@@ -474,7 +479,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::UpdateNoteLabel()
 		{
-			const int si = _pSong->instSelected;
+			const int si = _pSong->instSelected();
 			char buffer[64];
 			
 			const int octave= ((_pSong->_pInstrument[si]->waveTune+48)/12);

@@ -3,16 +3,23 @@
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 
 #include "MidiInput.hpp"
-#include "Psycle.hpp"
+#include "InputHandler.hpp"
+#include "Configuration.hpp"
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#include <psycle/core/player.h>
+#include <psycle/core/plugin.h>
+#include <psycle/core/vstplugin.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
 #include "Player.hpp"
-#include "Configuration.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
+#endif
 #include "ChildView.hpp"
 #include "MainFrm.hpp"
-#include "Helpers.hpp"
-#include "InputHandler.hpp"
+#include <psycle/helpers/helpers.hpp>
 #include <cassert>
 namespace psycle
 {
@@ -624,7 +631,7 @@ namespace psycle
 							// machine active?
 							if( program < MAX_MACHINES )
 							{  
-								if (Global::_pSong->_pMachine[ program ] )
+								if (Global::_pSong->machine( program ) )
 								{
 									// ok, map
 									SetGenMap( channel, program );
@@ -702,7 +709,7 @@ namespace psycle
 									m_stats.flags |= FSTAT_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->Stop();
+									Global::pPlayer->stop();
 									return;
 								}
 								break;
@@ -790,7 +797,7 @@ namespace psycle
 									m_stats.flags |= FSTAT_EMULATED_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->Stop();
+									Global::pPlayer->stop();
 									return;
 								}
 								break;
@@ -845,7 +852,11 @@ namespace psycle
 									// set?
 									if( gParameter >= 0 )
 									{
+#ifdef use_psycore
+										note = notetypes::tweak;
+#else
 										note = notecommands::tweak;
+#endif
 										cmd = gParameter;
 										parameter = data2;
 									}
@@ -876,20 +887,19 @@ namespace psycle
 					}
 
 					// invalid machine/channel?
-					if( !Global::_pSong->_pMachine[ busMachine ] && note != 254 )
+					if( !Global::_pSong->machine( busMachine ) && note != 254 )
 					{
 						return;
 					}
 
 					// create a patten entry struct in the midi buffer
 					int patIn = m_patIn;
-					PatternEntry * pEntry = &m_midiBuffer[ patIn ].entry;
-
-					pEntry->_note = note;
-					pEntry->_mach = busMachine;
-					pEntry->_inst = GetInstMap( channel );
-					pEntry->_cmd = cmd;
-					pEntry->_parameter = parameter;
+					PatternEvent* pEntry = &m_midiBuffer[ patIn ].entry;
+					pEntry->setNote(note);
+					pEntry->setMachine(busMachine);
+					pEntry->setInstrument(GetInstMap(channel));
+					pEntry->setCommand(cmd);
+					pEntry->setParameter(parameter);
 
 					// add the other necessary info
 					m_midiBuffer[ patIn ].timeStamp = dwParam2;
@@ -1054,9 +1064,18 @@ namespace psycle
 
 						if (mgn < MAX_MACHINES)
 						{
-							Machine* pMachine = Global::_pSong->_pMachine[mgn];
+							Machine* pMachine = Global::_pSong->machine(mgn);
 							if (pMachine)
 							{
+#ifdef use_psycore
+								PatternEvent pevent;
+								pevent.setNote(notetypes::midi_cc);
+								pevent.setMachine(pMachine->id());
+								pevent.setInstrument(status);
+								pevent.setCommand(data1);
+								pevent.setParameter(data2);
+								pMachine->AddEvent(0,0, pevent);
+#else
 								if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
 								{
 									((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
@@ -1068,13 +1087,14 @@ namespace psycle
 #error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 #if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-									PatternEntry pentry(notecommands::midicc,status,255,data1,data2,pMachine->_macIndex);
+									PatternEvent pentry(notecommands::midicc,status,255,data1,data2,pMachine->id());
 #else
-									PatternEntry pentry(notecommands::midicc,status,pMachine->_macIndex,data1,data2);
+									PatternEvent pentry(notecommands::midicc,status,pMachine->id(),data1,data2);
 #endif
 #endif
 									pMachine->Tick(0,&pentry);
 								}
+#endif
 							}
 						}
 					}
@@ -1309,13 +1329,62 @@ namespace psycle
 			// OK, if we get here then there is at least one MIDI message that needs injecting
 			do
 			{
-				int note = m_midiBuffer[ m_patOut ].entry._note;
-				int machine = m_midiBuffer[ m_patOut ].entry._mach;
-				int data1 = m_midiBuffer[ m_patOut ].entry._cmd;
-				int data2 = m_midiBuffer[ m_patOut ].entry._parameter;
-
+#ifdef use_psycore
+				int note = m_midiBuffer[ m_patOut ].entry.note();
+				int machine = m_midiBuffer[ m_patOut ].entry.machine();
+				int data1 = m_midiBuffer[ m_patOut ].entry.command();
+				int data2 = m_midiBuffer[ m_patOut ].entry.parameter();
 				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Global::_pSong->_pMachine[ machine ];
+				Plugin * pMachine = (Plugin*) Global::_pSong->machine( machine );
+				// make sure machine is still valid
+				if( pMachine || note == 254 )
+				{
+					// switch on note code
+					switch( note )
+					{
+						// TWEAK
+						case notetypes::tweak_slide:
+							// *********
+							// midi doesn't get a tweak slide yet
+						case notetypes::tweak:
+
+						{
+							int min, max;
+							if ( pMachine->getMachineKey().host() == Hosts::NATIVE ) {
+								// make sure parameter in range of machine
+								if( data1 > (pMachine->GetInfo().numParameters-1) )
+								{
+									break;
+								}
+
+								// get range
+								min = pMachine->GetInfo().Parameters[ data1 ]->MinValue;
+								max = pMachine->GetInfo().Parameters[ data1 ]->MaxValue;
+							}
+							else
+							{
+								// assume 0000..FFFF is the range (VST)
+								min = 0;
+								max = 0xFFFF;
+							}
+
+							// create actual value
+							int value = min + psycle::helpers::math::rounded( (max-min) * (data2/127.f) );
+
+							// assign
+							m_midiBuffer[ m_patOut ].entry.setInstrument(data1);
+							m_midiBuffer[ m_patOut ].entry.setCommand(value / 256);
+							m_midiBuffer[ m_patOut ].entry.setParameter(value % 256);
+							pMachine->AddEvent(0, m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry);
+						}
+						break;
+#else
+				int note = m_midiBuffer[ m_patOut ].entry.note();
+				int machine = m_midiBuffer[ m_patOut ].entry.nachine();
+				int data1 = m_midiBuffer[ m_patOut ].entry.command();
+				int data2 = m_midiBuffer[ m_patOut ].entry.parameter();
+				// get the machine pointer
+				Plugin * pMachine = (Plugin*) Global::_pSong->machine( machine );
 				// make sure machine is still valid
 				if( pMachine || note == 254 )
 				{
@@ -1327,6 +1396,7 @@ namespace psycle
 							// *********
 							// midi doesn't get a tweak slide yet
 						case notecommands::tweak:
+
 						{
 							int min, max;
 
@@ -1354,15 +1424,15 @@ namespace psycle
 							int value = min + helpers::math::rounded( (max-min) * (data2/127.f) );
 
 							// assign
-							m_midiBuffer[ m_patOut ].entry._inst = data1;
-							m_midiBuffer[ m_patOut ].entry._cmd = value / 256;
-							m_midiBuffer[ m_patOut ].entry._parameter = value % 256;
+							m_midiBuffer[ m_patOut ].entry.setInstrument(data1);
+							m_midiBuffer[ m_patOut ].entry.setCommand(value / 256);
+							m_midiBuffer[ m_patOut ].entry.setParameter(value % 256);
 
 							// and tweak!
 							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
 						}
 						break;
-
+#endif
 
 						// SYNC TICK
 						case 254:
@@ -1370,9 +1440,9 @@ namespace psycle
 							// simulate a tracker 'tick' (i.e. a line change for all machines)
 							for (int tc=0; tc<MAX_MACHINES; tc++)
 							{
-								if( Global::_pSong->_pMachine[tc])
+								if( Global::_pSong->machine(tc))
 								{
-									Global::_pSong->_pMachine[tc]->Tick();
+									Global::_pSong->machine(tc)->Tick();
 								}
 							}
 
@@ -1383,8 +1453,12 @@ namespace psycle
 						// NORMAL NOTE
 						default:
 						{
+#ifdef use_psycore
+							pMachine->AddEvent(0,  m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry );
+#else
 							// normal note tick
 							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
+#endif
 						}
 						break;
 
@@ -1395,12 +1469,11 @@ namespace psycle
 				m_patCount--;
 				m_patOut++;
 				if( m_patOut >= MIDI_BUFFER_SIZE ) m_patOut = 0;
-
 			} while( m_patCount && m_timingCounter >= (m_midiBuffer[ m_patOut ].timeStamp - tbaseStampTime) );
 
 			// Master machine initiates work
 			//
-			Global::_pSong->_pMachine[MASTER_INDEX]->Work( amount );
+			Global::_pSong->machine(MASTER_INDEX)->Work( amount );
 			return true;
 		}
 	}

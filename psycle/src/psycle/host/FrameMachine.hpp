@@ -1,8 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CFrameMachine.
 #pragma once
-#include "mfc_namespace.hpp"
-#include "configuration_options.hpp"
+#include "Psycle.hpp"
 
 #ifdef use_psycore
 namespace psy {
@@ -10,13 +9,17 @@ namespace psy {
 		class Machine;
 	}
 }
+using namespace psy::core;
 #endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 class CChildView;
-class Machine;
+class MachineGui;
+#ifndef use_psycore
+	class Machine;
+#endif
 
 #define K_XSIZE     28
 #define K_YSIZE     28
@@ -36,11 +39,7 @@ public:
 	void Init(int x, int y);		
 // Operations
 public:
-#ifdef use_psycore
-	virtual void SelectMachine(psy::core::Machine* pMachine);
-#else
 	virtual void SelectMachine(Machine* pMachine);
-#endif
 	virtual void Generate(double x, double y);
 	virtual int ConvertXYtoParam(int x, int y);
 	virtual void centerWindowOnPoint(int x, int y);
@@ -67,13 +66,9 @@ protected:
 
 	// Attributes
 protected:
-#ifdef use_psycore	
-	psy::core::Machine* _pMachine;
-#else
 	Machine* _pMachine;
-#endif
 	MachineGui* gen_gui_;
-	CChildView *wndView;
+	CChildView* wndView;
 	bool* _pActive;	// It is used to help the program know if this window is open or not.
 	//CBitmap b_knob;
 	CFont	b_font;

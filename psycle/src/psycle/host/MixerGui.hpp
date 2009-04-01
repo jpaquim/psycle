@@ -1,18 +1,15 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "EffectGui.hpp"
 
 namespace psycle {
 	namespace host {
+		
+		class CFrameMixerMachine;
 
 		class MixerGui : public EffectGui {
 		public:
-			MixerGui(class MachineView* view,
-#ifdef use_psycore
-					 class psy::core::Machine* mac);
-#else
-					 class Machine* mac);
-#endif
+			MixerGui(class MachineView* view, Machine* mac);
 			~MixerGui();
 
 			virtual void BeforeDeleteDlg();

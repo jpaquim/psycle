@@ -18,6 +18,7 @@
 	\endverbatim
 */
 #pragma once
+#include "Global.hpp"
 #include "Ddc.hpp"
 namespace psycle
 {

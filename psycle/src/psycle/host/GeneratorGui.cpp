@@ -1,11 +1,14 @@
 #include "GeneratorGui.hpp"
 
 #ifdef use_psycore
+#include <psycle/core/machine.h>
 #include <psycle/core/song.h>
+using namespace psy::core;
+#else
+#include "Machine.hpp"
+#include "Song.hpp"
 #endif
 
-#include "Song.hpp"
-#include "MasterDlg.hpp"
 #include "MachineView.hpp"
 #include "FrameMachine.hpp"
 #include "MainFrm.hpp"
@@ -13,12 +16,9 @@
 namespace psycle {
 	namespace host {
 
-		GeneratorGui::GeneratorGui(class MachineView* view,
-#ifdef use_psycore
-								   class psy::core::Machine* mac)
-#else
-							       class Machine* mac)
-#endif
+		class MachineView;
+
+		GeneratorGui::GeneratorGui(MachineView* view, Machine* mac)
 
 			: MachineGui(view, mac),
 			  dialog_(0),

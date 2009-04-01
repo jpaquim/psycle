@@ -27,6 +27,7 @@
 ///\file
 ///\brief interface file for psycle::host::RiffFile.
 #pragma once
+#include "Global.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <string>

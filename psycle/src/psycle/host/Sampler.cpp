@@ -1,5 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
+#include "configuration_options.hpp"
+#ifndef use_psycore
 
 #include "Sampler.hpp"
 #include "Song.hpp"
@@ -80,7 +82,7 @@ namespace psycle
 				while (ns)
 				{
 					int nextevent = ns+1;
-					for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+					for (int i=0; i < Global::_pSong->tracks(); i++)
 					{
 						if (TriggerDelay[i]._cmd)
 						{
@@ -92,7 +94,7 @@ namespace psycle
 					}
 					if (nextevent > ns)
 					{
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						for (int i=0; i < Global::_pSong->tracks(); i++)
 						{
 							// come back to this
 							if (TriggerDelay[i]._cmd)
@@ -116,7 +118,7 @@ namespace psycle
 								VoiceWork(nextevent, voice);
 							}
 						}
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						for (int i=0; i < Global::_pSong->tracks(); i++)
 						{
 							// come back to this
 							if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -420,18 +422,18 @@ namespace psycle
 		}
 		void Sampler::Tick(
 			int channel,
-			PatternEntry* pData)
+			PatternEvent* pData)
 		{
-			if ( pData->_note > notecommands::release ) // don't process twk , twf of Mcm Commands
+			if ( pData->note() > notecommands::release ) // don't process twk , twf of Mcm Commands
 			{
-				if ( pData->_cmd == 0 || pData->_note != 255) return; // Return in everything but commands!
+				if ( pData->command() == 0 || pData->note() != 255) return; // Return in everything but commands!
 			}
 			if ( _mute ) return; // Avoid new note entering when muted.
 
 			int voice;
 			int useVoice = -1;
 
-			PatternEntry data = *pData;
+			PatternEvent data = *pData;
 
 			if (data._inst >= 255)
 			{
@@ -443,7 +445,7 @@ namespace psycle
 			}
 			else
 			{
-				data._inst = lastInstrument[channel] = pData->_inst;
+				data._inst = lastInstrument[channel] = pData->instrument();
 			}
 
 
@@ -517,7 +519,7 @@ namespace psycle
 			VoiceTick(useVoice,&data); 
 		}
 
-		int Sampler::VoiceTick(int voice,PatternEntry* pEntry)
+		int Sampler::VoiceTick(int voice,PatternEvent* pEntry)
 		{		
 
 			Voice* pVoice = &_voices[voice];
@@ -527,37 +529,37 @@ namespace psycle
 			if (Global::_pSong->Invalided) return 0;
 
 			pVoice->_sampleCounter=0;
-			pVoice->effCmd=pEntry->_cmd;
+			pVoice->effCmd=pEntry->command();
 
-			switch(pEntry->_cmd) // DO NOT ADD here those commands that REQUIRE a note.
+			switch(pEntry->command()) // DO NOT ADD here those commands that REQUIRE a note.
 			{
 				case SAMPLER_CMD_EXTENDED:
-					if ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
+					if ((pEntry->parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
 					{
-						pVoice->_triggerNoteOff = (Global::pPlayer->SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
+						pVoice->_triggerNoteOff = (Global::pPlayer->SamplesPerRow()/6)*(pEntry->parameter() & 0x0f);
 					}
-					else if (((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry->_parameter & 0x0f) == 0 ))
+					else if (((pEntry->parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry->parameter() & 0x0f) == 0 ))
 					{
-						pEntry->_cmd=0; pEntry->_parameter=0;
+						pEntry->setCommand(0); pEntry->setParameter(0);
 					}
 					break;
 				case SAMPLER_CMD_PORTAUP:
-					pVoice->effVal=pEntry->_parameter;
+					pVoice->effVal=pEntry->parameter();
 					break;
 				case SAMPLER_CMD_PORTADOWN:
-					pVoice->effVal=pEntry->_parameter;
+					pVoice->effVal=pEntry->parameter();
 					break;
 			}
 			
 
 		//  All this mess should be really changed with classes using the "operator=" to "copy" values.
 
-			int twlength = Global::_pSong->_pInstrument[pEntry->_inst]->waveLength;
+			int twlength = Global::_pSong->_pInstrument[pEntry->instrument()]->waveLength;
 			
-			if (pEntry->_note < notecommands::release && twlength > 0)
+			if (pEntry->note() < notecommands::release && twlength > 0)
 			{
 				pVoice->_triggerNoteOff=0;
-				pVoice->_instrument = pEntry->_inst;
+				pVoice->_instrument = pEntry->instrument();
 				
 				// Init filter synthesizer
 				//
@@ -585,7 +587,7 @@ namespace psycle
 				pVoice->_coModify = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_EA;
 				pVoice->_filterEnv._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
 
-				if (( pEntry->_cmd != SAMPLER_CMD_EXTENDED) || ((pEntry->_parameter & 0xf0) != SAMPLER_CMD_EXT_NOTEDELAY))
+				if (( pEntry->command() != SAMPLER_CMD_EXTENDED) || ((pEntry->parameter() & 0xf0) != SAMPLER_CMD_EXT_NOTEDELAY))
 				{
 					pVoice->_filterEnv._stage = ENV_ATTACK;
 				}
@@ -621,15 +623,15 @@ namespace psycle
 				else
 				{
 					float const finetune = helpers::CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->waveFinetune);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer->SampleRate()));
+					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->note()+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer->SampleRate()));
 				}
 				
 
 				// Handle wave_start_offset cmd
 				//
-				if (pEntry->_cmd == SAMPLER_CMD_OFFSET)
+				if (pEntry->command() == SAMPLER_CMD_OFFSET)
 				{
-					w_offset = pEntry->_parameter*pVoice->_wave._length;
+					w_offset = pEntry->parameter()*pVoice->_wave._length;
 					pVoice->_wave._pos.QuadPart = (w_offset << 24);
 				}
 				else
@@ -641,9 +643,9 @@ namespace psycle
 				//
 				pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
-				if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
+				if (pEntry->command() == SAMPLER_CMD_VOLUME)
 				{
-					pVoice->_wave._vol *= helpers::CValueMapper::Map_255_1(pEntry->_parameter);
+					pVoice->_wave._vol *= helpers::CValueMapper::Map_255_1(pEntry->parameter());
 				}
 				
 				// Panning calculation -------------------------------------------
@@ -654,9 +656,9 @@ namespace psycle
 				{
 					panFactor = (float)rand()*0.000030517578125f;
 				}
-				else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
+				else if ( pEntry->command() == SAMPLER_CMD_PANNING )
 				{
-					panFactor = helpers::CValueMapper::Map_255_1(pEntry->_parameter);
+					panFactor = helpers::CValueMapper::Map_255_1(pEntry->parameter());
 				}
 				else {
 					panFactor = helpers::CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->_pan);
@@ -682,19 +684,19 @@ namespace psycle
 				pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer->SampleRate());
 				pVoice->_envelope._value = 0.0f;
 				pVoice->_envelope._sustain = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
-				if (( pEntry->_cmd == SAMPLER_CMD_EXTENDED) && ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
+				if (( pEntry->command() == SAMPLER_CMD_EXTENDED) && ((pEntry->parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
-					pVoice->_triggerNoteDelay = (Global::pPlayer->SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
+					pVoice->_triggerNoteDelay = (Global::pPlayer->SamplesPerRow()/6)*(pEntry->parameter() & 0x0f);
 					pVoice->_envelope._stage = ENV_OFF;
 				}
 				else
 				{
-					if (pEntry->_cmd == SAMPLER_CMD_RETRIG && (pEntry->_parameter&0x0f) > 0)
+					if (pEntry->command() == SAMPLER_CMD_RETRIG && (pEntry->parameter()&0x0f) > 0)
 					{
-						pVoice->effretTicks=(pEntry->_parameter&0x0f); // number of Ticks.
+						pVoice->effretTicks=(pEntry->parameter()&0x0f); // number of Ticks.
 						pVoice->effVal= (Global::pPlayer->SamplesPerRow()/(pVoice->effretTicks+1));
 						
-						int volmod = (pEntry->_parameter&0xf0)>>4; // Volume modifier.
+						int volmod = (pEntry->parameter()&0xf0)>>4; // Volume modifier.
 						switch (volmod) 
 						{
 							case 0:
@@ -726,13 +728,13 @@ namespace psycle
 				triggered = 1;
 			}
 
-			else if ((pEntry->_cmd == SAMPLER_CMD_VOLUME) || ( pEntry->_cmd == SAMPLER_CMD_PANNING ) )
+			else if ((pEntry->command() == SAMPLER_CMD_VOLUME) || ( pEntry->command() == SAMPLER_CMD_PANNING ) )
 			{
 				// Calculating volume coef ---------------------------------------
 				//
 				pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
-				if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= helpers::CValueMapper::Map_255_1(pEntry->_parameter);
+				if ( pEntry->command() == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= helpers::CValueMapper::Map_255_1(pEntry->parameter());
 				
 				// Panning calculation -------------------------------------------
 				//
@@ -742,9 +744,9 @@ namespace psycle
 				{
 					panFactor = (float)rand()*0.000030517578125f;
 				}
-				else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
+				else if ( pEntry->command() == SAMPLER_CMD_PANNING )
 				{
-					panFactor = helpers::CValueMapper::Map_255_1(pEntry->_parameter);
+					panFactor = helpers::CValueMapper::Map_255_1(pEntry->parameter());
 				}
 				else
 				{
@@ -895,3 +897,5 @@ namespace psycle
 		}
 	}
 }
+
+#endif //#ifndef use_psycore

@@ -1,12 +1,22 @@
 #pragma once
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class XMSampler;
+	}
+}
+using namespace psy::core;
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 // Cuadro de diálogo de XMSamplerMixerPage
-
+#ifndef use_psycore
 class XMSampler;
+#endif
 
 class XMSamplerMixerPage : public CPropertyPage
 {

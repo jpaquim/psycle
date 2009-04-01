@@ -1,9 +1,17 @@
 ///\file
 ///\implementation psycle::host::Configuration.
 
-#include "Global.hpp"
 #include "Configuration.hpp"
 #include "Registry.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#include <psycle/core/patternEvent.h>
+using namespace psy::core;
+#else
+#include "Song.hpp"
+#endif
+
 #if !defined WINAMP_PLUGIN
 	#include "WaveOut.hpp"
 	#include "DirectSound.hpp"
@@ -11,7 +19,7 @@
 	#include "MidiInput.hpp"
 	#include "NewMachine.hpp"
 #endif // !defined WINAMP_PLUGIN
-#include "Song.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -83,11 +91,7 @@ namespace psycle
 			// pattern height
 			{
 				defaultPatLines = 64;
-				for(int c(0) ; c < MAX_PATTERNS; ++c)
-				{
-					// All pattern reset
-					Global::_pSong->patternLines[c] = defaultPatLines;
-				}
+
 			}
 
 			// paths
@@ -167,8 +171,8 @@ namespace psycle
 
 
 #if !defined WINAMP_PLUGIN
-			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
-			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
+			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::machineGrouping);
+			reg.QueryValue("NewMacDlgpluginName", CNewMachine::displayName);
 			reg.QueryValue("WrapAround", _wrapAround);
 			reg.QueryValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.QueryValue("windowsBlocks", _windowsBlocks);
@@ -225,11 +229,7 @@ namespace psycle
 #endif // !defined WINAMP_PLUGIN
 
 			reg.QueryValue("defaultPatLines", defaultPatLines);
-			for(int c(0) ; c < MAX_PATTERNS; ++c)
-			{
-				// All pattern reset
-				Global::_pSong->patternLines[c] = defaultPatLines;
-			}
+			Global::_pSong->SetDefaultPatternLines(defaultPatLines);
 #if !defined WINAMP_PLUGIN
 			reg.QueryValue("bShowSongInfoOnLoad", bShowSongInfoOnLoad);
 			reg.QueryValue("bFileSaveReminders", bFileSaveReminders);
@@ -376,8 +376,8 @@ namespace psycle
 					return;
 				}
 			}
-			reg.SetValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
-			reg.SetValue("NewMacDlgpluginName", CNewMachine::pluginName);
+			reg.SetValue("NewMacDlgpluginOrder", CNewMachine::machineGrouping);
+			reg.SetValue("NewMacDlgpluginName", CNewMachine::displayName);
 			reg.SetValue("WrapAround", _wrapAround);
 			reg.SetValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.SetValue("CenterCursor", _centerCursor);
@@ -717,8 +717,8 @@ namespace psycle
 			if ( result != ERROR_SUCCESS) return false;
 
 #if !defined WINAMP_PLUGIN
-			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
-			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
+			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::machineGrouping);
+			reg.QueryValue("NewMacDlgpluginName", CNewMachine::displayName);
 			reg.QueryValue("WrapAround", _wrapAround);
 			reg.QueryValue("CenterCursor", _centerCursor);
 			reg.QueryValue("FollowSong", _followSong);
@@ -770,11 +770,8 @@ namespace psycle
 			}
 #endif // !defined WINAMP_PLUGIN
 			reg.QueryValue("defaultPatLines", defaultPatLines);
-			for(int c(0) ; c < MAX_PATTERNS; ++c)
-			{
-				// All pattern reset
-				Global::_pSong->patternLines[c] = defaultPatLines;
-			}
+				Global::_pSong->SetDefaultPatternLines(defaultPatLines);
+
 #if !defined WINAMP_PLUGIN
 
 			char savedbyte;

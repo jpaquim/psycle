@@ -3,12 +3,14 @@
 // http://www.codeproject.com/combobox/cexlistboc.asp
 //
 
-
 #include "ExListBox.h"
-#include "Psycle.hpp"
 #include "MainFrm.hpp"
-#include "Global.hpp"
+#ifdef use_psycore
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
+#endif
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

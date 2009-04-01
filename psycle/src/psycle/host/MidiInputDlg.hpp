@@ -1,10 +1,9 @@
 ///\file
 ///\interface psycle::host::CMidiInputDlg.
 #pragma once
+#include "Psycle.hpp"
 #include "AudioDriver.hpp"
-#include "resources/resources.hpp"
 #include <vector>
-#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

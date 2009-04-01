@@ -1,11 +1,15 @@
 // XMSamplerMixerPage.cpp: archivo de implementación
 //
 
-
 #include "XMSamplerMixerPage.hpp"
-#include "Psycle.hpp"
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#include <psycle/core/xmsampler.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
 #include "XMSampler.hpp"
+#endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -123,7 +127,7 @@ END_MESSAGE_MAP()
 BOOL XMSamplerMixerPage::OnSetActive()
 {
 	m_UpdatingGraphics=true;
-	((CSliderCtrl*)GetDlgItem(IDC_SL_CHANNELS))->SetRangeMax((Global::_pSong->SongTracks()>8)?(Global::_pSong->SongTracks()-8):0); // maxchans-visiblechans
+	((CSliderCtrl*)GetDlgItem(IDC_SL_CHANNELS))->SetRangeMax((Global::_pSong->tracks()>8)?(Global::_pSong->tracks()-8):0); // maxchans-visiblechans
 	if ( ((CButton*)GetDlgItem(IDC_R_SHOWVOICE))->GetCheck() == 0 ) { ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->SetCheck(1); }
 	for (int i=0;i<8;i++)
 	{

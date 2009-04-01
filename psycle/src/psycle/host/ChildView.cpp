@@ -2,18 +2,28 @@
 ///\brief implementation file for psycle::host::CChildView.
 
 #include "ChildView.hpp"
+#include "Configuration.hpp"
+#include "MachineView.hpp"
+#include "PatternView.hpp"
 
 #ifdef use_psycore
+//todo: fixme. This one has to be in configuration.hpp
 #include <psycle/audiodrivers/microsoftmmewaveout.h>
+
 #include <psycle/core/internal_machines.h>
+#include <psycle/core/vstplugin.h>
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
+using namespace psy::core;
+#else
+#include "Player.hpp"
+#include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #endif
 
-#include "Version.hpp"
-#include "Psycle.hpp"
-#include "Configuration.hpp"
-#include "Player.hpp"
+//todo: check if these file are really needed.
+#include "NativeGui.hpp"
+#include "XMSamplerUI.hpp"
+
 #include "MainFrm.hpp"
 #include "MidiInput.hpp"
 #include "ConfigDlg.hpp"
@@ -24,10 +34,6 @@
 #include "XMSongLoader.hpp"
 #include "XMSongExport.hpp"
 #include "ITModule2.h"
-#include "NativeGui.hpp"
-#include "XMSamplerUI.hpp"
-//#include "VstEditorDlg.hpp"
-#include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include <cmath>
 #include <cderr.h>
 
@@ -53,13 +59,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,UndoMacCounter(0)
 			,UndoMacSaved(0)
 #ifdef use_psycore
-			,machine_view_(this, main_frame)
 			,output_driver_(0)
-#else
-			,machine_view_(this, main_frame, Global::_pSong)
 #endif
-			,pattern_view_(this, main_frame, Global::_pSong)
-		{			
+		{
+#ifdef use_psycore
+			machine_view_ = new MachineView(this, main_frame);
+#else
+			machine_view_ = new MachineView(this, main_frame, Global::_pSong);
+#endif
+			pattern_view_ = new PatternView(this, main_frame, Global::_pSong);
+
 			for (int c=0; c<256; c++) { 
 				FLATSIZES[c]=8;
 			}	
@@ -69,7 +78,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// Referencing the childView song pointer to the
 			// Main Global::_pSong object [The application Global::_pSong]
 			_pSong = Global::_pSong;
-			// machine_view_.Rebuild();
+			// machine_view_->Rebuild();
 			// its done in psycle.cpp, todo check config load order
 		}
 
@@ -88,6 +97,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (output_driver_)
 				output_driver_->Enable(false);
 #endif
+			delete machine_view_;
+			delete pattern_view_;
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -279,28 +290,28 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					master->vuupdated = true;
 				}
 #else
-				if (Global::_pSong->_pMachine[MASTER_INDEX])
+				if (Global::_pSong->machine(MASTER_INDEX))
 				{
 					pParentMain->UpdateVumeters
 						(
-							//((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_LMAX,
-							//((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_RMAX,
-							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_lMax,
-							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_rMax,
+							//((Master*)Global::_pSong->machine(MASTER_INDEX))->_LMAX,
+							//((Master*)Global::_pSong->machine(MASTER_INDEX))->_RMAX,
+							((Master*)Global::_pSong->machine(MASTER_INDEX))->_lMax,
+							((Master*)Global::_pSong->machine(MASTER_INDEX))->_rMax,
 							Global::pConfig->vu1,
 							Global::pConfig->vu2,
 							Global::pConfig->vu3,
-							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip
+							((Master*)Global::_pSong->machine(MASTER_INDEX))->_clip
 						);
-					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
+					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->machine(MASTER_INDEX))->_outDry);
 					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
-					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
+					((Master*)Global::_pSong->machine(MASTER_INDEX))->vuupdated = true;
 				}
 #endif
 				if (viewMode == view_modes::machine)
 				{
 					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::pPlayer->Tweaker"
-/*					if (Global::pPlayer->_playing && Global::pPlayer->_lineChanged)
+/*					if (Global::pPlayer->playing() && Global::pPlayer->_lineChanged)
 					{
 						// This is meant to repaint the whole machine in case the panning/mute/solo/bypass has changed. (not really implemented right now)
 						Repaint(draw_modes::all_machines);
@@ -314,26 +325,32 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				for(int c=0; c<MAX_MACHINES; c++)
 				{
-					if (_pSong->_pMachine[c])
+					if (_pSong->machine(c))
 					{
-						if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
+#ifdef use_psycore
+						if(_pSong->machine(c)->getMachineKey().host() == Hosts::VST) {
+							((vst::plugin*)_pSong->machine(c))->Idle();
+						}
+#else
+						if ( _pSong->machine(c)->_type == MACH_PLUGIN )
 						{
 							//if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker) maybe a todo
 							//	pParentMain->m_pWndMac[c]->Invalidate(false);
 						}
-						else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
-								_pSong->_pMachine[c]->_type == MACH_VSTFX )
+						else if ( _pSong->machine(c)->_type == MACH_VST ||
+								_pSong->machine(c)->_type == MACH_VSTFX )
 						{
-							((vst::plugin*)_pSong->_pMachine[c])->Idle();
+							((vst::plugin*)_pSong->machine(c))->Idle();
 //							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
 //								((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
 						}
+#endif
 					}
 				}
 				Global::pPlayer->Tweaker = false;
 
 				if (XMSamplerMachineDialog != NULL ) XMSamplerMachineDialog->UpdateUI();
-				if (Global::pPlayer->_playing)
+				if (Global::pPlayer->playing())
 				{
 					if (Global::pPlayer->_lineChanged)
 					{
@@ -482,11 +499,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				oldbmp = bufDC.SelectObject(bmpDC);
 				if (viewMode==view_modes::machine)	// Machine view paint handler
 				{
-					machine_view_.Draw(&bufDC, pRgn); 
+					machine_view_->Draw(&bufDC, pRgn); 
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{
-					pattern_view_.Draw(&bufDC, pRgn);
+					pattern_view_->Draw(&bufDC, pRgn);
 				}
 				else if ( viewMode == view_modes::sequence)
 				{
@@ -503,11 +520,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (viewMode==view_modes::machine) // Machine view paint handler
 				{
-					machine_view_.Draw(&dc, pRgn);
+					machine_view_->Draw(&dc, pRgn);
 				}
 				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
 				{
-					pattern_view_.Draw(&dc, pRgn);
+					pattern_view_->Draw(&dc, pRgn);
 				}
 				else if ( viewMode == view_modes::sequence)
 				{
@@ -542,12 +559,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnSize(UINT nType, int cx, int cy) 
 		{
 			CWnd ::OnSize(nType, cx, cy);
-			machine_view_.OnSize(cx, cy);
+			machine_view_->OnSize(cx, cy);
 			CW = cx;
 			CH = cy;
+#ifndef use_psycore
 			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
 			_pSong->viewSize.y=cy;
-			
+#endif
 			if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 			{
 				TRACE("CChildView::OnResize(). Deleted bmpDC");
@@ -724,7 +742,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					(
 						Global::pConfig->_followSong &&
 						pattern_view()->editPosition  != Global::pPlayer->_playPosition &&
-						Global::pPlayer->_playing
+						Global::pPlayer->playing()
 					)
 				{
 					pattern_view()->editPosition=Global::pPlayer->_playPosition;
@@ -798,7 +816,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 		{
-			pCmdUI->SetCheck(Global::pPlayer->_playing);		
+			pCmdUI->SetCheck(Global::pPlayer->playing());		
 		}
 
 		void CChildView::OnUpdateBarplayFromStart(CCmdUI* pCmdUI) 
@@ -838,7 +856,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int i=0;
 			while ( Global::_pSong->playOrderSel[i] == false ) i++;
 			
-			if(!Global::pPlayer->_playing)
+			if(!Global::pPlayer->playing())
 				Global::pPlayer->Start(i,0);
 
 			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
@@ -858,9 +876,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.stop();
 #else
-			bool pl = Global::pPlayer->_playing;
+			bool pl = Global::pPlayer->playing();
 			bool blk = Global::pPlayer->_playBlock;
-			Global::pPlayer->Stop();
+			Global::pPlayer->stop();
 			pParentMain->SetAppSongBpm(0);
 			pParentMain->SetAppSongTpb(0);
 
@@ -916,9 +934,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Global::pConfig->autoStopMachines = false;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					if (Global::_pSong->_pMachine[c])
+					if (Global::_pSong->machine(c))
 					{
-						Global::_pSong->_pMachine[c]->Standby(false);
+						Global::_pSong->machine(c)->Standby(false);
 					}
 				}
 			}
@@ -1273,7 +1291,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
 		{
 			if (Global::pConfig->draw_vus)
-				machine_view_.UpdateVUs(devc);
+				machine_view_->UpdateVUs(devc);
 		}
 
 		void CChildView::AddMacViewUndo()

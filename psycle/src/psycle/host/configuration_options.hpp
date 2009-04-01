@@ -3,9 +3,9 @@
 #pragma once
 #include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 
-/// Define to 1 to use psycle-core
+/// Define to use psycle-core
 ///\todo check xml library in psycle-core
-//#define use_psycore 1
+#define use_psycore 1
 
 // correctness check: must not be defined to zero
 #if defined use_psycore && !use_psycore

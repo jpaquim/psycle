@@ -1,12 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::MachineGui.
 #pragma once
-
-#include "configuration_options.hpp" // just for the use_psycore define
-
+#include "Psycle.hpp"
 
 #ifdef use_psycore
-#include <psycle/core/machine.h>
+namespace psy {
+	namespace core {
+		class Machine;
+	}
+}
+using namespace psy::core;
 #endif
 
 #include "canvas.hpp"
@@ -14,6 +17,11 @@
 namespace psycle {
 	namespace host {
 		
+		class MachineView;
+#ifndef use_psycore
+		class Machine;
+#endif
+
 		class SSkinSource
 		{
 		public:
@@ -62,13 +70,7 @@ namespace psycle {
 
 		class MachineGui : public PsycleCanvas::Group {
 		public:
-#ifdef use_psycore
-			MachineGui(class MachineView* view,
-					   psy::core::Machine* mac);
-#else
-			MachineGui(class MachineView* view,
-			           class Machine* mac);
-#endif
+			MachineGui(MachineView* view, Machine* mac);
 			virtual ~MachineGui();
 
 			virtual void AttachWire(class WireGui* gui);
@@ -95,11 +97,7 @@ namespace psycle {
 			virtual bool IsSelected();			
 
 			MachineView* view() { return view_; }
-#ifdef use_psycore			
-			psy::core::Machine* mac() { return mac_; }
-#else
 			Machine* mac() { return mac_; }
-#endif
 
 			virtual int preferred_width() const;
 			virtual int preferred_height() const;
@@ -119,11 +117,7 @@ namespace psycle {
 			void StopDragging();						
 			void OnMove();
 			
-#ifdef use_psycore			
-			psy::core::Machine* mac_;
-#else
 			Machine* mac_;
-#endif
 			MachineView* view_;
 						
 			double dragging_x_;

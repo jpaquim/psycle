@@ -2,10 +2,10 @@
 ///\brief implementation file for psycle::host::CSongpDlg.
 
 #include "SongpDlg.hpp"
-#include "Psycle.hpp"
 
 #ifdef use_psycore
 #include <psycle/core/song.h>
+using namespace psy::core;
 #else
 #include "Song.hpp"
 #endif

@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::CNewVal.
 
 #include "NewVal.hpp"
-#include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

@@ -1,17 +1,31 @@
 ///\file
 ///\brief interface file for psycle::host::CMainFrame.
 #pragma once
+#include "Psycle.hpp"
+#include "ProjectData.hpp"
 #include "ChildView.hpp"
+#include "SeqView.hpp"
+#include "ExListBox.h"
 #include "InstrumentEditor.hpp"
 #include "InfoDlg.hpp"
 #include "MidiMonitorDlg.hpp"
-#include "ExListBox.h"
-#include "ProjectData.hpp"
-#include "SeqView.hpp"
-#include "mfc_namespace.hpp"
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class Song;
+	}
+}
+using namespace psy::core;
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+#ifndef use_psycore
 		class Song;
+#endif
+
 		class CWaveEdFrame;
 		class CGearRackDlg;
 
@@ -90,21 +104,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void SetUpStartProject();
 			
 			CStatusBar  m_wndStatusBar;
+			CReBar      m_wndReBar;
 			CToolBar    m_wndToolBar;
-			CChildView  m_wndView;
 			CDialogBar	m_wndControl;
 			CDialogBar	m_wndControl2;
-			SequencerView m_wndSeq;
-			CReBar      m_wndReBar;
-			std::string		szStatusIdle;
-			CExListBox	m_seqListbox;
-			ProjectData projects_;
+			std::string	szStatusIdle;
+
+			CChildView		m_wndView;
+			SequencerView	m_wndSeq;
+			CExListBox		m_seqListbox;
+			ProjectData		projects_;
 			
 			CInstrumentEditor	m_wndInst;
-			CInfoDlg	m_wndInfo;
+			CInfoDlg		m_wndInfo;
 			CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st
-			CWaveEdFrame	*m_pWndWed;
-			CGearRackDlg* pGearRackDialog;
+			CWaveEdFrame*	m_pWndWed;
+			CGearRackDlg*	pGearRackDialog;
 
 			CBitmap blessless;
 			CBitmap bless;

@@ -1,16 +1,26 @@
 #pragma once
+#include "Psycle.hpp"
 #include "XMSamplerUIGeneral.hpp"
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
-#include "Constants.hpp"
-#include "mfc_namespace.hpp"
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class XMSampler;
+	}
+}
+using namespace psy::core;
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
+#ifndef use_psycore
 class XMSampler;
+#endif
 
 class XMSamplerUI : public CPropertySheet
 	{

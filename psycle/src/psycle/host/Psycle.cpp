@@ -3,14 +3,14 @@
 #define _WIN32_DCOM
 
 #include "Psycle.hpp"
-#include "Version.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
+#include "MachineView.hpp"
+#include "PatternView.hpp"
 #include "MidiInput.hpp"
 #include "NewMachine.hpp"
 #include "SInstance.h"
-#include "Loggers.hpp"
 #include <universalis/processor/exception.hpp>
 #include <diversalis/compiler.hpp>
 #include <sstream>
@@ -18,8 +18,10 @@
 #include <wbemidl.h>
 
 #ifdef use_psycore
+#include <psycle/core/plugincatcher.h>
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/player.h>
+using namespace psy::core;
 #endif
 
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
@@ -59,10 +61,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CPsycleApp::InitInstance()
 		{		
 #ifdef use_psycore
-			psy::core::Player & player(psy::core::Player::singleton());
-			psy::core::MachineFactory & factory(psy::core::MachineFactory::getInstance());
+			MachineFactory & factory(MachineFactory::getInstance());
 			//TODO: Use the pluginCatcher when it's ready.
-			factory.Initialize(&player);
+			factory.Initialize(&Player::singleton(), new PluginFinderCache());
 #endif
 
 			// Allow only one instance of the program
@@ -141,6 +142,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #ifdef use_psycore
 			factory.setPsyclePath(Global::pConfig->GetPluginDir());
 			factory.setLadspaPath("");
+			Global::_pSong = &((CMainFrame *)theApp.m_pMainWnd)->projects_.active_project()->psy_song();
 #else
 			CNewMachine::LoadPluginInfo(false);
 #endif

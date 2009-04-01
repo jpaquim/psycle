@@ -1,7 +1,17 @@
 ///\file
 ///\brief interface file for psycle::host::CNativeGui.
 #pragma once
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class Machine;
+	}
+}
+using namespace psy::core;
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -10,7 +20,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		#define K_NUMFRAMES 63
 		#define W_ROWWIDTH  150
 
+#ifndef use_psycore
 		class Machine;
+#endif
 
 		class NativeGUISettings
 		{

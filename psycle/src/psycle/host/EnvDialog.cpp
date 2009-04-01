@@ -1,9 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CEnvDialog.
-
 #include "EnvDialog.hpp"
-#include "Psycle.hpp"
+#ifdef use_psycore
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
+#endif
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -66,7 +69,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CEnvDialog::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			int si = _pSong->instSelected;
+			int si = _pSong->instSelected();
 
 			// Set slider ranges
 			m_a_attack_slider.SetRange(1,65536);
@@ -112,7 +115,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnDrawAmpAttackSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si = _pSong->instSelected;
+			int si = _pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_AT = m_a_attack_slider.GetPos();
 			
@@ -133,7 +136,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnDrawAmpDecaySlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_DT = m_a_decay_slider.GetPos();
 			
@@ -153,7 +156,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnDrawAmpSustainSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_SL = m_a_sustain_slider.GetPos();
 			
@@ -173,7 +176,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnDrawAmpReleaseSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_RT = m_a_release_slider.GetPos();
 			
@@ -196,7 +199,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnCustomdrawFSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_F_AT = m_f_attack_slider.GetPos();
 			
@@ -215,7 +218,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnCustomdrawFSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_F_DT=m_f_decay_slider.GetPos();
 			char buffer[12];
@@ -233,7 +236,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnCustomdrawFSlider3(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			char buffer[12];
 			_pSong->_pInstrument[si]->ENV_F_SL=m_f_sustain_slider.GetPos();
@@ -251,7 +254,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnCustomdrawFSlider4(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_F_RT = m_f_release_slider.GetPos();
 			char buffer[12];
@@ -351,7 +354,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnCustomdrawSliderCutoff(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_F_CO = m_cutoff_slider.GetPos();
 			char buffer[12];
@@ -363,7 +366,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnCustomdrawSliderQ(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 
 			_pSong->_pInstrument[si]->ENV_F_RQ = m_q_slider.GetPos();
 
@@ -376,13 +379,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CEnvDialog::OnSelchangeCombo1() 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 			_pSong->_pInstrument[si]->ENV_F_TP = m_filtercombo.GetCurSel();
 		}
 
 		void CEnvDialog::OnCustomdrawEnvelope(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=_pSong->instSelected;
+			int si=_pSong->instSelected();
 			_pSong->_pInstrument[si]->ENV_F_EA = m_envelope_slider.GetPos()-128;
 			char buffer[12];
 			sprintf(buffer,"%.0f",(float)_pSong->_pInstrument[si]->ENV_F_EA*0.78125f);

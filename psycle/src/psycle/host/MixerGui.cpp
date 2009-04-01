@@ -1,19 +1,21 @@
 #include "MixerGui.hpp"
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
+#include "Machine.hpp"
 #include "Song.hpp"
-#include "MasterDlg.hpp"
+#endif
 #include "MachineView.hpp"
-#include "FrameMixerMachine.hpp"
 #include "ChildView.hpp"
+#include "FrameMixerMachine.hpp"
+//#include "ChildView.hpp"
 
 namespace psycle {
 	namespace host {
 
-		MixerGui::MixerGui(class MachineView* view,
-#ifdef use_psycore
-						   class psy::core::Machine* mac)
-#else
-						   class Machine* mac)
-#endif
+		MixerGui::MixerGui(MachineView* view, Machine* mac)
 			: EffectGui(view, mac),
 			  dialog_(0)
 		{
@@ -32,9 +34,6 @@ namespace psycle {
 
 		void MixerGui::ShowDialog(double x, double y)
 		{
-#ifdef use_psycore
-			// todo
-#else
 			if ( !dialog_ ) {
 				CRect rc;
 				view()->parent()->GetWindowRect(rc);
@@ -47,7 +46,6 @@ namespace psycle {
 				dialog_->Generate(x, y);			
 				dialog_->centerWindowOnPoint( x, y);
 			}
-#endif
 		}
 
 		void MixerGui::UpdateVU(CDC* devc)

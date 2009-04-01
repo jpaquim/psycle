@@ -1,11 +1,20 @@
 #include "patternview.hpp"
 #include "MainFrm.hpp"
-#include "Global.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+#include <psycle/core/machine.h>
+#include <psycle/helpers/helpers.hpp>
+using namespace psy::core;
+#else
 #include "Player.hpp"
-#include "helpers.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
+#include "helpers.hpp"
+#endif
 #include "InputHandler.hpp"
+#include "Configuration.hpp"
 #include "SwingFillDlg.hpp"
 #include "TransformPatternDlg.hpp"
 #include "InterpolateCurveDlg.hpp"
@@ -74,9 +83,6 @@ namespace psycle {
 			   bDoingSelection(false),
 			   maxView(false)
 		{
-#ifdef use_psycore
-			psy_song_ = 0;
-#endif
 			selpos.bottom=0;
 			newselpos.bottom=0;
 			szBlankParam[0]='\0';
@@ -111,12 +117,15 @@ namespace psycle {
 		bool PatternView::CheckUnsavedSong()
 		{
 			bool checked = true;
-			if (pUndoList) {
-				if (UndoSaved != pUndoList->counter) {
+			if (pUndoList)
+			{
+				if (UndoSaved != pUndoList->counter)
+				{
 					checked = false;
 				}
 			} else
-			if (UndoSaved != 0) {
+			if (UndoSaved != 0)
+			{
 				checked = false;
 			}
 			return checked;
@@ -124,7 +133,7 @@ namespace psycle {
 
 #ifdef use_psycore
 		psy::core::SinglePattern* PatternView::pattern() {
-			psy::core::PatternSequence* sequence = &psy_song()->patternSequence();
+			psy::core::PatternSequence* sequence = &song()->patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());	
 			psy::core::SequenceLine::iterator sit = line->begin();
 			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
@@ -141,7 +150,7 @@ namespace psycle {
 			if (cmd.GetType() == CT_Note)
 			{
 				const int outnote = cmd.GetNote();
-				if(bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
+				if(bEditMode && Global::pPlayer->playing() && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
 				{ 
 					EnterNote(outnote,0,true);	// note end
 				}
@@ -166,7 +175,7 @@ namespace psycle {
 		bool PatternView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		{
 			BOOL bRepeat = nFlags&0x4000;
-				if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
+				if (!(Global::pPlayer->playing() && Global::pConfig->_followSong && bRepeat))
 				{
 					bool success;
 					// add data
@@ -208,23 +217,24 @@ namespace psycle {
 			TRACE("PreparePatternRefresh\n");
 		#endif
 
-#ifdef use_psycore
-			psy::core::Song* song = psy_song();
-#else
 			Song* song = this->song();
-#endif
 			CRect rect;	
 			updateMode=drawMode;					// this is ununsed for patterns
 			
 #ifdef use_psycore			
-			psy::core::SinglePattern* pat = pattern();
+			psy::core::PatternSequence* sequence = &song->patternSequence();
+			psy::core::SequenceLine* line = *(sequence->begin());	
+			psy::core::SequenceLine::iterator sit = line->begin();
+			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
+			assert(sit != line->end());
+			psy::core::SequenceEntry* entry = sit->second;
+			psy::core::SinglePattern* pattern = entry->pattern();
 			int beat_zoom = project()->lines_per_beat();
-			const int plines = pat->beats() * beat_zoom;
-			const int snt = song->tracks();
+			const int plines = pattern->beats() * beat_zoom;
 #else
-			const int snt = song->SONGTRACKS;
 			const int plines = song->patternLines[song->playOrder[editPosition]];
 #endif
+			const int snt = song->tracks();
 			if ( editcur.track >= snt ) // This should only happen when changing the song tracks.
 			{							// Else, there is a problem.
 				TRACE("editcur.track out of range in PreparePatternRefresh");
@@ -549,7 +559,7 @@ namespace psycle {
 							rect.bottom=rect.top+ROWHEIGHT;	// left never changes and is set at ChildView init.
 							rect.left = 0;
 							rect.right=CW;
-							NewPatternDraw(0, song->SONGTRACKS, pos, pos);
+							NewPatternDraw(0, song->tracks(), pos, pos);
 							updatePar |= DRAW_DATA;
 							child_view()->InvalidateRect(rect,false);
 							if ((playpos >= 0) && (playpos != newplaypos))
@@ -558,7 +568,7 @@ namespace psycle {
 								rect.bottom = rect.top+ROWHEIGHT;
 								rect.left = 0;
 								rect.right = CW;
-								NewPatternDraw(0, song->SONGTRACKS, playpos, playpos);
+								NewPatternDraw(0, song->tracks(), playpos, playpos);
 								updatePar |= DRAW_DATA;
 								playpos =-1;
 								child_view()->InvalidateRect(rect,false);
@@ -574,7 +584,7 @@ namespace psycle {
 							rect.bottom = rect.top+ROWHEIGHT;
 							rect.left = 0;
 							rect.right = CW;
-							NewPatternDraw(0, song->SONGTRACKS, playpos, playpos);
+							NewPatternDraw(0, song->tracks(), playpos, playpos);
 							updatePar |= DRAW_DATA;
 							playpos = -1;
 							child_view()->InvalidateRect(rect,false);
@@ -1080,18 +1090,14 @@ namespace psycle {
 			}
 
 			// turn off play line if not playing
-			if (playpos >= 0 && !Global::pPlayer->_playing) 
+			if (playpos >= 0 && !Global::pPlayer->playing()) 
 			{
 				newplaypos=-1;
 				rect.top = YOFFSET+ (playpos-rnlOff)*ROWHEIGHT;
 				rect.bottom = rect.top+ROWHEIGHT;
 				rect.left = 0;
 				rect.right = XOFFSET+(maxt)*ROWWIDTH;
-#ifdef use_psycore
 				NewPatternDraw(0, song->tracks(), playpos, playpos);
-#else
-				NewPatternDraw(0, song->SONGTRACKS, playpos, playpos);
-#endif
 				playpos =-1;
 				updatePar |= DRAW_DATA;
 				child_view()->InvalidateRect(rect,false);
@@ -2531,18 +2537,29 @@ namespace psycle {
 				return;
 			lstart = std::max(lstart,0);
 			lend = std::min( std::max(lend,0), maxl);
+
 			tstart = std::min(std::max(0, tstart), maxt);
 #ifdef use_psycore
-			psy::core::SinglePattern* pat = pattern();		
+			Song* song = this->song();
+			PatternSequence* sequence = &song->patternSequence();
+			SequenceLine* line = *(sequence->begin());	
+			SequenceLine::iterator sit = line->begin();
+			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
+			assert(sit != line->end());
+			SequenceEntry* entry = sit->second;
+			SinglePattern* pattern = entry->pattern();
+			
 			double beat_zoom = static_cast<int>(project()->lines_per_beat());
-			psy::core::SinglePattern::iterator it;
+			SinglePattern::iterator it;
 			double low = (lstart + lOff - 0.5) / (double) beat_zoom;
-			it = pat->lower_bound(low);						
+			it = pattern->lower_bound(low);			
+			
+			char tBuf[16];
 
 			int top = (lstart)*ROWHEIGHT+YOFFSET;
 			int height = (lend-lstart)*ROWHEIGHT;
 			COLORREF* pBkg = pvc_row;
-			char tBuf[16];
+
 			for ( int l = lstart; l < lend; ++l) {
 				// break this up into several more general loops for speed
 				int linecount = l + lOff;
@@ -2661,7 +2678,7 @@ namespace psycle {
 			}
 
 
-			for ( ; it != pat->end(); ++it )  {						
+			for ( ; it != pattern->end(); ++it )  {						
 				psy::core::PatternEvent& ev = it->second;
 				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
 					continue;
@@ -3574,11 +3591,8 @@ namespace psycle {
 			float d1 = float((source2>>8)&0xff);
 			float d2 = float(source2&0xff);
 
-#ifdef use_psycore
-			int len = psy_song()->tracks()+1;
-#else
-			int len = song()->SONGTRACKS+1;
-#endif
+			int len = song()->tracks()+1;
+
 			float a0=(d0-p0)/(len);
 			float a1=(d1-p1)/(len);
 			float a2=(d2-p2)/(len);
@@ -3706,7 +3720,7 @@ namespace psycle {
 					}
 					else
 					{
-						if(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && Global::pConfig->_followSong)
+						if(Global::pConfig->_RecordNoteoff && Global::pPlayer->playing() && Global::pConfig->_followSong)
 						{
 							EnterNote(outnote,0,false);	// note end
 						}
@@ -3734,12 +3748,12 @@ namespace psycle {
 			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 
 			// build entry
-			PatternEntry entry;
-			entry._mach = song()->seqBus;
-			entry._cmd = (value>>8)&255;
-			entry._parameter = value&255;
-			entry._inst = command;
-			entry._note = notecommands::tweak;
+			PatternEvent entry;
+			entry.setMachine(song()->seqBus);
+			entry.setCommand((value>>8)&255);
+			entry.setParameter(value&255);
+			entry.setInstrument(command);
+			entry.setNote(notecommands::tweak);
 
 			if(bEditMode)
 			{ 
@@ -3748,7 +3762,7 @@ namespace psycle {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
 					if(song()->_trackArmedCount)
 					{
@@ -3757,12 +3771,16 @@ namespace psycle {
 					else if (!Global::pConfig->_RecordUnarmed)
 					{		
 						// play it
-						Machine* pMachine = song()->_pMachine[song()->seqBus];
+						Machine* pMachine = song()->machine(song()->seqBus);
 
 						// play
 						if (pMachine)
 						{
+#ifdef use_psycore
+							pMachine->Tick(editcur.track,entry);
+#else
 							pMachine->Tick(editcur.track,&entry);
+#endif
 						}
 						return;
 					}
@@ -3775,21 +3793,25 @@ namespace psycle {
 				}
 
 				// build entry
-				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= notecommands::release)
+				PatternEvent *pentry = (PatternEvent*) toffset;
+				if (pentry->note() >= notecommands::release)
 				{
-					if ((pentry->_mach != entry._mach) 
-						|| (pentry->_cmd != entry._cmd)
-						|| (pentry->_parameter != entry._parameter) 
-						|| (pentry->_inst != entry._inst) 
-						|| ((pentry->_note != notecommands::tweak) && (pentry->_note != notecommands::tweakeffect) && (pentry->_note != notecommands::tweakslide)))
+					if ((pentry->machine() != entry.machine()) 
+						|| (pentry->command() != entry.command())
+						|| (pentry->parameter() != entry.parameter()) 
+						|| (pentry->instrument() != entry.instrument()) 
+#ifdef use_psycore
+						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweak_slide)))
+#else
+						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweakeffect) && (pentry->note() != notecommands::tweakslide)))
+#endif
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-						pentry->_mach = entry._mach;
-						pentry->_cmd = entry._cmd;
-						pentry->_parameter = entry._parameter;
-						pentry->_inst = entry._inst;
-						pentry->_note = entry._note;
+						pentry->setMachine(entry.machine());
+						pentry->setCommand(entry.command());
+						pentry->setParameter(entry.parameter());
+						pentry->setInstrument(entry.instrument());
+						pentry->setNote(entry.note());
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(draw_modes::data);
@@ -3799,12 +3821,16 @@ namespace psycle {
 		//	else
 			{
 				// play it
-				Machine* pMachine = song()->_pMachine[song()->seqBus];
+				Machine* pMachine = song()->machine(song()->seqBus);
 
 				if (pMachine)
 				{
 					// play
+#ifdef use_psycore
+					pMachine->Tick(editcur.track,entry);
+#else
 					pMachine->Tick(editcur.track,&entry);
+#endif
 				}
 			}
 		}
@@ -3816,12 +3842,16 @@ namespace psycle {
 			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 
 			// build entry
-			PatternEntry entry;
-			entry._mach = song()->seqBus;
-			entry._cmd = (value>>8)&255;
-			entry._parameter = value&255;
-			entry._inst = command;
-			entry._note = notecommands::tweakslide;
+			PatternEvent entry;
+			entry.setMachine(song()->seqBus);
+			entry.setCommand((value>>8)&255);
+			entry.setParameter(value&255);
+			entry.setInstrument(command);
+#ifdef use_psycore
+			entry.setNote(notecommands::tweak_slide);
+#else
+			entry.setNote(notecommands::tweakslide);
+#endif
 
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -3830,7 +3860,7 @@ namespace psycle {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
 					if(song()->_trackArmedCount)
 					{
@@ -3838,12 +3868,16 @@ namespace psycle {
 					}
 					else if (!Global::pConfig->_RecordUnarmed)
 					{		
-						Machine* pMachine = song()->_pMachine[song()->seqBus];
+						Machine* pMachine = song()->machine(song()->seqBus);
 
 						if (pMachine)
 						{
 							// play
+#ifdef use_psycore
+							pMachine->Tick(editcur.track,entry);
+#else
 							pMachine->Tick(editcur.track,&entry);
+#endif
 						}
 						return;
 					}
@@ -3856,21 +3890,25 @@ namespace psycle {
 				}
 
 				// build entry
-				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= notecommands::release)
+				PatternEvent *pentry = (PatternEvent*) toffset;
+				if (pentry->note() >= notecommands::release)
 				{
-					if ((pentry->_mach != entry._mach) 
-						|| (pentry->_cmd != entry._cmd)
-						|| (pentry->_parameter != entry._parameter) 
-						|| (pentry->_inst != entry._inst) 
-						|| ((pentry->_note != notecommands::tweak) && (pentry->_note != notecommands::tweakeffect) && (pentry->_note != notecommands::tweakslide)))
+					if ((pentry->machine() != entry.machine()) 
+						|| (pentry->command() != entry.command())
+						|| (pentry->parameter() != entry.parameter()) 
+						|| (pentry->instrument() != entry.instrument()) 
+#ifdef use_psycore
+						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweak_slide)))
+#else
+						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweakeffect) && (pentry->note() != notecommands::tweakslide)))
+#endif
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-						pentry->_mach = entry._mach;
-						pentry->_cmd = entry._cmd;
-						pentry->_parameter = entry._parameter;
-						pentry->_inst = entry._inst;
-						pentry->_note = entry._note;
+						pentry->setMachine(entry.machine());
+						pentry->setCommand(entry.command());
+						pentry->setParameter(entry.parameter());
+						pentry->setInstrument(entry.instrument());
+						pentry->setNote(entry.note());
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(draw_modes::data);
@@ -3879,12 +3917,16 @@ namespace psycle {
 			}
 		//	else
 			{
-				Machine* pMachine = song()->_pMachine[song()->seqBus];
+				Machine* pMachine = song()->machine(song()->seqBus);
 
 				if (pMachine)
 				{
 					// play
+#ifdef use_psycore
+					pMachine->Tick(editcur.track,entry);
+#else
 					pMachine->Tick(editcur.track,&entry);
+#endif
 				}
 			}
 		}
@@ -3896,12 +3938,12 @@ namespace psycle {
 			if (value > 0xff) value = 0xff; // no else incase of neg overflow
 
 			// build entry
-			PatternEntry entry;
-			entry._mach = song()->seqBus;
-			entry._inst = song()->auxcolSelected;
-			entry._cmd = command;
-			entry._parameter = value;
-			entry._note = notecommands::empty;
+			PatternEvent entry;
+			entry.setMachine(song()->seqBus);
+			entry.setInstrument(song()->auxcolSelected);
+			entry.setCommand(command);
+			entry.setParameter(value);
+			entry.setNote(notecommands::empty);
 
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -3910,7 +3952,7 @@ namespace psycle {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
 					if(song()->_trackArmedCount)
 					{
@@ -3918,12 +3960,16 @@ namespace psycle {
 					}
 					else if (!Global::pConfig->_RecordUnarmed)
 					{		
-						Machine* pMachine = song()->_pMachine[song()->seqBus];
+						Machine* pMachine = song()->machine(song()->seqBus);
 
 						if (pMachine)
 						{
 							// play
+#ifdef use_psycore
+							pMachine->Tick(editcur.track,entry);
+#else
 							pMachine->Tick(editcur.track,&entry);
+#endif
 						}
 						return;
 					}
@@ -3936,17 +3982,17 @@ namespace psycle {
 				}
 
 				// build entry
-				PatternEntry *pentry = (PatternEntry*) toffset;
-				if ((pentry->_mach != entry._mach) 
-					|| (pentry->_inst != entry._inst) 
-					|| (pentry->_cmd != entry._cmd) 
-					|| (pentry->_parameter != entry._parameter))
+				PatternEvent *pentry = (PatternEvent*) toffset;
+				if ((pentry->machine() != entry.machine()) 
+					|| (pentry->instrument() != entry.instrument()) 
+					|| (pentry->command() != entry.command()) 
+					|| (pentry->parameter() != entry.parameter()))
 				{
 					AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-					pentry->_mach = entry._mach;
-					pentry->_cmd = entry._cmd;
-					pentry->_parameter = entry._parameter;
-					pentry->_inst = entry._inst;
+					pentry->setMachine(entry.machine());
+					pentry->setCommand(entry.command());
+					pentry->setParameter(entry.parameter());
+					pentry->setInstrument(entry.instrument());
 
 					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 					Repaint(draw_modes::data);
@@ -3955,12 +4001,16 @@ namespace psycle {
 		//	else
 			{
 				// play it
-				Machine* pMachine = song()->_pMachine[song()->seqBus];
+				Machine* pMachine = song()->machine(song()->seqBus);
 
 				if (pMachine)
 				{
 					// play
+#ifdef use_psycore
+					pMachine->Tick(editcur.track,entry);
+#else
 					pMachine->Tick(editcur.track,&entry);
+#endif
 				}
 			}
 		}
@@ -3968,12 +4018,16 @@ namespace psycle {
 		void PatternView::MidiPatternMidiCommand(int command, int value)
 		{
 			// UNDO CODE MIDI PATTERN TWEAK
-			PatternEntry entry;
-			entry._mach = song()->seqBus;
-			entry._cmd = (value&0xFF00)>>8;
-			entry._parameter = value&0xFF;
-			entry._inst = command;
-			entry._note = notecommands::midicc;
+			PatternEvent entry;
+			entry.setMachine(song()->seqBus);
+			entry.setCommand((value&0xFF00)>>8);
+			entry.setParameter(value&0xFF);
+			entry.setInstrument(command);
+#ifdef use_psycore
+			entry.setNote(notecommands::midi_cc);
+#else
+			entry.setNote(notecommands::midicc);
+#endif
 
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -3982,7 +4036,7 @@ namespace psycle {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
 					if(song()->_trackArmedCount)
 					{
@@ -3990,12 +4044,16 @@ namespace psycle {
 					}
 					else if (!Global::pConfig->_RecordUnarmed)
 					{		
-						Machine* pMachine = song()->_pMachine[song()->seqBus];
+						Machine* pMachine = song()->machine(song()->seqBus);
 
 						if (pMachine)
 						{
 							// play
+#ifdef use_psycore
+							pMachine->Tick(editcur.track,entry);
+#else
 							pMachine->Tick(editcur.track,&entry);
+#endif
 						}
 						return;
 					}
@@ -4008,21 +4066,25 @@ namespace psycle {
 				}
 
 				// build entry
-				PatternEntry *pentry = (PatternEntry*) toffset;
-				if (pentry->_note >= notecommands::release)
+				PatternEvent *pentry = (PatternEvent*) toffset;
+				if (pentry->note() >= notecommands::release)
 				{
-					if ((pentry->_mach != entry._mach) 
-						|| (pentry->_cmd != entry._cmd) 
-						|| (pentry->_parameter != entry._parameter) 
-						|| (pentry->_inst != entry._inst) 
-						|| (pentry->_note != notecommands::midicc))
+					if ((pentry->machine() != entry.machine()) 
+						|| (pentry->command() != entry.command()) 
+						|| (pentry->parameter() != entry.parameter()) 
+						|| (pentry->instrument() != entry.instrument()) 
+#ifdef use_psycore
+						|| (pentry->note() != notecommands::midi_cc))
+#else
+						|| (pentry->note() != notecommands::midicc))
+#endif
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-						pentry->_mach = entry._mach;
-						pentry->_cmd = entry._cmd;
-						pentry->_parameter = entry._parameter;
-						pentry->_inst = entry._inst;
-						pentry->_note = entry._note;
+						pentry->setMachine(entry.machine());
+						pentry->setCommand(entry.command());
+						pentry->setParameter(entry.parameter());
+						pentry->setInstrument(entry.instrument());
+						pentry->setNote(entry.note());
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(draw_modes::data);
@@ -4031,12 +4093,16 @@ namespace psycle {
 			}
 		//	else
 			{
-				Machine* pMachine = song()->_pMachine[song()->seqBus];
+				Machine* pMachine = song()->machine(song()->seqBus);
 
 				if (pMachine)
 				{
 					// play
+#ifdef use_psycore
+					pMachine->Tick(editcur.track,entry);
+#else
 					pMachine->Tick(editcur.track,&entry);
+#endif
 				}
 			}
 		}
@@ -4048,12 +4114,12 @@ namespace psycle {
 			if (value > 0xff) value = 0xff; // no else incase of neg overflow
 
 			// build entry
-			PatternEntry entry;
-			entry._mach = song()->seqBus;
-			entry._inst = value;
-			entry._cmd = 255;
-			entry._parameter = 255;
-			entry._note = notecommands::empty;
+			PatternEvent entry;
+			entry.setMachine(song()->seqBus);
+			entry.setInstrument(value);
+			entry.setCommand(255);
+			entry.setParameter(255);
+			entry.setNote(notecommands::empty);
 
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -4062,7 +4128,7 @@ namespace psycle {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
 					if(song()->_trackArmedCount)
 					{
@@ -4070,12 +4136,16 @@ namespace psycle {
 					}
 					else if (!Global::pConfig->_RecordUnarmed)
 					{		
-						Machine* pMachine = song()->_pMachine[song()->seqBus];
+						Machine* pMachine = song()->machine(song()->seqBus);
 
 						if (pMachine)
 						{
 							// play
+#ifdef use_psycore
+							pMachine->Tick(editcur.track,entry);
+#else
 							pMachine->Tick(editcur.track,&entry);
+#endif
 						}
 						return;
 					}
@@ -4088,13 +4158,13 @@ namespace psycle {
 				}
 
 				// build entry
-				PatternEntry *pentry = (PatternEntry*) toffset;
-				if ((pentry->_mach != entry._mach) 
-					|| (pentry->_inst != entry._inst))
+				PatternEvent *pentry = (PatternEvent*) toffset;
+				if ((pentry->machine() != entry.machine()) 
+					|| (pentry->instrument() != entry.instrument()))
 				{
 					AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-					pentry->_mach = entry._mach;
-					pentry->_inst = entry._inst;
+					pentry->setMachine(entry.machine());
+					pentry->setInstrument(entry.instrument());
 
 					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 					Repaint(draw_modes::data);
@@ -4102,12 +4172,16 @@ namespace psycle {
 			}
 		//	else
 			{
-				Machine* pMachine = song()->_pMachine[song()->seqBus];
+				Machine* pMachine = song()->machine(song()->seqBus);
 
 				if (pMachine)
 				{
 					// play
+#ifdef use_psycore
+					pMachine->Tick(editcur.track,entry);
+#else
 					pMachine->Tick(editcur.track,&entry);
+#endif
 				}
 			}
 		}
@@ -4124,7 +4198,7 @@ namespace psycle {
 				const int ps = _ps();
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset;
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
 					if(song()->_trackArmedCount)
 					{
@@ -4143,17 +4217,21 @@ namespace psycle {
 				}
 
 				// build entry
-				PatternEntry *entry = (PatternEntry*) toffset;
-				if (entry->_note >= notecommands::release)
+				PatternEvent *entry = (PatternEvent*) toffset;
+				if (entry->note() >= notecommands::release)
 				{
-					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
+#ifdef use_psycore
+					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweak_slide)))
+#else
+					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweakeffect) && (entry->note() != notecommands::tweakslide)))
+#endif
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-						entry->_mach = machine;
-						entry->_cmd = (value>>8)&255;
-						entry->_parameter = value&255;
-						entry->_inst = command;
-						entry->_note = notecommands::tweak;
+						entry->setMachine(machine);
+						entry->setCommand((value>>8)&255);
+						entry->setParameter(value&255);
+						entry->setInstrument(command);
+						entry->setNote(notecommands::tweak);
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(draw_modes::data);
@@ -4173,7 +4251,7 @@ namespace psycle {
 				const int ps = _ps();
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset;
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
 					if(song()->_trackArmedCount)
 					{
@@ -4192,17 +4270,25 @@ namespace psycle {
 				}
 
 				// build entry
-				PatternEntry *entry = (PatternEntry*) toffset;
-				if (entry->_note >= notecommands::release)
+				PatternEvent *entry = (PatternEvent*) toffset;
+				if (entry->note() >= notecommands::release)
 				{
-					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
+#ifdef use_psycore
+					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweak_slide)))
+#else
+					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweakeffect) && (entry->note() != notecommands::tweakslide)))
+#endif
 					{
 						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-						entry->_mach = machine;
-						entry->_cmd = (value>>8)&255;
-						entry->_parameter = value&255;
-						entry->_inst = command;
-						entry->_note = notecommands::tweakslide;
+						entry->setMachine(machine);
+						entry->setCommand((value>>8)&255);
+						entry->setParameter(value&255);
+						entry->setInstrument(command);
+#ifdef use_psycore
+						entry->setNote(notecommands::tweak_slide);
+#else
+						entry->setNote(notecommands::tweakslide);
+#endif
 
 						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 						Repaint(draw_modes::data);
@@ -4227,7 +4313,7 @@ namespace psycle {
 			}
 
 			int line = editcur.line;
-			psy::core::Song* song = psy_song();
+			psy::core::Song* song = this->song();
 			psy::core::PatternSequence* sequence = &song->patternSequence();
 			psy::core::SequenceLine* sline = *(sequence->begin());	
 			psy::core::SequenceLine::iterator sit = sline->begin();
@@ -4276,14 +4362,14 @@ namespace psycle {
 			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 
 			// realtime note entering
-/*			if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+/*			if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 			{
 				if(song()->_trackArmedCount)
 				{
 					if (velocity == 0)
 					{
 						int i;
-						for (i = 0; i < song()->SONGTRACKS; i++)
+						for (i = 0; i < song()->tracks(); i++)
 						{
 							if (song()->_trackArmed[i])
 							{
@@ -4295,7 +4381,7 @@ namespace psycle {
 							}
 						}
 						///\todo : errm.. == or !=  ????
-						if (i == song()->SONGTRACKS)
+						if (i == song()->tracks())
 						{
 							Global::pInputHandler->StopNote(note,false);
 							return;
@@ -4309,9 +4395,9 @@ namespace psycle {
 				else if (!Global::pConfig->_RecordUnarmed)
 				{
 					// build entry
-					PatternEntry entry;
-					entry._note = note;
-					entry._mach = song()->seqBus;
+					PatternEvent entry;
+					entry.note() = note;
+					entry.machine() = song()->seqBus;
 
 					if ( note < notecommands::release)
 					{
@@ -4319,13 +4405,13 @@ namespace psycle {
 						{
 							if (Global::pConfig->midi().raw())
 							{
-								entry._cmd = 0x0c;
-								entry._parameter = velocity*2;
+								entry.command() = 0x0c;
+								entry.parameter() = velocity*2;
 							}
 							else if (Global::pConfig->midi().velocity().record())
 							{
 								// command
-								entry._cmd = Global::pConfig->midi().velocity().command();
+								entry.command() = Global::pConfig->midi().velocity().command();
 								int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
 								if (par > 255) 
 								{
@@ -4335,41 +4421,41 @@ namespace psycle {
 								{
 									par = 0;
 								}
-								entry._parameter = par;
+								entry.parameter() = par;
 							}
 						}
 					}
 
 					if (note>notecommands::release)
 					{
-						entry._inst = song()->auxcolSelected;
+						entry.instrument() = song()->auxcolSelected;
 					}
 
-					Machine *tmac = song()->_pMachine[entry._mach];
+					Machine *tmac = song()->machine(entry.machine());
 					// implement lock sample to machine here.
 					// if the current machine is a sampler, check 
 					// if current sample is locked to a machine.
-					// if so, switch entry._mach to that machine number
+					// if so, switch entry.machine() to that machine number
 
 					if (tmac)
 					{
-						if (((Machine*)song()->_pMachine[song()->seqBus])->_type == MACH_SAMPLER)
+						if (((Machine*)song()->machine(song()->seqBus))->_type == MACH_SAMPLER)
 						{
 							if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
 								&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
 							{
-								entry._mach = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
-								tmac = song()->_pMachine[entry._mach];
+								entry.machine() = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
+								tmac = song()->machine(entry.machine());
 								if (!tmac) return;
 							}
 						}
 						if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
 						{
-							entry._inst = song()->auxcolSelected;
+							entry.instrument() = song()->auxcolSelected;
 						}
-						else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+						else if (tmac->_type == MACH_VST) // entry->Instrument() is the MIDI channel for VSTi's
 						{
-							entry._inst = song()->auxcolSelected;
+							entry.instrument() = song()->auxcolSelected;
 						}
 						
 						if ( note < notecommands::release)
@@ -4393,7 +4479,7 @@ namespace psycle {
 						ChordModeLine = editcur.line;
 						ChordModeTrack = editcur.track;
 					}
-					editcur.track = (ChordModeTrack+ChordModeOffs)%song()->SONGTRACKS;
+					editcur.track = (ChordModeTrack+ChordModeOffs)%song()->tracks();
 					editcur.line = line = ChordModeLine;
 					toffset = _ptrackline(ps, editcur.track, line);
 					ChordModeOffs++;
@@ -4413,33 +4499,33 @@ namespace psycle {
 			}
 
 			// build entry
-			PatternEntry *entry = (PatternEntry*) toffset;
+			PatternEvent *entry = (PatternEvent*) toffset;
 			if (velocity==0)
 			{
 				Global::pInputHandler->StopNote(note,false);
-				if (entry->_note == note)
+				if (entry->Note() == note)
 				{
 					return;
 				}
 				note = notecommands::release;
 			}
 			AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
-			entry->_note = note;
-			entry->_mach = song()->seqBus;
+			entry->setNote(note);
+			entry->setMachine(song()->seqBus);
 
-			if ( song()->seqBus < MAX_MACHINES && song()->_pMachine[song()->seqBus] != 0 ) 
+			if ( song()->seqBus < MAX_MACHINES && song()->machine(song()->seqBus) != 0 ) 
 			{
 
 					// implement lock sample to machine here.
 					// if the current machine is a sampler, check 
 					// if current sample is locked to a machine.
-					// if so, switch entry._mach to that machine number
-					if (((Machine*)song()->_pMachine[song()->seqBus])->_type == MACH_SAMPLER)
+					// if so, switch entry.machine() to that machine number
+					if (((Machine*)song()->machine(song()->seqBus))->_type == MACH_SAMPLER)
 					{
 						if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
 							&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
 						{
-							entry->_mach = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
+							entry->setMachine(song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine);
 						}
 					}
 			}
@@ -4449,13 +4535,13 @@ namespace psycle {
 				{
 					if (Global::pConfig->midi().raw())
 					{
-						entry->_cmd = 0x0c;
-						entry->_parameter = velocity * 2;
+						entry->setCommand(0x0c);
+						entry->setParameter(velocity * 2);
 					}
 					else if (Global::pConfig->midi().velocity().record())
 					{
 						// command
-						entry->_cmd = Global::pConfig->midi().velocity().command();
+						entry->setCommand(Global::pConfig->midi().velocity().command());
 						int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
 						if (par > 255) 
 						{
@@ -4465,28 +4551,28 @@ namespace psycle {
 						{
 							par = 0;
 						}
-						entry->_parameter = par;
+						entry->setParameter(par);
 					}
 				}
 			}
 
 			if (note>notecommands::release)
 			{
-				entry->_inst = song()->auxcolSelected;
+				entry->setInstrument(song()->auxcolSelected);
 			}
 
-			//Machine *tmac = song()->_pMachine[song()->seqBus];
+			//Machine *tmac = song()->machine(song()->seqBus);
 //altered for locking sample to machine by alk
-			Machine *tmac = song()->_pMachine[entry->_mach];
+			Machine *tmac = song()->machine(entry->Machine());
 			if (tmac)
 			{
 				if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
 				{
-					entry->_inst = song()->auxcolSelected;
+					entry->setInstrument(song()->auxcolSelected);
 				}
-				else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+				else if (tmac->_type == MACH_VST) // entry->Instrument() is the MIDI channel for VSTi's
 				{
-					entry->_inst = song()->auxcolSelected;
+					entry->setInstrument(song()->auxcolSelected);
 				}
 				
 				if ( note < notecommands::release)
@@ -4497,7 +4583,7 @@ namespace psycle {
 
 			Global::pInputHandler->notetrack[editcur.track]=note;
 			NewPatternDraw(editcur.track,editcur.track,line,line);
-			if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+			if (!(Global::pPlayer->playing()&&Global::pConfig->_followSong))
 			{
 				if (ChordModeOffs)
 				{
@@ -4530,14 +4616,14 @@ namespace psycle {
 			}
 			
 			// realtime note entering
-			if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+			if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 			{
 				if(song()->_trackArmedCount)
 				{
 					if (velocity == 0)
 					{
 						int i;
-						for (i = 0; i < song()->SONGTRACKS; i++)
+						for (i = 0; i < song()->tracks(); i++)
 						{
 							if (song()->_trackArmed[i])
 							{
@@ -4549,7 +4635,7 @@ namespace psycle {
 							}
 						}
 						///\todo : errm.. == or !=  ????
-						if (i == song()->SONGTRACKS)
+						if (i == song()->tracks())
 						{
 							Global::pInputHandler->StopNote(note,false);
 							return;
@@ -4563,9 +4649,9 @@ namespace psycle {
 				else if (!Global::pConfig->_RecordUnarmed)
 				{
 					// build entry
-					PatternEntry entry;
-					entry._note = note;
-					entry._mach = song()->seqBus;
+					PatternEvent entry;
+					entry.setNote(note);
+					entry.setMachine(song()->seqBus);
 
 					if ( note < notecommands::release)
 					{
@@ -4573,13 +4659,13 @@ namespace psycle {
 						{
 							if (Global::pConfig->midi().raw())
 							{
-								entry._cmd = 0x0c;
-								entry._parameter = velocity*2;
+								entry.setCommand(0x0c);
+								entry.setParameter(velocity*2);
 							}
 							else if (Global::pConfig->midi().velocity().record())
 							{
 								// command
-								entry._cmd = Global::pConfig->midi().velocity().command();
+								entry.setCommand(Global::pConfig->midi().velocity().command());
 								int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
 								if (par > 255) 
 								{
@@ -4589,41 +4675,41 @@ namespace psycle {
 								{
 									par = 0;
 								}
-								entry._parameter = par;
+								entry.setParameter(par);
 							}
 						}
 					}
 
 					if (note>notecommands::release)
 					{
-						entry._inst = song()->auxcolSelected;
+						entry.setInstrument(song()->auxcolSelected);
 					}
 
-					Machine *tmac = song()->_pMachine[entry._mach];
+					Machine *tmac = song()->machine(entry.machine());
 					// implement lock sample to machine here.
 					// if the current machine is a sampler, check 
 					// if current sample is locked to a machine.
-					// if so, switch entry._mach to that machine number
+					// if so, switch entry.machine() to that machine number
 
 					if (tmac)
 					{
-						if (((Machine*)song()->_pMachine[song()->seqBus])->_type == MACH_SAMPLER)
+						if (((Machine*)song()->machine(song()->seqBus))->_type == MACH_SAMPLER)
 						{
 							if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
 								&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
 							{
-								entry._mach = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
-								tmac = song()->_pMachine[entry._mach];
+								entry.setMachine(song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine);
+								tmac = song()->machine(entry.machine());
 								if (!tmac) return;
 							}
 						}
 						if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
 						{
-							entry._inst = song()->auxcolSelected;
+							entry.setInstrument(song()->auxcolSelected);
 						}
-						else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+						else if (tmac->_type == MACH_VST) // entry->instrument() is the MIDI channel for VSTi's
 						{
-							entry._inst = song()->auxcolSelected;
+							entry.setInstrument(song()->auxcolSelected);
 						}
 						
 						if ( note < notecommands::release)
@@ -4647,7 +4733,7 @@ namespace psycle {
 						ChordModeLine = editcur.line;
 						ChordModeTrack = editcur.track;
 					}
-					editcur.track = (ChordModeTrack+ChordModeOffs)%song()->SONGTRACKS;
+					editcur.track = (ChordModeTrack+ChordModeOffs)%song()->tracks();
 					editcur.line = line = ChordModeLine;
 					toffset = _ptrackline(ps, editcur.track, line);
 					ChordModeOffs++;
@@ -4667,33 +4753,33 @@ namespace psycle {
 			}
 
 			// build entry
-			PatternEntry *entry = (PatternEntry*) toffset;
+			PatternEvent *entry = (PatternEvent*) toffset;
 			if (velocity==0)
 			{
 				Global::pInputHandler->StopNote(note,false);
-				if (entry->_note == note)
+				if (entry->Note() == note)
 				{
 					return;
 				}
 				note = notecommands::release;
 			}
 			AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
-			entry->_note = note;
-			entry->_mach = song()->seqBus;
+			entry->setNote(note);
+			entry->setMachine(song()->seqBus);
 
-			if ( song()->seqBus < MAX_MACHINES && song()->_pMachine[song()->seqBus] != 0 ) 
+			if ( song()->seqBus < MAX_MACHINES && song()->machine(song()->seqBus) != 0 ) 
 			{
 
 					// implement lock sample to machine here.
 					// if the current machine is a sampler, check 
 					// if current sample is locked to a machine.
-					// if so, switch entry._mach to that machine number
-					if (((Machine*)song()->_pMachine[song()->seqBus])->_type == MACH_SAMPLER)
+					// if so, switch entry.machine() to that machine number
+					if (((Machine*)song()->machine(song()->seqBus))->_type == MACH_SAMPLER)
 					{
 						if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
 							&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
 						{
-							entry->_mach = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
+							entry->setMachine(song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine);
 						}
 					}
 			}
@@ -4703,13 +4789,13 @@ namespace psycle {
 				{
 					if (Global::pConfig->midi().raw())
 					{
-						entry->_cmd = 0x0c;
-						entry->_parameter = velocity * 2;
+						entry->setCommand(0x0c);
+						entry->setParameter(velocity * 2);
 					}
 					else if (Global::pConfig->midi().velocity().record())
 					{
 						// command
-						entry->_cmd = Global::pConfig->midi().velocity().command();
+						entry->setCommand(Global::pConfig->midi().velocity().command());
 						int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
 						if (par > 255) 
 						{
@@ -4719,28 +4805,28 @@ namespace psycle {
 						{
 							par = 0;
 						}
-						entry->_parameter = par;
+						entry->setParameter(par);
 					}
 				}
 			}
 
 			if (note>notecommands::release)
 			{
-				entry->_inst = song()->auxcolSelected;
+				entry->setInstrument(song()->auxcolSelected);
 			}
 
-			//Machine *tmac = song()->_pMachine[song()->seqBus];
+			//Machine *tmac = song()->machine(song()->seqBus);
 //altered for locking sample to machine by alk
-			Machine *tmac = song()->_pMachine[entry->_mach];
+			Machine *tmac = song()->machine(entry->Machine());
 			if (tmac)
 			{
 				if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
 				{
-					entry->_inst = song()->auxcolSelected;
+					entry->setInstrument(song()->auxcolSelected);
 				}
-				else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
+				else if (tmac->_type == MACH_VST) // entry->instrument() is the MIDI channel for VSTi's
 				{
-					entry->_inst = song()->auxcolSelected;
+					entry->setInstrument(song()->auxcolSelected);
 				}
 				
 				if ( note < notecommands::release)
@@ -4751,7 +4837,7 @@ namespace psycle {
 
 			Global::pInputHandler->notetrack[editcur.track]=note;
 			NewPatternDraw(editcur.track,editcur.track,line,line);
-			if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+			if (!(Global::pPlayer->playing()&&Global::pConfig->_followSong))
 			{
 				if (ChordModeOffs)
 				{
@@ -4777,7 +4863,7 @@ namespace psycle {
 				unsigned char * toffset;
 				
 				// realtime note entering
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
 					toffset = _ptrack(ps)+(Global::pPlayer->_lineCounter*MULTIPLY);
 				}
@@ -4787,15 +4873,15 @@ namespace psycle {
 				}
 
 				// build entry
-				PatternEntry *entry = (PatternEntry*) toffset;
+				PatternEvent *entry = (PatternEvent*) toffset;
 				AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-				entry->_note = notecommands::release;
+				entry->setNote(notecommands::release);
 
 				Global::pInputHandler->notetrack[editcur.track]=notecommands::release;
 
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
-				if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+				if (!(Global::pPlayer->playing()&&Global::pConfig->_followSong))
 				{
 					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 				}
@@ -4819,7 +4905,7 @@ namespace psycle {
 // 			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 			int line = editcur.line;
-			psy::core::Song* song = psy_song();
+			psy::core::Song* song = this->song();
 			psy::core::PatternSequence* sequence = &song->patternSequence();
 			psy::core::SequenceLine* sline = *(sequence->begin());	
 			psy::core::SequenceLine::iterator sit = sline->begin();
@@ -5141,15 +5227,19 @@ namespace psycle {
 			for (i=editcur.line; i < patlines-1; i++)
 				memcpy(offset+(i*MULTIPLY), offset+((i+1)*MULTIPLY), EVENT_SIZE);
 
-			PatternEntry blank;
+			PatternEvent blank;
 			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
 #endif
-			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
+//			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
+#ifdef use_psycore
 			Repaint(draw_modes::pattern);
+#else
+			Repaint(draw_modes::data);
+#endif
 		}
 
 		void PatternView::InsertCurr()
@@ -5195,14 +5285,19 @@ namespace psycle {
 			for (i=patlines-1; i > editcur.line; i--)
 				memcpy(offset+(i*MULTIPLY), offset+((i-1)*MULTIPLY), EVENT_SIZE);
 
-			PatternEntry blank;
+			PatternEvent blank;
 			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
-#endif
+
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
+#endif
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
+#ifdef use_psycore
+			Repaint(draw_modes::pattern);
+#else
 			Repaint(draw_modes::data);
+#endif
 		}
 
 
@@ -5216,21 +5311,21 @@ namespace psycle {
 			{
 				bScrollDetatch=false;
 			}
-			PatternEntry* pEntry = (PatternEntry*)_ptrackline(_ps(),0,editcur.line);
-#ifdef use_psycore			
-			for (int i=0; i<psy_song()->tracks(); i++)
-#else
-			for (int i=0; i<song()->SONGTRACKS;i++)
-#endif
+			PatternEvent* pEntry = (PatternEvent*)_ptrackline(_ps(),0,editcur.line);
+			for (int i=0; i<song()->tracks();i++)
 			{
-				if (pEntry->_mach < MAX_MACHINES && !song()->_trackMuted[i])
+				if (pEntry->machine() < MAX_MACHINES && !song()->_trackMuted[i])
 				{
-					Machine *pMachine = song()->machine(pEntry->_mach);
+					Machine *pMachine = song()->machine(pEntry->machine());
 					if (pMachine)
 					{
 						if ( !pMachine->_mute)	
 						{
-							pMachine->Tick(i, pEntry);
+#ifdef use_psycore
+							pMachine->Tick(i,*pEntry);
+#else
+							pMachine->Tick(i,pEntry);
+#endif
 						}
 					}
 				}
@@ -5245,19 +5340,24 @@ namespace psycle {
 				bScrollDetatch=false;
 			}
 
-			PatternEntry* pEntry = (PatternEntry*)_ptrackline();
-			if (pEntry->_mach < MAX_MACHINES)
+			PatternEvent* pEntry = (PatternEvent*)_ptrackline();
+			if (pEntry->machine() < MAX_MACHINES)
 			{
-				Machine *pMachine = song()->machine(pEntry->_mach);
+				Machine *pMachine = song()->machine(pEntry->machine());
 				if (pMachine)
 				{
 					if ( !pMachine->_mute)	
 					{
-						pMachine->Tick(editcur.track, pEntry);
+#ifdef use_psycore
+						pMachine->Tick(editcur.track,*pEntry);
+#else
+						pMachine->Tick(editcur.track,pEntry);
+#endif
 					}
 				}
 			}
 		}
+
 
 		//////////////////////////////////////////////////////////////////////
 		// Cursor Moving Functions
@@ -5273,11 +5373,7 @@ namespace psycle {
 				if (editcur.track == 0)
 				{
 					if ( wrap )
-#ifdef use_psycore						
-						editcur.track = psy_song()->tracks()-1;
-#else
-						editcur.track = song()->SONGTRACKS-1;
-#endif
+						editcur.track = song()->tracks()-1;
 					else 
 						editcur.col=0;
 				}
@@ -5299,11 +5395,7 @@ namespace psycle {
 			{
 				editcur.col = 0;
 				main()->StatusBarIdle();
-#ifdef use_psycore				
-				if (editcur.track == psy_song()->tracks()-1)
-#else
-				if (editcur.track == song()->SONGTRACKS-1)
-#endif
+				if (editcur.track == song()->tracks()-1)
 				{
 					if ( wrap ) 
 						editcur.track = 0;
@@ -5355,11 +5447,7 @@ namespace psycle {
 			if (x<0) //kind of trick used to advance track (related to chord mode).
 			{
 				editcur.track+=1;
-#ifdef use_psycore				
-				if (editcur.track >= psy_song()->tracks())
-#else
-				if (editcur.track >= song()->SONGTRACKS)
-#endif
+				if (editcur.track >= song()->tracks())
 				{
 					editcur.track=0;
 					editcur.line+=1;
@@ -5392,18 +5480,10 @@ namespace psycle {
 
 			editcur.track+=x;
 			editcur.col=0;
-#ifdef use_psycore						
-			if(editcur.track>= psy_song()->tracks())
-#else
-			if(editcur.track>= song()->SONGTRACKS)
-#endif
+			if(editcur.track>= song()->tracks())
 			{
 				if ( wrap ) editcur.track=0;
-#ifdef use_psycore										
-				else editcur.track=psy_song()->tracks()-1;
-#else
-				else editcur.track=song()->SONGTRACKS-1;
-#endif
+				else editcur.track=song()->tracks()-1;
 			}
 			
 			main()->StatusBarIdle();
@@ -5421,11 +5501,7 @@ namespace psycle {
 			
 			if(editcur.track<0)
 			{
-#ifdef use_psycore				
-				if (wrap) editcur.track=psy_song()->tracks()-1;
-#else
-				if (wrap) editcur.track=song()->SONGTRACKS-1;
-#endif
+				if (wrap) editcur.track=song()->tracks()-1;
 				else editcur.track=0;
 			}
 			
@@ -5445,7 +5521,7 @@ namespace psycle {
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
-				PatternEntry blank;
+				PatternEvent blank;
 
 				patBufferLines = song()->patternLines[ps];
 				AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
@@ -5460,7 +5536,7 @@ namespace psycle {
 				}
 				patBufferCopy = true;
 
-				NewPatternDraw(0,song()->SONGTRACKS,0,patBufferLines-1);
+				NewPatternDraw(0,song()->tracks(),0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
 		}
@@ -5539,7 +5615,7 @@ namespace psycle {
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
-				PatternEntry blank;
+				PatternEvent blank;
 
 				patBufferLines = song()->patternLines[ps];
 				AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
@@ -5552,7 +5628,7 @@ namespace psycle {
 					soffset+=EVENT_SIZE;
 				}
 
-				NewPatternDraw(0,song()->SONGTRACKS,0,patBufferLines-1);
+				NewPatternDraw(0,song()->tracks(),0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
 		}
@@ -5581,7 +5657,7 @@ namespace psycle {
 						soffset[c]=static_cast<unsigned char>(note);
 					}
 				}
-				NewPatternDraw(0,song()->SONGTRACKS,editcur.line,pLines-1);
+				NewPatternDraw(0,song()->tracks(),editcur.line,pLines-1);
 
 				Repaint(draw_modes::data);
 			}
@@ -5712,7 +5788,7 @@ namespace psycle {
 				
 				int ls=0;
 				int ts=0;
-				PatternEntry blank;
+				PatternEvent blank;
 
 				if (cutit)
 				{
@@ -5750,7 +5826,7 @@ namespace psycle {
 			{
 				int ps=song()->playOrder[editPosition];
 				
-				PatternEntry blank;
+				PatternEvent blank;
 
 				// UNDO CODE HERE CUT
 				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
@@ -5788,7 +5864,7 @@ namespace psycle {
 					}
 				//end of added by sampler
 
-				for (int t=tx;t<tx+blockNTracks && t<song()->SONGTRACKS;t++)
+				for (int t=tx;t<tx+blockNTracks && t<song()->tracks();t++)
 				{
 					ls=0;
 					for (int l=lx;l<lx+blockNLines && l<nl;l++)
@@ -5839,7 +5915,7 @@ namespace psycle {
 				int startRL=destl;
 				int startWT=blockLastOrigin.start.track;
 				int startWL=blockLastOrigin.start.line;
-				PatternEntry blank;
+				PatternEvent blank;
 
 				// Copy block(1) if not done already.
 				if (blockSelected) CopyBlock(false);
@@ -5847,7 +5923,7 @@ namespace psycle {
 				int stopL=destl+blockNLines;
 
 				// We backup the data of the whole block.
-				AddUndo(ps,0,0,song()->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				AddUndo(ps,0,0,song()->tracks(),nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				// Do the blocks overlap? Then take care of moving the appropiate data.
 				if (abs(blockLastOrigin.start.track-destt) < blockNTracks	&& abs(blockLastOrigin.start.line-destl) < blockNLines )
@@ -5918,7 +5994,7 @@ namespace psycle {
 							}
 							// We exchange just the lines here. The loop outside will exchange the tracks.
 							ts = startWT2;
-							for (int t=startRT2;t<stopT2 && t<song()->SONGTRACKS && ts<song()->SONGTRACKS;t++)
+							for (int t=startRT2;t<stopT2 && t<song()->tracks() && ts<song()->tracks();t++)
 							{
 								ls=startWL2;
 								for (int l=startRL2;l<stopL2 && l<nl && ls <nl;l++)
@@ -5956,7 +6032,7 @@ namespace psycle {
 			
 				// do Swap "inplace".
 				ts = startWT;
-				for (int t=startRT;t<stopT && t<song()->SONGTRACKS && ts <song()->SONGTRACKS;t++)
+				for (int t=startRT;t<stopT && t<song()->tracks() && ts <song()->tracks();t++)
 				{
 					ls=startWL;
 					for (int l=startRL;l<stopL && l<nl && ls<nl;l++)
@@ -5974,7 +6050,7 @@ namespace psycle {
 				// Finally, paste the Original selected block on the freed space.
 				PasteBlock(destt, destl, false,false);
 				
-				NewPatternDraw(0,song()->SONGTRACKS-1,0,nl-1);
+				NewPatternDraw(0,song()->tracks()-1,0,nl-1);
 				Repaint(draw_modes::data);
 			}
 		}
@@ -5985,11 +6061,11 @@ namespace psycle {
 
 			int ps = _ps();
 			int nlines = song()->patternLines[ps];
-
-			fwrite(&song()->SONGTRACKS, sizeof(int), 1, file);
+			int ntracks = song()->tracks();
+			fwrite(&ntracks, sizeof(int), 1, file);
 			fwrite(&nlines, sizeof(int), 1, file);
 
-			for (int t=0;t<song()->SONGTRACKS;t++)
+			for (int t=0;t<song()->tracks();t++)
 			{
 				for (int l=0;l<nlines;l++)
 				{
@@ -6029,7 +6105,7 @@ namespace psycle {
 						}
 					}
 				}
-				PatternEntry blank;
+				PatternEvent blank;
 
 				for (int t = nt; t < MAX_TRACKS;t++)
 				{
@@ -6047,7 +6123,7 @@ namespace psycle {
 		{
 			// UNDO CODE DOUBLE LENGTH
 			unsigned char *toffset;
-			PatternEntry blank;
+			PatternEvent blank;
 			int st, et, sl, el,nl;
 
 			int ps = _ps();
@@ -6064,7 +6140,7 @@ namespace psycle {
 			else 
 			{
 				st=0;		
-				et=song()->SONGTRACKS;		
+				et=song()->tracks();		
 				sl=0;
 				nl= song()->patternLines[ps]/2;	
 				el=song()->patternLines[ps]-1;
@@ -6092,7 +6168,7 @@ namespace psycle {
 			unsigned char *toffset;
 			int st, et, sl, el,nl;
 			int ps = _ps();
-			PatternEntry blank;
+			PatternEvent blank;
 
 			if ( blockSelected )
 			{
@@ -6107,7 +6183,7 @@ namespace psycle {
 			else 
 			{
 				st=0;	
-				et=song()->SONGTRACKS;		
+				et=song()->tracks();		
 				sl=0;
 				nl=song()->patternLines[ps];	
 				el=song()->patternLines[ps]/2;
@@ -6245,8 +6321,11 @@ namespace psycle {
 				const float addvalue = float(endvalue - initvalue) / (blockSel.end.line - blockSel.start.line);
 				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 				int displace = firstrow;
-				
+#ifdef use_psycore
+				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweak_slide || toffset[firstrow] == notecommands::midi_cc || twktype != notecommands::empty)
+#else
 				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide || toffset[firstrow] == notecommands::midicc || twktype != notecommands::empty)
+#endif
 				{
 					unsigned char note = (twktype != notecommands::empty)?twktype:toffset[firstrow];
 					unsigned char aux = (twktype != notecommands::empty)?song()->auxcolSelected:toffset[firstrow+1];
@@ -6308,7 +6387,7 @@ namespace psycle {
 		void PatternView::DecPosition()
 		{
 		//	case cdefPlaySkipBack:
-			if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 			{
 				if (Global::pPlayer->_playPosition > 0 )
 				{
@@ -6340,7 +6419,7 @@ namespace psycle {
 
 				main()->m_wndSeq.UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
-				if (Global::pPlayer->_playing) {
+				if (Global::pPlayer->playing()) {
 					Repaint(draw_modes::playback);
 				}
 			}
@@ -6349,7 +6428,7 @@ namespace psycle {
 		void PatternView::IncPosition(bool bRepeat)
 		{
 		//	case cdefPlaySkipAhead:
-			if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 			{
 				if (Global::pPlayer->_playPosition < song()->playLength-1)
 				{
@@ -6397,7 +6476,7 @@ namespace psycle {
 
 				main()->m_wndSeq.UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
-				if (Global::pPlayer->_playing) {
+				if (Global::pPlayer->playing()) {
 					Repaint(draw_modes::playback);
 				}
 			}
@@ -6476,9 +6555,9 @@ namespace psycle {
 			pNew->pattern = pattern;
 			pNew->x = x;
 			pNew->y = y;
-			if (tracks+x > song()->SONGTRACKS)
+			if (tracks+x > song()->tracks())
 			{
-				tracks = song()->SONGTRACKS-x;
+				tracks = song()->tracks()-x;
 			}
 			pNew->tracks = tracks;
 						
@@ -6553,11 +6632,11 @@ namespace psycle {
 		{
 			unsigned char *toffset=_ptrackline();
 
-			PatternEntry *entry = (PatternEntry*) toffset;
+			PatternEvent *entry = (PatternEvent*) toffset;
 
-			if ( entry->_mach < MAX_BUSES*2 ) song()->seqBus = entry->_mach;
+			if ( entry->machine() < MAX_BUSES*2 ) song()->seqBus = entry->machine();
 			main()->ChangeGen(song()->seqBus);
-			if ( entry->_inst != 255 ) song()->auxcolSelected = entry->_inst;
+			if ( entry->instrument() != 255 ) song()->auxcolSelected = entry->instrument();
 			main()->ChangeIns(song()->auxcolSelected);
 
 		}
@@ -6565,11 +6644,7 @@ namespace psycle {
 		void PatternView::SelectNextTrack()
 		{
 			int i;
-#ifdef use_psycore			
-			for (i = editcur.track+1; i < psy_song()->tracks(); i++)
-#else
-			for (i = editcur.track+1; i < song()->SONGTRACKS; i++)
-#endif
+			for (i = editcur.track+1; i < song()->tracks(); i++)
 			{
 				if (song()->_trackArmed[i])
 				{
@@ -6579,11 +6654,7 @@ namespace psycle {
 					}
 				}
 			}
-#ifdef use_psycore
-			if (i >= psy_song()->tracks())
-#else
-			if (i >= song()->SONGTRACKS)
-#endif
+			if (i >= song()->tracks())
 			{
 				for (i = 0; i <= editcur.track; i++)
 				{
@@ -6599,11 +6670,7 @@ namespace psycle {
 			editcur.track = i;
 			while(song()->_trackArmed[editcur.track] == 0)
 			{
-#ifdef use_psycore				
-				if(++editcur.track >= psy_song()->tracks())
-#else
-				if(++editcur.track >= song()->SONGTRACKS)
-#endif
+				if(++editcur.track >= song()->tracks())
 					editcur.track=0;
 			}
 			editcur.col = 0;
@@ -6683,11 +6750,7 @@ namespace psycle {
 		void PatternView::OnLButtonDown(UINT nFlags, CPoint point)
 		{			
 				int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
-#ifdef use_psycore
-				if ( ttm >= psy_song()->tracks() ) ttm = psy_song()->tracks()-1;
-#else
-				if ( ttm >= song()->SONGTRACKS ) ttm = song()->SONGTRACKS-1;
-#endif
+				if ( ttm >= song()->tracks() ) ttm = song()->tracks()-1;
 				else if ( ttm < 0 ) ttm = 0;
 				
 				if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
@@ -6768,7 +6831,7 @@ namespace psycle {
 					(point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
 				{
 					editcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
-		//			if ( editcur.track >= song()->SONGTRACKS ) editcur.track = song()->SONGTRACKS-1;
+		//			if ( editcur.track >= song()->tracks() ) editcur.track = song()->tracks()-1;
 		//			else if ( editcur.track < 0 ) editcur.track = 0;
 
 		//			int plines = song()->patternLines[_ps()];
@@ -6833,17 +6896,9 @@ namespace psycle {
 					else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 					{
 						ccm=8;
-#ifdef use_psycore						
-						if ( ttm >= psy_song()->tracks() ) // Out of Range
-#else
-						if ( ttm >= song()->SONGTRACKS ) // Out of Range		
-#endif
+						if ( ttm >= song()->tracks() ) // Out of Range		
 						{	
-#ifdef use_psycore
-							ttm = psy_song()->tracks()-1;
-#else
-							ttm = song()->SONGTRACKS-1;
-#endif
+							ttm = song()->tracks()-1;
 							if ( tOff != ttm-VISTRACKS ) 
 							{ 
 								ntOff = ttm-VISTRACKS+1; 
@@ -6921,7 +6976,7 @@ namespace psycle {
 
 							int tstart = (blockLastOrigin.start.track+(ttm-editcur.track) >= 0)?(ttm-editcur.track):-blockLastOrigin.start.track;
 							int lstart = (blockLastOrigin.start.line+(llm-editcur.line) >= 0)?(llm-editcur.line):-blockLastOrigin.start.line;
-							if (blockLastOrigin.end.track+(ttm-editcur.track) >= song()->SONGTRACKS) tstart = song()->SONGTRACKS-blockLastOrigin.end.track-1;
+							if (blockLastOrigin.end.track+(ttm-editcur.track) >= song()->tracks()) tstart = song()->tracks()-blockLastOrigin.end.track-1;
 							if (blockLastOrigin.end.line+(llm-editcur.line) >= plines) lstart = plines - blockLastOrigin.end.line-1;
 
 							blockSel.start.track=blockLastOrigin.start.track+(tstart);
@@ -7001,8 +7056,8 @@ namespace psycle {
 						{
 							if (nPos < 0)
 								ntOff= 0;
-							else if (nPos>song()->SONGTRACKS-VISTRACKS)
-								ntOff=song()->SONGTRACKS-VISTRACKS;
+							else if (nPos>song()->tracks()-VISTRACKS)
+								ntOff=song()->tracks()-VISTRACKS;
 							else
 								ntOff=nPos;
 							bScrollDetatch=true;
@@ -7014,8 +7069,8 @@ namespace psycle {
 						{
 							if (nPos < 0)
 								ntOff= 0;
-							else if (nPos>song()->SONGTRACKS-VISTRACKS)
-								ntOff=song()->SONGTRACKS-VISTRACKS;
+							else if (nPos>song()->tracks()-VISTRACKS)
+								ntOff=song()->tracks()-VISTRACKS;
 							else
 								ntOff=nPos;
 							bScrollDetatch=true;
@@ -7164,11 +7219,7 @@ namespace psycle {
 				{
 					case SB_LINERIGHT:
 					case SB_PAGERIGHT:
-#ifdef use_psycore
-						if ( tOff<psy_song()->tracks()-VISTRACKS)
-#else
-						if ( tOff<song()->SONGTRACKS-VISTRACKS)
-#endif
+						if ( tOff<song()->tracks()-VISTRACKS)
 						{
 							ntOff=tOff+1;
 //	Disabled, since people find it as a bug, not as a feature.
@@ -7199,11 +7250,7 @@ namespace psycle {
 					case SB_THUMBTRACK:
 						if (ntOff!=(int)nPos)
 						{
-#ifdef use_psycore
-							const int nt = psy_song()->tracks();
-#else
-							const int nt = song()->SONGTRACKS;
-#endif
+							const int nt = song()->tracks();
 							ntOff=(int)nPos;
 							if (ntOff >= nt)
 							{
@@ -7407,7 +7454,7 @@ namespace psycle {
 					else stepsize = Global::pConfig->_pageUpSteps;
 
 					//if added by sampler to move backward 16 lines when playing
-					if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+					if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 					{
 						if (Global::pPlayer->_playBlock )
 						{
@@ -7465,7 +7512,7 @@ namespace psycle {
 					else stepsize = Global::pConfig->_pageUpSteps;
 
 					//if added by sampler
-					if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+					if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 					{
 						Global::pPlayer->_lineCounter += stepsize;
 					}
@@ -7535,8 +7582,8 @@ namespace psycle {
 				{		
 					if (editcur.col != 8) 
 						editcur.col = 8;
-					else if ( editcur.track != song()->SONGTRACKS-1 ) 
-						editcur.track = song()->SONGTRACKS-1;
+					else if ( editcur.track != song()->tracks()-1 ) 
+						editcur.track = song()->tracks()-1;
 					else 
 						editcur.line = song()->patternLines[song()->playOrder[editPosition]]-1;
 				}
@@ -7598,7 +7645,7 @@ namespace psycle {
 				{
 					const int nl = song()->patternLines[song()->playOrder[editPosition]];
 					StartBlock(0,0,0);
-					EndBlock(song()->SONGTRACKS-1,nl-1,8);
+					EndBlock(song()->tracks()-1,nl-1,8);
 				}
 				break;
 				
@@ -8197,9 +8244,9 @@ namespace psycle {
 			pNew->pattern = pattern;
 			pNew->x = x;
 			pNew->y = y;
-			if (tracks+x > song()->SONGTRACKS)
+			if (tracks+x > song()->tracks())
 			{
-				tracks = song()->SONGTRACKS-x;
+				tracks = song()->tracks()-x;
 			}
 			pNew->tracks = tracks;
 			const int nl = song()->patternLines[pattern];
@@ -8383,8 +8430,8 @@ namespace psycle {
 						
 						unsigned char *offset=base+displace;
 						
-						PatternEntry *entry = (PatternEntry*) offset;
-						entry->_cmd = 0xff;
+						PatternEvent *entry = (PatternEvent*) offset;
+						entry->setCommand(0xff);
 						int val = helpers::math::rounded(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 						if (val < 1)
 						{
@@ -8394,7 +8441,7 @@ namespace psycle {
 						{
 							val = 255;
 						}
-						entry->_parameter = unsigned char (val);
+						entry->setParameter(unsigned char (val));
 						index+=step;
 					}
 					NewPatternDraw(x,x,y,y+ny);	
@@ -8482,16 +8529,26 @@ namespace psycle {
 			}
 			unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,blockSel.start.line);
 			if ( *offset_target == notecommands::tweak ) dlg.AssignInitialValues(valuearray,0);
+#ifdef use_psycore
+			else if ( *offset_target == notecommands::tweak_slide ) dlg.AssignInitialValues(valuearray,1);
+			else if ( *offset_target == notecommands::midi_cc ) dlg.AssignInitialValues(valuearray,2);
+#else
 			else if ( *offset_target == notecommands::tweakslide ) dlg.AssignInitialValues(valuearray,1);
 			else if ( *offset_target == notecommands::midicc ) dlg.AssignInitialValues(valuearray,2);
+#endif
 			else dlg.AssignInitialValues(valuearray,-1);
 			
 			if (dlg.DoModal() == IDOK )
 			{
 				int twktype(255);
 				if ( dlg.kftwk == 0 ) twktype = notecommands::tweak;
+#ifdef use_psycore
+				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweak_slide;
+				else if ( dlg.kftwk == 2 ) twktype = notecommands::midi_cc;
+#else
 				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweakslide;
 				else if ( dlg.kftwk == 2 ) twktype = notecommands::midicc;
+#endif
 				BlockParamInterpolate(dlg.kfresult,twktype);
 			}
 			delete valuearray;
@@ -8546,28 +8603,32 @@ namespace psycle {
 
 				if (mgn < MAX_MACHINES)
 				{
-					pMachine = song()->_pMachine[mgn];
+					pMachine = song()->machine(mgn);
 				}
 			}
 
-			for(int i=0;i<song()->SONGTRACKS;i++)
+			for(int i=0;i<song()->tracks();i++)
 			{
 				if(notetrack[i]==note)
 				{
 					notetrack[i]=120;
 					// build entry
-					PatternEntry entry;
-					entry._note = 120;
-					entry._inst = song()->auxcolSelected;
-					entry._mach = song()->seqBus;
-					entry._cmd = 0;
-					entry._parameter = 0;	
+					PatternEvent entry;
+					entry.note() = 120;
+					entry.instrument() = song()->auxcolSelected;
+					entry.machine() = song()->seqBus;
+					entry.command() = 0;
+					entry.parameter() = 0;	
 
 					// play it
 
 					if (pMachine)
 					{
+#ifdef use_psycore
+						pMachine->Tick(i,entry);
+#else
 						pMachine->Tick(i,&entry);
+#endif
 					}
 				}
 			}
@@ -8593,10 +8654,10 @@ namespace psycle {
 			}
 
 			// build entry
-			PatternEntry entry;
-			entry._note = note;
-			entry._inst = song()->auxcolSelected;
-			entry._mach = song()->seqBus;
+			PatternEvent entry;
+			entry.note() = note;
+			entry.instrument() = song()->auxcolSelected;
+			entry.machine() = song()->seqBus;
 
 			if(velocity != 127 && Global::pConfig->midi().velocity().record())
 			{
@@ -8605,26 +8666,26 @@ namespace psycle {
 				switch(Global::pConfig->midi().velocity().type())
 				{
 					case 0:
-						entry._cmd = Global::pConfig->midi().velocity().command();
-						entry._parameter = par;
+						entry.command() = Global::pConfig->midi().velocity().command();
+						entry.parameter() = par;
 						break;
 					case 3:
-						entry._inst = par;
+						entry.instrument() = par;
 						break;
 				}
 			}
 			else
 			{
-				entry._cmd=0;
-				entry._parameter=0;
+				entry.command()=0;
+				entry.parameter()=0;
 			}
 
 			// play it
 			if(pMachine==NULL)
 			{
-				if (entry._mach < MAX_MACHINES)
+				if (entry.machine() < MAX_MACHINES)
 				{
-					pMachine = song()->_pMachine[entry._mach];
+					pMachine = song()->machine(entry.machine());
 				}
 			}	
 
@@ -8633,14 +8694,14 @@ namespace psycle {
 				// implement lock sample to machine here.
 				// if the current machine is a sampler, check 
 				// if current sample is locked to a machine.
-				// if so, switch entry._mach to that machine number
+				// if so, switch entry.machine() to that machine number
 				if (pMachine->_type == MACH_SAMPLER)
 				{
 					if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
 						&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
 					{
-						entry._mach = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
-						pMachine = song()->_pMachine[entry._mach];
+						entry.machine() = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
+						pMachine = song()->machine(entry.machine());
 						if ( !pMachine) return;
 					}
 				}
@@ -8648,14 +8709,14 @@ namespace psycle {
 				if(bMultiKey)
 				{
 					int i;
-					for (i = outtrack+1; i < song()->SONGTRACKS; i++)
+					for (i = outtrack+1; i < song()->tracks(); i++)
 					{
 						if (notetrack[i] == 120)
 						{
 							break;
 						}
 					}
-					if (i >= song()->SONGTRACKS)
+					if (i >= song()->tracks())
 					{
 						for (i = 0; i <= outtrack; i++)
 						{
@@ -8679,7 +8740,11 @@ namespace psycle {
 
 				// play
 				notetrack[outtrack]=note;
+#ifdef use_psycore
+				pMachine->Tick(outtrack,entry);
+#else
 				pMachine->Tick(outtrack,&entry);
+#endif
 			}
 		}*/
 

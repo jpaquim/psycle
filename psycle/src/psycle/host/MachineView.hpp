@@ -1,38 +1,43 @@
 #pragma once
+#include "Psycle.hpp"
 
+#include "MachineGui.hpp" //For SMachineCoords
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class Song;
+		class Machine;
+	}
+}
+using namespace psy::core;
+#endif
 #include "Canvas.hpp"
-#include "MachineGui.hpp"
 
 namespace psycle {
 	namespace host {
+
+		class CChildView;
+		class CMainFrame;
+		class WireGui;
+
+#ifndef use_psycore
+		class Song;
+		class Machine;
+#endif
 
 		class MachineView : public PsycleCanvas::Canvas
 		{
 		public:
 #ifdef use_psycore
-			MachineView(class CChildView* parent, class CMainFrame* main);
-			void SetSong(class psy::core::Song* song);
+			MachineView(CChildView* parent, CMainFrame* main);
+			void SetSong(Song* song);
 #else
-			MachineView(class CChildView* parent, class CMainFrame* main, class Song* song);
+			MachineView(CChildView* parent, CMainFrame* main, Song* song);
 #endif
 			~MachineView();
 
 			void Rebuild();
-#ifdef use_psycore
-			void SetSolo(psy::core::Machine* mac);
-			void ShowNewMachineDlg(double x , double y, psy::core::Machine* mac, bool from_event);
-			// use this, if you want to delete a gui not called from 
-			// the machinegui event, that will be deleted
-			// (used e.g. in CGearRack)
-			void DeleteMachineGui(psy::core::Machine* mac);
-			void SetDeleteMachineGui(psy::core::Machine* mac, bool in_engine);
-			MachineGui* CreateMachineGui(psy::core::Machine* mac);
-			// from_event has to be set to true, if you show the macprop dialog from inside
-			// the machinegui OnEvent. In case of replace and delete this is important
-			void DoMacPropDialog(psy::core::Machine* mac, bool from_event);
-			void ShowDialog(psy::core::Machine* mac, double x, double y);
-			void UpdatePosition(psy::core::Machine* mac);
-#else
 			void SetSolo(Machine* mac);
 			void ShowNewMachineDlg(double x , double y, Machine* mac, bool from_event);
 			// use this, if you want to delete a gui not called from 
@@ -46,17 +51,14 @@ namespace psycle {
 			void DoMacPropDialog(Machine* mac, bool from_event);
 			void ShowDialog(Machine* mac, double x, double y);
 			void UpdatePosition(Machine* mac);
-#endif
+
 			void UpdateVUs(CDC* devc);			
 			void SelectMachine(MachineGui* gui);
 			virtual void OnEvent(PsycleCanvas::Event* ev);
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main();
-#ifdef use_psycore
-			psy::core::Song* song() { return song_; }
-#else
+
 			Song* song() { return song_; }
-#endif
 
 			void OnNewConnection(MachineGui* sender);
 			void OnRewireEnd(WireGui* sender,
@@ -87,13 +89,9 @@ namespace psycle {
 						double y,
 						int picker);
 
-#ifdef use_psycore
-			bool RewireSrc(psy::core::Machine* tmac, psy::core::Machine* dmac);
-			bool RewireDest(psy::core::Machine* tmac, psy::core::Machine* dmac);
-#else
+
 			bool RewireSrc(Machine* tmac, Machine* dmac);
 			bool RewireDest(Machine* tmac, Machine* dmac);			
-#endif
 			void RaiseMachinesToTop();
 			void UpdateSoloMuteBypass();
 			void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
@@ -102,13 +100,8 @@ namespace psycle {
 			
 			CChildView* parent_;
 			CMainFrame* main_;
-#ifdef use_psycore		
-			psy::core::Song* song_;
-			std::map<psy::core::Machine*, MachineGui*> gui_map_;
-#else
 			Song* song_;
 			std::map<Machine*, MachineGui*> gui_map_;
-#endif
 
 			WireGui* del_line_;
 			WireGui* rewire_line_;
@@ -130,4 +123,3 @@ namespace psycle {
 		};
 	}
 }
-

@@ -1,9 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CKeyConfigDlg.
 #pragma once
+#include "Psycle.hpp"
 #include <afxwin.h>
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

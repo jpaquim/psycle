@@ -1,20 +1,19 @@
 #include "SamplerGui.hpp"
-#include "Song.hpp"
-#include "MasterDlg.hpp"
-#include "MachineView.hpp"
-#include "FrameMachine.hpp"
+#ifdef use_psycore
+#include <psycle/core/sampler.h>
+using namespace psy::core;
+#else
+#include "Sampler.hpp"
+#endif
 #include "ChildView.hpp"
+#include "MachineView.hpp"
 #include "GearTracker.hpp"
 
 namespace psycle {
 	namespace host {
 
-		SamplerGui::SamplerGui(class MachineView* view,
-#ifdef use_psycore
-							   class psy::core::Machine* mac)
-#else
-							   class Machine* mac)
-#endif
+		SamplerGui::SamplerGui(MachineView* view,
+							   Machine* mac)
 			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{			

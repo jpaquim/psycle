@@ -1,8 +1,13 @@
 ///\file
 ///\brief interface file for psycle::host::CNewMachine.
 #pragma once
-#include "resources/resources.hpp"
+#include "Psycle.hpp"
+#ifdef use_psycore
+#include <psycle/core/machinekey.hpp>
+using namespace psy::core;
+#else
 #include "Machine.hpp"
+#endif
 #include "ProgressDialog.hpp"
 #include <afxwin.h>
 #include <afxcoll.h>
@@ -10,24 +15,35 @@
 #include <typeinfo>
 #include <map>
 #include <cstdint>
-#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
+#ifndef use_psycore
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
 
-		enum selectionclasses
-		{
-			internal=0,
-			native=1,
-			vstmac=2
-		};
-		enum selectionmodes
-		{
-			modegen=0,
-			modefx
-		};
+		// type Hosts::type
+		// Allows to differentiate between machines of different hosts.
+		namespace Hosts {
+			enum type
+			{
+				INTERNAL=0,
+				NATIVE,
+				LADSPA,
+				VST,
+				//Keep at last position
+				NUM_HOSTS
+			};
+		}
+		namespace MachineRole {
+			enum type {
+				GENERATOR = 0,
+				EFFECT,
+				MASTER,
+				CONTROLLER
+			};
+		}
+
 		class PluginInfo
 		{
 		public:
@@ -76,6 +92,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			*/
 		};
+#endif //#ifndef use_psycore
 
 		/// new machine dialog window.
 		class CNewMachine : public CDialog
@@ -90,35 +107,48 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CTreeCtrl	m_browser;
 			CStatic	m_versionLabel;
 			CStatic	m_descLabel;
-			int		m_orderby;
 			CStatic	m_dllnameLabel;
-			int		m_showdllName;
 			CStatic m_APIversionLabel;
-			protected:
+		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 		public:
 			CImageList imgList;
 			HTREEITEM tHand;
+#ifdef use_psycore
+			MachineKey outputMachine;
+#else
 			int Outputmachine;
 			std::string psOutputDll;
 			int shellIdx;
-			static int pluginOrder;
-			static bool pluginName;
+#endif
 
+			enum { groupHost = 0, groupRole = 1 };
+			enum { displayDll = 0, displayDesc = 1 };
+			static int machineGrouping;
+			static int displayName;
+
+#ifndef use_psycore
 			static void learnDllName(const std::string & fullpath, MachineType type);
 			static bool lookupDllName(const std::string, std::string & result, MachineType tye,int& shellIdx);
 			static void DestroyPluginInfo();
 			static void LoadPluginInfo(bool verify=true);
-			static int selectedClass;
-			static int selectedMode;
+#endif
+
+			static int selectedGroup;
+			static int selectedRole;
+
 			static bool TestFilename(const std::string & name,int shellIdx);
 		protected:
+#ifdef use_psycore
+			std::map<HTREEITEM,MachineKey> treeToInfo;
+#else
 			static std::map<std::string,std::string> NativeNames;
 			static std::map<std::string,std::string> VstNames;
 			bool bAllowChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
 			HTREEITEM hInt[6];
 			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
+#endif
 
 			afx_msg void OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult);
 			virtual BOOL OnInitDialog();
@@ -133,12 +163,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnCheckAllow();
 			DECLARE_MESSAGE_MAP()
 		private:
+#ifndef use_psycore
 			static int _numPlugins;
 			static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
-			static int _numDirs;
 			static void FindPlugins(int & currentPlugsCount, int & currentBadPlugsCount, std::vector<std::string> const & list, MachineType type, std::ostream & out, CProgressDialog * pProgress = 0);
 			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount, bool verify);
 			static bool SaveCacheFile();
+#endif
 			void UpdateList(bool bInit = false);
 		public:
 			afx_msg void OnEnChangeEdit1();

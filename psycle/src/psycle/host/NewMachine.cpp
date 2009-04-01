@@ -1,14 +1,22 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
 
-#include <universalis/operating_system/paths.hpp>
-#include <direct.h>
 #include "NewMachine.hpp"
-#include "Psycle.hpp"
+#include "Configuration.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/machinefactory.h>
+#include <psycle/core/machinehost.hpp>
+#include <psycle/core/plugincatcher.h>
+#include <psycle/core/machinekey.hpp>
+using namespace psy::core;
+#else
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
+#endif
 #include "ProgressDialog.hpp"
-#include "Loggers.hpp"
+#include <universalis/operating_system/paths.hpp>
+#include <direct.h>
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -18,17 +26,17 @@
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		int CNewMachine::pluginOrder = 1;
-		bool CNewMachine::pluginName = 1;
-		int CNewMachine::_numPlugins = -1;
-		int CNewMachine::selectedClass=internal;
-		int CNewMachine::selectedMode=modegen;
+		int CNewMachine::machineGrouping = groupRole;
+		int CNewMachine::displayName = displayName;
+		int CNewMachine::selectedGroup = Hosts::INTERNAL;
+		int CNewMachine::selectedRole = MachineRole::GENERATOR;
 
+#ifndef use_psycore
+		int CNewMachine::_numPlugins = -1;
 		PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
 
 		std::map<std::string,std::string> CNewMachine::NativeNames;
 		std::map<std::string,std::string> CNewMachine::VstNames;
-
 
 		void CNewMachine::learnDllName(const std::string & fullname,MachineType type)
 		{
@@ -94,15 +102,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			return false;
 		}
+#endif
 
 		CNewMachine::CNewMachine(CWnd* pParent)
 			: CDialog(CNewMachine::IDD, pParent)
+#ifdef use_psycore
+			, outputMachine(MachineKey::invalid())
+#else
+			, shellIdx(0)
+#endif
 		{
-			m_orderby = pluginOrder;
-			m_showdllName = pluginName;
-			shellIdx = 0;
-			//pluginOrder = 0; Do NOT uncomment. It would cause the variable to be reseted each time.
-				// It is initialized above, where it is declared.
 		}
 
 		CNewMachine::~CNewMachine()
@@ -117,9 +126,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DDX_Control(pDX, IDC_BROWSER, m_browser);
 			DDX_Control(pDX, IDC_VERSIONLABEL, m_versionLabel);
 			DDX_Control(pDX, IDC_DESCRLABEL, m_descLabel);
-			DDX_Radio(pDX, IDC_BYTYPE, m_orderby);
+			DDX_Radio(pDX, IDC_BYTYPE, machineGrouping);
 			DDX_Control(pDX, IDC_DLLNAMELABEL, m_dllnameLabel);
-			DDX_Radio(pDX, IDC_SHOWDLLNAME, m_showdllName);
+			DDX_Radio(pDX, IDC_SHOWDLLNAME, displayName);
 			DDX_Control(pDX, IDC_APIVERSIONLABEL, m_APIversionLabel);
 		}
 
@@ -142,8 +151,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
 			imgList.Create(IDB_MACHINETYPE,16,2,1);
 			m_browser.SetImageList(&imgList,TVSIL_NORMAL);
+#ifndef use_psycore
 			bAllowChanged = false;
 			LoadPluginInfo();
+#endif
 			UpdateList();
 			return TRUE;
 		}
@@ -152,14 +163,125 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CDialog::OnDestroy();
 			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
+			m_browser.DeleteAllItems();
+			treeToInfo.clear();
 		}
 
+#ifdef use_psycore
+		void CNewMachine::UpdateList(bool bInit)
+		{
+			m_browser.DeleteAllItems();
+			treeToInfo.clear();
+			HTREEITEM* hNodes = 0;
+			HTREEITEM fx[Hosts::NUM_HOSTS];
+			HTREEITEM gen[Hosts::NUM_HOSTS];
+			HTREEITEM crashedNode;
+
+			std::vector<MachineHost*> hosts = MachineFactory::getInstance().getHosts();
+			if(machineGrouping == groupHost)
+			{
+				hNodes = new HTREEITEM[hosts.size()];
+				int i=0;
+				for ( ; i < hosts.size(); i++) {
+					hNodes[i] = m_browser.InsertItem(hosts[i]->hostName().c_str() ,i*2, i*2 , TVI_ROOT, TVI_LAST);
+					gen[i] = hNodes[i];
+					fx[i] = hNodes[i];
+				}
+				crashedNode = m_browser.InsertItem("Crashed or invalid plugins", 6, 6, TVI_ROOT,TVI_LAST);
+			}
+			else {
+				hNodes = new HTREEITEM[2];
+				hNodes[0] = m_browser.InsertItem("Generators",0,0 , TVI_ROOT, TVI_LAST);
+				hNodes[1] = m_browser.InsertItem("Effects",1,1,TVI_ROOT,TVI_LAST);
+				crashedNode = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
+				for (int i=0; i < Hosts::NUM_HOSTS; i++ ) {
+					gen[i] = hNodes[0];
+					fx[i] = hNodes[1];
+				}
+			}
+			const PluginFinder& catcher = MachineFactory::getInstance().getFinder();
+			int imgindex;
+			HTREEITEM hPlug, hNode;
+			for( int j = 0 ; j < hosts.size(); j++ ) {
+				for(PluginFinder::const_iterator ite = catcher.begin(Hosts::type(j)); ite != catcher.end(Hosts::type(j)); ite++) {
+					if ( ite->second.role() == MachineRole::MASTER ) { continue; }
+					else if ( ite->second.role() == MachineRole::GENERATOR || ite->second.role() == MachineRole::CONTROLLER ) { imgindex = j*2 ; hNode = gen[j]; }
+					else if ( ite->second.role() == MachineRole::EFFECT ) { imgindex = j*2 +1; hNode = fx[j]; }
+					if (ite->second.error().empty() && ite->second.allow()) {
+						hPlug = m_browser.InsertItem(ite->second.name().c_str(), imgindex, imgindex, hNode, TVI_SORT);
+					} else {
+						hPlug = m_browser.InsertItem(ite->second.libName().c_str(), 6, 6, crashedNode, TVI_SORT);
+					}
+					treeToInfo[hPlug] = ite->first;
+				}
+			}
+
+
+			if(machineGrouping == groupHost ) { m_browser.Select(hNodes[selectedGroup],TVGN_CARET); }
+			else { m_browser.Select(hNodes[selectedRole],TVGN_CARET); }
+			outputMachine = MachineKey::failednative();
+			delete[] hNodes;
+		}
+
+		void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
+		{
+			//NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
+			tHand = m_browser.GetSelectedItem();
+			outputMachine = MachineKey::failednative();
+			MachineKey key = treeToInfo[tHand];
+			if (key == MachineKey::invalid() ) {
+				return;
+			}
+			const PluginInfo& info = MachineFactory::getInstance().getFinder().info(key);
+
+
+			{ //  Strip the directory and put just the dll name.
+				std::string str = info.libName();
+				std::string::size_type pos = str.rfind('\\');
+				if(pos != std::string::npos)
+					str=str.substr(pos+1);
+				m_dllnameLabel.SetWindowText(str.c_str());
+			}
+
+			m_nameLabel.SetWindowText(info.name().c_str());
+
+			if ( info.error().empty()) {
+				m_descLabel.SetWindowText(info.desc().c_str());
+			}
+			else
+			{	// Strip the function, and show only the error.
+				std::string str = info.error();
+				std::ostringstream s; s << std::endl;
+				std::string::size_type pos = str.find(s.str());
+				if(pos != std::string::npos)
+					str=str.substr(pos+1);
+
+				m_descLabel.SetWindowText(str.c_str());
+			}
+			m_versionLabel.SetWindowText(info.version().c_str());
+			m_APIversionLabel.SetWindowText("");
+			selectedGroup = key.host();
+			if ( info.role() == MachineRole::EFFECT ) {
+				selectedRole = MachineRole::EFFECT;
+			}
+			else {
+				selectedRole = MachineRole::GENERATOR;
+			}
+			outputMachine = key;
+
+			m_Allow.SetCheck(!info.allow());
+			m_Allow.EnableWindow(TRUE);
+
+			*pResult = 0;
+		}
+
+#else
 		void CNewMachine::UpdateList(bool bInit)
 		{
 			int nodeindex;
 			m_browser.DeleteAllItems();
 			HTREEITEM intFxNode;
-			if(!pluginOrder)
+			if(machineGrouping == groupHost)
 			{
 				hNodes[0] = m_browser.InsertItem("Internal Plugins",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Native plug-ins",2,2,TVI_ROOT,TVI_LAST);
@@ -222,7 +344,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						imgindex = 6;
 						hitem=hNodes[3];
 					}
-					if(pluginName && _pPlugsInfo[i]->error.empty())
+					if(displayName == displayDesc && _pPlugsInfo[i]->error.empty())
 						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 					else
 						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
@@ -233,7 +355,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
 				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
-				m_browser.Select(hNodes[selectedClass],TVGN_CARET);
+				m_browser.Select(hNodes[selectedGroup],TVGN_CARET);
 			}
 			else
 			{
@@ -280,7 +402,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						imgindex = 6;
 						hitem=hNodes[2];
 					}
-					if(pluginName && _pPlugsInfo[i]->error.empty())
+					if(displayName == displayDesc && _pPlugsInfo[i]->error.empty())
 						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 					else
 						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
@@ -292,7 +414,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
 				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
-				m_browser.Select(hNodes[selectedMode],TVGN_CARET);
+				m_browser.Select(hNodes[selectedRole],TVGN_CARET);
 			}
 			Outputmachine = -1;
 		}
@@ -310,8 +432,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V0.5b");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_SAMPLER;
-				selectedClass = internal;
-				selectedMode = modegen;
+				selectedGroup = Hosts::INTERNAL;
+				selectedRole = MachineRole::GENERATOR;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -323,8 +445,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_DUMMY;
-				selectedClass = internal;
-				selectedMode = modefx;
+				selectedGroup = Hosts::INTERNAL;
+				selectedRole = MachineRole::EFFECT;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -336,8 +458,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V0.9b");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_XMSAMPLER;
-				selectedClass = internal;
-				selectedMode = modegen;
+				selectedGroup = Hosts::INTERNAL;
+				selectedRole = MachineRole::GENERATOR;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 				}
@@ -349,8 +471,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_DUPLICATOR;
-				selectedClass = internal;
-				selectedMode = modegen;
+				selectedGroup = Hosts::INTERNAL;
+				selectedRole = MachineRole::GENERATOR;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -362,8 +484,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_MIXER;
-				selectedClass = internal;
-				selectedMode = modefx;
+				selectedGroup = Hosts::INTERNAL;
+				selectedRole = MachineRole::EFFECT;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -375,8 +497,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_RECORDER;
-				selectedClass = internal;
-				selectedMode = modegen;
+				selectedGroup = Hosts::INTERNAL;
+				selectedRole = MachineRole::GENERATOR;
 				m_Allow.SetCheck(FALSE);
 				m_Allow.EnableWindow(FALSE);
 			}
@@ -412,28 +534,27 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
 					{
 						Outputmachine = MACH_PLUGIN;
-						selectedClass = native;
+						selectedGroup = Hosts::NATIVE;
 						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
 						{
-							selectedMode = modegen;
+							selectedRole = MachineRole::GENERATOR;
 						}
 						else
 						{
-							selectedMode = modefx;
+							selectedRole = MachineRole::EFFECT;
 						}
 					}
 					else
 					{
-						selectedClass = vstmac;
+						selectedGroup = Hosts::VST;
+						Outputmachine = MACH_VST;
 						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
 						{
-							Outputmachine = MACH_VST;
-							selectedMode = modegen;
+							selectedRole = MachineRole::GENERATOR;
 						}
 						else
 						{
-							Outputmachine = MACH_VSTFX;
-							selectedMode = modefx;
+							selectedRole = MachineRole::EFFECT;
 						}
 					}
 
@@ -446,7 +567,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			*pResult = 0;
 		}
-
+#endif
 		void CNewMachine::OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			OnOK();	
@@ -455,17 +576,28 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnRefresh() 
 		{
+#ifdef use_psycore
+			MachineFactory& factory = MachineFactory::getInstance();
+			factory.RegenerateFinderData();
+#else
 			DestroyPluginInfo();
 			DeleteFile((universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache").native_file_string().c_str());
 			LoadPluginInfo();
+#endif			
 			UpdateList();
 			m_browser.Invalidate();
 			SetFocus();
 		}
 		void CNewMachine::OnBnClickedButton1()
 		{
+#ifdef use_psycore
+			MachineFactory& factory = MachineFactory::getInstance();
+			//\todo: should not delete the file, just find new plugs.
+			factory.RegenerateFinderData();
+#else
 			DestroyPluginInfo();
 			LoadPluginInfo();
+#endif
 			UpdateList();
 			m_browser.Invalidate();
 			SetFocus();
@@ -473,31 +605,85 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnBytype() 
 		{
-			pluginOrder=0;
+			machineGrouping=groupHost;
 			UpdateList();
 			m_browser.Invalidate();
 		}
 		void CNewMachine::OnByclass() 
 		{
-			pluginOrder=1;
+			machineGrouping=groupRole;
 			UpdateList();
 			m_browser.Invalidate();
 		}
 
 		void CNewMachine::OnShowdllname() 
 		{
-			pluginName=false;	
+			displayName=displayDll;	
 			UpdateList();
 			m_browser.Invalidate();
 		}
 
 		void CNewMachine::OnShoweffname() 
 		{
-			pluginName = true;
+			displayName = displayDesc;
 			UpdateList();
 			m_browser.Invalidate();
 		}
 
+#ifdef use_psycore
+		void CNewMachine::OnOK() 
+		{
+			if (outputMachine != MachineKey::invalid() ) // Necessary so that you cannot doubleclick a Node
+			{
+				CDialog::OnOK();
+			}
+		}
+
+		void CNewMachine::OnCheckAllow() 
+		{
+			MachineKey key = treeToInfo[tHand];
+			if (key != MachineKey::invalid() ) {
+				PluginFinder& finder = MachineFactory::getInstance().getFinder();
+				const PluginInfo& info = MachineFactory::getInstance().getFinder().info(key);
+				finder.EnablePlugin(key, !info.allow());
+			}
+		}
+#else
+		void CNewMachine::DestroyPluginInfo()
+		{
+			for (int i=0; i<_numPlugins; i++)
+			{
+				delete _pPlugsInfo[i];
+				_pPlugsInfo[i] = 0;
+			}
+			NativeNames.clear();
+			VstNames.clear();
+			_numPlugins = -1;
+		}
+
+		void CNewMachine::OnOK() 
+		{
+			if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
+			{
+				if (bAllowChanged)
+				{
+					SaveCacheFile();
+				}
+				CDialog::OnOK();
+			}
+		}
+
+		void CNewMachine::OnCheckAllow() 
+		{
+			for (int i=0; i<_numPlugins; i++)
+			{
+				if (tHand == hPlug[i])
+				{
+					_pPlugsInfo[i]->allow = !m_Allow.GetCheck();
+					bAllowChanged = TRUE;
+				}
+			}
+		}
 		void CNewMachine::LoadPluginInfo(bool verify)
 		{
 			if(_numPlugins == -1)
@@ -993,17 +1179,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			out.flush();
 		}
 
-		void CNewMachine::DestroyPluginInfo()
-		{
-			for (int i=0; i<_numPlugins; i++)
-			{
-				delete _pPlugsInfo[i];
-				_pPlugsInfo[i] = 0;
-			}
-			NativeNames.clear();
-			VstNames.clear();
-			_numPlugins = -1;
-		}
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
@@ -1168,30 +1343,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			return true;
 		}
 
-		void CNewMachine::OnOK() 
-		{
-			if (Outputmachine > -1) // Necessary so that you cannot doubleclick a Node
-			{
-				if (bAllowChanged)
-				{
-					SaveCacheFile();
-				}
-				CDialog::OnOK();
-			}
-		}
-
-		void CNewMachine::OnCheckAllow() 
-		{
-			for (int i=0; i<_numPlugins; i++)
-			{
-				if (tHand == hPlug[i])
-				{
-					_pPlugsInfo[i]->allow = !m_Allow.GetCheck();
-					bAllowChanged = TRUE;
-				}
-			}
-		}
-
 		bool CNewMachine::TestFilename(const std::string & name, const int shellIdx)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
@@ -1210,6 +1361,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			return false;
 		}
-
+#endif
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END

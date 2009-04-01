@@ -1,9 +1,13 @@
 #pragma once
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
 #include "ChildView.hpp"
+#ifdef use_psycore
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
-#include "Helpers.hpp"
+#endif
+#include <psycle/helpers/helpers.hpp>
 
 // CTransformPatternDlg dialog
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

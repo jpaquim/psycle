@@ -1,4 +1,5 @@
 #pragma once
+#include "Psycle.hpp"
 
 namespace PsycleCanvas {	
 

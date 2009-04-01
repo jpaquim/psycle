@@ -2,15 +2,26 @@
 ///\brief implementation file for psycle::host::CWireDlg.
 
 #include "WireDlg.hpp"
-#include "Psycle.hpp"
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Machine.hpp"
-#include "Helpers.hpp"
+#include "Song.hpp"
+#endif
+
+#include "Configuration.hpp"
 #include "ChildView.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
 #include "Zap.hpp"
 #include "WireGui.hpp"
-#include "FFT.hpp"
+#include <psycle/helpers/helpers.hpp>
+#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/fft.hpp>
+#include <psycle/helpers/dsp.hpp>
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CWireDlg::CWireDlg(CChildView* pParent)
@@ -94,11 +105,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_volslider.SetPos(256*4-t);
 
 			char buf[128];
-#ifdef use_psycore
 			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->GetEditName().c_str(), _pDstMachine->GetEditName().c_str());
-#else
-			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
-#endif
 			SetWindowText(buf);
 
 			hold = FALSE;
@@ -119,6 +126,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pos = 1;
 
 #ifdef use_psycore
+			mult = 3268.0f / _pSrcMachine->GetAudioRange();
 #else
 			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
 			{

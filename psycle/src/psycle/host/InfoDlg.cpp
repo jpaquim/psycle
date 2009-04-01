@@ -2,10 +2,17 @@
 ///\brief implementation file for psycle::host::CInfoDlg.
 
 #include "InfoDlg.hpp"
-#include "Psycle.hpp"
 #include "Configuration.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/song.h>
+#include <psycle/core/machine.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
 #include "Machine.hpp"
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CInfoDlg::CInfoDlg(CWnd* pParent)
@@ -85,9 +92,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int n=0;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					Machine *tmac = _pSong->_pMachine[c];
+					Machine *tmac = _pSong->machine(c);
 					if(tmac)
 					{
+#ifdef use_psycore
+						// Input numbers
+						sprintf(buffer,"%d",tmac->_connectedInputs);
+						m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+
+						// OutPut numbers
+						sprintf(buffer,"%d",tmac->_connectedOutputs);
+						m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+#else
 						// Input numbers
 						sprintf(buffer,"%d",tmac->_numInputs);
 						m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
@@ -95,6 +111,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						// OutPut numbers
 						sprintf(buffer,"%d",tmac->_numOutputs);
 						m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+#endif
 
 						float machCPU=0;
 		//				float masterCPU=0;
@@ -161,20 +178,42 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int n=0;
 			for(int c=0; c<MAX_MACHINES; c++)
 			{
-				Machine *tmac = _pSong->_pMachine[c];
+				Machine *tmac = _pSong->machine(c);
 				if(tmac)
 				{
 					char buffer[128];
 					
 					// Name [Machine view editor custom name]
-					sprintf(buffer,"%.3d: %s",n+1,tmac->_editName);
+					sprintf(buffer,"%.3d: %s",n+1,tmac->GetEditName().c_str());
 					m_machlist.InsertItem(n,buffer);
 					
 					// Gear [Gear type]
+#ifdef use_psycore
+					strcpy(buffer, tmac->GetName().c_str());
+#else
 					strcpy(buffer, tmac->GetName());
+#endif
 					m_machlist.SetItem(n,1,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// Type [Set is generator/effect/master]
+#ifdef use_psycore
+					if (tmac->getMachineKey() == MachineKey::master()) {
+						strcpy(buffer,"Master");
+					}
+					else if (tmac->IsGenerator() ) {
+						strcpy(buffer,"Generator");
+					}
+					else { strcpy(buffer,"Effect"); }
+					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
+
+					// Input numbers
+					sprintf(buffer,"%d",tmac->_connectedInputs);
+					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+					
+					// OutPut numbers
+					sprintf(buffer,"%d",tmac->_connectedOutputs);
+					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+#else
 					switch(tmac->_mode)
 					{
 					case MACHMODE_GENERATOR: strcpy(buffer,"Generator");break;
@@ -182,7 +221,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					case MACHMODE_MASTER: strcpy(buffer,"Master");break;
 					}
 					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
-					
+
 					// Input numbers
 					sprintf(buffer,"%d",tmac->_numInputs);
 					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
@@ -190,6 +229,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					// OutPut numbers
 					sprintf(buffer,"%d",tmac->_numOutputs);
 					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+#endif
 					n++;
 				}
 			}

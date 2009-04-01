@@ -2,8 +2,9 @@
 ///\brief implementation file for psycle::host::CConfigDlg.
 
 #include "ConfigDlg.hpp"
-#include "Psycle.hpp"
 #include "MainFrm.hpp"
+#include "PatternView.hpp"
+#include "MachineView.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

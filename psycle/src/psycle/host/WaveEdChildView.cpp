@@ -1,17 +1,24 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdChildView.
-
 #include "WaveEdChildView.hpp"
-#include "Psycle.hpp"
-#include "Helpers.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
+#include "Song.hpp"
+#endif
+#include "Configuration.hpp"
 #include "MainFrm.hpp"
+
+#include <psycle/helpers/helpers.hpp>
 #include "Zap.hpp"
 #include <mmreg.h>
 #include <math.h>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		using namespace helpers;
+	using namespace psycle::helpers;
 	
 		float const CWaveEdChildView::zoomBase = 1.06f;
 
@@ -1658,7 +1665,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
+#ifdef use_psycore
+					_pSong->_pInstrument[wsInstrument]->DeleteLayer();
+#else
 					_pSong->DeleteLayer(wsInstrument);
+#endif
 					wdLength = 0;
 					wdWave   = false;
 				}

@@ -1,5 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
+#include "configuration_options.hpp"
+#ifndef use_psycore
 
 #include "Machine.hpp"
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
@@ -30,7 +32,6 @@
 #include "VstHost24.hpp"
 
 #include "Loggers.hpp"
-#include "configuration_options.hpp"
 
 namespace psycle { namespace host 
 {
@@ -153,7 +154,7 @@ namespace psycle { namespace host
 		}
 		Machine::Machine(Machine* mac)
 			: crashed_()
-			, _macIndex(mac->_macIndex)
+			, _macIndex(mac->id())
 			, _type(mac->_type)
 			, _mode(mac->_mode)
 			, _bypass(mac->_bypass)
@@ -324,16 +325,16 @@ namespace psycle { namespace host
 				//Let's find if the new machine has still other machines connected to it.
 				// Right now the UI doesn't allow such configurations, but there isn't a reason
 				// not to allow it in the future.
-				Machine* pMac = pSong->_pMachine[srcmac];
+				Machine* pMac = pSong->machine(srcmac);
 				for(int c=0; c<MAX_CONNECTIONS; c++)
 				{
 					if(pMac->_inputCon[c])	{
-						pMac = pSong->_pMachine[pMac->_inputCon[c]];
+						pMac = pSong->machine(pMac->_inputCon[c]);
 						c=0;
 						continue;
 					}
 				}
-				NotifyNewSendtoMixer(pSong,_macIndex,pMac->_macIndex);
+				NotifyNewSendtoMixer(pSong,_macIndex,pMac->id());
 			}
 		}
 		int Machine::GetFreeInputWire(int slottype)
@@ -387,7 +388,7 @@ namespace psycle { namespace host
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = pSong->machine(_outputMachines[WireIndex]);
 
 			if (_pDstMachine)
 			{
@@ -408,7 +409,7 @@ namespace psycle { namespace host
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = pSong->machine(_outputMachines[WireIndex]);
 			
 			if (_pDstMachine)
 			{
@@ -457,7 +458,7 @@ namespace psycle { namespace host
 				{
 					if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
 					{
-						iMac = pSong->_pMachine[_inputMachines[w]];
+						iMac = pSong->machine(_inputMachines[w]);
 						if (iMac)
 						{
 							int wix = iMac->FindOutputWire(_macIndex);
@@ -474,7 +475,7 @@ namespace psycle { namespace host
 				{
 					if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
 					{
-						iMac = pSong->_pMachine[_outputMachines[w]];
+						iMac = pSong->machine(_outputMachines[w]);
 						if (iMac)
 						{
 							int wix = iMac->FindInputWire(_macIndex);
@@ -521,7 +522,7 @@ namespace psycle { namespace host
 		{
 			//Work down the connection wires until finding the mixer.
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
-				if ( _connection[i]) pSong->_pMachine[_outputMachines[i]]->NotifyNewSendtoMixer(pSong,_macIndex,senderMac);
+				if ( _connection[i]) pSong->machine(_outputMachines[i])->NotifyNewSendtoMixer(pSong,_macIndex,senderMac);
 		}
 		void Machine::ClearMixerSendFlag(Song* pSong)
 		{
@@ -529,7 +530,7 @@ namespace psycle { namespace host
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
 				if ( _inputCon[i])
 				{
-					pSong->_pMachine[_inputMachines[i]]->ClearMixerSendFlag(pSong);
+					pSong->machine(_inputMachines[i])->ClearMixerSendFlag(pSong);
 				}
 				
 			_isMixerSend=false;
@@ -602,7 +603,7 @@ namespace psycle { namespace host
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
+					Machine* pInMachine = Global::_pSong->machine(_inputMachines[i]);
 					if (pInMachine)
 					{
 						/*
@@ -661,7 +662,7 @@ namespace psycle { namespace host
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
+					Machine* pInMachine = Global::song().machine(_inputMachines[i]);
 					if (pInMachine)
 					{
 						if(!pInMachine->_worked && !pInMachine->_waitingForSound) pInMachine->Work(numSamples);
@@ -1260,3 +1261,4 @@ namespace psycle { namespace host
 			return true;
 		}
 }}
+#endif //#ifndef use_psycore

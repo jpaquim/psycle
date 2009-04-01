@@ -16,9 +16,7 @@
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(pop)
 #endif
-
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

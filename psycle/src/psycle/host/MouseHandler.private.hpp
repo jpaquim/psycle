@@ -1,6 +1,6 @@
 ///\file
 ///\brief pointer handler for psycle::host::CChildView, private header
-#include "internal_machines.hpp"
+#include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -19,7 +19,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.y = point.y;
 				ev.button = 3;
 				ev.shift = nFlags;
-				machine_view_.OnEvent(&ev);
+				machine_view_->OnEvent(&ev);
 				return;
 			}
 			CWnd::OnRButtonDown(nFlags,point);
@@ -36,7 +36,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.y = point.y;
 				ev.button = 3;
 				ev.shift = nFlags;
-				machine_view_.OnEvent(&ev);
+				machine_view_->OnEvent(&ev);
 				return;
 			}
 			pattern_view()->Repaint(PatternView::draw_modes::all);
@@ -46,7 +46,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
 		{			
 			if (viewMode == view_modes::pattern) {
-				pattern_view_.OnContextMenu(pWnd, point);
+				pattern_view_->OnContextMenu(pWnd, point);
 			}
 			CWnd::OnContextMenu(pWnd,point);
 		}
@@ -63,11 +63,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.y = point.y;
 				ev.button = 1;
 				ev.shift = nFlags;
-				machine_view_.OnEvent(&ev);
+				machine_view_->OnEvent(&ev);
 				return;
 			} else
 			if (viewMode==view_modes::pattern) {			
-				pattern_view_.OnLButtonDown(nFlags, point);
+				pattern_view_->OnLButtonDown(nFlags, point);
 			}//<-- End LBUTTONPRESING/VIEWMODE if statement
 			CWnd::OnLButtonDown(nFlags,point);
 		}
@@ -83,12 +83,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				ev.y = point.y;
 				ev.button = 1;
 				ev.shift = nFlags;
-				machine_view_.OnEvent(&ev);
+				machine_view_->OnEvent(&ev);
 				return;
 			}
 			else if (viewMode == view_modes::pattern)
 			{
-				pattern_view_.OnLButtonUp(nFlags, point);
+				pattern_view_->OnLButtonUp(nFlags, point);
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 			CWnd::OnLButtonUp(nFlags,point);
 		}
@@ -108,13 +108,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				else
 					ev.button = 0;
 				ev.shift = nFlags;
-				machine_view_.OnEvent(&ev);
+				machine_view_->OnEvent(&ev);
 				return;
 			}
 
 			else if (viewMode == view_modes::pattern)
 			{
-				pattern_view_.OnMouseMove(nFlags, point);
+				pattern_view_->OnMouseMove(nFlags, point);
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 			CWnd::OnMouseMove(nFlags,point);
 		}
@@ -130,7 +130,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					ev.y = point.y;
 					ev.button = 0;
 					ev.shift = nFlags;
-					machine_view_.OnEvent(&ev);				
+					machine_view_->OnEvent(&ev);				
 				break;				
 				case view_modes::pattern: // User is in pattern view mode
 					if (( point.y >= pattern_view()->YOFFSET ) && (point.x >= pattern_view()->XOFFSET))
@@ -150,20 +150,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
 		{
 			if (viewMode == view_modes::pattern) {
-				pattern_view_.OnMouseWheel(nFlags, zDelta, pt);
+				pattern_view_->OnMouseWheel(nFlags, zDelta, pt);
 			}
 			return CWnd ::OnMouseWheel(nFlags, zDelta, pt);
 		}
 
 		void CChildView::OnMButtonDown(UINT nFlags, CPoint point)
 		{
-			pattern_view_.OnMButtonDown(nFlags, point);
+			pattern_view_->OnMButtonDown(nFlags, point);
 		}
 
 		void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{
 			if (viewMode == view_modes::pattern) {
-				pattern_view_.OnVScroll(nSBCode, nPos, pScrollBar);
+				pattern_view_->OnVScroll(nSBCode, nPos, pScrollBar);
 			}
 			CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
 		}
@@ -172,7 +172,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{
 			if (viewMode == view_modes::pattern) {
-				pattern_view_.OnHScroll(nSBCode, nPos, pScrollBar);
+				pattern_view_->OnHScroll(nSBCode, nPos, pScrollBar);
 			}
 
 			CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);

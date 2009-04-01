@@ -14,7 +14,7 @@ All rights reserved.
 #ifndef __SINSTANCE_H__
 #define __SINSTANCE_H__
 
-
+#include "Psycle.hpp"
 #ifndef __AFXMT_H__
 #include <afxmt.h>
 #endif

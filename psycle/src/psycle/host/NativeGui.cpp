@@ -2,8 +2,14 @@
 ///\brief implementation file for psycle::host::CNativeGui.
 
 #include "NativeGui.hpp"
-#include "Psycle.hpp"
+
+#ifdef use_psycore
+#include <psycle/core/machine.h>
+using namespace psy::core;
+#else
 #include "Machine.hpp"
+#endif
+
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
 #include "NewVal.hpp"
@@ -155,7 +161,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CNativeGui::OnTimer(UINT nIDEvent) 
 		{
-			if ( nIDEvent == 2104+machine()._macIndex )
+			if ( nIDEvent == 2104+machine().id() )
 			{
 				Invalidate(false);
 			}
@@ -396,9 +402,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, tweakpar, prevval);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), tweakpar, prevval);
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, tweakpar, prevval);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), tweakpar, prevval);
 				}
 //				if(pParamGui)
 //					pParamGui->UpdateNew(index, value);
@@ -451,7 +457,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						max_v
 						);
 
-					CNewVal dlg(machine()._macIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
+					CNewVal dlg(machine().id(),tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
 //						wndView->AddMacViewUndo();
@@ -475,7 +481,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				case CT_Note:
 					if (!bRepeat){
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+						if ( _pMachine->IsGenerator() || Global::pConfig->_notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
@@ -502,7 +508,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
+				if ( _pMachine->IsGenerator() ||Global::pConfig->_notesToEffects)
 				{
 					Global::pInputHandler->StopNote(outnote,true,_pMachine);
 				}

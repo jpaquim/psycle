@@ -1,10 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CMasterDlg.
 #pragma once
-#include "Machine.hpp"
-#include "Constants.hpp"
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
+
+#include "Psycle.hpp"
 
 #ifdef use_psycore
 namespace psy {
@@ -12,14 +10,18 @@ namespace psy {
 		class Master;
 	}
 }
+using namespace psy::core;
 #endif
+
 
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CChildView;
-
+#ifndef use_psycore
+		class Master;
+#endif
 
 		class CVolumeCtrl: public CSliderCtrl
 		{
@@ -51,11 +53,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CBitmap m_sliderknob;
 			CBitmap m_back;
 			CFont namesFont;
-#ifdef use_psycore
-			psy::core::Master* _pMachine;
-#else
+
 			Master* _pMachine;			
-#endif
+
 			char macname[MAX_CONNECTIONS][32];
 			afx_msg void OnCancel();
 		// Dialog Data

@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::CMidiLearn.
 
 #include "MidiLearn.hpp"
-#include "Psycle.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"

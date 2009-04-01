@@ -1,22 +1,22 @@
 #include "VstGenGui.hpp"
+#ifdef use_psycore
+#include <psycle/core/song.h>
+using namespace psy::core;
+#else
 #include "Song.hpp"
-#include "MasterDlg.hpp"
-#include "MachineView.hpp"
-#include "FrameMachine.hpp"
-#include "MainFrm.hpp"
+#endif
+
+
 #include "ChildView.hpp"
+#include "MachineView.hpp"
+
 #include "VstEffectWnd.hpp"
-#include "VstHost24.hpp"
 
 namespace psycle {
 	namespace host {
 
-		VstGenGui::VstGenGui(class MachineView* view,
-#ifdef use_psycore
-							 class psy::core::Machine* mac)
-#else
-							 class Machine* mac)
-#endif
+		VstGenGui::VstGenGui(MachineView* view,
+							 Machine* mac)
 			: GeneratorGui(view, mac),
 			  dialog_(0)
 		{
@@ -46,11 +46,7 @@ namespace psycle {
 				std::ostringstream winname;
 				winname << std::hex << std::setw(2)
 					<< view()->song()->FindBusFromIndex(mac()->id())
-#ifdef use_psycore
 						<< " : " << mac()->GetEditName();
-#else
-						<< " : " << mac()->_editName;
-#endif
 						dialog_->SetTitleText(winname.str().c_str());
 							// C_Tuner.dll crashes if asking size before opening.
 //							newwin->ResizeWindow(0);*/

@@ -1,14 +1,22 @@
 #pragma once
-#include <afxwin.h>
-#include <afxcmn.h>
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
+
+#ifdef use_psycore
+namespace psy {
+	namespace core {
+		class AudioRecorder;
+	}
+}
+using namespace psy::core;
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-/// gear rack window.
+#ifndef use_psycore
+	class AudioRecorder;
+#endif
 
-class AudioRecorder;
 class CChildView;
 
 class CWaveInMacDlg : public CDialog

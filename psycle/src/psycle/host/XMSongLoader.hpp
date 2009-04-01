@@ -1,14 +1,29 @@
 #pragma once
-
+#include "Global.hpp"
+#ifdef use_psycore
+#include <psycle/core/commands.h>
+#include <psycle/core/patternevent.h>
+namespace psy {
+	namespace core {
+		class Song;
+		class XMSampler;
+		class XMInstrument;
+	}
+}
+using namespace psy::core;
+#else
 #include "SongStructs.hpp"
+#endif
 #include "FileIO.hpp"
 #include "XMFile.hpp"
 #include <cstdint>
 
 namespace psycle { namespace host {
-	class Song;
-	class XMSampler;
-	class XMInstrument;
+	#ifndef use_psycore
+		class Song;
+		class XMSampler;
+		class XMInstrument;
+	#endif
 
 	class XMSongLoader : public OldPsyFile
 	{
@@ -27,7 +42,7 @@ namespace psycle { namespace host {
 		const LONG LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
 		const LONG LoadSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
 		const LONG LoadSampleData(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
-		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
+		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEvent & e);
 		void SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader);		
 		char * AllocReadStr(const LONG size, const LONG start=-1);
 
@@ -62,6 +77,7 @@ namespace psycle { namespace host {
 		unsigned char memPortaNote[32];
 		unsigned char memPortaPos[32];
 
+		Song* m_pSong;
 		short m_iTempoTicks;
 		short m_iTempoBPM;
 		XMFILEHEADER m_Header;
@@ -103,7 +119,7 @@ namespace psycle { namespace host {
 		const void LoadInstrument(XMSampler & sampler, const int idx);
 		const void LoadSampleHeader(XMSampler & sampler, const int InstrIdx);
 		const void LoadSampleData(XMSampler & sampler, const int InstrIdx);
-		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
+		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEvent & e);
 		char * AllocReadStr(const LONG size, const LONG start=-1);
 
 		// inlines
@@ -128,6 +144,7 @@ namespace psycle { namespace host {
 			return Read(&i,4)?i:0;
 		}
 		static const short BIGMODPERIODTABLE[37*8];
+		Song* m_pSong;
 		unsigned short smpLen[32];
 		MODHEADER m_Header;
 		MODSAMPLEHEADER m_Samples[32];

@@ -1,11 +1,12 @@
 #pragma once
-
+#include "Psycle.hpp"
 #include "canvas.hpp"
 
 namespace psycle {
 	namespace host {
 
 		class CWireDlg;
+		class MachineGui;
 
 		class WireGui : public PsycleCanvas::Line {
 		public:
@@ -84,4 +85,4 @@ namespace psycle {
 		};
 
 	}  // namespace host
-}  // namespace psycle
+}
