@@ -12,6 +12,7 @@ namespace psycle
 {
 	namespace host
 	{
+		using namespace psycle::plugin_interface;
 		/// \todo CPresetsDlg code sux big time concerning interface separation :-(
 		class CPresetDlg;
 

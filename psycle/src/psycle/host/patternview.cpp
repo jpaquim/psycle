@@ -4453,7 +4453,7 @@ namespace psycle {
 						{
 							entry.instrument() = song()->auxcolSelected;
 						}
-						else if (tmac->_type == MACH_VST) // entry->Instrument() is the MIDI channel for VSTi's
+						else if (tmac->_type == MACH_VST) // entry->instrument() is the MIDI channel for VSTi's
 						{
 							entry.instrument() = song()->auxcolSelected;
 						}
@@ -4503,7 +4503,7 @@ namespace psycle {
 			if (velocity==0)
 			{
 				Global::pInputHandler->StopNote(note,false);
-				if (entry->Note() == note)
+				if (entry->note() == note)
 				{
 					return;
 				}
@@ -4563,14 +4563,14 @@ namespace psycle {
 
 			//Machine *tmac = song()->machine(song()->seqBus);
 //altered for locking sample to machine by alk
-			Machine *tmac = song()->machine(entry->Machine());
+			Machine *tmac = song()->machine(entry->machine());
 			if (tmac)
 			{
 				if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
 				{
 					entry->setInstrument(song()->auxcolSelected);
 				}
-				else if (tmac->_type == MACH_VST) // entry->Instrument() is the MIDI channel for VSTi's
+				else if (tmac->_type == MACH_VST) // entry->instrument() is the MIDI channel for VSTi's
 				{
 					entry->setInstrument(song()->auxcolSelected);
 				}
@@ -4757,7 +4757,7 @@ namespace psycle {
 			if (velocity==0)
 			{
 				Global::pInputHandler->StopNote(note,false);
-				if (entry->Note() == note)
+				if (entry->note() == note)
 				{
 					return;
 				}
@@ -4817,7 +4817,7 @@ namespace psycle {
 
 			//Machine *tmac = song()->machine(song()->seqBus);
 //altered for locking sample to machine by alk
-			Machine *tmac = song()->machine(entry->Machine());
+			Machine *tmac = song()->machine(entry->machine());
 			if (tmac)
 			{
 				if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)

@@ -719,24 +719,24 @@ namespace psycle
 		{
 			try
 			{
-				proxy().SeqTick(channel, pData->Note(), pData->Instrument(), pData->Command(), pData->Parameter());
+				proxy().SeqTick(channel, pData->note(), pData->instrument(), pData->command(), pData->parameter());
 			}
 			catch(const std::exception &)
 			{
 				return;
 			}
-			if(pData->Note() == notecommands::tweak || pData->Note() == notecommands::tweakeffect)
+			if(pData->note() == notecommands::tweak || pData->note() == notecommands::tweakeffect)
 			{
-				if(pData->Instrument() < _pInfo->numParameters)
+				if(pData->instrument() < _pInfo->numParameters)
 				{
-					int nv = (pData->Command()<<8)+pData->Parameter();
-					int const min = _pInfo->Parameters[pData->Instrument()]->MinValue;
-					int const max = _pInfo->Parameters[pData->Instrument()]->MaxValue;
+					int nv = (pData->command()<<8)+pData->parameter();
+					int const min = _pInfo->Parameters[pData->instrument()]->MinValue;
+					int const max = _pInfo->Parameters[pData->instrument()]->MaxValue;
 					nv += min;
 					if(nv > max) nv = max;
 					try
 					{
-						proxy().ParameterTweak(pData->Instrument(), nv);
+						proxy().ParameterTweak(pData->instrument(), nv);
 					}
 					catch(const std::exception &)
 					{
@@ -744,9 +744,9 @@ namespace psycle
 					Global::pPlayer->Tweaker = true;
 				}
 			}
-			else if(pData->Note() == notecommands::tweakslide)
+			else if(pData->note() == notecommands::tweakslide)
 			{
-				if(pData->Instrument() < _pInfo->numParameters)
+				if(pData->instrument() < _pInfo->numParameters)
 				{
 					int i;
 					if(TWSActive)
@@ -754,7 +754,7 @@ namespace psycle
 						// see if a tweak slide for this parameter is already happening
 						for(i = 0; i < MAX_TWS; i++)
 						{
-							if((TWSInst[i] == pData->Instrument()) && (TWSDelta[i] != 0))
+							if((TWSInst[i] == pData->instrument()) && (TWSDelta[i] != 0))
 							{
 								// yes
 								break;
@@ -782,15 +782,15 @@ namespace psycle
 					}
 					if (i < MAX_TWS)
 					{
-						TWSDestination[i] = float(pData->Command()<<8)+pData->Parameter();
-						float min = float(_pInfo->Parameters[pData->Instrument()]->MinValue);
-						float max = float(_pInfo->Parameters[pData->Instrument()]->MaxValue);
+						TWSDestination[i] = float(pData->command()<<8)+pData->parameter();
+						float min = float(_pInfo->Parameters[pData->instrument()]->MinValue);
+						float max = float(_pInfo->Parameters[pData->instrument()]->MaxValue);
 						TWSDestination[i] += min;
 						if (TWSDestination[i] > max)
 						{
 							TWSDestination[i] = max;
 						}
-						TWSInst[i] = pData->Instrument();
+						TWSInst[i] = pData->instrument();
 						try
 						{
 							TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
@@ -805,14 +805,14 @@ namespace psycle
 					else
 					{
 						// we have used all our slots, just send a twk
-						int nv = (pData->Command()<<8)+pData->Parameter();
-						int const min = _pInfo->Parameters[pData->Instrument()]->MinValue;
-						int const max = _pInfo->Parameters[pData->Instrument()]->MaxValue;
+						int nv = (pData->command()<<8)+pData->parameter();
+						int const min = _pInfo->Parameters[pData->instrument()]->MinValue;
+						int const max = _pInfo->Parameters[pData->instrument()]->MaxValue;
 						nv += min;
 						if (nv > max) nv = max;
 						try
 						{
-							proxy().ParameterTweak(pData->Instrument(), nv);
+							proxy().ParameterTweak(pData->instrument(), nv);
 						}
 						catch(const std::exception &)
 						{

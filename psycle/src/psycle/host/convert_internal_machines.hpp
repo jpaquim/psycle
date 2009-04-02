@@ -161,13 +161,13 @@ namespace psycle
 					for(int pattern(0) ; pattern < MAX_PATTERNS ; ++pattern)
 					{
 						if(!song.ppPatternData[pattern]) continue;
-						PatternEntry * const lines(reinterpret_cast<PatternEntry*>(song.ppPatternData[pattern]));
+						PatternEvent * const lines(reinterpret_cast<PatternEvent*>(song.ppPatternData[pattern]));
 						for(int line = 0 ; line < song.patternLines[pattern] ; ++line)
 						{
-							PatternEntry * const events(lines + line * MAX_TRACKS);
+							PatternEvent * const events(lines + line * MAX_TRACKS);
 							for(int track(0); track < song.SONGTRACKS ; ++track)
 							{
-								PatternEntry & event(events[track]);
+								PatternEvent & event(events[track]);
 								if(event._note == notecommands::tweakeffect)
 								{
 									event._mach += 0x40;

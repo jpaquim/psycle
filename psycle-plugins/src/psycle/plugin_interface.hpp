@@ -174,7 +174,7 @@ namespace psycle
 				///\todo doc. not used (yet?)
 				virtual void MidiNote(int /*channel*/, int /*value*/, int /*velocity*/) {}
 				///\todo doc. not used (yet?)
-				virtual void Event(uint32 const /*data*/) {}
+				virtual void Event(unsigned int const /*data*/) {}
 				///\todo doc
 				virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/) { return false; }
 				///\todo doc. not used (prolly never)

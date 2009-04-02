@@ -14,7 +14,7 @@
 *<@JosepMa> as such it maps all the dispatch calls to functions with parameter validation, and helps
 *           in the construction and destruction processes. Tries to help on other simpler tasks, and
 *           in the handling of parameter windows (VstEffectWnd.cpp/.hpp)
-*<@JosepMa> vst::host and vst::plugin are subclasses of the aforementioned classes, which both: extend
+*<@JosepMa> vst::AudioMaster and vst::plugin are subclasses of the aforementioned classes, which both: extend
 *           the functionality of the base classes, and adapts them to its usage inside psycle
 *<@JosepMa> the host one doesn't provide much more (since the base class is good enough), and the
 *           plugin one wraps the CEffect into a Machine class
@@ -43,7 +43,7 @@ namespace psycle
 			using namespace seib::vst;
 
 
-			class host;
+			class AudioMaster;
 			class CVstEffectWnd;
 
 			class plugin : public Machine, public CEffect
@@ -267,11 +267,11 @@ namespace psycle
 */
 			};
 
-			class host : public CVSTHost
+			class AudioMaster : public CVSTHost
 			{
 			public:
-				host(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; }
-				virtual ~host(){;}
+				AudioMaster(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; }
+				virtual ~AudioMaster(){;}
 
 				///< Helper class for Machine Creation.
 				//static Machine* CreateFromType(int _id, std::string _dllname);

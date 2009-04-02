@@ -566,7 +566,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_wndView.pattern_view()->editcur.track = projects_.active_project()->psy_song().tracks()-1;
 
 #else
-			_pSong->tracks(cc2->GetCurSel()+4);
+			_pSong->setTracks(cc2->GetCurSel()+4);
 		if (m_wndView.pattern_view()->editcur.track >= _pSong->tracks() )
 		m_wndView.pattern_view()->editcur.track= _pSong->tracks()-1;
 #endif

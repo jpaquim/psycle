@@ -458,10 +458,10 @@ namespace psycle
 					zapObject(_pMachine[i]);
 			}
 			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				XMSampler::rInstrument(i).Init();
+				rInstrument(i).Init();
 			}
 			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				XMSampler::SampleData(i).Init();
+				SampleData(i).Init();
 			}
 
 			for(int i(0) ; i < MAX_PATTERNS; ++i)
@@ -493,9 +493,9 @@ namespace psycle
 			CSingleLock lock(&door,TRUE);
 			seqBus=0;
 			// Song reset
-			name = "Untitled";
-			author = "Unnamed";
-			comments = "";
+			name_ = "Untitled";
+			author_ = "Unnamed";
+			comment_ = "";
 			currentOctave=4;
 			// General properties
 			m_BeatsPerMin=125;
@@ -1276,13 +1276,13 @@ namespace psycle
 						}
 						else
 						{
-							char name_[129]; char author_[65]; char comments_[65536];
-							pFile->ReadString(name_, sizeof name_);
-							pFile->ReadString(author_, sizeof author_);
-							pFile->ReadString(comments_,sizeof comments_);
-							name = name_;
-							author = author_;
-							comments = comments_;
+							char name[129]; char author[65]; char comments[65536];
+							pFile->ReadString(name, sizeof name);
+							pFile->ReadString(author, sizeof author);
+							pFile->ReadString(comments,sizeof comments);
+							name_ = name;
+							author_ = author;
+							comment_ = comments;
 
 						}
 					}
@@ -1509,7 +1509,7 @@ namespace psycle
 							for(int i = 0;i < numInstruments;i++)
 							{
 								pFile->Read(idx);
-								if (!XMSampler::rInstrument(idx).Load(*pFile)) { wrongState=true; break; }
+								if (!rInstrument(idx).Load(*pFile)) { wrongState=true; break; }
 								//m_Instruments[idx].IsEnabled(true); // done in the loader.
 							}
 							if (!wrongState)
@@ -1520,7 +1520,7 @@ namespace psycle
 								for(int i = 0;i < numSamples;i++)
 								{
 									pFile->Read(idx);
-									if (!XMSampler::SampleData(idx).Load(*pFile)) { wrongState=true; break; }
+									if (!SampleData(idx).Load(*pFile)) { wrongState=true; break; }
 								}
 							}
 						}
@@ -1636,13 +1636,13 @@ namespace psycle
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
 				New();
-				char name_[129]; char author_[65]; char comments_[65536];
-				pFile->Read(name_, 32);
-				pFile->Read(author_, 32);
-				pFile->Read(comments_,128);
-				name = name_;
-				author = author_;
-				comments = comments_;
+				char name[129]; char author[65]; char comments[65536];
+				pFile->Read(name, 32);
+				pFile->Read(author, 32);
+				pFile->Read(comments,128);
+				name_ = name;
+				author_ = author;
+				comment_ = comments;
 
 				pFile->Read(&m_BeatsPerMin, sizeof m_BeatsPerMin);
 				pFile->Read(&sampR, sizeof sampR);
@@ -1694,7 +1694,7 @@ namespace psycle
 				Progress.m_Progress.SetPos(2048);
 				::Sleep(1); ///< ???
 				// Instruments
-				pFile->Read(&_instSelected, sizeof instSelected);
+				pFile->Read(&_instSelected, sizeof _instSelected);
 				for(int i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
 				{
 					pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
@@ -2402,7 +2402,7 @@ namespace psycle
 			// Instrument Data Save
 			int numInstruments = 0;	
 			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				if(XMSampler::rInstrument(i).IsEnabled()){
+				if(rInstrument(i).IsEnabled()){
 					numInstruments++;
 				}
 			}
@@ -2452,14 +2452,14 @@ namespace psycle
 
 			pFile->Write("INFO",4);
 			version = CURRENT_FILE_VERSION_INFO;
-			size = name.length() + author.length() + comments.length() + 3; // +3 for \0
+			size = name().length() + author().length() + comment().length() + 3; // +3 for \0
 
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
 
-			pFile->Write(name.c_str(),name.length()+1);
-			pFile->Write(author.c_str(),author.length()+1);
-			pFile->Write(comments.c_str(),comments.length()+1);
+			pFile->Write(name().c_str(),name().length()+1);
+			pFile->Write(author().c_str(),author().length()+1);
+			pFile->Write(comment().c_str(),comment().length()+1);
 
 			if ( !autosave ) 
 			{

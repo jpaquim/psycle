@@ -62,7 +62,7 @@ namespace psycle
 		class Player;
 		namespace vst
 		{
-			class host;
+			class AudioMaster;
 		}
 #endif
 		//\todo: move this source to a better place.
@@ -110,13 +110,13 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 				static InputHandler* pInputHandler;
 #endif //!defined WINAMP_PLUGIN
-				static vst::host* pVstHost;
+				static vst::AudioMaster* pVstHost;
 
 				static inline Song           & song() { return *_pSong; }
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }
 				static inline helpers::dsp::Resampler & resampler(){ return *pResampler; }
-				static inline vst::host		 & vsthost(){ return *pVstHost; }
+				static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
 				static inline cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }
 				//void inline cpu_frequency(cpu::cycles_type const & value) throw() { cpu_frequency_ = value; }
 		};

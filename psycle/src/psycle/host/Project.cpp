@@ -158,7 +158,7 @@ namespace psycle {
 			CMainFrame* pParentMain = mac_view()->main();
 
 			mac_view()->LockVu();
-			Global::pPlayer->Stop();			
+			Global::pPlayer->stop();			
 			///\todo lock/unlock
 			Sleep(256);
 			mac_view()->child_view()->_outputActive = false;

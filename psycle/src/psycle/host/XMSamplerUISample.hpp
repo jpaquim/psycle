@@ -10,12 +10,14 @@ namespace psy {
 using namespace psy::core;
 #else
 #include "XMInstrument.hpp"
-class XMSampler;
 #endif
 #include <afxwin.h>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
+#ifndef use_psycore
+class XMSampler;
+#endif
 
 class CWaveScopeCtrl : public CStatic
 {

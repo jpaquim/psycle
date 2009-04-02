@@ -10,7 +10,6 @@ namespace psy {
 using namespace psy::core;
 #else
 #include "XMInstrument.hpp"
-class XMSampler;
 #endif
 
 #include <afxwin.h>
@@ -18,6 +17,9 @@ class XMSampler;
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
+#ifndef use_psycore
+class XMSampler;
+#endif
 
 class XMSamplerUIInst : public CPropertyPage
 {

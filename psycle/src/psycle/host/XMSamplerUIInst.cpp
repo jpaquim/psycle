@@ -12,6 +12,7 @@
 #include <psycle/core/xmsampler.h>
 using namespace psy::core;
 #else
+#include "Song.hpp"
 #include "Player.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"

@@ -687,6 +687,7 @@ namespace seib {
 		public:
 			CEffect* LoadPlugin(const char * sName,VstInt32 shellIdx=0);
 			static VstIntPtr VSTCALLBACK AudioMasterCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
+			static int GetQuantization() { return quantization; }
 
 			// overridable functions
 		protected:

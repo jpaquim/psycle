@@ -440,7 +440,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			m_ChannelNum = channelNum;
 			pChannel(&pSampler()->rChannel(channelNum));
 			InstrumentNum(instrumentNum);
-			XMInstrument & _inst = Global::pSong->rInstrument(instrumentNum);
+			XMInstrument & _inst = Global::_pSong->rInstrument(instrumentNum);
 			m_pInstrument = &_inst;
 
 			// Envelopes
@@ -664,7 +664,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol,bool reset)
 		{
 			int wavelayer = rInstrument().NoteToSample(note).second;
-			XMInstrument::WaveData& wave = Global::pSong->SampleData(wavelayer);
+			XMInstrument::WaveData& wave = Global::_pSong->SampleData(wavelayer);
 			if ( wave.WaveLength() == 0 ) return;
 
 			m_WaveDataController.Init(&wave,wavelayer);
@@ -1377,7 +1377,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					else if ( volcmd&0x0F == 1)  slidval=1;
 					else if ( volcmd&0x0F < 9) slidval=powf(2.0f,volcmd&0x0F);
 					else slidval=255;
-					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),slidval,Note());
+					PitchSlide(voice->Period()>voice->NoteToPeriod(note()),slidval,note());
 					break;
 				case CMD_VOL::VOL_PITCH_SLIDE_DOWN:
 					// Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
@@ -1467,14 +1467,14 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					PitchSlide(false,parameter);
 					break;
 				case CMD::PORTA2NOTE:
-					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),parameter,Note());
+					PitchSlide(voice->Period()>voice->NoteToPeriod(note()),parameter,note());
 					break;
 				case CMD::VOLUMESLIDE:
 					VolumeSlide(parameter);
 					break;
 				case CMD::TONEPORTAVOL:
 					VolumeSlide(parameter);
-					PitchSlide(voice->PeriodToNote(voice->Period())<Note(),0,Note());
+					PitchSlide(voice->PeriodToNote(voice->Period())<note(),0,note());
 					break;
 				case CMD::VIBRATOVOL:
 					VolumeSlide(parameter);
@@ -1509,22 +1509,22 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 				switch(parameter&0x0F)
 				{
 				case CMD_EE::EE_VOLENVOFF:
-					Global::pSong->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(false);
+					Global::_pSong->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_VOLENVON:
-					Global::pSong->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(true);
+					Global::_pSong->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(true);
 					break;
 				case CMD_EE::EE_PANENVOFF:
-					Global::pSong->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(false);
+					Global::_pSong->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_PANENVON:
-					Global::pSong->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(true);
+					Global::_pSong->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(true);
 					break;
 				case CMD_EE::EE_PITCHENVON:
-					Global::pSong->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(false);
+					Global::_pSong->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_PITCHENVOFF:
-					Global::pSong->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(true);
+					Global::_pSong->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(true);
 					break;
 				}
 			}
@@ -1884,8 +1884,8 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			else param = m_ArpeggioMem;
 			if ( ForegroundVoice())
 			{
-				m_ArpeggioPeriod[0] = ForegroundVoice()->NoteToPeriod(Note() + ((param & 0xf0) >> 4));
-				m_ArpeggioPeriod[1] = ForegroundVoice()->NoteToPeriod(Note() + (param & 0xf));
+				m_ArpeggioPeriod[0] = ForegroundVoice()->NoteToPeriod(note() + ((param & 0xf0) >> 4));
+				m_ArpeggioPeriod[1] = ForegroundVoice()->NoteToPeriod(note() + (param & 0xf));
 			}
 			m_EffectFlags |= EffectFlag::ARPEGGIO;
 		}
@@ -2124,32 +2124,32 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			if (Global::_pSong->IsInvalided()) { return; }
 
 			// don't process twk , twf, Mcm Commands, or empty lines.
-			if ( pData->Note() > notecommands::release )
+			if ( pData->note() > notecommands::release )
 			{
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				if ((pData->Command() == 0 && pData->_volume == 255 && pData->Instrument() == 255) || pData->Note() != notecommands::empty )return; // Return in everything but commands!
+				if ((pData->command() == 0 && pData->_volume == 255 && pData->instrument() == 255) || pData->note() != notecommands::empty )return; // Return in everything but commands!
 	#else
-				if ((pData->Command() == 0 && pData->Instrument() == 255 ) || pData->Note() != notecommands::empty )return; // Return in everything but commands!
+				if ((pData->command() == 0 && pData->instrument() == 255 ) || pData->note() != notecommands::empty )return; // Return in everything but commands!
 	#endif
 #endif
 			}
 
 			// define some variables to ease the case checking.
-			bool bInstrumentSet = (pData->Instrument() < 255);
+			bool bInstrumentSet = (pData->instrument() < 255);
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			bool bPortaEffect = ((pData->Command() == CMD::PORTA2NOTE) || ((pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO));
+			bool bPortaEffect = ((pData->command() == CMD::PORTA2NOTE) || ((pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO));
 	#else
-			bool bPortaEffect = (pData->Command() == CMD::PORTA2NOTE);
+			bool bPortaEffect = (pData->command() == CMD::PORTA2NOTE);
 	#endif
 #endif
-			bool bPorta2Note = (pData->Note() <= notecommands::b9) && bPortaEffect;
-			bool bNoteOn = (pData->Note() <= notecommands::b9) && !bPorta2Note;
+			bool bPorta2Note = (pData->note() <= notecommands::b9) && bPortaEffect;
+			bool bNoteOn = (pData->note() <= notecommands::b9) && !bPorta2Note;
 
 
 			Voice* currentVoice = NULL;
@@ -2157,11 +2157,11 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			XMSampler::Channel& thisChannel = rChannel(channelNum);
 			if(bInstrumentSet)
 			{
-				if ( pData->Instrument() != thisChannel.InstrumentNo() && thisChannel.Note() !=0)
+				if ( pData->instrument() != thisChannel.InstrumentNo() && thisChannel.note() !=0)
 				{
 					bNoteOn=true;
 				}
-				thisChannel.InstrumentNo(pData->Instrument()); // Instrument is always set, even if no new note comes.
+				thisChannel.InstrumentNo(pData->instrument()); // Instrument is always set, even if no new note comes.
 			}
 
 			// STEP A: Look for an existing (foreground) playing voice in the current channel.
@@ -2174,20 +2174,20 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					switch (currentVoice->rInstrument().DCT())
 					{
 					case XMInstrument::DCType::DCT_INSTRUMENT:
-						if ( pData->Instrument() == thisChannel.InstrumentNo())
+						if ( pData->instrument() == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
 						break;
 					case XMInstrument::DCType::DCT_SAMPLE:
 						//\todo: Implement DCType Sample.
-						if ( pData->Instrument() == thisChannel.InstrumentNo())
+						if ( pData->instrument() == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
 						break;
 					case XMInstrument::DCType::DCT_NOTE:
-						if ( pData->Note() == thisChannel.Note() && pData->Instrument() == thisChannel.InstrumentNo())
+						if ( pData->note() == thisChannel.note() && pData->instrument() == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
@@ -2211,7 +2211,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 						currentVoice->IsBackground(true);
 						break;
 					}
-				} else if(pData->Note() == notecommands::release ){
+				} else if(pData->note() == notecommands::release ){
 					currentVoice->NoteOff();
 				}
 				else 
@@ -2224,7 +2224,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					{
 						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
 						//		  and the position reset to 0.
-						thisChannel.Note(pData->Note());
+						thisChannel.Note(pData->note());
 					}
 				}
 			}
@@ -2237,13 +2237,13 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			// STEP B: Get a Voice to work with, and initialize it if needed.
 			if(bNoteOn)
 			{
-				if (( pData->Command() == CMD::EXTENDED) && ((pData->Parameter() & 0xf0) == CMD_E::E_NOTE_DELAY))
+				if (( pData->command() == CMD::EXTENDED) && ((pData->parameter() & 0xf0) == CMD_E::E_NOTE_DELAY))
 				{
 					thisChannel.DelayedNote(*pData);
 				}
 				else
 				{
-					if ( pData->Note() != notecommands::empty ) thisChannel.Note(pData->Note()); // If instrument set and no note, we don't want to reset the note.
+					if ( pData->note() != notecommands::empty ) thisChannel.Note(pData->note()); // If instrument set and no note, we don't want to reset the note.
 					newVoice = GetFreeVoice();
 					if ( newVoice )
 					{
@@ -2253,9 +2253,9 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 							return;
 						}
 
-						XMInstrument & _inst = Global::pSong->rInstrument(thisChannel.InstrumentNo());
-						int _layer = _inst.NoteToSample(pData->Note()).second;
-						int twlength = Global::pSong->SampleData(_layer).WaveLength();
+						XMInstrument & _inst = Global::_pSong->rInstrument(thisChannel.InstrumentNo());
+						int _layer = _inst.NoteToSample(pData->note()).second;
+						int twlength = Global::_pSong->SampleData(_layer).WaveLength();
 						if(twlength > 0)
 						{
 							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
@@ -2287,19 +2287,19 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-							if ( pData->_volume<0x40) newVoice->NoteOn(thisChannel.Note(),pData->_volume<<1,bInstrumentSet);
-							else newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
+							if ( pData->_volume<0x40) newVoice->NoteOn(thisChannel.note(),pData->_volume<<1,bInstrumentSet);
+							else newVoice->NoteOn(thisChannel.note(),-1,bInstrumentSet);
 	#else
-							newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
+							newVoice->NoteOn(thisChannel.note(),-1,bInstrumentSet);
 	#endif
 #endif
-							thisChannel.Note(thisChannel.Note()); //this forces a recalc of the m_Period.
+							thisChannel.Note(thisChannel.note()); //this forces a recalc of the m_Period.
 
 							// Add Here any command that is limited to the scope of the new note.
 							// An offset is a good candidate, but a volume is not (volume can apply to an existing note)
-							if ((pData->Command()&0xF0) == CMD::OFFSET)
+							if ((pData->command()&0xF0) == CMD::OFFSET)
 							{
-								int offset = ((pData->Command()&0x0F) << 16) +pData->Parameter()<<8;
+								int offset = ((pData->command()&0x0F) << 16) +pData->parameter()<<8;
 								if ( offset != 0 )
 								{
 									thisChannel.OffsetMem(offset);
@@ -2316,14 +2316,14 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 						{
 							bNoteOn=false;
 							newVoice = NULL;
-							if ( pData->Command() == 0 ) return;
+							if ( pData->command() == 0 ) return;
 						}
 					}
 					else
 					{
 						// This is a noteon command, but we are out of voices. We will try to process the effect.
 						bNoteOn=false;
-						if ( pData->Command() == 0 ) return;
+						if ( pData->command() == 0 ) return;
 					}
 				}
 				}
@@ -2333,9 +2333,9 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			thisChannel.SetEffect(newVoice,pData->_volume,pData->Command(),pData->Parameter());
+			thisChannel.SetEffect(newVoice,pData->_volume,pData->command(),pData->parameter());
 	#else
-			thisChannel.SetEffect(newVoice,255,pData->Command(),pData->Parameter());
+			thisChannel.SetEffect(newVoice,255,pData->command(),pData->parameter());
 	#endif
 #endif
 		}

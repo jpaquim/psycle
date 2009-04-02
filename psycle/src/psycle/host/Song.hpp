@@ -5,6 +5,7 @@
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
+#include "XMInstrument.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "InstPreview.hpp"
