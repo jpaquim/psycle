@@ -5,8 +5,8 @@
 
 #pragma once
 
-namespace psy {
-	namespace core {
+namespace psycle {
+	namespace host {
 		/// Base class for exceptions thrown from plugins.
 		class exception : public std::runtime_error
 		{

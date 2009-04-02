@@ -1380,7 +1380,7 @@ namespace psycle
 						break;
 #else
 				int note = m_midiBuffer[ m_patOut ].entry.note();
-				int machine = m_midiBuffer[ m_patOut ].entry.nachine();
+				int machine = m_midiBuffer[ m_patOut ].entry.machine();
 				int data1 = m_midiBuffer[ m_patOut ].entry.command();
 				int data2 = m_midiBuffer[ m_patOut ].entry.parameter();
 				// get the machine pointer

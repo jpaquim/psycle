@@ -5,6 +5,8 @@
 #include "Filter.hpp"
 #include "XMInstrument.hpp"
 #include <cstdint>
+#include <mutex>
+
 
 namespace psycle
 {
@@ -19,6 +21,7 @@ public:
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const std::uint32_t VERSION = 0x00010000;
 	static const float SURROUND_THRESHOLD;
+	typedef std::scoped_lock<std::mutex> scoped_lock;
 
 /*
 * = remembers its last value when called with param 00.
@@ -758,7 +761,7 @@ XMSampler::Channel::PerformFX().
 		XMSampler::Voice* ForegroundVoice(){ return m_pForegroundVoice; }
 		void ForegroundVoice(XMSampler::Voice* pVoice) { m_pForegroundVoice = pVoice; }
 
-		const int Note(){ return m_Note;}
+		const int note(){ return m_Note;}
 		void Note(const int note)
 		{	m_Note = note;
 			if (ForegroundVoice()) m_Period = ForegroundVoice()->NoteToPeriod(note);
@@ -1124,7 +1127,6 @@ private:
 	int _sampleCounter;	// Number of Samples since note start
 
 
-	typedef std::scoped_lock<std::mutex> scoped_lock;
 	std::mutex mutable m_Mutex;
 };
 }

@@ -164,7 +164,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnDestroy();
 			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
 			m_browser.DeleteAllItems();
+#ifdef use_psycore
 			treeToInfo.clear();
+#endif
 		}
 
 #ifdef use_psycore

@@ -27,7 +27,7 @@ namespace psycle
 		helpers::dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
 		cpu::cycles_type Global::_cpuHz(cpu::cycles_per_second());
-		vst::host *Global::pVstHost(0);
+		vst::AudioMaster *Global::pVstHost(0);
 #if !defined WINAMP_PLUGIN
 		InputHandler * Global::pInputHandler(0);
 #endif //!defined WINAMP_PLUGIN
@@ -44,11 +44,11 @@ namespace psycle
 
 #ifdef use_psycore
 			pPlayer = &Player::singleton();
-			pVstHost = &vst::host::getInstance(pPlayer);
+			pVstHost = &vst::AudioMaster::getInstance(pPlayer);
 #else
 			_pSong = new Song();
 			pPlayer = new Player();
-			pVstHost = new vst::host();
+			pVstHost = new vst::AudioMaster();
 #endif // use_psycore
 		}
 

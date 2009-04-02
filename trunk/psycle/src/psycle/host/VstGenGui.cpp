@@ -4,6 +4,7 @@
 using namespace psy::core;
 #else
 #include "Song.hpp"
+#include "Machine.hpp"
 #endif
 
 

@@ -11,6 +11,9 @@ namespace psycle
 		class Instrument
 		{
 		public:
+			//PSYCLE__STRONG_TYPEDEF(int, id_type);
+			typedef int id_type;
+
 			Instrument();
 			virtual ~Instrument();
 			void Delete();

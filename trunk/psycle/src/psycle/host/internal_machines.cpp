@@ -402,18 +402,18 @@ namespace psycle
 
 		void Mixer::Tick( int channel,PatternEvent* pData)
 		{
-			if(pData->Note() == notecommands::tweak)
+			if(pData->note() == notecommands::tweak)
 			{
-				int nv = (pData->Command()<<8)+pData->Parameter();
-				SetParameter(pData->Instrument(),nv);
+				int nv = (pData->command()<<8)+pData->parameter();
+				SetParameter(pData->instrument(),nv);
 				Global::player().Tweaker = true;
 			}
-			else if(pData->Note() == notecommands::tweakslide)
+			else if(pData->note() == notecommands::tweakslide)
 			{
 				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 				// doing simply "tweak" for now..
-				int nv = (pData->Command()<<8)+pData->Parameter();
-				SetParameter(pData->Instrument(),nv);
+				int nv = (pData->command()<<8)+pData->parameter();
+				SetParameter(pData->instrument(),nv);
 				Global::player().Tweaker = true;
 			}
 		}

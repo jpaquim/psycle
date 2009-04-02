@@ -50,7 +50,30 @@ namespace psycle
 					_parameter(param)
 				{
 				}
-		private:
+
+				void setNote(std::uint8_t value) { _note = value; }
+				std::uint8_t note() const { return _note; }
+
+				void setInstrument(std::uint8_t instrument) { _inst = instrument; }
+				std::uint8_t instrument() const { return _inst; }
+
+				void setMachine(std::uint8_t machine) { _mach = machine; }
+				std::uint8_t machine() const { return _mach; }
+
+				void setCommand(std::uint8_t command) { _cmd = command; }
+				std::uint8_t command() const { return _cmd; }
+
+				void setParameter(std::uint8_t parameter) { _parameter = parameter; }
+				std::uint8_t parameter() const { return _parameter; }
+
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+				void setVolume(std::uint8_t volume) { _volume = volume; }
+				std::uint8_t volume() const { return _volume; }
+	#endif
+#endif		private:
 				std::uint8_t _note;
 				std::uint8_t _inst;
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
@@ -67,30 +90,6 @@ namespace psycle
 				std::uint8_t _parameter;
 	#endif
 #endif
-				void setNote(std::uint8_t value) { note_ = value; }
-				std::uint8_t note() const { return note_; }
-
-				void setInstrument(std::uint8_t instrument) { inst_ = instrument; }
-				std::uint8_t instrument() const { return inst_; }
-
-				void setMachine(std::uint8_t machine) { mach_ = machine; }
-				std::uint8_t machine() const { return mach_; }
-
-				void setCommand(std::uint8_t command) { cmd_ = command; }
-				std::uint8_t command() const { return cmd_; }
-
-				void setParameter(std::uint8_t parameter) { param_ = parameter; }
-				std::uint8_t parameter() const { return param_; }
-
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				void setVolume(std::uint8_t volume) { volume_ = volume; }
-				std::uint8_t volume() const { return volume_; }
-	#endif
-#endif
-
 
 		};
 

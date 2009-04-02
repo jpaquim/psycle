@@ -59,7 +59,7 @@ namespace psycle
 			CSingleLock crit(&Global::_pSong->door, TRUE);
 			if (initialize)
 			{
-				Stop(); // This causes all machines to reset, and samplesperRow to init.				
+				stop(); // This causes all machines to reset, and samplesperRow to init.				
 				Work(this,256);
 				((Master*)(Global::_pSong->machine(MASTER_INDEX)))->_clip = false;
 				((Master*)(Global::_pSong->machine(MASTER_INDEX)))->sampleCount = 0;
@@ -707,7 +707,7 @@ namespace psycle
 				}
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
-				Stop();
+				stop();
 				if (!psFilename.empty())
 				{
 					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels, isFloat) == DDC_SUCCESS)

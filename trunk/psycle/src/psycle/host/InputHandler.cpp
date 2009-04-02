@@ -617,7 +617,7 @@ namespace psycle
 					notetrack[i]=120;
 					// build entry
 					PatternEvent entry;
-					entry.setNote(notetypes::release);
+					entry.setNote(notecommands::release);
 					entry.setInstrument(Global::_pSong->auxcolSelected);
 					entry.setMachine(Global::_pSong->seqBus);
 					entry.setCommand(0);
