@@ -1,5 +1,5 @@
 #include "XMSamplerUISample.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/xmsampler.h>
 #include <psycle/core/song.h>
 using namespace psy::core;

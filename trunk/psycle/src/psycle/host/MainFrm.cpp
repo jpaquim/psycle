@@ -4,19 +4,20 @@
 #include "MainFrm.hpp"
 #include "Project.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/core/plugin.h>
 #include <psycle/core/xmsampler.h>
 #include <psycle/core/song.h>
 #include <psycle/core/internal_machines.h>
-//todo: change for core's one when replacing OldPsyFile
+///\todo: change for core's one when replacing OldPsyFile
 #include "FileIO.hpp"
 using namespace psy::core;
 #else
 #include "Player.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
+#include "Sampler.hpp"
 #include "XMSampler.hpp"
 #include "Song.hpp"
 #endif
@@ -309,7 +310,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				_snprintf(s,4,"%i",i);
 				cc2->AddString(s);
 			}
-#ifdef use_psycore			
+#if PSYCLE__CONFIGURATION__USE_PSYCORE			
 			cc2->SetCurSel(projects_.active_project()->psy_song().tracks()-4);
 #else
 			cc2->SetCurSel(_pSong->tracks()-4);			
@@ -423,8 +424,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									   m_wndView.machine_view());
 			projects_.Add(prj);
 			m_wndSeq.SetProject(prj);
-#ifdef use_psycore
-			m_wndView.pattern_view()->SetPsySong(&prj->psy_song());
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			m_wndView.pattern_view()->SetSong(&prj->psy_song());
 #endif
 		}
 
@@ -539,7 +540,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cc2->SetCurSel(m_wndView.pattern_view()->patStep);
 			
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			cc2->SetCurSel(projects_.active_project()->psy_song().tracks()-4);
 #else
 			cc2->SetCurSel(_pSong->tracks()-4);
@@ -560,7 +561,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnSelchangeTrackcombo() 
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			projects_.active_project()->psy_song().setTracks(cc2->GetCurSel()+4);
 			if (m_wndView.pattern_view()->editcur.track >= projects_.active_project()->psy_song().tracks() )
 			m_wndView.pattern_view()->editcur.track = projects_.active_project()->psy_song().tracks()-1;
@@ -629,7 +630,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					Global::_pSong->BeatsPerMin(Global::pPlayer->bpm()+x);
 				}
 				else Global::_pSong->BeatsPerMin(Global::_pSong->BeatsPerMin()+x);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				Global::player().setBpm(Global::song().bpm());
+#else
 				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+#endif
 				sprintf(buffer,"%d",Global::_pSong->BeatsPerMin());
 			}
 			else sprintf(buffer,"%d",Global::pPlayer->bpm());
@@ -640,6 +645,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::SetAppSongTpb(int x) 
 		{
 			char buffer[16];
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if ( x != 0)
+			{
+				if (Global::pPlayer->playing() ) 
+				{
+					Global::_pSong->setTicksSpeed(Global::player().timeInfo().ticksSpeed(), Global::player().timeInfo().isTicks());
+				}
+				else Global::_pSong->LinesPerBeat(Global::_pSong->LinesPerBeat()+x);
+				Global::player().timeInfo().setTicksSpeed(Global::song().ticksSpeed(), Global::song().isTicks());
+				sprintf(buffer,"%d",Global::_pSong->LinesPerBeat());
+			}
+			else sprintf(buffer, "%d", Global::player().timeInfo().ticksSpeed());
+#else
 			if ( x != 0)
 			{
 				if (Global::pPlayer->playing() ) 
@@ -651,6 +669,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				sprintf(buffer,"%d",Global::_pSong->LinesPerBeat());
 			}
 			else sprintf(buffer, "%d", Global::pPlayer->tpb());
+#endif
 			
 			((CStatic *)m_wndControl.GetDlgItem(IDC_TPBLABEL))->SetWindowText(buffer);
 		}
@@ -684,7 +703,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::UpdateMasterValue(int newvalue)
 		{
 			CSliderCtrl *cs;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( projects_.active_project()->psy_song().machine(MASTER_INDEX))
 #else
 			if ( _pSong->machine(MASTER_INDEX) != NULL)
@@ -700,7 +719,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			CSliderCtrl *cs;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( projects_.active_project()->psy_song().machine(MASTER_INDEX))
 #else
 			if ( _pSong->machine(MASTER_INDEX) != NULL)
@@ -711,7 +730,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				///\todo: this causes problems sometimes when loading songs.
 				// customdraw happening before updatemastervalue, so invalid value get set.
 				// Added call to UpdateMasterValue() in PsybarsUpdate() in order to fix this.
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				psy::core::Master* master = (psy::core::Master*)projects_.active_project()->psy_song().machine(MASTER_INDEX);
 				master->_outDry = cs->GetPos();
 #else
@@ -726,7 +745,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnClipbut() 
 		{
 			// Stefan: what is this ??
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Master* master = (Master*)projects_.active_project()->psy_song().machine(MASTER_INDEX);
 			master->_clip = false;
 #else
@@ -921,7 +940,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				cb->ResetContent();
 			}
 			
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Song* song = &projects_.active_project()->psy_song();
 			for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
 			{
@@ -979,7 +998,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				line = selected;
 			}
 			
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
 			{
 				if(song->machine(b))
@@ -1038,7 +1057,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			cb->SetCurSel(selected);
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			// Select the appropiate Option in Aux Combobox.
 			if (found) // If found (which also means, if it exists)
 			{
@@ -1201,7 +1220,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOINS);
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* _pSong = &projects_.active_project()->psy_song();
 #endif
 
@@ -1242,7 +1261,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							std::memset(buffer2,0,64);
 							tmac->GetParamName(i,buffer2);
 							bool label(false);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							if(tmac->getMachineKey().host() == Hosts::NATIVE )
 							{
 								if(!(static_cast<Plugin*>(tmac)->GetInfo().Parameters[i]->Flags & psycle::plugin_interface::MPF_STATE))
@@ -1287,7 +1306,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					Machine *tmac = _pSong->machine(nmac);
 					if (tmac) 
 					{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						if ( tmac->getMachineKey() == MachineKey::sampulse())
 #else
 						if ( tmac->_type == MACH_XMSAMPLER)
@@ -1393,16 +1412,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Machine *tmac = _pSong->machine(nmac);
 			if (tmac) 
 			{
-#ifdef use_psycore
-				//todo
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				if ( tmac->getMachineKey() == MachineKey::sampulse())
 #else
 				if ( tmac->_type == MACH_XMSAMPLER)
+#endif
 				{
 					CPoint point(-1,-1);
 					// ShowMachineGui(nmac,point); maybe a todo
 					return;
 				}
-#endif
 			}
 
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|IFF Samples (*.iff)|*.iff|All Files (*.*)|*.*||";
@@ -1458,7 +1477,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
 			{
 				// Stopping wavepreview if not stopped.
-				_pSong->wavprev.Stop();
+				Sampler::wavprev.Stop();
 	/*			if(_pSong->PW_Stage)
 				{
 					_pSong->PW_Stage=0;
@@ -1468,7 +1487,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	*/
 
 				//Delete it.
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				_pSong->_pInstrument[PREV_WAV_INS]->DeleteLayer();
 #else
 				_pSong->DeleteLayer(PREV_WAV_INS);
@@ -1526,16 +1545,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Machine *tmac = _pSong->machine(nmac);
 			if (tmac) 
 			{
-#ifdef use_psycore
-				//todo
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				if ( tmac->getMachineKey() == MachineKey::sampulse())
 #else
 				if ( tmac->_type == MACH_XMSAMPLER)
+#endif
 				{
 					CPoint point(-1,-1);
 //					ShowMachineGui(nmac,point); maybe a todo
 					return;
 				}
-#endif
 			}
 			ShowInstrumentEditor();
 		}
@@ -1677,17 +1696,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					m_wndView.pattern_view()->ChordModeOffs = 0;
 					m_wndView.pattern_view()->bScrollDetatch=false;
-					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
+					if (pSeqList->GetCurSel() != Global::pPlayer->_sequencePosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
-						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
+						pSeqList->SetSel(Global::pPlayer->_sequencePosition,true);
 					}
-					if ( m_wndView.pattern_view()->editPosition  != Global::pPlayer->_playPosition )
+					if ( m_wndView.pattern_view()->editPosition  != Global::pPlayer->_sequencePosition )
 					{
-						m_wndView.pattern_view()->editPosition=Global::pPlayer->_playPosition;
+						m_wndView.pattern_view()->editPosition=Global::pPlayer->_sequencePosition;
 						m_wndView.Repaint(draw_modes::pattern);
 					}
-					int top = Global::pPlayer->_playPosition - 0xC;
+					int top = Global::pPlayer->_sequencePosition - 0xC;
 					if (top < 0) top = 0;
 					pSeqList->SetTopIndex(top);
 				}
@@ -1713,7 +1732,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CString str;
 			if (Global::pPlayer->playing())
 			{
-				str.Format("Pos %.2X", Global::pPlayer->_playPosition); 
+				str.Format("Pos %.2X", Global::pPlayer->_sequencePosition); 
 			}
 			else
 			{
@@ -1868,7 +1887,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						if (_pSong->machine(machine))
 						{
 							oss << " - " << _pSong->machine(machine)->GetEditName();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							if (_pSong->machine(machine)->getMachineKey() == MachineKey::sampler())
 #else
 							if (_pSong->machine(machine)->_type == MACH_SAMPLER)
@@ -1877,7 +1896,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								if (_pSong->_pInstrument[toffset[1]]->_sName[0])
 									oss <<  " - " << _pSong->_pInstrument[toffset[1]]->_sName;
 							}
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							else if (_pSong->machine(machine)->getMachineKey() == MachineKey::sampulse())
 #else
 							else if (_pSong->machine(machine)->_type == MACH_XMSAMPLER)

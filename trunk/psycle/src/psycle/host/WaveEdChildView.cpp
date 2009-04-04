@@ -2,11 +2,13 @@
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 #include "WaveEdChildView.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
+#include <psycle/core/sampler.h>
 using namespace psy::core;
 #else
 #include "Song.hpp"
+#include "Sampler.hpp"
 #endif
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
@@ -357,7 +359,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bDragLoopStart = bDragLoopEnd = false;
 			SelStart=0;
 			cursorPos=0;
-			_pSong->waved.SetVolume(0.4f);
+			Sampler::waved.SetVolume(0.4f);
 			wdWave=false;
 			wsInstrument=-1;
 			prevHeadLoopS = prevBodyLoopS = prevHeadLoopE = prevBodyLoopE = 0;
@@ -446,7 +448,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else if((CSliderCtrl*)pScrollBar == volSlider)
 			{
-				_pSong->waved.SetVolume( volSlider->GetPos()/100.0f );
+				Sampler::waved.SetVolume( volSlider->GetPos()/100.0f );
 				volSlider->Invalidate(false);
 				this->SetFocus();
 			}
@@ -539,7 +541,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if ( nmcd.dwDrawStage == CDDS_PREPAINT )
 			{
-				float vol = _pSong->waved.GetVolume();
+				float vol = Sampler::waved.GetVolume();
 				CDC* pDC = CDC::FromHandle( nmcd.hdc );
 				CDC memDC;
 				memDC.CreateCompatibleDC(pDC);
@@ -1665,7 +1667,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					_pSong->_pInstrument[wsInstrument]->DeleteLayer();
 #else
 					_pSong->DeleteLayer(wsInstrument);
@@ -2448,7 +2450,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			//set volume slider
 			volSlider->SetRange(0, 100);
-			volSlider->SetPos( _pSong->waved.GetVolume() );
+			volSlider->SetPos( Sampler::waved.GetVolume() );
 			volSlider->Invalidate(false);
 		}
 

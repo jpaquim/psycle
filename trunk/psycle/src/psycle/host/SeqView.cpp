@@ -5,7 +5,7 @@
 #include "MainFrm.hpp"
 #include "PatternView.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
 using namespace psy::core;
@@ -46,7 +46,7 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* song = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
@@ -88,7 +88,7 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* song = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
@@ -129,7 +129,7 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* song = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
@@ -194,7 +194,7 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* song = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
@@ -345,7 +345,7 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* song = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
@@ -414,7 +414,7 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* song = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
@@ -486,7 +486,7 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			// todo
 			psy::core::Song* song = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
@@ -954,9 +954,9 @@ namespace psycle {
 
 			UpdateSequencer();
 			CListBox *pls=(CListBox*)GetDlgItem(IDC_SEQLIST);
-			pls->SetSel(Global::pPlayer->_playPosition,true);
+			pls->SetSel(Global::pPlayer->_sequencePosition,true);
 
-			int top = ((Global::pPlayer->playing())?Global::pPlayer->_playPosition:pat_view->editPosition) - 0xC;
+			int top = ((Global::pPlayer->playing())?Global::pPlayer->_sequencePosition:pat_view->editPosition) - 0xC;
 			if (top < 0) top = 0;
 			pls->SetTopIndex(top);
 			main_frame_->m_wndView.SetFocus();			
@@ -974,7 +974,7 @@ namespace psycle {
 			int top = cc->GetTopIndex();
 			cc->ResetContent();
 			
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
 			// Iterate the sequence entries and add them.
@@ -1045,7 +1045,7 @@ namespace psycle {
 				return;
 			PatternView* pat_view = project_->pat_view();
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* _pSong = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
@@ -1066,7 +1066,7 @@ namespace psycle {
 			sprintf(buffer,"%.2X",ll);
 			ll_l->SetWindowText(buffer);
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #else
 			/*
 			int songLength = 0;

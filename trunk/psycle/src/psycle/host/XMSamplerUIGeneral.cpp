@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
 #include "XMSamplerUIGeneral.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/xminstrument.h>
 #include <psycle/core/xmsampler.h>
 using namespace psy::core;

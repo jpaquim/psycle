@@ -3,7 +3,7 @@
 // this shouldn't be here, it is for SSkin..
 #include "machinegui.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
 
@@ -30,7 +30,7 @@ namespace psycle {
 	
 		class CMainFrame;
 		class CChildView;
-	#ifndef use_psycore
+	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Song;
 	#endif
 
@@ -165,7 +165,7 @@ namespace psycle {
 			PatternView(CChildView* parent, CMainFrame* main, Song* song);
 			~PatternView();
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		private:
 			SinglePattern* pattern();
 		public:
@@ -255,6 +255,7 @@ namespace psycle {
 
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main() { return main_; }
+			void SetSong(Song* song) { song_ = song; }
 			Song* song() { return song_; }
 
 			void LoadPatternHeaderSkin();
@@ -560,7 +561,7 @@ public:
 			case 119: TXTFLAT(devc,"B-9",x,y,srx,sry);break;
 			case notecommands::release: TXTFLAT(devc,"off",x,y,srx,sry);break;
 			case notecommands::tweak: TXTFLAT(devc,"twk",x,y,srx,sry);break;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			case notecommands::midi_cc: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
 			case notecommands::tweak_slide: TXTFLAT(devc,"tws",x,y,srx,sry);break;
 #else

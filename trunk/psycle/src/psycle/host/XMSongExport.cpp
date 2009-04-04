@@ -5,7 +5,7 @@
  */
 #include "XMSongExport.hpp"
 //#include "ProgressDialog.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 using namespace psy::core;
@@ -48,7 +48,7 @@ namespace host{
 		lastMachine++;
 
 		for (int i=0; i<lastMachine; i++) {
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if (song.machine(i) != 0 && 
 				song.machine(i)->getMachineKey() == MachineKey::sampler() ) {
 					isSampler[i] = 1;

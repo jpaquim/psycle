@@ -3,10 +3,9 @@
 #include "Global.hpp"
 
 #include "Configuration.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
-#include <psycle/core/vsthost.h>
 using namespace psy::core;
 #else
 #include "Song.hpp"
@@ -27,7 +26,9 @@ namespace psycle
 		helpers::dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
 		cpu::cycles_type Global::_cpuHz(cpu::cycles_per_second());
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		vst::AudioMaster *Global::pVstHost(0);
+#endif
 #if !defined WINAMP_PLUGIN
 		InputHandler * Global::pInputHandler(0);
 #endif //!defined WINAMP_PLUGIN
@@ -42,20 +43,18 @@ namespace psycle
 			pInputHandler = new InputHandler();
 #endif //!defined WINAMP_PLUGIN
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			pPlayer = &Player::singleton();
-			pVstHost = &vst::AudioMaster::getInstance(pPlayer);
 #else
 			_pSong = new Song();
 			pPlayer = new Player();
 			pVstHost = new vst::AudioMaster();
-#endif // use_psycore
+#endif // PSYCLE__CONFIGURATION__USE_PSYCORE
 		}
 
 		Global::~Global()
 		{
-#ifdef use_psycore
-#else
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 			delete _pSong; _pSong = 0;
 			delete pPlayer; pPlayer = 0;
 			delete pResampler; pResampler = 0;
@@ -64,7 +63,7 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 			delete pInputHandler; pInputHandler = 0;
 #endif //!defined WINAMP_PLUGIN
-#endif // use_psycore
+#endif // PSYCLE__CONFIGURATION__USE_PSYCORE
 		}
 	}
 }

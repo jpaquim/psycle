@@ -4,7 +4,7 @@
 #include "MachineView.hpp"
 #include "WireDlg.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 using namespace psy::core;
 #else
@@ -95,7 +95,7 @@ namespace psycle {
 		void WireGui::RemoveWire()
 		{
 			set_manage(false); // this causes an unparent
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			fromGUI_->mac()->Disconnect(*toGUI_->mac()) ;
 #endif
 			wire_dlg_ = 0;

@@ -6,7 +6,7 @@
  */
 
 #include "XMSamplerUIInst.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/core/xminstrument.h>
 #include <psycle/core/xmsampler.h>

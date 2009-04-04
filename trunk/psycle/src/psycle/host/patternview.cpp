@@ -1,7 +1,7 @@
 #include "patternview.hpp"
 #include "MainFrm.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
@@ -131,7 +131,7 @@ namespace psycle {
 			return checked;
 		}
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		psy::core::SinglePattern* PatternView::pattern() {
 			psy::core::PatternSequence* sequence = &song()->patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());	
@@ -221,7 +221,7 @@ namespace psycle {
 			CRect rect;	
 			updateMode=drawMode;					// this is ununsed for patterns
 			
-#ifdef use_psycore			
+#if PSYCLE__CONFIGURATION__USE_PSYCORE			
 			psy::core::PatternSequence* sequence = &song->patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());	
 			psy::core::SequenceLine::iterator sit = line->begin();
@@ -544,12 +544,12 @@ namespace psycle {
 				}
 				break;
 			case draw_modes::playback: 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #else
 				{
 					int pos = Global::pPlayer->_lineCounter;
 					if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
-						(song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_playPosition]))
+						(song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_sequencePosition]))
 					{
 						if (pos != playpos)
 						{
@@ -594,9 +594,9 @@ namespace psycle {
 #endif
 				break;
 			case draw_modes::playback_change: 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #else
-				if (song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_playPosition])
+				if (song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_sequencePosition])
 				{
 					newplaypos= Global::pPlayer->_lineCounter;
 				}
@@ -2539,7 +2539,7 @@ namespace psycle {
 			lend = std::min( std::max(lend,0), maxl);
 
 			tstart = std::min(std::max(0, tstart), maxt);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Song* song = this->song();
 			PatternSequence* sequence = &song->patternSequence();
 			SequenceLine* line = *(sequence->begin());	
@@ -3776,7 +3776,7 @@ namespace psycle {
 						// play
 						if (pMachine)
 						{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							pMachine->Tick(editcur.track,entry);
 #else
 							pMachine->Tick(editcur.track,&entry);
@@ -3800,7 +3800,7 @@ namespace psycle {
 						|| (pentry->command() != entry.command())
 						|| (pentry->parameter() != entry.parameter()) 
 						|| (pentry->instrument() != entry.instrument()) 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweak_slide)))
 #else
 						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweakeffect) && (pentry->note() != notecommands::tweakslide)))
@@ -3826,7 +3826,7 @@ namespace psycle {
 				if (pMachine)
 				{
 					// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					pMachine->Tick(editcur.track,entry);
 #else
 					pMachine->Tick(editcur.track,&entry);
@@ -3847,7 +3847,7 @@ namespace psycle {
 			entry.setCommand((value>>8)&255);
 			entry.setParameter(value&255);
 			entry.setInstrument(command);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			entry.setNote(notecommands::tweak_slide);
 #else
 			entry.setNote(notecommands::tweakslide);
@@ -3873,7 +3873,7 @@ namespace psycle {
 						if (pMachine)
 						{
 							// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							pMachine->Tick(editcur.track,entry);
 #else
 							pMachine->Tick(editcur.track,&entry);
@@ -3897,7 +3897,7 @@ namespace psycle {
 						|| (pentry->command() != entry.command())
 						|| (pentry->parameter() != entry.parameter()) 
 						|| (pentry->instrument() != entry.instrument()) 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweak_slide)))
 #else
 						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweakeffect) && (pentry->note() != notecommands::tweakslide)))
@@ -3922,7 +3922,7 @@ namespace psycle {
 				if (pMachine)
 				{
 					// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					pMachine->Tick(editcur.track,entry);
 #else
 					pMachine->Tick(editcur.track,&entry);
@@ -3965,7 +3965,7 @@ namespace psycle {
 						if (pMachine)
 						{
 							// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							pMachine->Tick(editcur.track,entry);
 #else
 							pMachine->Tick(editcur.track,&entry);
@@ -4006,7 +4006,7 @@ namespace psycle {
 				if (pMachine)
 				{
 					// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					pMachine->Tick(editcur.track,entry);
 #else
 					pMachine->Tick(editcur.track,&entry);
@@ -4023,7 +4023,7 @@ namespace psycle {
 			entry.setCommand((value&0xFF00)>>8);
 			entry.setParameter(value&0xFF);
 			entry.setInstrument(command);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			entry.setNote(notecommands::midi_cc);
 #else
 			entry.setNote(notecommands::midicc);
@@ -4049,7 +4049,7 @@ namespace psycle {
 						if (pMachine)
 						{
 							// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							pMachine->Tick(editcur.track,entry);
 #else
 							pMachine->Tick(editcur.track,&entry);
@@ -4073,7 +4073,7 @@ namespace psycle {
 						|| (pentry->command() != entry.command()) 
 						|| (pentry->parameter() != entry.parameter()) 
 						|| (pentry->instrument() != entry.instrument()) 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						|| (pentry->note() != notecommands::midi_cc))
 #else
 						|| (pentry->note() != notecommands::midicc))
@@ -4098,7 +4098,7 @@ namespace psycle {
 				if (pMachine)
 				{
 					// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					pMachine->Tick(editcur.track,entry);
 #else
 					pMachine->Tick(editcur.track,&entry);
@@ -4141,7 +4141,7 @@ namespace psycle {
 						if (pMachine)
 						{
 							// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							pMachine->Tick(editcur.track,entry);
 #else
 							pMachine->Tick(editcur.track,&entry);
@@ -4177,7 +4177,7 @@ namespace psycle {
 				if (pMachine)
 				{
 					// play
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					pMachine->Tick(editcur.track,entry);
 #else
 					pMachine->Tick(editcur.track,&entry);
@@ -4220,7 +4220,7 @@ namespace psycle {
 				PatternEvent *entry = (PatternEvent*) toffset;
 				if (entry->note() >= notecommands::release)
 				{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweak_slide)))
 #else
 					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweakeffect) && (entry->note() != notecommands::tweakslide)))
@@ -4273,7 +4273,7 @@ namespace psycle {
 				PatternEvent *entry = (PatternEvent*) toffset;
 				if (entry->note() >= notecommands::release)
 				{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweak_slide)))
 #else
 					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweakeffect) && (entry->note() != notecommands::tweakslide)))
@@ -4284,7 +4284,7 @@ namespace psycle {
 						entry->setCommand((value>>8)&255);
 						entry->setParameter(value&255);
 						entry->setInstrument(command);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						entry->setNote(notecommands::tweak_slide);
 #else
 						entry->setNote(notecommands::tweakslide);
@@ -4300,7 +4300,7 @@ namespace psycle {
 
 		void PatternView::EnterNote(int note, int velocity, bool bTranspose)
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			int currentOctave = 4;
 			if (note < 0 || note >= notecommands::invalid )
 				return;
@@ -4894,7 +4894,7 @@ namespace psycle {
 
 		bool PatternView::MSBPut(int nChar)
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 
 			int sValue = -1;
 			if	(	nChar>='0'		&&	nChar<='9')			{ sValue = nChar - '0'; }
@@ -5097,7 +5097,7 @@ namespace psycle {
 
 		void PatternView::ClearCurr() // delete content at Cursor pos.
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SinglePattern* pat = pattern();
 			double beat_zoom = project()->lines_per_beat();
 			// todo AddUndo		
@@ -5166,7 +5166,7 @@ namespace psycle {
 
 		void PatternView::DeleteCurr()
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SinglePattern* pat = pattern();
 			double beat_zoom = project()->lines_per_beat();
 
@@ -5235,7 +5235,7 @@ namespace psycle {
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Repaint(draw_modes::pattern);
 #else
 			Repaint(draw_modes::data);
@@ -5244,7 +5244,7 @@ namespace psycle {
 
 		void PatternView::InsertCurr()
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SinglePattern* pat = pattern();
 			double beat_zoom = project()->lines_per_beat();
 
@@ -5293,7 +5293,7 @@ namespace psycle {
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Repaint(draw_modes::pattern);
 #else
 			Repaint(draw_modes::data);
@@ -5321,7 +5321,7 @@ namespace psycle {
 					{
 						if ( !pMachine->_mute)	
 						{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							pMachine->Tick(i,*pEntry);
 #else
 							pMachine->Tick(i,pEntry);
@@ -5348,7 +5348,7 @@ namespace psycle {
 				{
 					if ( !pMachine->_mute)	
 					{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						pMachine->Tick(editcur.track,*pEntry);
 #else
 						pMachine->Tick(editcur.track,pEntry);
@@ -6321,7 +6321,7 @@ namespace psycle {
 				const float addvalue = float(endvalue - initvalue) / (blockSel.end.line - blockSel.start.line);
 				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 				int displace = firstrow;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweak_slide || toffset[firstrow] == notecommands::midi_cc || twktype != notecommands::empty)
 #else
 				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide || toffset[firstrow] == notecommands::midicc || twktype != notecommands::empty)
@@ -6389,10 +6389,10 @@ namespace psycle {
 		//	case cdefPlaySkipBack:
 			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 			{
-				if (Global::pPlayer->_playPosition > 0 )
+				if (Global::pPlayer->_sequencePosition > 0 )
 				{
 					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(Global::pPlayer->_playPosition-1,0);
+					Global::pPlayer->Start(Global::pPlayer->_sequencePosition-1,0);
 					Global::pPlayer->_playBlock = b;
 				}
 				else
@@ -6430,10 +6430,10 @@ namespace psycle {
 		//	case cdefPlaySkipAhead:
 			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 			{
-				if (Global::pPlayer->_playPosition < song()->playLength-1)
+				if (Global::pPlayer->_sequencePosition < song()->playLength-1)
 				{
 					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(Global::pPlayer->_playPosition+1,0);
+					Global::pPlayer->Start(Global::pPlayer->_sequencePosition+1,0);
 					Global::pPlayer->_playBlock = b;
 				}
 				else
@@ -7470,10 +7470,10 @@ namespace psycle {
 							if (Global::pPlayer->_lineCounter >= stepsize) Global::pPlayer->_lineCounter -= stepsize;
 							else
 							{
-								if (Global::pPlayer->_playPosition > 0)
+								if (Global::pPlayer->_sequencePosition > 0)
 								{
-									Global::pPlayer->_playPosition -= 1;
-									Global::pPlayer->_lineCounter = song()->patternLines[Global::pPlayer->_playPosition] - stepsize;												
+									Global::pPlayer->_sequencePosition -= 1;
+									Global::pPlayer->_lineCounter = song()->patternLines[Global::pPlayer->_sequencePosition] - stepsize;												
 								}
 								else
 								{
@@ -8529,7 +8529,7 @@ namespace psycle {
 			}
 			unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,blockSel.start.line);
 			if ( *offset_target == notecommands::tweak ) dlg.AssignInitialValues(valuearray,0);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			else if ( *offset_target == notecommands::tweak_slide ) dlg.AssignInitialValues(valuearray,1);
 			else if ( *offset_target == notecommands::midi_cc ) dlg.AssignInitialValues(valuearray,2);
 #else
@@ -8542,7 +8542,7 @@ namespace psycle {
 			{
 				int twktype(255);
 				if ( dlg.kftwk == 0 ) twktype = notecommands::tweak;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweak_slide;
 				else if ( dlg.kftwk == 2 ) twktype = notecommands::midi_cc;
 #else
@@ -8624,7 +8624,7 @@ namespace psycle {
 
 					if (pMachine)
 					{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						pMachine->Tick(i,entry);
 #else
 						pMachine->Tick(i,&entry);
@@ -8740,7 +8740,7 @@ namespace psycle {
 
 				// play
 				notetrack[outtrack]=note;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				pMachine->Tick(outtrack,entry);
 #else
 				pMachine->Tick(outtrack,&entry);

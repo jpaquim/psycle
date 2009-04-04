@@ -1,11 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CWavFileDlg.
 #include "WavFileDlg.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
+#include <psycle/core/sampler.h>
 using namespace psy::core;
 #else
 #include "Song.hpp"
+#include "Sampler.hpp"
 #endif
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -35,9 +37,9 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			CString CurrExt=GetFileExt();
 			
 			CurrExt.MakeLower();
-			_pSong->wavprev.SetInstrument(_pSong->_pInstrument[PREV_WAV_INS]);
+			Sampler::wavprev.SetInstrument(_pSong->_pInstrument[PREV_WAV_INS]);
 			
-			_pSong->wavprev.Stop();
+			Sampler::wavprev.Stop();
 		/*	if (_pSong->PW_Stage)
 			{
 				_pSong->PW_Stage=0;
@@ -52,7 +54,7 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 				if (_pSong->WavAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
 //					_pSong->PW_Play();
-					_pSong->wavprev.Play();
+					Sampler::wavprev.Play();
 					
 				}
 			}
@@ -63,7 +65,7 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 				if (_pSong->IffAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
 					//_pSong->PW_Play();
-					_pSong->wavprev.Play();
+					Sampler::wavprev.Play();
 				}
 			}
 

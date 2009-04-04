@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
 #include "configuration_options.hpp"
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
 #include "Sampler.hpp"
 #include "Song.hpp"
@@ -14,6 +14,8 @@ namespace psycle
 	namespace host
 	{
 		char* Sampler::_psName = "Sampler";
+		InstPreview Sampler::wavprev;
+		InstPreview Sampler::waved;
 
 		Sampler::Sampler(int index)
 		{
@@ -895,7 +897,22 @@ namespace psycle
 				break;
 			}
 		}
+		void Sampler::DoPreviews(float* pSamplesL, float* pSamplesR, int amount)
+		{
+#if !defined WINAMP_PLUGIN
+			//todo do better.. use a vector<InstPreview*> or something instead
+			if(wavprev.IsEnabled())
+			{
+				wavprev.Work(pSamplesL, pSamplesR, amount);
+			}
+			if(waved.IsEnabled())
+			{
+				waved.Work(pSamplesL, pSamplesR, amount);
+			}
+#endif // !defined WINAMP_PLUGIN
+		}
+
 	}
 }
 
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

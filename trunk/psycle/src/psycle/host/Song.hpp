@@ -7,10 +7,6 @@
 #include "Instrument.hpp"
 #include "XMInstrument.hpp"
 
-#if !defined WINAMP_PLUGIN
-	#include "InstPreview.hpp"
-#endif // WINAMP_PLUGIN
-
 class CCriticalSection;
 
 namespace psycle
@@ -226,22 +222,10 @@ namespace psycle
 			bool IsPatternUsed(int i);
 			//Used to check the contents of the pattern.
 			bool IsPatternEmpty(int i);
-			///\name wave file previewing
-			///\todo shouldn't belong to the song class.
-			///\{
 		public:
-			//todo these ought to be dynamically allocated
-			/// Wave preview.
-#if !defined WINAMP_PLUGIN
-			InstPreview wavprev;
-			/// Wave editor playback.
-			InstPreview waved;
-#else
+#if defined WINAMP_PLUGIN
 			int filesize;
 #endif // WINAMP_PLUGIN
-			/// runs the wave previewing.
-			void DoPreviews(int amount);
-			///\}
 
 			/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
 			/// This function now is the same as doing &pPatternData[ps]

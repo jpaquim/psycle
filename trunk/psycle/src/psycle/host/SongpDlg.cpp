@@ -3,7 +3,7 @@
 
 #include "SongpDlg.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 using namespace psy::core;
 #else
@@ -14,19 +14,11 @@ using namespace psy::core;
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#ifdef use_psycore
-		CSongpDlg::CSongpDlg(psy::core::Song *song, CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)
-		,readonlystate(false)
-		,_pSong(song)
-		{
-		}
-#else
 		CSongpDlg::CSongpDlg(Song *song, CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)
 		,readonlystate(false)
 		,_pSong(song)
 		{
 		}
-#endif
 
 		void CSongpDlg::DoDataExchange(CDataExchange* pDX)
 		{

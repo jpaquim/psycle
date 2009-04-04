@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::Filter.
 #include "configuration_options.hpp"
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
 #include "Instrument.hpp"
 #include "Global.hpp"
@@ -304,4 +304,4 @@ namespace psycle
 		}
 	}
 }
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

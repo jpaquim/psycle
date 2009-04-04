@@ -6,7 +6,7 @@
 #include "PatternView.hpp"
 #include "Configuration.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
@@ -624,7 +624,7 @@ namespace psycle
 					entry.setParameter(0);	
 
 					// play it
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					pMachine->Tick(i,entry);
 #else
 					pMachine->Tick(i,&entry);
@@ -694,7 +694,7 @@ namespace psycle
 				// if the current machine is a sampler, check 
 				// if current sample is locked to a machine.
 				// if so, switch entry._mach to that machine number
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				if (pMachine->getMachineKey() == MachineKey::sampler())
 #else
 				if (pMachine->_type == MACH_SAMPLER)
@@ -743,7 +743,11 @@ namespace psycle
 
 				// play
 				notetrack[outtrack]=note;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				pMachine->Tick(outtrack,entry);
+#else
 				pMachine->Tick(outtrack,&entry);
+#endif
 			}
 		}
 

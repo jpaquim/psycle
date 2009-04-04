@@ -3,7 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class Machine;
@@ -31,7 +31,7 @@ namespace psycle
 		/// ???
 		const int max_cmds = 1024;
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Machine;
 #endif
 		class CChildView;

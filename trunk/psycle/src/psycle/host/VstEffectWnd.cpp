@@ -4,7 +4,7 @@
 #include "VstEffectWnd.hpp"
 #include "Configuration.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/vsthost.h>
 #include <psycle/core/vstplugin.h>
 using namespace psy::core;
@@ -224,11 +224,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (!bRepeat)
 					{
 						const int outnote = cmd.GetNote();
-#ifdef use_psycore
 						if ( machine().IsGenerator() || Global::pConfig->_notesToEffects)
-#else
-						if ( machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-#endif
 						{
 							Global::pInputHandler->PlayNote(outnote,127,true,&machine());
 						}
@@ -251,11 +247,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
 			if(outnote != -1) {
-#ifdef use_psycore
-				if(machine().IsGenerator() || Global::pConfig->_notesToEffects)
-#else
 				if(machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-#endif
 					Global::pInputHandler->StopNote(outnote, true, &machine());
 				else
 					Global::pInputHandler->StopNote(outnote, true);
@@ -504,7 +496,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				std::string filefilter;
 				for (int i=0;i<ptr->nbFileTypes;i++)
 				{
-					filefilter = ptr->fileTypes[i].name; filefilter.push_back('\0');
+					filefilter += ptr->fileTypes[i].name; filefilter.push_back('\0');
 					filefilter += "*."; filefilter += ptr->fileTypes[i].dosType; filefilter.push_back('\0');
 				}
 				filefilter += "All (*.*)"; filefilter.push_back('\0');

@@ -5,7 +5,7 @@
  */
 #include "XMSongLoader.hpp"
 #include "ProgressDialog.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/machinefactory.h>
@@ -160,7 +160,7 @@ namespace host{
 			return;
 		}
 		m_pSong = &song;
-#if use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
 		song.AddMachine(m_pSampler);
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,0.35f);
@@ -363,7 +363,7 @@ namespace host{
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || defined use_psycore
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
 					e.setVolume(255);
 
 					// volume/command
@@ -722,7 +722,7 @@ namespace host{
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || defined use_psycore
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
 					if ((e.note() == notecommands::empty) && (e.command() == 00) && (e.parameter() == 00) && (e.instrument() == 255) && (e.volume() == 255))
 	#else
 					if ((e.note() == notecommands::empty) && (e.command() == 00) && (e.parameter() == 00) && (e.instrument() == 255))
@@ -1099,7 +1099,7 @@ namespace host{
 			return;
 		}
 		m_pSong = &song;
-#if use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
 		song.AddMachine(m_pSampler);
 		//song.InsertConnection(*m_pSampler,*s->machine(MASTER_INDEX),0,0,0.75f); // This is done later, when determining the number of channels.
@@ -1142,7 +1142,7 @@ namespace host{
 		else if ( !stricmp(pID,"M!K!")) { song.setTracks(4); }
 		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.setTracks(atoi(tmp)); volume= 0.5f; }
 		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.setTracks(atoi(tmp)); volume = 0.35f; }
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,volume);
 #else
 		song.InsertConnection(0,MASTER_INDEX,0,0,volume);

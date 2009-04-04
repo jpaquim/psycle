@@ -5,12 +5,7 @@
 
 /// Define to use psycle-core
 ///\todo check xml library in psycle-core
-#define use_psycore 0
-
-// correctness check: must not be defined to zero
-#if defined use_psycore && !use_psycore
-	#undef use_psycore
-#endif
+#define PSYCLE__CONFIGURATION__USE_PSYCORE 0
 
 /// JAZ: Define to 1 to enable the volume column for XMSampler.
 ///      It will also make the machine column in the pattern to show the values of the volume column instead.
@@ -24,7 +19,7 @@
 	"compiler build tool chain = " PSYCLE__COMPILER__BUILD EOL \
 	"volume column = " UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__VOLUME_COLUMN) EOL \
 	"rms vu = " UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__RMS_VUS) EOL \
-	"psycle-core = " UNIVERSALIS__COMPILER__STRINGIZED(use_psycore) EOL \
+	"psycle-core = " UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__CONFIGURATION__USE_PSYCORE) EOL \
 	"debugging = " PSYCLE__CONFIGURATION__DEBUG
 
 	/// value to show in the string describing the configuration of the build.

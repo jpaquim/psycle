@@ -55,8 +55,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{			
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					if ( cmd == cdefInfoMachine) {
-#ifdef use_psycore
-						psy::core::Song* song = &projects_->active_project()->psy_song();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+						Song* song = &projects_->active_project()->song();
+#else
+						Song* song = Global::_pSong;
+#endif
 						// maybe this should handeld in the machine view
 						if (song->seqBus < MAX_MACHINES)
 						{
@@ -68,23 +71,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								machine_view_->ShowDialog(song->machine(song->seqBus), point.x, point.y);
 							}
 						}
-
-#else
-						Song* song = &projects_->active_project()->song();
-						// maybe this should handeld in the machine view
-						if (song->seqBus < MAX_MACHINES)
-						{
-							if (song->machine(song->seqBus))
-							{
-								CPoint point;
-								point.x = song->machine(song->seqBus)->_x;
-								point.y = song->machine(song->seqBus)->_y;
-								machine_view_->ShowDialog(song->machine(song->seqBus), point.x, point.y);
-							}
-						}
-#endif
-					} else
-					pattern_view_->PerformCmd(cmd, bRepeat);
+					}
+					else 
+						pattern_view_->PerformCmd(cmd, bRepeat);
 				}
 				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
 				{

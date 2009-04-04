@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 #include "configuration_options.hpp"
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
 #include "Machine.hpp"
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
@@ -1261,4 +1261,4 @@ namespace psycle { namespace host
 			return true;
 		}
 }}
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

@@ -3,7 +3,7 @@
 
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/machinefactory.h>
@@ -256,36 +256,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pParent->AddMacViewUndo();
 			switch (DisplayMode)
 			{
+			case 1:
+				tmac+=MAX_BUSES;
+				//fallthrough
 			case 0:
 				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
 					if (Global::_pSong->machine(tmac))
 					{
 						view_->DeleteMachineGui(view_->song()->machine(tmac));
-#if use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						Global::_pSong->DeleteMachine(view_->song()->machine(tmac));
 #else
 						Global::_pSong->DestroyMachine(tmac);
-#endif
-						pParentMain->UpdateEnvInfo();
-						pParentMain->UpdateComboGen();
-						if (m_pParent->viewMode==view_modes::machine)
-						{
-							m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
-						}
-					}
-				}
-				break;
-			case 1:
-				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
-				{
-					if (Global::_pSong->machine(tmac+MAX_BUSES))
-					{
-						view_->DeleteMachineGui(view_->song()->machine(tmac+MAX_BUSES));
-#if use_psycore
-						Global::_pSong->DeleteMachine(view_->song()->machine(tmac+MAX_BUSES));
-#else
-						Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
 #endif
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
@@ -485,7 +468,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// now lets do the actual work...
 			switch (DisplayMode) // should be necessary to rename opened parameter windows.
 			{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			case 1:
 				tmac1+=MAX_BUSES;
 				if (tmac2 >= 0)

@@ -4,7 +4,7 @@
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class XMSampler;
@@ -18,7 +18,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 class XMSampler;
 #endif
 

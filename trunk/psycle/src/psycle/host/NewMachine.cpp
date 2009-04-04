@@ -4,7 +4,7 @@
 #include "NewMachine.hpp"
 #include "Configuration.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/machinehost.hpp>
 #include <psycle/core/plugincatcher.h>
@@ -31,7 +31,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		int CNewMachine::selectedGroup = Hosts::INTERNAL;
 		int CNewMachine::selectedRole = MachineRole::GENERATOR;
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		int CNewMachine::_numPlugins = -1;
 		PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
 
@@ -106,9 +106,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		CNewMachine::CNewMachine(CWnd* pParent)
 			: CDialog(CNewMachine::IDD, pParent)
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			, outputMachine(MachineKey::invalid())
 #else
+			, Outputmachine(-1)
 			, shellIdx(0)
 #endif
 		{
@@ -151,7 +152,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
 			imgList.Create(IDB_MACHINETYPE,16,2,1);
 			m_browser.SetImageList(&imgList,TVSIL_NORMAL);
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 			bAllowChanged = false;
 			LoadPluginInfo();
 #endif
@@ -164,12 +165,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnDestroy();
 			if(imgList.GetSafeHandle()) imgList.DeleteImageList();
 			m_browser.DeleteAllItems();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			treeToInfo.clear();
 #endif
 		}
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		void CNewMachine::UpdateList(bool bInit)
 		{
 			m_browser.DeleteAllItems();
@@ -229,7 +230,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			//NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 			tHand = m_browser.GetSelectedItem();
-			outputMachine = MachineKey::failednative();
+			//Do not do. OnSelchangedBrowser is called when destroying the elements, so the selection is lost
+			//outputMachine = MachineKey::failednative();
 			MachineKey key = treeToInfo[tHand];
 			if (key == MachineKey::invalid() ) {
 				return;
@@ -425,7 +427,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 			tHand = m_browser.GetSelectedItem();
-			Outputmachine = -1;
+			//Do not do. OnSelchangedBrowser is called when destroying the elements, so the selection is lost
+			//Outputmachine = -1;
 			if (tHand == hInt[0])
 			{
 				m_nameLabel.SetWindowText("Sampler");
@@ -578,7 +581,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CNewMachine::OnRefresh() 
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineFactory& factory = MachineFactory::getInstance();
 			factory.RegenerateFinderData();
 #else
@@ -592,7 +595,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CNewMachine::OnBnClickedButton1()
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineFactory& factory = MachineFactory::getInstance();
 			//\todo: should not delete the file, just find new plugs.
 			factory.RegenerateFinderData();
@@ -632,7 +635,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_browser.Invalidate();
 		}
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		void CNewMachine::OnOK() 
 		{
 			if (outputMachine != MachineKey::invalid() ) // Necessary so that you cannot doubleclick a Node

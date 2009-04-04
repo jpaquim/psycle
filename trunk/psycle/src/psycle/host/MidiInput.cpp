@@ -5,7 +5,7 @@
 #include "MidiInput.hpp"
 #include "InputHandler.hpp"
 #include "Configuration.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/core/plugin.h>
@@ -852,11 +852,7 @@ namespace psycle
 									// set?
 									if( gParameter >= 0 )
 									{
-#ifdef use_psycore
-										note = notetypes::tweak;
-#else
 										note = notecommands::tweak;
-#endif
 										cmd = gParameter;
 										parameter = data2;
 									}
@@ -1067,7 +1063,7 @@ namespace psycle
 							Machine* pMachine = Global::_pSong->machine(mgn);
 							if (pMachine)
 							{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 								PatternEvent pevent;
 								pevent.setNote(notetypes::midi_cc);
 								pevent.setMachine(pMachine->id());
@@ -1329,7 +1325,6 @@ namespace psycle
 			// OK, if we get here then there is at least one MIDI message that needs injecting
 			do
 			{
-#ifdef use_psycore
 				int note = m_midiBuffer[ m_patOut ].entry.note();
 				int machine = m_midiBuffer[ m_patOut ].entry.machine();
 				int data1 = m_midiBuffer[ m_patOut ].entry.command();
@@ -1342,6 +1337,7 @@ namespace psycle
 					// switch on note code
 					switch( note )
 					{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						// TWEAK
 						case notetypes::tweak_slide:
 							// *********
@@ -1350,23 +1346,11 @@ namespace psycle
 
 						{
 							int min, max;
-							if ( pMachine->getMachineKey().host() == Hosts::NATIVE ) {
-								// make sure parameter in range of machine
-								if( data1 > (pMachine->GetInfo().numParameters-1) )
-								{
-									break;
-								}
-
-								// get range
-								min = pMachine->GetInfo().Parameters[ data1 ]->MinValue;
-								max = pMachine->GetInfo().Parameters[ data1 ]->MaxValue;
-							}
-							else
+							if (data1 > pMachine->GetNumParams()-1)
 							{
-								// assume 0000..FFFF is the range (VST)
-								min = 0;
-								max = 0xFFFF;
+								break
 							}
+							pMachine->GetParamRange(data1,min,max);
 
 							// create actual value
 							int value = min + psycle::helpers::math::rounded( (max-min) * (data2/127.f) );
@@ -1379,18 +1363,6 @@ namespace psycle
 						}
 						break;
 #else
-				int note = m_midiBuffer[ m_patOut ].entry.note();
-				int machine = m_midiBuffer[ m_patOut ].entry.machine();
-				int data1 = m_midiBuffer[ m_patOut ].entry.command();
-				int data2 = m_midiBuffer[ m_patOut ].entry.parameter();
-				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Global::_pSong->machine( machine );
-				// make sure machine is still valid
-				if( pMachine || note == 254 )
-				{
-					// switch on note code
-					switch( note )
-					{
 						// TWEAK
 						case notecommands::tweakslide:
 							// *********
@@ -1453,8 +1425,8 @@ namespace psycle
 						// NORMAL NOTE
 						default:
 						{
-#ifdef use_psycore
-							pMachine->AddEvent(0,  m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry );
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry );
 #else
 							// normal note tick
 							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );

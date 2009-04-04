@@ -3,7 +3,7 @@
 
 #include "MachineGui.hpp" //For SMachineCoords
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class Song;
@@ -21,7 +21,7 @@ namespace psycle {
 		class CMainFrame;
 		class WireGui;
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Song;
 		class Machine;
 #endif
@@ -29,7 +29,7 @@ namespace psycle {
 		class MachineView : public PsycleCanvas::Canvas
 		{
 		public:
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineView(CChildView* parent, CMainFrame* main);
 			void SetSong(Song* song);
 #else

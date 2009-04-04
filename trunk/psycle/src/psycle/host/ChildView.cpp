@@ -6,7 +6,7 @@
 #include "MachineView.hpp"
 #include "PatternView.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 //todo: fixme. This one has to be in configuration.hpp
 #include <psycle/audiodrivers/microsoftmmewaveout.h>
 
@@ -58,11 +58,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,bmpDC(NULL)
 			,UndoMacCounter(0)
 			,UndoMacSaved(0)
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			,output_driver_(0)
 #endif
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			machine_view_ = new MachineView(this, main_frame);
 #else
 			machine_view_ = new MachineView(this, main_frame, Global::_pSong);
@@ -93,9 +93,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-#ifdef use_psycore
-			if (output_driver_)
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (output_driver_) {
 				output_driver_->Enable(false);
+				delete output_driver_;
+			}
 #endif
 			delete machine_view_;
 			delete pattern_view_;
@@ -271,7 +273,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// It is causing skips on sound when there is a pattern change because
 				// it is not allowing the player to work. Do the same in the one inside Player::Work()
 				CSingleLock lock(&_pSong->door,TRUE);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				psy::core::Song* song = &projects_->active_project()->psy_song();
 				if (song->machine(MASTER_INDEX))
 				{
@@ -327,7 +329,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					if (_pSong->machine(c))
 					{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						if(_pSong->machine(c)->getMachineKey().host() == Hosts::VST) {
 							((vst::plugin*)_pSong->machine(c))->Idle();
 						}
@@ -362,15 +364,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						{
 							CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
 							pattern_view()->editcur.line=Global::pPlayer->_lineCounter;
-							if (pattern_view()->editPosition != Global::pPlayer->_playPosition)
-							//if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
+							if (pattern_view()->editPosition != Global::pPlayer->_sequencePosition)
+							//if (pSeqList->GetCurSel() != Global::pPlayer->_sequencePosition)
 							{
 								pSeqList->SelItemRange(false,0,pSeqList->GetCount());
-								pSeqList->SetSel(Global::pPlayer->_playPosition,true);
-								int top = Global::pPlayer->_playPosition - 0xC;
+								pSeqList->SetSel(Global::pPlayer->_sequencePosition,true);
+								int top = Global::pPlayer->_sequencePosition - 0xC;
 								if (top < 0) top = 0;
 								pSeqList->SetTopIndex(top);
-								pattern_view()->editPosition=Global::pPlayer->_playPosition;
+								pattern_view()->editPosition=Global::pPlayer->_sequencePosition;
 								if ( viewMode == view_modes::pattern ) 
 								{ 
 									Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
@@ -401,7 +403,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::EnableSound()
 		{
-#ifdef use_psycore						
+#if PSYCLE__CONFIGURATION__USE_PSYCORE						
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.song(projects_->active_project()->psy_song());
 			output_driver_ = new psy::core::MsWaveOut();
@@ -447,7 +449,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.driver().Enable(false);
 #else
@@ -562,7 +564,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			machine_view_->OnSize(cx, cy);
 			CW = cx;
 			CH = cy;
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
 			_pSong->viewSize.y=cy;
 #endif
@@ -741,11 +743,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if
 					(
 						Global::pConfig->_followSong &&
-						pattern_view()->editPosition  != Global::pPlayer->_playPosition &&
+						pattern_view()->editPosition  != Global::pPlayer->_sequencePosition &&
 						Global::pPlayer->playing()
 					)
 				{
-					pattern_view()->editPosition=Global::pPlayer->_playPosition;
+					pattern_view()->editPosition=Global::pPlayer->_sequencePosition;
 				}
 				Repaint();
 				pParentMain->StatusBarIdle();
@@ -789,7 +791,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pattern_view()->bScrollDetatch=false;
 			}
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.start(0); // todo
 #else			
@@ -800,7 +802,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnBarplayFromStart() 
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.start(0);
 #else
@@ -872,7 +874,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnBarstop()
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.stop();
 #else
@@ -951,7 +953,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnFileSongproperties() 
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CSongpDlg dlg(&projects_->active_project()->psy_song());
 #else
 			CSongpDlg dlg(Global::_pSong);

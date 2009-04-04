@@ -3,7 +3,7 @@
 
 #include "NativeGui.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 using namespace psy::core;
 #else
@@ -130,20 +130,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			return true;
 		}
 
-		void CNativeGui::SelectMachine(Machine* pMachine)
-		{
-			_pMachine = pMachine;
-			numParameters = _pMachine->GetNumParams();
-			ncol = _pMachine->GetNumCols();
-			if ( ncol == 0 )
-			{
-				ncol = 1;
-				while ( (numParameters/ncol)*uiSetting().dialheight > ncol*W_ROWWIDTH ) ncol++;
-			}
-			parspercol = numParameters/ncol;
-			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
-		}
-
 		int CNativeGui::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 		{
 			if (CWnd::OnCreate(lpCreateStruct) == -1)
@@ -173,6 +159,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 //			GetParent()->OnSetFocus(pOldWnd);
 			WindowIdle();
 		}
+
+		void CNativeGui::SelectMachine(Machine* pMachine)
+		{
+			_pMachine = pMachine;
+			numParameters = _pMachine->GetNumParams();
+			ncol = _pMachine->GetNumCols();
+			if ( ncol == 0 )
+			{
+				ncol = 1;
+				while ( (numParameters/ncol)*uiSetting().dialheight > ncol*W_ROWWIDTH ) ncol++;
+			}
+			parspercol = numParameters/ncol;
+			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
+		}
+
 
 
 		///////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 #include "ITModule2.h"
 #include "Configuration.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/song.h>
 #include <psycle/core/xmsampler.h>
@@ -120,7 +120,7 @@ namespace psycle
 			imported.append(szName);
 			s->setComment(imported);
 
-#if use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
@@ -896,7 +896,7 @@ Special:  Bit 0: On = song message attached.
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || defined use_psycore
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
 						if ( tmp<=64)
 						{
 							pent.setVolume(tmp<64?tmp:63);
@@ -1158,7 +1158,7 @@ Special:  Bit 0: On = song message attached.
 			imported.append(szName);
 			s->setComment(imported);
 
-#if use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(s3mFileH.mVol&0x7F)/128.0f);
@@ -1499,7 +1499,7 @@ OFFSET              Count TYPE   Description
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || defined use_psycore
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
 						if ( tmp<=64)
 						{
 							pent.setMachine(0);
