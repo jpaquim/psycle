@@ -48,7 +48,7 @@ namespace psycle {
 			PatternView* pat_view = project_->pat_view();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Song* song = &project_->psy_song();
-			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
+			psy::core::PatternSequence* sequence = &song->patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
 			int len = line->size(); // Length, in patterns, of the sequence.
 			pat_view->AddUndoSequence(len,
@@ -1049,7 +1049,7 @@ namespace psycle {
 			psy::core::Song* _pSong = &project_->psy_song();
 			psy::core::PatternSequence* sequence = &project_->psy_song().patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());
-			int ll = line->tickLength();
+			int ll = line->size();
 #else
 			Song* _pSong = &project_->song();
 			int ll = _pSong->playLength;
@@ -1067,6 +1067,9 @@ namespace psycle {
 			ll_l->SetWindowText(buffer);
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			sprintf(buffer, "%.02f beats", line->tickLength());
+			pLength->SetWindowText(buffer);
+
 #else
 			/*
 			int songLength = 0;

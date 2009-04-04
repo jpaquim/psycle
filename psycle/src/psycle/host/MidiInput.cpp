@@ -1348,7 +1348,7 @@ namespace psycle
 							int min, max;
 							if (data1 > pMachine->GetNumParams()-1)
 							{
-								break
+								break;
 							}
 							pMachine->GetParamRange(data1,min,max);
 

@@ -31,8 +31,8 @@ namespace psycle
 
 		void Instrument::Delete()
 		{
-			_lock_instrument_to_machine = -1;
-			_LOCKINST = false;
+			_locked_machine_index = -1;
+			_locked_to_machine = false;
 
 			// Reset envelope
 			ENV_AT = 1; // 16
@@ -207,8 +207,8 @@ namespace psycle
 
 				if ((version & 0xFF) >= 1) 
 				{ //revision 1 or greater
-					pFile->Read(&_lock_instrument_to_machine,sizeof(_lock_instrument_to_machine));
-					pFile->Read(&_LOCKINST,sizeof(_LOCKINST));
+					pFile->Read(&_locked_machine_index,sizeof(_locked_machine_index));
+					pFile->Read(&_locked_to_machine,sizeof(_locked_to_machine));
 				}
 			}
 		}
@@ -298,8 +298,8 @@ namespace psycle
 				}
 				zapArray(pData2);
 
-				pFile->Write(&_lock_instrument_to_machine,sizeof(_lock_instrument_to_machine));
-				pFile->Write(&_LOCKINST,sizeof(_LOCKINST));
+				pFile->Write(&_locked_machine_index,sizeof(_locked_machine_index));
+				pFile->Write(&_locked_to_machine,sizeof(_locked_to_machine));
 			}
 		}
 	}

@@ -205,7 +205,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			///\todo lock/unlock
 			Sleep(256);
 			_global.pConfig->_pMidiInput->Close();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			MachineFactory & factory(MachineFactory::getInstance());
+			factory.Finalize();
+#else
 			CNewMachine::DestroyPluginInfo();
+#endif
 			return CWinApp::ExitInstance();
 		}
 

@@ -115,17 +115,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			char buffer2[64];
 
-			if (_pSong->_pInstrument[si]->_lock_instrument_to_machine < 0)
+			if (_pSong->_pInstrument[si]->_locked_machine_index < 0)
 			{
 				m_lockinstnumber.SetWindowText("");
 			}
 			else
 			{
-				sprintf(buffer2, "%.2X", _pSong->_pInstrument[si]->_lock_instrument_to_machine);
+				sprintf(buffer2, "%.2X", _pSong->_pInstrument[si]->_locked_machine_index);
 				m_lockinstnumber.SetWindowText(buffer2);
 			}
 
-			if (_pSong->_pInstrument[si]->_LOCKINST)
+			if (_pSong->_pInstrument[si]->_locked_to_machine)
 			{
 				m_lockinst.SetCheck(BST_CHECKED);
 				m_lockinstnumber.EnableWindow(true);
@@ -240,7 +240,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if (buffer[0] == '\0')
 			{
-				_pSong->_pInstrument[si]->_lock_instrument_to_machine = -1;
+				_pSong->_pInstrument[si]->_locked_machine_index = -1;
 			}
 			else
 			{
@@ -249,7 +249,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					instNum = MAX_INSTRUMENTS;
 				else if (instNum < 0)
 					instNum = 0;
-				_pSong->_pInstrument[si]->_lock_instrument_to_machine = instNum;		
+				_pSong->_pInstrument[si]->_locked_machine_index = instNum;		
 			}
 		}
 
@@ -326,14 +326,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int si = _pSong->instSelected();
 			if (m_lockinst.GetCheck())
 			{
-				_pSong->_pInstrument[si]->_LOCKINST = true;				
+				_pSong->_pInstrument[si]->_locked_to_machine = true;				
 			}
 			else
 			{
-				_pSong->_pInstrument[si]->_LOCKINST = false;				
+				_pSong->_pInstrument[si]->_locked_to_machine = false;				
 			}
 
-			if (_pSong->_pInstrument[si]->_LOCKINST)
+			if (_pSong->_pInstrument[si]->_locked_to_machine)
 			{
 				m_lockinstnumber.EnableWindow(true);
 			}

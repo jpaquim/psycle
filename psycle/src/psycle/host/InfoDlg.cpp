@@ -86,8 +86,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				float machsCPU=0;
 				float wiresCPU=0;
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo
+				unsigned tempSampCount = 1;
+#else
 				unsigned tempSampCount = _pSong->_sampCount;
 				if( !tempSampCount ) tempSampCount=1;
+#endif
 				
 				int n=0;
 				for (int c=0; c<MAX_MACHINES; c++)
@@ -117,7 +122,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//				float masterCPU=0;
 		//				machCPU = (float)tmac->_cpuCost*0.1f;
 		//				machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * 100;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+						//todo
+#else
 						machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+#endif
 		/*				if (!c)
 						{
 							masterCPU = machCPU;
@@ -127,7 +136,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						n++;
 						machsCPU += machCPU;
 		//				wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz)*100;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+						//todo
+#else
 						wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
+#endif
 					}
 				}
 				if (itemcount != n)

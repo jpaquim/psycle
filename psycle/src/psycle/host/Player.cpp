@@ -436,7 +436,7 @@ namespace psycle
 				// Don't loop the recording
 				if(_recording)
 				{
-					StopRecording();
+					stopRecording();
 				}
 				if( _loopSong )
 				{
@@ -541,25 +541,25 @@ namespace psycle
 							case 0: // mono mix
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(((*pL++)+(*pR++))/2)) pThis->StopRecording(false);
+									if (!pThis->ClipboardWriteMono(((*pL++)+(*pR++))/2)) pThis->stopRecording(false);
 								}
 								break;
 							case 1: // mono L
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(*pL++)) pThis->StopRecording(false);
+									if (!pThis->ClipboardWriteMono(*pL++)) pThis->stopRecording(false);
 								}
 								break;
 							case 2: // mono R
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(*pR++)) pThis->StopRecording(false);
+									if (!pThis->ClipboardWriteMono(*pR++)) pThis->stopRecording(false);
 								}
 								break;
 							default: // stereo
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteStereo(*pL++,*pR++)) pThis->StopRecording(false);
+									if (!pThis->ClipboardWriteStereo(*pL++,*pR++)) pThis->stopRecording(false);
 								}
 								break;
 							}						}
@@ -569,25 +569,25 @@ namespace psycle
 							for(i=0; i<amount; i++)
 							{
 								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-								if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->StopRecording(false);
+								if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->stopRecording(false);
 							}
 							break;
 						case 1: // mono L
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) pThis->StopRecording(false);
+								if(pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) pThis->stopRecording(false);
 							}
 							break;
 						case 2: // mono R
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
+								if(pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) pThis->stopRecording(false);
 							}
 							break;
 						default: // stereo
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
+								if(pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) pThis->stopRecording(false);
 							}
 							break;
 						}
@@ -715,7 +715,7 @@ namespace psycle
 					else
 					{
 						_recording = true;
-						StopRecording(false);
+						stopRecording(false);
 					}
 				}
 				else
@@ -731,14 +731,14 @@ namespace psycle
 					}
 					else {
 						_recording = true;
-						StopRecording(false);
+						stopRecording(false);
 					}
 				}
 			}
 #endif //!defined WINAMP_PLUGIN
 		}
 
-		void Player::StopRecording(bool bOk)
+		void Player::stopRecording(bool bOk)
 		{
 #if !defined WINAMP_PLUGIN
 			if(_recording)

@@ -4441,10 +4441,10 @@ namespace psycle {
 					{
 						if (((Machine*)song()->machine(song()->seqBus))->_type == MACH_SAMPLER)
 						{
-							if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
-								&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
+							if ((song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index != -1)
+								&& (song()->_pInstrument[song()->auxcolSelected]->_locked_to_machine == true))
 							{
-								entry.machine() = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
+								entry.machine() = song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index;
 								tmac = song()->machine(entry.machine());
 								if (!tmac) return;
 							}
@@ -4522,10 +4522,10 @@ namespace psycle {
 					// if so, switch entry.machine() to that machine number
 					if (((Machine*)song()->machine(song()->seqBus))->_type == MACH_SAMPLER)
 					{
-						if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
-							&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
+						if ((song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index != -1)
+							&& (song()->_pInstrument[song()->auxcolSelected]->_locked_to_machine == true))
 						{
-							entry->setMachine(song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine);
+							entry->setMachine(song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index);
 						}
 					}
 			}
@@ -4695,10 +4695,10 @@ namespace psycle {
 					{
 						if (((Machine*)song()->machine(song()->seqBus))->_type == MACH_SAMPLER)
 						{
-							if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
-								&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
+							if ((song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index != -1)
+								&& (song()->_pInstrument[song()->auxcolSelected]->_locked_to_machine == true))
 							{
-								entry.setMachine(song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine);
+								entry.setMachine(song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index);
 								tmac = song()->machine(entry.machine());
 								if (!tmac) return;
 							}
@@ -4776,10 +4776,10 @@ namespace psycle {
 					// if so, switch entry.machine() to that machine number
 					if (((Machine*)song()->machine(song()->seqBus))->_type == MACH_SAMPLER)
 					{
-						if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
-							&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
+						if ((song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index != -1)
+							&& (song()->_pInstrument[song()->auxcolSelected]->_locked_to_machine == true))
 						{
-							entry->setMachine(song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine);
+							entry->setMachine(song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index);
 						}
 					}
 			}
@@ -8697,10 +8697,10 @@ namespace psycle {
 				// if so, switch entry.machine() to that machine number
 				if (pMachine->_type == MACH_SAMPLER)
 				{
-					if ((song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine != -1)
-						&& (song()->_pInstrument[song()->auxcolSelected]->_LOCKINST == true))
+					if ((song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index != -1)
+						&& (song()->_pInstrument[song()->auxcolSelected]->_locked_to_machine == true))
 					{
-						entry.machine() = song()->_pInstrument[song()->auxcolSelected]->_lock_instrument_to_machine;
+						entry.machine() = song()->_pInstrument[song()->auxcolSelected]->_locked_machine_index;
 						pMachine = song()->machine(entry.machine());
 						if ( !pMachine) return;
 					}

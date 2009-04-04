@@ -386,7 +386,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 			}
-			if (nIDEvent == 159 && !Global::pPlayer->_recording)
+			if (nIDEvent == 159 && !Global::pPlayer->recording())
 			{
 				//MessageBox("Saving Disabled");
 				//return;
@@ -860,7 +860,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			if(!Global::pPlayer->playing())
 				Global::pPlayer->Start(i,0);
-
 			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
 
 			pParentMain->StatusBarIdle();
@@ -904,7 +903,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnRecordWav() 
 		{
-			if (!Global::pPlayer->_recording)
+			if (!Global::pPlayer->recording())
 			{
 				static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 				
@@ -920,13 +919,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				Global::pPlayer->StopRecording();
+				Global::pPlayer->stopRecording();
 			}
 		}
 
 		void CChildView::OnUpdateRecordWav(CCmdUI* pCmdUI) 
 		{
-			pCmdUI->SetCheck(Global::pPlayer->_recording);
+			pCmdUI->SetCheck(Global::pPlayer->recording());
 		}
 
 		void CChildView::OnAutostop() 

@@ -136,7 +136,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			int index = m_driverComboBox.GetCurSel();
 			m_ppDrivers[index]->Configure();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			///\todo Implement audio drivers
+			//Global::pPlayer->samples_per_second()
+#else
 			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+#endif
 		}
 
 	PSYCLE__MFC__NAMESPACE__END
