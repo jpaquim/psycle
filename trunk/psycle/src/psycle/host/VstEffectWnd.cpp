@@ -247,7 +247,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
 			if(outnote != -1) {
-				if(machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+				if(machine().IsGenerator() || Global::pConfig->_notesToEffects)
 					Global::pInputHandler->StopNote(outnote, true, &machine());
 				else
 					Global::pInputHandler->StopNote(outnote, true);
@@ -484,14 +484,31 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				return false;
 
 			char fileName[_MAX_PATH];
+			fileName[0]='\0';
 			char *filePath;
 
 			if	((ptr->command == kVstFileLoad) 
 				||	(ptr->command == kVstFileSave)
 				||	(ptr->command == kVstMultipleFilesLoad))
 			{
-				OPENFILENAME ofn = {0}; // common dialog box structure
+				OPENFILENAME ofn; // common dialog box structure
+				// Initialize OPENFILENAME
+				ZeroMemory(&ofn, sizeof(OPENFILENAME));
 				ofn.lStructSize = sizeof(OPENFILENAME);
+				ofn.hwndOwner = GetSafeHwnd();
+				ofn.lpstrTitle = ptr->title;
+				ofn.lpstrFileTitle = fileName;
+				ofn.nMaxFileTitle = sizeof (fileName) - 1;
+				if (ptr->command == kVstMultipleFilesLoad) {
+					filePath = new char[_MAX_PATH * 100];
+					ofn.lpstrFile = filePath;
+					ofn.nMaxFile = _MAX_PATH * 100 - 1;
+				} else {
+					filePath = new char[_MAX_PATH];
+					ofn.lpstrFile = filePath;
+					ofn.nMaxFile = _MAX_PATH * 100 - 1;
+				}
+				filePath[0] = '\0';
 
 				std::string filefilter;
 				for (int i=0;i<ptr->nbFileTypes;i++)
@@ -502,39 +519,31 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				filefilter += "All (*.*)"; filefilter.push_back('\0');
 				filefilter += "*.*"; filefilter.push_back('\0');
 
-				if (ptr->command == kVstMultipleFilesLoad)
-					filePath = new char [_MAX_PATH * 100];
-				else
-					filePath = new char[_MAX_PATH];
-
-				filePath[0] = 0;
-				// Initialize OPENFILENAME
-				ofn.hwndOwner = GetSafeHwnd();
-
-				ofn.lpstrFile = filePath;
-				ofn.nMaxFile    = sizeof (filePath) - 1;
 				ofn.lpstrFilter =filefilter.c_str();
-				ofn.nFilterIndex = 1;
-				ofn.lpstrTitle = ptr->title;
-				ofn.lpstrFileTitle = fileName;
-				ofn.nMaxFileTitle = sizeof(fileName) - 1;
-				if ( ptr->initialPath != 0)
-					ofn.lpstrInitialDir = ptr->initialPath;
-				else
-					ofn.lpstrInitialDir =  (char*)machine().OnGetDirectory();
-				if (ptr->nbFileTypes >= 1)
+				if (ptr->nbFileTypes >= 1) {
 					ofn.lpstrDefExt = ptr->fileTypes[0].dosType;
-				if (ptr->command == kVstFileSave)
+				}
+				ofn.nFilterIndex = 1;
+				if ( ptr->initialPath != 0) {
+					ofn.lpstrInitialDir = ptr->initialPath;
+				} else {
+					ofn.lpstrInitialDir =  (char*)machine().OnGetDirectory();
+				}
+				if (ptr->command == kVstFileSave) {
 					ofn.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_EXPLORER | OFN_ENABLESIZING;
-				else
+				} else if (ptr->command == kVstMultipleFilesLoad) {
+					ofn.Flags = OFN_ALLOWMULTISELECT | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_EXPLORER | OFN_ENABLESIZING;
+				} else {
 					ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_EXPLORER | OFN_ENABLESIZING;
-
-				// Display the Open dialog box. 
-				if(::GetOpenFileName(&ofn)==TRUE)
+				}
+				// Display the Open dialog box.
+				int asdf = ::GetOpenFileName(&ofn);
+				if(asdf==TRUE)
 				{
 					if (ptr->command == kVstMultipleFilesLoad)
 					{
 						char string[_MAX_PATH], directory[_MAX_PATH];
+						string[0] = '\0'; directory[0] = '\0';
 						char *previous = ofn.lpstrFile;
 						long len;
 						bool dirFound = false;
@@ -573,11 +582,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						ptr->nbReturnPath = i;
 						delete filePath;
 					}
-					else if ( ptr->returnPath == 0 )
+					else if ( ptr->returnPath == NULL || ptr->sizeReturnPath == 0)
 					{
 						ptr->reserved = 1;
 						ptr->returnPath = filePath;
-						ptr->sizeReturnPath = sizeof(filePath);
+						ptr->sizeReturnPath = strlen(filePath);
 						ptr->nbReturnPath = 1;
 					}
 					else 
@@ -597,6 +606,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				//
 				if (::SHGetMalloc(&pMalloc) == NOERROR)
 				{
+					char someString[_MAX_PATH];
 					BROWSEINFO bi;
 					LPITEMIDLIST pidl;
 					if ( ptr->returnPath == 0)
@@ -611,10 +621,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					bi.hwndOwner = GetSafeHwnd();
 
 					bi.pidlRoot = NULL;
-					bi.pszDisplayName = ptr->returnPath;
+					bi.pszDisplayName = someString;
 					bi.lpszTitle = ptr->title;
-					bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
-					bi.lpfn = NULL;
+					bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
+					bi.lpfn = NULL; //&CVstEffectWnd::BrowseCallbackProc;
 					bi.lParam = 0;
 					// This next call issues the dialog box.
 					//
@@ -622,7 +632,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						if (::SHGetPathFromIDList(pidl, ptr->returnPath))
 						{
-							return true;
+							ptr->nbReturnPath=1;
 						}
 						// Free the PIDL allocated by SHBrowseForFolder.
 						//
@@ -634,8 +644,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pMalloc->Release();
 				}
 			}
-			return false;
+			return ptr->returnPath>0;
 		}
+
 		/*****************************************************************************/
 		/* OnCloseFileSelector : called when effect needs a file selector            */
 		/*																			 */
