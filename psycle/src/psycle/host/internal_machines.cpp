@@ -1,5 +1,5 @@
 #include "configuration_options.hpp"
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "internal_machines.hpp"
 #include "Configuration.hpp"
 #include "Song.hpp"
@@ -1510,4 +1510,4 @@ namespace psycle
 		}
 	}
 }
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::vst::plugin
 #include "configuration_options.hpp"
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "VstHost24.hpp"
 #include "Global.hpp"
 #include "Psycle.hpp"
@@ -1079,4 +1079,4 @@ namespace psycle
 		}
 	}
 }
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

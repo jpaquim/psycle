@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CWireDlg.
 
 #include "WireDlg.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
 using namespace psy::core;
@@ -125,7 +125,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetMode();
 			pos = 1;
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			mult = 3268.0f / _pSrcMachine->GetAudioRange();
 #else
 			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
@@ -227,7 +227,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWireDlg::OnButton1() 
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			//Nothing to do. done in wire_gui->RemoveWire()
 #else
 			m_pParent->AddMacViewUndo();
@@ -298,7 +298,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWireDlg::OnTimer(UINT nIDEvent) 
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			//todo
 #else
 			if ( nIDEvent == 2304+this_index )

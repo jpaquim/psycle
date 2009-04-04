@@ -1,6 +1,6 @@
 #pragma once
 #include "Psycle.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/xminstrument.h>
 namespace psy {
 	namespace core {
@@ -17,7 +17,7 @@ using namespace psy::core;
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 class XMSampler;
 #endif
 

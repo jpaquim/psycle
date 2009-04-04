@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Psycle.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class Machine;

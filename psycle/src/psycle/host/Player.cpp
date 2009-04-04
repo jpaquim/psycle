@@ -2,10 +2,11 @@
 ///\brief implementation file for psycle::host::Player.
 #include "configuration_options.hpp"
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "Player.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
+#include "Sampler.hpp"
 #include "Configuration.hpp"
 
 #if !defined WINAMP_PLUGIN
@@ -67,8 +68,8 @@ namespace psycle
 			_lineChanged = true;
 			_lineCounter = line;
 			_SPRChanged = false;
-			_playPosition= pos;
-			_playPattern = Global::_pSong->playOrder[_playPosition];
+			_sequencePosition= pos;
+			_playPattern = Global::_pSong->playOrder[_sequencePosition];
 			if (initialize)
 			{
 				_playTime = 0;
@@ -238,7 +239,7 @@ namespace psycle
 					case PatternCmd::BREAK_TO_LINE:
 						if (_patternjump ==-1) 
 						{
-							_patternjump=(_playPosition+1>=pSong->playLength)?0:_playPosition+1;
+							_patternjump=(_sequencePosition+1>=pSong->playLength)?0:_sequencePosition+1;
 						}
 						if ( pEntry->parameter() >= pSong->patternLines[_patternjump])
 						{
@@ -408,7 +409,7 @@ namespace psycle
 		void Player::AdvancePosition()
 		{
 			Song* pSong = Global::_pSong;
-			if ( _patternjump!=-1 ) _playPosition= _patternjump;
+			if ( _patternjump!=-1 ) _sequencePosition= _patternjump;
 			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = true; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
 			else _lineCounter++;
@@ -422,15 +423,15 @@ namespace psycle
 			{
 				_lineCounter = 0;
 				if(!_playBlock)
-					_playPosition++;
+					_sequencePosition++;
 				else
 				{
-					_playPosition++;
-					while(_playPosition< pSong->playLength && (!pSong->playOrderSel[_playPosition]))
-						_playPosition++;
+					_sequencePosition++;
+					while(_sequencePosition< pSong->playLength && (!pSong->playOrderSel[_sequencePosition]))
+						_sequencePosition++;
 				}
 			}
-			if( _playPosition >= pSong->playLength)
+			if( _sequencePosition >= pSong->playLength)
 			{	
 				// Don't loop the recording
 				if(_recording)
@@ -439,10 +440,10 @@ namespace psycle
 				}
 				if( _loopSong )
 				{
-					_playPosition = 0;
-					if(( _playBlock) && (pSong->playOrderSel[_playPosition] == false))
+					_sequencePosition = 0;
+					if(( _playBlock) && (pSong->playOrderSel[_sequencePosition] == false))
 					{
-						while((!pSong->playOrderSel[_playPosition]) && ( _playPosition< pSong->playLength)) _playPosition++;
+						while((!pSong->playOrderSel[_sequencePosition]) && ( _sequencePosition< pSong->playLength)) _sequencePosition++;
 					}
 				}
 				else 
@@ -452,7 +453,7 @@ namespace psycle
 				}
 			}
 			// this is outside the if, so that _patternjump works
-			_playPattern = pSong->playOrder[_playPosition];
+			_playPattern = pSong->playOrder[_sequencePosition];
 			_lineChanged = true;
 		}
 
@@ -509,8 +510,7 @@ namespace psycle
 						if(pSong->machine(c)) pSong->machine(c)->PreWork(amount);
 					}
 
-					//\todo: Sampler::DoPreviews( amount );
-					pSong->DoPreviews( amount );
+					Sampler::DoPreviews( pSong->machine(MASTER_INDEX)->_pSamplesL, pSong->machine(MASTER_INDEX)->_pSamplesR, amount );
 
 					CVSTHost::vstTimeInfo.samplePos = ((Master *) (pSong->machine(MASTER_INDEX)))->sampleCount;
 
@@ -760,4 +760,4 @@ namespace psycle
 		}
 	}
 }
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

@@ -3,7 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class AudioDriver;
@@ -174,7 +174,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::AudioDriver* output_driver_;
 #endif
 

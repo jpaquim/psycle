@@ -1,11 +1,16 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
+
+///\todo The use of song class could be removed. It only needs to have the current selected sample
+// and in psycore, the InstPreview has been moved to the Sampler class.
 #include "WaveEdFrame.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
+#include <psycle/core/sampler.h>
 using namespace psy::core;
 #else
 #include "Song.hpp"
+#include "Sampler.hpp"
 #endif
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
@@ -141,17 +146,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdFrame::OnUpdatePlayButtons(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(!_pSong->waved.IsEnabled());
+			pCmdUI->Enable(!Sampler::waved.IsEnabled());
 		}
 
 		void CWaveEdFrame::OnUpdateStopButton(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(_pSong->waved.IsEnabled());
+			pCmdUI->Enable(Sampler::waved.IsEnabled());
 		}
 
 		void CWaveEdFrame::OnUpdateReleaseButton(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(_pSong->waved.IsEnabled() && _pSong->waved.IsLooping());
+			pCmdUI->Enable(Sampler::waved.IsEnabled() && Sampler::waved.IsLooping());
 		}
 
 		void CWaveEdFrame::OnUpdateSelection(CCmdUI *pCmdUI)
@@ -206,11 +211,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CWaveEdFrame::OnPlayFromStart() {PlayFrom(0);}
 		void CWaveEdFrame::OnRelease()
 		{
-			_pSong->waved.Release();
+			Sampler::waved.Release();
 		}
 		void CWaveEdFrame::OnStop()
 		{
-			_pSong->waved.Stop();
+			Sampler::waved.Stop();
 		}
 
 		void CWaveEdFrame::PlayFrom(unsigned long startPos)
@@ -220,8 +225,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			OnStop();
 
-			_pSong->waved.SetInstrument( _pSong->_pInstrument[wsInstrument] );
-			_pSong->waved.Play(startPos);
+			Sampler::waved.SetInstrument( _pSong->_pInstrument[wsInstrument] );
+			Sampler::waved.Play(startPos);
 		}
 		void CWaveEdFrame::OnUpdateFFandRWButtons(CCmdUI* pCmdUI)
 		{

@@ -4,7 +4,7 @@
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
 using namespace psy::core;

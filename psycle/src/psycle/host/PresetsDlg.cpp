@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CPresetsDlg.
 
 #include "PresetsDlg.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/plugin.h>
 #include <psycle/core/file.h>
 #include <psycle/core/vsthost.h>
@@ -192,7 +192,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			numParameters = _pMachine->GetNumParams();
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if( _pMachine->getMachineKey().host() == Hosts::NATIVE)
 #else
 			if( _pMachine->_type == MACH_PLUGIN)
@@ -240,13 +240,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						// o_O`
 					}
 				}
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				buffer = _pMachine->GetDllName().c_str();
 #else
 				buffer = _pMachine->GetDllName();
 #endif
 			}
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			else if( _pMachine->getMachineKey().host() == Hosts::VST)
 #else
 			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
@@ -270,7 +270,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 					++i;
 				}
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				buffer = _pMachine->GetDllName().c_str();
 #else
 				buffer = _pMachine->GetDllName();
@@ -334,7 +334,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CPresetsDlg::OnImport() 
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if( _pMachine->getMachineKey().host() == Hosts::VST) return;
 #else
 			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
@@ -350,7 +350,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof szFile;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if( _pMachine->getMachineKey().host() == Hosts::VST)
 #else
 			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
@@ -551,7 +551,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE)
 #else
 			if ( _pMachine->_type == MACH_PLUGIN )
@@ -907,7 +907,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					// o_O`
 				}
 			}
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if(preset.GetData() && _pMachine->getMachineKey().host() == Hosts::NATIVE)
 #else
 			if(preset.GetData() && _pMachine->_type == MACH_PLUGIN)

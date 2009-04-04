@@ -2,7 +2,7 @@
 #include "FrameMixerMachine.hpp"
 #include "Configuration.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/mixer.h>
 using namespace psy::core;
@@ -301,13 +301,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	}
 	void CFrameMixerMachine::SelectMachine(Machine* pMachine)
 	{
-#ifdef use_psycore
-		// todo
-#else
 		_pMixer=(Mixer*)(_pMachine = pMachine);
 		numParameters = _pMixer->GetNumParams();
 		UpdateSendsandChans();
-#endif
 	}
 	void CFrameMixerMachine::Generate(double x, double y) {
 

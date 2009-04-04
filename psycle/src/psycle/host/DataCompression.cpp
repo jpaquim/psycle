@@ -10,10 +10,11 @@
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
 
-//Psycore includes psycle-helpers for now.
-#ifndef use_psycore
 
 #include "DataCompression.hpp"
+
+//Psycore includes psycle-helpers for now.
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <cstring>
 namespace psycle
 {

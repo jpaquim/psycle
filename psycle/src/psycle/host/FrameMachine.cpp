@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CFrameMachine.
 
 #include "FrameMachine.hpp"
-
-#ifdef use_psycore
+///\todo Replace the drawing code with NativeGui
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 #include <psycle/core/plugin.h>
 #include <psycle/core/song.h>
@@ -211,7 +211,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ncol = _pMachine->GetNumCols();
 			parspercol = numParameters/ncol;
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
 			{
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo().Command);
@@ -441,7 +441,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 	void CFrameMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
 #else
 			if( _pMachine->_type == MACH_PLUGIN)
@@ -451,7 +451,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
 				{
 					wndView->AddMacViewUndo();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo().Parameters[par]->DefValue);
 #else
 					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
@@ -650,7 +650,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersResetparameters() 
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
 #else
 			if( _pMachine->_type == MACH_PLUGIN)
@@ -659,7 +659,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int numpars = _pMachine->GetNumParams();
 				for (int c=0; c<numpars; c++)
 				{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					int dv = ((Plugin*)_pMachine)->GetInfo().Parameters[c]->DefValue;
 #else
 					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
@@ -677,7 +677,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersCommand() 
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
 			{
 				//todo
@@ -703,7 +703,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				istweak = false;
 			}
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
 #else
 			if( _pMachine->_type == MACH_PLUGIN)
@@ -711,7 +711,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				MessageBox
 					(
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo().Author),
 						"About " + CString(((Plugin*)_pMachine)->GetInfo().Name)
 #else
@@ -725,12 +725,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersShowpreset() 
 		{
-#ifdef use_psycore
-#else
 			CPresetsDlg dlg;
 			dlg._pMachine=_pMachine;
 			dlg.DoModal();
-#endif
 		}
 
 	PSYCLE__MFC__NAMESPACE__END

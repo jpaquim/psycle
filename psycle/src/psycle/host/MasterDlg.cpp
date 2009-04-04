@@ -3,7 +3,7 @@
 
 #include "MasterDlg.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/internal_machines.h>
 #include <psycle/helpers/dsp.hpp>
 using namespace psy::core;

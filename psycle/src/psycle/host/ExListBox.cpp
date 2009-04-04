@@ -5,7 +5,7 @@
 
 #include "ExListBox.h"
 #include "MainFrm.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 using namespace psy::core;
 #else

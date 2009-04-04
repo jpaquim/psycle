@@ -3,7 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 #include "FrameMachine.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class Mixer;
@@ -15,7 +15,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 
-	#ifndef use_psycore
+	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Mixer;
 	#endif
 

@@ -17,7 +17,7 @@
 #include <comdef.h>
 #include <wbemidl.h>
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/plugincatcher.h>
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/player.h>
@@ -60,7 +60,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		BOOL CPsycleApp::InitInstance()
 		{		
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineFactory & factory(MachineFactory::getInstance());
 			//TODO: Use the pluginCatcher when it's ready.
 			factory.Initialize(&Player::singleton(), new PluginFinderCache());
@@ -139,7 +139,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pFrame->m_wndView.machine_view()->CenterMaster();
 			pFrame->UpdateWindow();
 			
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			factory.setPsyclePath(Global::pConfig->GetPluginDir());
 			factory.setLadspaPath("");
 			Global::_pSong = &((CMainFrame *)theApp.m_pMainWnd)->projects_.active_project()->psy_song();

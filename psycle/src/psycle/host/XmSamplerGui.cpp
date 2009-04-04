@@ -1,6 +1,6 @@
 #include "XmSamplerGui.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/xmsampler.h>
 using namespace psy::core;
@@ -41,15 +41,11 @@ namespace psycle {
 
 		void XmSamplerGui::ShowDialog(double x, double y)
 		{
-#ifdef use_psycore
-			//todo
-#else
 			if ( !dialog_ ) {
 				dialog_ = new XMSamplerUI(mac()->GetEditName().c_str(), this, view()->child_view());
 				dialog_->Init((XMSampler*)mac());
 				dialog_->Create(view()->child_view());
 			}
-#endif
 		}
 
 	}  // namespace host

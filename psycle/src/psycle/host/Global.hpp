@@ -2,13 +2,16 @@
 ///\brief interface file for psycle::host::Global.
 #pragma once
 #include "Version.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/constants.h>
 #include <psycle/core/commands.h>
+namespace psy {
+	namespace core {
+		class Song;
+		class Player;
+	}
+}
 
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef unsigned long dword;
 namespace psycle { namespace host {
 namespace notecommands {
 	using namespace psy::core::notetypes;
@@ -17,7 +20,10 @@ namespace PatternCmd {
 	using namespace psy::core::commandtypes;
 }
 }}
-
+using namespace psy::core;
+typedef unsigned char byte;
+typedef unsigned short word;
+typedef unsigned long dword;
 #else
 #include "Constants.hpp"
 #endif
@@ -28,19 +34,6 @@ namespace PatternCmd {
 	#include <universalis/operating_system/clocks.hpp>
 #endif
 //#include <cstdint>
-
-#ifdef use_psycore
-namespace psy {
-	namespace core {
-		class Song;
-		class Player;
-		namespace vst {
-			class host;
-		}
-	}
-}
-using namespace psy::core;
-#endif
 
 namespace psycle
 {
@@ -57,7 +50,7 @@ namespace psycle
 		class InputHandler;
 
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Song;
 		class Player;
 		namespace vst
@@ -110,13 +103,16 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 				static InputHandler* pInputHandler;
 #endif //!defined WINAMP_PLUGIN
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				static vst::AudioMaster* pVstHost;
-
+#endif
 				static inline Song           & song() { return *_pSong; }
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }
 				static inline helpers::dsp::Resampler & resampler(){ return *pResampler; }
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
+#endif
 				static inline cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }
 				//void inline cpu_frequency(cpu::cycles_type const & value) throw() { cpu_frequency_ = value; }
 		};

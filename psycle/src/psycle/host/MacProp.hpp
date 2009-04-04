@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CMacProp.
 #pragma once
 #include "Psycle.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class Machine;
@@ -10,19 +10,13 @@ namespace psy {
 	}
 }
 using namespace psy::core;
-#else
-namespace psycle {
-	namespace host {
-		class Machine;
-		class Host;
-	}
-}
 #endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+		class Machine;
 		class Song;
 #endif
 		class CChildView;

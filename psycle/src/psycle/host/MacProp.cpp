@@ -3,7 +3,7 @@
 
 #include "MacProp.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/machinefactory.h>
@@ -68,11 +68,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
 			m_bypassCheck.SetCheck(pMachine->Bypass());
 
-#ifdef use_psycore
 			if (pMachine->IsGenerator() )
-#else
-			if (pMachine->_mode == MACHMODE_GENERATOR ) 
-#endif
 			{
 				m_bypassCheck.ShowWindow(SW_HIDE);
 			}
@@ -150,7 +146,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			if (dst >= 0)
 			{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				Machine * newMac = MachineFactory::getInstance().CloneMachine(*pMachine);
 				if(!newMac)
 				{

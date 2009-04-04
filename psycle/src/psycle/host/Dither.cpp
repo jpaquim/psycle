@@ -1,7 +1,7 @@
 
-//Psycore includes psycle-helpers for now.
 #include "configuration_options.hpp"
-#ifndef use_psycore
 
+//Psycore includes psycle-helpers for now.
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/helpers/dither.cpp>
 #endif 

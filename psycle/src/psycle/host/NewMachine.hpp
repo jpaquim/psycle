@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CNewMachine.
 #pragma once
 #include "Psycle.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machinekey.hpp>
 using namespace psy::core;
 #else
@@ -18,7 +18,7 @@ using namespace psy::core;
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
 
@@ -92,7 +92,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			*/
 		};
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
 		/// new machine dialog window.
 		class CNewMachine : public CDialog
@@ -114,7 +114,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		public:
 			CImageList imgList;
 			HTREEITEM tHand;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineKey outputMachine;
 #else
 			int Outputmachine;
@@ -127,7 +127,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			static int machineGrouping;
 			static int displayName;
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 			static void learnDllName(const std::string & fullpath, MachineType type);
 			static bool lookupDllName(const std::string, std::string & result, MachineType tye,int& shellIdx);
 			static void DestroyPluginInfo();
@@ -139,7 +139,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			static bool TestFilename(const std::string & name,int shellIdx);
 		protected:
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			std::map<HTREEITEM,MachineKey> treeToInfo;
 #else
 			static std::map<std::string,std::string> NativeNames;
@@ -163,7 +163,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnCheckAllow();
 			DECLARE_MESSAGE_MAP()
 		private:
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 			static int _numPlugins;
 			static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
 			static void FindPlugins(int & currentPlugsCount, int & currentBadPlugsCount, std::vector<std::string> const & list, MachineType type, std::ostream & out, CProgressDialog * pProgress = 0);

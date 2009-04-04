@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstParamList.
 #include "VstParamList.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/vsthost.h>
 #include <psycle/core/vstplugin.h>
 using namespace psy::core;

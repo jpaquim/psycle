@@ -3,7 +3,7 @@
 #include "Psycle.hpp"
 #include <cassert>
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 using namespace psy::core;
 #endif
@@ -22,7 +22,7 @@ namespace psycle {
 			~Project();
 
 			Song& song() { assert(Global::_pSong); return *Global::_pSong; }
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Song& psy_song() { return song_; }
 #endif
 
@@ -59,7 +59,7 @@ namespace psycle {
 
 			int lines_per_beat_;
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Song song_;
 #endif
 

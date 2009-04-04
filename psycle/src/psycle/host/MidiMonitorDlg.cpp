@@ -3,7 +3,7 @@
 
 #include "MidiMonitorDlg.hpp"
 #include "MidiInput.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 using namespace psy::core;
@@ -366,7 +366,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						if (pMachine->getMachineKey() == MachineKey::sampler()) {
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[instrument]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );

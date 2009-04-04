@@ -2,8 +2,7 @@
 #include "WaveInMacDlg.hpp"
 #include "Configuration.hpp"
 
-//TODO: AudioRecorder is not defined in psycle-core yet.
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/core/internal_machines.h>
 #include <psycle/helpers/dsp.hpp>

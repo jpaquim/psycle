@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::Song.
 #include "configuration_options.hpp"
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "Song.hpp"
 
 #if !defined WINAMP_PLUGIN
@@ -2746,20 +2746,6 @@ namespace psycle
 
 			return true;
 		}
-		void Song::DoPreviews(int amount)
-		{
-#if !defined WINAMP_PLUGIN
-			//todo do better.. use a vector<InstPreview*> or something instead
-			if(wavprev.IsEnabled())
-			{
-				wavprev.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
-			}
-			if(waved.IsEnabled())
-			{
-				waved.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
-			}
-#endif // !defined WINAMP_PLUGIN
-		}
 
 		bool Song::CloneMac(int src,int dst)
 		{
@@ -3103,4 +3089,4 @@ namespace psycle
 		}
 	}
 }
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

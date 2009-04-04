@@ -4,7 +4,7 @@
 #include "InfoDlg.hpp"
 #include "Configuration.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 using namespace psy::core;
@@ -95,7 +95,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					Machine *tmac = _pSong->machine(c);
 					if(tmac)
 					{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						// Input numbers
 						sprintf(buffer,"%d",tmac->_connectedInputs);
 						m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
@@ -188,7 +188,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					m_machlist.InsertItem(n,buffer);
 					
 					// Gear [Gear type]
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					strcpy(buffer, tmac->GetName().c_str());
 #else
 					strcpy(buffer, tmac->GetName());
@@ -196,7 +196,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					m_machlist.SetItem(n,1,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// Type [Set is generator/effect/master]
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					if (tmac->getMachineKey() == MachineKey::master()) {
 						strcpy(buffer,"Master");
 					}

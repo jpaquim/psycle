@@ -3,7 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class Machine;
@@ -19,7 +19,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		#define MAX_PRESETS 256
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Machine;
 #endif
 		class CFrameMachine;

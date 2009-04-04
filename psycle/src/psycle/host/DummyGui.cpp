@@ -1,6 +1,6 @@
 #include "DummyGui.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class Machine;
@@ -14,7 +14,7 @@ namespace psycle {
 
 		class MachineView;
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Machine;
 #endif
 

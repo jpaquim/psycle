@@ -1,7 +1,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class XMSampler;
@@ -14,7 +14,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 // Cuadro de diálogo de XMSamplerMixerPage
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 class XMSampler;
 #endif
 

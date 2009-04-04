@@ -40,7 +40,7 @@ namespace psycle
 			/// the line at which to stop playing (used by save block to wav)
 			int _lineStop;
 			/// the sequence position currently being played
-			int _playPosition;
+			int _sequencePosition;
 			/// the pattern currently being played.
 			int _playPattern;
 			/// elapsed time since playing started. Units is seconds and the float type allows for storing milliseconds.

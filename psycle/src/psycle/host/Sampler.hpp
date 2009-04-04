@@ -3,6 +3,10 @@
 #pragma once
 #include "Machine.hpp"
 #include "Filter.hpp"
+#if !defined WINAMP_PLUGIN
+	#include "InstPreview.hpp"
+#endif // WINAMP_PLUGIN
+
 namespace psycle
 {
 	namespace host
@@ -93,6 +97,19 @@ namespace psycle
 		class Sampler : public Machine
 		{
 		public:
+			///\name wave file previewing
+			///\{
+			//todo these ought to be dynamically allocated
+#if !defined WINAMP_PLUGIN
+			/// Wave preview.
+			static InstPreview wavprev;
+			/// Wave editor playback.
+			static InstPreview waved;
+#endif
+			/// runs the wave previewing.
+			static void DoPreviews(float* pSamplesL, float* pSamplesR, int amount);
+			///\}
+
 			void Tick();
 			Sampler(int index);
 			virtual void Init(void);

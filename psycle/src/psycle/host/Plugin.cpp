@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Plugin
 #include "configuration_options.hpp"
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
 #include "Plugin.hpp"
 #include "FileIO.hpp"
@@ -1044,4 +1044,4 @@ namespace psycle
 		}
 	}
 }
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

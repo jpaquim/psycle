@@ -3,7 +3,7 @@
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 #pragma once
 #include "Global.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 	#include <psycle/core/patternevent.h>
 using namespace psy::core;
 #else
@@ -85,11 +85,7 @@ namespace psycle
 		{
 		public:
 			/// tracker pattern info struct
-#ifdef use_psycore
 			PatternEvent entry;
-#else
-			PatternEvent entry;
-#endif
 			/// MIDI input device's timestamp
 			std::uint32_t timeStamp;
 			/// MIDI channel

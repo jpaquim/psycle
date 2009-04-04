@@ -2,7 +2,7 @@
 //
 
 #include "XMSamplerMixerPage.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/xmsampler.h>
 using namespace psy::core;

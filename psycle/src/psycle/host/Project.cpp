@@ -1,6 +1,6 @@
 #include "project.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
 using namespace psy::core;
@@ -31,7 +31,7 @@ namespace psycle {
 		{
 			assert(pat_view_);
 			assert(mac_view_);
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			mac_view_->SetSong(&song_);
 			psy::core::SequenceLine* line = song_.patternSequence().createNewLine();
 			psy::core::SinglePattern* pattern= new psy::core::SinglePattern();
@@ -124,7 +124,7 @@ namespace psycle {
 
 		void Project::FileLoadsongNamed(const std::string& fName)
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			mac_view()->LockVu();
 			Player & player(Player::singleton());
 			player.stop();
@@ -219,7 +219,7 @@ namespace psycle {
 #endif
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
-#ifdef use_psycore				
+#if PSYCLE__CONFIGURATION__USE_PSYCORE				
 				CSongpDlg dlg(&psy_song());
 #else
 				CSongpDlg dlg(&song());
@@ -394,7 +394,7 @@ namespace psycle {
 						xmfile.Load(song());
 						xmfile.Close();
 						mac_view()->Rebuild();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						CSongpDlg dlg(&psy_song());
 #else
 						CSongpDlg dlg(&song());
@@ -426,7 +426,7 @@ namespace psycle {
 						}
 						it.Close();
 						mac_view()->Rebuild();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						CSongpDlg dlg(&psy_song());
 #else
 						CSongpDlg dlg(&song());
@@ -458,7 +458,7 @@ namespace psycle {
 						}
 						s3m.Close();
 						mac_view()->Rebuild();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						CSongpDlg dlg(&psy_song());
 #else
 						CSongpDlg dlg(&song());
@@ -484,7 +484,7 @@ namespace psycle {
 						modfile.Load(song());
 						modfile.Close();
 						mac_view()->Rebuild();
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						CSongpDlg dlg(&psy_song());
 #else
 						CSongpDlg dlg(&song());

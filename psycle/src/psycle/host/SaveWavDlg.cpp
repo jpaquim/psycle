@@ -5,7 +5,7 @@
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/core/machine.h>
@@ -1037,18 +1037,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			Song* pSong = Global::_pSong;
 			Player* pPlayer = Global::pPlayer;
-			for (int i=lastpostick+1;i<pPlayer->_playPosition;i++)
+			for (int i=lastpostick+1;i<pPlayer->_sequencePosition;i++)
 			{
 				tickcont+=pSong->patternLines[pSong->playOrder[i]];
 			}
-			if (lastpostick!= pPlayer->_playPosition ) 
+			if (lastpostick!= pPlayer->_sequencePosition ) 
 			{
 				tickcont+=pSong->patternLines[pSong->playOrder[lastpostick]]-(lastlinetick+1)+pPlayer->_lineCounter;
 			}
 			else tickcont+=pPlayer->_lineCounter-lastlinetick;
 
 			lastlinetick = pPlayer->_lineCounter;
-			lastpostick = pPlayer->_playPosition;
+			lastpostick = pPlayer->_sequencePosition;
 
 			if (!kill_thread ) 
 			{

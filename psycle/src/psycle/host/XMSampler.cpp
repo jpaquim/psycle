@@ -1,5 +1,5 @@
 #include "configuration_options.hpp"
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
@@ -2735,4 +2735,4 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 	}
 }
 
-#endif //#ifndef use_psycore
+#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

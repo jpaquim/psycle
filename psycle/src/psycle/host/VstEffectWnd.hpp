@@ -3,7 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		namespace vst {
@@ -25,7 +25,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		class CVstParamList;
 
 		using namespace seib::vst;
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		namespace vst
 		{
 			class plugin;

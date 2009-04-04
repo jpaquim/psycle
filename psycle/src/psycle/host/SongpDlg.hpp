@@ -3,7 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
 		class Song;
@@ -16,7 +16,7 @@ using namespace psy::core;
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 	class Song; // forward declaration
 #endif
 

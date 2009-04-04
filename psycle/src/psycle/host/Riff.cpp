@@ -31,10 +31,10 @@
 	\endverbatim
 */
 
-//Psycore includes psycle-helpers for now.
-#ifndef use_psycore
-
 #include "Riff.hpp"
+//Psycore includes psycle-helpers for now.
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <io.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,7 +1,7 @@
 #include "MachineView.hpp"
 #include "Configuration.hpp"
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/machinefactory.h>
@@ -47,7 +47,7 @@ namespace psycle {
 			}
 		}
 
-#ifdef use_psycore		
+#if PSYCLE__CONFIGURATION__USE_PSYCORE		
 		MachineView::MachineView(CChildView* parent, CMainFrame* main)
 #else
 		MachineView::MachineView(CChildView* parent, CMainFrame* main, Song* song)
@@ -55,7 +55,7 @@ namespace psycle {
 			: PsycleCanvas::Canvas(parent),
 			  parent_(parent),
 			  main_(main),
-#ifdef use_psycore		
+#if PSYCLE__CONFIGURATION__USE_PSYCORE		
 			  song_(0),
 #else
 			  song_(song),
@@ -70,7 +70,7 @@ namespace psycle {
 			// InitSkin();
 		}
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		void MachineView::SetSong(class psy::core::Song* song)
 		{
 			song_ = song;
@@ -149,7 +149,7 @@ namespace psycle {
 				} else {
 					int mac_prop = gui->mac()->id();
 					DeleteMachineGui(gui->mac());
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					song()->DeleteMachine(song()->machine(mac_prop));
 #else
 					song()->DestroyMachine(mac_prop);
@@ -161,7 +161,7 @@ namespace psycle {
 					}								
 				}
 			} else if (dlg.replaced) {
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				int index = mac->id();
 				ShowNewMachineDlg(mac->GetPosX(), mac->GetPosY(), mac, from_event);
 				strcpy(dlg.txt, song()->machine(index)->GetEditName().c_str());
@@ -184,8 +184,9 @@ namespace psycle {
 
 		void MachineView::SetSolo(Machine* tmac)
 		{
-#ifdef use_psycore
-//			todo
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+///\todo
+
 /*			int smac = tmac->id();
 			if (song()->machineSoloed == smac ){
 				song()->machineSoloed = -1;
@@ -256,15 +257,9 @@ namespace psycle {
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
 			for ( ; it != gui_map_.end(); ++it ) {
 				MachineGui* mac_gui = (*it).second;
-#ifdef use_psycore
 				mac_gui->SetMute(mac_gui->mac()->_mute);
 				mac_gui->SetSolo(mac_gui->mac()->id() == song()->machineSoloed);
 				mac_gui->SetBypass(mac_gui->mac()->Bypass());
-#else
-				mac_gui->SetMute(mac_gui->mac()->_mute);
-				mac_gui->SetSolo(mac_gui->mac()->id() == song()->machineSoloed);
-				mac_gui->SetBypass(mac_gui->mac()->Bypass());
-#endif
 			}
 		}
 
@@ -315,7 +310,7 @@ namespace psycle {
 				delete del_machine_;
 				del_machine_ = 0;
 				if (del_in_engine_) {
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					song()->DeleteMachine(song()->machine(prop_mac));
 #else
 					song()->DestroyMachine(prop_mac);
@@ -332,7 +327,7 @@ namespace psycle {
 
 		void MachineView::ShowNewMachineDlg(double x, double y, Machine* mac, bool from_event)
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CNewMachine dlg;
 
 			if(mac)
@@ -537,18 +532,14 @@ namespace psycle {
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
 			MachineGui* gui = it->second;
-#ifdef use_psycore
 			gui->SetXY(mac->GetPosX(), mac->GetPosY());
-#else
-			gui->SetXY(mac->_x, mac->_y);
-#endif
 		}
 
 		MachineGui* MachineView::CreateMachineGui(Machine* mac)
 		{
 			assert(mac);
 			MachineGui* gui;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if( mac->getMachineKey() == MachineKey::master()) {
 				gui = new MasterGui(this, mac);
 			} else if( mac->getMachineKey() == MachineKey::sampler() ) {
@@ -725,7 +716,7 @@ namespace psycle {
 
 		void MachineView::BuildWires()
 		{
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
 			psy::core::Machine* mac = (song()->machine(idx));
 			if (mac) {
@@ -862,7 +853,7 @@ namespace psycle {
 				Machine* dmac = connect_to_gui->mac();
 				if (!rewire_line_) {				   
 				   int dsttype=0;
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				   if (song()->InsertConnection(*tmac, *dmac,0,dsttype)== -1) {
 #else
 				   if (song()->InsertConnection(tmac, dmac,0,dsttype)== -1) {
@@ -914,7 +905,7 @@ namespace psycle {
 			}
 		}
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		bool MachineView::RewireSrc(Machine* tmac, Machine* dmac)
 		{
 			///\todo: hardcoded. This needs to be extended with multi-io.
@@ -941,7 +932,7 @@ namespace psycle {
 		}
 #endif
 
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		bool MachineView::RewireDest(Machine* tmac, Machine* dmac)
 		{
 			///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
@@ -1806,13 +1797,8 @@ namespace psycle {
 
 		void MachineView::CenterMaster()
 		{
-#ifdef use_psycore
 			song()->machine(MASTER_INDEX)->SetPosX((child_view()->CW - MachineCoords.sMaster.width) / 2);			
 			song()->machine(MASTER_INDEX)->SetPosY((child_view()->CH - MachineCoords.sMaster.width) / 2);
-#else
-			song()->machine(MASTER_INDEX)->_x = (child_view()->CW - MachineCoords.sMaster.width) / 2;			
-			song()->machine(MASTER_INDEX)->_y = (child_view()->CH - MachineCoords.sMaster.width) / 2;
-#endif
 			UpdatePosition(song()->machine(MASTER_INDEX));				
 		}
 

@@ -7,7 +7,7 @@
 #include <psycle/host/WaveEdInsertSilenceDialog.hpp>
 #include <psycle/host/WaveEdCrossfadeDialog.hpp>
 #include <psycle/host/ScrollableDlgBar.hpp>
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/instrument.h>
 #endif
 #include <deque>
@@ -160,7 +160,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bool blSelection;			//whether data is selected currently
 			bool wdWave;				//whether we have a wave to display
 			bool cursorBlink;			//switched on timer messages.. cursor is visible when true
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Instrument::id_type wsInstrument;
 #else
 			int wsInstrument;

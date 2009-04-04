@@ -1,6 +1,6 @@
 #pragma once
 #include "Global.hpp"
-#ifdef use_psycore
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
 namespace psy {
@@ -18,7 +18,7 @@ using namespace psy::core;
 
 namespace psycle {
 	namespace host {
-#ifndef use_psycore
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Song;
 		class XMSampler;
 #endif
