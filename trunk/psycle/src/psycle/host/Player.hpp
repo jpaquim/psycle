@@ -94,10 +94,11 @@ namespace psycle
 			/// starts the recording output device.
 			void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1, bool isFloat = false, bool dodither=false, int ditherpdf=0, int noiseshape=0, std::vector<char*> *clipboardmem=0);
 			/// stops the recording output device.
-			void StopRecording(bool bOk = true);
+			void stopRecording(bool bOk = true);
 			bool ClipboardWriteMono(float sample);
 			bool ClipboardWriteStereo(float left, float right);
 			/// wether the recording device has been started.
+			bool recording() { return _recording; }
 			bool _recording;
 			/// wether the recording is done to memory.
 			bool _clipboardrecording;

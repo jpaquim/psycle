@@ -29,6 +29,7 @@ public:
 	// If you use the one wihout PluginFinder, one will be created automatically.
 	void Initialize(MachineCallbacks* callbacks);
 	void Initialize(MachineCallbacks* callbacks, PluginFinder* finder);
+	void Finalize(bool deleteFinder=true);
 	static MachineFactory& getInstance();
 
 	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);

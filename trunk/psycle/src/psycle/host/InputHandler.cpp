@@ -700,10 +700,10 @@ namespace psycle
 				if (pMachine->_type == MACH_SAMPLER)
 #endif
 				{
-					if ((Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
-						&& (Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_LOCKINST == true))
+					if ((Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_locked_machine_index != -1)
+						&& (Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_locked_to_machine == true))
 					{
-						entry.setMachine(Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine);
+						entry.setMachine(Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_locked_machine_index);
 						pMachine = Global::_pSong->machine(entry.machine());
 						if ( !pMachine) return;
 					}

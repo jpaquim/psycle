@@ -611,7 +611,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			saving=true;
 			Player *pPlayer = Global::pPlayer;
 			Song *pSong = Global::_pSong;
-			pPlayer->StopRecording();
+			pPlayer->stopRecording();
 			Global::pConfig->_pOutputDriver->Enable(false);
 			///\todo: for zealan, this call is not closing the midi driver, and when doing the Open again, it crashes.
 			Global::pConfig->_pMidiInput->Close();
@@ -733,7 +733,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//int stream_buffer[65535];
 			while(!((CSaveWavDlg*)b)->kill_thread)
 			{
-				if (!pPlayer->_recording) // the player automatically closes the wav recording when looping.
+				if (!pPlayer->recording()) // the player automatically closes the wav recording when looping.
 				{
 					pPlayer->stop();
 					((CSaveWavDlg*)b)->SaveEnd();
@@ -746,7 +746,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 
 			pPlayer->stop();
-			pPlayer->StopRecording();
+			pPlayer->stopRecording();
 			((CSaveWavDlg*)b)->SaveEnd();
 			((CSaveWavDlg*)b)->threadopen--;
 			ExitThread(0);

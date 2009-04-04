@@ -87,7 +87,12 @@ namespace psycle {
 				// midi implementation
 				Global::pConfig->_pMidiInput->Open();
 			}
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Global::pPlayer->setBpm(song().BeatsPerMin());
+			Global::pPlayer->timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
+#else
 			Global::pPlayer->SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
+#endif
 			mac_view()->child_view()->SetTitleBarText();
 			pat_view()->editPosition=0;
 			song().seqBus=0;

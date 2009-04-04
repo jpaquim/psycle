@@ -38,6 +38,11 @@ void MachineFactory::Initialize(MachineCallbacks* callbacks,PluginFinder* finder
 	finder_ = finder;
 	FillHosts();
 }
+void MachineFactory::Finalize(bool deleteFinder) {
+	if (deleteFinder) {
+		delete finder_;
+	}
+}
 void MachineFactory::FillHosts()
 {
 	finder_->Initialize();

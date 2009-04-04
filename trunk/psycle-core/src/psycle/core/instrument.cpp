@@ -69,6 +69,8 @@ namespace psy
 
 		void Instrument::Reset()
 		{
+			_locked_machine_index = -1;
+			_locked_to_machine = false;
 			// Reset envelope
 			ENV_AT = 1; // 16
 			ENV_DT = 1; // 16386
@@ -259,6 +261,12 @@ namespace psy
 					//MessageBox(NULL,"Wave Segment of File is from a newer version of psycle!",NULL,NULL);
 					pFile->Skip(size);
 				}
+				if ((version & 0xFF) >= 1) 
+				{ //revision 1 or greater
+					pFile->Read(_locked_machine_index);
+					pFile->Read(_locked_to_machine);
+				}
+
 			}
 		}
 
@@ -348,6 +356,9 @@ namespace psy
 				}
 				delete[] pData2;
 			}
+			pFile->Write(_locked_machine_index);
+			pFile->Write(_locked_to_machine);
+
 		}
 
 		std::string Instrument::toXml( ) const

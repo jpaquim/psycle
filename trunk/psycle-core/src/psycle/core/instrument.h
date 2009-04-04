@@ -47,6 +47,13 @@ class PSYCLE__CORE__DECL Instrument {
 		/// 2 = Note Continue [No NNA]
 		///\endverbatim
 		unsigned char _NNA;
+
+		///\name Instrument assignation to a specific sampler
+		///\{
+		int _locked_machine_index; //-1 means not locked
+		bool _locked_to_machine;
+		///\}
+
 		
 		///\name Amplitude Envelope overview:
 		///\{

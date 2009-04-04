@@ -495,7 +495,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// Initialize OPENFILENAME
 				ZeroMemory(&ofn, sizeof(OPENFILENAME));
 				ofn.lStructSize = sizeof(OPENFILENAME);
-				ofn.hwndOwner = GetSafeHwnd();
+				ofn.hwndOwner = GetParent()->m_hWnd;
 				ofn.lpstrTitle = ptr->title;
 				ofn.lpstrFileTitle = fileName;
 				ofn.nMaxFileTitle = sizeof (fileName) - 1;
@@ -618,7 +618,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 					// Get help on BROWSEINFO struct - it's got all the bit settings.
 					//
-					bi.hwndOwner = GetSafeHwnd();
+					bi.hwndOwner = GetParent()->m_hWnd;
 
 					bi.pidlRoot = NULL;
 					bi.pszDisplayName = someString;
