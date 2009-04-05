@@ -163,8 +163,8 @@ namespace psy
 
 				pFile->ReadArray(Header,4);
 				Header[4] = 0;
-				std::uint32_t version;
-				std::uint32_t size;
+				std::uint32_t version = 0;
+				std::uint32_t size = 0;
 
 				if (strcmp(Header,"WAVE")==0)
 				{
@@ -180,7 +180,7 @@ namespace psy
 					}
 					else
 					{
-						std::uint32_t index;
+						std::uint32_t index = 0;
 						pFile->Read(index);
 
 						pFile->Read(waveLength);
