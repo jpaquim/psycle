@@ -25,6 +25,8 @@
 	#define M_PI 3.14159265359f // note that's supposed to be a double!
 #endif
 
+using namespace psycle::plugin_interface;
+
 CMachineParameter const paraLFOFreq       = { "LFO Freq"       , "LFOFreq"      ,    1,  40, MPF_STATE,  4 };
 CMachineParameter const paraLFOStartPhase = { "LFO start phase", "LFOStartPhase",    0, 359, MPF_STATE,  0 };
 CMachineParameter const paraDepth         = { "Depth"          , "Depth"        ,    0, 100, MPF_STATE, 70 };

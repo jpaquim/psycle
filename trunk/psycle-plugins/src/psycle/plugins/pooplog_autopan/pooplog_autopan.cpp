@@ -26,18 +26,20 @@ v0.02b
 
 v0.01b
 - initial beta release
-
+*/
 /////////////////////////////////////////////////////////////////////
-	*/
+
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
 
+using namespace psycle::plugin_interface;
+
 #define PLUGIN_NAME "Pooplog Autopan 0.06b"
 
-inline int f2i(float flt)
+inline int f2i(float flt) ///\todo use psycle-helpers
 { 
 	#if defined _MSC_VER && defined _M_IX86
 		int i; 

@@ -9,6 +9,9 @@
 #include <psycle/plugin_interface.hpp>
 #include <memory>
 #include <cstring>
+
+using namespace psycle::plugin_interface;
+
 //============================================================================
 //				Defines
 //============================================================================

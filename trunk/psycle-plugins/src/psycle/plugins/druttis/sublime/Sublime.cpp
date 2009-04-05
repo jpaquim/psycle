@@ -8,6 +8,9 @@
 //#include <windows.h>
 #include "Voice.h"
 #include "../blwtbl/blwtbl.h"
+
+using namespace psycle::plugin_interface;
+
 //////////////////////////////////////////////////////////////////////
 //
 //				Machine Defs

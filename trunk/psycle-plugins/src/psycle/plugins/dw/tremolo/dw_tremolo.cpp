@@ -1,6 +1,8 @@
 #include <psycle/plugin_interface.hpp>
 #include <cmath>
 
+using namespace psycle::plugin_interface;
+
 #ifndef M_PI
 	#define M_PI 3.14159265358979323846
 #endif

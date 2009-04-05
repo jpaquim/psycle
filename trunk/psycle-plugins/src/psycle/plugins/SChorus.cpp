@@ -13,6 +13,8 @@
 #include <cstring>
 #include <cmath>
 
+using namespace psycle::plugin_interface;
+
 #define MAXIMUM_DELAY   40000
 
 #define NUMPARAMETERS 8

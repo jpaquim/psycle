@@ -1,12 +1,14 @@
 #include <psycle/plugin_interface.hpp>
 #include "biquad.hpp"
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 #include <cassert>
-#include <math.h>
+#include <cmath>
 
 //////////////////////////////////////////////////////////////////////
 // KarLKoX "Surround" plugin for PSYCLE
+
+using namespace psycle::plugin_interface;
 
 #define VERNUM "v1.2"
 

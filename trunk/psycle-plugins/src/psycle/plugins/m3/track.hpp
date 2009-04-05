@@ -176,7 +176,7 @@ class CTrack {
 
 };
 
-class mi : public CMachineInterface {
+class mi : public psycle::plugin_interface::CMachineInterface {
 	public:
 		mi();
 		virtual ~mi();

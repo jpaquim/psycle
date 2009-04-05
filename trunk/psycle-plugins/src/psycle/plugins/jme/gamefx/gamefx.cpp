@@ -24,8 +24,9 @@
 #include <cassert>
 #include <cmath>
 
-#define MAX_ENV_TIME 65536
+using namespace psycle::plugin_interface;
 
+#define MAX_ENV_TIME 65536
 
 CMachineParameter const paraVol1 = 
 { 

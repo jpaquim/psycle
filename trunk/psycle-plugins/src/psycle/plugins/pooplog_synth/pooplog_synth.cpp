@@ -178,7 +178,9 @@ TODO LIST
 #include <psycle/plugin_interface.hpp>
 	
 #include "SynthTrack.h"
-#include <cstring> // was <memory.h>
+#include <cstring>
+
+using namespace psycle::plugin_interface;
 
 //#define PREVIEW
 #define FILEVERSION 4

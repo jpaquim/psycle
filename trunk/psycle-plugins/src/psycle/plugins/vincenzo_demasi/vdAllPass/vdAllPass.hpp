@@ -51,7 +51,8 @@
 #define MAX_LOCK 1
 #define SET_LOCK 1
 
-
+using psycle::plugin_interface::CMachineParameter;
+using psycle::plugin_interface::MPF_STATE;
 
 CMachineParameter const parLeftDelay =
 {
@@ -93,9 +94,9 @@ CMachineParameter const *pParameters[] =
 	&parLockGain
 };
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	EFFECT,																																				// flags
+psycle::plugin_interface::CMachineInfo const MacInfo (
+	psycle::plugin_interface::MI_VERSION,
+	psycle::plugin_interface::EFFECT,																																				// flags
 	PARNUM,																																				// numParameters
 	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
@@ -109,21 +110,20 @@ CMachineInfo const MacInfo (
 	PARCOLS
 );
 
-class mi : public CMachineInterface
-{
-public:
-	mi();
-	virtual ~mi();
+class mi : public psycle::plugin_interface::CMachineInterface {
+	public:
+		mi();
+		virtual ~mi();
 
-	virtual void Init();
-	virtual void Command();
-	virtual void ParameterTweak(int par, int val);
-	virtual void SequencerTick();
-	virtual bool DescribeValue(char *txt,int const param, int const value);
-	virtual void Work(float *pleftsamples, float *prightsamples, int samplesnum, int tracks);
-private:
-	AllPassFilter leftFilter;
-	AllPassFilter rightFilter;
-	int lastDelayModified, lastGainModified;
-	float lGain, rGain;
+		virtual void Init();
+		virtual void Command();
+		virtual void ParameterTweak(int par, int val);
+		virtual void SequencerTick();
+		virtual bool DescribeValue(char *txt,int const param, int const value);
+		virtual void Work(float *pleftsamples, float *prightsamples, int samplesnum, int tracks);
+	private:
+		AllPassFilter leftFilter;
+		AllPassFilter rightFilter;
+		int lastDelayModified, lastGainModified;
+		float lGain, rGain;
 };

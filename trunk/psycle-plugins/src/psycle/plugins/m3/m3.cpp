@@ -4,6 +4,8 @@
 #include <cstring>
 #include <cmath>
 
+using namespace psycle::plugin_interface;
+
 // M3 Buzz plugin by MAKK makk@gmx.de
 // released on 04-21-99
 // Thanks must go to Robert Bristow-Johnson pbjrbj@viconet.com

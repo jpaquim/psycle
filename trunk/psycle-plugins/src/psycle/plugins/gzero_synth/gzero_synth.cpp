@@ -2,6 +2,8 @@
 #include "SynthTrack.hpp"
 #include <cstdlib>
 
+using namespace psycle::plugin_interface;
+
 int const MAX_ENV_TIME = 250000;
 int const NUMPARAMETERS = 60;
 
