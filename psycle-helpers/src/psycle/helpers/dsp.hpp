@@ -11,6 +11,7 @@
 #endif
 #include <cmath>
 #include <cstdint>
+#include <string.h>
 namespace psycle { namespace helpers { /** various signal processing utility functions. */ namespace dsp {
 
 	///\todo doc
@@ -194,7 +195,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#else
-			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
+			memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
 		#endif
 	}
 
@@ -226,7 +227,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#else
-			std::memset(pDstSamples, 0, numSamples * sizeof(float));
+			memset(pDstSamples, 0, numSamples * sizeof(float));
 		#endif
 	}
 
