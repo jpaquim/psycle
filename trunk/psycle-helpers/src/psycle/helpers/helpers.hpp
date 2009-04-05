@@ -9,6 +9,7 @@
 #include <limits>
 #include <string> // to declare hexstring_to_integer
 #include <cstdint>
+#include <limits>
 namespace psycle { namespace helpers {
 	/// the pi constant as a 32-bit floating point number
 	float const F_PI = math::pi_f;
