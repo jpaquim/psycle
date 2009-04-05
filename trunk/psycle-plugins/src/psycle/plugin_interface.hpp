@@ -242,7 +242,7 @@ namespace psycle
 			const char get_info_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO);
 			typedef
-				psycle::plugin_interface::CMachineInfo const * const
+				psycle::plugin_interface::CMachineInfo const *
 				(PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
 				(void);
 			
