@@ -15,6 +15,8 @@
 #include "song.h"
 #include "fileio.h"
 
+#include <cstdint>
+
 namespace psy { namespace core {
 
 	using namespace psycle::helpers;
@@ -507,7 +509,7 @@ int AudioRecorder::GenerateAudio(int numSamples)
 
 bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
 {
-	UINT size;
+	std::uint32_t size;
 	pFile->Read(size); // size of this part params to load
 	pFile->Read(_captureidx);
 	pFile->Read(_gainvol);
@@ -515,7 +517,7 @@ bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
 }
 void AudioRecorder::SaveSpecificChunk(RiffFile * pFile)
 {
-	UINT size = sizeof _captureidx+ sizeof _gainvol;
+	std::uint32_t size = sizeof _captureidx+ sizeof _gainvol;
 	pFile->Write(size); // size of this part params to save
 	pFile->Write(_captureidx);
 	pFile->Write(_gainvol);

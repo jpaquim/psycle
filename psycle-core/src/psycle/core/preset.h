@@ -11,6 +11,7 @@
 #include <psycle/core/config.hpp>
 
 #include <vector>
+#include <string>
 
 namespace psycle { namespace helpers {
 	class BinRead;

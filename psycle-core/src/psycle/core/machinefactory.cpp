@@ -58,8 +58,10 @@ void MachineFactory::FillHosts()
 	hosts_.push_back( &LadspaHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::LADSPA);
 
-	hosts_.push_back( &vst::host::getInstance(callbacks_) );
-	finder_->addHost(Hosts::VST);
+	#ifdef _WIN32
+		hosts_.push_back( &vst::host::getInstance(callbacks_) );
+		finder_->addHost(Hosts::VST);
+	#endif
 }
 
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
@@ -108,13 +110,16 @@ void MachineFactory::setLadspaPath(std::string path,bool cleardata)
 	LadspaHost::getInstance(0).FillFinderData(*finder_,cleardata);
 }
 
-///\FIXME: This only returns the first path, should regenerate the string
-std::string const & MachineFactory::getVstPath() const { return vst::host::getInstance(0).getPluginPath(0); }
-void MachineFactory::setVstPath(std::string path,bool cleardata)
-{
-	vst::host::getInstance(0).setPluginPath(path);
-	vst::host::getInstance(0).FillFinderData(*finder_,cleardata);
-}
+#ifdef _WIN32
+	///\FIXME: This only returns the first path, should regenerate the string
+	std::string const & MachineFactory::getVstPath() const { return vst::host::getInstance(0).getPluginPath(0); }
+	void MachineFactory::setVstPath(std::string path,bool cleardata)
+	{
+		vst::host::getInstance(0).setPluginPath(path);
+		vst::host::getInstance(0).FillFinderData(*finder_,cleardata);
+	}
+#endif
+	
 void MachineFactory::RegenerateFinderData() 
 {
 	finder_->Initialize(true);

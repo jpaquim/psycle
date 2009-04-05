@@ -368,6 +368,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 					}
 					break;
 				}
+				#ifdef _WIN32
 				case MACH_VST:
 				case MACH_VSTFX:
 					{
@@ -415,6 +416,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 						delete key;
 					}
 					break;
+				#endif
 				default: {
 					switch(type) {
 						case MACH_MASTER:
@@ -922,6 +924,7 @@ bool Plugin::LoadPsy2FileFormat(RiffFile * pFile) {
 
 	return true;
 }
+#ifdef _WIN32
 namespace vst {
 
 	bool plugin::PreLoadPsy2FileFormat(RiffFile * pFile, unsigned char &_program, int &_instance)
@@ -1047,6 +1050,6 @@ namespace vst {
 		return true;
 	}
 }
-
+#endif
 
 }}
