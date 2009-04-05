@@ -6,6 +6,7 @@
 #include <psycle/helpers/math/log.hpp>
 #include <universalis/compiler/numeric.hpp>
 #include <boost/static_assert.hpp>
+#include <limits>
 #include <string> // to declare hexstring_to_integer
 #include <cstdint>
 namespace psycle { namespace helpers {
