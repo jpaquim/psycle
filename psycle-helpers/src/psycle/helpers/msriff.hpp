@@ -4,7 +4,7 @@
 	
 */
 #pragma once
-#include "AbstractIff.hpp"
+#include "abstractiff.hpp"
 namespace psycle
 {
 	namespace helpers

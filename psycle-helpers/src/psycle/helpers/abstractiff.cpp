@@ -22,11 +22,11 @@ namespace psycle
 			d.byte.lolo = val&0xFF;
 		}
 
-		unsigned long ULongBE::unsignedValue() {
+		std::uint32_t ULongBE::unsignedValue() {
 			return d.byte.hihi << 24 + d.byte.hilo << 16 + d.byte.lohi << 8 + d.byte.lolo;
 		}
-		signed long ULongBE::signedValue() {
-			return static_cast<signed long>(unsignedValue());
+		std::int32_t ULongBE::signedValue() {
+			return static_cast<std::int32_t>(unsignedValue());
 		}
 
 		UShortBE::UShortBE() {
@@ -36,11 +36,11 @@ namespace psycle
 			d.byte.hi = (val >> 8)&0xFF;
 			d.byte.lo = val&0xFF;
 		}
-		unsigned short UShortBE::unsignedValue() {
+		std::uint16_t UShortBE::unsignedValue() {
 			return d.byte.hi << 8 + d.byte.lo;
 		}
-		signed short UShortBE::signedValue() {
-			return static_cast<signed short>(unsignedValue());
+		std::int16_t UShortBE::signedValue() {
+			return static_cast<std::int16_t>(unsignedValue());
 		}
 		LongBE::LongBE() {
 			d.originalValue = 0;
@@ -66,11 +66,11 @@ namespace psycle
 			d.byte.lohi = (val >> 8)&0xFF;
 			d.byte.lolo = val&0xFF;
 		}
-		unsigned long ULongLE::unsignedValue() {
+		std::uint32_t ULongLE::unsignedValue() {
 			return d.byte.hihi << 24 + d.byte.hilo << 16 + d.byte.lohi << 8 + d.byte.lolo;
 		}
-		signed long ULongLE::signedValue() {
-			return static_cast<signed long>(unsignedValue());
+		std::int32_t ULongLE::signedValue() {
+			return static_cast<std::int32_t>(unsignedValue());
 		}
 
 		UShortLE::UShortLE() {
@@ -80,11 +80,11 @@ namespace psycle
 			d.byte.hi = (val >> 8)&0xFF;
 			d.byte.lo = val&0xFF;
 		}
-		unsigned short UShortLE::unsignedValue() {
+		std::uint16_t UShortLE::unsignedValue() {
 			return d.byte.hi << 8 + d.byte.lo;
 		}
-		signed short UShortLE::signedValue() {
-			return static_cast<signed short>(unsignedValue());
+		std::int16_t UShortLE::signedValue() {
+			return static_cast<std::int16_t>(unsignedValue());
 		}
 		LongLE::LongLE() {
 			d.originalValue = 0;
@@ -252,7 +252,7 @@ namespace psycle
 		}
 
 		void AbstractIff::WriteString(const char * const data) {
-			unsigned long idx = 0;
+			std::ptrdiff_t idx = 0;
 
 			while(data[idx] != '\0')
 			{
@@ -265,7 +265,7 @@ namespace psycle
 			if (length <= 0 ) {
 				throw std::runtime_error("erroneous max_length passed to WriteString");
 			}
-			unsigned long idx = 0;
+			std::ptrdiff_t idx = 0;
 
 			while(data[idx] != '\0' && idx < length)
 			{
@@ -281,7 +281,7 @@ namespace psycle
 
 		template<typename T>
 		void AbstractIff::WriteArray(T const* thearray, int n) {
-			for(int i=0;i<n;i++) Write(thearray[i])
+			for(int i=0;i<n;i++) Write(thearray[i]);
 		}
 
 		void AbstractIff::Write(const std::uint8_t & x) {
