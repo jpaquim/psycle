@@ -39,27 +39,27 @@ namespace convert_internal_machines {
 			Converter();
 			virtual ~Converter() throw();
 
-			Machine & redirect(MachineFactory & factory, const int & index, const int & type, RiffFile & riff);
+			Machine & redirect(MachineFactory & factory, int index, int type, RiffFile & riff);
 
 			void retweak(CoreSong & song) const;
 
 		private:
-			class Plugin_Names : private std::map<const int, const std::string *> {
+			class Plugin_Names : private std::map<int, std::string const *> {
 				public:
 					Plugin_Names();
 					~Plugin_Names();
-					const bool exists(const int & type) const throw();
-					const std::string & operator()(const int & type) const;
+					bool exists(int type) const throw();
+					std::string const & operator()(int type) const;
 			};
 
 		public:
 			static const Plugin_Names & plugin_names();
 
 		private:
-			std::map<Machine * const, const int *> machine_converted_from;
+			std::map<Machine *, int const *> machine_converted_from;
 
-			template<typename Parameter> void retweak(Machine & machine, const int & type, Parameter parameters [], const int & parameter_count, const int & parameter_offset = 1);
-			void retweak(const int & type, int & parameter, int & integral_value) const;
+			template<typename Parameter> void retweak(Machine & machine, int type, Parameter parameters [], int parameter_count, int parameter_offset = 1);
+			void retweak(int type, int & parameter, int & integral_value) const;
 	};
 }
 
