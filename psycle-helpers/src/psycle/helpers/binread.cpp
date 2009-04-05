@@ -118,3 +118,4 @@ bool BinRead::bad() const {
 #endif
 
 }}
+

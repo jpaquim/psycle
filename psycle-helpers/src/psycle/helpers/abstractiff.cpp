@@ -301,35 +301,35 @@ namespace psycle
 		}
 		void AbstractIff::WriteBE(const std::uint32_t & x) {
 			ULongBE x2(x);
-			Write(x2.unsignedValue());			
+			Write(x2.unsignedValue());
 		}
 		void AbstractIff::WriteBE(const std::int32_t & x) {
 			LongBE x2(x);
-			Write(x2.signedValue());			
+			Write(x2.signedValue());
 		}
 		void AbstractIff::WriteBE(const std::uint16_t & x) {
 			UShortBE x2(x);
-			Write(x2.unsignedValue());			
+			Write(x2.unsignedValue());
 		}
 		void AbstractIff::WriteBE(const std::int16_t & x) {
 			ShortBE x2(x);
-			Write(x2.signedValue());			
+			Write(x2.signedValue());
 		}
 		void AbstractIff::WriteLE(const std::uint32_t & x) {
 			ULongLE x2(x);
-			Write(x2.unsignedValue());			
+			Write(x2.unsignedValue());
 		}
 		void AbstractIff::WriteLE(const std::int32_t & x) {
 			LongLE x2(x);
-			Write(x2.signedValue());			
+			Write(x2.signedValue());
 		}
 		void AbstractIff::WriteLE(const std::uint16_t & x) {
 			UShortLE x2(x);
-			Write(x2.unsignedValue());			
+			Write(x2.unsignedValue());
 		}
 		void AbstractIff::WriteLE(const std::int16_t & x) {
 			ShortLE x2(x);
-			Write(x2.signedValue());			
+			Write(x2.signedValue());
 		}
 
 		std::size_t AbstractIff::GetPos(void) {
@@ -395,3 +395,4 @@ namespace psycle
 		}
 	}
 }
+
