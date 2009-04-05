@@ -13,9 +13,10 @@
 #include "constants.h"
 
 #include <utility>
-#include <cstdint>
 #include <string>
+#include <cstring>
 #include <cassert>
+#include <cstdint>
 
 namespace psy { namespace core {
 
