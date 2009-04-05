@@ -24,12 +24,12 @@ Converter::Converter() {}
 
 Converter::~Converter() throw() {
 	for(
-		std::map<Machine * const, int const *>::const_iterator i = machine_converted_from.begin();
+		std::map<Machine *, int const *>::const_iterator i = machine_converted_from.begin();
 		i != machine_converted_from.end(); ++i
 	) delete const_cast<int *>(i->second);
 }
 
-Machine & Converter::redirect(MachineFactory& factory, int const & index, int const & type, RiffFile & riff) {
+Machine & Converter::redirect(MachineFactory & factory, int index, int type, RiffFile & riff) {
 	Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::NATIVE,(plugin_names()(type).c_str()),0),index);
 	if(!pointer_to_machine) pointer_to_machine = factory.CreateMachine(MachineKey::dummy(),index);
 	try {
@@ -280,11 +280,11 @@ Converter::Plugin_Names::~Plugin_Names() {
 	delete (*this)[asynth21];
 }
 
-const bool Converter::Plugin_Names::exists(int const & type) const throw() {
+bool Converter::Plugin_Names::exists(int type) const throw() {
 	return find(type) != end();
 }
 
-const std::string & Converter::Plugin_Names::operator()(int const & type) const {
+std::string const & Converter::Plugin_Names::operator()(int type) const {
 	const_iterator i = find(type);
 	//if(i == end()) throw std::exception("internal machine replacement plugin not declared");
 	if(i == end()) throw;
@@ -297,7 +297,7 @@ const Converter::Plugin_Names & Converter::plugin_names() {
 }
 
 template<typename Parameter>
-void Converter::retweak(Machine & machine, const int & type, Parameter parameters [], const int & parameter_count, const int & parameter_offset) {
+void Converter::retweak(Machine & machine, int type, Parameter parameters [], int parameter_count, int parameter_offset) {
 	for(int parameter(0); parameter < parameter_count ; ++parameter) {
 		int new_parameter(parameter_offset + parameter);
 		int new_value(parameters[parameter]);
@@ -306,7 +306,7 @@ void Converter::retweak(Machine & machine, const int & type, Parameter parameter
 	}
 }
 
-void Converter::retweak(const int & type, int & parameter, int & integral_value) const {
+void Converter::retweak(int type, int & parameter, int & integral_value) const {
 	Real value(integral_value);
 	const Real maximum(0xffff);
 	switch(type) {
