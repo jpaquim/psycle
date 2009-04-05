@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 CONFIG *= ordered
-SUBDIRS *= ../psycle-helpers qmake
+SUBDIRS *= ../universalis qmake
