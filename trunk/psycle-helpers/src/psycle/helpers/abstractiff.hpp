@@ -4,6 +4,8 @@
 */
 #pragma once
 
+#include <cstdint>
+
 namespace psycle
 {
 	namespace helpers
@@ -20,12 +22,12 @@ namespace psycle
 					unsigned char lohi;
 					unsigned char lolo;
 				}byte;
-				unsigned long originalValue;
+				std::uint32_t originalValue;
 			}d;
 			ULongBE();
 			ULongBE(std::uint32_t);
-			virtual unsigned long unsignedValue();
-			virtual signed long signedValue();
+			virtual std::uint32_t unsignedValue();
+			virtual std::int32_t signedValue();
 		};
 
 		class LongBE : public ULongBE
@@ -44,12 +46,12 @@ namespace psycle
 					unsigned char hi;
 					unsigned char lo;
 				}byte;
-				unsigned short originalValue;
+				std::uint16_t originalValue;
 			}d;
 			UShortBE();
 			UShortBE(std::uint16_t);
-			virtual unsigned short unsignedValue();
-			virtual signed short signedValue();
+			virtual std::uint16_t unsignedValue();
+			virtual std::int16_t signedValue();
 		};
 		class ShortBE : public UShortBE
 		{
@@ -73,7 +75,7 @@ namespace psycle
 					unsigned char hi;
 					unsigned char lo;
 				}byte;
-				unsigned short value;
+				std::uint16_t value;
 			}decimal;
 			float value();
 		};
@@ -89,12 +91,12 @@ namespace psycle
 					unsigned char hilo;
 					unsigned char hihi;
 				}byte;
-				unsigned long originalValue;
+				std::uint32_t originalValue;
 			}d;
 			ULongLE();
 			ULongLE(std::uint32_t);
-			virtual unsigned long unsignedValue();
-			virtual signed long signedValue();
+			virtual std::uint32_t unsignedValue();
+			virtual std::int32_t signedValue();
 		};
 
 		class LongLE : public ULongLE
@@ -113,12 +115,12 @@ namespace psycle
 					unsigned char lo;
 					unsigned char hi;
 				}byte;
-				unsigned short originalValue;
+				std::uint16_t originalValue;
 			}d;
 			UShortLE();
 			UShortLE(std::uint16_t);
-			virtual unsigned short unsignedValue();
-			virtual signed short signedValue();
+			virtual std::uint16_t unsignedValue();
+			virtual std::int16_t signedValue();
 		};
 		class ShortLE : public UShortLE
 		{
