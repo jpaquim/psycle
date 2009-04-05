@@ -16,7 +16,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::except
 		~exception() throw() { delete what_; }
 
 	public:
-		int const code() const throw() { return code_; }
+		int code() const throw() { return code_; }
 	private:
 		int const code_;
 
