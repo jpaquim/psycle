@@ -14,6 +14,9 @@
 //
 //////////////////////////////////////////////////////////////////////
 //				Monophonics
+
+using psycle::plugin_interface::MAX_BUFFER_LENGTH;
+
 extern float				m_out[MAX_BUFFER_LENGTH];
 //				Polyphonics
 extern float				m_osc1_fm_out[MAX_BUFFER_LENGTH];

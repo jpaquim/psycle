@@ -38,9 +38,8 @@ v0.01b
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cstdlib>
-//#include <cassert>
-//#include <cmath>
 
+using namespace psycle::plugin_interface;
 
 #define PLUGIN_NAME "Pooplog Scratch Master 0.06b"
 
@@ -50,7 +49,7 @@ v0.01b
 #define SPEED_ONE 1024.0f
 #define MAX_BUF 1024*1024*4
 
-inline int f2i(float flt)
+inline int f2i(float flt) ///\todo use psycle-helpers
 { 
 	#if defined _MSC_VER && defined _M_IX86
 		int i; 

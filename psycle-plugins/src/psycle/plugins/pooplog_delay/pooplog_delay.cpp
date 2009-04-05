@@ -27,6 +27,8 @@ v0.01b
 
 #include "filter.h"
 
+using namespace psycle::plugin_interface;
+
 #ifndef LIGHT
 #define MAX_BUF 1024*1024*4
 #define PLUGIN_NAME "Pooplog Delay 0.04b"
@@ -35,7 +37,7 @@ v0.01b
 #define PLUGIN_NAME "Pooplog Delay Light 0.04b"
 #endif
 
-inline int f2i(float flt)
+inline int f2i(float flt) ///\todo use psycle-helpers
 { 
 	#if defined _MSC_VER && defined _M_IX86
 		int i; 

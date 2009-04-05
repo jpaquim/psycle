@@ -1,6 +1,9 @@
 #include <psycle/plugin_interface.hpp>
 #include "envelope.hpp"
-#include <math.h> // should be <cmath>
+#include <cmath>
+#include <cstdint>
+
+using namespace psycle::plugin_interface;
 
 //////////////////////////////////////////////////////////////////////
 // Psycle
@@ -336,10 +339,10 @@ class mi : public CMachineInterface
 		virtual void DSPClear(float *psamplesleft,float *psamplesright, int numsamples);
 		virtual void Stop();
 
-		uint8 wave,ModWave;
+		std::uint8_t wave,ModWave;
 		CTrack Tracks[MAX_TRACKS];
 		int medBreakNote[MAX_TRACKS];
-		uint8 route;
+		std::uint8_t route;
 		int mod1_env,mod2_env,mod3_env;
 		int tickCounter;
 };

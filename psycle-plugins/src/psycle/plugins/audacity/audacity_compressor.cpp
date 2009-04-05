@@ -16,68 +16,64 @@
 **********************************************************************/
 
 #include <psycle/plugin_interface.hpp>
+#include "Compressor.h"
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
-#include "Compressor.h"
+
+using namespace psycle::plugin_interface;
 
 #define MAX_SAMPLES 3000
 #define M_PI 3.14159265359f
 #define NUMPARAMETERS 5
 
-CMachineParameter const paraThreshold = 
-{ 
+CMachineParameter const paraThreshold = {
 	"Threshold",
-	"Threshold",		// description
-	-36,			// MinValue
-	-1,			// MaxValue
-	MPF_STATE,		// Flags
+	"Threshold", // description
+	-36, // MinValue
+	-1, // MaxValue
+	MPF_STATE, // Flags
 	-12,
 };
 
-CMachineParameter const paraRatio = 
-{ 
+CMachineParameter const paraRatio = {
 	"Ratio",
-	"Ratio",		// description
-	100,			// MinValue
-	10000,			// MaxValue
-	MPF_STATE,		// Flags
+	"Ratio", // description
+	100, // MinValue
+	10000, // MaxValue
+	MPF_STATE, // Flags
 	200,
 };
 
-CMachineParameter const paraAttackTime = 
-{ 
+CMachineParameter const paraAttackTime = {
 	"Attack",
-	"Attack",		// description
-	100,			// MinValue
-	10000,			// MaxValue
-	MPF_STATE,		// Flags
+	"Attack", // description
+	100, // MinValue
+	10000, // MaxValue
+	MPF_STATE, // Flags
 	200,
 };
 
-CMachineParameter const paraDecayTime = 
-{ 
+CMachineParameter const paraDecayTime = {
 	"Decay",
-	"Decay",		// description
-	100,			// MinValue
-	10000,			// MaxValue
-	MPF_STATE,		// Flags
+	"Decay", // description
+	100, // MinValue
+	10000, // MaxValue
+	MPF_STATE, // Flags
 	1000,
 };
 
 
-CMachineParameter const paraUseGain = 
-{ 
+CMachineParameter const paraUseGain = {
 	"Use gain",
-	"Use gain",		// description
-	0,			// MinValue
-	1,			// MaxValue
-	MPF_STATE,		// Flags
+	"Use gain", // description
+	0, // MinValue
+	1, // MaxValue
+	MPF_STATE, // Flags
 	0,
 };
 
-CMachineParameter const *pParameters[] = 
-{ 
+CMachineParameter const *pParameters[] = {
 	// global
 	&paraThreshold,
 	&paraRatio,
@@ -88,111 +84,99 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo (
 	MI_VERSION,				
-	EFFECT,			// flags
-	NUMPARAMETERS,		// numParameters
-	pParameters,		// Pointer to parameters
-#ifdef _DEBUG
-	"Audacity Compressor (Debug build)",		// name
-#else
-	"Audacity Compressor",				// name
-#endif
-	"ACompressor",					// short name
-	"Dominic Mazzoni/Sartorius",			// author
-	"About",					// A command, that could be use for open an editor, etc...
+	EFFECT, // flags
+	NUMPARAMETERS, // numParameters
+	pParameters, // Pointer to parameters
+	"Audacity Compressor" // name
+		#ifndef NDEBUG
+		" (Debug build)"
+		#endif
+		,
+	"ACompressor", // short name
+	"Dominic Mazzoni/Sartorius", // author
+	"About", // A command, that could be use for open an editor, etc...
 	1
 );
 
+class mi : public CMachineInterface {
+	public:
+		mi();
+		virtual ~mi();
 
-class mi : public CMachineInterface
-{
-public:
+		virtual void Init();
+		virtual void SequencerTick();
+		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
+		virtual bool DescribeValue(char* txt,int const param, int const value);
+		virtual void Command();
+		virtual void ParameterTweak(int par, int val);
 
-	mi();
-	virtual ~mi();
-
-	virtual void Init();
-	virtual void SequencerTick();
-	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
-	virtual bool DescribeValue(char* txt,int const param, int const value);
-	virtual void Command();
-	virtual void ParameterTweak(int par, int val);
-
-private:
-
-	EffectCompressor sl,sr;
-	int samplerate;
+	private:
+		EffectCompressor sl,sr;
+		int samplerate;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
-mi::mi()
-{
+mi::mi() {
 	// The constructor zone
 	Vals = new int[NUMPARAMETERS];
 }
 
-mi::~mi()
-{
+mi::~mi() {
 	delete Vals;
 }
 
-void mi::Init()
-{
-// Initialize your stuff here
+void mi::Init() {
+	// Initialize your stuff here
 	samplerate = pCB->GetSamplingRate();
 	sl.setSampleRate(samplerate);
 	sr.setSampleRate(samplerate);
 }
 
-void mi::SequencerTick()
-{
-// Called on each tick while sequencer is playing
+void mi::SequencerTick() {
+	// Called on each tick while sequencer is playing
 	if(samplerate!=pCB->GetSamplingRate()) Init();
 }
 
-void mi::Command()
-{
-// Called when user presses editor button
-// Probably you want to show your custom window here
-// or an about button
+void mi::Command() {
+	// Called when user presses editor button
+	// Probably you want to show your custom window here
+	// or an about button
 	pCB->MessBox("Audacity Compressor","ACompressor",0);
 }
 
-void mi::ParameterTweak(int par, int val)
-{
+void mi::ParameterTweak(int par, int val) {
 	Vals[par]=val;
-	switch(par)
-	{
-	case 0:
-		sl.setThreshold(val);
-		sl.setGainDB();
-		sr.setThreshold(val);
-		sr.setGainDB();
-		break;
-	case 1: 
-		sl.setRatio(val*.01);
-		sr.setRatio(val*.01);
-		break;
-	case 2: 
-		sl.setAttack(val*.001);
-		sr.setAttack(val*.001);
-		break;
-	case 3: 
-		sl.setDecay(val*.001);
-		sr.setDecay(val*.001);
-		break;
-	case 4:
-		sl.setGain(val==1);
-		sr.setGain(val==1);
-		break;
-	default:
-		break;
+	switch(par) {
+		case 0:
+			sl.setThreshold(val);
+			sl.setGainDB();
+			sr.setThreshold(val);
+			sr.setGainDB();
+			break;
+		case 1: 
+			sl.setRatio(val*.01);
+			sr.setRatio(val*.01);
+			break;
+		case 2: 
+			sl.setAttack(val*.001);
+			sr.setAttack(val*.001);
+			break;
+		case 3: 
+			sl.setDecay(val*.001);
+			sr.setDecay(val*.001);
+			break;
+		case 4:
+			sl.setGain(val==1);
+			sr.setGain(val==1);
+			break;
+		default:
+			break;
 	}
 }
 
 // Work... where all is cooked 
-void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
-{
+void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
 	if (sl.BufferIn(psamplesleft,numsamples)!=0)
 		sl.Process(numsamples);
 	if (sr.BufferIn(psamplesright,numsamples)!=0)
@@ -202,11 +186,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 }
 
 // Function that describes value on client's displaying
-bool mi::DescribeValue(char* txt,int const param, int const value)
-{
-
-	switch(param)
-	{
+bool mi::DescribeValue(char* txt,int const param, int const value) {
+	switch(param) {
 		case 0:
 			std::sprintf(txt,"%i dB",value);
 			return true;

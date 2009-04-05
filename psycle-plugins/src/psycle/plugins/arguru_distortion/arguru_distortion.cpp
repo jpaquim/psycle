@@ -7,6 +7,8 @@
 //////////////////////////////////////////////////////////////////////
 // Arguru simple distortion/saturator plugin for PSYCLE
 
+using namespace psycle::plugin_interface;
+
 CMachineParameter const paraThreshold = 
 { 
 	"Threshold",

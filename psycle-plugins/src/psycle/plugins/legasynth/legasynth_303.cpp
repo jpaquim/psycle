@@ -10,6 +10,8 @@
 #include <vector>
 #include <psycle/plugin_interface.hpp>
 
+using namespace psycle::plugin_interface;
+
 #define NUMPARAMETERS 28
 
 CMachineParameter const paraCoarse = 

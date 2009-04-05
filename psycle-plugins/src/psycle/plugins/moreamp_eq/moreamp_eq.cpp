@@ -45,11 +45,12 @@
 	*   $Id: moreamp_eq.cpp 3616 2006-12-17 20:15:14Z johan-boule $$
 	*/
 #include <psycle/plugin_interface.hpp>
+#include "maEqualizer.h"
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
 
-#include "maEqualizer.h"
+using namespace psycle::plugin_interface;
 
 #define NUMPARAMETERS 36
 

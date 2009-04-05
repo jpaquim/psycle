@@ -2,10 +2,11 @@
 #include "drum.hpp"
 #include <cstdlib>
 
+using namespace psycle::plugin_interface;
+
 #define DRUM_VERSION "2.2"
 #define MAX_SIMUL_TRACKS 16
 #define NUMPARAMETERS 16
-
 
 CMachineParameter const prStartFreq = {
 	"Start Freq",

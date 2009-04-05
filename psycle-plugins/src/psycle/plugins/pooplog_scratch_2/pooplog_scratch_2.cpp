@@ -38,9 +38,9 @@ v0.01b
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cstdlib>
-//#include <cassert>
 #include <cmath>
 
+using namespace psycle::plugin_interface;
 
 #define PLUGIN_NAME "Pooplog Scratch Master 2 0.06b"
 
@@ -64,7 +64,7 @@ v0.01b
 float SyncAdd[MAXSYNCMODES+1];
 float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 
-inline int f2i(float flt)
+inline int f2i(float flt) ///\todo use psycle-helpers
 { 
 	#if defined _MSC_VER && defined _M_IX86
 		int i; 

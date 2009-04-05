@@ -1,6 +1,8 @@
 #include "track.hpp"
 #include <cassert>
 
+using namespace psycle::plugin_interface;
+
 // CTrack Definition file (M3Track.cpp)
 
 /* Since This doesn't work, the values in the "Init()" are hardcoded

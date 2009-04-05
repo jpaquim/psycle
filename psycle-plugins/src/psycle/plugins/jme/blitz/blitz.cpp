@@ -1,4 +1,4 @@
-/*								Blitz (C)2005 by jme
+/*								Blitz (C)2005-2009 by jme
 		Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
 		This plugin is free software; you can redistribute it and/or modify
@@ -19,1132 +19,1027 @@
 #include <packageneric/pre-compiled.private.hpp>
 #include "blitz.h"
 
-CMachineParameter const paraGlobal = 
-{ 
+using namespace psycle::plugin_interface;
+
+CMachineParameter const paraGlobal =
+{
 	"Global",
-	"Global",																																				// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Global",
+	0,
+	1,
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraGlobalVolume = 
-{ 
+CMachineParameter const paraGlobalVolume = {
 	"Volume",
-	"Volume",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Volume",
+	0,
+	256,
+	MPF_STATE,
 	128
 };
 
-CMachineParameter const paraGlobalCoarse = 
-{ 
+CMachineParameter const paraGlobalCoarse = {
 	"Coarse",
-	"Coarse",																																				// description
-	-60,																																								// MinValue				
-	60,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Coarse",
+	-60,
+	60,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraGlobalFine = 
-{ 
+CMachineParameter const paraGlobalFine = {
 	"Fine",
-	"Fine",																																								// description
-	-256,																																								// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Fine",				
+	-256,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraGlobalGlide = 
-{ 
+CMachineParameter const paraGlobalGlide = {
 	"Glide",
-	"Glide",																																				// description
-	0,																																												// MinValue				
-	255,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Glide",
+	0,
+	255,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraGlobalStereo = 
-{ 
+CMachineParameter const paraGlobalStereo = {
 	"Stereo Switching",
-	"Stereo Switching",																												// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Stereo Switching",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraArpeggiator = 
-{ 
+CMachineParameter const paraArpeggiator = {
 	"Arpeggiator",
-	"Arpeggiator",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Arpeggiator",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraArpPattern = 
-{ 
+CMachineParameter const paraArpPattern = {
 	"Pattern",
-	"Pattern",																																				// description
-	0,																																												// MinValue				
-	11,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Pattern",
+	0,
+	11,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraArpSpeed = 
-{ 
+CMachineParameter const paraArpSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	1,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	1,
+	256,
+	MPF_STATE,
 	24
 };
 
-CMachineParameter const paraArpShuffle = 
-{ 
+CMachineParameter const paraArpShuffle = {
 	"Shuffle",
-	"Shuffle",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Shuffle",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraArpRetrig = 
-{ 
+CMachineParameter const paraArpRetrig = {
 	"Retrig",
-	"Retrig",																																				// description
-	0,																																												// MinValue				
-	2,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Retrig",
+	0,
+	2,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraLfo = 
-{ 
+CMachineParameter const paraLfo = {
 	"LFO",
-	"LFO",																																								// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"LFO",				
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraLfoDelay = 
-{ 
+CMachineParameter const paraLfoDelay = {
 	"Delay",
-	"Delay",																																				// description
-	0,																																												// MinValue				
-	999,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Delay",
+	0,
+	999,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraLfoDepth = 
-{ 
+CMachineParameter const paraLfoDepth = {
 	"Depth",
-	"Depth",																																				// description
-	-999,																																								// MinValue				
-	999,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Depth",
+	-999,
+	999,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraLfoSpeed = 
-{ 
+CMachineParameter const paraLfoSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	999,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	999,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraLfoDestination = 
-{ 
+CMachineParameter const paraLfoDestination = {
 	"Destination Oscillators",
-	"Destination Oscillators",																				// description
-	0,																																												// MinValue				
-	7,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Destination Oscillators",
+	0,
+	7,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1 = 
-{ 
+CMachineParameter const paraOsc1 = {
 	"Oscillator 1",
-	"Oscillator 1",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Oscillator 1",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc1Volume = 
-{ 
+CMachineParameter const paraOsc1Volume = {
 	"Volume",
-	"Volume",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Volume",
+	0,
+	256,
+	MPF_STATE,
 	128
 };
 
-CMachineParameter const paraOsc1Coarse = 
-{ 
+CMachineParameter const paraOsc1Coarse = {
 	"Coarse",
-	"Coarse",																																				// description
-	-60,																																								// MinValue				
-	60,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Coarse",
+	-60,
+	60,				
+	MPF_STATE,
 	0
 };
 
 CMachineParameter const paraOsc1Fine = 
 {
 	"Fine",
-	"Fine",																																								// description
-	-256,																																								// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Fine",				
+	-256,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1Waveform = 
-{ 
+CMachineParameter const paraOsc1Waveform = {
 	"Waveform",
-	"Waveform",																																				// description
-	0,																																												// MinValue				
-	37,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Waveform",
+	0,
+	37,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1Feedback = 
-{ 
+CMachineParameter const paraOsc1Feedback = {
 	"Feedback",
-	"Feedback",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Feedback",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1Options = 
-{ 
+CMachineParameter const paraOsc1Options = {
 	"Options",
-	"Options",																																				// description
-	0,																																												// MinValue				
-	13,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Options",
+	0,
+	13,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1Func = 
-{ 
+CMachineParameter const paraOsc1Func = {
 	"Function",
-	"Function",																																				// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Function",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc1FuncType = 
-{ 
+CMachineParameter const paraOsc1FuncType = {
 	"Type",
-	"Type",																																								// description
-	0,																																												// MinValue				
-	54,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Type",				
+	0,
+	54,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1FuncSym = 
-{ 
+CMachineParameter const paraOsc1FuncSym = {
 	"Symmetry",
-	"Symmetry",																																				// description
-	0,																																												// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Symmetry",
+	0,
+	2047,
+	MPF_STATE,
 	1024
 };
 
-CMachineParameter const paraOsc1SymDrift = 
-{ 
+CMachineParameter const paraOsc1SymDrift = {
 	"Symmetry Drift",
-	"Symmetry Drift",																												// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Symmetry Drift",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc1SymDriftRange = 
-{ 
+CMachineParameter const paraOsc1SymDriftRange = {
 	"Range",
-	"Range",																																				// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Range",
+	-2047,
+	2047,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1SymDriftSpeed = 
-{ 
+CMachineParameter const paraOsc1SymDriftSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1SymLfo = 
-{ 
+CMachineParameter const paraOsc1SymLfo = {
 	"Symmetry LFO",
-	"Symmetry LFO",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Symmetry LFO",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc1SymLfoRange = 
-{ 
+CMachineParameter const paraOsc1SymLfoRange = {
 	"Range",
-	"Range",																																				// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Range",
+	-2047,
+	2047,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc1SymLfoSpeed = 
-{ 
+CMachineParameter const paraOsc1SymLfoSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2 = 
-{ 
+CMachineParameter const paraOsc2 = {
 	"Oscillator 2",
-	"Oscillator 2",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Oscillator 2",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc2Volume = 
-{ 
+CMachineParameter const paraOsc2Volume = {
 	"Volume",
-	"Volume",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Volume",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2Coarse = 
-{ 
+CMachineParameter const paraOsc2Coarse = {
 	"Coarse",
-	"Coarse",																																				// description
-	-60,																																								// MinValue				
-	60,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Coarse",
+	-60,
+	60,				
+	MPF_STATE,
 	0
 };
 
 CMachineParameter const paraOsc2Fine = 
 {
 	"Fine",
-	"Fine",																																								// description
-	-256,																																								// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Fine",				
+	-256,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2Waveform = 
-{ 
+CMachineParameter const paraOsc2Waveform = {
 	"Waveform",
-	"Waveform",																																				// description
-	0,																																												// MinValue				
-	37,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Waveform",
+	0,
+	37,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2Feedback = 
-{ 
+CMachineParameter const paraOsc2Feedback = {
 	"Feedback",
-	"Feedback",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Feedback",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2Options = 
-{ 
+CMachineParameter const paraOsc2Options = {
 	"Options",
-	"Options",																																				// description
-	0,																																												// MinValue				
-	13,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Options",
+	0,
+	13,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2Func = 
-{ 
+CMachineParameter const paraOsc2Func = {
 	"Function",
-	"Function",																																				// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Function",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc2FuncType = 
-{ 
+CMachineParameter const paraOsc2FuncType = {
 	"Type",
-	"Type",																																								// description
-	0,																																												// MinValue				
-	54,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Type",				
+	0,
+	54,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2FuncSym = 
-{ 
+CMachineParameter const paraOsc2FuncSym = {
 	"Symmetry",
-	"Symmetry",																																				// description
-	0,																																												// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Symmetry",
+	0,
+	2047,
+	MPF_STATE,
 	1024
 };
 
-CMachineParameter const paraOsc2SymDrift = 
-{ 
+CMachineParameter const paraOsc2SymDrift = {
 	"Symmetry Drift",
-	"Symmetry Drift",																												// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Symmetry Drift",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
 
-CMachineParameter const paraOsc2SymDriftRange = 
-{ 
+CMachineParameter const paraOsc2SymDriftRange = {
 	"Range",
-	"Range",																																				// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Range",
+	-2047,
+	2047,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2SymDriftSpeed = 
-{ 
+CMachineParameter const paraOsc2SymDriftSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2SymLfo = 
-{ 
+CMachineParameter const paraOsc2SymLfo = {
 	"Symmetry LFO",
-	"Symmetry LFO",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Symmetry LFO",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc2SymLfoRange = 
-{ 
+CMachineParameter const paraOsc2SymLfoRange = {
 	"Range",
-	"Range",																																				// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Range",
+	-2047,
+	2047,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc2SymLfoSpeed = 
-{ 
+CMachineParameter const paraOsc2SymLfoSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3 = 
-{ 
+CMachineParameter const paraOsc3 = {
 	"Oscillator 3",
-	"Oscillator 3",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Oscillator 3",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc3Volume = 
-{ 
+CMachineParameter const paraOsc3Volume = {
 	"Volume",
-	"Volume",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Volume",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3Coarse = 
-{ 
+CMachineParameter const paraOsc3Coarse = {
 	"Coarse",
-	"Coarse",																																				// description
-	-60,																																								// MinValue				
-	60,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Coarse",
+	-60,
+	60,				
+	MPF_STATE,
 	0
 };
 
 CMachineParameter const paraOsc3Fine = 
 {
 	"Fine",
-	"Fine",																																								// description
-	-256,																																								// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Fine",				
+	-256,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3Waveform = 
-{ 
+CMachineParameter const paraOsc3Waveform = {
 	"Waveform",
-	"Waveform",																																				// description
-	0,																																												// MinValue				
-	37,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Waveform",
+	0,
+	37,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3Feedback = 
-{ 
+CMachineParameter const paraOsc3Feedback = {
 	"Feedback",
-	"Feedback",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Feedback",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3Options = 
-{ 
+CMachineParameter const paraOsc3Options = {
 	"Options",
-	"Options",																																				// description
-	0,																																												// MinValue				
-	13,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Options",
+	0,
+	13,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3Func = 
-{ 
+CMachineParameter const paraOsc3Func = {
 	"Function",
-	"Function",																																				// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Function",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc3FuncType = 
-{ 
+CMachineParameter const paraOsc3FuncType = {
 	"Type",
-	"Type",																																								// description
-	0,																																												// MinValue				
-	54,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Type",				
+	0,
+	54,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3FuncSym = 
-{ 
+CMachineParameter const paraOsc3FuncSym = {
 	"Symmetry",
-	"Symmetry",																																				// description
-	0,																																												// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Symmetry",
+	0,
+	2047,
+	MPF_STATE,
 	1024
 };
 
-CMachineParameter const paraOsc3SymDrift = 
-{ 
+CMachineParameter const paraOsc3SymDrift = {
 	"Symmetry Drift",
-	"Symmetry Drift",																												// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Symmetry Drift",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc3SymDriftRange = 
-{ 
+CMachineParameter const paraOsc3SymDriftRange = {
 	"Range",
-	"Range",																																				// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Range",
+	-2047,
+	2047,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3SymDriftSpeed = 
-{ 
+CMachineParameter const paraOsc3SymDriftSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3SymLfo = 
-{ 
+CMachineParameter const paraOsc3SymLfo = {
 	"Symmetry LFO",
-	"Symmetry LFO",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Symmetry LFO",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc3SymLfoRange = 
-{ 
+CMachineParameter const paraOsc3SymLfoRange = {
 	"Range",
-	"Range",																																				// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Range",
+	-2047,
+	2047,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc3SymLfoSpeed = 
-{ 
+CMachineParameter const paraOsc3SymLfoSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
 
-CMachineParameter const paraOsc4 = 
-{ 
+CMachineParameter const paraOsc4 = {
 	"Oscillator 4",
-	"Oscillator 4",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Oscillator 4",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc4Volume = 
-{ 
+CMachineParameter const paraOsc4Volume = {
 	"Volume",
-	"Volume",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Volume",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
 CMachineParameter const paraOsc4Coarse = 
 {
 	"Coarse",
-	"Coarse",																																				// description
-	-60,																																								// MinValue				
-	60,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Coarse",
+	-60,
+	60,				
+	MPF_STATE,
 	0
 };
 
 CMachineParameter const paraOsc4Fine = 
 {
 	"Fine",
-	"Fine",																																								// description
-	-256,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Fine",				
+	-256,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc4Waveform = 
-{ 
+CMachineParameter const paraOsc4Waveform = {
 	"Waveform",
-	"Waveform",																																				// description
-	0,																																												// MinValue				
-	37,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Waveform",
+	0,
+	37,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc4Feedback = 
-{ 
+CMachineParameter const paraOsc4Feedback = {
 	"Feedback",
-	"Feedback",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Feedback",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc4Options = 
-{ 
+CMachineParameter const paraOsc4Options = {
 	"Options",
-	"Options",																																				// description
-	0,																																												// MinValue				
-	13,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Options",
+	0,
+	13,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc4Func = 
-{ 
+CMachineParameter const paraOsc4Func = {
 	"Function",
-	"Function",																																				// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Function",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc4FuncType = 
-{ 
+CMachineParameter const paraOsc4FuncType = {
 	"Type",
-	"Type",																																								// description
-	0,																																												// MinValue				
-	54,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Type",				
+	0,
+	54,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc4FuncSym = 
-{ 
+CMachineParameter const paraOsc4FuncSym = {
 	"Symmetry",
-	"Symmetry",																																				// description
-	0,																																												// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Symmetry",
+	0,
+	2047,
+	MPF_STATE,
 	1024
 };
 
-CMachineParameter const paraOsc4SymDrift = 
-{ 
+CMachineParameter const paraOsc4SymDrift = {
 	"Symmetry Drift",
-	"Symmetry Drift",																												// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Symmetry Drift",
+	-2047,
+	2047,
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc4SymDriftRange = 
-{ 
+CMachineParameter const paraOsc4SymDriftRange = {
 	"Range",
-	"Range",																																				// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Range",
+	-2047,
+	2047,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc4SymDriftSpeed = 
-{ 
+CMachineParameter const paraOsc4SymDriftSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc4SymLfo = 
-{ 
+CMachineParameter const paraOsc4SymLfo = {
 	"Symmetry LFO",
-	"Symmetry LFO",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Symmetry LFO",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraOsc4SymLfoRange = 
-{ 
+CMachineParameter const paraOsc4SymLfoRange = {
 	"Range",
-	"Range",																																				// description
-	-2047,																																								// MinValue				
-	2047,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Range",
+	-2047,
+	2047,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraOsc4SymLfoSpeed = 
-{ 
+CMachineParameter const paraOsc4SymLfoSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraRM = 
-{ 
+CMachineParameter const paraRM = {
 	"Ring Modulators",
-	"Ring Modulators",																												// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Ring Modulators",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraRM1 = 
-{ 
+CMachineParameter const paraRM1 = {
 	"RM 1/2 Volume",
-	"RM 1/2 Volume",																												// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"RM 1/2 Volume",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraRM2 = 
-{ 
+CMachineParameter const paraRM2 = {
 	"RM 3/4 Volume",
-	"RM 3/4 Volume",																												// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"RM 3/4 Volume",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraPitch = 
-{ 
+CMachineParameter const paraPitch = {
 	"Pitch Mod",
-	"Pitch Mod",																																// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Pitch Mod",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraModA = 
-{ 
+CMachineParameter const paraModA = {
 	"Envelope Attack",
-	"Envelope Attack",																												// description
-	1,																																												// MinValue				
-	MAX_ENV_TIME>>3,																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Envelope Attack",
+	1,
+	MAX_ENV_TIME>>3,
+	MPF_STATE,
 	1
 };
 
-CMachineParameter const paraModD = 
-{ 
+CMachineParameter const paraModD = {
 	"Envelope Decay",
-	"Envelope Decay",																												// description
-	1,																																												// MinValue				
-	MAX_ENV_TIME>>3,																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Envelope Decay",
+	1,
+	MAX_ENV_TIME>>3,
+	MPF_STATE,
 	1
 };
 
-CMachineParameter const paraModEnvAmount = 
-{ 
+CMachineParameter const paraModEnvAmount = {
 	"Envelope Amount",
-	"Envelope Amount",																												// description
-	-256,																																								// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Envelope Amount",
+	-256,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraAmp = 
-{ 
+CMachineParameter const paraAmp = {
 	"Amplifier Envelope",
-	"Amplifier Envelope",																								// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Amplifier Envelope",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraAmpA = 
-{ 
+CMachineParameter const paraAmpA = {
 	"Attack",
-	"Attack",																																				// description
-	MIN_ENV_TIME,																																// MinValue				
-	MAX_ENV_TIME,																																// MaxValue
-	MPF_STATE,																																				// Flags
+	"Attack",
+	MIN_ENV_TIME,
+	MAX_ENV_TIME,
+	MPF_STATE,
 	MIN_ENV_TIME
 };
 
-CMachineParameter const paraAmpD = 
-{ 
+CMachineParameter const paraAmpD = {
 	"Decay",
-	"Decay",																																				// description
-	MIN_ENV_TIME,																																// MinValue				
-	MAX_ENV_TIME,																																// MaxValue
-	MPF_STATE,																																				// Flags
+	"Decay",
+	MIN_ENV_TIME,
+	MAX_ENV_TIME,
+	MPF_STATE,
 	4096
 };
 
-CMachineParameter const paraAmpS = 
-{ 
+CMachineParameter const paraAmpS = {
 	"Sustain",
-	"Sustain",																																				// description
-	0,																																												// MinValue				
-	255,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Sustain",
+	0,
+	255,
+	MPF_STATE,
 	224
 };
 
-CMachineParameter const paraAmpD2 = 
-{ 
+CMachineParameter const paraAmpD2 = {
 	"Decay 2",
-	"Decay 2",																																				// description
-	MIN_ENV_TIME,																																// MinValue				
-	MAX_ENV_TIME,																																// MaxValue
-	MPF_STATE,																																				// Flags
+	"Decay 2",
+	MIN_ENV_TIME,
+	MAX_ENV_TIME,
+	MPF_STATE,
 	65536
 };
 
-CMachineParameter const paraAmpR = 
-{ 
+CMachineParameter const paraAmpR = {
 	"Release",
-	"Release",																																				// description
-	MIN_ENV_TIME,																																// MinValue				
-	MAX_ENV_TIME,																																// MaxValue
-	MPF_STATE,																																				// Flags
+	"Release",
+	MIN_ENV_TIME,
+	MAX_ENV_TIME,
+	MPF_STATE,
 	640
 };
 
-CMachineParameter const paraAmpScaling = 
-{ 
+CMachineParameter const paraAmpScaling = {
 	"Key Scaling",
-	"Key Scaling",																																// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Key Scaling",
+	0,
+	256,
+	MPF_STATE,
 	150
 };
 
-CMachineParameter const paraAmpVelocity = 
-{ 
+CMachineParameter const paraAmpVelocity = {
 	"Velocity",
-	"Velocity",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Velocity",
+	0,
+	256,
+	MPF_STATE,
 	256
 };
 
-CMachineParameter const paraAmpTrack = 
-{ 
+CMachineParameter const paraAmpTrack = {
 	"Soften High Notes",
-	"Soften High Notes",																								// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Soften High Notes",
+	0,
+	256,
+	MPF_STATE,
 	64
 };
 
-CMachineParameter const paraFlt = 
-{ 
+CMachineParameter const paraFlt = {
 	"Filter",
-	"Filter",																																				// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Filter",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
-CMachineParameter const paraFltType = 
-{ 
+CMachineParameter const paraFltType = {
 	"Type",
-	"Type",																																								// description
-	0,																																												// MinValue				
-	17,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Type",				
+	0,
+	17,				
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraFltCutoff = 
-{ 
+CMachineParameter const paraFltCutoff = {
 	"Cutoff",
-	"Cutoff",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Cutoff",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraFltResonance = 
-{ 
+CMachineParameter const paraFltResonance = {
 	"Resonance",
-	"Resonance",																																// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Resonance",
+	0,
+	256,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraFltTrack = 
-{ 
+CMachineParameter const paraFltTrack = {
 	"Track",
-	"Track",																																				// description
-	-64,																																								// MinValue				
-	64,																																												// MaxValue
-	MPF_STATE,																																				// Flags
+	"Track",
+	-64,
+	64,				
+	MPF_STATE,
 	5
 };
 
-CMachineParameter const paraFltSweep = 
-{ 
+CMachineParameter const paraFltSweep = {
 	"Sweep",
-	"Sweep",																																				// description
-	-999,																																								// MinValue				
-	999,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Sweep",
+	-999,
+	999,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraFltSpeed = 
-{ 
+CMachineParameter const paraFltSpeed = {
 	"Speed",
-	"Speed",																																				// description
-	0,																																												// MinValue				
-	999,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Speed",
+	0,
+	999,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraFltEnv = 
-{ 
+CMachineParameter const paraFltEnv = {
 	"Filter Envelope",
-	"Filter Envelope",																												// description
-	0,																																												// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE||MPF_LABEL,																								// Flags
+	"Filter Envelope",
+	0,
+	1,				
+	MPF_STATE||MPF_LABEL,
 	0
 };
 
 
 
-CMachineParameter const paraFltA = 
-{ 
+CMachineParameter const paraFltA = {
 	"Attack",
-	"Attack",																																				// description
-	MIN_ENV_TIME,																																// MinValue				
-	MAX_ENV_TIME,																																// MaxValue
-	MPF_STATE,																																				// Flags
+	"Attack",
+	MIN_ENV_TIME,
+	MAX_ENV_TIME,
+	MPF_STATE,
 	MIN_ENV_TIME
 };
 
-CMachineParameter const paraFltD = 
-{ 
+CMachineParameter const paraFltD = {
 	"Decay",
-	"Decay",																																				// description
-	MIN_ENV_TIME,																																// MinValue				
-	MAX_ENV_TIME,																																// MaxValue
-	MPF_STATE,																																				// Flags
+	"Decay",
+	MIN_ENV_TIME,
+	MAX_ENV_TIME,
+	MPF_STATE,
 	4096
 };
 
-CMachineParameter const paraFltS = 
-{ 
+CMachineParameter const paraFltS = {
 	"Sustain",
-	"Sustain",																																				// description
-	0,																																												// MinValue				
-	255,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Sustain",
+	0,
+	255,
+	MPF_STATE,
 	0
 };
 
-CMachineParameter const paraFltD2 = 
-{ 
+CMachineParameter const paraFltD2 = {
 	"Decay 2",
-	"Decay 2",																																				// description
-	MIN_ENV_TIME,																																// MinValue				
-	MAX_ENV_TIME,																																// MaxValue
-	MPF_STATE,																																				// Flags
+	"Decay 2",
+	MIN_ENV_TIME,
+	MAX_ENV_TIME,
+	MPF_STATE,
 	65536
 };
 
-CMachineParameter const paraFltR = 
-{ 
+CMachineParameter const paraFltR = {
 	"Release",
-	"Release",																																				// description
-	MIN_ENV_TIME,																																// MinValue				
-	MAX_ENV_TIME,																																// MaxValue
-	MPF_STATE,																																				// Flags
+	"Release",
+	MIN_ENV_TIME,
+	MAX_ENV_TIME,
+	MPF_STATE,
 	3074
 };
 
-CMachineParameter const paraFltScaling = 
-{ 
+CMachineParameter const paraFltScaling = {
 	"Key Scaling",
-	"Key Scaling",																																// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Key Scaling",
+	0,
+	256,
+	MPF_STATE,
 	150
 };
 
-CMachineParameter const paraFltVelocity = 
-{ 
+CMachineParameter const paraFltVelocity = {
 	"Velocity",
-	"Velocity",																																				// description
-	0,																																												// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Velocity",
+	0,
+	256,
+	MPF_STATE,
 	32
 };
 
-CMachineParameter const paraFltEnvAmount = 
-{ 
+CMachineParameter const paraFltEnvAmount = {
 	"Envelope Amount",
-	"Envelope Amount",																												// description
-	-256,																																								// MinValue				
-	256,																																								// MaxValue
-	MPF_STATE,																																				// Flags
+	"Envelope Amount",
+	-256,
+	256,
+	MPF_STATE,
 	150
 };
 
-CMachineParameter const *pParameters[] = 
-{ 
+CMachineParameter const *pParameters[] = {
 	//00
 	&paraGlobal,
 	&paraGlobalVolume,
@@ -1287,23 +1182,19 @@ CMachineParameter const *pParameters[] =
 	&paraFltEnvAmount
 };
 
-#pragma pack(1)								
-
-#pragma pack()
-
 CMachineInfo const MacInfo (
 	MI_VERSION,				
-	GENERATOR,																																// flags
-	112,																																				// numParameters
-	pParameters,																												// Pointer to parameters
-#ifndef NDEBUG
-	"Blitz (Debug build)",																				// name
-#else
-	"Blitz 1.5",																												// name
-#endif
-	"Blitz",																																// short name
-	"jme",																																				// author
-	"Help",																																				// A command, that could be use for open an editor, etc...
+	GENERATOR,								
+	112,
+	pParameters,
+	"Blitz 1.5"
+		#ifndef NDEBUG
+			" (Debug build)"
+		#endif
+		,
+	"Blitz",
+	"jme",
+	"Help",
 	7
 );
 
@@ -1456,33 +1347,32 @@ void mi::ParameterTweak(int par, int val){
 }
 
 void mi::Command(){
-// Called when user presses editor button
-// Probably you want to show your custom window here
-// or an about button
-char buffer[2048];
+	// Called when user presses editor button
+	// Probably you want to show your custom window here
+	// or an about button
+	char buffer[2048];
 
-sprintf(
-		buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
-		"Pattern commands\n",
-		"\n0Cxx : Set Volume (new!)",
-		"\nC1xx : Slide Up",
-		"\nC2xx : Slide Down",
-		"\nC3xx : Tone Portamento",
-		"\nC4xx : Tone Portamento with Retrig",
-		"\nC5xx : Interval (> 128 == minus)",
-		"\nC6xx : Touchtaping (> 128 == minus)",
-		"\nC7xx : Touchtaping with Retrig",
-		"\nC8xx : Init Strobe (+1:Drift, +2:SyncVib, +4:FltVib)",
-		"\nCCxx : Set Volume (obsolete)",
-		"\nCDxx : Interval Bend Down",
-		"\nCExx : Interval Bend Up",
-		"\nDxyy : Semi Portamento (x tones down with rate yy)",
-		"\nExyy : Semi Portamento (x tones up with rate yy)",
-		"\nBFFF and lower: Arpeggio (xyzz, x=2nd, y=3rd, zz=optional 4th tone)\n"
-		);
+	sprintf(
+			buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+			"Pattern commands\n",
+			"\n0Cxx : Set Volume (new!)",
+			"\nC1xx : Slide Up",
+			"\nC2xx : Slide Down",
+			"\nC3xx : Tone Portamento",
+			"\nC4xx : Tone Portamento with Retrig",
+			"\nC5xx : Interval (> 128 == minus)",
+			"\nC6xx : Touchtaping (> 128 == minus)",
+			"\nC7xx : Touchtaping with Retrig",
+			"\nC8xx : Init Strobe (+1:Drift, +2:SyncVib, +4:FltVib)",
+			"\nCCxx : Set Volume (obsolete)",
+			"\nCDxx : Interval Bend Down",
+			"\nCExx : Interval Bend Up",
+			"\nDxyy : Semi Portamento (x tones down with rate yy)",
+			"\nExyy : Semi Portamento (x tones up with rate yy)",
+			"\nBFFF and lower: Arpeggio (xyzz, x=2nd, y=3rd, zz=optional 4th tone)\n"
+			);
 
-pCB->MessBox(buffer,"Help",0);
-
+	pCB->MessBox(buffer,"Help",0);
 }
 
 // Work... where all is cooked
@@ -1853,7 +1743,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 }
 
 void mi::SequencerTick(){
-// Called on each tick while sequencer is playing
+	// Called on each tick while sequencer is playing
 }
 
 
@@ -2045,4 +1935,3 @@ void mi::InitWaveTable(){
 		globals.WaveTable[WAVE_RANDOM5][c]=globals.WaveTable[WAVE_RANDOM][c>>6];
 	}
 }
-

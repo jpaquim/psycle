@@ -18,6 +18,8 @@ Comments and suggestions should be mailed to Juhana Sadeharju
 #include <cmath>
 #include "gverb.h"
 
+using namespace psycle::plugin_interface;
+
 #define NUMPARAMETERS 8
 
 

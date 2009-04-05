@@ -35,10 +35,12 @@
 // version 0.2 - threshold now defaults to 32768 rather than to 512
 
 #include <psycle/plugin_interface.hpp>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
+#include <cstring>
+#include <cstdlib>
+#include <cassert>
+#include <cmath>
+
+using namespace psycle::plugin_interface;
 
 CMachineParameter const paraThreshold =
 {

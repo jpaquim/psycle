@@ -48,9 +48,11 @@ v0.01b
 
 #include "filter.h"
 
+using namespace psycle::plugin_interface;
+
 #define PLUGIN_NAME "Pooplog Filter 0.06b"
 
-inline int f2i(float flt)
+inline int f2i(float flt) ///\todo use psycle-helpers
 { 
 	#if defined _MSC_VER && defined _M_IX86
 		int i; 

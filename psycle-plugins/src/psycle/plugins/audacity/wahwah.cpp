@@ -17,19 +17,20 @@
 
 **********************************************************************/
 
-
-
-
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math/sine_cosine.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
 
+using namespace psycle::plugin_interface;
+
 #define lfoskipsamples 30
+
 #ifndef M_PI
-#define M_PI 3.14159265359f
+	#define M_PI 3.14159265359f
 #endif
+
 #define NUMPARAMETERS 5
 
 CMachineParameter const paraLFOFreq = 
