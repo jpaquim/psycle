@@ -20,6 +20,7 @@
 #include "newmachinedlg.hpp"
 
 #include <psycle/core/pluginfinder.h>
+#include <psycle/core/machinefactory.h>
 #include "../global.hpp"
 #include "../configuration.hpp"
 
@@ -43,7 +44,7 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
 	// Should we use a tree layout instead of tabs?
 	QTabWidget *machineTabs = new QTabWidget();
 
-	finder_ = &psy::core::PluginFinder::getInstance();
+	finder_ = &psy::core::MachineFactory::getInstance().getFinder();
 
 	genList = new QListWidget();
 	efxList = new QListWidget();
