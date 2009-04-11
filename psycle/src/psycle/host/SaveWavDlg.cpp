@@ -22,6 +22,9 @@ using namespace psy::core;
 #include <iostream>
 #include <iomanip>
 #include <psycle/helpers/helpers.hpp>
+#include <psycle/helpers/dither.hpp>
+using namespace psycle::helpers::dsp;
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -31,7 +34,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		int CSaveWavDlg::rate = -1;
 		int CSaveWavDlg::bits = -1;
 		int CSaveWavDlg::noiseshape = 0;
-		int CSaveWavDlg::ditherpdf = (int)pdf::triangular;
+		int CSaveWavDlg::ditherpdf = (int)Dither::Pdf::triangular;
 		BOOL CSaveWavDlg::savewires = false;
 		BOOL CSaveWavDlg::savetracks = false;
 		BOOL CSaveWavDlg::savegens = false;
@@ -252,7 +255,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pdf.AddString("Triangular");
 			m_pdf.AddString("Rectangular");
 			m_pdf.AddString("Gaussian");
-			ditherpdf = (int)pdf::triangular;
+			ditherpdf = (int)Dither::Pdf::triangular;
 			m_pdf.SetCurSel(ditherpdf);
 
 			m_noiseshaping.AddString("None");
@@ -614,7 +617,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// so for clipboard, we need an audio driver.
 			if (!file.empty()) {
 				pPlayer->setFileName(file);
-				pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape);
+				pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, Dither::Pdf(ditherpdf), Dither::NoiseShape(noiseshape));
 			}
 #else
 			pPlayer->StartRecording(file,bits,rate,channelmode,isFloat,
