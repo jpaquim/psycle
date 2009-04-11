@@ -3759,7 +3759,12 @@ namespace psycle {
 			{ 
 				// write effect
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: Add line positioning code
+				int line = 0;
+#else
 				int line = Global::pPlayer->_lineCounter;
+#endif
 				unsigned char * toffset; 
 
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
@@ -3857,7 +3862,12 @@ namespace psycle {
 			{ 
 				// write effect
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: Add line positioning code
+				int line = 0;
+#else
 				int line = Global::pPlayer->_lineCounter;
+#endif
 				unsigned char * toffset; 
 
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
@@ -3949,7 +3959,12 @@ namespace psycle {
 			{ 
 				// write effect
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: Add line positioning code
+				int line = 0;
+#else
 				int line = Global::pPlayer->_lineCounter;
+#endif
 				unsigned char * toffset; 
 
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
@@ -4033,7 +4048,12 @@ namespace psycle {
 			{ 
 				// write effect
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: Add line positioning code
+				int line = 0;
+#else
 				int line = Global::pPlayer->_lineCounter;
+#endif
 				unsigned char * toffset; 
 
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
@@ -4125,7 +4145,12 @@ namespace psycle {
 			{ 
 				// write effect
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: Add line positioning code
+				int line = 0;
+#else
 				int line = Global::pPlayer->_lineCounter;
+#endif
 				unsigned char * toffset; 
 
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
@@ -4196,7 +4221,12 @@ namespace psycle {
 			{ 
 				// write effect
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: Add line positioning code
+				int line = 0;
+#else
 				int line = Global::pPlayer->_lineCounter;
+#endif
 				unsigned char * toffset;
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
@@ -4249,7 +4279,12 @@ namespace psycle {
 			{ 
 				// write effect
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: Add line positioning code
+				int line = 0;
+#else
 				int line = Global::pPlayer->_lineCounter;
+#endif
 				unsigned char * toffset;
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
@@ -4865,7 +4900,12 @@ namespace psycle {
 				// realtime note entering
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					//todo: Add line positioning code
+					toffset = _ptrack(ps)+(0*MULTIPLY);
+#else
 					toffset = _ptrack(ps)+(Global::pPlayer->_lineCounter*MULTIPLY);
+#endif
 				}
 				else
 				{
@@ -5518,6 +5558,9 @@ namespace psycle {
 		{
 			if(child_view()->viewMode == view_modes::pattern)
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				///todo
+#else
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
@@ -5535,8 +5578,8 @@ namespace psycle {
 					soffset+=EVENT_SIZE;
 				}
 				patBufferCopy = true;
-
 				NewPatternDraw(0,song()->tracks(),0,patBufferLines-1);
+#endif
 				Repaint(draw_modes::data);
 			}
 		}
@@ -5545,6 +5588,9 @@ namespace psycle {
 		{
 			if(child_view()->viewMode == view_modes::pattern)
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				///todo
+#else
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
 				
@@ -5554,6 +5600,7 @@ namespace psycle {
 				memcpy(patBufferData,soffset,length);
 				
 				patBufferCopy=true;
+#endif
 			}
 		}
 
@@ -5563,6 +5610,8 @@ namespace psycle {
 			if(patBufferCopy && child_view()->viewMode == view_modes::pattern)
 			{
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 				unsigned char *soffset = _ppattern(ps);
 				// **************** funky shit goin on here yo with the pattern resize or some shit
 				AddUndo(ps,0,0,MAX_TRACKS,song()->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
@@ -5572,7 +5621,7 @@ namespace psycle {
 					song()->AllocNewPattern(ps,"",patBufferLines,false);
 				}
 				memcpy(soffset,patBufferData,patBufferLines*EVENT_SIZE*MAX_TRACKS);
-
+#endif
 				Repaint(draw_modes::pattern);
 			}
 		}
@@ -5583,6 +5632,8 @@ namespace psycle {
 			if(patBufferCopy && child_view()->viewMode == view_modes::pattern)
 			{
 				const int ps = _ps();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 				unsigned char* offset_target = _ppattern(ps);
 				unsigned char* offset_source = patBufferData;
 				// **************** funky shit goin on here yo with the pattern resize or some shit
@@ -5603,7 +5654,7 @@ namespace psycle {
 					offset_target+= EVENT_SIZE;
 					offset_source+= EVENT_SIZE;
 				}
-				
+#endif
 				Repaint(draw_modes::pattern);
 			}
 		}
@@ -6389,6 +6440,18 @@ namespace psycle {
 		//	case cdefPlaySkipBack:
 			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 			{
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				PlayerTimeInfo& tinfo = Player::singleton().timeInfo();
+				if (tinfo.playBeatPos() > 0 ) {
+					///todo: Add a way to skip back one pattern, not just an arbitrary size
+					Player::singleton().skip(-16.0);
+				}
+				else {
+					Player::singleton().skipTo(0.0);
+				}
+#else
+
 				if (Global::pPlayer->_sequencePosition > 0 )
 				{
 					bool b = Global::pPlayer->_playBlock;
@@ -6401,6 +6464,7 @@ namespace psycle {
 					Global::pPlayer->Start(song()->playLength-1,0);
 					Global::pPlayer->_playBlock = b;
 				}
+#endif
 			}
 			else
 			{
@@ -6430,6 +6494,16 @@ namespace psycle {
 		//	case cdefPlaySkipAhead:
 			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				PlayerTimeInfo& tinfo = Player::singleton().timeInfo();
+				if (tinfo.playBeatPos() < song()->patternSequence().tickLength() ) {
+					///todo: Add a way to skip forward one pattern, not just an arbitrary size
+					Player::singleton().skip(16.0);
+				}
+				else {
+					Player::singleton().skipTo(0.0);
+				}
+#else
 				if (Global::pPlayer->_sequencePosition < song()->playLength-1)
 				{
 					bool b = Global::pPlayer->_playBlock;
@@ -6442,6 +6516,7 @@ namespace psycle {
 					Global::pPlayer->Start(0,0);
 					Global::pPlayer->_playBlock = b;
 				}
+#endif
 			}
 			else 
 			{
@@ -6451,6 +6526,9 @@ namespace psycle {
 				}
 				else if (!bRepeat) // This prevents adding patterns when only trying to reach the end.
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					///todo: Allocate a new pattern at the end of the sequence
+#else
 					if ( song()->playLength+1 > MAX_SONG_POSITIONS) return;
 
 					AddUndoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition);
@@ -6469,6 +6547,7 @@ namespace psycle {
 					song()->playOrder[editPosition]=patternum;
 					
 					main()->m_wndSeq.UpdateSequencer();
+#endif
 				}
 
 				memset(song()->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
@@ -7456,6 +7535,32 @@ namespace psycle {
 					//if added by sampler to move backward 16 lines when playing
 					if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 					{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+						
+						PlayerTimeInfo& tinfo = Player::singleton().timeInfo();
+						if (Player::singleton().loopEnabled()) {
+
+							if (tinfo.playBeatPos() >= tinfo.cycleStartPos()) {
+								Player::singleton().skip(-stepsize);
+							}
+							else {
+								Player::singleton().skipTo(tinfo.cycleStartPos());
+							}
+						}
+						else {
+							if (tinfo.playBeatPos() >= tinfo.cycleStartPos()) {
+								Player::singleton().skip(stepsize);
+							}
+							else {
+								if (tinfo.playBeatPos() > 0 ) {
+									Player::singleton().skip(-stepsize);
+								}
+								else {
+									Player::singleton().skipTo(0);
+								}
+							}
+						}
+#else
 						if (Global::pPlayer->_playBlock )
 						{
 							if (Global::pPlayer->_lineCounter >= stepsize) Global::pPlayer->_lineCounter -= stepsize;
@@ -7482,6 +7587,7 @@ namespace psycle {
 								}
 							}
 						}
+#endif
 					}
 					//end of if added by sampler
 					else
@@ -7514,7 +7620,11 @@ namespace psycle {
 					//if added by sampler
 					if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 					{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+						Player::singleton().skip(stepsize);
+#else
 						Global::pPlayer->_lineCounter += stepsize;
+#endif
 					}
 					//end of if added by sampler
 					else
@@ -7828,7 +7938,12 @@ namespace psycle {
 
 		void PatternView::PlayFromCur() 
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			//todo: add proper code
+			Player::singleton().Start(0);
+#else
 			Global::pPlayer->Start(editPosition,editcur.line);
+#endif
 			main()->StatusBarIdle();
 		}
 
@@ -7977,6 +8092,9 @@ namespace psycle {
 			// fill data
 			// count used patterns
 			unsigned short count = 0;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			//todo: add proper undo code
+#else
 			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
 			{
 				if (song()->ppPatternData[i])
@@ -8002,7 +8120,7 @@ namespace psycle {
 					pWrite+=MULTIPLY2;
 				}
 			}
-
+#endif
 			pNew->pattern = 0;
 			pNew->x = 0;
 			pNew->y = 0;
@@ -8172,6 +8290,9 @@ namespace psycle {
 			// fill data
 			// count used patterns
 			unsigned char count = 0;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			///todo: add proper redo code
+#else
 			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
 			{
 				if (song()->ppPatternData[i])
@@ -8197,7 +8318,7 @@ namespace psycle {
 					pWrite+=MULTIPLY2;
 				}
 			}
-
+#endif
 			pNew->pattern = 0;
 			pNew->x = 0;
 			pNew->y = 0;
@@ -8466,6 +8587,9 @@ namespace psycle {
 			{
 				if ( nlines != dlg.patLines )
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					///todo: this operation shouldn't be needed with psycore
+#else
 					AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 					AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 					song()->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
@@ -8475,6 +8599,7 @@ namespace psycle {
 						main()->StatusBarIdle();
 					}
 					Repaint(draw_modes::all);
+#endif
 				}
 				else if ( strcmp(name,dlg.patName) != 0 )
 				{

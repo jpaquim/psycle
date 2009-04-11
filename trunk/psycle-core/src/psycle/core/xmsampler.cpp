@@ -2316,12 +2316,10 @@ int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 	//cpu::cycles_type cost = cpu::cycles();
-	int i;
 
 	if (!_mute)
 	{
 		Standby(false);
-		const int _songtracks = callbacks->song().tracks();
 		int ns = numSamples;
 		/* This is from Sampler. Is it needed for sampulse?
 		for (int voice=0; voice<_numVoices; voice++)

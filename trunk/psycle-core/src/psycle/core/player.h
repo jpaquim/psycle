@@ -157,6 +157,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void start(double pos = 0);
 			/// stops playing.
 			void stop();
+			void skip(double beats);
+			void skipTo(double beatpos);
 			/// is the player in playmode.
 			bool playing() const { return playing_; }
 		private:

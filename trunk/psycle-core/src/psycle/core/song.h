@@ -327,8 +327,6 @@ class PSYCLE__CORE__DECL Song : public UISong {
 			Instrument::id_type _instSelected;
 
 		public:
-			void SetDefaultPatternLines(int defaultPatLines);
-
 			Instrument::id_type instSelected() const { return _instSelected; }
 			void instSelected(Instrument::id_type id) {
 				assert(id >= 0);
@@ -348,6 +346,19 @@ class PSYCLE__CORE__DECL Song : public UISong {
 			int _trackSoloed;
 
 			// Compatibility with older psycle::host
+			void SetDefaultPatternLines(int defaultPatLines);
+
+			int Song::GetHighestInstrumentIndex()
+			{
+				int i;
+				for(i=MAX_INSTRUMENTS-1;i>=0;i--)
+				{
+					if(! this->_pInstrument[i]->Empty()) {
+						break;
+					}
+				}
+				return i;
+			}
 			const int BeatsPerMin(){return bpm();}
 			void BeatsPerMin(const int value)
 			{ 

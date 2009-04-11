@@ -178,7 +178,7 @@ XMSampler::Channel::PerformFX().
 			if(CurrentLoopDirection() == LoopDirection::FORWARD)
 			{
 				m_Position+=Speed();
-				const int curIntPos = m_Position >> 32;
+				const std::uint32_t curIntPos = m_Position >> 32;
 				switch(m_CurrentLoopType)
 				{
 				case XMInstrument::WaveData::LoopType::NORMAL:
@@ -1001,9 +1001,9 @@ XMSampler::Channel::PerformFX().
 	virtual MachineKey getMachineKey() const { return MachineKey::sampulse(); }
 	virtual std::string GetName(void) const { return _psName; }
 
-	virtual bool LoadPsy2FileFormat(RiffFile* const pFile);
-	virtual bool LoadSpecificChunk(RiffFile* const riffFile, const int version);
-	virtual void SaveSpecificChunk(RiffFile* const riffFile);
+	virtual bool LoadPsy2FileFormat(RiffFile* pFile);
+	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
+	virtual void SaveSpecificChunk(RiffFile* riffFile);
 
 	MachineCallbacks* const pCallbacks() const { return callbacks; }
 

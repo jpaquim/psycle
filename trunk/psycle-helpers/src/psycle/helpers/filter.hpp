@@ -209,16 +209,17 @@ inline void ITFilter::WorkOld(float & sample) {
 		sample = fy;
 	} catch(universalis::processor::exception const & e) 
 	{
+		e;
+#if 0
 		switch(e.code())
 		{
-#if 0
 			case STATUS_FLOAT_DENORMAL_OPERAND:
 			case STATUS_FLOAT_INVALID_OPERATION:
 					fLastSampleLeft[1] = fLastSampleLeft[0] = 0;
 				break;
-#endif
 			default: throw;
 		}
+#endif
 	}
 }
 
@@ -235,17 +236,18 @@ inline void ITFilter::WorkStereoOld(float& left, float& right) {
 		right = fyR;
 	} catch(universalis::processor::exception const & e)
 	{
+		e;
+#if 0
 		switch(e.code())
 		{
-#if 0
 			case STATUS_FLOAT_DENORMAL_OPERAND:
 				fLastSampleLeft[0] = fLastSampleLeft[1] = fLastSampleRight[0] = fLastSampleRight[1] = 0;
 				left *= fCoeff[0];
 				right *= fCoeff[0];
 			break;
-#endif
 			default: throw;
 		}
+#endif
 	}
 }
 

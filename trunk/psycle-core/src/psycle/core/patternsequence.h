@@ -190,6 +190,23 @@ namespace psy { namespace core {
 			reverse_iterator rend() { return lines_.rend(); }
 			const_reverse_iterator rend() const { return lines_.rend(); }
 
+			typedef std::map<int, SinglePattern*>::iterator patterniterator;
+			typedef std::map<int, SinglePattern*>::const_iterator const_patterniterator;
+			typedef std::map<int, SinglePattern*>::const_reverse_iterator const_reverse_patterniterator;
+			typedef std::map<int, SinglePattern*>::reverse_iterator reverse_patterniterator;
+
+			patterniterator patternbegin() { return patterns_.begin(); }
+			const_patterniterator patternbegin() const { return patterns_.begin(); }
+			patterniterator patternend() { return patterns_.end(); }
+			const_patterniterator patternend() const { return patterns_.end(); }
+
+			reverse_patterniterator patternrbegin() { return patterns_.rbegin(); }
+			const_reverse_patterniterator patternrbegin() const { return patterns_.rbegin(); }
+			reverse_patterniterator patternrend() { return patterns_.rend(); }
+			const_reverse_patterniterator patternrend() const { return patterns_.rend(); }
+
+			int numpatterns() { return patterns_.size(); }
+
 			typedef std::multimap<double, GlobalEvent*> GlobalMap;
 			typedef GlobalMap::iterator GlobalIter;
 
