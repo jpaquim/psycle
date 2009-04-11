@@ -103,8 +103,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		public:
 			/// starts the recording output device.
 			void startRecording(bool dodither=false , 
-				int ditherpdf=psycle::helpers::dsp::Dither::Pdf::triangular,
-				int noiseshaping=psycle::helpers::dsp::Dither::NoiseShape::none);
+				psycle::helpers::dsp::Dither::Pdf ditherpdf=psycle::helpers::dsp::Dither::Pdf::triangular,
+				psycle::helpers::dsp::Dither::NoiseShape noiseshaping=psycle::helpers::dsp::Dither::NoiseShape::none);
 			/// stops the recording output device.
 			void stopRecording( );
 			/// wether the recording device has been started.
