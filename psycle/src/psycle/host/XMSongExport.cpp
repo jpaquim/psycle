@@ -78,7 +78,16 @@ namespace host{
 		m_Header.norder = song.playLength;
 		m_Header.restartpos = 0;
 		m_Header.channels = song.tracks();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		int highest = 0;
+		for (PatternSequence::patterniterator pite = song.patternSequence().patternbegin(); pite != song.patternSequence().patternend(); pite++)
+		{
+			if (pite->first > highest) highest = pite->first;
+		}
+		m_Header.patterns = highest;
+#else
 		m_Header.patterns = song.GetHighestPatternIndexInSequence()+1;
+#endif
 		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
 		m_Header.flags = 0x0001; //Linear frequency.
 		m_Header.speed = 24/song.LinesPerBeat();
@@ -130,7 +139,9 @@ namespace host{
 		Write(&ptHeader,sizeof(ptHeader));
 		std::size_t currentpos = GetPos();
 
-
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		///todo: redo all the pattern saving
+#else
 		// check every pattern for validity
 		if (song.IsPatternUsed(patIdx))
 		{
@@ -267,7 +278,9 @@ namespace host{
 			Write(&ptHeader,sizeof(ptHeader));
 			Skip(ptHeader.packedsize);
 		}
-		else {
+		else
+#endif
+		{
 			Write(&ptHeader,sizeof(ptHeader));
 		}
 	}

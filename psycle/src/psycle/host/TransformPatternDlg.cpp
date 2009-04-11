@@ -125,38 +125,43 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (filtermac != -1)
 					matchTarget++;
 
-				int currentPattern;
-				int currentColumn;
-				int currentLine;
-
 				Song* pSong = 0;
 				pSong = pattern_view_->song();
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
 				int columnCount = MAX_TRACKS;
 				int lineCount;
-
+				int currentPattern;
+				int currentColumn;
+				int currentLine;
+#endif
 				int currentins;
 				int currentmac;
 
-				unsigned char * toffset;
-
 				int matchCount;
-				PatternEvent* patternEntry;
-				int elementIndex;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 
+				PatternSequence::patterniterator patite = pSong->patternSequence().patternbegin();
+				for (;patite != pSong->patternSequence().patternend();patite++) {
+					SinglePattern::iterator eventite = patite->second->begin();
+					PatternEvent pevent = eventite->second;
+
+#else
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
 					if (!pSong->IsPatternEmpty(currentPattern))
 					{				
-						patternEntry = (PatternEvent*) pSong->_ppattern(currentPattern);
+						PatternEvent* patternEntry = (PatternEvent*) pSong->_ppattern(currentPattern);
 						lineCount = pSong->patternLines[currentPattern];
 						
 						for (currentLine = 0; currentLine < lineCount; currentLine++)
 						{
 							for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
 							{
-								currentins = patternEntry[(currentLine*columnCount)+currentColumn].instrument();
-								currentmac = patternEntry[(currentLine*columnCount)+currentColumn].machine();																																							
+								PatternEvent pevent = patternEntry[(currentLine*columnCount)+currentColumn];
+#endif
+								currentins = pevent.instrument();
+								currentmac = pevent.machine();																																							
 
 								matchCount = 0;
 
@@ -174,17 +179,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								{
 									if (filterins != -1)
 									{
-										patternEntry[(currentLine*columnCount)+currentColumn].setInstrument(replaceins);
+										pevent.setInstrument(replaceins);
 									}
 									if (filtermac != -1)
 									{
-										patternEntry[(currentLine*columnCount)+currentColumn].setMachine(replacemac);
+										pevent.setMachine(replacemac);
 									}
 								}
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+							}
+#else
 							}
 						}
 					}
 				}
+#endif
 			}
 		}
 	PSYCLE__MFC__NAMESPACE__END

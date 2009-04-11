@@ -136,6 +136,23 @@ void Player::start(double pos) {
 	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
 }
 
+void Player::skip(double beats) {
+	if (!playing_) 
+		return;
+
+	skipTo(timeInfo_.playBeatPos()+beats);
+	
+}
+void Player::skipTo(double beatpos) {
+	if (!playing_) 
+		return;
+
+	timeInfo_.setPlayBeatPos(beatpos);
+	Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
+	master.sampleCount = 60 * beatpos / bpm();
+
+}
+
 void Player::suspend_and_compute_plan() {
 	if(!playing_) {
 		// no threads running, so no nothing to suspend; simply compute the plan and return.
@@ -237,6 +254,7 @@ void Player::thread_function(std::size_t thread_number) {
 			throw;
 		}
 	} catch(std::exception const & e) {
+		e;
 		#if 0
 		if(loggers::exception()()) {
 			std::ostringstream s;

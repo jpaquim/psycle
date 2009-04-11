@@ -445,7 +445,7 @@ namespace psy
 				xml << toHex(size1) <<"'>";
 				
 				xml << "<hex v='";
-				for (int k = 0; k < size1; k++) {
+				for (std::uint32_t k = 0; k < size1; k++) {
 					xml << toHex(pData1[k],2);
 				}
 				xml << "'/>" << std::endl;
@@ -457,7 +457,7 @@ namespace psy
 					xml << toHex(size2) <<"'>";
 				
 					xml << "<hex v='";
-					for (int k = 0; k < size2; k++) {
+					for (std::uint32_t k = 0; k < size2; k++) {
 						xml << toHex(pData2[k], 2);
 					}
 					xml << "'/>" << std::endl;
@@ -536,9 +536,9 @@ namespace psy
 
 		void Instrument::setCompressedData( unsigned char * left, unsigned char * right )
 		{
-			bool err = DataCompression::SoundDesquash( left , &waveDataL );
+			DataCompression::SoundDesquash( left , &waveDataL );
 			if (waveStereo) {
-				bool err = DataCompression::SoundDesquash( right, &waveDataR );
+				DataCompression::SoundDesquash( right, &waveDataR );
 			}
 		}
 

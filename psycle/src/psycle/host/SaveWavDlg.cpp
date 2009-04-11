@@ -617,7 +617,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// so for clipboard, we need an audio driver.
 			if (!file.empty()) {
 				pPlayer->setFileName(file);
-				pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, Dither::Pdf(ditherpdf), Dither::NoiseShape(noiseshape));
+				pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, Dither::Pdf::type(ditherpdf), Dither::NoiseShape::type(noiseshape));
 			}
 #else
 			pPlayer->StartRecording(file,bits,rate,channelmode,isFloat,
