@@ -1350,7 +1350,7 @@ namespace seib {
 
 			const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
 			//ppqPos	(sample pos in 1ppq units)
-			if((lMask & kVstPpqPosValid) || ((lMask & (kVstBarsValid | kVstClockValid)) && !(vstTimeInfo.flags & kVstBarsValid) )
+			if((lMask & kVstPpqPosValid) || ((lMask & (kVstBarsValid | kVstClockValid)) && !(vstTimeInfo.flags & kVstBarsValid) ))
 			{
 				vstTimeInfo.flags |= kVstPpqPosValid;
 				vstTimeInfo.ppqPos = seconds * vstTimeInfo.tempo / 60.0;
@@ -1435,13 +1435,13 @@ namespace seib {
 		{
 			if (cycleEnd - cycleStart > 0.1) {
 				vstTimeInfo.cycleStartPos=cycleStart;
-				vstTimeInfo.cycleEndPos= =cycleEnd; 
-				vstTimeInfo.flags |= kVstTransportCycleActive
+				vstTimeInfo.cycleEndPos=cycleEnd; 
+				vstTimeInfo.flags |= kVstTransportCycleActive;
 				vstTimeInfo.flags |= kVstCyclePosValid;
 			}
 			else {
-				vstTimeInfo.flags &= ^kVstTransportCycleActive
-				vstTimeInfo.flags &= ^kVstCyclePosValid;
+				vstTimeInfo.flags &= ~kVstTransportCycleActive;
+				vstTimeInfo.flags &= ~kVstCyclePosValid;
 			}
 		}
 

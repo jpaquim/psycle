@@ -157,14 +157,14 @@ void AudioMaster::CalcTimeInfo(long lMask)
 	//kVstCyclePosValid			= 1 << 12,	// start and end
 	//	cyclestart // locator positions in quarter notes.
 	//	cycleend   // locator positions in quarter notes.
-	const PlayerTimeInfo &info = Player::singleton().timeInfo();
+	const PlayerTimeInfo &info = pCallbacks->timeInfo();
 
 	if(lMask & kVstPpqPosValid)
 	{
 		vstTimeInfo.flags |= kVstPpqPosValid;
 		vstTimeInfo.ppqPos = info.playBeatPos();
 		// Disable default handling.
-		lMask &= ^kVstPpqPosValid;
+		lMask &= ~kVstPpqPosValid;
 	}
 
 	CVSTHost::CalcTimeInfo(lMask);
