@@ -1,3 +1,4 @@
+#pragma once
 namespace psycle
 {
 	namespace helpers
