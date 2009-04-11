@@ -1778,7 +1778,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (Global::pPlayer->playing())
 			{
 				CString str;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				const float playTime = Player::singleton().timeInfo().samplePos() /  (float) Player::singleton().timeInfo().sampleRate();
+				const int timeInt = helpers::math::truncated(playTime);
+				const int cents = (playTime - timeInt) * 100;
+				const int secs = timeInt % 60;
+				const int mins = (timeInt % 3600) - secs;
+				const int hour = timeInt / 3600;
+				str.Format( "%.2u:%.2u:%.2u.%.2u", hour, mins, secs, cents); 
+#else
 				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, helpers::math::truncated(Global::pPlayer->_playTime), helpers::math::truncated(Global::pPlayer->_playTime*100)-(helpers::math::truncated(Global::pPlayer->_playTime)*100)); 
+#endif
 				pCmdUI->SetText(str); 
 			}
 		}

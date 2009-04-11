@@ -701,6 +701,7 @@ namespace seib {
 			virtual void SetSampleRate(float fSampleRate=44100.);
 			virtual void SetBlockSize(long lSize=1024);
 			virtual void SetTimeSignature(long numerator, long denominator);
+			virtual void SetCycleActive(double cycleStart, double cycleEnd);
 			virtual float GetSampleRate() const { return vstTimeInfo.sampleRate; }
 			virtual long GetBlockSize() const { return lBlockSize; }
 

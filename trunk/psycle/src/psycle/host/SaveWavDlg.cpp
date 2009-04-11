@@ -381,45 +381,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CSaveWavDlg::OnSavewave() 
 		{
-			Song *pSong = Global::_pSong;
-			Player *pPlayer = Global::pPlayer;
-
-			m_savewave.EnableWindow(false);
-			m_cancel.SetWindowText("Stop");
-			
-			autostop = Global::pConfig->autoStopMachines;
-			if ( Global::pConfig->autoStopMachines )
-			{
-				Global::pConfig->autoStopMachines = false;
-				for (int c=0; c<MAX_MACHINES; c++)
-				{
-					if (pSong->machine(c))
-					{
-						pSong->machine(c)->Standby(false);
-					}
-				}
-			}
-			playblock = pPlayer->_playBlock;
-			loopsong = pPlayer->_loopSong;
-			memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
-			memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
-			
-			CString name;
-			m_filename.GetWindowText(name);
-
-			rootname=name;
-			rootname=rootname.substr(0,
-				std::max(std::string::size_type(0),rootname.length()-4));
-
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 			const int real_bits[]={8,16,24,32,32};
 			bool isFloat = (bits == 4);
+			Song *pSong = Global::_pSong;
+			Player *pPlayer = Global::pPlayer;
 
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
 			GetDlgItem(IDC_RECRANGE)->EnableWindow(false);
 			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(false);
 
+			m_savewave.EnableWindow(false);
+			m_cancel.SetWindowText("Stop");
 			m_filename.EnableWindow(false);
 			m_savetracks.EnableWindow(false);
 			m_savegens.EnableWindow(false);
@@ -434,6 +408,34 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
+			
+			autostop = Global::pConfig->autoStopMachines;
+			if ( Global::pConfig->autoStopMachines )
+			{
+				Global::pConfig->autoStopMachines = false;
+				for (int c=0; c<MAX_MACHINES; c++)
+				{
+					if (pSong->machine(c))
+					{
+						pSong->machine(c)->Standby(false);
+					}
+				}
+			}
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			//todo: keep previous values
+#else
+			playblock = pPlayer->_playBlock;
+			loopsong = pPlayer->_loopSong;
+			memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
+			memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
+#endif
+			CString name;
+			m_filename.GetWindowText(name);
+
+			rootname=name;
+			rootname=rootname.substr(0,
+				std::max(std::string::size_type(0),rootname.length()-4));
+
 
 			if (m_outputtype == 0)
 			{	//record to file
@@ -460,30 +462,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									pSong->_trackMuted[j] = false;
 								}
 							}
-	/*
-	similar conversions;
-	\operating_system\exception.h(43)
-	'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
-	\include\string(603):
-	'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
-	with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
-	[found using argument-dependent lookup];
-	while trying to match the argument list
-	'(std::ostringstream, std::string)'
-	*/
 							// now save the song
 							std::ostringstream filename;
 							filename << rootname;
 							filename << "-track "
 								<< std::setprecision(2) << (unsigned)i;
 							SaveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode,isFloat);
-	/*
-	'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
-	'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
-	with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
-	[found using argument-dependent lookup]; while trying to match the argument list
-	'(std::ostringstream, std::string)'
-	*/
 							return;
 						}
 					}
@@ -608,9 +592,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
 		{
-			saving=true;
 			Player *pPlayer = Global::pPlayer;
 			Song *pSong = Global::_pSong;
+			saving=true;
 			pPlayer->stopRecording();
 			Global::pConfig->_pOutputDriver->Enable(false);
 			///\todo: for zealan, this call is not closing the midi driver, and when doing the Open again, it crashes.
@@ -625,10 +609,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_text.SetWindowText(file.substr(pos+1).c_str());
 			}
-
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			///todo: recording in psycore doesn't support other mediums, except via audio drivers.
+			// so for clipboard, we need an audio driver.
+			if (!file.empty()) {
+				pPlayer->setFileName(file);
+				pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape);
+			}
+#else
 			pPlayer->StartRecording(file,bits,rate,channelmode,isFloat,
 									m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape,&clipboardmem);
-
+#endif
 			int tmp;
 			int cont;
 			CString name;
@@ -646,18 +637,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				using helpers::hexstring_to_integer;
 			case 0:
+				{
 				j=0; // Calculate progress bar range.
 				for (i=0;i<pSong->playLength;i++)
 				{
 					j+=pSong->patternLines[pSong->playOrder[i]];
 				}
 				m_progress.SetRange(0,j);
-				
-				pPlayer->_playBlock=false;
 				lastpostick=0;
+				
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				pPlayer->setLoopSong();
+				pPlayer->start();
+#else
+				pPlayer->_playBlock=false;
 				pPlayer->Start(0,0);
+#endif
+				}
 				break;
 			case 1:
+				{
 				m_patnumber.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_progress.SetRange(0,pSong->patternLines[pstart]);
@@ -670,12 +669,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				lastpostick=pstart;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				int findPattern=0;
+				SequenceLine* patternline = *pSong->patternSequence().begin();
+				SequenceLine::iterator iter = patternline->begin();
+				for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
+				if (iter != patternline->end()) {
+					pPlayer->setLoopSequenceEntry(iter->second);
+					pPlayer->start(iter->second->tickPosition());
+				}
+#else
 				pSong->playOrderSel[cont]=true;
 				pPlayer->Start(pstart,0);
 				pPlayer->_playBlock=true;
 				pPlayer->_loopSong=false;
+#endif
+				}
 				break;
 			case 2:
+				{
 				m_rangestart.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_rangeend.GetWindowText(name);
@@ -689,11 +701,29 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_progress.SetRange(0,j);
 
 				lastpostick=pstart;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				int findPattern=0;
+				SequenceLine* patternline = *pSong->patternSequence().begin();
+				SequenceLine::iterator iter = patternline->begin();
+				for(; iter != patternline->end() && findPattern < pstart; iter++ , findPattern++);
+
+				SequenceLine::iterator iterend = iter;
+				for(; iterend != patternline->end() && findPattern < tmp; iterend++ , findPattern++);
+
+				if (iter != patternline->end() && iterend != patternline->end()) {
+					pPlayer->setLoopRange(iter->second->tickPosition(), iterend->second->tickEndPosition());
+					pPlayer->start(iter->second->tickPosition());
+				}
+
+#else
 				pPlayer->Start(pstart,0);
 				pPlayer->_playBlock=true;
 				pPlayer->_loopSong=false;
+#endif
+				}
 				break;
 			case 3:
+				{
 				m_patnumber.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_linestart.GetWindowText(name);
@@ -712,10 +742,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				lastpostick=pstart;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: this records the whole sequenceEntry, not jus the lines selected.
+				int findPattern=0;
+				SequenceLine* patternline = *pSong->patternSequence().begin();
+				SequenceLine::iterator iter = patternline->begin();
+				for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
+				if (iter != patternline->end()) {
+					pPlayer->setLoopSequenceEntry(iter->second);
+					pPlayer->start(iter->second->tickPosition());
+				}
+
+#else
 				pSong->playOrderSel[cont]=true;
 				pPlayer->Start(pstart,blockSLine, blockELine);
 				pPlayer->_playBlock=true;
-				pPlayer->_loopSong=false;				
+				pPlayer->_loopSong=false;
+#endif
+
+				}
 				break;
 			default:
 				SaveEnd();
@@ -778,9 +823,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				Global::pConfig->autoStopMachines=true;
 			}
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			///todo: restore the previous values
+#else
 			Global::pPlayer->_playBlock=playblock;
 			Global::pPlayer->_loopSong=loopsong;
 			memcpy(Global::_pSong->playOrderSel,sel,MAX_SONG_POSITIONS);
+#endif
 			Global::pConfig->_pOutputDriver->Enable(true);
 			Global::pConfig->_pMidiInput->Open();
 
@@ -1037,6 +1086,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			Song* pSong = Global::_pSong;
 			Player* pPlayer = Global::pPlayer;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			///todo: bar positioning.
+#else
 			for (int i=lastpostick+1;i<pPlayer->_sequencePosition;i++)
 			{
 				tickcont+=pSong->patternLines[pSong->playOrder[i]];
@@ -1049,7 +1101,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			lastlinetick = pPlayer->_lineCounter;
 			lastpostick = pPlayer->_sequencePosition;
-
+#endif
 			if (!kill_thread ) 
 			{
 				m_progress.SetPos(tickcont);

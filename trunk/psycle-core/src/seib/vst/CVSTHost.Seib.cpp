@@ -1350,30 +1350,29 @@ namespace seib {
 
 			const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
 			//ppqPos	(sample pos in 1ppq units)
-			if((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask && kVstClockValid))
+			if((lMask & kVstPpqPosValid) || ((lMask & (kVstBarsValid | kVstClockValid)) && !(vstTimeInfo.flags & kVstBarsValid) )
 			{
 				vstTimeInfo.flags |= kVstPpqPosValid;
-				vstTimeInfo.ppqPos = seconds * vstTimeInfo.tempo / 60.L;
-
-				//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar. (ppqpos/sigdenominator ?)
-				if(lMask & kVstBarsValid)
-				{
-					vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* ((int)vstTimeInfo.ppqPos / (int)vstTimeInfo.timeSigDenominator);
-					vstTimeInfo.flags |= kVstBarsValid;
-				}
-				//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
-				if(lMask & kVstClockValid)
-				{
+				vstTimeInfo.ppqPos = seconds * vstTimeInfo.tempo / 60.0;
+			}
+			//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar. (ppqpos/sigdenominator ?)
+			if(lMask & kVstBarsValid)
+			{
+				vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* ((int)vstTimeInfo.ppqPos / (int)vstTimeInfo.timeSigDenominator);
+				vstTimeInfo.flags |= kVstBarsValid;
+			}
+			//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
+			if(lMask & kVstClockValid)
+			{
 //					option 1:
-					const double onesampleclock = (60.L * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.L);		// get size of one 24ppq in samples.
-					vstTimeInfo.samplesToNextClock = onesampleclock * (((int)vstTimeInfo.samplePos / (int)onesampleclock)+1); // quantize.
+				const double onesampleclock = (60.0 * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.0);		// get size of one 24ppq in samples.
+				vstTimeInfo.samplesToNextClock = onesampleclock * (((int)vstTimeInfo.samplePos / (int)onesampleclock)+1); // quantize.
 
 //					option 2:
 //					const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1);								// Quantize ppqpos
 //					const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
 //					vstTimeInfo.samplestoNextClock = sampleclockpos - ppqclockpos;									// get the difference.
-					vstTimeInfo.flags |= kVstClockValid;
-				}
+				vstTimeInfo.flags |= kVstClockValid;
 			}
 			//smpteOffset
 			if(lMask & kVstSmpteValid)
@@ -1387,7 +1386,7 @@ namespace seib {
 				double dOffsetInSecond = seconds - floor(seconds);
 				vstTimeInfo.smpteOffset = (long)(dOffsetInSecond *
 					fSmpteDiv[vstTimeInfo.smpteFrameRate] *
-					80.L);
+					80.0);
 				vstTimeInfo.flags |= kVstSmpteValid;
 			}
 			//nanoseconds (system time)
@@ -1432,6 +1431,21 @@ namespace seib {
 			vstTimeInfo.flags |= kVstTimeSigValid;
 			vstTimeInfo.flags |= kVstTransportChanged;
 		}
+		void CVSTHost::SetCycleActive(double cycleStart, double cycleEnd)
+		{
+			if (cycleEnd - cycleStart > 0.1) {
+				vstTimeInfo.cycleStartPos=cycleStart;
+				vstTimeInfo.cycleEndPos= =cycleEnd; 
+				vstTimeInfo.flags |= kVstTransportCycleActive
+				vstTimeInfo.flags |= kVstCyclePosValid;
+			}
+			else {
+				vstTimeInfo.flags &= ^kVstTransportCycleActive
+				vstTimeInfo.flags &= ^kVstCyclePosValid;
+			}
+		}
+
+
 
 		/*****************************************************************************/
 		/* GetPreviousPlugIn : returns predecessor to this plugin                    */
