@@ -8540,7 +8540,7 @@ namespace psycle {
 			
 			if (dlg.DoModal() == IDOK )
 			{
-				int twktype(255);
+				int twktype(notecommands::empty);
 				if ( dlg.kftwk == 0 ) twktype = notecommands::tweak;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweak_slide;

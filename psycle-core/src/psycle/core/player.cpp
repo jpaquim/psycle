@@ -46,7 +46,6 @@ Player::Player()
 	recording_(),
 	recording_with_dither_(),
 	playing_(),
-	loopSequenceEntry_(),
 	autoStopMachines_()
 {
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
@@ -201,6 +200,7 @@ void Player::process(int samples) {
 			}
 		}
 		// write samples to file
+		///\josepma: I don't understand this check. autoRecord doesn't play a role here
 		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
 		// move the pointer forward for the next Master::Work() iteration.
 		Master::_pMasterSamples += amount * 2;
@@ -368,7 +368,10 @@ void Player::stop() {
 	setBpm(song().bpm());
 	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
 	samples_per_second(driver_->settings().samplesPerSec());
-	if(autoRecord_) stopRecording();
+	// Disabled, because in psyclemfc, autorecording is used sometimes to record live, and pressing stop
+	// is a way to make autorecording ignore the song length and keep recording until intentionally stopping
+	// the recording (not the playback)
+	//if(autoRecord_) stopRecording();
 }
 
 Player::~Player() {
@@ -620,14 +623,13 @@ float * Player::Work(int numSamples) {
 		//playPos += beatLength;
 		//if(playPos > "signumerator") playPos -= signumerator;
 	} else {
-		if(loopSequenceEntry()) {
+		if(loopEnabled()) {
 			// Maintain the cursor inside the loop sequence
 			if(
-				timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition() ||
-				timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition()
-			) setPlayPos(loopSequenceEntry()->tickPosition());
-		} else if(loopSong() && timeInfo_.playBeatPos() >= song().patternSequence().tickLength())
-			setPlayPos(0);
+				timeInfo_.playBeatPos() >= timeInfo_.cycleEndPos() ||
+				timeInfo_.playBeatPos() < timeInfo_.cycleStartPos()
+			) setPlayPos(timeInfo_.cycleStartPos());
+		}
 		
 		std::vector<GlobalEvent*> globals;
 
@@ -650,12 +652,11 @@ float * Player::Work(int numSamples) {
 			// each time through the loop because global events can potentially move the song's beatposition elsewhere.
 			globals.clear();
 			chunkBeatEnd = song().patternSequence().GetNextGlobalEvents(timeInfo_.playBeatPos(), beatsToWork, globals, bFirst);
-			if(loopSequenceEntry()) {
+			if(loopEnabled()) {
 				// Don't go further than the sequenceEnd.
-				if(chunkBeatEnd >= loopSequenceEntry()->tickEndPosition())
-					chunkBeatEnd = loopSequenceEntry()->tickEndPosition();
-			} else if(loopSong() && chunkBeatEnd >= song().patternSequence().tickLength())
-				chunkBeatEnd = song().patternSequence().tickLength();
+				if(chunkBeatEnd >= timeInfo_.cycleEndPos())
+					chunkBeatEnd = timeInfo_.cycleEndPos();
+			}
 
 			// determine chunk length in beats and samples.
 			chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
@@ -745,12 +746,20 @@ void Player::writeSamplesToFile(int amount) {
 	}
 }
 
-void Player::startRecording() {
+void Player::startRecording(bool dodither=true , int ditherpdf=dsp::Dither::Pdf::triangular,
+											int noiseshaping=dsp::Dither::NoiseShape::none)
+{
 	if(recording_) return;
 	if(!song_ && !driver_) return;
 	int channels(2);
 	if(driver_->settings().channelMode() != 3) channels = 1;
-	recording_ = DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->settings().samplesPerSec(), driver_->settings().bitDepth(), channels);
+	recording_ =( DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->settings().samplesPerSec(), driver_->settings().bitDepth(), channels));
+	recording_with_dither_ = dodither;
+	if (dodither) {
+		dither.SetBitDepth(driver_->settings().bitDepth());
+		dither.SetPdf(ditherpdf);
+		dither.SetNoiseShaping(noiseshaping);
+	}
 }
 
 void Player::stopRecording() {

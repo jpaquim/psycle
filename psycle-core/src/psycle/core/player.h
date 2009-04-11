@@ -102,7 +102,9 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			/// starts the recording output device.
-			void startRecording( );
+			void startRecording(bool dodither=false , 
+				int ditherpdf=psycle::helpers::dsp::Dither::Pdf::triangular,
+				int noiseshaping=psycle::helpers::dsp::Dither::NoiseShape::none);
 			/// stops the recording output device.
 			void stopRecording( );
 			/// wether the recording device has been started.
@@ -164,14 +166,23 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\name loop
 	///\{
 		public:
-			bool loopSong() const { return loopSong_; }
-			void setLoopSong(bool setit) { loopSong_ = setit; }
-
-			SequenceEntry * loopSequenceEntry() const { return loopSequenceEntry_; }
-			void setLoopSequenceEntry(SequenceEntry * seqEntry ) { loopSequenceEntry_ = seqEntry; }
-		private:
-			bool loopSong_;
-			SequenceEntry * loopSequenceEntry_;
+			bool loopEnabled() const { return timeInfo_.cycleEnabled(); }
+			void UnsetLoop() {
+				timeInfo_.setCycleStartPos(0.0);
+				timeInfo_.setCycleEndPos(0.0);
+			}
+			void setLoopSong() { 
+				timeInfo_.setCycleStartPos(0.0);
+				timeInfo_.setCycleEndPos(song().patternSequence().tickLength());
+			}
+			void setLoopSequenceEntry(SequenceEntry * seqEntry ) {
+				timeInfo_.setCycleStartPos(seqEntry->tickPosition());
+				timeInfo_.setCycleEndPos(seqEntry->tickEndPosition());
+			}
+			void setLoopRange(double loopStart, double loopEnd) { 
+				timeInfo_.setCycleStartPos(loopStart);
+				timeInfo_.setCycleEndPos(loopEnd);
+			}
 	///\}
 
 	///\name auto stop

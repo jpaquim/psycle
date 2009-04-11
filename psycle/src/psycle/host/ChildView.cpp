@@ -1278,12 +1278,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		
 		void CChildView::OnConfigurationLoopplayback() 
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (Player::singleton().loopEnabled()) {
+				Player::singleton().UnsetLoop();
+			}
+			else {
+				Player::singleton().setLoopSong();
+			}
+#else
 			Global::pPlayer->_loopSong = !Global::pPlayer->_loopSong;
+#endif
 		}
 
 		void CChildView::OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI) 
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (Player::singleton().loopEnabled())
+#else
 			if (Global::pPlayer->_loopSong)
+#endif
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);	

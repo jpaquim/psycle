@@ -22,6 +22,16 @@ class PlayerTimeInfo {
 			void setPlayBeatPos( double pos );
 			double playBeatPos() const { return playBeatPos_; }
 
+			/// Start and end cycle position.
+			void setCycleStartPos( double pos );
+			double cycleStartPos() const { return cycleStartPos_; }
+
+			void setCycleEndPos( double pos );
+			double cycleEndPos() const { return cycleEndPos_; }
+
+			/// Returns if cycle is enabled. Not checking with equal for rounding errors.
+			bool cycleEnabled() const { return cycleEndPos_ - cycleStartPos_ > 0.1f; }
+
 			/// the current master sample position
 			void setSamplePos( int pos );
 			int samplePos() const { return samplePos_; }
@@ -59,6 +69,8 @@ class PlayerTimeInfo {
 			float samplesPerTick_;
 			int inputLatency_;
 			int outputLatency_;
+			double cycleStartPos_;
+			double cycleEndPos_;
 
 			void recalcSPB();
 			void recalcSPT();
