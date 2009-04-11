@@ -159,9 +159,9 @@ XMSampler::Channel::PerformFX().
 			};
 		};
 
-		virtual void Init(XMInstrument::WaveData* wave, const int layer);
+		virtual void Init(XMInstrument::WaveData* const wave, const int layer);
 		virtual void NoteOff(void);
-		virtual void Work(float *pLeftw,float *pRightw, psycle::helpers::dsp::PRESAMPLERFN pResamplerWork)
+		virtual void Work(float * const pLeftw,float * const pRightw, const psycle::helpers::dsp::PRESAMPLERFN pResamplerWork)
 		{
 			//Process sample
 			*pLeftw = pResamplerWork(
@@ -232,14 +232,14 @@ XMSampler::Channel::PerformFX().
 		}
 
 		// Properties
-		virtual const int Layer() { return m_Layer;}
-		virtual XMInstrument::WaveData &Wave() { return *m_pWave; }
+		virtual int Layer() const { return m_Layer;}
+		virtual XMInstrument::WaveData &Wave() const { return *m_pWave; }
 
-		virtual bool Playing(){ return m_Playing;}
-		virtual void Playing(bool play){ m_Playing=play; }
+		virtual bool Playing() const { return m_Playing;}
+		virtual void Playing(const bool play){ m_Playing=play; }
 
 		// Current sample position
-		virtual const std::uint32_t Position() { return m_Position >> 32; }
+		virtual std::uint32_t Position() const { return m_Position >> 32; }
 		virtual void Position(const std::uint32_t value) {
 			if(value < Length()) m_Position = value;
 			else m_Position = (Length() - 1);
@@ -247,28 +247,28 @@ XMSampler::Channel::PerformFX().
 		}
 
 		// Current sample Speed
-		virtual const std::int64_t Speed(){return m_Speed;}
+		virtual std::int64_t Speed() const {return m_Speed;}
 		virtual void Speed(const double value){m_Speed = value * 4294967296.0f;} // 4294967296 is a left shift of 32bits
 
 		virtual void CurrentLoopDirection(const int dir){m_LoopDirection = dir;}
-		virtual const int CurrentLoopDirection(){return m_LoopDirection;}
+		virtual int CurrentLoopDirection() const {return m_LoopDirection;}
 
-		virtual const int LoopType(){return m_pWave->WaveLoopType();}
-		virtual const int LoopStart(){return m_pWave->WaveLoopStart();}
-		virtual const int LoopEnd(){ return m_pWave->WaveLoopEnd();}
+		virtual int LoopType() const {return m_pWave->WaveLoopType();}
+		virtual int LoopStart() const {return m_pWave->WaveLoopStart();}
+		virtual int LoopEnd() const { return m_pWave->WaveLoopEnd();}
 
-		virtual const int SustainLoopType(){return m_pWave->WaveSusLoopType();}
-		virtual const int SustainLoopStart(){return m_pWave->WaveSusLoopStart();}
-		virtual const int SustainLoopEnd(){ return m_pWave->WaveSusLoopEnd();}
+		virtual int SustainLoopType() const {return m_pWave->WaveSusLoopType();}
+		virtual int SustainLoopStart() const {return m_pWave->WaveSusLoopStart();}
+		virtual int SustainLoopEnd() const { return m_pWave->WaveSusLoopEnd();}
 
-		virtual const int Length(){return m_pWave->WaveLength();}
+		virtual std::uint32_t Length() const {return m_pWave->WaveLength();}
 
-		virtual const bool IsStereo(){ return m_pWave->IsWaveStereo();}
+		virtual bool IsStereo() const { return m_pWave->IsWaveStereo();}
 
 		// pointer to Start of Left sample
-		virtual const short* pLeft(){return m_pL;}
+		virtual short* const pLeft() const {return m_pL;}
 		// pointer to Start of Right sample
-		virtual const short* pRight(){return m_pR;}
+		virtual short* const pRight() const {return m_pR;}
 
 
 	protected:
@@ -332,7 +332,7 @@ XMSampler::Channel::PerformFX().
 		EnvelopeController(){};
 		~EnvelopeController(){};
 
-		void Init(XMInstrument::Envelope *pEnvelope = NULL, MachineCallbacks * callbacks = NULL);
+		void Init(const XMInstrument::Envelope * const pEnvelope = NULL, const MachineCallbacks * const callbacks = NULL);
 
 		//const EnvelopeMode Mode() { return m_Mode; }
 		//const Mode(EnvelopeMode _mode){ m_Mode=_mode; }
@@ -391,32 +391,32 @@ XMSampler::Channel::PerformFX().
 		}
 
 		///
-		const XMInstrument::Envelope::ValueType ModulationAmount()
+		XMInstrument::Envelope::ValueType ModulationAmount() const
 		{
 			return m_ModulationAmount;
 		}
 
-		const EnvelopeStage::Type Stage(){return m_Stage;}
+		EnvelopeStage::Type Stage() const {return m_Stage;}
 		void Stage(const EnvelopeStage::Type value){m_Stage = value;}
-		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;}
+		const XMInstrument::Envelope & const Envelope() const {return *m_pEnvelope;}
 		inline void CalcStep(const int start,const int  end);
 		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; } // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
-		int GetPosition(void) { return m_PositionIndex; }
+		int GetPosition(void) const { return m_PositionIndex; }
 		void SetPositionInSamples(const int samplePos);
-		int GetPositionInSamples();
+		int GetPositionInSamples() const;
 		void RecalcDeviation();
 	private:
-		inline float SRateDeviation() { return m_sRateDeviation; }
+		inline float SRateDeviation() const { return m_sRateDeviation; }
 
 		int m_Samples;
 		float m_sRateDeviation;
 		int m_Mode;
 		int m_PositionIndex;
 		int m_NextEventSample;
-		MachineCallbacks * m_pCallbacks;
+		const MachineCallbacks * m_pCallbacks;
 		EnvelopeStage::Type m_Stage;
 
-		XMInstrument::Envelope * m_pEnvelope;
+		const XMInstrument::Envelope * m_pEnvelope;
 
 		XMInstrument::Envelope::ValueType m_ModulationAmount;
 		XMInstrument::Envelope::ValueType m_Step;
@@ -443,7 +443,7 @@ XMSampler::Channel::PerformFX().
 		void ResetEffects();
 
 		void VoiceInit(int channelNum,int instrumentNum);
-		void Work(int numSamples,float * pSamplesL,float *pSamplesR, const psycle::helpers::dsp::Resampler& _resampler);
+		void Work(int numSamples,float * const pSamplesL,float * const pSamplesR, const psycle::helpers::dsp::Resampler& _resampler);
 
 		// This one is Tracker Tick (Mod-tick)
 		void Tick();
@@ -455,7 +455,7 @@ XMSampler::Channel::PerformFX().
 		void NoteOffFast();
 		void NoteFadeout();
 		void UpdateFadeout();
-		const XMInstrument::NewNoteAction::Type NNA() { return m_NNA;}
+		XMInstrument::NewNoteAction::Type NNA() const { return m_NNA;}
 		void NNA(const XMInstrument::NewNoteAction::Type value){ m_NNA = value;}
 
 		void ResetVolAndPan(std::int16_t playvol,bool reset=true);
@@ -481,33 +481,41 @@ XMSampler::Channel::PerformFX().
 
 		// Do Auto Vibrato
 		void AutoVibrato();
-		bool IsAutoVibrato() { return m_AutoVibratoAmount!=0; }
+		bool IsAutoVibrato() const { return m_AutoVibratoAmount!=0; }
 		// Get Auto Vibrato Amount
-		const double AutoVibratoAmount(){return m_AutoVibratoAmount;}
+		double AutoVibratoAmount() const {return m_AutoVibratoAmount;}
 
 
 // Properties
-		const int InstrumentNum(){ return _instrument;}
+		int InstrumentNum() const { return _instrument;}
 		void InstrumentNum(const int value){_instrument = value;}
-		XMInstrument &rInstrument() { return *m_pInstrument;}
-		void pInstrument(XMInstrument *p){m_pInstrument = p;}
+		const XMInstrument & rInstrument() const { return *m_pInstrument;}
+		void pInstrument(XMInstrument* const p){m_pInstrument = p;}
 
-		const int ChannelNum(){ return m_ChannelNum;}
+		int ChannelNum() const { return m_ChannelNum;}
 		void ChannelNum(const int value){ m_ChannelNum = value;}
-		void pChannel(XMSampler::Channel *p){m_pChannel = p;};
-		XMSampler::Channel& rChannel(){return *m_pChannel;}
+		void pChannel(XMSampler::Channel * const p){m_pChannel = p;};
+		const XMSampler::Channel& rChannel() const {return *m_pChannel;}
+		XMSampler::Channel& rChannel() {return *m_pChannel;}
 
 		void pSampler(XMSampler * const p){m_pSampler = p;}
-		XMSampler * const pSampler(){return m_pSampler;}
+		const XMSampler* pSampler() const { return m_pSampler; }
+		XMSampler* pSampler() { return m_pSampler; }
 
-		XMSampler::EnvelopeController& AmplitudeEnvelope(){return m_AmplitudeEnvelope;}
-		XMSampler::EnvelopeController& FilterEnvelope(){return m_FilterEnvelope;}
-		XMSampler::EnvelopeController& PitchEnvelope(){return m_PitchEnvelope;}
-		XMSampler::EnvelopeController& PanEnvelope(){return m_PanEnvelope;}
+		const XMSampler::EnvelopeController& AmplitudeEnvelope() const {return m_AmplitudeEnvelope;}
+		const XMSampler::EnvelopeController& FilterEnvelope() const {return m_FilterEnvelope;}
+		const XMSampler::EnvelopeController& PitchEnvelope() const {return m_PitchEnvelope;}
+		const XMSampler::EnvelopeController& PanEnvelope() const {return m_PanEnvelope;}
 
-		WaveDataController& rWave(){return m_WaveDataController;}
+		XMSampler::EnvelopeController& AmplitudeEnvelope() {return m_AmplitudeEnvelope;}
+		XMSampler::EnvelopeController& FilterEnvelope() {return m_FilterEnvelope;}
+		XMSampler::EnvelopeController& PitchEnvelope() {return m_PitchEnvelope;}
+		XMSampler::EnvelopeController& PanEnvelope() {return m_PanEnvelope;}
 
-		const bool IsPlaying(){ return m_bPlay;}
+		const WaveDataController& rWave() const {return m_WaveDataController;}
+		WaveDataController& rWave() {return m_WaveDataController;}
+
+		bool IsPlaying() const { return m_bPlay;}
 		void IsPlaying(const bool value)
 		{
 			if ( value == false )
@@ -527,15 +535,15 @@ XMSampler::Channel::PerformFX().
 			m_bPlay = value;
 		}
 
-		const bool IsBackground() { return m_Background; }
+		bool IsBackground() const { return m_Background; }
 		void IsBackground(const bool background){ m_Background = background; }
 
-		const bool IsStopping() { return m_Stopping; }
+		bool IsStopping() const { return m_Stopping; }
 		void IsStopping(const bool stop) { m_Stopping = stop; }
 
 		// Volume of the current note.
 		//fixme: m_Volume is float! what's going on here?
-		const std::uint16_t Volume() { return m_Volume; }
+		std::uint16_t Volume() const { return m_Volume; }
 		void Volume(const std::uint16_t vol)
 		{
 			m_Volume = vol;
@@ -543,16 +551,16 @@ XMSampler::Channel::PerformFX().
 				//\todo :  rInstrument().RandomVolume() / 100.0f;
 		}
 		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
-		const float RealVolume() { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; }
-		void PanFactor(float pan)
+		float RealVolume() const { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; }
+		void PanFactor(const float pan)
 		{
 			m_PanFactor = pan;
 			m_PanRange = 0.5f -(fabs(0.5-m_PanFactor)*2);
 		}
-		float PanFactor() { return m_PanFactor; }
+		float PanFactor() const { return m_PanFactor; }
 
-		const int CutOff() { return m_CutOff; }
-		void CutOff(int co)
+		int CutOff() const { return m_CutOff; }
+		void CutOff(const int co)
 		{
 			#if 0
 				m_CutOff = co; m_Filter._cutoff = co;
@@ -562,8 +570,8 @@ XMSampler::Channel::PerformFX().
 			m_CutOff = co; m_Filter.Cutoff(co);
 		}
 
-		const int Ressonance() { return m_Ressonance; }
-		void Ressonance(int res)
+		int Ressonance() const { return m_Ressonance; }
+		void Ressonance(const int res)
 		{
 			#if 0
 				m_Ressonance = res; m_Filter._q = res;
@@ -573,22 +581,22 @@ XMSampler::Channel::PerformFX().
 			m_Ressonance = res; m_Filter.Ressonance(res);
 		}
 
-		void FilterType(psycle::helpers::dsp::FilterType ftype) { m_Filter.Type(ftype);}
+		void FilterType(const psycle::helpers::dsp::FilterType ftype) { m_Filter.Type(ftype);}
 
-		void Period(int newperiod) { m_Period = newperiod; UpdateSpeed(); }
-		int Period() { return m_Period; }
+		void Period(const int newperiod) { m_Period = newperiod; UpdateSpeed(); }
+		int Period() const { return m_Period; }
 		// convert note to period
-		const double NoteToPeriod(const int note);
+		double NoteToPeriod(const int note) const;
 		// convert period to note
-		const int PeriodToNote(const double period);
+		int PeriodToNote(const double period) const;
 
-		double VibratoAmount() { return m_VibratoAmount; }
+		double VibratoAmount() const { return m_VibratoAmount; }
 
 	protected:
 		// Gets the delta between the points of the wavetables for tremolo/panbrello/vibrato
-		int GetDelta(int wavetype,int wavepos);
-		float PanRange() { return m_PanRange; }
-		const bool IsTremorMute(){return m_bTremorMute;}
+		int GetDelta(int wavetype,int wavepos) const ;
+		float PanRange() const { return m_PanRange; }
+		bool IsTremorMute() const {return m_bTremorMute;}
 		void IsTremorMute(const bool value){m_bTremorMute = value;}
 
 
@@ -599,7 +607,7 @@ XMSampler::Channel::PerformFX().
 		XMSampler *m_pSampler;
 
 		int _instrument;// Instrument
-		XMInstrument *m_pInstrument;
+		const XMInstrument *m_pInstrument;
 		XMInstrument::NewNoteAction::Type m_NNA;
 
 
@@ -708,39 +716,39 @@ XMSampler::Channel::PerformFX().
 		void Restore();
 
 		// Prepare the channel for the new effect (or execute if it's a one-shot one). This is executed on TrackerTick==0
-		void SetEffect(Voice* voice,int volcmd,int cmd,int parameter);
+		void SetEffect(Voice* const voice,const int volcmd,const int cmd,const int parameter);
 
 		// Executes the slide/change effects. This is executed on TrackerTick!=0
 		void PerformFx();
 
-		const int EffectFlags(){return m_EffectFlags;}
+		int EffectFlags() const {return m_EffectFlags;}
 		void EffectFlags(const int value){m_EffectFlags = value;}
 
 
 // Effect-Related Object Functions
 
 		// Tick 0 commands
-		void GlobalVolSlide(int speed);
-		void PanningSlide(int speed);
-		void ChannelVolumeSlide(int speed);
-		void PitchSlide(bool bUp,int speed,int note=notetypes::empty);
-		void VolumeSlide(int speed);
-		void Tremor(int parameter);
-		void Vibrato(int speed,int depth = 0);
-		void Tremolo(int speed,int depth);
-		void Panbrello(int speed,int depth);
+		void GlobalVolSlide(const int speed);
+		void PanningSlide(const int speed);
+		void ChannelVolumeSlide(const int speed);
+		void PitchSlide(const bool bUp,const int speed,const int note=notetypes::empty);
+		void VolumeSlide(const int speed);
+		void Tremor(const int parameter);
+		void Vibrato(const int speed,const int depth = 0);
+		void Tremolo(const int speed,const int depth);
+		void Panbrello(const int speed,const int depth);
 		void Arpeggio(const int param);
 		void Retrigger(const int param);
 		void NoteCut(const int ntick);
-		void DelayedNote(PatternEvent data);
+		void DelayedNote(const PatternEvent data);
 
 		// Tick n commands.
 		void PanningSlide();
 		void ChannelVolumeSlide();
 		void NoteCut();
-		void StopBackgroundNotes(XMInstrument::NewNoteAction::Type action);
+		void StopBackgroundNotes(const XMInstrument::NewNoteAction::Type action);
 
-		const double ArpeggioPeriod()
+		double ArpeggioPeriod() const
 		{
 			const int arpi = m_pSampler->CurrentTick()%3;
 			if(arpi >= 1){
@@ -752,7 +760,7 @@ XMSampler::Channel::PerformFX().
 
 
 // Properties
-		const int Index(){ return m_Index;}
+		int Index() const { return m_Index;}
 		void Index(const int value){m_Index = value;}
 
 		void pSampler(XMSampler * const pSampler){m_pSampler = pSampler;}
@@ -760,84 +768,84 @@ XMSampler::Channel::PerformFX().
 		const int InstrumentNo(){return m_InstrumentNo;}
 		void InstrumentNo(const int no){m_InstrumentNo = no;}
 
-		XMSampler::Voice* ForegroundVoice(){ return m_pForegroundVoice; }
-		void ForegroundVoice(XMSampler::Voice* pVoice) { m_pForegroundVoice = pVoice; }
+		XMSampler::Voice* const ForegroundVoice() const{ return m_pForegroundVoice; }
+		void ForegroundVoice(XMSampler::Voice* const pVoice) { m_pForegroundVoice = pVoice; }
 
-		const int Note(){ return m_Note;}
+		int Note() const { return m_Note;}
 		void Note(const int note) {
 			m_Note = note;
 			if(ForegroundVoice()) m_Period = ForegroundVoice()->NoteToPeriod(note);
 		}
-		const double Period(){return m_Period;}
+		double Period() const {return m_Period;}
 		void Period(const double value){m_Period = value;}
 
-		const float Volume(){return m_Volume;}
+		float Volume() const {return m_Volume;}
 		void Volume(const float value){m_Volume = value;}
-		inline const int DefaultVolume(){return m_ChannelDefVolume;}
+		inline int DefaultVolume() const {return m_ChannelDefVolume;}
 		void DefaultVolume(const int value){
 			m_ChannelDefVolume = value;
 			if (DefaultIsMute() ) IsMute(true);
 			Volume(DefaultVolumeFloat());
 		}
-		inline const float DefaultVolumeFloat() { return (m_ChannelDefVolume&0xFF)/200.0f; }
-		void DefaultVolumeFloat(float value,bool ignoremute=false)
+		inline float DefaultVolumeFloat() const { return (m_ChannelDefVolume&0xFF)/200.0f; }
+		void DefaultVolumeFloat(const float value,const bool ignoremute=false)
 		{
 			if ( DefaultIsMute() && !ignoremute ) m_ChannelDefVolume = int(value*200) | 0x100;
 			else m_ChannelDefVolume = int(value*200);
 		}
-		inline const bool DefaultIsMute() { return m_ChannelDefVolume&0x100; }
-		void DefaultIsMute(bool mute)
+		inline bool DefaultIsMute() const { return m_ChannelDefVolume&0x100; }
+		void DefaultIsMute(const bool mute)
 		{
 			if (mute) m_ChannelDefVolume |= 0x100;
 			else m_ChannelDefVolume &=0xFF;
 		}
-		const int LastVoiceVolume(){return m_LastVoiceVolume;}
+		int LastVoiceVolume() const {return m_LastVoiceVolume;}
 		void LastVoiceVolume(const int value){m_LastVoiceVolume = value;}
 
-		const float PanFactor() { return m_PanFactor; }
+		float PanFactor() const { return m_PanFactor; }
 		void PanFactor(const float value){
 			m_PanFactor = value;
 			if ( ForegroundVoice()) ForegroundVoice()->PanFactor(value);
 		}
-		inline const int DefaultPanFactor() { return m_DefaultPanFactor; }
+		inline int DefaultPanFactor() const { return m_DefaultPanFactor; }
 		void DefaultPanFactor(const int value){
 			m_DefaultPanFactor = value;
 			PanFactor(DefaultPanFactorFloat());
 			if (DefaultIsSurround() ) IsSurround(true);
 		}
-		inline const float DefaultPanFactorFloat() { return (m_DefaultPanFactor&0xFF)/200.0f; }
-		void DefaultPanFactorFloat(float value,bool ignoresurround=false)
+		inline float DefaultPanFactorFloat() const { return (m_DefaultPanFactor&0xFF)/200.0f; }
+		void DefaultPanFactorFloat(const float value,const bool ignoresurround=false)
 		{
 			if ( DefaultIsSurround() && !ignoresurround )  m_DefaultPanFactor = int(value*200) | 0x100;
 			else m_DefaultPanFactor = int(value*200);
 		}
 
-		inline const bool DefaultIsSurround() { return (m_DefaultPanFactor&0x100); }
-		void DefaultIsSurround(bool surr)
+		inline bool DefaultIsSurround() const { return (m_DefaultPanFactor&0x100); }
+		void DefaultIsSurround(const bool surr)
 		{
 			if (surr) m_DefaultPanFactor |= 0x100;
 			else m_DefaultPanFactor &=0xFF;
 		}
 
-		const float LastVoicePanFactor(){return m_LastVoicePanFactor;}
+		float LastVoicePanFactor() const { return m_LastVoicePanFactor;}
 		void LastVoicePanFactor(const float value){m_LastVoicePanFactor = value;}
 
-		const int LastAmpEnvelopePosInSamples() { return m_LastAmpEnvelopePosInSamples; }
+		int LastAmpEnvelopePosInSamples() const { return m_LastAmpEnvelopePosInSamples; }
 		void LastAmpEnvelopePosInSamples(const int value) { m_LastAmpEnvelopePosInSamples = value; }
 
-		const int LastPanEnvelopePosInSamples() { return m_LastPanEnvelopePosInSamples; }
+		int LastPanEnvelopePosInSamples() const { return m_LastPanEnvelopePosInSamples; }
 		void LastPanEnvelopePosInSamples(const int value) { m_LastPanEnvelopePosInSamples = value; }
 
-		const int LastFilterEnvelopePosInSamples() { return m_LastFilterEnvelopePosInSamples; }
+		int LastFilterEnvelopePosInSamples() const { return m_LastFilterEnvelopePosInSamples; }
 		void LastFilterEnvelopePosInSamples(const int value) { m_LastFilterEnvelopePosInSamples = value; }
 
-		const int LastPitchEnvelopePosInSamples() { return m_LastPitchEnvelopePosInSamples; }
+		int LastPitchEnvelopePosInSamples() const { return m_LastPitchEnvelopePosInSamples; }
 		void LastPitchEnvelopePosInSamples(const int value) { m_LastPitchEnvelopePosInSamples = value; }
 
-		const int OffsetMem() { return m_OffsetMem; }
+		int OffsetMem() const { return m_OffsetMem; }
 		void OffsetMem(const int value) { m_OffsetMem=value; }
 
-		const bool IsSurround(){ return m_bSurround;}
+		bool IsSurround() const { return m_bSurround;}
 		void IsSurround(const bool value){
 			if ( value )
 			{
@@ -846,35 +854,35 @@ XMSampler::Channel::PerformFX().
 			}
 			m_bSurround = value;
 		}
-		const bool IsMute(){ return m_bMute;}
+		bool IsMute() const { return m_bMute;}
 		void IsMute(const bool value){
 			m_bMute = value;
 		}
 
-		const int Cutoff() { return m_Cutoff;}
+		int Cutoff() const { return m_Cutoff;}
 		void Cutoff(const int cut) { m_Cutoff =cut;  if ( ForegroundVoice() ) ForegroundVoice()->CutOff(cut); }
-		const int Ressonance() { return m_Ressonance;}
+		int Ressonance() const { return m_Ressonance;}
 		void Ressonance(const int res) { m_Ressonance=res; if ( ForegroundVoice() ) ForegroundVoice()->Ressonance(res);}
-		const psycle::helpers::dsp::FilterType FilterType() { return m_FilterType;}
+		psycle::helpers::dsp::FilterType FilterType() const { return m_FilterType;}
 
-		const int DefaultCutoff(){return m_DefaultCutoff;}
+		int DefaultCutoff() const {return m_DefaultCutoff;}
 		void DefaultCutoff(const int value){m_DefaultCutoff = value; Cutoff(value);}
-		const int DefaultRessonance(){return m_DefaultRessonance; }
+		int DefaultRessonance() const {return m_DefaultRessonance; }
 		void DefaultRessonance(const int value){m_DefaultRessonance = value; Ressonance(value); }
-		const psycle::helpers::dsp::FilterType DefaultFilterType(){return m_DefaultFilterType;}
+		psycle::helpers::dsp::FilterType DefaultFilterType() const {return m_DefaultFilterType;}
 		void DefaultFilterType(const psycle::helpers::dsp::FilterType value){m_DefaultFilterType = value; m_FilterType = value; }
 
-		const bool IsGrissando(){return m_bGrissando;}
+		bool IsGrissando() const {return m_bGrissando;}
 		void IsGrissando(const bool value){m_bGrissando = value;}
 		void VibratoType(const int value) { m_VibratoType = value;}
-		const int VibratoType() {return m_VibratoType;}
+		int VibratoType() const {return m_VibratoType;}
 		void TremoloType(const int type){m_TremoloType = type;}
-		const int TremoloType(){return m_TremoloType;}
+		int TremoloType() const {return m_TremoloType;}
 		void PanbrelloType(const int type){m_PanbrelloType = type;}
-		const int PanbrelloType(){return m_PanbrelloType;}
+		int PanbrelloType() const {return m_PanbrelloType;}
 
-		const bool IsArpeggio() { return ((m_EffectFlags & EffectFlag::ARPEGGIO) != 0); }
-		const bool IsVibrato(){return (m_EffectFlags & EffectFlag::VIBRATO) != 0;}
+		bool IsArpeggio() const { return ((m_EffectFlags & EffectFlag::ARPEGGIO) != 0); }
+		bool IsVibrato() const {return (m_EffectFlags & EffectFlag::VIBRATO) != 0;}
 		//void VibratoAmount(const double value){m_VibratoAmount = value;}
 		//const double VibratoAmount(){return m_VibratoAmount;}
 
@@ -979,7 +987,7 @@ XMSampler::Channel::PerformFX().
 	};
 
 
-	XMSampler(MachineCallbacks* callb,Machine::id_type id); friend class InternalHost;
+	XMSampler(MachineCallbacks* const callb, const Machine::id_type id); friend class InternalHost;
 	~XMSampler(){};
 
 	virtual void Init(void);
@@ -993,11 +1001,11 @@ XMSampler::Channel::PerformFX().
 	virtual MachineKey getMachineKey() const { return MachineKey::sampulse(); }
 	virtual std::string GetName(void) const { return _psName; }
 
-	virtual bool LoadPsy2FileFormat(RiffFile* pFile);
-	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
-	virtual void SaveSpecificChunk(RiffFile* riffFile);
+	virtual bool LoadPsy2FileFormat(RiffFile* const pFile);
+	virtual bool LoadSpecificChunk(RiffFile* const riffFile, const int version);
+	virtual void SaveSpecificChunk(RiffFile* const riffFile);
 
-	MachineCallbacks* pCallbacks() { return callbacks; }
+	MachineCallbacks* const pCallbacks() const { return callbacks; }
 
 	#if 0 // Deprecated. See why in the body of "CalcBPMAndTick()"
 		//Beats Per Minute
@@ -1012,9 +1020,9 @@ XMSampler::Channel::PerformFX().
 		void CalcBPMAndTick();
 	#endif
 	
-	int Speed2LPB(int speed) { return 24/((speed==0)?6:speed); }
-	int LPB2Speed(int lpb) { return 24/lpb; }
-	Voice* GetCurrentVoice(int channelNum)
+	int Speed2LPB(const int speed) const { return 24/((speed==0)?6:speed); }
+	int LPB2Speed(const int lpb) const { return 24/lpb; }
+	Voice* GetCurrentVoice(const int channelNum)
 	{
 		for(int current = 0;current < _numVoices;current++)
 		{
@@ -1038,7 +1046,7 @@ XMSampler::Channel::PerformFX().
 		}
 		return NULL;
 	}
-	int GetPlayingVoices(void)
+	int GetPlayingVoices(void) const
 	{
 		int c=0;
 		for (int i=0;i<MAX_POLYPHONY;i++)
@@ -1049,18 +1057,20 @@ XMSampler::Channel::PerformFX().
 	}
 
 /// properties
-	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];}///< Channel
+	const XMSampler::Channel& rChannel(const int index) const { return m_Channel[index];}///< Channel
+	XMSampler::Channel& rChannel(const int index) { return m_Channel[index];}///< Channel
+	const Voice& rVoice(const int index) const { return m_Voices[index];}///<
 	Voice& rVoice(const int index) { return m_Voices[index];}///<
 
-	const bool IsAmigaSlides(){ return m_bAmigaSlides;}
+	bool IsAmigaSlides() const { return m_bAmigaSlides;}
 	void IsAmigaSlides(const bool value){ m_bAmigaSlides = value;}
 
 	/// set current voice number
-	const int NumVoices(){ return _numVoices;}
+	int NumVoices() const { return _numVoices;}
 	/// get current voice number
-	void NumVoices(const int value){_numVoices = value;}
+	void NumVoices(const int value) {_numVoices = value;}
 
-	int GlobalVolume() { return m_GlobalVolume;}
+	int GlobalVolume() const { return m_GlobalVolume;}
 	void GlobalVolume(const int value) { m_GlobalVolume= value;}
 	void SlideVolume(const int value) {
 		m_GlobalVolume += value;
@@ -1073,27 +1083,27 @@ XMSampler::Channel::PerformFX().
 		_resampler.SetQuality(value);
 	}
 
-	const psycle::helpers::dsp::ResamplerQuality ResamplerQuality(){
+	psycle::helpers::dsp::ResamplerQuality ResamplerQuality() const {
 		return _resampler.GetQuality();
 	}
-	const bool UseFilters(void) { return m_UseFilters; }
-	void UseFilters(bool usefilters) { m_UseFilters = usefilters; }
-	int PanningMode() { return m_PanningMode;}
+	bool UseFilters(void) const { return m_UseFilters; }
+	void UseFilters(const bool usefilters) { m_UseFilters = usefilters; }
+	int PanningMode() const { return m_PanningMode;}
 	void PanningMode(const int value) { m_PanningMode= value;}
 
-	void SetZxxMacro(int index,int mode, int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; }
-	ZxxMacro GetMap(int index) { return zxxMap[index]; }
+	void SetZxxMacro(const int index,const int mode, const int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; }
+	ZxxMacro GetMap(const int index) const { return zxxMap[index]; }
 
-	std::mutex & Mutex() { return m_Mutex; }
+	std::mutex & Mutex() const { return m_Mutex; }
 
-	const int SampleCounter(){return _sampleCounter;}// Sample pos since last linechange.
+	int SampleCounter() const {return _sampleCounter;}// Sample pos since last linechange.
 	void SampleCounter(const int value){_sampleCounter = value;}// ""
 
 	void NextSampleTick(const int value){m_NextSampleTick = value;}// Sample Pos of the next (tracker) tick
-	const int NextSampleTick(){ return m_NextSampleTick;}// ""
+	int NextSampleTick() const { return m_NextSampleTick;}// ""
 
 	void CurrentTick(const int value){m_TickCount = value;}// Current Tracker Tick number
-	const int CurrentTick(){ return m_TickCount;}// ""
+	int CurrentTick() const { return m_TickCount;}// ""
 
 	int GetDeltaTick() { return m_DeltaTick; }
 
@@ -1110,8 +1120,8 @@ protected:
 
 
 	void DeltaTick(const int value){m_DeltaTick = value;}
-	const int DeltaTick(){return m_DeltaTick;}
-	void WorkVoices(int sampleOffset, int numsamples);
+	int DeltaTick() const {return m_DeltaTick;}
+	void WorkVoices(const int sampleOffset, const int numsamples);
 
 private:
 	/// Using Linear or Amiga Slides.

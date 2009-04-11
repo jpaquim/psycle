@@ -229,7 +229,7 @@ XMSampler::XDSPWaveController::~XDSPWaveController()
 */
 //////////////////////////////////////////////////////////////////////////
 //      XMSampler::EnvelopeController Implementation
-void XMSampler::EnvelopeController::Init(XMInstrument::Envelope *pEnvelope, MachineCallbacks * callbacks)
+void XMSampler::EnvelopeController::Init(const XMInstrument::Envelope *pEnvelope, const MachineCallbacks * callbacks)
 {
 	if(pEnvelope != NULL){
 		m_pEnvelope = pEnvelope;
@@ -347,7 +347,7 @@ void XMSampler::EnvelopeController::SetPositionInSamples(const int samplePos)
 	//TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
 	//TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
 }
-int XMSampler::EnvelopeController::GetPositionInSamples()
+int XMSampler::EnvelopeController::GetPositionInSamples() const
 {
 	//TRACE("Requested Pos:%d. Idx:%d, Current Amount:%f\n",m_Samples,m_PositionIndex,m_ModulationAmount);
 	//TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
@@ -969,7 +969,7 @@ void XMSampler::Voice::Retrig()
 		}
 	}
 
-int XMSampler::Voice::GetDelta(int wavetype,int wavepos)
+int XMSampler::Voice::GetDelta(const int wavetype,const int wavepos) const
 {
 	switch (wavetype)
 	{
@@ -1033,7 +1033,7 @@ double XMSampler::Voice::PeriodToSpeed(int period)
 	}
 }
 
-const double XMSampler::Voice::NoteToPeriod(const int note)
+double XMSampler::Voice::NoteToPeriod(const int note) const
 {
 	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
@@ -1050,7 +1050,7 @@ const double XMSampler::Voice::NoteToPeriod(const int note)
 	}
 }
 
-const int XMSampler::Voice::PeriodToNote(const double period)
+int XMSampler::Voice::PeriodToNote(const double period) const
 {
 	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
@@ -2243,22 +2243,30 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 						thisChannel.LastVoicePanFactor(currentVoice->PanFactor());
 						thisChannel.LastVoiceVolume(currentVoice->Volume());
 
-						XMInstrument::Envelope *pEnv = &currentVoice->AmplitudeEnvelope().Envelope();
-						if (pEnv->IsEnabled() && pEnv->IsCarry())
+						{
+						const XMInstrument::Envelope & pEnv = currentVoice->AmplitudeEnvelope().Envelope();
+						if (pEnv.IsEnabled() && pEnv.IsCarry())
 							thisChannel.LastAmpEnvelopePosInSamples(currentVoice->AmplitudeEnvelope().GetPositionInSamples());
 						else thisChannel.LastAmpEnvelopePosInSamples(0);
-						pEnv = &currentVoice->PanEnvelope().Envelope();
-						if (pEnv->IsEnabled() && pEnv->IsCarry())
+						}
+						{
+						const XMInstrument::Envelope & pEnv = currentVoice->PanEnvelope().Envelope();
+						if (pEnv.IsEnabled() && pEnv.IsCarry())
 							thisChannel.LastPanEnvelopePosInSamples(currentVoice->PanEnvelope().GetPositionInSamples());
 						else thisChannel.LastPanEnvelopePosInSamples(0);
-						pEnv = &currentVoice->FilterEnvelope().Envelope();
-						if (pEnv->IsEnabled() && pEnv->IsCarry())
+						}
+						{
+						const XMInstrument::Envelope & pEnv = currentVoice->FilterEnvelope().Envelope();
+						if (pEnv.IsEnabled() && pEnv.IsCarry())
 							thisChannel.LastFilterEnvelopePosInSamples(currentVoice->FilterEnvelope().GetPositionInSamples());
 						else thisChannel.LastFilterEnvelopePosInSamples(0);
-						pEnv = &currentVoice->PitchEnvelope().Envelope();
-						if (pEnv->IsEnabled() && pEnv->IsCarry())
+						}
+						{
+						const XMInstrument::Envelope & pEnv = currentVoice->PitchEnvelope().Envelope();
+						if (pEnv.IsEnabled() && pEnv.IsCarry())
 							thisChannel.LastPitchEnvelopePosInSamples(currentVoice->PitchEnvelope().GetPositionInSamples());
 						else thisChannel.LastPitchEnvelopePosInSamples(0);
+						}
 
 					}
 					if ( event.volume()<0x40) newVoice->NoteOn(thisChannel.Note(),event.volume()<<1,bInstrumentSet);
