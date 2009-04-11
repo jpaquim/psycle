@@ -398,7 +398,7 @@ XMSampler::Channel::PerformFX().
 
 		EnvelopeStage::Type Stage() const {return m_Stage;}
 		void Stage(const EnvelopeStage::Type value){m_Stage = value;}
-		const XMInstrument::Envelope & const Envelope() const {return *m_pEnvelope;}
+		const XMInstrument::Envelope & Envelope() const {return *m_pEnvelope;}
 		inline void CalcStep(const int start,const int  end);
 		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; } // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
 		int GetPosition(void) const { return m_PositionIndex; }
