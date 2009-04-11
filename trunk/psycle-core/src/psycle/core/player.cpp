@@ -746,7 +746,7 @@ void Player::writeSamplesToFile(int amount) {
 	}
 }
 
-void Player::startRecording(bool dodither , dsp::Dither::Pdf ditherpdf, dsp::Dither::NoiseShape noiseshaping)
+void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, dsp::Dither::NoiseShape::type noiseshaping)
 {
 	if(recording_) return;
 	if(!song_ && !driver_) return;
