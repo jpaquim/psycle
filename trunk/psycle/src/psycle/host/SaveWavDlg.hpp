@@ -71,16 +71,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			static int ditherpdf;
 			static int noiseshape;
 
-			struct pdf
-			{
-				enum pdfs
-				{
-					triangular=0,
-					rectangular,
-					gaussian
-				};
-			};
-
 			struct fullheader
 			{
 				std::uint32_t	head;
