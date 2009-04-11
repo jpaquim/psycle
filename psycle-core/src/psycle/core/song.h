@@ -348,7 +348,7 @@ class PSYCLE__CORE__DECL Song : public UISong {
 			// Compatibility with older psycle::host
 			void SetDefaultPatternLines(int defaultPatLines);
 
-			int Song::GetHighestInstrumentIndex()
+			int GetHighestInstrumentIndex()
 			{
 				int i;
 				for(i=MAX_INSTRUMENTS-1;i>=0;i--)
