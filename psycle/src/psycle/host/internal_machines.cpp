@@ -125,15 +125,15 @@ namespace psycle
 				bisTicking=true;
 				for (int i=0;i<NUMMACHINES;i++)
 				{
-					if (macOutput[i] != -1 && Global::_pSong->machine(macOutput[i]) != NULL )
+					if (macOutput[i] != -1 && Global::song().machine(macOutput[i]) != NULL )
 					{
 						AllocateVoice(channel,i);
 						PatternEvent pTemp = *pData;
 						CustomTick(channel,i, pTemp);
 						// this can happen if the parameter is the machine itself.
-						if (Global::_pSong->machine(macOutput[i]) != this) 
+						if (Global::song().machine(macOutput[i]) != this) 
 						{
-							Global::_pSong->machine(macOutput[i])->Tick(allocatedchans[channel][i],&pTemp);
+							Global::song().machine(macOutput[i])->Tick(allocatedchans[channel][i],&pTemp);
 							if (pTemp._note >= notecommands::release )
 							{
 								DeallocateVoice(channel,i);
@@ -247,9 +247,9 @@ namespace psycle
 		{
 			if (numparam >=0 && numparam <NUMMACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->machine(macOutput[numparam]) != NULL))
+				if ((macOutput[numparam] != -1 ) &&( Global::song().machine(macOutput[numparam]) != NULL))
 				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],Global::_pSong->machine(macOutput[numparam])->_editName);
+					sprintf(parVal,"%X -%s",macOutput[numparam],Global::song().machine(macOutput[numparam])->_editName);
 				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 

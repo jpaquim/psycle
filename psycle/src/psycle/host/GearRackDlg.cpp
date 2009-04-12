@@ -109,16 +109,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_radio_efx.SetCheck(0);
 				m_radio_ins.SetCheck(0);
 
-				selected = Global::_pSong->seqBus;
+				selected = Global::song().seqBus;
 				if (selected >= MAX_BUSES)
 				{
 					selected = 0;
 				}
 				for (b=0; b<MAX_BUSES; b++) // Check Generators
 				{
-					if(Global::_pSong->machine(b))
+					if(Global::song().machine(b))
 					{
-						sprintf(buffer,"%.2X: %s",b,Global::_pSong->machine(b)->GetEditName().c_str());
+						sprintf(buffer,"%.2X: %s",b,Global::song().machine(b)->GetEditName().c_str());
 						m_list.AddString(buffer);
 					}
 					else
@@ -135,7 +135,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_radio_efx.SetCheck(1);
 				m_radio_ins.SetCheck(0);
 
-				selected = Global::_pSong->seqBus;
+				selected = Global::song().seqBus;
 				if (selected < MAX_BUSES)
 				{
 					selected = 0;
@@ -146,9 +146,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 				{
-					if(Global::_pSong->machine(b))
+					if(Global::song().machine(b))
 					{
-						sprintf(buffer,"%.2X: %s",b,Global::_pSong->machine(b)->GetEditName().c_str());
+						sprintf(buffer,"%.2X: %s",b,Global::song().machine(b)->GetEditName().c_str());
 						m_list.AddString(buffer);
 					}
 					else
@@ -168,19 +168,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				char buffer[64];
 				for (int b=0;b<PREV_WAV_INS;b++)
 				{
-					sprintf(buffer, "%.2X: %s", b, Global::_pSong->_pInstrument[b]->_sName);
+					sprintf(buffer, "%.2X: %s", b, Global::song()._pInstrument[b]->_sName);
 					m_list.AddString(buffer);
 				}
 				CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 				if (cc->GetCurSel() == AUX_WAVES)
 				{
-					selected = Global::_pSong->instSelected();
+					selected = Global::song().instSelected();
 				}
 				else
 				{
 					cc->SetCurSel(AUX_WAVES);
 					pParentMain->UpdateComboIns(true);
-					selected = Global::_pSong->instSelected();
+					selected = Global::song().instSelected();
 				}
 				break;
 			}
@@ -196,7 +196,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 1:
 				tmac += MAX_BUSES;
 			case 0:
-				Global::_pSong->seqBus = tmac;
+				Global::song().seqBus = tmac;
 				pParentMain->UpdateComboGen();
 				break;
 			case 2:
@@ -204,15 +204,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					if (cc->GetCurSel() == AUX_WAVES)
 					{
-						Global::_pSong->instSelected(tmac);
-						Global::_pSong->auxcolSelected=tmac;
+						Global::song().instSelected(tmac);
+						Global::song().auxcolSelected=tmac;
 						pParentMain->UpdateComboIns(false);
 					}
 					else
 					{
 						cc->SetCurSel(AUX_WAVES);
-						Global::_pSong->instSelected(tmac);
-						Global::_pSong->auxcolSelected=tmac;
+						Global::song().instSelected(tmac);
+						Global::song().auxcolSelected=tmac;
 						pParentMain->UpdateComboIns(true);
 					}
 					pParentMain->m_wndInst.WaveUpdate();
@@ -238,8 +238,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-					Global::_pSong->instSelected(tmac);
-					Global::_pSong->auxcolSelected=tmac;
+					Global::song().instSelected(tmac);
+					Global::song().auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -262,13 +262,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
-					if (Global::_pSong->machine(tmac))
+					if (Global::song().machine(tmac))
 					{
 						view_->DeleteMachineGui(view_->song()->machine(tmac));
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Global::_pSong->DeleteMachine(view_->song()->machine(tmac));
+						Global::song().DeleteMachine(view_->song()->machine(tmac));
 #else
-						Global::_pSong->DestroyMachine(tmac);
+						Global::song().DestroyMachine(tmac);
 #endif
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
@@ -283,12 +283,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-						Global::_pSong->instSelected(tmac);
-						Global::_pSong->auxcolSelected=tmac;
+						Global::song().instSelected(tmac);
+						Global::song().auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
-				Global::_pSong->DeleteInstrument(Global::_pSong->instSelected());
+				Global::song().DeleteInstrument(Global::song().instSelected());
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
@@ -307,13 +307,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			switch (DisplayMode)
 			{
 			case 0:
-				if (Global::_pSong->machine(tmac))
+				if (Global::song().machine(tmac))
 				{
 					view_->DoMacPropDialog(view_->song()->machine(tmac), false);
 				}
 				break;
 			case 1:
-				if (Global::_pSong->machine(tmac+MAX_BUSES))
+				if (Global::song().machine(tmac+MAX_BUSES))
 				{
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
@@ -327,8 +327,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-						Global::_pSong->instSelected(tmac);
-						Global::_pSong->auxcolSelected=tmac;
+						Global::song().instSelected(tmac);
+						Global::song().auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -367,8 +367,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-					Global::_pSong->instSelected(tmac);
-					Global::_pSong->auxcolSelected=tmac;
+					Global::song().instSelected(tmac);
+					Global::song().auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -422,7 +422,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				//fallthrough
 			case 0:
 				m_pParent->AddMacViewUndo();
-				Global::_pSong->ExchangeMachines(sel[0],sel[1]);
+				Global::song().ExchangeMachines(sel[0],sel[1]);
 				pParentMain->UpdateComboGen(true);
 				view_->Rebuild();				
 				if (m_pParent->viewMode==view_modes::machine)
@@ -432,10 +432,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				break;
 			case 2:
 				m_pParent->AddMacViewUndo();
-				Global::_pSong->IsInvalided(true);
-				Global::_pSong->ExchangeInstruments(sel[0],sel[1]);
+				Global::song().IsInvalided(true);
+				Global::song().ExchangeInstruments(sel[0],sel[1]);
 				
-				Global::_pSong->IsInvalided(false);
+				Global::song().IsInvalided(false);
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
@@ -477,20 +477,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				//fallthrough
 			case 0:
-				if (!Global::_pSong->machine(tmac1)) {
+				if (!Global::song().machine(tmac1)) {
 					MessageBox("The first selection does not correspond to a valid machine","Gear Rack Dialog");
 					return;
-				} else if(tmac2 != -1 && Global::_pSong->machine(tmac2)) {
+				} else if(tmac2 != -1 && Global::song().machine(tmac2)) {
 					MessageBox("You cannot clone over an existing machine. Please select an empty slot.","Gear Rack Dialog");
 					return;
 				}
 				{
-					Machine* newMac = MachineFactory::getInstance().CloneMachine(*Global::_pSong->machine(tmac1));
+					Machine* newMac = MachineFactory::getInstance().CloneMachine(*Global::song().machine(tmac1));
 					if (!newMac) {
 						MessageBox("Cloning process failed","Gear Rack Dialog");
 						return;
 					}
-					Global::_pSong->AddMachine(newMac, tmac2);
+					Global::song().AddMachine(newMac, tmac2);
 					view_->CreateMachineGui(newMac);
 				}
 				pParentMain->UpdateComboGen(true);
@@ -503,11 +503,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				if (tmac2 < 0)
 				{
-					tmac2 = Global::_pSong->GetFreeBus();
+					tmac2 = Global::song().GetFreeBus();
 				}
 				if (tmac2 >= 0)
 				{
-					if (!Global::_pSong->CloneMac(tmac1,tmac2))
+					if (!Global::song().CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
@@ -530,11 +530,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					tmac2 = Global::_pSong->GetFreeFxBus();
+					tmac2 = Global::song().GetFreeFxBus();
 				}
 				if (tmac2 >= 0)
 				{
-					if (!Global::_pSong->CloneMac(tmac1,tmac2))
+					if (!Global::song().CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
@@ -548,12 +548,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				break;
 #endif
 			case 2:
-				Global::_pSong->IsInvalided(true);
+				Global::song().IsInvalided(true);
 				if (tmac2 < 0)
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)
 					{
-						if (Global::_pSong->_pInstrument[i]->Empty())
+						if (Global::song()._pInstrument[i]->Empty())
 						{
 							tmac2 = i;
 							break;
@@ -562,14 +562,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				if (tmac2 >=0)
 				{
-					if (!Global::_pSong->CloneIns(tmac1,tmac2))
+					if (!Global::song().CloneIns(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
 					}
 				}
 				
-				Global::_pSong->IsInvalided(false);
+				Global::song().IsInvalided(false);
 				pParentMain->UpdateComboIns(true);
 				break;
 			}

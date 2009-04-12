@@ -57,19 +57,19 @@ namespace psycle
 
 		void Player::Start(int pos, int line, bool initialize)
 		{
-			CSingleLock crit(&Global::_pSong->door, TRUE);
+			CSingleLock crit(&Global::song().door, TRUE);
 			if (initialize)
 			{
 				stop(); // This causes all machines to reset, and samplesperRow to init.				
 				Work(this,256);
-				((Master*)(Global::_pSong->machine(MASTER_INDEX)))->_clip = false;
-				((Master*)(Global::_pSong->machine(MASTER_INDEX)))->sampleCount = 0;
+				((Master*)(Global::song().machine(MASTER_INDEX)))->_clip = false;
+				((Master*)(Global::song().machine(MASTER_INDEX)))->sampleCount = 0;
 			}
 			_lineChanged = true;
 			_lineCounter = line;
 			_SPRChanged = false;
 			_sequencePosition= pos;
-			_playPattern = Global::_pSong->playOrder[_sequencePosition];
+			_playPattern = Global::song().playOrder[_sequencePosition];
 			if (initialize)
 			{
 				_playTime = 0;
@@ -79,7 +79,7 @@ namespace psycle
 			_loop_line = 0;
 			if (initialize)
 			{
-				SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+				SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
 				SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 				for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 				_playing = true;
@@ -92,7 +92,7 @@ namespace psycle
 
 		void Player::stop(void)
 		{
-			CSingleLock crit(&Global::_pSong->door, TRUE);
+			CSingleLock crit(&Global::song().door, TRUE);
 
 			if (_playing == true)
 				_lineStop = -1;
@@ -102,13 +102,13 @@ namespace psycle
 			_playBlock = false;			
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
-				if(Global::_pSong->machine(i))
+				if(Global::song().machine(i))
 				{
-					Global::_pSong->machine(i)->Stop();
-					for(int c = 0; c < MAX_TRACKS; c++) Global::_pSong->machine(i)->TriggerDelay[c]._cmd = 0;
+					Global::song().machine(i)->Stop();
+					for(int c = 0; c < MAX_TRACKS; c++) Global::song().machine(i)->TriggerDelay[c]._cmd = 0;
 				}
 			}
-			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
 			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 			CVSTHost::vstTimeInfo.flags &= ~kVstTransportPlaying;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
@@ -127,7 +127,7 @@ namespace psycle
 				CVSTHost::pHost->SetSampleRate(sampleRate);
 				for(int i(0) ; i < MAX_MACHINES; ++i)
 				{
-					if(Global::_pSong->machine(i)) Global::_pSong->machine(i)->SetSampleRate(sampleRate);
+					if(Global::song().machine(i)) Global::song().machine(i)->SetSampleRate(sampleRate);
 				}
 			}
 		}
@@ -463,7 +463,7 @@ namespace psycle
 			Player* pThis = (Player*)context;
 			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = pThis->_pBuffer;
-			CSingleLock crit(&Global::_pSong->door, TRUE);
+			CSingleLock crit(&Global::song().door, TRUE);
 			do
 			{
 				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;

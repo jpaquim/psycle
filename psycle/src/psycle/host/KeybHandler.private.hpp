@@ -56,19 +56,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					if ( cmd == cdefInfoMachine) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song* song = &projects_->active_project()->song();
+						Song& song = projects_->active_project()->song();
 #else
-						Song* song = Global::_pSong;
+						Song& song = Global::song();
 #endif
 						// maybe this should handeld in the machine view
-						if (song->seqBus < MAX_MACHINES)
+						if (song.seqBus < MAX_MACHINES)
 						{
-							if (song->machine(song->seqBus))
+							if (song.machine(song.seqBus))
 							{
 								CPoint point;
-								point.x = song->machine(song->seqBus)->GetPosX();
-								point.y = song->machine(song->seqBus)->GetPosY();
-								machine_view_->ShowDialog(song->machine(song->seqBus), point.x, point.y);
+								point.x = song.machine(song.seqBus)->GetPosX();
+								point.y = song.machine(song.seqBus)->GetPosY();
+								machine_view_->ShowDialog(song.machine(song.seqBus), point.x, point.y);
 							}
 						}
 					}

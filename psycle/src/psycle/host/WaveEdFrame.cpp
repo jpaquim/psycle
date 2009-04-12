@@ -55,8 +55,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		CWaveEdFrame::CWaveEdFrame(Song* _sng, CMainFrame* pframe)
 		{
-			this->_pSong=_sng;
-			wavview.SetSong(this->_pSong);
+			SetSong(_sng);
 			wavview.SetParent(pframe);
 		}
 
@@ -64,7 +63,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 
 		}
-
+		void CWaveEdFrame::SetSong(Song* _sng) {
+			this->_pSong=_sng;
+			wavview.SetSong(this->_pSong);
+		}
 		void CWaveEdFrame::OnClose() 
 		{
 			ShowWindow(SW_HIDE);

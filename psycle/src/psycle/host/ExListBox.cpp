@@ -82,7 +82,7 @@ void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
 	myedit.DestroyWindow();
 	myedit.Create(WS_CHILD|WS_BORDER,cellrect,this,IDC_SEQEDITBOX);
 	myedit.SetFont(&font);
-	myedit.SetWindowText(Global::_pSong->patternName[Global::_pSong->playOrder[row]]);
+	myedit.SetWindowText(Global::song().patternName[Global::song().playOrder[row]]);
 	myedit.ShowWindow(SW_SHOWNORMAL);
 	myedit.SetFocus();
 }
@@ -96,7 +96,7 @@ void CExListBox::OnChangePatternName()
 {
 	CString string;
 	myedit.GetWindowText(string);
-	strncpy(Global::_pSong->patternName[Global::_pSong->playOrder[GetCurSel()]],string,32);
+	strncpy(Global::song().patternName[Global::song().playOrder[GetCurSel()]],string,32);
 }
 int CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
@@ -128,7 +128,7 @@ BOOL CExListBox::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult )
 	// need to handle both ANSI and UNICODE versions of the message
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-	CString strTipText = Global::_pSong->patternName[Global::_pSong->playOrder[pNMHDR->idFrom]];
+	CString strTipText = Global::song().patternName[Global::song().playOrder[pNMHDR->idFrom]];
 //	UINT nID = pNMHDR->idFrom;
 //	GetText( nID ,strTipText);
 

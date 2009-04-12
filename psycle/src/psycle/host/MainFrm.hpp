@@ -96,6 +96,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			ProjectData* projects() { return &projects_; }
 
+			void SetSong(Song* song);
+
 			afx_msg void OnLoadwave();
 			
 			void EditQuantizeChange(int diff);

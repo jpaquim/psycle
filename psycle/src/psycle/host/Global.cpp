@@ -6,6 +6,8 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
+#include <psycle/host/MainFrm.hpp>
+
 using namespace psy::core;
 #else
 #include "Song.hpp"
@@ -21,7 +23,6 @@ namespace psycle
 {
 	namespace host
 	{
-		Song * Global::_pSong(0);
 		Player * Global::pPlayer(0);
 		helpers::dsp::Resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
@@ -46,7 +47,6 @@ namespace psycle
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			pPlayer = &Player::singleton();
 #else
-			_pSong = new Song();
 			pPlayer = new Player();
 			pVstHost = new vst::AudioMaster();
 #endif // PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -55,7 +55,6 @@ namespace psycle
 		Global::~Global()
 		{
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			delete _pSong; _pSong = 0;
 			delete pPlayer; pPlayer = 0;
 			delete pResampler; pResampler = 0;
 			delete pConfig; pConfig = 0;
@@ -65,6 +64,11 @@ namespace psycle
 #endif //!defined WINAMP_PLUGIN
 #endif // PSYCLE__CONFIGURATION__USE_PSYCORE
 		}
+
+		extern CPsycleApp theApp;
+
+		static inline Song&  song() { return ((CMainFrame*)theApp.m_pMainWnd)->projects()->active_project()->song(); }
+
 	}
 }
 

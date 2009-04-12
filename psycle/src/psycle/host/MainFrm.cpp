@@ -312,7 +312,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				cc2->AddString(s);
 			}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE			
-			cc2->SetCurSel(projects_.active_project()->psy_song().tracks()-4);
+			cc2->SetCurSel(projects_.active_project()->song().tracks()-4);
 #else
 			cc2->SetCurSel(_pSong->tracks()-4);			
 #endif
@@ -417,16 +417,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cs.lpszClass = AfxRegisterWndClass(0);
 			return TRUE;
 		}
+		void CMainFrame::SetSong(Song* song) {
+			this->_pSong = song;
+			m_pWndWed->SetSong(song);
 
+		}
 		void CMainFrame::SetUpStartProject()
 		{
 			Project* prj = new Project(&projects_,
 									   m_wndView.pattern_view(),
 									   m_wndView.machine_view());
+			// This operations sets prj as the active project, and assings the
+			// active song to mainframe, pattern view, machine view, sequencer view
+			// and editwnd
 			projects_.Add(prj);
-			m_wndSeq.SetProject(prj);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			m_wndView.pattern_view()->SetSong(&prj->psy_song());
 #endif
 		}
 
@@ -542,7 +547,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			cc2->SetCurSel(projects_.active_project()->psy_song().tracks()-4);
+			cc2->SetCurSel(projects_.active_project()->song().tracks()-4);
 #else
 			cc2->SetCurSel(_pSong->tracks()-4);
 #endif
@@ -551,7 +556,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cc2->SetCurSel(_pSong->currentOctave);
 			
 			UpdateComboGen();
-			UpdateMasterValue(((Master*)Global::_pSong->machine(MASTER_INDEX))->_outDry);
+			UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);
 			
 		}
 
@@ -563,9 +568,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			projects_.active_project()->psy_song().setTracks(cc2->GetCurSel()+4);
-			if (m_wndView.pattern_view()->editcur.track >= projects_.active_project()->psy_song().tracks() )
-			m_wndView.pattern_view()->editcur.track = projects_.active_project()->psy_song().tracks()-1;
+			projects_.active_project()->song().setTracks(cc2->GetCurSel()+4);
+			if (m_wndView.pattern_view()->editcur.track >= projects_.active_project()->song().tracks() )
+			m_wndView.pattern_view()->editcur.track = projects_.active_project()->song().tracks()-1;
 
 #else
 			_pSong->setTracks(cc2->GetCurSel()+4);
@@ -628,15 +633,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (Global::pPlayer->playing() ) 
 				{
-					Global::_pSong->BeatsPerMin(Global::pPlayer->bpm()+x);
+					Global::song().BeatsPerMin(Global::pPlayer->bpm()+x);
 				}
-				else Global::_pSong->BeatsPerMin(Global::_pSong->BeatsPerMin()+x);
+				else Global::song().BeatsPerMin(Global::song().BeatsPerMin()+x);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				Global::player().setBpm(Global::song().bpm());
 #else
-				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+				Global::pPlayer->SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
 #endif
-				sprintf(buffer,"%d",Global::_pSong->BeatsPerMin());
+				sprintf(buffer,"%d",Global::song().BeatsPerMin());
 			}
 			else sprintf(buffer,"%d",Global::pPlayer->bpm());
 			
@@ -651,11 +656,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (Global::pPlayer->playing() ) 
 				{
-					Global::_pSong->setTicksSpeed(Global::player().timeInfo().ticksSpeed(), Global::player().timeInfo().isTicks());
+					Global::song().setTicksSpeed(Global::player().timeInfo().ticksSpeed(), Global::player().timeInfo().isTicks());
 				}
-				else Global::_pSong->LinesPerBeat(Global::_pSong->LinesPerBeat()+x);
+				else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
 				Global::player().timeInfo().setTicksSpeed(Global::song().ticksSpeed(), Global::song().isTicks());
-				sprintf(buffer,"%d",Global::_pSong->LinesPerBeat());
+				sprintf(buffer,"%d",Global::song().LinesPerBeat());
 			}
 			else sprintf(buffer, "%d", Global::player().timeInfo().ticksSpeed());
 #else
@@ -663,11 +668,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (Global::pPlayer->playing() ) 
 				{
-					Global::_pSong->LinesPerBeat(Global::pPlayer->tpb()+x);
+					Global::song().LinesPerBeat(Global::pPlayer->tpb()+x);
 				}
-				else Global::_pSong->LinesPerBeat(Global::_pSong->LinesPerBeat()+x);
-				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->LinesPerBeat());
-				sprintf(buffer,"%d",Global::_pSong->LinesPerBeat());
+				else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
+				Global::pPlayer->SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
+				sprintf(buffer,"%d",Global::song().LinesPerBeat());
 			}
 			else sprintf(buffer, "%d", Global::pPlayer->tpb());
 #endif
@@ -705,7 +710,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CSliderCtrl *cs;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( projects_.active_project()->psy_song().machine(MASTER_INDEX))
+			if ( projects_.active_project()->song().machine(MASTER_INDEX))
 #else
 			if ( _pSong->machine(MASTER_INDEX) != NULL)
 #endif
@@ -721,7 +726,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CSliderCtrl *cs;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( projects_.active_project()->psy_song().machine(MASTER_INDEX))
+			if ( projects_.active_project()->song().machine(MASTER_INDEX))
 #else
 			if ( _pSong->machine(MASTER_INDEX) != NULL)
 #endif
@@ -732,7 +737,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// customdraw happening before updatemastervalue, so invalid value get set.
 				// Added call to UpdateMasterValue() in PsybarsUpdate() in order to fix this.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				psy::core::Master* master = (psy::core::Master*)projects_.active_project()->psy_song().machine(MASTER_INDEX);
+				psy::core::Master* master = (psy::core::Master*)projects_.active_project()->song().machine(MASTER_INDEX);
 				master->_outDry = cs->GetPos();
 #else
 				((Master*)_pSong->machine(MASTER_INDEX))->_outDry = cs->GetPos();
@@ -747,10 +752,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			// Stefan: what is this ??
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Master* master = (Master*)projects_.active_project()->psy_song().machine(MASTER_INDEX);
+			Master* master = (Master*)projects_.active_project()->song().machine(MASTER_INDEX);
 			master->_clip = false;
 #else
-			((Master*)(Global::_pSong->machine(MASTER_INDEX)))->_clip = false;
+			((Master*)(Global::song().machine(MASTER_INDEX)))->_clip = false;
 #endif
 			m_wndView.SetFocus();
 		}
@@ -942,7 +947,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Song* song = &projects_.active_project()->psy_song();
+			Song* song = &projects_.active_project()->song();
 			for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
 			{
 				if( song->machine(b))
@@ -1222,7 +1227,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Song* _pSong = &projects_.active_project()->psy_song();
+			psy::core::Song* _pSong = &projects_.active_project()->song();
 #endif
 
 
@@ -1752,7 +1757,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else
 			{
-				str.Format("Pat %.2X", Global::_pSong->playOrder[m_wndView.pattern_view()->editPosition]); 
+				str.Format("Pat %.2X", Global::song().playOrder[m_wndView.pattern_view()->editPosition]); 
 			}
 			pCmdUI->SetText(str); 
 		}

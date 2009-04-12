@@ -62,22 +62,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,output_driver_(0)
 #endif
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			machine_view_ = new MachineView(this, main_frame);
-#else
-			machine_view_ = new MachineView(this, main_frame, Global::_pSong);
-#endif
-			pattern_view_ = new PatternView(this, main_frame, Global::_pSong);
+			pattern_view_ = new PatternView(this, main_frame);
 
 			for (int c=0; c<256; c++) { 
 				FLATSIZES[c]=8;
 			}	
 			Global::pInputHandler->SetChildView(this);
 			// Creates a new song object. The application Song.
-			Global::_pSong->New();
-			// Referencing the childView song pointer to the
-			// Main Global::_pSong object [The application Global::_pSong]
-			_pSong = Global::_pSong;
+			Global::song().New();
 			// machine_view_->Rebuild();
 			// its done in psycle.cpp, todo check config load order
 		}
@@ -242,7 +235,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::ValidateParent()
 		{
 			pParentMain=(CMainFrame *)pParentFrame;
-			pParentMain->_pSong=Global::_pSong;
+			//pParentMain->_pSong=Global::_pSong;
 		}
 
 		/// Timer initialization
@@ -274,7 +267,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// it is not allowing the player to work. Do the same in the one inside Player::Work()
 				CSingleLock lock(&_pSong->door,TRUE);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				psy::core::Song* song = &projects_->active_project()->psy_song();
+				psy::core::Song* song = &projects_->active_project()->song();
 				if (song->machine(MASTER_INDEX))
 				{
 					psy::core::Master* master = (psy::core::Master*) (song->machine(MASTER_INDEX));
@@ -292,22 +285,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					master->vuupdated = true;
 				}
 #else
-				if (Global::_pSong->machine(MASTER_INDEX))
+				if (Global::song().machine(MASTER_INDEX))
 				{
 					pParentMain->UpdateVumeters
 						(
-							//((Master*)Global::_pSong->machine(MASTER_INDEX))->_LMAX,
-							//((Master*)Global::_pSong->machine(MASTER_INDEX))->_RMAX,
-							((Master*)Global::_pSong->machine(MASTER_INDEX))->_lMax,
-							((Master*)Global::_pSong->machine(MASTER_INDEX))->_rMax,
+							//((Master*)Global::song().machine(MASTER_INDEX))->_LMAX,
+							//((Master*)Global::song().machine(MASTER_INDEX))->_RMAX,
+							((Master*)Global::song().machine(MASTER_INDEX))->_lMax,
+							((Master*)Global::song().machine(MASTER_INDEX))->_rMax,
 							Global::pConfig->vu1,
 							Global::pConfig->vu2,
 							Global::pConfig->vu3,
-							((Master*)Global::_pSong->machine(MASTER_INDEX))->_clip
+							((Master*)Global::song().machine(MASTER_INDEX))->_clip
 						);
-					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->machine(MASTER_INDEX))->_outDry);
+					pParentMain->UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);
 					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
-					((Master*)Global::_pSong->machine(MASTER_INDEX))->vuupdated = true;
+					((Master*)Global::song().machine(MASTER_INDEX))->vuupdated = true;
 				}
 #endif
 				if (viewMode == view_modes::machine)
@@ -354,6 +347,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (XMSamplerMachineDialog != NULL ) XMSamplerMachineDialog->UpdateUI();
 				if (Global::pPlayer->playing())
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					PlayerTimeInfo& tinfo = Player::singleton().timeInfo();
+					Sequence& sequence = pattern_view()->song()->patternSequence();
+					SequenceEntry* entry = sequence.GetEntryOnPosition(*sequence.begin(), tinfo.playBeatPos());
+					pParentMain->SetAppSongBpm(0);
+					pParentMain->SetAppSongTpb(0);
+
+					if (Global::pConfig->_followSong)
+					{
+							///todo
+					}
+
+#else
 					if (Global::pPlayer->_lineChanged)
 					{
 						Global::pPlayer->_lineChanged = false;
@@ -382,8 +388,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							else if( viewMode == view_modes::pattern ) Repaint(draw_modes::playback);
 						}
 						else if ( viewMode == view_modes::pattern ) Repaint(draw_modes::playback);
+
 						if ( viewMode == view_modes::sequence ) Repaint(draw_modes::playback);
 					}
+#endif
 				}
 			}
 			if (nIDEvent == 159 && !Global::pPlayer->recording())
@@ -405,7 +413,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE						
 			psy::core::Player & player(psy::core::Player::singleton());
-			player.song(projects_->active_project()->psy_song());
+			player.song(projects_->active_project()->song());
 			output_driver_ = new psy::core::MsWaveOut();
 			player.setDriver(*output_driver_);
 			player.driver().Enable(true);
@@ -440,7 +448,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
 
 				Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
-				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+				Global::pPlayer->SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
 			}
 #endif
 		}
@@ -693,11 +701,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 			{
-				if (Global::_pSong->_saved)
+				if (Global::song()._saved)
 				{
 					std::ostringstream fullpath;
 					fullpath << Global::pConfig->GetCurrentSongDir().c_str()
-						<< '\\' << Global::_pSong->fileName.c_str();
+						<< '\\' << Global::song().fileName.c_str();
 					projects_->active_project()->FileLoadsongNamed(fullpath.str());
 				}
 			}
@@ -856,30 +864,55 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			int i=0;
-			while ( Global::_pSong->playOrderSel[i] == false ) i++;
-			
+			while ( Global::song().playOrderSel[i] == false ) i++;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (!Player::singleton().playing()) {
+				SequenceLine* seqLine = *pattern_view()->song()->patternSequence().begin();
+				SequenceLine::iterator seqite = seqLine->begin();
+				for ( ; seqite != seqLine->end() && i >0; seqite++, i--);
+
+				if (seqite != seqLine->end()) {
+					Player::singleton().start(seqite->second->tickPosition());
+				}
+			} else {
+				Player::singleton().UnsetLoop();
+			}
+#else
 			if(!Global::pPlayer->playing())
 				Global::pPlayer->Start(i,0);
 			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
-
+#endif
 			pParentMain->StatusBarIdle();
 			if ( viewMode == view_modes::pattern ) Repaint(draw_modes::pattern);
 		}
 
 		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 		{
-			pCmdUI->SetCheck(Global::pPlayer->_playBlock == true);			
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			PlayerTimeInfo tinfo = Player::singleton().timeInfo();
+			int check = Player::singleton().loopEnabled() && 
+				(tinfo.cycleStartPos() > 0.0f || tinfo.cycleEndPos() < projects_->active_project()->song().patternSequence().tickLength());
+			
+#else
+			int check = Global::pPlayer->_playBlock;
+#endif
+			pCmdUI->SetCheck(check);			
 		}
 
 		void CChildView::OnBarstop()
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Player & player(psy::core::Player::singleton());
+			PlayerTimeInfo tinfo = player.timeInfo();
+			bool pl = player.playing();
+			bool blk = player.loopEnabled()  && 
+				(tinfo.cycleStartPos() > 0.0f || tinfo.cycleEndPos() < projects_->active_project()->song().patternSequence().tickLength());
 			player.stop();
 #else
 			bool pl = Global::pPlayer->playing();
 			bool blk = Global::pPlayer->_playBlock;
 			Global::pPlayer->stop();
+#endif
 			pParentMain->SetAppSongBpm(0);
 			pParentMain->SetAppSongTpb(0);
 
@@ -893,12 +926,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					memset(Global::_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-					Global::_pSong->playOrderSel[pattern_view()->editPosition] = true;
+					memset(Global::song().playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+					Global::song().playOrderSel[pattern_view()->editPosition] = true;
 					Repaint(draw_modes::cursor); 
 				}
 			}
-#endif
 		}
 
 		void CChildView::OnRecordWav() 
@@ -910,7 +942,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 				if ( dlg.DoModal() == IDOK ) 
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					Player::singleton().setFileName(dlg.GetFileName().GetBuffer(4));
+					Player::singleton().startRecording();
+#else
 					Global::pPlayer->StartRecording(dlg.GetFileName().GetBuffer(4));
+#endif
 				}
 				if ( Global::pConfig->autoStopMachines ) 
 				{
@@ -935,9 +972,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Global::pConfig->autoStopMachines = false;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					if (Global::_pSong->machine(c))
+					if (Global::song().machine(c))
 					{
-						Global::_pSong->machine(c)->Standby(false);
+						Global::song().machine(c)->Standby(false);
 					}
 				}
 			}
@@ -953,7 +990,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnFileSongproperties() 
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			CSongpDlg dlg(&projects_->active_project()->psy_song());
+			CSongpDlg dlg(&projects_->active_project()->song());
 #else
 			CSongpDlg dlg(Global::_pSong);
 #endif
@@ -1166,9 +1203,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::SetTitleBarText()
 		{
 			std::string titlename = "[";
-			titlename+=Global::_pSong->fileName;
+			titlename+=Global::song().fileName;
 			/*
-			if(!(Global::_pSong->_saved))
+			if(!(Global::song()._saved))
 			{
 				titlename+=" *";
 			}

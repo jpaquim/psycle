@@ -440,7 +440,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			m_ChannelNum = channelNum;
 			pChannel(&pSampler()->rChannel(channelNum));
 			InstrumentNum(instrumentNum);
-			XMInstrument & _inst = Global::_pSong->rInstrument(instrumentNum);
+			XMInstrument & _inst = Global::song().rInstrument(instrumentNum);
 			m_pInstrument = &_inst;
 
 			// Envelopes
@@ -513,7 +513,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			float left_output = 0.0f;
 			float right_output = 0.0f;
 
-			if (Global::_pSong->IsInvalided())
+			if (Global::song().IsInvalided())
 			{
 				IsPlaying(false);
 				return;
@@ -664,7 +664,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol,bool reset)
 		{
 			int wavelayer = rInstrument().NoteToSample(note).second;
-			XMInstrument::WaveData& wave = Global::_pSong->SampleData(wavelayer);
+			XMInstrument::WaveData& wave = Global::song().SampleData(wavelayer);
 			if ( wave.WaveLength() == 0 ) return;
 
 			m_WaveDataController.Init(&wave,wavelayer);
@@ -1509,22 +1509,22 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 				switch(parameter&0x0F)
 				{
 				case CMD_EE::EE_VOLENVOFF:
-					Global::_pSong->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(false);
+					Global::song().rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_VOLENVON:
-					Global::_pSong->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(true);
+					Global::song().rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(true);
 					break;
 				case CMD_EE::EE_PANENVOFF:
-					Global::_pSong->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(false);
+					Global::song().rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_PANENVON:
-					Global::_pSong->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(true);
+					Global::song().rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(true);
 					break;
 				case CMD_EE::EE_PITCHENVON:
-					Global::_pSong->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(false);
+					Global::song().rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_PITCHENVOFF:
-					Global::_pSong->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(true);
+					Global::song().rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(true);
 					break;
 				}
 			}
@@ -2121,7 +2121,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		{
 			scoped_lock lock(m_Mutex);
 
-			if (Global::_pSong->IsInvalided()) { return; }
+			if (Global::song().IsInvalided()) { return; }
 
 			// don't process twk , twf, Mcm Commands, or empty lines.
 			if ( pData->note() > notecommands::release )
@@ -2253,9 +2253,9 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 							return;
 						}
 
-						XMInstrument & _inst = Global::_pSong->rInstrument(thisChannel.InstrumentNo());
+						XMInstrument & _inst = Global::song().rInstrument(thisChannel.InstrumentNo());
 						int _layer = _inst.NoteToSample(pData->note()).second;
-						int twlength = Global::_pSong->SampleData(_layer).WaveLength();
+						int twlength = Global::song().SampleData(_layer).WaveLength();
 						if(twlength > 0)
 						{
 							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
@@ -2350,7 +2350,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			if (!_mute)
 			{
 				Standby(false);
-				int _songtracks = Global::_pSong->tracks();
+				int _songtracks = Global::song().tracks();
 				int ns = numSamples;
 				int nextevent;
 
@@ -2565,20 +2565,20 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			int tmp = 24 / ((TicksPerRow() == 0)?6:TicksPerRow());
 			if (tmp*TicksPerRow() == 24)
 			{
-				Global::_pSong->LinesPerBeat(tmp);
-				Global::_pSong->BeatsPerMin(BPM());
+				Global::song().LinesPerBeat(tmp);
+				Global::song().BeatsPerMin(BPM());
 			}
 			else
 			{
-				Global::_pSong->LinesPerBeat(4);
-				Global::_pSong->BeatsPerMin(6 * BPM() / TicksPerRow() );
+				Global::song().LinesPerBeat(4);
+				Global::song().BeatsPerMin(6 * BPM() / TicksPerRow() );
 			}
 
 			int t= Global::pConfig->_pOutputDriver->_samplesPerSec * 60;
-			int v=Global::_pSong->BeatsPerMin();
-			int z=Global::_pSong->LinesPerBeat();
+			int v=Global::song().BeatsPerMin();
+			int z=Global::song().LinesPerBeat();
 			Global::pPlayer->SamplesPerRow(	t / (v * z) );
-			m_DeltaTick = t / (Global::_pSong->BeatsPerMin() * 24);
+			m_DeltaTick = t / (Global::song().BeatsPerMin() * 24);
 		}
 */
 		bool XMSampler::Load(RiffFile* riffFile)

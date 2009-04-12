@@ -47,19 +47,11 @@ namespace psycle {
 			}
 		}
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE		
 		MachineView::MachineView(CChildView* parent, CMainFrame* main)
-#else
-		MachineView::MachineView(CChildView* parent, CMainFrame* main, Song* song)
-#endif
 			: PsycleCanvas::Canvas(parent),
 			  parent_(parent),
 			  main_(main),
-#if PSYCLE__CONFIGURATION__USE_PSYCORE		
 			  song_(0),
-#else
-			  song_(song),
-#endif
 			  del_line_(0),
 			  rewire_line_(0),
 			  del_machine_(0),

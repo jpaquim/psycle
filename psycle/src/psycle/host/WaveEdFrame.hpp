@@ -22,6 +22,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
 			void GenerateView();
 			void Notify(void);
+			void SetSong(Song* song);
 			Song *_pSong;
 			CMainFrame *_pFrame;
 		// Overrides

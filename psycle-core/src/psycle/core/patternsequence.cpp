@@ -382,7 +382,15 @@ namespace psy { namespace core {
 			}
 		}
 
-		int PatternSequence::priority(const PatternEvent& cmd, int count) const {
+		SequenceEntry* Sequence::GetEntryOnPosition(SequenceLine* line, double tickPosition) {
+			for (SequenceLine::iterator ite = line->begin(); ite != line->end(); ite++) {
+				if (ite->second->tickPosition() >= tickPosition && ite->second->tickEndPosition() <= tickPosition) {
+					return ite->second;
+				}
+			}
+		}
+
+		int Sequence::priority(const PatternEvent& cmd, int count) const {
 			int p = 8;
 			if (cmd.note() == notetypes::tweak_slide) {
 				p = 1;
@@ -394,7 +402,7 @@ namespace psy { namespace core {
 			return p;
 		}
 
-		void PatternSequence::CollectEvent(const PatternEvent& command) {
+		void Sequence::CollectEvent(const PatternEvent& command) {
 			assert(command.time_offset() >= 0);
 			double delta_frames = command.time_offset();
 			std::multimap<double, std::multimap<int, PatternEvent > >::iterator it;
@@ -409,7 +417,7 @@ namespace psy { namespace core {
 			}
 		}
 
-		void PatternSequence::GetOrderedEvents(std::vector<PatternEvent*>& event_list) {
+		void Sequence::GetOrderedEvents(std::vector<PatternEvent*>& event_list) {
 			std::multimap<double, std::multimap< int, PatternEvent > >::iterator event_it = events_.begin();
 			for ( ; event_it != events_.end(); ++event_it ) {
 				std::multimap< int, PatternEvent>& map = event_it->second;

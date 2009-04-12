@@ -222,6 +222,7 @@ namespace psy { namespace core {
 			// heart of patternsequence
 			void GetEventsInRange( double start, double length, std::vector<PatternEvent*>& events );
 			void GetOrderedEvents(std::vector<PatternEvent*>& event_list);
+			SequenceEntry* GetEntryOnPosition(SequenceLine* line, double tickPosition);
 			void CollectEvent(const PatternEvent& command);
 			int priority(const PatternEvent& cmd, int count) const;
 

@@ -78,7 +78,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
-			CMainFrame* pFrame = new CMainFrame;
+			CMainFrame* pFrame = new CMainFrame();
 			m_pMainWnd = pFrame;
 
 			loggers::info("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
@@ -142,7 +142,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			factory.setPsyclePath(Global::pConfig->GetPluginDir());
 			factory.setLadspaPath("");
-			Global::_pSong = &((CMainFrame *)theApp.m_pMainWnd)->projects_.active_project()->psy_song();
 #else
 			CNewMachine::LoadPluginInfo(false);
 #endif

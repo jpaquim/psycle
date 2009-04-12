@@ -113,12 +113,12 @@ END_MESSAGE_MAP()
 void XMSamplerUIInst::SetInstrumentData(const int instno)
 {
 	TRACE("in setInstrumentData\n");
-	XMInstrument& inst = Global::_pSong->rInstrument(instno);
+	XMInstrument& inst = Global::song().rInstrument(instno);
 	m_iCurrentSelected=instno;
 
 	m_InstrumentName.SetWindowText(inst.Name().c_str());
 	SetNewNoteAction(inst.NNA(),inst.DCT(),inst.DCA());
-	m_SampleAssign.Initialize(m_pMachine,&Global::_pSong->rInstrument(instno),this);
+	m_SampleAssign.Initialize(m_pMachine,&Global::song().rInstrument(instno),this);
 
 	m_FilterType.SetCurSel((int)inst.FilterType());
 
@@ -309,7 +309,7 @@ BOOL XMSamplerUIInst::OnSetActive()
 		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
 		{
 			char line[48];
-			XMInstrument& inst = Global::_pSong->rInstrument(i);
+			XMInstrument& inst = Global::song().rInstrument(i);
 			sprintf(line,"%02X%s: ",i,inst.IsEnabled()?"*":" ");
 			strcat(line,inst.Name().c_str());
 			m_InstrumentList.AddString(line);
@@ -403,7 +403,7 @@ void XMSamplerUIInst::OnBnClickedInsTamp()
 	TRACE("inbtninsTamp\n");
 	m_bInitialized = false;
 	int i= m_iCurrentSelected;
-	XMInstrument& inst = Global::_pSong->rInstrument(i);
+	XMInstrument& inst = Global::song().rInstrument(i);
 
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
@@ -463,7 +463,7 @@ void XMSamplerUIInst::OnBnClickedInsTpan()
 {
 	m_bInitialized = false;
 	int i= m_iCurrentSelected;
-	XMInstrument& inst = Global::_pSong->rInstrument(i);
+	XMInstrument& inst = Global::song().rInstrument(i);
 
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
@@ -521,7 +521,7 @@ void XMSamplerUIInst::OnBnClickedInsTfilter()
 {
 	m_bInitialized = false;
 	int i= m_iCurrentSelected;
-	XMInstrument& inst = Global::_pSong->rInstrument(i);
+	XMInstrument& inst = Global::song().rInstrument(i);
 	
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
@@ -580,7 +580,7 @@ void XMSamplerUIInst::OnBnClickedInsTpitch()
 {
 	m_bInitialized = false;
 	int i= m_iCurrentSelected;
-	XMInstrument& inst = Global::_pSong->rInstrument(i);
+	XMInstrument& inst = Global::song().rInstrument(i);
 	
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
@@ -637,7 +637,7 @@ void XMSamplerUIInst::OnBnClickedInsTpitch()
 void XMSamplerUIInst::OnCbnSelendokFiltertype()
 {
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::_pSong->rInstrument(i);
+	XMInstrument& _inst = Global::song().rInstrument(i);
 
 	_inst.FilterType((dsp::FilterType)m_FilterType.GetCurSel());
 }
@@ -649,7 +649,7 @@ void XMSamplerUIInst::OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult
 	TRACE("incustomdraw\n");
 
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::_pSong->rInstrument(i);
+	XMInstrument& _inst = Global::song().rInstrument(i);
 	char tmp[64];
 	
 	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
@@ -699,7 +699,7 @@ void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::_pSong->rInstrument(i);
+	XMInstrument& _inst = Global::song().rInstrument(i);
 	char tmp[64];
 
 	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
@@ -732,7 +732,7 @@ void XMSamplerUIInst::OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::_pSong->rInstrument(i);
+	XMInstrument& _inst = Global::song().rInstrument(i);
 
 	char tmp[64];
 
@@ -777,7 +777,7 @@ void XMSamplerUIInst::OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::_pSong->rInstrument(i);
+	XMInstrument& _inst = Global::song().rInstrument(i);
 	
 	char tmp[64];
 	if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
@@ -799,7 +799,7 @@ void XMSamplerUIInst::OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult)
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SLNOTEMODNOTE);
 
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::_pSong->rInstrument(i);
+	XMInstrument& _inst = Global::song().rInstrument(i);
 	if (m_bInitialized)
 	{
 		_inst.NoteModPanCenter(slid->GetPos());
@@ -820,7 +820,7 @@ void XMSamplerUIInst::OnNMCustomdrawNoteMod(NMHDR *pNMHDR, LRESULT *pResult)
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_NOTEMOD);
 
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::_pSong->rInstrument(i);
+	XMInstrument& _inst = Global::song().rInstrument(i);
 	if (m_bInitialized)
 	{
 		_inst.NoteModPanSep(slid->GetPos());
@@ -918,7 +918,7 @@ void XMSamplerUIInst::OnEnChangeInsName()
 	if(m_bInitialized)
 	{
 		int i= m_iCurrentSelected;
-		XMInstrument& _inst = Global::_pSong->rInstrument(i);
+		XMInstrument& _inst = Global::song().rInstrument(i);
 		TCHAR _buf[256];
 		m_InstrumentName.GetWindowText(_buf,sizeof(_buf));
 		_inst.Name(_buf);

@@ -12,25 +12,25 @@ namespace psycle {
 	namespace host {
 
 		class ProjectData;
+		class PatternView;
+		class MachineView;
 
 		class Project
 		{
 		public:
 			Project(ProjectData* parent,
-					class PatternView* pat_view,
-					class MachineView* mac_view);
+					PatternView* pat_view,
+					MachineView* mac_view);
 			~Project();
 
-			Song& song() { assert(Global::_pSong); return *Global::_pSong; }
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Song& psy_song() { return song_; }
-#endif
+			Song& song() { return song_; }
 
 			// modules
 			PatternView* pat_view();
 			MachineView* mac_view();
 
 			ProjectData* parent();
+			void SetActive();
 
 			void FileImportModulefile();
 			bool Export(UINT id);
@@ -59,9 +59,7 @@ namespace psycle {
 
 			int lines_per_beat_;
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Song song_;
-#endif
 
 		};
 	}

@@ -539,11 +539,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (nFlags & MK_CONTROL)
 				{
-					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
+					Global::song().seqBus = MachineIndex;//Global::song().FindBusFromIndex(MachineIndex);
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
 					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS); // PARAMS
-					Global::_pSong->auxcolSelected=tweakpar;
+					Global::song().auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 				}
 				else 
