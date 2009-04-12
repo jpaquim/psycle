@@ -38,10 +38,9 @@ namespace psycle {
 		#define TWOPI_F (2.0f*3.141592665f)
 	
 
-		PatternView::PatternView(CChildView* parent, CMainFrame* main, Song* song)						
+		PatternView::PatternView(CChildView* parent, CMainFrame* main)						
 			:  parent_(parent),
 			   main_(main),
-			   song_(song),			   
 			   blockSelected(false),
 			   blockStart(false),
 			   blockswitch(false),
@@ -70,8 +69,6 @@ namespace psycle {
 			   isBlockCopied(false),
 			   blockNTracks(0),
 			   blockNLines(0),
-			   mcd_x(0),
-			   mcd_y(0),
 			   pUndoList(NULL),
 			   pRedoList(NULL),
 			   UndoCounter(0),
@@ -2540,6 +2537,7 @@ namespace psycle {
 
 			tstart = std::min(std::max(0, tstart), maxt);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			//todo: Use editPositionEntry when it is ready.
 			Song* song = this->song();
 			PatternSequence* sequence = &song->patternSequence();
 			SequenceLine* line = *(sequence->begin());	
@@ -6584,9 +6582,6 @@ namespace psycle {
 			UndoCounter = 0;
 			UndoSaved = 0;
 
-			UndoMacCounter=0;
-			UndoMacSaved=0;
-
 		//	SetTitleBarText();
 		}
 
@@ -7940,7 +7935,7 @@ namespace psycle {
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			//todo: add proper code
-			Player::singleton().Start(0);
+			Player::singleton().start(0);
 #else
 			Global::pPlayer->Start(editPosition,editcur.line);
 #endif

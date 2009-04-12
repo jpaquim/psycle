@@ -32,7 +32,6 @@ namespace psycle {
 			assert(pat_view_);
 			assert(mac_view_);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			mac_view_->SetSong(&song_);
 			psy::core::SequenceLine* line = song_.patternSequence().createNewLine();
 			psy::core::SinglePattern* pattern= new psy::core::SinglePattern();
 			pattern->setID(0);
@@ -59,6 +58,11 @@ namespace psycle {
 		ProjectData* Project::parent()
 		{
 			return parent_;
+		}
+
+		void Project::SetActive() {
+			pat_view()->SetSong(&song());
+			mac_view()->SetSong(&song());
 		}
 
 		void Project::Clear()
@@ -137,23 +141,23 @@ namespace psycle {
 			Sleep(256);
 			player.driver().Enable(false);
 			pat_view()->editPosition = 0;
-			if(!psy_song().load(fName.c_str())) {
+			if(!song().load(fName.c_str())) {
 				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 				return;			
 			}			
-			player.song(psy_song());
+			player.song(song());
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)
 			{
 				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
-				psy_song().fileName = fName.substr(index+1);
+				song().fileName = fName.substr(index+1);
 			}
 			else
 			{
-				psy_song().fileName = fName;
+				song().fileName = fName;
 			}
-			set_lines_per_beat(psy_song().ticksSpeed());
+			set_lines_per_beat(song().ticksSpeed());
 			player.driver().Enable(true);
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
@@ -224,11 +228,7 @@ namespace psycle {
 #endif
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE				
-				CSongpDlg dlg(&psy_song());
-#else
 				CSongpDlg dlg(&song());
-#endif
 				dlg.SetReadOnly();
 				dlg.DoModal();
 /*				std::ostringstream songLoaded;
@@ -399,11 +399,7 @@ namespace psycle {
 						xmfile.Load(song());
 						xmfile.Close();
 						mac_view()->Rebuild();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						CSongpDlg dlg(&psy_song());
-#else
 						CSongpDlg dlg(&song());
-#endif
 						dlg.SetReadOnly();
 						dlg.DoModal();
 /*						char buffer[512];		
@@ -431,11 +427,7 @@ namespace psycle {
 						}
 						it.Close();
 						mac_view()->Rebuild();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						CSongpDlg dlg(&psy_song());
-#else
 						CSongpDlg dlg(&song());
-#endif
 						dlg.SetReadOnly();
 						dlg.DoModal();
 /*						char buffer[512];		
@@ -463,11 +455,7 @@ namespace psycle {
 						}
 						s3m.Close();
 						mac_view()->Rebuild();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						CSongpDlg dlg(&psy_song());
-#else
 						CSongpDlg dlg(&song());
-#endif						
 						dlg.SetReadOnly();
 						dlg.DoModal();
 /*						char buffer[512];
@@ -489,11 +477,7 @@ namespace psycle {
 						modfile.Load(song());
 						modfile.Close();
 						mac_view()->Rebuild();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						CSongpDlg dlg(&psy_song());
-#else
 						CSongpDlg dlg(&song());
-#endif
 						dlg.SetReadOnly();
 						dlg.DoModal();
 /*						char buffer[512];		

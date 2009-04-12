@@ -88,13 +88,11 @@ namespace psycle
 
 		class Global
 		{
-			///\todo use accessors, dont make everything static/global, otherwise we get uninitialised vars, like _cpuHz
 			private:
 			public:
 				Global();
 				virtual ~Global() throw();
 
-				static Song * _pSong;
 				static Player * pPlayer;
 				static Configuration * pConfig;
 				static helpers::dsp::Resampler * pResampler;
@@ -103,16 +101,16 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 				static InputHandler* pInputHandler;
 #endif //!defined WINAMP_PLUGIN
+
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				static vst::AudioMaster* pVstHost;
+
+				static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
 #endif
-				static inline Song           & song() { return *_pSong; }
+				static inline Song           & song();
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }
 				static inline helpers::dsp::Resampler & resampler(){ return *pResampler; }
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
-#endif
 				static inline cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }
 				//void inline cpu_frequency(cpu::cycles_type const & value) throw() { cpu_frequency_ = value; }
 		};

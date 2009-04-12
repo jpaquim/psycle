@@ -29,12 +29,8 @@ namespace psycle {
 		class MachineView : public PsycleCanvas::Canvas
 		{
 		public:
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineView(CChildView* parent, CMainFrame* main);
 			void SetSong(Song* song);
-#else
-			MachineView(CChildView* parent, CMainFrame* main, Song* song);
-#endif
 			~MachineView();
 
 			void Rebuild();

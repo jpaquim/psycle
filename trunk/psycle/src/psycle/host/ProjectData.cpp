@@ -31,12 +31,21 @@ namespace psycle {
    
 		void ProjectData::Remove(Project* project)
 		{
-			// todo
+			for (std::vector<Project*>::iterator ite = projects_.begin(); ite != projects_.end(); ite++) {
+				if (*ite == project) {
+					projects_.erase(ite);
+				}
+			}
 		}
 
 		void ProjectData::SetActiveProject(Project* project)
 		{
 			active_project_ = project;
+			if (project != 0 ) {
+				project->SetActive();
+				project->mac_view()->main()->SetSong(&project->song());
+				project->mac_view()->main()->m_wndSeq.SetProject(project);
+			}
 		}
 
 		void ProjectData::FileNew()

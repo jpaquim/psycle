@@ -229,7 +229,7 @@ namespace psycle
 #endif // !defined WINAMP_PLUGIN
 
 			reg.QueryValue("defaultPatLines", defaultPatLines);
-			Global::_pSong->SetDefaultPatternLines(defaultPatLines);
+			Global::song().SetDefaultPatternLines(defaultPatLines);
 #if !defined WINAMP_PLUGIN
 			reg.QueryValue("bShowSongInfoOnLoad", bShowSongInfoOnLoad);
 			reg.QueryValue("bFileSaveReminders", bFileSaveReminders);
@@ -770,7 +770,7 @@ namespace psycle
 			}
 #endif // !defined WINAMP_PLUGIN
 			reg.QueryValue("defaultPatLines", defaultPatLines);
-				Global::_pSong->SetDefaultPatternLines(defaultPatLines);
+				Global::song().SetDefaultPatternLines(defaultPatLines);
 
 #if !defined WINAMP_PLUGIN
 

@@ -1,19 +1,16 @@
 #pragma once
 #include "Psycle.hpp"
 // this shouldn't be here, it is for SSkin..
-#include "machinegui.hpp"
+#include "MachineGui.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
+///todo: remove this include when removing the _pstrack() and related functions
 #include <psycle/core/song.h>
-
-//TODO: This is temporary until replaing notecommands with notetypes and patterncmd struct by pattercmd namespace
-//#include "SongStructs.hpp"
-
 namespace psy {
 	namespace core {
 		class SinglePattern;
-		class Song;
+		//class Song;
 	}
 }
 
@@ -30,9 +27,9 @@ namespace psycle {
 	
 		class CMainFrame;
 		class CChildView;
-	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Song;
-	#endif
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+		//class Song;
+#endif
 
 		class CCursor
 		{
@@ -162,7 +159,7 @@ namespace psycle {
 				};		
 			};
 
-			PatternView(CChildView* parent, CMainFrame* main, Song* song);
+			PatternView(CChildView* parent, CMainFrame* main);
 			~PatternView();
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -325,6 +322,9 @@ public:
 			int patStep;
 
 			int editPosition;	// Position in the Sequence!
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			SequenceEntry* editPositionEntry;
+#endif
 			int prevEditPosition;
 
 			int ChordModeOffs;
@@ -346,10 +346,6 @@ public:
 			int VISTRACKS;
 			int VISLINES;
 			int COLX[10];
-			bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
-								// Its function is to prevent audio (and midi) operations while it is not
-								// initialized, or while song is being modified (New(),Load()..).
-								// 
 
 			SPatternHeaderCoords PatHeaderCoords;
 			SMachineCoords	MachineCoords;
@@ -407,12 +403,6 @@ public:
 
 			int UndoCounter;
 			int UndoSaved;
-
-			int UndoMacCounter;
-			int UndoMacSaved;
-
-			int mcd_x;
-			int mcd_y;
 
 			COLORREF pvc_separator[MAX_TRACKS+1];
 			COLORREF pvc_background[MAX_TRACKS+1];
@@ -586,9 +576,6 @@ public:
 				Rect.left+=TEXTWIDTH; 
 				Rect.right+=TEXTWIDTH;
 				devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,szBlankParam,FLATSIZES);
-
-		//		Rect.right+=10;
-		//		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"  ",FLATSIZES);
 				return;
 			}
 			
@@ -708,6 +695,30 @@ public:
 			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,NULL);
 		}
 
+		int _xtoCol(int pointpos)
+		{
+			if ( pointpos < COLX[1] ) return 0;
+			else if ( pointpos < COLX[2] ) return 1;
+			else if ( pointpos < COLX[3] ) return 2;
+			else if ( pointpos < COLX[4] ) return 3;
+			else if ( pointpos < COLX[5] ) return 4;
+			else if ( pointpos < COLX[6] ) return 5;
+			else if ( pointpos < COLX[7] ) return 6;
+			else if ( pointpos < COLX[8] ) return 7;
+			else return 8;
+		}
+
+		bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0)
+		{
+			return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
+				(_y >= _src.y) && (_y < _src.y+_src2.height);
+		}
+
+
+
+
+
+
 		// song data
 
 		int _ps()
@@ -761,36 +772,6 @@ public:
 		{
 			return song()->_ppattern(_ps());
 		}
-
-		int _xtoCol(int pointpos)
-		{
-			if ( pointpos < COLX[1] ) return 0;
-			else if ( pointpos < COLX[2] ) return 1;
-			else if ( pointpos < COLX[3] ) return 2;
-			else if ( pointpos < COLX[4] ) return 3;
-			else if ( pointpos < COLX[5] ) return 4;
-			else if ( pointpos < COLX[6] ) return 5;
-			else if ( pointpos < COLX[7] ) return 6;
-			else if ( pointpos < COLX[8] ) return 7;
-			else return 8;
-		/*	if ( pointpos < 28 ) return 0;
-			else if ( pointpos < 40 ) return 1;
-			else if ( pointpos < 48 ) return 2;
-			else if ( pointpos < 60 ) return 3;
-			else if ( pointpos < 70 ) return 4;
-			else if ( pointpos < 83 ) return 5;
-			else if ( pointpos < 91 ) return 6;
-			else if ( pointpos < 100 ) return 7;
-		*/
-
-		}
-		
-		bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0)
-		{
-			return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
-				(_y >= _src.y) && (_y < _src.y+_src2.height);
-		}
-
 
 		};
 

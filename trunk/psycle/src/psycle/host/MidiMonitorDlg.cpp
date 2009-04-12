@@ -357,10 +357,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// machine mapped & active?
 				if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES )
 				{
-					if( Global::_pSong->machine( genFxIdx ) )
+					if( Global::song().machine( genFxIdx ) )
 					{
 						// machine
-						Machine * pMachine = Global::_pSong->machine( genFxIdx );
+						Machine * pMachine = Global::song().machine( genFxIdx );
 						sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->GetEditName().c_str() );
 						m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
@@ -368,17 +368,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						int instrument = pMidiInput->GetInstMap( ch );
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 						if (pMachine->getMachineKey() == MachineKey::sampler()) {
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[instrument]->_sName );
+							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[instrument]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
 						else if ( pMachine->getMachineKey() == MachineKey::sampulse()) {
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->rInstrument(instrument).Name() );
+							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song().rInstrument(instrument).Name() );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
 #else
 						if( pMachine->_type == MACH_SAMPLER )
 						{
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[ instrument ]->_sName );
+							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[ instrument ]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
 						else if( pMachine->_type == MACH_XMSAMPLER )

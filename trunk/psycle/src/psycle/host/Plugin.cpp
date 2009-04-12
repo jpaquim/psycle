@@ -407,7 +407,7 @@ namespace psycle
 					while (ns)
 					{
 						int nextevent = (TWSActive)?TWSSamples:ns+1;
-						for (int i=0; i < Global::_pSong->tracks(); i++)
+						for (int i=0; i < Global::song().tracks(); i++)
 						{
 							if (TriggerDelay[i]._cmd)
 							{
@@ -423,7 +423,7 @@ namespace psycle
 							{
 								TWSSamples -= ns;
 							}
-							for (int i=0; i < Global::_pSong->tracks(); i++)
+							for (int i=0; i < Global::song().tracks(); i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd)
@@ -433,7 +433,7 @@ namespace psycle
 							}
 							try
 							{
-								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->tracks());
+								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::song().tracks());
 							}
 							catch(const std::exception &)
 							{
@@ -447,7 +447,7 @@ namespace psycle
 								ns -= nextevent;
 								try
 								{
-									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->tracks());
+									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::song().tracks());
 								}
 								catch(const std::exception &)
 								{
@@ -488,7 +488,7 @@ namespace psycle
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for (int i=0; i < Global::_pSong->tracks(); i++)
+							for (int i=0; i < Global::song().tracks(); i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)

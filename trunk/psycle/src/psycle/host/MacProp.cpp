@@ -57,7 +57,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
-			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->GetEditName().c_str());
+			sprintf(buffer,"%.2X : %s Properties",Global::song().FindBusFromIndex(thisMac),pMachine->GetEditName().c_str());
 			m_macname.SetWindowText(pMachine->GetEditName().c_str());
 
 			SetWindowText(buffer);

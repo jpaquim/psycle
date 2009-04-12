@@ -631,7 +631,7 @@ namespace psycle
 							// machine active?
 							if( program < MAX_MACHINES )
 							{  
-								if (Global::_pSong->machine( program ) )
+								if (Global::song().machine( program ) )
 								{
 									// ok, map
 									SetGenMap( channel, program );
@@ -883,7 +883,7 @@ namespace psycle
 					}
 
 					// invalid machine/channel?
-					if( !Global::_pSong->machine( busMachine ) && note != 254 )
+					if( !Global::song().machine( busMachine ) && note != 254 )
 					{
 						return;
 					}
@@ -1056,11 +1056,11 @@ namespace psycle
 					else
 					{
 						// midi controllers pass-through
-						int mgn = Global::_pSong->seqBus;
+						int mgn = Global::song().seqBus;
 
 						if (mgn < MAX_MACHINES)
 						{
-							Machine* pMachine = Global::_pSong->machine(mgn);
+							Machine* pMachine = Global::song().machine(mgn);
 							if (pMachine)
 							{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -1330,7 +1330,7 @@ namespace psycle
 				int data1 = m_midiBuffer[ m_patOut ].entry.command();
 				int data2 = m_midiBuffer[ m_patOut ].entry.parameter();
 				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Global::_pSong->machine( machine );
+				Plugin * pMachine = (Plugin*) Global::song().machine( machine );
 				// make sure machine is still valid
 				if( pMachine || note == 254 )
 				{
@@ -1412,9 +1412,9 @@ namespace psycle
 							// simulate a tracker 'tick' (i.e. a line change for all machines)
 							for (int tc=0; tc<MAX_MACHINES; tc++)
 							{
-								if( Global::_pSong->machine(tc))
+								if( Global::song().machine(tc))
 								{
-									Global::_pSong->machine(tc)->Tick();
+									Global::song().machine(tc)->Tick();
 								}
 							}
 
@@ -1445,7 +1445,7 @@ namespace psycle
 
 			// Master machine initiates work
 			//
-			Global::_pSong->machine(MASTER_INDEX)->Work( amount );
+			Global::song().machine(MASTER_INDEX)->Work( amount );
 			return true;
 		}
 	}

@@ -108,7 +108,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 
 			threadopen = 0;
-			Song* pSong = Global::_pSong;
+			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Song& pSong = mainFrame->projects()->active_project()->song();
+#else
+			Song& pSong = Global::song();
+#endif
 			thread_handle=INVALID_HANDLE_VALUE;
 			kill_thread=1;
 			lastpostick=0;
@@ -117,7 +122,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			std::string name = Global::pConfig->GetCurrentWaveRecDir().c_str();
 			name+='\\';
-			name+=pSong->fileName;
+			name+=pSong.fileName;
 			name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
 			name+=".wav";
 			m_filename.SetWindowText(name.c_str());
@@ -131,14 +136,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_patnumber2.EnableWindow(false);
 
 			char num[3];
-			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->editPosition]);
+			sprintf(num,"%02x",pSong.playOrder[mainFrame->m_wndView.pattern_view()->editPosition]);
 			m_patnumber.SetWindowText(num);
 			sprintf(num,"%02x",0);
 			m_rangestart.SetWindowText(num);
-			sprintf(num,"%02x",pSong->playLength-1);
+			sprintf(num,"%02x",pSong.playLength-1);
 			m_rangeend.SetWindowText(num);			
 
-			sprintf(num,"%02x",pSong->playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->editPosition]);
+			sprintf(num,"%02x",pSong.playOrder[mainFrame->m_wndView.pattern_view()->editPosition]);
 			m_patnumber2.SetWindowText(num);
 
 
@@ -387,7 +392,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 			const int real_bits[]={8,16,24,32,32};
 			bool isFloat = (bits == 4);
-			Song *pSong = Global::_pSong;
+			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Song& pSong = mainFrame->projects()->active_project()->song();
+#else
+			Song& pSong = Global::song();
+#endif
 			Player *pPlayer = Global::pPlayer;
 
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
@@ -418,9 +428,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				Global::pConfig->autoStopMachines = false;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					if (pSong->machine(c))
+					if (pSong.machine(c))
 					{
-						pSong->machine(c)->Standby(false);
+						pSong.machine(c)->Standby(false);
 					}
 				}
 			}
@@ -429,8 +439,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #else
 			playblock = pPlayer->_playBlock;
 			loopsong = pPlayer->_loopSong;
-			memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
-			memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
+			memcpy(sel,pSong.playOrderSel,MAX_SONG_POSITIONS);
+			memset(pSong.playOrderSel,0,MAX_SONG_POSITIONS);
 #endif
 			CString name;
 			m_filename.GetWindowText(name);
@@ -444,25 +454,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{	//record to file
 				if (m_savetracks.GetCheck())
 				{
-					memcpy(_Muted,pSong->_trackMuted,sizeof(pSong->_trackMuted));
+					memcpy(_Muted,pSong._trackMuted,sizeof(pSong._trackMuted));
 
 					int count = 0;
 
-					for (int i = 0; i < pSong->tracks(); i++)
+					for (int i = 0; i < pSong.tracks(); i++)
 					{
 						if (!_Muted[i])
 						{
 							count++;
 							current = i;
-							for (int j = 0; j < pSong->tracks(); j++)
+							for (int j = 0; j < pSong.tracks(); j++)
 							{
 								if (j != i)
 								{
-									pSong->_trackMuted[j] = true;
+									pSong._trackMuted[j] = true;
 								}
 								else
 								{
-									pSong->_trackMuted[j] = false;
+									pSong._trackMuted[j] = false;
 								}
 							}
 							// now save the song
@@ -483,9 +493,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					// back up our connections first
 					for (int i = 0; i < MAX_CONNECTIONS; i++)
 					{
-						if (pSong->machine(MASTER_INDEX)->_inputCon[i])
+						if (pSong.machine(MASTER_INDEX)->_inputCon[i])
 						{
-							_Muted[i] = pSong->machine(pSong->machine(MASTER_INDEX)->_inputMachines[i])->_mute;
+							_Muted[i] = pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->_mute;
 						}
 						else
 						{
@@ -500,21 +510,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							current = i;
 							for (int j = 0; j < MAX_CONNECTIONS; j++)
 							{
-								if (pSong->machine(MASTER_INDEX)->_inputCon[j])
+								if (pSong.machine(MASTER_INDEX)->_inputCon[j])
 								{
 									if (j != i)
 									{
-										pSong->machine(pSong->machine(MASTER_INDEX)->_inputMachines[j])->_mute = true;
+										pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[j])->_mute = true;
 									}
 									else
 									{
-										pSong->machine(pSong->machine(MASTER_INDEX)->_inputMachines[j])->_mute = false;
+										pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[j])->_mute = false;
 									}
 								}
 							}
 							// now save the song
 							char filename[MAX_PATH];
-							sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->machine(pSong->machine(MASTER_INDEX)->_inputMachines[i])->GetEditName().c_str());
+							sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->GetEditName().c_str());
 							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 							return;
 						}
@@ -529,9 +539,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 					for (int i = 0; i < MAX_BUSES; i++)
 					{
-						if (pSong->machine(i))
+						if (pSong.machine(i))
 						{
-							_Muted[i] = pSong->machine(i)->_mute;
+							_Muted[i] = pSong.machine(i)->_mute;
 						}
 						else
 						{
@@ -546,21 +556,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							current = i;
 							for (int j = 0; j < MAX_BUSES; j++)
 							{
-								if (pSong->machine(j))
+								if (pSong.machine(j))
 								{
 									if (j != i)
 									{
-										pSong->machine(j)->_mute = true;
+										pSong.machine(j)->_mute = true;
 									}
 									else
 									{
-										pSong->machine(j)->_mute = false;
+										pSong.machine(j)->_mute = false;
 									}
 								}
 							}
 							// now save the song
 							char filename[MAX_PATH];
-							sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->machine(i)->GetEditName().c_str());
+							sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong.machine(i)->GetEditName().c_str());
 							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 							return;
 						}
@@ -596,7 +606,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
 		{
 			Player *pPlayer = Global::pPlayer;
-			Song *pSong = Global::_pSong;
+			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Song& pSong = mainFrame->projects()->active_project()->song();
+#else
+			Song& pSong = Global::song();
+#endif
 			saving=true;
 			pPlayer->stopRecording();
 			Global::pConfig->_pOutputDriver->Enable(false);
@@ -642,9 +657,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 0:
 				{
 				j=0; // Calculate progress bar range.
-				for (i=0;i<pSong->playLength;i++)
+				for (i=0;i<pSong.playLength;i++)
 				{
-					j+=pSong->patternLines[pSong->playOrder[i]];
+					j+=pSong.patternLines[pSong.playOrder[i]];
 				}
 				m_progress.SetRange(0,j);
 				lastpostick=0;
@@ -662,10 +677,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 				m_patnumber.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), pstart);
-				m_progress.SetRange(0,pSong->patternLines[pstart]);
-				for (cont=0;cont<pSong->playLength;cont++)
+				m_progress.SetRange(0,pSong.patternLines[pstart]);
+				for (cont=0;cont<pSong.playLength;cont++)
 				{
-					if ( (int)pSong->playOrder[cont] == pstart)
+					if ( (int)pSong.playOrder[cont] == pstart)
 					{
 						pstart= cont;
 						break;
@@ -674,7 +689,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				lastpostick=pstart;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				int findPattern=0;
-				SequenceLine* patternline = *pSong->patternSequence().begin();
+				SequenceLine* patternline = *pSong.patternSequence().begin();
 				SequenceLine::iterator iter = patternline->begin();
 				for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
 				if (iter != patternline->end()) {
@@ -682,7 +697,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pPlayer->start(iter->second->tickPosition());
 				}
 #else
-				pSong->playOrderSel[cont]=true;
+				pSong.playOrderSel[cont]=true;
 				pPlayer->Start(pstart,0);
 				pPlayer->_playBlock=true;
 				pPlayer->_loopSong=false;
@@ -698,15 +713,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				j=0;
 				for (cont=pstart;cont<=tmp;cont++)
 				{
-					pSong->playOrderSel[cont]=true;
-					j+=pSong->patternLines[pSong->playOrder[cont]];
+					pSong.playOrderSel[cont]=true;
+					j+=pSong.patternLines[pSong.playOrder[cont]];
 				}
 				m_progress.SetRange(0,j);
 
 				lastpostick=pstart;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				int findPattern=0;
-				SequenceLine* patternline = *pSong->patternSequence().begin();
+				SequenceLine* patternline = *pSong.patternSequence().begin();
 				SequenceLine::iterator iter = patternline->begin();
 				for(; iter != patternline->end() && findPattern < pstart; iter++ , findPattern++);
 
@@ -736,9 +751,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				m_progress.SetRange(blockSLine,blockELine);
 				//find the position in the sequence where the pstart pattern is located.
-				for (cont=0;cont<pSong->playLength;cont++)
+				for (cont=0;cont<pSong.playLength;cont++)
 				{
-					if ( (int)pSong->playOrder[cont] == pstart)
+					if ( (int)pSong.playOrder[cont] == pstart)
 					{
 						pstart= cont;
 						break;
@@ -748,7 +763,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: this records the whole sequenceEntry, not jus the lines selected.
 				int findPattern=0;
-				SequenceLine* patternline = *pSong->patternSequence().begin();
+				SequenceLine* patternline = *pSong.patternSequence().begin();
 				SequenceLine::iterator iter = patternline->begin();
 				for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
 				if (iter != patternline->end()) {
@@ -757,7 +772,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 
 #else
-				pSong->playOrderSel[cont]=true;
+				pSong.playOrderSel[cont]=true;
 				pPlayer->Start(pstart,blockSLine, blockELine);
 				pPlayer->_playBlock=true;
 				pPlayer->_loopSong=false;
@@ -831,7 +846,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #else
 			Global::pPlayer->_playBlock=playblock;
 			Global::pPlayer->_loopSong=loopsong;
-			memcpy(Global::_pSong->playOrderSel,sel,MAX_SONG_POSITIONS);
+			memcpy(Global::song().playOrderSel,sel,MAX_SONG_POSITIONS);
 #endif
 			Global::pConfig->_pOutputDriver->Enable(true);
 			Global::pConfig->_pMidiInput->Open();
@@ -865,26 +880,31 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else if (m_savetracks.GetCheck())
 			{
-				Song *pSong = Global::_pSong;
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				Song& pSong = mainFrame->projects()->active_project()->song();
+#else
+				Song& pSong = Global::song();
+#endif
 
 				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 				const int real_bits[]={8,16,24,32,32};
 				const bool isFloat = (bits == 4);
 
-				for (int i = current+1; i < pSong->tracks(); i++)
+				for (int i = current+1; i < pSong.tracks(); i++)
 				{
 					if (!_Muted[i])
 					{
 						current = i;
-						for (int j = 0; j < pSong->tracks(); j++)
+						for (int j = 0; j < pSong.tracks(); j++)
 						{
 							if (j != i)
 							{
-								pSong->_trackMuted[j] = true;
+								pSong._trackMuted[j] = true;
 							}
 							else
 							{
-								pSong->_trackMuted[j] = false;
+								pSong._trackMuted[j] = false;
 							}
 						}
 						// now save the song
@@ -894,12 +914,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						return;
 					}
 				}
-				memcpy(pSong->_trackMuted,_Muted,sizeof(pSong->_trackMuted));
+				memcpy(pSong._trackMuted,_Muted,sizeof(pSong._trackMuted));
 			}
 
 			else if (m_savewires.GetCheck())
 			{
-				Song *pSong = Global::_pSong;
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				Song& pSong = mainFrame->projects()->active_project()->song();
+#else
+				Song& pSong = Global::song();
+#endif
 
 				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 				const int real_bits[]={8,16,24,32,32};
@@ -912,21 +937,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						current = i;
 						for (int j = 0; j < MAX_CONNECTIONS; j++)
 						{
-							if (pSong->machine(MASTER_INDEX)->_inputCon[j])
+							if (pSong.machine(MASTER_INDEX)->_inputCon[j])
 							{
 								if (j != i)
 								{
-									pSong->machine(pSong->machine(MASTER_INDEX)->_inputMachines[j])->_mute = true;
+									pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[j])->_mute = true;
 								}
 								else
 								{
-									pSong->machine(pSong->machine(MASTER_INDEX)->_inputMachines[j])->_mute = false;
+									pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[j])->_mute = false;
 								}
 							}
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong->machine(pSong->machine(MASTER_INDEX)->_inputMachines[i])->GetEditName().c_str());
+						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->GetEditName().c_str());
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
@@ -934,16 +959,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
-					if (pSong->machine(MASTER_INDEX)->_inputCon[i])
+					if (pSong.machine(MASTER_INDEX)->_inputCon[i])
 					{
-						pSong->machine(pSong->machine(MASTER_INDEX)->_inputMachines[i])->_mute = _Muted[i];
+						pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->_mute = _Muted[i];
 					}
 				}
 			}
 
 			else if (m_savegens.GetCheck())
 			{
-				Song *pSong = Global::_pSong;
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				Song& pSong = mainFrame->projects()->active_project()->song();
+#else
+				Song& pSong = Global::song();
+#endif
 
 				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 				const int real_bits[]={8,16,24,32,32};
@@ -956,21 +986,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						current = i;
 						for (int j = 0; j < MAX_BUSES; j++)
 						{
-							if (pSong->machine(j))
+							if (pSong.machine(j))
 							{
 								if (j != i)
 								{
-									pSong->machine(j)->_mute = true;
+									pSong.machine(j)->_mute = true;
 								}
 								else
 								{
-									pSong->machine(j)->_mute = false;
+									pSong.machine(j)->_mute = false;
 								}
 							}
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong->machine(i)->GetEditName().c_str());
+						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong.machine(i)->GetEditName().c_str());
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
@@ -978,9 +1008,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				for (int i = 0; i < MAX_BUSES; i++)
 				{
-					if (pSong->machine(i))
+					if (pSong.machine(i))
 					{
-						pSong->machine(i)->_mute = _Muted[i];
+						pSong.machine(i)->_mute = _Muted[i];
 					}
 				}
 			}
@@ -1087,18 +1117,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CSaveWavDlg::SaveTick()
 		{
-			Song* pSong = Global::_pSong;
+			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Song& pSong = mainFrame->projects()->active_project()->song();
+#else
+			Song& pSong = Global::song();
+#endif
 			Player* pPlayer = Global::pPlayer;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			///todo: bar positioning.
 #else
 			for (int i=lastpostick+1;i<pPlayer->_sequencePosition;i++)
 			{
-				tickcont+=pSong->patternLines[pSong->playOrder[i]];
+				tickcont+=pSong.patternLines[pSong.playOrder[i]];
 			}
 			if (lastpostick!= pPlayer->_sequencePosition ) 
 			{
-				tickcont+=pSong->patternLines[pSong->playOrder[lastpostick]]-(lastlinetick+1)+pPlayer->_lineCounter;
+				tickcont+=pSong.patternLines[pSong.playOrder[lastpostick]]-(lastlinetick+1)+pPlayer->_lineCounter;
 			}
 			else tickcont+=pPlayer->_lineCounter-lastlinetick;
 

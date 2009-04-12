@@ -310,7 +310,7 @@ BOOL XMSamplerUISample::OnSetActive()
 		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
 		{
 			char line[48];
-			XMInstrument::WaveData& wave = Global::_pSong->SampleData(i);
+			XMInstrument::WaveData& wave = Global::song().SampleData(i);
 			sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
 			strcat(line,wave.WaveName().c_str());
 			m_SampleList.AddString(line);
@@ -330,7 +330,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	m_Init=false;
 	char tmp[40];
 	int i= m_SampleList.GetCurSel();
-	XMInstrument::WaveData& wave = Global::_pSong->SampleData(i);
+	XMInstrument::WaveData& wave = Global::song().SampleData(i);
 	pWave(&wave);
 
 	strcpy(tmp,wave.WaveName().c_str());
@@ -472,9 +472,9 @@ void XMSamplerUISample::OnBnClickedDupe()
 {
 	for (int j=0;j<XMSampler::MAX_INSTRUMENT;j++)
 	{
-		if ( Global::_pSong->SampleData(j).WaveLength() == 0 ) 
+		if ( Global::song().SampleData(j).WaveLength() == 0 ) 
 		{
-			XMInstrument::WaveData& wavenew = Global::_pSong->SampleData(j);
+			XMInstrument::WaveData& wavenew = Global::song().SampleData(j);
 			wavenew = rWave();
 			return;
 		}

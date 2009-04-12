@@ -179,8 +179,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #endif
 
 		public:			
-			int UndoMacCounter; // todo transfer this two variables into machineview
-			int UndoMacSaved;
+			int UndoMacCounter; // todo transfer this two variables into machineview and modify
+			int UndoMacSaved;	// the OnEditUndo/Redo operations.
 
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown( UINT nFlags, CPoint point );

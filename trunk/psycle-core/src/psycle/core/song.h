@@ -127,7 +127,6 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\}
 
 	///\name pattern sequence
-	///\todo: Think about PatternPool. Should be owned by PatternSequence, or by CoreSong?
 	///\{
 		public:
 			/// pattern sequence
