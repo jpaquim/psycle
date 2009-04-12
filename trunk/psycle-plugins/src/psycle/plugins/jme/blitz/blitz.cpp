@@ -1353,7 +1353,7 @@ void mi::Command(){
 	char buffer[2048];
 
 	sprintf(
-			buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
+			buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 			"Pattern commands\n",
 			"\n0Cxx : Set Volume (new!)",
 			"\nC1xx : Slide Up",
