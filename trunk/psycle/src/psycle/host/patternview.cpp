@@ -219,15 +219,8 @@ namespace psycle {
 			updateMode=drawMode;					// this is ununsed for patterns
 			
 #if PSYCLE__CONFIGURATION__USE_PSYCORE			
-			psy::core::PatternSequence* sequence = &song->patternSequence();
-			psy::core::SequenceLine* line = *(sequence->begin());	
-			psy::core::SequenceLine::iterator sit = line->begin();
-			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
-			assert(sit != line->end());
-			psy::core::SequenceEntry* entry = sit->second;
-			psy::core::SinglePattern* pattern = entry->pattern();
 			int beat_zoom = project()->lines_per_beat();
-			const int plines = pattern->beats() * beat_zoom;
+			const int plines = pattern()->beats() * beat_zoom;
 #else
 			const int plines = song->patternLines[song->playOrder[editPosition]];
 #endif
@@ -592,6 +585,7 @@ namespace psycle {
 				break;
 			case draw_modes::playback_change: 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo
 #else
 				if (song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_sequencePosition])
 				{
@@ -2539,13 +2533,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			//todo: Use editPositionEntry when it is ready.
 			Song* song = this->song();
-			PatternSequence* sequence = &song->patternSequence();
-			SequenceLine* line = *(sequence->begin());	
-			SequenceLine::iterator sit = line->begin();
-			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
-			assert(sit != line->end());
-			SequenceEntry* entry = sit->second;
-			SinglePattern* pattern = entry->pattern();
+			SinglePattern* pattern = pattern();
 			
 			double beat_zoom = static_cast<int>(project()->lines_per_beat());
 			SinglePattern::iterator it;

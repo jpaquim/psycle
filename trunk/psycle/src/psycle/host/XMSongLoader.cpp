@@ -307,8 +307,15 @@ namespace host{
 		short iNumRows = ReadInt2();
 		short iPackedSize = ReadInt2();
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		SinglePattern* pat = new SinglePattern();
+		pat->setName("unnamed");
+		pat->setBeatZoom(song.ticksSpeed());
+		pat->setID(patIdx);
+		song.patternSequence().Add(pat);
+#else
 		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
-
+#endif
 		PatternEvent e;
 
 		if(iPackedSize == 0)
@@ -1236,8 +1243,15 @@ namespace host{
 
 		short iNumRows = 64;
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		SinglePattern* pat = new SinglePattern();
+		pat->setName("unnamed");
+		pat->setBeatZoom(song.ticksSpeed());
+		pat->setID(patIdx);
+		song.patternSequence().Add(pat);
+#else
 		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
-
+#endif
 		PatternEvent e;
 		unsigned char mentry[4];
 
