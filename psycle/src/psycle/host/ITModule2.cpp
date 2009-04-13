@@ -315,7 +315,15 @@ Special:  Bit 0: On = song message attached.
 			{
 				if (pointersp[i]==0)
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					SinglePattern* pat = new SinglePattern();
+					pat->setName("unnamed");
+					pat->setBeatZoom(s->ticksSpeed());
+					pat->setID(i);
+					s->patternSequence().Add(pat);
+#else
 					s->AllocNewPattern(i,"unnamed",64,false);
+#endif
 				} else {
 					Seek(pointersp[i]);
 					LoadITPattern(i,numchans);
@@ -850,7 +858,15 @@ Special:  Bit 0: On = song message attached.
 			std::int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			SinglePattern* pat = new SinglePattern();
+			pat->setName("unnamed");
+			pat->setBeatZoom(s->ticksSpeed());
+			pat->setID(patIdx);
+			s->patternSequence().Add(pat);
+#else
 			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
+#endif
 			//char* packedpattern = new char[packedSize];
 			//Read(packedpattern, packedSize);
 			for (int row=0;row<rowCount;row++)
@@ -1475,7 +1491,15 @@ OFFSET              Count TYPE   Description
 			PatternEvent pent=pempty;
 
 			Skip(2);//int packedSize=ReadInt(2);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			SinglePattern* pat = new SinglePattern();
+			pat->setName("unnamed");
+			pat->setBeatZoom(s->ticksSpeed());
+			pat->setID(patIdx);
+			s->patternSequence().Add(pat);
+#else
 			s->AllocNewPattern(patIdx,"unnamed",64,false);
+#endif
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
