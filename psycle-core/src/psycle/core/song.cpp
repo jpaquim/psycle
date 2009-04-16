@@ -633,6 +633,22 @@ void Song::clearMyData() {
 	_instSelected = 0;
 	midiSelected = 0;
 	auxcolSelected = 0;
+	for (int i =0; i < MAX_TRACKS; i++) {
+		_trackArmed[i]=false;
+		_trackMuted[i]=false;
+	}
+	_trackArmedCount=0;
+	for (int i=0; i < MAX_SONG_POSITIONS; i++) {
+		playOrder[i]=0;
+		playOrderSel[i]=0;
+	}
+	playLength = 0;
+	for (int i=0; i < MAX_PATTERNS; i++ ){
+		patternLines[i]=64;
+		memset(patternName[i],0,32);
+	}
+	currentOctave=4;
+
 }
 
 void Song::DeleteMachine(Machine * mac, bool write_locked )  {

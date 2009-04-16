@@ -384,10 +384,11 @@ namespace psy { namespace core {
 
 		SequenceEntry* Sequence::GetEntryOnPosition(SequenceLine* line, double tickPosition) {
 			for (SequenceLine::iterator ite = line->begin(); ite != line->end(); ite++) {
-				if (ite->second->tickPosition() >= tickPosition && ite->second->tickEndPosition() <= tickPosition) {
+				if (ite->second->tickPosition() <= tickPosition &&  ite->second->tickEndPosition() >= tickPosition) {
 					return ite->second;
 				}
 			}
+			return NULL;
 		}
 
 		int Sequence::priority(const PatternEvent& cmd, int count) const {

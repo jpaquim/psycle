@@ -43,6 +43,7 @@ namespace psycle {
 			active_project_ = project;
 			if (project != 0 ) {
 				project->SetActive();
+				project->mac_view()->main()->m_wndView._pSong=&project->song();
 				project->mac_view()->main()->SetSong(&project->song());
 				project->mac_view()->main()->m_wndSeq.SetProject(project);
 			}

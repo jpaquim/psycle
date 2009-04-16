@@ -597,13 +597,13 @@ namespace psycle {
 			// random position
 			if ((mac->GetPosX() < 0) || (mac->GetPosX() < 0))
 			{
-				bool bCovered = TRUE;
+				bool bCovered = true;
 				int x, y;
-				while (bCovered)
+				do
 				{
 					x = (rand())%(cw()-xs);
 					y = (rand())%(ch()-ys);
-					bCovered = FALSE;
+					bCovered = false;
 					for (int i=0; i < MAX_MACHINES; i++)
 					{
 						if (song()->machine(i))
@@ -611,12 +611,12 @@ namespace psycle {
 							if ((abs(song()->machine(i)->GetPosX() - x) < 32) &&
 								(abs(song()->machine(i)->GetPosY() - y) < 32))
 							{
-								bCovered = TRUE;
+								bCovered = true;
 								break;
 							}
 						}
 					}
-				}
+				} while (bCovered);
 				mac->SetPosX(x);
 				mac->SetPosY(y);
 			}

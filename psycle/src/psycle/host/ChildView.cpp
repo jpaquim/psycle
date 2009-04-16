@@ -70,7 +70,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}	
 			Global::pInputHandler->SetChildView(this);
 			// Creates a new song object. The application Song.
-			Global::song().New();
+			//Global::song().New();
 			// machine_view_->Rebuild();
 			// its done in psycle.cpp, todo check config load order
 		}
@@ -265,8 +265,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				///\todo : IMPORTANT! change this lock to a more flexible one
 				// It is causing skips on sound when there is a pattern change because
 				// it is not allowing the player to work. Do the same in the one inside Player::Work()
-				CSingleLock lock(&_pSong->door,TRUE);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: we need that lock sincronization
 				psy::core::Song* song = &projects_->active_project()->song();
 				if (song->machine(MASTER_INDEX))
 				{
@@ -285,6 +285,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					master->vuupdated = true;
 				}
 #else
+				CSingleLock lock(&_pSong->door,TRUE);
 				if (Global::song().machine(MASTER_INDEX))
 				{
 					pParentMain->UpdateVumeters
@@ -357,6 +358,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (Global::pConfig->_followSong)
 					{
 							///todo
+						if (entry != pParentMain->m_wndSeq.selectedEntry() ) {
+							pParentMain->m_wndSeq.SetSelectedEntry(entry);
+
+						}
 					}
 
 #else
@@ -400,12 +405,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				//return;
 				CString filepath = Global::pConfig->GetSongDir().c_str();
 				filepath += "\\autosave.psy";
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				_pSong->save(filepath.GetBuffer(1),3);
+#else
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
 				_pSong->Save(&file,true);
 				/// \todo _pSong->Save() should not close a file which doesn't open. Add the following
 				// line when fixed. There are other places which need this too.
 				//file.Close();
+#endif
 			}
 		}
 
@@ -748,6 +757,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// set midi input mode to step insert
 				CMidiInput::Instance()->m_midiMode = MODE_STEP;			
 				GetParent()->SetActiveWindow();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				// skipped for psycore. the idea is that the timer has already updated it.
+#else
 				if
 					(
 						Global::pConfig->_followSong &&
@@ -757,6 +769,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					pattern_view()->editPosition=Global::pPlayer->_sequencePosition;
 				}
+#endif
 				Repaint();
 				pParentMain->StatusBarIdle();
 			}

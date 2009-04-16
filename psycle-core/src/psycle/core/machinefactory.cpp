@@ -68,7 +68,9 @@ Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 {
 	assert(key.host() >= 0 && key.host() < Hosts::NUM_HOSTS);
 
-	if ( !finder_->hasKey(key)) {
+	// a check for master is done, because we don't add it into the finder,
+	// because a user don't create master machines.
+	if ( key != MachineKey::master() && !finder_->hasKey(key)) {
 		return 0;
 	}
 	if ( !finder_->info(key).allow() ) {

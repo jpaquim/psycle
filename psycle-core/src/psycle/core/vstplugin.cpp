@@ -46,6 +46,9 @@ namespace psy { namespace core { namespace vst {
 
 /**************************************************************************/
 // Plugin
+	float plugin::junk[STREAM_SIZE];
+	int plugin::pitchWheelCentre(8191);
+
 
 plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id, LoadedAEffect &loadstruct)
 	:Machine(callbacks, id)

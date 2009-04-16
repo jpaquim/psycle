@@ -21,9 +21,9 @@ namespace PatternCmd {
 }
 }}
 using namespace psy::core;
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef unsigned long dword;
+//typedef unsigned char byte;
+//typedef unsigned short word;
+//typedef unsigned long dword;
 #else
 #include "Constants.hpp"
 #endif
@@ -107,7 +107,7 @@ namespace psycle
 
 				static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
 #endif
-				static inline Song           & song();
+				static Song           & song();
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }
 				static inline helpers::dsp::Resampler & resampler(){ return *pResampler; }

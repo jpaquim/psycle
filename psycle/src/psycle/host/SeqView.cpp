@@ -45,7 +45,14 @@ namespace psycle {
 		void SequencerView::SetSelectedEntry(SequenceEntry* entry) {
 			if (selectedEntry_ != entry) {
 				selectedEntry_ = entry;
-				UpdatePlayOrder(true);
+				Sequence* sequence = &project_->song().patternSequence();
+				SequenceLine* line = *(sequence->begin());	
+				SequenceLine::iterator sit = line->begin();
+				int pos = 0;
+				for (; sit != line->end() && sit->second != entry; ++sit, ++pos);
+				
+				UpdateSequencer(pos);
+				//UpdatePlayOrder(true);
 			}
 		}
 		SequenceEntry* SequencerView::selectedEntry() {
@@ -106,7 +113,6 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-			Song* _pSong = &project_->song();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
@@ -146,7 +152,6 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-			Song* _pSong = &project_->song();			
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
@@ -207,7 +212,6 @@ namespace psycle {
 				return;
 			PatternView* pat_view = project_->pat_view();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Song* song = &project_->song();
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
 			int len = line->size(); // Length, in patterns, of the sequence.
@@ -274,36 +278,53 @@ namespace psycle {
 			PatternView* pat_view = project_->pat_view();
 			Song* _pSong = &project_->song();
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
-			int maxitems=cc->GetCount();
+			//int maxitems=cc->GetCount();
 			int const ep=cc->GetCurSel();
-			if(pat_view->editPosition<0) pat_view->editPosition = 0; // DAN FIXME
-			int const cpid=_pSong->playOrder[pat_view->editPosition];
 
+			if(pat_view->editPosition<0) pat_view->editPosition = 0;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			SequenceLine* line = *_pSong->patternSequence().begin();
+			SequenceLine::iterator seqite = line->begin();
+			double loopstart=0.0, loopend=1.0;
+			bool isFirst = true;
+			for (int c=0; seqite != line->end(); ++seqite, ++c) {
+				if (cc->GetSel(c)) {
+					if (isFirst) { 
+						loopstart = (*seqite).second->tickPosition(); 
+						isFirst= false; 
+					}
+					loopend = (*seqite).second->tickEndPosition();
+				}
+
+			}
+			Player::singleton().setLoopRange(loopstart, loopend);
+#else
 			memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 			for (int c=0;c<maxitems;c++) 
 			{
 				if ( cc->GetSel(c) != 0) _pSong->playOrderSel[c]=true;
 			}
-			
+#endif		
 			if((ep!=pat_view->editPosition))// && ( cc->GetSelCount() == 1))
 			{
 				if ((Global::pPlayer->playing()) && (Global::pConfig->_followSong))
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					Player::singleton().start(loopstart);
+#else
 					bool b = Global::pPlayer->_playBlock;
 					Global::pPlayer->Start(ep,0,false);
 					Global::pPlayer->_playBlock = b;
+#endif
 				}
 				pat_view->editPosition=ep;
 				pat_view->prevEditPosition=ep;
 				UpdatePlayOrder(false);
 				
-				if(cpid!=_pSong->playOrder[ep])
-				{
-					main_frame_->m_wndView.Repaint(draw_modes::pattern);
-					if (Global::pPlayer->playing()) {
-						main_frame_->m_wndView.Repaint(draw_modes::playback);
-					}
-				}		
+				main_frame_->m_wndView.Repaint(draw_modes::pattern);
+				if (Global::pPlayer->playing()) {
+					main_frame_->m_wndView.Repaint(draw_modes::playback);
+				}
 			}
 			main_frame_->StatusBarIdle();
 			main_frame_->SetFocus();
@@ -330,6 +351,23 @@ namespace psycle {
 		//	
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			int const ep=cc->GetCurSel();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			SequenceLine* line = *_pSong->patternSequence().begin();
+			SequenceLine::iterator seqite = line->begin();
+			for (int c=0; seqite != line->end(); ++seqite, ++c) {
+				if (cc->GetSel(c)) {
+					break;
+				}
+			}
+			if (Global::pPlayer->playing())
+			{
+				Player::singleton().start(seqite->second->tickPosition());
+			}
+			else {
+				Player::singleton().UnsetLoop();
+				Player::singleton().start(seqite->second->tickPosition());
+			}
+#else
 			if (Global::pPlayer->playing())
 			{
 				bool b = Global::pPlayer->_playBlock;
@@ -340,6 +378,7 @@ namespace psycle {
 			{
 				Global::pPlayer->Start(ep,0);
 			}
+#endif
 			pat_view->editPosition=ep;
 			//Following two lines by alk to disable view change to pattern mode when 
 			//double clicking on a pattern in the sequencer list
@@ -354,7 +393,6 @@ namespace psycle {
 				return;
 			PatternView* pat_view = project_->pat_view();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Song* song = &project_->song();
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
 			int len = line->size(); // Length, in patterns, of the sequence.
@@ -419,7 +457,6 @@ namespace psycle {
 				return;
 			PatternView* pat_view = project_->pat_view();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Song* song = &project_->song();
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
 			int len = line->size(); // Length, in patterns, of the sequence.
@@ -488,7 +525,6 @@ namespace psycle {
 			PatternView* pat_view = project_->pat_view();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			// todo
-			Song* song = &project_->song();
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
 			int len = line->size(); // Length, in patterns, of the sequence.
@@ -497,10 +533,11 @@ namespace psycle {
 									  pat_view->editcur.line,
 									  pat_view->editcur.col,
 									  pat_view->editPosition);
+			//Todo: misses adding the new pattern, this just moves positions.
 			pat_view->editPosition++;
 			int const pop=pat_view->editPosition;
-			std::map<int,int> tmp_map;
-			std::map<int,int>::reverse_iterator rit = id_map_.rbegin();
+			std::map<int,SequenceEntry*> tmp_map;
+			std::map<int,SequenceEntry*>::reverse_iterator rit = id_map_.rbegin();
 			for ( int c = len; rit != id_map_.rend(); ++rit, c--) {
 				if (c >=pop )
 					tmp_map[rit->first+1] = rit->second;
@@ -550,7 +587,6 @@ namespace psycle {
 		{
 			if (!project_)
 				return;
-			PatternView* pat_view = project_->pat_view();
 				Song* _pSong = &project_->song();
 			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
 			{
@@ -620,6 +656,11 @@ namespace psycle {
 						newpat=_pSong->playOrder[litems[selcount-1]+j+1];
 					}
 				}
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				if (newpat == -1 ) {
+					//TODO: need a way to create a way to get an empty pattern.
+				}
+#else
 				if (newpat == -1 ) 
 				{
 					newpat = _pSong->GetBlankPatternUnused();
@@ -635,6 +676,7 @@ namespace psycle {
 					}
 				}
 				_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
+#endif
 			}
 			pat_view->editPosition=litems[selcount-1]+1;
 			UpdatePlayOrder(true);
@@ -718,7 +760,6 @@ namespace psycle {
 		{
 			if (!project_)
 				return;
-			PatternView* pat_view = project_->pat_view();
 			Song* _pSong = &project_->song();
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			seqcopybufferlength= cc->GetSelCount();
@@ -807,6 +848,14 @@ namespace psycle {
 									  pat_view->editcur.col,
 									  pat_view->editPosition);
 				
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				_pSong->patternSequence().removeAll();
+				SinglePattern* pattr = new SinglePattern();
+				pattr->setID(0);
+				_pSong->patternSequence().Add(pattr);
+				SequenceLine* line = _pSong->patternSequence().createNewLine();
+				line->createEntry(pattr,0);
+#else
 				// clear sequence
 				for(int c=0;c<MAX_SONG_POSITIONS;c++)
 				{
@@ -816,9 +865,10 @@ namespace psycle {
 				_pSong->DeleteAllPatterns();
 				// init a pattern for #0
 				_pSong->_ppattern(0);
-
+#endif
 				pat_view->editPosition=0;
 				_pSong->playLength=1;
+
 				UpdatePlayOrder(true);
 				UpdateSequencer();
 				main_frame_->m_wndView.Repaint(draw_modes::pattern);
@@ -851,7 +901,7 @@ namespace psycle {
 
 
 		// Part one, Read patterns from sequence and assign them a new ordered number.
-			unsigned unsigned char freep=0;
+			unsigned char freep=0;
 			for ( int i=0 ; i<_pSong->playLength ; i++ )
 			{
 				const unsigned char cp=_pSong->playOrder[i];
@@ -875,11 +925,22 @@ namespace psycle {
 		// Part two. Sort Patterns. Take first "invalid" out, and start putting patterns in their place.
 		//			 When we have to put the first read one back, do it and find next candidate.
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			SequenceLine* line = *_pSong->patternSequence().begin();
+			SequenceLine::iterator ite = line->begin();
+			for(int i(0) ; ite != line->end(); ++ite, ++i)
+			{
+				if ( newtoold[i] != i ) // check if this place belongs to another pattern
+				{
+					ite->second->pattern()->setID(newtoold[i]);
+				}
+			}
+			//no need for step 3 with psycore.
+
+#else
 			int patl; // first one is initial one, next one is temp one
 			char patn[32]; // ""
 			unsigned char * pData; // ""
-
-
 			int idx=0;
 			int idx2=0;
 			for(int i(0) ; i < MAX_PATTERNS ; ++i)
@@ -907,7 +968,6 @@ namespace psycle {
 					_pSong->ppPatternData[idx] = pData;
 					memcpy(&_pSong->patternLines[idx],&patl,sizeof(int));
 					memcpy(_pSong->patternName[idx],patn,sizeof(char)*32);
-
 					newtoold[idx]=idx; // and indicate that this pattern has been corrected.
 				}
 			}
@@ -917,6 +977,7 @@ namespace psycle {
 			{
 				_pSong->playOrder[i]=oldtonew[_pSong->playOrder[i]];
 			}
+#endif
 
 		// Part four. All the needed things.
 
@@ -931,8 +992,6 @@ namespace psycle {
 		{
 			if (!project_)
 				return;
-			PatternView* pat_view = project_->pat_view();
-			Song* _pSong = &project_->song();
 			Global::pConfig->_bShowPatternNames=((CButton*)GetDlgItem(IDC_SHOWPATTERNAME))->GetCheck();
 			
 			//
@@ -951,14 +1010,11 @@ namespace psycle {
 			//	//m_wndSeq.SetBorders(borders.left, borders.top, 3, borders.bottom);
 			//}
 			//
-
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			UpdateSequencer();
-			CListBox *pls=(CListBox*)GetDlgItem(IDC_SEQLIST);
-			pls->SetSel(Global::pPlayer->_sequencePosition,true);
-
-			int top = ((Global::pPlayer->playing())?Global::pPlayer->_sequencePosition:pat_view->editPosition) - 0xC;
-			if (top < 0) top = 0;
-			pls->SetTopIndex(top);
+#else
+			UpdateSequencer((Global::pPlayer->playing() ? Global::pPlayer->_sequencePosition : pat_view->editPosition));
+#endif
 			main_frame_->m_wndView.SetFocus();			
 		}
 
@@ -997,12 +1053,16 @@ namespace psycle {
 				selection_.clear();
 				selection_.push_back(selectedpos);
 				cc->SetSel(selectedpos);
+				selectedEntry_ = id_map_[selectedpos];
 				top = selectedpos - 0xC;
 				if (top < 0) top = 0;
 			} else {
 				std::vector<int>::iterator sel_it = selection_.begin();
 				for ( ; sel_it != selection_.end(); ++sel_it) {
 					cc->SetSel(*sel_it,true);
+				}
+				if (selection_.size() == 1 && selectedEntry_ != id_map_[selection_[0]]) {
+					selectedEntry_ = id_map_[selection_[0]];
 				}
 			}
 			cc->SetTopIndex(top);
@@ -1055,7 +1115,6 @@ namespace psycle {
 			CStatic *pLength = (CStatic*)GetDlgItem(IDC_LENGTH);			
 
 			char buffer[16];
-			PatternView* pat_view = project_->pat_view();
 			Song* _pSong = &project_->song();
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
