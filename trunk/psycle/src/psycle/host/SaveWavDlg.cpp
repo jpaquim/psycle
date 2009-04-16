@@ -710,13 +710,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_rangeend.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), tmp);
-				j=0;
-				for (cont=pstart;cont<=tmp;cont++)
-				{
-					pSong.playOrderSel[cont]=true;
-					j+=pSong.patternLines[pSong.playOrder[cont]];
-				}
-				m_progress.SetRange(0,j);
 
 				lastpostick=pstart;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -732,8 +725,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pPlayer->setLoopRange(iter->second->tickPosition(), iterend->second->tickEndPosition());
 					pPlayer->start(iter->second->tickPosition());
 				}
+				m_progress.SetRange(math::rounded(iter->second->tickPosition()),
+					math::rounded(iterend->second->tickEndPosition()));
 
 #else
+				j=0;
+				for (cont=pstart;cont<=tmp;cont++)
+				{
+					pSong.playOrderSel[cont]=true;
+					j+=pSong.patternLines[pSong.playOrder[cont]];
+				}
+				m_progress.SetRange(0,j);
 				pPlayer->Start(pstart,0);
 				pPlayer->_playBlock=true;
 				pPlayer->_loopSong=false;
@@ -749,6 +751,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_lineend.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), blockELine);
 
+				lastpostick=pstart;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				//todo: this uses the indexes as beat positions, instead of lines. It should be noted in the GUI.
+
+				pPlayer->setLoopRange(blockSLine, blockELine);
+				pPlayer->start(blockSLine);
+
+#else
 				m_progress.SetRange(blockSLine,blockELine);
 				//find the position in the sequence where the pstart pattern is located.
 				for (cont=0;cont<pSong.playLength;cont++)
@@ -759,19 +769,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						break;
 					}
 				}
-				lastpostick=pstart;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				//todo: this records the whole sequenceEntry, not jus the lines selected.
-				int findPattern=0;
-				SequenceLine* patternline = *pSong.patternSequence().begin();
-				SequenceLine::iterator iter = patternline->begin();
-				for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
-				if (iter != patternline->end()) {
-					pPlayer->setLoopSequenceEntry(iter->second);
-					pPlayer->start(iter->second->tickPosition());
-				}
-
-#else
 				pSong.playOrderSel[cont]=true;
 				pPlayer->Start(pstart,blockSLine, blockELine);
 				pPlayer->_playBlock=true;

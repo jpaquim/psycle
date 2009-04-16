@@ -2533,12 +2533,12 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			//todo: Use editPositionEntry when it is ready.
 			Song* song = this->song();
-			SinglePattern* pattern = pattern();
+			SinglePattern* patt = pattern();
 			
 			double beat_zoom = static_cast<int>(project()->lines_per_beat());
 			SinglePattern::iterator it;
 			double low = (lstart + lOff - 0.5) / (double) beat_zoom;
-			it = pattern->lower_bound(low);			
+			it = patt->lower_bound(low);			
 			
 			char tBuf[16];
 
@@ -2664,7 +2664,7 @@ namespace psycle {
 			}
 
 
-			for ( ; it != pattern->end(); ++it )  {						
+			for ( ; it != patt->end(); ++it )  {						
 				psy::core::PatternEvent& ev = it->second;
 				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
 					continue;

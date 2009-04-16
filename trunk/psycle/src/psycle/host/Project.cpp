@@ -320,6 +320,15 @@ namespace psycle {
 					switch (result)
 					{
 					case IDYES:
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+						 //todo: fileformat selection in the filter selection.
+						if ( ! song().save(filepath,3)) {
+							std::ostringstream szText;
+							szText << "Error writing to \"" << filepath << "\"!!!";
+							mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_ICONEXCLAMATION);
+							return FALSE;
+						}
+#else
 						if (!file.Create((char*)filepath.c_str(), true))
 						{
 							std::ostringstream szText;
@@ -329,6 +338,7 @@ namespace psycle {
 						}
 						song().Save(&file);
 						//file.Close(); <- save handles this
+#endif
 						return TRUE;
 						break;
 					case IDNO:
@@ -596,7 +606,13 @@ namespace psycle {
 					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
 					filepath += song().fileName;
-					
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					//todo: fileformat version
+					if (!song().save(filepath,3) ) {
+						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+						return FALSE;
+					}
+#else
 					OldPsyFile file;
 					if (!file.Create((char*)filepath.c_str(), true))
 					{
@@ -608,6 +624,7 @@ namespace psycle {
 						mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
 						bResult = FALSE;
 					}
+#endif
 					else 
 					{
 						song()._saved=true;
@@ -700,7 +717,13 @@ namespace psycle {
 					{
 						song().fileName = str;
 					}
-					
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					//todo: fileformat version
+					if ( ! song().save(str.GetBuffer(1),3)){
+						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+						return FALSE;
+					}
+#else
 					if (!file.Create(str.GetBuffer(1), true))
 					{
 						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
@@ -711,6 +734,7 @@ namespace psycle {
 						mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
 						bResult = FALSE;
 					}
+#endif
 					else 
 					{
 						song()._saved=true;

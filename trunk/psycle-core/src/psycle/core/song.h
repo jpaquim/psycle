@@ -345,7 +345,7 @@ class PSYCLE__CORE__DECL Song : public UISong {
 			int _trackSoloed;
 
 			// Compatibility with older psycle::host
-			void SetDefaultPatternLines(int defaultPatLines);
+			void SetDefaultPatternLines(int defaultPatLines) {}
 
 			int GetHighestInstrumentIndex()
 			{
@@ -370,26 +370,31 @@ class PSYCLE__CORE__DECL Song : public UISong {
 				setTicksSpeed(value);
 			}
 			void New() { clear(); }
-			//Fake. Just to compile
+
+			//Fake. Just to compile. They need to go out
 			//{
+			unsigned char asdf[5];
 			inline unsigned char * _ppattern(int ps){
-				return new unsigned char[5];
+				return asdf;
 			}
 			inline unsigned char * _ptrack(int ps, int track){
-				return new unsigned char[5];
+				return asdf;
 			}
 			inline unsigned char * _ptrackline(int ps, int track, int line){
-				return new unsigned char[5];
+				return asdf;
 			}
+
 			bool _trackArmed[MAX_TRACKS];
 			bool _trackMuted[MAX_TRACKS];
+			int _trackArmedCount;
 
 			int playOrder[MAX_SONG_POSITIONS];
 			int playOrderSel[MAX_SONG_POSITIONS];
-			int _trackArmedCount;
+			int playLength;
+
 			int patternLines[MAX_PATTERNS];
 			char patternName[MAX_PATTERNS][32];
-			int playLength;
+
 			unsigned char currentOctave;
 			//}
 	///\}

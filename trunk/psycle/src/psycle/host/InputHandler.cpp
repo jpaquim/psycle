@@ -575,7 +575,7 @@ namespace psycle
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			///todo: add proper start play code
-			Global::pPlayer->Start(0);
+			Global::pPlayer->start(0);
 #else
 			Global::pPlayer->Start(pChildView->pattern_view()->editPosition,pChildView->pattern_view()->editcur.line);
 #endif

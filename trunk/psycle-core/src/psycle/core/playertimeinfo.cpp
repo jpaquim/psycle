@@ -28,6 +28,18 @@ PlayerTimeInfo::~ PlayerTimeInfo( )
 {
 }
 
+void PlayerTimeInfo::setCycleStartPos( double pos )
+{
+	assert(pos >= 0);
+	cycleStartPos_ = pos;
+}
+
+void PlayerTimeInfo::setCycleEndPos( double pos )
+{
+	assert(pos >= 0);
+	cycleEndPos_ = pos;
+}
+
 void PlayerTimeInfo::setPlayBeatPos( double pos )
 {
 	assert(pos >= 0);

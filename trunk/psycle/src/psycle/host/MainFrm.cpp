@@ -158,6 +158,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			vuprevL = 0;
 			_pSong = 0;
 			pGearRackDialog = 0;
+			m_pWndWed = new CWaveEdFrame(this->_pSong,this);
 			SetUpStartProject();
 //			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
 		}
@@ -236,7 +237,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_wndInst.Validate();
 
 			// Wave Editor Window
-			m_pWndWed = new CWaveEdFrame(this->_pSong,this);
 			m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this);
 			m_pWndWed->GenerateView();
 
@@ -431,8 +431,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// active song to mainframe, pattern view, machine view, sequencer view
 			// and editwnd
 			projects_.Add(prj);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#endif
 		}
 
 		#if !defined NDEBUG
@@ -1702,6 +1700,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					m_wndView.pattern_view()->ChordModeOffs = 0;
 					m_wndView.pattern_view()->bScrollDetatch=false;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					//left out in psycore, since it's assumed the timer will update it.
+#else
 					if (pSeqList->GetCurSel() != Global::pPlayer->_sequencePosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
@@ -1715,6 +1716,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					int top = Global::pPlayer->_sequencePosition - 0xC;
 					if (top < 0) top = 0;
 					pSeqList->SetTopIndex(top);
+#endif
 				}
 				else
 				{
@@ -1738,7 +1740,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CString str;
 			if (Global::pPlayer->playing())
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				str.Format("Pos %.2X", Player::singleton().playPos());
+#else
 				str.Format("Pos %.2X", Global::pPlayer->_sequencePosition); 
+#endif
 			}
 			else
 			{
@@ -1753,7 +1759,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CString str;
 			if (Global::pPlayer->playing())
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				str.Format("Pat %.2X", m_wndSeq.selectedEntry()->pattern()->id());
+#else
 				str.Format("Pat %.2X", Global::pPlayer->_playPattern); 
+#endif
 			}
 			else
 			{
@@ -1768,7 +1778,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CString str;
 			if (Global::pPlayer->playing())
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				str.Format("Line %.03f", Player::singleton().playPos()); 
+#else
 				str.Format("Line %u", Global::pPlayer->_lineCounter); 
+#endif
 			}
 			else
 			{

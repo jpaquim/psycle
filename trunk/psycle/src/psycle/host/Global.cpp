@@ -67,7 +67,7 @@ namespace psycle
 
 		extern CPsycleApp theApp;
 
-		static inline Song&  song() { return ((CMainFrame*)theApp.m_pMainWnd)->projects()->active_project()->song(); }
+		Song& Global::song() { return ((CMainFrame*)theApp.m_pMainWnd)->projects()->active_project()->song(); }
 
 	}
 }
