@@ -298,9 +298,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWireDlg::OnTimer(UINT nIDEvent) 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			//todo
-#else
 			if ( nIDEvent == 2304+this_index )
 			{
 				CClientDC dc(this);
@@ -335,8 +332,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float awl=fabsf(pSamplesL[index]*_pSrcMachine->_lVol);///32768; 
-							float awr=fabsf(pSamplesR[index]*_pSrcMachine->_rVol);///32768; 
+							float awl=fabsf(pSamplesL[index]*_pSrcMachine->lVol());///32768; 
+							float awr=fabsf(pSamplesR[index]*_pSrcMachine->rVol());///32768; 
 
 							if (awl>curpeakl)	{	curpeakl = awl;	}
 							if (awr>curpeakr)	{	curpeakr = awr;	}
@@ -471,21 +468,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
 						float n = float(_pSrcMachine->_scopeBufferIndex-pos);
-						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
+						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->lVol()));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
 							n -= add;
-							bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
+							bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->lVol()));
 		//					bufDC.LineTo(x,GetY(32768/2));
 						}
 						bufDC.SelectObject(&linepenR);
 
 						n = float(_pSrcMachine->_scopeBufferIndex-pos);
-						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
+						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->rVol()));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
 							n -= add;
-							bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
+							bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->rVol()));
 						}
 
 						bufDC.SelectObject(oldpen);
@@ -622,8 +619,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						memset (bbr,0,sizeof(bbr));
 
 						int width = 128/scope_spec_bands;
-						const float multleft= invol*mult/32768.0f *_pSrcMachine->_lVol;
-						const float multright= invol*mult/32768.0f *_pSrcMachine->_rVol;
+						const float multleft= invol*mult/32768.0f *_pSrcMachine->lVol();
+						const float multright= invol*mult/32768.0f *_pSrcMachine->rVol();
 						const float invSamples = 1.0f/(SCOPE_SPEC_SAMPLES>>1);
 						// calculate our bands using same buffer chasing technique
 						int index = _pSrcMachine->_scopeBufferIndex;
@@ -762,8 +759,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
-							float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
+							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->lVol());///32768;
+							float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->rVol());///32768;
 							float awl=fabsf(wl);
 							float awr=fabsf(wr);
 							if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))
@@ -969,7 +966,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bufDC.DeleteDC();
 			}
 
-#endif
 			CDialog::OnTimer(nIDEvent);
 		}
 

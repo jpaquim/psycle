@@ -243,6 +243,8 @@ namespace psycle { namespace host {
 				public:///\todo private:
 					/// numerical value of panning
 					int _panning;							
+					float lVol() const { return _lVol; }
+					float rVol() const { return _rVol; }
 					/// left chan volume
 					float _lVol;							
 					/// right chan volume
