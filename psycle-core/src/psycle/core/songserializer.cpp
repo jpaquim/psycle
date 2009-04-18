@@ -45,7 +45,7 @@ namespace psy { namespace core {
 				if ( filter->version() == version ) {
 					// check postfix
 					std::string newFileName = fileName;
-					int dotPos = fileName.rfind(".");
+					std::string::size_type dotPos = fileName.rfind(".");
 					if ( dotPos == std::string::npos ) 
 						// append postfix
 						newFileName = fileName + "." + filter->filePostfix();
