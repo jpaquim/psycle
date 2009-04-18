@@ -121,6 +121,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 	}
 	//CPUCOST_CALC(cost, numSamples);
 	//_cpuCost += cost;
+	Machine::UpdateVuAndStanbyFlag(numSamples);
 	_worked = true;
 	return numSamples;
 #if 0

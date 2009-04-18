@@ -775,6 +775,7 @@ int plugin::GenerateAudioInTicks(int startSample, int numsamples)
 		}
 	}
 //	_cpuCost += cpu::cycles() - cost;
+	Machine::UpdateVuAndStanbyFlag(numsamples);
 	_worked = true;
 	return false;
 }
