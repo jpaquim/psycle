@@ -3,6 +3,7 @@
 #include "configuration_options.hpp"
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
+#include "Global.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
@@ -15,7 +16,9 @@
 #endif //!defined WINAMP_PLUGIN
 
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
-#include "Global.hpp"
+
+using namespace psycle::helpers::dsp;
+
 namespace psycle
 {
 	namespace host
@@ -151,7 +154,7 @@ namespace psycle
 		// Initial Loop. Read new line and Interpret the Global commands.
 		void Player::ExecuteGlobalCommands(void)
 		{
-			Song* pSong = Global::_pSong;
+			Song* pSong = &Global::song();
 			_patternjump = -1;
 			_linejump = -1;
 			int mIndex = 0;
@@ -325,7 +328,7 @@ namespace psycle
 			// Notify all machines that a new Tick() comes.
 		void Player::NotifyNewLine(void)
 		{
-			Song* pSong = Global::_pSong;
+			Song* pSong = &Global::song();
 			for(int tc=0; tc<MAX_MACHINES; tc++)
 			{
 				if(pSong->machine(tc))
@@ -340,7 +343,7 @@ namespace psycle
 		/// Final Loop. Read new line for notes to send to the Machines
 		void Player::ExecuteNotes(void)
 		{
-			Song* pSong = Global::_pSong;
+			Song* pSong = &Global::song();
 			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
 
@@ -408,7 +411,7 @@ namespace psycle
 
 		void Player::AdvancePosition()
 		{
-			Song* pSong = Global::_pSong;
+			Song* pSong = &Global::song();
 			if ( _patternjump!=-1 ) _sequencePosition= _patternjump;
 			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = true; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
@@ -461,7 +464,7 @@ namespace psycle
 		{
 			int amount;
 			Player* pThis = (Player*)context;
-			Song* pSong = Global::_pSong;
+			Song* pSong = &Global::song();
 			Master::_pMasterSamples = pThis->_pBuffer;
 			CSingleLock crit(&Global::song().door, TRUE);
 			do
@@ -702,8 +705,8 @@ namespace psycle
 				{
 					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
 					else			dither.SetBitDepth(Global::pConfig->_pOutputDriver->_bitDepth);
-					dither.SetPdf((helpers::dsp::Dither::Pdf)ditherpdf);
-					dither.SetNoiseShaping((helpers::dsp::Dither::NoiseShape)noiseshape);
+					dither.SetPdf(Dither::Pdf::type(ditherpdf));
+					dither.SetNoiseShaping(Dither::NoiseShape::type(noiseshape));
 				}
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;

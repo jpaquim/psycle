@@ -3,10 +3,11 @@
 #include "Global.hpp"
 
 #include "Configuration.hpp"
+#include <psycle/host/MainFrm.hpp>
+
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
-#include <psycle/host/MainFrm.hpp>
 
 using namespace psy::core;
 #else

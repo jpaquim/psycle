@@ -233,8 +233,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pParent->AddMacViewUndo();
 			Inval = true;
 			CSingleLock lock(&Global::song().door,TRUE);
-			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
-			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
+			_pSrcMachine->DeleteOutputWireIndex(&Global::song(),wireIndex);
+			_pDstMachine->DeleteInputWireIndex(&Global::song(),_dstWireIndex);
 #endif
 			wire_gui_->RemoveWire();
 			wire_gui_ = 0;

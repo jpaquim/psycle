@@ -38,6 +38,8 @@ namespace psycle {
 			song_.patternSequence().Add(pattern);
 			pattern->setName("Untitled");
 			line->createEntry(pattern,0);
+#else
+			song_.New();
 #endif
 		}
 

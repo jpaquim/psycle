@@ -59,11 +59,11 @@ namespace psycle {
 			return selectedEntry_;
 		}
 #else
-		void SetSelectedEntry(int entry) {
+		void SequencerView::SetSelectedEntry(int entry) {
 			selectedEntry_ = entry;
 			UpdateSequencer(selectedEntry_);
 		}
-		int selecteEntry() {
+		int SequencerView::selecteEntry() {
 			return selectedEntry_;
 		}
 #endif
@@ -130,6 +130,7 @@ namespace psycle {
 				UpdateSequencer();
 			}
 #else
+			Song* _pSong = &project_->song();
 			pat_view->AddUndoSequence(_pSong->playLength,
 									  pat_view->editcur.track,
 									  pat_view->editcur.line,
@@ -181,6 +182,7 @@ namespace psycle {
 			}
 			delete[] indexes;
 #else
+			Song* _pSong = &project_->song();
 			pat_view->AddUndoSequence(_pSong->playLength,
 									  pat_view->editcur.track,
 									  pat_view->editcur.line,
@@ -299,6 +301,7 @@ namespace psycle {
 			}
 			Player::singleton().setLoopRange(loopstart, loopend);
 #else
+			int maxitems=cc->GetCount();
 			memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 			for (int c=0;c<maxitems;c++) 
 			{
@@ -335,7 +338,6 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-			Song* _pSong = &project_->song();
 		//
 		//	CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
 		//	int const ep=_pSong->GetBlankPatternUnsed();
@@ -352,6 +354,7 @@ namespace psycle {
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			int const ep=cc->GetCurSel();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Song* _pSong = &project_->song();
 			SequenceLine* line = *_pSong->patternSequence().begin();
 			SequenceLine::iterator seqite = line->begin();
 			for (int c=0; seqite != line->end(); ++seqite, ++c) {
@@ -1013,6 +1016,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			UpdateSequencer();
 #else
+			PatternView* pat_view = project_->pat_view();
 			UpdateSequencer((Global::pPlayer->playing() ? Global::pPlayer->_sequencePosition : pat_view->editPosition));
 #endif
 			main_frame_->m_wndView.SetFocus();			
@@ -1179,6 +1183,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo
 #else
+				PatternView* pat_view = project_->pat_view();
 				const int ls= pat_view->editPosition;
 				const int le=_pSong->playOrder[ls];
 				pls->DeleteString(ls);

@@ -62,12 +62,10 @@ namespace psycle {
 			// InitSkin();
 		}
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		void MachineView::SetSong(class psy::core::Song* song)
+		void MachineView::SetSong(class Song* song)
 		{
 			song_ = song;
 		}
-#endif
 
 		MachineView::~MachineView()
 		{
