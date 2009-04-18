@@ -1008,7 +1008,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CSongpDlg dlg(&projects_->active_project()->song());
 #else
-			CSongpDlg dlg(Global::_pSong);
+			CSongpDlg dlg(&Global::song());
 #endif
 			dlg.DoModal();
 			pParentMain->StatusBarIdle();
