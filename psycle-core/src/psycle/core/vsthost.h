@@ -53,6 +53,7 @@ namespace psy{ namespace core{ namespace vst {
 const int quantize = 65535;
 
 class AudioMaster;
+class plugin;
 
 class host : public MachineHost
 {
@@ -95,6 +96,7 @@ public:
 	virtual ~AudioMaster(){;}
 
 	///< Helper class for Machine Creation.
+	vst::plugin* LoadPlugin(std::string fullName, MachineKey key, Machine::id_type id);
 	virtual CEffect * CreateEffect(LoadedAEffect &loadstruct);
 	virtual CEffect * CreateWrapper(AEffect *effect); 
 	virtual void Log(std::string message);

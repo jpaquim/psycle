@@ -61,12 +61,11 @@ Machine* host::CreateMachine(PluginFinder& finder, MachineKey key,Machine::id_ty
 		return static_cast<vst::plugin*>(master->CreateWrapper(0));
 	}
 	//FIXME: This is a good place where to use exceptions. (task for a later date)
+	if (!finder.hasKey(key)) return 0;
 	std::string fullPath = finder.lookupDllName(key);
 	if (fullPath.empty()) return 0;
 
-	master->currentKey = key;
-	master->currentId = id;
-	vst::plugin* plug = (vst::plugin*)master->LoadPlugin(fullPath.c_str(),key.index());
+	vst::plugin* plug = master->LoadPlugin(fullPath, key, id);
 	plug->Init();
 	return plug;
 }
@@ -75,61 +74,166 @@ Machine* host::CreateMachine(PluginFinder& finder, MachineKey key,Machine::id_ty
 void host::FillPluginInfo(const std::string& fullName, const std::string& fileName, PluginFinder& finder)
 {
 	#if defined __unix__ || defined __APPLE__
-		if ( fileName.find( "lib-xpsycle.") == std::string::npos ) return;
+		if ( fileName.find( ".dll" ) == std::string::npos ) return;
 	#else
 		if ( fileName.find( ".dll" ) == std::string::npos ) return;
 	#endif
 	
-	void* hInstance = LoadDll(fullName);
-	if (!hInstance) return;
-	
-	UnloadDll(hInstance);
-}
+	vst::plugin *vstPlug=0;
+	std::ostringstream sIn;
+	MachineKey key( hostCode(), fileName);
 
-void* host::LoadDll( std::string const & file_name )
-{
-	void* hInstance;
-	
-	std::string old_path = File::appendDirToEnvPath(file_name);
-
-#if defined __unix__ || defined __APPLE__
-	hInstance = ::dlopen(file_name.c_str(), RTLD_LAZY /*RTLD_NOW*/);
-	if (!hInstance) {
-		std::cerr << "Cannot load library: " << dlerror() << '\n';
+	try
+	{
+		vstPlug = master->LoadPlugin(fullName, key, 0);
 	}
-#else
-	// Set error mode to disable system error pop-ups (for LoadLibrary)
-	UINT uOldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-	hInstance = LoadLibraryA( file_name.c_str() );
-	// Restore previous error mode
-	SetErrorMode( uOldErrorMode );
-	if (!hInstance) {
-		///\todo
+	catch(const std::exception & e)
+	{
+		sIn << typeid(e).name() << std::endl;
+		if(e.what()) sIn << e.what(); else sIn << "no message"; sIn << std::endl;
 	}
-#endif
+	catch(...)
+	{
+		sIn << "Type of exception is unknown, cannot display any further information." << std::endl;
+	}
+	if(!sIn.str().empty())
+	{
+		PluginInfo pinfo;
+		pinfo.setError(sIn.str());
 
-	File::setEnvPath(old_path);
-	
-	return hInstance;
+		std::cout << "### ERRONEOUS ###" << std::endl;
+		std::cout.flush();
+		std::cout << pinfo.error();
+		std::cout.flush();
+		std::stringstream title; 
+		title << "Machine crashed: " << fileName;
+
+		pinfo.setAllow(false);
+		pinfo.setName("???");
+		pinfo.setAuthor("???");
+		pinfo.setDesc("???");
+		pinfo.setLibName(fullName);
+		pinfo.setVersion("???");
+		MachineKey key( hostCode(), fileName, 0);
+		finder.AddInfo( key, pinfo);
+		if (vstPlug) delete vstPlug;
+	}
+	else
+	{
+		if (vstPlug->IsShellMaster())
+		{
+			char tempName[64] = {0}; 
+			VstInt32 plugUniqueID = 0;
+			while ((plugUniqueID = vstPlug->GetNextShellPlugin(tempName)) != 0)
+			{ 
+				if (tempName[0] != 0)
+				{
+					PluginInfo pinfo;
+					pinfo.setLibName(fullName);
+					//todo!
+					//pinfo.setFileTime();
+
+					pinfo.setAllow(true);
+					{
+						std::ostringstream s;
+						s << vstPlug->GetVendorName() << " " << tempName;
+						pinfo.setName(s.str());
+					}
+					pinfo.setAuthor(vstPlug->GetVendorName());
+					pinfo.setRole( _isSynth?MachineRole::GENERATOR : MachineRole::EFFECT );
+
+					{
+						std::ostringstream s;
+						s << (vstPlug->IsSynth() ? "VST Shell instrument" : "VST Shell effect") << " by " << vstPlug->GetVendorName();
+						pinfo.setDesc(s.str());
+					}
+					{
+						std::ostringstream s;
+						s << std::hex << vstPlug->GetVersion();
+						pinfo.setVersion(s.str());
+					}
+					MachineKey keysubPlugin( hostCode(), fileName, 0);
+					finder.AddInfo( keysubPlugin, pinfo);
+				}
+			}
+		}
+		else
+		{
+			PluginInfo pinfo;
+			pinfo.setAllow(true);
+			pinfo.setLibName(fullName);
+			//todo!
+			//pinfo.setFileTime();
+			pinfo.setName(vstPlug->GetName());
+			pinfo.setAuthor(vstPlug->GetVendorName());
+			pinfo.setRole( _isSynth?MachineRole::GENERATOR : MachineRole::EFFECT );
+
+			{
+				std::ostringstream s;
+				s << (vstPlug->IsSynth() ? "VST instrument" : "VST effect") << " by " << vstPlug->GetVendorName();
+				pinfo.setDesc(s.str());
+			}
+			{
+				std::ostringstream s;
+				s << vstPlug->GetVersion();
+				pinfo.setVersion(s.str());
+			}
+			MachineKey key( hostCode(), fileName, vstPlug->uniqueId());
+			finder.AddInfo( key, pinfo);
+		}
+		std::cout << vstPlug->GetName() << " - successfully instanciated";
+		std::cout.flush();
+
+		// [bohan] vstPlug is a stack object, so its destructor is called
+		// [bohan] at the end of its scope (this cope actually).
+		// [bohan] The problem with destructors of any object of any class is that
+		// [bohan] they are never allowed to throw any exception.
+		// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
+		try
+		{
+			delete vstPlug;
+			// [bohan] phatmatik crashes here...
+			// <magnus> so does PSP Easyverb, in FreeLibrary
+		}
+		catch(const std::exception & e)
+		{
+			std::stringstream s; s
+				<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+				<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+				<< typeid(e).name() << std::endl;
+			if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+			std::cout
+				<< std::endl
+				<< "### ERRONEOUS ###" << std::endl
+				<< s.str().c_str();
+			std::cout.flush();
+			std::stringstream title; title
+				<< "Machine crashed: " << fileName;
+		}
+		catch(...)
+		{
+			std::stringstream s; s
+				<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+				<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+				<< "Type of exception is unknown, no further information available.";
+			std::cout
+				<< std::endl
+				<< "### ERRONEOUS ###" << std::endl
+				<< s.str().c_str();
+			std::cout.flush();
+			std::stringstream title; title
+				<< "Machine crashed: " << fileName;
+		}
+	}
 }
-
-
-
-void host::UnloadDll( void* hInstance )
-{
-	assert(hInstance);
-	#if defined __unix__ || defined __APPLE__
-		::dlclose(hInstance);
-	#else
-		::FreeLibrary((HINSTANCE)hInstance);
-	#endif
-}
-
-
-
 //==============================================================
 //==============================================================
 
+vst::plugin* AudioMaster::LoadPlugin(std::string fullName, MachineKey key, Machine::id_type id) {
+	currentKey = key;
+	currentId = id;
+	return dynamic_cast<vst::plugin*>(CVSTHost::LoadPlugin(fullName.c_str(),key.index()));
+}
 CEffect * AudioMaster::CreateEffect(LoadedAEffect &loadstruct)
 {
 	return new plugin(pCallbacks,currentKey,currentId,loadstruct);

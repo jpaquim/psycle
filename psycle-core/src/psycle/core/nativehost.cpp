@@ -84,7 +84,7 @@ void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& 
 		PluginInfo pinfo;
 		pinfo.setName( minfo->Name );
 		bool _isSynth = (minfo->Flags == 3);
-		pinfo.setRole( _isSynth?MachineRole::GENERATOR:MachineRole::EFFECT );
+		pinfo.setRole( _isSynth?MachineRole::GENERATOR : MachineRole::EFFECT );
 		pinfo.setLibName(fullName);
 		std::ostringstream o;
 		std::string version;

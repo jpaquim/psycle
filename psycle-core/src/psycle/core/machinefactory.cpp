@@ -54,14 +54,15 @@ void MachineFactory::FillHosts()
 
 	hosts_.push_back( &NativeHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::NATIVE);
-	
-	hosts_.push_back( &LadspaHost::getInstance(callbacks_) );
-	finder_->addHost(Hosts::LADSPA);
 
-	#ifdef _WIN32
+	#if defined _WIN32 || defined _WIN64 
 		hosts_.push_back( &vst::host::getInstance(callbacks_) );
 		finder_->addHost(Hosts::VST);
 	#endif
+
+	hosts_.push_back( &LadspaHost::getInstance(callbacks_) );
+	finder_->addHost(Hosts::LADSPA);
+
 }
 
 Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
