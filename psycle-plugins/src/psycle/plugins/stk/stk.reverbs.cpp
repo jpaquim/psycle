@@ -15,6 +15,8 @@
 
 #define NUMPARAMETERS 4
 
+using namespace psycle::plugin_interface;
+
 CMachineParameter const paraRev = {"Reverb","Reverb",0,2,MPF_STATE,0};
 CMachineParameter const paraTime = {"Time","Time",1,32767,MPF_STATE,32};
 CMachineParameter const paraDryWet = {"Dry/Wet","Dry/Wet",0,100,MPF_STATE,50};

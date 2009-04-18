@@ -483,11 +483,10 @@ std::auto_ptr<SinglePattern> SinglePattern::block( int left, int right, int top,
 	// the range is:
 	// startTrack >= tracks < endTracks ; startLine >= lines < endLines
 
-	float topBeat = top / (float) beatZoom();
-
 	std::auto_ptr<SinglePattern> newPattern(new SinglePattern());
 
 #if 0 ///\todo
+	float topBeat = top / (float) beatZoom();
 	for( SinglePattern::iterator lineIt = find_lower_nearest( top )
 			; lineIt != end() ; ++lineIt )
 	{

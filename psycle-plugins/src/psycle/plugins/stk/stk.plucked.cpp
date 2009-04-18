@@ -12,6 +12,8 @@
 #include <stk/ADSR.h>
 #include <cmath>
 
+using namespace psycle::plugin_interface;
+
 #define NUMPARAMETERS 5
 
 StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)

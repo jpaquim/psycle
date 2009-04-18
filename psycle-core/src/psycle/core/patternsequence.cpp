@@ -223,7 +223,6 @@ namespace psy { namespace core {
 				break;
 			}
 			if(iter!=end()) {
-				double oldpos = iter->first;
 				erase(iter);
 				line_.insert(std::pair<double, SequenceEntry*>(newpos, entry));
 			}
@@ -328,7 +327,6 @@ namespace psy { namespace core {
 					double entryStart = sLineIt->first;
 					float entryStartOffset  = sLineIt->second->startPos();
 					float entryEndOffset  = sLineIt->second->endPos();
-					float entryLength = entryEndOffset - entryStartOffset;
 					double relativeStart = start - entryStart + entryStartOffset;
 			
 					SinglePattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
@@ -489,7 +487,6 @@ namespace psy { namespace core {
 			}
 			if(iter!=globalEvents_.end())
 			{
-				double oldpos = iter->first;
 				globalEvents_.erase(iter);
 				globalEvents_.insert(GlobalMap::value_type(newpos, entry) );
 			}

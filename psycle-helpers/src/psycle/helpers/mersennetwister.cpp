@@ -75,8 +75,8 @@ void MersenneTwister::init_genrand(std::uint32_t s) {
 /// initialize by an array with array-length.
 /// init_key is the array for initializing keys,
 /// key_length is its length
-void MersenneTwister::init_by_array(std::uint32_t init_key[], unsigned int key_length) {
-	std::int32_t i, j, k;
+void MersenneTwister::init_by_array(std::uint32_t init_key[], std::size_t key_length) {
+	std::size_t i, j, k;
 	init_genrand(19650218);
 	i = 1; j = 0;
 	k = N > key_length ? N : key_length;

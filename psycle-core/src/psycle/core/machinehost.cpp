@@ -28,9 +28,10 @@ void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) {
 		std::vector<std::string> fileList;
 		try {
 			fileList = File::fileList(currentPath, File::list_modes::files);
-		} catch ( std::exception& e ) {
-			std::cout << "Warning: Unable to scan your " << hostName() << " plugin directory with path: " << currentPath
-				<< "." << std::endl << "Please make sure the directory exists." << std::endl;
+		} catch(std::exception & e) {
+			std::cerr
+				<< "psycle: host: warning: Unable to scan your " << hostName() << " plugin directory with path: " << currentPath
+				<< ".\nPlease make sure the directory exists.\nException: " << e.what();
 			return;
 		}
 		currentPath = currentPath + File::slash();

@@ -4,7 +4,8 @@
 
 #include <psycle/plugin_interface.hpp>
 #include <fluidsynth/fluidsynth.h>
-//#include <memory.h>
+
+using namespace psycle::plugin_interface;
 
 #define NUMPARAMETERS   24
 #define FILEVERSION     2
