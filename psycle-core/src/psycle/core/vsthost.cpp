@@ -140,7 +140,7 @@ void host::FillPluginInfo(const std::string& fullName, const std::string& fileNa
 						pinfo.setName(s.str());
 					}
 					pinfo.setAuthor(vstPlug->GetVendorName());
-					pinfo.setRole( _isSynth?MachineRole::GENERATOR : MachineRole::EFFECT );
+					pinfo.setRole( vstPlug->IsSynth()?MachineRole::GENERATOR : MachineRole::EFFECT );
 
 					{
 						std::ostringstream s;
@@ -166,7 +166,7 @@ void host::FillPluginInfo(const std::string& fullName, const std::string& fileNa
 			//pinfo.setFileTime();
 			pinfo.setName(vstPlug->GetName());
 			pinfo.setAuthor(vstPlug->GetVendorName());
-			pinfo.setRole( _isSynth?MachineRole::GENERATOR : MachineRole::EFFECT );
+			pinfo.setRole( vstPlug->IsSynth()?MachineRole::GENERATOR : MachineRole::EFFECT );
 
 			{
 				std::ostringstream s;
