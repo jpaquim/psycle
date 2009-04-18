@@ -34,7 +34,7 @@ bool RiffFile::ReadString(char * data, std::size_t const & max_length) {
 	if(max_length <= 0) return false;
 	std::memset(data, 0, max_length);
 	int c = EOF;
-	for(long index = 0; index < max_length; ++index) if((c = _stream.get()) != EOF) {
+	for(std::size_t index = 0; index < max_length; ++index) if((c = _stream.get()) != EOF) {
 		data[index] = c;
 		if(c == '\0') return true;
 	}

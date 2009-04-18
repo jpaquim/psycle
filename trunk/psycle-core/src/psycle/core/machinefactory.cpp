@@ -122,13 +122,9 @@ void MachineFactory::setLadspaPath(std::string path,bool cleardata)
 	}
 #endif
 	
-void MachineFactory::RegenerateFinderData() 
-{
+void MachineFactory::RegenerateFinderData()  {
 	finder_->Initialize(true);
-	for (int i=0; i < hosts_.size(); ++i )
-	{
-		hosts_[i]->FillFinderData(*finder_,true);
-	}
+	for(std::size_t i = 0; i < hosts_.size(); ++i) hosts_[i]->FillFinderData(*finder_, true);
 }
 
 }}

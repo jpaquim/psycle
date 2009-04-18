@@ -10,6 +10,8 @@
 #include <stk/stk.h>
 #include <stk/Shakers.h>
 
+using namespace psycle::plugin_interface;
+
 int const NUMPARAMETERS = 6;
 
 CMachineParameter const paraShakeEnergy = 

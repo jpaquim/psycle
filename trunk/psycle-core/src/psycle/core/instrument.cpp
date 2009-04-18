@@ -416,18 +416,6 @@ namespace psy
 				std::uint32_t index = 0;
 				xml << "<wave name='" << waveName << "' bin='";
 				std::uint32_t version = CURRENT_FILE_VERSION_WAVE;
-				std::uint32_t size =
-					sizeof index +
-					sizeof waveLength +
-					sizeof waveVolume +
-					sizeof waveLoopStart +
-					sizeof waveLoopEnd +
-					sizeof waveTune +
-					sizeof waveFinetune +
-					sizeof waveStereo +
-					std::strlen(waveName) + 1 +
-					size1 +
-					size2;
 				
 				xml << toHex(waveLength);
 				xml << toHex(waveVolume);

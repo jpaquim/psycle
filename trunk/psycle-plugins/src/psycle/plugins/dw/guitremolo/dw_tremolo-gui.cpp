@@ -8,9 +8,11 @@
 //it won't compile if you don't do this!!
 
 //#include <psycle/plugin_interface.hpp> //plugin_gui.hpp includes plugin_interface, so it's no longer necessary
-#include <psycle/plugin_gui.hpp>
+#include <psycle/plugin_interface.hpp>
+#include <psycle/host/NativeGUI.hpp>
 #include "resources.hpp"
 
+using namespace psycle::plugin_interface;
 
 #define MAGIC_COLOR 0x00859296
 
@@ -72,7 +74,7 @@ enum
 	grav_inout
 };
 
-std::map<int, CMachineGuiParameter**> InstMap;				//this map keeps track of all the parameter pointers for every instance of the plugin.
+//std::map<int, CMachineGuiParameter**> InstMap;				//this map keeps track of all the parameter pointers for every instance of the plugin.
 												//the key value is the index of the machine, which is sent to the constructor of the
 												//CMachineInterface class.  the constructor should save the index also, to erase it
 												//from the map when an instance is destroyed.  (this is necessary because gui

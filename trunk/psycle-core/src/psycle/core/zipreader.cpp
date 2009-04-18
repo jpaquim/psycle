@@ -73,7 +73,7 @@ static void _zr_fix_name(char **fn)
 		else break;
 	}
 }
-static zipreader *_zr_step2(int fd, unsigned int a, unsigned int b, unsigned int y)
+static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 {
 	unsigned int i;
 	unsigned char head1[30];

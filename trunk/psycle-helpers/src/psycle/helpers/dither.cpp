@@ -42,7 +42,7 @@ void Dither::Process(float * inSamps, unsigned int length) {
 			break;
 	}
 
-	for(int i(0); i < length; ++i) {
+	for(unsigned int i(0); i < length; ++i) {
 		switch(pdf) {
 			case Pdf::rectangular:
 				randval = mt.genrand_real1()-0.5;
