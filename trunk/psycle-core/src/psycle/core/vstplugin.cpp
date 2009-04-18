@@ -145,16 +145,9 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 			// unexplained reason ( example : mda piano.dd )
 			Work(STREAM_SIZE);
 		}
-		if (_psName == "") 
+		if (_psName.empty()) 
 		{
-			std::string temp;
-			std::string::size_type pos;
-			pos = key.dllName().rfind('\\');
-			if(pos==std::string::npos)
-				temp=key.dllName();
-			else
-				temp=key.dllName().substr(pos+1);
-			_psName=temp.substr(0,temp.rfind('.'));
+			_psName=key.dllName();
 		}
 
 		if(GetVendorString(temp) && temp[0]) _psAuthor = temp;

@@ -142,6 +142,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			factory.setPsyclePath(Global::pConfig->GetPluginDir());
 			factory.setLadspaPath("");
+			factory.setVstPath(Global::pConfig->GetVstDir());
 #else
 			CNewMachine::LoadPluginInfo(false);
 #endif

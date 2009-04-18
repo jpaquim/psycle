@@ -21,8 +21,8 @@ namespace Hosts {
 	{
 		INTERNAL=0,
 		NATIVE,
-		LADSPA,
 		VST,
+		LADSPA,
 		//Keep at last position
 		NUM_HOSTS
 	};

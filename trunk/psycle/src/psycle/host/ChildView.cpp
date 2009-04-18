@@ -423,9 +423,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE						
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.song(projects_->active_project()->song());
-			output_driver_ = new psy::core::MsWaveOut();
-			player.setDriver(*output_driver_);
-			player.driver().Enable(true);
+			if (!output_driver_) {
+				output_driver_ = new psy::core::MsWaveOut();
+			}
+			if (_outputActive) {
+				player.setDriver(*output_driver_);
+			}
 #else
 			if (_outputActive)
 			{

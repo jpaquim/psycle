@@ -172,7 +172,9 @@ namespace psycle
 
 #if !defined WINAMP_PLUGIN
 			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::machineGrouping);
-			reg.QueryValue("NewMacDlgpluginName", CNewMachine::displayName);
+			reg.QueryValue("NewMacDlgdisplayName", CNewMachine::displayName);
+			// Old values was boolean.
+			// reg.QueryValue("NewMacDlgpluginName", CNewMachine::displayName);
 			reg.QueryValue("WrapAround", _wrapAround);
 			reg.QueryValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.QueryValue("windowsBlocks", _windowsBlocks);
@@ -377,7 +379,9 @@ namespace psycle
 				}
 			}
 			reg.SetValue("NewMacDlgpluginOrder", CNewMachine::machineGrouping);
-			reg.SetValue("NewMacDlgpluginName", CNewMachine::displayName);
+			reg.SetValue("NewMacDlgdisplayName", CNewMachine::displayName);
+			// Old values was boolean.
+			//reg.SetValue("NewMacDlgpluginName", CNewMachine::displayName);
 			reg.SetValue("WrapAround", _wrapAround);
 			reg.SetValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.SetValue("CenterCursor", _centerCursor);
