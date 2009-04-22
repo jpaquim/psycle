@@ -79,6 +79,9 @@ namespace psycle {
 			   bShiftArrowsDoSelect(false),
 			   bDoingSelection(false),
 			   maxView(false)
+#ifdef use_psycore
+			   ,pattern_(0)
+#endif
 		{
 			selpos.bottom=0;
 			newselpos.bottom=0;
@@ -130,13 +133,14 @@ namespace psycle {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		psy::core::SinglePattern* PatternView::pattern() {
-			psy::core::PatternSequence* sequence = &song()->patternSequence();
+			return pattern_;
+/*			psy::core::PatternSequence* sequence = &song()->patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());	
 			psy::core::SequenceLine::iterator sit = line->begin();
 			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
 			assert(sit != line->end());
 			psy::core::SequenceEntry* entry = sit->second;
-			return entry->pattern();
+			return entry->pattern();*/
 		}
 #endif
 
@@ -533,13 +537,20 @@ namespace psycle {
 					child_view()->ShowScrollBar(SB_VERT,FALSE); 
 				}
 				break;
-			case draw_modes::playback: 
+			case draw_modes::playback:
+			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+				SinglePattern* pat = pattern();
+				psy::core::Player & player(psy::core::Player::singleton());
+				int ticks = static_cast<int>(project()->song().ticksSpeed());
+				int pos = player.playPos() * ticks;
+				if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) )
 #else
-				{
-					int pos = Global::pPlayer->_lineCounter;
-					if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
-						(song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_sequencePosition]))
+				int pos = Global::pPlayer->_lineCounter;
+				if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
+					(song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_sequencePosition]))
+#endif
+
 					{
 						if (pos != playpos)
 						{
@@ -581,7 +592,6 @@ namespace psycle {
 						}
 					}
 				}
-#endif
 				break;
 			case draw_modes::playback_change: 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -2535,7 +2545,7 @@ namespace psycle {
 			Song* song = this->song();
 			SinglePattern* patt = pattern();
 			
-			double beat_zoom = static_cast<int>(project()->lines_per_beat());
+			double beat_zoom = static_cast<int>(project()->song().ticksSpeed());
 			SinglePattern::iterator it;
 			double low = (lstart + lOff - 0.5) / (double) beat_zoom;
 			it = patt->lower_bound(low);			
@@ -2669,7 +2679,7 @@ namespace psycle {
 				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
 					continue;
 				int trackcount = ev.track() + tOff;
-				double pos = it->first;
+				double pos = patt->BeatPosWithTPB(project()->song().ticksSpeed(), it->first);
 				int line = static_cast<int>(pos * beat_zoom) - lOff;
 				int linecount = line + lOff;
 				if((linecount%(int)(beat_zoom)) == 0) {

@@ -405,6 +405,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_wndView.SetFocus();
 		//	m_wndView.EnableSound();
 			
+
 			return 0;
 		}
 

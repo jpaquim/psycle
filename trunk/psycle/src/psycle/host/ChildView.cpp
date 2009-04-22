@@ -362,8 +362,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							pParentMain->m_wndSeq.SetSelectedEntry(entry);
 
 						}
+					} else
+                    if (viewMode == view_modes::pattern) {
+					  Repaint(draw_modes::playback);
 					}
-
 #else
 					if (Global::pPlayer->_lineChanged)
 					{

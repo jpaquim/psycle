@@ -165,7 +165,11 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		private:
 			SinglePattern* pattern();
+			SinglePattern* pattern_;
 		public:
+			void SetPattern(SinglePattern* pattern) {
+				pattern_ = pattern;
+			}
 #endif
 
 			class Project* project();

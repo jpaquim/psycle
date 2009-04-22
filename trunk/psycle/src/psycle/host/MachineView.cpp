@@ -86,7 +86,6 @@ namespace psycle {
 			main()->StatusBarText(text.c_str());
 		}
 
-
 		void MachineView::DeleteMachineGui(Machine* mac)
 		{
 			std::map<Machine*, MachineGui*>::iterator it;

@@ -110,15 +110,16 @@ namespace psy { namespace core {
 			boost::signal<void (SequenceLine*)> wasDeleted;
 
 			SequenceEntry* createEntry(SinglePattern* pattern, double position);
-			void insertEntry( SequenceEntry *entry );
-			void moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine );
-			void removeSinglePatternEntries(SinglePattern* pattern);
+			void insertEntry(SequenceEntry *entry);
+			void moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine);
+			void removeSinglePatternEntries(SinglePattern* pattern);			
+			void insertEntryAndMoveRest(SequenceEntry *entry, double pos);
 
 			double tickLength() const;
 
 			Sequence* patternSequence() { return sequence_; }
 
-			void MoveEntry(SequenceEntry* entry, double newpos);
+			void MoveEntry(SequenceEntry* entry, double newpos);			
 			void removeEntry(SequenceEntry* entry);
 
 			const std::string& name() const;
