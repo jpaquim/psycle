@@ -187,6 +187,10 @@ namespace psy { namespace core {
 			line_.insert(std::pair<double, SequenceEntry*>(entry->startPos(), entry));
 		}
 
+		void SequenceLine::insertEntryAndMoveRest(SequenceEntry *entry, double pos) {
+			// todo
+		}
+
 		void SequenceLine::moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine) {
 			newLine->insertEntry(entry);
 			iterator it = begin();

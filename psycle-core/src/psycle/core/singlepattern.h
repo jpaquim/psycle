@@ -33,8 +33,7 @@ namespace psy { namespace core {
 
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
-
-
+			
 			void setEvent( int line, int track, const PatternEvent & event );
 			PatternEvent event( int line, int track );
 
@@ -117,6 +116,14 @@ namespace psy { namespace core {
 			}
 
 			std::map<double, PatternEvent>::size_type size() const { return lines_.size(); }
+
+			// beatpos with 4 is standard
+			double BeatPosWithTPB(int ticks, double beat_pos) {
+				if (ticks == 4)
+					return beat_pos;
+				else
+					return 4.0/ticks * beat_pos;
+			}
 
 		private:
 			int beatZoom_;

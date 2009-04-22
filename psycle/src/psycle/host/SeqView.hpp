@@ -72,12 +72,22 @@ namespace psycle {
 			int seqcopybuffer[MAX_SONG_POSITIONS];
 			int seqcopybufferlength;
 
+
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			SequenceEntry* GetEntry(int list_position);
+		
+		public:
+			void BuildPositionMap();
+			void BuildListBox();
+			void SelectItems();
+			void BuildSelectionList();
+		private:
+
 			SequenceEntry* selectedEntry_;
-			std::map<int,SequenceEntry*> id_map_; // Relation between the list position and the patterns
+			std::map<int,SequenceEntry*> pos_map_; // Relation between the list position and the patterns
 #else
 			int selectedEntry_;
-			std::map<int,int> id_map_; // Relation between the list position and the patterns
+			std::map<int,int> pos_map_; // Relation between the list position and the patterns
 #endif
 			std::vector<int> selection_; // Vector of the selected indexes
 		};
