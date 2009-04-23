@@ -309,30 +309,21 @@ namespace psycle {
 			if (!project_)
 				return;
 			PatternView* pat_view = project_->pat_view();
-			// todo
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
-			int len = line->size(); // Length, in patterns, of the sequence.
-			pat_view->AddUndoSequence(len,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);
-			//Todo: misses adding the new pattern, this just moves positions.
-			pat_view->editPosition++;
-			int const pop=pat_view->editPosition;
-			std::map<int,SequenceEntry*> tmp_map;
-			std::map<int,SequenceEntry*>::reverse_iterator rit = pos_map_.rbegin();
-			for ( int c = len; rit != pos_map_.rend(); ++rit, c--) {
-				if (c >=pop )
-					tmp_map[rit->first+1] = rit->second;
-				else
-					tmp_map[rit->first] = rit->second;
-			}
-			pos_map_ = tmp_map;
-			UpdatePlayOrder(true);
-			UpdateSequencer(pat_view->editPosition);
+			int id = 0;
+			for ( ; sequence->FindPattern(id) !=0 ; ++id);
+			psy::core::SinglePattern* pattern = new psy::core::SinglePattern();
+			pattern->setID(id);
+			sequence->Add(pattern);
+			psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
+			entry->setPattern(pattern);
+			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+			line->insertEntryAndMoveRest(entry, GetEntry(cc->GetCurSel())->tickEndPosition());
+			BuildPositionMap();
+			UpdateSequencer();
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
+			main_frame_->StatusBarIdle();
 			main_frame_->m_wndView.SetFocus();
 		}
 
