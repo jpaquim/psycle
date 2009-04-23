@@ -187,8 +187,27 @@ namespace psy { namespace core {
 			line_.insert(std::pair<double, SequenceEntry*>(entry->startPos(), entry));
 		}
 
-		void SequenceLine::insertEntryAndMoveRest(SequenceEntry *entry, double pos) {
-			// todo
+		void SequenceLine::insertEntryAndMoveRest(SequenceEntry *entry, double pos) {			
+			std::multimap<double, SequenceEntry*> old_line_ = line_;
+			line_.clear();
+			std::multimap<double, SequenceEntry*>::iterator it = old_line_.begin();
+			bool inserted = false;
+			double last_pos = 0;
+			for ( ; it != old_line_.end(); ++it ) {
+				if ( it->first < pos ) {
+					line_.insert(std::pair<double, SequenceEntry*>(it->first, it->second));					
+				} else  {
+					if ( !inserted ) {
+					  line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
+					  inserted = true;
+					}
+					double move = entry->patternBeats();
+					line_.insert(std::pair<double, SequenceEntry*>(it->first + move, it->second));
+				}
+			}
+			if ( !inserted ) {
+				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));				
+			}
 		}
 
 		void SequenceLine::moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine) {
