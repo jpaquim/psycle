@@ -356,6 +356,44 @@ namespace psycle {
 		}
 
 
+		void SequencerView::OnSeqduplicate() 
+		{
+			if (!project_)
+				return;
+			PatternView* pat_view = project_->pat_view();
+			Sequence* sequence = &project_->song().patternSequence();
+			SequenceLine* line = *(sequence->begin());			
+			std::sort(selection_.begin(), selection_.end());
+			if (selection_.size() == 0)
+				return;
+			int max = selection_.back();
+			int ins = max;
+			std::vector<int>::iterator it = selection_.begin();
+			for ( ; it != selection_.end(); ++it ) {
+				int id = 0;
+				for ( ; sequence->FindPattern(id) !=0 ; ++id);				
+				int sel_idx = *it;
+				psy::core::SinglePattern* src_pattern = GetEntry(sel_idx)->pattern();
+				psy::core::SinglePattern* pattern = new psy::core::SinglePattern(*src_pattern);
+				pattern->setID(id);
+				sequence->Add(pattern);
+				psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
+				entry->setPattern(pattern);			
+				line->insertEntryAndMoveRest(entry, GetEntry(max)->tickEndPosition());
+				BuildPositionMap();
+				++max;
+			}
+			BuildPositionMap();
+			BuildListBox();
+			selection_.clear();
+			selection_.push_back(ins+1);
+			SelectItems();
+			main_frame_->m_wndView.pattern_view()->SetPattern(GetEntry(ins+1)->pattern());
+			main_frame_->m_wndView.Repaint(draw_modes::pattern);
+			main_frame_->StatusBarIdle();
+			main_frame_->m_wndView.SetFocus();
+		}
+
 		void SequencerView::OnSelchangeSeqlist() 
 		{
 			if (!project_)
@@ -769,6 +807,8 @@ namespace psycle {
 		}
 #endif
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 		void SequencerView::OnSeqduplicate() 
 		{
 			if (!project_)
@@ -810,11 +850,6 @@ namespace psycle {
 						newpat=_pSong->playOrder[litems[selcount-1]+j+1];
 					}
 				}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if (newpat == -1 ) {
-					//TODO: need a way to create a way to get an empty pattern.
-				}
-#else
 				if (newpat == -1 ) 
 				{
 					newpat = _pSong->GetBlankPatternUnused();
@@ -830,7 +865,6 @@ namespace psycle {
 					}
 				}
 				_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
-#endif
 			}
 			pat_view->editPosition=litems[selcount-1]+1;
 			UpdatePlayOrder(true);
@@ -840,6 +874,7 @@ namespace psycle {
 			delete [] litems; litems = 0;
 			main_frame_->m_wndView.SetFocus();
 		}
+#endif
 
 		void SequencerView::OnSeqcut() 
 		{
