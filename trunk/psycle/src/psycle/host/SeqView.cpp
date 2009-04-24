@@ -332,6 +332,30 @@ namespace psycle {
 			main_frame_->m_wndView.SetFocus();
 		}
 
+		void SequencerView::OnSeqins() 
+		{
+			if (!project_)
+				return;
+			PatternView* pat_view = project_->pat_view();
+			Sequence* sequence = &project_->song().patternSequence();
+			SequenceLine* line = *(sequence->begin());			
+			psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);			
+			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+			int sel_idx = cc->GetCurSel();
+			entry->setPattern(GetEntry(sel_idx)->pattern());
+			line->insertEntryAndMoveRest(entry, GetEntry(sel_idx)->tickEndPosition());
+			BuildPositionMap();
+			BuildListBox();
+			selection_.clear();
+			selection_.push_back(sel_idx+1);
+			SelectItems();
+			main_frame_->m_wndView.pattern_view()->SetPattern(entry->pattern());
+			main_frame_->m_wndView.Repaint(draw_modes::pattern);
+			main_frame_->StatusBarIdle();
+			main_frame_->m_wndView.SetFocus();
+		}
+
+
 		void SequencerView::OnSelchangeSeqlist() 
 		{
 			if (!project_)
@@ -709,6 +733,9 @@ namespace psycle {
 		}
 #endif
 
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 		void SequencerView::OnSeqins() 
 		{
 			if (!project_)
@@ -740,6 +767,7 @@ namespace psycle {
 			}
 			main_frame_->m_wndView.SetFocus();
 		}
+#endif
 
 		void SequencerView::OnSeqduplicate() 
 		{
