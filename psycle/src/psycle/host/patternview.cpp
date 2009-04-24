@@ -4343,37 +4343,29 @@ namespace psycle {
 				note = std::min(note, 119);
 			}
 
-			int line = editcur.line;
-			psy::core::Song* song = this->song();
-			psy::core::PatternSequence* sequence = &song->patternSequence();
-			psy::core::SequenceLine* sline = *(sequence->begin());	
-			psy::core::SequenceLine::iterator sit = sline->begin();
-			for (int pos = 0; sit != sline->end() && pos < editPosition; ++sit, ++pos);
-			assert(sit != sline->end());
-			psy::core::SequenceEntry* entry = sit->second;
-			psy::core::SinglePattern* pattern = entry->pattern();
+			int line = editcur.line;			
 
 			double beat_zoom = 4.0;
 			psy::core::SinglePattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
-			it = pattern->lower_bound(low);
+			it = pattern()->lower_bound(low);
 			
-			if (it == pattern->end() || 
+			if (it == pattern()->end() || 
 				!(it->first >= low && it->first < up)
 				) {
 				// no entry on the beatpos
 				psy::core::PatternEvent ev;
 				ev.setNote(note);
 				ev.set_track(editcur.track);
-				ev.setMachine(song->seqBus);
-				pattern->insert(insert_pos, ev);
+				ev.setMachine(song()->seqBus);
+				pattern()->insert(insert_pos, ev);
 			} else
 			if (it->first >= low && it->first < up)	{
 				psy::core::SinglePattern::iterator track_it = it;
 				bool found = false;
-				for ( ; it != pattern->end() && it->first < up; ++it ) {
+				for ( ; it != pattern()->end() && it->first < up; ++it ) {
 					psy::core::PatternEvent& ev = it->second;
 					if (ev.track() == editcur.track ) {
 						it->second.setNote(note);
@@ -4385,8 +4377,8 @@ namespace psycle {
 					psy::core::PatternEvent ev;
 					ev.setNote(note);
 					ev.set_track(editcur.track);
-					ev.setMachine(song->seqBus);
-					pattern->insert(insert_pos, ev);
+					ev.setMachine(song()->seqBus);
+					pattern()->insert(insert_pos, ev);
 				}
 			} 
 			NewPatternDraw(editcur.track,editcur.track,line,line);
