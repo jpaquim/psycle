@@ -36,7 +36,9 @@ SinglePattern::SinglePattern(SinglePattern const& other)
 	timeSignatures_(other.timeSignatures_),
 	zeroTime(other.zeroTime),
 	id_(genId())
-{}
+{
+	lines_ = other.lines_;
+}
 
 SinglePattern::~SinglePattern() {
 	wasDeleted(this);
