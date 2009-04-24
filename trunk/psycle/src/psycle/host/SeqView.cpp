@@ -319,9 +319,14 @@ namespace psycle {
 			psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
 			entry->setPattern(pattern);
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
-			line->insertEntryAndMoveRest(entry, GetEntry(cc->GetCurSel())->tickEndPosition());
+			int sel_idx = cc->GetCurSel();
+			line->insertEntryAndMoveRest(entry, GetEntry(sel_idx)->tickEndPosition());
 			BuildPositionMap();
-			UpdateSequencer();
+			BuildListBox();
+			selection_.clear();
+			selection_.push_back(sel_idx+1);
+			SelectItems();
+			main_frame_->m_wndView.pattern_view()->SetPattern(entry->pattern());
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->StatusBarIdle();
 			main_frame_->m_wndView.SetFocus();
