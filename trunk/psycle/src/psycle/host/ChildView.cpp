@@ -358,10 +358,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (Global::pConfig->_followSong)
 					{
 							///todo
-						if (entry != pParentMain->m_wndSeq.selectedEntry() ) {
-							pParentMain->m_wndSeq.SetSelectedEntry(entry);
+//						if (entry != pParentMain->m_wndSeq.selectedEntry() ) {
+//							pParentMain->m_wndSeq.SetSelectedEntry(entry);
 
-						}
+//						}
 					} else
                     if (viewMode == view_modes::pattern) {
 					  Repaint(draw_modes::playback);

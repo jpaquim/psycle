@@ -42,6 +42,15 @@ namespace psycle {
 			project_ = project;
 		}
 
+		void SequencerView::OnSeqcut() 
+		{
+			if (!project_)
+				return;
+
+			OnSeqcopy();
+			OnSeqdelete();
+		}
+
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 
 		SequenceEntry* SequencerView::GetEntry(int list_position) {
@@ -62,7 +71,11 @@ namespace psycle {
 				selection_.push_back(0);
 				project_->pat_view()->SetPattern(GetEntry(0)->pattern());
 			}
-			SelectItems();			
+			SelectItems();
+
+			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+			int sel_idx = cc->GetCurSel();
+			main_frame_->m_wndView.pattern_view()->SetPattern(GetEntry(sel_idx)->pattern());
 		}
 
 		void SequencerView::BuildPositionMap()
@@ -150,10 +163,10 @@ namespace psycle {
 				SinglePattern* pattern = sequence->FindPattern(0);
 				assert(pattern);
 				double beat_pos = line->tickLength();
-				line->createEntry(pattern, beat_pos);
-				//UpdatePlayOrder(false);
+				line->createEntry(pattern, beat_pos);				
 				UpdateSequencer();				
 			}
+			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
 		}
 
@@ -175,8 +188,9 @@ namespace psycle {
 				++r;
 				line->erase(r.base());
 				UpdatePlayOrder(false);
-				UpdateSequencer();
+				UpdateSequencer();				
 			}
+			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
 		}
 
@@ -205,9 +219,9 @@ namespace psycle {
 				  psy::core::SinglePattern* pattern = new psy::core::SinglePattern();
 				  pattern->setID(id);
 				  sequence->Add(pattern);
-				  item->setPattern(pattern);
-			  }
-			}
+				  item->setPattern(pattern);				  
+			  }			  
+			}			
 			UpdateSequencer();
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
@@ -308,7 +322,6 @@ namespace psycle {
 				}	  			
 			  }
 			}
-			UpdatePlayOrder(false);
 			UpdateSequencer();
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
@@ -503,6 +516,21 @@ namespace psycle {
 			main_frame_->m_wndView.SetFocus();			
 		}
 
+		void SequencerView::OnSeqsort()
+		{
+			// todo
+
+			/*SequenceLine* line = *_pSong->patternSequence().begin();
+			SequenceLine::iterator ite = line->begin();
+			for(int i(0) ; ite != line->end(); ++ite, ++i)
+			{
+				if ( newtoold[i] != i ) // check if this place belongs to another pattern
+				{
+					ite->second->pattern()->setID(newtoold[i]);
+				}
+			}*/
+		}
+
 		void SequencerView::OnSelchangeSeqlist() 
 		{
 			if (!project_)
@@ -518,37 +546,23 @@ namespace psycle {
 			main_frame_->m_wndView.SetFocus();
 		}
 
+		void SequencerView::OnDblclkSeqlist() 
+		{
+		}
 
 #endif
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		void SequencerView::SetSelectedEntry(SequenceEntry* entry) {
-			if (selectedEntry_ != entry) {
-				selectedEntry_ = entry;
-				Sequence* sequence = &project_->song().patternSequence();
-				SequenceLine* line = *(sequence->begin());	
-				SequenceLine::iterator sit = line->begin();
-				int pos = 0;
-				for (; sit != line->end() && sit->second != entry; ++sit, ++pos);
-				
-				UpdateSequencer(pos);
-				//UpdatePlayOrder(true);
-			}
-		}
-		SequenceEntry* SequencerView::selectedEntry() {
-			return selectedEntry_;
-		}
 #else
 		void SequencerView::SetSelectedEntry(int entry) {
 			selectedEntry_ = entry;
 			UpdateSequencer(selectedEntry_);
 		}
+
 		int SequencerView::selecteEntry() {
 			return selectedEntry_;
 		}
-#endif
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
+
 		void SequencerView::OnInclen() 
 		{
 			if (!project_)
@@ -569,10 +583,7 @@ namespace psycle {
 			}
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnDeclen()
 		{
 			if (!project_)
@@ -594,10 +605,7 @@ namespace psycle {
 			}
 			main_frame_->SetFocus();	
 		}
-#endif
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnIncshort() 
 		{			
 			if (!project_)
@@ -627,10 +635,7 @@ namespace psycle {
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnDecshort() 
 		{		
 			if (!project_)
@@ -661,11 +666,7 @@ namespace psycle {
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnSelchangeSeqlist() 
 		{
 			if (!project_)
@@ -705,7 +706,6 @@ namespace psycle {
 			main_frame_->StatusBarIdle();
 			main_frame_->SetFocus();
 		}
-		#endif
 
 		void SequencerView::OnDblclkSeqlist() 
 		{
@@ -727,24 +727,6 @@ namespace psycle {
 		//	
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			int const ep=cc->GetCurSel();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Song* _pSong = &project_->song();
-			SequenceLine* line = *_pSong->patternSequence().begin();
-			SequenceLine::iterator seqite = line->begin();
-			for (int c=0; seqite != line->end(); ++seqite, ++c) {
-				if (cc->GetSel(c)) {
-					break;
-				}
-			}
-			if (Global::pPlayer->playing())
-			{
-				Player::singleton().start(seqite->second->tickPosition());
-			}
-			else {
-				Player::singleton().UnsetLoop();
-				Player::singleton().start(seqite->second->tickPosition());
-			}
-#else
 			if (Global::pPlayer->playing())
 			{
 				bool b = Global::pPlayer->_playBlock;
@@ -755,7 +737,6 @@ namespace psycle {
 			{
 				Global::pPlayer->Start(ep,0);
 			}
-#endif
 			pat_view->editPosition=ep;
 			//Following two lines by alk to disable view change to pattern mode when 
 			//double clicking on a pattern in the sequencer list
@@ -763,8 +744,6 @@ namespace psycle {
 			SetFocus();
 		}
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnInclong() 
 		{			
 			if (!project_)
@@ -798,11 +777,7 @@ namespace psycle {
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();			
 		}
-#endif
 
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnDeclong() 
 		{  
 			if (!project_)
@@ -837,10 +812,7 @@ namespace psycle {
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnSeqnew() 
 		{
 			if (!project_)
@@ -878,11 +850,7 @@ namespace psycle {
 			}
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnSeqins() 
 		{
 			if (!project_)
@@ -914,10 +882,7 @@ namespace psycle {
 			}
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnSeqduplicate() 
 		{
 			if (!project_)
@@ -983,19 +948,7 @@ namespace psycle {
 			delete [] litems; litems = 0;
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-		void SequencerView::OnSeqcut() 
-		{
-			if (!project_)
-				return;
-			OnSeqcopy();
-			OnSeqdelete();
-		}
-
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnSeqdelete() 
 		{
 			if (!project_)
@@ -1056,11 +1009,7 @@ namespace psycle {
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnSeqcopy() 
 		{
 			if (!project_)
@@ -1086,10 +1035,7 @@ namespace psycle {
 				seqcopybuffer[i] = _pSong->playOrder[seqcopybuffer[i]];
 			}
 		}
-#endif
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnSeqpaste() 
 		{		
 			if (!project_)
@@ -1141,10 +1087,7 @@ namespace psycle {
 			}
 			main_frame_->m_wndView.SetFocus();
 		}
-#endif
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 		void SequencerView::OnSeqclr() 
 		{
 			if (!project_)
@@ -1177,7 +1120,6 @@ namespace psycle {
 			}
 			main_frame_->m_wndView.SetFocus();			
 		}
-#endif
 
 		void SequencerView::OnSeqsort()
 		{
@@ -1228,19 +1170,6 @@ namespace psycle {
 		// Part two. Sort Patterns. Take first "invalid" out, and start putting patterns in their place.
 		//			 When we have to put the first read one back, do it and find next candidate.
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			SequenceLine* line = *_pSong->patternSequence().begin();
-			SequenceLine::iterator ite = line->begin();
-			for(int i(0) ; ite != line->end(); ++ite, ++i)
-			{
-				if ( newtoold[i] != i ) // check if this place belongs to another pattern
-				{
-					ite->second->pattern()->setID(newtoold[i]);
-				}
-			}
-			//no need for step 3 with psycore.
-
-#else
 			int patl; // first one is initial one, next one is temp one
 			char patn[32]; // ""
 			unsigned char * pData; // ""
@@ -1280,7 +1209,6 @@ namespace psycle {
 			{
 				_pSong->playOrder[i]=oldtonew[_pSong->playOrder[i]];
 			}
-#endif
 
 		// Part four. All the needed things.
 
@@ -1289,6 +1217,7 @@ namespace psycle {
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
 		}
+#endif
 
 
 		void SequencerView::OnSeqShowpattername()
