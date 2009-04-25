@@ -479,7 +479,30 @@ namespace psycle {
 			main_frame_->m_wndView.SetFocus();			
 		}
 
-	
+		void SequencerView::OnSeqclr() 
+		{
+			if (!project_)
+				return;
+
+			PatternView* pat_view = project_->pat_view();
+			Song* _pSong = &project_->song();
+			if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
+			{
+				_pSong->patternSequence().removeAll();
+				SinglePattern* pattr = new SinglePattern();
+				pattr->setID(0);
+				_pSong->patternSequence().Add(pattr);
+				SequenceLine* line = _pSong->patternSequence().createNewLine();
+				line->createEntry(pattr,0);
+				selection_.clear();
+				selection_.push_back(0);
+				UpdateSequencer();
+				pat_view->SetPattern(GetEntry(0)->pattern());
+				main_frame_->m_wndView.Repaint(draw_modes::pattern);
+			}
+			main_frame_->m_wndView.SetFocus();			
+		}
+
 		void SequencerView::OnSelchangeSeqlist() 
 		{
 			if (!project_)
@@ -1120,6 +1143,8 @@ namespace psycle {
 		}
 #endif
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 		void SequencerView::OnSeqclr() 
 		{
 			if (!project_)
@@ -1134,14 +1159,6 @@ namespace psycle {
 									  pat_view->editcur.col,
 									  pat_view->editPosition);
 				
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->patternSequence().removeAll();
-				SinglePattern* pattr = new SinglePattern();
-				pattr->setID(0);
-				_pSong->patternSequence().Add(pattr);
-				SequenceLine* line = _pSong->patternSequence().createNewLine();
-				line->createEntry(pattr,0);
-#else
 				// clear sequence
 				for(int c=0;c<MAX_SONG_POSITIONS;c++)
 				{
@@ -1151,7 +1168,6 @@ namespace psycle {
 				_pSong->DeleteAllPatterns();
 				// init a pattern for #0
 				_pSong->_ppattern(0);
-#endif
 				pat_view->editPosition=0;
 				_pSong->playLength=1;
 
@@ -1161,6 +1177,7 @@ namespace psycle {
 			}
 			main_frame_->m_wndView.SetFocus();			
 		}
+#endif
 
 		void SequencerView::OnSeqsort()
 		{
