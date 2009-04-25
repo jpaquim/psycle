@@ -127,7 +127,7 @@ namespace psycle {
 				if (Global::pConfig->_bShowPatternNames) {
 					sprintf(buf,"%.2X:%s",n, entry->pattern()->name().c_str());
 				} else {
-					sprintf(buf,"%.2X: %.2X", n, entry->pattern()->id());
+					sprintf(buf,"%.2X: %.2X", n, entry->pattern()->name_index());
 				}
 				cc->AddString(buf);
 			}
@@ -211,13 +211,13 @@ namespace psycle {
 			std::vector<int>::iterator it = selection_.begin();
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];
-			  int id = item->pattern()->id()+1;
+			  int id = item->pattern()->name_index()+1;
 			  SinglePattern* pattern = sequence->FindPattern(id);
 			  if (pattern) {				  
 				  item->setPattern(pattern);
 			  } else {
 				  psy::core::SinglePattern* pattern = new psy::core::SinglePattern();
-				  pattern->setID(id);
+				  pattern->set_name_as_index(id);
 				  sequence->Add(pattern);
 				  item->setPattern(pattern);				  
 			  }			  
@@ -243,14 +243,14 @@ namespace psycle {
 			std::vector<int>::iterator it = selection_.begin();
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];			
-			  int id = item->pattern()->id()-1;
+			  int id = item->pattern()->name_index()-1;
 			  if (id >= 0) {
 				SinglePattern* pattern = sequence->FindPattern(id);
 				if (pattern) {				  
 				  item->setPattern(pattern);
 				} else {
 				  pattern = new psy::core::SinglePattern();
-				  pattern->setID(id);
+				  pattern->set_name_as_index(id);
 				  sequence->Add(pattern);
 				  item->setPattern(pattern);
 				}	  			
@@ -277,13 +277,13 @@ namespace psycle {
 			std::vector<int>::iterator it = selection_.begin();
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];
-			  int id = item->pattern()->id()+16;
+			  int id = item->pattern()->name_index()+16;
 			  SinglePattern* pattern = sequence->FindPattern(id);
 			  if (pattern) {				  
 				  item->setPattern(pattern);
 			  } else {
 				  pattern = new psy::core::SinglePattern();
-				  pattern->setID(id);
+				  pattern->set_name_as_index(id);
 				  sequence->Add(pattern);
 				  item->setPattern(pattern);
 			  }
@@ -309,14 +309,14 @@ namespace psycle {
 			std::vector<int>::iterator it = selection_.begin();
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];
-			  int id = std::max(0, item->pattern()->id()-16);
+			  int id = std::max(0, item->pattern()->name_index()-16);
 			  if (id >= 0) {
 				  SinglePattern* pattern = sequence->FindPattern(id);
 				if (pattern) {				  
 				  item->setPattern(pattern);
 				} else {
 				  pattern = new psy::core::SinglePattern();
-				  pattern->setID(id);
+				  pattern->set_name_as_index(id);
 				  sequence->Add(pattern);
 				  item->setPattern(pattern);
 				}	  			
@@ -337,7 +337,7 @@ namespace psycle {
 			int id = 0;
 			for ( ; sequence->FindPattern(id) !=0 ; ++id);
 			psy::core::SinglePattern* pattern = new psy::core::SinglePattern();
-			pattern->setID(id);
+			pattern->set_name_as_index(id);
 			sequence->Add(pattern);
 			psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
 			entry->setPattern(pattern);
@@ -398,7 +398,7 @@ namespace psycle {
 				int sel_idx = *it;
 				psy::core::SinglePattern* src_pattern = GetEntry(sel_idx)->pattern();
 				psy::core::SinglePattern* pattern = new psy::core::SinglePattern(*src_pattern);
-				pattern->setID(id);
+				pattern->set_name_as_index(id);
 				sequence->Add(pattern);
 				psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
 				entry->setPattern(pattern);			
@@ -427,7 +427,7 @@ namespace psycle {
 			SequenceLine* line = *(sequence->begin());
 
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
-			if (GetEntry(cc->GetCurSel())->pattern()->id() == 0 && line->size() == 1)
+			if (GetEntry(cc->GetCurSel())->pattern()->name_index() == 0 && line->size() == 1)
 				return;
 
 			int min = selection_.front();
@@ -503,7 +503,7 @@ namespace psycle {
 			{
 				_pSong->patternSequence().removeAll();
 				SinglePattern* pattr = new SinglePattern();
-				pattr->setID(0);
+				pattr->set_name_as_index(0);
 				_pSong->patternSequence().Add(pattr);
 				SequenceLine* line = _pSong->patternSequence().createNewLine();
 				line->createEntry(pattr,0);
@@ -526,7 +526,7 @@ namespace psycle {
 			{
 				if ( newtoold[i] != i ) // check if this place belongs to another pattern
 				{
-					ite->second->pattern()->setID(newtoold[i]);
+					ite->second->pattern()->set_name_as_index(newtoold[i]);
 				}
 			}*/
 		}

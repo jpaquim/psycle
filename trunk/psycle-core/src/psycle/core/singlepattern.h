@@ -27,9 +27,11 @@ namespace psy { namespace core {
 			virtual ~SinglePattern();
 
 			boost::signal<void (SinglePattern*)> wasDeleted;
-
-			void setID(int id);
+			
 			int id() const;
+			
+			void set_name_as_index(int idx) { idx_ = idx; }
+			int name_index() const { return idx_; }
 
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
@@ -135,6 +137,7 @@ namespace psy { namespace core {
 			TimeSignature zeroTime;
 
 			int id_;
+			int idx_;
 			static int idCounter;
 			static int genId();
 
