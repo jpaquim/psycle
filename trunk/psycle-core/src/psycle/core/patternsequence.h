@@ -114,6 +114,7 @@ namespace psy { namespace core {
 			void moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine);
 			void removeSinglePatternEntries(SinglePattern* pattern);			
 			void insertEntryAndMoveRest(SequenceEntry *entry, double pos);
+			void removeSpaces(); // removes spaces between entries
 
 			double tickLength() const;
 
@@ -162,6 +163,8 @@ namespace psy { namespace core {
 			std::multimap<double, SequenceEntry*>::size_type size() const {
 				return line_.size();
 			}
+
+			bool empty() const { return line_.empty(); }
 
 		private:
 

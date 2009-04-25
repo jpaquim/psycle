@@ -210,6 +210,25 @@ namespace psy { namespace core {
 			}
 		}
 
+		void SequenceLine::removeSpaces()
+		{
+			std::multimap<double, SequenceEntry*>::iterator it = begin();
+			std::multimap<double, SequenceEntry*>::iterator next_it;
+			double pos = 0.0;
+			while ( it != end() ) {
+				double diff = it->first - pos;
+				pos = it->second->tickEndPosition() - diff;
+				if (diff > 0) {
+					next_it = it;
+					next_it++;					
+					MoveEntry(it->second, it->first - diff);
+					it = next_it;
+				} else {
+					++it;
+				}
+			}
+		}
+
 		void SequenceLine::moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine) {
 			newLine->insertEntry(entry);
 			iterator it = begin();

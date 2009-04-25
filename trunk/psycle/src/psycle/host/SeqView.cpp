@@ -175,6 +175,7 @@ namespace psycle {
 		{			
 			if (!project_)
 				return;
+
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
@@ -394,6 +395,46 @@ namespace psycle {
 			main_frame_->m_wndView.SetFocus();
 		}
 
+		void SequencerView::OnSeqdelete() 
+		{
+			if (!project_)
+				return;
+	
+			PatternView* pat_view = project_->pat_view();
+			Sequence* sequence = &project_->song().patternSequence();
+			SequenceLine* line = *(sequence->begin());
+
+			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+			if (GetEntry(cc->GetCurSel())->pattern()->id() == 0 && line->size() == 1)
+				return;
+
+			int min = selection_.front();
+			std::vector<int>::iterator it = selection_.begin();
+			for ( ; it != selection_.end(); ++it ) {
+				if (*it < min)
+					min = *it;
+				psy::core::SequenceEntry* entry = GetEntry(*it);
+				line->removeEntry(entry);
+			}
+			line->removeSpaces();
+			if ( line->empty() ) {
+				SinglePattern* pattern = sequence->FindPattern(0);
+				assert(pattern);
+				double beat_pos = line->tickLength();
+				line->createEntry(pattern, 0);
+				selection_.clear();
+				selection_.push_back(0);
+			} else {
+				selection_.clear();
+				selection_.push_back(std::max(0,min-1));
+			}
+
+			UpdateSequencer();
+			main_frame_->m_wndView.Repaint(draw_modes::pattern);
+			main_frame_->StatusBarIdle();
+			main_frame_->m_wndView.SetFocus();
+		}
+
 		void SequencerView::OnSelchangeSeqlist() 
 		{
 			if (!project_)
@@ -401,12 +442,12 @@ namespace psycle {
 
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			PatternView* pat_view = project_->pat_view();
-			pat_view->SetPattern(GetEntry(cc->GetCurSel())->pattern());
+			pat_view->SetPattern(GetEntry(cc->GetCurSel())->pattern());			
+			BuildSelectionList();
+			SelectItems();
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->StatusBarIdle();
 			main_frame_->m_wndView.SetFocus();
-			BuildSelectionList();
-			SelectItems();
 		}
 
 
@@ -884,6 +925,9 @@ namespace psycle {
 			OnSeqdelete();
 		}
 
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 		void SequencerView::OnSeqdelete() 
 		{
 			if (!project_)
@@ -944,6 +988,7 @@ namespace psycle {
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->m_wndView.SetFocus();
 		}
+#endif
 
 		void SequencerView::OnSeqcopy() 
 		{
