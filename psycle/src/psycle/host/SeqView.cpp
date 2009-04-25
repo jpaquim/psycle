@@ -92,6 +92,15 @@ namespace psycle {
 			delete[] indexes;			
 		}
 
+		void SequencerView::BuildCopyList()
+		{
+			copy_list_.clear();
+			std::vector<int>::iterator it = selection_.begin();
+			for ( ; it != selection_.end(); ++it) {
+				copy_list_.push_back(GetEntry(*it)->pattern());
+			}
+		}
+
 		void SequencerView::BuildListBox() {
 			if (!project_)
 				return;
@@ -435,6 +444,42 @@ namespace psycle {
 			main_frame_->m_wndView.SetFocus();
 		}
 
+		void SequencerView::OnSeqcopy() 
+		{
+			if (!project_)
+				return;
+
+			BuildCopyList();
+		}
+
+		void SequencerView::OnSeqpaste() 
+		{		
+			if (!project_)
+				return;
+
+			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+			int ins = cc->GetCurSel();
+			int max = ins;
+
+			PatternView* pat_view = project_->pat_view();
+			Sequence* sequence = &project_->song().patternSequence();
+			SequenceLine* line = *(sequence->begin());
+
+			std::vector<psy::core::SinglePattern*>::iterator it = copy_list_.begin();
+			for ( ; it != copy_list_.end(); ++it ) {					
+				psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
+				entry->setPattern(*it);			
+				line->insertEntryAndMoveRest(entry, GetEntry(max)->tickEndPosition());
+				BuildPositionMap();
+				++max;
+			}
+			UpdateSequencer();
+			main_frame_->m_wndView.Repaint(draw_modes::pattern);
+			main_frame_->StatusBarIdle();
+			main_frame_->m_wndView.SetFocus();			
+		}
+
+	
 		void SequencerView::OnSelchangeSeqlist() 
 		{
 			if (!project_)
@@ -990,6 +1035,9 @@ namespace psycle {
 		}
 #endif
 
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 		void SequencerView::OnSeqcopy() 
 		{
 			if (!project_)
@@ -1015,7 +1063,10 @@ namespace psycle {
 				seqcopybuffer[i] = _pSong->playOrder[seqcopybuffer[i]];
 			}
 		}
+#endif
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 		void SequencerView::OnSeqpaste() 
 		{		
 			if (!project_)
@@ -1067,6 +1118,7 @@ namespace psycle {
 			}
 			main_frame_->m_wndView.SetFocus();
 		}
+#endif
 
 		void SequencerView::OnSeqclr() 
 		{
