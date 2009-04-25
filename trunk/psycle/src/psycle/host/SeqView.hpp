@@ -4,7 +4,8 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psy {
 	namespace core {
-	class SequenceEntry;
+		class SequenceEntry;
+		class SinglePattern;
 	}
 }
 #endif
@@ -81,6 +82,7 @@ namespace psycle {
 			void BuildListBox();
 			void SelectItems();
 			void BuildSelectionList();
+			void BuildCopyList();
 		private:
 
 			SequenceEntry* selectedEntry_;
@@ -90,6 +92,8 @@ namespace psycle {
 			std::map<int,int> pos_map_; // Relation between the list position and the patterns
 #endif
 			std::vector<int> selection_; // Vector of the selected indexes
+
+			std::vector<psy::core::SinglePattern*> copy_list_; // list to store copy/cut/paste entries
 		};
 
 	}
