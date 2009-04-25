@@ -1761,7 +1761,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (Global::pPlayer->playing())
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				str.Format("Pat %.2X", m_wndSeq.selectedEntry()->pattern()->id());
+//				str.Format("Pat %.2X", m_wndSeq.selectedEntry()->pattern()->id());
 #else
 				str.Format("Pat %.2X", Global::pPlayer->_playPattern); 
 #endif
