@@ -319,7 +319,7 @@ Special:  Bit 0: On = song message attached.
 					SinglePattern* pat = new SinglePattern();
 					pat->setName("unnamed");
 					pat->setBeatZoom(s->ticksSpeed());
-					pat->setID(i);
+					pat->set_name_as_index(i);
 					s->patternSequence().Add(pat);
 #else
 					s->AllocNewPattern(i,"unnamed",64,false);
@@ -862,7 +862,7 @@ Special:  Bit 0: On = song message attached.
 			SinglePattern* pat = new SinglePattern();
 			pat->setName("unnamed");
 			pat->setBeatZoom(s->ticksSpeed());
-			pat->setID(patIdx);
+			pat->set_name_as_index(patIdx);
 			s->patternSequence().Add(pat);
 #else
 			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
@@ -1495,7 +1495,7 @@ OFFSET              Count TYPE   Description
 			SinglePattern* pat = new SinglePattern();
 			pat->setName("unnamed");
 			pat->setBeatZoom(s->ticksSpeed());
-			pat->setID(patIdx);
+			pat->set_name_as_index(patIdx);
 			s->patternSequence().Add(pat);
 #else
 			s->AllocNewPattern(patIdx,"unnamed",64,false);

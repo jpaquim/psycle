@@ -19,7 +19,9 @@ int SinglePattern::genId() {
 	return idCounter++;
 }
 
-SinglePattern::SinglePattern() {
+SinglePattern::SinglePattern() 
+	: idx_(0)
+{
 	TimeSignature timeSig;
 	timeSig.setCount(4);
 	timeSignatures_.push_back( timeSig  );
@@ -29,7 +31,7 @@ SinglePattern::SinglePattern() {
 
 // Explicit copy constructor needed because boost::signal is noncopyable
 SinglePattern::SinglePattern(SinglePattern const& other)
-:
+:	idx_(other.idx_),
 	beatZoom_(other.beatZoom_),
 	name_(other.name_),
 	category_(other.category_),
@@ -340,10 +342,6 @@ const std::vector<TimeSignature> & SinglePattern::timeSignatures() const {
 	return timeSignatures_;
 }
 
-void SinglePattern::setID( int id ) {
-	id_ = id;
-	idCounter = std::max(id_,idCounter)+1;
-}
 
 int SinglePattern::id( ) const {
 	return id_;

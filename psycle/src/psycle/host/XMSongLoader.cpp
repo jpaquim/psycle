@@ -311,7 +311,7 @@ namespace host{
 		SinglePattern* pat = new SinglePattern();
 		pat->setName("unnamed");
 		pat->setBeatZoom(song.ticksSpeed());
-		pat->setID(patIdx);
+		pat->set_name_as_index(patIdx);
 		song.patternSequence().Add(pat);
 #else
 		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
@@ -1247,7 +1247,7 @@ namespace host{
 		SinglePattern* pat = new SinglePattern();
 		pat->setName("unnamed");
 		pat->setBeatZoom(song.ticksSpeed());
-		pat->setID(patIdx);
+		pat->set_name_as_index(patIdx);
 		song.patternSequence().Add(pat);
 #else
 		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);

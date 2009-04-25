@@ -620,15 +620,8 @@ namespace psy { namespace core {
 			assert(pattern);
 			std::map<int, SinglePattern*>::iterator it;
 			it = patterns_.find(pattern->id());
-			if (it == patterns_.end()) {
-				patterns_[pattern->id()] = pattern;
-			} else {
-				std::map<int, SinglePattern*>::reverse_iterator rit;
-				rit = patterns_.rbegin();
-				int id = rit->first+1;
-				pattern->setID(id);
-				patterns_[id] = pattern;
-			}
+			assert(it == patterns_.end());
+			patterns_[pattern->id()] = pattern;			
 		}
 
 		SinglePattern* Sequence::FindPattern(int id) {
