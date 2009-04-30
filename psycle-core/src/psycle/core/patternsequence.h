@@ -209,6 +209,7 @@ namespace psy { namespace core {
 			reverse_patterniterator patternrend() { return patterns_.rend(); }
 			const_reverse_patterniterator patternrend() const { return patterns_.rend(); }
 
+
 			int numpatterns() { return patterns_.size(); }
 
 			typedef std::multimap<double, GlobalEvent*> GlobalMap;

@@ -223,7 +223,7 @@ namespace psycle {
 			updateMode=drawMode;					// this is ununsed for patterns
 			
 #if PSYCLE__CONFIGURATION__USE_PSYCORE			
-			int beat_zoom = project()->lines_per_beat();
+			int beat_zoom = project()->beat_zoom();
 			const int plines = pattern()->beats() * beat_zoom;
 #else
 			const int plines = song->patternLines[song->playOrder[editPosition]];
@@ -542,7 +542,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				SinglePattern* pat = pattern();
 				psy::core::Player & player(psy::core::Player::singleton());
-				int ticks = static_cast<int>(project()->song().ticksSpeed());
+				int ticks = static_cast<int>(project()->beat_zoom());
 				int pos = player.playPos() * ticks;
 				if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) )
 #else
@@ -2545,10 +2545,9 @@ namespace psycle {
 			Song* song = this->song();
 			SinglePattern* patt = pattern();
 			
-			double beat_zoom = static_cast<int>(project()->song().ticksSpeed());
-			SinglePattern::iterator it;
-			double low = (lstart + lOff - 0.5) / (double) beat_zoom;
-			it = patt->lower_bound(low);			
+			double beat_zoom = static_cast<int>(project()->beat_zoom());
+			SinglePattern::iterator it;			
+			it = patt->find_nearest(lstart+ lOff, project()->beat_zoom());
 			
 			char tBuf[16];
 
@@ -2679,7 +2678,7 @@ namespace psycle {
 				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
 					continue;
 				int trackcount = ev.track() + tOff;
-				double pos = patt->BeatPosWithTPB(project()->song().ticksSpeed(), it->first);
+				double pos = it->first;
 				int line = static_cast<int>(pos * beat_zoom) - lOff;
 				int linecount = line + lOff;
 				if((linecount%(int)(beat_zoom)) == 0) {
@@ -4345,13 +4344,13 @@ namespace psycle {
 
 			int line = editcur.line;			
 
-			double beat_zoom = 4.0;
+			double beat_zoom = project()->beat_zoom();
 			psy::core::SinglePattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
-			it = pattern()->lower_bound(low);
-			
+			it = pattern()->lower_bound(low);			
+
 			if (it == pattern()->end() || 
 				!(it->first >= low && it->first < up)
 				) {
@@ -4942,7 +4941,7 @@ namespace psycle {
 			psy::core::SequenceEntry* entry = sit->second;
 			psy::core::SinglePattern* pattern = entry->pattern();
 
-			double beat_zoom = 4.0;
+			double beat_zoom = project()->beat_zoom();
 			psy::core::SinglePattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
@@ -5127,7 +5126,7 @@ namespace psycle {
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SinglePattern* pat = pattern();
-			double beat_zoom = project()->lines_per_beat();
+			double beat_zoom = project()->beat_zoom();
 			// todo AddUndo		
 			psy::core::SinglePattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
@@ -5196,7 +5195,7 @@ namespace psycle {
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SinglePattern* pat = pattern();
-			double beat_zoom = project()->lines_per_beat();
+			double beat_zoom = project()->beat_zoom();
 
 			int patlines = static_cast<int>(beat_zoom * pat->beats());
 			if ( Global::pInputHandler->bFT2DelBehaviour )
@@ -5274,7 +5273,7 @@ namespace psycle {
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SinglePattern* pat = pattern();
-			double beat_zoom = project()->lines_per_beat();
+			double beat_zoom = project()->beat_zoom();
 
 			int patlines = static_cast<int>(beat_zoom * pat->beats());
 			

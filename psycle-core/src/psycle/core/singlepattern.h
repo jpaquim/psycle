@@ -34,15 +34,15 @@ namespace psy { namespace core {
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
 			
-			void setEvent( int line, int track, const PatternEvent & event );
-			PatternEvent event( int line, int track );
+			void setEvent(int line, int track, int beat_zoom, const PatternEvent& event);
+			PatternEvent event(int line, int track, int beat_zoom);
 
-			void setTweakEvent( int line, int track, const PatternEvent & event );
-			PatternEvent tweakEvent( int line, int track );
+			void setTweakEvent(int line, int track, const PatternEvent& event);
+			PatternEvent tweakEvent(int line, int track);
 
 
-			void addBar( const TimeSignature & signature );
-			void removeBar( float pos);
+			void addBar(const TimeSignature& signature);
+			void removeBar(float pos);
 
 			float beats() const;
 
@@ -63,13 +63,13 @@ namespace psy { namespace core {
 			void clearTweakTrack( int linenr , int tracknr );
 			bool lineIsEmpty( int linenr ) const;
 
-			/*
-			iterator find_nearest( int linenr );
-			const_iterator find_nearest( int linenr ) const;
+			
+			iterator find_nearest(int linenr, int beat_zoom);
+			const_iterator find_nearest(int linenr, int beat_zoom) const;
 
 			iterator find_lower_nearest( int linenr );
 			const_iterator find_lower_nearest( int linenr ) const;
-			*/
+			
 
 			void clearEmptyLines();
 

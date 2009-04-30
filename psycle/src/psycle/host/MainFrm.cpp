@@ -653,15 +653,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( x != 0)
 			{
-				if (Global::pPlayer->playing() ) 
-				{
-					Global::song().setTicksSpeed(Global::player().timeInfo().ticksSpeed(), Global::player().timeInfo().isTicks());
-				}
-				else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
-				Global::player().timeInfo().setTicksSpeed(Global::song().ticksSpeed(), Global::song().isTicks());
-				sprintf(buffer,"%d",Global::song().LinesPerBeat());
+				if (projects_.active_project()) {
+					projects_.active_project()->set_beat_zoom(x + projects_.active_project()->beat_zoom());
+				}			
 			}
-			else sprintf(buffer, "%d", Global::player().timeInfo().ticksSpeed());
+			sprintf(buffer, "%d", projects_.active_project()->beat_zoom());
 #else
 			if ( x != 0)
 			{

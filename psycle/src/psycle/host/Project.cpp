@@ -27,7 +27,8 @@ namespace psycle {
 			: parent_(parent),
 			  pat_view_(pat_view),
 			  mac_view_(mac_view),
-			  lines_per_beat_(4)
+			  lines_per_beat_(4),
+			  beat_zoom_(4)
 		{
 			assert(pat_view_);
 			assert(mac_view_);
