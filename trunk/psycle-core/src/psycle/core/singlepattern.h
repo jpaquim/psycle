@@ -28,11 +28,9 @@ namespace psy { namespace core {
 
 			boost::signal<void (SinglePattern*)> wasDeleted;
 			
-			int id() const;
-			
-			void set_name_as_index(int idx) { idx_ = idx; }
-			int name_index() const { return idx_; }
-
+			void setID(int id) { id_ = id; }
+			int id() const { return id_; }
+						
 			void setBeatZoom(int zoom);
 			int beatZoom() const;
 			
@@ -136,10 +134,7 @@ namespace psy { namespace core {
 
 			TimeSignature zeroTime;
 
-			int id_;
-			int idx_;
-			static int idCounter;
-			static int genId();
+			int id_;						
 
 			std::multimap<double, PatternEvent> lines_;
 		};

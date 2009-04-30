@@ -34,7 +34,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SequenceLine* line = song_.patternSequence().createNewLine();
 			psy::core::SinglePattern* pattern= new psy::core::SinglePattern();
-			pattern->set_name_as_index(0);
+			pattern->setID(0);
 			song_.patternSequence().Add(pattern);
 			pattern->setName("Untitled");
 			line->createEntry(pattern,0);

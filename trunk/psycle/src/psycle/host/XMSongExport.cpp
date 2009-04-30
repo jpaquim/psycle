@@ -82,7 +82,7 @@ namespace host{
 		int highest = 0;
 		for (PatternSequence::patterniterator pite = song.patternSequence().patternbegin(); pite != song.patternSequence().patternend(); pite++)
 		{
-			if (pite->first > highest) highest = pite->first;
+			if ((*pite)->id() > highest) highest = (*pite)->id();
 		}
 		m_Header.patterns = highest;
 #else
