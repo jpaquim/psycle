@@ -363,14 +363,14 @@ std::string SinglePattern::toXml( ) const {
 	return xml.str();
 }
 
-#if 0 ///\todo
-SinglePattern::iterator SinglePattern::find_nearest( int line ) {
+
+SinglePattern::iterator SinglePattern::find_nearest(int line, int beat_zoom) {
 	SinglePattern::iterator result;
 	
-	double low = ( (line - 0.5) / (float) beatZoom() );
-	double up  = (line + 0.5) / (float) beatZoom();
+	double low = (line - 0.5) / beat_zoom;
+	double up  = (line + 0.5) / beat_zoom;
 
-	result = lower_bound( low );
+	result = lines_.lower_bound(low);
 
 	if ( result != end() && result->first >=low && result->first < up ) {
 		return result;
@@ -378,13 +378,13 @@ SinglePattern::iterator SinglePattern::find_nearest( int line ) {
 	return end();
 }
 
-SinglePattern::const_iterator SinglePattern::find_nearest( int line ) const {
+SinglePattern::const_iterator SinglePattern::find_nearest(int line, int beat_zoom) const {
 	SinglePattern::const_iterator result;
 
-	double low = ( (line - 0.499999) / (float) beatZoom() );
-	double up  = (line + 0.49999999) / (float) beatZoom();
+	double low = (line - 0.499999) / (double) beat_zoom;
+	double up  = (line + 0.49999999) / (double) beat_zoom;
 
-	result = lower_bound( low );
+	result = lines_.lower_bound(low);
 
 	if ( result != end() && result->first >=low && result->first < up ) {
 		return result;
@@ -398,7 +398,7 @@ SinglePattern::iterator SinglePattern::find_lower_nearest( int linenr ) {
 	double low = (linenr - 0.5) / (float) beatZoom();
 	double up  = (linenr + 0.5) / (float) beatZoom();
 
-	result = lower_bound( low );
+	result = lines_.lower_bound(low);
 
 	if ( result != end() && result->first >=low ) {
 		return result;
@@ -413,34 +413,41 @@ SinglePattern::const_iterator SinglePattern::find_lower_nearest( int linenr ) co
 	double low = (linenr - 0.5) / (float) beatZoom();
 	double up  = (linenr + 0.5) / (float) beatZoom();
 
-	result = lower_bound( low );
+	result = lines_.lower_bound( low );
 
 	if ( result != end() && result->first >=low ) {
 		return result;
 	}
 	return end();
 }
-#endif
 
-void SinglePattern::setEvent( int line, int track, const PatternEvent & event ) {
-#if 0 ///\todo
-	iterator it = find_nearest( line );
+
+void SinglePattern::setEvent(int line, int track, int beat_zoom, const PatternEvent& event) {
+	iterator it = find_nearest(line, beat_zoom);
 	if ( it != end())
 	{
-		it->second.notes()[track] = event;
+		it->second = event;
+		it->second.set_track(track);
 	} else {
-		float position = line / (float) beatZoom();
-		(*this)[position].notes()[track] = event;
+		double position = line / (double) beat_zoom;
+		iterator it = lines_.insert(std::pair<double, PatternEvent>(position, event));
+		it->second.set_track(track);
 	}
-#endif
 }
 
-PatternEvent SinglePattern::event( int line, int track ) {
-	/*iterator it = find_nearest( line );
-	if ( it != end())
-		return it->second.notes()[track];
-	else*/
-		return PatternEvent();
+PatternEvent SinglePattern::event(int line, int track, int beat_zoom) {
+	iterator it = find_nearest(line, beat_zoom);
+	if ( it != end()) {
+		double pos = it->first;
+		double low = (line - 0.499999) / (double)beat_zoom;
+		double up  = (line + 0.49999999) / (double)beat_zoom;
+		while ( it != lines_.end() && pos <= up) {
+			if ( it->second.track() == track )
+				return it->second;
+			++it;
+		}
+	}
+	return PatternEvent();	
 }
 
 void SinglePattern::setTweakEvent( int line, int track, const PatternEvent & event ) {
