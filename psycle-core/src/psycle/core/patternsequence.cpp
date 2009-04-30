@@ -315,9 +315,9 @@ namespace psy { namespace core {
 			GlobalIter it = globalEvents_.begin();
 			for (; it != globalEvents_.end(); it++)
 				delete it->second;
-			std::map<int, SinglePattern*>::iterator pat_it = patterns_.begin();
+			std::vector<SinglePattern*>::iterator pat_it = patterns_.begin();
 			for(; pat_it != patterns_.end(); ++pat_it) {
-				delete pat_it->second;
+				delete *pat_it;
 			}
 		}
 
@@ -337,6 +337,16 @@ namespace psy { namespace core {
 				newLineInserted(line,selectedLine);
 			}
 			return line;
+		}
+
+		
+		SinglePattern* Sequence::FindPattern(int id) {
+			patterniterator it = patterns_.begin();
+			for ( ; it != patterns_.end(); ++it) {
+				if ((*it)->id() == id)
+					return *it;
+			}
+			return 0;
 		}
 
 		void Sequence::removeLine(SequenceLine * line) {
@@ -567,9 +577,9 @@ namespace psy { namespace core {
 				delete *it;
 			}
 			lines_.clear();
-			std::map<int, SinglePattern*>::iterator pat_it = patterns_.begin();
+			std::vector<SinglePattern*>::iterator pat_it = patterns_.begin();
 			for(; pat_it != patterns_.end(); ++pat_it) {
-				delete pat_it->second;
+				delete *pat_it;
 			}
 			patterns_.clear();
 		}
@@ -618,20 +628,9 @@ namespace psy { namespace core {
 
 		void Sequence::Add(SinglePattern* pattern) {
 			assert(pattern);
-			std::map<int, SinglePattern*>::iterator it;
-			it = patterns_.find(pattern->id());
-			assert(it == patterns_.end());
-			patterns_[pattern->id()] = pattern;			
+			patterns_.push_back(pattern);			
 		}
-
-		SinglePattern* Sequence::FindPattern(int id) {
-			std::map<int, SinglePattern*>::iterator it;
-			it = patterns_.find(id);
-			if (it != patterns_.end())
-				return it->second;
-			else return 0;
-		}
-
+	
 		void Sequence::Remove(SinglePattern* pattern) {
 			///\todo
 		}

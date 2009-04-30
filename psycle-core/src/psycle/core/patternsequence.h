@@ -194,10 +194,10 @@ namespace psy { namespace core {
 			reverse_iterator rend() { return lines_.rend(); }
 			const_reverse_iterator rend() const { return lines_.rend(); }
 
-			typedef std::map<int, SinglePattern*>::iterator patterniterator;
-			typedef std::map<int, SinglePattern*>::const_iterator const_patterniterator;
-			typedef std::map<int, SinglePattern*>::const_reverse_iterator const_reverse_patterniterator;
-			typedef std::map<int, SinglePattern*>::reverse_iterator reverse_patterniterator;
+			typedef std::vector<SinglePattern*>::iterator patterniterator;
+			typedef std::vector<SinglePattern*>::const_iterator const_patterniterator;
+			typedef std::vector<SinglePattern*>::const_reverse_iterator const_reverse_patterniterator;
+			typedef std::vector<SinglePattern*>::reverse_iterator reverse_patterniterator;
 
 			patterniterator patternbegin() { return patterns_.begin(); }
 			const_patterniterator patternbegin() const { return patterns_.begin(); }
@@ -284,7 +284,7 @@ namespace psy { namespace core {
 			// sequencer structure
 			std::vector<SequenceLine*> lines_;
 			// pattern pool
-			std::map<int, SinglePattern*> patterns_;
+			std::vector<SinglePattern*> patterns_;
 
 			int numTracks_;
 			std::vector<bool> mutedTrack_;

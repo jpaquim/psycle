@@ -13,31 +13,24 @@
 
 namespace psy { namespace core {
 
-int SinglePattern::idCounter = 0;
-
-int SinglePattern::genId() {
-	return idCounter++;
-}
 
 SinglePattern::SinglePattern() 
-	: idx_(0)
+	: id_(-1)
 {
 	TimeSignature timeSig;
 	timeSig.setCount(4);
-	timeSignatures_.push_back( timeSig  );
+	timeSignatures_.push_back(timeSig);
 	beatZoom_ = 4;
-	id_ = genId();
 }
 
 // Explicit copy constructor needed because boost::signal is noncopyable
 SinglePattern::SinglePattern(SinglePattern const& other)
-:	idx_(other.idx_),
+:	id_(other.id_),
 	beatZoom_(other.beatZoom_),
 	name_(other.name_),
 	category_(other.category_),
 	timeSignatures_(other.timeSignatures_),
-	zeroTime(other.zeroTime),
-	id_(genId())
+	zeroTime(other.zeroTime)
 {
 	lines_ = other.lines_;
 }
@@ -340,11 +333,6 @@ std::vector<TimeSignature> & SinglePattern::timeSignatures() {
 
 const std::vector<TimeSignature> & SinglePattern::timeSignatures() const {
 	return timeSignatures_;
-}
-
-
-int SinglePattern::id( ) const {
-	return id_;
 }
 
 std::string SinglePattern::toXml( ) const {
