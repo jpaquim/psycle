@@ -9,6 +9,7 @@
 #include "demangle.hpp"
 #if defined DIVERSALIS__COMPILER__GNU
 	#include <cxxabi.h>
+    #include <cstdlib>
 #endif
 namespace universalis
 {
