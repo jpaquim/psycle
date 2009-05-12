@@ -41,16 +41,22 @@ namespace universalis { namespace operating_system { namespace clocks {
 			monotonic_clock_id = process_cputime_clock_id = thread_cputime_clock_id = CLOCK_REALTIME;
 
 			/// TIMERS
-			#if !_POSIX_TIMERS && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				//#warning will use posix sysconf at runtime to determine whether this OS supports timers: !_POSIX_TIMERS
-			#elif _POSIX_TIMERS == -1 && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning this OS does not support posix timers: _POSIX_TIMERS == -1
+			#if !_POSIX_TIMERS
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    //#warning will use posix sysconf at runtime to determine whether this OS supports timers: !_POSIX_TIMERS
+                #endif
+			#elif _POSIX_TIMERS == -1
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    #warning this OS does not support posix timers: _POSIX_TIMERS == -1
+                #endif
 				clock_gettime_supported = clock_getres_supported = false;
 			#elif _POSIX_TIMERS > 0
 				clock_gettime_supported = clock_getres_supported = true;
 			#endif
-			#if !defined _SC_TIMERS && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning cannot use posix sysconf at runtime to determine whether this OS supports timers: !defined _SC_TIMERS
+			#if !defined _SC_TIMERS
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    #warning cannot use posix sysconf at runtime to determine whether this OS supports timers: !defined _SC_TIMERS
+                #endif
 				clock_gettime_supported = clock_getres_supported = false;
 			#else
 				clock_gettime_supported = clock_getres_supported = supported(_SC_TIMERS);
@@ -64,18 +70,24 @@ namespace universalis { namespace operating_system { namespace clocks {
 						if(!clock_gettime_supported) clock_gettime_supported = true;
 				#endif
 			#endif
-			
-			// MONOTONIC_CLOCK
-			#if !_POSIX_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				//#warning will use posix sysconf at runtime to determine whether this OS supports monotonic clock: !_POSIX_MONOTONIC_CLOCK
-			#elif _POSIX_MONOTONIC_CLOCK == -1 && defined DIVERSALIS__COMPILER__GNU
-				#warning this OS does not support posix monotonic clock: _POSIX_MONOTONIC_CLOCK == -1
+
+            // MONOTONIC_CLOCK
+			#if !_POSIX_MONOTONIC_CLOCK
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    //#warning will use posix sysconf at runtime to determine whether this OS supports monotonic clock: !_POSIX_MONOTONIC_CLOCK
+                #endif
+			#elif _POSIX_MONOTONIC_CLOCK == -1
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    #warning this OS does not support posix monotonic clock: _POSIX_MONOTONIC_CLOCK == -1
+                #endif
 				monotonic_clock_supported = false;
 			#elif _POSIX_MONOTONIC_CLOCK > 0
 				monotonic_clock_supported  = true;
 			#endif
-			#if !defined _SC_MONOTONIC_CLOCK && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning cannot use posix sysconf at runtime to determine whether this OS supports monotonic clock: !defined _SC_MONOTONIC_CLOCK
+			#if !defined _SC_MONOTONIC_CLOCK
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    #warning cannot use posix sysconf at runtime to determine whether this OS supports monotonic clock: !defined _SC_MONOTONIC_CLOCK
+				#endif
 				monotonic_clock_supported = false;
 			#else
 				monotonic_clock_supported = supported(_SC_MONOTONIC_CLOCK);
@@ -83,16 +95,22 @@ namespace universalis { namespace operating_system { namespace clocks {
 			#endif
 
 			// CPUTIME
-			#if !_POSIX_CPUTIME && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				//#warning will use posix sysconf at runtime to determine whether this OS supports cpu time: !_POSIX_CPUTIME
-			#elif _POSIX_CPUTIME == -1 && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning this OS does not support posix cpu time: _POSIX_CPUTIME == -1
+			#if !_POSIX_CPUTIME
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    //#warning will use posix sysconf at runtime to determine whether this OS supports cpu time: !_POSIX_CPUTIME
+                #endif
+			#elif _POSIX_CPUTIME == -1
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    #warning this OS does not support posix cpu time: _POSIX_CPUTIME == -1
+                #endif
 				cputime_supported = false;
 			#elif _POSIX_CPUTIME > 0
 				cputime_supported = true;
 			#endif
-			#if !defined _SC_CPUTIME && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning cannot use posix sysconf at runtime to determine whether this OS supports cpu time: !defined _SC_CPUTIME
+			#if !defined _SC_CPUTIME
+                #if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+                    #warning cannot use posix sysconf at runtime to determine whether this OS supports cpu time: !defined _SC_CPUTIME
+				#endif
 				cputime_supported = false;
 			#else
 				cputime_supported = supported(_SC_CPUTIME);
@@ -169,19 +187,43 @@ namespace detail {
 			/// posix CLOCK_MONOTONIC.
 			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
 			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.3e-05s, avg: 1.606e-05s, max: 0.001745s
-			std::nanoseconds monotonic() throw(std::runtime_error) { return get(CLOCK_MONOTONIC); }
+			std::nanoseconds monotonic() throw(std::runtime_error) {
+                return get(
+                    #if _POSIX_MONOTONIC_CLOCK > 0 || defined _SC_MONOTONIC_CLOCK
+                        CLOCK_MONOTONIC
+                    #else
+                        CLOCK_REALTIME
+                    #endif
+                );
+            }
 
 			/// posix CLOCK_PROCESS_CPUTIME_ID.
 			/// High-resolution per-process timer from the CPU.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on colinux AMD64: clock: CLOCK_PROCESS_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
-			std::nanoseconds process_cpu_time() throw(std::runtime_error) { return get(CLOCK_PROCESS_CPUTIME_ID); }
+			std::nanoseconds process_cpu_time() throw(std::runtime_error) {
+                return get(
+                    #if _POSIX_CPUTIME > 0 || defined _SC_CPUTIME
+                        CLOCK_PROCESS_CPUTIME_ID
+                    #else
+                        CLOCK_REALTIME
+                    #endif
+                );
+            }
 
 			/// posix CLOCK_THREAD_CPUTIME_ID.
 			/// Thread-specific CPU-time clock.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on colinux AMD64: clock: CLOCK_THREAD_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
-			std::nanoseconds thread_cpu_time() throw(std::runtime_error) { return get(CLOCK_THREAD_CPUTIME_ID); }
+			std::nanoseconds thread_cpu_time() throw(std::runtime_error) {
+                return get(
+                    #if _POSIX_CPUTIME > 0 || defined _SC_CPUTIME
+                        CLOCK_THREAD_CPUTIME_ID
+                    #else
+                        CLOCK_REALTIME
+                    #endif
+                );
+            }
 
 			/// posix gettimeofday.
 			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.5878e-05s, max: 0.001719s
