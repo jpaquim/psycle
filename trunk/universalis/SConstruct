@@ -106,6 +106,7 @@ class module(base_module):
 		self.add_sources(find(self.project(), 'src', [os.path.join('universalis', '*.cpp')]))
 		self.add_headers(find(self.project(), 'src', [os.path.join('universalis', '*.hpp')]))
 		self.contexes().source().compilers().cxx().paths().add(['src'])
+		self.contexes().source().compilers().cxx().paths().add([os.path.join('src', 'universalis', 'standard_library', 'future_std_include')])
 module = module()
 
 # pkg-config packages
@@ -130,6 +131,7 @@ unit_test_module = base_module(source_package,
 			target_type = base_module.target_types.program
 )
 unit_test_module.contexes().source().compilers().cxx().paths().add(['src'])
+unit_test_module.contexes().source().compilers().cxx().paths().add([os.path.join('src', 'universalis', 'standard_library', 'future_std_include')])
 from packageneric.scons.find import find
 unit_test_module.add_sources(find(project, 'src', [os.path.join(os.curdir, 'unit_tests.cpp')]))
 
