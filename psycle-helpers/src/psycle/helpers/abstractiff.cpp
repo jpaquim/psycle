@@ -3,9 +3,11 @@
 	implementation file for psycle::helpers::abstractIff
 */
 #include "abstractiff.hpp"
+#include <stdexcept>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
 namespace psycle
 {
 	namespace helpers
