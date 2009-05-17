@@ -2,9 +2,11 @@
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief compiler-independant meta-information about the compiler's target processor.
+
 #ifndef DIVERSALIS__PROCESSOR__INCLUDED
 #define DIVERSALIS__PROCESSOR__INCLUDED
 #pragma once
+
 #include "compiler.hpp"
 #include "operating_system.hpp"
 
