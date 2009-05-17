@@ -3,17 +3,18 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
+
+#ifndef DIVERSALIS__DETAIL__STRINGIZED__INCLUDED
+#define DIVERSALIS__DETAIL__STRINGIZED__INCLUDED
 #pragma once
 
-//#region DIVERSALIS
-	/// Interprets argument as a string litteral.
-	/// The indirection in the call to # lets the macro expansion on the argument be done first.
-	#define DIVERSALIS__STRINGIZED(tokens) DIVERSALIS__STRINGIZED__DETAIL__NO_EXPANSION(tokens)
+/// Interprets argument as a string litteral.
+/// The indirection in the call to # lets the macro expansion on the argument be done first.
+#define DIVERSALIS__STRINGIZED(tokens) DIVERSALIS__STRINGIZED__DETAIL__NO_EXPANSION(tokens)
 
-	//#region DETAIL
-		///\internal
-		/// Don't call this macro directly ; call DIVERSALIS__STRINGIZED, which calls this macro after macro expansion is done on the argument.
-		///\relates DIVERSALIS__STRINGIZED
-		#define DIVERSALIS__STRINGIZED__DETAIL__NO_EXPANSION(tokens) #tokens
-	//#endregion
-//#endregion
+///\internal
+/// Don't call this macro directly ; call DIVERSALIS__STRINGIZED, which calls this macro after macro expansion is done on the argument.
+///\relates DIVERSALIS__STRINGIZED
+#define DIVERSALIS__STRINGIZED__DETAIL__NO_EXPANSION(tokens) #tokens
+
+#endif

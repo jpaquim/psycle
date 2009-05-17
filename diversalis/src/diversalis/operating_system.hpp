@@ -2,9 +2,11 @@
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief project-wide operating system specific tweaks.
+
 #ifndef DIVERSALIS__OPERATING_SYSTEM__INCLUDED
 #define DIVERSALIS__OPERATING_SYSTEM__INCLUDED
 #pragma once
+
 #include "compiler.hpp"
 
 #if defined DIVERSALIS__COMPILER__DOXYGEN
