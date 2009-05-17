@@ -123,7 +123,7 @@ namespace loggers {
 		public:
 			typedef Logger logger;
 			operator logger & () const throw() { return logger::singleton(); }
-			int const threshold_level() const throw() { return Threshold_Level; }
+			int threshold_level() const throw() { return Threshold_Level; }
 			operator bool () const throw() { return threshold_level() >= levels::compiled_threshold; }
 			bool operator()() const throw() { return *this; }
 			void operator()(std::string const & string) throw() { if(*this) logger::singleton()(threshold_level(), string); }
