@@ -23,8 +23,6 @@
 	calculate a real FFT and a real power spectrum.
 
 **********************************************************************/
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/helpers/fft.hpp>
 #include <cstdlib>
 #include <cstdio>

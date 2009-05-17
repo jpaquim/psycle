@@ -2,8 +2,6 @@
 	\file
 	implementation file for psycle::helpers::eaiff
 */
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include "eaiff.hpp"
 #include <cstdio>
 #include <cstdlib>

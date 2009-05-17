@@ -1,6 +1,4 @@
 ///\implementation psycle::helpers::dsp::Cubic.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include "dsp.hpp"
 namespace psycle { namespace helpers { namespace dsp {
 

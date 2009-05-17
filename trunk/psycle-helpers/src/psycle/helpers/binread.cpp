@@ -5,8 +5,6 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 // based on sondar binread, copryright 2007 Stefan Nattkemper
 
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/helpers/binread.hpp>
 
 namespace psycle { namespace helpers {

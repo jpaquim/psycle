@@ -15,8 +15,6 @@
 /// designed with speed in mind
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/helpers/datacompression.hpp>
 #include <cstring>
 #include <cstdint>
