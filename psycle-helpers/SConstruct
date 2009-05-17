@@ -4,7 +4,7 @@
 # copyright 2006-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 # To be able to import the sconscrap package, we add the parent dir of this SConstruct file to the python path:
-import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+import sys, os ; sys.path.append(os.path.join(os.path.split(os.getcwd())[0]), 'build-systems') # SCons always makes the dir of the SConstruct file the current dir.
 
 # project
 
