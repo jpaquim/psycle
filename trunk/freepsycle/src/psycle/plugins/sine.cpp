@@ -3,8 +3,6 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation psycle::plugins::sine
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "sine.hpp"
 #include <psycle/helpers/math/sine.hpp>

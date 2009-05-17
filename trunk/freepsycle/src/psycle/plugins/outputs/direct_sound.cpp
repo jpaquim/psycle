@@ -2,8 +2,6 @@
 // copyright 1999-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::outputs::direct_sound
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "direct_sound.hpp"
 #include <psycle/stream/formats/riff_wave/format.hpp>

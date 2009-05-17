@@ -3,8 +3,6 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation psycle::stream::format::riff_wave
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "format.hpp"
 #include <universalis/operating_system/exceptions/code_description.hpp>

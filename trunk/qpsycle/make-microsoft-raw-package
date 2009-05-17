@@ -13,10 +13,10 @@ function main {
 	mkdir -p $install_dir/bin &&
 	cp -f \
 		$(find {.,../psycle-{core,audiodrivers}}/++build -iname \*.dll -or -iname \*.exe) \
-		../psycle-plugins/++packageneric/variants/default/stage-install/usr/local/bin/*.dll \
+		../psycle-plugins/++wonderbuild/staged-install/usr/local/bin/*.dll \
 		$install_dir/bin &&
 	local tar_name=qpsycle &&
-	../packageneric/microsoft-dll-collector $install_dir $tar_name &&
+	../build-systems/microsoft-dll-collector $install_dir $tar_name &&
 	mkdir $install_dir/$tar_name/presets &&
 	cp -Rf \
 		../psycle-plugins/presets/*.prs \

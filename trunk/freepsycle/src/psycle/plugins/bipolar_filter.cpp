@@ -2,8 +2,6 @@
 // copyright 1999-2007 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\\implementation psycle::plugins::bipolar_filter
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "bipolar_filter.hpp"
 namespace psycle { namespace plugins {

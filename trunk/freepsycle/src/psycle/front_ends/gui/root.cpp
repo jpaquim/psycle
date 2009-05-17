@@ -2,8 +2,6 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org : johan boule
 
 ///\implementation psycle::front_ends::gui::root
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "root.hpp"
 #include <psycle/paths.hpp>

@@ -3,18 +3,18 @@
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 # copyright 2006-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+# To be able to import the sconscrap package, we add the parent dir of this SConstruct file to the python path:
 import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
 
 # project
 
-from packageneric.scons.project import project
+from sconscrap.scons.project import project
 project = project(name = 'freepsycle')
 
 # source package
 
-from packageneric.scons.source_package import source_package
-from packageneric.scons.version import version
+from sconscrap.scons.source_package import source_package
+from sconscrap.scons.version import version
 source_package = source_package(project,
 	name = project.name(),
 	version = version(0, 0),
@@ -27,9 +27,9 @@ source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', '
 
 # external packages
 
-from packageneric.scons.check.external_package import external_package as external_package_check
-from packageneric.scons.check.pkg_config import pkg_config as pkg_config_check
-from packageneric.scons.check.cxx_build import cxx_build as cxx_build_check
+from sconscrap.scons.check.external_package import external_package as external_package_check
+from sconscrap.scons.check.pkg_config import pkg_config as pkg_config_check
+from sconscrap.scons.check.cxx_build import cxx_build as cxx_build_check
 
 universalis = os.path.join(os.pardir, 'universalis', 'SConstruct')
 if os.path.exists(universalis): universalis = project.subscript(universalis).local_package()
@@ -134,9 +134,9 @@ gnomecanvasmm = external_package_check(project, name = 'gnomecanvasmm', url = 'h
 
 # modules and pkg-config packages
 
-from packageneric.scons.module import module
-from packageneric.scons.pkg_config_package import pkg_config_package
-from packageneric.scons.find import find
+from sconscrap.scons.module import module
+from sconscrap.scons.pkg_config_package import pkg_config_package
+from sconscrap.scons.find import find
 
 modules = []
 pkg_config_packages = []

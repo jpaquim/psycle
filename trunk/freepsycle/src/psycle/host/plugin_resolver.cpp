@@ -2,8 +2,6 @@
 // copyright 1999-2007 psycledelics http://psycle.pastnotecut.org : johan boule
 
 ///\implementation psycle::host::plugin_resolver
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "plugin_resolver.hpp"
 #include <universalis/operating_system/paths.hpp>
