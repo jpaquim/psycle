@@ -144,7 +144,7 @@ namespace package {
 			#if defined PACKAGENERIC__PACKAGE__VERSION__MAJOR
 				return PACKAGENERIC__PACKAGE__VERSION__MAJOR;
 			#else
-				return -1;
+				return 0;
 			#endif
 		}
 
@@ -152,7 +152,7 @@ namespace package {
 			#if defined PACKAGENERIC__PACKAGE__VERSION__MINOR
 				return PACKAGENERIC__PACKAGE__VERSION__MINOR;
 			#else
-				return -1;
+				return 0;
 			#endif
 		}
 
@@ -160,7 +160,7 @@ namespace package {
 			#if defined PACKAGENERIC__PACKAGE__VERSION__PATCH
 				return PACKAGENERIC__PACKAGE__VERSION__PATCH;
 			#else
-				return -1;
+				return 0;
 			#endif
 		}
 	}

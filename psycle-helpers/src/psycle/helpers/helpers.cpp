@@ -1,6 +1,4 @@
 ///\implementation psycle::helpers.
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include "helpers.hpp"
 #include <cctype>
 namespace psycle { namespace helpers {

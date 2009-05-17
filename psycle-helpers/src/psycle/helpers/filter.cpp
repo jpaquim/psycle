@@ -6,8 +6,6 @@
 
 ///\implementation psy::core::Filter.
 
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <psycle/helpers/filter.hpp>
 
 #include <cmath>

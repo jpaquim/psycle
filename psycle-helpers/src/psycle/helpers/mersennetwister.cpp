@@ -46,8 +46,6 @@
 // (c++-ified for psycle by dw aley)
 // (64-bit compatibility by johan boule)
 
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include "mersennetwister.hpp"
 #include <cmath>
 namespace psycle { namespace helpers { namespace dsp {
