@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <packageneric/pre-compiled.private.hpp>
+#include <pre-compiled.private.hpp>
 
 #include <psycle/core/signalslib.h>
 

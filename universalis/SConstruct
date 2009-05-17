@@ -3,18 +3,18 @@
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 # copyright 2006-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+# To be able to import the sconscrap package, we add the parent dir of this SConstruct file to the python path:
 import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
 
 # project
 
-from packageneric.scons.project import project
+from sconscrap.scons.project import project
 project = project(name = 'universalis')
 
 # source package
 
-from packageneric.scons.source_package import source_package
-from packageneric.scons.version import version
+from sconscrap.scons.source_package import source_package
+from sconscrap.scons.version import version
 
 source_package = source_package(project,
 	name = project.name(),
@@ -26,9 +26,9 @@ source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', '
 
 # external packages
 
-from packageneric.scons.check.external_package import external_package as external_package_check
-from packageneric.scons.check.pkg_config import pkg_config as pkg_config_check
-from packageneric.scons.check.cxx_build import cxx_build as cxx_build_check
+from sconscrap.scons.check.external_package import external_package as external_package_check
+from sconscrap.scons.check.pkg_config import pkg_config as pkg_config_check
+from sconscrap.scons.check.cxx_build import cxx_build as cxx_build_check
 
 diversalis = os.path.join(os.pardir, 'diversalis', 'SConstruct')
 if os.path.exists(diversalis): diversalis = project.subscript(diversalis).local_package()
@@ -44,7 +44,7 @@ else:
 		dependencies = [pkg_config_check(project, name = 'diversalis >= 0')]
 	)
 
-from packageneric.std_checks.boost import boost
+from sconscrap.std_checks.boost import boost
 boost = boost(project, 103300, ['signals', 'thread', 'filesystem'])
 
 microsoft_mm_system = external_package_check(project, name = 'microsoft mm system', url = 'http://msdn.microsoft.com',
@@ -68,7 +68,7 @@ microsoft_mm_system = external_package_check(project, name = 'microsoft mm syste
 
 # modules
 
-from packageneric.scons.module import module as base_module
+from sconscrap.scons.module import module as base_module
 
 class module(base_module):
 	def __init__(self):
@@ -93,7 +93,7 @@ class module(base_module):
 		if glibmm.result(): self.add_dependency(glibmm)
 		else: quaquaversalis = False
 		
-		from packageneric.std_checks.dlfcn import dlfcn
+		from sconscrap.std_checks.dlfcn import dlfcn
 		dlfcn = dlfcn(self.project())
 		if dlfcn.result(): self.add_dependency(dlfcn)
 		else: quaquaversalis = False
@@ -102,7 +102,7 @@ class module(base_module):
 
 		if not quaquaversalis: self.contexes().build().compilers().cxx().defines().add({'UNIVERSALIS__QUAQUAVERSALIS': None})
 		
-		from packageneric.scons.find import find
+		from sconscrap.scons.find import find
 		self.add_sources(find(self.project(), 'src', [os.path.join('universalis', '*.cpp')]))
 		self.add_headers(find(self.project(), 'src', [os.path.join('universalis', '*.hpp')]))
 		self.contexes().source().compilers().cxx().paths().add(['src'])
@@ -111,7 +111,7 @@ module = module()
 
 # pkg-config packages
 
-from packageneric.scons.pkg_config_package import pkg_config_package
+from sconscrap.scons.pkg_config_package import pkg_config_package
 pkg_config_package = pkg_config_package(project,
 	name = module.name(),
 	version = module.version(),
@@ -121,7 +121,7 @@ pkg_config_package = pkg_config_package(project,
 
 # unit tests
 
-from packageneric.std_checks.boost import boost
+from sconscrap.std_checks.boost import boost
 boost_test = boost(project, 103300, ['unit_test_framework'])
 
 unit_test_module = base_module(source_package,
@@ -132,7 +132,7 @@ unit_test_module = base_module(source_package,
 )
 unit_test_module.contexes().source().compilers().cxx().paths().add(['src'])
 unit_test_module.contexes().source().compilers().cxx().paths().add([os.path.join('src', 'universalis', 'standard_library', 'future_std_include')])
-from packageneric.scons.find import find
+from sconscrap.scons.find import find
 unit_test_module.add_sources(find(project, 'src', [os.path.join(os.curdir, 'unit_tests.cpp')]))
 
 ###
