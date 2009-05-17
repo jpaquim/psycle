@@ -20,7 +20,7 @@
 	#include <boost/current_function.hpp>
 #endif
 #if defined PACKAGENERIC
-	#include <packageneric-module.private.hpp>
+	#include <packageneric.private.hpp>
 #endif
 
 namespace universalis { namespace compiler {
