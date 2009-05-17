@@ -3,7 +3,11 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\interface universalis::operating_system::code_description
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #include <string>
 #if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
@@ -11,8 +15,10 @@
 #else
 	#include <windows.h>
 #endif
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__EXCEPTIONS__CODE_DESCRIPTION
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace operating_system { namespace exceptions {
 
 ///\internal
@@ -36,5 +42,7 @@ std::string inline code_description(
 ) { return detail::code_description(code); }
 
 }}}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
 
+#endif

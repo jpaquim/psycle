@@ -3,8 +3,6 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation universalis::operating_system::detail::check_version
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "check_version.hpp"
 #include "../loggers.hpp"

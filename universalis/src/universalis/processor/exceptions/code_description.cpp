@@ -4,8 +4,6 @@
 
 ///\file
 ///\brief
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 
 // weird, must be included last or mingw 3.4.1 segfaults

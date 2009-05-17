@@ -2,10 +2,15 @@
 // copyright 2004-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__ALLOCATORS__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__ALLOCATORS__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #include "detail/allocators.hpp"
 #include <cstddef>
+
 namespace universalis { namespace standard_library { namespace allocators { namespace process {
 
 template<typename X>
@@ -16,3 +21,5 @@ class allocator {
 };
 
 }}}}
+
+#endif

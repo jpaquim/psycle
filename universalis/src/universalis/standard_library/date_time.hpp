@@ -2,7 +2,11 @@
 // copyright 2007-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief date_time standard header
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__DATE_TIME__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__DATE_TIME__INCLUDED
 #pragma once
+
 /*
 	The files included below implement the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2328.html
 	This intent is to use these types with the standard thread api timed_wait and sleep functions.
@@ -23,3 +27,5 @@
 #include "detail/duration.hpp"
 #include "detail/utc_time.hpp"
 #include "detail/hiresolution_clock.hpp"
+
+#endif

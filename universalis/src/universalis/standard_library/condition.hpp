@@ -3,10 +3,15 @@
 
 ///\file \brief condition standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__CONDITION__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__CONDITION__INCLUDED
 #pragma once
+
 #include "detail/boost_xtime.hpp"
 #include <boost/thread/condition.hpp> // or since version 1.35 <boost/thread/condition_variable.hpp>
 #include <date_time>
+
 namespace std {
 	typedef boost::lock_error lock_error;
 	// system_error
@@ -250,3 +255,4 @@ namespace std {
 	}}}}
 #endif
 
+#endif

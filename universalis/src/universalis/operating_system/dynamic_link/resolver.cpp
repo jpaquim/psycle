@@ -3,8 +3,6 @@
 
 ///\implementation universalis::operating_system::dynamic_link::resolver
 #define UNIVERSALIS__QUAQUAVERSALIS // \todo [bohan] I'm setting this for now to prevent glibmm from being used because it seems it's not honouring $ORIGIN
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "resolver.hpp"
 #include <universalis/exception.hpp>

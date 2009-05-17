@@ -5,8 +5,13 @@
 ///\file
 /// deprecated warning.
 /// declares a symbol as deprecated.
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEPRECATED__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEPRECATED__INCLUDED
 #pragma once
+
 #include "attribute.hpp"
+
 /// deprecated warning.
 /// declares a symbol as deprecated.
 #if defined DIVERSALIS__COMPILER__GNU
@@ -19,4 +24,6 @@
 	#endif
 #else
 	#define UNIVERSALIS__COMPILER__DEPRECATED
+#endif
+
 #endif

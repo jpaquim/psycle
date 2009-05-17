@@ -4,7 +4,11 @@
 
 ///\file
 ///\interface universalis::compiler::cast
+
+#ifndef UNIVERSALIS__COMPILER__CAST__INCLUDED
+#define UNIVERSALIS__COMPILER__CAST__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #include <universalis/operating_system/loggers.hpp>
 #include "typenameof.hpp"
@@ -14,7 +18,9 @@
 #if !defined NDEBUG
 	#include <typeinfo>
 #endif
+
 namespace universalis { namespace compiler { namespace cast {
+
 	template<typename Derived, typename Base>
 	Derived inline & derive(Base & base)
 		#if !defined NDEBUG
@@ -183,3 +189,5 @@ namespace universalis { namespace compiler { namespace cast {
 			}
 	};
 }}}
+
+#endif

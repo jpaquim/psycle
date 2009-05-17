@@ -4,19 +4,23 @@
 
 ///\file
 ///\brief
+
+#ifndef UNIVERSALIS__PROCESSOR__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
+#define UNIVERSALIS__PROCESSOR__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #include <string>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__PROCESSOR__EXCEPTIONS__CODE_DESCRIPTION
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace universalis
-{
-	namespace processor
-	{
-		namespace exceptions
-		{
-			std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK code_description(int const &) throw();
-		}
-	}
-}
+
+namespace universalis { namespace processor { namespace exceptions {
+
+std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK code_description(int const &) throw();
+
+}}}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

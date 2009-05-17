@@ -2,7 +2,11 @@
 // copyright 2008-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::operating_system::cpu_affinity
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__CPU_AFFINITY__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__CPU_AFFINITY__INCLUDED
 #pragma once
+
 #include <diversalis/operating_system.hpp>
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	//#define _GNU_SOURCE // for sched_getaffinity
@@ -19,6 +23,7 @@
 #if defined BOOST_AUTO_TEST_CASE
 	#include <sstream>
 #endif
+
 namespace universalis { namespace operating_system { namespace cpu_affinity {
 
 /// returns the number of cpus available for the current process
@@ -66,3 +71,5 @@ unsigned int inline cpu_count() throw(std::runtime_error) {
 #endif
 
 }}}
+
+#endif

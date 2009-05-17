@@ -2,9 +2,13 @@
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file circumvant usual lack of standardisation for the NDEBUG preprocessor definition on microsoft-based projects
-#pragma once
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__NDEBUG__INCLUDED
 #define UNIVERSALIS__STANDARD_LIBRARY__NDEBUG__INCLUDED
+#pragma once
+
 #include <universalis/detail/project.hpp>
+
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	// microsoft uses its own vendor #define _DEBUG (for debug), instead of the iso #define NDEBUG (for no debug)
 	// so, we recover the iso way
@@ -31,4 +35,6 @@
 	/// #endif
 	///\endcode
 	#define NDEBUG
+#endif
+
 #endif

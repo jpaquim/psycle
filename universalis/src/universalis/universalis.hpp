@@ -4,8 +4,14 @@
 
 ///\file
 ///\brief meta header
+
+#ifndef UNIVERSALIS__INCLUDED
+#define UNIVERSALIS__INCLUDED
 #pragma once
+
 #include "compiler.hpp"
 #include "operating_system.hpp"
 #include "standard_library.hpp"
 #include "processor.hpp"
+
+#endif

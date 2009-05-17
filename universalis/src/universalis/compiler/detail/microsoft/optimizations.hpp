@@ -2,9 +2,14 @@
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__MICROSOFT__OPTIMIZATIONS__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__MICROSOFT__OPTIMIZATIONS__INCLUDED
 #pragma once
+
 #include <universalis/standard_library/ndebug.hpp>
 #include "../pragmatic/pack.hpp"
+
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#if !defined UNIVERSALIS__STANDARD_LIBRARY__NDEBUG__INCLUDED
 		#error "setting optimizations before NDEBUG"
@@ -44,4 +49,6 @@
 		//#pragma inline_recursion(on)
 		//#define inline __forceinline
 	#endif
+#endif
+
 #endif

@@ -4,7 +4,11 @@
 ///\file
 ///\brief meta header
 /// extensions to the language which would become standard
+
+#ifndef UNIVERSALIS__COMPILER__COMPILER__INCLUDED
+#define UNIVERSALIS__COMPILER__COMPILER__INCLUDED
 #pragma once
+
 #include "stringized.hpp"
 #include "concatenated.hpp"
 #include "token.hpp"
@@ -34,4 +38,6 @@
 	#include "detail/microsoft/assume.hpp"
 	#include "detail/microsoft/namespace.hpp"
 	#include <boost/static_assert.hpp>
+#endif
+
 #endif

@@ -2,8 +2,13 @@
 // copyright 1999-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief microsoft's mfc resource editor
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__MICROSOFT__NAMESPACE__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__MICROSOFT__NAMESPACE__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
+
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined _AFXDLL // mfc
 	#if defined DIVERSALIS__COMPILER__RESOURCE //&& defined DIVERSALIS__COMPILER__MICROSOFT
 		// msvc7.1's resource compiler freaks out: warning RC4011: identifier truncated to 'APPSTUDIO_INVOKED__MSVC_MFC_RES'
@@ -16,4 +21,6 @@
 			#define UNIVERSALIS__COMPILER__NAMESPACE__END }
 		#endif
 	#endif
+#endif
+
 #endif

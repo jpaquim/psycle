@@ -4,15 +4,18 @@
 
 ///\file
 ///\brief microsoft's MAX_PATH has too low value for ntfs
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__DETAIL__MICROSOFT__MAX_PATH__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__DETAIL__MICROSOFT__MAX_PATH__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
-//#region UNIVERSALIS
-	//#region OPERATING_SYSTEM
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-			//#include <windows.h>
-			/// microsoft's MAX_PATH has too low value for ntfs
-			///\see <cstdio>'s FILENAME_MAX
-			#define UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH (MAX_PATH < (1 << 12) ? (1 << 12) : MAX_PATH)
-		#endif
-	//#endregion
-//#endregion
+
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	//#include <windows.h>
+	/// microsoft's MAX_PATH has too low value for ntfs
+	///\see <cstdio>'s FILENAME_MAX
+	#define UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH (MAX_PATH < (1 << 12) ? (1 << 12) : MAX_PATH)
+#endif
+
+#endif

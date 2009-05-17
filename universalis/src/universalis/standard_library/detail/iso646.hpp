@@ -2,12 +2,19 @@
 // copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__DETAIL__ISO646__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__DETAIL__ISO646__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
+
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	// _WCHAR_T_DEFINED defined when -Zc:wchar_t is used or if wchar_t was defined by system header include.
 	// _NATIVE_WCHAR_T_DEFINED defined when -Zc:wchar_t is used.
 
 	// with regards to alternate keywords for operators, the compiler conforms with C1990 but not C++1998
 	#include <ciso646>
+#endif
+
 #endif

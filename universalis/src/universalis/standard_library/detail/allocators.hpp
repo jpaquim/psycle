@@ -2,11 +2,17 @@
 // copyright 2004-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__DETAIL__ALLOCATORS__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__DETAIL__ALLOCATORS__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #include <cstddef>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__STANDARD_LIBRARY__DETAIL__ALLOCATORS
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace standard_library { namespace allocators { namespace process {
 
 ///\internal
@@ -16,4 +22,7 @@ namespace detail {
 }
 
 }}}}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

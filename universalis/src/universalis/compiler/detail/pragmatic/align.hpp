@@ -4,8 +4,13 @@
 
 ///\file
 /// memory alignment
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__ALIGN__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__ALIGN__INCLUDED
 #pragma once
+
 #include "attribute.hpp"
+
 #if defined DIVERSALIS__COMPILER__GNU
 	#define UNIVERSALIS__COMPILER__ALIGNED(bytes) UNIVERSALIS__COMPILER__ATTRIBUTE(aligned(bytes))
 	// note: a bit field is packed to 1 bit, not one byte.
@@ -16,4 +21,6 @@
 	/// memory alignment.
 	///\see packed
 	#define UNIVERSALIS__COMPILER__ALIGNED(bytes)
+#endif
+
 #endif

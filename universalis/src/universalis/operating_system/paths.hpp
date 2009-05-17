@@ -3,12 +3,21 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\interface universalis::operating_system::paths
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__PATHS__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__PATHS__INCLUDED
 #pragma once
-#include <universalis/detail/project.hpp>
-#include "paths/interface.hpp"
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__PATHS
-#include <universalis/compiler/dynamic_link/begin.hpp>
-namespace universalis { namespace operating_system { namespace paths {
-	#include "paths/injection/interface.hpp"
-}}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+
+	#include <universalis/detail/project.hpp>
+	#include "paths/interface.hpp"
+
+	#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
+	#include <universalis/compiler/dynamic_link/begin.hpp>
+
+		namespace universalis { namespace operating_system { namespace paths {
+			#include "paths/injection/interface.hpp"
+		}}}
+
+	#include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

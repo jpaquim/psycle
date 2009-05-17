@@ -3,11 +3,17 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\interface gets information from ellipsis exceptions: catch(...)
+
+#ifndef UNIVERSALIS__COMPILER__EXCEPTIONS__ELLIPSIS__INCLUDED
+#define UNIVERSALIS__COMPILER__EXCEPTIONS__ELLIPSIS__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #include <string>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__COMPILER__EXCEPTIONS__ELLIPSIS
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace compiler { namespace exceptions {
 
 /// provides information about the exception in an ellipsis catch(...) clause.
@@ -16,4 +22,7 @@ namespace universalis { namespace compiler { namespace exceptions {
 std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK ellipsis();
 
 }}}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

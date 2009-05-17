@@ -3,9 +3,12 @@
 
 ///\file
 ///\brief meta header
-#pragma once
-#include "detail/microsoft/max_path.hpp"
 
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__OPERATING_SYSTEM__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__OPERATING_SYSTEM__INCLUDED
+#pragma once
+
+#include "detail/microsoft/max_path.hpp"
 
 /// end-of-line character sequence on the host platform.
 
@@ -15,4 +18,6 @@
 	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\r"
 #else
 	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n"
+#endif
+
 #endif

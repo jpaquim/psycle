@@ -1,10 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__DETAIL__UTC_TIME__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__DETAIL__UTC_TIME__INCLUDED
 #pragma once
+
 #include "duration.hpp"
 #include <ctime> // for std::time_t in std::utc_time
 #include <boost/operators.hpp>
+
 namespace std {
 
 	template<typename Time_Point>
@@ -86,4 +90,6 @@ namespace std {
 			BOOST_CHECK(t1 == t0);
 		}
 	}}}}
+#endif
+
 #endif

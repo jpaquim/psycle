@@ -3,10 +3,17 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__ASM__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__ASM__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
+
 #if defined DIVERSALIS__COMPILER__GNU
 	// asm is a keyword
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
 	#define asm __asm
+#endif
+
 #endif

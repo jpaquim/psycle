@@ -3,7 +3,11 @@
 
 ///\file \brief secure version of standard C functions
 ///\see http://www.opengroup.org/platform/single_unix_specification/uploads/40/6355/n1093.pdf
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__STDC_SECURE_LIB__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__STDC_SECURE_LIB__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #if defined __STDC_SECURE_LIB__
 	#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION >= 1400
@@ -72,4 +76,6 @@
 		using std::vswprintf_s;
 	#endif
 	using std::strcpy_s;
+#endif
+
 #endif
