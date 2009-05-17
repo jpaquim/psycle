@@ -2,7 +2,11 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::operating_system::location
+
+#ifndef UNIVERSALIS__COMPILER__LOCATION__INCLUDED
+#define UNIVERSALIS__COMPILER__LOCATION__INCLUDED
 #pragma once
+
 #include <universalis/compiler/stringized.hpp>
 #include <iostream>
 #include <sstream>
@@ -111,3 +115,4 @@ class location {
 		BOOST_CURRENT_FUNCTION
 #endif
 
+#endif

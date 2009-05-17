@@ -2,7 +2,11 @@
 // copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief universalis::operating_system::clocks
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__INCLUDED
 #pragma once
+
 #include <diversalis/operating_system.hpp>
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	#include <ctime>
@@ -39,8 +43,10 @@
 	#include <thread>
 	#include <sstream>
 #endif
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__CLOCKS
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace operating_system { namespace clocks {
 
 // recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
@@ -290,4 +296,7 @@ namespace detail {
 	#endif // defined BOOST_AUTO_TEST_CASE
 } // namespace detail
 }}}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

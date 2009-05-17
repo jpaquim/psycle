@@ -2,8 +2,11 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::operating_system::loggers
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__INCLUDED
 #pragma once
-#include <packageneric/module.private.hpp>
+
 #include "exception.hpp"
 #include <universalis/compiler/compiler.hpp>
 #include <universalis/compiler/typenameof.hpp>
@@ -14,8 +17,10 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__LOGGERS
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace operating_system {
 
 namespace loggers {
@@ -160,6 +165,10 @@ namespace loggers {
 		logger_threshold_level<multiplex_logger, levels::crash> static once;
 		return once;
 	}
-}}}
+}
+
+}}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
 
+#endif

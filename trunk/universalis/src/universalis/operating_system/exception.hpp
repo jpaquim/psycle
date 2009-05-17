@@ -2,11 +2,17 @@
 // copyright 1999-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::operating_system::exception
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__EXCEPTION__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__EXCEPTION__INCLUDED
 #pragma once
+
 #include <universalis/exception.hpp>
 #include <universalis/compiler/compiler.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__EXCEPTION
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace operating_system {
 
 /// generic exception thrown by functions of the namespace universalis::operating_system.
@@ -36,4 +42,7 @@ namespace exceptions {
 }
 
 }}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

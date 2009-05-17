@@ -2,8 +2,13 @@
 // copyright 1999-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__GNU__DIAGNOSTICS__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__GNU__DIAGNOSTICS__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
+
 #if defined DIVERSALIS__COMPILER__GNU
 	#if DIVERSALIS__COMPILER__VERSION >= 40200 // 4.2.0
 		#pragma GCC diagnostic error "-Wsequence-point"
@@ -16,4 +21,6 @@
 		#pragma GCC diagnostic error "-Wuninitialized"
 			// Warn if an automatic variable is used without first being initialized or if a variable may be clobbered by a setjmp call.
 	#endif
+#endif
+
 #endif

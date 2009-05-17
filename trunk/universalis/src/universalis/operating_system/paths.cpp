@@ -3,8 +3,6 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation universalis::operating_system::paths
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include "paths.hpp"
 #include "paths/implementation.hpp"
 namespace universalis { namespace operating_system { namespace paths {

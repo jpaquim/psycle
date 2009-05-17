@@ -3,7 +3,13 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\interface universalis::operating_system::paths
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__PATHS__INTERFACE__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__PATHS__INTERFACE__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #include <boost/filesystem/path.hpp>
 #include <string>
+
+#endif

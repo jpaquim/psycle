@@ -3,7 +3,11 @@
 
 ///\file \brief thread standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__THREAD__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__THREAD__INCLUDED
 #pragma once
+
 #include <diversalis/operating_system.hpp>
 #include "detail/boost_xtime.hpp"
 #include <boost/thread.hpp>
@@ -11,6 +15,7 @@
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 #endif
+
 namespace std {
 
 class thread {
@@ -147,3 +152,5 @@ namespace this_thread {
 }
 
 }
+
+#endif

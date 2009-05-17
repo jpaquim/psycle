@@ -2,8 +2,6 @@
 // copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::exception
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "exception.hpp"
 #include "operating_system/loggers.hpp"

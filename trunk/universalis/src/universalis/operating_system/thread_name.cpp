@@ -2,8 +2,6 @@
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::operating_system::thread_name
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
 #include <universalis/detail/project.private.hpp>
 #include "thread_name.hpp"
 #include "loggers.hpp"

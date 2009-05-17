@@ -4,7 +4,11 @@
 
 ///\file
 /// stuff related with virtual member functions
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__VIRTUAL__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__VIRTUAL__INCLUDED
 #pragma once
+
 #include "attribute.hpp"
 
 /// pure virtual classes
@@ -26,3 +30,4 @@
 //#define UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES
 #define overrides_virtual UNIVERSALIS__COMPILER__VIRTUAL__OVERRIDES
 
+#endif

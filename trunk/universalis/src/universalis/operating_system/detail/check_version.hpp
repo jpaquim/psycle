@@ -3,19 +3,23 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\interface universalis::operating_system::detail::check_version
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__DETAIL__CHECK_VERSION__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__DETAIL__CHECK_VERSION__INCLUDED
 #pragma once
+
 #include <universalis/exception.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__DETAIL__CHECK_VERSION
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace universalis
-{
-	namespace operating_system
-	{
-		namespace detail
-		{
-			/// excludes poor operating systems
-			void UNIVERSALIS__COMPILER__DYNAMIC_LINK check_version() throw(universalis::exception);
-		}
-	}
-}
+
+namespace universalis { namespace operating_system { namespace detail {
+
+/// excludes poor operating systems
+void UNIVERSALIS__COMPILER__DYNAMIC_LINK check_version() throw(universalis::exception);
+
+}}}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

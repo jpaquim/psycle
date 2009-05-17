@@ -2,13 +2,18 @@
 // copyright 2006-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::processor::atomic::compare_and_swap
+
+#ifndef UNIVERSALIS__PROCESSOR__EXCEPTIONS__ATOMIC__COMPARE_AND_SWAP__INCLUDED
+#define UNIVERSALIS__PROCESSOR__EXCEPTIONS__ATOMIC__COMPARE_AND_SWAP__INCLUDED
 #pragma once
+
 #include <diversalis/compiler.hpp>
 #if defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION >= 40100 // 4.1.0
 	// gcc's __sync_* built-in functions documented at http://gcc.gnu.org/onlinedocs/gcc-4.1.0/gcc/Atomic-Builtins.html
 #else
 	#include <glib/gatomic.h>
 #endif
+
 namespace universalis { namespace processor { namespace atomic {
 
 // see c++ standard http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2047.html
@@ -48,3 +53,5 @@ bool inline compare_and_swap(Value * address, Value old_value, Value new_value) 
 #endif
 
 }}}
+
+#endif

@@ -2,8 +2,13 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file
+
+#ifndef UNIVERSALIS__COMPILER__WARNINGS__INCLUDED
+#define UNIVERSALIS__COMPILER__WARNINGS__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
+
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 
 	#pragma warning(push, 4) // generate level-4 (i.e. all) warnings
@@ -99,4 +104,6 @@
 	#define _CRT_NONSTDC_NO_DEPRECATE // posix is okay
 	#define _ATL_SECURE_NO_DEPRECATE
 	#define _AFX_SECURE_NO_DEPRECATE
+#endif
+
 #endif

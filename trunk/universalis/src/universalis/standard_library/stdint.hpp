@@ -2,7 +2,11 @@
 // copyright 2004-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief cstdint standard header
+
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__STDINT__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__STDINT__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #if 0
 	// what we would like to include in an ideal world
@@ -56,4 +60,6 @@
 		using boost::intmax_t;
 		using boost::uintmax_t;
 	}
+#endif
+
 #endif

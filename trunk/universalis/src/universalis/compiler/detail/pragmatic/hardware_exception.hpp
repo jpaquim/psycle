@@ -4,8 +4,13 @@
 
 ///\file
 ///\brief hardware exception handling
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__HARDWARE_EXCEPTION__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__HARDWARE_EXCEPTION__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
+
 #if 0 // not needed ... the 'try' keyword let us do what we want
 // we want to be able to catch hardware exceptions as typed c++ ones, not only via catch(...)
 	#if defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
@@ -72,3 +77,5 @@
 		*/
 	#endif
 #endif // 0
+
+#endif

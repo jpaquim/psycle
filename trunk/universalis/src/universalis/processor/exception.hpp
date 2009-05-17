@@ -2,11 +2,17 @@
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::processor::exception
+
+#ifndef UNIVERSALIS__PROCESSOR__EXCEPTION__INCLUDED
+#define UNIVERSALIS__PROCESSOR__EXCEPTION__INCLUDED
 #pragma once
+
 #include <universalis/operating_system/exception.hpp>
 #include <universalis/compiler/compiler.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__PROCESSOR__EXCEPTION
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace processor {
 
 /// external cpu/os exception translated into a c++ one, with deferred querying of the human-readable message.
@@ -31,4 +37,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::operat
 };
 
 }}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

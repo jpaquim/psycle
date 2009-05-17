@@ -3,7 +3,11 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__CONST_FUNCTION__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__CONST_FUNCTION__INCLUDED
 #pragma once
+
 #include "attribute.hpp"
 
 #if defined DIVERSALIS__COMPILER__GNU
@@ -12,4 +16,6 @@
 	#define UNIVERSALIS__COMPILER__CONST // supported.. check the doc
 #else
 	#define UNIVERSALIS__COMPILER__CONST
+#endif
+
 #endif

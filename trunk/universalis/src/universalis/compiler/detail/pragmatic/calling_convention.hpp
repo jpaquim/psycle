@@ -17,10 +17,15 @@
 // for borland's compatibility with microsoft's register calling convention: #define fastcall __msfastcall.
 // note: on the gnu compiler, one can use the #define __USER_LABEL_PREFIX__ to know what character is prepended to extern "C" symbols.
 // note: on microsoft's compiler, with cdecl, there's is no special decoration for extern "C" declarations, i.e., no '_' prepended.
-/// member functions defaults to thiscall
-/// non-member functions defaults to cdecl
+// member functions defaults to thiscall
+// non-member functions defaults to cdecl
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__CALLING_CONVENTION__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__CALLING_CONVENTION__INCLUDED
 #pragma once
+
 #include "attribute.hpp"
+
 #if defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#define UNIVERSALIS__COMPILER__CALLING_CONVENTION__C
 	#define UNIVERSALIS__COMPILER__CALLING_CONVENTION__PASCAL
@@ -65,4 +70,6 @@
 			#define UNIVERSALIS__COMPILER__CALLING_CONVENTION__FAST ...
 		#endif
 	*/
+#endif
+
 #endif

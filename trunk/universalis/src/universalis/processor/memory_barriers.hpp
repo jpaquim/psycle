@@ -25,7 +25,11 @@
 /// universalis::processor::memory_barriers::read()
 /// universalis::processor::memory_barriers::write()
 
-#include <diversalis/diversalis.hpp>
+#ifndef UNIVERSALIS__PROCESSOR__MEMORY_BARRIERS__INCLUDED
+#define UNIVERSALIS__PROCESSOR__MEMORY_BARRIERS__INCLUDED
+#pragma once
+
+#include <universalis/detail/project.hpp>
 
 #if defined DIVERSALIS__OPERATING_SYSTEM__APPLE
 	#include <libkern/OSAtomic.h>
@@ -159,3 +163,5 @@
 	}}}
 #endif
 #undef universalis__processor__memory_barriers__defined
+
+#endif

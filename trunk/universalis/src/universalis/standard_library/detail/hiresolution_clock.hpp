@@ -1,9 +1,13 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__DETAIL__HIRESOLUTION_CLOCK__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__DETAIL__HIRESOLUTION_CLOCK__INCLUDED
 #pragma once
+
 #include "utc_time.hpp"
 #include <universalis/operating_system/clocks.hpp>
+
 namespace std {
 	template<typename Time_Point>
 	class hiresolution_clock {
@@ -45,4 +49,6 @@ namespace std {
 			BOOST_CHECK(0.66 < ratio && ratio < 1.33);
 		}
 	}}}}
+#endif
+
 #endif

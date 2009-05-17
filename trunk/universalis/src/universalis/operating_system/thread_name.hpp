@@ -2,11 +2,17 @@
 // copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::operating_system::thread_name
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__THREAD_NAME__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__THREAD_NAME__INCLUDED
 #pragma once
+
 #include <universalis/compiler/compiler.hpp>
 #include <string>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__PROCESSOR__EXCEPTION
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace operating_system {
 
 /// thread name
@@ -36,4 +42,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread_name {
 };
 
 }}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

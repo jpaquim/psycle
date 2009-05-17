@@ -3,32 +3,39 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\interface universalis::compiler::typenameof
+
+#ifndef UNIVERSALIS__COMPILER__TYPENAMEOF__INCLUDED
+#define UNIVERSALIS__COMPILER__TYPENAMEOF__INCLUDED
 #pragma once
+
 #include "detail/pragmatic/demangle.hpp"
 #include <typeinfo>
 #include <string>
-namespace universalis
-{
-	namespace compiler
-	{
-		/// gets the compiler symbol string of any type.
-		template<typename X>
-		std::string inline typenameof(X const &);
-	}
+
+namespace universalis { namespace compiler {
+
+/// gets the compiler symbol string of any type.
+template<typename X>
+std::string inline typenameof(X const &);
+
+}}
+
+
+/********************************************************************************************/
+// implementation details
+
+namespace universalis { namespace compiler {
+
+template<typename X>
+std::string inline typenameof(X const & x) {
+	return typenameof(typeid(x));
 }
-namespace universalis
-{
-	namespace compiler
-	{
-		template<typename X>
-		std::string inline typenameof(X const & x)
-		{
-			return typenameof(typeid(x));
-		}
-		template<>
-		std::string inline typenameof<std::type_info>(std::type_info const & type_info)
-		{
-			return detail::demangled(std::string(type_info.name()));
-		}
-	}
+
+template<>
+std::string inline typenameof<std::type_info>(std::type_info const & type_info) {
+	return detail::demangled(std::string(type_info.name()));
 }
+
+}}
+
+#endif

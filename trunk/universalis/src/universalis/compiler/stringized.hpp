@@ -4,18 +4,21 @@
 
 ///\file
 ///\brief stringization
+
+#ifndef UNIVERSALIS__COMPILER__STRINGIZED__INCLUDED
+#define UNIVERSALIS__COMPILER__STRINGIZED__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
-//#region UNIVERSALIS
-	//#region COMPILER
-		/// Interprets argument as a string litteral.
-		#if !defined UNIVERSALIS__QUAQUAVERSALIS || !defined DIVERSALIS__COMPILER__GNU || !defined DIVERSALIS__COMPILER__MICROSOFT
-			// boost has workarounds for broken preprocessors
-			#define UNIVERSALIS__COMPILER__STRINGIZED(tokens) BOOST_PP_STRINGIZE(tokens)
-			#include <boost/preprocessor/stringize.hpp>
-		#else
-			#define UNIVERSALIS__COMPILER__STRINGIZED(tokens) UNIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens)
-			#define UNIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens) #tokens
-		#endif
-	//#endregion
-//#endregion
+
+/// Interprets argument as a string litteral.
+#if !defined UNIVERSALIS__QUAQUAVERSALIS || !defined DIVERSALIS__COMPILER__GNU || !defined DIVERSALIS__COMPILER__MICROSOFT
+	// boost has workarounds for broken preprocessors
+	#define UNIVERSALIS__COMPILER__STRINGIZED(tokens) BOOST_PP_STRINGIZE(tokens)
+	#include <boost/preprocessor/stringize.hpp>
+#else
+	#define UNIVERSALIS__COMPILER__STRINGIZED(tokens) UNIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens)
+	#define UNIVERSALIS__COMPILER__STRINGIZED__DETAIL__NO_EXPANSION(tokens) #tokens
+#endif
+
+#endif

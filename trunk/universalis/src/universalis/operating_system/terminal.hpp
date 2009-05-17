@@ -3,30 +3,36 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\interface universalis::operating_system::terminal
+
+#ifndef UNIVERSALIS__OPERATING_SYSTEM__TERMINAL__INCLUDED
+#define UNIVERSALIS__OPERATING_SYSTEM__TERMINAL__INCLUDED
 #pragma once
+
 #include <universalis/detail/project.hpp>
 #include "exception.hpp"
 #include <boost/thread/mutex.hpp>
 #include <string>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__OPERATING_SYSTEM__TERMINAL
+
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
-namespace universalis
-{
-	namespace operating_system
-	{
-		/// terminal.
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK terminal
-		{
-			public:
-				terminal() throw(exception);
-				virtual ~terminal() throw();
-				void output(int const & logger_level, std::string const & string);
-			private:
-				boost::mutex mutex_;
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					bool allocated_;
-				#endif
-		};
-	}
-}
+
+namespace universalis { namespace operating_system {
+
+/// terminal.
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK terminal {
+	public:
+		terminal() throw(exception);
+		virtual ~terminal() throw();
+		void output(int const & logger_level, std::string const & string);
+	private:
+		boost::mutex mutex_;
+		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			bool allocated_;
+		#endif
+};
+
+}}
+
 #include <universalis/compiler/dynamic_link/end.hpp>
+
+#endif

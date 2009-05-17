@@ -2,7 +2,11 @@
 // copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief thread local storage.
+
+#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__THREAD_LOCAL_STORAGE__INCLUDED
+#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__THREAD_LOCAL_STORAGE__INCLUDED
 #pragma once
+
 #include "attribute.hpp"
 
 #if defined DIVERSALIS__COMPILER__GNU && ( \
@@ -23,5 +27,7 @@
 	#if !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 		#warning "Cannot generate thread-safe code for this compiler ; please add support for thread-local storage for your compiler in the file where this warning is triggered."
 	#endif
+
+#endif
 
 #endif

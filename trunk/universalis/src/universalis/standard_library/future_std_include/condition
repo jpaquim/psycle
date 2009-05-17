@@ -1,2 +1,7 @@
+#ifndef UNIVERSALIS__STANDARD_LIBRARY__FUTURE_STD_INCLUDE__CONDITION__INCLUDED
+#define UNIVERSALIS__STANDARD_LIBRARY__FUTURE_STD_INCLUDE__CONDITION__INCLUDED
 #pragma once
+
 #include <universalis/standard_library/condition.hpp>
+
+#endif
