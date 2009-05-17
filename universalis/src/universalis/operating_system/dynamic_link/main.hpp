@@ -14,7 +14,7 @@
 	namespace universalis { namespace operating_system { namespace dynamic_link { namespace init {
 		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__HIDDEN {
 			// if this module owns the loggers, then it's not yet initialized and cannot be used for now.
-			#if !defined UNIVERSALIS__SOURCE
+			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
 					s << "module attached to process: " << PACKAGENERIC__MODULE__NAME;
@@ -25,7 +25,7 @@
 		
 		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__HIDDEN {
 			// if this module owns the loggers, then it's already destroyed and cannot be used anymore.
-			#if !defined UNIVERSALIS__SOURCE
+			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
 					s << "module detached from process: " << PACKAGENERIC__MODULE__NAME;

@@ -17,7 +17,7 @@
 		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__HIDDEN;
 		void constructor() {
 			// if this library owns the logger, then it's not yet initialized and cannot be used yet.
-			#if !defined UNIVERSALIS__SOURCE
+			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
 					s << "library attached to process: " << UNIVERSALIS__OPERATING_SYSTEM__LIBRARY__NAME;
@@ -29,7 +29,7 @@
 		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__HIDDEN;
 		void destructor() {
 			// if this library owns the logger, then it's already destroyed and cannot be used anymore.
-			#if !defined UNIVERSALIS__SOURCE
+			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
 					s << "library detached from process: " << UNIVERSALIS__OPERATING_SYSTEM__LIBRARY__NAME;
