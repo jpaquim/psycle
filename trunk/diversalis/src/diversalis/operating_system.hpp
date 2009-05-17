@@ -54,14 +54,6 @@
 	#define DIVERSALIS__OPERATING_SYSTEM__CYGWIN
 	#undef DIVERSALIS__OPERATING_SYSTEM__CYGWIN // was just defined to insert documentation.
 
-	/// X Window System.
-	/// On apple's macosx operating system,
-	/// and on cygwin,
-	/// we have to choose whether we want to use the x window system or not.
-	/// This is done by testing if DIVERSALIS__OPERATING_SYSTEM__CROSSPLATFORM is defined.
-	#define DIVERSALIS__OPERATING_SYSTEM__X_WINDOW
-	#undef DIVERSALIS__OPERATING_SYSTEM__X_WINDOW // was just defined to insert documentation.
-
 	/// microsoft's windows.
 	/// note: on cygwin, DIVERSALIS__OPERATING_SYSTEM__MICROSOFT is not defined, as it's considered to be in the unix family.
 	#define DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
@@ -84,16 +76,6 @@
 		#undef DIVERSALIS__OPERATING_SYSTEM__VERSION__PATCH // was just defined to insert documentation.
 	///\}
 
-	/// If defined, prefers to use crossplatforms libraries when choice is available.
-	/// For examples, we may use:\n
-	/// - glib or boost instead of the operating system proprietary/specific api directly.\n
-	/// - the x window system on apple's macosx and cygwin instead of the operating system proprietary/specific gui api directly.\n
-	#define DIVERSALIS__OPERATING_SYSTEM__UNIVERSALIS
-	#undef DIVERSALIS__OPERATING_SYSTEM__UNIVERSALIS // was just defined to insert documentation.
-
-	/// The opposite of DIVERSALIS__OPERATING_SYSTEM__UNIVERSALIS
-	#define DIVERSALIS__OPERATING_SYSTEM__QUAQUAVERSALIS
-	#undef DIVERSALIS__OPERATING_SYSTEM__QUAQUAVERSALIS // was just defined to insert documentation.
 #endif
 
 
@@ -125,7 +107,7 @@
 	#define DIVERSALIS__OPERATING_SYSTEM
 	#define DIVERSALIS__OPERATING_SYSTEM__UNIX
 	#define DIVERSALIS__OPERATING_SYSTEM__BSD
-	#define DIVERSALIS__OPERATING_SYSTEM__BSD__FREE
+	#define DIVERSALIS__OPERATING_SYSTEM__FREEBSD
 
 ////////////////////////
 // darwin/apple's macos
@@ -266,7 +248,7 @@
 	#define DIVERSALIS__OPERATING_SYSTEM__POSIX
 #endif
 
-// operating systems not yet having a X Window System by default
+// operating systems known to have an X Window System "by default"
 #if \
 	!defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && \
 	!defined DIVERSALIS__OPERATING_SYSTEM__APPLE
