@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# This script converts msvc 2008 projects and solutions to msvc-2005
+# This script converts msvc-2008 projects and solutions to msvc-2005
 
 cd $(dirname $0)/.. &&
 
