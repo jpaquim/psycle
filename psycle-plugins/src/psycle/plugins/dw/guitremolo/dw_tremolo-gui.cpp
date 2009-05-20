@@ -1,11 +1,11 @@
-//																dw tremolo, with the new gui
+// dw tremolo, with the new gui
 
 // since this is the first plugin to use the new gui code, i'm commenting it pretty heavily to help other people convert their own
 // plugins or make new ones.
 
-//one important note: since the plugin-gui uses mfc, the .pch file for all gui plugin projects needs to be pre_compiled_headers.mfc.pch, 
-// -not- pre_compiled_headers.pch.  also, the pdb should be changed to pre_compiled_headers.mfc.pdb
-//it won't compile if you don't do this!!
+// one important note: since the plugin-gui uses mfc, the .pch file for all gui plugin projects needs to be pre-compiled-headers-with-mfc.pch,
+// -not- pre-compiled-headers.pch.  also, the pdb should be changed to pre-compiled-headers-with-mfc.pdb
+// it won't compile if you don't do this!!
 
 //#include <psycle/plugin_interface.hpp> //plugin_gui.hpp includes plugin_interface, so it's no longer necessary
 #include <psycle/plugin_interface.hpp>
