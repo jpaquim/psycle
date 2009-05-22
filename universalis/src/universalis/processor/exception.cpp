@@ -40,10 +40,12 @@ namespace universalis { namespace processor {
 namespace {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		void structured_exception_translator(unsigned int code, ::EXCEPTION_POINTERS * exception_pointers) throw(exception) {
-			#if !defined NDEBUG
-				::EXCEPTION_RECORD const & exception_record(*exception_pointers->ExceptionRecord);
+			#if defined DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DEBUG
+				#if !defined NDEBUG
+					::EXCEPTION_RECORD const & exception_record(*exception_pointers->ExceptionRecord);
+				#endif
+				assert(code == exception_record.ExceptionCode);
 			#endif
-			assert(code == exception_record.ExceptionCode);
 			switch(code) {
 				////////////////////
 				// things to ignore

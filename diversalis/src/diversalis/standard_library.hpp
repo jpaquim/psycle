@@ -19,7 +19,7 @@
 		#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DYNAMIC_LINK
 	#endif
 
-	#if defined _DEBUG // defined when compiling with -LDd, -MDd, and -MTd.
+	#if defined _DEBUG // defined when compiling with -LDd, -MDd, or -MTd.
 		#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DEBUG
 	#endif
 #endif
