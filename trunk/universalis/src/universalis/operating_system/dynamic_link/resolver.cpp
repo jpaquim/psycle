@@ -2,7 +2,6 @@
 // copyright 1999-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::operating_system::dynamic_link::resolver
-#define UNIVERSALIS__QUAQUAVERSALIS // \todo [bohan] I'm setting this for now to prevent glibmm from being used because it seems it's not honouring $ORIGIN
 #include <universalis/detail/project.private.hpp>
 #include "resolver.hpp"
 #include <universalis/exception.hpp>
@@ -11,14 +10,14 @@
 #include <sstream>
 #include <cassert>
 #include <iostream>
-#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	#include <dlfcn.h> // dlopen, dlsym, dlclose, dlerror
 	#include <csignal>
-#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 	#include <universalis/operating_system/exceptions/code_description.hpp>
 #else
-	#include <glibmm/module.h>
+	#include <glibmm/module.h> // Note: it seems glibmm is not honouring $ORIGIN on ELF.
 #endif
 namespace universalis { namespace operating_system { namespace dynamic_link {
 
@@ -38,7 +37,7 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 	std::ostringstream version_string; version_string << version;
 	return
 		#if 1 || ( \
-			defined UNIVERSALIS__QUAQUAVERSALIS && ( \
+			!defined UNIVERSALIS__QUAQUAVERSALIS && ( \
 				defined DIVERSALIS__OPERATING_SYSTEM__LINUX || \
 				defined DIVERSALIS__OPERATING_SYSTEM__APPLE || \
 				defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT || \
@@ -79,15 +78,15 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 
 resolver::resolver(boost::filesystem::path const & path, unsigned int const & version)
 :
-	#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		path_(decorated_filename(path, version)),
 	#endif
 	underlying_(0)
 {
-	#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		underlying_ = ::dlopen(path_.native_file_string().c_str(), RTLD_LAZY /*RTLD_NOW*/);
 		if(!opened()) open_error(path_, std::string(::dlerror()));
-	#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		// we use \ here instead of / because ::LoadLibraryEx will not use the LOAD_WITH_ALTERED_SEARCH_PATH option if it does not see a \ character in the file path:
 		boost::filesystem::path const final_path(decorated_filename(path, version));
 		underlying_ = ::LoadLibraryExA(final_path.native_file_string().c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
@@ -106,9 +105,9 @@ resolver::resolver(boost::filesystem::path const & path, unsigned int const & ve
 
 bool resolver::opened() const throw() {
 	return
-		#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 			//
-		#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			//
 		#else
 			*
@@ -118,9 +117,9 @@ bool resolver::opened() const throw() {
 
 void resolver::close() {
 	assert(opened());
-	#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		if(::dlclose(underlying_)) close_error(std::string(::dlerror()));
-	#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		if(!::FreeLibrary(underlying_)) close_error(exceptions::code_description());
 	#else
 		delete underlying_;
@@ -145,17 +144,17 @@ resolver::function_pointer resolver::resolve_symbol_untyped(std::string const & 
 	assert(opened());
 	union result_union {
 		function_pointer typed;
-		#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			::PROC
 		#else
 			void *
 		#endif
 			untyped;
 	} result;
-	#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		result.untyped = ::dlsym(underlying_, decorated_symbol(name).c_str());
 		if(!result.untyped) resolve_symbol_error(name, std::string(::dlerror()));
-	#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		result.untyped = ::GetProcAddress(underlying_, decorated_symbol(name).c_str());
 		if(!result.untyped) resolve_symbol_error(name, exceptions::code_description());
 	#else
@@ -166,9 +165,9 @@ resolver::function_pointer resolver::resolve_symbol_untyped(std::string const & 
 
 boost::filesystem::path resolver::path() const throw() {
 	assert(opened());
-	#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		return path_;
-	#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		char module_file_name[UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
 		::GetModuleFileNameA(underlying_, module_file_name, sizeof module_file_name);
 		return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces

@@ -10,6 +10,9 @@
 #include "../exceptions/code_description.hpp"
 #if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "user32") // for the MessageBox function
+	#endif
 #endif
 namespace universalis { namespace operating_system { namespace detail {
 

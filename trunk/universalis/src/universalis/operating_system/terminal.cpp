@@ -21,6 +21,9 @@
 	#include <sstream>
 	#include <limits>
 	#include <cassert>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "user32") // for the MessageBox function
+	#endif
 #endif
 namespace universalis { namespace operating_system {
 
