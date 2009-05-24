@@ -10,9 +10,9 @@
 #include <universalis/detail/project.hpp>
 #include <boost/filesystem/path.hpp>
 #include <string>
-#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	//
-#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 #else
 	namespace Glib {
@@ -74,10 +74,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK resolver {
 		/// abi/compiler-specific
 		std::string static decorated_symbol(std::string const & name) throw();
 		/// os-specific
-		#if defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 			boost::filesystem::path const path_;
 			void *
-		#elif defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			::HINSTANCE
 		#else
 			Glib::Module *
