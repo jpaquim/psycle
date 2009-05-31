@@ -1,6 +1,6 @@
 /**
 	\file
-	interface file for psycle::helpers::RiffFile.
+	interface file for psycle::helpers::MsRiff.
 	
 */
 #pragma once
@@ -18,7 +18,7 @@ namespace psycle
 		public:
 			RiffChunkHeader();
 			virtual ~RiffChunkHeader();
-			virtual std::uint32_t length();
+			virtual std::uint32_t length() const;
 		};
 
 		class RiffFormChunkHeader
@@ -48,6 +48,7 @@ namespace psycle
 			virtual void addListProperty(IffChunkId contentId, IffChunkId propId);
 			virtual void addListProperty(IffChunkId contentId, IffChunkId propId, void const *data, std::uint32_t dataSize);
 */
+			virtual void addNewChunk(const RiffChunkHeader& header);
 			virtual const RiffChunkHeader& readHeader();
 			virtual const RiffChunkHeader& findChunk(IffChunkId id, bool allowWrap=false);
 			virtual void skipThisChunk();

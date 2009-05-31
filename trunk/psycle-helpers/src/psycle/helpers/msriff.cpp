@@ -12,7 +12,7 @@ namespace psycle
 	{
 		//const RiffChunkId MsRiff::grabbag = {' ',' ',' ',' '};
 
-		std::uint32_t RiffChunkHeader::length() {
+		std::uint32_t RiffChunkHeader::length() const {
 			return ulength.unsignedValue();
 		}
 
@@ -25,6 +25,9 @@ namespace psycle
 		void MsRiff::Create(std::string fname, bool const & overwrite) { AbstractIff::Create(fname, overwrite); }
 		void MsRiff::close() { AbstractIff::close(); }
 		bool MsRiff::Eof() { return AbstractIff::Eof(); }
+		void MsRiff::addNewChunk(const RiffChunkHeader& header) {
+			WriteChunkHeader(header);
+		}
 /*
 		void MsRiff::addFormChunk(IffChunkId id) {
 		}
@@ -39,7 +42,8 @@ namespace psycle
 */
 		void MsRiff::WriteChunkHeader(const RiffChunkHeader& header) {
 			if (GetPos()%2 > 0) Write('\0');
-			WriteRaw(&header,sizeof(header));
+			Write(header.id);
+			Write(header.length());
 			currentHeader=header;
 		}
 
@@ -56,7 +60,6 @@ namespace psycle
 			Seek(headerPosition + 8 + currentHeader.length());
 			if (GetPos() % 2 > 0) Skip(1);
 		}
-
 	}
 }
 

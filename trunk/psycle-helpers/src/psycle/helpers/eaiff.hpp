@@ -13,12 +13,13 @@ namespace psycle
 		/******* Data Structures *******/
 		class IffChunkHeader : public BaseChunkHeader
 		{
+			friend class EaIff;
 		protected:
 			ULongBE ulength;
 		public:
 			IffChunkHeader();
 			virtual ~IffChunkHeader();
-			virtual std::uint32_t length();
+			virtual std::uint32_t length() const;
 		};
 
 		class FormChunkHeader
@@ -40,7 +41,7 @@ namespace psycle
 			virtual void Open(std::string fname);
 			virtual void Create(std::string fname, bool const & overwrite);
 			virtual void close();
-			virtual bool Eof();
+			virtual bool Eof() const;
 
 			virtual void addFormChunk(IffChunkId id);
 			virtual void addCatChunk(IffChunkId id, bool endprevious=true);
@@ -73,8 +74,13 @@ namespace psycle
 			static const IffChunkId grabbag;
 
 		protected:
-			void WriteChunkHeader(const IffChunkHeader& header);
-			void WriteChunkId(IffChunkId id);
+			void WriteHeader(const IffChunkHeader& header);
+			void Read(IffChunkId id) { AbstractIff::Read(id); }
+			void Read(ULongBE& ulong){ AbstractIff::Read(ulong); }
+			void Read(ULongLE& ulong){ AbstractIff::Read(ulong); }
+			void Write(const IffChunkId id){ AbstractIff:Write(id); }
+			void Write(const ULongBE& ulong){ AbstractIff:Write(ulong); }
+			void Write(const ULongLE& ulong){ AbstractIff:Write(ulong); }
 
 			IffChunkHeader currentHeader;
 			std::uint32_t headerPosition;
