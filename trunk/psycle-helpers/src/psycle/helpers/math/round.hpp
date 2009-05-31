@@ -22,7 +22,7 @@ namespace psycle { namespace helpers { namespace math {
 // inline implementation
 namespace psycle { namespace helpers { namespace math {
 
-	#if DIVERSALIS__STANDARD_LIBRARY__MATH >= 199901	
+	#if DIVERSALIS__STANDARD_LIBRARY__MATH >= 199901
 		
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline rounded<>(long double ld)
