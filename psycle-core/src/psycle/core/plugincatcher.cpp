@@ -6,6 +6,7 @@
 
 #include <psycle/core/config.private.hpp>
 #include "plugincatcher.h"
+#include <universalis/operating_system/paths.hpp>
 
 #include "file.h"
 #include "fileio.h"
@@ -36,94 +37,79 @@ void PluginFinderCache::EnablePlugin(const MachineKey & key, bool enable) {
 
 bool PluginFinderCache::loadCache(){
 #if 0
-	//FIXME:std::string cache((universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache").native_file_string());
-	std::string cache(File::home() + "/psycle.plugin-scan.cache");
-
+	std::string cache((universalis::operating_system::paths::package::home() / "plugin-scan.cache").native_file_string());
 	RiffFile file;
+	CFileFind finder;
 
-	if (!file.Open(cache.c_str()))
-		return false;
-	
-	char Temp[1024];
-	file.ReadArray(Temp,8);
-	Temp[8]=0;
-	if (strcmp(Temp,"PSYCACHE")!=0)
+	char temp[9];
+	std::uint32_t version;
+	std::uint32_t fileNumPlugs;
+
+	file.ReadArray(temp,8);
+	temp[8]=0;
+	if (strcmp(temp,"PSYCACHE")!=0)
 	{
 		file.Close();
 		deleteCache();
 		return false;
 	}
-	
-	std::uint32_t version;
+
 	file.Read(version);
 	if (version != CURRENT_CACHE_MAP_VERSION)
 	{
 		file.Close();
-		deleteCache();
+		DeleteFile(cache.c_str());
 		return false;
 	}
-	
-	std::uint32_t fileNumPlugs;
+
 	file.Read(fileNumPlugs);
 	for (std::uint32_t i = 0; i < fileNumPlugs; i++)
 	{
 		PluginInfo p;
-		file.ReadString(Temp,sizeof(Temp));
+		Hosts::type host;
+		int index;
+
+		file.ReadString(temp,sizeof(temp));
+
 		{
-			//FIXME: types
 			time_t filetime;
-			//file.ReadArray(&filetime,sizeof(filetime));p.setFileTime(filetime);
-			std::uint32_t size;
-			file.Read(size);
-			if(size)
-			{
-				char *chars(new char[size + 1]);
-				file.ReadArray(chars, size);
-				chars[size] = '\0';
-				p.setError((const char*)chars);
-				delete [] chars;
-			}
+			std::string error_msg;
+
+			file.Read(filetime);	p.setFileTime(filetime);
+			file.ReadString(error_msg);		p.setError(error_msg);
 		}
 		{
 			std::string s_temp;
 			bool b_temp;
-			std::int32_t identifier;
-			MachineType mtype;
-			MachineMode mmode;
-			//FIXME: types
-			file.Read(b_temp); p.setAllow(b_temp);
-			//file.ReadArray(&mmode,sizeof(mmode)); p.setMode(mmode);
-			//file.ReadArray(&mtype,sizeof(mtype)); p.setType(mtype);
-			file.ReadString(s_temp); p.setName(s_temp);
-			file.Read(identifier);
-			file.ReadString(s_temp); p.setAuthor(s_temp);
-			file.ReadString(s_temp); p.setDesc(s_temp);
-			file.ReadString(s_temp); p.setVersion(s_temp);
+			MachineRole::type rl_temp;
+			file.Read(host);
+			file.Read(index);
+			file.Read(b_temp);		p.setAllow(b_temp);
+			file.Read(rl_temp);		p.setRole(rl_temp);
+			file.ReadString(s_temp);	p.setName(s_temp);
+			file.ReadString(s_temp);	p.setAuthor(s_temp);
+			file.ReadString(s_temp);	p.setDesc(s_temp);
+			file.ReadString(s_temp);	p.setVersion(s_temp);
 		}
 
-//FIXME:Unfinished
 		// Temp here contains the full path to the .dll
-		/*if(finder.FindFile(Temp))
+		if(finder.FindFile(temp))
 		{
 			time_t t_time;
 			finder.FindNextFile();
-			if (finder.GetLastWriteTime(&time))
+			if (finder.GetLastWriteTime(&t_time))
 			{
 				// Only add the information to the cache if the dll hasn't been modified (say, a new version)
 				// Else, we want to get the new information, and that will happen in the plugins scan.
 				if ( p.fileTime() == t_time )
 				{
-					p.setLibName( Temp );
-					PluginFinderKey key(fileName, ladspa_path + File::slash() + fileName, identifier);
-					map_[key] = info;
-					_numPlugins++;
-
+					MachineKey key( host, temp, index);
+					AddInfo( key, p);
 				}
 			}
 		}
-*/
 	}
-	
+
 	file.Close();
 #endif
 	return true;

@@ -22,10 +22,10 @@ namespace psycle
 			d.byte.lolo = val&0xFF;
 		}
 
-		std::uint32_t ULongBE::unsignedValue() {
+		std::uint32_t ULongBE::unsignedValue() const {
 			return d.byte.hihi << 24 + d.byte.hilo << 16 + d.byte.lohi << 8 + d.byte.lolo;
 		}
-		std::int32_t ULongBE::signedValue() {
+		std::int32_t ULongBE::signedValue() const {
 			return static_cast<std::int32_t>(unsignedValue());
 		}
 
@@ -36,10 +36,10 @@ namespace psycle
 			d.byte.hi = (val >> 8)&0xFF;
 			d.byte.lo = val&0xFF;
 		}
-		std::uint16_t UShortBE::unsignedValue() {
+		std::uint16_t UShortBE::unsignedValue() const {
 			return d.byte.hi << 8 + d.byte.lo;
 		}
-		std::int16_t UShortBE::signedValue() {
+		std::int16_t UShortBE::signedValue() const {
 			return static_cast<std::int16_t>(unsignedValue());
 		}
 		LongBE::LongBE() {
@@ -53,7 +53,7 @@ namespace psycle
 		ShortBE::ShortBE(std::int16_t val):UShortBE(static_cast<std::uint16_t>(val)){
 		}
 
-		float FixedPointBE::value() { 
+		float FixedPointBE::value() const {
 			return (float)(integer.byte.hi << 8 + integer.byte.lo) + (decimal.byte.hi << 8 + decimal.byte.lo)*0.0000152587890625f;
 		}
 
@@ -66,10 +66,10 @@ namespace psycle
 			d.byte.lohi = (val >> 8)&0xFF;
 			d.byte.lolo = val&0xFF;
 		}
-		std::uint32_t ULongLE::unsignedValue() {
+		std::uint32_t ULongLE::unsignedValue() const {
 			return d.byte.hihi << 24 + d.byte.hilo << 16 + d.byte.lohi << 8 + d.byte.lolo;
 		}
-		std::int32_t ULongLE::signedValue() {
+		std::int32_t ULongLE::signedValue() const {
 			return static_cast<std::int32_t>(unsignedValue());
 		}
 
@@ -80,10 +80,10 @@ namespace psycle
 			d.byte.hi = (val >> 8)&0xFF;
 			d.byte.lo = val&0xFF;
 		}
-		std::uint16_t UShortLE::unsignedValue() {
+		std::uint16_t UShortLE::unsignedValue() const {
 			return d.byte.hi << 8 + d.byte.lo;
 		}
-		std::int16_t UShortLE::signedValue() {
+		std::int16_t UShortLE::signedValue() const {
 			return static_cast<std::int16_t>(unsignedValue());
 		}
 		LongLE::LongLE() {
@@ -101,12 +101,16 @@ namespace psycle
 		BaseChunkHeader::~BaseChunkHeader() {
 		}
 
-		std::string BaseChunkHeader::idString() {
+		std::string BaseChunkHeader::idString() const {
 			const char id2[5] = {id[0],id[1],id[2],id[3],'\0'}; return id2;
 		}
 
-		bool BaseChunkHeader::matches(IffChunkId id2) {
-			return *(std::uint32_t const*)id == *(std::uint32_t const*)id2;
+		bool BaseChunkHeader::matches(IffChunkId id2) const {
+			bool match = true;
+			for(int i=0; i < 4; i++) {
+				match = match && id[i] == id2[i];
+			}
+			return match;
 		}
 
 		AbstractIff::AbstractIff() {
@@ -142,7 +146,7 @@ namespace psycle
 			_stream.close();
 		}
 
-		bool AbstractIff::Eof() {
+		bool AbstractIff::Eof() const {
 			//_stream.eof ???
 			return !_stream.bad();
 		}
@@ -181,10 +185,10 @@ namespace psycle
 			strncpy(data,temp.c_str(), std::min(temp.length(),max_length)-1);
 		}
 
-		void AbstractIff::ReadSizedString(char *data, std::size_t const & max_length) {
-			memset(data,0,max_length);
-			ReadRaw(data,max_length);
-			data[max_length-1]='\0';
+		void AbstractIff::ReadSizedString(char *data, std::size_t const & read_length) {
+			memset(data,0,read_length);
+			ReadRaw(data,read_length);
+			data[read_length-1]='\0';
 		}
 
 		template<typename T>
@@ -246,6 +250,16 @@ namespace psycle
 			ReadRaw(&x1.d.byte,2);
 			x = x1.signedValue();
 		}
+		void AbstractIff::Read(IffChunkId id) {
+			ReadRaw((char*)id, sizeof IffChunkId);
+		}
+		void AbstractIff::Read(ULongBE& ulong) {
+			ReadRaw(&ulong.d.byte,4);
+		}
+		void AbstractIff::Read(ULongLE& ulong) {
+			ReadRaw(&ulong.d.byte,4);
+		}
+
 
 		void AbstractIff::WriteString(std::string &string) {
 			WriteRaw(string.c_str(),string.length());
@@ -331,6 +345,16 @@ namespace psycle
 			ShortLE x2(x);
 			Write(x2.signedValue());
 		}
+		void AbstractIff::Write(const IffChunkId id) {
+			Write((const char*)id);
+		}
+		void AbstractIff::Write(const ULongBE& ulong) {
+			Write(ulong.unsignedValue());
+		}
+		void AbstractIff::Write(const ULongLE& ulong) {
+			Write(ulong.unsignedValue());
+		}
+
 
 		std::size_t AbstractIff::GetPos(void) {
 			return  (write_mode) ? _stream.tellp() : _stream.tellg();

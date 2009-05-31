@@ -12,7 +12,7 @@ namespace psycle
 	{
 		const IffChunkId EaIff::grabbag = {' ',' ',' ',' '};
 
-		std::uint32_t IffChunkHeader::length() {
+		std::uint32_t IffChunkHeader::length() const {
 			return ulength.unsignedValue();
 		}
 
@@ -24,7 +24,7 @@ namespace psycle
 		void EaIff::Open(std::string fname) { AbstractIff::Open(fname); }
 		void EaIff::Create(std::string fname, bool const & overwrite) { AbstractIff::Create(fname, overwrite); }
 		void EaIff::close() { AbstractIff::close(); }
-		bool EaIff::Eof() { return AbstractIff::Eof(); }
+		bool EaIff::Eof() const { return AbstractIff::Eof(); }
 
 
 		void EaIff::addFormChunk(IffChunkId id) {
@@ -38,15 +38,10 @@ namespace psycle
 		void EaIff::addListProperty(IffChunkId contentId, IffChunkId propId, void const *data, std::uint32_t dataSize) {
 		}
 
-		void EaIff::WriteChunkHeader(const IffChunkHeader& header) {
-			if (GetPos()%2 > 0) Write('\0');
-			WriteRaw(&header,sizeof(header));
-			currentHeader=header;
-		}
-
 		const IffChunkHeader& EaIff::readHeader() {
 			if(GetPos()%2 > 0) Skip(1);
-			ReadRaw(&currentHeader,sizeof(currentHeader));
+			Read(currentHeader.id);
+			Read(currentHeader.ulength);
 			return currentHeader;
 		}
 		const IffChunkHeader& EaIff::findChunk(IffChunkId id, bool allowWrap) {
@@ -57,6 +52,14 @@ namespace psycle
 			Seek(headerPosition + 8 + currentHeader.length());
 			if (GetPos() % 2 > 0) Skip(1);
 		}
+
+		void EaIff::WriteHeader(const IffChunkHeader& header) {
+			if (GetPos()%2 > 0) Write('\0');
+			Write(header.id);
+			Write(header.ulength);
+			currentHeader=header;
+		}
+
 
 	}
 }
