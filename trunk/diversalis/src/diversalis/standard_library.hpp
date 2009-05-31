@@ -8,6 +8,15 @@
 #pragma once
 
 #include "compiler.hpp"
+#include "operating_system.hpp"
+
+#if __STDC__VERSION__ >= 199901 || ( \
+	defined DIVERSALIS__COMPILER__GNU && \
+	DIVERSALIS__COMPILER__VERSION__MAJOR >= 4 && \
+	!defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN \
+)
+	#define DIVERSALIS__STANDARD_LIBRARY__MATH 199901
+#endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 

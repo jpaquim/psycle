@@ -1,4 +1,9 @@
 #pragma once
+#include <diversalis/standard_library.hpp>
+#if DIVERSALIS__STANDARD_LIBRARY__MATH < 199901
+	#include <diversalis/operating_system.hpp>
+	#include <diversalis/compiler.hpp>
+#endif
 #include <diversalis/processor.hpp>
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
@@ -22,8 +27,7 @@ namespace psycle { namespace helpers { namespace math {
 // inline implementation
 namespace psycle { namespace helpers { namespace math {
 	
-	#if __STDC__VERSION__ >= 199901 || \
-		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
+	#if DIVERSALIS__STANDARD_LIBRARY__MATH >= 199901
 		
 		template<> UNIVERSALIS__COMPILER__CONST
 		long long int inline fast_unspecified_round_to_integer<>(long double ld) {
@@ -105,7 +109,7 @@ namespace psycle { namespace helpers { namespace math {
 	#endif
 }}}
 
-#if defined BOOST_AUTO_TEST_CASE && __STDC_VERSION__ >= 199901 // some test of C1999's features
+#if defined BOOST_AUTO_TEST_CASE && DIVERSALIS__STANDARD_LIBRARY__MATH >= 199901 // some test of C1999's features
 	#include <cmath>
 	#include <fenv.h>
 	BOOST_AUTO_TEST_CASE(lrint_test) {
