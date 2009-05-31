@@ -1,5 +1,9 @@
 #pragma once
-#include <diversalis/processor.hpp>
+#include <diversalis/standard_library.hpp>
+#if DIVERSALIS__STANDARD_LIBRARY__MATH < 199901
+	#include <diversalis/compiler.hpp>
+	#include <diversalis/processor.hpp>
+#endif
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
@@ -17,9 +21,8 @@ namespace psycle { namespace helpers { namespace math {
 // inline implementation
 namespace psycle { namespace helpers { namespace math {
 
-	#if __STDC__VERSION__ >= 199901 || \
-		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
-		
+	#if DIVERSALIS__STANDARD_LIBRARY__MATH >= 199901
+
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline truncated<>(long double ld)
 		{
