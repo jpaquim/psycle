@@ -251,7 +251,7 @@ namespace psycle
 			x = x1.signedValue();
 		}
 		void AbstractIff::Read(IffChunkId id) {
-			ReadRaw((char*)id, sizeof IffChunkId);
+			ReadRaw((char*)id, sizeof(IffChunkId));
 		}
 		void AbstractIff::Read(ULongBE& ulong) {
 			ReadRaw(&ulong.d.byte,4);
