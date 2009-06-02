@@ -20,6 +20,12 @@ using namespace psy::core;
 #endif //!defined WINAMP_PLUGIN
 
 #include <psycle/helpers/dsp.hpp>
+
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle
 {
 	namespace host
@@ -57,13 +63,13 @@ namespace psycle
 		{
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 			delete pPlayer; pPlayer = 0;
-			delete pResampler; pResampler = 0;
-			delete pConfig; pConfig = 0;
 			delete pVstHost; pVstHost = 0;
+#endif // PSYCLE__CONFIGURATION__USE_PSYCORE
+			delete pConfig; pConfig = 0;
+			delete pResampler; pResampler = 0;
 #if !defined WINAMP_PLUGIN
 			delete pInputHandler; pInputHandler = 0;
 #endif //!defined WINAMP_PLUGIN
-#endif // PSYCLE__CONFIGURATION__USE_PSYCORE
 		}
 
 		extern CPsycleApp theApp;

@@ -21,6 +21,12 @@ using namespace psy::core;
 #include "MainFrm.hpp"
 #include <psycle/helpers/helpers.hpp>
 #include <cassert>
+
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle
 {
 	namespace host
@@ -47,13 +53,14 @@ namespace psycle
 			s_Instance = this;
 
 			// clear down buffers
-			std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
+			// Can't clear this. it's not a basic type!
+			//std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
 			std::memset( m_channelSetting, -1, sizeof( int ) * MAX_MIDI_CHANNELS );
 			std::memset( m_channelInstMap, 0, sizeof( std::uint32_t ) * MAX_MACHINES );
 			std::memset( m_channelGeneratorMap, -1, sizeof( std::uint32_t ) * MAX_MIDI_CHANNELS );
 			std::memset( m_channelNoteOff, 0, sizeof( bool ) * MAX_MIDI_CHANNELS );	
 			std::memset( m_channelController, -1, sizeof( int ) * MAX_MIDI_CHANNELS * MAX_CONTROLLERS );	
-			std::memset( m_devId, -1, sizeof( std::uint32_t ) * MAX_DRIVERS );
+			std::memset( m_devId, -1, sizeof( int ) * MAX_DRIVERS );
 			std::memset( m_midiInHandle, 0, sizeof( HMIDIIN ) * MAX_DRIVERS );
 
 			// setup config defaults (override some by registry settings)
