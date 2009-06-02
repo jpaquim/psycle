@@ -84,6 +84,7 @@ namespace psycle
 		class MIDI_BUFFER
 		{
 		public:
+			MIDI_BUFFER() : timeStamp(0), channel(0) {};
 			/// tracker pattern info struct
 			PatternEvent entry;
 			/// MIDI input device's timestamp
