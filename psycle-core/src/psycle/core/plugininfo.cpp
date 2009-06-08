@@ -108,4 +108,3 @@ const std::string & PluginInfo::category() const {
 }
 
 }}
-
