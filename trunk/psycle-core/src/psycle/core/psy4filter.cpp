@@ -807,4 +807,3 @@ bool Psy4Filter::saveWAVEv0( RiffFile * /*file*/, const CoreSong& /*song*/, int 
 }
 
 }}
-

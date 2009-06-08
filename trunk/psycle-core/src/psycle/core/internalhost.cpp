@@ -103,5 +103,3 @@ void InternalHost::FillFinderData(PluginFinder& finder, bool /*clearfirst*/)
 }
 
 }}
-
-

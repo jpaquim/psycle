@@ -122,4 +122,3 @@ void PluginFinderCache::deleteCache(){
 
 
 }}
-
