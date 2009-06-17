@@ -16,7 +16,7 @@ namespace psy { namespace core {
 // Allows to differentiate between internal machines.
 // They are not intended to be used from outside. Use MachineKey for that.
 namespace InternalMacs {
-	typedef enum type_t {
+	enum type_t {
 		MASTER = 0,
 		DUMMY,
 		SAMPLER,
