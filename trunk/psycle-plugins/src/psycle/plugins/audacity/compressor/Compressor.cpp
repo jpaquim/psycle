@@ -12,7 +12,7 @@
 **********************************************************************/
 #include <cmath>
 
-#include "compressor.hpp"
+#include "Compressor.h"
 
 EffectCompressor::EffectCompressor()
 {
