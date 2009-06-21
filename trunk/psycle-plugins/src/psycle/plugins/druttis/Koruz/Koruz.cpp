@@ -28,8 +28,6 @@ using namespace psycle::plugin_interface;
 #define WAVESIZE 4096
 #define WAVEMASK 4095
 float				wavetable[WAVESIZE];
-//				Truncation for f2i
-unsigned short cwTrunc = 0x1f72;
 //============================================================================
 //				Parameters
 //============================================================================
