@@ -144,6 +144,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 			#endif
 
 			// SMP
+			#if _POSIX_CPUTIME > 0 || _SC_CPUTIME
 			if(process_cputime_supported || thread_cputime_supported) {
 				::clockid_t clock_id;
 				if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
@@ -151,9 +152,6 @@ namespace universalis { namespace operating_system { namespace clocks {
 						#warning this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
 					#endif
 					process_cputime_supported = thread_cputime_supported = false;
-				} else {
-					if(process_cputime_supported) process_cputime_clock_id = CLOCK_PROCESS_CPUTIME_ID;
-					if(thread_cputime_supported) thread_cputime_clock_id = CLOCK_THREAD_CPUTIME_ID;
 				}
 			}
 
