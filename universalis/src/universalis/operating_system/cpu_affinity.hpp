@@ -31,22 +31,25 @@ unsigned int inline cpu_count() throw(std::runtime_error) {
 	unsigned int result(0);
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		///\todo also try using os.sysconf('SC_NPROCESSORS_ONLN') // SC_NPROCESSORS_CONF
-		
-		cpu_set_t set;
-		CPU_ZERO(&set);
-		if(
-			#if 0 // not available on all systems
-				pthread_getaffinity_np(pthread_self()
-			#else
-				sched_getaffinity(0 // current process
-			#endif
-			, sizeof set /* warning: do not use CPU_SETSIZE here */, &set)
-		) {
-			//throw exception(UNIVERSALIS__COMPILER__LOCATION);
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
-		for(unsigned int i(0); i < CPU_SETSIZE; ++i) if(CPU_ISSET(i, &set)) ++result;
+		#if defined DIVERSALIS__OPERATING_SYSTTEM__CYGWIN
+			return 1; ///\todo sysconf
+		#else
+			cpu_set_t set;
+			CPU_ZERO(&set);
+			if(
+				#if 0 // not available on all systems
+					pthread_getaffinity_np(pthread_self()
+				#else
+					sched_getaffinity(0 // current process
+				#endif
+				, sizeof set /* warning: do not use CPU_SETSIZE here */, &set)
+			) {
+				//throw exception(UNIVERSALIS__COMPILER__LOCATION);
+				std::ostringstream s; s << exceptions::code_description();
+				throw std::runtime_error(s.str().c_str());
+			}
+			for(unsigned int i(0); i < CPU_SETSIZE; ++i) if(CPU_ISSET(i, &set)) ++result;
+		#endif
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		///\todo also try using int(os.environ.get('NUMBER_OF_PROCESSORS', 1))
 
