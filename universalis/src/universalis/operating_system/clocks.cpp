@@ -145,15 +145,16 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 			// SMP
 			#if _POSIX_CPUTIME > 0 || _SC_CPUTIME
-			if(process_cputime_supported || thread_cputime_supported) {
-				::clockid_t clock_id;
-				if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
-					#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
-					#endif
-					process_cputime_supported = thread_cputime_supported = false;
+				if(process_cputime_supported || thread_cputime_supported) {
+					::clockid_t clock_id;
+					if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
+						#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+							#warning this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
+						#endif
+						process_cputime_supported = thread_cputime_supported = false;
+					}
 				}
-			}
+			#endif
 
 			once = true;
 		}
