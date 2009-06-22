@@ -226,7 +226,7 @@ namespace detail {
 				BOOST_MESSAGE(s.str());
 			}
 
-			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX && (_POSIX_TIMERS > 0 || defined _SC_TIMERS )
 				void display_clock_resolution(std::string const & clock_name, ::clockid_t clock) throw(std::runtime_error) {
 					::timespec t;
 					if(::clock_getres(clock, &t))
@@ -260,12 +260,14 @@ namespace detail {
 
 					if(clock_getres_supported) {
 						BOOST_MESSAGE("posix clock_getres");
-						display_clock_resolution("CLOCK_REALTIME", CLOCK_REALTIME);
-						if(monotonic_clock_supported) display_clock_resolution("CLOCK_MONOTONIC", CLOCK_MONOTONIC);
-						if(cputime_supported) {
-							display_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", CLOCK_PROCESS_CPUTIME_ID);
-							display_clock_resolution("CLOCK_THREAD_CPUTIME_ID", CLOCK_THREAD_CPUTIME_ID);
-						}
+						#if _POSIX_TIMERS > 0 || defined _SC_TIMERS
+							display_clock_resolution("CLOCK_REALTIME", CLOCK_REALTIME);
+							if(monotonic_clock_supported) display_clock_resolution("CLOCK_MONOTONIC", CLOCK_MONOTONIC);
+							if(cputime_supported) {
+								display_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", CLOCK_PROCESS_CPUTIME_ID);
+								display_clock_resolution("CLOCK_THREAD_CPUTIME_ID", CLOCK_THREAD_CPUTIME_ID);
+							}
+						#endif
 					} else {
 							std::ostringstream s;
 							s << "CLOCKS_PER_SEC: " << CLOCKS_PER_SEC;
