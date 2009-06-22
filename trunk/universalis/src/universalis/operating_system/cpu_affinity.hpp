@@ -31,7 +31,7 @@ unsigned int inline cpu_count() throw(std::runtime_error) {
 	unsigned int result(0);
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		///\todo also try using os.sysconf('SC_NPROCESSORS_ONLN') // SC_NPROCESSORS_CONF
-		#if defined DIVERSALIS__OPERATING_SYSTTEM__CYGWIN
+		#if defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN
 			return 1; ///\todo sysconf
 		#else
 			cpu_set_t set;
