@@ -17,7 +17,7 @@ namespace universalis { namespace operating_system { namespace clocks {
 /******************************************************************************************/
 #if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 	namespace detail { namespace posix {
-		bool clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, cputime_supported;
+		bool clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, process_cputime_supported, thread_cputime_supported;
 		::clockid_t monotonic_clock_id, process_cputime_clock_id, thread_cputime_clock_id;
 
 		namespace {
@@ -40,8 +40,8 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 			#if defined DIVERSALIS__COMPILER__DOXYGEN
 				/// define this macro to diagnose potential issues
-				#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE
 			#endif
+			#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE
 
 			/// TIMERS
 			#if !_POSIX_TIMERS
@@ -97,39 +97,65 @@ namespace universalis { namespace operating_system { namespace clocks {
 				if(monotonic_clock_supported) monotonic_clock_id = CLOCK_MONOTONIC;
 			#endif
 
-			// CPUTIME
+			// PROCESS_CPUTIME
 			#if !_POSIX_CPUTIME
 				#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-					#warning will use posix sysconf at runtime to determine whether this OS supports cpu time: !_POSIX_CPUTIME
+					#warning will use posix sysconf at runtime to determine whether this OS supports process cpu time: !_POSIX_CPUTIME
 				#endif
 			#elif _POSIX_CPUTIME == -1
 				#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-					#warning this OS does not support posix cpu time: _POSIX_CPUTIME == -1
+					#warning this OS does not support posix process cpu time: _POSIX_CPUTIME == -1
 				#endif
-				cputime_supported = false;
+				process_cputime_supported = false;
 			#elif _POSIX_CPUTIME > 0
-				cputime_supported = true;
+				process_cputime_supported = true;
 			#endif
 			#if !defined _SC_CPUTIME
 				#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-					#warning cannot use posix sysconf at runtime to determine whether this OS supports cpu time: !defined _SC_CPUTIME
+					#warning cannot use posix sysconf at runtime to determine whether this OS supports process cpu time: !defined _SC_CPUTIME
 				#endif
-				cputime_supported = false;
+				process_cputime_supported = false;
 			#else
-				cputime_supported = supported(_SC_CPUTIME);
-				if(cputime_supported) {
-					::clockid_t clock_id;
-					if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
-						// this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
-						cputime_supported = false;
-					} else {
-						///\todo do we do something with the clock_id?
-						//process_cputime_clock_id = thread_cputime_clock_id = clock_id;
-						process_cputime_clock_id = CLOCK_PROCESS_CPUTIME_ID;
-						thread_cputime_clock_id = CLOCK_THREAD_CPUTIME_ID;
-					}
-				}
+				process_cputime_supported = supported(_SC_CPUTIME);
+				if(process_cputime_supported) process_cputime_clock_id = CLOCK_PROCESS_CPUTIME_ID;
 			#endif
+
+			// THREAD_CPUTIME
+			#if !_POSIX_THREAD_CPUTIME
+				#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+					#warning will use posix sysconf at runtime to determine whether this OS supports thread cpu time: !_POSIX_THREAD_CPUTIME
+				#endif
+			#elif _POSIX_THREAD_CPUTIME == -1
+				#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+					#warning this OS does not support posix thread cpu time: _POSIX_THREAD_CPUTIME == -1
+				#endif
+				thread_cputime_supported = false;
+			#elif _POSIX_THREAD_CPUTIME > 0
+				thread_cputime_supported = true;
+			#endif
+			#if !defined _SC_THREAD_CPUTIME
+				#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+					#warning cannot use posix sysconf at runtime to determine whether this OS supports thread cpu time: !defined _SC_THREAD_CPUTIME
+				#endif
+				thread_cputime_supported = false;
+			#else
+				thread_cputime_supported = supported(_SC_THREAD_CPUTIME);
+				if(thread_cputime_supported) thread_cputime_clock_id = CLOCK_THREAD_CPUTIME_ID;
+			#endif
+
+			// SMP
+			if(process_cputime_supported || thread_cputime_supported) {
+				::clockid_t clock_id;
+				if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
+					#if defined UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
+						#warning this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
+					#endif
+					process_cputime_supported = thread_cputime_supported = false;
+				} else {
+					if(process_cputime_supported) process_cputime_clock_id = CLOCK_PROCESS_CPUTIME_ID;
+					if(thread_cputime_supported) thread_cputime_clock_id = CLOCK_THREAD_CPUTIME_ID;
+				}
+			}
 
 			once = true;
 		}
@@ -171,14 +197,18 @@ namespace detail {
 		namespace posix {
 			namespace {
 				std::nanoseconds get(::clockid_t clock) throw(std::runtime_error) {
-					::timespec t;
-					if(::clock_gettime(clock, &t)) {
-						//throw exception(UNIVERSALIS__COMPILER__LOCATION);
-						std::ostringstream s; s << exceptions::code_description();
-						throw std::runtime_error(s.str().c_str());
-					}
-					std::nanoseconds ns(std::nanoseconds(t.tv_nsec) + std::seconds(t.tv_sec));
-					return ns;
+					#if defined _POSIX_TIMERS > 0 || defined _SC_TIMERS
+						::timespec t;
+						if(::clock_gettime(clock, &t)) {
+							//throw exception(UNIVERSALIS__COMPILER__LOCATION);
+							std::ostringstream s; s << exceptions::code_description();
+							throw std::runtime_error(s.str().c_str());
+						}
+						std::nanoseconds ns(std::nanoseconds(t.tv_nsec) + std::seconds(t.tv_sec));
+						return ns;
+					#else
+						return iso_std_clock();
+					#endif
 				}
 			}
 
@@ -220,7 +250,7 @@ namespace detail {
 			/// test result on colinux AMD64: clock: CLOCK_THREAD_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
 			std::nanoseconds thread_cpu_time() throw(std::runtime_error) {
 				return get(
-					#if _POSIX_CPUTIME > 0 || defined _SC_CPUTIME
+					#if _POSIX_THREAD_CPUTIME > 0 || defined _SC_THREAD_CPUTIME
 						CLOCK_THREAD_CPUTIME_ID
 					#else
 						CLOCK_REALTIME
@@ -390,7 +420,7 @@ std::nanoseconds monotonic::current() {
 std::nanoseconds process::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		detail::posix::config();
-		if(detail::posix::cputime_supported) return detail::posix::process_cpu_time();
+		if(detail::posix::process_cputime_supported) return detail::posix::process_cpu_time();
 		else return monotonic::current();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		return detail::microsoft::process_time();
@@ -402,7 +432,7 @@ std::nanoseconds process::current() {
 std::nanoseconds thread::current() {
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		detail::posix::config();
-		if(detail::posix::cputime_supported) return detail::posix::thread_cpu_time();
+		if(detail::posix::thread_cputime_supported) return detail::posix::thread_cpu_time();
 		else return process::current();
 	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 		return detail::microsoft::thread_time();
