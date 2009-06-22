@@ -114,7 +114,7 @@ namespace detail {
 
 	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
 		namespace posix {
-			bool extern clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, cputime_supported;
+			bool extern clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, process_cputime_supported, thread_cputime_supported;
 			::clockid_t extern monotonic_clock_id, process_cputime_clock_id, thread_cputime_clock_id;
 			void config();
 
@@ -252,21 +252,23 @@ namespace detail {
 					config();
 					measure_clock_resolution("CLOCK_REALTIME", realtime);
 					if(monotonic_clock_supported) measure_clock_resolution("CLOCK_MONOTONIC", monotonic);
-					if(cputime_supported) {
-						measure_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", process_cpu_time);
-						measure_clock_resolution("CLOCK_THREAD_CPUTIME_ID", thread_cpu_time);
-					}
+					if(process_cputime_supported) measure_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", process_cpu_time);
+					if(thread_cputime_supported) measure_clock_resolution("CLOCK_THREAD_CPUTIME_ID", thread_cpu_time);
 					measure_clock_resolution("gettimeofday", time_of_day);
 
 					if(clock_getres_supported) {
-						BOOST_MESSAGE("posix clock_getres");
 						#if _POSIX_TIMERS > 0 || defined _SC_TIMERS
+							BOOST_MESSAGE("posix clock_getres");
 							display_clock_resolution("CLOCK_REALTIME", CLOCK_REALTIME);
-							if(monotonic_clock_supported) display_clock_resolution("CLOCK_MONOTONIC", CLOCK_MONOTONIC);
-							if(cputime_supported) {
-								display_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", CLOCK_PROCESS_CPUTIME_ID);
-								display_clock_resolution("CLOCK_THREAD_CPUTIME_ID", CLOCK_THREAD_CPUTIME_ID);
-							}
+							#if _POSIX_MONOTONIC_CLOCK > 0 || defined _SC_MONOTONIC_CLOCK
+								if(monotonic_clock_supported) display_clock_resolution("CLOCK_MONOTONIC", CLOCK_MONOTONIC);
+							#endif
+							#if _POSIX_CPUTIME > 0 || defined _SC_CPUTIME
+								if(process_cputime_supported) display_clock_resolution("CLOCK_PROCESS_CPUTIME_ID", CLOCK_PROCESS_CPUTIME_ID);
+							#endif
+							#if _POSIX_THREAD_CPUTIME > 0 || defined _SC_THREAD_CPUTIME
+								if(thread_cputime_supported) display_clock_resolution("CLOCK_THREAD_CPUTIME_ID", CLOCK_THREAD_CPUTIME_ID);
+							#endif
 						#endif
 					} else {
 							std::ostringstream s;
