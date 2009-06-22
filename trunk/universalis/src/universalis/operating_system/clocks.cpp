@@ -40,8 +40,8 @@ namespace universalis { namespace operating_system { namespace clocks {
 
 			#if defined DIVERSALIS__COMPILER__DOXYGEN
 				/// define this macro to diagnose potential issues
+				#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE
 			#endif
-			#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__DIAGNOSE
 
 			/// TIMERS
 			#if !_POSIX_TIMERS
