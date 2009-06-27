@@ -417,14 +417,8 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 			beatpos += 1 / static_cast<float>(linesPerBeat);
 		}
 		delete[] pDest; pDest = 0;
-		TimeSignature & sig =  pat->timeSignatures().back();
-		sig.setCount(static_cast<int>(beatpos / 4));
-		float uebertrag = beatpos - static_cast<int>(beatpos);
-		if(uebertrag) {
-			TimeSignature uebertragSig(uebertrag);
-			if(!sig.count()) pat->timeSignatures().pop_back();
-			pat->addBar(uebertragSig);
-		}
+		pat->timeSignatures().clear();
+		pat->timeSignatures().push_back(TimeSignature(beatpos));
 	}
 	return fileread;
 }

@@ -35,6 +35,8 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SequenceLine* line = song_.patternSequence().createNewLine();
 			psy::core::SinglePattern* pattern= new psy::core::SinglePattern();
+			pattern->timeSignatures().clear();
+			pattern->timeSignatures().push_back(psy::core::TimeSignature(4.0));
 			pattern->setID(0);
 			song_.patternSequence().Add(pattern);
 			pattern->setName("Untitled");

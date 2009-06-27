@@ -73,6 +73,10 @@ float TimeSignature::beats() const {
 	else return static_cast< float >(numerator_ * count_);
 }
 
+void TimeSignature::set_beats(float beats) {
+  ownerDefinedBeats_ = beats;
+}
+
 bool TimeSignature::ownerDefined() const {
 	return ownerDefined_;
 }

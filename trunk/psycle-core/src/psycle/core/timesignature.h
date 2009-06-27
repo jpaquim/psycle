@@ -32,6 +32,7 @@ class TimeSignature {
 
 		float beats() const;
 		bool ownerDefined() const;
+		void set_beats(float beats); // owner_defined
 
 	private:
 		int numerator_;
