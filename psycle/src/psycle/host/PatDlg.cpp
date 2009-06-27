@@ -3,9 +3,22 @@
 
 #include "PatDlg.hpp"
 
+#include <sstream>
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+	#include <psycle/core/singlepattern.h>
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
-		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		CPatDlg::CPatDlg(CWnd* pParent, psy::core::SinglePattern* pattern) : 
+			CDialog(CPatDlg::IDD, pParent),
+		    pattern_(pattern)
+#else
+		CPatDlg::CPatDlg(CWnd* pParent) : 
+			CDialog(CPatDlg::IDD, pParent)
+#endif
 		{
 			//{{AFX_DATA_INIT(CPatDlg)
 			m_adaptsize = FALSE;
@@ -33,15 +46,32 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
+		template< typename T >
+		static std::string asString( const T& value ) 
+		{
+			std::ostringstream o;
+			if (!(o << value) )
+				assert( 0 );
+			return o.str();
+		}
+
 		BOOL CPatDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
 			m_spinlines.SetRange(1,MAX_LINES);
 			m_patname.SetWindowText(patName);
 			m_patname.SetLimitText(30);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			m_numlines.SetWindowText(asString(pattern_->timeSignatures().front().beats()).c_str());
+			CStatic* cc =(CStatic*)GetDlgItem(IDC_STATIC1);
+			cc->SetWindowText("Beats");
+			GetDlgItem(IDC_CHECK1)->ShowWindow(SW_HIDE);			
+			GetDlgItem(IDC_TEXT)->ShowWindow(SW_HIDE);			
+#else
 			char buffer[16];
 			itoa(patLines,buffer,10);
 			m_numlines.SetWindowText(buffer);
+#endif
 			UDACCEL acc;
 			acc.nSec = 4;
 			acc.nInc = 16;
@@ -81,8 +111,28 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_adaptsize = m_adaptsizeCheck.GetCheck();
 		}
 
+		template< typename T > 
+		static T asValue( const std::string& strValue, bool isHex = 0 )
+		{    
+			T result;
+			if ( strValue == "" )
+				return 0;
+			std::stringstream stream(strValue);
+			stream >> result;
+			return result;
+		}
+
 		void CPatDlg::OnUpdateNumLines() 
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (bInit)
+			{
+				char buffer[256];
+				m_numlines.GetWindowText(buffer,16);
+				double result = asValue<double>(std::string(buffer));
+				pattern_->timeSignatures().front().set_beats(result);
+			}
+#else
 			char buffer[256];
 			if (bInit)
 			{
@@ -100,6 +150,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				sprintf(buffer,"HEX: %x",val);
 				m_text.SetWindowText(buffer);
 			}
+#endif
 		}
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
