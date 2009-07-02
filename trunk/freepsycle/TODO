@@ -1,6 +1,6 @@
 # This is a sorted list, top priority at the top!
 
-*	generic::wrappers::node find port by name functions
+*	generic::wrappers::node, add functions to find a port by its name
 	This is currently in engine.
 	-- bohan
 
