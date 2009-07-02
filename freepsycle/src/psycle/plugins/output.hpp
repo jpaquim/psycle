@@ -76,6 +76,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 		typedef output_base base;
 	protected: friend class virtual_factory_access;
 		output(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
+	public:
+		//engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 };
 
 }}
