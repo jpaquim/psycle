@@ -5,15 +5,15 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 
-#if defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__GSTREAMER
+#if defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__GSTREAMER
 	#include "outputs/gstreamer.hpp"
-#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__JACK
+#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__JACK
 	#include "outputs/jack.hpp"
-#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__ALSA
+#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__ALSA
 	#include "outputs/alsa.hpp"
-#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DIRECT_SOUND
+#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DIRECT_SOUND
 	#include "outputs/direct_sound.hpp"
-#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DUMMY
+#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DUMMY
 	#include "outputs/dummy.hpp"
 #else
 	#error no default output
@@ -55,15 +55,15 @@ namespace outputs {
 }
 
 typedef outputs::
-	#if defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__GSTREAMER
+	#if defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__GSTREAMER
 		gstreamer
-	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__JACK
+	#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__JACK
 		jack
-	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__ALSA
+	#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__ALSA
 		alsa
-	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DIRECT_SOUND
+	#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DIRECT_SOUND
 		direct_sound
-	#elif defined PSYCLE__PLUGINS__OUTPUTS__DEFAULT__DUMMY
+	#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DUMMY
 		dummy
 	#else
 		#error no default output
