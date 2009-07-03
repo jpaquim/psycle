@@ -10,7 +10,7 @@
 *	microsoft:
 	gthread-2.0.lib
 	DIVERSALIS__PACKAGENERIC__CONFIGURATION__OS__VERSION
-	universalis::operating_system::logger/terminal sync with mspsyclemfc/legacy/operating_system/logger.{c,h}pp
+	universalis::os::logger/terminal sync with mspsyclemfc/legacy/os/logger.{c,h}pp
 	-- bohan (sorry, it's cryptic)
 
 *	have a look at gnulib

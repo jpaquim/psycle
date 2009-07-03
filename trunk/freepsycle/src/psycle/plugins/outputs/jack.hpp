@@ -5,7 +5,7 @@
 #pragma once
 #include "../resource.hpp"
 #include <psycle/helpers/ring_buffer.hpp>
-#include <universalis/operating_system/thread_name.hpp>
+#include <universalis/os/thread_name.hpp>
 #include <jack/jack.h>
 #include <condition>
 #include <mutex>
@@ -41,7 +41,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK jack : public resource {
 
 		void static thread_init_callback_static(void*);
 		void        thread_init_callback();
-		universalis::operating_system::thread_name thread_name_;
+		universalis::os::thread_name thread_name_;
 		
 		typedef std::scoped_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_;

@@ -2,7 +2,7 @@
 // copyright 2006-2007 johan boule <bohan@jabber.org>
 // copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
-#include <diversalis/operating_system.hpp>
+#include <diversalis/os.hpp>
 #if !defined DIVERSALIS__OS__POSIX
 	#error "sorry, but your operating system ain't standard"
 #endif

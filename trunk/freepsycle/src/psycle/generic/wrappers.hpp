@@ -8,7 +8,7 @@
 namespace psycle { namespace generic { namespace wrappers {
 
 using engine::exception;
-namespace loggers = universalis::operating_system::loggers;
+namespace loggers = universalis::os::loggers;
 
 ///\internal
 namespace detail {

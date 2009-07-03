@@ -6,14 +6,14 @@
 ///\interface psycle::paths
 #pragma once
 #include <psycle/detail/project.hpp>
-#include <universalis/operating_system/paths/interface.hpp>
+#include <universalis/os/paths/interface.hpp>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PATHS
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle
 {
 	namespace paths
 	{
-		#include <universalis/operating_system/paths/injection/interface.hpp>
+		#include <universalis/os/paths/injection/interface.hpp>
 	}
 }
 #include <universalis/compiler/dynamic_link/end.hpp>

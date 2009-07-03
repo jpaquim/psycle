@@ -8,7 +8,7 @@
 #pragma once
 
 #include "compiler.hpp"
-#include "operating_system.hpp"
+#include "os.hpp"
 
 #if __STDC__VERSION__ >= 199901 || ( \
 	defined DIVERSALIS__COMPILER__GNU && \

@@ -6,7 +6,7 @@
 #include "Registry.hpp"
 #include "Configuration.hpp"
 #include <universalis/processor/exception.hpp>
-#include <universalis/operating_system/thread_name.hpp>
+#include <universalis/os/thread_name.hpp>
 #include <process.h>
 #include "Dsp.hpp"
 namespace psycle
@@ -340,7 +340,7 @@ namespace psycle
 
 		DWORD WINAPI DirectSound::PollerThread(void* pDirectSound)
 		{
-			universalis::operating_system::thread_name thread_name("direct sound");
+			universalis::os::thread_name thread_name("direct sound");
 			universalis::processor::exception::install_handler_in_thread();
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);

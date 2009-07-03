@@ -9,10 +9,10 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <psycle/generic/typenames.hpp>
-#include <universalis/operating_system/loggers.hpp>
+#include <universalis/os/loggers.hpp>
 #include "sample.hpp"
 namespace psycle {
-	namespace loggers = universalis::operating_system::loggers;
+	namespace loggers = universalis::os::loggers;
 
 	namespace engine {
 		class exception;

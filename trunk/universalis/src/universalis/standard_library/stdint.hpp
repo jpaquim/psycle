@@ -18,7 +18,7 @@
 	#endif
 
 	// some unix systems had the equivalent inttypes.h for a long time
-	#include <diversalis/operating_system.hpp>
+	#include <diversalis/os.hpp>
 	#if defined DIVERSALIS__OS__UNIX
 		#include <inttypes.h>
 	#endif

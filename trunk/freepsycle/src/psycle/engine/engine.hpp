@@ -6,7 +6,7 @@
 ///\brief meta header: all the psycle::engine interface in one header file inclusion.
 #pragma once
 #include <psycle/detail/project.hpp>
-#include <universalis/operating_system/loggers.hpp>
+#include <universalis/os/loggers.hpp>
 #include "forward_declarations.hpp"
 #include "exception.hpp"
 #include "reference_counter.hpp"

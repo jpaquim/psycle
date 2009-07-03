@@ -1,7 +1,7 @@
 #pragma once
 #include <diversalis/standard_library.hpp>
 #if DIVERSALIS__STANDARD_LIBRARY__MATH < 199901
-	#include <diversalis/operating_system.hpp>
+	#include <diversalis/os.hpp>
 	#include <diversalis/compiler.hpp>
 #endif
 #include <diversalis/processor.hpp>

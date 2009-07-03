@@ -46,7 +46,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				#if 0
 					if(!::LoadLibrary("unicows"))
 					{
-						std::runtime_error e("could not load library unicows: " + universalis::operating_system::exceptions::code_description());
+						std::runtime_error e("could not load library unicows: " + universalis::os::exceptions::code_description());
 						MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
 						throw e;
 					}

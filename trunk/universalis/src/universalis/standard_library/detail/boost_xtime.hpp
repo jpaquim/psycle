@@ -7,7 +7,7 @@
 
 #include <universalis/exception.hpp>
 #include <boost/thread/xtime.hpp>
-#include "utc_time.hpp" // cannot #include <date_time> due to dependency of std::hiresolution_clock on universalis::operating_system::clocks, which itself uses std::this_thread::sleep for unit testing, which itself uses this file
+#include "utc_time.hpp" // cannot #include <date_time> due to dependency of std::hiresolution_clock on universalis::os::clocks, which itself uses std::this_thread::sleep for unit testing, which itself uses this file
 
 namespace universalis { namespace standard_library { namespace detail {
 

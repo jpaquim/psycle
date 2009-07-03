@@ -165,11 +165,11 @@ namespace std {
 					#if 0
 						return hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch();
 					#elif 0
-						return universalis::operating_system::clocks::thread_cpu_time::current();
+						return universalis::os::clocks::thread_cpu_time::current();
 					#elif 0
-						return universalis::operating_system::clocks::process_cpu_time::current();
+						return universalis::os::clocks::process_cpu_time::current();
 					#else
-						return universalis::operating_system::clocks::monotonic::current();
+						return universalis::os::clocks::monotonic::current();
 					#endif
 				}
 				
