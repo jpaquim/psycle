@@ -5,8 +5,8 @@
 #include <universalis/detail/project.private.hpp>
 #include "exception.hpp"
 #include "exceptions/fpu.hpp"
-#include <universalis/operating_system/loggers.hpp>
-#include <universalis/operating_system/thread_name.hpp>
+#include <universalis/os/loggers.hpp>
+#include <universalis/os/thread_name.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <thread>
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -22,17 +22,17 @@ namespace universalis { namespace processor {
 
 #if !defined NDEBUG
 	exception::exception(unsigned int const & code, compiler::location const & location) throw()
-	: operating_system::exception(code, location)
+	: os::exception(code, location)
 	{
 		// This type of exception is usually likely followed by an abrupt termination of the whole process.
 		// So, we automatically log them as soon as they are created, that is, even before they are thrown.
-		if(operating_system::loggers::crash()()) {
+		if(os::loggers::crash()()) {
 			std::ostringstream s;
 			s
 				<< "cpu/os exception: "
-				"thread: name: " << operating_system::thread_name::get() << ", id: " << std::this_thread::id() << '\n'
+				"thread: name: " << os::thread_name::get() << ", id: " << std::this_thread::id() << '\n'
 				<< compiler::typenameof(*this) << ": " << what();
-			operating_system::loggers::crash()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			os::loggers::crash()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	}
 #endif
@@ -113,10 +113,10 @@ namespace {
 }
 
 void exception::install_handler_in_thread() {
-	if(operating_system::loggers::trace()()) {
+	if(os::loggers::trace()()) {
 		std::ostringstream s;
-		s << "installing cpu/os exception handler in thread: name: " << operating_system::thread_name::get() << ", id: " << std::this_thread::id();
-		operating_system::loggers::trace()(s.str());
+		s << "installing cpu/os exception handler in thread: name: " << os::thread_name::get() << ", id: " << std::this_thread::id();
+		os::loggers::trace()(s.str());
 	}
 	#if defined DIVERSALIS__OS__MICROSOFT
 		// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/seterrormode.asp
@@ -145,8 +145,8 @@ void exception::install_handler_in_thread() {
 					// http://jrfonseca.dyndns.org/projects/gnu-win32/software/drmingw/index.html#exchndl
 					// loads dr mingw's unhandled exception handler.
 					// it does not matter if the library fails to load, we just won't have this intermediate handler.
-					if(::LoadLibraryA("exchndl")) operating_system::loggers::information()("unhandled exception filter loaded");
-					else operating_system::loggers::information()("unhandled exception filter has not been loaded");
+					if(::LoadLibraryA("exchndl")) os::loggers::information()("unhandled exception filter loaded");
+					else os::loggers::information()("unhandled exception filter has not been loaded");
 				#endif
 			}
 		#endif

@@ -21,7 +21,7 @@
 namespace psy { namespace core {
 
 	using namespace psycle::helpers;
-///\todo general purpose => move this to universalis/operating_system/aligned_malloc.hpp or something
+///\todo general purpose => move this to universalis/os/aligned_malloc.hpp or something
 template<typename X>
 void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
 	std::size_t const size(count * sizeof(X));
@@ -47,7 +47,7 @@ void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
 	#endif
 }
 
-///\todo general purpose => move this to universalis/operating_system/aligned_dealloc.hpp or something
+///\todo general purpose => move this to universalis/os/aligned_dealloc.hpp or something
 template<typename X>
 void aligned_dealloc(X *& address) {
 	#if defined DIVERSALIS__OS__POSIX

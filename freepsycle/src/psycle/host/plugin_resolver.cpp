@@ -4,7 +4,7 @@
 ///\implementation psycle::host::plugin_resolver
 #include <psycle/detail/project.private.hpp>
 #include "plugin_resolver.hpp"
-#include <universalis/operating_system/paths.hpp>
+#include <universalis/os/paths.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 namespace psycle { namespace host {
@@ -76,8 +76,8 @@ namespace psycle { namespace host {
 			plugin_library_reference(name),
 			plugin_resolver_(plugin_resolver),
 			///\todo the version number is actually libtool's version info
-			//library_resolver_(*new universalis::operating_system::dynamic_link::resolver("-" + universalis::operating_system::paths::package::name() + ".plugin." + name, universalis::operating_system::paths::package::version::major_number())),
-			library_resolver_(*new universalis::operating_system::dynamic_link::resolver(
+			//library_resolver_(*new universalis::os::dynamic_link::resolver("-" + universalis::os::paths::package::name() + ".plugin." + name, universalis::os::paths::package::version::major_number())),
+			library_resolver_(*new universalis::os::dynamic_link::resolver(
 				#if defined DIVERSALIS__OS__MICROSOFT
 					// currently no prefix, when built with scons at least
 				#else

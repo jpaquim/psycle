@@ -16,7 +16,7 @@
 #include <psycle/audiodrivers/audiodriver.h>
 
 ///\todo needs link against libuniversalis
-//#include <universalis/operating_system/cpu_affinity.hpp>
+//#include <universalis/os/cpu_affinity.hpp>
 
 #include <boost/bind.hpp>
 #include <iostream> // only for debug output
@@ -71,7 +71,7 @@ void Player::start_threads() {
 	processed_node_count_ = suspended_ = 0;
 
 	///\todo needs link against libuniversalis
-	//thread_count_ = universalis::operating_system::cpu_affinity::cpu_count();
+	//thread_count_ = universalis::os::cpu_affinity::cpu_count();
 	thread_count_ = 0;
 	{ // thread count env var
 		char const * const env(std::getenv("PSYCLE_THREADS"));
@@ -235,7 +235,7 @@ void Player::thread_function(std::size_t thread_number) {
 	#if 0
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 	
-	universalis::operating_system::thread_name thread_name;
+	universalis::os::thread_name thread_name;
 	{ // set thread name
 		std::ostringstream s;
 		s << universalis::compiler::typenameof(*this) << '#' << graph().underlying().name() << '#' << thread_number;

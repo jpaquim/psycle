@@ -60,7 +60,7 @@ universalis (0.0.94) unstable; urgency=low
 
 universalis (0.0.92) unstable; urgency=low
 
-  * changed universalis::operating_system::loggers::stream_logger::default_logger
+  * changed universalis::os::loggers::stream_logger::default_logger
     from std::clog to std::cout because std::clog is unbuffered by default
     (buffering can be set at runtime tho)
 

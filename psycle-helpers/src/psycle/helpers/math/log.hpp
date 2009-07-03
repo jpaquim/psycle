@@ -8,7 +8,7 @@
 	#include <cmath>
 #endif
 #if defined BOOST_AUTO_TEST_CASE
-	#include <universalis/operating_system/clocks.hpp>
+	#include <universalis/os/clocks.hpp>
 	#include <cmath>
 	#include <sstream>
 #endif
@@ -141,7 +141,7 @@ namespace psycle
 						//BOOST_MESSAGE(s.str());
 						BOOST_CHECK(1 - tolerance < ratio && ratio < 1 + tolerance);
 					}
-					using namespace universalis::operating_system::clocks;
+					using namespace universalis::os::clocks;
 					//typedef thread clock;
 					typedef monotonic clock;
 					int const iterations(1000000);

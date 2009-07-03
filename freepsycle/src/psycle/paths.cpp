@@ -5,11 +5,11 @@
 ///\file
 ///\implementation psycle::paths
 #include "paths.hpp"
-#include <universalis/operating_system/paths/implementation.hpp>
+#include <universalis/os/paths/implementation.hpp>
 namespace psycle
 {
 	namespace paths
 	{
-		#include <universalis/operating_system/paths/injection/implementation.hpp>
+		#include <universalis/os/paths/injection/implementation.hpp>
 	}
 }

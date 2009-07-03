@@ -1,5 +1,5 @@
 
-#include <universalis/operating_system/paths.hpp>
+#include <universalis/os/paths.hpp>
 #include <direct.h>
 #include "shrunk_newmachine.hpp"
 #include "../../Plugin.hpp"
@@ -90,7 +90,7 @@ namespace psycle
 		void CNewMachine::Regenerate() 
 		{
 			DestroyPluginInfo();
-			DeleteFile((universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache").native_file_string().c_str());
+			DeleteFile((universalis::os::paths::package::home() / "psycle.plugin-scan.cache").native_file_string().c_str());
 			LoadPluginInfo();
 		}
 
@@ -170,7 +170,7 @@ namespace psycle
 				}
 				std::ofstream out;
 				{
-					boost::filesystem::path log_dir(universalis::operating_system::paths::package::home());
+					boost::filesystem::path log_dir(universalis::os::paths::package::home());
 					// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
 					mkdir(log_dir.native_directory_string().c_str());
 					out.open((log_dir / "psycle.plugin-scan.log.txt").native_file_string().c_str());
@@ -602,14 +602,14 @@ namespace psycle
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
-			std::string cache((universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache").native_file_string());
+			std::string cache((universalis::os::paths::package::home() / "psycle.plugin-scan.cache").native_file_string());
 			RiffFile file;
 			CFileFind finder;
 
 			if (!file.Open(cache.c_str()))
 			{
 				/// try old location
-				/// same as universalis::operating_system::paths::bin() / "psycle.plugin-scan.cache"
+				/// same as universalis::os::paths::bin() / "psycle.plugin-scan.cache"
 				char modulefilename[_MAX_PATH];
 				GetModuleFileName(NULL,modulefilename,_MAX_PATH);
 				std::string path=modulefilename;
@@ -725,7 +725,7 @@ namespace psycle
 
 		bool CNewMachine::SaveCacheFile()
 		{
-			boost::filesystem::path cache(universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache");
+			boost::filesystem::path cache(universalis::os::paths::package::home() / "psycle.plugin-scan.cache");
 
 			DeleteFile(cache.native_file_string().c_str());
 			RiffFile file;

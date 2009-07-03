@@ -16,4 +16,4 @@
 #include <thread>
 #include <mutex>
 #include <condition>
-#include <universalis/operating_system/cpu_affinity.hpp>
+#include <universalis/os/cpu_affinity.hpp>

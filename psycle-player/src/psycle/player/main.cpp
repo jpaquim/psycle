@@ -3,7 +3,7 @@
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
-#include <diversalis/operating_system.hpp>
+#include <diversalis/os.hpp>
 #include <iostream>
 #include <string>
 #include <sstream>

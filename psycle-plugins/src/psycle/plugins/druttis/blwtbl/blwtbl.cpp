@@ -554,7 +554,7 @@ bool UpdateWaveforms(int sr)
 	return true;
 }
 
-#include <diversalis/operating_system.hpp>
+#include <diversalis/os.hpp>
 #include <diversalis/compiler.hpp>
 #include <universalis/compiler.hpp>
 #if defined DIVERSALIS__COMPILER__GNU

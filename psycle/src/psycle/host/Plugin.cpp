@@ -17,8 +17,8 @@
 
 #include "Loggers.hpp"
 #include "Zap.hpp"
-#include <diversalis/operating_system.hpp>
-#include <universalis/operating_system/exceptions/code_description.hpp>
+#include <diversalis/os.hpp>
+#include <universalis/os/exceptions/code_description.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdlib> // for environment variables functions
@@ -167,7 +167,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not load library: " << file_name << std::endl
-					<< universalis::operating_system::exceptions::code_description();
+					<< universalis::os::exceptions::code_description();
 				throw exceptions::library_errors::loading_error(s.str());
 			}
 			GETINFO GetInfo = (GETINFO) GetProcAddress(_dll, "GetInfo");
@@ -176,7 +176,7 @@ namespace psycle
 				std::ostringstream s; s
 					<< "library is not a psycle native plugin:" << std::endl
 					<< "could not resolve symbol 'GetInfo' in library: " << file_name << std::endl
-					<< universalis::operating_system::exceptions::code_description();
+					<< universalis::os::exceptions::code_description();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try
@@ -199,7 +199,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
-					<< universalis::operating_system::exceptions::code_description();
+					<< universalis::os::exceptions::code_description();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try

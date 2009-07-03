@@ -9,7 +9,7 @@
 
 	#include "compiler.hpp"
 	#if !defined DIVERSALIS__COMPILER__RESOURCE
-		#include "operating_system.hpp"
+		#include "os.hpp"
 		#include "processor.hpp"
 		#include "standard_library.hpp"
 	#endif

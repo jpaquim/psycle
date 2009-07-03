@@ -31,7 +31,7 @@ using namespace psy::core;
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h> // for QueryPerformanceCounter
 #else
-	#include <universalis/operating_system/clocks.hpp>
+	#include <universalis/os/clocks.hpp>
 #endif
 //#include <cstdint>
 
@@ -70,7 +70,7 @@ namespace psycle
 					QueryPerformanceCounter(&result);
 					return result.QuadPart;
 				#else
-					return universalis::operating_system::clocks::thread::current();
+					return universalis::os::clocks::thread::current();
 				#endif
 			}
 
@@ -81,7 +81,7 @@ namespace psycle
 					QueryPerformanceFrequency(&result);
 					return result.QuadPart;
 				#else
-					return universalis::operating_system::clocks::thread::frequency();
+					return universalis::os::clocks::thread::frequency();
 				#endif
 			}
 		}

@@ -7,8 +7,8 @@
 #include <universalis/processor/exception.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
-#include <universalis/operating_system/clocks.hpp>
-#include <universalis/operating_system/thread_name.hpp>
+#include <universalis/os/clocks.hpp>
+#include <universalis/os/thread_name.hpp>
 #include <sstream>
 #include <limits>
 namespace psycle { namespace host { namespace schedulers { namespace single_threaded {
@@ -18,11 +18,11 @@ namespace {
 		#if 0
 			return std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch();
 		#elif 0
-			return universalis::operating_system::clocks::thread_cpu_time::current();
+			return universalis::os::clocks::thread_cpu_time::current();
 		#elif 0
-			return universalis::operating_system::clocks::process_cpu_time::current();
+			return universalis::os::clocks::process_cpu_time::current();
 		#else
-			return universalis::operating_system::clocks::monotonic::current();
+			return universalis::os::clocks::monotonic::current();
 		#endif
 	}
 }
@@ -260,7 +260,7 @@ void scheduler::thread_function() {
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 
 	// set thread name
-	universalis::operating_system::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
+	universalis::os::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
 
 	// install cpu/os exception handler/translator
 	universalis::processor::exception::install_handler_in_thread();

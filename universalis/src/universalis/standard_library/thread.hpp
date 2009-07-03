@@ -8,7 +8,7 @@
 #define UNIVERSALIS__STANDARD_LIBRARY__THREAD__INCLUDED
 #pragma once
 
-#include <diversalis/operating_system.hpp>
+#include <diversalis/os.hpp>
 #include "detail/boost_xtime.hpp"
 #include <boost/thread.hpp>
 #include <boost/operators.hpp>

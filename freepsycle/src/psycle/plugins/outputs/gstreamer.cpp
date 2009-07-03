@@ -102,7 +102,7 @@ namespace {
 			::GstStateChangeReturn const result(::gst_element_get_state(&element, &current_state, &pending_state, intermediate_timeout_nanoseconds));
 			switch(result) {
 				case ::GST_STATE_CHANGE_NO_PREROLL:
-					universalis::operating_system::loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+					universalis::os::loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				case ::GST_STATE_CHANGE_SUCCESS:
 					if(current_state == state_wanted) return;
 					else {
@@ -138,7 +138,7 @@ namespace {
 							<< " to " << ::gst_element_state_get_name(state_wanted)
 							<< " (waited a total of " << total_nanoseconds_waited * 1e-9
 							<< " seconds ; will timeout after " << timeout_nanoseconds * 1e-9 << " seconds)";
-						universalis::operating_system::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+						universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					}
 					intermediate_timeout_nanoseconds *= 2; // makes timeouts progressively sparser
 					continue;

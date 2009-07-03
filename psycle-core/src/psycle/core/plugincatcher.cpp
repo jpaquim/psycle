@@ -6,7 +6,7 @@
 
 #include <psycle/core/config.private.hpp>
 #include "plugincatcher.h"
-#include <universalis/operating_system/paths.hpp>
+#include <universalis/os/paths.hpp>
 
 #include "file.h"
 #include "fileio.h"
@@ -37,7 +37,7 @@ void PluginFinderCache::EnablePlugin(const MachineKey & key, bool enable) {
 
 bool PluginFinderCache::loadCache(){
 #if 0
-	std::string cache((universalis::operating_system::paths::package::home() / "plugin-scan.cache").native_file_string());
+	std::string cache((universalis::os::paths::package::home() / "plugin-scan.cache").native_file_string());
 	RiffFile file;
 	CFileFind finder;
 

@@ -3,7 +3,7 @@
 ///\\implementation psycle::front_ends::gui::contraption
 #include <psycle/detail/project.private.hpp>
 #include "contraption.hpp"
-#include <universalis/operating_system/loggers.hpp>
+#include <universalis/os/loggers.hpp>
 namespace psycle { namespace front_ends { namespace gui {
 
 contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real const & y, color const & color, std::string const & text)

@@ -5,7 +5,7 @@
 ///\implementation psycle::stream::format::riff_wave
 #include <psycle/detail/project.private.hpp>
 #include "format.hpp"
-#include <universalis/operating_system/exceptions/code_description.hpp>
+#include <universalis/os/exceptions/code_description.hpp>
 #include <cstring>
 #include <sstream>
 #include <climits>
@@ -43,7 +43,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 				details.pwfx = &const_cast<format&>(*this).wave_format_ex();
 				details.cbwfx = chunk().extra_information_size();
 				if(!::acmFormatDetails(0, &details, ACM_FORMATDETAILSF_FORMAT))
-					throw exception("acm format details: " + universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
+					throw exception("acm format details: " + universalis::os::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 				return std::string(details.szFormat);
 			}
 			else
@@ -65,7 +65,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 			tag_details.cbStruct = sizeof tag_details;
 			tag_details.dwFormatTag = tag();
 			if(!::acmFormatTagDetails(0, &tag_details, ACM_FORMATTAGDETAILSF_FORMATTAG))
-				throw exception("acm format tag details: " + universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
+				throw exception("acm format tag details: " + universalis::os::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 			return std::string(tag_details.szFormatTag);
 		#else
 			switch(tag()) {
@@ -171,7 +171,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 			std::uint16_t extra_information_size_which_fits_all_tags() throw(exception) {
 				std::uint16_t static extra_information_size_which_fits_all_tags(0);
 				if(!extra_information_size_which_fits_all_tags) {
-					if(!::acmMetrics(0, ACM_METRIC_MAX_SIZE_FORMAT, &extra_information_size_which_fits_all_tags)) throw exception("acm metrics: " + universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
+					if(!::acmMetrics(0, ACM_METRIC_MAX_SIZE_FORMAT, &extra_information_size_which_fits_all_tags)) throw exception("acm metrics: " + universalis::os::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 					chunk_extra_information_size_which_fits_all_tags -= sizeof(chunk_type);
 				}
 				return chunk_extra_information_size_which_fits_all_tags;
@@ -203,7 +203,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 			switch(result) {
 				case: MMSysErr_NoError: return true;
 				case: ACMErr_Canceled: return false;
-				default: throw exception("acm format choose: " + universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
+				default: throw exception("acm format choose: " + universalis::os::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		}
 	#endif

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "compiler.hpp"
-#include "operating_system.hpp"
+#include "os.hpp"
 #include "standard_library.hpp"
 #include "processor.hpp"
 

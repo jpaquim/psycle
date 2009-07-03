@@ -9,9 +9,9 @@
 #include <psycle/plugins/sequence.hpp>
 #include <psycle/host/host.hpp>
 #include <universalis/processor/exception.hpp>
-#include <universalis/operating_system/loggers.hpp>
-#include <universalis/operating_system/thread_name.hpp>
-#include <universalis/operating_system/cpu_affinity.hpp>
+#include <universalis/os/loggers.hpp>
+#include <universalis/os/thread_name.hpp>
+#include <universalis/os/cpu_affinity.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <string>
@@ -137,7 +137,7 @@ void stuff() {
 		{
 			#if 1
 				host::schedulers::multi_threaded::scheduler scheduler(graph);
-				std::size_t threads(universalis::operating_system::cpu_affinity::cpu_count());
+				std::size_t threads(universalis::os::cpu_affinity::cpu_count());
 				{ // thread count env var
 					char const * const env(std::getenv("PSYCLE__THREADS"));
 					if(env) {
@@ -217,13 +217,13 @@ void stuff() {
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	try {
 		try {
-			universalis::operating_system::loggers::multiplex_logger::singleton().add(universalis::operating_system::loggers::stream_logger::default_logger());
-			universalis::operating_system::thread_name thread_name("main");
+			universalis::os::loggers::multiplex_logger::singleton().add(universalis::os::loggers::stream_logger::default_logger());
+			universalis::os::thread_name thread_name("main");
 			universalis::processor::exception::install_handler_in_thread();
-			if(universalis::operating_system::loggers::information()()) {
+			if(universalis::os::loggers::information()()) {
 				std::ostringstream s;
 				s << paths::package::name() << " " << paths::package::version::string();
-				universalis::operating_system::loggers::information()(s.str());
+				universalis::os::loggers::information()(s.str());
 			}
 			paths();
 			#if 1

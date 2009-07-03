@@ -9,7 +9,7 @@
 // weird, must be included last or mingw 3.4.1 segfaults
 //#include "code_description.hpp"
 
-#include <universalis/operating_system/exceptions/code_description.hpp>
+#include <universalis/os/exceptions/code_description.hpp>
 
 // weird, must be included last or mingw 3.4.1 segfaults
 #include "code_description.hpp"
@@ -22,7 +22,7 @@ namespace universalis
 		{
 			std::string code_description(int const & code) throw()
 			{
-				return operating_system::exceptions::detail::code_description
+				return os::exceptions::detail::code_description
 					(
 						code
 						#if defined DIVERSALIS__OS__MICROSOFT
