@@ -3,17 +3,17 @@
 
 ///\interface universalis::operating_system::cpu_affinity
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__CPU_AFFINITY__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__CPU_AFFINITY__INCLUDED
+#ifndef UNIVERSALIS__OS__CPU_AFFINITY__INCLUDED
+#define UNIVERSALIS__OS__CPU_AFFINITY__INCLUDED
 #pragma once
 
 #include <diversalis/operating_system.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if defined DIVERSALIS__OS__POSIX
 	//#define _GNU_SOURCE // for sched_getaffinity
 	#include <sched.h> // for sched_getaffinity
 	#include <pthread.h> // for pthread_getaffinity_np
 	#include <cerrno>
-#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#elif defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #else
 	#error unsupported operating system
@@ -29,9 +29,9 @@ namespace universalis { namespace operating_system { namespace cpu_affinity {
 /// returns the number of cpus available for the current process
 unsigned int inline cpu_count() throw(std::runtime_error) {
 	unsigned int result(0);
-	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if defined DIVERSALIS__OS__POSIX
 		///\todo also try using os.sysconf('SC_NPROCESSORS_ONLN') // SC_NPROCESSORS_CONF
-		#if defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN
+		#if defined DIVERSALIS__OS__CYGWIN
 			return 1; ///\todo sysconf
 		#else
 			cpu_set_t set;
@@ -50,7 +50,7 @@ unsigned int inline cpu_count() throw(std::runtime_error) {
 			}
 			for(unsigned int i(0); i < CPU_SETSIZE; ++i) if(CPU_ISSET(i, &set)) ++result;
 		#endif
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#elif defined DIVERSALIS__OS__MICROSOFT
 		///\todo also try using int(os.environ.get('NUMBER_OF_PROCESSORS', 1))
 
 		DWORD process, system;

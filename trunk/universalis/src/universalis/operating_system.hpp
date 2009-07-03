@@ -5,8 +5,8 @@
 ///\file
 ///\brief meta header
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__INCLUDED
+#ifndef UNIVERSALIS__OS__INCLUDED
+#define UNIVERSALIS__OS__INCLUDED
 #pragma once
 
 #include "operating_system/operating_system.hpp"

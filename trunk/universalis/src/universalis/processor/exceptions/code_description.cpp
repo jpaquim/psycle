@@ -25,7 +25,7 @@ namespace universalis
 				return operating_system::exceptions::detail::code_description
 					(
 						code
-						#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+						#if defined DIVERSALIS__OS__MICROSOFT
 							, /* from_processor */ true
 						#endif
 					);

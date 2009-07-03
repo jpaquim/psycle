@@ -3,16 +3,16 @@
 
 ///\interface universalis::operating_system::dynamic_link::resolver
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__DYNAMIC_LINK__RESOLVER__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__DYNAMIC_LINK__RESOLVER__INCLUDED
+#ifndef UNIVERSALIS__OS__DYNAMIC_LINK__RESOLVER__INCLUDED
+#define UNIVERSALIS__OS__DYNAMIC_LINK__RESOLVER__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
 #include <boost/filesystem/path.hpp>
 #include <string>
-#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__POSIX
 	//
-#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #else
 	namespace Glib {
@@ -74,10 +74,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK resolver {
 		/// abi/compiler-specific
 		std::string static decorated_symbol(std::string const & name) throw();
 		/// os-specific
-		#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__POSIX
 			boost::filesystem::path const path_;
 			void *
-		#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
 			::HINSTANCE
 		#else
 			Glib::Module *

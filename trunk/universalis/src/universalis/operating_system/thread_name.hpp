@@ -3,8 +3,8 @@
 
 ///\interface universalis::operating_system::thread_name
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__THREAD_NAME__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__THREAD_NAME__INCLUDED
+#ifndef UNIVERSALIS__OS__THREAD_NAME__INCLUDED
+#define UNIVERSALIS__OS__THREAD_NAME__INCLUDED
 #pragma once
 
 #include <universalis/compiler/compiler.hpp>

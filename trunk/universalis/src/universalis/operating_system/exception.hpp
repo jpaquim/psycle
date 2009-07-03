@@ -3,8 +3,8 @@
 
 ///\interface universalis::operating_system::exception
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__EXCEPTION__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__EXCEPTION__INCLUDED
+#ifndef UNIVERSALIS__OS__EXCEPTION__INCLUDED
+#define UNIVERSALIS__OS__EXCEPTION__INCLUDED
 #pragma once
 
 #include <universalis/exception.hpp>

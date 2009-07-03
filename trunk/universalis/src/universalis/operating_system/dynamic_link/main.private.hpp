@@ -3,8 +3,8 @@
 
 ///\file
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__DYNAMIC_LINK__MAIN__PRIVATE__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__DYNAMIC_LINK__MAIN__PRIVATE__INCLUDED
+#ifndef UNIVERSALIS__OS__DYNAMIC_LINK__MAIN__PRIVATE__INCLUDED
+#define UNIVERSALIS__OS__DYNAMIC_LINK__MAIN__PRIVATE__INCLUDED
 #if defined UNIVERSALIS__SOURCE__MONOLITHIC
 	#pragma once
 #endif
@@ -20,7 +20,7 @@
 			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
-					s << "library attached to process: " << UNIVERSALIS__OPERATING_SYSTEM__LIBRARY__NAME;
+					s << "library attached to process: " << UNIVERSALIS__OS__LIBRARY__NAME;
 					loggers::information()(s.str());
 				}
 			#endif
@@ -32,13 +32,13 @@
 			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
-					s << "library detached from process: " << UNIVERSALIS__OPERATING_SYSTEM__LIBRARY__NAME;
+					s << "library detached from process: " << UNIVERSALIS__OS__LIBRARY__NAME;
 					loggers::information()(s.str());
 				}
 			#endif
 		}
 	}}}}
-#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <windows.h>
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/dynamic_link_library_functions.asp
 	::BOOL APIENTRY DllMain(::HMODULE module, ::DWORD reason_for_call, ::LPVOID) {
@@ -47,7 +47,7 @@
 		if(loggers::exception()()) {
 			s << "library: ";
 			{
-				char file_name[DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
+				char file_name[DIVERSALIS__OS__MICROSOFT__MAX_PATH];
 				::GetModuleFileNameA(module, file_name, sizeof file_name);
 				s << file_name << ": ";
 			}

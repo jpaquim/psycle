@@ -8,7 +8,7 @@
 #include "../loggers.hpp"
 #include "../exception.hpp"
 #include "../exceptions/code_description.hpp"
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 		#pragma comment(lib, "user32") // for the MessageBox function
@@ -17,7 +17,7 @@
 namespace universalis { namespace operating_system { namespace detail {
 
 void check_version() throw(universalis::exception) {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined DIVERSALIS__OS__MICROSOFT
 		class msdos {};
 		try {
 			bool static once(false);
@@ -50,7 +50,7 @@ void check_version() throw(universalis::exception) {
 								<< version_info.szCSDVersion;
 							loggers::information()(s.str());
 						}
-						#if DIVERSALIS__OPERATING_SYSTEM__VERSION >= 0x500
+						#if DIVERSALIS__OS__VERSION >= 0x500
 							if(
 								version_info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS ||
 								version_info.dwPlatformId == VER_PLATFORM_WIN32s
@@ -87,7 +87,7 @@ void check_version() throw(universalis::exception) {
 							<< version_info.szCSDVersion;
 						loggers::information()(s.str());
 					}
-					#if DIVERSALIS__OPERATING_SYSTEM__VERSION >= 0x500
+					#if DIVERSALIS__OS__VERSION >= 0x500
 						if(
 							version_info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS ||
 							version_info.dwPlatformId == VER_PLATFORM_WIN32s

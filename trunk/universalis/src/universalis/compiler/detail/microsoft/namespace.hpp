@@ -9,7 +9,7 @@
 
 #include <universalis/detail/project.hpp>
 
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined _AFXDLL // mfc
+#if defined DIVERSALIS__OS__MICROSOFT && defined _AFXDLL // mfc
 	#if defined DIVERSALIS__COMPILER__RESOURCE //&& defined DIVERSALIS__COMPILER__MICROSOFT
 		// msvc7.1's resource compiler freaks out: warning RC4011: identifier truncated to 'APPSTUDIO_INVOKED__MSVC_MFC_RES'
 	#else

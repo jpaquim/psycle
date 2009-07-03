@@ -4,13 +4,13 @@
 	#include <xmmintrin.h>
 #endif
 #include <cstdlib>
-#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if defined DIVERSALIS__OS__POSIX
 	extern "C" int posix_memalign(void **, std::size_t, std::size_t) throw();
 #endif
 
 CAllPass::CAllPass()
 {
-#if defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__OS__POSIX
 	posix_memalign(reinterpret_cast<void**>(&leftBuffer),16,MAX_ALLPASS_DELAY*sizeof(float));
 	posix_memalign(reinterpret_cast<void**>(&rightBuffer),16,MAX_ALLPASS_DELAY*sizeof(float));
 #elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT

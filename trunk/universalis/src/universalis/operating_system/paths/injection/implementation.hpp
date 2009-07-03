@@ -7,8 +7,8 @@ namespace {
 	boost::filesystem::path const & process_executable_file_path() {
 		struct once {
 			boost::filesystem::path const static path() throw(std::exception) {
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-					char module_file_name[UNIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
+				#if defined DIVERSALIS__OS__MICROSOFT
+					char module_file_name[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
 					if(!::GetModuleFileNameA(0, module_file_name, sizeof module_file_name))
 						throw
 							///\todo the following is making link error on mingw
@@ -86,7 +86,7 @@ boost::filesystem::path const & home() {
 	struct once {
 		boost::filesystem::path const static path() {
 			char const env_var [] = {
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					"USERPROFILE"
 				#else
 					"HOME"
@@ -167,7 +167,7 @@ namespace package {
 	
 	boost::filesystem::path const & lib() {
 		boost::filesystem::path const static once(
-			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			#if defined DIVERSALIS__OS__MICROSOFT
 				lib()
 			#else
 				paths::lib() / name()

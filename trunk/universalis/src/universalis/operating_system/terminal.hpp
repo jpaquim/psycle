@@ -4,8 +4,8 @@
 
 ///\interface universalis::operating_system::terminal
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__TERMINAL__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__TERMINAL__INCLUDED
+#ifndef UNIVERSALIS__OS__TERMINAL__INCLUDED
+#define UNIVERSALIS__OS__TERMINAL__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
@@ -26,7 +26,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK terminal {
 		void output(int const & logger_level, std::string const & string);
 	private:
 		boost::mutex mutex_;
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#if defined DIVERSALIS__OS__MICROSOFT
 			bool allocated_;
 		#endif
 };

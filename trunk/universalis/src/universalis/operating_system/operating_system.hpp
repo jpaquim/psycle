@@ -4,20 +4,20 @@
 ///\file
 ///\brief meta header
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__OPERATING_SYSTEM__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__OPERATING_SYSTEM__INCLUDED
+#ifndef UNIVERSALIS__OS__OS__INCLUDED
+#define UNIVERSALIS__OS__OS__INCLUDED
 #pragma once
 
 #include "detail/microsoft/max_path.hpp"
 
 /// end-of-line character sequence on the host platform.
 
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
-	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\r\n"
-#elif defined DIVERSALIS__OPERATING_SYSTEM__APPLE && DIVERSALIS__OPERATING_SYSTEM__VERSION__MAJOR < 10 // before bsd-unix (darwin)
-	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\r"
+#if defined DIVERSALIS__OS__MICROSOFT
+	#define UNIVERSALIS__OS__EOL "\r\n"
+#elif defined DIVERSALIS__OS__APPLE && DIVERSALIS__OS__VERSION__MAJOR < 10 // before bsd-unix (darwin)
+	#define UNIVERSALIS__OS__EOL "\r"
 #else
-	#define UNIVERSALIS__OPERATING_SYSTEM__EOL "\n"
+	#define UNIVERSALIS__OS__EOL "\n"
 #endif
 
 #endif

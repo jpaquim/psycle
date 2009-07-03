@@ -9,7 +9,7 @@
 #include <cstring>
 #include <sstream>
 #include <climits>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	//#include <msacm.h>
 #endif
 namespace psycle { namespace stream { namespace formats { namespace riff_wave {
@@ -33,7 +33,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 	}
 
 	std::string format::description() const {
-		#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#if 0 && defined DIVERSALIS__OS__MICROSOFT
 			if(bits_per_channel_sample() <= 16) // acm does not support more
 			{
 				::ACMFORMATDETAILS details;
@@ -59,7 +59,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 	}
 
 	std::string format::tag_description() const {
-		#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#if 0 && defined DIVERSALIS__OS__MICROSOFT
 			::ACMFORMATTAGDETAILS tag_details;
 			std::memset(&tag_details, 0, sizeof tag_details);
 			tag_details.cbStruct = sizeof tag_details;
@@ -166,7 +166,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 		}
 	#endif
 
-	#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if 0 && defined DIVERSALIS__OS__MICROSOFT
 		namespace {
 			std::uint16_t extra_information_size_which_fits_all_tags() throw(exception) {
 				std::uint16_t static extra_information_size_which_fits_all_tags(0);

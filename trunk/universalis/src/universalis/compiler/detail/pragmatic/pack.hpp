@@ -20,7 +20,7 @@
 	#define UNIVERSALIS__COMPILER__PACK__POP()
 #endif
 
-#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if 0 && defined DIVERSALIS__OS__MICROSOFT
 	#define UNIVERSALIS__COMPILER__PACK__PUSH(x) <pshpack#x.h>
 	#define UNIVERSALIS__COMPILER__PACK__POP     <poppack.h>
 #endif

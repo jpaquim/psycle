@@ -78,7 +78,7 @@ namespace psycle { namespace host {
 			///\todo the version number is actually libtool's version info
 			//library_resolver_(*new universalis::operating_system::dynamic_link::resolver("-" + universalis::operating_system::paths::package::name() + ".plugin." + name, universalis::operating_system::paths::package::version::major_number())),
 			library_resolver_(*new universalis::operating_system::dynamic_link::resolver(
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					// currently no prefix, when built with scons at least
 				#else
 					"lib"

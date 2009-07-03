@@ -5,6 +5,6 @@
 ///\file
 #pragma once
 #include <universalis/universalis.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "universalis")
 #endif

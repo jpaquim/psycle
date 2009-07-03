@@ -31,7 +31,7 @@
 
 #include <universalis/detail/project.hpp>
 
-#if defined DIVERSALIS__OPERATING_SYSTEM__APPLE
+#if defined DIVERSALIS__OS__APPLE
 	#include <libkern/OSAtomic.h>
 	// Mac OS X only provides full memory barriers, so the three types of barriers are the same,
 	// However, these barriers are superior to compiler-based ones.
