@@ -173,19 +173,19 @@
 	#if defined __powerpc__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__POWER_PC
-	#if defined __arm__
+	#elif defined __arm__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__ARM
-	#if defined __mips__
+	#elif defined __mips__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__MIPS
-	#if defined __sparc__
+	#elif defined __sparc__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__SPARC
-	#if defined __alpha__
+	#elif defined __alpha__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__ALPHA
-	#if defined __hppa__
+	#elif defined __hppa__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__HPPA
 	#elif defined __ia64__
