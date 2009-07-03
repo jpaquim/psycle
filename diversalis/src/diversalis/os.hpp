@@ -100,14 +100,35 @@
 	#define DIVERSALIS__OS__UNIX
 	#define DIVERSALIS__OS__LINUX
 
+////////////
+// gnu hurd
+
+#elif defined __GNU__
+	#define DIVERSALIS__OS
+	#define DIVERSALIS__OS__UNIX
+	#define DIVERSALIS__OS__GNU
+	#define DIVERSALIS__OS__HURD
+
 ////////
 // *bsd
 
-#elif defined __FreeBSD__ // todo netbsd and openbsd
+#elif defined __FreeBSD__
 	#define DIVERSALIS__OS
 	#define DIVERSALIS__OS__UNIX
 	#define DIVERSALIS__OS__BSD
 	#define DIVERSALIS__OS__FREEBSD
+
+#elif defined __NetBSD__
+	#define DIVERSALIS__OS
+	#define DIVERSALIS__OS__UNIX
+	#define DIVERSALIS__OS__BSD
+	#define DIVERSALIS__OS__NETBSD
+
+#elif defined __OpenBSD__
+	#define DIVERSALIS__OS
+	#define DIVERSALIS__OS__UNIX
+	#define DIVERSALIS__OS__BSD
+	#define DIVERSALIS__OS__OPENBSD
 
 ////////////////////////
 // darwin/apple's macos
@@ -121,6 +142,22 @@
 	#define DIVERSALIS__OS__MACH
 	#define DIVERSALIS__OS__DARWIN
 	#define DIVERSALIS__OS__APPLE
+	
+///////////////
+// sun solaris
+
+#elif defined _sun
+	#define DIVERSALIS__OS
+	#define DIVERSALIS__OS__UNIX
+	#define DIVERSALIS__OS__SOLARIS
+
+////////////
+// ibm aix
+
+#elif defined _AIX
+	#define DIVERSALIS__OS
+	#define DIVERSALIS__OS__UNIX
+	#define DIVERSALIS__OS__AIX
 
 ////////////
 // sgi irix

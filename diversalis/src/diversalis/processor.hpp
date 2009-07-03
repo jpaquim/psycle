@@ -173,6 +173,25 @@
 	#if defined __powerpc__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__POWER_PC
+	#if defined __arm__
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__ARM
+	#if defined __mips__
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__MIPS
+	#if defined __sparc__
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__SPARC
+	#if defined __alpha__
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__ALPHA
+	#if defined __hppa__
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__HPPA
+	#elif defined __ia64__
+		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__PROCESSOR__IA 2
+		#define DIVERSALIS__PROCESSOR__WORD_SIZE 64
 	#elif defined __x86_64__ // amd k8/opteron/athlon64/athlon-fx (sse2), intel nocona/emt64 (sse3)
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__PROCESSOR__X86 9
