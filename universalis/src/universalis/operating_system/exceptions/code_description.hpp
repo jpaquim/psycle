@@ -4,13 +4,13 @@
 
 ///\interface universalis::operating_system::code_description
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
+#ifndef UNIVERSALIS__OS__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
+#define UNIVERSALIS__OS__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
 #include <string>
-#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if !defined DIVERSALIS__OS__MICROSOFT
 	#include <cerrno>
 #else
 	#include <windows.h>
@@ -24,7 +24,7 @@ namespace universalis { namespace operating_system { namespace exceptions {
 ///\internal
 namespace detail {
 	std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK code_description(
-		#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#if !defined DIVERSALIS__OS__MICROSOFT
 			int const code = errno
 		#else
 			::DWORD /* or ::HRESULT in some cases */ const /*= ::GetLastError()*/,
@@ -34,7 +34,7 @@ namespace detail {
 }
 
 std::string inline code_description(
-	#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if !defined DIVERSALIS__OS__MICROSOFT
 		int const code = errno
 	#else
 		::DWORD /* or ::HRESULT in some cases */ const code = ::GetLastError()

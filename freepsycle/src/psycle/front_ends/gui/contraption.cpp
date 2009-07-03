@@ -23,7 +23,7 @@ contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real con
 		if(loggers::trace()()) loggers::trace()("pango: font description: creating ...", UNIVERSALIS__COMPILER__LOCATION);
 		font_description = new Pango::FontDescription;
 		font_description->set_family("helvetica");
-		#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#if !defined DIVERSALIS__OS__MICROSOFT
 			font_description->set_weight(Pango::WEIGHT_BOLD);
 		#else
 			font_description->set_weight(Pango::WEIGHT_ULTRABOLD);

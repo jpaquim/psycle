@@ -28,7 +28,7 @@ using namespace psy::core;
 #include "Constants.hpp"
 #endif
 
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h> // for QueryPerformanceCounter
 #else
 	#include <universalis/operating_system/clocks.hpp>
@@ -65,7 +65,7 @@ namespace psycle
 
 			cycles_type inline cycles()
 			{
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					LARGE_INTEGER result;
 					QueryPerformanceCounter(&result);
 					return result.QuadPart;
@@ -76,7 +76,7 @@ namespace psycle
 
 			cycles_type inline cycles_per_second()
 			{
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					LARGE_INTEGER result;
 					QueryPerformanceFrequency(&result);
 					return result.QuadPart;

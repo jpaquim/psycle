@@ -3,7 +3,7 @@
 // copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
 
 #include <diversalis/operating_system.hpp>
-#if !defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if !defined DIVERSALIS__OS__POSIX
 	#error "sorry, but your operating system ain't standard"
 #endif
 #include <dlfcn.h>

@@ -3,8 +3,8 @@
 
 ///\interface universalis::operating_system::loggers
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__INCLUDED
+#ifndef UNIVERSALIS__OS__LOGGERS__INCLUDED
+#define UNIVERSALIS__OS__LOGGERS__INCLUDED
 #pragma once
 
 #include "exception.hpp"
@@ -107,8 +107,8 @@ namespace loggers {
 		
 		/// the compile-time threshold level for the loggers
 		int const compiled_threshold(
-			#if defined UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__LEVELS__COMPILED_THRESHOLD
-				UNIVERSALIS__OPERATING_SYSTEM__LOGGERS__LEVELS__COMPILED_THRESHOLD
+			#if defined UNIVERSALIS__OS__LOGGERS__LEVELS__COMPILED_THRESHOLD
+				UNIVERSALIS__OS__LOGGERS__LEVELS__COMPILED_THRESHOLD
 			#elif defined NDEBUG
 				information
 			#else

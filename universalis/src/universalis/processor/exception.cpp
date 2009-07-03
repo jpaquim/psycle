@@ -9,7 +9,7 @@
 #include <universalis/operating_system/thread_name.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <thread>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #endif
 #if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -38,7 +38,7 @@ namespace universalis { namespace processor {
 #endif
 
 namespace {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined DIVERSALIS__OS__MICROSOFT
 		void structured_exception_translator(unsigned int code, ::EXCEPTION_POINTERS * exception_pointers) throw(exception) {
 			#if defined DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DEBUG
 				#if !defined NDEBUG
@@ -118,7 +118,7 @@ void exception::install_handler_in_thread() {
 		s << "installing cpu/os exception handler in thread: name: " << operating_system::thread_name::get() << ", id: " << std::this_thread::id();
 		operating_system::loggers::trace()(s.str());
 	}
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined DIVERSALIS__OS__MICROSOFT
 		// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/seterrormode.asp
 		//::SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
 			

@@ -6,7 +6,7 @@
 #include <universalis/detail/project.private.hpp>
 #include "terminal.hpp"
 #include "loggers.hpp"
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	#include "exceptions/code_description.hpp"
 	#include <universalis/standard_library/exceptions/code_description.hpp>
 	#include <universalis/compiler/typenameof.hpp>
@@ -28,14 +28,14 @@
 namespace universalis { namespace operating_system {
 
 terminal::terminal() throw(exception)
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined DIVERSALIS__OS__MICROSOFT
 		:
 			allocated_(false)
 	#endif
 {
-	#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if !defined DIVERSALIS__OS__MICROSOFT
 		// we do nothing when the operating system is not microsoft's
-	#elif DIVERSALIS__OPERATING_SYSTEM__VERSION < 0x500
+	#elif DIVERSALIS__OS__VERSION < 0x500
 		// Dizzy reported that on msdos/pre-nt systems the following code fails (no GetConsoleWindow in kernel32.dll)
 		// Problem is it's currently unkown whether it fails
 		// when dynamically linking at startup or only when we execute the code below.
@@ -257,7 +257,7 @@ terminal::terminal() throw(exception)
 }
 
 terminal::~terminal() throw() {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if defined DIVERSALIS__OS__MICROSOFT
 		if(allocated_) {
 			std::cout << "There is no parent process owning this terminal console window, so, it will close when this process terminates." << std::endl;
 			std::cout << "Press enter to terminate and close this window ..." << std::endl;
@@ -269,7 +269,7 @@ terminal::~terminal() throw() {
 
 void terminal::output(const int & logger_level, const std::string & string) {
 	boost::mutex::scoped_lock lock(mutex_);
-	#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if !defined DIVERSALIS__OS__MICROSOFT
 		std::cout << "\e[1m" << "logger: " << logger_level << string;
 		// ansi terminal
 		int const static color [] = {0, 2, 6, 1, 5, 3, 4, 7};

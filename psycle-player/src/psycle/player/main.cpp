@@ -9,7 +9,7 @@
 #include <sstream>
 #include <thread>
 
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	#define PSYCLE__PLAYER__EOF "z" // ctrl+z == EOF
 #else
 	#define PSYCLE__PLAYER__EOF "d" // ctrl+d == EOF

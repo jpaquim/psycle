@@ -9,7 +9,7 @@
 #pragma once
 
 #include <processor/project.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h> // for host-to-net and net-to-host functions
 #else
 	#include <netinet/in.h> // for host-to-net and net-to-host functions

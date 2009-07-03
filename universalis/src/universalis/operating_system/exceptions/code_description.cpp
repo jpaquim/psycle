@@ -10,14 +10,14 @@
 namespace universalis { namespace operating_system { namespace exceptions { namespace detail {
 
 std::string code_description(
-	#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if !defined DIVERSALIS__OS__MICROSOFT
 		int const code
 	#else
 		::DWORD /* or ::HRESULT in some cases */ const code,
 		bool from_processor
 	#endif
 ) {
-	#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#if !defined DIVERSALIS__OS__MICROSOFT
 		return standard_library::exceptions::code_description(code);
 	#else
 		std::ostringstream s; s

@@ -10,7 +10,7 @@
 #include "attribute.hpp"
 
 #if defined DIVERSALIS__COMPILER__GNU && ( \
-		!defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT || \
+		!defined DIVERSALIS__OS__MICROSOFT || \
 		DIVERSALIS__COMPILER__VERSION >= 40300 /* TLS support added on windows in version 4.3.0 */ \
 	)
 

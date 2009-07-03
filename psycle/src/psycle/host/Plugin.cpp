@@ -57,8 +57,8 @@ namespace psycle
 		}
 
 		#if 1 /* <bohan> i'm really not sure about the origin of the problem so i prefer to add the work around unconditionally */ || \
-			defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && \
-			defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__MSDOS
+			defined DIVERSALIS__OS__MICROSOFT && \
+			defined DIVERSALIS__OS__MICROSOFT__BRANCH__MSDOS
 			
 			// dos/win9x needs a work around for boost::filesystem::equivalent
 			// Or could that actually simply be due to FAT filesystems?
@@ -85,9 +85,9 @@ namespace psycle
 		{
 			char const static path_env_var_name[] =
 			{
-				#if defined DIVERSALIS__OPERATING_SYSTEM__LINUX
+				#if defined DIVERSALIS__OS__LINUX
 					"LD_LIBRARY_PATH"
-				#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#elif defined DIVERSALIS__OS__MICROSOFT
 					"PATH"
 				#else
 					#error unknown dynamic linker
@@ -134,7 +134,7 @@ namespace psycle
 					new_path << old_path;
 				}
 				// set the new path env var
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					if(!::SetEnvironmentVariable(path_env_var_name, new_path.str().c_str())) {
 						//int const e(::GetLastError());
 						throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
@@ -150,7 +150,7 @@ namespace psycle
 				// load the library passing just the base file name and relying on the search path env var
 				_dll = ::LoadLibrary(base_name.c_str());
 				// set the path env var back to its original value
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					if(!::SetEnvironmentVariable(path_env_var_name, old_path.c_str())) {
 						//int const e(::GetLastError());
 						throw exceptions::library_errors::loading_error("Could not set PATH env var back to its original value.");

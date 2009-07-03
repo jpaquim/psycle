@@ -4,8 +4,8 @@
 
 ///\interface universalis::operating_system::paths
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__PATHS__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__PATHS__INCLUDED
+#ifndef UNIVERSALIS__OS__PATHS__INCLUDED
+#define UNIVERSALIS__OS__PATHS__INCLUDED
 #pragma once
 
 	#include <universalis/detail/project.hpp>

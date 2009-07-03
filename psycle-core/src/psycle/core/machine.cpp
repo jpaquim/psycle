@@ -25,15 +25,15 @@ namespace psy { namespace core {
 template<typename X>
 void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
 	std::size_t const size(count * sizeof(X));
-	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if defined DIVERSALIS__OS__POSIX
 			void * address;
 			posix_memalign(&address, alignment, size);
 			x = static_cast<X*>(address);
 			// note: free with std::free
-	#elif 0///\todo defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+	#elif 0///\todo defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
 			x = static_cast<X*>(__mingw_aligned_malloc(size, alignment));
 			// note: free with _mingw_aligned_free
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+	#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 			x = static_cast<X*>(_aligned_malloc(size, alignment));
 			// note: free with _aligned_free
 	#else
@@ -50,11 +50,11 @@ void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
 ///\todo general purpose => move this to universalis/operating_system/aligned_dealloc.hpp or something
 template<typename X>
 void aligned_dealloc(X *& address) {
-	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if defined DIVERSALIS__OS__POSIX
 		free(address); address=0;
-	#elif 0///\todo: defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+	#elif 0///\todo: defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
 		_aligned_free(address); address=0;
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+	#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 		_aligned_free(address); address=0;
 	#else
 		delete[] address; address=0;

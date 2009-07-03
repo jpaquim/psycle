@@ -7,7 +7,7 @@
 // and declare steinberg's unstandard/specific options: WIN32/MAC
 #include <diversalis/operating_system.hpp>
 
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	#if defined _WIN64
 		#error internal steinberg error (actually, it might work)
 	#elif defined _WIN32
@@ -20,7 +20,7 @@
 	// so we include the missing headers ourselves
 	#include <objbase.h>
 
-#elif defined DIVERSALIS__OPERATING_SYSTEM__APPLE
+#elif defined DIVERSALIS__OS__APPLE
 	#define MAC // steinberg's asio build option
 
 #else

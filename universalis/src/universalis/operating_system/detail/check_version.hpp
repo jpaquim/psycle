@@ -4,8 +4,8 @@
 
 ///\interface universalis::operating_system::detail::check_version
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__DETAIL__CHECK_VERSION__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__DETAIL__CHECK_VERSION__INCLUDED
+#ifndef UNIVERSALIS__OS__DETAIL__CHECK_VERSION__INCLUDED
+#define UNIVERSALIS__OS__DETAIL__CHECK_VERSION__INCLUDED
 #pragma once
 
 #include <universalis/exception.hpp>

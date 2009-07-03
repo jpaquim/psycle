@@ -7,7 +7,7 @@
 #include <universalis/operating_system/exception.hpp>
 #include <universalis/compiler/numeric.hpp>
 
-#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if !defined DIVERSALIS__OS__MICROSOFT
 	#error "this plugin is specific to microsoft's operating system"
 #endif
 

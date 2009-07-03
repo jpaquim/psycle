@@ -36,8 +36,8 @@
 		int inline vsprintf_s(char * restrict destination, size_t max_length, char const * restrict format, va_list values) throw(runtime_error) {
 			int const result(
 				#if (\
-					defined DIVERSALIS__OPERATING_SYSTEM__LINUX || \
-					(defined DIVERSALIS__OPERATING_SYSTEM__BSD && DIVERSALIS__OPERATING_SYSTEM__VERSION >= 44 /* 4.4 */) || \
+					defined DIVERSALIS__OS__LINUX || \
+					(defined DIVERSALIS__OS__BSD && DIVERSALIS__OS__VERSION >= 44 /* 4.4 */) || \
 					defined DIVERSALIS__OPEPATING_SYSTEM__MICROSOFT \
 				)
 					vsnprintf(destination, max_length, format, values)
@@ -50,10 +50,10 @@
 		}
 
 		///\todo there might be a bug to submit to the w-api people about the following
-		#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__COMPILER__GNU
+		#if defined DIVERSALIS__OS__MICROSOFT && !defined DIVERSALIS__COMPILER__GNU
 			int inline vswprintf_s(wchar_t * restrict destination, size_t max_length, wchar_t const * restrict format, va_list values) throw(runtime_error) {
 				///\todo there might be a bug to submit to the w-api people about the following
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					int const result(vswprintf(destination, format, values));
 				#else
 					int const result(vswprintf(destination, max_length, format, values));
@@ -72,7 +72,7 @@
 	using std::freopen_s;
 	using std::vsprintf_s;
 	///\todo there might be a bug to submit to the w-api people about the following
-	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && !defined DIVERSALIS__COMPILER__GNU
+	#if defined DIVERSALIS__OS__MICROSOFT && !defined DIVERSALIS__COMPILER__GNU
 		using std::vswprintf_s;
 	#endif
 	using std::strcpy_s;

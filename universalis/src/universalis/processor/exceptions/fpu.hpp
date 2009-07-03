@@ -9,7 +9,7 @@
 #pragma once
 
 #include <universalis/detail/project.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <cfloat> // for _control*, _status* and _clear* functions
 	#if defined DIVERSALIS__PROCESSOR__X86 // #if DIVERSALIS__PROCESSOR__X86__SSE >= 2
 		///\todo use _*87_2 functions
@@ -26,7 +26,7 @@ namespace fpu {
 class status {
 	public:
 		void static inline clear() throw() {
-			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 				::_clearfp();
 				//::_clear87();
 			#else
@@ -59,14 +59,14 @@ class mask {
 
 			private:
 				bool mask(underlying const & mask) const throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT
 						return value & mask;
 					#else
 						return true; ///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				void mask(underlying const & mask, bool b) throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT
 						value &= ~mask; if(b) value |= mask;
 					#else
 						///\todo C1999 #include <fenv.h>
@@ -74,84 +74,84 @@ class mask {
 				}
 			public:
 				bool denormal() const throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						return mask(_EM_DENORMAL);
 					#else
 						return true; ///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				void denormal(bool b) throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						mask(_EM_DENORMAL, b);
 					#else
 						///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				bool inexact() const throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						return mask(_EM_INEXACT);
 					#else
 						return true; ///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				void inexact(bool b) throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						mask(_EM_INEXACT, b);
 					#else
 						///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				bool divide_by_0() const throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						return mask(_EM_ZERODIVIDE);
 					#else
 						return true; ///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				void divide_by_0(bool b) throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						mask(_EM_ZERODIVIDE, b);
 					#else
 						///\todo
 					#endif
 				}
 				bool overflow() const throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						return mask(_EM_OVERFLOW);
 					#else
 						return true; ///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				void overflow(bool b) throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						mask(_EM_OVERFLOW, b);
 					#else
 						///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				bool underflow() const throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						return mask(_EM_UNDERFLOW);
 					#else
 						return true; ///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				void underflow(bool b) throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						mask(_EM_UNDERFLOW, b);
 					#else
 						///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				bool invalid() const throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						return mask(_EM_INVALID);
 					#else
 						return true; ///\todo C1999 #include <fenv.h>
 					#endif
 				}
 				void invalid(bool b) throw() {
-					#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+					#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 						mask(_EM_INVALID, b);
 					#else
 						///\todo C1999 #include <fenv.h>
@@ -161,7 +161,7 @@ class mask {
 
 		/// the exception mask currently active
 		type static current() throw() {
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 				return ::_control87(0, 0);
 			#else
 				///\todo
@@ -175,7 +175,7 @@ class mask {
 
 		/// begins a scoped mask
 		mask(type const & mask)
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 			:
 				save //\todo check the doc here. this might not return the previous control flags. ::_control87(0, 0) does it.
 				(
@@ -202,7 +202,7 @@ class mask {
 
 		/// ends a scoped mask
 		~mask() throw() {
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 				::_control87
 				(
 					save, // values to set the control flags to

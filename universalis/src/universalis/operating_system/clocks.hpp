@@ -3,17 +3,17 @@
 
 ///\file \brief universalis::operating_system::clocks
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__CLOCKS__INCLUDED
+#ifndef UNIVERSALIS__OS__CLOCKS__INCLUDED
+#define UNIVERSALIS__OS__CLOCKS__INCLUDED
 #pragma once
 
 #include <diversalis/operating_system.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+#if defined DIVERSALIS__OS__POSIX
 	#include <ctime>
 	#include <cerrno>
 	#include <cstring>
 	#include <unistd.h>
-#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#elif defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 		#pragma comment(lib, "kernel32") // win64?
@@ -112,7 +112,7 @@ namespace detail {
 	/// test result on colinux AMD64: clock: std::clock, min: 0.01s, avg: 0.01511s, max: 0.02s
 	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds iso_std_clock() throw(std::runtime_error);
 
-	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	#if defined DIVERSALIS__OS__POSIX
 		namespace posix {
 			bool extern clock_gettime_supported, clock_getres_supported, monotonic_clock_supported, process_cputime_supported, thread_cputime_supported;
 			::clockid_t extern monotonic_clock_id, process_cputime_clock_id, thread_cputime_clock_id;
@@ -156,7 +156,7 @@ namespace detail {
 			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.5878e-05s, max: 0.001719s
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds time_of_day() throw(std::runtime_error);
 		}
-	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#elif defined DIVERSALIS__OS__MICROSOFT
 		namespace microsoft {
 			/// wall clock.
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
@@ -193,7 +193,7 @@ namespace detail {
 			/// test result: clock: GetThreadTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
 			UNIVERSALIS__COMPILER__DYNAMIC_LINK std::nanoseconds thread_time();
 		}
-	#endif // defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+	#endif // defined DIVERSALIS__OS__MICROSOFT
 
 	#if defined BOOST_AUTO_TEST_CASE
 		namespace test {
@@ -226,7 +226,7 @@ namespace detail {
 				BOOST_MESSAGE(s.str());
 			}
 
-			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX && (_POSIX_TIMERS > 0 || defined _SC_TIMERS )
+			#if defined DIVERSALIS__OS__POSIX && (_POSIX_TIMERS > 0 || defined _SC_TIMERS )
 				void display_clock_resolution(std::string const & clock_name, ::clockid_t clock) throw(std::runtime_error) {
 					::timespec t;
 					if(::clock_getres(clock, &t))
@@ -246,7 +246,7 @@ namespace detail {
 			BOOST_AUTO_TEST_CASE(clocks_test) {
 				measure_clock_resolution("std::time", iso_std_time, 1);
 				measure_clock_resolution("std::clock", iso_std_clock, 100);
-				#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+				#if defined DIVERSALIS__OS__POSIX
 					BOOST_MESSAGE("posix clocks");
 					using namespace posix;
 					config();
@@ -275,7 +275,7 @@ namespace detail {
 							s << "CLOCKS_PER_SEC: " << CLOCKS_PER_SEC;
 							BOOST_MESSAGE(s.str());
 					}
-				#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#elif defined DIVERSALIS__OS__MICROSOFT
 					BOOST_MESSAGE("microsoft clocks");
 					using namespace microsoft;
 					{

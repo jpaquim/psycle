@@ -12,7 +12,7 @@
 #include "detail/boost_xtime.hpp"
 #include <boost/thread.hpp>
 #include <boost/operators.hpp>
-#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+#if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #endif
 
@@ -68,9 +68,9 @@ class thread {
 					typedef
 						// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
 						// so we need to know the OS type
-						#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+						#if defined DIVERSALIS__OS__POSIX
 							::pthread_t *
-						#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+						#elif defined DIVERSALIS__OS__MICROSOFT
 							::DWORD
 						#else
 							#error unsupported operating system
@@ -117,9 +117,9 @@ namespace this_thread {
 		thread::id id(
 			// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
 			// so we need to know the OS type
-			#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+			#if defined DIVERSALIS__OS__POSIX
 				::pthread_self()
-			#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+			#elif defined DIVERSALIS__OS__MICROSOFT
 				::GetCurrentThreadId()
 			#else
 				#error unsupported operating system
@@ -130,9 +130,9 @@ namespace this_thread {
 	#else
 		// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
 		// so we need to know the OS type
-		#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		#if defined DIVERSALIS__OS__POSIX
 			::pthread_t inline id() { return ::pthread_self(); }
-		#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+		#elif defined DIVERSALIS__OS__MICROSOFT
 			::DWORD     inline id() { return ::GetCurrentThreadId(); }
 		#else
 			#error unsupported operating system

@@ -3,8 +3,8 @@
 
 ///\file
 
-#ifndef UNIVERSALIS__OPERATING_SYSTEM__DYNAMIC_LINK__MAIN__INCLUDED
-#define UNIVERSALIS__OPERATING_SYSTEM__DYNAMIC_LINK__MAIN__INCLUDED
+#ifndef UNIVERSALIS__OS__DYNAMIC_LINK__MAIN__INCLUDED
+#define UNIVERSALIS__OS__DYNAMIC_LINK__MAIN__INCLUDED
 #pragma once
 
 #include PACKAGENERIC
@@ -34,7 +34,7 @@
 			#endif
 		}
 	}}}}
-#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <windows.h>
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/dynamic_link_library_functions.asp
 	::BOOL APIENTRY DllMain(::HMODULE module, ::DWORD reason_for_call, ::LPVOID) {
@@ -43,7 +43,7 @@
 		if(loggers::exception()()) {
 			s << "module: ";
 			{
-				char file_name[DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__MAX_PATH];
+				char file_name[DIVERSALIS__OS__MICROSOFT__MAX_PATH];
 				::GetModuleFileNameA(module, file_name, sizeof file_name);
 				s << file_name << ": ";
 			}
