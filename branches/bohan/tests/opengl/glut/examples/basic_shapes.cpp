@@ -126,12 +126,3 @@ int main(int argc, char** argv) {
 	glutMainLoop(); //Start the main loop.  glutMainLoop doesn't return.
 	return 0; //This line is never reached
 }
-
-
-
-
-
-
-
-
-
