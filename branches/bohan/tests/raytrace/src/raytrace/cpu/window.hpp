@@ -4,7 +4,6 @@
 #ifndef RAYTRACE__WINDOW
 #define RAYTRACE__WINDOW
 
-#include "view.hpp"
 #include "render.hpp"
 #include "lock.hpp"
 
@@ -16,10 +15,10 @@
 
 namespace raytrace {
 
-class window : public view, public Gtk::Window {
+class window : public Gtk::Window {
 	public:
 		window(render &);
-		void update() /*override*/ {
+		void update() {
 			//std::cout << "update\n";
 			lock lock;
 			image_.set(image_.get_pixbuf());
