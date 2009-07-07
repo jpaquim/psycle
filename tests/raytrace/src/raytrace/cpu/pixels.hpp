@@ -18,27 +18,39 @@ class pixels {
 		Glib::RefPtr<Gdk::Pixbuf> pixbuf() { return pixbuf_; }
 		unsigned int width() const { return pixbuf_->get_width(); }
 		unsigned int height() const { return pixbuf_->get_height(); }
-		void fill(color c) { pixbuf_->fill(c); }
+		typedef std::uint32_t rgba;
+		void fill(rgba color) { pixbuf_->fill(color); }
 		void inline put(unsigned int x, unsigned int y, color);
+		void inline put(unsigned int x, unsigned int y, rgba);
 	private:
 		Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
+		union raw_datum {
+			std::uint8_t bytes[4];
+			rgba word;
+		} datum;
 		union raw_data {
 			std::uint8_t * bytes;
-			color * c;
+			rgba * word;
 		} data_;
 		unsigned int row_stride_;
 };
 
 void pixels::put(unsigned int x, unsigned int y, color c) {
+	raw_datum datum;
+	datum.bytes[0] = 255 * c.r;
+	datum.bytes[1] = 255 * c.g;
+	datum.bytes[2] = 255 * c.b;
+	datum.bytes[3] = 0;
+	put(x, y, datum.word);
+}
+
+void pixels::put(unsigned int x, unsigned int y, rgba color) {
 	raw_data p;
 	p.bytes = data_.bytes + y * row_stride_ + x * 3;
-	union raw_datum {
-		std::uint8_t bytes[4];
-		color c;
-	} datum;
-	datum.c = c;
+	raw_datum datum;
+	datum.word = color;
 	datum.bytes[3] = p.bytes[3];
-	*p.c = datum.c;
+	*p.word = datum.word;
 }
 
 }
