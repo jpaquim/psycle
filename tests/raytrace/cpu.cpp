@@ -37,7 +37,7 @@ class window : public Gtk::Window {
 #include <gtkmm/main.h>
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	Gtk::Main main(argument_count, arguments);
-	raytracer::pixels pixels(500, 500);
+	raytracer::pixels pixels(800, 800);
 	raytracer::window window(pixels.pixbuf());
 	main.run(window);
 	return 0;
@@ -49,10 +49,12 @@ namespace raytracer {
 
 pixels::pixels(unsigned int width, unsigned int height) {
 	pixbuf_ = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, width, height);
-	fill(0x11223300);
-	put(250, 240, 0x0000ff);
-	put(250, 250, 0x00ff00);
-	put(250, 260, 0xff0000);
+	fill(0xffffff00);
+	for(unsigned int x(0); x < width; ++x)
+		for(unsigned int y(0); y < height; ++y) {
+			color c = x * y;
+			put(x, y, c);
+		}
 }
 
 void pixels::fill(color c) {
@@ -74,10 +76,9 @@ void pixels::put(unsigned int x, unsigned int y, color c) {
 
 window::window(Glib::RefPtr<Gdk::Pixbuf> pixbuf)
 :
+	image_(pixbuf),
 	button_("Quit")
 {
-	image_.set_size_request(pixbuf->get_width(), pixbuf->get_height());
-	image_.set(pixbuf);
 	button_.signal_clicked().connect(sigc::mem_fun(*this, &window::on_button_clicked));
 	set_title("raytracer");
 	v_box_.pack_start(image_);
