@@ -83,7 +83,7 @@ void render::process() {
 }
 
 void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step) {
-	std::cout << "part: " << min_x << ' ' << max_x << ' ' << min_y << ' ' << max_y << '\n';
+	std::cout << "part: " << min_x << ' ' << max_x << ' ' << min_y << ' ' << max_y << ' ' << y_step << '\n';
 	unsigned int const inc(max_x - min_x);
 	while(true) {
 		{ scoped_lock lock(mutex_);
