@@ -8,10 +8,14 @@
 #include <gtkmm/image.h>
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/main.h>
+
+/*#include <gdk/gdk.h>*/ extern "C" { void gdk_threads_enter(); void gdk_flush(); void gdk_threads_leave(); }
+#include <cassert>
+
 #include <boost/bind.hpp>
 #include <thread>
 
-namespace raytracer {
+namespace raytrace {
 
 typedef guint32 color;
 
@@ -21,7 +25,7 @@ class pixels {
 		Glib::RefPtr<Gdk::Pixbuf> pixbuf() { return pixbuf_; }
 		unsigned int width() const { return pixbuf_->get_width(); }
 		unsigned int height() const { return pixbuf_->get_height(); }
-		void inline fill(color);
+		void fill(color c) { pixbuf_->fill(c); }
 		void inline put(unsigned int x, unsigned int y, color);
 	private:
 		Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
@@ -30,6 +34,7 @@ class pixels {
 class window : public Gtk::Window {
 	public:
 		window(Glib::RefPtr<Gdk::Pixbuf> pixbuf);
+		Gtk::Image & image() { return image_; }
 	private:
 		Gtk::VBox v_box_;
 		Gtk::Image image_;
@@ -37,16 +42,40 @@ class window : public Gtk::Window {
 		void on_button_clicked();
 };
 
-void stuff(pixels & pixels) {
+class lock {
+	public:
+		void static init();
+		bool static initialized() { return initialized_; }
+	private:
+		bool static initialized_;
+
+	public:
+		lock() {
+			class once { public: once() { init(); } };
+			once static once;
+			assert(initialized());
+			::gdk_threads_enter();
+		}
+		
+		~lock() throw() {
+			::gdk_flush();
+			::gdk_threads_leave();
+		}
+};
+
+void stuff(pixels & pixels, window & window) {
 	pixels.fill(0xffffff00);
 	color c0 = 0;
-	for(unsigned int i(0); i < 10000; ++i) {
+	for(unsigned int i(0); i < 100; ++i) {
 		for(unsigned int x(0); x < pixels.width(); ++x)
 			for(unsigned int y(0); y < pixels.height(); ++y) {
 				color c = c0 + x * y;
 				pixels.put(x, y, c);
 			}
-		++c0;
+		c0 += 1000;
+		{ lock lock;
+			window.image().set(pixels.pixbuf());
+		}
 	}
 }
 
@@ -54,19 +83,24 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	Gtk::Main main(argument_count, arguments);
 	pixels pixels(800, 800);
 	window window(pixels.pixbuf());
-	std::thread t(boost::bind(&stuff, pixels));
-	main.run(window);
+	std::thread t(boost::bind(&stuff, boost::ref(pixels), boost::ref(window)));
+	{ lock lock;
+		main.run(window);
+	}
 	return 0;
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <glibmm/thread.h>
+/*#include <gdk/gdk.h>*/ extern "C" { void gdk_threads_init(); }
+
+namespace raytrace {
+
 pixels::pixels(unsigned int width, unsigned int height) {
 	pixbuf_ = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, width, height);
-}
-
-void pixels::fill(color c) {
-	pixbuf_->fill(c);
 }
 
 void pixels::put(unsigned int x, unsigned int y, color c) {
@@ -99,10 +133,20 @@ void window::on_button_clicked() {
 	Gtk::Main::quit();
 }
 
+bool lock::initialized_(false);
+void lock::init() {
+	if(!initialized()) {
+		if(!Glib::thread_supported()) Glib::thread_init();
+		::gdk_threads_init();
+		initialized_ = true;
+	}
+	assert(initialized());
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
-	return raytracer::main(argument_count, arguments);
+	return raytrace::main(argument_count, arguments);
 }
