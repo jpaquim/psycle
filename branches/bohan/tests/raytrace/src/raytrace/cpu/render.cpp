@@ -21,7 +21,7 @@ render::render(typenames::scene & scene, typenames::pixels & pixels)
 void render::start() {
 	std::size_t thread_count(universalis::os::cpu_affinity::cpu_count());
 	{ // thread count env var
-		char const * const env(std::getenv("THREADS"));
+		char const * const env(std::getenv("RAYTRACE_THREADS"));
 		if(env) {
 			std::stringstream s;
 			s << env;
@@ -30,16 +30,23 @@ void render::start() {
 	}
 
 	unsigned int const width(pixels_.width()), height(pixels_.height());
-	unsigned int const x_stripe(width), y_stripe(height / thread_count);
 	unsigned int x(0), y(0);
 	try {
-		for(std::size_t i(0); i < thread_count; ++i) {
-			threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, x, x + x_stripe, y, y + y_stripe)));
-			x += x_stripe;
-			if(x >= width) {
-				x = 0;
-				y += y_stripe;
-				if(y >= height) y = 0;
+		if(false) {
+			unsigned int const x_stripe(width), y_stripe(height / thread_count);
+			for(std::size_t i(0); i < thread_count; ++i) {
+				threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, x, x + x_stripe, y, y + y_stripe, 1)));
+				x += x_stripe;
+				if(x >= width) {
+					x = 0;
+					y += y_stripe;
+					if(y >= height) y = 0;
+				}
+			}
+		} else {
+			unsigned int const y_step(thread_count);
+			for(std::size_t i(0); i < thread_count; ++i) {
+				threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, x, x + width, y + i, y + height, y_step)));
 			}
 		}
 	} catch(...) {
@@ -75,7 +82,7 @@ void render::process() {
 	condition_.notify_all();
 }
 
-void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y) {
+void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step) {
 	std::cout << "part: " << min_x << ' ' << max_x << ' ' << min_y << ' ' << max_y << '\n';
 	unsigned int const inc(max_x - min_x);
 	while(true) {
@@ -83,7 +90,7 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 			while(!stop_requested_ && !process_requested_) condition_.wait(lock);
 			if(stop_requested_) return;
 		}
-		for(unsigned int y(min_y); y < max_y; ++y) {
+		for(unsigned int y(min_y); y < max_y; y += y_step) {
 			for(unsigned int x(min_x); x < max_x; ++x) {
 				color c = scene_.trace(x, y);
 				pixels_.put(x, y, c);
