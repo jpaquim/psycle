@@ -7,6 +7,9 @@
 #include <gtkmm/button.h>
 #include <gtkmm/image.h>
 #include <gdkmm/pixbuf.h>
+#include <gtkmm/main.h>
+#include <boost/bind.hpp>
+#include <thread>
 
 namespace raytracer {
 
@@ -16,6 +19,8 @@ class pixels {
 	public:
 		pixels(unsigned int width, unsigned int height);
 		Glib::RefPtr<Gdk::Pixbuf> pixbuf() { return pixbuf_; }
+		unsigned int width() const { return pixbuf_->get_width(); }
+		unsigned int height() const { return pixbuf_->get_height(); }
 		void inline fill(color);
 		void inline put(unsigned int x, unsigned int y, color);
 	private:
@@ -32,31 +37,32 @@ class window : public Gtk::Window {
 		void on_button_clicked();
 };
 
+void stuff(pixels & pixels) {
+	pixels.fill(0xffffff00);
+	color c0 = 0;
+	for(unsigned int i(0); i < 10000; ++i) {
+		for(unsigned int x(0); x < pixels.width(); ++x)
+			for(unsigned int y(0); y < pixels.height(); ++y) {
+				color c = c0 + x * y;
+				pixels.put(x, y, c);
+			}
+		++c0;
+	}
 }
 
-#include <gtkmm/main.h>
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	Gtk::Main main(argument_count, arguments);
-	raytracer::pixels pixels(800, 800);
-	raytracer::window window(pixels.pixbuf());
+	pixels pixels(800, 800);
+	window window(pixels.pixbuf());
+	std::thread t(boost::bind(&stuff, pixels));
 	main.run(window);
 	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-namespace raytracer {
-
 pixels::pixels(unsigned int width, unsigned int height) {
 	pixbuf_ = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, width, height);
-	fill(0xffffff00);
-	color c0 = 0;
-	for(unsigned int i(0); i < 1; ++i)
-		for(unsigned int x(0); x < width; ++x)
-			for(unsigned int y(0); y < height; ++y) {
-				color c = c0 + x * y;
-				put(x, y, c);
-			}
 }
 
 void pixels::fill(color c) {
@@ -93,4 +99,10 @@ void window::on_button_clicked() {
 	Gtk::Main::quit();
 }
 
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
+	return raytracer::main(argument_count, arguments);
 }
