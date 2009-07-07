@@ -71,7 +71,7 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 		}
 		for(unsigned int y(min_y); y < max_y; y += y_step) {
 			for(unsigned int x(min_x); x < max_x; ++x) {
-				color c = scene_.trace(x, y);
+				color const c = scene_.trace(x, y);
 				pixels_.put(x, y, c);
 			}
 			{ scoped_lock lock(mutex_);
