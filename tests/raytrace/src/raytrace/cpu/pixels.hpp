@@ -7,6 +7,8 @@
 
 #include "color.hpp"
 #include <gdkmm/pixbuf.h>
+#include <cstdint>
+#include <cassert>
 
 namespace raytrace {
 
@@ -20,19 +22,23 @@ class pixels {
 		void inline put(unsigned int x, unsigned int y, color);
 	private:
 		Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
+		union raw_data {
+			std::uint8_t * bytes;
+			color * c;
+		} data_;
+		unsigned int row_stride_;
 };
 
 void pixels::put(unsigned int x, unsigned int y, color c) {
-	guint8 * p = pixbuf_->get_pixels();
-	p += y * pixbuf_->get_rowstride();
-	p += x * pixbuf_->get_n_channels();
-	union u {
-		guint8 r, g, b, x;
+	raw_data p;
+	p.bytes = data_.bytes + y * row_stride_ + x * 3;
+	union raw_datum {
+		std::uint8_t bytes[4];
 		color c;
-	} u;
-	u.c = c;
-	u.x = *(p + pixbuf_->get_n_channels());
-	*reinterpret_cast<color* >(p) = c;
+	} datum;
+	datum.c = c;
+	datum.bytes[3] = p.bytes[3];
+	*p.c = datum.c;
 }
 
 }
