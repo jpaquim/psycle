@@ -12,9 +12,8 @@ namespace raytrace {
 class scene0 : public scene {
 	protected:
 		color trace(unsigned int x, unsigned int y) /*override*/ {
-			color c(0);
-			for(unsigned int i(0); i < x * y / 1000000; ++i) c += i;
-			return c + x * y;
+			color c(x, y, x * y);
+			return c;
 		}
 };
 
