@@ -19,6 +19,7 @@ render::render(typenames::scene & scene, typenames::pixels & pixels)
 {}
 
 void render::start() {
+	process_requested_ = stop_requested_ = false;
 	thread_count_ = universalis::os::cpu_affinity::cpu_count();
 	{ // thread count env var
 		char const * const env(std::getenv("RAYTRACE_THREADS"));
@@ -65,7 +66,7 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 	unsigned int const inc(max_x - min_x);
 	while(true) {
 		{ scoped_lock lock(mutex_);
-			while(!stop_requested_ && !process_requested_) condition_.wait(lock);
+			while(!process_requested_ && !stop_requested_) condition_.wait(lock);
 			if(stop_requested_) return;
 		}
 		for(unsigned int y(min_y); y < max_y; y += y_step) {
@@ -83,7 +84,10 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 			}
 		}
 		{ scoped_lock lock(mutex_);
-			if(++thread_done_count_ == thread_count_) {
+			++thread_done_count_;
+			while(thread_done_count_ != thread_count_ && !stop_requested_) condition_.wait(lock);
+			if(stop_requested_) return;
+			if(process_requested_) {
 				process_requested_ = false;
 				if(count_ != 0) update_signal_();
 			}
