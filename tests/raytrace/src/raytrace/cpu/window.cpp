@@ -9,7 +9,6 @@ namespace raytrace {
 
 window::window(render & render)
 :
-	view(render.pixels()),
 	render_(render),
 	image_(render.pixels().pixbuf()),
 	button_("Quit")
