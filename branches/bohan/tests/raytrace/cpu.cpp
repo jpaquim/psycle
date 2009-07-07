@@ -50,11 +50,13 @@ namespace raytracer {
 pixels::pixels(unsigned int width, unsigned int height) {
 	pixbuf_ = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, width, height);
 	fill(0xffffff00);
-	for(unsigned int x(0); x < width; ++x)
-		for(unsigned int y(0); y < height; ++y) {
-			color c = x * y;
-			put(x, y, c);
-		}
+	color c0 = 0;
+	for(unsigned int i(0); i < 100; ++i)
+		for(unsigned int x(0); x < width; ++x)
+			for(unsigned int y(0); y < height; ++y) {
+				color c = c0 + x * y;
+				put(x, y, c);
+			}
 }
 
 void pixels::fill(color c) {
