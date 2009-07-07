@@ -2,11 +2,15 @@
 // copyright 2009-2009 psycledelics http://psycle.pastnotecut.org : johan boule
 
 #include "pixels.hpp"
+#include <cassert>
 
 namespace raytrace {
 
 pixels::pixels(unsigned int width, unsigned int height) {
 	pixbuf_ = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, width, height);
+	assert(pixbuf_->get_n_channels() == 3);
+	data_.bytes = pixbuf_->get_pixels();
+	row_stride_ = pixbuf_->get_rowstride();
 }
 
 }
