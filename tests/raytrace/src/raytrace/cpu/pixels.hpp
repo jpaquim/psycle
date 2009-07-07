@@ -30,7 +30,7 @@ class pixels {
 		} datum;
 		union raw_data {
 			std::uint8_t * bytes;
-			rgba * word;
+			rgba * words;
 		} data_;
 		unsigned int row_stride_;
 };
@@ -44,13 +44,13 @@ void pixels::put(unsigned int x, unsigned int y, color c) {
 	put(x, y, datum.word);
 }
 
-void pixels::put(unsigned int x, unsigned int y, rgba color) {
+void pixels::put(unsigned int x, unsigned int y, rgba c) {
 	raw_data p;
 	p.bytes = data_.bytes + y * row_stride_ + x * 3;
 	raw_datum datum;
-	datum.word = color;
+	datum.word = c;
 	datum.bytes[3] = p.bytes[3];
-	*p.word = datum.word;
+	*p.words = datum.word;
 }
 
 }
