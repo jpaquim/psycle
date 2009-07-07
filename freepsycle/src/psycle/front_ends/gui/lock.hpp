@@ -10,10 +10,10 @@ namespace psycle { namespace front_ends { namespace gui {
 
 class lock {
 	public:
-		void       static   init();
-		bool const static & initialized() { return initialized_; }
+		void static init();
+		bool static initialized() { return initialized_; }
 	private:
-		bool       static   initialized_;
+		bool static initialized_;
 
 	public:
 		lock() {
@@ -30,4 +30,3 @@ class lock {
 };
 
 }}}
-
