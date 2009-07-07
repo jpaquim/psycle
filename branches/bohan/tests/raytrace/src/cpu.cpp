@@ -215,7 +215,7 @@ class scene0 : public scene {
 	protected:
 		color trace(unsigned int x, unsigned int y) /*override*/ {
 			color c(0);
-			for(unsigned int i(0); i < 100000; ++i) c += i;
+			for(unsigned int i(0); i < x * y; ++i) c += i;
 			return c + x * y;
 		}
 };
