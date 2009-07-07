@@ -76,9 +76,9 @@ window::window(Glib::RefPtr<Gdk::Pixbuf> pixbuf)
 :
 	button_("Quit")
 {
+	image_.set_size_request(pixbuf->get_width(), pixbuf->get_height());
 	image_.set(pixbuf);
 	button_.signal_clicked().connect(sigc::mem_fun(*this, &window::on_button_clicked));
-	set_size_request(pixbuf->get_width() + 64, pixbuf->get_height() + 64);
 	set_title("raytracer");
 	v_box_.pack_start(image_);
 	v_box_.pack_start(button_, Gtk::PACK_SHRINK);
