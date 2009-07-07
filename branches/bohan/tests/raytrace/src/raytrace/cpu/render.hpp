@@ -44,6 +44,7 @@ class render {
 		std::condition<scoped_lock> mutable condition_;
 		bool process_requested_, stop_requested_;
 		unsigned int count_, update_signal_count_;
+		std::size_t thread_count_, thread_done_count_;
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
 		void process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step);

@@ -19,46 +19,23 @@ render::render(typenames::scene & scene, typenames::pixels & pixels)
 {}
 
 void render::start() {
-	std::size_t thread_count(universalis::os::cpu_affinity::cpu_count());
+	thread_count_ = universalis::os::cpu_affinity::cpu_count();
 	{ // thread count env var
 		char const * const env(std::getenv("RAYTRACE_THREADS"));
 		if(env) {
 			std::stringstream s;
 			s << env;
-			s >> thread_count;
+			s >> thread_count_;
 		}
 	}
-
 	unsigned int const width(pixels_.width()), height(pixels_.height());
 	unsigned int x(0), y(0);
 	try {
-		if(false) {
-			unsigned int const x_stripe(width), y_stripe(height / thread_count);
-			for(std::size_t i(0); i < thread_count; ++i) {
-				threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, x, x + x_stripe, y, y + y_stripe, 1)));
-				x += x_stripe;
-				if(x >= width) {
-					x = 0;
-					y += y_stripe;
-					if(y >= height) y = 0;
-				}
-			}
-		} else {
-			unsigned int const y_step(thread_count);
-			for(std::size_t i(0); i < thread_count; ++i) {
-				threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, x, x + width, y + i, y + height, y_step)));
-			}
-		}
+		unsigned int const y_step(thread_count_);
+		for(std::size_t i(0); i < thread_count_; ++i)
+			threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, x, x + width, y + i, y + height, y_step)));
 	} catch(...) {
-		{ scoped_lock lock(mutex_);
-			stop_requested_ = true;
-		}
-		condition_.notify_all();
-		for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
-			(**i).join();
-			delete *i;
-		}
-		threads_.clear();
+		stop();
 		throw;
 	}
 }
@@ -78,12 +55,13 @@ void render::stop() {
 void render::process() {
 	{ scoped_lock lock(mutex_);
 		process_requested_ = true;
+		thread_done_count_ = 0;
 	}
 	condition_.notify_all();
 }
 
 void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step) {
-	std::cout << "part: " << min_x << ' ' << max_x << ' ' << min_y << ' ' << max_y << ' ' << y_step << '\n';
+	//std::cout << "part: " << min_x << ' ' << max_x << ' ' << min_y << ' ' << max_y << ' ' << y_step << '\n';
 	unsigned int const inc(max_x - min_x);
 	while(true) {
 		{ scoped_lock lock(mutex_);
@@ -104,7 +82,12 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 				}
 			}
 		}
-		update_signal_();
+		{ scoped_lock lock(mutex_);
+			if(++thread_done_count_ == thread_count_) {
+				process_requested_ = false;
+				if(count_ != 0) update_signal_();
+			}
+		}
 	}
 }
 
