@@ -13,25 +13,25 @@ namespace raytrace {
 #else
 class object {
 	public:
-		bool virtual hit(vertex const & from, vertex const & to, vertex & pos, vertex & normal) = 0;
+		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos, vertex3 & normal) = 0;
 };
 
 class plane : public object {
 	public:
-		vertex normal,
+		vertex3 normal,
 		real r;
 };
 
 class sphere : public object {
 	public:
-		vertex pos;
+		vertex3 pos;
 		real radius;
 }
 #endif
 
 class scene0 : public scene {
 	public:
-		color trace(vertex const & from, vertex const & to) /*override*/ {
+		color trace(vertex3 const & from, vertex3 const & to) /*override*/ {
 			#if 1
 			color c(to.x, to.y, to.x * to.y);
 			return c;
@@ -55,7 +55,7 @@ class scene0 : public scene {
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	Gtk::Main main(argument_count, arguments);
 	scene0 scene;
-	view view; view.from = vertex(0, 0, 0); view.angles = vertex(0, 0, 0);
+	view view; view.from(0, 0, 0);
 	pixels pixels(800, 800);
 	pixels.fill(color(1, 1, 1));
 	render render(scene, view, pixels);
