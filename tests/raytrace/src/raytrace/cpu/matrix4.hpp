@@ -5,102 +5,14 @@
 #define RAYTRACE__MATRIX4
 #pragma once
 
+#include "matrix.hpp"
 #include "real.hpp"
 #include "vertex4.hpp"
 #include "vertex3.hpp"
 
 namespace raytrace {
 
-class matrix4 {
-	public:
-		typedef unsigned int size_type;
-		size_type static const size = 4;
-
-		real operator ()(size_type i, size_type j) const { return e[i][j]; }
-
-		real & operator ()(size_type i, size_type j) { return e[i][j]; }
-		
-		matrix4() {}
-
-		matrix4(matrix4 const & other) {
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					this->e[i][j] = other.e[i][j];
-		}
-		
-		matrix4 & operator =(matrix4 const & other) {
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					this->e[i][j] = other.e[i][j];
-		}
-		
-		matrix4 operator +(matrix4 const & other) const {
-			matrix4 m;
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					m.e[i][j] = this->e[i][j] + other.e[i][j];
-			return m;
-		}
-
-		matrix4 operator -(matrix4 const & other) const {
-			matrix4 m;
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					m.e[i][j] = this->e[i][j] - other.e[i][j];
-			return m;
-		}
-
-		matrix4 & operator +=(matrix4 const & other) {
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					this->e[i][j] += other.e[i][j];
-			return *this;
-		}
-
-		matrix4 & operator -=(matrix4 const & other) {
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					this->e[i][j] -= other.e[i][j];
-			return *this;
-		}
-
-		matrix4 operator -() const {
-			matrix4 m;
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					m.e[i][j] = -this->e[i][j];
-			return m;
-		}
-
-		matrix4 operator *(real r) const {
-			matrix4 m;
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					m.e[i][j] = this->e[i][j] * r;
-			return m;
-		}
-
-		matrix4 & operator *=(real r) {
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j)
-					this->e[i][j] *= r;
-			return *this;
-		}
-
-		matrix4 operator *(matrix4 const & other) const {
-			matrix4 m;
-			for(size_type i(0); i < size; ++i)
-				for(size_type j(0); j < size; ++j) {
-					m.e[i][j] = this->e[0][j] * other.e[i][0];
-					for(size_type k(1); k < size; ++k)
-						m.e[i][j] += this->e[k][j] * other.e[i][k];
-				}
-			return m;
-		}
-
-	private:
-		real e[size][size];
-};
+typedef matrix<real, 4, 4> matrix4;
 
 matrix4 inline operator *(real r, matrix4 const & m) {
 	matrix4 result;

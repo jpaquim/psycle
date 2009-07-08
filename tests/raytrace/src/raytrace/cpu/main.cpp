@@ -11,31 +11,40 @@
 
 namespace raytrace {
 
-#if 1
 class object {
 	public:
-		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos, vertex3 & normal) = 0;
+		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos) = 0;
 };
 
 class quadric : public object {
 	public:
 		matrix4 matrix;
-		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos, vertex3 & normal) /*override*/ {
-			real a = to * matrix * to;
-			real b = 2 * to * matrix * from;
-			real c = from * matrix * from;
-			if(std::abs(2 * a) <= std::numeric_limits<real>::epsilon()) return false;
-			real root1 = (-b + std::sqrt(b * b - 4 * a * c)) / (2 * a);
-			real root2 = (-b - std::sqrt(b * b - 4 * a * c)) / (2 * a);
-			pos = from + std::min(root1, root2) * to;
-			//normal = ...
+		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos) /*override*/ {
+			vertex4 const to_matrix(to * matrix);
+			real const a(to_matrix * to);
+			real const b(2 * (to_matrix * from));
+			real const c(from * matrix * from);
+			real const discriminant(b * b - 4 * a * c);
+			if(discriminant < 0) return false;
+			real const discriminant_sqrt(std::sqrt(discriminant));
+			real const inversed_denominator(1 / (2 * a));
+			real const opposed_b(-b);
+			real const root1((opposed_b + discriminant_sqrt) * inversed_denominator);
+			real const root2((opposed_b - discriminant_sqrt) * inversed_denominator);
+			real root;
+			if(root1 < 0) {
+				if(root2 < 0) return false;
+				root = root2;
+			} else if(root2 < 0) root = root1;
+			else root = std::min(root1, root2);
+			pos = from + root * to;
 			return true;
 		}
 };
-#else
+
 class plane : public object {
 	public:
-		vertex3 normal,
+		vertex3 normal;
 		real r;
 };
 
@@ -43,19 +52,34 @@ class sphere : public object {
 	public:
 		vertex3 pos;
 		real radius;
-}
-#endif
+};
 
 class scene0 : public scene {
 	public:
+		scene0() {
+			matrix4 & m(q.matrix);
+			m.identity();
+			m *= 0.1;
+			m(3, 3) = -0.99;
+		}
+		
 		color trace(vertex3 const & from, vertex3 const & to) /*override*/ {
-			#if 1
+			#if 0
 			color c(to.x, to.y, to.x * to.y);
 			return c;
 			#else
+			color c;
+			vertex3 pos;
+			if(!q.hit(from, to, pos)) c(0, 0, 0);
+			else {
+				real const mag(pos.mag());
+				c(mag, mag, mag);
+			}
+			return c;
 			#endif
 		}
 	#if 1
+		quadric q;
 	#else
 		public:
 			scene0() {

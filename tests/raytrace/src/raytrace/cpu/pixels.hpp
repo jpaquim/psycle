@@ -38,9 +38,9 @@ pixels::rgba pixels::quantize(color c, std::uint8_t a) {
 		std::uint8_t bytes[4];
 		rgba word;
 	} datum;
-	datum.bytes[0] = 0xff * c.r;
-	datum.bytes[1] = 0xff * c.g;
-	datum.bytes[2] = 0xff * c.b;
+	datum.bytes[0] = 0xff * c.x;
+	datum.bytes[1] = 0xff * c.y;
+	datum.bytes[2] = 0xff * c.z;
 	datum.bytes[3] = a;
 	return datum.word;
 }
