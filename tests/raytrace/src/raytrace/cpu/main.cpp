@@ -5,17 +5,34 @@
 #include "render.hpp"
 #include "window.hpp"
 #include "lock.hpp"
+#include "matrix4.hpp"
 #include <gtkmm/main.h>
+#include <limits>
 
 namespace raytrace {
 
 #if 1
-#else
 class object {
 	public:
 		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos, vertex3 & normal) = 0;
 };
 
+class quadric : public object {
+	public:
+		matrix4 matrix;
+		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos, vertex3 & normal) /*override*/ {
+			real a = to * matrix * to;
+			real b = 2 * to * matrix * from;
+			real c = from * matrix * from;
+			if(std::abs(2 * a) <= std::numeric_limits<real>::epsilon()) return false;
+			real root1 = (-b + std::sqrt(b * b - 4 * a * c)) / (2 * a);
+			real root2 = (-b - std::sqrt(b * b - 4 * a * c)) / (2 * a);
+			pos = from + std::min(root1, root2) * to;
+			//normal = ...
+			return true;
+		}
+};
+#else
 class plane : public object {
 	public:
 		vertex3 normal,

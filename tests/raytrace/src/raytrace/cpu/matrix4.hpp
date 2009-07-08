@@ -16,15 +16,23 @@ class matrix4 {
 		typedef unsigned int size_type;
 		size_type static const size = 4;
 
-		real operator()(size_type i, size_type j) const { return e[i][j]; }
+		real operator ()(size_type i, size_type j) const { return e[i][j]; }
 
-		real & operator()(size_type i, size_type j) { return e[i][j]; }
+		real & operator ()(size_type i, size_type j) { return e[i][j]; }
 		
 		matrix4() {}
 
-		matrix4(matrix4 const & other) : e(other.e) {}
+		matrix4(matrix4 const & other) {
+			for(size_type i(0); i < size; ++i)
+				for(size_type j(0); j < size; ++j)
+					this->e[i][j] = other.e[i][j];
+		}
 		
-		martix & operator =(matrix4 const & other) const { this->e = other.e; }
+		matrix4 & operator =(matrix4 const & other) {
+			for(size_type i(0); i < size; ++i)
+				for(size_type j(0); j < size; ++j)
+					this->e[i][j] = other.e[i][j];
+		}
 		
 		matrix4 operator +(matrix4 const & other) const {
 			matrix4 m;
@@ -86,6 +94,7 @@ class matrix4 {
 					m.e[i][j] = this->e[0][j] * other.e[i][0];
 					for(size_type k(1); k < size; ++k)
 						m.e[i][j] += this->e[k][j] * other.e[i][k];
+				}
 			return m;
 		}
 
@@ -106,14 +115,6 @@ vertex4 inline operator *(matrix4 const & m, vertex4 const & v) {
 	result.z = v.x * m(0, 2) + v.y * m(1, 2) + v.z * m(2, 2) + v.w * m(3, 2);
 	result.w = v.x * m(0, 3) + v.y * m(1, 3) + v.z * m(2, 3) + v.w * m(3, 3);
 	return result;
-}
-
-inline operator vertex4(vertex3 const & v) {
-	vertex4 result;
-	result.x = v.x;
-	result.y = v.y;
-	result.z = v.z;
-	result.w = 1;
 }
 
 vertex4 inline operator *(matrix4 const & m, vertex3 const & v) {
