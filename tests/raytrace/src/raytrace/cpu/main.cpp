@@ -9,8 +9,6 @@
 
 namespace raytrace {
 
-typedef float real;
-
 class scene0 : public scene {
 	protected:
 		color trace(vertex const & from, vertex const & to) /*override*/ {
