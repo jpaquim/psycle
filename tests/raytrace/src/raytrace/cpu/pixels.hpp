@@ -27,7 +27,7 @@ class pixels {
 		union raw_datum {
 			std::uint8_t bytes[4];
 			rgba word;
-		} datum;
+		};
 		union raw_data {
 			std::uint8_t * bytes;
 			rgba * words;
