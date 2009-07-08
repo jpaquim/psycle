@@ -6,7 +6,7 @@
 #pragma once
 
 #include "color.hpp"
-#include "vertex.hpp"
+#include "vertex3.hpp"
 
 namespace raytrace {
 
