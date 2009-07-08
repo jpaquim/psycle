@@ -42,18 +42,14 @@ void render::start() {
 }
 		
 void render::stop() {
-	//std::cout << "stop\n" << std::flush;
 	{ scoped_lock lock(mutex_);
 		stop_requested_ = true;
 	}
-	//std::cout << "stop 2\n" << std::flush;
 	condition_.notify_all();
 	for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
-		//std::cout << "stop 3\n" << std::flush;
 		(**i).join();
 		delete *i;
 	}
-	//std::cout << "stop 4\n" << std::flush;
 	threads_.clear();
 }
 

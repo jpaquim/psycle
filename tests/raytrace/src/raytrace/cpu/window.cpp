@@ -24,13 +24,12 @@ window::window(render & render)
 }
 
 void window::update() {
-	//std::cout << "update\n" << std::flush;
 	lock lock;
 	image_.set(image_.get_pixbuf());
-	//std::cout << "updated\n" << std::flush;
 }
 
 void window::on_button_clicked() {
+	/// XXX may deadlock if we're responding to a gui action and a thread is processing the update signal, which acquires the gui lock.
 	render_.stop();
 	Gtk::Main::quit();
 }

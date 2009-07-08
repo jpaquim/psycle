@@ -5,7 +5,7 @@
 #define RAYTRACE__LOCK
 #pragma once
 
-/*#include <gdk/gdk.h>*/ extern "C" { void gdk_threads_enter(); void gdk_flush(); void gdk_threads_leave(); }
+/*#include <gdk/gdk.h>*/ extern "C" { void gdk_threads_enter(); /*void gdk_flush();*/ void gdk_threads_leave(); }
 #include <cassert>
 
 namespace raytrace {
@@ -26,7 +26,7 @@ class lock {
 		}
 		
 		~lock() throw() {
-			::gdk_flush();
+			//::gdk_flush();
 			::gdk_threads_leave();
 		}
 };
