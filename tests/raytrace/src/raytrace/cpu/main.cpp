@@ -9,20 +9,56 @@
 
 namespace raytrace {
 
+#if 1
+#else
+class object {
+	public:
+		bool virtual hit(vertex const & from, vertex const & to, vertex & pos, vertex & normal) = 0;
+};
+
+class plane : public object {
+	public:
+		vertex normal,
+		real r;
+};
+
+class sphere : public object {
+	public:
+		vertex pos;
+		real radius;
+}
+#endif
+
 class scene0 : public scene {
-	protected:
+	public:
 		color trace(vertex const & from, vertex const & to) /*override*/ {
+			#if 1
 			color c(to.x, to.y, to.x * to.y);
 			return c;
+			#else
+			#endif
 		}
+	#if 1
+	#else
+		public:
+			scene0() {
+				plane_.normal(0, 1, 0);
+				plane_.r = 0;
+				sphere_.pos(0, 1, 0);
+				sphere_.radius = 1;
+			};
+		plane plane_;
+		sphere sphere_;
+	#endif
 };
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	Gtk::Main main(argument_count, arguments);
 	scene0 scene;
+	view view; view.from = vertex(0, 0, 0); view.angles = vertex(0, 0, 0);
 	pixels pixels(800, 800);
 	pixels.fill(color(1, 1, 1));
-	render render(scene, pixels);
+	render render(scene, view, pixels);
 	window window(render);
 	render.start();
 	render.process();
