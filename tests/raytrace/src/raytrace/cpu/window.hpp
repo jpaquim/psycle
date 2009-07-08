@@ -5,8 +5,6 @@
 #define RAYTRACE__WINDOW
 
 #include "render.hpp"
-#include "lock.hpp"
-
 #include <gtkmm/window.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/box.h>
@@ -18,11 +16,7 @@ namespace raytrace {
 class window : public Gtk::Window {
 	public:
 		window(render &);
-		void update() {
-			//std::cout << "update\n";
-			lock lock;
-			image_.set(image_.get_pixbuf());
-		}
+		void update();
 	private:
 		render & render_;
 		Gtk::VBox v_box_;
