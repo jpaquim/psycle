@@ -14,12 +14,6 @@ namespace raytrace {
 
 typedef matrix<real, 4, 4> matrix4;
 
-matrix4 inline operator *(matrix4::value_type r, matrix4 const & m) {
-	matrix4 result;
-	result = m * r;
-	return result;
-}
-
 vertex4 inline operator *(matrix4 const & m, vertex4 const & v) {
 	vertex4 result;
 	result.x = v.x * m(0, 0) + v.y * m(1, 0) + v.z * m(2, 0) + v.w * m(3, 0);
