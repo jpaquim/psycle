@@ -23,7 +23,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	Gtk::Main main(argument_count, arguments);
 	scene0 scene;
 	pixels pixels(800, 800);
-	pixels.fill(0xffffff00);
+	pixels.fill(color(1, 1, 1));
 	render render(scene, pixels);
 	window window(render);
 	render.start();

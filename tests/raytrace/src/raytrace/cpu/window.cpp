@@ -11,7 +11,7 @@ namespace raytrace {
 window::window(render & render)
 :
 	render_(render),
-	image_(render.pixels().pixbuf()),
+	image_(render.pixels()),
 	button_("Quit")
 {
 	render.update_signal().connect(boost::bind(&window::update, this));

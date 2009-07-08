@@ -15,42 +15,40 @@ namespace raytrace {
 class pixels {
 	public:
 		pixels(unsigned int width, unsigned int height);
-		Glib::RefPtr<Gdk::Pixbuf> pixbuf() { return pixbuf_; }
 		unsigned int width() const { return pixbuf_->get_width(); }
 		unsigned int height() const { return pixbuf_->get_height(); }
-		typedef std::uint32_t rgba;
-		void fill(rgba color) { pixbuf_->fill(color); }
-		void inline put(unsigned int x, unsigned int y, color);
-		void inline put(unsigned int x, unsigned int y, rgba);
+		void fill(color c) { pixbuf_->fill(quantize(c)); }
+		void inline put(unsigned int x, unsigned int y, color c);
+
+	public:
+		operator Glib::RefPtr<Gdk::Pixbuf>() { return pixbuf_; }
 	private:
 		Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
-		union raw_datum {
-			std::uint8_t bytes[4];
-			rgba word;
-		};
+		unsigned int row_stride_;
+		typedef std::uint32_t rgba;
 		union raw_data {
 			std::uint8_t * bytes;
 			rgba * words;
 		} data_;
-		unsigned int row_stride_;
+		rgba inline quantize(color c, std::uint8_t a = 0);
 };
 
-void pixels::put(unsigned int x, unsigned int y, color c) {
-	raw_datum datum;
+pixels::rgba pixels::quantize(color c, std::uint8_t a) {
+	union raw_datum {
+		std::uint8_t bytes[4];
+		rgba word;
+	} datum;
 	datum.bytes[0] = 255 * c.r;
 	datum.bytes[1] = 255 * c.g;
 	datum.bytes[2] = 255 * c.b;
-	datum.bytes[3] = 0;
-	put(x, y, datum.word);
+	datum.bytes[3] = a;
+	return datum.word;
 }
 
-void pixels::put(unsigned int x, unsigned int y, rgba c) {
+void pixels::put(unsigned int x, unsigned int y, color c) {
 	raw_data p;
 	p.bytes = data_.bytes + y * row_stride_ + x * 3;
-	raw_datum datum;
-	datum.word = c;
-	datum.bytes[3] = p.bytes[3];
-	*p.words = datum.word;
+	*p.words = quantize(c, p.bytes[3]);
 }
 
 }
