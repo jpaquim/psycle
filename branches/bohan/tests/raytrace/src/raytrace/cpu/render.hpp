@@ -40,7 +40,7 @@ class render {
 
 	private:
 		typedef std::scoped_lock<std::mutex> scoped_lock;
-		std::mutex mutable mutex_;
+		std::mutex mutable mutex_, update_signal_mutex_;
 		std::condition<scoped_lock> mutable condition_;
 		bool process_requested_, stop_requested_;
 		unsigned int count_, update_signal_count_;

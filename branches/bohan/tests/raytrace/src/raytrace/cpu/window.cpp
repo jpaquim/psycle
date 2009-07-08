@@ -2,6 +2,7 @@
 // copyright 2009-2009 psycledelics http://psycle.pastnotecut.org : johan boule
 
 #include "window.hpp"
+#include "lock.hpp"
 #include <gtkmm/main.h>
 #include <boost/bind.hpp>
 
@@ -20,6 +21,13 @@ window::window(render & render)
 	v_box_.pack_start(button_, Gtk::PACK_SHRINK);
 	add(v_box_);
 	show_all_children();
+}
+
+void window::update() {
+	//std::cout << "update\n" << std::flush;
+	lock lock;
+	image_.set(image_.get_pixbuf());
+	//std::cout << "updated\n" << std::flush;
 }
 
 void window::on_button_clicked() {

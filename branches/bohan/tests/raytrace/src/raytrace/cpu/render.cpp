@@ -42,14 +42,18 @@ void render::start() {
 }
 		
 void render::stop() {
+	//std::cout << "stop\n" << std::flush;
 	{ scoped_lock lock(mutex_);
 		stop_requested_ = true;
 	}
+	//std::cout << "stop 2\n" << std::flush;
 	condition_.notify_all();
 	for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
+		//std::cout << "stop 3\n" << std::flush;
 		(**i).join();
 		delete *i;
 	}
+	//std::cout << "stop 4\n" << std::flush;
 	threads_.clear();
 }
 
@@ -74,23 +78,33 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 				color const c = scene_.trace(x, y);
 				pixels_.put(x, y, c);
 			}
+			bool update_signal(false);
 			{ scoped_lock lock(mutex_);
 				if(stop_requested_) return;
 				count_ += inc;
 				if(count_ > update_signal_count_) {
 					count_ = 0;
-					update_signal_();
+					update_signal = true;
 				}
 			}
+			if(update_signal) {
+				scoped_lock lock(update_signal_mutex_);
+				update_signal_();
+			}
 		}
+		bool update_signal(false);
 		{ scoped_lock lock(mutex_);
 			++thread_done_count_;
 			while(thread_done_count_ != thread_count_ && !stop_requested_) condition_.wait(lock);
 			if(stop_requested_) return;
 			if(process_requested_) {
 				process_requested_ = false;
-				if(count_ != 0) update_signal_();
+				if(count_ != 0) update_signal = true;
 			}
+		}
+		if(update_signal) {
+			scoped_lock lock(update_signal_mutex_);
+			update_signal_();
 		}
 	}
 }
