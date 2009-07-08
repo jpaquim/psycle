@@ -5,15 +5,17 @@
 #define RAYTRACE__COLOR
 #pragma once
 
-#include "real.hpp"
+#include "vertex3.hpp"
 
 namespace raytrace {
 
-class color {
+class color : public vertex3 {
 	public:
 		color() {}
-		color(real r, real g, real b) : r(r), g(g), b(b) {}
-		real r, g, b;
+
+		color(real x, real y, real z) : vertex3(x, y, z) {}
+
+		color(color const & other) : vertex3(other) {}
 };
 
 }
