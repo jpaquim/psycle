@@ -8,15 +8,28 @@
 
 namespace raytrace {
 
-render::render(typenames::scene & scene, typenames::pixels & pixels)
+render::render(typenames::scene & scene, typenames::view & view, typenames::pixels & pixels)
 :
 	scene_(scene),
+	view_(view),
 	pixels_(pixels),
 	process_requested_(),
 	stop_requested_(),
 	count_(),
 	update_signal_count_(10000)
 {}
+
+void inline render::trace(unsigned int x, unsigned int y) {
+	vertex const & from(view_.from);
+
+	vertex to;
+	to.x = x;
+	to.y = y;
+	to.z = 1;
+
+	color const c(scene_.trace(from, to));
+	pixels_.put(x, y, c);
+}
 
 void render::start() {
 	process_requested_ = stop_requested_ = false;
@@ -63,7 +76,6 @@ void render::process() {
 
 void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step) {
 	//std::cout << "part: " << min_x << ' ' << max_x << ' ' << min_y << ' ' << max_y << ' ' << y_step << '\n';
-	vertex const from(0, 0, 0);
 	unsigned int const inc(max_x - min_x);
 	while(true) {
 		{ scoped_lock lock(mutex_);
@@ -72,9 +84,7 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 		}
 		for(unsigned int y(min_y); y < max_y; y += y_step) {
 			for(unsigned int x(min_x); x < max_x; ++x) {
-				vertex const to(x, y, 1);
-				color const c(scene_.trace(from, to));
-				pixels_.put(x, y, c);
+				trace(x, y);
 			}
 			bool update_signal(false);
 			{ scoped_lock lock(mutex_);

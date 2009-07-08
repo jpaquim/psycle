@@ -16,9 +16,15 @@
 
 namespace raytrace {
 
+class view {
+	public:
+		vertex from;
+		vertex angles;
+};
+
 class render {
 	public:
-		render(typenames::scene & scene, typenames::pixels & pixels);
+		render(typenames::scene & scene, typenames::view & view, typenames::pixels & pixels);
 		void start();
 		void stop();
 		void process();
@@ -28,6 +34,11 @@ class render {
 	private:
 		typenames::scene & scene_;
 		
+	public:
+		typenames::view & view() { return view_; }
+	private:
+		typenames::view & view_;
+
 	public:
 		typenames::pixels & pixels() { return pixels_; }
 	private:
@@ -48,6 +59,7 @@ class render {
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
 		void process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step);
+		void trace(unsigned int x, unsigned int y);
 };
 
 }

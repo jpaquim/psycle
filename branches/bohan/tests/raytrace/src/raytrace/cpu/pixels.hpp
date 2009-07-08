@@ -30,7 +30,7 @@ class pixels {
 			std::uint8_t * bytes;
 			rgba * words;
 		} data_;
-		rgba inline quantize(color c, std::uint8_t a = 0);
+		rgba inline quantize(color c, std::uint8_t a = 0xff);
 };
 
 pixels::rgba pixels::quantize(color c, std::uint8_t a) {
@@ -38,9 +38,9 @@ pixels::rgba pixels::quantize(color c, std::uint8_t a) {
 		std::uint8_t bytes[4];
 		rgba word;
 	} datum;
-	datum.bytes[0] = 255 * c.r;
-	datum.bytes[1] = 255 * c.g;
-	datum.bytes[2] = 255 * c.b;
+	datum.bytes[0] = 0xff * c.r;
+	datum.bytes[1] = 0xff * c.g;
+	datum.bytes[2] = 0xff * c.b;
 	datum.bytes[3] = a;
 	return datum.word;
 }
