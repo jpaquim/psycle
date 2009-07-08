@@ -9,10 +9,12 @@
 
 namespace raytrace {
 
+typedef float real;
+
 class scene0 : public scene {
 	protected:
-		color trace(unsigned int x, unsigned int y) /*override*/ {
-			color c(x, y, x * y);
+		color trace(vertex const & from, vertex const & to) /*override*/ {
+			color c(to.x, to.y, to.x * to.y);
 			return c;
 		}
 };

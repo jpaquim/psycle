@@ -63,6 +63,7 @@ void render::process() {
 
 void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step) {
 	//std::cout << "part: " << min_x << ' ' << max_x << ' ' << min_y << ' ' << max_y << ' ' << y_step << '\n';
+	vertex const from(0, 0, 0);
 	unsigned int const inc(max_x - min_x);
 	while(true) {
 		{ scoped_lock lock(mutex_);
@@ -71,7 +72,8 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 		}
 		for(unsigned int y(min_y); y < max_y; y += y_step) {
 			for(unsigned int x(min_x); x < max_x; ++x) {
-				color const c = scene_.trace(x, y);
+				vertex const to(x, y, 1);
+				color const c(scene_.trace(from, to));
 				pixels_.put(x, y, c);
 			}
 			bool update_signal(false);
