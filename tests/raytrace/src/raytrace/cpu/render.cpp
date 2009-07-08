@@ -20,9 +20,9 @@ render::render(typenames::scene & scene, typenames::view & view, typenames::pixe
 {}
 
 void inline render::trace(unsigned int x, unsigned int y) {
-	vertex const & from(view_.from);
+	vertex3 const & from(view_.from);
 
-	vertex to;
+	vertex3 to;
 	to.x = x;
 	to.y = y;
 	to.z = 1;

@@ -12,7 +12,7 @@ namespace raytrace {
 
 class scene {
 	public:
-		color virtual trace(vertex const & from, vertex const & to) = 0;
+		color virtual trace(vertex3 const & from, vertex3 const & to) = 0;
 };
 
 }

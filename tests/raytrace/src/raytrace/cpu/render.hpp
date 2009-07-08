@@ -18,8 +18,7 @@ namespace raytrace {
 
 class view {
 	public:
-		vertex from;
-		vertex angles;
+		vertex3 from;
 };
 
 class render {
