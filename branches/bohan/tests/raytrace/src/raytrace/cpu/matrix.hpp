@@ -15,9 +15,9 @@ class matrix {
 		size_type static const size1 = Size1;
 		size_type static const size2 = Size2;
 
-		real operator ()(size_type i, size_type j) const { return e[i][j]; }
+		value_type operator ()(size_type i, size_type j) const { return e[i][j]; }
 
-		real & operator ()(size_type i, size_type j) { return e[i][j]; }
+		value_type & operator ()(size_type i, size_type j) { return e[i][j]; }
 		
 		void zero() {
 			for(size_type i(0); i < size1; ++i)
@@ -83,7 +83,7 @@ class matrix {
 			return m;
 		}
 
-		matrix operator *(real r) const {
+		matrix operator *(value_type r) const {
 			matrix m;
 			for(size_type i(0); i < size1; ++i)
 				for(size_type j(0); j < size2; ++j)
@@ -91,7 +91,7 @@ class matrix {
 			return m;
 		}
 
-		matrix & operator *=(real r) {
+		matrix & operator *=(value_type r) {
 			for(size_type i(0); i < size1; ++i)
 				for(size_type j(0); j < size2; ++j)
 					this->e[i][j] *= r;
@@ -110,7 +110,7 @@ class matrix {
 		}
 
 	private:
-		real e[size1][size2];
+		value_type e[size1][size2];
 };
 
 template<typename Value, unsigned int Size1, unsigned int Size2>
