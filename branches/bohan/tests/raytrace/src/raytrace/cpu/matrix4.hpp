@@ -12,7 +12,7 @@
 
 namespace raytrace {
 
-typedef matrix<real, 4, 4> matrix4;
+typedef matrix<real, 4> matrix4;
 
 vertex4 inline operator *(matrix4 const & m, vertex4 const & v) {
 	vertex4 result;

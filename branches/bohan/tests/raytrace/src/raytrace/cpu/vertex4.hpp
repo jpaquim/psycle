@@ -111,6 +111,18 @@ vertex4 inline operator *(real r, vertex4 const & v) {
 	return result;
 }
 
+real inline operator *(vertex4 const & v4, vertex3 const & v3) {
+	real r;
+	r = v4.x * v3.x + v4.y * v3.y + v4.z * v3.z + v4.w;
+	return r;
+}
+
+real inline operator *(vertex3 const & v3, vertex4 const & v4) {
+	real r;
+	r = v4 * v3;
+	return r;
+}
+
 }
 
 #endif
