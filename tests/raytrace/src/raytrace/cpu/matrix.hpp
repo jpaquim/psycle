@@ -7,7 +7,7 @@
 
 namespace raytrace {
 
-template<typename Value, unsigned int Size1, unsigned int Size2>
+template<typename Value, unsigned int Size1, unsigned int Size2 = Size1>
 class matrix {
 	public:
 		typedef Value value_type;

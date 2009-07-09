@@ -14,16 +14,16 @@ namespace raytrace {
 class object {
 	public:
 		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos) = 0;
+		vertex3 virtual normal(vertex3 const & pos) = 0;
 };
 
-class quadric : public object {
+class quadric : public /*symmetric_*/matrix4, public object {
 	public:
-		matrix4 matrix;
-		bool virtual hit(vertex3 const & from, vertex3 const & to, vertex3 & pos) /*override*/ {
-			vertex4 const to_matrix(to * matrix);
+		bool hit(vertex3 const & from, vertex3 const & to, vertex3 & pos) /*override*/ {
+			vertex4 const to_matrix(to * *this);
 			real const a(to_matrix * to);
 			real const b(2 * (to_matrix * from));
-			real const c(from * matrix * from);
+			real const c(from * *this * from);
 			real const discriminant(b * b - 4 * a * c);
 			if(discriminant < 0) return false;
 			real const discriminant_sqrt(std::sqrt(discriminant));
@@ -40,57 +40,42 @@ class quadric : public object {
 			pos = from + root * to;
 			return true;
 		}
-};
 
-class plane : public object {
-	public:
-		vertex3 normal;
-		real r;
-};
-
-class sphere : public object {
-	public:
-		vertex3 pos;
-		real radius;
+		vertex3 normal(vertex3 const & pos) /*override*/ {
+			vertex3 result;
+			vertex4 const n(*this * pos);
+			result.x = n.x;
+			result.y = n.y;
+			result.z = n.z;
+			return result;
+		}
 };
 
 class scene0 : public scene {
 	public:
+		quadric q;
+
 		scene0() {
-			matrix4 & m(q.matrix);
-			m.identity();
-			m *= 0.1;
-			m(3, 3) = -0.99;
+			q.identity();
+			q(3, 3) = -1;
 		}
 		
 		color trace(vertex3 const & from, vertex3 const & to) /*override*/ {
-			#if 0
-			color c(to.x, to.y, to.x * to.y);
-			return c;
-			#else
 			color c;
 			vertex3 pos;
 			if(!q.hit(from, to, pos)) c(0, 0, 0);
 			else {
+				//c(0.5, 1, 1);
 				real const mag(pos.mag());
-				c(mag, mag, mag);
+				c(mag, mag, 1);
+				/*
+				vertex3 normal(q.normal(pos));
+				normal.normalize();
+				c(normal.x, normal.y, normal.z);
+				*/
 			}
 			return c;
-			#endif
 		}
-	#if 1
-		quadric q;
-	#else
-		public:
-			scene0() {
-				plane_.normal(0, 1, 0);
-				plane_.r = 0;
-				sphere_.pos(0, 1, 0);
-				sphere_.radius = 1;
-			};
-		plane plane_;
-		sphere sphere_;
-	#endif
 };
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
