@@ -15,7 +15,7 @@ render::render(typenames::scene const & scene, typenames::view const & view, typ
 	process_requested_(),
 	stop_requested_(),
 	count_(),
-	update_signal_count_(pixels_.width() * pixels_.height() / 100)
+	update_signal_count_() //pixels_.width() * pixels_.height() / 100)
 {
 	this->view(view);
 }
@@ -112,10 +112,12 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 			bool update_signal(false);
 			{ scoped_lock lock(mutex_);
 				if(stop_requested_) return;
-				count_ += inc;
-				if(count_ > update_signal_count_) {
-					count_ = 0;
-					update_signal = true;
+				if(update_signal_count_) {
+					count_ += inc;
+					if(count_ > update_signal_count_) {
+						count_ = 0;
+						update_signal = true;
+					}
 				}
 			}
 			if(update_signal) {
@@ -130,7 +132,7 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 			if(stop_requested_) return;
 			if(process_requested_) {
 				process_requested_ = false;
-				if(count_ != 0) update_signal = true;
+				if(!update_signal_count_ || count_ != 0) update_signal = true;
 			}
 		}
 		if(update_signal) {
