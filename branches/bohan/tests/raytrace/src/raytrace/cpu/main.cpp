@@ -62,7 +62,7 @@ class sphere : public object {
 		void radius(real radius) { radius2 = radius * radius; }
 
 		vertex3 normal(vertex3 const & pos) const /*override*/ {
-			vertex3 result(pos);
+			vertex3 result(pos - this->pos);
 			return result;
 		}
 
@@ -82,18 +82,18 @@ class scene0 : public scene {
 		quadric q;
 
 		scene0() {
-			lamp(-10, 10, 0);
+			lamp(-5, 5, 0);
 			
 			s1.c(1, 0.65, 0.65);
-			s1.pos(0, 0, -5);
+			s1.pos(0, 0, -10);
 			s1.radius(1);
 
 			s2.c(0.5, 1, 0.5);
-			s2.pos(1, 1, -5);
+			s2.pos(2, 1, -10);
 			s2.radius(1);
 
 			s3.c(0.75, 0.75, 1);
-			s3.pos(-1, -1, -5);
+			s3.pos(-2, -1, -10);
 			s3.radius(1);
 
 			q.identity();
@@ -109,14 +109,17 @@ class scene0 : public scene {
 			if(s3.hit(from, to, distance) && (!s || distance < min_distance)) { s = &s3; min_distance = distance; }
 			if(!s) c(0, 0, 0);
 			else {
-				vertex3 pos(from + min_distance * to);
+				vertex3 const pos(from + min_distance * to);
 				vertex3 normal(s->normal(pos));
 				normal.normalize();
 				vertex3 rel(lamp - pos);
 				rel.normalize();
 				real const angle(std::acos(rel * normal));
 				real const light(1 - angle / pi);
-				c = s->c * light;
+				real const light2(light * light);
+				real const amp = real(0.1) + (light + light2) * 0.65;
+				c = s->c * amp;
+				if(amp > 1) c = color(std::min(real(1), c.x), std::min(real(1), c.y), std::min(real(1), c.z));
 			}
 			return c;
 		}
@@ -128,8 +131,8 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	view view;
 	view.from(0, 0, 0);
 	view.angles(0, 0, 0);
-	view.x_fov = 90 * pi / 180;
-	pixels pixels(800, 800);
+	view.x_fov = 50 * pi / 180;
+	pixels pixels(1000, 800);
 	pixels.fill(color(1, 1, 1));
 	render render(scene, view, pixels);
 	render.start();
@@ -138,7 +141,6 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 		window window(render);
 		main.run(window);
 	}
-	render.wait();
 	render.stop();
 	std::cout << "done\n";
 	return 0;
