@@ -132,12 +132,15 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	pixels pixels(800, 800);
 	pixels.fill(color(1, 1, 1));
 	render render(scene, view, pixels);
-	window window(render);
 	render.start();
 	render.process();
 	{ lock lock;
+		window window(render);
 		main.run(window);
 	}
+	render.wait();
+	render.stop();
+	std::cout << "done\n";
 	return 0;
 }
 

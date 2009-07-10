@@ -20,8 +20,9 @@ class render {
 	public:
 		render(typenames::scene const & scene, typenames::view const & view, typenames::pixels & pixels);
 		void start();
-		void stop();
 		void process();
+		void wait();
+		void stop();
 
 	public:
 		typenames::scene const & scene() const { return scene_; }
@@ -30,9 +31,9 @@ class render {
 		
 	public:
 		typenames::view const & view() const { return view_; }
-		void view(typenames::view const &);
 	private:
-		typenames::view view_;
+		typenames::view const & view_;
+		void compute_view();
 		real x_offset_, y_offset_, z_offset_;
 		real xx_ratio_, xy_ratio_, xz_ratio_;
 		real yx_ratio_, yy_ratio_, yz_ratio_;
@@ -49,14 +50,14 @@ class render {
 
 	private:
 		typedef std::scoped_lock<std::mutex> scoped_lock;
-		std::mutex mutable mutex_, update_signal_mutex_;
-		std::condition<scoped_lock> mutable condition_;
-		bool process_requested_, stop_requested_;
+		std::mutex mutable mutex_, update_signal_mutex_, done_mutex_;
+		std::condition<scoped_lock> mutable condition_, condition_done_;
+		bool process_requested_, done_, stop_requested_;
 		unsigned int count_, update_signal_count_;
-		std::size_t thread_count_, thread_done_count_;
+		std::size_t thread_count_, thread_done_count_, thread_done_count2_;
 		typedef std::list<std::thread *> threads_type;
 		threads_type threads_;
-		void process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step);
+		void process_loop(std::size_t i, unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step);
 		void trace(unsigned int x, unsigned int y);
 };
 
