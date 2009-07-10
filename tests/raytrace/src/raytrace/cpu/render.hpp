@@ -16,27 +16,26 @@
 
 namespace raytrace {
 
-class view {
-	public:
-		vertex3 from;
-};
-
 class render {
 	public:
-		render(typenames::scene & scene, typenames::view & view, typenames::pixels & pixels);
+		render(typenames::scene const & scene, typenames::view const & view, typenames::pixels & pixels);
 		void start();
 		void stop();
 		void process();
 
 	public:
-		typenames::scene & scene() { return scene_; }
+		typenames::scene const & scene() const { return scene_; }
 	private:
-		typenames::scene & scene_;
+		typenames::scene const & scene_;
 		
 	public:
-		typenames::view & view() { return view_; }
+		typenames::view const & view() const { return view_; }
+		void view(typenames::view const &);
 	private:
-		typenames::view & view_;
+		typenames::view view_;
+		real x_offset_, y_offset_, z_offset_;
+		real xx_ratio_, xy_ratio_, xz_ratio_;
+		real yx_ratio_, yy_ratio_, yz_ratio_;
 
 	public:
 		typenames::pixels & pixels() { return pixels_; }
