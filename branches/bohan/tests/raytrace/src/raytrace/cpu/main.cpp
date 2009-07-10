@@ -89,11 +89,11 @@ class scene0 : public scene {
 			s1.radius(1);
 
 			s2.c(0.5, 1, 0.5);
-			s2.pos(2, 1, -10);
+			s2.pos(1, 1, -10);
 			s2.radius(1);
 
 			s3.c(0.75, 0.75, 1);
-			s3.pos(-2, -1, -10);
+			s3.pos(-1, -1, -10);
 			s3.radius(1);
 
 			q.identity();
