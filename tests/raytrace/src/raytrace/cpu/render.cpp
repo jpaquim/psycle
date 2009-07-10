@@ -11,32 +11,30 @@ namespace raytrace {
 render::render(typenames::scene const & scene, typenames::view const & view, typenames::pixels & pixels)
 :
 	scene_(scene),
+	view_(view),
 	pixels_(pixels),
 	process_requested_(),
 	stop_requested_(),
 	count_(),
 	update_signal_count_() //pixels_.width() * pixels_.height() / 100)
-{
-	this->view(view);
-}
+{}
 
-void render::view(typenames::view const & view) {
-	view_ = view;
+void render::compute_view() {
 	unsigned int const width(pixels_.width()), height(pixels_.height());
 
-	xx_ratio_ = 2 * std::sin(view.x_fov / 2) / width;
+	xx_ratio_ = 2 * std::sin(view_.x_fov / 2) / width;
 	xy_ratio_ = 0;
 	xz_ratio_ = 0;
 
 	yx_ratio_ = 0;
-	yy_ratio_ = -2 * std::sin(view.x_fov / 2 * height / width) / height;
+	yy_ratio_ = -2 * std::sin(view_.x_fov / 2 * height / width) / height;
 	yz_ratio_ = 0;
 	
 	x_offset_ = xx_ratio_ * width / -2;
 	y_offset_ = -yy_ratio_ * height / 2;
 	z_offset_ = -1;
 
-	#if 1
+	#if 0
 		std::cout << x_offset_ << ' '<<  xx_ratio_ << ' '<<  yx_ratio_ << '\n';
 		std::cout << y_offset_ << ' '<<  xy_ratio_ << ' '<<  yy_ratio_ << '\n';
 		std::cout << z_offset_ << ' '<<  xz_ratio_ << ' '<<  yz_ratio_ << '\n';
@@ -70,7 +68,7 @@ void render::start() {
 	try {
 		unsigned int const y_step(thread_count_);
 		for(std::size_t i(0); i < thread_count_; ++i)
-			threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, x, x + width, y + i, y + height, y_step)));
+			threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, i, x, x + width, y + i, y + height, y_step)));
 	} catch(...) {
 		stop();
 		throw;
@@ -91,13 +89,21 @@ void render::stop() {
 
 void render::process() {
 	{ scoped_lock lock(mutex_);
+		compute_view();
 		process_requested_ = true;
-		thread_done_count_ = 0;
+		thread_done_count_ = thread_done_count2_ = 0;
+		done_ = false;
 	}
 	condition_.notify_all();
 }
 
-void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step) {
+void render::wait() {
+	{ scoped_lock lock(done_mutex_);
+		while(!done_) condition_done_.wait(lock);
+	}
+}
+
+void render::process_loop(std::size_t i, unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step) {
 	//std::cout << "part: " << min_x << ' ' << max_x << ' ' << min_y << ' ' << max_y << ' ' << y_step << '\n';
 	unsigned int const inc(max_x - min_x);
 	while(true) {
@@ -125,19 +131,26 @@ void render::process_loop(unsigned int min_x, unsigned int max_x, unsigned int m
 				update_signal_();
 			}
 		}
-		bool update_signal(false);
+		bool notify(false), update_signal(false);
 		{ scoped_lock lock(mutex_);
-			++thread_done_count_;
-			while(thread_done_count_ != thread_count_ && !stop_requested_) condition_.wait(lock);
+			if(++thread_done_count_ == thread_count_) condition_.notify_all();
+			else while(thread_done_count_ != thread_count_ && !stop_requested_) condition_.wait(lock);
 			if(stop_requested_) return;
-			if(process_requested_) {
-				process_requested_ = false;
+			process_requested_ = false;
+			if(++thread_done_count2_ == thread_count_) {
+				notify = true;
 				if(!update_signal_count_ || count_ != 0) update_signal = true;
 			}
 		}
-		if(update_signal) {
-			scoped_lock lock(update_signal_mutex_);
-			update_signal_();
+		if(notify) {
+			if(update_signal) {
+				scoped_lock lock(update_signal_mutex_);
+				//update_signal_();
+			}
+			{ scoped_lock lock(done_mutex_);
+				done_ = true;
+			}
+			condition_done_.notify_one();
 		}
 	}
 }
