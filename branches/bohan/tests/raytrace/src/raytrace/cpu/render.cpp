@@ -8,26 +8,49 @@
 
 namespace raytrace {
 
-render::render(typenames::scene & scene, typenames::view & view, typenames::pixels & pixels)
+render::render(typenames::scene const & scene, typenames::view const & view, typenames::pixels & pixels)
 :
 	scene_(scene),
-	view_(view),
 	pixels_(pixels),
 	process_requested_(),
 	stop_requested_(),
 	count_(),
-	update_signal_count_(10000)
-{}
+	update_signal_count_(pixels_.width() * pixels_.height() / 100)
+{
+	this->view(view);
+}
+
+void render::view(typenames::view const & view) {
+	view_ = view;
+	unsigned int const width(pixels_.width()), height(pixels_.height());
+
+	xx_ratio_ = 2 * std::sin(view.x_fov / 2) / width;
+	xy_ratio_ = 0;
+	xz_ratio_ = 0;
+
+	yx_ratio_ = 0;
+	yy_ratio_ = -2 * std::sin(view.x_fov / 2 * height / width) / height;
+	yz_ratio_ = 0;
+	
+	x_offset_ = xx_ratio_ * width / -2;
+	y_offset_ = -yy_ratio_ * height / 2;
+	z_offset_ = -1;
+
+	#if 1
+		std::cout << x_offset_ << ' '<<  xx_ratio_ << ' '<<  yx_ratio_ << '\n';
+		std::cout << y_offset_ << ' '<<  xy_ratio_ << ' '<<  yy_ratio_ << '\n';
+		std::cout << z_offset_ << ' '<<  xz_ratio_ << ' '<<  yz_ratio_ << '\n';
+	#endif
+}
 
 void inline render::trace(unsigned int x, unsigned int y) {
-	vertex3 const & from(view_.from);
+	vertex3 to;//(view_.from);
+	to.x = x_offset_ + x * xx_ratio_ + y * yx_ratio_;
+	to.y = y_offset_ + x * xy_ratio_ + y * yy_ratio_;
+	to.z = z_offset_ + x * xz_ratio_ + y * yz_ratio_;
 
-	vertex3 to;
-	to.x = x;
-	to.y = y;
-	to.z = 1;
-
-	color const c(scene_.trace(from, to));
+	//std::cout << to.x << ' ' << to.y << ' ' << to.z << '\n';
+	color const c(scene_.trace(view_.from, view_.from + to));
 	pixels_.put(x, y, c);
 }
 

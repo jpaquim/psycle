@@ -12,7 +12,13 @@ namespace raytrace {
 
 class scene {
 	public:
-		color virtual trace(vertex3 const & from, vertex3 const & to) = 0;
+		color virtual trace(vertex3 const & from, vertex3 const & to) const = 0;
+};
+
+class view {
+	public:
+		vertex3 from, angles;
+		real x_fov;
 };
 
 }

@@ -12,10 +12,12 @@ namespace raytrace {
 class color : public vertex3 {
 	public:
 		color() {}
-
+		
 		color(real x, real y, real z) : vertex3(x, y, z) {}
 
 		color(color const & other) : vertex3(other) {}
+
+		color(vertex3 const & v) : vertex3(v) {}
 };
 
 }

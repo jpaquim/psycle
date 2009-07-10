@@ -24,6 +24,8 @@ class pixels {
 		operator Glib::RefPtr<Gdk::Pixbuf>() { return pixbuf_; }
 	private:
 		Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
+	
+	private:
 		unsigned int row_stride_;
 		typedef std::uint32_t rgba;
 		union raw_data {

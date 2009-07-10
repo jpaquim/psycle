@@ -5,9 +5,13 @@
 #define RAYTRACE__REAL
 #pragma once
 
+#include <psycle/helpers/math/pi.hpp>
+
 namespace raytrace {
 
 typedef float real;
+
+real const pi(real(psycle::helpers::math::pi));
 
 }
 
