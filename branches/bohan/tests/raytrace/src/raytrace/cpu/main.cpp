@@ -17,7 +17,7 @@ class object {
 		bool virtual hit(vertex3 const & from, vertex3 const & to, real & distance) const = 0;
 };
 
-bool inline second_order_hit(vertex3 const & from, vertex3 const & to, real & distance, real const a, real const b, real const c) {
+bool inline second_order_hit(real const a, real const b, real const c, real & root) {
 	real const discriminant(b * b - 4 * a * c);
 	if(discriminant < 0) return false;
 	real const discriminant_sqrt(std::sqrt(discriminant));
@@ -27,9 +27,9 @@ bool inline second_order_hit(vertex3 const & from, vertex3 const & to, real & di
 	real const root2((opposed_b - discriminant_sqrt) * inversed_denominator);
 	if(root1 < 0) {
 		if(root2 < 0) return false;
-		distance = root2;
-	} else if(root2 < 0) distance = root1;
-	else distance = std::min(root1, root2);
+		root = root2;
+	} else if(root2 < 0) root = root1;
+	else root = std::min(root1, root2);
 	return true;
 }
 
@@ -49,7 +49,7 @@ class quadric : public object, public /*symmetric_*/matrix4 {
 			real const a(to_matrix * to);
 			real const b(2 * (to_matrix * from));
 			real const c(from * *this * from);
-			return second_order_hit(from, to, distance, a, b, c);
+			return second_order_hit(a, b, c, distance);
 		}
 };
 
@@ -71,7 +71,7 @@ class sphere : public object {
 			real const a(to.mag2());
 			real const b(2 * (to * rel_pos));
 			real const c(rel_pos.mag2() - radius2);
-			return second_order_hit(from, to, distance, a, b, c);
+			return second_order_hit(a, b, c, distance);
 		}
 };
 
