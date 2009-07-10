@@ -78,19 +78,23 @@ class sphere : public object {
 class scene0 : public scene {
 	public:
 		vertex3 lamp;
-		sphere s1, s2;
+		sphere s1, s2, s3;
 		quadric q;
 
 		scene0() {
 			lamp(-10, 10, 0);
 			
-			s1.c(1, 0.5, 0);
+			s1.c(1, 0.65, 0.65);
 			s1.pos(0, 0, -5);
 			s1.radius(1);
 
-			s2.c(0, 1, 0.5);
-			s2.pos(-1, 1, -5);
+			s2.c(0.5, 1, 0.5);
+			s2.pos(1, 1, -5);
 			s2.radius(1);
+
+			s3.c(0.75, 0.75, 1);
+			s3.pos(-1, -1, -5);
+			s3.radius(1);
 
 			q.identity();
 			q(3, 3) = -1;
@@ -102,6 +106,7 @@ class scene0 : public scene {
 			sphere const * s(0);
 			if(s1.hit(from, to, min_distance)) s = &s1;
 			if(s2.hit(from, to, distance) && (!s || distance < min_distance)) { s = &s2; min_distance = distance; }
+			if(s3.hit(from, to, distance) && (!s || distance < min_distance)) { s = &s3; min_distance = distance; }
 			if(!s) c(0, 0, 0);
 			else {
 				vertex3 pos(from + min_distance * to);
