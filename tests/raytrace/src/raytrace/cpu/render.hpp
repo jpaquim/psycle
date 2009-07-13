@@ -31,8 +31,9 @@ class render {
 		
 	public:
 		typenames::view const & view() const { return view_; }
+		void view(typenames::view & view) { view_ = view; }
 	private:
-		typenames::view const & view_;
+		typenames::view view_;
 		void compute_view();
 		real x_offset_, y_offset_, z_offset_;
 		real xx_ratio_, xy_ratio_, xz_ratio_;

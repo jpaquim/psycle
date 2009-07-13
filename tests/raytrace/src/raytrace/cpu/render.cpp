@@ -91,7 +91,7 @@ void render::process() {
 	{ scoped_lock lock(mutex_);
 		compute_view();
 		process_requested_ = true;
-		thread_done_count_ = thread_done_count2_ = 0;
+		count_ = thread_done_count_ = thread_done_count2_ = 0;
 		done_ = false;
 	}
 	condition_.notify_all();
@@ -145,7 +145,7 @@ void render::process_loop(std::size_t i, unsigned int min_x, unsigned int max_x,
 		if(notify) {
 			if(update_signal) {
 				scoped_lock lock(update_signal_mutex_);
-				//update_signal_();
+				update_signal_();
 			}
 			{ scoped_lock lock(done_mutex_);
 				done_ = true;
