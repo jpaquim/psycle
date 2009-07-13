@@ -7,6 +7,8 @@
 #include "lock.hpp"
 #include "matrix4.hpp"
 #include <gtkmm/main.h>
+#include <boost/bind.hpp>
+#include <thread>
 #include <limits>
 
 namespace raytrace {
@@ -125,6 +127,20 @@ class scene0 : public scene {
 		}
 };
 
+void animate(scene & scene, view & view, render & render) {
+	real z(0);
+	while(true) {
+		view.from(0, 0, z);
+		render.view(view);
+		//std::cout << render.view().from.z << '\n';
+		render.process();
+		std::this_thread::sleep(std::milliseconds(20));
+		render.wait();
+		z -= 0.01;
+		if(z < -1) z = 1;
+	}
+}
+
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	Gtk::Main main(argument_count, arguments);
 	scene0 scene;
@@ -136,7 +152,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	pixels.fill(color(1, 1, 1));
 	render render(scene, view, pixels);
 	render.start();
-	render.process();
+	std::thread t(boost::bind(animate, boost::ref(scene), boost::ref(view), boost::ref(render)));
 	{ lock lock;
 		window window(render);
 		main.run(window);
