@@ -4,8 +4,8 @@
 ///\implementation psycle::plugins::outputs::dummy
 #include <psycle/detail/project.private.hpp>
 #include "dummy.hpp"
-#include <diversalis/processor.hpp>
-#include <universalis/processor/exception.hpp>
+#include <diversalis/cpu.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/exceptions/code_description.hpp>
 namespace psycle { namespace plugins { namespace outputs {

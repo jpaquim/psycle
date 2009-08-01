@@ -10,7 +10,7 @@
 	#include "compiler.hpp"
 	#if !defined DIVERSALIS__COMPILER__RESOURCE
 		#include "os.hpp"
-		#include "processor.hpp"
+		#include "cpu.hpp"
 		#include "stdlib.hpp"
 	#endif
 

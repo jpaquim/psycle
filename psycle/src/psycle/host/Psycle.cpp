@@ -11,7 +11,7 @@
 #include "MidiInput.hpp"
 #include "NewMachine.hpp"
 #include "SInstance.h"
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <diversalis/compiler.hpp>
 #include <sstream>
 #include <comdef.h>

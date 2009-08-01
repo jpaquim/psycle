@@ -3,7 +3,7 @@
 #pragma once
 #include "Global.hpp"
 #include <cmath>
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <cfloat>
 namespace psycle
 {

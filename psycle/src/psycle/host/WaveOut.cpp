@@ -5,7 +5,7 @@
 #include "Registry.hpp"
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <process.h>

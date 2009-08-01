@@ -4,7 +4,7 @@
 	#include <diversalis/os.hpp>
 	#include <diversalis/compiler.hpp>
 #endif
-#include <diversalis/processor.hpp>
+#include <diversalis/cpu.hpp>
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cmath>

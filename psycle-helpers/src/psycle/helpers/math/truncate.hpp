@@ -2,7 +2,7 @@
 #include <diversalis/stdlib.hpp>
 #if DIVERSALIS__STDLIB__MATH < 199901
 	#include <diversalis/compiler.hpp>
-	#include <diversalis/processor.hpp>
+	#include <diversalis/cpu.hpp>
 #endif
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>

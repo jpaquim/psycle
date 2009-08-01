@@ -8,7 +8,7 @@
 #include "MidiInput.hpp"
 #include "Helpers.hpp"
 #include "Dsp.hpp"
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 
 namespace psycle

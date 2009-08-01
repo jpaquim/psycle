@@ -12,6 +12,6 @@
 #include "compiler.hpp"
 #include "os.hpp"
 #include "stdlib.hpp"
-#include "processor.hpp"
+#include "cpu.hpp"
 
 #endif

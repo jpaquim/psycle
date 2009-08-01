@@ -21,7 +21,7 @@ std::string code_description(
 		return stdlib::exceptions::code_description(code);
 	#else
 		std::ostringstream s; s
-		<< (from_processor ? "processor/os exception" : "microsoft api error") << ": "
+		<< (from_processor ? "cpu/os exception" : "microsoft api error") << ": "
 		<< code << " 0x" << std::hex << code << ": ";
 		switch(code) {
 			#if !defined DIVERSALIS__COMPILER__ECLIPSE
