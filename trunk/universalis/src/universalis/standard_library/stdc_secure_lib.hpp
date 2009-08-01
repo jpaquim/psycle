@@ -4,8 +4,8 @@
 ///\file \brief secure version of standard C functions
 ///\see http://www.opengroup.org/platform/single_unix_specification/uploads/40/6355/n1093.pdf
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__STDC_SECURE_LIB__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__STDC_SECURE_LIB__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__STDC_SECURE_LIB__INCLUDED
+#define UNIVERSALIS__STDLIB__STDC_SECURE_LIB__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>

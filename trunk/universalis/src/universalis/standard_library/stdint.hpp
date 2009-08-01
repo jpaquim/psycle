@@ -3,8 +3,8 @@
 
 ///\file \brief cstdint standard header
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__STDINT__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__STDINT__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__STDINT__INCLUDED
+#define UNIVERSALIS__STDLIB__STDINT__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>

@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__DETAIL__DURATION__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__DETAIL__DURATION__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__DETAIL__DURATION__INCLUDED
+#define UNIVERSALIS__STDLIB__DETAIL__DURATION__INCLUDED
 #pragma once
 
 #include <boost/operators.hpp>
@@ -103,7 +103,7 @@ namespace std {
 
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
-	namespace universalis { namespace standard_library { namespace detail { namespace test {
+	namespace universalis { namespace stdlib { namespace detail { namespace test {
 		BOOST_AUTO_TEST_CASE(std_date_time_duration_test) {
 			using namespace std;
 			{

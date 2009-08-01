@@ -6,7 +6,7 @@
 #include "allocators.hpp"
 #include <diversalis/compiler.hpp>
 #include <memory>
-namespace universalis { namespace standard_library { namespace allocators { namespace process {
+namespace universalis { namespace stdlib { namespace allocators { namespace process {
 
 namespace detail {
 

@@ -3,8 +3,8 @@
 
 ///\file
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__DETAIL__ALLOCATORS__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__DETAIL__ALLOCATORS__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__DETAIL__ALLOCATORS__INCLUDED
+#define UNIVERSALIS__STDLIB__DETAIL__ALLOCATORS__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
@@ -13,7 +13,7 @@
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 
-namespace universalis { namespace standard_library { namespace allocators { namespace process {
+namespace universalis { namespace stdlib { namespace allocators { namespace process {
 
 ///\internal
 namespace detail {

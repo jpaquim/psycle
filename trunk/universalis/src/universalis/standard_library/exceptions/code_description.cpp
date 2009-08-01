@@ -7,7 +7,7 @@
 #include <cstring> // iso std::strerror
 #include <mutex>
 #include <sstream>
-namespace universalis { namespace standard_library { namespace exceptions {
+namespace universalis { namespace stdlib { namespace exceptions {
 
 std::string code_description(int const & code) throw() {
 	std::ostringstream s;

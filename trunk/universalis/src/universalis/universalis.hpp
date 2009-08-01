@@ -11,7 +11,7 @@
 
 #include "compiler.hpp"
 #include "os.hpp"
-#include "standard_library.hpp"
+#include "stdlib.hpp"
 #include "processor.hpp"
 
 #endif

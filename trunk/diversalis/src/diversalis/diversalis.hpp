@@ -11,7 +11,7 @@
 	#if !defined DIVERSALIS__COMPILER__RESOURCE
 		#include "os.hpp"
 		#include "processor.hpp"
-		#include "standard_library.hpp"
+		#include "stdlib.hpp"
 	#endif
 
 #endif

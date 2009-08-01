@@ -3,15 +3,15 @@
 
 ///\file
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__ALLOCATORS__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__ALLOCATORS__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__ALLOCATORS__INCLUDED
+#define UNIVERSALIS__STDLIB__ALLOCATORS__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
 #include "detail/allocators.hpp"
 #include <cstddef>
 
-namespace universalis { namespace standard_library { namespace allocators { namespace process {
+namespace universalis { namespace stdlib { namespace allocators { namespace process {
 
 template<typename X>
 class allocator {

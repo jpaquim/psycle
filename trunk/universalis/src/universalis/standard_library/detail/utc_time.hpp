@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__DETAIL__UTC_TIME__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__DETAIL__UTC_TIME__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__DETAIL__UTC_TIME__INCLUDED
+#define UNIVERSALIS__STDLIB__DETAIL__UTC_TIME__INCLUDED
 #pragma once
 
 #include "duration.hpp"
@@ -78,7 +78,7 @@ namespace std {
 
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
-	namespace universalis { namespace standard_library { namespace detail { namespace test {
+	namespace universalis { namespace stdlib { namespace detail { namespace test {
 		BOOST_AUTO_TEST_CASE(std_utc_time_test) {
 			using namespace std;
 			std::days const d(1);

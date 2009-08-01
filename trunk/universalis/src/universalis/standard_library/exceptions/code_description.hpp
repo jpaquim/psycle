@@ -3,8 +3,8 @@
 
 ///\file
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
+#define UNIVERSALIS__STDLIB__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
@@ -14,7 +14,7 @@
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 
-namespace universalis { namespace standard_library { namespace exceptions {
+namespace universalis { namespace stdlib { namespace exceptions {
 
 	/// returns a string describing a standard error code
 	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::string code_description(int const & code = errno) throw();

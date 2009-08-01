@@ -5,10 +5,10 @@
 ///\file
 ///\brief meta header
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__INCLUDED
+#define UNIVERSALIS__STDLIB__INCLUDED
 #pragma once
 
-#include "standard_library/standard_library.hpp"
+#include "stdlib/stdlib.hpp"
 
 #endif

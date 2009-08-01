@@ -4,8 +4,8 @@
 ///\file \brief condition standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__CONDITION__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__CONDITION__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__CONDITION__INCLUDED
+#define UNIVERSALIS__STDLIB__CONDITION__INCLUDED
 #pragma once
 
 #include "detail/boost_xtime.hpp"
@@ -63,7 +63,7 @@ namespace std {
 				/// and is generally the preferred method.
 				bool timed_wait(Lock & lock, utc_time const & timeout) throw(lock_error) {
 					return implementation_.timed_wait(lock.implementation_lock_,
-						universalis::standard_library::detail::make_boost_xtime(timeout)
+						universalis::stdlib::detail::make_boost_xtime(timeout)
 					);
 				}
 
@@ -75,7 +75,7 @@ namespace std {
 				template<typename Predicate>
 				bool timed_wait(Lock & lock, Predicate predicate, utc_time const & timeout) throw(lock_error) {
 					return implementation_.timed_wait(lock.implementation_lock_, predicate,
-						universalis::standard_library::detail::make_boost_xtime(timeout)
+						universalis::stdlib::detail::make_boost_xtime(timeout)
 					);
 				}
 			///\}
@@ -97,7 +97,7 @@ namespace std {
 	#include <vector>
 	#include <boost/bind.hpp>
 	#include <sstream>
-	namespace universalis { namespace standard_library { namespace detail { namespace test {
+	namespace universalis { namespace stdlib { namespace detail { namespace test {
 		using namespace std;
 
 		class condition_test_class {

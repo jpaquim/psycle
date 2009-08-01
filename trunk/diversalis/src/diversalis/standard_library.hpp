@@ -3,8 +3,8 @@
 
 ///\file \brief project-wide standard library tweaks.
 
-#ifndef DIVERSALIS__STANDARD_LIBRARY__INCLUDED
-#define DIVERSALIS__STANDARD_LIBRARY__INCLUDED
+#ifndef DIVERSALIS__STDLIB__INCLUDED
+#define DIVERSALIS__STDLIB__INCLUDED
 #pragma once
 
 #include "compiler.hpp"
@@ -15,22 +15,22 @@
 	DIVERSALIS__COMPILER__VERSION__MAJOR >= 4 && \
 	!defined DIVERSALIS__OS__CYGWIN \
 )
-	#define DIVERSALIS__STANDARD_LIBRARY__MATH 199901
+	#define DIVERSALIS__STDLIB__MATH 199901
 #endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 
 	#if defined _MT // defined when -MD or -MDd (multithreaded dll) or -MT or -MTd (multithreaded static) is specified.
-		#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__MULTITHREADED
+		#define DIVERSALIS__STDLIB__RUNTIME__MULTITHREADED
 	#endif
 
 	#if defined _DLL // defined when -MD or -MDd (multithread dll) is specified.
-		#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DYNAMIC_LINK
+		#define DIVERSALIS__STDLIB__RUNTIME__DYNAMIC_LINK
 	#endif
 
 	#if defined _DEBUG // defined when compiling with -LDd, -MDd, or -MTd.
-		#define DIVERSALIS__STANDARD_LIBRARY__RUNTIME__DEBUG
+		#define DIVERSALIS__STDLIB__RUNTIME__DEBUG
 	#endif
 #endif
 
-#endif // !defined DIVERSALIS__STANDARD_LIBRARY__INCLUDED
+#endif // !defined DIVERSALIS__STDLIB__INCLUDED

@@ -36,7 +36,7 @@
 	#error unsupported operating system
 #endif
 #include <cstdint>
-#include <universalis/standard_library/detail/duration.hpp> // cannot #include <date_time> due to mutual dependency
+#include <universalis/stdlib/detail/duration.hpp> // cannot #include <date_time> due to mutual dependency
 #include <stdexcept>
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/os/exceptions/code_description.hpp>
