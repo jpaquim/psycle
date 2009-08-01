@@ -4,8 +4,8 @@
 ///\file
 ///\brief explicitly sized, crossplatform (processor endianess independant) serializable types for numbers.
 
-#ifndef UNIVERSALIS__PROCESSOR__TODO__BITS__INCLUDED
-#define UNIVERSALIS__PROCESSOR__TODO__BITS__INCLUDED
+#ifndef UNIVERSALIS__CPU__TODO__BITS__INCLUDED
+#define UNIVERSALIS__CPU__TODO__BITS__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>

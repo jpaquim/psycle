@@ -4,14 +4,14 @@
 ///\file
 ///\interface universalis::processor::exceptions::fpu
 
-#ifndef UNIVERSALIS__PROCESSOR__EXCEPTIONS__FPU__INCLUDED
-#define UNIVERSALIS__PROCESSOR__EXCEPTIONS__FPU__INCLUDED
+#ifndef UNIVERSALIS__CPU__EXCEPTIONS__FPU__INCLUDED
+#define UNIVERSALIS__CPU__EXCEPTIONS__FPU__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <cfloat> // for _control*, _status* and _clear* functions
-	#if defined DIVERSALIS__PROCESSOR__X86 // #if DIVERSALIS__PROCESSOR__X86__SSE >= 2
+	#if defined DIVERSALIS__CPU__X86 // #if DIVERSALIS__CPU__X86__SSE >= 2
 		///\todo use _*87_2 functions
 	#endif
 #elif __STDC_VERSION__ >= 199901
@@ -44,7 +44,7 @@ class mask {
 		class type {
 			private:
 				typedef
-					#if defined DIVERSALIS__PROCESSOR__X86
+					#if defined DIVERSALIS__CPU__X86
 						unsigned int // or a bit field?
 					#else
 						unsigned int ///\todo
@@ -161,7 +161,7 @@ class mask {
 
 		/// the exception mask currently active
 		type static current() throw() {
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 				return ::_control87(0, 0);
 			#else
 				///\todo
@@ -175,7 +175,7 @@ class mask {
 
 		/// begins a scoped mask
 		mask(type const & mask)
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 			:
 				save //\todo check the doc here. this might not return the previous control flags. ::_control87(0, 0) does it.
 				(
@@ -202,7 +202,7 @@ class mask {
 
 		/// ends a scoped mask
 		~mask() throw() {
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 				::_control87
 				(
 					save, // values to set the control flags to

@@ -3,8 +3,8 @@
 
 ///\interface universalis::processor::exception
 
-#ifndef UNIVERSALIS__PROCESSOR__EXCEPTION__INCLUDED
-#define UNIVERSALIS__PROCESSOR__EXCEPTION__INCLUDED
+#ifndef UNIVERSALIS__CPU__EXCEPTION__INCLUDED
+#define UNIVERSALIS__CPU__EXCEPTION__INCLUDED
 #pragma once
 
 #include <universalis/os/exception.hpp>

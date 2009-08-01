@@ -25,8 +25,8 @@
 /// universalis::processor::memory_barriers::read()
 /// universalis::processor::memory_barriers::write()
 
-#ifndef UNIVERSALIS__PROCESSOR__MEMORY_BARRIERS__INCLUDED
-#define UNIVERSALIS__PROCESSOR__MEMORY_BARRIERS__INCLUDED
+#ifndef UNIVERSALIS__CPU__MEMORY_BARRIERS__INCLUDED
+#define UNIVERSALIS__CPU__MEMORY_BARRIERS__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
@@ -53,20 +53,20 @@
 	#else
 		// As a fallback, GCC understands volatile asm and "memory"
 		// to mean it should not reorder memory read/writes.
-		#if defined DIVERSALIS__PROCESSOR__POWER_PC
+		#if defined DIVERSALIS__CPU__POWER_PC
 			namespace universalis { namespace processor { namespace memory_barriers {
 				void inline  full() { asm volatile("sync" ::: "memory"); }
 				void inline  read() { full(); }
 				void inline write() { full(); }
 			}}}
 			#define universalis__processor__memory_barriers__defined
-		#elif defined DIVERSALIS__PROCESSOR__X86
+		#elif defined DIVERSALIS__CPU__X86
 			// [bohan] hardware fences are not always needed on x86 >= i686 memory model,
 			//         which is a cache-coherent, write-through one, except for SSE instructions!
 			namespace universalis { namespace processor { namespace memory_barriers {
 				void inline  full() {
 					///\todo it seems mfence needs SSE2/3(?).
-					#if DIVERSALIS__PROCESSOR__X86__SSE >= 3
+					#if DIVERSALIS__CPU__X86__SSE >= 3
 						asm volatile("mfence" ::: "memory");
 					#else
 						// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
@@ -78,7 +78,7 @@
 				void inline write() { asm volatile("sfence" ::: "memory"); }
 			}}}
 			#define universalis__processor__memory_barriers__defined
-		#elif defined DIVERSALIS__PROCESSOR__IA
+		#elif defined DIVERSALIS__CPU__IA
 			// asm volatile("mf" ::: "memory");
 		#endif
 	#endif
@@ -100,9 +100,9 @@
 		//         What has not been checked is whether we would end up with doubled hardware fences on non-x86 targets.
 		void inline  full() {
 			///\todo it seems mfence needs SSE2/3(?).
-			#if DIVERSALIS__PROCESSOR__X86__SSE >= 3
+			#if DIVERSALIS__CPU__X86__SSE >= 3
 				_mm_mfence();
-			#elif defined DIVERSALIS__PROCESSOR__X86
+			#elif defined DIVERSALIS__CPU__X86
 				// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
 				__asm { lock add [esp], 0 }
 			#else
@@ -141,7 +141,7 @@
 		//         (i.e. do the same as what the volatile keyword does).
 		// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
 		void inline  full() {
-			#if defined DIVERSALIS__PROCESSOR__X86
+			#if defined DIVERSALIS__CPU__X86
 				_asm { lock add [esp], 0 }
 			#else
 				#error sorry

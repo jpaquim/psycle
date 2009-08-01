@@ -4,8 +4,8 @@
 ///\file
 ///\brief detail.
 
-#ifndef UNIVERSALIS__PROCESSOR__TODO__DETAIL__BITS__INCLUDED
-#define UNIVERSALIS__PROCESSOR__TODO__DETAIL__BITS__INCLUDED
+#ifndef UNIVERSALIS__CPU__TODO__DETAIL__BITS__INCLUDED
+#define UNIVERSALIS__CPU__TODO__DETAIL__BITS__INCLUDED
 #pragma once
 
 #include <processor/project.hpp>
