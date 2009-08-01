@@ -4,8 +4,8 @@
 ///\file \brief mutex standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__MUTEX__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__MUTEX__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__MUTEX__INCLUDED
+#define UNIVERSALIS__STDLIB__MUTEX__INCLUDED
 #pragma once
 
 #include "detail/boost_xtime.hpp"
@@ -86,7 +86,7 @@ namespace detail {
 			/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 			template<typename Elapsed_Time>
 			bool timed_lock(Elapsed_Time const & elapsed_time) {
-				return this->implementation_lock_.timed_lock(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
+				return this->implementation_lock_.timed_lock(universalis::stdlib::detail::boost_xtime_get_and_add(elapsed_time));
 			}
 	};
 }

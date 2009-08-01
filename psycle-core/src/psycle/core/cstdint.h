@@ -9,7 +9,7 @@
 #pragma once
 
 #if defined _MSC_VER ///\todo check whether other scons and/or qmake projects use universalis
-	#include <universalis/standard_library/stdint.hpp>
+	#include <universalis/stdlib/stdint.hpp>
 
 #elif !defined _MSC_VER
 	// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.

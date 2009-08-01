@@ -5,7 +5,7 @@
 ///\implementation universalis::os::code_description
 #include <universalis/detail/project.private.hpp>
 #include "code_description.hpp"
-#include <universalis/standard_library/exceptions/code_description.hpp>
+#include <universalis/stdlib/exceptions/code_description.hpp>
 #include <sstream>
 namespace universalis { namespace os { namespace exceptions { namespace detail {
 
@@ -18,7 +18,7 @@ std::string code_description(
 	#endif
 ) {
 	#if !defined DIVERSALIS__OS__MICROSOFT
-		return standard_library::exceptions::code_description(code);
+		return stdlib::exceptions::code_description(code);
 	#else
 		std::ostringstream s; s
 		<< (from_processor ? "processor/os exception" : "microsoft api error") << ": "

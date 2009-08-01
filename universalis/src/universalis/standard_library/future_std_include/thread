@@ -1,7 +1,7 @@
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__FUTURE_STD_INCLUDE__THREAD__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__FUTURE_STD_INCLUDE__THREAD__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__FUTURE_STD_INCLUDE__THREAD__INCLUDED
+#define UNIVERSALIS__STDLIB__FUTURE_STD_INCLUDE__THREAD__INCLUDED
 #pragma once
 
-#include <universalis/standard_library/thread.hpp>
+#include <universalis/stdlib/thread.hpp>
 
 #endif

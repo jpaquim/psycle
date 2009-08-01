@@ -1,6 +1,6 @@
 #pragma once
-#include <diversalis/standard_library.hpp>
-#if DIVERSALIS__STANDARD_LIBRARY__MATH < 199901
+#include <diversalis/stdlib.hpp>
+#if DIVERSALIS__STDLIB__MATH < 199901
 	#include <diversalis/compiler.hpp>
 	#include <diversalis/processor.hpp>
 #endif
@@ -22,7 +22,7 @@ namespace psycle { namespace helpers { namespace math {
 // inline implementation
 namespace psycle { namespace helpers { namespace math {
 
-	#if DIVERSALIS__STANDARD_LIBRARY__MATH >= 199901
+	#if DIVERSALIS__STDLIB__MATH >= 199901
 		
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline rounded<>(long double ld)

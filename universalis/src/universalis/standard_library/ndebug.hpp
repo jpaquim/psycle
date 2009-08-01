@@ -3,8 +3,8 @@
 
 ///\file circumvant usual lack of standardisation for the NDEBUG preprocessor definition on microsoft-based projects
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__NDEBUG__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__NDEBUG__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__NDEBUG__INCLUDED
+#define UNIVERSALIS__STDLIB__NDEBUG__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
@@ -18,13 +18,13 @@
 		#endif
 	#elif defined _DEBUG
 	#if defined UNIVERSALIS__COMPILER__VERBOSE
-		#pragma message("universalis::standard_library:: debug ; ("__FILE__ ")")
+		#pragma message("universalis::stdlib:: debug ; ("__FILE__ ")")
 	#endif
 	#else
 		#define NDEBUG
 	#endif
 	#if defined UNIVERSALIS__COMPILER__VERBOSE && defined NDEBUG
-		#pragma message("universalis::standard_library:: no debug (NDEBUG) ; ("__FILE__ ")")
+		#pragma message("universalis::stdlib:: no debug (NDEBUG) ; ("__FILE__ ")")
 	#endif
 #elif defined DIVERSALIS__COMPILER__DOXYGEN
 	/// parts of the source code that contain instructions only useful for debugging purpose

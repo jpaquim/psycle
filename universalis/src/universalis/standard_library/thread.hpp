@@ -4,8 +4,8 @@
 ///\file \brief thread standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__THREAD__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__THREAD__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__THREAD__INCLUDED
+#define UNIVERSALIS__STDLIB__THREAD__INCLUDED
 #pragma once
 
 #include <diversalis/os.hpp>
@@ -147,7 +147,7 @@ namespace this_thread {
 		// boost::thread::sleep sleeps until the given absolute event date.
 		// So, we compute the event date by getting the current date and adding the delta to it.
 		// Note: boost::thread::sleep returns on interruptions (at least on posix)
-		boost::thread::sleep(universalis::standard_library::detail::boost_xtime_get_and_add(elapsed_time));
+		boost::thread::sleep(universalis::stdlib::detail::boost_xtime_get_and_add(elapsed_time));
 	}
 }
 

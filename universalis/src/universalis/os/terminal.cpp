@@ -8,7 +8,7 @@
 #include "loggers.hpp"
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include "exceptions/code_description.hpp"
-	#include <universalis/standard_library/exceptions/code_description.hpp>
+	#include <universalis/stdlib/exceptions/code_description.hpp>
 	#include <universalis/compiler/typenameof.hpp>
 	#include <windows.h>
 	#include <wincon.h>
@@ -110,20 +110,20 @@ terminal::terminal() throw(exception)
 					int file_descriptor(::_open_osfhandle(/* microsoft messed the type definition of handles, we *must* hard cast! */ reinterpret_cast<intptr_t>(os_output), _O_TEXT /* opens file in text (translated) mode */));
 					if(file_descriptor == -1) {
 							std::ostringstream s;
-							s << "could not allocate a standard output file descriptor at the runtime layer: " << standard_library::exceptions::code_description();
+							s << "could not allocate a standard output file descriptor at the runtime layer: " << stdlib::exceptions::code_description();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					} else {
 						const FILE * const file(::_fdopen(file_descriptor, "w"));
 						if(!file) {
 								std::ostringstream s;
-								s << "could not open the standard output file stream at the runtime layer: " << standard_library::exceptions::code_description();
+								s << "could not open the standard output file stream at the runtime layer: " << stdlib::exceptions::code_description();
 								throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 						}
 						*stdout = *file;
 					}
 					if(::setvbuf(stdout, 0, _IONBF, 0)) {
 							std::ostringstream s;
-							s << "could not set a buffer for the standard output file stream at the runtime layer: " << standard_library::exceptions::code_description();
+							s << "could not set a buffer for the standard output file stream at the runtime layer: " << stdlib::exceptions::code_description();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					#else
@@ -137,19 +137,19 @@ terminal::terminal() throw(exception)
 					int file_descriptor(::_open_osfhandle(/* microsoft messed the type definition of handles, we *must* hard cast! */ reinterpret_cast<intptr_t>(os_error), _O_TEXT /* opens file in text (translated) mode */));
 					if(file_descriptor == -1) {
 							std::ostringstream s;
-							s << "could not allocate a standard error file descriptor at the runtime layer: " << standard_library::exceptions::code_description();
+							s << "could not allocate a standard error file descriptor at the runtime layer: " << stdlib::exceptions::code_description();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					const FILE * const file(::_fdopen(file_descriptor, "w"));
 					if(!file) {
 							std::ostringstream s;
-							s << "could not open the standard error file stream at the runtime layer: " << standard_library::exceptions::code_description();
+							s << "could not open the standard error file stream at the runtime layer: " << stdlib::exceptions::code_description();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					*stderr = *file;
 					if(::setvbuf(stderr, 0, _IONBF, 0)) {
 							std::ostringstream s;
-							s << "could not set a buffer for the standard error file stream at the runtime layer: " << standard_library::exceptions::code_description();
+							s << "could not set a buffer for the standard error file stream at the runtime layer: " << stdlib::exceptions::code_description();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					#else
@@ -163,19 +163,19 @@ terminal::terminal() throw(exception)
 					int file_descriptor(::_open_osfhandle(/* microsoft messed the type definition of handles, we *must* hard cast! */ reinterpret_cast<intptr_t>(os_input), _O_TEXT /* opens file in text (translated) mode */));
 					if(file_descriptor == -1) {
 							std::ostringstream s;
-							s << "could not allocate a standard input file descriptor at the runtime layer: " << standard_library::exceptions::code_description();
+							s << "could not allocate a standard input file descriptor at the runtime layer: " << stdlib::exceptions::code_description();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					const FILE * const file(::_fdopen(file_descriptor, "r"));
 					if(!file) {
 							std::ostringstream s;
-							s << "could not open the standard input file stream at the runtime layer: " << standard_library::exceptions::code_description();
+							s << "could not open the standard input file stream at the runtime layer: " << stdlib::exceptions::code_description();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					*stdin = *file;
 					if(::setvbuf(stdin, 0, _IONBF, 0)) {
 							std::ostringstream s;
-							s << "could not set a buffer for the standard input file stream at the runtime layer: " << standard_library::exceptions::code_description();
+							s << "could not set a buffer for the standard input file stream at the runtime layer: " << stdlib::exceptions::code_description();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					#else

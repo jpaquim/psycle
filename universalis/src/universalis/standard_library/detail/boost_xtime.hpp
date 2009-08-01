@@ -1,15 +1,15 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2004-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-#ifndef UNIVERSALIS__STANDARD_LIBRARY__DETAIL__BOOST_XTIME__INCLUDED
-#define UNIVERSALIS__STANDARD_LIBRARY__DETAIL__BOOST_XTIME__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__DETAIL__BOOST_XTIME__INCLUDED
+#define UNIVERSALIS__STDLIB__DETAIL__BOOST_XTIME__INCLUDED
 #pragma once
 
 #include <universalis/exception.hpp>
 #include <boost/thread/xtime.hpp>
 #include "utc_time.hpp" // cannot #include <date_time> due to dependency of std::hiresolution_clock on universalis::os::clocks, which itself uses std::this_thread::sleep for unit testing, which itself uses this file
 
-namespace universalis { namespace standard_library { namespace detail {
+namespace universalis { namespace stdlib { namespace detail {
 
 	/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 	template<typename Elapsed_Time>
