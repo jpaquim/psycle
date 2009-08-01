@@ -8,58 +8,18 @@
 
 #include <psycle/core/config.private.hpp>
 #include "machine.h"
-
 #include "song.h"
-#include <psycle/helpers/dsp.hpp>
 #include "fileio.h"
+#include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/math/round.hpp>
+#include <universalis/os/aligned_memory_alloc.hpp>
 #include <cstddef>
-#include <cstdlib> // for posix_memalign
 #include <iostream> // only for debug output
 #include <sstream>
 
 namespace psy { namespace core {
 
-	using namespace psycle::helpers;
-///\todo general purpose => move this to universalis/os/aligned_malloc.hpp or something
-template<typename X>
-void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
-	std::size_t const size(count * sizeof(X));
-	#if defined DIVERSALIS__OS__POSIX
-			void * address;
-			posix_memalign(&address, alignment, size);
-			x = static_cast<X*>(address);
-			// note: free with std::free
-	#elif 0///\todo defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
-			x = static_cast<X*>(__mingw_aligned_malloc(size, alignment));
-			// note: free with _mingw_aligned_free
-	#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
-			x = static_cast<X*>(_aligned_malloc(size, alignment));
-			// note: free with _aligned_free
-	#else
-		// could also try _mm_malloc (#include <xmmintr.h> or <emmintr.h>?)
-		// memalign on SunOS but not BSD (#include both <cstdlib> and <cmalloc>)
-		// note that memalign is declared obsolete and does not specify how to free the allocated memory.
-		
-		size; // unused
-		x = new X[count];
-		// note: free with delete[]
-	#endif
-}
-
-///\todo general purpose => move this to universalis/os/aligned_dealloc.hpp or something
-template<typename X>
-void aligned_dealloc(X *& address) {
-	#if defined DIVERSALIS__OS__POSIX
-		free(address); address=0;
-	#elif 0///\todo: defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
-		_aligned_free(address); address=0;
-	#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
-		_aligned_free(address); address=0;
-	#else
-		delete[] address; address=0;
-	#endif
-}
+using namespace psycle::helpers;
 
 /********************************************************************************************/
 // AudioBuffer
@@ -67,11 +27,11 @@ void aligned_dealloc(X *& address) {
 AudioBuffer::AudioBuffer(int numChannels, int numSamples)
 : numchannels_(numChannels),numsamples_(numSamples)
 {
-	aligned_malloc(16, buffer_, numChannels * numSamples);
+	universalis::os::aligned_memory_alloc(16, buffer_, numChannels * numSamples);
 }
 
 AudioBuffer::~AudioBuffer() {
-	aligned_dealloc(buffer_);
+	universalis::os::aligned_memory_dealloc(buffer_);
 }
 
 void AudioBuffer::Clear() {
@@ -270,9 +230,8 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 	TWSActive(false),
 	TWSSamples(0)
 {
-
-	aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
-	aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
+	universalis::os::aligned_memory_alloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
+	universalis::os::aligned_memory_alloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
 
 	// Clear machine buffer samples
 	dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
@@ -306,8 +265,8 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 }
 
 Machine::~Machine() {
-	aligned_dealloc(_pSamplesL);
-	aligned_dealloc(_pSamplesR);
+	universalis::os::aligned_memory_dealloc(_pSamplesL);
+	universalis::os::aligned_memory_dealloc(_pSamplesR);
 }
 
 void Machine::CloneFrom(Machine & src) {

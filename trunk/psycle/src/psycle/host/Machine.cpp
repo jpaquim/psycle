@@ -33,6 +33,8 @@
 
 #include "Loggers.hpp"
 
+#include <universalis/os/aligned_memory_alloc.hpp>
+
 namespace psycle { namespace host 
 {
 #if !defined WINAMP_PLUGIN
@@ -103,38 +105,28 @@ namespace psycle { namespace host
 			, _scopePrevNumSamples(0)
 		{
 			_editName[0] = '\0';
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
-		#else
-			_pSamplesL = new float[STREAM_SIZE];
-			_pSamplesR = new float[STREAM_SIZE];
-		#endif
+			universalis::os::aligned_memory_alloc(16, _pSamplesL, STREAM_SIZE);
+			universalis::os::aligned_memory_alloc(16, _pSamplesR, STREAM_SIZE);
 
 			// Clear machine buffer samples
 			helpers::dsp::Clear(_pSamplesL,STREAM_SIZE);
 			helpers::dsp::Clear(_pSamplesR,STREAM_SIZE);
 
-			for (int c = 0; c<MAX_TRACKS; c++)
-			{
+			for(int c = 0; c < MAX_TRACKS; ++c) {
 				TriggerDelay[c]._cmd = 0;
 				TriggerDelayCounter[c]=0;
 				RetriggerRate[c]=256;
 				ArpeggioCount[c]=0;
 			}
-			for (int c = 0; c<MAX_TWS; c++)
-			{
+			
+			for(int c = 0; c < MAX_TWS; ++c) {
 				TWSInst[c] = 0;
 				TWSDelta[c] = 0;
 				TWSCurrent[c] = 0;
 				TWSDestination[c] = 0;
 			}
 
-			for (int i = 0; i<MAX_CONNECTIONS; i++)
-			{
+			for(int i = 0; i < MAX_CONNECTIONS; ++i) {
 				_inputMachines[i]=-1;
 				_inputCon[i]=false;
 				_inputConVol[i]=0.0f;
@@ -144,13 +136,14 @@ namespace psycle { namespace host
 				_connectionPoint[i].x=0;
 				_connectionPoint[i].y=0;
 			}
-#if PSYCLE__CONFIGURATION__RMS_VUS
-			rms.count=0;
-			rms.AccumLeft=0.;
-			rms.AccumRight=0.;
-			rms.previousLeft=0.;
-			rms.previousRight=0.;
-#endif
+			
+			#if PSYCLE__CONFIGURATION__RMS_VUS
+				rms.count=0;
+				rms.AccumLeft=0.;
+				rms.AccumRight=0.;
+				rms.previousLeft=0.;
+				rms.previousRight=0.;
+			#endif
 		}
 		Machine::Machine(Machine* mac)
 			: crashed_()
@@ -188,16 +181,8 @@ namespace psycle { namespace host
 			, _scopePrevNumSamples(0)
 		{
 			sprintf(_editName,mac->_editName);
-#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
-#else
-			_pSamplesL = new float[STREAM_SIZE];
-			_pSamplesR = new float[STREAM_SIZE];
-#endif
+			universalis::os::aligned_memory_alloc(16, _pSamplesL, STREAM_SIZE);
+			universalis::os::aligned_memory_alloc(16, _pSamplesR, STREAM_SIZE);
 
 			// Clear machine buffer samples
 			helpers::dsp::Clear(_pSamplesL,STREAM_SIZE);
@@ -230,31 +215,21 @@ namespace psycle { namespace host
 				_connectionPoint[i].x=mac->_connectionPoint[i].x;
 				_connectionPoint[i].y=mac->_connectionPoint[i].y;
 			}
-#if PSYCLE__CONFIGURATION__RMS_VUS
-			rms.count=0;
-			rms.AccumLeft=0.;
-			rms.AccumRight=0.;
-			rms.previousLeft=0.;
-			rms.previousRight=0.;
-#endif
-		}
-		Machine::~Machine() throw()
-		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_aligned_free(_pSamplesL);
-			_aligned_free(_pSamplesR);
-		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-			free(_pSamplesL);
-			free(_pSamplesR);
-		#else
-			delete [] _pSamplesL;
-			delete [] _pSamplesR;
-		#endif
-			_pSamplesL = _pSamplesR=0;
+			#if PSYCLE__CONFIGURATION__RMS_VUS
+				rms.count=0;
+				rms.AccumLeft=0.;
+				rms.AccumRight=0.;
+				rms.previousLeft=0.;
+				rms.previousRight=0.;
+			#endif
 		}
 
-		void Machine::Init()
-		{
+		Machine::~Machine() throw() {
+			universalis::os::aligned_memory_dealloc(_pSamplesL);
+			universalis::os::aligned_memory_dealloc(_pSamplesR);
+		}
+
+		void Machine::Init() {
 			// Standard gear initalization
 			_cpuCost = 0;
 			_wireCost = 0;
@@ -265,8 +240,7 @@ namespace psycle { namespace host
 			// Centering volume and panning
 			SetPan(64);
 			// Clearing connections
-			for(int i=0; i<MAX_CONNECTIONS; i++)
-			{
+			for(int i = 0; i < MAX_CONNECTIONS; ++i) {
 				_inputMachines[i]=-1;
 				_outputMachines[i]=-1;
 				_inputConVol[i] = 1.0f;
@@ -276,59 +250,44 @@ namespace psycle { namespace host
 			}
 			_numInputs = 0;
 			_numOutputs = 0;
-#if PSYCLE__CONFIGURATION__RMS_VUS
-			rms.AccumLeft=0.;
-			rms.AccumRight=0.;
-			rms.count=0;
-			rms.previousLeft=0.;
-			rms.previousRight=0.;
-#endif
+			#if PSYCLE__CONFIGURATION__RMS_VUS
+				rms.AccumLeft=0.;
+				rms.AccumRight=0.;
+				rms.count=0;
+				rms.previousLeft=0.;
+				rms.previousRight=0.;
+			#endif
 		}
 
-		void Machine::SetPan(int newPan)
-		{
-			if (newPan < 0)
-			{
-				newPan = 0;
-			}
-			if (newPan > 128)
-			{
-				newPan = 128;
-			}
+		void Machine::SetPan(int newPan) {
+			if(newPan < 0) newPan = 0;
+			if(newPan > 128) newPan = 128;
 			_rVol = newPan * 0.015625f;
-			_lVol = 2.0f-_rVol;
-			if (_lVol > 1.0f)
-			{
-				_lVol = 1.0f;
-			}
-			if (_rVol > 1.0f)
-			{
-				_rVol = 1.0f;
-			}
+			_lVol = 2.0f - _rVol;
+			if(_lVol > 1.0f) _lVol = 1.0f;
+			if(_rVol > 1.0f) _rVol = 1.0f;
 			_panning = newPan;
 		}
-		void Machine::InsertOutputWireIndex(Song* pSong,int wireIndex, int dstmac)
-		{
+
+		void Machine::InsertOutputWireIndex(Song* pSong,int wireIndex, int dstmac) {
 			if (!_connection[wireIndex]) _numOutputs++;
 			_outputMachines[wireIndex] = dstmac;
 			_connection[wireIndex] = true;
 		}
-		void Machine::InsertInputWireIndex(Song* pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
-		{
-			if (!_inputCon[wireIndex]) _numInputs++;
+
+		void Machine::InsertInputWireIndex(Song* pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol) {
+			if(!_inputCon[wireIndex]) ++_numInputs;
 			_inputMachines[wireIndex] = srcmac;
 			_inputCon[wireIndex] = true;
 			_wireMultiplier[wireIndex] = wiremultiplier;
 			SetWireVolume(wireIndex,initialvol);
-			if ( _isMixerSend )
-			{
+			if(_isMixerSend) {
 				//Let's find if the new machine has still other machines connected to it.
 				// Right now the UI doesn't allow such configurations, but there isn't a reason
 				// not to allow it in the future.
 				Machine* pMac = pSong->machine(srcmac);
-				for(int c=0; c<MAX_CONNECTIONS; c++)
-				{
-					if(pMac->_inputCon[c])	{
+				for(int c = 0; c < MAX_CONNECTIONS; ++c) {
+					if(pMac->_inputCon[c]) {
 						pMac = pSong->machine(pMac->_inputCon[c]);
 						c=0;
 						continue;
@@ -337,67 +296,46 @@ namespace psycle { namespace host
 				NotifyNewSendtoMixer(pSong,_macIndex,pMac->id());
 			}
 		}
-		int Machine::GetFreeInputWire(int slottype)
-		{
-			for(int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				if(!_inputCon[c]) return c;
-			}
-			return -1;
-		}
-		int Machine::GetFreeOutputWire(int slottype)
-		{
-			for(int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				if(!_connection[c]) return c;
-			}
+
+		int Machine::GetFreeInputWire(int slottype) {
+			for(int c = 0; c < MAX_CONNECTIONS; ++c) if(!_inputCon[c]) return c;
 			return -1;
 		}
 
-		int Machine::FindInputWire(int macIndex)
-		{
-			for (int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				if (_inputCon[c])
-				{
-					if (_inputMachines[c] == macIndex)
-					{
-						return c;
-					}
+		int Machine::GetFreeOutputWire(int slottype) {
+			for(int c = 0; c < MAX_CONNECTIONS; ++c) if(!_connection[c]) return c;
+			return -1;
+		}
+
+		int Machine::FindInputWire(int macIndex) {
+			for(int c = 0; c < MAX_CONNECTIONS; ++c) {
+				if(_inputCon[c]) {
+					if(_inputMachines[c] == macIndex) return c;
 				}
 			}
 			return -1;
 		}
 
-		int Machine::FindOutputWire(int macIndex)
-		{
-			for (int c=0; c<MAX_CONNECTIONS; c++)
-			{
-				if (_connection[c])
-				{
-					if (_outputMachines[c] == macIndex)
-					{
-						return c;
-					}
+		int Machine::FindOutputWire(int macIndex) {
+			for(int c = 0; c < MAX_CONNECTIONS; ++c) {
+				if(_connection[c]) {
+					if(_outputMachines[c] == macIndex) return c;
 				}
 			}
 			return -1;
 		}
 
-		bool Machine::SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value)
-		{
+		bool Machine::SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value) {
 			// Get reference to the destination machine
-			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
+			if((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
 			Machine *_pDstMachine = pSong->machine(_outputMachines[WireIndex]);
 
-			if (_pDstMachine)
-			{
+			if(_pDstMachine) {
 				//if ( value == 255 ) value =256; // FF = 255
 				//const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
 				
 				int c;
-				if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
-				{
+				if((c = _pDstMachine->FindInputWire(srcIndex)) != -1) {
 					_pDstMachine->SetWireVolume(c,value);
 					return true;
 				}
@@ -405,8 +343,7 @@ namespace psycle { namespace host
 			return false;
 		}
 
-		bool Machine::GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value)
-		{
+		bool Machine::GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value) {
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
 			Machine *_pDstMachine = pSong->machine(_outputMachines[WireIndex]);
@@ -426,8 +363,7 @@ namespace psycle { namespace host
 			return false;
 		}
 
-		void Machine::DeleteOutputWireIndex(Song* pSong,int wireIndex)
-		{
+		void Machine::DeleteOutputWireIndex(Song* pSong,int wireIndex) {
 			if ( _isMixerSend)
 			{
 				ClearMixerSendFlag(pSong);

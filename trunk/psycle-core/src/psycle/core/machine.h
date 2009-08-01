@@ -25,7 +25,7 @@
 
 namespace psy { namespace core {
 
-	using namespace psycle::helpers;
+using namespace psycle::helpers;
 class RiffFile;
 
 ///\todo FIXME: stole these from analzyer.h just to fix compile error.

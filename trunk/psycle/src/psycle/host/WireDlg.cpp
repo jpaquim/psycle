@@ -22,6 +22,8 @@ using namespace psy::core;
 #include <psycle/helpers/fft.hpp>
 #include <psycle/helpers/dsp.hpp>
 
+#include <universalis/os/aligned_memory_alloc.hpp>
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CWireDlg::CWireDlg(CChildView* pParent)
@@ -64,22 +66,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CWireDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			pSamplesL = static_cast<float*>(_aligned_malloc(SCOPE_BUF_SIZE*sizeof(float),16));
-			pSamplesR = static_cast<float*>(_aligned_malloc(SCOPE_BUF_SIZE*sizeof(float),16));
-			inl = static_cast<float*>(_aligned_malloc(SCOPE_SPEC_SAMPLES*sizeof(float),16));
-			inr = static_cast<float*>(_aligned_malloc(SCOPE_SPEC_SAMPLES*sizeof(float),16));
-		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(reinterpret_cast<void**>(pSamplesL),16,SCOPE_BUF_SIZE*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(pSamplesR),16,SCOPE_BUF_SIZE*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(inl),16,SCOPE_SPEC_SAMPLES*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(inr),16,SCOPE_SPEC_SAMPLES*sizeof(float));
-		#else
-			pSamplesL = new float[SCOPE_BUF_SIZE];
-			pSamplesR = new float[SCOPE_BUF_SIZE];
-			inl = new float[SCOPE_SPEC_SAMPLES];
-			inr = new float[SCOPE_SPEC_SAMPLES];
-		#endif
+			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
+			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
+			universalis::os::aligned_memory_alloc(16, inl, SCOPE_SPEC_SAMPLES);
+			universalis::os::aligned_memory_alloc(16, inr, SCOPE_SPEC_SAMPLES);
 			psycle::helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
 			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
 
@@ -140,13 +130,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			return TRUE;
 		}
 
-		BOOL CWireDlg::Create()
-		{
+		BOOL CWireDlg::Create() {
 			return CDialog::Create(IDD, m_pParent);
 		}
 
-		void CWireDlg::OnCancel()
-		{
+		void CWireDlg::OnCancel() {
 			KillTimer(2304+this_index);
 			_pSrcMachine->_pScopeBufferL = NULL;
 			_pSrcMachine->_pScopeBufferR = NULL;
@@ -163,30 +151,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			linepenbR.DeleteObject();
 			zapObject(bufBM);
 			zapObject(clearBM);
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_aligned_free(pSamplesL);
-			_aligned_free(pSamplesR);
-			_aligned_free(inl);
-			_aligned_free(inr);
-		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-			free(pSamplesL);
-			free(pSamplesR);
-			free(inl);
-			free(inr);
-		#else
-			delete [] pSamplesL;
-			delete [] pSamplesR;
-			delete [] inl;
-			delete [] inr;
-		#endif
+			universalis::os::aligned_memory_dealloc(pSamplesL);
+			universalis::os::aligned_memory_dealloc(pSamplesR);
+			universalis::os::aligned_memory_dealloc(inl);
+			universalis::os::aligned_memory_dealloc(inr);
 			delete this;
 		}
 
-		void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
+		void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)  {
 			char bufper[32];
 			char bufdb[32];
-		//	invol = (128-m_volslider.GetPos())*0.0078125f;
+			//invol = (128-m_volslider.GetPos())*0.0078125f;
 			invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
 
 			if (invol > 1.0f)

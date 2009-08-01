@@ -6,6 +6,7 @@
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
 #include <universalis/processor/exception.hpp>
+#include <universalis/os/aligned_memory_alloc.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <process.h>
 namespace psycle
@@ -172,16 +173,8 @@ namespace psycle
 				}
 				///\todo: wait until WHDR_DONE like with waveout?
 				waveInClose(_capPorts[i]._handle);
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-				_aligned_free(_capPorts[i].pleft);
-				_aligned_free(_capPorts[i].pright);
-			#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-				free(_capPorts[i].pleft);
-				free(_capPorts[i].pright);
-			#else
-				delete[] _capPorts[i].pleft;
-				delete[] _capPorts[i].pright;
-			#endif
+				universalis::os::aligned_memory_dealloc(_capPorts[i].pleft);
+				universalis::os::aligned_memory_dealloc(_capPorts[i].pright);
 			}
 			_capPorts.resize(0);
 
@@ -262,17 +255,8 @@ namespace psycle
 				);
 */
 			waveInStart(port._handle);
-
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			port.pleft = static_cast<float*>(_aligned_malloc(_blockSize*sizeof(float),16));
-			port.pright = static_cast<float*>(_aligned_malloc(_blockSize*sizeof(float),16));
-		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(reinterpret_cast<void**>(port.pleft),16,_blockSize*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(port.pright),16,_blockSize*sizeof(float));
-		#else
-			port.pleft = new float[_blockSize];
-			port.pright = new float[_blockSize];
-		#endif
+			universalis::os::aligned_memory_alloc(16, port.pleft, _blockSize);
+			universalis::os::aligned_memory_alloc(16, port.pright, _blockSize);
 			return true;
 		}
 

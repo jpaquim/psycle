@@ -31,24 +31,27 @@
 #include <psycle/core/fileio.h>
 #include <psycle/helpers/dsp.hpp>
 
-#include <sstream>
-#if defined __unix__ || defined __APPLE__
-	#include <dlfcn.h>
-#elif defined _WIN32
-	#include <windows.h>
-#endif
-// win32 note: plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
+#include <diversalis/os.hpp>
+#include <universalis/os/aligned_memory_alloc.hpp>
 
-using namespace psycle::helpers;
+#include <sstream>
+
+#if defined DIVERSALIS__OS__MICROSOFT
+	#include <windows.h>
+#else
+	#include <dlfcn.h>
+#endif
+
+// win32 note: plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
 
 namespace psy { namespace core { namespace vst {
 
+using namespace psycle::helpers;
 
 /**************************************************************************/
 // Plugin
-	float plugin::junk[STREAM_SIZE];
-	int plugin::pitchWheelCentre(8191);
-
+float plugin::junk[STREAM_SIZE];
+int plugin::pitchWheelCentre(8191);
 
 plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id, LoadedAEffect &loadstruct)
 	:Machine(callbacks, id)
@@ -110,16 +113,8 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 		}
 		else
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-			_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
-		#else
-			_pOutSamplesL = new float[STREAM_SIZE];
-			_pOutSamplesR = new float[STREAM_SIZE];
-		#endif
+			universalis::os::aligned_memory_alloc(16, _pOutSamplesL, STREAM_SIZE);
+			universalis::os::aligned_memory_alloc(16, _pOutSamplesR, STREAM_SIZE);
 			dsp::Clear(_pOutSamplesL, STREAM_SIZE);
 			dsp::Clear(_pOutSamplesR, STREAM_SIZE);
 			outputs[0] = _pOutSamplesL;
@@ -156,24 +151,11 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 	}PSYCLE__HOST__CATCH_ALL(crashclass);
 }
 
-plugin::~ plugin( ) throw()
-{
-	if (aEffect)
-	{
-		if (!WillProcessReplace())
-		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_aligned_free(_pOutSamplesL);
-			_aligned_free(_pOutSamplesR);
-		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-			free(_pOutSamplesL);
-			free(_pOutSamplesR);
-		#else
-
-			delete [] _pOutSamplesL;
-			delete [] _pOutSamplesR;
-		#endif
-			_pOutSamplesL = _pOutSamplesR=0;
+plugin::~plugin( ) throw() {
+	if(aEffect) {
+		if(!WillProcessReplace()) {
+			universalis::os::aligned_memory_dealloc(_pOutSamplesL);
+			universalis::os::aligned_memory_dealloc(_pOutSamplesR);
 		}
 	}
 }

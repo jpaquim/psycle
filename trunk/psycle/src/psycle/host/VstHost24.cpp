@@ -19,6 +19,8 @@
 ///\todo: When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
 //        (LiveSlice is a good example of what happens if it isn't correct)
 
+#include <universalis/os/aligned_memory_alloc.hpp>
+
 namespace psycle
 {
 	namespace host
@@ -169,22 +171,14 @@ namespace psycle
 					}
 					else
 					{
-					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-						_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-						_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-						posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-						posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
-					#else
-						_pOutSamplesL = new float[STREAM_SIZE];
-						_pOutSamplesR = new float[STREAM_SIZE];
-					#endif
+						universalis::os::aligned_memory_alloc(16, _pOutSamplesL, STREAM_SIZE);
+						universalis::os::aligned_memory_alloc(16, _pOutSamplesR, STREAM_SIZE);
 						helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
 						helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
 						outputs[0] = _pOutSamplesL;
 						outputs[1] = _pOutSamplesR;
 					}
-				}PSYCLE__HOST__CATCH_ALL(crashclass);
+				} PSYCLE__HOST__CATCH_ALL(crashclass);
 
 				for(int i(0) ; i < MAX_TRACKS; ++i)
 				{
@@ -237,24 +231,11 @@ namespace psycle
 				}PSYCLE__HOST__CATCH_ALL(crashclass);
 			}
 
-			plugin::~plugin()
-			{
-				if (aEffect)
-				{
-					if (!WillProcessReplace())
-					{
-					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-						_aligned_free(_pOutSamplesL);
-						_aligned_free(_pOutSamplesR);
-					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-						free(_pOutSamplesL);
-						free(_pOutSamplesR);
-					#else
-
-						delete [] _pOutSamplesL;
-						delete [] _pOutSamplesR;
-					#endif
-						_pOutSamplesL = _pOutSamplesR=0;
+			plugin::~plugin() {
+				if(aEffect) {
+					if(!WillProcessReplace()) {
+						universalis::os::aligned_memory_dealloc(_pOutSamplesL);
+						universalis::os::aligned_memory_dealloc(_pOutSamplesR);
 					}
 				}
 			}
