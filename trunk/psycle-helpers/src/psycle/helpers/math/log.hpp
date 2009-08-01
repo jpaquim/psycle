@@ -1,7 +1,7 @@
 #pragma once
 #include <diversalis/processor.hpp>
 #include <universalis/compiler.hpp>
-#if defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
+#if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
 	#include <boost/static_assert.hpp>
 	#include <cstdint>
 #else
@@ -25,7 +25,7 @@ namespace psycle
 			/// less than 10% for input values above 1.7.
 			float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f)
 			{
-				#if defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
+				#if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
 					BOOST_STATIC_ASSERT((sizeof f == 4));
 					//assert(f > 0); 
 					union result_union {

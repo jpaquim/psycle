@@ -5,8 +5,8 @@
 ///\file
 ///\brief meta header
 
-#ifndef UNIVERSALIS__PROCESSOR__INCLUDED
-#define UNIVERSALIS__PROCESSOR__INCLUDED
+#ifndef UNIVERSALIS__CPU__INCLUDED
+#define UNIVERSALIS__CPU__INCLUDED
 #pragma once
 
 #include "processor/processor.hpp"

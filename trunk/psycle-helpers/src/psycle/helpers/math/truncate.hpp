@@ -59,7 +59,7 @@ namespace psycle { namespace helpers { namespace math {
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline truncated<>(float f)
 		{
-			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
+			#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 				///\todo not always the fastest when using sse(2)
 				///\todo this custom asm is not very fast on some arch, the double "2^51 + 2^52" version might be faster
 				///\todo specify the rounding mode.. is this really a truncation toward -infinity, even with negative numbers?

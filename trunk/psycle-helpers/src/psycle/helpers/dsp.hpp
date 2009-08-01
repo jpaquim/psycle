@@ -6,7 +6,7 @@
 #include "math/truncate.hpp"
 #include "math/round.hpp"
 #include <universalis/compiler.hpp>
-#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
 #endif
 #include <cmath>
@@ -45,7 +45,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
 	inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 	{
-		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(vol);
 			__m128 *psrc = (__m128*)pSrcSamples;
 			__m128 *pdst = (__m128*)pDstSamples;
@@ -57,7 +57,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				pdst++;
 				numSamples-=4;
 			} while(numSamples>0);
-		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			__asm
 			{
 					movss xmm2, vol
@@ -89,7 +89,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	///\see MovMul()
 	inline void Mul(float *pDstSamples, int numSamples, float multi)
 	{
-		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(multi);
 			__m128 *pdst = (__m128*)pDstSamples;
 			do
@@ -98,7 +98,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				pdst++;
 				numSamples-=4;
 			} while(numSamples>0);
-		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
 			{
@@ -127,7 +127,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	///\see Mul()
 	inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
 	{
-		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(multi);
 			__m128 *psrc = (__m128*)pSrcSamples;
 			do
@@ -138,7 +138,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				pDstSamples+=4;
 				numSamples-=4;
 			} while(numSamples>0);
-		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
 			{
@@ -167,7 +167,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 	inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
 	{
-		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			do
 			{
 				__m128 tmpps = _mm_load_ps(pSrcSamples);
@@ -176,7 +176,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				pDstSamples+=4;
 				numSamples-=4;
 			} while(numSamples>0);
-		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
 			{
@@ -202,7 +202,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/// zero-out a signal buffer.
 	inline void Clear(float *pDstSamples, int numSamples)
 	{
-		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 zeroval = _mm_set_ps1(0.0f);
 			do
 			{
@@ -210,7 +210,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				pDstSamples+=4;
 				numSamples-=4;
 			}while(numSamples>0);
-		#elif defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
 			{
@@ -281,7 +281,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/// finds the maximum amplitude in a signal buffer.
 	inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 	{
-		#if defined DIVERSALIS__PROCESSOR__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// If anyone knows better assembler than me improve this variable utilization:
 			float volmax = 0.0f, volmin = 0.0f;
 			float *volmaxb = &volmax, *volminb = &volmin;
