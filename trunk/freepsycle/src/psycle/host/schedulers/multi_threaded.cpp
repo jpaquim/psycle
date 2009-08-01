@@ -4,7 +4,7 @@
 ///\implementation psycle::host::schedulers::multi_threaded
 #include <psycle/detail/project.private.hpp>
 #include "multi_threaded.hpp"
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <universalis/os/clocks.hpp>

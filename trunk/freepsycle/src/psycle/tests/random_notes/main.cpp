@@ -8,7 +8,7 @@
 #include <psycle/engine/engine.hpp>
 #include <psycle/plugins/sequence.hpp>
 #include <psycle/host/host.hpp>
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/cpu_affinity.hpp>

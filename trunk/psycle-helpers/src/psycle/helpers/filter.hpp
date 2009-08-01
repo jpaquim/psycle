@@ -7,7 +7,7 @@
 ///\interface psycle::helpers::Filter.
 
 #pragma once
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 
 namespace psycle { namespace helpers { namespace dsp {
 

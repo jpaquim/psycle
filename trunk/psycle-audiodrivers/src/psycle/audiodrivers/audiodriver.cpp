@@ -8,7 +8,7 @@
 **********************************************************************************************/
 
 #include "audiodriver.h"
-#include <diversalis/processor.hpp>
+#include <diversalis/cpu.hpp>
 #include <boost/bind.hpp>
 #include <thread>
 #include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>

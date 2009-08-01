@@ -1,5 +1,5 @@
 #pragma once
-#include <diversalis/processor.hpp>
+#include <diversalis/cpu.hpp>
 #include <universalis/compiler.hpp>
 #if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
 	#include <boost/static_assert.hpp>

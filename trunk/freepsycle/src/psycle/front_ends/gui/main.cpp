@@ -12,7 +12,7 @@
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <exception>
 #include <glibmm/exception.h>
 #include <gtkmm/main.h>

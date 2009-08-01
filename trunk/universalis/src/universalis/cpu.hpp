@@ -9,6 +9,6 @@
 #define UNIVERSALIS__CPU__INCLUDED
 #pragma once
 
-#include "processor/processor.hpp"
+#include "cpu/cpu.hpp"
 
 #endif

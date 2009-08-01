@@ -4,7 +4,7 @@
 ///\implementation psycle::host::schedulers::single_threaded
 #include <psycle/detail/project.private.hpp>
 #include "single_threaded.hpp"
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <universalis/os/clocks.hpp>

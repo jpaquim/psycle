@@ -1,5 +1,5 @@
 #pragma once
-#include <diversalis/processor.hpp>
+#include <diversalis/cpu.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
 #if 0 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
