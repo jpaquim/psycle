@@ -2502,13 +2502,12 @@ void XMSampler::WorkVoices(int startSample, int numsamples)
 		}
 	}
 	// Doing this here is faster than in voice, because it would be done once per voice then.
-	float multip = m_GlobalVolume/128.0f;
+	float const multip = m_GlobalVolume / 128.0f;
 	psamL = _pSamplesL + startSample;
 	psamR = _pSamplesR + startSample;
-	for (int i=0; i<origsamples;i++)
-	{
-		*psamL = *(psamL++)*multip;
-		*psamR = *(psamR++)*multip;
+	for(int i = 0; i < origsamples; ++i) {
+		*psamL *= multip; ++psamL;
+		*psamR *= multip; ++psamR;
 	}
 	_sampleCounter+=numsamples;
 }
