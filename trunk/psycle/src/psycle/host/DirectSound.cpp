@@ -199,8 +199,8 @@ namespace psycle
 				_capPorts[i]._pBuffer->Release();
 				_capPorts[i]._pDs->Release();
 				_capPorts[i]._pDs=0;
-				universalis::os::aligned_memory_dealloc(port.pleft);
-				universalis::os::aligned_memory_dealloc(port.pright);
+				universalis::os::aligned_memory_dealloc(_capPorts[i].pleft);
+				universalis::os::aligned_memory_dealloc(_capPorts[i].pright);
 			}
 			_capPorts.resize(0);
 			_running = false;
