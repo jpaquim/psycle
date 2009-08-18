@@ -3,6 +3,8 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
+
+#include "Psy3Saver.hpp"
 using namespace psy::core;
 #else
 #include "Player.hpp"
@@ -613,10 +615,22 @@ namespace psycle {
 					filepath += song().fileName;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					//todo: fileformat version
-					if (!song().save(filepath,3) ) {
+					// if (!song().save(filepath,3) ) {
+					//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+					//	return FALSE;
+					// }
+					psy::core::RiffFile file;
+					if (!file.Create((char*)filepath.c_str(), true))
+					{
 						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
 						return FALSE;
 					}
+					Psy3Saver saver(song());
+					if (!saver.Save(&file, true))
+					{
+						mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
+						bResult = FALSE;
+					}					
 #else
 					OldPsyFile file;
 					if (!file.Create((char*)filepath.c_str(), true))
@@ -724,10 +738,24 @@ namespace psycle {
 					}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					//todo: fileformat version
-					if ( ! song().save(str.GetBuffer(1),3)){
-						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
-					}
+					// if ( ! song().save(str.GetBuffer(1),3)){
+					//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+					//	return FALSE;
+					//}
+					
+						psy::core::RiffFile file1;
+						if (!file1.Create((char*)str.GetBuffer(1), true))
+						{
+							mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+							return FALSE;
+						}
+						Psy3Saver saver(song());
+						if (!saver.Save(&file1, true))
+						{
+							mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
+							bResult = FALSE;
+						}		
+								
 #else
 					if (!file.Create(str.GetBuffer(1), true))
 					{
