@@ -138,7 +138,7 @@ class PSYCLE__CORE__DECL RiffFile {
 		bool Read(std::int32_t & x) { return Read(reinterpret_cast<std::uint32_t&>(x)); }
 
 		bool Write(std::uint32_t x) {
-			//std::uint8_t data[4] = { x, x>>8, x>>16, x>>24 };
+			std::uint8_t data[4] = { x, x>>8, x>>16, x>>24 };
 			return WriteChunk(&x, sizeof(x));
 		}
 
@@ -236,8 +236,8 @@ class PSYCLE__CORE__DECL MemoryFile : public RiffFile {
 		virtual int Skip(std::ptrdiff_t const & bytes);
 		virtual bool ReadString(char *, std::size_t const & max_length);
 
-		virtual bool WriteChunk(void const *, std::size_t const &);
 	protected:		
+		virtual bool WriteChunk(void const *, std::size_t const &);
 		virtual bool ReadChunk (void       *, std::size_t const &);
 		virtual bool Expect    (void       *, std::size_t const &);
 
