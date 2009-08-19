@@ -142,7 +142,7 @@ class PSYCLE__CORE__DECL RiffFile {
 			return WriteChunk(&x, sizeof(x));
 		}
 
-		bool Write(std::int32_t x) { return Write(reinterpret_cast<std::uint32_t&>(x); }
+		bool Write(std::int32_t x) { return Write(reinterpret_cast<std::uint32_t&>(x)); }
 
 		bool Read(float & x) {
 			union {
