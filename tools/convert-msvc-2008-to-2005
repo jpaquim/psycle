@@ -14,7 +14,7 @@ do
 	echo $f | sed 's/msvc-2008/msvc-{2008->2005}/' &&
 	sed \
 		-e s/msvc-2008/msvc-2005/g \
-		-e 's/Version=\"9\.00\"/Version=\"8\.00\"/' \
+		-e 's/Version=\"9[.,]00\"/Version=\"8\.00\"/' \
 		< $f > $(echo $f | sed s/msvc-2008/msvc-2005/) ||
 	break
 done &&
