@@ -94,7 +94,7 @@ namespace psycle {
 			virtual void BeforeDeleteDlg();
 			virtual bool OnEvent(PsycleCanvas::Event* ev);
 			virtual void SetSelected(bool on);
-			virtual bool IsSelected();			
+			virtual bool IsSelected();
 
 			MachineView* view() { return view_; }
 			Machine* mac() { return mac_; }

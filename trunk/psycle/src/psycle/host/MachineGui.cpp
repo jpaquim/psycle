@@ -190,7 +190,7 @@ namespace psycle {
 			new_x = std::min(new_x, static_cast<double>(view()->cw() - preferred_width()));
 			new_y = std::min(new_y, static_cast<double>(view()->ch() - preferred_height()));
 			view()->SetSave(true);
-			SetXY(new_x, new_y);
+			SetXY(new_x, new_y);			
 			OnMove(); 
 			view()->SetSave(false);
 			view()->Flush();
