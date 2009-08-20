@@ -299,15 +299,20 @@ namespace psycle  {
 				if (song_->machine(i))
 				{
 					pFile->WriteArray("MACD",4);
-					version = CURRENT_FILE_VERSION_MACD;
+					version = 0; // CURRENT_FILE_VERSION_MACD; Why is it 256 ??
 					pFile->Write(version);
 					long pos = pFile->GetPos();
 					size = 0;
 					pFile->Write(size);
 
-					index = i; // index
-					pFile->Write(index);
+					index = i; // index					
+					// chunk data
 
+					MachineKey key = song_->machine(i)->getMachineKey();
+					pFile->Write(std::uint32_t(index));
+					pFile->Write(std::uint32_t(key.host()));
+					pFile->WriteArray(key.dllName().c_str(),key.dllName().length()+1);
+					// pFile->Write(std::uint32_t(key.index())); ?
 					song_->machine(i)->SaveFileChunk(pFile);
 
 					long pos2 = pFile->GetPos(); 
