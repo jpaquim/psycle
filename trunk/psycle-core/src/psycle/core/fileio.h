@@ -6,6 +6,8 @@
 
 ///\interface psy::core::RiffFile
 
+// this aborts
+
 #ifndef PSYCLE__CORE__FILE_IO__INCLUDED
 #define PSYCLE__CORE__FILE_IO__INCLUDED
 #pragma once
