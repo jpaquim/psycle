@@ -6,8 +6,6 @@
 
 ///\interface psy::core::RiffFile
 
-// this aborts, needs corections
-
 #ifndef PSYCLE__CORE__FILE_IO__INCLUDED
 #define PSYCLE__CORE__FILE_IO__INCLUDED
 #pragma once
@@ -117,7 +115,7 @@ class PSYCLE__CORE__DECL RiffFile {
 		bool ReadBE(std::int16_t & x) { return ReadBE(reinterpret_cast<std::uint16_t&>(x)); }
 
 		bool Write(std::uint16_t x) {
-			std::uint8_t data[2] = { x, x>>8 };
+			std::uint8_t data[2] = { x & 0xFF, (x>>8) & 0xFF };
 			return WriteChunk(data,2);
 		}
 		bool Write(std::int16_t x) { return Write(reinterpret_cast<std::uint16_t&>(x)); }
@@ -140,7 +138,7 @@ class PSYCLE__CORE__DECL RiffFile {
 		bool Read(std::int32_t & x) { return Read(reinterpret_cast<std::uint32_t&>(x)); }
 
 		bool Write(std::uint32_t x) {
-			std::uint8_t data[4] = { x, x>>8, x>>16, x>>24 };
+			std::uint8_t data[4] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF };
 			return WriteChunk(&x, sizeof(x));
 		}
 
