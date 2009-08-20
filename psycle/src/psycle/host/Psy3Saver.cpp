@@ -1,11 +1,15 @@
 #include "Psy3Saver.hpp"
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "FileIO.hpp"
 #include "ProgressDialog.hpp"
+#include "Zap.hpp"
 
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
 #include <psycle/core/xmsampler.h>
 #include <psycle/core/fileio.h>
+#include <psycle/core/patternevent.h>
+#include <psycle/helpers/datacompression.hpp>
 
 
 namespace psycle  {
@@ -224,53 +228,64 @@ namespace psycle  {
 			// id = "PATD"; 
 			//
 
-		/*	for (int i = 0; i < MAX_PATTERNS; i++)
-			{
-				// check every pattern for validity
-				if (IsPatternUsed(i))
+			// a first test version
+			
+			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
+			psy::core::Sequence::patterniterator  it = song_->patternSequence().patternbegin();
+			for ( ; it != song_->patternSequence().patternend(); ++it ) {
+				psy::core::SinglePattern* pattern = *it;
+				unsigned char* data = CreateNewPattern(pattern->id());
+				psy::core::SinglePattern::iterator ev_it = pattern->begin();
+				int lines_per_beat = 4;
+				int num_lines = pattern->beats() * lines_per_beat; // hardcoded atm
+				for ( ; ev_it != pattern->end(); ++ev_it ) {
+					psy::core::PatternEvent& ev = ev_it->second;
+					double pos = ev_it->first;
+					int line = pos * lines_per_beat;
+					unsigned char* data_ptr = data + line * EVENT_SIZE * song_->tracks();
+					ConvertEvent(ev, data_ptr);
+				}		
+				// ok save it
+				byte* pSource=new byte[song_->tracks()*num_lines*EVENT_SIZE];
+				byte* pCopy = pSource;
+
+				for (int y = 0; y < num_lines; y++)
 				{
-					// ok save it
-					byte* pSource=new byte[SONGTRACKS*patternLines[i]*EVENT_SIZE];
-					byte* pCopy = pSource;
+					unsigned char* pData = ppPatternData[pattern->id()]+(y*MULTIPLY);
+					memcpy(pCopy,pData,EVENT_SIZE*song_->tracks());
+					pCopy+=EVENT_SIZE*song_->tracks();
+				}
+				
+				int sizez77 = psycle::helpers::DataCompression::BEERZ77Comp2(pSource, &pCopy, song_->tracks()*num_lines*EVENT_SIZE);
+				zapArray(pSource);
 
-					for (int y = 0; y < patternLines[i]; y++)
-					{
-						unsigned char* pData = ppPatternData[i]+(y*MULTIPLY);
-						memcpy(pCopy,pData,EVENT_SIZE*SONGTRACKS);
-						pCopy+=EVENT_SIZE*SONGTRACKS;
-					}
-					
-					int sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
-					zapArray(pSource);
+				pFile->WriteArray("PATD",4);
+				version = CURRENT_FILE_VERSION_PATD;
 
-					pFile->Write("PATD",4);
-					version = CURRENT_FILE_VERSION_PATD;
+				pFile->Write(version);
+				size = sizez77+(4*sizeof(temp))+strlen(pattern->name().c_str())+1;
+				pFile->Write(size);
 
-					pFile->Write(&version,sizeof(version));
-					size = sizez77+(4*sizeof(temp))+strlen(patternName[i])+1;
-					pFile->Write(&size,sizeof(size));
+				index = pattern->id(); // index
+				pFile->Write(index);
+				temp = num_lines;
+				pFile->Write(temp);
+				temp = song_->tracks(); // eventually this may be variable per pattern
+				pFile->Write(temp);
 
-					index = i; // index
-					pFile->Write(&index,sizeof(index));
-					temp = patternLines[i];
-					pFile->Write(&temp,sizeof(temp));
-					temp = SONGTRACKS; // eventually this may be variable per pattern
-					pFile->Write(&temp,sizeof(temp));
+				pFile->WriteArray((pattern->name().c_str()),strlen(pattern->name().c_str())+1);
 
-					pFile->Write(&patternName[i],strlen(patternName[i])+1);
+				pFile->Write(sizez77);
+				pFile->WriteArray(pCopy,sizez77);
+				zapArray(pCopy);
 
-					pFile->Write(&sizez77,sizeof(sizez77));
-					pFile->Write(pCopy,sizez77);
-					zapArray(pCopy);
-
-					if ( !autosave ) 
-					{
-						Progress.m_Progress.StepIt();
-						::Sleep(1);
-					}
+				if ( !autosave ) 
+				{
+					Progress.m_Progress.StepIt();
+					::Sleep(1);
 				}
 			}
-*/
+
 			//
 			// ===================
 			// MACHINE DATA
@@ -412,6 +427,29 @@ namespace psycle  {
 			return true;
 		}
 
+		unsigned char* Psy3Saver::CreateNewPattern(int ps)
+		{			
+			ppPatternData[ps] = new unsigned char[MULTIPLY2];
+			PatternEvent blank;
+			unsigned char * pData = ppPatternData[ps];
+			for(int i = 0; i < MULTIPLY2; i+= EVENT_SIZE)
+			{
+				memcpy(pData,&blank,EVENT_SIZE);
+				pData+= EVENT_SIZE;
+			}
+			return ppPatternData[ps];
+		}
+
+		void Psy3Saver::ConvertEvent(const psy::core::PatternEvent& ev, unsigned char* data) const {
+			*data = ev.note();  ++data;
+			*data = ev.instrument(); ++data;
+			*data = ev.machine(); ++data;
+			*data = ev.command(); ++data;
+			*data = ev.parameter(); 
+		}
+
 
 	}	// namespace host
 }  // // namespace psycle
+
+#endif

@@ -8557,7 +8557,11 @@ namespace psycle {
 
 		void PatternView::ShowPatternDlg(void)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CPatDlg dlg(parent_, pattern());
+#else
+			CPatDlg dlg(parent_);
+#endif
 			int patNum = song()->playOrder[editPosition];
 			int nlines = song()->patternLines[patNum];
 			char name[32];
