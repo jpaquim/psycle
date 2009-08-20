@@ -6,7 +6,7 @@
 
 ///\interface psy::core::RiffFile
 
-// this aborts
+// this aborts, needs corections
 
 #ifndef PSYCLE__CORE__FILE_IO__INCLUDED
 #define PSYCLE__CORE__FILE_IO__INCLUDED
