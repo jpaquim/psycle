@@ -6978,9 +6978,12 @@ namespace psycle {
 					else // Not exceeded
 					{
 						ccm=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
-					}
-
-					int plines = song()->patternLines[_ps()];
+					}					
+#if PSYCLE__CONFIGURATION__USE_PSYCORE			
+				const int plines = pattern()->beats() * project()->beat_zoom();
+#else
+				const int plines = song()->patternLines[_ps()];
+#endif
 					int llm = lOff + (point.y-YOFFSET)/ROWHEIGHT;
 					if ( point.y < YOFFSET ) llm--; // 1/2 = 0 , -1/2 = 0 too!
 
@@ -7152,9 +7155,13 @@ namespace psycle {
 		{
 			if (( point.y >= YOFFSET ) && (point.x >= XOFFSET)) {
 				const int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
-				const int nl = song()->patternLines[song()->playOrder[editPosition]];
+#if PSYCLE__CONFIGURATION__USE_PSYCORE			
+				const int nlines = pattern()->beats() * project()->beat_zoom();
+#else
+				const int nlines = song()->patternLines[song()->playOrder[editPosition]];
+#endif
 				StartBlock(ttm,0,0);
-				EndBlock(ttm,nl-1,8);
+				EndBlock(ttm,nlines-1,8);
 				blockStart = false;
 			}
 		}
@@ -7162,7 +7169,11 @@ namespace psycle {
 
 		void PatternView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
 		{
-			int nlines = song()->patternLines[_ps()];
+#if PSYCLE__CONFIGURATION__USE_PSYCORE			
+			const int nlines = pattern()->beats() * project()->beat_zoom();
+#else
+			const int nlines = song()->patternLines[_ps()];
+#endif
 			int nPos = lOff - (zDelta/30);
 			if (nPos > lOff) {
 				if (nPos < 0)
@@ -7199,10 +7210,17 @@ namespace psycle {
 
 		void PatternView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE			
+			const int plines = pattern()->beats() * project()->beat_zoom();
+#else
+			const int plines = song()->patternLines[_ps()];
+#endif
+
 			switch(nSBCode)
 			{
 				case SB_LINEDOWN:
-					if ( lOff<song()->patternLines[_ps()]-VISLINES)
+					if ( lOff<plines-VISLINES)
 						{
 							nlOff=lOff+1;
 							bScrollDetatch=true;
@@ -7222,9 +7240,9 @@ namespace psycle {
 						}
 						break;
 					case SB_PAGEDOWN:
-						if ( lOff<song()->patternLines[_ps()]-VISLINES)
+						if ( lOff<plines-VISLINES)
 						{
-							const int nl = song()->patternLines[_ps()]-VISLINES;
+							const int nl = plines-VISLINES;
 							nlOff=lOff+16;
 							if (nlOff > nl)
 							{
@@ -7254,7 +7272,7 @@ namespace psycle {
 					case SB_THUMBTRACK:
 						if (nlOff!=(int)nPos)
 						{
-							const int nl = song()->patternLines[_ps()]-VISLINES;
+							const int nl = plines-VISLINES;
 							nlOff=(int)nPos;
 							if (nlOff > nl)
 							{
