@@ -26,7 +26,7 @@ namespace psycle {
 		private:
 			Project* active_project_;
 			// the projects
-			std::vector< Project* > projects_;
+			std::vector<Project*> projects_;
 
 		};
 	}

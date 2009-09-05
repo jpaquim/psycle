@@ -26,6 +26,7 @@ namespace psy { namespace core {
 
 			virtual ~SinglePattern();
 
+			SinglePattern& operator=(const SinglePattern& rhs);
 			boost::signal<void (SinglePattern*)> wasDeleted;
 			
 			void setID(int id) { id_ = id; }
@@ -59,6 +60,8 @@ namespace psy { namespace core {
 
 			float beatsPerLine() const;
 
+			void Clear();
+
 			void clearTrack( int linenr , int tracknr );
 			void clearTweakTrack( int linenr , int tracknr );
 			bool lineIsEmpty( int linenr ) const;
@@ -72,6 +75,9 @@ namespace psy { namespace core {
 			
 
 			void clearEmptyLines();
+
+			SinglePattern Clone(double from, double to, int start_track=0, int end_track=32000);
+			void erase(double from, double to, int start_track=0, int end_track=32000);
 
 			void scaleBlock(int left, int right, double top, double bottom, float factor);
 			void transposeBlock(int left, int right, double top, double bottom, int trp);
@@ -107,6 +113,7 @@ namespace psy { namespace core {
 			iterator insert(double pos, const PatternEvent& ev) {
 				return lines_.insert(std::pair<double, PatternEvent>(pos, ev));
 			}
+			void insert(const SinglePattern& srcPattern, double to, int to_track=0);			
 
 			iterator erase(iterator pos) {
 				iterator temp = pos;
@@ -140,4 +147,7 @@ namespace psy { namespace core {
 		};
 
 }}
+
+
+
 #endif
