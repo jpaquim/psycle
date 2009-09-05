@@ -25,7 +25,7 @@ SinglePattern::SinglePattern()
 
 // Explicit copy constructor needed because boost::signal is noncopyable
 SinglePattern::SinglePattern(SinglePattern const& other)
-:	id_(other.id_),
+:	id_(other.id_),  
 	beatZoom_(other.beatZoom_),
 	name_(other.name_),
 	category_(other.category_),
@@ -37,6 +37,26 @@ SinglePattern::SinglePattern(SinglePattern const& other)
 
 SinglePattern::~SinglePattern() {
 	wasDeleted(this);
+}
+
+SinglePattern& SinglePattern::operator=(const SinglePattern& rhs)
+{
+  if (this == &rhs) return *this; 
+  lines_ = rhs.lines_;
+  beatZoom_ = rhs.beatZoom_;
+  name_ = rhs.name_;
+  category_ = rhs.category_;
+  timeSignatures_ = rhs.timeSignatures_;
+  return *this;
+}
+
+
+void SinglePattern::Clear() {
+   lines_.clear();
+   TimeSignature timeSig;
+   timeSig.setCount(4);
+   timeSignatures_.push_back(timeSig);
+   beatZoom_ = 4;
 }
 
 void SinglePattern::setBeatZoom( int zoom ) {
@@ -472,6 +492,49 @@ PatternEvent SinglePattern::tweakEvent( int line, int track ) {
 #endif
 		return PatternEvent();
 }
+
+SinglePattern SinglePattern::Clone(double from, double to, int start_track, int end_track) {
+	SinglePattern clone_pattern;
+	SinglePattern::iterator it(lower_bound(from));
+    while (it != end()) {
+		PatternEvent& pattern_event = it->second;
+        if (it->first > to)
+          break;  
+		if (pattern_event.track() >= start_track && 
+			pattern_event.track() <= end_track) {
+				SinglePattern::iterator cloned_it = clone_pattern.insert(it->first - from, pattern_event);
+				cloned_it->second.set_track(pattern_event.track() - start_track);
+		}
+		++it;
+    }
+	return clone_pattern;
+}
+
+void SinglePattern::insert(const SinglePattern& src_pattern, double to, int to_track) {
+  SinglePattern::const_iterator it(src_pattern.begin());
+  while (it != src_pattern.end()) {
+    const PatternEvent& line = it->second;
+	SinglePattern::iterator new_it = insert(it->first + to, line);
+	new_it->second.set_track(to_track + line.track());
+    ++it;
+  }
+}
+
+void SinglePattern::erase(double from, double to, int start_track, int end_track) {
+   SinglePattern::iterator it(lower_bound(from));
+   while (it != end()) {
+     PatternEvent& patternEvent = it->second;
+     if ( it->first >= to )
+		break;
+	 if (patternEvent.track() <= end_track &&
+		 patternEvent.track() >= start_track
+	  ) {
+		it = erase(it);
+	} else it++;
+  }
+}
+
+
 
 std::auto_ptr<SinglePattern> SinglePattern::block( int left, int right, int top, int bottom ) {
 	// copies a given block into a new Pattern

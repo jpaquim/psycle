@@ -173,6 +173,7 @@ namespace psycle {
 #endif
 
 			class Project* project();
+			class Project* project() const;
 
 			void Draw(CDC *devc, const CRgn& rgn);
 			void OnSize(UINT nType, int cx, int cy);
@@ -392,6 +393,11 @@ public:
 public:
 			bool isBlockCopied;
 private:
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			SinglePattern block_buffer_pattern_;
+			double line_pos(int line) const;
+#endif
 			unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int	blockNTracks;
 			int	blockNLines;

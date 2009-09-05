@@ -102,6 +102,11 @@ namespace psycle {
 			return main_->projects()->active_project();
 		}
 
+		Project* PatternView::project() const
+		{
+			return main_->projects()->active_project();
+		}
+
 		void PatternView::Draw(CDC *devc, const CRgn& rgn)
 		{
 			DrawPatEditor(devc);
@@ -5813,6 +5818,11 @@ namespace psycle {
 			Repaint(draw_modes::selection);
 		}
 
+		double PatternView::line_pos(int line) const {
+			double pos = line / static_cast<double>(project()->beat_zoom());
+			return pos;
+		}
+
 		void PatternView::CopyBlock(bool cutit)
 		{
 			// UNDO CODE HERE CUT
@@ -5821,7 +5831,14 @@ namespace psycle {
 				isBlockCopied=true;
 				blockNTracks=(blockSel.end.track-blockSel.start.track)+1;
 				blockNLines=(blockSel.end.line-blockSel.start.line)+1;
-				
+
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				block_buffer_pattern_ = pattern()->Clone(line_pos(blockSel.start.line),
+														 line_pos(blockSel.end.line+1),
+														 blockSel.start.track,
+														 blockSel.end.track+1);
+#else
 				int ps=song()->playOrder[editPosition];
 				
 				int ls=0;
@@ -5849,6 +5866,7 @@ namespace psycle {
 					}
 					++ts;
 				}
+#endif
 				if(cutit)
 				{
 					NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
@@ -5862,6 +5880,12 @@ namespace psycle {
 		{
 			if(blockSelected)
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				pattern()->erase(line_pos(blockSel.start.line),
+								 line_pos(blockSel.end.line+1),
+								 blockSel.start.track,
+								 blockSel.end.track+1);
+#else
 				int ps=song()->playOrder[editPosition];
 				
 				PatternEvent blank;
@@ -5875,6 +5899,7 @@ namespace psycle {
 						memcpy(_ptrackline(ps,t,l),&blank,EVENT_SIZE);
 					}
 				}
+#endif
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 				Repaint(draw_modes::data);
 			}
@@ -5882,8 +5907,14 @@ namespace psycle {
 
 		void PatternView::PasteBlock(int tx,int lx,bool mix,bool save)
 		{
-			if(isBlockCopied)
-			{
+			if (isBlockCopied) {
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				if (!mix) {
+					pattern()->erase(line_pos(lx), line_pos(lx + blockNLines+1) + 1,
+									 tx, tx + blockNTracks);
+				}
+				pattern()->insert(block_buffer_pattern_, line_pos(lx), tx);
+#else
 				int ps=song()->playOrder[editPosition];
 				int nl = song()->patternLines[ps];
 
@@ -5925,9 +5956,10 @@ namespace psycle {
 					}
 					++ts;
 				}
-				
+#endif				
 				if (Global::pInputHandler->bMoveCursorPaste)
 				{
+					const int nl = pattern()->beats() * project()->beat_zoom();
 					if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 					else editcur.line = nl-1;
 				}
