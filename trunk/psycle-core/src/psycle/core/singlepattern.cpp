@@ -5,7 +5,7 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/config.private.hpp>
-#include "SinglePattern.h"
+#include "singlepattern.h"
 
 #include "xml.h"
 
