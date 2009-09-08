@@ -57,9 +57,12 @@ const int MAX_VST_EVENTS = 128;
 // The real VstEvents in the SDK is defined as events[2], so  it cannot be used from a Host point of view.
 typedef struct VstEventsDynamicstruct
 {
-	VstInt32 numEvents;		///< number of Events in array
-	VstIntPtr reserved;		///< zero (Reserved for future use)
-	VstEvent* events[MAX_VST_EVENTS];	///< event pointer array, variable size
+	/// number of Events in array
+	VstInt32 numEvents;
+	/// zero (Reserved for future use)
+	VstIntPtr reserved;
+	/// event pointer array, variable size
+	VstEvent* events[MAX_VST_EVENTS];
 } VstEventsDynamic;
 
 class AudioMaster;
@@ -144,7 +147,7 @@ public:
 	virtual const std::uint32_t GetVersion() const { return GetVendorVersion(); }
 	virtual bool IsGenerator() const { try { return IsSynth(); }PSYCLE__HOST__CATCH_ALL(crashclass); return false; }
 	virtual bool IsShellMaster() const { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL(crashclass); return 0; }
-	virtual int GetShellIdx() const { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL(crashclass); return 0; }
+	virtual int GetShellIdx() const { try { return ( IsShellPlugin()) ? uniqueId() : 0; }PSYCLE__HOST__CATCH_ALL(crashclass); return 0; }
 	virtual int GetPluginCategory() const { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL(crashclass); return 0; }
 	virtual void SetSampleRate(int sr) { Machine::SetSampleRate(sr); CEffect::SetSampleRate((float)sr); }
 	virtual bool Bypass(void) const { return Machine::Bypass(); }
@@ -169,14 +172,14 @@ public:
 			// some plugins ( psp vintage warmer ) might not like to change the state too
 			// frequently, or might have a delay which makes fast switching unusable.
 			// This is why this is commented out until another solution is found.
-//			if (!bCanBypass) MainsChanged(!e);
+			//if (!bCanBypass) MainsChanged(!e);
 			try
 			{
 				SetBypass(e);
 			}catch(...){}
 		}
 	}
-	virtual void GetParamRange(int numparam,int &minval, int &maxval) const {	minval = 0; maxval = CVSTHost::GetQuantization(); }
+	virtual void GetParamRange(int numparam,int &minval, int &maxval) const { minval = 0; maxval = CVSTHost::GetQuantization(); }
 	virtual int GetNumParams() const { return numParams(); }
 	virtual void GetParamName(int numparam, char * parval) const { if (numparam<numParams()) CEffect::GetParamName(numparam,parval); }
 	virtual void GetParamValue(int numparam, char * parval) const;
@@ -244,12 +247,12 @@ private:
 	bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false, unsigned int sampleoffset=0);
 	inline void SendMidi();
 	int LSB(int val)
-	{				
+	{
 		return val & 0x7f;
 	}
 
 	int MSB(int val)
-	{				
+	{
 		return (val & 0x3F80) >> 7;
 	}
 
@@ -272,9 +275,9 @@ private:
 	note trackNote[MAX_TRACKS];
 	VstEventsDynamic mevents;
 	VstMidiEvent midievent[MAX_VST_EVENTS];
-	int	queue_size;
+	int queue_size;
 	bool NSActive[16];
-	int	NSSamples[16];
+	int NSSamples[16];
 	int NSDelta[16];
 	int NSDestination[16];
 	int NSTargetDistance[16];

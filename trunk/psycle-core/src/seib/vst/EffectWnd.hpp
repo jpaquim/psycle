@@ -1,11 +1,11 @@
 /*****************************************************************************/
-/* EffectWnd.h : Interface for CEffectWnd class. (Base plugin window)		 */
+/* EffectWnd.h : Interface for CEffectWnd class. (Base plugin window)        */
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Work Derived from the LGPL host "vsthost (1.16m)".						 */
-/* (http://www.hermannseib.com/english/vsthost.htm)"						 */
-/* vsthost has the following lincense:										 *
+/* Work Derived from the LGPL host "vsthost (1.16m)".                        */
+/* (http://www.hermannseib.com/english/vsthost.htm)"                         */
+/* vsthost has the following lincense:                                       *
 
 Copyright (C) 2006  Hermann Seib
 
@@ -59,7 +59,7 @@ public:
 // Operations
 public:
 	virtual ~CEffectWnd();
-    CEffect& GetEffect() { return *pEffect; }
+	CEffect& GetEffect() { return *pEffect; }
 	void SetTitleText(const char* lpszText = NULL) { sTitle = (lpszText) ? lpszText : ""; UpdateTitle(); }
 
 protected:
@@ -88,5 +88,4 @@ protected:
 	std::string sTitle;
 	static VkeysT VKeys[];
 };
-	}
-}
+}}

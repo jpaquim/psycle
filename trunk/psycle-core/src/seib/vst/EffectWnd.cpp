@@ -3,9 +3,9 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Work Derived from the LGPL host "vsthost (1.16m)".						 */
-/* (http://www.hermannseib.com/english/vsthost.htm)"						 */
-/* vsthost has the following lincense:										 *
+/* Work Derived from the LGPL host "vsthost (1.16m)".                        */
+/* (http://www.hermannseib.com/english/vsthost.htm)"                         */
+/* vsthost has the following lincense:                                       *
 
 Copyright (C) 2006  Hermann Seib
 
@@ -172,7 +172,7 @@ bool CEffectWnd::SaveProgram(std::string sName)
 
 	if (p.Initialized())
 	{
-		 return p.Save(sName.c_str());
+		return p.Save(sName.c_str());
 	}
 	else return false;
 }
