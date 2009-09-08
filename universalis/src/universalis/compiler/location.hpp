@@ -8,11 +8,6 @@
 #pragma once
 
 #include <universalis/compiler/stringized.hpp>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <algorithm>
 #if !defined DIVERSALIS__COMPILER__GNU
 	// Only gcc is able to include the name of the current class implicitly with __PRETTY_FUNCTION__.
 	// We can use rtti support on other compilers.
@@ -22,6 +17,11 @@
 #if defined PACKAGENERIC
 	#include <packageneric.private.hpp>
 #endif
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <algorithm>
 
 namespace universalis { namespace compiler {
 
@@ -83,7 +83,7 @@ class location {
 		PACKAGENERIC__PACKAGE__VERSION
 #else
 	///\internal
-	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unkown)"
+	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unkown module)"
 #endif
 
 ///\internal
