@@ -160,7 +160,7 @@ namespace psycle {
 									  pat_view->editPosition);
 			// if(len<(MAX_SONG_POSITIONS-1)) limit it or not ?
 			{
-				SinglePattern* pattern = sequence->FindPattern(0);
+				Pattern* pattern = sequence->FindPattern(0);
 				assert(pattern);
 				double beat_pos = line->tickLength();
 				line->createEntry(pattern, beat_pos);				
@@ -212,11 +212,11 @@ namespace psycle {
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];
 			  int id = item->pattern()->id()+1;
-			  SinglePattern* pattern = sequence->FindPattern(id);
+			  Pattern* pattern = sequence->FindPattern(id);
 			  if (pattern) {				  
 				  item->setPattern(pattern);
 			  } else {
-				  psy::core::SinglePattern* pattern = new psy::core::SinglePattern();
+				  psy::core::Pattern* pattern = new psy::core::Pattern();
 				  pattern->setID(id);
 				  sequence->Add(pattern);
 				  item->setPattern(pattern);				  
@@ -245,11 +245,11 @@ namespace psycle {
 			  SequenceEntry* item = pos_map_[*it];			
 			  int id = item->pattern()->id()-1;
 			  if (id >= 0) {
-				SinglePattern* pattern = sequence->FindPattern(id);
+				Pattern* pattern = sequence->FindPattern(id);
 				if (pattern) {				  
 				  item->setPattern(pattern);
 				} else {
-				  pattern = new psy::core::SinglePattern();
+				  pattern = new psy::core::Pattern();
 				  pattern->setID(id);
 				  sequence->Add(pattern);
 				  item->setPattern(pattern);
@@ -278,11 +278,11 @@ namespace psycle {
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];
 			  int id = item->pattern()->id()+16;
-			  SinglePattern* pattern = sequence->FindPattern(id);
+			  Pattern* pattern = sequence->FindPattern(id);
 			  if (pattern) {				  
 				  item->setPattern(pattern);
 			  } else {
-				  pattern = new psy::core::SinglePattern();
+				  pattern = new psy::core::Pattern();
 				  pattern->setID(id);
 				  sequence->Add(pattern);
 				  item->setPattern(pattern);
@@ -311,11 +311,11 @@ namespace psycle {
 			  SequenceEntry* item = pos_map_[*it];
 			  int id = std::max(0, item->pattern()->id()-16);
 			  if (id >= 0) {
-				  SinglePattern* pattern = sequence->FindPattern(id);
+				  Pattern* pattern = sequence->FindPattern(id);
 				if (pattern) {				  
 				  item->setPattern(pattern);
 				} else {
-				  pattern = new psy::core::SinglePattern();
+				  pattern = new psy::core::Pattern();
 				  pattern->setID(id);
 				  sequence->Add(pattern);
 				  item->setPattern(pattern);
@@ -336,7 +336,7 @@ namespace psycle {
 			SequenceLine* line = *(sequence->begin());
 			int id = 0;
 			for ( ; sequence->FindPattern(id) !=0 ; ++id);
-			psy::core::SinglePattern* pattern = new psy::core::SinglePattern();
+			psy::core::Pattern* pattern = new psy::core::Pattern();
 			pattern->setID(id);
 			sequence->Add(pattern);
 			psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
@@ -396,8 +396,8 @@ namespace psycle {
 				int id = 0;
 				for ( ; sequence->FindPattern(id) !=0 ; ++id);				
 				int sel_idx = *it;
-				psy::core::SinglePattern* src_pattern = GetEntry(sel_idx)->pattern();
-				psy::core::SinglePattern* pattern = new psy::core::SinglePattern(*src_pattern);
+				psy::core::Pattern* src_pattern = GetEntry(sel_idx)->pattern();
+				psy::core::Pattern* pattern = new psy::core::Pattern(*src_pattern);
 				pattern->setID(id);
 				sequence->Add(pattern);
 				psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
@@ -440,7 +440,7 @@ namespace psycle {
 			}
 			line->removeSpaces();
 			if ( line->empty() ) {
-				SinglePattern* pattern = sequence->FindPattern(0);
+				Pattern* pattern = sequence->FindPattern(0);
 				assert(pattern);
 				double beat_pos = line->tickLength();
 				line->createEntry(pattern, 0);
@@ -478,7 +478,7 @@ namespace psycle {
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin());
 
-			std::vector<psy::core::SinglePattern*>::iterator it = copy_list_.begin();
+			std::vector<psy::core::Pattern*>::iterator it = copy_list_.begin();
 			for ( ; it != copy_list_.end(); ++it ) {					
 				psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
 				entry->setPattern(*it);			
@@ -502,7 +502,7 @@ namespace psycle {
 			if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
 			{
 				_pSong->patternSequence().removeAll();
-				SinglePattern* pattr = new SinglePattern();
+				Pattern* pattr = new Pattern();
 				pattr->setID(0);
 				_pSong->patternSequence().Add(pattr);
 				SequenceLine* line = _pSong->patternSequence().createNewLine();

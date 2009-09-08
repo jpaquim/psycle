@@ -168,7 +168,7 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		#if 0
 			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		#else
-			SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		#endif
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
@@ -570,7 +570,7 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	double pos = 0;
 	std::vector<int>::iterator it = seqList.begin();
 	for(; it < seqList.end(); ++it) {
-		SinglePattern* pat = song.patternSequence().FindPattern(*it);
+		Pattern* pat = song.patternSequence().FindPattern(*it);
 		singleLine->createEntry(pat, pos);
 		pos += pat->beats();
 	}

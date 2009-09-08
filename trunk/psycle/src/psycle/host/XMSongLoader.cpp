@@ -254,7 +254,7 @@ namespace host{
 		// get pattern data
 		int nextPatStart = m_Header.size + 60;
 		for(int j = 0;j < m_Header.patterns && nextPatStart > 0;j++){
-			nextPatStart = LoadSinglePattern(song,nextPatStart,j,m_Header.channels);
+			nextPatStart = LoadPattern(song,nextPatStart,j,m_Header.channels);
 		}
 		
 		return nextPatStart;
@@ -299,7 +299,7 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	const std::int32_t XMSongLoader::LoadSinglePattern(Song & song, const std::int32_t start,const int patIdx,const int iTracks)
+	const std::int32_t XMSongLoader::LoadPattern(Song & song, const std::int32_t start,const int patIdx,const int iTracks)
 	{
 
 		int iHeaderLen = ReadInt4(start);
@@ -308,7 +308,7 @@ namespace host{
 		short iPackedSize = ReadInt2();
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		SinglePattern* pat = new SinglePattern();
+		Pattern* pat = new Pattern();
 		pat->setName("unnamed");
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(patIdx);
@@ -1207,7 +1207,7 @@ namespace host{
 		// get pattern data
 		Seek(1084);
 		for(int j = 0;j < npatterns ;j++){
-			LoadSinglePattern(song,j,song.tracks() );
+			LoadPattern(song,j,song.tracks() );
 		}
 	}
 
@@ -1238,13 +1238,13 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	const void MODSongLoader::LoadSinglePattern(Song & song,const int patIdx,const int iTracks)
+	const void MODSongLoader::LoadPattern(Song & song,const int patIdx,const int iTracks)
 	{
 
 		short iNumRows = 64;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		SinglePattern* pat = new SinglePattern();
+		Pattern* pat = new Pattern();
 		pat->setName("unnamed");
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(patIdx);

@@ -69,7 +69,7 @@ namespace psy { namespace core {
 
 		/**************************************************************************/
 		// SequenceEntry
-		// pattern Entry contains one ptr to a SinglePattern and the tickPosition for the absolute Sequencer pos
+		// pattern Entry contains one ptr to a Pattern and the tickPosition for the absolute Sequencer pos
 
 		SequenceEntry::SequenceEntry() 
 		:
@@ -93,7 +93,7 @@ namespace psy { namespace core {
 			wasDeleted(this);
 		}
 
-		void SequenceEntry::setPattern(SinglePattern * pattern) {
+		void SequenceEntry::setPattern(Pattern * pattern) {
 			pattern_ = pattern;
 			startPos_ = 0;
 			endPos_   = pattern->beats();
@@ -176,7 +176,7 @@ namespace psy { namespace core {
 			wasDeleted(this);
 		}
 
-		SequenceEntry* SequenceLine::createEntry(SinglePattern * pattern, double position) {
+		SequenceEntry* SequenceLine::createEntry(Pattern * pattern, double position) {
 			SequenceEntry* entry = new SequenceEntry(this);
 			entry->setPattern(pattern);
 			line_.insert(std::pair<double, SequenceEntry*>(position, entry));
@@ -239,7 +239,7 @@ namespace psy { namespace core {
 			line_.erase(it); // Removes entry from this SequenceLine, but doesn't delete it.
 		}
 
-		void SequenceLine::removeSinglePatternEntries( SinglePattern* pattern ) {
+		void SequenceLine::removePatternEntries( Pattern* pattern ) {
 			iterator it = begin();
 			while ( it != end() ) {
 				SequenceEntry* entry = it->second;
@@ -315,7 +315,7 @@ namespace psy { namespace core {
 			GlobalIter it = globalEvents_.begin();
 			for (; it != globalEvents_.end(); it++)
 				delete it->second;
-			std::vector<SinglePattern*>::iterator pat_it = patterns_.begin();
+			std::vector<Pattern*>::iterator pat_it = patterns_.begin();
 			for(; pat_it != patterns_.end(); ++pat_it) {
 				delete *pat_it;
 			}
@@ -340,7 +340,7 @@ namespace psy { namespace core {
 		}
 
 		
-		SinglePattern* Sequence::FindPattern(int id) {
+		Pattern* Sequence::FindPattern(int id) {
 			patterniterator it = patterns_.begin();
 			for ( ; it != patterns_.end(); ++it) {
 				if ((*it)->id() == id)
@@ -375,13 +375,13 @@ namespace psy { namespace core {
 				// this was left open in the player code)
 				for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt ) {
 					// take the pattern,
-					SinglePattern* pPat = sLineIt->second->pattern();
+					Pattern* pPat = sLineIt->second->pattern();
 					double entryStart = sLineIt->first;
 					float entryStartOffset  = sLineIt->second->startPos();
 					float entryEndOffset  = sLineIt->second->endPos();
 					double relativeStart = start - entryStart + entryStartOffset;
 			
-					SinglePattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
+					Pattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
 					patEnd = pPat->lower_bound( std::min(relativeStart+length,(double) entryEndOffset) );
 
 					// and iterate through the lines that are inside the range
@@ -404,7 +404,7 @@ namespace psy { namespace core {
 							// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
 							tmpline.setSequenceTrack(seqlineidx);
 							tmpline.tweaks()=thisline->tweaks();
-							events.insert( SinglePattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
+							events.insert( Pattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
 						#endif
 						}
 				}
@@ -480,7 +480,7 @@ namespace psy { namespace core {
 			}
 		}
 
-		bool Sequence::getPlayInfo(SinglePattern* pattern, double start, double length, double& entryStart) const {
+		bool Sequence::getPlayInfo(Pattern* pattern, double start, double length, double& entryStart) const {
 			#if 0 ///\todo
 				entryStart = 0;
 				PatternLine* searchLine = 0;
@@ -497,7 +497,7 @@ namespace psy { namespace core {
 					for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt )
 					{
 						// take the pattern,
-						SinglePattern* pPat = sLineIt->second->pattern();
+						Pattern* pPat = sLineIt->second->pattern();
 						if ( pPat == pattern ) {
 							entryStart = sLineIt->first;
 							return true;
@@ -564,9 +564,9 @@ namespace psy { namespace core {
 			return globalEvents_;
 		}
 
-		void Sequence::removeSinglePattern(SinglePattern* pattern) {
+		void Sequence::removePattern(Pattern* pattern) {
 			for(iterator it = begin(); it != end(); ++it) {
-				(*it)->removeSinglePatternEntries(pattern);
+				(*it)->removePatternEntries(pattern);
 			}
 			Remove(pattern);
 		}
@@ -577,7 +577,7 @@ namespace psy { namespace core {
 				delete *it;
 			}
 			lines_.clear();
-			std::vector<SinglePattern*>::iterator pat_it = patterns_.begin();
+			std::vector<Pattern*>::iterator pat_it = patterns_.begin();
 			for(; pat_it != patterns_.end(); ++pat_it) {
 				delete *pat_it;
 			}
@@ -626,12 +626,12 @@ namespace psy { namespace core {
 			return xml.str();
 		}
 
-		void Sequence::Add(SinglePattern* pattern) {
+		void Sequence::Add(Pattern* pattern) {
 			assert(pattern);
 			patterns_.push_back(pattern);			
 		}
 	
-		void Sequence::Remove(SinglePattern* pattern) {
+		void Sequence::Remove(Pattern* pattern) {
 			///\todo
 		}
 

@@ -316,7 +316,7 @@ Special:  Bit 0: On = song message attached.
 				if (pointersp[i]==0)
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					SinglePattern* pat = new SinglePattern();
+					Pattern* pat = new Pattern();
 					pat->setName("unnamed");
 					pat->setBeatZoom(s->ticksSpeed());
 					pat->setID(i);
@@ -859,7 +859,7 @@ Special:  Bit 0: On = song message attached.
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			SinglePattern* pat = new SinglePattern();
+			Pattern* pat = new Pattern();
 			pat->setName("unnamed");
 			pat->setBeatZoom(s->ticksSpeed());
 			pat->setID(patIdx);
@@ -1492,7 +1492,7 @@ OFFSET              Count TYPE   Description
 
 			Skip(2);//int packedSize=ReadInt(2);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			SinglePattern* pat = new SinglePattern();
+			Pattern* pat = new Pattern();
 			pat->setName("unnamed");
 			pat->setBeatZoom(s->ticksSpeed());
 			pat->setID(patIdx);

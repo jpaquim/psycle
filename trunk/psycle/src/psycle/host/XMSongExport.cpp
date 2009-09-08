@@ -104,7 +104,7 @@ namespace host{
 	{
 		for (int i = 0; i < m_Header.patterns ; i++)
 		{
-			SaveSinglePattern(song,i);
+			SavePattern(song,i);
 		}
 	}
 
@@ -127,7 +127,7 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	void XMSongExport::SaveSinglePattern(Song & song, const int patIdx)
+	void XMSongExport::SavePattern(Song & song, const int patIdx)
 	{
 		XMPATTERNHEADER ptHeader;
 		memset(&ptHeader,0,sizeof(ptHeader));

@@ -5,7 +5,7 @@
 namespace psy {
 	namespace core {
 		class SequenceEntry;
-		class SinglePattern;
+		class Pattern;
 	}
 }
 #endif
@@ -85,7 +85,7 @@ namespace psycle {
 
 			SequenceEntry* selectedEntry_;
 			std::map<int,SequenceEntry*> pos_map_; // Relation between the list position and the patterns
-			std::vector<psy::core::SinglePattern*> copy_list_; // list to store copy/cut/paste entries
+			std::vector<psy::core::Pattern*> copy_list_; // list to store copy/cut/paste entries
 #else
 			int selectedEntry_;
 			std::map<int,int> pos_map_; // Relation between the list position and the patterns

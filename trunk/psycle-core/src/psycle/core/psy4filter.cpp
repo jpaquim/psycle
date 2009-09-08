@@ -11,7 +11,7 @@
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
-#include "singlepattern.h"
+#include "SinglePattern.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
@@ -119,14 +119,14 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
-	std::map<int, SinglePattern*> patMap;
+	std::map<int, Pattern*> patMap;
 	patMap.clear();
 	song.patternSequence().removeAll();
 	song.clear();
 	
 	float lastPatternPos = 0;
 	PatternCategory* lastCategory = 0;
-	SinglePattern* lastPattern  = 0;
+	Pattern* lastPattern  = 0;
 	SequenceLine* lastSeqLine  = 0;
 	std::cout << "psy4filter detected for load" << std::endl;
 
@@ -377,12 +377,12 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 					std::cerr << "expected patid attribute in seqentry element\n";
 					continue;
 				}
-				std::map<int, SinglePattern*>::iterator it =
+				std::map<int, Pattern*>::iterator it =
 					patMap.find(str<int>(id));
 				if(it == patMap.end())
 					continue;
 				
-				SinglePattern * pattern(it->second);
+				Pattern * pattern(it->second);
 				if (!pattern)
 					continue;
 

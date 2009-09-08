@@ -143,7 +143,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				PatternSequence::patterniterator patite = pSong->patternSequence().patternbegin();
 				for ( ; patite != pSong->patternSequence().patternend(); ++patite) {
-					SinglePattern::iterator eventite = (*patite)->begin();
+					Pattern::iterator eventite = (*patite)->begin();
 					PatternEvent pevent = eventite->second;
 
 #else
