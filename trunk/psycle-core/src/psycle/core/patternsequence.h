@@ -8,7 +8,7 @@
 #define PSYCLE__CORE__PATTERN_SEQUENCE__INCLUDED
 #pragma once
 
-#include "SinglePattern.h"
+#include "singlepattern.h"
 
 namespace psy { namespace core {
 
