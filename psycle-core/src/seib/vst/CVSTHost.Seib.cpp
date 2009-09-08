@@ -3,9 +3,9 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Work Derived from the LGPL host "vsthost (1.16m)".						 */
-/* (http://www.hermannseib.com/english/vsthost.htm)"						 */
-/* vsthost has the following lincense:										 *
+/* Work Derived from the LGPL host "vsthost (1.16m)".                        */
+/* (http://www.hermannseib.com/english/vsthost.htm)"                         */
+/* vsthost has the following lincense:                                       *
 
 Copyright (C) 2006-2007  Hermann Seib
 
@@ -67,33 +67,33 @@ namespace seib {
 						#define $(code) case audioMaster##code: return "audioMaster"#code;
 
 						// from AEffect.h
-						$(Automate)		$(Version)	$(CurrentId)	$(Idle)	$(PinConnected)
+						$(Automate) $(Version) $(CurrentId) $(Idle) $(PinConnected)
 
 						// from aeffectx.h
 
-						$(WantMidi)	$(GetTime)	$(ProcessEvents)$(SetTime)	$(TempoAt)
+						$(WantMidi) $(GetTime) $(ProcessEvents)$(SetTime) $(TempoAt)
 						
 						$(GetNumAutomatableParameters) $(GetParameterQuantization)
 
 						$(IOChanged) $(NeedIdle)
 
-						$(SizeWindow)	$(GetSampleRate)$(GetBlockSize)	$(GetInputLatency)
-						$(GetOutputLatency)	$(GetPreviousPlug)	$(GetNextPlug)
+						$(SizeWindow) $(GetSampleRate)$(GetBlockSize) $(GetInputLatency)
+						$(GetOutputLatency) $(GetPreviousPlug) $(GetNextPlug)
 						$(WillReplaceOrAccumulate)
 
-						$(GetCurrentProcessLevel)$(GetAutomationState)	$(OfflineStart)
-						$(OfflineRead)	$(OfflineWrite)	$(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
+						$(GetCurrentProcessLevel)$(GetAutomationState) $(OfflineStart)
+						$(OfflineRead) $(OfflineWrite) $(OfflineGetCurrentPass) $(OfflineGetCurrentMetaPass)
 
-						$(SetOutputSampleRate)	$(GetOutputSpeakerArrangement)
+						$(SetOutputSampleRate) $(GetOutputSpeakerArrangement)
 
-						$(GetVendorString) $(GetProductString)	$(GetVendorVersion)		$(VendorSpecific)
+						$(GetVendorString) $(GetProductString) $(GetVendorVersion) $(VendorSpecific)
 
-						$(SetIcon)	$(CanDo)	$(GetLanguage)		$(OpenWindow)	$(CloseWindow)
+						$(SetIcon) $(CanDo) $(GetLanguage) $(OpenWindow) $(CloseWindow)
 
-						$(GetDirectory)	$(UpdateDisplay)	$(BeginEdit)	$(EndEdit)	$(OpenFileSelector)
-						$(CloseFileSelector)	$(EditFile)
+						$(GetDirectory) $(UpdateDisplay) $(BeginEdit) $(EndEdit) $(OpenFileSelector)
+						$(CloseFileSelector) $(EditFile)
 
-						$(GetChunkFile)	$(GetInputSpeakerArrangement)
+						$(GetChunkFile) $(GetInputSpeakerArrangement)
 						#undef $
 
 						default:
@@ -236,11 +236,11 @@ namespace seib {
 		}
 
 		template <class T>
-		bool CFxBase::Read(T &f,bool allowswap)	{ size_t i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap && allowswap) SwapBytes(f); return (bool)i; }
+		bool CFxBase::Read(T &f,bool allowswap) { size_t i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap && allowswap) SwapBytes(f); return (bool)i; }
 		template <class T>
-		bool CFxBase::Write(T f, bool allowswap)	{ if (NeedsBSwap && allowswap) SwapBytes(f); size_t i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
-		bool CFxBase::ReadArray(void* f,int size)	{ size_t i=fread(f,size,1,pf); return (bool)i; }
-		bool CFxBase::WriteArray(void* f, int size)	{ size_t i=fwrite(f,size,1,pf);  return (bool)i; }
+		bool CFxBase::Write(T f, bool allowswap)   { if (NeedsBSwap && allowswap) SwapBytes(f); size_t i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
+		bool CFxBase::ReadArray(void* f,int size)  { size_t i=fread(f,size,1,pf); return (bool)i; }
+		bool CFxBase::WriteArray(void* f, int size { size_t i=fwrite(f,size,1,pf);  return (bool)i; }
 		bool CFxBase::ReadHeader()
 		{
 			VstInt32 chunkMagic(0),byteSize(0);
@@ -541,11 +541,11 @@ namespace seib {
 		{
 			if (pChunk)
 				delete[] pChunk;
-//			*szFileName = '\0';                     /* reset file name                   */
+			//*szFileName = '\0';                     /* reset file name                   */
 			pChunk = 0;                           /* reset bank pointer                */
 			chunkSize = 0;
-//			nBankLen = 0;                           /* reset bank length                 */
-//			bChunk = false;                         /* and of course it's no chunk.      */
+			//nBankLen = 0;                           /* reset bank length                 */
+			//bChunk = false;                         /* and of course it's no chunk.      */
 			programs.clear();
 			numPrograms = 0;
 			currentProgram = 0;
@@ -557,7 +557,7 @@ namespace seib {
 
 		CFxBank & CFxBank::DoCopy(const CFxBank &org)
 		{
-//			FreeMemory();
+			//FreeMemory();
 			CFxBase::DoCopy(org);
 			if (org.IsChunk())
 			{
@@ -578,7 +578,7 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
-		/* SetChunk / SetChunkSize : sets a new chunk								 */
+		/* SetChunk / SetChunkSize : sets a new chunk                                */
 		/*****************************************************************************/
 		bool CFxBank::SetChunk(const void *chunk, VstInt32 size)
 		{
@@ -678,7 +678,7 @@ namespace seib {
 		CEffect::CEffect(LoadedAEffect &loadstruct)
 			: aEffect(0)
 			, ploader(0)
-//			, sFileName(0)
+			//, sFileName(0)
 			, sDir(0)
 			, bEditOpen(false)
 			, bNeedIdle(false)
@@ -726,7 +726,7 @@ namespace seib {
 		{
 			try
 			{
-				if  (ploader)	Unload();
+				if(ploader) Unload();
 			}
 			catch(...)
 			{
@@ -822,7 +822,7 @@ namespace seib {
 		#if defined _WIN64 || defined _WIN32
 			if (sDir)                               /* reset directory            */
 			{
-				delete[] sDir;	sDir = NULL;
+				delete[] sDir; sDir = NULL;
 			}
 		#elif defined __APPLE__
 			#error yet to be done!
@@ -832,14 +832,14 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
-		/* LoadBank : loads a Bank from a CFxBank class								 */
+		/* LoadBank : loads a Bank from a CFxBank class                              */
 		/*****************************************************************************/
 
 		bool CEffect::LoadBank(CFxBank& fxstore)
 		{
 			if (uniqueId() != fxstore.GetFxID())
 			{
-//				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
+				//MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
 				return false;
 			}
 			bool mainsstate = bMainsState;
@@ -848,14 +848,13 @@ namespace seib {
 			{
 				if (!ProgramIsChunk())
 				{
-//					MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!",
-//						"Load Error", MB_ICONERROR);
+					//MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!", "Load Error", MB_ICONERROR);
 					return false;
 				}
 				CPatchChunkInfo pinfo(fxstore);
 				if (BeginLoadBank(&pinfo) == -1 )
 				{
-//					MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
+					//MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
 				SetProgram(fxstore.GetProgramIndex());
@@ -866,7 +865,7 @@ namespace seib {
 				CPatchChunkInfo pinfo(fxstore);
 				if (BeginLoadBank(&pinfo) == -1 )
 				{
-//					MessageBox("Plugin didn't accept the bank info data", "VST Preset Load Error", MB_ICONERROR);
+					//MessageBox("Plugin didn't accept the bank info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
 				for (int i = 0; i < fxstore.GetNumPrograms(); i++)
@@ -902,7 +901,7 @@ namespace seib {
 		{
 			if (uniqueId() != fxstore.GetFxID())
 			{
-//				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
+				//MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
 				return false;
 			}
 			bool mainsstate = bMainsState;
@@ -911,14 +910,13 @@ namespace seib {
 			{
 				if (!ProgramIsChunk())
 				{
-//					MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!",
-//						"Load Error", MB_ICONERROR);
+					//MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!", "Load Error", MB_ICONERROR);
 					return false;
 				}
 				CPatchChunkInfo pinfo(fxstore);
 				if (BeginLoadProgram(&pinfo) == -1 )
 				{
-//					MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
+					//MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
 				SetChunk(fxstore.GetChunk(), fxstore.GetChunkSize(),true);
@@ -928,7 +926,7 @@ namespace seib {
 				CPatchChunkInfo pinfo(fxstore);
 				if (BeginLoadProgram(&pinfo) == -1 )
 				{
-//					MessageBox("Plugin didn't accept the program info data", "VST Preset Load Error", MB_ICONERROR);
+					//MessageBox("Plugin didn't accept the program info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
 				BeginSetProgram();
@@ -944,7 +942,7 @@ namespace seib {
 		}
 
 		/*****************************************************************************/
-		/* SaveBank : saves current sound bank to CFxBank class					     */
+		/* SaveBank : saves current sound bank to CFxBank class                      */
 		/*****************************************************************************/
 
 		CFxBank CEffect::SaveBank(bool preferchunk)
@@ -1315,7 +1313,7 @@ namespace seib {
 				CEffect crashtest2(effect);
 				try 
 				{
-					 neweffect = CreateEffect(loadstruct);
+					neweffect = CreateEffect(loadstruct);
 				}PSYCLE__HOST__CATCH_ALL(crashtest2.crashclass);
 				if (isShell) neweffect->IsShellPlugin(true);
 				loadingEffect=false;
@@ -1339,17 +1337,17 @@ namespace seib {
 		{
 			// Either your player/sequencer or your overloaded member should update the following ones.
 			// They shouldn't need any calculations appart from your usual work procedures.
-			//sampleRate			(Via SetSampeRate() function )
+			//sampleRate (Via SetSampeRate() function )
 			//samplePos
 			//tempo
-			//cyclestart			// locator positions in quarter notes.
-			//cycleend				// locator positions in quarter notes.
-			//timeSigNumerator		} Via SetTimeSignature() function
-			//timeSigDenominator	} ""	""
-			//smpteFrameRate		(See VstSmpteFrameRate in aeffectx.h)
+			//cyclestart // locator positions in quarter notes.
+			//cycleend // locator positions in quarter notes.
+			//timeSigNumerator } Via SetTimeSignature() function
+			//timeSigDenominator } "" ""
+			//smpteFrameRate (See VstSmpteFrameRate in aeffectx.h)
 
 			const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
-			//ppqPos	(sample pos in 1ppq units)
+			//ppqPos (sample pos in 1ppq units)
 			if((lMask & kVstPpqPosValid) || ((lMask & (kVstBarsValid | kVstClockValid)) && !(vstTimeInfo.flags & kVstBarsValid) ))
 			{
 				vstTimeInfo.flags |= kVstPpqPosValid;
@@ -1364,25 +1362,22 @@ namespace seib {
 			//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
 			if(lMask & kVstClockValid)
 			{
-//					option 1:
-				const double onesampleclock = (60.0 * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.0);		// get size of one 24ppq in samples.
+				// option 1:
+				const double onesampleclock = (60.0 * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.0); // get size of one 24ppq in samples.
 				vstTimeInfo.samplesToNextClock = onesampleclock * (((int)vstTimeInfo.samplePos / (int)onesampleclock)+1); // quantize.
 
-//					option 2:
-//					const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1);								// Quantize ppqpos
-//					const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
-//					vstTimeInfo.samplestoNextClock = sampleclockpos - ppqclockpos;									// get the difference.
+				// option 2:
+				//const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1); // Quantize ppqpos
+				//const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo; // convert to samples
+				//vstTimeInfo.samplestoNextClock = sampleclockpos - ppqclockpos; // get the difference.
 				vstTimeInfo.flags |= kVstClockValid;
 			}
 			//smpteOffset
 			if(lMask & kVstSmpteValid)
 			{
-				//	24 fps ,  25 fps,	29.97 fps,	30 fps,	29.97 drop, 30 drop , Film 16mm ,  Film 35mm , none, none,
-				//	HDTV: 23.976 fps,	HDTV: 24.976 fps,	HDTV: 59.94 fps,	HDTV: 60 fps
-				static double fSmpteDiv[] =
-				{	24.f,		25.f,		29.97f,		30.f,	29.97f,		30.f ,		0.f,		0.f,	0.f,	0.f,
-					23.976f,	24.976f,	59.94f,		60.f
-				};
+				// 24 fps ,  25 fps, 29.97 fps, 30 fps, 29.97 drop, 30 drop , Film 16mm ,  Film 35mm , none, none,
+				// HDTV: 23.976 fps, HDTV: 24.976 fps, HDTV: 59.94 fps, HDTV: 60 fps
+				static double fSmpteDiv[] = {24.f, 25.f, 29.97f, 30.f, 29.97f, 30.f , 0.f, 0.f, 0.f, 0.f, 23.976f, 24.976f, 59.94f, 60.f};
 				double dOffsetInSecond = seconds - floor(seconds);
 				vstTimeInfo.smpteOffset = (long)(dOffsetInSecond *
 					fSmpteDiv[vstTimeInfo.smpteFrameRate] *
@@ -1449,9 +1444,9 @@ namespace seib {
 
 		/*****************************************************************************/
 		/* GetPreviousPlugIn : returns predecessor to this plugin                    */
-		/* This function is identified in the VST docs as "for future expansion",	 */
-		/* and in fact there is a bug in the audioeffectx.cpp (in the host call)	 */
-		/* where it forgets about the index completely.								 */
+		/* This function is identified in the VST docs as "for future expansion",    */
+		/* and in fact there is a bug in the audioeffectx.cpp (in the host call)     */
+		/* where it forgets about the index completely.                              */
 		/*****************************************************************************/
 		CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, int pinIndex) const 
 		{
@@ -1467,9 +1462,9 @@ namespace seib {
 
 		/*****************************************************************************/
 		/* GetNextPlugIn : returns successor to this plugin                          */
-		/* This function is identified in the VST docs as "for future expansion",	 */
-		/* and in fact there is a bug in the audioeffectx.cpp (in the host call)	 */
-		/* where it forgets about the index completely.								 */
+		/* This function is identified in the VST docs as "for future expansion",    */
+		/* and in fact there is a bug in the audioeffectx.cpp (in the host call)     */
+		/* where it forgets about the index completely.                              */
 		/*****************************************************************************/
 
 		CEffect* CVSTHost::GetNextPlugIn(CEffect & pEffect, int pinIndex) const
@@ -1491,27 +1486,27 @@ namespace seib {
 		{
 			using namespace HostCanDos;
 			// For the host, according to audioeffectx.cpp , "!= 0 -> true", so there isn't "-1 : can't do".
-			if (	(!strcmp(ptr, canDoSendVstEvents ))		// "sendVstEvents"
-				||	(!strcmp(ptr, canDoSendVstMidiEvent ))	// "sendVstMidiEvent"
-				||	(!strcmp(ptr, canDoSendVstTimeInfo ))	// "sendVstTimeInfo",
-				//||	(!strcmp(ptr, canDoReceiveVstEvents))	// "receiveVstEvents",
-				//||	(!strcmp(ptr, canDoReceiveVstMidiEvent ))// "receiveVstMidiEvent",
-				//||	(!strcmp(ptr, canDoReceiveVstTimeInfo ))// DEPRECATED
+			if (   (!strcmp(ptr, canDoSendVstEvents )) // "sendVstEvents"
+				|| (!strcmp(ptr, canDoSendVstMidiEvent )) // "sendVstMidiEvent"
+				|| (!strcmp(ptr, canDoSendVstTimeInfo )) // "sendVstTimeInfo",
+				//|| (!strcmp(ptr, canDoReceiveVstEvents)) // "receiveVstEvents",
+				//|| (!strcmp(ptr, canDoReceiveVstMidiEvent ))// "receiveVstMidiEvent",
+				//|| (!strcmp(ptr, canDoReceiveVstTimeInfo ))// DEPRECATED
 
-				//||	(!strcmp(ptr, canDoReportConnectionChanges ))// "reportConnectionChanges",
-				//||	(!strcmp(ptr, canDoAcceptIOChanges ))	// "acceptIOChanges",
-				//||	(!strcmp(ptr, canDoSizeWindow ))		// "sizeWindow",
+				//|| (!strcmp(ptr, canDoReportConnectionChanges ))// "reportConnectionChanges",
+				//|| (!strcmp(ptr, canDoAcceptIOChanges )) // "acceptIOChanges",
+				//|| (!strcmp(ptr, canDoSizeWindow )) // "sizeWindow",
 
-				//||	(!strcmp(ptr, canDoAsyncProcessing ))	// DEPRECATED
-				//||	(!strcmp(ptr, canDoOffline] ))			// "offline",
-				||	(!strcmp(ptr, "supplyIdle" ))				// DEPRECATED
-				//||	(!strcmp(ptr, "supportShell" ))			// DEPRECATED
-				||	(!strcmp(ptr, canDoOpenFileSelector ))		// "openFileSelector"
-				//||	(!strcmp(ptr, canDoEditFile ))			// "editFile",
-				||	(!strcmp(ptr, canDoCloseFileSelector ))		// "closeFileSelector"
-				||	(!strcmp(ptr, canDoStartStopProcess ))		// "startStopProcess"
-				||	(!strcmp(ptr, canDoShellCategory ))
-				//||	(!strcmp(ptr, canDoSendVstMidiEventFlagIsRealtime ))
+				//|| (!strcmp(ptr, canDoAsyncProcessing )) // DEPRECATED
+				//|| (!strcmp(ptr, canDoOffline] )) // "offline",
+				|| (!strcmp(ptr, "supplyIdle" )) // DEPRECATED
+				//|| (!strcmp(ptr, "supportShell" )) // DEPRECATED
+				|| (!strcmp(ptr, canDoOpenFileSelector )) // "openFileSelector"
+				//|| (!strcmp(ptr, canDoEditFile )) // "editFile",
+				|| (!strcmp(ptr, canDoCloseFileSelector )) // "closeFileSelector"
+				|| (!strcmp(ptr, canDoStartStopProcess )) // "startStopProcess"
+				|| (!strcmp(ptr, canDoShellCategory ))
+				//|| (!strcmp(ptr, canDoSendVstMidiEventFlagIsRealtime ))
 
 				)
 				return true;
@@ -1573,7 +1568,7 @@ namespace seib {
 		)
 		{
 			if (!pHost)
-				throw (int)1;	// It would have no sense that there is no host.
+				throw (int)1; // It would have no sense that there is no host.
 
 			CEffect *pEffect=0;
 			bool fakeeffect=false;
@@ -1616,11 +1611,11 @@ namespace seib {
 					pHost->Log(title.str() + '\n' + s.str());
 					// The VST SDK 2.0 said this:
 					// [QUOTE]
-					//	Whenever the Host instanciates a plug-in, after the main() call, it also immediately informs the
-					//	plug-in about important system parameters like sample rate, and sample block size. Because the
-					//	audio effect object is constructed in our plug-in’s main(), before the host gets any information about
-					//	the created object, you need to be careful what functions are called within the constructor of the
-					//	plug-in. You may be talking but no-one is listening.
+					// Whenever the Host instanciates a plug-in, after the main() call, it also immediately informs the
+					// plug-in about important system parameters like sample rate, and sample block size. Because the
+					// audio effect object is constructed in our plug-in’s main(), before the host gets any information about
+					// the created object, you need to be careful what functions are called within the constructor of the
+					// plug-in. You may be talking but no-one is listening.
 					// [/QUOTE]
 					// The truth is that most plugins call different audioMaster operations, and some even disallowed operations (WantEvents!),
 					// so this tries to alleviate the problem, as much as it can.
@@ -1735,7 +1730,7 @@ namespace seib {
 					if (fakeeffect )delete pEffect;
 					return result;
 				case audioMasterOfflineStart :
-					result = pHost->OnOfflineStart(*pEffect,	(VstAudioFile *)ptr,value,index);
+					result = pHost->OnOfflineStart(*pEffect, (VstAudioFile *)ptr,value,index);
 					if (fakeeffect )delete pEffect;
 					return result;
 				case audioMasterOfflineRead :

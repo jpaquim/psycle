@@ -450,8 +450,8 @@ AudioRecorder::AudioRecorder(MachineCallbacks* callbacks, Machine::id_type id)
 }
 
 AudioRecorder::~AudioRecorder() throw() {
-//	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-//	if (_initialized) mydriver.RemoveCapturePort(_captureidx);
+	//AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+	//if (_initialized) mydriver.RemoveCapturePort(_captureidx);
 	_pSamplesL=pleftorig;
 	_pSamplesR=prightorig;
 
@@ -461,20 +461,19 @@ AudioRecorder::~AudioRecorder() throw() {
 
 void AudioRecorder::Init(void) {
 	Machine::Init();
-/*	if (!_initialized)
-	{
+	/*
+	if(!_initialized) {
 		AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 		_initialized = mydriver.AddCapturePort(_captureidx);
 	}
-*/
+	*/
 }
 
 void AudioRecorder::ChangePort(int newport)
 {
 	/*
 	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-	if ( _initialized )
-	{
+	if(_initialized) {
 		mydriver.Enable(false);
 		mydriver.RemoveCapturePort(_captureidx);
 		_initialized=false;

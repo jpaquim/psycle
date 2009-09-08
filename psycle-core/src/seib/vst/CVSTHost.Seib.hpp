@@ -3,9 +3,9 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Work Derived from the LGPL host "vsthost (1.16m)".						 */
-/* (http://www.hermannseib.com/english/vsthost.htm)"						 */
-/* vsthost has the following lincense:										 *
+/* Work Derived from the LGPL host "vsthost (1.16m)".                        */
+/* (http://www.hermannseib.com/english/vsthost.htm)"                         */
+/* vsthost has the following lincense:                                       *
 
 Copyright (C) 2006-2007  Hermann Seib
 
@@ -97,10 +97,14 @@ namespace seib {
 			// This function would normally be protected, but it is needed in the saving of Programs from a Bank.
 			virtual bool SaveData(FILE* pFileHandle) { pf = pFileHandle; return SaveData(); }
 		protected:
-			VstInt32 fxMagic;			///< "Magic" identifier of this chunk. Tells if it is a Bank/Program and if it is chunk based.
-			VstInt32 version;			///< format version
-			VstInt32 fxID;				///< fx unique ID
-			VstInt32 fxVersion;			///< fx version
+			/// "Magic" identifier of this chunk. Tells if it is a Bank/Program and if it is chunk based.
+			VstInt32 fxMagic;
+			/// format version
+			VstInt32 version;
+			/// fx unique ID
+			VstInt32 fxID; 
+			/// fx version
+			VstInt32 fxVersion; 
 			std::string pathName;
 			bool initialized;
 			// pf would normally be private, but it is needed in the loading of Programs from a Bank.
@@ -113,7 +117,7 @@ namespace seib {
 			bool Read(T &f,bool allowswap=true);
 			template <class T>
 			bool Write(T f,bool allowswap=true);
-			bool ReadArray(void *f,int size);	
+			bool ReadArray(void *f,int size);
 			bool WriteArray(void *f, int size);
 			void Rewind(int bytes) { fseek(pf,-bytes,SEEK_CUR); }
 			void Forward(int bytes) { fseek(pf,bytes,SEEK_CUR); }
@@ -146,7 +150,7 @@ namespace seib {
 			CFxProgram & operator=(CFxProgram const &org) { FreeMemory(); return DoCopy(org); }
 
 			// access functions
-			const char * GetProgramName() const	{ return prgName;	}
+			const char * GetProgramName() const { return prgName; }
 			void SetProgramName(const char *name = "")
 			{
 				//leave last char for null.
@@ -157,19 +161,24 @@ namespace seib {
 			bool SetParameter(VstInt32 nParm, float val = 0.0);
 			long GetChunkSize() const{ return chunkSize; }
 			const void *GetChunk() const { return pChunk; }
-			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
+			bool CopyChunk(const void *chunk,const int size) { ChunkMode(); return SetChunk(chunk,size); }
 			bool IsChunk() const { return fxMagic == chunkPresetMagic; }
 			void ManuallyInitialized() { initialized = true; }
 
 			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pFileHandle); }
 
 		protected:
-			char prgName[28];			///< program name (null-terminated ASCII string)
+			/// program name (null-terminated ASCII string)
+			char prgName[28];
 
-			VstInt32 numParams;			///< number of parameters
-			float* pParams;				///< variable sized array with parameter values
-			int chunkSize;				///< Size of the opaque chunk.
-			unsigned char* pChunk;		///< variable sized array with opaque program data
+			/// number of parameters
+			VstInt32 numParams;
+			/// variable sized array with parameter values
+			float* pParams;
+			/// Size of the opaque chunk.
+			int chunkSize;
+			/// variable sized array with opaque program data
+			unsigned char* pChunk;
 
 		protected:
 			void Init();
@@ -212,7 +221,7 @@ namespace seib {
 			
 			long GetChunkSize() const { return chunkSize; }
 			void * const GetChunk() const { return pChunk; }
-			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
+			bool CopyChunk(const void *chunk,const int size) { ChunkMode(); return SetChunk(chunk,size); }
 			bool IsChunk() const{ return fxMagic == chunkBankMagic; }
 
 			// if nProgNum is not specified (i.e, it is -1) , currentProgram is used as index.
@@ -222,7 +231,7 @@ namespace seib {
 				else return programs[nProgNum];
 			}
 			void SetProgramIndex(VstInt32 nProgNum) { if (nProgNum < numPrograms ) currentProgram = nProgNum; }
-			VstInt32 GetProgramIndex() const { return currentProgram;	}
+			VstInt32 GetProgramIndex() const { return currentProgram; }
 			void ManuallyInitialized() { initialized = true; }
 			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pf); }
 
@@ -331,12 +340,12 @@ namespace seib {
 			//-------------------------------------------------------------------------------------------------------
 		};
 		/*****************************************************************************/
-		/* LoadedAEffect:															 */
-		/*		Struct definition to ease  CEffect creation/destruction.			 */
+		/* LoadedAEffect:                                                            */
+		/* Struct definition to ease  CEffect creation/destruction.             */
 		/* Sometimes it might be prefferable to create the CEffect *after* the       */
 		/* AEffect has been loaded, in order to have different subclasses for        */
 		/* different types. Yet, it might be necessary that the plugin frees the     */
-		/* library once it is destroyed. This is why it requires this information	 */
+		/* library once it is destroyed. This is why it requires this information    */
 		/*****************************************************************************/
 		class CVSTHost;
 
@@ -438,36 +447,36 @@ namespace seib {
 			virtual float GetParameter(VstInt32 index) const;
 		public:
 			// Not to be used, except if no other way.
-			inline AEffect	*GetAEffect() const{ return aEffect; }
+			inline AEffect  *GetAEffect() const{ return aEffect; }
 			//////////////////////////////////////////////////////////////////////////
 			// AEffect Properties
 			// magic is only used in the loader to verify that it is a VST plugin
 			//long int magic()
-			inline VstInt32 numPrograms() const	 throw(psy::core::exceptions::function_error){	try { return aEffect->numPrograms;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline VstInt32 numParams() const	 throw(psy::core::exceptions::function_error){	try { return aEffect->numParams;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline VstInt32 numInputs() const	 throw(psy::core::exceptions::function_error){	try { return aEffect->numInputs;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline VstInt32 numOutputs() const	 throw(psy::core::exceptions::function_error){	try { return aEffect->numOutputs;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 numPrograms() const throw(psy::core::exceptions::function_error){ try { return aEffect->numPrograms; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 numParams()   const throw(psy::core::exceptions::function_error){ try { return aEffect->numParams; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 numInputs()   const throw(psy::core::exceptions::function_error){ try { return aEffect->numInputs; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 numOutputs()  const throw(psy::core::exceptions::function_error){ try { return aEffect->numOutputs; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
 			//flags
-			inline bool HasEditor()const	 throw(psy::core::exceptions::function_error)					{	try { return aEffect->flags & effFlagsHasEditor;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool DECLARE_VST_DEPRECATED(HasClip)() const	 throw(psy::core::exceptions::function_error){	try { return aEffect->flags & effFlagsHasClip;		} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool DECLARE_VST_DEPRECATED(HasVu)() const	 throw(psy::core::exceptions::function_error){	try { return aEffect->flags & effFlagsHasVu;		} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool DECLARE_VST_DEPRECATED(CanInputMono)()const	 throw(psy::core::exceptions::function_error){	try { return aEffect->flags & effFlagsCanMono;			} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool CanProcessReplace() const	throw(psy::core::exceptions::function_error)				{	try { return aEffect->flags & effFlagsCanReplacing;		} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool ProgramIsChunk() const	throw(psy::core::exceptions::function_error)					{	try { return aEffect->flags & effFlagsProgramChunks;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool IsSynth() const	throw(psy::core::exceptions::function_error)							{	try { return aEffect->flags & effFlagsIsSynth;			} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool HasNoTail() const	throw(psy::core::exceptions::function_error)						{	try { return aEffect->flags & effFlagsNoSoundInStop;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool DECLARE_VST_DEPRECATED(ExternalAsync)() const	throw(psy::core::exceptions::function_error){	try { return aEffect->flags & effFlagsExtIsAsync;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline bool DECLARE_VST_DEPRECATED(ExternalBuffer)() const	throw(psy::core::exceptions::function_error){	try { return aEffect->flags & effFlagsExtHasBuffer;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool HasEditor()const throw(psy::core::exceptions::function_error) { try { return aEffect->flags & effFlagsHasEditor; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool DECLARE_VST_DEPRECATED(HasClip)() const throw(psy::core::exceptions::function_error){ try { return aEffect->flags & effFlagsHasClip; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool DECLARE_VST_DEPRECATED(HasVu)() const throw(psy::core::exceptions::function_error){ try { return aEffect->flags & effFlagsHasVu; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool DECLARE_VST_DEPRECATED(CanInputMono)()const throw(psy::core::exceptions::function_error){ try { return aEffect->flags & effFlagsCanMono; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool CanProcessReplace() const throw(psy::core::exceptions::function_error) { try { return aEffect->flags & effFlagsCanReplacing; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool ProgramIsChunk() const throw(psy::core::exceptions::function_error) { try { return aEffect->flags & effFlagsProgramChunks; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool IsSynth() const throw(psy::core::exceptions::function_error) { try { return aEffect->flags & effFlagsIsSynth; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool HasNoTail() const throw(psy::core::exceptions::function_error) { try { return aEffect->flags & effFlagsNoSoundInStop; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool DECLARE_VST_DEPRECATED(ExternalAsync)() const throw(psy::core::exceptions::function_error){ try { return aEffect->flags & effFlagsExtIsAsync; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline bool DECLARE_VST_DEPRECATED(ExternalBuffer)() const throw(psy::core::exceptions::function_error){ try { return aEffect->flags & effFlagsExtHasBuffer; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
 
-			inline VstInt32 DECLARE_VST_DEPRECATED(RealQualities)() const	throw(psy::core::exceptions::function_error){	try { return aEffect->realQualities;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline VstInt32 DECLARE_VST_DEPRECATED(OffQualities)() const	throw(psy::core::exceptions::function_error){	try { return aEffect->offQualities;		} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline float DECLARE_VST_DEPRECATED(IORatio)() const	throw(psy::core::exceptions::function_error)		{	try { return aEffect->ioRatio;			} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 DECLARE_VST_DEPRECATED(RealQualities)() const throw(psy::core::exceptions::function_error){ try { return aEffect->realQualities; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 DECLARE_VST_DEPRECATED(OffQualities)() const throw(psy::core::exceptions::function_error){ try { return aEffect->offQualities; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline float DECLARE_VST_DEPRECATED(IORatio)() const throw(psy::core::exceptions::function_error) { try { return aEffect->ioRatio; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
 
 			// the real plugin ID.
-			inline VstInt32 uniqueId() const	throw(psy::core::exceptions::function_error)	{	try { return aEffect->uniqueID;		} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 uniqueId() const throw(psy::core::exceptions::function_error) { try { return aEffect->uniqueID; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
 			// version() is never used (from my experience), in favour of GetVendorVersion(). Yet, it hasn't been deprecated in 2.4.
-			inline VstInt32 version() const	throw(psy::core::exceptions::function_error)		{	try { return aEffect->version;		} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
-			inline VstInt32 initialDelay() const	throw(psy::core::exceptions::function_error){	try { return aEffect->initialDelay;	} PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 version() const throw(psy::core::exceptions::function_error) { try { return aEffect->version; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
+			inline VstInt32 initialDelay() const throw(psy::core::exceptions::function_error){ try { return aEffect->initialDelay; } PSYCLE__HOST__CATCH_ALL(crashclass) return 0; }
 
 		protected:
 			virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index=0, VstIntPtr value=0, void* ptr=0, float opt=0.) const throw(psy::core::exceptions::function_error);
@@ -487,17 +496,17 @@ namespace seib {
 			// size of ptr string limited to kVstMaxProgNameLen chars + \0 delimiter.
 			inline void SetProgramName(const char *ptr) { Dispatch(effSetProgramName, 0, 0, const_cast<char*>(ptr) ); }
 			inline void GetProgramName(char *ptr) const {
-				 char s1[kVstMaxProgNameLen*3+1];
-				 Dispatch(effGetProgramName, 0, 0, s1);
-				 s1[kVstMaxProgNameLen]='\0';
-				 std::strcpy(ptr,s1);
+				char s1[kVstMaxProgNameLen*3+1];
+				Dispatch(effGetProgramName, 0, 0, s1);
+				s1[kVstMaxProgNameLen]='\0';
+				std::strcpy(ptr,s1);
 			}
 			// Unit of the paramter. size of ptr string limited to kVstMaxParamStrLen char + \0 delimiter
 			inline void GetParamLabel(VstInt32 index, char *ptr) const {
-				 char s1[kVstMaxProgNameLen*3+1];
-				 Dispatch(effGetParamLabel, index, 0, s1);
-				 s1[kVstMaxParamStrLen]='\0';
-				 std::strcpy(ptr,s1);
+				char s1[kVstMaxProgNameLen*3+1];
+				Dispatch(effGetParamLabel, index, 0, s1);
+				s1[kVstMaxParamStrLen]='\0';
+				std::strcpy(ptr,s1);
 			}
 			// Value of the parameter. size of ptr string limited to kVstMaxParamStrLen + \0 delimiter for safety.
 			inline void GetParamDisplay(VstInt32 index, char *ptr) const {
@@ -510,10 +519,9 @@ namespace seib {
 			// NOTE-NOTE-NOTE-NOTE: Forget about the limit. It's *way* exceeded usually. Use the kVstMaxProgNameLen instead.
 			inline void GetParamName(VstInt32 index, char *ptr) const {
 				char s1[kVstMaxProgNameLen*3+1]; 
-				 Dispatch(effGetParamName, index, 0, s1);
-				 s1[kVstMaxProgNameLen]='\0';
-				 std::strcpy(ptr,s1);
-				 
+				Dispatch(effGetParamName, index, 0, s1);
+				s1[kVstMaxProgNameLen]='\0';
+				std::strcpy(ptr,s1);
 			}
 			// Returns the vu value. Range [0-1] >1 -> clipped
 			inline float DECLARE_VST_DEPRECATED(GetVu)() { return Dispatch(effGetVu); }
@@ -644,23 +652,23 @@ namespace seib {
 			inline bool EndSetProgram() { return (bool)Dispatch(effEndSetProgram); }
 		// VST 2.3 Extensions
 			inline bool GetSpeakerArrangement(VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput)  { return (bool)Dispatch(effGetSpeakerArrangement, 0, (long)pluginInput, pluginOutput); }
-			//Called in offline (non RealTime) processing before process is called, indicates how many samples will be processed.	Actually returns value.
+			/// called in offline (non RealTime) processing before process is called, indicates how many samples will be processed. Actually returns value.
 			inline long SetTotalSampleToProcess (long value) { return Dispatch(effSetTotalSampleToProcess, 0, value); }
-			//Points to a char buffer of size 64, which is to be filled with the name of the plugin including the terminating 0.
+			/// points to a char buffer of size 64, which is to be filled with the name of the plugin including the terminating 0.
 			inline long GetNextShellPlugin(char *name)  { return Dispatch(effShellGetNextPlugin, 0, 0, name); }
-			//Called one time before the start of process call.
+			/// called one time before the start of process call.
 			inline long StartProcess() { return Dispatch(effStartProcess); }
 			inline long StopProcess() { return Dispatch(effStopProcess); }
 			inline bool SetPanLaw(long type, float val) { return (bool)Dispatch(effSetPanLaw, 0, type, 0, val); }
-			//	0 : 	Not implemented.
-			//	1 : 	The bank/program can be loaded.
-			//-1  : 	The bank/program can't be loaded.
+			// 0: Not implemented.
+			// 1: The bank/program can be loaded.
+			//-1: The bank/program can't be loaded.
 			inline long BeginLoadBank(VstPatchChunkInfo* ptr) { return Dispatch(effBeginLoadBank, 0, 0, ptr); }
 			inline long BeginLoadProgram(VstPatchChunkInfo* ptr) { return Dispatch(effBeginLoadProgram, 0, 0, ptr); }
 		// VST 2.4 Extensions
-			inline bool SetProcessPrecision(VstProcessPrecision precision)	{ return Dispatch(effSetProcessPrecision,0,precision,0,0); }
-			inline long	GetNumMidiInputChannels()  { return Dispatch(effGetNumMidiInputChannels,0,0,0,0); }
-			inline long	GetNumMidiOutputChannels()  { return Dispatch(effGetNumMidiOutputChannels,0,0,0,0); }
+			inline bool SetProcessPrecision(VstProcessPrecision precision) { return Dispatch(effSetProcessPrecision,0,precision,0,0); }
+			inline long GetNumMidiInputChannels()  { return Dispatch(effGetNumMidiInputChannels,0,0,0,0); }
+			inline long GetNumMidiOutputChannels()  { return Dispatch(effGetNumMidiOutputChannels,0,0,0,0); }
 		};
 
 		/*****************************************************************************/
@@ -731,9 +739,9 @@ namespace seib {
 			//  pos in Sample frames, return bpm* 10000
 			virtual long DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos) const { return 0; }
 			virtual long DECLARE_VST_DEPRECATED(OnGetNumAutomatableParameters)(CEffect &pEffect) const { return 0; }
-			//	0 :  	Not implemented.
-			//	1 : 	Full single float precision is maintained in automation.
-			//other : 	The integer value that represents +1.0.
+			// 0: Not implemented.
+			// 1: Full single float precision is maintained in automation.
+			// other: The integer value that represents +1.0.
 			virtual long DECLARE_VST_DEPRECATED(OnGetParameterQuantization)(CEffect &pEffect) const { return quantization; }
 			// Tell host numInputs and/or numOutputs and/or initialDelay has changed.
 			// The host could call a suspend (if the plugin was enabled (in resume state)) and then ask for getSpeakerArrangement
@@ -751,26 +759,26 @@ namespace seib {
 			virtual long OnUpdateBlockSize(CEffect &pEffect) {
 				pEffect.SetSampleRate(vstTimeInfo.sampleRate,true);
 				return lBlockSize; }
-			//	Returns the ASIO input latency values.
+			/// returns the ASIO input latency values.
 			virtual long OnGetInputLatency(CEffect &pEffect) const { return 0; }
-			// Returns the ASIO output latency values. To be used mostly for GUI sync with audio.
+			/// returns the ASIO output latency values. To be used mostly for GUI sync with audio.
 			virtual long OnGetOutputLatency(CEffect &pEffect) const { return 0; }
 			virtual CEffect *DECLARE_VST_DEPRECATED(GetPreviousPlugIn)(CEffect &pEffect,int pinIndex) const;
 			virtual CEffect *DECLARE_VST_DEPRECATED(GetNextPlugIn)(CEffect &pEffect, int pinIndex) const;
 			// asks the host if it will use this plugin with "processReplacing"
 			virtual bool DECLARE_VST_DEPRECATED(OnWillProcessReplacing)(CEffect &pEffect) const { return false; }
-			//	0 :  	Not supported.
-			//	1 : 	Currently in user thread (gui).
-			//	2 : 	Currently in audio thread or irq (where process is called).
-			//	3 : 	Currently in 'sequencer' thread or irq (midi, timer etc).
-			//	4 : 	Currently offline processing and thus in user thread.
-			//other : 	Not defined, but probably pre-empting user thread.
+			// 0: Not supported.
+			// 1: Currently in user thread (gui).
+			// 2: Currently in audio thread or irq (where process is called).
+			// 3: Currently in 'sequencer' thread or irq (midi, timer etc).
+			// 4: Currently offline processing and thus in user thread.
+			// other: Not defined, but probably pre-empting user thread.
 			virtual long OnGetCurrentProcessLevel(CEffect &pEffect) const { return 0; }
-			//	kVstAutomationUnsupported 	not supported by Host
-			//	kVstAutomationOff 	off
-			//	kVstAutomationRead 	read
-			//	kVstAutomationWrite 	write
-			//	kVstAutomationReadWrite 	read and write
+			// kVstAutomationUnsupported not supported by Host
+			// kVstAutomationOff off
+			// kVstAutomationRead read
+			// kVstAutomationWrite write
+			// kVstAutomationReadWrite read and write
 			virtual long OnGetAutomationState(CEffect &pEffect) const { return kVstAutomationUnsupported; }
 			// As already seen, a single VstOfflineTask structure can be used both to read an existing file, and to overwrite it.
 			// Moreover, the offline specification states that it is possible, at any time, to read both the original samples
