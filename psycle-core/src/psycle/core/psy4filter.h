@@ -17,7 +17,7 @@ namespace psy { namespace core {
 */
 class PSYCLE__CORE__DECL Psy4Filter : public Psy3Filter
 {
-	///\name Singleton SinglePattern
+	///\name Singleton Pattern
 	///\{ 
 		protected:
 			Psy4Filter();

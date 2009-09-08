@@ -37,7 +37,7 @@ namespace psycle { namespace host {
 		const bool IsValid();
 
 		const LONG LoadPatterns(Song & song);
-		const LONG LoadSinglePattern(Song & song, const LONG start, const int patIdx,const int iTracks);	
+		const LONG LoadPattern(Song & song, const LONG start, const int patIdx,const int iTracks);	
 		const bool LoadInstruments(XMSampler & sampler, LONG iInstrStart);
 		const LONG LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
 		const LONG LoadSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
@@ -114,7 +114,7 @@ namespace psycle { namespace host {
 		const bool IsValid();
 
 		const void LoadPatterns(Song & song);
-		const void LoadSinglePattern(Song & song, const int patIdx,const int iTracks);	
+		const void LoadPattern(Song & song, const int patIdx,const int iTracks);	
 		const unsigned char ConvertPeriodtoNote(const unsigned short period);
 		const void LoadInstrument(XMSampler & sampler, const int idx);
 		const void LoadSampleHeader(XMSampler & sampler, const int InstrIdx);

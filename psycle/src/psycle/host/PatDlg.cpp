@@ -6,13 +6,13 @@
 #include <sstream>
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/core/singlepattern.h>
+	#include <psycle/core/SinglePattern.h>
 #endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		CPatDlg::CPatDlg(CWnd* pParent, psy::core::SinglePattern* pattern) : 
+		CPatDlg::CPatDlg(CWnd* pParent, psy::core::Pattern* pattern) : 
 			CDialog(CPatDlg::IDD, pParent),
 		    pattern_(pattern)
 #else

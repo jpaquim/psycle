@@ -8,7 +8,7 @@
 #define PSYCLE__CORE__PATTERN_SEQUENCE__INCLUDED
 #pragma once
 
-#include "singlepattern.h"
+#include "SinglePattern.h"
 
 namespace psy { namespace core {
 
@@ -64,9 +64,9 @@ namespace psy { namespace core {
 			double tickPosition() const;
 			double tickEndPosition( ) const;
 
-			void setPattern(SinglePattern* pattern);
-			SinglePattern* pattern() { return pattern_; }
-			SinglePattern* pattern() const { return pattern_; }
+			void setPattern(Pattern* pattern);
+			Pattern* pattern() { return pattern_; }
+			Pattern* pattern() const { return pattern_; }
 
 			float patternBeats() const;
 
@@ -90,7 +90,7 @@ namespace psy { namespace core {
 			/// the sequence timeline that the sequenceEntry belongs to
 			SequenceLine* line_;
 			/// the wrapped pattern
-			SinglePattern* pattern_;
+			Pattern* pattern_;
 			/// here we can shrink the pattern of the entry
 			float startPos_;
 			/// endpos shrink (from begin of a pattern starting at 0)
@@ -109,10 +109,10 @@ namespace psy { namespace core {
 
 			boost::signal<void (SequenceLine*)> wasDeleted;
 
-			SequenceEntry* createEntry(SinglePattern* pattern, double position);
+			SequenceEntry* createEntry(Pattern* pattern, double position);
 			void insertEntry(SequenceEntry *entry);
 			void moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine);
-			void removeSinglePatternEntries(SinglePattern* pattern);			
+			void removePatternEntries(Pattern* pattern);			
 			void insertEntryAndMoveRest(SequenceEntry *entry, double pos);
 			void removeSpaces(); // removes spaces between entries
 
@@ -194,10 +194,10 @@ namespace psy { namespace core {
 			reverse_iterator rend() { return lines_.rend(); }
 			const_reverse_iterator rend() const { return lines_.rend(); }
 
-			typedef std::vector<SinglePattern*>::iterator patterniterator;
-			typedef std::vector<SinglePattern*>::const_iterator const_patterniterator;
-			typedef std::vector<SinglePattern*>::const_reverse_iterator const_reverse_patterniterator;
-			typedef std::vector<SinglePattern*>::reverse_iterator reverse_patterniterator;
+			typedef std::vector<Pattern*>::iterator patterniterator;
+			typedef std::vector<Pattern*>::const_iterator const_patterniterator;
+			typedef std::vector<Pattern*>::const_reverse_iterator const_reverse_patterniterator;
+			typedef std::vector<Pattern*>::reverse_iterator reverse_patterniterator;
 
 			patterniterator patternbegin() { return patterns_.begin(); }
 			const_patterniterator patternbegin() const { return patterns_.begin(); }
@@ -233,9 +233,9 @@ namespace psy { namespace core {
 
 			// playpos info
 
-			bool getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const;
+			bool getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const;
 
-			void removeSinglePattern(SinglePattern* pattern);
+			void removePattern(Pattern* pattern);
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.
@@ -277,15 +277,15 @@ namespace psy { namespace core {
 
 			std::string toXml() const;
 
-			void Add(SinglePattern* pattern);
-			void Remove(SinglePattern* pattern);
-			SinglePattern* FindPattern(int id);
+			void Add(Pattern* pattern);
+			void Remove(Pattern* pattern);
+			Pattern* FindPattern(int id);
 
 		private:
 			// sequencer structure
 			std::vector<SequenceLine*> lines_;
 			// pattern pool
-			std::vector<SinglePattern*> patterns_;
+			std::vector<Pattern*> patterns_;
 
 			int numTracks_;
 			std::vector<bool> mutedTrack_;

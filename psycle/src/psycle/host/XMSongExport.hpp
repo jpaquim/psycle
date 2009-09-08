@@ -33,7 +33,7 @@ namespace psycle { namespace host {
 	private:
 		void writeSongHeader(Song &song);
 		void SavePatterns(Song & song);
-		void SaveSinglePattern(Song & song, const int patIdx);
+		void SavePattern(Song & song, const int patIdx);
 		
 		void SaveInstruments(Song & song);
 		void SaveEmptyInstrument(std::string name);

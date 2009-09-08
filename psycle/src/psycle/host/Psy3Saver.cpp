@@ -233,9 +233,9 @@ namespace psycle  {
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			psy::core::Sequence::patterniterator  it = song_->patternSequence().patternbegin();
 			for ( ; it != song_->patternSequence().patternend(); ++it ) {
-				psy::core::SinglePattern* pattern = *it;
+				psy::core::Pattern* pattern = *it;
 				unsigned char* data = CreateNewPattern(pattern->id());
-				psy::core::SinglePattern::iterator ev_it = pattern->begin();
+				psy::core::Pattern::iterator ev_it = pattern->begin();
 				int lines_per_beat = 4;
 				int num_lines = pattern->beats() * lines_per_beat; // hardcoded atm
 				for ( ; ev_it != pattern->end(); ++ev_it ) {

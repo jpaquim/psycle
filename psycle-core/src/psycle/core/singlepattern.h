@@ -14,20 +14,20 @@
 
 namespace psy { namespace core {
 
-	class PSYCLE__CORE__DECL SinglePattern {
+	class PSYCLE__CORE__DECL Pattern {
 		public:
 			typedef std::multimap<double, PatternEvent>::iterator iterator;
 			typedef std::multimap<double, PatternEvent>::const_iterator const_iterator;
 			typedef std::multimap<double, PatternEvent>::const_reverse_iterator const_reverse_iterator;
 			typedef std::multimap<double, PatternEvent>::reverse_iterator reverse_iterator;
 
-			SinglePattern();
-			SinglePattern(const SinglePattern& other);
+			Pattern();
+			Pattern(const Pattern& other);
 
-			virtual ~SinglePattern();
+			virtual ~Pattern();
 
-			SinglePattern& operator=(const SinglePattern& rhs);
-			boost::signal<void (SinglePattern*)> wasDeleted;
+			Pattern& operator=(const Pattern& rhs);
+			boost::signal<void (Pattern*)> wasDeleted;
 			
 			void setID(int id) { id_ = id; }
 			int id() const { return id_; }
@@ -76,26 +76,19 @@ namespace psy { namespace core {
 
 			void clearEmptyLines();
 
-			SinglePattern Clone(double from, double to, int start_track=0, int end_track=32000);
+			Pattern Clone(double from, double to, int start_track=0, int end_track=32000);
 			void erase(double from, double to, int start_track=0, int end_track=32000);
 
-			void scaleBlock(int left, int right, double top, double bottom, float factor);
-			void transposeBlock(int left, int right, double top, double bottom, int trp);
-			void deleteBlock(int left, int right, double top, double bottom);
-			
+			void Transpose(int delta, double from, double to, int start_track=0, int end_track=32000);
+
+			void scaleBlock(int left, int right, double top, double bottom, float factor);		
 			void blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t newInstrument );
 			void blockSetMachine( int left, int right, double top, double bottom, std::uint8_t newMachine );
 
-			std::vector<TimeSignature> &  timeSignatures();
-			const std::vector<TimeSignature> &  timeSignatures() const;
+			std::vector<TimeSignature>& timeSignatures();
+			const std::vector<TimeSignature>&  timeSignatures() const;
 
 			std::string toXml() const;
-
-			std::auto_ptr<SinglePattern> block( int left, int right, int top, int bottom );
-			void copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
-			void mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
-
-			void deleteBlock( int left, int right, int top, int bottom );
 
 			iterator begin() { return lines_.begin(); }
 			const_iterator begin() const { return lines_.begin(); }
@@ -113,12 +106,12 @@ namespace psy { namespace core {
 			iterator insert(double pos, const PatternEvent& ev) {
 				return lines_.insert(std::pair<double, PatternEvent>(pos, ev));
 			}
-			void insert(const SinglePattern& srcPattern, double to, int to_track=0);			
+			void insert(const Pattern& srcPattern, double to, int to_track=0);			
 
 			iterator erase(iterator pos) {
 				iterator temp = pos;
-				temp++;
-				lines_.erase( pos );
+				++temp;
+				lines_.erase(pos);
 				return temp;
 			}
 

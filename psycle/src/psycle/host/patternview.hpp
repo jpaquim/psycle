@@ -9,7 +9,7 @@
 #include <psycle/core/song.h>
 namespace psy {
 	namespace core {
-		class SinglePattern;
+		class Pattern;
 		//class Song;
 	}
 }
@@ -164,10 +164,10 @@ namespace psycle {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		private:
-			SinglePattern* pattern();
-			SinglePattern* pattern_;
+			Pattern* pattern();
+			Pattern* pattern_;
 		public:
-			void SetPattern(SinglePattern* pattern) {
+			void SetPattern(Pattern* pattern) {
 				pattern_ = pattern;
 			}
 #endif
@@ -395,7 +395,7 @@ public:
 private:
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			SinglePattern block_buffer_pattern_;
+			Pattern block_buffer_pattern_;
 			double line_pos(int line) const;
 #endif
 			unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];

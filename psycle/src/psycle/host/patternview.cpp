@@ -137,7 +137,7 @@ namespace psycle {
 		}
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		psy::core::SinglePattern* PatternView::pattern() {
+		psy::core::Pattern* PatternView::pattern() {
 			return pattern_;
 /*			psy::core::PatternSequence* sequence = &song()->patternSequence();
 			psy::core::SequenceLine* line = *(sequence->begin());	
@@ -545,7 +545,7 @@ namespace psycle {
 			case draw_modes::playback:
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				SinglePattern* pat = pattern();
+				Pattern* pat = pattern();
 				psy::core::Player & player(psy::core::Player::singleton());
 				int ticks = static_cast<int>(project()->beat_zoom());
 				int pos = player.playPos() * ticks;
@@ -2548,10 +2548,10 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			//todo: Use editPositionEntry when it is ready.
 			Song* song = this->song();
-			SinglePattern* patt = pattern();
+			Pattern* patt = pattern();
 			
 			double beat_zoom = static_cast<int>(project()->beat_zoom());
-			SinglePattern::iterator it;			
+			Pattern::iterator it;			
 			it = patt->find_nearest(lstart+ lOff, project()->beat_zoom());
 			
 			char tBuf[16];
@@ -4350,7 +4350,7 @@ namespace psycle {
 			int line = editcur.line;			
 
 			double beat_zoom = project()->beat_zoom();
-			psy::core::SinglePattern::iterator it;
+			psy::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
@@ -4367,7 +4367,7 @@ namespace psycle {
 				pattern()->insert(insert_pos, ev);
 			} else
 			if (it->first >= low && it->first < up)	{
-				psy::core::SinglePattern::iterator track_it = it;
+				psy::core::Pattern::iterator track_it = it;
 				bool found = false;
 				for ( ; it != pattern()->end() && it->first < up; ++it ) {
 					psy::core::PatternEvent& ev = it->second;
@@ -4944,10 +4944,10 @@ namespace psycle {
 			for (int pos = 0; sit != sline->end() && pos < editPosition; ++sit, ++pos);
 			assert(sit != sline->end());
 			psy::core::SequenceEntry* entry = sit->second;
-			psy::core::SinglePattern* pattern = entry->pattern();
+			psy::core::Pattern* pattern = entry->pattern();
 
 			double beat_zoom = project()->beat_zoom();
-			psy::core::SinglePattern::iterator it;
+			psy::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
@@ -4984,7 +4984,7 @@ namespace psycle {
 				pattern->insert(insert_pos, ev);
 			} else
 			if (it->first >= low && it->first < up)	{
-				psy::core::SinglePattern::iterator track_it = it;
+				psy::core::Pattern::iterator track_it = it;
 				bool found = false;
 				for ( ; it != pattern->end() && it->first < up; ++it ) {
 					psy::core::PatternEvent& ev = it->second;
@@ -5130,17 +5130,17 @@ namespace psycle {
 		void PatternView::ClearCurr() // delete content at Cursor pos.
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::SinglePattern* pat = pattern();
+			psy::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
 			// todo AddUndo		
-			psy::core::SinglePattern::iterator it;
+			psy::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
 			it = pat->lower_bound(low);			
 			int track = editcur.track;
 			if (it != pat->end())	{
-				psy::core::SinglePattern::iterator track_it = it;				
+				psy::core::Pattern::iterator track_it = it;				
 				for ( ; it != pat->end() && it->first < up; ++it ) {
 					psy::core::PatternEvent& ev = it->second;
 					if (ev.track() == editcur.track ) {
@@ -5199,7 +5199,7 @@ namespace psycle {
 		void PatternView::DeleteCurr()
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::SinglePattern* pat = pattern();
+			psy::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
 
 			int patlines = static_cast<int>(beat_zoom * pat->beats());
@@ -5213,7 +5213,7 @@ namespace psycle {
 
 			// todo AddUndo
 			
-			psy::core::SinglePattern::iterator it;
+			psy::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
@@ -5221,7 +5221,7 @@ namespace psycle {
 			
 			int track = editcur.track;
 			if (it != pat->end() )	{
-				psy::core::SinglePattern::iterator track_it = it;				
+				psy::core::Pattern::iterator track_it = it;				
 				for ( ; it != pat->end() && it->first < up; ++it ) {
 					psy::core::PatternEvent& ev = it->second;
 					if (ev.track() == editcur.track ) {						
@@ -5277,23 +5277,23 @@ namespace psycle {
 		void PatternView::InsertCurr()
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::SinglePattern* pat = pattern();
+			psy::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
 
 			int patlines = static_cast<int>(beat_zoom * pat->beats());
 			
 			// todo AddUndo
 			
-			psy::core::SinglePattern::iterator it;
+			psy::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
 			
-			psy::core::SinglePattern::reverse_iterator rit = pat->rbegin();
+			psy::core::Pattern::reverse_iterator rit = pat->rbegin();
 			for ( ; rit != pat->rend() && rit->first > low ; ++rit) {
 					psy::core::PatternEvent& ev = rit->second;
 					if (ev.track() == editcur.track ) {
-						psy::core::SinglePattern::iterator it = rit.base();
+						psy::core::Pattern::iterator it = rit.base();
 						--it;
 						psy::core::PatternEvent old_event = it->second;
 						double old_pos = it->first;
@@ -5678,12 +5678,15 @@ namespace psycle {
 
 		void PatternView::patTranspose(int trp)
 		{
-			// UNDO CODE PATT TRANSPOSE
-			const int ps = _ps();
-			unsigned char *soffset = _ppattern(ps);
-
 			if(child_view()->viewMode == view_modes::pattern)
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				// pattern()->Transpose(trp, 
+				const int pLines = pattern()->beats() * project()->beat_zoom();
+#else
+				// UNDO CODE PATT TRANSPOSE
+				const int ps = _ps();
+				unsigned char *soffset = _ppattern(ps);
 				int pLines=song()->patternLines[ps];
 				int length=pLines*EVENT_SIZE*MAX_TRACKS;
 
@@ -5700,8 +5703,8 @@ namespace psycle {
 						soffset[c]=static_cast<unsigned char>(note);
 					}
 				}
+#endif
 				NewPatternDraw(0,song()->tracks(),editcur.line,pLines-1);
-
 				Repaint(draw_modes::data);
 			}
 		}
@@ -6282,9 +6285,17 @@ namespace psycle {
 
 		void PatternView::BlockTranspose(int trp)
 		{
+
 			// UNDO CODE TRANSPOSE
 			if ( blockSelected == true ) 
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				pattern()->Transpose(trp, 
+									 line_pos(blockSel.start.line),
+								     line_pos(blockSel.end.line+1),
+								     blockSel.start.track,
+								     blockSel.end.track+1);
+#else
 				int ps = _ps();
 
 				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
@@ -6305,6 +6316,7 @@ namespace psycle {
 						}
 					}
 				}
+#endif
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 				Repaint(draw_modes::data);
 			}

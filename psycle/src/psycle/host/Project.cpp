@@ -36,7 +36,7 @@ namespace psycle {
 			assert(mac_view_);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::SequenceLine* line = song_.patternSequence().createNewLine();
-			psy::core::SinglePattern* pattern= new psy::core::SinglePattern();
+			psy::core::Pattern* pattern= new psy::core::Pattern();
 			pattern->timeSignatures().clear();
 			pattern->timeSignatures().push_back(psy::core::TimeSignature(4.0));
 			pattern->setID(0);
