@@ -6328,6 +6328,13 @@ namespace psycle {
 			// UNDO CODE BLOCK GENERATOR CHANGE
 			if ( blockSelected == true ) 
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				pattern()->ChangeMac(x, 
+									 line_pos(blockSel.start.line),
+								     line_pos(blockSel.end.line+1),
+								     blockSel.start.track,
+								     blockSel.end.track+1);
+#else
 				int ps = _ps();
 				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
@@ -6348,6 +6355,7 @@ namespace psycle {
 						}
 					}
 				}
+#endif
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 				Repaint(draw_modes::data);
 			}
@@ -6358,6 +6366,14 @@ namespace psycle {
 			// UNDO CODE BLOCK INS CHANGE
 			if ( blockSelected == true ) 
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				pattern()->ChangeInst(x, 
+									  line_pos(blockSel.start.line),
+								      line_pos(blockSel.end.line+1),
+								      blockSel.start.track,
+								      blockSel.end.track+1);
+#else
+
 				const int ps=_ps();
 
 				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
@@ -6379,6 +6395,7 @@ namespace psycle {
 						}
 					}
 				}
+#endif
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 				Repaint(draw_modes::data);
 			}

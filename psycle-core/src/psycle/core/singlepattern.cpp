@@ -240,44 +240,6 @@ void Pattern::scaleBlock(int left, int right, double top, double bottom, float f
 #endif
 }
 
-
-
-void Pattern::blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t newInstrument ) {
-#if 0 ///\todo
-	for( iterator lineIt = lower_bound(top)
-		; lineIt != end() && lineIt->first < bottom
-		; ++lineIt )
-	{
-		PatternLine & line = lineIt->second;
-		for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
-			; entryIt != line.notes().end() && entryIt->first < right
-			; ++entryIt)
-		{
-			PatternEvent & entry = entryIt->second;
-			entry.setInstrument( newInstrument );
-		}
-	}
-#endif
-}
-
-void Pattern::blockSetMachine( int left, int right, double top, double bottom, std::uint8_t newMachine ) {
-#if 0 ///\todo
-	for( iterator lineIt = lower_bound(top)
-		; lineIt != end() && lineIt->first < bottom
-		; ++lineIt )
-	{
-		PatternLine & line = lineIt->second;
-		for( std::map<int, PatternEvent>::iterator entryIt = line.notes().lower_bound(left)
-			; entryIt != line.notes().end() && entryIt->first < right
-			; ++entryIt)
-		{
-			PatternEvent & entry = entryIt->second;
-			entry.setMachine( newMachine );
-		}
-	}
-#endif
-}
-
 bool Pattern::lineIsEmpty( int linenr ) const {
 #if 0 ///\todo
 	return ( find_nearest(linenr) == end() );
@@ -505,6 +467,40 @@ void Pattern::Transpose(int delta, double from, double to, int start_track, int 
 			if (note < 120) {
 				pattern_ev.setNote(std::min(std::max(0, note + delta), 119));
 			}
+		}
+		++it;
+	}
+}
+
+void Pattern::ChangeInst(int new_inst, double from, double to, int start_track, int end_track)
+{
+	Pattern::iterator it(lower_bound(from));
+	while (it != end()) {
+		PatternEvent& pattern_ev = it->second;
+		if ( it->first >= to ) break;
+		if(
+			pattern_ev.track() <= end_track &&
+			pattern_ev.track() >= start_track &&
+			pattern_ev.machine() != 255
+		) {					
+			pattern_ev.setInstrument(std::min(std::max(0, new_inst), 255));
+		}
+		++it;
+	}
+}
+
+void Pattern::ChangeMac(int new_mac, double from, double to, int start_track, int end_track)
+{
+	Pattern::iterator it(lower_bound(from));
+	while (it != end()) {
+		PatternEvent& pattern_ev = it->second;
+		if ( it->first >= to ) break;
+		if(
+			pattern_ev.track() <= end_track &&
+			pattern_ev.track() >= start_track &&
+			pattern_ev.machine() != 255
+		) {					
+			pattern_ev.setMachine(std::min(std::max(0, new_mac), 255));
 		}
 		++it;
 	}
