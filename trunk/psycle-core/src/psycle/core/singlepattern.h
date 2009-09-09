@@ -80,10 +80,10 @@ namespace psy { namespace core {
 			void erase(double from, double to, int start_track=0, int end_track=32000);
 
 			void Transpose(int delta, double from, double to, int start_track=0, int end_track=32000);
+			void ChangeInst(int new_inst, double from, double to, int start_track=0, int end_track=32000);
+			void ChangeMac(int new_inst, double from, double to, int start_track=0, int end_track=32000);
 
 			void scaleBlock(int left, int right, double top, double bottom, float factor);		
-			void blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t newInstrument );
-			void blockSetMachine( int left, int right, double top, double bottom, std::uint8_t newMachine );
 
 			std::vector<TimeSignature>& timeSignatures();
 			const std::vector<TimeSignature>&  timeSignatures() const;

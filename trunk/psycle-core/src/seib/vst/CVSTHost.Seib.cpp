@@ -240,7 +240,7 @@ namespace seib {
 		template <class T>
 		bool CFxBase::Write(T f, bool allowswap)   { if (NeedsBSwap && allowswap) SwapBytes(f); size_t i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
 		bool CFxBase::ReadArray(void* f,int size)  { size_t i=fread(f,size,1,pf); return (bool)i; }
-		bool CFxBase::WriteArray(void* f, int size { size_t i=fwrite(f,size,1,pf);  return (bool)i; }
+		bool CFxBase::WriteArray(void* f, int size) { size_t i=fwrite(f,size,1,pf);  return (bool)i; }
 		bool CFxBase::ReadHeader()
 		{
 			VstInt32 chunkMagic(0),byteSize(0);
