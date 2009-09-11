@@ -31,17 +31,7 @@ namespace psy { namespace core {
 			
 			void setID(int id) { id_ = id; }
 			int id() const { return id_; }
-						
-			void setBeatZoom(int zoom);
-			int beatZoom() const;
-			
-			void setEvent(int line, int track, int beat_zoom, const PatternEvent& event);
-			PatternEvent event(int line, int track, int beat_zoom);
-
-			void setTweakEvent(int line, int track, const PatternEvent& event);
-			PatternEvent tweakEvent(int line, int track);
-
-
+										
 			void addBar(const TimeSignature& signature);
 			void removeBar(float pos);
 
@@ -58,23 +48,7 @@ namespace psy { namespace core {
 			void setCategory(const std::string& category);
 			const std::string& category() const { return category_; };
 
-			float beatsPerLine() const;
-
 			void Clear();
-
-			void clearTrack( int linenr , int tracknr );
-			void clearTweakTrack( int linenr , int tracknr );
-			bool lineIsEmpty( int linenr ) const;
-
-			
-			iterator find_nearest(int linenr, int beat_zoom);
-			const_iterator find_nearest(int linenr, int beat_zoom) const;
-
-			iterator find_lower_nearest( int linenr );
-			const_iterator find_lower_nearest( int linenr ) const;
-			
-
-			void clearEmptyLines();
 
 			Pattern Clone(double from, double to, int start_track=0, int end_track=32000);
 			void erase(double from, double to, int start_track=0, int end_track=32000);
@@ -117,25 +91,12 @@ namespace psy { namespace core {
 
 			std::map<double, PatternEvent>::size_type size() const { return lines_.size(); }
 
-			// beatpos with 4 is standard
-			double BeatPosWithTPB(int ticks, double beat_pos) {
-				if (ticks == 4)
-					return beat_pos;
-				else
-					return 4.0/ticks * beat_pos;
-			}
-
 		private:
-			int beatZoom_;
 			std::string name_;
-
 			std::string category_;
 			std::vector<TimeSignature> timeSignatures_;
-
 			TimeSignature zeroTime;
-
 			int id_;						
-
 			std::multimap<double, PatternEvent> lines_;
 		};
 

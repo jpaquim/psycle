@@ -396,7 +396,7 @@ private:
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern block_buffer_pattern_;
-			double line_pos(int line) const;
+			double line_pos(int line, bool nearest) const;
 #endif
 			unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int	blockNTracks;

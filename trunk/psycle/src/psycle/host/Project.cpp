@@ -165,6 +165,7 @@ namespace psycle {
 				song().fileName = fName;
 			}
 			set_lines_per_beat(song().ticksSpeed());
+			set_beat_zoom(song().ticksSpeed());
 			player.driver().Enable(true);
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();

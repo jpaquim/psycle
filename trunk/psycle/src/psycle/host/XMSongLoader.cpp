@@ -310,7 +310,6 @@ namespace host{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		Pattern* pat = new Pattern();
 		pat->setName("unnamed");
-		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(patIdx);
 		song.patternSequence().Add(pat);
 #else
@@ -1246,7 +1245,6 @@ namespace host{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		Pattern* pat = new Pattern();
 		pat->setName("unnamed");
-		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(patIdx);
 		song.patternSequence().Add(pat);
 #else
