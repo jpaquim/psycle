@@ -318,7 +318,6 @@ Special:  Bit 0: On = song message attached.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					Pattern* pat = new Pattern();
 					pat->setName("unnamed");
-					pat->setBeatZoom(s->ticksSpeed());
 					pat->setID(i);
 					s->patternSequence().Add(pat);
 #else
@@ -861,7 +860,6 @@ Special:  Bit 0: On = song message attached.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern* pat = new Pattern();
 			pat->setName("unnamed");
-			pat->setBeatZoom(s->ticksSpeed());
 			pat->setID(patIdx);
 			s->patternSequence().Add(pat);
 #else
@@ -1494,7 +1492,6 @@ OFFSET              Count TYPE   Description
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern* pat = new Pattern();
 			pat->setName("unnamed");
-			pat->setBeatZoom(s->ticksSpeed());
 			pat->setID(patIdx);
 			s->patternSequence().Add(pat);
 #else

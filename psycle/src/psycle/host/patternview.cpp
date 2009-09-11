@@ -139,13 +139,6 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		psy::core::Pattern* PatternView::pattern() {
 			return pattern_;
-/*			psy::core::PatternSequence* sequence = &song()->patternSequence();
-			psy::core::SequenceLine* line = *(sequence->begin());	
-			psy::core::SequenceLine::iterator sit = line->begin();
-			for (int pos = 0; sit != line->end() && pos < editPosition; ++sit, ++pos);
-			assert(sit != line->end());
-			psy::core::SequenceEntry* entry = sit->second;
-			return entry->pattern();*/
 		}
 #endif
 
@@ -2550,10 +2543,7 @@ namespace psycle {
 			Song* song = this->song();
 			Pattern* patt = pattern();
 			
-			double beat_zoom = static_cast<int>(project()->beat_zoom());
-			Pattern::iterator it;			
-			it = patt->find_nearest(lstart+ lOff, project()->beat_zoom());
-			
+			double beat_zoom = static_cast<int>(project()->beat_zoom());		
 			char tBuf[16];
 
 			int top = (lstart)*ROWHEIGHT+YOFFSET;
@@ -2678,6 +2668,7 @@ namespace psycle {
 			}
 
 
+			Pattern::iterator it = patt->lower_bound(line_pos(lstart+lOff, true)); 
 			for ( ; it != patt->end(); ++it )  {						
 				psy::core::PatternEvent& ev = it->second;
 				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
@@ -5821,8 +5812,8 @@ namespace psycle {
 			Repaint(draw_modes::selection);
 		}
 
-		double PatternView::line_pos(int line) const {
-			double pos = line / static_cast<double>(project()->beat_zoom());
+		double PatternView::line_pos(int line, bool nearest) const {
+			double pos = (line - (nearest ? 0.4999 : 0)) / static_cast<double>(project()->beat_zoom());
 			return pos;
 		}
 
@@ -5837,8 +5828,8 @@ namespace psycle {
 
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				block_buffer_pattern_ = pattern()->Clone(line_pos(blockSel.start.line),
-														 line_pos(blockSel.end.line+1),
+				block_buffer_pattern_ = pattern()->Clone(line_pos(blockSel.start.line, true),
+														 line_pos(blockSel.end.line+1, true),
 														 blockSel.start.track,
 														 blockSel.end.track+1);
 #else
@@ -5884,8 +5875,8 @@ namespace psycle {
 			if(blockSelected)
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				pattern()->erase(line_pos(blockSel.start.line),
-								 line_pos(blockSel.end.line+1),
+				pattern()->erase(line_pos(blockSel.start.line, true),
+								 line_pos(blockSel.end.line+1, true),
 								 blockSel.start.track,
 								 blockSel.end.track+1);
 #else
@@ -5913,10 +5904,10 @@ namespace psycle {
 			if (isBlockCopied) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				if (!mix) {
-					pattern()->erase(line_pos(lx), line_pos(lx + blockNLines+1) + 1,
+					pattern()->erase(line_pos(lx, true), line_pos(lx + blockNLines+1, true) + 1,
 									 tx, tx + blockNTracks);
 				}
-				pattern()->insert(block_buffer_pattern_, line_pos(lx), tx);
+				pattern()->insert(block_buffer_pattern_, line_pos(lx, true), tx);
 #else
 				int ps=song()->playOrder[editPosition];
 				int nl = song()->patternLines[ps];
@@ -6291,8 +6282,8 @@ namespace psycle {
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				pattern()->Transpose(trp, 
-									 line_pos(blockSel.start.line),
-								     line_pos(blockSel.end.line+1),
+									 line_pos(blockSel.start.line, true),
+								     line_pos(blockSel.end.line+1, true),
 								     blockSel.start.track,
 								     blockSel.end.track+1);
 #else
@@ -6330,8 +6321,8 @@ namespace psycle {
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				pattern()->ChangeMac(x, 
-									 line_pos(blockSel.start.line),
-								     line_pos(blockSel.end.line+1),
+									 line_pos(blockSel.start.line, true),
+								     line_pos(blockSel.end.line+1, true),
 								     blockSel.start.track,
 								     blockSel.end.track+1);
 #else
@@ -6368,8 +6359,8 @@ namespace psycle {
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				pattern()->ChangeInst(x, 
-									  line_pos(blockSel.start.line),
-								      line_pos(blockSel.end.line+1),
+									  line_pos(blockSel.start.line, true),
+								      line_pos(blockSel.end.line+1, true),
 								      blockSel.start.track,
 								      blockSel.end.track+1);
 #else

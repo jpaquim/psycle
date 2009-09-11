@@ -20,13 +20,11 @@ Pattern::Pattern()
 	TimeSignature timeSig;
 	timeSig.setCount(4);
 	timeSignatures_.push_back(timeSig);
-	beatZoom_ = 4;
 }
 
 // Explicit copy constructor needed because boost::signal is noncopyable
 Pattern::Pattern(Pattern const& other)
 	: id_(-1),  
-	beatZoom_(other.beatZoom_),
 	name_(other.name_),
 	category_(other.category_),
 	timeSignatures_(other.timeSignatures_),
@@ -43,7 +41,6 @@ Pattern& Pattern::operator=(const Pattern& rhs)
 {
 	if (this == &rhs) return *this; 
 	lines_ = rhs.lines_;
-	beatZoom_ = rhs.beatZoom_;
 	name_ = rhs.name_;
 	category_ = rhs.category_;
 	timeSignatures_ = rhs.timeSignatures_;
@@ -56,15 +53,6 @@ void Pattern::Clear() {
 	TimeSignature timeSig;
 	timeSig.setCount(4);
 	timeSignatures_.push_back(timeSig);
-	beatZoom_ = 4;
-}
-
-void Pattern::setBeatZoom( int zoom ) {
-	beatZoom_ = zoom;
-}
-
-int Pattern::beatZoom( ) const {
-	return beatZoom_;
 }
 
 void Pattern::addBar( const TimeSignature & signature ) {
@@ -164,7 +152,7 @@ void Pattern::setName( const std::string & name )
 	name_ = name;
 }
 
-const std::string & Pattern::name( ) const
+const std::string& Pattern::name( ) const
 {
 	return name_;
 }
@@ -172,21 +160,6 @@ const std::string & Pattern::name( ) const
 void Pattern::setCategory(const std::string& category)
 {
 	category_ = category;
-}
-
-float Pattern::beatsPerLine() const {
-	return 1 / (float) beatZoom();
-}
-
-void Pattern::clearEmptyLines() {
-#if 0 ///\todo
-	for( iterator it = begin(); it != end(); ) {
-		if(it->second.empty())
-			erase(it++);
-		else
-			++it;
-	}
-#endif
 }
 
 void Pattern::scaleBlock(int left, int right, double top, double bottom, float factor) {
@@ -240,39 +213,11 @@ void Pattern::scaleBlock(int left, int right, double top, double bottom, float f
 #endif
 }
 
-bool Pattern::lineIsEmpty( int linenr ) const {
-#if 0 ///\todo
-	return ( find_nearest(linenr) == end() );
-#else
-	return 0;
-#endif
-}
-
-void Pattern::clearTrack( int linenr , int tracknr ) {
-#if 0 ///\todo
-	iterator it = find_nearest(linenr);
-	PatternLine & line = it->second;
-	if ( it == end() ) return;
-	line.notes().erase(tracknr);
-	if ( line.notes().empty() ) erase(it);
-#endif
-}
-
-void Pattern::clearTweakTrack( int linenr , int tracknr ) {
-#if 0 ///\todo
-	iterator it = find_nearest(linenr);
-	PatternLine & line = it->second;
-	if ( it == end() ) return;
-	line.tweaks().erase(tracknr);
-	if ( line.empty() ) erase(it);
-#endif
-}
-
-std::vector<TimeSignature> & Pattern::timeSignatures() {
+std::vector<TimeSignature>& Pattern::timeSignatures() {
 	return timeSignatures_;
 }
 
-const std::vector<TimeSignature> & Pattern::timeSignatures() const {
+const std::vector<TimeSignature>& Pattern::timeSignatures() const {
 	return timeSignatures_;
 }
 
@@ -302,116 +247,6 @@ std::string Pattern::toXml( ) const {
 	xml << "</pattern>" << std::endl;
 #endif
 	return xml.str();
-}
-
-
-Pattern::iterator Pattern::find_nearest(int line, int beat_zoom) {
-	Pattern::iterator result;
-	
-	double low = (line - 0.5) / beat_zoom;
-	double up  = (line + 0.5) / beat_zoom;
-
-	result = lines_.lower_bound(low);
-
-	if ( result != end() && result->first >=low && result->first < up ) {
-		return result;
-	}
-	return end();
-}
-
-Pattern::const_iterator Pattern::find_nearest(int line, int beat_zoom) const {
-	Pattern::const_iterator result;
-
-	double low = (line - 0.499999) / (double) beat_zoom;
-	double up  = (line + 0.49999999) / (double) beat_zoom;
-
-	result = lines_.lower_bound(low);
-
-	if ( result != end() && result->first >=low && result->first < up ) {
-		return result;
-	}
-	return end();
-}
-
-Pattern::iterator Pattern::find_lower_nearest( int linenr ) {
-	Pattern::iterator result;
-
-	double low = (linenr - 0.5) / (float) beatZoom();
-	double up  = (linenr + 0.5) / (float) beatZoom();
-
-	result = lines_.lower_bound(low);
-
-	if ( result != end() && result->first >=low ) {
-		return result;
-	}
-	return end();
-};
-
-Pattern::const_iterator Pattern::find_lower_nearest( int linenr ) const
-{
-	Pattern::const_iterator result;
-
-	double low = (linenr - 0.5) / (float) beatZoom();
-	double up  = (linenr + 0.5) / (float) beatZoom();
-
-	result = lines_.lower_bound( low );
-
-	if ( result != end() && result->first >=low ) {
-		return result;
-	}
-	return end();
-}
-
-
-void Pattern::setEvent(int line, int track, int beat_zoom, const PatternEvent& event) {
-	iterator it = find_nearest(line, beat_zoom);
-	if ( it != end())
-	{
-		it->second = event;
-		it->second.set_track(track);
-	} else {
-		double position = line / (double) beat_zoom;
-		iterator it = lines_.insert(std::pair<double, PatternEvent>(position, event));
-		it->second.set_track(track);
-	}
-}
-
-PatternEvent Pattern::event(int line, int track, int beat_zoom) {
-	iterator it = find_nearest(line, beat_zoom);
-	if ( it != end()) {
-		double pos = it->first;
-		double low = (line - 0.499999) / (double)beat_zoom;
-		double up  = (line + 0.49999999) / (double)beat_zoom;
-		while ( it != lines_.end() && pos <= up) {
-			if ( it->second.track() == track )
-				return it->second;
-			++it;
-		}
-	}
-	return PatternEvent();
-}
-
-void Pattern::setTweakEvent( int line, int track, const PatternEvent & event ) {
-#if 0 ///\todo
-	iterator it = find_nearest( line );
-	if ( it != end())
-	{
-		it->second.tweaks()[track] = event;
-	} else {
-		float position = line / (float) beatZoom();
-		(*this)[position].tweaks()[track] = event;
-	}
-#endif
-}
-
-PatternEvent Pattern::tweakEvent( int line, int track ) {
-#if 0 ///\todo
-	iterator it = find_nearest( line );
-	if ( it != end())
-		return it->second.tweaks()[track];
-	else
-#endif
-		return PatternEvent();
 }
 
 Pattern Pattern::Clone(double from, double to, int start_track, int end_track) {
