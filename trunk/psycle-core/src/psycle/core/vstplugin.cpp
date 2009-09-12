@@ -70,7 +70,7 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 	for (int midiChannel=0; midiChannel<16; midiChannel++)
 	{
 		NSActive[midiChannel] = false;
-	    NSCurrent[midiChannel] = pitchWheelCentre;
+		NSCurrent[midiChannel] = pitchWheelCentre;
 		NSDestination[midiChannel] = pitchWheelCentre;
 		NSTargetDistance[midiChannel] = 0;
 		NSSamples[midiChannel] = 0;
@@ -203,7 +203,7 @@ bool plugin::DescribeValue(int parameter, char * psTxt) const
 VstMidiEvent* plugin::reserveVstMidiEvent() {
 	assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 	if(queue_size >= MAX_VST_EVENTS) {
-//		loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
+		//loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
 		return NULL;
 	}
 	return &midievent[queue_size++];
@@ -212,7 +212,7 @@ VstMidiEvent* plugin::reserveVstMidiEvent() {
 VstMidiEvent* plugin::reserveVstMidiEventAtFront() {
 	assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 	if(queue_size >= MAX_VST_EVENTS) {
-//		loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
+		//loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
 		return NULL;
 	}
 	for(int i=queue_size; i > 0 ; --i) midievent[i] = midievent[i - 1];
@@ -309,37 +309,36 @@ void plugin::SendMidi()
 		mevents.numEvents = queue_size;
 		mevents.reserved = 0;
 		for(int q(0) ; q < queue_size ; ++q) {
-#ifndef NDEBUG
+			#ifndef NDEBUG
+				// assert that events are sent in order.
+				// although the standard doesn't require this,
+				// many synths rely on this.
+				if(q>0) {
+					assert(midievent[q-1].deltaFrames <= 
+						midievent[q].deltaFrames);
+				}
 
-			// assert that events are sent in order.
-			// although the standard doesn't require this,
-			// many synths rely on this.
-			if(q>0) {
-				assert(midievent[q-1].deltaFrames <= 
-					midievent[q].deltaFrames);
-			}
-
-/*						// assert that the note sequence is well-formed,
-			// which means, no note-offs happen without a
-			// corresponding preceding note-on.
-			switch(midievent[q].midiData[0]&0xf0) {
-			case 0x90: // note-on
-				note_checker_.note_on(midievent[q].midiData[1],
-					midievent[q].midiData[0]&0x0f);
-				break;
-			case 0x80: // note-off
-				note_checker_.note_off(midievent[q].midiData[1],
-					midievent[q].midiData[0]&0x0f);
-				break;
-			}
-*/
-#endif
-
+				#if 0
+				// assert that the note sequence is well-formed,
+				// which means, no note-offs happen without a
+				// corresponding preceding note-on.
+				switch(midievent[q].midiData[0]&0xf0) {
+				case 0x90: // note-on
+					note_checker_.note_on(midievent[q].midiData[1],
+						midievent[q].midiData[0]&0x0f);
+					break;
+				case 0x80: // note-off
+					note_checker_.note_off(midievent[q].midiData[1],
+						midievent[q].midiData[0]&0x0f);
+					break;
+				}
+				#endif
+			#endif
 			mevents.events[q] = (VstEvent*) &midievent[q];
 		}
 		//Finally Send the events.
 		queue_size = 0;
-//					WantsMidi(ProcessEvents(reinterpret_cast<VstEvents*>(&mevents)));
+		//WantsMidi(ProcessEvents(reinterpret_cast<VstEvents*>(&mevents)));
 		ProcessEvents(reinterpret_cast<VstEvents*>(&mevents));
 	}
 }
@@ -419,7 +418,7 @@ void plugin::Tick(int channel, const PatternEvent & pData) {
 					if (semisToSlide < (-rangeInSemis - currentSemi[midiChannel]))
 						semisToSlide = (-rangeInSemis - currentSemi[midiChannel]);
 				}
-				else							  //pitch slide up
+				else //pitch slide up
 				{
 					semisToSlide = pData.command() & 0x0F;
 					if (semisToSlide > (rangeInSemis - currentSemi[midiChannel]))
@@ -429,7 +428,7 @@ void plugin::Tick(int channel, const PatternEvent & pData) {
 				int speedToSlide = pData.parameter();
 				
 				NSCurrent[midiChannel] = pitchWheelCentre + (currentSemi[midiChannel] * (pitchWheelCentre / rangeInSemis));
-				NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);						
+				NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);
 				NSDelta[midiChannel] = ((NSDestination[midiChannel] - NSCurrent[midiChannel]) * (speedToSlide*2)) / callbacks->timeInfo().samplesPerTick();
 				NSSamples[midiChannel] = 0;
 				NSActive[midiChannel] = true;
@@ -460,7 +459,7 @@ void plugin::Tick(int channel, const PatternEvent & pData) {
 				AddNoteOn(channel,note,(pData.command() == 0x0C)?pData.parameter()/2:127,midiChannel,0,(pData.machine()==0xFF));
 			}
 			if (((pData.command() & 0xF0) == 0xD0) || ((pData.command() & 0xF0) == 0xE0))
-				oldNote[midiChannel] = note + semisToSlide;								
+				oldNote[midiChannel] = note + semisToSlide;
 			else
 				oldNote[midiChannel] = note;
 		}
@@ -477,10 +476,10 @@ void plugin::Tick(int channel, const PatternEvent & pData) {
 			{
 				AddMIDI(pData.instrument(),pData.parameter());
 			}
-//						else if (pData.command() == 0x0C) // channel volume.
-//						{
-///							AddMIDI(0xB0 | midiChannel,0x07,pData.parameter()*0.5f);
-//						}
+			//else if (pData.command() == 0x0C) // channel volume.
+			//{
+				//AddMIDI(0xB0 | midiChannel,0x07,pData.parameter()*0.5f);
+			//}
 			else if (pData.command() == 0x0C) // channel aftertouch.
 			{
 				AddMIDI(0xD0 | midiChannel,pData.parameter()*0.5f);
@@ -503,7 +502,7 @@ void plugin::Tick(int channel, const PatternEvent & pData) {
 					if (semisToSlide < (-rangeInSemis - currentSemi[midiChannel]))
 						semisToSlide = (-rangeInSemis - currentSemi[midiChannel]);
 				}
-				else							  //pitch slide up
+				else //pitch slide up
 				{
 					semisToSlide = pData.command() & 0x0F;
 					if (semisToSlide > (rangeInSemis - currentSemi[midiChannel]))
@@ -513,14 +512,14 @@ void plugin::Tick(int channel, const PatternEvent & pData) {
 				int speedToSlide = pData.parameter();
 				
 				NSCurrent[midiChannel] = pitchWheelCentre + (currentSemi[midiChannel] * (pitchWheelCentre / rangeInSemis));
-				NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);						
+				NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);
 				NSDelta[midiChannel] = ((NSDestination[midiChannel] - NSCurrent[midiChannel]) * (speedToSlide*2)) / callbacks->timeInfo().samplesPerTick();
 				NSSamples[midiChannel] = 0;
 				NSActive[midiChannel] = true;
 				currentSemi[midiChannel] = currentSemi[midiChannel] + semisToSlide;
 			}
 			if (((pData.command() & 0xF0) == 0xD0) || ((pData.command() & 0xF0) == 0xE0))
-				oldNote[midiChannel] = oldNote[midiChannel] + semisToSlide;								
+				oldNote[midiChannel] = oldNote[midiChannel] + semisToSlide;
 		}
 	}
 }
@@ -558,7 +557,6 @@ void plugin::PreWork(int numSamples,bool clear)
 					NSActive[midiChannel] = false;
 				}
 				AddMIDI(0xE0 + midiChannel,LSB(NSCurrent[midiChannel]),MSB(NSCurrent[midiChannel]),NSSamples[midiChannel]);
-				 
 				NSSamples[midiChannel]+=min(TWEAK_SLIDE_SAMPLES,ns);
 				ns-=TWEAK_SLIDE_SAMPLES;
 			}
@@ -573,7 +571,7 @@ int plugin::GenerateAudioInTicks(int startSample, int numsamples)
 	{
 		if (IsGenerator() || (!Standby() && !Bypass()) || bCanBypass)
 		{
-/*			The following is now being done in the OnTimer() thread of the UI.
+			#if 0 // The following is now being done in the OnTimer() thread of the UI.
 			if(bNeedIdle) 
 			{
 				try
@@ -585,7 +583,7 @@ int plugin::GenerateAudioInTicks(int startSample, int numsamples)
 					// o_O`
 				}
 			}
-*/
+			#endif
 			try
 			{
 				/*if (WantsMidi())*/ SendMidi();
@@ -740,23 +738,24 @@ int plugin::GenerateAudioInTicks(int startSample, int numsamples)
 			{
 				// We need the output in _pSamples, so we invert the
 				// pointers to avoid copying _pOutSamples into _pSamples
-/*				float* const tempSamplesL = inputs[0];
-				float* const tempSamplesR = inputs[1];	
+				#if 0
+				float* const tempSamplesL = inputs[0];
+				float* const tempSamplesR = inputs[1];
 				_pSamplesL = inputs[0] = outputs[0];
 				_pSamplesR = inputs[1] = outputs[1];
 				_pOutSamplesL = outputs[0] = tempSamplesL;
 				_pOutSamplesR = outputs[1] = tempSamplesR;
-*/
-				memcpy(inputs[0],outputs[0],numsamples*sizeof(float));
-				memcpy(inputs[1],outputs[1],numsamples*sizeof(float));
+				#endif
+				std::memcpy(inputs[0],outputs[0],numsamples*sizeof(float));
+				std::memcpy(inputs[1],outputs[1],numsamples*sizeof(float));
 			}
 			UpdateVuAndStanbyFlag(numsamples);
-			//	_cpuCost += cpu::cycles() - cost;
+			//_cpuCost += cpu::cycles() - cost;
 			_worked = true;
 			return true;
 		}
 	}
-//	_cpuCost += cpu::cycles() - cost;
+	//_cpuCost += cpu::cycles() - cost;
 	Machine::UpdateVuAndStanbyFlag(numsamples);
 	_worked = true;
 	return false;
@@ -820,7 +819,8 @@ bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 
 void plugin::SaveSpecificChunk(RiffFile * pFile) 
 {
-/*	try {
+	#if 0
+	try {
 		UINT count(numParams());
 		unsigned char _program=0;
 		UINT size(sizeof _program + sizeof count);
@@ -829,16 +829,16 @@ void plugin::SaveSpecificChunk(RiffFile * pFile)
 		bool b = ProgramIsChunk();
 		if(b)
 		{
-			// can't do this! we have  a thing called "autosave" and everything is stopped then.
-//					MainsChanged(false);
+			// can't do this! we have a thing called "autosave" and everything is stopped then.
+			//MainsChanged(false);
 			count=0;
 			chunksize = GetChunk((void**)&pData);
 			size+=chunksize;
-//					MainsChanged(true);
+			//MainsChanged(true);
 		}
 		else
 		{
-			 size+=sizeof(float) * count;
+			size += sizeof(float) * count;
 		}
 		pFile->Write(&size, sizeof size);
 		_program = static_cast<unsigned char>(GetProgram());
@@ -859,7 +859,7 @@ void plugin::SaveSpecificChunk(RiffFile * pFile)
 		}
 	} catch(...) {
 	}
-*/
+	#endif
 }
 }}}
 #endif

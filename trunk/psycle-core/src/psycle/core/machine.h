@@ -521,7 +521,8 @@ class PSYCLE__CORE__DECL Machine {
 			// this is introduced only for compatibility and will
 			// later solved different
 			// avoid using it and use it only for compatibility issues
-/*			typedef enum MachineType_t
+			#if 0
+			typedef enum MachineType_t
 			{
 				MACH_UNDEFINED = -1,
 				MACH_MASTER = 0,
@@ -543,7 +544,7 @@ class PSYCLE__CORE__DECL Machine {
 				MACH_DUMMY = 255
 			} MachineType;
 			MachineType _type;
-*/
+			#endif
 		protected:
 			int numInPorts;
 			int numOutPorts;

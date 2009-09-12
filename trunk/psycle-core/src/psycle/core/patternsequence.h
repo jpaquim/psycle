@@ -112,7 +112,7 @@ namespace psy { namespace core {
 			SequenceEntry* createEntry(Pattern* pattern, double position);
 			void insertEntry(SequenceEntry *entry);
 			void moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine);
-			void removePatternEntries(Pattern* pattern);			
+			void removePatternEntries(Pattern* pattern);
 			void insertEntryAndMoveRest(SequenceEntry *entry, double pos);
 			void removeSpaces(); // removes spaces between entries
 
@@ -120,7 +120,7 @@ namespace psy { namespace core {
 
 			Sequence* patternSequence() { return sequence_; }
 
-			void MoveEntry(SequenceEntry* entry, double newpos);			
+			void MoveEntry(SequenceEntry* entry, double newpos);
 			void removeEntry(SequenceEntry* entry);
 
 			const std::string& name() const;
