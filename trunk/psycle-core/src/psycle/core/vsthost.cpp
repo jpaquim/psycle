@@ -251,16 +251,16 @@ void AudioMaster::CalcTimeInfo(long lMask)
 	// automationwriting and automationreading.
 	//
 	/*
-	kVstTransportCycleActive	= 1 << 2,
-	kVstTransportRecording		= 1 << 3,
+	kVstTransportCycleActive = 1 << 2,
+	kVstTransportRecording   = 1 << 3,
 
-	kVstAutomationWriting		= 1 << 6,
-	kVstAutomationReading		= 1 << 7,
+	kVstAutomationWriting    = 1 << 6,
+	kVstAutomationReading    = 1 << 7,
 	*/
 
-	//kVstCyclePosValid			= 1 << 12,	// start and end
-	//	cyclestart // locator positions in quarter notes.
-	//	cycleend   // locator positions in quarter notes.
+	//kVstCyclePosValid = 1 << 12, // start and end
+	// cyclestart // locator positions in quarter notes.
+	// cycleend   // locator positions in quarter notes.
 	const PlayerTimeInfo &info = pCallbacks->timeInfo();
 
 	if(lMask & kVstPpqPosValid)
@@ -281,22 +281,22 @@ bool AudioMaster::OnCanDo(CEffect &pEffect, const char *ptr) const
 	bool value =  CVSTHost::OnCanDo(pEffect,ptr);
 	if (value) return value;
 	else if (
-		//||	(!strcmp(ptr, canDoReceiveVstEvents))	// "receiveVstEvents",
-		//||	(!strcmp(ptr, canDoReceiveVstMidiEvent ))// "receiveVstMidiEvent",
-		//||	(!strcmp(ptr, "receiveVstTimeInfo" ))// DEPRECATED
+		//|| (!strcmp(ptr, canDoReceiveVstEvents)) // "receiveVstEvents",
+		//|| (!strcmp(ptr, canDoReceiveVstMidiEvent )) // "receiveVstMidiEvent",
+		//|| (!strcmp(ptr, "receiveVstTimeInfo" )) // DEPRECATED
 
 		(!strcmp(ptr, canDoReportConnectionChanges )) // "reportConnectionChanges",
-		//||	(!strcmp(ptr, canDoAcceptIOChanges ))	// "acceptIOChanges",
-		||(!strcmp(ptr, canDoSizeWindow ))		// "sizeWindow",
+		//|| (!strcmp(ptr, canDoAcceptIOChanges )) // "acceptIOChanges",
+		||(!strcmp(ptr, canDoSizeWindow )) // "sizeWindow",
 
-		//||	(!strcmp(ptr, canDoAsyncProcessing ))	// DEPRECATED
-		//||	(!strcmp(ptr, canDoOffline ))			// "offline",
-		//||	(!strcmp(ptr, "supportShell" ))		// DEPRECATED
-		//||	(!strcmp(ptr, canDoEditFile ))			// "editFile",
-		//||	(!strcmp(ptr, canDoSendVstMidiEventFlagIsRealtime ))
+		//|| (!strcmp(ptr, canDoAsyncProcessing )) // DEPRECATED
+		//|| (!strcmp(ptr, canDoOffline )) // "offline",
+		//|| (!strcmp(ptr, "supportShell" )) // DEPRECATED
+		//|| (!strcmp(ptr, canDoEditFile )) // "editFile",
+		//|| (!strcmp(ptr, canDoSendVstMidiEventFlagIsRealtime ))
 		)
 		return true;
-	return false;                           /* per default, no.                  */
+	return false; // by default, no
 }
 
 long AudioMaster::DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos) const

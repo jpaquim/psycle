@@ -145,7 +145,7 @@ void DummyDriver::start() {
 }
 
 void DummyDriver::thread_function() {
- 	// notify that the thread is now running
+	// notify that the thread is now running
 	{ scoped_lock lock(mutex_);
 		running_ = true;
 	}

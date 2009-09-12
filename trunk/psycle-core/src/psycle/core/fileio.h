@@ -236,7 +236,7 @@ class PSYCLE__CORE__DECL MemoryFile : public RiffFile {
 		virtual int Skip(std::ptrdiff_t const & bytes);
 		virtual bool ReadString(char *, std::size_t const & max_length);
 
-	protected:		
+	protected:
 		virtual bool WriteChunk(void const *, std::size_t const &);
 		virtual bool ReadChunk (void       *, std::size_t const &);
 		virtual bool Expect    (void       *, std::size_t const &);
