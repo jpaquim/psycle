@@ -317,7 +317,7 @@ void Pattern::ChangeInst(int new_inst, double from, double to, int start_track, 
 			pattern_ev.track() <= end_track &&
 			pattern_ev.track() >= start_track &&
 			pattern_ev.machine() != 255
-		) {					
+		) {
 			pattern_ev.setInstrument(std::min(std::max(0, new_inst), 255));
 		}
 		++it;
@@ -334,7 +334,7 @@ void Pattern::ChangeMac(int new_mac, double from, double to, int start_track, in
 			pattern_ev.track() <= end_track &&
 			pattern_ev.track() >= start_track &&
 			pattern_ev.machine() != 255
-		) {					
+		) {
 			pattern_ev.setMachine(std::min(std::max(0, new_mac), 255));
 		}
 		++it;
