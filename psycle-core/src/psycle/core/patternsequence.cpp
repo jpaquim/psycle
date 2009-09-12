@@ -187,7 +187,7 @@ namespace psy { namespace core {
 			line_.insert(std::pair<double, SequenceEntry*>(entry->startPos(), entry));
 		}
 
-		void SequenceLine::insertEntryAndMoveRest(SequenceEntry *entry, double pos) {			
+		void SequenceLine::insertEntryAndMoveRest(SequenceEntry *entry, double pos) {
 			std::multimap<double, SequenceEntry*> old_line_ = line_;
 			line_.clear();
 			std::multimap<double, SequenceEntry*>::iterator it = old_line_.begin();
@@ -195,18 +195,18 @@ namespace psy { namespace core {
 			double last_pos = 0;
 			for ( ; it != old_line_.end(); ++it ) {
 				if ( it->first < pos ) {
-					line_.insert(std::pair<double, SequenceEntry*>(it->first, it->second));					
+					line_.insert(std::pair<double, SequenceEntry*>(it->first, it->second));
 				} else  {
 					if ( !inserted ) {
-					  line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
-					  inserted = true;
+						line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
+						inserted = true;
 					}
 					double move = entry->patternBeats();
 					line_.insert(std::pair<double, SequenceEntry*>(it->first + move, it->second));
 				}
 			}
 			if ( !inserted ) {
-				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));				
+				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
 			}
 		}
 
@@ -220,7 +220,7 @@ namespace psy { namespace core {
 				pos = it->second->tickEndPosition() - diff;
 				if (diff > 0) {
 					next_it = it;
-					next_it++;					
+					next_it++;
 					MoveEntry(it->second, it->first - diff);
 					it = next_it;
 				} else {
@@ -628,7 +628,7 @@ namespace psy { namespace core {
 
 		void Sequence::Add(Pattern* pattern) {
 			assert(pattern);
-			patterns_.push_back(pattern);			
+			patterns_.push_back(pattern);
 		}
 	
 		void Sequence::Remove(Pattern* pattern) {

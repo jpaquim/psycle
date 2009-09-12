@@ -132,8 +132,8 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			} //else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"MACD")) {
 			//song.progress.emit(2, 0, "Loading... Song machines...");
-			if((version & 0xff00) == 0) // chunkformat v0						
-				LoadMACDv0(&file, song, version & 0xff);			
+			if((version & 0xff00) == 0) // chunkformat v0
+				LoadMACDv0(&file, song, version & 0xff);
 			//else if((version & 0xff00) == 0x0100 ) //and so on
 		} else if(!std::strcmp(header,"INSD")) {
 			//song.progress.emit(2, 0, "Loading... Song instruments...");

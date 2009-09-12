@@ -75,8 +75,8 @@ bool PluginFinderCache::loadCache(){
 			time_t filetime;
 			std::string error_msg;
 
-			file.Read(filetime);	p.setFileTime(filetime);
-			file.ReadString(error_msg);		p.setError(error_msg);
+			file.Read(filetime); p.setFileTime(filetime);
+			file.ReadString(error_msg); p.setError(error_msg);
 		}
 		{
 			std::string s_temp;
@@ -84,12 +84,12 @@ bool PluginFinderCache::loadCache(){
 			MachineRole::type rl_temp;
 			file.Read(host);
 			file.Read(index);
-			file.Read(b_temp);		p.setAllow(b_temp);
-			file.Read(rl_temp);		p.setRole(rl_temp);
-			file.ReadString(s_temp);	p.setName(s_temp);
-			file.ReadString(s_temp);	p.setAuthor(s_temp);
-			file.ReadString(s_temp);	p.setDesc(s_temp);
-			file.ReadString(s_temp);	p.setVersion(s_temp);
+			file.Read(b_temp); p.setAllow(b_temp);
+			file.Read(rl_temp); p.setRole(rl_temp);
+			file.ReadString(s_temp); p.setName(s_temp);
+			file.ReadString(s_temp); p.setAuthor(s_temp);
+			file.ReadString(s_temp); p.setDesc(s_temp);
+			file.ReadString(s_temp); p.setVersion(s_temp);
 		}
 
 		// Temp here contains the full path to the .dll

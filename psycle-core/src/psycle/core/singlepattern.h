@@ -57,7 +57,7 @@ namespace psy { namespace core {
 			void ChangeInst(int new_inst, double from, double to, int start_track=0, int end_track=32000);
 			void ChangeMac(int new_inst, double from, double to, int start_track=0, int end_track=32000);
 
-			void scaleBlock(int left, int right, double top, double bottom, float factor);		
+			void scaleBlock(int left, int right, double top, double bottom, float factor);
 
 			std::vector<TimeSignature>& timeSignatures();
 			const std::vector<TimeSignature>&  timeSignatures() const;
@@ -80,7 +80,7 @@ namespace psy { namespace core {
 			iterator insert(double pos, const PatternEvent& ev) {
 				return lines_.insert(std::pair<double, PatternEvent>(pos, ev));
 			}
-			void insert(const Pattern& srcPattern, double to, int to_track=0);			
+			void insert(const Pattern& srcPattern, double to, int to_track=0);
 
 			iterator erase(iterator pos) {
 				iterator temp = pos;
@@ -96,7 +96,7 @@ namespace psy { namespace core {
 			std::string category_;
 			std::vector<TimeSignature> timeSignatures_;
 			TimeSignature zeroTime;
-			int id_;						
+			int id_;
 			std::multimap<double, PatternEvent> lines_;
 		};
 
