@@ -5542,7 +5542,9 @@ namespace psycle {
 			if(child_view()->viewMode == view_modes::pattern)
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				///todo
+				patBufferLines = project()->beat_zoom() * pattern()->beats();
+				block_buffer_pattern_ = *pattern();
+				pattern()->erase(0, pattern()->beats());
 #else
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
@@ -5560,9 +5562,9 @@ namespace psycle {
 					memcpy(soffset,&blank,EVENT_SIZE);
 					soffset+=EVENT_SIZE;
 				}
+#endif
 				patBufferCopy = true;
 				NewPatternDraw(0,song()->tracks(),0,patBufferLines-1);
-#endif
 				Repaint(draw_modes::data);
 			}
 		}
@@ -5572,7 +5574,7 @@ namespace psycle {
 			if(child_view()->viewMode == view_modes::pattern)
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				///todo
+				block_buffer_pattern_ = *pattern();
 #else
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
@@ -5581,9 +5583,8 @@ namespace psycle {
 				int length=patBufferLines*EVENT_SIZE*MAX_TRACKS;
 				
 				memcpy(patBufferData,soffset,length);
-				
+#endif				
 				patBufferCopy=true;
-#endif
 			}
 		}
 
@@ -5592,9 +5593,11 @@ namespace psycle {
 			// UNDO CODE PATT PASTE
 			if(patBufferCopy && child_view()->viewMode == view_modes::pattern)
 			{
-				const int ps = _ps();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+				pattern()->erase(0, pattern()->beats());
+				pattern()->insert(block_buffer_pattern_, 0, 0);
 #else
+			    const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
 				// **************** funky shit goin on here yo with the pattern resize or some shit
 				AddUndo(ps,0,0,MAX_TRACKS,song()->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
@@ -5614,9 +5617,10 @@ namespace psycle {
 			// UNDO CODE PATT PASTE
 			if(patBufferCopy && child_view()->viewMode == view_modes::pattern)
 			{
-				const int ps = _ps();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+				pattern()->insert(block_buffer_pattern_, 0, 0);
 #else
+				const int ps = _ps();
 				unsigned char* offset_target = _ppattern(ps);
 				unsigned char* offset_source = patBufferData;
 				// **************** funky shit goin on here yo with the pattern resize or some shit
@@ -5646,6 +5650,10 @@ namespace psycle {
 		{
 			if(child_view()->viewMode == view_modes::pattern)
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				patBufferLines = pattern()->beats() * project()->beat_zoom();
+				pattern()->erase(0, pattern()->beats());
+#else
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
@@ -5661,7 +5669,7 @@ namespace psycle {
 					memcpy(soffset,&blank,EVENT_SIZE);
 					soffset+=EVENT_SIZE;
 				}
-
+#endif
 				NewPatternDraw(0,song()->tracks(),0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
@@ -5674,6 +5682,8 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				// pattern()->Transpose(trp, 
 				const int pLines = pattern()->beats() * project()->beat_zoom();
+				double pos = line_pos(editcur.line, true);
+				pattern()->Transpose(trp, pos, pattern()->beats());
 #else
 				// UNDO CODE PATT TRANSPOSE
 				const int ps = _ps();
