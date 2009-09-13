@@ -5822,10 +5822,12 @@ namespace psycle {
 			Repaint(draw_modes::selection);
 		}
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		double PatternView::line_pos(int line, bool nearest) const {
 			double pos = (line - (nearest ? 0.4999 : 0)) / static_cast<double>(project()->beat_zoom());
 			return pos;
 		}
+#endif
 
 		void PatternView::CopyBlock(bool cutit)
 		{
@@ -5963,7 +5965,9 @@ namespace psycle {
 #endif				
 				if (Global::pInputHandler->bMoveCursorPaste)
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					const int nl = pattern()->beats() * project()->beat_zoom();
+#endif
 					if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 					else editcur.line = nl-1;
 				}
@@ -6459,31 +6463,7 @@ namespace psycle {
 				Repaint(draw_modes::data);
 			}
 		}
-
-
-		void PatternView::IncCurPattern()
-		{
-			if(song()->playOrder[editPosition]<(MAX_PATTERNS-1))
-			{
-				AddUndoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition);
-				++song()->playOrder[editPosition];
-				main()->m_wndSeq.UpdatePlayOrder(true);
-				Repaint(draw_modes::pattern);
-			}
-		}
-
-
-		void PatternView::DecCurPattern()
-		{
-			if(song()->playOrder[editPosition]>0)
-			{
-				AddUndoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition);
-				--song()->playOrder[editPosition];
-				main()->m_wndSeq.UpdatePlayOrder(true);
-				Repaint(draw_modes::pattern);
-			}
-		}
-
+	
 		void PatternView::DecPosition()
 		{
 		//	case cdefPlaySkipBack:

@@ -65,6 +65,9 @@ namespace psycle {
 			/// mode = true sets selection to editPosition and refreshes the name of that position.
 			void UpdatePlayOrder(bool mode);
 
+			void DecCurPattern();
+			void IncCurPattern();
+
 		private:
 			CMainFrame* main_frame_;
 			Project* project_;

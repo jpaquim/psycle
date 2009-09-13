@@ -538,12 +538,12 @@ namespace psycle
 
 			case cdefPatternInc:
 				pChildView->pattern_view()->ChordModeOffs = 0;
-				pChildView->pattern_view()->IncCurPattern();
+				pMainFrame->m_wndSeq.IncCurPattern();
 				break;
 
 			case cdefPatternDec:
 				pChildView->pattern_view()->ChordModeOffs = 0;
-				pChildView->pattern_view()->DecCurPattern();
+				pMainFrame->m_wndSeq.DecCurPattern();
 				break;
 
 			case cdefSongPosInc:
