@@ -481,6 +481,8 @@ namespace psycle {
 				}
 			}
 #endif
+			main()->UpdateEnvInfo();
+			main()->UpdateComboGen();	
 		}
 
 		void MachineView::Rebuild()
@@ -504,6 +506,8 @@ namespace psycle {
 			BuildWires();
 			UpdateSoloMuteBypass();
 			UnlockVu();
+			main()->UpdateEnvInfo();
+			main()->UpdateComboGen();	
 		}
 
 		void MachineView::SelectMachine(MachineGui* gui)
@@ -1783,7 +1787,6 @@ namespace psycle {
 			finder.Close();
 		}
 
-
 		void MachineView::CenterMaster()
 		{
 			song()->machine(MASTER_INDEX)->SetPosX((child_view()->CW - MachineCoords.sMaster.width) / 2);			
@@ -1793,12 +1796,7 @@ namespace psycle {
 
 		bool MachineView::CheckUnsavedSong()
 		{
-			bool checked = true;
-			if (child_view()->UndoMacSaved != child_view()->UndoMacCounter)
-			{
-				checked = false;
-			}
-			return checked;
+			return (child_view()->UndoMacSaved == child_view()->UndoMacCounter);
 		}
 		
 	}  // namespace host
