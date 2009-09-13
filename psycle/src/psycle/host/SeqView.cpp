@@ -1412,5 +1412,41 @@ namespace psycle {
 			}
 		}
 
+
+		void SequencerView::IncCurPattern()
+		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			OnIncshort();
+#else
+			Song* _pSong = &project_->song();
+			PatternView* pat_view = project_->pat_view();
+			if(_pSong->playOrder[pat_view->editPosition]<(MAX_PATTERNS-1))
+			{
+				pat_view->AddUndoSequence(_pSong->playLength,pat_view->editcur.track,pat_view->editcur.line,pat_view->editcur.col,pat_view->editPosition);
+				++_pSong->playOrder[pat_view->editPosition];
+				UpdatePlayOrder(true);
+				pat_view->Repaint(PatternView::draw_modes::pattern);
+			}	
+#endif
+		}
+
+
+		void SequencerView::DecCurPattern()
+		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			OnDecshort();
+#else
+			Song* _pSong = &project_->song();
+			PatternView* pat_view = project_->pat_view();
+			if(_pSong->playOrder[pat_view->editPosition]>0)
+			{
+				pat_view->AddUndoSequence(_pSong->playLength,pat_view->editcur.track,pat_view->editcur.line,pat_view->editcur.col,pat_view->editPosition);
+				--_pSong->playOrder[pat_view->editPosition];
+				UpdatePlayOrder(true);
+				pat_view->Repaint(PatternView::draw_modes::pattern);
+			}		
+#endif
+		}
+
 	} // namespace host
 } // namespace psycle

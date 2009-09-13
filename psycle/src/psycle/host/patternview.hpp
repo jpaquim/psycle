@@ -246,8 +246,6 @@ namespace psycle {
 			void BlockUnmark(void);
 			void SaveBlock(FILE* file);
 			void LoadBlock(FILE* file);
-			void DecCurPattern();
-			void IncCurPattern();
 			void IncPosition(bool bRepeat=false);
 			void DecPosition();
 			void SelectMachineUnderCursor(void);
