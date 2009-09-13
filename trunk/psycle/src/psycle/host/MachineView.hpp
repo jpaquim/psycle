@@ -64,7 +64,6 @@ namespace psycle {
 			void OnWireRewire(WireGui* sender, int pick_point);
 			void LockVu();
 			void UnlockVu();
-
 			// use the next both, if you want to delete a machingui itself from
 			// inside a machingui event (like used in macprop dialog)
 			void SetDeleteMachineGui(MachineGui* gui, bool in_engine) {
@@ -77,6 +76,8 @@ namespace psycle {
 			void CenterMaster();
 			bool CheckUnsavedSong();
 
+			SMachineCoords	MachineCoords;
+
 		private:			
 			void BuildWires();
 			void WireUp(WireGui* sender,
@@ -84,8 +85,6 @@ namespace psycle {
 						double x,
 						double y,
 						int picker);
-
-
 			bool RewireSrc(Machine* tmac, Machine* dmac);
 			bool RewireDest(Machine* tmac, Machine* dmac);			
 			void RaiseMachinesToTop();
@@ -98,7 +97,6 @@ namespace psycle {
 			CMainFrame* main_;
 			Song* song_;
 			std::map<Machine*, MachineGui*> gui_map_;
-
 			WireGui* del_line_;
 			WireGui* rewire_line_;
 			MachineGui* del_machine_;
@@ -110,9 +108,6 @@ namespace psycle {
 			HBITMAP hbmMachineSkin;
 			HBITMAP hbmMachineBkg;	
 			HBITMAP hbmMachineDial;	
-		public:
-			SMachineCoords	MachineCoords;
-		private:
 			int bkgx;
 			int bkgy;
 
