@@ -68,6 +68,9 @@ namespace psycle {
 			void DecCurPattern();
 			void IncCurPattern();
 
+			void DecPosition();
+			void IncPosition(bool bRepeat=false);
+
 		private:
 			CMainFrame* main_frame_;
 			Project* project_;
