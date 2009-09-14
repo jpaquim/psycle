@@ -1448,5 +1448,179 @@ namespace psycle {
 #endif
 		}
 
+
+		void SequencerView::IncPosition(bool bRepeat)
+		{
+		//	case cdefPlaySkipAhead:
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Song* song_ = &project_->song();
+			PatternView* pat_view = project_->pat_view();
+			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
+			{
+				PlayerTimeInfo& tinfo = Player::singleton().timeInfo();
+				if (tinfo.playBeatPos() < song_->patternSequence().tickLength() ) {
+					///todo: Add a way to skip forward one pattern, not just an arbitrary size
+					Player::singleton().skip(16.0);
+				}
+				else {
+					Player::singleton().skipTo(0.0);
+				}
+			} else {
+				std::vector<int>::iterator it = selection_.begin();
+				if ( it != selection_.end() ) {
+					int sel_idx = *it;
+					std::map<int,SequenceEntry*>::iterator pit = pos_map_.find(sel_idx+1);
+					if (pit != pos_map_.end()) {						
+						pat_view->SetPattern(GetEntry(sel_idx+1)->pattern());	
+					} else {
+						Sequence* sequence = &project_->song().patternSequence();
+						SequenceLine* line = *(sequence->begin());						
+						psy::core::Pattern* pattern = new psy::core::Pattern();
+						pattern->setID((*it)+1);
+						sequence->Add(pattern);
+						psy::core::SequenceEntry* entry = new psy::core::SequenceEntry(line);
+						entry->setPattern(pattern);
+						line->insertEntryAndMoveRest(entry, GetEntry(sel_idx)->tickEndPosition());
+					}
+					selection_.clear();
+					selection_.push_back(sel_idx+1);
+					UpdateSequencer();
+					main_frame_->m_wndView.Repaint(draw_modes::pattern);
+					main_frame_->m_wndView.SetFocus();
+				}
+			}
+
+#else
+			Song* song_ = &project_->song();
+			PatternView* pat_view = project_->pat_view();
+			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
+			{
+				if (Global::pPlayer->_sequencePosition < song()->playLength-1)
+				{
+					bool b = Global::pPlayer->_playBlock;
+					Global::pPlayer->Start(Global::pPlayer->_sequencePosition+1,0);
+					Global::pPlayer->_playBlock = b;
+				}
+				else
+				{
+					bool b = Global::pPlayer->_playBlock;
+					Global::pPlayer->Start(0,0);
+					Global::pPlayer->_playBlock = b;
+				}
+			}
+			else 
+			{
+				if(pat_view->editPosition < song_->playLength-1)
+				{
+					++pat_view->editPosition;
+				}
+				else if (!bRepeat) // This prevents adding patterns when only trying to reach the end.
+				{
+					if ( song_->playLength+1 > MAX_SONG_POSITIONS) return;
+
+					AddUndoSequence(song_->playLength,pat_view->editcur.track,pat_view->editcur.line,pat_view->editcur.col,pat_view->editPosition);
+					int patternum=song_->GetBlankPatternUnused();
+					if ( patternum>= MAX_PATTERNS )
+					{
+						patternum=MAX_PATTERNS-1;
+					}
+					else 
+					{
+						song_->AllocNewPattern(patternum,"",Global::pConfig->defaultPatLines,false);
+					}
+			
+					++song_->playLength;
+					++pat_view->editPosition;
+					song_->playOrder[editPosition]=patternum;
+					
+					UpdateSequencer();
+				}
+
+				memset(song_->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+				song_->playOrderSel[pat_view->editPosition]=true;
+
+				UpdatePlayOrder(true);
+				pat_view->Repaint(PatternView::draw_modes::pattern);
+				if (Global::pPlayer->playing()) {
+					pat_view->Repaint(PatternView::draw_modes::playback);
+				}
+			}
+#endif
+		}
+
+
+		void SequencerView::DecPosition()
+		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
+			{
+				PlayerTimeInfo& tinfo = Player::singleton().timeInfo();
+				if (tinfo.playBeatPos() > 0 ) {
+					///todo: Add a way to skip back one pattern, not just an arbitrary size
+					Player::singleton().skip(-16.0);
+				}
+				else {
+					Player::singleton().skipTo(0.0);
+				}
+			} else {
+				std::vector<int>::iterator it = selection_.begin();
+				if ( it != selection_.end() ) {
+					int sel_idx = *it;
+					if ( sel_idx > 0 ) {
+						std::map<int,SequenceEntry*>::iterator pit = pos_map_.find(sel_idx-1);
+						if (pit != pos_map_.end()) {						
+							project_->pat_view()->SetPattern(GetEntry(sel_idx-1)->pattern());	
+						}
+						selection_.clear();
+						selection_.push_back(sel_idx-1);
+						UpdateSequencer();
+						main_frame_->m_wndView.Repaint(draw_modes::pattern);
+						main_frame_->m_wndView.SetFocus();
+					}
+				}
+			}
+#else
+			Song* song_ = &project_->song();
+			PatternView* pat_view = project_->pat_view();
+			if (Global::pPlayer->_sequencePosition > 0 )
+				{
+					bool b = Global::pPlayer->_playBlock;
+					Global::pPlayer->Start(Global::pPlayer->_sequencePosition-1,0);
+					Global::pPlayer->_playBlock = b;
+				}
+				else
+				{
+					bool b = Global::pPlayer->_playBlock;
+					Global::pPlayer->Start(song()->playLength-1,0);
+					Global::pPlayer->_playBlock = b;
+				}
+			}
+			else
+			{
+				if(pat_view->editPosition>0)
+				{
+					--pat_view->editPosition;
+				}
+				else
+				{
+		//			editPosition = song()->playLength-1;
+					pat_view->editPosition = 0;
+				}
+				
+				memset(song_->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+				song_->playOrderSel[pat_view->editPosition]=true;
+
+				UpdatePlayOrder(true);
+				pat_view->Repaint(PatternView::draw_modes::pattern);
+				if (Global::pPlayer->playing()) {
+					pat_view->Repaint(PatternView::draw_modes::playback);
+				}
+			}
+#endif
+		}
+
+
+
+
 	} // namespace host
 } // namespace psycle

@@ -548,13 +548,13 @@ namespace psycle
 
 			case cdefSongPosInc:
 				pChildView->pattern_view()->ChordModeOffs = 0;
-				pChildView->pattern_view()->IncPosition(brepeat?true:false);
+				pMainFrame->m_wndSeq.IncPosition(brepeat?true:false);
 				pMainFrame->StatusBarIdle(); 
 				break;
 
 			case cdefSongPosDec:
 				pChildView->pattern_view()->ChordModeOffs = 0;
-				pChildView->pattern_view()->DecPosition();
+				pMainFrame->m_wndSeq.DecPosition();
 				pMainFrame->StatusBarIdle(); 
 				break;
 			default:;

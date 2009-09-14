@@ -245,8 +245,7 @@ namespace psycle {
 			void DeleteBlock();
 			void BlockUnmark(void);
 			void SaveBlock(FILE* file);
-			void LoadBlock(FILE* file);
-			void IncPosition(bool bRepeat=false);
+			void LoadBlock(FILE* file);			
 			void DecPosition();
 			void SelectMachineUnderCursor(void);
 			bool EnterData(UINT nChar,UINT nFlags);
