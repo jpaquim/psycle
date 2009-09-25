@@ -1495,7 +1495,7 @@ namespace psycle {
 			PatternView* pat_view = project_->pat_view();
 			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 			{
-				if (Global::pPlayer->_sequencePosition < song()->playLength-1)
+				if (Global::pPlayer->_sequencePosition < song_->playLength-1)
 				{
 					bool b = Global::pPlayer->_playBlock;
 					Global::pPlayer->Start(Global::pPlayer->_sequencePosition+1,0);
@@ -1518,7 +1518,7 @@ namespace psycle {
 				{
 					if ( song_->playLength+1 > MAX_SONG_POSITIONS) return;
 
-					AddUndoSequence(song_->playLength,pat_view->editcur.track,pat_view->editcur.line,pat_view->editcur.col,pat_view->editPosition);
+					pat_view->AddUndoSequence(song_->playLength,pat_view->editcur.track,pat_view->editcur.line,pat_view->editcur.col,pat_view->editPosition);
 					int patternum=song_->GetBlankPatternUnused();
 					if ( patternum>= MAX_PATTERNS )
 					{
@@ -1531,7 +1531,7 @@ namespace psycle {
 			
 					++song_->playLength;
 					++pat_view->editPosition;
-					song_->playOrder[editPosition]=patternum;
+					song_->playOrder[pat_view->editPosition]=patternum;
 					
 					UpdateSequencer();
 				}
@@ -1551,9 +1551,11 @@ namespace psycle {
 
 		void SequencerView::DecPosition()
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Song* song_ = &project_->song();
+			PatternView* pat_view = project_->pat_view();
 			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
-			{
+			{				
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				PlayerTimeInfo& tinfo = Player::singleton().timeInfo();
 				if (tinfo.playBeatPos() > 0 ) {
 					///todo: Add a way to skip back one pattern, not just an arbitrary size
@@ -1579,9 +1581,7 @@ namespace psycle {
 					}
 				}
 			}
-#else
-			Song* song_ = &project_->song();
-			PatternView* pat_view = project_->pat_view();
+#else			
 			if (Global::pPlayer->_sequencePosition > 0 )
 				{
 					bool b = Global::pPlayer->_playBlock;
@@ -1591,7 +1591,7 @@ namespace psycle {
 				else
 				{
 					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(song()->playLength-1,0);
+					Global::pPlayer->Start(song_->playLength-1,0);
 					Global::pPlayer->_playBlock = b;
 				}
 			}

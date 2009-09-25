@@ -594,6 +594,9 @@ namespace psycle {
 			case draw_modes::playback_change: 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo
+				{
+					int a = 10;
+				}
 #else
 				if (song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_sequencePosition])
 				{
@@ -5438,8 +5441,11 @@ namespace psycle {
 		{
 			//reinitialise the select bar state
 			blockSelectBarState = 1;
-
+#if PSYCLE__CONFIGURATION__USE_PSYCORE		
+			const int nl = static_cast<int>(project()->beat_zoom() * pattern()->beats());
+#else
 			const int nl = song()->patternLines[_ps()];
+#endif
 
 			editcur.line -= x;
 
@@ -5464,7 +5470,11 @@ namespace psycle {
 			//reinitialise the select bar state
 			blockSelectBarState = 1;
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE		
+			const int nl = static_cast<int>(project()->beat_zoom() * pattern()->beats());
+#else
 			const int nl = song()->patternLines[_ps()];
+#endif
 
 			// <sampler> a bit recoded. 
 			if (x<0) //kind of trick used to advance track (related to chord mode).

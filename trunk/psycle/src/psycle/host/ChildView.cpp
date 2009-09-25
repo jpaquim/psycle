@@ -357,6 +357,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 					if (Global::pConfig->_followSong)
 					{
+						if ( viewMode == view_modes::pattern )  { 
+									Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
+									Repaint(draw_modes::playback);
+						}
+//						pattern_view()->editcur.line=Global::pPlayer->_lineCounter;
+
 							///todo
 //						if (entry != pParentMain->m_wndSeq.selectedEntry() ) {
 //							pParentMain->m_wndSeq.SetSelectedEntry(entry);
@@ -364,7 +370,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 //						}
 					} else
                     if (viewMode == view_modes::pattern) {
-					  Repaint(draw_modes::playback);
+						if (Global::pConfig->_followSong)
+						{
+						}
+						Repaint(draw_modes::playback);
 					}
 #else
 					if (Global::pPlayer->_lineChanged)
