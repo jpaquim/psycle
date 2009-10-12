@@ -1,6 +1,7 @@
 ///\file
 ///\implementation psycle::host::DirectSound.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "DirectSound.hpp"
 #include "DSoundConfig.hpp"
 #include "Registry.hpp"

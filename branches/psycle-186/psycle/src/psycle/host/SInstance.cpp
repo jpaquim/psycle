@@ -19,6 +19,7 @@ All rights reserved.
 
 /////////////////////////////////  Includes  //////////////////////////////////
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "SInstance.h"
 
 

@@ -1,6 +1,7 @@
 ///\file
 ///\implementation psycle::host::Configuration.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "Global.hpp"
 #include "Configuration.hpp"
 #include "Registry.hpp"

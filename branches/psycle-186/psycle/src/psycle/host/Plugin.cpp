@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Plugin
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "Plugin.hpp"
 #include "FileIO.hpp"
 #include "Song.hpp"

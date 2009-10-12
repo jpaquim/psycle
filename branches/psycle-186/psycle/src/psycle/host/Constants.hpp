@@ -61,15 +61,25 @@ namespace psycle
 		/// Maximum size of the audio block to be passed to the Work() function.
 		/*unsigned*/ int const STREAM_SIZE = plugin_interface::MAX_BUFFER_LENGTH;
 
-		/// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, but not all information will be avaiable.
+		/// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, the loader skips the extra info.
+		//Version for the metadata information (author, comments..)
 		#define CURRENT_FILE_VERSION_INFO	0x0000
+		//Version for the song data information (BPM, number of tracks..)
 		#define CURRENT_FILE_VERSION_SNGI	0x0000
+		//Version for the sequence data (playback order)
 		#define CURRENT_FILE_VERSION_SEQD	0x0000
+		//Version for the pattern data
 		#define CURRENT_FILE_VERSION_PATD	0x0000
+		//Version for the machine data
 		#define CURRENT_FILE_VERSION_MACD	0x0000
+		//Version for the instrument (Old sampler) data
 		#define CURRENT_FILE_VERSION_INSD	0x0001
+		//Version for the wave (old sampler) data
 		#define CURRENT_FILE_VERSION_WAVE	0x0000
+		//Combined value for the fileformat.
 		#define CURRENT_FILE_VERSION CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD+CURRENT_FILE_VERSION_WAVE
+
+		unsigned const int VERSION_MAJOR_ZERO = 0;
 
 		#define CURRENT_CACHE_MAP_VERSION	0x0002
 	}

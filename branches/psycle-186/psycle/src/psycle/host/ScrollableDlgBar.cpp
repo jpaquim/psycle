@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::ScrollableDlgBar.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "ScrollableDlgBar.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

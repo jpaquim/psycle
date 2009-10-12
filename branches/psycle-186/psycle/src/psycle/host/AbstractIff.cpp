@@ -3,6 +3,7 @@
 	implementation file for psycle::host::abstractIff
 */
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "AbstractIff.hpp"
 #include <cstdio>
 #include <cstdlib>

@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "VstHost24.hpp"
 #include "Global.hpp"
 #include "Psycle.hpp"

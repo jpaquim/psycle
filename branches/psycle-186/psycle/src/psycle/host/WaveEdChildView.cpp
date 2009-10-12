@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "WaveEdChildView.hpp"
 #include "Psycle.hpp"
 #include "Helpers.hpp"

@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "Psycle.hpp"
 
 #if !defined WINAMP_PLUGIN
@@ -1229,18 +1230,19 @@ namespace psycle
 				{
 					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
 				}
+				int bytesread = 0;
 				if (size == 4) // Since "version" is used for File version, we use size as version identifier
 				{
 					pFile->Read(&chunkcount,sizeof(chunkcount));
+					bytesread = 4;
 				}
 				/*
-				if (size == )
+				else if (size == )
 				{
-				// This is left here if someday, extra data is added to the file version chunk.
-				// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - bytesread);
+					// This is left here if someday, extra data is added to the file version chunk.
 				}
 				*/
-				if ( size-4 > 0) pFile->Skip(size - 4);// Size of the current Header DATA // This ensures that any extra data is skipped.
+				if ( size-bytesread > 0) pFile->Skip(size - bytesread);// Size of the current Header DATA // This ensures that any extra data is skipped.
 
 				DestroyAllMachines();
 				_machineLock = true;
@@ -1257,13 +1259,8 @@ namespace psycle
 						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						if(version > CURRENT_FILE_VERSION_INFO)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Info Seqment of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							char name_[129]; char author_[65]; char comments_[65536];
 							pFile->ReadString(name_, sizeof name_);
@@ -1272,21 +1269,16 @@ namespace psycle
 							name = name_;
 							author = author_;
 							comments = comments_;
-
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"SNGI")==0)
 					{
 						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						if(version > CURRENT_FILE_VERSION_SNGI)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Song Segment of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							// why all these temps?  to make sure if someone changes the defs of
 							// any of these members, the rest of the file reads ok.  assume 
@@ -1337,19 +1329,15 @@ namespace psycle
 								Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
 							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
 					{
 						--chunkcount;
 						pFile->Read(&version,sizeof version);
 						pFile->Read(&size,sizeof size);
-						if(version > CURRENT_FILE_VERSION_SEQD)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							// index, for multipattern - for now always 0
 							pFile->Read(&index, sizeof index);
@@ -1367,30 +1355,22 @@ namespace psycle
 									playOrder[i] = temp;
 								}
 							}
-							else
-							{
-								//MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
-								pFile->Skip(size - sizeof index);
-							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"PATD") == 0)
 					{
 						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						if(version > CURRENT_FILE_VERSION_PATD)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							// index
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_PATTERNS)
 							{
+								unsigned int sizez77 = 0;
 								// num lines
 								pFile->Read(&temp, sizeof temp );
 								// clear it out if it already exists
@@ -1399,9 +1379,9 @@ namespace psycle
 								// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
 								pFile->Read(&temp, sizeof temp );
 								pFile->ReadString(patternName[index], sizeof *patternName);
-								pFile->Read(&size, sizeof size);
-								byte* pSource = new byte[size];
-								pFile->Read(pSource, size);
+								pFile->Read(&sizez77, sizeof sizez77);
+								byte* pSource = new byte[sizez77];
+								pFile->Read(pSource, sizez77);
 								byte* pDest;
 								BEERZ77Decomp2(pSource, &pDest);
 								zapArray(pSource,pDest);
@@ -1413,30 +1393,16 @@ namespace psycle
 								}
 								zapArray(pDest);
 							}
-							else
-							{
-								//MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
-								pFile->Skip(size - sizeof index);
-							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"MACD") == 0)
 					{
-						int curpos(0);
+						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						--chunkcount;
-						if(!fullopen)
-						{
-							curpos = pFile->GetPos();
-						}
-						if(version > CURRENT_FILE_VERSION_MACD)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Machine section of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_MACHINES)
@@ -1444,81 +1410,67 @@ namespace psycle
 								// we had better load it
 								DestroyMachine(index);
 								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
-								// skips specific chunk.
-								if(!fullopen) pFile->Seek(curpos + size);
-							}
-							else
-							{
-								//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-								pFile->Skip(size - sizeof index);
 							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"INSD") == 0)
 					{
+						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						--chunkcount;
-						if(version&0xFF00 > CURRENT_FILE_VERSION_INSD&0xFF00)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_INSTRUMENTS)
 							{
 								_pInstrument[index]->LoadFileChunk(pFile, version, fullopen);
 							}
-							else
-							{
-								//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-								pFile->Skip(size - sizeof index);
-							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"EINS") == 0)
 					{
+						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						long filepos;
+						size_t begins = pFile->GetPos();
+						long filepos=pFile->GetPos();
 						bool wrongState=false;
-						filepos=pFile->GetPos();
-						--chunkcount;
-						// Check higher bits of version (AAAABBBB). 
-						// different A, incompatible, different B, compatible
-						if ( (version&0x11110000) == (XMSampler::VERSION&0x11110000) )
+						//Version zero was the development version. Version one is the published one.
+						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
 						{
 							// Instrument Data Load
 							int numInstruments;
 							pFile->Read(numInstruments);
 							int idx;
-							for(int i = 0;i < numInstruments;i++)
+							for(int i = 0;i < numInstruments && filepos < begins+size;i++)
 							{
 								pFile->Read(idx);
-								if (!XMSampler::rInstrument(idx).Load(*pFile)) { wrongState=true; break; }
-								//m_Instruments[idx].IsEnabled(true); // done in the loader.
+								int sizeIns = XMSampler::rInstrument(idx).Load(*pFile);
+								if ((version&0xFFFF) > 0) {
+									//Version 0 doesn't write the chunk size correctly
+									//so we cannot correct it in case of error
+									pFile->Seek(filepos+sizeIns);
+									filepos=pFile->GetPos();
+								}
 							}
-							if (!wrongState)
+							int numSamples;
+							pFile->Read(numSamples);
+							for(int i = 0;i < numSamples && filepos < begins+size;i++)
 							{
-								int numSamples;
-								pFile->Read(numSamples);
-								int idx;
-								for(int i = 0;i < numSamples;i++)
-								{
-									pFile->Read(idx);
-									if (!XMSampler::SampleData(idx).Load(*pFile)) { wrongState=true; break; }
+								pFile->Read(idx);
+								int sizeSamp = XMSampler::SampleData(idx).Load(*pFile);
+								if ((version&0xFFFF) > 0) {
+									//Version 0 doesn't write the chunk size correctly
+									//so we cannot correct it in case of error
+									pFile->Seek(filepos+sizeSamp);
+									filepos=pFile->GetPos();
 								}
 							}
 						}
-						else wrongState=true;
-
-						if (wrongState)
-						{
-							pFile->Seek(filepos+size);
-						}
+						pFile->Seek(begins+size);
 					}
 					else 
 					{
@@ -2572,7 +2524,7 @@ namespace psycle
 					version = CURRENT_FILE_VERSION_PATD;
 
 					pFile->Write(&version,sizeof(version));
-					size = sizez77+(4*sizeof(temp))+strlen(patternName[i])+1;
+					size = sizez77+(4*sizeof(int))+strlen(patternName[i])+1;
 					pFile->Write(&size,sizeof(size));
 
 					index = i; // index

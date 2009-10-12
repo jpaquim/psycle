@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CPresetsDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "PresetsDlg.hpp"
 #include "Psycle.hpp"
 #include "Plugin.hpp"

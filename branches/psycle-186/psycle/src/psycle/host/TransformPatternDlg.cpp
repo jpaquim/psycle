@@ -1,6 +1,7 @@
 // TransformPatternDlg.cpp : implementation file
 //
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "TransformPatternDlg.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)

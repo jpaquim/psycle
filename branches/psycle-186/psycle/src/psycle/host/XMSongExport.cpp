@@ -4,6 +4,7 @@
  *  $Revision: 6303 $
  */
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMSongExport.hpp"
 //#include "ProgressDialog.hpp"
 #include "Song.hpp"

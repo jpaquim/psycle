@@ -2,6 +2,7 @@
 //
 
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMSamplerMixerPage.hpp"
 #include "Psycle.hpp"
 #include "Song.hpp"

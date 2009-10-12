@@ -3,6 +3,7 @@
 	implementation file for psycle::host::eaiff
 */
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "Eaiff.hpp"
 #include <cstdio>
 #include <cstdlib>

@@ -1,6 +1,7 @@
 //\file
 //\brief implementation file for psycle::host::InstPreview.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "InstPreview.hpp"
 #include "Instrument.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

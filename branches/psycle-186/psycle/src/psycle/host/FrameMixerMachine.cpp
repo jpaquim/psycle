@@ -1,4 +1,5 @@
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "FrameMixerMachine.hpp"
 #include "Psycle.hpp"
 #include "NativeGui.hpp"

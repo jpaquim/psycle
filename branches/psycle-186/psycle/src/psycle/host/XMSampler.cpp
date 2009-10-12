@@ -1,4 +1,5 @@
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"

@@ -4,6 +4,7 @@
 //
 
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "ExListBox.h"
 #include "Psycle.hpp"
 #include "MainFrm.hpp"

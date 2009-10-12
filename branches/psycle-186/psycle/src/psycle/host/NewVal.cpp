@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewVal.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "NewVal.hpp"
 #include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

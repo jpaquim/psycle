@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "MainFrm.hpp"
 #include "Psycle.hpp"
 #include "WavFileDlg.hpp"
@@ -2200,7 +2201,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 
 		// Part one, Read patterns from sequence and assign them a new ordered number.
-			unsigned unsigned char freep=0;
+			unsigned char freep=0;
 			for ( int i=0 ; i<_pSong->playLength ; i++ )
 			{
 				const unsigned char cp=_pSong->playOrder[i];

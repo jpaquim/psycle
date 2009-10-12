@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CNativeGui.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "NativeGui.hpp"
 #include "Psycle.hpp"
 #include "Machine.hpp"

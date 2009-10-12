@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "Instrument.hpp"
 #include "DataCompression.hpp"
 #include "Filter.hpp"

@@ -2876,6 +2876,11 @@ BEGIN
     ID__TRANSFORMPATTERN    "Pops Up the Transform Pattern Dialog\nShow Transform Pattern"
 END
 
+STRINGTABLE 
+BEGIN
+	ID_EXPORT               "Export song as Fast Tracker 2 module\nExport XM"
+END
+
 #endif    // Neutral (Default) resources
 /////////////////////////////////////////////////////////////////////////////
 

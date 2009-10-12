@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CSaveWavDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "SaveWavDlg.hpp"
 #include "Psycle.hpp"
 #include "Song.hpp"
