@@ -2,16 +2,13 @@
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief meta header that includes all of diversalis' headers.
-
 #ifndef DIVERSALIS__INCLUDED
 #define DIVERSALIS__INCLUDED
-#pragma once
-
+	#pragma once
 	#include "compiler.hpp"
 	#if !defined DIVERSALIS__COMPILER__RESOURCE
-		#include "os.hpp"
-		#include "cpu.hpp"
-		#include "stdlib.hpp"
+		#include "operating_system.hpp"
+		#include "processor.hpp"
+		#include "standard_library.hpp"
 	#endif
-
 #endif

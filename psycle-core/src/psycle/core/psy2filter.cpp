@@ -1,24 +1,33 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/config.private.hpp>
 #include "psy2filter.h"
-
+#include "commands.h"
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
-#include "pluginfinder.h"
 #include "convert_internal_machines.private.hpp"
 
 //Needed since the psy2loading source has been moved here
 #include "internal_machines.h"
 #include "sampler.h"
 #include "plugin.h"
-#include "vsthost.h"
-#include "vstplugin.h"
 
 #include <sstream>
 #include <iostream>
@@ -60,6 +69,8 @@ bool Psy2Filter::testFormat(const std::string & fileName) {
 void Psy2Filter::preparePatternSequence( CoreSong & song) {
 	seqList.clear();
 	song.patternSequence().removeAll();
+	// create a single Pattern Category
+	singleCat = song.patternSequence().patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence().createNewLine();
 }
@@ -155,7 +166,6 @@ PatternEvent Psy2Filter::convertEntry(unsigned char * data ) const {
 }
 
 bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
-#if 0 ///\todo
 	std::int32_t numLines;
 	char patternName[32];
 	file->Read(numLines);
@@ -168,7 +178,7 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		#if 0
 			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		#else
-			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+			SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
 		#endif
 		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
@@ -213,7 +223,6 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		RemovePattern(i);
 	}
 	#endif
-#endif
 	return true;
 }
 
@@ -363,60 +372,20 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 							p->LoadPsy2FileFormat(file);
 							pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
 							((Dummy*)pMac[i])->CopyFrom(p);
-							delete p;
 						} else pMac[i]->LoadPsy2FileFormat(file);
 					}
 					break;
 				}
-				#ifdef _WIN32
 				case MACH_VST:
 				case MACH_VSTFX:
 					{
-						char sError[128];
-						bool berror=false;
-						vst::plugin* pVstPlugin;
-						vst::plugin* pTempMac = static_cast<vst::plugin*>(factory.CreateMachine(MachineKey::wrapperVst(),i));
-						// The trick: We need to load the information from the file in order to know the "instance" number
-						// and be able to create a plugin from the corresponding dll. Later, we will set the loaded settings to
-						// the newly created plugin.
-						unsigned char program;
-						int instance;
-						pTempMac->PreLoadPsy2FileFormat(file,program,instance);
-						assert(instance < PSY2_MAX_PLUGINS);
-
-						MachineKey* key = new MachineKey(Hosts::VST,MachineKey::preprocessName(vstL[instance].dllName),0);
-						if( !vstL[instance].valid || !factory.getFinder().hasKey(*key))
-						{
-							berror=true;
-							sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
-						}
-						else try {
-							pMac[i] = pVstPlugin = static_cast<vst::plugin*>(factory.CreateMachine(*key,i));
-
-							if (pVstPlugin)
-							{
-								pVstPlugin->LoadFromMac(pTempMac, program, vstL[instance].numpars, vstL[instance].pars);
-							}
-						}
-						catch(...)
-						{
-							berror=true;
-							sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",key->dllName());
-						}
-						if (berror)
-						{
-							//MessageBox(NULL,sError, "Loading Error", MB_OK);
-							Dummy* dummy;
-							pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(MachineKey::dummy(),i));
-							dummy->CopyFrom(pTempMac);
-							delete pTempMac;
-							if (type == MACH_VST ) dummy->setGenerator(true);
-							else dummy->setGenerator(false);
-						}
-						delete key;
+						pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
+						pMac[i]->LoadPsy2FileFormat(file);
+						file->Skip(6);
 					}
+					//if (type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+					//else if (type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
 					break;
-				#endif
 				default: {
 					switch(type) {
 						case MACH_MASTER:
@@ -570,9 +539,13 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	double pos = 0;
 	std::vector<int>::iterator it = seqList.begin();
 	for(; it < seqList.end(); ++it) {
-		Pattern* pat = song.patternSequence().FindPattern(*it);
-		singleLine->createEntry(pat, pos);
-		pos += pat->beats();
+		#if 0
+			Pattern* pat = song.patternSequence()->PatternPool()->findById(*it);
+		#else
+			SinglePattern* pat = song.patternSequence().patternPool()->findById(*it);
+		#endif
+		singleLine->createEntry(pat,pos);
+		pos+=pat->beats();
 	}
 
 
@@ -924,16 +897,46 @@ bool Plugin::LoadPsy2FileFormat(RiffFile * pFile) {
 
 	return true;
 }
-#ifdef _WIN32
+#if 0
 namespace vst {
+	bool plugin::LoadChunkPsy2FileFormat(RiffFile * pFile) {
+		bool b;
+		try {
+			b = proxy().flags() & effFlagsProgramChunks;
+		}
+		catch(const std::exception &) {
+			b = false;
+		}
+		if(!b) return false;
 
-	bool plugin::PreLoadPsy2FileFormat(RiffFile * pFile, unsigned char &_program, int &_instance)
-	{
+		// read chunk size
+		std::uint32_t chunk_size;
+		pFile->Read(chunk_size);
+
+		// read chunk data
+		char * chunk(new char[chunk_size]);
+		pFile->ReadChunk(chunk, chunk_size);
+
+		try {
+			proxy().dispatcher(effSetChunk, 0, chunk_size, chunk);
+		}
+		catch(const std::exception &) {
+			// [bohan] hmm, so, data just gets lost?
+			delete[] chunk;
+			return false;
+		}
+
+		delete[] chunk;
+		return true;
+	}
+
+	bool plugin::LoadPsy2FileFormat(RiffFile * pFile) {
 		Machine::Init();
+
 		char edName[32];
-		pFile->ReadArray(edName, 16); edName[15] = 0;
+		pFile->ReadChunk(edName, 16); edName[15] = 0;
 		SetEditName(edName);
-		
+
 		pFile->Read(_inputMachines);
 		pFile->Read(_outputMachines);
 		pFile->Read(_inputConVol);
@@ -983,70 +986,9 @@ namespace vst {
 			char mch;
 			pFile->Read(mch);
 			_program = 0;
-		}
-		else {
+		} else {
 			pFile->Read(_program);
 		}
-		return true;
-	}
-
-	bool plugin::LoadFromMac(vst::plugin *pMac, unsigned char program,  int numPars, float* pars)
-	{
-		SetEditName(pMac->GetEditName());
-		memcpy(_inputMachines,pMac->_inputMachines,sizeof(_inputMachines));
-		memcpy(_outputMachines,pMac->_outputMachines,sizeof(_outputMachines));
-		memcpy(_inputConVol,pMac->_inputConVol,sizeof(_inputConVol));
-		memcpy(_connection,pMac->_connection,sizeof(_connection));
-		memcpy(_inputCon,pMac->_inputCon,sizeof(_inputCon));
-		_connectedInputs= pMac->_connectedInputs;
-		_connectedOutputs= pMac->_connectedOutputs;
-		
-		Machine::SetPan(pMac->_panning);
-
-		SetProgram(program);
-		for (int c(0) ; c < numPars; ++c)
-		{
-			try
-			{
-				SetParameter(c, pars[c]);
-			}
-			catch(const std::exception &)
-			{
-				// o_O`
-			}
-		}
-
-		return true;
-	}
-
-	bool plugin::LoadChunkPsy2FileFormat(RiffFile * pFile) {
-		bool b;
-		try {
-			b = ProgramIsChunk();
-		}
-		catch(const std::exception &) {
-			b = false;
-		}
-		if(!b) return false;
-
-		// read chunk size
-		std::uint32_t chunk_size;
-		pFile->Read(chunk_size);
-
-		// read chunk data
-		char * chunk(new char[chunk_size]);
-		pFile->ReadArray(chunk, chunk_size);
-
-		try {
-			SetChunk(chunk,chunk_size);
-		}
-		catch(const std::exception &) {
-			// [bohan] hmm, so, data just gets lost?
-			delete[] chunk;
-			return false;
-		}
-
-		delete[] chunk;
 		return true;
 	}
 }

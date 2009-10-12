@@ -1,21 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CPresetsDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "PresetsDlg.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/plugin.h>
-#include <psycle/core/file.h>
-#include <psycle/core/vsthost.h>
-#include <psycle/core/vstplugin.h>
-using namespace psy::core;
-#else
+#include "Psycle.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
+#include "FrameMachine.hpp"
 #include "FileIO.hpp"
-#endif
-
-#include "Configuration.hpp"
-//#include "FrameMachine.hpp"
 #include <cstring>
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -192,11 +184,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			numParameters = _pMachine->GetNumParams();
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if( _pMachine->getMachineKey().host() == Hosts::NATIVE)
-#else
 			if( _pMachine->_type == MACH_PLUGIN)
-#endif
 			{
 				try
 				{
@@ -240,17 +228,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						// o_O`
 					}
 				}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				buffer = _pMachine->GetDllName().c_str();
-#else
 				buffer = _pMachine->GetDllName();
-#endif
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			else if( _pMachine->getMachineKey().host() == Hosts::VST)
-#else
 			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
-#endif
 			{ 
 				iniPreset.Init(numParameters);
 				int i(0);
@@ -258,7 +238,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					try
 					{
-						iniPreset.SetParam(i, helpers::math::rounded(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::AudioMaster::GetQuantization()));
+						iniPreset.SetParam(i, helpers::math::rounded(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
 					}
 					catch(const std::exception &)
 					{
@@ -270,11 +250,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 					++i;
 				}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				buffer = _pMachine->GetDllName().c_str();
-#else
 				buffer = _pMachine->GetDllName();
-#endif
 
 			}
 			buffer = buffer.Left(buffer.GetLength()-4);
@@ -334,11 +310,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CPresetsDlg::OnImport() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if( _pMachine->getMachineKey().host() == Hosts::VST) return;
-#else
 			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
-#endif
+
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 
@@ -350,11 +323,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof szFile;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if( _pMachine->getMachineKey().host() == Hosts::VST)
-#else
 			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
-#endif
 			{
 				ofn.lpstrFilter = "Presets\0*.prs\0VST Banks\0*.fxb\0All\0*.*\0";
 			}
@@ -551,11 +520,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE)
-#else
 			if ( _pMachine->_type == MACH_PLUGIN )
-#endif
 			{
 				std::string tmpstr = Global::pConfig->GetPluginDir();
 				ofn.lpstrInitialDir = tmpstr.c_str();
@@ -907,11 +872,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					// o_O`
 				}
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if(preset.GetData() && _pMachine->getMachineKey().host() == Hosts::NATIVE)
-#else
 			if(preset.GetData() && _pMachine->_type == MACH_PLUGIN)
-#endif
 			{
 				try
 				{

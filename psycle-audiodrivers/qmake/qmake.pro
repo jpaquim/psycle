@@ -1,8 +1,9 @@
 TARGET = psycle-audiodrivers
 
 # include the base stuff shared amongst all qmake projects.
-include(../../build-systems/qmake/common.pri)
+include(../../packageneric/qmake/common.pri)
 
+# this include defines a dependency on the psycle-audiodrivers lib.
 include(psycle-audiodrivers.pri)
 
 TEMPLATE = lib # This project builds a library.
@@ -18,7 +19,7 @@ MOC_DIR = $$BUILD_DIR # Where intermediate moc files go.
 DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
 CONFIG *= precompile_header
-PRECOMPILED_HEADER = $$TOP_SRC_DIR/build-systems/src/forced-include.private.hpp
+PRECOMPILED_HEADER = $$TOP_SRC_DIR/packageneric/src/packageneric/pre-compiled.private.hpp
 
 sources_or_headers = \
 	$$PSYCLE_AUDIODRIVERS_DIR/src/psycle/audiodrivers/audiodriver \

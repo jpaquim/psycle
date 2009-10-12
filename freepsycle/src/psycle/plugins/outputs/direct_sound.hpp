@@ -4,10 +4,10 @@
 ///\interface psycle::plugins::devices::outputs::direct_sound
 #pragma once
 #include "../resource.hpp"
-#include <universalis/os/exception.hpp>
+#include <universalis/operating_system/exception.hpp>
 #include <universalis/compiler/numeric.hpp>
 
-#if !defined DIVERSALIS__OS__MICROSOFT
+#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#error "this plugin is specific to microsoft's operating system"
 #endif
 
@@ -43,17 +43,17 @@ namespace psycle { namespace plugins { namespace outputs {
 	/// outputs to a soundcard device via microsoft's direct sound output implementation.
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK direct_sound : public resource {
 		protected: friend class virtual_factory_access;
-			direct_sound(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(universalis::os::exception);
+			direct_sound(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(universalis::operating_system::exception);
 		public:
 			engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 			bool opened()  const /*override*/;
 			bool started() const /*override*/;
 		protected:
-			void do_open()    throw(universalis::os::exception) /*override*/;
-			void do_start()   throw(universalis::os::exception) /*override*/;
-			void do_process() throw(universalis::os::exception) /*override*/;
-			void do_stop()    throw(universalis::os::exception) /*override*/;
-			void do_close()   throw(universalis::os::exception) /*override*/;
+			void do_open()    throw(universalis::operating_system::exception) /*override*/;
+			void do_start()   throw(universalis::operating_system::exception) /*override*/;
+			void do_process() throw(universalis::operating_system::exception) /*override*/;
+			void do_stop()    throw(universalis::operating_system::exception) /*override*/;
+			void do_close()   throw(universalis::operating_system::exception) /*override*/;
 			void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
 		private:
 			::IDirectSound        * direct_sound_;

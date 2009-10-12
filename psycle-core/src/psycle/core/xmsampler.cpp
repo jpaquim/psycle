@@ -1,18 +1,30 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+/***************************************************************************
+	*   Copyright (C) 2007 Psycledelics   *
+	*   psycle.sf.net   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
 //
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
-
-#include <psycle/core/config.private.hpp>
-#include "xmsampler.h"
 
 #include "xminstrument.h"
+#include "xmsampler.h"
 #include "song.h"
 #include <cstdint>
 #include <algorithm>
-
-namespace psy { namespace core {
+namespace psy{ namespace core{
 
 std::string XMSampler::_psName = "Sampulse";
 const float XMSampler::SURROUND_THRESHOLD = 2.0f;
@@ -100,7 +112,6 @@ const int XMSampler::Voice::m_RandomTable[256] = {
 // being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
 // so (2*7159090.5/8363) ~ 1712 ( middle C period )
 // Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
-// The original middle C period was 856, but it was multiplied by two on PC's to add fine pitch slide.
 // The original table takes the lower octave values and multiplies them by two.
 // This doesn't take care of the roundings of the values.
 
@@ -229,7 +240,7 @@ XMSampler::XDSPWaveController::~XDSPWaveController()
 */
 //////////////////////////////////////////////////////////////////////////
 //      XMSampler::EnvelopeController Implementation
-void XMSampler::EnvelopeController::Init(const XMInstrument::Envelope *pEnvelope, const MachineCallbacks * callbacks)
+void XMSampler::EnvelopeController::Init(XMInstrument::Envelope *pEnvelope, MachineCallbacks * callbacks)
 {
 	if(pEnvelope != NULL){
 		m_pEnvelope = pEnvelope;
@@ -347,7 +358,7 @@ void XMSampler::EnvelopeController::SetPositionInSamples(const int samplePos)
 	//TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
 	//TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
 }
-int XMSampler::EnvelopeController::GetPositionInSamples() const
+int XMSampler::EnvelopeController::GetPositionInSamples()
 {
 	//TRACE("Requested Pos:%d. Idx:%d, Current Amount:%f\n",m_Samples,m_PositionIndex,m_ModulationAmount);
 	//TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
@@ -503,7 +514,7 @@ void XMSampler::Voice::VoiceInit(int channelNum, int instrumentNum)
 
 }// XMSampler::Voice::VoiceInit)
 
-void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, const dsp::Resampler& _resampler)
+void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, dsp::Cubic& _resampler)
 {
 	dsp::PRESAMPLERFN pResamplerWork;
 	pResamplerWork = _resampler._pWorkFn;
@@ -617,7 +628,7 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 3: Add the processed data to the sampler's buffer.
 		if(!m_WaveDataController.IsStereo()){
-				// Monoaural output‚ copy left to right output.
+		// Monoaural output copy left to right output.
 			right_output = left_output;
 		}
 
@@ -969,7 +980,7 @@ void XMSampler::Voice::Retrig()
 		}
 	}
 
-int XMSampler::Voice::GetDelta(const int wavetype,const int wavepos) const
+int XMSampler::Voice::GetDelta(int wavetype,int wavepos)
 {
 	switch (wavetype)
 	{
@@ -1033,7 +1044,7 @@ double XMSampler::Voice::PeriodToSpeed(int period)
 	}
 }
 
-double XMSampler::Voice::NoteToPeriod(const int note) const
+const double XMSampler::Voice::NoteToPeriod(const int note)
 {
 	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
@@ -1050,7 +1061,7 @@ double XMSampler::Voice::NoteToPeriod(const int note) const
 	}
 }
 
-int XMSampler::Voice::PeriodToNote(const double period) const
+const int XMSampler::Voice::PeriodToNote(const double period)
 {
 	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
@@ -2000,7 +2011,7 @@ bool XMSampler::Channel::Load(RiffFile& riffFile)
 	riffFile.Read(m_DefaultPanFactor);
 	riffFile.Read(m_DefaultCutoff);
 	riffFile.Read(m_DefaultRessonance);
-	riffFile.Read((std::uint32_t&)m_DefaultFilterType);
+	riffFile.Read((uint32_t&)m_DefaultFilterType);
 
 	return true;
 }
@@ -2013,7 +2024,7 @@ void XMSampler::Channel::Save(RiffFile& riffFile)
 	riffFile.Write(m_DefaultPanFactor);
 	riffFile.Write(m_DefaultCutoff);
 	riffFile.Write(m_DefaultRessonance);
-	riffFile.Write((std::uint32_t&)m_DefaultFilterType);
+	riffFile.Write((uint32_t&)m_DefaultFilterType);
 }
 
 
@@ -2243,30 +2254,22 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 						thisChannel.LastVoicePanFactor(currentVoice->PanFactor());
 						thisChannel.LastVoiceVolume(currentVoice->Volume());
 
-						{
-						const XMInstrument::Envelope & pEnv = currentVoice->AmplitudeEnvelope().Envelope();
-						if (pEnv.IsEnabled() && pEnv.IsCarry())
+						XMInstrument::Envelope *pEnv = &currentVoice->AmplitudeEnvelope().Envelope();
+						if (pEnv->IsEnabled() && pEnv->IsCarry())
 							thisChannel.LastAmpEnvelopePosInSamples(currentVoice->AmplitudeEnvelope().GetPositionInSamples());
 						else thisChannel.LastAmpEnvelopePosInSamples(0);
-						}
-						{
-						const XMInstrument::Envelope & pEnv = currentVoice->PanEnvelope().Envelope();
-						if (pEnv.IsEnabled() && pEnv.IsCarry())
+						pEnv = &currentVoice->PanEnvelope().Envelope();
+						if (pEnv->IsEnabled() && pEnv->IsCarry())
 							thisChannel.LastPanEnvelopePosInSamples(currentVoice->PanEnvelope().GetPositionInSamples());
 						else thisChannel.LastPanEnvelopePosInSamples(0);
-						}
-						{
-						const XMInstrument::Envelope & pEnv = currentVoice->FilterEnvelope().Envelope();
-						if (pEnv.IsEnabled() && pEnv.IsCarry())
+						pEnv = &currentVoice->FilterEnvelope().Envelope();
+						if (pEnv->IsEnabled() && pEnv->IsCarry())
 							thisChannel.LastFilterEnvelopePosInSamples(currentVoice->FilterEnvelope().GetPositionInSamples());
 						else thisChannel.LastFilterEnvelopePosInSamples(0);
-						}
-						{
-						const XMInstrument::Envelope & pEnv = currentVoice->PitchEnvelope().Envelope();
-						if (pEnv.IsEnabled() && pEnv.IsCarry())
+						pEnv = &currentVoice->PitchEnvelope().Envelope();
+						if (pEnv->IsEnabled() && pEnv->IsCarry())
 							thisChannel.LastPitchEnvelopePosInSamples(currentVoice->PitchEnvelope().GetPositionInSamples());
 						else thisChannel.LastPitchEnvelopePosInSamples(0);
-						}
 
 					}
 					if ( event.volume()<0x40) newVoice->NoteOn(thisChannel.Note(),event.volume()<<1,bInstrumentSet);
@@ -2316,10 +2319,12 @@ int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 	//cpu::cycles_type cost = cpu::cycles();
+	int i;
 
 	if (!_mute)
 	{
 		Standby(false);
+		const int _songtracks = callbacks->song().tracks();
 		int ns = numSamples;
 		/* This is from Sampler. Is it needed for sampulse?
 		for (int voice=0; voice<_numVoices; voice++)
@@ -2502,12 +2507,13 @@ void XMSampler::WorkVoices(int startSample, int numsamples)
 		}
 	}
 	// Doing this here is faster than in voice, because it would be done once per voice then.
-	float const multip = m_GlobalVolume / 128.0f;
+	float multip = m_GlobalVolume/128.0f;
 	psamL = _pSamplesL + startSample;
 	psamR = _pSamplesR + startSample;
-	for(int i = 0; i < origsamples; ++i) {
-		*psamL *= multip; ++psamL;
-		*psamR *= multip; ++psamR;
+	for (int i=0; i<origsamples;i++)
+	{
+		*psamL = *(psamL++)*multip;
+		*psamR = *(psamR++)*multip;
 	}
 	_sampleCounter+=numsamples;
 }
@@ -2617,7 +2623,7 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile)
 		// Sample Data Save
 		int numSamples = 0;
 		for(int i = 0;i < MAX_INSTRUMENT;i++){
-			if(m_rWaveLayer[i].WaveLength() != 0){
+			if([i].WaveLength() != 0){
 				numSamples++;
 			}
 		}
@@ -2625,9 +2631,9 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile)
 		riffFile->Write(numSamples);
 
 		for(int i = 0;i < MAX_INSTRUMENT;i++){
-			if(m_rWaveLayer[i].WaveLength() != 0){
+			if([i].WaveLength() != 0){
 				riffFile->Write(i);
-				m_rWaveLayer[i].Save(*riffFile);
+				[i].Save(*riffFile);
 			}
 		}
 	#endif
@@ -2686,7 +2692,8 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 			for(int i = 0;i < numInstruments;i++)
 			{
 				riffFile->Read(idx);
-				if (!m_rWaveLayer[idx].Load(*riffFile)) { wrongState=true; break; }
+				if (!m_Instruments[idx].Load(*riffFile)) { wrongState=true; break; }
+				//m_Instruments[idx].IsEnabled(true); // done in the loader.
 			}
 			if (!wrongState)
 			{

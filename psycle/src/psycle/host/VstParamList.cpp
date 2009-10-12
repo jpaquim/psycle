@@ -1,16 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstParamList.
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "VstParamList.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/vsthost.h>
-#include <psycle/core/vstplugin.h>
-using namespace psy::core;
-#else
+#include "Psycle.hpp"
 #include "VstHost24.hpp"
-#endif
 //#include "Helpers.hpp"
+//#include "Configuration.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-#include "Configuration.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 
@@ -94,7 +91,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			UpdateParList();
 			InitializePrograms();
-			m_slider.SetRange(0, vst::AudioMaster::GetQuantization());
+			m_slider.SetRange(0, vst::quantization);
 			UpdateOne();
 		}
 
@@ -150,7 +147,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int value = machine().GetParamValue(m_parlist.GetCurSel());
 			UpdateText(value);
 			_quantizedvalue = value;
-			m_slider.SetPos(vst::AudioMaster::GetQuantization() - _quantizedvalue);
+			m_slider.SetPos(vst::quantization - _quantizedvalue);
 		}
 
 		void CVstParamList::UpdateNew(int par,float value)
@@ -158,10 +155,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (par != m_parlist.GetCurSel() )
 				m_parlist.SetCurSel(par);
 
-			value *= vst::AudioMaster::GetQuantization();
+			value *= vst::quantization;
 			UpdateText(value);
 			_quantizedvalue = (helpers::math::rounded(value));
-			m_slider.SetPos(vst::AudioMaster::GetQuantization() - _quantizedvalue);
+			m_slider.SetPos(vst::quantization - _quantizedvalue);
 		}
 		void CVstParamList::OnSelchangeList() 
 		{
@@ -172,7 +169,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CVstParamList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
 
-			const int nVal = vst::AudioMaster::GetQuantization() - m_slider.GetPos();
+			const int nVal = vst::quantization - m_slider.GetPos();
 
 			if(nVal != _quantizedvalue)
 			{
@@ -182,9 +179,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), m_parlist.GetCurSel(), nVal);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, m_parlist.GetCurSel(), nVal);
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), m_parlist.GetCurSel(), nVal);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, m_parlist.GetCurSel(), nVal);
 				}
 			}
 		}

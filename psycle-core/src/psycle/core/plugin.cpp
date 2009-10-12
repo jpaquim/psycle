@@ -1,28 +1,38 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/config.private.hpp>
+
 #include "plugin.h"
-
 #include "player.h"
 #include "fileio.h"
 
 #include <sstream>
-
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
-#elif defined _WIN64 || defined _WIN32
+#elif defined _WIN32
 	#include <windows.h>
 #endif
-
-// *** ms-windows note ***
-// plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
+// win32 note: plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
 
 namespace psy { namespace core {
-	using namespace psycle::plugin_interface;
+
+
 /**************************************************************************/
 // PluginFxCallback
 
@@ -121,7 +131,6 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 	}
 	//CPUCOST_CALC(cost, numSamples);
 	//_cpuCost += cost;
-	Machine::UpdateVuAndStanbyFlag(numSamples);
 	_worked = true;
 	return numSamples;
 #if 0

@@ -3,6 +3,8 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\implementation psycle::engine::generic::test
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "test.hpp"
 #if defined PSYCLE__TEST

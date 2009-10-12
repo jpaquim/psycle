@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "DirectoryDlg.hpp"
 #include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

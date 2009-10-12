@@ -5,7 +5,7 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 
-#if !defined DIVERSALIS__OS__MICROSOFT
+#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#error "this plugin is specific to microsoft's operating system"
 #endif
 

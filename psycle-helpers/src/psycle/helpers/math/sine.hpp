@@ -5,7 +5,7 @@
 #include <cmath>
 #include "pi.hpp"
 #if defined BOOST_AUTO_TEST_CASE
-	#include <universalis/os/clocks.hpp>
+	#include <universalis/operating_system/clocks.hpp>
 	#include <universalis/compiler/typenameof.hpp>
 	#include <sstream>
 #endif
@@ -38,10 +38,10 @@ Real fast_sin(Real const & radians) {
 		// q = 0.782, p = 0.218 for minimal relative error
 		// q = ?, p = ? for minimal THD error
 		#if 1
-			Real const p(Real(0.224008178776));
+			Real const p(0.224008178776);
 			y = p * (y * std::abs(y) - y) + y;
 		#else
-			Real const q(Real(0.775991821224));
+			Real const q(0.775991821224);
 			y = q * y + p * y * std::abs(y);
 		#endif
 	}
@@ -50,12 +50,12 @@ Real fast_sin(Real const & radians) {
 }
 
 #if defined BOOST_AUTO_TEST_CASE
-	#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR < 4
+	#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR < 4
 		///\todo fail at runtime on old mingw
 	#else
 		template<unsigned int Polynomial_Degree, typename Real>
 		void fast_sin_test_template() {
-			using namespace universalis::os::clocks;
+			using namespace universalis::operating_system::clocks;
 			//typedef thread clock;
 			typedef monotonic clock;
 			int const iterations(1000000);

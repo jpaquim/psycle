@@ -1,29 +1,21 @@
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
+#include <packageneric/pre-compiled.private.hpp>
 #define _WIN32_DCOM
 
 #include "Psycle.hpp"
+#include "Version.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
-#include "ChildView.hpp"
-#include "MachineView.hpp"
-#include "PatternView.hpp"
 #include "MidiInput.hpp"
 #include "NewMachine.hpp"
 #include "SInstance.h"
-#include <universalis/cpu/exception.hpp>
+#include "Loggers.hpp"
+#include <universalis/processor/exception.hpp>
 #include <diversalis/compiler.hpp>
 #include <sstream>
 #include <comdef.h>
 #include <wbemidl.h>
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/plugincatcher.h>
-#include <psycle/core/machinefactory.h>
-#include <psycle/core/player.h>
-using namespace psy::core;
-#endif
-
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	# pragma comment(lib, "wbemuuid")
 #endif
@@ -46,7 +38,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				#if 0
 					if(!::LoadLibrary("unicows"))
 					{
-						std::runtime_error e("could not load library unicows: " + universalis::os::exceptions::code_description());
+						std::runtime_error e("could not load library unicows: " + universalis::operating_system::exceptions::code_description());
 						MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
 						throw e;
 					}
@@ -59,13 +51,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		BOOL CPsycleApp::InitInstance()
-		{		
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			MachineFactory & factory(MachineFactory::getInstance());
-			//TODO: Use the pluginCatcher when it's ready.
-			factory.Initialize(&Player::singleton(), new PluginFinderCache());
-#endif
-
+		{
 			// Allow only one instance of the program
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
 			CInstanceChecker instanceChecker;
@@ -78,7 +64,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
-			CMainFrame* pFrame = new CMainFrame();
+			CMainFrame* pFrame = new CMainFrame;
 			m_pMainWnd = pFrame;
 
 			loggers::info("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
@@ -124,28 +110,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			tIcon=LoadIcon(IDR_MAINFRAME);
 			pFrame->SetIcon(tIcon, true);
 			pFrame->SetIcon(tIcon, false);
-		
-			pFrame->m_wndView.machine_view()->InitSkin();
-			pFrame->m_wndView.machine_view()->Rebuild();
-			pFrame->m_wndView.pattern_view()->LoadPatternHeaderSkin();
-			pFrame->m_wndView.pattern_view()->RecalcMetrics();
-			pFrame->m_wndView.pattern_view()->RecalculateColourGrid();	
+			
+			pFrame->m_wndView.LoadMachineSkin();
+			pFrame->m_wndView.LoadPatternHeaderSkin();
+			pFrame->m_wndView.LoadMachineBackground();
+			pFrame->m_wndView.RecalcMetrics();
+			pFrame->m_wndView.RecalculateColourGrid();
+
 
 			// The one and only window has been initialized, so show and update it.
 
 			pFrame->ShowWindow(SW_MAXIMIZE);
-						
+			
 			// center master machine
-			pFrame->m_wndView.machine_view()->CenterMaster();
+			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+			
 			pFrame->UpdateWindow();
 			
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			factory.setPsyclePath(Global::pConfig->GetPluginDir());
-			factory.setLadspaPath("");
-			factory.setVstPath(Global::pConfig->GetVstDir());
-#else
 			CNewMachine::LoadPluginInfo(false);
-#endif
 
 			LoadRecent(pFrame); // Import recent files from registry.
 
@@ -160,7 +143,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				pFrame->CheckForAutosave();
 			}
-
 			return TRUE;
 		}
 
@@ -205,12 +187,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			///\todo lock/unlock
 			Sleep(256);
 			_global.pConfig->_pMidiInput->Close();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			MachineFactory & factory(MachineFactory::getInstance());
-			factory.Finalize();
-#else
 			CNewMachine::DestroyPluginInfo();
-#endif
 			return CWinApp::ExitInstance();
 		}
 
@@ -221,7 +198,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				char tmpName [257];
 				std::strncpy(tmpName, m_lpCmdLine+1, 256 );
 				tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
-				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.projects_->active_project()->OnFileLoadsongNamed(tmpName, 1);
+				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
 			}
 		}
 

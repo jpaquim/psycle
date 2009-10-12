@@ -35,12 +35,10 @@
 // version 0.2 - threshold now defaults to 32768 rather than to 512
 
 #include <psycle/plugin_interface.hpp>
-#include <cstring>
-#include <cstdlib>
-#include <cassert>
-#include <cmath>
-
-using namespace psycle::plugin_interface;
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <math.h>
 
 CMachineParameter const paraThreshold =
 {
@@ -68,7 +66,8 @@ CMachineParameter const *pParameters[] =
 	&paraHardness
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,
 	0,                                     // flags
 	2,                                     // numParameters
@@ -82,7 +81,7 @@ CMachineInfo const MacInfo (
 	"Catatonic Porpoise",                  // author
 	"About",                 // A command that is used to display an about box
 	3
-);
+};
 
 
 class mi : public CMachineInterface

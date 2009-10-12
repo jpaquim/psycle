@@ -1,7 +1,9 @@
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "SkinDlg.hpp"
+#include "Psycle.hpp"
 #include "Helpers.hpp"
 #include "Configuration.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -1200,7 +1202,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							hexstring_to_integer(q+1, _wirewidth);
 						}
 					}
-					else if (std::strstr(buf,"\"mv_wireaa\"=hex:"))
+					if (std::strstr(buf,"\"mv_wireaa\"=hex:"))
 					{
 						char *q = std::strchr(buf,58); // :
 						if (q)

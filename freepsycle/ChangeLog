@@ -419,7 +419,7 @@ freepsycle (0.0.213) unstable; urgency=low
 freepsycle (0.0.212) unstable; urgency=low
 
   * syncing debian package version patch number with that of gnu-arch
-  * universalis::os revised for boost::filesystem
+  * operating_system revised for boost::filesystem
 
  -- Johan Boule <bohan@retropaganda.info>  Fri, 15 Oct 2004 00:27:34 +0000
 

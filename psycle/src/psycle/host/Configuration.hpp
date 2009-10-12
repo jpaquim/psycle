@@ -1,11 +1,10 @@
 ///\file
 ///\interface psycle::host::Configuration.
 #pragma once
-#include "Global.hpp"
 #include "AudioDriver.hpp"
+#include "Version.hpp"
 #include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 #include <cstddef>
-
 namespace psycle
 {
 	namespace host

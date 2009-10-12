@@ -2,15 +2,16 @@ isEmpty(psycle_core_included) {
 	psycle_core_included = 1
 	verbose: message("psycle-core included")
 
-	include($$COMMON_DIR/libxml++.pri)
-	include($$COMMON_DIR/zlib.pri)
+	include(libxml++.pri)
+	include(zlib.pri)
+	include($$TOP_SRC_DIR/universalis/qmake/universalis.pri)
 	include($$TOP_SRC_DIR/psycle-audiodrivers/qmake/psycle-audiodrivers.pri)
 
 	PSYCLE_CORE_DIR = $$TOP_SRC_DIR/psycle-core
 	PSYCLE_CORE_BUILD_DIR = $$PSYCLE_CORE_DIR/++build
 
-	INCLUDEPATH *= $$PSYCLE_CORE_DIR/src $$TOP_SRC_DIR/psycle-plugins/src
-	DEPENDPATH  *= $$PSYCLE_CORE_DIR/src $$TOP_SRC_DIR/psycle-plugins/src
+	INCLUDEPATH *= $$PSYCLE_CORE_DIR/src
+	DEPENDPATH  *= $$PSYCLE_CORE_DIR/src
 
 	!contains(TARGET, psycle-core) {
 		CONFIG *= link_prl

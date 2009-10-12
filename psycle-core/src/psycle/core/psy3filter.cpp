@@ -1,13 +1,15 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/config.private.hpp>
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #include "psy3filter.h"
-
-#include <psycle/helpers/datacompression.hpp>
+#include "commands.h"
+#include "datacompression.h"
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
@@ -16,8 +18,6 @@
 #include <iostream>
 
 namespace psy { namespace core {
-
-	using namespace psycle::helpers;
 
 std::string const Psy3Filter::FILE_FOURCC = "PSY3";
 /// Current version of the Song file and its chunks.
@@ -68,6 +68,8 @@ bool Psy3Filter::testFormat(const std::string & fileName) {
 void Psy3Filter::preparePatternSequence(CoreSong & song) {
 	seqList.clear();
 	song.patternSequence().removeAll();
+	// creatse a single Pattern Category
+	singleCat = song.patternSequence().patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence().createNewLine();
 }
@@ -176,7 +178,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		#if 0
 			Pattern* pat = song.patternSequence().PatternPool()->findById(*it);
 		#else
-		Pattern* pat = song.patternSequence().FindPattern(*it);
+			SinglePattern* pat = song.patternSequence().patternPool()->findById(*it);
 		#endif
 		singleLine->createEntry(pat, pos);
 		pos += pat->beats();
@@ -380,10 +382,13 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 			indexStr = "error";
 		else
 			indexStr = o.str();
-		Pattern* pat = new Pattern();
-		pat->setName(patternName+indexStr);
+		#if 0
+			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#else
+			SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#endif
+		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
-		song.patternSequence().Add(pat);
 		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) { // lines
 			for (unsigned int x = 0; x < song.tracks(); ++x) {
@@ -392,21 +397,17 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 				PatternEvent event = convertEntry(entry);
 				if(!event.empty()) {
 					if(event.note() == notetypes::tweak) {
-						event.set_track(x);
-						pat->insert(beatpos, event);
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 					} else if(event.note() == notetypes::tweak_slide) {
-						event.set_track(x);
-						pat->insert(beatpos, event);
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
 					} else if(event.note() == notetypes::midi_cc) {
-						event.set_track(x);
-						pat->insert(beatpos, event);
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
 					} else {
 						if(event.command() == commandtypes::NOTE_DELAY)
 							/// Convert old value (part of line) to new value (part of beat)
 							event.setParameter(event.parameter()/linesPerBeat);
-						event.set_track(x);
-						pat->insert(beatpos, event);
+						(*pat)[beatpos].notes()[x] = event;
 					}
 					if((event.note() <= notetypes::release || event.note() == notetypes::empty) && event.command() == 0xfe && event.parameter() < 0x20)
 						linesPerBeat= event.parameter() & 0x1f;
@@ -416,8 +417,14 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 			beatpos += 1 / static_cast<float>(linesPerBeat);
 		}
 		delete[] pDest; pDest = 0;
-		pat->timeSignatures().clear();
-		pat->timeSignatures().push_back(TimeSignature(beatpos));
+		TimeSignature & sig =  pat->timeSignatures().back();
+		sig.setCount(static_cast<int>(beatpos / 4));
+		float uebertrag = beatpos - static_cast<int>(beatpos);
+		if(uebertrag) {
+			TimeSignature uebertragSig(uebertrag);
+			if(!sig.count()) pat->timeSignatures().pop_back();
+			pat->addBar(uebertragSig);
+		}
 	}
 	return fileread;
 }
@@ -465,14 +472,19 @@ bool Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) 
 			case MACH_PLUGIN:
 			{
 				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
-				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, MachineKey::preprocessName(sDllName), 0), id);
+				std::string dllName = sDllName;
+				std::string::size_type const pos(dllName.find(".dll"));
+				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, dllName, 0), id);
 				break;
 			}
 			case MACH_VST:
 			//case MACH_VSTFX:
 			{
-				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
-				mac = factory.CreateMachine(MachineKey(Hosts::VST, MachineKey::preprocessName(sDllName), 0), id);
+				//std::string::size_type const pos = dllName.find(".dll");
+				//if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+				//if(type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+				//else if(type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
 				break;
 			}
 			default: ;

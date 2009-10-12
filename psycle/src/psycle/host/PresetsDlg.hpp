@@ -1,27 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::CPresetsDlg.
 #pragma once
-#include "Psycle.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class Machine;
-	}
-}
-using namespace psy::core;
-#endif
-
+#include "resources/resources.hpp"
 #include <cstring>
-
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		#define MAX_PRESETS 256
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Machine;
-#endif
 		class CFrameMachine;
 
 		/// machine parameter preset \todo should we move it outside of gui classes?

@@ -1,14 +1,14 @@
 #pragma once
-#include <diversalis/cpu.hpp>
+#include <diversalis/processor.hpp>
 #include <universalis/compiler.hpp>
-#if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
+#if defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
 	#include <boost/static_assert.hpp>
 	#include <cstdint>
 #else
 	#include <cmath>
 #endif
 #if defined BOOST_AUTO_TEST_CASE
-	#include <universalis/os/clocks.hpp>
+	#include <universalis/operating_system/clocks.hpp>
 	#include <cmath>
 	#include <sstream>
 #endif
@@ -25,7 +25,7 @@ namespace psycle
 			/// less than 10% for input values above 1.7.
 			float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f)
 			{
-				#if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
+				#if defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
 					BOOST_STATIC_ASSERT((sizeof f == 4));
 					//assert(f > 0); 
 					union result_union {
@@ -141,7 +141,7 @@ namespace psycle
 						//BOOST_MESSAGE(s.str());
 						BOOST_CHECK(1 - tolerance < ratio && ratio < 1 + tolerance);
 					}
-					using namespace universalis::os::clocks;
+					using namespace universalis::operating_system::clocks;
 					//typedef thread clock;
 					typedef monotonic clock;
 					int const iterations(1000000);

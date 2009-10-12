@@ -1,27 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::CMasterDlg.
 #pragma once
-
-#include "Psycle.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class Master;
-	}
-}
-using namespace psy::core;
-#endif
-
-
-
+#include "Machine.hpp"
+#include "Constants.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CChildView;
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Master;
-#endif
+
 
 		class CVolumeCtrl: public CSliderCtrl
 		{
@@ -40,7 +28,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			CMasterDlg(CChildView * pParent);
-			~CMasterDlg();
 			BOOL Create();
 			void PaintNumbers(float val, int x, int y);
 			void PaintNumbersDC(CDC* dc,CDC* memDC,float val,int x,int y);
@@ -48,14 +35,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void PaintNames(char* name,int x,int y);
 			void SetSliderValues();
 			void UpdateUI(void);
-			void CenterWindowOnPoint(int x, int y);
 			CBitmap m_numbers;
 			CBitmap m_sliderknob;
 			CBitmap m_back;
 			CFont namesFont;
-
-			Master* _pMachine;			
-
+			Master* _pMachine;
 			char macname[MAX_CONNECTIONS][32];
 			afx_msg void OnCancel();
 		// Dialog Data

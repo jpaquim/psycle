@@ -1,34 +1,23 @@
 #pragma once
-#include "Psycle.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class AudioRecorder;
-	}
-}
-using namespace psy::core;
-#endif
-
+#include <afxwin.h>
+#include <afxcmn.h>
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-	class AudioRecorder;
-#endif
+/// gear rack window.
 
+class AudioRecorder;
 class CChildView;
 
 class CWaveInMacDlg : public CDialog
 {
 public:
 	CWaveInMacDlg(CChildView* pParent);
-	CWaveInMacDlg(CChildView* pParent, class MachineGui* gui);
-
 	CChildView* m_pParent;
 	void RedrawList();
 	BOOL Create();
-	void Show(int x, int y);
 	afx_msg void OnCancel();
 
 	CComboBox m_listbox;
@@ -46,9 +35,6 @@ public:
 	CStatic m_vollabel;
 	afx_msg void OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult);
 	CSliderCtrl m_volslider;
-private:
-	MachineGui* gui_;
-	void centerWindowOnPoint(int x, int y);
 };
 
 PSYCLE__MFC__NAMESPACE__END

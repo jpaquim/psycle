@@ -1,20 +1,20 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
-#include "configuration_options.hpp"
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-#include "Song.hpp"
+#include <packageneric/pre-compiled.private.hpp>
+#include "Psycle.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "NewMachine.hpp"
 	#include "MainFrm.hpp"
 	#include "ChildView.hpp"
-	#include "MachineView.hpp"
 	#include "ProgressDialog.hpp"
 #else
 	#include "player_plugins/winamp/fake_progressDialog.hpp"
 	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
+
+#include "Song.hpp"
 
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "Sampler.hpp"
@@ -267,8 +267,8 @@ namespace psycle
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					// Store the volumes of each wire and exchange.
-					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(this,mac1->id(),i,tmp1ovol[i]);	}
-					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(this,mac2->id(),i,tmp2ovol[i]); }				
+					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(this,mac1->_macIndex,i,tmp1ovol[i]);	}
+					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(this,mac2->_macIndex,i,tmp2ovol[i]); }				
 					mac1->GetWireVolume(i,tmp1ivol[i]);
 					mac2->GetWireVolume(i,tmp2ivol[i]);
 
@@ -312,12 +312,12 @@ namespace psycle
 					if (mac1->_inputCon[i])
 					{
 						Machine* macsrc = _pMachine[mac1->_inputMachines[i]];
-						mac1->InsertInputWireIndex(this,i,macsrc->id(),macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
+						mac1->InsertInputWireIndex(this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
 					}
 					if (mac2->_inputCon[i])
 					{
 						Machine* macsrc = _pMachine[mac2->_inputMachines[i]];
-						mac2->InsertInputWireIndex(this,i,macsrc->id(),macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
+						mac2->InsertInputWireIndex(this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
 					}
 
 					if (mac1->_connection[i])
@@ -458,10 +458,10 @@ namespace psycle
 					zapObject(_pMachine[i]);
 			}
 			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				rInstrument(i).Init();
+				XMSampler::rInstrument(i).Init();
 			}
 			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				SampleData(i).Init();
+				XMSampler::SampleData(i).Init();
 			}
 
 			for(int i(0) ; i < MAX_PATTERNS; ++i)
@@ -493,9 +493,9 @@ namespace psycle
 			CSingleLock lock(&door,TRUE);
 			seqBus=0;
 			// Song reset
-			name_ = "Untitled";
-			author_ = "Unnamed";
-			comment_ = "";
+			name = "Untitled";
+			author = "Unnamed";
+			comments = "";
 			currentOctave=4;
 			// General properties
 			m_BeatsPerMin=125;
@@ -513,7 +513,7 @@ namespace psycle
 			DeleteAllPatterns();
 			// Clear sequence
 			Reset();
-			_instSelected = 0;
+			instSelected = 0;
 			midiSelected = 0;
 			auxcolSelected = 0;
 			_saved=false;
@@ -524,10 +524,8 @@ namespace psycle
 				CreateMachine
 					(
 						MACH_MASTER, 
-						300,
-						200,
-//						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
-//						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
+						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
+						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
 						0,
 						MASTER_INDEX
 					);
@@ -594,7 +592,7 @@ namespace psycle
 			// Verify that the destination is not a generator
 			if(dstMac->_mode == MACHMODE_GENERATOR) return -1;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
-			if (srcMac->FindOutputWire(dstMac->id()) > -1 || dstMac->FindOutputWire(srcMac->id()) > -1) return -1;
+			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return -1;
 			// disallow mixer as a sender of another mixer
 			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && dsttype != 0) return -1;
 			// If source is in a mixer chain, dissallow the new connection.
@@ -611,8 +609,8 @@ namespace psycle
 			if(freebus == -1 || dfreebus == -1 ) return -1;
 
 			// If everything went right, connect them.
-			srcMac->InsertOutputWireIndex(this,freebus,dstMac->id());
-			dstMac->InsertInputWireIndex(this,dfreebus,srcMac->id(),srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
+			srcMac->InsertOutputWireIndex(this,freebus,dstMac->_macIndex);
+			dstMac->InsertInputWireIndex(this,dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
 			return dfreebus;
 		}
 		bool Song::ChangeWireDestMac(Machine* srcMac,Machine* dstMac, int wiresrc,int wiredest)
@@ -623,7 +621,7 @@ namespace psycle
 			// Verify that the destination is not a generator
 			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
-			if (srcMac->FindOutputWire(dstMac->id()) > -1 || dstMac->FindOutputWire(srcMac->id()) > -1) return false;
+			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
 			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >=MAX_CONNECTIONS) return false;
 			// If source is in a mixer chain, dissallow the new connection.
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
@@ -642,13 +640,13 @@ namespace psycle
 			Machine *oldmac = _pMachine[srcMac->_outputMachines[wiresrc]];
 			if (oldmac)
 			{
-				if ((w = oldmac->FindInputWire(srcMac->id()))== -1)
+				if ((w = oldmac->FindInputWire(srcMac->_macIndex))== -1)
 					return false;
 
 				oldmac->GetWireVolume(w,volume);
 				oldmac->DeleteInputWireIndex(this,w);
-				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->id());
-				dstMac->InsertInputWireIndex(this,wiredest,srcMac->id(),srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->_macIndex);
+				dstMac->InsertInputWireIndex(this,wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -661,7 +659,7 @@ namespace psycle
 			// Verify that the destination is not a generator
 			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
-			if (srcMac->FindOutputWire(dstMac->id()) > -1 || dstMac->FindOutputWire(srcMac->id()) > -1) return false;
+			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
 			// disallow mixer as a sender of another mixer
 			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS) return false;
 			// If source is in a mixer chain, dissallow the new connection.
@@ -692,13 +690,13 @@ namespace psycle
 			 
 			if (oldmac)
 			{
-				if ((w =oldmac->FindOutputWire(dstMac->id())) == -1)
+				if ((w =oldmac->FindOutputWire(dstMac->_macIndex)) == -1)
 					return false;
 
 				oldmac->DeleteOutputWireIndex(this,w);
-				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->id());
+				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->_macIndex);
 				dstMac->GetWireVolume(wiredest,volume);
-				dstMac->InsertInputWireIndex(this,wiredest,srcMac->id(),srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				dstMac->InsertInputWireIndex(this,wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -735,7 +733,7 @@ namespace psycle
 		{
 			RemovePattern(ps);
 			ppPatternData[ps] = new unsigned char[MULTIPLY2];
-			PatternEvent blank;
+			PatternEntry blank;
 			unsigned char * pData = ppPatternData[ps];
 			for(int i = 0; i < MULTIPLY2; i+= EVENT_SIZE)
 			{
@@ -747,7 +745,7 @@ namespace psycle
 
 		bool Song::AllocNewPattern(int pattern,char *name,int lines,bool adaptsize)
 		{
-			PatternEvent blank;
+			PatternEntry blank;
 			unsigned char *toffset;
 			if(adaptsize)
 			{
@@ -812,14 +810,6 @@ namespace psycle
 			return true;
 		}
 
-		void Song::SetDefaultPatternLines(int defaultlines) 
-		{
-			for(int c(0) ; c < MAX_PATTERNS; ++c)
-			{
-				patternLines[c] = defaultlines;
-			}
-		}
-
 		int Song::GetHighestInstrumentIndex()
 		{
 			int i;
@@ -862,7 +852,7 @@ namespace psycle
 			//Check for one unexistant pattern.
 			for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
 			//if none found, try to find an empty used pattern.
-			PatternEvent blank;
+			PatternEntry blank;
 			bool bTryAgain(true);
 			while(bTryAgain && rval < MAX_PATTERNS - 1)
 			{
@@ -1240,18 +1230,19 @@ namespace psycle
 				{
 					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
 				}
+				int bytesread = 0;
 				if (size == 4) // Since "version" is used for File version, we use size as version identifier
 				{
 					pFile->Read(&chunkcount,sizeof(chunkcount));
+					bytesread = 4;
 				}
 				/*
-				if (size == )
+				else if (size == )
 				{
-				// This is left here if someday, extra data is added to the file version chunk.
-				// Modify "pFile->Skip(size - 4);" as necessary. Ex:  pFile->Skip(size - bytesread);
+					// This is left here if someday, extra data is added to the file version chunk.
 				}
 				*/
-				if ( size-4 > 0) pFile->Skip(size - 4);// Size of the current Header DATA // This ensures that any extra data is skipped.
+				if ( size-bytesread > 0) pFile->Skip(size - bytesread);// Size of the current Header DATA // This ensures that any extra data is skipped.
 
 				DestroyAllMachines();
 				_machineLock = true;
@@ -1268,36 +1259,26 @@ namespace psycle
 						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						if(version > CURRENT_FILE_VERSION_INFO)
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Info Seqment of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
+							char name_[129]; char author_[65]; char comments_[65536];
+							pFile->ReadString(name_, sizeof name_);
+							pFile->ReadString(author_, sizeof author_);
+							pFile->ReadString(comments_,sizeof comments_);
+							name = name_;
+							author = author_;
+							comments = comments_;
 						}
-						else
-						{
-							char name[129]; char author[65]; char comments[65536];
-							pFile->ReadString(name, sizeof name);
-							pFile->ReadString(author, sizeof author);
-							pFile->ReadString(comments,sizeof comments);
-							name_ = name;
-							author_ = author;
-							comment_ = comments;
-
-						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"SNGI")==0)
 					{
 						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						if(version > CURRENT_FILE_VERSION_SNGI)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Song Segment of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							// why all these temps?  to make sure if someone changes the defs of
 							// any of these members, the rest of the file reads ok.  assume 
@@ -1329,7 +1310,7 @@ namespace psycle
 							pFile->Read(&temp, sizeof temp);  
 							auxcolSelected = temp;
 							pFile->Read(&temp, sizeof temp);  
-							_instSelected = temp;
+							instSelected = temp;
 							// sequence width, for multipattern
 							pFile->Read(&temp,sizeof(temp));
 							_trackArmedCount = 0;
@@ -1348,19 +1329,15 @@ namespace psycle
 								Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
 							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"SEQD")==0)
 					{
 						--chunkcount;
 						pFile->Read(&version,sizeof version);
 						pFile->Read(&size,sizeof size);
-						if(version > CURRENT_FILE_VERSION_SEQD)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							// index, for multipattern - for now always 0
 							pFile->Read(&index, sizeof index);
@@ -1378,30 +1355,22 @@ namespace psycle
 									playOrder[i] = temp;
 								}
 							}
-							else
-							{
-								//MessageBox(0, "Sequence section of File is from a newer version of psycle!", 0, 0);
-								pFile->Skip(size - sizeof index);
-							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"PATD") == 0)
 					{
 						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						if(version > CURRENT_FILE_VERSION_PATD)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							// index
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_PATTERNS)
 							{
+								unsigned int sizez77 = 0;
 								// num lines
 								pFile->Read(&temp, sizeof temp );
 								// clear it out if it already exists
@@ -1410,9 +1379,9 @@ namespace psycle
 								// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
 								pFile->Read(&temp, sizeof temp );
 								pFile->ReadString(patternName[index], sizeof *patternName);
-								pFile->Read(&size, sizeof size);
-								byte* pSource = new byte[size];
-								pFile->Read(pSource, size);
+								pFile->Read(&sizez77, sizeof sizez77);
+								byte* pSource = new byte[sizez77];
+								pFile->Read(pSource, sizez77);
 								byte* pDest;
 								BEERZ77Decomp2(pSource, &pDest);
 								zapArray(pSource,pDest);
@@ -1424,30 +1393,16 @@ namespace psycle
 								}
 								zapArray(pDest);
 							}
-							else
-							{
-								//MessageBox(0, "Pattern section of File is from a newer version of psycle!", 0, 0);
-								pFile->Skip(size - sizeof index);
-							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"MACD") == 0)
 					{
-						int curpos(0);
+						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						--chunkcount;
-						if(!fullopen)
-						{
-							curpos = pFile->GetPos();
-						}
-						if(version > CURRENT_FILE_VERSION_MACD)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Machine section of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_MACHINES)
@@ -1455,81 +1410,67 @@ namespace psycle
 								// we had better load it
 								DestroyMachine(index);
 								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
-								// skips specific chunk.
-								if(!fullopen) pFile->Seek(curpos + size);
-							}
-							else
-							{
-								//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-								pFile->Skip(size - sizeof index);
 							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"INSD") == 0)
 					{
+						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						--chunkcount;
-						if(version&0xFF00 > CURRENT_FILE_VERSION_INSD&0xFF00)
-						{
-							// there is an error, this file is newer than this build of psycle
-							//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-							pFile->Skip(size);
-						}
-						else
+						size_t begins = pFile->GetPos();
+						if((version&0xFF00) == VERSION_MAJOR_ZERO)
 						{
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_INSTRUMENTS)
 							{
 								_pInstrument[index]->LoadFileChunk(pFile, version, fullopen);
 							}
-							else
-							{
-								//MessageBox(0, "Instrument section of File is from a newer version of psycle!", 0, 0);
-								pFile->Skip(size - sizeof index);
-							}
 						}
+						pFile->Seek(begins + size);
 					}
 					else if(std::strcmp(Header,"EINS") == 0)
 					{
+						--chunkcount;
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
-						long filepos;
+						size_t begins = pFile->GetPos();
+						long filepos=pFile->GetPos();
 						bool wrongState=false;
-						filepos=pFile->GetPos();
-						--chunkcount;
-						// Check higher bits of version (AAAABBBB). 
-						// different A, incompatible, different B, compatible
-						if ( (version&0x11110000) == (XMSampler::VERSION&0x11110000) )
+						//Version zero was the development version. Version one is the published one.
+						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
 						{
 							// Instrument Data Load
 							int numInstruments;
 							pFile->Read(numInstruments);
 							int idx;
-							for(int i = 0;i < numInstruments;i++)
+							for(int i = 0;i < numInstruments && filepos < begins+size;i++)
 							{
 								pFile->Read(idx);
-								if (!rInstrument(idx).Load(*pFile)) { wrongState=true; break; }
-								//m_Instruments[idx].IsEnabled(true); // done in the loader.
+								int sizeIns = XMSampler::rInstrument(idx).Load(*pFile);
+								if ((version&0xFFFF) > 0) {
+									//Version 0 doesn't write the chunk size correctly
+									//so we cannot correct it in case of error
+									pFile->Seek(filepos+sizeIns);
+									filepos=pFile->GetPos();
+								}
 							}
-							if (!wrongState)
+							int numSamples;
+							pFile->Read(numSamples);
+							for(int i = 0;i < numSamples && filepos < begins+size;i++)
 							{
-								int numSamples;
-								pFile->Read(numSamples);
-								int idx;
-								for(int i = 0;i < numSamples;i++)
-								{
-									pFile->Read(idx);
-									if (!SampleData(idx).Load(*pFile)) { wrongState=true; break; }
+								pFile->Read(idx);
+								int sizeSamp = XMSampler::SampleData(idx).Load(*pFile);
+								if ((version&0xFFFF) > 0) {
+									//Version 0 doesn't write the chunk size correctly
+									//so we cannot correct it in case of error
+									pFile->Seek(filepos+sizeSamp);
+									filepos=pFile->GetPos();
 								}
 							}
 						}
-						else wrongState=true;
-
-						if (wrongState)
-						{
-							pFile->Seek(filepos+size);
-						}
+						pFile->Seek(begins+size);
 					}
 					else 
 					{
@@ -1636,13 +1577,13 @@ namespace psycle
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
 				New();
-				char name[129]; char author[65]; char comments[65536];
-				pFile->Read(name, 32);
-				pFile->Read(author, 32);
-				pFile->Read(comments,128);
-				name_ = name;
-				author_ = author;
-				comment_ = comments;
+				char name_[129]; char author_[65]; char comments_[65536];
+				pFile->Read(name_, 32);
+				pFile->Read(author_, 32);
+				pFile->Read(comments_,128);
+				name = name_;
+				author = author_;
+				comments = comments_;
 
 				pFile->Read(&m_BeatsPerMin, sizeof m_BeatsPerMin);
 				pFile->Read(&sampR, sizeof sampR);
@@ -1680,8 +1621,8 @@ namespace psycle
 						unsigned char * pData(CreateNewPattern(i));
 						for(int c(0) ; c < patternLines[i] ; ++c)
 						{
-							pFile->Read(reinterpret_cast<char*>(pData), OLD_MAX_TRACKS * sizeof(PatternEvent));
-							pData += MAX_TRACKS * sizeof(PatternEvent);
+							pFile->Read(reinterpret_cast<char*>(pData), OLD_MAX_TRACKS * sizeof(PatternEntry));
+							pData += MAX_TRACKS * sizeof(PatternEntry);
 						}
 						///\todo: tweak_effect should be converted to normal tweaks!
 					}
@@ -1694,7 +1635,7 @@ namespace psycle
 				Progress.m_Progress.SetPos(2048);
 				::Sleep(1); ///< ???
 				// Instruments
-				pFile->Read(&_instSelected, sizeof _instSelected);
+				pFile->Read(&instSelected, sizeof instSelected);
 				for(int i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
 				{
 					pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
@@ -2005,7 +1946,7 @@ namespace psycle
 						}
 
 #if !defined WINAMP_PLUGIN
-/*						switch (pMac[i]->_mode)
+						switch (pMac[i]->_mode)
 						{
 						case MACHMODE_GENERATOR:
 							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
@@ -2020,7 +1961,7 @@ namespace psycle
 							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
 							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 							break;
-						}*/
+						}
 #endif //!defined WINAMP_PLUGIN
 
 						pMac[i]->_x = x;
@@ -2229,7 +2170,7 @@ namespace psycle
 										val*=32768.0f; // BugFix
 									}
 									// and set the volume.
-									pMac[i]->InsertInputWireIndex(this,c,pOrigMachine->id(),pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
+									pMac[i]->InsertInputWireIndex(this,c,pOrigMachine->_macIndex,pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
 								}
 							}
 							else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
@@ -2402,7 +2343,7 @@ namespace psycle
 			// Instrument Data Save
 			int numInstruments = 0;	
 			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				if(rInstrument(i).IsEnabled()){
+				if(XMSampler::rInstrument(i).IsEnabled()){
 					numInstruments++;
 				}
 			}
@@ -2452,14 +2393,14 @@ namespace psycle
 
 			pFile->Write("INFO",4);
 			version = CURRENT_FILE_VERSION_INFO;
-			size = name().length() + author().length() + comment().length() + 3; // +3 for \0
+			size = name.length() + author.length() + comments.length() + 3; // +3 for \0
 
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
 
-			pFile->Write(name().c_str(),name().length()+1);
-			pFile->Write(author().c_str(),author().length()+1);
-			pFile->Write(comment().c_str(),comment().length()+1);
+			pFile->Write(name.c_str(),name.length()+1);
+			pFile->Write(author.c_str(),author.length()+1);
+			pFile->Write(comments.c_str(),comments.length()+1);
 
 			if ( !autosave ) 
 			{
@@ -2500,7 +2441,7 @@ namespace psycle
 			pFile->Write(&temp,sizeof(temp));
 			temp = auxcolSelected;
 			pFile->Write(&temp,sizeof(temp));
-			temp = _instSelected;
+			temp = instSelected;
 			pFile->Write(&temp,sizeof(temp));
 
 			temp = 1; // sequence width
@@ -2583,7 +2524,7 @@ namespace psycle
 					version = CURRENT_FILE_VERSION_PATD;
 
 					pFile->Write(&version,sizeof(version));
-					size = sizez77+(4*sizeof(temp))+strlen(patternName[i])+1;
+					size = sizez77+(4*sizeof(int))+strlen(patternName[i])+1;
 					pFile->Write(&size,sizeof(size));
 
 					index = i; // index
@@ -2699,16 +2640,16 @@ namespace psycle
 				pFile->Write(numInstruments);
 
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(rInstrument(i).IsEnabled()){
+					if(XMSampler::rInstrument(i).IsEnabled()){
 						pFile->Write(i);
-						rInstrument(i).Save(*pFile);
+						XMSampler::rInstrument(i).Save(*pFile);
 					}
 				}
 
 				// Sample Data Save
 				int numSamples = 0;	
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(SampleData(i).WaveLength() != 0){
+					if(XMSampler::SampleData(i).WaveLength() != 0){
 						numSamples++;
 					}
 				}
@@ -2716,9 +2657,9 @@ namespace psycle
 				pFile->Write(numSamples);
 
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(SampleData(i).WaveLength() != 0){
+					if(XMSampler::SampleData(i).WaveLength() != 0){
 						pFile->Write(i);
-						SampleData(i).Save(*pFile);
+						XMSampler::SampleData(i).Save(*pFile);
 					}
 				}
 				long pos2 = pFile->GetPos(); 
@@ -2745,6 +2686,20 @@ namespace psycle
 			}
 
 			return true;
+		}
+		void Song::DoPreviews(int amount)
+		{
+#if !defined WINAMP_PLUGIN
+			//todo do better.. use a vector<InstPreview*> or something instead
+			if(wavprev.IsEnabled())
+			{
+				wavprev.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+			}
+			if(waved.IsEnabled())
+			{
+				waved.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+			}
+#endif // !defined WINAMP_PLUGIN
 		}
 
 		bool Song::CloneMac(int src,int dst)
@@ -2863,13 +2818,13 @@ namespace psycle
 			int xs,ys,x,y;
 			if (src >= MAX_BUSES)
 			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->MachineCoords.sEffect.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->MachineCoords.sEffect.height;
+				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
 			}
 			else 
 			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->MachineCoords.sGenerator.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->MachineCoords.sGenerator.height;
+				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
 			}
 			x=_pMachine[dst]->_x+32;
 			y=_pMachine[dst]->_y+ys+8;
@@ -3076,7 +3031,7 @@ namespace psycle
 			if (!ppPatternData[i]) {
 				return true;
 			}
-			PatternEvent blank;
+			PatternEntry blank;
 			unsigned char * pData = ppPatternData[i];
 			for (int j = 0; j < MULTIPLY2; j+= EVENT_SIZE)
 			{
@@ -3089,4 +3044,3 @@ namespace psycle
 		}
 	}
 }
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

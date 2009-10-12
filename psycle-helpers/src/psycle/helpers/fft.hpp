@@ -29,8 +29,7 @@
 	you need to use doubles.
 
 **********************************************************************/
-#pragma once
-namespace psycle { namespace helpers { namespace dsp {
+namespace psycle { namespace host { namespace dsp {
 	#ifndef M_PI
 		#define M_PI 3.14159265358979323846
 	#endif

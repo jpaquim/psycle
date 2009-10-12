@@ -1,31 +1,18 @@
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "FrameMachine.hpp"
-///\todo Replace the drawing code with NativeGui
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machine.h>
-#include <psycle/core/plugin.h>
-#include <psycle/core/song.h>
-using namespace psy::core;
-#else
-#include "Machine.hpp"
-#include "Plugin.hpp"
-#include "Song.hpp"
-#endif
-
-#include "MainFrm.hpp"
-#include "ChildView.hpp"
-#include "MachineView.hpp"
-#include "InputHandler.hpp"
-#include "Configuration.hpp"
-
-#include "MachineGui.hpp"
+#include "Psycle.hpp"
 #include "NativeGui.hpp"
+#include "ChildView.hpp"
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
-#include <psycle/helpers/helpers.hpp>
-
+#include "Plugin.hpp"
+#include "InputHandler.hpp"
+#include "Helpers.hpp"
+#include "MainFrm.hpp"
+#include "Machine.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -56,37 +43,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		END_MESSAGE_MAP()
 
 		CFrameMachine::CFrameMachine()
-			: gen_gui_(0)
 		{
 			//do not use! Use OnCreate Instead.
-		}
-
-		CFrameMachine::CFrameMachine(MachineGui* gen_gui)
-			:	gen_gui_(gen_gui) {
-			assert(gen_gui);
-			wndView = gen_gui->view()->child_view();
-			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->id());			
 		}
 
 		CFrameMachine::~CFrameMachine()
 		{
 			//do not use! Use OnDestroy Instead.
-		}
-
-		void CFrameMachine::Init(int x, int y)
-		{
-			LoadFrame(
-				IDR_MACHINEFRAME, 
-				WS_POPUPWINDOW | WS_CAPTION,
-				gen_gui_->view()->child_view());
-			SelectMachine(gen_gui_->mac());
-			CRect rc;
-			gen_gui_->view()->parent()->GetWindowRect(rc);
-			Generate(x, y);			
-			std::ostringstream winname;
-			winname<<std::setfill('0') << std::setw(2) << std::hex;
-			winname << MachineIndex << " : " << _pMachine->GetEditName();
-			SetWindowText(winname.str().c_str());
 		}
 
 		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -127,8 +90,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnDestroy() 
 		{
-			assert(gen_gui_);
-			gen_gui_->BeforeDeleteDlg();
+			if ( _pActive != NULL ) *_pActive = false;
 			b_font.DeleteObject();
 			b_font_bold.DeleteObject();
 			KillTimer(2104+MachineIndex);
@@ -147,58 +109,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
 		{
 			CFrameWnd::OnSetFocus(pOldWnd);
-			//((CMainFrame*)wndView->pParentFrame)->ChangeGen(_pMachine->id());
+			//((CMainFrame*)wndView->pParentFrame)->ChangeGen(_pMachine->_macIndex);
 			Invalidate(false);
 		}
-		void CFrameMachine::Generate(double x, double y)
+		void CFrameMachine::Generate()
 		{
+
+			
 /*			if (Global::pConfig->bBmpDial)
 				wndView->LoadMachineDial();
 			else
 				wndView->machinedial.LoadBitmap(IDB_KNOB);
 */
+
 			UpdateWindow();
-
-			int const winh = parspercol*K_YSIZE;
-
-
-			CRect rect,rect2;
-			//Show the window in the usual way, without worrying about the exact sizes.
-			SetWindowPos
-				(0, 
-				x,
-				y,
-				W_ROWWIDTH * ncol,
-				winh + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYEDGE),
-				SWP_NOZORDER | SWP_SHOWWINDOW
-			);
-			//Get the coordinates (sizes) of the client area, and the frame.
-			GetClientRect(&rect);
-			GetWindowRect(&rect2);
-			//Using the previous values, resize the window to the desired sizes.
-			MoveWindow
-				(x,
-				y,
-				(rect2.right-rect2.left)+((W_ROWWIDTH*ncol)-rect.right),
-				(rect2.bottom-rect2.top)+(winh-rect.bottom),
-				true
-			);
-			centerWindowOnPoint(x, y);
-		}
-		void CFrameMachine::centerWindowOnPoint(int x, int y) {
-			CRect r;
-			GetWindowRect(&r);
-
-			x -= ((r.right-r.left)/2);
-			y -= ((r.bottom-r.top)/2);
-
-			if (x < 0) {
-				x = 0;
-			}
-			if (y < 0) {
-				y = 0;
-			}
-			SetWindowPos(0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 		}
 
 		void CFrameMachine::SelectMachine(Machine* pMachine)
@@ -211,21 +135,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ncol = _pMachine->GetNumCols();
 			parspercol = numParameters/ncol;
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-			{
-				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo().Command);
-			}
-			else if ( _pMachine->getMachineKey().host() == Hosts::VST )
-			{
-#else
 			if ( _pMachine->_type == MACH_PLUGIN )
 			{
 				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
 			}
 			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
 			{
-#endif
 				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
 				parspercol = numParameters/ncol;
 				if (parspercol>24)	// check for "too big" windows
@@ -240,6 +155,35 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
 			
+			int const winh = parspercol*K_YSIZE;
+
+			CWnd *dsk = GetDesktopWindow();
+			CRect rClient;
+			dsk->GetClientRect(&rClient);
+
+			CRect rect,rect2;
+			//Show the window in the usual way, without worrying about the exact sizes.
+			MoveWindow
+				(
+				rClient.Width() / 2 - W_ROWWIDTH * ncol / 2,
+				rClient.Height() / 2 - winh / 2,
+				W_ROWWIDTH * ncol,
+				winh + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYEDGE),
+				false
+				);
+			ShowWindow(SW_SHOW);
+			//Get the coordinates (sizes) of the client area, and the frame.
+			GetClientRect(&rect);
+			GetWindowRect(&rect2);
+			//Using the previous values, resize the window to the desired sizes.
+			MoveWindow
+				(
+				0,
+				0,
+				(rect2.right-rect2.left)+((W_ROWWIDTH*ncol)-rect.right),
+				(rect2.bottom-rect2.top)+(winh-rect.bottom),
+				true
+				);
 		}
 
 
@@ -441,21 +385,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 	void CFrameMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-#else
 			if( _pMachine->_type == MACH_PLUGIN)
-#endif
 			{
 				int par = ConvertXYtoParam(point.x,point.y);
 				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
 				{
 					wndView->AddMacViewUndo();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo().Parameters[par]->DefValue);
-#else
 					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
-#endif
 				}
 			}
 			Invalidate(false);
@@ -539,11 +475,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (nFlags & MK_CONTROL)
 				{
-					Global::song().seqBus = MachineIndex;//Global::song().FindBusFromIndex(MachineIndex);
+					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
 					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS); // PARAMS
-					Global::song().auxcolSelected=tweakpar;
+					Global::_pSong->auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 				}
 				else 
@@ -589,7 +525,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->IsGenerator() || Global::pConfig->_notesToEffects)
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
@@ -616,7 +552,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->IsGenerator() ||Global::pConfig->_notesToEffects)
+				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
 				{
 					Global::pInputHandler->StopNote(outnote,true,_pMachine);
 				}
@@ -650,20 +586,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersResetparameters() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-#else
-			if( _pMachine->_type == MACH_PLUGIN)
-#endif
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
 				int numpars = _pMachine->GetNumParams();
 				for (int c=0; c<numpars; c++)
 				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					int dv = ((Plugin*)_pMachine)->GetInfo().Parameters[c]->DefValue;
-#else
 					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
-#endif
 					wndView->AddMacViewUndo();
 					_pMachine->SetParameter(c,dv);
 				}
@@ -677,15 +605,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CFrameMachine::OnParametersCommand() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-			{
-				//todo
-#else
-			if( _pMachine->_type == MACH_PLUGIN)
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
 				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
-#endif
 				try
 				{
 					((Plugin*)_pMachine)->proxy().Command();
@@ -703,21 +625,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				istweak = false;
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-#else
-			if( _pMachine->_type == MACH_PLUGIN)
-#endif
+			if ( _pMachine->_type == MACH_PLUGIN)
 			{
 				MessageBox
 					(
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo().Author),
-						"About " + CString(((Plugin*)_pMachine)->GetInfo().Name)
-#else
 						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo()->Author),
 						"About " + CString(((Plugin*)_pMachine)->GetInfo()->Name)
-#endif
 					);
 			}
 		}

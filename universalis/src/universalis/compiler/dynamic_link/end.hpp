@@ -3,9 +3,7 @@
 
 ///\file
 ///\brief handling of shared dynamic-link libraries in microsoft's dll format
-
 #include <universalis/compiler/compiler.hpp>
-
 #if !defined UNIVERSALIS__COMPILER__DYNAMIC_LINK__DETAIL__DEFINED && !defined DIVERSALIS__COMPILER__ECLIPSE
 	#error missing #include <universalis/compiler/dynamic_link/begin.hpp>
 #endif

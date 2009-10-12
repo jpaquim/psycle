@@ -1,18 +1,16 @@
-// dw tremolo, with the new gui
+//																dw tremolo, with the new gui
 
 // since this is the first plugin to use the new gui code, i'm commenting it pretty heavily to help other people convert their own
 // plugins or make new ones.
 
-// one important note: since the plugin-gui uses mfc, the .pch file for all gui plugin projects needs to be pre-compiled-headers-with-mfc.pch,
-// -not- pre-compiled-headers.pch.  also, the pdb should be changed to pre-compiled-headers-with-mfc.pdb
-// it won't compile if you don't do this!!
+//one important note: since the plugin-gui uses mfc, the .pch file for all gui plugin projects needs to be pre_compiled_headers.mfc.pch, 
+// -not- pre_compiled_headers.pch.  also, the pdb should be changed to pre_compiled_headers.mfc.pdb
+//it won't compile if you don't do this!!
 
 //#include <psycle/plugin_interface.hpp> //plugin_gui.hpp includes plugin_interface, so it's no longer necessary
-#include <psycle/plugin_interface.hpp>
-#include <psycle/host/NativeGUI.hpp>
+#include <psycle/plugin_gui.hpp>
 #include "resources.hpp"
 
-using namespace psycle::plugin_interface;
 
 #define MAGIC_COLOR 0x00859296
 
@@ -74,7 +72,7 @@ enum
 	grav_inout
 };
 
-//std::map<int, CMachineGuiParameter**> InstMap;				//this map keeps track of all the parameter pointers for every instance of the plugin.
+std::map<int, CMachineGuiParameter**> InstMap;				//this map keeps track of all the parameter pointers for every instance of the plugin.
 												//the key value is the index of the machine, which is sent to the constructor of the
 												//CMachineInterface class.  the constructor should save the index also, to erase it
 												//from the map when an instance is destroyed.  (this is necessary because gui

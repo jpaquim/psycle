@@ -10,7 +10,7 @@
 #include <exception>
 #include <cstdint>
 #include <cstddef>
-#if defined DIVERSALIS__OS__MICROSOFT
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#include <windows.h>
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
 		#pragma warning(push)
@@ -39,7 +39,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 					void write(riff &, std::size_t);
 				#endif
 
-				#if 0 && defined DIVERSALIS__OS__MICROSOFT
+				#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					bool user_choose_dialog(HWnd const window_handle, format const * const source_format = 0, format const * const proposed_format = 0; std::string const & caption = "");
 				#endif
 
@@ -48,7 +48,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 					friend class format;
 
 					public:
-						#if defined DIVERSALIS__OS__MICROSOFT
+						#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 							operator ::WAVEFORMATEX & () { return reinterpret_cast< ::WAVEFORMATEX& >(*this); }
 						#endif
 
@@ -155,7 +155,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 
 			std::string description() const;
 
-			#if defined DIVERSALIS__OS__MICROSOFT
+			#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 				operator ::WAVEFORMATEX & () { return chunk(); }
 				::WAVEFORMATEX & wave_format_ex() { return *this; }
 			#endif

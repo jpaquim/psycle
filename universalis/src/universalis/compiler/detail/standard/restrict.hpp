@@ -8,13 +8,8 @@
 /// example:
 	/// void f(int & restrict r1, int & restrict r2, int * restrict p1, int restrict p2[]);
 	/// here the compiler is told that &r1 != &r2 != p1 != p2
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__STANDARD__RESTRICT__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__STANDARD__RESTRICT__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
-
 ///\todo test __STDC_VERSION
 #if defined DIVERSALIS__COMPILER__GNU
 	#define restrict __restrict__
@@ -23,6 +18,4 @@
 	#define restrict //__restrict
 #else
 	#define restrict
-#endif
-
 #endif

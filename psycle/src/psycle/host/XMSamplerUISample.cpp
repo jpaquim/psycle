@@ -1,12 +1,8 @@
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMSamplerUISample.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/xmsampler.h>
-#include <psycle/core/song.h>
-using namespace psy::core;
-#else
-#include "Song.hpp"
+#include "Psycle.hpp"
 #include "XMSampler.hpp"
-#endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -310,7 +306,7 @@ BOOL XMSamplerUISample::OnSetActive()
 		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
 		{
 			char line[48];
-			XMInstrument::WaveData& wave = Global::song().SampleData(i);
+			XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
 			sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
 			strcat(line,wave.WaveName().c_str());
 			m_SampleList.AddString(line);
@@ -330,7 +326,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	m_Init=false;
 	char tmp[40];
 	int i= m_SampleList.GetCurSel();
-	XMInstrument::WaveData& wave = Global::song().SampleData(i);
+	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
 	pWave(&wave);
 
 	strcpy(tmp,wave.WaveName().c_str());
@@ -406,7 +402,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 	{
 		m_wndView.AddMacViewUndo();
 
-		int si = _pSong->instSelected();
+		int si = _pSong->instSelected;
 
 		//added by sampler
 		if ( _pSong->_pInstrument[si]->waveLength != 0)
@@ -472,9 +468,9 @@ void XMSamplerUISample::OnBnClickedDupe()
 {
 	for (int j=0;j<XMSampler::MAX_INSTRUMENT;j++)
 	{
-		if ( Global::song().SampleData(j).WaveLength() == 0 ) 
+		if ( m_pMachine->SampleData(j).WaveLength() == 0 ) 
 		{
-			XMInstrument::WaveData& wavenew = Global::song().SampleData(j);
+			XMInstrument::WaveData& wavenew = m_pMachine->SampleData(j);
 			wavenew = rWave();
 			return;
 		}

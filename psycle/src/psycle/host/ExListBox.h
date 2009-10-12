@@ -1,6 +1,4 @@
 #pragma once
-#include "Psycle.hpp"
-
 // ExListBox.h : header file
 // Code originally from ran wainstein:
 // http://www.codeproject.com/combobox/cexlistboc.asp

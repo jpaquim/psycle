@@ -120,7 +120,6 @@ digraph dependencies {
 		"psycle-mfc" [ label = "{ psycle MFC | original psycle\nwith MFC GUI front-end }" ];
 		"psycle-mfc" -> "mfc";
 		"psycle-mfc" -> "psycle-plugin-interface";
-		"psycle-mfc" -> "psycle-core";
 		"psycle-mfc" -> "psycle-helpers";
 		//"psycle-mfc" -> "universalis";
 		//"psycle-mfc" -> "boost";

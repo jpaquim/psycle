@@ -26,20 +26,18 @@ v0.02b
 
 v0.01b
 - initial beta release
-*/
-/////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////
+	*/
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
 
-using namespace psycle::plugin_interface;
-
 #define PLUGIN_NAME "Pooplog Autopan 0.06b"
 
-inline int f2i(float flt) ///\todo use psycle-helpers
+inline int f2i(float flt)
 { 
 	#if defined _MSC_VER && defined _M_IX86
 		int i; 
@@ -201,7 +199,8 @@ CMachineParameter const *pParameters[] =
 	&paraOUTmix,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	0,																																								// flags
 	e_numVALS,																																								// numParameters
@@ -211,7 +210,7 @@ CMachineInfo const MacInfo (
 	"Jeremy Evers",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	3
-);
+};
 
 struct INERTIA
 {

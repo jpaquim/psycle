@@ -1,18 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CMasterDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "MasterDlg.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/internal_machines.h>
-#include <psycle/helpers/dsp.hpp>
-using namespace psy::core;
-#else
-#include "Machine.hpp"
-#include "Dsp.hpp"
-#endif
-
+#include "Psycle.hpp"
 #include "ChildView.hpp"
+#include "Dsp.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -39,17 +32,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//}}AFX_DATA_INIT
 			memset(macname,0,sizeof(macname));
 		}
-
-
-		CMasterDlg::~CMasterDlg()
-		{		
-			m_back.DeleteObject();
-			m_numbers.DeleteObject();
-			m_sliderknob.DeleteObject();
-		}
-
-
-
 
 		void CMasterDlg::DoDataExchange(CDataExchange* pDX)
 		{
@@ -136,41 +118,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetSliderValues();
 			if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
 			else m_autodec.SetCheck(0);
-
-/*
-			CWnd *dsk = GetDesktopWindow();
-			CRect rClient, rect, rect2;
-			dsk->GetClientRect(&rClient);
-
-			GetClientRect(&rect);
-			GetWindowRect(&rect2);
-			//Using the previous values, resize the window to the desired sizes.
-			MoveWindow
-				(
-				rClient.Width() / 2 - (rect2.right-rect2.left) / 2,
-				rClient.Height() / 2 - (rect2.bottom-rect2.top) / 2,
-				(rect2.right-rect2.left),
-				(rect2.bottom-rect2.top),
-				true
-				);
-*/
 			return TRUE;
-		}
-
-		void CMasterDlg::CenterWindowOnPoint(int x, int y) {
-			CRect r;
-			GetWindowRect(&r);
-
-			x -= ((r.right-r.left)/2);
-			y -= ((r.bottom-r.top)/2);
-
-			if (x < 0) {
-				x = 0;
-			}
-			if (y < 0) {
-				y = 0;
-			}
-			SetWindowPos( 0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE );
 		}
 
 		void CMasterDlg::SetSliderValues()
@@ -313,7 +261,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMasterDlg::OnCancel()
 		{
-			CDialog::OnCancel();
+			m_pParent->MasterMachineDialog = NULL;
+			m_back.DeleteObject();
+			m_numbers.DeleteObject();
+			m_sliderknob.DeleteObject();
+			DestroyWindow();
+			delete this;
 		}
 
 		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 

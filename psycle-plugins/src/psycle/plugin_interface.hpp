@@ -1,7 +1,7 @@
 ///\interface psycle native plugin interface api
 
-#ifndef PSYCLE__PLUGIN_INTERFACE__INCLUDED
-#define PSYCLE__PLUGIN_INTERFACE__INCLUDED
+#ifndef PSYCLE__PLUGIN_INTERFACE_HPP
+#define PSYCLE__PLUGIN_INTERFACE_HPP
 #pragma once
 
 // *** Note ***
@@ -13,6 +13,11 @@ namespace psycle
 {
 	namespace plugin_interface
 	{
+		///\todo use #include <cstdint> for that!
+		typedef /* std::uint8_t  */ unsigned char      uint8;
+		typedef /* std::uint16_t */ unsigned short int uint16;
+		typedef /* std::uint32_t */ unsigned       int uint32;
+
 		/// machine interface version
 		int const MI_VERSION = 11;
 
@@ -78,10 +83,6 @@ namespace psycle
 		class CMachineInfo
 		{
 		public:
-			CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const * parameters,
-				char const * name, char const * shortName, char const * author, char const * command, int numCols)
-			: Version(version), Flags(flags), numParameters(numParameters), Parameters(parameters),
-			Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
 			/// ...
 			int const Version;
 			/// ...
@@ -174,9 +175,9 @@ namespace psycle
 				///\todo doc. not used (yet?)
 				virtual void MidiNote(int /*channel*/, int /*value*/, int /*velocity*/) {}
 				///\todo doc. not used (yet?)
-				virtual void Event(unsigned int const /*data*/) {}
+				virtual void Event(uint32 const /*data*/) {}
 				///\todo doc
-				virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/) { return false; }
+				virtual bool DescribeValue(char * /*txt*/, int /*param*/, int /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
 				virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
 				///\todo doc
@@ -242,7 +243,7 @@ namespace psycle
 			const char get_info_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO);
 			typedef
-				psycle::plugin_interface::CMachineInfo const *
+				psycle::plugin_interface::CMachineInfo const * const
 				(PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
 				(void);
 			
@@ -263,5 +264,24 @@ namespace psycle
 	}
 }
 
+// for plugins that aren't namespace-aware
+using psycle::plugin_interface::MI_VERSION;
+using psycle::plugin_interface::MAX_TRACKS;
+using psycle::plugin_interface::NOTE_MAX;
+using psycle::plugin_interface::NOTE_NO;
+using psycle::plugin_interface::NOTE_OFF;
+using psycle::plugin_interface::MAX_BUFFER_LENGTH;
+using psycle::plugin_interface::CMachineInfo;
+using psycle::plugin_interface::GENERATOR;
+using psycle::plugin_interface::EFFECT;
+using psycle::plugin_interface::SEQUENCER;
+using psycle::plugin_interface::CMachineInterface;
+using psycle::plugin_interface::CMachineParameter;
+using psycle::plugin_interface::MPF_LABEL;
+using psycle::plugin_interface::MPF_STATE;
+using psycle::plugin_interface::CFxCallback;
+using psycle::plugin_interface::uint8; // deprecated anyway
+using psycle::plugin_interface::uint16; // deprecated anyway
+using psycle::plugin_interface::uint32; // deprecated anyway
 #endif
 #include <cstdio> // This is NOT part of the interface. It would be better if plugins that want it included it themselves.

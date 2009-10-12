@@ -1,24 +1,12 @@
 ///\file
 ///\brief interface file for psycle::host::CSongpDlg.
 #pragma once
-#include "Psycle.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class Song;
-	}
-}
-using namespace psy::core;
-#endif
-
-
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-	class Song; // forward declaration
-#endif
+		class Song; // forward declaration
 
 		/// song dialog window.
 		class CSongpDlg : public CDialog

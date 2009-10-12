@@ -4,7 +4,7 @@
 #pragma once
 #include "clip.hpp"
 #if defined BOOST_AUTO_TEST_CASE
-	#include <universalis/os/clocks.hpp>
+	#include <universalis/operating_system/clocks.hpp>
 	#include <sstream>
 	#include <cmath>
 #endif
@@ -42,7 +42,7 @@ class sine_sequence {
 		typedef double real;
 		sine_sequence<Clipped> sin;
 		{
-			using namespace universalis::os::clocks;
+			using namespace universalis::operating_system::clocks;
 			//typedef thread clock;
 			typedef monotonic clock;
 			int const iterations(1000000);

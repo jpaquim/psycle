@@ -1,43 +1,21 @@
 ///\file
 ///\brief implementation file for psycle::host::CWireDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "WireDlg.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machine.h>
-#include <psycle/core/song.h>
-using namespace psy::core;
-#else
+#include "Psycle.hpp"
 #include "Machine.hpp"
-#include "Song.hpp"
-#endif
-
-#include "Configuration.hpp"
+#include "Helpers.hpp"
+#include <psycle/helpers/math/pi.hpp>
 #include "ChildView.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
 #include "Zap.hpp"
-#include "WireGui.hpp"
-#include <psycle/helpers/helpers.hpp>
-#include <psycle/helpers/math.hpp>
-#include <psycle/helpers/fft.hpp>
-#include <psycle/helpers/dsp.hpp>
-
-#include <universalis/os/aligned_memory_alloc.hpp>
-
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
-		CWireDlg::CWireDlg(CChildView* pParent)
-			: CDialog(CWireDlg::IDD, pParent),
-			  m_pParent(pParent),
-			  wire_gui_(0)
+		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
 		{
-		}
-
-		CWireDlg::CWireDlg(CChildView* pParent, WireGui* wire_gui)
-			: CDialog(CWireDlg::IDD, pParent),
-			  m_pParent(pParent),
-			  wire_gui_(wire_gui)
-		{
+			m_pParent = pParent;
 		}
 
 		void CWireDlg::DoDataExchange(CDataExchange* pDX)
@@ -66,13 +44,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CWireDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
-			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
-			universalis::os::aligned_memory_alloc(16, inl, SCOPE_SPEC_SAMPLES);
-			universalis::os::aligned_memory_alloc(16, inr, SCOPE_SPEC_SAMPLES);
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			pSamplesL = static_cast<float*>(_aligned_malloc(SCOPE_BUF_SIZE*sizeof(float),16));
+			pSamplesR = static_cast<float*>(_aligned_malloc(SCOPE_BUF_SIZE*sizeof(float),16));
+		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(reinterpret_cast<void**>(pSamplesL),16,SCOPE_BUF_SIZE*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(pSamplesR),16,SCOPE_BUF_SIZE*sizeof(float));
+		#else
+			pSamplesL = new float[SCOPE_BUF_SIZE];
+			pSamplesR = new float[SCOPE_BUF_SIZE];
+		#endif
 			psycle::helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
 			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
-
+			
 			scope_mode = 0;
 			scope_peak_rate = 20;
 			scope_osc_freq = 5;
@@ -95,7 +79,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_volslider.SetPos(256*4-t);
 
 			char buf[128];
-			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->GetEditName().c_str(), _pDstMachine->GetEditName().c_str());
+			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
 			SetWindowText(buf);
 
 			hold = FALSE;
@@ -115,9 +99,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetMode();
 			pos = 1;
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			mult = 3268.0f / _pSrcMachine->GetAudioRange();
-#else
 			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
 			{
 				mult = 32768.0f;
@@ -126,21 +107,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				mult = 1.0f;
 			}	
-#endif
 			return TRUE;
 		}
 
-		BOOL CWireDlg::Create() {
+		BOOL CWireDlg::Create()
+		{
 			return CDialog::Create(IDD, m_pParent);
 		}
 
-		void CWireDlg::OnCancel() {
+		void CWireDlg::OnCancel()
+		{
 			KillTimer(2304+this_index);
 			_pSrcMachine->_pScopeBufferL = NULL;
 			_pSrcMachine->_pScopeBufferR = NULL;
 			_pSrcMachine->_scopeBufferIndex = 0;
-			if (wire_gui_)
-				wire_gui_->BeforeWireDlgDeletion();
+			m_pParent->WireDialog[this_index] = NULL;
 			DestroyWindow();
 			font.DeleteObject();
 			bufBM->DeleteObject();
@@ -151,17 +132,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			linepenbR.DeleteObject();
 			zapObject(bufBM);
 			zapObject(clearBM);
-			universalis::os::aligned_memory_dealloc(pSamplesL);
-			universalis::os::aligned_memory_dealloc(pSamplesR);
-			universalis::os::aligned_memory_dealloc(inl);
-			universalis::os::aligned_memory_dealloc(inr);
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			_aligned_free(pSamplesL);
+			_aligned_free(pSamplesR);
+		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+			free(pSamplesL);
+			free(pSamplesR);
+		#else
+			delete [] pSamplesL;
+			delete [] pSamplesR;
+		#endif
 			delete this;
 		}
 
-		void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)  {
+		void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
+		{
 			char bufper[32];
 			char bufdb[32];
-			//invol = (128-m_volslider.GetPos())*0.0078125f;
+		//	invol = (128-m_volslider.GetPos())*0.0078125f;
 			invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
 
 			if (invol > 1.0f)
@@ -202,17 +190,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWireDlg::OnButton1() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			//Nothing to do. done in wire_gui->RemoveWire()
-#else
 			m_pParent->AddMacViewUndo();
 			Inval = true;
-			CSingleLock lock(&Global::song().door,TRUE);
-			_pSrcMachine->DeleteOutputWireIndex(&Global::song(),wireIndex);
-			_pDstMachine->DeleteInputWireIndex(&Global::song(),_dstWireIndex);
-#endif
-			wire_gui_->RemoveWire();
-			wire_gui_ = 0;
+			CSingleLock lock(&Global::_pSong->door,TRUE);
+			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
+			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
 			OnCancel();
 		}
 
@@ -244,7 +226,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				//Linear -pi to pi.
 				const float constant = 2.0f * helpers::math::pi_f * (-0.5f + ((float)i/(SCOPE_SPEC_SAMPLES-1)));
 				//Hanning window 
-				const float window = 0.50 - 0.50 * cosf(2.0f * M_PI * i / (SCOPE_SPEC_SAMPLES - 1));
+				const float window = 0.50 - 0.50 * cosf(2.0f * helpers::math::pi * i / (SCOPE_SPEC_SAMPLES - 1));
 				float j=0.0f;
 				for(int h=0;h<scope_spec_bands;h++)
 				{ 
@@ -307,12 +289,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float awl=fabsf(pSamplesL[index]*_pSrcMachine->lVol());///32768; 
-							float awr=fabsf(pSamplesR[index]*_pSrcMachine->rVol());///32768; 
+							float awl=fabsf(pSamplesL[index]*_pSrcMachine->_lVol);///32768; 
+							float awr=fabsf(pSamplesR[index]*_pSrcMachine->_rVol);///32768; 
 
 							if (awl>curpeakl)	{	curpeakl = awl;	}
 							if (awr>curpeakr)	{	curpeakr = awr;	}
-						}
+							}
 
 						curpeakl=128-helpers::math::rounded(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
 						curpeakr=128-helpers::math::rounded(sqrtf(curpeakr*vucorrection));
@@ -443,21 +425,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
 						float n = float(_pSrcMachine->_scopeBufferIndex-pos);
-						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->lVol()));
+						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
 							n -= add;
-							bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->lVol()));
+							bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 		//					bufDC.LineTo(x,GetY(32768/2));
 						}
 						bufDC.SelectObject(&linepenR);
 
 						n = float(_pSrcMachine->_scopeBufferIndex-pos);
-						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->rVol()));
+						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
 							n -= add;
-							bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->rVol()));
+							bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 						}
 
 						bufDC.SelectObject(oldpen);
@@ -474,114 +456,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				case 2: // spectrum analyzer
 					{
-/*						int width = 1;
-						float aal[SCOPE_SPEC_SAMPLES>>1];
-						float aar[SCOPE_SPEC_SAMPLES>>1];
-						memset (aal,0,sizeof(aal));
-						memset (aar,0,sizeof(aar));
-						int amount = SCOPE_BUF_SIZE - _pSrcMachine->_scopeBufferIndex;
-						float vucorrection= invol*mult/6553500.0f;
-						if (amount >= SCOPE_SPEC_SAMPLES) {
-							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, SCOPE_SPEC_SAMPLES, vucorrection*_pSrcMachine->_lVol);
-							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, SCOPE_SPEC_SAMPLES, vucorrection*_pSrcMachine->_rVol);
-						} else {
-							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, amount, vucorrection*_pSrcMachine->_lVol);
-							psycle::helpers::dsp::MovMul(pSamplesL, inl+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection*_pSrcMachine->_rVol);
-							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, amount, vucorrection*_pSrcMachine->_lVol);
-							psycle::helpers::dsp::MovMul(pSamplesR, inr+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection*_pSrcMachine->_rVol);
-						}
-
-						psycle::host::dsp::WindowFunc(3,SCOPE_SPEC_SAMPLES,inl);
-						psycle::host::dsp::WindowFunc(3,SCOPE_SPEC_SAMPLES,inr);
-						psycle::host::dsp::PowerSpectrum(SCOPE_SPEC_SAMPLES,inl,aal);
-						psycle::host::dsp::PowerSpectrum(SCOPE_SPEC_SAMPLES,inr,aar);
-						psycle::helpers::dsp::Undenormalize(aal,aar,SCOPE_SPEC_SAMPLES>>1);
-						
-						COLORREF cl = 0x402020;
-						COLORREF cr = 0x204020;
-
-						RECT rect;
-						rect.left = 0;
-
-						// draw our bands
-
-						for (int i = 0; i < MAX_SCOPE_BANDS; i++)
-						{
-							//TODO: change this code to be logarithmic
-							//((pow(10.0f,i)-1.0f)/9.0f)
-							//(int)((((pow(10.0f,i/(float)MAX_SCOPE_BANDS))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))
-							int aml = - psycle::helpers::dsp::dB(aal[(int)((((pow(10.0f,i/(float)MAX_SCOPE_BANDS))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
-							if (aml < 0)
-							{
-								aml = 0;
-							}
-							if (aml > 128) {
-								aml = 128;
-							}
-							if (aml < bar_heightsl[i])
-							{
-								bar_heightsl[i]=aml;
-							}
-
-							rect.right = rect.left+width;
-							rect.top = bar_heightsl[i];
-							rect.bottom = aml;
-							bufDC.FillSolidRect(&rect,cl);
-
-							rect.top = rect.bottom;
-							rect.bottom = 128;
-							bufDC.FillSolidRect(&rect,cl+0x804040);
-
-							rect.left+=width;
-							//TODO: change this code to be logarithmic
-							int amr = - psycle::helpers::dsp::dB(aar[(int)((((pow(10.0f,i/(float)MAX_SCOPE_BANDS))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
-							if (amr < 0)
-							{
-								amr = 0;
-							}
-							if (amr > 128) {
-								amr = 128;
-							}
-							if (amr < bar_heightsr[i])
-							{
-								bar_heightsr[i]=amr;
-							}
-
-							rect.right = rect.left+width;
-							rect.top = bar_heightsr[i];
-							rect.bottom = amr;
-							bufDC.FillSolidRect(&rect,cr);
-
-							rect.top = rect.bottom;
-							rect.bottom = 128;
-							bufDC.FillSolidRect(&rect,cr+0x408040);
-
-							rect.left+=width;
-
-							if (!hold)
-							{
-								bar_heightsl[i]+=6;
-								if (bar_heightsl[i] > 128)
-								{
-									bar_heightsl[i] = 128;
-								}
-								bar_heightsr[i]+=6;
-								if (bar_heightsr[i] > 128)
-								{
-									bar_heightsr[i] = 128;
-								}
-							}
-						}
-						char buf[64];
-						sprintf(buf,"%d Bands Refresh %.2fhz",scope_spec_bands,1000.0f/scope_spec_rate);
-						CFont* oldFont= bufDC.SelectObject(&font);
-						bufDC.SetBkMode(TRANSPARENT);
-						bufDC.SetTextColor(0x505050);
-						bufDC.TextOut(4, 128-14, buf);
-						bufDC.SelectObject(oldFont);
-*/
-
-
 						float aal[MAX_SCOPE_BANDS]; 
 						float aar[MAX_SCOPE_BANDS]; 
 						float bbl[MAX_SCOPE_BANDS]; 
@@ -594,13 +468,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						memset (bbr,0,sizeof(bbr));
 
 						int width = 128/scope_spec_bands;
-						const float multleft= invol*mult/32768.0f *_pSrcMachine->lVol();
-						const float multright= invol*mult/32768.0f *_pSrcMachine->rVol();
+						const float multleft= invol*mult/32768.0f *_pSrcMachine->_lVol;
+						const float multright= invol*mult/32768.0f *_pSrcMachine->_rVol;
 						const float invSamples = 1.0f/(SCOPE_SPEC_SAMPLES>>1);
-						// calculate our bands using same buffer chasing technique
-						int index = _pSrcMachine->_scopeBufferIndex;
-						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
-						{ 
+					// calculate our bands using same buffer chasing technique
+					int index = _pSrcMachine->_scopeBufferIndex;
+					for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
+					{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
 							const float wl=pSamplesL[index]*multleft;
@@ -706,7 +580,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						bufDC.SetTextColor(0x505050);
 						bufDC.TextOut(4, 128-14, buf);
 						bufDC.SelectObject(oldFont);
-
 					}
 					break;
 				case 3: // phase scope
@@ -734,8 +607,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->lVol());///32768;
-							float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->rVol());///32768;
+							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
+							float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
 							float awl=fabsf(wl);
 							float awr=fabsf(wr);
 							if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))
@@ -940,7 +813,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bufDC.SelectObject(oldbmp);
 				bufDC.DeleteDC();
 			}
-
+			
 			CDialog::OnTimer(nIDEvent);
 		}
 

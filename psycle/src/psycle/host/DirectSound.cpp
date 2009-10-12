@@ -1,16 +1,15 @@
 ///\file
 ///\implementation psycle::host::DirectSound.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "DirectSound.hpp"
 #include "DSoundConfig.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
-#include "Dsp.hpp"
-#include <universalis/cpu/exception.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
-#include <universalis/os/thread_name.hpp>
+#include <universalis/processor/exception.hpp>
+#include <universalis/operating_system/thread_name.hpp>
 #include <process.h>
-
+#include "Dsp.hpp"
 namespace psycle
 {
 	namespace host
@@ -199,8 +198,16 @@ namespace psycle
 				_capPorts[i]._pBuffer->Release();
 				_capPorts[i]._pDs->Release();
 				_capPorts[i]._pDs=0;
-				universalis::os::aligned_memory_dealloc(_capPorts[i].pleft);
-				universalis::os::aligned_memory_dealloc(_capPorts[i].pright);
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+				_aligned_free(_capPorts[i].pleft);
+				_aligned_free(_capPorts[i].pright);
+			#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+				free(_capPorts[i].pleft);
+				free(_capPorts[i].pright);
+			#else
+				delete[] _capPorts[i].pleft;
+				delete[] _capPorts[i].pright;
+			#endif
 			}
 			_capPorts.resize(0);
 			_running = false;
@@ -308,8 +315,16 @@ namespace psycle
 				return false;
 			}
 			hr = port._pBuffer->Start(DSCBSTART_LOOPING);
-			universalis::os::aligned_memory_alloc(16, port.pleft, _dsBufferSize);
-			universalis::os::aligned_memory_alloc(16, port.pright, _dsBufferSize);
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			port.pleft = static_cast<float*>(_aligned_malloc(_dsBufferSize*sizeof(float),16));
+			port.pright = static_cast<float*>(_aligned_malloc(_dsBufferSize*sizeof(float),16));
+		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(reinterpret_cast<void**>(port.pleft),16,_dsBufferSize*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(port.pright),16,_dsBufferSize*sizeof(float));
+		#else
+			port.pleft = new float[_dsBufferSize];
+			port.pright = new float[_dsBufferSize];
+		#endif
 			return true;
 		}
 
@@ -326,7 +341,7 @@ namespace psycle
 
 		DWORD WINAPI DirectSound::PollerThread(void* pDirectSound)
 		{
-			universalis::os::thread_name thread_name("direct sound");
+			universalis::operating_system::thread_name thread_name("direct sound");
 			universalis::processor::exception::install_handler_in_thread();
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);

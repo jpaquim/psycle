@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2008 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 ///\implementation psycle::front_ends::gui::graph
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "graph.hpp"
 #include "lock.hpp"

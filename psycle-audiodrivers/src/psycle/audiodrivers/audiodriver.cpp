@@ -8,7 +8,7 @@
 **********************************************************************************************/
 
 #include "audiodriver.h"
-#include <diversalis/cpu.hpp>
+#include <diversalis/processor.hpp>
 #include <boost/bind.hpp>
 #include <thread>
 #include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
@@ -145,7 +145,7 @@ void DummyDriver::start() {
 }
 
 void DummyDriver::thread_function() {
-	// notify that the thread is now running
+ 	// notify that the thread is now running
 	{ scoped_lock lock(mutex_);
 		running_ = true;
 	}

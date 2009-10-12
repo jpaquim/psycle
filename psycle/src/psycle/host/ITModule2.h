@@ -1,27 +1,12 @@
 #pragma once
-#include "Global.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/commands.h>
-#include <psycle/core/patternevent.h>
-namespace psy {
-	namespace core {
-		class Song;
-		class XMSampler;
-	}
-}
-using namespace psy::core;
-#else
 #include "SongStructs.hpp"
-#endif
 #include "FileIO.hpp"
 #include <cstdint>
 
 namespace psycle {
 	namespace host {
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Song;
 		class XMSampler;
-#endif
 
 		class ITModule2 : public OldPsyFile
 		{
@@ -384,7 +369,7 @@ namespace psycle {
 			bool LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert);
 			bool LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert);
 			bool LoadITPattern(int patIdx,int &numchans);
-			void ParseEffect(PatternEvent&pent, int command,int param,int channel);
+			void ParseEffect(PatternEntry&pent, int command,int param,int channel);
 		private:
 			unsigned char highOffset[64];
 			EmbeddedMIDIData* embeddedData;

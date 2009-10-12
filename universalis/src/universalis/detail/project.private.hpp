@@ -2,11 +2,5 @@
 // copyright 1999-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file
-
-#ifndef UNIVERSALIS__DETAIL__PROJECT__PRIVATE__INCLUDED
-#define UNIVERSALIS__DETAIL__PROJECT__PRIVATE__INCLUDED
 #pragma once
-
 #include <universalis/detail/configuration.private.hpp>
-
-#endif

@@ -2,7 +2,8 @@
 ///\brief interface file for psycle::host::CASIOConfig.
 #pragma once
 #include "ASIOInterface.hpp"
-#include "Psycle.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		/// asio config window.

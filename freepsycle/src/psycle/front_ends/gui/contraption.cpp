@@ -1,9 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2008 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 ///\\implementation psycle::front_ends::gui::contraption
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "contraption.hpp"
-#include <universalis/os/loggers.hpp>
+#include <universalis/operating_system/loggers.hpp>
 namespace psycle { namespace front_ends { namespace gui {
 
 contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real const & y, color const & color, std::string const & text)
@@ -23,7 +25,7 @@ contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real con
 		if(loggers::trace()()) loggers::trace()("pango: font description: creating ...", UNIVERSALIS__COMPILER__LOCATION);
 		font_description = new Pango::FontDescription;
 		font_description->set_family("helvetica");
-		#if !defined DIVERSALIS__OS__MICROSOFT
+		#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			font_description->set_weight(Pango::WEIGHT_BOLD);
 		#else
 			font_description->set_weight(Pango::WEIGHT_ULTRABOLD);

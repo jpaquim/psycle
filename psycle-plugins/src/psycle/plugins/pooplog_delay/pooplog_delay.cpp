@@ -27,8 +27,6 @@ v0.01b
 
 #include "filter.h"
 
-using namespace psycle::plugin_interface;
-
 #ifndef LIGHT
 #define MAX_BUF 1024*1024*4
 #define PLUGIN_NAME "Pooplog Delay 0.04b"
@@ -37,7 +35,7 @@ using namespace psycle::plugin_interface;
 #define PLUGIN_NAME "Pooplog Delay Light 0.04b"
 #endif
 
-inline int f2i(float flt) ///\todo use psycle-helpers
+inline int f2i(float flt)
 { 
 	#if defined _MSC_VER && defined _M_IX86
 		int i; 
@@ -705,7 +703,8 @@ CMachineParameter const *pParameters[] =
 	&paraTRACKTempo
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	0,																																								// flags
 	e_numVALS,																																								// numParameters
@@ -715,7 +714,7 @@ CMachineInfo const MacInfo (
 	"Jeremy Evers",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	5
-);
+};
 
 #else
 
@@ -784,7 +783,8 @@ CMachineParameter const *pParameters[] =
 	&paraInertia,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	0,																																								// flags
 	e_numVALS,																																								// numParameters
@@ -794,7 +794,7 @@ CMachineInfo const MacInfo (
 	"Jeremy Evers",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	4
-);
+};
 
 #endif
 

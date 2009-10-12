@@ -4,7 +4,7 @@
 ///\implementation psycle::plugins::outputs::jack
 #include <psycle/detail/project.private.hpp>
 #include "jack.hpp"
-#include <universalis/cpu/exception.hpp>
+#include <universalis/processor/exception.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(jack)

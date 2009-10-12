@@ -1,5 +1,5 @@
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "internal_machines.hpp"
 #include "Configuration.hpp"
 #include "Song.hpp"
@@ -118,22 +118,22 @@ namespace psycle
 		}
 
 
-		void MultiMachine::Tick( int channel,PatternEvent* pData)
+		void MultiMachine::Tick( int channel,PatternEntry* pData)
 		{
 			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
 			{
 				bisTicking=true;
 				for (int i=0;i<NUMMACHINES;i++)
 				{
-					if (macOutput[i] != -1 && Global::song().machine(macOutput[i]) != NULL )
+					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )
 					{
 						AllocateVoice(channel,i);
-						PatternEvent pTemp = *pData;
+						PatternEntry pTemp = *pData;
 						CustomTick(channel,i, pTemp);
 						// this can happen if the parameter is the machine itself.
-						if (Global::song().machine(macOutput[i]) != this) 
+						if (Global::_pSong->_pMachine[macOutput[i]] != this) 
 						{
-							Global::song().machine(macOutput[i])->Tick(allocatedchans[channel][i],&pTemp);
+							Global::_pSong->_pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
 							if (pTemp._note >= notecommands::release )
 							{
 								DeallocateVoice(channel,i);
@@ -207,7 +207,7 @@ namespace psycle
 
 		}
 
-		void DuplicatorMac::CustomTick(int channel,int i, PatternEvent& pData)
+		void DuplicatorMac::CustomTick(int channel,int i, PatternEntry& pData)
 		{
 			if ( pData._note < notecommands::release )
 			{
@@ -247,9 +247,9 @@ namespace psycle
 		{
 			if (numparam >=0 && numparam <NUMMACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( Global::song().machine(macOutput[numparam]) != NULL))
+				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],Global::song().machine(macOutput[numparam])->_editName);
+					sprintf(parVal,"%X -%s",macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName);
 				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
@@ -400,20 +400,20 @@ namespace psycle
 			solocolumn_=-1;
 		}
 
-		void Mixer::Tick( int channel,PatternEvent* pData)
+		void Mixer::Tick( int channel,PatternEntry* pData)
 		{
-			if(pData->note() == notecommands::tweak)
+			if(pData->_note == notecommands::tweak)
 			{
-				int nv = (pData->command()<<8)+pData->parameter();
-				SetParameter(pData->instrument(),nv);
+				int nv = (pData->_cmd<<8)+pData->_parameter;
+				SetParameter(pData->_inst,nv);
 				Global::player().Tweaker = true;
 			}
-			else if(pData->note() == notecommands::tweakslide)
+			else if(pData->_note == notecommands::tweakslide)
 			{
 				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 				// doing simply "tweak" for now..
-				int nv = (pData->command()<<8)+pData->parameter();
-				SetParameter(pData->instrument(),nv);
+				int nv = (pData->_cmd<<8)+pData->_parameter;
+				SetParameter(pData->_inst,nv);
 				Global::player().Tweaker = true;
 			}
 		}
@@ -446,7 +446,7 @@ namespace psycle
 			{
 				if (sends_[i].IsValid())
 				{
-					Machine* pSendMachine = Global::song().machine(sends_[i].machine_);
+					Machine* pSendMachine = Global::song()._pMachine[sends_[i].machine_];
 					assert(pSendMachine);
 					if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
 					{ 
@@ -459,7 +459,7 @@ namespace psycle
 								int j = solocolumn_;
 								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 								{
-									Machine* pInMachine = Global::song().machine(_inputMachines[j]);
+									Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
 									assert(pInMachine);
 									if(!pInMachine->_mute && !pInMachine->Standby())
 									{
@@ -473,7 +473,7 @@ namespace psycle
 							{
 								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 								{
-									Machine* pInMachine = Global::song().machine(_inputMachines[j]);
+									Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
 									assert(pInMachine);
 									if(!pInMachine->_mute && !pInMachine->Standby())
 									{
@@ -487,7 +487,7 @@ namespace psycle
 							{
 								if (Return(j).IsValid() && Return(j).Send(i) && !Return(j).Mute() && (mixvolretpl[j][i] != 0.0f || mixvolretpr[j][i] != 0.0f ))
 								{
-									Machine* pRetMachine = Global::song().machine(Return(j).Wire().machine_);
+									Machine* pRetMachine = Global::song()._pMachine[Return(j).Wire().machine_];
 									assert(pRetMachine);
 									if(!pRetMachine->_mute && !pRetMachine->Standby())
 									{
@@ -503,10 +503,15 @@ namespace psycle
 
 						// tell the FX to work, now that the input is ready.
 						{
-							Machine* pRetMachine = Global::song().machine(Return(i).Wire().machine_);
+							#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+								#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+							#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+								universalis::processor::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+							#endif
+							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 							pRetMachine->Work(numSamples);
 							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
-							if(!pRetMachine->Standby()) Standby(false);
+							if(!pRetMachine->Standby())Standby(false);
 						}
 						///todo: why was this here? It is already done in PreWork()
 /*						{
@@ -531,7 +536,7 @@ namespace psycle
 					int i= solocolumn_-MAX_CONNECTIONS;
 					if (ReturnValid(i) && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 					{
-						Machine* pRetMachine = Global::song().machine(Return(i).Wire().machine_);
+						Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
@@ -544,7 +549,7 @@ namespace psycle
 				{
 					if (Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 					{
-						Machine* pRetMachine = Global::song().machine(Return(i).Wire().machine_);
+						Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
@@ -561,7 +566,7 @@ namespace psycle
 					int i = solocolumn_;
 					if (ChannelValid(i) && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
-						Machine* pInMachine = Global::song().machine(_inputMachines[i]);
+						Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 						assert(pInMachine);
 						if(!pInMachine->_mute && !pInMachine->Standby())
 						{
@@ -574,7 +579,7 @@ namespace psycle
 				{
 					if (_inputCon[i] && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
-						Machine* pInMachine = Global::song().machine(_inputMachines[i]);
+						Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 						assert(pInMachine);
 						if(!pInMachine->_mute && !pInMachine->Standby())
 						{
@@ -631,7 +636,7 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				SetMixerSendFlag(pSong,pSong->machine(srcmac));
+				SetMixerSendFlag(pSong,pSong->_pMachine[srcmac]);
 				MixerWire wire(srcmac,0);
 				// If we're replacing an existing connection
 				if ( ReturnValid(wireIndex))
@@ -697,7 +702,7 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				DeleteMixerSendFlag(pSong,pSong->machine(Return(wireIndex).Wire().machine_));
+				DeleteMixerSendFlag(pSong,pSong->_pMachine[Return(wireIndex).Wire().machine_]);
 				Return(wireIndex).Wire().machine_=-1;
 				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
@@ -707,7 +712,7 @@ namespace psycle
 		void Mixer::NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac)
 		{
 			// Mixer reached, set flags upwards.
-			SetMixerSendFlag(pSong,pSong->machine(callerMac));
+			SetMixerSendFlag(pSong,pSong->_pMachine[callerMac]);
 			for (int i(0); i < MAX_CONNECTIONS; i++)
 			{
 				if ( ReturnValid(i))
@@ -715,7 +720,7 @@ namespace psycle
 					if (Return(i).Wire().machine_ == callerMac)
 					{
 						sends_[i].machine_ = senderMac;
-						sends_[i].normalize_ = GetAudioRange()/pSong->machine(senderMac)->GetAudioRange();
+						sends_[i].normalize_ = GetAudioRange()/pSong->_pMachine[senderMac]->GetAudioRange();
 						for (int ch(0);ch<numinputs();ch++)
 						{
 							RecalcSend(ch,i);
@@ -728,7 +733,7 @@ namespace psycle
 		{
 			for (int i(0);i<MAX_CONNECTIONS;++i)
 			{
-				if (mac->_inputCon[i]) SetMixerSendFlag(pSong,pSong->machine(mac->_inputMachines[i]));
+				if (mac->_inputCon[i]) SetMixerSendFlag(pSong,pSong->_pMachine[mac->_inputMachines[i]]);
 			}
 			mac->_isMixerSend=true;
 		}
@@ -736,7 +741,7 @@ namespace psycle
 		{
 			for (int i(0);i<MAX_CONNECTIONS;++i)
 			{
-				if (mac->_inputCon[i]) DeleteMixerSendFlag(pSong,pSong->machine(mac->_inputMachines[i]));
+				if (mac->_inputCon[i]) DeleteMixerSendFlag(pSong,pSong->_pMachine[mac->_inputMachines[i]]);
 			}
 			mac->_isMixerSend=false;
 		}
@@ -750,7 +755,7 @@ namespace psycle
 				// Checking send/return Wires
 				if(Return(w).IsValid())
 				{
-					iMac = pSong->machine(Return(w).Wire().machine_);
+					iMac = pSong->_pMachine[Return(w).Wire().machine_];
 					if (iMac)
 					{
 						int wix = iMac->FindOutputWire(_macIndex);
@@ -1158,7 +1163,7 @@ namespace psycle
 				GetWireVolume(idx,vol);
 				vol*=Channel(idx).Volume();
 				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
-				return (Global::song().machine(_inputMachines[idx])->_volumeDisplay/97.0f)*vol;
+				return (Global::song()._pMachine[_inputMachines[idx]]->_volumeDisplay/97.0f)*vol;
 			}
 			return 0.0f;
 		}
@@ -1171,7 +1176,7 @@ namespace psycle
 				GetWireVolume(idx+MAX_CONNECTIONS,vol);
 				vol *= Return(idx).Volume();
 				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
-				return (Global::song().machine(Return(idx).Wire().machine_)->_volumeDisplay/97.0f)*vol;
+				return (Global::song()._pMachine[Return(idx).Wire().machine_]->_volumeDisplay/97.0f)*vol;
 			}
 			return 0.0f;
 		}
@@ -1510,4 +1515,3 @@ namespace psycle
 		}
 	}
 }
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

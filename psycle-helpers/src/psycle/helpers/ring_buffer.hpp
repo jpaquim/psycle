@@ -3,7 +3,7 @@
 
 ///\interface psycle::helpers::ring_buffer
 #pragma once
-#include <universalis/cpu/memory_barriers.hpp>
+#include <universalis/processor/memory_barriers.hpp>
 #include <cstddef>
 namespace psycle { namespace helpers {
 

@@ -24,9 +24,8 @@
 #include <cassert>
 #include <cmath>
 
-using namespace psycle::plugin_interface;
-
 #define MAX_ENV_TIME 65536
+
 
 CMachineParameter const paraVol1 = 
 { 
@@ -1440,7 +1439,8 @@ CMachineParameter const *pParameters[] =
 	&paraFinetune,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	GENERATOR,
 	128,
@@ -1448,13 +1448,13 @@ CMachineInfo const MacInfo (
 	#ifndef NDEBUG
 		"GameFX (Debug build)",
 	#else
-		"GameFX 1.5",
+		"GameFX 1.4",
 	#endif
 	"GameFX",
 	"jme",
 	"Help",
 	8
-);
+};
 
 class mi : public CMachineInterface
 {

@@ -1,7 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::CSaveWavDlg.
 #pragma once
-#include "Psycle.hpp"
+#include "Constants.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 #include <mmreg.h>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -70,6 +72,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			static int channelmode;
 			static int ditherpdf;
 			static int noiseshape;
+
+			struct pdf
+			{
+				enum pdfs
+				{
+					triangular=0,
+					rectangular,
+					gaussian
+				};
+			};
 
 			struct fullheader
 			{

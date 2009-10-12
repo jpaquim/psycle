@@ -4,10 +4,10 @@
 ///\implementation psycle::plugins::outputs::dummy
 #include <psycle/detail/project.private.hpp>
 #include "dummy.hpp"
-#include <diversalis/cpu.hpp>
-#include <universalis/cpu/exception.hpp>
-#include <universalis/os/thread_name.hpp>
-#include <universalis/os/exceptions/code_description.hpp>
+#include <diversalis/processor.hpp>
+#include <universalis/processor/exception.hpp>
+#include <universalis/operating_system/thread_name.hpp>
+#include <universalis/operating_system/exceptions/code_description.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
 using engine::exceptions::runtime_error;
@@ -53,7 +53,7 @@ void dummy::thread_function() {
 	if(loggers::information()()) loggers::information()("thread started", UNIVERSALIS__COMPILER__LOCATION);
 
 	// set thread name
-	universalis::os::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + qualified_name());
+	universalis::operating_system::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + qualified_name());
 
 	// install cpu/os exception handler/translator
 	universalis::processor::exception::install_handler_in_thread();

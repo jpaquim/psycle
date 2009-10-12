@@ -1,7 +1,0 @@
-#ifndef UNIVERSALIS__STDLIB__FUTURE_STD_INCLUDE__CONDITION__INCLUDED
-#define UNIVERSALIS__STDLIB__FUTURE_STD_INCLUDE__CONDITION__INCLUDED
-#pragma once
-
-#include <universalis/stdlib/condition.hpp>
-
-#endif

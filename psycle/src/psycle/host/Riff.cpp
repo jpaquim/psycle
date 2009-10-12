@@ -31,10 +31,8 @@
 	\endverbatim
 */
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "Riff.hpp"
-//Psycore includes psycle-helpers for now.
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-
 #include <io.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -681,4 +679,3 @@ namespace psycle
 		}
 	}
 }
-#endif

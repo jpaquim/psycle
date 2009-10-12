@@ -1,15 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CNativeGui.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "NativeGui.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machine.h>
-using namespace psy::core;
-#else
+#include "Psycle.hpp"
 #include "Machine.hpp"
-#endif
-
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
 #include "NewVal.hpp"
@@ -130,6 +125,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			return true;
 		}
 
+		void CNativeGui::SelectMachine(Machine* pMachine)
+		{
+			_pMachine = pMachine;
+			numParameters = _pMachine->GetNumParams();
+			ncol = _pMachine->GetNumCols();
+			if ( ncol == 0 )
+			{
+				ncol = 1;
+				while ( (numParameters/ncol)*uiSetting().dialheight > ncol*W_ROWWIDTH ) ncol++;
+			}
+			parspercol = numParameters/ncol;
+			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
+		}
+
 		int CNativeGui::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 		{
 			if (CWnd::OnCreate(lpCreateStruct) == -1)
@@ -147,7 +156,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CNativeGui::OnTimer(UINT nIDEvent) 
 		{
-			if ( nIDEvent == 2104+machine().id() )
+			if ( nIDEvent == 2104+machine()._macIndex )
 			{
 				Invalidate(false);
 			}
@@ -159,21 +168,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 //			GetParent()->OnSetFocus(pOldWnd);
 			WindowIdle();
 		}
-
-		void CNativeGui::SelectMachine(Machine* pMachine)
-		{
-			_pMachine = pMachine;
-			numParameters = _pMachine->GetNumParams();
-			ncol = _pMachine->GetNumCols();
-			if ( ncol == 0 )
-			{
-				ncol = 1;
-				while ( (numParameters/ncol)*uiSetting().dialheight > ncol*W_ROWWIDTH ) ncol++;
-			}
-			parspercol = numParameters/ncol;
-			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
-		}
-
 
 
 		///////////////////////////////////////////////////////////////////////
@@ -403,9 +397,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), tweakpar, prevval);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, tweakpar, prevval);
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), tweakpar, prevval);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, tweakpar, prevval);
 				}
 //				if(pParamGui)
 //					pParamGui->UpdateNew(index, value);
@@ -432,11 +426,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (nFlags & MK_CONTROL)
 				{
-/*					Global::song().seqBus = MachineIndex;//Global::song().FindBusFromIndex(MachineIndex);
+/*					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
 					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS); // PARAMS
-					Global::song().auxcolSelected=tweakpar;
+					Global::_pSong->auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 */
 				}
@@ -458,7 +452,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						max_v
 						);
 
-					CNewVal dlg(machine().id(),tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
+					CNewVal dlg(machine()._macIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
 //						wndView->AddMacViewUndo();
@@ -482,7 +476,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				case CT_Note:
 					if (!bRepeat){
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->IsGenerator() || Global::pConfig->_notesToEffects)
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
 							Global::pInputHandler->PlayNote(outnote,127,true, 0);
@@ -509,7 +503,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->IsGenerator() ||Global::pConfig->_notesToEffects)
+				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
 				{
 					Global::pInputHandler->StopNote(outnote,true,_pMachine);
 				}

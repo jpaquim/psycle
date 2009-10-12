@@ -4,13 +4,8 @@
 
 ///\file
 /// pragmatic attribute
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__ATTRIBUTE__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__ATTRIBUTE__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
-
 /// pragmatic attribute
 #if defined DIVERSALIS__COMPILER__GNU
 	#define UNIVERSALIS__COMPILER__ATTRIBUTE(x) __attribute__ ((x))
@@ -18,6 +13,4 @@
 	#define UNIVERSALIS__COMPILER__ATTRIBUTE(x) __declspec(x)
 #else
 	#define UNIVERSALIS__COMPILER__ATTRIBUTE(x)
-#endif
-
 #endif

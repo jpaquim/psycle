@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Player.
 #pragma once
-#include "Global.hpp"
+#include "Constants.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "Riff.hpp"
@@ -40,7 +40,7 @@ namespace psycle
 			/// the line at which to stop playing (used by save block to wav)
 			int _lineStop;
 			/// the sequence position currently being played
-			int _sequencePosition;
+			int _playPosition;
 			/// the pattern currently being played.
 			int _playPattern;
 			/// elapsed time since playing started. Units is seconds and the float type allows for storing milliseconds.
@@ -50,12 +50,10 @@ namespace psycle
 			int _playTimem;
 			/// the current beats per minute at which to play the song.
 			/// can be changed from the song itself using commands.
-			int bpm_;
-			int bpm() { return bpm_; }
+			int bpm;
 			/// the current ticks per beat at which to play the song.
 			/// can be changed from the song itself using commands.
-			int tpb_;
-			int tpb() { return tpb_; }
+			int tpb;
 			/// Contains the number of samples until a line change comes in.
 			int _samplesRemaining;
 			/// starts to play, also specifying a line to stop playing at.
@@ -64,7 +62,6 @@ namespace psycle
 			void Start(int pos,int line,bool initialize=true);
 			/// wether this player has been started.
 			bool _playing;
-			bool playing() const { return _playing; }
 			/// wether this player should only play the selected block in the sequence.
 			bool _playBlock;
 			/// wheter this player should play the song/block in loop.
@@ -72,13 +69,13 @@ namespace psycle
 			/// Indicates if the player is processing audio right now (It is in work function)
 			bool _isWorking;
 			/// stops playing.
-			void stop();
+			void Stop();
 			/// work function. (Entrance for the callback function (audiodriver)
 			static float * Work(void* context, int nsamples);
 			
 			void SetBPM(int _bpm,int _tpb=0);
 
-			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm_*tpb_)); }
+			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
 
 			/// Returns the number of samples that it takes for each row of the pattern to be played
 			const int SamplesPerRow(){ return m_SamplesPerRow;}
@@ -94,11 +91,10 @@ namespace psycle
 			/// starts the recording output device.
 			void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1, bool isFloat = false, bool dodither=false, int ditherpdf=0, int noiseshape=0, std::vector<char*> *clipboardmem=0);
 			/// stops the recording output device.
-			void stopRecording(bool bOk = true);
+			void StopRecording(bool bOk = true);
 			bool ClipboardWriteMono(float sample);
 			bool ClipboardWriteStereo(float left, float right);
 			/// wether the recording device has been started.
-			bool recording() { return _recording; }
 			bool _recording;
 			/// wether the recording is done to memory.
 			bool _clipboardrecording;

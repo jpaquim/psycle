@@ -2,14 +2,9 @@
 // copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\interface virtual constructor and destructor support à la delphi but also with support for creating on the stack
-
-#ifndef UNIVERSALIS__COMPILER__VIRTUAL_FACTORY__INCLUDED
-#define UNIVERSALIS__COMPILER__VIRTUAL_FACTORY__INCLUDED
 #pragma once
-
 #include <universalis/compiler/template_constructors.hpp>
 #include <boost/preprocessor/repetition/enum_trailing_params.hpp>
-
 namespace universalis { namespace compiler {
 
 class basic_virtual_factory {
@@ -111,5 +106,3 @@ class virtual_factory<Derived> : public basic_virtual_factory {
 };
 
 }}
-
-#endif

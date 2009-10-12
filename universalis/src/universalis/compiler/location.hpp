@@ -1,13 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
-///\interface universalis::os::location
-
-#ifndef UNIVERSALIS__COMPILER__LOCATION__INCLUDED
-#define UNIVERSALIS__COMPILER__LOCATION__INCLUDED
+///\interface universalis::operating_system::location
 #pragma once
-
 #include <universalis/compiler/stringized.hpp>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <algorithm>
 #if !defined DIVERSALIS__COMPILER__GNU
 	// Only gcc is able to include the name of the current class implicitly with __PRETTY_FUNCTION__.
 	// We can use rtti support on other compilers.
@@ -15,13 +16,8 @@
 	#include <boost/current_function.hpp>
 #endif
 #if defined PACKAGENERIC
-	#include <packageneric.private.hpp>
+	#include <packageneric/module.private.hpp>
 #endif
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <algorithm>
 
 namespace universalis { namespace compiler {
 
@@ -83,7 +79,7 @@ class location {
 		PACKAGENERIC__PACKAGE__VERSION
 #else
 	///\internal
-	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unkown module)"
+	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unkown)"
 #endif
 
 ///\internal
@@ -115,4 +111,3 @@ class location {
 		BOOST_CURRENT_FUNCTION
 #endif
 
-#endif

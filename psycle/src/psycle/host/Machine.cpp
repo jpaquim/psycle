@@ -1,8 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "Machine.hpp"
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
 // in a different way
@@ -32,38 +31,91 @@
 #include "VstHost24.hpp"
 
 #include "Loggers.hpp"
-
-#include <universalis/os/aligned_memory_alloc.hpp>
-
-namespace psycle { namespace host 
+#include "configuration_options.hpp"
+#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+	#include <universalis/processor/exception.hpp>
+#endif
+namespace psycle
 {
+	namespace host
+	{
 #if !defined WINAMP_PLUGIN
 		extern CPsycleApp theApp;
 #endif //!defined WINAMP_PLUGIN
 
 		char* Master::_psName = "Master";
 
-		void Machine::crashed(std::exception const & e) throw() {
-			///\todo do we need thread synchronization?
-			///\todo gui needs to update
-			crashed_ = true;
-			_bypass = true;
-			_mute = true;
-
+		void Machine::crashed(std::exception const & e) throw()
+		{
+			bool minor_problem(false);
+			bool crash(false);
+			{
+				exceptions::function_error const * const function_error(dynamic_cast<exceptions::function_error const * const>(&e));
+				if(function_error)
+				{
+					#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+						#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+					#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+						universalis::processor::exception const * const translated(dynamic_cast<universalis::processor::exception const * const>(function_error->exception()));
+						if(translated)
+						{
+							crash = true;
+							switch(translated->code())
+							{
+								// grows the fpu exception mask so that each type of exception is only reported once
+								case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
+								case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
+								case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
+								case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
+								case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
+								case STATUS_FLOAT_STACK_CHECK:                                                                       break;
+								case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
+							}
+						}
+					#endif
+				}
+			}
+			if(!minor_problem)
+			{
+				///\todo do we need thread synchronization?
+				///\todo gui needs to update
+				crashed_ = true;
+				_bypass = true;
+				_mute = true;
+			}
 			std::ostringstream s;
 			s << "Machine: " << _editName;
 			if(GetDllName()) s << ": " << GetDllName();
 			s << std::endl << e.what() << std::endl;
-			s
-				<< "The machine has been set to bypassed/muted to prevent it from making the host crash."
-				<< std::endl
-				<< "You should save your work to a new file, and restart the host.";
-			//loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
-			loggers::exception(s.str());
-			MessageBox(0, s.str().c_str(), "Exception", MB_OK | MB_ICONERROR);
+			if(minor_problem)
+			{
+				s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
+				loggers::warning(s.str());
+			}
+			else
+			{
+				s
+					<< "This is a serious error: the machine has been set to bypassed/muted to prevent it from making the host crash."
+					<< std::endl
+					<< "You should save your work to a new file, and restart the host.";
+				if(crash)
+				{
+					//loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
+					loggers::exception(s.str());
+				}
+				else
+				{
+					loggers::exception(s.str());
+				}
+			}
+			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
+			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered. Force this we need to use __except instead of catch.
 		}
-
-		Machine::Machine(MachineType msubclass, MachineMode mode, int id) {
+		Machine::Machine(MachineType msubclass, MachineMode mode, int id)
+		{
+		//	Machine();
 			_type=msubclass;
 			_mode=mode;
 			_macIndex=id;
@@ -71,6 +123,11 @@ namespace psycle { namespace host
 
 		Machine::Machine()
 			: crashed_()
+			#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+				#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+			#elif	PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+				, fpu_exception_mask_()
+			#endif
 			, _macIndex(0)
 			, _type(MACH_UNDEFINED)
 			, _mode(MACHMODE_UNDEFINED)
@@ -105,28 +162,38 @@ namespace psycle { namespace host
 			, _scopePrevNumSamples(0)
 		{
 			_editName[0] = '\0';
-			universalis::os::aligned_memory_alloc(16, _pSamplesL, STREAM_SIZE);
-			universalis::os::aligned_memory_alloc(16, _pSamplesR, STREAM_SIZE);
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
+		#else
+			_pSamplesL = new float[STREAM_SIZE];
+			_pSamplesR = new float[STREAM_SIZE];
+		#endif
 
 			// Clear machine buffer samples
 			helpers::dsp::Clear(_pSamplesL,STREAM_SIZE);
 			helpers::dsp::Clear(_pSamplesR,STREAM_SIZE);
 
-			for(int c = 0; c < MAX_TRACKS; ++c) {
+			for (int c = 0; c<MAX_TRACKS; c++)
+			{
 				TriggerDelay[c]._cmd = 0;
 				TriggerDelayCounter[c]=0;
 				RetriggerRate[c]=256;
 				ArpeggioCount[c]=0;
 			}
-			
-			for(int c = 0; c < MAX_TWS; ++c) {
+			for (int c = 0; c<MAX_TWS; c++)
+			{
 				TWSInst[c] = 0;
 				TWSDelta[c] = 0;
 				TWSCurrent[c] = 0;
 				TWSDestination[c] = 0;
 			}
 
-			for(int i = 0; i < MAX_CONNECTIONS; ++i) {
+			for (int i = 0; i<MAX_CONNECTIONS; i++)
+			{
 				_inputMachines[i]=-1;
 				_inputCon[i]=false;
 				_inputConVol[i]=0.0f;
@@ -136,18 +203,22 @@ namespace psycle { namespace host
 				_connectionPoint[i].x=0;
 				_connectionPoint[i].y=0;
 			}
-			
-			#if PSYCLE__CONFIGURATION__RMS_VUS
-				rms.count=0;
-				rms.AccumLeft=0.;
-				rms.AccumRight=0.;
-				rms.previousLeft=0.;
-				rms.previousRight=0.;
-			#endif
+#if PSYCLE__CONFIGURATION__RMS_VUS
+			rms.count=0;
+			rms.AccumLeft=0.;
+			rms.AccumRight=0.;
+			rms.previousLeft=0.;
+			rms.previousRight=0.;
+#endif
 		}
 		Machine::Machine(Machine* mac)
 			: crashed_()
-			, _macIndex(mac->id())
+#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+#elif	PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+			, fpu_exception_mask_()
+#endif
+			, _macIndex(mac->_macIndex)
 			, _type(mac->_type)
 			, _mode(mac->_mode)
 			, _bypass(mac->_bypass)
@@ -181,8 +252,16 @@ namespace psycle { namespace host
 			, _scopePrevNumSamples(0)
 		{
 			sprintf(_editName,mac->_editName);
-			universalis::os::aligned_memory_alloc(16, _pSamplesL, STREAM_SIZE);
-			universalis::os::aligned_memory_alloc(16, _pSamplesR, STREAM_SIZE);
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
+#else
+			_pSamplesL = new float[STREAM_SIZE];
+			_pSamplesR = new float[STREAM_SIZE];
+#endif
 
 			// Clear machine buffer samples
 			helpers::dsp::Clear(_pSamplesL,STREAM_SIZE);
@@ -215,21 +294,31 @@ namespace psycle { namespace host
 				_connectionPoint[i].x=mac->_connectionPoint[i].x;
 				_connectionPoint[i].y=mac->_connectionPoint[i].y;
 			}
-			#if PSYCLE__CONFIGURATION__RMS_VUS
-				rms.count=0;
-				rms.AccumLeft=0.;
-				rms.AccumRight=0.;
-				rms.previousLeft=0.;
-				rms.previousRight=0.;
-			#endif
+#if PSYCLE__CONFIGURATION__RMS_VUS
+			rms.count=0;
+			rms.AccumLeft=0.;
+			rms.AccumRight=0.;
+			rms.previousLeft=0.;
+			rms.previousRight=0.;
+#endif
+		}
+		Machine::~Machine() throw()
+		{
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			_aligned_free(_pSamplesL);
+			_aligned_free(_pSamplesR);
+		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+			free(_pSamplesL);
+			free(_pSamplesR);
+		#else
+			delete [] _pSamplesL;
+			delete [] _pSamplesR;
+		#endif
+			_pSamplesL = _pSamplesR=0;
 		}
 
-		Machine::~Machine() throw() {
-			universalis::os::aligned_memory_dealloc(_pSamplesL);
-			universalis::os::aligned_memory_dealloc(_pSamplesR);
-		}
-
-		void Machine::Init() {
+		void Machine::Init()
+		{
 			// Standard gear initalization
 			_cpuCost = 0;
 			_wireCost = 0;
@@ -240,7 +329,8 @@ namespace psycle { namespace host
 			// Centering volume and panning
 			SetPan(64);
 			// Clearing connections
-			for(int i = 0; i < MAX_CONNECTIONS; ++i) {
+			for(int i=0; i<MAX_CONNECTIONS; i++)
+			{
 				_inputMachines[i]=-1;
 				_outputMachines[i]=-1;
 				_inputConVol[i] = 1.0f;
@@ -250,92 +340,128 @@ namespace psycle { namespace host
 			}
 			_numInputs = 0;
 			_numOutputs = 0;
-			#if PSYCLE__CONFIGURATION__RMS_VUS
-				rms.AccumLeft=0.;
-				rms.AccumRight=0.;
-				rms.count=0;
-				rms.previousLeft=0.;
-				rms.previousRight=0.;
-			#endif
+#if PSYCLE__CONFIGURATION__RMS_VUS
+			rms.AccumLeft=0.;
+			rms.AccumRight=0.;
+			rms.count=0;
+			rms.previousLeft=0.;
+			rms.previousRight=0.;
+#endif
 		}
 
-		void Machine::SetPan(int newPan) {
-			if(newPan < 0) newPan = 0;
-			if(newPan > 128) newPan = 128;
+		void Machine::SetPan(int newPan)
+		{
+			if (newPan < 0)
+			{
+				newPan = 0;
+			}
+			if (newPan > 128)
+			{
+				newPan = 128;
+			}
 			_rVol = newPan * 0.015625f;
-			_lVol = 2.0f - _rVol;
-			if(_lVol > 1.0f) _lVol = 1.0f;
-			if(_rVol > 1.0f) _rVol = 1.0f;
+			_lVol = 2.0f-_rVol;
+			if (_lVol > 1.0f)
+			{
+				_lVol = 1.0f;
+			}
+			if (_rVol > 1.0f)
+			{
+				_rVol = 1.0f;
+			}
 			_panning = newPan;
 		}
-
-		void Machine::InsertOutputWireIndex(Song* pSong,int wireIndex, int dstmac) {
+		void Machine::InsertOutputWireIndex(Song* pSong,int wireIndex, int dstmac)
+		{
 			if (!_connection[wireIndex]) _numOutputs++;
 			_outputMachines[wireIndex] = dstmac;
 			_connection[wireIndex] = true;
 		}
-
-		void Machine::InsertInputWireIndex(Song* pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol) {
-			if(!_inputCon[wireIndex]) ++_numInputs;
+		void Machine::InsertInputWireIndex(Song* pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
+		{
+			if (!_inputCon[wireIndex]) _numInputs++;
 			_inputMachines[wireIndex] = srcmac;
 			_inputCon[wireIndex] = true;
 			_wireMultiplier[wireIndex] = wiremultiplier;
 			SetWireVolume(wireIndex,initialvol);
-			if(_isMixerSend) {
+			if ( _isMixerSend )
+			{
 				//Let's find if the new machine has still other machines connected to it.
 				// Right now the UI doesn't allow such configurations, but there isn't a reason
 				// not to allow it in the future.
-				Machine* pMac = pSong->machine(srcmac);
-				for(int c = 0; c < MAX_CONNECTIONS; ++c) {
-					if(pMac->_inputCon[c]) {
-						pMac = pSong->machine(pMac->_inputCon[c]);
+				Machine* pMac = pSong->_pMachine[srcmac];
+				for(int c=0; c<MAX_CONNECTIONS; c++)
+				{
+					if(pMac->_inputCon[c])	{
+						pMac = pSong->_pMachine[pMac->_inputCon[c]];
 						c=0;
 						continue;
 					}
 				}
-				NotifyNewSendtoMixer(pSong,_macIndex,pMac->id());
+				NotifyNewSendtoMixer(pSong,_macIndex,pMac->_macIndex);
 			}
 		}
-
-		int Machine::GetFreeInputWire(int slottype) {
-			for(int c = 0; c < MAX_CONNECTIONS; ++c) if(!_inputCon[c]) return c;
+		int Machine::GetFreeInputWire(int slottype)
+		{
+			for(int c=0; c<MAX_CONNECTIONS; c++)
+			{
+				if(!_inputCon[c]) return c;
+			}
+			return -1;
+		}
+		int Machine::GetFreeOutputWire(int slottype)
+		{
+			for(int c=0; c<MAX_CONNECTIONS; c++)
+			{
+				if(!_connection[c]) return c;
+			}
 			return -1;
 		}
 
-		int Machine::GetFreeOutputWire(int slottype) {
-			for(int c = 0; c < MAX_CONNECTIONS; ++c) if(!_connection[c]) return c;
-			return -1;
-		}
-
-		int Machine::FindInputWire(int macIndex) {
-			for(int c = 0; c < MAX_CONNECTIONS; ++c) {
-				if(_inputCon[c]) {
-					if(_inputMachines[c] == macIndex) return c;
+		int Machine::FindInputWire(int macIndex)
+		{
+			for (int c=0; c<MAX_CONNECTIONS; c++)
+			{
+				if (_inputCon[c])
+				{
+					if (_inputMachines[c] == macIndex)
+					{
+						return c;
+					}
 				}
 			}
 			return -1;
 		}
 
-		int Machine::FindOutputWire(int macIndex) {
-			for(int c = 0; c < MAX_CONNECTIONS; ++c) {
-				if(_connection[c]) {
-					if(_outputMachines[c] == macIndex) return c;
+		int Machine::FindOutputWire(int macIndex)
+		{
+			for (int c=0; c<MAX_CONNECTIONS; c++)
+			{
+				if (_connection[c])
+				{
+					if (_outputMachines[c] == macIndex)
+					{
+						return c;
+					}
 				}
 			}
 			return -1;
 		}
 
-		bool Machine::SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value) {
+		bool Machine::SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value)
+		{
 			// Get reference to the destination machine
-			if((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = pSong->machine(_outputMachines[WireIndex]);
+			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
+			Machine *_pDstMachine = pSong->_pMachine[_outputMachines[WireIndex]];
 
-			if(_pDstMachine) {
+			if (_pDstMachine)
+			{
 				//if ( value == 255 ) value =256; // FF = 255
 				//const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
 				
 				int c;
-				if((c = _pDstMachine->FindInputWire(srcIndex)) != -1) {
+				if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
+				{
 					_pDstMachine->SetWireVolume(c,value);
 					return true;
 				}
@@ -343,10 +469,11 @@ namespace psycle { namespace host
 			return false;
 		}
 
-		bool Machine::GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value) {
+		bool Machine::GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value)
+		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = pSong->machine(_outputMachines[WireIndex]);
+			Machine *_pDstMachine = pSong->_pMachine[_outputMachines[WireIndex]];
 			
 			if (_pDstMachine)
 			{
@@ -363,7 +490,8 @@ namespace psycle { namespace host
 			return false;
 		}
 
-		void Machine::DeleteOutputWireIndex(Song* pSong,int wireIndex) {
+		void Machine::DeleteOutputWireIndex(Song* pSong,int wireIndex)
+		{
 			if ( _isMixerSend)
 			{
 				ClearMixerSendFlag(pSong);
@@ -394,7 +522,7 @@ namespace psycle { namespace host
 				{
 					if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
 					{
-						iMac = pSong->machine(_inputMachines[w]);
+						iMac = pSong->_pMachine[_inputMachines[w]];
 						if (iMac)
 						{
 							int wix = iMac->FindOutputWire(_macIndex);
@@ -411,7 +539,7 @@ namespace psycle { namespace host
 				{
 					if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
 					{
-						iMac = pSong->machine(_outputMachines[w]);
+						iMac = pSong->_pMachine[_outputMachines[w]];
 						if (iMac)
 						{
 							int wix = iMac->FindInputWire(_macIndex);
@@ -458,7 +586,7 @@ namespace psycle { namespace host
 		{
 			//Work down the connection wires until finding the mixer.
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
-				if ( _connection[i]) pSong->machine(_outputMachines[i])->NotifyNewSendtoMixer(pSong,_macIndex,senderMac);
+				if ( _connection[i]) pSong->_pMachine[_outputMachines[i]]->NotifyNewSendtoMixer(pSong,_macIndex,senderMac);
 		}
 		void Machine::ClearMixerSendFlag(Song* pSong)
 		{
@@ -466,7 +594,7 @@ namespace psycle { namespace host
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
 				if ( _inputCon[i])
 				{
-					pSong->machine(_inputMachines[i])->ClearMixerSendFlag(pSong);
+					pSong->_pMachine[_inputMachines[i]]->ClearMixerSendFlag(pSong);
 				}
 				
 			_isMixerSend=false;
@@ -483,42 +611,25 @@ namespace psycle { namespace host
 				float *pSamplesL = _pSamplesL;   
 				float *pSamplesR = _pSamplesR;   
 				int i = _scopePrevNumSamples;
-				if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
+				while (i > 0)   
 				{   
-					//dsp::Mov SSE version needs 16byte (4 samples) aligned data.
-					const int cont = (SCOPE_BUF_SIZE-_scopeBufferIndex)&0x0FFFFFFC;
-					helpers::dsp::Mov(pSamplesL,&_pScopeBufferL[_scopeBufferIndex], cont);
-					helpers::dsp::Mov(pSamplesR,&_pScopeBufferR[_scopeBufferIndex], cont);
-					pSamplesL+=cont;
-					pSamplesR+=cont;
-					i -= cont;
-					_scopeBufferIndex +=cont;
-/*					if (_scopeBufferIndex < SCOPE_BUF_SIZE) {
-						const int cont2 = SCOPE_BUF_SIZE-_scopeBufferIndex;
-						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,cont2);
-						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,cont2);
-						pSamplesL+=cont2;
-						pSamplesR+=cont2;
-						i-=cont2;
-					}
-*/
-					_scopeBufferIndex = 0;  
-				}   
-				//dsp::Mov SSE version needs 16byte (4 samples) aligned data.
-				const int cont = i&0x0FFFFFFC;
-				helpers::dsp::Mov(pSamplesL,&_pScopeBufferL[_scopeBufferIndex], cont);
-				helpers::dsp::Mov(pSamplesR,&_pScopeBufferR[_scopeBufferIndex], cont);
-				pSamplesL+=cont;
-				pSamplesR+=cont;
-				_scopeBufferIndex += cont;
-				i -= cont;
-/*				if (i > 0) {
-					memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));
-					memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));
-					_scopeBufferIndex +=i;
-				}
-*/
-
+					if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
+					{   
+						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
+						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
+						pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+						pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+						i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
+						_scopeBufferIndex = 0;   
+					}   
+					else   
+					{   
+						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));   
+						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));   
+						_scopeBufferIndex += i;   
+						i = 0;   
+					}   
+				} 
 			}
 			_scopePrevNumSamples=numSamples;
 #endif //!defined WINAMP_PLUGIN
@@ -539,7 +650,7 @@ namespace psycle { namespace host
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::song().machine(_inputMachines[i]);
+					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
 						/*
@@ -550,7 +661,14 @@ namespace psycle { namespace host
 						*/
 						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
 						{ 
-							pInMachine->Work(numSamples);
+							{
+								#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+								#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									universalis::processor::exceptions::fpu::mask::type fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#endif
+								pInMachine->Work(numSamples);
+							}
 							{
 								//Disable bad-behaving machines
 								///\todo: add a better approach later on, 
@@ -598,10 +716,20 @@ namespace psycle { namespace host
 			{
 				if (_inputCon[i])
 				{
-					Machine* pInMachine = Global::song().machine(_inputMachines[i]);
+					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 					if (pInMachine)
 					{
-						if(!pInMachine->_worked && !pInMachine->_waitingForSound) pInMachine->Work(numSamples);
+						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
+						{ 
+							{
+								#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+								#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+								#endif
+								pInMachine->Work(numSamples);
+							}
+						}
 						if(!pInMachine->Standby()) Standby(false);
 					}
 				}
@@ -838,30 +966,30 @@ namespace psycle { namespace host
 			{
 				pMachine->_mode = MACHMODE_GENERATOR;
 #if !defined WINAMP_PLUGIN
-/*				if(pMachine->_x > Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
-					pMachine->_x = Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-				if(pMachine->_y > Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
-					pMachine->_y = Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;*/
+				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
+					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
+					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
 #endif //!defined WINAMP_PLUGIN
 			}
 			else if (index < MAX_BUSES*2)
 			{
 				pMachine->_mode = MACHMODE_FX;
 #if !defined WINAMP_PLUGIN
-/*				if(pMachine->_x > Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
-					pMachine->_x = Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-				if(pMachine->_y > Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
-					pMachine->_y = Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;*/
+				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
+					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
+					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
 #endif //!defined WINAMP_PLUGIN
 			}
 			else
 			{
 				pMachine->_mode = MACHMODE_MASTER;
 #if !defined WINAMP_PLUGIN
-/*				if(pMachine->_x > Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
-					pMachine->_x = Global::song().viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
-				if(pMachine->_y > Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
-					pMachine->_y = Global::song().viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;*/
+				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
+					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
+				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
+					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
 #endif //!defined WINAMP_PLUGIN
 			}
 			pMachine->SetPan(pMachine->_panning);
@@ -970,6 +1098,11 @@ namespace psycle { namespace host
 
 		void Master::Work(int numSamples)
 		{
+			#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+				#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
+			#elif PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
+				universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+			#endif
 			Machine::Work(numSamples);
 			cpu::cycles_type cost = cpu::cycles();
 
@@ -1196,5 +1329,7 @@ namespace psycle { namespace host
 
 			return true;
 		}
-}}
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+
+
+	}
+}

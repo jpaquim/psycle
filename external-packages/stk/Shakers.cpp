@@ -52,6 +52,7 @@
     by Perry R. Cook, 1996 - 2004.
 */
 /***************************************************/
+#include <packageneric/pre-compiled.private.hpp>
 #include "Stk.h"
 #include <cmath>
 

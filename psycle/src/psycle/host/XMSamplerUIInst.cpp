@@ -5,18 +5,12 @@
  *  $Revision$
  */
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMSamplerUIInst.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/player.h>
-#include <psycle/core/xminstrument.h>
-#include <psycle/core/xmsampler.h>
-using namespace psy::core;
-#else
-#include "Song.hpp"
+#include "Psycle.hpp"
 #include "Player.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
-#endif
 #include "XMSongLoader.hpp"
 #include "ITModule2.h"
 #include "Configuration.hpp"
@@ -113,12 +107,12 @@ END_MESSAGE_MAP()
 void XMSamplerUIInst::SetInstrumentData(const int instno)
 {
 	TRACE("in setInstrumentData\n");
-	XMInstrument& inst = Global::song().rInstrument(instno);
+	XMInstrument& inst = m_pMachine->rInstrument(instno);
 	m_iCurrentSelected=instno;
 
 	m_InstrumentName.SetWindowText(inst.Name().c_str());
 	SetNewNoteAction(inst.NNA(),inst.DCT(),inst.DCA());
-	m_SampleAssign.Initialize(m_pMachine,&Global::song().rInstrument(instno),this);
+	m_SampleAssign.Initialize(m_pMachine,&m_pMachine->rInstrument(instno),this);
 
 	m_FilterType.SetCurSel((int)inst.FilterType());
 
@@ -309,7 +303,7 @@ BOOL XMSamplerUIInst::OnSetActive()
 		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
 		{
 			char line[48];
-			XMInstrument& inst = Global::song().rInstrument(i);
+			XMInstrument& inst = m_pMachine->rInstrument(i);
 			sprintf(line,"%02X%s: ",i,inst.IsEnabled()?"*":" ");
 			strcat(line,inst.Name().c_str());
 			m_InstrumentList.AddString(line);
@@ -403,7 +397,7 @@ void XMSamplerUIInst::OnBnClickedInsTamp()
 	TRACE("inbtninsTamp\n");
 	m_bInitialized = false;
 	int i= m_iCurrentSelected;
-	XMInstrument& inst = Global::song().rInstrument(i);
+	XMInstrument& inst = m_pMachine->rInstrument(i);
 
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
@@ -463,7 +457,7 @@ void XMSamplerUIInst::OnBnClickedInsTpan()
 {
 	m_bInitialized = false;
 	int i= m_iCurrentSelected;
-	XMInstrument& inst = Global::song().rInstrument(i);
+	XMInstrument& inst = m_pMachine->rInstrument(i);
 
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
@@ -521,7 +515,7 @@ void XMSamplerUIInst::OnBnClickedInsTfilter()
 {
 	m_bInitialized = false;
 	int i= m_iCurrentSelected;
-	XMInstrument& inst = Global::song().rInstrument(i);
+	XMInstrument& inst = m_pMachine->rInstrument(i);
 	
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
@@ -580,7 +574,7 @@ void XMSamplerUIInst::OnBnClickedInsTpitch()
 {
 	m_bInitialized = false;
 	int i= m_iCurrentSelected;
-	XMInstrument& inst = Global::song().rInstrument(i);
+	XMInstrument& inst = m_pMachine->rInstrument(i);
 	
 	((CStatic*)GetDlgItem(IDC_INS_NOTESCROLL))->ShowWindow(SW_HIDE);
 	((CStatic*)GetDlgItem(IDC_FRAMENNA))->ShowWindow(SW_HIDE);
@@ -637,7 +631,7 @@ void XMSamplerUIInst::OnBnClickedInsTpitch()
 void XMSamplerUIInst::OnCbnSelendokFiltertype()
 {
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::song().rInstrument(i);
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
 
 	_inst.FilterType((dsp::FilterType)m_FilterType.GetCurSel());
 }
@@ -649,7 +643,7 @@ void XMSamplerUIInst::OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult
 	TRACE("incustomdraw\n");
 
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::song().rInstrument(i);
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
 	char tmp[64];
 	
 	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
@@ -699,16 +693,16 @@ void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::song().rInstrument(i);
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
 	char tmp[64];
 
 	if (((CButton*)GetDlgItem(IDC_INS_TAMP))->GetCheck())
 	{
 //		1024 / getpos() = number of ticks that needs to decrease to 0.
-//		(24.0f * Global::player().bpm()/60.0f) = number of ticks in a second.
-//		sprintf(tmp,"%.0fms",(float) (1024/m_SlFadeoutRes.GetPos()) / (24.0f * Global::player().bpm()/60.0f));
+//		(24.0f * Global::player().bpm/60.0f) = number of ticks in a second.
+//		sprintf(tmp,"%.0fms",(float) (1024/m_SlFadeoutRes.GetPos()) / (24.0f * Global::player().bpm/60.0f));
 		if (m_SlFadeoutRes.GetPos() == 0) strcpy(tmp,"off");
-		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::pPlayer->bpm() *m_SlFadeoutRes.GetPos()) );
+		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::pPlayer->bpm *m_SlFadeoutRes.GetPos()) );
 
 		if (m_bInitialized)
 		{
@@ -732,7 +726,7 @@ void XMSamplerUIInst::OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::song().rInstrument(i);
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
 
 	char tmp[64];
 
@@ -777,7 +771,7 @@ void XMSamplerUIInst::OnNMCustomdrawSwing2(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::song().rInstrument(i);
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
 	
 	char tmp[64];
 	if (((CButton*)GetDlgItem(IDC_INS_TFILTER))->GetCheck())
@@ -799,7 +793,7 @@ void XMSamplerUIInst::OnNMCustomdrawNotemodnote(NMHDR *pNMHDR, LRESULT *pResult)
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SLNOTEMODNOTE);
 
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::song().rInstrument(i);
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
 	if (m_bInitialized)
 	{
 		_inst.NoteModPanCenter(slid->GetPos());
@@ -820,7 +814,7 @@ void XMSamplerUIInst::OnNMCustomdrawNoteMod(NMHDR *pNMHDR, LRESULT *pResult)
 	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_NOTEMOD);
 
 	int i= m_iCurrentSelected;
-	XMInstrument& _inst = Global::song().rInstrument(i);
+	XMInstrument& _inst = m_pMachine->rInstrument(i);
 	if (m_bInitialized)
 	{
 		_inst.NoteModPanSep(slid->GetPos());
@@ -918,7 +912,7 @@ void XMSamplerUIInst::OnEnChangeInsName()
 	if(m_bInitialized)
 	{
 		int i= m_iCurrentSelected;
-		XMInstrument& _inst = Global::song().rInstrument(i);
+		XMInstrument& _inst = m_pMachine->rInstrument(i);
 		TCHAR _buf[256];
 		m_InstrumentName.GetWindowText(_buf,sizeof(_buf));
 		_inst.Name(_buf);
@@ -1101,7 +1095,7 @@ void XMSamplerUIInst::CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStru
 			const int _points =  m_pEnvelope->NumOfPoints();
 
 			int _mod = 0.0f;
-			float tenthsec = m_Zoom*0.04*Global::player().bpm();
+			float tenthsec = m_Zoom*0.04*Global::player().bpm;
 			int _sec = 0;
 
 			for(float i = 0; i < m_WindowWidth; i+=tenthsec)
@@ -1372,7 +1366,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopAddPoint()
 			_new_point = 0;
 		}
 
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 	//\todo : Verify that we aren't trying to add an existing point!!!
 
 	if ( m_pEnvelope->NumOfPoints() == 0 && _new_point != 0 ) m_EditPoint = m_pEnvelope->Insert(0,1.0f);
@@ -1383,7 +1377,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->SustainBegin(m_EditPoint);
 		if (m_pEnvelope->SustainEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainEnd(m_EditPoint);
 		else if (m_pEnvelope->SustainEnd() < m_EditPoint )m_pEnvelope->SustainEnd(m_EditPoint);
@@ -1394,7 +1388,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 		if (m_pEnvelope->SustainBegin()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainBegin(m_EditPoint);
 		else if (m_pEnvelope->SustainBegin() > m_EditPoint )m_pEnvelope->SustainBegin(m_EditPoint);
 		m_pEnvelope->SustainEnd(m_EditPoint);
@@ -1405,7 +1399,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 	{
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->LoopStart(m_EditPoint);
 		if (m_pEnvelope->LoopEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopEnd(m_EditPoint);
 		else if (m_pEnvelope->LoopEnd() < m_EditPoint )m_pEnvelope->LoopEnd(m_EditPoint);
@@ -1416,7 +1410,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 		if (m_pEnvelope->LoopStart()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopStart(m_EditPoint);
 		else if (m_pEnvelope->LoopStart() > m_EditPoint )m_pEnvelope->LoopStart(m_EditPoint);
 		m_pEnvelope->LoopEnd(m_EditPoint);
@@ -1437,7 +1431,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
 
 	if(m_EditPoint != _points)
 		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->Delete(m_EditPoint);
 		m_EditPoint = _points;
 			Invalidate();
@@ -1445,21 +1439,21 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveSustain()
 { 
-	XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+	boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 	m_pEnvelope->SustainBegin(XMInstrument::Envelope::INVALID);
 	m_pEnvelope->SustainEnd(XMInstrument::Envelope::INVALID);
 	Invalidate();
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveLoop()
 { 
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
 		m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
 		Invalidate();
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveEnvelope()
 {
-	XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+	boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
 	m_pEnvelope->Clear();
 	Invalidate();
 }

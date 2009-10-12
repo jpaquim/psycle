@@ -1,9 +1,5 @@
 #pragma once
-#include <diversalis/stdlib.hpp>
-#if DIVERSALIS__STDLIB__MATH < 199901
-	#include <diversalis/compiler.hpp>
-	#include <diversalis/cpu.hpp>
-#endif
+#include <diversalis/processor.hpp>
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
@@ -21,8 +17,9 @@ namespace psycle { namespace helpers { namespace math {
 // inline implementation
 namespace psycle { namespace helpers { namespace math {
 
-	#if DIVERSALIS__STDLIB__MATH >= 199901
-
+	#if __STDC__VERSION__ >= 199901 || \
+		(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR >= 4)
+		
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline truncated<>(long double ld)
 		{
@@ -59,7 +56,7 @@ namespace psycle { namespace helpers { namespace math {
 		template<> UNIVERSALIS__COMPILER__CONST
 		std::int32_t inline truncated<>(float f)
 		{
-			#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 				///\todo not always the fastest when using sse(2)
 				///\todo this custom asm is not very fast on some arch, the double "2^51 + 2^52" version might be faster
 				///\todo specify the rounding mode.. is this really a truncation toward -infinity, even with negative numbers?

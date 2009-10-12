@@ -1,21 +1,22 @@
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "ASIOInterface.hpp"
+#include "resources/resources.hpp"
 #include "Registry.hpp"
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
 #include "Helpers.hpp"
 #include "Dsp.hpp"
-#include <universalis/cpu/exception.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
-
+#include <universalis/processor/exception.hpp>
+#include "Configuration.hpp"
 namespace psycle
 {
 	namespace host
 	{
-		using namespace psycle::helpers;
+		using namespace helpers;
 
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 		#define ALLOW_NON_ASIO
@@ -238,12 +239,21 @@ namespace psycle
 			ASIObuffers =  new AsioStereoBuffer[_selectedins.size()+1];
 			counter=0;
 			unsigned int i(0);
-			for (; i < _selectedins.size() ; ++i) {
+			for (; i < _selectedins.size() ; ++i)
+			{
 				AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedins[i].port->_info.type);
 				ASIObuffers[i] = buffer;
-				universalis::os::aligned_memory_alloc(16, _selectedins[i].pleft, _ASIObufferSize);
-				universalis::os::aligned_memory_alloc(16, _selectedins[i].pright, _ASIObufferSize);
-				counter += 2;
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+				_selectedins[i].pleft = static_cast<float*>(_aligned_malloc(_ASIObufferSize*sizeof(float),16));
+				_selectedins[i].pright = static_cast<float*>(_aligned_malloc(_ASIObufferSize*sizeof(float),16));
+			#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+				posix_memalign(reinterpret_cast<void**>(_selectedins[i].pleft),16,_ASIObufferSize*sizeof(float));
+				posix_memalign(reinterpret_cast<void**>(_selectedins[i].pright),16,_ASIObufferSize*sizeof(float));
+			#else
+				_selectedins[i].pleft = new float[_ASIObufferSize];
+				_selectedins[i].pright = new float[_ASIObufferSize];
+			#endif
+				counter+=2;
 			}
 			AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedout.port->_info.type);
 			ASIObuffers[i] = buffer;
@@ -271,9 +281,18 @@ namespace psycle
 			_running = false;
 			ASIOStop();
 			ASIODisposeBuffers();
-			for (unsigned int i(0); i < _selectedins.size() ; ++i) {
-				universalis::os::aligned_memory_dealloc(_selectedins[i].pleft);
-				universalis::os::aligned_memory_dealloc(_selectedins[i].pright);
+			for (unsigned int i(0); i < _selectedins.size() ; ++i)
+			{
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+				_aligned_free(_selectedins[i].pleft);
+				_aligned_free(_selectedins[i].pright);
+			#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+				free(_selectedins[i].pleft);
+				free(_selectedins[i].pright);
+			#else
+				delete[] _selectedins[i].pleft;
+				delete[] _selectedins[i].pright;
+			#endif
 			}
 			delete[] ASIObuffers;
 			//ASIOExit();

@@ -3,17 +3,15 @@
  *  $Date: 2008-02-12 00:44:11 +0100 (mar, 12 feb 2008) $
  *  $Revision: 6303 $
  */
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMSongExport.hpp"
 //#include "ProgressDialog.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-using namespace psy::core;
-#else
 #include "Song.hpp"
-#include "Machine.hpp"
-#endif
+#include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 //#include "SongStructs.hpp"
+//#include "configuration_options.hpp"
+//#include "resources/resources.hpp"
 //#include <algorithm>
 //#include <cstring>
 
@@ -44,28 +42,21 @@ namespace host{
 	{
 		//We find the last index of machine, to use as first index of instruments
 		lastMachine=63;
-		while (lastMachine >= 0 && song.machine(lastMachine) == 0) lastMachine--;
+		while (lastMachine >= 0 && song._pMachine[lastMachine] == 0) lastMachine--;
 		lastMachine++;
 
 		for (int i=0; i<lastMachine; i++) {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if (song.machine(i) != 0 && 
-				song.machine(i)->getMachineKey() == MachineKey::sampler() ) {
+			if (song._pMachine[i] != 0 && 
+				song._pMachine[i]->_type == MACH_SAMPLER ) {
 					isSampler[i] = 1;
 			}
-#else
-			if (song.machine(i) != 0 && 
-				song.machine(i)->_type == MACH_SAMPLER ) {
-					isSampler[i] = 1;
-			}
-#endif
 			else {
 				isSampler[i] = 0;
 			}
 		}
 
 		Write(XM_HEADER, 17);//ID text
-		std::string name = "PE:" + song.name().substr(0,17);
+		std::string name = "PE:" + song.name.substr(0,17);
 		Write(name.c_str(), 20);//Module name
 		std::uint16_t temp = 0x1A;
 		Write(&temp, 1);							
@@ -77,17 +68,8 @@ namespace host{
 		m_Header.size = sizeof(m_Header);
 		m_Header.norder = song.playLength;
 		m_Header.restartpos = 0;
-		m_Header.channels = song.tracks();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		int highest = 0;
-		for (PatternSequence::patterniterator pite = song.patternSequence().patternbegin(); pite != song.patternSequence().patternend(); pite++)
-		{
-			if ((*pite)->id() > highest) highest = (*pite)->id();
-		}
-		m_Header.patterns = highest;
-#else
+		m_Header.channels = song.SONGTRACKS;
 		m_Header.patterns = song.GetHighestPatternIndexInSequence()+1;
-#endif
 		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
 		m_Header.flags = 0x0001; //Linear frequency.
 		m_Header.speed = 24/song.LinesPerBeat();
@@ -104,7 +86,7 @@ namespace host{
 	{
 		for (int i = 0; i < m_Header.patterns ; i++)
 		{
-			SavePattern(song,i);
+			SaveSinglePattern(song,i);
 		}
 	}
 
@@ -112,8 +94,8 @@ namespace host{
 	void XMSongExport::SaveInstruments(Song& song)
 	{
 		for (int i = 0; i < lastMachine ; i++ ) {
-			if ( song.machine(i) != 0 ) {
-				SaveEmptyInstrument(song.machine(i)->GetEditName());
+			if ( song._pMachine[i] != 0 ) {
+				SaveEmptyInstrument(song._pMachine[i]->_editName);
 			}
 			else {
 				SaveEmptyInstrument("");
@@ -127,7 +109,7 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	void XMSongExport::SavePattern(Song & song, const int patIdx)
+	void XMSongExport::SaveSinglePattern(Song & song, const int patIdx)
 	{
 		XMPATTERNHEADER ptHeader;
 		memset(&ptHeader,0,sizeof(ptHeader));
@@ -139,33 +121,31 @@ namespace host{
 		Write(&ptHeader,sizeof(ptHeader));
 		std::size_t currentpos = GetPos();
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		///todo: redo all the pattern saving
-#else
+
 		// check every pattern for validity
 		if (song.IsPatternUsed(patIdx))
 		{
 			for (int j = 0; j < ptHeader.rows && j < 256; j++) {
-				for (int i = 0; i < song.tracks(); i++) {
+				for (int i = 0; i < song.SONGTRACKS; i++) {
 					
-					PatternEvent* pData = (PatternEvent*) song._ptrackline(patIdx,i,j);
+					PatternEntry* pData = (PatternEntry*) song._ptrackline(patIdx,i,j);
 					
 					
 					unsigned char note;
-					if (pData->note() <= notecommands::b9) {
-						if (pData->note() >= 12 && pData->note() < 108 ) {
-							if (pData->machine() < MAX_MACHINES && song.machine(pData->machine()) != 0 
-								&& isSampler[pData->machine()] != 0)
+					if (pData->_note <= notecommands::b9) {
+						if (pData->_note >= 12 && pData->_note < 108 ) {
+							if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != 0 
+								&& isSampler[pData->_mach] != 0)
 							{ // The sampler machine uses C-4 as middle C.
-								note = pData->note() +1;
+								note = pData->_note +1;
 							} else {
-								note = pData->note() - 11;
+								note = pData->_note - 11;
 							}
 						} else {
 							note = 0x00;
 						}
 					}
-					else if (pData->note() == notecommands::release) {
+					else if (pData->_note == notecommands::release) {
 						note = 0x61;
 					} else {
 						note = 0x00;
@@ -174,12 +154,12 @@ namespace host{
 					unsigned char instr=0;
 					
 					//Very simple method for now:
-					if (pData->machine() < MAX_MACHINES) {
-						if ( song.machine(pData->machine()) != 0 && isSampler[pData->machine()] != 0)
+					if (pData->_mach < MAX_MACHINES) {
+						if ( song._pMachine[pData->_mach] != 0 && isSampler[pData->_mach] != 0)
 						{
-							if (pData->instrument() != 0xFF) instr = lastMachine +  pData->instrument() +1;
+							if (pData->_inst != 0xFF) instr = lastMachine +  pData->_inst +1;
 						}
-						else instr = pData->machine() + 1;
+						else instr = pData->_mach + 1;
 					}
 
 					unsigned char vol=0;
@@ -190,47 +170,47 @@ namespace host{
 				//Putting just a few commands for now.
 			
 					bool foundEffect = true;
-					int singleEffectCharacter = (pData->command() & 0xF0);					
+					int singleEffectCharacter = (pData->_cmd & 0xF0);					
 
 					if (singleEffectCharacter == 0xE0) { //slide up
-						int slideAmount = (pData->command() & 0x0F);
+						int slideAmount = (pData->_cmd & 0x0F);
 						type = XMCMD::PORTAUP;
-						param = pData->parameter();
+						param = pData->_parameter;
 					}
 					else if (singleEffectCharacter == 0xD0) { //slide down
-						int slideAmount = (pData->command() & 0x0F);
+						int slideAmount = (pData->_cmd & 0x0F);
 						type = XMCMD::PORTADOWN;
-						param = pData->parameter();
+						param = pData->_parameter;
 					}
 					else {
-						switch(pData->command()) {
+						switch(pData->_cmd) {
 							case 0xC3:
 								type = XMCMD::PORTA2NOTE;
-								param = pData->parameter();
+								param = pData->_parameter;
 								break;
 							case 0x0C:
-								vol = 0x10 + (pData->parameter()/4);
+								vol = 0x10 + (pData->_parameter/4);
 								break;
 							case PatternCmd::SET_TEMPO:
-								if (pData->parameter() > 32) {
+								if (pData->_parameter > 32) {
 									type = XMCMD::SETSPEED;
-									param = pData->parameter();
+									param = pData->_parameter;
 								}
 								break;
 							case PatternCmd::EXTENDED:
-								switch(pData->parameter()&0xF0) {
+								switch(pData->_parameter&0xF0) {
 								case PatternCmd::SET_LINESPERBEAT0:
 								case PatternCmd::SET_LINESPERBEAT1:
 									type = XMCMD::SETSPEED;
-									param = pData->parameter();
+									param = pData->_parameter;
 									break;
 								case PatternCmd::PATTERN_LOOP:
 									type = XMCMD::EXTENDED;
-									param = XMCMD_E::E_PATTERN_LOOP + (pData->parameter() & 0x0F);
+									param = XMCMD_E::E_PATTERN_LOOP + (pData->_parameter & 0x0F);
 									break;
 								case PatternCmd::PATTERN_DELAY:
 									type = XMCMD::EXTENDED;
-									param = XMCMD_E::E_PATTERN_DELAY + (pData->parameter() & 0x0F);
+									param = XMCMD_E::E_PATTERN_DELAY + (pData->_parameter & 0x0F);
 									break;
 								default:
 									break;
@@ -238,11 +218,11 @@ namespace host{
 								break;							
 							case PatternCmd::BREAK_TO_LINE:
 								type = XMCMD::PATTERN_BREAK;
-								param = (pData->parameter()/10)<<4 + (pData->parameter()%10);
+								param = (pData->_parameter/10)<<4 + (pData->_parameter%10);
 								break;
 							case PatternCmd::SET_VOLUME:
 								type = XMCMD::SET_GLOBAL_VOLUME;
-								param = pData->parameter()/2;
+								param = pData->_parameter/2;
 								break;
 							default:
 								foundEffect = false;
@@ -250,9 +230,9 @@ namespace host{
 						}
 					}
 
-					if ((foundEffect == false) & (pData->command() > 0)) {
+					if ((foundEffect == false) & (pData->_cmd > 0)) {
 						type = XMCMD::ARPEGGIO;
-						param = pData->command();
+						param = pData->_cmd;
 					}
 
 					unsigned char bWriteNote = note!=0;
@@ -278,9 +258,7 @@ namespace host{
 			Write(&ptHeader,sizeof(ptHeader));
 			Skip(ptHeader.packedsize);
 		}
-		else
-#endif
-		{
+		else {
 			Write(&ptHeader,sizeof(ptHeader));
 		}
 	}

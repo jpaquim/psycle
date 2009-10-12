@@ -7,7 +7,7 @@
 #include <psycle/engine/exception.hpp>
 #include <universalis/compiler/cast.hpp>
 #include <universalis/compiler/virtual_factory.hpp>
-#include <universalis/os/loggers.hpp>
+#include <universalis/operating_system/loggers.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
 #include <boost/call_traits.hpp>
@@ -35,7 +35,7 @@ namespace psycle { namespace generic { namespace basic {
 #endif
 
 using engine::exception;
-namespace loggers = universalis::os::loggers;
+namespace loggers = universalis::operating_system::loggers;
 
 /***********************************************************************/
 /// This template declares a class convertible to its derived type Typenames::graph.

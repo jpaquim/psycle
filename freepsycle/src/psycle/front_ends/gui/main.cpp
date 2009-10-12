@@ -2,6 +2,8 @@
 // copyright 1999-2007 psycledelics http://psycle.pastnotecut.org : johan boule
 
 ///\implementation psycle::front_ends::gui::main
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "main.hpp"
 #include "lock.hpp"
@@ -10,9 +12,9 @@
 #include <psycle/engine/engine.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
-#include <universalis/os/loggers.hpp>
-#include <universalis/os/thread_name.hpp>
-#include <universalis/cpu/exception.hpp>
+#include <universalis/operating_system/loggers.hpp>
+#include <universalis/operating_system/thread_name.hpp>
+#include <universalis/processor/exception.hpp>
 #include <exception>
 #include <glibmm/exception.h>
 #include <gtkmm/main.h>
@@ -23,13 +25,13 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[])
 {
 	try {
 		try {
-			universalis::os::loggers::multiplex_logger::singleton().add(universalis::os::loggers::stream_logger::default_logger());
-			universalis::os::thread_name thread_name("main");
+			universalis::operating_system::loggers::multiplex_logger::singleton().add(universalis::operating_system::loggers::stream_logger::default_logger());
+			universalis::operating_system::thread_name thread_name("main");
 			universalis::processor::exception::install_handler_in_thread();
-			if(universalis::os::loggers::information()()) {
+			if(universalis::operating_system::loggers::information()()) {
 				std::ostringstream s;
 				s << paths::package::name() << " " << paths::package::version::string();
-				universalis::os::loggers::information()(s.str());
+				universalis::operating_system::loggers::information()(s.str());
 			}
 			lock::init();
 			Gnome::Canvas::init();

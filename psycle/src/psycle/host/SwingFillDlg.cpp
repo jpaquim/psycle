@@ -1,7 +1,9 @@
 ///\file
 ///\brief implementation file for psycle::host::CSwingFillDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "SwingFillDlg.hpp"
+#include "Psycle.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CSwingFillDlg::CSwingFillDlg(CWnd* pParent) : CDialog(CSwingFillDlg::IDD, pParent)

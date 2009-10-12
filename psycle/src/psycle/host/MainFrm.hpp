@@ -1,31 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::CMainFrame.
 #pragma once
-#include "Psycle.hpp"
-#include "ProjectData.hpp"
 #include "ChildView.hpp"
-#include "SeqView.hpp"
-#include "ExListBox.h"
 #include "InstrumentEditor.hpp"
 #include "InfoDlg.hpp"
 #include "MidiMonitorDlg.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class Song;
-	}
-}
-using namespace psy::core;
-#endif
-
+#include "ExListBox.h"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
-
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Song;
-#endif
-
 		class CWaveEdFrame;
 		class CGearRackDlg;
 
@@ -52,19 +36,28 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Operations
 		public:
 			void SetAppSongBpm(int x);
-			void SetAppSongTpb(int x);			
-			
+			void SetAppSongTpb(int x);
+			void UpdatePlayOrder(bool mode);
+			void CenterWindowOnPoint(CWnd* pWnd, POINT point);
 		// Overrides
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 			friend class InputHandler;
 		// Implementation
-		public:			
+		public:
+			void UpdateSequencer(int bottom = -1);
+			bool isguiopen[MAX_MACHINES];
+			CFrameWnd	*m_pWndMac[MAX_MACHINES];
 			bool macComboInitialized;
+			int seqcopybuffer[MAX_SONG_POSITIONS];
+			int seqcopybufferlength;
 
 			void ClosePsycle();
 			void CheckForAutosave();
-			void WaveEditorBackUpdate();									
+			void WaveEditorBackUpdate();
+			void CloseMacGui(int mac,bool closewiredialogs=true);
+			void CloseAllMacGuis();
+			void ShowMachineGui(int tmac, CPoint point);
 			void UpdateEnvInfo();
 			void HidePerformanceDlg();
 			void ShowPerformanceDlg();
@@ -93,35 +86,27 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int GetNumFromCombo(CComboBox* cb);
 			void ChangeIns(int i);
 			void ChangeGen(int i);
-
-			ProjectData* projects() { return &projects_; }
-
-			void SetSong(Song* song);
-
 			afx_msg void OnLoadwave();
 			
 			void EditQuantizeChange(int diff);
 			void ShiftOctave(int x);
 			void UpdateMasterValue(int newvalue);
-			void SetUpStartProject();
 			
 			CStatusBar  m_wndStatusBar;
-			CReBar      m_wndReBar;
 			CToolBar    m_wndToolBar;
+			CChildView  m_wndView;
 			CDialogBar	m_wndControl;
 			CDialogBar	m_wndControl2;
-			std::string	szStatusIdle;
-
-			CChildView		m_wndView;
-			SequencerView	m_wndSeq;
-			CExListBox		m_seqListbox;
-			ProjectData		projects_;
+			CDialogBar	m_wndSeq;
+			CReBar      m_wndReBar;
+			std::string		szStatusIdle;
+			CExListBox	m_seqListbox;
 			
 			CInstrumentEditor	m_wndInst;
-			CInfoDlg		m_wndInfo;
+			CInfoDlg	m_wndInfo;
 			CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st
-			CWaveEdFrame*	m_pWndWed;
-			CGearRackDlg*	pGearRackDialog;
+			CWaveEdFrame	*m_pWndWed;
+			CGearRackDlg* pGearRackDialog;
 
 			CBitmap blessless;
 			CBitmap bless;
@@ -137,7 +122,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 //			Gdiplus::GdiplusStartupInput gdiplusStartupInput; // GDI+ stuff
 //			ULONG_PTR gdiplusToken; // GDI+ stuff
 
-		public:
+		protected:
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnSetFocus(CWnd *pOldWnd);
 			afx_msg void OnBarButton1();
@@ -166,8 +151,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnClose();
 			afx_msg void OnSelchangeSeqlist();
 			afx_msg void OnDblclkSeqlist();
-			afx_msg	void OnInclen();
 			afx_msg void OnDeclen();
+			afx_msg void OnInclen();
 			afx_msg void OnIncshort();
 			afx_msg void OnDecshort();
 			afx_msg void OnSeqins();
@@ -179,8 +164,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnSeqduplicate();
 			afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 			afx_msg void OnDecTPB();
-			afx_msg void OnIncTPB();			
-			afx_msg void OnFollowSong();			
+			afx_msg void OnIncTPB();
+			afx_msg void OnFollowSong();
 			afx_msg void OnSeqclr();
 			afx_msg void OnSeqsort();
 			afx_msg void OnMultichannelAudition();

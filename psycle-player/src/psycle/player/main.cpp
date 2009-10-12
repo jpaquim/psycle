@@ -3,13 +3,13 @@
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
-#include <diversalis/os.hpp>
+#include <diversalis/operating_system.hpp>
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <thread>
 
-#if defined DIVERSALIS__OS__MICROSOFT
+#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#define PSYCLE__PLAYER__EOF "z" // ctrl+z == EOF
 #else
 	#define PSYCLE__PLAYER__EOF "d" // ctrl+d == EOF
@@ -188,7 +188,7 @@ int main(int argument_count, char * arguments[]) {
 			std::cerr << "psycle: player: could not load song file: " << input_file_name << '\n';
 			return 2;
 		}
-		player.song(song);
+		player.song(&song);
 
 		// [JosepMa] workaround some "bugs" where machines are not well setup until a call to work is issued
 		// [JosepMa] (i.e. some machines read the samplerate in the work call, or similar things)

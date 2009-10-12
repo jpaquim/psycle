@@ -3,21 +3,18 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__PRAGMAS__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__PRAGMAS__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
+//#region UNIVERSALIS
+	//#region COMPILER
+		#define UNIVERSALIS__COMPILER__PRAGMA(x) _Pragma(#x)
 
-#define UNIVERSALIS__COMPILER__PRAGMA(x) _Pragma(#x)
-
-#if defined DIVERSALIS__COMPILER__GNU
-	#define UNIVERSALIS__COMPILER__POISON(x) UNIVERSALIS__COMPILER__PRAGMA("GCC poison " #x)
-#elif defined DIVERSALIS__COMPILER__MICROSOFT
-	#define UNIVERSALIS__COMPILER__POISON(x) UNIVERSALIS__COMPILER__PRAGMA("deprecated(\"#x\")")
-#else
-	#define UNIVERSALIS__COMPILER__POISON(x)
-#endif
-
-#endif
+		#if defined DIVERSALIS__COMPILER__GNU
+			#define UNIVERSALIS__COMPILER__POISON(x) UNIVERSALIS__COMPILER__PRAGMA("GCC poison " #x)
+		#elif defined DIVERSALIS__COMPILER__MICROSOFT
+			#define UNIVERSALIS__COMPILER__POISON(x) UNIVERSALIS__COMPILER__PRAGMA("deprecated(\"#x\")")
+		#else
+			#define UNIVERSALIS__COMPILER__POISON(x)
+		#endif
+	//#endregion
+//#endregion

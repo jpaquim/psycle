@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdFrame.
 #pragma once
-#include "Psycle.hpp"
 #include "WaveEdChildView.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -22,7 +22,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
 			void GenerateView();
 			void Notify(void);
-			void SetSong(Song* song);
 			Song *_pSong;
 			CMainFrame *_pFrame;
 		// Overrides

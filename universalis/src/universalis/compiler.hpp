@@ -4,11 +4,5 @@
 
 ///\file
 ///\brief meta header
-
-#ifndef UNIVERSALIS__COMPILER__INCLUDED
-#define UNIVERSALIS__COMPILER__INCLUDED
 #pragma once
-
 #include "compiler/compiler.hpp"
-
-#endif

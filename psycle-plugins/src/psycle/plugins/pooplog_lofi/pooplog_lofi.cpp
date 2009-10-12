@@ -26,11 +26,9 @@ v0.01b
 #include <cassert>
 #include <cmath>
 
-using namespace psycle::plugin_interface;
-
 #define PLUGIN_NAME "Pooplog Lofi Processor 0.04b"
 
-inline int f2i(float flt) ///\todo use psycle-helpers
+inline int f2i(float flt)
 { 
 	#if defined _MSC_VER && defined _M_IX86
 		int i; 
@@ -107,7 +105,8 @@ CMachineParameter const *pParameters[] =
 	&paraInputGain,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	0,																																								// flags
 	num_params,																																								// numParameters
@@ -117,7 +116,7 @@ CMachineInfo const MacInfo (
 	"Jeremy Evers",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	num_params
-);
+};
 
 
 class mi : public CMachineInterface

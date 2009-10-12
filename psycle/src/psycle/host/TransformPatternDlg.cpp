@@ -1,8 +1,8 @@
 // TransformPatternDlg.cpp : implementation file
 //
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "TransformPatternDlg.hpp"
-#include "PatternView.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -15,13 +15,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			_pChildView = pChildView;
 			m_applyto = 0;
-		}
-
-		CTransformPatternDlg::CTransformPatternDlg(PatternView* pattern_view, CWnd* pParent /*=NULL*/)
-			: CDialog(CTransformPatternDlg::IDD, pParent),
-			  pattern_view_(pattern_view),
-			  m_applyto(0)
-		{			
 		}
 
 		CTransformPatternDlg::~CTransformPatternDlg()
@@ -125,43 +118,38 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (filtermac != -1)
 					matchTarget++;
 
-				Song* pSong = 0;
-				pSong = pattern_view_->song();
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
-				int columnCount = MAX_TRACKS;
-				int lineCount;
 				int currentPattern;
 				int currentColumn;
 				int currentLine;
-#endif
+
+				Song* pSong = _pChildView->_pSong;
+
+				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
+				int columnCount = MAX_TRACKS;
+				int lineCount;
+
 				int currentins;
 				int currentmac;
 
+				unsigned char * toffset;
+
 				int matchCount;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				PatternEntry* patternEntry;
+				int elementIndex;
 
-				PatternSequence::patterniterator patite = pSong->patternSequence().patternbegin();
-				for ( ; patite != pSong->patternSequence().patternend(); ++patite) {
-					Pattern::iterator eventite = (*patite)->begin();
-					PatternEvent pevent = eventite->second;
-
-#else
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
 					if (!pSong->IsPatternEmpty(currentPattern))
 					{				
-						PatternEvent* patternEntry = (PatternEvent*) pSong->_ppattern(currentPattern);
+						patternEntry = (PatternEntry*) pSong->_ppattern(currentPattern);
 						lineCount = pSong->patternLines[currentPattern];
 						
 						for (currentLine = 0; currentLine < lineCount; currentLine++)
 						{
 							for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
 							{
-								PatternEvent pevent = patternEntry[(currentLine*columnCount)+currentColumn];
-#endif
-								currentins = pevent.instrument();
-								currentmac = pevent.machine();																																							
+								currentins = patternEntry[(currentLine*columnCount)+currentColumn]._inst;
+								currentmac = patternEntry[(currentLine*columnCount)+currentColumn]._mach;																																							
 
 								matchCount = 0;
 
@@ -179,21 +167,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								{
 									if (filterins != -1)
 									{
-										pevent.setInstrument(replaceins);
+										patternEntry[(currentLine*columnCount)+currentColumn]._inst = replaceins;
 									}
 									if (filtermac != -1)
 									{
-										pevent.setMachine(replacemac);
+										patternEntry[(currentLine*columnCount)+currentColumn]._mach = replacemac;
 									}
 								}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-							}
-#else
 							}
 						}
 					}
 				}
-#endif
 			}
 		}
 	PSYCLE__MFC__NAMESPACE__END

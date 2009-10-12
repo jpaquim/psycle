@@ -1,5 +1,5 @@
 #pragma once
-#include <diversalis/cpu.hpp>
+#include <diversalis/processor.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
 #if 0 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
@@ -11,14 +11,14 @@ namespace psycle { namespace helpers { namespace math {
 /// Type : Filters Denormals, NaNs, Infinities
 /// References : Posted by urs[AT]u-he[DOT]com
 void inline erase_all_nans_infinities_and_denormals(float & sample) {
-	#if !defined DIVERSALIS__CPU__X86
+	#if !defined DIVERSALIS__PROCESSOR__X86
 		// just do nothing.. not crucial for other archs
 	#else
 		BOOST_STATIC_ASSERT((sizeof sample == 4));
 		std::uint32_t const bits(reinterpret_cast<std::uint32_t&>(sample));
 		std::uint32_t const exponent_mask
 		(
-			#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+			#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 				0x7f800000
 			#else
 				#error sorry, was not much thought
@@ -32,25 +32,18 @@ void inline erase_all_nans_infinities_and_denormals(float & sample) {
 		// exponent > 0 is 0 if denormalized, otherwise 1
 		std::uint32_t const not_denormal(exponent > 0);
 
-		// It does not work for nans!
-		//sample *= not_nan_nor_infinity & not_denormal;
-		if (!not_nan_nor_infinity) {
-			sample = 0;
-		}
-		else {
-			sample *= not_denormal;
-		}
+		sample *= not_nan_nor_infinity & not_denormal;
 	#endif
 }
 
 ///\todo This works, but uses too much CPU probably. (at least on 32bit processors)
 void inline erase_all_nans_infinities_and_denormals(double & sample) {
-	#if !defined DIVERSALIS__CPU__X86
+	#if !defined DIVERSALIS__PROCESSOR__X86
 		// just do nothing.. not crucial for other archs
 	#else
 		std::uint64_t const bits(reinterpret_cast<std::uint64_t&>(sample));
 		std::uint64_t const exponent_mask(
-			#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+			#if defined DIVERSALIS__PROCESSOR__ENDIAN__LITTLE
 				0x7f80000000000000ULL
 			#else
 				#error sorry, was not much thought

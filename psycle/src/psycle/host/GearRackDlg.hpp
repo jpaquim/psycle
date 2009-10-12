@@ -1,19 +1,17 @@
 ///\file
 ///\brief interface file for psycle::host::CGearRackDlg.
 #pragma once
-#include "Psycle.hpp"
 #include "ChildView.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		/// gear rack window.
 		class CGearRackDlg : public CDialog
 		{
-		public:			
-			CGearRackDlg(class MachineView* mac_view);
-		private:
-			MachineView* view_;
 		public:
+			CGearRackDlg(CChildView* pParent, CMainFrame* pMain);
 			CChildView* m_pParent;
 			CMainFrame* pParentMain;
 			void RedrawList();

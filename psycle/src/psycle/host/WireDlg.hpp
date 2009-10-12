@@ -1,56 +1,34 @@
 ///\file
 ///\brief interface file for psycle::host::CWireDlg.
 #pragma once
-
-#include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class Machine;
-		class Song;
-	}
-}
-using namespace psy::core;
-#else
-namespace psycle {
-	namespace host {
-		class Machine;
-		class Song;
-	}
-}
-#endif
-
+#include "Machine.hpp"
+#include "Constants.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CChildView;
-		class WireGui;
 
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE = 4096;
 		const int SCOPE_SPEC_SAMPLES = 1024;
+
+		class Song;
 
 		/// wire monitor window.
 		class CWireDlg : public CDialog
 		{
 		public:
 			CWireDlg(CChildView* pParent);
-			CWireDlg(CChildView* pParent, class WireGui* wire_gui);
-		private:
-			WireGui* wire_gui_;
-
-		public:
-	
 			BOOL Create();
 			afx_msg void OnCancel();
 			UINT this_index;
 			int wireIndex;
 			int isrcMac;
 			bool Inval;
-
 			Machine* _pSrcMachine;
 			Machine* _pDstMachine;
-
 			int _dstWireIndex;
 			float invol;
 			float mult;
@@ -72,8 +50,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			float *pSamplesL;
 			float *pSamplesR;
-			float *inl;
-			float *inr;
 
 		// Dialog Data
 			enum { IDD = IDD_WIREDIALOG };

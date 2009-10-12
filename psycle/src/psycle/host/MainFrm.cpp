@@ -1,54 +1,34 @@
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "MainFrm.hpp"
-#include "Project.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/player.h>
-#include <psycle/core/plugin.h>
-#include <psycle/core/sampler.h>
-#include <psycle/core/xmsampler.h>
-#include <psycle/core/song.h>
-#include <psycle/core/internal_machines.h>
-///\todo: change for core's one when replacing OldPsyFile
-#include "FileIO.hpp"
-using namespace psy::core;
-#else
-#include "Player.hpp"
-#include "Plugin.hpp"
-#include "VstHost24.hpp"
-#include "Sampler.hpp"
-#include "XMSampler.hpp"
-#include "Song.hpp"
-#endif
-
-#include <psycle/helpers/helpers.hpp>
-
-#include "PatternView.hpp"
-#include "Configuration.hpp"
-#include "InputHandler.hpp"
-#include "MidiInput.hpp"
+#include "Psycle.hpp"
 #include "WavFileDlg.hpp"
-#include "KeyConfigDlg.hpp"
-#include "GearRackDlg.hpp"
-#include "WaveEdFrame.hpp"
-
 #include "MasterDlg.hpp"
 #include "GearTracker.hpp"
 #include "XMSamplerUI.hpp"
 #include "FrameMachine.hpp"
+//#include "VstEditorDlg.hpp"
 #include "VstEffectWnd.hpp"
 #include "FrameMixerMachine.hpp"
 #include "WaveInMacDlg.hpp"
+#include "Helpers.hpp"
 #include "WireDlg.hpp"
-
+#include "GearRackDlg.hpp"
+#include "WaveEdFrame.hpp"
+#include "Player.hpp"
+#include "MidiInput.hpp"
+#include "InputHandler.hpp"
+#include "KeyConfigDlg.hpp"
+#include "Plugin.hpp"
+#include "VstHost24.hpp"
+#include "XMSampler.hpp"
 #include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>
 #include <iomanip>
-
-
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -83,10 +63,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_BN_CLICKED(IDC_B_DECWAV, OnBDecwav)
 			ON_BN_CLICKED(IDC_B_INCWAV, OnBIncwav)
 			ON_WM_CLOSE()
-			ON_BN_CLICKED(IDC_INCLEN, OnInclen)
-			ON_BN_CLICKED(IDC_DECLEN, OnDeclen)
 			ON_LBN_SELCHANGE(IDC_SEQLIST, OnSelchangeSeqlist)
 			ON_LBN_DBLCLK(IDC_SEQLIST, OnDblclkSeqlist)
+			ON_BN_CLICKED(IDC_DECLEN, OnDeclen)
+			ON_BN_CLICKED(IDC_INCLEN, OnInclen)
 			ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
 			ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
 			ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
@@ -150,16 +130,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		};
 
 		CMainFrame::CMainFrame()
-			: m_wndView(this, &projects_),
-			  m_wndSeq(this)
 		{
-			Global::pInputHandler->SetMainFrame(this);			
+			Global::pInputHandler->SetMainFrame(this);
 			vuprevR = 0;
 			vuprevL = 0;
+			seqcopybufferlength = 0;
 			_pSong = 0;
 			pGearRackDialog = 0;
-			m_pWndWed = new CWaveEdFrame(this->_pSong,this);
-			SetUpStartProject();
 //			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
 		}
 
@@ -174,7 +151,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			m_wndView.pParentFrame = this;
 			macComboInitialized = false;
-				
+			
+			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
+			
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
 			// create a view to occupy the client area of the frame
@@ -237,6 +216,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_wndInst.Validate();
 
 			// Wave Editor Window
+			m_pWndWed = new CWaveEdFrame(this->_pSong,this);
 			m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this);
 			m_pWndWed->GenerateView();
 
@@ -311,11 +291,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				_snprintf(s,4,"%i",i);
 				cc2->AddString(s);
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE			
-			cc2->SetCurSel(projects_.active_project()->song().tracks()-4);
-#else
-			cc2->SetCurSel(_pSong->tracks()-4);			
-#endif
+			cc2->SetCurSel(_pSong->SONGTRACKS-4);
 
 		//	SetAppSongBpm(0);
 		//	SetAppSongTpb(0);
@@ -389,7 +365,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cb=(CButton*)m_wndSeq.GetDlgItem(IDC_INCLEN);
 			hi = (HBITMAP)bmore; cb->SetBitmap(hi);
 			
-			m_wndSeq.UpdatePlayOrder(true);
+			UpdatePlayOrder(true);
 			
 			DragAcceptFiles(true);
 
@@ -397,7 +373,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			// Finally initializing timer
 			
-			m_wndSeq.UpdateSequencer();
+			UpdateSequencer();
 			// Show Machine view and init MIDI
 			m_wndView.OnMachineview();
 			m_wndView.InitTimer();
@@ -405,7 +381,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_wndView.SetFocus();
 		//	m_wndView.EnableSound();
 			
-
 			return 0;
 		}
 
@@ -417,21 +392,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 			cs.lpszClass = AfxRegisterWndClass(0);
 			return TRUE;
-		}
-		void CMainFrame::SetSong(Song* song) {
-			this->_pSong = song;
-			m_pWndWed->SetSong(song);
-
-		}
-		void CMainFrame::SetUpStartProject()
-		{
-			Project* prj = new Project(&projects_,
-									   m_wndView.pattern_view(),
-									   m_wndView.machine_view());
-			// This operations sets prj as the active project, and assings the
-			// active song to mainframe, pattern view, machine view, sequencer view
-			// and editwnd
-			projects_.Add(prj);
 		}
 
 		#if !defined NDEBUG
@@ -474,10 +434,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnClose() 
 		{
-			if (projects_.active_project()->CheckUnsavedSong("Exit Psycle"))
+			if (m_wndView.CheckUnsavedSong("Exit Psycle"))
 			{
+				CloseAllMacGuis();
 				m_wndView._outputActive = false;
-				Global::pPlayer->stop();
+				Global::pPlayer->Stop();
 				Global::pConfig->_pOutputDriver->Enable(false);
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Close();
@@ -505,7 +466,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				file.Close();
 				int val = MessageBox("An autosave.psy file has been found in the root song dir. Do you want to reload it? (Press \"No\" to delete it)","Song Recovery",MB_YESNOCANCEL);
 
-				if (val == IDYES ) projects_.active_project()->FileLoadsongNamed(filepath.GetBuffer(1));
+				if (val == IDYES ) m_wndView.FileLoadsongNamed(filepath.GetBuffer(1));
 				else if (val == IDNO ) DeleteFile(filepath);
 			}
 		}
@@ -542,20 +503,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetAppSongTpb(0);
 
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
-			cc2->SetCurSel(m_wndView.pattern_view()->patStep);
+			cc2->SetCurSel(m_wndView.patStep);
 			
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			cc2->SetCurSel(projects_.active_project()->song().tracks()-4);
-#else
-			cc2->SetCurSel(_pSong->tracks()-4);
-#endif
+			cc2->SetCurSel(_pSong->SONGTRACKS-4);
 
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
 			cc2->SetCurSel(_pSong->currentOctave);
 			
 			UpdateComboGen();
-			UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);
+			UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
 			
 		}
 
@@ -566,18 +523,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnSelchangeTrackcombo() 
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			projects_.active_project()->song().setTracks(cc2->GetCurSel()+4);
-			if (m_wndView.pattern_view()->editcur.track >= projects_.active_project()->song().tracks() )
-			m_wndView.pattern_view()->editcur.track = projects_.active_project()->song().tracks()-1;
+			_pSong->SONGTRACKS=cc2->GetCurSel()+4;
+			if (m_wndView.editcur.track >= _pSong->SONGTRACKS )
+				m_wndView.editcur.track= _pSong->SONGTRACKS-1;
 
-#else
-			_pSong->setTracks(cc2->GetCurSel()+4);
-		if (m_wndView.pattern_view()->editcur.track >= _pSong->tracks() )
-		m_wndView.pattern_view()->editcur.track= _pSong->tracks()-1;
-#endif
-
-			m_wndView.pattern_view()->RecalculateColourGrid();
+			m_wndView.RecalculateColourGrid();
 			m_wndView.Repaint();
 			m_wndView.SetFocus();
 		}
@@ -630,19 +580,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			char buffer[16];
 			if ( x != 0 )
 			{
-				if (Global::pPlayer->playing() ) 
+				if (Global::pPlayer->_playing ) 
 				{
-					Global::song().BeatsPerMin(Global::pPlayer->bpm()+x);
+					Global::_pSong->BeatsPerMin(Global::pPlayer->bpm+x);
 				}
-				else Global::song().BeatsPerMin(Global::song().BeatsPerMin()+x);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Global::player().setBpm(Global::song().bpm());
-#else
-				Global::pPlayer->SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
-#endif
-				sprintf(buffer,"%d",Global::song().BeatsPerMin());
+				else Global::_pSong->BeatsPerMin(Global::_pSong->BeatsPerMin()+x);
+				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+				sprintf(buffer,"%d",Global::_pSong->BeatsPerMin());
 			}
-			else sprintf(buffer,"%d",Global::pPlayer->bpm());
+			else sprintf(buffer,"%d",Global::pPlayer->bpm);
 			
 			((CStatic *)m_wndControl.GetDlgItem(IDC_BPMLABEL))->SetWindowText(buffer);
 		}
@@ -650,27 +596,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::SetAppSongTpb(int x) 
 		{
 			char buffer[16];
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( x != 0)
 			{
-				if (projects_.active_project()) {
-					projects_.active_project()->set_beat_zoom(x + projects_.active_project()->beat_zoom());
-				}			
-			}
-			sprintf(buffer, "%d", projects_.active_project()->beat_zoom());
-#else
-			if ( x != 0)
-			{
-				if (Global::pPlayer->playing() ) 
+				if (Global::pPlayer->_playing ) 
 				{
-					Global::song().LinesPerBeat(Global::pPlayer->tpb()+x);
+					Global::_pSong->LinesPerBeat(Global::pPlayer->tpb+x);
 				}
-				else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
-				Global::pPlayer->SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
-				sprintf(buffer,"%d",Global::song().LinesPerBeat());
+				else Global::_pSong->LinesPerBeat(Global::_pSong->LinesPerBeat()+x);
+				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->LinesPerBeat());
+				sprintf(buffer,"%d",Global::_pSong->LinesPerBeat());
 			}
-			else sprintf(buffer, "%d", Global::pPlayer->tpb());
-#endif
+			else sprintf(buffer, "%d", Global::pPlayer->tpb);
 			
 			((CStatic *)m_wndControl.GetDlgItem(IDC_TPBLABEL))->SetWindowText(buffer);
 		}
@@ -704,11 +640,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::UpdateMasterValue(int newvalue)
 		{
 			CSliderCtrl *cs;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( projects_.active_project()->song().machine(MASTER_INDEX))
-#else
-			if ( _pSong->machine(MASTER_INDEX) != NULL)
-#endif
+			if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
 			{
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
 				if (cs->GetPos() != newvalue) {
@@ -720,23 +652,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			CSliderCtrl *cs;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( projects_.active_project()->song().machine(MASTER_INDEX))
-#else
-			if ( _pSong->machine(MASTER_INDEX) != NULL)
-#endif
+			if ( _pSong->_pMachine[MASTER_INDEX] != NULL)
 			{
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
-				//((Master*)_pSong->machine(MASTER_INDEX))->_outDry = cs->GetPos()*cs->GetPos()/1024;
+				//((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos()*cs->GetPos()/1024;
 				///\todo: this causes problems sometimes when loading songs.
 				// customdraw happening before updatemastervalue, so invalid value get set.
 				// Added call to UpdateMasterValue() in PsybarsUpdate() in order to fix this.
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				psy::core::Master* master = (psy::core::Master*)projects_.active_project()->song().machine(MASTER_INDEX);
-				master->_outDry = cs->GetPos();
-#else
-				((Master*)_pSong->machine(MASTER_INDEX))->_outDry = cs->GetPos();
-#endif
+				((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry = cs->GetPos();
 				m_wndView.SetFocus();
 			}
 			
@@ -745,13 +668,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnClipbut() 
 		{
-			// Stefan: what is this ??
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Master* master = (Master*)projects_.active_project()->song().machine(MASTER_INDEX);
-			master->_clip = false;
-#else
-			((Master*)(Global::song().machine(MASTER_INDEX)))->_clip = false;
-#endif
+			((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
 			m_wndView.SetFocus();
 		}
 
@@ -870,7 +787,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
 			int sel=cc->GetCurSel();
-			m_wndView.pattern_view()->patStep=sel;
+			m_wndView.patStep=sel;
 			m_wndView.SetFocus();
 		}
 
@@ -885,7 +802,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int total = cc->GetCount();
 			const int nextsel = (total + cc->GetCurSel() + diff) % total;
 			cc->SetCurSel(nextsel);
-			m_wndView.pattern_view()->patStep=nextsel;
+			m_wndView.patStep=nextsel;
 		}
 
 		void CMainFrame::OnBDecgen() // called by Button and Hotkey.
@@ -941,37 +858,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				cb->ResetContent();
 			}
 			
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Song* song = &projects_.active_project()->song();
-			for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
-			{
-				if( song->machine(b))
-				{
-					if (updatelist)
-					{	
-						sprintf(buffer,"%.2X: %s",b,song->machine(b)->GetEditName().c_str());
-						cb->AddString(buffer);
-						cb->SetItemData(cb->GetCount()-1,b);
-					}
-					if (!found) 
-					{
-						selected++;
-					}
-					if (song->seqBus == b) 
-					{
-						found = true;
-					}
-					filled = true;
-				}
-			}
-#else
 			for (int b=0; b<MAX_BUSES; b++) // Check Generators
 			{
-				if( _pSong->machine(b))
+				if( _pSong->_pMachine[b])
 				{
 					if (updatelist)
 					{	
-						sprintf(buffer,"%.2X: %s",b,_pSong->machine(b)->_editName);
+						sprintf(buffer,"%.2X: %s",b,_pSong->_pMachine[b]->_editName);
 						cb->AddString(buffer);
 						cb->SetItemData(cb->GetCount()-1,b);
 					}
@@ -986,8 +879,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					filled = true;
 				}
 			}
-
-#endif
 			if ( updatelist) 
 			{
 				cb->AddString("----------------------------------------------------");
@@ -999,37 +890,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				line = selected;
 			}
 			
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
-			{
-				if(song->machine(b))
-				{
-					if (updatelist)
-					{	
-						sprintf(buffer,"%.2X: %s",b,song->machine(b)->GetEditName().c_str());
-						cb->AddString(buffer);
-						cb->SetItemData(cb->GetCount()-1,b);
-					}
-					if (!found) 
-					{
-						selected++;
-					}
-					if (song->seqBus == b) 
-					{
-						found = true;
-					}
-					filled = true;
-				}
-			}
-
-#else
 			for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 			{
-				if(_pSong->machine(b))
+				if(_pSong->_pMachine[b])
 				{
 					if (updatelist)
 					{	
-						sprintf(buffer,"%.2X: %s",b,_pSong->machine(b)->_editName);
+						sprintf(buffer,"%.2X: %s",b,_pSong->_pMachine[b]->_editName);
 						cb->AddString(buffer);
 						cb->SetItemData(cb->GetCount()-1,b);
 					}
@@ -1044,7 +911,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					filled = true;
 				}
 			}
-#endif
 			if (!filled)
 			{
 				cb->ResetContent();
@@ -1058,61 +924,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			cb->SetCurSel(selected);
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			// Select the appropiate Option in Aux Combobox.
 			if (found) // If found (which also means, if it exists)
 			{
-				if (song->machine(song->seqBus))
-				{
-					if ( song->seqBus < psy::core::MAX_BUSES ) // it's a Generator
-					{
-						if (song->machine(song->seqBus)->getMachineKey() == MachineKey::sampler()
-							|| song->machine(song->seqBus)->getMachineKey() == MachineKey::sampulse() )
-						{
-							cb2->SetCurSel(AUX_WAVES);
-							song->auxcolSelected = song->instSelected();
-						}
-						else if (song->machine(song->seqBus)->getMachineKey().host() == Hosts::VST)
-						{
-							if ( cb2->GetCurSel() == AUX_WAVES)
-							{
-								cb2->SetCurSel(AUX_MIDI);
-								song->auxcolSelected = song->midiSelected;
-							}
-						}
-						else
-						{
-							cb2->SetCurSel(AUX_PARAMS);
-							song->auxcolSelected = 0;
-						}
-					}
-					else
-					{
-						cb2->SetCurSel(AUX_PARAMS);
-						song->auxcolSelected = 0;
-					}
-				}
-			}
-			else
-			{
-				cb2->SetCurSel(AUX_WAVES); // WAVES
-				song->auxcolSelected = song->instSelected();
-			}
-
-#else
-			// Select the appropiate Option in Aux Combobox.
-			if (found) // If found (which also means, if it exists)
-			{
-				if (_pSong->machine(_pSong->seqBus))
+				if (_pSong->_pMachine[_pSong->seqBus])
 				{
 					if ( _pSong->seqBus < MAX_BUSES ) // it's a Generator
 					{
-						if (_pSong->machine(_pSong->seqBus)->_type == MACH_SAMPLER ||_pSong->machine(_pSong->seqBus)->_type == MACH_XMSAMPLER  )
+						if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_SAMPLER ||_pSong->_pMachine[_pSong->seqBus]->_type == MACH_XMSAMPLER  )
 						{
 							cb2->SetCurSel(AUX_WAVES);
-							_pSong->auxcolSelected = _pSong->instSelected();
+							_pSong->auxcolSelected = _pSong->instSelected;
 						}
-						else if (_pSong->machine(_pSong->seqBus)->_type == MACH_VST)
+						else if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_VST)
 						{
 							if ( cb2->GetCurSel() == AUX_WAVES)
 							{
@@ -1136,9 +960,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else
 			{
 				cb2->SetCurSel(AUX_WAVES); // WAVES
-				_pSong->auxcolSelected = _pSong->instSelected();
+				_pSong->auxcolSelected = _pSong->instSelected;
 			}
-#endif
 			UpdateComboIns();
 			macComboInitialized = true;
 		}
@@ -1200,7 +1023,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else if ( cc2->GetCurSel() == AUX_WAVES )	// WAVES
 			{
-				_pSong->auxcolSelected=_pSong->instSelected();
+				_pSong->auxcolSelected=_pSong->instSelected;
 			}
 			UpdateComboIns();
 		}
@@ -1220,11 +1043,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOINS);
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Song* _pSong = &projects_.active_project()->song();
-#endif
-
 
 			int listlen = 0;
 			
@@ -1250,7 +1068,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else if ( cc2->GetCurSel() == AUX_PARAMS)	// Params
 			{
 				int nmac = _pSong->seqBus;
-				Machine *tmac = _pSong->machine(nmac);
+				Machine *tmac = _pSong->_pMachine[nmac];
 				if (tmac) 
 				{
 					int i=0;
@@ -1262,19 +1080,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							std::memset(buffer2,0,64);
 							tmac->GetParamName(i,buffer2);
 							bool label(false);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-							if(tmac->getMachineKey().host() == Hosts::NATIVE )
-							{
-								if(!(static_cast<Plugin*>(tmac)->GetInfo().Parameters[i]->Flags & psycle::plugin_interface::MPF_STATE))
-									label = true;
-							}
-#else
 							if(tmac->_type == MACH_PLUGIN)
 							{
 								if(!(static_cast<Plugin*>(tmac)->GetInfo()->Parameters[i]->Flags & MPF_STATE))
 									label = true;
 							}
-#endif
 							if(label)
 								// just a label
 								sprintf(buffer, "------ %s ------", buffer2);
@@ -1304,18 +1114,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (updatelist) 
 				{
 					int nmac = _pSong->seqBus;
-					Machine *tmac = _pSong->machine(nmac);
+					Machine *tmac = _pSong->_pMachine[nmac];
 					if (tmac) 
 					{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						if ( tmac->getMachineKey() == MachineKey::sampulse())
-#else
 						if ( tmac->_type == MACH_XMSAMPLER)
-#endif
 						{
 							for (int i(0); i<XMSampler::MAX_INSTRUMENT; i++)
 							{
-								sprintf(buffer, "%.2X: %s", i, _pSong->rInstrument(i).Name().c_str());
+								sprintf(buffer, "%.2X: %s", i, XMSampler::rInstrument(i).Name().c_str());
 								cc->AddString(buffer);
 								listlen++;
 		
@@ -1334,7 +1140,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					listlen = cc->GetCount();
 				}
-		//		_pSong->instSelected(_pSong->auxcolSelected);
+		//		_pSong->instSelected=_pSong->auxcolSelected;
 		//		WaveEditorBackUpdate();
 		//		m_wndInst.WaveUpdate();
 		//		RedrawGearRackList();
@@ -1357,7 +1163,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else if ( cc2->GetCurSel() == AUX_WAVES ) 
 			{
-				_pSong->instSelected(cc->GetCurSel());
+				_pSong->instSelected=cc->GetCurSel();
 				WaveEditorBackUpdate();
 				m_wndInst.WaveUpdate();
 				RedrawGearRackList();
@@ -1397,7 +1203,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if(i>=0 && i <(PREV_WAV_INS))
 				{
-					_pSong->instSelected(i);
+					_pSong->instSelected=i;
 					_pSong->auxcolSelected=i;
 					WaveEditorBackUpdate();
 					m_wndInst.WaveUpdate();
@@ -1410,17 +1216,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnLoadwave() 
 		{
 			int nmac = _pSong->seqBus;
-			Machine *tmac = _pSong->machine(nmac);
+			Machine *tmac = _pSong->_pMachine[nmac];
 			if (tmac) 
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if ( tmac->getMachineKey() == MachineKey::sampulse())
-#else
 				if ( tmac->_type == MACH_XMSAMPLER)
-#endif
 				{
 					CPoint point(-1,-1);
-					// ShowMachineGui(nmac,point); maybe a todo
+					ShowMachineGui(nmac,point);
 					return;
 				}
 			}
@@ -1435,7 +1237,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_wndView.AddMacViewUndo();
 
-				int si = _pSong->instSelected();
+				int si = _pSong->instSelected;
 				
 				//added by sampler
 				if ( _pSong->_pInstrument[si]->waveLength != 0)
@@ -1478,7 +1280,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
 			{
 				// Stopping wavepreview if not stopped.
-				Sampler::wavprev.Stop();
+				_pSong->wavprev.Stop();
 	/*			if(_pSong->PW_Stage)
 				{
 					_pSong->PW_Stage=0;
@@ -1488,11 +1290,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	*/
 
 				//Delete it.
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->_pInstrument[PREV_WAV_INS]->DeleteLayer();
-#else
 				_pSong->DeleteLayer(PREV_WAV_INS);
-#endif
 				_pSong->IsInvalided(false);
 			}
 
@@ -1505,22 +1303,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			WaveFile output;
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 			
-			if (_pSong->_pInstrument[_pSong->instSelected()]->waveLength)
+			if (_pSong->_pInstrument[_pSong->instSelected]->waveLength)
 			{
-				CFileDialog dlg(FALSE, "wav", _pSong->_pInstrument[_pSong->instSelected()]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+				CFileDialog dlg(FALSE, "wav", _pSong->_pInstrument[_pSong->instSelected]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 				if (dlg.DoModal() == IDOK)
 				{
-					output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected()]->waveStereo) ? (2) : (1) );
-					if (_pSong->_pInstrument[_pSong->instSelected()]->waveStereo)
+					output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo) ? (2) : (1) );
+					if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo)
 					{
-						for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected()]->waveLength; c++)
+						for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength; c++)
 						{
-							output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected()]->waveDataL + c), *(_pSong->_pInstrument[_pSong->instSelected()]->waveDataR + c) );
+							output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected]->waveDataL + c), *(_pSong->_pInstrument[_pSong->instSelected]->waveDataR + c) );
 						}
 					}
 					else
 					{
-						output.WriteData(_pSong->_pInstrument[_pSong->instSelected()]->waveDataL, _pSong->_pInstrument[_pSong->instSelected()]->waveLength);
+						output.WriteData(_pSong->_pInstrument[_pSong->instSelected]->waveDataL, _pSong->_pInstrument[_pSong->instSelected]->waveLength);
 					}
 
 					output.Close();
@@ -1534,7 +1332,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (pGearRackDialog == NULL)
 			{
-				pGearRackDialog = new CGearRackDlg(m_wndView.machine_view());				
+				pGearRackDialog = new CGearRackDlg(&m_wndView, this);
 				pGearRackDialog->Create();
 				pGearRackDialog->ShowWindow(SW_SHOW);
 			}
@@ -1543,17 +1341,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnEditwave() 
 		{
 			int nmac = _pSong->seqBus;
-			Machine *tmac = _pSong->machine(nmac);
+			Machine *tmac = _pSong->_pMachine[nmac];
 			if (tmac) 
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if ( tmac->getMachineKey() == MachineKey::sampulse())
-#else
 				if ( tmac->_type == MACH_XMSAMPLER)
-#endif
 				{
 					CPoint point(-1,-1);
-//					ShowMachineGui(nmac,point); maybe a todo
+					ShowMachineGui(nmac,point);
 					return;
 				}
 			}
@@ -1577,9 +1371,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 			cc2->SetCurSel(AUX_WAVES);
-			_pSong->auxcolSelected=_pSong->instSelected();
+			_pSong->auxcolSelected=_pSong->instSelected;
 			UpdateComboIns();
+
 			m_wndView.AddMacViewUndo();
+
 			m_wndInst.WaveUpdate();
 			m_wndInst.ShowWindow(SW_SHOWNORMAL);
 			m_wndInst.SetActiveWindow();
@@ -1632,25 +1428,910 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			::HtmlHelp(::GetDesktopWindow(),helppath, HH_DISPLAY_TOPIC, 0);
 		}
 
-		//////////////////// Sequencer Dialog 
-		void CMainFrame::OnInclen() { m_wndSeq.OnInclen(); }
-		void CMainFrame::OnDeclen() { m_wndSeq.OnDeclen(); }
-		void CMainFrame::OnSelchangeSeqlist() { m_wndSeq.OnSelchangeSeqlist(); }
-		void CMainFrame::OnDblclkSeqlist() { m_wndSeq.OnDblclkSeqlist(); }
-		void CMainFrame::OnIncshort() {	m_wndSeq.OnIncshort(); }
-		void CMainFrame::OnDecshort() { m_wndSeq.OnDecshort(); }
-		void CMainFrame::OnInclong() { m_wndSeq.OnInclong(); }
-		void CMainFrame::OnDeclong() { m_wndSeq.OnDeclong(); }
-		void CMainFrame::OnSeqnew() { m_wndSeq.OnSeqnew(); }
-		void CMainFrame::OnSeqins() { m_wndSeq.OnSeqins(); }
-		void CMainFrame::OnSeqduplicate() { m_wndSeq.OnSeqduplicate(); }
-		void CMainFrame::OnSeqcut() { m_wndSeq.OnSeqcut(); }
-		void CMainFrame::OnSeqdelete() { m_wndSeq.OnSeqdelete(); }
-		void CMainFrame::OnSeqcopy() { m_wndSeq.OnSeqcopy(); }
-		void CMainFrame::OnSeqpaste() {	m_wndSeq.OnSeqpaste(); }
-		void CMainFrame::OnSeqclr() { m_wndSeq.OnSeqclr(); }
-		void CMainFrame::OnSeqsort() { m_wndSeq.OnSeqsort(); }
-		void CMainFrame::OnSeqShowpattername() { m_wndSeq.OnSeqShowpattername(); }
+		void CMainFrame::ShowMachineGui(int tmac, CPoint point)
+		{
+			Machine *ma = _pSong->_pMachine[tmac];
+
+			if (ma)
+			{
+				if (isguiopen[tmac])
+				{
+					m_pWndMac[tmac]->SetActiveWindow();
+				}
+				else
+				{
+					m_wndView.AddMacViewUndo();
+
+					switch (ma->_type)
+					{
+					case MACH_MASTER:
+						if (!m_wndView.MasterMachineDialog)
+						{
+							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView);
+							m_wndView.MasterMachineDialog->_pMachine = (Master*)ma;
+							for (int i=0;i<MAX_CONNECTIONS; i++)
+							{
+								if ( ma->_inputCon[i])
+								{
+									if (_pSong->_pMachine[ma->_inputMachines[i]])
+									{
+										strcpy(m_wndView.MasterMachineDialog->macname[i],_pSong->_pMachine[ma->_inputMachines[i]]->_editName);
+									}
+								}
+							}
+							m_wndView.MasterMachineDialog->Create();
+							CenterWindowOnPoint(m_wndView.MasterMachineDialog, point);
+							m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
+						}
+						break;
+					case MACH_SAMPLER:
+						if (m_wndView.SamplerMachineDialog)
+						{
+							if (m_wndView.SamplerMachineDialog->_pMachine != (Sampler*)ma)
+							{
+								m_wndView.SamplerMachineDialog->OnCancel();
+								m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
+								m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
+								m_wndView.SamplerMachineDialog->Create();
+								CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
+								m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
+							}
+						}
+						else
+						{
+							m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
+							m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
+							m_wndView.SamplerMachineDialog->Create();
+							CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
+							m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
+						}
+						break;
+					case MACH_XMSAMPLER:
+						{
+						if (m_wndView.XMSamplerMachineDialog)
+						{
+							if (m_wndView.XMSamplerMachineDialog->GetMachine() != (XMSampler*)ma)
+							{
+								m_wndView.XMSamplerMachineDialog->DestroyWindow();
+							}
+							else return;
+						}
+						//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
+						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName(),&m_wndView);
+						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma);
+						m_wndView.XMSamplerMachineDialog->Create(&m_wndView);
+						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
+						}
+						break;
+					case MACH_RECORDER:
+						{
+							if (m_wndView.WaveInMachineDialog)
+							{
+								if (m_wndView.WaveInMachineDialog->pRecorder != (AudioRecorder*)ma)
+								{
+									m_wndView.WaveInMachineDialog->DestroyWindow();
+								}
+								else return;
+							}
+							//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
+							m_wndView.WaveInMachineDialog = new CWaveInMacDlg(&m_wndView);
+							m_wndView.WaveInMachineDialog->pRecorder = (AudioRecorder*)ma;
+							m_wndView.WaveInMachineDialog->Create();
+							CenterWindowOnPoint(m_wndView.WaveInMachineDialog, point);
+						}
+						break;
+					case MACH_PLUGIN:
+					case MACH_DUPLICATOR:
+						{
+							m_pWndMac[tmac] = new CFrameMachine(tmac);
+							((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+							((CFrameMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
+							((CFrameMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
+
+							m_pWndMac[tmac]->LoadFrame(
+								IDR_MACHINEFRAME, 
+								WS_POPUPWINDOW | WS_CAPTION,
+								this);
+							((CFrameMachine*)m_pWndMac[tmac])->Generate();
+							((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
+							char winname[32];
+							sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->MachineIndex
+													,ma->_editName);
+							((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
+							isguiopen[tmac] = true;
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
+						}
+						break;
+					case MACH_MIXER:
+						{
+							m_pWndMac[tmac] = new CFrameMixerMachine(tmac);
+							((CFrameMixerMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
+							((CFrameMixerMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
+							((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
+
+							m_pWndMac[tmac]->LoadFrame(
+								IDR_MACHINEFRAME, 
+								WS_POPUPWINDOW | WS_CAPTION,
+								this);
+							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate();
+							((CFrameMixerMachine*)m_pWndMac[tmac])->SelectMachine(ma);
+							std::ostringstream winname;
+							winname<<std::setfill('0') << std::setw(2) << std::hex;
+							winname << ((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex << " : " << ma->_editName;
+							((CFrameMixerMachine*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
+							isguiopen[tmac] = true;
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
+						}
+						break;
+					case MACH_VST:
+					case MACH_VSTFX:
+						{
+							CVstEffectWnd* newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
+							newwin->_pActive = &isguiopen[tmac];
+							newwin->LoadFrame(IDR_VSTFRAME, 
+//							WS_OVERLAPPEDWINDOW,
+								WS_POPUPWINDOW | WS_CAPTION,
+								this);
+							std::ostringstream winname;
+							winname << std::hex << std::setw(2)
+								<< _pSong->FindBusFromIndex(tmac)
+								<< " : " << ma->_editName;
+							newwin->SetTitleText(winname.str().c_str());
+							// C_Tuner.dll crashes if asking size before opening.
+//							newwin->ResizeWindow(0);
+							m_pWndMac[tmac] = newwin;
+							newwin->ShowWindow(SW_SHOWNORMAL);
+							newwin->PostOpenWnd();
+							CenterWindowOnPoint(m_pWndMac[tmac], point);
+						break;
+						}
+					}
+				}
+			}
+		}
+
+		void CMainFrame::CenterWindowOnPoint(CWnd* pWnd, POINT point)
+		{
+			RECT r,rw;
+			WINDOWPLACEMENT w1;
+			pWnd->GetWindowRect(&r);
+			m_wndView.GetWindowPlacement(&w1);
+
+			if ( point.x == -1 || point.y == -1)
+			{
+				point.x = r.right/2;
+				point.y = r.bottom/2;
+			}
+			/*
+			WINDOWPLACEMENT w2;
+			GetWindowPlacement(&w2);
+			if (w2.showCmd & SW_SHOWMAXIMIZED)
+			{
+			*/
+				rw.top = w1.rcNormalPosition.top;
+				rw.left = w1.rcNormalPosition.left;
+				rw.right = w1.rcNormalPosition.right;
+				rw.bottom = w1.rcNormalPosition.bottom+64;
+				/*
+			}
+			else
+			{
+				rw.top = w1.rcNormalPosition.top + w2.rcNormalPosition.top;
+				rw.left = w1.rcNormalPosition.left + w2.rcNormalPosition.left;
+				rw.bottom = w1.rcNormalPosition.bottom + w2.rcNormalPosition.top;
+				rw.right = w1.rcNormalPosition.right + w2.rcNormalPosition.left;
+			}
+			*/
+
+			int x = rw.left+point.x-((r.right-r.left)/2);
+			int y = rw.top+point.y-((r.bottom-r.top)/2);
+
+			if (x+(r.right-r.left) > (rw.right))
+			{
+				x = rw.right-(r.right-r.left);
+			}
+			// no else incase window is bigger than screen
+			if (x < rw.left)
+			{
+				x = rw.left;
+			}
+
+			if (y+(r.bottom-r.top) > (rw.bottom))
+			{
+				y = rw.bottom-(r.bottom-r.top);
+			}
+			// no else incase window is bigger than screen
+			if (y < rw.top)
+			{
+				y = rw.top;
+			}
+
+			pWnd->SetWindowPos(NULL,x,y,0,0,SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+		}
+
+		void CMainFrame::CloseAllMacGuis()
+		{
+			for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
+			{
+				if (m_wndView.WireDialog[i])
+				{
+					m_wndView.WireDialog[i]->OnCancel();
+				}
+			}
+			for (int c=0; c<MAX_MACHINES; c++)
+			{
+				if ( _pSong->_pMachine[c] ) CloseMacGui(c,false);
+			}
+		}
+
+		void CMainFrame::CloseMacGui(int mac,bool closewiredialogs)
+		{
+			if (closewiredialogs ) 
+			{
+				for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
+				{
+					if (m_wndView.WireDialog[i])
+					{
+						if ((m_wndView.WireDialog[i]->_pSrcMachine == _pSong->_pMachine[mac]) ||
+							(m_wndView.WireDialog[i]->_pDstMachine == _pSong->_pMachine[mac]))
+						{
+							m_wndView.WireDialog[i]->OnCancel();
+						}
+					}
+				}
+			}
+			if (_pSong->_pMachine[mac])
+			{
+				switch (_pSong->_pMachine[mac]->_type)
+				{
+					case MACH_MASTER:
+						if (m_wndView.MasterMachineDialog) m_wndView.MasterMachineDialog->OnCancel();
+						break;
+					case MACH_SAMPLER:
+						if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->OnCancel();
+						break;
+					case MACH_XMSAMPLER:
+						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->DestroyWindow();
+						break;
+					case MACH_DUPLICATOR:
+//					case MACH_LFO:
+//					case MACH_AUTOMATOR:
+					case MACH_MIXER:
+					case MACH_PLUGIN:
+					case MACH_VST:
+					case MACH_VSTFX:
+						if (isguiopen[mac])
+						{
+							m_pWndMac[mac]->DestroyWindow();
+							isguiopen[mac] = false;
+						}
+						break;
+					default:break;
+				}
+			}
+		}
+
+
+		////////////////////
+		//////////////////// Sequencer Dialog
+		////////////////////
+
+
+		void CMainFrame::UpdateSequencer(int selectedpos)
+		{
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			char buf[16];
+
+			int top = cc->GetTopIndex();
+			cc->ResetContent();
+			
+			if (Global::pConfig->_bShowPatternNames)
+			{
+				for(int n=0;n<_pSong->playLength;n++)
+				{
+					sprintf(buf,"%.2X:%s",n,_pSong->patternName[_pSong->playOrder[n]]);
+					cc->AddString(buf);
+				}
+			}
+			else
+			{
+				for(int n=0;n<_pSong->playLength;n++)
+				{
+					sprintf(buf,"%.2X: %.2X",n,_pSong->playOrder[n]);
+					cc->AddString(buf);
+				}
+			}
+			
+			cc->SelItemRange(false,0,cc->GetCount()-1);
+			for (int i=0; i<MAX_SONG_POSITIONS;i++)
+			{
+				if ( _pSong->playOrderSel[i]) cc->SetSel(i,true);
+			}
+			if (selectedpos >= 0)
+			{
+				cc->SetSel(selectedpos);
+				top = selectedpos - 0xC;
+				if (top < 0) top = 0;
+			}
+			cc->SetTopIndex(top);
+			StatusBarIdle();
+		}
+
+		void CMainFrame::OnSelchangeSeqlist() 
+		{
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int maxitems=cc->GetCount();
+			int const ep=cc->GetCurSel();
+			if(m_wndView.editPosition<0) m_wndView.editPosition = 0; // DAN FIXME
+			int const cpid=_pSong->playOrder[m_wndView.editPosition];
+
+			memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+			for (int c=0;c<maxitems;c++) 
+			{
+				if ( cc->GetSel(c) != 0) _pSong->playOrderSel[c]=true;
+			}
+			
+			if((ep!=m_wndView.editPosition))// && ( cc->GetSelCount() == 1))
+			{
+				if ((Global::pPlayer->_playing) && (Global::pConfig->_followSong))
+				{
+					bool b = Global::pPlayer->_playBlock;
+					Global::pPlayer->Start(ep,0,false);
+					Global::pPlayer->_playBlock = b;
+				}
+				m_wndView.editPosition=ep;
+				m_wndView.prevEditPosition=ep;
+				UpdatePlayOrder(false);
+				
+				if(cpid!=_pSong->playOrder[ep])
+				{
+					m_wndView.Repaint(draw_modes::pattern);
+					if (Global::pPlayer->_playing) {
+						m_wndView.Repaint(draw_modes::playback);
+					}
+				}		
+			}
+			StatusBarIdle();
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnDblclkSeqlist() 
+		{
+		/*
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int const ep=_pSong->GetBlankPatternUnsed();
+			int const sep=m_wndView.editPosition;
+			
+			if(ep!=_pSong->playOrder[sep])
+			{
+				_pSong->playOrder[sep]=ep;
+				UpdatePlayOrder(true);
+				m_wndView.Repaint(draw_modes::pattern);
+			}
+			m_wndView.SetFocus();
+			*/		
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int const ep=cc->GetCurSel();
+			if (Global::pPlayer->_playing)
+			{
+				bool b = Global::pPlayer->_playBlock;
+				Global::pPlayer->Start(ep,0);
+				Global::pPlayer->_playBlock = b;
+			}
+			else
+			{
+				Global::pPlayer->Start(ep,0);
+			}
+			m_wndView.editPosition=ep;
+			//Following two lines by alk to disable view change to pattern mode when 
+			//double clicking on a pattern in the sequencer list
+			//m_wndView.OnPatternView();
+			SetFocus();
+		}
+
+		void CMainFrame::OnIncshort() 
+		{
+			int indexes[MAX_SONG_POSITIONS];
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int const num= cc->GetSelCount();
+			cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+			for (int i = 0; i < num; i++)
+			{
+				if(_pSong->playOrder[indexes[i]]<(MAX_PATTERNS-1))
+				{
+					_pSong->playOrder[indexes[i]]++;
+				}
+			}
+			UpdatePlayOrder(false);
+			UpdateSequencer();
+			m_wndView.Repaint(draw_modes::pattern);
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnDecshort() 
+		{
+			int indexes[MAX_SONG_POSITIONS];
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int const num= cc->GetSelCount();
+			cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+			for (int i = 0; i < num; i++)
+			{
+				if(_pSong->playOrder[indexes[i]]>0)
+				{
+					_pSong->playOrder[indexes[i]]--;
+				}
+			}
+			UpdatePlayOrder(false);
+			UpdateSequencer();
+			m_wndView.Repaint(draw_modes::pattern);
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnInclong() 
+		{
+			int indexes[MAX_SONG_POSITIONS];
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int const num= cc->GetSelCount();
+			cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+			for (int i = 0; i < num; i++)
+			{
+				if(_pSong->playOrder[indexes[i]]<(MAX_PATTERNS-16))
+				{
+					_pSong->playOrder[indexes[i]]+=16;			
+				}
+				else
+				{
+					_pSong->playOrder[indexes[i]]=(MAX_PATTERNS-1);
+				}
+			}
+			UpdatePlayOrder(false);
+			UpdateSequencer();
+			m_wndView.Repaint(draw_modes::pattern);
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnDeclong() 
+		{
+			int indexes[MAX_SONG_POSITIONS];
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int const num= cc->GetSelCount();
+			cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+			for (int i = 0; i < num; i++)
+			{
+				if(_pSong->playOrder[indexes[i]]>=16)
+				{
+					_pSong->playOrder[indexes[i]]-=16;			
+				}
+				else
+				{
+					_pSong->playOrder[indexes[i]]=0;
+				}
+			}
+			UpdatePlayOrder(false);
+			UpdateSequencer();
+			m_wndView.Repaint(draw_modes::pattern);
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnSeqnew() 
+		{
+			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+			{
+				m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+				++_pSong->playLength;
+
+				m_wndView.editPosition++;
+				int const pop=m_wndView.editPosition;
+				for(int c=(_pSong->playLength-1);c>=pop;c--)
+				{
+					_pSong->playOrder[c]=_pSong->playOrder[c-1];
+				}
+				_pSong->playOrder[m_wndView.editPosition]=_pSong->GetBlankPatternUnused();
+				
+				if ( _pSong->playOrder[m_wndView.editPosition]>= MAX_PATTERNS )
+				{
+					_pSong->playOrder[m_wndView.editPosition]=MAX_PATTERNS-1;
+				}
+
+				_pSong->AllocNewPattern(_pSong->playOrder[m_wndView.editPosition],"",Global::pConfig->defaultPatLines,FALSE);
+
+				UpdatePlayOrder(true);
+				UpdateSequencer(m_wndView.editPosition);
+
+				m_wndView.Repaint(draw_modes::pattern);
+			}
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnSeqins() 
+		{
+			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+			{
+				m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+				++_pSong->playLength;
+
+				m_wndView.editPosition++;
+				int const pop=m_wndView.editPosition;
+				for(int c=(_pSong->playLength-1);c>=pop;c--)
+				{
+					_pSong->playOrder[c]=_pSong->playOrder[c-1];
+				}
+
+				UpdatePlayOrder(true);
+				UpdateSequencer(m_wndView.editPosition);
+
+				m_wndView.Repaint(draw_modes::pattern);
+			}
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnSeqduplicate() 
+		{
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int selcount = cc->GetSelCount();
+			if (selcount == 0) return;
+			if ( _pSong->playLength+selcount >= MAX_SONG_POSITIONS)
+			{
+				MessageBox("Cannot clone the pattern(s). The maximum sequence length would be exceeded.","Clone Patterns");
+				m_wndView.SetFocus();
+				return;
+			}
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			// Moves all patterns after the selection, to make space.
+			int* litems = new int[selcount];
+			cc->GetSelItems(selcount,litems);
+			for(int i(_pSong->playLength-1) ; i >= litems[selcount-1] ;--i)
+			{
+				_pSong->playOrder[i+selcount]=_pSong->playOrder[i];
+			}
+			_pSong->playLength+=selcount;
+
+			for(int i(0) ; i < selcount ; ++i)
+			{
+				int newpat = -1;
+				// This for loop is in order to clone sequences like: 00 00 01 01 and avoid duplication of same patterns.
+				for (int j(0); j < i; ++j)
+				{
+					if (_pSong->playOrder[litems[0]+j] == _pSong->playOrder[litems[0]+i])
+					{
+						newpat=_pSong->playOrder[litems[selcount-1]+j+1];
+					}
+				}
+				if (newpat == -1 ) 
+				{
+					newpat = _pSong->GetBlankPatternUnused();
+					if (newpat < MAX_PATTERNS-1)
+					{
+						int oldpat = _pSong->playOrder[litems[i]];
+						_pSong->AllocNewPattern(newpat,_pSong->patternName[oldpat],_pSong->patternLines[oldpat],FALSE);
+						memcpy(_pSong->_ppattern(newpat),_pSong->_ppattern(oldpat),MULTIPLY2);
+					}
+					else 
+					{
+						newpat=0;
+					}
+				}
+				_pSong->playOrder[litems[selcount-1]+i+1]=newpat;
+			}
+			m_wndView.editPosition=litems[selcount-1]+1;
+			UpdatePlayOrder(true);
+			UpdateSequencer(m_wndView.editPosition);
+			m_wndView.Repaint(draw_modes::pattern);
+
+			delete [] litems; litems = 0;
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnSeqcut() 
+		{
+			OnSeqcopy();
+			OnSeqdelete();
+		}
+
+		void CMainFrame::OnSeqdelete() 
+		{
+			int indexes[MAX_SONG_POSITIONS];
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			int const num= cc->GetSelCount();
+			cc->GetSelItems(MAX_SONG_POSITIONS,indexes);
+
+			// our list can be in any order so we must be careful
+			int smallest = indexes[0]; // we need a good place to put the cursor when we are done, above the topmost selection seems most intuitive
+			for (int i=0; i < num; i++)
+			{
+				int c;
+				for(c = indexes[i] ; c < _pSong->playLength - 1 ; ++c)
+				{
+					_pSong->playOrder[c]=_pSong->playOrder[c+1];
+				}
+				_pSong->playOrder[c]=0;
+				_pSong->playLength--;
+				if (_pSong->playLength <= 0)
+				{
+					_pSong->playLength =1;
+				}
+				for(int j(i + 1) ; j < num ; ++j)
+				{
+					if (indexes[j] > indexes[i])
+					{
+						indexes[j]--;
+					}
+				}
+				if (indexes[i] < smallest)
+				{
+					smallest = indexes[i];
+				}
+			}
+			m_wndView.editPosition = smallest-1;
+
+			if (m_wndView.editPosition<0)
+			{
+				m_wndView.editPosition = 0;
+			}
+			else if (m_wndView.editPosition>=_pSong->playLength)
+			{
+				m_wndView.editPosition=_pSong->playLength-1;
+			}
+
+			UpdatePlayOrder(true);
+			UpdateSequencer(m_wndView.editPosition);
+			m_wndView.Repaint(draw_modes::pattern);
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnSeqcopy() 
+		{
+			CListBox *cc=(CListBox *)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			seqcopybufferlength= cc->GetSelCount();
+			cc->GetSelItems(MAX_SONG_POSITIONS,seqcopybuffer);
+
+			// sort our table so we can paste it in a sensible manner later
+			for (int i=0; i < seqcopybufferlength; i++)
+			{
+				for (int j=i+1; j < seqcopybufferlength; j++)
+				{
+					if (seqcopybuffer[j] < seqcopybuffer[i])
+					{
+						int k = seqcopybuffer[i];
+						seqcopybuffer[i] = seqcopybuffer[j];
+						seqcopybuffer[j] = k;
+					}
+				}
+				// convert to actual index
+				seqcopybuffer[i] = _pSong->playOrder[seqcopybuffer[i]];
+			}
+		}
+
+		void CMainFrame::OnSeqpaste() 
+		{
+			if (seqcopybufferlength > 0)
+			{
+				if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+				{
+					m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+
+					// we will do this in a loop to easily handle an error if we run out of space
+
+					// our list can be in any order so we must be careful
+					int pastedcount = 0;
+					for (int i=0; i < seqcopybufferlength; i++)
+					{
+						if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+						{
+							++_pSong->playLength;
+
+							m_wndView.editPosition++;
+							pastedcount++;
+							int c;
+							for(c = _pSong->playLength - 1 ; c >= m_wndView.editPosition ; --c)
+							{
+								_pSong->playOrder[c]=_pSong->playOrder[c-1];
+							}
+							_pSong->playOrder[c+1] = seqcopybuffer[i];
+						}
+					}
+
+					if (pastedcount>0)
+					{
+						UpdatePlayOrder(true);
+						for(int i(m_wndView.editPosition + 1 - pastedcount) ; i < m_wndView.editPosition ; ++i)
+						{
+							_pSong->playOrderSel[i] = true;
+						}
+						UpdateSequencer(m_wndView.editPosition);
+						m_wndView.Repaint(draw_modes::pattern);
+
+					}
+				}
+			}
+			m_wndView.SetFocus();
+		}
+
+
+		void CMainFrame::OnSeqclr() 
+		{
+			if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
+			{
+				m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+				// clear sequence
+				for(int c=0;c<MAX_SONG_POSITIONS;c++)
+				{
+					_pSong->playOrder[c]=0;
+				}
+				// clear pattern data
+				_pSong->DeleteAllPatterns();
+				// init a pattern for #0
+				_pSong->_ppattern(0);
+
+				m_wndView.editPosition=0;
+				_pSong->playLength=1;
+				UpdatePlayOrder(true);
+				UpdateSequencer();
+				m_wndView.Repaint(draw_modes::pattern);
+			}
+			m_wndView.SetFocus();
+			
+		}
+		void CMainFrame::OnSeqsort()
+		{
+			m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			unsigned char oldtonew[MAX_PATTERNS];
+			unsigned char newtoold[MAX_PATTERNS];
+			memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
+			memset(newtoold,255,MAX_PATTERNS*sizeof(char));
+
+			if (Global::pPlayer->_playing)
+			{
+				Global::pPlayer->Stop();
+			}
+
+
+		// Part one, Read patterns from sequence and assign them a new ordered number.
+			unsigned char freep=0;
+			for ( int i=0 ; i<_pSong->playLength ; i++ )
+			{
+				const unsigned char cp=_pSong->playOrder[i];
+				if ( oldtonew[cp] == 255 ) // else, we have processed it already
+				{
+					oldtonew[cp]=freep;
+					newtoold[freep]=cp;
+					freep++;
+				}
+			}
+		// Part one and a half. End filling the order numbers.
+			for(int i(0) ; i < MAX_PATTERNS ; ++i)
+			{
+				if ( oldtonew[i] == 255 )
+				{
+					oldtonew[i] = freep;
+					newtoold[freep] = i;
+					freep++;
+				}
+			}
+		// Part two. Sort Patterns. Take first "invalid" out, and start putting patterns in their place.
+		//			 When we have to put the first read one back, do it and find next candidate.
+
+			int patl; // first one is initial one, next one is temp one
+			char patn[32]; // ""
+			unsigned char * pData; // ""
+
+
+			int idx=0;
+			int idx2=0;
+			for(int i(0) ; i < MAX_PATTERNS ; ++i)
+			{
+				if ( newtoold[i] != i ) // check if this place belongs to another pattern
+				{
+					pData = _pSong->ppPatternData[i];
+					memcpy(&patl,&_pSong->patternLines[i],sizeof(int));
+					memcpy(patn,&_pSong->patternName[i],sizeof(char)*32);
+
+					idx = i;
+					while ( newtoold[idx] != i ) // Start moving patterns while it is not the stored one.
+					{
+						idx2 = newtoold[idx]; // get pattern that goes here and move.
+
+						_pSong->ppPatternData[idx] = _pSong->ppPatternData[idx2];
+						memcpy(&_pSong->patternLines[idx],&_pSong->patternLines[idx2],sizeof(int));
+						memcpy(&_pSong->patternName[idx],&_pSong->patternName[idx2],sizeof(char)*32);
+						
+						newtoold[idx]=idx; // and indicate that this pattern has been corrected.
+						idx = idx2;
+					}
+
+					// Put pattern back.
+					_pSong->ppPatternData[idx] = pData;
+					memcpy(&_pSong->patternLines[idx],&patl,sizeof(int));
+					memcpy(_pSong->patternName[idx],patn,sizeof(char)*32);
+
+					newtoold[idx]=idx; // and indicate that this pattern has been corrected.
+				}
+			}
+		// Part three. Update the sequence
+
+			for(int i(0) ; i < _pSong->playLength ; ++i)
+			{
+				_pSong->playOrder[i]=oldtonew[_pSong->playOrder[i]];
+			}
+
+		// Part four. All the needed things.
+
+			seqcopybufferlength = 0;
+			UpdateSequencer();
+			m_wndView.Repaint(draw_modes::pattern);
+			m_wndView.SetFocus();
+		}
+
+
+		void CMainFrame::OnInclen() 
+		{
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			if(_pSong->playLength<(MAX_SONG_POSITIONS-1))
+			{
+				++_pSong->playLength;
+				UpdatePlayOrder(false);
+				UpdateSequencer();
+			}
+			m_wndView.SetFocus();
+		}
+
+		void CMainFrame::OnDeclen() 
+		{
+			m_wndView.AddUndoSequence(_pSong->playLength,m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
+			if(_pSong->playLength>1)
+			{
+				--_pSong->playLength;
+				_pSong->playOrder[_pSong->playLength]=0;
+				UpdatePlayOrder(false);
+				UpdateSequencer();
+			}
+			m_wndView.SetFocus();	
+		}
+		void CMainFrame::OnSeqShowpattername()
+		{
+			Global::pConfig->_bShowPatternNames=((CButton*)m_wndSeq.GetDlgItem(IDC_SHOWPATTERNAME))->GetCheck();
+			
+			/*
+
+			//trying to set the size of the sequencer bar... how to do this!?
+
+			CRect borders;
+			((CDialog*)m_wndSeq.GetDlgItem(AFX_IDW_DIALOGBAR))->GetWindowRect(&borders);
+			TRACE("borders.right = %i", borders.right);
+			if (Global::pConfig->_bShowPatternNames)
+			{
+               //m_wndSeq.SetBorders(borders.left, borders.top, 6, borders.bottom);
+			}
+			else
+			{
+				//m_wndSeq.SetBorders(borders.left, borders.top, 3, borders.bottom);
+			}
+			*/
+
+			UpdateSequencer();
+			CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			pls->SetSel(Global::pPlayer->_playPosition,true);
+
+			int top = ((Global::pPlayer->_playing)?Global::pPlayer->_playPosition:m_wndView.editPosition) - 0xC;
+			if (top < 0) top = 0;
+			pls->SetTopIndex(top);
+			m_wndView.SetFocus();
+		}
+
 
 		void CMainFrame::OnMultichannelAudition() 
 		{
@@ -1693,27 +2374,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if ( Global::pConfig->_followSong )
 			{
-				if  ( Global::pPlayer->playing() )
+				if  ( Global::pPlayer->_playing )
 				{
-					m_wndView.pattern_view()->ChordModeOffs = 0;
-					m_wndView.pattern_view()->bScrollDetatch=false;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					//left out in psycore, since it's assumed the timer will update it.
-#else
-					if (pSeqList->GetCurSel() != Global::pPlayer->_sequencePosition)
+					m_wndView.ChordModeOffs = 0;
+					m_wndView.bScrollDetatch=false;
+					if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
 					{
 						pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
-						pSeqList->SetSel(Global::pPlayer->_sequencePosition,true);
+						pSeqList->SetSel(Global::pPlayer->_playPosition,true);
 					}
-					if ( m_wndView.pattern_view()->editPosition  != Global::pPlayer->_sequencePosition )
+					if ( m_wndView.editPosition  != Global::pPlayer->_playPosition )
 					{
-						m_wndView.pattern_view()->editPosition=Global::pPlayer->_sequencePosition;
+						m_wndView.editPosition=Global::pPlayer->_playPosition;
 						m_wndView.Repaint(draw_modes::pattern);
 					}
-					int top = Global::pPlayer->_sequencePosition - 0xC;
+					int top = Global::pPlayer->_playPosition - 0xC;
 					if (top < 0) top = 0;
 					pSeqList->SetTopIndex(top);
-#endif
 				}
 				else
 				{
@@ -1722,7 +2399,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					{
 						if (_pSong->playOrderSel[i]) pSeqList->SetSel(i,true);
 					}
-					int top = m_wndView.pattern_view()->editPosition - 0xC;
+					int top = m_wndView.editPosition - 0xC;
 					if (top < 0) top = 0;
 					pSeqList->SetTopIndex(top);
 				}
@@ -1730,22 +2407,119 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_wndView.SetFocus();
 		}
 
+		void CMainFrame::UpdatePlayOrder(bool mode)
+		{
+			
+			CStatic *ll_l=(CStatic *)m_wndSeq.GetDlgItem(IDC_SEQ3);
+			CListBox *pls=(CListBox*)m_wndSeq.GetDlgItem(IDC_SEQLIST);
+			CStatic *pLength = (CStatic*)m_wndSeq.GetDlgItem(IDC_LENGTH);
+
+			int ll = _pSong->playLength;
+
+			char buffer[16];
+
+		// Update Labels
+			
+			sprintf(buffer,"%.2X",ll);
+			ll_l->SetWindowText(buffer);
+
+			/*
+			int songLength = 0;
+			for (int i=0; i <ll; i++)
+			{
+				int pattern = _pSong->playOrder[i];
+				// this should parse each line for ffxx commands if you want it to be truly accurate
+				songLength += (_pSong->patternLines[pattern] * 60/(_pSong->BeatsPerMin() * _pSong->_LinesPerBeat));
+			}
+
+			sprintf(buffer, "%02d:%02d", songLength / 60, songLength % 60);
+			*/
+
+			// take ff and fe commands into account
+
+			float songLength = 0;
+			int bpm = _pSong->BeatsPerMin();
+			int tpb = _pSong->LinesPerBeat();
+			for (int i=0; i <ll; i++)
+			{
+				int pattern = _pSong->playOrder[i];
+				// this should parse each line for ffxx commands if you want it to be truly accurate
+				unsigned char* const plineOffset = _pSong->_ppattern(pattern);
+				for (int l = 0; l < _pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
+				{
+					for (int t = 0; t < _pSong->SONGTRACKS*EVENT_SIZE; t+=EVENT_SIZE)
+					{
+						PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
+						switch (pEntry->_cmd)
+						{
+						case 0xFF:
+							if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+							{
+								bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+							}
+							break;
+							
+						case 0xFE:
+							if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+							{
+								tpb=pEntry->_parameter;
+							}
+							break;
+						}
+					}
+					songLength += (60.0f/(bpm * tpb));
+				}
+			}
+			
+			sprintf(buffer, "%02d:%02d", helpers::math::truncated(songLength / 60), helpers::math::truncated(songLength) % 60);
+			pLength->SetWindowText(buffer);
+			
+			// Update sequencer line
+			
+			if (mode)
+			{
+				const int ls=m_wndView.editPosition;
+				const int le=_pSong->playOrder[ls];
+				pls->DeleteString(ls);
+
+				if (Global::pConfig->_bShowPatternNames)
+					sprintf(buffer,"%.2X:%s",ls,_pSong->patternName[le]);
+				else
+					sprintf(buffer,"%.2X: %.2X",ls,le);
+				pls->InsertString(ls,buffer);
+				// Update sequencer selection	
+				pls->SelItemRange(false,0,pls->GetCount()-1);
+				pls->SetSel(ls,true);
+				int top = ls - 0xC;
+				if (top < 0) top = 0;
+				pls->SetTopIndex(top);
+				memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+				_pSong->playOrderSel[ls] = true;
+			}
+			else
+			{
+				int top = pls->GetTopIndex();
+				pls->SelItemRange(false,0,pls->GetCount()-1);
+				for (int i=0;i<MAX_SONG_POSITIONS;i++ )
+				{
+					if (_pSong->playOrderSel[i]) pls->SetSel(i,true);
+				}
+				pls->SetTopIndex(top);
+			}
+			
+		}
 
 		void CMainFrame::OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI) 
 		{
 			pCmdUI->Enable();
 			CString str;
-			if (Global::pPlayer->playing())
+			if (Global::pPlayer->_playing)
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				str.Format("Pos %.2X", Player::singleton().playPos());
-#else
-				str.Format("Pos %.2X", Global::pPlayer->_sequencePosition); 
-#endif
+				str.Format("Pos %.2X", Global::pPlayer->_playPosition); 
 			}
 			else
 			{
-				str.Format("Pos %.2X", m_wndView.pattern_view()->editPosition); 
+				str.Format("Pos %.2X", m_wndView.editPosition); 
 			}
 			pCmdUI->SetText(str); 
 		}
@@ -1754,17 +2528,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			pCmdUI->Enable(); 
 			CString str;
-			if (Global::pPlayer->playing())
+			if (Global::pPlayer->_playing)
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-//				str.Format("Pat %.2X", m_wndSeq.selectedEntry()->pattern()->id());
-#else
 				str.Format("Pat %.2X", Global::pPlayer->_playPattern); 
-#endif
 			}
 			else
 			{
-				str.Format("Pat %.2X", Global::song().playOrder[m_wndView.pattern_view()->editPosition]); 
+				str.Format("Pat %.2X", Global::_pSong->playOrder[m_wndView.editPosition]); 
 			}
 			pCmdUI->SetText(str); 
 		}
@@ -1773,17 +2543,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			pCmdUI->Enable(); 
 			CString str;
-			if (Global::pPlayer->playing())
+			if (Global::pPlayer->_playing)
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				str.Format("Line %.03f", Player::singleton().playPos()); 
-#else
 				str.Format("Line %u", Global::pPlayer->_lineCounter); 
-#endif
 			}
 			else
 			{
-				str.Format("Line %u", m_wndView.pattern_view()->editcur.line); 
+				str.Format("Line %u", m_wndView.editcur.line); 
 			}
 			pCmdUI->SetText(str); 
 		}
@@ -1791,27 +2557,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnUpdateIndicatorTime(CCmdUI *pCmdUI) 
 		{
 			pCmdUI->Enable(); 
-			if (Global::pPlayer->playing())
+			if (Global::pPlayer->_playing)
 			{
 				CString str;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				const float playTime = Player::singleton().timeInfo().samplePos() /  (float) Player::singleton().timeInfo().sampleRate();
-				const int timeInt = helpers::math::truncated(playTime);
-				const int cents = (playTime - timeInt) * 100;
-				const int secs = timeInt % 60;
-				const int mins = (timeInt % 3600) - secs;
-				const int hour = timeInt / 3600;
-				str.Format( "%.2u:%.2u:%.2u.%.2u", hour, mins, secs, cents); 
-#else
 				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, helpers::math::truncated(Global::pPlayer->_playTime), helpers::math::truncated(Global::pPlayer->_playTime*100)-(helpers::math::truncated(Global::pPlayer->_playTime)*100)); 
-#endif
 				pCmdUI->SetText(str); 
 			}
 		}
 
 		void CMainFrame::OnUpdateIndicatorEdit(CCmdUI *pCmdUI) 
 		{
-			if (m_wndView.pattern_view()->bEditMode)
+			if (m_wndView.bEditMode)
 			{
 				pCmdUI->Enable(); 
 			}
@@ -1902,41 +2658,33 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (_pSong)
 			{
 				std::ostringstream oss;
-				oss << _pSong->name()
-					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.pattern_view()->editPosition]];
+				oss << _pSong->name
+					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.editPosition]];
 
-				if ((m_wndView.viewMode==view_modes::pattern)	&& (!Global::pPlayer->playing()))
+				if ((m_wndView.viewMode==view_modes::pattern)	&& (!Global::pPlayer->_playing))
 				{
-					unsigned char *toffset=_pSong->_ptrackline(m_wndView.pattern_view()->editPosition,m_wndView.pattern_view()->editcur.track,m_wndView.pattern_view()->editcur.line);
+					unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
 					int machine = toffset[2];
 					if (machine<MAX_MACHINES)
 					{
-						if (_pSong->machine(machine))
+						if (_pSong->_pMachine[machine])
 						{
-							oss << " - " << _pSong->machine(machine)->GetEditName();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-							if (_pSong->machine(machine)->getMachineKey() == MachineKey::sampler())
-#else
-							if (_pSong->machine(machine)->_type == MACH_SAMPLER)
-#endif
+							oss << " - " << _pSong->_pMachine[machine]->_editName;
+							if (_pSong->_pMachine[machine]->_type == MACH_SAMPLER)
 							{
 								if (_pSong->_pInstrument[toffset[1]]->_sName[0])
 									oss <<  " - " << _pSong->_pInstrument[toffset[1]]->_sName;
 							}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-							else if (_pSong->machine(machine)->getMachineKey() == MachineKey::sampulse())
-#else
-							else if (_pSong->machine(machine)->_type == MACH_XMSAMPLER)
-#endif
+							else if (_pSong->_pMachine[machine]->_type == MACH_XMSAMPLER)
 							{
-								if (_pSong->rInstrument(toffset[1]).IsEnabled())
-									oss <<  " - " << _pSong->rInstrument(toffset[1]).Name();
+								if (XMSampler::rInstrument(toffset[1]).IsEnabled())
+									oss <<  " - " << XMSampler::rInstrument(toffset[1]).Name();
 							}
 							else
 							{
 								char buf[64];
 								buf[0]=0;
-								_pSong->machine(machine)->GetParamName(toffset[1],buf);
+								_pSong->_pMachine[machine]->GetParamName(toffset[1],buf);
 								if(buf[0])
 									oss <<  " - " << buf;
 							}
@@ -1978,7 +2726,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (!strcmpi(szExtension, ".psy")) // compare to ".psy"
 					{
 						SetForegroundWindow();
-						projects_.active_project()->OnFileLoadsongNamed(szFileName, 1);
+						m_wndView.OnFileLoadsongNamed(szFileName, 1);
 						DragFinish((HDROP)  hDropInfo);	// handle of structure for dropped files
 						return;
 					}
@@ -1990,24 +2738,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetForegroundWindow();
 		}
 
+
 		// void CMainFrame::LoadFonts() - removed, use Configuration::CreateFonts
 
 		void CMainFrame::OnViewSongbar() 
 		{
-			if (m_wndControl.IsWindowVisible()) {
+			if (m_wndControl.IsWindowVisible())
+			{
 				ShowControlBar(&m_wndControl,FALSE,FALSE);
-			} else {
-				ShowControlBar(&m_wndControl,TRUE,FALSE);
 			}
+			else {	ShowControlBar(&m_wndControl,TRUE,FALSE);	}
 		}
 
 		void CMainFrame::OnViewMachinebar() 
 		{
-			if (m_wndControl2.IsWindowVisible()) {
+			if (m_wndControl2.IsWindowVisible())
+			{
 				ShowControlBar(&m_wndControl2,FALSE,FALSE);
-			}  else { 
-				ShowControlBar(&m_wndControl2,TRUE,FALSE);
 			}
+			else {	ShowControlBar(&m_wndControl2,TRUE,FALSE);	}
 		}
 
 		void CMainFrame::OnViewSequencerbar() 
@@ -2021,17 +2770,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnUpdateViewSongbar(CCmdUI* pCmdUI) 
 		{
-			pCmdUI->SetCheck(m_wndControl.IsWindowVisible());			
+			if ( m_wndControl.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
+			else pCmdUI->SetCheck(FALSE);
+			
 		}
 
 		void CMainFrame::OnUpdateViewMachinebar(CCmdUI* pCmdUI) 
 		{
-			pCmdUI->SetCheck(m_wndControl2.IsWindowVisible());			
+			if ( m_wndControl2.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
+			else pCmdUI->SetCheck(FALSE);
+			
 		}
 
 		void CMainFrame::OnUpdateViewSequencerbar(CCmdUI* pCmdUI) 
 		{
-			pCmdUI->SetCheck(m_wndSeq.IsWindowVisible());			
+			if ( m_wndSeq.IsWindowVisible()) pCmdUI->SetCheck(TRUE);
+			else pCmdUI->SetCheck(FALSE);
 		}
 
 

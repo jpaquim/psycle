@@ -762,7 +762,6 @@
 #define IDC_NOTESTOEFFECTS              1523
 #define IDC_RECORD_UNARMED2             1523
 #define IDC_VOLUME_DB15                 1523
-#define IDC_INPUTTOFOCUS                1523
 #define IDC_RADIO_INS                   1524
 #define IDC_PROGRESS1                   1524
 #define IDC_VOLUME_PER15                1524

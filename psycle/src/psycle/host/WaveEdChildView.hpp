@@ -1,21 +1,19 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdChildView.
 #pragma once
-#include "Psycle.hpp"
 #include "WaveEdAmplifyDialog.hpp"
 #include <psycle/host/WaveEdMixDialog.hpp>
 #include <psycle/host/WaveEdInsertSilenceDialog.hpp>
 #include <psycle/host/WaveEdCrossfadeDialog.hpp>
 #include <psycle/host/ScrollableDlgBar.hpp>
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/instrument.h>
-#endif
 #include <deque>
 #include <utility>
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		class CMainFrame;
+		class Song;
 
 		/// wave editor window.
 		class CWaveEdChildView : public CWnd
@@ -160,11 +158,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bool blSelection;			//whether data is selected currently
 			bool wdWave;				//whether we have a wave to display
 			bool cursorBlink;			//switched on timer messages.. cursor is visible when true
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Instrument::id_type wsInstrument;
-#else
+
 			int wsInstrument;
-#endif
 			bool drawwave;
 			bool bSnapToZero;
 			bool bDragLoopStart, bDragLoopEnd;	//indicates that the user is dragging the loop start/end

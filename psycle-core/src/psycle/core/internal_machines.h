@@ -1,20 +1,20 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef PSYCLE__CORE__INTERNAL_MACHINES__INCLUDED
-#define PSYCLE__CORE__INTERNAL_MACHINES__INCLUDED
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #pragma once
-
 #include "machine.h"
 
 namespace psy { namespace core {
 
 /****************************************************************************************************/
 /// dummy machine.
-class PSYCLE__CORE__DECL Dummy : public Machine {
+class Dummy : public Machine {
 	protected:
 		Dummy(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
@@ -25,16 +25,13 @@ class PSYCLE__CORE__DECL Dummy : public Machine {
 		virtual int GenerateAudio(int numSamples);
 		virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
 		virtual std::string GetName() const { return _psName; }
-		virtual bool isGenerator() const { return generator; }
-		void setGenerator(bool gen) { generator = gen; }
 	protected:
 		static std::string _psName;
-		bool generator;
 };
 
 /****************************************************************************************************/
 /// note duplicator machine.
-class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
+class DuplicatorMac : public Machine {
 	protected:
 		DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
@@ -70,7 +67,7 @@ class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
 
 /****************************************************************************************************/
 /// master machine.
-class PSYCLE__CORE__DECL Master : public Machine {
+class Master : public Machine {
 	protected:
 		Master(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
@@ -101,38 +98,9 @@ class PSYCLE__CORE__DECL Master : public Machine {
 		static std::string _psName;
 };
 
-class PSYCLE__CORE__DECL AudioRecorder : public Machine
-{
-	protected:
-		AudioRecorder(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
-	public:
-		virtual ~AudioRecorder() throw();
-		virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
-		virtual void Init(void);
-		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-		virtual void SaveSpecificChunk(RiffFile * pFile);
-		virtual int GenerateAudio(int numSamples);
-		virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
-		virtual std::string GetName() const { return _psName; }
-
-		virtual void ChangePort(int newport);
-		virtual void setGainVol(float gainvol) { _gainvol = gainvol; }
-		virtual float GainVol() const { return _gainvol; }
-		virtual int CaptureIdx() const { return _captureidx; }
-	
-	private:
-		static std::string _psName;
-
-		int _captureidx;
-		bool _initialized;
-		float _gainvol;
-		float* pleftorig;
-		float* prightorig;
-};
-
 /****************************************************************************************************/
 /// LFO machine
-class PSYCLE__CORE__DECL LFO : public Machine {
+class LFO : public Machine {
 	protected:
 		LFO(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
@@ -213,4 +181,3 @@ class PSYCLE__CORE__DECL LFO : public Machine {
 };
 
 }}
-#endif

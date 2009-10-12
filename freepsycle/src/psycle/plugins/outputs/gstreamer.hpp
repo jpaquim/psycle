@@ -17,7 +17,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 	protected: friend class virtual_factory_access;
 		gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 	public:
-		engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
+		engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 		void do_name(std::string const &) /*override*/;
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;

@@ -1,25 +1,14 @@
 #pragma once
-#include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class XMSampler;
-	}
-}
-using namespace psy::core;
-#endif
+#include "Constants.hpp"
+#include "resources/resources.hpp"
 #include <afxwin.h>
-
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUIGeneral dialog
-
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 class XMSampler;
-#endif
-
 class XMSamplerUIGeneral : public CPropertyPage
 {
 	DECLARE_DYNCREATE(XMSamplerUIGeneral)

@@ -1,13 +1,13 @@
 TARGET = qpsycle
 
 # include the base stuff shared amongst all qmake projects.
-include(../../build-systems/qmake/common.pri)
+include(../../packageneric/qmake/common.pri)
 
 # this include defines a dependency on the qt-xml lib.
-include($$COMMON_DIR/qt-xml.pri)
+include(qt-xml.pri)
 
 # this include defines a dependency on the jdkmidi lib.
-#include($$COMMON_DIR/jdkmidi.pri) no need for this now
+#include(jdkmidi.pri) no need for this now
 
 # this include defines a dependency on the psycle-core lib.
 include($$TOP_SRC_DIR/psycle-core/qmake/psycle-core.pri)

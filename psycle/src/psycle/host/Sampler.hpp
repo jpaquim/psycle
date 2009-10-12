@@ -3,10 +3,6 @@
 #pragma once
 #include "Machine.hpp"
 #include "Filter.hpp"
-#if !defined WINAMP_PLUGIN
-	#include "InstPreview.hpp"
-#endif // WINAMP_PLUGIN
-
 namespace psycle
 {
 	namespace host
@@ -97,19 +93,6 @@ namespace psycle
 		class Sampler : public Machine
 		{
 		public:
-			///\name wave file previewing
-			///\{
-			//todo these ought to be dynamically allocated
-#if !defined WINAMP_PLUGIN
-			/// Wave preview.
-			static InstPreview wavprev;
-			/// Wave editor playback.
-			static InstPreview waved;
-#endif
-			/// runs the wave previewing.
-			static void DoPreviews(float* pSamplesL, float* pSamplesR, int amount);
-			///\}
-
 			void Tick();
 			Sampler(int index);
 			virtual void Init(void);
@@ -130,7 +113,7 @@ namespace psycle
 				}
 			}
 			virtual void Stop(void);
-			virtual void Tick(int channel, PatternEvent* pData);
+			virtual void Tick(int channel, PatternEntry* pData);
 			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
@@ -213,7 +196,7 @@ namespace psycle
 			void VoiceWork(int numsamples, int voice);
 			void NoteOff(int voice);
 			void NoteOffFast(int voice);
-			int VoiceTick(int channel, PatternEvent* pData);
+			int VoiceTick(int channel, PatternEntry* pData);
 			inline void TickEnvelope(int voice);
 			inline void TickFilterEnvelope(int voice);
 			unsigned char lastInstrument[MAX_TRACKS];

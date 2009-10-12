@@ -1,26 +1,18 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdChildView.
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "WaveEdChildView.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/sampler.h>
-using namespace psy::core;
-#else
-#include "Song.hpp"
-#include "Sampler.hpp"
-#endif
-#include "Configuration.hpp"
+#include "Psycle.hpp"
+#include "Helpers.hpp"
 #include "MainFrm.hpp"
-
-#include <psycle/helpers/helpers.hpp>
 #include "Zap.hpp"
 #include <mmreg.h>
 #include <math.h>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-	using namespace psycle::helpers;
+		using namespace helpers;
 	
 		float const CWaveEdChildView::zoomBase = 1.06f;
 
@@ -359,7 +351,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bDragLoopStart = bDragLoopEnd = false;
 			SelStart=0;
 			cursorPos=0;
-			Sampler::waved.SetVolume(0.4f);
+			_pSong->waved.SetVolume(0.4f);
 			wdWave=false;
 			wsInstrument=-1;
 			prevHeadLoopS = prevBodyLoopS = prevHeadLoopE = prevBodyLoopE = 0;
@@ -448,7 +440,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else if((CSliderCtrl*)pScrollBar == volSlider)
 			{
-				Sampler::waved.SetVolume( volSlider->GetPos()/100.0f );
+				_pSong->waved.SetVolume( volSlider->GetPos()/100.0f );
 				volSlider->Invalidate(false);
 				this->SetFocus();
 			}
@@ -541,7 +533,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if ( nmcd.dwDrawStage == CDDS_PREPAINT )
 			{
-				float vol = Sampler::waved.GetVolume();
+				float vol = _pSong->waved.GetVolume();
 				CDC* pDC = CDC::FromHandle( nmcd.hdc );
 				CDC memDC;
 				memDC.CreateCompatibleDC(pDC);
@@ -1667,11 +1659,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					_pSong->_pInstrument[wsInstrument]->DeleteLayer();
-#else
 					_pSong->DeleteLayer(wsInstrument);
-#endif
 					wdLength = 0;
 					wdWave   = false;
 				}
@@ -2450,7 +2438,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			//set volume slider
 			volSlider->SetRange(0, 100);
-			volSlider->SetPos( Sampler::waved.GetVolume() );
+			volSlider->SetPos( _pSong->waved.GetVolume() );
 			volSlider->Invalidate(false);
 		}
 

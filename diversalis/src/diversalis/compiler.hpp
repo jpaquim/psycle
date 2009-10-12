@@ -2,11 +2,9 @@
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief compiler-independant meta-information about the compiler
-
 #ifndef DIVERSALIS__COMPILER__INCLUDED
 #define DIVERSALIS__COMPILER__INCLUDED
 #pragma once
-
 #include <diversalis/detail/project.hpp>
 
 #if defined DIVERSALIS__COMPILER__DOXYGEN

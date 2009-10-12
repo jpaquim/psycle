@@ -178,9 +178,7 @@ TODO LIST
 #include <psycle/plugin_interface.hpp>
 	
 #include "SynthTrack.h"
-#include <cstring>
-
-using namespace psycle::plugin_interface;
+#include <cstring> // was <memory.h>
 
 //#define PREVIEW
 #define FILEVERSION 4
@@ -1269,7 +1267,8 @@ CMachineParameter const *pParameters[] =
 	};
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -1279,7 +1278,7 @@ CMachineInfo const MacInfo (
 	"Jeremy Evers",																												// author
 	"Pattern Commands",																																				// A command, that could be use for open an editor, etc...
 	NUMCOLUMNS
-);
+};
 #else
 #ifdef SYNTH_LIGHT
 // light synth
@@ -1406,7 +1405,8 @@ CMachineParameter const *pParameters[] =
 	};
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -1420,7 +1420,7 @@ CMachineInfo const MacInfo (
 	"Jeremy Evers",																												// author
 	"Pattern Commands",																																				// A command, that could be use for open an editor, etc...
 	NUMCOLUMNS
-);
+};
 #else
 // normal synth
 enum {
@@ -1634,7 +1634,8 @@ CMachineParameter const *pParameters[] =
 	};
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -1648,7 +1649,7 @@ CMachineInfo const MacInfo (
 	"Jeremy Evers",																												// author
 	"Pattern Commands",																																				// A command, that could be use for open an editor, etc...
 	NUMCOLUMNS
-);
+};
 #endif
 #endif
 

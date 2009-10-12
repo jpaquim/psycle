@@ -4,7 +4,7 @@
 ///\interface psycle::host::plugin_resolver
 #pragma once
 #include <psycle/engine/engine.hpp>
-#include <universalis/os/dynamic_link/resolver.hpp>
+#include <universalis/operating_system/dynamic_link/resolver.hpp>
 #include <cassert>
 #include <string>
 #include <iostream>
@@ -43,7 +43,7 @@ namespace psycle { namespace host {
 				private:
 					plugin_resolver & plugin_resolver_;
 					/// note: if aggregated directly without reference, on object destruction, we get "Inconsistency detected by ld.so: dl-close.c: 627: _dl_close: Assertion `map->l_init_called' failed!"
-					universalis::os::dynamic_link::resolver & library_resolver_;
+					universalis::operating_system::dynamic_link::resolver & library_resolver_;
 					typedef engine::node & (* const node_instanciator) (engine::reference_counter &, engine::graph &, std::string const & name);
 					node_instanciator const node_instanciator_;
 			};

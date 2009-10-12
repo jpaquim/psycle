@@ -1,14 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMSamplerUIGeneral.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/xminstrument.h>
-#include <psycle/core/xmsampler.h>
-using namespace psy::core;
-#else
+#include "Psycle.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
-#endif
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

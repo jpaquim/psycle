@@ -27,7 +27,7 @@
 
 #include <psycle/core/machine.h>
 #include <psycle/core/plugin.h>
-#include <psycle/helpers/binread.hpp>
+#include <psycle/core/binread.h>
 #include <psycle/core/constants.h>
 
 #include "machinetweakdlg.hpp"

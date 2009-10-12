@@ -1,7 +1,6 @@
 ///\file
 ///\brief interface file for psycle::host::AudioDriver.
 #pragma once
-#include "Global.hpp"
 namespace psycle
 {
 	namespace host

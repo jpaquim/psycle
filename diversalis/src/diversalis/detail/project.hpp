@@ -3,12 +3,6 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
-
-#ifndef DIVERSALIS__DETAIL__PROJECT__INCLUDED
-#define DIVERSALIS__DETAIL__PROJECT__INCLUDED
 #pragma once
-
 #include <diversalis/detail/configuration.hpp>
 #include "stringized.hpp"
-
-#endif

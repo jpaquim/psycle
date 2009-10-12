@@ -2,13 +2,15 @@
 // copyright 1999-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::host::schedulers::single_threaded
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "single_threaded.hpp"
-#include <universalis/cpu/exception.hpp>
+#include <universalis/processor/exception.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
-#include <universalis/os/clocks.hpp>
-#include <universalis/os/thread_name.hpp>
+#include <universalis/operating_system/clocks.hpp>
+#include <universalis/operating_system/thread_name.hpp>
 #include <sstream>
 #include <limits>
 namespace psycle { namespace host { namespace schedulers { namespace single_threaded {
@@ -18,11 +20,11 @@ namespace {
 		#if 0
 			return std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch();
 		#elif 0
-			return universalis::os::clocks::thread_cpu_time::current();
+			return universalis::operating_system::clocks::thread_cpu_time::current();
 		#elif 0
-			return universalis::os::clocks::process_cpu_time::current();
+			return universalis::operating_system::clocks::process_cpu_time::current();
 		#else
-			return universalis::os::clocks::monotonic::current();
+			return universalis::operating_system::clocks::monotonic::current();
 		#endif
 	}
 }
@@ -260,7 +262,7 @@ void scheduler::thread_function() {
 	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
 
 	// set thread name
-	universalis::os::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
+	universalis::operating_system::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
 
 	// install cpu/os exception handler/translator
 	universalis::processor::exception::install_handler_in_thread();

@@ -4,12 +4,14 @@
 
 ///\file
 ///\implementation psycle::paths
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include "paths.hpp"
-#include <universalis/os/paths/implementation.hpp>
+#include <universalis/operating_system/paths/implementation.hpp>
 namespace psycle
 {
 	namespace paths
 	{
-		#include <universalis/os/paths/injection/implementation.hpp>
+		#include <universalis/operating_system/paths/injection/implementation.hpp>
 	}
 }

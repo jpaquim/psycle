@@ -1,26 +1,21 @@
 //\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "VstEffectWnd.hpp"
-#include "Configuration.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/vsthost.h>
-#include <psycle/core/vstplugin.h>
-using namespace psy::core;
-#else
+#include "Psycle.hpp"
 #include "VstHost24.hpp"
-#endif
 
-#include "PresetsDlg.hpp"
-#include "MachineGui.hpp"
 #include "VstParamList.hpp"
 
 #include "InputHandler.hpp"
+#include "Configuration.hpp"
+
+#include "PresetsDlg.hpp"
+
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
-
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -93,21 +88,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_SHOWTOOLBAR, OnUpdateViewsShowtoolbar)
 		END_MESSAGE_MAP()
 
-		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect)
-			: CEffectWnd(effect),
-			  gui_(0),
-			  pView(0),
-			_machine(effect),
-			pParamGui(0)
-		{
-		}
-
-		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect, MachineGui* gui)
-			:CEffectWnd(effect),
-			gui_(gui),
-			pView(0),
-			_machine(effect),
-			pParamGui(0)
+		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
+		, pView(0) , _machine(effect) , pParamGui(0)
 		{
 		}
 
@@ -177,6 +159,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DockControlBar(&toolBar);
 			if (!Global::pConfig->_toolbarOnVsts) ShowControlBar(&toolBar,FALSE,FALSE);
 			machine().SetEditWnd(this);
+			*_pActive=true;
 			SetTimer(449, 25, 0);
 			return 0;
 		}
@@ -193,8 +176,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				::SendMessage(*it, WM_CLOSE, 0, 0);
 				++it;
 			}
-			if (gui_)
-				gui_->BeforeDeleteDlg();
+			*_pActive=false;
 			CFrameWnd::OnClose();
 		}
 
@@ -224,7 +206,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (!bRepeat)
 					{
 						const int outnote = cmd.GetNote();
-						if ( machine().IsGenerator() || Global::pConfig->_notesToEffects)
+						if ( machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
 						{
 							Global::pInputHandler->PlayNote(outnote,127,true,&machine());
 						}
@@ -247,7 +229,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
 			if(outnote != -1) {
-				if(machine().IsGenerator() || Global::pConfig->_notesToEffects)
+				if(machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
 					Global::pInputHandler->StopNote(outnote, true, &machine());
 				else
 					Global::pInputHandler->StopNote(outnote, true);
@@ -718,9 +700,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), index, helpers::math::rounded(value * vst::AudioMaster::GetQuantization()));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, index, helpers::math::rounded(value * vst::quantization));
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), index, helpers::math::rounded(value * vst::AudioMaster::GetQuantization()));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, helpers::math::rounded(value * vst::quantization));
 				}
 				if(pParamGui)
 					pParamGui->UpdateNew(index, value);
