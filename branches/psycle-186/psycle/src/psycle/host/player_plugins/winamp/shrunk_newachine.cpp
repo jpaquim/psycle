@@ -1,4 +1,5 @@
 
+#include <packageneric/pre-compiled.private.hpp>
 #include <universalis/operating_system/paths.hpp>
 #include <direct.h>
 #include "shrunk_newmachine.hpp"
