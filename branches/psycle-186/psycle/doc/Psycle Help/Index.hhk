@@ -1,0 +1,713 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value=".psb files">
+		<param name="Name" value="Psycle Pattern Files (.psb)">
+		<param name="Local" value="FileFunc_psb.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="About Psycle">
+		<param name="Name" value="About Psycle">
+		<param name="Local" value="About.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Allow Notes to Effects">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm#sequence">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Amplitude/Filter Envelopes">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Arming Tracks">
+		<param name="Name" value="Recording in real-time">
+		<param name="Local" value="PatternEd_Record.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Audio buffer">
+		<param name="Name" value="Input/Output Configuration">
+		<param name="Local" value="Config_IO.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Audio Settings">
+		<param name="Name" value="Input/Output Configuration">
+		<param name="Local" value="Config_IO.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Autosave">
+		<param name="Name" value="Keyboard and Misc. Configuration">
+		<param name="Local" value="Config_Keyboard.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="AutoStop Machines">
+		<param name="Name" value="Configuration">
+		<param name="Local" value="Configuration.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Bars">
+		<param name="Name" value="Bars">
+		<param name="Local" value="Bars.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Bypass">
+		<param name="Name" value="Machine Types">
+		<param name="Local" value="Machine_Types.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Changes, Recent">
+		<param name="Name" value="Recent Changes">
+		<param name="Local" value="About_Changes.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Configuration">
+		<param name="Name" value="Configuration">
+		<param name="Local" value="Configuration.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Connecting Machines">
+		<param name="Name" value="Wires and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CPU Monitor">
+		<param name="Name" value="CPU Monitor">
+		<param name="Local" value="Mon_CPU.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Credits">
+		<param name="Name" value="Credits">
+		<param name="Local" value="Credits.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Directories, configuration">
+		<param name="Name" value="Directory Configuration">
+		<param name="Local" value="Config_Dirs.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Disk Record">
+		<param name="Name" value="Wave (.wav) Files">
+		<param name="Local" value="FileFunc_Render.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Dithering">
+		<param name="Name" value="Input/Output Configuration">
+		<param name="Local" value="Config_IO.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Dummy Plugin">
+		<param name="Name" value="The Dummy Plugin">
+		<param name="Local" value="Internal_Dummy.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Effects">
+		<param name="Name" value="Effects">
+		<param name="Local" value="Machine_Types.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="F_xx">
+		<param name="Name" value="Global Commands">
+		<param name="Local" value="PatternEd_Global.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Folders, configuration">
+		<param name="Name" value="Directory Configuration">
+		<param name="Local" value="Config_Dirs.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Frequenty Asked Questions">
+		<param name="Name" value="Frequenty Asked Questions">
+		<param name="Local" value="FAQ.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="FT2 Behaviour">
+		<param name="Name" value="Keyboard and Misc. Configuration">
+		<param name="Local" value="Config_Keyboard.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Gear Rack">
+		<param name="Name" value="The Gear Rack">
+		<param name="Local" value="Machine_GearRack.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Generators">
+		<param name="Name" value="Machine Types">
+		<param name="Local" value="Machine_Types.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="History of Psycle">
+		<param name="Name" value="Psycle History">
+		<param name="Local" value="About_History.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Import Module">
+		<param name="Name" value="Psycle Files">
+		<param name="Local" value="FileFunc_New.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instrument Editor">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments">
+		<param name="Name" value="Instruments">
+		<param name="Local" value="Sampler_Instruments.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments, editing">
+		<param name="Name" value="Instruments">
+		<param name="Local" value="Sampler_Instruments.htm#settings">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments, Filter">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments, loading">
+		<param name="Name" value="Instruments">
+		<param name="Local" value="Sampler_Instruments.htm#settings">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments, looping">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		<param name="Name" value="The Wave Editor">
+		<param name="Local" value="Sampler_WaveEditor.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments, saving">
+		<param name="Name" value="Instruments">
+		<param name="Local" value="Sampler_Instruments.htm#settings">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments, tuning">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments, using in patterns">
+		<param name="Name" value="Using the Sampler in Patterns">
+		<param name="Local" value="Sampler_Using.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Instruments, volume envelope">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Internal Machines">
+		<param name="Name" value="Internal Machines">
+		<param name="Local" value="InternalMachines.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Keyboard Commands">
+		<param name="Name" value="Keyboard Commands">
+		<param name="Local" value="Keys.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Keyboard Commands, configuring">
+		<param name="Name" value="Keyboard and Misc. Configuration">
+		<param name="Local" value="Config_Keyboard.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Knobs">
+		<param name="Name" value="Machine Parameters">
+		<param name="Local" value="Machine_Parameters.htm">
+		<param name="Name" value="Skinning Psycle">
+		<param name="Local" value="Config_Skins.htm#knobs">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Latency">
+		<param name="Name" value="Input/Output Configuration">
+		<param name="Local" value="Config_IO.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Lines per beat (LPB)">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Loop Playback">
+		<param name="Name" value="Configuration">
+		<param name="Local" value="Configuration.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machine Bar">
+		<param name="Name" value="Machine Bar">
+		<param name="Local" value="Bars_Machine.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machine View">
+		<param name="Name" value="Machine View">
+		<param name="Local" value="MachineView.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machines, adding">
+		<param name="Name" value="Add, Edit and Remove Machines">
+		<param name="Local" value="Machine_Add.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machines, cloning">
+		<param name="Name" value="Machine Properties">
+		<param name="Local" value="Machine_Properties.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machines, connecting">
+		<param name="Name" value="Wires and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machines, editing">
+		<param name="Name" value="Add, Edit and Remove Machines">
+		<param name="Local" value="Machine_Add.htm">
+		<param name="Name" value="Machine Parameters">
+		<param name="Local" value="Machine_Parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machines, Master">
+		<param name="Name" value="The Master Machine and Minimixer">
+		<param name="Local" value="Machine_Master.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machines, parameters">
+		<param name="Name" value="Machine Parameters">
+		<param name="Local" value="Machine_Parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machines, presets">
+		<param name="Name" value="Machine Parameters">
+		<param name="Local" value="Machine_Parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Machines, removing">
+		<param name="Name" value="Add, Edit and Remove Machines">
+		<param name="Local" value="Machine_Add.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Master Machine">
+		<param name="Name" value="Master Machine and Minimixer">
+		<param name="Local" value="Machine_Master.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="mcm">
+		<param name="Name" value="mcm Command">
+		<param name="Local" value="PatternEd_command.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Menu Commands">
+		<param name="Name" value="Menu Commands">
+		<param name="Local" value="MenuTree.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="MIDI Controllers">
+		<param name="Name" value="MIDI Configuration">
+		<param name="Local" value="Config_MIDI.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="MIDI Implementation Chart">
+		<param name="Name" value="MIDI Implementation Chart">
+		<param name="Local" value="MIDI_Chart.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="MIDI in Psycle">
+		<param name="Name" value="MIDI in Psycle">
+		<param name="Local" value="MIDI.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="MIDI Settings">
+		<param name="Name" value="MIDI Configuration">
+		<param name="Local" value="Config_MIDI.htm">
+		<param name="Name" value="Input/Output Configuration">
+		<param name="Local" value="Config_IO.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="MIDI, mapping">
+		<param name="Name" value="MIDI Configuration">
+		<param name="Local" value="Config_MIDI.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Move Cursor When Paste">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm#sequence">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Multichannel Audition">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm#sequence">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Mute">
+		<param name="Name" value="Machine Types">
+		<param name="Local" value="Machine_Types.htm">
+		<param name="Name" value="How the Pattern Editor Works">
+		<param name="Local" value="PatternEd_Main.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="New">
+		<param name="Name" value="Psycle Files">
+		<param name="Local" value="FileFunc_New.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="New Note Actions">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Note Duplicator">
+		<param name="Name" value="The Note Duplicator">
+		<param name="Local" value="Internal_Duplicator.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Notes">
+		<param name="Name" value="Entering Notes">
+		<param name="Local" value="PatternEd_Notes.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Octave, current">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Open">
+		<param name="Name" value="Psycle Files">
+		<param name="Local" value="FileFunc_New.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Open">
+		<param name="Name" value="Open a Psycle File">
+		<param name="Local" value="FileFunc_New.htm">
+		<param name="Name" value="Import a Psycle Pattern">
+		<param name="Local" value="FileFunc_psb.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Oscilloscope">
+		<param name="Name" value="Wires and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm#analyser">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Panning">
+		<param name="Name" value="Machine Types">
+		<param name="Local" value="Machine_Types.htm">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Pattern Editor">
+		<param name="Name" value="The Pattern Editor">
+		<param name="Local" value="PatternEditor.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Pattern Step">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm#machine">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, entering notes">
+		<param name="Name" value="Entering Notes">
+		<param name="Local" value="PatternEd_Notes.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, functions">
+		<param name="Name" value="Pattern Functions">
+		<param name="Local" value="PatternEd_Functions.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, global commands">
+		<param name="Name" value="Global Commands">
+		<param name="Local" value="PatternEd_Global.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, how they work">
+		<param name="Name" value="How the Pattern Editor Works">
+		<param name="Local" value="PatternEd_Main.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, mcm command">
+		<param name="Name" value="mcm Command">
+		<param name="Local" value="PatternEd_command.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, naming">
+		<param name="Name" value="Pattern Properties">
+		<param name="Local" value="PatternEd_Properties.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, properties">
+		<param name="Name" value="Pattern Properties">
+		<param name="Local" value="PatternEd_Properties.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, recording">
+		<param name="Name" value="Recording in real-time">
+		<param name="Local" value="PatternEd_Record.htm">
+		<param name="Name" value="How the Pattern Editor Works">
+		<param name="Local" value="PatternEd_Main.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, settings">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Patterns, tweaking">
+		<param name="Name" value="Tweaking Machines (Parameter Automation)">
+		<param name="Local" value="PatternEd_Tweak.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Play">
+		<param name="Name" value="Playback">
+		<param name="Local" value="Playback.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Play From Start">
+		<param name="Name" value="Playback">
+		<param name="Local" value="Playback.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Play Selected Patterns">
+		<param name="Name" value="Playback">
+		<param name="Local" value="Playback.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Presets">
+		<param name="Name" value="Machine Parameters">
+		<param name="Local" value="Machine_Parameters.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Record NoteOffs">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm#sequence">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Record Tweaks">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm#sequence">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Recording in real-time">
+		<param name="Name" value="Recording in real-time">
+		<param name="Local" value="PatternEd_Record.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Render as Wav">
+		<param name="Name" value="Wave (.wav) Files">
+		<param name="Local" value="FileFunc_Render.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Revert to Saved">
+		<param name="Name" value="Psycle Files">
+		<param name="Local" value="FileFunc_New.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Sampler">
+		<param name="Name" value="The Internal Sampler">
+		<param name="Local" value="Sampler.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Sampler, commands">
+		<param name="Name" value="Using the Sampler in Patterns">
+		<param name="Local" value="Sampler_Using.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Sampler, interpolation method">
+		<param name="Name" value="Sampler Properties">
+		<param name="Local" value="Sampler_Properties.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Sampler, properties">
+		<param name="Name" value="Sampler Properties">
+		<param name="Local" value="Sampler_Properties.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Save">
+		<param name="Name" value="Psycle Files">
+		<param name="Local" value="FileFunc_New.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Save">
+		<param name="Name" value="Save">
+		<param name="Local" value="FileFunc_New.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Save As...">
+		<param name="Name" value="Psycle Files">
+		<param name="Local" value="FileFunc_New.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Scope Mode">
+		<param name="Name" value="Wires and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm#analyser">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Sequencer Bar">
+		<param name="Name" value="Sequencer Bar">
+		<param name="Local" value="Bars_Sequencer.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Signal Analyser">
+		<param name="Name" value="Wires and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm#analyser">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Skinning Psycle">
+		<param name="Name" value="Skinning Psycle">
+		<param name="Local" value="Config_Skins.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Solo">
+		<param name="Name" value="How the Pattern Editor Works">
+		<param name="Local" value="PatternEd_Main.htm">
+		<param name="Name" value="Machine Types">
+		<param name="Local" value="Machine_Types.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Song Bar">
+		<param name="Name" value="Song Bar">
+		<param name="Local" value="Bars_SongBar.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Song Properties">
+		<param name="Name" value="Psycle Files">
+		<param name="Local" value="FileFunc_New.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Sound Input/Output">
+		<param name="Name" value="Input/Output Configuration">
+		<param name="Local" value="Config_IO.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Specifications">
+		<param name="Name" value="Psycle Specifications">
+		<param name="Local" value="About_Specs.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Spectrum Analyser">
+		<param name="Name" value="Wires and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm#analyser">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Speed, changing">
+		<param name="Name" value="Pattern Setting">
+		<param name="Local" value="PatternEd_Settings.htm">
+		<param name="Name" value="Global commands">
+		<param name="Local" value="PatternEd_Global.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Status Bar">
+		<param name="Name" value="Status Bar">
+		<param name="Local" value="Bars_Status.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Stereo Phase">
+		<param name="Name" value="Wires and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm#analyser">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Stop">
+		<param name="Name" value="Playback">
+		<param name="Local" value="Playback.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="System Requirements">
+		<param name="Name" value="System Requirements">
+		<param name="Local" value="About_Sys.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Tempo">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Themes">
+		<param name="Name" value="Visual Configuration">
+		<param name="Local" value="Config_Visual.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Tips &amp; Tricks">
+		<param name="Name" value="Tips & Tricks">
+		<param name="Local" value="TipsandTricks.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Toolbar">
+		<param name="Name" value="Toolbar">
+		<param name="Local" value="Bars_Toolbar.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Track">
+		<param name="Name" value="How the Pattern Editor Works">
+		<param name="Local" value="PatternEd_Main.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Track header">
+		<param name="Name" value="Skinning Psycle">
+		<param name="Local" value="Config_Skins.htm#headers">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Tracks, number of">
+		<param name="Name" value="Pattern Settings">
+		<param name="Local" value="PatternEd_Settings.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Triangles">
+		<param name="Name" value="Wire Volumes and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Tutorial">
+		<param name="Name" value="Tutorial">
+		<param name="Local" value="Tutorial.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Tweaking">
+		<param name="Name" value="Tweaking Machines (Parameter Automation)">
+		<param name="Local" value="PatternEd_Tweak.htm">
+		<param name="Name" value="Tweaking Machines (Tutorial)">
+		<param name="Local" value="Tutorial_Tweaking.htm">
+		<param name="Name" value="Tweaking the Internal Sampler">
+		<param name="Local" value="Sampler_Using.htm">
+		<param name="Name" value="Global Commands (global parameter automation)">
+		<param name="Local" value="PatternEd_Global.htm">
+		<param name="Name" value="mcm Command">
+		<param name="Local" value="PatternEd_command.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="twk/tws">
+		<param name="Name" value="Tweaking Machines (Parameter Automation)">
+		<param name="Local" value="PatternEd_Tweak.htm">
+		<param name="Name" value="Tweaking Machines (Tutorial)">
+		<param name="Local" value="Tutorial_Tweaking.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Volume">
+		<param name="Name" value="The Master Machine and Minimixer">
+		<param name="Local" value="Machine_Master.htm">
+		<param name="Name" value="The Instrument Editor">
+		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		<param name="Name" value="Wires and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="VU Meter">
+		<param name="Name" value="The Song Bar">
+		<param name="Local" value="Bars_SongBar.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Wave Editor">
+		<param name="Name" value="The Wave Editor">
+		<param name="Local" value="Sampler_WaveEditor.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Wires">
+		<param name="Name" value="Wire and the Signal Analyser">
+		<param name="Local" value="Machine_Wires.htm">
+		</OBJECT>
+</UL>
+</BODY></HTML>

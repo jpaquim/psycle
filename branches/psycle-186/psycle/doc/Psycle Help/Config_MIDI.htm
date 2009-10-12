@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="Config_IO.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="Config_Skins.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+<p class=head2>MIDI Controllers</p>
+<p class=under>(Configuration > Settings... >>MIDI Controllers)</p>
+<center>
+<img src="config_MIDI.png" width="487" height="158" border="0"></center><P>
+</center>
+This is where you can map external (or virtual) MIDI controllers to control certain parameters.  Make sure that your device is selected as the <a href="Config_IO.htm">MIDI input device</a>.  <P>
+This window allows you to map the MIDI velocity (volume), the pitch wheel and MIDI Control Codes to various parameters.  If an external sequencer is being used, the MIDI channel of the signal will determine the machine it plays on (e.g. if information is sent on MIDI Channel 15, it will act on machine number 0E).  If a MIDI keyboard (or similar) is being used, the MIDI commands will act on the currently selected machine.  <P>
+To map a command to a parameter, type its number in the leftmost box (this is the MIDI CC number - read your synthesiser's manual for more details).  Then, select the function you want to use, and specify the minimum and maximum values of the function (this means that your controller's input will be scaled between the two values).  They behave as follows:<P>
+
+<table border="0" bordercolor="0" cellspacing="0" cellpadding="5">
+<Col width=120>
+<tr valign="top"><td><b>Function</b></td><td><b>Translates the MIDI CC into:</b></td>
+<tr valign="top"><td><code>cmd</code></td><td>Internal machine commands - read your plugin's manual for details.</td>
+<tr valign="top"><td><code>twk/tws</code></td><td>Tweak/Tweak Smooth Smooth - the value to the right of the drop-down box is the parameter number.</td>
+<tr valign="top"><td><code>ins</code></td><td>mcm command that changes the sample selected (if the machine is the Internal Sampler).</td>
+<tr valign="top"><td><code>mcm</code></td><td>Raw mcm command.</td>
+</table>
+<P>
+Note:  By selecting "Record Raw MIDI as MCM", the settings above are overridden and all MIDI input is recorded using the mcm commmand.
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="Config_IO.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="Config_Skins.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+</body>
+</html>

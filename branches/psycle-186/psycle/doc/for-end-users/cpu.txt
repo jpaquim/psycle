@@ -1,0 +1,25 @@
+There are two separate packs for two types of CPU's
+.
+Each of them contains the psycle host application, and all the open source native plugins, targeted to run best on a particular type of CPU.
+
+The packages are:
+
+	- SSE2, for "recent" AMD and Intel CPUs:
+		- SSE2:
+			AMD: Athlon 64, Athlon FX.
+			Intel: Pentium 4, Celeron Pentium 4, Pentium M, Centrino and newer
+
+	- SSE, for "old" Intel CPUs:
+		- SSE:
+			AMD: Athlon XP, late Duron.
+			Intel: Pentium III and Celeron Pentium III.
+
+You should copy everything contained in the package that matches your cpu into the psycle directory.
+Make sure you don't have duplicates of the same plugins:
+	the packs from psycledelics puts the plugins into subdirs of the plugins dir,
+	and this pack does have them all at the top of the plugins dir.
+	(This will be the case from now on)
+
+Currently, we don't distribute builds for older CPUs, Intel previous to Pentium III, AMD K5, K6, some earlier Athlon and Duron chips, 5x86, 6x86, etc.
+
+At the time of this writing, we do not have 64bit builds. There are parts of the source code that might not be fully adapted to 64bits, and we might generate test builds on a later date.

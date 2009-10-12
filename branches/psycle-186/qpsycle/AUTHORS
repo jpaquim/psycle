@@ -1,0 +1,31 @@
+qpsycle contributors through the ages
+-------------------------------------
+
+qpsycle is based on all the work contained in the Psycle
+codebase.  See psycle family history for all the great guys
+that contribute(d) to that.  This file contains contributions 
+related to qpsycle.
+
+Please add your name if you did/do any dev...
+
+Fairly recently active developers:
+----------------------------------
+
+                              (sf username)
+Josep Ma. Antol�n Segura       jaz001            Psycle 1.9, parts of xpsycle, psycle-core
+Johan Boul�                    johan-boule       Psycle 1.9, qpsycle (build system), psycle-core
+Magnus Jonsson                 zealmange         qpsycle, psycle-core.
+Neil Mather                    nmather           xpsycle->qpsycle (ngrs->Qt).  qpsycle misc.
+d.w. aley                      dw_aley           Psycle 1.9, parts of xpsycle, qpsycle.
+Mattias C.                     gravity0          qpsycle GUI, qpsycle windows, qpsycle DirectMidi driver.
+  
+Less recently active developers / contributors:
+-----------------------------------------------
+
+Stefan N.                      natti__           Initial xpsycle port of the original psycle 1.8/1.9 code. event-based audio core.
+Mauro Ottaviani                ranamauro         qpsycle directsound support.
+Simon                          div0              precompiled headers.
+Jaakko Pero                    erodix            automaker improvements
+
+
+See the SVN logs for a more detailed list of who did what.
