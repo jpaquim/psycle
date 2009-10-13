@@ -1269,6 +1269,8 @@ namespace psycle
 							name = name_;
 							author = author_;
 							comments = comments_;
+							//bugfix. There were songs with incorrect size.
+							size= pFile->GetPos() - begins;
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1410,6 +1412,16 @@ namespace psycle
 								// we had better load it
 								DestroyMachine(index);
 								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
+								//Bugfix.
+								if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
+									&& ((vst::plugin*)_pMachine[index])->ProgramIsChunk() == false) {
+									if (fullopen) {
+										size = pFile->GetPos() - begins;
+									} else if ((version&0xFF) == 0) {
+										size = (pFile->GetPos() - begins) 
+											 + sizeof(unsigned char) + 2*sizeof(int) + _pMachine[index]->GetNumParams()*sizeof(float);
+									}
+								}
 							}
 						}
 						pFile->Seek(begins + size);
