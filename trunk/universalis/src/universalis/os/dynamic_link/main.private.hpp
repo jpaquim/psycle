@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2007 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2000-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\file
 
@@ -20,7 +20,7 @@
 			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
-					s << "library attached to process: " << UNIVERSALIS__OS__LIBRARY__NAME;
+					s << "library attached to process: " << UNIVERSALIS__META__MODULE__NAME;
 					loggers::information()(s.str());
 				}
 			#endif
@@ -32,7 +32,7 @@
 			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
-					s << "library detached from process: " << UNIVERSALIS__OS__LIBRARY__NAME;
+					s << "library detached from process: " << UNIVERSALIS__META__MODULE__NAME;
 					loggers::information()(s.str());
 				}
 			#endif
@@ -47,7 +47,7 @@
 		if(loggers::exception()()) {
 			s << "library: ";
 			{
-				char file_name[DIVERSALIS__OS__MICROSOFT__MAX_PATH];
+				char file_name[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
 				::GetModuleFileNameA(module, file_name, sizeof file_name);
 				s << file_name << ": ";
 			}

@@ -42,7 +42,8 @@ class root : public Gtk::Window {
 		graph       & graph_;
 		
 	private:
-		Gtk::Frame hello_frame_, graph_frame_;
+		bool playing_;
+		Gtk::Frame sched_frame_, graph_frame_;
 		Gtk::VBox v_box_;
 		Gtk::HBox h_box_;
 };

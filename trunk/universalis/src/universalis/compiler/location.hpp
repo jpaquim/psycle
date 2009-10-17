@@ -1,8 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface universalis::os::location
-
 #ifndef UNIVERSALIS__COMPILER__LOCATION__INCLUDED
 #define UNIVERSALIS__COMPILER__LOCATION__INCLUDED
 #pragma once
@@ -13,9 +12,6 @@
 	// We can use rtti support on other compilers.
 	#include <universalis/compiler/typenameof.hpp>
 	#include <boost/current_function.hpp>
-#endif
-#if defined PACKAGENERIC
-	#include <packageneric.private.hpp>
 #endif
 #include <iostream>
 #include <sstream>
@@ -73,14 +69,14 @@ class location {
 // implementation details
 
 #if \
-	defined PACKAGENERIC__MODULE__NAME && \
-	defined PACKAGENERIC__MODULE__VERSION && \
-	defined PACKAGENERIC__PACKAGE__VERSION
+	defined UNIVERSALIS__META__MODULE__NAME && \
+	defined UNIVERSALIS__META__MODULE__VERSION && \
+	defined UNIVERSALIS__META__PACKAGE__VERSION
 	///\internal
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE \
-		PACKAGENERIC__MODULE__NAME " " \
-		PACKAGENERIC__MODULE__VERSION  " " \
-		PACKAGENERIC__PACKAGE__VERSION
+		UNIVERSALIS__META__MODULE__NAME " " \
+		UNIVERSALIS__META__MODULE__VERSION  " " \
+		UNIVERSALIS__META__PACKAGE__VERSION
 #else
 	///\internal
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unkown module)"

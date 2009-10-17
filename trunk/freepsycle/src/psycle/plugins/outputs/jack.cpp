@@ -44,8 +44,8 @@ void jack::do_open() throw(engine::exception) {
 	// open a client
 	char const * server_name(0);
 	std::string client_name(
-		#if defined PACKAGENERIC__MODULE__NAME
-			PACKAGENERIC__MODULE__NAME
+		#if defined UNIVERSALIS__META__MODULE__NAME
+			UNIVERSALIS__META__MODULE__NAME
 		#else
 			"psycle"
 		#endif

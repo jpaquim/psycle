@@ -10,10 +10,11 @@ namespace psycle { namespace front_ends { namespace gui {
 
 root::root(underlying::graph & graph)
 :
-	button_("get a hello message from psycle's engine"),
-	label_(/*"message from psycle's engine"*/),
+	playing_(),
+	button_("play"),
+	label_("stopped"),
 	graph_(gui::graph::create_on_heap(graph, resolver())),
-	hello_frame_("hello"),
+	sched_frame_("scheduler"),
 	graph_frame_(graph.name())
 {
 	set_size_request(1000, 700);
@@ -21,10 +22,10 @@ root::root(underlying::graph & graph)
 	set_border_width(4);
 
 	button().signal_clicked().connect(sigc::mem_fun(*this, &root::on_button_clicked));
-	//h_box_.pack_start(button(), Gtk::PACK_SHRINK);
-	//h_box_.pack_start(label(), Gtk::PACK_EXPAND_PADDING, 4);
-	//hello_frame_.add(h_box_);
-	//v_box_.pack_start(hello_frame_, Gtk::PACK_SHRINK);
+	h_box_.pack_start(button(), Gtk::PACK_SHRINK);
+	h_box_.pack_start(label(), Gtk::PACK_EXPAND_PADDING, 4);
+	sched_frame_.add(h_box_);
+	v_box_.pack_start(sched_frame_, Gtk::PACK_SHRINK);
 
 	graph_frame_.add(graph_instance());
 	v_box_.pack_start(graph_frame_);
@@ -39,7 +40,8 @@ root::~root() {
 }
 
 void root::on_button_clicked() {
-	label().set_text("dummy message");
+	playing_ = !playing_;
+	label().set_text(playing_ ? "playing" : "stopped");
 }
 
 }}}

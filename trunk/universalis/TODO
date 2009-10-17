@@ -7,11 +7,5 @@
 	and/or why they are needed.
 	-- bohan
 	
-*	microsoft:
-	gthread-2.0.lib
-	DIVERSALIS__PACKAGENERIC__CONFIGURATION__OS__VERSION
-	universalis::os::logger/terminal sync with mspsyclemfc/legacy/os/logger.{c,h}pp
-	-- bohan (sorry, it's cryptic)
-
 *	have a look at gnulib
 	-- bohan
