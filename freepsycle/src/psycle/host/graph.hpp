@@ -9,7 +9,7 @@
 #include <universalis/compiler/cast.hpp>
 #include <universalis/compiler/numeric.hpp>
 #include <boost/signal.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__HOST__GRAPH
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__HOST
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host {
 

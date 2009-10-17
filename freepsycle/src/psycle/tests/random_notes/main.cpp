@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\implementation psycle::front_ends::text::main
 #include <psycle/detail/project.private.hpp>
@@ -151,13 +151,14 @@ void stuff() {
 				host::schedulers::single_threaded::scheduler scheduler(graph);
 			#endif
 				
-			std::seconds const seconds(60);
+			if(loggers::information()()) loggers::information()("generating input ...");
+			std::seconds const seconds(10);
 			{
-				unsigned int const notes(10000);
+				unsigned int const notes(100000);
 				engine::real beat(0);
-				engine::real duration(0.1 / beats_per_second);
-				float slowdown(0.03);
-				float f1(200), f2(400), f3(800);
+				engine::real duration(0.00001 / beats_per_second);
+				float slowdown(0.001);
+				float f1(100), f2(400), f3(1000);
 				float ratio(1.1);
 				for(unsigned int note(0); note < notes; ++note) {
 					//std::clog << beat << ' ' << f1 << ' ' << f2 << ' ' << f3 << '\n';
@@ -187,11 +188,12 @@ void stuff() {
 					beat += duration;
 					duration += duration * slowdown;
 					if(
-						duration > 0.25  / beats_per_second ||
-						duration < 0.001 / beats_per_second
+						duration > 0.1  / beats_per_second ||
+						duration < 0.00001 / beats_per_second
 					) slowdown = -slowdown;
 				}
 			}
+			if(loggers::information()()) loggers::information()("generating input ... done");
 			if(loggers::information()()) {
 				std::ostringstream s;
 				s << "will end scheduler thread in " << seconds.get_count() << " seconds ...";
