@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2007 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2000-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\file
 
@@ -7,7 +7,6 @@
 #define UNIVERSALIS__OS__DYNAMIC_LINK__MAIN__INCLUDED
 #pragma once
 
-#include PACKAGENERIC
 #include <universalis/os/loggers.hpp>
 
 #if defined DIVERSALIS__COMPILER__GNU
@@ -17,7 +16,7 @@
 			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
-					s << "module attached to process: " << PACKAGENERIC__MODULE__NAME;
+					s << "module attached to process: " << UNIVERSALIS__META__MODULE__NAME;
 					loggers::information()(s.str());
 				}
 			#endif
@@ -28,7 +27,7 @@
 			#if !UNIVERSALIS__SOURCE
 				if(loggers::information()()) {
 					std::ostringstream s;
-					s << "module detached from process: " << PACKAGENERIC__MODULE__NAME;
+					s << "module detached from process: " << UNIVERSALIS__META__MODULE__NAME;
 					loggers::information()(s.str());
 				}
 			#endif
@@ -43,7 +42,7 @@
 		if(loggers::exception()()) {
 			s << "module: ";
 			{
-				char file_name[DIVERSALIS__OS__MICROSOFT__MAX_PATH];
+				char file_name[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
 				::GetModuleFileNameA(module, file_name, sizeof file_name);
 				s << file_name << ": ";
 			}

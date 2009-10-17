@@ -18,8 +18,8 @@ namespace {
 				#else
 					///\todo use binreloc instead
 					return boost::filesystem::path(".") /
-						#if defined PACKAGENERIC__MODULE__NAME
-							PACKAGENERIC__MODULE__NAME;
+						#if defined UNIVERSALIS__META__MODULE__NAME
+							UNIVERSALIS__META__MODULE__NAME;
 						#else
 							"unknown-module";
 						#endif
@@ -39,8 +39,8 @@ boost::filesystem::path const & bin() {
 boost::filesystem::path const & lib() {
 	boost::filesystem::path const static once(
 		bin()
-		#if defined PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_LIB
-			/ PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_LIB
+		#if defined UNIVERSALIS__OS__PATH__BIN_TO_LIB
+			/ UNIVERSALIS__OS__PATH__BIN_TO_LIB
 		#endif
 	);
 	return once;
@@ -49,8 +49,8 @@ boost::filesystem::path const & lib() {
 boost::filesystem::path const & share() {
 	boost::filesystem::path const static once(
 		bin() /
-		#if defined PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_SHARE
-			PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_SHARE
+		#if defined UNIVERSALIS__OS__PATH__BIN_TO_SHARE
+			UNIVERSALIS__OS__PATH__BIN_TO_SHARE
 		#else
 			"../share"
 		#endif
@@ -61,8 +61,8 @@ boost::filesystem::path const & share() {
 boost::filesystem::path const & var() {
 	boost::filesystem::path const static once(
 		bin() /
-		#if defined PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_VAR
-			PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_VAR
+		#if defined UNIVERSALIS__OS__PATH__BIN_TO_VAR
+			UNIVERSALIS__OS__PATH__BIN_TO_VAR
 		#else
 			"../var"
 		#endif
@@ -73,8 +73,8 @@ boost::filesystem::path const & var() {
 boost::filesystem::path const & etc() {
 	boost::filesystem::path const static once(
 		bin() /
-		#if defined PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_ETC
-			PACKAGENERIC__CONFIGURATION__INSTALL_PATH__BIN_TO_ETC
+		#if defined UNIVERSALIS__OS__PATH__BIN_TO_ETC
+			UNIVERSALIS__OS__PATH__BIN_TO_ETC
 		#else
 			"../etc"
 		#endif
@@ -110,8 +110,8 @@ boost::filesystem::path const & home() {
 namespace package {
 	const std::string & name() {
 		static std::string once(
-			#if defined PACKAGENERIC__PACKAGE__NAME
-				PACKAGENERIC__PACKAGE__NAME
+			#if defined UNIVERSALIS__META__PACKAGE__NAME
+				UNIVERSALIS__META__PACKAGE__NAME
 			#else
 				"unknown-package"
 			#endif
@@ -122,14 +122,16 @@ namespace package {
 	namespace version {
 		std::string const & string() {
 			static const std::string once(
-				#if defined PACKAGENERIC__PACKAGE__VERSION
-					PACKAGENERIC__PACKAGE__VERSION
+				#if defined UNIVERSALIS__META__PACKAGE__VERSION
+					UNIVERSALIS__META__PACKAGE__VERSION
 				#else
 					"unknown-version"
 				#endif
 				" "
-				#if defined PACKAGENERIC__CONFIGURATION__COMPILER__HOST
-					PACKAGENERIC__CONFIGURATION__COMPILER__HOST
+				#if defined DIVERSALIS__COMPILER__GNU
+					"gcc"
+				#elif defined DIVERSALIS__COMPILER__MICROSOFT
+					"msvc"
 				#else
 					"unknown-compiler"
 				#endif
@@ -141,24 +143,24 @@ namespace package {
 		}
 
 		unsigned int major_number() throw() {
-			#if defined PACKAGENERIC__PACKAGE__VERSION__MAJOR
-				return PACKAGENERIC__PACKAGE__VERSION__MAJOR;
+			#if defined UNIVERSALIS__META__PACKAGE__VERSION__MAJOR
+				return UNIVERSALIS__META__PACKAGE__VERSION__MAJOR;
 			#else
 				return 0;
 			#endif
 		}
 
 		unsigned int minor_number() throw() {
-			#if defined PACKAGENERIC__PACKAGE__VERSION__MINOR
-				return PACKAGENERIC__PACKAGE__VERSION__MINOR;
+			#if defined UNIVERSALIS__META__PACKAGE__VERSION__MINOR
+				return UNIVERSALIS__META__PACKAGE__VERSION__MINOR;
 			#else
 				return 0;
 			#endif
 		}
 
 		unsigned int patch_number() throw() {
-			#if defined PACKAGENERIC__PACKAGE__VERSION__PATCH
-				return PACKAGENERIC__PACKAGE__VERSION__PATCH;
+			#if defined UNIVERSALIS__META__PACKAGE__VERSION__PATCH
+				return UNIVERSALIS__META__PACKAGE__VERSION__PATCH;
 			#else
 				return 0;
 			#endif

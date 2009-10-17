@@ -16,6 +16,9 @@
 
 	///\name meta-information about the compiler's version
 	///\{
+		/// compiler name
+		#define DIVERSALIS__COMPILER__NAME <string>
+
 		/// compiler version, as a string.
 		#define DIVERSALIS__COMPILER__VERSION__STRING <string>
 
@@ -133,6 +136,7 @@
 
 #if defined DIVERSALIS__COMPILER__DOXYGEN
 	#define DIVERSALIS__COMPILER
+	#define DIVERSALIS__COMPILER__NAME "doxygen"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#if !defined __cplusplus
 		#define __cplusplus
@@ -143,6 +147,7 @@
 
 #elif defined DIVERSALIS__COMPILER__ECLIPSE
 	#define DIVERSALIS__COMPILER
+	#define DIVERSALIS__COMPILER__NAME "eclipse"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#if !defined __cplusplus
 		#define __cplusplus
@@ -154,6 +159,7 @@
 #elif defined __GNUC__
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__GNU
+	#define DIVERSALIS__COMPILER__NAME "gcc"
 	#if (!defined __GNUG__ || !defined __cplusplus) && !defined DIVERSALIS__COMPILER__RESOURCE
 		#if defined __GNUG__ || defined __cplusplus
 			#error "weird settings... we should have both __GNUG__ and __cplusplus"
@@ -186,6 +192,7 @@
 #elif defined __BORLAND__
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__BORLAND
+	#define DIVERSALIS__COMPILER__NAME "borland"
 	#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 	#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 
@@ -197,6 +204,7 @@
 	
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__MICROSOFT
+	#define DIVERSALIS__COMPILER__NAME "msvc"
 	
 	#define DIVERSALIS__COMPILER__VERSION _MSC_VER // first 2 components, e.g. 15.00.20706.01 -> 1500
 	#define DIVERSALIS__COMPILER__VERSION__MAJOR (_MSC_VER / 100)
@@ -240,6 +248,7 @@
 	
 	#if defined __INTEL_COMPILER
 		#define DIVERSALIS__COMPILER__INTEL
+		#define DIVERSALIS__COMPILER__NAME "intel"
 	#endif
 #endif
 
