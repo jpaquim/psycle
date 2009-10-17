@@ -108,8 +108,8 @@ boost::filesystem::path const & home() {
 }
 
 namespace package {
-	const std::string & name() {
-		static std::string once(
+	std::string const & name() {
+		std::string const static once(
 			#if defined UNIVERSALIS__META__PACKAGE__NAME
 				UNIVERSALIS__META__PACKAGE__NAME
 			#else
@@ -121,17 +121,20 @@ namespace package {
 	
 	namespace version {
 		std::string const & string() {
-			static const std::string once(
+			std::string const static once(
 				#if defined UNIVERSALIS__META__PACKAGE__VERSION
-					UNIVERSALIS__META__PACKAGE__VERSION
+					UNIVERSALIS__COMPILER__STRINGIZED(UNIVERSALIS__META__PACKAGE__VERSION)
 				#else
 					"unknown-version"
 				#endif
 				" "
-				#if defined DIVERSALIS__COMPILER__GNU
-					"gcc"
-				#elif defined DIVERSALIS__COMPILER__MICROSOFT
-					"msvc"
+				#if defined DIVERSALIS__COMPILER__NAME
+					DIVERSALIS__COMPILER__NAME
+					#if defined DIVERSALIS__COMPILER__VERSION__STRING
+						" " DIVERSALIS__COMPILER__VERSION__STRING
+					#elif defined DIVERSALIS__COMPILER__VERSION
+						" " UNIVERSALIS__COMPILER__STRINGIZED(DIVERSALIS__COMPILER__VERSION)
+					#endif
 				#else
 					"unknown-compiler"
 				#endif
