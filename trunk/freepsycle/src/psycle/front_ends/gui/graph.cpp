@@ -115,15 +115,22 @@ bool node::on_event_(GdkEvent * event) {
 	loggers::trace()("node::on_event");
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
+			loggers::trace()("node::on_event: enter");
+		}
+		break;
+		case GDK_LEAVE_NOTIFY: {
+			loggers::trace()("node::on_event: leave");
 		}
 		break;
 		case GDK_KEY_PRESS: {
+			loggers::trace()("node::on_event: key press");
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
+			loggers::trace()("node::on_event: button press");
 			switch(event->button.button) {
-				loggers::trace()("node::on_event: button press");
 				case 1: {
+					loggers::trace()("node::on_event: button press 1");
 				}
 				break;
 				case 2: {
@@ -133,6 +140,7 @@ bool node::on_event_(GdkEvent * event) {
 				}
 				break;
 				case 3: {
+					loggers::trace()("node::on_event: button press 3");
 				}
 				break;
 				default: ;
@@ -140,23 +148,22 @@ bool node::on_event_(GdkEvent * event) {
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
+			loggers::trace()("node::on_event: motion");
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
+			loggers::trace()("node::on_event: button release");
 			switch(event->button.button) {
 				default: ;
 			}
 		}
 		break;
 		case GDK_KEY_RELEASE: {
-		}
-		break;
-		case GDK_LEAVE_NOTIFY: {
+			loggers::trace()("node::on_event: key release");
 		}
 		break;
 		default: ;
 	}
-	//return Gnome::Canvas::Group::on_event(event);
 	loggers::trace()("node::on_event: false");
 	return false;
 }
@@ -196,38 +203,55 @@ void port::on_move(contraption & contraption) {
 
 bool port::on_event(GdkEvent * event) {
 	loggers::trace()("port::on_event");
-	//if(Gnome::Canvas::Group::on_event(event)) return true;
-	#if 0
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
+			loggers::trace()("port::on_event: enter");
+		}
+		break;
+		case GDK_LEAVE_NOTIFY: {
+			loggers::trace()("port::on_event: leave");
 		}
 		break;
 		case GDK_KEY_PRESS: {
+			loggers::trace()("port::on_event: key press");
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
+			loggers::trace()("port::on_event: button press");
 			switch(event->button.button) {
+				case 1: {
+					loggers::trace()("port::on_event: button press 1");
+				}
+				break;
+				case 2: {
+					loggers::trace()("port::on_event: button press 2");
+				}
+				break;
+				case 3: {
+					loggers::trace()("port::on_event: button press 3");
+				}
+				break;
+				default: ;
 			}
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
+			loggers::trace()("port::on_event: motion");
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
+			loggers::trace()("port::on_event: button release");
 			switch(event->button.button) {
 			}
 		}
 		break;
 		case GDK_KEY_RELEASE: {
-		}
-		break;
-		case GDK_LEAVE_NOTIFY: {
+			loggers::trace()("port::on_event: key release");
 		}
 		break;
 		default: ;
 	}
-	#endif
 	loggers::trace()("port::on_event: false");
 	return false;
 }
@@ -364,6 +388,10 @@ bool canvas::on_event(GdkEvent * event) {
 			loggers::trace()("canvas::on_event: enter");
 		}
 		break;
+		case GDK_LEAVE_NOTIFY: {
+			loggers::trace()("canvas::on_event: leave");
+		}
+		break;
 		case GDK_KEY_PRESS: {
 			loggers::trace()("canvas::on_event: key press");
 			#if 0
@@ -378,14 +406,17 @@ bool canvas::on_event(GdkEvent * event) {
 			loggers::trace()("canvas::on_event: button press");
 			switch(event->button.button) {
 				case 1: {
+					loggers::trace()("canvas::on_event: button press 1");
 				}
 				break;
 				case 2: {
+					loggers::trace()("canvas::on_event: button press 2");
 					set_scroll_region_from_bounds();
 					//return true;
 				}
 				break;
 				case 3: {
+					loggers::trace()("canvas::on_event: button press 3");
 					window_to_world(x, y, x_, y_);
 					menu_->popup(event->button.button, event->button.time);
 					return true;
@@ -448,10 +479,6 @@ bool canvas::on_event(GdkEvent * event) {
 				other = 0;
 			}
 			#endif
-		}
-		break;
-		case GDK_LEAVE_NOTIFY: {
-			loggers::trace()("canvas::on_event: leave");
 		}
 		break;
 		default: ;

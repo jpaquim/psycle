@@ -100,7 +100,6 @@ void contraption::dragging_stop(time const & time) {
 
 bool contraption::on_event_(GdkEvent * event) {
 	loggers::trace()("contraption::on_event");
-	//if(Gnome::Canvas::Group::on_event(event)) return true;
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
@@ -134,11 +133,13 @@ bool contraption::on_event_(GdkEvent * event) {
 			loggers::trace()("contraption::on_event: button press");
 			switch(event->button.button) {
 				case 1: {
+					loggers::trace()("contraption::on_event: button press 1");
 					dragging_start(x, y, event->button.time);
 					return true;
 				}
 				break;
 				case 2: {
+					loggers::trace()("contraption::on_event: button press 2");
 					if(event->button.state & GDK_SHIFT_MASK) {
 						//get_parent_group()->lower_to_bottom();
 						property_parent().get_value()->lower_to_bottom();
@@ -150,6 +151,7 @@ bool contraption::on_event_(GdkEvent * event) {
 				}
 				break;
 				case 3: {
+					loggers::trace()("contraption::on_event: button press 3");
 					if(event->button.state & GDK_SHIFT_MASK) {
 						property_parent().get_value()->raise_to_top();
 						//return true;
