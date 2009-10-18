@@ -99,11 +99,12 @@ void contraption::dragging_stop(time const & time) {
 }
 
 bool contraption::on_event_(GdkEvent * event) {
-std::clog << "contraption::on_event\n";
+	loggers::trace()("contraption::on_event");
 	if(Gnome::Canvas::Group::on_event(event)) return true;
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
+			loggers::trace()("contraption::on_event: enter");
 			rectangle().property_fill_color_rgba() = highlight_fill_color();
 			rectangle().property_outline_color_rgba() = highlight_outline_color();
 			signal_enter()(*this);
@@ -111,13 +112,15 @@ std::clog << "contraption::on_event\n";
 		}
 		break;
 		case GDK_KEY_PRESS: {
-			/*if(event->key.state & GDK_SHIFT_MASK)*/ {
+			if(event->key.state & GDK_SHIFT_MASK) {
+				loggers::trace()("contraption::on_event: key press shift");
 				signal_select()(*this);
 				//return true;
 			}
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
+			loggers::trace()("contraption::on_event: button press");
 			switch(event->button.button) {
 				case 1: {
 					dragging_start(x, y, event->button.time);
@@ -150,6 +153,7 @@ std::clog << "contraption::on_event\n";
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
+			loggers::trace()("contraption::on_event: motion");
 			if(dragging() && event->motion.state & GDK_BUTTON1_MASK) {
 				dragging(x, y);
 				return true;
@@ -157,6 +161,7 @@ std::clog << "contraption::on_event\n";
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
+			loggers::trace()("contraption::on_event: button release");
 			switch(event->button.button) {
 				case 1: {
 					if(dragging()) {
@@ -170,9 +175,11 @@ std::clog << "contraption::on_event\n";
 		}
 		break;
 		case GDK_KEY_RELEASE: {
+			loggers::trace()("contraption::on_event: key release");
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
+			loggers::trace()("contraption::on_event: leave");
 			if(!(event->crossing.state & GDK_BUTTON1_MASK)) {
 				rectangle().property_fill_color_rgba() = fill_color();
 				rectangle().property_outline_color_rgba() = outline_color();
@@ -183,7 +190,7 @@ std::clog << "contraption::on_event\n";
 		break;
 		default: ;
 	}
-std::clog << "contraption::on_event: false\n";
+	loggers::trace()("contraption::on_event: false");
 	return false;
 }
 }}}

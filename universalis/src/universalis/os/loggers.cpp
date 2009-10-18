@@ -6,6 +6,7 @@
 #include "loggers.hpp"
 #include <cstdlib>
 #include <algorithm> // for std::min
+#include <date_time>
 namespace universalis { namespace os {
 
 /**********************************************************************************************************/
@@ -86,9 +87,12 @@ void stream_logger::do_log(int const level, std::string const & string) throw() 
 	int const static levels [] = {'T', 'I', 'W', 'E', 'C'};
 	int const static colors [] = {0, 2, 6, 1, 5, 3, 4, 7};
 	char const level_char(levels[std::min(static_cast<std::size_t>(level), sizeof levels)]);
+	std::utc_time const time = std::hiresolution_clock<std::utc_time>::universal_time();
+	std::nanoseconds::tick_type const time_ns = time.nanoseconds_since_epoch().get_count();
 	try {
-		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << "mlog: " << level_char << ": \033[0m" << string << '\n';
-		else ostream() << "log: " << level_char << ": " << string << '\n';
+		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << "mlog: " << level_char << ":\033[0m ";
+		else ostream() << "log: " << level_char << ": ";
+		ostream() << time_ns << ": " << string << '\n';
 	} catch(...) {
 		// oh dear!
 		// report the error to std::cerr ...
