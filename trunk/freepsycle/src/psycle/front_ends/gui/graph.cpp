@@ -196,7 +196,7 @@ void port::on_move(contraption & contraption) {
 
 bool port::on_event(GdkEvent * event) {
 	loggers::trace()("port::on_event");
-	if(Gnome::Canvas::Group::on_event(event)) return true;
+	//if(Gnome::Canvas::Group::on_event(event)) return true;
 	#if 0
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
@@ -358,22 +358,24 @@ void canvas::set_scroll_region_from_bounds() {
 
 bool canvas::on_event(GdkEvent * event) {
 	loggers::trace()("canvas::on_event");
-	if(base::on_event(event)) return true;
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
+			loggers::trace()("canvas::on_event: enter");
 		}
 		break;
-		#if 0
 		case GDK_KEY_PRESS: {
+			loggers::trace()("canvas::on_event: key press");
+			#if 0
 			if(event->key.state & GDK_SHIFT_MASK) {
 				//dragging_ = true;
 				//grab(GDK_KEY_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, Gdk::Cursor(Gdk::TCROSS), event->key.time);
 			}
+			#endif
 		}
 		break;
-		#endif
 		case GDK_BUTTON_PRESS: {
+			loggers::trace()("canvas::on_event: button press");
 			switch(event->button.button) {
 				case 1: {
 				}
@@ -394,6 +396,7 @@ bool canvas::on_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
+			loggers::trace()("canvas::on_event: motion");
 			if(event->motion.state & GDK_BUTTON1_MASK) {
 			}
 			else if(event->motion.state & GDK_SHIFT_MASK) {
@@ -412,11 +415,13 @@ bool canvas::on_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
+			loggers::trace()("canvas::on_event: button release");
 			switch(event->button.button) {
 			}
 		}
 		break;
 		case GDK_KEY_RELEASE: {
+			loggers::trace()("canvas::on_event: key release");
 			//if(event->key.state & GDK_CONTROL_MASK)
 			{
 				selected_port_ = 0;
@@ -446,11 +451,17 @@ bool canvas::on_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
+			loggers::trace()("canvas::on_event: leave");
 		}
 		break;
 		default: ;
 	}
-	loggers::trace()("canvas::on_event: false");
-	return false;
+	if(base::on_event(event)) {
+		loggers::trace()("canvas::on_event: base true");
+		return true;
+	} else {
+		loggers::trace()("canvas::on_event: false");
+		return false;
+	}
 }
 }}}
