@@ -5,6 +5,7 @@
 #include <psycle/detail/project.private.hpp>
 #include "contraption.hpp"
 #include <universalis/os/loggers.hpp>
+#include <gdk/gdkkeysyms.h>
 namespace psycle { namespace front_ends { namespace gui {
 
 contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real const & y, color const & color, std::string const & text)
@@ -57,7 +58,7 @@ contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real con
 	
 	this->text(text);
 	
-	signal_event().connect(sigc::mem_fun(*this, &contraption::on_event_));
+	signal_event().connect(sigc::mem_fun(*this, &contraption::on_canvas_event));
 }
 
 void contraption::text(std::string const & text) {
@@ -98,7 +99,7 @@ void contraption::dragging_stop(time const & time) {
 	ungrab(time);
 }
 
-bool contraption::on_event_(GdkEvent * event) {
+bool contraption::on_canvas_event(GdkEvent * event) {
 	loggers::trace()("contraption::on_event");
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
@@ -122,10 +123,21 @@ bool contraption::on_event_(GdkEvent * event) {
 		break;
 		case GDK_KEY_PRESS: {
 			loggers::trace()("contraption::on_event: key press");
-			if(event->key.state & GDK_SHIFT_MASK) {
-				loggers::trace()("contraption::on_event: key press shift");
+			/*if(event->key.keyval == 'x') {
+				loggers::trace()("contraption::on_event: key press x");
+			}*/
+			if(
+				event->key.keyval == GDK_Shift_L ||
+				event->key.keyval == GDK_Shift_R ||
+				event->key.keyval == GDK_Control_L ||
+				event->key.keyval == GDK_Control_R
+			) {
+				loggers::trace()("contraption::on_event: key press shift/control");
 				signal_select()(*this);
 				//return true;
+			}
+			if(event->key.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) {
+				loggers::trace()("contraption::on_event: key press shift/control mask");
 			}
 		}
 		break;

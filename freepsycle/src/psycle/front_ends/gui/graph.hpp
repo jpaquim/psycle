@@ -150,9 +150,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
 		Gnome::Canvas::Line line_;
 
 	protected:
-		bool on_event(GdkEvent *) /*override*/;
 		void on_select(contraption &);
 		void on_move(contraption &);
+	private:
+		bool on_canvas_event(GdkEvent *);
 };
 
 namespace ports {
@@ -196,8 +197,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node
 		contraption contraption_;
 		//typenames::contraption contraption_;
 	
-	protected:
-		bool on_event_(GdkEvent *) /*override*/;
+	private:
+		bool on_canvas_event(GdkEvent *);
 		
 	///\name menu
 	///\{

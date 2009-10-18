@@ -58,8 +58,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK contraption : public Gnome::Canvas::Gr
 			boost::signal<void (contraption &)> inline & signal_leave()  { return signal_leave_; }
 		private:
 			boost::signal<void (contraption &)> signal_enter_, signal_move_, signal_select_, signal_leave_;
-		protected:
-			bool on_event_(GdkEvent *) /*override*/;
+			bool on_canvas_event(GdkEvent *);
 	///\}
 
 	///\name dragging
