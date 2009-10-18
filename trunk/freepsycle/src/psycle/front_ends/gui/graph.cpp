@@ -9,6 +9,7 @@
 #include <gdkmm/color.h>
 #include <gdkmm/colormap.h>
 #include <gtkmm/stock.h>
+#include <gdk/gdkkeysyms.h>
 namespace psycle { namespace front_ends { namespace gui {
 
 /**********************************************************************************************************************/
@@ -69,7 +70,7 @@ node::node(node::parent_type & parent, node::underlying_type & underlying, real 
 	item->signal_activate().connect(sigc::mem_fun(*this, &node::on_delete));
 	menu_->append(*item); // menu_->items().push_back(*item);
 	item->show();
-	/*contraption_.*/signal_event().connect(sigc::mem_fun(*this, &node::on_event_));
+	/*contraption_.*/signal_event().connect(sigc::mem_fun(*this, &node::on_canvas_event));
 }
 
 void node::after_construction() {
@@ -111,36 +112,36 @@ void node::on_delete() {
 	underlying().free_heap();
 }
 
-bool node::on_event_(GdkEvent * event) {
-	loggers::trace()("node::on_event");
+bool node::on_canvas_event(GdkEvent * event) {
+	loggers::trace()("node::on_canvas_event");
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
-			loggers::trace()("node::on_event: enter");
+			loggers::trace()("node::on_canvas_event: enter");
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
-			loggers::trace()("node::on_event: leave");
+			loggers::trace()("node::on_canvas_event: leave");
 		}
 		break;
 		case GDK_KEY_PRESS: {
-			loggers::trace()("node::on_event: key press");
+			loggers::trace()("node::on_canvas_event: key press");
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
-			loggers::trace()("node::on_event: button press");
+			loggers::trace()("node::on_canvas_event: button press");
 			switch(event->button.button) {
 				case 1: {
-					loggers::trace()("node::on_event: button press 1");
+					loggers::trace()("node::on_canvas_event: button press 1");
 				}
 				break;
 				case 2: {
-					loggers::trace()("node::on_event: button press 2");
+					loggers::trace()("node::on_canvas_event: button press 2");
 					menu_->popup(event->button.button, event->button.time);
 					return true;
 				}
 				break;
 				case 3: {
-					loggers::trace()("node::on_event: button press 3");
+					loggers::trace()("node::on_canvas_event: button press 3");
 				}
 				break;
 				default: ;
@@ -148,23 +149,23 @@ bool node::on_event_(GdkEvent * event) {
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
-			loggers::trace()("node::on_event: motion");
+			loggers::trace()("node::on_canvas_event: motion");
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
-			loggers::trace()("node::on_event: button release");
+			loggers::trace()("node::on_canvas_event: button release");
 			switch(event->button.button) {
 				default: ;
 			}
 		}
 		break;
 		case GDK_KEY_RELEASE: {
-			loggers::trace()("node::on_event: key release");
+			loggers::trace()("node::on_canvas_event: key release");
 		}
 		break;
 		default: ;
 	}
-	loggers::trace()("node::on_event: false");
+	loggers::trace()("node::on_canvas_event: false");
 	return false;
 }
 
@@ -182,6 +183,7 @@ port::port(port::parent_type & parent, port::underlying_type & underlying, real 
 	line().property_width_pixels() = 3;
 	line().property_last_arrowhead() = false;
 	line().lower_to_bottom();
+	/*contraption_.*/signal_event().connect(sigc::mem_fun(*this, &port::on_canvas_event));
 	contraption_instance().signal_select().connect(boost::bind(&port::on_select, this, _1));
 	contraption_instance().signal_move()  .connect(boost::bind(&port::on_move  , this, _1));
 	on_move(contraption_instance());
@@ -201,35 +203,35 @@ void port::on_move(contraption & contraption) {
 	line().property_points() = points;
 }
 
-bool port::on_event(GdkEvent * event) {
-	loggers::trace()("port::on_event");
+bool port::on_canvas_event(GdkEvent * event) {
+	loggers::trace()("port::on_canvas_event");
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
-			loggers::trace()("port::on_event: enter");
+			loggers::trace()("port::on_canvas_event: enter");
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
-			loggers::trace()("port::on_event: leave");
+			loggers::trace()("port::on_canvas_event: leave");
 		}
 		break;
 		case GDK_KEY_PRESS: {
-			loggers::trace()("port::on_event: key press");
+			loggers::trace()("port::on_canvas_event: key press");
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
-			loggers::trace()("port::on_event: button press");
+			loggers::trace()("port::on_canvas_event: button press");
 			switch(event->button.button) {
 				case 1: {
-					loggers::trace()("port::on_event: button press 1");
+					loggers::trace()("port::on_canvas_event: button press 1");
 				}
 				break;
 				case 2: {
-					loggers::trace()("port::on_event: button press 2");
+					loggers::trace()("port::on_canvas_event: button press 2");
 				}
 				break;
 				case 3: {
-					loggers::trace()("port::on_event: button press 3");
+					loggers::trace()("port::on_canvas_event: button press 3");
 				}
 				break;
 				default: ;
@@ -237,22 +239,22 @@ bool port::on_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
-			loggers::trace()("port::on_event: motion");
+			loggers::trace()("port::on_canvas_event: motion");
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
-			loggers::trace()("port::on_event: button release");
+			loggers::trace()("port::on_canvas_event: button release");
 			switch(event->button.button) {
 			}
 		}
 		break;
 		case GDK_KEY_RELEASE: {
-			loggers::trace()("port::on_event: key release");
+			loggers::trace()("port::on_canvas_event: key release");
 		}
 		break;
 		default: ;
 	}
-	loggers::trace()("port::on_event: false");
+	loggers::trace()("port::on_canvas_event: false");
 	return false;
 }
 
@@ -386,20 +388,17 @@ bool canvas::on_event(GdkEvent * event) {
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
 			loggers::trace()("canvas::on_event: enter");
+			grab_focus(); // grabs the keyboard focus so that items may receive keyboard events
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
 			loggers::trace()("canvas::on_event: leave");
+			// doesn't seem to do anything
+			this->get_display()->keyboard_ungrab(event->crossing.time);
 		}
 		break;
 		case GDK_KEY_PRESS: {
 			loggers::trace()("canvas::on_event: key press");
-			#if 0
-			if(event->key.state & GDK_SHIFT_MASK) {
-				//dragging_ = true;
-				//grab(GDK_KEY_RELEASE_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, Gdk::Cursor(Gdk::TCROSS), event->key.time);
-			}
-			#endif
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
@@ -413,6 +412,7 @@ bool canvas::on_event(GdkEvent * event) {
 					loggers::trace()("canvas::on_event: button press 2");
 					set_scroll_region_from_bounds();
 					//return true;
+					///\todo conflicts with node's delete menu
 				}
 				break;
 				case 3: {
@@ -429,8 +429,7 @@ bool canvas::on_event(GdkEvent * event) {
 		case GDK_MOTION_NOTIFY: {
 			loggers::trace()("canvas::on_event: motion");
 			if(event->motion.state & GDK_BUTTON1_MASK) {
-			}
-			else if(event->motion.state & GDK_SHIFT_MASK) {
+			} else if(event->motion.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) {
 				if(selected_port()) {
 					window_to_world(x, y, x, y);
 					real port_x(selected_port()->property_x()), port_y(selected_port()->property_y());
@@ -453,32 +452,37 @@ bool canvas::on_event(GdkEvent * event) {
 		break;
 		case GDK_KEY_RELEASE: {
 			loggers::trace()("canvas::on_event: key release");
-			//if(event->key.state & GDK_CONTROL_MASK)
-			{
+			if(
+				event->key.keyval == GDK_Shift_L ||
+				event->key.keyval == GDK_Shift_R ||
+				event->key.keyval == GDK_Control_L ||
+				event->key.keyval == GDK_Control_R
+			) {
+				loggers::trace()("canvas::on_event: key release shift/control");
 				selected_port_ = 0;
 				line().hide();
-			}
-			#if 0
-			if(event->key.state & GDK_SHIFT_MASK) {
-				dragging_ = false;
-				ungrab(event->key.time);
-			}
-			if(other) {
-				ports::output * output_port(dynamic_cast<ports::output*>(this));
-				ports::input * input_port(dynamic_cast<ports::input*>(other));
-				if(!(input_port && output_port)) {
-					output_port = dynamic_cast<ports::output*>(this);
-					input_port = dynamic_cast<ports::input*>(other);
+				#if 0
+				if(other) {
+					ports::output * output_port(dynamic_cast<ports::output*>(this));
+					ports::input * input_port(dynamic_cast<ports::input*>(other));
+					if(!(input_port && output_port)) {
+						output_port = dynamic_cast<ports::output*>(this);
+						input_port = dynamic_cast<ports::input*>(other);
+					}
+					if(input_port && output_port) {
+						static_cast<engine::ports::input&>(input_port->underlying_instance())
+							.connect(
+								static_cast<engine::ports::output&>(output_port->underlying_instance())
+							);
+					}
+					other = 0;
 				}
-				if(input_port && output_port) {
-					static_cast<engine::ports::input&>(other->underlying_instance())
-						.connect(
-							static_cast<engine::ports::output&>(this->underlying_instance())
-						);
-				}
-				other = 0;
+				#endif
 			}
-			#endif
+			if(event->key.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK))
+			{
+				loggers::trace()("canvas::on_event: key release shift/control mask");
+			}
 		}
 		break;
 		default: ;
