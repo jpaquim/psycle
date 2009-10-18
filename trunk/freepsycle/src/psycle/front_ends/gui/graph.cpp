@@ -24,7 +24,7 @@ graph::graph(underlying_type & underlying, host::plugin_resolver & resolver)
 	adjustment_(1.00, 0.05, 5.00, 0.001, 0.1, 0.1),
 	spin_(adjustment_, 1.0, 2)
 {
-std::clog << "new gui graph\n";
+	std::clog << "new gui graph\n";
 	//pack_start(start(), Gtk::PACK_SHRINK);
 	//pack_start(spin_, Gtk::PACK_SHRINK);
 	scroll_.add(canvas_instance());
@@ -62,7 +62,7 @@ node::node(node::parent_type & parent, node::underlying_type & underlying, real 
 	Gnome::Canvas::Group(parent, x, y),
 	contraption_(*this, 0, 0, 0x60606000, underlying.name() + "\n" + underlying.plugin_library_reference().name())
 {
-std::clog << "new gui node\n";
+	loggers::trace()("node::new (gui)");
 	menu_ = new Gtk::Menu;
 	Gtk::MenuItem * item;
 	item = new Gtk::MenuItem("Delete");
@@ -73,6 +73,7 @@ std::clog << "new gui node\n";
 }
 
 void node::after_construction() {
+	loggers::trace()("node::after_construction (gui)");
 	node_type::after_construction();
 	int const ports(single_input_ports().size() + output_ports().size() + (multiple_input_port() ? 1 : 0));
 	real const angle_step(engine::math::pi * 2 / ports);
@@ -106,12 +107,12 @@ void node::after_construction() {
 }
 
 void node::on_delete() {
-std::clog << "node::on_delete\n";
+	loggers::trace()("node::on_delete (gui)");
 	underlying().free_heap();
 }
 
 bool node::on_event_(GdkEvent * event) {
-std::clog << "node::on_event\n";
+	loggers::trace()("node::on_event");
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
 		}
@@ -121,11 +122,12 @@ std::clog << "node::on_event\n";
 		break;
 		case GDK_BUTTON_PRESS: {
 			switch(event->button.button) {
+				loggers::trace()("node::on_event: button press");
 				case 1: {
 				}
 				break;
 				case 2: {
-std::clog << "node::on_event: bp2\n";
+					loggers::trace()("node::on_event: button press 2");
 					menu_->popup(event->button.button, event->button.time);
 					return true;
 				}
@@ -155,7 +157,7 @@ std::clog << "node::on_event: bp2\n";
 		default: ;
 	}
 	//return Gnome::Canvas::Group::on_event(event);
-std::clog << "node::on_event: false\n";
+	loggers::trace()("node::on_event: false");
 	return false;
 }
 
@@ -193,6 +195,7 @@ void port::on_move(contraption & contraption) {
 }
 
 bool port::on_event(GdkEvent * event) {
+	loggers::trace()("port::on_event");
 	if(Gnome::Canvas::Group::on_event(event)) return true;
 	#if 0
 	real x(event->button.x), y(event->button.y);
@@ -225,6 +228,7 @@ bool port::on_event(GdkEvent * event) {
 		default: ;
 	}
 	#endif
+	loggers::trace()("port::on_event: false");
 	return false;
 }
 
@@ -353,6 +357,7 @@ void canvas::set_scroll_region_from_bounds() {
 }
 
 bool canvas::on_event(GdkEvent * event) {
+	loggers::trace()("canvas::on_event");
 	if(base::on_event(event)) return true;
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
@@ -445,6 +450,7 @@ bool canvas::on_event(GdkEvent * event) {
 		break;
 		default: ;
 	}
+	loggers::trace()("canvas::on_event: false");
 	return false;
 }
 }}}
