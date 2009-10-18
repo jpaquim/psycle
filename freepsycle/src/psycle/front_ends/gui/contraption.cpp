@@ -100,7 +100,7 @@ void contraption::dragging_stop(time const & time) {
 
 bool contraption::on_event_(GdkEvent * event) {
 	loggers::trace()("contraption::on_event");
-	if(Gnome::Canvas::Group::on_event(event)) return true;
+	//if(Gnome::Canvas::Group::on_event(event)) return true;
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
@@ -111,7 +111,18 @@ bool contraption::on_event_(GdkEvent * event) {
 			//return true;
 		}
 		break;
+		case GDK_LEAVE_NOTIFY: {
+			loggers::trace()("contraption::on_event: leave");
+			if(!(event->crossing.state & GDK_BUTTON1_MASK)) {
+				rectangle().property_fill_color_rgba() = fill_color();
+				rectangle().property_outline_color_rgba() = outline_color();
+				signal_leave()(*this);
+				//return true;
+			}
+		}
+		break;
 		case GDK_KEY_PRESS: {
+			loggers::trace()("contraption::on_event: key press");
 			if(event->key.state & GDK_SHIFT_MASK) {
 				loggers::trace()("contraption::on_event: key press shift");
 				signal_select()(*this);
@@ -176,16 +187,6 @@ bool contraption::on_event_(GdkEvent * event) {
 		break;
 		case GDK_KEY_RELEASE: {
 			loggers::trace()("contraption::on_event: key release");
-		}
-		break;
-		case GDK_LEAVE_NOTIFY: {
-			loggers::trace()("contraption::on_event: leave");
-			if(!(event->crossing.state & GDK_BUTTON1_MASK)) {
-				rectangle().property_fill_color_rgba() = fill_color();
-				rectangle().property_outline_color_rgba() = outline_color();
-				signal_leave()(*this);
-				//return true;
-			}
 		}
 		break;
 		default: ;
