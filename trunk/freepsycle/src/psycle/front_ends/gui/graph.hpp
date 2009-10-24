@@ -54,10 +54,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base {
 	///\name drawing of a new connection between ports
 	///\{
 		public:
-			void inline selected_port(port & port) { selected_port_ = &port; }
-			port inline * const selected_port() { return selected_port_; }
+			void inline selected_port(port & port);
 		private:
-			port * selected_port_;
+			port * selected_port_, * selected_port_2_;
+			bool selected_port_is_output_;
 
 		protected:
 			Gnome::Canvas::Line inline & line() { return line_; }
