@@ -190,8 +190,7 @@ port::port(port::parent_type & parent, port::underlying_type & underlying, real 
 }
 
 void port::on_select(typenames::contraption & contraption) {
-	if(!parent().parent().canvas().selected_port())
-		parent().parent().canvas().selected_port(*this);
+	parent().parent().canvas().selected_port(*this);
 }
 
 void port::on_move(typenames::contraption & contraption) {
@@ -267,39 +266,20 @@ namespace ports {
 	:
 		output_type(parent, underlying, x, y, boost::cref(color(0xa0600000)))
 	{
-		/* invisible!
 		Gnome::Canvas::Line & line = *new Gnome::Canvas::Line(contraption());
-		line.property_fill_color_rgba() = color(0xa060a000);
+		Gtk::manage(&line);
+		line.property_fill_color_rgba() = color(0xa060a0b0);
 		line.property_width_pixels() = 3;
 		line.property_last_arrowhead() = false;
 		line.lower_to_bottom();
 
 		Gnome::Canvas::Points points(2);
-		points[0] = Gnome::Art::Point(-100, -100);
-		points[1] = Gnome::Art::Point(100, 100);
+		points[0] = Gnome::Art::Point(0, 0);
+		points[1] = Gnome::Art::Point(100, 0);
 		line.property_points() = points;
 		line.show();
 
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
-
 		lines_.push_back(&line);
-		*/
 	}
 
 	input::input(input::parent_type & parent, input::underlying_type & underlying, real const & x, real const & y, color const & color)
@@ -416,6 +396,14 @@ void canvas::set_scroll_region_from_bounds() {
 	set_scroll_region(bounds_x_min, bounds_y_min, bounds_x_max, bounds_y_max);
 }
 
+void canvas::selected_port(port & port) {
+	if(!selected_port_) {
+		selected_port_ = &port;
+		ports::output * output_port(dynamic_cast<ports::output*>(&port));
+		selected_port_is_output_ = output_port;
+	}
+}
+
 bool canvas::on_event(GdkEvent * event) {
 	loggers::trace()("canvas::on_event");
 	real x(event->button.x), y(event->button.y);
@@ -464,13 +452,13 @@ bool canvas::on_event(GdkEvent * event) {
 			loggers::trace()("canvas::on_event: motion");
 			if(event->motion.state & GDK_BUTTON1_MASK) {
 			} else if(event->motion.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) {
-				if(selected_port()) {
+				if(selected_port_) {
 					window_to_world(x, y, x, y);
-					real port_x(selected_port()->property_x()), port_y(selected_port()->property_y());
-					selected_port()->property_parent().get_value()->i2w(port_x, port_y);
+					real port_x(selected_port_->property_x()), port_y(selected_port_->property_y());
+					selected_port_->property_parent().get_value()->i2w(port_x, port_y);
 					Gnome::Canvas::Points points(2);
-					points[0] = Gnome::Art::Point(port_x, port_y);
-					points[1] = Gnome::Art::Point(x, y);
+					points[selected_port_is_output_ ? 0 : 1] = Gnome::Art::Point(port_x, port_y);
+					points[selected_port_is_output_ ? 1 : 0] = Gnome::Art::Point(x, y);
 					line().property_points() = points;
 					line().show();
 					//return true;
