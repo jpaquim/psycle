@@ -28,7 +28,7 @@ graph::graph(underlying_type & underlying, host::plugin_resolver & resolver)
 	std::clog << "new gui graph\n";
 	//pack_start(start(), Gtk::PACK_SHRINK);
 	//pack_start(spin_, Gtk::PACK_SHRINK);
-	scroll_.add(canvas_instance());
+	scroll_.add(canvas());
 	pack_start(scroll_);
 	show_all_children();
 	start().signal_toggled().connect(sigc::mem_fun(*this, &graph::on_start));
@@ -51,7 +51,7 @@ void graph::on_size_allocate(Gtk::Allocation & allocation) {
 }
 
 void graph::on_zoom() {
-	canvas_instance().set_pixels_per_unit(adjustment_.get_value());
+	canvas().set_pixels_per_unit(adjustment_.get_value());
 }
 
 /**********************************************************************************************************************/
@@ -80,31 +80,31 @@ void node::after_construction() {
 	real const angle_step(engine::math::pi * 2 / ports);
 	real const radius(60);
 	real angle(0);
-	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) {
+	for(output_ports_type::const_iterator i(output_ports().begin()); i != output_ports().end(); ++i) {
 		typenames::ports::output & output_port(**i);
 		Gtk::manage(&output_port);
 		real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
-		output_port.contraption_instance().property_parent().get_value()->move(x, y);
-		output_port.contraption_instance().signal_move()(output_port.contraption_instance());
+		output_port.contraption().property_parent().get_value()->move(x, y);
+		output_port.contraption().signal_move()(output_port.contraption());
 		angle += angle_step;
 	}
 	if(multiple_input_port()) {
 		typenames::ports::inputs::multiple & multiple_input_port(*this->multiple_input_port());
 		Gtk::manage(&multiple_input_port);
 		real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
-		multiple_input_port.contraption_instance().property_parent().get_value()->move(x, y);
-		multiple_input_port.contraption_instance().signal_move()(multiple_input_port.contraption_instance());
+		multiple_input_port.contraption().property_parent().get_value()->move(x, y);
+		multiple_input_port.contraption().signal_move()(multiple_input_port.contraption());
 		angle += angle_step;
 	}
-	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) {
+	for(single_input_ports_type::const_iterator i(single_input_ports().begin()); i != single_input_ports().end(); ++i) {
 		typenames::ports::inputs::single & single_input_port(**i);
 		Gtk::manage(&single_input_port);
 		real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
-		single_input_port.contraption_instance().property_parent().get_value()->move(x, y);
-		single_input_port.contraption_instance().signal_move()(single_input_port.contraption_instance());
+		single_input_port.contraption().property_parent().get_value()->move(x, y);
+		single_input_port.contraption().signal_move()(single_input_port.contraption());
 		angle += angle_step;
 	}
-	contraption_instance().raise_to_top();
+	contraption().raise_to_top();
 }
 
 void node::on_delete() {
@@ -177,24 +177,24 @@ port::port(port::parent_type & parent, port::underlying_type & underlying, real 
 	port_type(parent, underlying),
 	Gnome::Canvas::Group(parent, x, y),
 	contraption_(*this, 0, 0, color, underlying.name()),
-	line_(contraption_instance())
+	line_(contraption())
 {
-	line().property_fill_color_rgba() = contraption_instance().fill_color();
+	line().property_fill_color_rgba() = contraption().fill_color();
 	line().property_width_pixels() = 3;
 	line().property_last_arrowhead() = false;
 	line().lower_to_bottom();
 	/*contraption_.*/signal_event().connect(sigc::mem_fun(*this, &port::on_canvas_event));
-	contraption_instance().signal_select().connect(boost::bind(&port::on_select, this, _1));
-	contraption_instance().signal_move()  .connect(boost::bind(&port::on_move  , this, _1));
-	on_move(contraption_instance());
+	contraption().signal_select().connect(boost::bind(&port::on_select, this, _1));
+	contraption().signal_move()  .connect(boost::bind(&port::on_move  , this, _1));
+	on_move(contraption());
 }
 
-void port::on_select(contraption & contraption) {
-	if(!parent().parent().canvas_instance().selected_port())
-		parent().parent().canvas_instance().selected_port(*this);
+void port::on_select(typenames::contraption & contraption) {
+	if(!parent().parent().canvas().selected_port())
+		parent().parent().canvas().selected_port(*this);
 }
 
-void port::on_move(contraption & contraption) {
+void port::on_move(typenames::contraption & contraption) {
 	Gnome::Canvas::Points points(2);
 	points[0] = Gnome::Art::Point(0, 0);
 	real node_x(parent().property_x()), node_y(parent().property_y());
@@ -266,7 +266,41 @@ namespace ports {
 	output::output(output::parent_type & parent, output::underlying_type & underlying, real const & x, real const & y)
 	:
 		output_type(parent, underlying, x, y, boost::cref(color(0xa0600000)))
-	{}
+	{
+		/* invisible!
+		Gnome::Canvas::Line & line = *new Gnome::Canvas::Line(contraption());
+		line.property_fill_color_rgba() = color(0xa060a000);
+		line.property_width_pixels() = 3;
+		line.property_last_arrowhead() = false;
+		line.lower_to_bottom();
+
+		Gnome::Canvas::Points points(2);
+		points[0] = Gnome::Art::Point(-100, -100);
+		points[1] = Gnome::Art::Point(100, 100);
+		line.property_points() = points;
+		line.show();
+
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+		std::cerr << "xxxxxxxxxxxxxxxxxxxxxxxxxx\n";
+
+		lines_.push_back(&line);
+		*/
+	}
 
 	input::input(input::parent_type & parent, input::underlying_type & underlying, real const & x, real const & y, color const & color)
 	:
@@ -296,7 +330,7 @@ namespace ports {
 /**********************************************************************************************************************/
 // canvas
 
-canvas::canvas(graph & graph)
+canvas::canvas(typenames::graph & graph)
 :
 	group_(*root()),
 	graph_(graph),
@@ -360,12 +394,12 @@ void canvas::on_new_node(std::string const & type) {
 	std::ostringstream name; name << type << id++;
 	node::underlying_type * underlying(0);
 	try {
-		underlying = &static_cast<node::underlying_type&>(graph_instance().resolver()(type, graph_instance(), name.str()));
+		underlying = &static_cast<node::underlying_type&>(graph().resolver()(type, graph(), name.str()));
 	} catch(std::exception const & e) {
 		loggers::exception()(e.what(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(underlying) {
-		node & underlying_wrapper(graph_instance().underlying_wrapper(*underlying));
+		node & underlying_wrapper(graph().underlying_wrapper(*underlying));
 		Gtk::manage(&underlying_wrapper);
 		underlying_wrapper.property_x() = x_;
 		underlying_wrapper.property_y() = y_;
