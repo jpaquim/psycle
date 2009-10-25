@@ -25,9 +25,9 @@ graph::graph(underlying_type & underlying, host::plugin_resolver & resolver)
 	adjustment_(1.00, 0.05, 5.00, 0.001, 0.1, 0.1),
 	spin_(adjustment_, 1.0, 2)
 {
-	std::clog << "new gui graph\n";
-	//pack_start(start(), Gtk::PACK_SHRINK);
-	//pack_start(spin_, Gtk::PACK_SHRINK);
+	loggers::trace()("new gui graph");
+	pack_start(start(), Gtk::PACK_SHRINK);
+	pack_start(spin_, Gtk::PACK_SHRINK);
 	scroll_.add(canvas());
 	pack_start(scroll_);
 	show_all_children();
@@ -43,6 +43,7 @@ void graph::after_construction() {
 graph::~graph() {}
 
 void graph::on_start() {
+	loggers::trace()("graph::on_start");
 	scheduler().started(start().get_active());
 }
 
@@ -51,6 +52,7 @@ void graph::on_size_allocate(Gtk::Allocation & allocation) {
 }
 
 void graph::on_zoom() {
+	loggers::trace()("graph::on_zoom");
 	canvas().set_pixels_per_unit(adjustment_.get_value());
 }
 
@@ -113,35 +115,28 @@ void node::on_delete() {
 }
 
 bool node::on_canvas_event(GdkEvent * event) {
-	loggers::trace()("node::on_canvas_event");
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
-			loggers::trace()("node::on_canvas_event: enter");
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
-			loggers::trace()("node::on_canvas_event: leave");
 		}
 		break;
 		case GDK_KEY_PRESS: {
-			loggers::trace()("node::on_canvas_event: key press");
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
-			loggers::trace()("node::on_canvas_event: button press");
 			switch(event->button.button) {
 				case 1: {
-					loggers::trace()("node::on_canvas_event: button press 1");
 				}
 				break;
 				case 2: {
-					loggers::trace()("node::on_canvas_event: button press 2");
+					loggers::trace()("node::on_canvas_event: menu");
 					menu_->popup(event->button.button, event->button.time);
 					return true;
 				}
 				break;
 				case 3: {
-					loggers::trace()("node::on_canvas_event: button press 3");
 				}
 				break;
 				default: ;
@@ -149,23 +144,20 @@ bool node::on_canvas_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
-			loggers::trace()("node::on_canvas_event: motion");
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
-			loggers::trace()("node::on_canvas_event: button release");
 			switch(event->button.button) {
 				default: ;
 			}
 		}
 		break;
 		case GDK_KEY_RELEASE: {
-			loggers::trace()("node::on_canvas_event: key release");
 		}
 		break;
 		default: ;
 	}
-	loggers::trace()("node::on_canvas_event: false");
+	//loggers::trace()("node::on_canvas_event: false");
 	return false;
 }
 
@@ -203,34 +195,26 @@ void port::on_move(typenames::contraption & contraption) {
 }
 
 bool port::on_canvas_event(GdkEvent * event) {
-	loggers::trace()("port::on_canvas_event");
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
-			loggers::trace()("port::on_canvas_event: enter");
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
-			loggers::trace()("port::on_canvas_event: leave");
 		}
 		break;
 		case GDK_KEY_PRESS: {
-			loggers::trace()("port::on_canvas_event: key press");
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
-			loggers::trace()("port::on_canvas_event: button press");
 			switch(event->button.button) {
 				case 1: {
-					loggers::trace()("port::on_canvas_event: button press 1");
 				}
 				break;
 				case 2: {
-					loggers::trace()("port::on_canvas_event: button press 2");
 				}
 				break;
 				case 3: {
-					loggers::trace()("port::on_canvas_event: button press 3");
 				}
 				break;
 				default: ;
@@ -238,22 +222,19 @@ bool port::on_canvas_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
-			loggers::trace()("port::on_canvas_event: motion");
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
-			loggers::trace()("port::on_canvas_event: button release");
 			switch(event->button.button) {
 			}
 		}
 		break;
 		case GDK_KEY_RELEASE: {
-			loggers::trace()("port::on_canvas_event: key release");
 		}
 		break;
 		default: ;
 	}
-	loggers::trace()("port::on_canvas_event: false");
+	//loggers::trace()("port::on_canvas_event: false");
 	return false;
 }
 
@@ -315,6 +296,7 @@ canvas::canvas(typenames::graph & graph)
 	group_(*root()),
 	graph_(graph),
 	selected_port_(),
+	selected_port_2_(),
 	line_(*root()),
 	x_(), y_()
 {
@@ -398,47 +380,47 @@ void canvas::set_scroll_region_from_bounds() {
 
 void canvas::selected_port(port & port) {
 	if(!selected_port_) {
+		if(loggers::trace()()) loggers::trace()("connection from");
 		selected_port_ = &port;
 		ports::output * output_port(dynamic_cast<ports::output*>(&port));
 		selected_port_is_output_ = output_port;
+	} else {
+		if(loggers::trace()()) loggers::trace()("connection to");
+		selected_port_2_ = &port;
 	}
 }
 
 bool canvas::on_event(GdkEvent * event) {
-	loggers::trace()("canvas::on_event");
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
-			loggers::trace()("canvas::on_event: enter");
+			loggers::trace()("canvas::on_event: grab focus");
 			grab_focus(); // grabs the keyboard focus so that items may receive keyboard events
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
-			loggers::trace()("canvas::on_event: leave");
+			loggers::trace()("canvas::on_event: keyboard ungrab");
 			// doesn't seem to do anything
 			this->get_display()->keyboard_ungrab(event->crossing.time);
 		}
 		break;
 		case GDK_KEY_PRESS: {
-			loggers::trace()("canvas::on_event: key press");
+			if(event->key.keyval == GDK_c) {
+				loggers::trace()("canvas::on_event: scroll region");
+				set_scroll_region_from_bounds();
+			}
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
-			loggers::trace()("canvas::on_event: button press");
 			switch(event->button.button) {
 				case 1: {
-					loggers::trace()("canvas::on_event: button press 1");
 				}
 				break;
 				case 2: {
-					loggers::trace()("canvas::on_event: button press 2");
-					set_scroll_region_from_bounds();
-					//return true;
-					///\todo conflicts with node's delete menu
 				}
 				break;
 				case 3: {
-					loggers::trace()("canvas::on_event: button press 3");
+					loggers::trace()("canvas::on_event: menu");
 					window_to_world(x, y, x_, y_);
 					menu_->popup(event->button.button, event->button.time);
 					return true;
@@ -449,7 +431,6 @@ bool canvas::on_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
-			loggers::trace()("canvas::on_event: motion");
 			if(event->motion.state & GDK_BUTTON1_MASK) {
 			} else if(event->motion.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) {
 				if(selected_port_) {
@@ -467,53 +448,58 @@ bool canvas::on_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
-			loggers::trace()("canvas::on_event: button release");
 			switch(event->button.button) {
 			}
 		}
 		break;
 		case GDK_KEY_RELEASE: {
-			loggers::trace()("canvas::on_event: key release");
 			if(
 				event->key.keyval == GDK_Shift_L ||
 				event->key.keyval == GDK_Shift_R ||
 				event->key.keyval == GDK_Control_L ||
 				event->key.keyval == GDK_Control_R
 			) {
-				loggers::trace()("canvas::on_event: key release shift/control");
-				selected_port_ = 0;
-				line().hide();
-				#if 0
-				if(other) {
-					ports::output * output_port(dynamic_cast<ports::output*>(this));
-					ports::input * input_port(dynamic_cast<ports::input*>(other));
+				if(selected_port_2_) {
+					if(loggers::trace()()) loggers::trace()("connection");
+					//selected_port_is_output_
+					ports::output * output_port(dynamic_cast<ports::output*>(selected_port_));
+					ports::input * input_port(dynamic_cast<ports::input*>(selected_port_2_));
 					if(!(input_port && output_port)) {
-						output_port = dynamic_cast<ports::output*>(this);
-						input_port = dynamic_cast<ports::input*>(other);
+						output_port = dynamic_cast<ports::output*>(selected_port_);
+						input_port = dynamic_cast<ports::input*>(selected_port_2_);
 					}
 					if(input_port && output_port) {
-						static_cast<engine::ports::input&>(input_port->underlying_instance())
+						if(loggers::trace()()) {
+							std::stringstream s;
+							s
+								<< "connecting " << input_port->underlying().qualified_name()
+								<< " to "  << output_port->underlying().qualified_name();
+							loggers::trace()(s.str());
+						}
+						static_cast<engine::ports::input&>(input_port->underlying())
 							.connect(
-								static_cast<engine::ports::output&>(output_port->underlying_instance())
+								static_cast<engine::ports::output&>(output_port->underlying())
 							);
+					} else {
+						if(loggers::trace()()) loggers::trace()("not connecting");
 					}
-					other = 0;
+					selected_port_ = selected_port_2_ = 0;
+				} else {
+					selected_port_ = 0;
+					line().hide();
 				}
-				#endif
 			}
-			if(event->key.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK))
-			{
-				loggers::trace()("canvas::on_event: key release shift/control mask");
+			if(event->key.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) {
 			}
 		}
 		break;
 		default: ;
 	}
 	if(base::on_event(event)) {
-		loggers::trace()("canvas::on_event: base true");
+		//loggers::trace()("canvas::on_event: base true");
 		return true;
 	} else {
-		loggers::trace()("canvas::on_event: false");
+		//loggers::trace()("canvas::on_event: false");
 		return false;
 	}
 }
