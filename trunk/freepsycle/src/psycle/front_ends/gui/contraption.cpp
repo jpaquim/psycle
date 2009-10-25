@@ -100,11 +100,9 @@ void contraption::dragging_stop(time const & time) {
 }
 
 bool contraption::on_canvas_event(GdkEvent * event) {
-	loggers::trace()("contraption::on_event");
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
-			loggers::trace()("contraption::on_event: enter");
 			rectangle().property_fill_color_rgba() = highlight_fill_color();
 			rectangle().property_outline_color_rgba() = highlight_outline_color();
 			signal_enter()(*this);
@@ -112,7 +110,6 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_LEAVE_NOTIFY: {
-			loggers::trace()("contraption::on_event: leave");
 			if(!(event->crossing.state & GDK_BUTTON1_MASK)) {
 				rectangle().property_fill_color_rgba() = fill_color();
 				rectangle().property_outline_color_rgba() = outline_color();
@@ -122,52 +119,51 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_KEY_PRESS: {
-			loggers::trace()("contraption::on_event: key press");
-			/*if(event->key.keyval == 'x') {
-				loggers::trace()("contraption::on_event: key press x");
-			}*/
 			if(
 				event->key.keyval == GDK_Shift_L ||
 				event->key.keyval == GDK_Shift_R ||
 				event->key.keyval == GDK_Control_L ||
 				event->key.keyval == GDK_Control_R
 			) {
-				loggers::trace()("contraption::on_event: key press shift/control");
+				loggers::trace()("contraption::on_event: select");
 				signal_select()(*this);
 				//return true;
 			}
+			/*
 			if(event->key.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) {
 				loggers::trace()("contraption::on_event: key press shift/control mask");
 			}
+			*/
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
-			loggers::trace()("contraption::on_event: button press");
 			switch(event->button.button) {
 				case 1: {
-					loggers::trace()("contraption::on_event: button press 1");
+					loggers::trace()("contraption::on_event: drag start");
 					dragging_start(x, y, event->button.time);
 					return true;
 				}
 				break;
 				case 2: {
-					loggers::trace()("contraption::on_event: button press 2");
 					if(event->button.state & GDK_SHIFT_MASK) {
+						loggers::trace()("contraption::on_event: lower bottom");
 						//get_parent_group()->lower_to_bottom();
 						property_parent().get_value()->lower_to_bottom();
 						//return true;
 					} else {
+						loggers::trace()("contraption::on_event: lower 1");
 						property_parent().get_value()->lower(1);
 						//return true;
 					}
 				}
 				break;
 				case 3: {
-					loggers::trace()("contraption::on_event: button press 3");
 					if(event->button.state & GDK_SHIFT_MASK) {
+						loggers::trace()("contraption::on_event: raise top");
 						property_parent().get_value()->raise_to_top();
 						//return true;
 					} else {
+						loggers::trace()("contraption::on_event: raise 1");
 						property_parent().get_value()->raise(1);
 						//return true;
 					}
@@ -178,7 +174,6 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_MOTION_NOTIFY: {
-			loggers::trace()("contraption::on_event: motion");
 			if(dragging() && event->motion.state & GDK_BUTTON1_MASK) {
 				dragging(x, y);
 				return true;
@@ -186,10 +181,10 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_BUTTON_RELEASE: {
-			loggers::trace()("contraption::on_event: button release");
 			switch(event->button.button) {
 				case 1: {
 					if(dragging()) {
+						loggers::trace()("contraption::on_event: drag stop");
 						dragging_stop(event->button.time);
 						return true;
 					}
@@ -200,12 +195,11 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 		}
 		break;
 		case GDK_KEY_RELEASE: {
-			loggers::trace()("contraption::on_event: key release");
 		}
 		break;
 		default: ;
 	}
-	loggers::trace()("contraption::on_event: false");
+	//loggers::trace()("contraption::on_event: false");
 	return false;
 }
 }}}
