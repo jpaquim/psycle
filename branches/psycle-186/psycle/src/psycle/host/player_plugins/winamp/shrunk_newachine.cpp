@@ -23,6 +23,22 @@ namespace psycle
 		std::map<std::string,std::string> CNewMachine::NativeNames;
 		std::map<std::string,std::string> CNewMachine::VstNames;
 
+		std::string CNewMachine::preprocessName(std::string dllName) {
+			{ // 1) remove extension
+				std::string::size_type const pos(dllName.find(".dll"));
+				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+			}
+
+			// 2) ensure lower case
+			std::transform(dllName.begin(),dllName.end(),dllName.begin(),std::tolower);
+
+			// 3) replace spaces and underscores with dash.
+			std::replace(dllName.begin(),dllName.end(),' ','-');
+			std::replace(dllName.begin(),dllName.end(),'_','-');
+
+			return dllName;
+		}
+
 		void CNewMachine::learnDllName(const std::string & fullname,MachineType type)
 		{
 			std::string str=fullname;
@@ -31,8 +47,7 @@ namespace psycle
 			if(pos != std::string::npos)
 				str=str.substr(pos+1);
 
-			// transform string to lower case
-			std::transform(str.begin(),str.end(),str.begin(),std::tolower);
+			str = preprocessName(str);
 
 			switch(type)
 			{
@@ -56,8 +71,7 @@ namespace psycle
 			}
 			else shellidx = 0;
 
-			// transform string to lower case
-			std::transform(tmp.begin(),tmp.end(),tmp.begin(),std::tolower);
+			tmp = preprocessName(tmp);
 
 			switch(type)
 			{

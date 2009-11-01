@@ -28,7 +28,7 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 6
+#define PSYCLE__VERSION__PATCH 6.1
 #define PSYCLE__VERSION__QUALITY "release"
 #define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$"
 

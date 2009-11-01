@@ -177,7 +177,7 @@ namespace psycle
 				///\todo doc. not used (yet?)
 				virtual void Event(uint32 const /*data*/) {}
 				///\todo doc
-				virtual bool DescribeValue(char * /*txt*/, int /*param*/, int /*value*/) { return false; }
+				virtual bool DescribeValue(char * /*txt*/, int const /*param*/, int const /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
 				virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
 				///\todo doc
