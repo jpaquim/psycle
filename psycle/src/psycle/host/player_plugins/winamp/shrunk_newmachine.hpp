@@ -63,6 +63,7 @@ namespace psycle
 		class CNewMachine
 		{
 		public:
+			static std::string preprocessName(std::string dllName);
 			static void learnDllName(const std::string & fullpath, MachineType type);
 			static bool lookupDllName(const std::string, std::string & result, MachineType tye,int& shellIdx);
 			static void DestroyPluginInfo();

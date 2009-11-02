@@ -26,7 +26,7 @@
 #include <winamp-2/in2.h>	// Winamp Input plugin header file
 
 
-#define WA_PLUGIN_VERSION "1.2"
+#define WA_PLUGIN_VERSION "1.3.1"
 
 using namespace psycle::host;
 
@@ -543,7 +543,7 @@ Song Length: %02i:%02i\nPatternsUsed: %i\nMachines Used: %i",
 			pSong->BeatsPerMin(),
 			pSong->LinesPerBeat(),
 			i / 60, i % 60,
-			pSong->GetNumPatternsUsed(),
+			pSong->GetNumPatterns(),
 			j);
 		SetDlgItemText(wnd,IDC_INFO,valstr);
 		

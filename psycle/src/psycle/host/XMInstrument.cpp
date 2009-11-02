@@ -27,7 +27,7 @@ namespace psycle
 			m_WaveSampleRate = value;
 		}
 
-		bool XMInstrument::WaveData::Load(RiffFile& riffFile)
+		int XMInstrument::WaveData::Load(RiffFile& riffFile)
 		{	
 			std::uint32_t size1,size2;
 			
@@ -35,7 +35,7 @@ namespace psycle
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
-			if (strcmp(temp,"SMPD")) return false;
+			if (strcmp(temp,"SMPD")) return size;
 
 			//\todo: add version
 			//riffFile.Read(version);
@@ -82,7 +82,7 @@ namespace psycle
 				SoundDesquash(pData, &m_pWaveDataR);
 			}
 			delete pData;
-			return true;
+			return size;
 		}
 
 		void XMInstrument::WaveData::Save(RiffFile& riffFile)
@@ -459,13 +459,13 @@ namespace psycle
 		}
 
 		/// load XMInstrument
-		bool XMInstrument::Load(RiffFile& riffFile)
+		int XMInstrument::Load(RiffFile& riffFile)
 		{
 			char temp[6];
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
-			if (strcmp(temp,"INST")) return false;
+			if (strcmp(temp,"INST")) return size;
 
 			//\todo: add version
 			//riffFile.Read(version);
@@ -510,7 +510,7 @@ namespace psycle
 			m_PanEnvelope.Load(riffFile,version);
 			m_FilterEnvelope.Load(riffFile,version);
 			m_PitchEnvelope.Load(riffFile,version);
-			return true;
+			return size;
 		}
 
 		// save XMInstrument
@@ -519,11 +519,8 @@ namespace psycle
 			if ( ! m_bEnabled ) return;
 
 			int i;
-			int size = sizeof(XMInstrument)
-				-sizeof(m_AmpEnvelope)
-				-sizeof(m_PanEnvelope)
-				-sizeof(m_PitchEnvelope)
-				-sizeof(m_FilterEnvelope);
+			int size = 0;
+			int filepos = riffFile.GetPos();
 
 			riffFile.Write("INST",4);
 			riffFile.Write(size);
@@ -569,6 +566,10 @@ namespace psycle
 			m_PanEnvelope.Save(riffFile,version);
 			m_FilterEnvelope.Save(riffFile,version);
 			m_PitchEnvelope.Save(riffFile,version);
+			int endpos = riffFile.GetPos();
+			riffFile.Seek(filepos+4);
+			riffFile.Write(endpos-filepos);
+			riffFile.Seek(endpos);
 		}
 
 	} //namespace host

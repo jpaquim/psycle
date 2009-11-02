@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.8.5  ---------
+				------------------------------- 1.8.6.1  ---------
 --------------------------------------------------------------------------------
 
 contents:
@@ -115,7 +115,7 @@ There is no SDK ready, so the best way to start a new one is getting the sources
 of an existing one. Arguru synth is an usual template.
 
 
-Psycle 1.8.5 includes a freeware VST pack containing software from the following vendors:
+Psycle 1.8.6.1 includes a freeware VST pack containing software from the following vendors:
 
 Digital Fish Phones	( http://www.digitalfishphones.com/ )
 DiscoDSP		( http://www.discodsp.com/ )

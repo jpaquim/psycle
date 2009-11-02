@@ -143,7 +143,7 @@ public:
 			m_WaveLength  = iLen;
 		}
 
-		bool Load(RiffFile& riffFile);
+		int Load(RiffFile& riffFile);
 		void Save(RiffFile& riffFile);
 
 		/// Wave Data Copy Operator
@@ -446,7 +446,7 @@ public:
 
 	void Init();
 
-	bool Load(RiffFile& riffFile);
+	int Load(RiffFile& riffFile);
 	void Save(RiffFile& riffFile);
 
 	void operator= (const XMInstrument & other)

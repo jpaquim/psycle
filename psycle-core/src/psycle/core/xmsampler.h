@@ -21,7 +21,6 @@ class PSYCLE__CORE__DECL XMSampler : public Machine {
 public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony
 	static const int MAX_INSTRUMENT = 255;///< max instrument
-	static const std::uint32_t VERSION = 0x00010000;
 	static const float SURROUND_THRESHOLD;
 
 	typedef std::scoped_lock<std::mutex> scoped_lock;
