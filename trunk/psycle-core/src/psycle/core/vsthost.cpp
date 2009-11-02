@@ -152,7 +152,7 @@ void host::FillPluginInfo(const std::string& fullName, const std::string& fileNa
 						s << std::hex << vstPlug->GetVersion();
 						pinfo.setVersion(s.str());
 					}
-					MachineKey keysubPlugin( hostCode(), fileName, 0);
+					MachineKey keysubPlugin( hostCode(), fileName, plugUniqueID);
 					finder.AddInfo( keysubPlugin, pinfo);
 				}
 			}
@@ -178,7 +178,7 @@ void host::FillPluginInfo(const std::string& fullName, const std::string& fileNa
 				s << vstPlug->GetVersion();
 				pinfo.setVersion(s.str());
 			}
-			MachineKey key( hostCode(), fileName, vstPlug->uniqueId());
+			MachineKey key( hostCode(), fileName, 0);
 			finder.AddInfo( key, pinfo);
 		}
 		std::cout << vstPlug->GetName() << " - successfully instanciated";
