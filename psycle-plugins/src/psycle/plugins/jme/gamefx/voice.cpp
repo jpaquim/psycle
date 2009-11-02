@@ -261,9 +261,9 @@ float CSynthTrack::GetEnvAmp()
 	break;
 
 	case 2: // Decay
-		AmpEnvValue = AmpEnvValue - (AmpEnvValue * AmpEnvCoef * 5.0f);
+		AmpEnvValue-=AmpEnvCoef;
 		
-		if((AmpEnvValue<AmpEnvSustainLevel) || (AmpEnvValue<0.001f))
+		if(AmpEnvValue<AmpEnvSustainLevel)
 		{
 			AmpEnvValue=AmpEnvSustainLevel;
 			AmpEnvStage=3;
@@ -279,9 +279,9 @@ float CSynthTrack::GetEnvAmp()
 	break;
 
 	case 4: // Release
-		AmpEnvValue = AmpEnvValue - (AmpEnvValue * AmpEnvCoef * 5.0f);
+		AmpEnvValue-=AmpEnvCoef;
 
-		if(AmpEnvValue<0.001f)
+		if(AmpEnvValue<0.0f)
 		{
 			AmpEnvValue=0.0f;
 			AmpEnvStage=0;
@@ -293,7 +293,7 @@ float CSynthTrack::GetEnvAmp()
 	case 5: // FastRelease
 		AmpEnvValue-=AmpEnvCoef;
 
-		if(AmpEnvValue<0.001f)
+		if(AmpEnvValue<0.0f)
 		{
 			AmpEnvValue=0.0f;
 			RealNoteOn();

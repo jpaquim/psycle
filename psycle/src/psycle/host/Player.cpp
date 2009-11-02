@@ -1,13 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::Player.
-#include "configuration_options.hpp"
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-#include "Global.hpp"
+#include <packageneric/pre-compiled.private.hpp>
 #include "Player.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
-#include "Sampler.hpp"
 #include "Configuration.hpp"
 
 #if !defined WINAMP_PLUGIN
@@ -16,9 +13,7 @@
 #endif //!defined WINAMP_PLUGIN
 
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
-
-using namespace psycle::helpers::dsp;
-
+#include "Global.hpp"
 namespace psycle
 {
 	namespace host
@@ -60,19 +55,19 @@ namespace psycle
 
 		void Player::Start(int pos, int line, bool initialize)
 		{
-			CSingleLock crit(&Global::song().door, TRUE);
+			CSingleLock crit(&Global::_pSong->door, TRUE);
 			if (initialize)
 			{
-				stop(); // This causes all machines to reset, and samplesperRow to init.				
+				Stop(); // This causes all machines to reset, and samplesperRow to init.				
 				Work(this,256);
-				((Master*)(Global::song().machine(MASTER_INDEX)))->_clip = false;
-				((Master*)(Global::song().machine(MASTER_INDEX)))->sampleCount = 0;
+				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
+				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
 			}
 			_lineChanged = true;
 			_lineCounter = line;
 			_SPRChanged = false;
-			_sequencePosition= pos;
-			_playPattern = Global::song().playOrder[_sequencePosition];
+			_playPosition= pos;
+			_playPattern = Global::_pSong->playOrder[_playPosition];
 			if (initialize)
 			{
 				_playTime = 0;
@@ -82,7 +77,7 @@ namespace psycle
 			_loop_line = 0;
 			if (initialize)
 			{
-				SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
+				SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 				SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 				for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
 				_playing = true;
@@ -93,9 +88,9 @@ namespace psycle
 			_samplesRemaining = SamplesPerRow();
 		}
 
-		void Player::stop(void)
+		void Player::Stop(void)
 		{
-			CSingleLock crit(&Global::song().door, TRUE);
+			CSingleLock crit(&Global::_pSong->door, TRUE);
 
 			if (_playing == true)
 				_lineStop = -1;
@@ -105,13 +100,13 @@ namespace psycle
 			_playBlock = false;			
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
-				if(Global::song().machine(i))
+				if(Global::_pSong->_pMachine[i])
 				{
-					Global::song().machine(i)->Stop();
-					for(int c = 0; c < MAX_TRACKS; c++) Global::song().machine(i)->TriggerDelay[c]._cmd = 0;
+					Global::_pSong->_pMachine[i]->Stop();
+					for(int c = 0; c < MAX_TRACKS; c++) Global::_pSong->_pMachine[i]->TriggerDelay[c]._cmd = 0;
 				}
 			}
-			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
+			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 			CVSTHost::vstTimeInfo.flags &= ~kVstTransportPlaying;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
@@ -130,16 +125,16 @@ namespace psycle
 				CVSTHost::pHost->SetSampleRate(sampleRate);
 				for(int i(0) ; i < MAX_MACHINES; ++i)
 				{
-					if(Global::song().machine(i)) Global::song().machine(i)->SetSampleRate(sampleRate);
+					if(Global::_pSong->_pMachine[i]) Global::_pSong->_pMachine[i]->SetSampleRate(sampleRate);
 				}
 			}
 		}
 		void Player::SetBPM(int _bpm,int _tpb)
 		{
-			if ( _tpb != 0) tpb_=_tpb;
-			if ( _bpm != 0) bpm_=_bpm;
+			if ( _tpb != 0) tpb=_tpb;
+			if ( _bpm != 0) bpm=_bpm;
 			RecalcSPR();
-			CVSTHost::vstTimeInfo.tempo = bpm_;
+			CVSTHost::vstTimeInfo.tempo = bpm;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
 			CVSTHost::vstTimeInfo.flags |= kVstTempoValid;
 			//\todo : Find out if we should notify the plugins of this change.
@@ -154,69 +149,69 @@ namespace psycle
 		// Initial Loop. Read new line and Interpret the Global commands.
 		void Player::ExecuteGlobalCommands(void)
 		{
-			Song* pSong = &Global::song();
+			Song* pSong = Global::_pSong;
 			_patternjump = -1;
 			_linejump = -1;
 			int mIndex = 0;
 			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
-			for(int track=0; track<pSong->tracks(); track++)
+			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
-				PatternEvent* pEntry = (PatternEvent*)(plineOffset + track*EVENT_SIZE);
-				if(pEntry->note() < notecommands::tweak || pEntry->note() == 255) // If This isn't a tweak (twk/tws/mcm) then do
+				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
+				if(pEntry->_note < notecommands::tweak || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
 				{
-					switch(pEntry->command())
+					switch(pEntry->_cmd)
 					{
 					case PatternCmd::SET_TEMPO:
-						if(pEntry->parameter() != 0)
+						if(pEntry->_parameter != 0)
 						{	///\todo: implement the Tempo slide
 							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
-							SetBPM(pEntry->parameter());
+							SetBPM(pEntry->_parameter);
 						}
 						break;
 					case PatternCmd::EXTENDED:
-						if(pEntry->parameter() != 0)
+						if(pEntry->_parameter != 0)
 						{
-							if ( (pEntry->parameter()&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
+							if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
 							{
-								SetBPM(0,pEntry->parameter());
+								SetBPM(0,pEntry->_parameter);
 							}
-							else if ( (pEntry->parameter()&0xF0) == PatternCmd::SET_BYPASS )
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_BYPASS )
 							{
-								mIndex = pEntry->machine();
-								if ( mIndex < MAX_MACHINES && pSong->machine(mIndex) && pSong->machine(mIndex)->_mode == MACHMODE_FX )
+								mIndex = pEntry->_mach;
+								if ( mIndex < MAX_MACHINES && pSong->_pMachine[mIndex] && pSong->_pMachine[mIndex]->_mode == MACHMODE_FX )
 								{
-									if ( pEntry->parameter()&0x0F )
-										pSong->machine(mIndex)->Bypass(true);
+									if ( pEntry->_parameter&0x0F )
+										pSong->_pMachine[mIndex]->Bypass(true);
 									else
-										pSong->machine(mIndex)->Bypass(false);
+										pSong->_pMachine[mIndex]->Bypass(false);
 								}
 							}
 
-							else if ( (pEntry->parameter()&0xF0) == PatternCmd::SET_MUTE )
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_MUTE )
 							{
-								mIndex = pEntry->machine();
-								if ( mIndex < MAX_MACHINES && pSong->machine(mIndex) && pSong->machine(mIndex)->_mode != MACHMODE_MASTER )
+								mIndex = pEntry->_mach;
+								if ( mIndex < MAX_MACHINES && pSong->_pMachine[mIndex] && pSong->_pMachine[mIndex]->_mode != MACHMODE_MASTER )
 								{
-									if ( pEntry->parameter()&0x0F )
-										pSong->machine(mIndex)->_mute = true;
+									if ( pEntry->_parameter&0x0F )
+										pSong->_pMachine[mIndex]->_mute = true;
 									else
-										pSong->machine(mIndex)->_mute = false;
+										pSong->_pMachine[mIndex]->_mute = false;
 								}
 							}
-							else if ( (pEntry->parameter()&0xF0) == PatternCmd::PATTERN_DELAY )
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
-								SamplesPerRow(SamplesPerRow()*(1+(pEntry->parameter()&0x0F)));
+								SamplesPerRow(SamplesPerRow()*(1+(pEntry->_parameter&0x0F)));
 								_SPRChanged=true;
 							}
-							else if ( (pEntry->parameter()&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
 							{
-								SamplesPerRow(SamplesPerRow()*(1.0f+((pEntry->parameter()&0x0F)*tpb()/24.0f)));
+								SamplesPerRow(SamplesPerRow()*(1.0f+((pEntry->_parameter&0x0F)*tpb/24.0f)));
 								_SPRChanged=true;
 							}
-							else if ( (pEntry->parameter()&0xF0) == PatternCmd::PATTERN_LOOP)
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
 							{
-								int value = pEntry->parameter()&0x0F;
+								int value = pEntry->_parameter&0x0F;
 								if (value == 0 )
 								{
 									_loop_line = _lineCounter;
@@ -234,40 +229,40 @@ namespace psycle
 						}
 						break;
 					case PatternCmd::JUMP_TO_ORDER:
-						if ( pEntry->parameter() < pSong->playLength ){
-							_patternjump=pEntry->parameter();
+						if ( pEntry->_parameter < pSong->playLength ){
+							_patternjump=pEntry->_parameter;
 							_linejump=0;
 						}
 						break;
 					case PatternCmd::BREAK_TO_LINE:
 						if (_patternjump ==-1) 
 						{
-							_patternjump=(_sequencePosition+1>=pSong->playLength)?0:_sequencePosition+1;
+							_patternjump=(_playPosition+1>=pSong->playLength)?0:_playPosition+1;
 						}
-						if ( pEntry->parameter() >= pSong->patternLines[_patternjump])
+						if ( pEntry->_parameter >= pSong->patternLines[_patternjump])
 						{
 							_linejump = pSong->patternLines[_patternjump];
-						} else { _linejump= pEntry->parameter(); }
+						} else { _linejump= pEntry->_parameter; }
 						break;
 					case PatternCmd::SET_VOLUME:
-						if(pEntry->machine() == 255)
+						if(pEntry->_mach == 255)
 						{
-							((Master*)(pSong->machine(MASTER_INDEX)))->_outDry = pEntry->parameter();
+							((Master*)(pSong->_pMachine[MASTER_INDEX]))->_outDry = pEntry->_parameter;
 						}
 						else 
 						{
-							int mIndex = pEntry->machine();
+							int mIndex = pEntry->_mach;
 							if(mIndex < MAX_MACHINES)
 							{
-								if(pSong->machine(mIndex)) pSong->machine(mIndex)->SetDestWireVolume(pSong,mIndex,pEntry->instrument(), helpers::CValueMapper::Map_255_1(pEntry->parameter()));
+								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(pSong,mIndex,pEntry->_inst, helpers::CValueMapper::Map_255_1(pEntry->_parameter));
 							}
 						}
 						break;
 					case  PatternCmd::SET_PANNING:
-						mIndex = pEntry->machine();
+						mIndex = pEntry->_mach;
 						if(mIndex < MAX_MACHINES)
 						{
-							if(pSong->machine(mIndex)) pSong->machine(mIndex)->SetPan(pEntry->parameter()>>1);
+							if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetPan(pEntry->_parameter>>1);
 						}
 
 						break;
@@ -276,34 +271,34 @@ namespace psycle
 				// Check For Tweak or MIDI CC
 				else if(!pSong->_trackMuted[track])
 				{
-					int mac = pEntry->machine();
+					int mac = pEntry->_mach;
 					if((mac != 255) || (prevMachines[track] != 255))
 					{
 						if(mac != 255) prevMachines[track] = mac;
 						else mac = prevMachines[track];
 						if(mac < MAX_MACHINES)
 						{
-							Machine *pMachine = pSong->machine(mac);
+							Machine *pMachine = pSong->_pMachine[mac];
 							if(pMachine)
 							{
-								if(pEntry->note() == notecommands::midicc && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
+								if(pEntry->_note == notecommands::midicc && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
 								{
 									// for native machines,
 									// use the value in the "instrument" field of the event as a voice number
-									int voice(pEntry->instrument());
+									int voice(pEntry->_inst);
 									// make a copy of the pattern entry, because we're going to modify it.
-									PatternEvent entry(*pEntry);
+									PatternEntry entry(*pEntry);
 									entry._note = 255;
 									entry._inst = 255;
 									// check for out of range voice values (with the classic tracker way, it's the same as the pattern tracks)
-									if(voice < pSong->tracks())
+									if(voice < pSong->SONGTRACKS)
 									{
 										pMachine->Tick(voice, &entry);
 									}
 									else if(voice == 0xff)
 									{
 										// special voice value which means we want to send the same command to all voices
-										for(int voice(0) ; voice < pSong->tracks() ; ++voice)
+										for(int voice(0) ; voice < pSong->SONGTRACKS ; ++voice)
 										{
 											pMachine->Tick(voice, &entry);
 										}
@@ -328,13 +323,13 @@ namespace psycle
 			// Notify all machines that a new Tick() comes.
 		void Player::NotifyNewLine(void)
 		{
-			Song* pSong = &Global::song();
+			Song* pSong = Global::_pSong;
 			for(int tc=0; tc<MAX_MACHINES; tc++)
 			{
-				if(pSong->machine(tc))
+				if(pSong->_pMachine[tc])
 				{
-					pSong->machine(tc)->Tick();
-					for(int c = 0; c < MAX_TRACKS; c++) pSong->machine(tc)->TriggerDelay[c]._cmd = 0;
+					pSong->_pMachine[tc]->Tick();
+					for(int c = 0; c < MAX_TRACKS; c++) pSong->_pMachine[tc]->TriggerDelay[c]._cmd = 0;
 				}
 			}
 
@@ -343,56 +338,56 @@ namespace psycle
 		/// Final Loop. Read new line for notes to send to the Machines
 		void Player::ExecuteNotes(void)
 		{
-			Song* pSong = &Global::song();
+			Song* pSong = Global::_pSong;
 			unsigned char* const plineOffset = pSong->_ptrackline(_playPattern,0,_lineCounter);
 
 
-			for(int track=0; track<pSong->tracks(); track++)
+			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
-				PatternEvent* pEntry = (PatternEvent*)(plineOffset + track*EVENT_SIZE);
-				if(( !pSong->_trackMuted[track]) && (pEntry->note() < notecommands::tweak || pEntry->note() == 255)) // Is it not muted and is a note?
+				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
+				if(( !pSong->_trackMuted[track]) && (pEntry->_note < notecommands::tweak || pEntry->_note == 255)) // Is it not muted and is a note?
 				{
-					int mac = pEntry->machine();
+					int mac = pEntry->_mach;
 					if(mac != 255) prevMachines[track] = mac;
 					else mac = prevMachines[track];
-					if( mac != 255 && (pEntry->note() != 255 || pEntry->command() != 0 || pEntry->parameter() != 0) ) // is there a machine number and it is either a note or a command?
+					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0 || pEntry->_parameter != 0) ) // is there a machine number and it is either a note or a command?
 //					if( mac != 255 ) // is there a machine number and it is either a note or a command?
 					{
 						if(mac < MAX_MACHINES) //looks like a valid machine index?
 						{
-							Machine *pMachine = pSong->machine(mac);
+							Machine *pMachine = pSong->_pMachine[mac];
 							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
 							{
-								if(pEntry->command() == PatternCmd::NOTE_DELAY)
+								if(pEntry->_cmd == PatternCmd::NOTE_DELAY)
 								{
 									// delay
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEvent));
-									pMachine->TriggerDelayCounter[track] = ((pEntry->parameter()+1)*SamplesPerRow())/256;
+									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*SamplesPerRow())/256;
 								}
-								else if(pEntry->command() == PatternCmd::RETRIGGER)
+								else if(pEntry->_cmd == PatternCmd::RETRIGGER)
 								{
 									// retrigger
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEvent));
-									pMachine->RetriggerRate[track] = (pEntry->parameter()+1);
+									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+									pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
 									pMachine->TriggerDelayCounter[track] = 0;
 								}
-								else if(pEntry->command() == PatternCmd::RETR_CONT)
+								else if(pEntry->_cmd == PatternCmd::RETR_CONT)
 								{
 									// retrigger continue
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEvent));
-									if(pEntry->parameter()&0xf0) pMachine->RetriggerRate[track] = (pEntry->parameter()&0xf0);
+									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+									if(pEntry->_parameter&0xf0) pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
 								}
-								else if (pEntry->command() == PatternCmd::ARPEGGIO)
+								else if (pEntry->_cmd == PatternCmd::ARPEGGIO)
 								{
 									// arpeggio
 									//\todo : Add Memory.
 									//\todo : This won't work... What about sampler's NNA's?
-									if (pEntry->parameter())
+									if (pEntry->_parameter)
 									{
-										memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEvent));
+										memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
 										pMachine->ArpeggioCount[track] = 1;
 									}
-									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb()/24;
+									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
 								}
 								else
 								{
@@ -411,12 +406,12 @@ namespace psycle
 
 		void Player::AdvancePosition()
 		{
-			Song* pSong = &Global::song();
-			if ( _patternjump!=-1 ) _sequencePosition= _patternjump;
+			Song* pSong = Global::_pSong;
+			if ( _patternjump!=-1 ) _playPosition= _patternjump;
 			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = true; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
 			else _lineCounter++;
-			_playTime += 60 / float (bpm_ * tpb_);
+			_playTime += 60 / float (bpm * tpb);
 			if(_playTime>60)
 			{
 				_playTime-=60;
@@ -426,27 +421,27 @@ namespace psycle
 			{
 				_lineCounter = 0;
 				if(!_playBlock)
-					_sequencePosition++;
+					_playPosition++;
 				else
 				{
-					_sequencePosition++;
-					while(_sequencePosition< pSong->playLength && (!pSong->playOrderSel[_sequencePosition]))
-						_sequencePosition++;
+					_playPosition++;
+					while(_playPosition< pSong->playLength && (!pSong->playOrderSel[_playPosition]))
+						_playPosition++;
 				}
 			}
-			if( _sequencePosition >= pSong->playLength)
+			if( _playPosition >= pSong->playLength)
 			{	
 				// Don't loop the recording
 				if(_recording)
 				{
-					stopRecording();
+					StopRecording();
 				}
 				if( _loopSong )
 				{
-					_sequencePosition = 0;
-					if(( _playBlock) && (pSong->playOrderSel[_sequencePosition] == false))
+					_playPosition = 0;
+					if(( _playBlock) && (pSong->playOrderSel[_playPosition] == false))
 					{
-						while((!pSong->playOrderSel[_sequencePosition]) && ( _sequencePosition< pSong->playLength)) _sequencePosition++;
+						while((!pSong->playOrderSel[_playPosition]) && ( _playPosition< pSong->playLength)) _playPosition++;
 					}
 				}
 				else 
@@ -456,7 +451,7 @@ namespace psycle
 				}
 			}
 			// this is outside the if, so that _patternjump works
-			_playPattern = pSong->playOrder[_sequencePosition];
+			_playPattern = pSong->playOrder[_playPosition];
 			_lineChanged = true;
 		}
 
@@ -464,9 +459,9 @@ namespace psycle
 		{
 			int amount;
 			Player* pThis = (Player*)context;
-			Song* pSong = &Global::song();
+			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = pThis->_pBuffer;
-			CSingleLock crit(&Global::song().door, TRUE);
+			CSingleLock crit(&Global::_pSong->door, TRUE);
 			do
 			{
 				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;
@@ -500,22 +495,23 @@ namespace psycle
 						pSong->_sampCount =0;
 						for(int c=0; c<MAX_MACHINES; c++)
 						{
-							if(pSong->machine(c))
+							if(pSong->_pMachine[c])
 							{
-								pSong->machine(c)->_wireCost = 0;
-								pSong->machine(c)->_cpuCost = 0;
+								pSong->_pMachine[c]->_wireCost = 0;
+								pSong->_pMachine[c]->_cpuCost = 0;
 							}
 						}
 					}
 					// Reset all machines
 					for(int c=0; c<MAX_MACHINES; c++)
 					{
-						if(pSong->machine(c)) pSong->machine(c)->PreWork(amount);
+						if(pSong->_pMachine[c]) pSong->_pMachine[c]->PreWork(amount);
 					}
 
-					Sampler::DoPreviews( pSong->machine(MASTER_INDEX)->_pSamplesL, pSong->machine(MASTER_INDEX)->_pSamplesR, amount );
+					//\todo: Sampler::DoPreviews( amount );
+					pSong->DoPreviews( amount );
 
-					CVSTHost::vstTimeInfo.samplePos = ((Master *) (pSong->machine(MASTER_INDEX)))->sampleCount;
+					CVSTHost::vstTimeInfo.samplePos = ((Master *) (pSong->_pMachine[MASTER_INDEX]))->sampleCount;
 
 #if !defined WINAMP_PLUGIN
 					// Inject Midi input data
@@ -523,14 +519,14 @@ namespace psycle
 					{
 						// if midi not enabled we just do the original tracker thing
 						// Master machine initiates work
-						pSong->machine(MASTER_INDEX)->Work(amount);
+						pSong->_pMachine[MASTER_INDEX]->Work(amount);
 					}
 
 					pSong->_sampCount += amount;
 					if((pThis->_playing) && (pThis->_recording))
 					{
-						float* pL(pSong->machine(MASTER_INDEX)->_pSamplesL);
-						float* pR(pSong->machine(MASTER_INDEX)->_pSamplesR);
+						float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);
+						float* pR(pSong->_pMachine[MASTER_INDEX]->_pSamplesR);
 						if(pThis->_dodither)
 						{
 							pThis->dither.Process(pL, amount);
@@ -544,25 +540,25 @@ namespace psycle
 							case 0: // mono mix
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(((*pL++)+(*pR++))/2)) pThis->stopRecording(false);
+									if (!pThis->ClipboardWriteMono(((*pL++)+(*pR++))/2)) pThis->StopRecording(false);
 								}
 								break;
 							case 1: // mono L
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(*pL++)) pThis->stopRecording(false);
+									if (!pThis->ClipboardWriteMono(*pL++)) pThis->StopRecording(false);
 								}
 								break;
 							case 2: // mono R
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(*pR++)) pThis->stopRecording(false);
+									if (!pThis->ClipboardWriteMono(*pR++)) pThis->StopRecording(false);
 								}
 								break;
 							default: // stereo
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteStereo(*pL++,*pR++)) pThis->stopRecording(false);
+									if (!pThis->ClipboardWriteStereo(*pL++,*pR++)) pThis->StopRecording(false);
 								}
 								break;
 							}						}
@@ -572,31 +568,31 @@ namespace psycle
 							for(i=0; i<amount; i++)
 							{
 								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-								if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->stopRecording(false);
+								if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->StopRecording(false);
 							}
 							break;
 						case 1: // mono L
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) pThis->stopRecording(false);
+								if(pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) pThis->StopRecording(false);
 							}
 							break;
 						case 2: // mono R
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) pThis->stopRecording(false);
+								if(pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
 							}
 							break;
 						default: // stereo
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) pThis->stopRecording(false);
+								if(pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
 							}
 							break;
 						}
 					}
 #else
-					pSong->machine(MASTER_INDEX)->Work(amount);
+					pSong->_pMachine[MASTER_INDEX]->Work(amount);
 					pSong->_sampCount += amount;
 #endif //!defined WINAMP_PLUGIN
 
@@ -705,12 +701,12 @@ namespace psycle
 				{
 					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
 					else			dither.SetBitDepth(Global::pConfig->_pOutputDriver->_bitDepth);
-					dither.SetPdf(Dither::Pdf::type(ditherpdf));
-					dither.SetNoiseShaping(Dither::NoiseShape::type(noiseshape));
+					dither.SetPdf((helpers::dsp::Dither::Pdf)ditherpdf);
+					dither.SetNoiseShaping((helpers::dsp::Dither::NoiseShape)noiseshape);
 				}
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
-				stop();
+				Stop();
 				if (!psFilename.empty())
 				{
 					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels, isFloat) == DDC_SUCCESS)
@@ -718,7 +714,7 @@ namespace psycle
 					else
 					{
 						_recording = true;
-						stopRecording(false);
+						StopRecording(false);
 					}
 				}
 				else
@@ -734,14 +730,14 @@ namespace psycle
 					}
 					else {
 						_recording = true;
-						stopRecording(false);
+						StopRecording(false);
 					}
 				}
 			}
 #endif //!defined WINAMP_PLUGIN
 		}
 
-		void Player::stopRecording(bool bOk)
+		void Player::StopRecording(bool bOk)
 		{
 #if !defined WINAMP_PLUGIN
 			if(_recording)
@@ -763,4 +759,3 @@ namespace psycle
 		}
 	}
 }
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

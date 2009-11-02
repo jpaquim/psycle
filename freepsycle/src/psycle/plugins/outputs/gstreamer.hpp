@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2004-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::outputs::gstreamer
 #pragma once
@@ -17,7 +17,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 	protected: friend class virtual_factory_access;
 		gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 	public:
-		engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
+		engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 		void do_name(std::string const &) /*override*/;
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;

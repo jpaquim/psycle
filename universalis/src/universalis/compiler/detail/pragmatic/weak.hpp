@@ -3,11 +3,7 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__WEAK__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__WEAK__INCLUDED
 #pragma once
-
 #include "attribute.hpp"
 
 #if defined DIVERSALIS__COMPILER__GNU
@@ -16,6 +12,4 @@
 	#define UNIVERSALIS__COMPILER__WEAK UNIVERSALIS__COMPILER__ATTRIBUTE(selectany)
 #else
 	#define UNIVERSALIS__COMPILER__WEAK
-#endif
-
 #endif

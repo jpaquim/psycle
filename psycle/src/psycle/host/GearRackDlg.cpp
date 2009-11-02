@@ -1,34 +1,25 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearRackDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "GearRackDlg.hpp"
+#include "Psycle.hpp"
 #include "WaveEdFrame.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-#include <psycle/core/machinefactory.h>
-using namespace psy::core;
-#else
 #include "Song.hpp"
 #include "Machine.hpp"
-#endif
 #include "MainFrm.hpp"
-#include "PatternView.hpp"
-#include "MachineView.hpp"
-
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		int CGearRackDlg::DisplayMode = 0;
 
-		CGearRackDlg::CGearRackDlg(MachineView* view)
-			: CDialog(CGearRackDlg::IDD, view->child_view()),
-			  view_(view)
+		CGearRackDlg::CGearRackDlg(CChildView* pParent, CMainFrame* pMain)
+			: CDialog(CGearRackDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CGearRackDlg)
 			//}}AFX_DATA_INIT
-			m_pParent = view->child_view();
-			pParentMain = view->main();
+			m_pParent = pParent;
+			pParentMain = pMain;
 		}
 
 		void CGearRackDlg::DoDataExchange(CDataExchange* pDX)
@@ -109,16 +100,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_radio_efx.SetCheck(0);
 				m_radio_ins.SetCheck(0);
 
-				selected = Global::song().seqBus;
+				selected = Global::_pSong->seqBus;
 				if (selected >= MAX_BUSES)
 				{
 					selected = 0;
 				}
 				for (b=0; b<MAX_BUSES; b++) // Check Generators
 				{
-					if(Global::song().machine(b))
+					if(Global::_pSong->_pMachine[b])
 					{
-						sprintf(buffer,"%.2X: %s",b,Global::song().machine(b)->GetEditName().c_str());
+						sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
 						m_list.AddString(buffer);
 					}
 					else
@@ -135,7 +126,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_radio_efx.SetCheck(1);
 				m_radio_ins.SetCheck(0);
 
-				selected = Global::song().seqBus;
+				selected = Global::_pSong->seqBus;
 				if (selected < MAX_BUSES)
 				{
 					selected = 0;
@@ -146,9 +137,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 				{
-					if(Global::song().machine(b))
+					if(Global::_pSong->_pMachine[b])
 					{
-						sprintf(buffer,"%.2X: %s",b,Global::song().machine(b)->GetEditName().c_str());
+						sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
 						m_list.AddString(buffer);
 					}
 					else
@@ -168,19 +159,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				char buffer[64];
 				for (int b=0;b<PREV_WAV_INS;b++)
 				{
-					sprintf(buffer, "%.2X: %s", b, Global::song()._pInstrument[b]->_sName);
+					sprintf(buffer, "%.2X: %s", b, Global::_pSong->_pInstrument[b]->_sName);
 					m_list.AddString(buffer);
 				}
 				CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 				if (cc->GetCurSel() == AUX_WAVES)
 				{
-					selected = Global::song().instSelected();
+					selected = Global::_pSong->instSelected;
 				}
 				else
 				{
 					cc->SetCurSel(AUX_WAVES);
 					pParentMain->UpdateComboIns(true);
-					selected = Global::song().instSelected();
+					selected = Global::_pSong->instSelected;
 				}
 				break;
 			}
@@ -196,7 +187,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			case 1:
 				tmac += MAX_BUSES;
 			case 0:
-				Global::song().seqBus = tmac;
+				Global::_pSong->seqBus = tmac;
 				pParentMain->UpdateComboGen();
 				break;
 			case 2:
@@ -204,15 +195,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					if (cc->GetCurSel() == AUX_WAVES)
 					{
-						Global::song().instSelected(tmac);
-						Global::song().auxcolSelected=tmac;
+						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 						pParentMain->UpdateComboIns(false);
 					}
 					else
 					{
 						cc->SetCurSel(AUX_WAVES);
-						Global::song().instSelected(tmac);
-						Global::song().auxcolSelected=tmac;
+						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 						pParentMain->UpdateComboIns(true);
 					}
 					pParentMain->m_wndInst.WaveUpdate();
@@ -228,18 +217,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 			case 1:
 				tmac += MAX_BUSES;
-				//fallthrough
 			case 0:
 				{
-					view_->ShowNewMachineDlg(-1,-1,view_->song()->machine(tmac), false);
+					m_pParent->NewMachine(-1,-1,tmac);
+
+					pParentMain->UpdateEnvInfo();
+					pParentMain->UpdateComboGen();
+					if (m_pParent->viewMode==view_modes::machine)
+					{
+						m_pParent->Repaint();
+					}
 				}
 				break;
 			case 2:
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-					Global::song().instSelected(tmac);
-					Global::song().auxcolSelected=tmac;
+					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -256,25 +250,34 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pParent->AddMacViewUndo();
 			switch (DisplayMode)
 			{
-			case 1:
-				tmac+=MAX_BUSES;
-				//fallthrough
 			case 0:
 				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
-					if (Global::song().machine(tmac))
+					if (Global::_pSong->_pMachine[tmac])
 					{
-						view_->DeleteMachineGui(view_->song()->machine(tmac));
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Global::song().DeleteMachine(view_->song()->machine(tmac));
-#else
-						Global::song().DestroyMachine(tmac);
-#endif
+						pParentMain->CloseMacGui(tmac);
+						Global::_pSong->DestroyMachine(tmac);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
 						if (m_pParent->viewMode==view_modes::machine)
 						{
-							m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
+							m_pParent->Repaint();
+						}
+					}
+				}
+				break;
+			case 1:
+				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
+				{
+					if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
+					{
+						pParentMain->CloseMacGui(tmac+MAX_BUSES);
+						Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
+						pParentMain->UpdateEnvInfo();
+						pParentMain->UpdateComboGen();
+						if (m_pParent->viewMode==view_modes::machine)
+						{
+							m_pParent->Repaint();
 						}
 					}
 				}
@@ -283,12 +286,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-						Global::song().instSelected(tmac);
-						Global::song().auxcolSelected=tmac;
+					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
-				Global::song().DeleteInstrument(Global::song().instSelected());
+				Global::_pSong->DeleteInstrument(Global::_pSong->instSelected);
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
@@ -307,19 +309,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			switch (DisplayMode)
 			{
 			case 0:
-				if (Global::song().machine(tmac))
+				if (Global::_pSong->_pMachine[tmac])
 				{
-					view_->DoMacPropDialog(view_->song()->machine(tmac), false);
-				}
-				break;
-			case 1:
-				if (Global::song().machine(tmac+MAX_BUSES))
-				{
+					m_pParent->DoMacPropDialog(tmac);
 					pParentMain->UpdateEnvInfo();
 					pParentMain->UpdateComboGen();
 					if (m_pParent->viewMode==view_modes::machine)
 					{
-						m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
+						m_pParent->Repaint();
+					}
+				}
+				break;
+			case 1:
+				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
+				{
+					m_pParent->DoMacPropDialog(tmac+MAX_BUSES);
+					pParentMain->UpdateEnvInfo();
+					pParentMain->UpdateComboGen();
+					if (m_pParent->viewMode==view_modes::machine)
+					{
+						m_pParent->Repaint();
 					}
 				}
 				break;
@@ -327,8 +336,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-						Global::song().instSelected(tmac);
-						Global::song().auxcolSelected=tmac;
+					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -348,27 +356,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			switch (DisplayMode)
 			{
 			case 0:
-				if (view_->song()->machine(tmac))
+				if (Global::_pSong->_pMachine[tmac])
 				{
-					view_->ShowDialog(view_->song()->machine(tmac),
-									  point.x,
-									  point.y);
+					pParentMain->ShowMachineGui(tmac,point);
 				}
 				break;
 			case 1:
-				if (view_->song()->machine(tmac+MAX_BUSES))
+				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
 				{
-					view_->ShowDialog(view_->song()->machine(tmac+MAX_BUSES),
-									  point.x,
-									  point.y);
+					pParentMain->ShowMachineGui(tmac+MAX_BUSES,point);
 				}
 				break;
 			case 2:
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_WAVES);
-					Global::song().instSelected(tmac);
-					Global::song().auxcolSelected=tmac;
+					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
@@ -416,26 +419,30 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			switch (DisplayMode) // should be necessary to rename opened parameter windows.
 			{
-			case 1:
-				sel[0]+=MAX_BUSES;
-				sel[1]+=MAX_BUSES;
-				//fallthrough
 			case 0:
 				m_pParent->AddMacViewUndo();
-				Global::song().ExchangeMachines(sel[0],sel[1]);
+				Global::_pSong->ExchangeMachines(sel[0],sel[1]);
 				pParentMain->UpdateComboGen(true);
-				view_->Rebuild();				
 				if (m_pParent->viewMode==view_modes::machine)
 				{
-					m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
+					m_pParent->Repaint();
+				}
+				break;
+			case 1:
+				m_pParent->AddMacViewUndo();
+				Global::_pSong->ExchangeMachines(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
+				pParentMain->UpdateComboGen(true);
+				if (m_pParent->viewMode==view_modes::machine)
+				{
+					m_pParent->Repaint();
 				}
 				break;
 			case 2:
 				m_pParent->AddMacViewUndo();
-				Global::song().IsInvalided(true);
-				Global::song().ExchangeInstruments(sel[0],sel[1]);
+				Global::_pSong->Invalided=true;
+				Global::_pSong->ExchangeInstruments(sel[0],sel[1]);
 				
-				Global::song().IsInvalided(false);
+				Global::_pSong->Invalided=false;
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
@@ -465,61 +472,27 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 				return;
 			}
+
 			// now lets do the actual work...
 			switch (DisplayMode) // should be necessary to rename opened parameter windows.
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			case 1:
-				tmac1+=MAX_BUSES;
-				if (tmac2 >= 0)
-				{
-					tmac2+=MAX_BUSES;
-				}
-				//fallthrough
-			case 0:
-				if (!Global::song().machine(tmac1)) {
-					MessageBox("The first selection does not correspond to a valid machine","Gear Rack Dialog");
-					return;
-				} else if(tmac2 != -1 && Global::song().machine(tmac2)) {
-					MessageBox("You cannot clone over an existing machine. Please select an empty slot.","Gear Rack Dialog");
-					return;
-				}
-				{
-					Machine* newMac = MachineFactory::getInstance().CloneMachine(*Global::song().machine(tmac1));
-					if (!newMac) {
-						MessageBox("Cloning process failed","Gear Rack Dialog");
-						return;
-					}
-					Global::song().AddMachine(newMac, tmac2);
-					view_->CreateMachineGui(newMac);
-				}
-				pParentMain->UpdateComboGen(true);
-				if (m_pParent->viewMode==view_modes::machine)
-				{
-					m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
-				}
-				break;
-#else
 			case 0:
 				if (tmac2 < 0)
 				{
-					tmac2 = Global::song().GetFreeBus();
+					tmac2 = Global::_pSong->GetFreeBus();
 				}
 				if (tmac2 >= 0)
 				{
-					if (!Global::song().CloneMac(tmac1,tmac2))
+					if (!Global::_pSong->CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
 					}
-					else {
-						view_->CreateMachineGui(view_->song()->machine(tmac2));
-					}
 				}
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
-					m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
+					m_pParent->Repaint();
 				}
 				break;
 			case 1:
@@ -530,11 +503,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else
 				{
-					tmac2 = Global::song().GetFreeFxBus();
+					tmac2 = Global::_pSong->GetFreeFxBus();
 				}
 				if (tmac2 >= 0)
 				{
-					if (!Global::song().CloneMac(tmac1,tmac2))
+					if (!Global::_pSong->CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
@@ -543,17 +516,16 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
-					m_pParent->pattern_view()->Repaint(PatternView::draw_modes::all);
+					m_pParent->Repaint();
 				}
 				break;
-#endif
 			case 2:
-				Global::song().IsInvalided(true);
+				Global::_pSong->Invalided=true;
 				if (tmac2 < 0)
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)
 					{
-						if (Global::song()._pInstrument[i]->Empty())
+						if (Global::_pSong->_pInstrument[i]->Empty())
 						{
 							tmac2 = i;
 							break;
@@ -562,14 +534,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				if (tmac2 >=0)
 				{
-					if (!Global::song().CloneIns(tmac1,tmac2))
+					if (!Global::_pSong->CloneIns(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
 					}
 				}
 				
-				Global::song().IsInvalided(false);
+				Global::_pSong->Invalided=false;
 				pParentMain->UpdateComboIns(true);
 				break;
 			}

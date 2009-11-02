@@ -1,6 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
-
+// copyright 2000-2008 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 ///\interface psycle::front_ends::gui::graph
 #pragma once
 #include "forward_declarations.hpp"
@@ -23,8 +22,7 @@
 #include <libgnomecanvasmm/rect.h>
 #include <libgnomecanvasmm/line.h>
 #include <libgnomecanvasmm/text.h>
-#include <vector>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__FRONT_ENDS__GUI
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__FRONT_ENDS__GUI__GRAPH
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace front_ends { namespace gui {
 
@@ -37,7 +35,7 @@ typedef
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base {
 	public:
 		typedef canvas_base base;
-		canvas(typenames::graph &);
+		canvas(graph &);
 
 	protected:
 		bool on_event(GdkEvent *) /*override*/;
@@ -46,18 +44,18 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base {
 		Gnome::Canvas::Group group_;
 		
 	public:
-		typenames::graph inline & graph() { return graph_; }
-		inline operator typenames::graph & () { return graph(); }
+		graph inline & graph_instance() { return graph_; }
+		inline operator graph & () { return graph_instance(); }
 	private:
-		typenames::graph & graph_;
+		graph & graph_;
 	
 	///\name drawing of a new connection between ports
 	///\{
 		public:
-			void inline selected_port(port & port);
+			void inline selected_port(port & port) { selected_port_ = &port; }
+			port inline * const selected_port() { return selected_port_; }
 		private:
-			port * selected_port_, * selected_port_2_;
-			bool selected_port_is_output_;
+			port * selected_port_;
 
 		protected:
 			Gnome::Canvas::Line inline & line() { return line_; }
@@ -110,15 +108,17 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
 		Gtk::ToggleButton start_;
 
 	public:
-		typenames::canvas inline & canvas() throw() { return canvas_; }
-		inline operator typenames::canvas & () throw() { return canvas(); }
-		inline operator Gnome::Canvas::Group & () throw() { return *canvas().root(); }
-		inline operator Gnome::Canvas::Group * () throw() { return canvas().root(); }
+		canvas inline & canvas_instance() throw() { return canvas_; }
+		//typenames::canvas inline & canvas() throw() { return canvas_; }
+		inline operator canvas & () throw() { return canvas_instance(); }
+		inline operator Gnome::Canvas::Group & () throw() { return *canvas_instance().root(); }
+		inline operator Gnome::Canvas::Group * () throw() { return canvas_instance().root(); }
 	protected:
 		void on_size_allocate(Gtk::Allocation & allocation) /*override*/;
 		void on_zoom();
 	private:
-		typenames::canvas canvas_;
+		canvas canvas_;
+		//typenames::canvas canvas_;
 		Gtk::ScrolledWindow scroll_;
 		Gtk::Adjustment adjustment_;
 		Gtk::SpinButton spin_;
@@ -137,9 +137,11 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
 		virtual inline ~port() {}
 
 	protected: friend class node;
-		typenames::contraption inline & contraption() throw() { return contraption_; }
+		contraption inline & contraption_instance() throw() { return contraption_; }
+		//typenames::contraption inline & contraption() throw() { return contraption_; }
 	private:
-		typenames::contraption contraption_;
+		contraption contraption_;
+		//typenames::contraption contraption_;
 	
 	protected:
 		Gnome::Canvas::Line inline & line() throw() { return line_; }
@@ -147,21 +149,15 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
 		Gnome::Canvas::Line line_;
 
 	protected:
-		void on_select(typenames::contraption &);
-		void on_move(typenames::contraption &);
-	private:
-		bool on_canvas_event(GdkEvent *);
+		bool on_event(GdkEvent *) /*override*/;
+		void on_select(contraption &);
+		void on_move(contraption &);
 };
 
 namespace ports {
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output {
 		protected: friend class virtual_factory_access;
 			output(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
-		
-		protected:
-			std::vector<Gnome::Canvas::Line*> inline & lines() throw() { return lines_; }
-		private:
-			std::vector<Gnome::Canvas::Line*> lines_;
 	};
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input {
 		protected: friend class virtual_factory_access;
@@ -193,12 +189,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node
 		~node() throw() {}
 
 	protected:
-		typenames::contraption inline & contraption() throw() { return contraption_; }
+		contraption inline & contraption_instance() throw() { return contraption_; }
+		//typenames::contraption inline & contraption() throw() { return contraption_; }
 	private:
-		typenames::contraption contraption_;
+		contraption contraption_;
+		//typenames::contraption contraption_;
 	
-	private:
-		bool on_canvas_event(GdkEvent *);
+	protected:
+		bool on_event_(GdkEvent *) /*override*/;
 		
 	///\name menu
 	///\{

@@ -6,10 +6,10 @@
 //
 //============================================================================
 #pragma once
-#include "AMath.h"
-#include "CEnvelope.h"
-#include "DLineN.h"
-#include "BiQuad.h"
+#include "../Lib/AMath.h"
+#include "../Lib/BiQuad.h"
+#include "../Lib/DLineN.h"
+#include "../Lib/CEnvelope.h"
 
 #define EXCITATION_FILTER_LENGTH 3
 
@@ -74,6 +74,8 @@ public:
 	//				Methods
 	//------------------------------------------------------------------------
 public:
+	CVoice();
+	~CVoice();
 	void Init();
 	void Clear();
 	void SetFreq(float frequency);

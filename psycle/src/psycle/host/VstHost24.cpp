@@ -1,7 +1,7 @@
 ///\file
-///\brief implementation file for psycle::host::vst::plugin
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+///\brief implementation file for psycle::host::Machine
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "VstHost24.hpp"
 #include "Global.hpp"
 #include "Psycle.hpp"
@@ -19,8 +19,6 @@
 ///\todo: When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
 //        (LiveSlice is a good example of what happens if it isn't correct)
 
-#include <universalis/os/aligned_memory_alloc.hpp>
-
 namespace psycle
 {
 	namespace host
@@ -35,15 +33,15 @@ namespace psycle
 			using namespace seib::vst;
 			int plugin::pitchWheelCentre(8191);
 
-/*			Machine* AudioMaster::CreateFromType(int _id, std::string _dllname)
+/*			Machine* host::CreateFromType(int _id, std::string _dllname)
 			{
 				//\todo;
 				//return new;
 			}
 */
-			void AudioMaster::CalcTimeInfo(long lMask)
+			void host::CalcTimeInfo(long lMask)
 			{
-				///\todo: cycleactive and recording to a "start()" function.
+				///\todo: cycleactive and recording to a "Start()" function.
 				// automationwriting and automationreading.
 				//
 				/*
@@ -62,7 +60,7 @@ namespace psycle
 			}
 
 
-			bool AudioMaster::OnCanDo(CEffect &pEffect, const char *ptr)
+			bool host::OnCanDo(CEffect &pEffect, const char *ptr)
 			{
 				using namespace seib::vst::HostCanDos;
 				bool value =  CVSTHost::OnCanDo(pEffect,ptr);
@@ -86,31 +84,31 @@ namespace psycle
 				return false;                           /* per default, no.                  */
 			}
 
-			long AudioMaster::DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos)
+			long host::DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos)
 			{
 				//\todo: return the real tempo in the future, not always the current one
 				// pos in Sample frames, return bpm* 10000
 				return vstTimeInfo.tempo * 10000;
 			}
-			long AudioMaster::OnGetOutputLatency(CEffect &pEffect)
+			long host::OnGetOutputLatency(CEffect &pEffect)
 			{
 				//\todo : return Global::pPlayer->->LatencyInSamples();
 				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
 				return pdriver->GetOutputLatency();
 			}
-			long AudioMaster::OnGetInputLatency(CEffect &pEffect)
+			long host::OnGetInputLatency(CEffect &pEffect)
 			{
 				//\todo : return Global::pPlayer->->LatencyInSamples();
 				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
 				return pdriver->GetInputLatency();
 			}
-			void AudioMaster::Log(std::string message)
+			void host::Log(std::string message)
 			{
 				loggers::info(message);
 			}
 
 			///\todo: Get information about this function
-			long AudioMaster::OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
+			long host::OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -171,14 +169,22 @@ namespace psycle
 					}
 					else
 					{
-						universalis::os::aligned_memory_alloc(16, _pOutSamplesL, STREAM_SIZE);
-						universalis::os::aligned_memory_alloc(16, _pOutSamplesR, STREAM_SIZE);
+					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+						_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+						_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
+					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+						posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
+						posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
+					#else
+						_pOutSamplesL = new float[STREAM_SIZE];
+						_pOutSamplesR = new float[STREAM_SIZE];
+					#endif
 						helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
 						helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
 						outputs[0] = _pOutSamplesL;
 						outputs[1] = _pOutSamplesR;
 					}
-				} PSYCLE__HOST__CATCH_ALL(crashclass);
+				}PSYCLE__HOST__CATCH_ALL(crashclass);
 
 				for(int i(0) ; i < MAX_TRACKS; ++i)
 				{
@@ -231,11 +237,24 @@ namespace psycle
 				}PSYCLE__HOST__CATCH_ALL(crashclass);
 			}
 
-			plugin::~plugin() {
-				if(aEffect) {
-					if(!WillProcessReplace()) {
-						universalis::os::aligned_memory_dealloc(_pOutSamplesL);
-						universalis::os::aligned_memory_dealloc(_pOutSamplesR);
+			plugin::~plugin()
+			{
+				if (aEffect)
+				{
+					if (!WillProcessReplace())
+					{
+					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+						_aligned_free(_pOutSamplesL);
+						_aligned_free(_pOutSamplesR);
+					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+						free(_pOutSamplesL);
+						free(_pOutSamplesR);
+					#else
+
+						delete [] _pOutSamplesL;
+						delete [] _pOutSamplesR;
+					#endif
+						_pOutSamplesL = _pOutSamplesR=0;
 					}
 				}
 			}
@@ -553,17 +572,17 @@ namespace psycle
 					}
 				}
 			}
-			void plugin::Tick(int channel, PatternEvent * pData)
+			void plugin::Tick(int channel, PatternEntry * pData)
 			{
-				const int note = pData->note();
+				const int note = pData->_note;
 				int midiChannel;
-				if (pData->instrument() == 0xFF) midiChannel = 0;
-				else midiChannel = pData->instrument() & 0x0F;
+				if (pData->_inst == 0xFF) midiChannel = 0;
+				else midiChannel = pData->_inst & 0x0F;
 
 				if(note == notecommands::tweak || note == notecommands::tweakeffect) // Tweak Command
 				{
-					const float value(((pData->command() * 256) + pData->parameter()) / 65535.0f);
-					SetParameter(pData->instrument(), value);
+					const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
+					SetParameter(pData->_inst, value);
 					Global::pPlayer->Tweaker = true;
 				}
 				else if(note == notecommands::tweakslide)
@@ -571,14 +590,14 @@ namespace psycle
 					int i;
 					if(TWSActive)
 					{
-						for(i = 0 ; i < MAX_TWS; ++i) if(TWSInst[i] == pData->instrument() && TWSDelta[i]) break;
+						for(i = 0 ; i < MAX_TWS; ++i) if(TWSInst[i] == pData->_inst && TWSDelta[i]) break;
 						if(i == MAX_TWS) for(i = 0 ; i < MAX_TWS; ++i) if(!TWSDelta[i]) break;
 					}
 					else for(i = MAX_TWS - 1 ; i > 0 ; --i) TWSDelta[i] = 0;
 					if(i < MAX_TWS)
 					{
-						TWSDestination[i] = ((pData->command() * 256) + pData->parameter()) / 65535.0f;
-						TWSInst[i] = pData->instrument();
+						TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / 65535.0f;
+						TWSInst[i] = pData->_inst;
 						TWSCurrent[i] = GetParameter(TWSInst[i]);
 						TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::pPlayer->SamplesPerRow();
 						TWSSamples = 0;
@@ -587,35 +606,35 @@ namespace psycle
 					else
 					{
 						// we have used all our slots, just send a twk
-						const float value(((pData->command() * 256) + pData->parameter()) / 65535.0f);
-						SetParameter(pData->instrument(), value);
+						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
+						SetParameter(pData->_inst, value);
 					}
 					Global::pPlayer->Tweaker = true;
 				}
-				else if(pData->note() == notecommands::midicc) // Mcm (MIDI CC) Command
+				else if(pData->_note == notecommands::midicc) // Mcm (MIDI CC) Command
 				{
-					AddMIDI(pData->instrument(), pData->command(), pData->parameter());
+					AddMIDI(pData->_inst, pData->_cmd, pData->_parameter);
 				}
 				else
 				{
-					if(pData->command() == 0xC1) //set the pitch bend range
+					if(pData->_cmd == 0xC1) //set the pitch bend range
 					{
-						rangeInSemis = pData->parameter();
+						rangeInSemis = pData->_parameter;
 					}
-					else if(pData->command() == 0xC2) //Panning
+					else if(pData->_cmd == 0xC2) //Panning
 					{
-						AddMIDI(0xB0 | midiChannel, 0x0A,pData->parameter()*0.5f);
+						AddMIDI(0xB0 | midiChannel, 0x0A,pData->_parameter*0.5f);
 					}
 
 					if(note < notecommands::release) // Note on
 					{
 						int semisToSlide(0);
 
-						if((pData->command() == 0x10) && ((pData->instrument() & 0xF0) == 0x80 || (pData->instrument() & 0xF0) == 0x90)) // _OLD_ MIDI Command
+						if((pData->_cmd == 0x10) && ((pData->_inst & 0xF0) == 0x80 || (pData->_inst & 0xF0) == 0x90)) // _OLD_ MIDI Command
 						{
-							AddMIDI(pData->instrument(), note, pData->parameter());
+							AddMIDI(pData->_inst, note, pData->_parameter);
 						}
-						else if((pData->command() & 0xF0) == 0xD0 || (pData->command() & 0xF0) == 0xE0) //semislide
+						else if((pData->_cmd & 0xF0) == 0xD0 || (pData->_cmd & 0xF0) == 0xE0) //semislide
 						{
 							if (NSCurrent[midiChannel] != pitchWheelCentre)
 							{
@@ -624,20 +643,20 @@ namespace psycle
 							///\todo: sorry???
 							currentSemi[midiChannel] = 0;
 
-							if ((pData->command() & 0xF0) == 0xD0) //pitch slide down
+							if ((pData->_cmd & 0xF0) == 0xD0) //pitch slide down
 							{
-								semisToSlide = -(pData->command() & 0x0F);
+								semisToSlide = -(pData->_cmd & 0x0F);
 								if (semisToSlide < (-rangeInSemis - currentSemi[midiChannel]))
 									semisToSlide = (-rangeInSemis - currentSemi[midiChannel]);
 							}
 							else							  //pitch slide up
 							{
-								semisToSlide = pData->command() & 0x0F;
+								semisToSlide = pData->_cmd & 0x0F;
 								if (semisToSlide > (rangeInSemis - currentSemi[midiChannel]))
 									semisToSlide = (rangeInSemis - currentSemi[midiChannel]);
 							}
 
-							int speedToSlide = pData->parameter();
+							int speedToSlide = pData->_parameter;
 							
 							NSCurrent[midiChannel] = pitchWheelCentre + (currentSemi[midiChannel] * (pitchWheelCentre / rangeInSemis));
 							NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);						
@@ -647,10 +666,10 @@ namespace psycle
 							currentSemi[midiChannel] = currentSemi[midiChannel] + semisToSlide;
 							AddNoteOn(channel, note, 127, midiChannel);
 						}
-						else if((pData->command() == 0xC3) && (oldNote[midiChannel]!=-1))//slide to note
+						else if((pData->_cmd == 0xC3) && (oldNote[midiChannel]!=-1))//slide to note
 						{
 							semisToSlide = note - oldNote[midiChannel];
-							int speedToSlide = pData->parameter();
+							int speedToSlide = pData->_parameter;
 							NSDestination[midiChannel] = NSDestination[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);
 							NSTargetDistance[midiChannel] = (NSDestination[midiChannel] - NSCurrent[midiChannel]);
 							NSDelta[midiChannel] = (NSTargetDistance[midiChannel] * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
@@ -668,9 +687,9 @@ namespace psycle
 								currentSemi[midiChannel] = 0;
 							}
 							//AddMIDI(0xB0 | midiChannel,0x07,127); // channel volume. Reset it for the new note.
-							AddNoteOn(channel,note,(pData->command() == 0x0C)?pData->parameter()/2:127,midiChannel,0,(pData->machine()==0xFF));
+							AddNoteOn(channel,note,(pData->_cmd == 0x0C)?pData->_parameter/2:127,midiChannel,0,(pData->_mach==0xFF));
 						}
-						if (((pData->command() & 0xF0) == 0xD0) || ((pData->command() & 0xF0) == 0xE0))
+						if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
 							oldNote[midiChannel] = note + semisToSlide;								
 						else
 							oldNote[midiChannel] = note;
@@ -680,48 +699,48 @@ namespace psycle
 						AddNoteOff(channel, midiChannel);
 						oldNote[midiChannel] = -1;
 					}
-					else if(pData->note() == notecommands::empty)
+					else if(pData->_note == notecommands::empty)
 					{
 						int semisToSlide(0);
 
-						if (pData->command() == 0x10) // _OLD_ MIDI Command
+						if (pData->_cmd == 0x10) // _OLD_ MIDI Command
 						{
-							AddMIDI(pData->instrument(),pData->parameter());
+							AddMIDI(pData->_inst,pData->_parameter);
 						}
-//						else if (pData->command() == 0x0C) // channel volume.
+//						else if (pData->_cmd == 0x0C) // channel volume.
 //						{
-///							AddMIDI(0xB0 | midiChannel,0x07,pData->parameter()*0.5f);
+///							AddMIDI(0xB0 | midiChannel,0x07,pData->_parameter*0.5f);
 //						}
-						else if (pData->command() == 0x0C) // channel aftertouch.
+						else if (pData->_cmd == 0x0C) // channel aftertouch.
 						{
-							AddMIDI(0xD0 | midiChannel,pData->parameter()*0.5f);
+							AddMIDI(0xD0 | midiChannel,pData->_parameter*0.5f);
 						}
-						else if(pData->command() == 0xC3) //slide to note . Used to change the speed.
+						else if(pData->_cmd == 0xC3) //slide to note . Used to change the speed.
 						{
-							int speedToSlide = pData->parameter();
+							int speedToSlide = pData->_parameter;
 							NSDelta[midiChannel] = (NSTargetDistance[midiChannel] * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
 						}
-						else if((pData->command() & 0xF0) == 0xD0 || (pData->command() & 0xF0) == 0xE0) //semislide
+						else if((pData->_cmd & 0xF0) == 0xD0 || (pData->_cmd & 0xF0) == 0xE0) //semislide
 						{
 							if (NSCurrent[midiChannel] != NSDestination[midiChannel])
 							{
 								AddMIDI(0xE0 | midiChannel,LSB(NSDestination[midiChannel]),MSB(NSDestination[midiChannel]));
 							}
 
-							if ((pData->command() & 0xF0) == 0xD0) //pitch slide down
+							if ((pData->_cmd & 0xF0) == 0xD0) //pitch slide down
 							{
-								semisToSlide = -(pData->command() & 0x0F);
+								semisToSlide = -(pData->_cmd & 0x0F);
 								if (semisToSlide < (-rangeInSemis - currentSemi[midiChannel]))
 									semisToSlide = (-rangeInSemis - currentSemi[midiChannel]);
 							}
 							else							  //pitch slide up
 							{
-								semisToSlide = pData->command() & 0x0F;
+								semisToSlide = pData->_cmd & 0x0F;
 								if (semisToSlide > (rangeInSemis - currentSemi[midiChannel]))
 									semisToSlide = (rangeInSemis - currentSemi[midiChannel]);
 							}
 
-							int speedToSlide = pData->parameter();
+							int speedToSlide = pData->_parameter;
 							
 							NSCurrent[midiChannel] = pitchWheelCentre + (currentSemi[midiChannel] * (pitchWheelCentre / rangeInSemis));
 							NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);						
@@ -730,7 +749,7 @@ namespace psycle
 							NSActive[midiChannel] = true;
 							currentSemi[midiChannel] = currentSemi[midiChannel] + semisToSlide;
 						}
-						if (((pData->command() & 0xF0) == 0xD0) || ((pData->command() & 0xF0) == 0xE0))
+						if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
 							oldNote[midiChannel] = oldNote[midiChannel] + semisToSlide;								
 					}
 				}
@@ -796,14 +815,14 @@ namespace psycle
 						{
 							int nextevent;
 							if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-							for(int i(0) ; i < Global::song().tracks() ; ++i)
+							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
 							{
 								if(TriggerDelay[i]._cmd && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 							}
 							if(nextevent > ns)
 							{
 								if(TWSActive) TWSSamples -= ns;
-								for(int i(0) ; i < Global::song().tracks(); ++i)
+								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
 								{
 									// come back to this
 									if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
@@ -868,7 +887,7 @@ namespace psycle
 										if(activecount == 0) TWSActive = false;
 									}
 								}
-								for(int i(0) ; i < Global::song().tracks(); ++i)
+								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
 								{
 									// come back to this
 									if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -1060,4 +1079,3 @@ namespace psycle
 		}
 	}
 }
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

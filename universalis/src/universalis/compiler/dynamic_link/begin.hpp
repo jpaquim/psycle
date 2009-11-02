@@ -3,9 +3,7 @@
 
 ///\file
 ///\brief handling of shared dynamic-link libraries for microsoft's dll format
-
 #include <universalis/compiler/compiler.hpp>
-
 #if defined UNIVERSALIS__COMPILER__DYNAMIC_LINK__DETAIL__DEFINED
 	#error missing #include <universalis/compiler/dynamic_link/end.hpp>
 #elif !defined UNIVERSALIS__COMPILER__DYNAMIC_LINK
@@ -19,10 +17,10 @@
 	/// Note that the gcc/mingw compiler handles dll transparently thanks to automatic import and runtime pseudo-relocations :-)
 	#define UNIVERSALIS__COMPILER__DYNAMIC_LINK
 #else
-	#if UNIVERSALIS__COMPILER__DYNAMIC_LINK > 0
+	#if UNIVERSALIS__COMPILER__DYNAMIC_LINK > 0 || UNIVERSALIS__COMPILER__CONCATENATED(PACKAGENERIC__MODULE__SOURCE__, UNIVERSALIS__COMPILER__DYNAMIC_LINK) > 0
 		#undef  UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
-	#elif UNIVERSALIS__COMPILER__DYNAMIC_LINK < 0
+	#elif UNIVERSALIS__COMPILER__DYNAMIC_LINK < 0 || UNIVERSALIS__COMPILER__CONCATENATED(PACKAGENERIC__MODULE__SOURCE__, UNIVERSALIS__COMPILER__DYNAMIC_LINK) < 0
 		#undef  UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		#define UNIVERSALIS__COMPILER__DYNAMIC_LINK // nothing needed for static link
 	#else

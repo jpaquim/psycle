@@ -3,13 +3,8 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__STANDARD__WCHAR_T__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__STANDARD__WCHAR_T__INCLUDED
 #pragma once
-
 #include <universalis/compiler/numeric.hpp>
-
 #if defined DIVERSALIS__COMPILER__MICROSOFT && 0 // [bohan] disabled... i can't help microsoft with this... let them fix that flaw.
 	// the microsoft compiler has an old implementation of wchar_t: it is 16 bits while it actually must be 32 bits nowadays.
 	// see also: _WCHAR_T_DEFINED _NATIVE_WCHAR_T_DEFINED
@@ -20,6 +15,4 @@
 		#define wchar_t universalis::compiler::numeric<32>::unsigned_int
 		// we cannot use a typedef since wchar_t is already a type, and we cannot #undef a type.
 	#endif
-#endif
-
 #endif

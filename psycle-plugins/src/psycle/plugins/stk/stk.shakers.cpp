@@ -10,8 +10,6 @@
 #include <stk/stk.h>
 #include <stk/Shakers.h>
 
-using namespace psycle::plugin_interface;
-
 int const NUMPARAMETERS = 6;
 
 CMachineParameter const paraShakeEnergy = 
@@ -86,7 +84,8 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -100,7 +99,7 @@ CMachineInfo const MacInfo (
 	"Sartorius, bohan and STK 4.2.0 developers",																												// author
 	"Help",																																				// A command, that could be use for open an editor, etc...
 	1
-);
+};
 
 class mi : public CMachineInterface
 {

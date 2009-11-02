@@ -1,23 +1,13 @@
 ///\file
 ///\brief interface file for psycle::host::CFrameMachine.
 #pragma once
-#include "Psycle.hpp"
 #include "FrameMachine.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class Mixer;
-	}
-}
-using namespace psy::core;
-#endif
+#include "Constants.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-
-	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Mixer;
-	#endif
+	class Mixer;
 
 	/// mixer window.
 	class CFrameMixerMachine : public CFrameMachine
@@ -68,12 +58,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 			InfoLabel(){};
 			virtual ~InfoLabel(){};
 
-			static void Draw(CDC *dc, int x, int y, std::string parName, std::string parValue);
-			static void DrawValue(CDC *dc, int x, int y, std::string parValue);
-			static void DrawHLight(CDC *dc,CFont *font_bold, int x, int y, std::string parName, std::string parValue);
-			static void DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y, std::string parName, std::string parValue);
-			static void DrawHLightValue(CDC *dc, int x, int y, std::string parValue);
-//			static void DrawHeader(CDC *dc, int x, int y, std::string parName, std::string parValue);
+			static void Draw(CDC *dc, int x, int y,const char *parName,const char *parValue);
+			static void DrawValue(CDC *dc, int x, int y,const char *parValue);
+			static void DrawHLight(CDC *dc,CFont *font_bold, int x, int y,const char *parName,const char *parValue);
+			static void DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y,const char *parName,const char *parValue);
+			static void DrawHLightValue(CDC *dc, int x, int y,const char *parValue);
+//			static void DrawHeader(CDC *dc, int x, int y,const char *parName, const char *parValue);
 
 			static int xoffset;
 			static int width;
@@ -162,8 +152,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 	protected:
 		CFrameMixerMachine(); // protected constructor used by dynamic creation
 		// Attributes
-	public:		
-		CFrameMixerMachine(class MachineGui* gui);
+	public:
+		CFrameMixerMachine(int dum);
 	private:
 		Mixer* _pMixer;
 
@@ -191,9 +181,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		// Operations
 	public:
 		virtual void SelectMachine(Machine* pMachine);
-		virtual void Generate(double x, double y);
+		virtual void Generate(){};
 		virtual int ConvertXYtoParam(int x, int y);
-		void UpdateUI();
 		// Overrides
 		// Implementation
 	protected:
@@ -213,6 +202,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnDestroy();
 		afx_msg void OnSetFocus(CWnd* pOldWnd);
+		afx_msg void OnTimer(UINT nIDEvent);
 		afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 		afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 		DECLARE_MESSAGE_MAP()

@@ -10,8 +10,6 @@
 #include <vector>
 #include <psycle/plugin_interface.hpp>
 
-using namespace psycle::plugin_interface;
-
 #define NUMPARAMETERS 28
 
 CMachineParameter const paraCoarse = 
@@ -332,7 +330,8 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -346,7 +345,7 @@ CMachineInfo const MacInfo (
 	"Juan Linietsky, ported by Sartorius",																												// author
 	"Help",																																				// A command, that could be use for open an editor, etc...
 	2
-);
+};
 
 class mi : public CMachineInterface
 {
@@ -612,15 +611,18 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	
 	if( cmd == 0x0C) track[channel].set_preamp(val * .003921568627450980392156862745098f); // 1/255
 	
-	// Note off
-	if(note==120)
+	if(note!=255)
 	{
-		track[channel].set_note_off(0);
-	}
-	else if (note< 120)
-	// Note on
-	{
-		//track[channel].set_note_off(127);
-		track[channel].set_note(note,Vals[4]);
+		// Note off
+		if(note==120)
+		{
+			track[channel].set_note_off(0);
+		}
+		else 
+		// Note on
+		{
+			//track[channel].set_note_off(127);
+			track[channel].set_note(note,Vals[4]);
+		}
 	}
 }

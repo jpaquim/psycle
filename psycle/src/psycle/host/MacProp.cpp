@@ -1,30 +1,17 @@
 ///\file
 ///\brief implementation file for psycle::host::CMacProp.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "MacProp.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-#include <psycle/core/machinefactory.h>
-using namespace psy::core;
-#else
-#include "Machine.hpp"
-#include "Song.hpp"
-#endif
-
+#include "Psycle.hpp"
 #include "MainFrm.hpp"
-#include "MachineView.hpp"
-#include "MachineGui.hpp"
-
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 		extern CPsycleApp theApp;
 
-		CMacProp::CMacProp(MachineGui* gui)
-			: CDialog(CMacProp::IDD, 0),
-			  gui_(gui)
+		CMacProp::CMacProp(CWnd* pParent)
+			: CDialog(CMacProp::IDD, pParent)
 		{
 			m_view=NULL;
 		}
@@ -53,22 +40,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 
 			deleted=false;
-			replaced=false;
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
-			sprintf(buffer,"%.2X : %s Properties",Global::song().FindBusFromIndex(thisMac),pMachine->GetEditName().c_str());
-			m_macname.SetWindowText(pMachine->GetEditName().c_str());
-
+			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->_editName);
 			SetWindowText(buffer);
 
-
+			m_macname.SetWindowText(pMachine->_editName);
 
 			m_muteCheck.SetCheck(pMachine->_mute);
 			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
 			m_bypassCheck.SetCheck(pMachine->Bypass());
-
-			if (pMachine->IsGenerator() )
+			if (pMachine->_mode == MACHMODE_GENERATOR ) 
 			{
 				m_bypassCheck.ShowWindow(SW_HIDE);
 			}
@@ -109,10 +92,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if ( m_view != NULL )
 			{
 				m_view->AddMacViewUndo();
-				m_view->updatePar=thisMac;				
+				m_view->updatePar=thisMac;
+				m_view->Repaint(draw_modes::machine);
 			}
-			gui_->SetMute(pMachine->_mute);
-			gui_->QueueDraw();
 		}
 		void CMacProp::OnBypass() 
 		{
@@ -120,58 +102,75 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if ( m_view != NULL )
 			{
 				m_view->AddMacViewUndo();
-				m_view->updatePar=thisMac;				
-				gui_->QueueDraw();
+				m_view->updatePar=thisMac;
+				m_view->Repaint(draw_modes::machine);
 			}
 		}
 
 		void CMacProp::OnSolo() 
 		{
-			gui_->view()->SetSolo(pMachine);
-			gui_->QueueDraw();
+			m_view->AddMacViewUndo();
+			if (m_soloCheck.GetCheck() == 1)
+			{
+				for ( int i=0;i<MAX_MACHINES;i++ )
+				{
+					if (pSong->_pMachine[i])
+					{
+						if ( pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR )
+						{
+							pSong->_pMachine[i]->_mute = true;
+							pSong->_pMachine[i]->_volumeCounter=0.0f;
+							pSong->_pMachine[i]->_volumeDisplay =0;
+						}
+					}
+				}
+				pMachine->_mute = false;
+				if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
+				pSong->machineSoloed = thisMac;
+			}
+			else
+			{
+				pSong->machineSoloed = -1;
+				for ( int i=0;i<MAX_BUSES;i++ )
+				{
+					if (pSong->_pMachine[i])
+					{
+						pSong->_pMachine[i]->_mute = false;
+					}
+				}
+				if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
+			}
+			if ( m_view != NULL )
+			{
+				m_view->Repaint(draw_modes::all_machines);
+			}
 		}
 
 		void CMacProp::OnClone() 
 		{
-			int src = pMachine->id();
+			int src = pMachine->_macIndex;
 			int dst = -1;
 
 			if ((src < MAX_BUSES) && (src >=0))
 			{
-				dst = gui_->view()->song()->GetFreeBus();
+				dst = Global::_pSong->GetFreeBus();
 			}
 			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
 			{
-				dst = gui_->view()->song()->GetFreeFxBus();
+				dst = Global::_pSong->GetFreeFxBus();
 			}
 			if (dst >= 0)
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Machine * newMac = MachineFactory::getInstance().CloneMachine(*pMachine);
-				if(!newMac)
+				if (!Global::_pSong->CloneMac(src,dst))
 				{
 					MessageBox("Cloning failed","Cloning failed");
 				}
-				else {
-					gui_->view()->song()->AddMachine(newMac);
-					gui_->view()->CreateMachineGui(newMac);
-				}
-#else
-				if (!gui_->view()->song()->CloneMac(src,dst))
-				{
-					MessageBox("Cloning failed","Cloning failed");
-				}
-				else {
-					gui_->view()->CreateMachineGui(gui_->view()->song()->machine(dst));
-				}
-#endif
-
 				if ( m_view != NULL )
 				{
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
 					if (m_view->viewMode==view_modes::machine)
 					{
-						m_view->Invalidate();
+						m_view->Repaint();
 					}
 				}
 			}
@@ -179,8 +178,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CMacProp::OnBnClickedReplacemac()
 		{
-			int index = pMachine->id();
-			replaced = true;
+			int index = pMachine->_macIndex;
+			m_view->NewMachine(pMachine->_x,pMachine->_y,index);
+			strcpy(txt,Global::_pSong->_pMachine[index]->_editName);
+
+			CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
+			pParentMain->UpdateEnvInfo();
+			pParentMain->UpdateComboGen();
+			if (m_view->viewMode==view_modes::machine)
+			{
+				m_view->Repaint();
+			}
 			OnCancel();
 		}
 

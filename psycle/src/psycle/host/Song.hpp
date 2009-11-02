@@ -1,11 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::Song
 #pragma once
-#include "Global.hpp"
+#include "Constants.hpp"
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
-#include "XMInstrument.hpp"
+
+#if !defined WINAMP_PLUGIN
+	#include "InstPreview.hpp"
+#endif // WINAMP_PLUGIN
 
 class CCriticalSection;
 
@@ -24,39 +27,12 @@ namespace psycle
 			Song();
 			/// destructor.
 			virtual ~Song() throw();
-			///\name name of the song
-			///\{
-			public:
-				/// the name of the song
-				std::string const & name() const { return name_; }
-				/// sets the name of the song
-				void setName(std::string const & name) { name_ = name; }
-			private:
-				std::string name_;
-			///\}
-
-			///\name author of the song
-			///\{
-			public:
-				/// the author of the song
-				std::string const & author() const { return author_; }
-				/// sets the author of the song
-				void setAuthor(std::string const & author) { author_ = author; }
-			private:
-				std::string author_;
-			///\}
-
-			///\name comment on the song
-			///\{
-			public:
-				/// the comment on the song
-				std::string const & comment() const { return comment_; }
-				/// sets the comment on the song
-				void setComment(std::string const & comment) { comment_ = comment; }
-			private:
-				std::string comment_;
-			///\}
-			public:
+			/// the name of the song.
+			std::string name;
+			/// the author of the song.
+			std::string author;
+			/// the comments on the song
+			std::string comments;
 			///\todo: this variable was used in Player, but it didn't store a good value. Either try to fix it or remove.
 			std::uint64_t cpuIdle;
 			unsigned _sampCount;
@@ -87,25 +63,10 @@ namespace psycle
 			///\name instrument
 			///\{
 			///
-			int _instSelected;
-			Instrument::id_type instSelected() const { return _instSelected; }
-			void instSelected(Instrument::id_type id) {
-				assert(id >= 0);
-				assert(id < MAX_INSTRUMENTS);
-				_instSelected = id;
-			}
-			public:
-				XMInstrument & rInstrument(const int index){return m_Instruments[index];}
-				XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];}
-				///\todo doc
-				///\todo hardcoded limits and wastes
-				Instrument * _pInstrument[MAX_INSTRUMENTS];
-			private:
-				XMInstrument m_Instruments[MAX_INSTRUMENTS];
-				XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENTS];
-
+			int instSelected;
+			///
+			Instrument * _pInstrument[MAX_INSTRUMENTS];
 			///\}
-			public:
 			/// The index of the selected MIDI program for note entering
 			/// \todo This is a gui thing... should not be here.
 			int midiSelected;
@@ -126,7 +87,6 @@ namespace psycle
 			bool _machineLock;
 			/// the array of machines.
 			Machine* _pMachine[MAX_MACHINES];
-			Machine * machine(int id) { return _pMachine[id]; }
 			/// Current selected machine number in the GUI
 			/// \todo This is a gui thing... should not be here.
 			int seqBus;
@@ -194,8 +154,6 @@ namespace psycle
 			int GetBlankPatternUnused(int rval = 0);
 			/// creates a new pattern.
 			bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
-			/// Sets the number of lines for a new pattern
-			void SetDefaultPatternLines(int defaultlines);
 			/// clones a machine.
 			bool CloneMac(int src,int dst);
 			/// clones an instrument.
@@ -222,10 +180,22 @@ namespace psycle
 			bool IsPatternUsed(int i);
 			//Used to check the contents of the pattern.
 			bool IsPatternEmpty(int i);
+			///\name wave file previewing
+			///\todo shouldn't belong to the song class.
+			///\{
 		public:
-#if defined WINAMP_PLUGIN
+			//todo these ought to be dynamically allocated
+			/// Wave preview.
+#if !defined WINAMP_PLUGIN
+			InstPreview wavprev;
+			/// Wave editor playback.
+			InstPreview waved;
+#else
 			int filesize;
 #endif // WINAMP_PLUGIN
+			/// runs the wave previewing.
+			void DoPreviews(int amount);
+			///\}
 
 			/// Returns the start offset of the requested pattern in memory, and creates one if none exists.
 			/// This function now is the same as doing &pPatternData[ps]
@@ -250,8 +220,8 @@ namespace psycle
 			/// removes a pattern from this song.
 			void RemovePattern(int ps);
 			
-			const int tracks(){return SONGTRACKS;}
-			void setTracks(const int value){ SONGTRACKS = value;}
+			const int SongTracks(){return SONGTRACKS;}
+			void SongTracks(const int value){ SONGTRACKS = value;}
 
 			const int BeatsPerMin(){return m_BeatsPerMin;}
 			void BeatsPerMin(const int value)

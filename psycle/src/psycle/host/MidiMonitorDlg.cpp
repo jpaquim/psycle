@@ -1,16 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiMonitorDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "MidiMonitorDlg.hpp"
+#include "Psycle.hpp"
 #include "MidiInput.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-using namespace psy::core;
-#else
 #include "Song.hpp"
 #include "Machine.hpp"
-#endif
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
@@ -357,34 +353,24 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// machine mapped & active?
 				if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES )
 				{
-					if( Global::song().machine( genFxIdx ) )
+					if( Global::_pSong->_pMachine[ genFxIdx ] )
 					{
 						// machine
-						Machine * pMachine = Global::song().machine( genFxIdx );
-						sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->GetEditName().c_str() );
+						Machine * pMachine = Global::_pSong->_pMachine[ genFxIdx ];
+						sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->_editName );
 						m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						if (pMachine->getMachineKey() == MachineKey::sampler()) {
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[instrument]->_sName );
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
-						}
-						else if ( pMachine->getMachineKey() == MachineKey::sampulse()) {
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song().rInstrument(instrument).Name() );
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
-						}
-#else
+						
 						if( pMachine->_type == MACH_SAMPLER )
 						{
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[ instrument ]->_sName );
+							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[ instrument ]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
 						else if( pMachine->_type == MACH_XMSAMPLER )
 						{
 						}
-#endif
 						else
 						{
 							// n/a

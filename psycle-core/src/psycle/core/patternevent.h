@@ -1,14 +1,24 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
-
+/******************************************************************************
+*  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
+*                                                                             *
+*  This program is free software; you can redistribute it and/or modify       *
+*  it under the terms of the GNU General Public License as published by       *
+*  the Free Software Foundation; either version 2 of the License, or          *
+*  (at your option) any later version.                                        *
+*                                                                             *
+*  This program is distributed in the hope that it will be useful,            *
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+*  GNU General Public License for more details.                               *
+*                                                                             *
+*  You should have received a copy of the GNU General Public License          *
+*  along with this program; if not, write to the                              *
+*  Free Software Foundation, Inc.,                                            *
+*  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
+******************************************************************************/
 #ifndef PSYCLE__CORE__PATTERN_EVENT__INCLUDED
 #define PSYCLE__CORE__PATTERN_EVENT__INCLUDED
 #pragma once
-
-#include <psycle/core/config.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -16,7 +26,11 @@
 
 namespace psy { namespace core {
 
-class PSYCLE__CORE__DECL PatternEvent {
+/**
+@author  Psycledelics  
+*/
+class PatternEvent
+{
 	public:
 		typedef std::pair<std::uint8_t,std::uint8_t> PcmType;
 		typedef std::vector<PcmType> PcmListType;
@@ -47,23 +61,6 @@ class PSYCLE__CORE__DECL PatternEvent {
 
 		PcmListType & paraCmdList() { return paraCmdList_; }
 
-		void set_track(int track) {
-			track_ = track;
-		}
-
-		void set_sequence(int seq_track) {
-			seq_track_ = seq_track;
-		}
-
-		int track() const { return track_; }
-		int sequence_track() const { return seq_track_; }
-
-		void set_time_offset(double offset) {
-			offset_ = offset;
-		}
-		double time_offset() const { return offset_; }
-
-
 	private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.
 		std::uint8_t note_;
 		std::uint8_t inst_;
@@ -72,9 +69,6 @@ class PSYCLE__CORE__DECL PatternEvent {
 		std::uint8_t param_;
 		std::uint8_t volume_;
 		PcmListType paraCmdList_;
-		int track_;
-		int seq_track_;
-		double offset_;
 };
 
 }}

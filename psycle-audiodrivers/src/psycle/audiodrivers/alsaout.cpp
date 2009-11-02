@@ -123,7 +123,7 @@ bool AlsaOut::Start() {
 }
 
 void AlsaOut::thread_function() {
-	// notify that the thread is now running
+ 	// notify that the thread is now running
 	{ scoped_lock lock(mutex_);
 		running_ = true;
 	}
@@ -169,7 +169,7 @@ int AlsaOut::xrun_recovery(int err) {
 		return 0;
 	} else if(err == -ESTRPIPE) {
 		while((err = snd_pcm_resume(handle)) == -EAGAIN)
-			// wait until the suspend flag is released
+		 	/// wait until the suspend flag is released
 			std::this_thread::yield(); ///\todo any other way?
 		if(err < 0) {
 			err = snd_pcm_prepare(handle);

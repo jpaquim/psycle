@@ -60,7 +60,7 @@ private:
 	HMIDIOUT handle;				// Midi device/channel handler.
 };
 
-struct MacParams {
+typedef struct {
 	int portidx;
 	int patch1;
 	int patch2;
@@ -78,27 +78,26 @@ struct MacParams {
 	int patch14;
 	int patch15;
 	int patch16;
-};
+}MacParams;
+CMachineParameter const prPort = {"Output Port","Output Port",0,15,MPF_STATE,0};
+CMachineParameter const prPatch1 = {"Program Channel 1","Program Channel 1",0,127,MPF_STATE,0};
+CMachineParameter const prPatch2 = {"Program Channel 2","Program Channel 2",0,127,MPF_STATE,0};
+CMachineParameter const prPatch3 = {"Program Channel 3","Program Channel 3",0,127,MPF_STATE,0};
+CMachineParameter const prPatch4 = {"Program Channel 4","Program Channel 4",0,127,MPF_STATE,0};
+CMachineParameter const prPatch5 = {"Program Channel 5","Program Channel 5",0,127,MPF_STATE,0};
+CMachineParameter const prPatch6 = {"Program Channel 6","Program Channel 6",0,127,MPF_STATE,0};
+CMachineParameter const prPatch7 = {"Program Channel 7","Program Channel 7",0,127,MPF_STATE,0};
+CMachineParameter const prPatch8 = {"Program Channel 8","Program Channel 8",0,127,MPF_STATE,0};
+CMachineParameter const prPatch9 = {"Program Channel 9","Program Channel 9",0,127,MPF_STATE,0};
+CMachineParameter const prPatch10 = {"Program Channel 10","Program Channel 10",0,127,MPF_STATE,0};
+CMachineParameter const prPatch11 = {"Program Channel 11","Program Channel 11",0,127,MPF_STATE,0};
+CMachineParameter const prPatch12 = {"Program Channel 12","Program Channel 12",0,127,MPF_STATE,0};
+CMachineParameter const prPatch13 = {"Program Channel 13","Program Channel 13",0,127,MPF_STATE,0};
+CMachineParameter const prPatch14 = {"Program Channel 14","Program Channel 14",0,127,MPF_STATE,0};
+CMachineParameter const prPatch15 = {"Program Channel 15","Program Channel 15",0,127,MPF_STATE,0};
+CMachineParameter const prPatch16 = {"Program Channel 16","Program Channel 16",0,127,MPF_STATE,0};
 
-psycle::plugin_interface::CMachineParameter const prPort = {"Output Port","Output Port",0,15,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch1 = {"Program Channel 1","Program Channel 1",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch2 = {"Program Channel 2","Program Channel 2",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch3 = {"Program Channel 3","Program Channel 3",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch4 = {"Program Channel 4","Program Channel 4",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch5 = {"Program Channel 5","Program Channel 5",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch6 = {"Program Channel 6","Program Channel 6",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch7 = {"Program Channel 7","Program Channel 7",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch8 = {"Program Channel 8","Program Channel 8",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch9 = {"Program Channel 9","Program Channel 9",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch10 = {"Program Channel 10","Program Channel 10",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch11 = {"Program Channel 11","Program Channel 11",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch12 = {"Program Channel 12","Program Channel 12",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch13 = {"Program Channel 13","Program Channel 13",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch14 = {"Program Channel 14","Program Channel 14",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch15 = {"Program Channel 15","Program Channel 15",0,127,psycle::plugin_interface::MPF_STATE,0};
-psycle::plugin_interface::CMachineParameter const prPatch16 = {"Program Channel 16","Program Channel 16",0,127,psycle::plugin_interface::MPF_STATE,0};
-
-psycle::plugin_interface::CMachineParameter const *pParameters[] = 
+CMachineParameter const *pParameters[] = 
 { 
 	&prPort,
 	&prPatch1,
@@ -119,9 +118,10 @@ psycle::plugin_interface::CMachineParameter const *pParameters[] =
 	&prPatch16,
 };
 
-psycle::plugin_interface::CMachineInfo const MacInfo (
-	psycle::plugin_interface::MI_VERSION,
-	psycle::plugin_interface::GENERATOR,
+CMachineInfo const MacInfo =
+{
+	MI_VERSION,
+	GENERATOR,
 	NUMPARAMETERS,
 	pParameters,
 	"YMidi - Midi Out "
@@ -134,12 +134,12 @@ psycle::plugin_interface::CMachineInfo const MacInfo (
 	"YanniS and JosepMa on " __DATE__,
 	"Command Help",
 	1
-);
+};
 
 // =====================================
 // mi plugin class
 // =====================================
-class mi : public psycle::plugin_interface::CMachineInterface
+class mi : public CMachineInterface
 {
 public:
 	mi();
@@ -162,9 +162,9 @@ protected:
 	void UpdatePatch(int channel, int patch);
 
 private:
-	midichannel numChannel[MIDI_TRACKS]; // List of MAX_TRACKS (16 usually) which hold channel note information
-	int numC[psycle::plugin_interface::MAX_TRACKS]; // Assignation of tracker track to midi channel.
-	int notes[psycle::plugin_interface::MAX_TRACKS]; // Last note being played in this track.
+	midichannel numChannel[MIDI_TRACKS];				// List of MAX_TRACKS (16 usually) which hold channel note information
+	int numC[MAX_TRACKS];																				// Assignation of tracker track to midi channel.
+	int notes[MAX_TRACKS];																				// Last note being played in this track.
 	MacParams pars;
 
 	static int midiopencount;

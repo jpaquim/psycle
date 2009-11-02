@@ -1,29 +1,16 @@
 ///\file
 ///\brief interface file for psycle::host::CVstParamList.
 #pragma once
-#include "Psycle.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		namespace vst {
-			class plugin;
-		}
-	}
-}
-using namespace psy::core;
-#endif
-
+#include "resources/resources.hpp"
 #include <afxext.h>
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		namespace vst
 		{
 			class plugin;
 		}
-#endif
 
 		class CVstParamList : public CDialog
 		{

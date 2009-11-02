@@ -1,43 +1,26 @@
 ///\file
 ///\brief interface file for psycle::host::CMacProp.
 #pragma once
-#include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class Machine;
-		class Song;
-	}
-}
-using namespace psy::core;
-#endif
-
+#include "Machine.hpp"
+#include "ChildView.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Machine;
 		class Song;
-#endif
-		class CChildView;
-		class MachineGui;
 
 		/// machine properties window.
 		class CMacProp : public CDialog
 		{
 		public:
 			CChildView *m_view;
-			CMacProp(class MachineGui* gui);
-		private:
-			MachineGui* gui_;
-		public:
+			CMacProp(CWnd* pParent = 0);
 			Machine *pMachine;
 			Song* pSong;
-
 			int thisMac;
 			char txt[32];
 			bool deleted;
-			bool replaced;
 		// Dialog Data
 			//{{AFX_DATA(CMacProp)
 			enum { IDD = IDD_MACPROP };

@@ -1,8 +1,6 @@
 #include <psycle/plugin_interface.hpp>
 #include <cmath>
 
-using namespace psycle::plugin_interface;
-
 #ifndef M_PI
 	#define M_PI 3.14159265358979323846
 #endif
@@ -59,7 +57,8 @@ enum
 	grav_inout
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	0,																																// flags
 	8,																																// numParameters
@@ -73,7 +72,7 @@ CMachineInfo const MacInfo (
 	"dw",																												// author
 	"About",																								// A command, that could be use for open an editor, etc...
 	2
-);
+};
 
 
 class mi : public CMachineInterface

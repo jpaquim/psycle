@@ -554,7 +554,7 @@ bool UpdateWaveforms(int sr)
 	return true;
 }
 
-#include <diversalis/os.hpp>
+#include <diversalis/operating_system.hpp>
 #include <diversalis/compiler.hpp>
 #include <universalis/compiler.hpp>
 #if defined DIVERSALIS__COMPILER__GNU
@@ -570,7 +570,7 @@ bool UpdateWaveforms(int sr)
 			CleanupWaveforms();
 		}
 	}
-#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <windows.h>
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/dynamic_link_library_functions.asp
 	::BOOL APIENTRY DllMain(::HMODULE module, ::DWORD reason_for_call, ::LPVOID)

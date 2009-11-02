@@ -1,17 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::COutputDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "OutputDlg.hpp"
+#include "Psycle.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-using namespace psy::core;
-#else
 #include "Player.hpp"
 #include "Song.hpp"
-#endif
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -136,12 +132,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			int index = m_driverComboBox.GetCurSel();
 			m_ppDrivers[index]->Configure();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			///\todo Implement audio drivers
-			//Global::pPlayer->samples_per_second()
-#else
 			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
-#endif
 		}
 
 	PSYCLE__MFC__NAMESPACE__END

@@ -4,8 +4,6 @@
 #include <cstring>
 #include <cmath>
 
-using namespace psycle::plugin_interface;
-
 // M3 Buzz plugin by MAKK makk@gmx.de
 // released on 04-21-99
 // Thanks must go to Robert Bristow-Johnson pbjrbj@viconet.com
@@ -188,7 +186,7 @@ CMachineParameter const *pParameters[] = {
 	&paraLFO2Amount,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = {
 		MI_VERSION,
 		GENERATOR,
 		NUMPARAMETERS,
@@ -202,7 +200,7 @@ CMachineInfo const MacInfo (
 		"Makk",
 		"About",
 		5
-);
+};
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 

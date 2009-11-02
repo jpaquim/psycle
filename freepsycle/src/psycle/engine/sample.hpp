@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2001-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2001-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::sample
 #pragma once
@@ -9,7 +9,7 @@
 #include <cmath>
 #include <cassert>
 #include <boost/static_assert.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE__SAMPLE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace engine {
 

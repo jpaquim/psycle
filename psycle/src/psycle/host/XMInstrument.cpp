@@ -3,9 +3,9 @@
  *  $Date$
  *  $Revision$
  */
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "XMInstrument.hpp"
 #include "Configuration.hpp"
 //#include "IPsySongLoader.h"
@@ -400,6 +400,7 @@ namespace psycle
 			}
 		}
 
+
 //////////////////////////////////////////////////////////////////////////
 //   XMInstrument Implementation
 		XMInstrument::XMInstrument()
@@ -574,4 +575,3 @@ namespace psycle
 
 	} //namespace host
 }// namespace psycle
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

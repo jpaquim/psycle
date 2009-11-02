@@ -1,23 +1,15 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2001-2009 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2002-2007 johan boule <bohan@jabber.org>
+// copyright 2001-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
 ///\brief meta header
 /// extensions to the language which would become standard
-
-#ifndef UNIVERSALIS__COMPILER__COMPILER__INCLUDED
-#define UNIVERSALIS__COMPILER__COMPILER__INCLUDED
 #pragma once
-
 #include "stringized.hpp"
 #include "concatenated.hpp"
 #include "token.hpp"
 #if !defined DIVERSALIS__COMPILER__RESOURCE
-	// includes with side-effects on compiler must come first
-	#include "detail/gnu/diagnostics.hpp"
-	#include "detail/microsoft/warnings.hpp"
-	#include "detail/microsoft/optimizations.hpp"
-
 	#include "detail/standard/restrict.hpp"
 	#include "detail/standard/wchar_t.hpp"
 	#include "detail/pragmatic/pragmas.hpp"
@@ -35,9 +27,11 @@
 	#include "detail/pragmatic/dynamic_link.hpp"
 	#include "detail/pragmatic/hardware_exception.hpp"
 	#include "detail/gnu/typeof.hpp"
+	#include "detail/gnu/diagnostics.hpp"
 	#include "detail/microsoft/assume.hpp"
+	#include "detail/microsoft/super.hpp"
+	#include "detail/microsoft/warnings.hpp"
+	#include "detail/microsoft/optimizations.hpp"
 	#include "detail/microsoft/namespace.hpp"
 	#include <boost/static_assert.hpp>
-#endif
-
 #endif

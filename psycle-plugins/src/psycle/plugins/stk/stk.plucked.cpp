@@ -12,8 +12,6 @@
 #include <stk/ADSR.h>
 #include <cmath>
 
-using namespace psycle::plugin_interface;
-
 #define NUMPARAMETERS 5
 
 StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
@@ -80,7 +78,8 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -94,7 +93,7 @@ CMachineInfo const MacInfo (
 	"Sartorius, Bohan and STK 4.2.0 developers",																												// author
 	"Help",																																				// A command, that could be use for open an editor, etc...
 	1
-);
+};
 
 class mi : public CMachineInterface
 {

@@ -2,11 +2,7 @@
 // copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::exception
-
-#ifndef UNIVERSALIS__EXCEPTION__INCLUDED
-#define UNIVERSALIS__EXCEPTION__INCLUDED
 #pragma once
-
 #include "compiler/exceptions/ellipsis.hpp"
 #include "compiler/location.hpp"
 #include <stdexcept>
@@ -14,10 +10,8 @@
 #if !defined NDEBUG
 	#include <typeinfo>
 #endif
-
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__SOURCE
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__EXCEPTION
 #include <universalis/compiler/dynamic_link/begin.hpp>
-
 namespace universalis {
 
 namespace exceptions {
@@ -128,7 +122,4 @@ namespace exceptions {
 		catch(               ...                ) { rethrow_functor.operator_<void*>(location    ); }
 	}
 }
-
 #include <universalis/compiler/dynamic_link/end.hpp>
-
-#endif

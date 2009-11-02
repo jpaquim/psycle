@@ -45,12 +45,11 @@
 	*   $Id: moreamp_eq.cpp 3616 2006-12-17 20:15:14Z johan-boule $$
 	*/
 #include <psycle/plugin_interface.hpp>
-#include "maEqualizer.h"
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
 
-using namespace psycle::plugin_interface;
+#include "maEqualizer.h"
 
 #define NUMPARAMETERS 36
 
@@ -180,7 +179,8 @@ CMachineParameter const *pParameters[] =
 		&paraLink
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	EFFECT,																																								// flags
 	NUMPARAMETERS,																																// numParameters
@@ -194,7 +194,7 @@ CMachineInfo const MacInfo (
 	"Felipe Rivera/pmisteli/Sartorius",																												// author
 	"Help",																																// A command, that could be use for open an editor, etc...
 	3
-);
+};
 
 class mi : public CMachineInterface
 {

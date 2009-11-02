@@ -1,33 +1,32 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/config.private.hpp>
-#include <psycle/helpers/math.hpp>
-#include <psycle/helpers/dsp.hpp>
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #include "internal_machines.h"
 
 ///\todo: These two includes need to be replaced by a "host" callback which gives such information.
+#include "commands.h"
 #include "player.h"
 
 #include "song.h"
+#include "dsp.h"
 #include "fileio.h"
-
-#include <cstdint>
 
 namespace psy { namespace core {
 
-	using namespace psycle::helpers;
 /****************************************************************************************************/
 // Dummy
 
 std::string Dummy::_psName = "Dummy";
 
 Dummy::Dummy(MachineCallbacks* callbacks, Machine::id_type id)
-	: Machine(callbacks, id)
-	, generator(false)
+:
+	Machine(callbacks, id)
 {
 	defineInputAsStereo();
 	defineOutputAsStereo();
@@ -320,6 +319,10 @@ void Master::Tick(int /*channel*/, const PatternEvent & data ) {
 }
 
 int Master::GenerateAudio( int numSamples ) {
+	#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+		universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+	#endif
+
 	//cpu::cycles_type cost(cpu::cycles());
 	
 	//if(!_mute) {
@@ -345,11 +348,11 @@ int Master::GenerateAudio( int numSamples ) {
 			if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
 				_lMax = fabsf(*pSamplesL);
 			if(*pSamples > 32767.0f) {
-				_outDry = math::rounded((float)_outDry * 32767.0f / (*pSamples));
+				_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
 				mv = CValueMapper::Map_255_1(_outDry);
 				*pSamples = *pSamplesL = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
-				_outDry = math::rounded((float)_outDry * -32767.0f / (*pSamples));
+				_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
 				mv = CValueMapper::Map_255_1(_outDry);
 				*pSamples = *pSamplesL = -32767.0f; 
 			}
@@ -359,11 +362,11 @@ int Master::GenerateAudio( int numSamples ) {
 			if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
 				_rMax = fabsf(*pSamplesR);
 			if(*pSamples > 32767.0f) {
-					_outDry = math::rounded((float)_outDry * 32767.0f / (*pSamples));
+				_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
 				mv = CValueMapper::Map_255_1(_outDry);
 				*pSamples = *pSamplesR = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
-				_outDry = math::rounded((float)_outDry * -32767.0f / (*pSamples));
+				_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
 				mv = CValueMapper::Map_255_1(_outDry);
 				*pSamples = *pSamplesR = -32767.0f; 
 			}
@@ -424,102 +427,6 @@ void Master::SaveSpecificChunk(RiffFile* pFile) const {
 	pFile->Write(size);
 	pFile->Write(_outDry);
 	pFile->Write(decreaseOnClip);
-}
-
-
-/****************************************************************************************************/
-// AudioRecorder
-
-std::string AudioRecorder::_psName = "AudioRecorder";
-
-AudioRecorder::AudioRecorder(MachineCallbacks* callbacks, Machine::id_type id)
-	: Machine(callbacks, id)
-	, _initialized(false)
-	, _captureidx(0)
-	, pleftorig(_pSamplesL)
-	, prightorig(_pSamplesR)
-	, _gainvol(1.0f)
-
-{
-	defineInputAsStereo();
-	defineOutputAsStereo();
-	SetEditName(_psName);
-	//DefineStereoInput(1);
-	//DefineStereoOutput(1);
-	SetAudioRange(32768.0f);
-}
-
-AudioRecorder::~AudioRecorder() throw() {
-	//AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-	//if (_initialized) mydriver.RemoveCapturePort(_captureidx);
-	_pSamplesL=pleftorig;
-	_pSamplesR=prightorig;
-
-	//DestroyInputs();
-	//DestroyOutputs();
-}
-
-void AudioRecorder::Init(void) {
-	Machine::Init();
-	/*
-	if(!_initialized) {
-		AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-		_initialized = mydriver.AddCapturePort(_captureidx);
-	}
-	*/
-}
-
-void AudioRecorder::ChangePort(int newport)
-{
-	/*
-	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-	if(_initialized) {
-		mydriver.Enable(false);
-		mydriver.RemoveCapturePort(_captureidx);
-		_initialized=false;
-		_pSamplesL=pleftorig;
-		_pSamplesR=prightorig;
-	}
-	_initialized = mydriver.AddCapturePort(newport);
-	_captureidx = newport;
-	mydriver.Enable(true);
-	*/
-}
-int AudioRecorder::GenerateAudio(int numSamples)
-{
-	if (!_mute &&_initialized)
-	{
-		/*
-		AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-		mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
-		// prevent crashing if the audio driver is not working.
-		if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
-		helpers::dsp::Mul(_pSamplesL,numSamples,_gainvol);
-		helpers::dsp::Mul(_pSamplesR,numSamples,_gainvol);
-		helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-		*/
-		UpdateVuAndStanbyFlag(numSamples);
-	}
-	else Standby(true);
-	//_cpuCost = 1;
-	_worked = true;
-	return numSamples;
-}
-
-bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
-{
-	std::uint32_t size;
-	pFile->Read(size); // size of this part params to load
-	pFile->Read(_captureidx);
-	pFile->Read(_gainvol);
-	return true;
-}
-void AudioRecorder::SaveSpecificChunk(RiffFile * pFile)
-{
-	std::uint32_t size = sizeof _captureidx+ sizeof _gainvol;
-	pFile->Write(size); // size of this part params to save
-	pFile->Write(_captureidx);
-	pFile->Write(_gainvol);
 }
 
 

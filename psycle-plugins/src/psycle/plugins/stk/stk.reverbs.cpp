@@ -15,8 +15,6 @@
 
 #define NUMPARAMETERS 4
 
-using namespace psycle::plugin_interface;
-
 CMachineParameter const paraRev = {"Reverb","Reverb",0,2,MPF_STATE,0};
 CMachineParameter const paraTime = {"Time","Time",1,32767,MPF_STATE,32};
 CMachineParameter const paraDryWet = {"Dry/Wet","Dry/Wet",0,100,MPF_STATE,50};
@@ -31,7 +29,8 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 		MI_VERSION,     
 		EFFECT,                                                         // flags
 		NUMPARAMETERS,                                                  // numParameters
@@ -45,7 +44,7 @@ CMachineInfo const MacInfo (
 		"Sartorius and STK 4.2.1 developers",                                                   // author
 		"Help",                                                                 // A command, that could be use for open an editor, etc...
 		1
-);
+};
 
 class mi : public CMachineInterface
 {

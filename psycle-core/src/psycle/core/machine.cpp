@@ -1,25 +1,65 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psy::core::Machine.
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/config.private.hpp>
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
+///\implementation psy::core::Machine
+
 #include "machine.h"
 #include "song.h"
+#include "dsp.h"
 #include "fileio.h"
-#include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/math/round.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
 #include <cstddef>
+#include <cstdlib> // for posix_memalign
 #include <iostream> // only for debug output
 #include <sstream>
 
 namespace psy { namespace core {
 
-using namespace psycle::helpers;
+///\todo general purpose => move this to universalis/operating_system/aligned_malloc.hpp or something
+template<typename X>
+void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
+	std::size_t const size(count * sizeof(X));
+	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+			void * address;
+			posix_memalign(&address, alignment, size);
+			x = static_cast<X*>(address);
+			// note: free with std::free
+	#elif 0///\todo defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+			x = static_cast<X*>(__mingw_aligned_malloc(size, alignment));
+			// note: free with _mingw_aligned_free
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			x = static_cast<X*>(_aligned_malloc(size, alignment));
+			// note: free with _aligned_free
+	#else
+		// could also try _mm_malloc (#include <xmmintr.h> or <emmintr.h>?)
+		// memalign on SunOS but not BSD (#include both <cstdlib> and <cmalloc>)
+		// note that memalign is declared obsolete and does not specify how to free the allocated memory.
+		
+		size; // unused
+		x = new X[count];
+		// note: free with delete[]
+	#endif
+}
+
+///\todo general purpose => move this to universalis/operating_system/aligned_dealloc.hpp or something
+template<typename X>
+void aligned_dealloc(X *& address) {
+	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		free(address); address=0;
+	#elif 0///\todo: defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+		_aligned_free(address); address=0;
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+		_aligned_free(address); address=0;
+	#else
+		delete[] address; address=0;
+	#endif
+}
 
 /********************************************************************************************/
 // AudioBuffer
@@ -27,11 +67,11 @@ using namespace psycle::helpers;
 AudioBuffer::AudioBuffer(int numChannels, int numSamples)
 : numchannels_(numChannels),numsamples_(numSamples)
 {
-	universalis::os::aligned_memory_alloc(16, buffer_, numChannels * numSamples);
+	aligned_malloc(16, buffer_, numChannels * numSamples);
 }
 
 AudioBuffer::~AudioBuffer() {
-	universalis::os::aligned_memory_dealloc(buffer_);
+	aligned_dealloc(buffer_);
 }
 
 void AudioBuffer::Clear() {
@@ -230,8 +270,9 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 	TWSActive(false),
 	TWSSamples(0)
 {
-	universalis::os::aligned_memory_alloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
-	universalis::os::aligned_memory_alloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
+
+	aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
+	aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
 
 	// Clear machine buffer samples
 	dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
@@ -265,8 +306,8 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 }
 
 Machine::~Machine() {
-	universalis::os::aligned_memory_dealloc(_pSamplesL);
-	universalis::os::aligned_memory_dealloc(_pSamplesR);
+	aligned_dealloc(_pSamplesL);
+	aligned_dealloc(_pSamplesR);
 }
 
 void Machine::CloneFrom(Machine & src) {
@@ -632,7 +673,14 @@ void Machine::WorkWires(int numSamples, bool mix) {
 		if(_inputCon[i]) {
 			Machine * pInMachine = callbacks->song().machine(_inputMachines[i]);
 			if(pInMachine) {
-				if(!pInMachine->_worked && !pInMachine->_waitingForSound) pInMachine->Work(numSamples);
+				if(!pInMachine->_worked && !pInMachine->_waitingForSound) { 
+					{
+						#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+							universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+						#endif
+						pInMachine->Work(numSamples);
+					}
+				}
 				if(!pInMachine->Standby()) Standby(false);
 				if(!_mute && !Standby() && mix) {
 					//PSYCLE__CPU_COST__INIT(wcost);
@@ -881,10 +929,5 @@ void Machine::reallocateRemainingEvents(double beatOffset) {
 		++it;
 	}
 }
-
-	bool Machine::IsGenerator() const
-	{
-		return !acceptsConnections();
-	}
 
 }}

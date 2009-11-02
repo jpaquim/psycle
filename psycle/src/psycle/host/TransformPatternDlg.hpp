@@ -1,13 +1,9 @@
 #pragma once
-#include "Psycle.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 #include "ChildView.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-using namespace psy::core;
-#else
 #include "Song.hpp"
-#endif
-#include <psycle/helpers/helpers.hpp>
+#include "Helpers.hpp"
 
 // CTransformPatternDlg dialog
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -18,11 +14,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		private:
 			CChildView* _pChildView;
-			PatternView* pattern_view_;
 
 		public:
 			CTransformPatternDlg(CChildView* pChildView, CWnd* pParent = NULL);   // standard constructor
-			CTransformPatternDlg(PatternView* pattern_view, CWnd* pParent = NULL);
 			virtual ~CTransformPatternDlg();
 
 		// Dialog Data

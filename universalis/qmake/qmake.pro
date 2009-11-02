@@ -1,8 +1,9 @@
 TARGET = universalis
 
 # include the base stuff shared amongst all qmake projects.
-include(../../build-systems/qmake/common.pri)
+include(../../packageneric/qmake/common.pri)
 
+# this include defines a dependency on the universalis lib.
 include(universalis.pri)
 
 TEMPLATE = lib # This project builds a library.
@@ -17,7 +18,7 @@ OBJECTS_DIR = $$BUILD_DIR # Where the .o files go.
 DESTDIR = $$BUILD_DIR # Where the final executable goes.
 
 #CONFIG *= precompile_header
-#PRECOMPILED_HEADER = $$TOP_SRC_DIR/build-systems/src/forced-include.private.hpp
+#PRECOMPILED_HEADER = $$TOP_SRC_DIR/packageneric/src/packageneric/pre-compiled.private.hpp
 
 sources_or_headers = \
 	$$UNIVERSALIS_DIR/src/universalis/compiler/cast \
@@ -63,55 +64,55 @@ sources_or_headers = \
 	$$UNIVERSALIS_DIR/src/universalis/detail/configuration \
 	$$UNIVERSALIS_DIR/src/universalis/detail/project \
 	$$UNIVERSALIS_DIR/src/universalis/exception \
-	$$UNIVERSALIS_DIR/src/universalis/os/clocks \
-	$$UNIVERSALIS_DIR/src/universalis/os/cpu_affinity \
-	$$UNIVERSALIS_DIR/src/universalis/os/detail/check_version \
-	$$UNIVERSALIS_DIR/src/universalis/os/detail/microsoft/max_path \
-	$$UNIVERSALIS_DIR/src/universalis/os/dynamic_link/main \
-	$$UNIVERSALIS_DIR/src/universalis/os/dynamic_link/resolver \
-	$$UNIVERSALIS_DIR/src/universalis/os/exception \
-	$$UNIVERSALIS_DIR/src/universalis/os/exceptions/code_description \
-	$$UNIVERSALIS_DIR/src/universalis/os \
-	$$UNIVERSALIS_DIR/src/universalis/os/loggers \
-	$$UNIVERSALIS_DIR/src/universalis/os/os \
-	$$UNIVERSALIS_DIR/src/universalis/os/paths \
-	$$UNIVERSALIS_DIR/src/universalis/os/paths/implementation \
-	$$UNIVERSALIS_DIR/src/universalis/os/paths/injection/implementation \
-	$$UNIVERSALIS_DIR/src/universalis/os/paths/injection/interface \
-	$$UNIVERSALIS_DIR/src/universalis/os/paths/interface \
-	$$UNIVERSALIS_DIR/src/universalis/os/terminal \
-	$$UNIVERSALIS_DIR/src/universalis/os/thread_name \
-	$$UNIVERSALIS_DIR/src/universalis/cpu/atomic/compare_and_swap \
-	$$UNIVERSALIS_DIR/src/universalis/cpu/exception \
-	$$UNIVERSALIS_DIR/src/universalis/cpu/exceptions/code_description \
-	$$UNIVERSALIS_DIR/src/universalis/cpu/exceptions/fpu \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/clocks \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/cpu_affinity \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/detail/check_version \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/detail/microsoft/max_path \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/dynamic_link/main \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/dynamic_link/resolver \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/exception \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/exceptions/code_description \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/loggers \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/operating_system \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/paths \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/paths/implementation \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/paths/injection/implementation \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/paths/injection/interface \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/paths/interface \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/terminal \
+	$$UNIVERSALIS_DIR/src/universalis/operating_system/thread_name \
+	$$UNIVERSALIS_DIR/src/universalis/processor/atomic/compare_and_swap \
+	$$UNIVERSALIS_DIR/src/universalis/processor/exception \
+	$$UNIVERSALIS_DIR/src/universalis/processor/exceptions/code_description \
+	$$UNIVERSALIS_DIR/src/universalis/processor/exceptions/fpu \
 	$$UNIVERSALIS_DIR/src/universalis/processor \
-	$$UNIVERSALIS_DIR/src/universalis/cpu/processor \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/allocators \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/condition \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/date_time \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/detail/allocators \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/detail/boost_xtime \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/detail/duration \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/detail/hiresolution_clock \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/detail/iso646 \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/detail/utc_time \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/exceptions/code_description \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/mutex \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/ndebug \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/stdlib \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/stdc_secure_lib \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/stdint \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/thread \
+	$$UNIVERSALIS_DIR/src/universalis/processor/processor \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/allocators \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/condition \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/date_time \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/detail/allocators \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/detail/boost_xtime \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/detail/duration \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/detail/hiresolution_clock \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/detail/iso646 \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/detail/utc_time \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/exceptions/code_description \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/mutex \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/ndebug \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/standard_library \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/stdc_secure_lib \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/stdint \
+	$$UNIVERSALIS_DIR/src/universalis/standard_library/thread \
 	$$UNIVERSALIS_DIR/src/universalis/universalis
 
 SOURCES_PRESERVE_PATH += $$sources(sources_or_headers)
 HEADERS += $$headers(sources_or_headers) \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/future_std_include/condition \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/future_std_include/date_time \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/future_std_include/mutex \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/future_std_include/cstdint \
-	$$UNIVERSALIS_DIR/src/universalis/stdlib/future_std_include/thread
+	$$UNIVERSALIS_DIR/src/condition \
+	$$UNIVERSALIS_DIR/src/date_time \
+	$$UNIVERSALIS_DIR/src/mutex \
+	$$UNIVERSALIS_DIR/src/cstdint \
+	$$UNIVERSALIS_DIR/src/thread
 
 include($$COMMON_DIR/display-vars.pri)

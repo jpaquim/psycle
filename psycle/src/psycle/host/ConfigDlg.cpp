@@ -1,10 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CConfigDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "ConfigDlg.hpp"
+#include "Psycle.hpp"
 #include "MainFrm.hpp"
-#include "PatternView.hpp"
-#include "MachineView.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -223,7 +223,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (_pConfig->pattern_header_skin != _skinDlg._pattern_header_skin)
 				{
 					_pConfig->pattern_header_skin = _skinDlg._pattern_header_skin;
-					if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->LoadPatternHeaderSkin();
+					if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
 				}
 
 				_pConfig->pattern_font_point = _skinDlg._pattern_font_point;
@@ -245,7 +245,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					_pConfig->machine_skin = _skinDlg._machine_skin;
 					if (_pConfig->Initialized() ) 
 					{
-//						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin(); maybe a todo
+						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
 					}
 				}
 
@@ -255,8 +255,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					_pConfig->szBmpBkgFilename = _skinDlg.szBmpBkgFilename;
 					if (_pConfig->Initialized() ) 
 					{
-//						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineBackground();
-						//maybe a todo
+						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineBackground();
 					}
 				}
 
@@ -267,8 +266,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				if (_pConfig->Initialized() ) 
 				{
-//					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial(); maybe a todo
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->RecalcMetrics();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
 				}
 
 				_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
@@ -286,12 +285,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				if (_pConfig->Initialized() ) 
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->RecalculateColourGrid();
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->Repaint(PatternView::draw_modes::all);
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
 				}
 				_pConfig->Write();
-				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->InitSkin();
-				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->Rebuild();
 			}
 			return retVal;
 		}

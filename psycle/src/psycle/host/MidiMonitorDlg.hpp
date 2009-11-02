@@ -1,7 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CMidiMonitorDlg.
 #pragma once
-#include "Psycle.hpp"
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		#define	DARK_GREEN	RGB( 0, 128, 0 )

@@ -1,5 +1,5 @@
 #pragma once
-#include "Global.hpp"
+#include "Constants.hpp"
 #include "FileIO.hpp"
 #include "Filter.hpp"
 #include <cstdint>

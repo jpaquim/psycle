@@ -1,6 +1,7 @@
 ///\file
 ///\implementation psycle::host::CDSoundConfig.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "DSoundConfig.hpp"
 #include <diversalis/compiler.hpp>
 
@@ -25,6 +26,7 @@
 
 #include <iomanip>
 
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

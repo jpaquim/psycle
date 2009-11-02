@@ -1,17 +1,15 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
 
 ///\interface psy::core::RiffFile
 
-#ifndef PSYCLE__CORE__FILE_IO__INCLUDED
-#define PSYCLE__CORE__FILE_IO__INCLUDED
 #pragma once
-
-#include <psycle/core/config.hpp>
-
 #include <diversalis/compiler.hpp>
 #include <cstdio>
 #include <cstddef>
@@ -39,7 +37,7 @@ class RiffChunkHeader {
 /// that use the Motorola integer byte-ordering format rather than the Intel format.
 /// A RIFX file is the same as a RIFF file, except that the first four bytes are "RIFX" instead of "RIFF",
 /// and integer byte ordering is represented in Motorola format.
-class PSYCLE__CORE__DECL RiffFile {
+class RiffFile {
 	public:
 		std::string const inline & file_name() const throw() { return file_name_; }
 	private:
@@ -115,7 +113,7 @@ class PSYCLE__CORE__DECL RiffFile {
 		bool ReadBE(std::int16_t & x) { return ReadBE(reinterpret_cast<std::uint16_t&>(x)); }
 
 		bool Write(std::uint16_t x) {
-			std::uint8_t data[2] = { x & 0xFF, (x>>8) & 0xFF };
+			std::uint8_t data[2] = { x, x>>8 };
 			return WriteChunk(data,2);
 		}
 		bool Write(std::int16_t x) { return Write(reinterpret_cast<std::uint16_t&>(x)); }
@@ -138,8 +136,8 @@ class PSYCLE__CORE__DECL RiffFile {
 		bool Read(std::int32_t & x) { return Read(reinterpret_cast<std::uint32_t&>(x)); }
 
 		bool Write(std::uint32_t x) {
-			std::uint8_t data[4] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF };
-			return WriteChunk(&x, sizeof(x));
+			std::uint8_t data[4] = { x, x>>8, x>>16, x>>24 };
+			return WriteChunk(data,4);
 		}
 
 		bool Write(std::int32_t x) { return Write(reinterpret_cast<std::uint32_t&>(x)); }
@@ -223,7 +221,7 @@ class PSYCLE__CORE__DECL RiffFile {
 };
 
 
-class PSYCLE__CORE__DECL MemoryFile : public RiffFile {
+class MemoryFile : public RiffFile {
 	public:
 		MemoryFile();
 		virtual ~MemoryFile();
@@ -235,7 +233,6 @@ class PSYCLE__CORE__DECL MemoryFile : public RiffFile {
 		virtual int Seek(std::ptrdiff_t const & bytes);
 		virtual int Skip(std::ptrdiff_t const & bytes);
 		virtual bool ReadString(char *, std::size_t const & max_length);
-
 	protected:
 		virtual bool WriteChunk(void const *, std::size_t const &);
 		virtual bool ReadChunk (void       *, std::size_t const &);
@@ -246,4 +243,3 @@ class PSYCLE__CORE__DECL MemoryFile : public RiffFile {
 };
 
 }}
-#endif

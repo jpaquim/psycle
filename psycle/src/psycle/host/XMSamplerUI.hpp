@@ -1,26 +1,16 @@
 #pragma once
-#include "Psycle.hpp"
 #include "XMSamplerUIGeneral.hpp"
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
-	namespace core {
-		class XMSampler;
-	}
-}
-using namespace psy::core;
-#endif
-
+#include "Constants.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 class XMSampler;
-#endif
 
 class XMSamplerUI : public CPropertySheet
 	{
@@ -29,9 +19,8 @@ class XMSamplerUI : public CPropertySheet
 	public:
 		XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 		XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
-		XMSamplerUI(LPCTSTR pszCaption, class MachineGui* gui, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 
-		enum { IDD = IDD_XM_SAMPLER };
+				enum { IDD = IDD_XM_SAMPLER };
 
 	private:
 		XMSampler* _pMachine;
@@ -40,7 +29,6 @@ class XMSamplerUI : public CPropertySheet
 		XMSamplerUISample m_Sample;
 		XMSamplerMixerPage m_Mixer;
 		bool init;
-		MachineGui* gui_;
 
 	public:
 		void Init(XMSampler* pMachine);

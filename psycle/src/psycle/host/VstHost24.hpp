@@ -14,7 +14,7 @@
 *<@JosepMa> as such it maps all the dispatch calls to functions with parameter validation, and helps
 *           in the construction and destruction processes. Tries to help on other simpler tasks, and
 *           in the handling of parameter windows (VstEffectWnd.cpp/.hpp)
-*<@JosepMa> vst::AudioMaster and vst::plugin are subclasses of the aforementioned classes, which both: extend
+*<@JosepMa> vst::host and vst::plugin are subclasses of the aforementioned classes, which both: extend
 *           the functionality of the base classes, and adapts them to its usage inside psycle
 *<@JosepMa> the host one doesn't provide much more (since the base class is good enough), and the
 *           plugin one wraps the CEffect into a Machine class
@@ -43,7 +43,7 @@ namespace psycle
 			using namespace seib::vst;
 
 
-			class AudioMaster;
+			class host;
 			class CVstEffectWnd;
 
 			class plugin : public Machine, public CEffect
@@ -114,7 +114,7 @@ namespace psycle
 				virtual void PreWork(int numSamples,bool clear=true);
 				virtual void Work(int numSamples);
 				virtual void Tick() { Machine::Tick(); }
-				virtual void Tick(int track, PatternEvent * pData);
+				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop();
 				// old fileformat {
 				virtual bool PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance);
@@ -267,11 +267,11 @@ namespace psycle
 */
 			};
 
-			class AudioMaster : public CVSTHost
+			class host : public CVSTHost
 			{
 			public:
-				AudioMaster(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; }
-				virtual ~AudioMaster(){;}
+				host(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; }
+				virtual ~host(){;}
 
 				///< Helper class for Machine Creation.
 				//static Machine* CreateFromType(int _id, std::string _dllname);

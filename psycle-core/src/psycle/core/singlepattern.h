@@ -1,39 +1,89 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/**************************************************************************
+*   Copyright (C) 2007-2008 Psycledelics http://psycle.sourceforge.net    *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
+#ifndef SINGLEPATTERN_H
+#define SINGLEPATTERN_H
 
-#ifndef PSYCLE__CORE__SINGLE_PATTERN__INCLUDED
-#define PSYCLE__CORE__SINGLE_PATTERN__INCLUDED
-#pragma once
-
-#include "patternevent.h"
+#include "patternline.h"
 #include "signalslib.h"
 #include "timesignature.h"
 
-namespace psy { namespace core {
+/**
+@author  Psycledelics  
+*/
 
-	class PSYCLE__CORE__DECL Pattern {
+namespace psy
+{
+	namespace core
+	{
+
+		class PatternCategory;
+
+		class TweakTrackInfo {
 		public:
-			typedef std::multimap<double, PatternEvent>::iterator iterator;
-			typedef std::multimap<double, PatternEvent>::const_iterator const_iterator;
-			typedef std::multimap<double, PatternEvent>::const_reverse_iterator const_reverse_iterator;
-			typedef std::multimap<double, PatternEvent>::reverse_iterator reverse_iterator;
 
-			Pattern();
-			Pattern(const Pattern& other);
+			enum TweakType { twk, tws, mdi, aut };
 
-			virtual ~Pattern();
+			TweakTrackInfo();
+			TweakTrackInfo( int mac, int param, TweakType type );
 
-			Pattern& operator=(const Pattern& rhs);
-			boost::signal<void (Pattern*)> wasDeleted;
-			
-			void setID(int id) { id_ = id; }
-			int id() const { return id_; }
-										
-			void addBar(const TimeSignature& signature);
-			void removeBar(float pos);
+			~TweakTrackInfo();
+
+			int machineIdx()    const;
+			int parameterIdx()  const;
+			TweakType type()          const;
+
+			bool operator<(const TweakTrackInfo & key) const;
+
+		private:
+
+			int macIdx_;
+			int paramIdx_;
+			TweakType type_;
+
+		};
+
+
+		class SinglePattern : public std::map<double, PatternLine> {
+		public:
+			SinglePattern();
+			SinglePattern(SinglePattern const& other);
+
+			virtual ~SinglePattern();
+
+			boost::signal<void (SinglePattern*)> wasDeleted;
+
+			void setID(int id);
+			int id() const;
+
+			void setBeatZoom(int zoom);
+			int beatZoom() const;
+
+
+			void setEvent( int line, int track, const PatternEvent & event );
+			PatternEvent event( int line, int track );
+
+			void setTweakEvent( int line, int track, const PatternEvent & event );
+			PatternEvent tweakEvent( int line, int track );
+
+
+			void addBar( const TimeSignature & signature );
+			void removeBar( float pos);
 
 			float beats() const;
 
@@ -45,63 +95,64 @@ namespace psy { namespace core {
 			void setName(const std::string & name);
 			const std::string & name() const;
 
-			void setCategory(const std::string& category);
-			const std::string& category() const { return category_; };
+			void setCategory(PatternCategory* category);
+			PatternCategory* category();
 
-			void Clear();
+			float beatsPerLine() const;
 
-			Pattern Clone(double from, double to, int start_track=0, int end_track=32000);
-			void erase(double from, double to, int start_track=0, int end_track=32000);
+			void clearTrack( int linenr , int tracknr );
+			void clearTweakTrack( int linenr , int tracknr );
+			bool lineIsEmpty( int linenr ) const;
 
-			void Transpose(int delta, double from, double to, int start_track=0, int end_track=32000);
-			void ChangeInst(int new_inst, double from, double to, int start_track=0, int end_track=32000);
-			void ChangeMac(int new_inst, double from, double to, int start_track=0, int end_track=32000);
+			SinglePattern::iterator find_nearest( int linenr );
+			SinglePattern::const_iterator find_nearest( int linenr ) const;
+
+			SinglePattern::iterator find_lower_nearest( int linenr );
+			SinglePattern::const_iterator find_lower_nearest( int linenr ) const;
+			
+
+			void clearEmptyLines();
 
 			void scaleBlock(int left, int right, double top, double bottom, float factor);
+			void transposeBlock(int left, int right, double top, double bottom, int trp);
+			void deleteBlock(int left, int right, double top, double bottom);
+			
+			void blockSetInstrument( int left, int right, double top, double bottom, std::uint8_t newInstrument );
+			void blockSetMachine( int left, int right, double top, double bottom, std::uint8_t newMachine );
 
-			std::vector<TimeSignature>& timeSignatures();
-			const std::vector<TimeSignature>&  timeSignatures() const;
+			std::vector<TimeSignature> &  timeSignatures();
+			const std::vector<TimeSignature> &  timeSignatures() const;
 
 			std::string toXml() const;
 
-			iterator begin() { return lines_.begin(); }
-			const_iterator begin() const { return lines_.begin(); }
-			iterator end() { return lines_.end(); }
-			const_iterator end() const { return lines_.end(); }
+			std::auto_ptr<SinglePattern> block( int left, int right, int top, int bottom );
+			void copyBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
+			void mixBlock(int left, int top, const SinglePattern & pattern, int tracks, float maxBeats);
 
-			reverse_iterator rbegin() { return lines_.rbegin(); }
-			const_reverse_iterator rbegin() const { return lines_.rbegin();}
-			reverse_iterator rend() { return lines_.rend(); }
-			const_reverse_iterator rend() const { return lines_.rend(); }
+			void deleteBlock( int left, int right, int top, int bottom );
 
-			iterator lower_bound(double pos) { return lines_.lower_bound(pos); }
-			iterator upper_bound(double pos) { return lines_.upper_bound(pos); }
-
-			iterator insert(double pos, const PatternEvent& ev) {
-				return lines_.insert(std::pair<double, PatternEvent>(pos, ev));
-			}
-			void insert(const Pattern& srcPattern, double to, int to_track=0);
-
-			iterator erase(iterator pos) {
-				iterator temp = pos;
-				++temp;
-				lines_.erase(pos);
-				return temp;
-			}
-
-			std::map<double, PatternEvent>::size_type size() const { return lines_.size(); }
+			TweakTrackInfo tweakInfo( int track ) const;
+			int tweakTrack( const TweakTrackInfo & info);
 
 		private:
+
+			int beatZoom_;
 			std::string name_;
-			std::string category_;
+
+			PatternCategory* category_;
 			std::vector<TimeSignature> timeSignatures_;
+
 			TimeSignature zeroTime;
+
 			int id_;
-			std::multimap<double, PatternEvent> lines_;
+			static int idCounter;
+			static int genId();
+
+			std::map<TweakTrackInfo, int> tweakInfoMap;
+
 		};
 
-}}
-
-
+	}
+}
 
 #endif

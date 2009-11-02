@@ -4,11 +4,7 @@
 
 ///\file
 ///\brief numeric types
-
-#ifndef UNIVERSALIS__COMPILER__NUMERIC__INCLUDED
-#define UNIVERSALIS__COMPILER__NUMERIC__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 	//#include <inttypes.h> // posix/unix
 	//#include <stdint.h> // C1999
@@ -79,4 +75,3 @@ namespace universalis { namespace compiler {
 	#endif
 }}
 
-#endif

@@ -4,8 +4,7 @@
 
 #include <psycle/plugin_interface.hpp>
 #include <fluidsynth/fluidsynth.h>
-
-using namespace psycle::plugin_interface;
+//#include <memory.h>
 
 #define NUMPARAMETERS   24
 #define FILEVERSION     2
@@ -222,7 +221,8 @@ enum {
 //      NUMPARAMETERS
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 		MI_VERSION,     
 		GENERATOR,                                                              // flags
 		NUMPARAMETERS,                                                  // numParameters
@@ -236,7 +236,7 @@ CMachineInfo const MacInfo (
 		"Peter Hanappe and others http://fluidsynth.org/ \n\nSoundFont(R) is a registered trademark of E-mu Systems, Inc.\n\nUsage:\n\nC-4 02 03 0C20\tC4 - note\n\t\t02 - instrument number (required!)\n\t\t03 - machine number\n\t\t0Cxx - (optional) volume at note on (00-7F)\n\noff 02 03\t\tnote-off (the instrument number is required!)\n\nported by Sartorius",
 		"Load SoundFont",                                                                       // A command, that could be use for open an editor, etc...
 		3
-);
+};
 
 class mi : public CMachineInterface
 {

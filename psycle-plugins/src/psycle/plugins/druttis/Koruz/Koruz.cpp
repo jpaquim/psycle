@@ -12,9 +12,6 @@
 #include "../DspLib/Phaser.h"
 #include <cstring>
 #include <cmath>
-
-using namespace psycle::plugin_interface;
-
 //============================================================================
 //				Defines
 //============================================================================
@@ -28,6 +25,8 @@ using namespace psycle::plugin_interface;
 #define WAVESIZE 4096
 #define WAVEMASK 4095
 float				wavetable[WAVESIZE];
+//				Truncation for f2i
+unsigned short cwTrunc = 0x1f72;
 //============================================================================
 //				Parameters
 //============================================================================
@@ -87,7 +86,8 @@ CMachineParameter const *pParams[] =
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo =
+{
 	MI_VERSION,
 	EFFECT,
 	NUM_PARAMS,
@@ -101,7 +101,7 @@ CMachineInfo const MacInfo (
 	MAC_AUTHOR " on " __DATE__,
 	"Command Help",
 	2
-);
+};
 
 //============================================================================
 //				Machine

@@ -3,14 +3,13 @@
 // http://www.codeproject.com/combobox/cexlistboc.asp
 //
 
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "ExListBox.h"
+#include "Psycle.hpp"
 #include "MainFrm.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-using namespace psy::core;
-#else
+#include "Global.hpp"
 #include "Song.hpp"
-#endif
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -82,13 +81,13 @@ void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
 	myedit.DestroyWindow();
 	myedit.Create(WS_CHILD|WS_BORDER,cellrect,this,IDC_SEQEDITBOX);
 	myedit.SetFont(&font);
-	myedit.SetWindowText(Global::song().patternName[Global::song().playOrder[row]]);
+	myedit.SetWindowText(Global::_pSong->patternName[Global::_pSong->playOrder[row]]);
 	myedit.ShowWindow(SW_SHOWNORMAL);
 	myedit.SetFocus();
 }
 void CExListBox::OnKillFocusPatternName()
 {
-	((CMainFrame*)GetParentFrame())->m_wndSeq.UpdateSequencer();
+	((CMainFrame*)GetParentFrame())->UpdateSequencer();
 	myedit.DestroyWindow();
 }
 
@@ -96,7 +95,7 @@ void CExListBox::OnChangePatternName()
 {
 	CString string;
 	myedit.GetWindowText(string);
-	strncpy(Global::song().patternName[Global::song().playOrder[GetCurSel()]],string,32);
+	strncpy(Global::_pSong->patternName[Global::_pSong->playOrder[GetCurSel()]],string,32);
 }
 int CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
@@ -128,7 +127,7 @@ BOOL CExListBox::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult )
 	// need to handle both ANSI and UNICODE versions of the message
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-	CString strTipText = Global::song().patternName[Global::song().playOrder[pNMHDR->idFrom]];
+	CString strTipText = Global::_pSong->patternName[Global::_pSong->playOrder[pNMHDR->idFrom]];
 //	UINT nID = pNMHDR->idFrom;
 //	GetText( nID ,strTipText);
 

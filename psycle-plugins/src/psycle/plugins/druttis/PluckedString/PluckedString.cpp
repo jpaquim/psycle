@@ -8,9 +8,6 @@
 #include "CVoice.h"
 #include <psycle/plugin_interface.hpp>
 #include <memory>
-
-using namespace psycle::plugin_interface;
-
 //============================================================================
 //				Defines
 //============================================================================
@@ -110,7 +107,8 @@ CMachineParameter const *pParams[] = {
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo =
+{
 	MI_VERSION,
 	GENERATOR,
 	NUM_PARAMS,
@@ -124,7 +122,7 @@ CMachineInfo const MacInfo (
 	MAC_AUTHOR " on " __DATE__,
 	"Command Help",
 	1
-);
+};
 //============================================================================
 //				Machine
 //============================================================================

@@ -10,6 +10,7 @@
 
 
 //#include "mfc_wrapped_classes.hpp"
+#include <packageneric/pre-compiled.private.hpp>
 #include "../../Version.hpp"
 #include "../../Global.hpp"
 #include "../../Configuration.hpp"

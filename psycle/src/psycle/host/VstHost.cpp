@@ -153,7 +153,7 @@ namespace psycle
 				{
 					std::ostringstream s; s
 						<< "could not load library: " << dllname << std::endl
-						<< os::exceptions::code_description();
+						<< operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::loading_error(s.str());
 				}
 				PVSTMAIN main(reinterpret_cast<PVSTMAIN>(::GetProcAddress(h_dll, "main")));
@@ -162,7 +162,7 @@ namespace psycle
 					std::ostringstream s; s
 						<< "library is not a VST plugin:" << std::endl
 						<< "could not resolve symbol 'main' in library: " << dllname << std::endl
-						<< os::exceptions::code_description();
+						<< operating_system::exceptions::code_description();
 					throw host::exceptions::library_errors::symbol_resolving_error(s.str());
 				}
 				// 1: calls the "main" function and receives the pointer to the AEffect structure.

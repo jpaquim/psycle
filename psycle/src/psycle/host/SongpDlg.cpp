@@ -1,16 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CSongpDlg.
 
+#include <packageneric/pre-compiled.private.hpp>
 #include "SongpDlg.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-using namespace psy::core;
-#else
+#include "Psycle.hpp"
 #include "Song.hpp"
-#endif
-
-
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -38,9 +32,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_songtitle.SetLimitText(128);
 			m_songcredits.SetLimitText(64);
 			m_songcomments.SetLimitText(65535);
-			m_songtitle.SetWindowText(_pSong->name().c_str());
-			m_songcredits.SetWindowText(_pSong->author().c_str());
-			m_songcomments.SetWindowText(_pSong->comment().c_str());
+			m_songtitle.SetWindowText(_pSong->name.c_str());
+			m_songcredits.SetWindowText(_pSong->author.c_str());
+			m_songcomments.SetWindowText(_pSong->comments.c_str());
 			m_songtitle.SetFocus();
 			m_songtitle.SetSel(0,-1);
 
@@ -68,9 +62,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_songtitle.GetWindowText(name,128);
 				m_songcredits.GetWindowText(author,64);
 				m_songcomments.GetWindowText(comments,65535);
-				_pSong->setName(name);
-				_pSong->setAuthor(author);
-				_pSong->setComment(comments);
+				_pSong->name = name;
+				_pSong->author = author;
+				_pSong->comments = comments;
 				CDialog::OnOK();
 			}
 			else CDialog::OnCancel();

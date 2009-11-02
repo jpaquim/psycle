@@ -1,13 +1,13 @@
 ///\file
 ///\brief interface file for psycle::host::CConfigDlg.
 #pragma once
-#include "Psycle.hpp"
 #include "DirectoryDlg.hpp"
 #include "SkinDlg.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInputDlg.hpp"
 #include "Configuration.hpp"
 #include "KeyConfigDlg.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

@@ -23,6 +23,8 @@
 	calculate a real FFT and a real power spectrum.
 
 **********************************************************************/
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/helpers/fft.hpp>
 #include <cstdlib>
 #include <cstdio>
@@ -30,7 +32,7 @@
 
 namespace psycle
 {
-	namespace helpers
+	namespace host
 	{
 		namespace dsp
 		{
@@ -39,21 +41,34 @@ int **gFFTBitTable = NULL;
 const int MaxFastBits = 16;
 
 /* Declare Static functions */
-static bool IsPowerOfTwo(int x);
+static int IsPowerOfTwo(int x);
 static int NumberOfBitsNeeded(int PowerOfTwo);
 static int ReverseBits(int index, int NumBits);
 static void InitFFT();
 
-bool IsPowerOfTwo(int x)
+int IsPowerOfTwo(int x)
 {
-	return ((x & (x - 1))==0);
+	if (x < 2)
+		return false;
+
+	if (x & (x - 1))             /* Thanks to 'byang' for this cute trick! */
+		return false;
+
+	return true;
 }
 
 int NumberOfBitsNeeded(int PowerOfTwo)
 {
-	int i=0;
-	while((PowerOfTwo >>=1)> 0) i++;
-	return i;
+	int i;
+
+	if (PowerOfTwo < 2) {
+		fprintf(stderr, "Error: FFT called with size %d\n", PowerOfTwo);
+		exit(1);
+	}
+
+	for (i = 0;; i++)
+		if (PowerOfTwo & (1 << i))
+			return i;
 }
 
 int ReverseBits(int index, int NumBits)
@@ -108,11 +123,9 @@ void FFT(int NumSamples,
 	double tr, ti;                /* temp real, temp imaginary */
 
 	if (!IsPowerOfTwo(NumSamples)) {
-		fprintf(stderr, "Error: FFT called with size %d\n", NumSamples);
+		fprintf(stderr, "%d is not a power of two\n", NumSamples);
 		exit(1);
 	}
-
-	NumBits = NumberOfBitsNeeded(NumSamples);
 
 	if (!gFFTBitTable)
 		InitFFT();
@@ -120,6 +133,7 @@ void FFT(int NumSamples,
 	if (InverseTransform)
 		angle_numerator = -angle_numerator;
 
+	NumBits = NumberOfBitsNeeded(NumSamples);
 
 	/*
 	**   Do simultaneous data copy and bit-reversal ordering into outputs...

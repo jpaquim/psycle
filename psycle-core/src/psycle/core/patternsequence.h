@@ -1,20 +1,41 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/***************************************************************************
+	*   Copyright (C) 2007 Psycledelics     *
+	*   psycle.sf.net   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
+#ifndef PATTERNSEQUENCE_H
+#define PATTERNSEQUENCE_H
 
-#ifndef PSYCLE__CORE__PATTERN_SEQUENCE__INCLUDED
-#define PSYCLE__CORE__PATTERN_SEQUENCE__INCLUDED
-#pragma once
-
+#include "patternpool.h"
 #include "singlepattern.h"
 
-namespace psy { namespace core {
+/**
+@author  Psycledelics  
+*/
+
+namespace psy
+{
+	namespace core
+	{
 
 		const int PatternEnd = -1;
 
-		class GlobalEvent {
+		class GlobalEvent
+		{
 			public:
 					enum GlobalType {
 					BPM_CHANGE,
@@ -64,9 +85,9 @@ namespace psy { namespace core {
 			double tickPosition() const;
 			double tickEndPosition( ) const;
 
-			void setPattern(Pattern* pattern);
-			Pattern* pattern() { return pattern_; }
-			Pattern* pattern() const { return pattern_; }
+			void setPattern(SinglePattern* pattern);
+			SinglePattern* pattern();
+			SinglePattern* pattern() const;
 
 			float patternBeats() const;
 
@@ -90,127 +111,58 @@ namespace psy { namespace core {
 			/// the sequence timeline that the sequenceEntry belongs to
 			SequenceLine* line_;
 			/// the wrapped pattern
-			Pattern* pattern_;
+			SinglePattern* pattern_;
 			/// here we can shrink the pattern of the entry
 			float startPos_;
 			/// endpos shrink (from begin of a pattern starting at 0)
 			float endPos_;
 			/// a transpose offset for the entry
 			int transpose_;
+
+			void init();
+
 		};
 
-		class Sequence;
+		class PatternSequence;
 
-	class PSYCLE__CORE__DECL SequenceLine {
+		class SequenceLine : public  std::multimap<double, SequenceEntry*>
+		{
+
 		public:
 			SequenceLine();
-			SequenceLine(Sequence* sequence);
+			SequenceLine(PatternSequence* patSeq);
 			~SequenceLine();
 
 			boost::signal<void (SequenceLine*)> wasDeleted;
 
-			SequenceEntry* createEntry(Pattern* pattern, double position);
-			void insertEntry(SequenceEntry *entry);
-			void moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine);
-			void removePatternEntries(Pattern* pattern);
-			void insertEntryAndMoveRest(SequenceEntry *entry, double pos);
-			void removeSpaces(); // removes spaces between entries
+			SequenceEntry* createEntry(SinglePattern* pattern, double position);
+			void insertEntry( SequenceEntry *entry );
+			void moveEntryToNewLine( SequenceEntry *entry, SequenceLine *newLine );
+			void removeSinglePatternEntries(SinglePattern* pattern);
 
 			double tickLength() const;
 
-			Sequence* patternSequence() { return sequence_; }
+			PatternSequence* patternSequence();
 
 			void MoveEntry(SequenceEntry* entry, double newpos);
 			void removeEntry(SequenceEntry* entry);
 
-			const std::string& name() const;
+			const std::string & name() const;
 			void setName(const std::string & newname);
 
 			std::string toXml() const;
 
-			typedef std::multimap<double, SequenceEntry*>::iterator iterator;
-			typedef std::multimap<double, SequenceEntry*>::const_iterator const_iterator;
-			typedef std::multimap<double, SequenceEntry*>::const_reverse_iterator const_reverse_iterator;
-			typedef std::multimap<double, SequenceEntry*>::reverse_iterator reverse_iterator;
-
-			iterator begin() { return line_.begin(); }
-			const_iterator begin() const { return line_.begin(); }
-			iterator end() { return line_.end(); }
-			const_iterator end() const { return line_.end(); }
-
-			reverse_iterator rbegin() { return line_.rbegin(); }
-			const_reverse_iterator rbegin() const { return line_.rbegin(); }
-			reverse_iterator rend() { return line_.rend(); }
-			const_reverse_iterator rend() const { return line_.rend(); }
-
-			void insert(double pos, SequenceEntry* entry) {
-				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
-				entry->setSequenceLine(this);
-			}
-
-			void erase(iterator it) {
-				line_.erase(it);
-			}
-
-			iterator lower_bound(double pos) {
-				return line_.lower_bound(pos);
-			}
-
-			iterator upper_bound(double pos) {
-				return line_.upper_bound(pos);
-			}
-
-			std::multimap<double, SequenceEntry*>::size_type size() const {
-				return line_.size();
-			}
-
-			bool empty() const { return line_.empty(); }
-
 		private:
 
-			std::multimap<double, SequenceEntry*> line_;
 			std::string name_;
-			Sequence* sequence_;
+			PatternSequence* patternSequence_;
 
-	};
+		};
 
-	class PSYCLE__CORE__DECL Sequence {
+		class PatternSequence : public std::vector<SequenceLine*> {
 		public:
-			Sequence();
-			~Sequence();
-
-			typedef std::vector<SequenceLine*>::iterator iterator;
-			typedef std::vector<SequenceLine*>::const_iterator const_iterator;
-			typedef std::vector<SequenceLine*>::const_reverse_iterator const_reverse_iterator;
-			typedef std::vector<SequenceLine*>::reverse_iterator reverse_iterator;
-
-			iterator begin() { return lines_.begin(); }
-			const_iterator begin() const { return lines_.begin(); }
-			iterator end() { return lines_.end(); }
-			const_iterator end() const { return lines_.end(); }
-
-			reverse_iterator rbegin() { return lines_.rbegin(); }
-			const_reverse_iterator rbegin() const { return lines_.rbegin(); }
-			reverse_iterator rend() { return lines_.rend(); }
-			const_reverse_iterator rend() const { return lines_.rend(); }
-
-			typedef std::vector<Pattern*>::iterator patterniterator;
-			typedef std::vector<Pattern*>::const_iterator const_patterniterator;
-			typedef std::vector<Pattern*>::const_reverse_iterator const_reverse_patterniterator;
-			typedef std::vector<Pattern*>::reverse_iterator reverse_patterniterator;
-
-			patterniterator patternbegin() { return patterns_.begin(); }
-			const_patterniterator patternbegin() const { return patterns_.begin(); }
-			patterniterator patternend() { return patterns_.end(); }
-			const_patterniterator patternend() const { return patterns_.end(); }
-
-			reverse_patterniterator patternrbegin() { return patterns_.rbegin(); }
-			const_reverse_patterniterator patternrbegin() const { return patterns_.rbegin(); }
-			reverse_patterniterator patternrend() { return patterns_.rend(); }
-			const_reverse_patterniterator patternrend() const { return patterns_.rend(); }
-
-
-			int numpatterns() { return patterns_.size(); }
+			PatternSequence();
+			~PatternSequence();
 
 			typedef std::multimap<double, GlobalEvent*> GlobalMap;
 			typedef GlobalMap::iterator GlobalIter;
@@ -225,17 +177,16 @@ namespace psy { namespace core {
 			void removeAll();
 
 			// heart of patternsequence
-			void GetEventsInRange( double start, double length, std::vector<PatternEvent*>& events );
-			void GetOrderedEvents(std::vector<PatternEvent*>& event_list);
-			SequenceEntry* GetEntryOnPosition(SequenceLine* line, double tickPosition);
-			void CollectEvent(const PatternEvent& command);
-			int priority(const PatternEvent& cmd, int count) const;
+			void GetLinesInRange( double start, double length, std::multimap<double, PatternLine>& events );
 
 			// playpos info
 
-			bool getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const;
+			bool getPlayInfo( SinglePattern* pattern, double start, double length, double & entryStart  ) const;
 
-			void removePattern(Pattern* pattern);
+			PatternPool* patternPool();
+			const PatternPool & patternPool() const;
+
+			void removeSinglePattern(SinglePattern* pattern);
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.
@@ -277,15 +228,9 @@ namespace psy { namespace core {
 
 			std::string toXml() const;
 
-			void Add(Pattern* pattern);
-			void Remove(Pattern* pattern);
-			Pattern* FindPattern(int id);
-
 		private:
-			// sequencer structure
-			std::vector<SequenceLine*> lines_;
-			// pattern pool
-			std::vector<Pattern*> patterns_;
+
+			PatternPool patternPool_;
 
 			int numTracks_;
 			std::vector<bool> mutedTrack_;
@@ -296,9 +241,8 @@ namespace psy { namespace core {
 
 			GlobalMap globalEvents_;
 
-			std::multimap<double, std::multimap< int, PatternEvent > > events_;
-	};
-	typedef Sequence PatternSequence;
+		};
+	}
+}
 
-}}
 #endif

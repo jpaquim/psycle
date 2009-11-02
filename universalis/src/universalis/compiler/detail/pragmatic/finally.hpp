@@ -4,13 +4,8 @@
 
 ///\file
 ///\brief try-finally statements
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__FINALLY__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__FINALLY__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
-
 #if 0 // disabled ; as of january 2005, we still can't use try-finally statements easily but with borland's compiler.
 	#if defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 		#define try_finally
@@ -36,5 +31,3 @@
 		*/
 	#endif
 #endif // 0
-
-#endif

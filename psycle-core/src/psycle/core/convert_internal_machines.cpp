@@ -1,10 +1,4 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-#include <psycle/core/config.private.hpp>
 #include "convert_internal_machines.private.hpp"
 #include "machinefactory.h"
 #include "fileio.h"
@@ -24,12 +18,12 @@ Converter::Converter() {}
 
 Converter::~Converter() throw() {
 	for(
-		std::map<Machine *, int const *>::const_iterator i = machine_converted_from.begin();
+		std::map<Machine * const, int const *>::const_iterator i = machine_converted_from.begin();
 		i != machine_converted_from.end(); ++i
 	) delete const_cast<int *>(i->second);
 }
 
-Machine & Converter::redirect(MachineFactory & factory, int index, int type, RiffFile & riff) {
+Machine & Converter::redirect(MachineFactory& factory, int const & index, int const & type, RiffFile & riff) {
 	Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::NATIVE,(plugin_names()(type).c_str()),0),index);
 	if(!pointer_to_machine) pointer_to_machine = factory.CreateMachine(MachineKey::dummy(),index);
 	try {
@@ -226,11 +220,10 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 }
 
 void Converter::retweak(CoreSong & song) const {
-#if 0 ///\todo
 	// Get the first category (there's only one with imported psy's) and...
 	std::vector<PatternCategory*>::iterator cit  = song.patternSequence().patternPool()->begin();
 	// ... for all the patterns in this category...
-	for(std::vector<Pattern*>::iterator pit  = (*cit)->begin(); pit != (*cit)->end(); ++pit) {
+	for(std::vector<SinglePattern*>::iterator pit  = (*cit)->begin(); pit != (*cit)->end(); ++pit) {
 		// ... check all lines searching...
 		for(std::map<double, PatternLine>::iterator lit = (*pit)->begin(); lit != (*pit)->end() ; ++lit) {
 			PatternLine & line = lit->second;
@@ -251,7 +244,6 @@ void Converter::retweak(CoreSong & song) const {
 			}
 		}
 	}
-#endif
 }
 
 Converter::Plugin_Names::Plugin_Names() {
@@ -280,11 +272,11 @@ Converter::Plugin_Names::~Plugin_Names() {
 	delete (*this)[asynth21];
 }
 
-bool Converter::Plugin_Names::exists(int type) const throw() {
+const bool Converter::Plugin_Names::exists(int const & type) const throw() {
 	return find(type) != end();
 }
 
-std::string const & Converter::Plugin_Names::operator()(int type) const {
+const std::string & Converter::Plugin_Names::operator()(int const & type) const {
 	const_iterator i = find(type);
 	//if(i == end()) throw std::exception("internal machine replacement plugin not declared");
 	if(i == end()) throw;
@@ -297,7 +289,7 @@ const Converter::Plugin_Names & Converter::plugin_names() {
 }
 
 template<typename Parameter>
-void Converter::retweak(Machine & machine, int type, Parameter parameters [], int parameter_count, int parameter_offset) {
+void Converter::retweak(Machine & machine, const int & type, Parameter parameters [], const int & parameter_count, const int & parameter_offset) {
 	for(int parameter(0); parameter < parameter_count ; ++parameter) {
 		int new_parameter(parameter_offset + parameter);
 		int new_value(parameters[parameter]);
@@ -306,7 +298,7 @@ void Converter::retweak(Machine & machine, int type, Parameter parameters [], in
 	}
 }
 
-void Converter::retweak(int type, int & parameter, int & integral_value) const {
+void Converter::retweak(const int & type, int & parameter, int & integral_value) const {
 	Real value(integral_value);
 	const Real maximum(0xffff);
 	switch(type) {

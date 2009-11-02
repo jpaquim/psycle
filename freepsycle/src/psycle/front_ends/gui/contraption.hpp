@@ -1,6 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
-
+// copyright 2000-2008 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 ///\\interface psycle::front_ends::gui::contraption
 #pragma once
 #include "forward_declarations.hpp"
@@ -10,7 +9,7 @@
 #include <libgnomecanvasmm/rect.h>
 #include <libgnomecanvasmm/text.h>
 #include <universalis/compiler/numeric.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__FRONT_ENDS__GUI
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__FRONT_ENDS__GUI__CONTRAPTION
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace front_ends { namespace gui {
 
@@ -58,7 +57,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK contraption : public Gnome::Canvas::Gr
 			boost::signal<void (contraption &)> inline & signal_leave()  { return signal_leave_; }
 		private:
 			boost::signal<void (contraption &)> signal_enter_, signal_move_, signal_select_, signal_leave_;
-			bool on_canvas_event(GdkEvent *);
+		protected:
+			bool on_event_(GdkEvent *) /*override*/;
 	///\}
 
 	///\name dragging

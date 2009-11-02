@@ -1,14 +1,12 @@
 #include <psycle/plugin_interface.hpp>
 #include "biquad.hpp"
-#include <cstring>
-#include <cstdlib>
+#include <string.h>
+#include <stdlib.h>
 #include <cassert>
-#include <cmath>
+#include <math.h>
 
 //////////////////////////////////////////////////////////////////////
 // KarLKoX "Surround" plugin for PSYCLE
-
-using namespace psycle::plugin_interface;
 
 #define VERNUM "v1.2"
 
@@ -38,7 +36,8 @@ CMachineParameter const *pParameters[] =
 	&paraMode
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	EFFECT,																																				// flags
 	2,																																								// numParameters
@@ -52,7 +51,7 @@ CMachineInfo const MacInfo (
 	"Saïd Bougribate",																								// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	2																																								// must be 2 else we can't see the knob (??)
-);
+};
 
 class mi : public CMachineInterface
 {

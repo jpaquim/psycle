@@ -1,18 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "GearTracker.hpp"
+#include "Psycle.hpp"
 #include "ChildView.hpp"
-#include "MachineView.hpp"
-#include "MachineGui.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/sampler.h>
-using namespace psy::core;
-#else
-#include "Sampler.hpp"
-#endif
-#include <psycle/helpers/dsp.hpp>
-
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -20,19 +12,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			: CDialog(CGearTracker::IDD, pParent)
 		{
 			m_pParent = pParent;
-			//{{AFX_DATA_INIT(CGearTracker)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
-		}
-
-		CGearTracker::CGearTracker(MachineGui* gui)
-			: CDialog(CGearTracker::IDD, gui->view()->child_view()),
-			  gui_(gui),
-			  m_pParent(gui->view()->child_view()),
-				_pMachine((Sampler*)gui->mac())
-
-		{
-
 			//{{AFX_DATA_INIT(CGearTracker)
 				// NOTE: the ClassWizard will add member initialization here
 			//}}AFX_DATA_INIT
@@ -66,7 +45,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			m_interpol.SetCurSel(_pMachine->_resampler.GetQuality());
 
-			SetWindowText(_pMachine->GetEditName().c_str());
+			SetWindowText(_pMachine->_editName);
 
 			m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 			m_polyslider.SetPos(_pMachine->_numVoices);
@@ -99,7 +78,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CGearTracker::OnSelchangeCombo1() 
 		{
-			_pMachine->_resampler.SetQuality((psycle::helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
+			_pMachine->_resampler.SetQuality((helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
 		}
 
 		BOOL CGearTracker::Create()
@@ -109,8 +88,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CGearTracker::OnCancel()
 		{
-			if (gui_)
-			  gui_->BeforeDeleteDlg();
+			m_pParent->SamplerMachineDialog = NULL;
 			DestroyWindow();
 			delete this;
 		}

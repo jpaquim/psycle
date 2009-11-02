@@ -1,17 +1,30 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/**************************************************************************
+*   Copyright 2007-2008 Psycledelics http://psycle.sourceforge.net        *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/config.private.hpp>
+
 #include "psy4filter.h"
 
 #include "file.h"
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
-#include "SinglePattern.h"
+#include "singlepattern.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
@@ -25,8 +38,6 @@
 #elif defined _WIN64 || defined _WIN32
 	#include <io.h>
 	#if defined _MSC_VER
-#ifdef no_xml_available
-#else
 		#pragma comment(lib, "xml++-2.6.lib")
 		#pragma comment(lib, "xml2")
 		#pragma comment(lib, "glibmm-2.4.lib")
@@ -35,7 +46,6 @@
 		#pragma comment(lib, "glib-2.0.lib")
 		#pragma comment(lib, "intl")
 		#pragma comment(lib, "iconv")
-#endif
 	#endif
 #endif
 
@@ -65,15 +75,15 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	zipreader *z;
 	zipreader_file *f;
 	//int fd = open( fileName.c_str(), O_RDONLY );
-	FILE* file1 = fopen(fileName.c_str(), "rb");
+	FILE* file1 = fopen( fileName.c_str(), "rb" );
 	int fd = fileno(file1);
-	z = zipreader_open(fd);
+	z = zipreader_open( fd );
 	//int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
 	FILE* file2 = fopen(std::string("psytemp.xml").c_str(), "wb+");
 	int outFd = fileno(file2);
 	f = zipreader_seek(z, "xml/song.xml");
 
-	if (!zipreader_extract(f, outFd)) {
+	if (!zipreader_extract(f, outFd )) {
 		zipreader_close( z );
 		//close( outFd );
 		//close( fd );
@@ -86,7 +96,7 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 
 	f = zipreader_seek(z, "bin/song.bin");
 	//outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
-	file2 = fopen(std::string("psytemp.bin").c_str(), "wb+");
+	file2 = fopen(std::string("psytemp.bin").c_str(), "wb+" );
 	outFd = fileno(file2);
 	if (!zipreader_extract(f, outFd )) {
 		zipreader_close( z );
@@ -103,35 +113,30 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	//close( fd );
 	fclose(file1);
 
-#ifdef no_xml_available
-	return false;
-#else
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
 	if(!parser) return false;
 	xmlpp::Element const & root_element(*parser.get_document()->get_root_node());
 	return root_element.get_name() == "psy4";
-#endif
-
 }
 
 bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
-	std::map<int, Pattern*> patMap;
+	std::map<int, SinglePattern*> patMap;
 	patMap.clear();
+
+	song.patternSequence().patternPool()->removeAll();
 	song.patternSequence().removeAll();
 	song.clear();
 	
 	float lastPatternPos = 0;
 	PatternCategory* lastCategory = 0;
-	Pattern* lastPattern  = 0;
+	SinglePattern* lastPattern  = 0;
 	SequenceLine* lastSeqLine  = 0;
 	std::cout << "psy4filter detected for load" << std::endl;
 
-#ifdef no_xml_available
-#else
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
 	if(!parser) return false;
@@ -377,12 +382,12 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 					std::cerr << "expected patid attribute in seqentry element\n";
 					continue;
 				}
-				std::map<int, Pattern*>::iterator it =
+				std::map<int, SinglePattern*>::iterator it =
 					patMap.find(str<int>(id));
 				if(it == patMap.end())
 					continue;
 				
-				Pattern * pattern(it->second);
+				SinglePattern * pattern(it->second);
 				if (!pattern)
 					continue;
 
@@ -563,7 +568,6 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		///\todo:
 	}
 
-	#endif
 	return true;
 } // load
 
@@ -596,7 +600,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
 	xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 	xml << "</info>" << std::endl;
-	// xml << song.patternSequence().patternPool().toXml(); todo
+	xml << song.patternSequence().patternPool().toXml();
 	xml << song.patternSequence().toXml();
 	xml << "</psy4>" << std::endl;
 
@@ -754,7 +758,7 @@ bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 	file->Write(std::uint32_t(index));
 	file->Write(std::uint32_t(key.host()));
 	file->WriteArray(key.dllName().c_str(),key.dllName().length()+1);
-	// file->Write(std::uint32_t(key.index())); ?
+	file->Write(std::uint32_t(key.index()));
 	
 	song.machine(index)->SaveFileChunk(file);
 
@@ -807,3 +811,4 @@ bool Psy4Filter::saveWAVEv0( RiffFile * /*file*/, const CoreSong& /*song*/, int 
 }
 
 }}
+

@@ -1,9 +1,6 @@
 #include <psycle/plugin_interface.hpp>
 #include "envelope.hpp"
-#include <cmath>
-#include <cstdint>
-
-using namespace psycle::plugin_interface;
+#include <math.h> // should be <cmath>
 
 //////////////////////////////////////////////////////////////////////
 // Psycle
@@ -310,7 +307,8 @@ class CTrack
 		float Mot1dv,Mot2dv,Mot3dv;
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	20,																																								// numParameters
@@ -324,7 +322,7 @@ CMachineInfo const MacInfo (
 	"Zephod / Arguru",																								// author
 	"Help",																																				// A command, that could be use for open an editor, etc...
 	2
-);
+};
 
 class mi : public CMachineInterface
 {
@@ -339,10 +337,10 @@ class mi : public CMachineInterface
 		virtual void DSPClear(float *psamplesleft,float *psamplesright, int numsamples);
 		virtual void Stop();
 
-		std::uint8_t wave,ModWave;
+		uint8 wave,ModWave;
 		CTrack Tracks[MAX_TRACKS];
 		int medBreakNote[MAX_TRACKS];
-		std::uint8_t route;
+		uint8 route;
 		int mod1_env,mod2_env,mod3_env;
 		int tickCounter;
 };

@@ -1,11 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
-#include "configuration_options.hpp"
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-
+#include <packageneric/pre-compiled.private.hpp>
 #include "Instrument.hpp"
-#include "Global.hpp"
 #include "DataCompression.hpp"
 #include "Filter.hpp"
 #include "Zap.hpp"
@@ -31,8 +28,8 @@ namespace psycle
 
 		void Instrument::Delete()
 		{
-			_locked_machine_index = -1;
-			_locked_to_machine = false;
+			_lock_instrument_to_machine = -1;
+			_LOCKINST = false;
 
 			// Reset envelope
 			ENV_AT = 1; // 16
@@ -207,8 +204,8 @@ namespace psycle
 
 				if ((version & 0xFF) >= 1) 
 				{ //revision 1 or greater
-					pFile->Read(&_locked_machine_index,sizeof(_locked_machine_index));
-					pFile->Read(&_locked_to_machine,sizeof(_locked_to_machine));
+					pFile->Read(&_lock_instrument_to_machine,sizeof(_lock_instrument_to_machine));
+					pFile->Read(&_LOCKINST,sizeof(_LOCKINST));
 				}
 			}
 		}
@@ -298,10 +295,9 @@ namespace psycle
 				}
 				zapArray(pData2);
 
-				pFile->Write(&_locked_machine_index,sizeof(_locked_machine_index));
-				pFile->Write(&_locked_to_machine,sizeof(_locked_to_machine));
+				pFile->Write(&_lock_instrument_to_machine,sizeof(_lock_instrument_to_machine));
+				pFile->Write(&_LOCKINST,sizeof(_LOCKINST));
 			}
 		}
 	}
 }
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

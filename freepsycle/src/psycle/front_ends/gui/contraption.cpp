@@ -1,11 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
-
+// copyright 2000-2008 psycledelics http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 ///\\implementation psycle::front_ends::gui::contraption
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "contraption.hpp"
-#include <universalis/os/loggers.hpp>
-#include <gdk/gdkkeysyms.h>
+#include <universalis/operating_system/loggers.hpp>
 namespace psycle { namespace front_ends { namespace gui {
 
 contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real const & y, color const & color, std::string const & text)
@@ -25,7 +25,7 @@ contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real con
 		if(loggers::trace()()) loggers::trace()("pango: font description: creating ...", UNIVERSALIS__COMPILER__LOCATION);
 		font_description = new Pango::FontDescription;
 		font_description->set_family("helvetica");
-		#if !defined DIVERSALIS__OS__MICROSOFT
+		#if !defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 			font_description->set_weight(Pango::WEIGHT_BOLD);
 		#else
 			font_description->set_weight(Pango::WEIGHT_ULTRABOLD);
@@ -58,7 +58,7 @@ contraption::contraption(Gnome::Canvas::Group & parent, real const & x, real con
 	
 	this->text(text);
 	
-	signal_event().connect(sigc::mem_fun(*this, &contraption::on_canvas_event));
+	signal_event().connect(sigc::mem_fun(*this, &contraption::on_event_));
 }
 
 void contraption::text(std::string const & text) {
@@ -99,7 +99,9 @@ void contraption::dragging_stop(time const & time) {
 	ungrab(time);
 }
 
-bool contraption::on_canvas_event(GdkEvent * event) {
+bool contraption::on_event_(GdkEvent * event) {
+std::clog << "contraption::on_event\n";
+	if(Gnome::Canvas::Group::on_event(event)) return true;
 	real x(event->button.x), y(event->button.y);
 	switch(event->type) {
 		case GDK_ENTER_NOTIFY: {
@@ -109,49 +111,26 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 			//return true;
 		}
 		break;
-		case GDK_LEAVE_NOTIFY: {
-			if(!(event->crossing.state & GDK_BUTTON1_MASK)) {
-				rectangle().property_fill_color_rgba() = fill_color();
-				rectangle().property_outline_color_rgba() = outline_color();
-				signal_leave()(*this);
-				//return true;
-			}
-		}
-		break;
 		case GDK_KEY_PRESS: {
-			if(
-				event->key.keyval == GDK_Shift_L ||
-				event->key.keyval == GDK_Shift_R ||
-				event->key.keyval == GDK_Control_L ||
-				event->key.keyval == GDK_Control_R
-			) {
-				loggers::trace()("contraption::on_event: select");
+			/*if(event->key.state & GDK_SHIFT_MASK)*/ {
 				signal_select()(*this);
 				//return true;
 			}
-			/*
-			if(event->key.state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK)) {
-				loggers::trace()("contraption::on_event: key press shift/control mask");
-			}
-			*/
 		}
 		break;
 		case GDK_BUTTON_PRESS: {
 			switch(event->button.button) {
 				case 1: {
-					loggers::trace()("contraption::on_event: drag start");
 					dragging_start(x, y, event->button.time);
 					return true;
 				}
 				break;
 				case 2: {
 					if(event->button.state & GDK_SHIFT_MASK) {
-						loggers::trace()("contraption::on_event: lower bottom");
 						//get_parent_group()->lower_to_bottom();
 						property_parent().get_value()->lower_to_bottom();
 						//return true;
 					} else {
-						loggers::trace()("contraption::on_event: lower 1");
 						property_parent().get_value()->lower(1);
 						//return true;
 					}
@@ -159,11 +138,9 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 				break;
 				case 3: {
 					if(event->button.state & GDK_SHIFT_MASK) {
-						loggers::trace()("contraption::on_event: raise top");
 						property_parent().get_value()->raise_to_top();
 						//return true;
 					} else {
-						loggers::trace()("contraption::on_event: raise 1");
 						property_parent().get_value()->raise(1);
 						//return true;
 					}
@@ -184,7 +161,6 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 			switch(event->button.button) {
 				case 1: {
 					if(dragging()) {
-						loggers::trace()("contraption::on_event: drag stop");
 						dragging_stop(event->button.time);
 						return true;
 					}
@@ -197,9 +173,18 @@ bool contraption::on_canvas_event(GdkEvent * event) {
 		case GDK_KEY_RELEASE: {
 		}
 		break;
+		case GDK_LEAVE_NOTIFY: {
+			if(!(event->crossing.state & GDK_BUTTON1_MASK)) {
+				rectangle().property_fill_color_rgba() = fill_color();
+				rectangle().property_outline_color_rgba() = outline_color();
+				signal_leave()(*this);
+				//return true;
+			}
+		}
+		break;
 		default: ;
 	}
-	//loggers::trace()("contraption::on_event: false");
+std::clog << "contraption::on_event: false\n";
 	return false;
 }
 }}}

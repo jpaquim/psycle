@@ -3,11 +3,7 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__PACK__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__PACK__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 
 #if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__COMPILER__MICROSOFT
@@ -20,9 +16,7 @@
 	#define UNIVERSALIS__COMPILER__PACK__POP()
 #endif
 
-#if 0 && defined DIVERSALIS__OS__MICROSOFT
+#if 0 && defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 	#define UNIVERSALIS__COMPILER__PACK__PUSH(x) <pshpack#x.h>
 	#define UNIVERSALIS__COMPILER__PACK__POP     <poppack.h>
-#endif
-
 #endif

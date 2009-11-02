@@ -1,40 +1,12 @@
 ///\file
 ///\brief interface file for psycle::host::Global.
 #pragma once
-#include "Version.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/constants.h>
-#include <psycle/core/commands.h>
-namespace psy {
-	namespace core {
-		class Song;
-		class Player;
-	}
-}
-
-namespace psycle { namespace host {
-namespace notecommands {
-	using namespace psy::core::notetypes;
-}
-namespace PatternCmd {
-	using namespace psy::core::commandtypes;
-}
-}}
-using namespace psy::core;
-//typedef unsigned char byte;
-//typedef unsigned short word;
-//typedef unsigned long dword;
-#else
-#include "Constants.hpp"
-#endif
-
-#if defined DIVERSALIS__OS__MICROSOFT
+#if defined DIVERSALIS__OPERATING_SYSTEM__WINDOWS
 	#include <windows.h> // for QueryPerformanceCounter
 #else
-	#include <universalis/os/clocks.hpp>
+	#include <universalis/operating_system/clocks.hpp>
 #endif
-//#include <cstdint>
-
+#include <cstdint>
 namespace psycle
 {
 	namespace helpers
@@ -46,18 +18,15 @@ namespace psycle
 	}
 	namespace host
 	{
-		class Configuration;
-		class InputHandler;
-
-
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		class Song;
 		class Player;
+		class Configuration;
+		class InputHandler;
 		namespace vst
 		{
-			class AudioMaster;
+			class host;
 		}
-#endif
+
 		//\todo: move this source to a better place.
 		namespace cpu
 		{
@@ -65,34 +34,36 @@ namespace psycle
 
 			cycles_type inline cycles()
 			{
-				#if defined DIVERSALIS__OS__MICROSOFT
+				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					LARGE_INTEGER result;
 					QueryPerformanceCounter(&result);
 					return result.QuadPart;
 				#else
-					return universalis::os::clocks::thread::current();
+					return universalis::operating_system::clocks::thread::current();
 				#endif
 			}
 
 			cycles_type inline cycles_per_second()
 			{
-				#if defined DIVERSALIS__OS__MICROSOFT
+				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
 					LARGE_INTEGER result;
 					QueryPerformanceFrequency(&result);
 					return result.QuadPart;
 				#else
-					return universalis::os::clocks::thread::frequency();
+					return universalis::operating_system::clocks::thread::frequency();
 				#endif
 			}
 		}
 
 		class Global
 		{
+			///\todo use accessors, dont make everything static/global, otherwise we get uninitialised vars, like _cpuHz
 			private:
 			public:
 				Global();
 				virtual ~Global() throw();
 
+				static Song * _pSong;
 				static Player * pPlayer;
 				static Configuration * pConfig;
 				static helpers::dsp::Resampler * pResampler;
@@ -101,16 +72,14 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 				static InputHandler* pInputHandler;
 #endif //!defined WINAMP_PLUGIN
+				static vst::host* pVstHost;
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				static vst::AudioMaster* pVstHost;
-
-				static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
-#endif
-				static Song           & song();
+				static inline Song           & song() { return *_pSong; }
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }
 				static inline helpers::dsp::Resampler & resampler(){ return *pResampler; }
+				static inline vst::host		 & vsthost(){ return *pVstHost; }
+
 				static inline cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }
 				//void inline cpu_frequency(cpu::cycles_type const & value) throw() { cpu_frequency_ = value; }
 		};

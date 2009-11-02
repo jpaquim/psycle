@@ -1,29 +1,17 @@
 ///\file
 ///\brief interface file for psycle::host::CPatDlg.
 #pragma once
-#include "Psycle.hpp"
-
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy { 
-			namespace core {
-				class Pattern;
-			}
-		}
-#endif
-
+#include "resources/resources.hpp"
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+		class Song;
 
 		/// pattern window.
 		class CPatDlg : public CDialog
 		{
 		public:
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			CPatDlg(CWnd* pParent, psy::core::Pattern* pattern);
-#else
-			CPatDlg(CWnd* pParent);
-#endif
+			CPatDlg(CWnd* pParent = 0);
 			int patLines;
 			char patName[32];
 		// Dialog Data
@@ -45,9 +33,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Implementation
 		protected:
 			BOOL bInit;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Pattern* pattern_;
-#endif
 			// Generated message map functions
 			//{{AFX_MSG(CPatDlg)
 			virtual BOOL OnInitDialog();

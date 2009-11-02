@@ -30,7 +30,7 @@ mspsycle (0) unstable; urgency=low
 		* changed a bit the initialization of the static psycle::host::logger::default_logger_ostream() in psycle/host/global.cpp.
 		* plugin dir: temporary work around for msvc8 manifests.
 		* replaced most of src/legacy with src/universalis ; only src/legacy/loggers.{c,h}pp left.
-		* src/legacy/os/logger.cpp: fixed a #if which was taking out some code that should have been enabled on mswindows.
+		* src/legacy/operating_system/logger.cpp: fixed a #if which was taking out some code that should have been enabled on mswindows.
 		* 64-bit: got rid of a few size reduction problems.
 
 	2006/03/13 20:35:04  jaz001
@@ -214,7 +214,7 @@ mspsycle (0) unstable; urgency=low
 
 	2005/05/14 15:32:57  johan-boule
 
-		* bug fix: os::exceptions::translated::what() returned the address of a temporary stack object
+		* bug fix: operating_system::exceptions::translated::what() returned the address of a temporary stack object
 
 	2005/05/12 22:18:39  johan-boule
 

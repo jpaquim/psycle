@@ -17,11 +17,6 @@
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
 #pragma once
-
-#ifdef _MSC_VER
-#define PSYCLE__MICROSOFT_MME_AVAILABLE 1
-#endif
-
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "audiodriver.h"
 #include <windows.h>

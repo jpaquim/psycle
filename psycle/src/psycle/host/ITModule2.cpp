@@ -1,18 +1,12 @@
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "ITModule2.h"
 #include "Configuration.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machinefactory.h>
-#include <psycle/core/song.h>
-#include <psycle/core/xmsampler.h>
-#include <psycle/core/player.h>
-using namespace psy::core;
-#else
 #include "Song.hpp"
 #include "Player.hpp"
 #include "XMSampler.hpp"
-#endif
-
+#include "Song.hpp"
+#include "configuration_options.hpp"
 #include <algorithm>
 namespace psycle
 {
@@ -82,7 +76,7 @@ namespace psycle
 			itInsHeader2x inshead;
 			Read(&inshead,sizeof(inshead));
 			Seek(0);
-			s->rInstrument(idx).Init();
+			sampler.rInstrument(idx).Init();
 			LoadITInst(&sampler,idx);
 			Skip(2);
 
@@ -90,10 +84,10 @@ namespace psycle
 			unsigned char *sRemap = new unsigned char[inshead.noS];
 			for (unsigned int i(0); i<inshead.noS; i++)
 			{
-				while (s->SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-1) curSample++;
+				while (sampler.SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-1) curSample++;
 				LoadITSample(&sampler,curSample);
 				// Only get REAL samples.
-				if ( s->SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-2 ) {	sRemap[i]=curSample; }
+				if ( sampler.SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-2 ) {	sRemap[i]=curSample; }
 				else { sRemap[i]=MAX_INSTRUMENTS-1; }
 			}
 
@@ -101,9 +95,9 @@ namespace psycle
 			
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
 			{
-				XMInstrument::NotePair npair = s->rInstrument(idx).NoteToSample(i);
+				XMInstrument::NotePair npair = sampler.rInstrument(idx).NoteToSample(i);
 				npair.second=sRemap[(npair.second<inshead.noS)?npair.second:0];
-				s->rInstrument(idx).NoteToSample(i,npair);
+				sampler.rInstrument(idx).NoteToSample(i,npair);
 			}
 			delete[] sRemap;
 
@@ -114,23 +108,15 @@ namespace psycle
 			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
 
-			s->setName(itFileH.songName);
-			s->setAuthor("");
-			std::string imported = "Imported from Impulse Tracker Module: ";
-			imported.append(szName);
-			s->setComment(imported);
+			s->name = itFileH.songName;
+			s->author = "";
+			s->comments = "Imported from Impulse Tracker Module: ";
+			s->comments.append(szName);
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
-			s->AddMachine(sampler);
-			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
-			s->seqBus=sampler->id();
-#else
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 			s->InsertConnection(0,MASTER_INDEX,0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
 			s->seqBus=0;
-			XMSampler* sampler = ((XMSampler*)s->machine(0));
-#endif
+			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 
 			song->BeatsPerMin(itFileH.iTempo);
 			song->LinesPerBeat(sampler->Speed2LPB(itFileH.iSpeed));
@@ -315,20 +301,13 @@ Special:  Bit 0: On = song message attached.
 			{
 				if (pointersp[i]==0)
 				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Pattern* pat = new Pattern();
-					pat->setName("unnamed");
-					pat->setID(i);
-					s->patternSequence().Add(pat);
-#else
 					s->AllocNewPattern(i,"unnamed",64,false);
-#endif
 				} else {
 					Seek(pointersp[i]);
 					LoadITPattern(i,numchans);
 				}
 			}
-			song->setTracks(std::max(numchans+1,4));
+			song->SONGTRACKS = std::max(numchans+1,4);
 
 			delete[] pointersi;
 			delete[] pointerss;
@@ -340,7 +319,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadOldITInst(XMSampler *sampler,int iInstIdx)
 		{
 			itInsHeader1x curH;
-			XMInstrument &xins = s->rInstrument(iInstIdx);
+			XMInstrument &xins = sampler->rInstrument(iInstIdx);
 			Read(&curH,sizeof(curH));
 
 			std::string itname(curH.sName);
@@ -359,7 +338,7 @@ Special:  Bit 0: On = song message attached.
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=short(curH.notes[i].first);
 				npair.second=short(curH.notes[i].second)-1;
-				s->rInstrument(iInstIdx).NoteToSample(i,npair);
+				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
 			xins.AmpEnvelope()->Init();
 			if(curH.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
@@ -408,7 +387,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadITInst(XMSampler *sampler,int iInstIdx)
 		{
 			itInsHeader2x curH;
-			XMInstrument &xins = s->rInstrument(iInstIdx);
+			XMInstrument &xins = sampler->rInstrument(iInstIdx);
 
             Read(&curH,sizeof(curH));
 			std::string itname(curH.sName);
@@ -451,7 +430,7 @@ Special:  Bit 0: On = song message attached.
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=curH.notes[i].first;
 				npair.second=curH.notes[i].second-1;
-				s->rInstrument(iInstIdx).NoteToSample(i,npair);
+				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
 
 			// volume envelope
@@ -579,7 +558,7 @@ Special:  Bit 0: On = song message attached.
 		{
 			itSampleHeader curH;
 			Read(&curH,sizeof(curH));
-			XMInstrument::WaveData& _wave = s->SampleData(iSampleIdx);
+			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 
 /*		      Flg:      Bit 0. On = sample associated with header.
 			Bit 1. On = 16 bit, Off = 8 bit.
@@ -605,9 +584,9 @@ Special:  Bit 0: On = song message attached.
 				npair.second=iSampleIdx;
 				for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 					npair.first=i;
-					s->rInstrument(iSampleIdx).NoteToSample(i,npair);
+					sampler->rInstrument(iSampleIdx).NoteToSample(i,npair);
 				}
-				s->rInstrument(iSampleIdx).IsEnabled(true);
+				sampler->rInstrument(iSampleIdx).IsEnabled(true);
 			}
 
 
@@ -678,7 +657,7 @@ Special:  Bit 0: On = song message attached.
 
 		bool ITModule2::LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert)
 		{
-			XMInstrument::WaveData& _wave = s->SampleData(iSampleIdx);
+			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 
 			signed short wNew,wTmp;
 			int offset=(convert & SampleConvert::IS_SIGNED)?0:-32768;
@@ -739,7 +718,7 @@ Special:  Bit 0: On = song message attached.
 			} else {
 				topsize=0x8000;		packsize=3;	maxbitsize=8;
 			}
-			XMInstrument::WaveData& _wave = s->SampleData(iSampleIdx);
+			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 			
 			j=0;
 			while(j<iLen) // While we haven't decompressed the whole sample
@@ -845,26 +824,15 @@ Special:  Bit 0: On = song message attached.
 			std::memset(lasteff,255,sizeof(char)*64);
 			std::memset(mask,255,sizeof(char)*64);
 
-			PatternEvent pempty;
-			pempty.setNote(notecommands::empty);
-			pempty.setMachine(255);
-			pempty.setInstrument(255);
-			pempty.setCommand(0);
-			pempty.setParameter(0);
-			PatternEvent pent=pempty;
+			PatternEntry pempty;
+			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
+			PatternEntry pent=pempty;
 
 			Skip(2); // packedSize
 			std::int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Pattern* pat = new Pattern();
-			pat->setName("unnamed");
-			pat->setID(patIdx);
-			s->patternSequence().Add(pat);
-#else
 			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
-#endif
 			//char* packedpattern = new char[packedSize];
 			//Read(packedpattern, packedSize);
 			for (int row=0;row<rowCount;row++)
@@ -877,22 +845,22 @@ Special:  Bit 0: On = song message attached.
 					if(mask[channel]&1)
 					{
 						unsigned char note=ReadUInt8();
-						if (note==255) pent.setNote(notecommands::release);
-						else if (note==254) pent.setNote(notecommands::release); //\todo: Attention ! Psycle doesn't have a note-cut note.
-						else pent.setNote(note);
-						pent.setMachine(0);
-						lastnote[channel]=pent.note();
+						if (note==255) pent._note = notecommands::release;
+						else if (note==254) pent._note=notecommands::release; //\todo: Attention ! Psycle doesn't have a note-cut note.
+						else pent._note = note;
+						pent._mach=0;
+						lastnote[channel]=pent._note;
 					}
 					if (mask[channel]&2)
 					{
-						pent.setInstrument(ReadUInt8()-1);
-						pent.setMachine(0);
-						lastinst[channel]=pent.instrument();
+						pent._inst=ReadUInt8()-1;
+						pent._mach=0;
+						lastinst[channel]=pent._inst;
 					}
 					if (mask[channel]&4 || mask[channel]&0x40)
 					{
 						unsigned char tmp;
-						pent.setMachine(0);
+						pent._mach=0;
 						if (mask[channel]&0x40 ) tmp=lastvol[channel];
 						else tmp=ReadUInt8();
 						lastvol[channel]=tmp;
@@ -910,77 +878,77 @@ Special:  Bit 0: On = song message attached.
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
-							pent.setVolume(tmp<64?tmp:63);
+							pent._volume=tmp<64?tmp:63;
 						}
 						else if (tmp<75)
 						{
-							pent.setVolume(XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP | (tmp-65));
+							pent._volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP | (tmp-65);
 						}
 						else if (tmp<85)
 						{
-							pent.setVolume(XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN | (tmp-75));
+							pent._volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN | (tmp-75);
 						}
 						else if (tmp<95)
 						{
-							pent.setVolume(XMSampler::CMD_VOL::VOL_VOLSLIDEUP | (tmp-85));
+							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEUP | (tmp-85);
 						}
 						else if (tmp<105)
 						{
-							pent.setVolume(XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN | (tmp-95));
+							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN | (tmp-95);
 						}
 						else if (tmp<115)
 						{
-							pent.setVolume(XMSampler::CMD_VOL::VOL_PITCH_SLIDE_DOWN | (tmp-105));
+							pent._volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_DOWN | (tmp-105);
 						}
 						else if (tmp<125)
 						{
-							pent.setVolume(XMSampler::CMD_VOL::VOL_PITCH_SLIDE_UP | (tmp-115));
+							pent._volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_UP | (tmp-115);
 						}
 						else if (tmp<193)
 						{
 							tmp= (tmp==192)?15:(tmp-128)/4;
-							pent.setVolume(XMSampler::CMD_VOL::VOL_PANNING | tmp);
+							pent._volume=XMSampler::CMD_VOL::VOL_PANNING | tmp;
 						}
 						else if (tmp<203)
 						{
-							pent.setVolume(XMSampler::CMD_VOL::VOL_TONEPORTAMENTO | (tmp-193));
+							pent._volume=XMSampler::CMD_VOL::VOL_TONEPORTAMENTO | (tmp-193);
 						}
 						else if (tmp<213)
 						{
-							pent.setVolume(XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 ));
+							pent._volume=XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 );
 						}
 	#else
 						if ( tmp<=64)
 						{
-							pent.setCommand(0x0C);
-							pent.setParameter(tmp*2);
+							pent._cmd=0x0C;
+							pent._parameter= tmp*2;
 						}
 	#endif
 #endif
 					}
 					if(mask[channel]&8)
 					{
-						pent.setMachine(0);
+						pent._mach=0;
 						std::uint8_t command=ReadUInt8();
 						std::uint8_t param=ReadUInt8();
-						if ( command != 0 ) pent.setParameter(param);
+						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,command,param,channel);
-						lastcom[channel]=pent.command();
-						lasteff[channel]=pent.parameter();
+						lastcom[channel]=pent._cmd;
+						lasteff[channel]=pent._parameter;
 
 					}
-					if (mask[channel]&0x10) { pent.setNote(lastnote[channel]); pent.setMachine(0); }
-					if (mask[channel]&0x20) { pent.setInstrument(lastinst[channel]); pent.setMachine(0); }
+					if (mask[channel]&0x10) { pent._note=lastnote[channel]; pent._mach=0; }
+					if (mask[channel]&0x20) { pent._inst=lastinst[channel]; pent._mach=0; }
 					if ( mask[channel]&0x80 )
 					{
-						pent.setCommand(lastcom[channel]);
-						pent.setParameter(lasteff[channel]);
+						pent._cmd = lastcom[channel];
+						pent._parameter = lasteff[channel];
 					}
 
-					PatternEvent* pData = (PatternEvent*) s->_ptrackline(patIdx,channel,row);
+					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);
 
 					*pData = pent;
 					pent=pempty;
@@ -993,7 +961,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		void ITModule2::ParseEffect(PatternEvent&pent, int command,int param,int channel)
+		void ITModule2::ParseEffect(PatternEntry&pent, int command,int param,int channel)
 		{
 			int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
 				XMInstrument::WaveData::WaveForms::SAWDOWN,
@@ -1002,155 +970,155 @@ Special:  Bit 0: On = song message attached.
 			};
 			switch(command){
 				case ITModule2::CMD::SET_SPEED:
-					pent.setCommand(PatternCmd::EXTENDED);
-					pent.setParameter(24 / ((param == 0)?6:param));
+					pent._cmd=PatternCmd::EXTENDED;
+					pent._parameter = 24 / ((param == 0)?6:param);;
 					break;
 				case ITModule2::CMD::JUMP_TO_ORDER:
-					pent.setCommand(PatternCmd::JUMP_TO_ORDER);
+					pent._cmd = PatternCmd::JUMP_TO_ORDER;
 					break;
 				case ITModule2::CMD::BREAK_TO_ROW:
-					pent.setCommand(PatternCmd::BREAK_TO_LINE);
+					pent._cmd = PatternCmd::BREAK_TO_LINE;
 					break;
 				case ITModule2::CMD::VOLUME_SLIDE:
-					pent.setCommand(XMSampler::CMD::VOLUMESLIDE);
+					pent._cmd = XMSampler::CMD::VOLUMESLIDE;
 					break;
 				case ITModule2::CMD::PORTAMENTO_DOWN:
-					pent.setCommand(XMSampler::CMD::PORTAMENTO_DOWN);
+					pent._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
 					break;
 				case ITModule2::CMD::PORTAMENTO_UP:
-					pent.setCommand(XMSampler::CMD::PORTAMENTO_UP);
+					pent._cmd = XMSampler::CMD::PORTAMENTO_UP;
 					break;
 				case ITModule2::CMD::TONE_PORTAMENTO:
-					pent.setCommand(XMSampler::CMD::PORTA2NOTE);
+					pent._cmd = XMSampler::CMD::PORTA2NOTE;
 					break;
 				case ITModule2::CMD::VIBRATO:
-					pent.setCommand(XMSampler::CMD::VIBRATO);
+					pent._cmd = XMSampler::CMD::VIBRATO;
 					break;
 				case ITModule2::CMD::TREMOR:
-					pent.setCommand(XMSampler::CMD::TREMOR);
+					pent._cmd = XMSampler::CMD::TREMOR;
 					break;
 				case ITModule2::CMD::ARPEGGIO:
-					pent.setCommand(XMSampler::CMD::ARPEGGIO);
+					pent._cmd = XMSampler::CMD::ARPEGGIO;
 					break;
 				case ITModule2::CMD::VOLSLIDE_VIBRATO:
-					pent.setCommand(XMSampler::CMD::VIBRATOVOL);
+					pent._cmd = XMSampler::CMD::VIBRATOVOL;
 					break;
 				case ITModule2::CMD::VOLSLIDE_TONEPORTA:
-					pent.setCommand(XMSampler::CMD::TONEPORTAVOL);
+					pent._cmd = XMSampler::CMD::TONEPORTAVOL;
 					break;
 				case CMD::SET_CHANNEL_VOLUME: // IT
-					pent.setCommand(XMSampler::CMD::SET_CHANNEL_VOLUME);
+					pent._cmd = XMSampler::CMD::SET_CHANNEL_VOLUME;
 					break;
 				case CMD::CHANNEL_VOLUME_SLIDE: // IT
-					pent.setCommand(XMSampler::CMD::CHANNEL_VOLUME_SLIDE);
+					pent._cmd = XMSampler::CMD::CHANNEL_VOLUME_SLIDE;
 					break;
 				case CMD::SET_SAMPLE_OFFSET:
-					pent.setCommand(XMSampler::CMD::OFFSET | highOffset[channel]);
+					pent._cmd = XMSampler::CMD::OFFSET | highOffset[channel];
 					break;
 				case ITModule2::CMD::PANNING_SLIDE: // IT
-					pent.setCommand(XMSampler::CMD::PANNINGSLIDE);
+					pent._cmd = XMSampler::CMD::PANNINGSLIDE;
 					break;
 				case ITModule2::CMD::RETRIGGER_NOTE:
-					pent.setCommand(XMSampler::CMD::RETRIG);
+					pent._cmd = XMSampler::CMD::RETRIG;
 					break;
 				case ITModule2::CMD::TREMOLO:
-					pent.setCommand(XMSampler::CMD::TREMOLO);
+					pent._cmd = XMSampler::CMD::TREMOLO;
 					break;
 				case ITModule2::CMD::S:
 					switch(param & 0xf0){
 						case CMD_S::S_SET_FILTER:
-							pent.setCommand(XMSampler::CMD::NONE);
+							pent._cmd = XMSampler::CMD::NONE;
 							break;
 						case CMD_S::S_SET_GLISSANDO_CONTROL:
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::E_GLISSANDO_TYPE | (param & 0xf));
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE | (param & 0xf);
 							break;
 						case CMD_S::S_FINETUNE:
-							pent.setCommand(XMSampler::CMD::NONE);
+							pent._cmd = XMSampler::CMD::NONE;
 							break;
 						case CMD_S::S_SET_VIBRATO_WAVEFORM:
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[(param & 0x3)]);
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[(param & 0x3)];
 							break;
 						case CMD_S::S_SET_TREMOLO_WAVEFORM:
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::E_TREMOLO_WAVE | exchwave[(param & 0x3)]);
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | exchwave[(param & 0x3)];
 							break;
 						case CMD_S::S_SET_PANBRELLO_WAVEFORM: // IT
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::E_PANBRELLO_WAVE | exchwave[(param & 0x3)]);
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_PANBRELLO_WAVE | exchwave[(param & 0x3)];
 							break;
 						case CMD_S::S_FINE_PATTERN_DELAY: // IT
 							break;
 						case CMD_S::S7: // IT
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::EE | (param&0x0F));
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::EE | (param&0x0F);
 							break;
 						case CMD_S::S_SET_PAN:
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::E_SET_PAN | (param & 0xf));
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_SET_PAN | (param & 0xf);
 							break;
 						case CMD_S::S9: // IT
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::E9 | (param&0x0F));
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E9 | (param&0x0F);
 							break;
 						case CMD_S::S_SET_HIGH_OFFSET: // IT
 							highOffset[channel] = param &0x0F;
 							break;
 						case CMD_S::S_PATTERN_LOOP:
-							pent.setCommand(PatternCmd::EXTENDED);
-							pent.setParameter(PatternCmd::PATTERN_LOOP | (param & 0xf));
+							pent._cmd = PatternCmd::EXTENDED;
+							pent._parameter = PatternCmd::PATTERN_LOOP | (param & 0xf);
 							break;
 						case CMD_S::S_DELAYED_NOTE_CUT:
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::E_DELAYED_NOTECUT  | (param & 0xf));
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_DELAYED_NOTECUT  | (param & 0xf);
 							break;
 						case CMD_S::S_NOTE_DELAY:
-							pent.setCommand(XMSampler::CMD::EXTENDED);
-							pent.setParameter(XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf));
+							pent._cmd = XMSampler::CMD::EXTENDED;
+							pent._parameter = XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf);
 							break;
 						case CMD_S::S_PATTERN_DELAY:
-							pent.setCommand(PatternCmd::EXTENDED);
-							pent.setParameter(PatternCmd::PATTERN_DELAY | (param & 0xf));
+							pent._cmd = PatternCmd::EXTENDED;
+							pent._parameter = PatternCmd::PATTERN_DELAY | (param & 0xf);
 							break;
 						case CMD_S::S_SET_MIDI_MACRO:
-							pent.setCommand(XMSampler::CMD::EXTENDED);
+							pent._cmd = XMSampler::CMD::EXTENDED;
 							if ( embeddedData)
 							{
 								//\todo: SFx is never initialized. I need to check why I did it this way also. Leaving the defaults for now.
-							//	pent.setParameter(XMSampler::CMD_E::E_SET_MIDI_MACRO | (embeddedData->SFx[(param & 0xf)][5]-48));
-								pent.setParameter(XMSampler::CMD_E::E_SET_MIDI_MACRO | (param & 0xf));
+							//	pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (embeddedData->SFx[(param & 0xf)][5]-48);
+								pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (param & 0xf);
 							}
 							break;
 					}
 					break;
 				case CMD::SET_SONG_TEMPO:
-					pent.setCommand(PatternCmd::SET_TEMPO);
+					pent._cmd = PatternCmd::SET_TEMPO;
 					break;
 				case CMD::FINE_VIBRATO:
-					pent.setCommand(XMSampler::CMD::FINE_VIBRATO);
+					pent._cmd = XMSampler::CMD::FINE_VIBRATO;
 					break;
 				case CMD::SET_GLOBAL_VOLUME: 
-					pent.setCommand(XMSampler::CMD::SET_GLOBAL_VOLUME);
+					pent._cmd = XMSampler::CMD::SET_GLOBAL_VOLUME;
 					break;
 				case CMD::GLOBAL_VOLUME_SLIDE: // IT
-					pent.setCommand(XMSampler::CMD::GLOBAL_VOLUME_SLIDE);
+					pent._cmd = XMSampler::CMD::GLOBAL_VOLUME_SLIDE;
 					break;
 				case CMD::SET_PANNING: // IT
-					pent.setCommand(XMSampler::CMD::PANNING);
+					pent._cmd = XMSampler::CMD::PANNING;
 					break;
 				case CMD::PANBRELLO: // IT
-					pent.setCommand(XMSampler::CMD::PANBRELLO);
+					pent._cmd = XMSampler::CMD::PANBRELLO;
 					break;
 				case CMD::MIDI_MACRO:
 					if ( param < 127)
 					{
-						pent.setParameter(param);
+						pent._parameter = param;
 					}
-					pent.setCommand(XMSampler::CMD::MIDI_MACRO);
+					pent._cmd = XMSampler::CMD::MIDI_MACRO;
 					break;
 				default:
-					pent.setCommand(XMSampler::CMD::NONE);
+					pent._cmd = XMSampler::CMD::NONE;
 					break;
 			}
 		}
@@ -1166,25 +1134,15 @@ Special:  Bit 0: On = song message attached.
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;
 
 			s3mFileH.songName[28]='\0';
-			s->setName(s3mFileH.songName);
-			s->setAuthor("");
-			std::string imported = "Imported from Scream Tracker 3 Module: ";
-			imported.append(szName);
-			s->setComment(imported);
+			s->name = s3mFileH.songName;
+			s->author = "";
+			s->comments = "Imported from Scream Tracker 3 Module: ";
+			s->comments.append(szName);
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
-			s->AddMachine(sampler);
-			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(s3mFileH.mVol&0x7F)/128.0f);
-			s->seqBus=sampler->id();
-#else
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 			s->InsertConnection(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
 			s->seqBus=0;
-			XMSampler* sampler = ((XMSampler*)s->machine(0));
-#endif
-
-
+			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 
 			song->BeatsPerMin(s3mFileH.iTempo);
 			song->LinesPerBeat(sampler->Speed2LPB(s3mFileH.iSpeed));
@@ -1237,7 +1195,7 @@ Special:  Bit 0: On = song message attached.
 					sampler->rChannel(i).DefaultIsMute(true);
 				}
 			}
-			s->setTracks(std::max(numchans,4));
+			s->SONGTRACKS=std::max(numchans,4);
 
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )
@@ -1277,19 +1235,19 @@ Special:  Bit 0: On = song message attached.
 			s3mInstHeader curH;
 			Read(&curH,sizeof(curH));
 
-			s->rInstrument(iInstIdx).Name(curH.sName);
+			sampler->rInstrument(iInstIdx).Name(curH.sName);
 
 			int i;
 			XMInstrument::NotePair npair;
 			npair.second=iInstIdx;
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=i;
-				s->rInstrument(iInstIdx).NoteToSample(i,npair);
+				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
 			
 			if ( curH.type == 1) 
 			{
-				s->rInstrument(iInstIdx).IsEnabled(true);
+				sampler->rInstrument(iInstIdx).IsEnabled(true);
 				return LoadS3MSampleX(sampler,reinterpret_cast<s3mSampleHeader*>(&curH),iInstIdx,iInstIdx);
 			}
 			else if ( curH.type != 0)
@@ -1339,7 +1297,7 @@ OFFSET              Count TYPE   Description
 		bool ITModule2::LoadS3MSampleX(XMSampler *sampler,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx)
 		{
 
-			XMInstrument::WaveData& _wave = s->SampleData(iSampleIdx);
+			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 			bool bLoop=currHeader->flags&S3MSampleFlags::LOOP;
 			bool bstereo=currHeader->flags&S3MSampleFlags::STEREO;
 			bool b16Bit=currHeader->flags&S3MSampleFlags::IS16BIT;
@@ -1405,7 +1363,7 @@ OFFSET              Count TYPE   Description
 		{
 			if (!packed) // Looks like the packed format never existed.
 			{
-				XMInstrument::WaveData& _wave =  s->SampleData(iSampleIdx);
+				XMInstrument::WaveData& _wave =  sampler->SampleData(iSampleIdx);
 				char * smpbuf;
 				if(b16Bit)
 				{
@@ -1484,19 +1442,12 @@ OFFSET              Count TYPE   Description
 		bool ITModule2::LoadS3MPatternX(int patIdx)
 		{
 			unsigned char newEntry;
-			PatternEvent pempty;
-			pempty.setNote(notecommands::empty); pempty.setMachine(255);pempty.setInstrument(255);pempty.setCommand(0);pempty.setParameter(0);
-			PatternEvent pent=pempty;
+			PatternEntry pempty;
+			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
+			PatternEntry pent=pempty;
 
 			Skip(2);//int packedSize=ReadInt(2);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Pattern* pat = new Pattern();
-			pat->setName("unnamed");
-			pat->setID(patIdx);
-			s->patternSequence().Add(pat);
-#else
 			s->AllocNewPattern(patIdx,"unnamed",64,false);
-#endif
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
@@ -1508,11 +1459,11 @@ OFFSET              Count TYPE   Description
 					if(newEntry&32)
 					{
 						std::uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
-						if (note==254) pent.setNote(notecommands::release);
-						else if (note==255) pent.setNote(255);
-						else pent.setNote(((note/16)*12+(note%16)+12));  // +12 since ST3 C-4 is Psycle's C-5
-						pent.setInstrument(ReadUInt8()-1);
-						pent.setMachine(0);
+						if (note==254) pent._note = notecommands::release;
+						else if (note==255) pent._note=255;
+						else pent._note = ((note/16)*12+(note%16)+12);  // +12 since ST3 C-4 is Psycle's C-5
+						pent._inst=ReadUInt8()-1;
+						pent._mach=0;
 					}
 					if(newEntry&64)
 					{
@@ -1520,50 +1471,49 @@ OFFSET              Count TYPE   Description
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
-							pent.setMachine(0);
-							pent.setVolume((tmp<64)?tmp:63);
+							pent._mach =0;
+							pent._volume=(tmp<64)?tmp:63;
 						}
 	#else
 						if ( tmp<=64)
 						{
-							pent.setMachine(0);
-							pent.setCommand(0x0C);
-							pent.setParameter(tmp*2);
+							pent._mach =0;
+							pent._cmd = 0x0C;
+							pent._parameter = tmp*2;
 						}
 	#endif
 #endif
-
 					}
 					if(newEntry&128)
 					{
-						pent.setMachine(0);
+						pent._mach=0;
 						std::uint8_t command=ReadUInt8();
 						std::uint8_t param=ReadUInt8();
-						if ( command != 0 ) pent.setParameter(param);
+						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,command,param,channel);
-						if ( pent.command() == PatternCmd::BREAK_TO_LINE )
+						if ( pent._cmd == PatternCmd::BREAK_TO_LINE )
 						{
-							pent.setParameter(((pent.parameter()&0xF0)>>4)*10 + (pent.parameter()&0x0F));
+							pent._parameter = ((pent._parameter&0xF0)>>4)*10 + (pent._parameter&0x0F);
 						}
-						else if ( pent.command() == XMSampler::CMD::SET_GLOBAL_VOLUME )
+						else if ( pent._cmd == XMSampler::CMD::SET_GLOBAL_VOLUME )
 						{
-							pent.setParameter((pent.parameter()<0x40)?pent.parameter()*2:0x80);
+							pent._parameter = (pent._parameter<0x40)?pent._parameter*2:0x80;
 						}
-						else if ( pent.command() == XMSampler::CMD::PANNING )
+						else if ( pent._cmd == XMSampler::CMD::PANNING )
 						{
-							if ( pent.parameter() < 0x80) pent.setParameter(pent.parameter()*2);
-							else if ( pent.parameter() == 0x80) pent.setParameter(255);
-							else if ( pent.parameter() == 0xA4)
+							if ( pent._parameter < 0x80) pent._parameter = pent._parameter*2;
+							else if ( pent._parameter == 0x80 ) pent._parameter = 255;
+							else if ( pent._parameter == 0xA4) 
 							{
-								pent.setCommand(XMSampler::CMD::EXTENDED);
-								pent.setParameter(XMSampler::CMD_E::E9 | 1);
+								pent._cmd = XMSampler::CMD::EXTENDED;
+								pent._parameter = XMSampler::CMD_E::E9 | 1;
 							}
 						}
 					}
-					PatternEvent* pData = (PatternEvent*) s->_ptrackline(patIdx,channel,row);
+					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);
 
 					*pData = pent;
 					pent=pempty;

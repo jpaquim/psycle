@@ -1,11 +1,13 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2007 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::outputs::direct_sound
+#include <packageneric/pre-compiled.private.hpp>
+#include <packageneric/module.private.hpp>
 #include <psycle/detail/project.private.hpp>
 #include "direct_sound.hpp"
 #include <psycle/stream/formats/riff_wave/format.hpp>
-#include <universalis/os/exceptions/code_description.hpp>
+#include <universalis/operating_system/exceptions/code_description.hpp>
 #include <thread>
 #include <sstream>
 namespace psycle { namespace plugins { namespace outputs {
@@ -13,7 +15,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	PSYCLE__PLUGINS__NODE_INSTANTIATOR(direct_sound)
 
-	direct_sound::direct_sound(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(universalis::os::exception)
+	direct_sound::direct_sound(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(universalis::operating_system::exception)
 	:
 		resource(plugin_library_reference, graph, name),
 		direct_sound_(),
@@ -32,11 +34,11 @@ namespace psycle { namespace plugins { namespace outputs {
 		resource::channel_change_notification_from_port(port);
 	}
 
-	void direct_sound::do_open() throw(universalis::os::exception) {
+	void direct_sound::do_open() throw(universalis::operating_system::exception) {
 		HRESULT error(0);
 		try {
 			resource::do_open();
-			if(error = ::DirectSoundCreate(0, &direct_sound_, 0)) throw universalis::os::exceptions::runtime_error("direct sound create: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+			if(error = ::DirectSoundCreate(0, &direct_sound_, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound create: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			format format(in_port().channels(), in_port().events_per_second(), /*significant_bits_per_channel_sample*/ 16); /// \todo parametrable
 			if(loggers::information()()) {
 				std::ostringstream s;
@@ -49,12 +51,12 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(write_primary_) {
 				if(error = direct_sound_implementation().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_WRITEPRIMARY)) {
 					buffer_ = 0;
-					//throw universalis::os::exceptions::runtime_error("direct sound set write primary cooperative level: " + os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+					//throw universalis::operating_system::exceptions::runtime_error("direct sound set write primary cooperative level: " + operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 					// actually, we should not report this, since we may simply do not have the focus
 					return; ///\todo that sux.. we're just going to crash latter
 				}
 			}
-			else if(error = direct_sound_implementation().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_PRIORITY)) throw universalis::os::exceptions::runtime_error("direct sound set priority cooperative level: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+			else if(error = direct_sound_implementation().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_PRIORITY)) throw universalis::operating_system::exceptions::runtime_error("direct sound set priority cooperative level: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			::DSBUFFERDESC description;
 			std::memset(&description, 0, sizeof description);
 			description.dwSize = sizeof description;
@@ -67,24 +69,24 @@ namespace psycle { namespace plugins { namespace outputs {
 				description.lpwfxFormat = &format.wave_format_ex();
 				description.dwBufferBytes = total_buffer_size_ = buffers_ * samples_per_buffer_ * static_cast<unsigned long int>(format.bytes_per_sample());
 			}
-			if(FAILED(error = direct_sound_implementation().CreateSoundBuffer(&description, &buffer_, 0))) throw universalis::os::exceptions::runtime_error("direct sound create sound buffer: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+			if(FAILED(error = direct_sound_implementation().CreateSoundBuffer(&description, &buffer_, 0))) throw universalis::operating_system::exceptions::runtime_error("direct sound create sound buffer: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			if(error && loggers::warning()()) {
 				std::ostringstream s;
-				s << "warning: create sound buffer: " << universalis::os::exceptions::code_description(error);
+				s << "warning: create sound buffer: " << universalis::operating_system::exceptions::code_description(error);
 				loggers::warning()(s.str());
 			}
 			if(write_primary_) {
 				buffer().Stop(); // o_O`
-				if(error = buffer().SetFormat(&format.wave_format_ex())) throw universalis::os::exceptions::runtime_error("direct sound buffer set format: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+				if(error = buffer().SetFormat(&format.wave_format_ex())) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer set format: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			}
 			::DSBCAPS caps;
 			caps.dwSize = sizeof(caps);
 			if(error = buffer().GetCaps(&caps)) {
 				buffer().Release();
 				buffer_ = 0;
-				throw universalis::os::exceptions::runtime_error("direct sound buffer get caps: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+				throw universalis::operating_system::exceptions::runtime_error("direct sound buffer get caps: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			if(caps.dwFlags & DSBCAPS_STATIC) throw universalis::os::exceptions::runtime_error("direct sound buffer get caps, what kind of fancy sound card hardware you got ? it uses on-board memory only !", UNIVERSALIS__COMPILER__LOCATION);
+			if(caps.dwFlags & DSBCAPS_STATIC) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer get caps, what kind of fancy sound card hardware you got ? it uses on-board memory only !", UNIVERSALIS__COMPILER__LOCATION);
 			if(write_primary_) total_buffer_size_ = caps.dwBufferBytes;
 			assert(total_buffer_size_);
 			if(loggers::information()()) {
@@ -110,8 +112,8 @@ namespace psycle { namespace plugins { namespace outputs {
 		catch(std::exception const & e) {
 			std::ostringstream s;
 			s << e.what();
-			if(FAILED(error)) s << ": " << universalis::os::exceptions::code_description(error);
-			throw universalis::os::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			if(FAILED(error)) s << ": " << universalis::operating_system::exceptions::code_description(error);
+			throw universalis::operating_system::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	}
 
@@ -119,7 +121,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		return direct_sound_; //&& buffer_;
 	}
 
-	void direct_sound::do_start() throw(universalis::os::exception) {
+	void direct_sound::do_start() throw(universalis::operating_system::exception) {
 		resource::do_start();
 		current_position_ = 0;
 		buffer().Play(0, 0, DSBPLAY_LOOPING); // may return DSERR_BUFFERLOST
@@ -130,11 +132,11 @@ namespace psycle { namespace plugins { namespace outputs {
 		return started_;
 	}
 
-	void direct_sound::do_process() throw(universalis::os::exception) {
+	void direct_sound::do_process() throw(universalis::operating_system::exception) {
 		bool const ultra_trace(false);
 		while(true) {
 			DWORD position;
-			if(HRESULT error = buffer().GetCurrentPosition(&position, 0)) throw universalis::os::exceptions::runtime_error("direct sound buffer get current position: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+			if(HRESULT error = buffer().GetCurrentPosition(&position, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer get current position: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			if(ultra_trace && loggers::trace()()) {
 				std::ostringstream s;
 				s << "position: " << position;
@@ -154,7 +156,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		DWORD bytes(0), bytes2(0);
 		bool restored(false);
 		while(HRESULT error = buffer().Lock(current_position_ * buffer_size_, buffer_size_, reinterpret_cast<void**>(&samples), &bytes, reinterpret_cast<void**>(&samples2), &bytes2, 0)) {
-			if(error != DSERR_BUFFERLOST) throw universalis::os::exceptions::runtime_error("direct sound buffer lock: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+			if(error != DSERR_BUFFERLOST) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			while(true) if(!buffer().Restore()) break;
 			if(loggers::information()()) {
 				std::ostringstream s;
@@ -164,7 +166,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			current_position_ = 0;
 			restored = true;
 		}
-		if(bytes2) throw universalis::os::exceptions::runtime_error("direct sound buffer lock unaligned", UNIVERSALIS__COMPILER__LOCATION);
+		if(bytes2) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer lock unaligned", UNIVERSALIS__COMPILER__LOCATION);
 		assert(last_samples_.size() == in_port().channels());
 		engine::buffer & in = in_port().buffer();
 		for(int channel(0) ; channel < in.channels() ; ++channel) {
@@ -192,28 +194,28 @@ namespace psycle { namespace plugins { namespace outputs {
 			}
 			for( ; spread < samples_per_buffer_ ; ++spread) samples[spread + channel] = last_samples_[channel];
 		}
-		if(HRESULT error = buffer().Unlock(samples, bytes, samples2, 0)) throw universalis::os::exceptions::runtime_error("direct sound buffer unlock: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+		if(HRESULT error = buffer().Unlock(samples, bytes, samples2, 0)) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer unlock: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 		if(restored) buffer().Play(0, 0, DSBPLAY_LOOPING); // may return DSERR_BUFFERLOST
 		++current_position_ %= buffers_;
 	}
 
-	void direct_sound::do_stop() throw(universalis::os::exception) {
-		if(HRESULT error = buffer().Stop()) throw universalis::os::exceptions::runtime_error("direct sound buffer stop: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+	void direct_sound::do_stop() throw(universalis::operating_system::exception) {
+		if(HRESULT error = buffer().Stop()) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer stop: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 		resource::do_stop();
 		started_ = false;
 	}
 
-	void direct_sound::do_close() throw(universalis::os::exception) {
+	void direct_sound::do_close() throw(universalis::operating_system::exception) {
 		if(buffer_) {
 			try {
-				if(HRESULT error = buffer().Release()) throw universalis::os::exceptions::runtime_error("direct sound buffer release: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+				if(HRESULT error = buffer().Release()) throw universalis::operating_system::exceptions::runtime_error("direct sound buffer release: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			} catch(...) {
 				loggers::crash()("please ignore the crash above, this is possibly a bug in your driver", UNIVERSALIS__COMPILER__LOCATION);
 			}
 			buffer_ = 0;
 		}
 		if(direct_sound_) {
-			if(HRESULT error = direct_sound_implementation().Release()) throw universalis::os::exceptions::runtime_error("direct sound release: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+			if(HRESULT error = direct_sound_implementation().Release()) throw universalis::operating_system::exceptions::runtime_error("direct sound release: " + universalis::operating_system::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			direct_sound_ = 0;
 		}
 		resource::do_close();

@@ -1,24 +1,23 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/config.private.hpp>
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #include "psy3filter.h"
-
-#include <psycle/helpers/datacompression.hpp>
+#include "commands.h"
+#include "datacompression.h"
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
 #include "mixer.h"
-#include "vstplugin.h"
 #include <sstream>
 #include <iostream>
 
 namespace psy { namespace core {
-
-	using namespace psycle::helpers;
 
 std::string const Psy3Filter::FILE_FOURCC = "PSY3";
 /// Current version of the Song file and its chunks.
@@ -69,6 +68,8 @@ bool Psy3Filter::testFormat(const std::string & fileName) {
 void Psy3Filter::preparePatternSequence(CoreSong & song) {
 	seqList.clear();
 	song.patternSequence().removeAll();
+	// creatse a single Pattern Category
+	singleCat = song.patternSequence().patternPool()->createNewCategory("Pattern");
 	// here we add in one single Line the patterns
 	singleLine = song.patternSequence().createNewLine();
 }
@@ -90,121 +91,72 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	///\todo:
 	song.clear();
 	preparePatternSequence(song);
-//	size_t filesize = file.FileSize();
+	size_t filesize = file.FileSize();
 	std::uint32_t version = 0;
 	std::uint32_t size = 0;
-	bool problemfound = false;
-	int fileposition = 0;
 	char header[5];
 	header[4]=0;
 	std::uint32_t chunkcount = LoadSONGv0(&file,song);
 	/* chunk_loop: */
 
 	while(file.ReadArray(header, 4) && chunkcount) {
-		//song.progress.emit(4, static_cast<int>(file.GetPos() * 16384.0f / filesize), "");
+		file.Read(version);
+		file.Read(size);
+
+		int fileposition = file.GetPos();
+		//song.progress.emit(4, static_cast<int>(fileposition * 16384.0f / filesize), "");
 
 		if(!std::strcmp(header,"INFO")) {
 			//song.progress.emit(2, 0, "Loading... Song authorship information...");
-			--chunkcount;
-			problemfound=false;
-			file.Read(version);
-			file.Read(size);
-			fileposition = file.GetPos();
 			if((version & 0xff00) == 0) { // chunkformat v0
 				LoadINFOv0(&file, song, version & 0xff);
 				//bug in psycle 1.8.5, writes size as 12bytes more!
 				if(version == 0) size = song.name().length()+song.author().length()+song.comment().length() + 3;
-			}
-			//else if((version & 0xff00) == 0x0100) // and so on
+			} //else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"SNGI")) {
 			//song.progress.emit(2, 0, "Loading... Song properties information...");
-			--chunkcount;
-			problemfound=false;
-			file.Read(version);
-			file.Read(size);
-			fileposition = file.GetPos();
 			if((version & 0xff00) == 0) { // chunkformat v0
 				LoadSNGIv0(&file, song, version & 0xff);
 				// fix for a bug existing in the song saver in the 1.7.x series
 				if(version == 0) size = 11 * sizeof(std::uint32_t) + song.tracks() * 2 * sizeof(bool);
-			}
-			//else if((version & 0xff00) == 0x0100) // and so on
+			} //else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"SEQD")) {
 			//song.progress.emit(2, 0, "Loading... Song sequence...");
-			--chunkcount;
-			problemfound=false;
-			file.Read(version);
-			file.Read(size);
-			fileposition = file.GetPos();
-			if ((version & 0xff00) == 0) { // chunkformat v0
+			if ((version & 0xff00) == 0) // chunkformat v0
 				LoadSEQDv0(&file, song, version & 0xff);
-			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"PATD")) {
 			//progress.emit(2, 0, "Loading... Song patterns...");
-			--chunkcount;
-			problemfound=false;
-			file.Read(version);
-			file.Read(size);
-			fileposition = file.GetPos();
 			if((version  & 0xff00) == 0) { // chunkformat v0
 				LoadPATDv0(&file, song, version & 0xff);
 				//\ Fix for a bug existing in the Song Saver in the 1.7.x series
 				if((version == 0x0000) &&( file.GetPos() == fileposition+size+4)) size += 4;
-			}
-			//else if((version & 0xff00) == 0x0100) // and so on
+			} //else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"MACD")) {
 			//song.progress.emit(2, 0, "Loading... Song machines...");
-			--chunkcount;
-			problemfound=false;
-			file.Read(version);
-			file.Read(size);
-			fileposition = file.GetPos();
-			if((version & 0xff00) == 0) {// chunkformat v0
-				Machine* mac = LoadMACDv0(&file, song, version & 0xff);
-				//Bugfix.
-				if (mac->getMachineKey().host() == Hosts::VST
-					&& ((vst::plugin*)mac)->ProgramIsChunk() == false) {
-						size = file.GetPos() - fileposition;
-				}		
-			}
+			if((version & 0xff00) == 0) // chunkformat v0
+				LoadMACDv0(&file, song, version & 0xff);
 			//else if((version & 0xff00) == 0x0100 ) //and so on
 		} else if(!std::strcmp(header,"INSD")) {
 			//song.progress.emit(2, 0, "Loading... Song instruments...");
-			--chunkcount;
-			problemfound=false;
-			file.Read(version);
-			file.Read(size);
-			fileposition = file.GetPos();
-			if((version & 0xff00) == 0) {// chunkformat v0
+			if((version & 0xff00) == 0) // chunkformat v0
 				LoadINSDv0(&file,song,version&0x00FF);
-			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"EINS")) {
 			//song.progress.emit(2, 0, "Loading... Extended Song instruments...");
-			--chunkcount;
-			problemfound=false;
-			file.Read(version);
-			file.Read(size);
-			fileposition = file.GetPos();
-			if((version & 0xffff0000) == FILE_VERSION_XMSAMPLER_ONE) {// chunkformat v1
-				LoadEINSv1(&file,song,version&0xFFFF, size);
-			}
+			if((version & 0xffff0000)>>16 == 1) // chunkformat v1
+				LoadEINSv1(&file,song,version&0xFFFF);
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else {
-			if (!problemfound) {
-				//loggers::warning("invalid position or unknown chunk found. skipping it.");
-				//song.progress.emit(2, 0, "Loading... invalid position or unknown chunk found. skipping it...");
-				std::ostringstream s;
-				s << "invalid position or unknown chunk found:" << header << ", position:" << file.GetPos();
-				//loggers::trace(s.str());
-				std::cerr << "psycle: core: psy3 loader: " << s << '\n';
-			}
-			problemfound = true;
-			// shift back 3 bytes and try again
-			fileposition = file.GetPos()-3;
-			size = 0;
+			//loggers::warning("foreign chunk found. skipping it.");
+			//song.progress.emit(2, 0, "Loading... foreign chunk found. skipping it...");
+			std::ostringstream s;
+			s << "foreign chunk: version: " << version << ", size: " << size;
+			//loggers::trace(s.str());
+			std::cerr << "psycle: core: psy3 loader: " << s << '\n';
+			if(size && size < filesize-fileposition) file.Skip(size);
 		}
+
 		// For invalid version chunks, or chunks that haven't been read correctly/completely.
 		if(file.GetPos() != fileposition+size) {
 			///\todo: verify how it works with invalid data.
@@ -212,6 +164,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			//else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
 			file.Seek(fileposition+size);
 		}
+		--chunkcount;
 	}
 
 	//song.progress.emit(4,16384,"");
@@ -225,7 +178,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		#if 0
 			Pattern* pat = song.patternSequence().PatternPool()->findById(*it);
 		#else
-		Pattern* pat = song.patternSequence().FindPattern(*it);
+			SinglePattern* pat = song.patternSequence().patternPool()->findById(*it);
 		#endif
 		singleLine->createEntry(pat, pos);
 		pos += pat->beats();
@@ -292,13 +245,13 @@ int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/) {
 	}
 
 	file->Read(chunkcount);
-	int bytesread(4);
+	int const bytesread(4);
 	if(size > 4) {
 		// This is left here if someday, extra data is added to the file version chunk.
 		// update "bytesread" accordingly.
 
 		//file->Read(chunkversion);
-		//if((chunkversion&0xFF00) ) == x) {} else if(...) {}
+		//if(chunkversion == x) {} else if(...) {}
 
 		file->Skip(size - bytesread);// Size of the current header DATA // This ensures that any extra data is skipped.
 	}
@@ -429,10 +382,13 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 			indexStr = "error";
 		else
 			indexStr = o.str();
-		Pattern* pat = new Pattern();
-		pat->setName(patternName+indexStr);
+		#if 0
+			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#else
+			SinglePattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
+		#endif
+		pat->setBeatZoom(song.ticksSpeed());
 		pat->setID(index);
-		song.patternSequence().Add(pat);
 		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) { // lines
 			for (unsigned int x = 0; x < song.tracks(); ++x) {
@@ -441,21 +397,17 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 				PatternEvent event = convertEntry(entry);
 				if(!event.empty()) {
 					if(event.note() == notetypes::tweak) {
-						event.set_track(x);
-						pat->insert(beatpos, event);
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
 					} else if(event.note() == notetypes::tweak_slide) {
-						event.set_track(x);
-						pat->insert(beatpos, event);
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
 					} else if(event.note() == notetypes::midi_cc) {
-						event.set_track(x);
-						pat->insert(beatpos, event);
+						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
 					} else {
 						if(event.command() == commandtypes::NOTE_DELAY)
 							/// Convert old value (part of line) to new value (part of beat)
 							event.setParameter(event.parameter()/linesPerBeat);
-						event.set_track(x);
-						pat->insert(beatpos, event);
+						(*pat)[beatpos].notes()[x] = event;
 					}
 					if((event.note() <= notetypes::release || event.note() == notetypes::empty) && event.command() == 0xfe && event.parameter() < 0x20)
 						linesPerBeat= event.parameter() & 0x1f;
@@ -465,13 +417,19 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 			beatpos += 1 / static_cast<float>(linesPerBeat);
 		}
 		delete[] pDest; pDest = 0;
-		pat->timeSignatures().clear();
-		pat->timeSignatures().push_back(TimeSignature(beatpos));
+		TimeSignature & sig =  pat->timeSignatures().back();
+		sig.setCount(static_cast<int>(beatpos / 4));
+		float uebertrag = beatpos - static_cast<int>(beatpos);
+		if(uebertrag) {
+			TimeSignature uebertragSig(uebertrag);
+			if(!sig.count()) pat->timeSignatures().pop_back();
+			pat->addBar(uebertragSig);
+		}
 	}
 	return fileread;
 }
 
-Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) {
+bool Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) {
 	MachineFactory& factory = MachineFactory::getInstance();
 	std::int32_t index = 0;
 
@@ -514,14 +472,19 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 			case MACH_PLUGIN:
 			{
 				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
-				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, MachineKey::preprocessName(sDllName), 0), id);
+				std::string dllName = sDllName;
+				std::string::size_type const pos(dllName.find(".dll"));
+				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, dllName, 0), id);
 				break;
 			}
 			case MACH_VST:
 			//case MACH_VSTFX:
 			{
-				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
-				mac = factory.CreateMachine(MachineKey(Hosts::VST, MachineKey::preprocessName(sDllName), 0), id);
+				//std::string::size_type const pos = dllName.find(".dll");
+				//if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+				//if(type == MACH_VST) pMac[i] = pVstPlugin = new vst::instrument(i);
+				//else if(type == MACH_VSTFX) pMac[i] = pVstPlugin = new vst::fx(i);
 				break;
 			}
 			default: ;
@@ -537,7 +500,7 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 		mac->LoadFileChunk(file,minorversion);
 		if(failedLoad) mac->SetEditName(mac->GetEditName() + " (replaced)");
 	}
-	return song.machine(index);
+	return song.machine(index) != 0;
 }
 
 bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion) {
@@ -548,39 +511,31 @@ bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion) {
 	return true;
 }
 
-bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, std::uint32_t size) {
+bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion) {
 
+	bool wrongState=false;
 	// Instrument Data Load
 	int numInstruments;
-	long begins=file->GetPos();
-	unsigned long filepos=file->GetPos();
 	file->Read(numInstruments);
 	int idx;
-	for(int i = 0;i < numInstruments && filepos < begins+size;i++)
+	for(int i = 0;i < numInstruments;i++)
 	{
 		file->Read(idx);
-		unsigned int sizeIns = song.rInstrument(idx).Load(*file);
-		if ((minorversion&0xFFFF) > 0) {
-			//Version 0 doesn't write the chunk size correctly
-			//so we cannot correct it in case of error
-			file->Seek(filepos+sizeIns);
-			filepos=file->GetPos();
-		}
+		if (!song.rInstrument(idx).Load(*file)) { wrongState=true; break; }
+		//m_Instruments[idx].IsEnabled(true); // done in the loader.
 	}
-	int numSamples;
-	file->Read(numSamples);
-	for(int i = 0;i < numSamples && filepos < begins+size;i++)
+	if (!wrongState)
 	{
-		file->Read(idx);
-		unsigned int sizeSamp = song.SampleData(idx).Load(*file);
-		if ((minorversion&0xFFFF) > 0) {
-			//Version 0 doesn't write the chunk size correctly
-			//so we cannot correct it in case of error
-			file->Seek(filepos+sizeSamp);
-			filepos=file->GetPos();
+		int numSamples;
+		file->Read(numSamples);
+		int idx;
+		for(int i = 0;i < numSamples;i++)
+		{
+			file->Read(idx);
+			if (!song.SampleData(idx).Load(*file)) { wrongState=true; break; }
 		}
 	}
-	return begins+size == filepos;
+	return !wrongState;
 
 }
 

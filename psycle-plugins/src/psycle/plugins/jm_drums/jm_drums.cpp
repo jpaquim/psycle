@@ -2,11 +2,10 @@
 #include "drum.hpp"
 #include <cstdlib>
 
-using namespace psycle::plugin_interface;
-
 #define DRUM_VERSION "2.2"
 #define MAX_SIMUL_TRACKS 16
 #define NUMPARAMETERS 16
+
 
 CMachineParameter const prStartFreq = {
 	"Start Freq",
@@ -171,7 +170,8 @@ CMachineParameter const *pParameters[] =
 	&prThumpFreq,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo =
+{
 	MI_VERSION,
 	GENERATOR,
 	NUMPARAMETERS,
@@ -185,7 +185,7 @@ CMachineInfo const MacInfo (
 	"[JAZ] on " __DATE__,
 	"Command Help",
 	4
-);
+};
 
 class mi : public CMachineInterface
 {

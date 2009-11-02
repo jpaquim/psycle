@@ -18,8 +18,6 @@ Comments and suggestions should be mailed to Juhana Sadeharju
 #include <cmath>
 #include "gverb.h"
 
-using namespace psycle::plugin_interface;
-
 #define NUMPARAMETERS 8
 
 
@@ -121,7 +119,8 @@ CMachineParameter const *pParameters[] =
 	&paraMonoStereo
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	EFFECT,																																								// flags
 	NUMPARAMETERS,																																// numParameters
@@ -135,7 +134,7 @@ CMachineInfo const MacInfo (
 	"Juhana Sadeharju/Steve Harris/Sartorius",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	1
-);
+};
 
 
 class mi : public CMachineInterface

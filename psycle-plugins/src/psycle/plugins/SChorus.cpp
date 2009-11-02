@@ -13,8 +13,6 @@
 #include <cstring>
 #include <cmath>
 
-using namespace psycle::plugin_interface;
-
 #define MAXIMUM_DELAY   40000
 
 #define NUMPARAMETERS 8
@@ -113,7 +111,8 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo = 
+{
 	MI_VERSION,				
 	EFFECT,																																								// flags
 	NUMPARAMETERS,																																// numParameters
@@ -127,7 +126,7 @@ CMachineInfo const MacInfo (
 	"Sartorius",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	4
-);
+};
 
 
 class mi : public CMachineInterface

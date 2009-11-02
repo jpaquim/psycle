@@ -1,8 +1,6 @@
 ///\file
 ///\interface psycle::host::DirectSound.
 #pragma once
-#include "Global.hpp"
-#include "AudioDriver.hpp"
 #include <diversalis/compiler.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -10,10 +8,10 @@
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 #endif
 
-#include <mmsystem.h>
-#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "winmm")
-#endif
+	#include <mmsystem.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "winmm")
+	#endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(pop)
@@ -24,6 +22,7 @@
 	#pragma comment(lib, "dsound")
 #endif
 
+#include "AudioDriver.hpp"
 #include <map>
 namespace psycle
 {

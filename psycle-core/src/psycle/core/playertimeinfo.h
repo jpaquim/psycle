@@ -1,18 +1,29 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
-
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef PSYCLE__CORE__PLAYER_TIME_INFO__INCLUDED
 #define PSYCLE__CORE__PLAYER_TIME_INFO__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
-
 namespace psy { namespace core {
 
-/// class for play time information
+/// class for play time informations
+///\author Psycledelics
 class PlayerTimeInfo {
 	public:
 			PlayerTimeInfo();
@@ -21,16 +32,6 @@ class PlayerTimeInfo {
 			/// the sequence position currently being played in beats
 			void setPlayBeatPos( double pos );
 			double playBeatPos() const { return playBeatPos_; }
-
-			/// Start and end cycle position.
-			void setCycleStartPos( double pos );
-			double cycleStartPos() const { return cycleStartPos_; }
-
-			void setCycleEndPos( double pos );
-			double cycleEndPos() const { return cycleEndPos_; }
-
-			/// Returns if cycle is enabled. Not checking with equal for rounding errors.
-			bool cycleEnabled() const { return cycleEndPos_ - cycleStartPos_ > 0.1f; }
 
 			/// the current master sample position
 			void setSamplePos( int pos );
@@ -49,12 +50,6 @@ class PlayerTimeInfo {
 			void setSampleRate( int rate );
 			int sampleRate( ) const { return sampleRate_; }
 
-			void setInputLatency( int lat );
-			int inputLatency( ) const { return inputLatency_; }
-			void setOutputLatency( int lat );
-			int outputLatency( ) const { return outputLatency_; }
-
-
 			float samplesPerBeat() const { return samplesPerBeat_; }
 			float samplesPerTick() const { return samplesPerTick_; }
 			
@@ -67,10 +62,6 @@ class PlayerTimeInfo {
 			int sampleRate_;
 			float samplesPerBeat_;
 			float samplesPerTick_;
-			int inputLatency_;
-			int outputLatency_;
-			double cycleStartPos_;
-			double cycleEndPos_;
 
 			void recalcSPB();
 			void recalcSPT();

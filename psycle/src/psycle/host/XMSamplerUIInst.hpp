@@ -1,25 +1,13 @@
 #pragma once
-#include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/xminstrument.h>
-namespace psy {
-	namespace core {
-		class XMSampler;
-	}
-}
-using namespace psy::core;
-#else
 #include "XMInstrument.hpp"
-#endif
-
+#include "resources/resources.hpp"
 #include <afxwin.h>
 #include <afxcmn.h>
+#include "mfc_namespace.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 class XMSampler;
-#endif
 
 class XMSamplerUIInst : public CPropertyPage
 {

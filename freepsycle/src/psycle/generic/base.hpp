@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2002-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2002-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::generic::basic
 #pragma once
@@ -7,7 +7,7 @@
 #include <psycle/engine/exception.hpp>
 #include <universalis/compiler/cast.hpp>
 #include <universalis/compiler/virtual_factory.hpp>
-#include <universalis/os/loggers.hpp>
+#include <universalis/operating_system/loggers.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
 #include <boost/call_traits.hpp>
@@ -35,7 +35,7 @@ namespace psycle { namespace generic { namespace basic {
 #endif
 
 using engine::exception;
-namespace loggers = universalis::os::loggers;
+namespace loggers = universalis::operating_system::loggers;
 
 /***********************************************************************/
 /// This template declares a class convertible to its derived type Typenames::graph.
@@ -553,4 +553,5 @@ namespace ports {
 		};
 	}
 }
+
 }}}

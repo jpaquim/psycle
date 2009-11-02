@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2007 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
 /// forward declarations for the namespace psycle::engine.
@@ -9,10 +9,10 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <psycle/generic/typenames.hpp>
-#include <universalis/os/loggers.hpp>
+#include <universalis/operating_system/loggers.hpp>
 #include "sample.hpp"
 namespace psycle {
-	namespace loggers = universalis::os::loggers;
+	namespace loggers = universalis::operating_system::loggers;
 
 	namespace engine {
 		class exception;
@@ -41,3 +41,4 @@ namespace psycle {
 		}
 	}
 }
+

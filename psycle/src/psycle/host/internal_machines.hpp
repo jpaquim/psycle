@@ -31,14 +31,14 @@ public:
 	MultiMachine(int index);
 	virtual ~MultiMachine();
 	virtual void Init();
-	virtual void Tick( int channel,PatternEvent* pData);
+	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Stop();
 
 protected:
 	static const int NUMMACHINES=8;
 	void AllocateVoice(int channel, int machine);
 	void DeallocateVoice(int channel, int machine);
-		virtual void CustomTick(int channel,int i, PatternEvent& pData) = 0;
+		virtual void CustomTick(int channel,int i, PatternEntry& pData) = 0;
 	short macOutput[NUMMACHINES];
 	short noteOffset[NUMMACHINES];
 	bool bisTicking;
@@ -55,7 +55,7 @@ public:
 	DuplicatorMac(int index);
 	virtual void Init(void);
 	virtual void Tick();
-	virtual void CustomTick(int channel,int i, PatternEvent& pData);
+	virtual void CustomTick(int channel,int i, PatternEntry& pData);
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
@@ -81,7 +81,7 @@ public:
 	DrumsMatrix(int index);
 	virtual void Init(void);
 	virtual void Tick();
-	virtual void Tick( int channel,PatternEvent* pData);
+	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Stop();
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange(){ return 32768.0f; }
@@ -115,9 +115,6 @@ public:
 	virtual void SaveSpecificChunk(RiffFile * pFile);
 
 	virtual void ChangePort(int newport);
-	virtual void setGainVol(float gainvol) { _gainvol = gainvol; }
-	virtual float GainVol() const { return _gainvol; }
-	virtual int CaptureIdx() const { return _captureidx; }
 
 	static char* _psName;
 
@@ -292,7 +289,7 @@ public:
 	Mixer(int index);
 	virtual ~Mixer() throw();
 	virtual void Init(void);
-	virtual void Tick( int channel,PatternEvent* pData);
+	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Work(int numSamples);
 	void FxSend(int numSamples);
 	void Mix(int numSamples);

@@ -1,13 +1,15 @@
 ///\file
 ///\brief implementation file for psycle::host::WaveOut.
+
+#include <packageneric/pre-compiled.private.hpp>
 #include "WaveOut.hpp"
+#include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
-#include <universalis/cpu/exception.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
-#include <universalis/os/thread_name.hpp>
+#include <universalis/processor/exception.hpp>
+#include <universalis/operating_system/thread_name.hpp>
 #include <process.h>
 namespace psycle
 {
@@ -62,7 +64,7 @@ namespace psycle
 			if(_initialized) Reset();
 		}
 
-		bool WaveOut::start()
+		bool WaveOut::Start()
 		{
 //			CSingleLock lock(&_lock, TRUE);
 			if(_running) return true;
@@ -173,8 +175,16 @@ namespace psycle
 				}
 				///\todo: wait until WHDR_DONE like with waveout?
 				waveInClose(_capPorts[i]._handle);
-				universalis::os::aligned_memory_dealloc(_capPorts[i].pleft);
-				universalis::os::aligned_memory_dealloc(_capPorts[i].pright);
+			#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+				_aligned_free(_capPorts[i].pleft);
+				_aligned_free(_capPorts[i].pright);
+			#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+				free(_capPorts[i].pleft);
+				free(_capPorts[i].pright);
+			#else
+				delete[] _capPorts[i].pleft;
+				delete[] _capPorts[i].pright;
+			#endif
 			}
 			_capPorts.resize(0);
 
@@ -202,7 +212,7 @@ namespace psycle
 			_portMapping[idx]=_capPorts.size()-1;
 			if (isplaying)
 			{
-				return start();
+				return Start();
 			}
 			return true;
 		}
@@ -223,7 +233,7 @@ namespace psycle
 				else newports.push_back(_capPorts[i]);
 			}
 			_capPorts = newports;
-			if (restartplayback) start();
+			if (restartplayback) Start();
 			return true;
 		}
 		bool WaveOut::CreateCapturePort(PortCapt &port)
@@ -255,8 +265,17 @@ namespace psycle
 				);
 */
 			waveInStart(port._handle);
-			universalis::os::aligned_memory_alloc(16, port.pleft, _blockSize);
-			universalis::os::aligned_memory_alloc(16, port.pright, _blockSize);
+
+		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+			port.pleft = static_cast<float*>(_aligned_malloc(_blockSize*sizeof(float),16));
+			port.pright = static_cast<float*>(_aligned_malloc(_blockSize*sizeof(float),16));
+		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
+			posix_memalign(reinterpret_cast<void**>(port.pleft),16,_blockSize*sizeof(float));
+			posix_memalign(reinterpret_cast<void**>(port.pright),16,_blockSize*sizeof(float));
+		#else
+			port.pleft = new float[_blockSize];
+			port.pright = new float[_blockSize];
+		#endif
 			return true;
 		}
 
@@ -272,7 +291,7 @@ namespace psycle
 
 		void WaveOut::PollerThread(void * pWaveOut)
 		{
-			universalis::os::thread_name thread_name("mme wave out");
+			universalis::operating_system::thread_name thread_name("mme wave out");
 			universalis::processor::exception::install_handler_in_thread();
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
@@ -507,7 +526,7 @@ namespace psycle
 
 			if(_initialized)
 			{
-				if(start()) WriteConfig();
+				if(Start()) WriteConfig();
 				else
 				{
 					_numBlocks = oldnb;
@@ -515,7 +534,7 @@ namespace psycle
 					_deviceID = olddid;
 					_dither = olddither;
 					_samplesPerSec = oldsps;
-					start();
+					Start();
 				}
 			}
 			else WriteConfig();
@@ -545,7 +564,7 @@ namespace psycle
 
 		bool WaveOut::Enable(bool e)
 		{
-			return e ? start() : Stop();
+			return e ? Start() : Stop();
 		}
 		MMRESULT WaveOut::IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID) 
 		{ 

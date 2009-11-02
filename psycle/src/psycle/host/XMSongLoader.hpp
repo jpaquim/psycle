@@ -1,29 +1,14 @@
 #pragma once
-#include "Global.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/commands.h>
-#include <psycle/core/patternevent.h>
-namespace psy {
-	namespace core {
-		class Song;
-		class XMSampler;
-		class XMInstrument;
-	}
-}
-using namespace psy::core;
-#else
+
 #include "SongStructs.hpp"
-#endif
 #include "FileIO.hpp"
 #include "XMFile.hpp"
 #include <cstdint>
 
 namespace psycle { namespace host {
-	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Song;
-		class XMSampler;
-		class XMInstrument;
-	#endif
+	class Song;
+	class XMSampler;
+	class XMInstrument;
 
 	class XMSongLoader : public OldPsyFile
 	{
@@ -37,12 +22,12 @@ namespace psycle { namespace host {
 		const bool IsValid();
 
 		const LONG LoadPatterns(Song & song);
-		const LONG LoadPattern(Song & song, const LONG start, const int patIdx,const int iTracks);	
+		const LONG LoadSinglePattern(Song & song, const LONG start, const int patIdx,const int iTracks);	
 		const bool LoadInstruments(XMSampler & sampler, LONG iInstrStart);
 		const LONG LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
 		const LONG LoadSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
 		const LONG LoadSampleData(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
-		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEvent & e);
+		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
 		void SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader);		
 		char * AllocReadStr(const LONG size, const LONG start=-1);
 
@@ -77,7 +62,6 @@ namespace psycle { namespace host {
 		unsigned char memPortaNote[32];
 		unsigned char memPortaPos[32];
 
-		Song* m_pSong;
 		short m_iTempoTicks;
 		short m_iTempoBPM;
 		XMFILEHEADER m_Header;
@@ -114,12 +98,12 @@ namespace psycle { namespace host {
 		const bool IsValid();
 
 		const void LoadPatterns(Song & song);
-		const void LoadPattern(Song & song, const int patIdx,const int iTracks);	
+		const void LoadSinglePattern(Song & song, const int patIdx,const int iTracks);	
 		const unsigned char ConvertPeriodtoNote(const unsigned short period);
 		const void LoadInstrument(XMSampler & sampler, const int idx);
 		const void LoadSampleHeader(XMSampler & sampler, const int InstrIdx);
 		const void LoadSampleData(XMSampler & sampler, const int InstrIdx);
-		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEvent & e);
+		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
 		char * AllocReadStr(const LONG size, const LONG start=-1);
 
 		// inlines
@@ -144,7 +128,6 @@ namespace psycle { namespace host {
 			return Read(&i,4)?i:0;
 		}
 		static const short BIGMODPERIODTABLE[37*8];
-		Song* m_pSong;
 		unsigned short smpLen[32];
 		MODHEADER m_Header;
 		MODSAMPLEHEADER m_Samples[32];

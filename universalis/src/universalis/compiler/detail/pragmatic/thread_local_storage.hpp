@@ -2,16 +2,13 @@
 // copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief thread local storage.
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__THREAD_LOCAL_STORAGE__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__THREAD_LOCAL_STORAGE__INCLUDED
 #pragma once
-
 #include "attribute.hpp"
 
 #if defined DIVERSALIS__COMPILER__GNU && ( \
-		!defined DIVERSALIS__OS__MICROSOFT || \
-		DIVERSALIS__COMPILER__VERSION >= 40300 /* TLS support added on windows in version 4.3.0 */ \
+		!defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && /* mingw 3.2.4 had no support. */ \
+		!defined DIVERSALIS__OPERATING_SYSTEM__CYGWIN || /* needs to check whether cygwin had support already */ \
+		DIVERSALIS__COMPILER__VERSION__MAJOR >= 4 \
 	)
 
 	#define UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE  __thread
@@ -27,7 +24,5 @@
 	#if !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
 		#warning "Cannot generate thread-safe code for this compiler ; please add support for thread-local storage for your compiler in the file where this warning is triggered."
 	#endif
-
-#endif
 
 #endif

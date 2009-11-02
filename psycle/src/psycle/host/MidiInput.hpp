@@ -2,13 +2,8 @@
 ///\brief implementation file for psycle::host::CMidiInput.
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 #pragma once
-#include "Global.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/core/patternevent.h>
-using namespace psy::core;
-#else
-	#include "SongStructs.hpp"
-#endif
+#include "Constants.hpp"
+#include "SongStructs.hpp"
 #include <diversalis/compiler.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -84,9 +79,8 @@ namespace psycle
 		class MIDI_BUFFER
 		{
 		public:
-			MIDI_BUFFER() : timeStamp(0), channel(0) {};
 			/// tracker pattern info struct
-			PatternEvent entry;
+			PatternEntry entry;
 			/// MIDI input device's timestamp
 			std::uint32_t timeStamp;
 			/// MIDI channel

@@ -1,13 +1,13 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2004-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::outputs::alsa
 #include <psycle/detail/project.private.hpp>
 #include "alsa.hpp"
-#include <diversalis/cpu.hpp>
-#include <universalis/cpu/exception.hpp>
-#include <universalis/os/thread_name.hpp>
-#include <universalis/os/exceptions/code_description.hpp>
+#include <diversalis/processor.hpp>
+#include <universalis/processor/exception.hpp>
+#include <universalis/operating_system/thread_name.hpp>
+#include <universalis/operating_system/exceptions/code_description.hpp>
 #include <poll.h>
 #include <alloca.h> // beware: this is not in posix, but this is available on *bsd and linux.
 #include <cstdio>
@@ -460,7 +460,7 @@ void alsa::thread_function() {
 	if(loggers::information()) loggers::information()("poller thread started", UNIVERSALIS__COMPILER__LOCATION);
 
 	// set thread name
-	universalis::os::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + qualified_name());
+	universalis::operating_system::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + qualified_name());
 
 	// install cpu/os exception handler/translator
 	universalis::processor::exception::install_handler_in_thread();
@@ -512,7 +512,7 @@ void alsa::poll_loop() throw(engine::exception) {
 		// the fds array will be unmodified and the global variable errno will be set to indicate the error.
 		if(0 > (error = ::poll(fds, nfds, timeout_ms)))
 			if(errno == EAGAIN || errno == EINTR) loop = true;
-			else throw engine::exceptions::runtime_error(universalis::os::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
+			else throw engine::exceptions::runtime_error(universalis::operating_system::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 		if(!error) {
 			if(loggers::warning()) loggers::warning()("timed out", UNIVERSALIS__COMPILER__LOCATION);
 			loop = true;

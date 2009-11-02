@@ -28,9 +28,9 @@
 #define PSYCLE__LICENSE "none, public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 9
-#define PSYCLE__VERSION__QUALITY "alpha"
-#define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$" // $Date$
+#define PSYCLE__VERSION__PATCH 6.1
+#define PSYCLE__VERSION__QUALITY "release"
+#define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
@@ -63,7 +63,9 @@
 
 	#define RC__InternalName PSYCLE__TAR_NAME
 	#define RC__ProductName PSYCLE__NAME
-	#define RC__ProductVersion PSYCLE__VERSION
+	#define RC__ProductVersion PSYCLE__VERSION \
+		"\r\n" "Subversion $Revision$" \
+		"\r\n" "Subversion $Date$"
 
 	#define RC__OriginalFilename PSYCLE__TAR_NAME ".exe"
 	#define RC__FileDescription RC__ProductName " - Host"

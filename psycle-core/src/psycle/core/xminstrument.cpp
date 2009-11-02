@@ -1,36 +1,38 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/config.private.hpp>
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #include "xminstrument.h"
-
-#include <psycle/helpers/datacompression.hpp>
+#include "datacompression.h"
 #include "fileio.h"
+#include "filter.h"
 #include <cassert>
 #include <cstring>
 
 namespace psy { namespace core {
 
-	using namespace psycle::helpers;
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
 
-void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value) {
+void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value){
 	//todo: Readapt Tune and FineTune, respect of the new SampleRate.
 	m_WaveSampleRate = value;
 }
 
-int XMInstrument::WaveData::Load(RiffFile & riffFile) {
+bool XMInstrument::WaveData::Load(RiffFile& riffFile)
+{
 	std::uint32_t size1 =0 ,size2 = 0;
 
 	char temp[6];
 	int size=0;
 	riffFile.ReadArray(temp,4); temp[4]='\0';
 	riffFile.Read(size);
-			if (strcmp(temp,"SMPD")) return size;
+	if (strcmp(temp,"SMPD")) return false;
 
 	//\todo: add version
 	//riffFile.Read(version);
@@ -45,11 +47,11 @@ int XMInstrument::WaveData::Load(RiffFile & riffFile) {
 
 	riffFile.Read(m_WaveLoopStart);
 	riffFile.Read(m_WaveLoopEnd);
-	riffFile.Read((std::uint32_t&) m_WaveLoopType);
+	riffFile.Read((uint32_t&) m_WaveLoopType);
 
 	riffFile.Read(m_WaveSusLoopStart);
 	riffFile.Read(m_WaveSusLoopEnd);
-	riffFile.Read((std::uint32_t&) m_WaveSusLoopType);
+	riffFile.Read((uint32_t&) m_WaveSusLoopType);
 
 	riffFile.Read(m_WaveTune);
 	riffFile.Read(m_WaveFineTune);
@@ -77,7 +79,7 @@ int XMInstrument::WaveData::Load(RiffFile & riffFile) {
 		DataCompression::SoundDesquash(pData, &m_pWaveDataR);
 	}
 	delete pData;
-	return size;
+	return true;
 }
 
 void XMInstrument::WaveData::Save(RiffFile& riffFile)
@@ -113,11 +115,11 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 
 	riffFile.Write(m_WaveLoopStart);
 	riffFile.Write(m_WaveLoopEnd);
-	riffFile.Write((std::uint32_t&)m_WaveLoopType);
+	riffFile.Write((uint32_t&)m_WaveLoopType);
 
 	riffFile.Write(m_WaveSusLoopStart);
 	riffFile.Write(m_WaveSusLoopEnd);
-	riffFile.Write((std::uint32_t&)m_WaveSusLoopType);
+	riffFile.Write((uint32_t&)m_WaveSusLoopType);
 
 	riffFile.Write(m_WaveTune);
 	riffFile.Write(m_WaveFineTune);
@@ -153,7 +155,7 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 * @param value Desired point Value.
 * @return New point index.
 */
-int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
+const int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
 {
 	assert(pointIndex < m_Points.size());
 	if(pointIndex < m_Points.size())
@@ -269,7 +271,7 @@ int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const 
 * @param value Point Value.
 * @return New point index.
 */
-unsigned int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
+const unsigned int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
 {
 	unsigned int _new_index;
 	for(_new_index = 0;_new_index < (int)m_Points.size();_new_index++)
@@ -464,13 +466,13 @@ void XMInstrument::Init()
 }
 
 /// load XMInstrument
-int XMInstrument::Load(RiffFile& riffFile)
+bool XMInstrument::Load(RiffFile& riffFile)
 {
 	char temp[6];
 	int size=0;
 	riffFile.ReadArray(temp,4); temp[4]='\0';
 	riffFile.Read(size);
-	if (strcmp(temp,"INST")) return size;
+	if (strcmp(temp,"INST")) return false;
 
 	//\todo: add version
 	//riffFile.Read(version);
@@ -492,16 +494,16 @@ int XMInstrument::Load(RiffFile& riffFile)
 	riffFile.Read(m_FilterCutoff);
 	riffFile.Read(m_FilterResonance);
 	riffFile.Read(m_FilterEnvAmount);
-	riffFile.Read((std::uint32_t&)m_FilterType);
+	riffFile.Read((uint32_t&)m_FilterType);
 
 	riffFile.Read(m_RandomVolume);
 	riffFile.Read(m_RandomPanning);
 	riffFile.Read(m_RandomCutoff);
 	riffFile.Read(m_RandomResonance);
 
-	riffFile.Read((std::uint32_t&)m_NNA);
-	riffFile.Read((std::uint32_t&)m_DCT);
-	riffFile.Read((std::uint32_t&)m_DCA);
+	riffFile.Read((uint32_t&)m_NNA);
+	riffFile.Read((uint32_t&)m_DCT);
+	riffFile.Read((uint32_t&)m_DCA);
 
 	NotePair npair;
 	for(int i = 0;i < NOTE_MAP_SIZE;i++){
@@ -515,7 +517,7 @@ int XMInstrument::Load(RiffFile& riffFile)
 	m_PanEnvelope.Load(riffFile,version);
 	m_FilterEnvelope.Load(riffFile,version);
 	m_PitchEnvelope.Load(riffFile,version);
-	return size;
+	return true;
 }
 
 // save XMInstrument
@@ -524,8 +526,11 @@ void XMInstrument::Save(RiffFile& riffFile)
 	if ( ! m_bEnabled ) return;
 
 	int i;
-	int size = 0;
-	int filepos = riffFile.GetPos();
+	int size = sizeof(XMInstrument)
+		-sizeof(m_AmpEnvelope)
+		-sizeof(m_PanEnvelope)
+		-sizeof(m_PitchEnvelope)
+		-sizeof(m_FilterEnvelope);
 
 	riffFile.WriteArray("INST",4);
 	riffFile.Write(size);
@@ -548,15 +553,15 @@ void XMInstrument::Save(RiffFile& riffFile)
 	riffFile.Write(m_FilterCutoff);
 	riffFile.Write(m_FilterResonance);
 	riffFile.Write(m_FilterEnvAmount);
-	riffFile.Write((std::uint32_t&)m_FilterType);
+	riffFile.Write((uint32_t&)m_FilterType);
 
 	riffFile.Write(m_RandomVolume);
 	riffFile.Write(m_RandomPanning);
 	riffFile.Write(m_RandomCutoff);
 	riffFile.Write(m_RandomResonance);
-	riffFile.Write((std::uint32_t&)m_NNA);
-	riffFile.Write((std::uint32_t&)m_DCT);
-	riffFile.Write((std::uint32_t&)m_DCA);
+	riffFile.Write((uint32_t&)m_NNA);
+	riffFile.Write((uint32_t&)m_DCT);
+	riffFile.Write((uint32_t&)m_DCA);
 
 	NotePair npair;
 	for(i = 0;i < NOTE_MAP_SIZE;i++){
@@ -570,10 +575,7 @@ void XMInstrument::Save(RiffFile& riffFile)
 	m_PanEnvelope.Save(riffFile,version);
 	m_FilterEnvelope.Save(riffFile,version);
 	m_PitchEnvelope.Save(riffFile,version);
-	int endpos = riffFile.GetPos();
-	riffFile.Seek(filepos+4);
-	riffFile.Write(static_cast<std::uint32_t>(endpos-filepos));
-	riffFile.Seek(endpos);
 }
+
 
 }}

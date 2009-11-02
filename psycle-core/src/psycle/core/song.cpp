@@ -1,23 +1,31 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+// Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
 //
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the
+// Free Software Foundation, Inc.,
+// 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-#include <psycle/core/config.private.hpp>
 #include "song.h"
-
-#include <psycle/helpers/datacompression.hpp>
-#include <psycle/helpers/riff.hpp>
+#include "datacompression.h"
 #include "fileio.h"
 #include "machine.h"
 #include "machinefactory.h"
+#include "riff.h"
 #include <sstream>
 #include <iostream> // only for debug output
 
 namespace psy { namespace core {
-
-	using namespace psycle::helpers;
 
 SongSerializer CoreSong::serializer;
 
@@ -66,18 +74,10 @@ bool CoreSong::save(std::string const & filename, int version) {
 	return serializer.saveSong(filename, *this, version);
 }
 
-void CoreSong::AddMachine(Machine * pmac, Machine::id_type newIdx) {
-	if ( newIdx != -1) {
-		if (!machine(newIdx) ){
-			pmac->id(newIdx);
-		}
-	}
-	else if ( pmac->id() == -1) {
-		if(pmac->IsGenerator()) pmac->id(GetFreeBus());
-		else pmac->id(GetFreeFxBus());
-		if(pmac->id() == -1) {
-			return;
-		}
+void CoreSong::AddMachine(Machine * pmac) {
+	if(pmac->id() == -1) {
+		if(pmac->acceptsConnections()) pmac->id(GetFreeFxBus());
+		else pmac->id(GetFreeBus());
 	}
 	machine(pmac->id(), pmac);
 }
@@ -85,12 +85,6 @@ void CoreSong::AddMachine(Machine * pmac, Machine::id_type newIdx) {
 void CoreSong::ReplaceMachine(Machine * pmac, Machine::id_type idx) {
 	if(machine(idx)) DeleteMachine(machine(idx));
 	machine(idx, pmac);
-}
-void CoreSong::ExchangeMachines(Machine::id_type macIdx1, Machine::id_type macIdx2) {
-	assert(macIdx1 >= 0 && macIdx2 >= 0 && macIdx1 < MAX_MACHINES && macIdx2 < MAX_MACHINES);
-	Machine* mac1 = machine_[macIdx1];
-	machine_[macIdx1] = machine_[macIdx2];
-	machine_[macIdx2] = mac1;
 }
 void CoreSong::DeleteAllMachines(bool write_locked) {
 	_machineLock = true;
@@ -532,14 +526,6 @@ bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/
 	return true;
 }
 
-void CoreSong::ExchangeInstruments(Instrument::id_type src, Instrument::id_type dst) {
-	
-	assert(src >= 0 && dst >= 0 && src < MAX_INSTRUMENTS && dst < MAX_INSTRUMENTS);
-	Instrument* inst1 = _pInstrument[src];
-	_pInstrument[src] = _pInstrument[dst];
-	_pInstrument[dst] = inst1;
-}
-
 void CoreSong::/*Reset*/DeleteInstrument(Instrument::id_type id) {
 	Invalided = true;
 	_pInstrument[id]->Reset();
@@ -622,10 +608,7 @@ void Song::clear() {
 	UISong::clear();
 	clearMyData();
 }
-void SetDefaultPatternLines(int defaultPatLines)
-{
-	//todo
-}
+
 void Song::clearMyData() {
 	seqBus = 0;
 	machineSoloed = -1;
@@ -633,22 +616,6 @@ void Song::clearMyData() {
 	_instSelected = 0;
 	midiSelected = 0;
 	auxcolSelected = 0;
-	for (int i =0; i < MAX_TRACKS; i++) {
-		_trackArmed[i]=false;
-		_trackMuted[i]=false;
-	}
-	_trackArmedCount=0;
-	for (int i=0; i < MAX_SONG_POSITIONS; i++) {
-		playOrder[i]=0;
-		playOrderSel[i]=0;
-	}
-	playLength = 0;
-	for (int i=0; i < MAX_PATTERNS; i++ ){
-		patternLines[i]=64;
-		memset(patternName[i],0,32);
-	}
-	currentOctave=4;
-
 }
 
 void Song::DeleteMachine(Machine * mac, bool write_locked )  {

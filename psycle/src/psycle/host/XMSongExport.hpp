@@ -1,27 +1,13 @@
 #pragma once
-#include "Global.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/commands.h>
-#include <psycle/core/patternevent.h>
-namespace psy {
-	namespace core {
-		class Song;
-		class XMSampler;
-	}
-}
-using namespace psy::core;
-#else
+
 #include "SongStructs.hpp"
-#endif
 #include "FileIO.hpp"
 #include "XMFile.hpp"
 #include <cstdint>
 #include <map>
 
 namespace psycle { namespace host {
-	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Song;
-	#endif
+	class Song;
 
 	class XMSongExport : public OldPsyFile
 	{
@@ -33,7 +19,7 @@ namespace psycle { namespace host {
 	private:
 		void writeSongHeader(Song &song);
 		void SavePatterns(Song & song);
-		void SavePattern(Song & song, const int patIdx);
+		void SaveSinglePattern(Song & song, const int patIdx);
 		
 		void SaveInstruments(Song & song);
 		void SaveEmptyInstrument(std::string name);

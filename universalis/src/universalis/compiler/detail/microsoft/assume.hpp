@@ -3,13 +3,8 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\file
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__MICROSOFT__ASSUME__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__MICROSOFT__ASSUME__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
-
 /// [bohan] i don't quite understand what microsoft says about this keyword...
 #if defined DIVERSALIS__COMPILER__GNU
 	// unsupported?
@@ -18,6 +13,4 @@
 	#define assume(x) __assume(x)
 #else
 	#define assume(x)
-#endif
-
 #endif

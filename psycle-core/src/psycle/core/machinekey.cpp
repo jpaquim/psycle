@@ -1,25 +1,43 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/***************************************************************************
+*   Copyright (C) 2007 Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/config.private.hpp>
+
 #include "machinekey.hpp"
-#include "internalhost.hpp"
 
 #include <algorithm>
 
-namespace psy { namespace core {
+namespace psy
+{
+	namespace core
+	{
 	
-		struct ToLower {
+		struct ToLower
+		{
 			char operator() (char c) const  { return std::tolower(c); }
 		};
+
 
 		MachineKey::MachineKey( )
 			:host_(Hosts::INTERNAL)
 			,dllName_(),
-			index_(-1) {
+			index_(0) {
 		}
 		MachineKey::MachineKey( const MachineKey & key)
 			:host_(key.host())
@@ -39,9 +57,6 @@ namespace psy { namespace core {
 		MachineKey::~MachineKey() {
 		}
 
-		const MachineKey MachineKey::invalid() {
-			return MachineKey(Hosts::INTERNAL,"",-1);
-		}
 		const MachineKey MachineKey::master() {
 			return MachineKey(Hosts::INTERNAL,"",InternalMacs::MASTER);
 		}
@@ -68,9 +83,6 @@ namespace psy { namespace core {
 		}
 		const MachineKey MachineKey::failednative() {
 			return MachineKey(Hosts::NATIVE,"",0);
-		}
-		const MachineKey MachineKey::wrapperVst() {
-			return MachineKey(Hosts::VST,"",0);
 		}
 
 
@@ -131,4 +143,5 @@ namespace psy { namespace core {
 		int MachineKey::index() const {
 			return index_;
 		}
-}}
+	}
+}

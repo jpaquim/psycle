@@ -3,29 +3,23 @@
 // copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
 
 ///\interface universalis::compiler::detail::demangled
-
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEMANGLE__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEMANGLE__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 #include <typeinfo>
 #include <string>
-
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__SOURCE
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEMANGLE
 #include <universalis/compiler/dynamic_link/begin.hpp>
-
-namespace universalis { namespace compiler {
-
-///\internal
-namespace detail {
-	///\internal
-	/// demangling of compiler symbols strings.
-	std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK demangled(std::string const & mangled_symbol);
+namespace universalis
+{
+	namespace compiler
+	{
+		///\internal
+		namespace detail
+		{
+			///\internal
+			/// demangling of compiler symbols strings.
+			std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK demangled(std::string const & mangled_symbol);
+		}
+	}
 }
-
-}}
-
 #include <universalis/compiler/dynamic_link/end.hpp>
-
-#endif

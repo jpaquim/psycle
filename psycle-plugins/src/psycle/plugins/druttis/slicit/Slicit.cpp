@@ -10,8 +10,6 @@
 #include <cmath>
 #include "../dsp/Inertia.h"
 
-using namespace psycle::plugin_interface;
-
 //============================================================================
 //				Defines
 //============================================================================
@@ -359,7 +357,8 @@ struct PROG
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo =
+{
 	MI_VERSION,
 	EFFECT,
 	NUM_PARAMS,
@@ -373,7 +372,7 @@ CMachineInfo const MacInfo (
 	MAC_AUTHOR " on " __DATE__,
 	"Command Help",
 	4
-);
+};
 
 //============================================================================
 //				Machine

@@ -1,10 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net ; erodix ; johan boule <bohan@jabber.org>
+// copyright 2004-2008 members of the psycle project http://psycle.sourceforge.net ; erodix ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::outputs::jack
 #include <psycle/detail/project.private.hpp>
 #include "jack.hpp"
-#include <universalis/cpu/exception.hpp>
+#include <universalis/processor/exception.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(jack)
@@ -44,8 +44,8 @@ void jack::do_open() throw(engine::exception) {
 	// open a client
 	char const * server_name(0);
 	std::string client_name(
-		#if defined UNIVERSALIS__META__MODULE__NAME
-			UNIVERSALIS__META__MODULE__NAME
+		#if defined PACKAGENERIC__MODULE__NAME
+			PACKAGENERIC__MODULE__NAME
 		#else
 			"psycle"
 		#endif

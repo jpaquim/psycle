@@ -27,6 +27,7 @@
     by Perry R. Cook and Gary P. Scavone, 1995 - 2007.
 */
 /***************************************************/
+#include <packageneric/pre-compiled.private.hpp>
 #include "Filter.h"
 #include <stdio.h>
 
