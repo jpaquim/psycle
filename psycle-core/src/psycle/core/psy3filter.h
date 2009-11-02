@@ -33,6 +33,7 @@ class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 			MACH_SAMPLER = 3,
 			MACH_PLUGIN = 8,
 			MACH_VST = 9,
+			MACH_VSTFX = 10,
 			MACH_XMSAMPLER = 12,
 			MACH_DUPLICATOR = 13,
 			MACH_MIXER = 14,
