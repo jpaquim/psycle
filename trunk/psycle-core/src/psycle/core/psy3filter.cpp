@@ -163,10 +163,14 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			if((version & 0xff00) == 0) {// chunkformat v0
 				Machine* mac = LoadMACDv0(&file, song, version & 0xff);
 				//Bugfix.
+#if _WIN32 || _WIN64
 				if (mac->getMachineKey().host() == Hosts::VST
 					&& ((vst::plugin*)mac)->ProgramIsChunk() == false) {
 						size = file.GetPos() - fileposition;
-				}		
+				}	
+#else
+				//todo
+#endif
 			}
 			//else if((version & 0xff00) == 0x0100 ) //and so on
 		} else if(!std::strcmp(header,"INSD")) {
