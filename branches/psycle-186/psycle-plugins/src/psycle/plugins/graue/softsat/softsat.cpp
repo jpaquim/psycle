@@ -66,8 +66,7 @@ CMachineParameter const *pParameters[] =
 	&paraHardness
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,
 	0,                                     // flags
 	2,                                     // numParameters
@@ -81,7 +80,7 @@ CMachineInfo const MacInfo =
 	"Catatonic Porpoise",                  // author
 	"About",                 // A command that is used to display an about box
 	3
-};
+);
 
 
 class mi : public CMachineInterface

@@ -223,8 +223,7 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	0,																												// flags
 	50,																												// numParameters
@@ -238,7 +237,7 @@ CMachineInfo const MacInfo =
 	"dw",																												// author
 	"About",																								// A command, that could be use for open an editor, etc...
 	5																																//number of columns
-};
+);
 
 class GrainLayer
 {

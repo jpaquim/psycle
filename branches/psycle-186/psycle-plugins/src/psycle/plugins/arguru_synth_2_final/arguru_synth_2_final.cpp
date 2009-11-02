@@ -335,8 +335,7 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -350,7 +349,7 @@ CMachineInfo const MacInfo =
 	"J. Arguelles (arguru)",																												// author
 	"help",																																				// A command, that could be use for open an editor, etc...
 	4
-};
+);
 
 class mi : public CMachineInterface
 {

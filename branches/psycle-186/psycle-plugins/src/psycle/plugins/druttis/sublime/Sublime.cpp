@@ -871,8 +871,7 @@ CMachineParameter const *pParams[] =
 //				Machine Info
 //
 //////////////////////////////////////////////////////////////////////
-CMachineInfo MacInfo =
-{
+CMachineInfo MacInfo(
 	MI_VERSION,
 	GENERATOR,
 	NUM_PARAMS,
@@ -886,7 +885,7 @@ CMachineInfo MacInfo =
 	MAC_AUTHOR " on " __DATE__,
 	"Command Help",
 	NUM_PARAM_COLS
-};
+);
 //////////////////////////////////////////////////////////////////////
 //
 //				Machine Class

@@ -179,8 +179,7 @@ CMachineParameter const *pParams[] =
 //				Machine Info
 //
 //////////////////////////////////////////////////////////////////////
-CMachineInfo MacInfo =
-{
+CMachineInfo MacInfo(
 	MI_VERSION,
 	EFFECT,
 	NUM_PARAMS,
@@ -194,7 +193,7 @@ CMachineInfo MacInfo =
 	MAC_AUTHOR " on " __DATE__,
 	"Command Help",
 	NUM_PARAM_COLS
-};
+);
 //////////////////////////////////////////////////////////////////////
 //
 //				InitFilter Helper Function

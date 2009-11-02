@@ -95,8 +95,7 @@ CMachineParameter const *pParameters[] =								//this array should be filled wi
 	&paramNull
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 
 	USEGUI,																																//<-- make sure you set the USEGUI flag here, or else everything will fall apart.
@@ -112,7 +111,7 @@ CMachineInfo const MacInfo =
 	"dw",																												// author
 	"About",																								// A command, that could be use for open an editor, etc...
 	2
-};
+);
 //a note on the numcols variable and sizing in general:  the size of the window is automatically calculated based on the positions of the
 //gui parameters.  the smallest size possible that will fit every parameter is chosen, in increments of 28x150 (the size of the old parameters).
 //currently, the numcols variable in the CMachineInfo class provides a starting point for the calculations, but that will probably be deemed

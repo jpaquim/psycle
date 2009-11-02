@@ -20,7 +20,7 @@ CMachineParameter const static * const parameters[] = {
 	&mute_parameter
 };
 
-CMachineInfo const static machine_info = {
+CMachineInfo const static machine_info(
 	MI_VERSION,				
 	0, // flags
 	sizeof parameters / sizeof *parameters, // number of parameters
@@ -36,7 +36,7 @@ CMachineInfo const static machine_info = {
 	"Alk", // author
 	"About", // a command, that could be use to open an editor, etc...
 	1 // number of columns
-};
+);
 
 class machine : public CMachineInterface {
 	public:

@@ -76,8 +76,7 @@ CMachineParameter const *pParameters[] =
 
 #pragma pack()
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	0,																																								// flags
 	5,																																								// numParameters
@@ -91,7 +90,7 @@ CMachineInfo const MacInfo =
 	"Jezar",																																// author
 	"About",																																				// A command, that could be use for open an editor, etc...
 	5
-};
+);
 
 class mi : public CMachineInterface
 {

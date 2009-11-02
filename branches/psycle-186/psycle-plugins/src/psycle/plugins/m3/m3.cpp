@@ -186,7 +186,7 @@ CMachineParameter const *pParameters[] = {
 	&paraLFO2Amount,
 };
 
-CMachineInfo const MacInfo = {
+CMachineInfo const MacInfo(
 		MI_VERSION,
 		GENERATOR,
 		NUMPARAMETERS,
@@ -200,7 +200,7 @@ CMachineInfo const MacInfo = {
 		"Makk",
 		"About",
 		5
-};
+);
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 

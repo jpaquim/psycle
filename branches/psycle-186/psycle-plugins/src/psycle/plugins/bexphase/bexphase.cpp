@@ -89,8 +89,7 @@ int const pAmount = 4;
 int const pDiff = 5;
 int const numVals = 6;
 
-CMachineInfo const bexphase_info = 
-{
+CMachineInfo const bexphase_info(
 	MI_VERSION,				
 	EFFECT,
 	numVals,
@@ -100,7 +99,7 @@ CMachineInfo const bexphase_info =
 	"Simon Bucher",
 	"About",
 	3
-};
+);
 
 
 class bexphase : public CMachineInterface

@@ -1290,22 +1290,21 @@ CMachineParameter const *pParameters[] =
 
 #pragma pack()
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,				
-	GENERATOR,																																// flags
-	112,																																				// numParameters
-	pParameters,																												// Pointer to parameters
+	GENERATOR,		// flags
+	112,			// numParameters
+	pParameters,	// Pointer to parameters
 #ifndef NDEBUG
-	"Blitz (Debug build)",																				// name
+	"Blitz (Debug build)",	// name
 #else
-	"Blitz 1.4",																												// name
+	"Blitz 1.4",	// name
 #endif
-	"Blitz",																																// short name
-	"jme",																																				// author
-	"Help",																																				// A command, that could be use for open an editor, etc...
+	"Blitz",		// short name
+	"jme",			// author
+	"Help",			// A command, that could be use for open an editor, etc...
 	7
-};
+);
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo) // To export DLL functions to host
 

@@ -179,8 +179,7 @@ CMachineParameter const *pParameters[] =
 		&paraLink
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	EFFECT,																																								// flags
 	NUMPARAMETERS,																																// numParameters
@@ -194,7 +193,7 @@ CMachineInfo const MacInfo =
 	"Felipe Rivera/pmisteli/Sartorius",																												// author
 	"Help",																																// A command, that could be use for open an editor, etc...
 	3
-};
+);
 
 class mi : public CMachineInterface
 {

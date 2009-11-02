@@ -330,8 +330,7 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -345,7 +344,7 @@ CMachineInfo const MacInfo =
 	"Juan Linietsky, ported by Sartorius",																												// author
 	"Help",																																				// A command, that could be use for open an editor, etc...
 	2
-};
+);
 
 class mi : public CMachineInterface
 {

@@ -92,8 +92,7 @@ CMachineParameter const *pParameters[] =
 	&paraWahFreqOff
 };
 
-CMachineInfo const MacInfo = 
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	EFFECT,																																								// flags
 	NUMPARAMETERS,																																// numParameters
@@ -107,7 +106,7 @@ CMachineInfo const MacInfo =
 	"Nasca Octavian Paul/Sartorius",																												// author
 	"About",																																// A command, that could be use for open an editor, etc...
 	1
-};
+);
 
 
 class mi : public CMachineInterface

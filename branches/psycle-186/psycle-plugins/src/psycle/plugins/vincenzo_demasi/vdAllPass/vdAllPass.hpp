@@ -93,8 +93,7 @@ CMachineParameter const *pParameters[] =
 	&parLockGain
 };
 
-CMachineInfo const MacInfo =
-{
+CMachineInfo const MacInfo(
 	MI_VERSION,
 	EFFECT,																																				// flags
 	PARNUM,																																				// numParameters
@@ -108,7 +107,7 @@ CMachineInfo const MacInfo =
 	VDAUTHOR,																																// author
 	VDCOMMAND,																																// A command, that could be use for open an editor, etc...
 	PARCOLS
-};
+);
 
 class mi : public CMachineInterface
 {
