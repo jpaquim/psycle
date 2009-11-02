@@ -82,6 +82,8 @@ void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& 
 	CMachineInfo* minfo = LoadDescriptor(hInstance);
 	if (minfo) {
 		PluginInfo pinfo;
+		//todo!
+		//pinfo.setFileTime();
 		pinfo.setName( minfo->Name );
 		bool _isSynth = (minfo->Flags == 3);
 		pinfo.setRole( _isSynth?MachineRole::GENERATOR : MachineRole::EFFECT );

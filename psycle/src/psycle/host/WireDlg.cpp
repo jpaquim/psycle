@@ -68,8 +68,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
 			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
-			universalis::os::aligned_memory_alloc(16, inl, SCOPE_SPEC_SAMPLES);
-			universalis::os::aligned_memory_alloc(16, inr, SCOPE_SPEC_SAMPLES);
+//			universalis::os::aligned_memory_alloc(16, inl, SCOPE_SPEC_SAMPLES);
+//			universalis::os::aligned_memory_alloc(16, inr, SCOPE_SPEC_SAMPLES);
 			psycle::helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
 			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
 
@@ -116,7 +116,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pos = 1;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			mult = 3268.0f / _pSrcMachine->GetAudioRange();
+			mult = 32768.0f / _pSrcMachine->GetAudioRange();
 #else
 			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
 			{
@@ -153,8 +153,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			zapObject(clearBM);
 			universalis::os::aligned_memory_dealloc(pSamplesL);
 			universalis::os::aligned_memory_dealloc(pSamplesR);
-			universalis::os::aligned_memory_dealloc(inl);
-			universalis::os::aligned_memory_dealloc(inr);
+//			universalis::os::aligned_memory_dealloc(inl);
+//			universalis::os::aligned_memory_dealloc(inr);
 			delete this;
 		}
 
@@ -243,7 +243,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{ 
 				//Linear -pi to pi.
 				const float constant = 2.0f * helpers::math::pi_f * (-0.5f + ((float)i/(SCOPE_SPEC_SAMPLES-1)));
-				//Hanning window 
+				//Hann window 
 				const float window = 0.50 - 0.50 * cosf(2.0f * M_PI * i / (SCOPE_SPEC_SAMPLES - 1));
 				float j=0.0f;
 				for(int h=0;h<scope_spec_bands;h++)

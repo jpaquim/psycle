@@ -434,6 +434,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE						
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.song(projects_->active_project()->song());
+			///\todo: this is a temporal hack, the output dialog should be changed to use core's drivers.
 			if (!output_driver_) {
 				output_driver_ = new psy::core::MsWaveOut();
 			}

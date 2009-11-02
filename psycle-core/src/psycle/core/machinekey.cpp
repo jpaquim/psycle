@@ -27,7 +27,7 @@ namespace psy { namespace core {
 			,index_(key.index()) {
 		}
 
-		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, int index )
+		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, std::uint32_t index )
 			:host_( host )
 			,index_( index )
 		{
@@ -89,8 +89,9 @@ namespace psy { namespace core {
 			// 2) ensure lower case
 			std::transform(dllName.begin(),dllName.end(),dllName.begin(),ToLower());
 			
-			// 3) replace spaces with underscores
-			std::replace(dllName.begin(),dllName.end(),' ','_');
+			// 3) replace spaces and underscores with dash.
+			std::replace(dllName.begin(),dllName.end(),' ','-');
+			std::replace(dllName.begin(),dllName.end(),'_','-');
 
 			{ // 4) remove prefix
 				std::string const prefix("lib-xpsycle.plugin.");
@@ -128,7 +129,7 @@ namespace psy { namespace core {
 		const Hosts::type MachineKey::host() const { 
 			return host_;
 		}
-		int MachineKey::index() const {
+		std::uint32_t MachineKey::index() const {
 			return index_;
 		}
 }}

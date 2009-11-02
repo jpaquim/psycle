@@ -90,7 +90,7 @@ class PSYCLE__CORE__DECL Master : public Machine {
 		double sampleCount;
 		bool _clip;
 		bool decreaseOnClip;
-		static float* _pMasterSamples;
+		float* _pMasterSamples;
 		int peaktime;
 		float currentpeak;
 		float _lMax;

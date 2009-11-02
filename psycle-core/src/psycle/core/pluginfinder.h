@@ -21,7 +21,7 @@ class PSYCLE__CORE__DECL PluginFinder {
 		typedef std::map<MachineKey, PluginInfo>::const_iterator const_iterator;
 		typedef std::map<MachineKey, PluginInfo>::iterator iterator;
 
-		PluginFinder();
+		PluginFinder(bool delayedScan);
 		virtual ~PluginFinder();
 
 		virtual void addHost(Hosts::type);
@@ -39,8 +39,11 @@ class PSYCLE__CORE__DECL PluginFinder {
 		PluginFinder::const_iterator end(Hosts::type) const;
 		virtual int size(Hosts::type) const;
 		virtual void ClearMap(Hosts::type);
+		virtual void PostInitialization();
+		bool DelayedScan();
 
 	protected:
+		bool delayedScan_;
 		PluginInfo empty_;
 		std::vector<std::map<MachineKey, PluginInfo> > maps_;
 };

@@ -31,7 +31,7 @@ namespace Hosts {
 class PSYCLE__CORE__DECL MachineKey {
 	public:
 		MachineKey();
-		MachineKey(const Hosts::type host, const std::string & dllName, const int index = 0 );
+		MachineKey(const Hosts::type host, const std::string & dllName, const std::uint32_t index = 0 );
 		MachineKey(const MachineKey& key);
 		~MachineKey();
 		static const MachineKey invalid();
@@ -50,7 +50,7 @@ class PSYCLE__CORE__DECL MachineKey {
 
 		const std::string & dllName() const;
 		const Hosts::type host() const;
-		int index() const;
+		std::uint32_t index() const;
 
 		bool operator<( const MachineKey & key) const;
 		bool operator==( const MachineKey & rhs ) const;
@@ -59,7 +59,7 @@ class PSYCLE__CORE__DECL MachineKey {
 	private:
 		std::string dllName_;
 		Hosts::type host_;
-		int index_;
+		std::uint32_t index_;
 };
 
 }}

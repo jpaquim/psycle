@@ -1738,7 +1738,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (Global::pPlayer->playing())
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				str.Format("Pos %.2X", Player::singleton().playPos());
+//				SequenceLine *pSLine = *Global::song().patternSequence().begin();
+//				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(Player::singleton().playPos()) );
+//				str.Format("B %.2f", );
 #else
 				str.Format("Pos %.2X", Global::pPlayer->_sequencePosition); 
 #endif
@@ -1757,7 +1759,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (Global::pPlayer->playing())
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-//				str.Format("Pat %.2X", m_wndSeq.selectedEntry()->pattern()->id());
+				SequenceLine *pSLine = *Global::song().patternSequence().begin();
+				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(Player::singleton().playPos()) );
+				if (sLineIt != pSLine->rend()) {
+					Pattern* pPat = sLineIt->second->pattern();
+					str.Format("Pat %.2X", pPat->id());
+				}
+				else {
+					str.Format("Pat ??");
+				}
 #else
 				str.Format("Pat %.2X", Global::pPlayer->_playPattern); 
 #endif
@@ -1776,7 +1786,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (Global::pPlayer->playing())
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				str.Format("Line %.03f", Player::singleton().playPos()); 
+				str.Format("B %.2f", Player::singleton().playPos());
 #else
 				str.Format("Line %u", Global::pPlayer->_lineCounter); 
 #endif
@@ -1799,7 +1809,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				const int timeInt = helpers::math::truncated(playTime);
 				const int cents = (playTime - timeInt) * 100;
 				const int secs = timeInt % 60;
-				const int mins = (timeInt % 3600) - secs;
+				const int mins = ((timeInt/60) % 60);
 				const int hour = timeInt / 3600;
 				str.Format( "%.2u:%.2u:%.2u.%.2u", hour, mins, secs, cents); 
 #else

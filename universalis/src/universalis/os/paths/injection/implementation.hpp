@@ -111,7 +111,7 @@ namespace package {
 	std::string const & name() {
 		std::string const static once(
 			#if defined UNIVERSALIS__META__PACKAGE__NAME
-				UNIVERSALIS__META__PACKAGE__NAME
+				UNIVERSALIS__COMPILER__STRINGIZED(UNIVERSALIS__META__PACKAGE__NAME)
 			#else
 				"unknown-package"
 			#endif

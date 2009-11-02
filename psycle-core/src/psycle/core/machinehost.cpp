@@ -19,28 +19,55 @@ MachineHost::MachineHost(MachineCallbacks*calls)
 {}
 
 void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) {
+	class populate_plugin_list
+	{
+	public:
+		populate_plugin_list(std::vector<std::string> & result, std::string directory)
+		{
+			std::vector<std::string> intermediate;
+			intermediate = File::fileList(directory, File::list_modes::dirs);
+			for ( std::vector<std::string>::iterator it = intermediate.begin()
+				; it < intermediate.end(); ++it )
+			{
+				if (*it != "." && *it != "..")
+				{
+					populate_plugin_list(result, directory + File::slash() + *it);
+				}
+			}
+
+			intermediate = File::fileList(directory, File::list_modes::files);
+			for ( std::vector<std::string>::iterator it = intermediate.begin();
+				it < intermediate.end(); ++it )
+			{
+				result.push_back(directory + File::slash() + *it);
+			}
+		}
+	};
+
 	if (clearfirst) {
 		finder.ClearMap(hostCode());
 	}
 	for (int i=0; i < getNumPluginPaths();i++) 
 	{
-		std::string currentPath = getPluginPath(i);
+		if (getPluginPath(i) == "") continue;
+
+		//std::string currentPath = getPluginPath(i);
 		std::vector<std::string> fileList;
 		try {
-			fileList = File::fileList(currentPath, File::list_modes::files);
+			populate_plugin_list(fileList, getPluginPath(i));
+			//fileList = File::fileList(currentPath, File::list_modes::files);
 		} catch(std::exception & e) {
 			std::cerr
-				<< "psycle: host: warning: Unable to scan your " << hostName() << " plugin directory with path: " << currentPath
+				<< "psycle: host: warning: Unable to scan your " << hostName() << " plugin directory with path: " << getPluginPath(i)
 				<< ".\nPlease make sure the directory exists.\nException: " << e.what();
 			return;
 		}
-		currentPath = currentPath + File::slash();
+		//currentPath = currentPath + File::slash();
 		std::vector<std::string>::iterator it = fileList.begin();
 		for ( ; it < fileList.end(); ++it ) {
-			MachineKey thekey(hostCode(),*it,0);
+			MachineKey thekey(hostCode(),File::extractFileNameFromPath(*it),0);
 			if ( !finder.hasKey(thekey) ) {
-				std::string fullName = currentPath + *it;
-				FillPluginInfo(fullName,*it,finder);
+				FillPluginInfo(*it,File::extractFileNameFromPath(*it),finder);
 			}
 		}
 	}
