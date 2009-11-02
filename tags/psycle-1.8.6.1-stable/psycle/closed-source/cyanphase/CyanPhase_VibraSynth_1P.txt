@@ -1,0 +1,9 @@
+2004-08-28:
+<dilvie> is vibrasynth stable?
+<dilvie> the release param is acting very weird.
+<bohan> damn
+<bohan> then, another plugin for which we would need the source code
+<dilvie> hrm
+<dilvie> who wrote vibrasynth?
+<bohan> cyanpjh[
+<dilvie> Edward Blake

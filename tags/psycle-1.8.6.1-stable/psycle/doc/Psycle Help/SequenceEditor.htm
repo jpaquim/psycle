@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+
+<p class=head1>The Sequence Editor</p>
+The Sequence Editor is where you organise your patterns, and is located on the left side of the Machines window (F2). The song progresses from top to bottom, and each line in the list holds one pattern.  The number on the left is the position number, and the number on the right is the pattern number.  You may use the same pattern in more than one position.<P>
+
+<table cellspacing="20">
+<tr valign="top">
+<td>
+<b>Plus/Minus</b> &ndash; Increase/Decrease the pattern number at the selected position by one. <P>
+<b>Double Plus/Minus</b> &ndash; Increase/Decrease the pattern number at the selected position by 16 (10 in hexadecimal).<P>
+<b>New</b> &ndash; Create a new pattern with the default pattern length in the next position after the current selection.<P>
+<b>Clone</b> &ndash; Copies the current selected patterns and pastes them with new pattern numbers.<P>
+<b>Ins</b> &ndash; Inserts the current selected pattern below the current selection, moving the rest of the patterns down by one.<P>
+<a name="del">
+<b>Del</b> (<i>Edit > Sequence Delete</i>) &ndash; Deletes the pattern from the list, moving the other patterns up by one.  Note:  This does not delete the <b><i>contents</i></b> of the pattern.<P>
+<b>Cut</b> (<i>Edit > Sequence Cut</i>) &ndash; Cuts the selection to the internal clipboard.<P>
+<b>Copy</b> (<i>Edit > Sequence Copy</i>) &ndash; Copies the selection to the internal clipboard.<P>
+<b>Paste</b> (<i>Edit > Sequence Paste</i>) &ndash; Pastes the selection after the currently selected position.<P>
+<b>Clear</b> &ndash; Clears <b><i>ALL</i></b> sequence and pattern data - this <b><i>WILL</i></b> erase all your patterns.<P>
+<b>Sort</b>  &ndash; Sorts all visible patterns by changing their numbers to match their position.  If a pattern appears multiple times, its number will be assigned based on the first instance of it e.g. if pattern 03 is in positions 04, 07, and 21, it will be renamed to 04.<P>
+<b>Length</b> &ndash; Alters the length of the song in patterns. Reducing the size of the song with this method  can only be reversed using the <a href="PatternEd_Functions.htm">Undo</a> comand.  Increase the size of a song with this method will increase the number of positions, which will be filled with pattern 00.
+</td>
+
+<td><img src="sequencerbar_cut.png" border="0"></td>
+</table>
+
+</body>
+</html>

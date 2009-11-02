@@ -1,0 +1,32 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_Setup.htm">Previous</a></td><td align="right"><a href="MIDI_OtherFeat.htm">Next</a></td>
+</table>
+
+<p class=head2>Using Psycle alongside other synth/MIDI modules</P>
+
+This will work, as long as a few precautions are taken.  You will probably need to offset your non-Psycle MIDI/Audio tracks (in your sequencer) to align with Psycle's audio, due to the playback delay.  It is also a good idea to send some MIDI sync codes (emulated sync) to Psycle, which is usually referred to as Transmit MIDI Start/Continue/Stop/Clock or similar.<P>
+
+To enable MIDI sync in CakeWalk: <P>
+
+<img src="midiout.jpg" width="391" height="204" border="0">
+
+<P>
+
+Some sequencers (CakeWalk included) allow you to send a MIDI Sync Start code when playback is start from any point in the song (not just the very beginning). This is usually referred to as Use Start, Never Continue or similar. If your sequencer has this facility, it should be enabled to force Psycle to resync with the audio engine every time sequencer playback is initiated.<P>
+
+If your sequencer does not support outputting a MIDI clock, then you can use three controllers to simulate a clock using a standard MIDI track. Place a CC 121 as the first event in the song (preferably leaving a bar gap between it and the next midi event). Then every regular interval (say 1/16th of a bar) place a CC 122. You can send these events through any channel and setting a generator/instrument map is not required. Finally, to stop all sound, place a CC 124 right at the end of your song.
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_Setup.htm">Previous</a></td><td align="right"><a href="MIDI_OtherFeat.htm">Next</a></td>
+</table>
+</body>
+</html>
