@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
+1.8.6.1	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.6	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.5	| 2007 | RC                          | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
 1.8.3	| 2007 | beta                        | [JAZ]
@@ -40,6 +41,12 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.8.6.1
+--------
+Fixed psy loader (songs made with the previous version were showing an error on loading)
+Fixed native plugins not showing the description of their parameters in the parameters window.
+
+
 v1.8.6
 ------
 (post 7502)
@@ -55,7 +62,7 @@ v1.8.6
 + Export to .wav using float precision.
 * Allow command mute to generators.
 ! XMSampler improvements: correct panning, UI fixes, source code changes. (Around 60% complete now)
-! Fixes on .XM import for pattern loop an global volume.
+! Fixes on .XM import for pattern loop and global volume.
 ! Fix undo when the sequence is full.
 ! Fix for sort when the sequence is full.
 ! Other smaller fixes and changes (universalis, and things related to native plugins)

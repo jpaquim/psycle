@@ -1230,19 +1230,17 @@ namespace psycle
 				{
 					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
 				}
-				int bytesread = 0;
-				if (size == 4) // Since "version" is used for File version, we use size as version identifier
-				{
-					pFile->Read(&chunkcount,sizeof(chunkcount));
-					bytesread = 4;
-				}
-				/*
-				else if (size == )
+				pFile->Read(&chunkcount,sizeof(chunkcount));
+				int bytesread = 4;
+				if (size > 4) 
 				{
 					// This is left here if someday, extra data is added to the file version chunk.
+					// update "bytesread" accordingly.
+
+					//file->Read(chunkversion);
+					//if((chunkversion&0xFF00) ) == x) {} else if(...) {}
+					pFile->Skip(size - bytesread);// Size of the current Header DATA // This ensures that any extra data is skipped.
 				}
-				*/
-				if ( size-bytesread > 0) pFile->Skip(size - bytesread);// Size of the current Header DATA // This ensures that any extra data is skipped.
 
 				DestroyAllMachines();
 				_machineLock = true;
@@ -1270,7 +1268,9 @@ namespace psycle
 							author = author_;
 							comments = comments_;
 							//bugfix. There were songs with incorrect size.
-							size= pFile->GetPos() - begins;
+							if(version == 0) {
+								size= pFile->GetPos() - begins;
+							}
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1290,9 +1290,14 @@ namespace psycle
 							pFile->Read(&temp, sizeof temp);
 							SONGTRACKS = temp;
 							// bpm
-							pFile->Read(&temp, sizeof temp);
-							m_BeatsPerMin = temp;
-							// tpb
+							{///\todo: This was a hack added in 1.9alpha to allow decimal BPM values
+								std::int16_t temp16(0);
+								pFile->Read(&temp16, sizeof temp16);
+								int BPMCoarse = temp16;
+								pFile->Read(&temp16, sizeof temp16);
+								m_BeatsPerMin = BPMCoarse + (temp16 / 100.0f);
+							}
+							// linesperbeat
 							pFile->Read(&temp, sizeof temp);
 							m_LinesPerBeat = temp;
 							// current octave
@@ -1330,6 +1335,11 @@ namespace psycle
 								/// is bad for the Winamp plugin (or any other multi-document situation).
 								Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
 							}
+							// fix for a bug existing in the song saver in the 1.7.x series
+							if(version == 0) {
+								size = 11 * sizeof(std::uint32_t) + SONGTRACKS * 2 * sizeof(bool);
+							}
+
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1395,6 +1405,8 @@ namespace psycle
 								}
 								zapArray(pDest);
 							}
+							//\ Fix for a bug existing in the Song Saver in the 1.7.x series
+							if((version == 0x0000) &&( pFile->GetPos() == begins+size+4)) size += 4;
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1449,7 +1461,6 @@ namespace psycle
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
 						long filepos=pFile->GetPos();
-						bool wrongState=false;
 						//Version zero was the development version. Version one is the published one.
 						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
 						{

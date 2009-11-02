@@ -27,7 +27,7 @@
 #include <winamp-2/in2.h>	// Winamp Input plugin header file
 
 
-#define WA_PLUGIN_VERSION "1.3"
+#define WA_PLUGIN_VERSION "1.3.1"
 
 using namespace psycle::host;
 

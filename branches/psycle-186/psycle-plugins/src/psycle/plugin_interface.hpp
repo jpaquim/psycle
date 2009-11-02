@@ -83,6 +83,10 @@ namespace psycle
 		class CMachineInfo
 		{
 		public:
+			CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const * parameters,
+				char const * name, char const * shortName, char const * author, char const * command, int numCols)
+			: Version(version), Flags(flags), numParameters(numParameters), Parameters(parameters),
+			Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
 			/// ...
 			int const Version;
 			/// ...
@@ -175,9 +179,9 @@ namespace psycle
 				///\todo doc. not used (yet?)
 				virtual void MidiNote(int /*channel*/, int /*value*/, int /*velocity*/) {}
 				///\todo doc. not used (yet?)
-				virtual void Event(uint32 const /*data*/) {}
+				virtual void Event(unsigned int const /*data*/) {}
 				///\todo doc
-				virtual bool DescribeValue(char * /*txt*/, int const /*param*/, int const /*value*/) { return false; }
+				virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
 				virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
 				///\todo doc
@@ -243,7 +247,7 @@ namespace psycle
 			const char get_info_function_name[] =
 				PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO);
 			typedef
-				psycle::plugin_interface::CMachineInfo const * const
+				psycle::plugin_interface::CMachineInfo const *
 				(PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
 				(void);
 			

@@ -33,23 +33,37 @@ $$      $$$$              $..$$     $$...........
 \/ Description
 ---------------
 
-	This Plugin allows you to play .psy files containing Psycle Songs.
+	This Plugin allows you to play .psy files containing Psycle Songs with
+	winamp, or any player compatible with winamp plugins (like XMPlay)
 
-	It is based on the source code of Psycle 1.7.4.
-	It is faster than psycle (since this code doesn't calculate the CPU usage
-	nor the vumeters) but with winamp's eq and vis, it can become slower.
-
-	On a side note:
-	---------------
-	Winamp GENERIC EQ from versions previous to 2.9 destroys high frequencies,
-    as reported by other plugin developers.
-
-	If you want to see/hear it, connect the eq, put it on zero (all frequencies as well
-	as the PreAmp). In this position, the eq is internally disabled by winamp.
-	Now, move any slider a little up or down and you'll hear the big difference in the
-	high spectrum (and you'll be able to see it in the Vis as well).
+	This release is based on the source code of Psycle 1.8.6.1
+	Newer releases will be based on psycle-core.
 
 
+\/ Installation
+---------------
+
+	The package contains several files. This is the exact place where they should go:
+	
+	Winamp's directory (the directory where winamp.exe is located, Generally 
+	C:\Program Files\Winamp)
+	
+	- boost_filesystem-vc71-mt-1_32.dll
+	- boost_thread-vc71-mt-1_32.dll
+	- universalis.dll
+	
+	Winamp's plugin directory (the directory of its plugins, Generally C:\Program Files\
+	Winamp\Plugins)
+	
+	- in_psycle.dll
+	- winamp-psycle-plugin.txt
+	
+	Note:
+	
+	If you have a file namde blwtbl.dll in your winamp's directory, delete it. The older
+	plugin needed that file to be there, but the new one doesn't, and if it finds it,
+	Druttis sublime won't work.
+	
 
 \/ Limitations
 ---------------
@@ -58,14 +72,20 @@ $$      $$$$              $..$$     $$...........
 
 	· Not exact duration and/or seeking with songs that use FFxx or FExx commands.
 	· Cannot save the info.
-	· Maybe others that I can't think of right now.
-	· It is known that it crashes a bit frequently, when loading a new song. We haven't
-	  been able to fix this for long, and now the only solution will come from the
-	  recoding of Psycle, which will start shortly.
-
 
 \/ Version Revision
 --------------------
+1.3 (12-10-2009)
+----------------
+· Engine update to 1.8.6.
+
+1.2 (19-10-2007)
+----------------
+· Engine update to 1.8.5. This is an important update, which leverages the plugin again
+ with the tracker.
+ · The info and configuration dialgos have been redone partially. 
+
+
 1.1 (15-07-2003)
 ----------------
 · Engine update to 1.7.4. This allows the playback of old and new fileformat,
