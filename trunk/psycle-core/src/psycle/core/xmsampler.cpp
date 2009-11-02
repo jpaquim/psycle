@@ -2571,7 +2571,7 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile)
 	unsigned int size = 0;
 	unsigned int filepos = riffFile->GetPos();
 	riffFile->Write(size);
-	riffFile->Write(VERSION);
+	riffFile->Write(CURRENT_FILE_VERSION_XMSAMPLER);
 	riffFile->Write(_numVoices); // numSubtracks
 	switch (_resampler.GetQuality())
 	{
@@ -2653,7 +2653,7 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 
 	// Check higher bits of version (AAAABBBB).
 	// different A, incompatible, different B, compatible
-		if ( (filevers&0x11110000) == (VERSION&0x11110000) )
+	if ( (filevers&0xFFFF0000) == (FILE_VERSION_XMSAMPLER_ONE&0xFFFF0000) )
 	{
 		riffFile->Read(_numVoices); // numSubtracks
 		riffFile->Read(temp); // quality

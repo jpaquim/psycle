@@ -15,6 +15,7 @@
 
 namespace psy { namespace core {
 
+class Machine;
 class RiffFile;
 class PatternCategory;
 class SequenceLine;
@@ -83,9 +84,9 @@ class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 		virtual bool LoadSNGIv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadSEQDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
-		virtual bool LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion);
+		virtual Machine* LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
-		virtual bool LoadEINSv1(RiffFile* file,CoreSong& song,int minorversion);
+		virtual bool LoadEINSv1(RiffFile* file,CoreSong& song,int minorversion, std::uint32_t size);
 
 	protected:
 		static std::string const FILE_FOURCC;

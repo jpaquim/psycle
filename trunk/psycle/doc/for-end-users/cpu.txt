@@ -14,7 +14,8 @@ The packages are:
 			AMD: Athlon XP, late Duron.
 			Intel: Pentium III and Celeron Pentium III.
 
-You should copy everything contained in the package that matches your cpu into the psycle directory.
+If you use the zip file (instead of the installer), you should copy everything contained in the package that
+matches your cpu into the psycle directory.
 Make sure you don't have duplicates of the same plugins:
 	the packs from psycledelics puts the plugins into subdirs of the plugins dir,
 	and this pack does have them all at the top of the plugins dir.

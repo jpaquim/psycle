@@ -155,7 +155,6 @@ PatternEvent Psy2Filter::convertEntry(unsigned char * data ) const {
 }
 
 bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
-#if 0 ///\todo
 	std::int32_t numLines;
 	char patternName[32];
 	file->Read(numLines);
@@ -164,29 +163,37 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		// create a Pattern
 		std::string indexStr;
 		std::ostringstream o;
-		if(!(o << index)) indexStr = "error"; else indexStr = o.str();
-		#if 0
-			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
-		#else
-			Pattern* pat = singleCat->createNewPattern(std::string(patternName)+indexStr);
-		#endif
-		pat->setBeatZoom(song.ticksSpeed());
+		if(!(o << index)) indexStr = "error";
+		else indexStr = o.str();
+
+		Pattern* pat = new Pattern();
+		pat->setName(patternName+indexStr);
 		pat->setID(index);
+		song.patternSequence().Add(pat);
 		float beatpos = 0;
 		for(int y(0) ; y < numLines ; ++y) { // lines
 			for(unsigned int x = 0; x < song.tracks(); x++) {
-				unsigned char entry[EVENT_SIZE];
+				unsigned char entry[5];
 				file->ReadArray(entry,sizeof(entry));
 				PatternEvent event = convertEntry(entry);
 				if(!event.empty()) {
-					if(event.note() == notetypes::tweak)
-						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::twk))] = event;
-					else if (event.note() == notetypes::tweak_slide)
-						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::tws))] = event;
-					else if (event.note() == notetypes::midi_cc)
-						(*pat)[beatpos].tweaks()[pat->tweakTrack(TweakTrackInfo(event.machine(),event.parameter(),TweakTrackInfo::mdi))] = event;
-					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
-					else (*pat)[beatpos].notes()[x] = event;
+					if(event.note() == notetypes::tweak) {
+						event.set_track(x);
+						pat->insert(beatpos, event);
+					} else if(event.note() == notetypes::tweak_slide) {
+						event.set_track(x);
+						pat->insert(beatpos, event);
+					} else if(event.note() == notetypes::midi_cc) {
+						event.set_track(x);
+						pat->insert(beatpos, event);
+					}
+					else {
+						if(event.command() == commandtypes::NOTE_DELAY)
+							/// Convert old value (part of line) to new value (part of beat)
+							event.setParameter(event.parameter()/linesPerBeat);
+						event.set_track(x);
+						pat->insert(beatpos, event);
+					}
 	
 					if(
 						(event.note() <= notetypes::release || event.note() == notetypes::empty) &&
@@ -197,23 +204,15 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 			beatpos += 1 / (float) linesPerBeat;
 			file->Skip((PSY2_MAX_TRACKS - song.tracks()) * EVENT_SIZE);
 		}
-		TimeSignature & sig =  pat->timeSignatures().back();
-		sig.setCount((int) (beatpos / 4));
-		float uebertrag = beatpos - ((int) beatpos);
-		if(uebertrag != 0) {
-			TimeSignature uebertragSig(uebertrag);
-			if(sig.count() == 0 ) pat->timeSignatures().pop_back();
-			pat->addBar(uebertragSig);
-		}
+		pat->timeSignatures().clear();
+		pat->timeSignatures().push_back(TimeSignature(beatpos));
 	}
-	///\todo: verify that the sequence doesn't use this pattern, and if it does, make it use an empty pattern
-	#if 0
 	else {
-		patternLines[i] = 64;
-		RemovePattern(i);
+		Pattern* pat = new Pattern();
+		pat->setName(patternName);
+		pat->setID(index);
+		song.patternSequence().Add(pat);
 	}
-	#endif
-#endif
 	return true;
 }
 
@@ -391,10 +390,11 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 							sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
 						}
 						else try {
-							pMac[i] = pVstPlugin = static_cast<vst::plugin*>(factory.CreateMachine(*key,i));
+							pMac[i] = factory.CreateMachine(*key,i);
 
-							if (pVstPlugin)
+							if (pMac[i])
 							{
+								pVstPlugin = static_cast<vst::plugin*>(pMac[i]);
 								pVstPlugin->LoadFromMac(pTempMac, program, vstL[instance].numpars, vstL[instance].pars);
 							}
 						}
@@ -509,39 +509,30 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 				pMac[busMachine[i]]->defineInputAsStereo(0);
 		}
 	}
-	#if 0
+	#if defined _WIN32 || defined _WIN64 
 		// Patch 2: VST's Chunk.
 		bool chunkpresent=false;
 		file->Read(chunkpresent);
-		if(fullopen && chunkpresent) for(i = 0; i < 128; ++i) {
+		if(chunkpresent) for(i = 0; i < 128; ++i) {
 			if(_machineActive[i]) {
-				if(pMac[i]->subclass() == MACH_DUMMY) {
-					if(((Dummy*)pMac[i])->wasVST && chunkpresent) {
+#if 0 
+				//Now we don't have an indicator of crashed vst so this cannot be done.
+				if(pMac[i]->getMachineKey() == MachineKey::dummy()) {
+					if(((Dummy*)pMac[i])->ºwasVST && chunkpresent) {
 						// Since we don't know if the plugin saved it or not, 
 						// we're stuck on letting the loading crash/behave incorrectly.
 						// There should be a flag, like in the VST loading Section to be correct.
 						MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
 					}
-				} else if(pMac[i]->subclass() == MACH_VST || pMac[i]->subclass() == MACH_VSTFX) {
+				} else
+#endif
+					if(pMac[i]->getMachineKey().host() == Hosts::VST) {
 					bool chunkread = false;
 					try {
 						vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
-						if(chunkpresent) chunkread = plugin.LoadChunkOldFileFormat(file);
-						plugin.proxy().dispatcher(effSetProgram, 0, plugin._program);
+						if(chunkpresent) chunkread = plugin.LoadChunkPsy2FileFormat(file);
 					} catch(const std::exception &) {
 						// o_O`
-					}
-					if(!chunkpresent || !chunkread) {
-						vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
-						const int vi = plugin._instance;
-						const int numpars = vstL[vi].numpars;
-						for(int c(0) ; c < numpars; ++c) {
-							try {
-								plugin.proxy().setParameter(c, vstL[vi].pars[c]);
-							} catch(const std::exception &) {
-								// o_O`
-							}
-						}
 					}
 				}
 			}

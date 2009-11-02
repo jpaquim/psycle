@@ -375,7 +375,7 @@ namespace psycle  {
 			if (numInstruments >0)
 			{
 				pFile->WriteArray("EINS",4);
-				version = XMSampler::VERSION;
+				version = CURRENT_FILE_VERSION_XMSAMPLER;
 				pFile->Write(version);
 				long pos = pFile->GetPos();
 				size = 0;
