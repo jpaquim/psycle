@@ -392,8 +392,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 			const int real_bits[]={8,16,24,32,32};
 			bool isFloat = (bits == 4);
-			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 			Song& pSong = mainFrame->projects()->active_project()->song();
 #else
 			Song& pSong = Global::song();
@@ -606,8 +606,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
 		{
 			Player *pPlayer = Global::pPlayer;
-			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 			Song& pSong = mainFrame->projects()->active_project()->song();
 #else
 			Song& pSong = Global::song();
@@ -877,8 +877,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else if (m_savetracks.GetCheck())
 			{
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 				Song& pSong = mainFrame->projects()->active_project()->song();
 #else
 				Song& pSong = Global::song();
@@ -916,8 +916,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			else if (m_savewires.GetCheck())
 			{
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 				Song& pSong = mainFrame->projects()->active_project()->song();
 #else
 				Song& pSong = Global::song();
@@ -965,8 +965,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			else if (m_savegens.GetCheck())
 			{
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 				Song& pSong = mainFrame->projects()->active_project()->song();
 #else
 				Song& pSong = Global::song();
@@ -1114,8 +1114,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CSaveWavDlg::SaveTick()
 		{
-			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 			Song& pSong = mainFrame->projects()->active_project()->song();
 #else
 			Song& pSong = Global::song();

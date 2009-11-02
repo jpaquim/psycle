@@ -220,10 +220,11 @@ void Player::process(int samples) {
 		///\josepma: I don't understand this check. autoRecord doesn't play a role here
 		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
 		// move the pointer forward for the next Master::Work() iteration.
-		Master::_pMasterSamples += amount * 2;
+		((Master*)song().machine(MASTER_INDEX))->_pMasterSamples += amount * 2;
 		remaining_samples -= amount;
 		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
 		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
+		timeInfo_.setSamplePos(((Master*)song().machine(MASTER_INDEX))->sampleCount);
 	}
 }
 
@@ -628,7 +629,7 @@ float * Player::Work(int numSamples) {
 	scoped_lock lock(work_mutex());
 
 	// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
-	Master::_pMasterSamples = buffer_;
+	((Master*)song().machine(MASTER_INDEX))->_pMasterSamples = buffer_;
 	double beatsToWork = numSamples / static_cast<double>(timeInfo_.samplesPerBeat());
 	
 	///\todo CSingleLock crit(&song().door, true);

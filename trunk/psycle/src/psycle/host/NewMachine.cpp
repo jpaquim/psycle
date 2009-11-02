@@ -38,6 +38,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		std::map<std::string,std::string> CNewMachine::NativeNames;
 		std::map<std::string,std::string> CNewMachine::VstNames;
 
+		std::string CNewMachine::preprocessName(std::string dllName) {
+			{ // 1) remove extension
+				std::string::size_type const pos(dllName.find(".dll"));
+				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+			}
+
+			// 2) ensure lower case
+			std::transform(dllName.begin(),dllName.end(),dllName.begin(),std::tolower);
+			
+			// 3) replace spaces and underscores with dash.
+			std::replace(dllName.begin(),dllName.end(),' ','-');
+			std::replace(dllName.begin(),dllName.end(),'_','-');
+
+			return dllName;
+		}
+
 		void CNewMachine::learnDllName(const std::string & fullname,MachineType type)
 		{
 			std::string str=fullname;
@@ -46,8 +62,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if(pos != std::string::npos)
 				str=str.substr(pos+1);
 
-			// transform string to lower case
-			std::transform(str.begin(),str.end(),str.begin(),std::tolower);
+			str = preprocessName(str);
 
 			switch(type)
 			{
@@ -71,8 +86,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			else shellidx = 0;
 
-			// transform string to lower case
-			std::transform(tmp.begin(),tmp.end(),tmp.begin(),std::tolower);
+			tmp = preprocessName(tmp);
 
 			switch(type)
 			{
@@ -184,7 +198,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if(machineGrouping == groupHost)
 			{
 				hNodes = new HTREEITEM[hosts.size()];
-				int i=0;
+				unsigned int i=0;
 				for ( ; i < hosts.size(); i++) {
 					hNodes[i] = m_browser.InsertItem(hosts[i]->hostName().c_str() ,i*2, i*2 , TVI_ROOT, TVI_LAST);
 					gen[i] = hNodes[i];
@@ -197,7 +211,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				hNodes[0] = m_browser.InsertItem("Generators",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Effects",1,1,TVI_ROOT,TVI_LAST);
 				crashedNode = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
-				for (int i=0; i < Hosts::NUM_HOSTS; i++ ) {
+				for (unsigned int i=0; i < Hosts::NUM_HOSTS; i++ ) {
 					gen[i] = hNodes[0];
 					fx[i] = hNodes[1];
 				}
@@ -211,7 +225,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					else if ( ite->second.role() == MachineRole::GENERATOR || ite->second.role() == MachineRole::CONTROLLER ) { imgindex = j*2 ; hNode = gen[j]; }
 					else if ( ite->second.role() == MachineRole::EFFECT ) { imgindex = j*2 +1; hNode = fx[j]; }
 					if (ite->second.error().empty() && ite->second.allow()) {
-						hPlug = m_browser.InsertItem(ite->second.name().c_str(), imgindex, imgindex, hNode, TVI_SORT);
+						if ( displayName == displayDesc || ite->first.host() == Hosts::INTERNAL) {
+							hPlug = m_browser.InsertItem(ite->second.name().c_str(), imgindex, imgindex, hNode, TVI_SORT);
+						} else {
+							hPlug = m_browser.InsertItem(ite->second.libName().c_str(), imgindex, imgindex, hNode, TVI_SORT);
+						}
 					} else {
 						hPlug = m_browser.InsertItem(ite->second.libName().c_str(), 6, 6, crashedNode, TVI_SORT);
 					}
@@ -583,7 +601,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineFactory& factory = MachineFactory::getInstance();
-			factory.RegenerateFinderData();
+			factory.RegenerateFinderData(true);
 #else
 			DestroyPluginInfo();
 			DeleteFile((universalis::os::paths::package::home() / "psycle.plugin-scan.cache").native_file_string().c_str());
@@ -597,8 +615,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineFactory& factory = MachineFactory::getInstance();
-			//\todo: should not delete the file, just find new plugs.
-			factory.RegenerateFinderData();
+			factory.RegenerateFinderData(false);
 #else
 			DestroyPluginInfo();
 			LoadPluginInfo();

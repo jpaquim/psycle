@@ -63,7 +63,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineFactory & factory(MachineFactory::getInstance());
 			//TODO: Use the pluginCatcher when it's ready.
-			factory.Initialize(&Player::singleton(), new PluginFinderCache());
+			factory.Initialize(&Player::singleton(), new PluginFinderCache(true));
 #endif
 
 			// Allow only one instance of the program
@@ -141,8 +141,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			factory.setPsyclePath(Global::pConfig->GetPluginDir());
-			factory.setLadspaPath("");
 			factory.setVstPath(Global::pConfig->GetVstDir());
+			factory.setLadspaPath("");
+			factory.getFinder().PostInitialization();
 #else
 			CNewMachine::LoadPluginInfo(false);
 #endif

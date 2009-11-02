@@ -16,8 +16,9 @@
 namespace psy { namespace core {
 
 
-PluginFinderCache::PluginFinderCache()
-:_numPlugins(0)
+
+PluginFinderCache::PluginFinderCache(bool delayedScan)
+:PluginFinder(delayedScan), _numPlugins(0)
 {
 }
 
@@ -36,14 +37,18 @@ void PluginFinderCache::EnablePlugin(const MachineKey & key, bool enable) {
 }
 
 bool PluginFinderCache::loadCache(){
-#if 0
-	std::string cache((universalis::os::paths::package::home() / "plugin-scan.cache").native_file_string());
-	RiffFile file;
-	CFileFind finder;
-
+	///\todo: Implement this with a better structure (My plan was to use
+	// the new riff classes on the helpers project, but they are unfinished)
 	char temp[9];
 	std::uint32_t version;
 	std::uint32_t fileNumPlugs;
+	boost::filesystem::path cache(universalis::os::paths::package::home() / "plugin-scan-v2.cache");
+	RiffFile file;
+
+	if (!file.Open(cache.native_file_string().c_str()))
+	{
+		return false;
+	}
 
 	file.ReadArray(temp,8);
 	temp[8]=0;
@@ -58,7 +63,7 @@ bool PluginFinderCache::loadCache(){
 	if (version != CURRENT_CACHE_MAP_VERSION)
 	{
 		file.Close();
-		DeleteFile(cache.c_str());
+		deleteCache();
 		return false;
 	}
 
@@ -68,8 +73,9 @@ bool PluginFinderCache::loadCache(){
 		PluginInfo p;
 		Hosts::type host;
 		int index;
+		std::string fullPath;
 
-		file.ReadString(temp,sizeof(temp));
+		file.ReadString(fullPath); p.setLibName(fullPath);
 
 		{
 			time_t filetime;
@@ -78,12 +84,12 @@ bool PluginFinderCache::loadCache(){
 			file.Read(filetime); p.setFileTime(filetime);
 			file.ReadString(error_msg); p.setError(error_msg);
 		}
+		file.Read(host);
+		file.Read(index);
 		{
 			std::string s_temp;
 			bool b_temp;
 			MachineRole::type rl_temp;
-			file.Read(host);
-			file.Read(index);
 			file.Read(b_temp); p.setAllow(b_temp);
 			file.Read(rl_temp); p.setRole(rl_temp);
 			file.ReadString(s_temp); p.setName(s_temp);
@@ -93,8 +99,10 @@ bool PluginFinderCache::loadCache(){
 		}
 
 		// Temp here contains the full path to the .dll
-		if(finder.FindFile(temp))
+		if(File::fileIsReadable(fullPath))
 		{
+			///\todo: implement modification time checking.
+#if 0
 			time_t t_time;
 			finder.FindNextFile();
 			if (finder.GetLastWriteTime(&t_time))
@@ -103,22 +111,71 @@ bool PluginFinderCache::loadCache(){
 				// Else, we want to get the new information, and that will happen in the plugins scan.
 				if ( p.fileTime() == t_time )
 				{
-					MachineKey key( host, temp, index);
+					MachineKey key( host, File::extractFileNameFromPath(fullPath) , index);
 					AddInfo( key, p);
 				}
 			}
+#endif
+			MachineKey key( host, File::extractFileNameFromPath(fullPath) , index);
+			if (!hasHost(host)) {
+				addHost(host);
+			}
+			AddInfo( key, p);
 		}
 	}
 
 	file.Close();
-#endif
 	return true;
 }
 bool PluginFinderCache::saveCache(){
-	return false;
+	deleteCache();
+
+	boost::filesystem::path cache(universalis::os::paths::package::home() / "plugin-scan-v2.cache");
+	RiffFile file;
+	if (!file.Create(cache.native_file_string().c_str(),true)) 
+	{
+		boost::filesystem::create_directory(cache.branch_path());
+		if (!file.Create(cache.native_file_string().c_str(),true)) return false;
+	}
+	file.WriteArray("PSYCACHE",8);
+	std::uint32_t version = CURRENT_CACHE_MAP_VERSION;
+	file.Write(version);
+	
+	std::uint32_t fileNumPlugs = 0;
+	
+	for(std::uint32_t numHost = 0; hasHost(Hosts::type(numHost)); numHost++) {
+		fileNumPlugs += size(Hosts::type(numHost));
+	}
+	file.Write(fileNumPlugs);
+
+	for(std::uint32_t numHost = 0; hasHost(Hosts::type(numHost)); numHost++) {
+		PluginFinder::const_iterator iter = begin(Hosts::type(numHost));
+		while(iter != end(Hosts::type(numHost))) {
+			PluginInfo info =iter->second;
+			file.WriteString(info.libName());
+			file.Write(info.fileTime());
+			file.WriteString(info.error());
+			file.Write(iter->first.host());
+			file.Write(iter->first.index());
+			file.Write(info.allow());
+			file.Write((std::uint32_t)info.role());
+			file.WriteString(info.name());
+			file.WriteString(info.author());
+			file.WriteString(info.desc());
+			file.WriteString(info.version());
+			iter++;
+		}
+	}
+	file.Close();
+	return true;
 }
 void PluginFinderCache::deleteCache(){
-}
+	boost::filesystem::path cache(universalis::os::paths::package::home() / "plugin-scan-v2.cache");
+	DeleteFile(cache.native_file_string().c_str());
 
+}
+void PluginFinderCache::PostInitialization() {
+	saveCache();
+}
 
 }}

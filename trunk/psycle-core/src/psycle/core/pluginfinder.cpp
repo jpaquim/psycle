@@ -11,7 +11,8 @@
 
 namespace psy { namespace core {
 
-PluginFinder::PluginFinder() {
+PluginFinder::PluginFinder(bool delayedScan) {
+	delayedScan_ = delayedScan;
 }
 
 PluginFinder::~PluginFinder() {
@@ -77,14 +78,18 @@ std::string PluginFinder::lookupDllName( const MachineKey & key ) const {
 
 bool PluginFinder::hasKey( const MachineKey& key ) const {
 	if(!hasHost(key.host())) return false;
+	std::map<MachineKey, PluginInfo> thisMap = maps_[key.host()];
 
-	std::map< MachineKey, PluginInfo >::const_iterator it = maps_[key.host()].find( key );
-	if(it != maps_[key.host()].end()) return true;
+	std::map< MachineKey, PluginInfo >::const_iterator it = thisMap.find(key);
+	if(it != thisMap.end()) return true;
 	else return false;
 }
 
 void PluginFinder::ClearMap(Hosts::type host) {
 	if(hasHost(host)) maps_[host].clear();
 }
-
+bool PluginFinder::DelayedScan() {
+	return delayedScan_;
+}
+void PluginFinder::PostInitialization() { }
 }}

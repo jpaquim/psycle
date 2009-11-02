@@ -819,7 +819,6 @@ bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 
 void plugin::SaveSpecificChunk(RiffFile * pFile) 
 {
-	#if 0
 	try {
 		UINT count(numParams());
 		unsigned char _program=0;
@@ -840,26 +839,25 @@ void plugin::SaveSpecificChunk(RiffFile * pFile)
 		{
 			size += sizeof(float) * count;
 		}
-		pFile->Write(&size, sizeof size);
+		pFile->Write(size);
 		_program = static_cast<unsigned char>(GetProgram());
-		pFile->Write(&_program, sizeof _program);
-		pFile->Write(&count, sizeof count);
+		pFile->Write(_program);
+		pFile->Write(count);
 
 		if(b)
 		{
-			pFile->Write(pData, chunksize);
+			pFile->WriteArray(pData, chunksize);
 		}
 		else
 		{
 			for(UINT i(0); i < count; ++i)
 			{
 				float temp = GetParameter(i);
-				pFile->Write(&temp, sizeof temp);
+				pFile->Write(temp);
 			}
 		}
 	} catch(...) {
 	}
-	#endif
 }
 }}}
 #endif

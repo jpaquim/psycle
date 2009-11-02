@@ -51,6 +51,7 @@ void CoreSong::clear() {
 	DeleteInstruments();
 	// Clear patterns
 	patternSequence().removeAll();
+
 	_saved=false;
 	fileName = "Untitled.psy";
 	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX));

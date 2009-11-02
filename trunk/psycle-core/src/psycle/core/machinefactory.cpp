@@ -29,7 +29,7 @@ void MachineFactory::Initialize(MachineCallbacks* callbacks)
 {
 	callbacks_ = callbacks;
 	//\todo: probably we need a destructor for this
-	finder_= new PluginFinder();
+	finder_= new PluginFinder(false);
 	FillHosts();
 }
 void MachineFactory::Initialize(MachineCallbacks* callbacks,PluginFinder* finder)
@@ -71,7 +71,8 @@ Machine* MachineFactory::CreateMachine(MachineKey key,Machine::id_type id)
 
 	// a check for master is done, because we don't add it into the finder,
 	// because a user don't create master machines.
-	if ( key != MachineKey::master() && !finder_->hasKey(key)) {
+	if ( key != MachineKey::master() && key != MachineKey::failednative() &&
+		key != MachineKey::wrapperVst() && !finder_->hasKey(key)) {
 		return 0;
 	}
 	if ( !finder_->info(key).allow() ) {
@@ -101,16 +102,22 @@ Machine* MachineFactory::CloneMachine(Machine& mac)
 std::string const & MachineFactory::getPsyclePath() const { return NativeHost::getInstance(0).getPluginPath(0); }
 void MachineFactory::setPsyclePath(std::string path,bool cleardata)
 {
-	NativeHost::getInstance(0).setPluginPath(path);
-	NativeHost::getInstance(0).FillFinderData(*finder_,cleardata);
+	NativeHost::getInstance(callbacks_).setPluginPath(path);
+	if (!finder_->DelayedScan())
+	{
+		NativeHost::getInstance(callbacks_).FillFinderData(*finder_,cleardata);
+	}
 }
 
 ///\FIXME: This only returns the first path, should regenerate the string
 std::string const & MachineFactory::getLadspaPath() const { return LadspaHost::getInstance(0).getPluginPath(0); }
 void MachineFactory::setLadspaPath(std::string path,bool cleardata)
 {
-	LadspaHost::getInstance(0).setPluginPath(path);
-	LadspaHost::getInstance(0).FillFinderData(*finder_,cleardata);
+	LadspaHost::getInstance(callbacks_).setPluginPath(path);
+	if (!finder_->DelayedScan())
+	{
+		LadspaHost::getInstance(callbacks_).FillFinderData(*finder_,cleardata);
+	}
 }
 
 #ifdef _WIN32
@@ -118,14 +125,21 @@ void MachineFactory::setLadspaPath(std::string path,bool cleardata)
 	std::string const & MachineFactory::getVstPath() const { return vst::host::getInstance(0).getPluginPath(0); }
 	void MachineFactory::setVstPath(std::string path,bool cleardata)
 	{
-		vst::host::getInstance(0).setPluginPath(path);
-		vst::host::getInstance(0).FillFinderData(*finder_,cleardata);
+		vst::host::getInstance(callbacks_).setPluginPath(path);
+		if (!finder_->DelayedScan())
+		{
+			vst::host::getInstance(callbacks_).FillFinderData(*finder_,cleardata);
+		}
 	}
 #endif
 	
-void MachineFactory::RegenerateFinderData()  {
-	finder_->Initialize(true);
+void MachineFactory::RegenerateFinderData(bool clear)  {
+	if (clear) {
+		finder_->Initialize(clear);
+	}
 	for(std::size_t i = 0; i < hosts_.size(); ++i) hosts_[i]->FillFinderData(*finder_, true);
+	finder_->PostInitialization();
 }
+
 
 }}

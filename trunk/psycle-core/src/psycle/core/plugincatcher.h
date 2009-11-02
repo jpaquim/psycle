@@ -16,11 +16,12 @@ namespace psy { namespace core {
 
 class PSYCLE__CORE__DECL PluginFinderCache: public PluginFinder {
 	public:
-		PluginFinderCache();
+		PluginFinderCache(bool delayedScan);
 		~PluginFinderCache();
 		
 		virtual void Initialize(bool clear=false);
 		virtual void EnablePlugin(const MachineKey & key, bool enable);
+		virtual void PostInitialization();
 
 
 	protected:

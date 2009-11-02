@@ -34,18 +34,7 @@ namespace psycle {
 		{
 			assert(pat_view_);
 			assert(mac_view_);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::SequenceLine* line = song_.patternSequence().createNewLine();
-			psy::core::Pattern* pattern= new psy::core::Pattern();
-			pattern->timeSignatures().clear();
-			pattern->timeSignatures().push_back(psy::core::TimeSignature(16.0));
-			pattern->setID(0);
-			song_.patternSequence().Add(pattern);
-			pattern->setName("Untitled");
-			line->createEntry(pattern,0);
-#else
 			song_.New();
-#endif
 		}
 
 		Project::~Project()
@@ -77,6 +66,23 @@ namespace psycle {
 			pat_view()->KillUndo();
 			pat_view()->KillRedo();
 			mac_view()->LockVu();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			Player & player(Player::singleton());
+			player.stop();
+			///\todo lock/unlock
+			Sleep(256);
+			player.driver().Enable(false);
+
+			song().New();
+
+			player.driver().Enable(true);
+			player.setBpm(song().BeatsPerMin());
+			player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
+			CMainFrame* pParentMain = mac_view()->main();
+			pParentMain->m_wndSeq.UpdateSequencer();
+			mac_view()->Rebuild();
+			mac_view()->UnlockVu();
+#else
 			Global::pPlayer->stop();
 			///\todo lock/unlock
 			Sleep(256);
@@ -88,6 +94,7 @@ namespace psycle {
 			Sleep(256);
 
 			song().New();
+
 			mac_view()->child_view()->_outputActive = true;
 			if (!Global::pConfig->_pOutputDriver->Enable(true))
 			{
@@ -98,12 +105,7 @@ namespace psycle {
 				// midi implementation
 				Global::pConfig->_pMidiInput->Open();
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Global::pPlayer->setBpm(song().BeatsPerMin());
-			Global::pPlayer->timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
-#else
 			Global::pPlayer->SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
-#endif
 			mac_view()->child_view()->SetTitleBarText();
 			pat_view()->editPosition=0;
 			song().seqBus=0;
@@ -119,6 +121,7 @@ namespace psycle {
 			mac_view()->child_view()->Repaint();
 			mac_view()->Rebuild();
 			mac_view()->UnlockVu();
+#endif
 		}
 
 		void Project::OnFileLoadsongNamed(const std::string& fName, int fType)

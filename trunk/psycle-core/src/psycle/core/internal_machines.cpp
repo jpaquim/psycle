@@ -270,11 +270,10 @@ void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile) const {
 
 std::string Master::_psName = "Master";
 
-float * Master::_pMasterSamples = 0;
-
 Master::Master(MachineCallbacks* callbacks, Machine::id_type id)
 :
 	Machine(callbacks, id),
+	_pMasterSamples(0),
 	sampleCount(0),
 	decreaseOnClip(false),
 	_lMax(0),

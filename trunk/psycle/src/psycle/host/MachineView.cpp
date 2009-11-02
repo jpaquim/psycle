@@ -505,6 +505,7 @@ namespace psycle {
 			}
 			BuildWires();
 			UpdateSoloMuteBypass();
+			this->main()->SetFocus();
 			UnlockVu();
 			main()->UpdateEnvInfo();
 			main()->UpdateComboGen();	
@@ -548,12 +549,6 @@ namespace psycle {
 			} else if( mac->getMachineKey() == MachineKey::lfo() ) {
 				gui = new GeneratorGui(this, mac);
 			}
-			else if (mac->getMachineKey() == MachineKey::dummy() ) {
-				if (mac->IsGenerator())
-					gui = new DummyGenGui(this, mac);
-				else
-					gui = new DummyEffectGui(this, mac);
-			}
 			else if (mac->getMachineKey().host() == Hosts::NATIVE ) {
 				if (mac->IsGenerator())
 					gui = new GeneratorGui(this, mac);
@@ -567,7 +562,12 @@ namespace psycle {
 					gui = new VstFxGui(this, mac);
 			
 			}
-
+			else /*if (mac->getMachineKey() == MachineKey::dummy() )*/ {
+				if (mac->IsGenerator())
+					gui = new DummyGenGui(this, mac);
+				else
+					gui = new DummyEffectGui(this, mac);
+			}
 			gui_map_[mac] = gui;
 			int xs, ys;
 			if (mac->IsGenerator()) {

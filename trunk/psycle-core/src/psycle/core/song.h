@@ -369,7 +369,17 @@ class PSYCLE__CORE__DECL Song : public UISong {
 			{
 				setTicksSpeed(value);
 			}
-			void New() { clear(); }
+			void New() {
+				clear();
+				SequenceLine* line = patternSequence().createNewLine();
+				Pattern* pattern= new Pattern();
+				pattern->timeSignatures().clear();
+				pattern->timeSignatures().push_back(psy::core::TimeSignature(16.0));
+				pattern->setID(0);
+				pattern->setName("Untitled");
+				patternSequence().Add(pattern);
+				line->createEntry(pattern,0);
+			}
 
 			//Fake. Just to compile. They need to go out
 			//{

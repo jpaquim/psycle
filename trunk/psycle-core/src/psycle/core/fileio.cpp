@@ -48,6 +48,10 @@ bool RiffFile::ReadString(char * data, std::size_t const & max_length) {
 	#endif
 	return c == EOF;
 }
+bool RiffFile::WriteString(std::string inString) {
+	WriteChunk(inString.c_str(), inString.length()+1);
+	return true;
+}
 
 bool RiffFile::Open(std::string const & filename) {
 	write_mode = false;

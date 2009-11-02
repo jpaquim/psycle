@@ -139,7 +139,7 @@ class PSYCLE__CORE__DECL RiffFile {
 
 		bool Write(std::uint32_t x) {
 			std::uint8_t data[4] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF };
-			return WriteChunk(&x, sizeof(x));
+			return WriteChunk(data, 4);
 		}
 
 		bool Write(std::int32_t x) { return Write(reinterpret_cast<std::uint32_t&>(x)); }
@@ -185,7 +185,10 @@ class PSYCLE__CORE__DECL RiffFile {
 			}
 			return false;
 		}
-
+		bool Write(time_t x) {
+			WriteChunk(&x, sizeof(time_t));
+			return true;
+		}
 		template<typename T>
 		bool ReadArray(T* array, int n) {
 			for(int i=0;i<n;i++) if (!Read(array[i])) return false;
@@ -209,9 +212,12 @@ class PSYCLE__CORE__DECL RiffFile {
 
 		bool ReadString(std::string &);
 		bool ReadString(char *, std::size_t const & max_length);
-		///\todo : Implement a WriteString() to complement ReadString, and a ReadSizedString() which would do the same as ReadString
+		bool WriteString(std::string );
+		///\todo : Implement a ReadSizedString() which would do the same as ReadString
 		//         which won't stop on the null, but rather on the size of the array(or else indicated by the second parameter). Finally,
 		//         setting the last char to null.
+		//bool ReadSizedString(std::string &, std::size_t const &numchars);
+		//bool WriteSizedString(std::string &, std::size_T const &numchars);
 
 		static bool matchFourCC(char const a[4], char const b[4]) {
 			return *(std::uint32_t const*)a == *(std::uint32_t const*)b;

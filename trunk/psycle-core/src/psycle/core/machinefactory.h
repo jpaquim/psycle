@@ -27,8 +27,11 @@ public:
 	// To create a MachineFactory do a getInstance().Initialize() with either
 	// of the Initialize Functions.
 	// If you use the one wihout PluginFinder, one will be created automatically.
+	// Then, set the different paths, and call postInitialize to let the finder
+	// prepare the data.
 	void Initialize(MachineCallbacks* callbacks);
 	void Initialize(MachineCallbacks* callbacks, PluginFinder* finder);
+	void PostInitialize();
 	void Finalize(bool deleteFinder=true);
 	static MachineFactory& getInstance();
 
@@ -50,7 +53,7 @@ public:
 	PluginFinder& getFinder() const { return *finder_; }
 
 
-	void RegenerateFinderData();
+	void RegenerateFinderData(bool clear);
 
 protected:
 	void FillHosts();

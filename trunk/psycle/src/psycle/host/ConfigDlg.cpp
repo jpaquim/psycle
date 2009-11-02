@@ -5,6 +5,7 @@
 #include "MainFrm.hpp"
 #include "PatternView.hpp"
 #include "MachineView.hpp"
+#include <psycle/core/machinefactory.h>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -279,8 +280,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				if (_dirDlg._instPathChanged) _pConfig->SetInstrumentDir(_dirDlg._instPathBuf);
 				if (_dirDlg._songPathChanged) _pConfig->SetSongDir(_dirDlg._songPathBuf);
-				if (_dirDlg._pluginPathChanged) _pConfig->SetPluginDir(_dirDlg._pluginPathBuf);
-				if (_dirDlg._vstPathChanged) _pConfig->SetVstDir(_dirDlg._vstPathBuf);
+				if (_dirDlg._pluginPathChanged) {
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					MachineFactory & factory(MachineFactory::getInstance());
+					factory.setPsyclePath(_dirDlg._pluginPathBuf);
+#endif
+					_pConfig->SetPluginDir(_dirDlg._pluginPathBuf);
+
+				}
+				if (_dirDlg._vstPathChanged) {
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					MachineFactory & factory(MachineFactory::getInstance());
+					factory.setVstPath(_dirDlg._vstPathBuf);
+#endif
+					_pConfig->SetVstDir(_dirDlg._vstPathBuf);
+				}
 				if (_dirDlg._skinPathChanged) _pConfig->SetSkinDir(_dirDlg._skinPathBuf);
 				if (_dirDlg._waveRecPathChanged) _pConfig->SetWaveRecDir(_dirDlg._waveRecPathBuf);
 
