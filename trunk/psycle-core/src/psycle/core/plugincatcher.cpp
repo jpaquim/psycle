@@ -71,27 +71,23 @@ bool PluginFinderCache::loadCache(){
 	for (std::uint32_t i = 0; i < fileNumPlugs; i++)
 	{
 		PluginInfo p;
-		Hosts::type host;
-		int index;
+
 		std::string fullPath;
-
 		file.ReadString(fullPath); p.setLibName(fullPath);
+		
+		{ time_t filetime; file.Read(filetime); p.setFileTime(filetime); }
+		{ std::string error_msg; file.ReadString(error_msg); p.setError(error_msg); }
 
-		{
-			time_t filetime;
-			std::string error_msg;
+		Hosts::type host;
+		{ std::uint8_t host_int; file.Read(host_int); host = Hosts::type(host_int); }
 
-			file.Read(filetime); p.setFileTime(filetime);
-			file.ReadString(error_msg); p.setError(error_msg);
-		}
-		file.Read(host);
+		int index;
 		file.Read(index);
-		{
-			std::string s_temp;
-			bool b_temp;
-			MachineRole::type rl_temp;
-			file.Read(b_temp); p.setAllow(b_temp);
-			file.Read(rl_temp); p.setRole(rl_temp);
+		
+		{ bool allow; file.Read(allow); p.setAllow(allow); }
+		{ std::uint8_t role_int; file.Read(role_int); p.setRole(MachineRole::type(role_int)); }
+
+		{ std::string s_temp;
 			file.ReadString(s_temp); p.setName(s_temp);
 			file.ReadString(s_temp); p.setAuthor(s_temp);
 			file.ReadString(s_temp); p.setDesc(s_temp);
@@ -99,28 +95,23 @@ bool PluginFinderCache::loadCache(){
 		}
 
 		// Temp here contains the full path to the .dll
-		if(File::fileIsReadable(fullPath))
-		{
+		if(File::fileIsReadable(fullPath)) {
 			///\todo: implement modification time checking.
-#if 0
-			time_t t_time;
-			finder.FindNextFile();
-			if (finder.GetLastWriteTime(&t_time))
-			{
-				// Only add the information to the cache if the dll hasn't been modified (say, a new version)
-				// Else, we want to get the new information, and that will happen in the plugins scan.
-				if ( p.fileTime() == t_time )
-				{
-					MachineKey key( host, File::extractFileNameFromPath(fullPath) , index);
-					AddInfo( key, p);
+			#if 0
+				time_t t_time;
+				finder.FindNextFile();
+				if(finder.GetLastWriteTime(&t_time)) {
+					// Only add the information to the cache if the dll hasn't been modified (say, a new version)
+					// Else, we want to get the new information, and that will happen in the plugins scan.
+					if(p.fileTime() == t_time) {
+						MachineKey key( host, File::extractFileNameFromPath(fullPath) , index);
+						AddInfo( key, p);
+					}
 				}
-			}
-#endif
-			MachineKey key( host, File::extractFileNameFromPath(fullPath) , index);
-			if (!hasHost(host)) {
-				addHost(host);
-			}
-			AddInfo( key, p);
+			#endif
+			MachineKey key(host, File::extractFileNameFromPath(fullPath), index);
+			if(!hasHost(host)) addHost(host);
+			AddInfo(key, p);
 		}
 	}
 
@@ -171,9 +162,9 @@ bool PluginFinderCache::saveCache(){
 }
 void PluginFinderCache::deleteCache(){
 	boost::filesystem::path cache(universalis::os::paths::package::home() / "plugin-scan-v2.cache");
-	DeleteFile(cache.native_file_string().c_str());
-
+	File::unlink(cache.native_file_string());
 }
+
 void PluginFinderCache::PostInitialization() {
 	saveCache();
 }

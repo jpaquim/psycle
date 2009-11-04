@@ -8,10 +8,11 @@
 #define PSYCLE__CORE__FILE__INCLUDED
 #pragma once
 
+#include <psycle/core/config.hpp>
+
+#include <diversalis/os.hpp>
 #include <vector>
 #include <string>
-
-#include <psycle/core/config.hpp>
 
 namespace psy { namespace core {
 
@@ -55,6 +56,14 @@ namespace psy { namespace core {
 			static std::string replaceIllegalXmlChr(std::string const & text, bool strict = true);
 			/// basename
 			static std::string extractFileNameFromPath(std::string const & path);
+			static void inline unlink(std::string const & path) {
+				#if defined DIVERSALIS__OS__MICROSOFT
+					DeleteFile
+				#else
+					unlink
+				#endif
+				(path.c_str());
+			}
 	};
 
 }}

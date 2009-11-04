@@ -144,6 +144,29 @@ class PSYCLE__CORE__DECL RiffFile {
 
 		bool Write(std::int32_t x) { return Write(reinterpret_cast<std::uint32_t&>(x)); }
 
+		bool Read(std::uint64_t & x) {
+			std::uint8_t data[8];
+			if(!ReadChunk(data,8)) return false;
+			x = (std::uint64_t(data[7])<<56) | (std::uint64_t(data[6])<<48) | (std::uint64_t(data[5])<<40) | (std::uint64_t(data[4])<<32) | (data[3]<<24) | (data[2]<<16) | (data[1]<<8) | data[0];
+			return true;
+		}
+
+		bool ReadBE(std::uint64_t & x) {
+			std::uint8_t data[8];
+			if(!ReadChunk(data,8)) return false;
+			x = (std::uint64_t(data[0])<<56) | (std::uint64_t(data[1])<<48) | (std::uint64_t(data[2])<<40) | (std::uint64_t(data[3])<<32) | (data[4]<<24) | (data[5]<<16) | (data[6]<<8) | data[7];
+			return true;
+		}
+
+		bool Read(std::int64_t & x) { return Read(reinterpret_cast<std::uint64_t&>(x)); }
+
+		bool Write(std::uint64_t x) {
+			std::uint8_t data[8] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF, (x>>32) & 0xFF, (x>>40) & 0xFF, (x>>48) & 0xFF, (x>>56) & 0xFF };
+			return WriteChunk(data, 4);
+		}
+
+		bool Write(std::int64_t x) { return Write(reinterpret_cast<std::uint64_t&>(x)); }
+
 		bool Read(float & x) {
 			union {
 				float f;
@@ -185,10 +208,7 @@ class PSYCLE__CORE__DECL RiffFile {
 			}
 			return false;
 		}
-		bool Write(time_t x) {
-			WriteChunk(&x, sizeof(time_t));
-			return true;
-		}
+
 		template<typename T>
 		bool ReadArray(T* array, int n) {
 			for(int i=0;i<n;i++) if (!Read(array[i])) return false;
@@ -209,15 +229,14 @@ class PSYCLE__CORE__DECL RiffFile {
 			return WriteChunk(h._id,4) && Write(h._size);
 		}
 
-
 		bool ReadString(std::string &);
-		bool ReadString(char *, std::size_t const & max_length);
-		bool WriteString(std::string );
+		bool ReadString(char *, std::size_t const max_length);
+		bool WriteString(std::string const &);
 		///\todo : Implement a ReadSizedString() which would do the same as ReadString
 		//         which won't stop on the null, but rather on the size of the array(or else indicated by the second parameter). Finally,
 		//         setting the last char to null.
 		//bool ReadSizedString(std::string &, std::size_t const &numchars);
-		//bool WriteSizedString(std::string &, std::size_T const &numchars);
+		//bool WriteSizedString(std::string const &, std::size_T const &numchars);
 
 		static bool matchFourCC(char const a[4], char const b[4]) {
 			return *(std::uint32_t const*)a == *(std::uint32_t const*)b;
