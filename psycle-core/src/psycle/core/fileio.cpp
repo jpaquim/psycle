@@ -30,7 +30,7 @@ bool RiffFile::ReadString(std::string & result) {
 	}
 }
 
-bool RiffFile::ReadString(char * data, std::size_t const & max_length) {
+bool RiffFile::ReadString(char * data, std::size_t const max_length) {
 	if(max_length <= 0) return false;
 	std::memset(data, 0, max_length);
 	int c = EOF;
@@ -48,7 +48,7 @@ bool RiffFile::ReadString(char * data, std::size_t const & max_length) {
 	#endif
 	return c == EOF;
 }
-bool RiffFile::WriteString(std::string inString) {
+bool RiffFile::WriteString(std::string const & inString) {
 	WriteChunk(inString.c_str(), inString.length()+1);
 	return true;
 }
