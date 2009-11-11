@@ -70,7 +70,7 @@ class PSYCLE__CORE__DECL RiffFile {
 		virtual bool Expect    (void       *, std::size_t const &);
 
 	public:
-		#if defined DIVERSALIS__COMPILER__MICROSOFT
+		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
 			/// workaround for msvc8 which fails to determine which overload to call
 			template<typename X>
 			bool Read(X & x) { return ReadChunk(&x, sizeof x); }
@@ -113,14 +113,14 @@ class PSYCLE__CORE__DECL RiffFile {
 
 		///\name 1 bit
 		///\{
-			bool Write(bool x) { std::uint8_t c = x; return Write(c); }
-
 			bool Read(bool & x) {
 				std::uint8_t c;
 				if (!Read(c)) return false;
 				x = c;
 				return true;
 			}
+
+			bool Write(bool x) { std::uint8_t c = x; return Write(c); }
 		///\}
 
 		///\name 8 bits
