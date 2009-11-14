@@ -1,7 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 1999-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::os::dynamic_link::resolver
+
 #include <universalis/detail/project.private.hpp>
 #include "resolver.hpp"
 #include <universalis/exception.hpp>
@@ -19,6 +20,7 @@
 #else
 	#include <glibmm/module.h> // Note: it seems glibmm is not honouring $ORIGIN on ELF.
 #endif
+
 namespace universalis { namespace os { namespace dynamic_link {
 
 void resolver::open_error(boost::filesystem::path const & path, std::string const & message) {
@@ -36,26 +38,23 @@ void resolver::resolve_symbol_error(std::string const & name, std::string const 
 boost::filesystem::path resolver::decorated_filename(boost::filesystem::path const & path, unsigned int const & version) throw() {
 	std::ostringstream version_string; version_string << version;
 	return
-		#if 1 || ( \
-			!defined UNIVERSALIS__QUAQUAVERSALIS && ( \
-				defined DIVERSALIS__OS__LINUX || \
-				defined DIVERSALIS__OS__APPLE || \
-				defined DIVERSALIS__OS__MICROSOFT || \
-				defined DIVERSALIS__OS__CYGWIN \
-			) \
+		#if !defined UNIVERSALIS__QUAQUAVERSALIS && ( \
+				defined DIVERSALIS__OS__POSIX || \
+				defined DIVERSALIS__OS__MICROSOFT \
 		)
+			#if defined DIVERSALIS__OS__CYGWIN
+			//"cyg" +
+			#else
 			//"lib" +
+			#endif
 			path.branch_path() / (
 				path.leaf() +
 				#if defined DIVERSALIS__OS__LINUX
-					".so" // "." + version_string.str() // lib-foo.so.0
+					".so" // "." + version_string.str() // libfoo.so.0
 				#elif defined DIVERSALIS__OS__APPLE
-					// to create a bundle with libtool, we pass the -module option.
-					//".bundle" // lib-foo.bundle
-					// actually, libtool names bundles with the usual .so extension.
-					".so" // lib-foo.so
+					".dylib" // libfoo.dylib or libfoo.bundle
 				#elif defined DIVERSALIS__OS__MICROSOFT || defined DIVERSALIS__OS__CYGWIN
-					".dll" // "-" + version_string.str() + ".dll" // lib-foo-0.dll
+					".dll" // "-" + version_string.str() + ".dll" // libfoo-0.dll or cygfoo-0.dll
 					// [bohan] it is only necessary to append the .dll suffix when the given name itself contains a dot,
 					// [bohan] otherwise, we do not need to explicitly tell the suffix.
 				#else
@@ -201,4 +200,5 @@ std::string resolver::decorated_symbol(std::string const & name) throw() {
 		//#error "Unsupported compiler."
 	#endif
 }
+
 }}}
