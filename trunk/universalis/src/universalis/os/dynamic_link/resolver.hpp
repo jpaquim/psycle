@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 1999-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::os::dynamic_link::resolver
 
@@ -28,7 +28,7 @@ namespace universalis { namespace os {
 namespace dynamic_link {
 
 /// resolves symbol names in a dynamic shared library.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK resolver {
+class resolver {
 	public:
 		/// creates a new resolver for symbols in the library of given name.
 		///\param path the path to the the library file to load.
@@ -40,19 +40,28 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK resolver {
 		/// contained in this library before closing (that is, unloading) it.
 		///\throws exception if there is an error trying to open the library file.
 		///\post opened()
+		UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		resolver(boost::filesystem::path const & path, unsigned int const & version);
+
 		/// wether the underlying library is opened and loaded/mapped.
 		///\returns true if the underlying library is opened and loaded/mapped
+		UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		bool opened() const throw();
+
 		/// the full path to the file of the underlying library.
 		///\pre opened()
+		UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		boost::filesystem::path path() const throw();
+
 		/// resolves a symbol name in the library to an address in memory.
 		///\name the symbol name in the library to resolve to an address in memory.
 		///\returns the address in memory of the code or data represented by the given symbol name.
 		///\throws exception if there is an error trying to resolve the symbol.
 		///\pre opened()
-		template<typename x> x const inline resolve_symbol(std::string const & name) const;
+		template<typename X> X const inline resolve_symbol(std::string const & name) const {
+			return reinterpret_cast<X>(resolve_symbol_untyped(name));
+		}
+
 		/// closes the underlying library.
 		/// The library will be unloaded if there is no other
 		/// resolver object (or other mean) holding the same library.
@@ -60,9 +69,13 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK resolver {
 		/// contained in this library before closing (that is, unloading/unmapping) it.
 		///\throws exception if there is an error trying to unload the library or close the library file.
 		///\post !opened()
+		UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		void close();
+
 		/// will implicitely close() if opened().
+		UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		virtual ~resolver() throw();
+
 	private:
 		typedef void (*function_pointer)();
 		function_pointer resolve_symbol_untyped(std::string const & name) const;
@@ -84,14 +97,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK resolver {
 		#endif
 				underlying_;
 };
-
-}}}
-
-namespace universalis { namespace os { namespace dynamic_link {
-
-template<typename x> x const inline resolver::resolve_symbol(std::string const & name) const {
-	return reinterpret_cast<x>(resolve_symbol_untyped(name));
-}
 
 }}}
 
