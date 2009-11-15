@@ -6,13 +6,13 @@
 
 #include <psycle/core/config.private.hpp>
 #include "psy3filter.h"
-
-#include <psycle/helpers/datacompression.hpp>
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
 #include "mixer.h"
 #include "vstplugin.h"
+#include <psycle/helpers/datacompression.hpp>
+#include <diversalis/os.hpp>
 #include <sstream>
 #include <iostream>
 
@@ -90,7 +90,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	///\todo:
 	song.clear();
 	preparePatternSequence(song);
-//	size_t filesize = file.FileSize();
+	//size_t filesize = file.FileSize();
 	std::uint32_t version = 0;
 	std::uint32_t size = 0;
 	bool problemfound = false;
@@ -163,14 +163,14 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			if((version & 0xff00) == 0) {// chunkformat v0
 				Machine* mac = LoadMACDv0(&file, song, version & 0xff);
 				//Bugfix.
-#if _WIN32 || _WIN64
-				if (mac->getMachineKey().host() == Hosts::VST
-					&& ((vst::plugin*)mac)->ProgramIsChunk() == false) {
-						size = file.GetPos() - fileposition;
-				}	
-#else
-				//todo
-#endif
+				#if defined DIVERSALIS__OS__MICROSOFT
+					if (mac->getMachineKey().host() == Hosts::VST
+						&& ((vst::plugin*)mac)->ProgramIsChunk() == false) {
+							size = file.GetPos() - fileposition;
+					}
+				#else
+					///\todo
+				#endif
 			}
 			//else if((version & 0xff00) == 0x0100 ) //and so on
 		} else if(!std::strcmp(header,"INSD")) {
