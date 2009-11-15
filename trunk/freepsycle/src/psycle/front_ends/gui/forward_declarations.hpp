@@ -24,7 +24,8 @@ namespace underlying = engine;
 
 namespace typenames {
 	using namespace gui;
-	class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
+	class typenames : public generic::typenames<graph, node,
+		port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
 }
 
 }}}
