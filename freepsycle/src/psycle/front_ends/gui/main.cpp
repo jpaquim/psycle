@@ -17,6 +17,7 @@
 #include <glibmm/exception.h>
 #include <gtkmm/main.h>
 #include <libgnomecanvasmm/init.h> // for Gnome::Canvas::init()
+#include <clutter/clutter-main.h> // for clutter_init()
 namespace psycle { namespace front_ends { namespace gui {
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
@@ -32,6 +33,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 			}
 			lock::init();
 			Gnome::Canvas::init();
+			clutter_init(&argument_count, &arguments);
 			Gtk::Main main(argument_count, arguments);
 			engine::graph & graph(engine::graph::create_on_heap("graph"));
 			root window(graph);
