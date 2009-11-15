@@ -229,7 +229,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		#if 0
 			Pattern* pat = song.patternSequence().PatternPool()->findById(*it);
 		#else
-		Pattern* pat = song.patternSequence().FindPattern(*it);
+			Pattern* pat = song.patternSequence().FindPattern(*it);
 		#endif
 		singleLine->createEntry(pat, pos);
 		pos += pat->beats();
