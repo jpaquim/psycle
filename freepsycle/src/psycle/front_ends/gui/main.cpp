@@ -13,21 +13,11 @@
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/cpu/exception.hpp>
-#include <thread>
-#include <date_time>
 #include <exception>
 #include <glibmm/exception.h>
 #include <gtkmm/main.h>
 #include <libgnomecanvasmm/init.h> // for Gnome::Canvas::init()
 namespace psycle { namespace front_ends { namespace gui {
-
-void logger_marker() {
-	std::seconds const seconds(1);
-	while(true) {
-		std::this_thread::sleep(seconds);
-		loggers::trace()("---------------------------------");
-	}
-}
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	try {
@@ -47,7 +37,6 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 			root window(graph);
 			{
 				lock lock;
-				std::thread t(logger_marker);
 				main.run(window);
 			}
 			graph.free_heap();
