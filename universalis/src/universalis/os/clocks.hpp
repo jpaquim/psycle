@@ -200,7 +200,7 @@ namespace detail {
 			typedef std::nanoseconds (*clock_function) ();
 
 			/// measures the resolution of a clock and displays the result
-			void measure_clock_resolution(std::string const & clock_name, clock_function clock, unsigned int count = 10000000) {
+			void measure_clock_resolution(std::string const & clock_name, clock_function clock, unsigned int count = 1000000) {
 				std::nanoseconds min(std::days(1)), avg, max;
 				for(unsigned int i(0); i < count; ++i) {
 					unsigned long long int timeout(0);
