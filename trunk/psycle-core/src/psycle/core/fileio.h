@@ -20,7 +20,7 @@
 #include <cassert>
 #include <vector>
 #include <typeinfo>
- 
+
 namespace psy { namespace core {
 
 class RiffChunkHeader {
