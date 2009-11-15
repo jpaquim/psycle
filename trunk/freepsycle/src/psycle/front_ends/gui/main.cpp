@@ -38,6 +38,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 				s << paths::package::name() << " " << paths::package::version::string();
 				universalis::os::loggers::information()(s.str());
 			}
+			// gtk_clutter_init(&argument_count, &arguments); replaces gtk_init(&argument_count, &arguments);
 			lock::init(); // => threads support init
 			Gnome::Canvas::init();
 			//Glib::thread_init() or ::g_thread_init(); (then ::gdk_threads_init();)
