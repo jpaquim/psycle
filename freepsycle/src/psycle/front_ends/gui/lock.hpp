@@ -17,9 +17,7 @@ class lock {
 
 	public:
 		lock() {
-			class once { public: once() { init(); } };
-			once static once;
-			assert(initialized());
+			assert(initialized_);
 			::gdk_threads_enter();
 		}
 		

@@ -9,13 +9,13 @@
 namespace psycle { namespace front_ends { namespace gui {
 
 bool lock::initialized_(false);
+
 void lock::init() {
-	if(!initialized()) {
+	if(!initialized_) {
 		if(!Glib::thread_supported()) Glib::thread_init();
 		::gdk_threads_init();
 		initialized_ = true;
 	}
-	assert(initialized());
 }
 
 }}}

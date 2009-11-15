@@ -16,8 +16,15 @@
 #include <exception>
 #include <glibmm/exception.h>
 #include <gtkmm/main.h>
+
 #include <libgnomecanvasmm/init.h> // for Gnome::Canvas::init()
+
+#include <clutter/clutter-version.h>
+#if !CLUTTER_CHECK_VERSION(0, 6, 0)
+	#error clutter library is too old
+#endif
 #include <clutter/clutter-main.h> // for clutter_init()
+
 namespace psycle { namespace front_ends { namespace gui {
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
@@ -31,8 +38,10 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 				s << paths::package::name() << " " << paths::package::version::string();
 				universalis::os::loggers::information()(s.str());
 			}
-			lock::init();
+			lock::init(); // => threads support init
 			Gnome::Canvas::init();
+			//Glib::thread_init() or ::g_thread_init(); (then ::gdk_threads_init();)
+			//clutter_threads_init();
 			clutter_init(&argument_count, &arguments);
 			Gtk::Main main(argument_count, arguments);
 			engine::graph & graph(engine::graph::create_on_heap("graph"));
