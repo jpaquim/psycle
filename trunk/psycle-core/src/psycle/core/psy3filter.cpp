@@ -517,15 +517,13 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 				break;
 			case MACH_PLUGIN:
 			{
-				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
-				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, MachineKey::preprocessName(sDllName), 0), id);
+				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, sDllName, 0), id);
 				break;
 			}
 			case MACH_VST:
 			case MACH_VSTFX:
 			{
-				// PSY3 Format saves the suffix, so we have to remove it before creating the key.
-				mac = factory.CreateMachine(MachineKey(Hosts::VST, MachineKey::preprocessName(sDllName), 0), id);
+				mac = factory.CreateMachine(MachineKey(Hosts::VST, sDllName, 0), id);
 				break;
 			}
 			default: ;

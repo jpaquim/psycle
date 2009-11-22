@@ -44,6 +44,9 @@ int PluginFinder::size(Hosts::type host) const {
 	return maps_[host].size();
 }
 void PluginFinder::AddInfo(const MachineKey & key, const PluginInfo& info) {
+	#if 0
+	std::cout << "pluginfinder::addinfo: " << key.dllName() << " host:" << key.host() << std::endl;
+	#endif
 	if(hasHost(key.host())) maps_[key.host()][key]= info;
 }
 

@@ -75,14 +75,14 @@ namespace psy { namespace core {
 
 
 		const std::string MachineKey::preprocessName(std::string dllName) {
+			#if 0
+			std::cout << "preprocess in: " << dllName << std::endl;
+			#endif
 			{ // 1) remove extension
-				std::string::size_type const pos(dllName.find(
-					#if defined __unix__ || defined __APPLE__
-						".so"
-					#else
-						".dll"
-					#endif
-				));
+				std::string::size_type pos(dllName.find(".so"));
+				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+
+				pos = dllName.find(".dll");
 				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
 			}
 
@@ -94,11 +94,13 @@ namespace psy { namespace core {
 			std::replace(dllName.begin(),dllName.end(),'_','-');
 
 			{ // 4) remove prefix
-				std::string const prefix("lib-xpsycle.plugin.");
+				std::string const prefix("libpsycle-plugin-");
 				std::string::size_type const pos(dllName.find(prefix));
 				if(pos == 0) dllName.erase(pos, prefix.length());
 			}
-
+			#if 0
+			std::cout << "preprocess out: " << dllName << std::endl;
+			#endif
 			return dllName;
 		}
 

@@ -30,7 +30,7 @@ LadspaHost& LadspaHost::getInstance(MachineCallbacks* callb) {
 	return instance;
 }
 
-Machine* LadspaHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine::id_type id) {
+Machine* LadspaHost::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id) {
 	///\todo This is a good place where to use exceptions. (task for a later date)
 	std::string fullPath = finder.lookupDllName(key);
 	if (fullPath.empty()) return 0;
@@ -76,6 +76,7 @@ void LadspaHost::FillPluginInfo(const std::string& fullName, const std::string& 
 			pinfo.setLibName( fullName );
 			//pinfo.setVersion( version );
 			pinfo.setAuthor( psDescriptor->Maker );
+			pinfo.setAllow( true );
 			MachineKey key( hostCode() , fileName, index );
 			finder.AddInfo(key, pinfo);
 			psDescriptor = pfDescriptorFunction(++index);
