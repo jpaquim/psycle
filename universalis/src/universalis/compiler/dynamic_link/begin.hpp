@@ -11,7 +11,7 @@
 #elif !defined UNIVERSALIS__COMPILER__DYNAMIC_LINK
 	#error missing #define UNIVERSALIS__COMPILER__DYNAMIC_LINK
 #endif
-#if defined DIVERSALIS__COMPILER__DOXYGEN
+#if defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#undef  UNIVERSALIS__COMPILER__DYNAMIC_LINK
 	/// handling of shared dynamic-link libraries in microsoft's dll format.
 	/// defined either to UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT or UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT for dynamic link,
