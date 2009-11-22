@@ -35,7 +35,7 @@ public:
 	void Finalize(bool deleteFinder=true);
 	static MachineFactory& getInstance();
 
-	Machine* CreateMachine(MachineKey key,Machine::id_type id=-1);
+	Machine* CreateMachine(const MachineKey &key,Machine::id_type id=-1);
 	Machine* CloneMachine(Machine& mac);
 	
 	const std::vector<MachineHost*> getHosts() const { return hosts_; }
@@ -46,10 +46,14 @@ public:
 
 	std::string const & getLadspaPath() const;
 	void setLadspaPath(std::string path,bool cleardata=false);
-
+#if !defined _WIN64 && !defined _WIN32
+        #if defined DIVERSALIS__COMPILER__GNU
+                #warning ###########################- UNIMPLEMENTED ###################
+        #endif
+#else
 	std::string const & getVstPath() const;
 	void setVstPath(std::string path,bool cleardata=false);
-
+#endif
 	PluginFinder& getFinder() const { return *finder_; }
 
 

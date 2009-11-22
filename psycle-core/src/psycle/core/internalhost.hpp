@@ -37,7 +37,7 @@ class PSYCLE__CORE__DECL InternalHost : public MachineHost {
 		virtual ~InternalHost();
 		static InternalHost& getInstance(MachineCallbacks*);
 
-		virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type);
+		virtual Machine* CreateMachine(PluginFinder&, const MachineKey &, Machine::id_type);
 		virtual void FillFinderData(PluginFinder&, bool clearfirst=false);
 
 		virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }

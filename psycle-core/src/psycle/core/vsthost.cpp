@@ -55,7 +55,7 @@ host& host::getInstance(MachineCallbacks* callb)
 	return instance;
 }
 
-Machine* host::CreateMachine(PluginFinder& finder, MachineKey key,Machine::id_type id) 
+Machine* host::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id) 
 {
 	if (key == MachineKey::wrapperVst() ) {
 		return static_cast<vst::plugin*>(master->CreateWrapper(0));

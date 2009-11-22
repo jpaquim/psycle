@@ -204,8 +204,8 @@ void AlsaOut::setDefault() {
 	channels = 2; // count of channels
 
 	// safe default values
-	buffer_time = 100000;
-	period_time = 20000;
+	buffer_time = 200000;
+	period_time = 60000;
 	
 	buffer_size = 0;
 	period_size = 0;

@@ -39,7 +39,7 @@ NativeHost& NativeHost::getInstance(MachineCallbacks* callb)
 	return instance;
 }
 
-Machine* NativeHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine::id_type id) 
+Machine* NativeHost::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id) 
 {
 	if (key == MachineKey::failednative()) 
 	{
@@ -50,6 +50,7 @@ Machine* NativeHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine:
 	//FIXME: This is a good place where to use exceptions. (task for a later date)
 	std::string fullPath = finder.lookupDllName(key);
 	if (fullPath.empty()) return 0;
+
 	void* hInstance = LoadDll(fullPath);
 	if (!hInstance) return 0;
 	CMachineInfo* info = LoadDescriptor(hInstance);
@@ -71,7 +72,7 @@ Machine* NativeHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine:
 void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& fileName, PluginFinder& finder)
 {
 	#if defined __unix__ || defined __APPLE__
-		if ( fileName.find( "lib-xpsycle.") == std::string::npos ) return;
+		if ( fileName.find( "libpsycle-plugin-") == std::string::npos ) return;
 	#else
 		if ( fileName.find( ".dll" ) == std::string::npos ) return;
 	#endif
@@ -93,9 +94,11 @@ void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& 
 		if (!(o << minfo->Version )) version = o.str();
 		pinfo.setVersion( version );
 		pinfo.setAuthor( minfo->Author );
+		pinfo.setAllow(true);
 		MachineKey key( hostCode(), fileName, 0);
 		finder.AddInfo( key, pinfo);
 	}
+	//\todo: Add the else, so that the plugin can be added as bad.
 	UnloadDll(hInstance);
 }
 

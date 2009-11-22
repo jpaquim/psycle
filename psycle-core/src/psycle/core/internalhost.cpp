@@ -53,7 +53,7 @@ InternalHost& InternalHost::getInstance(MachineCallbacks* callb) {
 	return instance;
 }
 
-Machine* InternalHost::CreateMachine(PluginFinder& /*finder */, MachineKey key,Machine::id_type id)
+Machine* InternalHost::CreateMachine(PluginFinder& /*finder */, const MachineKey& key, Machine::id_type id)
 {
 	Machine* mac=0;
 
