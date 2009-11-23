@@ -7,7 +7,7 @@ function main {
 	rm -Rf ../*/++build && # We can't trust qmake's makefiles (unreliable when config is changed, etc), so we clean everything first.
 	qmake -recursive CONFIG-=debug CONFIG-=debug_and_release &&
 	mingw32-make &&
-	(cd ../psycle-plugins && scons) &&
+	(cd ../psycle-plugins && ./wonderbuild_script.py) &&
 	local install_dir=++install &&
 	rm -Rf $install_dir &&
 	mkdir -p $install_dir/bin &&
@@ -16,7 +16,7 @@ function main {
 		../psycle-plugins/++wonderbuild/staged-install/usr/local/bin/*.dll \
 		$install_dir/bin &&
 	local tar_name=qpsycle &&
-	../build-systems/microsoft-dll-collector $install_dir $tar_name &&
+	../tools/microsoft-dll-collector $install_dir $tar_name &&
 	mkdir $install_dir/$tar_name/presets &&
 	cp -Rf \
 		../psycle-plugins/presets/*.prs \

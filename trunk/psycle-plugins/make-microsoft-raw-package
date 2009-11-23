@@ -5,11 +5,11 @@ INSTALL_DIR = ++wonderbuild/install
 TAR_NAME = psycle-plugins
 
 all:
-	../build-systems/wonderbuild.py
+	../build-systems/wonderbuild/wonderbuild.py
 	rm -Rf $(INSTALL_DIR)
 	mkdir -p $(INSTALL_DIR)/bin
 	cp -f $(BUILD_DIR)/bin/*.dll $(INSTALL_DIR)/bin
-	../build-systems/microsoft-dll-collector $(INSTALL_DIR) $(TAR_NAME)
+	../tools/microsoft-dll-collector $(INSTALL_DIR) $(TAR_NAME)
 	mkdir $(INSTALL_DIR)/$(TAR_NAME)/presets
 	cp -Rf ../psycle-plugins/presets/*.prs $(INSTALL_DIR)/$(TAR_NAME)/presets/
 	echo subversion revision "$$(svnversion)" > $(INSTALL_DIR)/$(TAR_NAME)/version.text
