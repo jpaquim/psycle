@@ -378,8 +378,8 @@ void mi::ParameterTweak(int par, int val) {
 	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
 
-	globalpar.pWave=&WaveTable[Vals[0]][0];
-	globalpar.pWave2=&WaveTable[Vals[1]][0];
+	globalpar.pWave=WaveTable[Vals[0]];
+	globalpar.pWave2=WaveTable[Vals[1]];
 	globalpar.osc2detune=Vals[2];
 	globalpar.osc2finetune=Vals[3];
 	globalpar.osc2sync=Vals[4];

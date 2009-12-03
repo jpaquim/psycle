@@ -411,6 +411,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 
 	// index
 	file->Read(index);
+	//todo: This loading is quite slow now. Needs an improvement
 	if(index < MAX_PATTERNS) {
 		// num lines
 		file->Read(temp);

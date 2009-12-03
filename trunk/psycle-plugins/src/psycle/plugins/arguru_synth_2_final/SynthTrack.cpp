@@ -396,6 +396,7 @@ void CSynthTrack::PerformFx()
 	{
 		/* 0x01 : Pitch Up */
 		case 0x01:
+			//FIXME: THESE COMMANDS ARE BROKEN, because oscglide is by default zero. shift should modify osglide too.
 			shift=(float)sp_val*0.001f;
 			OSC1Speed+=shift;
 			OSC2Speed+=shift;

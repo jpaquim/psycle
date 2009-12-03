@@ -105,7 +105,7 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 	riffFile.Write(size);
 	//\todo: add version
 
-	riffFile.WriteArray(_wave_name.c_str(), _wave_name.length() + 1);
+	riffFile.WriteString(_wave_name);
 
 	riffFile.Write(m_WaveLength);
 	riffFile.Write(m_WaveGlobVolume);
@@ -531,7 +531,7 @@ void XMInstrument::Save(RiffFile& riffFile)
 	riffFile.Write(size);
 	///\todo : add version.
 
-	riffFile.WriteArray(m_Name.c_str(),m_Name.length() + 1);
+	riffFile.WriteString(m_Name);
 
 	//riffFile.Write(m_bEnabled);
 

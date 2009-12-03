@@ -2321,17 +2321,11 @@ int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 	{
 		Standby(false);
 		int ns = numSamples;
-		/* This is from Sampler. Is it needed for sampulse?
-		for (int voice=0; voice<_numVoices; voice++)
-		{
-			// A correct implementation needs to take numsamples into account.
-			// This will not be fixed to leave sampler compatible with old songs.
-			PerformFx(voice);
-		}
-		*/
+		int nextevent;
+
 		while (ns)
 		{
-			int nextevent = ns + 1;
+			nextevent = ns + 1;
 			for (unsigned int i=0; i < callbacks->song().tracks(); i++)
 			{
 				if (TriggerDelay[i].command() )
@@ -2679,6 +2673,7 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 
 		for(int i = 0;i < MAX_TRACKS;i++) m_Channel[i].Load(*riffFile);
 		#if 0
+			//This has been moved to the PSY3 loader
 			// Instrument Data Load
 			int numInstruments;
 			riffFile->Read(numInstruments);
@@ -2686,7 +2681,8 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 			for(int i = 0;i < numInstruments;i++)
 			{
 				riffFile->Read(idx);
-				if (!m_rWaveLayer[idx].Load(*riffFile)) { wrongState=true; break; }
+				if (!m_Instruments[idx].Load(*riffFile)) { wrongState=true; break; }
+				//m_Instruments[idx].IsEnabled(true); // done in the loader.
 			}
 			if (!wrongState)
 			{
@@ -2696,7 +2692,7 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 				for(int i = 0;i < numSamples;i++)
 				{
 					riffFile->Read(idx);
-					if (![idx].Load(*riffFile)) { wrongState=true; break; }
+					if (!m_rWaveLayer[idx].Load(*riffFile)) { wrongState=true; break; }
 				}
 			}
 		#endif

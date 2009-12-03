@@ -27,7 +27,7 @@ public:
 	/// A Note pair (note number=first, and sample number=second)
 	typedef std::pair<unsigned char,unsigned char> NotePair;
 
-	/// When a note starts to play in a channel, and there is still a note playing in it,
+	/// When a new note comes to play in a channel, and there is still one playing in it,
 	/// do this on the currently playing note:
 	struct NewNoteAction {
 		enum Type {
@@ -38,7 +38,9 @@ public:
 		};
 	};
 
-	/// ?
+	/// In some cases, the default NNA is not adequate. This option lets choose one type of element
+	/// that, if it is equal than the currently playing, will apply the DCAction intead.
+	/// A common example is using NNA NOTEOFF, DCT_NOTE and DCA_STOP
 	struct DCType {
 		enum Type {
 			DCT_NONE = 0,
@@ -48,7 +50,7 @@ public:
 		};
 	};
 /*
-	Using NewNoteAction so that we can convert easily from DCA to NNA.
+	Using NewNoteAction instead so that we can convert easily from DCA to NNA.
 	struct DCAction {
 		enum Type {
 			DCA_STOP = 0,

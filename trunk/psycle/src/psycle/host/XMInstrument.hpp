@@ -36,7 +36,7 @@ namespace psycle { namespace host {
 			};
 		};
 /*
-		Using NewNoteAction so that we can convert easily from DCA to NNA.
+	Using NewNoteAction instead so that we can convert easily from DCA to NNA.
 		struct DCAction {
 			enum Type {
 			DCA_STOP=0x0,

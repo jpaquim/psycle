@@ -1373,9 +1373,9 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					// Portamento to (Gx) affects the memory for Gxx and has the equivalent
 					// slide given by this table:
 					// SlideTable      DB      1, 4, 8, 16, 32, 64, 96, 128, 255
-					if ( volcmd&0x0F == 0 ) slidval=0;
-					else if ( volcmd&0x0F == 1)  slidval=1;
-					else if ( volcmd&0x0F < 9) slidval=powf(2.0f,volcmd&0x0F);
+					if ( (volcmd&0x0F) == 0 ) slidval=0;
+					else if ( (volcmd&0x0F) == 1)  slidval=1;
+					else if ( (volcmd&0x0F) < 9) slidval=powf(2.0f,volcmd&0x0F);
 					else slidval=255;
 					PitchSlide(voice->Period()>voice->NoteToPeriod(note()),slidval,note());
 					break;
@@ -2700,6 +2700,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 
 				for(int i = 0;i < MAX_TRACKS;i++) m_Channel[i].Load(*riffFile);
 			#if 0
+			//This has been moved to the PSY3 loader
 				// Instrument Data Load
 				int numInstruments;
 				riffFile->Read(numInstruments);
