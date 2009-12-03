@@ -7,10 +7,6 @@
 
 // CTrack Declaration file (M3Track.h)
 
-extern float freqTab[120];
-extern float coefsTab[4*128*128*8];
-extern float LFOOscTab[0x10000];
-extern signed short WaveTable[5][2100];
 
 #define MAX_SIMUL_TRACKS 8
 
@@ -81,6 +77,12 @@ class CTrack {
 		int MSToSamples(double const ms);
 
 	public:
+
+		static float freqTab[120];
+		static float coefsTab[4*128*128*8];
+		static float LFOOscTab[0x10000];
+		static signed short WaveTable[5][2100];
+
 		int _channel;
 
 		// ......Osc......
@@ -199,6 +201,7 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 		inline float Bandwidth( int v);
 
 		float TabSizeDivSampleFreq;
+		
 
 	private:
 
@@ -209,23 +212,23 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 // scale functions
 
 inline float mi::Cutoff(int v) {
-	return std::pow((v + 5) / (127.0 + 5), 1.7) * 13000 + 30;
+	return std::pow((v + 5.0) / (127.0 + 5.0), 1.7) * 13000.0 + 30.0;
 }
 
 inline float mi::Resonance(float v) {
-	return std::pow(v / 127.0, 4) * 150 + 0.1;
+	return std::pow(v / 127.0, 4.0) * 150.0 + 0.1;
 }
 
 inline float mi::Bandwidth(int v) {
-	return std::pow(v / 127.0, 4) * 4 + 0.1;
+	return std::pow(v / 127.0, 4.0) * 4.0 + 0.1;
 }
 
 inline float mi::LFOFreq(int v) {
-	return (std::pow((v + 8) / (116.0 + 8), 4) - 0.000017324998565270) * 40.00072;
+	return (std::pow((v + 8.0) / (116.0 + 8.0), 4.0) - 0.000017324998565270) * 40.00072;
 }
 
 inline float mi::EnvTime(int v) {
-	return std::pow((v + 2) / (127.0 + 2), 3) * 10000;
+	return std::pow((v + 2.0) / (127.0 + 2.0), 3.0) * 10000;
 }
 
 
@@ -369,10 +372,10 @@ inline float CTrack::Filter( float x) {
 	if(LFO_Reso) {
 		r = Resonance +
 		((pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount) >> (7 + 8));
-		if(r < 0) r = 0;
-		else if(r > 127) r = 127;
 	} else r = Resonance;
 
+	if(r < 0) r = 0;
+	else if(r > 127) r = 127;
 
 	int ofs = ((c << 7) + r) << 3;
 	y =
@@ -384,7 +387,9 @@ inline float CTrack::Filter( float x) {
 
 	y2 = y1; y1 = y;
 	x2 = x1; x1 = x;
+	///\fixme
 	return y;
+	//return x;
 }
 
 inline void CTrack::NewPhases() {

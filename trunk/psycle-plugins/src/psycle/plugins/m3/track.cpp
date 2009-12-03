@@ -67,6 +67,7 @@ void CTrack::Init()
 		AEGState = EGS_NONE;
 		FEGState = EGS_NONE;
 		PEGState = EGS_NONE;
+		Frequency = FrequencyFrom = 0.0;
 		r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
 		noisePhase = Phase1 = Phase2 = PhaseSub = PhaseLFO1 = PhaseLFO2 = 0; // Osc starten neu
 		x1 = x2 = y1 = y2 = 0;
@@ -108,6 +109,7 @@ void CTrack::Tick( tvals const &tv)
 	// Filter
 	if( tv.FilterType != 0xff)
 	{
+		assert(tv.FilterType<4);
 		coefsTabOffs = coefsTab + (int)tv.FilterType*128*128*8;
 	}
 	if( tv.Cutoff != 0xff)
@@ -236,11 +238,14 @@ void CTrack::Tick( tvals const &tv)
 		RandomWave1 = noise1 = false;
 
 		if( tv.Wave1 == 4) // noise
-		{				pwavetab1 = NULL;
+		{
+			pwavetab1 = NULL;
 			noise1 = true;
 		}
 		else if( tv.Wave1 == 5) // random
-		{				RandomWave1 = true;				}
+		{
+			RandomWave1 = true;
+		}
 		else 
 		{
 			assert(tv.Wave1 < 4 );
@@ -254,11 +259,14 @@ void CTrack::Tick( tvals const &tv)
 		RandomWave2 = noise2 = false;
 
 		if( tv.Wave2 == 4) // noise
-		{				noise2 = true;
+		{
+			noise2 = true;
 			pwavetab2 = NULL;
 		}
 		else if( tv.Wave2 == 5) // random
-		{				RandomWave2 = true;				}
+		{
+			RandomWave2 = true;
+		}
 		else 
 		{				
 			assert(tv.Wave2 < 4 );
@@ -370,33 +378,33 @@ void CTrack::Tick( tvals const &tv)
 		LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;
 		switch( tv.LFO1Dest)
 		{
-//								case 0: ...none
-		case 1: LFO_Osc1 = true;				break;
-		case 2: LFO_PW1 = true;								break;
-		case 3: LFO_Amp = true;								break;
-		case 4: LFO_Cut = true;								break;
+//		case 0: ...none
+		case 1: LFO_Osc1 = true;	break;
+		case 2: LFO_PW1 = true;		break;
+		case 3: LFO_Amp = true;		break;
+		case 4: LFO_Cut = true;		break;
 
 		case 5: // 12
-			LFO_Osc1 = true;				LFO_PW1 = true;				break;
+			LFO_Osc1 = true;	LFO_PW1 = true;		break;
 		case 6: // 13
-			LFO_Osc1 = true;				LFO_Amp = true;				break;
+			LFO_Osc1 = true;	LFO_Amp = true;		break;
 		case 7: // 14
-			LFO_Osc1 = true;				LFO_Cut = true;				break;
+			LFO_Osc1 = true;	LFO_Cut = true;		break;
 		case 8: // 23
-			LFO_PW1 = true;								LFO_Amp = true;				break;
+			LFO_PW1 = true;		LFO_Amp = true;		break;
 		case 9: // 24
-			LFO_PW1 = true;								LFO_Cut = true;				break;
+			LFO_PW1 = true;		LFO_Cut = true;		break;
 		case 10: // 34
-			LFO_Amp = true;								LFO_Cut = true;				break;
+			LFO_Amp = true;		LFO_Cut = true;		break;
 
 		case 11: // 123
-			LFO_Osc1 = true;				LFO_PW1 = true;				LFO_Amp = true;				break;
+			LFO_Osc1 = true;	LFO_PW1 = true;		LFO_Amp = true;	break;
 		case 12: // 124
-			LFO_Osc1 = true;				LFO_PW1 = true; LFO_Cut = true; break;
+			LFO_Osc1 = true;	LFO_PW1 = true;		LFO_Cut = true; break;
 		case 13: // 134
-			LFO_Osc1 = true;				LFO_Amp = true; LFO_Cut = true; break;
+			LFO_Osc1 = true;	LFO_Amp = true;		LFO_Cut = true; break;
 		case 14: // 234
-			LFO_PW1 = true;								LFO_Amp = true;				LFO_Cut = true;				break;
+			LFO_PW1 = true;		LFO_Amp = true;		LFO_Cut = true;	break;
 		case 15: // 1234
 			LFO_Osc1 = true;
 			LFO_PW1 = true;
@@ -456,33 +464,33 @@ void CTrack::Tick( tvals const &tv)
 		LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
 		switch( tv.LFO2Dest)
 		{
-//								case 0: ...none
-		case 1:				LFO_Osc2 = true;				break;
-		case 2: LFO_PW2 = true;								break;
-		case 3:				LFO_Mix = true;								break;
-		case 4:				LFO_Reso = true;				break;
+//		case 0: ...none
+		case 1:	LFO_Osc2 = true;	break;
+		case 2: LFO_PW2 = true;		break;
+		case 3:	LFO_Mix = true;		break;
+		case 4:	LFO_Reso = true;	break;
 
 		case 5: // 12
-			LFO_Osc2 = true;				LFO_PW2 = true;				break;
+			LFO_Osc2 = true;	LFO_PW2 = true;		break;
 		case 6: // 13
-			LFO_Osc2 = true;				LFO_Mix = true;				break;
+			LFO_Osc2 = true;	LFO_Mix = true;		break;
 		case 7: // 14
-			LFO_Osc2 = true;				LFO_Reso = true;break;
+			LFO_Osc2 = true;	LFO_Reso = true;	break;
 		case 8: // 23
-			LFO_PW2 = true;				LFO_Mix = true;								break;
+			LFO_PW2 = true;		LFO_Mix = true;		break;
 		case 9: // 24
-			LFO_PW2 = true;				LFO_Reso = true;				break;
+			LFO_PW2 = true;		LFO_Reso = true;	break;
 		case 10: // 34
-			LFO_Mix = true;				LFO_Reso = true;				break;
+			LFO_Mix = true;		LFO_Reso = true;	break;
 
 		case 11: // 123
-			LFO_Osc2 = true;				LFO_PW2 = true;				LFO_Mix = true;				break;
+			LFO_Osc2 = true;	LFO_PW2 = true;		LFO_Mix = true;		break;
 		case 12: // 124
-			LFO_Osc2 = true;				LFO_PW2 = true;				LFO_Reso = true;break;
+			LFO_Osc2 = true;	LFO_PW2 = true;		LFO_Reso = true;	break;
 		case 13: // 134
-			LFO_Osc2 = true;				LFO_Mix = true;				LFO_Reso = true;break;
+			LFO_Osc2 = true;	LFO_Mix = true;		LFO_Reso = true;	break;
 		case 14: // 234
-			LFO_PW2 = true;				LFO_Mix = true;				LFO_Reso = true;				break;
+			LFO_PW2 = true;		LFO_Mix = true;		LFO_Reso = true;	break;
 
 		case 15: // 1234
 			LFO_Osc2 = true;
@@ -561,7 +569,7 @@ void CTrack::Work( float *psamples, int numsamples)
 		if( AEGState)
 		{
 			float o = Osc()*VCA();
-			*psamples++ += Filter( OldOut + o); // anti knack
+			*(psamples++) += Filter( OldOut + o); // anti knack
 			OldOut = o;
 		}
 		NewPhases();
