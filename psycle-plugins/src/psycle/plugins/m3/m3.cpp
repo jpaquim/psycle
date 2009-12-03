@@ -23,10 +23,10 @@ using namespace psycle::plugin_interface;
 // Original Author sources are under:
 // http://www.fortunecity.com/skyscraper/rsi/76/plugins.htm
 
-float freqTab[120];
-float coefsTab[4 * 128 * 128 * 8];
-float LFOOscTab[0x10000];
-signed short WaveTable[5][2100];
+float CTrack::freqTab[120];
+float CTrack::coefsTab[4 * 128 * 128 * 8];
+float CTrack::LFOOscTab[0x10000];
+signed short CTrack::WaveTable[5][2100];
 
 /// This value defines the MAX_TRACKS of PSYCLE, not of the Plugin.
 /// Leave it like it is. Your Plugin NEEDS TO support it.
@@ -225,34 +225,34 @@ void mi::Init() {
 	// Generate Oscillator tables
 	for(int c = 0; c < 2100; ++c) {
 		double sval = (double) c * 0.00306796157577128245943617517898389;
-		WaveTable[0][c] = int(std::sin(sval) * 16384.0f);
+		CTrack::WaveTable[0][c] = int(std::sin(sval) * 16384.0f);
 
-		if(c < 2048) WaveTable[1][c] = (c * 16) - 16384;
-		else WaveTable[1][c] = ((c - 2048) * 16) - 16384;
+		if(c < 2048) CTrack::WaveTable[1][c] = (c * 16) - 16384;
+		else CTrack::WaveTable[1][c] = ((c - 2048) * 16) - 16384;
 
-		if(c < 1024) WaveTable[2][c] = -16384;
-		else WaveTable[2][c] = 16384;
+		if(c < 1024) CTrack::WaveTable[2][c] = -16384;
+		else CTrack::WaveTable[2][c] = 16384;
 
-		if(c < 1024) WaveTable[3][c] = (c * 32) - 16384;
-		else WaveTable[3][c] = 16384 - ((c - 1024) * 32);
+		if(c < 1024) CTrack::WaveTable[3][c] = (c * 32) - 16384;
+		else CTrack::WaveTable[3][c] = 16384 - ((c - 1024) * 32);
 
-		WaveTable[4][c] = std::rand();
+		CTrack::WaveTable[4][c] = std::rand();
 	}
 
 	// generate frequencyTab
 	double freq = 16.35; // c0 to b9
 	for(int j = 0; j < 10; ++j)
 		for(int i = 0; i < 12; ++i) {
-			freqTab[j * 12 + i] = float(freq);
+			CTrack::freqTab[j * 12 + i] = float(freq);
 			freq *= 1.05946309435929526; // * 2 ^ (1 / 12)
 		}
 	// generate coefsTab
 	for(int t = 0; t < 4; ++t)
 		for(int f = 0; f < 128; ++f)
 			for(int r = 0; r < 128; ++r)
-				ComputeCoefs(coefsTab + (t * 128 * 128 + f * 128 + r) * 8, f, r, t);
+				ComputeCoefs(CTrack::coefsTab + (t * 128 * 128 + f * 128 + r) * 8, f, r, t);
 	// generate LFOOscTab
-	for(int p = 0; p < 0x10000; ++p) LFOOscTab[p] = std::pow(1.00004230724139582, p - 0x8000);
+	for(int p = 0; p < 0x10000; ++p) CTrack::LFOOscTab[p] = std::pow(1.00004230724139582, p - 0x8000);
 }
 
 void mi::Stop() {

@@ -833,6 +833,9 @@ int Machine::GenerateAudio(int numsamples) {
 	}
 	int samplestoprocess = 0;
 	int processedsamples = 0;
+	if (static_cast<int>(positionInBeat) == 0) {
+		Tick();
+	}
 	for(; processedsamples < numsamples; processedsamples += samplestoprocess) {
 		if(processedsamples == nextLineInSamples) {
 			Tick();

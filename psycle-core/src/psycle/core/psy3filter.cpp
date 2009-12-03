@@ -562,6 +562,7 @@ bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, st
 	for(int i = 0;i < numInstruments && filepos < begins+size;i++)
 	{
 		file->Read(idx);
+		filepos = file->GetPos();
 		unsigned int sizeIns = song.rInstrument(idx).Load(*file);
 		if ((minorversion&0xFFFF) > 0) {
 			//Version 0 doesn't write the chunk size correctly
@@ -575,6 +576,7 @@ bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, st
 	for(int i = 0;i < numSamples && filepos < begins+size;i++)
 	{
 		file->Read(idx);
+		filepos = file->GetPos();
 		unsigned int sizeSamp = song.SampleData(idx).Load(*file);
 		if ((minorversion&0xFFFF) > 0) {
 			//Version 0 doesn't write the chunk size correctly
@@ -583,6 +585,7 @@ bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, st
 			filepos=file->GetPos();
 		}
 	}
+	filepos=file->GetPos();
 	return begins+size == filepos;
 
 }
