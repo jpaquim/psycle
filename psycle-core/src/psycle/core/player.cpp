@@ -432,6 +432,7 @@ void Player::process_global_event(GlobalEvent const & event) {
 			std::cout << "psycle: core: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter() << '\n';
 			break;
 		case GlobalEvent::JUMP_TO:
+			//todo: fix this. parameter indicates the pattern, not the beat!
 			timeInfo_.setPlayBeatPos(event.parameter());
 			break;
 		case GlobalEvent::SET_BYPASS:
@@ -477,6 +478,8 @@ void Player::process_global_event(GlobalEvent const & event) {
 }
 
 /// Final Loop. Read new line for notes to send to the Machines
+#if 0
+		//replaced by sequencer
 void Player::execute_notes(double beat_offset, PatternEvent& entry) {
 	// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modifiable)
 
@@ -622,6 +625,7 @@ void Player::execute_notes(double beat_offset, PatternEvent& entry) {
 		}
 	}
 }
+#endif
 
 float * Player::Work(int numSamples) {
 	if(!song_) return buffer_;

@@ -1280,7 +1280,9 @@ namespace psycle
 							author_ = author;
 							comment_ = comments;
 							//bugfix. There were songs with incorrect size.
-							size= pFile->GetPos() - begins;
+							if(version == 0) {
+								size= pFile->GetPos() - begins;
+							}
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1302,7 +1304,7 @@ namespace psycle
 							// bpm
 							pFile->Read(&temp, sizeof temp);
 							m_BeatsPerMin = temp;
-							// tpb
+							// linesperbeat
 							pFile->Read(&temp, sizeof temp);
 							m_LinesPerBeat = temp;
 							// current octave
@@ -1340,6 +1342,11 @@ namespace psycle
 								/// is bad for the Winamp plugin (or any other multi-document situation).
 								Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
 							}
+							// fix for a bug existing in the song saver in the 1.7.x series
+							if(version == 0) {
+								size = 11 * sizeof(std::uint32_t) + SONGTRACKS * 2 * sizeof(bool);
+							}
+
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1405,6 +1412,8 @@ namespace psycle
 								}
 								zapArray(pDest);
 							}
+							//\ Fix for a bug existing in the Song Saver in the 1.7.x series
+							if((version == 0x0000) &&( pFile->GetPos() == begins+size+4)) size += 4;
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1423,13 +1432,14 @@ namespace psycle
 								DestroyMachine(index);
 								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
 								//Bugfix.
-								if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
+								if (fullopen) {
+									if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
 									&& ((vst::plugin*)_pMachine[index])->ProgramIsChunk() == false) {
-									if (fullopen) {
 										size = pFile->GetPos() - begins;
-									} else if ((version&0xFF) == 0) {
+/*									} else if ((version&0xFF) == 0) {
 										size = (pFile->GetPos() - begins) 
 											 + sizeof(unsigned char) + 2*sizeof(int) + _pMachine[index]->GetNumParams()*sizeof(float);
+*/
 									}
 							}
 							}
@@ -1459,7 +1469,6 @@ namespace psycle
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
 						long filepos=pFile->GetPos();
-						bool wrongState=false;
 						//Version zero was the development version. Version one is the published one.
 						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
 						{
@@ -1470,7 +1479,7 @@ namespace psycle
 							for(int i = 0;i < numInstruments && filepos < begins+size;i++)
 							{
 								pFile->Read(idx);
-								int sizeIns = XMSampler::rInstrument(idx).Load(*pFile);
+								int sizeIns = rInstrument(idx).Load(*pFile);
 								if ((version&0xFFFF) > 0) {
 									//Version 0 doesn't write the chunk size correctly
 									//so we cannot correct it in case of error
@@ -1483,7 +1492,7 @@ namespace psycle
 							for(int i = 0;i < numSamples && filepos < begins+size;i++)
 								{
 									pFile->Read(idx);
-								int sizeSamp = XMSampler::SampleData(idx).Load(*pFile);
+								int sizeSamp = SampleData(idx).Load(*pFile);
 								if ((version&0xFFFF) > 0) {
 									//Version 0 doesn't write the chunk size correctly
 									//so we cannot correct it in case of error

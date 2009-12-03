@@ -65,8 +65,6 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 	SetAudioRange(1.0f);
 	_nCols=0;
 
-/*
-
 	for (int midiChannel=0; midiChannel<16; midiChannel++)
 	{
 		NSActive[midiChannel] = false;
@@ -83,8 +81,6 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 		trackNote[i].key = 255; // No Note.
 		trackNote[i].midichan = 0;
 	}
-
-*/
 
 
 	// Compatibility hacks

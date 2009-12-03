@@ -206,7 +206,10 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 
 	private:
 		/// Final Loop. Read new line for notes to send to the Machines
+#if 0
+		//replaced by sequencer
 		void execute_notes(double beat_offset, PatternEvent& line);
+#endif
 		void process_global_event(const GlobalEvent & event);
 		void process(int samples);
 

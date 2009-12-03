@@ -361,8 +361,9 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			{
 				proxy().ParameterTweak(pData.instrument(), nv);
 			}
-			catch(const std::exception &)
+			catch(const std::exception &ex)
 			{
+				const char* bla = ex.what();
 			}
 			Player::singleton().Tweaker = true;
 		}

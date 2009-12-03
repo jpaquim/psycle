@@ -717,14 +717,6 @@ namespace psycle
 
 		void Plugin::Tick(int channel, PatternEvent * pData)
 		{
-			try
-			{
-				proxy().SeqTick(channel, pData->note(), pData->instrument(), pData->command(), pData->parameter());
-			}
-			catch(const std::exception &)
-			{
-				return;
-			}
 			if(pData->note() == notecommands::tweak || pData->note() == notecommands::tweakeffect)
 			{
 				if(pData->instrument() < _pInfo->numParameters)
@@ -820,6 +812,16 @@ namespace psycle
 					}
 				}
 				Global::pPlayer->Tweaker = true;
+			}
+			else {
+				try
+				{
+					proxy().SeqTick(channel, pData->note(), pData->instrument(), pData->command(), pData->parameter());
+				}
+				catch(const std::exception &)
+				{
+					return;
+				}
 			}
 		}
 

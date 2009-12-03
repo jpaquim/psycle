@@ -42,16 +42,18 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 	int track = entry.track();
 	int sequence_track = entry.sequence_track();
 
+	int mac = entry.machine();
+	if(mac != 255) prev_machines_[track] = mac;
+	else mac = prev_machines_[track];
+
+	// not a valid machine id?
+	if(mac >= MAX_MACHINES || !song()->machine(mac))
+		return;
+	
+	Machine& machine = *song()->machine(mac);
+
 	// step 1: process all tweaks.
 	{
-		int mac = entry.machine();
-
-		// not a valid machine id?
-		if(mac >= MAX_MACHINES || !song()->machine(mac))
-			return;
-	
-		Machine& machine = *song()->machine(mac);
-
 		switch(entry.note()) {
 			case notetypes::tweak_slide: {
 				int const delay(64);
@@ -97,19 +99,7 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 		if(song()->patternSequence().trackMuted(track)) return;
 
 		// not a note ?
-		if(entry.note() >= notetypes::tweak && entry.note() != 255) return;
-
-		int mac = entry.machine();
-		if(mac != 255) prev_machines_[track] = mac;
-		else mac = prev_machines_[track];
-
-		// not a valid machine id?
-		if(mac == 255 || mac >= MAX_MACHINES) return;
-	
-		// no machine with this id?
-		if(!song()->machine(mac)) return;
-
-		Machine& machine = *song()->machine(mac);
+		if(entry.note() > notetypes::release && entry.note() != notetypes::empty) return;
 
 		// machine muted?
 		if(machine._mute) return;
