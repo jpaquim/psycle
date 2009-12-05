@@ -183,16 +183,14 @@ int main(int argument_count, char * arguments[]) {
 
 	CoreSong song;
 	if(input_file_name.length()) {
+		//Song is assigned to player previous to load, since the plugins can ask information about
+		//the song they are being loaded from.
+		player.song(song);
 		std::cout << "psycle: player: loading song file: " << input_file_name << '\n';
 		if(!song.load(input_file_name)) {
 			std::cerr << "psycle: player: could not load song file: " << input_file_name << '\n';
 			return 2;
 		}
-		player.song(song);
-
-		// [JosepMa] workaround some "bugs" where machines are not well setup until a call to work is issued
-		// [JosepMa] (i.e. some machines read the samplerate in the work call, or similar things)
-		{ int samples = 256; player.Work(&player, samples); }
 
 		if(output_file_name.length()) player.startRecording();
 		player.driver().Enable(true);

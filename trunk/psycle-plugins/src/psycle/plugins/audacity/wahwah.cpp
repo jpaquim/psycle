@@ -25,7 +25,7 @@
 
 using namespace psycle::plugin_interface;
 
-#define lfoskipsamples 30
+#define LFO_SKIP_SAMPLES 30
 
 #ifndef M_PI
 	#define M_PI 3.14159265359f
@@ -229,7 +229,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			float in_l = *psamplesleft * 0.000030517578125f;  // divide by 32768 =>  -1..1
 			float in_r = *psamplesright * 0.000030517578125f; 
 
-			if ((skipcount++) % lfoskipsamples == 0) {
+			if ((skipcount++) % LFO_SKIP_SAMPLES == 0) {
 				float calc_1_time = float(skipcount) * lfoskip + phase; // :-)
 
 				frequency = 1.f + std::cos(calc_1_time); // Left channel
@@ -237,6 +237,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
 
+				
 				psycle::helpers::math::sin_cos(omega, sn, cs);
 				//sn = std::sin(omega);
 				//cs = std::cos(omega);
