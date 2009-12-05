@@ -39,7 +39,7 @@ struct WAVEFORM
 {
 	int												index;								// Index of waveform (wavenumber)
 //				int												count;								// How many shares this wave now.
-	char								*pname;								// Name :)
+	char const							*pname;								// Name :)
 	float								*pdata;								// Data, partial or non partial
 	int												*preverse;				// Lookup table to find pdata offset
 };

@@ -49,7 +49,7 @@ double Formant::m_coeff[5][11] =
 //				Vowel names
 //
 //////////////////////////////////////////////////////////////////////
-char *Formant::m_names[5] =
+char const *Formant::m_names[5] =
 {
 	"A",
 	"E",

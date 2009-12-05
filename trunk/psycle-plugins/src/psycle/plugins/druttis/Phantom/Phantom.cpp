@@ -26,7 +26,7 @@ using namespace psycle::plugin_interface;
 #define SINE(x) ((float) sin((float) (x) * PI2))
 float				wavetable[NUMWAVEFORMS][WAVESIZE];
 char				wave_str[NUMWAVEFORMS + 5][16];
-char				*filt_str[4] = { "LP-12", "LP-24", "HP-12", "HP-24" };
+char const			*filt_str[4] = { "LP-12", "LP-24", "HP-12", "HP-24" };
 //============================================================================
 //				Parameters
 //============================================================================
