@@ -49,7 +49,7 @@ namespace psycle { namespace helpers { namespace math {
 		template<typename Real>
 		void sin_cos_test_template() {
 			Real const tolerance = 1e-15;
-			Real const input_values[] = { 0, pi / 4, pi / 3, pi };
+			Real const input_values[] = { 0, pi / 4, pi / 3, pi / 2, pi };
 			for(unsigned int i(0); i < sizeof input_values / sizeof *input_values; ++i) {
 				Real const x(input_values[i]);
 				Real s, c;
