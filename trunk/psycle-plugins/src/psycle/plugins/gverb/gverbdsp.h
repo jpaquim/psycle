@@ -3,6 +3,7 @@
 #define GVERBDSP_H
 
 //#include "ladspa-util.h"
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 
 typedef struct {
 	int size;
@@ -42,14 +43,20 @@ void fixeddelay_flush(ty_fixeddelay *);
 int isprime(int);
 int nearest_prime(int, float);
 
-#define flush_to_zero(fv) (((*(unsigned int*)&(fv))&0x7f800000)==0)?0.0f:(fv)
+#if 0
+	#define flush_to_zero(fv) (((*(unsigned int*)&(fv))&0x7f800000)==0)?0.0f:(fv)
+#endif
 
 static inline float diffuser_do(ty_diffuser *p, float x)
 {
 	float y,w;
 
 	w = x - p->buf[p->idx]*p->coeff;
-	w = flush_to_zero(w);
+	#if 0
+		w = flush_to_zero(w);
+	#else
+		psycle::helpers::math::erase_all_nans_infinities_and_denormals(w);
+	#endif
 	y = p->buf[p->idx] + w*p->coeff;
 	p->buf[p->idx] = w;
 	p->idx = (p->idx + 1) % p->size;

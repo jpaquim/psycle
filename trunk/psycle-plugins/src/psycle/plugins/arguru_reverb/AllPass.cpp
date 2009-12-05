@@ -4,8 +4,8 @@
 CAllPass::CAllPass() {
 	universalis::os::aligned_memory_alloc(16, leftBuffer, MAX_ALLPASS_DELAY);
 	universalis::os::aligned_memory_alloc(16, rightBuffer, MAX_ALLPASS_DELAY);
-	smpleft = reinterpret_cast<unsigned int*>(&tmpleft);
-	smpright = reinterpret_cast<unsigned int*>(&tmpright);
+	//smpleft = reinterpret_cast<unsigned int*>(&tmpleft);
+	//smpright = reinterpret_cast<unsigned int*>(&tmpright);
 	Counter = MAX_ALLPASS_DELAY - 4;
 	l_delayedCounter = 0;
 	r_delayedCounter = 0;
