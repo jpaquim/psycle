@@ -232,7 +232,7 @@ private:
 
 	float dither[MAX_BUFFER_LENGTH];
 
-	char g_eqi, g_eqj, g_eqk;
+	int g_eqi, g_eqj, g_eqk;
 	short bnds;
 	int di;
 	int srate;
