@@ -29,7 +29,7 @@ using namespace psycle::plugin_interface;
 #define FTYPE_1P_LP 1
 #define FTYPE_1P_HP 2
 
-char *FTYPE_STRING[3] = { "off", "1-Pole LP", "1-Pole HP" };
+char const *FTYPE_STRING[3] = { "off", "1-Pole LP", "1-Pole HP" };
 
 int SPEED_FACTORS[4] = { 1, 2, 4, 8 };
 

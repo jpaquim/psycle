@@ -57,7 +57,7 @@ int lfowaves[] =
 	WF_REVSAWTOOTH
 };
 
-char *str_pm_types[] =
+char const *str_pm_types[] =
 {
 	"off",
 	"sub",
@@ -65,13 +65,13 @@ char *str_pm_types[] =
 	"mul"
 };
 
-char *str_yes_no[] =
+char const *str_yes_no[] =
 {
 	"no",
 	"yes"
 };
 
-char *str_mod_dests[] =
+char const *str_mod_dests[] =
 {
 	"off",
 	"OSC 1",
@@ -87,7 +87,7 @@ char *str_mod_dests[] =
 	"LFO 2 - Freq."
 };
 
-char *str_lfo1_dests[] =
+char const *str_lfo1_dests[] =
 {
 	"off",
 	"OSC 1",
@@ -101,7 +101,7 @@ char *str_lfo1_dests[] =
 	"FLT 2 - Freq."
 };
 
-char *str_lfo2_dests[] =
+char const *str_lfo2_dests[] =
 {
 	"off",
 	"OSC 1",
@@ -116,7 +116,7 @@ char *str_lfo2_dests[] =
 	"AMP - Level"
 };
 
-char *str_flt1_types[] =
+char const *str_flt1_types[] =
 {
 	"LP-12",
 	"LP-24",
@@ -128,7 +128,7 @@ char *str_flt1_types[] =
 	"Moog BP-24"
 };
 
-char *str_flt2_modes[] =
+char const *str_flt2_modes[] =
 {
 	"disabled",
 	"enabled",

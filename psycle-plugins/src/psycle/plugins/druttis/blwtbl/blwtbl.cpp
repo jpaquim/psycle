@@ -12,12 +12,14 @@
 //				Simple data
 //
 //////////////////////////////////////////////////////////////////////
-float *psinetable;
-int samplingrate;
-int totalpartials;
-int *preverse[2];
-float *pfmtable;
-float *ppmtable;
+namespace {
+	float *psinetable;
+	int samplingrate;
+	int totalpartials;
+	int *preverse[2];
+	float *pfmtable;
+	float *ppmtable;
+}
 //////////////////////////////////////////////////////////////////////
 //
 //				BlankFunc
@@ -172,7 +174,7 @@ void RevSawtoothFunc(float *pbuf, int len, int partial)
 //////////////////////////////////////////////////////////////////////
 typedef struct wavespec_t
 {
-	char								*pname;
+	char const							*pname;
 	bool								bandlimited;
 	void								(*func) (float *pbuf, int len, int partial);
 	float								*pdata;
