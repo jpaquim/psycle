@@ -7,7 +7,7 @@
 // http://ccrma.stanford.edu/software/stk/
 
 #include <psycle/plugin_interface.hpp>
-#include <stk/stk.h>
+#include <stk/Stk.h>
 #include <stk/Shakers.h>
 
 using namespace psycle::plugin_interface;
