@@ -6,10 +6,10 @@
 
 #include <psycle/core/config.private.hpp>
 #include "plugincatcher.h"
-#include <universalis/os/paths.hpp>
-
 #include "file.h"
 #include "fileio.h"
+#include <universalis/os/paths.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <iostream> // only for debug output
 #include <sstream>
 

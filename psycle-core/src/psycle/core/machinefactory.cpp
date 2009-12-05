@@ -13,6 +13,8 @@
 #include "vsthost.h"
 #include "ladspahost.hpp"
 
+#include <iostream>
+
 namespace psy { namespace core {
 
 MachineFactory& MachineFactory::getInstance() {

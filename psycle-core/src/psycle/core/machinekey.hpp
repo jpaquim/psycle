@@ -11,6 +11,7 @@
 #include <psycle/core/config.hpp>
 
 #include <string>
+#include <cstdint>
 
 namespace psy { namespace core {
 
