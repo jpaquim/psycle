@@ -14,7 +14,7 @@
 #include "instrument.h"
 #include "instpreview.h"
 #include "machine.h"
-#include "cstdint.h"
+#include <cstdint>
 
 namespace psy { namespace core {
 

@@ -41,10 +41,10 @@ void inline erase_all_nans_infinities_and_denormals(float & sample) {
 
 		// It does not work for nans!
 		//sample *= not_nan_nor_infinity & not_denormal;
+		
 		if (!not_nan_nor_infinity) {
 			sample = 0;
-		}
-		else {
+		} else {
 			sample *= not_denormal;
 		}
 	#endif

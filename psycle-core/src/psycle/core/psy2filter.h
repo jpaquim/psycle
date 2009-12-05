@@ -9,9 +9,8 @@
 #pragma once
 
 #include "psyfilterbase.h"
-#include "cstdint.h"
-
 #include <vector>
+#include <cstdint>
 
 namespace psy { namespace core {
 

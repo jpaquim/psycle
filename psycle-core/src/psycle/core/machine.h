@@ -13,7 +13,6 @@
 #include <psycle/helpers/helpers.hpp>
 #include "constants.h"
 #include "commands.h"
-#include "cstdint.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
 #include "machinekey.hpp"
@@ -22,6 +21,7 @@
 #include <deque>
 #include <map>
 #include <stdexcept>
+#include <cstdint>
 
 namespace psy { namespace core {
 
