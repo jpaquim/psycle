@@ -1,5 +1,7 @@
 #pragma once
 
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
+
 #define MAX_ALLPASS_DELAY 8192
 
 class CAllPass
@@ -19,10 +21,10 @@ private:
 	int l_delayedCounter;
 	int r_delayedCounter;
 	int Counter;
-	float tmpleft;
-	float tmpright;
-	unsigned int *smpleft;
-	unsigned int *smpright;
+	//float tmpleft;
+	//float tmpright;
+	//unsigned int *smpleft;
+	//unsigned int *smpright;
 
 };
 
@@ -31,16 +33,22 @@ inline void CAllPass::Work(float l_input,float r_input,float g)
 	left_output=(l_input*-g)+leftBuffer[l_delayedCounter];
 	right_output=(r_input*-g)+rightBuffer[r_delayedCounter];
 
-	tmpleft = l_input+left_output*g;
-	tmpright = r_input+right_output*g;
+	float tmpleft = l_input+left_output*g;
+	float tmpright = r_input+right_output*g;
 
-	//  Added following code to correct denormals.
-	*smpleft *= ((*smpleft < 0x7F800000) & ((*smpleft & 0x7F800000) > 0));
-	*smpright *= ((*smpright < 0x7F800000) & ((*smpright & 0x7F800000) > 0));
+	#if 0
+		//  Added following code to correct denormals.
+		*smpleft *= ((*smpleft < 0x7F800000) & ((*smpleft & 0x7F800000) > 0));
+		*smpright *= ((*smpright < 0x7F800000) & ((*smpright & 0x7F800000) > 0));
+	#else
+		psycle::helpers::math::erase_all_nans_infinities_and_denormals(tmpleft);
+		psycle::helpers::math::erase_all_nans_infinities_and_denormals(tmpright);
+	#endif
+	
 	leftBuffer[Counter] = tmpleft;
 	rightBuffer[Counter] = tmpright;
 
-	if(++Counter>=MAX_ALLPASS_DELAY)Counter=0;
-	if(++l_delayedCounter>=MAX_ALLPASS_DELAY)l_delayedCounter=0;
-	if(++r_delayedCounter>=MAX_ALLPASS_DELAY)r_delayedCounter=0;
+	if(++Counter>=MAX_ALLPASS_DELAY) Counter = 0;
+	if(++l_delayedCounter>=MAX_ALLPASS_DELAY) l_delayedCounter = 0;
+	if(++r_delayedCounter>=MAX_ALLPASS_DELAY) r_delayedCounter = 0;
 }

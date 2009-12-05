@@ -10,9 +10,10 @@
 	GUI added and implementation improved by Dominic Mazzoni, 5/11/2003.
 
 **********************************************************************/
-#include <cmath>
 
 #include "Compressor.h"
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
+#include <cmath>
 
 EffectCompressor::EffectCompressor()
 {
@@ -168,11 +169,15 @@ double EffectCompressor::AvgCircle(float value)
 	mCircle[mCirclePos] = value*value;
 	mRMSSum += mCircle[mCirclePos];
 	level = std::sqrt(mRMSSum/mCircleSize);
-	// NaN and Den remover :
-	unsigned int corrected_sample = *((unsigned int*)&level);
-	unsigned int exponent = corrected_sample & 0x7F800000;
-	corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-	level = *((float*)&corrected_sample);
+	#if 0
+		// NaN and Den remover :
+		unsigned int corrected_sample = *((unsigned int*)&level);
+		unsigned int exponent = corrected_sample & 0x7F800000;
+		corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+		level = *((float*)&corrected_sample);
+	#else
+		psycle::helpers::math::erase_all_nans_infinities_and_denormals(level);
+	#endif
 
 	mLevelCircle[mCirclePos] = level;
 	mCirclePos = (mCirclePos+1)%mCircleSize;   
