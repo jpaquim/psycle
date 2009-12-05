@@ -23,7 +23,7 @@ namespace psycle
 		}
 
 		std::uint32_t ULongBE::unsignedValue() const {
-			return d.byte.hihi << 24 + d.byte.hilo << 16 + d.byte.lohi << 8 + d.byte.lolo;
+			return (d.byte.hihi << 24) + (d.byte.hilo << 16) + (d.byte.lohi << 8) + d.byte.lolo;
 		}
 		std::int32_t ULongBE::signedValue() const {
 			return static_cast<std::int32_t>(unsignedValue());
@@ -37,7 +37,7 @@ namespace psycle
 			d.byte.lo = val&0xFF;
 		}
 		std::uint16_t UShortBE::unsignedValue() const {
-			return d.byte.hi << 8 + d.byte.lo;
+			return (d.byte.hi << 8) + d.byte.lo;
 		}
 		std::int16_t UShortBE::signedValue() const {
 			return static_cast<std::int16_t>(unsignedValue());
@@ -54,7 +54,7 @@ namespace psycle
 		}
 
 		float FixedPointBE::value() const {
-			return (float)(integer.byte.hi << 8 + integer.byte.lo) + (decimal.byte.hi << 8 + decimal.byte.lo)*0.0000152587890625f;
+			return (float)((integer.byte.hi << 8) + integer.byte.lo) + ((decimal.byte.hi << 8) + decimal.byte.lo)*0.0000152587890625f;
 		}
 
 		ULongLE::ULongLE() {
@@ -67,7 +67,7 @@ namespace psycle
 			d.byte.lolo = val&0xFF;
 		}
 		std::uint32_t ULongLE::unsignedValue() const {
-			return d.byte.hihi << 24 + d.byte.hilo << 16 + d.byte.lohi << 8 + d.byte.lolo;
+			return (d.byte.hihi << 24) + (d.byte.hilo << 16) + (d.byte.lohi << 8) + d.byte.lolo;
 		}
 		std::int32_t ULongLE::signedValue() const {
 			return static_cast<std::int32_t>(unsignedValue());
@@ -81,7 +81,7 @@ namespace psycle
 			d.byte.lo = val&0xFF;
 		}
 		std::uint16_t UShortLE::unsignedValue() const {
-			return d.byte.hi << 8 + d.byte.lo;
+			return (d.byte.hi << 8) + d.byte.lo;
 		}
 		std::int16_t UShortLE::signedValue() const {
 			return static_cast<std::int16_t>(unsignedValue());

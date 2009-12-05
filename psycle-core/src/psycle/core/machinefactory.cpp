@@ -86,7 +86,16 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 		}
 	}
 	std::cout << "MachineFactory:createmachine: loading with host:" << key.host() << " dll:" << key.dllName() << std::endl;
-	return hosts_[key.host()]->CreateMachine(*finder_,key,id);
+	Machine* mac = hosts_[key.host()]->CreateMachine(*finder_,key,id);
+	if (mac && mac->getMachineKey() != MachineKey::master() && 
+		mac->getMachineKey() != MachineKey::failednative() &&
+		mac->getMachineKey() != MachineKey::wrapperVst() &&
+		mac->getMachineKey() != MachineKey::invalid()) {
+		//Workaround for some where the first work call initializes some variables.
+		mac->PreWork(MAX_BUFFER_LENGTH, true);
+		mac->GenerateAudio(MAX_BUFFER_LENGTH);
+	}
+	return mac;
 #if 0
 	for (int i=0; i< hosts_.size(); ++i)
 	{

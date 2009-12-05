@@ -343,15 +343,12 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 					file->ReadArray(sDllName,256); // Plugin dll name
 					sDllName[255]='\0';
 	
-					std::string dllName = sDllName;
-					std::string::size_type pos = dllName.find(".dll");
-					if (pos != std::string::npos) dllName = dllName.substr(0,pos);
-					dllName = MachineKey::preprocessName(dllName);
-					if(dllName == "arguru_bass")
+					std::string dllName = MachineKey::preprocessName(sDllName);
+					if(dllName == "arguru-bass")
 						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::abass, *file);
-					else if(dllName == "arguru_synth")
+					else if(dllName == "arguru-synth")
 						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::asynth1, *file);
-					else if(dllName == "arguru_synth_2")
+					else if(dllName == "arguru-synth-2")
 						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::asynth2, *file);
 					else if(dllName == "synth21")
 						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::asynth21, *file);
@@ -367,10 +364,10 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 					}
 					break;
 				}
-				#ifdef _WIN32
 				case MACH_VST:
 				case MACH_VSTFX:
 					{
+				#if defined DIVERSALIS__OS__MICROSOFT
 						char sError[128];
 						bool berror=false;
 						vst::plugin* pVstPlugin;
@@ -414,9 +411,23 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 							else dummy->setGenerator(false);
 						}
 						delete key;
+				#else
+					#warning "Temporary hack for songs with VSTs"
+					Dummy* dummy;
+					pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(MachineKey::dummy(),i));
+					if (type == MACH_VST ) dummy->setGenerator(true);
+					else dummy->setGenerator(false);
+					pMac[i]->LoadPsy2FileFormat(file);
+					bool old;
+					int instance;
+					file->Read(old); // old format
+					file->Read(instance); // ovst.instance
+					char mch;
+					file->Read(mch);
+					std::cout << "replaced VST with dummy: " << vstL[instance].dllName << std::endl;
+				#endif
 					}
 					break;
-				#endif
 				default: {
 					switch(type) {
 						case MACH_MASTER:
@@ -431,7 +442,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 							break;
 						default: {
 								std::ostringstream s;
-								s << "unkown machine type: " << type;
+								s << "unkown machine type: " << type << std::endl;
 								std::cout << s.str();
 								//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 						}
@@ -440,7 +451,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 						pMac[i] = factory.CreateMachine(MachineKey::dummy(),i);
 	
 						std::ostringstream s;
-						s << "Couldnt create machine index: " << i << ", type: " << type;
+						s << "Couldnt create machine index: " << i << ", type: " << type << std::endl;
 						std::cout << s.str();
 
 						//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);

@@ -255,16 +255,16 @@ void Converter::retweak(CoreSong & song) const {
 }
 
 Converter::Plugin_Names::Plugin_Names() {
-	(*this)[ring_modulator] = new std::string("ring_modulator");
+	(*this)[ring_modulator] = new std::string("ring-modulator");
 	(*this)[distortion] = new std::string("distortion");
 	(*this)[delay] = new std::string("delay");
-	(*this)[filter_2_poles] = new std::string("filter_2_poles");
+	(*this)[filter_2_poles] = new std::string("filter-2-poles");
 	(*this)[gainer] = new std::string("gainer");
 	(*this)[flanger] = new std::string("flanger");
-	(*this)[abass] = new std::string("arguru synth 2f");
-	(*this)[asynth1] = new std::string("arguru synth 2f");
-	(*this)[asynth2] = new std::string("arguru synth 2f");
-	(*this)[asynth21] = new std::string("arguru synth 2f");
+	(*this)[abass] = new std::string("arguru-synth-2f");
+	(*this)[asynth1] = new std::string("arguru-synth-2f");
+	(*this)[asynth2] = new std::string("arguru-synth-2f");
+	(*this)[asynth21] = new std::string("arguru-synth-2f");
 }
 
 Converter::Plugin_Names::~Plugin_Names() {
