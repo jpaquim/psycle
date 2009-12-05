@@ -6,9 +6,8 @@
 
 #include <psycle/core/config.private.hpp>
 #include "instpreview.h"
-
-#include "cstdint.h"
 #include "instrument.h"
+#include <cstdint>
 
 namespace psy { namespace core {
 
