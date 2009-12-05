@@ -1,10 +1,17 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net
+
+#ifndef PSYCLE__HELPERS__MATH__ERASE_ALL_NANS_INFINITES_AND_DENORMALS__INCLUDED
+#define PSYCLE__HELPERS__MATH__ERASE_ALL_NANS_INFINITES_AND_DENORMALS__INCLUDED
 #pragma once
+
 #include <diversalis/cpu.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
 #if 0 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	//#include <xmmintrin.h>
 #endif
+
 namespace psycle { namespace helpers { namespace math {
 
 /// Cure for malicious samples
@@ -77,3 +84,5 @@ void inline erase_all_nans_infinities_and_denormals(double samples[], unsigned i
 }
 
 }}}
+
+#endif

@@ -1,7 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 members of the music-dsp mailing list http://www.music.columbia.edu/cmc/music-dsp and of the psycle project http://psycle.sourceforge.net 
+// copyright 1999-2009 members of the psycle project http://psycle.sourceforge.net and of the music-dsp mailing list http://www.music.columbia.edu/cmc/music-dsp
 
+#ifndef PSYCLE__HELPERS__MATH__SINE__INCLUDED
+#define PSYCLE__HELPERS__MATH__SINE__INCLUDED
 #pragma once
+
 #include <cmath>
 #include "pi.hpp"
 #if defined BOOST_AUTO_TEST_CASE
@@ -9,18 +12,20 @@
 	#include <universalis/compiler/typenameof.hpp>
 	#include <sstream>
 #endif
+
 namespace psycle { namespace helpers { namespace math {
 
-// worth reading
-// http://www.audiomulch.com/~rossb/code/sinusoids/
-// http://www.devmaster.net/forums/showthread.php?t=5784
-
 /// polynomial approximation of the sin function.
+///
 /// two variants: 2nd degree positive polynomial (parabola), 4th degree polynomial (square of the same parabola).
 /// input range: [-pi, pi]
 /// output range: [0, 1]
 /// constraints applied: sin(0) = 0, sin(pi / 2) = 1, sin(pi) = 0
 /// THD = 3.8% with only odd harmonics (in the accurate variant THD is only 0.078% with q = 0.775, p = 0.225)
+///
+/// worth reading:
+/// http://www.audiomulch.com/~rossb/code/sinusoids/
+/// http://www.devmaster.net/forums/showthread.php?t=5784
 template<unsigned int Polynomial_Degree, typename Real>
 Real fast_sin(Real const & radians) {
 	//assert(-pi <= radians && radians <= pi);
@@ -55,9 +60,7 @@ Real fast_sin(Real const & radians) {
 	#else
 		template<unsigned int Polynomial_Degree, typename Real>
 		void fast_sin_test_template() {
-			using namespace universalis::os::clocks;
-			//typedef thread clock;
-			typedef monotonic clock;
+			typedef universalis::os::clocks::monotonic clock;
 			int const iterations(1000000);
 			std::nanoseconds const t1(clock::current());
 			Real const step(pi / 1000);
@@ -98,4 +101,7 @@ Real fast_sin(Real const & radians) {
 		}
 	#endif
 #endif
+
 }}}
+
+#endif
