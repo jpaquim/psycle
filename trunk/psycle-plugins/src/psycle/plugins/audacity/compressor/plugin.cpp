@@ -24,7 +24,11 @@
 using namespace psycle::plugin_interface;
 
 #define MAX_SAMPLES 3000
-#define M_PI 3.14159265359f
+
+#ifndef M_PI
+	#define M_PI 3.14159265359f
+#endif
+
 #define NUMPARAMETERS 5
 
 CMachineParameter const paraThreshold = {
