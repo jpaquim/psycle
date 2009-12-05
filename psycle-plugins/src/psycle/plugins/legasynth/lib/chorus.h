@@ -23,20 +23,22 @@
 
 #include <vector>
 #define BUFFER_SIZE 30000
-#define M_PI 3.14159265359f
+
+#ifndef M_PI
+	#define M_PI 3.14159265359f
+#endif
+
 /**
-	*@author red
-	*/
-
+ *@author red
+ */
 class Chorus {
-
-		float delay;
-		float lfo_speed;
+	float delay;
+	float lfo_speed;
 	float lfo_depth;
 	float feedback;
-		float width;
+	float width;
 	
-		int index; //osc index
+	int index; //osc index
 	int ring_buffer_index;
 
 	//std::vector<float> ringbuffer_l;

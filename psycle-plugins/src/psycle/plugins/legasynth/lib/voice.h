@@ -24,7 +24,9 @@
 #include <vector>
 #include <cstring>
 
-#define M_PI 3.14159265359f
+#ifndef M_PI
+	#define M_PI 3.14159265359f
+#endif
 
 
 class Voice {
