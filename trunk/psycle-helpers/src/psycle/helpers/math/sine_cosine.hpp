@@ -45,7 +45,7 @@ namespace psycle { namespace helpers { namespace math {
 
 	#endif
 	
-	#if defined BOOST_AUTO_TEST_CASE && !defined PSYCLE__HELPERS__MATH__FAST_LOG2__SKIP_TEST_CASE
+	#if defined BOOST_AUTO_TEST_CASE
 		template<typename Real>
 		void sin_cos_test_template() {
 			Real const tolerance = 1e-15;
