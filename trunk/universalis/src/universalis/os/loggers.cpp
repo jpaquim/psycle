@@ -85,7 +85,7 @@ void stream_logger::do_log(int const level, std::string const & message, compile
 
 void stream_logger::do_log(int const level, std::string const & string) throw() {
 	int const static levels [] = {'T', 'I', 'W', 'E', 'C'};
-	int const static colors [] = {0, 2, 6, 1, 5, 3, 4, 7};
+	int const static colors [] = {0, 2, 5, 1, 6, 3, 4, 7};
 	char const level_char(levels[std::min(static_cast<std::size_t>(level), sizeof levels)]);
 	std::utc_time const time = std::hiresolution_clock<std::utc_time>::universal_time();
 	std::nanoseconds::tick_type const time_ns = time.nanoseconds_since_epoch().get_count();
