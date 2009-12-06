@@ -17,6 +17,8 @@
 #endif
 
 using namespace psy::core;
+namespace loggers = universalis::os::loggers;
+
 void usage() {
 		std::cerr <<
 			"Usage: psycle-player [options] [--input-file] <song file name>\n"
@@ -148,14 +150,24 @@ int main(int argument_count, char * arguments[]) {
 	}
 	Configuration configuration;
 	if(!configuration.pluginPath().length()) {
-		std::cerr << "psycle: player: native plugin path not configured. You can set the PSYCLE_PATH environment variable.\n";
+		if(loggers::warning()())
+			loggers::warning()("psycle: player: native plugin path not configured. You can set the PSYCLE_PATH environment variable.");
 	} else {
-		std::cout << "psycle: player: native plugins are looked for in: " << configuration.pluginPath() << '\n';
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "psycle: player: native plugins are looked for in: " << configuration.pluginPath();
+			loggers::information()(s.str());
+		}
 	}
 	if(!configuration.ladspaPath().length()) {
-		std::cerr << "psycle: player: ladspa plugin path not configured. You can set the LADSPA_PATH environment variable.\n";
+		if(loggers::warning()())
+			loggers::warning()("psycle: player: ladspa plugin path not configured. You can set the LADSPA_PATH environment variable.");
 	} else {
-		std::cout << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath() << '\n';
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "psycle: player: ladspa plugins are looked for in: " << configuration.ladspaPath();
+			loggers::information()(s.str());
+		}
 	}
 
 	Player & player(Player::singleton());
@@ -166,7 +178,11 @@ int main(int argument_count, char * arguments[]) {
 	factory.setLadspaPath(configuration.ladspaPath());
 
 	if(output_driver_name.length()) {
-		std::cout << "psycle: player: setting output driver name to: " << output_driver_name << '\n';
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "psycle: player: setting output driver name to: " << output_driver_name;
+			loggers::information()(s.str());
+		}
 		configuration.set_driver_by_name(output_driver_name);
 	}
 	psy::core::AudioDriver & output_driver(configuration.output_driver());
@@ -175,14 +191,22 @@ int main(int argument_count, char * arguments[]) {
 
 	///\todo it seems player.setDriver resets the settings to their default, so we need to set the settings after.
 	if(output_device_name.length()) {
-		std::cout << "psycle: player: setting output driver device name to: " << output_device_name << '\n';
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "psycle: player: setting output driver device name to: " << output_device_name;
+			loggers::information()(s.str());
+		}
 		psy::core::AudioDriverSettings settings(player.driver().settings()); ///\todo why do we do a copy?
 		settings.setDeviceName(output_device_name);
 		player.driver().setSettings(settings); ///\todo why do we copy?
 	}
 
 	if(output_file_name.length()) {
-		std::cout << "psycle: player: setting output file name to: " << output_file_name << '\n';
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "psycle: player: setting output file name to: " << output_file_name;
+			loggers::information()(s.str());
+		}
 		player.setFileName(output_file_name);
 	}
 	player.driver().Enable(false); ///\todo setDriver enables it and we disable it just after, why?
@@ -192,16 +216,34 @@ int main(int argument_count, char * arguments[]) {
 		//Song is assigned to player previous to load, since the plugins can ask information about
 		//the song they are being loaded from.
 		player.song(song);
-		std::cout << "psycle: player: loading song file: " << input_file_name << '\n';
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "psycle: player: loading song file: " << input_file_name;
+			loggers::information()(s.str());
+		}
 		if(!song.load(input_file_name)) {
-			std::cerr << "psycle: player: could not load song file: " << input_file_name << '\n';
+			if(loggers::exception()()) {
+				std::ostringstream s;
+				s << "psycle: player: could not load song file: " << input_file_name;
+				loggers::exception()(s.str());
+			}
 			return 2;
 		}
 
-		if(output_file_name.length()) player.startRecording();
+		if(output_file_name.length()) {
+			if(loggers::information()()) {
+				std::ostringstream s;
+				s << "psycle: player: starting to record to: " << output_file_name;
+				loggers::information()(s.str());
+			}
+			player.startRecording();
+		}
+		
+		if(loggers::trace()()) loggers::trace()("psycle: player: enabling output driver", UNIVERSALIS__COMPILER__LOCATION);
 		player.driver().Enable(true);
+
+		if(loggers::information()()) loggers::information()("psycle: player: playing...");
 		player.start(0);
-		std::cout << "psycle: player: playing...\n";
 
 		if(wait) {
 			std::cout << "psycle: player: press enter or ctrl+" PSYCLE__PLAYER__EOF " (EOF) to stop.\n";
@@ -212,13 +254,26 @@ int main(int argument_count, char * arguments[]) {
 			std::string s; std::getline(std::cin, s);
 		}
 
-		std::cout << "\npsycle: player: stopping at position " << player.playPos() << ".\n";
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "psycle: player: stopping at position " << player.playPos();
+			loggers::information()(s.str());
+		}
 		player.stop();
-		if(output_file_name.length()) player.stopRecording();
+		
+		if(output_file_name.length()) {
+			if(loggers::information()()) {
+				std::ostringstream s;
+				s << "psycle: player: stopping recording to: " << output_file_name;
+				loggers::information()(s.str());
+			}
+			player.stopRecording();
+		}
 	}
 	player.driver().Enable(false);
 	
 	///\todo kluge
+	loggers::information()("(klugy pause)");
 	std::this_thread::sleep(std::seconds(1));
 
 	return 0;

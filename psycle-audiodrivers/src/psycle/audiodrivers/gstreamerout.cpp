@@ -18,8 +18,8 @@ namespace {
 	::GstElement & instantiate(std::string const & type, std::string const & name) throw(universalis::exception) {
 		try {
 			if(loggers::information()) {
-				std::ostringstream s; s << "instantiating " << type << " " << name;
-				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				std::ostringstream s; s << "psycle: audiodrivers: gstreamer: instantiating " << type << " " << name;
+				loggers::information()(s.str());
 			}
 			::GstElementFactory * factory;
 			if(!(factory = ::gst_element_factory_find(type.c_str()))) {
@@ -29,12 +29,12 @@ namespace {
 			}
 			if(loggers::information()) {
 				std::ostringstream s;
-				s
-					<< "The element type " << ::gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory))
-					<< " is a member of the group " << ::gst_element_factory_get_klass(factory) << "." << std::endl
-					<< "Description:" << std::endl
-					<< ::gst_element_factory_get_description(factory);
-				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				s <<
+					"psycle: audiodrivers: gstreamer:"
+					" The element type " << ::gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory)) <<
+					" is a member of the group " << ::gst_element_factory_get_klass(factory) <<
+					". Description: " << ::gst_element_factory_get_description(factory);
+				loggers::information()(s.str());
 			}
 			::GstElement * element;
 			if(!(element = ::gst_element_factory_create(factory, name.c_str()))) {
@@ -67,7 +67,7 @@ namespace {
 			::GstStateChangeReturn const result(::gst_element_get_state(&element, &current_state, &pending_state, intermediate_timeout_nanoseconds));
 			switch(result) {
 				case ::GST_STATE_CHANGE_NO_PREROLL:
-					universalis::os::loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+					if(loggers::information()()) loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				case ::GST_STATE_CHANGE_SUCCESS:
 					if(current_state == state_wanted) return;
 					else {
@@ -268,10 +268,12 @@ void GStreamerOut::do_open() {
 	if(loggers::information()) {
 		float const latency(float(period_frames_) / samples_per_second_);
 		std::ostringstream s;
-		s
-			<< "period size: " << period_size << " bytes\n"
-			<< periods_ << " periods; total buffer size: " << periods_ * period_size << " bytes\n"
-			"latency: between " << latency << " and " << latency * periods_ << " seconds ";
+		s <<
+			"psycle: audiodrivers: gstreamer: "
+			"period size: " << period_size << " bytes; "
+			"periods: " << periods_ << "; "
+			"total buffer size: " << periods_ * period_size << " bytes; "
+			"latency: between " << latency << " and " << latency * periods_ << " seconds";
 		loggers::information()(s.str());
 	}
 
