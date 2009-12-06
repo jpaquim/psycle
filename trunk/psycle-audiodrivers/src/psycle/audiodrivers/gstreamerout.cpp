@@ -232,7 +232,7 @@ void GStreamerOut::do_open() {
 
 	// create caps, audio format pad capabilities 
 	caps_ = ::gst_caps_new_simple(
-		"audio/x-raw-int", // note we could simply use "audio/x-raw-float" and we'd be freed from having to handle the convertion,
+		"audio/x-raw-int", // note we could simply use "audio/x-raw-float" and we'd be freed from having to handle the conversion,
 		"rate"      , G_TYPE_INT    , ::gint(samples_per_second),
 		"channels"  , G_TYPE_INT    , ::gint(channels),
 		"width"     , G_TYPE_INT    , ::gint(bits_per_channel_sample),
