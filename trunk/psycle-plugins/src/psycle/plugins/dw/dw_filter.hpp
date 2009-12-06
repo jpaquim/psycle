@@ -65,7 +65,7 @@ public:
 protected:
 
 	virtual void zeroize();
-	virtual bool isdenormal(float num);
+	//virtual bool isdenormal(float num);
 	virtual void emptybuffers();
 
 	filtmode mode;
