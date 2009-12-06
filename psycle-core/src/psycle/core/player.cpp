@@ -83,15 +83,16 @@ void Player::start_threads() {
 		}
 	}
 	
+	if(loggers::information()()) {
+		std::ostringstream s;
+		s << "psycle: core: player: using " << thread_count_ << " threads";
+		loggers::information()(s.str());
+	}
+
 	if(!thread_count_) return; // don't create any thread, will use a single-threaded, recursive processing
 
 	try {
 		// start the scheduling threads
-		if(loggers::information()()) {
-			std::ostringstream s;
-			s << "psycle: core: player: using " << thread_count_ << " threads";
-			loggers::information()(s.str());
-		}
 		for(std::size_t i(0); i < thread_count_; ++i)
 			threads_.push_back(new std::thread(boost::bind(&Player::thread_function, this, i)));
 	} catch(...) {

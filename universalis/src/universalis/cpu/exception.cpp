@@ -116,7 +116,7 @@ void exception::install_handler_in_thread() {
 	if(os::loggers::trace()()) {
 		std::ostringstream s;
 		s << "installing cpu/os exception handler in thread: name: " << os::thread_name::get() << ", id: " << std::this_thread::id();
-		os::loggers::trace()(s.str());
+		os::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 	}
 	#if defined DIVERSALIS__OS__MICROSOFT
 		// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/seterrormode.asp

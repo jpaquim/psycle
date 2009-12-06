@@ -30,7 +30,7 @@ void thread_name::set_tls() {
 	if(os::loggers::trace()) {
 		std::ostringstream s;
 		s << "setting name for thread: id: " << std::this_thread::id() << ", name: " << thread_name_;
-		os::loggers::trace()(s.str());
+		os::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	tls_thread_name_ = &thread_name_;
 }
