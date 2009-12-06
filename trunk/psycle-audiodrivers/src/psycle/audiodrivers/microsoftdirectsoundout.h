@@ -36,7 +36,6 @@ class MsDirectSound : public AudioDriver {
 		AudioDriverInfo info( ) const;
 
 		virtual void Initialize( AUDIODRIVERWORKFN pCallback, void * context );
-		virtual void Reset();
 		virtual bool Enable( bool );
 		virtual int GetWritePos();
 		virtual int GetPlayPos();

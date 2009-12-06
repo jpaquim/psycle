@@ -4,6 +4,7 @@
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
 #include <diversalis/os.hpp>
+#include <universalis/os/loggers.hpp>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -77,6 +78,11 @@ void usage() {
 }
 
 int main(int argument_count, char * arguments[]) {
+	{
+		using namespace universalis::os::loggers;
+		multiplex_logger::singleton().add(stream_logger::default_logger());
+	}
+
 	if(argument_count < 2) {
 		usage();
 		return 1;

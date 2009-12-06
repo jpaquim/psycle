@@ -30,9 +30,9 @@ AudioDriverSettings::AudioDriverSettings()
 	samplesPerSec_(44100),
 	bitDepth_(16),
 	channelMode_(3),
-	bufferSize_(2048),
-	blockSize_(4096),
-	blockCount_(7)
+	bufferSize_(4096),
+	blockSize_(1024),
+	blockCount_(4)
 {}
 
 int AudioDriverSettings::sampleSize() const {
