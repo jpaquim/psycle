@@ -7,6 +7,8 @@
 #include <cstdlib>
 #include <algorithm> // for std::min
 #include <date_time>
+#include <iomanip>
+
 namespace universalis { namespace os {
 
 /**********************************************************************************************************/
@@ -68,10 +70,10 @@ namespace {
 		if(ansi_terminal) out << "\033[34m";
 		out
 			<< "# "
+			<< location.module() << " # "
 			<< location.file() << ":"
 			<< location.line() << " # "
-			<< location.function() << " # "
-			<< location.module();
+			<< location.function();
 		if(ansi_terminal) out << "\033[0m";
 	}
 }
@@ -79,20 +81,28 @@ namespace {
 void stream_logger::do_log(int const level, std::string const & message, compiler::location const & location) throw() {
 	std::ostringstream s;
 	dump_location(location, s);
-	s << '\n' << message;
 	do_log(level, s.str());
+	do_log(level, message);
 }
 
 void stream_logger::do_log(int const level, std::string const & string) throw() {
 	int const static levels [] = {'T', 'I', 'W', 'E', 'C'};
 	int const static colors [] = {0, 2, 5, 1, 6, 3, 4, 7};
 	char const level_char(levels[std::min(static_cast<std::size_t>(level), sizeof levels)]);
-	std::utc_time const time = std::hiresolution_clock<std::utc_time>::universal_time();
-	std::nanoseconds::tick_type const time_ns = time.nanoseconds_since_epoch().get_count();
+	std::nanoseconds::tick_type static const time0_ns =
+		std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch().get_count();
+	std::nanoseconds::tick_type const time_ns =
+		std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch().get_count() - time0_ns;
 	try {
-		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << "mlog: " << level_char << ":\033[0m ";
-		else ostream() << "log: " << level_char << ": ";
-		ostream() << time_ns << ": " << string << '\n';
+		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << 'm';
+		ostream() << "log: " << std::setw(7) << time_ns / 1000 << "µs: " << level_char << ": ";
+		if(ansi_terminal) {
+			ostream() << "\033[0m";
+			if(level >= 2) ostream() << "\033[1m";
+		}
+		ostream() << string;
+		if(ansi_terminal && level >= 2) ostream() << "\033[0m";
+		ostream() << '\n';
 	} catch(...) {
 		// oh dear!
 		// report the error to std::cerr ...

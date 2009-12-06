@@ -102,7 +102,7 @@ namespace {
 			::GstStateChangeReturn const result(::gst_element_get_state(&element, &current_state, &pending_state, intermediate_timeout_nanoseconds));
 			switch(result) {
 				case ::GST_STATE_CHANGE_NO_PREROLL:
-					universalis::os::loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+					if(loggers::information()()) loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				case ::GST_STATE_CHANGE_SUCCESS:
 					if(current_state == state_wanted) return;
 					else {
@@ -278,10 +278,11 @@ void gstreamer::do_open() throw(engine::exception) {
 	if(loggers::information()) {
 		real const latency(static_cast<real>(parent().events_per_buffer()) / format.samples_per_second());
 		std::ostringstream s;
-		s
-			<< "period size: " << period_size << " bytes\n"
-			<< periods << " periods; total buffer size: " << periods * period_size << " bytes\n"
-			"latency: between " << latency << " and " << latency * periods << " seconds ";
+		s <<
+			"period size: " << period_size << " bytes; "
+			"periods: " << periods << "; "
+			"total buffer size: " << periods * period_size << " bytes; "
+			"latency: between " << latency << " and " << latency * periods << " seconds";
 		loggers::information()(s.str());
 	}
 

@@ -13,9 +13,11 @@
 #include "vsthost.h"
 #include "ladspahost.hpp"
 
-#include <iostream>
+#include <universalis/os/loggers.hpp>
 
 namespace psy { namespace core {
+
+namespace loggers = universalis::os::loggers;
 
 MachineFactory& MachineFactory::getInstance() {
 	static MachineFactory factory;
@@ -69,9 +71,6 @@ void MachineFactory::FillHosts()
 
 Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id)
 {
-	#if 0
-	std::cout << "machinefactory::createmachine : " << key.dllName() << std::endl;
-	#endif
 	assert(key.host() >= 0 && key.host() < Hosts::NUM_HOSTS);
 
 	// a check for these machines is done, because we don't add it into the finder,
@@ -79,15 +78,27 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 	if ( key != MachineKey::master() && 
 		key != MachineKey::failednative() && key != MachineKey::wrapperVst()) {
 		if (!finder_->hasKey(key)) {
-			std::cout << "MachineFactory:createmachine: haskey returned false!!!! :" << key.dllName() << std::endl;
+			if(loggers::warning()()) {
+				std::ostringstream s;
+				s << "psycle: core: machine factory: create machine: plugin not found: " << key.dllName();
+				loggers::warning()(s.str());
+			}
 			return 0;
 		}
 		if ( !finder_->info(key).allow() ) {
-			std::cout << "MachineFactory:createmachine: Plugin not allowed to run: " << key.dllName() << std::endl;
+			if(loggers::warning()()) {
+				std::ostringstream s;
+				s << "psycle: core: machine factory: create machine: plugin not allowed to run: " << key.dllName();
+				loggers::warning()(s.str());
+			}
 			return hosts_[Hosts::INTERNAL]->CreateMachine(*finder_,MachineKey::dummy(),id);
 		}
 	}
-	std::cout << "MachineFactory:createmachine: loading with host:" << key.host() << " dll:" << key.dllName() << std::endl;
+	if(loggers::information()()) {
+		std::ostringstream s;
+		s << "psycle: core: machine factory: create machine: loading with host: " << key.host() << ", plugin: " << key.dllName();
+		loggers::information()(s.str());
+	}
 	Machine* mac = hosts_[key.host()]->CreateMachine(*finder_,key,id);
 	if (mac && mac->getMachineKey() != MachineKey::master() && 
 		mac->getMachineKey() != MachineKey::failednative() &&
