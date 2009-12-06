@@ -187,8 +187,7 @@ void gstreamer::do_open() throw(engine::exception) {
 	{ // initialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
 		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
-		if(!global_client_count) {
-			++global_client_count;
+		if(!global_client_count++) {
 			int * argument_count(0);
 			char *** arguments(0);
 			::GError * error(0);
