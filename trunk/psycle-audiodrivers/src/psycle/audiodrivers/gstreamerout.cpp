@@ -14,26 +14,6 @@ namespace psy { namespace core {
 namespace loggers = universalis::os::loggers;
 using universalis::exceptions::runtime_error;
 
-AudioDriverInfo GStreamerOut::info( ) const {
-	return AudioDriverInfo("gstreamer", "GStreamer Driver", "Output through the GStreamer infrastructure", true);
-}
-
-GStreamerOut::GStreamerOut()
-:
-	name_("gstreamer"),
-	io_ready_(true),
-	pipeline_(),
-	source_(),
-	caps_filter_(),
-	sink_(),
-	caps_(),
-	intermediate_buffer_()
-{}
-
-GStreamerOut::~GStreamerOut() {
-	close();
-}
-
 namespace {
 	::GstElement & instantiate(std::string const & type, std::string const & name) throw(universalis::exception) {
 		try {
@@ -166,6 +146,19 @@ namespace {
 	}
 }
 
+GStreamerOut::GStreamerOut()
+:
+	callback_(),
+	callback_context_(),
+	pipeline_(),
+	source_(),
+	caps_filter_(),
+	sink_(),
+	caps_(),
+	channels_(2),
+	samples_per_second_(44100)
+{}
+
 void GStreamerOut::do_open() {
 	{ // initialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
@@ -183,7 +176,7 @@ void GStreamerOut::do_open() {
 
 	// create an audio sink
 	#define psycle_log loggers::information()("exception: caught while trying to instantiate audio sink ; trying next type ...", UNIVERSALIS__COMPILER__LOCATION);
-		std::string const sink_name(name() + "-sink");
+		std::string const sink_name("sink");
 		try { sink_ = &instantiate("gconfaudiosink", sink_name); }
 		catch(...) {
 			psycle_log
@@ -211,48 +204,32 @@ void GStreamerOut::do_open() {
 		}}}}}}
 	#undef psycle_log
 
-	// audio format
-	#if 0 // freepsycle
-		format format(in_port().channels(), in_port().events_per_second(), /*significant_bits_per_channel_sample*/ 16); ///\todo parametrable
-		if(loggers::information()) {
-			std::ostringstream s;
-			s << "format: " << format.description();
-			loggers::information()(s.str());
-		}
-	#else
-		///\todo parametrable
-		int const channels = 2;
-		int const samples_per_second = 44100;
-		int const bits_per_channel_sample = 16;
-		int const significant_bits_per_channel_sample = 16;
-		int const bytes_per_sample = channels * bits_per_channel_sample / 8;
-		int const events_per_buffer = 1024;
-		typedef float real;
-	#endif
-
 	// create caps, audio format pad capabilities 
+	int const bits_per_channel_sample = sizeof(output_sample_type) * 8;
+	int const significant_bits_per_channel_sample = bits_per_channel_sample;
+	int const bytes_per_sample = channels_ * sizeof(output_sample_type);
 	caps_ = ::gst_caps_new_simple(
-		"audio/x-raw-int", // note we could simply use "audio/x-raw-float" and we'd be freed from having to handle the conversion,
-		"rate"      , G_TYPE_INT    , ::gint(samples_per_second),
-		"channels"  , G_TYPE_INT    , ::gint(channels),
+		"audio/x-raw-float",
+		"rate"      , G_TYPE_INT    , ::gint(samples_per_second_),
+		"channels"  , G_TYPE_INT    , ::gint(channels_),
 		"width"     , G_TYPE_INT    , ::gint(bits_per_channel_sample),
 		"depth"     , G_TYPE_INT    , ::gint(significant_bits_per_channel_sample),
-		"signed"    , G_TYPE_BOOLEAN, ::gboolean(/*format.sample_signed()*/ std::numeric_limits<output_sample_type>::min() < 0),
-		"endianness", G_TYPE_INT    , ::gint(/*format.sample_endianness()*/ G_BYTE_ORDER),
+		"signed"    , G_TYPE_BOOLEAN, ::gboolean(std::numeric_limits<output_sample_type>::min()),
+		"endianness", G_TYPE_INT    , ::gint(G_BYTE_ORDER),
 		(void*)0
 	);
 
 	// create a capsfilter
-	caps_filter_ = &instantiate("capsfilter", name() + "-caps-filter");
+	caps_filter_ = &instantiate("capsfilter", "caps-filter");
 
 	// set caps on the capsfilter
 	::g_object_set(G_OBJECT(caps_filter_), "caps", caps_, (void*)0);
 
 	// create a fakesrc
-	source_ = &instantiate("fakesrc", name() + "-src");
+	source_ = &instantiate("fakesrc", "src");
 
 	// create a pipeline
-	if(!(pipeline_ = ::gst_pipeline_new((name() + "-pipeline").c_str()))) throw runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
+	if(!(pipeline_ = ::gst_pipeline_new("pipeline"))) throw runtime_error("could not create new empty pipeline", UNIVERSALIS__COMPILER__LOCATION);
 	
 	// add the elements to the pipeline
 	//::gst_bin_add_many(GST_BIN(pipeline), source_, caps_filter_, sink_, (void*)0);
@@ -271,7 +248,7 @@ void GStreamerOut::do_open() {
 	unsigned int const period_frames(1024); ///\todo parametrable
 	unsigned int const period_size(static_cast<unsigned int>(period_frames * bytes_per_sample));
 	if(loggers::information()) {
-		real const latency(static_cast<real>(events_per_buffer) / samples_per_second);
+		float const latency(float(period_frames) / samples_per_second_);
 		std::ostringstream s;
 		s
 			<< "period size: " << period_size << " bytes\n"
@@ -292,17 +269,6 @@ void GStreamerOut::do_open() {
 		(void*)0
 	);
 
-	{ // allocate the intermediate buffer
-		///\todo use gstreamer's lock-free ringbuffer
-		// note: period_frames may be different from parent().events_per_buffer()
-		std::size_t const bytes(static_cast<std::size_t>(events_per_buffer * bytes_per_sample));
-		if(!(intermediate_buffer_ = new char[bytes])) {
-			std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
-			throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		intermediate_buffer_end_ = intermediate_buffer_ + bytes;
-	}
-
 	// set the pipeline state to ready
 	set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
 
@@ -319,8 +285,6 @@ bool GStreamerOut::opened() const {
 }
 
 void GStreamerOut::do_start() {
-	//resource::do_start();
-	intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 	stop_requested_ = handoff_called_ = false;
 	wait_for_state_to_become_playing_ = true;
 	// register our callback to the handoff signal of the fakesrc element
@@ -355,7 +319,7 @@ void GStreamerOut::handoff_static(::GstElement * source, ::GstBuffer * buffer, :
 void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
 	{ scoped_lock lock(mutex_);
-		while(io_ready() && !stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
+		while(!stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
 		if(stop_requested_) return;
 		// Handoff is called before state is changed to playing.
 		if(wait_for_state_to_become_playing_) {
@@ -365,69 +329,13 @@ void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 			while(wait_for_state_to_become_playing_) condition_.wait(lock);
 		}
 	}
+	std::cout << "xxxxxxx\n";
 	::guint8 * out(GST_BUFFER_DATA(&buffer));
-	std::size_t out_size(GST_BUFFER_SIZE(&buffer));
-	while(true) { // copy the intermediate buffer to the gstreamer buffer
-		std::size_t const in_size(intermediate_buffer_end_ - intermediate_buffer_current_read_pointer_);
-		std::size_t const copy_size(std::min(in_size, out_size));
-		std::memcpy(out, intermediate_buffer_current_read_pointer_, copy_size);
-		intermediate_buffer_current_read_pointer_ += copy_size;
-		out_size -= copy_size;
-		if(!out_size) break;
-		{ scoped_lock lock(mutex_);
-			io_ready(true);
-		}
-		condition_.notify_one();
-		{ scoped_lock lock(mutex_);
-			while(io_ready() && !stop_requested_) condition_.wait(lock);
-		}
-		if(stop_requested_) return;
-		out += copy_size;
-	}
-	if(intermediate_buffer_current_read_pointer_ == intermediate_buffer_end_) {
-		{ scoped_lock lock(mutex_);
-			io_ready(true);
-		}
-		condition_.notify_one();
-	}
-}
-
-/// this is called from within psycle's host's processing thread(s).
-void GStreamerOut::do_process() {
-	if(false && loggers::trace()) loggers::trace()("process", UNIVERSALIS__COMPILER__LOCATION);
-	//if(!in_port()) return;
-	{ scoped_lock lock(mutex_);
-		if(false && loggers::warning() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
-		while(!io_ready()) condition_.wait(lock);
-	}
-	{ // fill the intermediate buffer
-		#if 0 // freepsycle
-		unsigned int const channels(in_port().channels());
-		unsigned int const samples_per_buffer(parent().events_per_buffer());
-		assert(last_samples_.size() == channels);
-		for(unsigned int c(0); c < channels; ++c) {
-			engine::buffer::channel & in(in_port().buffer()[c]);
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + c);
-			unsigned int spread(0);
-			for(std::size_t e(0), s(in.size()); e < s; ++e) {
-				real s(in[e].sample());
-				{
-					s *= std::numeric_limits<output_sample_type>::max();
-					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
-					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
-				}
-				last_samples_[c] = static_cast<output_sample_type>(s);
-				for( ; spread <= in[e].index() ; ++spread, ++out) *out = last_samples_[c];
-			}
-			for( ; spread < samples_per_buffer ; ++spread, ++out) *out = last_samples_[c];
-		}
-		#endif
-	}
-	{ scoped_lock lock(mutex_);
-		intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
-		io_ready(false);
-	}
-	condition_.notify_one();
+	std::size_t const out_size(GST_BUFFER_SIZE(&buffer));
+	int sample_count = out_size / sizeof(output_sample_type) / channels_;
+	float const * const samples = callback_(callback_context_, sample_count);
+	std::memcpy(out, samples, out_size);
+	std::cout << "xxxxxxx\n";
 }
 
 void GStreamerOut::do_stop() {
@@ -438,7 +346,6 @@ void GStreamerOut::do_stop() {
 		condition_.notify_one();
 		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
 	}
-	//resource::do_stop();
 }
 
 void GStreamerOut::do_close() {
@@ -462,9 +369,6 @@ void GStreamerOut::do_close() {
 		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
 		if(!--global_client_count) ::gst_deinit();
 	}
-
-	delete[] intermediate_buffer_; intermediate_buffer_ = 0;
-	//resource::do_close();
 }
 
 }}
