@@ -285,10 +285,6 @@ void gstreamer::do_open() throw(engine::exception) {
 			"latency: between " << latency << " and " << latency * periods << " seconds ";
 		loggers::information()(s.str());
 	}
-	if(loggers::information()) {
-		std::ostringstream s;
-		loggers::information()(s.str());
-	}
 
 	// set properties of the fakesrc element
 	::g_object_set(
