@@ -156,10 +156,31 @@ GStreamerOut::GStreamerOut()
 	sink_(),
 	caps_(),
 	channels_(2),
-	samples_per_second_(44100)
+	samples_per_second_(44100),
+	periods_(4),
+	period_frames_(1024)
 {}
 
 void GStreamerOut::do_open() {
+	switch(settings().channelMode()) {
+		case 0: // mono
+		case 1: // left
+		case 2: // right
+			channels_ = 1;
+			break;
+		case 3: // stereo
+			channels_ = 2;
+			break;
+		default: {
+			std::ostringstream s;
+			s << "unhandled channel mode: " << settings().channelMode();
+			throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+	}
+	samples_per_second_ = settings().samplesPerSec();
+	periods_ = settings().blockCount();
+	period_frames_ = settings().blockSize();
+
 	{ // initialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
 		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
@@ -209,12 +230,12 @@ void GStreamerOut::do_open() {
 	int const significant_bits_per_channel_sample = bits_per_channel_sample;
 	int const bytes_per_sample = channels_ * sizeof(output_sample_type);
 	caps_ = ::gst_caps_new_simple(
-		"audio/x-raw-float",
+		"audio/x-raw-int", // note we could simply use "audio/x-raw-float" and we'd be freed from having to handle the conversion,
 		"rate"      , G_TYPE_INT    , ::gint(samples_per_second_),
 		"channels"  , G_TYPE_INT    , ::gint(channels_),
 		"width"     , G_TYPE_INT    , ::gint(bits_per_channel_sample),
 		"depth"     , G_TYPE_INT    , ::gint(significant_bits_per_channel_sample),
-		"signed"    , G_TYPE_BOOLEAN, ::gboolean(std::numeric_limits<output_sample_type>::min()),
+		"signed"    , G_TYPE_BOOLEAN, ::gboolean(std::numeric_limits<output_sample_type>::min() < 0),
 		"endianness", G_TYPE_INT    , ::gint(G_BYTE_ORDER),
 		(void*)0
 	);
@@ -244,16 +265,14 @@ void GStreamerOut::do_open() {
 
 	// buffer settings
 
-	unsigned int const periods(4); ///\todo parametrable
-	unsigned int const period_frames(1024); ///\todo parametrable
-	unsigned int const period_size(static_cast<unsigned int>(period_frames * bytes_per_sample));
+	unsigned int const period_size(static_cast<unsigned int>(period_frames_ * bytes_per_sample));
 	if(loggers::information()) {
-		float const latency(float(period_frames) / samples_per_second_);
+		float const latency(float(period_frames_) / samples_per_second_);
 		std::ostringstream s;
 		s
 			<< "period size: " << period_size << " bytes\n"
-			<< periods << " periods; total buffer size: " << periods * period_size << " bytes\n"
-			"latency: between " << latency << " and " << latency * periods << " seconds ";
+			<< periods_ << " periods; total buffer size: " << periods_ * period_size << " bytes\n"
+			"latency: between " << latency << " and " << latency * periods_ << " seconds ";
 		loggers::information()(s.str());
 	}
 
@@ -262,7 +281,7 @@ void GStreamerOut::do_open() {
 		G_OBJECT(source_),
 		"signal-handoffs", ::gboolean(true),
 		"data"           , ::gint(/*FAKE_SRC_DATA_SUBBUFFER*/ 2), // data allocation method
-		"parentsize"     , ::gint(period_size * periods),
+		"parentsize"     , ::gint(period_size * periods_),
 		"sizemax"        , ::gint(period_size),
 		"sizetype"       , ::gint(/*FAKE_SRC_SIZETYPE_FIXED*/ 2), // fixed to sizemax
 		"filltype"       , ::gint(/*FAKE_SRC_FILLTYPE_NOTHING*/ 1),
@@ -319,23 +338,30 @@ void GStreamerOut::handoff_static(::GstElement * source, ::GstBuffer * buffer, :
 void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
 	{ scoped_lock lock(mutex_);
-		while(!stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
-		if(stop_requested_) return;
-		// Handoff is called before state is changed to playing.
-		if(wait_for_state_to_become_playing_) {
-			if(loggers::trace()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
-			handoff_called_ = true;
-			condition_.notify_one();
-			while(wait_for_state_to_become_playing_) condition_.wait(lock);
+		if(!handoff_called_) {
+			while(!stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
+			if(stop_requested_) return;
+			// Handoff is called before state is changed to playing.
+			if(wait_for_state_to_become_playing_) {
+				if(loggers::trace()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
+				handoff_called_ = true;
+				condition_.notify_one();
+				while(wait_for_state_to_become_playing_) condition_.wait(lock);
+			}
 		}
 	}
-	std::cout << "xxxxxxx\n";
-	::guint8 * out(GST_BUFFER_DATA(&buffer));
-	std::size_t const out_size(GST_BUFFER_SIZE(&buffer));
-	int sample_count = out_size / sizeof(output_sample_type) / channels_;
-	float const * const samples = callback_(callback_context_, sample_count);
-	std::memcpy(out, samples, out_size);
-	std::cout << "xxxxxxx\n";
+	output_sample_type * const out = reinterpret_cast<output_sample_type * const>(GST_BUFFER_DATA(&buffer));
+	std::size_t const frames = GST_BUFFER_SIZE(&buffer) / sizeof(output_sample_type) / channels_;
+	// The callback is unable to process more than AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH samples at a time,
+	// so we may have to call it several times to fill the output buffer.
+	int chunk = AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH, done = 0, remaining = frames;
+	while(remaining) {
+		if(remaining < chunk) chunk = remaining;
+		float const * const in = callback_(callback_context_, chunk);
+		Quantize16WithDither(in, out + done * channels_, chunk);
+		done += chunk;
+		remaining = frames - done;
+	}
 }
 
 void GStreamerOut::do_stop() {

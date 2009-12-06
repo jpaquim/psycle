@@ -81,7 +81,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			/// entrance for the callback function (audiodriver)
-			static float * Work(void * context, int & samples) { return reinterpret_cast<Player*>(context)->Work(samples); }
+			static float * Work(void * context, int samples) { return reinterpret_cast<Player*>(context)->Work(samples); }
 		private:
 			/// entrance for the callback function (audiodriver)
 			float * Work(int samples);

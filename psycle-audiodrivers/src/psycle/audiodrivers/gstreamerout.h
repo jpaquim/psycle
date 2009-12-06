@@ -9,6 +9,7 @@
 #include <gst/gstelement.h>
 #include <condition>
 #include <mutex>
+#include <cstdint>
 
 namespace psy { namespace core {
 
@@ -21,8 +22,6 @@ class GStreamerOut : public AudioDriver {
 			return AudioDriverInfo("gstreamer", "GStreamer Driver", "Output through the GStreamer infrastructure", true);
 		}
 
-		/*override*/ void Configure() {}
-	
 	public:
 		/*override*/ void Initialize(AUDIODRIVERWORKFN callback, void * context) { callback_ = callback; callback_context_ = context; }
 		/*override*/ bool Initialized() { return callback_; }
@@ -35,17 +34,15 @@ class GStreamerOut : public AudioDriver {
 	private:
 		bool opened() const;
 		void open() { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
+		void do_open();
 		void close() { stop(); if(opened()) do_close(); }
+		void do_close();
 		
 		bool started() const;
 		void start() { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
-		void stop() { if(started()) do_stop(); }
-		
-		void do_open();
 		void do_start();
-		void do_process();
+		void stop() { if(started()) do_stop(); }
 		void do_stop();
-		void do_close();
 		
 		::GstElement * pipeline_, * source_, * caps_filter_, * sink_;
 
@@ -62,9 +59,11 @@ class GStreamerOut : public AudioDriver {
 		bool handoff_called_;
 		bool stop_requested_;
 
-		typedef float output_sample_type;
-		int channels_;
-		int samples_per_second_;
+		typedef std::int16_t output_sample_type;
+		unsigned int channels_;
+		unsigned int samples_per_second_;
+		unsigned int periods_;
+		unsigned int period_frames_;
 };
 
 }}

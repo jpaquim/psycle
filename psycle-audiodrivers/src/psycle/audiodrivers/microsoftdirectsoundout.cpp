@@ -53,12 +53,8 @@ namespace psy { namespace core {
 			_initialized = true;
 		}
 
-		void MsDirectSound::Reset() {
-			Stop();
-		}
-
 		MsDirectSound::~MsDirectSound() {
-			Reset();
+			Stop();
 		}
 
 		bool MsDirectSound::Start() {

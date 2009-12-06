@@ -15,7 +15,10 @@
 namespace psy { namespace core {
 
 /// typedef for work callback
-typedef float * (*AUDIODRIVERWORKFN) (void * context, int & numSamples);
+typedef float * (*AUDIODRIVERWORKFN) (void * context, int numSamples);
+
+/// max number of samples (per channel) that the Work function may ask to return
+int const AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH = 256;
 
 /// provides some text info about the driver
 class AudioDriverInfo {
@@ -144,14 +147,16 @@ class AudioDriver {
 		/// gives the driver information
 		virtual AudioDriverInfo info() const;
 
-		virtual void Reset() {}
 		/// enable will start the driver and the calls to the work player function
 		virtual bool Enable(bool /*e*/) { return true; }
+
 		/// initialize has nothing to do with the driver, it sets only the pointer for a later player work call
 		virtual void Initialize(AUDIODRIVERWORKFN /*pCallback*/, void * /*context*/) {}
-		virtual void Configure() {}
 		virtual bool Initialized() { return true; }
+
+		virtual void Configure() {}
 		virtual bool Configured() { return true; }
+
 		static double frand();
 		static void Quantize16WithDither(float const * pin, std::int16_t * piout, int c);
 		static void Quantize16(float const * pin, std::int16_t * piout, int c);
