@@ -50,16 +50,17 @@ int nearest_prime(int, float);
 static inline float diffuser_do(ty_diffuser *p, float x)
 {
 	float y,w;
-
-	w = x - p->buf[p->idx]*p->coeff;
+	float* buf = &p->buf[p->idx];
+	w = x - (*buf)*p->coeff;
 	#if 0
 		w = flush_to_zero(w);
 	#else
 		psycle::helpers::math::erase_all_nans_infinities_and_denormals(w);
 	#endif
-	y = p->buf[p->idx] + w*p->coeff;
-	p->buf[p->idx] = w;
+	y = (*buf) + w*p->coeff;
+	*buf = w;
 	p->idx = (p->idx + 1) % p->size;
+	///\todo: denormal check on y too?
 	return(y);
 }
 
@@ -87,6 +88,7 @@ static inline float damper_do(ty_damper *p, float x)
 	float y;
 	
 	y = x*(1.0-p->damping) + p->delay*p->damping;
+	psycle::helpers::math::erase_all_nans_infinities_and_denormals(y);
 	p->delay = y;
 	return(y);
 }
