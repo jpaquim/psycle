@@ -239,7 +239,8 @@ int main(int argument_count, char * arguments[]) {
 			player.startRecording();
 		}
 		
-		if(loggers::trace()()) loggers::trace()("psycle: player: enabling output driver", UNIVERSALIS__COMPILER__LOCATION);
+		//TODO: temporarily disabled for Windows compilation.
+		//if(loggers::trace()()) loggers::trace()("psycle: player: enabling output driver", UNIVERSALIS__COMPILER__LOCATION);
 		player.driver().Enable(true);
 
 		if(loggers::information()()) loggers::information()("psycle: player: playing...");
