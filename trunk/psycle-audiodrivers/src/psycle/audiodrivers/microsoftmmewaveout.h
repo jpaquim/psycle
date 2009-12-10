@@ -18,10 +18,6 @@
 ******************************************************************************/
 #pragma once
 
-#ifdef _MSC_VER
-#define PSYCLE__MICROSOFT_MME_AVAILABLE 1
-#endif
-
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "audiodriver.h"
 #include <windows.h>

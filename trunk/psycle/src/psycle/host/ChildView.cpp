@@ -8,7 +8,7 @@
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 //todo: fixme. This one has to be in configuration.hpp
-#include <psycle/audiodrivers/microsoftmmewaveout.h>
+#include <psycle/audiodrivers/microsoftdirectsoundout.h>
 
 #include <psycle/core/internal_machines.h>
 #include <psycle/core/vstplugin.h>
@@ -358,7 +358,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (Global::pConfig->_followSong)
 					{
 						if ( viewMode == view_modes::pattern )  { 
-									Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
+									//Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
 									Repaint(draw_modes::playback);
 						}
 //						pattern_view()->editcur.line=Global::pPlayer->_lineCounter;
@@ -436,7 +436,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			player.song(projects_->active_project()->song());
 			///\todo: this is a temporal hack, the output dialog should be changed to use core's drivers.
 			if (!output_driver_) {
-				output_driver_ = new psy::core::MsWaveOut();
+				output_driver_ = new psy::core::MsDirectSound();
 			}
 			if (_outputActive) {
 				player.setDriver(*output_driver_);
