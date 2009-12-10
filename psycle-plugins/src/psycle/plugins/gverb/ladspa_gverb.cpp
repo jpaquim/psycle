@@ -238,21 +238,21 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 {
 	float const dry = DB_CO((float)Vals[4]*.001f);
 	
-	float sl = 0;
-	float sr = 0;
+	float outl = 0;
+	float outr = 0;
 
 	if (Vals[7])
 	{
 		do
 		{
-			float _sl = *psamplesleft;// * 0.000030517578125f;
-			float _sr = *psamplesright;// * 0.000030517578125f;
-			gverb_do(gv_l,_sl,&sl,&sr);
-			*psamplesleft = _sl*dry + sl;//*32767.f;
-			*psamplesright = _sr*dry + sr;//*32767.f;
-			gverb_do(gv_r,_sr,&sl,&sr);
-			*psamplesleft += sl;//*32767.f;
-			*psamplesright += sr;//*32767.f;
+			float inl = *psamplesleft;// * 0.000030517578125f;
+			float inr = *psamplesright;// * 0.000030517578125f;
+			gverb_do(gv_l,inl,&outl,&outr);
+			*psamplesleft = inl*dry + outl;//*32767.f;
+			*psamplesright = inr*dry + outr;//*32767.f;
+			gverb_do(gv_r,inr,&outl,&outr);
+			*psamplesleft += outl;//*32767.f;
+			*psamplesright += outr;//*32767.f;
 
 			++psamplesleft;
 			++psamplesright;
@@ -262,11 +262,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	{
 		do
 		{
-			float sm = (*psamplesleft + *psamplesright) / 2;// * 0.000030517578125f;
-			gverb_do(gv_l,sm,&sl,&sr);
+			float sm = (*psamplesleft + *psamplesright) * 0.5f;// * 0.000030517578125f;
+			gverb_do(gv_l,sm,&outl,&outr);
 
-			*psamplesleft = *psamplesleft * dry + sl;//*32767.f;
-			*psamplesright = *psamplesright * dry + sr;//*32767.f;
+			*psamplesleft = *psamplesleft * dry + outl;//*32767.f;
+			*psamplesright = *psamplesright * dry + outr;//*32767.f;
 
 			++psamplesleft;
 			++psamplesright;
