@@ -541,7 +541,9 @@ namespace psycle {
 				Pattern* pat = pattern();
 				psy::core::Player & player(psy::core::Player::singleton());
 				int ticks = static_cast<int>(project()->beat_zoom());
-				int pos = player.playPos() * ticks;
+				int pos = 0;
+				if (project()->song().patternSequence().last_worked_entry())
+					pos = (player.playPos() - project()->song().patternSequence().last_worked_entry()->tickPosition()) * ticks;
 				if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) )
 #else
 				int pos = Global::pPlayer->_lineCounter;

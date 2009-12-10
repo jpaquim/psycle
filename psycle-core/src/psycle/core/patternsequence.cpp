@@ -279,6 +279,7 @@ namespace psy { namespace core {
 			if(iter!=end()) {
 				SequenceEntry* entry = iter->second;
 				line_.erase(iter);
+				sequence_->last_entry_ = 0;
 				delete entry;
 			}
 		}
@@ -307,6 +308,7 @@ namespace psy { namespace core {
 
 		Sequence::Sequence() {
 			setNumTracks(16);
+			last_entry_ = 0;
 		}
 
 		Sequence::~Sequence() {
@@ -354,6 +356,7 @@ namespace psy { namespace core {
 			if ( it != end() ) {
 				lines_.erase(it);
 				lineRemoved(line);
+				last_entry_ = 0;
 				delete line;
 			}
 		}
@@ -373,9 +376,12 @@ namespace psy { namespace core {
 				// and iterate backwards to include any other that is inside the range [start,start+length)
 				// (The UI won't allow more than one pattern for the same range in the same timeline, but 
 				// this was left open in the player code)
+				bool worked = false;
 				for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt ) {
 					// take the pattern,
 					Pattern* pPat = sLineIt->second->pattern();
+					worked = true;
+					last_entry_ = sLineIt->second;
 					double entryStart = sLineIt->first;
 					float entryStartOffset  = sLineIt->second->startPos();
 					float entryEndOffset  = sLineIt->second->endPos();
@@ -408,6 +414,8 @@ namespace psy { namespace core {
 						#endif
 						}
 				}
+				if (!worked)
+					last_entry_ = 0;
 				++seqlineidx;
 			}
 			GetOrderedEvents(events);

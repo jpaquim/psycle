@@ -24,7 +24,8 @@ namespace psycle {
 			void SetProject(Project* project);
 			/// To be used when changing the selected entry from outside of SequencerView.
 			/// Example: from playback, or via hotkey.
-#if PSYCLE__CONFIGURATION__USE_PSYCORE			
+#if PSYCLE__CONFIGURATION__USE_PSYCORE	
+			void SetEntry(psy::core::SequenceEntry* entry);
 #else
 			void SetSelectedEntry(int entry);
 			int selecteEntry();

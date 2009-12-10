@@ -60,6 +60,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			,UndoMacSaved(0)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			,output_driver_(0)
+			,last_pos_(-1)
 #endif
 		{
 			machine_view_ = new MachineView(this, main_frame);
@@ -349,25 +350,31 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (Global::pPlayer->playing())
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					PlayerTimeInfo& tinfo = Player::singleton().timeInfo();
 					Sequence& sequence = pattern_view()->song()->patternSequence();
-					SequenceEntry* entry = sequence.GetEntryOnPosition(*sequence.begin(), tinfo.playBeatPos());
-					pParentMain->SetAppSongBpm(0);
-					pParentMain->SetAppSongTpb(0);
-
-					if (Global::pConfig->_followSong)
-					{
-						if ( viewMode == view_modes::pattern )  { 
-									//Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
-									Repaint(draw_modes::playback);
+					psy::core::SequenceEntry* entry = sequence.last_worked_entry();
+					int pos = 0;
+					if (entry) {
+						// this scrolls the pattern view, if follow song is activated
+						int ticks = static_cast<int>(projects_->active_project()->beat_zoom());
+						pos = (Player::singleton().playPos() - entry->tickPosition()) * ticks;
+						pattern_view()->editcur.line=pos;
+					}
+					if ( last_pos_!= pos ) {
+						last_pos_ = pos;
+						pParentMain->SetAppSongBpm(0);
+						pParentMain->SetAppSongTpb(0);
+						if (Global::pConfig->_followSong)
+						{											
+							if (entry && pattern_view()->pattern() != entry->pattern()) {
+								// change seqview
+								pattern_view()->main()->m_wndSeq.SetEntry(entry);
+							}
+							pattern_view()->editcur.line=pos;
+							if ( viewMode == view_modes::pattern )  { 
+//								Repaint(draw_modes::pattern);
+								Repaint(draw_modes::playback);
+							}
 						}
-//						pattern_view()->editcur.line=Global::pPlayer->_lineCounter;
-
-							///todo
-//						if (entry != pParentMain->m_wndSeq.selectedEntry() ) {
-//							pParentMain->m_wndSeq.SetSelectedEntry(entry);
-
-//						}
 					} else
                     if (viewMode == view_modes::pattern) {
 						if (Global::pConfig->_followSong)
@@ -436,7 +443,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			player.song(projects_->active_project()->song());
 			///\todo: this is a temporal hack, the output dialog should be changed to use core's drivers.
 			if (!output_driver_) {
-				output_driver_ = new psy::core::MsDirectSound();
+				output_driver_ =  new psy::core::MsDirectSound();
 			}
 			if (_outputActive) {
 				player.setDriver(*output_driver_);
@@ -841,11 +848,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.start(0);
-#else
 			if (Global::pConfig->_followSong)
 			{
 				pattern_view()->bScrollDetatch=false;
 			}
+#else			
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			Global::pPlayer->Start(0,0);
 #endif

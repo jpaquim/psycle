@@ -166,6 +166,7 @@ namespace psy { namespace core {
 
 			bool empty() const { return line_.empty(); }
 
+
 		private:
 
 			std::multimap<double, SequenceEntry*> line_;
@@ -175,6 +176,7 @@ namespace psy { namespace core {
 	};
 
 	class PSYCLE__CORE__DECL Sequence {
+		friend class SequenceLine;
 		public:
 			Sequence();
 			~Sequence();
@@ -281,6 +283,11 @@ namespace psy { namespace core {
 			void Remove(Pattern* pattern);
 			Pattern* FindPattern(int id);
 
+			SequenceEntry* last_worked_entry() {
+				return last_entry_;
+			}
+
+
 		private:
 			// sequencer structure
 			std::vector<SequenceLine*> lines_;
@@ -297,6 +304,8 @@ namespace psy { namespace core {
 			GlobalMap globalEvents_;
 
 			std::multimap<double, std::multimap< int, PatternEvent > > events_;
+
+			SequenceEntry* last_entry_;
 	};
 	typedef Sequence PatternSequence;
 

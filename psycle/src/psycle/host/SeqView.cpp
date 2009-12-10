@@ -53,11 +53,35 @@ namespace psycle {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 
-		SequenceEntry* SequencerView::GetEntry(int list_position) {
+		SequenceEntry* SequencerView::GetEntry(int list_position) 
+		{
 			std::map<int,SequenceEntry*>::iterator it;
 			it = pos_map_.find(list_position);
 			assert(it != pos_map_.end());
 			return it->second;
+		}
+
+		void SequencerView::SetEntry(psy::core::SequenceEntry* entry)
+		{
+			std::map<int,SequenceEntry*>::iterator it = pos_map_.begin();
+			for ( ; it != pos_map_.end(); ++it) {
+				if (it->second == entry) {
+					const int pos = it->first;
+					CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+					cc->SelItemRange(false,0,cc->GetCount());
+					cc->SetSel(pos,true);
+					int top = pos - 0xC;
+					if (top < 0) top = 0;
+					cc->SetTopIndex(top);
+					PatternView* pat_view = project_->pat_view();
+					pat_view->SetPattern(entry->pattern());			
+					BuildSelectionList();
+					SelectItems();
+					main_frame_->m_wndView.Repaint(draw_modes::pattern);
+					main_frame_->StatusBarIdle();
+					main_frame_->m_wndView.SetFocus();
+				}
+			}
 		}
 
 		void SequencerView::UpdateSequencer(int selectedpos)

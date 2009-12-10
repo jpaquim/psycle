@@ -163,8 +163,8 @@ namespace psycle {
 			~PatternView();
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		private:
 			Pattern* pattern();
+		private:
 			Pattern* pattern_;
 		public:
 			void SetPattern(Pattern* pattern) {
