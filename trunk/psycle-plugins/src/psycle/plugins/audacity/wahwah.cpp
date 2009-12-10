@@ -19,6 +19,7 @@
 
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math/sine_cosine.hpp>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
@@ -220,7 +221,6 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 {
 
 	float frequency, omega, sn, cs, alpha;
-	static float anti_denormal = 1.0e-20f;
 	static const float depth_mul_1_minus_freqofs = depth * (1.f - freqofs) * .5f;
 
 		do
@@ -272,18 +272,20 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 
 			float out_l = (b0_l * in_l + b1_l * xn1_l + b2_l * xn2_l - a1_l * yn1_l - a2_l * yn2_l) * a0_r* recip; // /a0_l;
+			psycle::helpers::math::erase_all_nans_infinities_and_denormals(out_l);
 
 			xn2_l = xn1_l;
 			xn1_l = in_l;
 			yn2_l = yn1_l;
-			yn1_l = out_l+anti_denormal;
+			yn1_l = out_l;
 
 			float out_r = (b0_r * in_r + b1_r * xn1_r + b2_r * xn2_r - a1_r * yn1_r - a2_r * yn2_r) * a0_l* recip; // / a0_r;
+			 psycle::helpers::math::erase_all_nans_infinities_and_denormals(out_r); 
 
 			xn2_r = xn1_r;
 			xn1_r = in_r;
 			yn2_r = yn1_r;
-			yn1_r = out_r+anti_denormal;
+			yn1_r = out_r;
 
 
 			// Prevents clipping
@@ -305,8 +307,6 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			++psamplesleft;
 			++psamplesright;
 
-			anti_denormal = -anti_denormal;
-		
 		} while(--numsamples);
 	
 }
