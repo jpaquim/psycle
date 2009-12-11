@@ -17,8 +17,8 @@
 
 namespace psycle { namespace helpers { namespace math {
 
-/// C1999 rint - converts a floating point number to an integer by rounding in an unspecified way.
-/// This function has the same semantic as C1999's rint series of functions,
+/// C1999 lrint - converts a floating point number to an integer by rounding in an unspecified way.
+/// This function has the same semantic as C1999's lrint series of functions,
 /// but with C++ overload support, we don't need different names for each type.
 /// On C1999, the rounding mode may be set with fesetround, but msvc does not support it, so the mode is unspecified.
 template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
