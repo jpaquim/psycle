@@ -179,7 +179,7 @@ void GStreamerOut::do_open() {
 	}
 	samples_per_second_ = playbackSettings().samplesPerSec();
 	periods_ = playbackSettings().blockCount();
-	period_frames_ = playbackSettings().blockSize();
+	period_frames_ = playbackSettings().blockBytes() / sizeof(output_sample_type);
 
 	{ // initialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
