@@ -835,8 +835,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Player & player(psy::core::Player::singleton());
-			player.start(0); // todo
+			psy::core::Player & player(psy::core::Player::singleton());			
+			psy::core::SequenceEntry* entry = pattern_view()->main()->m_wndSeq.selected_entry();			
+			player.start(entry->tickPosition());
 #else			
 			Global::pPlayer->Start(pattern_view()->editPosition,0);
 #endif

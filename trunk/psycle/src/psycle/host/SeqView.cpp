@@ -29,7 +29,7 @@ namespace psycle {
 			: main_frame_(main_frame)
 	        , project_(0)
 			, seqcopybufferlength(0)
-			, selectedEntry_(0)
+			, selected_entry_(0)
 		{
 		}
 
@@ -74,12 +74,14 @@ namespace psycle {
 					if (top < 0) top = 0;
 					cc->SetTopIndex(top);
 					PatternView* pat_view = project_->pat_view();
+					selected_entry_ = entry;
 					pat_view->SetPattern(entry->pattern());			
 					BuildSelectionList();
 					SelectItems();
 					main_frame_->m_wndView.Repaint(draw_modes::pattern);
 					main_frame_->StatusBarIdle();
 					main_frame_->m_wndView.SetFocus();
+					selected_entry_ = entry;
 				}
 			}
 		}
@@ -93,13 +95,15 @@ namespace psycle {
 			BuildListBox();
 			if (selection_.empty() && pos_map_.size() > 0) {
 				selection_.push_back(0);
-				project_->pat_view()->SetPattern(GetEntry(0)->pattern());
+				selected_entry_ = GetEntry(0);
+				project_->pat_view()->SetPattern(selected_entry_->pattern());
 			}
 			SelectItems();
 
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			int sel_idx = cc->GetCurSel();
-			main_frame_->m_wndView.pattern_view()->SetPattern(GetEntry(sel_idx)->pattern());
+			selected_entry_ = GetEntry(sel_idx);
+			main_frame_->m_wndView.pattern_view()->SetPattern(selected_entry_->pattern());
 		}
 
 		void SequencerView::BuildPositionMap()
@@ -373,6 +377,7 @@ namespace psycle {
 			selection_.clear();
 			selection_.push_back(sel_idx+1);
 			SelectItems();
+			selected_entry_ = entry;
 			main_frame_->m_wndView.pattern_view()->SetPattern(entry->pattern());
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->StatusBarIdle();
@@ -397,6 +402,7 @@ namespace psycle {
 			selection_.push_back(sel_idx+1);
 			SelectItems();
 			main_frame_->m_wndView.pattern_view()->SetPattern(entry->pattern());
+			selected_entry_ = entry;
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->StatusBarIdle();
 			main_frame_->m_wndView.SetFocus();
@@ -435,7 +441,8 @@ namespace psycle {
 			selection_.clear();
 			selection_.push_back(ins+1);
 			SelectItems();
-			main_frame_->m_wndView.pattern_view()->SetPattern(GetEntry(ins+1)->pattern());
+			selected_entry_ = GetEntry(ins+1);
+			main_frame_->m_wndView.pattern_view()->SetPattern(selected_entry_->pattern());
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			main_frame_->StatusBarIdle();
 			main_frame_->m_wndView.SetFocus();
@@ -534,7 +541,8 @@ namespace psycle {
 				selection_.clear();
 				selection_.push_back(0);
 				UpdateSequencer();
-				pat_view->SetPattern(GetEntry(0)->pattern());
+				selected_entry_ = GetEntry(0);
+				pat_view->SetPattern(selected_entry_->pattern());
 				main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			}
 			main_frame_->m_wndView.SetFocus();			
@@ -562,7 +570,8 @@ namespace psycle {
 
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			PatternView* pat_view = project_->pat_view();
-			pat_view->SetPattern(GetEntry(cc->GetCurSel())->pattern());			
+			selected_entry_ = GetEntry(cc->GetCurSel());
+			pat_view->SetPattern(selected_entry_->pattern());			
 			BuildSelectionList();
 			SelectItems();
 			main_frame_->m_wndView.Repaint(draw_modes::pattern);
@@ -579,12 +588,12 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #else
 		void SequencerView::SetSelectedEntry(int entry) {
-			selectedEntry_ = entry;
-			UpdateSequencer(selectedEntry_);
+			selected_entry_ = entry;
+			UpdateSequencer(selected_entry_);
 		}
 
 		int SequencerView::selecteEntry() {
-			return selectedEntry_;
+			return selected_entry_;
 		}
 
 		void SequencerView::OnInclen() 
@@ -1494,8 +1503,9 @@ namespace psycle {
 				if ( it != selection_.end() ) {
 					int sel_idx = *it;
 					std::map<int,SequenceEntry*>::iterator pit = pos_map_.find(sel_idx+1);
-					if (pit != pos_map_.end()) {						
-						pat_view->SetPattern(GetEntry(sel_idx+1)->pattern());	
+					if (pit != pos_map_.end()) {
+						selected_entry_ = GetEntry(sel_idx+1);
+						pat_view->SetPattern(selected_entry_->pattern());	
 					} else {
 						Sequence* sequence = &project_->song().patternSequence();
 						SequenceLine* line = *(sequence->begin());						
@@ -1594,8 +1604,9 @@ namespace psycle {
 					int sel_idx = *it;
 					if ( sel_idx > 0 ) {
 						std::map<int,SequenceEntry*>::iterator pit = pos_map_.find(sel_idx-1);
-						if (pit != pos_map_.end()) {						
-							project_->pat_view()->SetPattern(GetEntry(sel_idx-1)->pattern());	
+						if (pit != pos_map_.end()) {	
+							selected_entry_ = GetEntry(sel_idx-1);
+							project_->pat_view()->SetPattern(selected_entry_->pattern());	
 						}
 						selection_.clear();
 						selection_.push_back(sel_idx-1);

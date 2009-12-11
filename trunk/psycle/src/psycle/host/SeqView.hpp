@@ -79,9 +79,12 @@ namespace psycle {
 			int seqcopybufferlength;
 
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#if PSYCLE__CONFIGURATION__USE_PSYCORE       
 			SequenceEntry* GetEntry(int list_position);
-		
+		public:
+			SequenceEntry* selected_entry() { return selected_entry_; } 
+			// this entry is currently used by the patternview
+
 		public:
 			void BuildPositionMap();
 			void BuildListBox();
@@ -90,11 +93,11 @@ namespace psycle {
 			void BuildCopyList();
 		private:
 
-			SequenceEntry* selectedEntry_;
+			SequenceEntry* selected_entry_;
 			std::map<int,SequenceEntry*> pos_map_; // Relation between the list position and the patterns
 			std::vector<psy::core::Pattern*> copy_list_; // list to store copy/cut/paste entries
 #else
-			int selectedEntry_;
+			int selected_entry_;
 			std::map<int,int> pos_map_; // Relation between the list position and the patterns
 #endif
 			std::vector<int> selection_; // Vector of the selected indexes
