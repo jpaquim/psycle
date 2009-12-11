@@ -7,12 +7,11 @@
 
 #include <diversalis/stdlib.hpp>
 #if DIVERSALIS__STDLIB__MATH < 199901
-	#include <diversalis/os.hpp>
 	#include <diversalis/compiler.hpp>
+	#include <diversalis/cpu.hpp>
+	#include <boost/static_assert.hpp>
 #endif
-#include <diversalis/cpu.hpp>
 #include <universalis/compiler.hpp>
-#include <boost/static_assert.hpp>
 #include <cmath>
 #include <cstdint>
 
