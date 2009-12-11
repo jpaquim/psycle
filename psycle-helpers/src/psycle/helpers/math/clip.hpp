@@ -18,6 +18,20 @@ Real inline clipped(Real const & minimum, Real const & value, Real const & maxim
 	else return value;
 }
 
+
+/// ensures a value stays between 16 bit boundaries
+template<typename Real> UNIVERSALIS__COMPILER__CONST
+Real inline clipped16(Real const & value) {
+	return clipped<Real>(-32768, value, 32767);
+}
+
+/// ensures a value stays between 24 bit boundariess
+template<typename Real> UNIVERSALIS__COMPILER__CONST
+Real inline clipped24(Real const & value) {
+	return clipped<Real>(-8388608, value, 8388607);
+}
+
+
 }}}
 
 #endif

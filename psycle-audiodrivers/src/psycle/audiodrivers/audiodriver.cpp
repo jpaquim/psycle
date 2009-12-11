@@ -11,6 +11,7 @@
 #include <diversalis/cpu.hpp>
 #include <boost/bind.hpp>
 #include <thread>
+#include <psycle/helpers/math/clip.hpp>
 #include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
 namespace psy { namespace core {
 
@@ -35,9 +36,6 @@ AudioDriverSettings::AudioDriverSettings()
 	blockCount_(4)
 {}
 
-int AudioDriverSettings::sampleSize() const {
-	return (channelMode_ == 3) ? bitDepth_ / 4 : bitDepth_ / 8;
-}
 
 /*******************************************************************************************/
 // AudioDriver
@@ -53,15 +51,13 @@ double AudioDriver::frand() {
 }
 
 using psycle::helpers::math::furti;
+using psycle::helpers::math::clipped16;
+using psycle::helpers::math::clipped24;
 
 void AudioDriver::Quantize16WithDither(float const * pin, std::int16_t * piout, int c) {
 	do {
-		int r = furti<int>(pin[1] + frand());
-		if(r < -32768) r = -32768;
-		else if(r > 32767) r = 32767;
-		int l = furti<int>(pin[0] + frand());
-		if(l < -32768) l = -32768;
-		else if(l > 32767) l = 32767;
+		const int r = clipped16<float>(furti<int>(pin[1] + frand()));
+		const int l = clipped16<float>(furti<int>(pin[0] + frand()));
 		*piout++ = static_cast<std::int16_t>(l);
 		*piout++ = static_cast<std::int16_t>(r);
 		pin += 2;
@@ -70,12 +66,8 @@ void AudioDriver::Quantize16WithDither(float const * pin, std::int16_t * piout, 
 
 void AudioDriver::Quantize16(float const * pin, std::int16_t * piout, int c) {
 	do {
-		int r = furti<int>(pin[1]);
-		if(r < -32768) r = -32768;
-		else if(r > 32767) r = 32767;
-		int l = furti<int>(pin[0]);
-		if(l < -32768) l = -32768;
-		else if(l > 32767) l = 32767;
+		const int r = clipped16<float>(furti<int>(pin[1]));
+		const int l = clipped16<float>(furti<int>(pin[0]));
 		*piout++ = static_cast<std::int16_t>(l);
 		*piout++ = static_cast<std::int16_t>(r);
 		pin += 2;
@@ -84,14 +76,10 @@ void AudioDriver::Quantize16(float const * pin, std::int16_t * piout, int c) {
 
 void AudioDriver::Quantize16AndDeinterlace(float const * pin, std::int16_t * pileft, int strideleft, std::int16_t * piright, int strideright, int c) {
 	do {
-		int r = furti<int>(pin[1]);
-		if(r < -32768) r = -32768;
-		else if(r > 32767) r = 32767;
+		const int r = clipped16<float>(furti<int>(pin[1]));
 		*piright = static_cast<std::int16_t>(r);
 		piright += strideright;
-		int l = furti<int>(pin[0]);
-		if(l < -32768) l = -32768;
-		else if(l > 32767) l = 32767;
+		const int l = clipped16<float>(furti<int>(pin[0]));
 		*pileft = static_cast<std::int16_t>(l);
 		pileft += strideleft;
 		pin += 2;
@@ -100,9 +88,69 @@ void AudioDriver::Quantize16AndDeinterlace(float const * pin, std::int16_t * pil
 
 void AudioDriver::DeQuantize16AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c) {
 	do {
-		*poutleft++ = static_cast<short int>(*pin & 0xFFFF);
-		*poutright++ = static_cast<short int>((*pin & 0xFFFF0000) >> 16);
+		*poutleft++ = static_cast<std::int16_t>(*pin & 0xFFFF);
+		*poutright++ = static_cast<std::int16_t>((*pin & 0xFFFF0000) >> 16);
 		++pin;
+	} while(--c);
+}
+
+void AudioDriver::Quantize24WithDither(float const * pin, std::int32_t * piout, int c) {
+	do {
+		const int r = clipped24<float>(furti<int>(pin[1] + frand()));
+		const int l = clipped24<float>(furti<int>(pin[0] + frand()));
+		*piout++ = l;
+		*piout++ = r;
+		pin += 2;
+	} while(--c);
+}
+
+void AudioDriver::Quantize24(float const * pin, std::int32_t * piout, int c) {
+	do {
+		const int r = clipped24<float>(furti<int>(pin[1]));
+		const int l = clipped24<float>(furti<int>(pin[0]));
+		*piout++ = l;
+		*piout++ = r;
+		pin += 2;
+	} while(--c);
+}
+///\todo: not verified. copied from ASIO implementation
+void AudioDriver::Quantize24AndDeinterlace(float const * pin, std::int32_t * pileft, std::int32_t * piright, int c) {
+	char* outl = (char*)pileft;
+	char* outr = (char*)piright;
+	int t;
+	char* pt = (char*)&t;
+	do
+	{
+		t = clipped24<float>(furti<int>((*pin++)*256.0f));
+		*outl++ = pt[0];
+		*outl++ = pt[1];
+		*outl++ = pt[2];
+
+		t = clipped24<float>(furti<int>((*pin++)*256.0f));
+		*outr++ = pt[0];
+		*outr++ = pt[1];
+		*outr++ = pt[2];
+	} while(--c);
+}
+///\todo: not verified. copied from ASIO implementation
+void AudioDriver::DeQuantize24AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c) {
+	char* inl;
+	char* inr;
+	inl = (char*)poutleft;
+	inr = (char*)poutright;
+	int t;
+	char* pt = (char*)&t;
+	do {
+		pt[0] = *inl++;
+		pt[1] = *inl++;
+		pt[2] = *inl++;
+		*(poutleft++) = t >> 8;
+
+		pt[0] = *inr++;
+		pt[1] = *inr++;
+		pt[2] = *inr++;
+		*(poutright++) = t >> 8;
+
 	} while(--c);
 }
 

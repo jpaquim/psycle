@@ -80,64 +80,64 @@ class AudioDriverSettings {
 	///\name getter/setter for sample rate
 	///\{
 		public:
-			int samplesPerSec() const { return samplesPerSec_; }
-			void setSamplesPerSec(int samples) { samplesPerSec_ = samples; }
+			std::uint32_t samplesPerSec() const { return samplesPerSec_; }
+			void setSamplesPerSec(std::uint32_t samples) { samplesPerSec_ = samples; }
 		private:
-			int samplesPerSec_;
+			std::uint32_t samplesPerSec_;
 	///\}
 
 	///\name getter/setter for bit depth ( 8, 16, 24. what about ASIO that offers more modes? 
 	///\{
 		public:
-			int bitDepth() const { return bitDepth_; }
-			void setBitDepth(int depth) { bitDepth_ = depth; }
+			std::uint32_t bitDepth() const { return bitDepth_; }
+			void setBitDepth(std::uint32_t depth) { bitDepth_ = depth; }
 		private:
-		int bitDepth_;
+		std::uint32_t bitDepth_;
 	///\}
 
 	///\name getter/setter for channel mode (mode 3 == stereo, 1 == mono left, 2 == mono right, 0 = mono both channels)
 	///\{
 		public:
-			int channelMode() const { return channelMode_; }
-			void setChannelMode(int mode) { channelMode_ = mode; }
+			std::uint32_t channelMode() const { return channelMode_; }
+			void setChannelMode(std::uint32_t mode) { channelMode_ = mode; }
+			std::uint32_t numChannels() const { return (channelMode_ == 3) ? 2 : 1; }
 		private:
-			int channelMode_;
+			std::uint32_t channelMode_;
 	///\}
 
-	/// getter for number of bits per sample
-	public:
-		int sampleSize() const;
+	/// getter for number of bytes per sample. (should verify if this is valid for 24bits)
+		public:
+			int sampleSize() const {
+			return (channelMode_ == 3) ? bitDepth_ / 4 : bitDepth_ / 8;
+		}
 
-	///\todo: Unused????
-	///\name getter/setter for buffer size
+
+	///\name getter/setter for the whole buffer size (in bytes).
 	///\{
 		public:
-			int bufferSize() const { return bufferSize_; }
-			void setBufferSize(int size) { bufferSize_ = size; }
+			std::uint32_t totalBufferBytes() const { return bufferSize_; }
+			void setTotalBufferBytes(std::uint32_t size) { bufferSize_ = size; }
 		private:
-			int bufferSize_;
+			std::uint32_t bufferSize_;
 	///\}
 
-	///\todo: Only used by mmewaveout???
-	///\name getter/setter for the audio block size 
+	///\name getter/setter for the audio block size (in bytes)
 	///\{
 		public:
-			int blockSize() const { return blockSize_; }
-			void setBlockSize(int size) { blockSize_ = size; }
+			std::uint32_t blockBytes() const { return blockSize_; }
+			void setBlockBytes(std::uint32_t size) { blockSize_ = size; }
 		private:
-			int blockSize_;
+			std::uint32_t blockSize_;
 	///\}
 
-	///\todo: Only used by mmewaveout???
 	///\name getter/setter for number of blocks.
 	///\{
 		public:
-			int blockCount() const { return blockCount_; }
-			void setBlockCount(int count) { blockCount_ = count; }
+			std::uint32_t blockCount() const { return blockCount_; }
+			void setBlockCount(std::uint32_t count) { blockCount_ = count; }
 		private:
-			int blockCount_;
+			std::uint32_t blockCount_;
 	///\}
-		int sampleSize() { return (channelMode_==3)?(bitDepth_/4):(bitDepth_/8); }
 };
 
 /// base class for all audio drivers
@@ -158,24 +158,44 @@ class AudioDriver {
 		virtual void Configure() {}
 		virtual bool Configured() { return true; }
 
+		virtual int GetInputLatency() { return captureSettings_.totalBufferBytes(); }
+		virtual int GetOutputLatency() { return playbackSettings_.totalBufferBytes(); }
+
 		static double frand();
 		static void Quantize16WithDither(float const * pin, std::int16_t * piout, int c);
 		static void Quantize16(float const * pin, std::int16_t * piout, int c);
 		static void Quantize16AndDeinterlace(float const * pin, std::int16_t * pileft, int strideleft, std::int16_t * piright, int strideright, int c);
 		static void DeQuantize16AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
+		static void Quantize24WithDither(float const * pin, std::int32_t * piout, int c);
+		static void Quantize24(float const * pin, std::int32_t * piout, int c);
+		static void Quantize24AndDeinterlace(float const * pin, std::int32_t * pileft, std::int32_t * piright, int c);
+		static void DeQuantize24AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
 
-	///\name settings
+	///\name playback settings
 	///\{
 		public:
 			/// here you can set the settings of the driver, like samplerate depth etc
-			void virtual setSettings(AudioDriverSettings const & settings ) { settings_ = settings; }
+			void virtual setPlaybackSettings(AudioDriverSettings const & settings ) { playbackSettings_ = settings; }
 
 			/// here you get the special audio driver settings.
 			/// In case of some drivers like  e.g jack you must prepare, that a driver can set itself.
-			AudioDriverSettings const & settings() const { return settings_; }
-		private:
+			AudioDriverSettings const & playbackSettings() const { return playbackSettings_; }
+		protected:
 			/// holds the sample rate, bit depth, etc
-			AudioDriverSettings settings_; 
+			AudioDriverSettings playbackSettings_; 
+	///\}
+	///\name capture settings
+	///\{
+		public:
+			/// here you can set the settings of the driver, like samplerate depth etc
+			void virtual setCaptureSettings(AudioDriverSettings const & settings ) { captureSettings_ = settings; }
+
+			/// here you get the special audio driver settings.
+			/// In case of some drivers like  e.g jack you must prepare, that a driver can set itself.
+			AudioDriverSettings const & captureSettings() const { return captureSettings_; }
+		protected:
+			/// holds the sample rate, bit depth, etc
+			AudioDriverSettings captureSettings_; 
 	///\}
 };
 

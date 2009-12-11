@@ -384,7 +384,7 @@ void Player::stop() {
 	}
 	setBpm(song().bpm());
 	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
-	samples_per_second(driver_->settings().samplesPerSec());
+	samples_per_second(driver_->playbackSettings().samplesPerSec());
 	// Disabled, because in psyclemfc, autorecording is used sometimes to record live, and pressing stop
 	// is a way to make autorecording ignore the song length and keep recording until intentionally stopping
 	// the recording (not the playback)
@@ -739,7 +739,7 @@ void Player::setDriver(AudioDriver & driver) {
 			s << "psycle: core: player: audio driver enabled: " << driver.info().name();
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		samples_per_second(driver.settings().samplesPerSec());
+		samples_per_second(driver.playbackSettings().samplesPerSec());
 		driver_ = &driver;
 	} else {
 		if(loggers::exception()()) loggers::exception()("psycle: core: player: audio driver failed to enable. setting back previous driver", UNIVERSALIS__COMPILER__LOCATION);
@@ -758,7 +758,7 @@ void Player::writeSamplesToFile(int amount) {
 		dither.Process(pL, amount);
 		dither.Process(pR, amount);
 	}
-	switch(driver_->settings().channelMode()) {
+	switch(driver_->playbackSettings().channelMode()) {
 		case 0: // mono mix
 			for(int i(0); i < amount; ++i)
 				//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
@@ -783,12 +783,11 @@ void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, ds
 {
 	if(recording_) return;
 	if(!song_ && !driver_) return;
-	int channels(2);
-	if(driver_->settings().channelMode() != 3) channels = 1;
-	recording_ =( DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->settings().samplesPerSec(), driver_->settings().bitDepth(), channels));
+	int channels(driver_->playbackSettings().numChannels());
+	recording_ =( DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->playbackSettings().samplesPerSec(), driver_->playbackSettings().bitDepth(), channels));
 	recording_with_dither_ = dodither;
 	if (dodither) {
-		dither.SetBitDepth(driver_->settings().bitDepth());
+		dither.SetBitDepth(driver_->playbackSettings().bitDepth());
 		dither.SetPdf(ditherpdf);
 		dither.SetNoiseShaping(noiseshaping);
 	}
