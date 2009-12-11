@@ -846,17 +846,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnBarplayFromStart() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Player & player(psy::core::Player::singleton());
-			player.start(0);
 			if (Global::pConfig->_followSong)
 			{
 				pattern_view()->bScrollDetatch=false;
 			}
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			psy::core::Player & player(psy::core::Player::singleton());
+			player.start(0);		
 #else			
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			Global::pPlayer->Start(0,0);
-#endif
+#endif			
 			pParentMain->StatusBarIdle();
 		}
 
