@@ -1,15 +1,12 @@
 ///\interface psycle::helpers
 #pragma once
-#include <psycle/helpers/math/pi.hpp>
-#include <psycle/helpers/math/truncate.hpp>
-#include <psycle/helpers/math/round.hpp>
-#include <psycle/helpers/math/log.hpp>
-#include <universalis/compiler/numeric.hpp>
-#include <boost/static_assert.hpp>
-#include <limits>
+#include "math/pi.hpp"
+#include "math/rint.hpp"
+#include "math/truncate.hpp"
+#include "math/round.hpp"
+#include "math/log.hpp"
+#include "math/clip.hpp"
 #include <string> // to declare hexstring_to_integer
-#include <cstdint>
-#include <limits>
 namespace psycle { namespace helpers {
 	/// the pi constant as a 32-bit floating point number
 	float const F_PI = math::pi_f;
@@ -59,64 +56,18 @@ namespace psycle { namespace helpers {
 			static float fMap_255_100[257];
 	};
 
-	/// clipping.
-	template<unsigned int const bits> UNIVERSALIS__COMPILER__CONST
-	typename universalis::compiler::numeric<bits>::signed_int inline f2iclip(float const & f)
-	{
-		typedef typename universalis::compiler::numeric<bits>::signed_int result_type;
-		typedef std::numeric_limits<result_type> type_traits;
-		if(f < type_traits::min) return type_traits::min;
-		if(f > type_traits::max) return type_traits::max;
-		return static_cast<result_type>(f);
+	/// combines float to signed integer conversion with clipping.
+	template<typename Result, unsigned int const bits> UNIVERSALIS__COMPILER__CONST
+	Result inline clipped_rint(float f) {
+		int const max(1 << (bits - 1)); // The compiler is able to compute this statically.
+		int const min(1 - max);
+		return math::clipped(min, math::rint<int>(f), max);
 	}
 
-	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
-	f2iclip16(float f)
-	{ 
-		int const l(32767);
-		if(f < -l) return -l;
-		if(f > +l) return +l;
-		return math::rounded(f);
+	/// combines float to signed integer conversion with clipping.
+	template<typename Result> UNIVERSALIS__COMPILER__CONST
+	Result inline clipped_rint(float f) {
+		return clipped_rint<Result, sizeof(Result) >> 3>(f);
 	}
 
-	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
-	f2iclip18(float f)
-	{ 
-		int const l(131071);
-		if(f < -l) return -l;
-		if(f > +l) return +l;
-		return math::rounded(f);
-	}
-
-	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
-	f2iclip20(float f)
-	{ 
-		int const l(524287);
-		if(f < -l) return -l;
-		if(f > +l) return +l;
-		return math::rounded(f);
-	}
-
-	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
-	f2iclip24(float f)
-	{ 
-		int const l(8388607);
-		if(f < -l) return -l;
-		if(f > +l) return +l;
-		return math::rounded(f);
-	}
-
-	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
-	f2iclip32(float f)
-	{ 
-		int const l(2147483647);
-		if(f < -l) return -l;
-		if(f > +l) return +l;
-		return math::rounded(f);
-	}
 }}
