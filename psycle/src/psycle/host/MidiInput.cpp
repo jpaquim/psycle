@@ -1118,13 +1118,17 @@ namespace psycle
 
 		void CMidiInput::InternalClock( DWORD dwParam2 )
 		{
-			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
 
 			// WARNING! GetPlayPos() has max of 0x7FFFFF
 
 			// get the current play sample position
- 			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
-
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+ 			int playPos = 0;
+#else
+			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
+#endif
 			// calc the latency of the clock midi message
 			int midiLatencyMs = ( timeGetTime() - m_tickBase ) - dwParam2;
 
@@ -1190,9 +1194,14 @@ namespace psycle
 		void CMidiInput::InternalReSync( DWORD dwParam2 )
 		{
 			// get the current play sample position
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+ 			int playPos = 0;
+#else
 			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
+#endif
 			
-			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
 
 			// calculate the latency of the MIDI message in samples (delay in getting to us)
 			// using our own timer, started at the same time (hopefully!) as the MIDI
@@ -1236,6 +1245,16 @@ namespace psycle
 			// method here in that they differ in the way the MME functions have been
 			// implemented!?  Oh, and the DSound functions are also not working correctly!
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// midi injection NOT enabled?
+			if( !m_midiInHandle[ DRIVER_MIDI ] || 
+				strcmp( Global::pConfig->_pOutputDriver->info().name().c_str(), "mmewaveout" ) != 0 )	// TODO: need to remove this string compare? (speed)
+			{
+				m_stats.flags &= ~FSTAT_ACTIVE;
+				return false;
+			}
+			
+#else
 			// midi injection NOT enabled?
 			if( !m_midiInHandle[ DRIVER_MIDI ] || 
 				strcmp( Global::pConfig->_pOutputDriver->GetInfo()->_psName, "Windows WaveOut MME" ) != 0 )	// TODO: need to remove this string compare? (speed)
@@ -1243,10 +1262,12 @@ namespace psycle
 				m_stats.flags &= ~FSTAT_ACTIVE;
 				return false;
 			}
+			
+#endif
 
 			m_stats.flags |= FSTAT_ACTIVE;
 
-			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
+			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
 			m_stats.bufferCount = m_patCount;
 
 			// (waiting until we are sure we will have enough midi data in the buffer
@@ -1257,10 +1278,17 @@ namespace psycle
 
 				// get the write position now and adjust for samples done since the
 				// resync interrupt
-				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();
-				
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				// todo
+				int writePos = 0;
+				// todo is this right ??
+				int blockSamples = Global::pConfig->_pOutputDriver->playbackSettings().blockBytes();
+				int blocks = Global::pConfig->_pOutputDriver->playbackSettings().blockCount();
+#else
+				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();				
 				int blockSamples = Global::pConfig->_pOutputDriver->GetBufferSize() / Global::pConfig->_pOutputDriver->GetSampleSize();
 				int blocks = Global::pConfig->_pOutputDriver->GetNumBuffers();
+#endif
 
 				// calculate our final adjuster
 				int syncAdjuster = m_adjustedPlayPos - ( writePos - (blockSamples*blocks) );

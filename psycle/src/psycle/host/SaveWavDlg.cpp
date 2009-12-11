@@ -167,35 +167,35 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if ((rate < 0) || (rate >5))
 			{
-				if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 8000)
+				if (Global::pConfig->GetSamplesPerSec() <= 8000)
 				{
 					rate = 0;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 11025)
+				else if (Global::pConfig->GetSamplesPerSec() <= 11025)
 				{
 					rate = 1;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 16000)
+				else if (Global::pConfig->GetSamplesPerSec() <= 16000)
 				{
 					rate = 2;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 22050)
+				else if (Global::pConfig->GetSamplesPerSec() <= 22050)
 				{
 					rate = 3;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 32000)
+				else if (Global::pConfig->GetSamplesPerSec() <= 32000)
 				{
 					rate = 4;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 44100)
+				else if (Global::pConfig->GetSamplesPerSec() <= 44100)
 				{
 					rate = 5;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 48000)
+				else if (Global::pConfig->GetSamplesPerSec() <= 48000)
 				{
 					rate = 6;
 				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 88200)
+				else if (Global::pConfig->GetSamplesPerSec() <= 88200)
 				{
 					rate = 7;
 				}
@@ -218,19 +218,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if ((bits < 0) || (bits > 3))
 			{
-				if (Global::pConfig->_pOutputDriver->_bitDepth <= 8)
+				if (Global::pConfig->GetBitDepth() <= 8)
 				{
 					bits = 0;
 				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 16)
+				else if (Global::pConfig->GetBitDepth() <= 16)
 				{
 					bits = 1;
 				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 24)
+				else if (Global::pConfig->GetBitDepth() <= 24)
 				{
 					bits = 2;
 				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 32)
+				else if (Global::pConfig->GetBitDepth() <= 32)
 				{
 					bits = 4;
 				}
@@ -251,7 +251,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			if ((channelmode < 0) || (channelmode > 3))
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				channelmode = Global::pConfig->_pOutputDriver->playbackSettings().channelMode();
+#else
 				channelmode = Global::pConfig->_pOutputDriver->_channelmode;
+#endif
+
 			}
 			m_channelmode.SetCurSel(channelmode);
 

@@ -69,7 +69,17 @@ void CWaveInMacDlg::FillCombobox()
 {
 	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 	std::vector<std::string> ports;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE	
+	// todo use real port names in the driver
+	unsigned int n = mydriver.captureSettings().numChannels();
+	for ( unsigned int i = 0; i < n; ++i ) {
+		std::ostringstream buffer;
+		buffer << "Input" << i;
+		ports.push_back(buffer.str());
+	}
+#else
 	mydriver.GetCapturePorts(ports);
+#endif
 	for (unsigned int i =0; i < ports.size(); ++i)
 	{
 		m_listbox.AddString(ports[i].c_str());

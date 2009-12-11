@@ -7,9 +7,6 @@
 #include "PatternView.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-//todo: fixme. This one has to be in configuration.hpp
-#include <psycle/audiodrivers/microsoftdirectsoundout.h>
-
 #include <psycle/core/internal_machines.h>
 #include <psycle/core/vstplugin.h>
 #include <psycle/core/player.h>
@@ -87,12 +84,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if (output_driver_) {
-				output_driver_->Enable(false);
-				delete output_driver_;
-			}
-#endif
 			delete machine_view_;
 			delete pattern_view_;
 		}
@@ -435,16 +426,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::EnableSound()
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE						
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psy::core::Player & player(psy::core::Player::singleton());
 			player.song(projects_->active_project()->song());
-			///\todo: this is a temporal hack, the output dialog should be changed to use core's drivers.
-			if (!output_driver_) {
-				output_driver_ =  new psy::core::MsDirectSound();
-			}
-			if (_outputActive) {
-				player.setDriver(*output_driver_);
-			}
+			output_driver_ =  Global::pConfig->_pOutputDriver;
+			player.setDriver(*output_driver_);
 #else
 			if (_outputActive)
 			{
@@ -897,12 +883,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			int i=0;
-			while ( Global::song().playOrderSel[i] == false ) i++;
+			for ( ; Global::song().playOrderSel[i] == false ; ++i);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if (!Player::singleton().playing()) {
 				SequenceLine* seqLine = *pattern_view()->song()->patternSequence().begin();
 				SequenceLine::iterator seqite = seqLine->begin();
-				for ( ; seqite != seqLine->end() && i >0; seqite++, i--);
+				for ( ; seqite != seqLine->end() && i>0; ++seqite, --i);
 
 				if (seqite != seqLine->end()) {
 					Player::singleton().start(seqite->second->tickPosition());
@@ -1016,8 +1002,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateAutostop(CCmdUI* pCmdUI) 
 		{
-			if (Global::pConfig->autoStopMachines == true ) pCmdUI->SetCheck(TRUE);
-			else pCmdUI->SetCheck(FALSE);
+			pCmdUI->SetCheck(Global::pConfig->autoStopMachines);			
 		}
 
 		void CChildView::OnFileSongproperties() 

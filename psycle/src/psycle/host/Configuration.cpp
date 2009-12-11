@@ -7,6 +7,8 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/patternEvent.h>
+#include <psycle/audiodrivers/microsoftmmewaveout.h>
+#include <psycle/audiodrivers/microsoftdirectsoundout.h>
 using namespace psy::core;
 #else
 #include "Song.hpp"
@@ -54,7 +56,15 @@ namespace psycle
 
 			SetSkinDefaults();
 			// soundcard output device
-			{
+			{				
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				_numOutputDrivers = 3;
+				_ppOutputDrivers = new psy::core::AudioDriver*[_numOutputDrivers];
+				_ppOutputDrivers[0] = new psy::core::DummyDriver();
+				_ppOutputDrivers[1] = new psy::core::MsWaveOut(); // this driver is broken
+				_ppOutputDrivers[2] = new psy::core::MsDirectSound;				
+				_outputDriverIndex = 2; // use direct sound so far as default;				
+#else
 				_numOutputDrivers = 4;
 				_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
 				_ppOutputDrivers[0] = new AudioDriver;
@@ -67,6 +77,7 @@ namespace psycle
 					delete _ppOutputDrivers[3]; _ppOutputDrivers[3] = 0;
 				}
 				_outputDriverIndex = 1;
+#endif
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 			}
 			// midi
