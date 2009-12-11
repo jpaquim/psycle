@@ -10,9 +10,6 @@
 #pragma once
 
 #include <universalis/detail/project.hpp>
-	//#include <inttypes.h> // posix/unix
-	//#include <stdint.h> // C1999
-	//#include <cstdint> // C++0x
 #if 0
 	#include <cstdint>
 	namespace universalis { namespace compiler { namespace numerics { namespace detail { namespace implementation = std; } } } }
@@ -24,7 +21,7 @@
 ///\todo: <boost/integer.hpp> offers the same kind of templates. this makes this code redundant.
 
 namespace universalis { namespace compiler {
-	template<unsigned int const bytes = 0> struct numeric
+	template<unsigned int const bits = 0> struct numeric
 	{
 		#if defined DIVERSALIS__COMPILER__FEATURE__TYPEOF
 			typedef typeof( 0) unsigned_int;

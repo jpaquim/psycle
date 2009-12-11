@@ -22,10 +22,10 @@ class sine_sequence {
 		typedef double real;
 
 		/// constructor
-		inline sine_sequence() : index_(0) {}
+		sine_sequence() : index_(0) {}
 
 		/// changes the phase and increment
-		inline void operator()(real phase, real radians_per_sample) throw() {
+		void operator()(real phase, real radians_per_sample) {
 			step_ = 2 * std::cos(radians_per_sample);
 			sequence_[0] = std::sin(phase - radians_per_sample);
 			sequence_[1] = std::sin(phase - 2 * radians_per_sample);
@@ -33,7 +33,7 @@ class sine_sequence {
 		}
 
 		/// compute the next sine according to last phase and increment
-		real inline operator()() throw() {
+		real operator()() {
 			int const swapped_index(index_ ^ 1);
 			real sin;
 			if(Clipped) sin = clipped<real>(-1, sequence_[index_] * step_ - sequence_[swapped_index], +1);
@@ -50,12 +50,10 @@ class sine_sequence {
 #if defined BOOST_AUTO_TEST_CASE
 	template<bool Clipped>
 	void sine_sequence_test_template() {
-		typedef double real;
+		typedef typename sine_sequence<Clipped>::real real;
 		sine_sequence<Clipped> sin;
 		{
-			using namespace universalis::os::clocks;
-			//typedef thread clock;
-			typedef monotonic clock;
+			typedef universalis::os::clocks::monotonic clock;
 			int const iterations(1000000);
 			real const step(pi / 1000);
 			sin(0, step);

@@ -57,20 +57,7 @@ std::int32_t inline rounded(Real x) {
 	
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline rounded<>(float f) {
-		#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
-			///\todo not always the fastest when using sse(2)
-			///\todo the double "2^51 + 2^52" version might be faster.
-			///\todo the rounding mode is UNSPECIFIED! (potential bug some code changes the FPU's rounding mode)...
-			std::int32_t i;
-			__asm
-			{ 
-				fld f;
-				fistp i;
-			}
-			return i;
-		#else
-			return rounded(double(f));
-		#endif
+		return rounded(double(f));
 	}
 
 #endif
