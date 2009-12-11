@@ -64,9 +64,9 @@ namespace psy { namespace core {
 		{
 
 			unsigned char* buffer;
-			int i;
+			std::uint32_t i;
 			WAVEHDR* blocks;
-			DWORD totalBufferSize = (settings().blockSize() + sizeof(WAVEHDR)) * settings().blockCount();
+			DWORD totalBufferSize = (playbackSettings().blockBytes() + sizeof(WAVEHDR)) * playbackSettings().blockCount();
 
 			//
 			// allocate memory for the entire set in one go
@@ -83,11 +83,11 @@ namespace psy { namespace core {
 			// and set up the pointers to each bit
 			//
 			blocks = (WAVEHDR*)buffer;
-			buffer += sizeof(WAVEHDR) * settings().blockCount();
-			for(i = 0; i < settings().blockCount(); i++) {
-				blocks[i].dwBufferLength = settings().blockSize();
+			buffer += sizeof(WAVEHDR) * playbackSettings().blockCount();
+			for(i = 0; i < playbackSettings().blockCount(); i++) {
+				blocks[i].dwBufferLength = playbackSettings().blockBytes();
 				blocks[i].lpData = (CHAR*)( buffer );
-				buffer += settings().blockSize();
+				buffer += playbackSettings().blockBytes();
 			}
 
 			return blocks;
@@ -115,17 +115,17 @@ namespace psy { namespace core {
 				if(current->dwFlags & WHDR_PREPARED) 
 					waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 
-				if( size < static_cast<int>( settings().blockSize() - current->dwUser) ) {
+				if( size < static_cast<int>( playbackSettings().blockBytes() - current->dwUser) ) {
 					memcpy(current->lpData + current->dwUser, data, size);
 					current->dwUser += size;
 					break;
 				}
 
-				remain = settings().blockSize() - current->dwUser;
+				remain = playbackSettings().blockBytes() - current->dwUser;
 				memcpy(current->lpData + current->dwUser, data, remain);
 				size -= remain;
 				data += remain;
-				current->dwBufferLength = settings().blockSize();
+				current->dwBufferLength = playbackSettings().blockBytes();
 
 				waveOutPrepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 				waveOutWrite(hWaveOut, current, sizeof(WAVEHDR));
@@ -145,7 +145,7 @@ namespace psy { namespace core {
 				// point to the next block
 				//
 				waveCurrentBlock++;
-				waveCurrentBlock %= settings().blockCount();
+				waveCurrentBlock %= playbackSettings().blockCount();
 
 				current = &waveBlocks[waveCurrentBlock];
 				current->dwUser = 0;
@@ -207,8 +207,8 @@ namespace psy { namespace core {
 			// some informations are redundant, but you need to define them
 			WAVEFORMATEX format;
 			format.wFormatTag = WAVE_FORMAT_PCM;
-			format.wBitsPerSample = settings().bitDepth();
-			format.nSamplesPerSec = settings().samplesPerSec();
+			format.wBitsPerSample = playbackSettings().bitDepth();
+			format.nSamplesPerSec = playbackSettings().samplesPerSec();
 			format.nChannels = 2;
 			format.nBlockAlign = ( format.nChannels * format.wBitsPerSample ) >> 3;
 			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
@@ -218,7 +218,7 @@ namespace psy { namespace core {
 
 			// the buffer block variables
 			if (!(waveBlocks = allocateBlocks())) return 0; // memory error
-			waveFreeBlockCount =  settings().blockCount();
+			waveFreeBlockCount =  playbackSettings().blockCount();
 			waveCurrentBlock   = 0;
 
 			// this will protect the monitor buffer counter variable 

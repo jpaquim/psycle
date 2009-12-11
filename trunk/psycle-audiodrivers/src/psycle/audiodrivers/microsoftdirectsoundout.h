@@ -28,7 +28,6 @@
 namespace psy { namespace core {
 
 /// output device interface implemented by direct sound.
-///\todo this driver is (over)filling the buffer to fast!
 class MsDirectSound : public AudioDriver {
 	class PortEnums {
 	public:
@@ -44,10 +43,10 @@ class MsDirectSound : public AudioDriver {
 		LPGUID _pGuid;
 		LPDIRECTSOUNDCAPTURE8 _pDs;
 		LPDIRECTSOUNDCAPTUREBUFFER8  _pBuffer;
-		int _lowMark;
+		std::uint32_t _lowMark;
 		float *pleft;
 		float *pright;
-		int _machinepos;
+		std::uint32_t _machinepos;
 	};
 	public:
 
@@ -58,18 +57,15 @@ class MsDirectSound : public AudioDriver {
 
 		virtual void Initialize( AUDIODRIVERWORKFN pCallback, void * context );
 		virtual bool Enable( bool );
-		virtual bool Enabled() { return _running; }
+		virtual bool Enabled() { return threadRunning_; }
 		virtual void GetCapturePorts(std::vector<std::string>&ports);
-		virtual bool AddCapturePort(int idx);
-		virtual bool RemoveCapturePort(int idx);
+		virtual bool AddCapturePort(std::uint32_t idx);
+		virtual bool RemoveCapturePort(std::uint32_t idx);
 		virtual bool CreateCapturePort(PortCapt &port);
-		virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
+		virtual void GetReadBuffers(std::uint32_t idx, float **pleft, float **pright,int numsamples);
 		static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
-		virtual int GetInputLatency() { return _dsBufferSize; }
-		virtual int GetOutputLatency() { return _dsBufferSize; }
 		virtual int GetWritePos();
 		virtual int GetPlayPos();
-//		int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
 		virtual void Configure();
 		virtual bool Initialized() { return _initialized; }
 		virtual bool Configured() { return _configured; }
@@ -77,9 +73,10 @@ class MsDirectSound : public AudioDriver {
 		void ReadConfig();
 		void WriteConfig();
 		void Error(const WCHAR msg[]);
-		static DWORD WINAPI PollerThread(void* pDirectSound);
-		//static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
-		void DoBlocks();
+		static DWORD WINAPI PollerThreadStatic(void* pDirectSound);
+		void PollerThread();
+		void DoBlocks16();
+		void DoBlocks24();
 		bool WantsMoreBlocks();
 		void DoBlocksRecording(PortCapt& port);
 		bool WantsMoreBlocksRecording(PortCapt& port);
@@ -91,23 +88,24 @@ class MsDirectSound : public AudioDriver {
 		bool _configured;
 		static AudioDriverInfo _info;
 
-		bool _running;
-		bool _playing;
-		bool _threadRun;
-		//static AudioDriverEvent _event;
-		//CCriticalSection _lock;
+		/// whether the directsound buffer is enabled and playing.
+		bool dsBufferPlaying_;
+		/// whether the thread is running
+		bool threadRunning_;
+		/// whether the thread is asked to terminate
+		bool stopRequested_;
+		/// a mutex to synchronise accesses to running_ and stop_requested_
+		std::mutex mutex_;
+		typedef std::scoped_lock<std::mutex> scoped_lock;
+		/// a condition variable to wait until notified that the value of running_ has changed
+		std::condition<scoped_lock> condition_;
 
 		GUID device_guid;
 		bool _exclusive;
 		bool _dither;
-		int _bytesPerSample;
-		int _bufferSize;
-		int _numBuffers;
-
-		int _dsBufferSize;
 		int _runningBufSize;
-		int _lowMark;
-		int _highMark;
+		DWORD _lowMark;
+		DWORD _highMark;
 		int _buffersToDo;
 
 		std::vector<PortEnums> _capEnums;
@@ -117,9 +115,6 @@ class MsDirectSound : public AudioDriver {
 		LPDIRECTSOUNDBUFFER8 _pBuffer;
 		void* _callbackContext;
 		AUDIODRIVERWORKFN _pCallback;
-
-
-		void quantize(float *pin, int *piout, int c);
 };
 
 }}

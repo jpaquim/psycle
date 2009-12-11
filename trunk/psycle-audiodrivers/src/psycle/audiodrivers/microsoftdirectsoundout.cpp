@@ -49,9 +49,9 @@ namespace psy { namespace core {
 			device_guid(), // DSDEVID_DefaultPlayback <- unresolved external.
 			_initialized(),
 			_configured(),
-			_running(),
-			_playing(),
-			_threadRun(),
+			dsBufferPlaying_(),
+			threadRunning_(),
+			stopRequested_(),
 			_pDs(),
 			_pBuffer(),
 			_pCallback()
@@ -63,9 +63,10 @@ namespace psy { namespace core {
 		void MsDirectSound::Initialize( AUDIODRIVERWORKFN pCallback, void * context ) {
 			_callbackContext = context;
 			_pCallback = pCallback;
-			_running = false;
 			//_hwnd = NApp::mainWindow()->win();
 			ReadConfig();
+			_capEnums.resize(0);
+			_capPorts.resize(0);
 			DirectSoundCaptureEnumerate(DSEnumCallback,&_capEnums);
 			_initialized = true;
 		}
@@ -75,9 +76,12 @@ namespace psy { namespace core {
 		}
 
 		bool MsDirectSound::Start() {
-			//CSingleLock lock(&_lock, true);
-			if(_running) return true;
-			if(!_pCallback) return false;
+			// return immediatly if the thread is already running
+			if(threadRunning_) return true;
+			if(!_initialized || !_pCallback) {
+				Error(L"(DirectSound) Failed to start: Not initialized or callback is null");
+				return false;
+			}
 			if( FAILED( ::CoInitialize(NULL) ) ) {
 				Error(L"(DirectSound) Failed to initialize COM");
 				return false;
@@ -126,20 +130,20 @@ namespace psy { namespace core {
 			// Set up wave format structure. 
 			memset(&format, 0, sizeof(WAVEFORMATEX)); 
 			format.wFormatTag = WAVE_FORMAT_PCM;
-			format.nChannels = 2;
-			format.wBitsPerSample = 16;//_bitDepth;
-			format.nSamplesPerSec = settings().samplesPerSec();
+			format.nChannels = playbackSettings().numChannels();
+			format.wBitsPerSample = playbackSettings().bitDepth();
+			format.nSamplesPerSec = playbackSettings().samplesPerSec();
 			format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
 			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 			format.cbSize = 0;
 
-			_dsBufferSize = _exclusive ? 0 : _bufferSize*_numBuffers;
+			int dsBufferSize = _exclusive ? 0 : playbackSettings().blockBytes()*playbackSettings().blockCount();
 			// Set up DSBUFFERDESC structure. 
 			memset(&desc, 0, sizeof(DSBUFFERDESC));
 			desc.dwSize = sizeof(DSBUFFERDESC); 
 			desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2;
 			desc.dwFlags |= _exclusive ? DSBCAPS_PRIMARYBUFFER : DSBCAPS_GLOBALFOCUS;
-			desc.dwBufferBytes = _dsBufferSize; 
+			desc.dwBufferBytes = dsBufferSize; 
 			desc.dwReserved = 0;
 			desc.lpwfxFormat = _exclusive ? 0 : &format;
 			desc.guid3DAlgorithm = GUID_NULL;
@@ -154,7 +158,7 @@ namespace psy { namespace core {
 
 			if(_exclusive)
 			{
-//				_pBuffer->Stop();
+				//_pBuffer->Stop();
 				if(FAILED(_pBuffer->SetFormat(&format)))
 				{
 					Error(L"Failed to set DirectSound Buffer format");
@@ -174,48 +178,49 @@ namespace psy { namespace core {
 					_pDs = 0;
 					return false;
 				}
-				_dsBufferSize = caps.dwBufferBytes;
-//				WriteConfig();
-				_runningBufSize = _dsBufferSize*0.5f;
+				dsBufferSize = caps.dwBufferBytes;
+				_runningBufSize = dsBufferSize*0.5f;
 				_buffersToDo = 1;
 			}
 			else
 			{
-				_runningBufSize = _bufferSize;
-				_buffersToDo = _numBuffers;
+				_runningBufSize = playbackSettings().blockBytes();
+				_buffersToDo = playbackSettings().blockCount();
 			}
 			_lowMark = 0;
 			_highMark = _runningBufSize;
+			playbackSettings_.setTotalBufferBytes(dsBufferSize);
 
 			_pBuffer->Initialize(_pDs,&desc);
 			for (unsigned int i=0; i<_capPorts.size();i++)
 				CreateCapturePort(_capPorts[i]);
 
-			///\todo: what's this?
-			//_event.ResetEvent();
-			_threadRun = true;
-			_playing = false;
+			dsBufferPlaying_ = false;
 			DWORD dwThreadId;
-			CreateThread( NULL, 0, PollerThread, this, 0, &dwThreadId );
-			_running = true;
+			CreateThread( NULL, 0, PollerThreadStatic, this, 0, &dwThreadId );
+			// wait for the thread to be running
+			{ scoped_lock lock(mutex_);
+				while(!threadRunning_) condition_.wait(lock);
+			}
 			return true;
 		}
 
 		bool MsDirectSound::Stop()
 		{
-			//CSingleLock lock(&_lock, true);
-			if(!_running) return true;
-			_threadRun = false;
-			//CSingleLock event(&_event, true);
-			// Once we get here, the PollerThread should have stopped
-			///\todo: some threadlocking mechanism. For now adding this sleeps
-			Sleep(1000);
-
-			if(_playing)
-			{
-				_pBuffer->Stop();
-				_playing = false;
+			if(!threadRunning_) return true;
+			// ask the thread to terminate
+			{	scoped_lock lock(mutex_);
+				stopRequested_ = true;
 			}
+			condition_.notify_one();
+
+			/// join the thread
+			{	scoped_lock lock(mutex_);
+				while(threadRunning_) condition_.wait(lock);
+				stopRequested_ = false;
+			}
+			// Once we get here, the PollerThread should have stopped
+
 			_pBuffer->Release();
 			_pBuffer = 0;
 			_pDs->Release();
@@ -230,7 +235,6 @@ namespace psy { namespace core {
 				universalis::os::aligned_memory_dealloc(_capPorts[i].pright);
 			}
 			_capPorts.resize(0);
-			_running = false;
 			// Release COM
 			CoUninitialize();
 
@@ -248,9 +252,9 @@ namespace psy { namespace core {
 			ports->push_back(port);
 			return TRUE;
 		}
-		bool MsDirectSound::AddCapturePort(int idx)
+		bool MsDirectSound::AddCapturePort(std::uint32_t idx)
 		{
-			bool isplaying = _running;
+			bool isplaying = threadRunning_;
 			if ( idx >= _capEnums.size() ) return false;
 			for (unsigned int i=0;i<_capPorts.size();++i)
 			{
@@ -271,7 +275,7 @@ namespace psy { namespace core {
 			}
 			return true;
 		}
-		bool MsDirectSound::RemoveCapturePort(int idx)
+		bool MsDirectSound::RemoveCapturePort(std::uint32_t idx)
 		{
 			bool restartplayback = false;
 			std::vector<PortCapt> newports;
@@ -280,7 +284,7 @@ namespace psy { namespace core {
 			{
 				if (_capPorts[i]._pGuid == _capEnums[idx].guid )
 				{
-					if (_playing)
+					if (dsBufferPlaying_)
 					{
 						Stop();
 						restartplayback=true;
@@ -317,16 +321,19 @@ namespace psy { namespace core {
 			// Set up wave format structure. 
 			ZeroMemory(&format, sizeof(WAVEFORMATEX));
 			format.wFormatTag = WAVE_FORMAT_PCM;
-			format.nChannels = 2;
-			format.wBitsPerSample = 16;//_bitDepth;
-			format.nSamplesPerSec = settings().samplesPerSec();
+			format.nChannels = captureSettings().numChannels();
+			format.wBitsPerSample = captureSettings().bitDepth();
+			format.nSamplesPerSec = captureSettings().samplesPerSec();
 			format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
 			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 			format.cbSize = 0;
 
-			ZeroMemory( &dscbd, sizeof(dscbd) );
-			dscbd.dwSize        = sizeof(dscbd);
-			dscbd.dwBufferBytes = _dsBufferSize;
+			///\todo: The buffer size may not be the appropiate. Note that if this changes,
+			/// the doBlocksRecording method has to be modified.
+			int dsBufferSize = _exclusive ? 0 : playbackSettings().totalBufferBytes();
+			ZeroMemory( &dscbd, sizeof(DSCBUFFERDESC) );
+			dscbd.dwSize        = sizeof(DSCBUFFERDESC);
+			dscbd.dwBufferBytes = dsBufferSize;
 			dscbd.lpwfxFormat   = &format;
 
 			if( FAILED( hr = port._pDs->CreateCaptureBuffer( &dscbd, reinterpret_cast<LPDIRECTSOUNDCAPTUREBUFFER*>(&port._pBuffer), NULL ) ) )
@@ -335,14 +342,14 @@ namespace psy { namespace core {
 				return false;
 			}
 			hr = port._pBuffer->Start(DSCBSTART_LOOPING);
-			universalis::os::aligned_memory_alloc(16, port.pleft, _dsBufferSize);
-			universalis::os::aligned_memory_alloc(16, port.pright, _dsBufferSize);
+			universalis::os::aligned_memory_alloc(16, port.pleft, dsBufferSize);
+			universalis::os::aligned_memory_alloc(16, port.pright, dsBufferSize);
 			return true;
 		}
 
-		void MsDirectSound::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples)
+		void MsDirectSound::GetReadBuffers(std::uint32_t idx,float **pleft, float **pright,int numsamples)
 		{
-			if (_running)
+			if (threadRunning_)
 			{
 				if (idx >=_capPorts.size()) return;
 				*pleft=_capPorts[_portMapping[idx]].pleft+_capPorts[_portMapping[idx]]._machinepos;
@@ -351,56 +358,91 @@ namespace psy { namespace core {
 			}
 		}
 
-		DWORD WINAPI MsDirectSound::PollerThread(void * pDirectSound)
+		DWORD WINAPI MsDirectSound::PollerThreadStatic(void * pDirectSound)
 		{
 			universalis::os::thread_name thread_name("direct sound");
 			universalis::processor::exception::install_handler_in_thread();
 			MsDirectSound * pThis = reinterpret_cast<MsDirectSound*>( pDirectSound );
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);
-			//Prefill buffer:
-			for(int i=0; i< pThis->_buffersToDo;i++)
+			pThis->PollerThread();
+			//::_endthread();
+			return 0;
+		}
+		void MsDirectSound::PollerThread()
+		{
+			// notify that the thread is now running
 			{
-				//CSingleLock lock(&pThis->_lock, TRUE);
-				for (unsigned int i =0; i < pThis->_capPorts.size(); i++)
-				{
-					pThis->DoBlocksRecording(pThis->_capPorts[i]);
-				}
-				pThis->DoBlocks();
+				scoped_lock lock(mutex_);
+				threadRunning_ = true;
 			}
-
-			while(pThis->_threadRun)
+			condition_.notify_one();
+			//Prefill buffer:
+			for(int i=0; i< _buffersToDo;i++)
 			{
-				int runs=0;
-
-				while(pThis->WantsMoreBlocks())
+				for (unsigned int i =0; i < _capPorts.size(); i++)
 				{
-					for (unsigned int i =0; i < pThis->_capPorts.size(); i++)
+					DoBlocksRecording(_capPorts[i]);
+				}
+				if (playbackSettings().bitDepth() == 16) {
+					DoBlocks16();
+				} else if (playbackSettings().bitDepth() == 24) {
+					DoBlocks24();
+				}
+			}
+			while(true)
+			{
+				std::uint32_t runs=0;
+
+				while(WantsMoreBlocks())
+				{
+					for (unsigned int i =0; i < _capPorts.size(); i++)
 					{
-						pThis->DoBlocksRecording(pThis->_capPorts[i]);
+						DoBlocksRecording(_capPorts[i]);
+					}
+					if (playbackSettings().bitDepth() == 16) {
+						DoBlocks16();
+					} else if (playbackSettings().bitDepth() == 24) {
+						DoBlocks24();
 					}
 
-					pThis->DoBlocks();
-					if (++runs > pThis->_numBuffers)
+					// This if prevents the application to become unresponsible.
+					// in case of too high cpu usage.
+					if (++runs > playbackSettings().blockCount())
 						break;
+				}
+				// check whether the thread has been asked to terminate
+				{
+					scoped_lock lock(mutex_);
+					if(stopRequested_) break;
 				}
 				::Sleep(10);
 			}
-			//_event.SetEvent();
-			//::_endthread();
-			return 0;
+
+			if(dsBufferPlaying_)
+			{
+				_pBuffer->Stop();
+				dsBufferPlaying_ = false;
+			}
+
+			// notify that the thread is not running anymore
+			{
+				scoped_lock lock(mutex_);
+				threadRunning_ = false;
+			}
+			condition_.notify_one();
 		}
 		bool MsDirectSound::WantsMoreBlocks()
 		{
 			// [_lowMark,_highMark] is the next buffer to be filled.
 			// if pos is still inside, we have to wait.
-			int pos=0;
-			HRESULT hr = _pBuffer->GetCurrentPosition((DWORD*)&pos, 0);
+			DWORD pos=0;
+			HRESULT hr = _pBuffer->GetCurrentPosition(&pos, 0);
 			if(hr == DSERR_BUFFERLOST)
 			{
-				_playing = false;
-				if(FAILED(_pBuffer->Restore()))	return false;
-				hr = _pBuffer->GetCurrentPosition((DWORD*)&pos, 0);
+				dsBufferPlaying_ = false;
+				if(FAILED(_pBuffer->Restore())) return false;
+				hr = _pBuffer->GetCurrentPosition(&pos, 0);
 				if (FAILED(hr)) return false;
 				else return true;
 			}
@@ -409,20 +451,21 @@ namespace psy { namespace core {
 			{
 				if((pos >= _lowMark) || (pos < _highMark)) return false;
 			}
-			else if((pos >= _lowMark) && (pos < _highMark))	return false;
+			else if((pos >= _lowMark) && (pos < _highMark)) return false;
 			return true;
 		}
 		bool MsDirectSound::WantsMoreBlocksRecording(PortCapt& port)
 		{
 			// [_lowMark,_highMark] is the next buffer to be filled.
 			// if pos is still inside, we have to wait.
-/*			int pos=0;
-			HRESULT hr = port._pBuffer->GetCurrentPosition(0,(DWORD*)&pos);
+#if 0
+			DWORD pos=0;
+			HRESULT hr = port._pBuffer->GetCurrentPosition(0,&pos);
 			if(hr == DSERR_BUFFERLOST)
 			{
-				_playing = false;
-				if(FAILED(port._pBuffer->Start(DSCBSTART_LOOPING)))	return false;
-				hr = port._pBuffer->GetCurrentPosition(0,(DWORD*)&pos);
+				dsBufferPlaying_ = false;
+				if(FAILED(port._pBuffer->Start(DSCBSTART_LOOPING))) return false;
+				hr = port._pBuffer->GetCurrentPosition(0,&pos);
 				if (FAILED(hr)) return false;
 				else return true;
 			}
@@ -432,8 +475,8 @@ namespace psy { namespace core {
 			{
 				if((pos >= port._lowMark) || (pos < _highMark)) return false;
 			}
-			else if((pos >= port._lowMark) && (pos < _highMark))	return false;
-*/
+			else if((pos >= port._lowMark) && (pos < _highMark)) return false;
+#endif
 			return true;
 		}
 
@@ -455,26 +498,39 @@ namespace psy { namespace core {
 			if (SUCCEEDED(hr))
 			{ 
 				// Put the audio in our float buffers.
-				int numSamples = blockSize1 / settings().sampleSize();
-				DeQuantize16AndDeinterlace(pBlock1, port.pleft,port.pright, numSamples);
+				int numSamples = blockSize1 / captureSettings().sampleSize();
+				if(captureSettings().bitDepth() == 16) {
+					DeQuantize16AndDeinterlace(pBlock1, port.pleft,port.pright, numSamples);
+				}
+				else if (captureSettings().bitDepth() == 24) {
+					DeQuantize24AndDeinterlace(pBlock1, port.pleft,port.pright, numSamples);
+				}
 				port._lowMark += blockSize1;
 				if (blockSize2 > 0)
 				{
-					DeQuantize16AndDeinterlace(pBlock2, port.pleft+numSamples,port.pright+numSamples, blockSize2 / settings().sampleSize());
+					numSamples = blockSize2 / captureSettings().sampleSize();
+					if(captureSettings().bitDepth() == 16) {
+						DeQuantize16AndDeinterlace(pBlock2, port.pleft+numSamples,port.pright+numSamples, numSamples);
+					}
+					else if (captureSettings().bitDepth() == 24) {
+						DeQuantize24AndDeinterlace(pBlock2, port.pleft+numSamples,port.pright+numSamples, numSamples);
+					}
 					_lowMark += blockSize2;
 				}
 				// Release the data back to DirectSound. 
 				hr = port._pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
 
-				if ( port._lowMark >= _dsBufferSize ) port._lowMark -= _dsBufferSize;
+				if ( port._lowMark >= playbackSettings().totalBufferBytes() ) {
+					port._lowMark -= playbackSettings().totalBufferBytes();
+				}
 			}
 			port._machinepos=0;
 		}
-		void MsDirectSound::DoBlocks()
+		void MsDirectSound::DoBlocks16()
 		{
 			// Next, proceeed with the generation of audio
-			int* pBlock1 , *pBlock2;
-			unsigned long blockSize1, blockSize2;
+			std::int16_t* pBlock1 , *pBlock2;
+			DWORD blockSize1, blockSize2;
 			// Obtain write pointer. 
 			HRESULT hr = _pBuffer->Lock(_lowMark, _runningBufSize, 
 				(void**)&pBlock1, &blockSize1, 
@@ -483,7 +539,7 @@ namespace psy { namespace core {
 			{ 
 				// If DSERR_BUFFERLOST is returned, restore and retry lock. 
 				_pBuffer->Restore(); 
-				_playing = false;
+				dsBufferPlaying_ = false;
 				hr = _pBuffer->Lock(_lowMark, _runningBufSize, 
 					(void**)&pBlock1, &blockSize1, 
 					(void**)&pBlock2, &blockSize2, 0);
@@ -491,51 +547,102 @@ namespace psy { namespace core {
 			if (SUCCEEDED(hr))
 			{ 
 				// Generate audio and put it into the buffer
-				int numSamples = blockSize1 / settings().sampleSize();
+				int numSamples = blockSize1 / playbackSettings().sampleSize();
 				float *pFloatBlock = _pCallback(_callbackContext, numSamples);
-				// if(_dither) QuantizeWithDither(pFloatBlock, pBlock1, numSamples); else 
-				quantize(pFloatBlock, pBlock1, numSamples);
+				if(_dither) Quantize16WithDither(pFloatBlock, pBlock1, numSamples);
+				else Quantize16(pFloatBlock, pBlock1, numSamples);
 				_lowMark += blockSize1;
 
-				while(blockSize2 > 0)
+				if(blockSize2 > 0)
 				{
-					numSamples = blockSize2 / settings().sampleSize();
+					numSamples = blockSize2 / playbackSettings().sampleSize();
 					float *pFloatBlock = _pCallback(_callbackContext, numSamples);
-					// if(_dither) QuantizeWithDither(pFloatBlock, pBlock2, numSamples); else 
-					quantize(pFloatBlock, pBlock2, numSamples);
+					if(_dither) Quantize16WithDither(pFloatBlock, pBlock2, numSamples);
+					else Quantize16(pFloatBlock, pBlock2, numSamples);
 					_lowMark += blockSize2;
 				}
 				// Release the data back to DirectSound. 
 				hr = _pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
-				if(SUCCEEDED(hr) && !_playing)
+				if(SUCCEEDED(hr) && !dsBufferPlaying_)
 				{
-					_playing = true;
+					dsBufferPlaying_ = true;
 					hr = _pBuffer->Play(0, 0, DSBPLAY_LOOPING);
 				}
 				_highMark = _lowMark + _runningBufSize;
-				if(_highMark > _dsBufferSize)
+				const std::uint32_t dsBufferSize = playbackSettings().totalBufferBytes();
+				if(_highMark > dsBufferSize)
 				{
-					_highMark -= _dsBufferSize;
-					if ( _lowMark >= _dsBufferSize ) _lowMark -= _dsBufferSize;
+					_highMark -= dsBufferSize;
+					if ( _lowMark >= dsBufferSize ) _lowMark -= dsBufferSize;
 				}
 			}
 		}
+		void MsDirectSound::DoBlocks24()
+		{
+			// Next, proceeed with the generation of audio
+			std::int32_t* pBlock1 , *pBlock2;
+			DWORD blockSize1, blockSize2;
+			// Obtain write pointer. 
+			HRESULT hr = _pBuffer->Lock(_lowMark, _runningBufSize, 
+				(void**)&pBlock1, &blockSize1, 
+				(void**)&pBlock2, &blockSize2, 0);
+			if (DSERR_BUFFERLOST == hr) 
+			{ 
+				// If DSERR_BUFFERLOST is returned, restore and retry lock. 
+				_pBuffer->Restore(); 
+				dsBufferPlaying_ = false;
+				hr = _pBuffer->Lock(_lowMark, _runningBufSize, 
+					(void**)&pBlock1, &blockSize1, 
+					(void**)&pBlock2, &blockSize2, 0);
+			} 
+			if (SUCCEEDED(hr))
+			{ 
+				// Generate audio and put it into the buffer
+				int numSamples = blockSize1 / playbackSettings().sampleSize();
+				float *pFloatBlock = _pCallback(_callbackContext, numSamples);
+				if(_dither) Quantize24WithDither(pFloatBlock, pBlock1, numSamples);
+				else Quantize24(pFloatBlock, pBlock1, numSamples);
+				_lowMark += blockSize1;
 
+				if(blockSize2 > 0)
+				{
+					numSamples = blockSize2 / playbackSettings().sampleSize();
+					float *pFloatBlock = _pCallback(_callbackContext, numSamples);
+					if(_dither) Quantize24WithDither(pFloatBlock, pBlock2, numSamples);
+					else Quantize24(pFloatBlock, pBlock2, numSamples);
+					_lowMark += blockSize2;
+				}
+				// Release the data back to DirectSound. 
+				hr = _pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
+				if(SUCCEEDED(hr) && !dsBufferPlaying_)
+				{
+					dsBufferPlaying_ = true;
+					hr = _pBuffer->Play(0, 0, DSBPLAY_LOOPING);
+				}
+				_highMark = _lowMark + _runningBufSize;
+				const std::uint32_t dsBufferSize = playbackSettings().totalBufferBytes();
+				if(_highMark > dsBufferSize)
+				{
+					_highMark -= dsBufferSize;
+					if ( _lowMark >= dsBufferSize ) _lowMark -= dsBufferSize;
+				}
+			}
+		}
 		void MsDirectSound::ReadConfig()
 		{
 			// default configuration
-			bool saveatend(false);
 			device_guid = GUID(); // DSDEVID_DefaultPlayback <-- unresolved external symbol
 			_exclusive = false;
 			_dither = false;
-			//_bitDepth = 16;
-			//_channelmode = 3;
-			//_samplesPerSec = 44100;
-			_bufferSize = 8192;
-			_numBuffers = 4;
+			playbackSettings_.setBitDepth(16);
+			playbackSettings_.setChannelMode(3);
+			playbackSettings_.setSamplesPerSec(44100);
+			playbackSettings_.setBlockBytes(8192);
+			playbackSettings_.setBlockCount(4);
+			captureSettings_.setBitDepth(16);
+			captureSettings_.setChannelMode(3);
+			captureSettings_.setSamplesPerSec(44100);
 			_configured = true;
-
-
 		}
 
 		void MsDirectSound::WriteConfig()
@@ -555,7 +662,7 @@ namespace psy { namespace core {
 
 		int MsDirectSound::GetPlayPos()
 		{
-			if(!_running) return 0;
+			if(!threadRunning_) return 0;
 			DWORD playPos;
 			if(FAILED(_pBuffer->GetCurrentPosition(&playPos, 0)))
 			{
@@ -567,7 +674,7 @@ namespace psy { namespace core {
 
 		int MsDirectSound::GetWritePos()
 		{
-			if(!_running) return 0;
+			if(!threadRunning_) return 0;
 			DWORD writePos;
 			if(FAILED(_pBuffer->GetCurrentPosition(0, &writePos)))
 			{
@@ -580,27 +687,6 @@ namespace psy { namespace core {
 		bool MsDirectSound::Enable(bool e)
 		{
 			return e ? Start() : Stop();
-		}
-
-		void MsDirectSound::quantize(float *pin, int *piout, int c) {
-			///\todo use the functions already available in the base class.
-			
-			using psycle::helpers::math::furti;
-
-			int const SHORT_MIN = -32768;
-			int const SHORT_MAX = +32767;
-			do {
-				int l = furti<int>((pin[0]));
-				if(l < SHORT_MIN) l = SHORT_MIN;
-				else if(l > SHORT_MAX) l = SHORT_MAX;
-
-				int r = furti<int>((pin[1]));
-				if(r < SHORT_MIN) r = SHORT_MIN;
-				else if(r > SHORT_MAX) r = SHORT_MAX;
-
-				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
-				pin += 2;
-			} while(--c);
 		}
 }}
 #endif // defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
