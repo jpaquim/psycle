@@ -1220,8 +1220,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::SetTitleBarText()
 		{
-			std::string titlename = "[";
-			titlename+=Global::song().fileName;
+			std::string titlename = "[" + Global::song().fileName;
 			/*
 			if(!(Global::song()._saved))
 			{
@@ -1348,13 +1347,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI) 
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if (Player::singleton().loopEnabled())
+			pCmdUI->SetCheck(Player::singleton().loopEnabled());
 #else
-			if (Global::pPlayer->_loopSong)
+			pCmdUI->SetCheck(Global::pPlayer->_loopSong);
 #endif
-				pCmdUI->SetCheck(1);
-			else
-				pCmdUI->SetCheck(0);	
 		}
 
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
