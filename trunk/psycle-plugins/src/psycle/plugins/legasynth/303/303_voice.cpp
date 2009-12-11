@@ -160,7 +160,7 @@ void TB303_Voice::recalculate_filters() {
 	vcf_e0*=M_PI/base_freq;
 	vcf_e1*=M_PI/base_freq;
 	vcf_e1 -= vcf_e0;
-	//undenormalise(vcf_e1);
+	//psycle::helpers::math::erase_all_nans_infinities_and_denormals(vcf_e1);
 	vcf_envpos = ENVINC;
 }
 
@@ -208,19 +208,7 @@ void TB303_Voice::mix_internal(int p_amount,int *p_where_l,int *p_where_r) {
 		// compute sample
 		val=vcf_a*vcf_d1 + vcf_b*vcf_d2 + vcf_c*vco_k*vca_a;
 
-		#if 0
-			//undenormalise(val);
-			//anti-denormal code from Jazz
-			//unsigned int corrected_sample = *((unsigned int*)&val);
-			//corrected_sample *= ((corrected_sample < 0x7F800000) && ((corrected_sample & 0x7F800000) > 0));
-			//val = *((float*)&corrected_sample);
-			unsigned int corrected_sample = *((unsigned int*)&val);
-			unsigned int exponent = corrected_sample & 0x7F800000;
-			corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-			val = *((float*)&corrected_sample);
-		#else
-			psycle::helpers::math::erase_all_nans_infinities_and_denormals(val);
-		#endif
+		psycle::helpers::math::erase_all_nans_infinities_and_denormals(val);
 
 		left_c = val * mix_volume_left*REQUESTED_MAX_SAMPLE_VALUE;
 		right_c = val * mix_volume_right*REQUESTED_MAX_SAMPLE_VALUE;
