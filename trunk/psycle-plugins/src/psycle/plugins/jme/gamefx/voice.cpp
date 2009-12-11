@@ -18,7 +18,7 @@
 */
 
 #include <cmath>
-#include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
+#include <psycle/helpers/math/rint.hpp>
 
 #include "voice.h"
 
@@ -206,7 +206,7 @@ float CSynthTrack::GetSample()
 					for (int i = 0; i<16; i++){
 						OSCPosition+=OOSCSpeed;
 						if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
-						pos = psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition-0.5f);
+						pos = psycle::helpers::math::rint<std::int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos+cur_pw];
 						output+=aaf1.process((vpar->Wavetable[cur_waveform][((pos+1)&2047)+cur_pw] - sample) * (OSCPosition - (float)pos) + sample);
 					}
@@ -220,7 +220,7 @@ float CSynthTrack::GetSample()
 					for (int i = 0; i<16; i++){
 						OSCPosition+=OOSCSpeed;
 						if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
-						pos = psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition-0.5f);
+						pos = psycle::helpers::math::rint<std::int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos];
 						output+=aaf1.process((vpar->Wavetable[cur_waveform][(pos+1)&2047] - sample) * (OSCPosition - (float)pos) + sample);
 					}

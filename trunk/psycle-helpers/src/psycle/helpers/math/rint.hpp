@@ -18,69 +18,66 @@
 
 namespace psycle { namespace helpers { namespace math {
 
-/// converts a floating point number to an integer by rounding in an unspecified way
+/// C1999 rint - converts a floating point number to an integer by rounding in an unspecified way.
+/// This function has the same semantic as C1999's rint series of functions,
+/// but with C++ overload support, we don't need different names for each type.
+/// On C1999, the rounding mode may be set with fesetround, but msvc does not support it, so the mode is unspecified.
 template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
-Integer inline fast_unspecified_round_to_integer(Real x) {
+Integer inline rint(Real x) {
 	return x;
-}
-
-/// shorter name for fast_unspecified_round_to_integer
-template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
-Integer inline furti(Real x) {
-	return fast_unspecified_round_to_integer<Integer>(x);
 }
 
 #if DIVERSALIS__STDLIB__MATH >= 199901
 	
 	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline fast_unspecified_round_to_integer<>(long double ld) {
+	long long int inline rint<>(long double ld) {
 		return ::llrintl(ld);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline fast_unspecified_round_to_integer<>(double d) {
+	long long int inline rint<>(double d) {
 		return ::llrint(d);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline fast_unspecified_round_to_integer<>(float f) {
+	long long int inline rint<>(float f) {
 		return ::llrintf(f);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline fast_unspecified_round_to_integer<>(long double ld) {
+	long int inline rint<>(long double ld) {
 		return ::lrintl(ld);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline fast_unspecified_round_to_integer<>(double d) {
+	long int inline rint<>(double d) {
 		return ::lrint(d);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline fast_unspecified_round_to_integer<>(float f) {
+	long int inline rint<>(float f) {
 		return ::lrintf(f);
 	}
 	
 	template<> UNIVERSALIS__COMPILER__CONST
-	int inline fast_unspecified_round_to_integer<>(long double ld) {
+	int inline rint<>(long double ld) {
 		return ::lrintl(ld);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int inline fast_unspecified_round_to_integer<>(double d) {
+	int inline rint<>(double d) {
 		return ::lrint(d);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int inline fast_unspecified_round_to_integer<>(float f) {
+	int inline rint<>(float f) {
 		return ::lrintf(f);
 	}
 	
 #else
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	std::int32_t inline fast_unspecified_round_to_integer<>(double d) {
+	std::int32_t inline rint<>(double d) {
 		BOOST_STATIC_ASSERT((sizeof d == 8));
 		union result_union
 		{
@@ -92,7 +89,7 @@ Integer inline furti(Real x) {
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	std::int32_t inline fast_unspecified_round_to_integer<>(float f) {
+	std::int32_t inline rint<>(float f) {
 		#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 			///\todo not always the fastest when using sse(2)
 			///\todo the double "2^51 + 2^52" version might be faster.
@@ -105,7 +102,7 @@ Integer inline furti(Real x) {
 			}
 			return i;
 		#else
-			return fast_unspecified_round_to_integer<std::int32_t>(double(f));
+			return rint<std::int32_t>(double(f));
 		#endif
 	}
 
