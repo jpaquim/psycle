@@ -1,5 +1,5 @@
 #pragma once
-#include "denormals.hpp"
+#include <psycle/helpers/math/erase_denormals.hpp>
 
 // Allpass filter declaration
 //
@@ -31,7 +31,7 @@ inline float allpass::process(float input)
 	float bufout;
 	
 	bufout = buffer[bufidx];
-	undenormalise(bufout);
+	psycle::helpers::math::fast_erase_denormals_inplace(bufout);
 	
 	output = -input + bufout;
 	buffer[bufidx] = input + (bufout*feedback);
