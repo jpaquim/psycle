@@ -76,11 +76,11 @@ bool AlsaOut::Start() {
 		return false;
 	}
 	
-	std::cout << "psycle: alsa: playback device is: " << settings().deviceName() << '\n';
+	std::cout << "psycle: alsa: playback device is: " << playbackSettings().deviceName() << '\n';
 	std::cout << "psycle: alsa: stream parameters are: " << rate << "Hz, " << snd_pcm_format_name(format) << ", " << channels << " channels\n";
 	std::cout << "psycle: alsa: using transfer method: " << "write" << '\n'; ///\todo parametrable?
 	
-	if((err = snd_pcm_open(&handle, settings().deviceName().c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+	if((err = snd_pcm_open(&handle, playbackSettings().deviceName().c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
 		std::cerr << "psycle: alsa: playback open error: " << snd_strerror(err) << '\n';
 		return false;
 	}
@@ -211,9 +211,9 @@ void AlsaOut::setDefault() {
 	period_size = 0;
 	output = 0;
 	
-	AudioDriverSettings settings(this->settings());
+	AudioDriverSettings settings(this->playbackSettings());
 	settings.setDeviceName("default");
-	this->setSettings(settings);
+	this->setPlaybackSettings(settings);
 }
 
 void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {

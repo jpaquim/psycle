@@ -162,7 +162,7 @@ GStreamerOut::GStreamerOut()
 {}
 
 void GStreamerOut::do_open() {
-	switch(settings().channelMode()) {
+	switch(playbackSettings().channelMode()) {
 		case 0: // mono
 		case 1: // left
 		case 2: // right
@@ -173,13 +173,13 @@ void GStreamerOut::do_open() {
 			break;
 		default: {
 			std::ostringstream s;
-			s << "unhandled channel mode: " << settings().channelMode();
+			s << "unhandled channel mode: " << playbackSettings().channelMode();
 			throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	}
-	samples_per_second_ = settings().samplesPerSec();
-	periods_ = settings().blockCount();
-	period_frames_ = settings().blockSize();
+	samples_per_second_ = playbackSettings().samplesPerSec();
+	periods_ = playbackSettings().blockCount();
+	period_frames_ = playbackSettings().blockSize();
 
 	{ // initialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
