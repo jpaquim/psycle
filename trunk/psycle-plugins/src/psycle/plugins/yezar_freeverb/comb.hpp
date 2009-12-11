@@ -1,5 +1,5 @@
 #pragma once
-#include "denormals.hpp"
+#include <psycle/helpers/math/erase_denormals.hpp>
 
 // Comb filter class declaration
 //
@@ -35,10 +35,10 @@ inline float comb::process(float input)
 	float output;
 
 	output = buffer[bufidx];
-	undenormalise(output);
+	psycle::helpers::math::fast_erase_denormals_inplace(output);
 
 	filterstore = (output*damp2) + (filterstore*damp1);
-	undenormalise(filterstore);
+	psycle::helpers::math::fast_erase_denormals_inplace(filterstore);
 
 	buffer[bufidx] = input + (filterstore*feedback);
 
