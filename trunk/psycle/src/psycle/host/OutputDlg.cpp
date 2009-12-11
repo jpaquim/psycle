@@ -53,8 +53,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			for (int i=0; i < _numDrivers; i++)
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				std::string name = m_ppDrivers[i]->info().header();
+				m_driverComboBox.AddString(name.c_str());
+#else
 				const char* psDesc = m_ppDrivers[i]->GetInfo()->_psName;
 				m_driverComboBox.AddString(psDesc);
+#endif		
 			}
 
 			if (m_driverIndex >= _numDrivers)

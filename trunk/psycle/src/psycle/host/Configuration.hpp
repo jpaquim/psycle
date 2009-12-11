@@ -2,9 +2,14 @@
 ///\interface psycle::host::Configuration.
 #pragma once
 #include "Global.hpp"
-#include "AudioDriver.hpp"
 #include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 #include <cstddef>
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+	#include <psycle/audiodrivers/audiodriver.h>
+#else
+	#include "AudioDriver.hpp"
+#endif
+
 
 namespace psycle
 {
@@ -232,7 +237,11 @@ namespace psycle
 			bool _linenumbersCursor;
 			bool _followSong;
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			psy::core::AudioDriver** _ppOutputDrivers;
+#else
 			AudioDriver** _ppOutputDrivers;
+#endif
 			int _numOutputDrivers;
 			int _outputDriverIndex;
 
@@ -253,20 +262,44 @@ namespace psycle
 			int defaultPatLines;
 			bool autoStopMachines;
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			psy::core::AudioDriver* _pOutputDriver;
+#else
 			AudioDriver* _pOutputDriver;
+#endif
 
 			bool Initialized() { return _initialized; }
 			bool Read();
 			void Write();
 			bool ReadVersion17();
 			void SetSkinDefaults();
+
+			inline int GetBitDepth() const throw()
+			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				return _pOutputDriver->playbackSettings().bitDepth();
+#else
+				return _pOutputDriver->_samplesPerSec;
+#endif
+			}
+
 			inline int GetSamplesPerSec() const throw()
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				return _pOutputDriver->playbackSettings().samplesPerSec();
+#else
 				return _pOutputDriver->_samplesPerSec;
+#endif
 			}
 			inline void SetSamplesPerSec(int samplerate) const throw()
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				psy::core::AudioDriverSettings settings = _pOutputDriver->playbackSettings();
+				settings.setSamplesPerSec(samplerate);
+				_pOutputDriver->setPlaybackSettings(settings); 				
+#else
 				_pOutputDriver->_samplesPerSec = samplerate;
+#endif
 			}
 
 

@@ -2,7 +2,11 @@
 ///\interface file for psycle::host::COutputDlg.
 #pragma once
 #include "Psycle.hpp"
-#include "AudioDriver.hpp"
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+	#include <psycle/audiodrivers/audiodriver.h>
+#else
+	#include "AudioDriver.hpp"
+#endif
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -26,8 +30,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int m_syncDriverIndex;
 			int _numDrivers;
 			int _numMidiDrivers;
-			int m_midiHeadroom;
+			int m_midiHeadroom;	
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			psy::core::AudioDriver** m_ppDrivers;
+#else
 			AudioDriver** m_ppDrivers;
+#endif
 		private:
 			int m_oldDriverIndex;
 			int m_oldMidiDriverIndex;
