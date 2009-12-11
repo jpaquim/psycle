@@ -247,9 +247,9 @@ void Configuration::loadConfig(std::string const & path) {
 								std::map<std::string, AudioDriver*>::iterator i(driver_map_.find("alsa"));
 								if(i != driver_map_.end()) {
 									psy::core::AudioDriver & audiodriver(*i->second);
-									psy::core::AudioDriverSettings settings(audiodriver.settings()); ///\todo why do we do a copy?
+									psy::core::AudioDriverSettings settings(audiodriver.playbackSettings()); ///\todo why do we do a copy?
 									settings.setDeviceName(device);
-									audiodriver.setSettings(settings); ///\todo why do we copy?
+									audiodriver.setPlaybackSettings(settings); ///\todo why do we copy?
 								}
 							}
 						}
