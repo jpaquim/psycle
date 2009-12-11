@@ -1362,7 +1362,6 @@ namespace psycle {
 				memDC.SelectObject(oldbmp);
 				memDC.DeleteDC();
 			}
-
 			// 2 if there is a redraw all, we do that then exit
 			if ((updatePar & DRAW_FULL_DATA) || (abs(scrollT) > VISTRACKS) || (abs(scrollL) > VISLINES) || (scrollT && scrollL))
 			{
@@ -1395,7 +1394,9 @@ namespace psycle {
 
 					xOffset += ROWWIDTH;
 				}
+
 				DrawPatternData(devc,0,VISTRACKS+1,0,VISLINES+1);
+
 				// wipe todo list
 				numPatternDraw = 0;
 				// Fill Bottom Space with Background colour if needed
