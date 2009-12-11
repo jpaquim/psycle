@@ -37,9 +37,6 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 		math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
 	}
 
-	/// Funky denormal check \todo make it a function
-	#define IS_DENORMAL(f) (!((*(unsigned int *)&f)&0x7f800000))
-
 	/****************************************************************************/
 
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
