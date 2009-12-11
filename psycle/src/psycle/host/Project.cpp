@@ -172,6 +172,7 @@ namespace psycle {
 			player.driver().Enable(true);
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
+			pat_view()->RecalculateColourGrid();
 			mac_view()->Rebuild();
 			mac_view()->UnlockVu();
 #else
