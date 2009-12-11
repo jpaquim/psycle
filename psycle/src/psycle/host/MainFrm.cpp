@@ -642,7 +642,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #endif
 				sprintf(buffer,"%d",Global::song().BeatsPerMin());
 			}
-			else sprintf(buffer,"%d",Global::pPlayer->bpm());
+			else sprintf(buffer,"%d",static_cast<int>(Global::pPlayer->bpm()));
 			
 			((CStatic *)m_wndControl.GetDlgItem(IDC_BPMLABEL))->SetWindowText(buffer);
 		}
