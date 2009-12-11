@@ -209,13 +209,15 @@ namespace psy { namespace core {
 		{
 			if(!threadRunning_) return true;
 			// ask the thread to terminate
-			{	scoped_lock lock(mutex_);
+			{
+				scoped_lock lock(mutex_);
 				stopRequested_ = true;
 			}
 			condition_.notify_one();
 
 			/// join the thread
-			{	scoped_lock lock(mutex_);
+			{
+				scoped_lock lock(mutex_);
 				while(threadRunning_) condition_.wait(lock);
 				stopRequested_ = false;
 			}

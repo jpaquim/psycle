@@ -104,10 +104,10 @@ bool JackOut::registerToJackServer() {
 		return 0;
 		}
 
-	AudioDriverSettings settings_ = settings();
+	AudioDriverSettings settings_ = playbackSettings();
 		settings_.setSamplesPerSec( jack_get_sample_rate (client) );
 		settings_.setBitDepth( 16 ); // hardcoded so far
-	setSettings( settings_ );
+	setPlaybackSettings( settings_ );
 
 	if ((ports = jack_get_ports (client, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
 		std::cout << "Cannot find any physical playback ports" << std::endl;
