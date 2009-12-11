@@ -9,8 +9,8 @@
 namespace psycle { namespace helpers { namespace math {
 
 /// ensures a value stays between two bounds
-template<typename Real> UNIVERSALIS__COMPILER__CONST
-Real inline clipped(Real const & minimum, Real const & value, Real const & maximum) {
+template<typename X> UNIVERSALIS__COMPILER__CONST
+X inline clipped(X const & minimum, X const & value, X const & maximum) {
 	// it looks a bit dumb to write a function to do that code,
 	// but maybe someone will find an optimised way to do this.
 	if(minimum > value) return minimum;
@@ -20,15 +20,15 @@ Real inline clipped(Real const & minimum, Real const & value, Real const & maxim
 
 
 /// ensures a value stays between 16 bit boundaries
-template<typename Real> UNIVERSALIS__COMPILER__CONST
-Real inline clipped16(Real const & value) {
-	return clipped<Real>(-32768, value, 32767);
+template<typename X> UNIVERSALIS__COMPILER__CONST
+X inline clipped16(X const & value) {
+	return clipped<X>(-32768, value, 32767);
 }
 
 /// ensures a value stays between 24 bit boundariess
-template<typename Real> UNIVERSALIS__COMPILER__CONST
-Real inline clipped24(Real const & value) {
-	return clipped<Real>(-8388608, value, 8388607);
+template<typename X> UNIVERSALIS__COMPILER__CONST
+X inline clipped24(X const & value) {
+	return clipped<X>(-8388608, value, 8388607);
 }
 
 
