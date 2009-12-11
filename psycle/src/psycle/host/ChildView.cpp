@@ -352,13 +352,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					Sequence& sequence = pattern_view()->song()->patternSequence();
 					psy::core::SequenceEntry* entry = sequence.last_worked_entry();
-					int pos = 0;
-					if (entry) {
-						// this scrolls the pattern view, if follow song is activated
-						int ticks = static_cast<int>(projects_->active_project()->beat_zoom());
-						pos = (Player::singleton().playPos() - entry->tickPosition()) * ticks;
-						pattern_view()->editcur.line=pos;
-					}
+					int pos = (entry) ?	(Player::singleton().playPos() - entry->tickPosition())
+						  		        * static_cast<int>(projects_->active_project()->beat_zoom())
+									  : 0;
 					if ( last_pos_!= pos ) {
 						last_pos_ = pos;
 						pParentMain->SetAppSongBpm(0);
@@ -369,6 +365,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 								// change seqview
 								pattern_view()->main()->m_wndSeq.SetEntry(entry);
 							}
+							// this scrolls the pattern view, if follow song is activated
 							pattern_view()->editcur.line=pos;
 							if ( viewMode == view_modes::pattern )  { 
 //								Repaint(draw_modes::pattern);
