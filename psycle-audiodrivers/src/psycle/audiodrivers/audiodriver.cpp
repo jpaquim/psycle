@@ -12,7 +12,7 @@
 #include <boost/bind.hpp>
 #include <thread>
 #include <psycle/helpers/math/clip.hpp>
-#include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
+#include <psycle/helpers/math/rint.hpp>
 namespace psy { namespace core {
 
 /*******************************************************************************************/
@@ -50,14 +50,14 @@ double AudioDriver::frand() {
 	return static_cast<double>(stat) * (1.0 / 0x7fffffff);
 }
 
-using psycle::helpers::math::furti;
+using psycle::helpers::math::rint;
 using psycle::helpers::math::clipped16;
 using psycle::helpers::math::clipped24;
 
 void AudioDriver::Quantize16WithDither(float const * pin, std::int16_t * piout, int c) {
 	do {
-		const int r = clipped16<float>(furti<int>(pin[1] + frand()));
-		const int l = clipped16<float>(furti<int>(pin[0] + frand()));
+		const int r = clipped16<float>(rint<int>(pin[1] + frand()));
+		const int l = clipped16<float>(rint<int>(pin[0] + frand()));
 		*piout++ = static_cast<std::int16_t>(l);
 		*piout++ = static_cast<std::int16_t>(r);
 		pin += 2;
@@ -66,8 +66,8 @@ void AudioDriver::Quantize16WithDither(float const * pin, std::int16_t * piout, 
 
 void AudioDriver::Quantize16(float const * pin, std::int16_t * piout, int c) {
 	do {
-		const int r = clipped16<float>(furti<int>(pin[1]));
-		const int l = clipped16<float>(furti<int>(pin[0]));
+		const int r = clipped16<float>(rint<int>(pin[1]));
+		const int l = clipped16<float>(rint<int>(pin[0]));
 		*piout++ = static_cast<std::int16_t>(l);
 		*piout++ = static_cast<std::int16_t>(r);
 		pin += 2;
@@ -76,10 +76,10 @@ void AudioDriver::Quantize16(float const * pin, std::int16_t * piout, int c) {
 
 void AudioDriver::Quantize16AndDeinterlace(float const * pin, std::int16_t * pileft, int strideleft, std::int16_t * piright, int strideright, int c) {
 	do {
-		const int r = clipped16<float>(furti<int>(pin[1]));
+		const int r = clipped16<float>(rint<int>(pin[1]));
 		*piright = static_cast<std::int16_t>(r);
 		piright += strideright;
-		const int l = clipped16<float>(furti<int>(pin[0]));
+		const int l = clipped16<float>(rint<int>(pin[0]));
 		*pileft = static_cast<std::int16_t>(l);
 		pileft += strideleft;
 		pin += 2;
@@ -96,8 +96,8 @@ void AudioDriver::DeQuantize16AndDeinterlace(int const * pin, float * poutleft, 
 
 void AudioDriver::Quantize24WithDither(float const * pin, std::int32_t * piout, int c) {
 	do {
-		const int r = clipped24<float>(furti<int>(pin[1] + frand()));
-		const int l = clipped24<float>(furti<int>(pin[0] + frand()));
+		const int r = clipped24<float>(rint<int>(pin[1] + frand()));
+		const int l = clipped24<float>(rint<int>(pin[0] + frand()));
 		*piout++ = l;
 		*piout++ = r;
 		pin += 2;
@@ -106,8 +106,8 @@ void AudioDriver::Quantize24WithDither(float const * pin, std::int32_t * piout, 
 
 void AudioDriver::Quantize24(float const * pin, std::int32_t * piout, int c) {
 	do {
-		const int r = clipped24<float>(furti<int>(pin[1]));
-		const int l = clipped24<float>(furti<int>(pin[0]));
+		const int r = clipped24<float>(rint<int>(pin[1]));
+		const int l = clipped24<float>(rint<int>(pin[0]));
 		*piout++ = l;
 		*piout++ = r;
 		pin += 2;
@@ -121,12 +121,12 @@ void AudioDriver::Quantize24AndDeinterlace(float const * pin, std::int32_t * pil
 	char* pt = (char*)&t;
 	do
 	{
-		t = clipped24<float>(furti<int>((*pin++)*256.0f));
+		t = clipped24<float>(rint<int>((*pin++)*256.0f));
 		*outl++ = pt[0];
 		*outl++ = pt[1];
 		*outl++ = pt[2];
 
-		t = clipped24<float>(furti<int>((*pin++)*256.0f));
+		t = clipped24<float>(rint<int>((*pin++)*256.0f));
 		*outr++ = pt[0];
 		*outr++ = pt[1];
 		*outr++ = pt[2];

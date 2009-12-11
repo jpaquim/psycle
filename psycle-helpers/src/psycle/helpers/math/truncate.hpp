@@ -13,7 +13,7 @@
 #include <universalis/compiler.hpp>
 #include <boost/static_assert.hpp>
 #include <cstdint>
-#include "fast_unspecified_round_to_integer.hpp"
+#include "rint.hpp"
 
 namespace psycle { namespace helpers { namespace math {
 
@@ -28,17 +28,17 @@ std::int32_t inline truncated(Real x) {
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline truncated<>(long double ld) {
-		return fast_unspecified_round_to_integer<std::int32_t>(::truncl(ld));
+		return rint<std::int32_t>(::truncl(ld));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline truncated<>(double d) {
-		return fast_unspecified_round_to_integer<std::int32_t>(::trunc(d));
+		return rint<std::int32_t>(::trunc(d));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline truncated<>(float f) {
-		return fast_unspecified_round_to_integer<std::int32_t>(::truncf(f));
+		return rint<std::int32_t>(::truncf(f));
 	}
 
 #else

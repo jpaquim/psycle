@@ -13,7 +13,7 @@
 #include <universalis/compiler.hpp>
 #include <cmath>
 #include <cstdint>
-#include "fast_unspecified_round_to_integer.hpp"
+#include "rint.hpp"
 
 namespace psycle { namespace helpers { namespace math {
 
@@ -28,17 +28,17 @@ std::int32_t inline rounded(Real x) {
 	
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline rounded<>(long double ld) {
-		return fast_unspecified_round_to_integer<std::int32_t>(::roundl(ld));
+		return rint<std::int32_t>(::roundl(ld));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline rounded<>(double d) {
-		return fast_unspecified_round_to_integer<std::int32_t>(::round(d));
+		return rint<std::int32_t>(::round(d));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline rounded<>(float f) {
-		return fast_unspecified_round_to_integer<std::int32_t>(::roundf(f));
+		return rint<std::int32_t>(::roundf(f));
 	}
 
 #else
