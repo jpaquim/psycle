@@ -137,6 +137,7 @@ class AudioDriverSettings {
 		private:
 			int blockCount_;
 	///\}
+		int sampleSize() { return (channelMode_==3)?(bitDepth_/4):(bitDepth_/8); }
 };
 
 /// base class for all audio drivers
