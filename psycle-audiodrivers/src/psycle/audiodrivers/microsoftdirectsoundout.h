@@ -27,6 +27,19 @@
 
 namespace psy { namespace core {
 
+	class DSoundUiInterface {
+	public:
+		DSoundUiInterface::DSoundUiInterface() {}
+		virtual ~DSoundUiInterface() {}
+
+		virtual int DoModal() = 0;
+		virtual void SetValues(GUID device_guid, bool exclusive, bool dither,
+							   int sample_rate, int buffer_size, int buffer_count) = 0;
+		virtual void GetValues(GUID& device_guid, bool& exclusive, bool& dither,
+							   int& sample_rate, int& buffer_size, int& buffer_count) = 0;
+	};
+
+
 /// output device interface implemented by direct sound.
 class MsDirectSound : public AudioDriver {
 	class PortEnums {
@@ -51,6 +64,7 @@ class MsDirectSound : public AudioDriver {
 	public:
 
 		MsDirectSound();
+		MsDirectSound(DSoundUiInterface* ui);
 		virtual ~MsDirectSound();
 
 		AudioDriverInfo info( ) const;
@@ -69,6 +83,8 @@ class MsDirectSound : public AudioDriver {
 		virtual void Configure();
 		virtual bool Initialized() { return _initialized; }
 		virtual bool Configured() { return _configured; }
+		void AddConfigGui(DSoundUiInterface* ui) { ui_ = ui; }
+
 	protected:
 		void ReadConfig();
 		void WriteConfig();
@@ -115,6 +131,8 @@ class MsDirectSound : public AudioDriver {
 		LPDIRECTSOUNDBUFFER8 _pBuffer;
 		void* _callbackContext;
 		AUDIODRIVERWORKFN _pCallback;
+
+		DSoundUiInterface* ui_;
 };
 
 }}

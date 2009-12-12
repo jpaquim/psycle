@@ -54,7 +54,25 @@ namespace psy { namespace core {
 			stopRequested_(),
 			_pDs(),
 			_pBuffer(),
-			_pCallback()
+			_pCallback(),
+			ui_(0)
+		{
+			_capEnums.resize(0);
+			_capPorts.resize(0);
+		}
+
+		MsDirectSound::MsDirectSound(DSoundUiInterface* ui)
+		:
+			device_guid(), // DSDEVID_DefaultPlayback <- unresolved external.
+			_initialized(),
+			_configured(),
+			dsBufferPlaying_(),
+			threadRunning_(),
+			stopRequested_(),
+			_pDs(),
+			_pBuffer(),
+			_pCallback(),
+			ui_(ui)
 		{
 			_capEnums.resize(0);
 			_capPorts.resize(0);
@@ -659,7 +677,54 @@ namespace psy { namespace core {
 
 			ReadConfig();
 
+			if (ui_) {
+				ui_->SetValues(device_guid,
+							   _exclusive,
+							   _dither, 
+							   playbackSettings_.samplesPerSec(),
+							   playbackSettings_.blockBytes(),
+							   playbackSettings_.blockCount());
+				if (ui_->DoModal() != IDOK) return;
+				_configured = true;
 
+				// save the settings to be able to rollback if it doesn't work
+				GUID device_guid = this->device_guid;
+				bool exclusive = _exclusive;
+				bool dither = _dither;
+				int samplesPerSec = playbackSettings_.samplesPerSec();
+				int bufferSize = playbackSettings_.blockBytes();
+				int numBuffers = playbackSettings_.blockCount();
+
+				if(_initialized) Stop();
+
+				int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
+				ui_->GetValues(this->device_guid,
+							   _exclusive,
+							   _dither,
+							   tmp_samplespersec,
+							   tmp_blockbytes, 
+							   tmp_block_count);
+				playbackSettings_.setSamplesPerSec(tmp_samplespersec);
+				playbackSettings_.setBlockBytes(tmp_blockbytes);
+				playbackSettings_.setBlockCount(tmp_block_count);
+
+				if(_initialized)
+				{
+					if(Start()) WriteConfig();
+					else
+					{
+						// rollback
+						this->device_guid = device_guid;
+						_exclusive = exclusive;
+						_dither = dither;
+						playbackSettings_.setSamplesPerSec(samplesPerSec);
+						playbackSettings_.setBlockBytes(bufferSize);
+						playbackSettings_.setBlockCount(numBuffers);
+						Start();
+					}
+				}
+				else WriteConfig();
+			}
 		}
 
 		int MsDirectSound::GetPlayPos()

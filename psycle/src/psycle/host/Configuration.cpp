@@ -7,6 +7,7 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/patternEvent.h>
+#include "DSoundConfig.hpp"
 #include <psycle/audiodrivers/microsoftmmewaveout.h>
 #include <psycle/audiodrivers/microsoftdirectsoundout.h>
 using namespace psy::core;
@@ -62,7 +63,8 @@ namespace psycle
 				_ppOutputDrivers = new psy::core::AudioDriver*[_numOutputDrivers];
 				_ppOutputDrivers[0] = new psy::core::DummyDriver();
 				_ppOutputDrivers[1] = new psy::core::MsWaveOut(); // this driver is broken
-				_ppOutputDrivers[2] = new psy::core::MsDirectSound;				
+				dsound_ui_ = new DSoundUi();
+				_ppOutputDrivers[2] = new psy::core::MsDirectSound(dsound_ui_);
 				_outputDriverIndex = 2; // use direct sound so far as default;				
 #else
 				_numOutputDrivers = 4;
@@ -143,6 +145,7 @@ namespace psycle
 				delete [] _ppOutputDrivers;
 			}
 			delete _pMidiInput;
+			delete dsound_ui_;
 #endif // !defined WINAMP_PLUGIN
 		}
 
