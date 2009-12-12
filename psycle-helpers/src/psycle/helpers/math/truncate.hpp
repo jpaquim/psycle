@@ -28,17 +28,17 @@ std::int32_t inline truncated(Real x) {
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline truncated<>(long double ld) {
-		return rint<std::int32_t>(::truncl(ld));
+		return lrint<std::int32_t>(::truncl(ld));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline truncated<>(double d) {
-		return rint<std::int32_t>(::trunc(d));
+		return lrint<std::int32_t>(::trunc(d));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline truncated<>(float f) {
-		return rint<std::int32_t>(::truncf(f));
+		return lrint<std::int32_t>(::truncf(f));
 	}
 
 #else

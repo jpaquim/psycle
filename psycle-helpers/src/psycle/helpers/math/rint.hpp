@@ -22,61 +22,61 @@ namespace psycle { namespace helpers { namespace math {
 /// but with C++ overload support, we don't need different names for each type.
 /// On C1999, the rounding mode may be set with fesetround, but msvc does not support it, so the mode is unspecified.
 template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
-Integer inline rint(Real x) {
+Integer inline lrint(Real x) {
 	return x;
 }
 
 #if DIVERSALIS__STDLIB__MATH >= 199901
 	
 	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline rint<>(long double ld) {
+	long long int inline lrint<>(long double ld) {
 		return ::llrintl(ld);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline rint<>(double d) {
+	long long int inline lrint<>(double d) {
 		return ::llrint(d);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline rint<>(float f) {
+	long long int inline lrint<>(float f) {
 		return ::llrintf(f);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline rint<>(long double ld) {
+	long int inline lrint<>(long double ld) {
 		return ::lrintl(ld);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline rint<>(double d) {
+	long int inline lrint<>(double d) {
 		return ::lrint(d);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline rint<>(float f) {
+	long int inline lrint<>(float f) {
 		return ::lrintf(f);
 	}
 	
 	template<> UNIVERSALIS__COMPILER__CONST
-	int inline rint<>(long double ld) {
+	int inline lrint<>(long double ld) {
 		return ::lrintl(ld);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int inline rint<>(double d) {
+	int inline lrint<>(double d) {
 		return ::lrint(d);
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int inline rint<>(float f) {
+	int inline lrint<>(float f) {
 		return ::lrintf(f);
 	}
 	
 #else
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	std::int32_t inline rint<>(double d) {
+	std::int32_t inline lrint<>(double d) {
 		BOOST_STATIC_ASSERT((sizeof d == 8));
 		union result_union
 		{
@@ -88,7 +88,7 @@ Integer inline rint(Real x) {
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	std::int32_t inline rint<>(float f) {
+	std::int32_t inline lrint<>(float f) {
 		#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 			///\todo not always the fastest when using sse(2)
 			///\todo the double "2^51 + 2^52" version might be faster.
@@ -100,7 +100,7 @@ Integer inline rint(Real x) {
 			}
 			return i;
 		#else
-			return rint<std::int32_t>(double(f));
+			return lrint<std::int32_t>(double(f));
 		#endif
 	}
 
@@ -113,25 +113,25 @@ Integer inline rint(Real x) {
 		int const initial_feround(fegetround());
 		try {
 			fesetround(FE_TONEAREST);
-			BOOST_CHECK(lrint(+2.6) == +3);
-			BOOST_CHECK(lrint(+1.4) == +1);
-			BOOST_CHECK(lrint(-2.6) == -3);
-			BOOST_CHECK(lrint(-1.4) == -1);
+			BOOST_CHECK(lrint<long int>(+2.6) == +3);
+			BOOST_CHECK(lrint<long int>(+1.4) == +1);
+			BOOST_CHECK(lrint<long int>(-2.6) == -3);
+			BOOST_CHECK(lrint<long int>(-1.4) == -1);
 			fesetround(FE_TOWARDZERO);
-			BOOST_CHECK(lrint(+1.6) == +1);
-			BOOST_CHECK(lrint(+1.4) == +1);
-			BOOST_CHECK(lrint(-1.6) == -1);
-			BOOST_CHECK(lrint(-1.4) == -1);
+			BOOST_CHECK(lrint<long int>(+1.6) == +1);
+			BOOST_CHECK(lrint<long int>(+1.4) == +1);
+			BOOST_CHECK(lrint<long int>(-1.6) == -1);
+			BOOST_CHECK(lrint<long int>(-1.4) == -1);
 			fesetround(FE_DOWNWARD);
-			BOOST_CHECK(lrint(+1.6) == +1);
-			BOOST_CHECK(lrint(+1.4) == +1);
-			BOOST_CHECK(lrint(-1.6) == -2);
-			BOOST_CHECK(lrint(-1.4) == -2);
+			BOOST_CHECK(lrint<long int>(+1.6) == +1);
+			BOOST_CHECK(lrint<long int>(+1.4) == +1);
+			BOOST_CHECK(lrint<long int>(-1.6) == -2);
+			BOOST_CHECK(lrint<long int>(-1.4) == -2);
 			fesetround(FE_UPWARD);
-			BOOST_CHECK(lrint(+1.6) == +2);
-			BOOST_CHECK(lrint(+1.4) == +2);
-			BOOST_CHECK(lrint(-1.6) == -1);
-			BOOST_CHECK(lrint(-1.4) == -1);
+			BOOST_CHECK(lrint<long int>(+1.6) == +2);
+			BOOST_CHECK(lrint<long int>(+1.4) == +2);
+			BOOST_CHECK(lrint<long int>(-1.6) == -1);
+			BOOST_CHECK(lrint<long int>(-1.4) == -1);
 		} catch(...) {
 			fesetround(initial_feround);
 			throw;
