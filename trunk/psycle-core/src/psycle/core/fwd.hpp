@@ -9,7 +9,7 @@
 #pragma once
 
 // forward defines to cut down on file interdependencies
-namespace psy {
+namespace psycle {
 	namespace core {
 		class PluginFinder;
 		class PluginInfo;

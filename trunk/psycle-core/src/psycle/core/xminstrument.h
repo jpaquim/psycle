@@ -18,7 +18,7 @@
 #include <cassert>
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class PSYCLE__CORE__DECL XMInstrument {
 public:

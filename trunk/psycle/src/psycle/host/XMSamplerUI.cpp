@@ -2,7 +2,7 @@
 #include "XMSamplerUI.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/xmsampler.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "XMSampler.hpp"
 #endif

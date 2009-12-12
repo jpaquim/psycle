@@ -5,7 +5,7 @@
 #include <psycle/audiodrivers/audiodriver.h>
 
 #include "Psy3Saver.hpp"
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Player.hpp"
 #endif
@@ -624,7 +624,7 @@ namespace psycle {
 					//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
 					//	return FALSE;
 					// }
-					psy::core::RiffFile file;
+					psycle::core::RiffFile file;
 					if (!file.Create((char*)filepath.c_str(), true))
 					{
 						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
@@ -748,7 +748,7 @@ namespace psycle {
 					//	return FALSE;
 					//}
 					
-						psy::core::RiffFile file1;
+						psycle::core::RiffFile file1;
 						if (!file1.Create((char*)str.GetBuffer(1), true))
 						{
 							mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);

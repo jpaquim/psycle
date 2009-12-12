@@ -10,7 +10,7 @@
 
 #include <algorithm>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	
 		struct ToLower {
 			char operator() (char c) const  { return std::tolower(c); }

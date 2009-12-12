@@ -14,7 +14,7 @@
 #include <vector>
 #include <string>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class PSYCLE__CORE__DECL PatternEvent {
 	public:

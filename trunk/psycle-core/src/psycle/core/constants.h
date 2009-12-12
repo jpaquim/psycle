@@ -12,7 +12,7 @@
 
 #include <psycle/core/config.hpp>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 ///\todo: Tweak slides (and midi slides that should be added aswell)
 /// number of samples per tweak slide update

@@ -21,7 +21,7 @@
 #include "audiodriver.h"
 #include <jack/jack.h>
 #include <string>
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class JackOut : public AudioDriver {
 	public:

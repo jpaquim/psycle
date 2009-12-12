@@ -14,7 +14,7 @@
 #include <psycle/helpers/scale.hpp>
 #include <psycle/helpers/math/pi.hpp>
 
-namespace psy { namespace core { namespace convert_internal_machines {
+namespace psycle { namespace core { namespace convert_internal_machines {
 
 namespace math = psycle::helpers::math;
 namespace scale = psycle::helpers::scale;

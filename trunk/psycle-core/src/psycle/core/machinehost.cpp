@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 MachineHost::MachineHost(MachineCallbacks*calls)
 : mcallback_(calls)

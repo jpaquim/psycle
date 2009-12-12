@@ -10,7 +10,7 @@
 #include <psycle/core/player.h>
 #include <psycle/core/xminstrument.h>
 #include <psycle/core/xmsampler.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Song.hpp"
 #include "Player.hpp"

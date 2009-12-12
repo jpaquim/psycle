@@ -12,7 +12,7 @@
 
 #include <psycle/core/config.hpp>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 const int volumeempty = 0xFF;
 

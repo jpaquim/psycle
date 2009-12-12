@@ -21,7 +21,7 @@
 #endif
 
 #include <sstream>
-namespace psy { namespace core {
+namespace psycle { namespace core {
 /// helper function for xml writing.
 ///
 /// replaces entitys`s for xml writing.

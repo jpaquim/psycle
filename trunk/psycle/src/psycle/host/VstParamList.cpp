@@ -4,7 +4,7 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/vsthost.h>
 #include <psycle/core/vstplugin.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "VstHost24.hpp"
 #endif

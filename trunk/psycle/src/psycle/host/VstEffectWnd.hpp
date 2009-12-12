@@ -4,7 +4,7 @@
 #include "Psycle.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
+namespace psycle {
 	namespace core {
 		namespace vst {
 			class plugin;
@@ -12,7 +12,7 @@ namespace psy {
 	}
 }
 #include <seib/vst/EffectWnd.hpp>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include <seib-vsthost/EffectWnd.hpp>
 #endif

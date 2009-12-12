@@ -1049,7 +1049,7 @@ namespace seib {
 		VstIntPtr CEffect::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt) const
 		{
 			if (!aEffect)
-				throw psy::core::exception("Invalid AEffect!");
+				throw psycle::core::exception("Invalid AEffect!");
 			try
 			{
 				return aEffect->dispatcher(aEffect, opCode, index, value, ptr, opt);
@@ -1064,7 +1064,7 @@ namespace seib {
 		void CEffect::Process(float **inputs, float **outputs, VstInt32 sampleframes)
 		{
 			if (!aEffect)
-				throw psy::core::exception("Invalid AEffect!");
+				throw psycle::core::exception("Invalid AEffect!");
 
 			try
 			{
@@ -1080,7 +1080,7 @@ namespace seib {
 		{
 			if ((!aEffect) ||
 				(!(aEffect->flags & effFlagsCanReplacing)))
-				throw psy::core::exception("Invalid AEffect!");
+				throw psycle::core::exception("Invalid AEffect!");
 
 			try
 			{
@@ -1091,7 +1091,7 @@ namespace seib {
 		void CEffect::ProcessDouble(double **inputs, double **outputs, VstInt32 sampleframes)
 		{
 			if (!aEffect)
-				throw psy::core::exception("Invalid AEffect!");
+				throw psycle::core::exception("Invalid AEffect!");
 
 			try
 			{
@@ -1106,7 +1106,7 @@ namespace seib {
 		void CEffect::SetParameter(VstInt32 index, float parameter)
 		{
 			if (!aEffect)
-				throw psy::core::exception("Invalid AEffect!");
+				throw psycle::core::exception("Invalid AEffect!");
 
 			try
 			{
@@ -1121,7 +1121,7 @@ namespace seib {
 		float CEffect::GetParameter(VstInt32 index) const
 		{
 			if (!aEffect)
-				throw psy::core::exception("Invalid AEffect!");
+				throw psycle::core::exception("Invalid AEffect!");
 
 			try
 			{
@@ -1277,7 +1277,7 @@ namespace seib {
 				delete loader;
 				std::ostringstream s; s
 					<< "Couldn't open the library: " << sName << std::endl;
-				throw psy::core::exceptions::library_errors::loading_error(s.str());
+				throw psycle::core::exceptions::library_errors::loading_error(s.str());
 			}
 
 			PluginEntryProc mainEntry = loader->getMainEntry ();
@@ -1286,7 +1286,7 @@ namespace seib {
 				delete loader;
 				std::ostringstream s; s
 					<< "couldn't locate the main entry to VST: " << sName << std::endl;
-					throw psy::core::exceptions::library_errors::symbol_resolving_error(s.str());
+					throw psycle::core::exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 
 			loadingEffect = true;
@@ -1325,7 +1325,7 @@ namespace seib {
 			loadingShellId=0;
 			std::ostringstream s; s
 				<< "VST main call returned a null/wrong AEffect: " << sName << std::endl;
-			throw psy::core::exceptions::function_errors::bad_returned_value(s.str());
+			throw psycle::core::exceptions::function_errors::bad_returned_value(s.str());
 		}
 
 

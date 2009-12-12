@@ -13,7 +13,7 @@
 #include <psycle/helpers/dsp.hpp>
 #include "fileio.h"
 
-namespace psy {
+namespace psycle {
 	namespace core {
 
 		using namespace psycle::helpers;

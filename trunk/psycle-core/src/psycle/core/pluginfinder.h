@@ -14,7 +14,7 @@
 #include <vector>
 #include <map>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class PSYCLE__CORE__DECL PluginFinder {
 	public:

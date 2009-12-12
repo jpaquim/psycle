@@ -4,7 +4,7 @@
 #include "Global.hpp"
 
 
-namespace psy {
+namespace psycle {
 	namespace core {
 		class PatternEvent;
 		class RiffFile;		
@@ -16,17 +16,17 @@ namespace psycle {
 
 		class Psy3Saver {
 		public:
-			Psy3Saver(psy::core::Song& song);
+			Psy3Saver(psycle::core::Song& song);
 			~Psy3Saver();
 
-			bool Save(psy::core::RiffFile* pFile,bool autosave);
+			bool Save(psycle::core::RiffFile* pFile,bool autosave);
 
 		private:
 
-			void ConvertEvent(const psy::core::PatternEvent& ev, unsigned char* data) const;
+			void ConvertEvent(const psycle::core::PatternEvent& ev, unsigned char* data) const;
 			unsigned char* CreateNewPattern(int ps);
 
-			psy::core::Song* song_;
+			psycle::core::Song* song_;
 			unsigned char * ppPatternData[MAX_PATTERNS];
 			
 

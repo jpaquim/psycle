@@ -18,7 +18,7 @@ namespace psycle { namespace plugin_interface {
 	class CMachineInterface;
 }}
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class PSYCLE__CORE__DECL NativeHost : public MachineHost {
 	protected:

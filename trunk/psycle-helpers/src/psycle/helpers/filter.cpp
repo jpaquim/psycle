@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psy::core::Filter.
+///\implementation psycle::core::Filter.
 
 #include <psycle/helpers/filter.hpp>
 

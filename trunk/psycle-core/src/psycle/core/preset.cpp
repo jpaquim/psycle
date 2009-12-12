@@ -11,7 +11,7 @@
 #include "machine.h"
 #include "plugin.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 		using namespace std;
 		using namespace psycle::helpers;

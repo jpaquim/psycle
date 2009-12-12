@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\interface psy::core::RiffFile
+///\interface psycle::core::RiffFile
 
 #ifndef PSYCLE__CORE__FILE_IO__INCLUDED
 #define PSYCLE__CORE__FILE_IO__INCLUDED
@@ -21,7 +21,7 @@
 #include <vector>
 #include <typeinfo>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class RiffChunkHeader {
 	public:

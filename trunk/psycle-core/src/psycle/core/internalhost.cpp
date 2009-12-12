@@ -15,7 +15,7 @@
 
 #include <map>
 
-namespace psy {namespace core {
+namespace psycle {namespace core {
 
 namespace InternalMacs {
 

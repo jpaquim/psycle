@@ -13,7 +13,7 @@
 #include <string>
 #include <map>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class Machine;
 class RiffFile;

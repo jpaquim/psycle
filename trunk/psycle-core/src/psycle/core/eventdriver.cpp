@@ -7,7 +7,7 @@
 #include <psycle/core/config.private.hpp>
 #include "eventdriver.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 EventDriver::EventDriver() {
 }

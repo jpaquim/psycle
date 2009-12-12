@@ -60,34 +60,34 @@ void SequencerLine::paint( QPainter *painter, const QStyleOptionGraphicsItem *op
 	painter->drawRect( boundingRect() );
 }
 
-void SequencerLine::setSequenceLine( psy::core::SequenceLine * line )
+void SequencerLine::setSequenceLine( psycle::core::SequenceLine * line )
 {
 	seqLine_ = line;
 	// Iterate the sequence entries and add them.
-	psy::core::SequenceLine::iterator iter = seqLine_->begin();
+	psycle::core::SequenceLine::iterator iter = seqLine_->begin();
 	for(; iter!= seqLine_->end(); ++iter) {
-		psy::core::SequenceEntry* entry = iter->second;
+		psycle::core::SequenceEntry* entry = iter->second;
 		addEntry(entry);
 	}
 }
 
-psy::core::SequenceLine *SequencerLine::sequenceLine() const
+psycle::core::SequenceLine *SequencerLine::sequenceLine() const
 {
 	return seqLine_;
 }
 
-	void SequencerLine::addItem( psy::core::SinglePattern* pattern )
+	void SequencerLine::addItem( psycle::core::SinglePattern* pattern )
 {
 	qDebug( "SequencerLine::addItem called\n" );
 	double endTick = sequenceLine()->tickLength();
 	
 	SequencerItem *item = new SequencerItem( sDraw_ );
-	psy::core::SequenceEntry* entry =
+	psycle::core::SequenceEntry* entry =
 		sequenceLine()->createEntry(pattern, endTick);
 	addEntry(entry);
 }
 
-void SequencerLine::addEntry( psy::core::SequenceEntry* entry )
+void SequencerLine::addEntry( psycle::core::SequenceEntry* entry )
 {
 	SequencerItem* item = new SequencerItem( sDraw_ );
 	item->setSequenceEntry( entry );
@@ -101,7 +101,7 @@ void SequencerLine::addEntry( psy::core::SequenceEntry* entry )
 	connect( item, SIGNAL( moved( SequencerItem*, QPointF ) ),
 			sDraw_, SLOT( onItemMoved( SequencerItem*, QPointF ) ) );
 	connect( item, SIGNAL( changedLine( SequencerItem*, int ) ), sDraw_, SLOT( onItemChangedLine( SequencerItem*, int ) ) );
-	connect( item, SIGNAL( newPatternCreated( psy::core::SinglePattern* ) ), sDraw_, SLOT( onNewPatternCreated( psy::core::SinglePattern* ) ) );
+	connect( item, SIGNAL( newPatternCreated( psycle::core::SinglePattern* ) ), sDraw_, SLOT( onNewPatternCreated( psycle::core::SinglePattern* ) ) );
 
 	item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
 
@@ -137,7 +137,7 @@ void SequencerLine::moveItemToNewLine( SequencerItem *item, SequencerLine *newLi
 	}
 }
 
-void SequencerLine::removeEntry(psy::core::SequenceEntry* entry) {
+void SequencerLine::removeEntry(psycle::core::SequenceEntry* entry) {
 	qDebug( "SequencerLine(this=%p)::removeEntry(%p)",this,entry );
 	for(items_iterator i=items_.begin();i!=items_.end();++i) {
 		qDebug("item: %p\n",*i); // gives address 0x0000001 which is clearly wrong!

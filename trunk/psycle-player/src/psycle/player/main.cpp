@@ -16,7 +16,7 @@
 	#define PSYCLE__PLAYER__EOF "d" // ctrl+d == EOF
 #endif
 
-using namespace psy::core;
+using namespace psycle::core;
 namespace loggers = universalis::os::loggers;
 
 void usage() {
@@ -185,7 +185,7 @@ int main(int argument_count, char * arguments[]) {
 		}
 		configuration.set_driver_by_name(output_driver_name);
 	}
-	psy::core::AudioDriver & output_driver(configuration.output_driver());
+	psycle::core::AudioDriver & output_driver(configuration.output_driver());
 
 	player.setDriver(output_driver);
 
@@ -196,7 +196,7 @@ int main(int argument_count, char * arguments[]) {
 			s << "psycle: player: setting output driver device name to: " << output_device_name;
 			loggers::information()(s.str());
 		}
-		psy::core::AudioDriverSettings settings(player.driver().playbackSettings()); ///\todo why do we do a copy?
+		psycle::core::AudioDriverSettings settings(player.driver().playbackSettings()); ///\todo why do we do a copy?
 		settings.setDeviceName(output_device_name);
 		player.driver().setPlaybackSettings(settings); ///\todo why do we copy?
 	}

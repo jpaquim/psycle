@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psy::core::Instrument.
+///\implementation psycle::core::Instrument.
 
 #include <psycle/core/config.private.hpp>
 #include "instrument.h"
@@ -45,7 +45,7 @@ template<class T> inline T str_hex(const std::string &  value, int pos) {
 
 
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 using namespace psycle::helpers;
 

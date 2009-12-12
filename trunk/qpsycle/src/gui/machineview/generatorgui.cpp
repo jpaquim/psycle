@@ -33,7 +33,7 @@
 
 namespace qpsycle {
 
-GeneratorGui::GeneratorGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
+GeneratorGui::GeneratorGui(int left, int top, psycle::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)
 	, isPanning(false)
 {
@@ -63,7 +63,7 @@ void GeneratorGui::paint( QPainter * painter, const QStyleOptionGraphicsItem * o
 	painter->setPen( Qt::white );
 	mac()->_mute ? painter->setBrush( Qt::red ) : painter->setBrush( QColor( 100, 0, 0 ) );
 	painter->drawEllipse( *muteRect );
-	dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
+	dynamic_cast<psycle::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ? painter->setBrush( Qt::green ) : painter->setBrush( QColor( 0, 100, 0 ) );
 	painter->drawEllipse( *soloRect );
 
 	//panning
@@ -88,7 +88,7 @@ void GeneratorGui::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 		toggleMuteAct_->setText( muteText );
 	
 		QString soloText;
-		dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
+		dynamic_cast<psycle::core::Song*>(m_macView->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
 		toggleSoloAct_->setText( soloText );
 	
 		QMenu menu;
@@ -189,10 +189,10 @@ void GeneratorGui::showMacTweakDlg()
 	
 	// Make connections for keyjazz in the mac tweak dialog.
 	///\todo Is this the best place for this?
-	connect(m_macTweakDlg, SIGNAL( notePress( int, psy::core::Machine* )),
-					m_macView, SLOT( onNotePress( int, psy::core::Machine* ) ) );
-	connect(m_macTweakDlg, SIGNAL( noteRelease( int, psy::core::Machine* )),
-					m_macView, SLOT( onNoteRelease( int, psy::core::Machine* ) ) );
+	connect(m_macTweakDlg, SIGNAL( notePress( int, psycle::core::Machine* )),
+					m_macView, SLOT( onNotePress( int, psycle::core::Machine* ) ) );
+	connect(m_macTweakDlg, SIGNAL( noteRelease( int, psycle::core::Machine* )),
+					m_macView, SLOT( onNoteRelease( int, psycle::core::Machine* ) ) );
 
 	m_macTweakDlg->show();
 }

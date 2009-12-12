@@ -13,7 +13,7 @@
 #include "psy4filter.h"
 #include <iostream>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 		SongSerializer::SongSerializer() {
 			filters.push_back( Psy2Filter::getInstance() );

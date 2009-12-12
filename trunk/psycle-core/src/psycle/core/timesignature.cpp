@@ -7,7 +7,7 @@
 #include <psycle/core/config.private.hpp>
 #include "timesignature.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 TimeSignature::TimeSignature() :
 	numerator_(4),

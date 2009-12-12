@@ -9,7 +9,7 @@
 #include <psycle/core/machinehost.hpp>
 #include <psycle/core/plugincatcher.h>
 #include <psycle/core/machinekey.hpp>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Plugin.hpp"
 #include "VstHost24.hpp"

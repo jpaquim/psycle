@@ -13,7 +13,7 @@
 #include <iostream> // only for debug output
 #include <sstream>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 
 

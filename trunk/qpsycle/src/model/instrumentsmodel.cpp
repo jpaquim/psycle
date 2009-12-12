@@ -40,7 +40,7 @@
  */
 namespace qpsycle {
 
-	InstrumentsModel::InstrumentsModel( psy::core::Song *song )
+	InstrumentsModel::InstrumentsModel( psycle::core::Song *song )
 		: song_( song )
 	{}
 
@@ -49,7 +49,7 @@ namespace qpsycle {
 
 	int InstrumentsModel::rowCount( const QModelIndex & /* parent */ ) const
 	{
-		return psy::core::MAX_INSTRUMENTS;
+		return psycle::core::MAX_INSTRUMENTS;
 	}
 
 	QVariant InstrumentsModel::data( const QModelIndex & index, int role ) const
@@ -80,12 +80,12 @@ namespace qpsycle {
 	void InstrumentsModel::setName( int instrIndex, const QString & newname )
 	{
 		if (
-			instrIndex < 0 || instrIndex >= psy::core::MAX_INSTRUMENTS ||
+			instrIndex < 0 || instrIndex >= psycle::core::MAX_INSTRUMENTS ||
 			slotIsEmpty( instrIndex )
 			)
 			return;
 
-		psy::core::Instrument *inst = song_->_pInstrument[instrIndex];
+		psycle::core::Instrument *inst = song_->_pInstrument[instrIndex];
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		inst->setName( newname.toStdString() );
 
@@ -117,7 +117,7 @@ namespace qpsycle {
 	/**
 	 * Returns an instrument from the CoreSong.
 	 */
-	psy::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
+	psycle::core::Instrument *InstrumentsModel::getInstrument( int instrIndex )
 	{
 		return song_->_pInstrument[instrIndex];
 	}
@@ -132,7 +132,7 @@ namespace qpsycle {
 	void InstrumentsModel::clearInstrument( int instrIndex )
 	{
 		assert( instrIndex >= 0 );
-		assert( instrIndex < psy::core::MAX_INSTRUMENTS );
+		assert( instrIndex < psycle::core::MAX_INSTRUMENTS );
 		
 		// Clear the instrument from the CoreSong.
 		song_->DeleteInstrument( instrIndex );
@@ -149,7 +149,7 @@ namespace qpsycle {
 	void InstrumentsModel::setSelectedInstrumentIndex( int newIndex )
 	{
 		assert( newIndex >= 0 );
-		assert( newIndex < psy::core::MAX_INSTRUMENTS );
+		assert( newIndex < psycle::core::MAX_INSTRUMENTS );
 		assert( song_->_pInstrument[newIndex] != NULL );
 
 		song_->instSelected( newIndex );
@@ -162,7 +162,7 @@ namespace qpsycle {
 	bool InstrumentsModel::slotIsEmpty( int instrIndex ) const
 	{
 		assert( instrIndex >= 0 );
-		assert( instrIndex < psy::core::MAX_INSTRUMENTS );
+		assert( instrIndex < psycle::core::MAX_INSTRUMENTS );
 		return song_->_pInstrument[instrIndex]->Empty();
 	}
 

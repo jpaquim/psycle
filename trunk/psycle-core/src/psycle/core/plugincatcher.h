@@ -12,7 +12,7 @@
 #include "machinekey.hpp"
 #include "pluginfinder.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class PSYCLE__CORE__DECL PluginFinderCache: public PluginFinder {
 	public:

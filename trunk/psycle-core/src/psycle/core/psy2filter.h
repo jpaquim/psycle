@@ -12,7 +12,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class RiffFile;
 class PatternCategory;

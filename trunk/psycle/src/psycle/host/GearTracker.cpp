@@ -7,7 +7,7 @@
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/sampler.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Sampler.hpp"
 #endif

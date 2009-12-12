@@ -34,7 +34,7 @@
 #endif
 
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 		AudioDriverInfo MsDirectSound::info( ) const {
 			return AudioDriverInfo("dsound","Microsoft DirectSound Driver","Microsoft output driver",true);

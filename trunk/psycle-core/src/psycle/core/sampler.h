@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\interface psy::core::Sampler.
+///\interface psycle::core::Sampler.
 #ifndef PSYCLE__CORE__SAMPLER__INCLUDED
 #define PSYCLE__CORE__SAMPLER__INCLUDED
 #pragma once
@@ -16,7 +16,7 @@
 #include "machine.h"
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 	#define SAMPLER_MAX_POLYPHONY          16
 	#define SAMPLER_DEFAULT_POLYPHONY      8

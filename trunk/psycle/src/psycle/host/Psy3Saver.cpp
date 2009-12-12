@@ -15,7 +15,7 @@
 namespace psycle  {
 	namespace host {
 
-		Psy3Saver::Psy3Saver(psy::core::Song& song)
+		Psy3Saver::Psy3Saver(psycle::core::Song& song)
 			: song_(&song)
 		{
 		}
@@ -25,7 +25,7 @@ namespace psycle  {
 		}
 
 
-		bool Psy3Saver::Save(psy::core::RiffFile* pFile,bool autosave)
+		bool Psy3Saver::Save(psycle::core::RiffFile* pFile,bool autosave)
 		{
 			// NEW FILE FORMAT!!!
 			// this is much more flexible, making maintenance a breeze compared to that old hell.
@@ -65,7 +65,7 @@ namespace psycle  {
 
 			// Instrument Data Save
 			int numInstruments = 0;	
-			for(int i = 0;i < psy::core::XMSampler::MAX_INSTRUMENT;i++){
+			for(int i = 0;i < psycle::core::XMSampler::MAX_INSTRUMENT;i++){
 				if(song_->rInstrument(i).IsEnabled()){
 					numInstruments++;
 				}
@@ -190,7 +190,7 @@ namespace psycle  {
 			//
 
 			// we use only the first track in mfc
-			psy::core::SequenceLine* line = *song_->patternSequence().begin();
+			psycle::core::SequenceLine* line = *song_->patternSequence().begin();
 			int playLength = line->size();
 			index = 0; // index
 			for (index=0;index<MAX_SEQUENCES;index++)
@@ -209,7 +209,7 @@ namespace psycle  {
 
 				pFile->WriteArray(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
 
-				psy::core::SequenceLine::iterator sit = line->begin();
+				psycle::core::SequenceLine::iterator sit = line->begin();
 				for ( ; sit != line->end(); ++sit) {
 					temp = sit->second->pattern()->id();
 					pFile->Write(temp);	// Sequence data.
@@ -231,15 +231,15 @@ namespace psycle  {
 			// a first test version
 			
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
-			psy::core::Sequence::patterniterator  it = song_->patternSequence().patternbegin();
+			psycle::core::Sequence::patterniterator  it = song_->patternSequence().patternbegin();
 			for ( ; it != song_->patternSequence().patternend(); ++it ) {
-				psy::core::Pattern* pattern = *it;
+				psycle::core::Pattern* pattern = *it;
 				unsigned char* data = CreateNewPattern(pattern->id());
-				psy::core::Pattern::iterator ev_it = pattern->begin();
+				psycle::core::Pattern::iterator ev_it = pattern->begin();
 				int lines_per_beat = 4;
 				int num_lines = pattern->beats() * lines_per_beat; // hardcoded atm
 				for ( ; ev_it != pattern->end(); ++ev_it ) {
-					psy::core::PatternEvent& ev = ev_it->second;
+					psycle::core::PatternEvent& ev = ev_it->second;
 					double pos = ev_it->first;
 					int line = pos * lines_per_beat;
 					unsigned char* data_ptr = data + line * EVENT_SIZE * song_->tracks();
@@ -445,7 +445,7 @@ namespace psycle  {
 			return ppPatternData[ps];
 		}
 
-		void Psy3Saver::ConvertEvent(const psy::core::PatternEvent& ev, unsigned char* data) const {
+		void Psy3Saver::ConvertEvent(const psycle::core::PatternEvent& ev, unsigned char* data) const {
 			*data = ev.note();  ++data;
 			*data = ev.instrument(); ++data;
 			*data = ev.machine(); ++data;

@@ -26,7 +26,7 @@
 #include <cerrno>
 #include <cstring>
 #include <cstdint>
-namespace psy {
+namespace psycle {
 	namespace core {
 
 		ESoundOut::ESoundOut()

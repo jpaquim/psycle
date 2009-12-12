@@ -12,7 +12,7 @@
 #include <mutex>
 #include <condition>
 #include <cstdint>
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 /// typedef for work callback
 typedef float * (*AUDIODRIVERWORKFN) (void * context, int numSamples);

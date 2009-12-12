@@ -6,7 +6,7 @@
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/helpers/helpers.hpp>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Player.hpp"
 #include "Song.hpp"
@@ -137,7 +137,7 @@ namespace psycle {
 		}
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		psy::core::Pattern* PatternView::pattern() {
+		psycle::core::Pattern* PatternView::pattern() {
 			return pattern_;
 		}
 #endif
@@ -539,7 +539,7 @@ namespace psycle {
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				Pattern* pat = pattern();
-				psy::core::Player & player(psy::core::Player::singleton());
+				psycle::core::Player & player(psycle::core::Player::singleton());
 				int ticks = static_cast<int>(project()->beat_zoom());
 				int pos = 0;
 				if (project()->song().patternSequence().last_worked_entry())
@@ -2676,7 +2676,7 @@ namespace psycle {
 
 			Pattern::iterator it = patt->lower_bound(line_pos(lstart+lOff, true)); 
 			for ( ; it != patt->end(); ++it )  {						
-				psy::core::PatternEvent& ev = it->second;
+				psycle::core::PatternEvent& ev = it->second;
 				if ( ev.track() < tstart+tOff || ev.track() > tend+tOff)
 					continue;
 				int trackcount = ev.track() + tOff;
@@ -4347,7 +4347,7 @@ namespace psycle {
 			int line = editcur.line;			
 
 			double beat_zoom = project()->beat_zoom();
-			psy::core::Pattern::iterator it;
+			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
@@ -4357,17 +4357,17 @@ namespace psycle {
 				!(it->first >= low && it->first < up)
 				) {
 				// no entry on the beatpos
-				psy::core::PatternEvent ev;
+				psycle::core::PatternEvent ev;
 				ev.setNote(note);
 				ev.set_track(editcur.track);
 				ev.setMachine(song()->seqBus);
 				pattern()->insert(insert_pos, ev);
 			} else
 			if (it->first >= low && it->first < up)	{
-				psy::core::Pattern::iterator track_it = it;
+				psycle::core::Pattern::iterator track_it = it;
 				bool found = false;
 				for ( ; it != pattern()->end() && it->first < up; ++it ) {
-					psy::core::PatternEvent& ev = it->second;
+					psycle::core::PatternEvent& ev = it->second;
 					if (ev.track() == editcur.track ) {
 						it->second.setNote(note);
 						found = true;
@@ -4375,7 +4375,7 @@ namespace psycle {
 					}
 				}
 				if (!found) {
-					psy::core::PatternEvent ev;
+					psycle::core::PatternEvent ev;
 					ev.setNote(note);
 					ev.set_track(editcur.track);
 					ev.setMachine(song()->seqBus);
@@ -4934,17 +4934,17 @@ namespace psycle {
 // 			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 			int line = editcur.line;
-			psy::core::Song* song = this->song();
-			psy::core::PatternSequence* sequence = &song->patternSequence();
-			psy::core::SequenceLine* sline = *(sequence->begin());	
-			psy::core::SequenceLine::iterator sit = sline->begin();
+			psycle::core::Song* song = this->song();
+			psycle::core::PatternSequence* sequence = &song->patternSequence();
+			psycle::core::SequenceLine* sline = *(sequence->begin());	
+			psycle::core::SequenceLine::iterator sit = sline->begin();
 			for (int pos = 0; sit != sline->end() && pos < editPosition; ++sit, ++pos);
 			assert(sit != sline->end());
-			psy::core::SequenceEntry* entry = sit->second;
-			psy::core::Pattern* pattern = entry->pattern();
+			psycle::core::SequenceEntry* entry = sit->second;
+			psycle::core::Pattern* pattern = entry->pattern();
 
 			double beat_zoom = project()->beat_zoom();
-			psy::core::Pattern::iterator it;
+			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
@@ -4954,7 +4954,7 @@ namespace psycle {
 				!(it->first >= low && it->first < up)
 				) {
 				// no entry on the beatpos
-				psy::core::PatternEvent ev;
+				psycle::core::PatternEvent ev;
 				int old_value = 0;
 				int new_value = 0;
 				switch ((editcur.col+1)%2) {
@@ -4981,14 +4981,14 @@ namespace psycle {
 				pattern->insert(insert_pos, ev);
 			} else
 			if (it->first >= low && it->first < up)	{
-				psy::core::Pattern::iterator track_it = it;
+				psycle::core::Pattern::iterator track_it = it;
 				bool found = false;
 				for ( ; it != pattern->end() && it->first < up; ++it ) {
-					psy::core::PatternEvent& ev = it->second;
+					psycle::core::PatternEvent& ev = it->second;
 					if (ev.track() == editcur.track ) {
 						//it->second.setNote(note);
 						// no entry on the beatpos
-						psy::core::PatternEvent& ev = it->second;
+						psycle::core::PatternEvent& ev = it->second;
 						int old_value = 0;
 						int new_value = 0;
 						if ( editcur.col == 1 || editcur.col == 2) {
@@ -5030,7 +5030,7 @@ namespace psycle {
 				}
 				if (!found) {
 					// no entry on the beatpos
-					psy::core::PatternEvent ev;
+					psycle::core::PatternEvent ev;
 					int old_value = 0;
 					int new_value = 0;
 					switch ((editcur.col+1)%2) {
@@ -5127,19 +5127,19 @@ namespace psycle {
 		void PatternView::ClearCurr() // delete content at Cursor pos.
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Pattern* pat = pattern();
+			psycle::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
 			// todo AddUndo		
-			psy::core::Pattern::iterator it;
+			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
 			it = pat->lower_bound(low);			
 			int track = editcur.track;
 			if (it != pat->end())	{
-				psy::core::Pattern::iterator track_it = it;				
+				psycle::core::Pattern::iterator track_it = it;				
 				for ( ; it != pat->end() && it->first < up; ++it ) {
-					psy::core::PatternEvent& ev = it->second;
+					psycle::core::PatternEvent& ev = it->second;
 					if (ev.track() == editcur.track ) {
 						if ( editcur.col == 0)
 							it = pat->erase(it);
@@ -5196,7 +5196,7 @@ namespace psycle {
 		void PatternView::DeleteCurr()
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Pattern* pat = pattern();
+			psycle::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
 
 			int patlines = static_cast<int>(beat_zoom * pat->beats());
@@ -5210,7 +5210,7 @@ namespace psycle {
 
 			// todo AddUndo
 			
-			psy::core::Pattern::iterator it;
+			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
@@ -5218,18 +5218,18 @@ namespace psycle {
 			
 			int track = editcur.track;
 			if (it != pat->end() )	{
-				psy::core::Pattern::iterator track_it = it;				
+				psycle::core::Pattern::iterator track_it = it;				
 				for ( ; it != pat->end() && it->first < up; ++it ) {
-					psy::core::PatternEvent& ev = it->second;
+					psycle::core::PatternEvent& ev = it->second;
 					if (ev.track() == editcur.track ) {						
 						it = pat->erase(it);
 						break;
 					}
 				}
 				for ( ; it != pat->end(); ++it) {
-					psy::core::PatternEvent& ev = it->second;
+					psycle::core::PatternEvent& ev = it->second;
 					if (ev.track() == editcur.track ) {
-						psy::core::PatternEvent old_event = it->second;
+						psycle::core::PatternEvent old_event = it->second;
 						double old_pos = it->first;
 						it = pat->erase(it);
 						it = pat->insert(old_pos - 1 / beat_zoom, old_event);
@@ -5274,25 +5274,25 @@ namespace psycle {
 		void PatternView::InsertCurr()
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Pattern* pat = pattern();
+			psycle::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
 
 			int patlines = static_cast<int>(beat_zoom * pat->beats());
 			
 			// todo AddUndo
 			
-			psy::core::Pattern::iterator it;
+			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
 			double insert_pos = editcur.line / beat_zoom;
 			
-			psy::core::Pattern::reverse_iterator rit = pat->rbegin();
+			psycle::core::Pattern::reverse_iterator rit = pat->rbegin();
 			for ( ; rit != pat->rend() && rit->first > low ; ++rit) {
-					psy::core::PatternEvent& ev = rit->second;
+					psycle::core::PatternEvent& ev = rit->second;
 					if (ev.track() == editcur.track ) {
-						psy::core::Pattern::iterator it = rit.base();
+						psycle::core::Pattern::iterator it = rit.base();
 						--it;
-						psy::core::PatternEvent old_event = it->second;
+						psycle::core::PatternEvent old_event = it->second;
 						double old_pos = it->first;
 						double new_pos = old_pos + 1 / beat_zoom;
 						it = pat->erase(it);

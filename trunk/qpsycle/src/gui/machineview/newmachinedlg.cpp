@@ -44,33 +44,33 @@ NewMachineDlg::NewMachineDlg(QWidget *parent)
 	// Should we use a tree layout instead of tabs?
 	QTabWidget *machineTabs = new QTabWidget();
 
-	finder_ = &psy::core::MachineFactory::getInstance().getFinder();
+	finder_ = &psycle::core::MachineFactory::getInstance().getFinder();
 
 	genList = new QListWidget();
 	efxList = new QListWidget();
 	intList = new QListWidget();
 	ladList = new QListWidget();
 
-	int i = psy::core::Hosts::INTERNAL;
-	for (; finder_->hasHost(psy::core::Hosts::type(i)); i++) {
-		std::map< psy::core::MachineKey, psy::core::PluginInfo >::const_iterator it = finder_->begin(psy::core::Hosts::type(i));
-		for ( ; it != finder_->end(psy::core::Hosts::type(i)); it++ ) {
-			const psy::core::MachineKey & key = it->first;
-			const psy::core::PluginInfo & info = it->second;
+	int i = psycle::core::Hosts::INTERNAL;
+	for (; finder_->hasHost(psycle::core::Hosts::type(i)); i++) {
+		std::map< psycle::core::MachineKey, psycle::core::PluginInfo >::const_iterator it = finder_->begin(psycle::core::Hosts::type(i));
+		for ( ; it != finder_->end(psycle::core::Hosts::type(i)); it++ ) {
+			const psycle::core::MachineKey & key = it->first;
+			const psycle::core::PluginInfo & info = it->second;
 			QListWidget* list=NULL;
 	
 			switch(key.host()) {
-			case psy::core::Hosts::INTERNAL:
+			case psycle::core::Hosts::INTERNAL:
 				list=intList;
 				break;
-			case psy::core::Hosts::NATIVE:
+			case psycle::core::Hosts::NATIVE:
 				switch(info.role()) {
-				case psy::core::MachineRole::EFFECT: list = efxList; break;
-				case psy::core::MachineRole::GENERATOR: list = genList; break;
+				case psycle::core::MachineRole::EFFECT: list = efxList; break;
+				case psycle::core::MachineRole::GENERATOR: list = genList; break;
 				default: break;
 				}
 				break;
-			case psy::core::Hosts::LADSPA: list = ladList; break;
+			case psycle::core::Hosts::LADSPA: list = ladList; break;
 			default:
 				break;
 			};
@@ -156,12 +156,12 @@ void NewMachineDlg::itemSelectionChanged()
 
 void NewMachineDlg::setPlugin( QListWidgetItem* item ) 
 {
-	std::map< QListWidgetItem*, psy::core::MachineKey >::iterator it;
+	std::map< QListWidgetItem*, psycle::core::MachineKey >::iterator it;
 	it = pluginIdentify_.find( item );
 	
 	if ( it != pluginIdentify_.end() ) {
-		const psy::core::MachineKey & key = it->second;
-		const psy::core::PluginInfo & info = finder_->info( key );
+		const psycle::core::MachineKey & key = it->second;
+		const psycle::core::PluginInfo & info = finder_->info( key );
 
 		#if 0
 		name->setText( info.name() );
@@ -185,7 +185,7 @@ void NewMachineDlg::tryAccept() {
 }
 
 
-const psy::core::MachineKey & NewMachineDlg::pluginKey() const {
+const psycle::core::MachineKey & NewMachineDlg::pluginKey() const {
 	return selectedKey_;
 }
 

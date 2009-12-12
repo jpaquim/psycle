@@ -5,7 +5,7 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/constants.h>
 #include <psycle/core/commands.h>
-namespace psy {
+namespace psycle {
 	namespace core {
 		class Song;
 		class Player;
@@ -14,13 +14,13 @@ namespace psy {
 
 namespace psycle { namespace host {
 namespace notecommands {
-	using namespace psy::core::notetypes;
+	using namespace psycle::core::notetypes;
 }
 namespace PatternCmd {
-	using namespace psy::core::commandtypes;
+	using namespace psycle::core::commandtypes;
 }
 }}
-using namespace psy::core;
+using namespace psycle::core;
 //typedef unsigned char byte;
 //typedef unsigned short word;
 //typedef unsigned long dword;

@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 	using namespace psycle::helpers;
 /****************************************************************************************************/

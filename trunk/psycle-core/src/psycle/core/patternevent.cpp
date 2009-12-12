@@ -9,7 +9,7 @@
 
 #include <sstream>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 		
 PatternEvent::PatternEvent() :
 	note_(255),

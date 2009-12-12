@@ -14,7 +14,7 @@
 #include <string>
 #include <map>
 
-namespace psy{ namespace core{
+namespace psycle { namespace core{
 
 class PSYCLE__CORE__DECL LadspaHost : public MachineHost {
 protected:

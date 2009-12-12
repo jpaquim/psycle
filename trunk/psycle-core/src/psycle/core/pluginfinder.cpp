@@ -9,7 +9,7 @@
 
 #include <cassert>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 PluginFinder::PluginFinder(bool delayedScan) {
 	delayedScan_ = delayedScan;

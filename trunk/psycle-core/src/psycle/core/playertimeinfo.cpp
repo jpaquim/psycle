@@ -9,7 +9,7 @@
 
 #include <cassert>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 PlayerTimeInfo::PlayerTimeInfo( )
 :

@@ -21,7 +21,7 @@
 #if defined _WIN64 || defined _WIN32
 	#include <windows.h>
 #endif
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 volatile int WaveFileOut::kill_thread = 0;
 volatile int WaveFileOut::threadOpen = 0;

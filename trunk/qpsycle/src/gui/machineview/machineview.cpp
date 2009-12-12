@@ -47,7 +47,7 @@
 
 namespace qpsycle {
 
-MachineView::MachineView(psy::core::Song * song) {
+MachineView::MachineView(psycle::core::Song * song) {
 	song_ = song;
 	setScene( new MachineScene( this ) );
 	scene()->setBackgroundBrush(Qt::black);
@@ -68,9 +68,9 @@ MachineView::MachineView(psy::core::Song * song) {
 */
 void MachineView::createMachineGuis() {
 	if ( song() ) {
-		for( int m=0; m < psy::core::MAX_MACHINES; m++ )
+		for( int m=0; m < psycle::core::MAX_MACHINES; m++ )
 		{
-			psy::core::Machine* mac = song()->machine(m);
+			psycle::core::Machine* mac = song()->machine(m);
 			if ( mac ) {
 				createMachineGui( mac );
 			}
@@ -82,7 +82,7 @@ void MachineView::createMachineGuis() {
 	Given a core Machine, this method makes a MachineGui
 	for it and adds it to the graphics scene. 
 */
-MachineGui * MachineView::createMachineGui( psy::core::Machine *mac ) {
+MachineGui * MachineView::createMachineGui( psycle::core::Machine *mac ) {
 	//FIXME: Find a good solution. (MachineRoles in machines?, get info using machinekey?)
 	MachineGui *macGui;
 	if ( !mac->acceptsConnections() ) {
@@ -121,17 +121,17 @@ MachineGui * MachineView::createMachineGui( psy::core::Machine *mac ) {
 void MachineView::createWireGuis()  {
 	if ( song() ) 
 	{
-		for ( int m=0; m < psy::core::MAX_MACHINES; m++ )
+		for ( int m=0; m < psycle::core::MAX_MACHINES; m++ )
 		{
-			psy::core::Machine* tmac = song()->machine(m);
+			psycle::core::Machine* tmac = song()->machine(m);
 			if (tmac) 
 			{ 
-				for ( int w=0; w < psy::core::MAX_CONNECTIONS; w++ )
+				for ( int w=0; w < psycle::core::MAX_CONNECTIONS; w++ )
 				{
 					if (tmac->_connection[w]) {
 						MachineGui* srcMacGui = findMachineGuiByCoreMachine(tmac);
 						if ( srcMacGui!=0 ) {
-							psy::core::Machine *pout = song()->machine(tmac->_outputMachines[w]);
+							psycle::core::Machine *pout = song()->machine(tmac->_outputMachines[w]);
 							MachineGui* dstMacGui = findMachineGuiByCoreMachine(pout);
 							if ( dstMacGui != 0 ) {
 								WireGui *wireGui = createWireGui( srcMacGui, dstMacGui );
@@ -174,7 +174,7 @@ void MachineView::createTempLine() {
 */
 void MachineView::initKeyjazzSettings() {
 	outtrack = 0;
-	for ( int i=0; i<psy::core::MAX_TRACKS; i++ ) notetrack[i]=120;
+	for ( int i=0; i<psycle::core::MAX_TRACKS; i++ ) notetrack[i]=120;
 }
 
 
@@ -208,8 +208,8 @@ void MachineView::closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseE
 */
 void MachineView::connectMachines( MachineGui *srcMacGui, MachineGui *dstMacGui ) {
 	if ( dstMacGui->mac()->acceptsConnections() ) {
-		psy::core::InPort::id_type portin=psy::core::InPort::id_type(0);
-		psy::core::OutPort::id_type portout=psy::core::OutPort::id_type(0);
+		psycle::core::InPort::id_type portin=psycle::core::InPort::id_type(0);
+		psycle::core::OutPort::id_type portout=psycle::core::OutPort::id_type(0);
 		if ( srcMacGui->mac()->GetOutPorts() > 1 ) {
 			QPortsDialog dialog(this);
 			portout =  dialog.GetOutPort(srcMacGui->mac());
@@ -263,10 +263,10 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui ) {
 	directly, or a machine gets deleted and its connections have to go too.
 */
 void MachineView::deleteConnection( WireGui *wireGui ) {
-	psy::core::Player::scoped_lock lock(psy::core::Player::singleton().work_mutex());
+	psycle::core::Player::scoped_lock lock(psycle::core::Player::singleton().work_mutex());
 
-	psy::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
-	psy::core::Machine *dstMac = wireGui->destMacGui()->mac();
+	psycle::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
+	psycle::core::Machine *dstMac = wireGui->destMacGui()->mac();
 
 	// Delete the connection in the GUI.
 	wireGui->sourceMacGui()->wireGuiList_.erase (
@@ -307,9 +307,9 @@ void MachineView::onMachineRenamed() {
 */
 void MachineView::onCloneMachine( MachineGui *macGui ) {
 	qDebug("in clone machine");
-	psy::core::Machine *pMachine = macGui->mac();
-	psy::core::Machine::id_type src( pMachine->id() );
-	psy::core::Machine* newmac = psy::core::MachineFactory::getInstance().CloneMachine(*macGui->mac());
+	psycle::core::Machine *pMachine = macGui->mac();
+	psycle::core::Machine::id_type src( pMachine->id() );
+	psycle::core::Machine* newmac = psycle::core::MachineFactory::getInstance().CloneMachine(*macGui->mac());
 	if (newmac) {
 		song()->AddMachine(newmac);
 	} else {
@@ -321,10 +321,10 @@ void MachineView::onCloneMachine( MachineGui *macGui ) {
 /**
 	This is called when a new machine is added via the NewMachineDialog.
 */
-void MachineView::addNewMachineGui( psy::core::Machine *mac ) {
+void MachineView::addNewMachineGui( psycle::core::Machine *mac ) {
 	MachineGui *macGui = createMachineGui( mac );
 
-	//if ( mac->mode() == psy::core::MACHMODE_GENERATOR ) {
+	//if ( mac->mode() == psycle::core::MACHMODE_GENERATOR ) {
 		//setChosenMachine( macGui );
 		//song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
 	//}
@@ -348,7 +348,7 @@ void MachineView::onMachineChosen( MachineGui *macGui ) {
 
 
 
-MachineGui *MachineView::findMachineGuiByCoreMachine( psy::core::Machine *mac ) const {
+MachineGui *MachineView::findMachineGuiByCoreMachine( psycle::core::Machine *mac ) const {
 	for (std::vector<MachineGui*>::const_iterator it = machineGuis.begin() ; it < machineGuis.end(); it++) {
 		MachineGui* machineGui = *it;
 		if ( machineGui->mac() == mac ) return machineGui;
@@ -386,7 +386,7 @@ MachineGui *MachineView::machineGuiAtPoint( QPointF point ) const {
 /**
 	For keyjazz.
 */
-void MachineView::playNote( int note,int /*velocity*/,bool bTranspose, psy::core::Machine *pMachine ) {
+void MachineView::playNote( int note,int /*velocity*/,bool bTranspose, psycle::core::Machine *pMachine ) {
 
 	// stop any notes with the same value
 	stopNote(note,bTranspose,pMachine);
@@ -402,7 +402,7 @@ void MachineView::playNote( int note,int /*velocity*/,bool bTranspose, psy::core
 	}
 
 	// build entry
-	psy::core::PatternEvent entry;
+	psycle::core::PatternEvent entry;
 	entry.setNote( note );
 	entry.setInstrument( song()->auxcolSelected );
 	//entry.setMachine( song()->seqBus ); // Not really needed.
@@ -415,7 +415,7 @@ void MachineView::playNote( int note,int /*velocity*/,bool bTranspose, psy::core
 	{
 		int mgn = song()->seqBus;
 
-		if (mgn < psy::core::MAX_MACHINES) {
+		if (mgn < psycle::core::MAX_MACHINES) {
 			pMachine = song()->machine(mgn);
 		}
 	}
@@ -453,13 +453,13 @@ void MachineView::playNote( int note,int /*velocity*/,bool bTranspose, psy::core
 	}
 }
 
-static void sendStopNote(psy::core::Machine* pMachine) {
+static void sendStopNote(psycle::core::Machine* pMachine) {
 }
 
 /**
 	For keyjazz again, on key release.
 */
-void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMachine ) {
+void MachineView::stopNote( int note, bool bTranspose, psycle::core::Machine * pMachine ) {
 	if (!(note >=0 && note < 128)) return;
 
 	// octave offset
@@ -471,7 +471,7 @@ void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMac
 	if(pMachine==NULL) {
 		int mgn = song()->seqBus;
 
-		if (mgn < psy::core::MAX_MACHINES) {
+		if (mgn < psycle::core::MAX_MACHINES) {
 			pMachine = song()->machine(mgn);
 		}
 	}
@@ -481,7 +481,7 @@ void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMac
 			if(notetrack[i]==note) {
 				notetrack[i]=120;
 				// build entry
-				psy::core::PatternEvent entry;
+				psycle::core::PatternEvent entry;
 				entry.setNote( 120+0 );
 				entry.setInstrument( song()->auxcolSelected );
 				entry.setMachine( song()->seqBus );
@@ -495,11 +495,11 @@ void MachineView::stopNote( int note, bool bTranspose, psy::core::Machine * pMac
 	}
 }
 
-void MachineView::onNotePress( int note, psy::core::Machine* mac ) {
+void MachineView::onNotePress( int note, psycle::core::Machine* mac ) {
 	playNote( note, 127, true, mac );
 }
 
-void MachineView::onNoteRelease( int note, psy::core::Machine* mac ) {
+void MachineView::onNoteRelease( int note, psycle::core::Machine* mac ) {
 	stopNote( note, true, mac );
 }
 
@@ -552,10 +552,10 @@ void MachineScene::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event ) {
 	{
 		int accepted = newMachineDlg->exec();
 		if (accepted) { // Add a new machine to the song.
-			psy::core::MachineKey key = newMachineDlg->pluginKey(); 
+			psycle::core::MachineKey key = newMachineDlg->pluginKey(); 
 
 			// Create machine, tell where to place the new machine--get from mouse.
-			psy::core::Machine *mac = psy::core::MachineFactory::getInstance().CreateMachine(key);
+			psycle::core::Machine *mac = psycle::core::MachineFactory::getInstance().CreateMachine(key);
 
 			if ( mac ) {
 				mac->SetPosX(event->scenePos().toPoint().x());
@@ -617,23 +617,23 @@ QPortsDialog::QPortsDialog(QWidget *parent)
 	numButtons=0;
 }
 
-psy::core::OutPort::id_type QPortsDialog::GetOutPort(psy::core::Machine* mac) {
+psycle::core::OutPort::id_type QPortsDialog::GetOutPort(psycle::core::Machine* mac) {
 	setWindowTitle(tr("Output Port Selection"));
 
 	const int nPorts = mac->GetOutPorts();
 	for(int i=0; i < nPorts; i++) {
 		addNewButton(mac->GetPortOutputName(i),i);
 	}
-	return psy::core::OutPort::id_type(exec());
+	return psycle::core::OutPort::id_type(exec());
 }
 
-psy::core::InPort::id_type QPortsDialog::GetInPort(psy::core::Machine* mac) {
+psycle::core::InPort::id_type QPortsDialog::GetInPort(psycle::core::Machine* mac) {
 	setWindowTitle(tr("Input Port Selection"));
 	const int nPorts = mac->GetInPorts();
 	for(int i=0; i < nPorts; i++) {
 		addNewButton(mac->GetPortInputName(i),i);
 	}
-	return psy::core::InPort::id_type(exec());
+	return psycle::core::InPort::id_type(exec());
 }
 
 void QPortsDialog::addNewButton(std::string message, int portidx) {

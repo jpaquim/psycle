@@ -39,7 +39,7 @@
 	#if defined DIVERSALIS__COMPILER__GNU
 		#warning ###########################- UNIMPLEMENTED ###################
 	#endif
-namespace psy { namespace core { namespace vst {
+namespace psycle { namespace core { namespace vst {
 class host;
 class AudioMaster;
 }}}
@@ -51,7 +51,7 @@ class AudioMaster;
 
 using namespace seib::vst;
 
-namespace psy{ namespace core{ namespace vst {
+namespace psycle { namespace core{ namespace vst {
 
 // Dialog max ticks for parameters.
 const int quantize = 65535;

@@ -6,7 +6,7 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/internal_machines.h>
 #include <psycle/helpers/dsp.hpp>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Machine.hpp"
 #include "Dsp.hpp"

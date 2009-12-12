@@ -30,7 +30,7 @@
 #include <cstdlib>
 #include <iostream>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	using namespace std;
 
 	char const File::path_env_var_name[] =

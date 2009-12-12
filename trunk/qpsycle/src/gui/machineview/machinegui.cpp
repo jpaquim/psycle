@@ -47,7 +47,7 @@
 namespace qpsycle {
 
 /// The graphical representation of a CoreSong machine in the GUI.
-MachineGui::MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
+MachineGui::MachineGui(int left, int top, psycle::core::Machine *mac, MachineView *macView)
 	: m_macView(macView),
 		m_mac(mac),
 		left_(left),
@@ -91,7 +91,7 @@ void MachineGui::initActions()
 	m_mac->_mute ? muteText = "Unmute" : muteText = "Mute";
 	toggleMuteAct_ = new QAction( muteText, this );
 	QString soloText;   
-	dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
+	dynamic_cast<psycle::core::Song*>(m_macView->song())->machineSoloed == m_mac->id() ? soloText = "Unsolo" : soloText = "Solo";
 	toggleSoloAct_ = new QAction( soloText, this );
 }
 
@@ -181,8 +181,8 @@ void MachineGui::onToggleMuteActionTriggered()
 	{
 		mac()->_volumeCounter = 0.0f;
 		mac()->_volumeDisplay = 0;
-		if ( dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ) {
-			dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed = -1;
+		if ( dynamic_cast<psycle::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ) {
+			dynamic_cast<psycle::core::Song*>(m_macView->song())->machineSoloed = -1;
 		}
 	}
 
@@ -194,10 +194,10 @@ void MachineGui::onToggleMuteActionTriggered()
 	*/
 void MachineGui::onToggleSoloActionTriggered() 
 {
-	if (dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ) // Unsolo it.
+	if (dynamic_cast<psycle::core::Song*>(m_macView->song())->machineSoloed == mac()->id() ) // Unsolo it.
 	{
-		dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed = -1;
-		for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
+		dynamic_cast<psycle::core::Song*>(m_macView->song())->machineSoloed = -1;
+		for ( int i=0;i<psycle::core::MAX_MACHINES;i++ ) {
 			if ( m_macView->song()->machine(i) ) {
 				if ( !m_macView->song()->machine(i)->acceptsConnections() ) {
 					m_macView->song()->machine(i)->_mute = false;
@@ -205,7 +205,7 @@ void MachineGui::onToggleSoloActionTriggered()
 			}
 		}
 	} else { // Solo it.
-		for ( int i=0;i<psy::core::MAX_MACHINES;i++ ) {
+		for ( int i=0;i<psycle::core::MAX_MACHINES;i++ ) {
 			if ( m_macView->song()->machine(i) )
 			{
 				if (( !m_macView->song()->machine(i)->acceptsConnections()) && (i != mac()->id()))
@@ -217,7 +217,7 @@ void MachineGui::onToggleSoloActionTriggered()
 			}
 		}
 		mac()->_mute = false;
-		dynamic_cast<psy::core::Song*>(m_macView->song())->machineSoloed = mac()->id();
+		dynamic_cast<psycle::core::Song*>(m_macView->song())->machineSoloed = mac()->id();
 	}
 
 	scene()->update(); // FIXME: possibly more efficient to update individual machines in the loop above.
@@ -286,7 +286,7 @@ std::vector<WireGui *> MachineGui::wireGuiList() const
 	return wireGuiList_;
 }
 
-psy::core::Machine* MachineGui::mac() const
+psycle::core::Machine* MachineGui::mac() const
 {
 	return m_mac;
 }

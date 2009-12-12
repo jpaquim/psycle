@@ -12,7 +12,7 @@
 #include <psycle/core/xminstrument.h>
 #include <psycle/core/xmsampler.h>
 #include <psycle/core/player.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Song.hpp"
 #include "Machine.hpp"
@@ -23,7 +23,7 @@ using namespace psy::core;
 #include <algorithm>
 #include <cstring>
 
-namespace psycle{
+namespace psycle {
 namespace host{
 	
 	const short MODSongLoader::BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine

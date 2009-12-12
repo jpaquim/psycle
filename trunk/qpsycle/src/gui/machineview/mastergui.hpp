@@ -28,7 +28,7 @@ namespace qpsycle {
 class MasterGui : public MachineGui
 {
 public:
-	MasterGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+	MasterGui(int left, int top, psycle::core::Machine *mac, MachineView *macView);
 
 protected:
 	// Override these, as MasterGui doesn't do much (for now.)

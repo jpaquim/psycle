@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psy::core::Machine.
+///\implementation psycle::core::Machine.
 
 #include <psycle/core/config.private.hpp>
 #include "machine.h"
@@ -17,7 +17,7 @@
 #include <iostream> // only for debug output
 #include <sstream>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 using namespace psycle::helpers;
 

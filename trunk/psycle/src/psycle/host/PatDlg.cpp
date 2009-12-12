@@ -12,7 +12,7 @@
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		CPatDlg::CPatDlg(CWnd* pParent, psy::core::Pattern* pattern) : 
+		CPatDlg::CPatDlg(CWnd* pParent, psycle::core::Pattern* pattern) : 
 			CDialog(CPatDlg::IDD, pParent),
 		    pattern_(pattern)
 #else

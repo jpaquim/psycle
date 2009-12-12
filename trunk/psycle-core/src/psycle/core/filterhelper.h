@@ -10,7 +10,7 @@
 
 #include <string>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 ///\todo: Have a way to allow to save program-specific data to the song filters.
 /// This will allow extended Songs (for example, save some windows specific options that the linux version doesn't need to know about, etc..)

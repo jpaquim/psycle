@@ -14,7 +14,7 @@
 #include <mutex>
 #include <condition>
 #include <cstdint>
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class AlsaOut : public AudioDriver {
 	public:

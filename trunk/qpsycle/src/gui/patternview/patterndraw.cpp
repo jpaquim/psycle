@@ -224,7 +224,7 @@ namespace qpsycle {
 	// Draws the grid lines of the pattern grid.
 	void PatternDraw::drawBackground( QPainter * painter, const QRectF & rect )  
 	{
-		psy::core::TimeSignature signature;
+		psycle::core::TimeSignature signature;
 
 		///\ todo: colours shouldn't be hardcoded.
 		QColor backgroundColor = Qt::black;
@@ -270,7 +270,7 @@ namespace qpsycle {
 		for (int line = startLineNum; line <= endLineNum; line++ ) 
 		{
 			float position = line / (float) patternView()->beatZoom();
-			if (!(line == patternView()->playPos() ) || !psy::core::Player::singleton().playing() ) 
+			if (!(line == patternView()->playPos() ) || !psycle::core::Player::singleton().playing() ) 
 			{
 				if ( !(line % patternView()->beatZoom() ) ) 
 				{

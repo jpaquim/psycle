@@ -15,7 +15,7 @@
 
 #include <universalis/os/loggers.hpp>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 namespace loggers = universalis::os::loggers;
 

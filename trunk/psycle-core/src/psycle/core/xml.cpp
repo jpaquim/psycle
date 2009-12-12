@@ -11,7 +11,7 @@
 
 #include <psycle/helpers/helpers.hpp>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	using namespace psycle::helpers;
 
 std::string replaceIllegalXmlChr(const std::string & text, bool strict) {

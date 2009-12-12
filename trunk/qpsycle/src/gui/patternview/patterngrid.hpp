@@ -121,7 +121,7 @@ public:
 	~PatternGrid();
 
 	void addEvent( const ColumnEvent & event );
-	psy::core::SinglePattern *pattern();
+	psycle::core::SinglePattern *pattern();
 	enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
 	PatternDraw *patDraw() { return patDraw_; }
 	void patDraw( PatternDraw *pd ) { patDraw_ = pd; }
@@ -289,7 +289,7 @@ private:
 	bool blockSelected_;
 
 	bool isBlockCopied_;
-	psy::core::SinglePattern pasteBuffer;
+	psycle::core::SinglePattern pasteBuffer;
 	float lastXmlLineBeatPos;
 	int xmlTracks;
 	float xmlBeats;

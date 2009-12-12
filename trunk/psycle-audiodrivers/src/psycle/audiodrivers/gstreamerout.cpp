@@ -9,7 +9,7 @@
 #include <gst/gst.h>
 #include <thread>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 namespace loggers = universalis::os::loggers;
 using universalis::exceptions::runtime_error;

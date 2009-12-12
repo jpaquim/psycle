@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\interface psy::core::Instrument
+///\interface psycle::core::Instrument
 
 #ifndef PSYCLE__CORE__INSTRUMENT__INCLUDED
 #define PSYCLE__CORE__INSTRUMENT__INCLUDED
@@ -15,7 +15,7 @@
 #include <cstdint>
 #include <string>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class RiffFile;
 
