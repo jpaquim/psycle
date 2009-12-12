@@ -590,6 +590,7 @@ namespace psycle { namespace core {
 				delete *pat_it;
 			}
 			patterns_.clear();
+			last_entry_ = 0;
 		}
 
 		double Sequence::tickLength() const {
