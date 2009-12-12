@@ -28,17 +28,17 @@ std::int32_t inline rounded(Real x) {
 	
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline rounded<>(long double ld) {
-		return rint<std::int32_t>(::roundl(ld));
+		return lrint<std::int32_t>(::roundl(ld));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline rounded<>(double d) {
-		return rint<std::int32_t>(::round(d));
+		return lrint<std::int32_t>(::round(d));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	std::int32_t inline rounded<>(float f) {
-		return rint<std::int32_t>(::roundf(f));
+		return lrint<std::int32_t>(::roundf(f));
 	}
 
 #else
