@@ -20,7 +20,7 @@
 	#include <windows.h>
 #endif
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	using namespace psycle::plugin_interface;
 
 typedef CMachineInfo * (* GETINFO) ();

@@ -10,7 +10,7 @@
 
 #include <psycle/core/config.hpp>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 /// base class for an event driver, such as a MIDI input driver.
 ///\author Josep Ma Antolin

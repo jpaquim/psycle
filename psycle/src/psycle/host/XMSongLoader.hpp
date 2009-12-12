@@ -3,14 +3,14 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
-namespace psy {
+namespace psycle {
 	namespace core {
 		class Song;
 		class XMSampler;
 		class XMInstrument;
 	}
 }
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "SongStructs.hpp"
 #endif

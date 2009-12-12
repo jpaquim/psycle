@@ -20,7 +20,7 @@
 #ifndef SEQUENCERLINE_H
 #define SEQUENCERLINE_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	class SequenceLine;
 	class SequenceEntry; 
 	class SinglePattern;
@@ -46,10 +46,10 @@ namespace qpsycle {
 
 		// don't call setSequenceLine until you have added
 		// this SequencerLine to a scene
-		void setSequenceLine( psy::core::SequenceLine * line );
-		psy::core::SequenceLine *sequenceLine() const; 
+		void setSequenceLine( psycle::core::SequenceLine * line );
+		psycle::core::SequenceLine *sequenceLine() const; 
 
-		void addItem( psy::core::SinglePattern* pattern );
+		void addItem( psycle::core::SinglePattern* pattern );
 		void insertItem( SequencerItem *item );
 		void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
 
@@ -73,12 +73,12 @@ namespace qpsycle {
 
 	private:
 		// does not take ownership of entry.
-		void addEntry( psy::core::SequenceEntry* entry );
+		void addEntry( psycle::core::SequenceEntry* entry );
 
 		// does not delete entry.
-		void removeEntry(psy::core::SequenceEntry* entry);
+		void removeEntry(psycle::core::SequenceEntry* entry);
 
-		psy::core::SequenceLine *seqLine_;
+		psycle::core::SequenceLine *seqLine_;
 		std::list<SequencerItem*> items_;
 		typedef std::list<SequencerItem*>::iterator items_iterator;
 	};

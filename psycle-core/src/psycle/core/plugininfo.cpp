@@ -7,7 +7,7 @@
 #include <psycle/core/config.private.hpp>
 #include "plugininfo.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 PluginInfo::PluginInfo(){}
 PluginInfo::PluginInfo(MachineRole::type role, std::string name, std::string author, std::string desc, std::string version, std::string libname, std::string categ)

@@ -23,7 +23,7 @@
 #else
 	#include <windows.h>
 #endif
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class WaveFileOut : public AudioDriver {
 	public:

@@ -11,7 +11,7 @@
 #include <mutex>
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class GStreamerOut : public AudioDriver {
 	public:

@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <algorithm>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 std::string XMSampler::_psName = "Sampulse";
 const float XMSampler::SURROUND_THRESHOLD = 2.0f;

@@ -13,7 +13,7 @@
 #include <string>
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 // type Hosts::type
 // Allows to differentiate between machines of different hosts.

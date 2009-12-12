@@ -13,7 +13,7 @@
 #include <psycle/core/internal_machines.h>
 ///\todo: change for core's one when replacing OldPsyFile
 #include "FileIO.hpp"
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Player.hpp"
 #include "Plugin.hpp"
@@ -732,7 +732,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// customdraw happening before updatemastervalue, so invalid value get set.
 				// Added call to UpdateMasterValue() in PsybarsUpdate() in order to fix this.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				psy::core::Master* master = (psy::core::Master*)projects_.active_project()->song().machine(MASTER_INDEX);
+				psycle::core::Master* master = (psycle::core::Master*)projects_.active_project()->song().machine(MASTER_INDEX);
 				master->_outDry = cs->GetPos();
 #else
 				((Master*)_pSong->machine(MASTER_INDEX))->_outDry = cs->GetPos();
@@ -943,7 +943,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Song* song = &projects_.active_project()->song();
-			for (int b=0; b<psy::core::MAX_BUSES; b++) // Check Generators
+			for (int b=0; b<psycle::core::MAX_BUSES; b++) // Check Generators
 			{
 				if( song->machine(b))
 				{
@@ -1000,7 +1000,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			for (int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++) // Write Effects Names.
+			for (int b=psycle::core::MAX_BUSES; b<psycle::core::MAX_BUSES*2; b++) // Write Effects Names.
 			{
 				if(song->machine(b))
 				{
@@ -1064,7 +1064,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				if (song->machine(song->seqBus))
 				{
-					if ( song->seqBus < psy::core::MAX_BUSES ) // it's a Generator
+					if ( song->seqBus < psycle::core::MAX_BUSES ) // it's a Generator
 					{
 						if (song->machine(song->seqBus)->getMachineKey() == MachineKey::sampler()
 							|| song->machine(song->seqBus)->getMachineKey() == MachineKey::sampulse() )
@@ -1222,7 +1222,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Song* _pSong = &projects_.active_project()->song();
+			psycle::core::Song* _pSong = &projects_.active_project()->song();
 #endif
 
 

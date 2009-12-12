@@ -10,7 +10,7 @@
 
 #include "machine.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 		//////////////////////////////////////////////////////////////////////////
 		/// mixer machine.

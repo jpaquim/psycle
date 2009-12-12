@@ -10,7 +10,7 @@
 #include <psycle/core/player.h>
 #include <psycle/core/plugin.h>
 #include <psycle/core/vstplugin.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Song.hpp"
 #include "Player.hpp"

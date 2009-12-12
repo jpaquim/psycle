@@ -23,7 +23,7 @@
 
 #include "machinegui.hpp"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 		class Machine;
 	}}
 
@@ -42,7 +42,7 @@ namespace qpsycle {
 class GeneratorGui : public MachineGui {
 Q_OBJECT
 public:
-	GeneratorGui( int left, int top, psy::core::Machine *mac, MachineView *macView );
+	GeneratorGui( int left, int top, psycle::core::Machine *mac, MachineView *macView );
 	~GeneratorGui();
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 

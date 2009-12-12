@@ -9,7 +9,7 @@
 #include "instrument.h"
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 void InstPreview::Work(float * pInSamplesL, float * pInSamplesR, int numSamples) {
 	if(!m_pInstrument) return;

@@ -11,7 +11,7 @@
 #include "machine.h"
 #include "ladspa.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 		class PSYCLE__CORE__DECL LadspaParam {
 			public:

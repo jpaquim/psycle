@@ -13,7 +13,7 @@
 #include "patternsequence.h"
 #include "song.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 Sequencer::Sequencer()
 {

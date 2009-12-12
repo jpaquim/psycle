@@ -12,7 +12,7 @@
 #include "signalslib.h"
 #include "timesignature.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 	class PSYCLE__CORE__DECL Pattern {
 		public:

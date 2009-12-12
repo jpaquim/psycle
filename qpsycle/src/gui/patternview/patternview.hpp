@@ -25,7 +25,7 @@ class QVBoxLayout;
 #include <QCheckBox>
 
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 class Song;
 class SinglePattern;
 }}
@@ -53,7 +53,7 @@ class PatternView : public QWidget {
 Q_OBJECT
 
 public:
-	PatternView( psy::core::Song *song, InstrumentsModel *instrumentsModel );
+	PatternView( psycle::core::Song *song, InstrumentsModel *instrumentsModel );
 	~PatternView();
 
 	//FIXME: These three functions should be placed inside patternGrid, and have a signal call for view update
@@ -65,8 +65,8 @@ public:
 
 
 	// Getters.
-	psy::core::Song *song() { return song_; }
-	psy::core::SinglePattern *pattern() const { return pattern_; }
+	psycle::core::Song *song() { return song_; }
+	psycle::core::SinglePattern *pattern() const { return pattern_; }
 	PatternDraw* patDraw() { return patDraw_; }
 	PatternGrid* patternGrid(); 
 	InstrumentsModel* instrumentsModel();
@@ -81,7 +81,7 @@ public:
 
 	// Setters.
 	void setSelectedMachineIndex( int idx );
-	void setPattern( psy::core::SinglePattern *pattern );
+	void setPattern( psycle::core::SinglePattern *pattern );
 	void setNumberOfTracks( int numTracks );
 	void setPatternStep( int newStep );
 	void setOctave( int newOctave );
@@ -99,9 +99,9 @@ protected:
 private:
 	void createToolBar();
 
-	psy::core::Song *song_;
+	psycle::core::Song *song_;
 	InstrumentsModel *instrumentsModel_;
-	psy::core::SinglePattern* pattern_;
+	psycle::core::SinglePattern* pattern_;
 
 	// Settings.
 	int patternStep_;

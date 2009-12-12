@@ -20,7 +20,7 @@
 #ifndef SEQUENCERDRAW_H
 #define SEQUENCERDRAW_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	class Song;
 	class SequenceLine;
 	class SinglePattern;
@@ -50,7 +50,7 @@ class SequencerDraw : public QGraphicsView, public boost::signalslib::trackable
 public:
 	SequencerDraw( SequencerView *seqView );
 
-	void addPattern( psy::core::SinglePattern *pattern );
+	void addPattern( psycle::core::SinglePattern *pattern );
 
 	SequencerView *sequencerView() const { return seqView_; }
 	PlayLine *pLine() const { return pLine_; }
@@ -76,10 +76,10 @@ public slots:
 	void onPlayLineMoved( double newXPos );
 	void onItemMoved( SequencerItem* item, QPointF diff );
 	void onItemChangedLine( SequencerItem *item, int direction );
-	void onNewPatternCreated( psy::core::SinglePattern *newPattern );
+	void onNewPatternCreated( psycle::core::SinglePattern *newPattern );
 
 signals:
-	void newPatternCreated( psy::core::SinglePattern * );
+	void newPatternCreated( psycle::core::SinglePattern * );
 
 protected:
 	virtual void keyPressEvent( QKeyEvent *event );
@@ -102,12 +102,12 @@ private:
 	double newBeatPos_;
 	int lineHeight_;
 
-	SequencerLine* makeSequencerLine(psy::core::SequenceLine* seqLine);
+	SequencerLine* makeSequencerLine(psycle::core::SequenceLine* seqLine);
 
-	void onNewLineCreated(psy::core::SequenceLine* seqLine);
-	void onNewLineInserted(psy::core::SequenceLine* newSeqLine, psy::core::SequenceLine* position);
-	void onLineRemoved(psy::core::SequenceLine* seqLine);
-	void onLinesSwapped(psy::core::SequenceLine* a, psy::core::SequenceLine* b);
+	void onNewLineCreated(psycle::core::SequenceLine* seqLine);
+	void onNewLineInserted(psycle::core::SequenceLine* newSeqLine, psycle::core::SequenceLine* position);
+	void onLineRemoved(psycle::core::SequenceLine* seqLine);
+	void onLinesSwapped(psycle::core::SequenceLine* a, psycle::core::SequenceLine* b);
 
 	QList<SequencerItem*> copyBuffer_;
 };

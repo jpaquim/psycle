@@ -11,7 +11,7 @@
 #include <psycle/core/vstplugin.h>
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Player.hpp"
 #include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
@@ -259,10 +259,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// it is not allowing the player to work. Do the same in the one inside Player::Work()
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: we need that lock sincronization
-				psy::core::Song* song = &projects_->active_project()->song();
+				psycle::core::Song* song = &projects_->active_project()->song();
 				if (song->machine(MASTER_INDEX))
 				{
-					psy::core::Master* master = (psy::core::Master*) (song->machine(MASTER_INDEX));
+					psycle::core::Master* master = (psycle::core::Master*) (song->machine(MASTER_INDEX));
 					pParentMain->UpdateVumeters
 						(							
 							master->_lMax,
@@ -342,7 +342,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					Sequence& sequence = pattern_view()->song()->patternSequence();
-					psy::core::SequenceEntry* entry = sequence.last_worked_entry();
+					psycle::core::SequenceEntry* entry = sequence.last_worked_entry();
 					int pos = (entry) ?	(Player::singleton().playPos() - entry->tickPosition())
 						  		        * static_cast<int>(projects_->active_project()->beat_zoom())
 									  : 0;
@@ -427,7 +427,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::EnableSound()
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Player & player(psy::core::Player::singleton());
+			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.song(projects_->active_project()->song());
 			output_driver_ =  Global::pConfig->_pOutputDriver;
 			player.setDriver(*output_driver_);
@@ -472,7 +472,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnDestroy()
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Player & player(psy::core::Player::singleton());
+			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.driver().Enable(false);
 #else
 			if (Global::pConfig->_pOutputDriver->Initialized())
@@ -818,8 +818,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Player & player(psy::core::Player::singleton());			
-			psy::core::SequenceEntry* entry = pattern_view()->main()->m_wndSeq.selected_entry();			
+			psycle::core::Player & player(psycle::core::Player::singleton());			
+			psycle::core::SequenceEntry* entry = pattern_view()->main()->m_wndSeq.selected_entry();			
 			player.start(entry->tickPosition());
 #else			
 			Global::pPlayer->Start(pattern_view()->editPosition,0);
@@ -834,7 +834,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pattern_view()->bScrollDetatch=false;
 			}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Player & player(psy::core::Player::singleton());
+			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.start(0);		
 #else			
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
@@ -921,7 +921,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnBarstop()
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Player & player(psy::core::Player::singleton());
+			psycle::core::Player & player(psycle::core::Player::singleton());
 			PlayerTimeInfo tinfo = player.timeInfo();
 			bool pl = player.playing();
 			bool blk = player.loopEnabled()  && 

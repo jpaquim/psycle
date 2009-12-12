@@ -2,12 +2,12 @@
 #include "Psycle.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/xminstrument.h>
-namespace psy {
+namespace psycle {
 	namespace core {
 		class XMSampler;
 	}
 }
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "XMInstrument.hpp"
 #endif

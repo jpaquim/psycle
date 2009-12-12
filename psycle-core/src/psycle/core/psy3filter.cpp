@@ -16,7 +16,7 @@
 #include <sstream>
 #include <iostream>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 	using namespace psycle::helpers;
 

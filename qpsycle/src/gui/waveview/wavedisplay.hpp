@@ -23,7 +23,7 @@
 #include <QGraphicsView>
 #include <QGraphicsRectItem>
 
-namespace psy {
+namespace psycle {
 	namespace core {
 		class Instrument;
 	}
@@ -86,7 +86,7 @@ public slots:
 private:
 	int zoomLevel;
 	InstrumentsModel *instrumentsModel_;
-	psy::core::Instrument *inst_;
+	psycle::core::Instrument *inst_;
 	WaveDisplay *disp_;
 
 	QGraphicsTextItem *nodata_;

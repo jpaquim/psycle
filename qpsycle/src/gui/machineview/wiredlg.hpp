@@ -20,7 +20,7 @@
 #ifndef WIREDLG_H
 #define WIREDLG_H
 
-namespace psy {
+namespace psycle {
 	namespace core {
 		class Machine;
 	}
@@ -51,13 +51,13 @@ signals:
 private:
 	WireGui* m_wireGui;
 
-	//<dw> m_wireId should be a psy::core::Wire::id_type, but i'd have to
+	//<dw> m_wireId should be a psycle::core::Wire::id_type, but i'd have to
 	//#include machine.h here to use it.  Wire::id_type is actually listed
 	//as legacy..  looking at machine.h, it seems like we should have a
 	//pointer to a Wire object in WireGui.  is this ready to implement yet,
 	//or are changes needed in Machine first?
 	int m_wireId; 
-	psy::core::Machine *m_sourceMac, *m_destMac;
+	psycle::core::Machine *m_sourceMac, *m_destMac;
 
 	float m_volume;
 

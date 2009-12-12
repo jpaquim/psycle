@@ -11,11 +11,11 @@
 #include <string>
 #include <map>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	class AudioDriver;
 }}
 
-using psy::core::AudioDriver;
+using psycle::core::AudioDriver;
 
 /// configuration for the user interface
 class Configuration {

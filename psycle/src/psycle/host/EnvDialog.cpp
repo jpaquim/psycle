@@ -3,7 +3,7 @@
 #include "EnvDialog.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Song.hpp"
 #endif

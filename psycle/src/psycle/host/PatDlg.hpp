@@ -5,7 +5,7 @@
 
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy { 
+namespace psycle { 
 			namespace core {
 				class Pattern;
 			}
@@ -20,7 +20,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			CPatDlg(CWnd* pParent, psy::core::Pattern* pattern);
+			CPatDlg(CWnd* pParent, psycle::core::Pattern* pattern);
 #else
 			CPatDlg(CWnd* pParent);
 #endif
@@ -46,7 +46,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		protected:
 			BOOL bInit;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::Pattern* pattern_;
+			psycle::core::Pattern* pattern_;
 #endif
 			// Generated message map functions
 			//{{AFX_MSG(CPatDlg)

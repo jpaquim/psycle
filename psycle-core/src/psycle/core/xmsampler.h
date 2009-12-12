@@ -15,7 +15,7 @@
 
 #include <mutex>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class PSYCLE__CORE__DECL XMSampler : public Machine {
 public:

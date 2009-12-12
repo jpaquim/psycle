@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\interface psy::core::Song
+///\interface psycle::core::Song
 
 #ifndef PSYCLE__CORE__SONG__INCLUDED
 #define PSYCLE__CORE__SONG__INCLUDED
@@ -18,7 +18,7 @@
 
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 // forward declarations.
 class PluginFinderKey;
@@ -374,7 +374,7 @@ class PSYCLE__CORE__DECL Song : public UISong {
 				SequenceLine* line = patternSequence().createNewLine();
 				Pattern* pattern= new Pattern();
 				pattern->timeSignatures().clear();
-				pattern->timeSignatures().push_back(psy::core::TimeSignature(16.0));
+				pattern->timeSignatures().push_back(psycle::core::TimeSignature(16.0));
 				pattern->setID(0);
 				pattern->setName("Untitled");
 				patternSequence().Add(pattern);

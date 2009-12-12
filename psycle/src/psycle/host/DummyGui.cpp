@@ -1,12 +1,12 @@
 #include "DummyGui.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
+namespace psycle {
 	namespace core {
 		class Machine;
 	}
 }
-using namespace psy::core;
+using namespace psycle::core;
 #endif
 
 namespace psycle {

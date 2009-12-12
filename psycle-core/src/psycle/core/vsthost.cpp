@@ -38,7 +38,7 @@
 #elif defined _WIN32
 	#include <windows.h>
 #endif
-namespace psy {namespace core { namespace vst {
+namespace psycle {namespace core { namespace vst {
 
 host::host(MachineCallbacks*calls)
 :MachineHost(calls){

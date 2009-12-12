@@ -6,7 +6,7 @@
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/core/internal_machines.h>
 #include <psycle/helpers/dsp.hpp>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "AudioDriver.hpp"
 #include "internal_machines.hpp"

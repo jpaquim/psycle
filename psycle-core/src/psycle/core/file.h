@@ -14,7 +14,7 @@
 #include <vector>
 #include <string>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 	/// misc file operations
 	class PSYCLE__CORE__DECL File {

@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\interface psy::core::Machine
+///\interface psycle::core::Machine
 
 #ifndef PSYCLE__CORE__MACHINE__INCLUDED
 #define PSYCLE__CORE__MACHINE__INCLUDED
@@ -23,7 +23,7 @@
 #include <stdexcept>
 #include <cstdint>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 using namespace psycle::helpers;
 class RiffFile;

@@ -21,7 +21,7 @@
 #include <psycle/core/plugincatcher.h>
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/player.h>
-using namespace psy::core;
+using namespace psycle::core;
 #endif
 
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK

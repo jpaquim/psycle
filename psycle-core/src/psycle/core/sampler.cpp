@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psy::core::Sampler.
+///\implementation psycle::core::Sampler.
 
 #include <psycle/core/config.private.hpp>
 #include "sampler.h"
@@ -12,7 +12,7 @@
 #include "fileio.h"
 #include "song.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 using namespace psycle::helpers;
 

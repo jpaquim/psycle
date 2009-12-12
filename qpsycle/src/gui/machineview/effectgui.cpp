@@ -35,7 +35,7 @@
 
 namespace qpsycle {
 
-EffectGui::EffectGui(int left, int top, psy::core::Machine *mac, MachineView *macView)
+EffectGui::EffectGui(int left, int top, psycle::core::Machine *mac, MachineView *macView)
 	: MachineGui(left, top, mac, macView)
 	, isPanning(false)
 {
@@ -188,7 +188,7 @@ void EffectGui::showMacTweakDlg()
 {
 	if ( !m_macTweakDlg )
 	{
-		if ( m_mac->getMachineKey() == psy::core::MachineKey::mixer())
+		if ( m_mac->getMachineKey() == psycle::core::MachineKey::mixer())
 			m_macTweakDlg = new MixerTweakDlg( this, m_macView);
 		else
 			m_macTweakDlg = new MachineTweakDlg( this, m_macView);
@@ -199,7 +199,7 @@ void EffectGui::showMacTweakDlg()
 	{
 		delete m_macTweakDlg;
 
-		if ( m_mac->getMachineKey() == psy::core::MachineKey::mixer())
+		if ( m_mac->getMachineKey() == psycle::core::MachineKey::mixer())
 			m_macTweakDlg = new MixerTweakDlg( this, m_macView );
 		else
 			m_macTweakDlg = new MachineTweakDlg( this, m_macView);

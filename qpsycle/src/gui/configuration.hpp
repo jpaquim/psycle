@@ -5,13 +5,13 @@
 #include <string>
 #include <map>
 /// configuration for the user interface
-namespace psy {
+namespace psycle {
 	namespace core {
 		class AudioDriver;
 	}
 }
 
-using psy::core::AudioDriver;
+using psycle::core::AudioDriver;
 
 namespace qpsycle {
 

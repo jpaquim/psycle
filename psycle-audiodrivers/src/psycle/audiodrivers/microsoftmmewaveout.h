@@ -27,7 +27,7 @@
 #undef max
 #include <cstdint>
 #include <iostream>
-namespace psy { namespace core {                                      
+namespace psycle { namespace core {                                      
 
 ///\todo work in progress
 /// status working, restarting etc not working

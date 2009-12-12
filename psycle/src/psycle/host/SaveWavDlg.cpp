@@ -9,7 +9,7 @@
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/core/machine.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Song.hpp"
 #include "Player.hpp"

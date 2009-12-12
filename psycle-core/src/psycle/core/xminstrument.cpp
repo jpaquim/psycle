@@ -12,7 +12,7 @@
 #include <cassert>
 #include <cstring>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 	using namespace psycle::helpers;
 //////////////////////////////////////////////////////////////////////////

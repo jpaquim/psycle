@@ -2,7 +2,7 @@
 
 #include "Psycle.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
+namespace psycle {
 	namespace core {
 		class SequenceEntry;
 		class Pattern;
@@ -25,7 +25,7 @@ namespace psycle {
 			/// To be used when changing the selected entry from outside of SequencerView.
 			/// Example: from playback, or via hotkey.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE	
-			void SetEntry(psy::core::SequenceEntry* entry);
+			void SetEntry(psycle::core::SequenceEntry* entry);
 #else
 			void SetSelectedEntry(int entry);
 			int selecteEntry();
@@ -95,7 +95,7 @@ namespace psycle {
 
 			SequenceEntry* selected_entry_;
 			std::map<int,SequenceEntry*> pos_map_; // Relation between the list position and the patterns
-			std::vector<psy::core::Pattern*> copy_list_; // list to store copy/cut/paste entries
+			std::vector<psycle::core::Pattern*> copy_list_; // list to store copy/cut/paste entries
 #else
 			int selected_entry_;
 			std::map<int,int> pos_map_; // Relation between the list position and the patterns

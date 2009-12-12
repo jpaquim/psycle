@@ -11,7 +11,7 @@
 #include "machine.h"
 #include <psycle/plugin_interface.hpp>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 	class PluginFxCallback : public psycle::plugin_interface::CFxCallback {
 	public:

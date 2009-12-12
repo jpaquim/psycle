@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psy::core::Player.
+///\implementation psycle::core::Player.
 
 #include <psycle/core/config.private.hpp>
 #include "player.h"
@@ -23,7 +23,7 @@
 #include <boost/bind.hpp>
 #include <iostream> // only for debug output
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 using namespace psycle::helpers;
 namespace loggers = universalis::os::loggers;

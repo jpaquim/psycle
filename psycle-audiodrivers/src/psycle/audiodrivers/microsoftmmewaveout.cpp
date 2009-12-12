@@ -18,7 +18,7 @@
 ******************************************************************************/
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "microsoftmmewaveout.h"
-namespace psy { namespace core {
+namespace psycle { namespace core {
 		int const SHORT_MIN = -32768;
 		int const SHORT_MAX =  32767;
 

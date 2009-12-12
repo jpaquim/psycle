@@ -4,7 +4,7 @@
 #include "Psycle.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machinekey.hpp>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Machine.hpp"
 #endif

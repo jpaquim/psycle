@@ -10,7 +10,7 @@
 
 #include <psycle/core/config.hpp>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 /// class for play time information
 class PlayerTimeInfo {

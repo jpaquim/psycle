@@ -21,7 +21,7 @@
 #ifndef MACHINEGUI_H
 #define MACHINEGUI_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 class Machine;
 }}
 
@@ -41,7 +41,7 @@ class MachineTweakDlg;
 class MachineGui : public QObject, public QGraphicsRectItem {
 Q_OBJECT
 public:
-	MachineGui(int left, int top, psy::core::Machine *mac, MachineView *macView);
+	MachineGui(int left, int top, psycle::core::Machine *mac, MachineView *macView);
 	~MachineGui();
 
 	void addWireGui(WireGui *wireGui);
@@ -52,7 +52,7 @@ public:
 	enum { Type = UserType + 1 };
 	int type() const { return Type; }
 
-	psy::core::Machine* mac() const;
+	psycle::core::Machine* mac() const;
 	int noteFromCommand( int command ) const;
 
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
@@ -75,7 +75,7 @@ protected:
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 
 	MachineView *m_macView;
-	psy::core::Machine *m_mac;
+	psycle::core::Machine *m_mac;
 
 	QAction *showMacTweakDlgAct_;
 	QAction *deleteMachineAct_;

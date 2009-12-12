@@ -60,11 +60,11 @@ namespace qpsycle {
 		scene_->addItem( seqArea_ );
 		seqArea_->setPos( 0, 0 );
 
-		psy::core::PatternSequence & patternSequence = sequencerView()->song()->patternSequence();
+		psycle::core::PatternSequence & patternSequence = sequencerView()->song()->patternSequence();
 
-		std::vector<psy::core::SequenceLine*>::iterator it = patternSequence.begin();
+		std::vector<psycle::core::SequenceLine*>::iterator it = patternSequence.begin();
 		for ( ; it < patternSequence.end(); it++) {
-			psy::core::SequenceLine* seqLine = *it;
+			psycle::core::SequenceLine* seqLine = *it;
 			onNewLineCreated(seqLine);
 		}
 
@@ -99,7 +99,7 @@ namespace qpsycle {
 	}
 
 
-	void SequencerDraw::addPattern( psy::core::SinglePattern *pattern )
+	void SequencerDraw::addPattern( psycle::core::SinglePattern *pattern )
 	{
 		if ( selectedLine() ) {
 			selectedLine()->addItem( pattern );
@@ -146,7 +146,7 @@ namespace qpsycle {
 		selectedLine()->scale(1.0f, 2.0f);
 	}
 
-	SequencerLine* SequencerDraw::makeSequencerLine( psy::core::SequenceLine* seqLine ) {
+	SequencerLine* SequencerDraw::makeSequencerLine( psycle::core::SequenceLine* seqLine ) {
 		SequencerLine* line = new SequencerLine( this );
 		scene()->addItem(line);
 		line->setSequenceLine(seqLine);
@@ -170,16 +170,16 @@ namespace qpsycle {
 
 	void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
 	{
-		psy::core::SequenceEntry *entry = item->sequenceEntry();
-		if ( psy::core::Player::singleton().loopSequenceEntry() == entry ) {
-			psy::core::Player::singleton().setLoopSequenceEntry( 0 );
+		psycle::core::SequenceEntry *entry = item->sequenceEntry();
+		if ( psycle::core::Player::singleton().loopSequenceEntry() == entry ) {
+			psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
 		}
 		entry->track()->removeEntry(entry); // Remove from the core song's pattern sequence.
 		// Note: Removing the entry from the core song triggers a (boost) signal in the core,
 		// which, when caught by the host, removes the SequencerItem's GUI from the host.
 	}
 
-	void SequencerDraw::onNewLineCreated(psy::core::SequenceLine* seqLine)
+	void SequencerDraw::onNewLineCreated(psycle::core::SequenceLine* seqLine)
 	{
 		SequencerLine* line = makeSequencerLine(seqLine);
 		line->setPos( 0, lines_.size()*lineHeight_ );
@@ -187,7 +187,7 @@ namespace qpsycle {
 		setSelectedLine( line );
 	}
 
-	void SequencerDraw::onNewLineInserted(psy::core::SequenceLine* seqLine, psy::core::SequenceLine* position)
+	void SequencerDraw::onNewLineInserted(psycle::core::SequenceLine* seqLine, psycle::core::SequenceLine* position)
 	{
 		qDebug("onNewLineInserted(%p,%p)\n",seqLine,position);
 		SequencerLine* line = makeSequencerLine(seqLine);
@@ -209,7 +209,7 @@ namespace qpsycle {
 		setSelectedLine( line );
 	}
 
-	void SequencerDraw::onLineRemoved(psy::core::SequenceLine* seqLine)
+	void SequencerDraw::onLineRemoved(psycle::core::SequenceLine* seqLine)
 	{
 		if (selectedLine() && selectedLine()->sequenceLine() == seqLine)
 			setSelectedLine( NULL );
@@ -227,12 +227,12 @@ namespace qpsycle {
 		}
 	}
 
-	void SequencerDraw::onLinesSwapped(psy::core::SequenceLine* a, psy::core::SequenceLine* b)
+	void SequencerDraw::onLinesSwapped(psycle::core::SequenceLine* a, psycle::core::SequenceLine* b)
 	{
 		lines_iterator ita = lines_.end();
 		lines_iterator itb = lines_.end();
 		for(lines_iterator i=lines_.begin();i != lines_.end();i++) {
-			psy::core::SequenceLine* sl = (*i)->sequenceLine();
+			psycle::core::SequenceLine* sl = (*i)->sequenceLine();
 			if (sl == a)
 				ita = i;
 			if (sl == b)
@@ -249,8 +249,8 @@ namespace qpsycle {
 
 	void SequencerDraw::onPlayLineMoved( double newXPos )
 	{
-		psy::core::Player::singleton().stop();
-		psy::core::Player::singleton().setPlayPos( newXPos / beatPxLength_ );
+		psycle::core::Player::singleton().stop();
+		psycle::core::Player::singleton().setPlayPos( newXPos / beatPxLength_ );
 	}
 
 	/**
@@ -339,7 +339,7 @@ namespace qpsycle {
 	}
 
 
-	void SequencerDraw::onNewPatternCreated( psy::core::SinglePattern *newPattern )
+	void SequencerDraw::onNewPatternCreated( psycle::core::SinglePattern *newPattern )
 	{
 		emit newPatternCreated( newPattern );
 	}
@@ -408,7 +408,7 @@ namespace qpsycle {
 			foreach ( QGraphicsItem *child, children )
 			{
 				SequencerItem *seqItem = qgraphicsitem_cast<SequencerItem*>( child );
-				psy::core::SequenceEntry *entry = seqItem->sequenceEntry();
+				psycle::core::SequenceEntry *entry = seqItem->sequenceEntry();
 				seqItem->setPos( entry->tickPosition() * beatPxLength_, 0 );
 			}
 		}

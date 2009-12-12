@@ -302,12 +302,12 @@ void MachineTweakDlg::randomiseParameters()
 
 void MachineTweakDlg::resetParameters()
 {
-	if ( pMachine_->getMachineKey().host() == psy::core::Hosts::NATIVE)
+	if ( pMachine_->getMachineKey().host() == psycle::core::Hosts::NATIVE)
 	{
 		int numpars = pMachine_->GetNumParams();
 		for (int c=0; c<numpars; c++)
 		{
-			int dv = ((psy::core::Plugin*)pMachine_)->GetInfo().Parameters[c]->DefValue;
+			int dv = ((psycle::core::Plugin*)pMachine_)->GetInfo().Parameters[c]->DefValue;
 			pMachine_->SetParameter(c,dv);
 		}
 	}
@@ -326,11 +326,11 @@ void MachineTweakDlg::showPresetsDialog()
 
 void MachineTweakDlg::showAboutDialog()
 {
-	if ( pMachine_->getMachineKey().host() == psy::core::Hosts::NATIVE )
+	if ( pMachine_->getMachineKey().host() == psycle::core::Hosts::NATIVE )
 	{
 		QMessageBox::information( this,
-			"About " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Name),
-			"Authors: " + QString::fromStdString(((psy::core::Plugin*)pMachine_)->GetInfo().Author) );
+			"About " + QString::fromStdString(((psycle::core::Plugin*)pMachine_)->GetInfo().Name),
+			"Authors: " + QString::fromStdString(((psycle::core::Plugin*)pMachine_)->GetInfo().Author) );
 	}
 }
 
@@ -762,7 +762,7 @@ bool PresetsDialog::loadPresets()
 		return false; 
 	}
 
-	psy::core::BinRead binIn( prsIn );
+	psycle::core::BinRead binIn( prsIn );
 
 	int numpresets = binIn.readInt4LE();
 	int filenumpars = binIn.readInt4LE();
@@ -777,8 +777,8 @@ bool PresetsDialog::loadPresets()
 			// new preset format version 1
 			// new preset format version 1
 
-			int numParameters = ((psy::core::Plugin*) m_macGui->mac())->GetInfo().numParameters;
-			int sizeDataStruct = ((psy::core::Plugin *) m_macGui->mac())->proxy().GetDataSize();
+			int numParameters = ((psycle::core::Plugin*) m_macGui->mac())->GetInfo().numParameters;
+			int sizeDataStruct = ((psycle::core::Plugin *) m_macGui->mac())->proxy().GetDataSize();
 
 			int numpresets = binIn.readInt4LE();
 			filenumpars = binIn.readInt4LE();
@@ -790,7 +790,7 @@ bool PresetsDialog::loadPresets()
 
 			while ( !prsIn.eof() ) 
 			{
-				psy::core::Preset newPreset(numParameters, sizeDataStruct);
+				psycle::core::Preset newPreset(numParameters, sizeDataStruct);
 				if (newPreset.read( binIn )) 
 				{
 					QListWidgetItem *prsItm = new QListWidgetItem( QString::fromStdString( newPreset.name() ) );
@@ -808,7 +808,7 @@ bool PresetsDialog::loadPresets()
 void PresetsDialog::usePreset()
 {
 	if ( QListWidgetItem *selItem = prsList->currentItem() ) {
-		std::map<QListWidgetItem*,psy::core::Preset>::iterator itr;
+		std::map<QListWidgetItem*,psycle::core::Preset>::iterator itr;
 		if ( ( itr = presetMap.find( selItem ) ) != presetMap.end() ) {
 			if ( m_macGui->mac() ) itr->second.tweakMachine( *m_macGui->mac() );
 		}

@@ -13,7 +13,7 @@
 #include <thread>
 #include <psycle/helpers/math/clip.hpp>
 #include <psycle/helpers/math/rint.hpp>
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 /*******************************************************************************************/
 // AudioDriverInfo

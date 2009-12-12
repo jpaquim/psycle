@@ -9,7 +9,7 @@
 
 #pragma pack(1)
 
-namespace psycle{ namespace host{
+namespace psycle { namespace host{
 
 	static const char XM_HEADER [] = "Extended Module: ";
 

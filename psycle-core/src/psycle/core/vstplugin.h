@@ -47,7 +47,7 @@
 
 using namespace seib::vst;
 
-namespace psy { namespace core { namespace vst {
+namespace psycle { namespace core { namespace vst {
 
 // Maximum number of Audio Input/outputs
 // \todo : this shouldn't be a static value. Host should ask the plugin and the array get created dynamically.

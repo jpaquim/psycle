@@ -11,7 +11,7 @@
 #include "machinekey.hpp"
 #include "machine.h"
 
-namespace psy { namespace core { 
+namespace psycle { namespace core { 
 
 class PluginFinder;
 class MachineHost;

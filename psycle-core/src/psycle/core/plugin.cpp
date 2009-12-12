@@ -21,7 +21,7 @@
 // *** ms-windows note ***
 // plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	using namespace psycle::plugin_interface;
 /**************************************************************************/
 // PluginFxCallback

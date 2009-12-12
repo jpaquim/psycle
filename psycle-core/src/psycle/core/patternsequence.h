@@ -10,7 +10,7 @@
 
 #include "singlepattern.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 		const int PatternEnd = -1;
 

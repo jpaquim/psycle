@@ -10,7 +10,7 @@
 
 #include "psy3filter.h"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 /**
 @author  Stefan Nattkemper

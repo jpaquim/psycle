@@ -7,14 +7,14 @@
 #include <psycle/core/machine.h>
 ///todo: remove this include when removing the _pstrack() and related functions
 #include <psycle/core/song.h>
-namespace psy {
+namespace psycle {
 	namespace core {
 		class Pattern;
 		//class Song;
 	}
 }
 
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Machine.hpp"
 #include "Song.hpp"

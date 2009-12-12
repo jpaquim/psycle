@@ -10,7 +10,7 @@
 
 #include "machinehost.hpp"
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 // type InternalMacs::type
 // Allows to differentiate between internal machines.

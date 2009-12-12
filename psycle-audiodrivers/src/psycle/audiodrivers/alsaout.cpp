@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 AlsaOut::AlsaOut()
 :

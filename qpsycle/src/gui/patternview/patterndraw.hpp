@@ -20,7 +20,7 @@
 	#ifndef PATTERNDRAW_H
 	#define PATTERNDRAW_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 class Song;
 class SinglePattern;
 }}
@@ -123,7 +123,7 @@ private:
 	LineNumberColumn *lineNumCol_;
 	TrackHeader *trackHeader_;
 
-	psy::core::SinglePattern *pattern_;
+	psycle::core::SinglePattern *pattern_;
 };
 
 } // namespace qpsycle

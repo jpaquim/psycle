@@ -4,7 +4,7 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/xminstrument.h>
 #include <psycle/core/xmsampler.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"

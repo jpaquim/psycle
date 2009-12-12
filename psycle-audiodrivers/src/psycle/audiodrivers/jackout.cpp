@@ -19,7 +19,7 @@
 #if defined PSYCLE__JACK_AVAILABLE
 #include "jackout.h"
 #include <iostream>
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 JackOut::JackOut()
 :

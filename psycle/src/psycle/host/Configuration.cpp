@@ -5,14 +5,13 @@
 #include "Registry.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/patternEvent.h>
-#include "DSoundConfig.hpp"
-#include <psycle/audiodrivers/microsoftmmewaveout.h>
-#include <psycle/audiodrivers/microsoftdirectsoundout.h>
-using namespace psy::core;
+	#include <psycle/core/song.h>
+	#include <psycle/core/patternEvent.h>
+	#include "DSoundConfig.hpp"
+	#include <psycle/audiodrivers/microsoftmmewaveout.h>
+	#include <psycle/audiodrivers/microsoftdirectsoundout.h>
 #else
-#include "Song.hpp"
+	#include "Song.hpp"
 #endif
 
 #if !defined WINAMP_PLUGIN
@@ -23,10 +22,10 @@ using namespace psy::core;
 	#include "NewMachine.hpp"
 #endif // !defined WINAMP_PLUGIN
 
-namespace psycle
-{
-	namespace host
-	{
+namespace psycle { namespace host {
+
+		using namespace core;
+		
 		Configuration::Configuration()
 		{
 			_initialized = false;

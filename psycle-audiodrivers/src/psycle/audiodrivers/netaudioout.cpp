@@ -24,7 +24,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cstdint>
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 NetAudioOut::NetAudioOut()
 :

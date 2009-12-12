@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\interface psy::core::Player.
+///\interface psycle::core::Player.
 
 #ifndef PSYCLE__CORE__PLAYER__INCLUDED
 #define PSYCLE__CORE__PLAYER__INCLUDED
@@ -27,7 +27,7 @@
 
 
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class AudioDriver; ///\todo doesn't belong in psycore
 using namespace psycle::helpers;

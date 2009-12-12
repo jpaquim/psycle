@@ -20,7 +20,7 @@
 	#include <windows.h>
 #endif
 
-namespace psy {
+namespace psycle {
 	namespace core {
 		using namespace psycle::helpers;
 	

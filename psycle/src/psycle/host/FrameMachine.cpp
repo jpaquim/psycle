@@ -7,7 +7,7 @@
 #include <psycle/core/machine.h>
 #include <psycle/core/plugin.h>
 #include <psycle/core/song.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Machine.hpp"
 #include "Plugin.hpp"

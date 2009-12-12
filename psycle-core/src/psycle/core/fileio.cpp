@@ -4,7 +4,7 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psy::core::RiffFile
+///\implementation psycle::core::RiffFile
 
 #include <psycle/core/config.private.hpp>
 #include "fileio.h"
@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <cstring>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 RiffFile::RiffFile() {}
 

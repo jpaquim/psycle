@@ -18,7 +18,7 @@
 	#include <windows.h>
 #endif
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 LadspaHost::LadspaHost(MachineCallbacks*calls)
 :MachineHost(calls) {}

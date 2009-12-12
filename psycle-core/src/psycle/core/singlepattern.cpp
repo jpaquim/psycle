@@ -11,7 +11,7 @@
 
 #include <sstream>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 
 Pattern::Pattern() 

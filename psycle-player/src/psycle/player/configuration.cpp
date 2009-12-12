@@ -59,7 +59,7 @@
 namespace loggers = universalis::os::loggers;
 
 Configuration::Configuration() {
-	using namespace psy::core;
+	using namespace psycle::core;
 	
 	add_driver(*(base_driver_ = new AudioDriver));
 
@@ -109,7 +109,7 @@ Configuration::Configuration() {
 }
 
 Configuration::~Configuration() {
-	for(std::map<std::string, psy::core::AudioDriver*>::iterator i(driver_map_.begin()), e(driver_map_.end()); i != e; ++i)
+	for(std::map<std::string, psycle::core::AudioDriver*>::iterator i(driver_map_.begin()), e(driver_map_.end()); i != e; ++i)
 		delete i->second;
 }
 
@@ -144,10 +144,10 @@ void Configuration::set_driver_by_name(std::string const & driver_name) {
 }
 
 void Configuration::loadConfig() {
-	std::string path = psy::core::File::replaceTilde("~" + psy::core::File::slash() + ".xpsycle.xml");
+	std::string path = psycle::core::File::replaceTilde("~" + psycle::core::File::slash() + ".xpsycle.xml");
 	if(path.length()!=0) {
 		try {
-			loadConfig( psy::core::File::replaceTilde( "~" + psy::core::File::slash() + ".xpsycle.xml") );
+			loadConfig( psycle::core::File::replaceTilde( "~" + psycle::core::File::slash() + ".xpsycle.xml") );
 		} catch( std::exception const & e ) {
 			if(loggers::exception()()) {
 				std::ostringstream s;
@@ -246,8 +246,8 @@ void Configuration::loadConfig(std::string const & path) {
 								std::string device(device_attribute->get_value());
 								std::map<std::string, AudioDriver*>::iterator i(driver_map_.find("alsa"));
 								if(i != driver_map_.end()) {
-									psy::core::AudioDriver & audiodriver(*i->second);
-									psy::core::AudioDriverSettings settings(audiodriver.playbackSettings()); ///\todo why do we do a copy?
+									psycle::core::AudioDriver & audiodriver(*i->second);
+									psycle::core::AudioDriverSettings settings(audiodriver.playbackSettings()); ///\todo why do we do a copy?
 									settings.setDeviceName(device);
 									audiodriver.setPlaybackSettings(settings); ///\todo why do we copy?
 								}

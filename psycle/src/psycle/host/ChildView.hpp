@@ -4,13 +4,13 @@
 #include "Psycle.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
+namespace psycle {
 	namespace core {
 		class AudioDriver;
 		class Song;
 	}
 }
-using namespace psy::core;
+using namespace psycle::core;
 #else
 namespace psycle {
 	namespace host {
@@ -175,7 +175,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int FLATSIZES[256];
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::AudioDriver* output_driver_;
+			psycle::core::AudioDriver* output_driver_;
 			int last_pos_;
 #endif
 

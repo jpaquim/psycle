@@ -4,13 +4,13 @@
 #include "MachineGui.hpp" //For SMachineCoords
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psy {
+namespace psycle {
 	namespace core {
 		class Song;
 		class Machine;
 	}
 }
-using namespace psy::core;
+using namespace psycle::core;
 #endif
 #include "Canvas.hpp"
 

@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class PsyFilterBase;
 class CoreSong;

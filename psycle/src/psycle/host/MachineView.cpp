@@ -8,7 +8,7 @@
 #include <psycle/core/plugininfo.h>
 #include <psycle/core/player.h>
 #include <psycle/core/file.h>
-using namespace psy::core;
+using namespace psycle::core;
 #else
 #include "Song.hpp"
 #include "Machine.hpp"
@@ -711,16 +711,16 @@ namespace psycle {
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
-			psy::core::Machine* mac = (song()->machine(idx));
+			psycle::core::Machine* mac = (song()->machine(idx));
 			if (mac) {
 					for (int w=0; w<MAX_CONNECTIONS; w++) {
 						if (mac->_connection[w]) {
-							psy::core::Machine* pout = song()->machine(mac->_outputMachines[w]);
+							psycle::core::Machine* pout = song()->machine(mac->_outputMachines[w]);
 							if (pout)
 							{
-								std::map<psy::core::Machine*, MachineGui*>::iterator fromIt = 
+								std::map<psycle::core::Machine*, MachineGui*>::iterator fromIt = 
 									gui_map_.find(mac);
-								std::map<psy::core::Machine*, MachineGui*>::iterator toIt = 
+								std::map<psycle::core::Machine*, MachineGui*>::iterator toIt = 
 									gui_map_.find(pout);
 								WireGui* wireUi = new WireGui(this);
 								wireUi->set_wires(w, pout->FindInputWire(mac->id()));
@@ -902,9 +902,9 @@ namespace psycle {
 		bool MachineView::RewireSrc(Machine* tmac, Machine* dmac)
 		{
 			///\todo: hardcoded. This needs to be extended with multi-io.
-			psy::core::InPort::id_type portin=psy::core::InPort::id_type(0);
-			psy::core::OutPort::id_type portout=psy::core::OutPort::id_type(0);
-			if(!song()->ChangeWireSourceMac(*dmac, *tmac, portout, psy::core::Wire::id_type(rewire_line_->wiredest()), portin))	{
+			psycle::core::InPort::id_type portin=psycle::core::InPort::id_type(0);
+			psycle::core::OutPort::id_type portout=psycle::core::OutPort::id_type(0);
+			if(!song()->ChangeWireSourceMac(*dmac, *tmac, portout, psycle::core::Wire::id_type(rewire_line_->wiredest()), portin))	{
 				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 				return false;
 			}
@@ -929,14 +929,14 @@ namespace psycle {
 		bool MachineView::RewireDest(Machine* tmac, Machine* dmac)
 		{
 			///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
-			psy::core::InPort::id_type portin=psy::core::InPort::id_type(0);
-			psy::core::OutPort::id_type portout=psy::core::OutPort::id_type(0);
+			psycle::core::InPort::id_type portin=psycle::core::InPort::id_type(0);
+			psycle::core::OutPort::id_type portout=psycle::core::OutPort::id_type(0);
 			if ( dmac->GetInPorts() > 1 ) {
 				if (child_view()->MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES ) {
-					portin=psy::core::InPort::id_type(1);
+					portin=psycle::core::InPort::id_type(1);
 				}
 			}
-			if(!song()->ChangeWireDestMac(*tmac, *dmac, portout, psy::core::Wire::id_type(rewire_line_->wiresrc()), portin))	{
+			if(!song()->ChangeWireDestMac(*tmac, *dmac, portout, psycle::core::Wire::id_type(rewire_line_->wiresrc()), portin))	{
 				child_view()->MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 				return false;
 			}

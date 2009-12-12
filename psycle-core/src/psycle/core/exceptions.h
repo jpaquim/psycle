@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace psy {
+namespace psycle {
 	namespace core {
 		/// Base class for exceptions thrown from plugins.
 		class exception : public std::runtime_error
@@ -119,11 +119,11 @@ namespace psy {
 				///
 				/// Note that the crashable argument can be of any type as long as it has a member function void crashed(std::exception const &) throw();
 				#define PSYCLE__HOST__CATCH_ALL(crashable) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psy::core::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::core::exceptions::function_errors::detail::make_rethrow_functor(crashable))
 
 				///\see PSYCLE__HOST__CATCH_ALL
 				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psy::core::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::core::exceptions::function_errors::detail::make_rethrow_functor(crashable))
 			}
 		}
 	}

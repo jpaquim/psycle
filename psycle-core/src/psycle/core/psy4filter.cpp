@@ -47,7 +47,7 @@
 #include <sstream>
 #include <iostream> // only for debug output
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 Psy4Filter* Psy4Filter::getInstance() {
 	// don`t use multithreaded

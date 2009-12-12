@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 class CoreSong;
 

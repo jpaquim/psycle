@@ -17,7 +17,7 @@ namespace psycle { namespace helpers {
 	class BinRead;
 }}
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 		class Machine;
 

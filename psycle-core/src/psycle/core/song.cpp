@@ -15,7 +15,7 @@
 #include <sstream>
 #include <iostream> // only for debug output
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 
 	using namespace psycle::helpers;
 
