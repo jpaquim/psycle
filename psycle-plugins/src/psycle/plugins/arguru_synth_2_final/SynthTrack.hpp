@@ -1,10 +1,13 @@
 #pragma once
 #include "filter.hpp"
+#include <psycle/helpers/math/rint.hpp>
+#include <psycle/helpers/math/pi.hpp>
 ///\file SynthTrack.h
 ///\brief interface for the CSynthTrack class.
+#define FILTER_CALC_TIME 64
+#define TWOPI            2.0*math::pi
 
-#define FILTER_CALC_TIME				64
-#define TWOPI																6.28318530717958647692528676655901f
+using namespace psycle::helpers;
 
 struct SYNPAR
 {
@@ -41,70 +44,44 @@ struct SYNPAR
 class CSynthTrack  
 {
 public:
-
-	void InitEffect(int cmd,int val);
-	void PerformFx();
-	void DoGlide();
-	void DisableVibrato();
-	void ActiveVibrato(int speed,int depth);
-	void Vibrate();
-	float Filter(float x);
-	void NoteOff(bool stop=false);
-	float GetEnvAmp();
-	void GetEnvVcf();
-	float oscglide;
-	float GetSample();
-	float GetSampleOsc1();
-	float GetSampleOsc2();
-	void NoteOn(int note, SYNPAR *tspar,int spd);
-	void InitArpeggio();
-	
 	CSynthTrack();
 	virtual ~CSynthTrack();
 
+	void setSampleRate(int currentSR_, int wavetableSize_, float srCorrection_);
+	void setGlobalPar(SYNPAR* globalPar);
+	void InitEffect(int cmd,int val);
+	void NoteOn(int note, int spd);
+	void NoteOff(bool stop=false);
+	void PerformFx();
+	inline float GetSample();
+	inline float GetSampleOsc1();
+	inline float GetSampleOsc2();
+	
 	int AmpEnvStage;
 	int NoteCutTime;
-	bool NoteCut;
-	filter m_filter;
 
 private:
-	float output;
-	float lfo_freq;
-	float lfo_phase;
-
 	void InitLfo(int freq,int amp);
-
-	short timetocompute;
 	void InitEnvelopes(bool force=false);
+	void ActiveVibrato(int speed,int depth);
+	void DisableVibrato();
+	void DoGlide();
+	void Vibrate();
+	inline float GetEnvAmp();
+	inline void GetEnvVcf();
+	inline void ArpTick(void);
+	inline void FilterTick(void);
 
-	float VcfResonance;
+	static const signed char ArpNote[9][16];
+	filter m_filter;
+	SYNPAR *syntp;
+	int sampleRate;
+	float srCorrection;
+	//in float since it is compared with OSCPosition
+	float waveTableSize;
+
 	int sp_cmd;
 	int sp_val;
-
-	float OSC1Speed;
-	float OSC2Speed;
-	float ROSC1Speed;
-	float ROSC2Speed;
-	
-	float OSC1Position;
-	float OSC2Position;
-	
-	float OSCvib;
-	float VibratoGr;
-	float VibratoSpeed;
-	float VibratoDepth;
-
-	// Arpeggiator
-	int Arp_tickcounter;
-	int Arp_samplespertick;
-	float Arp_basenote;
-	int ArpMode;
-	unsigned char ArpCounter;
-	unsigned char ArpLimit;
-
-	signed char ArpNote[16][16];
-
-	bool Arp;
 
 	// Envelope [Amplitude]
 	float AmpEnvValue;
@@ -116,23 +93,46 @@ private:
 	float OSC2Vol;
 
 	// Envelope [Filter]
+	int VcfEnvStage;
 	float VcfEnvValue;
 	float VcfEnvCoef;
 	float VcfEnvSustainLevel;
-	int VcfEnvStage;
-	float Stage5VcfVal;
+
 	float VcfEnvMod;
 	float VcfCutoff;
-	float synthglide;
-	
-	SYNPAR *syntp;
+	float VcfResonance;
 
-	inline void ArpTick(void);
-	inline void FilterTick(void);
-	inline int f2i(float d)
-	{
-		return static_cast<int>(d);
-	}
+	//LFO
+	float lfo_freq;
+	float lfo_phase;
+	short timetocompute;
+
+
+	//Oscillator. Target and current speed.
+	float OSC1Speed;
+	float OSC2Speed;
+	float ROSC1Speed;
+	float ROSC2Speed;
+	
+	float OSC1Position;
+	float OSC2Position;
+	
+	float oscglide;
+
+	//Vibrato parameters and value
+	float VibratoGr;
+	float VibratoSpeed;
+	float VibratoDepth;
+	float OSCvib;
+
+	// Arpeggiator
+	int ArpMode;
+	int Arp_tickcounter;
+	int Arp_samplespertick;
+	float Arp_basenote;
+	unsigned char ArpCounter;
+	//unsigned char ArpLimit;
+
 
 };
 
@@ -140,7 +140,7 @@ inline void CSynthTrack::ArpTick()
 {
 	Arp_tickcounter=0;
 
-	float note=Arp_basenote+(float)ArpNote[syntp->arp_mod-1][ArpCounter];
+	float note=Arp_basenote+(float)ArpNote[ArpMode-1][ArpCounter];
 	OSC1Speed=(float)pow(2.0, note/12.0);
 
 	float note2=note+
@@ -150,8 +150,9 @@ inline void CSynthTrack::ArpTick()
 
 	if(++ArpCounter>=syntp->arp_cnt)  ArpCounter=0;
 
-	InitEnvelopes(AmpEnvStage<4);
-	if ( oscglide == 0.0f ) oscglide =256.0f;
+	if (AmpEnvStage<4) {
+		InitEnvelopes(true);
+	}
 }
 
 inline void CSynthTrack::FilterTick()
@@ -173,6 +174,7 @@ inline void CSynthTrack::FilterTick()
 
 inline float CSynthTrack::GetSample()
 {
+	float output;
 
 	if(AmpEnvStage)
 	{
@@ -180,27 +182,39 @@ inline float CSynthTrack::GetSample()
 	
 		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
 		{
-			int iOsc=f2i(OSC1Position);
+			int wtSizeInt = math::lrint<int,float>(waveTableSize);
+			int iOsc=math::lrint<int,float>(OSC1Position);
 			float fractpart=OSC1Position-iOsc;
-			float d0=syntp->pWave[iOsc-1];
+			float d0;
 			float d1=syntp->pWave[iOsc];
 			float d2=syntp->pWave[iOsc+1];
 			float d3=syntp->pWave[iOsc+2];
+			if (iOsc == 0) {
+				d0=syntp->pWave[wtSizeInt - 1];
+			}
+			else {
+				d0=syntp->pWave[iOsc-1];
+			}
 			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC1Vol;
 			
-			iOsc=f2i(OSC2Position);
+			iOsc=math::lrint<int,float>(OSC2Position);
 			fractpart=OSC2Position-iOsc;
-			d0=syntp->pWave2[iOsc-1];
 			d1=syntp->pWave2[iOsc];
 			d2=syntp->pWave2[iOsc+1];
 			d3=syntp->pWave2[iOsc+2];
+			if (iOsc == 0) {
+				d0=syntp->pWave2[wtSizeInt - 1];
+			}
+			else {
+				d0=syntp->pWave2[iOsc-1];
+			}
 			output+=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC2Vol;
 
 		}
 		else
 		{
-			output=syntp->pWave[f2i(OSC1Position)]*OSC1Vol+
-					syntp->pWave2[f2i(OSC2Position)]*OSC2Vol;
+			output=syntp->pWave[math::lrint<int,float>(OSC1Position)]*OSC1Vol+
+					syntp->pWave2[math::lrint<int,float>(OSC2Position)]*OSC2Vol;
 		}
 
 		if(vibrato)
@@ -214,14 +228,15 @@ inline float CSynthTrack::GetSample()
 			OSC2Position+=ROSC2Speed;
 		}
 		
-		if(OSC1Position>=2048.0f)
+		if(OSC1Position>=waveTableSize)
 		{
-			OSC1Position-=2048.0f;
+			OSC1Position-=waveTableSize;
 		
-			if(syntp->osc2sync)				OSC2Position=OSC1Position;
+			if(syntp->osc2sync)
+				OSC2Position=OSC1Position;
 		}
 
-		if(OSC2Position>=2048.0f) OSC2Position-=2048.0f;
+		if(OSC2Position>=waveTableSize) OSC2Position-=waveTableSize;
 
 		GetEnvVcf();
 
@@ -235,6 +250,7 @@ inline float CSynthTrack::GetSample()
 
 inline float CSynthTrack::GetSampleOsc1()
 {
+	float output;
 
 	if(AmpEnvStage)
 	{
@@ -242,23 +258,30 @@ inline float CSynthTrack::GetSampleOsc1()
 	
 		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
 		{
-			int iOsc=f2i(OSC1Position);
+			int wtSizeInt = math::lrint<int,float>(waveTableSize);
+			int iOsc=math::lrint<int,float>(OSC1Position);
 			float fractpart=OSC1Position-iOsc;
-			float d0=syntp->pWave[iOsc-1];
+			float d0;
 			float d1=syntp->pWave[iOsc];
 			float d2=syntp->pWave[iOsc+1];
 			float d3=syntp->pWave[iOsc+2];
+			if (iOsc == 0) {
+				d0=syntp->pWave[wtSizeInt - 1];
+			}
+			else {
+				d0=syntp->pWave[iOsc-1];
+			}
 			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC1Vol;
 		}
 		else
 		{
-			output=syntp->pWave[f2i(OSC1Position)]*OSC1Vol;
+			output=syntp->pWave[math::lrint<int,float>(OSC1Position)]*OSC1Vol;
 		}
 
-		if(vibrato)				OSC1Position+=ROSC1Speed+OSCvib;
-		else								OSC1Position+=ROSC1Speed;
+		if(vibrato) OSC1Position+=ROSC1Speed+OSCvib;
+		else        OSC1Position+=ROSC1Speed;
 		
-		if(OSC1Position>=2048.0f)  OSC1Position-=2048.0f;
+		if(OSC1Position>=waveTableSize)  OSC1Position-=waveTableSize;
 		
 		GetEnvVcf();
 
@@ -271,29 +294,38 @@ inline float CSynthTrack::GetSampleOsc1()
 }
 inline float CSynthTrack::GetSampleOsc2()
 {
+	float output;
+
 	if(AmpEnvStage)
 	{
 		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
 	
 		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
 		{
-			int iOsc=f2i(OSC2Position);
+			int wtSizeInt = math::lrint<int,float>(waveTableSize);
+			int iOsc=math::lrint<int,float>(OSC2Position);
 			float fractpart=OSC2Position-iOsc;
-			float d0=syntp->pWave2[iOsc-1];
+			float d0;
 			float d1=syntp->pWave2[iOsc];
 			float d2=syntp->pWave2[iOsc+1];
 			float d3=syntp->pWave2[iOsc+2];
+			if (iOsc == 0) {
+				d0=syntp->pWave2[wtSizeInt - 1];
+			}
+			else {
+				d0=syntp->pWave2[iOsc-1];
+			}
 			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC2Vol;
 		}
 		else
 		{
-			output=syntp->pWave2[f2i(OSC2Position)]*OSC2Vol;
+			output=syntp->pWave2[math::lrint<int,float>(OSC2Position)]*OSC2Vol;
 		}
 
-		if(vibrato)				OSC2Position+=ROSC2Speed+OSCvib;
-		else								OSC2Position+=ROSC2Speed;
+		if(vibrato) OSC2Position+=ROSC2Speed+OSCvib;
+		else        OSC2Position+=ROSC2Speed;
 		
-		if(OSC2Position>=2048.0f) OSC2Position-=2048.0f;
+		if(OSC2Position>=waveTableSize) OSC2Position-=waveTableSize;
 		
 		GetEnvVcf();
 
@@ -317,8 +349,6 @@ inline float CSynthTrack::GetEnvAmp()
 			AmpEnvCoef=(1.0f-AmpEnvSustainLevel)/(float)syntp->amp_env_decay;
 			AmpEnvStage=2;
 		}
-
-		return AmpEnvValue;
 	break;
 
 	case 2: // Decay
@@ -326,24 +356,19 @@ inline float CSynthTrack::GetEnvAmp()
 		
 		if(AmpEnvValue<AmpEnvSustainLevel)
 		{
-			if(AmpEnvSustainLevel == 0.0f)
-			{
+			if(AmpEnvSustainLevel == 0.0f) {
+				AmpEnvValue=0.0f;
 				AmpEnvStage=0;
-				ROSC1Speed=0.0f;
-				ROSC2Speed=0.0f;
+				if (oscglide == 0.0f) {
+					ROSC1Speed=0.0f;
+					ROSC2Speed=0.0f;
+				}
 			}
-			else
-			{
+			else {
 				AmpEnvValue=AmpEnvSustainLevel;
 				AmpEnvStage=3;
 			}
 		}
-
-		return AmpEnvValue;
-	break;
-
-	case 3:
-		return AmpEnvValue;
 	break;
 
 	case 4: // Release
@@ -353,29 +378,36 @@ inline float CSynthTrack::GetEnvAmp()
 		{
 			AmpEnvValue=0.0f;
 			AmpEnvStage=0;
-			ROSC1Speed=0.0f;
-			ROSC2Speed=0.0f;
+			if (oscglide == 0.0f) {
+				ROSC1Speed=0.0f;
+				ROSC2Speed=0.0f;
+			}
 		}
-
-		return AmpEnvValue;
 	break;
 	
 	case 5: // FastRelease
 		AmpEnvValue-=AmpEnvCoef;
-		Stage5AmpVal+=AmpEnvCoef;
+		Stage5AmpVal+=1.0f/(float)syntp->amp_env_attack;
 
 		if(AmpEnvValue<Stage5AmpVal)
 		{
 			AmpEnvValue=Stage5AmpVal;
+			if (oscglide == 0.0f) {
+				ROSC1Speed = OSC1Speed;
+				ROSC2Speed = OSC2Speed;
+			}
 			AmpEnvStage=1;
+			AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
+			VcfEnvStage=1;
+			VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
 		}
-
-		return AmpEnvValue;
 	break;
-	
+
+	default:
+		break;
 	}
 
-	return 0;
+	return AmpEnvValue;
 }
 
 inline void CSynthTrack::GetEnvVcf()
@@ -412,16 +444,7 @@ inline void CSynthTrack::GetEnvVcf()
 		}
 	break;
 
-	case 5: // FastRelease
-		VcfEnvValue-=VcfEnvCoef;
-		Stage5VcfVal+=VcfEnvCoef;
-
-		if(VcfEnvValue<Stage5VcfVal)
-		{
-			VcfEnvValue=Stage5VcfVal;
-			VcfEnvStage=1;
-		}
-
-	break;
+	default:
+		break;
 	}
 }
