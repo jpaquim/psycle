@@ -37,6 +37,10 @@ namespace psycle { namespace core {
 							   int sample_rate, int buffer_size, int buffer_count) = 0;
 		virtual void GetValues(GUID& device_guid, bool& exclusive, bool& dither,
 							   int& sample_rate, int& buffer_size, int& buffer_count) = 0;
+		virtual void WriteConfig(GUID device_guid, bool exclusive, bool dither,
+							   int sample_rate, int buffer_size, int buffer_count) = 0;
+		virtual void ReadConfig(GUID& device_guid, bool& exclusive, bool& dither,
+							   int& sample_rate, int& buffer_size, int& buffer_count) = 0;
 	};
 
 

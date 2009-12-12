@@ -4,9 +4,11 @@
 #include "Psycle.hpp"
 #include <afxwin.h>
 #include <afxcmn.h> // CSpinButtonCtrl
+#include "Registry.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/audiodrivers/microsoftdirectsoundout.h>
+#include "Configuration.hpp"
 #endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -82,6 +84,77 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					sample_rate = dlg_.sample_rate;
 					buffer_size = dlg_.buffer_size;
 					buffer_count = dlg_.buffer_count;
+			}
+
+			virtual void WriteConfig(GUID device_guid, bool exclusive, bool dither,
+								   int sample_rate, int buffer_size, int buffer_count) {
+				Registry reg;
+				if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
+				{
+					MessageBox(0, "Unable to write configuration to the registry", _T("DirectSound Output driver"), MB_OK | MB_ICONERROR);
+					return;
+				}
+				if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS)
+				{
+					if(reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS)
+					{
+						MessageBox(0, "Unable to write configuration to the registry", _T("DirectSound Output driver"), MB_OK | MB_ICONERROR);
+						return;
+					}
+				}
+				reg.SetValue("DeviceGuid", device_guid);
+				reg.SetValue("Exclusive", exclusive);
+				reg.SetValue("Dither", dither);
+				//reg.SetValue("BitDepth", _bitDepth);
+				reg.SetValue("SamplesPerSec", sample_rate);
+				reg.SetValue("BufferSize", buffer_size);
+				reg.SetValue("NumBuffers", buffer_count);
+				reg.CloseKey();
+				reg.CloseRootKey();
+			}
+
+			virtual void ReadConfig(GUID& device_guid, bool& exclusive, bool& dither,
+								   int& sample_rate, int& buffer_size, int& buffer_count) {
+									   // default configuration
+				bool saveatend(false);
+				device_guid = GUID(); // DSDEVID_DefaultPlayback <-- unresolved external symbol
+				exclusive = false;
+				dither = false;
+				sample_rate = 44100;
+				buffer_size = 4096;
+				buffer_count = 4;
+
+				// read from registry
+				Registry reg;
+				reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
+			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS) // settings in version 1.8
+			{
+				reg.CloseRootKey();
+				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
+				if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
+				{
+					reg.CloseRootKey();
+					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
+					if(reg.OpenKey("DirectSound") != ERROR_SUCCESS)
+					{
+						reg.CloseRootKey();
+						return;
+					}
+				}
+				saveatend=true;
+			}
+			bool configured(true);
+			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceGuid", device_guid);
+			configured &= ERROR_SUCCESS == reg.QueryValue("Exclusive", exclusive);
+			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", dither);
+			//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
+			configured &= ERROR_SUCCESS == reg.QueryValue("NumBuffers", buffer_count);
+			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", buffer_size);
+			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", sample_rate);
+
+			reg.CloseKey();
+			reg.CloseRootKey();
+			if(saveatend) WriteConfig(device_guid, exclusive, dither, sample_rate, buffer_size, buffer_count);
 			}
 
 		private:
