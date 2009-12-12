@@ -663,10 +663,32 @@ namespace psycle { namespace core {
 			captureSettings_.setChannelMode(3);
 			captureSettings_.setSamplesPerSec(44100);
 			_configured = true;
+			if (ui_) {
+				_configured = true;
+				int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
+				ui_->ReadConfig(this->device_guid,
+							   _exclusive,
+							   _dither,
+							   tmp_samplespersec,
+							   tmp_blockbytes, 
+							   tmp_block_count);
+				playbackSettings_.setSamplesPerSec(tmp_samplespersec);
+				playbackSettings_.setBlockBytes(tmp_blockbytes);
+				playbackSettings_.setBlockCount(tmp_block_count);
+			}
 		}
 
 		void MsDirectSound::WriteConfig()
 		{
+			if (ui_) {
+				ui_->WriteConfig(device_guid,
+								_exclusive,
+								_dither,
+								playbackSettings_.samplesPerSec(),
+								playbackSettings_.blockBytes(),
+								playbackSettings_.blockCount());
+
+			}
 		}
 
 		void MsDirectSound::Configure()
