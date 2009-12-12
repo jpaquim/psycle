@@ -7,7 +7,7 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 	#include <psycle/audiodrivers/audiodriver.h>
 
-namespace psy { namespace core { class DSoundUiInterface; }}
+namespace psycle { namespace core { class DSoundUiInterface; }}
 
 #else
 	#include "AudioDriver.hpp"
@@ -241,7 +241,7 @@ namespace psycle
 			bool _followSong;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::AudioDriver** _ppOutputDrivers;
+			psycle::core::AudioDriver** _ppOutputDrivers;
 #else
 			AudioDriver** _ppOutputDrivers;
 #endif
@@ -266,9 +266,9 @@ namespace psycle
 			bool autoStopMachines;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psy::core::AudioDriver* _pOutputDriver;
+			psycle::core::AudioDriver* _pOutputDriver;
 		private:
-			DSoundUiInterface* dsound_ui_;
+			psycle::core::DSoundUiInterface* dsound_ui_;
 		public:
 #else
 			AudioDriver* _pOutputDriver;
@@ -300,7 +300,7 @@ namespace psycle
 			inline void SetSamplesPerSec(int samplerate) const throw()
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				psy::core::AudioDriverSettings settings = _pOutputDriver->playbackSettings();
+				psycle::core::AudioDriverSettings settings = _pOutputDriver->playbackSettings();
 				settings.setSamplesPerSec(samplerate);
 				_pOutputDriver->setPlaybackSettings(settings); 				
 #else

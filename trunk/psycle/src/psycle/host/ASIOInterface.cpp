@@ -1030,8 +1030,8 @@ namespace psycle
 					outr = (DWORD*)ASIObuffers[counter].pright[index];
 					for (i = 0; i < _ASIObufferSize; i++)
 					{
-						*outl++ = SwapLong(clipped_lrint<DWORD, 16>(*pBuf++));
-						*outr++ = SwapLong(clipped_lrint<DWORD, 16>(*pBuf++));
+						*outl++ = SwapLong( (clipped_lrint<DWORD, 16>(*pBuf++)) );
+						*outr++ = SwapLong( (clipped_lrint<DWORD, 16>(*pBuf++)) );
 					}
 				}
 				break;
@@ -1043,8 +1043,8 @@ namespace psycle
 					outr = (DWORD*)ASIObuffers[counter].pright[index];
 					for(i = 0; i < _ASIObufferSize; i++)
 					{
-						*outl++ = SwapLong(clipped_lrint<DWORD, 18>((*pBuf++)*4.0f));
-						*outr++ = SwapLong(clipped_lrint<DWORD, 18>((*pBuf++)*4.0f));
+						*outl++ = SwapLong((clipped_lrint<DWORD, 18>((*pBuf++)*4.0f)));
+						*outr++ = SwapLong((clipped_lrint<DWORD, 18>((*pBuf++)*4.0f)));
 					}
 				}
 				break;
@@ -1056,8 +1056,8 @@ namespace psycle
 					outr = (DWORD*)ASIObuffers[counter].pright[index];
 					for (i = 0; i < _ASIObufferSize; i++)
 					{
-						*outl++ = SwapLong(clipped_lrint<DWORD, 20>((*pBuf++)*16.0f));
-						*outr++ = SwapLong(clipped_lrint<DWORD, 20>((*pBuf++)*16.0f));
+						*outl++ = SwapLong((clipped_lrint<DWORD, 20>((*pBuf++)*16.0f)));
+						*outr++ = SwapLong((clipped_lrint<DWORD, 20>((*pBuf++)*16.0f)));
 					}
 				}
 				break;
@@ -1069,8 +1069,8 @@ namespace psycle
 					outr = (DWORD*)ASIObuffers[counter].pright[index];
 					for(i = 0; i < _ASIObufferSize; i++)
 					{
-						*outl++ = SwapLong(clipped_lrint<DWORD, 24>((*pBuf++)*256.0f));
-						*outr++ = SwapLong(clipped_lrint<DWORD, 24>((*pBuf++)*256.0f));
+						*outl++ = SwapLong((clipped_lrint<DWORD, 24>((*pBuf++)*256.0f)));
+						*outr++ = SwapLong((clipped_lrint<DWORD, 24>((*pBuf++)*256.0f)));
 					}
 				}
 				break;
