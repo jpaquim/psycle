@@ -71,7 +71,7 @@ class MsDirectSound : public AudioDriver {
 		MsDirectSound(DSoundUiInterface* ui);
 		virtual ~MsDirectSound();
 
-		AudioDriverInfo info( ) const;
+		AudioDriverInfo info() const;
 
 		virtual void Initialize( AUDIODRIVERWORKFN pCallback, void * context );
 		virtual bool Enable( bool );

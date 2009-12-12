@@ -2,6 +2,8 @@
 ///\brief implementation file for psycle::host::ASIOInterface.
 
 #include "ASIOInterface.hpp"
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 #include "Registry.hpp"
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"
@@ -1185,3 +1187,5 @@ namespace psycle
 		}
 	}
 }
+
+#endif

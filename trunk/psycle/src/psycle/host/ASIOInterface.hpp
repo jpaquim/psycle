@@ -1,7 +1,12 @@
 ///\file
 ///\brief interface file for psycle::host::ASIOInterface.
+
 #pragma once
 #include "Global.hpp"
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+  // see in psycle/audiodrivers
+#else
+
 #include "AudioDriver.hpp"
 #include <asiodrivers.h>
 #include <asio.h>
@@ -141,7 +146,7 @@ namespace psycle
 			static AUDIODRIVERWORKFN _pCallback;
 			static void* _pCallbackContext;
 
-			ASIOCallbacks asioCallbacks;
+			ASIOCallbacks asioCallbacks;			
 
 
 
@@ -177,3 +182,5 @@ namespace psycle
 		};
 	}
 }
+
+#endif

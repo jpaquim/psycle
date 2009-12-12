@@ -7,7 +7,12 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 	#include <psycle/audiodrivers/audiodriver.h>
 
-namespace psycle { namespace core { class DSoundUiInterface; }}
+namespace psycle { 
+	namespace core { 
+		class DSoundUiInterface; 
+		class AsioUiInterface; 
+	}
+}
 
 #else
 	#include "AudioDriver.hpp"
@@ -269,6 +274,7 @@ namespace psycle
 			psycle::core::AudioDriver* _pOutputDriver;
 		private:
 			psycle::core::DSoundUiInterface* dsound_ui_;
+			psycle::core::AsioUiInterface* asio_ui_;
 		public:
 #else
 			AudioDriver* _pOutputDriver;
