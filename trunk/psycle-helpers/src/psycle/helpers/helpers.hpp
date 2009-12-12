@@ -67,7 +67,7 @@ namespace psycle { namespace helpers {
 	/// combines float to signed integer conversion with clipping.
 	template<typename Result> UNIVERSALIS__COMPILER__CONST
 	Result inline clipped_lrint(float f) {
-		return clipped_lrint<Result, sizeof(Result) >> 3>(f);
+		return clipped_lrint<Result, (sizeof(Result) >> 3)>(f);
 	}
 
 }}
