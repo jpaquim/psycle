@@ -1,6 +1,7 @@
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math/rint.hpp>
 #include "SynthTrack.hpp"
 #include <cstdlib>
 
@@ -710,7 +711,7 @@ void mi::InitWaveTableSR(bool delArray) {
 	}
 	for(std::uint32_t c=0;c<half;c++) {
 		double sval=(double)c*sinFraction;
-		WaveTable[0][c]=short int(sin(sval)*16384.0);
+		WaveTable[0][c]=math::lrint<short int,double>(sin(sval)*16384.0);
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=-16384;
 		WaveTable[3][c]=(c*increase2)-16384;
@@ -719,7 +720,7 @@ void mi::InitWaveTableSR(bool delArray) {
 	}
 	for(std::uint32_t c=half;c<amount;c++) {
 		double sval=(double)c*sinFraction;
-		WaveTable[0][c]=short int(sin(sval)*16384.0);
+		WaveTable[0][c]=math::lrint<short int,double>(sin(sval)*16384.0);
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=16384;
 		WaveTable[3][c]=16384-((c-half)*increase2);
