@@ -4,9 +4,14 @@
 #include "Psycle.hpp"
 #include <afxwin.h>
 #include <afxcmn.h> // CSpinButtonCtrl
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#include <psycle/audiodrivers/microsoftdirectsoundout.h>
+#endif
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
-		/// direct sound config window.
+  		/// direct sound config window.
 		class CDSoundConfig : public CDialog
 		{
 				DECLARE_MESSAGE_MAP()
@@ -48,5 +53,41 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			private:
 				void RecalcLatency();
 		};
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		class DSoundUi : public psy::core::DSoundUiInterface {
+		public:
+			DSoundUi() {}
+			~DSoundUi() {}
+
+			int DoModal() {
+				return dlg_.DoModal();
+			}
+
+			virtual void SetValues(GUID device_guid, bool exclusive, bool dither,
+								   int sample_rate, int buffer_size, int buffer_count) {
+					dlg_.device_guid = device_guid;
+					dlg_.exclusive = exclusive;
+					dlg_.dither = dither;
+					dlg_.sample_rate = sample_rate;
+					dlg_.buffer_size = buffer_size;
+					dlg_.buffer_count = buffer_count;
+			}
+			
+			virtual void GetValues(GUID& device_guid, bool& exclusive, bool& dither,
+								   int& sample_rate, int& buffer_size, int& buffer_count) {
+					device_guid = dlg_.device_guid;
+					exclusive = dlg_.exclusive;
+					dither = dlg_.dither;
+					sample_rate = dlg_.sample_rate;
+					buffer_size = dlg_.buffer_size;
+					buffer_count = dlg_.buffer_count;
+			}
+
+		private:
+			CDSoundConfig dlg_;
+		};
+#endif
+
 	PSYCLE__MFC__NAMESPACE__END
 PSYCLE__MFC__NAMESPACE__END
