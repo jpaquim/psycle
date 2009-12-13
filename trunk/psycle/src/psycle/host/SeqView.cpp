@@ -103,49 +103,39 @@ namespace psycle {
 
 		void SequencerView::SetEntry(psycle::core::SequenceEntry* entry)
 		{
+			int pos = -1;
 			if (!selblock_play_) {
 				std::map<int,SequenceEntry*>::iterator it = pos_map_.begin();
 				for ( ; it != pos_map_.end(); ++it) {
 					if (it->second == entry) {
-						const int pos = it->first;
-						CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
-						cc->SelItemRange(false,0,cc->GetCount());
-						cc->SetSel(pos,true);
-						int top = pos - 0xC;
-						if (top < 0) top = 0;
-						cc->SetTopIndex(top);
-						PatternView* pat_view = project_->pat_view();
-						selected_entry_ = entry;
-						pat_view->SetPattern(entry->pattern());			
-						BuildSelectionList();
-						SelectItems();
-						main_frame_->m_wndView.Repaint(draw_modes::pattern);
-						main_frame_->StatusBarIdle();
-						main_frame_->m_wndView.SetFocus();
-						selected_entry_ = entry;
-					} 
+						pos = it->first;
+						break;
+					}
 				}
 			} else {
 				std::map<SequenceEntry*, int>::iterator it;
 				it = sel_pos_map_.find(entry);
-				const int pos = it->second;
-				CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
-				cc->SelItemRange(false,0,cc->GetCount());
-				cc->SetSel(pos,true);
-				int top = pos - 0xC;
-				if (top < 0) top = 0;
-				cc->SetTopIndex(top);
-				PatternView* pat_view = project_->pat_view();
-				selected_entry_ = entry;
-				pat_view->SetPattern(entry->pattern());			
-				BuildSelectionList();
-				SelectItems();
-				main_frame_->m_wndView.Repaint(draw_modes::pattern);
-				main_frame_->StatusBarIdle();
-				main_frame_->m_wndView.SetFocus();
-				selected_entry_ = entry;
-			}				
-		}
+				if ( it != sel_pos_map_.end() )
+					pos = it->second;
+			}
+			assert(pos != -1);
+
+			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+			cc->SelItemRange(false,0,cc->GetCount());
+			cc->SetSel(pos,true);
+			int top = pos - 0xC;
+			if (top < 0) top = 0;
+			cc->SetTopIndex(top);
+			PatternView* pat_view = project_->pat_view();
+			selected_entry_ = entry;
+			pat_view->SetPattern(entry->pattern());			
+			BuildSelectionList();
+			SelectItems();
+			main_frame_->m_wndView.Repaint(draw_modes::pattern);
+			main_frame_->StatusBarIdle();
+			main_frame_->m_wndView.SetFocus();
+			selected_entry_ = entry;
+		} 
 
 		void SequencerView::UpdateSequencer(int selectedpos)
 		{
