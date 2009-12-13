@@ -13,7 +13,8 @@
 typedef float SIG;
 #define TWOPI_F (2.0f*3.141592665f)
 #define PI 3.14159265358979323846
-//static const double PI=4*atan(1.0);
+
+#define THREESEL(sel,a,b,c) ((sel)<120)?((a)+((b)-(a))*(sel)/120):((b)+((c)-(b))*((sel)-120)/120)
 
 
 class CBiquad
@@ -185,8 +186,10 @@ public:
 	}
 	float res2(float in)
 	{
-		float out=Biquad2.ProcessSample(Biquad.ProcessSample(in));
-		if (invert) return in-out;
+		float out1=Biquad.ProcessSample(in);
+		if (invert) out1=in-out1;
+		float out=Biquad2.ProcessSample(out1);
+		if (invert) return out1-out;
 		return out;
 	}
 	void reset()

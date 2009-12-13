@@ -54,9 +54,6 @@ CSynthTrack::CSynthTrack()
 	VcfEnvValue=0.0f;
 	Stage5AmpVal=0.0f;
 	vibrato=false;
-
-//	InitArpeggio();
-//	setSampleRate(44100,2048,1.0f);
 }
 
 CSynthTrack::~CSynthTrack()
