@@ -31,10 +31,17 @@ namespace psycle {
 			, seqcopybufferlength(0)
 			, selected_entry_(0)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			seq_sel_play_line_ = new psycle::core::SequenceLine();
+			selblock_play_ = false;
+#endif
 		}
 
 		SequencerView::~SequencerView()
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			delete seq_sel_play_line_;
+#endif
 		}
 
 		void SequencerView::SetProject(Project* project)
@@ -53,6 +60,39 @@ namespace psycle {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 
+		SequenceLine* SequencerView::ComputeSelblockLine() {
+			seq_sel_play_line_->clear();
+			sel_pos_map_.clear();
+			std::vector<int>::iterator it = selection_.begin();
+			for ( ; it != selection_.end(); ++it) {
+				SequenceEntry* old_entry = GetEntry(*it);				
+				SequenceEntry* entry = new SequenceEntry(seq_sel_play_line_);
+				entry->setPattern(old_entry->pattern());				
+				seq_sel_play_line_->insert(old_entry->tickPosition(), entry);
+				sel_pos_map_[entry] = *it;				
+			}
+			seq_sel_play_line_->removeSpaces();
+			return seq_sel_play_line_;
+		}
+
+		void SequencerView::SwitchToSelBlockPlay() {
+			psycle::core::PatternSequence& seq = project_->song().patternSequence();
+			seq_main_play_line_ = *seq.begin();
+			seq_sel_play_line_ = ComputeSelblockLine();
+			*seq.begin() = seq_sel_play_line_;
+			seq_sel_play_line_->SetSequence(&project_->song().patternSequence());
+			selblock_play_= true;
+		}
+
+		void SequencerView::SwitchToNormalPlay() {
+			if (selblock_play_) {
+				psycle::core::PatternSequence& seq = project_->song().patternSequence();
+				*seq.begin() = seq_main_play_line_;
+				selblock_play_= false;
+			}
+		}
+
+
 		SequenceEntry* SequencerView::GetEntry(int list_position) 
 		{
 			std::map<int,SequenceEntry*>::iterator it;
@@ -63,27 +103,48 @@ namespace psycle {
 
 		void SequencerView::SetEntry(psycle::core::SequenceEntry* entry)
 		{
-			std::map<int,SequenceEntry*>::iterator it = pos_map_.begin();
-			for ( ; it != pos_map_.end(); ++it) {
-				if (it->second == entry) {
-					const int pos = it->first;
-					CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
-					cc->SelItemRange(false,0,cc->GetCount());
-					cc->SetSel(pos,true);
-					int top = pos - 0xC;
-					if (top < 0) top = 0;
-					cc->SetTopIndex(top);
-					PatternView* pat_view = project_->pat_view();
-					selected_entry_ = entry;
-					pat_view->SetPattern(entry->pattern());			
-					BuildSelectionList();
-					SelectItems();
-					main_frame_->m_wndView.Repaint(draw_modes::pattern);
-					main_frame_->StatusBarIdle();
-					main_frame_->m_wndView.SetFocus();
-					selected_entry_ = entry;
+			if (!selblock_play_) {
+				std::map<int,SequenceEntry*>::iterator it = pos_map_.begin();
+				for ( ; it != pos_map_.end(); ++it) {
+					if (it->second == entry) {
+						const int pos = it->first;
+						CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+						cc->SelItemRange(false,0,cc->GetCount());
+						cc->SetSel(pos,true);
+						int top = pos - 0xC;
+						if (top < 0) top = 0;
+						cc->SetTopIndex(top);
+						PatternView* pat_view = project_->pat_view();
+						selected_entry_ = entry;
+						pat_view->SetPattern(entry->pattern());			
+						BuildSelectionList();
+						SelectItems();
+						main_frame_->m_wndView.Repaint(draw_modes::pattern);
+						main_frame_->StatusBarIdle();
+						main_frame_->m_wndView.SetFocus();
+						selected_entry_ = entry;
+					} 
 				}
-			}
+			} else {
+				std::map<SequenceEntry*, int>::iterator it;
+				it = sel_pos_map_.find(entry);
+				const int pos = it->second;
+				CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
+				cc->SelItemRange(false,0,cc->GetCount());
+				cc->SetSel(pos,true);
+				int top = pos - 0xC;
+				if (top < 0) top = 0;
+				cc->SetTopIndex(top);
+				PatternView* pat_view = project_->pat_view();
+				selected_entry_ = entry;
+				pat_view->SetPattern(entry->pattern());			
+				BuildSelectionList();
+				SelectItems();
+				main_frame_->m_wndView.Repaint(draw_modes::pattern);
+				main_frame_->StatusBarIdle();
+				main_frame_->m_wndView.SetFocus();
+				selected_entry_ = entry;
+			}				
 		}
 
 		void SequencerView::UpdateSequencer(int selectedpos)

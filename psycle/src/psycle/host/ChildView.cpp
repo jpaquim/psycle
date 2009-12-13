@@ -403,6 +403,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						if ( viewMode == view_modes::sequence ) Repaint(draw_modes::playback);
 					}
 #endif
+				} else {
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					if (pattern_view()->main()->m_wndSeq.sel_block_play() ) {
+						SequencerView& s_view = pattern_view()->main()->m_wndSeq;
+						s_view.SwitchToNormalPlay();
+					}
+#endif
 				}
 			}
 			if (nIDEvent == 159 && !Global::pPlayer->recording())
@@ -880,25 +887,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				pattern_view()->bScrollDetatch=false;
 			}
-
-			pattern_view()->prevEditPosition=pattern_view()->editPosition;
-			int i=0;
-			for ( ; Global::song().playOrderSel[i] == false ; ++i);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if (!Player::singleton().playing()) {
-				SequenceLine* seqLine = *pattern_view()->song()->patternSequence().begin();
-				SequenceLine::iterator seqite = seqLine->begin();
-				for ( ; seqite != seqLine->end() && i>0; ++seqite, --i);
-
-				if (seqite != seqLine->end()) {
-					Player::singleton().start(seqite->second->tickPosition());
-				}
-			} else {
-				Player::singleton().UnsetLoop();
-			}
+			SequencerView& s_view = pattern_view()->main()->m_wndSeq;
+			s_view.SwitchToSelBlockPlay();
+			Global::pPlayer->start(0);			
 #else
+			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			if(!Global::pPlayer->playing())
-				Global::pPlayer->Start(i,0);
+			Global::pPlayer->Start(i,0);
 			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
 #endif
 			pParentMain->StatusBarIdle();
@@ -911,7 +907,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			PlayerTimeInfo tinfo = Player::singleton().timeInfo();
 			int check = Player::singleton().loopEnabled() && 
 				(tinfo.cycleStartPos() > 0.0f || tinfo.cycleEndPos() < projects_->active_project()->song().patternSequence().tickLength());
-			
 #else
 			int check = Global::pPlayer->_playBlock;
 #endif

@@ -284,6 +284,15 @@ namespace psycle { namespace core {
 			}
 		}
 
+		void SequenceLine::clear() {
+			if (sequence_)
+				sequence_->last_entry_ = 0;
+			iterator it = begin();
+			for (it; it != end(); ++it)
+				delete it->second;
+			line_.clear();
+		}
+
 		const std::string& SequenceLine::name() const {
 			return name_;
 		}

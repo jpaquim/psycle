@@ -34,7 +34,7 @@ namespace psycle {
 		{
 			assert(pat_view_);
 			assert(mac_view_);
-			song_.New();
+			song_.New();			
 		}
 
 		Project::~Project()

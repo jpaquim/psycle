@@ -5,6 +5,7 @@
 namespace psycle {
 	namespace core {
 		class SequenceEntry;
+		class SequenceLine;
 		class Pattern;
 	}
 }
@@ -26,6 +27,9 @@ namespace psycle {
 			/// Example: from playback, or via hotkey.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE	
 			void SetEntry(psycle::core::SequenceEntry* entry);
+
+			SequenceLine* ComputeSelblockLine();
+			std::map<int,SequenceEntry*>& pos_map() { return pos_map_; }
 #else
 			void SetSelectedEntry(int entry);
 			int selecteEntry();
@@ -91,11 +95,20 @@ namespace psycle {
 			void SelectItems();
 			void BuildSelectionList();
 			void BuildCopyList();
+			void SwitchToSelBlockPlay();
+			void SwitchToNormalPlay();
+
+			bool sel_block_play() const { return selblock_play_; }
+
 		private:
 
 			SequenceEntry* selected_entry_;
 			std::map<int,SequenceEntry*> pos_map_; // Relation between the list position and the patterns
 			std::vector<psycle::core::Pattern*> copy_list_; // list to store copy/cut/paste entries
+			psycle::core::SequenceLine* seq_sel_play_line_;
+			psycle::core::SequenceLine* seq_main_play_line_; // mainline between normal play and bar selblock play
+			bool selblock_play_;
+			std::map<SequenceEntry*, int> sel_pos_map_;
 #else
 			int selected_entry_;
 			std::map<int,int> pos_map_; // Relation between the list position and the patterns
