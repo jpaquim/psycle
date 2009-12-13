@@ -5,7 +5,7 @@
 
 /// Define to use psycle-core
 ///\todo check xml library in psycle-core
-#define PSYCLE__CONFIGURATION__USE_PSYCORE 1
+#define PSYCLE__CONFIGURATION__USE_PSYCORE 0
 
 /// JAZ: Define to 1 to enable the volume column for XMSampler.
 ///      It will also make the machine column in the pattern to show the values of the volume column instead.
