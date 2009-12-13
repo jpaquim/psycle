@@ -176,7 +176,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::AudioDriver* output_driver_;
-			int last_pos_;
+			int last_pos_;			
 #endif
 
 		public:			

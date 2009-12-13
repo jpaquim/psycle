@@ -115,6 +115,7 @@ namespace psycle { namespace core {
 			void removePatternEntries(Pattern* pattern);
 			void insertEntryAndMoveRest(SequenceEntry *entry, double pos);
 			void removeSpaces(); // removes spaces between entries
+			void clear();
 
 			double tickLength() const;
 
@@ -166,6 +167,7 @@ namespace psycle { namespace core {
 
 			bool empty() const { return line_.empty(); }
 
+			void SetSequence(Sequence* sequence) { sequence_ = sequence; }
 
 		private:
 
