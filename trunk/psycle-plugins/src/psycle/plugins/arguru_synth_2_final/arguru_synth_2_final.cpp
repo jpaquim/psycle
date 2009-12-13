@@ -254,7 +254,7 @@ CMachineParameter const paraGlobalDetune = {
 // log2 of this value is ~ 4.3528.
 // Multiply this amount by 12 (notes/octave) to get 52.2344, which stands
 // for note 52 and finetune 0.2344.
-// The original compensation was using note-18 in the SeqTick() call ( 69-18 = 51 )
+// There is a compensation in the SeqTick() call which does note-18 ( 69-18 = 51 )
 // So to correctly compensate, 1 seminote and fine of 60 is added (0.2344 * 256 ~ 60.01)
 //
 // With the new implementation where the wavetable is generated depending
@@ -408,7 +408,12 @@ void mi::Stop() {
 
 void mi::SequencerTick() {
 	if (currentSR != pCB->GetSamplingRate()) {
-		Init();
+#if USE_NEW_WAVETABLES
+		InitWaveTableSR(true);
+#endif
+		for (int i = 0; i < MAX_TRACKS; ++i) {
+			track[i].setSampleRate(currentSR, waveTableSize, srCorrection);
+		}
 		//force an update of all the parameters.
 		ParameterTweak(-1,-1);
 		Stop();
@@ -567,11 +572,69 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 	case 7:
 	case 11:
 	case 20:
-		std::sprintf(txt,"%.1f%%",(float)value*0.390625f);
-		return true;
+			std::sprintf(txt,"%.1f%%",(float)value*0.390625f);
+			return true;
 	case 13:
-		std::sprintf(txt,"%.03f Hz",(value*0.000005f)/(2.0f*math::pi_f)*(currentSR/64.0f));
-		return true;
+			std::sprintf(txt,"%.03f Hz",(value*0.000005f)/(2.0f*math::pi_f)*(currentSR/64.0f));
+			return true;
+	case 15:
+			if (Vals[17] < 6) {
+				std::sprintf(txt,"%.03f Hz",264*pow(32.,value/240.));
+			}
+			else if(Vals[17] < 8){
+				std::sprintf(txt,"%.03f Hz",THREESEL((float)value,270.0f,400.0f,800.0f));
+			}
+			else if(Vals[17] < 10){
+				std::sprintf(txt,"%.03f Hz",THREESEL((float)value,270.0f,400.0f,650.0f));
+			}
+			else if (Vals[17] < 12) {
+				std::sprintf(txt,"%.03f Hz x2",264*pow(32.,value/240.)*0.7f);
+			}
+			else if (Vals[17] <14) {
+				std::sprintf(txt,"%.03f Hz - %.03f Hz", float(value/(1+Vals[16]/240.0)), 264*pow(32.,value/240.));
+			}
+			else if (Vals[17] <16) {
+				std::sprintf(txt,"%.03f Hz - %.03f Hz", float(value/(3.5-2*Vals[16]/240.0)), 264*pow(32.,value/240.));
+			}
+			else if(Vals[17] < 18){
+				std::sprintf(txt,"%.03f Hz + %.03f Hz",THREESEL((float)value,270.0f,400.0f,800.0f), THREESEL((float)value,2140.0f,800.0f,1150.0f));
+			}
+			else {
+				std::sprintf(txt,"%.03f Hz + %.03f Hz",THREESEL((float)value,270.0f,400.0f,650.0f), THREESEL((float)value,2140.0f,1700.0f,1080.0f));
+			}
+			return true;
+	case 16:
+			if (Vals[17] < 2) {
+				std::sprintf(txt,"%.03f Q",(float)sqrt(1.01+14*value/240.0));
+			}
+			else if (Vals[17] < 4) {
+				std::sprintf(txt,"%.03f Q",(float)(1.0+value/12.0));
+			}
+			else if (Vals[17] < 6) {
+				std::sprintf(txt,"%.03f Q",8.0f);
+			}
+			else if(Vals[17] < 8){
+				std::sprintf(txt,"%.03f Q",2.0f+value/48.0f);
+			}
+			else if(Vals[17] < 10){
+				std::sprintf(txt,"%.03f Q",2.0f+value/56.0f);
+			}
+			if (Vals[17] < 12) {
+				std::sprintf(txt,"%.03f Q",(float)sqrt(1.01+14*value/240.0));
+			}
+			else if (Vals[17] < 14) {
+				std::sprintf(txt,"%.03f Q",(float)(1.0+value/12.0));
+			}
+			else if (Vals[17] < 16) {
+				std::sprintf(txt,"%.03f Q",8.0f);
+			}
+			else if(Vals[17] < 18){
+				std::sprintf(txt,"%.03f Q",2.0f+value/48.0f);
+			}
+			else{
+				std::sprintf(txt,"%.03f Q",2.0f+value/56.0f);
+			}
+			return true;
 	case 17:
 			switch(value) {
 			case 0:std::strcpy(txt,"Lowpass A");return true;
