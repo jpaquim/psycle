@@ -30,7 +30,10 @@
 
 namespace psycle { namespace host {
 
-		using namespace core;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			using namespace core;
+#else
+#endif
 		
 		Configuration::Configuration()
 		{

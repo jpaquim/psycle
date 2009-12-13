@@ -897,6 +897,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			s_view.SwitchToSelBlockPlay();
 			Global::pPlayer->start(0);			
 #else
+ 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
+			int i=0;
+			for ( ; Global::song().playOrderSel[i] == false ; ++i);
+
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			if(!Global::pPlayer->playing())
 			Global::pPlayer->Start(i,0);
