@@ -437,6 +437,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.song(projects_->active_project()->song());
 			output_driver_ =  Global::pConfig->_pOutputDriver;
+			if (&player.driver() == output_driver_) {
+				if (output_driver_->Enabled())
+					return;
+				output_driver_->Enable(true);
+			} else
 			player.setDriver(*output_driver_);
 #else
 			if (_outputActive)

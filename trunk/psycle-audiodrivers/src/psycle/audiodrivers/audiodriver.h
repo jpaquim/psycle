@@ -148,6 +148,7 @@ class AudioDriver {
 		/// gives the driver information
 		virtual AudioDriverInfo info() const;
 
+		virtual bool Enabled() { return false; }
 		/// enable will start the driver and the calls to the work player function
 		virtual bool Enable(bool /*e*/) { return true; }
 
