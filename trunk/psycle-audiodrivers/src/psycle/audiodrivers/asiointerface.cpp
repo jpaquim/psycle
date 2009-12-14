@@ -162,6 +162,8 @@ void ASIOInterface::Reset() {
 
 bool ASIOInterface::Start() {
 	//CSingleLock lock(&_lock, TRUE);
+	scoped_lock lock(mutex_);
+
 	_firstrun = true;
 	if(_running) return true;
 	if(_pCallback == 0) {
@@ -253,6 +255,8 @@ bool ASIOInterface::Start() {
 
 bool ASIOInterface::Stop() {
 	//CSingleLock lock(&_lock, TRUE); todo
+	scoped_lock lock(mutex_);
+
 	if(!_running) return true;
 	_running = false;
 	ASIOStop();
@@ -746,13 +750,13 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 	switch (_selectedout.port->_info.type) {
 		case ASIOSTInt16LSB:
 			{
-				WORD* outl;
-				WORD* outr;
-				outl = (WORD*)ASIObuffers[counter].pleft[index];
-				outr = (WORD*)ASIObuffers[counter].pright[index];
+				std::int16_t* outl;
+				std::int16_t* outr;
+				outl = (std::int16_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int16_t*)ASIObuffers[counter].pright[index];
 				for(i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = psycle::helpers::clipped_lrint<WORD>(*pBuf++);
-					*outr++ = psycle::helpers::clipped_lrint<WORD>(*pBuf++);
+					*outl++ = psycle::helpers::clipped_lrint<std::int16_t>(*pBuf++);
+					*outr++ = psycle::helpers::clipped_lrint<std::int16_t>(*pBuf++);
 				}
 			}
 			break;
@@ -780,13 +784,13 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 			break;
 		case ASIOSTInt32LSB:
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for (i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = psycle::helpers::clipped_lrint<DWORD>((*pBuf++) * 65536.0f);
-					*outr++ = psycle::helpers::clipped_lrint<DWORD>((*pBuf++) * 65536.0f);
+					*outl++ = psycle::helpers::clipped_lrint<std::int32_t>((*pBuf++) * 65536.0f);
+					*outr++ = psycle::helpers::clipped_lrint<std::int32_t>((*pBuf++) * 65536.0f);
 				}
 			}
 			break;
@@ -816,63 +820,63 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 			break;
 			// these are used for 32 bit data buffer, with different alignment of the data inside
 			// 32 bit PCI bus systems can more easily used with these
-		case ASIOSTInt32LSB16: // 32 bit data with 18 bit alignment
+		case ASIOSTInt32LSB16: // 32 bit data with 16 bit alignment
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for (i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = psycle::helpers::clipped_lrint<DWORD, 16>(*pBuf++);
-					*outr++ = psycle::helpers::clipped_lrint<DWORD, 16>(*pBuf++);
+					*outl++ = psycle::helpers::clipped_lrint<std::int32_t, 16>(*pBuf++);
+					*outr++ = psycle::helpers::clipped_lrint<std::int32_t, 16>(*pBuf++);
 				}
 			}
 			break;
 		case ASIOSTInt32LSB18: // 32 bit data with 18 bit alignment
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for (i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = psycle::helpers::clipped_lrint<DWORD, 18>((*pBuf++) * 4.0f);
-					*outr++ = psycle::helpers::clipped_lrint<DWORD, 18>((*pBuf++) * 4.0f);
+					*outl++ = psycle::helpers::clipped_lrint<std::int32_t, 18>((*pBuf++) * 4.0f);
+					*outr++ = psycle::helpers::clipped_lrint<std::int32_t, 18>((*pBuf++) * 4.0f);
 				}
 			}
 			break;
 		case ASIOSTInt32LSB20: // 32 bit data with 20 bit alignment
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for (i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = psycle::helpers::clipped_lrint<DWORD, 20>((*pBuf++) * 16.0f);
-					*outr++ = psycle::helpers::clipped_lrint<DWORD, 20>((*pBuf++) * 16.0f);
+					*outl++ = psycle::helpers::clipped_lrint<std::int32_t, 20>((*pBuf++) * 16.0f);
+					*outr++ = psycle::helpers::clipped_lrint<std::int32_t, 20>((*pBuf++) * 16.0f);
 				}
 			}
 			break;
 		case ASIOSTInt32LSB24: // 32 bit data with 24 bit alignment
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for (i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = psycle::helpers::clipped_lrint<DWORD, 24>((*pBuf++) * 256.0f);
-					*outr++ = psycle::helpers::clipped_lrint<DWORD, 24>((*pBuf++) * 256.0f);
+					*outl++ = psycle::helpers::clipped_lrint<std::int32_t, 24>((*pBuf++) * 256.0f);
+					*outr++ = psycle::helpers::clipped_lrint<std::int32_t, 24>((*pBuf++) * 256.0f);
 				}
 			}
 			break;
 		case ASIOSTInt16MSB:
 			{
-				WORD* outl;
-				WORD* outr;
-				outl = (WORD*)ASIObuffers[counter].pleft[index];
-				outr = (WORD*)ASIObuffers[counter].pright[index];
+				std::int16_t* outl;
+				std::int16_t* outr;
+				outl = (std::int16_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int16_t*)ASIObuffers[counter].pright[index];
 				for (i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = SwapShort(psycle::helpers::clipped_lrint<WORD>(*pBuf++));
-					*outr++ = SwapShort(psycle::helpers::clipped_lrint<WORD>(*pBuf++));
+					*outl++ = SwapShort(psycle::helpers::clipped_lrint<std::int16_t>(*pBuf++));
+					*outr++ = SwapShort(psycle::helpers::clipped_lrint<std::int16_t>(*pBuf++));
 				}
 			}
 			break;
@@ -899,61 +903,61 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 			break;
 		case ASIOSTInt32MSB:
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for(i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = SwapLong(psycle::helpers::clipped_lrint<DWORD>((*pBuf++) * 65536.0f));
-					*outr++ = SwapLong(psycle::helpers::clipped_lrint<DWORD>((*pBuf++) * 65536.0f));
+					*outl++ = SwapLong(psycle::helpers::clipped_lrint<std::int32_t>((*pBuf++) * 65536.0f));
+					*outr++ = SwapLong(psycle::helpers::clipped_lrint<std::int32_t>((*pBuf++) * 65536.0f));
 				}
 			}
 			break;
 		case ASIOSTInt32MSB16: // 32 bit data with 18 bit alignment
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for (i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = SwapLong( (psycle::helpers::clipped_lrint<DWORD, 16>(*pBuf++)) );
-					*outr++ = SwapLong( (psycle::helpers::clipped_lrint<DWORD, 16>(*pBuf++)) );
+					*outl++ = SwapLong( (psycle::helpers::clipped_lrint<std::int32_t, 16>(*pBuf++)) );
+					*outr++ = SwapLong( (psycle::helpers::clipped_lrint<std::int32_t, 16>(*pBuf++)) );
 				}
 			}
 			break;
 		case ASIOSTInt32MSB18: // 32 bit data with 18 bit alignment
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for(i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = SwapLong((psycle::helpers::clipped_lrint<DWORD, 18>((*pBuf++) * 4.0f)));
-					*outr++ = SwapLong((psycle::helpers::clipped_lrint<DWORD, 18>((*pBuf++) * 4.0f)));
+					*outl++ = SwapLong((psycle::helpers::clipped_lrint<std::int32_t, 18>((*pBuf++) * 4.0f)));
+					*outr++ = SwapLong((psycle::helpers::clipped_lrint<std::int32_t, 18>((*pBuf++) * 4.0f)));
 				}
 			}
 			break;
 		case ASIOSTInt32MSB20: // 32 bit data with 20 bit alignment
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for (i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = SwapLong((psycle::helpers::clipped_lrint<DWORD, 20>((*pBuf++) * 16.0f)));
-					*outr++ = SwapLong((psycle::helpers::clipped_lrint<DWORD, 20>((*pBuf++) * 16.0f)));
+					*outl++ = SwapLong((psycle::helpers::clipped_lrint<std::int32_t, 20>((*pBuf++) * 16.0f)));
+					*outr++ = SwapLong((psycle::helpers::clipped_lrint<std::int32_t, 20>((*pBuf++) * 16.0f)));
 				}
 			}
 			break;
 		case ASIOSTInt32MSB24: // 32 bit data with 24 bit alignment
 			{
-				DWORD* outl;
-				DWORD* outr;
-				outl = (DWORD*)ASIObuffers[counter].pleft[index];
-				outr = (DWORD*)ASIObuffers[counter].pright[index];
+				std::int32_t* outl;
+				std::int32_t* outr;
+				outl = (std::int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (std::int32_t*)ASIObuffers[counter].pright[index];
 				for(i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = SwapLong((psycle::helpers::clipped_lrint<DWORD, 24>((*pBuf++) * 256.0f)));
-					*outr++ = SwapLong((psycle::helpers::clipped_lrint<DWORD, 24>((*pBuf++) * 256.0f)));
+					*outl++ = SwapLong((psycle::helpers::clipped_lrint<std::int32_t, 24>((*pBuf++) * 256.0f)));
+					*outr++ = SwapLong((psycle::helpers::clipped_lrint<std::int32_t, 24>((*pBuf++) * 256.0f)));
 				}
 			}
 			break;

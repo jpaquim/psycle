@@ -57,17 +57,18 @@ namespace psycle { namespace helpers {
 	};
 
 	/// combines float to signed integer conversion with clipping.
+	///\todo: WARNING!!! This only works with signed types, not with unsigned.
 	template<typename Result, unsigned int const bits> UNIVERSALIS__COMPILER__CONST
 	Result inline clipped_lrint(float f) {
-		int const max(1 << (bits - 1)); // The compiler is able to compute this statically.
-		int const min(1 - max);
-		return math::clipped(min, math::lrint<int>(f), max);
+		Result const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
+		Result const min(-max-1);
+		return math::clipped(min, math::lrint<Result>(f), max);
 	}
 
 	/// combines float to signed integer conversion with clipping.
 	template<typename Result> UNIVERSALIS__COMPILER__CONST
 	Result inline clipped_lrint(float f) {
-		return clipped_lrint<Result, (sizeof(Result) >> 3)>(f);
+		return clipped_lrint<Result, (sizeof(Result) << 3)>(f);
 	}
 
 }}
