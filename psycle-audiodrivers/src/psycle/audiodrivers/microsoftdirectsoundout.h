@@ -33,14 +33,22 @@ namespace psycle { namespace core {
 		virtual ~DSoundUiInterface() {}
 
 		virtual int DoModal() = 0;
-		virtual void SetValues(GUID device_guid, bool exclusive, bool dither,
-							   int sample_rate, int buffer_size, int buffer_count) = 0;
-		virtual void GetValues(GUID& device_guid, bool& exclusive, bool& dither,
-							   int& sample_rate, int& buffer_size, int& buffer_count) = 0;
-		virtual void WriteConfig(GUID device_guid, bool exclusive, bool dither,
-							   int sample_rate, int buffer_size, int buffer_count) = 0;
-		virtual void ReadConfig(GUID& device_guid, bool& exclusive, bool& dither,
-							   int& sample_rate, int& buffer_size, int& buffer_count) = 0;
+
+		virtual void SetValues(
+			GUID device_guid, bool exclusive, bool dither,
+			int sample_rate, int buffer_size, int buffer_count) = 0;
+
+		virtual void GetValues(
+			GUID& device_guid, bool& exclusive, bool& dither,
+			int& sample_rate, int& buffer_size, int& buffer_count) = 0;
+			
+		virtual void WriteConfig(
+			GUID device_guid, bool exclusive, bool dither,
+			int sample_rate, int buffer_size, int buffer_count) = 0;
+
+		virtual void ReadConfig(
+			GUID& device_guid, bool& exclusive, bool& dither,
+			int& sample_rate, int& buffer_size, int& buffer_count) = 0;
 	};
 
 

@@ -666,12 +666,13 @@ namespace psycle { namespace core {
 			if (ui_) {
 				_configured = true;
 				int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
-				ui_->ReadConfig(this->device_guid,
-							   _exclusive,
-							   _dither,
-							   tmp_samplespersec,
-							   tmp_blockbytes, 
-							   tmp_block_count);
+				ui_->ReadConfig(
+					this->device_guid,
+					_exclusive,
+					_dither,
+					tmp_samplespersec,
+					tmp_blockbytes, 
+					tmp_block_count);
 				playbackSettings_.setSamplesPerSec(tmp_samplespersec);
 				playbackSettings_.setBlockBytes(tmp_blockbytes);
 				playbackSettings_.setBlockCount(tmp_block_count);
@@ -700,12 +701,13 @@ namespace psycle { namespace core {
 			ReadConfig();
 
 			if (ui_) {
-				ui_->SetValues(device_guid,
-							   _exclusive,
-							   _dither, 
-							   playbackSettings_.samplesPerSec(),
-							   playbackSettings_.blockBytes(),
-							   playbackSettings_.blockCount());
+				ui_->SetValues(
+					device_guid,
+					_exclusive,
+					_dither, 
+					playbackSettings_.samplesPerSec(),
+					playbackSettings_.blockBytes(),
+					playbackSettings_.blockCount());
 				if (ui_->DoModal() != IDOK) return;
 				_configured = true;
 
@@ -720,12 +722,13 @@ namespace psycle { namespace core {
 				if(_initialized) Stop();
 
 				int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
-				ui_->GetValues(this->device_guid,
-							   _exclusive,
-							   _dither,
-							   tmp_samplespersec,
-							   tmp_blockbytes, 
-							   tmp_block_count);
+				ui_->GetValues(
+					this->device_guid,
+					_exclusive,
+					_dither,
+					tmp_samplespersec,
+					tmp_blockbytes, 
+					tmp_block_count);
 				playbackSettings_.setSamplesPerSec(tmp_samplespersec);
 				playbackSettings_.setBlockBytes(tmp_blockbytes);
 				playbackSettings_.setBlockCount(tmp_block_count);
