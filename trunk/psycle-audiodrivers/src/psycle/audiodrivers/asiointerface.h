@@ -9,51 +9,60 @@
 #include <windows.h>
 #pragma comment(lib, "asio")
 
-namespace psycle
-{
-	namespace core
-	{
-		#define MAX_ASIO_DRIVERS 32
-		#define MAX_ASIO_OUTPUTS 128
+namespace psycle { namespace core {
 
-		class AsioUiInterface {
-		public:
-			AsioUiInterface::AsioUiInterface() {}
-			virtual ~AsioUiInterface() {}
+#define MAX_ASIO_DRIVERS 32
+#define MAX_ASIO_OUTPUTS 128
 
-			virtual int DoModal(class ASIOInterface* asio) = 0;
-			virtual void SetValues(int device_id, int sample_rate, int buffer_size) = 0;
-			virtual void GetValues(int& device_id, int& sample_rate, int& buffer_size) = 0;
-			virtual void WriteConfig(int device_id_guid, int sample_rate, int buffer_size) = 0;
-			virtual void ReadConfig(int& device_id, int& sample_rate, int& buffer_size) = 0;
-		};
+class AsioUiInterface {
+	public:
+		AsioUiInterface::AsioUiInterface() {}
+		virtual ~AsioUiInterface() {}
 
-		/// output device interface implemented by asio.
-		class ASIOInterface : public AudioDriver
+		virtual int DoModal(class ASIOInterface* asio) = 0;
+		virtual void SetValues(int device_id, int sample_rate, int buffer_size) = 0;
+		virtual void GetValues(int& device_id, int& sample_rate, int& buffer_size) = 0;
+		virtual void WriteConfig(int device_id_guid, int sample_rate, int buffer_size) = 0;
+		virtual void ReadConfig(int& device_id, int& sample_rate, int& buffer_size) = 0;
+};
+
+/// output device interface implemented by asio.
+class ASIOInterface : public AudioDriver {
+	public:
+		class PortEnum
 		{
-		public:
-			class PortEnum
-			{
 			public:
-				PortEnum():_idx(0)
+				PortEnum()
+				:
+					_idx(0)
 				{
-					_info.channel=0;			_info.isInput=0;
-					_info.isActive=0;			_info.channelGroup=0;
-					_info.type=0;				memset(_info.name,0,sizeof(_info.name));
+					_info.channel = 0;
+					_info.isInput = 0;
+					_info.isActive = 0;
+					_info.channelGroup = 0;
+					_info.type = 0;
+					std::memset(_info.name, 0, sizeof _info.name);
 				}
-				PortEnum(int idx,ASIOChannelInfo info):_idx(idx)
+
+				PortEnum(int idx,ASIOChannelInfo info)
+				:
+					_idx(idx)
 				{
-					_info.channel=info.channel;		_info.isInput=info.isInput;
-					_info.isActive=info.isActive;	_info.channelGroup=info.channelGroup;
-					_info.type=info.type;			strcpy(_info.name,info.name);
+					_info.channel = info.channel;
+					_info.isInput = info.isInput;
+					_info.isActive = info.isActive;
+					_info.channelGroup = info.channelGroup;
+					_info.type = info.type;
+					std::strcpy(_info.name, info.name);
 				}
+				
 				std::string GetName();
 			public:
 				int _idx;
 				ASIOChannelInfo _info;
-			};
-			class DriverEnum
-			{
+		};
+
+		class DriverEnum {
 			public:
 				DriverEnum():minSamples(2048),maxSamples(2048),prefSamples(2048),granularity(0){};
 				DriverEnum(std::string name):_name(name){};
@@ -68,137 +77,144 @@ namespace psycle
 				long maxSamples;
 				long prefSamples;
 				long granularity;
-			};
-			class PortOut
-			{
+		};
+
+		class PortOut {
 			public:
 				PortOut():driver(0),port(0){};
 				DriverEnum* driver;
 				PortEnum* port;
-			};
-			class PortCapt : public PortOut
-			{
+		};
+
+		class PortCapt : public PortOut {
 			public:
 				PortCapt():PortOut(),pleft(0),pright(0),machinepos(0){};
 				float *pleft;
 				float *pright;
 				int machinepos;
-			};
-			class AsioStereoBuffer
-			{
+		};
+
+		class AsioStereoBuffer {
 			public:
-				AsioStereoBuffer()
-				{	pleft[0]=0;	pleft[1]=0;	pright[0]=0;	pright[1]=0;_sampletype=0;	}
-				AsioStereoBuffer(void** left,void**right,ASIOSampleType stype)
-				{
-					pleft[0]=left[0];pleft[1]=left[1];pright[0]=right[0];pright[1]=right[1];
+				AsioStereoBuffer() {
+					pleft[0] = 0;
+					pleft[1] = 0;
+					pright[0] = 0;
+					pright[1] = 0;
+					_sampletype = 0;
+				}
+				
+				AsioStereoBuffer(void** left,void**right,ASIOSampleType stype) {
+					pleft[0] = left[0];
+					pleft[1] = left[1];
+					pright[0] = right[0];
+					pright[1] = right[1];
 					_sampletype=stype;
 				}
+				
 				ASIOSampleType _sampletype;
-				AsioStereoBuffer operator=(AsioStereoBuffer& buf)
-				{
-					_sampletype=buf._sampletype;
-					pleft[0]=buf.pleft[0];
-					pleft[1]=buf.pleft[1];
-					pright[0]=buf.pright[0];
-					pright[1]=buf.pright[1];
+				
+				AsioStereoBuffer operator=(AsioStereoBuffer& buf) {
+					_sampletype = buf._sampletype;
+					pleft[0] = buf.pleft[0];
+					pleft[1] = buf.pleft[1];
+					pright[0] = buf.pright[0];
+					pright[1] = buf.pright[1];
 					return *this;
 				}
+				
 				void *pleft[2];
 				void *pright[2];
-			};
+		};
 
-		public:
-			ASIOInterface();
-			ASIOInterface(AsioUiInterface* ui);
-			virtual ~ASIOInterface() throw();
+	public:
+		ASIOInterface();
+		ASIOInterface(AsioUiInterface* ui);
+		virtual ~ASIOInterface() throw();
 
-			AudioDriverInfo info() const;
-			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context);
-			virtual void Configure();
-			inline virtual bool Initialized() { return _initialized; };
-			inline virtual bool Configured() { return _configured; };
-			virtual bool Enabled() { return _running; };
-			virtual int GetBufferSize();
-			virtual void GetCapturePorts(std::vector<std::string>&ports);
-			virtual bool AddCapturePort(int idx);
-			virtual bool RemoveCapturePort(int idx);
-			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
-			virtual void Reset();
-			virtual bool Enable(bool e);
-			virtual int GetWritePos();
-			virtual int GetPlayPos();
-			DriverEnum GetDriverFromidx(int driverID);
-			PortOut GetOutPortFromidx(int driverID);
-			int GetidxFromOutPort(PortOut&port);
-			void ControlPanel(int driverID);
-			virtual int GetInputLatency() { return _inlatency; }
-			virtual int GetOutputLatency() { return _outlatency; }
+		AudioDriverInfo info() const;
+		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context);
+		virtual void Configure();
+		inline virtual bool Initialized() { return _initialized; };
+		inline virtual bool Configured() { return _configured; };
+		virtual bool Enabled() { return _running; };
+		virtual int GetBufferSize();
+		virtual void GetCapturePorts(std::vector<std::string>&ports);
+		virtual bool AddCapturePort(int idx);
+		virtual bool RemoveCapturePort(int idx);
+		virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
+		virtual void Reset();
+		virtual bool Enable(bool e);
+		virtual int GetWritePos();
+		virtual int GetPlayPos();
+		DriverEnum GetDriverFromidx(int driverID);
+		PortOut GetOutPortFromidx(int driverID);
+		int GetidxFromOutPort(PortOut&port);
+		void ControlPanel(int driverID);
+		virtual int GetInputLatency() { return _inlatency; }
+		virtual int GetOutputLatency() { return _outlatency; }
 
-			static void bufferSwitch(long index, ASIOBool processNow);
-			static ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow);
-			static void sampleRateChanged(ASIOSampleRate sRate);
-			static long asioMessages(long selector, long value, void* message, double* opt);
+		static void bufferSwitch(long index, ASIOBool processNow);
+		static ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow);
+		static void sampleRateChanged(ASIOSampleRate sRate);
+		static long asioMessages(long selector, long value, void* message, double* opt);
 
-			std::vector<DriverEnum> _drivEnum;
+		std::vector<DriverEnum> _drivEnum;
 
-			static int _ASIObufferSize;
-			static AsioStereoBuffer *ASIObuffers;
-			static bool _firstrun;
-			static bool _supportsOutputReady;
+		static int _ASIObufferSize;
+		static AsioStereoBuffer *ASIObuffers;
+		static bool _firstrun;
+		static bool _supportsOutputReady;
 
-		protected:
-			void Error(const char msg[]);
-			void ReadConfig();
-			void WriteConfig();
-			bool Start();
-			bool Stop();
+	protected:
+		void Error(const char msg[]);
+		void ReadConfig();
+		void WriteConfig();
+		bool Start();
+		bool Stop();
 
-			static AUDIODRIVERWORKFN _pCallback;
-			static void* _pCallbackContext;
+		static AUDIODRIVERWORKFN _pCallback;
+		static void* _pCallbackContext;
 
-			ASIOCallbacks asioCallbacks;
+		ASIOCallbacks asioCallbacks;
 
 
 
-//			int drivercount;
-//			char szFullName[MAX_ASIO_OUTPUTS][160];
+		//int drivercount;
+		//char szFullName[MAX_ASIO_OUTPUTS][160];
 
 		// callback prototypes
-/*
-			int driverindex[MAX_ASIO_OUTPUTS];
-			int outputindex[MAX_ASIO_OUTPUTS];
-			long minSamples[MAX_ASIO_DRIVERS];
-			long maxSamples[MAX_ASIO_DRIVERS];
-			long prefSamples[MAX_ASIO_DRIVERS];
-			long Granularity[MAX_ASIO_DRIVERS];
-			int currentSamples[MAX_ASIO_DRIVERS];
-*/
-		private:
-			// static ::CCriticalSection _lock;
-			std::mutex mutex_;
-			typedef std::scoped_lock<std::mutex> scoped_lock;
-			/// a condition variable to wait until notified that the value of running_ has changed
-			std::condition<scoped_lock> condition_;
+		#if 0
+		int driverindex[MAX_ASIO_OUTPUTS];
+		int outputindex[MAX_ASIO_OUTPUTS];
+		long minSamples[MAX_ASIO_DRIVERS];
+		long maxSamples[MAX_ASIO_DRIVERS];
+		long prefSamples[MAX_ASIO_DRIVERS];
+		long Granularity[MAX_ASIO_DRIVERS];
+		int currentSamples[MAX_ASIO_DRIVERS];
+		#endif
+	private:
+		// static ::CCriticalSection _lock;
+		std::mutex mutex_;
+		typedef std::scoped_lock<std::mutex> scoped_lock;
+		/// a condition variable to wait until notified that the value of running_ has changed
+		std::condition<scoped_lock> condition_;
 
-			bool _initialized;
-			bool _configured;
-			bool _running;
-//			int _driverID;
-			AsioDrivers asioDrivers;
-			long _inlatency;
-			long _outlatency;
+		bool _initialized;
+		bool _configured;
+		bool _running;
+		//int _driverID;
+		AsioDrivers asioDrivers;
+		long _inlatency;
+		long _outlatency;
 
 
-			static PortOut _selectedout;
-			static std::vector<PortCapt> _selectedins;
-			std::vector<int> _portMapping;
+		static PortOut _selectedout;
+		static std::vector<PortCapt> _selectedins;
+		std::vector<int> _portMapping;
 
-			AsioUiInterface* ui_;
-			void Init();
-
-		};
+		AsioUiInterface* ui_;
+		void Init();
+};
 	
-
-	}	// namespace core
-}	// namespace psycle
+}}
