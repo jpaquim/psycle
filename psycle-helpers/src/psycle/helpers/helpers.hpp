@@ -58,9 +58,12 @@ namespace psycle { namespace helpers {
 
 	/// combines float to signed integer conversion with clipping.
 	///\todo: WARNING!!! This only works with signed types, not with unsigned.
+	///\todo: WARNING!!! maybe we should clip in float and convert. but that has the other
+	/// problem of integral types not being equal on both sides.
 	template<typename Result, unsigned int const bits> UNIVERSALIS__COMPILER__CONST
 	Result inline clipped_lrint(float f) {
-		Result const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
+		//This is not exactly correct (one value less) but at least works.
+		Result const max(((1 << (bits - 2)) - 1) << 1); // The compiler is able to compute this statically.
 		Result const min(-max-1);
 		return math::clipped(min, math::lrint<Result>(f), max);
 	}
