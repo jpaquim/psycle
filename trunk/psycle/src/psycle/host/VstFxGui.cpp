@@ -40,7 +40,7 @@ namespace psycle {
 				dialog_->LoadFrame(IDR_VSTFRAME, 
 //					WS_OVERLAPPEDWINDOW,
 					WS_POPUPWINDOW | WS_CAPTION,
-					view()->child_view()->pParentFrame);
+					(CWnd*)view()->child_view()->main_frame_);
 				std::ostringstream winname;
 				winname << std::hex << std::setw(2)
 					<< view()->song()->FindBusFromIndex(mac()->id())

@@ -102,7 +102,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			virtual ~CChildView();
 
 			void InitTimer();
-			void ValidateParent();
 			void EnableSound();
 			void Repaint(draw_modes::draw_mode drawMode = draw_modes::all);					
 
@@ -133,7 +132,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 //			CBitmap machinedial; //the machine dial bitmap
 
-			CFrameWnd* pParentFrame;
+			class CMainFrame* main_frame_;
 			ProjectData* projects_;
 			Song* _pSong;
 		//	bool multiPattern;			
