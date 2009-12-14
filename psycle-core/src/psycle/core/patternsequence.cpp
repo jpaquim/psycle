@@ -210,6 +210,30 @@ namespace psycle { namespace core {
 			}
 		}
 
+		void SequenceLine::moveEntries(SequenceEntry* start_entry, double delta) {
+			std::multimap<double, SequenceEntry*> old_line_ = line_;
+			line_.clear();
+			bool inserted = false;
+			std::multimap<double, SequenceEntry*>::iterator it = old_line_.begin();
+			for ( ; it != old_line_.end(); ++it ) {
+				if (it->second != start_entry && !inserted) {
+					line_.insert(std::pair<double, SequenceEntry*>(it->first, it->second));
+				} else {
+					line_.insert(std::pair<double, SequenceEntry*>(it->first + delta, it->second));
+					inserted = true;
+				}
+			}
+		}
+
+		SequenceLine::iterator SequenceLine::find(SequenceEntry* entry) {
+			std::multimap<double, SequenceEntry*>::iterator it = line_.begin();
+			for ( ; it != line_.end(); ++it ) {
+				if (it->second == entry)
+					return it;
+			}
+			return line_.end();
+		}
+
 		void SequenceLine::removeSpaces()
 		{
 			std::multimap<double, SequenceEntry*>::iterator it = begin();

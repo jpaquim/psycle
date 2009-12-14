@@ -111,9 +111,10 @@ namespace psycle { namespace core {
 
 			SequenceEntry* createEntry(Pattern* pattern, double position);
 			void insertEntry(SequenceEntry *entry);
-			void moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine);
+			void moveEntryToNewLine(SequenceEntry* entry, SequenceLine *newLine);
 			void removePatternEntries(Pattern* pattern);
-			void insertEntryAndMoveRest(SequenceEntry *entry, double pos);
+			void insertEntryAndMoveRest(SequenceEntry* entry, double pos);
+			void moveEntries(SequenceEntry* start_entry, double delta);
 			void removeSpaces(); // removes spaces between entries
 			void clear();
 
@@ -148,6 +149,8 @@ namespace psycle { namespace core {
 				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
 				entry->setSequenceLine(this);
 			}
+
+			iterator find(SequenceEntry* entry);
 
 			void erase(iterator it) {
 				line_.erase(it);
