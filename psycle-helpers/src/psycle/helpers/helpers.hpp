@@ -118,6 +118,60 @@ namespace psycle { namespace helpers {
 		int const min(-max - 1);
 		return math::lrint<Result>(math::clipped(float(min), f, float(max)));
 	}
+	
+#elif 0
+
+	/******* first clip, then convert to integer **********/
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip16(float f)
+	{ 
+		int const l(32767);
+		if(f < -l) return -l;
+		if(f > +l) return +l;
+		return math::rounded(f);
+	}
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip18(float f)
+	{ 
+		int const l(131071);
+		if(f < -l) return -l;
+		if(f > +l) return +l;
+		return math::rounded(f);
+	}
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip20(float f)
+	{ 
+		int const l(524287);
+		if(f < -l) return -l;
+		if(f > +l) return +l;
+		return math::rounded(f);
+	}
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip24(float f)
+	{ 
+		int const l(8388607);
+		if(f < -l) return -l;
+		if(f > +l) return +l;
+		return math::rounded(f);
+	}
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip32(float f)
+	{ 
+		int const l(2147483647);
+		if(f < -l) return -l;
+		if(f > +l) return +l;
+		return math::rounded(f);
+	}
 
 #endif
 
