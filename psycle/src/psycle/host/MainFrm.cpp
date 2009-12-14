@@ -151,16 +151,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		CMainFrame::CMainFrame()
 			: m_wndView(this, &projects_),
-			  m_wndSeq(this)
+			  m_wndSeq(this),
+			  vuprevR(0),
+			  vuprevL(0),
+			  _pSong(0),
+			  pGearRackDialog(0)
 		{
-			Global::pInputHandler->SetMainFrame(this);			
-			vuprevR = 0;
-			vuprevL = 0;
-			_pSong = 0;
-			pGearRackDialog = 0;
+			Global::pInputHandler->SetMainFrame(this);						
 			m_pWndWed = new CWaveEdFrame(this->_pSong,this);
 			SetUpStartProject();
-//			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
 		}
 
 		CMainFrame::~CMainFrame()
@@ -172,7 +171,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{
-			m_wndView.pParentFrame = this;
 			macComboInitialized = false;
 				
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
@@ -185,7 +183,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				TRACE0("Failed to create view window\n");
 				return -1;
 			}
-			m_wndView.ValidateParent();
 
 			// Create Toolbars.
 			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP
@@ -1821,50 +1818,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::OnUpdateIndicatorEdit(CCmdUI *pCmdUI) 
 		{
-			if (m_wndView.pattern_view()->bEditMode)
-			{
-				pCmdUI->Enable(); 
-			}
-			else
-			{
-				pCmdUI->Enable(FALSE);
-			}
+			pCmdUI->Enable(m_wndView.pattern_view()->bEditMode);
 		}
 
 		void CMainFrame::OnUpdateIndicatorFollow(CCmdUI *pCmdUI) 
 		{
-			if (Global::pConfig->_followSong)
-			{
-				pCmdUI->Enable(); 
-			}
-			else
-			{
-				pCmdUI->Enable(FALSE);
-			}
+			pCmdUI->Enable(Global::pConfig->_followSong);
 		}
 
 		void CMainFrame::OnUpdateIndicatorNoteoff(CCmdUI *pCmdUI) 
 		{
-			if (Global::pConfig->_RecordNoteoff)
-			{
-				pCmdUI->Enable(); 
-			}
-			else
-			{
-				pCmdUI->Enable(FALSE);
-			}
+			pCmdUI->Enable(Global::pConfig->_RecordNoteoff);
 		}
 
 		void CMainFrame::OnUpdateIndicatorTweaks(CCmdUI *pCmdUI) 
 		{
-			if (Global::pConfig->_RecordTweaks)
-			{
-				pCmdUI->Enable(); 
-			}
-			else
-			{
-				pCmdUI->Enable(FALSE);
-			}
+			pCmdUI->Enable(Global::pConfig->_RecordTweaks);
 		}
 
 		void CMainFrame::OnUpdateIndicatorOctave(CCmdUI *pCmdUI) 
@@ -1875,7 +1844,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pCmdUI->SetText(str); 
 
 		}
-
 
 		int CMainFrame::GetNumFromCombo(CComboBox *cb)
 		{

@@ -37,10 +37,8 @@ using namespace psycle::core;
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		CMainFrame		*pParentMain;
-
 		CChildView::CChildView(CMainFrame* main_frame, ProjectData* projects)
-			:pParentFrame(0)
+			:main_frame_(main_frame)
 			,projects_(projects)
 			,SamplerMachineDialog(NULL)
 			,XMSamplerMachineDialog(NULL)
@@ -217,18 +215,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					0
 				);
 			return TRUE;
-		}
-
-		/// This function gives to the pParentMain the pointer to a CMainFrm
-		/// object. Call this function from the CMainframe side object to
-		/// allow CCHildView call functions of the CMainFrm parent object
-		/// Call this function after creating both the CCHildView object and
-		/// the cmainfrm object
-		void CChildView::ValidateParent()
-		{
-			pParentMain=(CMainFrame *)pParentFrame;
-			//pParentMain->_pSong=Global::_pSong;
-		}
+		}		
 
 		/// Timer initialization
 		void CChildView::InitTimer()
@@ -263,7 +250,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (song->machine(MASTER_INDEX))
 				{
 					psycle::core::Master* master = (psycle::core::Master*) (song->machine(MASTER_INDEX));
-					pParentMain->UpdateVumeters
+					main_frame_->UpdateVumeters
 						(							
 							master->_lMax,
 							master->_rMax,
@@ -272,7 +259,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							Global::pConfig->vu3,
 							master->_clip
 						);
-					pParentMain->UpdateMasterValue(master->_outDry);
+					main_frame_->UpdateMasterValue(master->_outDry);
 					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
 					master->vuupdated = true;
 				}
@@ -280,7 +267,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CSingleLock lock(&_pSong->door,TRUE);
 				if (Global::song().machine(MASTER_INDEX))
 				{
-					pParentMain->UpdateVumeters
+					main_frame_->UpdateVumeters
 						(
 							//((Master*)Global::song().machine(MASTER_INDEX))->_LMAX,
 							//((Master*)Global::song().machine(MASTER_INDEX))->_RMAX,
@@ -291,7 +278,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							Global::pConfig->vu3,
 							((Master*)Global::song().machine(MASTER_INDEX))->_clip
 						);
-					pParentMain->UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);
+					main_frame_->UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);
 					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
 					((Master*)Global::song().machine(MASTER_INDEX))->vuupdated = true;
 				}
@@ -322,15 +309,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #else
 						if ( _pSong->machine(c)->_type == MACH_PLUGIN )
 						{
-							//if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker) maybe a todo
-							//	pParentMain->m_pWndMac[c]->Invalidate(false);
+							//if (main_frame_->isguiopen[c] && Global::pPlayer->Tweaker) maybe a todo
+							//	main_frame_->m_pWndMac[c]->Invalidate(false);
 						}
 						else if ( _pSong->machine(c)->_type == MACH_VST ||
 								_pSong->machine(c)->_type == MACH_VSTFX )
 						{
 							((vst::plugin*)_pSong->machine(c))->Idle();
-//							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
-//								((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
+//							if (main_frame_->isguiopen[c] && Global::pPlayer->Tweaker)
+//								((CVstEditorDlg*)main_frame_->m_pWndMac[c])->Refresh(-1,0);
 						}
 #endif
 					}
@@ -352,8 +339,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									  : 0;
 					if ( last_pos_!= pos ) {
 						last_pos_ = pos;
-						pParentMain->SetAppSongBpm(0);
-						pParentMain->SetAppSongTpb(0);
+						main_frame_->SetAppSongBpm(0);
+						main_frame_->SetAppSongTpb(0);
 						if (Global::pConfig->_followSong)
 						{											
 							if (entry && pattern_view()->pattern() != entry->pattern()) {
@@ -378,12 +365,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (Global::pPlayer->_lineChanged)
 					{
 						Global::pPlayer->_lineChanged = false;
-						pParentMain->SetAppSongBpm(0);
-						pParentMain->SetAppSongTpb(0);
+						main_frame_->SetAppSongBpm(0);
+						main_frame_->SetAppSongTpb(0);
 
 						if (Global::pConfig->_followSong)
 						{
-							CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
+							CListBox* pSeqList = (CListBox*)main_frame_->m_wndSeq.GetDlgItem(IDC_SEQLIST);
 							pattern_view()->editcur.line=Global::pPlayer->_lineCounter;
 							if (pattern_view()->editPosition != Global::pPlayer->_sequencePosition)
 							//if (pSeqList->GetCurSel() != Global::pPlayer->_sequencePosition)
@@ -502,7 +489,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnAppExit() 
 		{
-			pParentMain->ClosePsycle();
+			main_frame_->ClosePsycle();
 		}
 
 		void CChildView::OnPaint() 
@@ -708,7 +695,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					break;
 				}
 			}
-			pParentMain->StatusBarIdle();
+			main_frame_->StatusBarIdle();
 		}
 
 		void CChildView::OnFileNew() 
@@ -739,7 +726,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					projects_->active_project()->FileLoadsongNamed(fullpath.str());
 				}
 			}
-			pParentMain->StatusBarIdle();
+			main_frame_->StatusBarIdle();
 		}
 
 		/// Tool bar buttons and View Commands
@@ -757,7 +744,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
 
 				Repaint();
-				pParentMain->StatusBarIdle();
+				main_frame_->StatusBarIdle();
 			}
 			SetFocus();
 		}
@@ -792,7 +779,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 #endif
 				Repaint();
-				pParentMain->StatusBarIdle();
+				main_frame_->StatusBarIdle();
 			}
 			SetFocus();
 		}
@@ -815,7 +802,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				
 				GetParent()->SetActiveWindow();
 				Repaint();
-				pParentMain->StatusBarIdle();
+				main_frame_->StatusBarIdle();
 			}	
 			*/
 			SetFocus();
@@ -840,7 +827,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #else			
 			Global::pPlayer->Start(pattern_view()->editPosition,0);
 #endif
-			pParentMain->StatusBarIdle();
+			main_frame_->StatusBarIdle();
 		}
 
 		void CChildView::OnBarplayFromStart() 
@@ -856,7 +843,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			Global::pPlayer->Start(0,0);
 #endif			
-			pParentMain->StatusBarIdle();
+			main_frame_->StatusBarIdle();
 		}
 
 		void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
@@ -879,10 +866,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				Global::pConfig->_followSong = TRUE;
 				pattern_view()->bEditMode = TRUE;
-				CButton*cb=(CButton*)pParentMain->m_wndSeq.GetDlgItem(IDC_FOLLOW);
+				CButton*cb=(CButton*)main_frame_->m_wndSeq.GetDlgItem(IDC_FOLLOW);
 				cb->SetCheck(1);
 			}
-			pParentMain->StatusBarIdle();
+			main_frame_->StatusBarIdle();
 		}
 
 		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
@@ -910,7 +897,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Global::pPlayer->Start(i,0);
 			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
 #endif
-			pParentMain->StatusBarIdle();
+			main_frame_->StatusBarIdle();
 			if ( viewMode == view_modes::pattern ) Repaint(draw_modes::pattern);
 		}
 
@@ -940,15 +927,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			bool blk = Global::pPlayer->_playBlock;
 			Global::pPlayer->stop();
 #endif
-			pParentMain->SetAppSongBpm(0);
-			pParentMain->SetAppSongTpb(0);
+			main_frame_->SetAppSongBpm(0);
+			main_frame_->SetAppSongTpb(0);
 
 			if (pl)
 			{
 				if ( Global::pConfig->_followSong && blk)
 				{
 					pattern_view()->editPosition=pattern_view()->prevEditPosition;
-					pParentMain->m_wndSeq.UpdatePlayOrder(false); // <- This restores the selected block
+					main_frame_->m_wndSeq.UpdatePlayOrder(false); // <- This restores the selected block
 					Repaint(draw_modes::pattern);
 				}
 				else
@@ -1021,25 +1008,25 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CSongpDlg dlg(&Global::song());
 #endif
 			dlg.DoModal();
-			pParentMain->StatusBarIdle();
+			main_frame_->StatusBarIdle();
 			//Repaint();
 		}
 
 		void CChildView::OnViewInstrumenteditor()
 		{
-			pParentMain->ShowInstrumentEditor();
+			main_frame_->ShowInstrumentEditor();
 		}
 
 		/// Show the CPU Performance dialog
 		void CChildView::OnHelpPsycleenviromentinfo() 
 		{
-			pParentMain->ShowPerformanceDlg();
+			main_frame_->ShowPerformanceDlg();
 		}
 
 		/// Show the MIDI monitor dialog
 		void CChildView::OnMidiMonitorDlg() 
 		{
-			pParentMain->ShowMidiMonitorDlg();
+			main_frame_->ShowMidiMonitorDlg();
 		}
 		
 		void CChildView::OnNewmachine() 
@@ -1256,35 +1243,35 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 			// don't know how to access to the IDR_MAINFRAME String Title.
 			titlename += "] Psycle Modular Music Creation Studio (" PSYCLE__VERSION ")";
-			pParentMain->SetWindowText(titlename.c_str());
+			main_frame_->SetWindowText(titlename.c_str());
 		}
 
 		void CChildView::OnHelpKeybtxt() 
 		{
 			char path[MAX_PATH];
 			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath().c_str());
-			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
+			ShellExecute(main_frame_->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpReadme() 
 		{
 			char path[MAX_PATH];
 			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath().c_str());
-			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
+			ShellExecute(main_frame_->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpTweaking() 
 		{
 			char path[MAX_PATH];
 			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath().c_str());
-			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
+			ShellExecute(main_frame_->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpWhatsnew() 
 		{
 			char path[MAX_PATH];
 			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath().c_str());
-			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
+			ShellExecute(main_frame_->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::patTrackMute()
