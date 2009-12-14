@@ -45,14 +45,6 @@ namespace psycle {
 
 			void Clear();
 
-			// deprectaded
-			void set_lines_per_beat(int lines_per_beat) {
-				lines_per_beat_ = lines_per_beat;
-			}
-			// deprectaded
-			int lines_per_beat() const { return lines_per_beat_; }
-
-
 			int beat_zoom() const { return beat_zoom_; }
 			void set_beat_zoom(int zoom) { beat_zoom_ = zoom; }
 
@@ -65,7 +57,6 @@ namespace psycle {
 			MachineView* mac_view_;
 			ProjectData* parent_;
 
-			int lines_per_beat_;
 			int beat_zoom_;
 
 			Song song_;
