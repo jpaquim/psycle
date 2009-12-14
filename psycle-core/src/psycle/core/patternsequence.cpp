@@ -473,13 +473,15 @@ namespace psycle { namespace core {
 			}
 		}
 
-		SequenceEntry* Sequence::GetEntryOnPosition(SequenceLine* line, double tickPosition) {
-			for (SequenceLine::iterator ite = line->begin(); ite != line->end(); ite++) {
-				if (ite->second->tickPosition() <= tickPosition &&  ite->second->tickEndPosition() >= tickPosition) {
-					return ite->second;
+		SequenceEntry* Sequence::GetEntryOnPosition(SequenceLine* line, double pos) {
+			for (SequenceLine::iterator it = line->begin(); it != line->end(); ++it) {
+				if (pos >= it->second->tickPosition() && 
+					pos < it->second->tickEndPosition()
+					) {
+					return it->second;
 				}
 			}
-			return NULL;
+			return 0;
 		}
 
 		int Sequence::priority(const PatternEvent& cmd, int count) const {

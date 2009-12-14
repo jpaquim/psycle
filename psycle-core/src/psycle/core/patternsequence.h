@@ -288,6 +288,7 @@ namespace psycle { namespace core {
 			void Remove(Pattern* pattern);
 			Pattern* FindPattern(int id);
 
+			void set_last_worked_entry(SequenceEntry* entry) { last_entry_  = entry; }
 			SequenceEntry* last_worked_entry() {
 				return last_entry_;
 			}
