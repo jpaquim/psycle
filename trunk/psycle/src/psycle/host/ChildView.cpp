@@ -343,9 +343,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					Sequence& sequence = pattern_view()->song()->patternSequence();
 					psycle::core::SequenceEntry* entry =  sequence.last_worked_entry();						
+					if (!entry)
+						entry = sequence.GetEntryOnPosition(*sequence.begin(), Player::singleton().playPos());
+					else
 					if (pattern_view()->pattern() != entry->pattern())
 						entry = sequence.GetEntryOnPosition(*sequence.begin(), Player::singleton().playPos());
-					int pos = (Player::singleton().playPos() - entry->tickPosition())	* static_cast<int>(projects_->active_project()->beat_zoom());
+					int pos = (entry) ? (Player::singleton().playPos() - entry->tickPosition())	* static_cast<int>(projects_->active_project()->beat_zoom())
+									  : 0;
 					if ( last_pos_!= pos ) {
 						last_pos_ = pos;
 						pParentMain->SetAppSongBpm(0);
