@@ -416,6 +416,8 @@ namespace psycle {
 			int id = 0;
 			for ( ; sequence->FindPattern(id) !=0 ; ++id);
 			psycle::core::Pattern* pattern = new psycle::core::Pattern();
+			pattern->timeSignatures().clear();
+			pattern->timeSignatures().push_back(psycle::core::TimeSignature(16.0));
 			pattern->setID(id);
 			sequence->Add(pattern);
 			psycle::core::SequenceEntry* entry = new psycle::core::SequenceEntry(line);

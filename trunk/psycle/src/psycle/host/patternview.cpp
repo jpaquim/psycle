@@ -8518,8 +8518,21 @@ namespace psycle {
 			strcpy(dlg.patName,name);
 			main()->m_wndSeq.UpdateSequencer();
 			
+			double old_len = pattern()->beats();
+
 			if (dlg.DoModal() == IDOK)
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				psycle::core::SequenceLine* line = *song()->patternSequence().begin();
+				psycle::core::SequenceLine::iterator it = line->find(main()->m_wndSeq.selected_entry());
+				if ( it != line->end()) {
+					++it;
+					if ( it != line->end()) {
+						line->moveEntries(it->second, pattern()->beats() - old_len);
+					}
+				}
+#endif
+
 				if ( nlines != dlg.patLines )
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
