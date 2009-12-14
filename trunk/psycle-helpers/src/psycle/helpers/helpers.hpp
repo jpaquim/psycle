@@ -7,7 +7,12 @@
 #include "math/log.hpp"
 #include "math/clip.hpp"
 #include <string> // to declare hexstring_to_integer
+#include <cstdint>
+#include <limits>
+#include <boost/static_assert.hpp>
+
 namespace psycle { namespace helpers {
+
 	/// the pi constant as a 32-bit floating point number
 	float const F_PI = math::pi_f;
 
@@ -56,17 +61,65 @@ namespace psycle { namespace helpers {
 			static float fMap_255_100[257];
 	};
 
+#if 1
+
+	/******* first convert to integer, then clip **********/
+
 	/// combines float to signed integer conversion with clipping.
 	///\todo: WARNING!!! This only works with signed types, not with unsigned.
 	///\todo: WARNING!!! maybe we should clip in float and convert. but that has the other
 	/// problem of integral types not being equal on both sides.
 	template<typename Result, unsigned int const bits> UNIVERSALIS__COMPILER__CONST
 	Result inline clipped_lrint(float f) {
+		// check that Result is signed
+		BOOST_STATIC_ASSERT((std::numeric_limits<Result>::is_signed));
+
 		//This is not exactly correct (one value less) but at least works.
 		Result const max(((1 << (bits - 2)) - 1) << 1); // The compiler is able to compute this statically.
 		Result const min(-max-1);
 		return math::clipped(min, math::lrint<Result>(f), max);
 	}
+
+#elif 0
+
+	/******* first convert to integer, then clip **********/
+	
+	/// combines float to signed integer conversion with clipping.
+	///\todo: WARNING!!! This only works with signed types, not with unsigned.
+	template<typename Result, unsigned int const bits> UNIVERSALIS__COMPILER__CONST
+	Result inline clipped_lrint(float f) {
+		// check that Result is signed
+		BOOST_STATIC_ASSERT((std::numeric_limits<Result>::is_signed));
+
+		// use 64-bit if needed, otherwise 32-bit
+		if(sizeof(Result) >= sizeof(std::int32_t)) { // The compiler *should* be able to compute this statically.
+			std::int64_t const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
+			std::int64_t const min(-max - 1);
+			return math::clipped(min, math::lrint<std::int64_t>(f), max);
+		} else {
+			std::int32_t const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
+			std::int32_t const min(-max - 1);
+			return math::clipped(min, math::lrint<std::int32_t>(f), max);
+		}
+	}
+
+#elif 0
+
+	/******* first clip, then convert to integer (like the previous f2iclipXX functions) **********/
+	
+	/// combines float to signed integer conversion with clipping.
+	///\todo: WARNING!!! This only works with signed types, not with unsigned.
+	template<typename Result, unsigned int const bits> UNIVERSALIS__COMPILER__CONST
+	Result inline clipped_lrint(float f) {
+		// check that Result is signed
+		BOOST_STATIC_ASSERT((std::numeric_limits<Result>::is_signed));
+
+		int const max((1 << (bits - 1)) - 1);
+		int const min(-max - 1);
+		return math::lrint<Result>(math::clipped(float(min), f, float(max)));
+	}
+
+#endif
 
 	/// combines float to signed integer conversion with clipping.
 	template<typename Result> UNIVERSALIS__COMPILER__CONST
