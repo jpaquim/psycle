@@ -8,17 +8,19 @@
 namespace psycle {
 	namespace host {
 
-		class EnterNoteCommand : public CommandUndoable {
+		class EnterDataCommand : public CommandUndoable {
 		public:
-			EnterNoteCommand(class PatternView* pat_view, int note);
-			~EnterNoteCommand();
+			EnterDataCommand(class PatternView* pat_view, unsigned int n_char,
+							 unsigned int n_flags);
+			~EnterDataCommand();
 
 			virtual void Execute();
 			virtual void Undo();
 			virtual void Redo();
 
 		private:
-			int note_;
+			unsigned int n_char_;
+			unsigned int n_flags_;
 			PatternView* pat_view_;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::PatternEvent prev_ev_;

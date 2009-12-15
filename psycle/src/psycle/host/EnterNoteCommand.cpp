@@ -5,22 +5,24 @@
 namespace psycle {
 	namespace host {
 		
-		EnterNoteCommand::EnterNoteCommand(PatternView* pat_view, int note) 
+		EnterDataCommand::EnterDataCommand(PatternView* pat_view, unsigned int n_char,
+										   unsigned int n_flags) 
 			: pat_view_(pat_view),
-			  note_(note) {
+			  n_char_(n_char),
+			  n_flags_(n_flags) {
 		}
 		
-		EnterNoteCommand::~EnterNoteCommand() {
+		EnterDataCommand::~EnterDataCommand() {
 		}
 
-		void EnterNoteCommand::Execute() {
+		void EnterDataCommand::Execute() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			// three steps
 			// 1. Undo data store
 			// 2. Execute
 			// 3. Redo data store
 
-			// 1. Undo
+			// 1. Undo data store
 			psycle::core::Pattern::iterator it = pat_view_->GetEventOnCursor();
 			if ( it == pat_view_->pattern()->end() ) {
 				prev_has_ev_ = false;
@@ -31,8 +33,8 @@ namespace psycle {
 				prev_has_ev_ = true;
 			}
 			// 2. Execute Command
-			pat_view_->EnterNote(note_);
-			// 3. Redo
+			pat_view_->EnterData(n_char_, n_flags_);
+			// 3. Redo data store
 			it = pat_view_->GetEventOnPos(prev_pos_);
 			if ( it == pat_view_->pattern()->end() ) {
 				next_pos_ = prev_pos_;
@@ -45,7 +47,7 @@ namespace psycle {
 #endif
 		}
 
-		void EnterNoteCommand::Undo() {
+		void EnterDataCommand::Undo() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Pattern::iterator it = pat_view_->GetEventOnPos(prev_pos_);
 			if (it != pat_view_->pattern()->end()) {
@@ -58,7 +60,7 @@ namespace psycle {
 #endif
 		}
 
-		void EnterNoteCommand::Redo() {
+		void EnterDataCommand::Redo() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Pattern::iterator it = pat_view_->GetEventOnPos(next_pos_);
 			if (it != pat_view_->pattern()->end()) {

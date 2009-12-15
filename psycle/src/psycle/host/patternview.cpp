@@ -19,7 +19,7 @@ using namespace psycle::core;
 #include "TransformPatternDlg.hpp"
 #include "InterpolateCurveDlg.hpp"
 #include "PatDlg.hpp"
-#include "EnterNoteCommand.hpp"
+#include "EnterDataCommand.hpp"
 
 #ifdef _MSC_VER
 #undef min
@@ -177,40 +177,29 @@ namespace psycle {
 			BOOL bRepeat = nFlags&0x4000;
 				if (!(Global::pPlayer->playing() && Global::pConfig->_followSong && bRepeat))
 				{
-					bool success;
+					CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
+					if ( editcur.col == 0 && cmd.GetType() != CT_Note)
+						return false; else
+					if ( !(::GetKeyState(VK_CONTROL)>=0 && ::GetKeyState(VK_SHIFT)>=0))
+						return false;
 					// add data
-					success = EnterData(nChar,nFlags);
-					return success;
+					project()->cmd_manager()->ExecuteCommand(
+						new EnterDataCommand(this, nChar, nFlags));
+					return true;
 				}
 				return false;
 		}
 
-		bool PatternView::EnterData(UINT nChar,UINT nFlags)
+		void PatternView::EnterData(UINT nChar,UINT nFlags)
 		{
-			if ( editcur.col == 0 )
-			{
+			if ( editcur.col == 0 ) {
 				// get command
 				CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
-
-		//		BOOL bRepeat = nFlags&0x4000;
-				if ( cmd.GetType() == CT_Note )
-				{
-		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
-		//			{
-					project()->cmd_manager()->ExecuteCommand(
-						new EnterNoteCommand(this, cmd.GetNote()));
-					return true;
-		//			}
-				}
-				return false;
+				EnterNote(cmd.GetNote());
+			} else {
+				MSBPut(nChar);
 			}
-			else if ( ::GetKeyState(VK_CONTROL)>=0 && ::GetKeyState(VK_SHIFT)>=0 )
-			{
-				return MSBPut(nChar);
-			}
-			return false;
 		}
-
 
 		void PatternView::PreparePatternRefresh(int drawMode)
 		{
@@ -4954,25 +4943,10 @@ namespace psycle {
 // 			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 			int line = editcur.line;
-			psycle::core::Song* song = this->song();
-			psycle::core::PatternSequence* sequence = &song->patternSequence();
-			psycle::core::SequenceLine* sline = *(sequence->begin());	
-			psycle::core::SequenceLine::iterator sit = sline->begin();
-			for (int pos = 0; sit != sline->end() && pos < editPosition; ++sit, ++pos);
-			assert(sit != sline->end());
-			psycle::core::SequenceEntry* entry = sit->second;
-			psycle::core::Pattern* pattern = entry->pattern();
-
-			double beat_zoom = project()->beat_zoom();
-			psycle::core::Pattern::iterator it;
-			double low = (editcur.line - 0.5) / beat_zoom;
-			double up  = (editcur.line + 0.5) / beat_zoom;
-			double insert_pos = editcur.line / beat_zoom;
-			it = pattern->lower_bound(low);
+			psycle::core::Pattern::iterator it = GetEventOnCursor();
+			double insert_pos = editcur.line / static_cast<double>(project()->beat_zoom());
 			
-			if (it == pattern->end() || 
-				!(it->first >= low && it->first < up)
-				) {
+			if (it == pattern()->end()) {
 				// no entry on the beatpos
 				psycle::core::PatternEvent ev;
 				int old_value = 0;
@@ -4998,85 +4972,45 @@ namespace psycle {
 					ev.setParameter(new_value);
 				}
 				ev.set_track(editcur.track);				
-				pattern->insert(insert_pos, ev);
-			} else
-			if (it->first >= low && it->first < up)	{
-				psycle::core::Pattern::iterator track_it = it;
-				bool found = false;
-				for ( ; it != pattern->end() && it->first < up; ++it ) {
-					psycle::core::PatternEvent& ev = it->second;
-					if (ev.track() == editcur.track ) {
-						//it->second.setNote(note);
-						// no entry on the beatpos
-						psycle::core::PatternEvent& ev = it->second;
-						int old_value = 0;
-						int new_value = 0;
-						if ( editcur.col == 1 || editcur.col == 2) {
-							old_value = ev.instrument();
-						} else
-						if ( editcur.col == 3 || editcur.col == 4) {
-							old_value = ev.machine();
-						} else
-						if ( editcur.col == 5 || editcur.col == 6) {
-							old_value = ev.command();
-						} else
-						if ( editcur.col == 7 || editcur.col == 8) {
-							old_value = ev.parameter();
-						}
-						switch ((editcur.col+1)%2) {
-							case 0:	
-								new_value = (old_value&0xF)+(sValue<<4); 
-							break;		
-							case 1:	
-								new_value = (old_value&0xF0)+(sValue); 
-							break;
-						}
-						if ( editcur.col == 1 || editcur.col == 2) {
-							ev.setInstrument(new_value);
-						} else
-						if ( editcur.col == 3 || editcur.col == 4) {
-							ev.setMachine(new_value);
-						} else
-						if ( editcur.col == 5 || editcur.col == 6) {
-							ev.setCommand(new_value);
-						} else
-						if ( editcur.col == 7 || editcur.col == 8) {
-							ev.setParameter(new_value);
-						}
-						ev.set_track(editcur.track);				
-						found = true;
-						break;
-					}
+				pattern()->insert(insert_pos, ev);
+			} else {
+				psycle::core::PatternEvent& ev = it->second;
+				int old_value = 0;
+				int new_value = 0;
+				if ( editcur.col == 1 || editcur.col == 2) {
+					old_value = ev.instrument();
+				} else
+				if ( editcur.col == 3 || editcur.col == 4) {
+					old_value = ev.machine();
+				} else
+				if ( editcur.col == 5 || editcur.col == 6) {
+					old_value = ev.command();
+				} else
+				if ( editcur.col == 7 || editcur.col == 8) {
+					old_value = ev.parameter();
 				}
-				if (!found) {
-					// no entry on the beatpos
-					psycle::core::PatternEvent ev;
-					int old_value = 0;
-					int new_value = 0;
-					switch ((editcur.col+1)%2) {
+				switch ((editcur.col+1)%2) {
 						case 0:	
-						new_value = (old_value&0xF)+(sValue<<4); 
+							new_value = (old_value&0xF)+(sValue<<4); 
 						break;		
 						case 1:	
-						new_value = (old_value&0xF0)+(sValue); 
+							new_value = (old_value&0xF0)+(sValue); 
 						break;
 					}
-					if ( editcur.col == 1 || editcur.col == 2) {
-						ev.setInstrument(new_value);
-					} else
-					if ( editcur.col == 3 || editcur.col == 4) {
-						ev.setMachine(new_value);
-					} else
-					if ( editcur.col == 5 || editcur.col == 6) {
-						ev.setCommand(new_value);
-					} else
-					if ( editcur.col == 7 || editcur.col == 8) {
-						ev.setParameter(new_value);
-					}
-					ev.set_track(editcur.track);				
-					pattern->insert(insert_pos, ev);
+				if ( editcur.col == 1 || editcur.col == 2) {
+					ev.setInstrument(new_value);
+				} else
+				if ( editcur.col == 3 || editcur.col == 4) {
+					ev.setMachine(new_value);
+				} else
+				if ( editcur.col == 5 || editcur.col == 6) {
+					ev.setCommand(new_value);
+				} else
+				if ( editcur.col == 7 || editcur.col == 8) {
+					ev.setParameter(new_value);
 				}
-			} 
+				ev.set_track(editcur.track);				
+			}
 
 #else
 			// UNDO CODE MSB PUT
