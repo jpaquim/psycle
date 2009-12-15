@@ -1398,7 +1398,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnEditUndo() 
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			projects_->cmd_manager()->Undo();
+#else
 			pattern_view()->OnEditUndo();
+#endif
 		}
 
 		void CChildView::OnEditRedo() 

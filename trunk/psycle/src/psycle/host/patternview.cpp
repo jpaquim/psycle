@@ -19,6 +19,7 @@ using namespace psycle::core;
 #include "TransformPatternDlg.hpp"
 #include "InterpolateCurveDlg.hpp"
 #include "PatDlg.hpp"
+#include "EnterNoteCommand.hpp"
 
 #ifdef _MSC_VER
 #undef min
@@ -196,8 +197,9 @@ namespace psycle {
 				{
 		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
 		//			{
-						EnterNote(cmd.GetNote());
-						return true;
+					project()->parent()->cmd_manager()->ExecuteCommand(
+						new EnterNoteCommand(this, cmd.GetNote()));
+					return true;
 		//			}
 				}
 				return false;
@@ -8349,6 +8351,9 @@ namespace psycle {
 
 		void PatternView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			pCmdUI->Enable(project()->parent()->cmd_manager()->Size() != 0); // just for test
+#else
 			if(pUndoList) 
 			{
 				switch (pUndoList->type)
@@ -8376,6 +8381,7 @@ namespace psycle {
 				pCmdUI->SetText("Undo");
 				pCmdUI->Enable(FALSE);
 			}
+#endif
 		}
 
 		void PatternView::OnUpdateRedo(CCmdUI* pCmdUI)
