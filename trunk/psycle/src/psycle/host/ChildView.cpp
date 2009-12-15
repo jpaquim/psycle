@@ -1399,7 +1399,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnEditUndo() 
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			projects_->cmd_manager()->Undo();
+			if (projects_->active_project())
+				projects_->active_project()->cmd_manager()->Undo();
 #else
 			pattern_view()->OnEditUndo();
 #endif
@@ -1408,7 +1409,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CChildView::OnEditRedo() 
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			projects_->cmd_manager()->Redo();
+			if (projects_->active_project())
+				projects_->active_project()->cmd_manager()->Redo();
 #else
 			pattern_view()->OnEditRedo();
 #endif
