@@ -8352,7 +8352,7 @@ namespace psycle {
 		void PatternView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			pCmdUI->Enable(project()->parent()->cmd_manager()->Size() != 0); // just for test
+			pCmdUI->Enable(project()->parent()->cmd_manager()->UndoSize() != 0);
 #else
 			if(pUndoList) 
 			{
@@ -8386,6 +8386,9 @@ namespace psycle {
 
 		void PatternView::OnUpdateRedo(CCmdUI* pCmdUI)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			pCmdUI->Enable(project()->parent()->cmd_manager()->RedoSize() != 0);
+#else
 			if(pRedoList) 
 			{
 				switch (pRedoList->type)
@@ -8413,6 +8416,7 @@ namespace psycle {
 				pCmdUI->Enable(FALSE);
 				pCmdUI->SetText("Redo");
 			}
+#endif
 		}
 
 		void PatternView::ShowSwingFillDlg(bool bTrackMode)

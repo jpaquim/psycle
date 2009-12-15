@@ -1407,7 +1407,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnEditRedo() 
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			projects_->cmd_manager()->Redo();
+#else
 			pattern_view()->OnEditRedo();
+#endif
 		}
 
 	PSYCLE__MFC__NAMESPACE__END
