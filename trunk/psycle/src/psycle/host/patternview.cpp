@@ -4331,6 +4331,46 @@ namespace psycle {
 			}
 		}
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
+		psycle::core::Pattern::iterator PatternView::GetEventOnPos(double insert_pos) {
+			double beat_zoom = project()->beat_zoom();
+			int line = static_cast<int>(project()->beat_zoom() * insert_pos);
+			psycle::core::Pattern::iterator it;
+			double low = (line - 0.5) / beat_zoom;
+			double up  = (line + 0.5) / beat_zoom;
+
+			it = pattern()->lower_bound(low);
+
+			// no entry on the beatpos
+			if (it == pattern()->end() || 
+				!(it->first >= low && it->first < up)
+				) {
+				return pattern()->end();
+			} else
+			if (it->first >= low && it->first < up)	{
+				psycle::core::Pattern::iterator track_it = it;
+				bool found = false;
+				for ( ; it != pattern()->end() && it->first < up; ++it ) {
+					psycle::core::PatternEvent& ev = it->second;
+					if (ev.track() == editcur.track ) {
+						return it;
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					return pattern()->end();
+				}
+			} 
+
+		}
+
+		psycle::core::Pattern::iterator PatternView::GetEventOnCursor() {
+			return GetEventOnPos(editcur.line / static_cast<double>(project()->beat_zoom()));
+		}
+#endif
+
 
 		void PatternView::EnterNote(int note, int velocity, bool bTranspose)
 		{
@@ -4346,44 +4386,22 @@ namespace psycle {
 				note = std::min(note, 119);
 			}
 
+			psycle::core::Pattern::iterator it = GetEventOnCursor();
+
 			int line = editcur.line;			
-
-			double beat_zoom = project()->beat_zoom();
-			psycle::core::Pattern::iterator it;
-			double low = (editcur.line - 0.5) / beat_zoom;
-			double up  = (editcur.line + 0.5) / beat_zoom;
-			double insert_pos = editcur.line / beat_zoom;
-			it = pattern()->lower_bound(low);			
-
-			if (it == pattern()->end() || 
-				!(it->first >= low && it->first < up)
-				) {
+			double insert_pos = editcur.line / static_cast<double>(project()->beat_zoom());
+					
+			if (it == pattern()->end()) {
 				// no entry on the beatpos
 				psycle::core::PatternEvent ev;
 				ev.setNote(note);
 				ev.set_track(editcur.track);
 				ev.setMachine(song()->seqBus);
 				pattern()->insert(insert_pos, ev);
-			} else
-			if (it->first >= low && it->first < up)	{
-				psycle::core::Pattern::iterator track_it = it;
-				bool found = false;
-				for ( ; it != pattern()->end() && it->first < up; ++it ) {
-					psycle::core::PatternEvent& ev = it->second;
-					if (ev.track() == editcur.track ) {
-						it->second.setNote(note);
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					psycle::core::PatternEvent ev;
-					ev.setNote(note);
-					ev.set_track(editcur.track);
-					ev.setMachine(song()->seqBus);
-					pattern()->insert(insert_pos, ev);
-				}
-			} 
+			} else {
+				it->second.setNote(note);
+			}
+
 			NewPatternDraw(editcur.track,editcur.track,line,line);
 			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 

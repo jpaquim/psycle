@@ -21,8 +21,12 @@ namespace psycle {
 			int note_;
 			PatternView* pat_view_;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::Pattern prev_pattern_;
-			psycle::core::Pattern next_pattern_;
+			psycle::core::PatternEvent prev_ev_;
+			double prev_pos_;
+			bool prev_has_ev_;
+			psycle::core::PatternEvent next_ev_;
+			double next_pos_;
+			bool next_has_ev_;
 #endif
 		};
 
