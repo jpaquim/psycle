@@ -251,7 +251,7 @@ namespace psycle {
 			void LoadBlock(FILE* file);			
 			void DecPosition();
 			void SelectMachineUnderCursor(void);
-			bool EnterData(UINT nChar,UINT nFlags);
+			void EnterData(UINT nChar,UINT nFlags);
 
 			bool CheckUnsavedSong();
 
