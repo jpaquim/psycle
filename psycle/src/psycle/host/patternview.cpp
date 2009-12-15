@@ -197,7 +197,7 @@ namespace psycle {
 				{
 		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
 		//			{
-					project()->parent()->cmd_manager()->ExecuteCommand(
+					project()->cmd_manager()->ExecuteCommand(
 						new EnterNoteCommand(this, cmd.GetNote()));
 					return true;
 		//			}
@@ -8352,7 +8352,7 @@ namespace psycle {
 		void PatternView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			pCmdUI->Enable(project()->parent()->cmd_manager()->UndoSize() != 0);
+			pCmdUI->Enable(project()->cmd_manager()->UndoSize() != 0);
 #else
 			if(pUndoList) 
 			{
@@ -8387,7 +8387,7 @@ namespace psycle {
 		void PatternView::OnUpdateRedo(CCmdUI* pCmdUI)
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			pCmdUI->Enable(project()->parent()->cmd_manager()->RedoSize() != 0);
+			pCmdUI->Enable(project()->cmd_manager()->RedoSize() != 0);
 #else
 			if(pRedoList) 
 			{

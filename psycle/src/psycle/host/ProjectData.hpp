@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Psycle.hpp"
-#include "CommandManager.hpp"
 #include "project.hpp"
 #include <vector>
 
@@ -22,16 +21,13 @@ namespace psycle {
 			Project* active_project() { return active_project_; }
 
 			// but for now simple one song new, load save code here
-			void FileNew();
-
-			CommandManager* cmd_manager() { return &cmd_manager_; }
+			void FileNew();			
 
 		private:
 			Project* active_project_;
 			// the projects
 			std::vector<Project*> projects_;
 
-			CommandManager cmd_manager_;
 		};
 	}
 }
