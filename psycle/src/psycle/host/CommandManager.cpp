@@ -5,13 +5,19 @@ namespace psycle {
 	namespace host {
 
 		CommandManager::CommandManager()
-			: max_cmds_(30) {
+			: max_undo_(30),
+			  max_redo_(30) {
 		}
 
 		CommandManager::~CommandManager() {
-			while (!command_queue_.empty()) {
-				CommandUndoable* cmd = command_queue_.back();
-				command_queue_.pop_back();
+			while (!undo_queue_.empty()) {
+				CommandUndoable* cmd = undo_queue_.back();
+				undo_queue_.pop_back();
+				delete cmd;
+			}
+			while (!redo_queue_.empty()) {
+				CommandUndoable* cmd = redo_queue_.back();
+				redo_queue_.pop_back();
 				delete cmd;
 			}
 		}
@@ -20,20 +26,41 @@ namespace psycle {
 		}
 
 		void CommandManager::InvokeCommand(CommandUndoable* cmd) {			
-			command_queue_.push_back(cmd);
-			if ( command_queue_.size() > max_cmds_ ) {
-				CommandUndoable* cmd = command_queue_.front();
-				command_queue_.pop_front();
+			undo_queue_.push_back(cmd);
+			if (undo_queue_.size() > max_undo_) {
+				CommandUndoable* cmd = undo_queue_.front();
+				undo_queue_.pop_front();
 				delete cmd;
 			}
 		}
 
 		void CommandManager::Undo() {
-			if (!command_queue_.empty()) {
-				CommandUndoable* cmd = command_queue_.back();
-				command_queue_.pop_back();
+			if (!undo_queue_.empty()) {
+				CommandUndoable* cmd = undo_queue_.back();
+				undo_queue_.pop_back();
 				cmd->Undo();
-				delete cmd;
+				if (redo_queue_.size() > max_redo_) {
+					CommandUndoable* cmd = redo_queue_.front();
+					redo_queue_.pop_front();
+					delete cmd;
+				} else {
+					redo_queue_.push_back(cmd);
+				}
+			}
+		}
+
+		void CommandManager::Redo() {
+			if (!redo_queue_.empty()) {
+				CommandUndoable* cmd = redo_queue_.back();
+				redo_queue_.pop_back();
+				cmd->Redo();
+				if (undo_queue_.size() > max_undo_) {
+					CommandUndoable* cmd = undo_queue_.front();
+					undo_queue_.pop_front();
+					delete cmd;
+				} else {
+					undo_queue_.push_back(cmd);
+				}	
 			}
 		}
 

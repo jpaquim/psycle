@@ -15,12 +15,14 @@ namespace psycle {
 
 			virtual void Execute();
 			virtual void Undo();
+			virtual void Redo();
 
 		private:
 			int note_;
 			PatternView* pat_view_;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Pattern prev_pattern_;
+			psycle::core::Pattern next_pattern_;
 #endif
 		};
 
