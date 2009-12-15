@@ -136,6 +136,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 //			Gdiplus::GdiplusStartupInput gdiplusStartupInput; // GDI+ stuff
 //			ULONG_PTR gdiplusToken; // GDI+ stuff
+		
 
 		public:
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
