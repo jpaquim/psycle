@@ -170,6 +170,9 @@ namespace psycle {
 			void SetPattern(Pattern* pattern) {
 				pattern_ = pattern;
 			}
+
+			psycle::core::Pattern::iterator GetEventOnCursor();
+			psycle::core::Pattern::iterator GetEventOnPos(double pos);
 #endif
 
 			class Project* project();
