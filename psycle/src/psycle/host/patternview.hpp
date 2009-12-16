@@ -172,7 +172,7 @@ namespace psycle {
 			}
 
 			psycle::core::Pattern::iterator GetEventOnCursor();
-			psycle::core::Pattern::iterator GetEventOnPos(double pos);
+			psycle::core::Pattern::iterator GetEventOnPos(double pos, int track);
 #endif
 
 			class Project* project();

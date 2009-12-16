@@ -23,6 +23,7 @@ namespace psycle {
 			// 3. Redo data store
 
 			// 1. Undo data store
+			prev_track_ = pat_view_->editcur.track;
 			psycle::core::Pattern::iterator it = pat_view_->GetEventOnCursor();
 			if ( it == pat_view_->pattern()->end() ) {
 				prev_has_ev_ = false;
@@ -35,7 +36,8 @@ namespace psycle {
 			// 2. Execute Command
 			pat_view_->EnterData(n_char_, n_flags_);
 			// 3. Redo data store
-			it = pat_view_->GetEventOnPos(prev_pos_);
+			next_track_ = pat_view_->editcur.track;
+			it = pat_view_->GetEventOnPos(prev_pos_, next_track_);
 			if ( it == pat_view_->pattern()->end() ) {
 				next_pos_ = prev_pos_;
 				next_has_ev_ = false;
@@ -49,7 +51,7 @@ namespace psycle {
 
 		void EnterDataCommand::Undo() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::Pattern::iterator it = pat_view_->GetEventOnPos(prev_pos_);
+			psycle::core::Pattern::iterator it = pat_view_->GetEventOnPos(prev_pos_, prev_track_);
 			if (it != pat_view_->pattern()->end()) {
 				pat_view_->pattern()->erase(it);
 			}
@@ -62,7 +64,7 @@ namespace psycle {
 
 		void EnterDataCommand::Redo() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::Pattern::iterator it = pat_view_->GetEventOnPos(next_pos_);
+			psycle::core::Pattern::iterator it = pat_view_->GetEventOnPos(next_pos_, next_track_);
 			if (it != pat_view_->pattern()->end()) {
 				pat_view_->pattern()->erase(it);
 			}
