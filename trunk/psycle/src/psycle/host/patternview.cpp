@@ -22,6 +22,10 @@ using namespace psycle::core;
 #include "EnterDataCommand.hpp"
 #include "DeleteBlockCommand.hpp"
 #include "PasteBlockCommand.hpp"
+#include "DeleteCurrCommand.hpp"
+#include "ClearCurrCommand.hpp"
+#include "InsertCurrCommand.hpp"
+#include "BlockTransposeCommand.hpp"
 
 #ifdef _MSC_VER
 #undef min
@@ -4364,8 +4368,7 @@ namespace psycle {
 		}
 
 		psycle::core::Pattern::iterator PatternView::GetEventOnCursor() {
-			return GetEventOnPos(editcur.line / static_cast<double>(project()->beat_zoom()),
-								 editcur.track);
+			return GetEventOnPos(editcur.line / static_cast<double>(project()->beat_zoom()), editcur.track);
 		}
 #endif
 
@@ -5161,7 +5164,6 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
-
 			int patlines = static_cast<int>(beat_zoom * pat->beats());
 			if ( Global::pInputHandler->bFT2DelBehaviour )
 			{
@@ -5170,9 +5172,7 @@ namespace psycle {
 				else
 					editcur.line--;
 			}
-
-			// todo AddUndo
-			
+			// todo AddUndo		
 			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
@@ -5222,16 +5222,11 @@ namespace psycle {
 			PatternEvent blank;
 			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
 #endif
-//			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
-
+			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Repaint(draw_modes::pattern);
-#else
 			Repaint(draw_modes::data);
-#endif
 		}
 
 		void PatternView::InsertCurr()
@@ -5278,18 +5273,13 @@ namespace psycle {
 				memcpy(offset+(i*MULTIPLY), offset+((i-1)*MULTIPLY), EVENT_SIZE);
 
 			PatternEvent blank;
-			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
-
-			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
+			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);			
 #endif
+			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Repaint(draw_modes::pattern);
-#else
 			Repaint(draw_modes::data);
-#endif
 		}
 
 
@@ -7605,7 +7595,7 @@ namespace psycle {
 			case cdefRowInsert:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;
-				InsertCurr();
+				project()->cmd_manager()->ExecuteCommand(new InsertCurrCommand(this));
 				break;
 
 			case cdefRowDelete:
@@ -7617,7 +7607,7 @@ namespace psycle {
 				}
 				else
 				{
-					DeleteCurr();
+					project()->cmd_manager()->ExecuteCommand(new DeleteCurrCommand(this));
 				}
 				break;
 
@@ -7630,7 +7620,7 @@ namespace psycle {
 				}
 				else
 				{
-					ClearCurr();		
+					project()->cmd_manager()->ExecuteCommand(new ClearCurrCommand(this));
 				}
 				break;
 
@@ -7713,16 +7703,16 @@ namespace psycle {
 				break;
 
 			case cdefTransposeBlockInc:
-				BlockTranspose(1);
+				project()->cmd_manager()->ExecuteCommand(new BlockTransposeCommand(this,1));
 				break;
 			case cdefTransposeBlockDec:
-				BlockTranspose(-1);
+				project()->cmd_manager()->ExecuteCommand(new BlockTransposeCommand(this,-1));
 				break;
 			case cdefTransposeBlockInc12:
-				BlockTranspose(12);
+				project()->cmd_manager()->ExecuteCommand(new BlockTransposeCommand(this,12));
 				break;
 			case cdefTransposeBlockDec12:
-				BlockTranspose(-12);
+				project()->cmd_manager()->ExecuteCommand(new BlockTransposeCommand(this,-12));
 				break;
 
 

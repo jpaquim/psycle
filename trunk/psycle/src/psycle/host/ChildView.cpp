@@ -34,6 +34,7 @@ using namespace psycle::core;
 #include <cmath>
 #include <cderr.h>
 #include "DeleteBlockCommand.hpp"
+#include "BlockTransposeCommand.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -1121,19 +1122,23 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CChildView::OnPopTranspose1() {
-			pattern_view()->BlockTranspose(1);
+			projects_->active_project()->cmd_manager()->ExecuteCommand(
+				new BlockTransposeCommand(pattern_view(), 1));
 		}
 
 		void CChildView::OnPopTranspose12() {
-			pattern_view()->BlockTranspose(12);
+			projects_->active_project()->cmd_manager()->ExecuteCommand(
+				new BlockTransposeCommand(pattern_view(), 12));
 		}
 
 		void CChildView::OnPopTranspose_1() {
-			pattern_view()->BlockTranspose(-1);
+			projects_->active_project()->cmd_manager()->ExecuteCommand(
+				new BlockTransposeCommand(pattern_view(), -1));
 		}
 
 		void CChildView::OnPopTranspose_12() {
-			pattern_view()->BlockTranspose(-12);
+			projects_->active_project()->cmd_manager()->ExecuteCommand(
+				new BlockTransposeCommand(pattern_view(), -12));
 		}
 
 		void CChildView::OnPopTransformpattern() 
