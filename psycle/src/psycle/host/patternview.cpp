@@ -5818,6 +5818,8 @@ namespace psycle {
 														 line_pos(blockSel.end.line+1, true),
 														 blockSel.start.track,
 														 blockSel.end.track+1);
+				if (cutit)
+					project()->cmd_manager()->ExecuteCommand(new DeleteBlockCommand(this));
 #else
 				int ps=song()->playOrder[editPosition];
 				
@@ -5850,7 +5852,6 @@ namespace psycle {
 				if(cutit)
 				{
 					NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-
 					Repaint(draw_modes::data);
 				}
 			}
