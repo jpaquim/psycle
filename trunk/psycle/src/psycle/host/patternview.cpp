@@ -20,6 +20,7 @@ using namespace psycle::core;
 #include "InterpolateCurveDlg.hpp"
 #include "PatDlg.hpp"
 #include "EnterDataCommand.hpp"
+#include "DeleteBlockCommand.hpp"
 
 #ifdef _MSC_VER
 #undef min
@@ -182,6 +183,12 @@ namespace psycle {
 						return false; else
 					if ( !(::GetKeyState(VK_CONTROL)>=0 && ::GetKeyState(VK_SHIFT)>=0))
 						return false;
+					else if (editcur.col != 0) {
+						if	(	nChar>='0'		&&	nChar<='9')			{ }
+						else if(nChar>=VK_NUMPAD0&&nChar<=VK_NUMPAD9)	{ }
+						else if(nChar>='A'		&&	nChar<='F')			{ }
+						else											{ return false; }
+					}
 					// add data
 					project()->cmd_manager()->ExecuteCommand(
 						new EnterDataCommand(this, nChar, nFlags));
@@ -7603,7 +7610,7 @@ namespace psycle {
 				ChordModeOffs = 0;
 				if (blockSelected && Global::pConfig->_windowsBlocks)
 				{
-					DeleteBlock();
+					project()->cmd_manager()->ExecuteCommand(new DeleteBlockCommand(this));
 				}
 				else
 				{
@@ -7616,7 +7623,7 @@ namespace psycle {
 				ChordModeOffs = 0;
 				if (blockSelected && Global::pConfig->_windowsBlocks)
 				{
-					DeleteBlock();
+					project()->cmd_manager()->ExecuteCommand(new DeleteBlockCommand(this));
 				}
 				else
 				{
@@ -7755,7 +7762,7 @@ namespace psycle {
 			case cdefBlockDelete:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;
-				DeleteBlock();
+				project()->cmd_manager()->ExecuteCommand(new DeleteBlockCommand(this));
 				break;
 
 			case cdefBlockInterpolate:
