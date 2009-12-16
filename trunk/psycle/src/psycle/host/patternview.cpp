@@ -21,6 +21,7 @@ using namespace psycle::core;
 #include "PatDlg.hpp"
 #include "EnterDataCommand.hpp"
 #include "DeleteBlockCommand.hpp"
+#include "PasteBlockCommand.hpp"
 
 #ifdef _MSC_VER
 #undef min
@@ -7751,13 +7752,13 @@ namespace psycle {
 			case cdefBlockPaste:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;
-				PasteBlock(editcur.track,editcur.line,false);
+				project()->cmd_manager()->ExecuteCommand(new PasteBlockCommand(this, editcur.track,editcur.line,false));
 				break;
 
 			case cdefBlockMix:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;
-				PasteBlock(editcur.track,editcur.line,true);
+				project()->cmd_manager()->ExecuteCommand(new PasteBlockCommand(this, editcur.track,editcur.line,false));
 				break;
 
 			case cdefBlockDelete:
@@ -8540,7 +8541,7 @@ namespace psycle {
 
 		void PatternView::OnPopMixpaste()
 		{
-			PasteBlock(editcur.track,editcur.line,true);
+			project()->cmd_manager()->ExecuteCommand(new PasteBlockCommand(this, editcur.track, editcur.line, false));
 		}
 
 		void PatternView::OnPopBlockswitch()
@@ -8550,7 +8551,7 @@ namespace psycle {
 
 		void PatternView::OnPopPaste()
 		{
-			PasteBlock(editcur.track,editcur.line,false);
+			project()->cmd_manager()->ExecuteCommand(new PasteBlockCommand(this, editcur.track, editcur.line, false));
 		}
 
 		void PatternView::OnPopInterpolateCurve()
