@@ -25,9 +25,11 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::PatternEvent prev_ev_;
 			double prev_pos_;
+			int prev_track_;
 			bool prev_has_ev_;
 			psycle::core::PatternEvent next_ev_;
 			double next_pos_;
+			int next_track_;
 			bool next_has_ev_;
 #endif
 		};

@@ -4330,7 +4330,7 @@ namespace psycle {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 
-		psycle::core::Pattern::iterator PatternView::GetEventOnPos(double insert_pos) {
+		psycle::core::Pattern::iterator PatternView::GetEventOnPos(double insert_pos, int track) {
 			double beat_zoom = project()->beat_zoom();
 			int line = static_cast<int>(project()->beat_zoom() * insert_pos);
 			psycle::core::Pattern::iterator it;
@@ -4350,7 +4350,7 @@ namespace psycle {
 				bool found = false;
 				for ( ; it != pattern()->end() && it->first < up; ++it ) {
 					psycle::core::PatternEvent& ev = it->second;
-					if (ev.track() == editcur.track ) {
+					if (ev.track() == track ) {
 						return it;
 						found = true;
 						break;
@@ -4364,7 +4364,8 @@ namespace psycle {
 		}
 
 		psycle::core::Pattern::iterator PatternView::GetEventOnCursor() {
-			return GetEventOnPos(editcur.line / static_cast<double>(project()->beat_zoom()));
+			return GetEventOnPos(editcur.line / static_cast<double>(project()->beat_zoom()),
+								 editcur.track);
 		}
 #endif
 
