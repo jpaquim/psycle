@@ -33,6 +33,7 @@ using namespace psycle::core;
 #include "ITModule2.h"
 #include <cmath>
 #include <cderr.h>
+#include "DeleteBlockCommand.hpp"
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -1099,7 +1100,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		void CChildView::OnPopDelete() {
-			pattern_view()->DeleteBlock();
+			projects_->active_project()->cmd_manager()->ExecuteCommand(new DeleteBlockCommand(pattern_view()));
 		}
 
 		void CChildView::OnPopInterpolate() {
