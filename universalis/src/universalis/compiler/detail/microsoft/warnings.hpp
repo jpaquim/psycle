@@ -21,17 +21,6 @@
 	#pragma warning(error:4150) // deletion of pointer to incomplete type 'X<...>'; no destructor called
 	#pragma warning(error:4518) // storage-class or type specifier(s) unexpected here; ignored
 
-	/////////////
-	// weirdness
-	/////////////
-	//#pragma warning(disable:4702) // unreachable code
-		// see comments on exception handling (and also global optimization on msvc 6)
-		// [bohan] actually, here is what i did:
-		// [bohan] the problem appeared in <vector>, but seems to be due to code in <stdexcept>, which is #included by <vector>.
-		// [bohan] i've just disabled the warning/error in precompiled_headers.h,
-		// [bohan] around the #include <stdexcept> (which is #included just for the fix)
-		// [bohan] maybe there will be more problematic headers appearing later, i'll do the same as with <stdexcept>.
-
 	//////////
 	// shiatz
 	//////////
@@ -98,7 +87,7 @@
 	#define _CRT_NONSTDC_NO_WARNINGS // posix is okay
 	#define _ATL_SECURE_NO_WARNINGS
 	#define _AFX_SECURE_NO_WARNINGS
-	// old names for the same thing
+	// old names for the same thing (vc2005 without sp1)
 	#define _SCL_SECURE_NO_DEPRECATE
 	#define _CRT_SECURE_NO_DEPRECATE
 	#define _CRT_NONSTDC_NO_DEPRECATE // posix is okay
