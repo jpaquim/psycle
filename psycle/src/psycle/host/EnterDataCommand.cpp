@@ -33,8 +33,10 @@ namespace psycle {
 				prev_pos_ = it->first;
 				prev_has_ev_ = true;
 			}
+#endif
 			// 2. Execute Command
 			pat_view_->EnterData(n_char_, n_flags_);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			// 3. Redo data store
 			next_track_ = pat_view_->editcur.track;
 			it = pat_view_->GetEventOnPos(prev_pos_, next_track_);

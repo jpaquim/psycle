@@ -131,6 +131,9 @@ namespace psycle {
 
 		bool PatternView::CheckUnsavedSong()
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			return (project()->cmd_manager()->UndoSize() == 0);
+#else
 			bool checked = true;
 			if (pUndoList)
 			{
@@ -144,6 +147,7 @@ namespace psycle {
 				checked = false;
 			}
 			return checked;
+#endif
 		}
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -2547,9 +2551,10 @@ namespace psycle {
 			if ( (lstart > VISLINES && lstart > maxl) || tstart > maxt || tend < 0)
 				return;
 			lstart = std::max(lstart,0);
-			lend = std::min( std::max(lend,0), maxl);
-
+			lend = std::min(std::max(lend,0), maxl);
 			tstart = std::min(std::max(0, tstart), maxt);
+			tend = std::min(std::max(0, tend), maxt);
+
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			//todo: Use editPositionEntry when it is ready.
 			Song* song = this->song();
