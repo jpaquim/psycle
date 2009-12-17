@@ -57,9 +57,9 @@ namespace psycle {
 			  textLeftEdge(2),
 			  bmpDC(NULL),
 			  UndoMacCounter(0),
-			  UndoMacSaved(0),
+			  UndoMacSaved(0)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			  output_driver_(0),
+			  ,output_driver_(0),
 			  last_pos_(-1)
 #endif
 		{

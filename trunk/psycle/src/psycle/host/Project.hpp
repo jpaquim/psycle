@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Psycle.hpp"
+#include "CommandManager.hpp"
 #include <cassert>
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
-#include "CommandManager.hpp"
 using namespace psycle::core;
 #else 
 #include <psycle/host/Song.hpp>
@@ -49,9 +49,7 @@ namespace psycle {
 			int beat_zoom() const { return beat_zoom_; }
 			void set_beat_zoom(int zoom) { beat_zoom_ = zoom; }
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CommandManager* cmd_manager() { return &cmd_manager_; }
-#endif
 
 		private:
 
@@ -65,9 +63,7 @@ namespace psycle {
 			int beat_zoom_;
 
 			Song song_;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CommandManager cmd_manager_;
-#endif
 
 		};
 	}

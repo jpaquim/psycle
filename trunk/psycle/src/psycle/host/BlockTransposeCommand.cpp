@@ -41,9 +41,8 @@ namespace psycle {
 			pat_view_->pattern()->timeSignatures() = next_pattern_.timeSignatures();
 			pat_view_->pattern()->insert(next_pattern_, 0);
 			pat_view_->Repaint(PatternView::draw_modes::pattern);
-		}
 #endif
-
+		}
 
 	}	// namespace host
 }	// namespace psycle
