@@ -26,6 +26,9 @@ using namespace psycle::core;
 #include "ClearCurrCommand.hpp"
 #include "InsertCurrCommand.hpp"
 #include "BlockTransposeCommand.hpp"
+#include "PatTransposeCommand.hpp"
+#include "PatPasteCommand.hpp"
+#include "PatDeleteCommand.hpp"
 
 #ifdef _MSC_VER
 #undef min
@@ -7265,17 +7268,17 @@ namespace psycle {
 			case cdefPatternPaste:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;
-				patPaste();
+				project()->cmd_manager()->ExecuteCommand(new PatPasteCommand(this));
 				break;
 
 			case cdefPatternMixPaste:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;
-				patPaste();
+				project()->cmd_manager()->ExecuteCommand(new PatPasteCommand(this, true));
 				break;
 
 			case cdefPatternDelete:
-				patDelete();
+				project()->cmd_manager()->ExecuteCommand(new PatDeleteCommand(this));
 				break;
 
 			case cdefPatternTrackMute:
@@ -7690,16 +7693,16 @@ namespace psycle {
 				break;
 
 			case cdefTransposeChannelInc:
-				patTranspose(1);
+				project()->cmd_manager()->ExecuteCommand(new PatTransposeCommand(this, 1));
 				break;
 			case cdefTransposeChannelDec:
-				patTranspose(-1);
+				project()->cmd_manager()->ExecuteCommand(new PatTransposeCommand(this, -1));
 				break;
 			case cdefTransposeChannelInc12:
-				patTranspose(12);
+				project()->cmd_manager()->ExecuteCommand(new PatTransposeCommand(this, 12));
 				break;
 			case cdefTransposeChannelDec12:
-				patTranspose(-12);
+				project()->cmd_manager()->ExecuteCommand(new PatTransposeCommand(this, -12));
 				break;
 
 			case cdefTransposeBlockInc:

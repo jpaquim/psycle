@@ -35,29 +35,32 @@ using namespace psycle::core;
 #include <cderr.h>
 #include "DeleteBlockCommand.hpp"
 #include "BlockTransposeCommand.hpp"
+#include "PatTransposeCommand.hpp"
+#include "PatPasteCommand.hpp"
+#include "PatDeleteCommand.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		CChildView::CChildView(CMainFrame* main_frame, ProjectData* projects)
-			:main_frame_(main_frame)
-			,projects_(projects)
-			,SamplerMachineDialog(NULL)
-			,XMSamplerMachineDialog(NULL)
-			,WaveInMachineDialog(NULL)
-			,updateMode(0)
-			,updatePar(0)
-			,viewMode(view_modes::machine)
-			,_outputActive(false)
-			,CW(300)
-			,CH(200)
-			,textLeftEdge(2)
-			,bmpDC(NULL)
-			,UndoMacCounter(0)
-			,UndoMacSaved(0)
+			: main_frame_(main_frame),
+			  projects_(projects),
+			  SamplerMachineDialog(NULL),
+			  XMSamplerMachineDialog(NULL),
+			  WaveInMachineDialog(NULL),
+			  updateMode(0),
+			  updatePar(0),
+			  viewMode(view_modes::machine),
+			  _outputActive(false),
+			  CW(300),
+			  CH(200),
+			  textLeftEdge(2),
+			  bmpDC(NULL),
+			  UndoMacCounter(0),
+			  UndoMacSaved(0),
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			,output_driver_(0)
-			,last_pos_(-1)
+			  output_driver_(0),
+			  last_pos_(-1)
 #endif
 		{
 			machine_view_ = new MachineView(this, main_frame);
@@ -1068,8 +1071,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
 		{
-			if (pattern_view()->blockSelected && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
-			else pCmdUI->Enable(FALSE);
+			pCmdUI->Enable(pattern_view()->blockSelected && (viewMode == view_modes::pattern));
 		}
 
 		void CChildView::OnPopCopy() {
@@ -1081,8 +1083,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 		{
-			if (pattern_view()->isBlockCopied  && (viewMode == view_modes::pattern)) pCmdUI->Enable(TRUE);
-			else  pCmdUI->Enable(FALSE);
+			pCmdUI->Enable(pattern_view()->isBlockCopied  && (viewMode == view_modes::pattern));
 		}
 
 		void CChildView::OnPopMixpaste() { 
@@ -1096,8 +1097,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
 		{
-			if (pattern_view()->isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
-			else  pCmdUI->Enable(false);
+			pCmdUI->Enable(pattern_view()->isBlockCopied && (viewMode == view_modes::pattern));
 		}
 
 		void CChildView::OnPopDelete() {
@@ -1387,18 +1387,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CChildView::OnPatPaste()
 		{
-			pattern_view()->patPaste();
+			projects_->active_project()->cmd_manager()->ExecuteCommand(new PatPasteCommand(pattern_view()));
 		}
 
 		void CChildView::OnPatMixPaste()
 		{
-			pattern_view()->patMixPaste();
+			projects_->active_project()->cmd_manager()->ExecuteCommand(new PatPasteCommand(pattern_view(), true));
 		}
 
 		void CChildView::OnPatDelete()
 		{
 			if (viewMode == view_modes::pattern) {
-				pattern_view()->patDelete();
+				projects_->active_project()->cmd_manager()->ExecuteCommand(new PatDeleteCommand(pattern_view()));
 			}
 		}	
 
@@ -1422,8 +1422,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #endif
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}	// namespace host
+}	// namespace psycle
 
 
 // User/Mouse Responses, private headers included only by this translation unit
