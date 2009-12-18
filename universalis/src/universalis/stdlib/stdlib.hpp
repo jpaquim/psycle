@@ -7,6 +7,7 @@
 #define UNIVERSALIS__STDLIB__STDLIB__INCLUDED
 #pragma once
 
+#include "cstdint.hpp"
 #include "stdc_secure_lib.hpp"
 #include "detail/iso646.hpp"
 #include <cassert>
