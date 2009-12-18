@@ -25,10 +25,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::b
 
 	///\name thread synchronisation
 		public:
-			typedef std::scoped_lock<std::mutex> scoped_lock;
-			std::mutex       & mutex() const { return mutex_; }
+			typedef universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
+			universalis::stdlib::mutex & mutex() const { return mutex_; }
 		private:
-			std::mutex mutable mutex_;
+			universalis::stdlib::mutex mutable mutex_;
 	///\}
 
 	public:
@@ -90,9 +90,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::ba
 			void propagate_channels_to_node(std::size_t) throw(exception);
 		protected:
 			/// sets the channel count of this port.
-			void virtual do_channels(std::size_t) throw(exception);
+			virtual void do_channels(std::size_t) throw(exception);
 			/// propagates the channel count to its connected ports.
-			void virtual do_propagate_channels() throw(exception) {}
+			virtual void do_propagate_channels() throw(exception) {}
 		public:
 			/// the channel count of this port.
 			std::size_t channels() const { return channels_; }
@@ -114,7 +114,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::ba
 			/// sets the seconds per event of this port and propagates it to its node.
 			void propagate_seconds_per_event_to_node(real const &);
 			/// propagates the seconds per event to its connected ports.
-			void virtual do_propagate_seconds_per_event() {}
+			virtual void do_propagate_seconds_per_event() {}
 		public:
 			/// events per second.
 			real events_per_second() const { return 1 / seconds_per_event(); }
@@ -139,7 +139,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::ba
 
 	/// outputs a textual representation of this port.
 	///\see operator<<()
-	void virtual dump(std::ostream &, std::size_t tabulations = 0) const;
+	virtual void dump(std::ostream &, std::size_t tabulations = 0) const;
 };
 /// outputs a textual representation of a port.
 ///\relates port
