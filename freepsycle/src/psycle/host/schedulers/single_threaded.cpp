@@ -263,7 +263,7 @@ void scheduler::thread_function() {
 	universalis::os::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + graph().underlying().name());
 
 	// install cpu/os exception handler/translator
-	universalis::processor::exception::install_handler_in_thread();
+	universalis::cpu::exception::install_handler_in_thread();
 	
 	try {
 		try {

@@ -58,7 +58,7 @@ class ring_buffer {
 			}
 			
 			void get_read_position_and_sizes(size_type & restrict position, size_type & restrict size1, size_type & restrict size2) const {
-				universalis::processor::memory_barriers::read();
+				universalis::cpu::memory_barriers::read();
 				size_type const r(read_position_), w(write_position_);
 				position = r;
 				if(r < w) {
@@ -71,7 +71,7 @@ class ring_buffer {
 			}
 			
 			void advance_read_position(size_type amount) {
-				universalis::processor::memory_barriers::write();
+				universalis::cpu::memory_barriers::write();
 				read_position_ += amount;
 				read_position_ &= size_mask_;
 			}
@@ -88,7 +88,7 @@ class ring_buffer {
 			}
 
 			void get_write_position_and_sizes(size_type & restrict position, size_type & restrict size1, size_type & restrict size2) const {
-				universalis::processor::memory_barriers::read();
+				universalis::cpu::memory_barriers::read();
 				size_type const r(read_position_), w(write_position_);
 				position = w;
 				if(w < r) {
@@ -101,7 +101,7 @@ class ring_buffer {
 			}
 			
 			void advance_write_position(size_type amount) {
-				universalis::processor::memory_barriers::write();
+				universalis::cpu::memory_barriers::write();
 				write_position_ += amount;
 				write_position_ &= size_mask_;
 			}

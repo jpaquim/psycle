@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2006-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\interface universalis::processor::atomic::compare_and_swap
+///\interface universalis::cpu::atomic::compare_and_swap
 
 #ifndef UNIVERSALIS__CPU__EXCEPTIONS__ATOMIC__COMPARE_AND_SWAP__INCLUDED
 #define UNIVERSALIS__CPU__EXCEPTIONS__ATOMIC__COMPARE_AND_SWAP__INCLUDED
@@ -14,7 +14,7 @@
 	#include <glib/gatomic.h>
 #endif
 
-namespace universalis { namespace processor { namespace atomic {
+namespace universalis { namespace cpu { namespace atomic {
 
 // see c++ standard http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2047.html
 // see apache portable runtime http://svn.apache.org/viewvc/apr/apr/trunk/atomic

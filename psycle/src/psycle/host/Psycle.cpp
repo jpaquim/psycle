@@ -40,7 +40,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CPsycleApp::CPsycleApp()
 		:m_uUserMessage(0)
 		{
-			universalis::processor::exception::install_handler_in_thread();
+			universalis::cpu::exception::install_handler_in_thread();
 			// support for unicode characters on mswin98
 			{
 				#if 0

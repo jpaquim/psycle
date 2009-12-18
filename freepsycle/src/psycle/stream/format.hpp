@@ -37,8 +37,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK format {
 		bool virtual sample_signed(    ) const = 0;
 
 	#if 0 // should go in a subclass
-		void                                     virtual sample_endianness(universalis::processor::endianness::type)       = 0;
-		universalis::processor::endianness::type virtual sample_endianness(                                        ) const = 0;
+		void virtual sample_endianness(universalis::cpu::endianness::type) = 0;
+		universalis::cpu::endianness::type virtual sample_endianness() const = 0;
 	#endif
 };
 

@@ -32,7 +32,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 		try {
 			universalis::os::loggers::multiplex_logger::singleton().add(universalis::os::loggers::stream_logger::default_logger());
 			universalis::os::thread_name thread_name("main");
-			universalis::processor::exception::install_handler_in_thread();
+			universalis::cpu::exception::install_handler_in_thread();
 			if(universalis::os::loggers::information()()) {
 				std::ostringstream s;
 				s << paths::package::name() << " " << paths::package::version::string();

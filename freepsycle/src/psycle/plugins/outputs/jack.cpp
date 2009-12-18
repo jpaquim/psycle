@@ -182,7 +182,7 @@ void jack::thread_init_callback() {
 	thread_name_.set(universalis::compiler::typenameof(*this) + "#" + qualified_name());
 
 	// install cpu/os exception handler/translator
-	universalis::processor::exception::install_handler_in_thread();
+	universalis::cpu::exception::install_handler_in_thread();
 }
 
 /// this is called from within jack's processing thread.

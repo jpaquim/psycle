@@ -1,10 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
-///\implementation universalis::processor::exception
+///\implementation universalis::cpu::exception
 #include <universalis/detail/project.private.hpp>
 #include "exception.hpp"
-#include "exceptions/fpu.hpp"
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/compiler/typenameof.hpp>
@@ -18,7 +17,7 @@
 
 #include "exceptions/code_description.hpp" // weird, must be included last or mingw 3.4.1 segfaults
 
-namespace universalis { namespace processor {
+namespace universalis { namespace cpu {
 
 #if !defined NDEBUG
 	exception::exception(unsigned int const & code, compiler::location const & location) throw()
@@ -30,7 +29,7 @@ namespace universalis { namespace processor {
 			std::ostringstream s;
 			s
 				<< "cpu/os exception: "
-				"thread: name: " << os::thread_name::get() << ", id: " << std::this_thread::id() << '\n'
+				"thread: name: " << os::thread_name::get() << ", id: " << stdlib::this_thread::id() << '\n'
 				<< compiler::typenameof(*this) << ": " << what();
 			os::loggers::crash()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
@@ -61,19 +60,14 @@ namespace {
 				case STATUS_FLOAT_DENORMAL_OPERAND:
 				case STATUS_FLOAT_UNDERFLOW:
 					return; // unimportant exception, continue the execution.
+
 				case STATUS_FLOAT_OVERFLOW:
 				case STATUS_FLOAT_STACK_CHECK:
 				case STATUS_FLOAT_DIVIDE_BY_ZERO:
 				case STATUS_FLOAT_INVALID_OPERATION:
-					exceptions::fpu::status::clear();
-					// and throw ...
-
-				///////////
-				// default
-
-				default: throw exception(code, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+				default:
+					throw exception(code, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
-
 
 			///\todo add more information using ::EXCEPTION_POINTERS * exception_pointers
 			#if 0
@@ -115,7 +109,7 @@ namespace {
 void exception::install_handler_in_thread() {
 	if(os::loggers::trace()()) {
 		std::ostringstream s;
-		s << "installing cpu/os exception handler in thread: name: " << os::thread_name::get() << ", id: " << std::this_thread::id();
+		s << "installing cpu/os exception handler in thread: name: " << os::thread_name::get() << ", id: " << stdlib::this_thread::id();
 		os::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 	}
 	#if defined DIVERSALIS__OS__MICROSOFT

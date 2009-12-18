@@ -102,7 +102,7 @@ namespace loggers {
 			information, ///< normal, informative output.
 			warning,     ///< warnings.
 			exception,   ///< exceptions thrown from software, via "throw some_exception;".
-			crash        ///< exceptions thrown from cpu/os. They are translated into c++ exceptions, \see processor::exception and os::exception.
+			crash        ///< exceptions thrown from cpu/os. They are translated into c++ exceptions, \see cpu::exception and os::exception.
 		};
 		
 		/// the compile-time threshold level for the loggers
@@ -159,7 +159,7 @@ namespace loggers {
 	}
 	
 	/// exceptions thrown from cpu/os.
-	/// They are translated into c++ exceptions, \see processor::exception and os::exception.
+	/// They are translated into c++ exceptions, \see cpu::exception and os::exception.
 	///\see levels::crash
 	logger_threshold_level<multiplex_logger, levels::crash> inline & crash() throw() {
 		logger_threshold_level<multiplex_logger, levels::crash> static once;

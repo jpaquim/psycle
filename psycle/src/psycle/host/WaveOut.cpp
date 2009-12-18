@@ -273,7 +273,7 @@ namespace psycle
 		void WaveOut::PollerThread(void * pWaveOut)
 		{
 			universalis::os::thread_name thread_name("mme wave out");
-			universalis::processor::exception::install_handler_in_thread();
+			universalis::cpu::exception::install_handler_in_thread();
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);

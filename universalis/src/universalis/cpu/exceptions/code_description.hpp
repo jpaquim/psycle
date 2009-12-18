@@ -15,7 +15,7 @@
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 
-namespace universalis { namespace processor { namespace exceptions {
+namespace universalis { namespace cpu { namespace exceptions {
 
 std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK code_description(int const &) throw();
 

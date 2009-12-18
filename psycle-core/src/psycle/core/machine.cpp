@@ -143,7 +143,7 @@ void Machine::crashed(std::exception const & e) throw() {
 	{
 		#if 0 ///\todo
 		if(function_error) {
-			universalis::processor::exception const * const translated(dynamic_cast<universalis::processor::exception const * const>(function_error->exception()));
+			universalis::cpu::exception const * const translated(dynamic_cast<universalis::cpu::exception const * const>(function_error->exception()));
 			if(translated) {
 				crash = true;
 				switch(translated->code()) {

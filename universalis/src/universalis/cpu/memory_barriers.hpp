@@ -21,9 +21,9 @@
 /// is written out to cache where it can be snooped by other CPUs. (ie, the volatile keyword should not be required).
 ///
 /// The primitives defined here are:
-/// universalis::processor::memory_barriers::full()
-/// universalis::processor::memory_barriers::read()
-/// universalis::processor::memory_barriers::write()
+/// universalis::cpu::memory_barriers::full()
+/// universalis::cpu::memory_barriers::read()
+/// universalis::cpu::memory_barriers::write()
 
 #ifndef UNIVERSALIS__CPU__MEMORY_BARRIERS__INCLUDED
 #define UNIVERSALIS__CPU__MEMORY_BARRIERS__INCLUDED
@@ -35,35 +35,35 @@
 	#include <libkern/OSAtomic.h>
 	// Mac OS X only provides full memory barriers, so the three types of barriers are the same,
 	// However, these barriers are superior to compiler-based ones.
-	namespace universalis { namespace processor { namespace memory_barriers {
+	namespace universalis { namespace cpu { namespace memory_barriers {
 		void inline  full() { OSMemoryBarrier(); }
 		void inline  read() { full(); }
 		void inline write() { full(); }
 	}}}
-	#define universalis__processor__memory_barriers__defined
+	#define universalis__cpu__memory_barriers__defined
 #elif defined DIVERSALIS__COMPILER__GNU
 	#if DIVERSALIS__COMPILER__VERSION >= 40100 // 4.1.0
 		// GCC >= 4.1 has built-in intrinsics. We'll use those.
-		namespace universalis { namespace processor { namespace memory_barriers {
+		namespace universalis { namespace cpu { namespace memory_barriers {
 			void inline  full() { __sync_synchronize(); }
 			void inline  read() { full(); }
 			void inline write() { full(); }
 		}}}
-		#define universalis__processor__memory_barriers__defined
+		#define universalis__cpu__memory_barriers__defined
 	#else
 		// As a fallback, GCC understands volatile asm and "memory"
 		// to mean it should not reorder memory read/writes.
 		#if defined DIVERSALIS__CPU__POWER_PC
-			namespace universalis { namespace processor { namespace memory_barriers {
+			namespace universalis { namespace cpu { namespace memory_barriers {
 				void inline  full() { asm volatile("sync" ::: "memory"); }
 				void inline  read() { full(); }
 				void inline write() { full(); }
 			}}}
-			#define universalis__processor__memory_barriers__defined
+			#define universalis__cpu__memory_barriers__defined
 		#elif defined DIVERSALIS__CPU__X86
 			// [bohan] hardware fences are not always needed on x86 >= i686 memory model,
 			//         which is a cache-coherent, write-through one, except for SSE instructions!
-			namespace universalis { namespace processor { namespace memory_barriers {
+			namespace universalis { namespace cpu { namespace memory_barriers {
 				void inline  full() {
 					///\todo it seems mfence needs SSE2/3(?).
 					#if DIVERSALIS__CPU__X86__SSE >= 3
@@ -77,7 +77,7 @@
 				void inline  read() { asm volatile("lfence" ::: "memory"); }
 				void inline write() { asm volatile("sfence" ::: "memory"); }
 			}}}
-			#define universalis__processor__memory_barriers__defined
+			#define universalis__cpu__memory_barriers__defined
 		#elif defined DIVERSALIS__CPU__IA
 			// asm volatile("mf" ::: "memory");
 		#endif
@@ -90,7 +90,7 @@
 		#pragma intrinsic(_ReadBarrier)
 		#pragma intrinsic(_WriteBarrier)
 	#endif
-	namespace universalis { namespace processor { namespace memory_barriers {
+	namespace universalis { namespace cpu { namespace memory_barriers {
 		// [bohan] hardware fences are not always needed on x86 >= i686 memory model,
 		//         which is a cache-coherent, write-through one, except for SSE instructions!
 		//         So on x86 the _Read/WriteBarrier() and __memory_barrier() instrinsics might be for the compiler only,
@@ -131,9 +131,9 @@
 			#endif
 		}
 	}}}
-	#define universalis__processor__memory_barriers__defined
+	#define universalis__cpu__memory_barriers__defined
 #elif defined DIVERSALIS__COMPILER__BORLAND && 0 ///\todo needs hardware fence
-	namespace universalis { namespace processor { namespace memory_barriers {
+	namespace universalis { namespace cpu { namespace memory_barriers {
 		// [bohan] hardware fences are not always needed on x86 >= i686 memory model,
 		//         which is a cache-coherent, write-through one, except for SSE instructions!
 		//         I'm not sure whether these instructions are for the cpu only or if the compiler sees them,
@@ -150,18 +150,18 @@
 		void inline  read() { full(); }
 		void inline write() { full(); }
 	}}}
-	#define universalis__processor__memory_barriers__defined
+	#define universalis__cpu__memory_barriers__defined
 #endif
 
-#if !defined universalis__processor__memory_barriers__defined
+#if !defined universalis__cpu__memory_barriers__defined
 	#warning Memory barriers are not defined for this system. Will use compare_and_swap to emulate.
 	#include <universalis/cpu/atomic/compare_and_swap.hpp>
-	namespace universalis { namespace processor { namespace memory_barriers {
+	namespace universalis { namespace cpu { namespace memory_barriers {
 		void inline  full() { static int dummy; compare_and_swap(&dummy, 0, 1); }
 		void inline  read() {}
 		void inline write() {}
 	}}}
 #endif
-#undef universalis__processor__memory_barriers__defined
+#undef universalis__cpu__memory_barriers__defined
 
 #endif
