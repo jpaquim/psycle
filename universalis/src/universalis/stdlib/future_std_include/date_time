@@ -1,7 +1,0 @@
-#ifndef UNIVERSALIS__STDLIB__FUTURE_STD_INCLUDE__DATE_TIME__INCLUDED
-#define UNIVERSALIS__STDLIB__FUTURE_STD_INCLUDE__DATE_TIME__INCLUDED
-
-#pragma once
-#include <universalis/stdlib/date_time.hpp>
-
-#endif

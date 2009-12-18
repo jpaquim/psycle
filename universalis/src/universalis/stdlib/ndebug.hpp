@@ -12,6 +12,7 @@
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	// microsoft uses its own vendor #define _DEBUG (for debug), instead of the iso #define NDEBUG (for no debug)
 	// so, we recover the iso way
+	// (actually to be precise, _DEBUG seem to indicate the use of a debug runtime lib)
 	#if defined NDEBUG
 		#if defined _DEBUG
 			#error "We have both ISO #define NDEBUG (no debug) and microsoft's vendor #define _DEBUG (debug) ... Is this intended?"

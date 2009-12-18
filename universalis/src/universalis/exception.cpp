@@ -15,7 +15,7 @@ runtime_error::runtime_error(std::string const & what, compiler::location const 
 	if(os::loggers::trace()()) {
 		std::ostringstream s;
 		s 
-			<< "exception: thread id: " << std::this_thread::id() << ", "
+			<< "exception: thread id: " << stdlib::this_thread::id() << ", "
 			<< compiler::typenameof(*this) << ": " << this->what();
 		os::loggers::exception()(s.str(), location);
 	}

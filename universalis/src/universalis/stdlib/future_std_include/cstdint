@@ -1,7 +1,0 @@
-#ifndef UNIVERSALIS__STDLIB__FUTURE_STD_INCLUDE__CSTDINT__INCLUDED
-#define UNIVERSALIS__STDLIB__FUTURE_STD_INCLUDE__CSTDINT__INCLUDED
-#pragma once
-
-#include <universalis/stdlib/stdint.hpp>
-
-#endif

@@ -15,7 +15,7 @@
 		#include <cwchar>
 		#include <cstdarg>
 		#include <cstring>
-		namespace std {
+		namespace universalis { namespace stdlib {
 			using ::freopen_s;
 			using ::vsprintf_s;
 			using ::vswprintf_s;
@@ -28,12 +28,12 @@
 	#include <cstdarg>
 	#include <cstring>
 	#include <stdexcept>
-	namespace std {
+	namespace universalis { namespace stdlib {
 		FILE inline * freopen_s(FILE * restrict * restrict result, char const * restrict path, char const * restrict mode, FILE * restrict stream) throw() {
 			return *result = freopen(path, mode, stream);
 		}
 
-		int inline vsprintf_s(char * restrict destination, size_t max_length, char const * restrict format, va_list values) throw(runtime_error) {
+		int inline vsprintf_s(char * restrict destination, size_t max_length, char const * restrict format, va_list values) throw(std::runtime_error) {
 			int const result(
 				#if (\
 					defined DIVERSALIS__OS__LINUX || \
@@ -45,7 +45,7 @@
 					vsprintf(destination, format, values)
 				#endif
 			);
-			if(result < 0 || static_cast<size_t>(result) > max_length) throw runtime_error("buffer overflow");
+			if(result < 0 || static_cast<size_t>(result) > max_length) throw std::runtime_error("buffer overflow");
 			return result;
 		}
 
@@ -63,19 +63,24 @@
 			}
 		#endif
 
-		char inline * strcpy_s(char * restrict destination, size_t max_length, char const * restrict source) throw(runtime_error) {
+		char inline * strcpy_s(char * restrict destination, size_t max_length, char const * restrict source) throw(std::runtime_error) {
 			char * const result(strncpy(destination, source, max_length));
-			if(result[max_length - 1]) throw runtime_error("buffer overflow");
+			if(result[max_length - 1]) throw std::runtime_error("buffer overflow");
 			return result;
 		}
-	}
-	using std::freopen_s;
-	using std::vsprintf_s;
+	}}
+
+	using universalis::stdlib::freopen_s;
+	using universalis::stdlib::vsprintf_s;
 	///\todo there might be a bug to submit to the w-api people about the following
 	#if defined DIVERSALIS__OS__MICROSOFT && !defined DIVERSALIS__COMPILER__GNU
-		using std::vswprintf_s;
+		using universalis::stdlib::vswprintf_s;
 	#endif
-	using std::strcpy_s;
+	using universalis::stdlib::strcpy_s;
 #endif
+
+/****************************************************************************/
+// injection in std namespace
+namespace std { using namespace universalis::stdlib; }
 
 #endif

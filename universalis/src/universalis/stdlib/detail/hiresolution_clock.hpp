@@ -8,38 +8,44 @@
 #include "utc_time.hpp"
 #include <universalis/os/clocks.hpp>
 
-namespace std {
-	template<typename Time_Point>
-	class hiresolution_clock {
-		public:
-			Time_Point static universal_time() {
-				std::nanoseconds const ns(universalis::os::clocks::utc_since_epoch::current());
-				Time_Point t(ns);
-				return t;
-			}
-	};
-	template<>
-	class hiresolution_clock<std::utc_time> {
-		public:
-			std::utc_time static universal_time() {
-				std::nanoseconds const ns(universalis::os::clocks::utc_since_epoch::current());
-				std::utc_time t(ns.get_count());
-				return t;
-			}
-	};
-}
+namespace universalis { namespace stdlib {
+
+template<typename Time_Point>
+class hiresolution_clock {
+	public:
+		Time_Point static universal_time() {
+			std::nanoseconds const ns(universalis::os::clocks::utc_since_epoch::current());
+			Time_Point t(ns);
+			return t;
+		}
+};
+template<>
+class hiresolution_clock<std::utc_time> {
+	public:
+		std::utc_time static universal_time() {
+			std::nanoseconds const ns(universalis::os::clocks::utc_since_epoch::current());
+			std::utc_time t(ns.get_count());
+			return t;
+		}
+};
+
+}}
+
+/****************************************************************************/
+// injection in std namespace
+namespace std { using namespace universalis::stdlib; }
 
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/stdlib/thread.hpp>
 	#include <sstream>
-	namespace universalis { namespace stdlib { namespace detail { namespace test {
-		BOOST_AUTO_TEST_CASE(std_hiresolution_clock_and_sleep_test) {
-			std::nanoseconds const sleep_nanoseconds(std::milliseconds(250));
-			std::utc_time const t0(std::hiresolution_clock<std::utc_time>::universal_time());
-			std::this_thread::sleep(sleep_nanoseconds);
+	namespace universalis { namespace stdlib {
+		BOOST_AUTO_TEST_CASE(hiresolution_clock_and_sleep_test) {
+			nanoseconds const sleep_nanoseconds(milliseconds(250));
+			utc_time const t0(hiresolution_clock<utc_time>::universal_time());
+			this_thread::sleep(sleep_nanoseconds);
 			double const ratio(
-				double((std::hiresolution_clock<std::utc_time>::universal_time() - t0).get_count()) /
+				double((hiresolution_clock<utc_time>::universal_time() - t0).get_count()) /
 				sleep_nanoseconds.get_count()
 			);
 			{
@@ -48,7 +54,7 @@ namespace std {
 			}
 			BOOST_CHECK(0.66 < ratio && ratio < 1.33);
 		}
-	}}}}
+	}}
 #endif
 
 #endif
