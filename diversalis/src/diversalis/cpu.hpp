@@ -325,6 +325,10 @@
 	#elif defined DIVERSALIS__CPU__MIPS
 		#define DIVERSALIS__CPU__ENDIAN
 		#define DIVERSALIS__CPU__ENDIAN__BOTH
+	#elif defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+		// choose arbitrarily
+		#define DIVERSALIS__CPU__ENDIAN
+		#define DIVERSALIS__CPU__ENDIAN__BIG
 	#else
 		#error please specify the endianness of your processor
 	#endif
