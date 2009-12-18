@@ -16,8 +16,8 @@ namespace universalis { namespace stdlib { namespace allocators { namespace proc
 template<typename X>
 class allocator {
 	public:
-		X * allocate(std::size_t const &) { return reinterpret_cast<X*>(detail::allocate(size * sizeof(X))); }
-		void deallocate(X *, std::size_t const &) { detail::deallocate(x, size * sizeof(X)); }
+		X * allocate(std::size_t const & size) { return reinterpret_cast<X*>(detail::allocate(size * sizeof(X))); }
+		void deallocate(X * x, std::size_t const & size) { detail::deallocate(x, size * sizeof(X)); }
 };
 
 }}}}
