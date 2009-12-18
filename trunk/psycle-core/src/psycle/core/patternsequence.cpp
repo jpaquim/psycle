@@ -173,7 +173,7 @@ namespace psycle { namespace core {
 			iterator it = begin();
 			for (it; it != end(); ++it)
 				delete it->second;
-//			wasDeleted(this);
+			//wasDeleted(this);
 		}
 
 		SequenceEntry* SequenceLine::createEntry(Pattern * pattern, double position) {
