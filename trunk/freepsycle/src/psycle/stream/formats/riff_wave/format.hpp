@@ -148,8 +148,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK format : public stream::format {
 		bool virtual inline sample_signed(    ) const { return true; }
 
 		#if 0 // it's handled by riff's root chunk header id: either "RIFF" or "RIFX"
-			void                                     virtual sample_endianness(universalis::processor::endianness::type)       {                                                 }
-			universalis::processor::endianness::type virtual sample_endianness(                                        ) const { return universalis::processor::endianness::big; }
+			void virtual sample_endianness(universalis::cpu::endianness::type) {}
+			universalis::cpu::endianness::type virtual sample_endianness() const { return universalis::cpu::endianness::big; }
 		#endif
 
 		std::string description() const;

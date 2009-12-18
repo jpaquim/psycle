@@ -252,18 +252,6 @@ class PSYCLE__CORE__DECL Machine {
 			bool                crashed_;
 	///\}
 
-	#if 0 ///\todo re-enable this
-	///\name crash handling ... fpu exception mask
-	///\{
-		public:
-			universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
-			universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
-		private:
-			universalis::processor::exceptions::fpu::mask::type                fpu_exception_mask_;
-	///\}
-	#endif
-
-
 	#if 0
 	///\name cpu cost measurement ... for the time spent in the machine's processing function
 	///\{

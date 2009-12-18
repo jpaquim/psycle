@@ -14,22 +14,16 @@
 // weird, must be included last or mingw 3.4.1 segfaults
 #include "code_description.hpp"
 
-namespace universalis
-{
-	namespace processor
-	{
-		namespace exceptions
-		{
-			std::string code_description(int const & code) throw()
-			{
-				return os::exceptions::detail::code_description
-					(
-						code
-						#if defined DIVERSALIS__OS__MICROSOFT
-							, /* from_processor */ true
-						#endif
-					);
-			}
-		}
-	}
+namespace universalis { namespace cpu { namespace exceptions {
+
+std::string code_description(int const & code) throw() {
+	return os::exceptions::detail::code_description
+		(
+			code
+			#if defined DIVERSALIS__OS__MICROSOFT
+				, /* from_processor */ true
+			#endif
+		);
 }
+
+}}}

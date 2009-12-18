@@ -590,7 +590,7 @@ namespace psycle
 			// about thread synchronization. This is omitted here for simplicity.
 			if(_firstrun)
 			{
-				universalis::processor::exception::install_handler_in_thread();
+				universalis::cpu::exception::install_handler_in_thread();
 				SetThreadAffinityMask(GetCurrentThread(), 1);
 				_firstrun = false;
 			}

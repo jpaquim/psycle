@@ -325,7 +325,7 @@ void scheduler::thread_function(std::size_t thread_number) {
 		thread_name.set(s.str());
 	}
 	// install cpu/os exception handler/translator
-	universalis::processor::exception::install_handler_in_thread();
+	universalis::cpu::exception::install_handler_in_thread();
 
 	try {
 		try {

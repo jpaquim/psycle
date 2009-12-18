@@ -381,7 +381,7 @@ namespace psycle { namespace core {
 		DWORD WINAPI MsDirectSound::PollerThreadStatic(void * pDirectSound)
 		{
 			universalis::os::thread_name thread_name("direct sound");
-			universalis::processor::exception::install_handler_in_thread();
+			universalis::cpu::exception::install_handler_in_thread();
 			MsDirectSound * pThis = reinterpret_cast<MsDirectSound*>( pDirectSound );
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			SetThreadAffinityMask(GetCurrentThread(), 1);
