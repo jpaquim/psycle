@@ -158,7 +158,7 @@ namespace std { using namespace universalis::stdlib; }
 			}
 		};
 
-		BOOST_AUTO_TEST_CASE(std_condition_test) {
+		BOOST_AUTO_TEST_CASE(condition_test) {
 			condition_test_class test;
 			test.test();
 		}
@@ -250,7 +250,7 @@ namespace std { using namespace universalis::stdlib; }
 				}
 		};
 
-		BOOST_AUTO_TEST_CASE(std_condition_speed_test) {
+		BOOST_AUTO_TEST_CASE(condition_speed_test) {
 			condition_speed_test_class test;
 			test.test(2);
 			test.test(4);
