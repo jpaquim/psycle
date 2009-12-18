@@ -6,7 +6,7 @@
 #include "Player.hpp"
 #include "AudioDriver.hpp"
 #include "Global.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 namespace psycle
 {
 	namespace host

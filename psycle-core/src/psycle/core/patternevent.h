@@ -9,8 +9,7 @@
 #pragma once
 
 #include <psycle/core/config.hpp>
-
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <vector>
 #include <string>
 

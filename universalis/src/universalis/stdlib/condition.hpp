@@ -10,7 +10,7 @@
 
 #include "detail/boost_xtime.hpp"
 #include <boost/thread/condition.hpp> // or since version 1.35 <boost/thread/condition_variable.hpp>
-#include <date_time>
+#include <universalis/stdlib/date_time.hpp>
 
 namespace std {
 	typedef boost::lock_error lock_error;

@@ -5,10 +5,10 @@
 #include <psycle/audiodrivers/audiodriver.h>
 #include <diversalis/os.hpp>
 #include <universalis/os/loggers.hpp>
+#include <universalis/stdlib/thread.hpp>
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <thread>
 
 #if defined DIVERSALIS__OS__MICROSOFT
 	#define PSYCLE__PLAYER__EOF "z" // ctrl+z == EOF

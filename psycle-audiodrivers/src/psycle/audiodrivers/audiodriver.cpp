@@ -10,7 +10,7 @@
 #include "audiodriver.h"
 #include <diversalis/cpu.hpp>
 #include <boost/bind.hpp>
-#include <thread>
+#include <universalis/stdlib/thread.hpp>
 #include <psycle/helpers/math/clip.hpp>
 #include <psycle/helpers/math/rint.hpp>
 namespace psycle { namespace core {

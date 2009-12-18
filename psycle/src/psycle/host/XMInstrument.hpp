@@ -2,7 +2,7 @@
 #include "Global.hpp"
 #include "FileIO.hpp"
 #include "Filter.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstring>
 namespace psycle { namespace host {
 	class XMInstrument

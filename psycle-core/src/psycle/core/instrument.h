@@ -11,8 +11,7 @@
 #pragma once
 
 #include <psycle/core/config.hpp>
-
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <string>
 
 namespace psycle { namespace core {

@@ -10,8 +10,8 @@
 
 #include <psycle/core/config.hpp>
 
+#include <universalis/stdlib/cstdint.hpp>
 #include <string>
-#include <cstdint>
 
 namespace psycle { namespace core {
 

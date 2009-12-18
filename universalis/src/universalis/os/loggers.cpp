@@ -4,9 +4,9 @@
 ///\implementation universalis::os::loggers
 #include <universalis/detail/project.private.hpp>
 #include "loggers.hpp"
+#include <universalis/stdlib/date_time.hpp>
 #include <cstdlib>
 #include <algorithm> // for std::min
-#include <date_time>
 #include <iomanip>
 
 namespace universalis { namespace os {

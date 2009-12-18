@@ -10,18 +10,19 @@
 #define PSYCLE__CORE__MACHINE__INCLUDED
 #pragma once
 
-#include <psycle/helpers/helpers.hpp>
 #include "constants.h"
 #include "commands.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
 #include "machinekey.hpp"
 
+#include <psycle/helpers/helpers.hpp>
+
+#include <universalis/stdlib/cstdint.hpp>
 #include <cassert>
 #include <deque>
 #include <map>
 #include <stdexcept>
-#include <cstdint>
 
 namespace psycle { namespace core {
 

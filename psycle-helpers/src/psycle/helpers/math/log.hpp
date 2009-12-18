@@ -8,8 +8,8 @@
 #include <diversalis/cpu.hpp>
 #include <universalis/compiler.hpp>
 #if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
+	#include <universalis/stdlib/cstdint.hpp>
 	#include <boost/static_assert.hpp>
-	#include <cstdint>
 #else
 	#include <cmath>
 #endif

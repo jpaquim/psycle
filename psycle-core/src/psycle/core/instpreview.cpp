@@ -7,7 +7,7 @@
 #include <psycle/core/config.private.hpp>
 #include "instpreview.h"
 #include "instrument.h"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle { namespace core {
 

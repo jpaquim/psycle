@@ -8,7 +8,7 @@
 #include <gst/gst.h>
 #include <universalis/compiler/numeric.hpp>
 #include <universalis/exception.hpp>
-#include <thread>
+#include <universalis/stdlib/thread.hpp>
 #include <limits>
 #include <algorithm>
 #include <cmath>

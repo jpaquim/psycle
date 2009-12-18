@@ -8,8 +8,8 @@
 **********************************************************************************************/
 
 #pragma once
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstdio>
-#include <cstdint>
 namespace psycle { namespace helpers {
 
 enum DDCRET {

@@ -4,8 +4,8 @@
 #include "Machine.hpp"
 #include "Filter.hpp"
 #include "XMInstrument.hpp"
-#include <cstdint>
-#include <mutex>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 
 
 namespace psycle

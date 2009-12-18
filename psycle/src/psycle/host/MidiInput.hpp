@@ -25,8 +25,8 @@ using namespace psycle::core;
 	#pragma warning(pop)
 #endif
 
+#include <universalis/stdlib/cstdint.hpp>
 #include <cassert>
-#include <cstdint>
 namespace psycle
 {
 	namespace host

@@ -19,13 +19,13 @@
 #if defined PSYCLE__ESOUND_AVAILABLE
 #include "esoundout.h"
 #include <esd.h>
+#include <universalis/stdlib/cstdint.hpp>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <cassert>
 #include <cerrno>
 #include <cstring>
-#include <cstdint>
 namespace psycle {
 	namespace core {
 

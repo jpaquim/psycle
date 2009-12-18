@@ -3,29 +3,21 @@
 #pragma once
 #include "Version.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/constants.h>
-#include <psycle/core/commands.h>
-namespace psycle {
-	namespace core {
-		class Song;
-		class Player;
+	#include <psycle/core/constants.h>
+	#include <psycle/core/commands.h>
+	namespace psycle {
+		namespace core {
+			class Song;
+			class Player;
+		}
+		namespace host {
+			namespace notecommands { using namespace psycle::core::notetypes; }
+			namespace PatternCmd { using namespace psycle::core::commandtypes; }
+		}
 	}
-}
-
-namespace psycle { namespace host {
-namespace notecommands {
-	using namespace psycle::core::notetypes;
-}
-namespace PatternCmd {
-	using namespace psycle::core::commandtypes;
-}
-}}
-using namespace psycle::core;
-//typedef unsigned char byte;
-//typedef unsigned short word;
-//typedef unsigned long dword;
+	using namespace psycle::core;
 #else
-#include "Constants.hpp"
+	#include "Constants.hpp"
 #endif
 
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -33,7 +25,6 @@ using namespace psycle::core;
 #else
 	#include <universalis/os/clocks.hpp>
 #endif
-//#include <cstdint>
 
 namespace psycle
 {

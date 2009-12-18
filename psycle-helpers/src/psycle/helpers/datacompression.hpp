@@ -11,8 +11,8 @@
 /// simple, non adaptave delta predictor, less effective with high frequency content
 
 #pragma once
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstddef>
-#include <cstdint>
 namespace psycle
 {
 	namespace helpers

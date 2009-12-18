@@ -28,8 +28,8 @@
 ///\brief interface file for psycle::host::RiffFile.
 #pragma once
 #include "Global.hpp"
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstddef>
-#include <cstdint>
 #include <string>
 namespace psycle
 {

@@ -6,10 +6,9 @@
 
 #include <psycle/core/config.private.hpp>
 #include "xmsampler.h"
-
 #include "xminstrument.h"
 #include "song.h"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <algorithm>
 
 namespace psycle { namespace core {

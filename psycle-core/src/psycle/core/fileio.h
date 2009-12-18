@@ -13,10 +13,10 @@
 #include <psycle/core/config.hpp>
 
 #include <diversalis/compiler.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstdio>
 #include <cstddef>
 #include <fstream>
-#include <cstdint>
 #include <cassert>
 #include <vector>
 #include <typeinfo>

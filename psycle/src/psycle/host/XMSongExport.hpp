@@ -15,7 +15,7 @@ using namespace psycle::core;
 #endif
 #include "FileIO.hpp"
 #include "XMFile.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <map>
 
 namespace psycle { namespace host {

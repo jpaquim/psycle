@@ -18,12 +18,12 @@
 ******************************************************************************/
 #if defined PSYCLE__NET_AUDIO_AVAILABLE
 #include "netaudioout.h"
+#include <universalis/stdlib/cstdint.hpp>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <cassert>
 #include <cerrno>
-#include <cstdint>
 namespace psycle { namespace core {
 
 NetAudioOut::NetAudioOut()
