@@ -12,7 +12,8 @@
 #include <universalis/os/loggers.hpp>
 #include "sample.hpp"
 namespace psycle {
-	namespace loggers = universalis::os::loggers;
+	//namespace loggers = universalis::os::loggers;
+	namespace loggers { using namespace universalis::os::loggers; }
 
 	namespace engine {
 		class exception;

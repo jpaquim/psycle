@@ -20,7 +20,8 @@ namespace ports {
 	}
 }
 
-namespace underlying = engine;
+//namespace underlying = engine;
+namespace underlying { using namespace engine; }
 
 namespace typenames {
 	using namespace gui;

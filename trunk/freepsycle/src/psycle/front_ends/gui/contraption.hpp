@@ -67,7 +67,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK contraption : public Gnome::Canvas::Gr
 			void dragging_start(real const & x, real const & y, time const & time);
 			void dragging(real const & x, real const & y);
 			void dragging_stop(time const & time);
-			bool inline const & dragging() { return dragging_; }
+			bool const inline & dragging() { return dragging_; }
 		private:
 			bool dragging_;
 			real dragging_x_, dragging_y_;
