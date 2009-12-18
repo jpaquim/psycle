@@ -25,6 +25,7 @@
 #else
 	#include <universalis/os/clocks.hpp>
 #endif
+#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle
 {
