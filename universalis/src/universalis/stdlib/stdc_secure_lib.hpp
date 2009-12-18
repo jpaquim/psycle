@@ -20,7 +20,7 @@
 			using ::vsprintf_s;
 			using ::vswprintf_s;
 			using ::strcpy_s;
-		}
+		}}
 	#endif
 #else
 	#include <cstdio>
