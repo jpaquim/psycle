@@ -6,9 +6,9 @@
 #include "../resource.hpp"
 #include <psycle/helpers/ring_buffer.hpp>
 #include <universalis/os/thread_name.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
 #include <jack/jack.h>
-#include <condition>
-#include <mutex>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__JACK
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins { namespace outputs {

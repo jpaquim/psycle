@@ -47,8 +47,8 @@
 // (64-bit compatibility by johan boule)
 
 #pragma once
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstddef>
-#include <cstdint>
 namespace psycle { namespace helpers { namespace dsp {
 
 /// Period parameters

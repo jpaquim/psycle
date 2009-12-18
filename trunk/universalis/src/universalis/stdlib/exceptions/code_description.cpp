@@ -4,8 +4,8 @@
 ///\file
 #include <universalis/detail/project.private.hpp>
 #include "code_description.hpp"
+#include <universalis/stdlib/mutex.hpp>
 #include <cstring> // iso std::strerror
-#include <mutex>
 #include <sstream>
 namespace universalis { namespace stdlib { namespace exceptions {
 

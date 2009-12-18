@@ -5,9 +5,9 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include "../../format.hpp"
+#include <universalis/stdlib/cstdint.hpp>
 #include <string>
 #include <exception>
-#include <cstdint>
 #include <cstddef>
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>

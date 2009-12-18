@@ -7,8 +7,8 @@
 #include "named.hpp"
 #include "buffer.hpp"
 #include <psycle/generic/base.hpp>
+#include <universalis/stdlib/mutex.hpp>
 #include <set>
-#include <mutex>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace engine {

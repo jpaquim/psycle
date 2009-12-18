@@ -1,7 +1,7 @@
 #include <psycle/plugin_interface.hpp>
 #include "envelope.hpp"
+#include <universalis/stdlib/cstdint.hpp>
 #include <cmath>
-#include <cstdint>
 
 using namespace psycle::plugin_interface;
 

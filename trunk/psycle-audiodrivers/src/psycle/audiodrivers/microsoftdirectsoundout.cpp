@@ -22,7 +22,7 @@
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 
 ///\todo: needed?
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK

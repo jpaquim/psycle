@@ -12,8 +12,8 @@
 	#include <boost/static_assert.hpp>
 #endif
 #include <universalis/compiler.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cmath>
-#include <cstdint>
 
 namespace psycle { namespace helpers { namespace math {
 

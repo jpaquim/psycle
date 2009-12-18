@@ -9,8 +9,9 @@
 #pragma once
 
 #include "psyfilterbase.h"
+
+#include <universalis/stdlib/cstdint.hpp>
 #include <vector>
-#include <cstdint>
 
 namespace psycle { namespace core {
 

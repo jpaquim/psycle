@@ -5,11 +5,12 @@
 #pragma once
 #include "../resource.hpp"
 #include <universalis/compiler/numeric.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
 #include <gst/gstelement.h>
-#include <condition>
-#include <mutex>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__GSTREAMER
 #include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace psycle { namespace plugins { namespace outputs {
 
 /// outputs to a soundcard device via gstreamer output implementation.

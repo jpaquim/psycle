@@ -9,9 +9,9 @@
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
 #endif
+#include <universalis/stdlib/cstdint.hpp>
 #include <cmath>
-#include <cstdint>
-#include <string.h>
+#include <cstring>
 namespace psycle { namespace helpers { /** various signal processing utility functions. */ namespace dsp {
 
 	///\todo doc

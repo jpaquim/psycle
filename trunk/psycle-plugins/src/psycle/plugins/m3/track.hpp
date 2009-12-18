@@ -1,9 +1,10 @@
+// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.
+
 #pragma once
 #include <psycle/plugin_interface.hpp>
-// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstdlib>
 #include <cmath>
-#include <cstdint>
 
 // CTrack Declaration file (M3Track.h)
 

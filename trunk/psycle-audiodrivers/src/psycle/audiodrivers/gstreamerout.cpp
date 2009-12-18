@@ -6,8 +6,8 @@
 #include "gstreamerout.h"
 #include <universalis/os/loggers.hpp>
 #include <universalis/exception.hpp>
+#include <universalis/stdlib/thread.hpp>
 #include <gst/gst.h>
-#include <thread>
 
 namespace psycle { namespace core {
 

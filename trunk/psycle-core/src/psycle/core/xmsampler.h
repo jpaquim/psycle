@@ -8,12 +8,13 @@
 #define PSYCLE__CORE__XM_SAMPLER__INCLUDED
 #pragma once
 
-#include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/filter.hpp>
 #include "xminstrument.h"
 #include "machine.h"
 
-#include <mutex>
+#include <psycle/helpers/dsp.hpp>
+#include <psycle/helpers/filter.hpp>
+
+#include <universalis/stdlib/mutex.hpp>
 
 namespace psycle { namespace core {
 

@@ -10,7 +10,7 @@
 
 #include "psyfilterbase.h"
 
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <vector>
 
 namespace psycle { namespace core {

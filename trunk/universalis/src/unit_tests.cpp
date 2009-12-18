@@ -12,8 +12,8 @@
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
 
-#include <date_time>
-#include <thread>
-#include <mutex>
-#include <condition>
+#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
 #include <universalis/os/cpu_affinity.hpp>

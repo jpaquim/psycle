@@ -8,7 +8,7 @@
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/compiler/typenameof.hpp>
-#include <thread>
+#include <universalis/stdlib/thread.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #endif

@@ -11,9 +11,9 @@
 #if defined PSYCLE__ALSA_AVAILABLE
 #include "audiodriver.h"
 #include <alsa/asoundlib.h>
-#include <mutex>
-#include <condition>
-#include <cstdint>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 namespace psycle { namespace core {
 
 class AlsaOut : public AudioDriver {

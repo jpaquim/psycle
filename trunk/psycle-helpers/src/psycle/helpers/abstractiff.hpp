@@ -4,9 +4,9 @@
 */
 #pragma once
 
+#include <universalis/stdlib/cstdint.hpp>
 #include <string>
 #include <fstream>
-#include <cstdint>
 
 namespace psycle
 {

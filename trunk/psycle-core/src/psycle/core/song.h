@@ -15,8 +15,7 @@
 #include "machine.h"
 #include "instrument.h"
 #include "xminstrument.h"
-
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle { namespace core {
 

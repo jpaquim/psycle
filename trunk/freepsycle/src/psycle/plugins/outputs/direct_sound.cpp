@@ -6,7 +6,7 @@
 #include "direct_sound.hpp"
 #include <psycle/stream/formats/riff_wave/format.hpp>
 #include <universalis/os/exceptions/code_description.hpp>
-#include <thread>
+#include <universalis/stdlib/thread.hpp>
 #include <sstream>
 namespace psycle { namespace plugins { namespace outputs {
 	using stream::formats::riff_wave::format;

@@ -31,7 +31,7 @@ namespace std {
 
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
-	#include <thread>
+	#include <universalis/stdlib/thread.hpp>
 	#include <sstream>
 	namespace universalis { namespace stdlib { namespace detail { namespace test {
 		BOOST_AUTO_TEST_CASE(std_hiresolution_clock_and_sleep_test) {

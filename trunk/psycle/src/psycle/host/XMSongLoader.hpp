@@ -16,7 +16,7 @@ using namespace psycle::core;
 #endif
 #include "FileIO.hpp"
 #include "XMFile.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle { namespace host {
 	#if !PSYCLE__CONFIGURATION__USE_PSYCORE

@@ -6,7 +6,7 @@
 #include "exception.hpp"
 #include "os/loggers.hpp"
 #include "compiler/typenameof.hpp"
-#include <thread>
+#include "stdlib/thread.hpp"
 namespace universalis { namespace exceptions {
 
 runtime_error::runtime_error(std::string const & what, compiler::location const & location, void const * cause) throw()

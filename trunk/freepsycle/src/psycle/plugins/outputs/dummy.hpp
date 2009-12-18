@@ -4,9 +4,9 @@
 ///\interface psycle::plugins::outputs::dummy
 #pragma once
 #include "../resource.hpp"
-#include <thread>
-#include <mutex>
-#include <condition>
+#include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__DUMMY
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins { namespace outputs {

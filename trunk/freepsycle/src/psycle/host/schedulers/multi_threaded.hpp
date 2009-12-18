@@ -5,12 +5,12 @@
 #pragma once
 #include "../scheduler.hpp"
 #include <psycle/generic/wrappers.hpp>
-#include <thread>
-#include <date_time>
-#include <mutex>
-#include <condition>
+#include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <list>
-#include <cstdint>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host { namespace schedulers {

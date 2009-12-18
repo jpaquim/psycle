@@ -4,7 +4,7 @@
 ///\\interface psycle::front_ends:gui:color
 #pragma once
 #include <psycle/detail/project.hpp>
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cassert>
 namespace psycle { namespace front_ends { namespace gui {
 	class color {

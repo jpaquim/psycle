@@ -14,11 +14,11 @@
 #include <universalis/os/cpu_affinity.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
+#include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/date_time.hpp>
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <thread>
-#include <date_time>
 namespace psycle { namespace front_ends { namespace text {
 
 void paths() {

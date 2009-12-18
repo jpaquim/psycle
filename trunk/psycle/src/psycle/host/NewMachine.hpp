@@ -9,12 +9,12 @@ using namespace psycle::core;
 #include "Machine.hpp"
 #endif
 #include "ProgressDialog.hpp"
+#include <universalis/stdlib/cstdint.hpp>
 #include <afxwin.h>
 #include <afxcoll.h>
 #include <iostream>
 #include <typeinfo>
 #include <map>
-#include <cstdint>
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

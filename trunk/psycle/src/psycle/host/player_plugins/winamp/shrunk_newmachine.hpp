@@ -1,8 +1,8 @@
 #include "../../SongStructs.hpp"
+#include <universalis/stdlib/cstdint.hpp>
 #include <iostream>
 #include <typeinfo>
 #include <map>
-#include <cstdint>
 namespace psycle
 {
 	namespace host

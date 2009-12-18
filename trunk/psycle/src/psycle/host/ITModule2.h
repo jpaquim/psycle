@@ -14,7 +14,7 @@ using namespace psycle::core;
 #include "SongStructs.hpp"
 #endif
 #include "FileIO.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle {
 	namespace host {

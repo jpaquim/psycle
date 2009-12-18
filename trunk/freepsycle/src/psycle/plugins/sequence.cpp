@@ -4,7 +4,7 @@
 ///\implementation psycle::plugins::sequence
 #include <psycle/detail/project.private.hpp>
 #include "sequence.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(sequence)

@@ -10,22 +10,20 @@
 #define PSYCLE__CORE__PLAYER__INCLUDED
 #pragma once
 
-#include <psycle/helpers/dither.hpp>
-#include <psycle/helpers/riff.hpp>
 #include "song.h"
 #include "machine.h"
 #include "sequencer.h"
 
-#include <thread>
-#include <date_time>
-#include <mutex>
-#include <condition>
+#include <psycle/helpers/dither.hpp>
+#include <psycle/helpers/riff.hpp>
+
+#include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <list>
-#include <cstdint>
 #include <stdexcept>
-
-
-
 
 namespace psycle { namespace core {
 

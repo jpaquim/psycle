@@ -7,7 +7,7 @@
 #include "Player.hpp"
 #include "Global.hpp"
 #include <diversalis/compiler.hpp>
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 namespace psycle
 {
 	namespace host

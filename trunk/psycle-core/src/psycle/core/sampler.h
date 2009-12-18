@@ -9,12 +9,14 @@
 #define PSYCLE__CORE__SAMPLER__INCLUDED
 #pragma once
 
-#include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/filter.hpp>
 #include "instrument.h"
 #include "instpreview.h"
 #include "machine.h"
-#include <cstdint>
+
+#include <psycle/helpers/dsp.hpp>
+#include <psycle/helpers/filter.hpp>
+
+#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle { namespace core {
 

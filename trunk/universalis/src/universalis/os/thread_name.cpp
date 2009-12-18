@@ -3,9 +3,9 @@
 
 ///\implementation universalis::os::thread_name
 #include <universalis/detail/project.private.hpp>
+#include <universalis/stdlib/thread.hpp>
 #include "thread_name.hpp"
 #include "loggers.hpp"
-#include <thread>
 #include <cassert>
 
 namespace universalis { namespace os {

@@ -7,7 +7,7 @@
 #include "FileIO.hpp"
 #include "Configuration.hpp"
 #include "Global.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <algorithm>
 namespace psycle
 {

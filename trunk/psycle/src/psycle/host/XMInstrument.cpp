@@ -13,7 +13,7 @@
 #include "Filter.hpp"
 #include "DataCompression.hpp"
 #include "FileIO.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cassert>
 namespace psycle
 {

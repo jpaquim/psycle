@@ -1,5 +1,5 @@
 #pragma once
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 namespace psycle
 {
 	namespace host

@@ -5,17 +5,18 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/config.private.hpp>
-#include <psycle/helpers/math.hpp>
-#include <psycle/helpers/dsp.hpp>
 #include "internal_machines.h"
 
-///\todo: These two includes need to be replaced by a "host" callback which gives such information.
+///\todo: These two (two?!) includes need to be replaced by a "host" callback which gives such information.
 #include "player.h"
 
 #include "song.h"
 #include "fileio.h"
 
-#include <cstdint>
+#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/dsp.hpp>
+
+#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle { namespace core {
 

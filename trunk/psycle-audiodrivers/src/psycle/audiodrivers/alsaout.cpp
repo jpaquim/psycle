@@ -10,7 +10,7 @@
 #if defined PSYCLE__ALSA_AVAILABLE
 #include "alsaout.h"
 #include <boost/bind.hpp>
-#include <thread>
+#include <universalis/stdlib/thread.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <iostream>

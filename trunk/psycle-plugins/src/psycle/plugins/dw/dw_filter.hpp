@@ -1,10 +1,8 @@
 //interface definitions for dwfilter class
 
 #pragma once
+#include <universalis/stdlib/cstdint.hpp>
 #include <cmath>
-#include <cstdint>
-
-
 
 class dwfilter
 {

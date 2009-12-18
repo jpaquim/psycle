@@ -6,8 +6,8 @@
 #pragma once
 
 #include <diversalis/cpu.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <boost/static_assert.hpp>
-#include <cstdint>
 #if 0 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	//#include <xmmintrin.h>
 #endif

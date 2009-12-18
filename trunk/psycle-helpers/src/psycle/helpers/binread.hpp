@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include <universalis/stdlib/cstdint.hpp>
 #include <istream>
-#include <cstdint>
 
 namespace psycle { namespace helpers {
 

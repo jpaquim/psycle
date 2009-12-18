@@ -4,7 +4,7 @@
 ///\implementation psycle::engine::sequence
 #include <psycle/detail/project.private.hpp>
 #include "sequence.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 namespace psycle { namespace engine {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

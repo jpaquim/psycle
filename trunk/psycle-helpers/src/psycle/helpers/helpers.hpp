@@ -6,8 +6,8 @@
 #include "math/round.hpp"
 #include "math/log.hpp"
 #include "math/clip.hpp"
+#include <universalis/stdlib/cstdint.hpp>
 #include <string> // to declare hexstring_to_integer
-#include <cstdint>
 #include <limits>
 #include <boost/static_assert.hpp>
 

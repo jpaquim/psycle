@@ -16,8 +16,8 @@
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
 #include <psycle/helpers/datacompression.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstring>
-#include <cstdint>
 
 namespace psycle
 {

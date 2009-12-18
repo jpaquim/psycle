@@ -8,10 +8,10 @@
 **********************************************************************************************/
 
 #pragma once
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <string>
-#include <mutex>
-#include <condition>
-#include <cstdint>
 namespace psycle { namespace core {
 
 /// typedef for work callback

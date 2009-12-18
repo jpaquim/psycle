@@ -11,8 +11,8 @@
 	#include <diversalis/cpu.hpp>
 #endif
 #include <universalis/compiler.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <boost/static_assert.hpp>
-#include <cstdint>
 #include "rint.hpp"
 
 namespace psycle { namespace helpers { namespace math {
