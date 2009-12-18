@@ -90,7 +90,7 @@ namespace psycle { namespace core {
 		{}
 
 		SequenceEntry::~SequenceEntry() {
-			wasDeleted(this);
+			// wasDeleted(this);
 		}
 
 		void SequenceEntry::setPattern(Pattern * pattern) {
@@ -173,7 +173,7 @@ namespace psycle { namespace core {
 			iterator it = begin();
 			for (it; it != end(); ++it)
 				delete it->second;
-			wasDeleted(this);
+//			wasDeleted(this);
 		}
 
 		SequenceEntry* SequenceLine::createEntry(Pattern * pattern, double position) {
@@ -317,14 +317,6 @@ namespace psycle { namespace core {
 			line_.clear();
 		}
 
-		const std::string& SequenceLine::name() const {
-			return name_;
-		}
-
-		void SequenceLine::setName(const std::string& newname) {
-			name_ = newname;
-		}
-
 		std::string SequenceLine::toXml() const {
 			std::ostringstream xml;
 			xml << "<seqline>" << std::endl;
@@ -373,7 +365,6 @@ namespace psycle { namespace core {
 			}
 			return line;
 		}
-
 		
 		Pattern* Sequence::FindPattern(int id) {
 			patterniterator it = patterns_.begin();

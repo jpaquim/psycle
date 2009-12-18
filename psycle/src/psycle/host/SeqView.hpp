@@ -23,6 +23,7 @@ namespace psycle {
 			~SequencerView();
 
 			void SetProject(Project* project);
+			Project* project() { return project_; }
 			/// To be used when changing the selected entry from outside of SequencerView.
 			/// Example: from playback, or via hotkey.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE	

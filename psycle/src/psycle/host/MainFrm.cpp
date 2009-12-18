@@ -43,6 +43,10 @@ using namespace psycle::core;
 #include "WaveInMacDlg.hpp"
 #include "WireDlg.hpp"
 
+#include "SeqDeleteCommand.hpp"
+#include "SeqPasteCommand.hpp"
+#include "SeqCloneCommand.hpp"
+
 #include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>
@@ -1640,11 +1644,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnDeclong() { m_wndSeq.OnDeclong(); }
 		void CMainFrame::OnSeqnew() { m_wndSeq.OnSeqnew(); }
 		void CMainFrame::OnSeqins() { m_wndSeq.OnSeqins(); }
-		void CMainFrame::OnSeqduplicate() { m_wndSeq.OnSeqduplicate(); }
+		void CMainFrame::OnSeqduplicate() {
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqCloneCommand(&m_wndSeq));
+		}
 		void CMainFrame::OnSeqcut() { m_wndSeq.OnSeqcut(); }
-		void CMainFrame::OnSeqdelete() { m_wndSeq.OnSeqdelete(); }
+		void CMainFrame::OnSeqdelete() { 
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqDeleteCommand(&m_wndSeq));
+		}
 		void CMainFrame::OnSeqcopy() { m_wndSeq.OnSeqcopy(); }
-		void CMainFrame::OnSeqpaste() {	m_wndSeq.OnSeqpaste(); }
+		void CMainFrame::OnSeqpaste() {
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqPasteCommand(&m_wndSeq));
+		}
 		void CMainFrame::OnSeqclr() { m_wndSeq.OnSeqclr(); }
 		void CMainFrame::OnSeqsort() { m_wndSeq.OnSeqsort(); }
 		void CMainFrame::OnSeqShowpattername() { m_wndSeq.OnSeqShowpattername(); }
