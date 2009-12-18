@@ -16,7 +16,10 @@
 #include <universalis/detail/project.hpp>
 
 ///\todo test __STDC_VERSION
-#if defined DIVERSALIS__COMPILER__GNU
+#if defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+	// not sure netbeans, eclipse and doxygen handle the keyword
+	#define restrict
+#elif defined DIVERSALIS__COMPILER__GNU
 	#define restrict __restrict__
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
 	// With msvc, the __restrict keyword works on pointers, but not on C++ references :-(

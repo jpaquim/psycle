@@ -38,8 +38,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger {
 	protected: friend class loggers::multiplex_logger;
 		void            log(int const level, std::string const &, compiler::location const & location) throw();
 		void            log(int const level, std::string const &) throw();
-		void virtual do_log(int const level, std::string const & message, compiler::location const &) throw() = 0;
-		void virtual do_log(int const level, std::string const &) throw() = 0;
+		virtual void do_log(int const level, std::string const & message, compiler::location const &) throw() = 0;
+		virtual void do_log(int const level, std::string const &) throw() = 0;
 
 	protected: boost::mutex & mutex() throw() { return mutex_; }
 	private:   boost::mutex   mutex_;

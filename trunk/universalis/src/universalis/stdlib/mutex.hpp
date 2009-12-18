@@ -12,7 +12,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
-namespace std {
+namespace universalis { namespace stdlib {
 
 class mutex;
 class recursive_mutex;
@@ -271,6 +271,10 @@ class unique_lock : private boost::noncopyable {
 		bool owns_;
 };
 
-}
+}}
+
+/****************************************************************************/
+// injection in std namespace
+namespace std { using namespace universalis::stdlib; }
 
 #endif

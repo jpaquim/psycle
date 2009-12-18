@@ -106,6 +106,10 @@
 		/// doxygen documentation compiler. This is not autodetected and has to be manually defined.
 		#define DIVERSALIS__COMPILER__DOXYGEN
 
+		/// netbeans c++ indexer. This is not autodetected and has to be manually defined.
+		#define DIVERSALIS__COMPILER__NETBEANS
+		#undef DIVERSALIS__COMPILER__NETBEANS // was just defined to insert documentation.
+
 		/// eclipse cdt c++ indexer. This is not autodetected and has to be manually defined.
 		#define DIVERSALIS__COMPILER__ECLIPSE
 		#undef DIVERSALIS__COMPILER__ECLIPSE // was just defined to insert documentation.
@@ -143,15 +147,20 @@
 	#endif
 
 ///////////////////////
-// eclipse c++ indexer
+// netbeans c++ indexer
+
+#elif defined DIVERSALIS__COMPILER__NETBEANS
+	#define DIVERSALIS__COMPILER
+	#define DIVERSALIS__COMPILER__NAME "netbeans"
+	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+
+///////////////////////
+// eclipse cdt c++ indexer
 
 #elif defined DIVERSALIS__COMPILER__ECLIPSE
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__NAME "eclipse"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#if !defined __cplusplus
-		#define __cplusplus
-	#endif
 
 ////////////////
 // gnu compiler

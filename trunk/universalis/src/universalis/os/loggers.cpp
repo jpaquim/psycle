@@ -89,10 +89,10 @@ void stream_logger::do_log(int const level, std::string const & string) throw() 
 	int const static levels [] = {'T', 'I', 'W', 'E', 'C'};
 	int const static colors [] = {0, 2, 5, 1, 6, 3, 4, 7};
 	char const level_char(levels[std::min(static_cast<std::size_t>(level), sizeof levels)]);
-	std::nanoseconds::tick_type static const time0_ns =
-		std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch().get_count();
-	std::nanoseconds::tick_type const time_ns =
-		std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch().get_count() - time0_ns;
+	stdlib::nanoseconds::tick_type const static time0_ns =
+		stdlib::hiresolution_clock<stdlib::utc_time>::universal_time().nanoseconds_since_epoch().get_count();
+	stdlib::nanoseconds::tick_type const time_ns =
+		stdlib::hiresolution_clock<stdlib::utc_time>::universal_time().nanoseconds_since_epoch().get_count() - time0_ns;
 	try {
 		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << 'm';
 		ostream() << "log: " << std::setw(7) << time_ns / 1000 << "µs: " << level_char << ": ";

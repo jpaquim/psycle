@@ -12,94 +12,98 @@
 #include <boost/thread/condition.hpp> // or since version 1.35 <boost/thread/condition_variable.hpp>
 #include <universalis/stdlib/date_time.hpp>
 
-namespace std {
-	typedef boost::lock_error lock_error;
-	// system_error
-	// thread_canceled
+namespace universalis { namespace stdlib {
 
-	template<typename Lock>
-	class condition : private boost::noncopyable {
-		public:
-			///\name notification
-			///\{
-				/// wakes up one of the threads waiting on the condition.
-				/// Note: consider releasing the locks associated with the condition
-				/// that the threads are waiting for before notifying.
-				void notify_one() { implementation_.notify_one(); }
+typedef boost::lock_error lock_error;
+// system_error
+// thread_canceled
 
-				/// broadcasts a wake up notification to all the threads waiting on the condition.
-				/// Note: consider releasing the locks associated with the condition
-				/// that the threads are waiting for before notifying.
-				void notify_all() { implementation_.notify_all(); }
-			///\}
+template<typename Lock>
+class condition : private boost::noncopyable {
+	public:
+		///\name notification
+		///\{
+			/// wakes up one of the threads waiting on the condition.
+			/// Note: consider releasing the locks associated with the condition
+			/// that the threads are waiting for before notifying.
+			void notify_one() { implementation_.notify_one(); }
 
-			typedef Lock lock_type;
+			/// broadcasts a wake up notification to all the threads waiting on the condition.
+			/// Note: consider releasing the locks associated with the condition
+			/// that the threads are waiting for before notifying.
+			void notify_all() { implementation_.notify_all(); }
+		///\}
 
-			///\name waiting
-			///\{
-				/// unlocks and sleeps until woken up.
-				/// Beware: due to possible "spurious wake ups", this version should always be used within a loop
-				/// checking that the predicate state logically associated with the condition has become true.
-				/// The templated overload version encapsulates this loop idiom internally
-				/// and is generally the preferred method.
-				void wait(Lock & lock) throw(lock_error) {
-					implementation_.wait(lock.implementation_lock_);
-				}
+		typedef Lock lock_type;
 
-				/// unlocks and sleeps until woken up and predicate has become true.
-				/// Effect is as if the following was done:
-				///\code
-				/// while(!predicate()) wait(lock);
-				///\endcode
-				template<typename Predicate>
-				void wait(Lock & lock, Predicate predicate) throw(lock_error) {
-					implementation_.wait(lock.implementation_lock_, predicate);
-				}
+		///\name waiting
+		///\{
+			/// unlocks and sleeps until woken up.
+			/// Beware: due to possible "spurious wake ups", this version should always be used within a loop
+			/// checking that the predicate state logically associated with the condition has become true.
+			/// The templated overload version encapsulates this loop idiom internally
+			/// and is generally the preferred method.
+			void wait(Lock & lock) throw(lock_error) {
+				implementation_.wait(lock.implementation_lock_);
+			}
 
-				/// unlocks and sleep until woken up or until timeout is reached.
-				/// Beware: due to possible "spurious wake ups", this version should always be used within a loop
-				/// checking that the predicate state logically associated with the condition has become true.
-				/// The templated overload version encapsulates this loop idiom internally
-				/// and is generally the preferred method.
-				bool timed_wait(Lock & lock, utc_time const & timeout) throw(lock_error) {
-					return implementation_.timed_wait(lock.implementation_lock_,
-						universalis::stdlib::detail::make_boost_xtime(timeout)
-					);
-				}
+			/// unlocks and sleeps until woken up and predicate has become true.
+			/// Effect is as if the following was done:
+			///\code
+			/// while(!predicate()) wait(lock);
+			///\endcode
+			template<typename Predicate>
+			void wait(Lock & lock, Predicate predicate) throw(lock_error) {
+				implementation_.wait(lock.implementation_lock_, predicate);
+			}
 
-				/// unlocks and sleep until woken up and predicate has become true or until timeout is reached.
-				/// Effect is as if the following was done:
-				///\code
-				/// while(!predicate()) if(!timed_wait(lock, timeout) return false; return true;
-				///\endcode
-				template<typename Predicate>
-				bool timed_wait(Lock & lock, Predicate predicate, utc_time const & timeout) throw(lock_error) {
-					return implementation_.timed_wait(lock.implementation_lock_, predicate,
-						universalis::stdlib::detail::make_boost_xtime(timeout)
-					);
-				}
-			///\}
+			/// unlocks and sleep until woken up or until timeout is reached.
+			/// Beware: due to possible "spurious wake ups", this version should always be used within a loop
+			/// checking that the predicate state logically associated with the condition has become true.
+			/// The templated overload version encapsulates this loop idiom internally
+			/// and is generally the preferred method.
+			bool timed_wait(Lock & lock, utc_time const & timeout) throw(lock_error) {
+				return implementation_.timed_wait(lock.implementation_lock_,
+					universalis::stdlib::detail::make_boost_xtime(timeout)
+				);
+			}
 
-		private:
-			boost::condition implementation_; // same as boost::condition_variable_any since version 1.35
-			///\todo optimised specialisation with boost::condition_variable (using unique_lock<mutex>)
-	};
-}
+			/// unlocks and sleep until woken up and predicate has become true or until timeout is reached.
+			/// Effect is as if the following was done:
+			///\code
+			/// while(!predicate()) if(!timed_wait(lock, timeout) return false; return true;
+			///\endcode
+			template<typename Predicate>
+			bool timed_wait(Lock & lock, Predicate predicate, utc_time const & timeout) throw(lock_error) {
+				return implementation_.timed_wait(lock.implementation_lock_, predicate,
+					universalis::stdlib::detail::make_boost_xtime(timeout)
+				);
+			}
+		///\}
+
+	private:
+		boost::condition implementation_; // same as boost::condition_variable_any since version 1.35
+		///\todo optimised specialisation with boost::condition_variable (using unique_lock<mutex>)
+};
+
+}}
 
 #include "mutex.hpp"
-namespace std {
+namespace universalis { namespace stdlib {
 	typedef condition<mutex> condition_mtx;
 	typedef condition<unique_lock<mutex> > condition_ulm;
-}
+}}
+
+/****************************************************************************/
+// injection in std namespace
+namespace std { using namespace universalis::stdlib; }
 
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
 	#include <vector>
 	#include <boost/bind.hpp>
 	#include <sstream>
-	namespace universalis { namespace stdlib { namespace detail { namespace test {
-		using namespace std;
-
+	namespace universalis { namespace stdlib {
 		class condition_test_class {
 			public:
 				void test() {
@@ -200,7 +204,7 @@ namespace std {
 								while(shared == tls.i) c.wait(l);
 							}
 						}
-						std::nanoseconds const t1(cpu_time_clock());
+						nanoseconds const t1(cpu_time_clock());
 						if(++tls.count > start) tls.t += t1 - t0;
 					}
 					{ scoped_lock_type l(m);
@@ -225,10 +229,10 @@ namespace std {
 					shared_start = threads;
 					shared = 0;
 
-					vector<tls*> tls_(threads);
+					std::vector<tls*> tls_(threads);
 					for(unsigned int i(0); i < threads; ++i) tls_[i] = new tls(i);
 					
-					vector<thread*> threads_(threads);
+					std::vector<thread*> threads_(threads);
 					for(unsigned int i(0); i < threads; ++i)
 						threads_[i] = new thread(boost::bind(&condition_speed_test_class::thread_function, this, tls_[i]));
 					
@@ -252,7 +256,7 @@ namespace std {
 			test.test(4);
 			test.test(8);
 		}
-	}}}}
+	}}
 #endif
 
 #endif

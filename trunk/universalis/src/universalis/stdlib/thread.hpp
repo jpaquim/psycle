@@ -16,7 +16,7 @@
 	#include <windows.h>
 #endif
 
-namespace std {
+namespace universalis { namespace stdlib {
 
 class thread {
 	public:
@@ -151,6 +151,10 @@ namespace this_thread {
 	}
 }
 
-}
+}}
+
+/****************************************************************************/
+// injection in std namespace
+namespace std { using namespace universalis::stdlib; }
 
 #endif
