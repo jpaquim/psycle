@@ -338,7 +338,7 @@ namespace psycle {
 					if (!entry)
 						entry = sequence.GetEntryOnPosition(*sequence.begin(), Player::singleton().playPos());
 					else
-					if (pattern_view()->pattern() != entry->pattern())
+					if (main_frame_->m_wndSeq.selected_entry() != entry)
 						entry = sequence.GetEntryOnPosition(*sequence.begin(), Player::singleton().playPos());
 					int pos = (entry) ? (Player::singleton().playPos() - entry->tickPosition())	* static_cast<int>(projects_->active_project()->beat_zoom())
 									  : 0;
@@ -348,7 +348,7 @@ namespace psycle {
 						main_frame_->SetAppSongTpb(0);
 						if (Global::pConfig->_followSong)
 						{											
-							if (entry && pattern_view()->pattern() != entry->pattern()) {
+							if (entry && main_frame_->m_wndSeq.selected_entry() != entry) {
 								// change seqview
 								pattern_view()->main()->m_wndSeq.SetEntry(entry);
 							}
@@ -1175,8 +1175,7 @@ namespace psycle {
 
 		void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) 
 		{
-			if(viewMode == view_modes::pattern) pCmdUI->Enable(TRUE);
-			else pCmdUI->Enable(FALSE);
+			pCmdUI->Enable(viewMode == view_modes::pattern);
 		}
 
 		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 

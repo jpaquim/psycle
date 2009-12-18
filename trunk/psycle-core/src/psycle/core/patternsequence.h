@@ -59,7 +59,7 @@ namespace psycle { namespace core {
 			SequenceEntry(SequenceLine* line);
 			~SequenceEntry();
 
-			boost::signal<void (SequenceEntry*)> wasDeleted;
+			// boost::signal<void (SequenceEntry*)> wasDeleted;
 
 			double tickPosition() const;
 			double tickEndPosition( ) const;
@@ -107,7 +107,7 @@ namespace psycle { namespace core {
 			SequenceLine(Sequence* sequence);
 			~SequenceLine();
 
-			boost::signal<void (SequenceLine*)> wasDeleted;
+			// boost::signal<void (SequenceLine*)> wasDeleted;
 
 			SequenceEntry* createEntry(Pattern* pattern, double position);
 			void insertEntry(SequenceEntry *entry);
@@ -125,8 +125,10 @@ namespace psycle { namespace core {
 			void MoveEntry(SequenceEntry* entry, double newpos);
 			void removeEntry(SequenceEntry* entry);
 
-			const std::string& name() const;
-			void setName(const std::string & newname);
+			const std::string& name() const { return name_; }
+			void set_name(const std::string& name) {
+				name_ = name;
+			}
 
 			std::string toXml() const;
 

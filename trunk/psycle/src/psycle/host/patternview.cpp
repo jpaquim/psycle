@@ -5518,7 +5518,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				patBufferLines = project()->beat_zoom() * pattern()->beats();
 				block_buffer_pattern_ = *pattern();
-				pattern()->erase(0, pattern()->beats());
+				project()->cmd_manager()->ExecuteCommand(new PatDeleteCommand(this));
 #else
 				// UNDO CODE PATT CUT
 				const int ps = _ps();
