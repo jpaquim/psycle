@@ -36,22 +36,16 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public named {
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence_iterator {
 	public:
 		/// constructs a sequence iterator.
-		sequence_iterator(typenames::sequence const & sequence);
+		sequence_iterator(sequence const &);
 
 		/// outputs events to the given buffer and advances the beat position.
 		void process(buffer & out, real events_per_second, std::size_t channels) throw(exception);
 
 	private:
-		/// iterator in events_ container corresponding to current beat_
-		typenames::sequence::events_type::const_iterator i_;
-
-	///\name the sequence on which iteration is done
-	///\{
-		public:
-			typenames::sequence const & sequence() const throw() { return sequence_; }
-		private:
-			typenames::sequence const & sequence_;
-	///\}
+		/// the sequence on which the iteration is done
+		sequence const & sequence_;
+		/// iterator in the events_ container positionned at the current beat_
+		sequence::events_type::const_iterator i_;
 
 	///\name beats per second
 	///\{
