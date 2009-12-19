@@ -148,7 +148,7 @@ class node
 		}
 
 		/// virtual destructor
-		virtual inline ~node() {}
+		virtual ~node() {}
 
 	///\name destruction
 	///\{
@@ -369,10 +369,10 @@ namespace ports {
 					this->parent().parent().new_connection_signal()(*this, output_port);
 				}
 			protected:
-				void virtual connect_internal_side(typename Typenames::ports::output &) = 0;
+				virtual void connect_internal_side(typename Typenames::ports::output &) = 0;
 
 			public:
-				void virtual disconnect_all() = 0;
+				virtual void disconnect_all() = 0;
 				void disconnect(typename Typenames::ports::output & output_port) {
 					// disconnect this input port internal side from the output port
 					this->disconnect_internal_side(output_port);
@@ -382,7 +382,7 @@ namespace ports {
 					this->parent().parent().delete_connection_signal()(*this, output_port);
 				}
 			protected:
-				void virtual disconnect_internal_side(typename Typenames::ports::output &) = 0;
+				virtual void disconnect_internal_side(typename Typenames::ports::output &) = 0;
 		///\}
 	};
 	
@@ -433,7 +433,7 @@ namespace ports {
 				public:
 					typename Typenames::ports::output * const & output_port() const throw() { return output_port_; }
 				private:
-					typename Typenames::ports::output *         output_port_;
+					typename Typenames::ports::output * output_port_;
 			///\}
 			
 			///\name (dis)connection functions
@@ -504,9 +504,9 @@ namespace ports {
 			///\{
 				public:
 					typedef std::vector<typename Typenames::ports::output*> output_ports_type;
-					output_ports_type inline const & output_ports() const throw() { return output_ports_; }
+					output_ports_type const & output_ports() const throw() { return output_ports_; }
 				private:
-					output_ports_type                output_ports_;
+					output_ports_type output_ports_;
 			///\}
 
 			///\name (dis)connection functions

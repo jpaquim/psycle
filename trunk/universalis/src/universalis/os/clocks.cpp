@@ -14,6 +14,8 @@
 #include <sstream>
 namespace universalis { namespace os { namespace clocks {
 
+using namespace universalis::stdlib;
+
 /******************************************************************************************/
 #if defined DIVERSALIS__OS__POSIX
 	namespace detail { namespace posix {
@@ -162,40 +164,40 @@ namespace universalis { namespace os { namespace clocks {
 #endif // defined DIVERSALIS__OS__POSIX
 
 /******************************************************************************************/
-typedef std::nanoseconds (*clock_function) ();
+typedef nanoseconds (*clock_function) ();
 namespace detail {
 	/// iso std time.
 	/// returns the time since the Epoch (00:00:00 UTC, January 1, 1970), measured in seconds.
 	/// test result: clock: std::time, min: 1s, avg: 1s, max: 1s
-	std::nanoseconds iso_std_time() throw(std::runtime_error) {
+	nanoseconds iso_std_time() throw(std::runtime_error) {
 		std::time_t const t(std::time(0));
 		if(t < 0) {
 			//throw exception(UNIVERSALIS__COMPILER__LOCATION);
 			std::ostringstream s; s << exceptions::code_description();
 			throw std::runtime_error(s.str().c_str());
 		}
-		std::nanoseconds ns = std::seconds(t);
+		nanoseconds ns = seconds(t);
 		return ns;
 	}
 
 	/// iso std clock.
 	/// returns an approximation of processor time used by the program
 	/// test result on colinux AMD64: clock: std::clock, min: 0.01s, avg: 0.01511s, max: 0.02s
-	std::nanoseconds iso_std_clock() throw(std::runtime_error) {
+	nanoseconds iso_std_clock() throw(std::runtime_error) {
 		std::clock_t const t(std::clock());
 		if(t < 0) {
 			//throw exception(UNIVERSALIS__COMPILER__LOCATION);
 			std::ostringstream s; s << exceptions::code_description();
 			throw std::runtime_error(s.str().c_str());
 		}
-		std::nanoseconds ns = std::nanoseconds(1000 * 1000 * 1000LL * t / CLOCKS_PER_SEC);
+		nanoseconds ns = nanoseconds(1000 * 1000 * 1000LL * t / CLOCKS_PER_SEC);
 		return ns;
 	}
 
 	#if defined DIVERSALIS__OS__POSIX
 		namespace posix {
 			namespace {
-				std::nanoseconds get(::clockid_t clock) throw(std::runtime_error) {
+				nanoseconds get(::clockid_t clock) throw(std::runtime_error) {
 					#if defined _POSIX_TIMERS > 0 || defined _SC_TIMERS
 						::timespec t;
 						if(::clock_gettime(clock, &t)) {
@@ -203,7 +205,7 @@ namespace detail {
 							std::ostringstream s; s << exceptions::code_description();
 							throw std::runtime_error(s.str().c_str());
 						}
-						std::nanoseconds ns(std::nanoseconds(t.tv_nsec) + std::seconds(t.tv_sec));
+						nanoseconds ns(nanoseconds(t.tv_nsec) + seconds(t.tv_sec));
 						return ns;
 					#else
 						return iso_std_clock();
@@ -214,12 +216,12 @@ namespace detail {
 			/// posix CLOCK_REALTIME.
 			/// System-wide realtime clock.
 			/// test result on colinux AMD64: clock: CLOCK_REALTIME, min: 1.3e-05s, avg: 1.6006e-05s, max: 0.001359s
-			std::nanoseconds realtime() throw(std::runtime_error) { return get(CLOCK_REALTIME); }
+			nanoseconds realtime() throw(std::runtime_error) { return get(CLOCK_REALTIME); }
 
 			/// posix CLOCK_MONOTONIC.
 			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
 			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.3e-05s, avg: 1.606e-05s, max: 0.001745s
-			std::nanoseconds monotonic() throw(std::runtime_error) {
+			nanoseconds monotonic() throw(std::runtime_error) {
 				return get(
 					#if _POSIX_MONOTONIC_CLOCK > 0 || defined _SC_MONOTONIC_CLOCK
 						CLOCK_MONOTONIC
@@ -233,7 +235,7 @@ namespace detail {
 			/// High-resolution per-process timer from the CPU.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386, AR.ITC on Itanium).
 			/// test result on colinux AMD64: clock: CLOCK_PROCESS_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
-			std::nanoseconds process_cpu_time() throw(std::runtime_error) {
+			nanoseconds process_cpu_time() throw(std::runtime_error) {
 				return get(
 					#if _POSIX_CPUTIME > 0 || defined _SC_CPUTIME
 						CLOCK_PROCESS_CPUTIME_ID
@@ -247,7 +249,7 @@ namespace detail {
 			/// Thread-specific CPU-time clock.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386, AR.ITC on Itanium).
 			/// test result on colinux AMD64: clock: CLOCK_THREAD_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
-			std::nanoseconds thread_cpu_time() throw(std::runtime_error) {
+			nanoseconds thread_cpu_time() throw(std::runtime_error) {
 				return get(
 					#if _POSIX_THREAD_CPUTIME > 0 || defined _SC_THREAD_CPUTIME
 						CLOCK_THREAD_CPUTIME_ID
@@ -259,14 +261,14 @@ namespace detail {
 
 			/// posix gettimeofday.
 			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.5878e-05s, max: 0.001719s
-			std::nanoseconds time_of_day() throw(std::runtime_error) {
+			nanoseconds time_of_day() throw(std::runtime_error) {
 				::timeval t;
 				if(::gettimeofday(&t, 0)) { // second argument passed is 0 for no timezone
 					//throw exception(UNIVERSALIS__COMPILER__LOCATION);
 					std::ostringstream s; s << exceptions::code_description();
 					throw std::runtime_error(s.str().c_str());
 				}
-				std::nanoseconds ns(std::microseconds(t.tv_usec) + std::seconds(t.tv_sec));
+				nanoseconds ns(microseconds(t.tv_usec) + seconds(t.tv_sec));
 				return ns;
 			}
 		}
@@ -276,7 +278,7 @@ namespace detail {
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386, AR.ITC on Itanium).
 			/// test result on AMD64: clock resolution: QueryPerformancefrequency: 3579545Hz (3.6MHz)
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
-			std::nanoseconds performance_counter() throw(std::runtime_error) {
+			nanoseconds performance_counter() throw(std::runtime_error) {
 				::LARGE_INTEGER counter, frequency;
 				if(!::QueryPerformanceCounter(&counter) || !::QueryPerformanceFrequency(&frequency)) {
 					//throw exception(UNIVERSALIS__COMPILER__LOCATION);
@@ -286,14 +288,14 @@ namespace detail {
 				#if 1
 					// for systems where the frequency may change over time, we need to remember the last counter and time values
 					///\todo make them per-thread variables (need to upgrade mingw)
-					std::int64_t static last_counter(0);
-					std::nanoseconds static last_time;
-					std::nanoseconds ns((counter.QuadPart - last_counter) * 1000 * 1000 * 1000 / frequency.QuadPart);
+					int64_t static last_counter(0);
+					nanoseconds static last_time;
+					nanoseconds ns((counter.QuadPart - last_counter) * 1000 * 1000 * 1000 / frequency.QuadPart);
 					ns += last_time;
 					last_time = ns;
 					last_counter = counter.QuadPart;
 				#else
-					std::nanoseconds ns(counter.QuadPart * 1000 * 1000 * 1000 / frequency.QuadPart);
+					nanoseconds ns(counter.QuadPart * 1000 * 1000 * 1000 / frequency.QuadPart);
 				#endif
 				return ns;
 			}
@@ -303,7 +305,7 @@ namespace detail {
 			/// it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: mmsystem timeGetTime, min: 0.001s, avg: 0.0010413s, max: 0.084s.
-			std::nanoseconds mme_system_time() {
+			nanoseconds mme_system_time() {
 				class set_timer_resolution {
 					private: ::UINT milliseconds;
 					public:
@@ -323,7 +325,7 @@ namespace detail {
 								//throw std::runtime_error(GetLastErrorString());
 						}
 				} static once;
-				std::nanoseconds ns(1000LL * 1000 * ::timeGetTime());
+				nanoseconds ns(1000LL * 1000 * ::timeGetTime());
 				return ns;
 			}
 
@@ -334,46 +336,46 @@ namespace detail {
 			/// and hence is very inaccurate: it can lag behind the real clock value as much as 15ms, and sometimes more.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: GetTickCount, min: 0.015s, avg: 0.015719s, max: 0.063s.
-			std::nanoseconds tick_count() {
-				std::nanoseconds ns(1000LL * 1000 * ::GetTickCount());
+			nanoseconds tick_count() {
+				nanoseconds ns(1000LL * 1000 * ::GetTickCount());
 				return ns;
 			}
 
 			/// wall clock.
 			/// test result: clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
-			std::nanoseconds system_time_as_file_time_since_epoch() {
+			nanoseconds system_time_as_file_time_since_epoch() {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;
 				} u;
 				::GetSystemTimeAsFileTime(&u.file_time);
 				u.large_integer.QuadPart -= 116444736000000000LL; // microsoft disregards the unix/posix epoch time, so we need to apply an offset
-				std::nanoseconds ns(100 * u.large_integer.QuadPart);
+				nanoseconds ns(100 * u.large_integer.QuadPart);
 				return ns;
 			}
 
 			/// virtual clock. kernel time not included.
 			/// test result: clock: GetProcessTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			std::nanoseconds process_time() {
+			nanoseconds process_time() {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;
 				} creation, exit, kernel, user;
 				::GetProcessTimes(::GetCurrentProcess(), &creation.file_time, &exit.file_time, &kernel.file_time, &user.file_time);
-				std::nanoseconds ns(100 * user.large_integer.QuadPart);
+				nanoseconds ns(100 * user.large_integer.QuadPart);
 				return ns;
 			}
 
 			/// virtual clock. kernel time not included.
 			/// The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
 			/// test result: clock: GetThreadTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			std::nanoseconds thread_time() {
+			nanoseconds thread_time() {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;
 				} creation, exit, kernel, user;
 				::GetThreadTimes(::GetCurrentThread(), &creation.file_time, &exit.file_time, &kernel.file_time, &user.file_time);
-				std::nanoseconds ns(100 * user.large_integer.QuadPart);
+				nanoseconds ns(100 * user.large_integer.QuadPart);
 				return ns;
 			}
 		}
@@ -381,7 +383,7 @@ namespace detail {
 } // namespace detail
 
 /******************************************************************************************/
-std::nanoseconds utc_since_epoch::current() {
+nanoseconds utc_since_epoch::current() {
 	#if defined DIVERSALIS__OS__POSIX
 		return detail::posix::realtime();
 	#elif defined DIVERSALIS__OS__MICROSOFT
@@ -390,11 +392,11 @@ std::nanoseconds utc_since_epoch::current() {
 		// So, we need to compute an offset once between the system_time_as_file_time_since_epoch clock
 		// and the performance_counter one, that we can apply to what the performance_counter clock
 		// returns in every call to this function.
-		std::nanoseconds const static performance_counter_to_utc_since_epoch_offset(
+		nanoseconds const static performance_counter_to_utc_since_epoch_offset(
 			detail::microsoft::system_time_as_file_time_since_epoch() -
 			detail::microsoft::performance_counter()
 		);
-		std::nanoseconds ns(
+		nanoseconds ns(
 			detail::microsoft::performance_counter() +
 			performance_counter_to_utc_since_epoch_offset
 		);
@@ -404,7 +406,7 @@ std::nanoseconds utc_since_epoch::current() {
 	#endif
 }
 
-std::nanoseconds monotonic::current() {
+nanoseconds monotonic::current() {
 	#if defined DIVERSALIS__OS__POSIX
 		detail::posix::config();
 		if(detail::posix::monotonic_clock_supported) return detail::posix::monotonic();
@@ -416,7 +418,7 @@ std::nanoseconds monotonic::current() {
 	#endif
 }
 
-std::nanoseconds process::current() {
+nanoseconds process::current() {
 	#if defined DIVERSALIS__OS__POSIX
 		detail::posix::config();
 		if(detail::posix::process_cputime_supported) return detail::posix::process_cpu_time();
@@ -428,7 +430,7 @@ std::nanoseconds process::current() {
 	#endif
 }
 
-std::nanoseconds thread::current() {
+nanoseconds thread::current() {
 	#if defined DIVERSALIS__OS__POSIX
 		detail::posix::config();
 		if(detail::posix::thread_cputime_supported) return detail::posix::thread_cpu_time();

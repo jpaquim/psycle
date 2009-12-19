@@ -10,6 +10,8 @@
 
 namespace universalis { namespace os {
 
+using namespace universalis::stdlib;
+
 namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
 	std::string const * tls_thread_name_(0);
@@ -29,7 +31,7 @@ void thread_name::set(std::string const & name) {
 void thread_name::set_tls() {
 	if(os::loggers::trace()) {
 		std::ostringstream s;
-		s << "setting name for thread: id: " << std::this_thread::id() << ", name: " << thread_name_;
+		s << "setting name for thread: id: " << this_thread::id() << ", name: " << thread_name_;
 		os::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	tls_thread_name_ = &thread_name_;

@@ -28,7 +28,7 @@
 
 	// boost takes care of all the mess for us
 	#include <boost/cstdint.hpp>
-	namespace std {
+	namespace universalis { namespace stdlib {
 		using boost::int8_t;
 		using boost::int_least8_t;
 		using boost::int_fast8_t;
@@ -59,7 +59,15 @@
 		
 		using boost::intmax_t;
 		using boost::uintmax_t;
-	}
+	}}
 #endif
+
+/****************************************************************************/
+// injection in std namespace
+namespace std { using namespace universalis::stdlib; }
+
+/****************************************************************************/
+// injection in root namespace
+using namespace universalis::stdlib;
 
 #endif

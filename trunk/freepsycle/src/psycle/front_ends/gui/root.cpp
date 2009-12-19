@@ -8,17 +8,19 @@
 #include <gdkmm/screen.h>
 namespace psycle { namespace front_ends { namespace gui {
 
-root::root(underlying::graph & graph)
+root::root(underlying::graph & g)
 :
 	playing_(),
 	button_("play"),
 	label_("stopped"),
-	graph_(gui::graph::create_on_heap(graph, resolver())),
+	graph_(gui::graph::create_on_heap(g, resolver())),
 	sched_frame_("scheduler"),
-	graph_frame_(graph.name())
+	graph_frame_(g.name())
 {
 	set_size_request(1000, 700);
-	set_title(paths::package::name() + " " + paths::package::version::string());
+	#if !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // parsing problems
+		set_title(paths::package::name() + " " + paths::package::version::string());
+	#endif
 	set_border_width(4);
 
 	button().signal_clicked().connect(sigc::mem_fun(*this, &root::on_button_clicked));
@@ -36,7 +38,7 @@ root::root(underlying::graph & graph)
 }
 
 root::~root() {
-	graph_.free_heap();
+ 	graph_.free_heap();
 }
 
 void root::on_button_clicked() {

@@ -53,20 +53,21 @@ class sine_sequence {
 		typedef typename sine_sequence<Clipped>::real real;
 		sine_sequence<Clipped> sin;
 		{
+			using namespace universalis::stdlib;
 			typedef universalis::os::clocks::monotonic clock;
 			int const iterations(1000000);
 			real const step(pi / 1000);
 			sin(0, step);
-			std::nanoseconds const t1(clock::current());
+			nanoseconds const t1(clock::current());
 			real f1(1);
 			for(int i(0); i < iterations; ++i) f1 += sin();
-			std::nanoseconds const t2(clock::current());
+			nanoseconds const t2(clock::current());
 			real f2(1), ff2(0);
 			for(int i(0); i < iterations; ++i) {
 				f2 += std::sin(ff2);
 				ff2 += step;
 			}
-			std::nanoseconds const t3(clock::current());
+			nanoseconds const t3(clock::current());
 			{
 				std::ostringstream s; s << "sine_sequence<Clipped = " << Clipped << ">: " << f1;
 				BOOST_MESSAGE(s.str());

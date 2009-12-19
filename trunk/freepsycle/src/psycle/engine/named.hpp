@@ -24,7 +24,7 @@ class named {
 		///\post the given name is copied.
 		void inline name(name_type const & name) { do_name(name); }
 		/// overridable virtual setter.
-		void virtual inline do_name(name_type const & name) { this->name_ = name; }
+		virtual void inline do_name(name_type const & name) { this->name_ = name; }
 		virtual inline ~named() {}
 	private:
 		name_type name_;

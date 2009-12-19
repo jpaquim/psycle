@@ -22,7 +22,7 @@
 namespace universalis { namespace compiler { namespace cast {
 
 	template<typename Derived, typename Base>
-	Derived inline & derive(Base & base)
+	Derived & derive(Base & base)
 		#if !defined NDEBUG
 			throw(std::bad_cast)
 		#endif
@@ -49,11 +49,11 @@ namespace universalis { namespace compiler { namespace cast {
 		protected:
 			typedef derived derived_type;
 		public:
-			inline operator Derived const & () const throw() { return /*derive<Derived const>*/ static_cast<Derived const &>(*this); }
-			inline operator Derived       & ()       throw() { return /*derive<Derived      >*/ static_cast<Derived       &>(*this); }
+			operator Derived const & () const throw() { return /*derive<Derived const>*/ static_cast<Derived const &>(*this); }
+			operator Derived       & ()       throw() { return /*derive<Derived      >*/ static_cast<Derived       &>(*this); }
 			
-			Derived inline const & derived_this() const throw() { return *this; }
-			Derived inline       & derived_this()       throw() { return *this; }
+			Derived const & derived_this() const throw() { return *this; }
+			Derived       & derived_this()       throw() { return *this; }
 	};
 
 	template<typename Derived_Underlying, typename Derived, typename Underlying>
@@ -61,7 +61,7 @@ namespace universalis { namespace compiler { namespace cast {
 		private:
 			BOOST_STATIC_ASSERT((boost::is_base_and_derived<Underlying, Derived_Underlying>::value));
 		public:
-			inline operator Derived_Underlying const & () const throw() {
+			operator Derived_Underlying const & () const throw() {
 				#if 0 && !defined NDEBUG
 					if(os::loggers::trace()()) {
 						std::ostringstream s;
@@ -88,7 +88,7 @@ namespace universalis { namespace compiler { namespace cast {
 				#endif
 			}
 			
-			inline operator Derived_Underlying & () throw() {
+			operator Derived_Underlying & () throw() {
 				#if 0 && !defined NDEBUG
 					if(os::loggers::trace()()) {
 						std::ostringstream s;
@@ -132,8 +132,8 @@ namespace universalis { namespace compiler { namespace cast {
 			typedef underlying_wrapper underlying_wrapper_type;
 		public:
 			typedef Derived_Underlying underlying_type;
-			underlying_type inline const & underlying() const throw() { return *this; }
-			underlying_type inline       & underlying()       throw() { return *this; }
+			underlying_type const & underlying() const throw() { return *this; }
+			underlying_type       & underlying()       throw() { return *this; }
 	};
 
 	template<typename Underlying>

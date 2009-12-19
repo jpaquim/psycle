@@ -9,8 +9,8 @@
 namespace psycle { namespace front_ends { namespace gui {
 	class color {
 		public:
-			typedef std::uint32_t rgba; // meant to match glib/gdk's ::guint32
-			typedef std::uint8_t channel;
+			typedef uint32_t rgba; // meant to match glib/gdk's ::guint32
+			typedef uint8_t channel;
 			
 			inline color(rgba const & rgba) : rgba_(rgba) {}
 			inline operator rgba const & () const throw() { return rgba_; }

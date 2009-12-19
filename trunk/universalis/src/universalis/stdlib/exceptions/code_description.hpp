@@ -17,7 +17,7 @@
 namespace universalis { namespace stdlib { namespace exceptions {
 
 	/// returns a string describing a standard error code
-	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::string code_description(int const & code = errno) throw();
+	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::string code_description(int code = errno) throw();
 
 }}}
 

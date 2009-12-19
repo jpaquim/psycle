@@ -4,8 +4,15 @@
 ///\interface psycle::front_ends::gui::lock
 #pragma once
 #include <psycle/detail/project.hpp>
-/*#include <gdk/gdk.h>*/ extern "C" { void gdk_threads_enter(); /*void gdk_flush();*/ void gdk_threads_leave(); }
 #include <cassert>
+
+//#include <gdk/gdk.h>
+extern "C" {
+	void gdk_threads_enter();
+	//void gdk_flush();
+	void gdk_threads_leave();
+}
+
 namespace psycle { namespace front_ends { namespace gui {
 
 class lock {

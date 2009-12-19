@@ -118,7 +118,7 @@ namespace loggers {
 	}
 
 	/// handling of threshold levels for a logger.
-	template<typename Logger, levels::level const Threshold_Level = levels::compiled_threshold>
+	template<typename Logger, const levels::level Threshold_Level = levels::compiled_threshold>
 	class logger_threshold_level {
 		public:
 			typedef Logger logger;

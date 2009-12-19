@@ -42,7 +42,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::b
 		public:
 			/// the fully qualified name (a path)
 			name_type qualified_name() const;
-			void virtual dump(std::ostream &, std::size_t tabulations = 0) const;
+			virtual void dump(std::ostream &, std::size_t tabulations = 0) const;
 	///\}
 };
 /// outputs a textual representation of a graph.
@@ -295,9 +295,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 	///\name reference to plugin library
 	///\{
 		public:
-			typenames::plugin_library_reference & plugin_library_reference() const throw() { return plugin_library_reference_; }
+			engine::plugin_library_reference & plugin_library_reference() const throw() { return plugin_library_reference_; }
 		private:
-			typenames::plugin_library_reference & plugin_library_reference_;
+			engine::plugin_library_reference & plugin_library_reference_;
 	///\}
 
 	///\name output ports
@@ -318,26 +318,26 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 	///\{
 		public:
 			/// called by schedulers
-			void            open  (          ) throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
-			void            opened(bool value) throw(std::exception) { if(value) open(); else close(); }
-			bool virtual    opened(          ) const { return opened_; }
+			void open() throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
+			void opened(bool value) throw(std::exception) { if(value) open(); else close(); }
+			virtual bool opened() const { return opened_; }
 		protected:
-			void virtual do_open() throw(std::exception);
+			virtual void do_open() throw(std::exception);
 		private:
-			bool            opened_;
+			bool opened_;
 	///\}
 
 	///\name start
 	///\{
 		public:
 			/// called by schedulers
-			void            start  (          ) throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
-			void            started(bool value) throw(std::exception) { if(value) start(); else stop(); }
-			bool virtual    started(          ) const { return started_; }
+			void start() throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
+			void started(bool value) throw(std::exception) { if(value) start(); else stop(); }
+			virtual bool started() const { return started_; }
 		protected:
-			void virtual do_start() throw(std::exception);
+			virtual void do_start() throw(std::exception);
 		private:
-			bool            started_;
+			bool started_;
 	///\}
 
 	///\name process
@@ -364,48 +364,48 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 			
 		public:
 			/// called by schedulers
-			void inline     process_first() throw(std::exception);
+			void inline process_first() throw(std::exception);
 		protected:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
-			void virtual do_process_first() throw(std::exception) {}
+			virtual void do_process_first() throw(std::exception) {}
 
 		public:
 			/// called by schedulers
-			void inline     process() throw(std::exception);
+			void inline process() throw(std::exception);
 		protected:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
-			void virtual do_process() throw(std::exception) = 0;
+			virtual void do_process() throw(std::exception) = 0;
 
 		public:
 			/// called by schedulers, reset the state of this node so that it prepares for the next call to process()
-			void inline     reset();
+			void inline reset();
 		protected:
-			void virtual do_reset() {}
+			virtual void do_reset() {}
 	///\}
 
 	///\name stop
 	///\{
 		public:
 			/// called by schedulers
-			void            stop() throw(std::exception) { if(started()) do_stop(); }
+			void stop() throw(std::exception) { if(started()) do_stop(); }
 		protected:
-			void virtual do_stop() throw(std::exception);
+			virtual void do_stop() throw(std::exception);
 	///\}
 	
 	///\name close
 	///\{
 		public:
 			/// called by schedulers
-			void            close() throw(std::exception) { stop(); if(opened()) do_close(); }
+			void close() throw(std::exception) { stop(); if(opened()) do_close(); }
 		protected:
-			void virtual do_close() throw(std::exception);
+			virtual void do_close() throw(std::exception);
 	///\}
 
 	protected:
-		void virtual channel_change_notification_from_port(port const &) throw(std::exception) {}
-		void virtual seconds_per_event_change_notification_from_port(port const &) {}
+		virtual void channel_change_notification_from_port(port const &) throw(std::exception) {}
+		virtual void seconds_per_event_change_notification_from_port(port const &) {}
 		void quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port const &);
 
 	///\name name
@@ -413,7 +413,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 		public:
 			/// the full path of the node (within its graph)
 			name_type qualified_name() const;
-			void virtual dump(std::ostream &, std::size_t tabulations = 0) const;
+			virtual void dump(std::ostream &, std::size_t tabulations = 0) const;
 	///\}
 };
 /// outputs a textual representation of a node.

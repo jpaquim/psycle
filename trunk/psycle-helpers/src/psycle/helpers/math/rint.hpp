@@ -76,23 +76,23 @@ Integer inline lrint(Real x) {
 #else
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	std::int32_t inline lrint<>(double d) {
+	int32_t inline lrint<>(double d) {
 		BOOST_STATIC_ASSERT((sizeof d == 8));
 		union result_union
 		{
 			double d;
-			std::int32_t i;
+			int32_t i;
 		} result;
 		result.d = d + 6755399441055744.0; // 2^51 + 2^52
 		return result.i;
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	std::int32_t inline lrint<>(float f) {
+	int32_t inline lrint<>(float f) {
 		#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 			///\todo not always the fastest when using sse(2)
 			///\todo the double "2^51 + 2^52" version might be faster.
-			std::int32_t i;
+			int32_t i;
 			__asm
 			{ 
 				fld f;
@@ -100,7 +100,7 @@ Integer inline lrint(Real x) {
 			}
 			return i;
 		#else
-			return lrint<std::int32_t>(double(f));
+			return lrint<int32_t>(double(f));
 		#endif
 	}
 
