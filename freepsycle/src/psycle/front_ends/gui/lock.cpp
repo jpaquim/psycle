@@ -5,7 +5,12 @@
 #include <psycle/detail/project.private.hpp>
 #include "lock.hpp"
 #include <glibmm/thread.h>
-/*#include <gdk/gdk.h>*/ extern "C" { void gdk_threads_init(); }
+
+//#include <gdk/gdk.h>
+extern "C" {
+	void gdk_threads_init();
+}
+
 namespace psycle { namespace front_ends { namespace gui {
 
 bool lock::initialized_(false);

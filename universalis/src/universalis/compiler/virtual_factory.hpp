@@ -70,8 +70,8 @@ class basic_virtual_factory {
 		
 	protected:
 		basic_virtual_factory() {}
-		void virtual after_construction() {}
-		void virtual before_destruction() {}
+		virtual void after_construction() {}
+		virtual void before_destruction() {}
 		virtual ~basic_virtual_factory() {}
 };
 

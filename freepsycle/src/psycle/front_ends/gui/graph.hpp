@@ -46,21 +46,21 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base {
 		Gnome::Canvas::Group group_;
 		
 	public:
-		typenames::graph inline & graph() { return graph_; }
-		inline operator typenames::graph & () { return graph(); }
+		typenames::graph & graph() { return graph_; }
+		operator typenames::graph & () { return graph(); }
 	private:
 		typenames::graph & graph_;
 	
 	///\name drawing of a new connection between ports
 	///\{
 		public:
-			void inline selected_port(port & port);
+			void selected_port(port & port);
 		private:
 			port * selected_port_, * selected_port_2_;
 			bool selected_port_is_output_;
 
 		protected:
-			Gnome::Canvas::Line inline & line() { return line_; }
+			Gnome::Canvas::Line & line() { return line_; }
 		private:
 			Gnome::Canvas::Line line_;
 	///\}
@@ -94,26 +94,26 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
 		virtual ~graph();
 
 	public:
-		host::plugin_resolver inline & resolver() { return resolver_; }
+		host::plugin_resolver & resolver() { return resolver_; }
 	private:
 		host::plugin_resolver & resolver_;
 
 	protected:
-		host::schedulers::single_threaded::scheduler inline & scheduler() throw() { return scheduler_; }
+		host::schedulers::single_threaded::scheduler & scheduler() throw() { return scheduler_; }
 	private:
 		host::schedulers::single_threaded::scheduler scheduler_;
 
 	protected:
 		void on_start();
-		Gtk::ToggleButton inline & start() throw() { return start_; }
+		Gtk::ToggleButton & start() throw() { return start_; }
 	private:
 		Gtk::ToggleButton start_;
 
 	public:
-		typenames::canvas inline & canvas() throw() { return canvas_; }
-		inline operator typenames::canvas & () throw() { return canvas(); }
-		inline operator Gnome::Canvas::Group & () throw() { return *canvas().root(); }
-		inline operator Gnome::Canvas::Group * () throw() { return canvas().root(); }
+		gui::canvas & canvas() throw() { return canvas_; }
+		operator typenames::canvas & () throw() { return canvas(); }
+		operator Gnome::Canvas::Group & () throw() { return *canvas().root(); }
+		operator Gnome::Canvas::Group * () throw() { return canvas().root(); }
 	protected:
 		void on_size_allocate(Gtk::Allocation & allocation) /*override*/;
 		void on_zoom();
@@ -134,15 +134,15 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
 {
 	protected: friend class virtual_factory_access;
 		port(parent_type &, underlying_type &, real const & x, real const & y, color const &);
-		virtual inline ~port() {}
+		virtual ~port() {}
 
 	protected: friend class node;
-		typenames::contraption inline & contraption() throw() { return contraption_; }
+		typenames::contraption & contraption() throw() { return contraption_; }
 	private:
 		typenames::contraption contraption_;
 	
 	protected:
-		Gnome::Canvas::Line inline & line() throw() { return line_; }
+		Gnome::Canvas::Line & line() throw() { return line_; }
 	private:
 		Gnome::Canvas::Line line_;
 
@@ -159,7 +159,7 @@ namespace ports {
 			output(parent_type &, underlying_type &, real const & x = 0, real const & y = 0);
 		
 		protected:
-			std::vector<Gnome::Canvas::Line*> inline & lines() throw() { return lines_; }
+			std::vector<Gnome::Canvas::Line*> & lines() throw() { return lines_; }
 		private:
 			std::vector<Gnome::Canvas::Line*> lines_;
 	};
@@ -193,7 +193,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node
 		~node() throw() {}
 
 	protected:
-		typenames::contraption inline & contraption() throw() { return contraption_; }
+		typenames::contraption & contraption() throw() { return contraption_; }
 	private:
 		typenames::contraption contraption_;
 	

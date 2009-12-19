@@ -14,17 +14,17 @@ template<typename Time_Point>
 class hiresolution_clock {
 	public:
 		Time_Point static universal_time() {
-			std::nanoseconds const ns(universalis::os::clocks::utc_since_epoch::current());
+			nanoseconds const ns(universalis::os::clocks::utc_since_epoch::current());
 			Time_Point t(ns);
 			return t;
 		}
 };
 template<>
-class hiresolution_clock<std::utc_time> {
+class hiresolution_clock<utc_time> {
 	public:
-		std::utc_time static universal_time() {
-			std::nanoseconds const ns(universalis::os::clocks::utc_since_epoch::current());
-			std::utc_time t(ns.get_count());
+		utc_time static universal_time() {
+			nanoseconds const ns(universalis::os::clocks::utc_since_epoch::current());
+			utc_time t(ns.get_count());
 			return t;
 		}
 };

@@ -15,8 +15,8 @@ namespace detail {
 	template<typename Underlying_Wrapper>
 	class underlying_wrapper_predicate {
 		public:
-			inline underlying_wrapper_predicate(typename Underlying_Wrapper::underlying_type & underlying) : underlying(underlying) {}
-			inline bool operator()(Underlying_Wrapper const * const underlying_wrapper) const { return &underlying_wrapper->underlying() == &underlying; }
+			underlying_wrapper_predicate(typename Underlying_Wrapper::underlying_type & underlying) : underlying(underlying) {}
+			bool operator()(Underlying_Wrapper const * const underlying_wrapper) const { return &underlying_wrapper->underlying() == &underlying; }
 		private:
 			typename Underlying_Wrapper::underlying_type & underlying;
 	};

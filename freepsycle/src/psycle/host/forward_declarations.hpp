@@ -12,7 +12,6 @@ namespace psycle {
 
 /// functionalities used by the host side only, not by the plugins.
 namespace host {
-	namespace underlying = engine;
 
 	class graph;
 	class node;
@@ -25,6 +24,8 @@ namespace host {
 			class multiple;
 		}
 	}
+
+	namespace underlying = engine;
 
 	namespace typenames {
 		using namespace host;

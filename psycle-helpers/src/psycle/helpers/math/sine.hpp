@@ -60,9 +60,10 @@ Real fast_sin(Real const & radians) {
 	#else
 		template<unsigned int Polynomial_Degree, typename Real>
 		void fast_sin_test_template() {
+			using namespace universalis::stdlib;
 			typedef universalis::os::clocks::monotonic clock;
 			int const iterations(1000000);
-			std::nanoseconds const t1(clock::current());
+			nanoseconds const t1(clock::current());
 			Real const step(pi / 1000);
 			Real f1(1), ff1(0);
 			for(int i(0); i < iterations; ++i) {
@@ -71,13 +72,13 @@ Real fast_sin(Real const & radians) {
 				ff1 += step;
 				if(ff1 > pi) ff1 -= 2 * pi;
 			}
-			std::nanoseconds const t2(clock::current());
+			nanoseconds const t2(clock::current());
 			Real f2(1), ff2(0);
 			for(int i(0); i < iterations; ++i) {
 				f2 += std::sin(ff2);
 				ff2 += step;
 			}
-			std::nanoseconds const t3(clock::current());
+			nanoseconds const t3(clock::current());
 			{
 				std::ostringstream s; s << "fast_sin<Polynomial_Degree = " << Polynomial_Degree << ", Real = " << universalis::compiler::typenameof(f1) << ">: " << f1;
 				BOOST_MESSAGE(s.str());

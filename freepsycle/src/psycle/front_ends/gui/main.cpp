@@ -35,7 +35,9 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 			universalis::cpu::exception::install_handler_in_thread();
 			if(universalis::os::loggers::information()()) {
 				std::ostringstream s;
-				s << paths::package::name() << " " << paths::package::version::string();
+				#if !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // parsing problems
+					s << paths::package::name() << " " << paths::package::version::string();
+				#endif
 				universalis::os::loggers::information()(s.str());
 			}
 			// gtk_clutter_init(&argument_count, &arguments); replaces gtk_init(&argument_count, &arguments);
@@ -84,5 +86,5 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 }}}
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
-	psycle::front_ends::gui::main(argument_count, arguments);
+	return psycle::front_ends::gui::main(argument_count, arguments);
 }

@@ -35,7 +35,7 @@ void sequence_iterator::beat(real beat) {
 
 void sequence_iterator::process(buffer & out, real events_per_second, std::size_t channels) throw(exception) {
 	real const samples_per_beat = events_per_second / beats_per_second_;
-	std::uint64_t const initial_sample(static_cast<std::size_t>(beat_ * samples_per_beat));
+	uint64_t const initial_sample(static_cast<std::size_t>(beat_ * samples_per_beat));
 	real last_beat(beat_ + (out.events() - 1) / samples_per_beat);
 	std::size_t last_index(0);
 	for(; i_ != sequence_.events_.end() && i_->first < last_beat; ++i_) {

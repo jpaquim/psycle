@@ -9,12 +9,12 @@
 #include <sstream>
 namespace universalis { namespace stdlib { namespace exceptions {
 
-std::string code_description(int const & code) throw() {
+std::string code_description(int code) throw() {
 	std::ostringstream s;
 	s << "standard: " << code << " 0x" << std::hex << code << ": ";
 	{
-		static std::mutex mutex;
-		std::scoped_lock<std::mutex> lock(mutex);
+		static mutex m;
+		scoped_lock<mutex> lock(m);
 		s << std::strerror(code);
 	}
 	return s.str();

@@ -23,7 +23,7 @@ class root : public Gtk::Window {
 		host::plugin_resolver   resolver_;
 
 	protected:
-		void virtual on_button_clicked();
+		virtual void on_button_clicked();
 		Gtk::Button const & button() const throw() { return button_; }
 		Gtk::Button       & button()       throw() { return button_; }
 	private:
