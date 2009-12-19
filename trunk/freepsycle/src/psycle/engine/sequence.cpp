@@ -19,10 +19,10 @@ void sequence::erase_events(real begin_beat, real end_beat) {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // sequence_iterator
 
-sequence_iterator::sequence_iterator(typenames::sequence const & sequence)
+sequence_iterator::sequence_iterator(sequence const & s)
 :
-	i_(sequence.events_.end()),
-	sequence_(sequence_),
+	i_(s.events_.end()),
+	sequence_(s),
 	beats_per_second_(1),
 	seconds_per_beat_(1),
 	beat_()
