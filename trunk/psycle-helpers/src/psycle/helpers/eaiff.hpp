@@ -78,9 +78,9 @@ namespace psycle
 			void Read(IffChunkId id) { AbstractIff::Read(id); }
 			void Read(ULongBE& ulong){ AbstractIff::Read(ulong); }
 			void Read(ULongLE& ulong){ AbstractIff::Read(ulong); }
-			void Write(const IffChunkId id){ AbstractIff:Write(id); }
-			void Write(const ULongBE& ulong){ AbstractIff:Write(ulong); }
-			void Write(const ULongLE& ulong){ AbstractIff:Write(ulong); }
+			void Write(const IffChunkId id){ AbstractIff::Write(id); }
+			void Write(const ULongBE& ulong){ AbstractIff::Write(ulong); }
+			void Write(const ULongLE& ulong){ AbstractIff::Write(ulong); }
 
 			IffChunkHeader currentHeader;
 			std::uint32_t headerPosition;
