@@ -14,6 +14,8 @@
 #include <string>
 namespace psycle { namespace core {
 
+using namespace universalis::stdlib;
+
 /// typedef for work callback
 typedef float * (*AUDIODRIVERWORKFN) (void * context, int numSamples);
 
@@ -80,29 +82,29 @@ class AudioDriverSettings {
 	///\name getter/setter for sample rate
 	///\{
 		public:
-			std::uint32_t samplesPerSec() const { return samplesPerSec_; }
-			void setSamplesPerSec(std::uint32_t samples) { samplesPerSec_ = samples; }
+			uint32_t samplesPerSec() const { return samplesPerSec_; }
+			void setSamplesPerSec(uint32_t samples) { samplesPerSec_ = samples; }
 		private:
-			std::uint32_t samplesPerSec_;
+			uint32_t samplesPerSec_;
 	///\}
 
 	///\name getter/setter for bit depth ( 8, 16, 24. what about ASIO that offers more modes? 
 	///\{
 		public:
-			std::uint32_t bitDepth() const { return bitDepth_; }
-			void setBitDepth(std::uint32_t depth) { bitDepth_ = depth; }
+			uint32_t bitDepth() const { return bitDepth_; }
+			void setBitDepth(uint32_t depth) { bitDepth_ = depth; }
 		private:
-		std::uint32_t bitDepth_;
+		uint32_t bitDepth_;
 	///\}
 
 	///\name getter/setter for channel mode (mode 3 == stereo, 1 == mono left, 2 == mono right, 0 = mono both channels)
 	///\{
 		public:
-			std::uint32_t channelMode() const { return channelMode_; }
-			void setChannelMode(std::uint32_t mode) { channelMode_ = mode; }
-			std::uint32_t numChannels() const { return (channelMode_ == 3) ? 2 : 1; }
+			uint32_t channelMode() const { return channelMode_; }
+			void setChannelMode(uint32_t mode) { channelMode_ = mode; }
+			uint32_t numChannels() const { return (channelMode_ == 3) ? 2 : 1; }
 		private:
-			std::uint32_t channelMode_;
+			uint32_t channelMode_;
 	///\}
 
 	/// getter for number of bytes per sample. (should verify if this is valid for 24bits)
@@ -115,28 +117,28 @@ class AudioDriverSettings {
 	///\name getter/setter for the whole buffer size (in bytes).
 	///\{
 		public:
-			std::uint32_t totalBufferBytes() const { return bufferSize_; }
-			void setTotalBufferBytes(std::uint32_t size) { bufferSize_ = size; }
+			uint32_t totalBufferBytes() const { return bufferSize_; }
+			void setTotalBufferBytes(uint32_t size) { bufferSize_ = size; }
 		private:
-			std::uint32_t bufferSize_;
+			uint32_t bufferSize_;
 	///\}
 
 	///\name getter/setter for the audio block size (in bytes)
 	///\{
 		public:
-			std::uint32_t blockBytes() const { return blockSize_; }
-			void setBlockBytes(std::uint32_t size) { blockSize_ = size; }
+			uint32_t blockBytes() const { return blockSize_; }
+			void setBlockBytes(uint32_t size) { blockSize_ = size; }
 		private:
-			std::uint32_t blockSize_;
+			uint32_t blockSize_;
 	///\}
 
 	///\name getter/setter for number of blocks.
 	///\{
 		public:
-			std::uint32_t blockCount() const { return blockCount_; }
-			void setBlockCount(std::uint32_t count) { blockCount_ = count; }
+			uint32_t blockCount() const { return blockCount_; }
+			void setBlockCount(uint32_t count) { blockCount_ = count; }
 		private:
-			std::uint32_t blockCount_;
+			uint32_t blockCount_;
 	///\}
 };
 
@@ -163,13 +165,13 @@ class AudioDriver {
 		virtual int GetOutputLatency() { return playbackSettings_.totalBufferBytes(); }
 
 		static double frand();
-		static void Quantize16WithDither(float const * pin, std::int16_t * piout, int c);
-		static void Quantize16(float const * pin, std::int16_t * piout, int c);
-		static void Quantize16AndDeinterlace(float const * pin, std::int16_t * pileft, int strideleft, std::int16_t * piright, int strideright, int c);
+		static void Quantize16WithDither(float const * pin, int16_t * piout, int c);
+		static void Quantize16(float const * pin, int16_t * piout, int c);
+		static void Quantize16AndDeinterlace(float const * pin, int16_t * pileft, int strideleft, int16_t * piright, int strideright, int c);
 		static void DeQuantize16AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
-		static void Quantize24WithDither(float const * pin, std::int32_t * piout, int c);
-		static void Quantize24(float const * pin, std::int32_t * piout, int c);
-		static void Quantize24AndDeinterlace(float const * pin, std::int32_t * pileft, std::int32_t * piright, int c);
+		static void Quantize24WithDither(float const * pin, int32_t * piout, int c);
+		static void Quantize24(float const * pin, int32_t * piout, int c);
+		static void Quantize24AndDeinterlace(float const * pin, int32_t * pileft, int32_t * piright, int c);
 		static void DeQuantize24AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
 
 	///\name playback settings
@@ -226,10 +228,10 @@ class DummyDriver : public AudioDriver {
 			/// whether the thread is asked to terminate
 			bool stop_requested_;
 			/// a mutex to synchronise accesses to running_ and stop_requested_
-			std::mutex mutex_;
-			typedef std::scoped_lock<std::mutex> scoped_lock;
+			mutex mutex_;
+			typedef class scoped_lock<mutex> scoped_lock;
 			/// a condition variable to wait until notified that the value of running_ has changed
-			std::condition<scoped_lock> condition_;
+			condition<scoped_lock> condition_;
 		///\}
 };
 

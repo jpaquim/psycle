@@ -20,14 +20,16 @@
 
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "audiodriver.h"
+#include <universalis/stdlib/cstdint.hpp>
+#include <iostream>
 #include <windows.h>
 #include <mmsystem.h>
 #pragma comment(lib, "winmm")
 #undef min
 #undef max
-#include <universalis/stdlib/cstdint.hpp>
-#include <iostream>
 namespace psycle { namespace core {                                      
+
+using namespace universalis::stdlib;
 
 ///\todo work in progress
 /// status working, restarting etc not working
@@ -56,8 +58,8 @@ class MsWaveOut : public AudioDriver {
 		static CRITICAL_SECTION waveCriticalSection;
 		static WAVEHDR*         waveBlocks; // array of header structure, 
 		// that points to a block buffer
-		static volatile int     waveFreeBlockCount;
-		static int              waveCurrentBlock;
+		static volatile /* why volatile *?/ int waveFreeBlockCount;
+		static int waveCurrentBlock;
 
 		// mme functions
 

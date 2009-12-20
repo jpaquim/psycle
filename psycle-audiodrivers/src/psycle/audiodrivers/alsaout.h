@@ -16,6 +16,8 @@
 #include <universalis/stdlib/cstdint.hpp>
 namespace psycle { namespace core {
 
+using namespace universalis::stdlib;
+
 class AlsaOut : public AudioDriver {
 	public:
 		AlsaOut();
@@ -58,7 +60,7 @@ class AlsaOut : public AudioDriver {
 		/// 5:direct_noninterleaved 6:DIRECT_WRITE
 		int method;
 		
-		std::int16_t * samples;
+		int16_t * samples;
 		snd_pcm_channel_area_t *areas;
 
 		void FillBuffer(snd_pcm_uframes_t offset, int count);
@@ -66,10 +68,10 @@ class AlsaOut : public AudioDriver {
 		int id;
 
 		/// left out (getSample should change this non-stop if audio was started
-		std::int16_t left;
+		int16_t left;
 
 		/// right out (getSample should change this non-stop if audio was started)
-		std::int16_t right;
+		int16_t right;
 
 		void (*getSample) (void*);
 
@@ -86,10 +88,10 @@ class AlsaOut : public AudioDriver {
 			/// whether the thread is asked to terminate
 			bool stop_requested_;
 			/// a mutex to synchronise accesses to running_ and stop_requested_
-			std::mutex mutex_;
-			typedef std::scoped_lock<std::mutex> scoped_lock;
+			mutex mutex_;
+			typedef class scoped_lock<mutex> scoped_lock;
 			/// a condition variable to wait until notified that the value of running_ has changed
-			std::condition<scoped_lock> condition_;
+			condition<scoped_lock> condition_;
 		///\}
 };
 
