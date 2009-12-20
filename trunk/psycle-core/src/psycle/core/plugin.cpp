@@ -19,10 +19,12 @@
 #endif
 
 // *** ms-windows note ***
-// plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and std calling convention)
+// plugins produced by mingw and msvc are binary-incompatible due to c++ abi ("this" pointer and calling convention)
 
 namespace psycle { namespace core {
-	using namespace psycle::plugin_interface;
+
+using namespace psycle::plugin_interface;
+
 /**************************************************************************/
 // PluginFxCallback
 
@@ -361,9 +363,9 @@ void Plugin::Tick( int channel, const PatternEvent & pData )
 			{
 				proxy().ParameterTweak(pData.instrument(), nv);
 			}
-			catch(const std::exception &ex)
+			catch(const std::exception &)
 			{
-				const char* bla = ex.what();
+				///\todo
 			}
 			Player::singleton().Tweaker = true;
 		}

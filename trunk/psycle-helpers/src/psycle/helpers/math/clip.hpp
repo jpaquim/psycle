@@ -27,9 +27,9 @@ SignedIntegralResult inline clipped_lrint(Real x) {
 	// check that Result is signed
 	BOOST_STATIC_ASSERT((std::numeric_limits<SignedIntegralResult>::is_signed));
 
-	int const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
+	int const max((1u << (bits - 1)) - 1); // The compiler is able to compute this statically.
 	int const min(-max - 1);
-	return math::lrint<SignedIntegralResult>(math::clipped(Real(min), x, Real(max)));
+	return lrint<SignedIntegralResult>(clipped(Real(min), x, Real(max)));
 }
 
 /// combines float to signed integer conversion with clipping.
