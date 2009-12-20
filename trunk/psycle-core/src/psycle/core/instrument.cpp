@@ -19,6 +19,12 @@
 #include <iomanip>
 #include <cstring>
 
+namespace psycle { namespace core {
+
+using namespace helpers;
+
+///\todo doc!
+///\todo move to psycle-helpers?
 template<class T> inline std::string toHex(T value , int nums = 8) {
 
 		std::ostringstream buffer;
@@ -31,6 +37,8 @@ template<class T> inline std::string toHex(T value , int nums = 8) {
 		return buffer.str();
 }
 
+///\todo doc!
+///\todo move to psycle-helpers?
 template<class T> inline T str_hex(const std::string &  value, int pos) {
 		T result;
 
@@ -42,12 +50,6 @@ template<class T> inline T str_hex(const std::string &  value, int pos) {
 
 		return result;
 }
-
-
-
-namespace psycle { namespace core {
-
-using namespace psycle::helpers;
 
 Instrument::Instrument()
 :
@@ -411,9 +413,9 @@ std::cout << "loopStart" << waveLoopStart << std::endl;
 			size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
 		}
 		
-		std::uint32_t index = 0;
+		std::uint32_t index = 0; ///\todo unused?
 		xml << "<wave name='" << waveName << "' bin='";
-		std::uint32_t version = CURRENT_FILE_VERSION_WAVE;
+		std::uint32_t version = CURRENT_FILE_VERSION_WAVE; ///\todo unused?
 		
 		xml << toHex(waveLength);
 		xml << toHex(waveVolume);
@@ -486,7 +488,7 @@ void Instrument::createHeader( const std::string & header )
 	_RCUT = str_hex<int> (header,pos++);
 	_RRES = str_hex<int> (header,pos++);
 
-	int numwaves = str_hex<int> (header,pos++);
+	int numwaves = str_hex<int> (header,pos++); ///\todo unused?
 }
 
 void Instrument::setName( const std::string & name )

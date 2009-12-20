@@ -2,13 +2,14 @@
 ///\brief implementation file for psycle::host::CWireDlg.
 
 #include "WireDlg.hpp"
+
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machine.h>
-#include <psycle/core/song.h>
-using namespace psycle::core;
+	#include <psycle/core/machine.h>
+	#include <psycle/core/song.h>
+	using namespace psycle::core;
 #else
-#include "Machine.hpp"
-#include "Song.hpp"
+	#include "Machine.hpp"
+	#include "Song.hpp"
 #endif
 
 #include "Configuration.hpp"
@@ -17,11 +18,10 @@ using namespace psycle::core;
 #include "VolumeDlg.hpp"
 #include "Zap.hpp"
 #include "WireGui.hpp"
-#include <psycle/helpers/helpers.hpp>
+
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/fft.hpp>
 #include <psycle/helpers/dsp.hpp>
-
 #include <universalis/os/aligned_memory_alloc.hpp>
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -68,10 +68,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnInitDialog();
 			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
 			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
-//			universalis::os::aligned_memory_alloc(16, inl, SCOPE_SPEC_SAMPLES);
-//			universalis::os::aligned_memory_alloc(16, inr, SCOPE_SPEC_SAMPLES);
-			psycle::helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
-			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
+			//universalis::os::aligned_memory_alloc(16, inl, SCOPE_SPEC_SAMPLES);
+			//universalis::os::aligned_memory_alloc(16, inr, SCOPE_SPEC_SAMPLES);
+			helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
+			helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
 
 			scope_mode = 0;
 			scope_peak_rate = 20;
@@ -115,18 +115,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetMode();
 			pos = 1;
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			mult = 32768.0f / _pSrcMachine->GetAudioRange();
-#else
-			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
-			{
-				mult = 32768.0f;
-			}
-			else // native to native, no need to convert.
-			{
-				mult = 1.0f;
-			}	
-#endif
+			#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				mult = 32768.0f / _pSrcMachine->GetAudioRange();
+			#else
+				if(_pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX)
+					mult = 32768.0f; // native to VST, divide.
+				else
+					mult = 1.0f; // native to native, no need to convert.
+			#endif
+
 			return TRUE;
 		}
 

@@ -20,10 +20,13 @@
 #include "vsthost.h"
 #include "vstplugin.h"
 
+#include <psycle/helpers/dsp.hpp>
 #include <sstream>
 #include <iostream>
 
 namespace psycle { namespace core {
+
+using namespace helpers;
 
 struct ToLower {
 	char operator() (char c) const  { return std::tolower(c); }

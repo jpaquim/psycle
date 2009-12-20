@@ -20,9 +20,9 @@
 	#include <windows.h>
 #endif
 
-namespace psycle {
-	namespace core {
-		using namespace psycle::helpers;
+namespace psycle { namespace core {
+
+using namespace helpers;
 	
 		///\todo: Improve the case where no min/max limit is given by the plugin (Example: the amp.so doesn't have a max value).
 		LadspaParam::LadspaParam(LADSPA_PortDescriptor descriptor,LADSPA_PortRangeHint hint, const char *newname)

@@ -13,25 +13,21 @@ using namespace psycle::core;
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
 
-#include <psycle/helpers/helpers.hpp>
 #include "Zap.hpp"
 #include <mmreg.h>
-#include <math.h>
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include <cmath>
 
-	using namespace psycle::helpers;
-	
-		float const CWaveEdChildView::zoomBase = 1.06f;
+PSYCLE__MFC__NAMESPACE__BEGIN(psycle) PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		CWaveEdChildView::CWaveEdChildView()
-		{
-		}
+using namespace psycle::helpers;
 
-		CWaveEdChildView::~CWaveEdChildView()
-		{
-		}
+float const CWaveEdChildView::zoomBase = 1.06f;
 
+CWaveEdChildView::CWaveEdChildView()
+{}
+
+CWaveEdChildView::~CWaveEdChildView()
+{}
 
 		BEGIN_MESSAGE_MAP(CWaveEdChildView, CWnd)
 			//{{AFX_MSG_MAP(CWaveEdChildView)
@@ -2738,5 +2734,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 	
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+PSYCLE__MFC__NAMESPACE__END PSYCLE__MFC__NAMESPACE__END

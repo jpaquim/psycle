@@ -16,8 +16,6 @@
 #include "playertimeinfo.h"
 #include "machinekey.hpp"
 
-#include <psycle/helpers/helpers.hpp>
-
 #include <universalis/stdlib/cstdint.hpp>
 #include <cassert>
 #include <deque>
@@ -26,7 +24,6 @@
 
 namespace psycle { namespace core {
 
-using namespace helpers;
 class RiffFile;
 
 ///\todo FIXME: stole these from analzyer.h just to fix compile error.

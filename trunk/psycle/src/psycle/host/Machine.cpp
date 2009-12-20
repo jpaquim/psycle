@@ -1,7 +1,8 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 #include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE // popped at eof
 
 #include "Machine.hpp"
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
@@ -33,10 +34,11 @@
 
 #include "Loggers.hpp"
 
+#include <psycle/helpers/value_mapper.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 
-namespace psycle { namespace host 
-{
+namespace psycle { namespace host {
+
 #if !defined WINAMP_PLUGIN
 		extern CPsycleApp theApp;
 #endif //!defined WINAMP_PLUGIN
@@ -332,7 +334,7 @@ namespace psycle { namespace host
 
 			if(_pDstMachine) {
 				//if ( value == 255 ) value =256; // FF = 255
-				//const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
+				//const float invol = value_mapper::map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
 				
 				int c;
 				if((c = _pDstMachine->FindInputWire(srcIndex)) != -1) {
@@ -973,7 +975,7 @@ namespace psycle { namespace host
 			Machine::Work(numSamples);
 			cpu::cycles_type cost = cpu::cycles();
 
-			float mv = helpers::CValueMapper::Map_255_1(_outDry);
+			float mv = value_mapper::map_255_1(_outDry);
 				
 			float *pSamples = _pMasterSamples;
 			float *pSamplesL = _pSamplesL;
@@ -998,13 +1000,13 @@ namespace psycle { namespace host
 					if(*pSamples > 32767.0f)
 					{
 						_outDry = helpers::math::rounded((float)_outDry * 32767.0f / (*pSamples));
-						mv = helpers::CValueMapper::Map_255_1(_outDry);
+						mv = value_mapper::map_255_1(_outDry);
 						*pSamples = *pSamplesL = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
 						_outDry = helpers::math::rounded((float)_outDry * -32767.0f / (*pSamples));
-						mv = helpers::CValueMapper::Map_255_1(_outDry);
+						mv = value_mapper::map_255_1(_outDry);
 						*pSamples = *pSamplesL = -32767.0f; 
 					}
 					pSamples++;
@@ -1017,13 +1019,13 @@ namespace psycle { namespace host
 					if(*pSamples > 32767.0f)
 					{
 						_outDry = helpers::math::rounded((float)_outDry * 32767.0f / (*pSamples));
-						mv = helpers::CValueMapper::Map_255_1(_outDry);
+						mv = value_mapper::map_255_1(_outDry);
 						*pSamples = *pSamplesR = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
 						_outDry = helpers::math::rounded((float)_outDry * -32767.0f / (*pSamples));
-						mv = helpers::CValueMapper::Map_255_1(_outDry);
+						mv = value_mapper::map_255_1(_outDry);
 						*pSamples = *pSamplesR = -32767.0f; 
 					}
 					pSamples++;

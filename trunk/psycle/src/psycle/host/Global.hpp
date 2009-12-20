@@ -1,7 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::Global.
 #pragma once
+
 #include "Version.hpp"
+
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 	#include <psycle/core/constants.h>
 	#include <psycle/core/commands.h>
@@ -25,86 +27,83 @@
 #else
 	#include <universalis/os/clocks.hpp>
 #endif
-#include <universalis/stdlib/cstdint.hpp>
 
-namespace psycle
-{
-	namespace helpers
-	{
-		namespace dsp
-		{
+#include <universalis/stdlib/cstdint.hpp>
+#include <psycle/helpers/math.hpp>
+
+namespace psycle {
+	namespace helpers {
+		namespace dsp {
 			class Resampler;
 		}
 	}
-	namespace host
-	{
+	namespace host {
+		using namespace helpers;
+		using namespace helpers::math;
+
 		class Configuration;
 		class InputHandler;
 
+		#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+			class Song;
+			class Player;
+			namespace vst {
+				class AudioMaster;
+			}
+		#endif
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Song;
-		class Player;
-		namespace vst
-		{
-			class AudioMaster;
-		}
-#endif
 		//\todo: move this source to a better place.
-		namespace cpu
-		{
+		namespace cpu {
 			typedef std::uint64_t cycles_type;
 
-			cycles_type inline cycles()
-			{
+			cycles_type inline cycles() {
 				#if defined DIVERSALIS__OS__MICROSOFT
 					LARGE_INTEGER result;
 					QueryPerformanceCounter(&result);
 					return result.QuadPart;
 				#else
-					return universalis::os::clocks::thread::current();
+					return universalis::os::clocks::realtime::current();
 				#endif
 			}
 
-			cycles_type inline cycles_per_second()
-			{
+			cycles_type inline cycles_per_second() {
 				#if defined DIVERSALIS__OS__MICROSOFT
 					LARGE_INTEGER result;
 					QueryPerformanceFrequency(&result);
 					return result.QuadPart;
 				#else
-					return universalis::os::clocks::thread::frequency();
+					return universalis::os::clocks::realtime::frequency();
 				#endif
 			}
 		}
 
-		class Global
-		{
-			private:
+		class Global {
 			public:
 				Global();
 				virtual ~Global() throw();
 
 				static Player * pPlayer;
 				static Configuration * pConfig;
-				static helpers::dsp::Resampler * pResampler;
+				static dsp::Resampler * pResampler;
+
 				///\todo shouldn't we update this value regularly?
 				static cpu::cycles_type _cpuHz;
-#if !defined WINAMP_PLUGIN
-				static InputHandler* pInputHandler;
-#endif //!defined WINAMP_PLUGIN
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				static vst::AudioMaster* pVstHost;
+				#if !defined WINAMP_PLUGIN
+					static InputHandler* pInputHandler;
+				#endif //!defined WINAMP_PLUGIN
 
-				static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
-#endif
-				static Song           & song();
-				static inline Player         & player(){ return *pPlayer; }
-				static inline Configuration  & configuration(){ return *pConfig; }
-				static inline helpers::dsp::Resampler & resampler(){ return *pResampler; }
-				static inline cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }
-				//void inline cpu_frequency(cpu::cycles_type const & value) throw() { cpu_frequency_ = value; }
+				#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+					static vst::AudioMaster* pVstHost;
+					static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
+				#endif
+
+				static Song & song();
+				static Player & player() { return *pPlayer; }
+				static Configuration & configuration() { return *pConfig; }
+				static dsp::Resampler & resampler() { return *pResampler; }
+				static cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }
+				//void cpu_frequency(cpu::cycles_type const & value) throw() { cpu_frequency_ = value; }
 		};
 	}
 }

@@ -13,8 +13,6 @@ using namespace psycle::core;
 #include "Player.hpp"
 #include "Song.hpp"
 #endif
-#include <psycle/helpers/helpers.hpp>
-
 
 #ifdef _MSC_VER
 #undef min
@@ -1450,7 +1448,7 @@ namespace psycle {
 			}
 #endif
 			
-			sprintf(buffer, "%02d:%02d", helpers::math::truncated(songLength / 60), helpers::math::truncated(songLength) % 60);
+			sprintf(buffer, "%02d:%02d", truncated(songLength / 60), truncated(songLength) % 60);
 			pLength->SetWindowText(buffer);
 			// Update sequencer line
 			

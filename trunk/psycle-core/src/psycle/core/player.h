@@ -27,8 +27,8 @@
 
 namespace psycle { namespace core {
 
+using namespace helpers;
 class AudioDriver; ///\todo doesn't belong in psycore
-using namespace psycle::helpers;
 
 /// schedules the processing of machines, sends signal buffers and sequence events to them, ...
 class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncopyable {

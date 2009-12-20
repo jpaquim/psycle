@@ -5,7 +5,7 @@
 #include "DSoundConfig.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
-#include "Dsp.hpp"
+#include <psycle/helpers/dsp.hpp>
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <universalis/os/thread_name.hpp>

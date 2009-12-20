@@ -11,7 +11,11 @@ using namespace psycle::core;
 #else
 #include "Song.hpp"
 #endif
-#include <psycle/helpers/helpers.hpp>
+
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
+using psycle::helpers::hexstring_to_integer;
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -236,8 +240,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			int si = _pSong->instSelected();
 			
-			using helpers::hexstring_to_integer;
-
 			if (buffer[0] == '\0')
 			{
 				_pSong->_pInstrument[si]->_locked_machine_index = -1;

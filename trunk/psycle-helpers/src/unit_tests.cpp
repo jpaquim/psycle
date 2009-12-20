@@ -12,11 +12,4 @@
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
 
-#include <psycle/helpers/helpers.hpp>
-#include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/math/round.hpp>
-#include <psycle/helpers/math/truncate.hpp>
-#include <psycle/helpers/math/log.hpp>
-#include <psycle/helpers/math/sine.hpp>
-#include <psycle/helpers/math/sine_cosine.hpp>
-#include <psycle/helpers/math/sine_sequence.hpp>
+#include <psycle/helpers/math/math.hpp>

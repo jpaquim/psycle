@@ -1,20 +1,20 @@
 
 #include "WaveInMacDlg.hpp"
+
 #include "Configuration.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/audiodrivers/audiodriver.h>
-#include <psycle/core/internal_machines.h>
-#include <psycle/helpers/dsp.hpp>
-using namespace psycle::core;
-#else
-#include "AudioDriver.hpp"
-#include "internal_machines.hpp"
-#include "Dsp.hpp"
-#endif
-
 #include "ChildView.hpp"
 #include "RecorderGui.hpp"
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+	#include <psycle/audiodrivers/audiodriver.h>
+	#include <psycle/core/internal_machines.h>
+	using namespace psycle::core;
+#else
+	#include "AudioDriver.hpp"
+	#include "internal_machines.hpp"
+#endif
+
+#include <psycle/helpers/dsp.hpp>
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 PSYCLE__MFC__NAMESPACE__BEGIN(host)

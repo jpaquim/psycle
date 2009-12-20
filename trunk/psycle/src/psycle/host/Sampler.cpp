@@ -1,18 +1,19 @@
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
 #include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE // popped at eof
+
+#include "Global.hpp"
 #include "Sampler.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
-#include "Global.hpp"
-namespace psycle
-{
-	namespace host
-	{
+#include <psycle/helpers/value_mapper.hpp>
+
+namespace psycle { namespace host {
+
 		char* Sampler::_psName = "Sampler";
 		InstPreview Sampler::wavprev;
 		InstPreview Sampler::waved;
@@ -624,7 +625,7 @@ namespace psycle
 				}	
 				else
 				{
-					float const finetune = helpers::CValueMapper::Map_255_1(Global::song()._pInstrument[pVoice->_instrument]->waveFinetune);
+					float const finetune = helpers::value_mapper::map_255_1(Global::song()._pInstrument[pVoice->_instrument]->waveFinetune);
 					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->note()+Global::song()._pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer->SampleRate()));
 				}
 				
@@ -647,7 +648,7 @@ namespace psycle
 
 				if (pEntry->command() == SAMPLER_CMD_VOLUME)
 				{
-					pVoice->_wave._vol *= helpers::CValueMapper::Map_255_1(pEntry->parameter());
+					pVoice->_wave._vol *= helpers::value_mapper::map_255_1(pEntry->parameter());
 				}
 				
 				// Panning calculation -------------------------------------------
@@ -660,10 +661,10 @@ namespace psycle
 				}
 				else if ( pEntry->command() == SAMPLER_CMD_PANNING )
 				{
-					panFactor = helpers::CValueMapper::Map_255_1(pEntry->parameter());
+					panFactor = helpers::value_mapper::map_255_1(pEntry->parameter());
 				}
 				else {
-					panFactor = helpers::CValueMapper::Map_255_1(Global::song()._pInstrument[pVoice->_instrument]->_pan);
+					panFactor = helpers::value_mapper::map_255_1(Global::song()._pInstrument[pVoice->_instrument]->_pan);
 				}
 
 				pVoice->_wave._rVolDest = panFactor;
@@ -736,7 +737,7 @@ namespace psycle
 				//
 				pVoice->_wave._vol = (float)Global::song()._pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
-				if ( pEntry->command() == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= helpers::CValueMapper::Map_255_1(pEntry->parameter());
+				if ( pEntry->command() == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= helpers::value_mapper::map_255_1(pEntry->parameter());
 				
 				// Panning calculation -------------------------------------------
 				//
@@ -748,11 +749,11 @@ namespace psycle
 				}
 				else if ( pEntry->command() == SAMPLER_CMD_PANNING )
 				{
-					panFactor = helpers::CValueMapper::Map_255_1(pEntry->parameter());
+					panFactor = helpers::value_mapper::map_255_1(pEntry->parameter());
 				}
 				else
 				{
-					panFactor = helpers::CValueMapper::Map_255_1(Global::song()._pInstrument[pVoice->_instrument]->_pan);
+					panFactor = helpers::value_mapper::map_255_1(Global::song()._pInstrument[pVoice->_instrument]->_pan);
 				}
 
 				pVoice->_wave._rVolDest = panFactor;
@@ -899,7 +900,7 @@ namespace psycle
 		}
 		void Sampler::DoPreviews(float* pSamplesL, float* pSamplesR, int amount)
 		{
-#if !defined WINAMP_PLUGIN
+			#if !defined WINAMP_PLUGIN
 			//todo do better.. use a vector<InstPreview*> or something instead
 			if(wavprev.IsEnabled())
 			{
@@ -909,10 +910,9 @@ namespace psycle
 			{
 				waved.Work(pSamplesL, pSamplesR, amount);
 			}
-#endif // !defined WINAMP_PLUGIN
+			#endif // !defined WINAMP_PLUGIN
 		}
 
-	}
-}
+}}
 
 #endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

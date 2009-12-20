@@ -2,8 +2,11 @@
 ///\brief implementation file for psycle::host::CSkinDlg.
 
 #include "SkinDlg.hpp"
-#include "Helpers.hpp"
 #include "Configuration.hpp"
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
+using namespace psycle::helpers;
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -766,7 +769,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				char buf[1 << 10];
 				while(std::fgets(buf, sizeof buf, hfile))
 				{
-					using helpers::hexstring_to_integer;
 					// this is a horror of repetitive code :-(
 					if (std::strstr(buf,"\"pattern_fontface\"=\""))
 					{

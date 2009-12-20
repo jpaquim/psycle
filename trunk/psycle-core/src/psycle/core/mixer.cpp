@@ -13,10 +13,9 @@
 #include <psycle/helpers/dsp.hpp>
 #include "fileio.h"
 
-namespace psycle {
-	namespace core {
+namespace psycle { namespace core {
 
-		using namespace psycle::helpers;
+using namespace helpers;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Mixer

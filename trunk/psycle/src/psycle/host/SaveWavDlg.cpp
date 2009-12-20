@@ -21,8 +21,10 @@ using namespace psycle::core;
 #include "PatternView.hpp"
 #include <iostream>
 #include <iomanip>
-#include <psycle/helpers/helpers.hpp>
+#include <psycle/helpers/hexstring_to_integer.hpp>
 #include <psycle/helpers/dither.hpp>
+
+using namespace psycle::helpers;
 using namespace psycle::helpers::dsp;
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -658,7 +660,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			switch (m_recmode)
 			{
-				using helpers::hexstring_to_integer;
 			case 0:
 				{
 				j=0; // Calculate progress bar range.
@@ -730,8 +731,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					pPlayer->setLoopRange(iter->second->tickPosition(), iterend->second->tickEndPosition());
 					pPlayer->start(iter->second->tickPosition());
 				}
-				m_progress.SetRange(math::rounded(iter->second->tickPosition()),
-					math::rounded(iterend->second->tickEndPosition()));
+				m_progress.SetRange(rounded(iter->second->tickPosition()),
+					rounded(iterend->second->tickEndPosition()));
 
 #else
 				j=0;

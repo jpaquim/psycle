@@ -46,10 +46,12 @@
 
 #include <psycle/core/machine.h>
 #include <seib/vst/CVSTHost.Seib.hpp>
-
-using namespace seib::vst;
+#include <psycle/helpers/math.hpp>
 
 namespace psycle { namespace core { namespace vst {
+
+using namespace seib::vst;
+using namespace helpers::math;
 
 // Maximum number of Audio Input/outputs
 // \todo : this shouldn't be a static value. Host should ask the plugin and the array get created dynamically.
@@ -191,7 +193,7 @@ public:
 		try
 		{
 			if(numparam < numParams())
-				return psycle::helpers::math::rounded(GetParameter(numparam) * CVSTHost::GetQuantization());
+				return rounded(GetParameter(numparam) * CVSTHost::GetQuantization());
 		}catch(...){}
 		return 0;
 	}

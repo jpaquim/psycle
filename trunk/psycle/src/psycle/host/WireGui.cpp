@@ -13,10 +13,9 @@ using namespace psycle::core;
 
 #include "Configuration.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		using namespace psycle::helpers;
+using namespace helpers;
 
 		WireGui::WireGui(MachineView* view)	:
 			view_(view),
