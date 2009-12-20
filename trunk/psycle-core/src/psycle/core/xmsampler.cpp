@@ -2090,7 +2090,7 @@ void XMSampler::SetSampleRate(int sr)
 
 void XMSampler::Tick()
 {
-	scoped_lock lock(m_Mutex);
+	scoped_lock lock(*this);
 	SampleCounter(0);
 	m_TickCount=0;
 
@@ -2113,7 +2113,7 @@ void XMSampler::Tick()
 
 void XMSampler::Tick(int channelNum, const PatternEvent & event)
 {
-	scoped_lock lock(m_Mutex);
+	scoped_lock lock(*this);
 
 	if (callbacks->song().IsInvalided()) { return; }
 
@@ -2311,7 +2311,7 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 
 int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 {
-	scoped_lock lock(m_Mutex);
+	scoped_lock lock(*this);
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 	//cpu::cycles_type cost = cpu::cycles();
