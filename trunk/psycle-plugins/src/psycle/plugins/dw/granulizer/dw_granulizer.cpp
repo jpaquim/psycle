@@ -351,7 +351,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 	for(int i = 0; i < MAX_LAYERS; ++i)
 		delete layers[i];
 

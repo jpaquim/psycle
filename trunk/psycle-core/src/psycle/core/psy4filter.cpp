@@ -553,7 +553,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		{
 			if (!song.machine(MASTER_INDEX) )
 			{
-				MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX);
+				song.addMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX));
 			}
 			std::ostringstream s;
 			s << "Error reading from file '" << file.file_name() << "'" << std::endl;

@@ -60,7 +60,7 @@ machine::machine():volume(1.0f), change(false) {
 }
 
 machine::~machine() {
-	delete Vals;
+	delete[] Vals;
 }
 
 void machine::Init() {

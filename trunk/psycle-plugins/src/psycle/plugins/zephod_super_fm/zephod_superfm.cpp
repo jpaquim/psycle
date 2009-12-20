@@ -540,7 +540,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 
 	for (int c = 0; c < MAX_TRACKS; c++)
 	{

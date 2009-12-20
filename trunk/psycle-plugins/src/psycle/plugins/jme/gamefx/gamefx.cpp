@@ -1484,7 +1484,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 }
 
 void mi::Init()

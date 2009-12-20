@@ -84,7 +84,7 @@ public:
 		}
 	}
 
-	Filter_2_Poles() : Plugin(information()), modulation_phase_(0)
+	Filter_2_Poles() : Plugin(information()), modulation_phase_(0), cutoff_sin_(0)
 	{
 		::memset(buffers_, 0, sizeof buffers_);
 	}

@@ -301,6 +301,7 @@ mi::mi()
 	globals.filter_freq.current=0.0f;
 	globals.filter_res.current=0.0f;
 
+	globals.samplingrate=0;
 	for (int ti = 0; ti < MAX_TRACKS; ti++) {
 		for (int vi = 0; vi < MAX_VOICES; vi++)
 			voices[ti][vi].globals = &globals;
@@ -370,7 +371,7 @@ mi::mi()
 mi::~mi()
 {
 	Stop();
-	delete Vals;
+	delete[] Vals;
 }
 
 //////////////////////////////////////////////////////////////////////

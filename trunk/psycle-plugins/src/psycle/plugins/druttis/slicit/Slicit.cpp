@@ -500,8 +500,8 @@ mi::mi()
 mi::~mi()
 {
 	Stop();
-	delete m_programs;
-	delete Vals;
+	delete[] m_programs;
+	delete[] Vals;
 }
 
 //////////////////////////////////////////////////////////////////////

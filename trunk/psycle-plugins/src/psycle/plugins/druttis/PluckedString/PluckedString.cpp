@@ -167,7 +167,7 @@ mi::~mi()
 {
 	initialized = false;
 	while (working);
-	delete Vals;
+	delete[] Vals;
 }
 //============================================================================
 //				Init

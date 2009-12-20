@@ -80,7 +80,7 @@ mi::mi()
 mi::~mi()
 {
 		// Destroy dinamically allocated objects/memory here
-		delete Vals;
+		delete[] Vals;
 		rev_l = NULL;
 		rev_r = NULL;
 }

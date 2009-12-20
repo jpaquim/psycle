@@ -102,7 +102,7 @@ mi::mi():leftLim(1.0f), rightLim(1.0f)
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 // Destroy dinamically allocated objects/memory here
 }
 

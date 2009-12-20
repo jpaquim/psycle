@@ -271,7 +271,7 @@ int main(int argument_count, char * arguments[]) {
 		}
 	}
 	player.driver().Enable(false);
-	
+	factory.Finalize();
 	///\todo kluge
 	loggers::information()("(klugy pause)");
 	std::this_thread::sleep(std::seconds(1));

@@ -168,7 +168,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 	gverb_free(gv_l);
 	gverb_free(gv_r);
 }

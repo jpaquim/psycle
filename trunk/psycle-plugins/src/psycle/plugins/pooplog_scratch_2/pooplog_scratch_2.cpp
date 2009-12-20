@@ -509,14 +509,14 @@ mi::mi()
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 	if (pBufferL)
 	{
-		delete pBufferL;
+		delete[] pBufferL;
 	}
 	if (pBufferR)
 	{
-		delete pBufferR;
+		delete[] pBufferR;
 	}
 // Destroy dinamically allocated objects/memory here
 }

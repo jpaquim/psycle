@@ -543,7 +543,7 @@ bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
 					delete pData;
 					return false;
 				}
-				delete pData;
+				delete[] pData;
 				return true;
 			}
 		}

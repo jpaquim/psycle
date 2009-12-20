@@ -134,7 +134,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 
 // Destroy dinamically allocated objects/memory here
 }

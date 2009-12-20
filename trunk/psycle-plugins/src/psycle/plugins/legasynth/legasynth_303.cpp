@@ -382,7 +382,7 @@ mi::mi()
 mi::~mi()
 {
 	// Destroy dinamically allocated objects/memory here
-	delete Vals;
+	delete[] Vals;
 }
 
 void mi::Init()
