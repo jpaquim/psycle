@@ -297,7 +297,7 @@ mi::mi()
 mi::~mi()
 {
 		// Destroy dinamically allocated objects/memory here
-		delete Vals;
+		delete[] Vals;
 		
 		if (synth) delete_fluid_synth(synth);
 		if (settings) delete_fluid_settings(settings);

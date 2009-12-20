@@ -69,10 +69,6 @@ namespace psycle {
 					template<typename Crashable>
 					class rethrow_functor
 					{
-						public:
-							rethrow_functor(Crashable & crashable) : crashable_(crashable) {}
-							template<typename E> void operator_                (universalis::compiler::location const & location,              E const * const e = 0) const throw(function_error) { rethrow(location, e, 0); }
-							template<          > void operator_<std::exception>(universalis::compiler::location const & location, std::exception const * const e    ) const throw(function_error) { rethrow(location, e, e); }
 						private:
 							template<typename E> void rethrow                  (universalis::compiler::location const & location,              E const * const e, std::exception const * const standard) const throw(function_error)
 							{
@@ -95,6 +91,10 @@ namespace psycle {
 								throw f_error;
 							}
 							Crashable & crashable_;
+						public:
+							rethrow_functor(Crashable & crashable) : crashable_(crashable) {}
+							template<typename E> void operator_                (universalis::compiler::location const & location,              E const * const e = 0) const throw(function_error) { rethrow(location, e, 0); }
+							template<          > void operator_<std::exception>(universalis::compiler::location const & location, std::exception const * const e    ) const throw(function_error) { rethrow(location, e, e); }
 					};
 
 					template<typename Crashable>

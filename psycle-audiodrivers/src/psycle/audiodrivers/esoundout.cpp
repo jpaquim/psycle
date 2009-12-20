@@ -176,6 +176,7 @@ namespace psycle {
 				killThread_ = true;
 				while(threadRunning_) usleep(500); // give thread time to close
 				threadStarted = false;
+				close();
 			}
 			return threadStarted;
 		}

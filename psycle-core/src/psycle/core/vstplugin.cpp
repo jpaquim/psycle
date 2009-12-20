@@ -17,13 +17,14 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-
-#include <psycle/core/vstplugin.h>
 #if !defined _WIN64 && !defined _WIN32
 	#if defined DIVERSALIS__COMPILER__GNU
 		#warning ###########################- UNIMPLEMENTED ###################
 	#endif
 #else
+
+
+#include <psycle/core/vstplugin.h>
 
 //#include <psycle/core/vsthost.h>
 #include <psycle/core/player.h>
@@ -857,3 +858,4 @@ void plugin::SaveSpecificChunk(RiffFile * pFile)
 }
 }}}
 #endif
+

@@ -116,6 +116,8 @@ PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 mi::mi() {
 	// The constructor zone
 	Vals = new int[6];
+	//Setting by-time by default, so that the ParameterTweak call can work.
+	Vals[4]=0;
 	for(int c=0;c<MAX_DELAY_SAMPLES;c++) {
 		dbl[c]=0;
 		dbr[c]=0;
@@ -127,7 +129,7 @@ mi::mi() {
 }
 
 mi::~mi() {
-	delete Vals;
+	delete[] Vals;
 	// Destroy dinamically allocated objects/memory here
 }
 

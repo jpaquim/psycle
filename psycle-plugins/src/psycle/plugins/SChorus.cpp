@@ -168,9 +168,9 @@ mi::mi()
 
 mi::~mi()
 {
-	delete Vals;
-	delete DM_l;
-	delete DM_r;
+	delete[] Vals;
+	delete[] DM_l;
+	delete[] DM_r;
 // Destroy dinamically allocated objects/memory here
 }
 

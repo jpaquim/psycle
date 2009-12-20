@@ -105,7 +105,7 @@ audacity_phaser::audacity_phaser() {
 }
 
 audacity_phaser::~audacity_phaser() {
-	delete Vals;
+	delete[] Vals;
 }
 
 void audacity_phaser::Init() {

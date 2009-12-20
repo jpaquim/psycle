@@ -15,11 +15,8 @@
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cmath>
 
-EffectCompressor::EffectCompressor()
-{
-	mFloor = 0.001;
-	mGainDB = 0.0;
-
+EffectCompressor::EffectCompressor(): mFloor(0.001), mGainDB(0.0), mUseGain(false),mAttackTime(0.2),mDecayTime(1.0)
+{	
 	this->setThreshold(-12.0);
 	this->setRatio(2.0);
 	this->setGain(true);

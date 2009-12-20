@@ -270,7 +270,6 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	if(chunkcount) {
 		if(!song.machine(MASTER_INDEX)) {
 			Machine* mac = MachineFactory::getInstance().CreateMachine(MachineKey::master(), MASTER_INDEX);
-			mac->Init();
 			song.AddMachine(mac);
 		}
 		std::ostringstream s;

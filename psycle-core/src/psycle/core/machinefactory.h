@@ -46,14 +46,8 @@ public:
 
 	std::string const & getLadspaPath() const;
 	void setLadspaPath(std::string path,bool cleardata=false);
-	#if !defined _WIN64 && !defined _WIN32
-		#if defined DIVERSALIS__COMPILER__GNU
-			#warning ###########################- UNIMPLEMENTED ###################
-		#endif
-	#else
-		std::string const & getVstPath() const;
-		void setVstPath(std::string path,bool cleardata=false);
-	#endif
+	std::string const & getVstPath() const;
+	void setVstPath(std::string path,bool cleardata=false);
 	PluginFinder& getFinder() const { return *finder_; }
 
 	void RegenerateFinderData(bool clear);

@@ -140,7 +140,7 @@ bexphase::bexphase() {
 }
 
 bexphase::~bexphase() {
-	delete Vals;
+	delete[] Vals;
 }
 	
 void bexphase::Init() {

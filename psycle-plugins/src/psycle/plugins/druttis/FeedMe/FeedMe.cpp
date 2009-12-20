@@ -358,7 +358,7 @@ mi::mi()
 //============================================================================
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 	instances--;
 	if (instances == 0)
 		CTrack::Destroy();

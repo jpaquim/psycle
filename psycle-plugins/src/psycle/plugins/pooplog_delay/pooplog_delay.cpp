@@ -981,7 +981,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 // Destroy dynamically allocated objects/memory here
 	INERTIA* pI = pInertia;
 	while (pI)
@@ -993,11 +993,11 @@ mi::~mi()
 	pLastInertia = pInertia = NULL;
 	if (pBufferL)
 	{
-		delete pBufferL;
+		delete[] pBufferL;
 	}
 	if (pBufferR)
 	{
-		delete pBufferR;
+		delete[] pBufferR;
 	}
 }
 

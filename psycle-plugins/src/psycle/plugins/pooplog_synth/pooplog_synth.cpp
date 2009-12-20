@@ -1713,7 +1713,7 @@ mi::~mi()
 {
 
 // Destroy dynamically allocated objects/memory here
-	delete Vals;
+	delete[] Vals;
 	INERTIA* pI = pInertia;
 	while (pI)
 	{

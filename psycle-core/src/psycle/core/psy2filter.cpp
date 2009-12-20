@@ -442,7 +442,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 							break;
 						default: {
 								std::ostringstream s;
-								s << "unkown machine type: " << type << std::endl;
+								s << "unknown machine type: " << type << std::endl;
 								std::cout << s.str();
 								//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 						}

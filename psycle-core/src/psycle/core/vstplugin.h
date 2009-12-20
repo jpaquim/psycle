@@ -18,18 +18,19 @@
 *   59 Temple Place - Suite 330, Boston, MA  02?111-1307, USA.            *
 ***************************************************************************/
 /*
-*<@JosepMa> the so-called seib host (which is mine, but based on his), is composed of two classes:
+**<@JosepMa> The so-called seib host (which is mine, but based on his), is composed of two classes:
 *<@JosepMa> CVstHost and CEffect.
-*<@JosepMa> the former maps all the AudioMaster calls, provides a way to create CEffects, and helps
+*<@JosepMa> The former maps all the AudioMaster calls, provides a way to create CEffects, and helps
 *           in getting time/position information.
-*<@JosepMa> CEffect is a C++ wrapper for the AEffect class, for a host (AudioEffect is a C++ wrapper
+*<@JosepMa> CEffect is a C++ wrapper of the AEffect class for a host. (AudioEffect is a C++ wrapper
 *           for a plugin)
-*<@JosepMa> as such it maps all the dispatch calls to functions with parameter validation, and helps
+*<@JosepMa> As such it maps all the dispatch calls to functions with parameter validation, and helps
 *           in the construction and destruction processes. Tries to help on other simpler tasks, and
 *           in the handling of parameter windows (VstEffectWnd.cpp/.hpp)
-*<@JosepMa> vst::AudioMaster and vst::plugin are subclasses of the aforementioned classes, which both: extend
-*           the functionality of the base classes, and adapts them to its usage inside psycle
-*<@JosepMa> the host one doesn't provide much more (since the base class is good enough), and the
+*<@JosepMa> vst::AudioMaster and vst::plugin are subclasses of the previously mentioned classes,
+*           which extend the functionality of the base classes, and adapts them to its usage
+*           inside psycle.
+*<@JosepMa> The host one doesn't provide much more (since the base class is good enough), and the
 *           plugin one wraps the CEffect into a Machine class
 */
 
@@ -41,6 +42,7 @@
 		#warning ###########################- UNIMPLEMENTED ###################
 	#endif
 #else
+
 
 #include <psycle/core/machine.h>
 #include <seib/vst/CVSTHost.Seib.hpp>
