@@ -167,9 +167,7 @@ namespace psycle
 		}
 
 		Song::Song()
-		{
-			_machineLock = false;
-			Invalided = false;
+		: Invalided() {
 			
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
@@ -387,15 +385,11 @@ namespace psycle
 
 		void Song::DestroyAllMachines(bool write_locked)
 		{
-			_machineLock = true;
-			for(int c(0) ;  c < MAX_MACHINES; ++c)
-			{
-				if(_pMachine[c])
-				{
-					for(int j(c + 1) ; j < MAX_MACHINES; ++j)
-					{
-						if(_pMachine[c] == _pMachine[j])
-						{
+			scoped_lock lock(*this);
+			for(int c(0) ;  c < MAX_MACHINES; ++c) {
+				if(_pMachine[c]) {
+					for(int j(c + 1) ; j < MAX_MACHINES; ++j) {
+						if(_pMachine[c] == _pMachine[j]) {
 							///\todo wtf? duplicate machine? could happen if loader messes up?
 							char buf[128];
 							std::sprintf(buf,"%d and %d have duplicate pointers", c, j);
@@ -407,7 +401,6 @@ namespace psycle
 				}
 				_pMachine[c] = 0;
 			}
-			_machineLock = false;
 		}
 
 		void Song::ExchangeInstruments(int one, int two)
@@ -1255,330 +1248,332 @@ namespace psycle
 				if ( size-bytesread > 0) pFile->Skip(size - bytesread);// Size of the current Header DATA // This ensures that any extra data is skipped.
 
 				DestroyAllMachines();
-				_machineLock = true;
-				DeleteInstruments();
-				DeleteAllPatterns();
-				Reset(); //added by sampler mainly to reset current pattern showed.
-				while(pFile->Read(&Header, 4) && chunkcount)
 				{
-					Progress.m_Progress.SetPos(helpers::math::rounded((pFile->GetPos()*16384.0f)/filesize));
-					::Sleep(1); ///< Allow screen refresh.
-					// we should use the size to update the index, but for now we will skip it
-					if(std::strcmp(Header,"INFO") == 0)
+					scoped_lock lock(*this);
+					DeleteInstruments();
+					DeleteAllPatterns();
+					Reset(); //added by sampler mainly to reset current pattern showed.
+					while(pFile->Read(&Header, 4) && chunkcount)
 					{
-						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
-						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
+						Progress.m_Progress.SetPos(helpers::math::rounded((pFile->GetPos()*16384.0f)/filesize));
+						::Sleep(1); ///< Allow screen refresh.
+						// we should use the size to update the index, but for now we will skip it
+						if(std::strcmp(Header,"INFO") == 0)
 						{
-							char name[129]; char author[65]; char comments[65536];
-							pFile->ReadString(name, sizeof name);
-							pFile->ReadString(author, sizeof author);
-							pFile->ReadString(comments,sizeof comments);
-							name_ = name;
-							author_ = author;
-							comment_ = comments;
-							//bugfix. There were songs with incorrect size.
-							if(version == 0) {
-								size= pFile->GetPos() - begins;
+							--chunkcount;
+							pFile->Read(&version, sizeof version);
+							pFile->Read(&size, sizeof size);
+							size_t begins = pFile->GetPos();
+							if((version&0xFF00) == VERSION_MAJOR_ZERO)
+							{
+								char name[129]; char author[65]; char comments[65536];
+								pFile->ReadString(name, sizeof name);
+								pFile->ReadString(author, sizeof author);
+								pFile->ReadString(comments,sizeof comments);
+								name_ = name;
+								author_ = author;
+								comment_ = comments;
+								//bugfix. There were songs with incorrect size.
+								if(version == 0) {
+									size= pFile->GetPos() - begins;
+								}
 							}
+							pFile->Seek(begins + size);
 						}
-						pFile->Seek(begins + size);
-					}
-					else if(std::strcmp(Header,"SNGI")==0)
-					{
-						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
-						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
+						else if(std::strcmp(Header,"SNGI")==0)
 						{
-							// why all these temps?  to make sure if someone changes the defs of
-							// any of these members, the rest of the file reads ok.  assume 
-							// everything is an int, when we write we do the same thing.
+							--chunkcount;
+							pFile->Read(&version, sizeof version);
+							pFile->Read(&size, sizeof size);
+							size_t begins = pFile->GetPos();
+							if((version&0xFF00) == VERSION_MAJOR_ZERO)
+							{
+								// why all these temps?  to make sure if someone changes the defs of
+								// any of these members, the rest of the file reads ok.  assume 
+								// everything is an int, when we write we do the same thing.
 
-							// # of tracks for whole song
-							pFile->Read(&temp, sizeof temp);
-							SONGTRACKS = temp;
-							// bpm
-							pFile->Read(&temp, sizeof temp);
-							m_BeatsPerMin = temp;
-							// linesperbeat
-							pFile->Read(&temp, sizeof temp);
-							m_LinesPerBeat = temp;
-							// current octave
-							pFile->Read(&temp, sizeof temp);
-							currentOctave = temp;
-							// machineSoloed
-							// we need to buffer this because destroy machine will clear it
-							pFile->Read(&temp, sizeof temp);
-							solo = temp;
-							// trackSoloed
-							pFile->Read(&temp, sizeof temp);
-							_trackSoloed = temp;
-							pFile->Read(&temp, sizeof temp);  
-							seqBus = temp;
-							pFile->Read(&temp, sizeof temp);  
-							midiSelected = temp;
-							pFile->Read(&temp, sizeof temp);  
-							auxcolSelected = temp;
-							pFile->Read(&temp, sizeof temp);  
-							_instSelected = temp;
-							// sequence width, for multipattern
-							pFile->Read(&temp,sizeof(temp));
-							_trackArmedCount = 0;
-							for(int i(0) ; i < SONGTRACKS; ++i)
-							{
-								pFile->Read(&_trackMuted[i],sizeof(_trackMuted[i]));
-								// remember to count them
-								pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
-								if(_trackArmed[i]) ++_trackArmedCount;
-							}
-							if (fullopen)
-							{
-								///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
-								/// It should be coded in some way to get this information from the loading song, since doing it here
-								/// is bad for the Winamp plugin (or any other multi-document situation).
-								Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
-							}
-							// fix for a bug existing in the song saver in the 1.7.x series
-							if(version == 0) {
-								size = 11 * sizeof(std::uint32_t) + SONGTRACKS * 2 * sizeof(bool);
-							}
-
-						}
-						pFile->Seek(begins + size);
-					}
-					else if(std::strcmp(Header,"SEQD")==0)
-					{
-						--chunkcount;
-						pFile->Read(&version,sizeof version);
-						pFile->Read(&size,sizeof size);
-						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
-						{
-							// index, for multipattern - for now always 0
-							pFile->Read(&index, sizeof index);
-							if (index < MAX_SEQUENCES)
-							{
-								char pTemp[256];
-								// play length for this sequence
+								// # of tracks for whole song
 								pFile->Read(&temp, sizeof temp);
-								playLength = temp;
-								// name, for multipattern, for now unused
-								pFile->ReadString(pTemp, sizeof pTemp);
-								for (int i(0) ; i < playLength; ++i)
+								SONGTRACKS = temp;
+								// bpm
+								pFile->Read(&temp, sizeof temp);
+								m_BeatsPerMin = temp;
+								// linesperbeat
+								pFile->Read(&temp, sizeof temp);
+								m_LinesPerBeat = temp;
+								// current octave
+								pFile->Read(&temp, sizeof temp);
+								currentOctave = temp;
+								// machineSoloed
+								// we need to buffer this because destroy machine will clear it
+								pFile->Read(&temp, sizeof temp);
+								solo = temp;
+								// trackSoloed
+								pFile->Read(&temp, sizeof temp);
+								_trackSoloed = temp;
+								pFile->Read(&temp, sizeof temp);  
+								seqBus = temp;
+								pFile->Read(&temp, sizeof temp);  
+								midiSelected = temp;
+								pFile->Read(&temp, sizeof temp);  
+								auxcolSelected = temp;
+								pFile->Read(&temp, sizeof temp);  
+								_instSelected = temp;
+								// sequence width, for multipattern
+								pFile->Read(&temp,sizeof(temp));
+								_trackArmedCount = 0;
+								for(int i(0) ; i < SONGTRACKS; ++i)
 								{
+									pFile->Read(&_trackMuted[i],sizeof(_trackMuted[i]));
+									// remember to count them
+									pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
+									if(_trackArmed[i]) ++_trackArmedCount;
+								}
+								if (fullopen)
+								{
+									///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
+									/// It should be coded in some way to get this information from the loading song, since doing it here
+									/// is bad for the Winamp plugin (or any other multi-document situation).
+									Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
+								}
+								// fix for a bug existing in the song saver in the 1.7.x series
+								if(version == 0) {
+									size = 11 * sizeof(std::uint32_t) + SONGTRACKS * 2 * sizeof(bool);
+								}
+
+							}
+							pFile->Seek(begins + size);
+						}
+						else if(std::strcmp(Header,"SEQD")==0)
+						{
+							--chunkcount;
+							pFile->Read(&version,sizeof version);
+							pFile->Read(&size,sizeof size);
+							size_t begins = pFile->GetPos();
+							if((version&0xFF00) == VERSION_MAJOR_ZERO)
+							{
+								// index, for multipattern - for now always 0
+								pFile->Read(&index, sizeof index);
+								if (index < MAX_SEQUENCES)
+								{
+									char pTemp[256];
+									// play length for this sequence
 									pFile->Read(&temp, sizeof temp);
-									playOrder[i] = temp;
-								}
-							}
-						}
-						pFile->Seek(begins + size);
-					}
-					else if(std::strcmp(Header,"PATD") == 0)
-					{
-						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
-						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
-						{
-							// index
-							pFile->Read(&index, sizeof index);
-							if(index < MAX_PATTERNS)
-							{
-								unsigned int sizez77 = 0;
-								// num lines
-								pFile->Read(&temp, sizeof temp );
-								// clear it out if it already exists
-								RemovePattern(index);
-								patternLines[index] = temp;
-								// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
-								pFile->Read(&temp, sizeof temp );
-								pFile->ReadString(patternName[index], sizeof *patternName);
-								pFile->Read(&sizez77, sizeof sizez77);
-								byte* pSource = new byte[sizez77];
-								pFile->Read(pSource, sizez77);
-								byte* pDest;
-								BEERZ77Decomp2(pSource, &pDest);
-								zapArray(pSource,pDest);
-								for(int y(0) ; y < patternLines[index] ; ++y)
-								{
-									unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
-									std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
-									pSource += SONGTRACKS * EVENT_SIZE;
-								}
-								zapArray(pDest);
-							}
-							//\ Fix for a bug existing in the Song Saver in the 1.7.x series
-							if((version == 0x0000) &&( pFile->GetPos() == begins+size+4)) size += 4;
-						}
-						pFile->Seek(begins + size);
-					}
-					else if(std::strcmp(Header,"MACD") == 0)
-					{
-						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
-						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
-						{
-							pFile->Read(&index, sizeof index);
-							if(index < MAX_MACHINES)
-							{
-								// we had better load it
-								DestroyMachine(index);
-								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
-								//Bugfix.
-								if (fullopen) {
-									if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
-									&& ((vst::plugin*)_pMachine[index])->ProgramIsChunk() == false) {
-										size = pFile->GetPos() - begins;
-/*									} else if ((version&0xFF) == 0) {
-										size = (pFile->GetPos() - begins) 
-											 + sizeof(unsigned char) + 2*sizeof(int) + _pMachine[index]->GetNumParams()*sizeof(float);
-*/
+									playLength = temp;
+									// name, for multipattern, for now unused
+									pFile->ReadString(pTemp, sizeof pTemp);
+									for (int i(0) ; i < playLength; ++i)
+									{
+										pFile->Read(&temp, sizeof temp);
+										playOrder[i] = temp;
 									}
-							}
-							}
-						}
-						pFile->Seek(begins + size);
-					}
-					else if(std::strcmp(Header,"INSD") == 0)
-					{
-						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
-						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
-						{
-							pFile->Read(&index, sizeof index);
-							if(index < MAX_INSTRUMENTS)
-							{
-								_pInstrument[index]->LoadFileChunk(pFile, version, fullopen);
-							}
-						}
-						pFile->Seek(begins + size);
-					}
-					else if(std::strcmp(Header,"EINS") == 0)
-					{
-						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
-						size_t begins = pFile->GetPos();
-						long filepos=pFile->GetPos();
-						//Version zero was the development version. Version one is the published one.
-						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
-						{
-							// Instrument Data Load
-							int numInstruments;
-							pFile->Read(numInstruments);
-							int idx;
-							for(int i = 0;i < numInstruments && filepos < begins+size;i++)
-							{
-								pFile->Read(idx);
-								int sizeIns = rInstrument(idx).Load(*pFile);
-								if ((version&0xFFFF) > 0) {
-									//Version 0 doesn't write the chunk size correctly
-									//so we cannot correct it in case of error
-									pFile->Seek(filepos+sizeIns);
-									filepos=pFile->GetPos();
 								}
 							}
-								int numSamples;
-								pFile->Read(numSamples);
-							for(int i = 0;i < numSamples && filepos < begins+size;i++)
+							pFile->Seek(begins + size);
+						}
+						else if(std::strcmp(Header,"PATD") == 0)
+						{
+							--chunkcount;
+							pFile->Read(&version, sizeof version);
+							pFile->Read(&size, sizeof size);
+							size_t begins = pFile->GetPos();
+							if((version&0xFF00) == VERSION_MAJOR_ZERO)
+							{
+								// index
+								pFile->Read(&index, sizeof index);
+								if(index < MAX_PATTERNS)
+								{
+									unsigned int sizez77 = 0;
+									// num lines
+									pFile->Read(&temp, sizeof temp );
+									// clear it out if it already exists
+									RemovePattern(index);
+									patternLines[index] = temp;
+									// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
+									pFile->Read(&temp, sizeof temp );
+									pFile->ReadString(patternName[index], sizeof *patternName);
+									pFile->Read(&sizez77, sizeof sizez77);
+									byte* pSource = new byte[sizez77];
+									pFile->Read(pSource, sizez77);
+									byte* pDest;
+									BEERZ77Decomp2(pSource, &pDest);
+									zapArray(pSource,pDest);
+									for(int y(0) ; y < patternLines[index] ; ++y)
+									{
+										unsigned char* pData(_ppattern(index) + (y * MULTIPLY));
+										std::memcpy(pData, pSource, SONGTRACKS * EVENT_SIZE);
+										pSource += SONGTRACKS * EVENT_SIZE;
+									}
+									zapArray(pDest);
+								}
+								//\ Fix for a bug existing in the Song Saver in the 1.7.x series
+								if((version == 0x0000) &&( pFile->GetPos() == begins+size+4)) size += 4;
+							}
+							pFile->Seek(begins + size);
+						}
+						else if(std::strcmp(Header,"MACD") == 0)
+						{
+							--chunkcount;
+							pFile->Read(&version, sizeof version);
+							pFile->Read(&size, sizeof size);
+							size_t begins = pFile->GetPos();
+							if((version&0xFF00) == VERSION_MAJOR_ZERO)
+							{
+								pFile->Read(&index, sizeof index);
+								if(index < MAX_MACHINES)
+								{
+									// we had better load it
+									DestroyMachine(index);
+									_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
+									//Bugfix.
+									if (fullopen) {
+										if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
+										&& ((vst::plugin*)_pMachine[index])->ProgramIsChunk() == false) {
+											size = pFile->GetPos() - begins;
+										#if 0
+										} else if ((version&0xFF) == 0) {
+											size = (pFile->GetPos() - begins) 
+												 + sizeof(unsigned char) + 2*sizeof(int) + _pMachine[index]->GetNumParams()*sizeof(float);
+
+										#endif
+										}
+								}
+								}
+							}
+							pFile->Seek(begins + size);
+						}
+						else if(std::strcmp(Header,"INSD") == 0)
+						{
+							--chunkcount;
+							pFile->Read(&version, sizeof version);
+							pFile->Read(&size, sizeof size);
+							size_t begins = pFile->GetPos();
+							if((version&0xFF00) == VERSION_MAJOR_ZERO)
+							{
+								pFile->Read(&index, sizeof index);
+								if(index < MAX_INSTRUMENTS)
+								{
+									_pInstrument[index]->LoadFileChunk(pFile, version, fullopen);
+								}
+							}
+							pFile->Seek(begins + size);
+						}
+						else if(std::strcmp(Header,"EINS") == 0)
+						{
+							--chunkcount;
+							pFile->Read(&version, sizeof version);
+							pFile->Read(&size, sizeof size);
+							size_t begins = pFile->GetPos();
+							long filepos=pFile->GetPos();
+							//Version zero was the development version. Version one is the published one.
+							if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
+							{
+								// Instrument Data Load
+								int numInstruments;
+								pFile->Read(numInstruments);
+								int idx;
+								for(int i = 0;i < numInstruments && filepos < begins+size;i++)
 								{
 									pFile->Read(idx);
-								int sizeSamp = SampleData(idx).Load(*pFile);
-								if ((version&0xFFFF) > 0) {
-									//Version 0 doesn't write the chunk size correctly
-									//so we cannot correct it in case of error
-									pFile->Seek(filepos+sizeSamp);
-									filepos=pFile->GetPos();
+									int sizeIns = rInstrument(idx).Load(*pFile);
+									if ((version&0xFFFF) > 0) {
+										//Version 0 doesn't write the chunk size correctly
+										//so we cannot correct it in case of error
+										pFile->Seek(filepos+sizeIns);
+										filepos=pFile->GetPos();
+									}
+								}
+									int numSamples;
+									pFile->Read(numSamples);
+								for(int i = 0;i < numSamples && filepos < begins+size;i++)
+									{
+										pFile->Read(idx);
+									int sizeSamp = SampleData(idx).Load(*pFile);
+									if ((version&0xFFFF) > 0) {
+										//Version 0 doesn't write the chunk size correctly
+										//so we cannot correct it in case of error
+										pFile->Seek(filepos+sizeSamp);
+										filepos=pFile->GetPos();
+									}
 								}
 							}
+							pFile->Seek(begins+size);
 						}
-						pFile->Seek(begins+size);
-					}
-					else 
-					{
-						// we are not at a valid header for some weird reason.  
-						// probably there is some extra data.
-						// shift back 3 bytes and try again
-						pFile->Seek(pFile->GetPos()-3);
-					}
-				}
-				// now that we have loaded all the modules, time to prepare them.
-				Progress.m_Progress.SetPos(16384);
-				::Sleep(1); ///< ???
-				// test all connections for invalid machines. disconnect invalid machines.
-				for(int i(0) ; i < MAX_MACHINES ; ++i)
-				{
-					if(_pMachine[i])
-					{
-						_pMachine[i]->_numInputs = 0;
-						_pMachine[i]->_numOutputs = 0;
-						for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
+						else 
 						{
-							if(_pMachine[i]->_connection[c])
+							// we are not at a valid header for some weird reason.  
+							// probably there is some extra data.
+							// shift back 3 bytes and try again
+							pFile->Seek(pFile->GetPos()-3);
+						}
+					}
+					// now that we have loaded all the modules, time to prepare them.
+					Progress.m_Progress.SetPos(16384);
+					::Sleep(1); ///< ???
+					// test all connections for invalid machines. disconnect invalid machines.
+					for(int i(0) ; i < MAX_MACHINES ; ++i)
+					{
+						if(_pMachine[i])
+						{
+							_pMachine[i]->_numInputs = 0;
+							_pMachine[i]->_numOutputs = 0;
+							for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
 							{
-								if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
+								if(_pMachine[i]->_connection[c])
 								{
-									_pMachine[i]->_connection[c] = false;
-									_pMachine[i]->_outputMachines[c] = -1;
-								}
-								else if(!_pMachine[_pMachine[i]->_outputMachines[c]])
-								{
-									_pMachine[i]->_connection[c] = false;
-									_pMachine[i]->_outputMachines[c] = -1;
-								}
-								else 
-								{
-									_pMachine[i]->_numOutputs++;
-								}
-							}
-							else
-							{
-								_pMachine[i]->_outputMachines[c] = -1;
-							}
-
-							if (_pMachine[i]->_inputCon[c])
-							{
-								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
-								{
-									_pMachine[i]->_inputCon[c] = false;
-									_pMachine[i]->_inputMachines[c] = -1;
-								}
-								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
-								{
-									_pMachine[i]->_inputCon[c] = false;
-									_pMachine[i]->_inputMachines[c] = -1;
+									if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
+									{
+										_pMachine[i]->_connection[c] = false;
+										_pMachine[i]->_outputMachines[c] = -1;
+									}
+									else if(!_pMachine[_pMachine[i]->_outputMachines[c]])
+									{
+										_pMachine[i]->_connection[c] = false;
+										_pMachine[i]->_outputMachines[c] = -1;
+									}
+									else 
+									{
+										_pMachine[i]->_numOutputs++;
+									}
 								}
 								else
 								{
-									_pMachine[i]->_numInputs++;
+									_pMachine[i]->_outputMachines[c] = -1;
 								}
-							}
-							else
-							{
-								_pMachine[i]->_inputMachines[c] = -1;
+
+								if (_pMachine[i]->_inputCon[c])
+								{
+									if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
+									{
+										_pMachine[i]->_inputCon[c] = false;
+										_pMachine[i]->_inputMachines[c] = -1;
+									}
+									else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
+									{
+										_pMachine[i]->_inputCon[c] = false;
+										_pMachine[i]->_inputMachines[c] = -1;
+									}
+									else
+									{
+										_pMachine[i]->_numInputs++;
+									}
+								}
+								else
+								{
+									_pMachine[i]->_inputMachines[c] = -1;
+								}
 							}
 						}
 					}
-				}
 
-				RestoreMixerSendFlags();
-				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
-				// translate any data that is required
-#if !defined WINAMP_PLUGIN
-				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
-#endif //!defined WINAMP_PLUGIN
-				machineSoloed = solo;
-				// allow stuff to work again
-				_machineLock = false;
+					RestoreMixerSendFlags();
+					for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
+					// translate any data that is required
+					#if !defined WINAMP_PLUGIN
+						static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
+					#endif //!defined WINAMP_PLUGIN
+					machineSoloed = solo;
+				} // end of scoped_lock
 				Progress.OnCancel();
 				if((!pFile->Close()) || (chunkcount))
 				{
@@ -1602,7 +1597,6 @@ namespace psycle
 				Progress.Create();
 				Progress.SetWindowText("Loading old format...");
 				Progress.ShowWindow(SW_SHOW);
-//				int i;
 				int num,sampR;
 				bool _machineActive[128];
 				unsigned char busEffect[64];
@@ -1632,9 +1626,11 @@ namespace psycle
 					/// It should be coded in some way to get this information from the loading song, since doing it here
 					/// is bad for the Winamp plugin (or any other multi-document situation).
 					Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
-	//				Global::pPlayer->bpm = m_BeatsPerMin;
-	//				Global::pPlayer->tpb = m_LinesPerBeat;
-	//				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
+					#if 0
+						Global::pPlayer->bpm = m_BeatsPerMin;
+						Global::pPlayer->tpb = m_LinesPerBeat;
+						Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
+					#endif
 				}
 				pFile->Read(&currentOctave, sizeof(char));
 				pFile->Read(busMachine, 64);
@@ -1668,77 +1664,41 @@ namespace psycle
 				// Instruments
 				pFile->Read(&_instSelected, sizeof _instSelected);
 				for(int i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
-				{
 					pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->_NNA, sizeof(_pInstrument[0]->_NNA));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_AT, sizeof(_pInstrument[0]->ENV_AT));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_DT, sizeof(_pInstrument[0]->ENV_DT));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_SL, sizeof(_pInstrument[0]->ENV_SL));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_RT, sizeof(_pInstrument[0]->ENV_RT));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_F_AT, sizeof(_pInstrument[0]->ENV_F_AT));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_F_DT, sizeof(_pInstrument[0]->ENV_F_DT));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_F_SL, sizeof(_pInstrument[0]->ENV_F_SL));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_F_RT, sizeof(_pInstrument[0]->ENV_F_RT));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_F_CO, sizeof(_pInstrument[0]->ENV_F_CO));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_F_RQ, sizeof(_pInstrument[0]->ENV_F_RQ));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_F_EA, sizeof(_pInstrument[0]->ENV_F_EA));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->ENV_F_TP, sizeof(_pInstrument[0]->ENV_F_TP));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->_pan, sizeof(_pInstrument[0]->_pan));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->_RPAN, sizeof(_pInstrument[0]->_RPAN));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->_RCUT, sizeof(_pInstrument[0]->_RCUT));
-				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
 					pFile->Read(&_pInstrument[i]->_RRES, sizeof(_pInstrument[0]->_RRES));
-				}
 				
 				Progress.m_Progress.SetPos(4096);
 				::Sleep(1);
@@ -1747,16 +1707,12 @@ namespace psycle
 				int tmpwvsl;
 				pFile->Read(&tmpwvsl, sizeof(int));
 
-				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
-					for (int w=0; w<OLD_MAX_WAVES; w++)
-					{
+				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++) {
+					for (int w=0; w<OLD_MAX_WAVES; w++) {
 						int wltemp;
 						pFile->Read(&wltemp, sizeof(_pInstrument[0]->waveLength));
-						if (wltemp > 0)
-						{
-							if ( w == 0 )
-							{
+						if (wltemp > 0) {
+							if ( w == 0 ) {
 								short tmpFineTune;
 								_pInstrument[i]->waveLength=wltemp;
 								pFile->Read(&_pInstrument[i]->waveName, 32);
@@ -1769,14 +1725,11 @@ namespace psycle
 								pFile->Read(&_pInstrument[i]->waveStereo, sizeof(_pInstrument[0]->waveStereo));
 								_pInstrument[i]->waveDataL = new signed short[_pInstrument[i]->waveLength];
 								pFile->Read(_pInstrument[i]->waveDataL, _pInstrument[i]->waveLength*sizeof(short));
-								if (_pInstrument[i]->waveStereo)
-								{
+								if (_pInstrument[i]->waveStereo) {
 									_pInstrument[i]->waveDataR = new signed short[_pInstrument[i]->waveLength];
 									pFile->Read(_pInstrument[i]->waveDataR, _pInstrument[i]->waveLength*sizeof(short));
 								}
-							}
-							else 
-							{
+							} else {
 								bool stereo;
 								char *junk =new char[42+sizeof(bool)];
 								pFile->Read(junk,sizeof(junk));
@@ -1785,9 +1738,7 @@ namespace psycle
 								short *junk2 = new signed short[wltemp];
 								pFile->Read(junk2, sizeof(junk2));
 								if ( stereo )
-								{
 									pFile->Read(junk2, sizeof(junk2));
-								}
 								delete junk2;
 							}
 						}
@@ -1800,20 +1751,16 @@ namespace psycle
 				//
 
 				VSTLoader vstL[OLD_MAX_PLUGINS]; 
-				for (int i=0; i<OLD_MAX_PLUGINS; i++)
-				{
+				for (int i=0; i<OLD_MAX_PLUGINS; i++) {
 					pFile->Read(&vstL[i].valid,sizeof(bool));
-					if( vstL[i].valid )
-					{
+					if( vstL[i].valid ) {
 						pFile->Read(vstL[i].dllName,sizeof(vstL[i].dllName));
 						_strlwr(vstL[i].dllName);
 						pFile->Read(&(vstL[i].numpars), sizeof(int));
 						vstL[i].pars = new float[vstL[i].numpars];
 
 						for (int c=0; c<vstL[i].numpars; c++)
-						{
 							pFile->Read(&(vstL[i].pars[c]), sizeof(float));
-						}
 					}
 				}
 				
@@ -1821,487 +1768,468 @@ namespace psycle
 				::Sleep(1);
 				// Machines
 				//
-				_machineLock = true;
-
-				pFile->Read(&_machineActive[0], sizeof(_machineActive));
-				Machine* pMac[128];
-				memset(pMac,0,sizeof(pMac));
-
-				convert_internal_machines::Converter converter;
-
-				for (int i=0; i<128; i++)
 				{
-					Sampler* pSampler;
-					XMSampler* pXMSampler;
-					Plugin* pPlugin;
-					vst::plugin * pVstPlugin(0);
-					int x,y,type;
-					if (_machineActive[i])
-					{
-						Progress.m_Progress.SetPos(8192+i*(4096/128));
-						::Sleep(1);
+					scoped_lock lock(*this);
+					pFile->Read(&_machineActive[0], sizeof(_machineActive));
+					Machine* pMac[128];
+					memset(pMac,0,sizeof(pMac));
 
-						pFile->Read(&x, sizeof(x));
-						pFile->Read(&y, sizeof(y));
+					convert_internal_machines::Converter converter;
 
-						pFile->Read(&type, sizeof(type));
+					for (int i=0; i<128; i++) {
+						Sampler* pSampler;
+						XMSampler* pXMSampler;
+						Plugin* pPlugin;
+						vst::plugin * pVstPlugin(0);
+						int x,y,type;
+						if (_machineActive[i]) {
+							Progress.m_Progress.SetPos(8192+i*(4096/128));
+							::Sleep(1);
 
-						if(converter.plugin_names().exists(type))
-							pMac[i] = &converter.redirect(i, type, *pFile);
-						else switch (type)
-						{
-						case MACH_MASTER:
-							pMac[i] = _pMachine[MASTER_INDEX];
-							pMac[i]->Init();
-							pMac[i]->Load(pFile);
-							break;
-						case MACH_SAMPLER:
-							pMac[i] = pSampler = new Sampler(i);
-							pMac[i]->Init();
-							pMac[i]->Load(pFile);
-							break;
-						case MACH_XMSAMPLER:
-							pMac[i] = pXMSampler = new XMSampler(i);
-							pMac[i]->Init();
-							pMac[i]->Load(pFile);
-							break;
-						case MACH_PLUGIN:
+							pFile->Read(&x, sizeof(x));
+							pFile->Read(&y, sizeof(y));
+
+							pFile->Read(&type, sizeof(type));
+
+							if(converter.plugin_names().exists(type))
+								pMac[i] = &converter.redirect(i, type, *pFile);
+							else switch (type)
 							{
-							pMac[i] = pPlugin = new Plugin(i);
-							// Should the "Init()" function go here? -> No. Needs to load the dll first.
-							if (!pMac[i]->Load(pFile))
-							{
-								Machine* pOldMachine = pMac[i];
-								pMac[i] = new Dummy(pOldMachine);
-								pMac[i]->_macIndex=i;
-								std::stringstream s;
-								s << "X!" << pOldMachine->GetEditName();
-								pMac[i]->SetEditName(s.str());
-								zapObject(pOldMachine);
-								// Warning: It cannot be known if the missing plugin is a generator
-								// or an effect. This will be guessed from the busMachine array.
-							}
-							break;
-							}
-						case MACH_VST:
-						case MACH_VSTFX:
-							{
-								std::string temp;
-								char sPath[_MAX_PATH];
-								char sError[128];
-								bool berror=false;
-								vst::plugin* pTempMac = new vst::plugin(0);
-								unsigned char program;
-								int instance;
-								// The trick: We need to load the information from the file in order to know the "instance" number
-								// and be able to create a plugin from the corresponding dll. Later, we will set the loaded settings to
-								// the newly created plugin.
-								pTempMac->PreLoad(pFile,program,instance);
-								assert(instance < OLD_MAX_PLUGINS);
-								int shellIdx=0;
-								if((!vstL[instance].valid) || (!CNewMachine::lookupDllName(vstL[instance].dllName,temp,MACH_VST,shellIdx)))
+							case MACH_MASTER:
+								pMac[i] = _pMachine[MASTER_INDEX];
+								pMac[i]->Init();
+								pMac[i]->Load(pFile);
+								break;
+							case MACH_SAMPLER:
+								pMac[i] = pSampler = new Sampler(i);
+								pMac[i]->Init();
+								pMac[i]->Load(pFile);
+								break;
+							case MACH_XMSAMPLER:
+								pMac[i] = pXMSampler = new XMSampler(i);
+								pMac[i]->Init();
+								pMac[i]->Load(pFile);
+								break;
+							case MACH_PLUGIN:
 								{
-									berror=true;
-									sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
+								pMac[i] = pPlugin = new Plugin(i);
+								// Should the "Init()" function go here? -> No. Needs to load the dll first.
+								if (!pMac[i]->Load(pFile))
+								{
+									Machine* pOldMachine = pMac[i];
+									pMac[i] = new Dummy(pOldMachine);
+									pMac[i]->_macIndex=i;
+									std::stringstream s;
+									s << "X!" << pOldMachine->GetEditName();
+									pMac[i]->SetEditName(s.str());
+									zapObject(pOldMachine);
+									// Warning: It cannot be known if the missing plugin is a generator
+									// or an effect. This will be guessed from the busMachine array.
 								}
-								else
+								break;
+								}
+							case MACH_VST:
+							case MACH_VSTFX:
 								{
-									strcpy(sPath,temp.c_str());
-									if (!CNewMachine::TestFilename(sPath,shellIdx))
+									std::string temp;
+									char sPath[_MAX_PATH];
+									char sError[128];
+									bool berror=false;
+									vst::plugin* pTempMac = new vst::plugin(0);
+									unsigned char program;
+									int instance;
+									// The trick: We need to load the information from the file in order to know the "instance" number
+									// and be able to create a plugin from the corresponding dll. Later, we will set the loaded settings to
+									// the newly created plugin.
+									pTempMac->PreLoad(pFile,program,instance);
+									assert(instance < OLD_MAX_PLUGINS);
+									int shellIdx=0;
+									if((!vstL[instance].valid) || (!CNewMachine::lookupDllName(vstL[instance].dllName,temp,MACH_VST,shellIdx)))
 									{
 										berror=true;
-										sprintf(sError,"This VST plug-in is Disabled \"%s\" - replacing with Dummy.",sPath);
+										sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
 									}
 									else
 									{
-										try
+										strcpy(sPath,temp.c_str());
+										if (!CNewMachine::TestFilename(sPath,shellIdx))
 										{
-											pMac[i] = pVstPlugin = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath,shellIdx));
-
-											if (pVstPlugin)
+											berror=true;
+											sprintf(sError,"This VST plug-in is Disabled \"%s\" - replacing with Dummy.",sPath);
+										}
+										else
+										{
+											try
 											{
-												pVstPlugin->LoadFromMac(pTempMac);
-												pVstPlugin->SetProgram(program);
-												pVstPlugin->_macIndex=i;
-												const int numpars = vstL[instance].numpars;
-												for (int c(0) ; c < numpars; ++c)
+												pMac[i] = pVstPlugin = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath,shellIdx));
+
+												if (pVstPlugin)
 												{
-													try
+													pVstPlugin->LoadFromMac(pTempMac);
+													pVstPlugin->SetProgram(program);
+													pVstPlugin->_macIndex=i;
+													const int numpars = vstL[instance].numpars;
+													for (int c(0) ; c < numpars; ++c)
 													{
-														pVstPlugin->SetParameter(c, vstL[instance].pars[c]);
-													}
-													catch(const std::exception &)
-													{
-														// o_O`
+														try
+														{
+															pVstPlugin->SetParameter(c, vstL[instance].pars[c]);
+														}
+														catch(const std::exception &)
+														{
+															// o_O`
+														}
 													}
 												}
 											}
-										}
-										catch(...)
-										{
-											berror=true;
-											sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath);
+											catch(...)
+											{
+												berror=true;
+												sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath);
+											}
 										}
 									}
+									if (berror)
+									{
+										MessageBox(NULL,sError, "Loading Error", MB_OK);
+
+										pMac[i] = new Dummy(pTempMac);
+										pMac[i]->_macIndex=i;
+										std::stringstream s;
+										s << "X!" << pTempMac->GetEditName();
+										pMac[i]->SetEditName(s.str());
+										zapObject(pTempMac);
+										if (type == MACH_VST ) pMac[i]->_mode = MACHMODE_FX;
+										else pMac[i]->_mode = MACHMODE_GENERATOR;
+									}
+								break;
 								}
-								if (berror)
+							case MACH_SCOPE:
+							case MACH_DUMMY:
+								pMac[i] = new Dummy(i);
+								pMac[i]->Init();
+								pMac[i]->Load(pFile);
+								break;
+							default:
 								{
-									MessageBox(NULL,sError, "Loading Error", MB_OK);
-
-									pMac[i] = new Dummy(pTempMac);
-									pMac[i]->_macIndex=i;
-									std::stringstream s;
-									s << "X!" << pTempMac->GetEditName();
-									pMac[i]->SetEditName(s.str());
-									zapObject(pTempMac);
-									if (type == MACH_VST ) pMac[i]->_mode = MACHMODE_FX;
-									else pMac[i]->_mode = MACHMODE_GENERATOR;
+									char buf[MAX_PATH];
+									sprintf(buf,"unkown machine type: %i",type);
+									MessageBox(0, buf, "Loading old song", MB_ICONERROR);
 								}
-							break;
+								pMac[i] = new Dummy(i);
+								pMac[i]->Init();
+								pMac[i]->Load(pFile);
 							}
-						case MACH_SCOPE:
-						case MACH_DUMMY:
-							pMac[i] = new Dummy(i);
-							pMac[i]->Init();
-							pMac[i]->Load(pFile);
-							break;
-						default:
+
+							#if !defined WINAMP_PLUGIN
+								#if 0
+									switch (pMac[i]->_mode)
+									{
+									case MACHMODE_GENERATOR:
+										if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
+										if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+										break;
+									case MACHMODE_FX:
+										if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
+										if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+										break;
+
+									case MACHMODE_MASTER:
+										if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
+										if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
+										break;
+									}
+								#endif
+							#endif //!defined WINAMP_PLUGIN
+
+							pMac[i]->_x = x;
+							pMac[i]->_y = y;
+						}
+					}
+
+					// Patch 0: Some extra data added around the 1.0 release.
+					for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
+						pFile->Read(&_pInstrument[i]->_loop, sizeof(_pInstrument[0]->_loop));
+					for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
+						pFile->Read(&_pInstrument[i]->_lines, sizeof(_pInstrument[0]->_lines));
+
+					// Validate the machine arrays. At the same time we fill volMatrix that
+					// we will use later on to correctly initialize the wire volumes.
+					float volMatrix[128][MAX_CONNECTIONS];
+					for (int i=0; i<128; ++i) { // First, we add the output volumes to a Matrix for latter reference
+						if (!_machineActive[i])
+							zapObject(pMac[i]);
+						else if (!pMac[i])
+							_machineActive[i] = false;
+						else {
+							for (int c=0; c<MAX_CONNECTIONS; c++)
+								volMatrix[i][c] = pMac[i]->_inputConVol[c];
+						}
+					}
+
+					// Patch 1: BusEffects (twf). Try to read it, and if it doesn't exist, generate it.
+					Progress.m_Progress.SetPos(8192+4096);
+					::Sleep(1);
+					if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false ) {
+						int j = 0;
+						unsigned char invmach[128];
+						std::memset(invmach, 255, sizeof invmach);
+						// The guessing procedure does not rely on the machmode because if a plugin
+						// is missing, then it is always tagged as a generator.
+						for (int i = 0; i < 64; ++i) {
+							if (busMachine[i] != 255) invmach[busMachine[i]]=i;
+						}
+						for(int i = 1; i < 128; ++i) { // machine 0 is the Master machine.
+							if (_machineActive[i]) {
+								if (invmach[i] == 255) {
+									busEffect[j]=i;	
+									j++;
+								}
+							}
+						}
+						while(j < 64) {
+							busEffect[j] = 255;
+							j++;
+						}
+					}
+					// Validate that there isn't any duplicated machine.
+					for ( int i=0;i<64;i++ ) 
+					{
+						for ( int j=i+1;j<64;j++ ) 
+						{
+							if  (busMachine[i] == busMachine[j]) busMachine[j]=255;
+							if  (busEffect[i] == busEffect[j]) busEffect[j]=255;
+						}
+						for (int j=0;j<64;j++)
+						{
+							if  (busMachine[i] == busEffect[j]) busEffect[j]=255;
+						}
+					}
+
+					// Patch 1.2: Fixes erroneous machine mode when a dummy replaces a bad plugin
+					// (missing dll, or when the load process failed).
+					// At the same time, we validate the indexes of the busMachine and busEffects arrays.
+					for ( int i=0;i<64;i++ ) 
+					{
+						if (busEffect[i] != 255)
+						{
+							if ( busEffect[i] > 128 || !_machineActive[busEffect[i]] )
+								busEffect[i] = 255;
+							// If there's a dummy, force it to be an effect
+							else if (pMac[busEffect[i]]->_type == MACH_DUMMY ) 
 							{
-								char buf[MAX_PATH];
-								sprintf(buf,"unkown machine type: %i",type);
-								MessageBox(0, buf, "Loading old song", MB_ICONERROR);
+								pMac[busEffect[i]]->_mode = MACHMODE_FX;
 							}
-							pMac[i] = new Dummy(i);
-							pMac[i]->Init();
-							pMac[i]->Load(pFile);
+							// Else if the machine is a generator, move it to gens bus.
+							// This can't happen, but it is here for completeness
+							else if (pMac[busEffect[i]]->_mode == MACHMODE_GENERATOR)
+							{
+								int k=0;
+								while (busEffect[k] != 255 && k<MAX_BUSES) 
+								{
+									k++;
+								}
+								busMachine[k]=busEffect[i];
+								busEffect[i]=255;
+							}
 						}
-
-#if !defined WINAMP_PLUGIN
-/*						switch (pMac[i]->_mode)
+						if (busMachine[i] != 255)
 						{
-						case MACHMODE_GENERATOR:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
-							break;
-						case MACHMODE_FX:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
-							break;
-
-						case MACHMODE_MASTER:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
-							break;
-						}*/
-#endif //!defined WINAMP_PLUGIN
-
-						pMac[i]->_x = x;
-						pMac[i]->_y = y;
-					}
-				}
-
-				// Patch 0: Some extra data added around the 1.0 release.
-				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
-					pFile->Read(&_pInstrument[i]->_loop, sizeof(_pInstrument[0]->_loop));
-				}
-				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
-				{
-					pFile->Read(&_pInstrument[i]->_lines, sizeof(_pInstrument[0]->_lines));
-				}
-
-				// Validate the machine arrays. At the same time we fill volMatrix that
-				// we will use later on to correctly initialize the wire volumes.
-				float volMatrix[128][MAX_CONNECTIONS];
-				for (int i=0; i<128; i++) // First, we add the output volumes to a Matrix for latter reference
-				{
-					if (!_machineActive[i])
-					{
-						zapObject(pMac[i]);
-					}
-					else if (!pMac[i])
-					{
-						_machineActive[i] = false;
-					}
-					else 
-					{
-						for (int c=0; c<MAX_CONNECTIONS; c++)
-						{
-							volMatrix[i][c] = pMac[i]->_inputConVol[c];
+							if (busMachine[i] > 128 || !_machineActive[busMachine[i]])
+								busMachine[i] = 255;
+							 // If there's a dummy, force it to be a Generator
+							else if (pMac[busMachine[i]]->_type == MACH_DUMMY ) 
+							{
+								pMac[busMachine[i]]->_mode = MACHMODE_GENERATOR;
+							}
+							// Else if the machine is an fx, move it to FXs bus.
+							// This can't happen, but it is here for completeness
+							else if ( pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)
+							{
+								int j=0;
+								while (busEffect[j] != 255 && j<MAX_BUSES) 
+								{
+									j++;
+								}
+								busEffect[j]=busMachine[i];
+								busMachine[i]=255;
+							}
 						}
 					}
-				}
 
-				// Patch 1: BusEffects (twf). Try to read it, and if it doesn't exist, generate it.
-				Progress.m_Progress.SetPos(8192+4096);
-				::Sleep(1);
-				if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false )
-				{
-					int j=0;
-					unsigned char invmach[128];
-					memset(invmach,255,sizeof(invmach));
-					// The guessing procedure does not rely on the machmode because if a plugin
-					// is missing, then it is always tagged as a generator.
-					for (int i = 0; i < 64; i++)
-					{
-						if (busMachine[i] != 255) invmach[busMachine[i]]=i;
-					}
-					for ( int i=1;i<128;i++ ) // machine 0 is the Master machine.
+					 // Patch 2: VST Chunks.
+					Progress.m_Progress.SetPos(8192+4096+1024);
+					::Sleep(1);
+					bool chunkpresent=false;
+					pFile->Read(&chunkpresent,sizeof(chunkpresent));
+
+					if ( fullopen && chunkpresent ) for ( int i=0;i<128;i++ ) 
 					{
 						if (_machineActive[i])
 						{
-							if (invmach[i] == 255)
+							if ( pMac[i]->_type == MACH_DUMMY ) 
 							{
-								busEffect[j]=i;	
-								j++;
-							}
-						}
-					}
-					while(j < 64)
-					{
-						busEffect[j] = 255;
-						j++;
-					}
-				}
-				// Validate that there isn't any duplicated machine.
-				for ( int i=0;i<64;i++ ) 
-				{
-					for ( int j=i+1;j<64;j++ ) 
-					{
-						if  (busMachine[i] == busMachine[j]) busMachine[j]=255;
-						if  (busEffect[i] == busEffect[j]) busEffect[j]=255;
-					}
-					for (int j=0;j<64;j++)
-					{
-						if  (busMachine[i] == busEffect[j]) busEffect[j]=255;
-					}
-				}
-
-				// Patch 1.2: Fixes erroneous machine mode when a dummy replaces a bad plugin
-				// (missing dll, or when the load process failed).
-				// At the same time, we validate the indexes of the busMachine and busEffects arrays.
-				for ( int i=0;i<64;i++ ) 
-				{
-					if (busEffect[i] != 255)
-					{
-						if ( busEffect[i] > 128 || !_machineActive[busEffect[i]] )
-							busEffect[i] = 255;
-						// If there's a dummy, force it to be an effect
-						else if (pMac[busEffect[i]]->_type == MACH_DUMMY ) 
-						{
-							pMac[busEffect[i]]->_mode = MACHMODE_FX;
-						}
-						// Else if the machine is a generator, move it to gens bus.
-						// This can't happen, but it is here for completeness
-						else if (pMac[busEffect[i]]->_mode == MACHMODE_GENERATOR)
-						{
-							int k=0;
-							while (busEffect[k] != 255 && k<MAX_BUSES) 
-							{
-								k++;
-							}
-							busMachine[k]=busEffect[i];
-							busEffect[i]=255;
-						}
-					}
-					if (busMachine[i] != 255)
-					{
-						if (busMachine[i] > 128 || !_machineActive[busMachine[i]])
-							busMachine[i] = 255;
-						 // If there's a dummy, force it to be a Generator
-						else if (pMac[busMachine[i]]->_type == MACH_DUMMY ) 
-						{
-							pMac[busMachine[i]]->_mode = MACHMODE_GENERATOR;
-						}
-						// Else if the machine is an fx, move it to FXs bus.
-						// This can't happen, but it is here for completeness
-						else if ( pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)
-						{
-							int j=0;
-							while (busEffect[j] != 255 && j<MAX_BUSES) 
-							{
-								j++;
-							}
-							busEffect[j]=busMachine[i];
-							busMachine[i]=255;
-						}
-					}
-				}
-
-				 // Patch 2: VST Chunks.
-				Progress.m_Progress.SetPos(8192+4096+1024);
-				::Sleep(1);
-				bool chunkpresent=false;
-				pFile->Read(&chunkpresent,sizeof(chunkpresent));
-
-				if ( fullopen && chunkpresent ) for ( int i=0;i<128;i++ ) 
-				{
-					if (_machineActive[i])
-					{
-						if ( pMac[i]->_type == MACH_DUMMY ) 
-						{
-							if (((Dummy*)pMac[i])->wasVST && chunkpresent )
-							{
-								// Since we don't know if the plugin saved it or not, 
-								// we're stuck on letting the loading crash/behave incorrectly.
-								// There should be a flag, like in the VST loading Section to be correct.
-								MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
-							}
-						}
-						else if (( pMac[i]->_type == MACH_VST ) || 
-							( pMac[i]->_type == MACH_VSTFX))
-						{
-							bool chunkread = false;
-							try
-							{
-								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
-								if(chunkpresent) chunkread = plugin.LoadChunk(pFile);
-							}
-							catch(const std::exception &)
-							{
-								// o_O`
-							}
-						}
-					}
-				}
-
-
-				//////////////////////////////////////////////////////////////////////////
-				//Finished all the file loading. Now Process the data to the current structures
-
-				// The old fileformat stored the volumes on each output, 
-				// so what we have in inputConVol is really the output
-				// and we have to convert it.
-				Progress.m_Progress.SetPos(8192+4096+2048);
-				::Sleep(1);
-				for (int i=0; i<128; i++) // we go to fix this for each
-				{
-					if (_machineActive[i])		// valid machine (important, since we have to navigate!)
-					{
-						for (int c=0; c<MAX_CONNECTIONS; c++) // all for each of its input connections.
-						{
-							if (pMac[i]->_inputCon[c] && pMac[i]->_inputMachines[c] > -1 && pMac[pMac[i]->_inputMachines[c]])	// If there's a valid machine in this inputconnection,
-							{
-								Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
-								int d = pOrigMachine->FindOutputWire(i);				// and wire
-
-								if ( d == -1 )
+								if (((Dummy*)pMac[i])->wasVST && chunkpresent )
 								{
-									 pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; 
+									// Since we don't know if the plugin saved it or not, 
+									// we're stuck on letting the loading crash/behave incorrectly.
+									// There should be a flag, like in the VST loading Section to be correct.
+									MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
 								}
-								else
+							}
+							else if (( pMac[i]->_type == MACH_VST ) || 
+								( pMac[i]->_type == MACH_VSTFX))
+							{
+								bool chunkread = false;
+								try
 								{
-									float val = volMatrix[pMac[i]->_inputMachines[c]][d];
-									if( val > 4.1f )
+									vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
+									if(chunkpresent) chunkread = plugin.LoadChunk(pFile);
+								}
+								catch(const std::exception &)
+								{
+									// o_O`
+								}
+							}
+						}
+					}
+
+					//////////////////////////////////////////////////////////////////////////
+					//Finished all the file loading. Now Process the data to the current structures
+
+					// The old fileformat stored the volumes on each output, 
+					// so what we have in inputConVol is really the output
+					// and we have to convert it.
+					Progress.m_Progress.SetPos(8192+4096+2048);
+					::Sleep(1);
+					for (int i=0; i<128; i++) // we go to fix this for each
+					{
+						if (_machineActive[i])		// valid machine (important, since we have to navigate!)
+						{
+							for (int c=0; c<MAX_CONNECTIONS; c++) // all for each of its input connections.
+							{
+								if (pMac[i]->_inputCon[c] && pMac[i]->_inputMachines[c] > -1 && pMac[pMac[i]->_inputMachines[c]])	// If there's a valid machine in this inputconnection,
+								{
+									Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
+									int d = pOrigMachine->FindOutputWire(i);				// and wire
+
+									if ( d == -1 )
 									{
-										val*=0.000030517578125f; // BugFix
+										 pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; 
 									}
-									else if ( val < 0.00004f) 
+									else
 									{
-										val*=32768.0f; // BugFix
+										float val = volMatrix[pMac[i]->_inputMachines[c]][d];
+										if( val > 4.1f )
+										{
+											val*=0.000030517578125f; // BugFix
+										}
+										else if ( val < 0.00004f) 
+										{
+											val*=32768.0f; // BugFix
+										}
+										// and set the volume.
+										pMac[i]->InsertInputWireIndex(this,c,pOrigMachine->id(),pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
 									}
-									// and set the volume.
-									pMac[i]->InsertInputWireIndex(this,c,pOrigMachine->id(),pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
 								}
+								else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
 							}
-							else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
 						}
 					}
-				}
-				
-				// Psycle no longer uses busMachine and busEffect, since the pMachine Array directly maps
-				// to the real machine.
-				// Due to this, we have to move machines to where they really are, 
-				// and remap the inputs and outputs indexes again... ouch
-				// At the same time, we validate each wire, and the number count.
-				Progress.m_Progress.SetPos(8192+4096+2048+1024);
-				::Sleep(1);
-				unsigned char invmach[128];
-				memset(invmach,255,sizeof(invmach));
-				for (int i = 0; i < 64; i++)
-				{
-					if (busMachine[i] != 255) invmach[busMachine[i]]=i;
-					if (busEffect[i] != 255) invmach[busEffect[i]]=i+64;
-				}
-				invmach[0]=MASTER_INDEX;
-
-				for (int i = 0; i < 128; i++)
-				{
-					if (invmach[i] != 255)
+					
+					// Psycle no longer uses busMachine and busEffect, since the pMachine Array directly maps
+					// to the real machine.
+					// Due to this, we have to move machines to where they really are, 
+					// and remap the inputs and outputs indexes again... ouch
+					// At the same time, we validate each wire, and the number count.
+					Progress.m_Progress.SetPos(8192+4096+2048+1024);
+					::Sleep(1);
+					unsigned char invmach[128];
+					memset(invmach,255,sizeof(invmach));
+					for (int i = 0; i < 64; i++)
 					{
-						;
-						Machine *cMac = _pMachine[invmach[i]] = pMac[i];
-						cMac->_macIndex = invmach[i];
-						_machineActive[i] = false; // mark as "converted"
-						cMac->_numInputs = 0;
-						cMac->_numOutputs = 0;
-						for (int c=0; c<MAX_CONNECTIONS; c++)
-						{
-							if (cMac->_inputCon[c])
-							{
-								if (cMac->_inputMachines[c] < 0 || cMac->_inputMachines[c] >= MAX_MACHINES-1)
-								{
-									cMac->_inputCon[c]=false;
-									cMac->_inputMachines[c]=-1;
-								}
-								else if (!pMac[cMac->_inputMachines[c]])
-								{
-									cMac->_inputCon[c]=false;
-									cMac->_inputMachines[c]=-1;
-								}
-								else
-								{
-									cMac->_inputMachines[c] = invmach[cMac->_inputMachines[c]];
-									cMac->_numInputs++;
-								}
-							}
-							if (cMac->_connection[c])
-							{
-								if (cMac->_outputMachines[c] < 0 || cMac->_outputMachines[c] >= MAX_MACHINES)
-								{
-									cMac->_connection[c]=false;
-									cMac->_outputMachines[c]=-1;
-								}
-								else if (!pMac[cMac->_outputMachines[c]])
-								{
-									cMac->_connection[c]=false;
-									cMac->_outputMachines[c]=-1;
-								}
-								else 
-								{
-									cMac->_outputMachines[c] = invmach[cMac->_outputMachines[c]];
-									cMac->_numOutputs++;
-								}
-							}
-						}
+						if (busMachine[i] != 255) invmach[busMachine[i]]=i;
+						if (busEffect[i] != 255) invmach[busEffect[i]]=i+64;
 					}
-				}
-				// verify that there isn't any machine that hasn't been copied into _pMachine
-				// Shouldn't happen. It would mean a damaged file.
-				int j=0;
-				int k=64;
-				for (int i=0;i < 128; i++)
-				{
-					if (_machineActive[i])
-					{
-						if ( pMac[i]->_mode == MACHMODE_GENERATOR)
-						{
-							while (_pMachine[j] && j<64) j++;
-							_pMachine[j]=pMac[i];
-						}
-						else
-						{
-							while (_pMachine[k] && k<128) k++;
-							_pMachine[k]=pMac[i];
-						}
-					}
-				}
+					invmach[0]=MASTER_INDEX;
 
-				Progress.m_Progress.SetPos(16384);
-				::Sleep(1);
-				if(fullopen) converter.retweak(*this);
-				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
-				_machineLock = false;
+					for (int i = 0; i < 128; i++)
+					{
+						if (invmach[i] != 255)
+						{
+							;
+							Machine *cMac = _pMachine[invmach[i]] = pMac[i];
+							cMac->_macIndex = invmach[i];
+							_machineActive[i] = false; // mark as "converted"
+							cMac->_numInputs = 0;
+							cMac->_numOutputs = 0;
+							for (int c=0; c<MAX_CONNECTIONS; c++)
+							{
+								if (cMac->_inputCon[c])
+								{
+									if (cMac->_inputMachines[c] < 0 || cMac->_inputMachines[c] >= MAX_MACHINES-1)
+									{
+										cMac->_inputCon[c]=false;
+										cMac->_inputMachines[c]=-1;
+									}
+									else if (!pMac[cMac->_inputMachines[c]])
+									{
+										cMac->_inputCon[c]=false;
+										cMac->_inputMachines[c]=-1;
+									}
+									else
+									{
+										cMac->_inputMachines[c] = invmach[cMac->_inputMachines[c]];
+										cMac->_numInputs++;
+									}
+								}
+								if (cMac->_connection[c])
+								{
+									if (cMac->_outputMachines[c] < 0 || cMac->_outputMachines[c] >= MAX_MACHINES)
+									{
+										cMac->_connection[c]=false;
+										cMac->_outputMachines[c]=-1;
+									}
+									else if (!pMac[cMac->_outputMachines[c]])
+									{
+										cMac->_connection[c]=false;
+										cMac->_outputMachines[c]=-1;
+									}
+									else 
+									{
+										cMac->_outputMachines[c] = invmach[cMac->_outputMachines[c]];
+										cMac->_numOutputs++;
+									}
+								}
+							}
+						}
+					}
+					// verify that there isn't any machine that hasn't been copied into _pMachine
+					// Shouldn't happen. It would mean a damaged file.
+					int j=0;
+					int k=64;
+					for (int i=0;i < 128; i++)
+					{
+						if (_machineActive[i])
+						{
+							if ( pMac[i]->_mode == MACHMODE_GENERATOR)
+							{
+								while (_pMachine[j] && j<64) j++;
+								_pMachine[j]=pMac[i];
+							}
+							else
+							{
+								while (_pMachine[k] && k<128) k++;
+								_pMachine[k]=pMac[i];
+							}
+						}
+					}
+
+					Progress.m_Progress.SetPos(16384);
+					::Sleep(1);
+					if(fullopen) converter.retweak(*this);
+					for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
+				} // end of scoped_lock
 				seqBus=0;
 				// Clean the vst loader helpers.
 				for (int i=0; i<OLD_MAX_PLUGINS; i++)

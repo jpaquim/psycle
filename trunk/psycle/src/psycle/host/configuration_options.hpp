@@ -3,15 +3,14 @@
 #pragma once
 #include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 
-/// Define to use psycle-core
-///\todo check xml library in psycle-core
+/// Define to 1 to use psycle-core, 0 otherwise
 #define PSYCLE__CONFIGURATION__USE_PSYCORE 1
 
-/// JAZ: Define to 1 to enable the volume column for XMSampler.
-///      It will also make the machine column in the pattern to show the values of the volume column instead.
+/// Define to 1 to enable the volume column for XMSampler, 0 otherwise.
+/// It will also make the machine column in the pattern to show the values of the volume column instead.
 #define PSYCLE__CONFIGURATION__VOLUME_COLUMN 0
 
-/// Test for RMS Vu's
+/// Define to 1 to use RMS Vu's, 0 otherwise
 #define PSYCLE__CONFIGURATION__RMS_VUS 0
 
 /// string describing the configuration of the build.
