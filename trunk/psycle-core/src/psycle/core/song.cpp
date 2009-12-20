@@ -17,13 +17,14 @@
 
 namespace psycle { namespace core {
 
-	using namespace psycle::helpers;
+using namespace helpers;
 
 SongSerializer CoreSong::serializer;
 
-CoreSong::CoreSong() {
-	_machineLock = false;
-	Invalided = false;
+CoreSong::CoreSong()
+:
+	Invalided()
+{
 	for(int i(0); i < MAX_MACHINES; ++i) machine_[i] = 0;
 	for(int i(0); i < MAX_INSTRUMENTS; ++i) _pInstrument[i] = new Instrument;
 	clear(); // Warning! Due to C++ semantics, CoreSong::clear() will be called, even in a derived class that implements clear().
@@ -35,7 +36,6 @@ CoreSong::~CoreSong() {
 }
 
 void CoreSong::clear() {
-	_machineLock = false;
 	Invalided = false;
 	setTracks(MAX_TRACKS);
 	setName("Untitled");
@@ -46,7 +46,7 @@ void CoreSong::clear() {
 		setTicksSpeed(4);
 	}
 	// Clean up allocated machines.
-	DeleteAllMachines(true);
+	DeleteAllMachines();
 	// Cleaning instruments
 	DeleteInstruments();
 	// Clear patterns
@@ -93,8 +93,7 @@ void CoreSong::ExchangeMachines(Machine::id_type macIdx1, Machine::id_type macId
 	machine_[macIdx1] = machine_[macIdx2];
 	machine_[macIdx2] = mac1;
 }
-void CoreSong::DeleteAllMachines(bool write_locked) {
-	_machineLock = true;
+void CoreSong::DeleteAllMachines() {
 	for(Machine::id_type c(0); c < MAX_MACHINES; ++c) if(machine_[c]) {
 		for(Machine::id_type j(c + 1); j < MAX_MACHINES; ++j) if(machine_[c] == machine_[j]) {
 			{ ///\todo wtf? duplicate machine? could happen if loader messes up?
@@ -106,20 +105,21 @@ void CoreSong::DeleteAllMachines(bool write_locked) {
 			}
 			machine_[j] = 0;
 		}
-		DeleteMachine(machine_[c], write_locked);
+		DeleteMachine(machine_[c]);
 		machine_[c] = 0;
 	}
-	_machineLock = false;
 }
-void CoreSong::DeleteMachine(Machine * mac, bool /*write_locked*/) {
-	//CSingleLock lock(&door, TRUE);
+void CoreSong::DeleteMachine(Machine * mac) {
+	scoped_lock lock(mutex_);
 	mac->DeleteWires();
 	// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 	try {
 		Machine::id_type id = mac->id();
 		delete mac;
-		machine_[id]=0;
-	} catch(...) {}
+		machine_[id] = 0;
+	} catch(...) {
+		///\todo
+	}
 }
 
 Machine::id_type CoreSong::GetFreeBus() {
@@ -148,7 +148,7 @@ bool CoreSong::ValidateMixerSendCandidate(Machine & mac, bool rewiring) {
 }
 
 Wire::id_type CoreSong::InsertConnection(Machine & srcMac, Machine & dstMac, InPort::id_type srctype, OutPort::id_type dsttype, float volume) {
-	//CSingleLock lock(&door,TRUE);
+	scoped_lock lock(mutex_);
 	// Verify that the destination is not a generator
 	if(!dstMac.acceptsConnections()) return -1;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
@@ -165,7 +165,7 @@ Wire::id_type CoreSong::InsertConnection(Machine & srcMac, Machine & dstMac, InP
 }
 
 bool CoreSong::ChangeWireDestMac(Machine & srcMac, Machine & newDstMac, OutPort::id_type srctype, Wire::id_type wiretochange, InPort::id_type dsttype) {
-	//CSingleLock lock(&door,TRUE);
+	scoped_lock lock(mutex_);
 	// Verify that the destination is not a generator
 	if(!newDstMac.acceptsConnections()) return false;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
@@ -179,7 +179,7 @@ bool CoreSong::ChangeWireDestMac(Machine & srcMac, Machine & newDstMac, OutPort:
 	return srcMac.MoveWireDestTo(newDstMac,srctype,wiretochange,dsttype);
 }
 bool CoreSong::ChangeWireSourceMac(Machine & newSrcMac, Machine & dstMac, InPort::id_type dsttype, Wire::id_type wiretochange, OutPort::id_type srctype) {
-	//CSingleLock lock(&door,TRUE);
+	scoped_lock lock(mutex_);
 	// Verify that the destination is not a generator
 	if(!dstMac.acceptsConnections()) return false;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
@@ -607,12 +607,6 @@ void CoreSong::patternTweakSlide(int /*machine*/, int /*command*/, int /*value*/
 }
 
 /****************************************************************************************************/
-// UISong
-
-UISong::UISong()
-{}
-
-/****************************************************************************************************/
 // Song
 
 Song::Song() {
@@ -620,7 +614,7 @@ Song::Song() {
 };
 
 void Song::clear() {
-	UISong::clear();
+	CoreSong::clear();
 	clearMyData();
 }
 void SetDefaultPatternLines(int defaultPatLines)
@@ -652,9 +646,9 @@ void Song::clearMyData() {
 
 }
 
-void Song::DeleteMachine(Machine * mac, bool write_locked )  {
+void Song::DeleteMachine(Machine * mac)  {
 	if(mac->id() == machineSoloed) machineSoloed = -1;
-	CoreSong::DeleteMachine(mac, write_locked);
+	CoreSong::DeleteMachine(mac);
 }
 
 }}

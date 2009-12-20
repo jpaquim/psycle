@@ -16,6 +16,7 @@
 #include "instrument.h"
 #include "xminstrument.h"
 #include <universalis/stdlib/cstdint.hpp>
+#include <universalis/stdlib/mutex.hpp>
 
 namespace psycle { namespace core {
 
@@ -201,13 +202,13 @@ class PSYCLE__CORE__DECL CoreSong {
 			/// Exchange the position of two machines
 			virtual void ExchangeMachines(Machine::id_type mac1, Machine::id_type mac2);
 			/// destroy a machine of this song.
-			virtual void DeleteMachine(Machine * machine, bool write_locked = false);
+			virtual void DeleteMachine(Machine * machine);
 			/// destroy a machine of this song.
-			virtual void DeleteMachineDeprecated(Machine::id_type mac, bool write_locked = false) {
-				if (machine(mac)) DeleteMachine(machine(mac), write_locked);
+			virtual void DeleteMachineDeprecated(Machine::id_type mac) {
+				if (machine(mac)) DeleteMachine(machine(mac));
 			}
 			/// destroys all the machines of this song.
-			virtual void DeleteAllMachines(bool write_locked = false);
+			virtual void DeleteAllMachines();
 		
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 			Machine::id_type GetFreeBus();
@@ -268,12 +269,9 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\}
 
 	///\name IsInvalid
-	///\todo This should be changed by a semaphore.
+	///\todo doc ... what's that?
 	///\{
 		public:
-			/// Sort of semaphore to not allow doing something with machines when they are changing (deleting,creating, etc..)
-			/// \todo change it by a real semaphore?
-			bool _machineLock;
 			///\name IsInvalid
 			///\todo doc ... what's that?
 			bool IsInvalided(){return Invalided;};
@@ -287,18 +285,18 @@ class PSYCLE__CORE__DECL CoreSong {
 	public:
 		void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
 
+	///\name thread synchronisation
+	///\{
+	public:
+		typedef universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
+		universalis::stdlib::mutex & mutex() const { return mutex_; }
+	private:
+		universalis::stdlib::mutex mutable mutex_;
+	///\}
 };
 
-/// UI stuff moved here
-class PSYCLE__CORE__DECL UISong : public CoreSong {
-	public:
-		UISong();
-		virtual ~UISong() {}
-	};
-
-/// the actual song class used by qpsycle. it's simply the UISong class
-/// note that a simple typedef won't work due to the song class being forward-declared, as a class and not a typedef.
-class PSYCLE__CORE__DECL Song : public UISong {
+/// Song extends CoreSong with UI-related stuff
+class PSYCLE__CORE__DECL Song : public CoreSong {
 	///\todo: For derived UI machines, the data is hold by Song in a class VisualMachine.
 	// This means that a Song maintans a separate array of VisualMachines for the Non-visual counterparts and gives access
 	// to these with ui-specific methods.
@@ -310,7 +308,7 @@ class PSYCLE__CORE__DECL Song : public UISong {
 		virtual ~Song() {}
 
 		virtual void clear();
-		virtual void DeleteMachine(Machine* mac, bool write_locked = false);
+		virtual void DeleteMachine(Machine* mac);
 	private:
 		void clearMyData();
 
