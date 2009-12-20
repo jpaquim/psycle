@@ -23,8 +23,6 @@ using namespace psycle::core;
 #include "Song.hpp"
 #endif
 
-#include <psycle/helpers/helpers.hpp>
-
 #include "PatternView.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
@@ -47,14 +45,18 @@ using namespace psycle::core;
 #include "SeqPasteCommand.hpp"
 #include "SeqCloneCommand.hpp"
 
+#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/hexstring_to_integer.hpp>
 #include <HtmlHelp.h>
 #include <cmath>
 #include <sstream>
 #include <iomanip>
 
-
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+		using namespace psycle::helpers;
+		using namespace psycle::helpers::math;
 
 		#define WM_SETMESSAGESTRING 0x0362
 
@@ -797,8 +799,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CClientDC canvasl(lv);
 //				CClientDC canvasr(rv);
 
-				int log_l=helpers::math::truncated(100*log10f(l));
-				int log_r=helpers::math::truncated(100*log10f(r));
+				int log_l=truncated(100*log10f(l));
+				int log_r=truncated(100*log10f(r));
 				log_l=log_l-225;
 				if ( log_l < 0 )log_l=0;
 				log_r=log_r-225;
@@ -1813,14 +1815,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CString str;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				const float playTime = Player::singleton().timeInfo().samplePos() /  (float) Player::singleton().timeInfo().sampleRate();
-				const int timeInt = helpers::math::truncated(playTime);
+				const int timeInt = truncated(playTime);
 				const int cents = (playTime - timeInt) * 100;
 				const int secs = timeInt % 60;
 				const int mins = ((timeInt/60) % 60);
 				const int hour = timeInt / 3600;
 				str.Format( "%.2u:%.2u:%.2u.%.2u", hour, mins, secs, cents); 
 #else
-				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, helpers::math::truncated(Global::pPlayer->_playTime), helpers::math::truncated(Global::pPlayer->_playTime*100)-(helpers::math::truncated(Global::pPlayer->_playTime)*100)); 
+				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, truncated(Global::pPlayer->_playTime), truncated(Global::pPlayer->_playTime*100)-(truncated(Global::pPlayer->_playTime)*100)); 
 #endif
 				pCmdUI->SetText(str); 
 			}
@@ -1860,7 +1862,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CString str;
 			cb->GetWindowText(str);
 			int result;
-			helpers::hexstring_to_integer(str.Left(2).GetBuffer(2), result);
+			hexstring_to_integer(str.Left(2).GetBuffer(2), result);
 			return result;
 		}
 

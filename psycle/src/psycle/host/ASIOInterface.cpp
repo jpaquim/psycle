@@ -8,8 +8,7 @@
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
-#include "Helpers.hpp"
-#include "Dsp.hpp"
+#include <psycle/helpers/dsp.hpp>
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 
@@ -23,7 +22,7 @@ namespace psycle
 {
 	namespace host
 	{
-		using namespace psycle::helpers;
+		using namespace helpers;
 
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 		#define ALLOW_NON_ASIO

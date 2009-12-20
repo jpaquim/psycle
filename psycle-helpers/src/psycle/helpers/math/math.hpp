@@ -7,10 +7,15 @@
 
 #include "pi.hpp"
 #include "log.hpp"
+#include "sine.hpp"
+#include "sine_cosine.hpp"
+#include "sine_sequence.hpp"
 #include "remainder.hpp"
+#include "rint.hpp"
 #include "round.hpp"
 #include "truncate.hpp"
 #include "clip.hpp"
 #include "erase_all_nans_infinities_and_denormals.hpp"
+#include "erase_denormals.hpp"
 
 #endif

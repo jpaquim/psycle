@@ -1,7 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::AudioDriver.
 #include "AudioDriver.hpp"
-#include "Helpers.hpp"
 namespace psycle
 {
 	namespace host
@@ -68,7 +67,7 @@ namespace psycle
 			{
 				//double res = ((double)pin[1]) + d2i;
 				//int r = *(int *)&res;
-				int r = helpers::math::rounded(pin[1]);
+				int r = rounded(pin[1]);
 
 				if (r < SHORT_MIN)
 				{
@@ -80,7 +79,7 @@ namespace psycle
 				}
 				//res = ((double)pin[0]) + d2i;
 				//int l = *(int *)&res;
-				int l = helpers::math::rounded(pin[0]);
+				int l = rounded(pin[0]);
 
 				if (l < SHORT_MIN)
 				{

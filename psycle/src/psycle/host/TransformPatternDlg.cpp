@@ -3,6 +3,10 @@
 
 #include "TransformPatternDlg.hpp"
 #include "PatternView.hpp"
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
+using namespace psycle::helpers;
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -96,8 +100,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int filtermac = -1;
 			int replaceins = -1;
 			int replacemac = -1;
-
-			using helpers::hexstring_to_integer;
 
 			if (afilterins[0] !=	'\0')
 				filterins = hexstring_to_integer(afilterins);

@@ -7,7 +7,6 @@ using namespace psycle::core;
 #else
 #include "Song.hpp"
 #endif
-#include <psycle/helpers/helpers.hpp>
 
 // CTransformPatternDlg dialog
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)

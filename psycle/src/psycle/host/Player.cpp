@@ -2,7 +2,8 @@
 ///\brief implementation file for psycle::host::Player.
 #include "configuration_options.hpp"
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE // popped at eof
+
 #include "Global.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
@@ -16,14 +17,12 @@
 #endif //!defined WINAMP_PLUGIN
 
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
+#include <psycle/helpers/value_mapper.hpp>
 
-using namespace psycle::helpers::dsp;
+namespace psycle { namespace host {
 
-namespace psycle
-{
-	namespace host
-	{
-		using namespace seib::vst;
+using namespace seib::vst;
+
 		Player::Player()
 		{
 			_playing = false;
@@ -47,9 +46,9 @@ namespace psycle
 
 		Player::~Player()
 		{
-#if !defined WINAMP_PLUGIN
+			#if !defined WINAMP_PLUGIN
 			if(_recording) _outputWaveFile.Close();
-#endif //!defined WINAMP_PLUGIN
+			#endif //!defined WINAMP_PLUGIN
 		}
 
 		void Player::Start(int pos, int lineStart, int lineStop, bool initialize)
@@ -120,9 +119,9 @@ namespace psycle
 		void Player::SampleRate(const int sampleRate)
 		{
 			///\todo update the source code of the plugins...
-#if PSYCLE__CONFIGURATION__RMS_VUS
-			helpers::dsp::numRMSSamples=sampleRate*0.05f;
-#endif
+			#if PSYCLE__CONFIGURATION__RMS_VUS
+				helpers::dsp::numRMSSamples=sampleRate*0.05f;
+			#endif
 			if(m_SampleRate != sampleRate)
 			{
 				m_SampleRate = sampleRate;
@@ -259,7 +258,7 @@ namespace psycle
 							int mIndex = pEntry->machine();
 							if(mIndex < MAX_MACHINES)
 							{
-								if(pSong->machine(mIndex)) pSong->machine(mIndex)->SetDestWireVolume(pSong,mIndex,pEntry->instrument(), helpers::CValueMapper::Map_255_1(pEntry->parameter()));
+								if(pSong->machine(mIndex)) pSong->machine(mIndex)->SetDestWireVolume(pSong,mIndex,pEntry->instrument(), value_mapper::map_255_1(pEntry->parameter()));
 							}
 						}
 						break;
@@ -517,7 +516,7 @@ namespace psycle
 
 					CVSTHost::vstTimeInfo.samplePos = ((Master *) (pSong->machine(MASTER_INDEX)))->sampleCount;
 
-#if !defined WINAMP_PLUGIN
+					#if !defined WINAMP_PLUGIN
 					// Inject Midi input data
 					if(!CMidiInput::Instance()->InjectMIDI( amount ))
 					{
@@ -595,10 +594,10 @@ namespace psycle
 							break;
 						}
 					}
-#else
+					#else
 					pSong->machine(MASTER_INDEX)->Work(amount);
 					pSong->_sampCount += amount;
-#endif //!defined WINAMP_PLUGIN
+					#endif //!defined WINAMP_PLUGIN
 
 					Master::_pMasterSamples += amount * 2;
 					numSamples -= amount;
@@ -690,7 +689,7 @@ namespace psycle
 
 		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool isFloat, bool dodither, int ditherpdf, int noiseshape, std::vector<char*> *clipboardmem)
 		{
-#if !defined WINAMP_PLUGIN
+			#if !defined WINAMP_PLUGIN
 			if(!_recording)
 			{
 				//\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
@@ -738,28 +737,28 @@ namespace psycle
 					}
 				}
 			}
-#endif //!defined WINAMP_PLUGIN
+			#endif //!defined WINAMP_PLUGIN
 		}
 
 		void Player::stopRecording(bool bOk)
 		{
-#if !defined WINAMP_PLUGIN
-			if(_recording)
-			{
-				Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
-				SampleRate(backup_rate);
-				Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
-				Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
-				if (!_clipboardrecording)
-					_outputWaveFile.Close();
-				_recording = false;
-				_clipboardrecording =false;
-				if(!bOk)
+			#if !defined WINAMP_PLUGIN
+				if(_recording)
 				{
-					MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
+					Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
+					SampleRate(backup_rate);
+					Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
+					Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
+					if (!_clipboardrecording)
+						_outputWaveFile.Close();
+					_recording = false;
+					_clipboardrecording =false;
+					if(!bOk)
+					{
+						MessageBox(0, "Wav recording failed.", "ERROR", MB_OK);
+					}
 				}
-			}
-#endif //!defined WINAMP_PLUGIN
+			#endif //!defined WINAMP_PLUGIN
 		}
 	}
 }

@@ -15,12 +15,13 @@
 
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
-
+#include <psycle/helpers/value_mapper.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle { namespace core {
 
-	using namespace psycle::helpers;
+using namespace helpers;
+
 /****************************************************************************************************/
 // Dummy
 
@@ -324,7 +325,7 @@ int Master::GenerateAudio( int numSamples ) {
 	
 	//if(!_mute) {
 	
-	float mv = CValueMapper::Map_255_1(_outDry);
+	float mv = value_mapper::map_255_1(_outDry);
 	float *pSamples = _pMasterSamples;
 	float *pSamplesL = _pSamplesL;
 	float *pSamplesR = _pSamplesR;
@@ -346,11 +347,11 @@ int Master::GenerateAudio( int numSamples ) {
 				_lMax = fabsf(*pSamplesL);
 			if(*pSamples > 32767.0f) {
 				_outDry = math::rounded((float)_outDry * 32767.0f / (*pSamples));
-				mv = CValueMapper::Map_255_1(_outDry);
+				mv = value_mapper::map_255_1(_outDry);
 				*pSamples = *pSamplesL = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
 				_outDry = math::rounded((float)_outDry * -32767.0f / (*pSamples));
-				mv = CValueMapper::Map_255_1(_outDry);
+				mv = value_mapper::map_255_1(_outDry);
 				*pSamples = *pSamplesL = -32767.0f; 
 			}
 			++pSamples;
@@ -360,11 +361,11 @@ int Master::GenerateAudio( int numSamples ) {
 				_rMax = fabsf(*pSamplesR);
 			if(*pSamples > 32767.0f) {
 					_outDry = math::rounded((float)_outDry * 32767.0f / (*pSamples));
-				mv = CValueMapper::Map_255_1(_outDry);
+				mv = value_mapper::map_255_1(_outDry);
 				*pSamples = *pSamplesR = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
 				_outDry = math::rounded((float)_outDry * -32767.0f / (*pSamples));
-				mv = CValueMapper::Map_255_1(_outDry);
+				mv = value_mapper::map_255_1(_outDry);
 				*pSamples = *pSamplesR = -32767.0f; 
 			}
 			++pSamples;

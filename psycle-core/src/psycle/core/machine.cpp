@@ -19,7 +19,7 @@
 
 namespace psycle { namespace core {
 
-using namespace psycle::helpers;
+using namespace helpers;
 
 /********************************************************************************************/
 // AudioBuffer

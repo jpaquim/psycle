@@ -30,6 +30,8 @@ using namespace psycle::core;
 #include "XmSamplerGui.hpp"
 #include "MacProp.hpp"
 
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
 #ifdef _MSC_VER
 #undef min
 #undef max

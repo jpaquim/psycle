@@ -8,10 +8,13 @@
 #include "xmsampler.h"
 #include "xminstrument.h"
 #include "song.h"
+#include <psycle/helpers/dsp.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <algorithm>
 
 namespace psycle { namespace core {
+
+using namespace helpers;
 
 std::string XMSampler::_psName = "Sampulse";
 const float XMSampler::SURROUND_THRESHOLD = 2.0f;

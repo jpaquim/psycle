@@ -24,7 +24,6 @@ using namespace psycle::core;
 #include "NativeGui.hpp"
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
-#include <psycle/helpers/helpers.hpp>
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)

@@ -1,7 +1,6 @@
 ///\file
 ///\brief configuration of the build.
 #pragma once
-#include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 
 /// Define to 1 to use plugins in the build dir, 0 otherwise.
 /// When enabled, psycle will read the env var with the same name (PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS),
@@ -9,7 +8,13 @@
 /// So to really enable this you need to setup your IDE's debug settings to set the env var when launching the process.
 /// The advantage of using an env var is that it doesn't hardcode the behaviour in the executable,
 /// hence it continues working normally when launched outside the IDE.
-/// Note that visual sutio saves the debug settings in the .user file, so these don't go in the repository, which is a good thing.
+///
+/// Note 1: Visual sutio saves the debug settings in the .user file,
+///         so these don't go in the repository, which is a good thing.
+///
+/// Note 2: With visual studio, you need to set the env var as
+///         "PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS=", that is, with an equal sign at the end,
+///         even if there no value after the equal, otherwise the var is *not* set!
 #define PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS 1
 
 /// Define to 1 to use psycle-core, 0 otherwise
@@ -22,6 +27,7 @@
 /// Define to 1 to use RMS Vu's, 0 otherwise
 #define PSYCLE__CONFIGURATION__RMS_VUS 0
 
+/**************************************************************************************************/
 /// string describing the configuration of the build.
 #define PSYCLE__CONFIGURATION(EOL) \
 	"compiler build tool chain = " PSYCLE__COMPILER__BUILD EOL \
@@ -48,3 +54,5 @@
 	#else
 		#define PSYCLE__COMPILER__BUILD "unknown"
 	#endif
+
+#include <universalis/compiler/stringized.hpp> // for UNIVERSALIS__COMPILER__STRINGIZED

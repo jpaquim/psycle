@@ -47,7 +47,7 @@
 
 namespace psycle { namespace core { namespace vst {
 
-using namespace psycle::helpers;
+using namespace helpers;
 
 /**************************************************************************/
 // Plugin

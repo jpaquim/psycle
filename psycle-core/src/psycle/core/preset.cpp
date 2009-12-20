@@ -13,8 +13,8 @@
 
 namespace psycle { namespace core {
 
-		using namespace std;
-		using namespace psycle::helpers;
+using namespace std;
+using namespace helpers;
 
 		Preset::Preset() {
 		}

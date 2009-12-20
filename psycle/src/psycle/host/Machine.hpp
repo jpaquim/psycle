@@ -3,8 +3,7 @@
 #pragma once
 #include "Global.hpp"
 #include "SongStructs.hpp"
-#include "Dsp.hpp"
-#include "Helpers.hpp"
+#include <psycle/helpers/dsp.hpp>
 #include "FileIO.hpp"
 #include "exceptions.hpp"
 

@@ -5,11 +5,11 @@
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/math/rint.hpp>
+#include <psycle/helpers/math/clip.hpp>
 
 namespace psycle { namespace core {
 
-using psycle::helpers::math::clipped_lrint;
+using helpers::math::clipped_lrint;
 
 // note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 #define ALLOW_NON_ASIO

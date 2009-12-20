@@ -18,7 +18,7 @@
 
 namespace psycle { namespace core {
 
-	using namespace psycle::helpers;
+using namespace helpers;
 
 std::string const Psy3Filter::FILE_FOURCC = "PSY3";
 /// Current version of the Song file and its chunks.

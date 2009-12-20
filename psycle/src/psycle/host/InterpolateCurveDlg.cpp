@@ -2,7 +2,9 @@
 ///\brief implementation file for psycle::host::CInterpolateCurve.
 
 #include "InterpolateCurveDlg.hpp"
-#include "Helpers.hpp"
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
+using namespace psycle::helpers;
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -480,7 +482,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_Value.GetWindowText(text);
 				std::string text2 = text;
 				int value=0;
-				helpers::hexstring_to_integer(text2,value);
+				hexstring_to_integer(text2,value);
 				if ( value >=0 && value < 65536)
 				{
 					kf[selectedGPoint].value = value;

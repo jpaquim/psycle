@@ -19,7 +19,6 @@ using namespace psycle::core;
 #endif
 #include "ChildView.hpp"
 #include "MainFrm.hpp"
-#include <psycle/helpers/helpers.hpp>
 #include <cassert>
 
 #if !defined NDEBUG

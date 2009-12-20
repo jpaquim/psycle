@@ -12,9 +12,13 @@
 #include "fileio.h"
 #include "song.h"
 
+#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/value_mapper.hpp>
+
 namespace psycle { namespace core {
 
-using namespace psycle::helpers;
+using namespace helpers;
+using namespace helpers::math;
 
 std::string Sampler::_psName = "Sampler";
 InstPreview Sampler::wavprev;
@@ -298,7 +302,7 @@ void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 			if (pVoice->_filter._type < dsp::F_NONE)
 			{
 				TickFilterEnvelope( voice );
-				pVoice->_filter._cutoff = pVoice->_cutoff + psycle::helpers::math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
+				pVoice->_filter._cutoff = pVoice->_cutoff + rounded(pVoice->_filterEnv._value*pVoice->_coModify);
 				if (pVoice->_filter._cutoff < 0)
 				{
 					pVoice->_filter._cutoff = 0;
@@ -644,7 +648,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		}
 		else
 		{
-			float const finetune = CValueMapper::Map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->waveFinetune);
+			float const finetune = value_mapper::map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->waveFinetune);
 			pVoice->_wave._speed = (std::int64_t)(pow(2.0f, ((pEntry.note()+callbacks->song()._pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
 		}
 		
@@ -667,7 +671,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 
 		if (pEntry.command() == SAMPLER_CMD_VOLUME)
 		{
-			pVoice->_wave._vol *= CValueMapper::Map_255_1( pEntry.parameter() );
+			pVoice->_wave._vol *= value_mapper::map_255_1( pEntry.parameter() );
 		}
 		
 		// Panning calculation -------------------------------------------
@@ -680,10 +684,10 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		}
 		else if ( pEntry.command() == SAMPLER_CMD_PANNING )
 		{
-			panFactor = CValueMapper::Map_255_1( pEntry.parameter() );
+			panFactor = value_mapper::map_255_1( pEntry.parameter() );
 		}
 		else {
-			panFactor = CValueMapper::Map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
+			panFactor = value_mapper::map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
@@ -756,7 +760,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		//
 		pVoice->_wave._vol = (float)callbacks->song()._pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
-		if ( pEntry.command() == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= CValueMapper::Map_255_1(pEntry.parameter() );
+		if ( pEntry.command() == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= value_mapper::map_255_1(pEntry.parameter() );
 		
 		// Panning calculation -------------------------------------------
 		//
@@ -768,11 +772,11 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		}
 		else if ( pEntry.command() == SAMPLER_CMD_PANNING )
 		{
-			panFactor = CValueMapper::Map_255_1( pEntry.parameter() );
+			panFactor = value_mapper::map_255_1( pEntry.parameter() );
 		}
 		else
 		{
-			panFactor = CValueMapper::Map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
+			panFactor = value_mapper::map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;

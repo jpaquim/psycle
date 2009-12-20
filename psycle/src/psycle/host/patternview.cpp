@@ -2,16 +2,14 @@
 #include "MainFrm.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-#include <psycle/helpers/helpers.hpp>
-using namespace psycle::core;
+	#include <psycle/core/player.h>
+	#include <psycle/core/song.h>
+	#include <psycle/core/machine.h>
+	using namespace psycle::core;
 #else
-#include "Player.hpp"
-#include "Song.hpp"
-#include "Machine.hpp"
-#include "helpers.hpp"
+	#include "Player.hpp"
+	#include "Song.hpp"
+	#include "Machine.hpp"
 #endif
 #include "InputHandler.hpp"
 #include "Configuration.hpp"
@@ -30,13 +28,18 @@ using namespace psycle::core;
 #include "PatPasteCommand.hpp"
 #include "PatDeleteCommand.hpp"
 
+#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
 #ifdef _MSC_VER
 #undef min
 #undef max
 #endif
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
+
+using namespace helpers;
+using namespace helpers::math;
 
 		#define DRAW_DATA		1
 		#define DRAW_HSCROLL	2
@@ -3458,7 +3461,7 @@ namespace psycle {
 									char *q = strchr(buf,61); // =
 									if (q)
 									{
-										helpers::hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
+										hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
 										PatHeaderCoords.bHasTransparency = TRUE;
 									}
 								}
@@ -3607,9 +3610,9 @@ namespace psycle {
 
 			for (int i = 0; i < len; i++)
 			{
-				pDest[i] = (helpers::math::rounded(p0*0x10000)&0xff0000)
-							| (helpers::math::rounded(p1*0x100)&0xff00)
-							| (helpers::math::rounded(p2)&0xff);
+				pDest[i] = (rounded(p0*0x10000)&0xff0000)
+							| (rounded(p1*0x100)&0xff00)
+							| (rounded(p2)&0xff);
 				p0+=a0;
 				p1+=a1;
 				p2+=a2;
@@ -4364,6 +4367,7 @@ namespace psycle {
 					psycle::core::PatternEvent& ev = it->second;
 					if (ev.track() == track ) {
 						return it;
+						///\todo unreachable code
 						found = true;
 						break;
 					}
@@ -8454,7 +8458,7 @@ namespace psycle {
 						
 						PatternEvent *entry = (PatternEvent*) offset;
 						entry->setCommand(0xff);
-						int val = helpers::math::rounded(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+						int val = rounded(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 						if (val < 1)
 						{
 							val = 1;

@@ -3,16 +3,17 @@
 
 #include "MasterDlg.hpp"
 
+#include "ChildView.hpp"
+
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/internal_machines.h>
-#include <psycle/helpers/dsp.hpp>
-using namespace psycle::core;
+	#include <psycle/core/internal_machines.h>
+	using namespace psycle::core;
 #else
-#include "Machine.hpp"
-#include "Dsp.hpp"
+	#include "Machine.hpp"
 #endif
 
-#include "ChildView.hpp"
+#include <psycle/helpers/dsp.hpp>
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 

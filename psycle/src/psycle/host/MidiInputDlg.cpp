@@ -5,7 +5,10 @@
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
-#include "Helpers.hpp"
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
+using namespace psycle::helpers;
+
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
@@ -110,7 +113,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				CString mfc;
 				gui.GetWindowText(mfc);
-				helpers::hexstring_to_integer(static_cast<char const * const>(mfc), model);
+				hexstring_to_integer(static_cast<char const * const>(mfc), model);
 			}
 			void read_from_gui(CMidiInputDlg::group const & gui, Configuration::midi_type::group_type & model)
 			{

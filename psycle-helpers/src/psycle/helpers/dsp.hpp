@@ -1,10 +1,7 @@
 ///\file
 ///\brief various signal processing utility functions and classes, psycle::helpers::dsp::Cubic amongst others.
 #pragma once
-#include "helpers.hpp"
 #include "math/erase_all_nans_infinities_and_denormals.hpp"
-#include "math/truncate.hpp"
-#include "math/round.hpp"
 #include <universalis/compiler.hpp>
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
@@ -14,7 +11,7 @@
 #include <cstring>
 namespace psycle { namespace helpers { /** various signal processing utility functions. */ namespace dsp {
 
-	///\todo doc
+	/// linear -> deciBell
 	/// amplitude normalized to 1.0f.
 	float inline UNIVERSALIS__COMPILER__CONST
 	dB(float amplitude)
@@ -22,7 +19,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 		return 20.0f * std::log10(amplitude);
 	}
 
-	///\todo doc
+	/// deciBell -> linear
 	float inline UNIVERSALIS__COMPILER__CONST
 	dB2Amp(float db)
 	{

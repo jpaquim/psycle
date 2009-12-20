@@ -13,19 +13,19 @@
 #include "machine.h"
 #include "sampler.h"
 #include "song.h"
-#include <psycle/audiodrivers/audiodriver.h>
 
+#include <psycle/audiodrivers/audiodriver.h>
+#include <psycle/helpers/value_mapper.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/cpu_affinity.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/cpu/exception.hpp>
-
 #include <boost/bind.hpp>
 #include <iostream> // only for debug output
 
 namespace psycle { namespace core {
 
-using namespace psycle::helpers;
+using namespace helpers;
 namespace loggers = universalis::os::loggers;
 
 namespace {
@@ -466,7 +466,7 @@ void Player::process_global_event(GlobalEvent const & event) {
 				if(mIndex < MAX_MACHINES && song().machine(mIndex)) {
 					Wire::id_type wire(event.target2());
 					song().machine(mIndex)->SetDestWireVolume(mIndex, wire,
-						CValueMapper::Map_255_1(static_cast<int>(event.parameter()))
+						value_mapper::map_255_1(static_cast<int>(event.parameter()))
 					);
 				}
 			}
