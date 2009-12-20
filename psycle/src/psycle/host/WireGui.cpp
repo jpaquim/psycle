@@ -276,7 +276,7 @@ namespace psycle {
 			pts.push_back(p);
 			
 			rgn_.DeleteObject();
-			int err = rgn_.CreatePolygonRgn(&pts[0],pts.size(), WINDING);
+			/*int err =*/ rgn_.CreatePolygonRgn(&pts[0],pts.size(), WINDING);
 			return rgn_;
 		}
 
@@ -366,8 +366,8 @@ namespace psycle {
 
 		void WireGui::UpdatePosition()
 		{
-			PsycleCanvas::Group* parentGroup = parent();
-			double xp1, yp1, xp2, yp2;
+			//PsycleCanvas::Group* parentGroup = parent();
+			double xp1, xp2;
 			xp1 = 0;
 			xp2 = 0; //parentGroup->GetBounds(xp1, yp1, xp2, yp2);
 			if ( fromGUI_ ) {				

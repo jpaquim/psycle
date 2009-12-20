@@ -1638,8 +1638,11 @@ namespace psycle {
 
 		void SequencerView::DecPosition()
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 			Song* song_ = &project_->song();
 			PatternView* pat_view = project_->pat_view();
+#endif
 			if (Global::pPlayer->playing() && Global::pConfig->_followSong)
 			{				
 #if PSYCLE__CONFIGURATION__USE_PSYCORE

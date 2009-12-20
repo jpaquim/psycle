@@ -11,8 +11,6 @@
 
 namespace psycle { namespace core {
 
-using namespace universalis::stdlib;
-
 unsigned int const MAX_ASIO_DRIVERS = 32;
 unsigned int const MAX_ASIO_OUTPUTS = 128;
 

@@ -179,7 +179,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 		void CMacProp::OnBnClickedReplacemac()
 		{
-			int index = pMachine->id();
 			replaced = true;
 			OnCancel();
 		}
