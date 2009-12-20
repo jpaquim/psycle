@@ -6,9 +6,10 @@
 /// Define to 1 to use plugins in the build dir, 0 otherwise.
 /// When enabled, psycle will read the env var with the same name (PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS),
 /// and if it's set (to any value), it won't read nor save the config file or registry settings regarding the plugin dir.
-/// So to really enable this you need to setup your IDE to set the env var when launching the process.
+/// So to really enable this you need to setup your IDE's debug settings to set the env var when launching the process.
 /// The advantage of using an env var is that it doesn't hardcode the behaviour in the executable,
 /// hence it continues working normally when launched outside the IDE.
+/// Note that visual sutio saves the debug settings in the .user file, so these don't go in the repository, which is a good thing.
 #define PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS 1
 
 /// Define to 1 to use psycle-core, 0 otherwise
