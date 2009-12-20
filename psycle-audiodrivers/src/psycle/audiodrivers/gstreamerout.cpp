@@ -136,12 +136,12 @@ namespace {
 }
 
 namespace {
-	unsigned int   global_client_count;
-	std::mutex     global_client_count_mutex;
-	std::once_flag global_client_count_init_once_flag = STD_ONCE_INIT;
-	void           global_client_count_init() {
+	unsigned int global_client_count;
+	mutex global_client_count_mutex;
+	once_flag global_client_count_init_once_flag = STD_ONCE_INIT;
+	void global_client_count_init() {
 		// note: we do not need to lock here, but this is a way to ensure it is initialised.
-		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+		scoped_lock<mutex> lock(global_client_count_mutex);
 		global_client_count = 0;
 	}
 }
