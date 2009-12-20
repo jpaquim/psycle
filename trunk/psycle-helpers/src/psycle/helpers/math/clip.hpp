@@ -5,7 +5,10 @@
 #define PSYCLE__HELPERS__MATH__CLIP__INCLUDED
 #pragma once
 
+#include "rint.hpp"
 #include <universalis/compiler.hpp>
+#include <limits>
+#include <boost/static_assert.hpp>
 namespace psycle { namespace helpers { namespace math {
 
 /// ensures a value stays between two bounds
@@ -18,19 +21,22 @@ X inline clipped(X const & minimum, X const & value, X const & maximum) {
 	else return value;
 }
 
+/// combines float to signed integer conversion with clipping.
+template<typename Result, const unsigned int bits> UNIVERSALIS__COMPILER__CONST
+Result inline clipped_lrint(float f) {
+	// check that Result is signed
+	BOOST_STATIC_ASSERT((std::numeric_limits<Result>::is_signed));
 
-/// ensures a value stays between 16 bit boundaries
-template<typename X> UNIVERSALIS__COMPILER__CONST
-X inline clipped16(X const & value) {
-	return clipped<X>(-32768, value, 32767);
+	int const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
+	int const min(-max - 1);
+	return math::lrint<Result>(math::clipped(float(min), f, float(max)));
 }
 
-/// ensures a value stays between 24 bit boundariess
-template<typename X> UNIVERSALIS__COMPILER__CONST
-X inline clipped24(X const & value) {
-	return clipped<X>(-8388608, value, 8388607);
+/// combines float to signed integer conversion with clipping.
+template<typename Result> UNIVERSALIS__COMPILER__CONST
+Result inline clipped_lrint(float f) {
+	return clipped_lrint<Result, (sizeof(Result) << 3)>(f);
 }
-
 
 }}}
 
