@@ -20,6 +20,8 @@
 
 namespace psycle { namespace core {
 
+using namespace universalis::stdlib;
+
 // forward declarations.
 class PluginFinderKey;
 class MachineFactory;
@@ -287,11 +289,11 @@ class PSYCLE__CORE__DECL CoreSong {
 
 	///\name thread synchronisation
 	///\{
-	public:
-		typedef universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
-		universalis::stdlib::mutex & mutex() const { return mutex_; }
-	private:
-		universalis::stdlib::mutex mutable mutex_;
+		public:
+			typedef class scoped_lock<mutex> scoped_lock;
+			operator mutex & () const { return mutex_; }
+		private:
+			mutex mutable mutex_;
 	///\}
 };
 
