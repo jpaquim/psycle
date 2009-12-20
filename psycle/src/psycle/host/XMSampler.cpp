@@ -2096,7 +2096,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 
 		void XMSampler::Tick()
 		{
-			scoped_lock lock(m_Mutex);
+			scoped_lock lock(*this);
 			SampleCounter(0);
 			m_TickCount=0;
 
@@ -2119,7 +2119,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 
 		void XMSampler::Tick(int channelNum,PatternEvent* pData)
 		{
-			scoped_lock lock(m_Mutex);
+			scoped_lock lock(*this);
 
 			if (Global::song().IsInvalided()) { return; }
 
@@ -2342,7 +2342,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 
 		void XMSampler::Work(int numSamples)
 		{
-			scoped_lock lock(m_Mutex);
+			scoped_lock lock(*this);
 
 			cpu::cycles_type cost = cpu::cycles();
 			int i;

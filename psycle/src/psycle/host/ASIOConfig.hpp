@@ -126,7 +126,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					saveatend=true;
 				}
 				bool configured(true);
-				int driverID(0);
 				configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", buffer_size);
 				configured &= ERROR_SUCCESS == reg.QueryValue("DriverID", device_id);
 				configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", sample_rate);

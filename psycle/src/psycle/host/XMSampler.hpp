@@ -7,22 +7,18 @@
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 
+namespace psycle { namespace host {
 
-namespace psycle
-{
-	namespace host
-	{
+using namespace universalis::stdlib;
 
-class XMSampler : public Machine
-{
+class XMSampler : public Machine {
+
 public:
-
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const std::uint32_t VERSION = 0x00010001;
 	static const std::uint32_t VERSION_ONE = 0x00010000;
 	static const float SURROUND_THRESHOLD;
-	typedef std::scoped_lock<std::mutex> scoped_lock;
 
 /*
 * = remembers its last value when called with param 00.
@@ -147,8 +143,8 @@ XMSampler::Channel::PerformFX().
 
 	class Channel;
 
-//////////////////////////////////////////////////////////////////////////
-//  XMSampler::WaveDataController Declaration
+	//////////////////////////////////////////////////////////////////////////
+	// XMSampler::WaveDataController Declaration
 	//\todo: WaveDateController Needs to update the speed if sampleRate changes (but... would the samplerate change while
 	//       there's a voice playing?)
 	class WaveDataController
@@ -1084,8 +1080,6 @@ XMSampler::Channel::PerformFX().
 	void SetZxxMacro(int index,int mode, int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; }
 	ZxxMacro GetMap(int index) { return zxxMap[index]; }
 
-	std::mutex & Mutex() { return m_Mutex; }
-
 	const int SampleCounter(){return _sampleCounter;}// Sample pos since last linechange.
 	void SampleCounter(const int value){_sampleCounter = value;}// ""
 
@@ -1127,8 +1121,14 @@ private:
 	int m_NextSampleTick;// The sample position of the next Tracker Tick
 	int _sampleCounter;	// Number of Samples since note start
 
-
-	std::mutex mutable m_Mutex;
+	///\name thread synchronisation
+	///\{
+		public:
+			typedef class scoped_lock<mutex> scoped_lock;
+			operator mutex & () const { return mutex_; }
+		private:
+			mutex mutable mutex_;
+	///\}
 };
-}
-}
+
+}}
