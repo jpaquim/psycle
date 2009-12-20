@@ -22,20 +22,20 @@ X inline clipped(X const & minimum, X const & value, X const & maximum) {
 }
 
 /// combines float to signed integer conversion with clipping.
-template<typename Result, const unsigned int bits> UNIVERSALIS__COMPILER__CONST
-Result inline clipped_lrint(float f) {
+template<typename SignedIntegralResult, const unsigned int bits, typename Real> UNIVERSALIS__COMPILER__CONST
+SignedIntegralResult inline clipped_lrint(Real x) {
 	// check that Result is signed
-	BOOST_STATIC_ASSERT((std::numeric_limits<Result>::is_signed));
+	BOOST_STATIC_ASSERT((std::numeric_limits<SignedIntegralResult>::is_signed));
 
 	int const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
 	int const min(-max - 1);
-	return math::lrint<Result>(math::clipped(float(min), f, float(max)));
+	return math::lrint<SignedIntegralResult>(math::clipped(Real(min), x, Real(max)));
 }
 
 /// combines float to signed integer conversion with clipping.
-template<typename Result> UNIVERSALIS__COMPILER__CONST
-Result inline clipped_lrint(float f) {
-	return clipped_lrint<Result, (sizeof(Result) << 3)>(f);
+template<typename SignedIntegralResult, typename Real> UNIVERSALIS__COMPILER__CONST
+SignedIntegralResult inline clipped_lrint(Real x) {
+	return clipped_lrint<SignedIntegralResult, (sizeof(SignedIntegralResult) << 3)>(x);
 }
 
 }}}
