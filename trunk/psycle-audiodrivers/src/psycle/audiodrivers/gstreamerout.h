@@ -13,6 +13,8 @@
 
 namespace psycle { namespace core {
 
+using namespace universalis::stdlib;
+
 class GStreamerOut : public AudioDriver {
 	public:
 		GStreamerOut();
@@ -51,15 +53,15 @@ class GStreamerOut : public AudioDriver {
 		void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, GStreamerOut *);
 		void        handoff(::GstBuffer &, ::GstPad &);
 
-		typedef std::scoped_lock<std::mutex> scoped_lock;
-		std::mutex mutable mutex_;
-		std::condition<scoped_lock> mutable condition_;
+		typedef class scoped_lock<mutex> scoped_lock;
+		mutex mutable mutex_;
+		condition<scoped_lock> mutable condition_;
 
 		bool wait_for_state_to_become_playing_;
 		bool handoff_called_;
 		bool stop_requested_;
 
-		typedef std::int16_t output_sample_type;
+		typedef int16_t output_sample_type;
 		unsigned int channels_;
 		unsigned int samples_per_second_;
 		unsigned int periods_;

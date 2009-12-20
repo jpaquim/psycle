@@ -11,8 +11,10 @@
 
 namespace psycle { namespace core {
 
-#define MAX_ASIO_DRIVERS 32
-#define MAX_ASIO_OUTPUTS 128
+using namespace universalis::stdlib;
+
+unsigned int const MAX_ASIO_DRIVERS = 32;
+unsigned int const MAX_ASIO_OUTPUTS = 128;
 
 class AsioUiInterface {
 	public:
@@ -195,10 +197,10 @@ class ASIOInterface : public AudioDriver {
 		#endif
 	private:
 		// static ::CCriticalSection _lock;
-		std::mutex mutex_;
-		typedef std::scoped_lock<std::mutex> scoped_lock;
+		mutex mutex_;
+		typedef class scoped_lock<mutex> scoped_lock;
 		/// a condition variable to wait until notified that the value of running_ has changed
-		std::condition<scoped_lock> condition_;
+		condition<scoped_lock> condition_;
 
 		bool _initialized;
 		bool _configured;

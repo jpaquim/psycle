@@ -20,6 +20,9 @@
 
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "audiodriver.h"
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <windows.h>
 #include <mmsystem.h>
 #include <dsound.h>
@@ -27,7 +30,9 @@
 
 namespace psycle { namespace core {
 
-	class DSoundUiInterface {
+using namespace universalis::stdlib;
+
+class DSoundUiInterface {
 	public:
 		DSoundUiInterface::DSoundUiInterface() {}
 		virtual ~DSoundUiInterface() {}
@@ -49,8 +54,7 @@ namespace psycle { namespace core {
 		virtual void ReadConfig(
 			GUID& device_guid, bool& exclusive, bool& dither,
 			int& sample_rate, int& buffer_size, int& buffer_count) = 0;
-	};
-
+};
 
 /// output device interface implemented by direct sound.
 class MsDirectSound : public AudioDriver {
@@ -68,10 +72,10 @@ class MsDirectSound : public AudioDriver {
 		LPGUID _pGuid;
 		LPDIRECTSOUNDCAPTURE8 _pDs;
 		LPDIRECTSOUNDCAPTUREBUFFER8  _pBuffer;
-		std::uint32_t _lowMark;
+		uint32_t _lowMark;
 		float *pleft;
 		float *pright;
-		std::uint32_t _machinepos;
+		uint32_t _machinepos;
 	};
 	public:
 
@@ -85,10 +89,10 @@ class MsDirectSound : public AudioDriver {
 		virtual bool Enable( bool );
 		virtual bool Enabled() { return threadRunning_; }
 		virtual void GetCapturePorts(std::vector<std::string>&ports);
-		virtual bool AddCapturePort(std::uint32_t idx);
-		virtual bool RemoveCapturePort(std::uint32_t idx);
+		virtual bool AddCapturePort(uint32_t idx);
+		virtual bool RemoveCapturePort(uint32_t idx);
 		virtual bool CreateCapturePort(PortCapt &port);
-		virtual void GetReadBuffers(std::uint32_t idx, float **pleft, float **pright,int numsamples);
+		virtual void GetReadBuffers(uint32_t idx, float **pleft, float **pright,int numsamples);
 		static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
 		virtual int GetWritePos();
 		virtual int GetPlayPos();
@@ -123,10 +127,10 @@ class MsDirectSound : public AudioDriver {
 		/// whether the thread is asked to terminate
 		bool stopRequested_;
 		/// a mutex to synchronise accesses to running_ and stop_requested_
-		std::mutex mutex_;
-		typedef std::scoped_lock<std::mutex> scoped_lock;
+		mutex mutex_;
+		typedef class scoped_lock<mutex> scoped_lock;
 		/// a condition variable to wait until notified that the value of running_ has changed
-		std::condition<scoped_lock> condition_;
+		condition<scoped_lock> condition_;
 
 		GUID device_guid;
 		bool _exclusive;
