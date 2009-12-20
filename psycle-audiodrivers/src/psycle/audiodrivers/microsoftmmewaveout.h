@@ -58,7 +58,7 @@ class MsWaveOut : public AudioDriver {
 		static CRITICAL_SECTION waveCriticalSection;
 		static WAVEHDR*         waveBlocks; // array of header structure, 
 		// that points to a block buffer
-		static volatile /* why volatile *?/ int waveFreeBlockCount;
+		static volatile /* why volatile ? */ int waveFreeBlockCount;
 		static int waveCurrentBlock;
 
 		// mme functions
