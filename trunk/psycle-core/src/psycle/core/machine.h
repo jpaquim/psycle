@@ -26,7 +26,7 @@
 
 namespace psycle { namespace core {
 
-using namespace psycle::helpers;
+using namespace helpers;
 class RiffFile;
 
 ///\todo FIXME: stole these from analzyer.h just to fix compile error.
@@ -60,7 +60,7 @@ class AudioPort;
 // the wire is also responsible of volume changes and even pin reassignation (convert 5.1 to stereo, etc.. not yet)
 class PSYCLE__CORE__DECL Wire {
 	public:
-		typedef std::int32_t id_type;
+		typedef int32_t id_type;
 
 		Wire(): volume(1.0f), pan(), multiplier(1.0f), rvol(1.0f), lvol(1.0f), index(), senderport(), receiverport() {}
 		virtual ~Wire() {
@@ -129,7 +129,7 @@ class PSYCLE__CORE__DECL AudioPort {
 
 class PSYCLE__CORE__DECL InPort : public AudioPort {
 	public:
-		typedef std::int32_t id_type;
+		typedef int32_t id_type;
 		InPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 		virtual ~InPort(){};
 		virtual void CollectData(int numSamples);
@@ -137,7 +137,7 @@ class PSYCLE__CORE__DECL InPort : public AudioPort {
 
 class PSYCLE__CORE__DECL OutPort : public AudioPort {
 	public:
-		typedef std::int32_t id_type;
+		typedef int32_t id_type;
 		OutPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 		virtual ~OutPort() {}
 		virtual void CollectData(int numSamples);
@@ -302,7 +302,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\{
 		public:
 			///\see enum MachineType which defined somewhere outside
-			typedef std::int32_t type_type; // Was: MachineType type_type
+			typedef int32_t type_type; // Was: MachineType type_type
 			type_type inline type() const throw() { return type_; }
 		private:
 			void type(type_type type) { type_ = type; } friend class CoreSong;
@@ -325,7 +325,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\{
 		public:
 			///\todo should be unsigned but some functions return negative values to signal errors instead of throwing an exception
-			typedef std::int32_t id_type;
+			typedef int32_t id_type;
 			id_type id() const throw() { return id_; }
 		private:
 			id_type id_;
@@ -547,7 +547,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\{
 		public:
 			/// number of Incoming connections
-			std::int32_t _connectedInputs;
+			int32_t _connectedInputs;
 			/// Incoming connections Machine numbers
 			///\todo hardcoded limits and wastes
 			Machine::id_type _inputMachines[MAX_CONNECTIONS];
@@ -566,7 +566,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\{
 		public:
 			/// number of Outgoing connections
-			std::int32_t _connectedOutputs;
+			int32_t _connectedOutputs;
 			/// Outgoing connections Machine numbers
 			///\todo hardcoded limits and wastes
 			Machine::id_type _outputMachines[MAX_CONNECTIONS];
@@ -598,13 +598,13 @@ class PSYCLE__CORE__DECL Machine {
 	public:
 		///\todo 3 dimensional?
 		virtual void SetPan(int newpan);
-		std::int32_t Pan() const { return _panning; }
+		int32_t Pan() const { return _panning; }
 		float lVol() const { return _lVol; }
 		float rVol() const { return _rVol; }
 
 	protected:
 		/// numerical value of panning.
-		std::int32_t _panning;
+		int32_t _panning;
 		/// left chan volume
 		float _lVol;
 		/// right chan volume

@@ -18,13 +18,15 @@
 
 namespace psycle { namespace core {
 
+using namespace universalis::stdlib;
+
 class PSYCLE__CORE__DECL XMSampler : public Machine {
 public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const float SURROUND_THRESHOLD;
 
-	typedef std::scoped_lock<std::mutex> scoped_lock;
+	typedef scoped_lock<mutex> scoped_lock;
 
 /*
 * = remembers its last value when called with param 00.
@@ -161,7 +163,7 @@ XMSampler::Channel::PerformFX().
 
 		virtual void Init(XMInstrument::WaveData* const wave, const int layer);
 		virtual void NoteOff(void);
-		virtual void Work(float * const pLeftw,float * const pRightw, const psycle::helpers::dsp::PRESAMPLERFN pResamplerWork)
+		virtual void Work(float * const pLeftw,float * const pRightw, const helpers::dsp::PRESAMPLERFN pResamplerWork)
 		{
 			//Process sample
 			*pLeftw = pResamplerWork(
@@ -178,7 +180,7 @@ XMSampler::Channel::PerformFX().
 			if(CurrentLoopDirection() == LoopDirection::FORWARD)
 			{
 				m_Position+=Speed();
-				const std::uint32_t curIntPos = m_Position >> 32;
+				const uint32_t curIntPos = m_Position >> 32;
 				switch(m_CurrentLoopType)
 				{
 				case XMInstrument::WaveData::LoopType::NORMAL:
@@ -239,15 +241,15 @@ XMSampler::Channel::PerformFX().
 		virtual void Playing(const bool play){ m_Playing=play; }
 
 		// Current sample position
-		virtual std::uint32_t Position() const { return m_Position >> 32; }
-		virtual void Position(const std::uint32_t value) {
+		virtual uint32_t Position() const { return m_Position >> 32; }
+		virtual void Position(const uint32_t value) {
 			if(value < Length()) m_Position = value;
 			else m_Position = (Length() - 1);
 			m_Position <<= 32;
 		}
 
 		// Current sample Speed
-		virtual std::int64_t Speed() const {return m_Speed;}
+		virtual int64_t Speed() const {return m_Speed;}
 		virtual void Speed(const double value){m_Speed = value * 4294967296.0f;} // 4294967296 is a left shift of 32bits
 
 		virtual void CurrentLoopDirection(const int dir){m_LoopDirection = dir;}
@@ -261,7 +263,7 @@ XMSampler::Channel::PerformFX().
 		virtual int SustainLoopStart() const {return m_pWave->WaveSusLoopStart();}
 		virtual int SustainLoopEnd() const { return m_pWave->WaveSusLoopEnd();}
 
-		virtual std::uint32_t Length() const {return m_pWave->WaveLength();}
+		virtual uint32_t Length() const {return m_pWave->WaveLength();}
 
 		virtual bool IsStereo() const { return m_pWave->IsWaveStereo();}
 
@@ -274,7 +276,7 @@ XMSampler::Channel::PerformFX().
 	protected:
 		int m_Layer;
 		XMInstrument::WaveData *m_pWave;
-		std::uint64_t m_Position;
+		uint64_t m_Position;
 		double m_Speed;
 		bool m_Playing;
 
@@ -443,14 +445,14 @@ XMSampler::Channel::PerformFX().
 		void ResetEffects();
 
 		void VoiceInit(int channelNum,int instrumentNum);
-		void Work(int numSamples,float * const pSamplesL,float * const pSamplesR, const psycle::helpers::dsp::Resampler& _resampler);
+		void Work(int numSamples,float * const pSamplesL,float * const pSamplesR, const helpers::dsp::Resampler& _resampler);
 
 		// This one is Tracker Tick (Mod-tick)
 		void Tick();
 		// This one is Psycle's "Tick"
 		void NewLine();
 
-		void NoteOn(const std::uint8_t note,const std::int16_t playvol=-1,bool reset=true);
+		void NoteOn(const uint8_t note,const int16_t playvol=-1,bool reset=true);
 		void NoteOff();
 		void NoteOffFast();
 		void NoteFadeout();
@@ -458,7 +460,7 @@ XMSampler::Channel::PerformFX().
 		XMInstrument::NewNoteAction::Type NNA() const { return m_NNA;}
 		void NNA(const XMInstrument::NewNoteAction::Type value){ m_NNA = value;}
 
-		void ResetVolAndPan(std::int16_t playvol,bool reset=true);
+		void ResetVolAndPan(int16_t playvol,bool reset=true);
 		void UpdateSpeed();
 		double PeriodToSpeed(int period);
 
@@ -543,8 +545,8 @@ XMSampler::Channel::PerformFX().
 
 		// Volume of the current note.
 		//fixme: m_Volume is float! what's going on here?
-		std::uint16_t Volume() const { return m_Volume; }
-		void Volume(const std::uint16_t vol)
+		uint16_t Volume() const { return m_Volume; }
+		void Volume(const uint16_t vol)
 		{
 			m_Volume = vol;
 			m_RealVolume = rWave().Wave().WaveGlobVolume() * rInstrument().GlobVol() * (vol/128.0f);
@@ -581,7 +583,7 @@ XMSampler::Channel::PerformFX().
 			m_Ressonance = res; m_Filter.Ressonance(res);
 		}
 
-		void FilterType(const psycle::helpers::dsp::FilterType ftype) { m_Filter.Type(ftype);}
+		void FilterType(const helpers::dsp::FilterType ftype) { m_Filter.Type(ftype);}
 
 		void Period(const int newperiod) { m_Period = newperiod; UpdateSpeed(); }
 		int Period() const { return m_Period; }
@@ -620,7 +622,7 @@ XMSampler::Channel::PerformFX().
 		WaveDataController m_WaveDataController;
 		//XDSPWaveController m_WaveDataController;
 
-		psycle::helpers::dsp::ITFilter m_Filter;
+		helpers::dsp::ITFilter m_Filter;
 		int m_CutOff;
 		int m_Ressonance;
 		float _coModify;
@@ -863,14 +865,14 @@ XMSampler::Channel::PerformFX().
 		void Cutoff(const int cut) { m_Cutoff =cut;  if ( ForegroundVoice() ) ForegroundVoice()->CutOff(cut); }
 		int Ressonance() const { return m_Ressonance;}
 		void Ressonance(const int res) { m_Ressonance=res; if ( ForegroundVoice() ) ForegroundVoice()->Ressonance(res);}
-		psycle::helpers::dsp::FilterType FilterType() const { return m_FilterType;}
+		helpers::dsp::FilterType FilterType() const { return m_FilterType;}
 
 		int DefaultCutoff() const {return m_DefaultCutoff;}
 		void DefaultCutoff(const int value){m_DefaultCutoff = value; Cutoff(value);}
 		int DefaultRessonance() const {return m_DefaultRessonance; }
 		void DefaultRessonance(const int value){m_DefaultRessonance = value; Ressonance(value); }
-		psycle::helpers::dsp::FilterType DefaultFilterType() const {return m_DefaultFilterType;}
-		void DefaultFilterType(const psycle::helpers::dsp::FilterType value){m_DefaultFilterType = value; m_FilterType = value; }
+		helpers::dsp::FilterType DefaultFilterType() const {return m_DefaultFilterType;}
+		void DefaultFilterType(const helpers::dsp::FilterType value){m_DefaultFilterType = value; m_FilterType = value; }
 
 		bool IsGrissando() const {return m_bGrissando;}
 		void IsGrissando(const bool value){m_bGrissando = value;}
@@ -967,10 +969,10 @@ XMSampler::Channel::PerformFX().
 		int m_MIDI_Set;
 		int m_Cutoff;
 		int m_Ressonance;
-		psycle::helpers::dsp::FilterType m_FilterType;
+		helpers::dsp::FilterType m_FilterType;
 		int m_DefaultCutoff;
 		int m_DefaultRessonance;
-		psycle::helpers::dsp::FilterType m_DefaultFilterType;
+		helpers::dsp::FilterType m_DefaultFilterType;
 	};
 
 
@@ -1079,11 +1081,11 @@ XMSampler::Channel::PerformFX().
 	}
 
 	/// set resampler quality
-	void ResamplerQuality(const psycle::helpers::dsp::ResamplerQuality value){
+	void ResamplerQuality(const helpers::dsp::ResamplerQuality value){
 		_resampler.SetQuality(value);
 	}
 
-	psycle::helpers::dsp::ResamplerQuality ResamplerQuality() const {
+	helpers::dsp::ResamplerQuality ResamplerQuality() const {
 		return _resampler.GetQuality();
 	}
 	bool UseFilters(void) const { return m_UseFilters; }
@@ -1094,7 +1096,7 @@ XMSampler::Channel::PerformFX().
 	void SetZxxMacro(const int index,const int mode, const int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; }
 	ZxxMacro GetMap(const int index) const { return zxxMap[index]; }
 
-	std::mutex & Mutex() const { return m_Mutex; }
+	mutex & Mutex() const { return m_Mutex; }
 
 	int SampleCounter() const {return _sampleCounter;}// Sample pos since last linechange.
 	void SampleCounter(const int value){_sampleCounter = value;}// ""
@@ -1115,7 +1117,7 @@ protected:
 
 	Voice m_Voices[MAX_POLYPHONY];
 	XMSampler::Channel m_Channel[MAX_TRACKS];
-	psycle::helpers::dsp::Cubic _resampler;
+	helpers::dsp::Cubic _resampler;
 	ZxxMacro zxxMap[128];
 
 
@@ -1146,7 +1148,7 @@ private:
 	/// Number of Samples since note start
 	int _sampleCounter;
 
-	std::mutex mutable m_Mutex;
+	mutex mutable m_Mutex;
 };
 
 }}

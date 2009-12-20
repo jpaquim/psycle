@@ -69,7 +69,7 @@ namespace psycle { namespace helpers {
 	///\todo: WARNING!!! This only works with signed types, not with unsigned.
 	///\todo: WARNING!!! maybe we should clip in float and convert. but that has the other
 	/// problem of integral types not being equal on both sides.
-	template<typename Result, unsigned int const bits> UNIVERSALIS__COMPILER__CONST
+	template<typename Result, const unsigned int bits> UNIVERSALIS__COMPILER__CONST
 	Result inline clipped_lrint(float f) {
 		// check that Result is signed
 		BOOST_STATIC_ASSERT((std::numeric_limits<Result>::is_signed));
@@ -92,14 +92,14 @@ namespace psycle { namespace helpers {
 		BOOST_STATIC_ASSERT((std::numeric_limits<Result>::is_signed));
 
 		// use 64-bit if needed, otherwise 32-bit
-		if(sizeof(Result) >= sizeof(std::int32_t)) { // The compiler *should* be able to compute this statically.
-			std::int64_t const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
-			std::int64_t const min(-max - 1);
-			return math::clipped(min, math::lrint<std::int64_t>(f), max);
+		if(sizeof(Result) >= sizeof(int32_t)) { // The compiler *should* be able to compute this statically.
+			int64_t const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
+			int64_t const min(-max - 1);
+			return math::clipped(min, math::lrint<int64_t>(f), max);
 		} else {
-			std::int32_t const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
-			std::int32_t const min(-max - 1);
-			return math::clipped(min, math::lrint<std::int32_t>(f), max);
+			int32_t const max((1 << (bits - 1)) - 1); // The compiler is able to compute this statically.
+			int32_t const min(-max - 1);
+			return math::clipped(min, math::lrint<int32_t>(f), max);
 		}
 	}
 

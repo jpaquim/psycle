@@ -140,8 +140,8 @@ public:
 		void AllocWaveData(const int iLen,const bool bStereo)
 		{
 			DeleteWaveData();
-			m_pWaveDataL = new std::int16_t[iLen];
-			m_pWaveDataR = bStereo?new std::int16_t[iLen]:NULL;
+			m_pWaveDataL = new int16_t[iLen];
+			m_pWaveDataR = bStereo?new int16_t[iLen]:NULL;
 			m_WaveStereo = bStereo;
 			m_WaveLength  = iLen;
 		}
@@ -184,13 +184,13 @@ public:
 		const std::string WaveName()const { return m_WaveName;}
 		void WaveName(const std::string newname){ m_WaveName = newname;}
 
-		std::uint32_t WaveLength() const { return m_WaveLength;}
-		void WaveLength (const std::uint32_t value){m_WaveLength = value;}
+		uint32_t WaveLength() const { return m_WaveLength;}
+		void WaveLength (const uint32_t value){m_WaveLength = value;}
 
 		float WaveGlobVolume() const { return m_WaveGlobVolume;}
 		void WaveGlobVolume(const float value) {m_WaveGlobVolume = value;}
-		std::uint16_t WaveVolume() const { return m_WaveDefVolume;}
-		void WaveVolume(const std::uint16_t value){m_WaveDefVolume = value;}
+		uint16_t WaveVolume() const { return m_WaveDefVolume;}
+		void WaveVolume(const uint16_t value){m_WaveDefVolume = value;}
 
 		/// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
 		float PanFactor() const { return m_PanFactor;}
@@ -198,78 +198,78 @@ public:
 		bool PanEnabled() const { return m_PanEnabled;}
 		void PanEnabled(const bool pan){ m_PanEnabled=pan;}
 
-		std::uint32_t WaveLoopStart() const { return m_WaveLoopStart;}
-		void WaveLoopStart(const std::uint32_t value){m_WaveLoopStart = value;}
-		std::uint32_t WaveLoopEnd() const { return m_WaveLoopEnd;}
-		void WaveLoopEnd(const std::uint32_t value){m_WaveLoopEnd = value;}
+		uint32_t WaveLoopStart() const { return m_WaveLoopStart;}
+		void WaveLoopStart(const uint32_t value){m_WaveLoopStart = value;}
+		uint32_t WaveLoopEnd() const { return m_WaveLoopEnd;}
+		void WaveLoopEnd(const uint32_t value){m_WaveLoopEnd = value;}
 		LoopType::Type WaveLoopType() const { return m_WaveLoopType;}
 		void WaveLoopType(const LoopType::Type value){ m_WaveLoopType = value;}
 
-		std::uint32_t WaveSusLoopStart() const { return m_WaveSusLoopStart;}
-		void WaveSusLoopStart(const std::uint32_t value){m_WaveSusLoopStart = value;}
-		std::uint32_t WaveSusLoopEnd() const { return m_WaveSusLoopEnd;}
-		void WaveSusLoopEnd(const std::uint32_t value){m_WaveSusLoopEnd = value;}
+		uint32_t WaveSusLoopStart() const { return m_WaveSusLoopStart;}
+		void WaveSusLoopStart(const uint32_t value){m_WaveSusLoopStart = value;}
+		uint32_t WaveSusLoopEnd() const { return m_WaveSusLoopEnd;}
+		void WaveSusLoopEnd(const uint32_t value){m_WaveSusLoopEnd = value;}
 		LoopType::Type WaveSusLoopType() const { return m_WaveSusLoopType;}
 		void WaveSusLoopType(const LoopType::Type value){ m_WaveSusLoopType = value;}
 
-		std::int16_t WaveTune() const {return m_WaveTune;}
-		void WaveTune(const std::int16_t value){m_WaveTune = value;}
-		std::int16_t WaveFineTune() const {return m_WaveFineTune;}
-		void WaveFineTune(const std::int16_t value){m_WaveFineTune = value;}
-		std::uint32_t WaveSampleRate() const {return m_WaveSampleRate;}
-		void WaveSampleRate(const std::uint32_t value);
+		int16_t WaveTune() const {return m_WaveTune;}
+		void WaveTune(const int16_t value){m_WaveTune = value;}
+		int16_t WaveFineTune() const {return m_WaveFineTune;}
+		void WaveFineTune(const int16_t value){m_WaveFineTune = value;}
+		uint32_t WaveSampleRate() const {return m_WaveSampleRate;}
+		void WaveSampleRate(const uint32_t value);
 
 		bool IsWaveStereo() const { return m_WaveStereo;}
 		void IsWaveStereo(const bool value){ m_WaveStereo = value;}
 
-		std::uint8_t VibratoType() const {return m_VibratoType;}
-		std::uint8_t VibratoSpeed() const {return m_VibratoSpeed;}
-		std::uint8_t VibratoDepth() const {return m_VibratoDepth;}
-		std::uint8_t VibratoAttack() const {return m_VibratoAttack;}
+		uint8_t VibratoType() const {return m_VibratoType;}
+		uint8_t VibratoSpeed() const {return m_VibratoSpeed;}
+		uint8_t VibratoDepth() const {return m_VibratoDepth;}
+		uint8_t VibratoAttack() const {return m_VibratoAttack;}
 
-		void VibratoType(const std::uint8_t value){m_VibratoType = value ;}
-		void VibratoSpeed(const std::uint8_t value){m_VibratoSpeed = value ;}
-		void VibratoDepth(const std::uint8_t value){m_VibratoDepth = value ;}
-		void VibratoAttack(const std::uint8_t value){m_VibratoAttack = value ;}
+		void VibratoType(const uint8_t value){m_VibratoType = value ;}
+		void VibratoSpeed(const uint8_t value){m_VibratoSpeed = value ;}
+		void VibratoDepth(const uint8_t value){m_VibratoDepth = value ;}
+		void VibratoAttack(const uint8_t value){m_VibratoAttack = value ;}
 
 		bool IsAutoVibrato() const {return m_VibratoDepth && m_VibratoSpeed;}
 
-		std::int16_t * const pWaveDataL() const { return m_pWaveDataL;}
-		std::int16_t * const pWaveDataR() const { return m_pWaveDataR;}
+		int16_t * const pWaveDataL() const { return m_pWaveDataL;}
+		int16_t * const pWaveDataR() const { return m_pWaveDataR;}
 
-		std::int16_t WaveDataL(const std::int32_t index) const { return *(m_pWaveDataL + index); }
-		std::int16_t WaveDataR(const std::int32_t index) const { return *(m_pWaveDataR + index); }
+		int16_t WaveDataL(const int32_t index) const { return *(m_pWaveDataL + index); }
+		int16_t WaveDataR(const int32_t index) const { return *(m_pWaveDataR + index); }
 
-		void WaveDataL(const int index,const std::int16_t value){ *(m_pWaveDataL + index) = value;}
-		void WaveDataR(const int index,const std::int16_t value){ *(m_pWaveDataR + index) = value;}
+		void WaveDataL(const int index,const int16_t value){ *(m_pWaveDataL + index) = value;}
+		void WaveDataR(const int index,const int16_t value){ *(m_pWaveDataR + index) = value;}
 
 	private:
 
 		std::string m_WaveName;
 		/// Wave length in Samples.
-		std::uint32_t m_WaveLength;
+		uint32_t m_WaveLength;
 		float m_WaveGlobVolume;
-		std::uint16_t m_WaveDefVolume;
-		std::uint32_t m_WaveLoopStart;
-		std::uint32_t m_WaveLoopEnd;
+		uint16_t m_WaveDefVolume;
+		uint32_t m_WaveLoopStart;
+		uint32_t m_WaveLoopEnd;
 		LoopType::Type m_WaveLoopType;
-		std::uint32_t m_WaveSusLoopStart;
-		std::uint32_t m_WaveSusLoopEnd;
+		uint32_t m_WaveSusLoopStart;
+		uint32_t m_WaveSusLoopEnd;
 		LoopType::Type m_WaveSusLoopType;
-		std::uint32_t m_WaveSampleRate;
-		std::int16_t m_WaveTune;
+		uint32_t m_WaveSampleRate;
+		int16_t m_WaveTune;
 		/// [ -256 .. 256] full range = -/+ 1 seminote
-		std::int16_t m_WaveFineTune;
+		int16_t m_WaveFineTune;
 		bool m_WaveStereo;
-		std::int16_t *m_pWaveDataL;
-		std::int16_t *m_pWaveDataR;
+		int16_t *m_pWaveDataL;
+		int16_t *m_pWaveDataR;
 		bool m_PanEnabled;
 		/// Default position for panning ( 0..1 ) 0left 1 right
 		float m_PanFactor;
-		std::uint8_t m_VibratoAttack;
-		std::uint8_t m_VibratoSpeed;
-		std::uint8_t m_VibratoDepth;
-		std::uint8_t m_VibratoType;
+		uint8_t m_VibratoAttack;
+		uint8_t m_VibratoSpeed;
+		uint8_t m_VibratoDepth;
+		uint8_t m_VibratoType;
 
 	};// WaveData
 
@@ -385,8 +385,8 @@ public:
 
 		unsigned int NumOfPoints() const { return m_Points.size();}
 
-		void Load(RiffFile& riffFile,const std::uint32_t version);
-		void Save(RiffFile& riffFile,const std::uint32_t version);
+		void Load(RiffFile& riffFile,const uint32_t version);
+		void Save(RiffFile& riffFile,const uint32_t version);
 
 		/// overloaded copy function
 		Envelope& operator=(const Envelope& other)
@@ -503,8 +503,8 @@ public:
 	const std::string& Name() const {return m_Name;}
 	void Name(const std::string& name) { m_Name= name; }
 
-	std::uint16_t Lines() const { return m_Lines;}
-	void Lines(const std::uint16_t value){ m_Lines = value;}
+	uint16_t Lines() const { return m_Lines;}
+	void Lines(const uint16_t value){ m_Lines = value;}
 
 	const Envelope* AmpEnvelope() const { return &m_AmpEnvelope;}
 	const Envelope* PanEnvelope() const {return &m_PanEnvelope;}
@@ -526,17 +526,17 @@ public:
 	void Pan(const float pan) { m_InitPan = pan;}
 	bool PanEnabled() const { return m_PanEnabled;}
 	void PanEnabled(const bool pan) { m_PanEnabled = pan;}
-	std::uint8_t NoteModPanCenter() const { return m_NoteModPanCenter;}
-	void NoteModPanCenter(const std::uint8_t pan) { m_NoteModPanCenter = pan;}
-	std::int8_t NoteModPanSep() const { return m_NoteModPanSep;}
-	void NoteModPanSep(const std::int8_t pan) { m_NoteModPanSep = pan;}
+	uint8_t NoteModPanCenter() const { return m_NoteModPanCenter;}
+	void NoteModPanCenter(const uint8_t pan) { m_NoteModPanCenter = pan;}
+	int8_t NoteModPanSep() const { return m_NoteModPanSep;}
+	void NoteModPanSep(const int8_t pan) { m_NoteModPanSep = pan;}
 
-	std::uint8_t FilterCutoff() const { return m_FilterCutoff;}
-	void FilterCutoff(const std::uint8_t value){m_FilterCutoff = value;}
-	std::uint8_t FilterResonance() const { return m_FilterResonance;}
-	void FilterResonance(const std::uint8_t value){m_FilterResonance = value;}
-	std::int16_t FilterEnvAmount() const { return m_FilterEnvAmount;}
-	void FilterEnvAmount(const std::int16_t value){ m_FilterEnvAmount = value;}
+	uint8_t FilterCutoff() const { return m_FilterCutoff;}
+	void FilterCutoff(const uint8_t value){m_FilterCutoff = value;}
+	uint8_t FilterResonance() const { return m_FilterResonance;}
+	void FilterResonance(const uint8_t value){m_FilterResonance = value;}
+	int16_t FilterEnvAmount() const { return m_FilterEnvAmount;}
+	void FilterEnvAmount(const int16_t value){ m_FilterEnvAmount = value;}
 	psycle::helpers::dsp::FilterType FilterType() const { return m_FilterType;}
 	void FilterType(const psycle::helpers::dsp::FilterType value){ m_FilterType = value;}
 
@@ -565,7 +565,7 @@ private:
 	std::string m_Name;
 
 	/// If m_Lines > 0 use samplelen/(tickduration*m_Lines) to determine the wave speed instead of the note.
-	std::uint16_t m_Lines;
+	uint16_t m_Lines;
 
 	/// envelope range = [0.0f..1.0f]
 	Envelope m_AmpEnvelope;
@@ -587,16 +587,16 @@ private:
 	/// Initial panFactor (if enabled) [-1..1]
 	float m_InitPan;
 	/// Note number for center pan position
-	std::uint8_t m_NoteModPanCenter;
+	uint8_t m_NoteModPanCenter;
 	/// -32..32. 1/256th of panFactor change per seminote.
-	std::int8_t m_NoteModPanSep;
+	int8_t m_NoteModPanSep;
 
 	/// Cutoff Frequency [0..127]
-	std::uint8_t m_FilterCutoff;
+	uint8_t m_FilterCutoff;
 	/// Resonance [0..127]
-	std::uint8_t m_FilterResonance;
+	uint8_t m_FilterResonance;
 	/// EnvAmount [-128..128]
-	std::int16_t m_FilterEnvAmount;
+	int16_t m_FilterEnvAmount;
 	/// Filter Type [0..4]
 	psycle::helpers::dsp::FilterType m_FilterType;
 
