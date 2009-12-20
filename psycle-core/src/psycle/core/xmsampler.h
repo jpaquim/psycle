@@ -24,8 +24,6 @@ public:
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const float SURROUND_THRESHOLD;
 
-	typedef universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
-
 /*
 * = remembers its last value when called with param 00.
 t = slides/changes each tick. (or is applied in a specific tick != 0 )
@@ -1094,8 +1092,6 @@ XMSampler::Channel::PerformFX().
 	void SetZxxMacro(const int index,const int mode, const int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; }
 	ZxxMacro GetMap(const int index) const { return zxxMap[index]; }
 
-	universalis::stdlib::mutex & Mutex() const { return m_Mutex; }
-
 	int SampleCounter() const {return _sampleCounter;}// Sample pos since last linechange.
 	void SampleCounter(const int value){_sampleCounter = value;}// ""
 
@@ -1108,8 +1104,8 @@ XMSampler::Channel::PerformFX().
 	int GetDeltaTick() { return m_DeltaTick; }
 
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
-protected:
 
+protected:
 	static std::string _psName;
 	int _numVoices;
 
@@ -1146,7 +1142,14 @@ private:
 	/// Number of Samples since note start
 	int _sampleCounter;
 
-	mutex mutable m_Mutex;
+	///\name thread synchronisation
+	///\{
+	public:
+		typedef universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
+		universalis::stdlib::mutex & Mutex() const { return m_Mutex; }
+	private:
+		universalis::stdlib::mutex mutable m_Mutex;
+	///\}
 };
 
 }}
