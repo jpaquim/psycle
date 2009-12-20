@@ -132,7 +132,16 @@ namespace psycle { namespace host {
 					SetSongDir(appPath()+"songs");
 					SetCurrentSongDir(GetSongDir());
 					SetSkinDir(appPath()+"skins");
-					SetPluginDir(appPath()+"PsyclePlugins");
+
+					///\todo let's be consistent
+					/// when building the visual-studio solution, plugins are put in the 'psycle-plugins' subdir
+					/// but the install-shield installer put them in a 'PsyclePlugins' subdir.
+					SetPluginDir(appPath() + "PsyclePlugins");
+					#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+						if(std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
+							SetPluginDir(appPath() + "psycle-plugins");
+					#endif
+
 					SetVstDir(appPath()+"VstPlugins");
 					SetWaveRecDir(appPath()+"songs");
 					SetCurrentWaveRecDir(GetWaveRecDir());
@@ -378,7 +387,12 @@ namespace psycle { namespace host {
 				reg.QueryValue("SongDir", song_dir_);
 				SetCurrentSongDir(GetSongDir());
 				reg.QueryValue("SkinDir", skin_dir_);
-				reg.QueryValue("PluginDir", plugin_dir_);
+
+				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+					if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
+				#endif
+						reg.QueryValue("PluginDir", plugin_dir_);
+
 				reg.QueryValue("VstDir", vst_dir_);
 				reg.QueryValue("WaveRecDir", wave_rec_dir_);
 				SetCurrentWaveRecDir(GetWaveRecDir());
@@ -531,7 +545,12 @@ namespace psycle { namespace host {
 			reg.SetValue("machine_skin", machine_skin);
 			reg.SetValue("InstrumentDir", GetInstrumentDir());
 			reg.SetValue("SongDir", GetSongDir());
-			reg.SetValue("PluginDir", GetPluginDir());
+
+			#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+				if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
+			#endif
+					reg.SetValue("PluginDir", GetPluginDir());
+
 			reg.SetValue("VstDir", GetVstDir());
 			reg.SetValue("SkinDir", GetSkinDir());
 			reg.SetValue("WaveRecDir", GetWaveRecDir());
@@ -919,7 +938,12 @@ namespace psycle { namespace host {
 				reg.QueryValue("SongDir", song_dir_);
 				SetCurrentSongDir(GetSongDir());
 				reg.QueryValue("SkinDir", skin_dir_);
-				reg.QueryValue("PluginDir", plugin_dir_);
+
+				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+					if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
+				#endif
+						reg.QueryValue("PluginDir", plugin_dir_);
+
 				reg.QueryValue("VstDir", vst_dir_);
 				SetWaveRecDir(GetSongDir());
 				SetCurrentWaveRecDir(GetWaveRecDir());
