@@ -50,38 +50,30 @@ double AudioDriver::frand() {
 	return static_cast<double>(stat) * (1.0 / 0x7fffffff);
 }
 
-using helpers::math::lrint;
-using helpers::math::clipped16;
-using helpers::math::clipped24;
+using helpers::math::clipped_lrint;
 
 void AudioDriver::Quantize16WithDither(float const * pin, int16_t * piout, int c) {
 	do {
-		const int r = clipped16(lrint<int>(pin[1] + frand()));
-		const int l = clipped16(lrint<int>(pin[0] + frand()));
-		*piout++ = static_cast<int16_t>(l);
-		*piout++ = static_cast<int16_t>(r);
+		*piout++ = clipped_lrint<int16_t>(pin[0] + frand());
+		*piout++ = clipped_lrint<int16_t>(pin[1] + frand());
 		pin += 2;
 	} while(--c);
 }
 
 void AudioDriver::Quantize16(float const * pin, int16_t * piout, int c) {
 	do {
-		const int r = clipped16(lrint<int>(pin[1]));
-		const int l = clipped16(lrint<int>(pin[0]));
-		*piout++ = static_cast<int16_t>(l);
-		*piout++ = static_cast<int16_t>(r);
+		*piout++ = clipped_lrint<int16_t>(pin[0]);
+		*piout++ = clipped_lrint<int16_t>(pin[1]);
 		pin += 2;
 	} while(--c);
 }
 
 void AudioDriver::Quantize16AndDeinterlace(float const * pin, int16_t * pileft, int strideleft, int16_t * piright, int strideright, int c) {
 	do {
-		const int r = clipped16(lrint<int>(pin[1]));
-		*piright = static_cast<int16_t>(r);
-		piright += strideright;
-		const int l = clipped16(lrint<int>(pin[0]));
-		*pileft = static_cast<int16_t>(l);
+		*pileft = clipped_lrint<int16_t>(pin[0]);
+		*piright = clipped_lrint<int16_t>(pin[1]);
 		pileft += strideleft;
+		piright += strideright;
 		pin += 2;
 	} while(--c);
 }
@@ -96,37 +88,33 @@ void AudioDriver::DeQuantize16AndDeinterlace(int const * pin, float * poutleft, 
 
 void AudioDriver::Quantize24WithDither(float const * pin, int32_t * piout, int c) {
 	do {
-		const int r = clipped24(lrint<int>(pin[1] + frand()));
-		const int l = clipped24(lrint<int>(pin[0] + frand()));
-		*piout++ = l;
-		*piout++ = r;
+		*piout++ = clipped_lrint<int32_t, 24>(pin[0] + frand());
+		*piout++ = clipped_lrint<int32_t, 24>(pin[1] + frand());
 		pin += 2;
 	} while(--c);
 }
 
 void AudioDriver::Quantize24(float const * pin, int32_t * piout, int c) {
 	do {
-		const int r = clipped24(lrint<int>(pin[1]));
-		const int l = clipped24(lrint<int>(pin[0]));
-		*piout++ = l;
-		*piout++ = r;
+		*piout++ = clipped_lrint<int32_t, 24>(pin[0]);
+		*piout++ = clipped_lrint<int32_t, 24>(pin[1]);
 		pin += 2;
 	} while(--c);
 }
+
 ///\todo: not verified. copied from ASIO implementation
 void AudioDriver::Quantize24AndDeinterlace(float const * pin, int32_t * pileft, int32_t * piright, int c) {
 	char* outl = (char*)pileft;
 	char* outr = (char*)piright;
 	int t;
 	char* pt = (char*)&t;
-	do
-	{
-		t = clipped24(lrint<int>((*pin++)*256.0f));
+	do {
+		t = clipped_lrint<int, 24>((*pin++) * 256.0f);
 		*outl++ = pt[0];
 		*outl++ = pt[1];
 		*outl++ = pt[2];
 
-		t = clipped24(lrint<int>((*pin++)*256.0f));
+		t = clipped_lrint<int, 24>((*pin++) * 256.0f);
 		*outr++ = pt[0];
 		*outr++ = pt[1];
 		*outr++ = pt[2];
