@@ -18,6 +18,8 @@
 
 namespace psycle { namespace core {
 
+using namespace universalis::stdlib;
+
 class PSYCLE__CORE__DECL XMSampler : public Machine {
 public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony
@@ -1144,11 +1146,11 @@ private:
 
 	///\name thread synchronisation
 	///\{
-	public:
-		typedef universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
-		universalis::stdlib::mutex & Mutex() const { return m_Mutex; }
-	private:
-		universalis::stdlib::mutex mutable m_Mutex;
+		public:
+			typedef class scoped_lock<mutex> scoped_lock;
+			operator mutex & () const { return mutex_; }
+		private:
+			mutex mutable mutex_;
 	///\}
 };
 
