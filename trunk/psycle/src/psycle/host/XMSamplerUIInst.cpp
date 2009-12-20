@@ -1350,116 +1350,93 @@ void XMSamplerUIInst::CEnvelopeEditor::OnContextMenu(CWnd* pWnd, CPoint point)
 }
 
 			
-void XMSamplerUIInst::CEnvelopeEditor::OnPopAddPoint()
-{
-		
-		int _new_point = (int)((float)m_EditPointX / m_Zoom);
+void XMSamplerUIInst::CEnvelopeEditor::OnPopAddPoint() {	
+	int _new_point = (int)((float)m_EditPointX / m_Zoom);
 	float _new_value = (1.0f - (float)m_EditPointY / (float)m_WindowHeight);
 
-		
-		if(_new_value > 1.0f)
-		{
-			_new_value = 1.0f;
-		}
+	if(_new_value > 1.0f) _new_value = 1.0f;
+	if(_new_value < 0.0f) _new_value = 0.0f;
+	if(_new_point < 0) _new_point = 0;
 
-		if(_new_value < 0.0f)
-		{
-			_new_value = 0.0f;
-		}
-
-		if( _new_point < 0)
-		{
-			_new_point = 0;
-		}
-
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+	XMSampler::scoped_lock lock(*m_pXMSampler);
 	//\todo : Verify that we aren't trying to add an existing point!!!
 
 	if ( m_pEnvelope->NumOfPoints() == 0 && _new_point != 0 ) m_EditPoint = m_pEnvelope->Insert(0,1.0f);
 	m_EditPoint = m_pEnvelope->Insert(_new_point,_new_value);
 	Invalidate();
 }
-void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainStart()
-{
-	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
-		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+
+void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainStart() {
+	if ( m_EditPoint != m_pEnvelope->NumOfPoints()) {
+		XMSampler::scoped_lock lock(*m_pXMSampler);
 		m_pEnvelope->SustainBegin(m_EditPoint);
 		if (m_pEnvelope->SustainEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainEnd(m_EditPoint);
 		else if (m_pEnvelope->SustainEnd() < m_EditPoint )m_pEnvelope->SustainEnd(m_EditPoint);
-			Invalidate();
-		}
+		Invalidate();
+	}
 }
-void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainEnd()
-{
-	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
-		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+
+void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainEnd() {
+	if ( m_EditPoint != m_pEnvelope->NumOfPoints()) {
+		XMSampler::scoped_lock lock(*m_pXMSampler);
 		if (m_pEnvelope->SustainBegin()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainBegin(m_EditPoint);
 		else if (m_pEnvelope->SustainBegin() > m_EditPoint )m_pEnvelope->SustainBegin(m_EditPoint);
 		m_pEnvelope->SustainEnd(m_EditPoint);
-			Invalidate();
-		}
+		Invalidate();
+	}
 }
-void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopStart()
-{
-	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
-	{
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+
+void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopStart() {
+	if ( m_EditPoint != m_pEnvelope->NumOfPoints()) {
+		XMSampler::scoped_lock lock(*m_pXMSampler);
 		m_pEnvelope->LoopStart(m_EditPoint);
 		if (m_pEnvelope->LoopEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopEnd(m_EditPoint);
 		else if (m_pEnvelope->LoopEnd() < m_EditPoint )m_pEnvelope->LoopEnd(m_EditPoint);
 		Invalidate();
 	}
 }
-void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopEnd()
-{
-	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
-		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+
+void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopEnd() {
+	if ( m_EditPoint != m_pEnvelope->NumOfPoints()) {
+		XMSampler::scoped_lock lock(*m_pXMSampler);
 		if (m_pEnvelope->LoopStart()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopStart(m_EditPoint);
 		else if (m_pEnvelope->LoopStart() > m_EditPoint )m_pEnvelope->LoopStart(m_EditPoint);
 		m_pEnvelope->LoopEnd(m_EditPoint);
-			Invalidate();
-		}
-}
-void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
-{
-	const int _points =  m_pEnvelope->NumOfPoints();
-	if(_points == 0)
-	{
-		return;
+		Invalidate();
 	}
+}
+
+void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint() {
+	const int _points =  m_pEnvelope->NumOfPoints();
+	if(_points == 0) return;
 
 	CRect _rect;
 	GetClientRect(&_rect);
 
-
-	if(m_EditPoint != _points)
-		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+	if(m_EditPoint != _points) {
+		XMSampler::scoped_lock lock(*m_pXMSampler);
 		m_pEnvelope->Delete(m_EditPoint);
 		m_EditPoint = _points;
-			Invalidate();
-		}
+		Invalidate();
+	}
 }
-void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveSustain()
-{ 
-	XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+
+void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveSustain() { 
+	XMSampler::scoped_lock lock(*m_pXMSampler);
 	m_pEnvelope->SustainBegin(XMInstrument::Envelope::INVALID);
 	m_pEnvelope->SustainEnd(XMInstrument::Envelope::INVALID);
 	Invalidate();
 }
-void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveLoop()
-{ 
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
-		m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
-		m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
-		Invalidate();
+
+void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveLoop() { 
+	XMSampler::scoped_lock lock(*m_pXMSampler);
+	m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
+	m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
+	Invalidate();
 }
-void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveEnvelope()
-{
-	XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+
+void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveEnvelope() {
+	XMSampler::scoped_lock lock(*m_pXMSampler);
 	m_pEnvelope->Clear();
 	Invalidate();
 }

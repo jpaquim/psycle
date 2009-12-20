@@ -10,9 +10,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			SetCapture();			
   			if(viewMode == view_modes::machine) // User is in machine view mode
 			{
-				if (_pSong->_machineLock)
-					return;
-
+				#if 0
+					///\todo what was that ? Were we cancelling the mouse click in case of thread race?
+					if (_pSong->_machineLock) return;
+				#endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
 				ev.x = point.x;
@@ -55,8 +56,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			SetCapture();
 			if( viewMode == view_modes::machine) {
-				if (_pSong->_machineLock)
-					return;
+				#if 0
+					///\todo what was that ? Were we cancelling the mouse click in case of thread race?
+					if (_pSong->_machineLock) return;
+				#endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
 				ev.x = point.x;
