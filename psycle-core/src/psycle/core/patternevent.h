@@ -17,28 +17,28 @@ namespace psycle { namespace core {
 
 class PSYCLE__CORE__DECL PatternEvent {
 	public:
-		typedef std::pair<std::uint8_t,std::uint8_t> PcmType;
+		typedef std::pair<uint8_t, uint8_t> PcmType;
 		typedef std::vector<PcmType> PcmListType;
 
 		PatternEvent();
 
-		void setNote(std::uint8_t value) { note_ = value; }
-		std::uint8_t note() const { return note_; }
+		void setNote(uint8_t value) { note_ = value; }
+		uint8_t note() const { return note_; }
 
-		void setInstrument(std::uint8_t instrument) { inst_ = instrument; }
-		std::uint8_t instrument() const { return inst_; }
+		void setInstrument(uint8_t instrument) { inst_ = instrument; }
+		uint8_t instrument() const { return inst_; }
 
-		void setMachine(std::uint8_t machine) { mach_ = machine; }
-		std::uint8_t machine() const { return mach_; }
+		void setMachine(uint8_t machine) { mach_ = machine; }
+		uint8_t machine() const { return mach_; }
 
-		void setCommand(std::uint8_t command) { cmd_ = command; }
-		std::uint8_t command() const { return cmd_; }
+		void setCommand(uint8_t command) { cmd_ = command; }
+		uint8_t command() const { return cmd_; }
 
-		void setParameter(std::uint8_t parameter) { param_ = parameter; }
-		std::uint8_t parameter() const { return param_; }
+		void setParameter(uint8_t parameter) { param_ = parameter; }
+		uint8_t parameter() const { return param_; }
 
-		void setVolume(std::uint8_t volume) { volume_ = volume; }
-		std::uint8_t volume() const { return volume_; }
+		void setVolume(uint8_t volume) { volume_ = volume; }
+		uint8_t volume() const { return volume_; }
 
 		bool empty() const { return note_ == 255 && inst_ == 255 && mach_ == 255 && cmd_ == 0 && param_ == 0; }
 
@@ -64,12 +64,12 @@ class PSYCLE__CORE__DECL PatternEvent {
 
 
 	private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.
-		std::uint8_t note_;
-		std::uint8_t inst_;
-		std::uint8_t mach_;
-		std::uint8_t cmd_;
-		std::uint8_t param_;
-		std::uint8_t volume_;
+		uint8_t note_;
+		uint8_t inst_;
+		uint8_t mach_;
+		uint8_t cmd_;
+		uint8_t param_;
+		uint8_t volume_;
 		PcmListType paraCmdList_;
 		int track_;
 		int seq_track_;

@@ -570,7 +570,7 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 			lvol = std::min(1.0f, (1.0f - rvol) * 2);
 		} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
 			//lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
-			lvol = log10f(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
+			lvol = std::log10(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
 		}
 
 		// PanningMode::Linear is already on rvol, so we omit the case.
@@ -578,7 +578,7 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 			rvol = std::min(1.0f, rvol*2.0f);
 		} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
 			//rvol = powf(rvol, 0.5f);// This is the commonly used one
-			rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
+			rvol = std::log10((rvol*9.0f)+1.0f); // This is a faster approximation.
 		}
 
 		left_output *=  volume;
@@ -616,7 +616,7 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 3: Add the processed data to the sampler's buffer.
 		if(!m_WaveDataController.IsStereo()){
-				// Monoaural output‚ copy left to right output.
+				// Monoaural outputï¿½ copy left to right output.
 			right_output = left_output;
 		}
 
@@ -657,7 +657,7 @@ void XMSampler::Voice::NewLine()
 	m_FilterEnvelope.RecalcDeviation();
 }
 
-void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol,bool reset)
+void XMSampler::Voice::NoteOn(const uint8_t note,const int16_t playvol,bool reset)
 {
 	int wavelayer = rInstrument().NoteToSample(note).second;
 	XMInstrument::WaveData& wave = pSampler()->pCallbacks()->song().SampleData(wavelayer);
@@ -686,7 +686,7 @@ void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol
 	IsPlaying(true);
 }
 
-void XMSampler::Voice::ResetVolAndPan(std::int16_t playvol,bool reset)
+void XMSampler::Voice::ResetVolAndPan(int16_t playvol,bool reset)
 {
 	float fpan=0.5f;
 	if ( reset)
@@ -1369,7 +1369,7 @@ void XMSampler::Channel::SetEffect(Voice* voice,int volcmd,int cmd,int parameter
 			// SlideTable      DB      1, 4, 8, 16, 32, 64, 96, 128, 255
 			if ( (volcmd&0x0F) == 0 ) slidval=0;
 			else if ( (volcmd&0x0F) == 1)  slidval=1;
-			else if ( (volcmd&0x0F) < 9) slidval=powf(2.0f,volcmd&0x0F);
+			else if ( (volcmd&0x0F) < 9) slidval=std::pow(2.0f,volcmd&0x0F);
 			else slidval=255;
 			PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),slidval,Note());
 			break;
@@ -1999,7 +1999,7 @@ bool XMSampler::Channel::Load(RiffFile& riffFile)
 	riffFile.Read(m_DefaultPanFactor);
 	riffFile.Read(m_DefaultCutoff);
 	riffFile.Read(m_DefaultRessonance);
-	riffFile.Read((std::uint32_t&)m_DefaultFilterType);
+	riffFile.Read((uint32_t&)m_DefaultFilterType);
 
 	return true;
 }
@@ -2012,7 +2012,7 @@ void XMSampler::Channel::Save(RiffFile& riffFile)
 	riffFile.Write(m_DefaultPanFactor);
 	riffFile.Write(m_DefaultCutoff);
 	riffFile.Write(m_DefaultRessonance);
-	riffFile.Write((std::uint32_t&)m_DefaultFilterType);
+	riffFile.Write((uint32_t&)m_DefaultFilterType);
 }
 
 
@@ -2637,7 +2637,7 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 {
 	int temp;
 	bool wrongState=false;
-	std::uint32_t filevers= 0;
+	uint32_t filevers= 0;
 	unsigned long filepos;
 	int size=0;
 	riffFile->Read(size);

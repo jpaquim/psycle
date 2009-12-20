@@ -332,8 +332,8 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			--pSamplesL; --pSamplesR;
 			float vol = 0.0f;
 			do { /// not all waves are symmetrical
-				const float volL = fabsf(*++pSamplesL);
-				const float volR = fabsf(*++pSamplesR);
+				const float volL = std::fabs(*++pSamplesL);
+				const float volR = std::fabs(*++pSamplesR);
 				if (volL > vol) vol = volL;
 				if (volR > vol) vol = volR;
 			} while (--numSamples);
@@ -355,7 +355,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 	/// interpolator work function.
 	///\todo typdef should be inside the Resampler class itself.
-	typedef float (*PRESAMPLERFN)(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length);
+	typedef float (*PRESAMPLERFN)(int16_t const * pData, uint64_t offset, uint32_t res, uint64_t length);
 
 	/// sample interpolator.
 	class Resampler
@@ -372,7 +372,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			/// kind of interpolation.
 			ResamplerQuality _quality;
 			/// interpolation work function which does nothing.
-			static float None(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+			static float None(int16_t const * pData, uint64_t offset, uint32_t res, uint64_t length)
 			{
 				return *pData;
 			}
@@ -410,7 +410,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 		protected:
 			/// interpolation work function which does linear interpolation.
-			static float Linear(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+			static float Linear(int16_t const * pData, uint64_t offset, uint32_t res, uint64_t length)
 			{
 				float y0,y1;
 				y0 = *pData;
@@ -418,7 +418,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				return (y0+(y1-y0)*_lTable[res>>21]);
 			}
 			/// interpolation work function which does spline interpolation.
-			static float Spline(const short *pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+			static float Spline(const short *pData, uint64_t offset, uint32_t res, uint64_t length)
 			{
 				float yo, y0,y1, y2;
 				res = res >> 21;
@@ -457,7 +457,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
 
 			/// interpolation work function which does band-limited interpolation.
-			static float Bandlimit(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+			static float Bandlimit(int16_t const * pData, uint64_t offset, uint32_t res, uint64_t length)
 			{
 				res = res>>23; //!!!assumes SINC_RESOLUTION == 512!!!
 				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
@@ -483,7 +483,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 			/****************************************************************************/
 			#if 0
-				static float FIRResampling(std::int16_t const * pData, std::uint64_t offset, std::uint32_t res, std::uint64_t length)
+				static float FIRResampling(int16_t const * pData, uint64_t offset, uint32_t res, uint64_t length)
 
 				static float FIRResampling(
 					int interp_factor, int decim_factor, int inp_size, const double *p_H,
