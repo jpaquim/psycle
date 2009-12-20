@@ -18,15 +18,13 @@
 
 namespace psycle { namespace core {
 
-using namespace universalis::stdlib;
-
 class PSYCLE__CORE__DECL XMSampler : public Machine {
 public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const float SURROUND_THRESHOLD;
 
-	typedef scoped_lock<mutex> scoped_lock;
+	typedef universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
 
 /*
 * = remembers its last value when called with param 00.
@@ -1096,7 +1094,7 @@ XMSampler::Channel::PerformFX().
 	void SetZxxMacro(const int index,const int mode, const int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; }
 	ZxxMacro GetMap(const int index) const { return zxxMap[index]; }
 
-	mutex & Mutex() const { return m_Mutex; }
+	universalis::stdlib::mutex & Mutex() const { return m_Mutex; }
 
 	int SampleCounter() const {return _sampleCounter;}// Sample pos since last linechange.
 	void SampleCounter(const int value){_sampleCounter = value;}// ""

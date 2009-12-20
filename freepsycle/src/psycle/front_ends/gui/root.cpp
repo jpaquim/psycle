@@ -38,7 +38,7 @@ root::root(underlying::graph & g)
 }
 
 root::~root() {
- 	graph_.free_heap();
+	graph_.free_heap();
 }
 
 void root::on_button_clicked() {
