@@ -11,7 +11,7 @@ namespace psycle {
 		void SeqPasteCommand::Execute() {
 			SeqHelperCommand::PrepareUndoStorage();
 			// Execute Command
-			seq_view()->OnSeqdelete();
+			seq_view()->OnSeqpaste();
 			SeqHelperCommand::PrepareRedoStorage();
 		}
 

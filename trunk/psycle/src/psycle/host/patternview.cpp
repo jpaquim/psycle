@@ -27,6 +27,8 @@
 #include "PatTransposeCommand.hpp"
 #include "PatPasteCommand.hpp"
 #include "PatDeleteCommand.hpp"
+#include "ChangeGenCommand.hpp"
+#include "ChangeInsCommand.hpp"
 
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/hexstring_to_integer.hpp>
@@ -7775,11 +7777,11 @@ using namespace helpers::math;
 				break;
 
 			case cdefBlockSetMachine:
-				BlockGenChange(song()->seqBus);
+				project()->cmd_manager()->ExecuteCommand(new ChangeGenCommand(this, song()->seqBus));
 				break;
 
 			case cdefBlockSetInstr:
-				BlockInsChange(song()->auxcolSelected);
+				project()->cmd_manager()->ExecuteCommand(new ChangeInsCommand(this, song()->auxcolSelected));
 				break;
 
 			case cdefOctaveUp:
