@@ -540,7 +540,7 @@ bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
 				try {
 					proxy().PutData(pData); // Internal load
 				} catch(std::exception const &) {
-					delete pData;
+					delete[] pData;
 					return false;
 				}
 				delete[] pData;
