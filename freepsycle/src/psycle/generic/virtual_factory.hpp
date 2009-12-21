@@ -3,14 +3,14 @@
 
 ///\interface virtual constructor and destructor support à la delphi but also with support for creating on the stack
 
-#ifndef UNIVERSALIS__COMPILER__VIRTUAL_FACTORY__INCLUDED
-#define UNIVERSALIS__COMPILER__VIRTUAL_FACTORY__INCLUDED
+#ifndef PSYCLE__GENERIC__VIRTUAL_FACTORY__INCLUDED
+#define PSYCLE__GENERIC__VIRTUAL_FACTORY__INCLUDED
 #pragma once
 
-#include <universalis/compiler/template_constructors.hpp>
+#include "template_constructors.hpp"
 #include <boost/preprocessor/repetition/enum_trailing_params.hpp>
 
-namespace universalis { namespace compiler {
+namespace psycle { namespace generic {
 
 class basic_virtual_factory {
 	public:
@@ -35,7 +35,7 @@ class basic_virtual_factory {
 							create_on_stack(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
 							: instance(BOOST_PP_ENUM_PARAMS(count, xtra)) { instance.after_construction(); }
 							
-							UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
+							PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
 						#undef constructor
 						operator Type & () { return instance; }
 						operator Type const & () const { return instance; }
@@ -50,7 +50,7 @@ class basic_virtual_factory {
 						return instance; \
 					}
 					
-					UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
+					PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
 				#undef constructor
 		};
 		
@@ -60,7 +60,7 @@ class basic_virtual_factory {
 				return virtual_factory_access::template create_on_heap<Type BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 			}
 			
-			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
+			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
 		#undef constructor
 
 		void free_heap() {
@@ -79,7 +79,7 @@ template<typename Derived = void, typename Base = void /*basic_virtual_factory*/
 class virtual_factory : public Base {
 	protected:
 		typedef virtual_factory virtual_factory_type;
-		UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(virtual_factory, Base, UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY)
+		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(virtual_factory, Base, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 	public:
 		typedef basic_virtual_factory::virtual_factory_access::create_on_stack<Derived> create_on_stack;
 
@@ -89,7 +89,7 @@ class virtual_factory : public Base {
 				return basic_virtual_factory::template create_on_heap<Derived BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 			}
 			
-			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
+			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
 		#undef constructor
 };
 
@@ -106,7 +106,7 @@ class virtual_factory<Derived> : public basic_virtual_factory {
 				return basic_virtual_factory::template create_on_heap<Derived BOOST_PP_ENUM_TRAILING_PARAMS(count, Xtra) >(BOOST_PP_ENUM_PARAMS(count, xtra)); \
 			}
 			
-			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
+			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__LOOP(constructor)
 		#undef constructor
 };
 

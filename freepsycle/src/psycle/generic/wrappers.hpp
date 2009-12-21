@@ -2,9 +2,12 @@
 // copyright 2002-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::generic::wrappers
+
 #pragma once
+
 #include "base.hpp"
 #include <algorithm>
+
 namespace psycle { namespace generic { namespace wrappers {
 
 using engine::exception;
@@ -28,7 +31,7 @@ template<typename Typenames>
 class graph
 :
 	public basic::graph<Typenames>,
-	public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::graph>
+	public cast::underlying_wrapper<typename Typenames::underlying::graph>
 {
 	protected:
 		typedef graph graph_type;
@@ -146,7 +149,7 @@ template<typename Typenames>
 class node
 :
 	public basic::node<Typenames>,
-	public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::node>
+	public cast::underlying_wrapper<typename Typenames::underlying::node>
 {
 	protected:
 		typedef node node_type;
@@ -276,7 +279,7 @@ template<typename Typenames>
 class port
 :
 	public basic::port<Typenames>,
-	public universalis::compiler::cast::underlying_wrapper<typename Typenames::underlying::port>
+	public cast::underlying_wrapper<typename Typenames::underlying::port>
 {
 	protected:
 		typedef port port_type;
@@ -297,9 +300,9 @@ namespace ports {
 	template<typename Typenames>
 	class output
 	:
-		public universalis::compiler::cast::underlying_wrapper<
+		public cast::underlying_wrapper<
 			typename Typenames::underlying::ports::output,
-			universalis::compiler::virtual_factory<
+			virtual_factory<
 				typename Typenames::ports::output,
 				basic::ports::output<Typenames>
 				// note that the base class of basic::ports::output<Typenames>
@@ -308,7 +311,7 @@ namespace ports {
 	{
 		protected:
 			typedef output output_type;
-			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
+			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 				output, output::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 			)
 	};
@@ -320,9 +323,9 @@ namespace ports {
 	template<typename Typenames>
 	class input
 	:
-		public universalis::compiler::cast::underlying_wrapper<
+		public cast::underlying_wrapper<
 			typename Typenames::underlying::ports::input,
-			universalis::compiler::virtual_factory<
+			virtual_factory<
 				typename Typenames::ports::input,
 				basic::ports::input<Typenames>
 				// note that the base class of basic::ports::input<Typenames>
@@ -331,7 +334,7 @@ namespace ports {
 	{
 		protected:
 			typedef input input_type;
-			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
+			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 				input, input::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 			)
 
@@ -366,9 +369,9 @@ namespace ports {
 		template<typename Typenames>
 		class single
 		:
-			public universalis::compiler::cast::underlying_wrapper<
+			public cast::underlying_wrapper<
 				typename Typenames::underlying::ports::inputs::single,
-				universalis::compiler::virtual_factory<
+				virtual_factory<
 					typename Typenames::ports::inputs::single,
 					basic::ports::inputs::single<Typenames>
 					// note that the base class of basic::ports::inputs::single<Typenames>
@@ -377,7 +380,7 @@ namespace ports {
 		{
 			protected:
 				typedef single single_type;
-				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
+				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 					single, single::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 				)
 		};
@@ -389,9 +392,9 @@ namespace ports {
 		template<typename Typenames>
 		class multiple
 		:
-			public universalis::compiler::cast::underlying_wrapper<
+			public cast::underlying_wrapper<
 				typename Typenames::underlying::ports::inputs::multiple,
-				universalis::compiler::virtual_factory<
+				virtual_factory<
 					typename Typenames::ports::inputs::multiple,
 					basic::ports::inputs::multiple<Typenames>
 					// note that the base class of basic::ports::inputs::multiple<Typenames>
@@ -400,7 +403,7 @@ namespace ports {
 		{
 			protected:
 				typedef multiple multiple_type;
-				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
+				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 					multiple, multiple::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 				)
 		};

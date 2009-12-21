@@ -2,6 +2,7 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::exception
+
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <universalis/exception.hpp>
