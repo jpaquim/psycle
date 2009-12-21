@@ -14,12 +14,13 @@
 
 #include <diversalis/compiler.hpp>
 #include <universalis/stdlib/cstdint.hpp>
+#include <boost/static_assert.hpp>
+#include <limits>
 #include <cstdio>
 #include <cstddef>
 #include <fstream>
 #include <cassert>
 #include <vector>
-#include <typeinfo>
 
 namespace psycle { namespace core {
 
@@ -32,7 +33,7 @@ class RiffChunkHeader {
 
 		/// size of the chunk in bytes.
 		/// little endian for RIFF files ; big endian for RIFX files.
-		std::uint32_t _size;
+		uint32_t _size;
 };
 
 /// riff file format.
@@ -79,7 +80,7 @@ class PSYCLE__CORE__DECL RiffFile {
 			template<typename X>
 			bool Write(X & x) { return WriteChunk(&x, sizeof x); }
 		#else
-			// If std::int32_t is 'int' and std::int64_t is 'long long int',
+			// If int32_t is 'int' and int64_t is 'long long int',
 			// this leaves a hole for the 'long int' type.
 			// The following templates solve this issue.
 			// If there is an overloaded specialized normal function for a given type,
@@ -88,136 +89,139 @@ class PSYCLE__CORE__DECL RiffFile {
 		
 			template<typename X>
 			bool Read(X & x) {
-				return
-					sizeof x == 8 ? Read(reinterpret_cast<std::uint64_t&>(x)) :
-					sizeof x == 4 ? Read(reinterpret_cast<std::uint32_t&>(x)) :
-					throw std::bad_cast();
+				BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+				BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+				return sizeof x == 8 ?
+					Read(reinterpret_cast<uint64_t&>(x)) :
+					Read(reinterpret_cast<uint32_t&>(x));
 			}
 
 			template<typename X>
 			bool ReadBE(X & x) {
-				return
-					sizeof x == 8 ? ReadBE(reinterpret_cast<std::uint64_t&>(x)) :
-					sizeof x == 4 ? ReadBE(reinterpret_cast<std::uint32_t&>(x)) :
-					throw std::bad_cast();
+				BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+				BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+				return sizeof x == 8 ?
+					ReadBE(reinterpret_cast<uint64_t&>(x)) :
+					ReadBE(reinterpret_cast<uint32_t&>(x));
 			}
 
 			template<typename X>
 			bool Write(X x) {
-				return
-					sizeof x == 8 ? Write(reinterpret_cast<std::uint64_t&>(x)) :
-					sizeof x == 4 ? Write(reinterpret_cast<std::uint32_t&>(x)) :
-					throw std::bad_cast();
+				BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+				BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+				return sizeof x == 8 ?
+					Write(reinterpret_cast<uint64_t&>(x)) :
+					Write(reinterpret_cast<uint32_t&>(x));
 			}
 		#endif
 
 		///\name 1 bit
 		///\{
 			bool Read(bool & x) {
-				std::uint8_t c;
+				uint8_t c;
 				if (!Read(c)) return false;
 				x = c;
 				return true;
 			}
 
-			bool Write(bool x) { std::uint8_t c = x; return Write(c); }
+			bool Write(bool x) { uint8_t c = x; return Write(c); }
 		///\}
 
 		///\name 8 bits
 		///\{
-			bool Read(std::uint8_t & x) { return ReadChunk(&x,1); }
-			bool Read(std::int8_t & x) { return ReadChunk(&x,1); }
+			bool Read(uint8_t & x) { return ReadChunk(&x,1); }
+			bool Read(int8_t & x) { return ReadChunk(&x,1); }
 			bool Read(char & x) { return ReadChunk(&x,1); } // somehow char doesn't match int8_t nor uint8_t
 
-			bool Write(std::uint8_t x) { return WriteChunk(&x,1); }
-			bool Write(std::int8_t x) { return WriteChunk(&x,1);  }
+			bool Write(uint8_t x) { return WriteChunk(&x,1); }
+			bool Write(int8_t x) { return WriteChunk(&x,1);  }
 			bool Write(char x) { return WriteChunk(&x,1);  } // somehow char doesn't match int8_t nor uint8_t
 		///\}
 
 		///\name 16 bits
 		///\{
-			bool Read(std::uint16_t & x) {
-				std::uint8_t data[2];
+			bool Read(uint16_t & x) {
+				uint8_t data[2];
 				if(!ReadChunk(data,2)) return false;
 				x = (data[1])<<8 | data[0];
 				return true;
 			}
 
-			bool Read(std::int16_t & x) { return Read(reinterpret_cast<std::uint16_t&>(x)); }
+			bool Read(int16_t & x) { return Read(reinterpret_cast<uint16_t&>(x)); }
 
-			bool ReadBE(std::uint16_t & x) {
-				std::uint8_t data[2];
+			bool ReadBE(uint16_t & x) {
+				uint8_t data[2];
 				if(!ReadChunk(data,2)) return false;
 				x = (data[0])<<8 | data[1];
 				return true;
 			}
 
-			bool ReadBE(std::int16_t & x) { return ReadBE(reinterpret_cast<std::uint16_t&>(x)); }
+			bool ReadBE(int16_t & x) { return ReadBE(reinterpret_cast<uint16_t&>(x)); }
 
-			bool Write(std::uint16_t x) {
-				std::uint8_t data[2] = { x & 0xFF, (x>>8) & 0xFF };
+			bool Write(uint16_t x) {
+				uint8_t data[2] = { x & 0xFF, (x>>8) & 0xFF };
 				return WriteChunk(data,2);
 			}
-			bool Write(std::int16_t x) { return Write(reinterpret_cast<std::uint16_t&>(x)); }
+			bool Write(int16_t x) { return Write(reinterpret_cast<uint16_t&>(x)); }
 		///\}
 
 		///\name 32 bits
 		///\{
-			bool Read(std::uint32_t & x) {
-				std::uint8_t data[4];
+			bool Read(uint32_t & x) {
+				uint8_t data[4];
 				if(!ReadChunk(data,4)) return false;
 				x = (data[3]<<24) | (data[2]<<16) | (data[1]<<8) | data[0];
 				return true;
 			}
 
-			bool ReadBE(std::uint32_t & x) {
-				std::uint8_t data[4];
+			bool ReadBE(uint32_t & x) {
+				uint8_t data[4];
 				if(!ReadChunk(data,4)) return false;
 				x = (data[0]<<24) | (data[1]<<16) | (data[2]<<8) | data[3];
 				return true;
 			}
 
-			bool Read(std::int32_t & x) { return Read(reinterpret_cast<std::uint32_t&>(x)); }
+			bool Read(int32_t & x) { return Read(reinterpret_cast<uint32_t&>(x)); }
 
-			bool Write(std::uint32_t x) {
-				std::uint8_t data[4] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF };
+			bool Write(uint32_t x) {
+				uint8_t data[4] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF };
 				return WriteChunk(data, 4);
 			}
 
-			bool Write(std::int32_t x) { return Write(reinterpret_cast<std::uint32_t&>(x)); }
+			bool Write(int32_t x) { return Write(reinterpret_cast<uint32_t&>(x)); }
 		///\}
 
 		///\name 64 bits
 		///\{
-			bool Read(std::uint64_t & x) {
-				std::uint8_t data[8];
+			bool Read(uint64_t & x) {
+				uint8_t data[8];
 				if(!ReadChunk(data,8)) return false;
-				x = (std::uint64_t(data[7])<<56) | (std::uint64_t(data[6])<<48) | (std::uint64_t(data[5])<<40) | (std::uint64_t(data[4])<<32) | (std::uint64_t(data[3])<<24) | (data[2]<<16) | (data[1]<<8) | data[0];
+				x = (uint64_t(data[7])<<56) | (uint64_t(data[6])<<48) | (uint64_t(data[5])<<40) | (uint64_t(data[4])<<32) | (uint64_t(data[3])<<24) | (data[2]<<16) | (data[1]<<8) | data[0];
 				return true;
 			}
 
-			bool ReadBE(std::uint64_t & x) {
-				std::uint8_t data[8];
+			bool ReadBE(uint64_t & x) {
+				uint8_t data[8];
 				if(!ReadChunk(data,8)) return false;
-				x = (std::uint64_t(data[0])<<56) | (std::uint64_t(data[1])<<48) | (std::uint64_t(data[2])<<40) | (std::uint64_t(data[3])<<32) | (std::uint64_t(data[4])<<24) | (data[5]<<16) | (data[6]<<8) | data[7];
+				x = (uint64_t(data[0])<<56) | (uint64_t(data[1])<<48) | (uint64_t(data[2])<<40) | (uint64_t(data[3])<<32) | (uint64_t(data[4])<<24) | (data[5]<<16) | (data[6]<<8) | data[7];
 				return true;
 			}
 
-			bool Read(std::int64_t & x) { return Read(reinterpret_cast<std::uint64_t&>(x)); }
+			bool Read(int64_t & x) { return Read(reinterpret_cast<uint64_t&>(x)); }
 
-			bool Write(std::uint64_t x) {
-				std::uint8_t data[8] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF, (x>>32) & 0xFF, (x>>40) & 0xFF, (x>>48) & 0xFF, (x>>56) & 0xFF };
+			bool Write(uint64_t x) {
+				uint8_t data[8] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF, (x>>32) & 0xFF, (x>>40) & 0xFF, (x>>48) & 0xFF, (x>>56) & 0xFF };
 				return WriteChunk(data, 8);
 			}
 
-			bool Write(std::int64_t x) { return Write(reinterpret_cast<std::uint64_t&>(x)); }
+			bool Write(int64_t x) { return Write(reinterpret_cast<uint64_t&>(x)); }
 
 		///\name floating point
 		///\{
 			bool Read(float & x) {
 				union {
 					float f;
-					std::uint8_t data[4];
+					uint8_t data[4];
 				};
 				f = 1.0f;
 				if (data[0] == 63 && data[1] == 128) {
@@ -239,7 +243,7 @@ class PSYCLE__CORE__DECL RiffFile {
 			bool Write(float x) {
 				union {
 					float f;
-					std::uint8_t data[4];
+					uint8_t data[4];
 				};
 				f = 1.0f;
 				if (data[0] == 63 && data[1]==128) {
@@ -287,7 +291,7 @@ class PSYCLE__CORE__DECL RiffFile {
 		///\name riff four cc
 		///\{
 			static bool matchFourCC(char const a[4], char const b[4]) {
-				return *(std::uint32_t const*)a == *(std::uint32_t const*)b;
+				return *(uint32_t const*)a == *(uint32_t const*)b;
 			}
 		///\}
 
