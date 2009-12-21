@@ -47,6 +47,12 @@ using namespace psycle::core;
 #include "SeqCloneCommand.hpp"
 #include "SeqInsCommand.hpp"
 #include "SeqSortCommand.hpp"
+#include "SeqIncLenCommand.hpp"
+#include "SeqDecLenCommand.hpp"
+#include "SeqIncShortCommand.hpp"
+#include "SeqDecShortCommand.hpp"
+#include "SeqIncLongCommand.hpp"
+#include "SeqDecLongCommand.hpp"
 
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/hexstring_to_integer.hpp>
@@ -1639,14 +1645,26 @@ namespace psycle {
 		}
 
 		//////////////////// Sequencer Dialog 
-		void CMainFrame::OnInclen() { m_wndSeq.OnInclen(); }
-		void CMainFrame::OnDeclen() { m_wndSeq.OnDeclen(); }
+		void CMainFrame::OnInclen() {
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqIncLenCommand(&m_wndSeq));
+		}
+		void CMainFrame::OnDeclen() { 
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqDecLenCommand(&m_wndSeq));
+		}
 		void CMainFrame::OnSelchangeSeqlist() { m_wndSeq.OnSelchangeSeqlist(); }
 		void CMainFrame::OnDblclkSeqlist() { m_wndSeq.OnDblclkSeqlist(); }
-		void CMainFrame::OnIncshort() {	m_wndSeq.OnIncshort(); }
-		void CMainFrame::OnDecshort() { m_wndSeq.OnDecshort(); }
-		void CMainFrame::OnInclong() { m_wndSeq.OnInclong(); }
-		void CMainFrame::OnDeclong() { m_wndSeq.OnDeclong(); }
+		void CMainFrame::OnIncshort() {	
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqIncShortCommand(&m_wndSeq));
+		}
+		void CMainFrame::OnDecshort() { 
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqDecShortCommand(&m_wndSeq));
+		}
+		void CMainFrame::OnInclong() {
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqIncLongCommand(&m_wndSeq));
+		}
+		void CMainFrame::OnDeclong() {
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqDecLongCommand(&m_wndSeq));
+		}
 		void CMainFrame::OnSeqnew() {
 			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqNewCommand(&m_wndSeq));
 		}
