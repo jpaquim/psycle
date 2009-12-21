@@ -594,6 +594,7 @@ namespace psycle {
 				UpdateSequencer();
 				selected_entry_ = GetEntry(0);
 				pat_view->SetPattern(selected_entry_->pattern());
+				project_->cmd_manager()->Clear(); // no undo available
 				main_frame_->m_wndView.Repaint(draw_modes::pattern);
 			}
 			main_frame_->m_wndView.SetFocus();			

@@ -18,6 +18,7 @@ namespace psycle {
 
 			void Undo();
 			void Redo();
+			void Clear();
 
 			std::deque<CommandUndoable*>::size_type UndoSize() const {
 				return undo_queue_.size();
