@@ -368,6 +368,7 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 			{
 				setTicksSpeed(value);
 			}
+			
 			void New();
 
 			//Fake. Just to compile. They need to go out
