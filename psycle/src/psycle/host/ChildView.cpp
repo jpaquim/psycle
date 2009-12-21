@@ -38,6 +38,8 @@ using namespace psycle::core;
 #include "PatTransposeCommand.hpp"
 #include "PatPasteCommand.hpp"
 #include "PatDeleteCommand.hpp"
+#include "ChangeGenCommand.hpp"
+#include "ChangeInsCommand.hpp"
 
 namespace psycle {
 	namespace host {
@@ -1114,11 +1116,13 @@ namespace psycle {
 		}
 
 		void CChildView::OnPopChangegenerator() {
-			pattern_view()->BlockGenChange(_pSong->seqBus);
+			projects_->active_project()->cmd_manager()->ExecuteCommand(
+				new ChangeGenCommand(pattern_view(), _pSong->seqBus));
 		}
 
 		void CChildView::OnPopChangeinstrument() { 
-			pattern_view()->BlockInsChange(_pSong->auxcolSelected);
+			projects_->active_project()->cmd_manager()->ExecuteCommand(
+				new ChangeInsCommand(pattern_view(), _pSong->auxcolSelected));
 		}
 
 		void CChildView::OnPopTranspose1() {

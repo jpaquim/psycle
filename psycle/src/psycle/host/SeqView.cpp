@@ -4,6 +4,7 @@
 #include "Project.hpp"
 #include "MainFrm.hpp"
 #include "PatternView.hpp"
+#include "SeqDeleteCommand.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
@@ -53,7 +54,7 @@ namespace psycle {
 				return;
 
 			OnSeqcopy();
-			OnSeqdelete();
+			project_->cmd_manager()->ExecuteCommand(new SeqDeleteCommand(this));
 		}
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
