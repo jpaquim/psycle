@@ -41,9 +41,12 @@ using namespace psycle::core;
 #include "WaveInMacDlg.hpp"
 #include "WireDlg.hpp"
 
+#include "SeqNewCommand.hpp"
 #include "SeqDeleteCommand.hpp"
 #include "SeqPasteCommand.hpp"
 #include "SeqCloneCommand.hpp"
+#include "SeqInsCommand.hpp"
+#include "SeqSortCommand.hpp"
 
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/hexstring_to_integer.hpp>
@@ -52,8 +55,8 @@ using namespace psycle::core;
 #include <sstream>
 #include <iomanip>
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		using namespace psycle::helpers;
 		using namespace psycle::helpers::math;
@@ -1644,8 +1647,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnDecshort() { m_wndSeq.OnDecshort(); }
 		void CMainFrame::OnInclong() { m_wndSeq.OnInclong(); }
 		void CMainFrame::OnDeclong() { m_wndSeq.OnDeclong(); }
-		void CMainFrame::OnSeqnew() { m_wndSeq.OnSeqnew(); }
-		void CMainFrame::OnSeqins() { m_wndSeq.OnSeqins(); }
+		void CMainFrame::OnSeqnew() {
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqNewCommand(&m_wndSeq));
+		}
+		void CMainFrame::OnSeqins() { 
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqInsCommand(&m_wndSeq));
+		}
 		void CMainFrame::OnSeqduplicate() {
 			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqCloneCommand(&m_wndSeq));
 		}
@@ -1657,8 +1664,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CMainFrame::OnSeqpaste() {
 			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqPasteCommand(&m_wndSeq));
 		}
-		void CMainFrame::OnSeqclr() { m_wndSeq.OnSeqclr(); }
-		void CMainFrame::OnSeqsort() { m_wndSeq.OnSeqsort(); }
+		void CMainFrame::OnSeqclr() { 
+			m_wndSeq.OnSeqclr();
+		}
+		void CMainFrame::OnSeqsort() {
+			m_wndSeq.project()->cmd_manager()->ExecuteCommand(new SeqSortCommand(&m_wndSeq));
+		}
 		void CMainFrame::OnSeqShowpattername() { m_wndSeq.OnSeqShowpattername(); }
 
 		void CMainFrame::OnMultichannelAudition() 
@@ -2027,11 +2038,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CMainFrame::RedrawGearRackList()
 		{
-			if (pGearRackDialog)
-			{
+			if (pGearRackDialog) {
 				pGearRackDialog->RedrawList();
 			}
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}	// namespace host
+}	// namespace psycle

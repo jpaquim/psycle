@@ -10,6 +10,10 @@ namespace psycle {
 		}
 
 		CommandManager::~CommandManager() {
+			Clear();
+		}
+
+		void CommandManager::Clear() {
 			while (!undo_queue_.empty()) {
 				CommandUndoable* cmd = undo_queue_.back();
 				undo_queue_.pop_back();
