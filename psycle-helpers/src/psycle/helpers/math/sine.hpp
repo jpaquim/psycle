@@ -5,8 +5,8 @@
 #define PSYCLE__HELPERS__MATH__SINE__INCLUDED
 #pragma once
 
+#include "constants.hpp"
 #include <cmath>
-#include "pi.hpp"
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/os/clocks.hpp>
 	#include <universalis/compiler/typenameof.hpp>

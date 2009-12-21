@@ -4,11 +4,7 @@
 ///\file
 ///\brief delay modulated by a sine
 #include "plugin.hpp"
-#include <psycle/helpers/math/round.hpp>
-#include <psycle/helpers/math/sine_sequence.hpp>
-#include <psycle/helpers/math/pi.hpp>
-#include <psycle/helpers/math/remainder.hpp>
-#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
+#include <psycle/helpers/math.hpp>
 #include <cassert>
 #include <vector>
 namespace psycle { namespace plugin {

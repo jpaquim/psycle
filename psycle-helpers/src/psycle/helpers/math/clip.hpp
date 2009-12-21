@@ -16,9 +16,7 @@ template<typename X> UNIVERSALIS__COMPILER__CONST
 X inline clipped(X const & minimum, X const & value, X const & maximum) {
 	// it looks a bit dumb to write a function to do that code,
 	// but maybe someone will find an optimised way to do this.
-	if(minimum > value) return minimum;
-	else if(value > maximum) return maximum;
-	else return value;
+	return value < minimum ? minimum : value > maximum ? maximum : value;
 }
 
 /// combines float to signed integer conversion with clipping.
@@ -26,6 +24,7 @@ template<typename SignedIntegralResult, const unsigned int bits, typename Real> 
 SignedIntegralResult inline clipped_lrint(Real x) {
 	// check that Result is signed
 	BOOST_STATIC_ASSERT((std::numeric_limits<SignedIntegralResult>::is_signed));
+	BOOST_STATIC_ASSERT((std::numeric_limits<SignedIntegralResult>::is_integer));
 
 	int const max((1u << (bits - 1)) - 1); // The compiler is able to compute this statically.
 	int const min(-max - 1);

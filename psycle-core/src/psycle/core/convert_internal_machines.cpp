@@ -12,7 +12,7 @@
 #include "player.h"
 #include "song.h"
 #include <psycle/helpers/scale.hpp>
-#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math.hpp>
 
 namespace psycle { namespace core { namespace convert_internal_machines {
 

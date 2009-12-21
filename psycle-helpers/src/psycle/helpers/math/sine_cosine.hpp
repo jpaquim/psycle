@@ -8,7 +8,7 @@
 #include <diversalis/stdlib.hpp>
 #include <cmath>
 #if defined BOOST_AUTO_TEST_CASE
-	#include "pi.hpp"
+	#include "constants.hpp"
 	#include <universalis/compiler/typenameof.hpp>
 	#include <sstream>
 #endif
