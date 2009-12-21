@@ -1,7 +1,6 @@
 #pragma once
 #include "filter.hpp"
-#include <psycle/helpers/math/rint.hpp>
-#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math.hpp>
 ///\file SynthTrack.h
 ///\brief interface for the CSynthTrack class.
 #define FILTER_CALC_TIME 64
