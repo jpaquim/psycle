@@ -1,5 +1,6 @@
 ///\interface psycle::helpers
 #pragma once
+#include <cassert>
 
 namespace psycle { namespace helpers {
 
@@ -8,12 +9,14 @@ namespace psycle { namespace helpers {
 namespace value_mapper {
 
 namespace detail {
-	float static map_table_255_1[257];
-	float static map_table_255_100[257];
+	float extern map_table_255_1[257];
+	float extern map_table_255_100[257];
 }
 
 /// maps a byte (0 to 255) to a float (0 to 1).
 float inline map_255_1(int byte) {
+	assert("initialised" && detail::map_table_255_1[1] == 0.00390625);
+	
 	///\todo the conditional branches probably make it slower than direct calculation
 	if(0 <= byte && byte <= 256)
 		return detail::map_table_255_1[byte];
@@ -24,6 +27,8 @@ float inline map_255_1(int byte) {
 
 /// maps a byte (0 to 255) to a float (0 to 100).
 float inline map_255_100(int byte) {
+	assert("initialised" && detail::map_table_255_100[1] == 0.390625);
+	
 	///\todo the conditional branches probably make it slower than direct calculation
 	if(0 <= byte && byte <= 256)
 		return detail::map_table_255_100[byte];
