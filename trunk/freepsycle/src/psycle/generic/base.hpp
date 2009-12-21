@@ -2,11 +2,13 @@
 // copyright 2002-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::generic::basic
+
 #pragma once
+
 #include "typenames.hpp"
+#include "cast.hpp"
+#include "virtual_factory.hpp"
 #include <psycle/engine/exception.hpp>
-#include <universalis/compiler/cast.hpp>
-#include <universalis/compiler/virtual_factory.hpp>
 #include <universalis/os/loggers.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
@@ -16,23 +18,8 @@
 #include <set>
 #include <vector>
 #include <algorithm>
-namespace psycle { namespace generic { namespace basic {
 
-/// the minimum arity for the template constructors used in the virtual factory patterns
-#define PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM \
-	UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM // use the same miminum arity as in universalis
-	
-// ensure a minimum arity
-#if \
-	PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY < \
-	PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
-	#undef \
-		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
-	/// the arity for the template constructors used in the virtual factory patterns
-	#define \
-		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY \
-		PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY__MINIMUM
-#endif
+namespace psycle { namespace generic { namespace basic {
 
 using engine::exception;
 namespace loggers = universalis::os::loggers;
@@ -43,9 +30,9 @@ template<typename Typenames>
 class graph
 :
 	// makes the class convertible to its derived type Typenames::graph
-	public universalis::compiler::cast::derived<typename Typenames::graph>,
+	public cast::derived<typename Typenames::graph>,
 	// note: while the virtual factory pattern is useful for nodes and ports, it could possibly be removed for graph.
-	public universalis::compiler::virtual_factory<typename Typenames::graph>,
+	public virtual_factory<typename Typenames::graph>,
 	public std::set<typename Typenames::node*>
 {
 	protected: friend class graph::virtual_factory_access;
@@ -106,8 +93,8 @@ template<typename Typenames>
 class node
 :
 	// makes the class convertible to its derived type Typenames::node
-	public universalis::compiler::cast::derived<typename Typenames::node>,
-	public universalis::compiler::virtual_factory<typename Typenames::node>,
+	public cast::derived<typename Typenames::node>,
+	public virtual_factory<typename Typenames::node>,
 	public child_of<typename Typenames::graph>
 {
 	private:
@@ -221,8 +208,8 @@ template<typename Typenames>
 class port
 :
 	// makes the class convertible to its derived type Typenames::port
-	public universalis::compiler::cast::derived<typename Typenames::port>,
-	public universalis::compiler::virtual_factory<typename Typenames::port>,
+	public cast::derived<typename Typenames::port>,
+	public virtual_factory<typename Typenames::port>,
 	public child_of<typename Typenames::node>
 {
 	protected: friend class port::virtual_factory_access;
@@ -241,15 +228,15 @@ namespace ports {
 	class output
 	:
 		// makes the class convertible to its derived type Typenames::ports::output
-		public universalis::compiler::cast::derived<typename Typenames::ports::output>,
-		public universalis::compiler::virtual_factory<typename Typenames::ports::output, typename Typenames::port>
+		public cast::derived<typename Typenames::ports::output>,
+		public virtual_factory<typename Typenames::ports::output, typename Typenames::port>
 	{
 		protected: friend class output::virtual_factory_access;
 			typedef output output_type;
 
 			/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
 			/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
-			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(output, output::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
+			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(output, output::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
 			void after_construction() /*override*/ {
 				this->parent().output_ports_.push_back(static_cast<typename Typenames::ports::output*>(this));
@@ -333,15 +320,15 @@ namespace ports {
 	class input
 	:
 		// makes the class convertible to its derived type Typenames::ports::input
-		public universalis::compiler::cast::derived<typename Typenames::ports::input>,
-		public universalis::compiler::virtual_factory<typename Typenames::ports::input, typename Typenames::port>
+		public cast::derived<typename Typenames::ports::input>,
+		public virtual_factory<typename Typenames::ports::input, typename Typenames::port>
 	{
 		protected: friend class input::virtual_factory_access;
 			typedef input input_type;
 
 			/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
 			/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
-			UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(input, input::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
+			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(input, input::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
 
 			void before_destruction() /*override*/ {
 				disconnect_all();
@@ -396,8 +383,8 @@ namespace ports {
 		class single
 		:
 			// makes the class convertible to its derived type Typenames::ports::inputs::single
-			public universalis::compiler::cast::derived<typename Typenames::ports::inputs::single>,
-			public universalis::compiler::virtual_factory<typename Typenames::ports::inputs::single, typename Typenames::ports::input>
+			public cast::derived<typename Typenames::ports::inputs::single>,
+			public virtual_factory<typename Typenames::ports::inputs::single, typename Typenames::ports::input>
 		{
 			protected: friend class single::virtual_factory_access;
 				typedef single single_type;
@@ -415,7 +402,7 @@ namespace ports {
 				#undef constructor
 
 				#if 0
-				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS__WITH_BODY(
+				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__WITH_BODY(
 					single, single::virtual_factory_type,
 					(BOOST_PP_COMMA output_port_() {}),
 					PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
@@ -480,8 +467,8 @@ namespace ports {
 		class multiple
 		:
 			// makes the class convertible to its derived type Typenames::ports::inputs::multiple
-			public universalis::compiler::cast::derived<typename Typenames::ports::inputs::multiple>,
-			public universalis::compiler::virtual_factory<typename Typenames::ports::inputs::multiple, typename Typenames::ports::input>
+			public cast::derived<typename Typenames::ports::inputs::multiple>,
+			public virtual_factory<typename Typenames::ports::inputs::multiple, typename Typenames::ports::input>
 		{
 			protected: friend class multiple::virtual_factory_access;
 
@@ -489,7 +476,7 @@ namespace ports {
 
 				/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
 				/// Note that Typenames::ports::input, which is the base class, is in this case derived from wrappers::ports::input<Typenames>.
-				UNIVERSALIS__COMPILER__TEMPLATE_CONSTRUCTORS(
+				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 					multiple, multiple::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 				)
 

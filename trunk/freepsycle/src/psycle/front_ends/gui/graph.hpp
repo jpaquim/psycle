@@ -8,7 +8,7 @@
 #include "contraption.hpp"
 #include <psycle/engine.hpp>
 #include <psycle/host.hpp>
-#include <universalis/compiler/cast.hpp>
+#include <psycle/generic/cast.hpp>
 #include <boost/signal.hpp>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/scrolledwindow.h>
