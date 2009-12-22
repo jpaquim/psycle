@@ -1,7 +1,5 @@
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math.hpp>
-#include <psycle/helpers/math/pi.hpp>
-#include <psycle/helpers/math/rint.hpp>
 #include "SynthTrack.hpp"
 #include <cstdlib>
 
