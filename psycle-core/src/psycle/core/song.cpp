@@ -51,10 +51,6 @@ void CoreSong::clear() {
 	DeleteInstruments();
 	// Clear patterns
 	patternSequence().removeAll();
-	
-	_saved=false;
-	fileName = "Untitled.psy";
-	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX));
 }
 
 bool CoreSong::load(std::string const & filename) {
@@ -620,6 +616,9 @@ void Song::clear() {
 
 void Song::New() {
 	clear();
+	_saved=false;
+	fileName = "Untitled.psy";
+	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX));
 	SequenceLine* line = patternSequence().createNewLine();
 	Pattern* pattern= new Pattern();
 	pattern->timeSignatures().clear();
