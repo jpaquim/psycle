@@ -34,15 +34,16 @@ class GStreamerOut : public AudioDriver {
 	public:
 		/*override*/ bool Enable(bool e) { if(e) start(); else stop(); return true; }
 		/*override*/ bool Enabled(bool e) { return started(); }
+		bool Configured() { opened(); }
+		/*override*/ void Configure() { try { do_open(); } catch(...) { do_close(); throw; } }
 	private:
 		bool opened() const;
-		void open() { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
 		void do_open();
 		void close() { stop(); if(opened()) do_close(); }
 		void do_close();
 		
 		bool started() const;
-		void start() { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
+		void start() { if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
 		void do_start();
 		void stop() { if(started()) do_stop(); }
 		void do_stop();

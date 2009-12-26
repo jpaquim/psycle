@@ -179,7 +179,7 @@ void GStreamerOut::do_open() {
 	}
 	samples_per_second_ = playbackSettings().samplesPerSec();
 	periods_ = playbackSettings().blockCount();
-	period_frames_ = playbackSettings().blockBytes() / sizeof(output_sample_type);
+	period_frames_ = playbackSettings().blockSamples();
 
 	{ // initialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
@@ -224,7 +224,8 @@ void GStreamerOut::do_open() {
 		}}}}}}
 	#undef psycle_log
 
-	// create caps, audio format pad capabilities 
+	// create caps, audio format pad capabilities
+	///\todo: fixed to 16bit sample size right now.
 	int const bits_per_channel_sample = sizeof(output_sample_type) * 8;
 	int const significant_bits_per_channel_sample = bits_per_channel_sample;
 	int const bytes_per_sample = channels_ * sizeof(output_sample_type);
@@ -233,6 +234,7 @@ void GStreamerOut::do_open() {
 		"rate"      , G_TYPE_INT    , ::gint(samples_per_second_),
 		"channels"  , G_TYPE_INT    , ::gint(channels_),
 		"width"     , G_TYPE_INT    , ::gint(bits_per_channel_sample),
+		///\todo: what is depth? couldn't find information about this.
 		"depth"     , G_TYPE_INT    , ::gint(significant_bits_per_channel_sample),
 		"signed"    , G_TYPE_BOOLEAN, ::gboolean(std::numeric_limits<output_sample_type>::min() < 0),
 		"endianness", G_TYPE_INT    , ::gint(G_BYTE_ORDER),
@@ -284,6 +286,7 @@ void GStreamerOut::do_open() {
 		"data"           , ::gint(/*FAKE_SRC_DATA_SUBBUFFER*/ 2), // data allocation method
 		"parentsize"     , ::gint(period_size * periods_),
 		"sizemax"        , ::gint(period_size),
+		//"num-buffers"    , ::gint(periods_),
 		"sizetype"       , ::gint(/*FAKE_SRC_SIZETYPE_FIXED*/ 2), // fixed to sizemax
 		"filltype"       , ::gint(/*FAKE_SRC_FILLTYPE_NOTHING*/ 1),
 		(void*)0
@@ -325,9 +328,13 @@ void GStreamerOut::do_start() {
 bool GStreamerOut::started() const {
 	if(!opened()) return false;
 	if(state(*pipeline_) == ::GST_STATE_PLAYING) return true;
+#if 0
 	{ scoped_lock lock(mutex_);
 		return wait_for_state_to_become_playing_;
 	}
+#else
+	return handoff_called_;
+#endif
 }
 
 /// this is called from within gstreamer's processing thread.
@@ -339,9 +346,8 @@ void GStreamerOut::handoff_static(::GstElement * source, ::GstBuffer * buffer, :
 void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
 	{ scoped_lock lock(mutex_);
+		if(stop_requested_) return;
 		if(!handoff_called_) {
-			while(!stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
-			if(stop_requested_) return;
 			// Handoff is called before state is changed to playing.
 			if(wait_for_state_to_become_playing_) {
 				if(loggers::trace()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
@@ -359,7 +365,7 @@ void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	while(remaining) {
 		if(remaining < chunk) chunk = remaining;
 		float const * const in = callback_(callback_context_, chunk);
-		Quantize16WithDither(in, out + done * channels_, chunk);
+		Quantize16WithDither(in, out + (done * 2), chunk); // * 2 since Quantize assumes a stereo signal.
 		done += chunk;
 		remaining = frames - done;
 	}
@@ -372,6 +378,7 @@ void GStreamerOut::do_stop() {
 		}
 		condition_.notify_one();
 		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
+		handoff_called_ =false;
 	}
 }
 
