@@ -40,8 +40,7 @@
 	#include <psycle/audiodrivers/microsoftmmewaveout.h>
 #endif
 #if defined PSYCLE__STEINBERG_ASIO_AVAILABLE
-	///\todo Steinberg ASIO not implemented in core yet.
-	//#include <psycle/audiodrivers/steinberg_asio_out.hpp>
+	#include <psycle/audiodrivers/asiointerface.h>
 #endif
 
 #include <cstdlib>

@@ -31,9 +31,9 @@ AudioDriverSettings::AudioDriverSettings()
 	samplesPerSec_(44100),
 	bitDepth_(16),
 	channelMode_(3),
-	bufferSize_(4096),
-	blockSize_(1024),
-	blockCount_(4)
+	bufferSize_(131072),
+	blockSize_(4096),
+	blockCount_(8)
 {}
 
 
@@ -52,6 +52,7 @@ double AudioDriver::frand() {
 
 using helpers::math::clipped_lrint;
 
+///\todo: all these methods assume a stereo signal. It's allright for now, but...
 void AudioDriver::Quantize16WithDither(float const * pin, int16_t * piout, int c) {
 	do {
 		*piout++ = clipped_lrint<int16_t>(pin[0] + frand());
