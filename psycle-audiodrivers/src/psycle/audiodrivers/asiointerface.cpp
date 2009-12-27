@@ -137,35 +137,52 @@ void ASIOInterface::Init() {
 	}
 }
 
-ASIOInterface::~ASIOInterface() throw() {
-	if(_initialized) Reset();
-	//ASIOExit();
-	asioDrivers.removeCurrentDriver();
+void ASIOInterface::do_open() {
+	if(!_configured) ReadConfig();
+	if(ui_) {
+		ui_->SetValues(GetidxFromOutPort(_selectedout), playbackSettings_.samplesPerSec(), _ASIObufferSize);
+		if(ui_->DoModal(this) != IDOK) return;
+		int oldbs = _ASIObufferSize;
+		PortOut oldout = _selectedout;
+		int oldsps = playbackSettings_.samplesPerSec();
+		bool was_started = started();
+		if(was_started) do_stop();
+		int tmp_driver_id, tmp_sample_rate, tmp_buffer_size;
+		ui_->GetValues(tmp_driver_id, tmp_sample_rate, tmp_buffer_size);
+		_ASIObufferSize = tmp_buffer_size;
+		_selectedout = GetOutPortFromidx(tmp_driver_id);
+		playbackSettings_.setSamplesPerSec(tmp_sample_rate);
+		_configured = true;
+		bool write_config = true;
+		if(was_started) {
+			try {
+				do_start();
+			}
+			catch(...) {
+				// rollback
+				_ASIObufferSize = oldbs;
+				_selectedout = oldout;
+				playbackSettings_.setSamplesPerSec(oldsps);
+				write_config = false;
+				do_start();
+			}
+		}
+		if(write_config) WriteConfig();
+	}
 }
 
-void ASIOInterface::Initialize(AUDIODRIVERWORKFN pcallback, void* context) {
-}
-
-void ASIOInterface::Reset() {
-	Stop();
-}
-
-bool ASIOInterface::Start() {
+void ASIOInterface::do_start() {
 	//CSingleLock lock(&_lock, TRUE);
 	scoped_lock lock(mutex_);
 
 	_firstrun = true;
-	if(_running) return true;
-	if(_pCallback == 0) {
-		_running = false;
-		return false;
-	}
+	if(_running) return;
+
 	// BEGIN -  Code
 	asioDrivers.removeCurrentDriver();
 	char bla[128]; strcpy(bla,_selectedout.driver->_name.c_str());
 	if(!asioDrivers.loadDriver(bla)) {
-		_running = false;
-		return false;
+		throw std::runtime_error("..........")
 	}
 	// initialize the driver
 	ASIODriverInfo driverInfo;
@@ -173,16 +190,14 @@ bool ASIOInterface::Start() {
 	if (ASIOInit(&driverInfo) != ASE_OK) {
 		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
-		_running = false;
-		return false;
+		throw std::runtime_error("..........")
 	}
 	if(ASIOSetSampleRate(playbackSettings_.samplesPerSec()) != ASE_OK) {
 		playbackSettings_.setSamplesPerSec(44100);
 		if(ASIOSetSampleRate(playbackSettings_.samplesPerSec()) != ASE_OK) {
 			//ASIOExit();
 			asioDrivers.removeCurrentDriver();
-			_running = false;
-			return false;
+			throw std::runtime_error("..........")
 		}
 	}
 	if(ASIOOutputReady() == ASE_OK) _supportsOutputReady = true;
@@ -194,7 +209,7 @@ bool ASIOInterface::Start() {
 	asioCallbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfo;
 	//////////////////////////////////////////////////////////////////////////
 	// Create the buffers to play and record.
-	int numbuffers = (1+_selectedins.size())*2;
+	int numbuffers = (1 + _selectedins.size()) * 2;
 	ASIOBufferInfo *info = new ASIOBufferInfo[numbuffers];
 	int counter=0;
 	for (unsigned int i(0); i < _selectedins.size() ; ++i) {
@@ -202,18 +217,17 @@ bool ASIOInterface::Start() {
 		info[counter].channelNum = _selectedins[i].port->_idx;
 		info[counter+1].channelNum = _selectedins[i].port->_idx + 1;
 		info[counter].buffers[0] = info[counter].buffers[1] = info[counter+1].buffers[0] = info[counter+1].buffers[1] = 0;
-		counter+=2;
+		counter += 2;
 	}
 	info[counter].isInput = info[counter+1].isInput = _selectedout.port->_info.isInput;
 	info[counter].channelNum = _selectedout.port->_idx;
-	info[counter+1].channelNum = _selectedout.port->_idx + 1;
+	info[counter + 1].channelNum = _selectedout.port->_idx + 1;
 	info[counter].buffers[0] = info[counter].buffers[1] = info[counter+1].buffers[0] = info[counter+1].buffers[1] = 0;
 	// create and activate buffers
 	if(ASIOCreateBuffers(info,numbuffers,_ASIObufferSize,&asioCallbacks) != ASE_OK) {
 		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
-		_running = false;
-		return false;
+		throw std::runtime_error("..........")
 	}
 	ASIObuffers =  new AsioStereoBuffer[_selectedins.size()+1];
 	counter=0;
@@ -233,8 +247,7 @@ bool ASIOInterface::Start() {
 		ASIODisposeBuffers();
 		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
-		_running = false;
-		return false;
+		throw std::runtime_error("..........")
 	}
 	// END -  CODE
 	_running = true;
@@ -243,11 +256,11 @@ bool ASIOInterface::Start() {
 	return true;
 }
 
-bool ASIOInterface::Stop() {
+void ASIOInterface::do_stop() {
 	//CSingleLock lock(&_lock, TRUE); todo
 	scoped_lock lock(mutex_);
 
-	if(!_running) return true;
+	if(!_running) return;
 	_running = false;
 	ASIOStop();
 	ASIODisposeBuffers();
@@ -258,7 +271,6 @@ bool ASIOInterface::Stop() {
 	delete[] ASIObuffers;
 	//ASIOExit();
 	asioDrivers.removeCurrentDriver();
-	return true;
 }
 
 void ASIOInterface::GetCapturePorts(std::vector<std::string>&ports) {
@@ -269,34 +281,29 @@ void ASIOInterface::GetCapturePorts(std::vector<std::string>&ports) {
 	}
 }
 
-bool ASIOInterface::AddCapturePort(int idx) {
+void ASIOInterface::AddCapturePort(int idx) {
 	DriverEnum *driver = _selectedout.driver;
-	if(driver->_portin.size()<= idx) return false;
+	if(driver->_portin.size() <= idx) return; // throw exception?
 	
 	int pidx = driver->_portin[idx]._idx;
 	for(unsigned int i = 0; i < _selectedins.size(); ++i) {
-		if(_selectedins[i].port->_idx == pidx) return false;
+		if(_selectedins[i].port->_idx == pidx) return; // throw exception?
 	}
 
 	bool isplaying = _running;
 	PortCapt port;
 	port.driver = driver;
 	port.port = &driver->_portin[idx];
-	if(isplaying) {
-		Stop();
-	}
+	if(isplaying) do_stop();
 	_portMapping.resize(_portMapping.size()+1);
 	_portMapping[idx]=_selectedins.size();
 	_selectedins.push_back(port);
-	if(isplaying) {
-		return Start();
-	}
-	return true;
+	if(isplaying) do_start();
 }
 
-bool ASIOInterface::RemoveCapturePort(int idx) {
+void ASIOInterface::RemoveCapturePort(int idx) {
 	DriverEnum *driver = _selectedout.driver;
-	if  (driver->_portin.size()<= idx) return false;
+	if  (driver->_portin.size()<= idx) return; // throw exception?
 
 	bool restartplayback = false;
 	std::vector<PortCapt> newports;
@@ -304,7 +311,7 @@ bool ASIOInterface::RemoveCapturePort(int idx) {
 	for(unsigned int i = 0; i < _selectedins.size(); ++i) {
 		if(_selectedins[i].port->_idx == pidx) {
 			if(_running) {
-				Stop();
+				do_stop();
 				restartplayback = true;
 			}
 		} else {
@@ -314,8 +321,7 @@ bool ASIOInterface::RemoveCapturePort(int idx) {
 	}
 	_portMapping.resize(newports.size());
 	_selectedins = newports;
-	if (restartplayback) Start();
-	return true;
+	if(restartplayback) do_start();
 }
 
 void ASIOInterface::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples) {
@@ -393,38 +399,6 @@ void ASIOInterface::WriteConfig() {
 		int driverID = GetidxFromOutPort(_selectedout);
 		ui_->WriteConfig(driverID, playbackSettings_.samplesPerSec(), _ASIObufferSize);
 	}
-}
-
-void ASIOInterface::Configure() {
-	if(!_configured) ReadConfig();
-	if(ui_) {
-		ui_->SetValues(GetidxFromOutPort(_selectedout), playbackSettings_.samplesPerSec(), _ASIObufferSize);
-		if(ui_->DoModal(this) != IDOK) return;
-		int oldbs = _ASIObufferSize;
-		PortOut oldout = _selectedout;
-		int oldsps = playbackSettings_.samplesPerSec();
-		if(_initialized) Stop();
-		int tmp_driver_id, tmp_sample_rate, tmp_buffer_size;
-		ui_->GetValues(tmp_driver_id, tmp_sample_rate, tmp_buffer_size);
-		_ASIObufferSize = tmp_buffer_size;
-		_selectedout = GetOutPortFromidx(tmp_driver_id);
-		playbackSettings_.setSamplesPerSec(tmp_sample_rate);
-		_configured = true;
-		if(_initialized) {
-			if (Start()) WriteConfig();
-			else {
-				_ASIObufferSize = oldbs;
-				_selectedout = oldout;
-				playbackSettings_.setSamplesPerSec(oldsps);
-				Start();
-			}
-		}
-		else WriteConfig();
-	}
-}
-
-bool ASIOInterface::Enable(bool e) {
-	return e ? Start() : Stop();
 }
 
 int ASIOInterface::GetWritePos() {
@@ -1054,6 +1028,12 @@ long ASIOInterface::asioMessages(long selector, long value, void* message, doubl
 			break;
 	}
 	return ret;
+}
+
+ASIOInterface::~ASIOInterface() throw() {
+	set_opened(false);
+	//ASIOExit();
+	asioDrivers.removeCurrentDriver();
 }
 
 }}

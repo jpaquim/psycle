@@ -59,38 +59,39 @@ class DSoundUiInterface {
 /// output device interface implemented by direct sound.
 class MsDirectSound : public AudioDriver {
 	class PortEnums {
-	public:
-		PortEnums():guid() {};
-		PortEnums(LPGUID _guid,std::string _pname):guid(_guid),portname(_pname){}
-		std::string portname;
-		LPGUID guid;
+		public:
+			PortEnums():guid() {};
+			PortEnums(LPGUID _guid,std::string _pname):guid(_guid),portname(_pname){}
+			std::string portname;
+			LPGUID guid;
 	};
+
 	class PortCapt {
-	public:
-		PortCapt():pleft(0),pright(0),_pGuid(0),_pDs(0),_pBuffer(0),_lowMark(0),_machinepos(0) {};
+		public:
+			PortCapt():pleft(0),pright(0),_pGuid(0),_pDs(0),_pBuffer(0),_lowMark(0),_machinepos(0) {};
 
-		LPGUID _pGuid;
-		LPDIRECTSOUNDCAPTURE8 _pDs;
-		LPDIRECTSOUNDCAPTUREBUFFER8  _pBuffer;
-		uint32_t _lowMark;
-		float *pleft;
-		float *pright;
-		uint32_t _machinepos;
+			LPGUID _pGuid;
+			LPDIRECTSOUNDCAPTURE8 _pDs;
+			LPDIRECTSOUNDCAPTUREBUFFER8  _pBuffer;
+			uint32_t _lowMark;
+			float *pleft;
+			float *pright;
+			uint32_t _machinepos;
 	};
-	public:
 
+	public:
 		MsDirectSound();
 		MsDirectSound(DSoundUiInterface* ui);
 		virtual ~MsDirectSound();
+		/*override*/ AudioDriverInfo info() const;
 
-		AudioDriverInfo info() const;
+	protected:
+		/*override*/ void do_open() {}
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close() {}
 
-		/*override*/ void Configure();
-		/*override*/ bool Configured() { return _configured; }
-
-		/*override*/ bool Enable( bool );
-		/*override*/ bool Enabled() { return threadRunning_; }
-
+	public:
 		virtual void GetCapturePorts(std::vector<std::string>&ports);
 		virtual bool AddCapturePort(uint32_t idx);
 		virtual bool RemoveCapturePort(uint32_t idx);

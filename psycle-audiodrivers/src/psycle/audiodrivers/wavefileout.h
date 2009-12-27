@@ -29,11 +29,13 @@ class WaveFileOut : public AudioDriver {
 	public:
 		WaveFileOut();
 		~WaveFileOut();
-
 		/*override*/ AudioDriverInfo info() const;
 
-		// starts stops file writing
-		/*override*/ bool Enable(bool e);
+	protected:
+		/*override*/ void do_open() {}
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close() {}
 
 	private:
 		///\todo use std::thread

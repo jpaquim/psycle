@@ -23,14 +23,14 @@ class AlsaOut : public AudioDriver {
 		AlsaOut();
 		~AlsaOut();
 		/*override*/ AudioDriverInfo info() const;
-		/*override*/ void Configure() {}
-		/*override*/ bool Enable(bool e);
+
+	protected:
+		/*override*/ void do_open() {}
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close() {}
 
 	private:
-		void setDefault();
-		bool Start();
-		void Stop();
-
 		/// stream rate
 		unsigned int rate;
 		/// sample format

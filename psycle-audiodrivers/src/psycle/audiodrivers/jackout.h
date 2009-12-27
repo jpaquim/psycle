@@ -28,8 +28,12 @@ class JackOut : public AudioDriver {
 		JackOut();
 		~JackOut();
 		/*override*/ AudioDriverInfo info() const;
-		/*override*/ void configure();
-		/*override*/ bool Enable(bool e);
+
+	protected:
+		/*override*/ void do_open() {}
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close() {}
 
 	private:
 		bool running_;
@@ -43,8 +47,6 @@ class JackOut : public AudioDriver {
 
 		std::string clientName_;
 		std::string serverName_;
-
-		bool registerToJackServer();
 
 		static int process (jack_nframes_t nframes, void *arg);
 		int fillBuffer( jack_nframes_t nframes );

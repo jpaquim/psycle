@@ -16,6 +16,9 @@
 *  Free Software Foundation, Inc.,                                            *
 *  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
 ******************************************************************************/
+
+#include <stdexcept>
+
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "microsoftdirectsoundout.h"
 #include <psycle/helpers/math/rint.hpp>
@@ -74,53 +77,37 @@ MsDirectSound::MsDirectSound(DSoundUiInterface* ui)
 	_capPorts.resize(0);
 }
 
-MsDirectSound::~MsDirectSound() {
-	Stop();
-}
-
-bool MsDirectSound::Start() {
+void MsDirectSound::do_start() {
 	// return immediatly if the thread is already running
-	if(threadRunning_) return true;
+	if(threadRunning_) return;
 	if( FAILED( ::CoInitialize(NULL) ) ) {
 		Error(L"(DirectSound) Failed to initialize COM");
-		return false;
+		throw std::runtime_error("(DirectSound) Failed to initialize COM");
 	}
-	if(FAILED(::DirectSoundCreate8(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
-	{
+	if(FAILED(::DirectSoundCreate8(device_guid != GUID() ? &device_guid : 0, &_pDs, 0))) {
 		Error(L"Failed to create DirectSound object");
-		return false;
+		throw std::runtime_error("Failed to create DirectSound object");
 	}
 
 	HWND hwnd = ::GetWindow(NULL, 0);
-	if (!hwnd)
-	{
-		hwnd = ::GetForegroundWindow();
-	}
-	if (!hwnd)
-	{
-		hwnd = ::GetDesktopWindow();
-	}
+	if(!hwnd) hwnd = ::GetForegroundWindow();
+	if(!hwnd) hwnd = ::GetDesktopWindow();
 
-	if(_exclusive)
-	{
+	if(_exclusive) {
 		if(FAILED(_pDs->SetCooperativeLevel(hwnd, DSSCL_WRITEPRIMARY)))
 		{
 			// Don't report this, since we may have simply have lost focus
 			// Error(L"Failed to set DirectSound cooperative level");
 			_pDs->Release();
 			_pDs = 0;
-			return false;
+			//throw std::runtime_error("Failed to set DirectSound cooperative level");
 		}
 	}
-	else
-	{
-		if(FAILED(_pDs->SetCooperativeLevel(hwnd, DSSCL_PRIORITY)))
-		{
+	else if(FAILED(_pDs->SetCooperativeLevel(hwnd, DSSCL_PRIORITY))) {
 			Error(L"Failed to set DirectSound cooperative level");
 			_pDs->Release();
 			_pDs = 0;
-			return false;
-		}
+			throw std::runtime_error("Failed to set DirectSound cooperative level");
 	}
 
 	DSBCAPS caps;
@@ -147,42 +134,36 @@ bool MsDirectSound::Start() {
 	desc.lpwfxFormat = _exclusive ? 0 : &format;
 	desc.guid3DAlgorithm = GUID_NULL;
 
-	if(FAILED(_pDs->CreateSoundBuffer(&desc, reinterpret_cast<LPDIRECTSOUNDBUFFER*>(&_pBuffer), 0)))
-	{
+	if(FAILED(_pDs->CreateSoundBuffer(&desc, reinterpret_cast<LPDIRECTSOUNDBUFFER*>(&_pBuffer), 0))) {
 		Error(L"Failed to create DirectSound Buffer(s)");
 		_pDs->Release();
 		_pDs = 0;
-		return false;
+		throw std::runtime_error("Failed to create DirectSound Buffer(s)");
 	}
 
-	if(_exclusive)
-	{
+	if(_exclusive) {
 		//_pBuffer->Stop();
-		if(FAILED(_pBuffer->SetFormat(&format)))
-		{
+		if(FAILED(_pBuffer->SetFormat(&format))) {
 			Error(L"Failed to set DirectSound Buffer format");
 			_pBuffer->Release();
 			_pBuffer = 0;
 			_pDs->Release();
 			_pDs = 0;
-			return false;
+			throw std::runtime_error("Failed to set DirectSound Buffer format");
 		}
 		caps.dwSize = sizeof(caps);
-		if(FAILED(_pBuffer->GetCaps(&caps)))
-		{
+		if(FAILED(_pBuffer->GetCaps(&caps))) {
 			Error(L"Failed to get DirectSound Buffer capabilities");
 			_pBuffer->Release();
 			_pBuffer = 0;
 			_pDs->Release();
 			_pDs = 0;
-			return false;
+			throw std::runtime_error("Failed to get DirectSound Buffer capabilities");
 		}
 		dsBufferSize = caps.dwBufferBytes;
 		_runningBufSize = dsBufferSize*0.5f;
 		_buffersToDo = 1;
-	}
-	else
-	{
+	} else {
 		_runningBufSize = playbackSettings().blockBytes();
 		_buffersToDo = playbackSettings().blockCount();
 	}
@@ -204,8 +185,7 @@ bool MsDirectSound::Start() {
 	return true;
 }
 
-bool MsDirectSound::Stop()
-{
+void MsDirectSound::do_stop() {
 	if(!threadRunning_) return true;
 	// ask the thread to terminate
 	{
@@ -238,8 +218,6 @@ bool MsDirectSound::Stop()
 	_capPorts.resize(0);
 	// Release COM
 	CoUninitialize();
-
-	return true;
 }
 
 void MsDirectSound::GetCapturePorts(std::vector<std::string>&ports) {
@@ -699,7 +677,8 @@ void MsDirectSound::Configure() {
 		int bufferSize = playbackSettings_.blockBytes();
 		int numBuffers = playbackSettings_.blockCount();
 
-		if(_initialized) Stop();
+		bool was_started = started();
+		if(was_started) do_stop();
 
 		int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
 		ui_->GetValues(
@@ -713,11 +692,12 @@ void MsDirectSound::Configure() {
 		playbackSettings_.setBlockBytes(tmp_blockbytes);
 		playbackSettings_.setBlockCount(tmp_block_count);
 
-		if(_initialized)
-		{
-			if(Start()) WriteConfig();
-			else
-			{
+		bool write_config = true;
+		if(was_started) {
+			try {
+				do_start();
+			}
+			catch(...) {
 				// rollback
 				this->device_guid = device_guid;
 				_exclusive = exclusive;
@@ -725,10 +705,11 @@ void MsDirectSound::Configure() {
 				playbackSettings_.setSamplesPerSec(samplesPerSec);
 				playbackSettings_.setBlockBytes(bufferSize);
 				playbackSettings_.setBlockCount(numBuffers);
-				Start();
+				write_config = false;
+				do_start();
 			}
 		}
-		else WriteConfig();
+		if(write_config) WriteConfig();
 	}
 }
 
@@ -756,9 +737,8 @@ int MsDirectSound::GetWritePos()
 	return writePos;
 }
 
-bool MsDirectSound::Enable(bool e)
-{
-	return e ? Start() : Stop();
+MsDirectSound::~MsDirectSound() {
+	set_opened(false);
 }
 
 }}

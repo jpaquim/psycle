@@ -57,15 +57,15 @@
 
 namespace loggers = universalis::os::loggers;
 
-Configuration::Configuration() {
+Configuration::Configuration()
+:
+	enable_sound_()
+{
 	using namespace psycle::core;
 	
-	add_driver(*(base_driver_ = new AudioDriver));
-
-	set_driver_by_name("silent");
-	enable_sound_ = false;
-
 	add_driver(*(dummy_driver_ = new DummyDriver));
+	set_driver_by_name("dummy");
+
 	add_driver(*new WaveFileOut);
 
 	#if defined PSYCLE__ALSA_AVAILABLE
@@ -134,11 +134,11 @@ void Configuration::set_driver_by_name(std::string const & driver_name) {
 	} else {
 		if(loggers::exception()()) {
 			std::ostringstream s;
-			s << "psycle: player: config: audio driver not found: " << driver_name << ", setting fallback: " << base_driver_->info().name();
+			s << "psycle: player: config: audio driver not found: " << driver_name << ", setting fallback: " << dummy_driver_->info().name();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
-		// driver not found,  set silent default driver
-		output_driver_ = base_driver_;
+		// driver not found, set silent default driver
+		output_driver_ = dummy_driver_;
 	}
 }
 

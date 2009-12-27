@@ -132,25 +132,29 @@ class ASIOInterface : public AudioDriver {
 		ASIOInterface(AsioUiInterface* ui);
 		virtual ~ASIOInterface() throw();
 
-		AudioDriverInfo info() const;
-		virtual void Configure();
-		inline virtual bool Configured() { return _configured; };
-		virtual bool Enabled() { return _running; };
-		virtual int GetBufferSize();
-		virtual void GetCapturePorts(std::vector<std::string>&ports);
-		virtual bool AddCapturePort(int idx);
-		virtual bool RemoveCapturePort(int idx);
-		virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
-		virtual void Reset();
-		virtual bool Enable(bool e);
-		virtual int GetWritePos();
-		virtual int GetPlayPos();
+		/*override*/ AudioDriverInfo info() const;
+	protected:
+		/*override*/ void do_open() {}
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close() {}
+
+	public:
+		/*override*/ int GetInputLatency() { return _inlatency; }
+		/*override*/ int GetOutputLatency() { return _outlatency; }
+
+	public: ///\todo all that public!?
+		virtual/*?*/ int GetBufferSize();
+		virtual/*?*/ void GetCapturePorts(std::vector<std::string>&ports);
+		virtual/*?*/ bool AddCapturePort(int idx);
+		virtual/*?*/ bool RemoveCapturePort(int idx);
+		virtual/*?*/ void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
+		virtual/*?*/ int GetWritePos();
+		virtual/*?*/ int GetPlayPos();
 		DriverEnum GetDriverFromidx(int driverID);
 		PortOut GetOutPortFromidx(int driverID);
 		int GetidxFromOutPort(PortOut&port);
 		void ControlPanel(int driverID);
-		virtual int GetInputLatency() { return _inlatency; }
-		virtual int GetOutputLatency() { return _outlatency; }
 
 		static void bufferSwitch(long index, ASIOBool processNow);
 		static ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow);
@@ -168,8 +172,6 @@ class ASIOInterface : public AudioDriver {
 		void Error(const char msg[]);
 		void ReadConfig();
 		void WriteConfig();
-		bool Start();
-		bool Stop();
 
 		ASIOCallbacks asioCallbacks;
 

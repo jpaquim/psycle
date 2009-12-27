@@ -21,50 +21,29 @@
 #include <iostream>
 namespace psycle { namespace core {
 
-JackOut::JackOut() {
-	clientName_ = "xpsycle";
-	serverName_ = ""; // maybe not needed
-	running_ = 0;
-}
-
-JackOut::~JackOut() {
-}
-
 AudioDriverInfo JackOut::info( ) const {
 	return AudioDriverInfo("jack","Jack Audio Connection Kit Driver","Low Latency audio driver",true);
 }
 
-void JackOut::configure() {
+JackOut::JackOut() {
+	clientName_ = "psycle";
+	serverName_ = ""; // maybe not needed
+	running_ = 0;
 }
 
-bool JackOut::Enable(bool e) {
-	if(e && !running_) {
-		running_ = registerToJackServer();
-	} else if(running_) {
-		jack_client_close(client);
-		running_ = false;
-	}
-	return running_;
-}
-
-/***********************************************************/
-// Jack special functions
-
-bool JackOut::registerToJackServer() {
+void JackOut::do_start() {
 	//jack_options_t options = JackNullOption;
 	//jack_status_t status;
 	// try to become a client of the JACK server
 	const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
 
 	if ( (client = jack_client_new ( registerCPtr )) == 0) {
-			std::cerr << "jack server not running?\n" << std::endl;
-		return 0;
-		}
-
-	/*if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL )
-	{
 		std::cerr << "jack server not running?\n" << std::endl;
-		return 0;
+		return;
+	}
+
+	/*if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL ) {
+		std::cerr << "jack server not running?\n" << std::endl;
 	}*/
 
 	// tell the JACK server to call `process()' whenever
@@ -87,8 +66,8 @@ bool JackOut::registerToJackServer() {
 		// tell the JACK server that we are ready to roll
 
 		if (jack_activate (client)) {
-			std::cout << "cannot activate client" << std::endl;
-		return 0;
+			std::cerr << "cannot activate client" << std::endl;
+			return;
 		}
 
 	playbackSettings_.setSamplesPerSec(jack_get_sample_rate(client));
@@ -96,29 +75,27 @@ bool JackOut::registerToJackServer() {
 	///\todo inform the player that the sample rate is different
 
 	if ((ports = jack_get_ports (client, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
-		std::cout << "Cannot find any physical playback ports" << std::endl;
-		return 0;
+		std::cerr << "Cannot find any physical playback ports" << std::endl;
+		return;
 	}
 
 	std::cout << "jo1" << std::endl;
 
 	if (jack_connect (client, jack_port_name (output_port_1), ports[0])) {
-		std::cout << "cannot connect output ports" << std::endl;
+		std::cerr << "cannot connect output ports" << std::endl;
 	}
 
 	std::cout << "jo2" << std::endl;
 
 	if (jack_connect (client, jack_port_name (output_port_2), ports[1])) {
-		std::cout << "cannot connect output ports" << std::endl;
+		std::cerr << "cannot connect output ports" << std::endl;
 	}
 
 	std::cout << "jo3" << std::endl;
 
-	free (ports);
+	std::free (ports);
 
 	std::cout << "jack enabled" << std::endl;
-
-	return 1;
 }
 
 int JackOut::process (jack_nframes_t nframes, void *arg) {
@@ -138,6 +115,14 @@ int JackOut::fillBuffer( jack_nframes_t nframes ) {
 		++count;
 	}
 	return 0;
+}
+
+void JackOut::do_stop() {
+	jack_client_close(client);
+}
+
+JackOut::~JackOut() {
+	set_opened(false);
 }
 
 }}

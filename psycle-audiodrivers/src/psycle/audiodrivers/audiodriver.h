@@ -69,6 +69,8 @@ class AudioDriverInfo {
 class AudioDriverSettings {
 	public:
 		AudioDriverSettings();
+		bool operator!=(AudioDriverSettings const &);
+		bool operator==(AudioDriverSettings const & other) { return !((*this) != other); }
 
 	///\name getter/setter for device name  ( hw:0 and others )
 	///\{
@@ -146,11 +148,10 @@ class AudioDriverSettings {
 class AudioDriver {
 	public:
 		AudioDriver();
-
 		virtual ~AudioDriver() {}
 
 		/// gives the driver information
-		virtual AudioDriverInfo info() const;
+		virtual AudioDriverInfo info() const = 0;
 
 	///\name callback to the player work function that generates audio
 	///\{
@@ -163,53 +164,74 @@ class AudioDriver {
 			void * callback_context_;
 	///\}
 
-	public:
-		virtual bool Enabled() { return false; }
-		/// enable will start the driver and the calls to the work player function
-		virtual bool Enable(bool /*e*/) { return true; }
-
-		virtual void Configure() {}
-		virtual bool Configured() { return true; }
-
-		virtual int GetInputLatency() { return captureSettings_.totalBufferBytes(); }
-		virtual int GetOutputLatency() { return playbackSettings_.totalBufferBytes(); }
-
-	protected:
-		static double frand();
-		static void Quantize16WithDither(float const * pin, int16_t * piout, int c);
-		static void Quantize16(float const * pin, int16_t * piout, int c);
-		static void Quantize16AndDeinterlace(float const * pin, int16_t * pileft, int strideleft, int16_t * piright, int strideright, int c);
-		static void DeQuantize16AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
-		static void Quantize24WithDither(float const * pin, int32_t * piout, int c);
-		static void Quantize24(float const * pin, int32_t * piout, int c);
-		static void Quantize24AndDeinterlace(float const * pin, int32_t * pileft, int32_t * piright, int c);
-		static void DeQuantize24AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
-
 	///\name playback settings
 	///\{
 		public:
 			/// here you can set the settings of the driver, like samplerate depth etc
-			void setPlaybackSettings(AudioDriverSettings const & settings ) { playbackSettings_ = settings; }
+			void setPlaybackSettings(AudioDriverSettings const &);
 
 			/// here you get the special audio driver settings.
 			/// In case of some drivers like  e.g jack you must prepare, that a driver can set itself.
 			AudioDriverSettings const & playbackSettings() const { return playbackSettings_; }
+
+			virtual/*?*/ int GetOutputLatency() { return playbackSettings_.totalBufferBytes(); }
 		protected:
 			/// holds the sample rate, bit depth, etc
 			AudioDriverSettings playbackSettings_; 
 	///\}
+
 	///\name capture settings
 	///\{
 		public:
 			/// here you can set the settings of the driver, like samplerate depth etc
-			void setCaptureSettings(AudioDriverSettings const & settings ) { captureSettings_ = settings; }
+			void setCaptureSettings(AudioDriverSettings const &);
 
 			/// here you get the special audio driver settings.
 			/// In case of some drivers like  e.g jack you must prepare, that a driver can set itself.
 			AudioDriverSettings const & captureSettings() const { return captureSettings_; }
+
+			virtual/*?*/ int GetInputLatency() { return captureSettings_.totalBufferBytes(); }
 		protected:
 			/// holds the sample rate, bit depth, etc
 			AudioDriverSettings captureSettings_; 
+	///\}
+
+	///\name open/close the device (allocate/deallocate resources)
+	///\{
+		public:
+			void set_opened(bool);
+			bool opened() const { return opened_; }
+		protected:
+			virtual void do_open() = 0;
+			virtual void do_close() = 0;
+		private:
+			bool opened_;
+	///\}
+
+	///\name start/stop the device (enable/disable processing)
+	///\{
+		public:
+			void set_started(bool);
+			bool started() const { return started_; }
+		protected:
+			virtual void do_start() = 0;
+			virtual void do_stop() = 0;
+		private:
+			bool started_;
+	///\}
+
+	///\name utility functions
+	///\{
+		protected:
+			static double frand();
+			static void Quantize16WithDither(float const * pin, int16_t * piout, int c);
+			static void Quantize16(float const * pin, int16_t * piout, int c);
+			static void Quantize16AndDeinterlace(float const * pin, int16_t * pileft, int strideleft, int16_t * piright, int strideright, int c);
+			static void DeQuantize16AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
+			static void Quantize24WithDither(float const * pin, int32_t * piout, int c);
+			static void Quantize24(float const * pin, int32_t * piout, int c);
+			static void Quantize24AndDeinterlace(float const * pin, int32_t * pileft, int32_t * piright, int c);
+			static void DeQuantize24AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
 	///\}
 };
 
@@ -219,12 +241,14 @@ class DummyDriver : public AudioDriver {
 		DummyDriver();
 		~DummyDriver();
 		/*override*/ AudioDriverInfo info() const;
-		/*override*/ bool Enable(bool e) { if(e) start(); else stop(); return true; }
+
+	protected:
+		/*override*/ void do_open() {}
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close() {}
 
 	private:
-		void start();
-		void stop();
-
 		///\name thread
 		///\{
 			/// the function executed by the alsa thread

@@ -722,34 +722,31 @@ float * Player::Work(int numSamples) {
 }
 
 void Player::setDriver(AudioDriver & driver) {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << "psycle: core: player: setting audio driver to: " << driver.info().name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
-	if(driver_) driver_->Enable(false);
+	if(&driver == driver_) {
+		// same driver instance
+		driver.set_started(false);
+	} else {
+		// different driver instance
+		if(driver_) driver_->set_opened(false);
+		driver_ = &driver;
+	}
 
 	driver.set_callback(Work, this);
 	
-	if(!driver.Configured()) {
-		if(loggers::trace()()) loggers::trace()("psycle: core: player: asking audio driver to configure itself", UNIVERSALIS__COMPILER__LOCATION);
-		driver.Configure();
+	if(loggers::trace()) {
+		std::ostringstream s;
+		s << "psycle: core: player: starting audio driver: " << driver.info().name();
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	if(loggers::trace()()) loggers::trace()("psycle: core: player: audio driver configured", UNIVERSALIS__COMPILER__LOCATION);
-	
-	if(driver.Enable(true)) {
-		if(loggers::trace()()) {
-			std::ostringstream s;
-			s << "psycle: core: player: audio driver enabled: " << driver.info().name();
-			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		samples_per_second(driver.playbackSettings().samplesPerSec());
-		driver_ = &driver;
-	} else {
-		if(loggers::exception()()) loggers::exception()("psycle: core: player: audio driver failed to enable. setting back previous driver", UNIVERSALIS__COMPILER__LOCATION);
-		if(driver_) driver_->Enable(true);
-	}
+	driver.set_started(true);
+
+	samples_per_second(driver.playbackSettings().samplesPerSec());
 }
 
 /*****************************************************************************/
