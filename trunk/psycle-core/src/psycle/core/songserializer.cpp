@@ -31,7 +31,6 @@ namespace psycle { namespace core {
 					PsyFilterBase* filter = *it;
 					if ( filter->testFormat(fileName) ) {
 						return filter->load(fileName,song);
-						break;
 					}
 				}
 			}
@@ -50,7 +49,6 @@ namespace psycle { namespace core {
 						// append postfix
 						newFileName = fileName + "." + filter->filePostfix();
 					return filter->save(newFileName,song);
-					break;
 				}
 			}
 			std::cerr << "SongSerializer::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;

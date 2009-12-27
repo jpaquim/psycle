@@ -90,7 +90,19 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		public:
 			CoreSong const & song() const { return *song_; }
 			CoreSong & song() { return *song_; }
-			void song(CoreSong & song) { song_ = &song; sequencer_.set_song(&song); }
+			void song(CoreSong & song) { 
+				if (song_) {
+					scoped_lock lock(song_->Mutex());
+					scoped_lock lock2(song.Mutex());
+					song_ = &song;
+					sequencer_.set_song(&song);
+				}
+				else {
+					scoped_lock lock(song.Mutex());
+					song_ = &song;
+					sequencer_.set_song(&song);
+				}
+			}
 		private:
 			CoreSong * song_;
 	///\}
@@ -101,8 +113,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		public:
 			/// starts the recording output device.
 			void startRecording(bool dodither=false , 
-				psycle::helpers::dsp::Dither::Pdf::type ditherpdf=psycle::helpers::dsp::Dither::Pdf::triangular,
-				psycle::helpers::dsp::Dither::NoiseShape::type noiseshaping=psycle::helpers::dsp::Dither::NoiseShape::none);
+				dsp::Dither::Pdf::type ditherpdf=dsp::Dither::Pdf::triangular,
+				dsp::Dither::NoiseShape::type noiseshaping=dsp::Dither::NoiseShape::none);
 			/// stops the recording output device.
 			void stopRecording( );
 			/// wether the recording device has been started.
@@ -193,14 +205,6 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			bool autoStopMachines_;
 	///\}
 
-	///\name multithreading locking
-	///\{
-		public:
-			typedef std::scoped_lock<std::mutex> scoped_lock;
-			std::mutex & work_mutex() { return mutex_; }
-		private:
-			std::mutex mutable work_mutex_;
-	///\}
 
 	private:
 		/// Final Loop. Read new line for notes to send to the Machines
@@ -232,6 +236,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			threads_type threads_;
 			void thread_function(std::size_t thread_number);
 
+			typedef class std::scoped_lock<std::mutex> scoped_lock;
 			std::mutex mutable mutex_;
 			std::condition<scoped_lock> mutable condition_;
 
