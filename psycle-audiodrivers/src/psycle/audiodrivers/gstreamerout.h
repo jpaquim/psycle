@@ -7,8 +7,6 @@
 
 #include "audiodriver.h"
 #include <gst/gstelement.h>
-#include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle { namespace core {
