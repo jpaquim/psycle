@@ -133,9 +133,7 @@ class ASIOInterface : public AudioDriver {
 		virtual ~ASIOInterface() throw();
 
 		AudioDriverInfo info() const;
-		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context);
 		virtual void Configure();
-		inline virtual bool Initialized() { return _initialized; };
 		inline virtual bool Configured() { return _configured; };
 		virtual bool Enabled() { return _running; };
 		virtual int GetBufferSize();
@@ -173,12 +171,7 @@ class ASIOInterface : public AudioDriver {
 		bool Start();
 		bool Stop();
 
-		static AUDIODRIVERWORKFN _pCallback;
-		static void* _pCallbackContext;
-
 		ASIOCallbacks asioCallbacks;
-
-
 
 		//int drivercount;
 		//char szFullName[MAX_ASIO_OUTPUTS][160];
@@ -200,7 +193,6 @@ class ASIOInterface : public AudioDriver {
 		/// a condition variable to wait until notified that the value of running_ has changed
 		condition<scoped_lock> condition_;
 
-		bool _initialized;
 		bool _configured;
 		bool _running;
 		//int _driverID;

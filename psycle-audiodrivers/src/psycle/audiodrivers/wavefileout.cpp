@@ -26,12 +26,9 @@ namespace psycle { namespace core {
 volatile int WaveFileOut::kill_thread = 0;
 volatile int WaveFileOut::threadOpen = 0;
 
-WaveFileOut::WaveFileOut()
-: AudioDriver()
-{
+WaveFileOut::WaveFileOut() {
 	kill_thread = 0;
 	threadOpen = 0;
-	_initialized = false;
 }
 
 WaveFileOut::~WaveFileOut() {
@@ -48,16 +45,6 @@ WaveFileOut::~WaveFileOut() {
 
 AudioDriverInfo WaveFileOut::info( ) const {
 	return AudioDriverInfo("wavefileout","Wave to File Driver","Recording a wav to a file",false);
-}
-
-void WaveFileOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context ) {
-	_pCallback = pCallback;
-	_callbackContext = context;
-	_initialized = true;
-}
-
-bool WaveFileOut::Initialized(void) {
-	return _initialized;
 }
 
 bool WaveFileOut::Enable( bool e ) {
@@ -104,7 +91,7 @@ void WaveFileOut::writeBuffer() {
 		#else
 			Sleep(1);
 		#endif
-		float const * input(_pCallback(_callbackContext, count));
+		float const * input(callback(count));
 		///\todo well, the real job, i.e. output to a file
 	}
 

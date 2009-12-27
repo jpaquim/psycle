@@ -32,11 +32,8 @@ namespace psycle {
 		ESoundOut::ESoundOut()
 		:
 			AudioDriver(),
-			initialized_(false),
 			threadRunning_(false),
 			killThread_(false),
-			callback_(0),
-			callbackContext_(0),
 			host_(""),
 			port_(0)
 		{
@@ -51,22 +48,6 @@ namespace psycle {
 		AudioDriverInfo ESoundOut::info( ) const
 		{
 			return AudioDriverInfo("esd", "ESound Driver", "Driver with optional network capabilities (high latency)",true);
-		}
-
-		void ESoundOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext)
-		{
-			#if !defined NDEBUG
-				std::cout << "psycle: esound: initializing\n";
-			#endif
-			assert(!threadRunning_);
-			callback_ = callback;
-			callbackContext_ = callbackContext;
-			initialized_ = true;
-		}
-
-		bool ESoundOut::Initialized()
-		{
-			return initialized_;
 		}
 
 		void ESoundOut::Configure( )
@@ -194,11 +175,11 @@ namespace psycle {
 			std::cout << "psycle: esound: device buffer: samples: " << deviceBufferSamples << "\n";
 			if (bits_ == 16) {
 				int bufSize = deviceBuffer_ / 2;
-				std::int16_t buf[bufSize];
+				int16_t buf[bufSize];
 				int newCount = bufSize / channels_;
 				while(!killThread_)
 				{
-					float const * input(callback_(callbackContext_, newCount));
+					float const * input(callback(newCount));
 					#if 0
 						for (int i = 0; i < bufSize; i++) {
 							buf[i] = *input++;
@@ -209,12 +190,12 @@ namespace psycle {
 					if(write(fd_, buf, sizeof buf) < 0) std::cerr << "psycle: esound: write failed.\n";
 				}
 			} else {
-				std::uint8_t buf[deviceBufferSamples];
+				uint8_t buf[deviceBufferSamples];
 				int bytes(sizeof buf);
 				int samples(bytes);
 				while(!killThread_)
 				{
-					float const * input(callback_(callbackContext_, samples));
+					float const * input(callback(samples));
 					for (int i(0); i < samples; ++i) buf[i] = *input++ / 256 + 128;
 					if(write(fd_, buf, bytes) < 0) std::cout << "psycle: esound: write failed.\n";
 				}

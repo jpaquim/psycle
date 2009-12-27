@@ -26,10 +26,6 @@ bool ASIOInterface::_supportsOutputReady(false);
 ASIOInterface::PortOut ASIOInterface::_selectedout;
 std::vector<ASIOInterface::PortCapt> ASIOInterface::_selectedins;
 
-AUDIODRIVERWORKFN ASIOInterface::_pCallback(0);
-void* ASIOInterface::_pCallbackContext(0);
-
-
 std::string ASIOInterface::PortEnum::GetName() {
 	std::string fullname = _info.name;
 	switch(_info.type) {
@@ -89,11 +85,9 @@ ASIOInterface::ASIOInterface(AsioUiInterface* ui)
 }
 
 void ASIOInterface::Init() {
-	_initialized = false;
 	_configured = false;
 	_running = false;
 	_firstrun = true;
-	_pCallback = 0;
 	char szNameBuf[MAX_ASIO_DRIVERS][33];
 	char* pNameBuf[MAX_ASIO_DRIVERS];
 	for(int i(0); i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
@@ -150,11 +144,6 @@ ASIOInterface::~ASIOInterface() throw() {
 }
 
 void ASIOInterface::Initialize(AUDIODRIVERWORKFN pcallback, void* context) {
-	_pCallbackContext = context;
-	_pCallback = pcallback;
-	_running = false;
-	ReadConfig();
-	_initialized = true;
 }
 
 void ASIOInterface::Reset() {

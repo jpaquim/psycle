@@ -722,10 +722,7 @@ void Player::setDriver(AudioDriver & driver) {
 
 	if(driver_) driver_->Enable(false);
 
-	if(!driver.Initialized()) {
-		driver.Initialize(Work, this);
-		if(loggers::trace()()) loggers::trace()("psycle: core: player: audio driver initialized", UNIVERSALIS__COMPILER__LOCATION);
-	}
+	driver.set_callback(Work, this);
 	
 	if(!driver.Configured()) {
 		if(loggers::trace()()) loggers::trace()("psycle: core: player: asking audio driver to configure itself", UNIVERSALIS__COMPILER__LOCATION);

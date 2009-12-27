@@ -28,13 +28,9 @@ namespace psycle { namespace core {
 
 NetAudioOut::NetAudioOut()
 :
-	AudioDriver(),
-	initialized_(false),
 	threadRunning_(false),
 	killThread_(false),
 	threadId_(0),
-	callback_(0),
-	callbackContext_(0),
 	host_(),
 	port_(0),
 	latency_(4096)
@@ -48,20 +44,6 @@ NetAudioOut::~NetAudioOut() {
 
 AudioDriverInfo NetAudioOut::info( ) const {
 	return AudioDriverInfo("netaudio","nas sound system driver","not working",false);
-}
-
-void NetAudioOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext) {
-	#if !defined NDEBUG
-		std::cout << "psycle: netaudio: initializing\n";
-	#endif
-	assert(!threadRunning_);
-	callback_ = callback;
-	callbackContext_ = callbackContext;
-	initialized_ = true;
-}
-
-bool NetAudioOut::Initialized() {
-	return initialized_;
 }
 
 void NetAudioOut::Configure() {

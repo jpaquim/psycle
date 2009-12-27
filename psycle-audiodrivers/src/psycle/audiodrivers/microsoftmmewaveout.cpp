@@ -33,26 +33,12 @@ namespace psycle { namespace core {
 		}      
 
 		MsWaveOut::MsWaveOut() {
-			_pCallback = 0;
 			hWaveOut = 0; // use this audio handle to detect if the driver is working
 			_running = 0; // running condition for the thread loop
-			_initialized = 0;
 		}
 
 		MsWaveOut::~MsWaveOut() {
 			if ( hWaveOut ) stop( );
-		}
-
-		void MsWaveOut::Initialize( AUDIODRIVERWORKFN pCallback, void * context )
-		{
-			_callbackContext = context;
-			_pCallback = pCallback;
-			_initialized= true;
-		}
-
-		bool MsWaveOut::Initialized( )
-		{
-			return _initialized;
 		}
 
 		bool MsWaveOut::Enable( bool e )

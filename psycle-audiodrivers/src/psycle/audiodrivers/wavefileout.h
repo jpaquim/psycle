@@ -30,17 +30,12 @@ class WaveFileOut : public AudioDriver {
 		WaveFileOut();
 		~WaveFileOut();
 
-		virtual AudioDriverInfo info() const;
-		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-		virtual bool Initialized();
+		/*override*/ AudioDriverInfo info() const;
 
 		// starts stops file writing
-		virtual bool Enable(bool e);
+		/*override*/ bool Enable(bool e);
 
 	private:
-		void* _callbackContext; // Player callback
-		AUDIODRIVERWORKFN _pCallback;
-
 		///\todo use std::thread
 		#if defined __unix__ || defined __APPLE__
 			pthread_t threadid;
@@ -52,8 +47,6 @@ class WaveFileOut : public AudioDriver {
 		static volatile int kill_thread;
 		///\todo bad
 		static volatile int threadOpen;
-
-		bool _initialized;
 
 		static int audioOutThread(void * ptr);
 

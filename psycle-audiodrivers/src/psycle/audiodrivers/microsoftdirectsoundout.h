@@ -85,9 +85,12 @@ class MsDirectSound : public AudioDriver {
 
 		AudioDriverInfo info() const;
 
-		virtual void Initialize( AUDIODRIVERWORKFN pCallback, void * context );
-		virtual bool Enable( bool );
-		virtual bool Enabled() { return threadRunning_; }
+		/*override*/ void Configure();
+		/*override*/ bool Configured() { return _configured; }
+
+		/*override*/ bool Enable( bool );
+		/*override*/ bool Enabled() { return threadRunning_; }
+
 		virtual void GetCapturePorts(std::vector<std::string>&ports);
 		virtual bool AddCapturePort(uint32_t idx);
 		virtual bool RemoveCapturePort(uint32_t idx);
@@ -96,9 +99,6 @@ class MsDirectSound : public AudioDriver {
 		static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
 		virtual int GetWritePos();
 		virtual int GetPlayPos();
-		virtual void Configure();
-		virtual bool Initialized() { return _initialized; }
-		virtual bool Configured() { return _configured; }
 		void AddConfigGui(DSoundUiInterface* ui) { ui_ = ui; }
 
 	protected:
@@ -116,7 +116,6 @@ class MsDirectSound : public AudioDriver {
 		bool Stop();
 
 	private:
-		bool _initialized;
 		bool _configured;
 		static AudioDriverInfo _info;
 
@@ -145,8 +144,6 @@ class MsDirectSound : public AudioDriver {
 		std::vector<int> _portMapping;
 		LPDIRECTSOUND8 _pDs;
 		LPDIRECTSOUNDBUFFER8 _pBuffer;
-		void* _callbackContext;
-		AUDIODRIVERWORKFN _pCallback;
 
 		DSoundUiInterface* ui_;
 };

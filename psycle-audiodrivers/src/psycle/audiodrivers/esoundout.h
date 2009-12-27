@@ -34,12 +34,6 @@ namespace psycle {
 				/*override*/ void Configure();
 				/*override*/ bool Enable(bool e);
 
-			public:
-				/*override*/ void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-				/*override*/ bool Initialized();
-			private:
-				bool initialized_;
-				
 			private:
 				unsigned int channels_;
 				int channelsFlag();
@@ -65,11 +59,6 @@ namespace psycle {
 				bool threadRunning_;
 				bool killThread_;
 
-				/// player callback
-				AUDIODRIVERWORKFN callback_;
-				/// player callback
-				void * callbackContext_; 
-				
 				int writeBuffer(char * buffer, long size);
 				long deviceBuffer_;
 		};
