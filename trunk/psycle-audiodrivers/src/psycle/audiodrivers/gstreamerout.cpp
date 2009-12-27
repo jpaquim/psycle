@@ -62,7 +62,7 @@ namespace {
 	::GstClockTime const default_timeout_nanoseconds(static_cast<GstClockTime>(5e9));
 
 	void wait_for_state(::GstElement & element, ::GstState state_wanted, ::GstClockTime timeout_nanoseconds = default_timeout_nanoseconds) throw(universalis::exception) {
-		::GstClockTime intermediate_timeout_nanoseconds(std::min(timeout_nanoseconds, static_cast<GstClockTime>(0.1e9)));
+		::GstClockTime intermediate_timeout_nanoseconds(std::min(timeout_nanoseconds, static_cast<GstClockTime>(0.5e9)));
 		::GstClockTime total_nanoseconds_waited(0);
 		for(;;) {
 			::GstState current_state, pending_state;
