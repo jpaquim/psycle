@@ -436,9 +436,9 @@ namespace psycle {
 			player.song(projects_->active_project()->song());
 			output_driver_ =  Global::pConfig->_pOutputDriver;
 			if (&player.driver() == output_driver_) {
-				if (output_driver_->Enabled())
+				if (output_driver_->started())
 					return;
-				output_driver_->Enable(true);
+				output_driver_->set_started(true);
 			} else
 			player.setDriver(*output_driver_);
 #else
@@ -483,7 +483,7 @@ namespace psycle {
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Player & player(psycle::core::Player::singleton());
-			player.driver().Enable(false);
+			player.driver().set_started(false);
 #else
 			if (Global::pConfig->_pOutputDriver->Initialized())
 			{

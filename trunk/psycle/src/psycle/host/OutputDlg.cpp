@@ -108,7 +108,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_driverIndex = m_driverComboBox.GetCurSel();
 			if (m_driverIndex != m_oldDriverIndex)
 			{
-				m_ppDrivers[m_oldDriverIndex]->Enable(false);
+				#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					m_ppDrivers[m_oldDriverIndex]->set_started(false);
+				#else
+					m_ppDrivers[m_oldDriverIndex]->Enable(false);
+				#endif
 			}
 			m_midiDriverIndex = m_midiDriverComboBox.GetCurSel();
 			if( m_oldMidiDriverIndex != m_midiDriverIndex )
@@ -140,11 +144,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 
 			int index = m_driverComboBox.GetCurSel();
-			m_ppDrivers[index]->Configure();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			///\todo Implement audio drivers
+			m_ppDrivers[index]->set_opened(true);
 			//Global::pPlayer->samples_per_second()
 #else
+			m_ppDrivers[index]->Configure();
 			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 #endif
 		}

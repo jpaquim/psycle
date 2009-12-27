@@ -123,7 +123,7 @@ void MsDirectSound::do_start() {
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 	format.cbSize = 0;
 
-	int dsBufferSize = _exclusive ? 0 : playbackSettings().blockBytes()*playbackSettings().blockCount();
+	int dsBufferSize = _exclusive ? 0 : format.nBlockAlign * playbackSettings().blockCount();
 	// Set up DSBUFFERDESC structure.
 	memset(&desc, 0, sizeof(DSBUFFERDESC));
 	desc.dwSize = sizeof(DSBUFFERDESC);
@@ -164,7 +164,7 @@ void MsDirectSound::do_start() {
 		_runningBufSize = dsBufferSize*0.5f;
 		_buffersToDo = 1;
 	} else {
-		_runningBufSize = playbackSettings().blockBytes();
+		_runningBufSize = playbackSettings().totalBufferBytes() / playbackSettings().blockCount();
 		_buffersToDo = playbackSettings().blockCount();
 	}
 	_lowMark = 0;
@@ -182,11 +182,10 @@ void MsDirectSound::do_start() {
 	{ scoped_lock lock(mutex_);
 		while(!threadRunning_) condition_.wait(lock);
 	}
-	return true;
 }
 
 void MsDirectSound::do_stop() {
-	if(!threadRunning_) return true;
+	if(!threadRunning_) return;
 	// ask the thread to terminate
 	{
 		scoped_lock lock(mutex_);
@@ -231,45 +230,32 @@ BOOL CALLBACK MsDirectSound::DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescript
 	return TRUE;
 }
 
-bool MsDirectSound::AddCapturePort(std::uint32_t idx) {
+void MsDirectSound::AddCapturePort(std::uint32_t idx) {
 	bool isplaying = threadRunning_;
-	if ( idx >= _capEnums.size() ) return false;
-	for (unsigned int i=0;i<_capPorts.size();++i)
-	{
-		if (_capPorts[i]._pGuid == _capEnums[idx].guid ) return false;
+	if(idx >= _capEnums.size()) return; // throw exception?
+	for(unsigned int i = 0; i < _capPorts.size(); ++i) {
+		if(_capPorts[i]._pGuid == _capEnums[idx].guid) return; // throw exception?
 	}
 	PortCapt port;
 	port._pGuid = _capEnums[idx].guid;
-	if (isplaying)
-	{
-		Stop();
-	}
+	if(isplaying) do_stop();
 	_capPorts.push_back(port);
-	if ( _portMapping.size() <= idx) _portMapping.resize(idx+1);
+	if(_portMapping.size() <= idx) _portMapping.resize(idx+1);
 	_portMapping[idx]=_capPorts.size()-1;
-	if (isplaying)
-	{
-		return Start();
-	}
-	return true;
+	if(isplaying) do_start();
 }
 
-bool MsDirectSound::RemoveCapturePort(std::uint32_t idx) {
+void MsDirectSound::RemoveCapturePort(std::uint32_t idx) {
 	bool restartplayback = false;
 	std::vector<PortCapt> newports;
-	if ( idx >= _capEnums.size() ) return false;
-	for (unsigned int i=0;i<_capPorts.size();++i)
-	{
-		if (_capPorts[i]._pGuid == _capEnums[idx].guid )
-		{
-			if (dsBufferPlaying_)
-			{
-				Stop();
-				restartplayback=true;
+	if(idx >= _capEnums.size()) return; // throw exception?
+	for(unsigned int i = 0; i < _capPorts.size(); ++i) {
+		if(_capPorts[i]._pGuid == _capEnums[idx].guid) {
+			if(dsBufferPlaying_) {
+				do_stop();
+				restartplayback = true;
 			}
-		}
-		else
-		{
+		} else {
 			///\todo: this assignation is probably wrong. should be checked.
 			_portMapping[newports.size()]=_portMapping[i];
 			newports.push_back(_capPorts[i]);
@@ -277,20 +263,18 @@ bool MsDirectSound::RemoveCapturePort(std::uint32_t idx) {
 	}
 	_portMapping.resize(newports.size());
 	_capPorts = newports;
-	if (restartplayback) Start();
-	return true;
+	if (restartplayback) do_start();
 }
 
-bool MsDirectSound::CreateCapturePort(PortCapt &port) {
+void MsDirectSound::CreateCapturePort(PortCapt &port) {
 	HRESULT hr;
 	//not try to open a port twice
-	if (port._pDs) return true;
+	if(port._pDs) return; // throw exception?
 
 	// Create IDirectSoundCapture using the preferred capture device
-	if( FAILED( hr = DirectSoundCaptureCreate8( port._pGuid, &port._pDs, NULL ) ) )
-	{
+	if(FAILED(hr = DirectSoundCaptureCreate8( port._pGuid, &port._pDs, NULL))) {
 		Error(L"Failed to create Capture DirectSound Device");
-		return false;
+		throw std::runtime_error("Failed to create Capture DirectSound Device");
 	}
 
 	// Create the capture buffer
@@ -314,15 +298,13 @@ bool MsDirectSound::CreateCapturePort(PortCapt &port) {
 	dscbd.dwBufferBytes = dsBufferSize;
 	dscbd.lpwfxFormat   = &format;
 
-	if( FAILED( hr = port._pDs->CreateCaptureBuffer( &dscbd, reinterpret_cast<LPDIRECTSOUNDCAPTUREBUFFER*>(&port._pBuffer), NULL ) ) )
-	{
+	if(FAILED(hr = port._pDs->CreateCaptureBuffer(&dscbd, reinterpret_cast<LPDIRECTSOUNDCAPTUREBUFFER*>(&port._pBuffer), NULL))) {
 		Error(L"Failed to create Capture DirectSound Buffer(s)");
-		return false;
+		throw std::runtime_error("Failed to create Capture DirectSound Buffer(s)");
 	}
 	hr = port._pBuffer->Start(DSCBSTART_LOOPING);
 	universalis::os::aligned_memory_alloc(16, port.pleft, dsBufferSize);
 	universalis::os::aligned_memory_alloc(16, port.pright, dsBufferSize);
-	return true;
 }
 
 void MsDirectSound::GetReadBuffers(std::uint32_t idx,float **pleft, float **pright,int numsamples) {
@@ -611,7 +593,7 @@ void MsDirectSound::ReadConfig() {
 	playbackSettings_.setBitDepth(16);
 	playbackSettings_.setChannelMode(3);
 	playbackSettings_.setSamplesPerSec(44100);
-	playbackSettings_.setBlockBytes(8192);
+	playbackSettings_.setBlockSamples(4096);
 	playbackSettings_.setBlockCount(4);
 	captureSettings_.setBitDepth(16);
 	captureSettings_.setChannelMode(3);
@@ -645,7 +627,7 @@ void MsDirectSound::WriteConfig() {
 	}
 }
 
-void MsDirectSound::Configure() {
+void MsDirectSound::do_open() {
 	// 1. reads the config from persistent storage
 	// 2. opens the gui to let the user edit the settings
 	// 3. writes the config to persistent storage
@@ -711,6 +693,10 @@ void MsDirectSound::Configure() {
 		}
 		if(write_config) WriteConfig();
 	}
+}
+
+void MsDirectSound::do_close() {
+	///\todo YES, TODO!
 }
 
 int MsDirectSound::GetPlayPos()

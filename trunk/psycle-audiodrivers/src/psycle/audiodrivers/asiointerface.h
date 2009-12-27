@@ -134,7 +134,7 @@ class ASIOInterface : public AudioDriver {
 
 		/*override*/ AudioDriverInfo info() const;
 	protected:
-		/*override*/ void do_open() {}
+		/*override*/ void do_open();
 		/*override*/ void do_start();
 		/*override*/ void do_stop();
 		/*override*/ void do_close() {}
@@ -144,19 +144,20 @@ class ASIOInterface : public AudioDriver {
 		/*override*/ int GetOutputLatency() { return _outlatency; }
 
 	public: ///\todo all that public!?
-		virtual/*?*/ int GetBufferSize();
-		virtual/*?*/ void GetCapturePorts(std::vector<std::string>&ports);
-		virtual/*?*/ bool AddCapturePort(int idx);
-		virtual/*?*/ bool RemoveCapturePort(int idx);
-		virtual/*?*/ void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
-		virtual/*?*/ int GetWritePos();
-		virtual/*?*/ int GetPlayPos();
+		int GetBufferSize();
+		void GetCapturePorts(std::vector<std::string>&ports);
+		void AddCapturePort(int idx);
+		void RemoveCapturePort(int idx);
+		void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
+		int GetWritePos();
+		int GetPlayPos();
 		DriverEnum GetDriverFromidx(int driverID);
 		PortOut GetOutPortFromidx(int driverID);
 		int GetidxFromOutPort(PortOut&port);
 		void ControlPanel(int driverID);
 
 		static void bufferSwitch(long index, ASIOBool processNow);
+		static ASIOInterface * instance_;
 		static ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow);
 		static void sampleRateChanged(ASIOSampleRate sRate);
 		static long asioMessages(long selector, long value, void* message, double* opt);

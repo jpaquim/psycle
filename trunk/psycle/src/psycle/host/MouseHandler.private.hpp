@@ -14,7 +14,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					///\todo what was that ? Were we cancelling the mouse click in case of thread race?
 					if (_pSong->_machineLock) return;
 				#else
-					Song::scoped_lock lock(*_pSong);
+					Song::scoped_lock lock(_pSong->Mutex());
 				#endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
@@ -62,7 +62,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					///\todo what was that ? Were we cancelling the mouse click in case of thread race?
 					if (_pSong->_machineLock) return;
 				#else
-					Song::scoped_lock lock(*_pSong);
+					Song::scoped_lock lock(_pSong->Mutex());
 				#endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;

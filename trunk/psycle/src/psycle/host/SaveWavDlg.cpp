@@ -613,15 +613,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
 		{
 			Player *pPlayer = Global::pPlayer;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-			Song& pSong = mainFrame->projects()->active_project()->song();
-#else
-			Song& pSong = Global::song();
-#endif
+			#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+				Song& pSong = mainFrame->projects()->active_project()->song();
+			#else
+				Song& pSong = Global::song();
+			#endif
 			saving=true;
 			pPlayer->stopRecording();
-			Global::pConfig->_pOutputDriver->Enable(false);
+			#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				Global::pConfig->_pOutputDriver->set_started(false);
+			#else
+				Global::pConfig->_pOutputDriver->Enable(false);
+			#endif
 			///\todo: for zealan, this call is not closing the midi driver, and when doing the Open again, it crashes.
 			Global::pConfig->_pMidiInput->Close();
 
@@ -634,17 +638,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				m_text.SetWindowText(file.substr(pos+1).c_str());
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			///todo: recording in psycore doesn't support other mediums, except via audio drivers.
-			// so for clipboard, we need an audio driver.
-			if (!file.empty()) {
-				pPlayer->setFileName(file);
-				pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, Dither::Pdf::type(ditherpdf), Dither::NoiseShape::type(noiseshape));
-			}
-#else
-			pPlayer->StartRecording(file,bits,rate,channelmode,isFloat,
-									m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape,&clipboardmem);
-#endif
+			#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				///todo: recording in psycore doesn't support other mediums, except via audio drivers.
+				// so for clipboard, we need an audio driver.
+				if (!file.empty()) {
+					pPlayer->setFileName(file);
+					pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, Dither::Pdf::type(ditherpdf), Dither::NoiseShape::type(noiseshape));
+				}
+			#else
+				pPlayer->StartRecording(file,bits,rate,channelmode,isFloat,
+										m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape,&clipboardmem);
+			#endif
 			int tmp;
 			int cont;
 			CString name;
@@ -658,10 +662,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int blockSLine;
 			int blockELine;
 
-			switch (m_recmode)
-			{
-			case 0:
-				{
+			switch (m_recmode) {
+			case 0: {
 				j=0; // Calculate progress bar range.
 				for (i=0;i<pSong.playLength;i++)
 				{
@@ -670,86 +672,80 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_progress.SetRange(0,j);
 				lastpostick=0;
 				
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				pPlayer->setLoopSong();
-				pPlayer->start();
-#else
-				pPlayer->_playBlock=false;
-				pPlayer->Start(0,0);
-#endif
-				}
-				break;
-			case 1:
-				{
+				#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					pPlayer->setLoopSong();
+					pPlayer->start();
+				#else
+					pPlayer->_playBlock=false;
+					pPlayer->Start(0,0);
+				#endif
+			}
+			break;
+			case 1: {
 				m_patnumber.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_progress.SetRange(0,pSong.patternLines[pstart]);
-				for (cont=0;cont<pSong.playLength;cont++)
-				{
-					if ( (int)pSong.playOrder[cont] == pstart)
-					{
+				for (cont=0;cont<pSong.playLength;cont++) {
+					if ( (int)pSong.playOrder[cont] == pstart) {
 						pstart= cont;
 						break;
 					}
 				}
 				lastpostick=pstart;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				int findPattern=0;
-				SequenceLine* patternline = *pSong.patternSequence().begin();
-				SequenceLine::iterator iter = patternline->begin();
-				for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
-				if (iter != patternline->end()) {
-					pPlayer->setLoopSequenceEntry(iter->second);
-					pPlayer->start(iter->second->tickPosition());
-				}
-#else
-				pSong.playOrderSel[cont]=true;
-				pPlayer->Start(pstart,0);
-				pPlayer->_playBlock=true;
-				pPlayer->_loopSong=false;
-#endif
-				}
-				break;
-			case 2:
-				{
+				#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					int findPattern=0;
+					SequenceLine* patternline = *pSong.patternSequence().begin();
+					SequenceLine::iterator iter = patternline->begin();
+					for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
+					if (iter != patternline->end()) {
+						pPlayer->setLoopSequenceEntry(iter->second);
+						pPlayer->start(iter->second->tickPosition());
+					}
+				#else
+					pSong.playOrderSel[cont]=true;
+					pPlayer->Start(pstart,0);
+					pPlayer->_playBlock=true;
+					pPlayer->_loopSong=false;
+				#endif
+			}
+			break;
+			case 2: {
 				m_rangestart.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_rangeend.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), tmp);
 
 				lastpostick=pstart;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				int findPattern=0;
-				SequenceLine* patternline = *pSong.patternSequence().begin();
-				SequenceLine::iterator iter = patternline->begin();
-				for(; iter != patternline->end() && findPattern < pstart; iter++ , findPattern++);
+				#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					int findPattern=0;
+					SequenceLine* patternline = *pSong.patternSequence().begin();
+					SequenceLine::iterator iter = patternline->begin();
+					for(; iter != patternline->end() && findPattern < pstart; iter++ , findPattern++);
 
-				SequenceLine::iterator iterend = iter;
-				for(; iterend != patternline->end() && findPattern < tmp; iterend++ , findPattern++);
+					SequenceLine::iterator iterend = iter;
+					for(; iterend != patternline->end() && findPattern < tmp; iterend++ , findPattern++);
 
-				if (iter != patternline->end() && iterend != patternline->end()) {
-					pPlayer->setLoopRange(iter->second->tickPosition(), iterend->second->tickEndPosition());
-					pPlayer->start(iter->second->tickPosition());
-				}
-				m_progress.SetRange(rounded(iter->second->tickPosition()),
-					rounded(iterend->second->tickEndPosition()));
-
-#else
-				j=0;
-				for (cont=pstart;cont<=tmp;cont++)
-				{
-					pSong.playOrderSel[cont]=true;
-					j+=pSong.patternLines[pSong.playOrder[cont]];
-				}
-				m_progress.SetRange(0,j);
-				pPlayer->Start(pstart,0);
-				pPlayer->_playBlock=true;
-				pPlayer->_loopSong=false;
-#endif
-				}
-				break;
-			case 3:
-				{
+					if (iter != patternline->end() && iterend != patternline->end()) {
+						pPlayer->setLoopRange(iter->second->tickPosition(), iterend->second->tickEndPosition());
+						pPlayer->start(iter->second->tickPosition());
+					}
+					m_progress.SetRange(rounded(iter->second->tickPosition()),
+						rounded(iterend->second->tickEndPosition()));
+				#else
+					j=0;
+					for (cont=pstart;cont<=tmp;cont++)
+					{
+						pSong.playOrderSel[cont]=true;
+						j+=pSong.patternLines[pSong.playOrder[cont]];
+					}
+					m_progress.SetRange(0,j);
+					pPlayer->Start(pstart,0);
+					pPlayer->_playBlock=true;
+					pPlayer->_loopSong=false;
+				#endif
+			}
+			break;
+			case 3: {
 				m_patnumber.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				m_linestart.GetWindowText(name);
@@ -758,31 +754,26 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				hexstring_to_integer(name.GetBuffer(2), blockELine);
 
 				lastpostick=pstart;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				//todo: this uses the indexes as beat positions, instead of lines. It should be noted in the GUI.
-
-				pPlayer->setLoopRange(blockSLine, blockELine);
-				pPlayer->start(blockSLine);
-
-#else
-				m_progress.SetRange(blockSLine,blockELine);
-				//find the position in the sequence where the pstart pattern is located.
-				for (cont=0;cont<pSong.playLength;cont++)
-				{
-					if ( (int)pSong.playOrder[cont] == pstart)
-					{
-						pstart= cont;
-						break;
+				#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					///\todo: this uses the indexes as beat positions, instead of lines. It should be noted in the GUI.
+					pPlayer->setLoopRange(blockSLine, blockELine);
+					pPlayer->start(blockSLine);
+				#else
+					m_progress.SetRange(blockSLine,blockELine);
+					// find the position in the sequence where the pstart pattern is located.
+					for (cont=0;cont<pSong.playLength;cont++) {
+						if ( (int)pSong.playOrder[cont] == pstart) {
+							pstart= cont;
+							break;
+						}
 					}
-				}
-				pSong.playOrderSel[cont]=true;
-				pPlayer->Start(pstart,blockSLine, blockELine);
-				pPlayer->_playBlock=true;
-				pPlayer->_loopSong=false;
-#endif
-
-				}
-				break;
+					pSong.playOrderSel[cont]=true;
+					pPlayer->Start(pstart,blockSLine, blockELine);
+					pPlayer->_playBlock=true;
+					pPlayer->_loopSong=false;
+				#endif
+			}
+			break;
 			default:
 				SaveEnd();
 				return;
@@ -791,8 +782,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
 		}
 
-		DWORD WINAPI __stdcall RecordThread(void *b)
-		{
+		DWORD WINAPI __stdcall RecordThread(void *b) {
 			((CSaveWavDlg*)b)->threadopen++;
 			Player* pPlayer = Global::pPlayer;
 			int stream_size = 8192; // Player has just a single buffer of 65535 samples to allocate both channels
@@ -844,14 +834,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				Global::pConfig->autoStopMachines=true;
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			///todo: restore the previous values
-#else
-			Global::pPlayer->_playBlock=playblock;
-			Global::pPlayer->_loopSong=loopsong;
-			memcpy(Global::song().playOrderSel,sel,MAX_SONG_POSITIONS);
-#endif
-			Global::pConfig->_pOutputDriver->Enable(true);
+			#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				///todo: restore the previous values
+				Global::pConfig->_pOutputDriver->set_started(true);
+			#else
+				Global::pPlayer->_playBlock=playblock;
+				Global::pPlayer->_loopSong=loopsong;
+				std::memcpy(Global::song().playOrderSel,sel,MAX_SONG_POSITIONS);
+				Global::pConfig->_pOutputDriver->Enable(true);
+			#endif
 			Global::pConfig->_pMidiInput->Open();
 
 			if (m_outputtype == 1)

@@ -79,7 +79,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CInfoDlg::OnTimer(UINT nIDEvent) 
 		{
 			if(nIDEvent==1) {
-				Song::scoped_lock lock(*_pSong);
+				Song::scoped_lock lock(_pSong->Mutex();
 				char buffer[128];
 				
 				float totalCPU=0;

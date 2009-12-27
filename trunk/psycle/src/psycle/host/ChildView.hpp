@@ -130,12 +130,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//RECENT!!!//
 			HMENU hRecentMenu;
 
-//			CBitmap machinedial; //the machine dial bitmap
+			//CBitmap machinedial; //the machine dial bitmap
 
 			class CMainFrame* main_frame_;
 			ProjectData* projects_;
 			Song* _pSong;
-		//	bool multiPattern;			
+			//bool multiPattern;			
 			CGearTracker * SamplerMachineDialog;
 			XMSamplerUI* XMSamplerMachineDialog;
 			CWaveInMacDlg* WaveInMachineDialog;						

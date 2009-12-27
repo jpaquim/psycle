@@ -70,11 +70,11 @@ namespace psycle {
 			player.stop();
 			///\todo lock/unlock
 			Sleep(256);
-			player.driver().Enable(false);
+			player.driver().set_started(false);
 
 			song().New();
 
-			player.driver().Enable(true);
+			player.driver().set_started(true);
 			player.setBpm(song().BeatsPerMin());
 			player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
 			CMainFrame* pParentMain = mac_view()->main();
@@ -148,7 +148,7 @@ namespace psycle {
 			player.stop();
 			///\todo lock/unlock
 			Sleep(256);
-			player.driver().Enable(false);
+			player.driver().set_started(false);
 			pat_view()->editPosition = 0;
 			if(!song().load(fName.c_str())) {
 				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
@@ -168,7 +168,7 @@ namespace psycle {
 			}
 		//	set_lines_per_beat(song().ticksSpeed());
 			set_beat_zoom(song().ticksSpeed());
-			player.driver().Enable(true);
+			player.driver().set_started(true);
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
 			pat_view()->RecalculateColourGrid();
@@ -400,7 +400,7 @@ namespace psycle {
 				///\todo lock/unlock
 				Sleep(256);
 				mac_view()->child_view()->_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
+				Global::pConfig->_pOutputDriver->set_started(false);
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Close();
 				///\todo lock/unlock
@@ -526,11 +526,15 @@ namespace psycle {
 					song().fileName = str+".psy";
 				}
 				mac_view()->child_view()->_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-				{
-					mac_view()->child_view()->_outputActive = false;
-				}
-				else
+				#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					Global::pConfig->_pOutputDriver->set_started(true);
+				#else
+					if (!Global::pConfig->_pOutputDriver->Enable(true))
+					{
+						mac_view()->child_view()->_outputActive = false;
+					}
+					else
+				#endif
 				{
 					// MIDI IMPLEMENTATION
 					Global::pConfig->_pMidiInput->Open();

@@ -19,6 +19,7 @@ AudioDriverInfo ASIOInterface::info( ) const {
 }
 
 // CCriticalSection ASIOInterface::_lock;
+ASIOInterface * ASIOInterface::instance_(0);
 int ASIOInterface::_ASIObufferSize(1024);
 ASIOInterface::AsioStereoBuffer *ASIOInterface::ASIObuffers(0);
 bool ASIOInterface::_firstrun(true);
@@ -182,7 +183,7 @@ void ASIOInterface::do_start() {
 	asioDrivers.removeCurrentDriver();
 	char bla[128]; strcpy(bla,_selectedout.driver->_name.c_str());
 	if(!asioDrivers.loadDriver(bla)) {
-		throw std::runtime_error("..........")
+		throw std::runtime_error("..........");
 	}
 	// initialize the driver
 	ASIODriverInfo driverInfo;
@@ -190,19 +191,20 @@ void ASIOInterface::do_start() {
 	if (ASIOInit(&driverInfo) != ASE_OK) {
 		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
-		throw std::runtime_error("..........")
+		throw std::runtime_error("..........");
 	}
 	if(ASIOSetSampleRate(playbackSettings_.samplesPerSec()) != ASE_OK) {
 		playbackSettings_.setSamplesPerSec(44100);
 		if(ASIOSetSampleRate(playbackSettings_.samplesPerSec()) != ASE_OK) {
 			//ASIOExit();
 			asioDrivers.removeCurrentDriver();
-			throw std::runtime_error("..........")
+			throw std::runtime_error("..........");
 		}
 	}
 	if(ASIOOutputReady() == ASE_OK) _supportsOutputReady = true;
 	else _supportsOutputReady = false;
 	// set up the asioCallback structure and create the ASIO data buffer
+	instance_ = this;
 	asioCallbacks.bufferSwitch = &bufferSwitch;
 	asioCallbacks.sampleRateDidChange = &sampleRateChanged;
 	asioCallbacks.asioMessage = &asioMessages;
@@ -227,7 +229,7 @@ void ASIOInterface::do_start() {
 	if(ASIOCreateBuffers(info,numbuffers,_ASIObufferSize,&asioCallbacks) != ASE_OK) {
 		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
-		throw std::runtime_error("..........")
+		throw std::runtime_error("..........");
 	}
 	ASIObuffers =  new AsioStereoBuffer[_selectedins.size()+1];
 	counter=0;
@@ -247,13 +249,12 @@ void ASIOInterface::do_start() {
 		ASIODisposeBuffers();
 		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
-		throw std::runtime_error("..........")
+		throw std::runtime_error("..........");
 	}
 	// END -  CODE
 	_running = true;
 	//CMidiInput::Instance()->ReSync(); // MIDI IMPLEMENTATION
 	delete[] info;
-	return true;
 }
 
 void ASIOInterface::do_stop() {
@@ -423,13 +424,13 @@ void ASIOInterface::ControlPanel(int driverID) {
 	DriverEnum* newdriver = pout.driver;
 	if(_selectedout.driver != newdriver) {
 		if(_running) {
-			Stop();
+			do_stop();
 			// load it
 			if(asioDrivers.loadDriver(const_cast<char*>(newdriver->_name.c_str()))) {
 				ASIOControlPanel(); // you might want to check wether the ASIOControlPanel() can open
 				asioDrivers.removeCurrentDriver();
 			}
-			Start();
+			do_start();
 		}
 		else if(asioDrivers.loadDriver(const_cast<char*>(newdriver->_name.c_str()))) {
 			ASIOControlPanel(); // you might want to check wether the ASIOControlPanel() can open
@@ -708,8 +709,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 
 	//////////////////////////////////////////////////////////////////////////
 	// Outputs
-	float *pBuf = _pCallback(_pCallbackContext, _ASIObufferSize);
-	int i;
+	float *pBuf = instance_->callback(_ASIObufferSize);
 	switch (_selectedout.port->_info.type) {
 		case ASIOSTInt16LSB:
 			{
@@ -717,7 +717,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int16_t* outr;
 				outl = (int16_t*)ASIObuffers[counter].pleft[index];
 				outr = (int16_t*)ASIObuffers[counter].pright[index];
-				for(i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = clipped_lrint<int16_t>(*pBuf++);
 					*outr++ = clipped_lrint<int16_t>(*pBuf++);
 				}
@@ -731,7 +731,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outr = (char*)ASIObuffers[counter].pright[index];
 				int t;
 				char* pt = (char*)&t;
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
 					*outl++ = pt[0];
 					*outl++ = pt[1];
@@ -751,7 +751,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
 					*outr++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
 				}
@@ -763,7 +763,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				float* outr;
 				outl = (float*)ASIObuffers[counter].pleft[index];
 				outr = (float*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = (*pBuf++) / 32768.0f;
 					*outr++ = (*pBuf++) / 32768.0f;
 				}
@@ -775,7 +775,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				double* outr;
 				outl = (double*)ASIObuffers[counter].pleft[index];
 				outr = (double*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = (*pBuf++) / 32768.0;
 					*outr++ = (*pBuf++) / 32768.0;
 				}
@@ -789,7 +789,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = clipped_lrint<int32_t, 16>(*pBuf++);
 					*outr++ = clipped_lrint<int32_t, 16>(*pBuf++);
 				}
@@ -801,7 +801,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
 					*outr++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
 				}
@@ -813,7 +813,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
 					*outr++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
 				}
@@ -825,7 +825,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
 					*outr++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
 				}
@@ -837,7 +837,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int16_t* outr;
 				outl = (int16_t*)ASIObuffers[counter].pleft[index];
 				outr = (int16_t*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; i++) {
 					*outl++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
 					*outr++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
 				}
@@ -851,7 +851,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outr = (char*)ASIObuffers[counter].pright[index];
 				int t;
 				char* pt = (char*)&t;
-				for(i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
 					*outl++ = pt[2];
 					*outl++ = pt[1];
@@ -870,7 +870,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
 					*outr++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
 				}
@@ -882,7 +882,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
 					*outr++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
 				}
@@ -894,7 +894,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
 					*outr++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
 				}
@@ -906,7 +906,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for (i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
 					*outr++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
 				}
@@ -918,7 +918,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
 					*outr++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
 				}
@@ -953,7 +953,7 @@ void ASIOInterface::bufferSwitch(long index, ASIOBool processNow) {
 	if(ASIOGetSamplePosition(&timeInfo.timeInfo.samplePosition, &timeInfo.timeInfo.systemTime) == ASE_OK)
 		timeInfo.timeInfo.flags = kSystemTimeValid | kSamplePositionValid;
 
-	bufferSwitchTimeInfo (&timeInfo, index, processNow);
+	bufferSwitchTimeInfo(&timeInfo, index, processNow);
 }
 
 
