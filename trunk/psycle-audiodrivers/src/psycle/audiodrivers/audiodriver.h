@@ -150,13 +150,18 @@ class AudioDriver {
 		/// gives the driver information
 		virtual AudioDriverInfo info() const;
 
+	public:
+		/// initialize has nothing to do with the driver, it only sets only the pointer for a later player work call
+		virtual/*todo not virtual*/ void Initialize(AUDIODRIVERWORKFN callback, void * context) { callback_ = callback; callback_context_ = context; }
+		virtual/*todo not virtual*/ bool Initialized() { return callback_; }
+	private:
+		AUDIODRIVERWORKFN callback_;
+		void * callback_context_;
+
+	public:
 		virtual bool Enabled() { return false; }
 		/// enable will start the driver and the calls to the work player function
 		virtual bool Enable(bool /*e*/) { return true; }
-
-		/// initialize has nothing to do with the driver, it sets only the pointer for a later player work call
-		virtual void Initialize(AUDIODRIVERWORKFN /*pCallback*/, void * /*context*/) {}
-		virtual bool Initialized() { return true; }
 
 		virtual void Configure() {}
 		virtual bool Configured() { return true; }

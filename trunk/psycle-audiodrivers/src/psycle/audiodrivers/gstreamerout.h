@@ -23,13 +23,6 @@ class GStreamerOut : public AudioDriver {
 		}
 
 	public:
-		/*override*/ void Initialize(AUDIODRIVERWORKFN callback, void * context) { callback_ = callback; callback_context_ = context; }
-		/*override*/ bool Initialized() { return callback_; }
-	private:
-		AUDIODRIVERWORKFN callback_;
-		void * callback_context_;
-
-	public:
 		/*override*/ void Configure();
 		/*override*/ bool Configured() const;
 		/*override*/ bool Enable(bool e);
