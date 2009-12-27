@@ -156,7 +156,8 @@ class AudioDriver {
 		/// initialize has nothing to do with the driver, it only sets only the pointer for a later player work call
 		virtual/*todo not virtual*/ void Initialize(AUDIODRIVERWORKFN callback, void * context) { callback_ = callback; callback_context_ = context; }
 		virtual/*todo not virtual*/ bool Initialized() { return callback_; }
-	protected:
+		float * callback(int numSamples) { return callback_(callback_context_, numSamples); }
+	private:
 		AUDIODRIVERWORKFN callback_;
 		void * callback_context_;
 

@@ -13,6 +13,7 @@
 namespace psycle { namespace core {
 
 namespace loggers = universalis::os::loggers;
+using namespace universalis::stdlib;
 using universalis::exceptions::runtime_error;
 
 namespace {
@@ -164,8 +165,8 @@ GStreamerOut::GStreamerOut()
 
 void GStreamerOut::do_open() {
 	{ // initialize gstreamer
-		std::call_once(global_client_count_init_once_flag, global_client_count_init);
-		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+		call_once(global_client_count_init_once_flag, global_client_count_init);
+		scoped_lock<mutex> lock(global_client_count_mutex);
 		if(!global_client_count++) {
 			if(loggers::trace()) loggers::trace()("psycle: audiodrivers: gstreamer: init", UNIVERSALIS__COMPILER__LOCATION);
 			int * argument_count(0);
@@ -348,7 +349,7 @@ void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	int chunk = AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH, done = 0, remaining = frames;
 	while(remaining) {
 		if(remaining < chunk) chunk = remaining;
-		float const * const in = callback_(callback_context_, chunk);
+		float const * const in = callback(chunk);
 		Quantize16WithDither(in, out + (done * 2), chunk); // * 2 since Quantize assumes a stereo signal.
 		done += chunk;
 		remaining = frames - done;
@@ -372,8 +373,8 @@ void GStreamerOut::do_close() {
 	} else sink_ = caps_filter_ = /*queue_ =*/ source_ = 0; caps_ = 0;
 
 	{ // deinitialize gstreamer
-		std::call_once(global_client_count_init_once_flag, global_client_count_init);
-		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+		call_once(global_client_count_init_once_flag, global_client_count_init);
+		scoped_lock<mutex> lock(global_client_count_mutex);
 		if(!--global_client_count) {
 			#if 0 // gst_deinit must not be called because gst_init won't work afterwards
 				if(loggers::trace()) loggers::trace()("psycle: audiodrivers: gstreamer: deinit", UNIVERSALIS__COMPILER__LOCATION);
