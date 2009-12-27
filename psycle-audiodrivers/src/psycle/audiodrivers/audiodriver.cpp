@@ -31,9 +31,9 @@ AudioDriverSettings::AudioDriverSettings()
 	samplesPerSec_(44100),
 	bitDepth_(16),
 	channelMode_(3),
-	bufferSize_(131072),
-	blockSize_(4096),
-	blockCount_(8)
+	bufferSize_(24576),
+	blockSize_(1024),
+	blockCount_(6)
 {}
 
 

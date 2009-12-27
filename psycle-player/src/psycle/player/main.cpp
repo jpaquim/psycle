@@ -209,7 +209,7 @@ int main(int argument_count, char * arguments[]) {
 		}
 		player.setFileName(output_file_name);
 	}
-	player.driver().Enable(false); ///\todo setDriver enables it and we disable it just after, why?
+	//player.driver().Enable(false); ///\todo setDriver enables it and we disable it just after, why?
 
 	CoreSong song;
 	if(input_file_name.length()) {
@@ -239,8 +239,8 @@ int main(int argument_count, char * arguments[]) {
 			player.startRecording();
 		}
 		
-		if(loggers::trace()()) loggers::trace()("psycle: player: enabling output driver", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-		player.driver().Enable(true);
+		//if(loggers::trace()()) loggers::trace()("psycle: player: enabling output driver", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		//player.driver().Enable(true);
 
 		if(loggers::information()()) loggers::information()("psycle: player: playing...");
 		player.start(0);

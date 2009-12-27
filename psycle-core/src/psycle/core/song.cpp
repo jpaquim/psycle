@@ -23,7 +23,7 @@ SongSerializer CoreSong::serializer;
 
 CoreSong::CoreSong()
 :
-	Invalided()
+	ready()
 {
 	for(int i(0); i < MAX_MACHINES; ++i) machine_[i] = 0;
 	for(int i(0); i < MAX_INSTRUMENTS; ++i) _pInstrument[i] = new Instrument;
@@ -36,7 +36,7 @@ CoreSong::~CoreSong() {
 }
 
 void CoreSong::clear() {
-	Invalided = false;
+	SetReady(false);
 	setTracks(MAX_TRACKS);
 	setName("Untitled");
 	setAuthor("Unnamed");
@@ -54,9 +54,13 @@ void CoreSong::clear() {
 }
 
 bool CoreSong::load(std::string const & filename) {
+	SetReady(false);
 	DeleteAllMachines();
 	DeleteInstruments();
-	return serializer.loadSong(filename, *this);
+	const bool result = serializer.loadSong(filename, *this);
+	///\todo: setReady true or setReady result? what would be better?
+	SetReady(true);
+	return result;
 }
 
 bool CoreSong::save(std::string const & filename, int version) {
@@ -239,17 +243,13 @@ char *data
 */
 
 bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
-	if(instrument != PREV_WAV_INS) {
-		Invalided = true;
-		//::Sleep(LOCK_LATENCY); ///< ???
-	}
+	scoped_lock lock(mutex_);
 	RiffFile file;
 	RiffChunkHeader hd;
 	char fourCC[4];
 	int bits = 0;
 	// opens the file and reads the "FORM" header.
 	if(!file.Open(const_cast<char*>(str))) {
-		Invalided = false;
 		return false;
 	}
 	DeleteLayer(instrument);
@@ -299,7 +299,6 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 		}
 	}
 	file.Close();
-	Invalided = false;
 	return true;
 }
 
@@ -337,10 +336,9 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 	// opens the file and read the format Header.
 	DDCRET retcode(file.OpenForRead(pathToWav));
 	if(retcode != DDC_SUCCESS) {
-		Invalided = false;
 		return false; 
 	}
-	Invalided = true;
+	scoped_lock lock(mutex_);
 	//::Sleep(LOCK_LATENCY); ///< ???
 	// sample type
 	int st_type(file.NumChannels());
@@ -442,7 +440,6 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 		retcode = file.Read(hd); ///\todo bloergh!
 	}
 	file.Close();
-	Invalided = false;
 	return true;
 }
 
@@ -530,7 +527,7 @@ bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/
 }
 
 void CoreSong::ExchangeInstruments(Instrument::id_type src, Instrument::id_type dst) {
-	
+	scoped_lock lock(mutex_);
 	assert(src >= 0 && dst >= 0 && src < MAX_INSTRUMENTS && dst < MAX_INSTRUMENTS);
 	Instrument* inst1 = _pInstrument[src];
 	_pInstrument[src] = _pInstrument[dst];
@@ -538,18 +535,17 @@ void CoreSong::ExchangeInstruments(Instrument::id_type src, Instrument::id_type 
 }
 
 void CoreSong::/*Reset*/DeleteInstrument(Instrument::id_type id) {
-	Invalided = true;
+	scoped_lock lock(mutex_);
 	_pInstrument[id]->Reset();
-	Invalided = false;
 }
 
 void CoreSong::/*Reset*/DeleteInstruments() {
-	Invalided = true;
+	scoped_lock lock(mutex_);
 	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) _pInstrument[id]->Reset();
-	Invalided = false;
 }
 
 void CoreSong::/*Delete*/FreeInstrumentsMemory() {
+	scoped_lock lock(mutex_);
 	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
 		delete _pInstrument[id];
 		_pInstrument[id] = 0;
@@ -557,6 +553,7 @@ void CoreSong::/*Delete*/FreeInstrumentsMemory() {
 }
 
 void CoreSong::DeleteLayer(Instrument::id_type id) {
+	scoped_lock lock(mutex_);
 	_pInstrument[id]->DeleteLayer();
 }
 
@@ -615,6 +612,7 @@ void Song::clear() {
 }
 
 void Song::New() {
+	SetReady(false);
 	clear();
 	_saved=false;
 	fileName = "Untitled.psy";
@@ -627,6 +625,7 @@ void Song::New() {
 	pattern->setName("Untitled");
 	patternSequence().Add(pattern);
 	line->createEntry(pattern,0);
+	SetReady(true);
 }
 
 void SetDefaultPatternLines(int defaultPatLines)

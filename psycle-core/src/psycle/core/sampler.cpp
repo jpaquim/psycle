@@ -234,12 +234,7 @@ void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 
 	pVoice->_sampleCounter += numsamples;
 
-	if ( callbacks->song().IsInvalided() )
-	{
-		pVoice->_envelope._stage = ENV_OFF;
-		return;
-	}
-	else if ((pVoice->_triggerNoteDelay) && (pVoice->_sampleCounter >= pVoice->_triggerNoteDelay))
+	if ((pVoice->_triggerNoteDelay) && (pVoice->_sampleCounter >= pVoice->_triggerNoteDelay))
 	{
 		if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
 		{
@@ -550,8 +545,6 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 	Voice* pVoice = &_voices[voice];
 	int triggered = 0;
 	std::uint64_t w_offset = 0;
-
-	if (callbacks->song().IsInvalided()) return 0;
 
 	pVoice->_sampleCounter=0;
 	pVoice->effCmd= pEntry.command();

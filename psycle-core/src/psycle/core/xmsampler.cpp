@@ -513,11 +513,6 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	float left_output = 0.0f;
 	float right_output = 0.0f;
 
-	if (pSampler()->pCallbacks()->song().IsInvalided())
-	{
-		IsPlaying(false);
-		return;
-	}
 	//m_WaveDataController.Workxdsp(numSamples);
 	//int tmpcount=0;
 	while (numSamples)
@@ -2117,8 +2112,6 @@ void XMSampler::Tick()
 void XMSampler::Tick(int channelNum, const PatternEvent & event)
 {
 	scoped_lock lock(*this);
-
-	if (callbacks->song().IsInvalided()) { return; }
 
 	// don't process twk , twf, Mcm Commands, or empty lines.
 	if ( event.note() > notetypes::release )

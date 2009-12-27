@@ -45,6 +45,27 @@ class PSYCLE__CORE__DECL CoreSong {
 		private:
 			static SongSerializer serializer;
 	///\}
+	///\name file-related stuff
+	///\{
+		public:
+			/// The file name this song was loaded from.
+			std::string fileName;
+	///\}
+
+	///\name IsReady
+	///\todo Identifies if the song is operational or in a loading/saving state.
+	///\{
+		public:
+			///\name IsReady
+			/// Checks the ready state of song (if it can be played). Always call it after acquiring the lock.
+			bool IsReady(){ return ready; };
+			///\name SetReady
+			/// Sets song to ready state (it can be played).
+			void SetReady(const bool value) { scoped_lock lock(mutex_); ready = value; }
+		private:
+			bool ready;
+	///\}
+
 
 	#if defined PSYCLE__CORE__SIGNALS
 		///\name signals
@@ -155,15 +176,6 @@ class PSYCLE__CORE__DECL CoreSong {
 			Machine * machine_[MAX_MACHINES];
 	///\}
 
-	///\name file-related stuff
-	///\{
-		public:
-			/// The file name this song was loaded from.
-			std::string fileName;
-			/// Is this song saved to a file?
-			bool _saved;
-	///\}
-
 	///\name instruments
 	///\{
 		public:
@@ -270,20 +282,6 @@ class PSYCLE__CORE__DECL CoreSong {
 			void DeleteLayer(Instrument::id_type id);
 	///\}
 
-	///\name IsInvalid
-	///\todo doc ... what's that?
-	///\{
-		public:
-			///\name IsInvalid
-			///\todo doc ... what's that?
-			bool IsInvalided(){return Invalided;};
-			///\name IsInvalid
-			///\todo doc ... what's that?
-			void IsInvalided(const bool value) { Invalided = value; }
-		private:
-			bool Invalided;
-	///\}
-
 	public:
 		void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
 
@@ -291,7 +289,7 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\{
 		public:
 			typedef class scoped_lock<mutex> scoped_lock;
-			operator mutex & () const { return mutex_; }
+			mutex & Mutex() const { return mutex_; }
 		private:
 			mutex mutable mutex_;
 	///\}
@@ -313,6 +311,10 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 		virtual void DeleteMachine(Machine* mac);
 	private:
 		void clearMyData();
+
+	public:
+		/// Is this song saved to a file?
+		bool _saved;
 
 	///\name various ui-related stuff
 	///\{

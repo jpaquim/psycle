@@ -123,6 +123,7 @@ void Player::start(double pos) {
 		return;
 	}
 
+	scoped_lock lock(song().Mutex());
 	if(autoRecord_) startRecording();
 
 	Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
@@ -136,6 +137,7 @@ void Player::start(double pos) {
 }
 
 void Player::skip(double beats) {
+	scoped_lock lock(song().Mutex());
 	if (!playing_) 
 		return;
 
@@ -143,6 +145,7 @@ void Player::skip(double beats) {
 	
 }
 void Player::skipTo(double beatpos) {
+	scoped_lock lock(song().Mutex());
 	if (!playing_) 
 		return;
 
@@ -377,6 +380,8 @@ void Player::process(Player::node & node) throw(std::exception) {
 void Player::stop() {
 	if(loggers::information()()) loggers::information()("psycle: core: player: stopping");
 	if(!song_ || !driver_) return;
+	
+	scoped_lock lock(song().Mutex());
 	playing_ = false;
 	for(int i(0); i < MAX_MACHINES; ++i) if(song().machine(i)) {
 		song().machine(i)->Stop();
@@ -632,14 +637,17 @@ void Player::execute_notes(double beat_offset, PatternEvent& entry) {
 float * Player::Work(int numSamples) {
 	if(!song_) return buffer_;
 
-	scoped_lock lock(work_mutex());
+	scoped_lock lock(song().Mutex());
+	if (!song().IsReady()) {
+		dsp::Clear(buffer_, numSamples);
+		return buffer_;
+	}
 
 	// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
+	///\todo: The buffer has to be served by the audiodriver, since the audiodriver knows the size it needs to have.
 	((Master*)song().machine(MASTER_INDEX))->_pMasterSamples = buffer_;
 	double beatsToWork = numSamples / static_cast<double>(timeInfo_.samplesPerBeat());
 	
-	///\todo CSingleLock crit(&song().door, true);
-
 	if(autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence().tickLength()) stopRecording();
 
 	if(!playing_) {
@@ -778,8 +786,10 @@ void Player::writeSamplesToFile(int amount) {
 
 void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, dsp::Dither::NoiseShape::type noiseshaping)
 {
-	if(recording_) return;
 	if(!song_ && !driver_) return;
+	
+	scoped_lock lock(song().Mutex());
+	if(recording_) return;
 	int channels(driver_->playbackSettings().numChannels());
 	recording_ =( DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->playbackSettings().samplesPerSec(), driver_->playbackSettings().bitDepth(), channels));
 	recording_with_dither_ = dodither;
@@ -791,6 +801,8 @@ void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, ds
 }
 
 void Player::stopRecording() {
+
+	scoped_lock lock(song().Mutex());
 	if(!recording_) return;
 	_outputWaveFile.Close();
 	recording_ = false;
