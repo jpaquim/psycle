@@ -36,6 +36,16 @@ AudioDriverSettings::AudioDriverSettings()
 	blockCount_(6)
 {}
 
+bool AudioDriverSettings::operator!=(AudioDriverSettings const & other) {
+	return
+		samplesPerSec_ != other.samplesPerSec_ ||
+		bitDepth_ != other.bitDepth_ ||
+		channelMode_ != other.channelMode_ ||
+		bufferSize_ != other.bufferSize_ ||
+		blockSize_ != other.blockSize_ ||
+		blockCount_ != other.blockCount_ ||
+		deviceName_ != other.deviceName_;
+}
 
 /*******************************************************************************************/
 // AudioDriver
@@ -43,16 +53,54 @@ AudioDriverSettings::AudioDriverSettings()
 AudioDriver::AudioDriver()
 :
 	callback_(),
-	callback_context_() {
-}
+	callback_context_(),
+	opened_(),
+	started_()
+{}
 
 void AudioDriver::set_callback(AUDIODRIVERWORKFN callback, void * context) {
 	callback_ = callback;
 	callback_context_ = context;
 }
 
-AudioDriverInfo AudioDriver::info() const {
-	return AudioDriverInfo("silent", "null output driver", "no sound output", true);
+void AudioDriver::set_opened(bool b) {
+	if(b) {
+		if(!opened_) do_open();
+	} else if(opened_) {
+		set_started(false);
+		do_close();
+	}
+	opened_ = b;
+}
+
+void AudioDriver::set_started(bool b) {
+	if(b) {
+		if(!started_) {
+			set_opened(true);
+			do_start();
+		}
+	} else if(started_) do_stop();
+	started_ = b;
+}
+
+void AudioDriver::setPlaybackSettings(AudioDriverSettings const & settings ) {
+	if(!opened_) playbackSettings_ = settings;
+	else if(playbackSettings_ != settings) {
+		do_close();
+		playbackSettings_ = settings;
+		do_open();
+		if(started_) do_start();
+	}
+}
+
+void AudioDriver::setCaptureSettings(AudioDriverSettings const & settings ) {
+	if(!opened_) captureSettings_ = settings;
+	else if(captureSettings_ != settings) {
+		do_close();
+		captureSettings_ = settings;
+		do_open();
+		if(started_) do_start();
+	}
 }
 
 double AudioDriver::frand() {
@@ -157,21 +205,17 @@ void AudioDriver::DeQuantize24AndDeinterlace(int const * pin, float * poutleft, 
 /*******************************************************************************************/
 // DummyDriver
 
+AudioDriverInfo DummyDriver::info() const {
+	return AudioDriverInfo("dummy", "Dummy Driver", "Dummy silent driver", true);
+}
+
 DummyDriver::DummyDriver()
 :
 	running_(),
 	stop_requested_()
 {}
 	
-DummyDriver::~DummyDriver() {
-	stop();
-}
-
-AudioDriverInfo DummyDriver::info() const {
-	return AudioDriverInfo("dummy", "Dummy Driver", "Dummy silent driver", true);
-}
-
-void DummyDriver::start() {
+void DummyDriver::do_start() {
 	// return immediatly if the thread is already running
 	if(running_) return;
 	
@@ -205,7 +249,7 @@ void DummyDriver::thread_function() {
 		condition_.notify_one();
 }
 
-void DummyDriver::stop() {
+void DummyDriver::do_stop() {
 	// return immediatly if the thread is not running
 	if(!running_) return;
 
@@ -220,6 +264,10 @@ void DummyDriver::stop() {
 		while(running_) condition_.wait(lock);
 		stop_requested_ = false;
 	}
+}
+
+DummyDriver::~DummyDriver() {
+	set_opened(false);
 }
 
 }}

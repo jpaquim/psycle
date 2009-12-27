@@ -23,46 +23,45 @@
 #include <pthread.h>
 #include <exception>
 
-namespace psycle {
-	namespace core {
-		class ESoundOut : public AudioDriver
-		{
-			public:
-				ESoundOut();
-				~ESoundOut();
-				/*override*/ AudioDriverInfo info() const;
-				/*override*/ void Configure();
-				/*override*/ bool Enable(bool e);
+namespace psycle { namespace core {
 
-			private:
-				unsigned int channels_;
-				int channelsFlag();
+class ESoundOut : public AudioDriver {
+	public:
+		ESoundOut();
+		~ESoundOut();
+		/*override*/ AudioDriverInfo info() const;
 
-				unsigned int bits_;
-				int bitsFlag();
-				
-				unsigned int rate_;
-				
-				void setDefaults();
-				
-				int open();
-				int close();
-				std::string host_;
-				int port_;
-				std::string hostPort();
-				int output_;
-				int fd_;
+	protected:
+		/*override*/ void do_open();
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close();
 
-				pthread_t threadId_;
-				static void audioOutThreadStatic(void*);
-				void audioOutThread();
-				bool threadRunning_;
-				bool killThread_;
+	private:
+		unsigned int channels_;
+		int channelsFlag();
 
-				int writeBuffer(char * buffer, long size);
-				long deviceBuffer_;
-		};
-	}
-}
+		unsigned int bits_;
+		int bitsFlag();
+
+		unsigned int rate_;
+
+		std::string host_;
+		int port_;
+		std::string hostPort();
+		int output_;
+		int fd_;
+
+		pthread_t threadId_;
+		static void audioOutThreadStatic(void*);
+		void audioOutThread();
+		bool threadRunning_;
+		bool killThread_;
+
+		int writeBuffer(char * buffer, long size);
+		long deviceBuffer_;
+};
+
+}}
 #endif // defined PSYCLE__ESOUND_AVAILABLE
 #endif

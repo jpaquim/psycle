@@ -40,10 +40,14 @@ class MsWaveOut : public AudioDriver {
 		~MsWaveOut();
 
 		/*override*/ AudioDriverInfo info() const;
-		/*override*/ bool Enable( bool e );
+
+	protected:
+		/*override*/ void do_open() {}
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close() {}
 
 	private:
-
 		char buffer[1024];   // intermediate buffer for reading
 
 		// mme variables
@@ -74,9 +78,6 @@ class MsWaveOut : public AudioDriver {
 		void fillBuffer();
 
 		bool _dither;
-
-		bool start();
-		bool stop();
 };
 
 }}

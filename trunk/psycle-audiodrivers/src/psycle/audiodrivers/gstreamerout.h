@@ -18,24 +18,18 @@ class GStreamerOut : public AudioDriver {
 		GStreamerOut();
 		~GStreamerOut();
 		/*override*/ AudioDriverInfo info() const;
-		/*override*/ void Configure();
-		/*override*/ bool Configured() const;
-		/*override*/ bool Enable(bool);
-		/*override*/ bool Enabled() const;
+
+	protected:
+		/*override*/ void do_open();
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close();
 
 	private:
-		void do_open();
-		void do_start();
-		void do_stop();
-		void do_close();
-		
 		::GstElement * pipeline_, * source_, * caps_filter_, * sink_;
-
 		::GstCaps * caps_;
-
 		void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, GStreamerOut *);
-		void        handoff(::GstBuffer &, ::GstPad &);
-
+		void handoff(::GstBuffer &, ::GstPad &);
 		typedef int16_t output_sample_type;
 };
 

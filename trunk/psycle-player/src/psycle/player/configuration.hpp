@@ -66,6 +66,6 @@ class Configuration {
 		public:
 			AudioDriver & output_driver() throw() { return *output_driver_; }
 		private:
-			AudioDriver * output_driver_, * base_driver_, * dummy_driver_;
+			AudioDriver * output_driver_, * dummy_driver_;
 	///\}
 };

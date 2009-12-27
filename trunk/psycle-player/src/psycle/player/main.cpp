@@ -270,7 +270,7 @@ int main(int argument_count, char * arguments[]) {
 			player.stopRecording();
 		}
 	}
-	player.driver().Enable(false);
+	player.driver().set_started(false);
 	factory.Finalize();
 	///\todo kluge
 	loggers::information()("(klugy pause)");

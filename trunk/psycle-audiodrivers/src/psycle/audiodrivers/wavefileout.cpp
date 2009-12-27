@@ -23,7 +23,13 @@
 #endif
 namespace psycle { namespace core {
 
+AudioDriverInfo WaveFileOut::info( ) const {
+	return AudioDriverInfo("wavefileout","Wave to File Driver","Recording a wav to a file",false);
+}
+
+///\todo use proper synchronisation mecanisms
 volatile int WaveFileOut::kill_thread = 0;
+///\todo use proper synchronisation mecanisms
 volatile int WaveFileOut::threadOpen = 0;
 
 WaveFileOut::WaveFileOut() {
@@ -43,13 +49,8 @@ WaveFileOut::~WaveFileOut() {
 	}
 }
 
-AudioDriverInfo WaveFileOut::info( ) const {
-	return AudioDriverInfo("wavefileout","Wave to File Driver","Recording a wav to a file",false);
-}
-
-bool WaveFileOut::Enable( bool e ) {
-	bool threadStarted = false;
-	if (e && !threadOpen) {
+void WaveFileOut::do_start() {
+	if(!threadOpen) {
 		kill_thread = 0;
 		///\todo use std::thread
 		#if defined __unix__ || defined __APPLE__
@@ -57,21 +58,21 @@ bool WaveFileOut::Enable( bool e ) {
 		#else
 			CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)audioOutThread, this, 0, &threadid);
 		#endif
-		threadStarted = true;
-	} else
-		if (!e && threadOpen) {
-			kill_thread = 1;
-			threadStarted = false;
-			while ( threadOpen ) {
-				///\todo bad
-				#if defined __unix__ || defined __APPLE__
-					usleep(10); // give thread time to close
-				#else
-					Sleep(1);
-				#endif
-			}
+	}
+}
+
+void WaveFileOut::do_stop() {
+	if (threadOpen) {
+		kill_thread = 1;
+		while(threadOpen) {
+			///\todo bad
+			#if defined __unix__ || defined __APPLE__
+				usleep(10); // give thread time to close
+			#else
+				Sleep(1);
+			#endif
 		}
-		return threadStarted;
+	}
 }
 
 int WaveFileOut::audioOutThread(void * ptr) {

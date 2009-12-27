@@ -154,6 +154,10 @@ namespace {
 	}
 }
 
+AudioDriverInfo GStreamerOut::info() const {
+	return AudioDriverInfo("gstreamer", "GStreamer Driver", "Output through the GStreamer infrastructure", true);
+}
+
 GStreamerOut::GStreamerOut()
 :
 	pipeline_(),
@@ -162,10 +166,6 @@ GStreamerOut::GStreamerOut()
 	sink_(),
 	caps_()
 {}
-
-AudioDriverInfo GStreamerOut::info() const {
-	return AudioDriverInfo("gstreamer", "GStreamer Driver", "Output through the GStreamer infrastructure", true);
-}
 
 void GStreamerOut::do_open() {
 	{ // initialize gstreamer
@@ -283,53 +283,6 @@ void GStreamerOut::do_open() {
 	set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
 }
 
-bool GStreamerOut::Configured() const {
-	if(!pipeline_) return false;
-	::GstState s(state(*pipeline_));
-	return
-		s == ::GST_STATE_READY ||
-		s == ::GST_STATE_PAUSED ||
-		s == ::GST_STATE_PLAYING;
-}
-
-void GStreamerOut::Configure() {
-	#if 1 ///\todo THE AUDIODRIVER INTERFACE SUCKS
-		if(Configured()) do_close();
-	#endif
-	if(!Configured()) {
-		try {
-			do_open();
-		} catch(...) {
-			do_close();
-			throw;
-		}
-	}
-}
-
-bool GStreamerOut::Enabled() const {
-	if(!Configured()) return false;
-	return state(*pipeline_) == ::GST_STATE_PLAYING;
-}
-
-bool GStreamerOut::Enable(bool e) {
-	if(e) {
-		if(!Enabled()) {
-			#if 1 ///\todo THE AUDIODRIVER INTERFACE SUCKS
-				Configure();
-			#else
-				if(!Configured()) Configure();
-			#endif
-			try {
-				do_start();
-			} catch(...) {
-				do_stop();
-				throw;
-			}
-		}
-	} else if(Enabled()) do_stop();
-	return true;
-}
-
 void GStreamerOut::do_start() {
 	// register our callback to the handoff signal of the fakesrc element
 	if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
@@ -391,8 +344,7 @@ void GStreamerOut::do_close() {
 }
 
 GStreamerOut::~GStreamerOut() {
-	Enable(false);
-	if(Configured()) do_close();
+	set_opened(false);
 }
 
 }}
