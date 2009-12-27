@@ -161,19 +161,10 @@ GStreamerOut::GStreamerOut()
 	source_(),
 	caps_filter_(),
 	sink_(),
-	caps_(),
-	channels_(2),
-	samples_per_second_(44100),
-	periods_(4),
-	period_frames_(1024)
+	caps_()
 {}
 
 void GStreamerOut::do_open() {
-	channels_ = playbackSettings().numChannels();
-	samples_per_second_ = playbackSettings().samplesPerSec();
-	periods_ = playbackSettings().blockCount();
-	period_frames_ = playbackSettings().blockSamples();
-
 	{ // initialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
 		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
@@ -222,11 +213,11 @@ void GStreamerOut::do_open() {
 	///\todo: fixed to 16bit sample size right now.
 	int const bits_per_channel_sample = sizeof(output_sample_type) * 8;
 	int const significant_bits_per_channel_sample = bits_per_channel_sample;
-	int const bytes_per_sample = channels_ * sizeof(output_sample_type);
+	int const bytes_per_sample = playbackSettings().numChannels() * sizeof(output_sample_type);
 	caps_ = ::gst_caps_new_simple(
 		"audio/x-raw-int", // note we could simply use "audio/x-raw-float" and we'd be freed from having to handle the conversion,
-		"rate"      , G_TYPE_INT    , ::gint(samples_per_second_),
-		"channels"  , G_TYPE_INT    , ::gint(channels_),
+		"rate"      , G_TYPE_INT    , ::gint(playbackSettings().samplesPerSec()),
+		"channels"  , G_TYPE_INT    , ::gint(playbackSettings().numChannels()),
 		"width"     , G_TYPE_INT    , ::gint(bits_per_channel_sample),
 		"depth"     , G_TYPE_INT    , ::gint(significant_bits_per_channel_sample), // depth may be smaller than width; e.g. width could be 24, and depth 20, leaving 4 unused bits.
 		"signed"    , G_TYPE_BOOLEAN, ::gboolean(std::numeric_limits<output_sample_type>::min() < 0),
@@ -259,16 +250,16 @@ void GStreamerOut::do_open() {
 
 	// buffer settings
 
-	unsigned int const period_size(static_cast<unsigned int>(period_frames_ * bytes_per_sample));
+	unsigned int const period_size(static_cast<unsigned int>(playbackSettings().blockSamples() * bytes_per_sample));
 	if(loggers::information()) {
-		float const latency(float(period_frames_) / samples_per_second_);
+		float const latency(float(playbackSettings().blockSamples()) / playbackSettings().samplesPerSec());
 		std::ostringstream s;
 		s <<
 			"psycle: audiodrivers: gstreamer: "
 			"period size: " << period_size << " bytes; "
-			"periods: " << periods_ << "; "
-			"total buffer size: " << periods_ * period_size << " bytes; "
-			"latency: between " << latency << " and " << latency * periods_ << " seconds";
+			"periods: " << playbackSettings().blockCount() << "; "
+			"total buffer size: " << playbackSettings().blockCount() * period_size << " bytes; "
+			"latency: between " << latency << " and " << latency * playbackSettings().blockCount() << " seconds";
 		loggers::information()(s.str());
 	}
 
@@ -277,7 +268,7 @@ void GStreamerOut::do_open() {
 		G_OBJECT(source_),
 		"signal-handoffs", ::gboolean(true),
 		"data"           , ::gint(/*FAKE_SRC_DATA_SUBBUFFER*/ 2), // data allocation method
-		"parentsize"     , ::gint(period_size * periods_),
+		"parentsize"     , ::gint(period_size * playbackSettings().blockCount()),
 		"sizemax"        , ::gint(period_size),
 		//"num-buffers"    , ::gint(periods_),
 		"sizetype"       , ::gint(/*FAKE_SRC_SIZETYPE_FIXED*/ 2), // fixed to sizemax
@@ -353,7 +344,7 @@ void GStreamerOut::handoff_static(::GstElement * source, ::GstBuffer * buffer, :
 void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
 	output_sample_type * const out = reinterpret_cast<output_sample_type * const>(GST_BUFFER_DATA(&buffer));
-	std::size_t const frames = GST_BUFFER_SIZE(&buffer) / sizeof(output_sample_type) / channels_;
+	std::size_t const frames = GST_BUFFER_SIZE(&buffer) / sizeof(output_sample_type) / playbackSettings().numChannels();
 	// The callback is unable to process more than AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH samples at a time,
 	// so we may have to call it several times to fill the output buffer.
 	int chunk = AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH, done = 0, remaining = frames;
