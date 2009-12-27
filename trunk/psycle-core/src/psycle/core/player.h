@@ -218,7 +218,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 		Machine::id_type prev_machines_[MAX_TRACKS];
 		/// temporary buffer to get all the audio from master (which work in small chunks), and send it to the soundcard after converting it to float.
-		float buffer_[MAX_DELAY_BUFFER];
+		float * buffer_;
 
 		/// dither handler
 		dsp::Dither dither;

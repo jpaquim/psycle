@@ -20,6 +20,7 @@
 #include <universalis/os/cpu_affinity.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/cpu/exception.hpp>
+#include <universalis/os/aligned_memory_alloc.hpp>
 #include <boost/bind.hpp>
 #include <iostream> // only for debug output
 
@@ -51,9 +52,8 @@ Player::Player()
 	playing_(),
 	autoStopMachines_()
 {
+	universalis::os::aligned_memory_alloc(16, buffer_, MAX_DELAY_BUFFER);
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
-
-	///\todo starting the threads needs to be done elsewhere?
 	start_threads();
 }
 
@@ -397,7 +397,7 @@ void Player::stop() {
 }
 
 Player::~Player() {
-	///\todo stopping the threads needs to be done elsewhere?
+	universalis::os::aligned_memory_dealloc(buffer_);
 	stop_threads();
 }
 
