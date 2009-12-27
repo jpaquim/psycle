@@ -48,12 +48,12 @@ namespace {
 		return *static_cast< ::GstElement* >(0); // dummy return to avoid warning
 	}
 
-	::GstState inline state(::GstElement & element) {
+	::GstState inline state(::GstElement /*const*/ & element) {
 		// note: GST_STATE(&element) directly accesses the structure data, so this would be wrong for multi-threading.
 		::GstState current_state, pending_state;
 		::GstClockTime const timeout(0); // don't wait
-		//::GstStateChangeReturn const result(
-			::gst_element_get_state(&element, &current_state, &pending_state, timeout);
+		//::GstStateChangeReturn const result =
+		::gst_element_get_state(&element, &current_state, &pending_state, timeout);
 		return current_state;
 	}
 	
@@ -69,8 +69,14 @@ namespace {
 				case ::GST_STATE_CHANGE_NO_PREROLL:
 					if(loggers::information()()) loggers::information()("no preroll", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				case ::GST_STATE_CHANGE_SUCCESS:
-					if(current_state == state_wanted) return;
-					else {
+					if(current_state == state_wanted) {
+						if(loggers::trace()) {
+							std::ostringstream s;
+							s << "psycle: audiodrivers: gstreamer: waited for state: " << ::gst_element_state_get_name(current_state);
+							loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						}
+						return;
+					} else {
 						std::ostringstream s;
 							s
 								<< "unexpected current state on element: " << ::gst_element_get_name(&element)
@@ -185,6 +191,7 @@ void GStreamerOut::do_open() {
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
 		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
 		if(!global_client_count++) {
+			if(loggers::trace()) loggers::trace()("psycle: audiodrivers: gstreamer: init", UNIVERSALIS__COMPILER__LOCATION);
 			int * argument_count(0);
 			char *** arguments(0);
 			::GError * error(0);
@@ -234,8 +241,7 @@ void GStreamerOut::do_open() {
 		"rate"      , G_TYPE_INT    , ::gint(samples_per_second_),
 		"channels"  , G_TYPE_INT    , ::gint(channels_),
 		"width"     , G_TYPE_INT    , ::gint(bits_per_channel_sample),
-		///\todo: what is depth? couldn't find information about this.
-		"depth"     , G_TYPE_INT    , ::gint(significant_bits_per_channel_sample),
+		"depth"     , G_TYPE_INT    , ::gint(significant_bits_per_channel_sample), // depth may be smaller than width; e.g. width could be 24, and depth 20, leaving 4 unused bits.
 		"signed"    , G_TYPE_BOOLEAN, ::gboolean(std::numeric_limits<output_sample_type>::min() < 0),
 		"endianness", G_TYPE_INT    , ::gint(G_BYTE_ORDER),
 		(void*)0
@@ -294,47 +300,57 @@ void GStreamerOut::do_open() {
 
 	// set the pipeline state to ready
 	set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
-
-	// set to false so that started() returns false
-	wait_for_state_to_become_playing_ = false;
 }
 
-bool GStreamerOut::opened() const {
-	return pipeline_ && (
-		state(*pipeline_) == ::GST_STATE_READY ||
-		state(*pipeline_) == ::GST_STATE_PAUSED ||
-		state(*pipeline_) == ::GST_STATE_PLAYING
-	);
+bool GStreamerOut::Configured() const {
+	if(!pipeline_) return false;
+	::GstState s(state(*pipeline_));
+	return
+		s == ::GST_STATE_READY ||
+		s == ::GST_STATE_PAUSED ||
+		s == ::GST_STATE_PLAYING;
+}
+
+void GStreamerOut::Configure() {
+	if(!Configured()) {
+		try {
+			do_open();
+		} catch(...) {
+			do_close();
+			throw;
+		}
+	}
+}
+
+bool GStreamerOut::Enabled() const {
+	if(!Configured()) return false;
+	return state(*pipeline_) == ::GST_STATE_PLAYING;
+}
+
+bool GStreamerOut::Enable(bool e) {
+	if(e) {
+		if(!Enabled()) {
+			try {
+				#if 1 ///\todo THE AUDIODRIVER INTERFACE SUCKS
+					if(Configured()) do_close();
+				#endif
+				if(!Configured()) Configure();
+				do_start();
+			} catch(...) {
+				do_stop();
+				throw;
+			}
+		}
+	} else if(Enabled()) do_stop();
+	return true;
 }
 
 void GStreamerOut::do_start() {
-	stop_requested_ = handoff_called_ = false;
-	wait_for_state_to_become_playing_ = true;
 	// register our callback to the handoff signal of the fakesrc element
 	if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
 	// set the pipeline state to playing
-	#if 0 // Handoff is called before state is changed to playing.
-		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
-	#else
-		::gst_element_set_state(GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
-	#endif
-	{ scoped_lock lock(mutex_);
-		while(!handoff_called_) condition_.wait(lock);
-		wait_for_state_to_become_playing_ = false;
-	}
-	condition_.notify_one();
-}
-
-bool GStreamerOut::started() const {
-	if(!opened()) return false;
-	if(state(*pipeline_) == ::GST_STATE_PLAYING) return true;
-#if 0
-	{ scoped_lock lock(mutex_);
-		return wait_for_state_to_become_playing_;
-	}
-#else
-	return handoff_called_;
-#endif
+	// Handoff is called before state is changed to playing.
+	set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_PLAYING);
 }
 
 /// this is called from within gstreamer's processing thread.
@@ -345,18 +361,6 @@ void GStreamerOut::handoff_static(::GstElement * source, ::GstBuffer * buffer, :
 /// this is called from within gstreamer's processing thread.
 void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
-	{ scoped_lock lock(mutex_);
-		if(stop_requested_) return;
-		if(!handoff_called_) {
-			// Handoff is called before state is changed to playing.
-			if(wait_for_state_to_become_playing_) {
-				if(loggers::trace()) loggers::trace()("handoff called", UNIVERSALIS__COMPILER__LOCATION);
-				handoff_called_ = true;
-				condition_.notify_one();
-				while(wait_for_state_to_become_playing_) condition_.wait(lock);
-			}
-		}
-	}
 	output_sample_type * const out = reinterpret_cast<output_sample_type * const>(GST_BUFFER_DATA(&buffer));
 	std::size_t const frames = GST_BUFFER_SIZE(&buffer) / sizeof(output_sample_type) / channels_;
 	// The callback is unable to process more than AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH samples at a time,
@@ -372,22 +376,11 @@ void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 }
 
 void GStreamerOut::do_stop() {
-	if(pipeline_) {
-		{ scoped_lock lock(mutex_);
-			stop_requested_ = true;
-		}
-		condition_.notify_one();
-		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
-		handoff_called_ =false;
-	}
+	if(pipeline_) set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
 }
 
 void GStreamerOut::do_close() {
 	if(pipeline_) {
-		{ scoped_lock lock(mutex_);
-			stop_requested_ = true;
-		}
-		condition_.notify_one();
 		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_NULL);
 		::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
 	}
@@ -401,8 +394,20 @@ void GStreamerOut::do_close() {
 	{ // deinitialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
 		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
-		if(!--global_client_count) ::gst_deinit();
+		if(!--global_client_count) {
+			#if 0 // gst_deinit must not be called because gst_init won't work afterwards
+				if(loggers::trace()) loggers::trace()("psycle: audiodrivers: gstreamer: deinit", UNIVERSALIS__COMPILER__LOCATION);
+				::gst_deinit();
+			#else
+				global_client_count = 1;
+			#endif
+		}
 	}
+}
+
+GStreamerOut::~GStreamerOut() {
+	Enable(false);
+	if(Configured()) do_close();
 }
 
 }}

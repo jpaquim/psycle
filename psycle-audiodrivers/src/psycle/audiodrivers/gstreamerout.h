@@ -18,7 +18,7 @@ using namespace universalis::stdlib;
 class GStreamerOut : public AudioDriver {
 	public:
 		GStreamerOut();
-		~GStreamerOut() { close(); }
+		~GStreamerOut();
 
 		/*override*/ AudioDriverInfo info() const {
 			return AudioDriverInfo("gstreamer", "GStreamer Driver", "Output through the GStreamer infrastructure", true);
@@ -32,21 +32,15 @@ class GStreamerOut : public AudioDriver {
 		void * callback_context_;
 
 	public:
-		/*override*/ bool Enable(bool e) { if(e) start(); else stop(); return true; }
-		/*override*/ bool Enabled(bool e) { return started(); }
-		bool Configured() { opened(); }
-		/*override*/ void Configure() { try { do_open(); } catch(...) { do_close(); throw; } }
+		/*override*/ void Configure();
+		/*override*/ bool Configured() const;
+		/*override*/ bool Enable(bool e);
+		/*override*/ bool Enabled() const;
 	private:
-		bool opened() const;
 		void do_open();
-		void close() { stop(); if(opened()) do_close(); }
-		void do_close();
-		
-		bool started() const;
-		void start() { if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
 		void do_start();
-		void stop() { if(started()) do_stop(); }
 		void do_stop();
+		void do_close();
 		
 		::GstElement * pipeline_, * source_, * caps_filter_, * sink_;
 
@@ -54,14 +48,6 @@ class GStreamerOut : public AudioDriver {
 
 		void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, GStreamerOut *);
 		void        handoff(::GstBuffer &, ::GstPad &);
-
-		typedef class scoped_lock<mutex> scoped_lock;
-		mutex mutable mutex_;
-		condition<scoped_lock> mutable condition_;
-
-		bool wait_for_state_to_become_playing_;
-		bool handoff_called_;
-		bool stop_requested_;
 
 		typedef int16_t output_sample_type;
 		unsigned int channels_;
