@@ -169,21 +169,7 @@ GStreamerOut::GStreamerOut()
 {}
 
 void GStreamerOut::do_open() {
-	switch(playbackSettings().channelMode()) {
-		case 0: // mono
-		case 1: // left
-		case 2: // right
-			channels_ = 1;
-			break;
-		case 3: // stereo
-			channels_ = 2;
-			break;
-		default: {
-			std::ostringstream s;
-			s << "unhandled channel mode: " << playbackSettings().channelMode();
-			throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-	}
+	channels_ = playbackSettings().numChannels();
 	samples_per_second_ = playbackSettings().samplesPerSec();
 	periods_ = playbackSettings().blockCount();
 	period_frames_ = playbackSettings().blockSamples();
