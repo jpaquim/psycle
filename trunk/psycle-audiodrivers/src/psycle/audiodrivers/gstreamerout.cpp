@@ -313,6 +313,9 @@ bool GStreamerOut::Configured() const {
 }
 
 void GStreamerOut::Configure() {
+	#if 1 ///\todo THE AUDIODRIVER INTERFACE SUCKS
+		if(Configured()) do_close();
+	#endif
 	if(!Configured()) {
 		try {
 			do_open();
@@ -331,11 +334,12 @@ bool GStreamerOut::Enabled() const {
 bool GStreamerOut::Enable(bool e) {
 	if(e) {
 		if(!Enabled()) {
-			try {
-				#if 1 ///\todo THE AUDIODRIVER INTERFACE SUCKS
-					if(Configured()) do_close();
-				#endif
+			#if 1 ///\todo THE AUDIODRIVER INTERFACE SUCKS
+				Configure();
+			#else
 				if(!Configured()) Configure();
+			#endif
+			try {
 				do_start();
 			} catch(...) {
 				do_stop();
