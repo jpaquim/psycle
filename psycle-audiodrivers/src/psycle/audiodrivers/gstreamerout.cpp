@@ -155,8 +155,6 @@ namespace {
 
 GStreamerOut::GStreamerOut()
 :
-	callback_(),
-	callback_context_(),
 	pipeline_(),
 	source_(),
 	caps_filter_(),
