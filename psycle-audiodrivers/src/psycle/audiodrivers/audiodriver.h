@@ -119,10 +119,17 @@ class AudioDriverSettings {
 	///\name getter/setter for the whole buffer size (in bytes).
 	///\{
 		public:
-			uint32_t totalBufferBytes() const { return bufferSize_; }
-			void setTotalBufferBytes(uint32_t size) { bufferSize_ = size; }
+			uint32_t totalBufferBytes() const { return totalBufferBytes_; }
+			void setTotalBufferBytes(uint32_t size) { totalBufferBytes_ = size; }
 		private:
-			uint32_t bufferSize_;
+			uint32_t totalBufferBytes_;
+	///\}
+
+	///\name getter/setter for the audio block size (in bytes)
+	///\{
+		public:
+			uint32_t blockBytes() const { return blockSize_ * sampleSize(); }
+			void setBlockBytes(uint32_t size) { blockSize_ = size / sampleSize(); }
 	///\}
 
 	///\name getter/setter for the audio block size (in samples)

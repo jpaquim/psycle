@@ -157,7 +157,7 @@ void MsWaveOut::fillBuffer() {
 	std::int16_t buf[1024 / 2];
 	int newCount = bufSize / 2;
 	while ( _running ) {
-		float const * input(_pCallback(_callbackContext, newCount));
+		float const * input(callback(newCount));
 		Quantize16(input,buf,newCount);
 		writeAudio(hWaveOut, (CHAR*) buf, sizeof(buf) );
 	}
@@ -171,8 +171,7 @@ DWORD WINAPI MsWaveOut::audioOutThread( void *pWaveOut ) {
 }
 
 void MsWaveOut::do_start() {
-	if ( hWaveOut ) return true;   // do not start again
-	if(!_pCallback) return false;  // no player callback
+	if(hWaveOut) throw std::runtime_error("............");
 	// WAVEFORMATEX is defined in mmsystem.h
 	// this structure is used, to define the sampling rate, sampling resolution
 	// and the number of channles
@@ -189,9 +188,9 @@ void MsWaveOut::do_start() {
 	_dither = 0;
 
 	// the buffer block variables
-	if (!(waveBlocks = allocateBlocks())) return 0; // memory error
-	waveFreeBlockCount =  playbackSettings().blockCount();
-	waveCurrentBlock   = 0;
+	if(!(waveBlocks = allocateBlocks())) throw std::runtime_error("............");
+	waveFreeBlockCount = playbackSettings().blockCount();
+	waveCurrentBlock = 0;
 
 	// this will protect the monitor buffer counter variable
 

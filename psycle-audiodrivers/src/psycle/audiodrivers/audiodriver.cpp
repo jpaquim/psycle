@@ -31,7 +31,7 @@ AudioDriverSettings::AudioDriverSettings()
 	samplesPerSec_(44100),
 	bitDepth_(16),
 	channelMode_(3),
-	bufferSize_(24576),
+	totalBufferBytes_(24576),
 	blockSize_(1024),
 	blockCount_(6)
 {}
@@ -41,7 +41,7 @@ bool AudioDriverSettings::operator!=(AudioDriverSettings const & other) {
 		samplesPerSec_ != other.samplesPerSec_ ||
 		bitDepth_ != other.bitDepth_ ||
 		channelMode_ != other.channelMode_ ||
-		bufferSize_ != other.bufferSize_ ||
+		totalBufferBytes_ != other.totalBufferBytes_ ||
 		blockSize_ != other.blockSize_ ||
 		blockCount_ != other.blockCount_ ||
 		deviceName_ != other.deviceName_;

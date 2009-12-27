@@ -348,58 +348,41 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 			// Compatibility with older psycle::host
 			void SetDefaultPatternLines(int defaultPatLines) {}
 
-			int GetHighestInstrumentIndex()
-			{
+			int GetHighestInstrumentIndex() {
 				int i;
-				for(i=MAX_INSTRUMENTS-1;i>=0;i--)
-				{
-					if(! this->_pInstrument[i]->Empty()) {
-						break;
-					}
-				}
+				for(i = MAX_INSTRUMENTS - 1; i >= 0; --i) if(! this->_pInstrument[i]->Empty()) break;
 				return i;
 			}
-			const int BeatsPerMin(){return bpm();}
-			void BeatsPerMin(const int value)
-			{ 
-				setBpm(value);
-			}
+
+			const int BeatsPerMin() { return bpm(); }
+			void BeatsPerMin(const int value) { setBpm(value); }
 
 			const int LinesPerBeat(){return ticksSpeed();}
-			void LinesPerBeat(const int value)
-			{
-				setTicksSpeed(value);
-			}
+			void LinesPerBeat(const int value) { setTicksSpeed(value); }
 			
 			void New();
-
-			//Fake. Just to compile. They need to go out
-			//{
-			unsigned char asdf[5];
-			inline unsigned char * _ppattern(int ps){
-				return asdf;
-			}
-			inline unsigned char * _ptrack(int ps, int track){
-				return asdf;
-			}
-			inline unsigned char * _ptrackline(int ps, int track, int line){
-				return asdf;
-			}
-
-			bool _trackArmed[MAX_TRACKS];
-			bool _trackMuted[MAX_TRACKS];
-			int _trackArmedCount;
-
-			int playOrder[MAX_SONG_POSITIONS];
-			int playOrderSel[MAX_SONG_POSITIONS];
-			int playLength;
-
-			int patternLines[MAX_PATTERNS];
-			char patternName[MAX_PATTERNS][32];
-
-			unsigned char currentOctave;
-			//}
 	///\}
+
+	//Fake. Just to compile. They need to go out
+	//{
+		unsigned char asdf[5];
+		unsigned char * _ppattern(int ps){ return asdf; }
+		unsigned char * _ptrack(int ps, int track){ return asdf; }
+		unsigned char * _ptrackline(int ps, int track, int line) { return asdf; }
+
+		bool _trackArmed[MAX_TRACKS];
+		bool _trackMuted[MAX_TRACKS];
+		int _trackArmedCount;
+
+		int playOrder[MAX_SONG_POSITIONS];
+		int playOrderSel[MAX_SONG_POSITIONS];
+		int playLength;
+
+		int patternLines[MAX_PATTERNS];
+		char patternName[MAX_PATTERNS][32];
+
+		unsigned char currentOctave;
+	//}
 };
 
 }}

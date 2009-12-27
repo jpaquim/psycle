@@ -490,7 +490,11 @@ namespace psycle {
 			{
 				m_wndView._outputActive = false;
 				Global::pPlayer->stop();
-				Global::pConfig->_pOutputDriver->Enable(false);
+				#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					Global::pConfig->_pOutputDriver->set_started(false);
+				#else
+					Global::pConfig->_pOutputDriver->Enable(false);
+				#endif
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Close();
 

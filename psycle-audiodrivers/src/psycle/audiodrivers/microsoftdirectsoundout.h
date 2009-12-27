@@ -86,20 +86,20 @@ class MsDirectSound : public AudioDriver {
 		/*override*/ AudioDriverInfo info() const;
 
 	protected:
-		/*override*/ void do_open() {}
+		/*override*/ void do_open();
 		/*override*/ void do_start();
 		/*override*/ void do_stop();
-		/*override*/ void do_close() {}
+		/*override*/ void do_close();
 
 	public:
-		virtual void GetCapturePorts(std::vector<std::string>&ports);
-		virtual bool AddCapturePort(uint32_t idx);
-		virtual bool RemoveCapturePort(uint32_t idx);
-		virtual bool CreateCapturePort(PortCapt &port);
-		virtual void GetReadBuffers(uint32_t idx, float **pleft, float **pright,int numsamples);
+		void GetCapturePorts(std::vector<std::string>&ports);
+		void AddCapturePort(uint32_t idx);
+		void RemoveCapturePort(uint32_t idx);
+		void CreateCapturePort(PortCapt &port);
+		void GetReadBuffers(uint32_t idx, float **pleft, float **pright,int numsamples);
 		static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
-		virtual int GetWritePos();
-		virtual int GetPlayPos();
+		int GetWritePos();
+		int GetPlayPos();
 		void AddConfigGui(DSoundUiInterface* ui) { ui_ = ui; }
 
 	protected:
@@ -113,8 +113,6 @@ class MsDirectSound : public AudioDriver {
 		bool WantsMoreBlocks();
 		void DoBlocksRecording(PortCapt& port);
 		bool WantsMoreBlocksRecording(PortCapt& port);
-		bool Start();
-		bool Stop();
 
 	private:
 		bool _configured;

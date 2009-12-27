@@ -106,7 +106,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
 				}
-				_global.pConfig->_pOutputDriver->Enable(false);
+				#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					_global.pConfig->_pOutputDriver->set_started(false);
+				#else
+					_global.pConfig->_pOutputDriver->Enable(false);
+				#endif
 				///\todo lock/unlock
 				Sleep(256);
 				_global.pConfig->_pMidiInput->Close();
@@ -202,16 +206,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		int CPsycleApp::ExitInstance() 
 		{
 			_global.pConfig->Write();
-			_global.pConfig->_pOutputDriver->Enable(false);
+			#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				_global.pConfig->_pOutputDriver->set_started(false);
+			#else
+				_global.pConfig->_pOutputDriver->Enable(false);
+			#endif
 			///\todo lock/unlock
 			Sleep(256);
 			_global.pConfig->_pMidiInput->Close();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			MachineFactory & factory(MachineFactory::getInstance());
-			factory.Finalize();
-#else
-			CNewMachine::DestroyPluginInfo();
-#endif
+			#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				MachineFactory & factory(MachineFactory::getInstance());
+				factory.Finalize();
+			#else
+				CNewMachine::DestroyPluginInfo();
+			#endif
 			return CWinApp::ExitInstance();
 		}
 

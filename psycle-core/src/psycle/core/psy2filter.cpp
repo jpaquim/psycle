@@ -939,11 +939,11 @@ namespace vst {
 		pFile->ReadArray(edName, 16); edName[15] = 0;
 		SetEditName(edName);
 		
-		pFile->Read(_inputMachines);
-		pFile->Read(_outputMachines);
-		pFile->Read(_inputConVol);
-		pFile->Read(_connection);
-		pFile->Read(_inputCon);
+		pFile->ReadArray(_inputMachines, sizeof _inputMachines / sizeof *_inputMachines);
+		pFile->ReadArray(_outputMachines, sizeof _outputMachines / sizeof *_outputMachines);
+		pFile->ReadArray(_inputConVol, sizeof _inputConVol / sizeof *_inputConVol);
+		pFile->ReadArray(_connection, sizeof _connection / sizeof *_connection);
+		pFile->ReadArray(_inputCon, sizeof _inputCon / sizeof *_inputCon);
 		pFile->Skip(96); // ConnectionPoints, 12*8bytes
 		pFile->Read(_connectedInputs);
 		pFile->Read(_connectedOutputs);
