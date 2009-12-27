@@ -7,7 +7,6 @@
 #include <universalis/os/loggers.hpp>
 #include <universalis/exception.hpp>
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <gst/gst.h>
 
