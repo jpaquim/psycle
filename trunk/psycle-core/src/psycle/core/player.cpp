@@ -397,8 +397,8 @@ void Player::stop() {
 }
 
 Player::~Player() {
-	universalis::os::aligned_memory_dealloc(buffer_);
 	stop_threads();
+	universalis::os::aligned_memory_dealloc(buffer_);
 }
 
 void Player::stop_threads() {
