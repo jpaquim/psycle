@@ -196,9 +196,9 @@ int main(int argument_count, char * arguments[]) {
 			s << "psycle: player: setting output driver device name to: " << output_device_name;
 			loggers::information()(s.str());
 		}
-		psycle::core::AudioDriverSettings settings(player.driver().playbackSettings()); ///\todo why do we do a copy?
+		psycle::core::AudioDriverSettings settings(player.driver().playbackSettings());
 		settings.setDeviceName(output_device_name);
-		player.driver().setPlaybackSettings(settings); ///\todo why do we copy?
+		player.driver().setPlaybackSettings(settings);
 	}
 
 	if(output_file_name.length()) {

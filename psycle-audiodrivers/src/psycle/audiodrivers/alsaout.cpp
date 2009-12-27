@@ -17,6 +17,10 @@
 #include <cstring>
 namespace psycle { namespace core {
 
+AudioDriverInfo AlsaOut::info() const {
+	return AudioDriverInfo("alsa", "Alsa Driver", "Low Latency audio driver", true);
+}
+
 AlsaOut::AlsaOut()
 :
 	rate(),
@@ -40,13 +44,24 @@ AlsaOut::AlsaOut()
 	setDefault();
 }
 	
-AlsaOut::~AlsaOut() {
-	Stop();
-	/// \todo free memory here
+void AlsaOut::setDefault() {
+	rate = 44100; // stream rate
+	format = SND_PCM_FORMAT_S16; // sample format
+	channels = 2; // count of channels
+
+	// safe default values
+	buffer_time = 200000;
+	period_time = 60000;
+
+	buffer_size = 0;
+	period_size = 0;
+	output = 0;
 }
 
-AudioDriverInfo AlsaOut::info() const {
-	return AudioDriverInfo("alsa", "Alsa Driver", "Low Latency audio driver", true);
+bool AlsaOut::Enable(bool e) {
+	if(e) Start();
+	else Stop();
+	return true;
 }
 
 bool AlsaOut::Start() {
@@ -65,12 +80,15 @@ bool AlsaOut::Start() {
 		std::cerr << "psycle: alsa: attaching output failed: " << snd_strerror(err) << '\n';
 		return false;
 	}
-	
-	std::cout << "psycle: alsa: playback device is: " << playbackSettings().deviceName() << '\n';
+
+	std::string device_name = playbackSettings().deviceName();
+	if(!device_name.length()) device_name = "default";
+
+	std::cout << "psycle: alsa: playback device is: " << device_name << '\n';
 	std::cout << "psycle: alsa: stream parameters are: " << rate << "Hz, " << snd_pcm_format_name(format) << ", " << channels << " channels\n";
 	std::cout << "psycle: alsa: using transfer method: " << "write" << '\n'; ///\todo parametrable?
 	
-	if((err = snd_pcm_open(&handle, playbackSettings().deviceName().c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+	if((err = snd_pcm_open(&handle, device_name.c_str() , SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
 		std::cerr << "psycle: alsa: playback open error: " << snd_strerror(err) << '\n';
 		return false;
 	}
@@ -170,9 +188,9 @@ int AlsaOut::xrun_recovery(int err) {
 	return err;
 }
 
-bool AlsaOut::Stop() {
+void AlsaOut::Stop() {
 	// return immediatly if the thread is not running
-	if(!running_) return true;
+	if(!running_) return;
 
 	// ask the thread to terminate
 	{ scoped_lock lock(mutex_);
@@ -185,25 +203,6 @@ bool AlsaOut::Stop() {
 		while(running_) condition_.wait(lock);
 		stop_requested_ = false;
 	}
-	return true; ///\todo we actually always return true, so the result is useless!
-}
-
-void AlsaOut::setDefault() {
-	rate = 44100; // stream rate
-	format = SND_PCM_FORMAT_S16; // sample format
-	channels = 2; // count of channels
-
-	// safe default values
-	buffer_time = 200000;
-	period_time = 60000;
-	
-	buffer_size = 0;
-	period_size = 0;
-	output = 0;
-	
-	AudioDriverSettings settings(this->playbackSettings());
-	settings.setDeviceName("default");
-	this->setPlaybackSettings(settings);
 }
 
 void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {
@@ -362,6 +361,11 @@ int AlsaOut::set_swparams(snd_pcm_sw_params_t *swparams) {
 		return err;
 	}
 	return 0;
+}
+
+AlsaOut::~AlsaOut() {
+	Stop();
+	/// \todo free memory here
 }
 
 }}

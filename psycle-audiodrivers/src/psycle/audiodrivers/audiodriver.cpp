@@ -27,7 +27,7 @@ AudioDriverInfo::AudioDriverInfo(std::string const & name, std::string const & h
 
 AudioDriverSettings::AudioDriverSettings()
 :
-	deviceName_("unnamed"),
+	deviceName_(),
 	samplesPerSec_(44100),
 	bitDepth_(16),
 	channelMode_(3),
