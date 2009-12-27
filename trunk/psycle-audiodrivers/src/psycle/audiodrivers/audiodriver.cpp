@@ -40,6 +40,17 @@ AudioDriverSettings::AudioDriverSettings()
 /*******************************************************************************************/
 // AudioDriver
 
+AudioDriver::AudioDriver()
+:
+	callback_(),
+	callback_context_() {
+}
+
+void AudioDriver::set_callback(AUDIODRIVERWORKFN callback, void * context) {
+	callback_ = callback;
+	callback_context_ = context;
+}
+
 AudioDriverInfo AudioDriver::info() const {
 	return AudioDriverInfo("silent", "null output driver", "no sound output", true);
 }
@@ -148,10 +159,6 @@ void AudioDriver::DeQuantize24AndDeinterlace(int const * pin, float * poutleft, 
 
 DummyDriver::DummyDriver()
 :
-	AudioDriver(),
-	callback_function_(),
-	callback_context_(),
-	initialized_(),
 	running_(),
 	stop_requested_()
 {}
@@ -162,12 +169,6 @@ DummyDriver::~DummyDriver() {
 
 AudioDriverInfo DummyDriver::info() const {
 	return AudioDriverInfo("dummy", "Dummy Driver", "Dummy silent driver", true);
-}
-
-void DummyDriver::Initialize(AUDIODRIVERWORKFN callback_function, void * callback_context) {
-	callback_function_ = callback_function;
-	callback_context_ = callback_context;
-	initialized_ = true;
 }
 
 void DummyDriver::start() {
@@ -193,8 +194,7 @@ void DummyDriver::thread_function() {
 		{ scoped_lock lock(mutex_);
 			if(stop_requested_) goto notify_termination;
 		}
-		int samples(256);
-		callback_function_(callback_context_, samples);
+		callback(AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH);
 	}
 
 	// notify that the thread is not running anymore

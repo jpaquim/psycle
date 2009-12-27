@@ -163,6 +163,10 @@ GStreamerOut::GStreamerOut()
 	caps_()
 {}
 
+AudioDriverInfo GStreamerOut::info() const {
+	return AudioDriverInfo("gstreamer", "GStreamer Driver", "Output through the GStreamer infrastructure", true);
+}
+
 void GStreamerOut::do_open() {
 	{ // initialize gstreamer
 		call_once(global_client_count_init_once_flag, global_client_count_init);

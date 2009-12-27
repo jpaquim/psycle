@@ -27,19 +27,11 @@ class JackOut : public AudioDriver {
 	public:
 		JackOut();
 		~JackOut();
-
-		virtual AudioDriverInfo info() const;
-
-		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-				virtual bool Initialized();
-				virtual void configure();
-				virtual bool Enable(bool e);
+		/*override*/ AudioDriverInfo info() const;
+		/*override*/ void configure();
+		/*override*/ bool Enable(bool e);
 
 	private:
-		// psycle variables
-		bool _initialized;
-		void* _callbackContext;
-		AUDIODRIVERWORKFN _pCallback;
 		bool running_;
 
 		// jack variables

@@ -145,21 +145,23 @@ class AudioDriverSettings {
 /// base class for all audio drivers
 class AudioDriver {
 	public:
-		AudioDriver(): callback_(), callback_context_() {}
+		AudioDriver();
 
 		virtual ~AudioDriver() {}
 
 		/// gives the driver information
 		virtual AudioDriverInfo info() const;
 
-	public:
-		/// initialize has nothing to do with the driver, it only sets only the pointer for a later player work call
-		virtual/*todo not virtual*/ void Initialize(AUDIODRIVERWORKFN callback, void * context) { callback_ = callback; callback_context_ = context; }
-		virtual/*todo not virtual*/ bool Initialized() { return callback_; }
-		float * callback(int numSamples) { return callback_(callback_context_, numSamples); }
-	private:
-		AUDIODRIVERWORKFN callback_;
-		void * callback_context_;
+	///\name callback to the player work function that generates audio
+	///\{
+		public:
+			void set_callback(AUDIODRIVERWORKFN callback, void * context);
+		protected:
+			float * callback(int numSamples) { return callback_(callback_context_, numSamples); }
+		private:
+			AUDIODRIVERWORKFN callback_;
+			void * callback_context_;
+	///\}
 
 	public:
 		virtual bool Enabled() { return false; }
@@ -172,6 +174,7 @@ class AudioDriver {
 		virtual int GetInputLatency() { return captureSettings_.totalBufferBytes(); }
 		virtual int GetOutputLatency() { return playbackSettings_.totalBufferBytes(); }
 
+	protected:
 		static double frand();
 		static void Quantize16WithDither(float const * pin, int16_t * piout, int c);
 		static void Quantize16(float const * pin, int16_t * piout, int c);
@@ -215,15 +218,10 @@ class DummyDriver : public AudioDriver {
 	public:
 		DummyDriver();
 		~DummyDriver();
-		virtual AudioDriverInfo info() const;
-		virtual void Initialize(AUDIODRIVERWORKFN callback_function, void * callback_context);
-		virtual bool Initialized() { return initialized_; }
-		virtual bool Enable(bool e) { if(e) start(); else stop(); return true; }
+		/*override*/ AudioDriverInfo info() const;
+		/*override*/ bool Enable(bool e) { if(e) start(); else stop(); return true; }
 
 	private:
-		AUDIODRIVERWORKFN callback_function_;
-		void * callback_context_;
-		bool initialized_;
 		void start();
 		void stop();
 

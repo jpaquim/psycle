@@ -19,10 +19,6 @@ namespace psycle { namespace core {
 
 AlsaOut::AlsaOut()
 :
-	AudioDriver(),
-	_callbackContext(),
-	_pCallback(),
-	_initialized(),
 	rate(),
 	channels(),
 	buffer_time(),
@@ -51,12 +47,6 @@ AlsaOut::~AlsaOut() {
 
 AudioDriverInfo AlsaOut::info() const {
 	return AudioDriverInfo("alsa", "Alsa Driver", "Low Latency audio driver", true);
-}
-
-void AlsaOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context) {
-	_pCallback = pCallback;
-	_callbackContext = context;
-	_initialized = true;
 }
 
 bool AlsaOut::Start() {
@@ -95,7 +85,7 @@ bool AlsaOut::Start() {
 		return false;
 	}
 	
-	samples = (std::int16_t*) std::malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
+	samples = (int16_t*) std::malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
 	if(!samples) {
 		std::cerr << "psycle: alsa: out of memory\n";
 		return false;
@@ -113,7 +103,7 @@ bool AlsaOut::Start() {
 		areas[chn].step = channels * 16;
 	}
 	
-	std::thread t(boost::bind(&AlsaOut::thread_function, this));
+	thread t(boost::bind(&AlsaOut::thread_function, this));
 	// wait for the thread to be running
 	{ scoped_lock lock(mutex_);
 		while(!running_) condition_.wait(lock);
@@ -135,7 +125,7 @@ void AlsaOut::thread_function() {
 			if(stop_requested_) goto notify_termination;
 		}
 		FillBuffer(0, period_size);
-		std::int16_t * ptr = samples;
+		int16_t * ptr = samples;
 		int cptr = period_size;
 		while(cptr > 0) {
 			int err = snd_pcm_writei(handle, ptr, cptr);
@@ -150,7 +140,7 @@ void AlsaOut::thread_function() {
 			ptr += err * channels;
 			cptr -= err;
 		}
-		std::this_thread::yield(); ///\todo is this useful?
+		this_thread::yield(); ///\todo is this useful?
 	}
 
 	// notify that the thread is not running anymore
@@ -170,7 +160,7 @@ int AlsaOut::xrun_recovery(int err) {
 	} else if(err == -ESTRPIPE) {
 		while((err = snd_pcm_resume(handle)) == -EAGAIN)
 			// wait until the suspend flag is released
-			std::this_thread::yield(); ///\todo any other way?
+			this_thread::yield(); ///\todo any other way?
 		if(err < 0) {
 			err = snd_pcm_prepare(handle);
 			if(err < 0) std::cerr << "psycle: alsa: cannot recover from suspend, prepare failed: " << snd_strerror(err) << '\n';
@@ -217,7 +207,7 @@ void AlsaOut::setDefault() {
 }
 
 void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {
-	std::int16_t *samples[channels];
+	int16_t *samples[channels];
 	int steps[channels];
 	// verify and prepare the contents of areas
 	for (unsigned int chn(0); chn < channels; ++chn) {
@@ -226,7 +216,7 @@ void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {
 			s << "psycle: alsa: areas[" << chn << "].first == " << areas[chn].first << ", aborting.";
 			throw std::runtime_error(s.str().c_str());
 		}
-		samples[chn] = (std::int16_t *)(((unsigned char *)areas[chn].addr) + (areas[chn].first / 8));
+		samples[chn] = (int16_t *)(((unsigned char *)areas[chn].addr) + (areas[chn].first / 8));
 		if(areas[chn].step % 16) {
 			std::ostringstream s;
 			s <<  "psycle: alsa: areas[" << chn << "].step == " << areas[chn].step << ", aborting.";
@@ -236,7 +226,7 @@ void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {
 		samples[chn] += offset * steps[chn];
 	}
 	// fill the channel areas
-	float const * input(_pCallback(_callbackContext, count));
+	float const * input(callback(count));
 	
 	Quantize16AndDeinterlace(input,samples[0], steps[0], samples[1], steps[1], count);
 	samples[0] += steps[0] * count;

@@ -21,10 +21,7 @@
 #include <iostream>
 namespace psycle { namespace core {
 
-JackOut::JackOut()
-:
-	_initialized()
-{
+JackOut::JackOut() {
 	clientName_ = "xpsycle";
 	serverName_ = ""; // maybe not needed
 	running_ = 0;
@@ -37,17 +34,7 @@ AudioDriverInfo JackOut::info( ) const {
 	return AudioDriverInfo("jack","Jack Audio Connection Kit Driver","Low Latency audio driver",true);
 }
 
-void JackOut::Initialize( AUDIODRIVERWORKFN pCallback, void * context ) {
-	_pCallback = pCallback;
-	_callbackContext = context;
-	_initialized = true;
-}
-
 void JackOut::configure() {
-}
-
-bool JackOut::Initialized() {
-	return _initialized;
 }
 
 bool JackOut::Enable(bool e) {
@@ -146,7 +133,7 @@ int JackOut::fillBuffer( jack_nframes_t nframes ) {
 	jack_default_audio_sample_t *out_2 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_2, nframes);
 
 	int nframesint = nframes;
-	float const * input(_pCallback(_callbackContext, nframesint));
+	float const * input(callback(nframesint));
 
 	int count=0;
 	while ( count < nframesint) {

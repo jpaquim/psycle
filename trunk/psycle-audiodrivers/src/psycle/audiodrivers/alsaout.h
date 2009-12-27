@@ -24,17 +24,10 @@ class AlsaOut : public AudioDriver {
 		~AlsaOut();
 		virtual AudioDriverInfo info() const;
 
-		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-		virtual bool Initialized() { return _initialized; }
 		virtual void configure() {}
 		virtual bool Enable(bool e) { return e ? Start() : Stop(); }
 
 	private:
-		void * _callbackContext;
-		AUDIODRIVERWORKFN _pCallback;
-
-		bool _initialized;
-		
 		void setDefault();
 		bool Start();
 		bool Stop();

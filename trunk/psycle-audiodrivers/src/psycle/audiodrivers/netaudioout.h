@@ -174,23 +174,11 @@ class NetAudioOut : public AudioDriver {
 	public:
 		NetAudioOut();
 		~NetAudioOut();
-		
-		virtual AudioDriverInfo info() const;
-
-	public:
-		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-		virtual bool Initialized();
-	private:
-		bool initialized_;
-		
-	public:
-		virtual void Configure();
-		virtual bool Enable(bool e);
-		virtual AudioDriver* clone() const;
-
+		/*override*/ AudioDriverInfo info() const;
+		/*override*/ void Configure();
+		/*override*/ bool Enable(bool e);
 		
 	private:
-		
 		void setDefaults();
 		bool open();
 		bool close();
@@ -211,9 +199,6 @@ class NetAudioOut : public AudioDriver {
 		bool threadRunning_;
 		bool killThread_;
 
-		//int writeBuffer(char * buffer, long size);
-		AUDIODRIVERWORKFN callback_;
-		void* callbackContext_; // Player callback
 		short buf[48000];
 
 		int latencyInBytes();
@@ -221,7 +206,6 @@ class NetAudioOut : public AudioDriver {
 
 		static char *nas_error(AuServer* aud,AuStatus status);
 		unsigned char toNasFormat();
-	
 };
 
 }}

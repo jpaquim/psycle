@@ -17,16 +17,12 @@ class GStreamerOut : public AudioDriver {
 	public:
 		GStreamerOut();
 		~GStreamerOut();
-
-		/*override*/ AudioDriverInfo info() const {
-			return AudioDriverInfo("gstreamer", "GStreamer Driver", "Output through the GStreamer infrastructure", true);
-		}
-
-	public:
+		/*override*/ AudioDriverInfo info() const;
 		/*override*/ void Configure();
 		/*override*/ bool Configured() const;
-		/*override*/ bool Enable(bool e);
+		/*override*/ bool Enable(bool);
 		/*override*/ bool Enabled() const;
+
 	private:
 		void do_open();
 		void do_start();

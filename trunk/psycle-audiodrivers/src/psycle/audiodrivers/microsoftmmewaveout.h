@@ -39,19 +39,12 @@ class MsWaveOut : public AudioDriver {
 		MsWaveOut();
 		~MsWaveOut();
 
-		virtual AudioDriverInfo info() const;
-		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-		bool Initialized( );
-		virtual bool Enable( bool e );
+		/*override*/ AudioDriverInfo info() const;
+		/*override*/ bool Enable( bool e );
 
 	private:
 
 		char buffer[1024];   // intermediate buffer for reading
-
-		// pointers for work callback
-		AUDIODRIVERWORKFN _pCallback;
-		void* _callbackContext;
-		bool _initialized;
 
 		// mme variables
 		HWAVEOUT hWaveOut;   // device handle
