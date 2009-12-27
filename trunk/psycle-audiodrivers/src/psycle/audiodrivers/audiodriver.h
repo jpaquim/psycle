@@ -189,7 +189,7 @@ class AudioDriver {
 	///\{
 		public:
 			/// here you can set the settings of the driver, like samplerate depth etc
-			virtual void setPlaybackSettings(AudioDriverSettings const & settings ) { playbackSettings_ = settings; }
+			void setPlaybackSettings(AudioDriverSettings const & settings ) { playbackSettings_ = settings; }
 
 			/// here you get the special audio driver settings.
 			/// In case of some drivers like  e.g jack you must prepare, that a driver can set itself.
@@ -202,7 +202,7 @@ class AudioDriver {
 	///\{
 		public:
 			/// here you can set the settings of the driver, like samplerate depth etc
-			virtual void setCaptureSettings(AudioDriverSettings const & settings ) { captureSettings_ = settings; }
+			void setCaptureSettings(AudioDriverSettings const & settings ) { captureSettings_ = settings; }
 
 			/// here you get the special audio driver settings.
 			/// In case of some drivers like  e.g jack you must prepare, that a driver can set itself.

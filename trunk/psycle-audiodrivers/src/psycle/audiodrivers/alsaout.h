@@ -22,15 +22,14 @@ class AlsaOut : public AudioDriver {
 	public:
 		AlsaOut();
 		~AlsaOut();
-		virtual AudioDriverInfo info() const;
-
-		virtual void configure() {}
-		virtual bool Enable(bool e) { return e ? Start() : Stop(); }
+		/*override*/ AudioDriverInfo info() const;
+		/*override*/ void Configure() {}
+		/*override*/ bool Enable(bool e);
 
 	private:
 		void setDefault();
 		bool Start();
-		bool Stop();
+		void Stop();
 
 		/// stream rate
 		unsigned int rate;
