@@ -91,9 +91,8 @@ bool JackOut::registerToJackServer() {
 		return 0;
 		}
 
-	AudioDriverSettings settings = playbackSettings();
-	settings.setSamplesPerSec(jack_get_sample_rate(client));
-	settings.setBitDepth(16); // hardcoded so far
+	playbackSettings_.setSamplesPerSec(jack_get_sample_rate(client));
+	playbackSettings_.setBitDepth(16); // hardcoded so far
 	///\todo inform the player that the sample rate is different
 
 	if ((ports = jack_get_ports (client, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
