@@ -317,11 +317,12 @@ void gstreamer::do_open() throw(engine::exception) {
 }
 
 bool gstreamer::opened() const {
-	return pipeline_ && (
-		state(*pipeline_) == ::GST_STATE_READY ||
-		state(*pipeline_) == ::GST_STATE_PAUSED ||
-		state(*pipeline_) == ::GST_STATE_PLAYING
-	);
+	if(!pipeline_) return false;
+	::GstState s(state(*pipeline_));
+	return
+		s == ::GST_STATE_READY ||
+		s == ::GST_STATE_PAUSED ||
+		s == ::GST_STATE_PLAYING;
 }
 
 void gstreamer::do_start() throw(engine::exception) {
@@ -464,7 +465,13 @@ void gstreamer::do_close() throw(engine::exception) {
 	{ // deinitialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
 		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
-		if(!--global_client_count) ::gst_deinit();
+		if(!--global_client_count) {
+			#if 0  // gst_deinit must not be called because gst_init won't work afterwards
+				::gst_deinit();
+			#else
+				global_client_count = 1;
+			#endif
+		}
 	}
 
 	delete[] intermediate_buffer_; intermediate_buffer_ = 0;
