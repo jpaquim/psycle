@@ -48,10 +48,6 @@ class GStreamerOut : public AudioDriver {
 		void        handoff(::GstBuffer &, ::GstPad &);
 
 		typedef int16_t output_sample_type;
-		unsigned int channels_;
-		unsigned int samples_per_second_;
-		unsigned int periods_;
-		unsigned int period_frames_;
 };
 
 }}
