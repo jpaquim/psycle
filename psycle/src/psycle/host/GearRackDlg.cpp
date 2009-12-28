@@ -432,10 +432,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				break;
 			case 2:
 				m_pParent->AddMacViewUndo();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				Global::song().ExchangeInstruments(sel[0],sel[1]);
+#else
 				Global::song().IsInvalided(true);
 				Global::song().ExchangeInstruments(sel[0],sel[1]);
 				
 				Global::song().IsInvalided(false);
+#endif
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
@@ -548,7 +552,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				break;
 #endif
 			case 2:
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				Global::song().IsInvalided(true);
+#endif
 				if (tmac2 < 0)
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)
@@ -569,7 +575,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					}
 				}
 				
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				Global::song().IsInvalided(false);
+#endif
 				pParentMain->UpdateComboIns(true);
 				break;
 			}

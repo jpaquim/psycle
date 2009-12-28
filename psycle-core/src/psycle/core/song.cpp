@@ -445,6 +445,9 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 
 ///\todo mfc+winapi->std
 bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/) {
+#if defined DIVERSALIS__COMPILER__GNU
+	#warning ###########################- UNIMPLEMENTED ###################
+#endif
 	// src has to be occupied and dst must be empty
 	#if 0
 		if(!Gloxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty() && !Gloxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())
@@ -545,7 +548,6 @@ void CoreSong::/*Reset*/DeleteInstruments() {
 }
 
 void CoreSong::/*Delete*/FreeInstrumentsMemory() {
-	scoped_lock lock(mutex_);
 	for(Instrument::id_type id(0) ; id < MAX_INSTRUMENTS ; ++id) {
 		delete _pInstrument[id];
 		_pInstrument[id] = 0;
@@ -553,7 +555,6 @@ void CoreSong::/*Delete*/FreeInstrumentsMemory() {
 }
 
 void CoreSong::DeleteLayer(Instrument::id_type id) {
-	scoped_lock lock(mutex_);
 	_pInstrument[id]->DeleteLayer();
 }
 
