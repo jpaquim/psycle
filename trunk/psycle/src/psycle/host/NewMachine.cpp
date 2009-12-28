@@ -224,6 +224,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if ( ite->second.role() == MachineRole::MASTER ) { continue; }
 					else if ( ite->second.role() == MachineRole::GENERATOR || ite->second.role() == MachineRole::CONTROLLER ) { imgindex = j*2 ; hNode = gen[j]; }
 					else if ( ite->second.role() == MachineRole::EFFECT ) { imgindex = j*2 +1; hNode = fx[j]; }
+					else { imgindex = 6; hNode = crashedNode; }
 					if (ite->second.error().empty() && ite->second.allow()) {
 						if ( displayName == displayDesc || ite->first.host() == Hosts::INTERNAL) {
 							hPlug = m_browser.InsertItem(ite->second.name().c_str(), imgindex, imgindex, hNode, TVI_SORT);

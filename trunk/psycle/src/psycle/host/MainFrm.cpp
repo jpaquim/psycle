@@ -1505,11 +1505,11 @@ namespace psycle {
 
 				//Delete it.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->_pInstrument[PREV_WAV_INS]->DeleteLayer();
+				_pSong->DeleteInstrument(PREV_WAV_INS);
 #else
 				_pSong->DeleteLayer(PREV_WAV_INS);
-#endif
 				_pSong->IsInvalided(false);
+#endif
 			}
 
 

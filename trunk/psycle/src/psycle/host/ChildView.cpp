@@ -361,12 +361,9 @@ namespace psycle {
 								Repaint(draw_modes::playback);
 							}
 						}
-					} else
-                    if (viewMode == view_modes::pattern) {
-						if (Global::pConfig->_followSong)
-						{
-						}
-						Repaint(draw_modes::playback);
+//					} else
+//                    if (viewMode == view_modes::pattern) {
+//						Repaint(draw_modes::playback);
 					}
 #else
 					if (Global::pPlayer->_lineChanged)

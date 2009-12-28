@@ -4361,24 +4361,18 @@ using namespace helpers::math;
 				!(it->first >= low && it->first < up)
 				) {
 				return pattern()->end();
-			} else
-			if (it->first >= low && it->first < up)	{
+			} else {
+			// this is implicit: if (it->first >= low && it->first < up)
 				psycle::core::Pattern::iterator track_it = it;
 				bool found = false;
 				for ( ; it != pattern()->end() && it->first < up; ++it ) {
 					psycle::core::PatternEvent& ev = it->second;
 					if (ev.track() == track ) {
 						return it;
-						///\todo unreachable code
-						found = true;
-						break;
 					}
 				}
-				if (!found) {
-					return pattern()->end();
-				}
+				return pattern()->end();
 			} 
-
 		}
 
 		psycle::core::Pattern::iterator PatternView::GetEventOnCursor() {
