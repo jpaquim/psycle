@@ -40,39 +40,38 @@ namespace psycle { namespace core {
 		}
 
 		const MachineKey MachineKey::invalid() {
-			return MachineKey(Hosts::INTERNAL,"",-1);
+			return MachineKey(Hosts::INTERNAL,"<invalid>", -1);
 		}
 		const MachineKey MachineKey::master() {
-			return MachineKey(Hosts::INTERNAL,"",InternalMacs::MASTER);
+			return MachineKey(Hosts::INTERNAL,"<master>", InternalMacs::MASTER);
 		}
 		const MachineKey MachineKey::dummy() {
-			return MachineKey(Hosts::INTERNAL,"",InternalMacs::DUMMY);
+			return MachineKey(Hosts::INTERNAL,"<dummy>", InternalMacs::DUMMY);
 		}
 		const MachineKey MachineKey::sampler() {
-			return MachineKey(Hosts::INTERNAL,"",InternalMacs::SAMPLER );
+			return MachineKey(Hosts::INTERNAL,"<sampler>", InternalMacs::SAMPLER );
 		}
 		const MachineKey MachineKey::sampulse() {
-			return MachineKey(Hosts::INTERNAL,"",InternalMacs::XMSAMPLER );
+			return MachineKey(Hosts::INTERNAL,"<xm-sampler>", InternalMacs::XMSAMPLER );
 		}
 		const MachineKey MachineKey::duplicator() {
-			return MachineKey(Hosts::INTERNAL,"",InternalMacs::DUPLICATOR);
+			return MachineKey(Hosts::INTERNAL,"<duplicator>", InternalMacs::DUPLICATOR);
 		}
 		const MachineKey MachineKey::mixer() {
-			return MachineKey(Hosts::INTERNAL,"",InternalMacs::MIXER );
+			return MachineKey(Hosts::INTERNAL,"<mixer>", InternalMacs::MIXER );
 		}
 		const MachineKey MachineKey::audioinput() {
-			return MachineKey(Hosts::INTERNAL,"",InternalMacs::AUDIOINPUT );
+			return MachineKey(Hosts::INTERNAL,"<audio-input>", InternalMacs::AUDIOINPUT );
 		}
 		const MachineKey MachineKey::lfo() {
-			return MachineKey(Hosts::INTERNAL,"",InternalMacs::LFO );
+			return MachineKey(Hosts::INTERNAL,"<lfo>", InternalMacs::LFO );
 		}
 		const MachineKey MachineKey::failednative() {
-			return MachineKey(Hosts::NATIVE,"",0);
+			return MachineKey(Hosts::NATIVE,"<failed-native>", 0);
 		}
 		const MachineKey MachineKey::wrapperVst() {
-			return MachineKey(Hosts::VST,"",0);
+			return MachineKey(Hosts::VST,"<vst-wrapper>", 0);
 		}
-
 
 		const std::string MachineKey::preprocessName(std::string dllName) {
 			#if 0

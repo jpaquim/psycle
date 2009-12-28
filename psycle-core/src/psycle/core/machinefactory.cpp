@@ -96,10 +96,13 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 	}
 	if(loggers::information()()) {
 		std::ostringstream s;
-		s << "psycle: core: machine factory: create machine: loading with host: " << key.host() << ", plugin: " << key.dllName();
+		s << "psycle: core: machine factory: create machine: loading with host: " << key.host() << ", plugin: " << key.dllName()
+			//<< " | " << finder_->info(key).libName()
+			//<< " | " << finder_->info(key).name()
+			;
 		loggers::information()(s.str());
 	}
-	Machine* mac = hosts_[key.host()]->CreateMachine(*finder_,key,id);
+	Machine* mac = hosts_[key.host()]->CreateMachine(*finder_, key, id);
 	if (mac && mac->getMachineKey() != MachineKey::master() && 
 		mac->getMachineKey() != MachineKey::failednative() &&
 		mac->getMachineKey() != MachineKey::wrapperVst() &&
