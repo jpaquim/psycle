@@ -455,12 +455,7 @@ void gstreamer::do_close() throw(engine::exception) {
 		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_NULL);
 		::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
 	}
-	if(false) { // seems the pipeline owns its element. need to check the doc.
-		if(sink_) ::gst_object_unref(GST_OBJECT(sink_)); sink_ = 0;
-		if(caps_filter_) ::gst_object_unref(GST_OBJECT(caps_filter_)); caps_filter_ = 0;
-		if(source_) ::gst_object_unref(GST_OBJECT(source_)); source_ = 0;
-		if(caps_) ::gst_caps_unref(caps_); caps_ = 0;
-	} else sink_ = caps_filter_ = /*queue_ =*/ source_ = 0; caps_ = 0;
+	sink_ = caps_filter_ = source_ = 0; caps_ = 0;
 
 	{ // deinitialize gstreamer
 		std::call_once(global_client_count_init_once_flag, global_client_count_init);
