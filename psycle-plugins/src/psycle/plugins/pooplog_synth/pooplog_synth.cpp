@@ -1893,17 +1893,13 @@ X const inline read(char const *& data) {
 }
 
 void mi::PutData(void * pData) {
-	int i;
-	if ((pData == NULL) || (((SYNPAR*)pData)->version != FILEVERSION)) {
-#ifndef SYNTH_LIGHT
-		pCB->MessBox("WARNING!\nThis fileversion does not match current plugin's fileversion.\nYour settings are probably fucked.","Pooplog FM Laboratory",0);
-#else
-		pCB->MessBox("WARNING!\nThis fileversion does not match current plugin's fileversion.\nYour settings are probably fucked.","Pooplog FM Light",0);
-#endif
+	char const * cdata = reinterpret_cast<char const * >(pData);
+	if(cdata) globalpar.version = read<int32_t>(cdata);
+	if(!cdata || globalpar.version != FILEVERSION) {
+		pCB->MessBox("WARNING!\nThis fileversion does not match current plugin's fileversion.\n"
+			"Your settings are probably fucked.", "Pooplog FM Laboratory", 0);
 		return;
 	}
-
-	char const * cdata = reinterpret_cast<char const * >(pData);
 	#if defined SYNTH_ULTRALIGHT
 		cdata += 8; // skip junk
 		globalpar.curOsc = read<int32_t>(cdata);
@@ -2075,7 +2071,7 @@ void mi::PutData(void * pData) {
 	}
 
 	// rebuild pointers
-	for (i = 0; i < MAXOSC; i++)
+	for (int i = 0; i < MAXOSC; i++)
 	{
 #ifndef SYNTH_ULTRALIGHT
 		globalpar.gOscp[i].pWave[0]=WaveTable[globalpar.gOscp[i].Wave[0]%(MAXWAVE+1)]; 
@@ -2089,7 +2085,7 @@ void mi::PutData(void * pData) {
 		globalpar.gOscp[i].poscflfowave=SourceWaveTable[globalpar.gOscp[i].oscflfowave%MAXLFOWAVE]; 
 #endif
 	}
-	for (i = 0; i < MAXVCF; i++)
+	for (int i = 0; i < MAXVCF; i++)
 	{
 		globalpar.gVcfp[i].pvcflfowave=SourceWaveTable[globalpar.gVcfp[i].vcflfowave%MAXLFOWAVE];
 	}
@@ -2174,6 +2170,7 @@ void inline write(char *& data, X const & x) {
 void mi::GetData(void * pData) {
 	if(pData) {
 		char * cdata = reinterpret_cast<char* >(pData);
+		write<int32_t>(cdata, globalpar.version);
 		#if defined SYNTH_ULTRALIGHT
 			cdata += 8; // skip junk
 			write<int32_t>(cdata, globalpar.curOsc);
