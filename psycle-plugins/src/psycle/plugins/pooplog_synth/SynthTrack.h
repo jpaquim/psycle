@@ -375,9 +375,6 @@ struct OSCVALS
 struct SYNPAR
 {
 	int version;
-	#if defined __GNUG__
-		#warning ********************* BUG HERE : loading/saving pointers without handling 32/64-bit differences! *********************
-	#endif
 	float *pvibrato_wave;
 	float *pgain_lfo_wave;
 	int curOsc;
@@ -407,9 +404,6 @@ struct SYNPAR
 // normal synth
 struct OSCPAR
 {
-	#if defined __GNUG__
-		#warning ********************* BUG HERE : loading/saving pointers without handling 32/64-bit differences! *********************
-	#endif
 	float *pWave[2];
 	float *poscplfowave;
 	float *poscwlfowave;
@@ -488,9 +482,6 @@ struct OSCVALS
 struct SYNPAR
 {
 	int version;
-	#if defined __GNUG__
-		#warning ********************* BUG HERE : loading/saving pointers without handling 32/64-bit differences! *********************
-	#endif
 	float *ptremolo_wave;
 	float *pvibrato_wave;
 	float *pgain_lfo_wave;
@@ -535,9 +526,6 @@ struct SYNPAR
 // light synth
 struct OSCPAR
 {
-	#if defined __GNUG__
-		#warning ********************* BUG HERE : loading/saving pointers without handling 32/64-bit differences! *********************
-	#endif
 	float *pWave[2];
 	int Wave[2];
 	int oscwidth;
@@ -562,9 +550,6 @@ struct OSCVALS
 struct SYNPAR
 {
 	int version;
-	#if defined __GNUG__
-		#warning ********************* BUG HERE : loading/saving pointers without handling 32/64-bit differences! *********************
-	#endif
 	float *pvibrato_wave;
 	float *pgain_lfo_wave;
 	int curOsc;
