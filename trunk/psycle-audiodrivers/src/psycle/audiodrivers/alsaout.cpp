@@ -90,17 +90,8 @@ void AlsaOut::do_start() {
 		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
-	if((err = set_hwparams(hwparams, SND_PCM_ACCESS_RW_INTERLEAVED)) < 0) {
-		std::ostringstream s;
-		s << "psycle: alsa: setting of hwparams failed: " << snd_strerror(err);
-		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	
-	if((err = set_swparams(swparams)) < 0) {
-		std::ostringstream s;
-		s << "psycle: alsa: setting of swparams failed: " << snd_strerror(err);
-		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
+	set_hwparams(hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
+	set_swparams(swparams);
 	
 	samples = (int16_t*) std::malloc((period_size * channels * snd_pcm_format_width(format)) / 8);
 	if(!samples) {
@@ -243,61 +234,46 @@ void AlsaOut::FillBuffer(snd_pcm_uframes_t offset, int count) {
 	samples[1] += steps[1] * count;
 }
 
-int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access) {
+void AlsaOut::set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access) {
 	snd_pcm_uframes_t size;
 	int err;
 	
 	// choose all parameters
 	err = snd_pcm_hw_params_any(handle, params);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: broken configuration for playback: no configurations available: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: broken configuration for playback: no configurations available: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	#if 0
 		// set hardware resampling
 		err = snd_pcm_hw_params_set_rate_resample(handle, params, resample);
 		if(err < 0) {
-			if(loggers::exception()) {
-				std::ostringstream s;
-				s << "psycle: alsa: resampling setup failed for playback: " << snd_strerror(err);
-				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			return err;
+			std::ostringstream s;
+			s << "psycle: alsa: resampling setup failed for playback: " << snd_strerror(err);
+			throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	#endif
 	// set the interleaved read/write format
 	err = snd_pcm_hw_params_set_access(handle, params, access);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: access type not available for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: access type not available for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	// set the sample format
 	err = snd_pcm_hw_params_set_format(handle, params, format);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: sample format not available for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: sample format not available for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	// set the count of channels
 	err = snd_pcm_hw_params_set_channels(handle, params, channels);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: channels count (" << channels << ") not available for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: channels count (" << channels << ") not available for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
 	// set the stream rate
@@ -305,42 +281,31 @@ int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access) 
 		unsigned int rrate(rate);
 		err = snd_pcm_hw_params_set_rate_near(handle, params, &rrate, 0);
 		if(err < 0) {
-			if(loggers::exception()) {
-				std::ostringstream s;
-				s << "psycle: alsa: rate "<< rate << "Hz not available for playback: " << snd_strerror(err);
-				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			return err;
+			std::ostringstream s;
+			s << "psycle: alsa: rate "<< rate << "Hz not available for playback: " << snd_strerror(err);
+			throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		if(rrate != rate) {
-			if(loggers::exception()) {
-				std::ostringstream s;
-				s << "psycle: alsa: rate does not match (requested " << rate << "Hz, got " << err << "Hz)";
-				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			return -EINVAL;
+			///\todo don't throw an exception, but inform the caller that the actual settings differ.
+			std::ostringstream s;
+			s << "psycle: alsa: rate does not match (requested " << rate << "Hz, got " << err << "Hz)";
+			throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	}
 	
 	// set the buffer time
 	err = snd_pcm_hw_params_set_buffer_time_near(handle, params, &buffer_time, 0);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to set buffer time " << buffer_time << " for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to set buffer time " << buffer_time << " for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
 	err = snd_pcm_hw_params_get_buffer_size(params, &size);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to get buffer size for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to get buffer size for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
 	if(loggers::trace()) {
@@ -353,22 +318,16 @@ int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access) 
 	// set the period time
 	err = snd_pcm_hw_params_set_period_time_near(handle, params, &period_time, 0);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to set period time " << period_time << " for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to set period time " << period_time << " for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
 	err = snd_pcm_hw_params_get_period_size(params, &size, 0);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to get period size for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to get period size for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	
 	period_size = size;
@@ -376,48 +335,35 @@ int AlsaOut::set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access) 
 	// write the parameters to device
 	err = snd_pcm_hw_params(handle, params);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to set hw params for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to set hw params for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	return 0;
 }
 
-int AlsaOut::set_swparams(snd_pcm_sw_params_t *swparams) {
+void AlsaOut::set_swparams(snd_pcm_sw_params_t *swparams) {
 	int err;
 	// get the current swparams
 	err = snd_pcm_sw_params_current(handle, swparams);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to determine current swparams for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to determine current swparams for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	// start the transfer when the buffer is almost full:
 	// (buffer_size / avail_min) * avail_min
 	err = snd_pcm_sw_params_set_start_threshold(handle, swparams, (buffer_size / period_size) * period_size);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to set start threshold mode for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to set start threshold mode for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	// allow the transfer when at least period_size samples can be processed
 	err = snd_pcm_sw_params_set_avail_min(handle, swparams, period_size);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to set avail min for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to set avail min for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	// align all transfers to 1 sample
 	#if SND_LIB_VERSION >= 0x10010 // 1.0.16
@@ -425,25 +371,18 @@ int AlsaOut::set_swparams(snd_pcm_sw_params_t *swparams) {
 	#else
 		err = snd_pcm_sw_params_set_xfer_align(handle, swparams, 1);
 		if(err < 0) {
-			if(loggers::exception()) {
-				std::ostringstream s;
-				s << "psycle: alsa: unable to set transfer align for playback: " << snd_strerror(err);
-				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			return err;
+			std::ostringstream s;
+			s << "psycle: alsa: unable to set transfer align for playback: " << snd_strerror(err);
+			throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	#endif
 	// write the parameters to the playback device
 	err = snd_pcm_sw_params(handle, swparams);
 	if(err < 0) {
-		if(loggers::exception()) {
-			std::ostringstream s;
-			s << "psycle: alsa: unable to set sw params for playback: " << snd_strerror(err);
-			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-		return err;
+		std::ostringstream s;
+		s << "psycle: alsa: unable to set sw params for playback: " << snd_strerror(err);
+		throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	return 0;
 }
 
 AlsaOut::~AlsaOut() {
