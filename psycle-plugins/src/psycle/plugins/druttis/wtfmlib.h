@@ -45,7 +45,7 @@ inline float ClipWTPhase(float phase) {
 	while(phase < 0.0f) phase += (float) WAVESIZE;
 	while(phase >= (float) WAVESIZE) phase -= (float) WAVESIZE;
 	return phase;
-	// return (float) (lrint<int>(phase) & WAVEMASK) + (phase - (float) f2i(phase));
+	// return (float) (lrint<int>(phase) & WAVEMASK) + (phase - (float) lrint<int>(phase));
 }
 
 /// Get wavetable sample

@@ -88,7 +88,7 @@ public:
 	//////////////////////////////////////////////////////////////////
 	inline float GetSample(float phase)
 	{
-		register int offset = f2i(phase);
+		register int offset = lrint<int>(phase);
 		const float frac = phase - (float) offset;
 		const float out = m_wave.pdata[offset & WAVEMASK];
 		return out + (m_wave.pdata[++offset & WAVEMASK] - out) * frac;
@@ -101,7 +101,7 @@ public:
 	inline float GetSample(float phase, int index)
 	{
 		const float *pdata = &m_wave.pdata[m_wave.preverse[index] << WAVESIBI];
-		register int offset = f2i(phase);
+		register int offset = lrint<int>(phase);
 		const float frac = phase - (float) offset;
 		const float out = pdata[offset & WAVEMASK];
 		return out + (pdata[++offset & WAVEMASK] - out) * frac;
@@ -113,6 +113,6 @@ public:
 	//////////////////////////////////////////////////////////////////
 	inline float GetSample(float phase, float incr)
 	{
-		return GetSample(phase, f2i(incr * incr2freq) & 0xffff);
+		return GetSample(phase, lrint<int>(incr * incr2freq) & 0xffff);
 	}
 };

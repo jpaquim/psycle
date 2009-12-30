@@ -36,10 +36,12 @@ v0.01b
 /////////////////////////////////////////////////////////////////////
 	*/
 #include <psycle/plugin_interface.hpp>
+#include <psycle/helpers/math/rint.hpp>
 #include <cstring>
 #include <cstdlib>
 
 using namespace psycle::plugin_interface;
+using namespace psycle::helpers::math;
 
 #define PLUGIN_NAME "Pooplog Scratch Master 0.06b"
 
@@ -49,22 +51,6 @@ using namespace psycle::plugin_interface;
 #define SPEED_ONE 1024.0f
 #define MAX_BUF 1024*1024*4
 
-inline int f2i(float flt) ///\todo use psycle-helpers
-{ 
-	#if defined _MSC_VER && defined _M_IX86
-		int i; 
-		static const double half = 0.5f; 
-		_asm 
-		{ 
-			fld flt 
-			fsub half 
-			fistp i 
-		} 
-		return i;
-	#else
-		return static_cast<int>(flt - 0.5f);
-	#endif
-}
 
 #define NUM_BUFF 89
 const static float buffindex[NUM_BUFF]={
@@ -490,7 +476,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 		if (pBufferL)
 		{
-			int i = f2i(rlindex);
+			int i = lrint<int>(rlindex);
 			if (i < (bufsize-1))
 			{
 				sol = (pBufferL[i]*(1.0f-(rlindex-i)))+(pBufferL[i+1]*(rlindex-i))+denormal;
@@ -503,7 +489,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		if (pBufferR)
 		{
-			int i = f2i(rrindex);
+			int i = lrint<int>(rrindex);
 			if (i < (bufsize-1))
 			{
 				sor = (pBufferR[i]*(1.0f-(rrindex-i)))+(pBufferR[i+1]*(rrindex-i))+denormal;

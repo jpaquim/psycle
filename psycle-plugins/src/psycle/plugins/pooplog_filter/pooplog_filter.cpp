@@ -41,6 +41,7 @@ v0.01b
 /////////////////////////////////////////////////////////////////////
 	*/
 #include <psycle/plugin_interface.hpp>
+#include <psycle/helpers/math/rint.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
@@ -49,25 +50,9 @@ v0.01b
 #include "filter.h"
 
 using namespace psycle::plugin_interface;
+using namespace psycle::helpers::math;
 
 #define PLUGIN_NAME "Pooplog Filter 0.06b"
-
-inline int f2i(float flt) ///\todo use psycle-helpers
-{ 
-	#if defined _MSC_VER && defined _M_IX86
-		int i; 
-		static const double half = 0.5f; 
-		_asm 
-		{ 
-			fld flt 
-			fsub half 
-			fistp i 
-		} 
-		return i;
-	#else
-		return static_cast<int>(flt - 0.5f);
-	#endif
-}
 
 #define SYNTH_REMAP_0 24
 #define FILEVERSION 2
@@ -87,7 +72,7 @@ inline int f2i(float flt) ///\todo use psycle-helpers
 #define MAXFILTER 26
 #define MAX_RATE								4096
 #define MAXWAVE 17
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
 
 float SyncAdd[MAXSYNCMODES+1];
@@ -511,7 +496,7 @@ inline void mi::FilterTick()
 		vcflfophase += ((vcflfospeed-MAXSYNCMODES)*(vcflfospeed-MAXSYNCMODES))*(0.000030517f*44100.0f/song_freq);
 	}
 	WRAP_AROUND(vcflfophase);
-	Vals[e_paraVCFlfophase] = f2i(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraVCFlfophase] = lrint<int>(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
 	// vcf
 	if (vcftype)
 	{
@@ -521,7 +506,7 @@ inline void mi::FilterTick()
 
 		if (unbalancelfoamplitude)
 		{
-			int val = f2i((pvcflfowave[f2i(vcflfophase)])*(unbalancelfoamplitude))+256;
+			int val = lrint<int>((pvcflfowave[lrint<int>(vcflfophase)])*(unbalancelfoamplitude))+256;
 			// unbalance
 			if (val <= 256)
 			{
@@ -544,7 +529,7 @@ inline void mi::FilterTick()
 		}
 		if (vcflfoamplitude)
 		{
-			outcutoff+= (float(pvcflfowave[f2i(vcflfophase)])
+			outcutoff+= (float(pvcflfowave[lrint<int>(vcflfophase)])
 							*float(vcflfoamplitude));
 		}
 		if (outcutoff<0) outcutoff = 0;
@@ -576,7 +561,7 @@ inline void mi::FilterTick()
 	{
 		if (gainlfoamplitude)
 		{
-			float p = overdrivegain+(float(pvcflfowave[f2i(vcflfophase)])
+			float p = overdrivegain+(float(pvcflfowave[lrint<int>(vcflfophase)])
 							*float(gainlfoamplitude));
 			if (p < 0) 
 			{
@@ -836,7 +821,7 @@ void mi::UpdateInertia()
 			}
 			else 
 			{
-				*pI->source = f2i(pI->current);
+				*pI->source = lrint<int>(pI->current);
 				if (pI->bCutoff)
 				{
 					VcfCutoff=pI->current;
@@ -885,7 +870,7 @@ void mi::ParameterTweak(int par, int val)
 				float outcutoff = VcfCutoff;
 				if (vcflfoamplitude)
 				{
-					outcutoff+= (float(pvcflfowave[f2i(vcflfophase)])
+					outcutoff+= (float(pvcflfowave[lrint<int>(vcflfophase)])
 									*float(vcflfoamplitude));
 				}
 				if (outcutoff<0) outcutoff = 0;
@@ -1021,15 +1006,15 @@ inline float mi::HandleOverdrive(float input)
 	case 5: // hard clip 2
 		// bounce off limits
 		input *= OutGain;
-		if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
-		else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
+		if (input < -1.0f)								return input-(lrint<int>(input)+1)*(input+1.0f);
+		else if (input > 1.0f)				return input-(lrint<int>(input)+1)*(input-1.0f);
 		return input;
 		break;
 	case 6: // hard clip 3
 		// invert, this one is harsh
 		input *= OutGain;
-		if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
-		else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
+		if (input < -1.0f)								return input + (lrint<int>(input/(2.0f)))*(2.0f);
+		else if (input > 1.0f)				return input - (lrint<int>(input/(2.0f)))*(2.0f);
 		return input;
 		break;
 	case 7: // parabolic distortion
@@ -1044,7 +1029,7 @@ inline float mi::HandleOverdrive(float input)
 		return input;
 		break;
 	case 9: // sin remapper
-		return SourceWaveTable[0][f2i(input*OutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
+		return SourceWaveTable[0][lrint<int>(input*OutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
 		break;
 	case 10: //
 		// good negative partial rectifier
@@ -1329,93 +1314,93 @@ inline float mi::HandleOverdrive(float input)
 		}
 		if (playPos >= SAMPLE_LENGTH)
 		{
-			int i = f2i(playPos/SAMPLE_LENGTH);
+			int i = lrint<int>(playPos/SAMPLE_LENGTH);
 			if (i & 1)
 			{
 				playDir = -playDir;
 			}
-			playPos = (playPos-f2i(playPos))+(f2i(playPos)&((SAMPLE_LENGTH)-1));
+			playPos = (playPos-lrint<int>(playPos))+(lrint<int>(playPos)&((SAMPLE_LENGTH)-1));
 		}
 		switch (overdrive)
 		{
 		case SYNTH_REMAP_0: 
 			if (playDir<0)
 			{
-				return SourceWaveTable[0][f2i(playPos)+SAMPLE_LENGTH]*thisMin*2;
+				return SourceWaveTable[0][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[0][f2i(playPos)+SAMPLE_LENGTH]*thisMax*2;
+				return SourceWaveTable[0][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+1: 
 			if (playDir<0)
 			{
-				return SourceWaveTable[1][f2i(playPos)+SAMPLE_LENGTH]*thisMin*2;
+				return SourceWaveTable[1][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[1][f2i(playPos)+SAMPLE_LENGTH]*thisMax*2;
+				return SourceWaveTable[1][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+2: 
 			if (playDir<0)
 			{
-				return SourceWaveTable[10][f2i(playPos)+SAMPLE_LENGTH]*thisMin*2;
+				return SourceWaveTable[10][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][f2i(playPos)+SAMPLE_LENGTH]*thisMax*2;
+				return SourceWaveTable[10][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+3: 
 			if (playDir<0)
 			{
-				return SourceWaveTable[4][f2i(playPos)+SAMPLE_LENGTH]*thisMin*2;
+				return SourceWaveTable[4][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][f2i(playPos)+SAMPLE_LENGTH]*thisMax*2;
+				return SourceWaveTable[4][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+4: 
 			if (playDir<0)
 			{
-				return SourceWaveTable[0][f2i(playPos)+SAMPLE_LENGTH]*thisMin*2;
+				return SourceWaveTable[0][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][f2i(playPos)+SAMPLE_LENGTH]*thisMax*2;
+				return SourceWaveTable[10][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+5: 
 			if (playDir<0)
 			{
-				return SourceWaveTable[1][f2i(playPos)+SAMPLE_LENGTH]*thisMin*2;
+				return SourceWaveTable[1][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][f2i(playPos)+SAMPLE_LENGTH]*thisMax*2;
+				return SourceWaveTable[10][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+6: 
 			if (playDir<0)
 			{
-				return SourceWaveTable[1][f2i(playPos)+SAMPLE_LENGTH]*thisMin*2;
+				return SourceWaveTable[1][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][f2i(playPos)+SAMPLE_LENGTH]*thisMax*2;
+				return SourceWaveTable[4][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+7: 
 			if (playDir<0)
 			{
-				return SourceWaveTable[10][f2i(playPos)+SAMPLE_LENGTH]*thisMin*2;
+				return SourceWaveTable[10][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][f2i(playPos)+SAMPLE_LENGTH]*thisMax*2;
+				return SourceWaveTable[4][lrint<int>(playPos)+SAMPLE_LENGTH]*thisMax*2;
 			}
 			break;
 		}

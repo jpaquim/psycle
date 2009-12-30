@@ -30,31 +30,16 @@ v0.01b
 /////////////////////////////////////////////////////////////////////
 
 #include <psycle/plugin_interface.hpp>
+#include <psycle/helpers/math/rint.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
 
 using namespace psycle::plugin_interface;
+using namespace psycle::helpers::math;
 
 #define PLUGIN_NAME "Pooplog Autopan 0.06b"
-
-inline int f2i(float flt) ///\todo use psycle-helpers
-{ 
-	#if defined _MSC_VER && defined _M_IX86
-		int i; 
-		static const double half = 0.5f; 
-		_asm 
-		{ 
-			fld flt 
-			fsub half 
-			fistp i 
-		} 
-		return i;
-	#else
-		return static_cast<int>(flt - 0.5f);
-	#endif
-}
 
 #define FILEVERSION 2
 #define MAXSYNCMODES 16
@@ -66,7 +51,7 @@ inline int f2i(float flt) ///\todo use psycle-helpers
 #define MAXENVTYPE 2
 #define MAX_RATE								8192
 #define MAXWAVE 17
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
 
 float SyncAdd[MAXSYNCMODES+1];
@@ -338,14 +323,14 @@ inline void mi::FilterTick()
 		vcflfophase += ((vcflfospeed-MAXSYNCMODES)*(vcflfospeed-MAXSYNCMODES))*0.000030517f*44100/song_freq;
 	}
 	WRAP_AROUND(vcflfophase);
-	Vals[e_paraVCFlfophase] = f2i(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraVCFlfophase] = lrint<int>(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
 	// vcf
 	int newpan = pan;
 
 	if (panlfoamplitude)
 	{
 		oldpan = pan;
-		newpan += f2i((pvcflfowave[f2i(vcflfophase)])*(panlfoamplitude));
+		newpan += lrint<int>((pvcflfowave[lrint<int>(vcflfophase)])*(panlfoamplitude));
 
 		if (newpan < 0)
 		{
@@ -496,7 +481,7 @@ void mi::UpdateInertia()
 			}
 			else 
 			{
-				*pI->source = f2i(pI->current);
+				*pI->source = lrint<int>(pI->current);
 				pI = pI->next;
 			}
 		}
