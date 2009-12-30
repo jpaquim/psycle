@@ -21,31 +21,17 @@ v0.01b
 /////////////////////////////////////////////////////////////////////
 	*/
 #include <psycle/plugin_interface.hpp>
+#include <psycle/helpers/math/rint.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
 
 using namespace psycle::plugin_interface;
+using namespace psycle::helpers::math;
 
 #define PLUGIN_NAME "Pooplog Lofi Processor 0.04b"
 
-inline int f2i(float flt) ///\todo use psycle-helpers
-{ 
-	#if defined _MSC_VER && defined _M_IX86
-		int i; 
-		static const double half = 0.5f; 
-		_asm 
-		{ 
-			fld flt 
-			fsub half 
-			fistp i 
-		} 
-		return i;
-	#else
-		return static_cast<int>(flt - 0.5f);
-	#endif
-}
 
 CMachineParameter const paraFrequency = 
 { 
@@ -356,7 +342,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		// do bits
 		if (fabs(sl) < 16384)
 		{
-			i = abs(f2i(sl*65536*2));
+			i = abs(lrint<int>(sl*65536*2));
 		}
 		else
 		{
@@ -372,7 +358,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		if (fabs(sr) < 16384)
 		{
-			i = abs(f2i(sr*65536*2));
+			i = abs(lrint<int>(sr*65536*2));
 		}
 		else
 		{

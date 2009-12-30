@@ -129,7 +129,7 @@ public:
 			}
 			vib_out *= globals->vib_amount * (float) sin(vib_phase * PI2);
 			vib_phase += globals->vib_speed;
-			vib_phase -= (float) f2i(vib_phase);								// Mod! :)
+			vib_phase -= (float) lrint<int>(vib_phase);								// Mod! :)
 			float loopFilterDelay = 0.5f;
 			float freq = currentFreq + vib_out * currentFreq;
 			float length = (globals->srate / freq);

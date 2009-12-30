@@ -106,7 +106,7 @@ v0.51b
 12:41 PM 03/03/2002
 - improved interpolation algorithm to provide better antialiasing
 - made antialias filter reset when switched to "off"
-- did some major performance optimizations (f2i)
+- did some major performance optimizations (lrint<int>)
 - made oscilator phase cycle much more accurate
 
 v0.45b-0.50b
@@ -2176,7 +2176,7 @@ void mi::UpdateInertia()
 			}
 			else 
 			{
-				*pI->source = f2i(pI->current);
+				*pI->source = lrint<int>(pI->current);
 				if (pI->bCutoff)
 				{
 					for(int c=0;c<MAX_TRACKS;c++)

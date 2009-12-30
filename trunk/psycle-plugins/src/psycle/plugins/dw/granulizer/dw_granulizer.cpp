@@ -321,7 +321,7 @@ mi::mi()
 	layers.resize(MAX_LAYERS);
 	for(int i = 0; i < MAX_LAYERS; ++i)
 	{
-		layers[i]=new GrainLayer;
+		layers[i]=new GrainLayer();
 		layers[i]->in_use=false;
 	}
 	counter=0;

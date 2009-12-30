@@ -6,31 +6,15 @@
 //
 //////////////////////////////////////////////////////////////////////
 #pragma once
+#include <psycle/helpers/math/rint.hpp>
 #include <cmath>
 
+using namespace psycle::helpers::math;
 //////////////////////////////////////////////////////////////////////
 // PI constants
 #define PI 3.1415926536f
 #define PI2 6.2831853072f
 #define HALFPI 1.5707963268f
-
-//////////////////////////////////////////////////////////////////////
-/// converts a double to an integer
-inline int f2i(double d) {
-	#ifdef __BIG_ENDIAN__
-	  return lrintf(d - 0.5);
-	#else
-		const double magic = 6755399441055744.0;
-		const double half = 0.5;
-		union tmp_union
-		{
-			double d;
-			int i;
-		} tmp;
-		tmp.d = d - half + magic;
-		return tmp.i;
-	#endif
-}
 
 //////////////////////////////////////////////////////////////////////
 // floor2int : fast floor thing
