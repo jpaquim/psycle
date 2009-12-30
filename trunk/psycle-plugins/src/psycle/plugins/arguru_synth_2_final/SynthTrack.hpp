@@ -12,17 +12,17 @@ struct SYNPAR
 {
 	signed short *pWave;
 	signed short *pWave2;
-	int osc2detune;
-	int osc2finetune;
-	int osc2sync;
-	int amp_env_attack;
-	int amp_env_decay;
+	float osc2detune;
+	float osc2finetune;
+	bool osc2sync;
+	float amp_env_attack;
+	float amp_env_decay;
 	int amp_env_sustain;
-	int amp_env_release;
-	int vcf_env_attack;
-	int vcf_env_decay;
+	float amp_env_release;
+	float vcf_env_attack;
+	float vcf_env_decay;
 	int vcf_env_sustain;
-	int vcf_env_release;
+	float vcf_env_release;
 	int vcf_lfo_speed;
 	int vcf_lfo_amplitude;
 	int vcf_cutoff;
@@ -62,7 +62,7 @@ public:
 private:
 	void InitLfo(int freq,int amp);
 	void InitEnvelopes(bool force=false);
-	void ActiveVibrato(int speed,int depth);
+	void ActiveVibrato(int depth,int speed);
 	void DisableVibrato();
 	void DoGlide();
 	void Vibrate();
@@ -78,6 +78,7 @@ private:
 	float srCorrection;
 	//in float since it is compared with OSCPosition
 	float waveTableSize;
+	float wavetableCorrection;
 
 	int sp_cmd;
 	int sp_val;
@@ -140,12 +141,12 @@ inline void CSynthTrack::ArpTick()
 	Arp_tickcounter=0;
 
 	float note=Arp_basenote+(float)ArpNote[ArpMode-1][ArpCounter];
-	OSC1Speed=(float)pow(2.0, note/12.0);
+	OSC1Speed=(float)pow(2.0, note*wavetableCorrection/12.0);
 
 	float note2=note+
-	(float)syntp->osc2finetune*0.0039062f+
-	(float)syntp->osc2detune;
-	OSC2Speed=(float)pow(2.0, note2/12.0);
+	syntp->osc2finetune+
+	syntp->osc2detune;
+	OSC2Speed=(float)pow(2.0, note2*wavetableCorrection/12.0);
 
 	if(++ArpCounter>=syntp->arp_cnt)  ArpCounter=0;
 
@@ -386,7 +387,7 @@ inline float CSynthTrack::GetEnvAmp()
 	
 	case 5: // FastRelease
 		AmpEnvValue-=AmpEnvCoef;
-		Stage5AmpVal+=1.0f/(float)syntp->amp_env_attack;
+		Stage5AmpVal+=1.0f/syntp->amp_env_attack;
 
 		if(AmpEnvValue<Stage5AmpVal)
 		{
@@ -396,9 +397,9 @@ inline float CSynthTrack::GetEnvAmp()
 				ROSC2Speed = OSC2Speed;
 			}
 			AmpEnvStage=1;
-			AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
+			AmpEnvCoef=1.0f/syntp->amp_env_attack;
 			VcfEnvStage=1;
-			VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
+			VcfEnvCoef=1.0f/syntp->vcf_env_attack;
 		}
 	break;
 
