@@ -322,13 +322,13 @@ CMachineInfo const MacInfo (
 	GENERATOR,
 	NUMPARAMETERS,
 	pParameters,
-	"Arguru Synth 2 final"
+	"Arguru Synth 2.5"
 		#ifndef NDEBUG
 		" (debug build)"
 		#endif
 		,
 	"Arguru Synth",
-	"J. Arguelles (arguru)",
+	"J. Arguelles (arguru) and psycledelics",
 	"help",
 	4
 );
@@ -355,7 +355,7 @@ class mi : public CMachineInterface {
 		signed short WaveTable[5][2050];
 #endif
 		std::uint32_t waveTableSize;
-		float srCorrection;
+		float wavetableCorrection;
 		CSynthTrack track[MAX_TRACKS];
 	
 		SYNPAR globalpar;
@@ -376,6 +376,10 @@ mi::mi() {
 		track[i].setGlobalPar(&globalpar);
 		reinitChannel[i] = false;
 	}
+	//this prevents a warning in valgrind when calling parameterTweak
+	for(int i=0; i < NUMPARAMETERS; i++) {
+		Vals[i]=0;
+	}
 }
 
 mi::~mi() {
@@ -395,7 +399,7 @@ void mi::Init() {
 	InitWaveTableSR();
 #endif
 	for (int i = 0; i < MAX_TRACKS; ++i) {
-		track[i].setSampleRate(currentSR, waveTableSize, srCorrection);
+		track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 	}
 }
 
@@ -406,40 +410,42 @@ void mi::Stop() {
 
 void mi::SequencerTick() {
 	if (currentSR != pCB->GetSamplingRate()) {
+		Stop();
+		currentSR = pCB->GetSamplingRate();
 #if USE_NEW_WAVETABLES
 		InitWaveTableSR(true);
 #endif
-		for (int i = 0; i < MAX_TRACKS; ++i) {
-			track[i].setSampleRate(currentSR, waveTableSize, srCorrection);
-		}
 		//force an update of all the parameters.
 		ParameterTweak(-1,-1);
-		Stop();
+		for (int i = 0; i < MAX_TRACKS; ++i) {
+			track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
+		}
 	}
 	for (int i = 0; i < MAX_TRACKS; ++i) reinitChannel[i] = true;
 }
 
 void mi::ParameterTweak(int par, int val) {
 	// Called when a parameter is changed by the host app / user gui
-	if (par >= 0 ) Vals[par]=val;
+	if (par >= 0 ) { Vals[par]=val; }
 	float multiplier = currentSR/44100.0f;
 
-	if (par == 0) globalpar.pWave=WaveTable[Vals[0]];
-	if (par == 1) globalpar.pWave2=WaveTable[Vals[1]];
-	globalpar.osc2detune=Vals[2];
-	globalpar.osc2finetune=Vals[3];
-	globalpar.osc2sync=Vals[4];
+	globalpar.pWave=WaveTable[Vals[0]];
+	globalpar.pWave2=WaveTable[Vals[1]];
+	globalpar.osc2detune=(float)Vals[2];
+	globalpar.osc2finetune=(float)Vals[3]*0.0038962f;
+	globalpar.osc2sync=(Vals[4]>0);
 	
-	if (par == 5) globalpar.amp_env_attack=Vals[5]*multiplier;
-	if (par == 6) globalpar.amp_env_decay=Vals[6]*multiplier;
+	//All parameters that are sample rate dependant are corrected here.
+	globalpar.amp_env_attack=Vals[5]*multiplier;
+	globalpar.amp_env_decay=Vals[6]*multiplier;
 	globalpar.amp_env_sustain=Vals[7];
-	if (par == 8) globalpar.amp_env_release=Vals[8]*multiplier;
+	globalpar.amp_env_release=Vals[8]*multiplier;
 
-	if (par == 9) globalpar.vcf_env_attack=Vals[9]*multiplier;
-	if (par == 10) globalpar.vcf_env_decay=Vals[10]*multiplier;
+	globalpar.vcf_env_attack=Vals[9]*multiplier;
+	globalpar.vcf_env_decay=Vals[10]*multiplier;
 	globalpar.vcf_env_sustain=Vals[11];
-	if (par == 12) globalpar.vcf_env_release=Vals[12]*multiplier;
-	if (par == 13) globalpar.vcf_lfo_speed=Vals[13]*multiplier;
+	globalpar.vcf_env_release=Vals[12]*multiplier;
+	globalpar.vcf_lfo_speed=Vals[13]*multiplier;
 	globalpar.vcf_lfo_amplitude=Vals[14];
 
 	globalpar.vcf_cutoff=Vals[15];
@@ -453,6 +459,7 @@ void mi::ParameterTweak(int par, int val) {
 	globalpar.arp_cnt=Vals[23];
 	globalpar.globaldetune=Vals[24];
 #if USE_NEW_WAVETABLES
+	//With the new wavetable, we remove the compensation
 	globalpar.globalfinetune=Vals[25]-60;
 #else
 	globalpar.globalfinetune=Vals[25];
@@ -480,19 +487,16 @@ void mi::Command() {
 			"\n07xx : Change vcf env modulation [$00=-128, $80=0, $FF=+128]",
 			"\n08xx : Change vcf cutoff frequency",
 			"\n09xx : Change vcf resonance amount",
-			"\n0Exx : NoteCut in xx*32 samples",
+			"\n0Exx : NoteCut in xx/2 milliseconds",
 			"\n11xx : Vcf cutoff slide-up",
 			"\n12xx : Vcf cutoff slide-down\0"
 			);
 
-	pCB->MessBox(buffer,"·-=<([aRgUrU's SYNTH 2 (Final)])>=-·",0);
+	pCB->MessBox(buffer,"·-=<([aRgUrU's SYNTH 2.5])>=-·",0);
 }
 
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks) {
-	float sl=0;
-	// not used: float sr=0;
-
 	for(int c=0;c<tracks;c++) {
 		if(track[c].AmpEnvStage) {
 			float *xpsamplesleft=psamplesleft;
@@ -510,25 +514,27 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 
 			if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=numsamples;
 		
+			///\todo: this could be considered a bug, calling performFx here doesn't ensure
+			// a constant number of samples between calls.
 			ptrack->PerformFx();
 
 			if(globalpar.osc_mix == 0) {
 				do {
-					sl=ptrack->GetSampleOsc1();
+					const float sl=ptrack->GetSampleOsc1();
 					*++xpsamplesleft+=sl;
 					*++xpsamplesright+=sl;
 				} while(--xnumsamples);
 			}
 			else if(globalpar.osc_mix == 256) {
 				do {
-					sl=ptrack->GetSampleOsc2();
+					const float sl=ptrack->GetSampleOsc2();
 					*++xpsamplesleft+=sl;
 					*++xpsamplesright+=sl;
 				} while(--xnumsamples);
 			}
 			else {
 				do {
-					sl=ptrack->GetSample();
+					const float sl=ptrack->GetSample();
 					*++xpsamplesleft+=sl;
 					*++xpsamplesright+=sl;
 				} while(--xnumsamples);
@@ -538,6 +544,9 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 }
 
 // Function that describes value on client's displaying
+
+//warning: All sampling rate dependant parameters assume 44.1Khz.
+//The correction is done in the parameterTweak method.
 bool mi::DescribeValue(char* txt,int const param, int const value) {
 	// Oscillators waveform descriptions
 	switch(param) {
@@ -551,8 +560,10 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 				case 4:std::strcpy(txt,"Random");return true;
 			}
 			break;
-	case 3: //fallthrough
-	case 25:
+	case 2:
+			std::sprintf(txt,"%d notes",Vals[param]);
+			return true;
+	case 3: 
 			std::sprintf(txt,"%.03f cts.",Vals[param]*0.390625f);
 			return true;
 	case 4:	//fallthrough
@@ -565,7 +576,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 	case 9: //fallthrough
 	case 10: //fallthrough
 	case 12:
-			std::sprintf(txt,"%.03f ms",Vals[param]*1000.0f/currentSR);
+			std::sprintf(txt,"%.03f ms",Vals[param]*1000.0f/44100.0f);
 			return true;
 	case 7:
 	case 11:
@@ -573,7 +584,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			std::sprintf(txt,"%.1f%%",(float)value*0.390625f);
 			return true;
 	case 13:
-			std::sprintf(txt,"%.03f Hz",(value*0.000005f)/(2.0f*math::pi_f)*(currentSR/64.0f));
+			std::sprintf(txt,"%.03f Hz",(value*0.000005f)/(2.0f*math::pi_f)*(44100.0f/64.0f));
 			return true;
 	case 15:
 			if (Vals[17] < 6) {
@@ -680,6 +691,14 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			case 9:std::strcpy(txt,"Major Bounce");return true;
 			}
 			break;
+	case 24:
+		//Correct the display for finetune
+		std::sprintf(txt,"%d notes",Vals[param]-1);
+		return true;
+	case 25:
+		//Correct the display for finetune
+		std::sprintf(txt,"%.03f cts.",(Vals[param]-60)*0.390625f);
+		return true;
 	case 26:
 			if (value == 0) {std::strcpy(txt, "Off"); return true;}
 			break;
@@ -726,6 +745,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 }
 
 void mi::InitWaveTableOrig() {
+	//Two more shorts (2050-2048=2) allocated for the interpolation routine.
 	for(int c=0;c<2050;c++) {
 		double sval=(double)c*0.00306796157577128245943617517898389;
 		WaveTable[0][c]=int(sin(sval)*16384.0f);
@@ -745,17 +765,18 @@ void mi::InitWaveTableOrig() {
 	}
 
 	waveTableSize = 2048;
-	srCorrection = 1.0f;
+	//wavetableCorrection = 1.0f;
+	wavetableCorrection = pCB->GetSamplingRate()/44100.0f;
 }
 
 //New method to generate the wavetables:
 //
 //Generate a signal of aproximately 22Hz for the current sampling rate.
 //since it will not be an integer amount of samples, store the difference
-//as a factor in srCorrection, so that it can be applied when calculating
+//as a factor in wavetableCorrection, so that it can be applied when calculating
 //the OSC speed.
 void mi::InitWaveTableSR(bool delArray) {
-	//Ensure the value is even, we need two halfs.
+	//Ensure the value is even, we need to divide it by two.
 	const std::uint32_t amount = math::rounded((float)currentSR/22.0f) &0xFFFFFFF8;
 	const std::uint32_t half = amount >> 1;
 
@@ -796,6 +817,6 @@ void mi::InitWaveTableSR(bool delArray) {
 
 
 	waveTableSize = amount;
-	srCorrection = (float)amount*22.0f / (float)currentSR;
+	wavetableCorrection = (float)amount*22.0f / (float)currentSR;
 
 }

@@ -61,11 +61,11 @@ CSynthTrack::~CSynthTrack()
 
 }
 void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float srCorrection_) {
-	///\todo: modify the note-on and initlfo calls to use srCorrection
-	/// also modify the doglide and performFX for srCorrection (oscglide should remain unmodified)
 	m_filter.init(currentSR_);
+	sampleRate = currentSR_;
+	srCorrection = 44100.0f / (float)sampleRate;
 	waveTableSize = wavetableSize_;
-	srCorrection = srCorrection_;
+	wavetableCorrection = srCorrection_;
 }
 
 void CSynthTrack::setGlobalPar(SYNPAR* globalPar) {
@@ -80,14 +80,15 @@ void CSynthTrack::NoteOn(int note,int spd)
 	float nnote=(float)note+
 		(float)syntp->globalfinetune*0.0038962f+
 		(float)syntp->globaldetune;
-	OSC1Speed=(float)pow(2.0, (float)nnote/12.0);
+	OSC1Speed=(float)pow(2.0, (float)nnote*wavetableCorrection/12.0);
 
 	float note2=nnote+
-		(float)syntp->osc2finetune*0.0038962f+
-		(float)syntp->osc2detune;
-	OSC2Speed=(float)pow(2.0, (float)note2/12.0);
+		syntp->osc2finetune+
+		syntp->osc2detune;
+	OSC2Speed=(float)pow(2.0, (float)note2*wavetableCorrection/12.0);
 
-	if (oscglide == 0.0f)
+	//if (oscglide == 0.0f)
+	if (sp_cmd != 0x03)
 	{
 		if (AmpEnvStage == 0)
 		{
@@ -124,7 +125,8 @@ void CSynthTrack::NoteOn(int note,int spd)
 	ArpMode=syntp->arp_mod;
 	Arp_tickcounter=0;
 	Arp_basenote=nnote;
-	Arp_samplespertick=2646000/(syntp->arp_bpm*4);
+	//divides each beat in four arp ticks.
+	Arp_samplespertick=(sampleRate * 60)/(syntp->arp_bpm*4);
 	ArpCounter=1;
 
 	InitEnvelopes(forceNew);
@@ -144,17 +146,17 @@ void CSynthTrack::InitEnvelopes(bool forceNew)
 	if(AmpEnvStage == 0)
 	{
 		AmpEnvStage=1;
-		AmpEnvCoef=1.0f/(float)syntp->amp_env_attack;
+		AmpEnvCoef=1.0f/syntp->amp_env_attack;
 		VcfEnvStage=1;
-		VcfEnvCoef=1.0f/(float)syntp->vcf_env_attack;
+		VcfEnvCoef=1.0f/syntp->vcf_env_attack;
 	}
 	else if (forceNew)
 	{
 		AmpEnvStage=5;
-		AmpEnvCoef=AmpEnvValue/(float)syntp->amp_env_release;
+		AmpEnvCoef=AmpEnvValue/syntp->amp_env_release;
 		Stage5AmpVal=0.0f;
 		VcfEnvStage=4;
-		VcfEnvCoef=VcfEnvValue/(float)syntp->vcf_env_release;
+		VcfEnvCoef=VcfEnvValue/syntp->vcf_env_release;
 	}
 }
 
@@ -167,8 +169,8 @@ void CSynthTrack::NoteOff(bool fast)
 		AmpEnvStage=4;
 		VcfEnvStage=4;
 
-		AmpEnvCoef=AmpEnvValue/(float)syntp->amp_env_release;
-		VcfEnvCoef=VcfEnvValue/(float)syntp->vcf_env_release;
+		AmpEnvCoef=AmpEnvValue/syntp->amp_env_release;
+		VcfEnvCoef=VcfEnvValue/syntp->vcf_env_release;
 
 		if(AmpEnvCoef<unde)AmpEnvCoef=unde;
 		if(VcfEnvCoef<unde)VcfEnvCoef=unde;
@@ -182,16 +184,16 @@ void CSynthTrack::Vibrate()
 		OSCvib=(float)sin(VibratoGr)*VibratoDepth;
 		VibratoGr+=VibratoSpeed;
 
-		if (VibratoGr>6.28318530717958647692528676655901f)
-			VibratoGr-=6.28318530717958647692528676655901f;
+		if (VibratoGr>TWOPI)
+			VibratoGr-=TWOPI;
 	}
 }
 
-void CSynthTrack::ActiveVibrato(int speed,int depth)
+void CSynthTrack::ActiveVibrato(int depth,int speed)
 {
 	if (depth != 0 ) {
-		VibratoSpeed=(float)depth/16.0f;
-		VibratoDepth=(float)speed/16.0f;
+		VibratoSpeed=(float)speed*0.0625*srCorrection;// /16.0f;
+		VibratoDepth=(float)depth*0.0625;// /16.0f;
 	}
 	if (VibratoDepth > 0.0f ) {
 		vibrato=true;
@@ -207,26 +209,26 @@ void CSynthTrack::DoGlide()
 	// Glide Handler
 	if(ROSC1Speed<OSC1Speed)
 	{
-		ROSC1Speed+=oscglide;
+		ROSC1Speed+=oscglide*wavetableCorrection;
 
 		if(ROSC1Speed>OSC1Speed) ROSC1Speed=OSC1Speed;
 	}
 	else if (ROSC1Speed>OSC1Speed)
 	{
-		ROSC1Speed-=oscglide;
+		ROSC1Speed-=oscglide*wavetableCorrection;
 
 		if(ROSC1Speed<OSC1Speed) ROSC1Speed=OSC1Speed;
 	}
 
 	if(ROSC2Speed<OSC2Speed)
 	{
-		ROSC2Speed+=oscglide;
+		ROSC2Speed+=oscglide*wavetableCorrection;
 
 		if(ROSC2Speed>OSC2Speed) ROSC2Speed=OSC2Speed;
 	}
 	else if(ROSC2Speed>OSC2Speed)
 	{
-		ROSC2Speed-=oscglide;
+		ROSC2Speed-=oscglide*wavetableCorrection;
 
 		if(ROSC2Speed<OSC2Speed) ROSC2Speed=OSC2Speed;
 	}
@@ -249,14 +251,14 @@ void CSynthTrack::PerformFx()
 	{
 		/* 0x01 : Pitch Up */
 		case 0x01:
-			shift=(float)sp_val*0.001f;
+			shift=(float)sp_val*0.001f*wavetableCorrection;
 			ROSC1Speed+=shift;
 			ROSC2Speed+=shift;
 			break;
 
 		/* 0x02 : Pitch Down */
 		case 0x02:
-			shift=(float)sp_val*0.001f;
+			shift=(float)sp_val*0.001f*wavetableCorrection;
 			ROSC1Speed-=shift;
 			ROSC2Speed-=shift;
 			if(ROSC1Speed<0.0f)ROSC1Speed=0.0f;
@@ -300,12 +302,12 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	// Note CUT
 	if (cmd==0x0E && val>0)
 	{
-		NoteCutTime=val*32;
+		NoteCutTime=val*sampleRate/2000;
 	}
 
 }
 
 void CSynthTrack::InitLfo(int freq,int amp)
 {
-	lfo_freq=(float)freq*0.000005f;
+	lfo_freq=(float)freq*0.000005f*wavetableCorrection;
 }
