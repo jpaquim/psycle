@@ -323,7 +323,7 @@ const signed char ArpNote[MAXARP][16] = {
 struct VCFPAR
 {
 	float *pvcflfowave;
-	int				vcflfowave;
+	int vcflfowave;
 	int vcfenvdelay;
 	int vcfenvattack;
 	int vcfenvdecay;
@@ -340,7 +340,7 @@ struct VCFPAR
 
 struct VCFVALS
 {
-	int				VcfEnvStage;
+	int VcfEnvStage;
 	float VcfCutoff;
 	float vcflfophase;
 	float VcfEnvValue;

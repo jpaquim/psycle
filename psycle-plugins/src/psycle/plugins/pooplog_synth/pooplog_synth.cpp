@@ -1883,11 +1883,18 @@ void mi::Stop()
 	track[c].NoteOff();
 }
 
-void mi::PutData(void * pData)
-{
+///\todo move that to plugin interface
+template<typename X>
+X const inline read(char const *& data) {
+	///\todo handle endianness
+	X result = *reinterpret_cast<X const * const>(data);
+	data += sizeof(X);
+	return result;
+}
+
+void mi::PutData(void * pData) {
 	int i;
-	if ((pData == NULL) || (((SYNPAR*)pData)->version != FILEVERSION))
-	{
+	if ((pData == NULL) || (((SYNPAR*)pData)->version != FILEVERSION)) {
 #ifndef SYNTH_LIGHT
 		pCB->MessBox("WARNING!\nThis fileversion does not match current plugin's fileversion.\nYour settings are probably fucked.","Pooplog FM Laboratory",0);
 #else
@@ -1895,7 +1902,178 @@ void mi::PutData(void * pData)
 #endif
 		return;
 	}
-	memcpy(&globalpar, pData, sizeof(SYNPAR));
+
+	char const * cdata = reinterpret_cast<char const * >(pData);
+	#if defined SYNTH_ULTRALIGHT
+		cdata += 8; // skip junk
+		globalpar.curOsc = read<int32_t>(cdata);
+		globalpar.curVcf = read<uint32_t>(cdata);
+		globalpar.vcfmixmode = read<uint32_t>(cdata);
+		globalpar.vibrato_wave = read<uint32_t>(cdata);
+		globalpar.gain_lfo_wave = read<uint32_t>(cdata);
+		globalpar.amp_env_attack = read<int32_t>(cdata);
+		globalpar.amp_env_decay = read<int32_t>(cdata);
+		globalpar.amp_env_sustain = read<int32_t>(cdata);
+		globalpar.amp_env_release = read<int32_t>(cdata);
+		globalpar.out_vol = read<int32_t>(cdata);
+		globalpar.vibrato_speed = read<int32_t>(cdata);
+		globalpar.vibrato_amplitude = read<int32_t>(cdata);
+		globalpar.globaltune = read<int32_t>(cdata);
+		globalpar.globalfinetune = read<int32_t>(cdata);
+		globalpar.synthporta = read<int32_t>(cdata);
+		globalpar.interpolate = read<uint32_t>(cdata);
+		globalpar.overdrive = read<int32_t>(cdata);
+		globalpar.song_sync = read<int32_t>(cdata);
+		globalpar.overdrivegain = read<int32_t>(cdata);
+		for(int i = 0; i < MAXOSC; ++i) {
+			cdata += 4; // skip junk
+			globalpar.gOscp[i].Wave = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfinetune = read<int32_t>(cdata);
+			globalpar.gOscp[i].osctune = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscsync = read<uint32_t>(cdata);
+			globalpar.gOscp[i].oscvol = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscmixtype = read<int32_t>(cdata);
+		}
+	#elif defined SYNTH_LIGHT
+		cdata += 8; // skip junk
+		globalpar.curOsc = read<int32_t>(cdata);
+		globalpar.curVcf = read<uint32_t>(cdata);
+		globalpar.vcfmixmode = read<uint32_t>(cdata);
+		globalpar.vibrato_wave = read<uint32_t>(cdata);
+		globalpar.gain_lfo_wave = read<uint32_t>(cdata);
+		globalpar.amp_env_attack = read<int32_t>(cdata);
+		globalpar.amp_env_decay = read<int32_t>(cdata);
+		globalpar.amp_env_sustain = read<int32_t>(cdata);
+		globalpar.amp_env_release = read<int32_t>(cdata);
+		globalpar.out_vol = read<int32_t>(cdata);
+		globalpar.vibrato_speed = read<int32_t>(cdata);
+		globalpar.vibrato_amplitude = read<int32_t>(cdata);
+		globalpar.gain_env_delay = read<int32_t>(cdata);
+		globalpar.gain_env_attack = read<int32_t>(cdata);
+		globalpar.gain_env_decay = read<int32_t>(cdata);
+		globalpar.gain_env_sustain = read<int32_t>(cdata);
+		globalpar.gain_env_release = read<int32_t>(cdata);
+		globalpar.gain_envmod = read<int32_t>(cdata);
+		globalpar.gain_envtype = read<int32_t>(cdata);
+		globalpar.gain_lfo_speed = read<int32_t>(cdata);
+		globalpar.gain_lfo_amplitude = read<int32_t>(cdata);
+		globalpar.globaltune = read<int32_t>(cdata);
+		globalpar.globalfinetune = read<int32_t>(cdata);
+		globalpar.synthporta = read<int32_t>(cdata);
+		globalpar.interpolate = read<uint32_t>(cdata);
+		globalpar.overdrive = read<int32_t>(cdata);
+		globalpar.song_sync = read<int32_t>(cdata);
+		globalpar.overdrivegain = read<int32_t>(cdata);
+		for(int i = 0; i < MAXOSC; ++i) {
+			cdata += 8; // skip junk
+			globalpar.gOscp[i].Wave[0] = read<int32_t>(cdata);
+			globalpar.gOscp[i].Wave[1] = read<uint32_t>(cdata);
+			globalpar.gOscp[i].oscwidth = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfinetune = read<int32_t>(cdata);
+			globalpar.gOscp[i].osctune = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscsync = read<uint32_t>(cdata);
+			globalpar.gOscp[i].oscvol[0] = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscvol[1] = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscmixtype = read<int32_t>(cdata);
+		}
+	#else
+		cdata += 12; // skip junk
+		globalpar.curOsc = read<int32_t>(cdata);
+		globalpar.curVcf = read<uint32_t>(cdata);
+		globalpar.vcfmixmode = read<uint32_t>(cdata);
+		globalpar.tremolo_wave = read<uint32_t>(cdata);
+		globalpar.vibrato_wave = read<uint32_t>(cdata);
+		globalpar.gain_lfo_wave = read<uint32_t>(cdata);
+		globalpar.amp_env_attack = read<int32_t>(cdata);
+		globalpar.amp_env_decay = read<int32_t>(cdata);
+		globalpar.amp_env_sustain = read<int32_t>(cdata);
+		globalpar.amp_env_release = read<int32_t>(cdata);
+		globalpar.out_vol = read<int32_t>(cdata);
+		globalpar.arp_mod = read<int32_t>(cdata);
+		globalpar.arp_bpm = read<int32_t>(cdata);
+		globalpar.arp_cnt = read<uint32_t>(cdata);
+		globalpar.tremolo_speed = read<int32_t>(cdata);
+		globalpar.tremolo_amplitude = read<int32_t>(cdata);
+		globalpar.vibrato_speed = read<int32_t>(cdata);
+		globalpar.vibrato_amplitude = read<int32_t>(cdata);
+		globalpar.gain_env_delay = read<int32_t>(cdata);
+		globalpar.gain_env_attack = read<int32_t>(cdata);
+		globalpar.gain_env_decay = read<int32_t>(cdata);
+		globalpar.gain_env_sustain = read<int32_t>(cdata);
+		globalpar.gain_env_release = read<int32_t>(cdata);
+		globalpar.gain_envmod = read<int32_t>(cdata);
+		globalpar.gain_envtype = read<int32_t>(cdata);
+		globalpar.gain_lfo_speed = read<int32_t>(cdata);
+		globalpar.gain_lfo_amplitude = read<int32_t>(cdata);
+		globalpar.globaltune = read<int32_t>(cdata);
+		globalpar.globalfinetune = read<int32_t>(cdata);
+		globalpar.synthporta = read<int32_t>(cdata);
+		globalpar.interpolate = read<uint32_t>(cdata);
+		globalpar.overdrive = read<int32_t>(cdata);
+		globalpar.song_sync = read<int32_t>(cdata);
+		globalpar.overdrivegain = read<int32_t>(cdata);
+		for(int i = 0; i < MAXOSC; ++i) {
+			cdata += 20; // skip junk
+			globalpar.gOscp[i].Wave[0] = read<int32_t>(cdata);
+			globalpar.gOscp[i].Wave[1] = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscplfowave = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwlfowave = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscflfowave = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwidth = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscphasemix = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscphase = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscplfospeed = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscplfoamplitude = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwlfospeed = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwlfoamplitude = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscflfospeed = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscflfoamplitude = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscpenvmod = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscpenvtype = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscpdelay = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscpattack = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscpdecay = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscpsustain = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscprelease = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwenvmod = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwenvtype = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwdelay = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwattack = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwdecay = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwsustain = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscwrelease = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfenvtype = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfenvmod = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfdelay = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfattack = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfdecay = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfsustain = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfrelease = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscfinetune = read<int32_t>(cdata);
+			globalpar.gOscp[i].osctune = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscsync = read<uint32_t>(cdata);
+			globalpar.gOscp[i].oscvol[0] = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscvol[1] = read<int32_t>(cdata);
+			globalpar.gOscp[i].oscmixtype = read<int32_t>(cdata);
+		}
+	#endif
+	for(int i = 0; i < MAXVCF; ++i) {
+		cdata += 4; // skip junk
+		globalpar.gVcfp[i].vcflfowave = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfenvdelay = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfenvattack = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfenvdecay = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfenvsustain = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfenvrelease = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcflfospeed = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcflfoamplitude = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfcutoff = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfresonance = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcftype = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfenvmod = read<int32_t>(cdata);
+		globalpar.gVcfp[i].vcfenvtype = read<int32_t>(cdata);
+	}
+
 	// rebuild pointers
 	for (i = 0; i < MAXOSC; i++)
 	{
@@ -1985,11 +2163,186 @@ void mi::PutData(void * pData)
 	Vals[e_paraVCFlfospeed]= globalpar.gVcfp[globalpar.curVcf].vcflfospeed;
 }
 
-void mi::GetData(void * pData)
-{
-	if (pData)
-	{
-		memcpy(pData, &globalpar, sizeof(SYNPAR));
+///\todo move that to plugin interface
+template<typename X>
+void inline write(char *& data, X const & x) {
+	///\todo handle endianness
+	*reinterpret_cast<X *>(data) = x;
+	data += sizeof(X);
+}
+
+void mi::GetData(void * pData) {
+	if(pData) {
+		char * cdata = reinterpret_cast<char* >(pData);
+		#if defined SYNTH_ULTRALIGHT
+			cdata += 8; // skip junk
+			write<int32_t>(cdata, globalpar.curOsc);
+			write<uint32_t>(cdata, globalpar.curVcf);
+			write<uint32_t>(cdata, globalpar.vcfmixmode);
+			write<uint32_t>(cdata, globalpar.vibrato_wave);
+			write<uint32_t>(cdata, globalpar.gain_lfo_wave);
+			write<int32_t>(cdata, globalpar.amp_env_attack);
+			write<int32_t>(cdata, globalpar.amp_env_decay);
+			write<int32_t>(cdata, globalpar.amp_env_sustain);
+			write<int32_t>(cdata, globalpar.amp_env_release);
+			write<int32_t>(cdata, globalpar.out_vol);
+			write<int32_t>(cdata, globalpar.vibrato_speed);
+			write<int32_t>(cdata, globalpar.vibrato_amplitude);
+			write<int32_t>(cdata, globalpar.globaltune);
+			write<int32_t>(cdata, globalpar.globalfinetune);
+			write<int32_t>(cdata, globalpar.synthporta);
+			write<uint32_t>(cdata, globalpar.interpolate);
+			write<int32_t>(cdata, globalpar.overdrive);
+			write<int32_t>(cdata, globalpar.song_sync);
+			write<int32_t>(cdata, globalpar.overdrivegain);
+			for(int i = 0; i < MAXOSC; ++i) {
+				cdata += 4; // skip junk
+				write<int32_t>(cdata, globalpar.gOscp[i].Wave);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfinetune);
+				write<int32_t>(cdata, globalpar.gOscp[i].osctune);
+				write<uint32_t>(cdata, globalpar.gOscp[i].oscsync);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscvol);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscmixtype);
+			}
+		#elif defined SYNTH_LIGHT
+			cdata += 8; // skip junk
+			write<int32_t>(cdata, globalpar.curOsc);
+			write<uint32_t>(cdata, globalpar.curVcf);
+			write<uint32_t>(cdata, globalpar.vcfmixmode);
+			write<uint32_t>(cdata, globalpar.vibrato_wave);
+			write<uint32_t>(cdata, globalpar.gain_lfo_wave);
+			write<int32_t>(cdata, globalpar.amp_env_attack);
+			write<int32_t>(cdata, globalpar.amp_env_decay);
+			write<int32_t>(cdata, globalpar.amp_env_sustain);
+			write<int32_t>(cdata, globalpar.amp_env_release);
+			write<int32_t>(cdata, globalpar.out_vol);
+			write<int32_t>(cdata, globalpar.vibrato_speed);
+			write<int32_t>(cdata, globalpar.vibrato_amplitude);
+			write<int32_t>(cdata, globalpar.gain_env_delay);
+			write<int32_t>(cdata, globalpar.gain_env_attack);
+			write<int32_t>(cdata, globalpar.gain_env_decay);
+			write<int32_t>(cdata, globalpar.gain_env_sustain);
+			write<int32_t>(cdata, globalpar.gain_env_release);
+			write<int32_t>(cdata, globalpar.gain_envmod);
+			write<int32_t>(cdata, globalpar.gain_envtype);
+			write<int32_t>(cdata, globalpar.gain_lfo_speed);
+			write<int32_t>(cdata, globalpar.gain_lfo_amplitude);
+			write<int32_t>(cdata, globalpar.globaltune);
+			write<int32_t>(cdata, globalpar.globalfinetune);
+			write<int32_t>(cdata, globalpar.synthporta);
+			write<uint32_t>(cdata, globalpar.interpolate);
+			write<int32_t>(cdata, globalpar.overdrive);
+			write<int32_t>(cdata, globalpar.song_sync);
+			write<int32_t>(cdata, globalpar.overdrivegain);
+			for(int i = 0; i < MAXOSC; ++i) {
+				cdata += 8; // skip junk
+				write<int32_t>(cdata, globalpar.gOscp[i].Wave[0]);
+				write<uint32_t>(cdata, globalpar.gOscp[i].Wave[1]);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwidth);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfinetune);
+				write<int32_t>(cdata, globalpar.gOscp[i].osctune);
+				write<uint32_t>(cdata, globalpar.gOscp[i].oscsync);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscvol[0]);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscvol[1]);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscmixtype);
+			}
+		#else
+			cdata += 12; // skip junk
+			write<int32_t>(cdata, globalpar.curOsc);
+			write<uint32_t>(cdata, globalpar.curVcf);
+			write<uint32_t>(cdata, globalpar.vcfmixmode);
+			write<uint32_t>(cdata, globalpar.tremolo_wave);
+			write<uint32_t>(cdata, globalpar.vibrato_wave);
+			write<uint32_t>(cdata, globalpar.gain_lfo_wave);
+			write<int32_t>(cdata, globalpar.amp_env_attack);
+			write<int32_t>(cdata, globalpar.amp_env_decay);
+			write<int32_t>(cdata, globalpar.amp_env_sustain);
+			write<int32_t>(cdata, globalpar.amp_env_release);
+			write<int32_t>(cdata, globalpar.out_vol);
+			write<int32_t>(cdata, globalpar.arp_mod);
+			write<int32_t>(cdata, globalpar.arp_bpm);
+			write<uint32_t>(cdata, globalpar.arp_cnt);
+			write<int32_t>(cdata, globalpar.tremolo_speed);
+			write<int32_t>(cdata, globalpar.tremolo_amplitude);
+			write<int32_t>(cdata, globalpar.vibrato_speed);
+			write<int32_t>(cdata, globalpar.vibrato_amplitude);
+			write<int32_t>(cdata, globalpar.gain_env_delay);
+			write<int32_t>(cdata, globalpar.gain_env_attack);
+			write<int32_t>(cdata, globalpar.gain_env_decay);
+			write<int32_t>(cdata, globalpar.gain_env_sustain);
+			write<int32_t>(cdata, globalpar.gain_env_release);
+			write<int32_t>(cdata, globalpar.gain_envmod);
+			write<int32_t>(cdata, globalpar.gain_envtype);
+			write<int32_t>(cdata, globalpar.gain_lfo_speed);
+			write<int32_t>(cdata, globalpar.gain_lfo_amplitude);
+			write<int32_t>(cdata, globalpar.globaltune);
+			write<int32_t>(cdata, globalpar.globalfinetune);
+			write<int32_t>(cdata, globalpar.synthporta);
+			write<uint32_t>(cdata, globalpar.interpolate);
+			write<int32_t>(cdata, globalpar.overdrive);
+			write<int32_t>(cdata, globalpar.song_sync);
+			write<int32_t>(cdata, globalpar.overdrivegain);
+			for(int i = 0; i < MAXOSC; ++i) {
+				cdata += 20; // skip junk
+				write<int32_t>(cdata, globalpar.gOscp[i].Wave[0]);
+				write<int32_t>(cdata, globalpar.gOscp[i].Wave[1]);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscplfowave);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwlfowave);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscflfowave);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwidth);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscphasemix);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscphase);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscplfospeed);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscplfoamplitude);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwlfospeed);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwlfoamplitude);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscflfospeed);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscflfoamplitude);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscpenvmod);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscpenvtype);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscpdelay);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscpattack);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscpdecay);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscpsustain);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscprelease);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwenvmod);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwenvtype);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwdelay);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwattack);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwdecay);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwsustain);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscwrelease);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfenvtype);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfenvmod);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfdelay);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfattack);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfdecay);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfsustain);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfrelease);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscfinetune);
+				write<int32_t>(cdata, globalpar.gOscp[i].osctune);
+				write<uint32_t>(cdata, globalpar.gOscp[i].oscsync);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscvol[0]);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscvol[1]);
+				write<int32_t>(cdata, globalpar.gOscp[i].oscmixtype);
+			}
+		#endif
+		for(int i = 0; i < MAXVCF; ++i) {
+			cdata += 4; // skip junk
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcflfowave);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvdelay);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvattack);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvdecay);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvsustain);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvrelease);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcflfospeed);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcflfoamplitude);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfcutoff);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfresonance);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcftype);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvmod);
+			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvtype);
+		}
 	}
 }
 
