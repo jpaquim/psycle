@@ -10,6 +10,7 @@
 
 #include <diversalis/os.hpp>
 #include "detail/boost_xtime.hpp"
+#include <boost/version.hpp>
 #include <boost/thread.hpp>
 #include <boost/operators.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -106,8 +107,12 @@ typedef boost::once_flag once_flag;
 
 template<typename Callable /*, typename Arguments...*/>
 void inline call_once(once_flag & flag, Callable callable /*, Arguments... arguments*/) {
-	/// note: boost wants a function pointer and arguments in reversed order
-	boost::call_once(callable, flag);
+	#if BOOST_VERSION >= 103800
+		boost::call_once(flag, callable);
+	#else
+		// olf boost versions want a function pointer and arguments in reversed order
+		boost::call_once(callable, flag);
+	#endif
 }
 
 namespace this_thread {

@@ -169,7 +169,7 @@ GStreamerOut::GStreamerOut()
 
 void GStreamerOut::do_open() {
 	{ // initialize gstreamer
-		call_once(global_client_count_init_once_flag, global_client_count_init);
+		universalis::stdlib::call_once(global_client_count_init_once_flag, global_client_count_init);
 		scoped_lock<mutex> lock(global_client_count_mutex);
 		if(!global_client_count++) {
 			if(loggers::trace()) loggers::trace()("psycle: audiodrivers: gstreamer: init", UNIVERSALIS__COMPILER__LOCATION);
@@ -325,7 +325,7 @@ void GStreamerOut::do_close() {
 	sink_ = caps_filter_ = source_ = 0; caps_ = 0;
 
 	{ // deinitialize gstreamer
-		call_once(global_client_count_init_once_flag, global_client_count_init);
+		universalis::stdlib::call_once(global_client_count_init_once_flag, global_client_count_init);
 		scoped_lock<mutex> lock(global_client_count_mutex);
 		if(!--global_client_count) {
 			#if 0 // gst_deinit must not be called because gst_init won't work afterwards
