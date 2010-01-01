@@ -289,7 +289,7 @@ private:
 	bool blockSelected_;
 
 	bool isBlockCopied_;
-	psycle::core::SinglePattern pasteBuffer;
+	psycle::core::Pattern pasteBuffer;
 	float lastXmlLineBeatPos;
 	int xmlTracks;
 	float xmlBeats;
