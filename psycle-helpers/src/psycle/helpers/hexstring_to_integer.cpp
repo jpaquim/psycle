@@ -1,6 +1,7 @@
 ///\implementation psycle::helpers.
 #include <vector>
 #include <cctype>
+#include <string>
 
 namespace psycle { namespace helpers {
 
