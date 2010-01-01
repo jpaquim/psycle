@@ -124,7 +124,7 @@ namespace qpsycle {
 
 		song_ = createBlankSong();
 		setupSound();
-		psycle::core::Player::singleton().setLoopSong( true ); ///\todo: should this option should perhaps be a GUI setting, not something the player cares about?
+		psycle::core::Player::singleton().setLoopSong();
 
 		instrumentsModel_ = new InstrumentsModel( song_ );
 
@@ -187,7 +187,7 @@ namespace qpsycle {
 	}
 
 	void MainWindow::setupSound() {
-		psycle::core::Player::singleton().song(song_);
+		psycle::core::Player::singleton().song(*song_);
 		psycle::core::Player::singleton().setDriver(*Global::configuration()._pOutputDriver);
 	}
 
@@ -483,9 +483,9 @@ namespace qpsycle {
 	}
 
 	void MainWindow::setupSignals() {
-		connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psycle::core::SinglePattern* ) ), this, SLOT( onPatternSelectedInPatternBox( psycle::core::SinglePattern* ) ) );
+		connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psycle::core::Pattern* ) ), this, SLOT( onPatternSelectedInPatternBox( psycle::core::Pattern* ) ) );
 		connect( patternBox_, SIGNAL( patternDeleted() ), this, SLOT( onPatternDeleted() ) );
-		connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psycle::core::SinglePattern* ) ), this, SLOT( onAddPatternToSequencerRequest( psycle::core::SinglePattern* ) ) );
+		connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psycle::core::Pattern* ) ), this, SLOT( onAddPatternToSequencerRequest( psycle::core::Pattern* ) ) );
 		connect( patternBox_, SIGNAL( patternNameChanged() ), this, SLOT( onPatternNameChanged() ) );
 		connect( patternBox_, SIGNAL( categoryColorChanged() ), this, SLOT( onCategoryColorChanged() ) );
 
@@ -498,7 +498,7 @@ namespace qpsycle {
 
 		connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 
-		connect( seqView_->sequencerDraw(), SIGNAL( newPatternCreated( psycle::core::SinglePattern* ) ), patternBox_, SLOT( onNewPatternCreated( psycle::core::SinglePattern* ) ) );
+		connect( seqView_->sequencerDraw(), SIGNAL( newPatternCreated( psycle::core::Pattern* ) ), patternBox_, SLOT( onNewPatternCreated( psycle::core::Pattern* ) ) );
 	}
 
 	void MainWindow::onNewSongRequest() {
@@ -595,8 +595,8 @@ namespace qpsycle {
 
 	psycle::core::Song *MainWindow::createBlankSong() {
 		psycle::core::Song *blankSong = new psycle::core::Song( );
-		psycle::core::PatternCategory* category0 = blankSong->patternSequence().patternPool()->createNewCategory("New Category");
-		psycle::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
+		psycle::core::Pattern* pattern0 = new psycle::core::Pattern();
+		pattern0->setCategory("New Category");
 
 		psycle::core::SequenceLine *seqLine = blankSong->patternSequence().createNewLine();
 		seqLine->createEntry( pattern0, 0 );
@@ -631,7 +631,7 @@ namespace qpsycle {
 	void MainWindow::loadSong( psycle::core::Song *song ) {
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 
-		psycle::core::Player::singleton().driver().Enable(false);
+		psycle::core::Player::singleton().driver().set_opened(false);
 		if ( song_ ) delete song_;
 		song_ = song;
 		// Update gui to new song 
@@ -646,7 +646,7 @@ namespace qpsycle {
 	
 		logConsole_->Clear();
 
-		psycle::core::Player::singleton().song( song_ );
+		psycle::core::Player::singleton().song( *song_ );
 
 		instrumentsModel_ = new InstrumentsModel( song_ );
 		macView_ = new MachineView( song_ );
@@ -671,7 +671,7 @@ namespace qpsycle {
 		createActions();
 		setupSignals();
 		// enable audio driver
-		psycle::core::Player::singleton().driver().Enable(true);
+		psycle::core::Player::singleton().driver().set_opened(true);
 
 		statusBar()->showMessage( "Song loaded.", 5000 );
 		logConsole_->AddSuccessText("Song Loaded Successfuly");
@@ -837,7 +837,7 @@ namespace qpsycle {
 		instrumentsModel_->setSelectedInstrumentIndex( newIndex );
 	}
 
-	void MainWindow::onPatternSelectedInPatternBox( psycle::core::SinglePattern* selectedPattern ) {
+	void MainWindow::onPatternSelectedInPatternBox( psycle::core::Pattern* selectedPattern ) {
 		patView_->setPattern( selectedPattern );
 	}
 
@@ -869,7 +869,7 @@ namespace qpsycle {
 		seqView_->onPatternNameChanged();
 	}
 
-	void MainWindow::onAddPatternToSequencerRequest( psycle::core::SinglePattern *pattern ) {
+	void MainWindow::onAddPatternToSequencerRequest( psycle::core::Pattern *pattern ) {
 		seqView_->addPattern( pattern );
 	}
 
@@ -1068,7 +1068,7 @@ namespace qpsycle {
 		if ( psycle::core::Player::singleton().playing() ) {
 			seqView_->updatePlayPos();
 
-			psycle::core::SinglePattern* visiblePattern = 0;
+			psycle::core::Pattern* visiblePattern = 0;
 			visiblePattern = patView_->pattern();
 			if ( visiblePattern ) {
 				double entryStart = 0;

@@ -24,7 +24,7 @@
 
 namespace psycle { namespace core {
 	class Song;
-	class SinglePattern;
+	class Pattern;
 }}
 
 #include <QtGui/QVBoxLayout>
@@ -45,7 +45,7 @@ public:
 	psycle::core::Song* song() const { return song_; }
 	SequencerLine *selectedLine() const;
 	void setSelectedLine( SequencerLine *line ) ;
-	void addPattern( psycle::core::SinglePattern *pattern );
+	void addPattern( psycle::core::Pattern *pattern );
 	SequencerDraw *sequencerDraw() const { return seqDraw_; }
 	void updatePlayPos();
 	void onPatternNameChanged();

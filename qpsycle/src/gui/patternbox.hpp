@@ -22,7 +22,7 @@
 
 namespace psycle { namespace core {
 class Song;
-class SinglePattern;
+class Pattern;
 class PatternCategory;
 }}
 
@@ -85,7 +85,7 @@ namespace qpsycle {
 		void populatePatternTree();
 		PatternTree* patternTree() const { return patternTree_; }
 		psycle::core::Song* song() const { return song_; }
-		psycle::core::SinglePattern* currentPattern() const { return currentPattern_; }
+		psycle::core::Pattern* currentPattern() const { return currentPattern_; }
 
 	public slots:
 		void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
@@ -97,15 +97,15 @@ namespace qpsycle {
 		void addPatternToSequencer();
 		void onPatternNameEdited( const QString & newText );
 		void onEditCategoryColorActionTriggered();
-		void onNewPatternCreated( psycle::core::SinglePattern *newPattern );
+		void onNewPatternCreated( psycle::core::Pattern *newPattern );
 
 	protected:
 		bool event( QEvent *event );
 
 	signals:
-		void patternSelectedInPatternBox( psycle::core::SinglePattern *selectedPattern );
+		void patternSelectedInPatternBox( psycle::core::Pattern *selectedPattern );
 		void patternDeleted();
-		void addPatternToSequencerRequest( psycle::core::SinglePattern *selectedPattern );
+		void addPatternToSequencerRequest( psycle::core::Pattern *selectedPattern );
 		void patternNameChanged();
 		void categoryColorChanged();
 
@@ -117,10 +117,10 @@ namespace qpsycle {
 		long QColorToLongColor( const QColor & qCol );
 
 		psycle::core::Song *song_;
-		psycle::core::SinglePattern* currentPattern_;
+		psycle::core::Pattern* currentPattern_;
 		std::map<CategoryItem*, psycle::core::PatternCategory*> categoryMap;
 		std::vector<CategoryItem*> catItems;
-		std::map<PatternItem*, psycle::core::SinglePattern*> patternMap;
+		std::map<PatternItem*, psycle::core::Pattern*> patternMap;
 
 		QToolBar *toolBar_;
 		PatternTree *patternTree_;
