@@ -30,9 +30,9 @@
 		#undef DIVERSALIS__CPU__ENDIAN__BOTH // was just defined to insert documentation.
 	///\}
 
-	/// indicates the compiler's target processor native word size in bits.
-	#define DIVERSALIS__CPU__WORD_SIZE <number>
-	#undef DIVERSALIS__CPU__WORD_SIZE // was just defined to insert documentation.
+	/// indicates the compiler's target processor/os address size in bytes.
+	#define DIVERSALIS__CPU__SIZEOF_POINTER <number>
+	#undef DIVERSALIS__CPU__SIZEOF_POINTER // was just defined to insert documentation.
 
 	///\name processor brand
 	///\{
@@ -166,8 +166,8 @@
 	// gcc -E -dM -x c++ -std=c++98 -march=<xxx> -ffast-math -msse2 /dev/null
 	// where <xxx> in -march=<xxx> may be native, k8, nocona, ...
 
-	#if defined __LP64__ ///\todo check whether that's the OS or the processor!
-		#define DIVERSALIS__CPU__WORD_SIZE 64
+	#if defined __LP64__
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#endif
 	
 	#if defined __powerpc__
@@ -191,11 +191,11 @@
 	#elif defined __ia64__
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__IA 2
-		#define DIVERSALIS__CPU__WORD_SIZE 64
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif defined __x86_64__ // amd k8/opteron/athlon64/athlon-fx (sse2), intel nocona/emt64 (sse3)
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__X86 9
-		#define DIVERSALIS__CPU__WORD_SIZE 64
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif \
 		defined __k8__     /* amd k8/opteron/athlon64/athlon-fx (sse2) */ || \
 		defined __nocona__ /* intel prescott/nocona/emt64 (sse3) */
@@ -251,27 +251,27 @@
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
 	// see http://msdn.microsoft.com/en-us/library/b0084kay.aspx
 
-	#if defined _WIN64 ///\todo that's the OS, not the processor!
-		#define DIVERSALIS__CPU__WORD_SIZE 64
+	#if defined _WIN64
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif defined _WIN32
-		#define DIVERSALIS__CPU__WORD_SIZE 32
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 4
 	#endif
 	
 	#if defined _M_X64 // the only doc says "defined for x64 processors." ... not sure what's that supposed to mean :-(
-		#define DIVERSALIS__CPU__WORD_SIZE 64
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#endif
 
 	#if defined _M_IA64
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__IA 2
-		#define DIVERSALIS__CPU__WORD_SIZE 64
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif defined _M_X64 // 64-bit x86 amd or intel
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__X86 9
 		#define DIVERSALIS__CPU__X86__SSE 2 ///\todo detect SSE3
 		///\todo detect 3d-now
 		#define DIVERSALIS__CPU__X86__MMX
-		#define DIVERSALIS__CPU__WORD_SIZE 64
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif defined _M_IX86 // according to the only doc, it doesn't seem to go above 600 (i686)
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__X86 _M_IX86 / 100
