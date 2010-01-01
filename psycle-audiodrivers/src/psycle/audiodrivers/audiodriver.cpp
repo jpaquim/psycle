@@ -12,9 +12,11 @@
 #include <boost/bind.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <psycle/helpers/math/clip.hpp>
-#include <psycle/helpers/math/rint.hpp>
 namespace psycle { namespace core {
+/// number of samples that the dummy driver reads at a time
+int const DUMMYDRIVERWORKFN_MAX_BUFFER_LENGTH = 8192;
 
+using namespace psycle::helpers::math;
 /*******************************************************************************************/
 // AudioDriverInfo
 
@@ -121,19 +123,15 @@ void AudioDriver::Quantize16WithDither(float const * pin, int16_t * piout, int c
 }
 
 void AudioDriver::Quantize16(float const * pin, int16_t * piout, int c) {
-	do {
-		*piout++ = clipped_lrint<int16_t>(pin[0]);
-		*piout++ = clipped_lrint<int16_t>(pin[1]);
-		pin += 2;
-	} while(--c);
+	clip16_lrint(pin, piout, c*2);
 }
 
-void AudioDriver::Quantize16AndDeinterlace(float const * pin, int16_t * pileft, int strideleft, int16_t * piright, int strideright, int c) {
+void AudioDriver::Quantize16AndDeinterlace(float const * pin, int16_t * poleft, int strideleft, int16_t * poright, int strideright, int c) {
 	do {
-		*pileft = clipped_lrint<int16_t>(pin[0]);
-		*piright = clipped_lrint<int16_t>(pin[1]);
-		pileft += strideleft;
-		piright += strideright;
+		*poleft = clipped_lrint<int16_t>(pin[0]);
+		*poright = clipped_lrint<int16_t>(pin[1]);
+		poleft += strideleft;
+		poright += strideright;
 		pin += 2;
 	} while(--c);
 }
@@ -238,7 +236,7 @@ void DummyDriver::thread_function() {
 		{ scoped_lock lock(mutex_);
 			if(stop_requested_) goto notify_termination;
 		}
-		callback(AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH);
+		callback(DUMMYDRIVERWORKFN_MAX_BUFFER_LENGTH);
 	}
 
 	// notify that the thread is not running anymore

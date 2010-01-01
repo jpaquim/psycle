@@ -20,7 +20,8 @@ using namespace universalis::stdlib;
 typedef float * (*AUDIODRIVERWORKFN) (void * context, int numSamples);
 
 /// max number of samples (per channel) that the Work function may ask to return
-int const AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH = 256;
+int const MAX_SAMPLES_WORKFN = 65536;
+
 
 /// provides some text info about the driver
 class AudioDriverInfo {
@@ -182,6 +183,8 @@ class AudioDriver {
 			AudioDriverSettings const & playbackSettings() const { return playbackSettings_; }
 
 			virtual/*?*/ int GetOutputLatency() { return playbackSettings_.totalBufferBytes(); }
+			virtual int GetWritePos() { return 0; }
+			virtual int GetPlayPos() { return 0; }
 		protected:
 			/// holds the sample rate, bit depth, etc
 			AudioDriverSettings playbackSettings_; 

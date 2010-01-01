@@ -54,7 +54,7 @@ namespace psycle
 		const int MAX_PATTERN_BUFFER_LEN =	MULTIPLY2 * MAX_PATTERNS;
 
 		/// \todo Lock latency acts like a semaphore (Sleep(LOCK_LATENCY)). Should we do a real semaphore instead?
-		const int xxxLOCK_LATENCY =			256;
+		const int LOCK_LATENCY =			256;
 		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 		const int MAX_DELAY_BUFFER =		65536;
 		/// Sampler

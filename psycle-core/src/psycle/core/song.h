@@ -53,7 +53,7 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\}
 
 	///\name IsReady
-	///\todo Identifies if the song is operational or in a loading/saving state.
+	/// Identifies if the song is operational or in a loading/saving state. It serves as a non-locking synchronization
 	///\{
 		public:
 			///\name IsReady

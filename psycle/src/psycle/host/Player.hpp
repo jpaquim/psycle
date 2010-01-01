@@ -116,7 +116,7 @@ class Player {
 		/// Stores the channel mode (mono/stereo) of playback when recording to wave offline (non-realtime), since it can be changed.
 		int backup_channelmode;
 		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
-		float _pBuffer[MAX_DELAY_BUFFER];
+		float _pBuffer[STREAM_SIZE];
 
 		#if !defined WINAMP_PLUGIN
 			/// file to which to output signal.

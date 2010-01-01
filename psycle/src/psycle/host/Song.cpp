@@ -969,7 +969,7 @@ namespace psycle
 			{
 				Invalided = true;
 				///\todo lock/unlock
-				::Sleep(256);
+				::Sleep(LOCK_LATENCY);
 			}
 			RiffFile file;
 			RiffChunkHeader hd;
@@ -1084,7 +1084,7 @@ namespace psycle
 			}
 			Invalided = true;
 			///\todo lock/unlock
-			::Sleep(256);
+			::Sleep(LOCK_LATENCY);
 			// sample type	
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());

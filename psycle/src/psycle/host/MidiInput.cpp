@@ -1280,15 +1280,13 @@ namespace psycle
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				// todo
 				int writePos = 0;
-				// todo is this right ??
-				int blockSamples = Global::pConfig->_pOutputDriver->playbackSettings().blockBytes();
+				int blockSamples = Global::pConfig->_pOutputDriver->playbackSettings().blockSamples();
 				int blocks = Global::pConfig->_pOutputDriver->playbackSettings().blockCount();
 #else
 				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();				
 				int blockSamples = Global::pConfig->_pOutputDriver->GetBufferSize() / Global::pConfig->_pOutputDriver->GetSampleSize();
 				int blocks = Global::pConfig->_pOutputDriver->GetNumBuffers();
 #endif
-
 				// calculate our final adjuster
 				int syncAdjuster = m_adjustedPlayPos - ( writePos - (blockSamples*blocks) );
 				m_stats.syncAdjuster = syncAdjuster;

@@ -51,7 +51,7 @@ using namespace helpers;
 
 /**************************************************************************/
 // Plugin
-float plugin::junk[STREAM_SIZE];
+float plugin::junk[MAX_BUFFER_LENGTH];
 int plugin::pitchWheelCentre(8191);
 
 plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id, LoadedAEffect &loadstruct)
@@ -92,7 +92,7 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 		}
 	}
 
-	std::memset(junk, 0, STREAM_SIZE * sizeof(float));
+	std::memset(junk, 0, MAX_BUFFER_LENGTH * sizeof(float));
 	for(int i(2) ; i < vst::max_io ; ++i)
 	{
 		inputs[i]=junk;
@@ -110,10 +110,10 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 		}
 		else
 		{
-			universalis::os::aligned_memory_alloc(16, _pOutSamplesL, STREAM_SIZE);
-			universalis::os::aligned_memory_alloc(16, _pOutSamplesR, STREAM_SIZE);
-			dsp::Clear(_pOutSamplesL, STREAM_SIZE);
-			dsp::Clear(_pOutSamplesR, STREAM_SIZE);
+			universalis::os::aligned_memory_alloc(16, _pOutSamplesL, MAX_BUFFER_LENGTH);
+			universalis::os::aligned_memory_alloc(16, _pOutSamplesR, MAX_BUFFER_LENGTH);
+			dsp::Clear(_pOutSamplesL, MAX_BUFFER_LENGTH);
+			dsp::Clear(_pOutSamplesR, MAX_BUFFER_LENGTH);
 			outputs[0] = _pOutSamplesL;
 			outputs[1] = _pOutSamplesR;
 		}
@@ -134,8 +134,8 @@ plugin::plugin(MachineCallbacks* callbacks, MachineKey key, Machine::id_type id,
 			if (GetEffectName(temp) && temp[0])_psName=temp;
 			else if(GetProductString(temp) && temp[0]) _psName=temp;
 			// This is a safe measure against some plugins that have noise at its output for some
-			// unexplained reason ( example : mda piano.dd )
-			Work(STREAM_SIZE);
+			// unexplained reason ( example : mda piano.dll )
+			Work(MAX_BUFFER_LENGTH);
 		}
 		if (_psName.empty()) 
 		{

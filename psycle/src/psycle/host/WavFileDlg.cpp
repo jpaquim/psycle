@@ -40,20 +40,15 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			Sampler::wavprev.SetInstrument(_pSong->_pInstrument[PREV_WAV_INS]);
 			
 			Sampler::wavprev.Stop();
-		/*	if (_pSong->PW_Stage)
-			{
-				_pSong->PW_Stage=0;
-				Sleep(LOCK_LATENCY);
-			}
-		*/	
-			
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+			Sleep(LOCK_LATENCY);
+#endif
 			if (CurrExt=="wav" && _lastFile != GetFileName())
 			{
 				_lastFile=GetFileName();
 				
 				if (_pSong->WavAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
-//					_pSong->PW_Play();
 					Sampler::wavprev.Play();
 					
 				}
@@ -64,7 +59,6 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 				
 				if (_pSong->IffAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
-					//_pSong->PW_Play();
 					Sampler::wavprev.Play();
 				}
 			}

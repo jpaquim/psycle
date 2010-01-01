@@ -52,7 +52,7 @@ Player::Player()
 	playing_(),
 	autoStopMachines_()
 {
-	universalis::os::aligned_memory_alloc(16, buffer_, MAX_DELAY_BUFFER);
+	universalis::os::aligned_memory_alloc(16, buffer_, MAX_SAMPLES_WORKFN);
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
 	start_threads();
 }
@@ -199,7 +199,7 @@ void Player::clear_plan() {
 void Player::process(int samples) {
 	int remaining_samples = samples;
 	while(remaining_samples) {
-		int const amount(std::min(remaining_samples, STREAM_SIZE));
+		int const amount(std::min(remaining_samples, MAX_BUFFER_LENGTH));
 		// reset all machine buffers
 		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
 		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);

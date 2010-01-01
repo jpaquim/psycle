@@ -297,7 +297,7 @@ private:
 	float * _pOutSamplesR;
 	// Junk is a safe buffer for vst plugins that would want more buffers than
 	// supplied.
-	static float junk[STREAM_SIZE];
+	static float junk[MAX_BUFFER_LENGTH];
 
 };
 
