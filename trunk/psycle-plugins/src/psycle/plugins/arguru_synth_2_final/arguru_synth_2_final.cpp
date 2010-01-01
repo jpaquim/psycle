@@ -447,7 +447,8 @@ void mi::ParameterTweak(int par, int val) {
 	globalpar.vcf_env_release=Vals[12]*multiplier;
 	globalpar.vcf_lfo_speed=Vals[13]*multiplier;
 	globalpar.vcf_lfo_amplitude=Vals[14];
-
+	
+	///\todo: the change of cutoff only affects new notes. needs to be fixed
 	globalpar.vcf_cutoff=Vals[15];
 	globalpar.vcf_resonance=Vals[16];
 	globalpar.vcf_type=Vals[17];

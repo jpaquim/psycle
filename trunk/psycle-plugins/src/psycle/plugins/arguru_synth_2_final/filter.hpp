@@ -186,10 +186,14 @@ public:
 	}
 	float res2(float in)
 	{
-		float out1=Biquad.ProcessSample(in);
-		if (invert) out1=in-out1;
-		float out=Biquad2.ProcessSample(out1);
-		if (invert) return out1-out;
+		// This would be the correct thing to do, but the original didn't
+		// and makes some interesting sounds.
+		//float out1=Biquad.ProcessSample(in);
+		//if (invert) out1=in-out1;
+		//float out=Biquad2.ProcessSample(out1);
+		//if (invert) return out1-out;
+		float out=Biquad2.ProcessSample(Biquad.ProcessSample(in));
+		if (invert) return in-out;
 		return out;
 	}
 	void reset()
