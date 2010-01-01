@@ -18,6 +18,7 @@
 ******************************************************************************/
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "microsoftmmewaveout.h"
+#include <universalis/os/aligned_memory_alloc.hpp>
 namespace psycle { namespace core {
 
 int const SHORT_MIN = -32768;
@@ -36,6 +37,7 @@ AudioDriverInfo MsWaveOut::info( ) const {
 MsWaveOut::MsWaveOut() {
 	hWaveOut = 0; // use this audio handle to detect if the driver is working
 	_running = 0; // running condition for the thread loop
+	buf = 0;
 }
 
 WAVEHDR* MsWaveOut::allocateBlocks( ) {
@@ -153,13 +155,10 @@ void MsWaveOut::fillBuffer() {
 	// this protects freeBlockCounter, that is manipulated from two threads.
 	// the waveOut interface callback WM_Done thread in waveOutProc and in writeAudio
 	InitializeCriticalSection( &waveCriticalSection );
-	int bufSize = 1024 / 2;
-	std::int16_t buf[1024 / 2];
-	int newCount = bufSize / 2;
 	while ( _running ) {
-		float const * input(callback(newCount));
-		Quantize16(input,buf,newCount);
-		writeAudio(hWaveOut, (CHAR*) buf, sizeof(buf) );
+		float const * input(callback(playbackSettings().blockSamples()));
+		Quantize16(input,buf,playbackSettings().blockSamples());
+		writeAudio(hWaveOut, (CHAR*) buf, playbackSettings().blockSamples()*playbackSettings().numChannels()*sizeof(std::int16_t));
 	}
 }
 
@@ -201,6 +200,8 @@ void MsWaveOut::do_start() {
 
 	_running = true;
 	DWORD dwThreadId;
+	universalis::os::aligned_memory_alloc(16, buf, playbackSettings().blockSamples()*playbackSettings().numChannels());
+
 	_hThread = CreateThread( NULL, 0, audioOutThread, this, 0, &dwThreadId );
 }
 
@@ -213,6 +214,7 @@ void MsWaveOut::do_stop() {
 #else
 	sleep(1);
 #endif
+
 	TerminateThread( _hThread, 0 ); // just in case
 	if(::waveOutReset(hWaveOut) != MMSYSERR_NOERROR) {
 		hWaveOut=0;
@@ -224,6 +226,8 @@ void MsWaveOut::do_stop() {
 		throw std::runtime_error("waveOutClose() failed");
 	}
 	hWaveOut=0;
+	universalis::os::aligned_memory_dealloc(buf);
+	buf=0;
 }
 
 MsWaveOut::~MsWaveOut() {

@@ -48,8 +48,7 @@ class MsWaveOut : public AudioDriver {
 		/*override*/ void do_close() {}
 
 	private:
-		char buffer[1024];   // intermediate buffer for reading
-
+		std::int16_t *buf;
 		// mme variables
 		HWAVEOUT hWaveOut;   // device handle
 		static CRITICAL_SECTION waveCriticalSection;
