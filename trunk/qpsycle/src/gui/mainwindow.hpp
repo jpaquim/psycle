@@ -23,7 +23,7 @@
 
 namespace psycle { namespace core {
 class Song;
-class SinglePattern;
+class Pattern;
 class Machine;
 }}
 
@@ -102,7 +102,7 @@ private slots:
 	void onSampleComboBoxIndexChanged( int newIndex );
 	void onOctaveComboBoxIndexChanged( int newIndex );
 
-	void onPatternSelectedInPatternBox( psycle::core::SinglePattern* selectedPattern );
+	void onPatternSelectedInPatternBox( psycle::core::Pattern* selectedPattern );
 	void onNewMachineCreated( psycle::core::Machine *mac );
 	void onMachineChosen( MachineGui *macGui );
 	void onMachineDeleted();
@@ -111,7 +111,7 @@ private slots:
 	void onPatternDeleted();
 	void onPatternNameChanged();
 
-	void onAddPatternToSequencerRequest( psycle::core::SinglePattern* );
+	void onAddPatternToSequencerRequest( psycle::core::Pattern* );
 	void onCategoryColorChanged();
 
 	void playFromStart();

@@ -27,7 +27,7 @@ class QVBoxLayout;
 
 namespace psycle { namespace core {
 class Song;
-class SinglePattern;
+class Pattern;
 }}
 
 class QToolBar;
@@ -66,7 +66,7 @@ public:
 
 	// Getters.
 	psycle::core::Song *song() { return song_; }
-	psycle::core::SinglePattern *pattern() const { return pattern_; }
+	psycle::core::Pattern *pattern() const { return pattern_; }
 	PatternDraw* patDraw() { return patDraw_; }
 	PatternGrid* patternGrid(); 
 	InstrumentsModel* instrumentsModel();
@@ -81,7 +81,7 @@ public:
 
 	// Setters.
 	void setSelectedMachineIndex( int idx );
-	void setPattern( psycle::core::SinglePattern *pattern );
+	void setPattern( psycle::core::Pattern *pattern );
 	void setNumberOfTracks( int numTracks );
 	void setPatternStep( int newStep );
 	void setOctave( int newOctave );
@@ -101,7 +101,7 @@ private:
 
 	psycle::core::Song *song_;
 	InstrumentsModel *instrumentsModel_;
-	psycle::core::SinglePattern* pattern_;
+	psycle::core::Pattern* pattern_;
 
 	// Settings.
 	int patternStep_;
