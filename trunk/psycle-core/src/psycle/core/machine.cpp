@@ -742,12 +742,12 @@ bool Machine::LoadFileChunk(RiffFile* pFile,int version) {
 }
 
 bool Machine::LoadSpecificChunk(RiffFile * pFile, int /*version*/) {
-	std::uint32_t size(0);
+	uint32_t size(0);
 	pFile->Read(size);
-	std::uint32_t count(0);
+	uint32_t count(0);
 	pFile->Read(count);
-	for(std::uint32_t i(0); i < count; ++i) {
-		std::uint32_t temp(0);
+	for(uint32_t i(0); i < count; ++i) {
+		uint32_t temp(0);
 		pFile->Read(temp);
 		SetParameter(i,temp);
 	}
