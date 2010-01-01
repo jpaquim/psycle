@@ -18,7 +18,6 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/audiodrivers/audiodriver.h>
-#include <psycle/core/patternpool.h>
 #include <psycle/core/patternsequence.h>
 #include <psycle/core/player.h>
 #include <psycle/core/singlepattern.h>
