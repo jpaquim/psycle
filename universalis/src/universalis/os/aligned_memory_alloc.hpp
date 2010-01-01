@@ -7,8 +7,10 @@
 #define UNIVERSALIS__OS__ALIGNED_MEMORY_ALLOC__INCLUDED
 #pragma once
 
+#include "exception.hpp"
 #include <diversalis/os.hpp>
 #include <diversalis/compiler.hpp>
+#include <universalis/compiler/location.hpp>
 
 #if defined DIVERSALIS__OS__POSIX
 	#include <cstdlib> // for posix_memalign
@@ -21,7 +23,8 @@ void aligned_memory_alloc(std::size_t alignment, X *& x, std::size_t count) {
 	std::size_t const size(count * sizeof(X));
 	#if defined DIVERSALIS__OS__POSIX
 			void * address;
-			posix_memalign(&address, alignment, size);
+			int const err(posix_memalign(&address, alignment, size));
+			if(err) throw exception(err, UNIVERSALIS__COMPILER__LOCATION);
 			x = static_cast<X*>(address);
 			// note: free with std::free
 	#elif 0///\todo defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
