@@ -23,7 +23,6 @@
 namespace psycle { namespace core {
 class Song;
 class Pattern;
-class PatternCategory;
 }}
 
 
@@ -65,6 +64,11 @@ namespace qpsycle {
 
 		enum { Type = QTreeWidgetItem::UserType + 2 };
 		int type() const { return Type; }
+
+	  const std::string& name() { return name_; }
+	  void name(const std::string& name) { name_ = name; }
+	private:
+	  std::string name_;
 	};
 
 	class PatternItem : public QTreeWidgetItem {
@@ -118,8 +122,14 @@ namespace qpsycle {
 
 		psycle::core::Song *song_;
 		psycle::core::Pattern* currentPattern_;
-		std::map<CategoryItem*, psycle::core::PatternCategory*> categoryMap;
+	
+	  // TODO: PatternCategory doesn't exist anymore, use
+	  // the CategoryItem::name() method I just created instead.
+	  //
+	  //std::map<CategoryItem*, psycle::core::PatternCategory*> categoryMap;
 		std::vector<CategoryItem*> catItems;
+
+	  // TODO put this pointer in PatternItem instead?
 		std::map<PatternItem*, psycle::core::Pattern*> patternMap;
 
 		QToolBar *toolBar_;
