@@ -12,6 +12,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <iostream> // only for debug output
 #include <sstream>
+#include <cstring>
 
 namespace psycle { namespace core {
 
