@@ -65,16 +65,11 @@ const int MULTIPLY = MAX_TRACKS * EVENT_SIZE;
 const int MULTIPLY2 = MULTIPLY * MAX_LINES;
 const int MAX_PATTERN_BUFFER_LEN = MULTIPLY2 * MAX_PATTERNS;
 
-///\todo: Mostly useless constants, or misplaced ones. Also, STREAM_SIZE should be dependant on audio driver parameters so we need some work.
-/// Lock latency acts like a semaphore (Sleep(LOCK_LATENCY)). Should we do a real semaphore instead?
-const int LOCK_LATENCY = 256;
-/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
-const int MAX_DELAY_BUFFER = 65536;
+///\todo: Mostly useless constants, or misplaced ones. Also, MAX_BUFFER_LENGTH should be dependant on audio driver parameters so we need some work.
 /// Sampler
 const int OVERLAPTIME = 128;
 /// Maximum size of the audio block to be passed to the Work() function.
 const int MAX_BUFFER_LENGTH = 256;
-const int STREAM_SIZE = MAX_BUFFER_LENGTH;
 
 /// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, but not all information will be avaiable.
 const int CURRENT_FILE_VERSION_INFO = 0x0000;

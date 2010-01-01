@@ -159,8 +159,8 @@ using namespace helpers;
 		{
 			SetEditName(GetName());
 			SetAudioRange(1.0f);
-			//pOutSamplesL= new LADSPA_Data[STREAM_SIZE];
-			//pOutSamplesR= new LADSPA_Data[STREAM_SIZE];
+			//pOutSamplesL= new LADSPA_Data[MAX_BUFFER_LENGTH];
+			//pOutSamplesR= new LADSPA_Data[MAX_BUFFER_LENGTH];
 			// Step five: Prepare the structures to use the plugin with the program.
 			std::cout << "step five" << std::endl;
 			prepareStructures();

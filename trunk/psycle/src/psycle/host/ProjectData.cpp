@@ -5,7 +5,6 @@
 #include "PatternView.hpp"
 #include "MachineView.hpp"
 #include "MainFrm.hpp"
-#include "Player.hpp"
 
 namespace psycle {
 	namespace host {

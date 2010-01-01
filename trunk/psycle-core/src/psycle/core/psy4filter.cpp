@@ -443,7 +443,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 			file.Read(size);
 
 			int fileposition = file.GetPos();
-			//progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
+			//progress.emit(4,static_cast<int>(fileposition*16384.0f)/filesize),"");
 
 			if(std::strcmp(header,"MACD") == 0)
 			{

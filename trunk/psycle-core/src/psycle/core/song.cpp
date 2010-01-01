@@ -339,7 +339,6 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 		return false; 
 	}
 	scoped_lock lock(mutex_);
-	//::Sleep(LOCK_LATENCY); ///< ???
 	// sample type
 	int st_type(file.NumChannels());
 	int bits(file.BitsPerSample());

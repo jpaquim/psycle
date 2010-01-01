@@ -1495,18 +1495,12 @@ namespace psycle {
 			{
 				// Stopping wavepreview if not stopped.
 				Sampler::wavprev.Stop();
-	/*			if(_pSong->PW_Stage)
-				{
-					_pSong->PW_Stage=0;
-					_pSong->IsInvalided(true);
-					Sleep(LOCK_LATENCY);
-				}
-	*/
-
 				//Delete it.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				_pSong->DeleteInstrument(PREV_WAV_INS);
 #else
+				_pSong->IsInvalided(true);
+				Sleep(LOCK_LATENCY);
 				_pSong->DeleteLayer(PREV_WAV_INS);
 				_pSong->IsInvalided(false);
 #endif

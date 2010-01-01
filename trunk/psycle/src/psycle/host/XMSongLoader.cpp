@@ -154,13 +154,13 @@ namespace host{
 
 	void XMSongLoader::Load(Song& song,const bool fullopen)
 	{
-
 		// check validity
 		if(!IsValid()){
 			return;
 		}
 		m_pSong = &song;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+		song.SetReady(false);
 		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
 		song.AddMachine(m_pSampler);
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,0.35f);
@@ -188,7 +188,9 @@ namespace host{
 
 		std::int32_t iInstrStart = LoadPatterns(song);
 		LoadInstruments(*m_pSampler,iInstrStart);
-
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		song.SetReady(true);
+#endif
 	}
 
 	const bool XMSongLoader::IsValid()
@@ -1106,6 +1108,7 @@ namespace host{
 		}
 		m_pSong = &song;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+		song.SetReady(false);
 		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
 		song.AddMachine(m_pSampler);
 		//song.InsertConnection(*m_pSampler,*s->machine(MASTER_INDEX),0,0,0.75f); // This is done later, when determining the number of channels.
@@ -1167,6 +1170,9 @@ namespace host{
 		for(int i = 0;i < 31;i++){
 			LoadInstrument(*m_pSampler,i);
 		}
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		song.SetReady(true);
+#endif
 	}
 
 	const bool MODSongLoader::IsValid()

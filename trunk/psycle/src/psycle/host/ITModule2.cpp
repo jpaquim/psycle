@@ -121,6 +121,7 @@ namespace psycle
 			s->setComment(imported);
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			song->SetReady(false);
 			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
@@ -333,7 +334,9 @@ Special:  Bit 0: On = song message attached.
 			delete[] pointersi;
 			delete[] pointerss;
 			delete[] pointersp;
-			
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			song->SetReady(true);
+#endif			
 			return true;
 		}
 
@@ -1173,6 +1176,7 @@ Special:  Bit 0: On = song message attached.
 			s->setComment(imported);
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+			song->SetReady(false);
 			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(s3mFileH.mVol&0x7F)/128.0f);
@@ -1268,7 +1272,9 @@ Special:  Bit 0: On = song message attached.
 			}
 			delete [] pointersi; pointersi = 0;
 			delete [] pointersp; pointersp = 0;
-
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			song->SetReady(true);
+#endif
 			return true;
 		}
 

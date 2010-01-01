@@ -110,9 +110,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					_global.pConfig->_pOutputDriver->set_started(false);
 				#else
 					_global.pConfig->_pOutputDriver->Enable(false);
+					///\todo lock/unlock
+					Sleep(LOCK_LATENCY);
 				#endif
-				///\todo lock/unlock
-				Sleep(256);
 				_global.pConfig->_pMidiInput->Close();
 
 				return FALSE;
@@ -210,9 +210,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				_global.pConfig->_pOutputDriver->set_started(false);
 			#else
 				_global.pConfig->_pOutputDriver->Enable(false);
+				///\todo lock/unlock
+				Sleep(LOCK_LATENCY);
 			#endif
-			///\todo lock/unlock
-			Sleep(256);
 			_global.pConfig->_pMidiInput->Close();
 			#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				MachineFactory & factory(MachineFactory::getInstance());

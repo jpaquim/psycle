@@ -68,13 +68,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Player & player(Player::singleton());
 			player.stop();
-			///\todo lock/unlock
-			Sleep(256);
-			player.driver().set_started(false);
-
 			song().New();
-
-			player.driver().set_started(true);
 			player.setBpm(song().BeatsPerMin());
 			player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
 			CMainFrame* pParentMain = mac_view()->main();
@@ -84,13 +78,13 @@ namespace psycle {
 #else
 			Global::pPlayer->stop();
 			///\todo lock/unlock
-			Sleep(256);
+			Sleep(LOCK_LATENCY);
 			mac_view()->child_view()->_outputActive = false;
 			Global::pConfig->_pOutputDriver->Enable(false);
 			// midi implementation
 			Global::pConfig->_pMidiInput->Close();
 			///\todo lock/unlock
-			Sleep(256);
+			Sleep(LOCK_LATENCY);
 
 			song().New();
 
@@ -146,15 +140,12 @@ namespace psycle {
 			mac_view()->LockVu();
 			Player & player(Player::singleton());
 			player.stop();
-			///\todo lock/unlock
-			Sleep(256);
-			player.driver().set_started(false);
+			player.song(song());
 			pat_view()->editPosition = 0;
 			if(!song().load(fName.c_str())) {
 				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 				return;			
 			}			
-			player.song(song());
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)
@@ -168,7 +159,6 @@ namespace psycle {
 			}
 		//	set_lines_per_beat(song().ticksSpeed());
 			set_beat_zoom(song().ticksSpeed());
-			player.driver().set_started(true);
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
 			pat_view()->RecalculateColourGrid();
@@ -180,13 +170,13 @@ namespace psycle {
 			mac_view()->LockVu();
 			Global::pPlayer->stop();			
 			///\todo lock/unlock
-			Sleep(256);
+			Sleep(LOCK_LATENCY);
 			mac_view()->child_view()->_outputActive = false;
 			Global::pConfig->_pOutputDriver->Enable(false);
 			// MIDI IMPLEMENTATION
 			Global::pConfig->_pMidiInput->Close();
 			///\todo lock/unlock
-			Sleep(256);
+			Sleep(LOCK_LATENCY);
 			
 			OldPsyFile file;
 			if (!file.Open(fName.c_str()))
@@ -397,15 +387,16 @@ namespace psycle {
 				pat_view()->KillRedo();
 				mac_view()->LockVu();
 				Global::pPlayer->stop();
+#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				///\todo lock/unlock
-				Sleep(256);
+				Sleep(LOCK_LATENCY);
 				mac_view()->child_view()->_outputActive = false;
 				Global::pConfig->_pOutputDriver->set_started(false);
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Close();
 				///\todo lock/unlock
-				Sleep(256);
-
+				Sleep(LOCK_LATENCY);
+#endif
 				CString str = ofn.lpstrFile;
 				int index = str.ReverseFind('.');
 				if (index != -1)
@@ -526,19 +517,17 @@ namespace psycle {
 					song().fileName = str+".psy";
 				}
 				mac_view()->child_view()->_outputActive = true;
-				#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Global::pConfig->_pOutputDriver->set_started(true);
-				#else
+				#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 					if (!Global::pConfig->_pOutputDriver->Enable(true))
 					{
 						mac_view()->child_view()->_outputActive = false;
 					}
 					else
+					{
+						// MIDI IMPLEMENTATION
+						Global::pConfig->_pMidiInput->Open();
+					}
 				#endif
-				{
-					// MIDI IMPLEMENTATION
-					Global::pConfig->_pMidiInput->Open();
-				}
 				pParentMain->PsybarsUpdate();
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();

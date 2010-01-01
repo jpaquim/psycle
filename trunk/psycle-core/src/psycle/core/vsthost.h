@@ -95,7 +95,7 @@ public:
 		, currentKey(MachineKey::invalid())
 	{
 		quantization = quantize;
-		SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4);
+		SetBlockSize(MAX_BUFFER_LENGTH); SetTimeSignature(4,4);
 		vstTimeInfo.smpteFrameRate = kVstSmpte25fps;
 	}
 	virtual ~AudioMaster(){;}

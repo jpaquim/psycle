@@ -818,7 +818,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #else
 					_pSong->IsInvalided(true);
 					///\todo lock/unlock
-					Sleep(256);
+					Sleep(LOCK_LATENCY);
 #endif
 					wdLoopE = diStart+((x*diLength)/rect.Width());
 					_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
@@ -871,7 +871,7 @@ CWaveEdChildView::~CWaveEdChildView()
 						Song::scoped_lock lock(_pSong->Mutex());
 #else					_pSong->IsInvalided(true);
 					///\todo lock/unlock
-					Sleep(256);
+					Sleep(LOCK_LATENCY);
 #endif
 					wdLoopS = diStart+((x*diLength)/rect.Width());
 					_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
@@ -1227,7 +1227,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #else
 				_pSong->IsInvalided(true);
 				///\todo lock/unlock
-				Sleep(256);
+				Sleep(LOCK_LATENCY);
 #endif
 				for (c = startPoint ; c < startPoint+length ; c++)
 				{
@@ -1296,7 +1296,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #else
 				_pSong->IsInvalided(true);
 				///\todo lock/unlock
-				Sleep(256);
+				Sleep(LOCK_LATENCY);
 #endif
 				for (c=startPoint; c<startPoint+length; c++)
 				{
@@ -1374,7 +1374,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #else
 					_pSong->IsInvalided(true);
 					///\todo lock/unlock
-					Sleep(256);
+					Sleep(LOCK_LATENCY);
 #endif
 					ratio = pow(10.0, (double) pos / (double) 2000.0);
 
@@ -1408,7 +1408,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #else
 				_pSong->IsInvalided(true);
 				///\todo lock/unlock
-				Sleep(256);
+				Sleep(LOCK_LATENCY);
 #endif
 				//halved = (int) floor(length/2.0);	
 				//<dw> if length is odd (even number of samples), middle two samples aren't flipped:
@@ -1534,7 +1534,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #else
 				_pSong->IsInvalided(true);
 				///\todo lock/unlock
-				Sleep(256);
+				Sleep(LOCK_LATENCY);
 #endif
 				//SetUndo(4, wdLeft, wdRight, wdLength); 
 				for (unsigned int c = 0; c < wdLength; c++)
@@ -1702,7 +1702,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				_pSong->IsInvalided(true);
 				///\todo lock/unlock
-				Sleep(256);
+				Sleep(LOCK_LATENCY);
 #endif
 				unsigned long length = blLength+1;
 
@@ -1894,7 +1894,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 			_pSong->IsInvalided(true);
 			///\todo lock/unlock
-			Sleep(256);
+			Sleep(LOCK_LATENCY);
 #endif
 			if (!wdWave)
 			{
@@ -2022,7 +2022,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 			_pSong->IsInvalided(true);
 			///\todo lock/unlock
-			Sleep(256);
+			Sleep(LOCK_LATENCY);
 #endif
 
 			if (pFmt->wBitsPerSample == 16 && pFmt->nChannels==1 || pFmt->nChannels==2)
@@ -2128,7 +2128,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				_pSong->IsInvalided(true);
 				///\todo lock/unlock
-				Sleep(256);
+				Sleep(LOCK_LATENCY);
 #endif
 				if (pFmt->wBitsPerSample == 16 && ( pFmt->nChannels==1 || pFmt->nChannels==2 ) )
 				{
@@ -2262,7 +2262,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				_pSong->IsInvalided(true);
 				///\todo lock/unlock
-				Sleep(256);
+				Sleep(LOCK_LATENCY);
 #endif
 				if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels == 1 || pFmt->nChannels == 2))
 				{
@@ -2376,7 +2376,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				Song::scoped_lock lock(_pSong->Mutex());
 #else			_pSong->IsInvalided(true);
 			///\todo lock/unlock
-			Sleep(256);
+			Sleep(LOCK_LATENCY);
 #endif
 			int nWidth = rect.Width();
 			wdLoopS = diStart + rbX * diLength/nWidth;
@@ -2411,7 +2411,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #else
 			_pSong->IsInvalided(true);
 			///\todo lock/unlock
-			Sleep(256);
+			Sleep(LOCK_LATENCY);
 #endif
 			int nWidth = rect.Width();
 			wdLoopE = diStart + rbX * diLength/nWidth;
