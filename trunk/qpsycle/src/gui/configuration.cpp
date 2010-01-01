@@ -58,7 +58,7 @@ namespace qpsycle {
 		_RecordTweaks(),
 		_RecordUnarmed()
 	{
-		AudioDriver* driver = new AudioDriver;
+		psycle::core::AudioDriver* driver = new psycle::core::DummyDriver;
 		_pSilentDriver = driver;
 		addAudioDriver(driver);
 
@@ -199,14 +199,14 @@ namespace qpsycle {
 					std::string deviceName = alsaElm.attribute("device").toStdString();
 					std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
 					if((it = driverMap_.find("alsa")) != driverMap_.end()) {
-						psycle::core::AudioDriverSettings settings = it->second->settings(); ///\todo why do we do a copy?
+						psycle::core::AudioDriverSettings settings = it->second->playbackSettings(); ///\todo why do we do a copy?
 						if(deviceName.length()) {
 							settings.setDeviceName(deviceName);
 						} else {
 							///\todo use the ALSA_CARD env var if present: char const * const device(std::getenv("ALSA_CARD"));
 							settings.setDeviceName("default");
 						}
-						it->second->setSettings(settings); ///\todo why do we copy?
+						it->second->setPlaybackSettings(settings); ///\todo why do we copy?
 					}
 				}
 			}
