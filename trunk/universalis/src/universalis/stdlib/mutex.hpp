@@ -9,6 +9,7 @@
 #pragma once
 
 #include "detail/boost_xtime.hpp"
+#include <boost/version.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
