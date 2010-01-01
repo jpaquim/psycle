@@ -762,7 +762,7 @@ bool PresetsDialog::loadPresets()
 		return false; 
 	}
 
-	psycle::core::BinRead binIn( prsIn );
+	psycle::helpers::BinRead binIn( prsIn );
 
 	int numpresets = binIn.readInt4LE();
 	int filenumpars = binIn.readInt4LE();
