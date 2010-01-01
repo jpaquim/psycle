@@ -8,7 +8,6 @@
 #include "patternsequence.h"
 
 #include "commands.h"
-
 #include <sstream>
 
 namespace psycle { namespace core {

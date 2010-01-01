@@ -13,6 +13,7 @@
 #include <ios>
 #include <ostream>
 #include <streambuf>
+#include <cstdio>
 
 #pragma comment(lib, "zlib") // auto-link
 

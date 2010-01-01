@@ -25,15 +25,15 @@ std::string const Psy3Filter::FILE_FOURCC = "PSY3";
 /// format: 0xAABB
 /// A = Major version. It can't be loaded, skip the whole chunk. (Right now the loader does it, so simply do nothing)
 /// B = minor version. It can be loaded with the existing loader, but not all information will be available.
-std::uint32_t const Psy3Filter::VERSION_INFO = 0x0000;
-std::uint32_t const Psy3Filter::VERSION_SNGI = 0x0000;
-std::uint32_t const Psy3Filter::VERSION_SEQD = 0x0000;
-std::uint32_t const Psy3Filter::VERSION_PATD = 0x0000;
-std::uint32_t const Psy3Filter::VERSION_MACD = 0x0000;
-std::uint32_t const Psy3Filter::VERSION_INSD = 0x0000;
-std::uint32_t const Psy3Filter::VERSION_WAVE = 0x0000;
+uint32_t const Psy3Filter::VERSION_INFO = 0x0000;
+uint32_t const Psy3Filter::VERSION_SNGI = 0x0000;
+uint32_t const Psy3Filter::VERSION_SEQD = 0x0000;
+uint32_t const Psy3Filter::VERSION_PATD = 0x0000;
+uint32_t const Psy3Filter::VERSION_MACD = 0x0000;
+uint32_t const Psy3Filter::VERSION_INSD = 0x0000;
+uint32_t const Psy3Filter::VERSION_WAVE = 0x0000;
 
-std::uint32_t const Psy3Filter::FILE_VERSION =
+uint32_t const Psy3Filter::FILE_VERSION =
 	Psy3Filter::VERSION_INFO +
 	Psy3Filter::VERSION_SNGI +
 	Psy3Filter::VERSION_SEQD +
@@ -91,13 +91,13 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	song.clear();
 	preparePatternSequence(song);
 	//size_t filesize = file.FileSize();
-	std::uint32_t version = 0;
-	std::uint32_t size = 0;
+	uint32_t version = 0;
+	uint32_t size = 0;
 	bool problemfound = false;
 	int fileposition = 0;
 	char header[5];
 	header[4]=0;
-	std::uint32_t chunkcount = LoadSONGv0(&file,song);
+	uint32_t chunkcount = LoadSONGv0(&file,song);
 	/* chunk_loop: */
 
 	while(file.ReadArray(header, 4) && chunkcount) {
@@ -126,7 +126,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			if((version & 0xff00) == 0) { // chunkformat v0
 				LoadSNGIv0(&file, song, version & 0xff);
 				// fix for a bug existing in the song saver in the 1.7.x series
-				if(version == 0) size = 11 * sizeof(std::uint32_t) + song.tracks() * 2 * sizeof(bool);
+				if(version == 0) size = 11 * sizeof(uint32_t) + song.tracks() * 2 * sizeof(bool);
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"SEQD")) {
@@ -273,7 +273,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			song.AddMachine(mac);
 		}
 		std::ostringstream s;
-		s << "Error reading from file '" << file.file_name() << "'" << std::endl;
+		s << "Error reading from file '" << file.file_name() << "'\n";
 		s << "some chunks were missing in the file";
 		//loggers::trace(s.str());
 		std::cerr << "psycle: core: psy3 loader: " << s << '\n';
@@ -284,9 +284,9 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 }
 
 int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/) {
-	std::int32_t fileversion = 0;
-	std::uint32_t size = 0;
-	std::uint32_t chunkcount = 0;
+	int32_t fileversion = 0;
+	uint32_t size = 0;
+	uint32_t chunkcount = 0;
 
 	file->Read(fileversion);
 	file->Read(size);
@@ -322,8 +322,8 @@ bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 
 bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) {
 	MachineCallbacks* callbacks = MachineFactory::getInstance().getCallbacks();
-	std::int32_t temp(0);
-	std::int16_t temp16(0);
+	int32_t temp(0);
+	int16_t temp16(0);
 	bool fileread = false;
 
 	// why all these temps?  to make sure if someone changes the defs of
@@ -372,8 +372,8 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 }
 
 bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& /*song*/,int /*minorversion*/) {
-	std::int32_t index = 0;
-	std::uint32_t temp;
+	int32_t index(0);
+	uint32_t temp(0);
 	bool fileread = false;
 	// index, for multipattern - for now always 0
 	file->Read(index);
@@ -403,9 +403,9 @@ PatternEvent Psy3Filter::convertEntry(unsigned char * data) const {
 }
 
 bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) {
-	std::int32_t index = 0;
-	std::uint32_t temp = 0;
-	std::uint32_t size = 0;
+	int32_t index = 0;
+	uint32_t temp = 0;
+	uint32_t size = 0;
 	bool fileread=false;
 
 	// index
@@ -477,13 +477,13 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 
 Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversion) {
 	MachineFactory& factory = MachineFactory::getInstance();
-	std::int32_t index = 0;
+	int32_t index = 0;
 
 	file->Read(index);
 	if(index < MAX_MACHINES) {
 		Machine::id_type const id(index);
 		// assume version 0 for now
-		std::int32_t type;
+		int32_t type;
 		Machine* mac=0;
 		char sDllName[256];
 		file->Read(type);
@@ -530,7 +530,7 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 		}
 		if(!mac) {
 			std::ostringstream s;
-			s << "Problem loading machine!" << std::endl << "type: " << type << ", dllName: " << sDllName;
+			s << "Problem loading machine!\ntype: " << type << ", dllName: " << sDllName;
 			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
 			failedLoad = true;
@@ -543,14 +543,14 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 }
 
 bool Psy3Filter::LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion) {
-	std::int32_t index = 0;
+	int32_t index(0);
 	file->Read(index);
 	if(index < MAX_INSTRUMENTS) song._pInstrument[index]->LoadFileChunk(file, minorversion, true);
 	///\todo:
 	return true;
 }
 
-bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, std::uint32_t size) {
+bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, uint32_t size) {
 
 	// Instrument Data Load
 	int numInstruments;
