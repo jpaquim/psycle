@@ -28,7 +28,7 @@ void decay::seconds_per_event_change_notification_from_port(engine::port const &
 
 void decay::do_process() throw(engine::exception) {
 	if(!have_out()) return;
-	PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(do_process_template,,
+	PSYCLE__PLUGINS__TEMPLATE_SWITCH(do_process_template,
 		(have_pulse() ? pulse_channel().flag() : channel::flags::empty)
 		(have_decay() ? decay_channel().flag() : channel::flags::empty)
 	);

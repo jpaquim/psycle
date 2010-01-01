@@ -35,7 +35,7 @@ void sine::seconds_per_event_change_notification_from_port(engine::port const & 
 
 void sine::do_process() throw(engine::exception) {
 	if(!out_port()) return;
-	PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(do_process_template,,
+	PSYCLE__PLUGINS__TEMPLATE_SWITCH(do_process_template,
 		(phase_port()     ?     phase_channel().flag() : channel::flags::empty)
 		(frequency_port() ? frequency_channel().flag() : channel::flags::empty)
 		(amplitude_port() ? amplitude_channel().flag() : channel::flags::empty)
