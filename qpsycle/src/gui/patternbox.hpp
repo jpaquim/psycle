@@ -66,7 +66,7 @@ namespace qpsycle {
 		int type() const { return Type; }
 
 	  const std::string& name() { return name_; }
-	  void name(const std::string& name) { name_ = name; }
+	  void name(const std::string& name) { name_ = name;} 
 	private:
 	  std::string name_;
 	};
@@ -122,11 +122,7 @@ namespace qpsycle {
 
 		psycle::core::Song *song_;
 		psycle::core::Pattern* currentPattern_;
-	
-	  // TODO: PatternCategory doesn't exist anymore, use
-	  // the CategoryItem::name() method I just created instead.
-	  //
-	  //std::map<CategoryItem*, psycle::core::PatternCategory*> categoryMap;
+
 		std::vector<CategoryItem*> catItems;
 
 	  // TODO put this pointer in PatternItem instead?
