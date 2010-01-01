@@ -27,6 +27,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK decay : public engine::node {
 		void do_process() throw(engine::exception) /*override*/;
 
 	private:
+		typedef engine::buffer::channel channel; // just to make netbeans parser happy
 		template<channel::flags::type, channel::flags::type>
 		void do_process_template() throw(engine::exception);
 		

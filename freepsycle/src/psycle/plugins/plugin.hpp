@@ -7,6 +7,7 @@
 #include <cmath>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__PLUGIN
 #include <universalis/compiler/dynamic_link/begin.hpp>
+#include <boost/preprocessor/seq.hpp>
 ///\internal
 /// extensible modular audio frawework.
 namespace psycle {
@@ -41,265 +42,121 @@ typedef engine::real real;
 		} \
 	}
 
-#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(t, a, b) \
-	switch(a) { \
+#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__1(template, evaluated_flags, flags_to_evaluate) \
+	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \
-			switch(b) { \
-				case psycle::engine::channel::flags::continuous: \
-					t<psycle::engine::channel::flags::continuous, psycle::engine::channel::flags::continuous>(); \
-				break; \
-				case psycle::engine::channel::flags::empty: \
-					t<psycle::engine::channel::flags::continuous, psycle::engine::channel::flags::empty>(); \
-				break; \
-				case psycle::engine::channel::flags::discrete: \
-					t<psycle::engine::channel::flags::continuous, psycle::engine::channel::flags::discrete>(); \
-				break; \
-				default: \
-					throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-			} \
+			template<BOOST_PP_SEQ_ENUM(evaluated_flags), psycle::engine::channel::flags::continuous>(); \
 		break; \
 		case psycle::engine::channel::flags::empty: \
-			switch(b) { \
-				case psycle::engine::channel::flags::continuous: \
-					t<psycle::engine::channel::flags::empty, psycle::engine::channel::flags::continuous>(); \
-				break; \
-				case psycle::engine::channel::flags::empty: \
-					t<psycle::engine::channel::flags::empty, psycle::engine::channel::flags::empty>(); \
-				break; \
-				case psycle::engine::channel::flags::discrete: \
-					t<psycle::engine::channel::flags::empty, psycle::engine::channel::flags::discrete>(); \
-				break; \
-				default: \
-					throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-			} \
+			template<BOOST_PP_SEQ_ENUM(evaluated_flags), psycle::engine::channel::flags::empty>(); \
 		break; \
 		case psycle::engine::channel::flags::discrete: \
-			switch(b) { \
-				case psycle::engine::channel::flags::continuous: \
-					t<psycle::engine::channel::flags::discrete, psycle::engine::channel::flags::continuous>(); \
-				break; \
-				case psycle::engine::channel::flags::empty: \
-					t<psycle::engine::channel::flags::discrete, psycle::engine::channel::flags::empty>(); \
-				break; \
-				case psycle::engine::channel::flags::discrete: \
-					t<psycle::engine::channel::flags::discrete, psycle::engine::channel::flags::discrete>(); \
-				break; \
-				default: \
-					throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-			} \
+			template<BOOST_PP_SEQ_ENUM(evaluated_flags), psycle::engine::channel::flags::discrete>(); \
 		break; \
 		default: \
 			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 	}
 
-#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(t, a, b, c) \
-	switch(a) { \
+#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(template, evaluated_flags, flags_to_evaluate) \
+	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \
-			switch(b) { \
-				case psycle::engine::channel::flags::continuous: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				case psycle::engine::channel::flags::empty: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				case psycle::engine::channel::flags::discrete: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				default: \
-					throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-			} \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__1(template, evaluated_flags \
+				(psycle::engine::channel::flags::continuous), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
 		break; \
 		case psycle::engine::channel::flags::empty: \
-			switch(b) { \
-				case psycle::engine::channel::flags::continuous: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				case psycle::engine::channel::flags::empty: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				case psycle::engine::channel::flags::discrete: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				default: \
-					throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-			} \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__1(template, evaluated_flags \
+				(psycle::engine::channel::flags::empty), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
 		break; \
 		case psycle::engine::channel::flags::discrete: \
-			switch(b) { \
-				case psycle::engine::channel::flags::continuous: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::continuous, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				case psycle::engine::channel::flags::empty: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::empty, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				case psycle::engine::channel::flags::discrete: \
-					switch(c) { \
-						case psycle::engine::channel::flags::continuous: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::continuous>(); \
-						break; \
-						case psycle::engine::channel::flags::empty: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::empty>(); \
-						break; \
-						case psycle::engine::channel::flags::discrete: t< \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::discrete, \
-							psycle::engine::channel::flags::discrete>(); \
-						break; \
-						default: \
-							throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					} \
-				break; \
-				default: \
-					throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-			} \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__1(template, evaluated_flags \
+				(psycle::engine::channel::flags::discrete), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		default: \
+			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
+	}
+
+#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(template, evaluated_flags, flags_to_evaluate) \
+	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
+		case psycle::engine::channel::flags::continuous: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(template, evaluated_flags \
+				(psycle::engine::channel::flags::continuous), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		case psycle::engine::channel::flags::empty: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(template, evaluated_flags \
+				(psycle::engine::channel::flags::empty), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		case psycle::engine::channel::flags::discrete: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(template, evaluated_flags \
+				(psycle::engine::channel::flags::discrete), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		default: \
+			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
+	}
+
+#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__4(template, evaluated_flags, flags_to_evaluate) \
+	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
+		case psycle::engine::channel::flags::continuous: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(template, evaluated_flags \
+				(psycle::engine::channel::flags::continuous), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		case psycle::engine::channel::flags::empty: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(template, evaluated_flags \
+				(psycle::engine::channel::flags::empty), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		case psycle::engine::channel::flags::discrete: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__3(template, evaluated_flags \
+				(psycle::engine::channel::flags::discrete), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		default: \
+			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
+	}
+
+#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__5(template, evaluated_flags, flags_to_evaluate) \
+	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
+		case psycle::engine::channel::flags::continuous: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__4(template, evaluated_flags \
+				(psycle::engine::channel::flags::continuous), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		case psycle::engine::channel::flags::empty: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__4(template, evaluated_flags \
+				(psycle::engine::channel::flags::empty), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		case psycle::engine::channel::flags::discrete: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__4(template, evaluated_flags \
+				(psycle::engine::channel::flags::discrete), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		default: \
+			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
+	}
+
+#define PSYCLE__PLUGINS__TEMPLATE_SWITCH__6(template, evaluated_flags, flags_to_evaluate) \
+	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
+		case psycle::engine::channel::flags::continuous: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__5(template, evaluated_flags \
+				(psycle::engine::channel::flags::continuous), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		case psycle::engine::channel::flags::empty: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__5(template, evaluated_flags \
+				(psycle::engine::channel::flags::empty), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
+		break; \
+		case psycle::engine::channel::flags::discrete: \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__5(template, evaluated_flags \
+				(psycle::engine::channel::flags::discrete), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
+			); \
 		break; \
 		default: \
 			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \

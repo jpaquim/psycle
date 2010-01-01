@@ -28,9 +28,9 @@ void decay::seconds_per_event_change_notification_from_port(engine::port const &
 
 void decay::do_process() throw(engine::exception) {
 	if(!have_out()) return;
-	PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(do_process_template,
-		have_pulse() ? pulse_channel().flag() : channel::flags::empty,
-		have_decay() ? decay_channel().flag() : channel::flags::empty
+	PSYCLE__PLUGINS__TEMPLATE_SWITCH__2(do_process_template,,
+		(have_pulse() ? pulse_channel().flag() : channel::flags::empty)
+		(have_decay() ? decay_channel().flag() : channel::flags::empty)
 	);
 }
 
@@ -64,6 +64,7 @@ void decay::do_process_template() throw(engine::exception) {
 		out_channel()[out_event](out_event, current_);
 		current_ *= decay_;
 	}
+	///\todo flush to zero
 	if(current_) out_channel().flag(channel::flags::continuous);
 	else out_channel().flag(channel::flags::empty);
 }

@@ -28,8 +28,8 @@ void bipolar_filter::seconds_per_event_change_notification_from_port(engine::por
 }
 
 void bipolar_filter::do_process_first() throw(engine::exception) {
-	if(!multiple_input_port()->output_ports().size()) return;
-	if(!output_ports()[0]->input_ports().size()) return;
+	if(!*output_ports()[0]) return;
+	if(!*multiple_input_port()) return;
 	assert(&multiple_input_port()->buffer());
 	assert(&output_ports()[0]->buffer());
 	engine::buffer & in(multiple_input_port()->buffer());
