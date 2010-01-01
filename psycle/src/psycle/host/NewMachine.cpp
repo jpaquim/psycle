@@ -203,14 +203,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					hNodes[i] = m_browser.InsertItem(hosts[i]->hostName().c_str() ,i*2, i*2 , TVI_ROOT, TVI_LAST);
 					gen[i] = hNodes[i];
 					fx[i] = hNodes[i];
+					treeToInfo[hNodes[i]] = MachineKey::invalid();
 				}
 				crashedNode = m_browser.InsertItem("Crashed or invalid plugins", 6, 6, TVI_ROOT,TVI_LAST);
+				treeToInfo[crashedNode] = MachineKey::invalid();
 			}
 			else {
 				hNodes = new HTREEITEM[2];
 				hNodes[0] = m_browser.InsertItem("Generators",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Effects",1,1,TVI_ROOT,TVI_LAST);
 				crashedNode = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
+				treeToInfo[hNodes[0]] = MachineKey::invalid();
+				treeToInfo[hNodes[1]] = MachineKey::invalid();
+				treeToInfo[crashedNode] = MachineKey::invalid();
 				for (unsigned int i=0; i < Hosts::NUM_HOSTS; i++ ) {
 					gen[i] = hNodes[0];
 					fx[i] = hNodes[1];
