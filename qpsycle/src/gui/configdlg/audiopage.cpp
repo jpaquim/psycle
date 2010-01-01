@@ -111,7 +111,7 @@ void AudioPage::initDriverList() {
 		if(i->second == Global::pConfig()->_pOutputDriver) {
 			audio_driverCbx_->setCurrentIndex(audio_driverCbx_->count() - 1);
 			if(driverName == "alsa")
-				audio_deviceBox_->setText(i->second->settings().deviceName().c_str());
+				audio_deviceBox_->setText(i->second->playbackSettings().deviceName().c_str());
 		}
 	}
 }
@@ -123,7 +123,7 @@ void AudioPage::onDriverSelected(QString const & text) {
 		psycle::core::AudioDriver* driver = i->second;
 		selectedDriver_ = driver;
 		if(text == "alsa") {
-			audio_deviceBox_->setText(i->second->settings().deviceName().c_str());
+			audio_deviceBox_->setText(i->second->playbackSettings().deviceName().c_str());
 			audio_deviceBox_->setVisible(true);
 			audio_deviceLbl_->setVisible(true);
 		} else {
@@ -138,9 +138,9 @@ void AudioPage::onRestartDriver() {
 	if(selectedDriver_) {
 		// set the device
 		if(!audio_deviceBox_->text().isEmpty()) {
-			psycle::core::AudioDriverSettings settings = selectedDriver_->settings();
+			psycle::core::AudioDriverSettings settings = selectedDriver_->playbackSettings();
 			settings.setDeviceName( audio_deviceBox_->text().toStdString() );
-			selectedDriver_->setSettings(settings);
+			selectedDriver_->setPlaybackSettings(settings);
 		}
 		// set new Driver to Player
 		psycle::core::Player::singleton().setDriver(*selectedDriver_);
