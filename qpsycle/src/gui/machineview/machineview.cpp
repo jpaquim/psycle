@@ -263,7 +263,7 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui ) {
 	directly, or a machine gets deleted and its connections have to go too.
 */
 void MachineView::deleteConnection( WireGui *wireGui ) {
-	psycle::core::Player::scoped_lock lock(psycle::core::Player::singleton().work_mutex());
+	psycle::core::Song::scoped_lock lock(song_->Mutex());
 
 	psycle::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
 	psycle::core::Machine *dstMac = wireGui->destMacGui()->mac();
