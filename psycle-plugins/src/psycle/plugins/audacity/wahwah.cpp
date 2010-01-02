@@ -220,8 +220,8 @@ void mi::ParameterTweak(int par, int val)
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 
-	float frequency, omega, sn, cs, alpha;
-	static const float depth_mul_1_minus_freqofs = depth * (1.f - freqofs) * .5f;
+	double frequency, omega, sn, cs, alpha;
+	const float depth_mul_1_minus_freqofs = depth * (1.f - freqofs) * .5f;
 
 		do
 			{
@@ -231,13 +231,23 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 			if ((skipcount++) % LFO_SKIP_SAMPLES == 0) {
 				float calc_1_time = float(skipcount) * lfoskip + phase; // :-)
-
-				frequency = 1.f + std::cos(calc_1_time); // Left channel
+				//Ensure limits.
+				if (calc_1_time > 2*M_PI) {
+					int memo = skipcount;
+					skipcount-=pCB->GetSamplingRate()/freq;
+				}
+				float sintime;
+				float costime;	
+				psycle::helpers::math::sin_cos(calc_1_time, sintime, costime);
+				frequency = 1.f + costime; // Left channel
 				frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
-
+				if (omega > 2*M_PI) do {
+					omega = omega - 2*M_PI;
+				} while(omega > 2*M_PI); 
 				
+
 				sincos(omega, sn, cs);
 				//sn = std::sin(omega);
 				//cs = std::cos(omega);
@@ -250,10 +260,13 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				a1_l = -2.f * cs;
 				a2_l = 1.f - alpha;
 				
-				frequency = 1.f + std::cos(calc_1_time + M_PI); // Right channel
+				frequency = 1.f + sintime; // Right channel
 				frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
+				if (omega > 2*M_PI) do {
+					omega = omega - 2*M_PI;
+				} while(omega > 2*M_PI); 
 
 				sincos(omega, sn, cs);
 				//sn = std::sin(omega);
@@ -273,6 +286,13 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 			float out_l = (b0_l * in_l + b1_l * xn1_l + b2_l * xn2_l - a1_l * yn1_l - a2_l * yn2_l) * a0_r* recip; // /a0_l;
 			psycle::helpers::math::erase_all_nans_infinities_and_denormals(out_l);
+			// Prevents clipping
+			if (out_l < -1.f) {
+				out_l = -1.f;
+			}
+			else if (out_l > 1.f) {
+				out_l = 1.f;                   
+			}
 
 			xn2_l = xn1_l;
 			xn1_l = in_l;
@@ -280,7 +300,14 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			yn1_l = out_l;
 
 			float out_r = (b0_r * in_r + b1_r * xn1_r + b2_r * xn2_r - a1_r * yn1_r - a2_r * yn2_r) * a0_l* recip; // / a0_r;
-			 psycle::helpers::math::erase_all_nans_infinities_and_denormals(out_r); 
+			psycle::helpers::math::erase_all_nans_infinities_and_denormals(out_r); 
+			
+			if (out_r < -1.f) {
+				out_r = -1.f;
+			}
+			else if (out_r > 1.f) {
+				out_r = 1.f; 
+			}
 
 			xn2_r = xn1_r;
 			xn1_r = in_r;
@@ -288,19 +315,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			yn1_r = out_r;
 
 
-			// Prevents clipping
 
-			if (out_l < -1.f) 
-				out_l = -1.f;
-			else if (out_l > 1.f)
-				out_l = 1.f;                   
-			
 			*psamplesleft = out_l * 32767.0f;  // Amplify
-			
-			if (out_r < -1.f) 
-				out_r = -1.f;
-			else if (out_r > 1.f)
-				out_r = 1.f; 
 
 			*psamplesright = out_r * 32767.0f; // Amplify
 
