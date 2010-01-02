@@ -276,9 +276,9 @@ std::string Master::_psName = "Master";
 Master::Master(MachineCallbacks* callbacks, Machine::id_type id)
 :
 	Machine(callbacks, id),
-	_pMasterSamples(0),
 	sampleCount(0),
 	decreaseOnClip(false),
+	_pMasterSamples(0),
 	_lMax(0),
 	_rMax(0),
 	_outDry(256)
@@ -436,11 +436,11 @@ std::string AudioRecorder::_psName = "AudioRecorder";
 
 AudioRecorder::AudioRecorder(MachineCallbacks* callbacks, Machine::id_type id)
 	: Machine(callbacks, id)
-	, _initialized(false)
 	, _captureidx(0)
+	, _initialized(false)
+	, _gainvol(1.0f)
 	, pleftorig(_pSamplesL)
 	, prightorig(_pSamplesR)
-	, _gainvol(1.0f)
 
 {
 	defineInputAsStereo();

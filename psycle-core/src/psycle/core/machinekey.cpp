@@ -17,23 +17,24 @@ namespace psycle { namespace core {
 		};
 
 		MachineKey::MachineKey( )
-			:host_(Hosts::INTERNAL)
-			,dllName_(),
-			index_(-1) {
-		}
+		:
+			dllName_(),
+			host_(Hosts::INTERNAL),
+			index_(-1)
+		{}
 		MachineKey::MachineKey( const MachineKey & key)
-			:host_(key.host())
-			,dllName_(key.dllName())
-			,index_(key.index()) {
-		}
+		:
+			dllName_(key.dllName()),
+			host_(key.host()),
+			index_(key.index())
+		{}
 
 		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, std::uint32_t index )
-			:host_( host )
-			,index_( index )
+		:
+			host_(host),
+			index_(index)
 		{
-			if (!dllName.empty()) {
-				dllName_ = preprocessName(dllName);
-			}
+			if(!dllName.empty()) dllName_ = preprocessName(dllName);
 		}
 
 		MachineKey::~MachineKey() {

@@ -202,49 +202,22 @@ inline void ITFilter::WorkStereo(float & left, float & right) {
 }
 
 inline void ITFilter::WorkOld(float & sample) {
-	try {
-		const float fy = (sample * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
-		fLastSampleLeft[0] = fLastSampleLeft[1];
-		fLastSampleLeft[1] = fy - (sample * fCoeff[3]);
-		sample = fy;
-	} catch(universalis::cpu::exception const & e) {
-		e;
-		#if 0
-			switch(e.code()) {
-				case STATUS_FLOAT_DENORMAL_OPERAND:
-				case STATUS_FLOAT_INVALID_OPERATION:
-					fLastSampleLeft[1] = fLastSampleLeft[0] = 0;
-				break;
-				default: throw;
-			}
-		#endif
-	}
+	const float fy = (sample * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
+	fLastSampleLeft[0] = fLastSampleLeft[1];
+	fLastSampleLeft[1] = fy - (sample * fCoeff[3]);
+	sample = fy;
 }
 
 inline void ITFilter::WorkStereoOld(float& left, float& right) {
-	try {
-		const float fyL = (left * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
-		fLastSampleLeft[0] = fLastSampleLeft[1];
-		fLastSampleLeft[1] = fyL - (left * fCoeff[3]);
-		left = fyL;
+	const float fyL = (left * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
+	fLastSampleLeft[0] = fLastSampleLeft[1];
+	fLastSampleLeft[1] = fyL - (left * fCoeff[3]);
+	left = fyL;
 
-		const float fyR = (right * fCoeff[0]) + (fLastSampleRight[1] * fCoeff[1]) + (fLastSampleRight[0] * fCoeff[2]);
-		fLastSampleRight[0] = fLastSampleRight[1];
-		fLastSampleRight[1] = fyR - (right * fCoeff[3]);
-		right = fyR;
-	} catch(universalis::cpu::exception const & e) {
-		e;
-		#if 0
-			switch(e.code()) {
-				case STATUS_FLOAT_DENORMAL_OPERAND:
-					fLastSampleLeft[0] = fLastSampleLeft[1] = fLastSampleRight[0] = fLastSampleRight[1] = 0;
-					left *= fCoeff[0];
-					right *= fCoeff[0];
-				break;
-				default: throw;
-			}
-		#endif
-	}
+	const float fyR = (right * fCoeff[0]) + (fLastSampleRight[1] * fCoeff[1]) + (fLastSampleRight[0] * fCoeff[2]);
+	fLastSampleRight[0] = fLastSampleRight[1];
+	fLastSampleRight[1] = fyR - (right * fCoeff[3]);
+	right = fyR;
 }
 
 }}}
