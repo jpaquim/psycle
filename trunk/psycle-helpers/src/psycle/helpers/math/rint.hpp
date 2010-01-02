@@ -27,53 +27,70 @@ Integer inline lrint(Real x) {
 }
 
 #if DIVERSALIS__STDLIB__MATH >= 199901
+
+	// signed long long int
+
+	template<> UNIVERSALIS__COMPILER__CONST signed long long int inline lrint<>(long double ld) { return ::llrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST signed long long int inline lrint<>(double d) { return ::llrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST signed long long int inline lrint<>(float f) { return ::llrintf(f); }
+
+	// unsigned long long int
+
+	template<> UNIVERSALIS__COMPILER__CONST unsigned long long int inline lrint<>(long double ld) { return ::llrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned long long int inline lrint<>(double d) { return ::llrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned long long int inline lrint<>(float f) { return ::llrintf(f); }
+
+	// signed long int
+
+	template<> UNIVERSALIS__COMPILER__CONST signed long int inline lrint<>(long double ld) { return ::lrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST signed long int inline lrint<>(double d) { return ::lrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST signed long int inline lrint<>(float f) { return ::lrintf(f); }
 	
-	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline lrint<>(long double ld) {
-		return ::llrintl(ld);
-	}
+	// unsigned long int
 
-	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline lrint<>(double d) {
-		return ::llrint(d);
-	}
+	template<> UNIVERSALIS__COMPILER__CONST unsigned long int inline lrint<>(long double ld) { return ::lrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned long int inline lrint<>(double d) { return ::lrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned long int inline lrint<>(float f) { return ::lrintf(f); }
 
-	template<> UNIVERSALIS__COMPILER__CONST
-	long long int inline lrint<>(float f) {
-		return ::llrintf(f);
-	}
+	// signed int
 
-	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline lrint<>(long double ld) {
-		return ::lrintl(ld);
-	}
+	template<> UNIVERSALIS__COMPILER__CONST signed int inline lrint<>(long double ld) { return ::lrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST signed int inline lrint<>(double d) { return ::lrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST signed int inline lrint<>(float f) { return ::lrintf(f); }
 
-	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline lrint<>(double d) {
-		return ::lrint(d);
-	}
+	// unsigned int
 
-	template<> UNIVERSALIS__COMPILER__CONST
-	long int inline lrint<>(float f) {
-		return ::lrintf(f);
-	}
-	
-	template<> UNIVERSALIS__COMPILER__CONST
-	int inline lrint<>(long double ld) {
-		return ::lrintl(ld);
-	}
+	template<> UNIVERSALIS__COMPILER__CONST unsigned int inline lrint<>(long double ld) { return ::lrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned int inline lrint<>(double d) { return ::lrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned int inline lrint<>(float f) { return ::lrintf(f); }
 
-	template<> UNIVERSALIS__COMPILER__CONST
-	int inline lrint<>(double d) {
-		return ::lrint(d);
-	}
+	// signed short
 
-	template<> UNIVERSALIS__COMPILER__CONST
-	int inline lrint<>(float f) {
-		return ::lrintf(f);
-	}
-	
+	template<> UNIVERSALIS__COMPILER__CONST signed short inline lrint<>(long double ld) { return ::lrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST signed short inline lrint<>(double d) { return ::lrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST signed short inline lrint<>(float f) { return ::lrintf(f); }
+
+	// unsigned short
+
+	template<> UNIVERSALIS__COMPILER__CONST unsigned short inline lrint<>(long double ld) { return ::lrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned short inline lrint<>(double d) { return ::lrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned short inline lrint<>(float f) { return ::lrintf(f); }
+
+	// signed char
+
+	template<> UNIVERSALIS__COMPILER__CONST signed char inline lrint<>(long double ld) { return ::lrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST signed char inline lrint<>(double d) { return ::lrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST signed char inline lrint<>(float f) { return ::lrintf(f); }
+
+	// unsigned char
+
+	template<> UNIVERSALIS__COMPILER__CONST unsigned char inline lrint<>(long double ld) { return ::lrintl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned char inline lrint<>(double d) { return ::lrint(d); }
+	template<> UNIVERSALIS__COMPILER__CONST unsigned char inline lrint<>(float f) { return ::lrintf(f); }
+
 #else
+
+	// int32_t
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	int32_t inline lrint<>(double d) {
@@ -103,6 +120,26 @@ Integer inline lrint(Real x) {
 			return lrint<int32_t>(double(f));
 		#endif
 	}
+
+	// int16_t
+
+	template<> UNIVERSALIS__COMPILER__CONST int16_t inline lrint<>(double d) { return lrint<int32_t>(d); }
+	template<> UNIVERSALIS__COMPILER__CONST int16_t inline lrint<>(float f) { return lrint<int32_t>(f); }
+
+	// uint16_t
+
+	template<> UNIVERSALIS__COMPILER__CONST uint16_t inline lrint<>(double d) { return lrint<int32_t>(d); }
+	template<> UNIVERSALIS__COMPILER__CONST uint16_t inline lrint<>(float f) { return lrint<int32_t>(f); }
+
+	// int8_t
+
+	template<> UNIVERSALIS__COMPILER__CONST int8_t inline lrint<>(double d) { return lrint<int32_t>(d); }
+	template<> UNIVERSALIS__COMPILER__CONST int8_t inline lrint<>(float f) { return lrint<int32_t>(f); }
+
+	// uint8_t
+
+	template<> UNIVERSALIS__COMPILER__CONST uint8_t inline lrint<>(double d) { return lrint<int32_t>(d); }
+	template<> UNIVERSALIS__COMPILER__CONST uint8_t inline lrint<>(float f) { return lrint<int32_t>(f); }
 
 #endif
 
