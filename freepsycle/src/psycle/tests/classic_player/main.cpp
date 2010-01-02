@@ -19,7 +19,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-namespace psycle { namespace tests { namespace random_notes {
+namespace psycle { namespace tests { namespace classic_player {
 
 void paths() {
 	#if defined $
@@ -151,7 +151,7 @@ void stuff() {
 			#else
 				host::schedulers::single_threaded::scheduler scheduler(graph);
 			#endif
-				
+
 			if(loggers::information()()) loggers::information()("generating input ...");
 			std::seconds const seconds(10);
 			{
@@ -163,13 +163,13 @@ void stuff() {
 				float ratio(1.1);
 				for(unsigned int note(0); note < notes; ++note) {
 					//std::clog << beat << ' ' << f1 << ' ' << f2 << ' ' << f3 << '\n';
-					
+
 					engine::real const b1(beat), b2(beat * 1.1), b3(beat * 1.2);
-					
+
 					freq1.insert_event(b1, f1);
 					freq2.insert_event(b2 * 1.1, f2 * 1.1);
 					freq3.insert_event(b3 * 1.2, f3 * 1.17);
-					
+
 					sequence1.insert_event(b1, 0.3);
 					sequence2.insert_event(b2 * 1.1, 0.3);
 					sequence3.insert_event(b3 * 1.2, 0.3);
@@ -278,7 +278,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 }}}
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
-	psycle::tests::random_notes::main(argument_count, arguments);
+	psycle::tests::classic_player::main(argument_count, arguments);
 }
 
 #if 1
@@ -295,12 +295,12 @@ void imaginary() {
 
 	node & decay1(pr("decay", g, "decay1"));
 	sine1.input_port("amplitude")->connect(*decay1.output_port("out"));
-	
+
 	sequence_master & seq_master;
-	
+
 	sequence_node & seq_node1(g, "seq1", seq_master);
 	decay1.input_port("decay")->connect(*seq_node1.output_port("out"));
-	
+
 	sequence_node & seq_node2(g, "seq1", seq_master);
 	decay1.input_port("pulse")->connect(*seq_node2.output_port("out"));
 
