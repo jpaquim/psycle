@@ -3596,55 +3596,38 @@ using namespace helpers::math;
 		void PatternView::RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2)
 		{
 			// makes an array of colours between source1 and source2
-			float p0 = float((source1>>16)&0xff);
-			float p1 = float((source1>>8)&0xff);
-			float p2 = float(source1&0xff);
+			float p0 = float((source1 >> 16) & 0xff);
+			float p1 = float((source1 >>  8) & 0xff);
+			float p2 = float( source1        & 0xff);
 
-			float d0 = float((source2>>16)&0xff);
-			float d1 = float((source2>>8)&0xff);
-			float d2 = float(source2&0xff);
+			float d0 = float((source2 >> 16) & 0xff);
+			float d1 = float((source2 >> 8 ) & 0xff);
+			float d2 = float( source2        & 0xff);
 
-			int len = song()->tracks()+1;
+			int len = song()->tracks() + 1;
 
-			float a0=(d0-p0)/(len);
-			float a1=(d1-p1)/(len);
-			float a2=(d2-p2)/(len);
+			float a0 = (d0 - p0) / len;
+			float a1 = (d1 - p1) / len;
+			float a2 = (d2 - p2) / len;
 
 			for (int i = 0; i < len; i++)
 			{
-				pDest[i] = (rounded(p0*0x10000)&0xff0000)
-							| (rounded(p1*0x100)&0xff00)
-							| (rounded(p2)&0xff);
-				p0+=a0;
-				p1+=a1;
-				p2+=a2;
+				pDest[i] =
+					(lround<int32_t>(p0 * 0x10000) & 0xff0000) |
+					(lround<int32_t>(p1 * 0x00100) & 0x00ff00) |
+					(lround<int32_t>(p2          ) & 0x0000ff);
+				p0 += a0;
+				p1 += a1;
+				p2 += a2;
 
-				if (p0 < 0)
-				{
-					p0 = 0;
-				}
-				else if (p0 > 255)
-				{
-					p0 = 255;
-				}
+				if(p0 < 0) p0 = 0;
+				else if(p0 > 255) p0 = 255;
 
-				if (p1 < 0)
-				{
-					p1 = 0;
-				}
-				else if (p1 > 255)
-				{
-					p1 = 255;
-				}
+				if(p1 < 0) p1 = 0;
+				else if(p1 > 255) p1 = 255;
 
-				if (p2 < 0)
-				{
-					p2 = 2;
-				}
-				else if (p2 > 255)
-				{
-					p2 = 255;
-				}
+				if(p2 < 0) p2 = 2;
+				else if(p2 > 255) p2 = 255;
 			}
 		}
 
@@ -3654,32 +3637,14 @@ using namespace helpers::math;
 			int a1 = ((add>>8 )&0x0ff)+((adjust>>8 )&0x0ff)-((base>>8 )&0x0ff);
 			int a2 = ((add    )&0x0ff)+((adjust    )&0x0ff)-((base    )&0x0ff);
 
-			if (a0 < 0)
-			{
-				a0 = 0;
-			}
-			else if (a0 > 255)
-			{
-				a0 = 255;
-			}
+			if(a0 < 0) a0 = 0;
+			else if(a0 > 255) a0 = 255;
 
-			if (a1 < 0)
-			{
-				a1 = 0;
-			}
-			else if (a1 > 255)
-			{
-				a1 = 255;
-			}
+			if(a1 < 0) a1 = 0;
+			else if(a1 > 255) a1 = 255;
 
-			if (a2 < 0)
-			{
-				a2 = 0;
-			}
-			else if (a2 > 255)
-			{
-				a2 = 255;
-			}
+			if(a2 < 0) a2 = 0;
+			else if (a2 > 255) a2 = 255;
 
 			COLORREF pa = (a0<<16) | (a1<<8) | (a2);
 			return pa;
@@ -8454,15 +8419,9 @@ using namespace helpers::math;
 						
 						PatternEvent *entry = (PatternEvent*) offset;
 						entry->setCommand(0xff);
-						int val = rounded(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
-						if (val < 1)
-						{
-							val = 1;
-						}
-						else if (val > 255)
-						{
-							val = 255;
-						}
+						int val = lround<int32_t>(((std::sin(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+						if(val < 1) val = 1;
+						else if(val > 255) val = 255;
 						entry->setParameter(unsigned char (val));
 						index+=step;
 					}
@@ -8482,10 +8441,10 @@ using namespace helpers::math;
 			int patNum = song()->playOrder[editPosition];
 			int nlines = song()->patternLines[patNum];
 			char name[32];
-			strcpy(name,song()->patternName[patNum]);
+			std::strcpy(name,song()->patternName[patNum]);
 
 			dlg.patLines= nlines;
-			strcpy(dlg.patName,name);
+			std::strcpy(dlg.patName,name);
 			main()->m_wndSeq.UpdateSequencer();
 			
 			if (dlg.DoModal() == IDOK)
@@ -8510,9 +8469,9 @@ using namespace helpers::math;
 					AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 					AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 					song()->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
-					if ( strcmp(name,dlg.patName) != 0 )
+					if ( std::strcmp(name,dlg.patName) != 0 )
 					{
-						strcpy(song()->patternName[patNum],dlg.patName);
+						std::strcpy(song()->patternName[patNum],dlg.patName);
 						main()->StatusBarIdle();
 					}
 					Repaint(draw_modes::all);
@@ -8520,7 +8479,7 @@ using namespace helpers::math;
 				}
 				else if ( strcmp(name,dlg.patName) != 0 )
 				{
-					strcpy(song()->patternName[patNum],dlg.patName);
+					std::strcpy(song()->patternName[patNum],dlg.patName);
 					main()->m_wndSeq.UpdatePlayOrder(true);
 					main()->m_wndSeq.UpdateSequencer();
 					//Repaint(draw_modes::patternHeader);

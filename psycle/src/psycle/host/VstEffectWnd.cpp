@@ -21,6 +21,9 @@ using namespace psycle::core;
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 
+#include <psycle/helpers/math.hpp>
+
+using namespace psycle::helpers::math;
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -718,9 +721,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), index, helpers::math::rounded(value * vst::AudioMaster::GetQuantization()));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), index, lround<int>(value * vst::AudioMaster::GetQuantization()));
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), index, helpers::math::rounded(value * vst::AudioMaster::GetQuantization()));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), index, lround<int>(value * vst::AudioMaster::GetQuantization()));
 				}
 				if(pParamGui)
 					pParamGui->UpdateNew(index, value);

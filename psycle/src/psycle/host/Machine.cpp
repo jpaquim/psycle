@@ -34,10 +34,13 @@
 
 #include "Loggers.hpp"
 
+#include <psycle/helpers/math.hpp>
 #include <psycle/helpers/value_mapper.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 
 namespace psycle { namespace host {
+
+using namespace helpers::math;
 
 #if !defined WINAMP_PLUGIN
 		extern CPsycleApp theApp;
@@ -357,7 +360,7 @@ namespace psycle { namespace host {
 				{
 					//float val;
 					_pDstMachine->GetWireVolume(c,value);
-					//value = helpers::math::rounded(val*256.0f);
+					//value = lround<int>(val*256.0f);
 					return true;
 				}
 			}
@@ -616,7 +619,7 @@ namespace psycle { namespace host {
 #if PSYCLE__CONFIGURATION__RMS_VUS
 			_volumeCounter = helpers::dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(lround<int>((50.0f * std::log10(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > 0)
@@ -641,7 +644,7 @@ namespace psycle { namespace host {
 #else
 			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(lround<int>((50.0f * std::log10(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
@@ -999,13 +1002,13 @@ namespace psycle { namespace host {
 					}
 					if(*pSamples > 32767.0f)
 					{
-						_outDry = helpers::math::rounded((float)_outDry * 32767.0f / (*pSamples));
+						_outDry = lround<int>(_outDry * 32767.0f / (*pSamples));
 						mv = value_mapper::map_255_1(_outDry);
 						*pSamples = *pSamplesL = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
-						_outDry = helpers::math::rounded((float)_outDry * -32767.0f / (*pSamples));
+						_outDry = lround<int>(_outDry * -32767.0f / (*pSamples));
 						mv = value_mapper::map_255_1(_outDry);
 						*pSamples = *pSamplesL = -32767.0f; 
 					}
@@ -1018,13 +1021,13 @@ namespace psycle { namespace host {
 					}
 					if(*pSamples > 32767.0f)
 					{
-						_outDry = helpers::math::rounded((float)_outDry * 32767.0f / (*pSamples));
+						_outDry = lround<int>(_outDry * 32767.0f / (*pSamples));
 						mv = value_mapper::map_255_1(_outDry);
 						*pSamples = *pSamplesR = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
-						_outDry = helpers::math::rounded((float)_outDry * -32767.0f / (*pSamples));
+						_outDry = lround<int>(_outDry * -32767.0f / (*pSamples));
 						mv = value_mapper::map_255_1(_outDry);
 						*pSamples = *pSamplesR = -32767.0f; 
 					}

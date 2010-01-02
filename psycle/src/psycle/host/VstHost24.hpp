@@ -3,6 +3,7 @@
 #pragma once
 #include "Machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
+#include <psycle/helpers/math.hpp>
 #include <cstring>
 /*
 *<@JosepMa> the so-called seib host (which is mine, but based on his), is composed of two classes:
@@ -19,12 +20,10 @@
 *<@JosepMa> the host one doesn't provide much more (since the base class is good enough), and the
 *           plugin one wraps the CEffect into a Machine class
 */
-namespace psycle
-{
-	namespace host
-	{
-		namespace vst
-		{
+namespace psycle { namespace host { namespace vst {
+
+using namespace helpers::math;
+
 			// Maximum number of Audio Input/outputs
 			// \todo : this shouldn't be a static value. Host should ask the plugin and the array get created dynamically.
 			const int max_io = 16;
@@ -186,7 +185,7 @@ namespace psycle
 					try
 					{
 						if(numparam < numParams())
-							return helpers::math::rounded(GetParameter(numparam) * quantization);
+							return lround<int>(GetParameter(numparam) * quantization);
 					}catch(...){}
 					return 0;
 				}

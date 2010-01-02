@@ -10,9 +10,12 @@
 #include "Player.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
+#include <psycle/helpers/math.hpp>
 #include <psycle/helpers/value_mapper.hpp>
 
 namespace psycle { namespace host {
+
+using namespace helpers::math;
 
 		char* Sampler::_psName = "Sampler";
 		InstPreview Sampler::wavprev;
@@ -346,7 +349,7 @@ namespace psycle { namespace host {
 					if (pVoice->_filter._type < dsp::F_NONE)
 					{
 						TickFilterEnvelope(voice);
-						pVoice->_filter._cutoff = pVoice->_cutoff + helpers::math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
+						pVoice->_filter._cutoff = pVoice->_cutoff + lround<int>(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (pVoice->_filter._cutoff < 0)
 						{
 							pVoice->_filter._cutoff = 0;

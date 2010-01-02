@@ -13,6 +13,9 @@ using namespace psycle::core;
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
+#include <psycle/helpers/math.hpp>
+
+using namespace psycle::helpers::math;
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -160,7 +163,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			value *= vst::AudioMaster::GetQuantization();
 			UpdateText(value);
-			_quantizedvalue = (helpers::math::rounded(value));
+			_quantizedvalue = lround<int>(value);
 			m_slider.SetPos(vst::AudioMaster::GetQuantization() - _quantizedvalue);
 		}
 		void CVstParamList::OnSelchangeList() 

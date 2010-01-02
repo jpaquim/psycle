@@ -8,11 +8,12 @@
 #include "Configuration.hpp"
 #include "Global.hpp"
 #include <universalis/stdlib/cstdint.hpp>
+#include <psycle/helpers/math.hpp>
 #include <algorithm>
-namespace psycle
-{
-	namespace host
-	{
+namespace psycle { namespace host {
+
+using namespace helpers::math;
+
 /*		__declspec(align(32)) static float xdspFloatBuffer[20960];
 		static CXPreparedResamplerFilter *pFilter = NULL;
 		static CXResampler *pResampler = NULL;

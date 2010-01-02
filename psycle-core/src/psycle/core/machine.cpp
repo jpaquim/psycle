@@ -10,8 +10,8 @@
 #include "machine.h"
 #include "song.h"
 #include "fileio.h"
+#include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/math/round.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <cstddef>
 #include <iostream> // only for debug output
@@ -20,6 +20,7 @@
 namespace psycle { namespace core {
 
 using namespace helpers;
+using namespace helpers::math;
 
 /********************************************************************************************/
 // AudioBuffer
@@ -672,7 +673,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 	#if defined PSYCLE__CONFIGURATION__RMS_VUS
 		_volumeCounter = dsp::GetRMSVol(rms, _pSamplesL, _pSamplesR, numSamples) * (1.f / GetAudioRange());
 		// transpose scale from [-40, 0] dB to [0, 97] pixels (actually 100 pixels)
-		int temp(psycle::helpers::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
+		int temp(lround<int>(50.0f * std::log10(_volumeCounter) + 100.0f));
 		// clip values
 		if(temp > 97) temp = 97;
 		if(temp > 0) _volumeDisplay = temp;
@@ -692,7 +693,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 	#else
 		_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples) * (1.f / GetAudioRange());
 		// transpose scale from [-40, 0] dB to [0, 97] pixels (actually 100 pixels)
-		int temp(psycle::helpers::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
+		int temp(lround<int>(50.0f * std::log10(_volumeCounter) + 100.0f));
 		// clip values
 		if(temp > 97) temp = 97;
 		if(temp > _volumeDisplay) _volumeDisplay = temp;

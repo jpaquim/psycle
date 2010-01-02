@@ -193,7 +193,7 @@ public:
 		try
 		{
 			if(numparam < numParams())
-				return rounded(GetParameter(numparam) * CVSTHost::GetQuantization());
+				return lround<int>(GetParameter(numparam) * CVSTHost::GetQuantization());
 		}catch(...){}
 		return 0;
 	}

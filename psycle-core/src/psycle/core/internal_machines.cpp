@@ -21,6 +21,7 @@
 namespace psycle { namespace core {
 
 using namespace helpers;
+using namespace helpers::math;
 
 /****************************************************************************************************/
 // Dummy
@@ -346,11 +347,11 @@ int Master::GenerateAudio( int numSamples ) {
 			if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
 				_lMax = fabsf(*pSamplesL);
 			if(*pSamples > 32767.0f) {
-				_outDry = math::rounded((float)_outDry * 32767.0f / (*pSamples));
+				_outDry = lround<int>(_outDry * 32767.0f / (*pSamples));
 				mv = value_mapper::map_255_1(_outDry);
 				*pSamples = *pSamplesL = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
-				_outDry = math::rounded((float)_outDry * -32767.0f / (*pSamples));
+				_outDry = lround<int>(_outDry * -32767.0f / (*pSamples));
 				mv = value_mapper::map_255_1(_outDry);
 				*pSamples = *pSamplesL = -32767.0f; 
 			}
@@ -360,11 +361,11 @@ int Master::GenerateAudio( int numSamples ) {
 			if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
 				_rMax = fabsf(*pSamplesR);
 			if(*pSamples > 32767.0f) {
-					_outDry = math::rounded((float)_outDry * 32767.0f / (*pSamples));
+					_outDry = lround<int>(_outDry * 32767.0f / (*pSamples));
 				mv = value_mapper::map_255_1(_outDry);
 				*pSamples = *pSamplesR = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
-				_outDry = math::rounded((float)_outDry * -32767.0f / (*pSamples));
+				_outDry = lround<int>(_outDry * -32767.0f / (*pSamples));
 				mv = value_mapper::map_255_1(_outDry);
 				*pSamples = *pSamplesR = -32767.0f; 
 			}
