@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2009 members of the psycle project http://psycle.sourceforge.net and of the music-dsp mailing list http://www.music.columbia.edu/cmc/music-dsp
 
-#ifndef PSYCLE__HELPERS__MATH__SINE__INCLUDED
-#define PSYCLE__HELPERS__MATH__SINE__INCLUDED
+#ifndef PSYCLE__HELPERS__MATH__SIN__INCLUDED
+#define PSYCLE__HELPERS__MATH__SIN__INCLUDED
 #pragma once
 
 #include "constants.hpp"

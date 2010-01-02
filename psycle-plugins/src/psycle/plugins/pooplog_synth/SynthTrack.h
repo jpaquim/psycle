@@ -4,7 +4,7 @@
 
 #pragma once
 #include "filter.h"
-#include <psycle/helpers/math/rint.hpp>
+#include <psycle/helpers/math.hpp>
 
 using namespace psycle::helpers::math;
 

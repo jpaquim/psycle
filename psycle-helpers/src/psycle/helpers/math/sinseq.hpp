@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-#ifndef PSYCLE__HELPERS__MATH__SINE_SEQUENCE__INCLUDED
-#define PSYCLE__HELPERS__MATH__SINE_SEQUENCE__INCLUDED
+#ifndef PSYCLE__HELPERS__MATH__SINSEQ__INCLUDED
+#define PSYCLE__HELPERS__MATH__SINSEQ__INCLUDED
 #pragma once
 
 #include "clip.hpp"
@@ -16,13 +16,13 @@ namespace psycle { namespace helpers { namespace math {
 
 /// optimised sine computation when dealing with constant phase increment.
 template<bool Clipped>
-class sine_sequence {
+class sinseq {
 	public:
 		/// use 64-bit floating point numbers or else accuracy is not sufficient
 		typedef double real;
 
 		/// constructor
-		sine_sequence() : index_(0) {}
+		sinseq() : index_(0) {}
 
 		/// changes the phase and increment
 		void operator()(real phase, real radians_per_sample) {
@@ -49,9 +49,9 @@ class sine_sequence {
 
 #if defined BOOST_AUTO_TEST_CASE
 	template<bool Clipped>
-	void sine_sequence_test_template() {
-		typedef typename sine_sequence<Clipped>::real real;
-		sine_sequence<Clipped> sin;
+	void sinseq_test_template() {
+		typedef typename sinseq<Clipped>::real real;
+		sinseq<Clipped> sin;
 		{
 			using namespace universalis::stdlib;
 			typedef universalis::os::clocks::monotonic clock;
@@ -69,7 +69,7 @@ class sine_sequence {
 			}
 			nanoseconds const t3(clock::current());
 			{
-				std::ostringstream s; s << "sine_sequence<Clipped = " << Clipped << ">: " << f1;
+				std::ostringstream s; s << "sinseq<Clipped = " << Clipped << ">: " << f1;
 				BOOST_MESSAGE(s.str());
 			}
 			{
@@ -96,15 +96,15 @@ class sine_sequence {
 			}
 			{
 				std::ostringstream s;
-				s << "sine_sequence<Clipped = " << Clipped << ">: min + 1: " << min + 1 << ", max - 1: " << max - 1;
+				s << "sinseq<Clipped = " << Clipped << ">: min + 1: " << min + 1 << ", max - 1: " << max - 1;
 				BOOST_MESSAGE(s.str());
 			}
 			if(Clipped) BOOST_CHECK(-1 <= min && max <= 1);
 		}
 	}
 	BOOST_AUTO_TEST_CASE(sine_sequence_test) {
-		sine_sequence_test_template<false>();
-		sine_sequence_test_template<true>();
+		sinseq_test_template<false>();
+		sinseq_test_template<true>();
 	}
 #endif
 

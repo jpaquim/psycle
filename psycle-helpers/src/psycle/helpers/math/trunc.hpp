@@ -13,38 +13,38 @@
 #include <universalis/compiler.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <boost/static_assert.hpp>
-#include "rint.hpp"
+#include "lrint.hpp"
 
 namespace psycle { namespace helpers { namespace math {
 
 /// converts a floating point number to an integer by truncating
 /// positive numbers toward zero and negative ones toward an unspecified direction
 template<typename Real> UNIVERSALIS__COMPILER__CONST
-int32_t inline truncated(Real x) {
+int32_t inline trunc(Real x) {
 	return x > 0 ? std::floor(x) : std::ceil(x);
 }
 
 #if DIVERSALIS__STDLIB__MATH >= 199901
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int32_t inline truncated<>(long double ld) {
+	int32_t inline trunc<>(long double ld) {
 		return lrint<int32_t>(::truncl(ld));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int32_t inline truncated<>(double d) {
+	int32_t inline trunc<>(double d) {
 		return lrint<int32_t>(::trunc(d));
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int32_t inline truncated<>(float f) {
+	int32_t inline trunc<>(float f) {
 		return lrint<int32_t>(::truncf(f));
 	}
 
 #else
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int32_t inline truncated<>(double d) {
+	int32_t inline trunc<>(double d) {
 		BOOST_STATIC_ASSERT((sizeof d == 8));
 		union result_union {
 			double d;
@@ -55,7 +55,7 @@ int32_t inline truncated(Real x) {
 	}
 
 	template<> UNIVERSALIS__COMPILER__CONST
-	int32_t inline truncated<>(float f) {
+	int32_t inline trunc<>(float f) {
 		#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT // also intel's compiler?
 			///\todo not always the fastest when using sse(2)
 			///\todo this custom asm is not very fast on some arch, the double "2^51 + 2^52" version might be faster
@@ -69,22 +69,22 @@ int32_t inline truncated(Real x) {
 			}
 			return i;
 		#else
-			return truncated(double(f));
+			return trunc(double(f));
 		#endif
 	}
 	
 #endif
 
 #if defined BOOST_AUTO_TEST_CASE
-	BOOST_AUTO_TEST_CASE(truncated_test) {
-		BOOST_CHECK(truncated(+1.6) == +1);
-		BOOST_CHECK(truncated(+1.4) == +1);
-		BOOST_CHECK(truncated(-1.6) == -2 || truncated(-1.6) == -1);
-		BOOST_CHECK(truncated(-1.4) == -2 || truncated(-1.4) == -1);
-		BOOST_CHECK(truncated(+1.6f) == +1);
-		BOOST_CHECK(truncated(+1.4f) == +1);
-		BOOST_CHECK(truncated(-1.6f) == -2 || truncated(-1.6f) == -1);
-		BOOST_CHECK(truncated(-1.4f) == -2 || truncated(-1.4f) == -1);
+	BOOST_AUTO_TEST_CASE(trunc_test) {
+		BOOST_CHECK(trunc(+1.6) == +1);
+		BOOST_CHECK(trunc(+1.4) == +1);
+		BOOST_CHECK(trunc(-1.6) == -2 || trunc(-1.6) == -1);
+		BOOST_CHECK(trunc(-1.4) == -2 || trunc(-1.4) == -1);
+		BOOST_CHECK(trunc(+1.6f) == +1);
+		BOOST_CHECK(trunc(+1.4f) == +1);
+		BOOST_CHECK(trunc(-1.6f) == -2 || trunc(-1.6f) == -1);
+		BOOST_CHECK(trunc(-1.4f) == -2 || trunc(-1.4f) == -1);
 	}
 #endif
 

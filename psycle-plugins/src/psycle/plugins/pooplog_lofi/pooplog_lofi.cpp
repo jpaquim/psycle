@@ -21,11 +21,10 @@ v0.01b
 /////////////////////////////////////////////////////////////////////
 	*/
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math/rint.hpp>
+#include <psycle/helpers/math.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
-#include <cmath>
 
 using namespace psycle::plugin_interface;
 using namespace psycle::helpers::math;

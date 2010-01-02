@@ -3,7 +3,7 @@
 
 #include "WinampDriver.hpp"
 #include "../../Player.hpp"
-#include "../../Helpers.hpp"
+#include <psycle/helpers/math.hpp>
 #include <winamp-2/in2.h>
 
 extern In_Module mod;
@@ -139,12 +139,10 @@ namespace psycle
 		void WinampDriver::Quantize(float *pin, short *piout, int c)
 		{
 			float* inb =pin;
-			short* outb =piout;
+			int16_t* outb =piout;
 			for (int i=0; i<c; i++)
 			{
-				if ( *inb > 32767.0f) *outb = 32767;
-				else if ( *inb < -32767.0f ) *outb = -32768;
-				else *outb = psycle::helpers::math::truncated(*inb);
+				*outb = psycle::helpers::math::clipped_lrint(*inb);
 				*inb++; outb++;
 			}
 		}

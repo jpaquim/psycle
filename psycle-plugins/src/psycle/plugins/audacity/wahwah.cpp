@@ -18,13 +18,13 @@
 **********************************************************************/
 
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math/sine_cosine.hpp>
-#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
+#include <psycle/helpers/math.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
 
 using namespace psycle::plugin_interface;
+using namespace psycle::helpers::math;
 
 #define LFO_SKIP_SAMPLES 30
 
@@ -238,7 +238,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				omega = M_PI * frequency;
 
 				
-				psycle::helpers::math::sin_cos(omega, sn, cs);
+				sincos(omega, sn, cs);
 				//sn = std::sin(omega);
 				//cs = std::cos(omega);
 
@@ -255,7 +255,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				frequency = exp((frequency - 1.f) * 6.f);
 				omega = M_PI * frequency;
 
-				psycle::helpers::math::sin_cos(omega, sn, cs);
+				sincos(omega, sn, cs);
 				//sn = std::sin(omega);
 				//cs = std::cos(omega);
 

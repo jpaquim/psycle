@@ -13,7 +13,7 @@
 #include <universalis/compiler.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <cmath>
-#include "rint.hpp"
+#include "lrint.hpp"
 
 namespace psycle { namespace helpers { namespace math {
 

@@ -17,10 +17,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <cmath>
-#include <psycle/helpers/math/rint.hpp>
+#include <psycle/helpers/math.hpp>
 
 #include "voice.h"
+
+namespace math = psycle::helpers::math;
 
 #define FILTER_CALC_TIME 64
 #define TWOPI 6.28318530717958647692528676655901f
@@ -206,7 +207,7 @@ float CSynthTrack::GetSample()
 					for (int i = 0; i<16; i++){
 						OSCPosition+=OOSCSpeed;
 						if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
-						pos = psycle::helpers::math::lrint<std::int32_t>(OSCPosition-0.5f);
+						pos = math::lrint<std::int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos+cur_pw];
 						output+=aaf1.process((vpar->Wavetable[cur_waveform][((pos+1)&2047)+cur_pw] - sample) * (OSCPosition - (float)pos) + sample);
 					}
@@ -220,7 +221,7 @@ float CSynthTrack::GetSample()
 					for (int i = 0; i<16; i++){
 						OSCPosition+=OOSCSpeed;
 						if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
-						pos = psycle::helpers::math::lrint<std::int32_t>(OSCPosition-0.5f);
+						pos = math::lrint<std::int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos];
 						output+=aaf1.process((vpar->Wavetable[cur_waveform][(pos+1)&2047] - sample) * (OSCPosition - (float)pos) + sample);
 					}

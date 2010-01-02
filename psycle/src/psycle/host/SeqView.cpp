@@ -15,14 +15,16 @@ using namespace psycle::core;
 #include "Song.hpp"
 #endif
 
+#include <psycle/helpers/math.hpp>
+
 #ifdef _MSC_VER
 #undef min
 #undef max
 #endif
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
+using namespace psycle::helpers::math;
 
 		SequencerView::SequencerView(CMainFrame* main_frame)
 			: main_frame_(main_frame)
@@ -1450,7 +1452,7 @@ namespace psycle {
 			}
 #endif
 			
-			sprintf(buffer, "%02d:%02d", truncated(songLength / 60), truncated(songLength) % 60);
+			sprintf(buffer, "%02d:%02d", trunc(songLength / 60), trunc(songLength) % 60);
 			pLength->SetWindowText(buffer);
 			// Update sequencer line
 			
@@ -1709,9 +1711,4 @@ namespace psycle {
 			}
 #endif
 		}
-
-
-
-
-	} // namespace host
-} // namespace psycle
+}}

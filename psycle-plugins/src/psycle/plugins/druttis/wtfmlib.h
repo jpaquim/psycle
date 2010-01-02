@@ -2,7 +2,7 @@
 ///\brief wave tables
 #pragma once
 #include <algorithm>
-#include <psycle/helpers/math/rint.hpp>
+#include <psycle/helpers/math.hpp>
 
 using namespace psycle::helpers::math;
 
