@@ -811,8 +811,8 @@ using namespace psycle::helpers::math;
 				CClientDC canvasl(lv);
 //				CClientDC canvasr(rv);
 
-				int log_l=trunc(100*log10f(l));
-				int log_r=trunc(100*log10f(r));
+				int log_l = static_cast<int>(100 * std::log10(l));
+				int log_r = static_cast<int>(100 * std::log10(r));
 				log_l=log_l-225;
 				if ( log_l < 0 )log_l=0;
 				log_r=log_r-225;
@@ -1841,14 +1841,19 @@ using namespace psycle::helpers::math;
 				CString str;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				const float playTime = Player::singleton().timeInfo().samplePos() /  (float) Player::singleton().timeInfo().sampleRate();
-				const int timeInt = trunc(playTime);
+				const int timeInt = static_cast<int>(playTime);
 				const int cents = (playTime - timeInt) * 100;
 				const int secs = timeInt % 60;
 				const int mins = ((timeInt/60) % 60);
 				const int hour = timeInt / 3600;
 				str.Format( "%.2u:%.2u:%.2u.%.2u", hour, mins, secs, cents); 
 #else
-				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, trunc(Global::pPlayer->_playTime), trunc(Global::pPlayer->_playTime*100)-(trunc(Global::pPlayer->_playTime)*100)); 
+				str.Format( "%.2u:%.2u:%.2u.%.2u",
+					Global::pPlayer->_playTimem / 60,
+					Global::pPlayer->_playTimem % 60,
+					static_cast<unsigned int>(Global::pPlayer->_playTime),
+					static_cast<unsigned int>(Global::pPlayer->_playTime * 100) -
+					static_cast<unsigned int>(Global::pPlayer->_playTime) * 100;
 #endif
 				pCmdUI->SetText(str); 
 			}
