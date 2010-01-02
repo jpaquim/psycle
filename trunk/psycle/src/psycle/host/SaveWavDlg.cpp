@@ -21,10 +21,12 @@ using namespace psycle::core;
 #include "PatternView.hpp"
 #include <iostream>
 #include <iomanip>
+#include <psycle/helpers/math.hpp>
 #include <psycle/helpers/hexstring_to_integer.hpp>
 #include <psycle/helpers/dither.hpp>
 
 using namespace psycle::helpers;
+using namespace psycle::helpers::math;
 using namespace psycle::helpers::dsp;
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -729,8 +731,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						pPlayer->setLoopRange(iter->second->tickPosition(), iterend->second->tickEndPosition());
 						pPlayer->start(iter->second->tickPosition());
 					}
-					m_progress.SetRange(rounded(iter->second->tickPosition()),
-						rounded(iterend->second->tickEndPosition()));
+					m_progress.SetRange(
+						lround<int32_t>(iter->second->tickPosition()),
+						lround<int32_t>(iterend->second->tickEndPosition())
+					);
 				#else
 					j=0;
 					for (cont=pstart;cont<=tmp;cont++)

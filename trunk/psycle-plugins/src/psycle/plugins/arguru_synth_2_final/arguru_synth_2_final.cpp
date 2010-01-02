@@ -5,6 +5,7 @@
 
 using namespace psycle::plugin_interface;
 using namespace psycle::helpers;
+using namespace psycle::helpers::math;
 
 int const MAX_ENV_TIME = 250000;
 int const NUMPARAMETERS = 28;
@@ -778,8 +779,8 @@ void mi::InitWaveTableOrig() {
 //the OSC speed.
 void mi::InitWaveTableSR(bool delArray) {
 	//Ensure the value is even, we need to divide it by two.
-	const std::uint32_t amount = math::rounded((float)currentSR/22.0f) &0xFFFFFFF8;
-	const std::uint32_t half = amount >> 1;
+	const uint32_t amount = lround<uint32_t>(currentSR / 22.0f) & 0xFFFFFFF8;
+	const uint32_t half = amount >> 1;
 
 	const double sinFraction = 2.0*math::pi/(double)amount;
 	const float increase = 32768.0f/(float)amount;

@@ -1,10 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::AudioDriver.
 #include "AudioDriver.hpp"
-namespace psycle
-{
-	namespace host
-	{
+#include <psycle/helpers/math.hpp>
+
+namespace psycle { namespace host {
+
+using namespace helpers::math;
+
 		#define SHORT_MIN -32768
 		#define SHORT_MAX 32767
 
@@ -62,12 +64,8 @@ namespace psycle
 
 		void AudioDriver::Quantize(float *pin, int *piout, int c)
 		{
-			//double const d2i = (1.5 * (1 << 26) * (1 << 26));
-			do
-			{
-				//double res = ((double)pin[1]) + d2i;
-				//int r = *(int *)&res;
-				int r = rounded(pin[1]);
+			do {
+				int r = lrint<int>(pin[1]);
 
 				if (r < SHORT_MIN)
 				{
@@ -77,9 +75,7 @@ namespace psycle
 				{
 					r = SHORT_MAX;
 				}
-				//res = ((double)pin[0]) + d2i;
-				//int l = *(int *)&res;
-				int l = rounded(pin[0]);
+				int l = lrint<int>(pin[0]);
 
 				if (l < SHORT_MIN)
 				{
@@ -91,22 +87,16 @@ namespace psycle
 				}
 				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
 				pin += 2;
-			}
-			while(--c);
+			} while(--c);
 		}
 
 		void AudioDriver::DeQuantizeAndDeinterlace(int *pin, float *poutleft,float *poutright,int c)
 		{
-			//const float multiplier = (_bitDepth==24?0.00000011920928955078125f:(_bitDepth==16?0.000030517578125f:0.0078125f));
-			do
-			{
+			do {
 				*poutleft++ = static_cast<short int>(*pin&0xFFFF);
 				*poutright++ = static_cast<short int>((*pin&0xFFFF0000)>>16);
-				//*poutleft++ = *(pin++)*multiplier;
-				//*poutright++ = *(pin++)*multiplier;
-				pin++;
-			}
-			while(--c);
+				++pin;
+			} while(--c);
 		}
 	}
 }

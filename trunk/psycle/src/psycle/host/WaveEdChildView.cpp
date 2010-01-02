@@ -15,11 +15,12 @@ using namespace psycle::core;
 
 #include "Zap.hpp"
 #include <mmreg.h>
-#include <cmath>
+#include <psycle/helpers/math.hpp>
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle) PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
 using namespace psycle::helpers;
+using namespace psycle::helpers::math;
 
 float const CWaveEdChildView::zoomBase = 1.06f;
 
@@ -146,17 +147,17 @@ CWaveEdChildView::~CWaveEdChildView()
 				oldbmp = memDC.SelectObject(bmpBuffer);
 				memDC.SetWindowOrg(invalidRect.left, invalidRect.top);
 				
-				int const nHeadHeight=helpers::math::rounded(rect.Height()*0.1f);
+				int const nHeadHeight = lround<int>(rect.Height()*0.1f);
 				int const nWidth=rect.Width();
 				int const nHeight=rect.Height()-cyHScroll-nHeadHeight;
 
-				int const my =		helpers::math::rounded(nHeight*0.5f);
-				int const myHead =	helpers::math::rounded(nHeadHeight*0.5f);
+				int const my =     lround<int>(nHeight*0.5f);
+				int const myHead = lround<int>(nHeadHeight*0.5f);
 
 				if(wdStereo)
 				{
-					wrHeight =		helpers::math::rounded(my*0.5f);
-					wrHeadHeight =	helpers::math::rounded(myHead*0.5f);
+					wrHeight =     lround<int>(my*0.5f);
+					wrHeadHeight = lround<int>(myHead*0.5f);
 				}
 				else 
 				{
@@ -235,7 +236,7 @@ CWaveEdChildView::~CWaveEdChildView()
 					memDC.SelectObject(&cpen_lo);
 					if ( wdLoopS >= diStart && wdLoopS < diStart+diLength)
 					{
-						int ls = helpers::math::rounded((wdLoopS-diStart)*dispRatio);
+						int ls = lround<int>((wdLoopS-diStart)*dispRatio);
 						memDC.MoveTo(ls,nHeadHeight);
 						memDC.LineTo(ls,nHeight+nHeadHeight);
 						CSize textsize = memDC.GetTextExtent("Start");
@@ -243,7 +244,7 @@ CWaveEdChildView::~CWaveEdChildView()
 					}
 					if ( wdLoopE >= diStart && wdLoopE < diStart+diLength)
 					{
-						int le = helpers::math::rounded((wdLoopE-diStart)*dispRatio);
+						int le = lround<int>((wdLoopE-diStart)*dispRatio);
 						memDC.MoveTo(le,nHeadHeight);
 						memDC.LineTo(le,nHeight+nHeadHeight);
 						CSize textsize = memDC.GetTextExtent("End");
@@ -251,8 +252,8 @@ CWaveEdChildView::~CWaveEdChildView()
 					}
 
 					//draw loop points in header
-					int ls = helpers::math::rounded(wdLoopS * headDispRatio);
-					int le = helpers::math::rounded(wdLoopE * headDispRatio);
+					int ls = lround<int>(wdLoopS * headDispRatio);
+					int le = lround<int>(wdLoopE * headDispRatio);
 
 					memDC.MoveTo(ls, 0);
 					memDC.LineTo(ls, nHeadHeight);
@@ -263,8 +264,8 @@ CWaveEdChildView::~CWaveEdChildView()
 
 				//draw screen size on header
 				memDC.SelectObject(&cpen_white);
-				int screenx  = helpers::math::rounded( diStart           * headDispRatio);
-				int screenx2 = helpers::math::rounded((diStart+diLength) * headDispRatio);
+				int screenx  = lround<int>( diStart           * headDispRatio);
+				int screenx2 = lround<int>((diStart+diLength) * headDispRatio);
 				memDC.MoveTo(screenx, 0);
 				memDC.LineTo(screenx, nHeadHeight-1);
 				memDC.LineTo(screenx2,nHeadHeight-1);
@@ -277,7 +278,7 @@ CWaveEdChildView::~CWaveEdChildView()
 
 				if(cursorBlink	&&	cursorPos >= diStart	&&	cursorPos <= diStart+diLength)
 				{
-					int cursorX = helpers::math::rounded((cursorPos-diStart)*dispRatio);
+					int cursorX = lround<int>((cursorPos-diStart)*dispRatio);
 					memDC.MoveTo(cursorX, nHeadHeight);
 					memDC.LineTo(cursorX, nHeadHeight+nHeight);
 				}
@@ -285,8 +286,8 @@ CWaveEdChildView::~CWaveEdChildView()
 				selx =blStart;
 				selx2=blStart+blLength;
 
-				int HeadSelX = helpers::math::rounded(selx * headDispRatio);
-				int HeadSelX2= helpers::math::rounded(selx2* headDispRatio);
+				int HeadSelX = lround<int>(selx * headDispRatio);
+				int HeadSelX2= lround<int>(selx2* headDispRatio);
 				memDC.Rectangle(HeadSelX,0,		HeadSelX2,nHeadHeight);
 
 				if(selx<diStart) selx=diStart;
@@ -294,8 +295,8 @@ CWaveEdChildView::~CWaveEdChildView()
 				//if the selected block is entirely off the screen, the above statements will flip the order
 				if(selx<selx2)					//if not, it will just clip the drawing
 				{
-					selx = helpers::math::rounded((selx -diStart)*dispRatio) ;
-					selx2= helpers::math::rounded((selx2-diStart)*dispRatio) ;
+					selx = lround<int>((selx -diStart)*dispRatio) ;
+					selx2= lround<int>((selx2-diStart)*dispRatio) ;
 					memDC.Rectangle(selx,nHeadHeight,selx2,nHeight+nHeadHeight);
 				}
 
@@ -566,7 +567,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				memDC.SelectObject( &blueBrush );
 				memDC.Rectangle(	rc.left+7,
 								rc.top+2,
-								rc.left+7+helpers::math::rounded( vol*(rc.right-rc.left-14) ),
+								rc.left+7+lround<int>(vol*(rc.right-rc.left-14)),
 								rc.bottom-2);
 				
 				memDC.SelectStockObject(BLACK_BRUSH);
@@ -907,24 +908,24 @@ CWaveEdChildView::~CWaveEdChildView()
 					{
 						float dispRatio = nWidth/float(diLength);
 						if		( blSelection	&&
-								abs(x - helpers::math::rounded((blStart-diStart)			* dispRatio )) < 10 )	//mouse down on block start
+								abs(x - lround<int>((blStart-diStart)			* dispRatio )) < 10 )	//mouse down on block start
 						{
 							SelStart = blStart+blLength;				//set SelStart to the end we're -not- moving
 							cursorPos=blStart;
 						}
 						else if ( blSelection	&&
-								abs(x - helpers::math::rounded((blStart+blLength-diStart)	* dispRatio )) < 10 )	//mouse down on block end
+								abs(x - lround<int>((blStart+blLength-diStart)	* dispRatio )) < 10 )	//mouse down on block end
 						{
 							SelStart=blStart;							//set SelStart to the end we're -not- moving
 							cursorPos=blStart+blLength;
 						}
 						else if ( wdLoop		&&
-								abs(x - helpers::math::rounded((wdLoopS-diStart)			* dispRatio )) < 10 )	//mouse down on loop start
+								abs(x - lround<int>((wdLoopS-diStart)			* dispRatio )) < 10 )	//mouse down on loop start
 						{
 							bDragLoopStart=true;
 						}
 						else if ( wdLoop		&&
-								abs(x - helpers::math::rounded((wdLoopE-diStart)			* dispRatio )) < 10 )	//mouse down on loop end
+								abs(x - lround<int>((wdLoopE-diStart)			* dispRatio )) < 10 )	//mouse down on loop end
 						{
 							bDragLoopEnd=true;
 						}
@@ -943,12 +944,12 @@ CWaveEdChildView::~CWaveEdChildView()
 					{
 						float headDispRatio = nWidth/float(wdLength);
 						if		( blSelection		&&
-								abs( x - helpers::math::rounded( blStart				* headDispRatio ) ) < 10 )	//mouse down on block start
+								abs( x - lround<int>( blStart				* headDispRatio ) ) < 10 )	//mouse down on block start
 						{
 							SelStart = blStart+blLength;
 						}
 						else if ( blSelection		&&
-								abs( x - helpers::math::rounded((blStart+blLength)	* headDispRatio ) ) < 10 )	//mouse down on block end
+								abs( x - lround<int>((blStart+blLength)	* headDispRatio ) ) < 10 )	//mouse down on block end
 						{
 							SelStart = blStart;
 						}
@@ -956,7 +957,7 @@ CWaveEdChildView::~CWaveEdChildView()
 						{
 							blSelection=false;
 							
-							blStart = helpers::math::rounded(double((x*wdLength)/nWidth));
+							blStart = lround<int>(double((x*wdLength)/nWidth));
 							blLength=0;
 							SelStart = blStart;
 
@@ -995,7 +996,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				{
 					float diRatio = (float) diLength/nWidth;
 					unsigned long newpos =  (x*diRatio+diStart > 0? x*diRatio+diStart: 0);
-					int headX = helpers::math::rounded((diStart+x*diRatio)*nWidth/float(wdLength));
+					int headX = lround<int>((diStart+x*diRatio)*nWidth/float(wdLength));
 					if(bDragLoopStart)
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -1081,7 +1082,7 @@ CWaveEdChildView::~CWaveEdChildView()
 						blLength = SelStart-blStart;
 					}
 					//set invalid rects
-					int bodyX = helpers::math::rounded(double( (x*wdLength - diStart*nWidth)/diLength ));
+					int bodyX = lround<int>(double( (x*wdLength - diStart*nWidth)/diLength ));
 					if(bodyX<0 || bodyX>nWidth)
 						invBody.SetRectEmpty();
 					else
@@ -1105,11 +1106,11 @@ CWaveEdChildView::~CWaveEdChildView()
 				{
 					float dispRatio = nWidth/(float)diLength;
 					if	(		blSelection		&&
-							(	abs ( x - helpers::math::rounded((  blStart-diStart )			* dispRatio ))  < 10		||
-								abs ( x - helpers::math::rounded((  blStart+blLength-diStart)	* dispRatio ))  < 10	)	||
+							(	abs ( x - lround<int>((  blStart-diStart )			* dispRatio ))  < 10		||
+								abs ( x - lround<int>((  blStart+blLength-diStart)	* dispRatio ))  < 10	)	||
 							(	wdLoop &&
-							(	abs ( x - helpers::math::rounded((  wdLoopS-diStart )			* dispRatio ))  < 10		||
-								abs ( x - helpers::math::rounded((  wdLoopE-diStart )			* dispRatio ))  < 10) )
+							(	abs ( x - lround<int>((  wdLoopS-diStart )			* dispRatio ))  < 10		||
+								abs ( x - lround<int>((  wdLoopE-diStart )			* dispRatio ))  < 10) )
 						)
 						::SetCursor(hResizeLR);
 					else
@@ -1120,8 +1121,8 @@ CWaveEdChildView::~CWaveEdChildView()
 					
 					float dispRatio = nWidth/(float)wdLength;
 					if (		blSelection		&&
-							(	abs ( x - helpers::math::rounded(   blStart			* dispRatio ))	< 10 ||
-								abs ( x - helpers::math::rounded((  blStart+blLength)	* dispRatio ))	< 10 )
+							(	abs ( x - lround<int>(   blStart			* dispRatio ))	< 10 ||
+								abs ( x - lround<int>((  blStart+blLength)	* dispRatio ))	< 10 )
 						)
 						::SetCursor(hResizeLR);
 					else
@@ -2545,7 +2546,7 @@ CWaveEdChildView::~CWaveEdChildView()
 
 					float maxzoom = log10(float(wdLength/8.0f))/log10(zoomBase);	// wdLength/(b^n)>=8    <==>   n <= log<b>(wdLength/8)
 					// log<10>(x)/log<10>(b) == log<b>(x)
-					int slidermax = helpers::math::rounded(floor(maxzoom));
+					int slidermax = lround<int>(std::floor(maxzoom));
 					if(slidermax<0) slidermax=0;			//possible for waves with less than 8 samples (!)
 					zoomSlider->SetRange(0, slidermax);
 				}
@@ -2555,7 +2556,7 @@ CWaveEdChildView::~CWaveEdChildView()
 					//this is the same concept, except this is to give us some idea of where to draw the slider based on the existing zoom
 					//so, instead of wdLength/8 (the max zoom), we're doing wdLength/diLength (the current zoom)
 					float zoomfactor = log10(wdLength/(float)diLength)/log10(zoomBase);
-					int newpos = helpers::math::rounded(zoomfactor+0.5f);
+					int newpos = lround<int>(zoomfactor+0.5f);
 					if(newpos<0)	newpos=0;		//i'm not sure how this would happen, but just in case
 					zoomSlider->SetPos(newpos);
 				}

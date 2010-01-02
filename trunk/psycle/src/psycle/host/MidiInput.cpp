@@ -19,6 +19,7 @@ using namespace psycle::core;
 #endif
 #include "ChildView.hpp"
 #include "MainFrm.hpp"
+#include <psycle/helpers/math.hpp>
 #include <cassert>
 
 #if !defined NDEBUG
@@ -26,10 +27,11 @@ using namespace psycle::core;
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
-namespace psycle
-{
-	namespace host
-	{
+
+namespace psycle { namespace host {
+
+using namespace helpers::math;
+
 		extern CPsycleApp theApp;
 
 		CMidiInput * CMidiInput::s_Instance(0);	// the current instance
@@ -1132,7 +1134,7 @@ namespace psycle
 			int midiLatencyMs = ( timeGetTime() - m_tickBase ) - dwParam2;
 
 			// adjust the sample position (fix latency)
-			int adjPlayPos = playPos - helpers::math::rounded((midiLatencyMs/1000.f) * samplesPerSecond );
+			int adjPlayPos = playPos - lround<int>((midiLatencyMs/1000.f) * samplesPerSecond );
 			
 			// never let the adjusted play pos become negative (this really breaks things - usually
 			// when trying to resync just after the audio engine has restared)
@@ -1206,7 +1208,7 @@ namespace psycle
 			// using our own timer, started at the same time (hopefully!) as the MIDI
 			// input timer.
  			int midiLatency = ( timeGetTime() - m_tickBase ) - dwParam2;
-			int midiLatencySamples = helpers::math::rounded( (midiLatency/1000.f) * samplesPerSecond );
+			int midiLatencySamples = lround<int>( (midiLatency/1000.f) * samplesPerSecond );
 			m_stats.syncEventLatency = midiLatencySamples;
 
 			// work out the real play position
@@ -1385,7 +1387,7 @@ namespace psycle
 							pMachine->GetParamRange(data1,min,max);
 
 							// create actual value
-							int value = min + psycle::helpers::math::rounded( (max-min) * (data2/127.f) );
+							int value = min + lround<int>( (max-min) * (data2/127.f) );
 
 							// assign
 							m_midiBuffer[ m_patOut ].entry.setInstrument(data1);
@@ -1425,7 +1427,7 @@ namespace psycle
 							}
 
 							// create actual value
-							int value = min + helpers::math::rounded( (max-min) * (data2/127.f) );
+							int value = min + lround<int>( (max-min) * (data2/127.f) );
 
 							// assign
 							m_midiBuffer[ m_patOut ].entry.setInstrument(data1);

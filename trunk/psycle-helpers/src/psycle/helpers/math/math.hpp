@@ -11,7 +11,7 @@
 #include "sincos.hpp"
 #include "sinseq.hpp"
 #include "lrint.hpp"
-#include "round.hpp"
+#include "lround.hpp"
 #include "clip.hpp"
 #include "erase_all_nans_infinities_and_denormals.hpp"
 #include "erase_denormals.hpp"
@@ -25,19 +25,19 @@ Summary of some of the C99 functions that do floating point rounding and convers
 "(int)" means it returns an integral number.
 "(float)" means it returns a floating point number.
 
-round to nearest integer, using the current rounding direction:
+round to integer, using the current rounding direction (fesetround FE_TONEAREST, FE_TOWARDZERO, FE_DOWNWARD, FE_UPWARD):
 	(float) rint, rintf, rintl - raise the inexact exception when the result differs in value from the argument
 	(float) nearbyint, nearbyintf, nearbyintl - don't raise the inexact exception
 	(int) lrint, lrintf, lrintl, llrint, llrintf, llrintl
-round to nearest integer, away from zero for halfway cases:
+round to nearest integer, away from zero for halfway cases (fesetround FE_TONEAREST):
 	(float) round, roundf, roundl
 	(int) lround, lroundf, lroundl, llround, llroundf, llroundl
-round to integer, towards zero:
+round to integer, towards zero (fesetround FE_TOWARDZERO):
 	(float) trunc, truncf, truncl
 	(int) static_cast, c-style cast, constructor-style cast
-round to integer, towards -inf:
+round to integer, towards -inf (fesetround FE_DOWNWARD):
 	(float) floor, floorf, floorl
-round to integer, towards +inf:
+round to integer, towards +inf (fesetround FE_UPWARD):
 	(float) ceil, ceilf, ceill
 remainder/modulo:
 	(float) fmod, fmodf, fmodl - quotient rounded towards zero to an integer

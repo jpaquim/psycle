@@ -1,6 +1,3 @@
-*	Review the few calls to the psycle::helpers::rounded and truncated functions.
-	These functions are not verry well specified. Either remove them or find precise C99 mapping.
-
 *	Boost provides implementation of some C99 functions for msvc,
 	but we need to upgrade the boost version for msvc2005 in the external-packages dir.
 

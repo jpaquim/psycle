@@ -1,5 +1,4 @@
 #include "WireGui.hpp"
-#include <psycle/helpers/math.hpp>
 #include "MachineGui.hpp"
 #include "MachineView.hpp"
 #include "WireDlg.hpp"
@@ -13,9 +12,12 @@ using namespace psycle::core;
 
 #include "Configuration.hpp"
 
+#include <psycle/helpers/math.hpp>
+
 namespace psycle { namespace host {
 
 using namespace helpers;
+using namespace helpers::math;
 
 		WireGui::WireGui(MachineView* view)	:
 			view_(view),
@@ -130,17 +132,17 @@ using namespace helpers;
 				double slope = atan2(modY, modX);
 				double altslope;
 										
-				int rtcol = 140+abs(math::rounded(slope*32));
+				int rtcol = 140+std::abs(lround<int>(slope*32));
 
 				altslope=slope;
 				if(altslope<-1.05)  altslope -= 2 * (altslope + 1.05);
 				if(altslope>2.10) altslope -= 2 * (altslope - 2.10);
-				int ltcol = 140 + abs(math::rounded((altslope - 2.10) * 32));
+				int ltcol = 140 + std::abs(lround<int>((altslope - 2.10) * 32));
 
 				altslope=slope;
 				if(altslope>0.79)  altslope -= 2 * (altslope - 0.79);
 				if(altslope<-2.36)  altslope -= 2 * (altslope + 2.36);
-				int btcol = 240 - abs(math::rounded((altslope-0.79) * 32));
+				int btcol = 240 - std::abs(lround<int>((altslope-0.79) * 32));
 
 				// brushes for the right side, left side, and bottom of the arrow (when pointed straight up).
 				CBrush rtBrush(RGB(rtcol * deltaColR,
@@ -166,16 +168,16 @@ using namespace helpers;
 				CPoint pol[5];
 				CPoint fillpoly[7];
 								
-				pol[0].x = f1 - math::rounded(modX*triangle_size_center);
-				pol[0].y = f2 - math::rounded(modY*triangle_size_center);
-				pol[1].x = pol[0].x + math::rounded(modX*triangle_size_tall);
-				pol[1].y = pol[0].y + math::rounded(modY*triangle_size_tall);
-				pol[2].x = pol[0].x - math::rounded(modY*triangle_size_wide);
-				pol[2].y = pol[0].y + math::rounded(modX*triangle_size_wide);
-				pol[3].x = pol[0].x + math::rounded(modX*triangle_size_indent);
-				pol[3].y = pol[0].y + math::rounded(modY*triangle_size_indent);
-				pol[4].x = pol[0].x + math::rounded(modY*triangle_size_wide);
-				pol[4].y = pol[0].y - math::rounded(modX*triangle_size_wide);
+				pol[0].x = f1 - lround<int>(modX*triangle_size_center);
+				pol[0].y = f2 - lround<int>(modY*triangle_size_center);
+				pol[1].x = pol[0].x + lround<int>(modX*triangle_size_tall);
+				pol[1].y = pol[0].y + lround<int>(modY*triangle_size_tall);
+				pol[2].x = pol[0].x - lround<int>(modY*triangle_size_wide);
+				pol[2].y = pol[0].y + lround<int>(modX*triangle_size_wide);
+				pol[3].x = pol[0].x + lround<int>(modX*triangle_size_indent);
+				pol[3].y = pol[0].y + lround<int>(modY*triangle_size_indent);
+				pol[4].x = pol[0].x + lround<int>(modY*triangle_size_wide);
+				pol[4].y = pol[0].y - lround<int>(modX*triangle_size_wide);
 				if (Global::pConfig->mv_wireaa)
 				{				
 					devc->SelectObject(&linepen1);
@@ -190,8 +192,8 @@ using namespace helpers;
 				} else {
 					devc->Polygon(&pol[1], 4);
 				}
-				fillpoly[2].x = pol[0].x + math::rounded(2*modX*triangle_size_indent);
-				fillpoly[2].y = pol[0].y + math::rounded(2*modY*triangle_size_indent);
+				fillpoly[2].x = pol[0].x + lround<int>(2*modX*triangle_size_indent);
+				fillpoly[2].y = pol[0].y + lround<int>(2*modY*triangle_size_indent);
 				fillpoly[6].x = fillpoly[2].x;    
 				fillpoly[6].y = fillpoly[2].y;    
 				fillpoly[1].x = pol[1].x;         
