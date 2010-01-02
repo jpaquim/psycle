@@ -301,16 +301,8 @@ void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
 	output_sample_type * const out = reinterpret_cast<output_sample_type * const>(GST_BUFFER_DATA(&buffer));
 	std::size_t const frames = GST_BUFFER_SIZE(&buffer) / sizeof(output_sample_type) / playbackSettings().numChannels();
-	// The callback is unable to process more than AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH samples at a time,
-	// so we may have to call it several times to fill the output buffer.
-	int chunk = AUDIODRIVERWORKFN_MAX_BUFFER_LENGTH, done = 0, remaining = frames;
-	while(remaining) {
-		if(remaining < chunk) chunk = remaining;
-		float const * const in = callback(chunk);
-		Quantize16WithDither(in, out + (done * 2), chunk); // * 2 since Quantize assumes a stereo signal.
-		done += chunk;
-		remaining = frames - done;
-	}
+	float const * const in = callback(frames);
+	Quantize16WithDither(in, out, frames);
 }
 
 void GStreamerOut::do_stop() {
