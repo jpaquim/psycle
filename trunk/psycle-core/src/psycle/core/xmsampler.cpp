@@ -1999,7 +1999,7 @@ bool XMSampler::Channel::Load(RiffFile& riffFile)
 	riffFile.Read(m_DefaultPanFactor);
 	riffFile.Read(m_DefaultCutoff);
 	riffFile.Read(m_DefaultRessonance);
-	riffFile.Read((uint32_t&)m_DefaultFilterType);
+	{ uint32_t i(0); riffFile.Read(i); m_DefaultFilterType = static_cast<dsp::FilterType>(i); }
 
 	return true;
 }
@@ -2012,7 +2012,7 @@ void XMSampler::Channel::Save(RiffFile& riffFile)
 	riffFile.Write(m_DefaultPanFactor);
 	riffFile.Write(m_DefaultCutoff);
 	riffFile.Write(m_DefaultRessonance);
-	riffFile.Write((uint32_t&)m_DefaultFilterType);
+	{ uint32_t i = m_DefaultFilterType; riffFile.Write(i); }
 }
 
 
