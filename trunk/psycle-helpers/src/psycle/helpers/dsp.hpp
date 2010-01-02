@@ -359,7 +359,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	{
 		public:
 			/// constructor
-			Resampler() : _quality(R_NONE), _pWorkFn(None) {}
+			Resampler() : _pWorkFn(None), _quality(R_NONE) {}
 			/// work function corresponding to the selected kind.
 			PRESAMPLERFN _pWorkFn;
 			/// sets the kind of interpolation.
