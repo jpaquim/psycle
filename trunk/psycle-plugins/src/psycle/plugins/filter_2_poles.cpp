@@ -8,7 +8,7 @@
 #include <psycle/helpers/math.hpp>
 namespace psycle { namespace plugin {
 
-namespace math = helpers::math;
+using namespace helpers::math;
 
 class Filter_2_Poles : public Plugin
 {
@@ -38,11 +38,11 @@ public:
 		static const Information::Parameter parameters [] =
 		{
 			Information::Parameter::discrete("response", low, high),
-			Information::Parameter::exponential("cutoff frequency", 15 * math::pi, 22050 * math::pi, 22050 * math::pi),
+			Information::Parameter::exponential("cutoff frequency", 15 * pi, 22050 * pi, 22050 * pi),
 			Information::Parameter::linear("resonance", 0, 0, 1),
-			Information::Parameter::exponential("mod. frequency", math::pi * 2 / 10000, 0, math::pi * 2 * 2 * 3 * 4 * 5 * 7),
+			Information::Parameter::exponential("mod. frequency", pi * 2 / 10000, 0, pi * 2 * 2 * 3 * 4 * 5 * 7),
 			Information::Parameter::linear("mod. amplitude", 0, 0, 1),
-			Information::Parameter::linear("mod. stereodephase", 0, 0, math::pi)
+			Information::Parameter::linear("mod. stereodephase", 0, 0, pi)
 		};
 		static const Information information(Information::Types::effect, "ayeternal 2-Pole Filter", "2-Pole Filter", "bohan", 2, parameters, sizeof parameters / sizeof *parameters);
 		return information;
@@ -66,15 +66,15 @@ public:
 			}
 			break;
 		case cutoff_frequency:
-			out << (*this)(cutoff_frequency) / math::pi << " hertz";
+			out << (*this)(cutoff_frequency) / pi << " hertz";
 			break;
 		case modulation_sequencer_ticks:
-			out << math::pi * 2 / (*this)(modulation_sequencer_ticks) << " ticks (lines)";
+			out << pi * 2 / (*this)(modulation_sequencer_ticks) << " ticks (lines)";
 			break;
 		case modulation_stereo_dephase:
 			if((*this)(modulation_stereo_dephase) == 0) out << 0;
-			else if((*this)(modulation_stereo_dephase) == Sample(math::pi)) out << "pi";
-			else out << "pi / " << math::pi / (*this)(modulation_stereo_dephase);
+			else if((*this)(modulation_stereo_dephase) == Sample(pi)) out << "pi";
+			else out << "pi / " << pi / (*this)(modulation_stereo_dephase);
 			break;
 		default:
 			Plugin::describe(out, parameter);
@@ -108,7 +108,7 @@ void Filter_2_Poles::sequencer_note_event(const int note, const int, const int, 
 	switch(command)
 	{
 	case 1:
-		modulation_phase_ = math::pi * 2 * value / 0x100;
+		modulation_phase_ = pi * 2 * value / 0x100;
 		break;
 	}
 	if ( note < 120 )
@@ -141,10 +141,10 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 {
 	const Real minimum(static_cast<Real>(1e-2));
 	const Real maximum(1 - minimum);
-	coefficients[0] = math::clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
+	coefficients[0] = clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
 	coefficients[1] = 1 - coefficients[0];
 	coefficients[2] = (*this)(resonance) * (1 + 1 / coefficients[1]);
-	math::erase_all_nans_infinities_and_denormals(coefficients, poles + 1);
+	erase_all_nans_infinities_and_denormals(coefficients, poles + 1);
 }
 
 void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
@@ -157,7 +157,7 @@ void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
 
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
 	{
-		modulation_phase_ = math::remainder(modulation_phase_ + modulation_radians_per_sample_ * samples, math::pi * 2);
+		modulation_phase_ = std::fmod(modulation_phase_ + modulation_radians_per_sample_ * samples, pi * 2);
 		update_coefficients();
 	}
 }
@@ -166,17 +166,16 @@ inline const Filter_2_Poles::Real Filter_2_Poles::process(const Real & input, Re
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
 	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
-	math::erase_all_nans_infinities_and_denormals(buffer, channels);
-	switch((*this)[response])
-	{
-	case low:
-		return buffer[1];
-		break;
-	case high:
-		return input - buffer[1];
-		break;
-	default:
-		throw Exception("unknown response type");
+	erase_all_nans_infinities_and_denormals(buffer, channels);
+	switch((*this)[response]) {
+		case low:
+			return buffer[1];
+			break;
+		case high:
+			return input - buffer[1];
+			break;
+		default:
+			throw Exception("unknown response type");
 	}
 }
 

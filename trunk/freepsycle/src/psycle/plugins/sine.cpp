@@ -4,7 +4,7 @@
 ///\implementation psycle::plugins::sine
 #include <psycle/detail/project.private.hpp>
 #include "sine.hpp"
-#include <psycle/helpers/math/sine.hpp>
+#include <psycle/helpers/math.hpp>
 namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(sine)

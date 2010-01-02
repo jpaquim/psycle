@@ -8,7 +8,7 @@
 #include <psycle/helpers/math.hpp>
 namespace psycle { namespace plugin {
 
-namespace math = helpers::math;
+using namespace helpers::math;
 
 class Ring_Modulator : public Plugin
 {
@@ -32,10 +32,10 @@ public:
 	{
 		static const Information::Parameter parameters [] =
 		{
-			Information::Parameter::exponential("am frequency", 0.0001 * math::pi * 2, 0, 22050 * math::pi * 2),
-			Information::Parameter::exponential("am frequency glide", 0.0001 * math::pi * 2, 0, 15 * 22050 * math::pi * 2),
-			Information::Parameter::exponential("fm frequency", 0.0001 * math::pi * 2, 0, 100 * math::pi * 2),
-			Information::Parameter::exponential("fm bandwidth", 0.0001 * math::pi * 2, 0, 22050 * math::pi * 2)
+			Information::Parameter::exponential("am frequency", 0.0001 * pi * 2, 0, 22050 * pi * 2),
+			Information::Parameter::exponential("am frequency glide", 0.0001 * pi * 2, 0, 15 * 22050 * pi * 2),
+			Information::Parameter::exponential("fm frequency", 0.0001 * pi * 2, 0, 100 * pi * 2),
+			Information::Parameter::exponential("fm bandwidth", 0.0001 * pi * 2, 0, 22050 * pi * 2)
 		};
 		static const Information information(Information::Types::effect, "ayeternal PsychOsc AM", "PsychOsc AM", "bohan and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
 		return information;
@@ -48,10 +48,10 @@ public:
 		case am_radians_per_second:
 		case fm_radians_per_second:
 		case fm_bandwidth:
-			out << (*this)(parameter) / math::pi / 2 << " hertz";
+			out << (*this)(parameter) / pi / 2 << " hertz";
 			break;
 		case am_glide:
-			out << (*this)(am_glide) / math::pi / 2 << " hertz/second";
+			out << (*this)(am_glide) / pi / 2 << " hertz/second";
 			break;
 		default:
 			Plugin::describe(out, parameter);
@@ -89,10 +89,10 @@ void Ring_Modulator::sequencer_note_event(const int, const int, const int, const
 	switch(command)
 	{
 	case 1:
-		phases_[am] = math::pi * 2 * value / 0x100;
+		phases_[am] = pi * 2 * value / 0x100;
 		break;
 	case 2:
-		phases_[fm] = math::pi * 2 * value / 0x100;
+		phases_[fm] = pi * 2 * value / 0x100;
 		break;
 	}
 }
@@ -137,7 +137,7 @@ void Ring_Modulator::process(Sample l[], Sample r[], int samples, int)
 		}
 	}
 	for(int oscillator(0) ; oscillator < oscillators ; ++oscillator)
-		phases_[oscillator] = math::remainder(phases_[oscillator], math::pi * 2);
+		phases_[oscillator] = std::fmod(phases_[oscillator], pi * 2);
 }
 
 inline const Ring_Modulator::Real Ring_Modulator::process(const Real & sample, const Real & modulation) const

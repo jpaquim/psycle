@@ -5,7 +5,7 @@
 #define PSYCLE__HELPERS__MATH__CLIP__INCLUDED
 #pragma once
 
-#include "rint.hpp"
+#include "lrint.hpp"
 #include <universalis/compiler.hpp>
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>

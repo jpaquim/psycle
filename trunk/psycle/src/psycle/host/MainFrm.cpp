@@ -61,11 +61,10 @@ using namespace psycle::core;
 #include <sstream>
 #include <iomanip>
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		using namespace psycle::helpers;
-		using namespace psycle::helpers::math;
+using namespace psycle::helpers;
+using namespace psycle::helpers::math;
 
 		#define WM_SETMESSAGESTRING 0x0362
 
@@ -812,8 +811,8 @@ namespace psycle {
 				CClientDC canvasl(lv);
 //				CClientDC canvasr(rv);
 
-				int log_l=truncated(100*log10f(l));
-				int log_r=truncated(100*log10f(r));
+				int log_l=trunc(100*log10f(l));
+				int log_r=trunc(100*log10f(r));
 				log_l=log_l-225;
 				if ( log_l < 0 )log_l=0;
 				log_r=log_r-225;
@@ -1842,14 +1841,14 @@ namespace psycle {
 				CString str;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				const float playTime = Player::singleton().timeInfo().samplePos() /  (float) Player::singleton().timeInfo().sampleRate();
-				const int timeInt = truncated(playTime);
+				const int timeInt = trunc(playTime);
 				const int cents = (playTime - timeInt) * 100;
 				const int secs = timeInt % 60;
 				const int mins = ((timeInt/60) % 60);
 				const int hour = timeInt / 3600;
 				str.Format( "%.2u:%.2u:%.2u.%.2u", hour, mins, secs, cents); 
 #else
-				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, truncated(Global::pPlayer->_playTime), truncated(Global::pPlayer->_playTime*100)-(truncated(Global::pPlayer->_playTime)*100)); 
+				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, trunc(Global::pPlayer->_playTime), trunc(Global::pPlayer->_playTime*100)-(trunc(Global::pPlayer->_playTime)*100)); 
 #endif
 				pCmdUI->SetText(str); 
 			}
@@ -2058,6 +2057,4 @@ namespace psycle {
 				pGearRackDialog->RedrawList();
 			}
 		}
-
-	}	// namespace host
-}	// namespace psycle
+}}

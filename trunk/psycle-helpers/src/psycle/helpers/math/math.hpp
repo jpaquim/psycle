@@ -7,18 +7,44 @@
 
 #include "constants.hpp"
 #include "log.hpp"
-#include "sine.hpp"
-#include "sine_cosine.hpp"
-#include "sine_sequence.hpp"
-#include "remainder.hpp"
-#include "rint.hpp"
+#include "sin.hpp"
+#include "sincos.hpp"
+#include "sinseq.hpp"
+#include "lrint.hpp"
 #include "round.hpp"
-#include "truncate.hpp"
+#include "trunc.hpp"
 #include "clip.hpp"
 #include "erase_all_nans_infinities_and_denormals.hpp"
 #include "erase_denormals.hpp"
 #include <universalis/compiler.hpp>
 #include <cmath>
+
+/*************************************************************************************************
+
+Summary of some of the C99 functions that do floating point rounding and conversions to integers:
+
+"(int)" means it returns an integral number.
+"(float)" means it returns a floating point number.
+
+round to nearest integer, using the current rounding direction:
+	(float) rint, rintf, rintl - raise the inexact exception when the result differs in value from the argument
+	(float) nearbyint, nearbyintf, nearbyintl - don't raise the inexact exception
+	(int) lrint, lrintf, lrintl, llrint, llrintf, llrintl
+round to nearest integer, away from zero for halfway cases:
+	(float) round, roundf, roundl
+	(int) lround, lroundf, lroundl, llround, llroundf, llroundl
+round to integer, towards zero:
+	(float) trunc, truncf, truncl
+	(int) static_cast, c-style cast, constructor-style cast
+round to integer, towards -inf:
+	(float) floor, floorf, floorl
+round to integer, towards +inf:
+	(float) ceil, ceilf, ceill
+remainder/modulo:
+	(float) fmod, fmodf, fmodl - quotient rounded towards zero to an integer
+	(float) remainder, remainderf, remainderl - quotient rounded to the nearest integer.
+
+*************************************************************************************************/
 
 namespace psycle { namespace helpers { namespace math {
 

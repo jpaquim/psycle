@@ -1,10 +1,11 @@
 // Here It goes the "mi" declaration. It has been moved to track.hpp due to some compiling requirements.
 #include "track.hpp"
-#include <psycle/helpers/math/sine_cosine.hpp>
+#include <psycle/helpers/math.hpp>
 #include <cstring>
 #include <cmath>
 
 using namespace psycle::plugin_interface;
+using namespace psycle::helpers::math;
 
 // M3 Buzz plugin by MAKK makk@gmx.de
 // released on 04-21-99
@@ -569,7 +570,7 @@ void mi::ComputeCoefs( float *coefs, int freq, int r, int t) {
 	float omega = 2 * psycle::plugin_interface::pi * Cutoff(freq) / pCB->GetSamplingRate();
 
 	float sn, cs;
-	psycle::helpers::math::sin_cos(omega, sn, cs);
+	sincos(omega, sn, cs);
 	//float sn = std::sin(omega);
 	//float cs = std::cos(omega);
 	
