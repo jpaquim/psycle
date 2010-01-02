@@ -21,7 +21,7 @@
 
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "microsoftdirectsoundout.h"
-#include <psycle/helpers/math/rint.hpp>
+#include <psycle/helpers/math.hpp>
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <universalis/os/thread_name.hpp>

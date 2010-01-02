@@ -238,7 +238,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				}
 				float sintime;
 				float costime;	
-				psycle::helpers::math::sin_cos(calc_1_time, sintime, costime);
+				sincos(calc_1_time, sintime, costime);
 				frequency = 1.f + costime; // Left channel
 				frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 				frequency = exp((frequency - 1.f) * 6.f);
