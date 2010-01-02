@@ -121,6 +121,11 @@ Integer inline lrint(Real x) {
 		#endif
 	}
 
+	// uint32_t
+
+	template<> UNIVERSALIS__COMPILER__CONST uint32_t inline lrint<>(double d) { return lrint<int32_t>(d); }
+	template<> UNIVERSALIS__COMPILER__CONST uint32_t inline lrint<>(float f) { return lrint<int32_t>(f); }
+
 	// int16_t
 
 	template<> UNIVERSALIS__COMPILER__CONST int16_t inline lrint<>(double d) { return lrint<int32_t>(d); }
