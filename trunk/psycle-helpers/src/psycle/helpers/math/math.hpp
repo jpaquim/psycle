@@ -12,7 +12,6 @@
 #include "sinseq.hpp"
 #include "lrint.hpp"
 #include "round.hpp"
-#include "trunc.hpp"
 #include "clip.hpp"
 #include "erase_all_nans_infinities_and_denormals.hpp"
 #include "erase_denormals.hpp"

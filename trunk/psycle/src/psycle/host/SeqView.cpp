@@ -1452,7 +1452,7 @@ using namespace psycle::helpers::math;
 			}
 #endif
 			
-			sprintf(buffer, "%02d:%02d", trunc(songLength / 60), trunc(songLength) % 60);
+			sprintf(buffer, "%02d:%02d", static_cast<int>(songLength / 60), static_cast<int>(songLength) % 60);
 			pLength->SetWindowText(buffer);
 			// Update sequencer line
 			
