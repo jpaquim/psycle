@@ -852,7 +852,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									*o_mvpl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-helpers::math::rounded(o_mvpc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-lround<int>(o_mvpc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
 						x = lround<int>(std::sin((pi_f/4.0f)+(o_mvdpr*pi_f/(32768.0f*4.0f)))
 									*o_mvpr*(128.0f/32768.0f))+128;
@@ -881,11 +881,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 						x = lround<int>(std::sin(-(pi_f/4.0f)-(mvdpl*pi_f/(32768.0f*4.0f)))
 									*mvpl*(128.0f/32768.0f))+128;
-						y = lround<int<(-std::cos(-(pi_f/4.0f)-(mvdpl*pi_f/(32768.0f*4.0f)))
+						y = lround<int>(-std::cos(-(pi_f/4.0f)-(mvdpl*pi_f/(32768.0f*4.0f)))
 									*mvpl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-helpers::math::rounded(mvpc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-lround<int>(mvpc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
 						x = lround<int>(std::sin((pi_f/4.0f)+(mvdpr*pi_f/(32768.0f*4.0f)))
 									*mvpr*(128.0f/32768.0f))+128;
