@@ -142,7 +142,7 @@ namespace psycle
 			int16_t* outb =piout;
 			for (int i=0; i<c; i++)
 			{
-				*outb = psycle::helpers::math::clipped_lrint(*inb);
+				*outb = psycle::helpers::math::clipped_lrint<int16_t>(*inb);
 				*inb++; outb++;
 			}
 		}
