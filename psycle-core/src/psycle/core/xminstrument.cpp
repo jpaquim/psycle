@@ -19,13 +19,13 @@ using namespace helpers;
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
 
-void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value) {
+void XMInstrument::WaveData::WaveSampleRate(const uint32_t value) {
 	//todo: Readapt Tune and FineTune, respect of the new SampleRate.
 	m_WaveSampleRate = value;
 }
 
 int XMInstrument::WaveData::Load(RiffFile & riffFile) {
-	std::uint32_t size1 =0 ,size2 = 0;
+	uint32_t size1 = 0, size2 = 0;
 
 	char temp[6];
 	int size=0;
@@ -46,11 +46,11 @@ int XMInstrument::WaveData::Load(RiffFile & riffFile) {
 
 	riffFile.Read(m_WaveLoopStart);
 	riffFile.Read(m_WaveLoopEnd);
-	riffFile.Read((std::uint32_t&) m_WaveLoopType);
+	{ uint32_t i(0); riffFile.Read(i); m_WaveLoopType = static_cast<LoopType::Type>(i); }
 
 	riffFile.Read(m_WaveSusLoopStart);
 	riffFile.Read(m_WaveSusLoopEnd);
-	riffFile.Read((std::uint32_t&) m_WaveSusLoopType);
+	{ uint32_t i(0); riffFile.Read(i); m_WaveSusLoopType = static_cast<LoopType::Type>(i); }
 
 	riffFile.Read(m_WaveTune);
 	riffFile.Read(m_WaveFineTune);
@@ -85,8 +85,8 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 {
 	unsigned char * pData1(0);
 	unsigned char * pData2(0);
-	std::uint32_t size1= DataCompression::SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
-	std::uint32_t size2(0);
+	uint32_t size1 = DataCompression::SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
+	uint32_t size2(0);
 
 	if (m_WaveStereo)
 	{
@@ -94,7 +94,7 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 	}
 
 	std::string _wave_name(m_WaveName);
-	std::uint32_t size =
+	uint32_t size =
 		sizeof(XMInstrument::WaveData)
 		- sizeof m_pWaveDataL
 		- sizeof m_pWaveDataR
@@ -114,11 +114,11 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 
 	riffFile.Write(m_WaveLoopStart);
 	riffFile.Write(m_WaveLoopEnd);
-	riffFile.Write((std::uint32_t&)m_WaveLoopType);
+	{ uint32_t i = m_WaveLoopType; riffFile.Write(i); }
 
 	riffFile.Write(m_WaveSusLoopStart);
 	riffFile.Write(m_WaveSusLoopEnd);
-	riffFile.Write((std::uint32_t&)m_WaveSusLoopType);
+	{ uint32_t i = m_WaveSusLoopType; riffFile.Write(i); }
 
 	riffFile.Write(m_WaveTune);
 	riffFile.Write(m_WaveFineTune);
@@ -357,50 +357,43 @@ void XMInstrument::Envelope::Delete(const unsigned int pointIndex)
 }
 
 /// Loading Procedure
-void XMInstrument::Envelope::Load(RiffFile& riffFile,const std::uint32_t version)
+void XMInstrument::Envelope::Load(RiffFile& riffFile,const uint32_t version)
 {
 	riffFile.Read(m_Enabled);
 	riffFile.Read(m_Carry);
-
-	std::int32_t i32;
-
-	riffFile.Read(i32);
-	m_LoopStart = i32;
-	
-	riffFile.Read(i32);
-	m_LoopEnd = i32;
-	
-	riffFile.Read(i32);
-	m_SustainBegin = i32;
-	
-	riffFile.Read(i32);
-	m_SustainEnd = i32;
-
-	std::uint32_t num_of_points = 0;
-	riffFile.Read(num_of_points);
-	for(std::size_t i = 0; i < num_of_points; ++i)
 	{
-		PointValue value;
-		riffFile.Read(value.first); // point
-		riffFile.Read(value.second); // value
-		m_Points.push_back(value);
+		int32_t i32(0);
+		riffFile.Read(i32); m_LoopStart = i32;
+		riffFile.Read(i32); m_LoopEnd = i32;
+		riffFile.Read(i32); m_SustainBegin = i32;
+		riffFile.Read(i32); m_SustainEnd = i32;
+	}
+	{
+		uint32_t num_of_points = 0; riffFile.Read(num_of_points);
+		for(std::size_t i = 0; i < num_of_points; ++i) {
+			PointValue value;
+			riffFile.Read(value.first); // point
+			riffFile.Read(value.second); // value
+			m_Points.push_back(value);
+		}
 	}
 }
 
 /// Saving Procedure
-void XMInstrument::Envelope::Save(RiffFile& riffFile, const std::uint32_t version)
+void XMInstrument::Envelope::Save(RiffFile& riffFile, const uint32_t version)
 {
 	// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 	riffFile.Write(m_Enabled);
 	riffFile.Write(m_Carry);
-	riffFile.Write(static_cast<std::int32_t>(m_LoopStart));
-	riffFile.Write(static_cast<std::int32_t>(m_LoopEnd));
-	riffFile.Write(static_cast<std::int32_t>(m_SustainBegin));
-	riffFile.Write(static_cast<std::int32_t>(m_SustainEnd));
-	riffFile.Write(static_cast<std::uint32_t>(m_Points.size()));
-
-	for(std::size_t i = 0; i < m_Points.size(); ++i)
 	{
+		int32_t i;
+		i = m_LoopStart; riffFile.Write(i);
+		i = m_LoopEnd; riffFile.Write(i);
+		i = m_SustainBegin; riffFile.Write(i);
+		i = m_SustainEnd; riffFile.Write(i);
+	}
+	{ uint32_t s = m_Points.size(); riffFile.Write(s); }
+	for(std::size_t i = 0; i < m_Points.size(); ++i) {
 		riffFile.Write(m_Points[i].first); // point
 		riffFile.Write(m_Points[i].second); // value
 	}
@@ -468,7 +461,7 @@ void XMInstrument::Init()
 int XMInstrument::Load(RiffFile& riffFile)
 {
 	char temp[6];
-	int size=0;
+	int32_t size = 0;
 	riffFile.ReadArray(temp,4); temp[4]='\0';
 	riffFile.Read(size);
 	if (strcmp(temp,"INST")) return size;
@@ -493,16 +486,19 @@ int XMInstrument::Load(RiffFile& riffFile)
 	riffFile.Read(m_FilterCutoff);
 	riffFile.Read(m_FilterResonance);
 	riffFile.Read(m_FilterEnvAmount);
-	riffFile.Read((std::uint32_t&)m_FilterType);
+	{ uint32_t i(0); riffFile.Read(i); m_FilterType = static_cast<dsp::FilterType>(i); }
 
 	riffFile.Read(m_RandomVolume);
 	riffFile.Read(m_RandomPanning);
 	riffFile.Read(m_RandomCutoff);
 	riffFile.Read(m_RandomResonance);
 
-	riffFile.Read((std::uint32_t&)m_NNA);
-	riffFile.Read((std::uint32_t&)m_DCT);
-	riffFile.Read((std::uint32_t&)m_DCA);
+	{
+		uint32_t i(0);
+		riffFile.Read(i); m_NNA = static_cast<NewNoteAction::Type>(i);
+		riffFile.Read(i); m_DCT = static_cast<DCType::Type>(i);
+		riffFile.Read(i); m_DCA = static_cast<NewNoteAction::Type>(i);
+	}
 
 	NotePair npair;
 	for(int i = 0;i < NOTE_MAP_SIZE;i++){
@@ -524,8 +520,7 @@ void XMInstrument::Save(RiffFile& riffFile)
 {
 	if ( ! m_bEnabled ) return;
 
-	int i;
-	int size = 0;
+	int32_t size = 0;
 	int filepos = riffFile.GetPos();
 
 	riffFile.WriteArray("INST",4);
@@ -549,18 +544,21 @@ void XMInstrument::Save(RiffFile& riffFile)
 	riffFile.Write(m_FilterCutoff);
 	riffFile.Write(m_FilterResonance);
 	riffFile.Write(m_FilterEnvAmount);
-	riffFile.Write((std::uint32_t&)m_FilterType);
+	{ uint32_t i = m_FilterType; riffFile.Write(i); }
 
 	riffFile.Write(m_RandomVolume);
 	riffFile.Write(m_RandomPanning);
 	riffFile.Write(m_RandomCutoff);
 	riffFile.Write(m_RandomResonance);
-	riffFile.Write((std::uint32_t&)m_NNA);
-	riffFile.Write((std::uint32_t&)m_DCT);
-	riffFile.Write((std::uint32_t&)m_DCA);
+	{
+		uint32_t i;
+		i = m_NNA; riffFile.Write(i);
+		i = m_DCT; riffFile.Write(i);
+		i = m_DCA; riffFile.Write(i);
+	}
 
 	NotePair npair;
-	for(i = 0;i < NOTE_MAP_SIZE;i++){
+	for(int i = 0; i < NOTE_MAP_SIZE; ++i) {
 		npair = NoteToSample(i);
 		riffFile.Write(npair.first);
 		riffFile.Write(npair.second);
@@ -573,7 +571,7 @@ void XMInstrument::Save(RiffFile& riffFile)
 	m_PitchEnvelope.Save(riffFile,version);
 	int endpos = riffFile.GetPos();
 	riffFile.Seek(filepos+4);
-	riffFile.Write(static_cast<std::uint32_t>(endpos-filepos));
+	{ uint32_t i = endpos - filepos; riffFile.Write(i); }
 	riffFile.Seek(endpos);
 }
 
