@@ -24,6 +24,8 @@
 
 **********************************************************************/
 #include <psycle/helpers/fft.hpp>
+#include <universalis/exception.hpp>
+#include <universalis/compiler/location.hpp>
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
@@ -108,8 +110,9 @@ void FFT(int NumSamples,
 	double tr, ti;                /* temp real, temp imaginary */
 
 	if (!IsPowerOfTwo(NumSamples)) {
-		fprintf(stderr, "Error: FFT called with size %d\n", NumSamples);
-		exit(1);
+		std::ostringstream s;
+		s << "FFT called with size "<< NumSamples;
+		throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
 	NumBits = NumberOfBitsNeeded(NumSamples);
