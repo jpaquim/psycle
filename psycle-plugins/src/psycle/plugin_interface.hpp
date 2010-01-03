@@ -82,32 +82,35 @@ namespace psycle
 				char const * name, char const * shortName, char const * author, char const * command, int numCols)
 			: Version(version), Flags(flags), numParameters(numParameters), Parameters(parameters),
 			Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
-			/// ...
+			/// API version. Use MI_VERSION
 			int const Version;
-			/// ...
+			/// Machine flags. Defines the type of machine
 			int const Flags;
-			/// number of parameters
+			/// number of parameters.
 			int const numParameters;
 			/// a pointer to an array of pointers to parameter infos
 			CMachineParameter const * const * const Parameters;
-			/// "Rambo Delay"
+			/// "Name of the machine in listing"
 			char const * const Name;
-			/// "Delay"
+			/// "Name of the machine in machine Display"
 			char const * const ShortName;
-			/// "John Rambo"
+			/// "Name of author"
 			char const * const Author;
-			/// "About"
+			/// "Text to show as custom command (see Command method)"
 			char const * const Command;
-			/// number of columns
+			/// number of columns to display in the parameters' window
 			int numCols;
 		};
 
 		///\name CMachineInfo flags
 		///\{
+			/// Machine is an effect (can receive audio)
 			int const EFFECT = 0;
 			///\todo: unused
 			int const SEQUENCER = 1;
+			/// Machine is a generator (does not receive audio)
 			int const GENERATOR = 3;
+			///\todo: unused
 			int const CUSTOM_GUI = 16;
 		///\}
 
@@ -142,30 +145,42 @@ namespace psycle
 		{
 			public:
 				virtual ~CMachineInterface() {}
-				///\todo doc
+				/// Initialization method called by the Host at initialization time.
+				/// pCB callback pointer is available here.
 				virtual void Init() {}
-				///\todo doc
+				/// Called by the Host each sequence tick (in psyclemfc, means each line).
+				/// It is called even when the playback is stopped, so that the plugin can synchronize correctly.
 				virtual void SequencerTick() {}
-				///\todo doc
+				/// Called by the host when the user changes a paramter from the UI or a tweak from the pattern.
+				/// It is also called just after calling Init, to set each parameter to its default value, so you
+				/// don't need to explicitely do so.
 				virtual void ParameterTweak(int /*par*/, int /*val*/) {}
 
-				/// Work function
+				/// Called by the host when it needs audio data. the pointers are input-output pointers
+				/// (read the data in case of effects, and write the new data over). 
+				/// numsamples is the amount of samples (per channel) to generate and tracks is mostly unused. It carries
+				/// the current number of tracks of the song.
 				virtual void Work(float * /*psamplesleft*/, float * /*psamplesright*/, int /*numsamples*/, int /*tracks*/) {}
 
-				///\todo doc
+				/// Called by the host when the user presses the stop button.
 				virtual void Stop() {}
 
 				///\name Export / Import
 				///\{
-					///\todo doc
+					/// Called by the host when loading a song or preset. The pointer contains the data saved
+				/// by the plugin with GetData()
+					/// It is called after all parameters have been set with ParameterTweak.
 					virtual void PutData(void * /*pData*/) {}
-					///\todo doc
+					/// Called by the host when saving a song or preset. Use it to to save extra data that you need
+					/// The values of the parameters will be automatically restored via calls to parameterTweak().
 					virtual void GetData(void * /*pData*/) {}
-					///\todo doc
+					/// Called by the host before calling GetData to know the size to allocate for pData before calling
+					/// GetData()
 					virtual int GetDataSize() { return 0; }
 				///\}
 
-				///\todo doc
+				/// Called by the host when the user selects the command menu option. Commonly used to show a help box,
+				/// but can be used to show a specific editor,a configuration or other similar things.
 				virtual void Command() {}
 				///\todo doc. not used (yet?)
 				virtual void MuteTrack(int /*track*/) {}
@@ -175,17 +190,20 @@ namespace psycle
 				virtual void MidiNote(int /*channel*/, int /*value*/, int /*velocity*/) {}
 				///\todo doc. not used (yet?)
 				virtual void Event(unsigned int const /*data*/) {}
-				///\todo doc
+				/// Called by the host when it requires to show a description of the value of a parameter.
+				/// return false to tell the host to show the numerical value. Return true and fill txt with
+				/// some text to show that text to the user.
 				virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/) { return false; }
 				///\todo doc. not used (prolly never)
 				virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
-				///\todo doc
+				/// Called by the host when there is some data to play. Only notes and pattern commands will be informed
+				/// this way. Tweaks call ParameterTweak
 				virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
 				///\todo doc. not used (prolly never)
 				virtual void StopWave() {}
 
 			public:
-				/// initialize these members in the constructor
+				/// initialize this member in the constructor with the size of parameters.
 				int * Vals;
 
 				/// callback.
@@ -195,6 +213,8 @@ namespace psycle
 		};
 
 		/*////////////////////////////////////////////////////////////////////////*/
+		/// From the text below, you just need to know that once you've defined the MachineInteface class
+		/// and the MachineInfo instance, USE PSYCLE__PLUGIN__INSTANCIATOR() to export it.
 		namespace symbols
 		{
 			// spelling INSTANCIATOR -> INSTANTIATOR
@@ -264,4 +284,4 @@ namespace psycle
 }
 
 #endif
-#include <cstdio> // This is NOT part of the interface. It would be better if plugins that want it included it themselves.
+
