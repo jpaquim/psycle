@@ -1,54 +1,36 @@
+///\file
+///\brief Arguru simple distortion/saturator plugin for PSYCLE
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
 
-//////////////////////////////////////////////////////////////////////
-// Arguru simple distortion/saturator plugin for PSYCLE
-
 using namespace psycle::plugin_interface;
 
-CMachineParameter const paraLength = { 
-	"Length",
-	"Length", // description
-	1, // MinValue
-	8192, // MaxValue
-	MPF_STATE, // Flags
-	2048,
-};
+CMachineParameter const paraLength = {"Length","Length",1,8192,MPF_STATE,2048};
+CMachineParameter const paraSlope = {"Slope","Slope",1,2048,MPF_STATE,512};
 
-CMachineParameter const paraSlope = {
-	"Slope",
-	"Slope", // description
-	1, // MinValue
-	2048, // MaxValue
-	MPF_STATE, // Flags
-	512,
-};
-
-CMachineParameter const *pParameters[] = { 
-	// global
+CMachineParameter const *pParameters[] = {
 	&paraLength,
 	&paraSlope
 };
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
-	0, // flags
-	2, // numParameters
-	pParameters, // Pointer to parameters
-	"Arguru Goaslicer" // name
-		#ifndef NDEBUG
-			" (Debug build)"
-		#endif
-		,
-	"Goaslicer", // short name
-	"J. Arguelles", // author
-	"About", // A command, that could be use for open an editor, etc...
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	"Arguru Goaslicer 1.2"
+	#ifndef NDEBUG
+		" (Debug build)"
+	#endif
+	,
+	"Goaslicer",
+	"J. Arguelles",
+	"About",
 	1
 );
-
 
 class mi : public CMachineInterface {
 	public:
@@ -61,176 +43,122 @@ class mi : public CMachineInterface {
 		virtual void Command();
 		virtual void ParameterTweak(int par, int val);
 	private:
+		float slopeAmount;
+		int timerSamples;
+		bool muted;
+		bool changing;
 		float m_CurrentVolume;
 		float m_TargetVolume;
+		int currentSR;
 		int m_Timer;
 };
 
 PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
-mi::mi() {
-	m_CurrentVolume=0;
-	m_TargetVolume=0;
-	m_Timer=0;
-
-	// The constructor zone
+mi::mi(): slopeAmount(0.01f), timerSamples(2048), muted(false), changing(false),
+m_CurrentVolume(1.0f), m_TargetVolume(1.0f), currentSR(44100), m_Timer(0) {
 	Vals = new int[2];
 }
 
 mi::~mi() {
 	delete[] Vals;
-	// Destroy dinamically allocated objects/memory here
 }
 
 void mi::Init() {
-	// Initialize your stuff here
 }
 
 void mi::SequencerTick() {
-	// Called on each tick while sequencer is playing
+	if (currentSR != pCB->GetSamplingRate()) {
+		currentSR = pCB->GetSamplingRate();
+		timerSamples = Vals[0]*44100/currentSR;
+		slopeAmount = Vals[1]*5.38330078125f/currentSR;
+	}
 	m_Timer = 0;
+	if (muted) {
+		muted = false;
+		changing = true;
+	}
 }
 
 void mi::Command() {
-	// Called when user presses editor button
-	// Probably you want to show your custom window here
-	// or an about button
-	pCB->MessBox("Made 18/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","-=<([aRgUrU's G-o-a-s-l-i-e-r])>=-",0);
+	pCB->MessBox("Made 18/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","-=<([aRgUrU's G-o-a-s-l-i-c-e-r])>=-",0);
 }
 
 void mi::ParameterTweak(int par, int val) {
 	Vals[par] = val;
+	timerSamples = Vals[0]*44100/currentSR;
+	slopeAmount = Vals[1]*5.38330078125f/currentSR;
 }
 
-// Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
-	float const ts = (float) Vals[1] / 8192.0f;
-	int const barrier = Vals[0];
-	int const hik = pCB->GetTickLength();
 
-	do {
-		float sl = *psamplesleft;
-		float sr = *psamplesright;
-
-		if(m_Timer<barrier) m_TargetVolume = 1.0f;
-		else m_TargetVolume = 0.0f;
-
-		if(++m_Timer > hik) m_Timer = 0;
-
-		if(m_CurrentVolume<m_TargetVolume) {
-			m_CurrentVolume += ts;
-			if(m_CurrentVolume>m_TargetVolume) m_CurrentVolume = m_TargetVolume;
+	if (m_Timer < timerSamples && m_Timer+numsamples >= timerSamples) {
+		int diff = timerSamples - m_Timer;
+		m_Timer+= diff;
+		numsamples-=diff;
+		if (changing) {
+			while(m_CurrentVolume<0.99f && diff--) {
+				(*psamplesleft)*=m_CurrentVolume; (*psamplesright)*=m_CurrentVolume;
+				psamplesleft++; psamplesright++;
+				m_CurrentVolume+=slopeAmount;
+			}
+			diff++;
 		}
-
-		if(m_CurrentVolume>m_TargetVolume) {
-			m_CurrentVolume -= ts;
-			if(m_CurrentVolume<m_TargetVolume) m_CurrentVolume = m_TargetVolume;
+		psamplesleft+=diff;
+		psamplesright+=diff;
+		changing = true;
+		muted = true;
+	}
+	m_Timer+=numsamples;
+	if (!changing) {
+		if(!muted) return;
+		while(numsamples--) *psamplesleft++ = *psamplesright++ = 0;
+	} else if (muted){
+		// mute enabled
+		while(m_CurrentVolume>0.01f && numsamples--) {
+			(*psamplesleft)*=m_CurrentVolume; (*psamplesright)*=m_CurrentVolume;
+			psamplesleft++; psamplesright++;
+			m_CurrentVolume-=slopeAmount;
 		}
-
-		*psamplesleft = sl * m_CurrentVolume;
-		*psamplesright = sr * m_CurrentVolume;
-
-		++psamplesleft;
-		++psamplesright;
-	} while(--numsamples);
+		numsamples++;
+		while(numsamples--) *psamplesleft++ = *psamplesright++ = 0;
+		if (m_CurrentVolume<=0.01f) {
+			changing=false;
+		}
+	} else {
+		// mute disabled
+		while(m_CurrentVolume<0.99f && numsamples--) {
+			(*psamplesleft)*=m_CurrentVolume; (*psamplesright)*=m_CurrentVolume;
+			psamplesleft++; psamplesright++;
+			m_CurrentVolume+=slopeAmount;
+		}
+		if (m_CurrentVolume>=0.99f) {
+			changing=false;
+		}
+	}
 }
 
 // Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value) {
-	return false;
-}
-
-
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////:
-/////////////////////////////////////////////////////////////////////////////////////////////////:
-/////////////////////////////////////////////////////////////////////////////////////////////////:
-// following is an unfinished port to the new plugin interface
-#if 0
-
-#include "plugin.hpp"
-///\file
-///\brief arguru simple distortion/saturator plugin
-namespace psycle { namespace plugin {
-
-class Goaslicer : public Plugin
-{
-public:
-	virtual void help(std::ostream & out) const throw()
+	switch(param) {
+	case 0:
 	{
-		out << "-=<([aRgUrU's G-o-a-s-l-i-e-r])>=-" << std::endl;
-		out << "Made 18/5/2000 by Juan Antonio Arguelles Rius for Psycl3!" << std::endl;
-		out << "(note: too much 1337)" << std::endl;
-	}
-
-	enum Parameters { length, slope };
-
-	static const Information & information() throw()
-	{
-		static const Information::Parameter parameters [] =
-		{
-			Information::Parameter::linear("length", 1, 2048, 8192),
-			Information::Parameter::linear("slope", 1, 512, 2048)
-		};
-		static const Information information(Information::Type::effect, "arguru goaslicer", "j arguelles & the psycledelics community", 2, parameters, sizeof parameters / sizeof parameters[0]);
-		return information;
-	}
-
-	Goaslicer() : Plugin(information()), timer_(0)
-	{
-		for(int volume(0) ; volume < volumes ; ++volume)
-			volumes_[volume] = 0;
-	}
-
-	virtual void process(Sample l[], Sample r[], int samples, int);
-	virtual void sequencer_tick_event();
-protected:
-	inline const Real process(const Real & sample) const;
-	enum Volumes { current, target, volumes };
-	Real volumes_[volumes];
-	int timer_;
-};
-
-PLUGIN_INSTANCIATOR(Goaslicer);
-
-void Goaslicer::sequencer_tick_event()
-{
-	timer_ = 0;
-}
-
-void Goaslicer::process(Sample l[], Sample r[], int samples, int)
-{
-	const Real samples_per_sequencer_tick(samples_per_sequencer_tick());
-	for(int sample(0) ; sample < samples ; ++sample)
-	{
-		if(timer_ < (*this)(length)) volumes_[target] = 1;
-		else volumes_[target] = 0;
-		if(++timer_ > (*this)(slope)) timer_ = 0;
-		if(volumes_[current] < volumes_[target])
-		{
-			volumes_[current] += (*this)(length);
-			if(volumes_[current] > volumes_[target]) volumes_[current] = volumes_[target];
+		int samp = value*44100/currentSR;
+		if (samp < pCB->GetTickLength()) {
+			std::sprintf(txt, "%.02f ticks (%dms)", (float)samp/pCB->GetTickLength(), 1000*samp/currentSR);
 		}
-		if(volumes_[current] > volumes_[target])
-		{
-			volumes_[current] -= (*this)(length);
-			if(volumes_[current] < volumes_[target]) volumes_[current] = volumes_[target];
+		else {
+			std::sprintf(txt, "1 tick (%dms)", 1000*pCB->GetTickLength()/currentSR);
 		}
-		l[sample] = static_cast<Sample>(process(l[sample]));
-		r[sample] = static_cast<Sample>(process(r[sample]));
+		return true;
 	}
-};
-
-inline const Real Goaslicer::process(const Real & sample) const
-{
-	return sample * volumes_[current];
+	case 1:
+	{
+		int slopms = 1000000/(value*5.38330078125);
+		std::sprintf(txt, "%d mcs", slopms);
+		return true;
+	}
+	default: return false; // returning false will simply show the value as a raw integral number
+	}
 }
 
-}}
-
-#endif // 0
