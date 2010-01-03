@@ -94,7 +94,7 @@ class audacity_phaser : public CMachineInterface {
 		float phase_l, phase_r;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(audacity_phaser, audacity_phaser_info)
+PSYCLE__PLUGIN__INSTANTIATOR(audacity_phaser, audacity_phaser_info)
 
 float const audacity_phaser::phaser_lfo_shape = 4.0f;
 /// how many samples are processed before compute the lfo value again

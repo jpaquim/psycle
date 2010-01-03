@@ -93,7 +93,7 @@ class mi : public CMachineInterface {
 		virtual void ParameterTweak(int par, int val);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
 	Vals = new int[sizeof pParameters];

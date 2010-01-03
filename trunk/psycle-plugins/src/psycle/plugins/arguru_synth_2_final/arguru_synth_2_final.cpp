@@ -364,7 +364,7 @@ class mi : public CMachineInterface {
 		std::uint32_t currentSR;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
 	Vals = new int[NUMPARAMETERS];

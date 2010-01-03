@@ -476,7 +476,7 @@ public:
 	float				m_out[2][2];
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 //////////////////////////////////////////////////////////////////////
 //

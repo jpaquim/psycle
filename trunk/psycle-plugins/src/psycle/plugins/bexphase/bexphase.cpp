@@ -124,7 +124,7 @@ class bexphase : public CMachineInterface {
 		float dlay_r, dlay_l, shift_r, shift_l, diff, undiff;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(bexphase, bexphase_info)
+PSYCLE__PLUGIN__INSTANTIATOR(bexphase, bexphase_info)
 
 bexphase::bexphase() {
 	Vals = new int[numVals];

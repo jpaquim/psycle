@@ -205,7 +205,7 @@ CMachineInfo const MacInfo (
 		5
 );
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
 	Vals =new int[NUMPARAMETERS];

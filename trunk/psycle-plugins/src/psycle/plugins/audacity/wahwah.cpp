@@ -139,7 +139,7 @@ private:
 
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {

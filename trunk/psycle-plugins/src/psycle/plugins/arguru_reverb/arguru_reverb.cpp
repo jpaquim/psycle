@@ -154,7 +154,7 @@ class mi : public CMachineInterface {
 		int prevfilters;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
 	Vals = new int[8];
