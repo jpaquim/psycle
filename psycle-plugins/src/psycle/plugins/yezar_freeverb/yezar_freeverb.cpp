@@ -98,7 +98,7 @@ class mi : public CMachineInterface {
 		revmodel reverb;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
 	Vals = new int[5];

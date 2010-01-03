@@ -56,7 +56,7 @@ private:
 
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi():leftLim(1.0f), rightLim(1.0f)
 {

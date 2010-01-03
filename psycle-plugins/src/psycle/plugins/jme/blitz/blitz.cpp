@@ -1197,7 +1197,7 @@ CMachineInfo const MacInfo (
 	7
 );
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo) // To export DLL functions to host
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo) // To export DLL functions to host
 
 mi::mi()
 {

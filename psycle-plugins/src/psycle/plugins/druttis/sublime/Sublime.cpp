@@ -931,7 +931,7 @@ public:
 	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int numtracks);
 	// Custom
 };
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 //////////////////////////////////////////////////////////////////////
 //
 //				Initialize Static Machine Variables

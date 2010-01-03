@@ -347,7 +347,7 @@ class mi : public CMachineInterface
 		int tickCounter;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 void CTrack::Stop()
 {
