@@ -67,7 +67,7 @@ public:
 	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
 	/*override*/ void parameter(const int &);
 protected:
-	/*override*/ void SeqTick(const int, const int, const int, const int command, const int value);
+	/*override*/ void SeqTick(int, int, int, int command, int value);
 	/*override*/ void samples_per_second_changed()
 	{
 		parameter(am_radians_per_second);
@@ -84,7 +84,7 @@ protected:
 
 PSYCLE__PLUGIN__INSTANTIATOR(Ring_Modulator)
 
-void Ring_Modulator::SeqTick(const int, const int, const int, const int command, const int value)
+void Ring_Modulator::SeqTick(int, int, int, int command, int value)
 {
 	switch(command)
 	{

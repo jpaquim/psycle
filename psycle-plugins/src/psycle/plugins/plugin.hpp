@@ -174,7 +174,7 @@ class Plugin : protected plugin_interface::CMachineInterface {
 				this->scaled_parameters_[parameter] = information.parameter(parameter).scale.apply(static_cast<Real>(value));
 			}
 			///\internal
-			/*override*/ void ParameterTweak(int const parameter, int const value) {
+			/*override*/ void ParameterTweak(int parameter, int value) {
 				parameter_internal(parameter, value);
 				this->parameter(parameter);
 			}
@@ -197,7 +197,7 @@ class Plugin : protected plugin_interface::CMachineInterface {
 			}
 		private:
 			///\internal
-			/*override*/ bool DescribeValue(char out[], int const parameter, int const) const {
+			/*override*/ bool DescribeValue(char * out, int const parameter, int const) {
 				std::stringstream s;
 				describe(s, parameter);
 				std::strcpy(out, s.str().c_str());
