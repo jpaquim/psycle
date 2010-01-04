@@ -239,6 +239,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			typedef class std::scoped_lock<std::mutex> scoped_lock;
 			std::mutex mutable mutex_;
 			std::condition<scoped_lock> mutable condition_;
+			std::condition<scoped_lock> mutable main_condition_;
 
 			bool stop_requested_;
 			bool suspend_requested_;

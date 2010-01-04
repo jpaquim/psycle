@@ -96,7 +96,7 @@ void stream_logger::do_log(int const level, std::string const & string) throw() 
 		nanoseconds::tick_type const static time0_ns =
 			hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch().get_count();
 		nanoseconds::tick_type const time_ns =
-		hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch().get_count() - time0_ns;
+			hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch().get_count() - time0_ns;
 		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << 'm';
 		ostream() << "log: "
 				<< std::setw(7) << time_ns / 1000 << "µs: "

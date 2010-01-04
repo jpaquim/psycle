@@ -22,7 +22,6 @@
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <boost/bind.hpp>
-#include <iostream> // only for debug output
 
 namespace psycle { namespace core {
 
@@ -58,9 +57,9 @@ Player::Player()
 }
 
 void Player::start_threads() {
-	if(loggers::trace()()) loggers::trace()("psycle: core: player: starting scheduler threads", UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::trace()) loggers::trace()("psycle: core: player: starting scheduler threads", UNIVERSALIS__COMPILER__LOCATION);
 	if(threads_.size()) {
-		if(loggers::trace()()) loggers::trace()("psycle: core: player: scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
+		if(loggers::trace()) loggers::trace()("psycle: core: player: scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
 
@@ -73,7 +72,7 @@ void Player::start_threads() {
 	processed_node_count_ = suspended_ = 0;
 
 	thread_count_ = universalis::os::cpu_affinity::cpu_count();
-	thread_count_ = 0;
+	thread_count_ = 0; // multithreading disabled by default
 	{ // thread count env var
 		char const * const env(std::getenv("PSYCLE_THREADS"));
 		if(env) {
@@ -83,7 +82,7 @@ void Player::start_threads() {
 		}
 	}
 	
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		std::ostringstream s;
 		s << "psycle: core: player: using " << thread_count_ << " threads";
 		loggers::information()(s.str());
@@ -113,13 +112,13 @@ void Player::start_threads() {
 void Player::start(double pos) {
 	stop(); // This causes all machines to reset, and samplesperRow to init.
 
-	if(loggers::information()()) loggers::information()("psycle: core: player: starting");
+	if(loggers::information()) loggers::information()("psycle: core: player: starting");
 	if(!song_) {
-		if(loggers::warning()()) loggers::warning()("psycle: core: player: no song to play");
+		if(loggers::warning()) loggers::warning()("psycle: core: player: no song to play");
 		return;
 	}
 	if(!driver_) {
-		if(loggers::warning()()) loggers::warning()("psycle: core: player: no audio driver to output the song to");
+		if(loggers::warning()) loggers::warning()("psycle: core: player: no audio driver to output the song to");
 		return;
 	}
 
@@ -168,7 +167,7 @@ void Player::suspend_and_compute_plan() {
 	condition_.notify_all();  // notify all threads they must suspend
 	{ scoped_lock lock(mutex_);
 		// wait until all threads are suspended
-		while(suspended_ != threads_.size()) condition_.wait(lock);
+		while(suspended_ != threads_.size()) main_condition_.wait(lock);
 		compute_plan();
 		suspend_requested_ = false;
 	}
@@ -215,7 +214,7 @@ void Player::process(int samples) {
 			condition_.notify_all(); // notify all threads that we added nodes to the queue
 			// wait until all nodes have been processed
 			{ scoped_lock lock(mutex_);
-				while(processed_node_count_ != graph_size_) condition_.wait(lock);
+				while(processed_node_count_ != graph_size_) main_condition_.wait(lock);
 			}
 		}
 		// write samples to file
@@ -231,7 +230,7 @@ void Player::process(int samples) {
 }
 
 void Player::thread_function(std::size_t thread_number) {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		scoped_lock lock(mutex_);
 		std::ostringstream s;
 		s << "psycle: core: player: scheduler thread #" << thread_number << " started";
@@ -257,14 +256,14 @@ void Player::thread_function(std::size_t thread_number) {
 		}
 	} catch(std::exception const & e) {
 		e;
-		if(loggers::exception()()) {
+		if(loggers::exception()) {
 			std::ostringstream s;
 			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		throw;
 	} catch(...) {
-		if(loggers::exception()()) {
+		if(loggers::exception()) {
 			std::ostringstream s;
 			s << "exception: " << universalis::compiler::exceptions::ellipsis();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -272,7 +271,7 @@ void Player::thread_function(std::size_t thread_number) {
 		throw;
 	}
 
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		scoped_lock lock(mutex_);
 		std::ostringstream s;
 		s << "psycle: core: player: scheduler thread #" << thread_number << " terminated";
@@ -296,7 +295,7 @@ void Player::process_loop() throw(std::exception) {
 				if(!this_thread_suspended_) {
 					this_thread_suspended_ = true;
 					++suspended_;
-					condition_.notify_all();
+					main_condition_.notify_one();
 				}
 				continue;
 			}
@@ -312,11 +311,11 @@ void Player::process_loop() throw(std::exception) {
 
 		process(node);
 	
-		unsigned int notify(0);
+		int notify(0);
 		{ scoped_lock lock(mutex_);
 			node.processed_by_multithreaded_scheduler_ = true;
 			// check whether all nodes have been processed
-			if(++processed_node_count_ == graph_size_) notify = 2; // wake up the main processing loop
+			if(++processed_node_count_ == graph_size_) notify = -1; // wake up the main processing loop
 			else // check whether successors of the node we processed are now ready.
 				// iterate over all the outputs of the node we processed
 				if(node._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(node._connection[c]) {
@@ -339,6 +338,8 @@ void Player::process_loop() throw(std::exception) {
 				}
 		}
 		switch(notify) {
+			case -1:
+				main_condition_.notify_one(); // wake up the main processing loop
 			case 0:
 				// no successor ready
 			break;
@@ -355,7 +356,7 @@ void Player::process_loop() throw(std::exception) {
 }
 
 void Player::process(Player::node & node) throw(std::exception) {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		scoped_lock lock(mutex_);
 		std::ostringstream s;
 		s << "psycle: core: player: processing node: " << node.GetEditName();
@@ -378,7 +379,7 @@ void Player::process(Player::node & node) throw(std::exception) {
 }
 
 void Player::stop() {
-	if(loggers::information()()) loggers::information()("psycle: core: player: stopping");
+	if(loggers::information()) loggers::information()("psycle: core: player: stopping");
 	if(!song_ || !driver_) return;
 	
 	scoped_lock lock(song().Mutex());
@@ -402,9 +403,9 @@ Player::~Player() {
 }
 
 void Player::stop_threads() {
-	if(loggers::trace()()) loggers::trace()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::trace()) loggers::trace()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(!threads_.size()) {
-		if(loggers::trace()()) loggers::trace()("scheduler threads were not running", UNIVERSALIS__COMPILER__LOCATION);
+		if(loggers::trace()) loggers::trace()("scheduler threads were not running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
 	{ scoped_lock lock(mutex_);
@@ -415,7 +416,7 @@ void Player::stop_threads() {
 		(**i).join();
 		delete *i;
 	}
-	if(loggers::trace()()) loggers::trace()("scheduler threads joined", UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::trace()) loggers::trace()("scheduler threads joined", UNIVERSALIS__COMPILER__LOCATION);
 	threads_.clear();
 	clear_plan();
 }
@@ -432,7 +433,7 @@ void Player::process_global_event(GlobalEvent const & event) {
 	switch(event.type()) {
 		case GlobalEvent::BPM_CHANGE:
 			setBpm(event.parameter());
-			if(loggers::trace()()) {
+			if(loggers::trace()) {
 				std::ostringstream s;
 				s << "psycle: core: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
