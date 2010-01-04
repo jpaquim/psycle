@@ -60,11 +60,16 @@ class Host_Plugin {
 					)
 				{
 					for(int i(0) ; i < parameter_count ; ++i) {
-						Parameter const * p = static_cast<Parameter const*>(
-							const_cast<plugin_interface::CMachineParameter ** >(this->Parameters)[i]
-						);
+						parameters[i].scale.apply(0);
+					}
+
+					for(int i(0) ; i < parameter_count ; ++i) {
+						plugin_interface::CMachineParameter const * p = const_cast<plugin_interface::CMachineParameter const *>(Parameters[i]);
 						p = &parameters[i];
-						
+					}
+					
+					for(int i(0) ; i < parameter_count ; ++i) {
+						this->parameter(i).scale.apply(0);
 					}
 				}
 			public:
@@ -342,12 +347,28 @@ class Plugin : protected Host_Plugin {
 		}; // class Exception
 }; // class Plugin
 
+#undef PSYCLE__PLUGIN__INSTANTIATOR
+
 /// call this from your plugin's source file to export the necessary function from the dynamically linked library.
 #define PSYCLE__PLUGIN__INSTANTIATOR(typename) \
 	extern "C" { \
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT Host_Plugin::Information const & UNIVERSALIS__COMPILER__CALLING_CONVENTION__C GetInfo() { return typename::information(); } \
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT psycle::plugin::Plugin &         UNIVERSALIS__COMPILER__CALLING_CONVENTION__C CreateMachine() { return * new typename; } \
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT void                             UNIVERSALIS__COMPILER__CALLING_CONVENTION__C DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
+		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		Host_Plugin::Information const & \
+		PSYCLE__PLUGIN__CALLING_CONVENTION \
+		GetInfo() { return typename::information(); } \
+		\
+		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		psycle::plugin::Plugin & \
+		PSYCLE__PLUGIN__CALLING_CONVENTION \
+		CreateMachine() { return * new typename; } \
+		\
+		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		void \
+		PSYCLE__PLUGIN__CALLING_CONVENTION \
+		DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
 	}
+	
+int const Host_Plugin::Information::Parameter::input_minimum_value;
+int const Host_Plugin::Information::Parameter::input_maximum_value;
 	
 }}
