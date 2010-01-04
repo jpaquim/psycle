@@ -57,7 +57,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi(): slopeAmount(0.01f), timerSamples(2048), muted(false), changing(false),
 m_CurrentVolume(1.0f), m_TargetVolume(1.0f), currentSR(44100), m_Timer(0) {
-	Vals = new int[2];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi() {
