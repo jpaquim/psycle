@@ -142,7 +142,7 @@ inline void Proxy::operator()(psycle::plugin_interface::CMachineInterface * plug
 }
 inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw() { assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }
 inline void Proxy::StopWave() throw() { assert((*this)());plugin().StopWave(); }
-inline void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw() { assert((*this)()); fflush(stdout); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
+inline void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw() { assert((*this)()); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
 inline int * const Proxy::Vals() throw() { assert((*this)()); return plugin().Vals; }
 inline int const * const Proxy::Vals() const throw() { assert((*this)()); return plugin().Vals; }
 inline void Proxy::Stop() throw() { assert((*this)()); plugin().Stop();  }
