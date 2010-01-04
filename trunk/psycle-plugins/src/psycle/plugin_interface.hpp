@@ -197,7 +197,7 @@ class CMachineInterface {
 		/// callback.
 		/// This member is initialized by the engine right after it calls CreateMachine().
 		/// Don't touch it in the constructor.
-		CFxCallback * pCB;
+		CFxCallback mutable * pCB;
 };
 
 /*////////////////////////////////////////////////////////////////////////*/
