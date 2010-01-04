@@ -72,6 +72,6 @@ class Gainer : public Plugin
 		Real gain_;
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Gainer)
+PSYCLE__PLUGIN__INSTANTIATOR(Gainer)
 
 }}

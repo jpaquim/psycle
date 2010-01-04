@@ -9,6 +9,7 @@
 /// - it provides a bugfree initialization of the plugin.
 /// - it provides the events samples_per_second_changed and sequencer_ticks_per_second_changed, which were not part of the original interface (i don't know if it's been fixed in the host nowadays).
 #pragma once
+#include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/scale.hpp>
 #include <universalis/compiler.hpp>
 #include <string>
@@ -28,41 +29,17 @@ class Host_Plugin {
 		typedef float Sample;
 
 		/// information describing a plugin
-		class Information {
+		class Information : public plugin_interface::CMachineInfo {
 			public:
-				/// version of the binary interface of the plugin.
-				int const interface_version;
-				/// type of the plugin, either generator or effect.
-				struct Types { enum Type { effect = 0, generator = 3 }; };
-				/// type of the plugin, either generator or effect.
-				/// declared as int rather than enum for binary compatibility.
-				int /*Types::Type*/ const type;
-				/// number of parameters the plugin has.
-				int const parameter_count;
-				class Parameter; // forward declaration
-			private:
-				///\internal
-				Parameter const * * const parameters;
-			public:
+				struct Types { enum Type { effect = plugin_interface::EFFECT, generator = plugin_interface::GENERATOR }; };
+				class Parameter;
 				///\return the Parameter at the index parameter.
-				Parameter const inline & parameter(int const & parameter) const throw() { return *parameters[parameter]; }
-				/// description of the plugin.
-				char const *
-					#if defined NDEBUG
-						const
-					#endif
-					description;
-				/// name of the plugin.
-				char const * const name;
-				/// author of the plugin.
-				char const * const author;
-				/// caption to be displated in the help message.
-				char const * const help_caption;
-				/// number of columns that the parameter grid should be displayed with.
-				int const columns;
+				Parameter const inline & parameter(int const & parameter) const throw() {
+					return *static_cast<Parameter const * const>(Parameters[parameter]);
+				}
 				/// creates the information object.
 				Information(
-					Types::Type const & type,
+					int const & type,
 					char const description[],
 					char const name[],
 					char const author[],
@@ -70,58 +47,45 @@ class Host_Plugin {
 					Parameter const parameters[],
 					int const & parameter_count
 				) :
-					interface_version(11),
-					type(type),
-					parameter_count(parameter_count),
-					parameters(new Parameter const * [parameter_count]),
-					description(description),
-					name(name),
-					author(author),
-					help_caption("Help"),
-					columns(columns)
+					plugin_interface::CMachineInfo(
+						plugin_interface::MI_VERSION,
+						type,
+						parameter_count,
+						new plugin_interface::CMachineParameter const * [parameter_count],
+						description,
+						name,
+						author,
+						"Help",
+						columns
+					)
 				{
-					for(int i(0) ; i < parameter_count ; ++i) this->parameters[i] = &parameters[i];
-					#if !defined NDEBUG
-					{
-						std::string & s(*new std::string(this->description));
-						s += " (debug build)";
-						this->description = s.c_str();
+					for(int i(0) ; i < parameter_count ; ++i) {
+						Parameter const * p = static_cast<Parameter const*>(
+							const_cast<plugin_interface::CMachineParameter ** >(this->Parameters)[i]
+						);
+						p = &parameters[i];
+						
 					}
-					#endif
 				}
 			public:
 				/// information describing a parameter
-				class Parameter {
+				class Parameter : public plugin_interface::CMachineParameter {
 					public:
-						/// name of the parameter.
-						char const * const name;
-						/// useless field, set to the same value as name.
-						char const * const unused_name;
-						/// the lower bound the parameter's range.
-						/// If using a non-discrete scale (i.e. real), you can't chose this, it's always the minimum value possible.
-						int const minimum_value;
-						/// the upper bound of the parameter's range.
-						/// If using a non-discrete scale (i.e. real), you can't chose this, it's always the maximum value possible.
-						int const maximum_value;
-						/// type of parameter, either null (label), or state.
-						struct Types { enum Type { null = 0, state = 2 }; };
-						/// type of parameter, either null (label), or state.
-						/// declared as int rather than enum for binary compatibility.
-						int /*Types::Type*/ const type;
-						int const default_value;
+						struct Types { enum Type { null = plugin_interface::MPF_NULL, state = plugin_interface::MPF_STATE }; };
 						helpers::Scale const & scale;
 					public:
 						/// creates a separator with an optional label.
 						Parameter(char const name[] = "")
 						:
-							name(name),
-							unused_name(name),
-							minimum_value(0),
-							maximum_value(0),
-							type(Types::null),
-							default_value(0),
 							scale(* new helpers::scale::Discrete(0))
-						{}
+						{
+							Name = name;
+							Description = name;
+							MinValue = 0;
+							MaxValue = 0;
+							Flags = Types::null;
+							DefValue = 0;
+						}
 					public:
 						/// minimum lower bound authorized by the binary interface. (unsigned 16-bit integer)
 						int const static input_minimum_value = 0;
@@ -131,22 +95,21 @@ class Host_Plugin {
 						/// creates a scaled parameter ; you don't use this directly, but rather the public static creation functions.
 						Parameter(char const name[], helpers::Scale const & scale, Real const & default_value, int const & input_maximum_value = Parameter::input_maximum_value)
 						:
-							name(name),
-							unused_name(name),
-							minimum_value(input_minimum_value),
-							maximum_value(input_maximum_value),
-							type(Types::state),
-							default_value(
-								std::min(
-									std::max(
-										input_minimum_value,
-										static_cast<int>(scale.apply_inverse(default_value))
-									),
-									input_maximum_value
-								)
-							),
 							scale(scale)
-						{}
+						{
+							Name = name;
+							Description = name;
+							MinValue = input_minimum_value;
+							MaxValue = input_maximum_value;
+							Flags = Types::state;
+							DefValue = std::min(
+								std::max(
+									input_minimum_value,
+									static_cast<int>(scale.apply_inverse(default_value))
+								),
+								input_maximum_value
+							);
+						}
 					public:
 						/// creates a discrete scale, i.e. integers.
 						static const Parameter & discrete(char const name[], int const & default_value, int const & maximum_value) {
@@ -257,10 +220,10 @@ class Plugin : protected Host_Plugin {
 			sequencer_ticks_per_sequencer_beat_(0),
 			sequencer_beats_per_minute_(0)
 		{
-			parameters_ = new int[information.parameter_count];
-			scaled_parameters_ = new Real[information.parameter_count];
-			for(int parameter(0) ; parameter < information.parameter_count ; ++parameter)
-				parameter_internal(parameter, information.parameter(parameter).default_value);
+			parameters_ = new int[information.numParameters];
+			scaled_parameters_ = new Real[information.numParameters];
+			for(int parameter(0) ; parameter < information.numParameters ; ++parameter)
+				parameter_internal(parameter, information.parameter(parameter).DefValue);
 		}
 		///\returns the integral internal value (i.e. non-scaled) of a parameter ; use this for discrete scales.
 		inline int const & operator[](int const & parameter) const throw() { return parameters_[parameter]; }
@@ -358,7 +321,7 @@ class Plugin : protected Host_Plugin {
 		///\internal
 		inline void message(std::string const & caption, std::string const & message) const {
 			std::stringstream s;
-			s << information.name << " - " << caption;
+			s << information.Name << " - " << caption;
 			host_->message(message.c_str(), s.str().c_str());
 		}
 	protected:
@@ -370,7 +333,7 @@ class Plugin : protected Host_Plugin {
 		void help() const throw() {
 			std::ostringstream message;
 			help(message);
-			this->message(information.help_caption, message.str());
+			this->message(information.Command, message.str());
 		}
 	protected:
 		class Exception : public std::runtime_error {
@@ -378,9 +341,6 @@ class Plugin : protected Host_Plugin {
 				Exception(const std::string & what) : std::runtime_error(what.c_str()) {}
 		}; // class Exception
 }; // class Plugin
-
-/// spelling INSTANCIATOR -> INSTANTIATOR
-#define PSYCLE__PLUGIN__INSTANCIATOR(typename) PSYCLE__PLUGIN__INSTANTIATOR(typename)
 
 /// call this from your plugin's source file to export the necessary function from the dynamically linked library.
 #define PSYCLE__PLUGIN__INSTANTIATOR(typename) \
@@ -390,7 +350,4 @@ class Plugin : protected Host_Plugin {
 		UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT void                             UNIVERSALIS__COMPILER__CALLING_CONVENTION__C DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \
 	}
 	
-int const Host_Plugin::Information::Parameter::input_minimum_value;
-int const Host_Plugin::Information::Parameter::input_maximum_value;
-
 }}

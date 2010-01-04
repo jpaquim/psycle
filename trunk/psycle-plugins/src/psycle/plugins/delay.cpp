@@ -55,7 +55,7 @@ public:
 			out << (*this)(parameter) << " ticks (lines)";
 			break;
 		case snap:
-			if((*this)[parameter] == information().parameter(parameter).maximum_value) out << "off ";
+			if((*this)[parameter] == information().parameter(parameter).MaxValue) out << "off ";
 			out << "1 / " << 1 + (*this)[parameter] << " ticks (lines)";
 			break;
 		case left_feedback:
@@ -96,7 +96,7 @@ protected:
 	inline void resize(const int & channel, const Real & delay);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Delay)
+PSYCLE__PLUGIN__INSTANTIATOR(Delay)
 
 void Delay::init()
 {

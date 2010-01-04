@@ -210,7 +210,7 @@ protected:
 	void resize(const Real & delay);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Haas)
+PSYCLE__PLUGIN__INSTANTIATOR(Haas)
 
 void Haas::init()
 {

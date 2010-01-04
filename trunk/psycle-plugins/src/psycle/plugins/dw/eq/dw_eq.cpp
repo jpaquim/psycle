@@ -133,9 +133,7 @@ protected:
 	bool active[4];				//used to bypass eq channels with gain==0
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(dw_eq)
-
-
+PSYCLE__PLUGIN__INSTANTIATOR(dw_eq)
 
 void dw_eq::parameter(const int & param)
 {

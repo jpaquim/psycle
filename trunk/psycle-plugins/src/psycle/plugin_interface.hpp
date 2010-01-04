@@ -32,13 +32,7 @@ int const MAX_BUFFER_LENGTH = 256;
 
 /// the pi constant.
 /// note: this is also defined in <psycle/helpers/math/pi.hpp> but we want no dependency here
-double const pi = 
-	#if defined M_PI // on some systems, #include <cmath> defines M_PI but this is not standard
-		M_PI
-	#else
-		3.14159265358979323846
-	#endif
-;
+double const pi = 3.14159265358979323846;
 
 /*////////////////////////////////////////////////////////////////////////*/
 
@@ -74,7 +68,7 @@ class CMachineParameter {
 /// class defining the machine properties
 class CMachineInfo {
 	public:
-		CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const * parameters,
+		CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const parameters[],
 			char const * name, char const * shortName, char const * author, char const * command, int numCols)
 		: Version(version), Flags(flags), numParameters(numParameters), Parameters(parameters),
 		Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
