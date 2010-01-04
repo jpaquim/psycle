@@ -18,7 +18,13 @@ namespace {
 }
 
 std::string thread_name::get() {
-	std::string nvr(tls_thread_name_ ? *tls_thread_name_ : "<unknown>");
+	std::string nvr;
+	if(tls_thread_name_) nvr = *tls_thread_name_;
+	else {
+		std::ostringstream s;
+		s << "thread-id-" << this_thread::id();
+		nvr = s.str();
+	}
 	return nvr;
 }
 
