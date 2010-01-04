@@ -40,6 +40,8 @@
 #ifndef STK_STK_H
 #define STK_STK_H
 
+#define STK_VERSION -1 // added by psycledelics
+
 #include <string>
 #include <iostream>
 #include <sstream>
