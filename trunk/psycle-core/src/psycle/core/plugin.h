@@ -15,15 +15,14 @@ namespace psycle { namespace core {
 
 	class PluginFxCallback : public psycle::plugin_interface::CFxCallback {
 	public:
-		/* implement */ ~PluginFxCallback() throw();
-		/* implement */ void MessBox(char const * ptxt, char const * caption, unsigned int type);
-		/* implement */ int GetTickLength();
-		/* implement */ int GetSamplingRate();
-		/* implement */ int GetBPM();
-		/* implement */ int GetTPB();
-		/* implement */ int CallbackFunc(int, int, int, int);
-		/* implement */ float * unused0(int, int);
-		/* implement */ float * unused1(int, int);
+		/* implement */ void MessBox(char const * ptxt, char const * caption, unsigned int type) const;
+		/* implement */ int GetTickLength() const;
+		/* implement */ int GetSamplingRate() const;
+		/* implement */ int GetBPM() const;
+		/* implement */ int GetTPB() const;
+		/* implement */ int CallbackFunc(int, int, int, int) const;
+		/* implement */ float * unused0(int, int) const;
+		/* implement */ float * unused1(int, int) const;
 };
 
 class Plugin; // forward declaration

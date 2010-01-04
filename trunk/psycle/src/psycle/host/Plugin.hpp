@@ -21,14 +21,14 @@ namespace psycle
 		class PluginFxCallback : public CFxCallback
 		{
 			public:
-				inline virtual int GetTickLength() { return Global::pPlayer->SamplesPerRow(); }
-				inline virtual int GetSamplingRate() { return Global::pConfig->GetSamplesPerSec(); }
-				inline virtual int GetBPM() { return Global::pPlayer->bpm(); }
-				inline virtual int GetTPB() { return Global::pPlayer->tpb(); }
+				/* implement */ int GetTickLength() const { return Global::pPlayer->SamplesPerRow(); }
+				/* implement */ int GetSamplingRate() const { return Global::pConfig->GetSamplesPerSec(); }
+				/* implement */ int GetBPM() const { return Global::pPlayer->bpm(); }
+				/* implement */ int GetTPB() const { return Global::pPlayer->tpb(); }
 
 			public:
 				///\todo mswindows! humpf! mswindows!
-				inline virtual void MessBox(char const* ptxt,char const* caption,unsigned int type) { MessageBox(hWnd,ptxt,caption,type); }
+				/* implement */ void MessBox(char const* ptxt,char const* caption,unsigned int type) const { MessageBox(hWnd,ptxt,caption,type); }
 			public: ///\todo private:
 				///\todo mswindows! humpf! mswindows!
 				HWND hWnd;

@@ -11,6 +11,7 @@
 #include "fileio.h"
 
 #include <sstream>
+#include <iostream>
 
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
@@ -30,21 +31,19 @@ using namespace psycle::plugin_interface;
 
 PluginFxCallback Plugin::_callback;
 
-PluginFxCallback::~PluginFxCallback() throw() {}
-
-void PluginFxCallback::MessBox(char const * /*ptxt*/, char const * /*caption*/, unsigned int /*type*/) {
-	//MessageBox(hWnd,ptxt,caption,type); 
+void PluginFxCallback::MessBox(char const * message, char const * caption, unsigned int /*type*/) const {
+	std::cout << caption << '\n' << message << '\n';
 }
 
-int PluginFxCallback::GetTickLength() { return static_cast<int>(Player::singleton().timeInfo().samplesPerTick()); }
-int PluginFxCallback::GetSamplingRate() { return Player::singleton().timeInfo().sampleRate(); }
-int PluginFxCallback::GetBPM() { return static_cast<int>(Player::singleton().timeInfo().bpm()); }
-int PluginFxCallback::GetTPB() { return Player::singleton().timeInfo().ticksSpeed(); }
+int PluginFxCallback::GetTickLength() const { return static_cast<int>(Player::singleton().timeInfo().samplesPerTick()); }
+int PluginFxCallback::GetSamplingRate() const { return Player::singleton().timeInfo().sampleRate(); }
+int PluginFxCallback::GetBPM() const { return static_cast<int>(Player::singleton().timeInfo().bpm()); }
+int PluginFxCallback::GetTPB() const { return Player::singleton().timeInfo().ticksSpeed(); }
 
 // dummy body
-int PluginFxCallback::CallbackFunc(int, int, int, int) { return 0; }
-float * PluginFxCallback::unused0(int, int) { return 0; }
-float * PluginFxCallback::unused1(int, int) { return 0; }
+int PluginFxCallback::CallbackFunc(int, int, int, int) const { return 0; }
+float * PluginFxCallback::unused0(int, int) const { return 0; }
+float * PluginFxCallback::unused1(int, int) const { return 0; }
 
 /**************************************************************************/
 // Plugin
