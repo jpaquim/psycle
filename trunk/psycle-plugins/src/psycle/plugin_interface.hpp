@@ -68,7 +68,7 @@ class CMachineParameter {
 /// class defining the machine properties
 class CMachineInfo {
 	public:
-		CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const parameters[],
+		CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const * parameters,
 			char const * name, char const * shortName, char const * author, char const * command, int numCols)
 		: Version(version), Flags(flags), numParameters(numParameters), Parameters(parameters),
 		Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}

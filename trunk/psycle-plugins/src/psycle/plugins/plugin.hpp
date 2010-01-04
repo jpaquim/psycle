@@ -60,16 +60,8 @@ class Host_Plugin {
 					)
 				{
 					for(int i(0) ; i < parameter_count ; ++i) {
-						parameters[i].scale.apply(0);
-					}
-
-					for(int i(0) ; i < parameter_count ; ++i) {
-						plugin_interface::CMachineParameter const * p = const_cast<plugin_interface::CMachineParameter const *>(Parameters[i]);
-						p = &parameters[i];
-					}
-					
-					for(int i(0) ; i < parameter_count ; ++i) {
-						this->parameter(i).scale.apply(0);
+						plugin_interface::CMachineParameter *& p = const_cast<plugin_interface::CMachineParameter *&>(Parameters[i]);
+						p = const_cast<Parameter *>(&parameters[i]);
 					}
 				}
 			public:
