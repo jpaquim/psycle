@@ -4,12 +4,15 @@
 ///\implementation universalis::os::loggers
 #include <universalis/detail/project.private.hpp>
 #include "loggers.hpp"
+#include "thread_name.hpp"
 #include <universalis/stdlib/date_time.hpp>
 #include <cstdlib>
 #include <algorithm> // for std::min
 #include <iomanip>
 
 namespace universalis { namespace os {
+
+using namespace stdlib;
 
 /**********************************************************************************************************/
 // logger
@@ -89,13 +92,16 @@ void stream_logger::do_log(int const level, std::string const & string) throw() 
 	int const static levels [] = {'T', 'I', 'W', 'E', 'C'};
 	int const static colors [] = {0, 2, 5, 1, 6, 3, 4, 7};
 	char const level_char(levels[std::min(static_cast<std::size_t>(level), sizeof levels)]);
-	stdlib::nanoseconds::tick_type const static time0_ns =
-		stdlib::hiresolution_clock<stdlib::utc_time>::universal_time().nanoseconds_since_epoch().get_count();
-	stdlib::nanoseconds::tick_type const time_ns =
-		stdlib::hiresolution_clock<stdlib::utc_time>::universal_time().nanoseconds_since_epoch().get_count() - time0_ns;
+	nanoseconds::tick_type const static time0_ns =
+		hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch().get_count();
+	nanoseconds::tick_type const time_ns =
+		hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch().get_count() - time0_ns;
 	try {
 		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << 'm';
-		ostream() << "log: " << std::setw(7) << time_ns / 1000 << "µs: " << level_char << ": ";
+		ostream() << "log: "
+				<< std::setw(7) << time_ns / 1000 << "µs: "
+				<< level_char << ": "
+				<< thread_name::get() << ": ";
 		if(ansi_terminal) {
 			ostream() << "\033[0m";
 			if(level >= 2) ostream() << "\033[1m";
