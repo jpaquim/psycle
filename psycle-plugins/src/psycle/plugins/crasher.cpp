@@ -50,7 +50,7 @@ protected:
 	}
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Crasher)
+PSYCLE__PLUGIN__INSTANTIATOR(Crasher)
 
 void Crasher::process(Sample l[], Sample r[], int sample, int)
 {

@@ -26,7 +26,7 @@ protected:
 	inline void process(Sample &);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Negative)
+PSYCLE__PLUGIN__INSTANTIATOR(Negative)
 
 void Negative::process(Sample l[], Sample r[], int sample, int)
 {

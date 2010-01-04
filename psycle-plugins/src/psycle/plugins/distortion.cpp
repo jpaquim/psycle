@@ -97,7 +97,7 @@ protected:
 	);
 };
 
-PSYCLE__PLUGIN__INSTANCIATOR(Distortion)
+PSYCLE__PLUGIN__INSTANTIATOR(Distortion)
 
 void Distortion::process(Sample l[], Sample r[], int sample, int)
 {
