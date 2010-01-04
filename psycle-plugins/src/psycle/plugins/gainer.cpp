@@ -11,7 +11,7 @@ class Gainer : public Plugin
 {
 	public:
 
-		virtual void help(std::ostream & out) const throw()
+		/*override*/ void help(std::ostream & out) const throw()
 		{
 			out << "just a multiplier" << std::endl;
 		}
@@ -28,7 +28,7 @@ class Gainer : public Plugin
 			return information;
 		}
 
-		virtual void describe(std::ostream & out, const int & parameter) const
+		/*override*/ void describe(std::ostream & out, const int & parameter) const
 		{
 			switch(parameter)
 			{
@@ -43,7 +43,7 @@ class Gainer : public Plugin
 
 		Gainer() : Plugin(information()) {}
 
-		virtual void parameter(const int & parameter)
+		/*override*/ void parameter(const int & parameter)
 		{
 			switch(parameter)
 			{
@@ -53,18 +53,18 @@ class Gainer : public Plugin
 			}
 		}
 
-		virtual void process(Sample l[], Sample r[], int sample, int)
+		/*override*/ void Work(Sample l[], Sample r[], int sample, int)
 		{
 			while(sample--)
 			{
-				process(l[sample]);
-				process(r[sample]);
+				Work(l[sample]);
+				Work(r[sample]);
 			}
 		}
 
 	protected:
 
-		inline void process(Sample & sample)
+		inline void Work(Sample & sample)
 		{
 			sample *= gain_;
 		}

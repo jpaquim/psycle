@@ -13,7 +13,7 @@ using namespace helpers::math;
 class Ring_Modulator : public Plugin
 {
 public:
-	virtual void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) const throw()
 	{
 		out << "ring modulator with frequency modulation of the amplitude modulation" << std::endl;
 		out << "compatible with original psycle 1 arguru's psych-osc" << std::endl;
@@ -41,7 +41,7 @@ public:
 		return information;
 	}
 
-	virtual void describe(std::ostream & out, const int & parameter) const
+	/*override*/ void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -64,18 +64,18 @@ public:
 			phases_[oscillator] = 0;
 	}
 
-	virtual void process(Sample l[], Sample r[], int samples, int);
-	virtual void parameter(const int &);
+	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
+	/*override*/ void parameter(const int &);
 protected:
-	virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
-	virtual void samples_per_second_changed()
+	/*override*/ void SeqTick(const int, const int, const int, const int command, const int value);
+	/*override*/ void samples_per_second_changed()
 	{
 		parameter(am_radians_per_second);
 		parameter(fm_radians_per_second);
 		parameter(fm_bandwidth);
 		parameter(am_glide);
 	}
-	inline const Real process(const Real & sample, const Real & modulation) const;
+	inline const Real Work(const Real & sample, const Real & modulation) const;
 	enum Oscillators { am, fm, oscillators };
 	Real
 		phases_[oscillators], radians_per_sample_[oscillators],
@@ -84,7 +84,7 @@ protected:
 
 PSYCLE__PLUGIN__INSTANTIATOR(Ring_Modulator)
 
-void Ring_Modulator::sequencer_note_event(const int, const int, const int, const int command, const int value)
+void Ring_Modulator::SeqTick(const int, const int, const int, const int command, const int value)
 {
 	switch(command)
 	{
@@ -114,13 +114,13 @@ void Ring_Modulator::parameter(const int & parameter)
 	}
 }
 
-void Ring_Modulator::process(Sample l[], Sample r[], int samples, int)
+void Ring_Modulator::Work(Sample l[], Sample r[], int samples, int)
 {
 	for(int sample(0) ; sample < samples ; ++sample)
 	{
 		const Real modulation(static_cast<Real>(::sin(phases_[am]))); // * glided_am_radians_per_samples_);
-		l[sample] = static_cast<Sample>(process(l[sample], modulation));
-		r[sample] = static_cast<Sample>(process(r[sample], modulation));;
+		l[sample] = static_cast<Sample>(Work(l[sample], modulation));
+		r[sample] = static_cast<Sample>(Work(r[sample], modulation));;
 		phases_[am] += static_cast<Real>(glided_am_radians_per_samples_ + ::sin(phases_[fm]) * fm_bandwidth_);
 		phases_[fm] += radians_per_sample_[fm];
 		if(radians_per_sample_[am] > glided_am_radians_per_samples_)
@@ -140,7 +140,7 @@ void Ring_Modulator::process(Sample l[], Sample r[], int samples, int)
 		phases_[oscillator] = std::fmod(phases_[oscillator], pi * 2);
 }
 
-inline const Ring_Modulator::Real Ring_Modulator::process(const Real & sample, const Real & modulation) const
+inline const Ring_Modulator::Real Ring_Modulator::Work(const Real & sample, const Real & modulation) const
 {
 	return sample * modulation;
 }

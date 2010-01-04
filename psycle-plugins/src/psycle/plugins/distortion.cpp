@@ -11,7 +11,7 @@ namespace psycle { namespace plugin {
 class Distortion : public Plugin
 {
 public:
-	virtual void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) const throw()
 	{
 		out << "distortion ..." << std::endl;
 		out << "compatible with psycle 1 arguru's original distortion" << std::endl;
@@ -45,7 +45,7 @@ public:
 		return information;
 	}
 
-	virtual void describe(std::ostream & out, const int & parameter) const
+	/*override*/ void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -81,15 +81,15 @@ public:
 	}
 
 	Distortion() : Plugin(information()) {}
-	virtual void process(Sample l[], Sample r[], int samples, int);
+	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
 protected:
-	inline void process
+	inline void Work
 	(
 		Sample & l, Sample & r,
 		const Sample & positive_threshold, const Sample & positive_clamp,
 		const Sample & negative_threshold, const Sample & negative_clamp
 	);
-	inline void process
+	inline void Work
 	(
 		Sample & sample,
 		const Sample & positive_threshold, const Sample & positive_clamp,
@@ -99,14 +99,14 @@ protected:
 
 PSYCLE__PLUGIN__INSTANTIATOR(Distortion)
 
-void Distortion::process(Sample l[], Sample r[], int sample, int)
+void Distortion::Work(Sample l[], Sample r[], int sample, int)
 {
 	switch((*this)[symmetric])
 	{
 	case no:
 		while(sample--)
 		{
-			process
+			Work
 				(
 					l[sample], r[sample],
 					(*this)(positive_threshold), (*this)(positive_clamp),
@@ -117,7 +117,7 @@ void Distortion::process(Sample l[], Sample r[], int sample, int)
 	case yes:
 		while(sample--)
 		{
-			process
+			Work
 				(
 					l[sample], r[sample],
 					(*this)(positive_threshold), (*this)(positive_clamp),
@@ -130,18 +130,18 @@ void Distortion::process(Sample l[], Sample r[], int sample, int)
 	}
 }
 
-inline void Distortion::process
+inline void Distortion::Work
 (
 	Sample & l, Sample & r,
 	const Sample & positive_threshold, const Sample & positive_clamp,
 	const Sample & negative_threshold, const Sample & negative_clamp
 )
 {
-	process(l, positive_threshold, positive_clamp, negative_threshold, negative_clamp);
-	process(r, positive_threshold, positive_clamp, negative_threshold, negative_clamp);
+	Work(l, positive_threshold, positive_clamp, negative_threshold, negative_clamp);
+	Work(r, positive_threshold, positive_clamp, negative_threshold, negative_clamp);
 }
 
-inline void Distortion::process
+inline void Distortion::Work
 (
 	Sample & sample,
 	const Sample & positive_threshold, const Sample & positive_clamp,
