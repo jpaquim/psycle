@@ -60,7 +60,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi():leftLim(1.0f), rightLim(1.0f)
 {
-	Vals = new int[4];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi()
