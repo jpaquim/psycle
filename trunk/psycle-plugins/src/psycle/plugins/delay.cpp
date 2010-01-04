@@ -13,7 +13,7 @@ namespace psycle { namespace plugin {
 class Delay : public Plugin
 {
 public:
-	virtual void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) const throw()
 	{
 		out << "Delay." << std::endl;
 		out << "Compatible with original psycle 1 arguru's dala delay." << std::endl;
@@ -46,7 +46,7 @@ public:
 		return information;
 	}
 
-	virtual void describe(std::ostream & out, const int & parameter) const
+	/*override*/ void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -73,17 +73,16 @@ public:
 	}
 
 	Delay() : Plugin(information()) {}
-	virtual inline ~Delay() throw() {}
-	virtual void init();
-	virtual void process(Sample l [], Sample r [], int samples, int);
-	virtual void parameter(const int &);
+	/*override*/ void init();
+	/*override*/ void Work(Sample l [], Sample r [], int samples, int);
+	/*override*/ void parameter(const int &);
 protected:
-	virtual void samples_per_second_changed()
+	/*override*/ void samples_per_second_changed()
 	{
 		parameter(left_delay);
 		parameter(right_delay);
 	}
-	virtual void sequencer_ticks_per_second_changed()
+	/*override*/ void sequencer_ticks_per_second_changed()
 	{
 		parameter(left_delay);
 		parameter(right_delay);
@@ -91,7 +90,7 @@ protected:
 	enum Channels { left, right, channels };
 	std::vector<Real> buffers_ [channels];
 	std::vector<Real>::iterator buffer_iterators_ [channels];
-	inline void process(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback);
+	inline void Work(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback);
 	inline void resize(const int & channel, const int & parameter);
 	inline void resize(const int & channel, const Real & delay);
 };
@@ -121,8 +120,8 @@ inline void Delay::resize(const int & channel, const int & parameter)
 {
 	const int snap1((*this)[snap] + 1);
 	const Real snap_delay(static_cast<int>((*this)(parameter) * snap1) / static_cast<Real>(snap1));
-	this->scaled_parameters_[parameter] = snap_delay;
-	this->parameters_[parameter] = information().parameter(parameter).scale.apply_inverse(snap_delay)+1; // Round up.
+	(*this)(parameter) = snap_delay;
+	(*this)[parameter] = information().parameter(parameter).scale.apply_inverse(snap_delay) + 1; // Round up.
 	resize(channel, snap_delay);
 }
 
@@ -133,16 +132,16 @@ inline void Delay::resize(const int & channel, const Real & delay)
 	buffer_iterators_[channel] = buffers_[channel].begin();
 }
 
-void Delay::process(Sample l [], Sample r [], int samples, int)
+void Delay::Work(Sample l [], Sample r [], int samples, int)
 {
 	for(int sample(0) ; sample < samples ; ++sample)
 	{
-		process(buffers_[left] , buffer_iterators_[left] , l[sample], (*this)(left_feedback));
-		process(buffers_[right], buffer_iterators_[right], r[sample], (*this)(right_feedback));
+		Work(buffers_[left] , buffer_iterators_[left] , l[sample], (*this)(left_feedback));
+		Work(buffers_[right], buffer_iterators_[right], r[sample], (*this)(right_feedback));
 	}
 }
 
-inline void Delay::process(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback)
+inline void Delay::Work(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback)
 {
 	const Real read(*buffer_iterator);
 	*buffer_iterator = input + feedback * read;

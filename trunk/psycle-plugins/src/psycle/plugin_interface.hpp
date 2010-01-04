@@ -110,16 +110,16 @@ class CMachineInfo {
 /// DO NOT CHANGE the order of the functions. This is an exported class!
 class CFxCallback {
 	public:
-		virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) {}
-		virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, int /*par3*/) { return 0; }
+		virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) const {}
+		virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, int /*par3*/) const { return 0; }
 		/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-		virtual float * unused0(int, int) { return 0; }
+		virtual float * unused0(int, int) const { return 0; }
 		/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-		virtual float * unused1(int, int) { return 0; }
-		virtual int GetTickLength() { return 2048; }
-		virtual int GetSamplingRate() { return 44100; }
-		virtual int GetBPM() { return 125; }
-		virtual int GetTPB() { return 4; }
+		virtual float * unused1(int, int) const { return 0; }
+		virtual int GetTickLength() const { return 2048; }
+		virtual int GetSamplingRate() const { return 44100; }
+		virtual int GetBPM() const { return 125; }
+		virtual int GetTPB() const { return 4; }
 		// Don't get fooled by the above return values.
 		// You get a pointer to a subclass of this one that returns the correct ones.
 		virtual ~CFxCallback() throw() {}

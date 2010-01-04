@@ -13,7 +13,7 @@ using namespace helpers::math;
 class Filter_2_Poles : public Plugin
 {
 public:
-	virtual void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) const throw()
 	{
 		out << "filter in the frequency domain using 2 poles" << std::endl;
 		out << "compatible with original psycle 1 arguru's 2 poles filter" << std::endl;
@@ -48,7 +48,7 @@ public:
 		return information;
 	}
 
-	virtual void describe(std::ostream & out, const int & parameter) const
+	/*override*/ void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -86,24 +86,24 @@ public:
 		::memset(buffers_, 0, sizeof buffers_);
 	}
 
-	virtual void process(Sample l[], Sample r[], int samples, int);
-	virtual void parameter(const int &);
+	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
+	/*override*/ void parameter(const int &);
 protected:
-	virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
-	virtual void samples_per_second_changed() { parameter(cutoff_frequency); }
-	virtual void sequencer_ticks_per_second_changed() { parameter(modulation_sequencer_ticks); }
+	/*override*/ void SeqTick(const int, const int, const int, const int command, const int value);
+	/*override*/ void samples_per_second_changed() { parameter(cutoff_frequency); }
+	/*override*/ void sequencer_ticks_per_second_changed() { parameter(modulation_sequencer_ticks); }
 	static const int poles = 2;
 	inline void update_coefficients();
 	inline void update_coefficients(Real coefficients[poles + 1], const Real & modulation_stereo_dephase = 0);
 	enum Channels { left, right, channels };
 	void erase_NaNs_Infinities_And_Denormals( float* inSample );
-	inline const Real process(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
+	inline const Real Work(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
 	Real cutoff_sin_, modulation_radians_per_sample_, modulation_phase_, buffers_ [channels][poles], coefficients_ [channels][poles + 1];
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(Filter_2_Poles)
 
-void Filter_2_Poles::sequencer_note_event(const int note, const int, const int, const int command, const int value)
+void Filter_2_Poles::SeqTick(const int note, const int, const int, const int command, const int value)
 {
 	switch(command)
 	{
@@ -147,12 +147,12 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 	erase_all_nans_infinities_and_denormals(coefficients, poles + 1);
 }
 
-void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
+void Filter_2_Poles::Work(Sample l[], Sample r[], int samples, int)
 {
 	for(int sample(0) ; sample < samples ; ++sample)
 	{
-		l[sample] = static_cast<Sample>(process(l[sample], buffers_[left] , coefficients_[left]));
-		r[sample] = static_cast<Sample>(process(r[sample], buffers_[right], coefficients_[right]));
+		l[sample] = static_cast<Sample>(Work(l[sample], buffers_[left] , coefficients_[left]));
+		r[sample] = static_cast<Sample>(Work(r[sample], buffers_[right], coefficients_[right]));
 	}
 
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
@@ -162,7 +162,7 @@ void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
 	}
 }
 
-inline const Filter_2_Poles::Real Filter_2_Poles::process(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
+inline const Filter_2_Poles::Real Filter_2_Poles::Work(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
 	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];

@@ -16,7 +16,7 @@ public:
 	/// <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
 	typedef double Real;
 
-	virtual void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) const throw()
 	{
 		out << "Haas stereo time delay spatial localization" << std::endl;
 		out << std::endl;
@@ -95,7 +95,7 @@ public:
 		return information;
 	}
 
-	virtual void describe(std::ostream & out, const int & parameter) const
+	/*override*/ void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -177,20 +177,13 @@ public:
 		late_reflection_gain_left(1),
 		late_reflection_gain_right(1)
 	{}
-	virtual inline ~Haas() throw() {}
-	virtual void init();
-	virtual void process(Sample l [], Sample r [], int samples, int);
-	virtual void parameter(const int &);
+	/*override*/ void init();
+	/*override*/ void Work(Sample l [], Sample r [], int samples, int);
+	/*override*/ void parameter(const int &);
 
 protected:
 
-	virtual void samples_per_second_changed()
-	{
-		parameter(late_reflection_delay);
-	}
-
-	virtual void sequencer_ticks_per_second_changed()
-	{}
+	/*override*/ void samples_per_second_changed() { parameter(late_reflection_delay); }
 
 	enum Channels { left, right, channels };
 	enum Stages { direct_first, direct_last, early_reflection_first, early_reflection_last, late_reflection, stages };
@@ -205,7 +198,7 @@ protected:
 	Real early_reflection_gain_left, early_reflection_gain_right;
 	Real late_reflection_gain_left, late_reflection_gain_right;
 
-	inline void process(Sample & left, Sample & right);
+	inline void Work(Sample & left, Sample & right);
 	void resize();
 	void resize(const Real & delay);
 };
@@ -308,22 +301,22 @@ void Haas::resize(const Real & delay)
 	buffer_iterators_[late_reflection] = buffer_.begin();
 }
 
-void Haas::process(Sample l [], Sample r [], int samples, int)
+void Haas::Work(Sample l [], Sample r [], int samples, int)
 {
 	switch((*this)[channel_mix])
 	{
 		case normal:
 			for(int sample(0) ; sample < samples ; ++sample)
-				process(l[sample], r[sample]);
+				Work(l[sample], r[sample]);
 			break;
 		case swapped:
 			for(int sample(0) ; sample < samples ; ++sample)
-				process(r[sample], l[sample]);
+				Work(r[sample], l[sample]);
 			break;
 		case mono:
 			for(int sample(0) ; sample < samples ; ++sample)
 			{
-				process(l[sample], r[sample]);
+				Work(l[sample], r[sample]);
 				l[sample] = r[sample] = l[sample] + r[sample];
 			}
 			break;
@@ -332,7 +325,7 @@ void Haas::process(Sample l [], Sample r [], int samples, int)
 	}
 }
 
-inline void Haas::process(Sample & left, Sample & right)
+inline void Haas::Work(Sample & left, Sample & right)
 {
 	const Real mono_input(left + right);
 	*buffer_iterators_[direct_first] = mono_input;

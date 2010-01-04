@@ -11,7 +11,7 @@ namespace psycle { namespace plugin {
 class Negative : public Plugin
 {
 public:
-	virtual void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) const throw()
 	{
 		out << "just a Negative (out = -in)" << std::endl;
 	}
@@ -21,23 +21,23 @@ public:
 		return information;
 	}
 	Negative() : Plugin(information()) {}
-	virtual void process(Sample l[], Sample r[], int samples, int);
+	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
 protected:
-	inline void process(Sample &);
+	inline void Work(Sample &);
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(Negative)
 
-void Negative::process(Sample l[], Sample r[], int sample, int)
+void Negative::Work(Sample l[], Sample r[], int sample, int)
 {
 	while(sample--)
 	{
-		process(l[sample]);
-		process(r[sample]);
+		Work(l[sample]);
+		Work(r[sample]);
 	}
 }
 
-inline void Negative::process(Sample & sample)
+inline void Negative::Work(Sample & sample)
 {
 	sample = -sample;
 }

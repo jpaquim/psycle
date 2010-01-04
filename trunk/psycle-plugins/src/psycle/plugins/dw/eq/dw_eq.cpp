@@ -1,17 +1,13 @@
 #include <psycle/plugins/plugin.hpp>
 #include "../dw_filter.hpp"
 
-#ifndef M_PI
-	#define M_PI 3.14159265358979323846
-#endif
-
 namespace psycle { namespace plugin {
 
 /// dw eq
 class dw_eq : public Plugin
 {
 public:
-	virtual void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) const throw()
 	{
 		out << "dw eq v0.1" << std::endl;
 		out << "parametric eq plugin by d.w.aley" << std::endl;
@@ -43,10 +39,10 @@ public:
 			Information::Parameter::exponential("Gain 2", 0.125,				1,								8.0),
 			Information::Parameter::exponential("Gain 3", 0.125,				1,								8.0),
 			Information::Parameter::exponential("Gain 4", 0.125,				1,								8.0),
-			Information::Parameter::linear("Bandwidth 1", 0,								0,												M_PI/3.0f),
-			Information::Parameter::linear("Bandwidth 2", .01,								M_PI/6.0f,				M_PI/3.0f),
-			Information::Parameter::linear("Bandwidth 3", .01,								M_PI/6.0f,				M_PI/3.0f),
-			Information::Parameter::linear("Bandwidth 4", 0,								0,												M_PI/3.0f)
+			Information::Parameter::linear("Bandwidth 1", 0,								0,												pi/3.0f),
+			Information::Parameter::linear("Bandwidth 2", .01,								pi/6.0f,				pi/3.0f),
+			Information::Parameter::linear("Bandwidth 3", .01,								pi/6.0f,				pi/3.0f),
+			Information::Parameter::linear("Bandwidth 4", 0,								0,												pi/3.0f)
 		};
 
 		static const Information information(
@@ -60,7 +56,7 @@ public:
 		return information;
 	}
 
-	virtual void describe(std::ostream & out, const int & parameter) const
+	/*override*/ void describe(std::ostream & out, const int & parameter) const
 	{
 		out.setf(std::ios::fixed);
 		out<<std::setw(6)<<std::setprecision(3);
@@ -117,16 +113,16 @@ public:
 		band4.SetMode(dwfilter::eq_hishelf);
 	}
 
-	~dw_eq() throw() {}
+	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
+	/*override*/ void parameter(const int &);
 
-	virtual void process(Sample l[], Sample r[], int samples, int);
-	virtual void parameter(const int &);
 protected:
-	virtual void samples_per_second_changed() { band1.SetSampleRate(samples_per_second());
-												band2.SetSampleRate(samples_per_second());
-												band3.SetSampleRate(samples_per_second());
-												band4.SetSampleRate(samples_per_second());				}
-	virtual void sequencer_ticks_per_second_changed() {}
+	/*override*/ void samples_per_second_changed() {
+		band1.SetSampleRate(samples_per_second());
+		band2.SetSampleRate(samples_per_second());
+		band3.SetSampleRate(samples_per_second());
+		band4.SetSampleRate(samples_per_second());
+	}
 
 	dwfilter band1, band2, band3, band4; //this is silly, i should use an array
 	int samprate;
@@ -197,7 +193,7 @@ void dw_eq::parameter(const int & param)
 	}
 }
 
-void dw_eq::process(Sample l[], Sample r[], int samples, int)
+void dw_eq::Work(Sample l[], Sample r[], int samples, int)
 {
 	do
 	{
