@@ -112,7 +112,7 @@ void FFT(int NumSamples,
 	if (!IsPowerOfTwo(NumSamples)) {
 		std::ostringstream s;
 		s << "FFT called with size "<< NumSamples;
-		throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 	}
 
 	NumBits = NumberOfBitsNeeded(NumSamples);
