@@ -233,6 +233,9 @@ int main(int argument_count, char * arguments[]) {
 			return 2;
 		}
 
+		///\todo since we don't have a way to wait until the song is finished with the sequence, we may as well just loop it
+		player.setLoopSong();
+
 		if(output_file_name.length()) {
 			if(loggers::information()()) {
 				std::ostringstream s;
@@ -275,10 +278,6 @@ int main(int argument_count, char * arguments[]) {
 	}
 	player.driver().set_started(false);
 	factory.Finalize();
-
-	///\todo kluge
-	loggers::information()("(klugy pause)");
-	this_thread::sleep(seconds(1));
 
 	return 0;
 }
