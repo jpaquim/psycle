@@ -6,6 +6,7 @@
 #include <diversalis/os.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/stdlib/thread.hpp>
+#include <universalis/os/thread_name.hpp>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -17,6 +18,7 @@
 #endif
 
 using namespace psycle::core;
+using namespace universalis::stdlib;
 namespace loggers = universalis::os::loggers;
 
 void usage() {
@@ -84,6 +86,7 @@ int main(int argument_count, char * arguments[]) {
 		using namespace universalis::os::loggers;
 		multiplex_logger::singleton().add(stream_logger::default_logger());
 	}
+	universalis::os::thread_name thread_name("main");
 
 	if(argument_count < 2) {
 		usage();
@@ -136,7 +139,7 @@ int main(int argument_count, char * arguments[]) {
 					usage();
 					return 0;
 				} else if(s == "--version") {
-				std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")\n"; ///\todo need a real version
+					std::cout << "psycle-player devel (built on " __DATE__ " " __TIME__ ")\n"; ///\todo need a real version
 					return 0;
 				} else if(s.length() && s[0] == '-') { // unrecognised option
 					std::cerr << "error: unknown option: " << s << '\n';
@@ -272,9 +275,10 @@ int main(int argument_count, char * arguments[]) {
 	}
 	player.driver().set_started(false);
 	factory.Finalize();
+
 	///\todo kluge
 	loggers::information()("(klugy pause)");
-	std::this_thread::sleep(std::seconds(1));
+	this_thread::sleep(seconds(1));
 
 	return 0;
 }
