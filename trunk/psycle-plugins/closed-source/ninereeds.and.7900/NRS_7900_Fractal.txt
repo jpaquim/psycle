@@ -1,3 +1,7 @@
+2010-01-05:
+17:36 < JosepMa> i was trying to find the real release date of arguru compressor
+17:36 < JosepMa> and i found the sources of 7900 fractal!
+
 2004-08-28:
 <_7900> you mean that ninereeds fractal distortion i converted a bit?
 <_7900> im not sure ive still got it
