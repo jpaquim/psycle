@@ -83,7 +83,7 @@ void mi::ParameterTweak(int par, int val) {
 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
 	float const makeUpGain = 1 + Vals[paramGain] * 0.015625f;
-	if(true || Vals[paramRatio] == 0) {
+	if(Vals[paramRatio] == 0) {
 		// No compression. 
 		do {
 			*psamplesleft *= makeUpGain;
