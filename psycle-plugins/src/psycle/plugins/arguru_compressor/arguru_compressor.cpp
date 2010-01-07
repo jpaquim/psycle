@@ -98,7 +98,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		float const release = Vals[paramRelease] * pCB->GetSamplingRate() * 0.001f;
 
 		// TODO use peak or RMS?
-		float inputLevel = (std::fabs(*psamplesleft) + std::fabs(*psamplesright)) * 0.5f * 0.000030517578125f;
+		//float inputLevel = (std::fabs(*psamplesleft) + std::fabs(*psamplesright)) * 0.5f * 0.000030517578125f;
 		//float const avgSamples = pCB->GetSamplingRate() / 20; // window for average (should lead to a constant level for 20Hz)
 		//inputLevel = (avgInputLevel + inputLevel) / (avgSamples + 1); // average ponderation
 		
@@ -107,6 +107,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		if(Vals[paramRatio] >= 16) {
 			// Hard limiter
 			do {
+				float const inputLevel = (std::fabs(*psamplesleft) + std::fabs(*psamplesright)) * 0.5f * 0.000030517578125f;
 				if(inputLevel > threshold) {
 					currentGain = threshold / inputLevel;
 				} else if(currentGain < 1) {
@@ -127,6 +128,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		} else {
 			// Compressor
 			do {
+				float const inputLevel = (std::fabs(*psamplesleft) + std::fabs(*psamplesright)) * 0.5f * 0.000030517578125f;
 				if(inputLevel > threshold) {
 					if(currentAction != actAttack) {
 						currentAction = actAttack;
