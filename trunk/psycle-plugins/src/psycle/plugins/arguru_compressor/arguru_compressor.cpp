@@ -114,7 +114,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						currentAction = actRelease;
 						gainStep = gainStepSpeed / (release * pCB->GetSamplingRate());
 					}
-					currentGain += gainStep;
+					currentGain = std::min(currentGain + gainStep, 1.0f);
 				} else {
 					//currentAction = none;
 					currentGain = 1;
