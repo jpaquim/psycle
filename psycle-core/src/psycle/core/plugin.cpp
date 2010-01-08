@@ -92,7 +92,11 @@ Plugin::~ Plugin( ) throw()
 	#endif
 }
 void Plugin::DeleteMachine(CMachineInterface &plugin) {
-	DELETEMACHINE DeleteMachine = (DELETEMACHINE) GetProcAddress( static_cast<HINSTANCE>( libHandle_ ), "DeleteMachine" );
+	#if defined __unix__ || defined __APPLE__
+		DELETEMACHINE DeleteMachine = (DELETEMACHINE) dlsym( libHandle_, "DeleteMachine");
+	#else
+		DELETEMACHINE DeleteMachine = (DELETEMACHINE) GetProcAddress( static_cast<HINSTANCE>( libHandle_ ), "DeleteMachine" );
+	#endif
 	if (DeleteMachine) {
 		DeleteMachine(plugin);
 	}
