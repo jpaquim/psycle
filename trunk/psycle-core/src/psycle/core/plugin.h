@@ -12,6 +12,9 @@
 #include <psycle/plugin_interface.hpp>
 
 namespace psycle { namespace core {
+	typedef psycle::plugin_interface::CMachineInfo * (* GETINFO) ();
+	typedef psycle::plugin_interface::CMachineInterface * (* CREATEMACHINE) ();
+	typedef void (* DELETEMACHINE) (psycle::plugin_interface::CMachineInterface &);
 
 	class PluginFxCallback : public psycle::plugin_interface::CFxCallback {
 	public:
@@ -109,6 +112,7 @@ class PSYCLE__CORE__DECL Plugin : public Machine {
 		inline Proxy const & proxy() const { return proxy_; }
 		inline Proxy & proxy() { return proxy_; }
 		psycle::plugin_interface::CMachineInfo const & GetInfo() const throw() { return *info_; }
+		void DeleteMachine(psycle::plugin_interface::CMachineInterface &plugin);
 		
 	private:
 		char _psShortName[16];
@@ -132,7 +136,10 @@ inline void Proxy::callback() throw() { assert((*this)()); plugin().pCB = host()
 inline const bool Proxy::operator()() const throw() { return !!plugin_; }
 inline void Proxy::operator()(psycle::plugin_interface::CMachineInterface * plugin) throw()//exceptions::function_error)
 {
-	delete this->plugin_; this->plugin_ = plugin;
+	if (this->plugin_) {
+		host().DeleteMachine(*this->plugin_);
+	}
+	this->plugin_ = plugin;
 	if(plugin)
 	{
 		callback();
