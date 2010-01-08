@@ -18,6 +18,7 @@ namespace psycle  {
 		Psy3Saver::Psy3Saver(psycle::core::Song& song)
 			: song_(&song)
 		{
+			InitTranslationList();
 		}
 
 		Psy3Saver::~Psy3Saver()
@@ -25,27 +26,81 @@ namespace psycle  {
 		}
 
 
+		std::string Psy3Saver::ModifyDllNameWithIndex(const std::string& name, int index)
+		{
+			std::string new_name = name;
+			if (index != 0)
+			{
+				std::ostringstream buffer;
+				buffer.setf(std::ios::uppercase);
+				buffer.str("");
+				buffer << std::setfill('0') << std::hex << std::setw(4);
+				buffer << static_cast<int>(index);
+				new_name += buffer.str();
+			}
+			return new_name;
+		}
+
+
+		void Psy3Saver::InitTranslationList()
+		{
+			underscore_plugins_.push_back("dw-eq.dll");
+			underscore_plugins_.push_back("dw-granulizer.dll");
+			underscore_plugins_.push_back("dw-iopan.dll");
+			underscore_plugins_.push_back("dw-tremolo.dll");
+			underscore_plugins_.push_back("filter-2_poles.dll");
+			underscore_plugins_.push_back("fs-sf2-player.dll");
+			underscore_plugins_.push_back("legasynth-303.dll");
+			underscore_plugins_.push_back("ring-modulator.dll");
+		}
+
+		// maybe we have some method like this already ?
+		std::string Psy3Saver::replaceString(const std::string& text,
+			const std::string& old_substr,
+			const std::string& new_substr) const {
+				std::string replaced = text;
+				std::string::size_type search_pos = 0;
+				while ( (search_pos = replaced.find(old_substr, search_pos)) != std::string::npos )
+					replaced.replace(search_pos++, 1, new_substr);
+				return replaced;
+		}
+
+		std::string Psy3Saver::ConvertName(const std::string& name) const
+		{
+			std::string new_name;
+			std::vector<std::string>::const_iterator it;
+			it = std::find(underscore_plugins_.begin(), underscore_plugins_.end(), name);
+			if (it != underscore_plugins_.end()) {
+				// translate to underscore
+				new_name = replaceString(name,"-","_");
+			} else {
+				// translate to whitespace
+				new_name = replaceString(name,"-"," ");
+			}
+			return new_name;
+		}
+
 		int Psy3Saver::ConvertType(const psycle::core::MachineKey& key) const
 		{
 			int old_type = OldMachineType::MACH_DUMMY; // default
 			if (key == MachineKey::dummy()) {
 				old_type = OldMachineType::MACH_DUMMY;
 			} else
-			if (key == MachineKey::master() ) {
-				old_type = OldMachineType::MACH_MASTER;
-			} else
-			if (key == MachineKey::duplicator() ) {
-				old_type = OldMachineType::MACH_DUPLICATOR;
-			} else
-			if (key == MachineKey::sampler()) {
-				old_type = OldMachineType::MACH_SAMPLER;
-			} else
-			if (key.host() == Hosts::NATIVE) {
-				old_type = OldMachineType::MACH_PLUGIN;
-			}
+				if (key == MachineKey::master() ) {
+					old_type = OldMachineType::MACH_MASTER;
+				} else
+					if (key == MachineKey::duplicator() ) {
+						old_type = OldMachineType::MACH_DUPLICATOR;
+					} else
+						if (key == MachineKey::sampler()) {
+							old_type = OldMachineType::MACH_SAMPLER;
+						} else
+							if (key.host() == Hosts::NATIVE) {
+								old_type = OldMachineType::MACH_PLUGIN;
+							}
 
 
-			return old_type;
+							return old_type;
 		}
 
 
@@ -64,8 +119,8 @@ namespace psycle  {
 				Progress.SetWindowText("Saving...");
 				Progress.ShowWindow(SW_SHOW);
 			}
-						
-					
+
+
 			int chunkcount = 3; // 3 chunks plus:	
 
 			chunkcount += song_->patternSequence().numpatterns(); // limit to MAXPATTERNS ..
@@ -226,7 +281,7 @@ namespace psycle  {
 				size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
 				pFile->Write(version);
 				pFile->Write(size);
-				
+
 				pFile->Write(index); // Sequence Track number
 				temp = playLength;
 				pFile->Write(temp); // Sequence length
@@ -253,7 +308,7 @@ namespace psycle  {
 			//
 
 			// a first test version
-			
+
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			psycle::core::Sequence::patterniterator  it = song_->patternSequence().patternbegin();
 			for ( ; it != song_->patternSequence().patternend(); ++it ) {
@@ -279,7 +334,7 @@ namespace psycle  {
 					memcpy(pCopy,pData,EVENT_SIZE*song_->tracks());
 					pCopy+=EVENT_SIZE*song_->tracks();
 				}
-				
+
 				int sizez77 = psycle::helpers::DataCompression::BEERZ77Comp2(pSource, &pCopy, song_->tracks()*num_lines*EVENT_SIZE);
 				zapArray(pSource);
 
@@ -335,8 +390,9 @@ namespace psycle  {
 					MachineKey key = song_->machine(i)->getMachineKey();
 					pFile->Write(std::uint32_t(index));
 					pFile->Write(std::uint32_t(ConvertType(key)));
-					pFile->WriteArray((key.dllName()+".dll").c_str(),key.dllName().length()+1+4);
-					// pFile->Write(std::uint32_t(key.index())); ?
+					std::string dllName = ModifyDllNameWithIndex(ConvertName(key.dllName())+".dll", 0); //song_->machine(i)->GetShellIdx());
+					pFile->WriteArray(dllName.c_str(),dllName.length()+1);
+					// pFile->Write(std::uint32_t(key.index())); // is saved in the dllName
 					song_->machine(i)->SaveFileChunk(pFile);
 
 					long pos2 = pFile->GetPos(); 
