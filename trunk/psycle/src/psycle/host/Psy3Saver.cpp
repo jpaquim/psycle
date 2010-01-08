@@ -390,7 +390,7 @@ namespace psycle  {
 					MachineKey key = song_->machine(i)->getMachineKey();
 					pFile->Write(std::uint32_t(index));
 					pFile->Write(std::uint32_t(ConvertType(key)));
-					std::string dllName = ModifyDllNameWithIndex(ConvertName(key.dllName())+".dll", 0); //song_->machine(i)->GetShellIdx());
+					std::string dllName = ModifyDllNameWithIndex(ConvertName(key.dllName())+".dll", key.index());
 					pFile->WriteArray(dllName.c_str(),dllName.length()+1);
 					// pFile->Write(std::uint32_t(key.index())); // is saved in the dllName
 					song_->machine(i)->SaveFileChunk(pFile);
