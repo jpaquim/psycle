@@ -2,6 +2,7 @@
 #include "configuration_options.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "Global.hpp"
+#include <psycle/core/machinekey.hpp>
 
 
 namespace psycle {
@@ -23,6 +24,29 @@ namespace psycle {
 
 		private:
 
+			enum OldMachineType
+			{
+				MACH_UNDEFINED = -1,
+				MACH_MASTER = 0,
+				MACH_SINE = 1, ///< now a plugin
+				MACH_DIST = 2, ///< now a plugin
+				MACH_SAMPLER = 3,
+				MACH_DELAY = 4, ///< now a plugin
+				MACH_2PFILTER = 5, ///< now a plugin
+				MACH_GAIN = 6, ///< now a plugin
+				MACH_FLANGER = 7, ///< now a plugin
+				MACH_PLUGIN = 8,
+				MACH_VST = 9,
+				MACH_VSTFX = 10,
+				MACH_SCOPE = 11,
+				MACH_XMSAMPLER = 12,
+				MACH_DUPLICATOR = 13,
+				MACH_MIXER = 14,
+				MACH_RECORDER = 15,
+				MACH_DUMMY = 255
+			};
+
+			int ConvertType(const psycle::core::MachineKey& key) const;
 			void ConvertEvent(const psycle::core::PatternEvent& ev, unsigned char* data) const;
 			unsigned char* CreateNewPattern(int ps);
 

@@ -428,7 +428,7 @@ namespace psycle {
 
 		void CChildView::EnableSound()
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#if PSYCLE__CONFIGURATION__USE_PSYCORE			
 			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.song(projects_->active_project()->song());
 			output_driver_ =  Global::pConfig->_pOutputDriver;
@@ -436,8 +436,9 @@ namespace psycle {
 				if (output_driver_->started())
 					return;
 				output_driver_->set_started(true);
-			} else
-			player.setDriver(*output_driver_);
+			} else {
+				player.setDriver(*output_driver_);
+			}
 #else
 			if (_outputActive)
 			{

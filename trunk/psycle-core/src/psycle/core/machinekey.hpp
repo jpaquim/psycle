@@ -35,6 +35,7 @@ class PSYCLE__CORE__DECL MachineKey {
 		MachineKey(const Hosts::type host, const std::string & dllName, const uint32_t index = 0 );
 		MachineKey(const MachineKey& key);
 		~MachineKey();
+
 		static const MachineKey invalid();
 		static const MachineKey master();
 		static const MachineKey dummy();
