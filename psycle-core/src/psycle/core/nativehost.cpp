@@ -23,9 +23,6 @@
 namespace psycle { namespace core {
 	using namespace psycle::plugin_interface;
 
-typedef CMachineInfo * (* GETINFO) ();
-typedef CMachineInterface * (* CREATEMACHINE) ();
-
 NativeHost::NativeHost(MachineCallbacks*calls)
 :MachineHost(calls){
 }

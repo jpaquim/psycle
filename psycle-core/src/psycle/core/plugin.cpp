@@ -30,7 +30,8 @@ using namespace psycle::plugin_interface;
 // PluginFxCallback
 
 PluginFxCallback Plugin::_callback;
-
+///\todo: This code needs to show a message box somehow. Maybe we need to allow the application to supply this call so that the 
+// core engine can call it.
 void PluginFxCallback::MessBox(char const * message, char const * caption, unsigned int /*type*/) const {
 	std::cout << caption << '\n' << message << '\n';
 }
@@ -89,6 +90,15 @@ Plugin::~ Plugin( ) throw()
 	#else
 		::FreeLibrary((HINSTANCE)libHandle_);
 	#endif
+}
+void Plugin::DeleteMachine(CMachineInterface &plugin) {
+	DELETEMACHINE DeleteMachine = (DELETEMACHINE) GetProcAddress( static_cast<HINSTANCE>( libHandle_ ), "DeleteMachine" );
+	if (DeleteMachine) {
+		DeleteMachine(plugin);
+	}
+	else {
+		delete &plugin; 
+	}
 }
 
 void Plugin::Init( )
