@@ -15,7 +15,7 @@
 
 #if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
-#elif defined _WIN64 || defined _WIN32
+#elif defined _WIN32
 	#include <windows.h>
 #endif
 
@@ -60,8 +60,7 @@ Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, 
 	SetAudioRange(32768.0f);
 
 	//Psy2Filter can generate a plugin without info
-	if( info )
-	{
+	if(info) {
 		_isSynth = (info_->Flags == 3);
 		if(!_isSynth) {
 			defineInputAsStereo();
@@ -79,17 +78,17 @@ Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, 
 	}
 }
 
-Plugin::~ Plugin( ) throw()
-{
-	if (proxy_()) {
+Plugin::~ Plugin( ) throw() {
+	if(proxy_()) {
 		proxy_(0); // i.e. delete CMachineInterface.
 	}
-	if(libHandle_)
-	#if defined __unix__ || defined __APPLE__
-		::dlclose(libHandle_);
-	#else
-		::FreeLibrary((HINSTANCE)libHandle_);
-	#endif
+	if(libHandle_) {
+		#if defined __unix__ || defined __APPLE__
+			dlclose(libHandle_);
+		#else
+			::FreeLibrary((HINSTANCE)libHandle_);
+		#endif
+	}
 }
 void Plugin::DeleteMachine(CMachineInterface &plugin) {
 	#if defined __unix__ || defined __APPLE__
@@ -99,32 +98,25 @@ void Plugin::DeleteMachine(CMachineInterface &plugin) {
 	#endif
 	if (DeleteMachine) {
 		DeleteMachine(plugin);
-	}
-	else {
+	} else {
 		delete &plugin; 
 	}
 }
 
-void Plugin::Init( )
-{
+void Plugin::Init() {
 	Machine::Init();
-
-	if(proxy()())
-	{
+	if(proxy()()) {
 		proxy().Init();
-		for(int gbp(0) ; gbp < GetInfo().numParameters ; ++gbp)
-		{
+		for(int gbp(0) ; gbp < GetInfo().numParameters ; ++gbp) {
 			proxy().ParameterTweak(gbp, GetInfo().Parameters[gbp]->DefValue);
 		}
 	}
 }
 
-int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
-{
+int Plugin::GenerateAudioInTicks(int startSample,  int numSamples) {
 	int ns = numSamples;
 	int us = startSample;
-	if(_isSynth)
-	{
+	if(_isSynth) {
 		if (!_mute) Standby(false);
 		else Standby(true);
 	}
@@ -134,199 +126,155 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, callbacks->song().tracks());
 		}
 	}
+	///\todo cpu cost measurement
 	//CPUCOST_CALC(cost, numSamples);
 	//_cpuCost += cost;
 	Machine::UpdateVuAndStanbyFlag(numSamples);
 	_worked = true;
 	return numSamples;
-#if 0
+
+	#if 0 ///\todo HUGE CODE CHUNK DISABLE!
 	if (!_mute) {
 		if ((mode() == MACHMODE_GENERATOR) || (!_bypass && !Standby())) {
 			int ns = numSamples;
 			int us = startSample;
-			while (ns)
-			{
+			while (ns) {
 				int nextevent = (TWSActive)?TWSSamples:ns+1;
-				for (int i=0; i < song()->tracks(); i++)
-				{
+				for (int i=0; i < song()->tracks(); i++) {
 					if (TriggerDelay[i]._cmd) {
-						if (TriggerDelayCounter[i] < nextevent)
-						{
+						if (TriggerDelayCounter[i] < nextevent) {
 							nextevent = TriggerDelayCounter[i];
 						}
 					}
 				}
-				if (nextevent > ns)
-				{
-					if (TWSActive)
-					{
+				if (nextevent > ns) {
+					if (TWSActive) {
 						TWSSamples -= ns;
 					}
-					for (int i=0; i < song()->tracks(); i++)
-					{
+					for (int i=0; i < song()->tracks(); i++) {
 						// come back to this
-						if (TriggerDelay[i]._cmd)
-						{
+						if (TriggerDelay[i]._cmd) {
 							TriggerDelayCounter[i] -= ns;
 						}
 					}
-					try
-					{
+					try {
 						proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, song()->tracks());
-					}
-					catch(const std::exception &)
-					{
+					} catch(const std::exception &) {
+						///\todo bad error handling
 					}
 					ns = 0;
 				} else {
 					if(nextevent) {
 						ns -= nextevent;
-						try
-						{
+						try {
 							proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, song()->tracks());
-						}
-						catch(const std::exception &)
-						{
+						} catch(const std::exception &) {
+							///\todo bad error handling
 						}
 						us += nextevent;
 					}
-					if (TWSActive)
-					{
-						if (TWSSamples == nextevent)
-						{
+					if (TWSActive) {
+						if (TWSSamples == nextevent) {
 							int activecount = 0;
 							TWSSamples = TWEAK_SLIDE_SAMPLES;
-							for (int i = 0; i < MAX_TWS; i++)
-							{
-								if (TWSDelta[i] != 0)
-								{
+							for (int i = 0; i < MAX_TWS; i++) {
+								if (TWSDelta[i] != 0) {
 									TWSCurrent[i] += TWSDelta[i];
-									if (((TWSDelta[i] > 0) && (TWSCurrent[i] >= TWSDestination[i])) || ((TWSDelta[i] < 0) && (TWSCurrent[i] <= TWSDestination[i])))
-									{
+									if (((TWSDelta[i] > 0) && (TWSCurrent[i] >= TWSDestination[i])) || ((TWSDelta[i] < 0) && (TWSCurrent[i] <= TWSDestination[i]))) {
 										TWSCurrent[i] = TWSDestination[i];
 										TWSDelta[i] = 0;
-									} else
-									{
+									} else {
 										activecount++;
 									}
-									try
-									{
+									try {
 										proxy().ParameterTweak(TWSInst[i], int(TWSCurrent[i]));
-									}
-									catch(const std::exception &)
-									{
+									} catch(const std::exception &) {
+										///\todo bad error handling
 									}
 								}
 							}
 							if(!activecount) TWSActive = false;
 						}
 					}
-					for (int i=0; i < song()->tracks(); i++)
-					{
+					for (int i=0; i < song()->tracks(); i++) {
 						// come back to this
-						if (TriggerDelay[i]._cmd == commandtypes::NOTE_DELAY)
-						{
-							if (TriggerDelayCounter[i] == nextevent)
-							{
+						if (TriggerDelay[i]._cmd == commandtypes::NOTE_DELAY) {
+							if (TriggerDelayCounter[i] == nextevent) {
 								// do event
-								try
-								{
+								try {
 									proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
-								}
-								catch(const std::exception &)
-								{
+								} catch(const std::exception &) {
+									///\todo bad error handling
 								}
 								TriggerDelay[i]._cmd = 0;
-							}
-							else
-							{
+							} else {
 								TriggerDelayCounter[i] -= nextevent;
 							}
 						}
-						else if (TriggerDelay[i]._cmd == commandtypes::RETRIGGER)
-						{
-							if (TriggerDelayCounter[i] == nextevent)
-							{
+						else if (TriggerDelay[i]._cmd == commandtypes::RETRIGGER) {
+							if (TriggerDelayCounter[i] == nextevent) {
 								// do event
-								try
-								{
+								try {
 									proxy().SeqTick(i, TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
-								}
-								catch(const std::exception &)
-								{
+								} catch(const std::exception &) {
+									///\todo bad error handling
 								}
 								TriggerDelayCounter[i] = (RetriggerRate[i]*Gloxxxxxxxxxxxxxxxxxxxxbal::pPlayer()->SamplesPerRow())/256;
-							} else
-							{
+							} else {
 								TriggerDelayCounter[i] -= nextevent;
 							}
 						}
 						else if (TriggerDelay[i]._cmd == commandtypes::RETR_CONT)
 						{
-							if (TriggerDelayCounter[i] == nextevent)
-							{
+							if (TriggerDelayCounter[i] == nextevent) {
 								// do event
-								try
-								{
+								try {
 									proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
-								}
-								catch(const std::exception &)
-								{
+								} catch(const std::exception &) {
+									///\todo bad error handling
 								}
 								TriggerDelayCounter[i] = (RetriggerRate[i]*Gloxxxxxxxxxxxxxxxxxxxxxxxbal::pPlayer()->SamplesPerRow())/256;
 								int parameter = TriggerDelay[i]._parameter&0x0f;
-								if (parameter < 9)
-								{
+								if (parameter < 9) {
 									RetriggerRate[i]+= 4*parameter;
-								} else
-								{
+								} else {
 									RetriggerRate[i]-= 2*(16-parameter);
-									if (RetriggerRate[i] < 16)
-									{
+									if (RetriggerRate[i] < 16) {
 										RetriggerRate[i] = 16;
 									}
 								}
-							}
-							else
-							{
+							} else {
 								TriggerDelayCounter[i] -= nextevent;
 							}
-						} else if (TriggerDelay[i]._cmd == commandtypes::ARPEGGIO)
-						{
-							if (TriggerDelayCounter[i] == nextevent)
-							{
+						} else if (TriggerDelay[i]._cmd == commandtypes::ARPEGGIO) {
+							if (TriggerDelayCounter[i] == nextevent) {
 								PatternEntry entry =TriggerDelay[i];
-								switch(ArpeggioCount[i])
-								{
+								switch(ArpeggioCount[i]) {
 								case 0:
-									try
-									{
+									try {
 										proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
-									}
-									catch(const std::exception &)
-									{
+									} catch(const std::exception &) {
+										///\todo bad error handling
 									}
 									ArpeggioCount[i]++;
 									break;
 								case 1:
 									entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
-									try
-									{
+									try {
 										proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
 									}
-									catch(const std::exception &)
-									{
+									catch(const std::exception &) {
+										///\todo bad error handling
 									}
 									ArpeggioCount[i]++;
 									break;
 								case 2:
 									entry._note+=(TriggerDelay[i]._parameter&0x0F);
-									try
-									{
+									try {
 										proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
 									}
-									catch(const std::exception &)
-									{
+									catch(const std::exception &) {
+										///\todo bad error handling
 									}
 									ArpeggioCount[i]=0;
 									break;
@@ -343,132 +291,109 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples )
 			Machine::UpdateVuAndStanbyFlag(numSamples);
 		}
 	}
+	///\todo cpu cost measurement
 	//CPUCOST_CALC(cost, numSamples);
 	//_cpuCost += cost;
 	_worked = true;
-#endif // 0
+	#endif // 0
 }
 
-void Plugin::Tick( )
-{
+void Plugin::Tick( ) {
 	try {
 		proxy().SequencerTick();
-	}
-	catch(const std::exception &) {
+	} catch(const std::exception &) {
+		///\todo bad error handling
 	}
 }
 
-void Plugin::Tick( int channel, const PatternEvent & pData )
-{
+void Plugin::Tick( int channel, const PatternEvent & pData ) {
 	const PlayerTimeInfo & timeInfo = Player::singleton().timeInfo();
 	///\todo Add the Information about the tweaks.
 
-	if(pData.note() == notetypes::tweak)
-	{
-		if( pData.instrument() < info_->numParameters)
-		{
+	if(pData.note() == notetypes::tweak) {
+		if( pData.instrument() < info_->numParameters) {
 			int nv = (pData.command() << 8) +pData.parameter();
 			int const min = info_->Parameters[pData.instrument()]->MinValue;
 			int const max = info_->Parameters[pData.instrument()]->MaxValue;
 			nv += min;
 			if(nv > max) nv = max;
-			try
-			{
+			try {
 				proxy().ParameterTweak(pData.instrument(), nv);
-			}
-			catch(const std::exception &)
-			{
-				///\todo
+			} catch(const std::exception &) {
+				///\todo bad error handling
 			}
 			Player::singleton().Tweaker = true;
 		}
 	}
-	else if(pData.note() == notetypes::tweak_slide)
-	{
-		if(pData.instrument() < info_->numParameters)
-		{
+	else if(pData.note() == notetypes::tweak_slide) {
+		if(pData.instrument() < info_->numParameters) {
 			int i;
-			if(TWSActive)
-			{
+			if(TWSActive) {
 				// see if a tweak slide for this parameter is already happening
-				for(i = 0; i < MAX_TWS; i++)
-				{
-					if((TWSInst[i] == pData.instrument()) && (TWSDelta[i] != 0))
-					{
+				for(i = 0; i < MAX_TWS; i++) {
+					if((TWSInst[i] == pData.instrument()) && (TWSDelta[i] != 0)) {
 						// yes
 						break;
 					}
 				}
-				if(i == MAX_TWS)
-				{
+				if(i == MAX_TWS) {
 					// nope, find an empty slot
-					for (i = 0; i < MAX_TWS; i++)
-					{
-						if (TWSDelta[i] == 0)
-						{
+					for (i = 0; i < MAX_TWS; i++) {
+						if (TWSDelta[i] == 0) {
 							break;
 						}
 					}
 				}
-			}
-			else
-			{
+			} else {
 				// wipe our array for safety
-				for (i = MAX_TWS-1; i > 0; i--)
-				{
+				for (i = MAX_TWS-1; i > 0; i--) {
 					TWSDelta[i] = 0;
 				}
 			}
-			if (i < MAX_TWS)
-			{
+			if (i < MAX_TWS) {
 				TWSDestination[i] = float(pData.command() << 8)+pData.parameter();
 				float min = float(info_->Parameters[pData.instrument()]->MinValue);
 				float max = float(info_->Parameters[pData.instrument()]->MaxValue);
 				TWSDestination[i] += min;
-				if (TWSDestination[i] > max)
-				{
+				if (TWSDestination[i] > max) {
 					TWSDestination[i] = max;
 				}
 				TWSInst[i] = pData.instrument();
-				try
-				{
+				try {
 					TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
-				}
-				catch(const std::exception &)
-				{
+				} catch(const std::exception &) {
+					///\todo bad error handling
 				}
 				TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/ timeInfo.samplesPerTick();
 				TWSSamples = 0;
 				TWSActive = true;
-			}
-			else
-			{
+			} else {
 				// we have used all our slots, just send a twk
 				int nv = (pData.command() << 8)+pData.parameter();
 				int const min = info_->Parameters[pData.instrument()]->MinValue;
 				int const max = info_->Parameters[pData.instrument()]->MaxValue;
 				nv += min;
 				if (nv > max) nv = max;
-				try
-				{
+				try {
 					proxy().ParameterTweak(pData.instrument(), nv);
-				}
-				catch(const std::exception &)
-				{
+				} catch(const std::exception &) {
+					///\todo bad error handling
 				}
 			}
 		}
 		Player::singleton().Tweaker = true;
 	} else try {
 			proxy().SeqTick(channel, pData.note(), pData.instrument(), pData.command(), pData.parameter());
-	} catch(const std::exception &) { }
+	} catch(const std::exception &) {
+		///\todo bad error handling
+	}
 }
 
 void Plugin::Stop() {
 	try {
 		proxy().Stop();
 	} catch(const std::exception &) {
-		///\todo huh!
+		///\todo bad error handling
 	}
 	Machine::Stop();
 }
@@ -476,7 +401,6 @@ void Plugin::Stop() {
 void Plugin::GetParamName(int numparam, char * name) const {
 	if(numparam < info_->numParameters ) std::strcpy(name,info_->Parameters[numparam]->Name);
 	else std::strcpy(name, "Out of Range");
-
 }
 
 void Plugin::GetParamRange(int numparam,int &minval,int &maxval) const {
@@ -504,8 +428,9 @@ void Plugin::GetParamValue(int numparam, char * parval) const {
 			if(!proxy().DescribeValue(parval, numparam, proxy().Vals()[numparam]))
 				std::sprintf(parval, "%i", proxy().Vals()[numparam]);
 		}
-		catch(const std::exception &) {}
-		catch (...) {}
+		catch(const std::exception &) {
+			///\todo bad error handling
+		}
 	}
 	else std::strcpy(parval,"Out of Range");
 }
@@ -515,38 +440,38 @@ bool Plugin::SetParameter(int numparam,int value) {
 		try {
 			proxy().ParameterTweak(numparam,value);
 		} catch(const std::exception &) {
-			return false;
+			return false; // hmm
 		}
 		return true;
-	} else return false;
+	} else return false; // hmm
 }
 
 bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
-	std::uint32_t size=0;
+	uint32_t size=0;
 	pFile->Read(size); // size of whole structure
 	if(size) {
 		if(version > CURRENT_FILE_VERSION_MACD) {
 			pFile->Skip(size);
+			///\todo bad error handling
 			std::ostringstream s; s
-				<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
-				<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
+				<< version << " > " << CURRENT_FILE_VERSION_MACD
+				<< "\nData is from a newer format of psycle, it might be unsafe to load.\n";
 			//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 			return false;
 		} else {
-			std::uint32_t count=0;
+			uint32_t count=0;
 			pFile->Read(count);  // size of vars
-			/*
-			if (count)
-			{
-			pFile->ReadChunk(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+			#if 0
+			if (count) {
+				pFile->ReadChunk(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
 			}
-			*/
+			#endif
 			for(unsigned int i(0) ; i < count ; ++i) {
-				std::uint32_t temp=0;
+				uint32_t temp=0;
 				pFile->Read(temp);
 				SetParameter(i, temp);
 			}
-			size -= sizeof(count) + sizeof(std::uint32_t) * count;
+			size -= sizeof(count) + sizeof(uint32_t) * count;
 			if(size) {
 				char * pData = new char[size];
 				pFile->ReadArray(pData, size); // Number of parameters
@@ -554,7 +479,7 @@ bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
 					proxy().PutData(pData); // Internal load
 				} catch(std::exception const &) {
 					delete[] pData;
-					return false;
+					return false; // hmm
 				}
 				delete[] pData;
 				return true;
@@ -565,19 +490,19 @@ bool Plugin::LoadSpecificChunk(RiffFile* pFile, int version) {
 };
 
 void Plugin::SaveSpecificChunk(RiffFile* pFile) const {
-	std::uint32_t count = GetNumParams();
-	std::uint32_t size2(0);
+	uint32_t count = GetNumParams();
+	uint32_t size2(0);
 	try {
 		size2 = proxy().GetDataSize();
 	}
 	catch(std::exception const &) {
 		// data won't be saved
 	}
-	std::uint32_t size = size2 + sizeof count  + sizeof(std::uint32_t) * count;
+	uint32_t size = size2 + sizeof count + sizeof(uint32_t) * count;
 	pFile->Write(size);
 	pFile->Write(count);
 	for(unsigned int i(0) ; i < count ; ++i) {
-		std::uint32_t temp = GetParamValue(i);
+		uint32_t temp = GetParamValue(i);
 		pFile->Write(temp);
 	}
 	if(size2) {
