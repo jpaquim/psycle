@@ -227,7 +227,8 @@ namespace psycle  {
 			pFile->Write(temp);
 			temp = song_->bpm();
 			pFile->Write(temp);
-			temp = song_->ticksSpeed(); // m_LinesPerBeat; --- todo 
+			int lines_per_beat = ComputeLinesPerBeat();
+			temp = lines_per_beat;
 			pFile->Write(temp);
 			temp = song_->currentOctave;
 			pFile->Write(temp);
@@ -315,8 +316,7 @@ namespace psycle  {
 				psycle::core::Pattern* pattern = *it;
 				unsigned char* data = CreateNewPattern(pattern->id());
 				psycle::core::Pattern::iterator ev_it = pattern->begin();
-				int lines_per_beat = 4;
-				int num_lines = pattern->beats() * lines_per_beat; // hardcoded atm
+				int num_lines = pattern->beats() * lines_per_beat;
 				for ( ; ev_it != pattern->end(); ++ev_it ) {
 					psycle::core::PatternEvent& ev = ev_it->second;
 					double pos = ev_it->first;
@@ -531,6 +531,24 @@ namespace psycle  {
 			*data = ev.machine(); ++data;
 			*data = ev.command(); ++data;
 			*data = ev.parameter(); 
+		}
+
+		int Psy3Saver::ComputeLinesPerBeat() {
+			psycle::core::Sequence& seq = song_->patternSequence();
+			psycle::core::Sequence::patterniterator it = seq.patternbegin();
+			double min = 1.0;
+			for ( ; it != seq.patternend(); ++it) {
+				psycle::core::Pattern* pattern = *it;
+				psycle::core::Pattern::iterator pat_it = pattern->begin();
+				double old_pos = 0;
+				for ( ; pat_it != pattern->end(); ++pat_it ) {
+					double pos = pat_it->first;
+					double delta = pos - old_pos;
+					if ( delta != 0 && delta < min)
+						min = delta;
+				}
+			}
+			return static_cast<int>(1 / min);
 		}
 
 

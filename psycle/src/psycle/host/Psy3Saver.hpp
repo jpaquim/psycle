@@ -60,6 +60,7 @@ namespace psycle {
 			unsigned char * ppPatternData[MAX_PATTERNS];
 			std::vector<std::string> underscore_plugins_;
 			
+			int ComputeLinesPerBeat();
 
 		};
 
