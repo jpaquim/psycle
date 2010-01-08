@@ -25,6 +25,30 @@ namespace psycle  {
 		}
 
 
+		int Psy3Saver::ConvertType(const psycle::core::MachineKey& key) const
+		{
+			int old_type = OldMachineType::MACH_DUMMY; // default
+			if (key == MachineKey::dummy()) {
+				old_type = OldMachineType::MACH_DUMMY;
+			} else
+			if (key == MachineKey::master() ) {
+				old_type = OldMachineType::MACH_MASTER;
+			} else
+			if (key == MachineKey::duplicator() ) {
+				old_type = OldMachineType::MACH_DUPLICATOR;
+			} else
+			if (key == MachineKey::sampler()) {
+				old_type = OldMachineType::MACH_SAMPLER;
+			} else
+			if (key.host() == Hosts::NATIVE) {
+				old_type = OldMachineType::MACH_PLUGIN;
+			}
+
+
+			return old_type;
+		}
+
+
 		bool Psy3Saver::Save(psycle::core::RiffFile* pFile,bool autosave)
 		{
 			// NEW FILE FORMAT!!!
@@ -310,8 +334,8 @@ namespace psycle  {
 
 					MachineKey key = song_->machine(i)->getMachineKey();
 					pFile->Write(std::uint32_t(index));
-					pFile->Write(std::uint32_t(key.host()));
-					pFile->WriteArray(key.dllName().c_str(),key.dllName().length()+1);
+					pFile->Write(std::uint32_t(ConvertType(key)));
+					pFile->WriteArray((key.dllName()+".dll").c_str(),key.dllName().length()+1+4);
 					// pFile->Write(std::uint32_t(key.index())); ?
 					song_->machine(i)->SaveFileChunk(pFile);
 
