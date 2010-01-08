@@ -4,7 +4,7 @@
 	This is currently in engine.
 	-- bohan
 
-*	finish merging engine::sample::math with psycle-helpers
+*	finish merging engine::sample::math with psycle-helpers::math
 	-- bohan
 
 *	PulseAudio, RTAudio, libao.
