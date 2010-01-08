@@ -46,12 +46,19 @@ namespace psycle {
 				MACH_DUMMY = 255
 			};
 
+			std::string  ModifyDllNameWithIndex(const std::string& name, int index);
+			void InitTranslationList();
+			std::string replaceString(const std::string& text,
+                                      const std::string& old_substr,
+                                      const std::string& new_substr) const;
+			std::string ConvertName(const std::string& name) const;
 			int ConvertType(const psycle::core::MachineKey& key) const;
 			void ConvertEvent(const psycle::core::PatternEvent& ev, unsigned char* data) const;
 			unsigned char* CreateNewPattern(int ps);
 
 			psycle::core::Song* song_;
 			unsigned char * ppPatternData[MAX_PATTERNS];
+			std::vector<std::string> underscore_plugins_;
 			
 
 		};
