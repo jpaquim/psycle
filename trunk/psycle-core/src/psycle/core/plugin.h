@@ -119,7 +119,7 @@ class PSYCLE__CORE__DECL Plugin : public Machine {
 		std::string _psAuthor;
 		std::string _psName;
 		MachineKey key_;
-		void* libHandle_;
+		void* libHandle_; ///\todo should not be void* on _WIN64
 		bool _isSynth;
 		psycle::plugin_interface::CMachineInfo * info_;
 		Proxy proxy_;
