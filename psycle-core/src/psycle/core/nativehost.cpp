@@ -184,7 +184,7 @@ void NativeHost::UnloadDll( void* hInstance )
 {
 	assert(hInstance);
 	#if defined __unix__ || defined __APPLE__
-		::dlclose(hInstance);
+		dlclose(hInstance);
 	#else
 		::FreeLibrary((HINSTANCE)hInstance);
 	#endif
