@@ -114,23 +114,41 @@
 ;------------------------------------------------------------------------------
   		Align	16
  Work:
+;		ecx : Mostly the this pointer, except at the end
+; 		ecx+04h = Vals
+; 		ecx+08h = pCB
+; 		ecx+0Ch = currentGain
+
+;		ebx: psamplesleft pointer
+;		ebp:  numsamples
+;		eax: used for Vals array and for psamplesleft and right in form or difference (eax=psamplesleft, eax+ecx=psamplesright)
+;		esp+10h  (Vals[paramGain]*0.015625000f+1.0f)*0.5		
+;		esp+14h = Vals[paramThreshold]
+; 		esp+18h = Vals[paramRatio]
+; 		esp+1Ch = Vals[paramAttack]
+;		esp+20h = Vals[paramRelease]
+;		esp+24h = Vals[paramClip]
+;
+; esp+34h = Vals[paramThreshold]*0.0078125000F
+
   		sub	esp,00000018h
   		mov	eax,[ecx+04h]
   		fild	dword ptr [eax]
   		mov	edx,[eax+04h]
   		push	ebx
   		mov	ebx,[esp+24h]
-  		fmul	dword ptr [L100021AC]
+  		fmul	dword ptr [0.015625000Float]
   		mov	[esp+08h],edx
   		mov	edx,[eax+0Ch]
   		push	ebp
-  		fadd	dword ptr [L100021A8]
+  		fadd	dword ptr [1.0Float]
   		mov	ebp,[esp+2Ch]
+;		test numsamples		
   		test	ebp,ebp
   		mov	[esp+14h],edx
   		mov	edx,[eax+10h]
   		push	esi
-  		fmul	qword ptr [L100021A0]
+  		fmul	qword ptr [0.5Float]
   		push	edi
   		mov	edi,[eax+08h]
   		mov	[esp+20h],edx
@@ -138,12 +156,12 @@
   		mov	edx,[eax+14h]
   		mov	[esp+18h],edi
   		mov	[esp+24h],edx
-  		jle	L100011C7
+  		jle	NoSamplesToGain
   		mov	edx,[esp+2Ch]
   		mov	eax,ebx
   		sub	edx,ebx
   		mov	esi,ebp
- L100011AB:
+ ApplyInputGain:
   		fld	dword ptr [esp+10h]
   		add	eax,00000004h
   		dec	esi
@@ -152,42 +170,45 @@
   		fld	dword ptr [esp+10h]
   		fmul	dword ptr [eax-04h]
   		fstp	dword ptr [eax-04h]
-  		jnz	L100011AB
- L100011C7:
+  		jnz	ApplyInputGain
+ NoSamplesToGain:
+ ; 		test Vals[paramRatio]
   		test	edi,edi
-  		jz 	L100012C4
+  		jz 	paramRatio_Zero
   		fild	dword ptr [esp+14h]
-  		fmul	dword ptr [L10002198]
+  		fmul	dword ptr [0.0078125000Float]
   		fstp	dword ptr [esp+34h]
   		fild	dword ptr [esp+18h]
-  		fcom	dword ptr [L10002194]
+  		fcom	dword ptr [16Float]
   		fnstsw	ax
   		test	ah,01h
-  		jnz	L100011F8
+  		jnz	Ratiolessthan16
   		fstp	ST(0)
-  		fld	dword ptr [L10002190]
-  		jmp	L10001204
- L100011F8:
-  		fadd	dword ptr [L100021A8]
-  		fdivr	dword ptr [L100021A8]
- L10001204:
-  		test	ebp,ebp
+  		fld	dword ptr [0Float]
+  		jmp	CalcAttackAndRelease
+ Ratiolessthan16:
+  		fadd	dword ptr [1.0Float]
+  		fdivr	dword ptr [1.0Float]
+ CalcAttackAndRelease:
+ ;		test numsamples		
+ 		test	ebp,ebp
   		fild	dword ptr [esp+1Ch]
-  		fadd	dword ptr [L100021A8]
-  		fmul	qword ptr [L10002188]
-  		fdivr	qword ptr [L10002180]
+  		fadd	dword ptr [1.0Float]
+  		fmul	qword ptr [44.1Float]
+  		fdivr	qword ptr [1.8750000Float]
   		fstp	dword ptr [esp+1Ch]
   		fild	dword ptr [esp+20h]
-  		fadd	dword ptr [L100021A8]
-  		fmul	qword ptr [L10002188]
-  		fdivr	qword ptr [L10002180]
+  		fadd	dword ptr [1.0Float]
+  		fmul	qword ptr [44.1Float]
+  		fdivr	qword ptr [1.8750000Float]
   		fstp	dword ptr [esp+20h]
-  		jle	L100012C2
+  		jle	NothingToCalculate
   		mov	esi,[esp+2Ch]
   		mov	edx,ebx
   		sub	esi,ebx
   		mov	edi,ebp
- L1000124A:
+ CompressLoop:
+ ;		input signal
   		fld	dword ptr [edx+esi]
   		fabs
   		fld	dword ptr [edx]
@@ -196,34 +217,35 @@
   		fcom	dword ptr [esp+30h]
   		fnstsw	ax
   		test	ah,41h
-  		jz 	L10001268
+  		jz 	LeftBiggerThanRight
   		fstp	ST(0)
   		fld	dword ptr [esp+30h]
- L10001268:
+ LeftBiggerThanRight:
   		fcom	dword ptr [esp+34h]
   		fnstsw	ax
   		test	ah,41h
-  		jnz	L10001283
+  		jnz	ValueSmallerThanThreshold
   		fld	ST(0)
   		fsub	dword ptr [esp+34h]
   		fmul	ST,ST(2)
   		fadd	dword ptr [esp+34h]
   		fdivrp	ST(1),ST
-  		jmp	L1000128B
- L10001283:
+  		jmp	CalculateCurrentGain
+ ValueSmallerThanThreshold:
   		fstp	ST(0)
-  		fld	dword ptr [L100021A8]
- L1000128B:
+  		fld	dword ptr [1.0Float]
+ CalculateCurrentGain:
   		fcom	dword ptr [ecx+0Ch]
   		fsub	dword ptr [ecx+0Ch]
   		fnstsw	ax
   		test	ah,01h
-  		jz 	L1000129E
+  		jz 	ApplyRelease
+		;apply attack
   		fmul	dword ptr [esp+1Ch]
-  		jmp	L100012A2
- L1000129E:
+  		jmp	ApplyCurrentGain
+ ApplyRelease:
   		fmul	dword ptr [esp+20h]
- L100012A2:
+ ApplyCurrentGain:
   		fadd	dword ptr [ecx+0Ch]
   		add	edx,00000004h
   		dec	edi
@@ -234,20 +256,21 @@
   		fld	dword ptr [edx-04h]
   		fmul	dword ptr [ecx+0Ch]
   		fstp	dword ptr [edx-04h]
-  		jnz	L1000124A
- L100012C2:
+  		jnz	CompressLoop
+ NothingToCalculate:
   		fstp	ST(0)
- L100012C4:
+paramRatio_Zero:
   		mov	eax,[esp+24h]
   		test	eax,eax
-  		jz 	L100012FE
+  		jz 	NoSoftClip
+;		test numsamples		
   		test	ebp,ebp
-  		jle	L10001329
+  		jle	ExitWork
   		mov	edi,[esp+2Ch]
   		mov	esi,ebx
   		sub	edi,ebx
   		mov	[esp+34h],ebp
- L100012DC:
+ ApplySoftClip:
   		fld	dword ptr [esi+edi]
   		call	jmp_MSVCRT.dll!_CItanh
   		fstp	dword ptr [esi+edi]
@@ -258,24 +281,25 @@
   		add	esi,00000004h
   		dec	eax
   		mov	[esp+34h],eax
-  		jnz	L100012DC
- L100012FE:
+  		jnz	ApplySoftClip
+ NoSoftClip:
+;		test numsamples		
   		test	ebp,ebp
-  		jle	L10001329
+  		jle	ExitWork
   		mov	ecx,[esp+2Ch]
   		mov	eax,ebx
   		sub	ecx,ebx
- L1000130A:
+ Gain32768:
   		fld	dword ptr [eax+ecx]
   		add	eax,00000004h
   		dec	ebp
-  		fmul	qword ptr [L10002178]
+  		fmul	qword ptr [32768.0Float]
   		fstp	dword ptr [eax+ecx-04h]
   		fld	dword ptr [eax-04h]
-  		fmul	qword ptr [L10002178]
+  		fmul	qword ptr [32768.0Float]
   		fstp	dword ptr [eax-04h]
-  		jnz	L1000130A
- L10001329:
+  		jnz	Gain32768
+ ExitWork:
   		pop	edi
   		pop	esi
   		pop	ebp
@@ -291,12 +315,12 @@
   		fild	dword ptr [esp+0Ch]
   		mov	eax,[esp+04h]
   		sub	esp,00000008h
-  		fmul	dword ptr [L100021AC]
-  		fadd	qword ptr [L10002180]
+  		fmul	dword ptr [0.015625000Float]
+  		fadd	qword ptr [1.8750000Float]
   		fldlg2
   		fxch	ST(1)
   		fyl2x
-  		fmul	qword ptr [L100021B0]
+  		fmul	qword ptr [20.0Float]
   		fstp	qword ptr [esp]
   		push	SSZ1000311C____1f_dB
   		push	eax
@@ -314,11 +338,11 @@
   		fild	dword ptr [esp+0Ch]
   		mov	ecx,[esp+04h]
   		sub	esp,00000008h
-  		fmul	dword ptr [L10002198]
+  		fmul	dword ptr [0.0078125000Float]
   		fldlg2
   		fxch	ST(1)
   		fyl2x
-  		fmul	qword ptr [L100021B0]
+  		fmul	qword ptr [20.0Float]
   		fstp	qword ptr [esp]
   		push	SSZ10003114___1f_dB
   		push	ecx
@@ -870,29 +894,29 @@
  		db	00h;
  		db	00h;
  		db	00h;
- L10002178:
+ 32768.0Float:
   		dq	40E0000000000000h
- L10002180:
+ 1.8750000Float:
   		dq	3FF0000000000000h
- L10002188:
+ 44.1Float:
   		dq	40460CCCCCCCCCCDh
- L10002190:
+ 0Float:
   		dd	00000000h
- L10002194:
+ 16Float:
   		dd	41800000h
- L10002198:
+ 0.0078125000Float:
   		dd	3C000000h
  		db	00h;
  		db	00h;
  		db	00h;
  		db	00h;
- L100021A0:
+ 0.5Float:
   		dq	3F00000000000000h
- L100021A8:
+ 1.0Float:
   		dd	3F800000h
- L100021AC:
+ 0.015625000Float:
   		dd	3C800000h
- L100021B0:
+ 20.0Float:
   		dq	4034000000000000h
  L100021B8:
   		dd	19930520h
