@@ -2,13 +2,12 @@
 #include "configuration_options.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "Global.hpp"
-#include <psycle/core/machinekey.hpp>
-
 
 namespace psycle {
 	namespace core {
 		class PatternEvent;
-		class RiffFile;		
+		class RiffFile;
+		class MachineKey;
   }
 }
 
@@ -18,12 +17,11 @@ namespace psycle {
 		class Psy3Saver {
 		public:
 			Psy3Saver(psycle::core::Song& song);
-			~Psy3Saver();
+			~Psy3Saver() {}
 
 			bool Save(psycle::core::RiffFile* pFile,bool autosave);
 
 		private:
-
 			enum OldMachineType
 			{
 				MACH_UNDEFINED = -1,
@@ -55,16 +53,14 @@ namespace psycle {
 			int ConvertType(const psycle::core::MachineKey& key) const;
 			void ConvertEvent(const psycle::core::PatternEvent& ev, unsigned char* data) const;
 			unsigned char* CreateNewPattern(int ps);
+			int ComputeLinesPerBeat();
 
 			psycle::core::Song* song_;
 			unsigned char * ppPatternData[MAX_PATTERNS];
-			std::vector<std::string> underscore_plugins_;
-			
-			int ComputeLinesPerBeat();
-
+			std::vector<std::string> underscore_plugins_;			
 		};
 
-	}
-}
+	}	// namespace host
+}	// namespace psycle
 
 #endif

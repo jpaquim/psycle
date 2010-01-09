@@ -3,6 +3,8 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
+#include <psycle/core/signalslib.h>
+#include <boost/bind.hpp>
 
 #include "Psy3Saver.hpp"
 using namespace psycle::core;
@@ -33,7 +35,10 @@ namespace psycle {
 		{
 			assert(pat_view_);
 			assert(mac_view_);
-			song_.New();			
+			song_.New();
+			song_.progress.connect(boost::bind(&Project::OnProgress, this, _1, _2, _3));
+			song_.report.connect(boost::bind(&Project::OnReport, this, _1, _2));
+			progress_.Create();
 		}
 
 		Project::~Project()
@@ -134,6 +139,15 @@ namespace psycle {
 			}
 		}
 
+		void Project::OnProgress(int a, int b, std::string c) {
+			progress_.SetWindowText(c.c_str());
+			progress_.m_Progress.SetPos(b);
+		}
+
+		void Project::OnReport(std::string a, std::string b) {
+			MessageBox(0, a.c_str(), b.c_str(), MB_OK | MB_ICONERROR);
+		}
+
 		void Project::FileLoadsongNamed(const std::string& fName)
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -142,10 +156,14 @@ namespace psycle {
 			player.stop();
 			player.song(song());
 			pat_view()->editPosition = 0;
+			progress_.m_Progress.SetPos(0);
+			progress_.ShowWindow(SW_SHOW);
 			if(!song().load(fName.c_str())) {
 				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+				progress_.ShowWindow(SW_HIDE);
 				return;			
-			}			
+			}	
+			progress_.ShowWindow(SW_HIDE);
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)

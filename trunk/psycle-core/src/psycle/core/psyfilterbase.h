@@ -11,6 +11,7 @@
 #include <psycle/core/config.hpp>
 
 #include <string>
+#include "signalslib.h"
 
 namespace psycle { namespace core {
 

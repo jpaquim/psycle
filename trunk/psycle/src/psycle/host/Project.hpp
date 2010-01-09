@@ -10,6 +10,7 @@ using namespace psycle::core;
 #else 
 #include <psycle/host/Song.hpp>
 #endif
+#include "ProgressDialog.hpp"
 
 namespace psycle {
 	namespace host {
@@ -18,7 +19,7 @@ namespace psycle {
 		class PatternView;
 		class MachineView;
 
-		class Project
+		class Project : private boost::noncopyable
 		{
 		public:
 			Project(ProjectData* parent,
@@ -54,6 +55,8 @@ namespace psycle {
 		private:
 
 			void AppendToRecent(const std::string& fName);
+			void OnProgress(int a, int b, std::string c);
+			void OnReport(std::string a, std::string b);
 
 			//todo make this both owner of this project
 			PatternView* pat_view_;
@@ -65,6 +68,7 @@ namespace psycle {
 			Song song_;
 			CommandManager cmd_manager_;
 
+			CProgressDialog progress_;
 		};
 	}
 }

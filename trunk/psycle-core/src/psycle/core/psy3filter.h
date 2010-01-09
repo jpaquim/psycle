@@ -65,7 +65,7 @@ class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 	protected:
 		Psy3Filter();
 	private:
-		Psy3Filter( Psy3Filter const & );
+		Psy3Filter(Psy3Filter const &);
 		Psy3Filter& operator=(Psy3Filter const&);
 	public:
 		static Psy3Filter* getInstance();
@@ -102,6 +102,10 @@ class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 		static std::uint32_t const FILE_VERSION;
 
 	private:
+		void RestoreMixerSendFlags(CoreSong& song);
+		PatternEvent convertEntry( unsigned char* data) const;
+		void preparePatternSequence(CoreSong& song);
+
 		std::vector<int> seqList;
 		PatternCategory* singleCat;
 		SequenceLine* singleLine;
@@ -117,13 +121,6 @@ class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 		int auxcolSelected;
 		int machineSoloed;
 		int trackSoloed;
-
-
-		void RestoreMixerSendFlags(CoreSong& song);
-
-		PatternEvent convertEntry( unsigned char* data) const;
-
-		void preparePatternSequence(CoreSong& song);
 };
 
 }}

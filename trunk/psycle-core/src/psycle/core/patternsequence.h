@@ -35,7 +35,6 @@ namespace psycle { namespace core {
 	
 				void setType(GlobalType type);
 				GlobalType type() const;
-
 				void setParameter(float parameter);
 				float parameter() const;
 				void setTarget(int target);
@@ -43,10 +42,10 @@ namespace psycle { namespace core {
 				void setTarget2(int target);
 				int target2() const;
 
-				private:
-					float parameter_;
-					int target_, target2_;
-					GlobalType type_;
+			private:
+				float parameter_;
+				int target_, target2_;
+				GlobalType type_;
 		};
 
 
@@ -60,33 +59,23 @@ namespace psycle { namespace core {
 			~SequenceEntry();
 
 			// boost::signal<void (SequenceEntry*)> wasDeleted;
-
 			double tickPosition() const;
 			double tickEndPosition( ) const;
-
 			void setPattern(Pattern* pattern);
 			Pattern* pattern() { return pattern_; }
 			Pattern* pattern() const { return pattern_; }
-
 			float patternBeats() const;
-
 			SequenceLine* track() {return line_;}
 			void setSequenceLine( SequenceLine *newLine );
-
 			void setStartPos( float pos );
 			float startPos() const;
-
 			void setEndPos( float pos );
 			float endPos() const;
-
 			void setTranspose( int offset );
 			int transpose() const;
-
 			std::string toXml(double pos) const;
 
-
 		private:
-
 			/// the sequence timeline that the sequenceEntry belongs to
 			SequenceLine* line_;
 			/// the wrapped pattern
@@ -107,7 +96,7 @@ namespace psycle { namespace core {
 			SequenceLine(Sequence* sequence);
 			~SequenceLine();
 
-			// boost::signal<void (SequenceLine*)> wasDeleted;
+			boost::signal<void (SequenceLine*)> wasDeleted;
 
 			SequenceEntry* createEntry(Pattern* pattern, double position);
 			void insertEntry(SequenceEntry *entry);
@@ -217,8 +206,6 @@ namespace psycle { namespace core {
 			const_reverse_patterniterator patternrbegin() const { return patterns_.rbegin(); }
 			reverse_patterniterator patternrend() { return patterns_.rend(); }
 			const_reverse_patterniterator patternrend() const { return patterns_.rend(); }
-
-
 			int numpatterns() { return patterns_.size(); }
 
 			typedef std::multimap<double, GlobalEvent*> GlobalMap;
@@ -241,27 +228,21 @@ namespace psycle { namespace core {
 			int priority(const PatternEvent& cmd, int count) const;
 
 			// playpos info
-
 			bool getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const;
-
 			void removePattern(Pattern* pattern);
 
 			///populates globals with a list of the first row of global events between beatpositions start and start+length.
 			///\param bInclusive whether to include events with positions of exactly start.
 			///\return the beat position of the global events, or if there are none, start+length.
 			double GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive);
-
 			GlobalEvent* createBpmChangeEntry(double position, float bpm);
 			void moveGlobalEvent(GlobalEvent* entry, double newpos);
 			double globalTickPosition( GlobalEvent * event) const;
 			const GlobalMap & globalEvents();
-
 			double tickLength() const;
-
 			void moveDownLine(SequenceLine* line);
 			void moveUpLine(SequenceLine* line);
 			boost::signal<void (SequenceLine*, SequenceLine*)> linesSwapped;
-
 			const int &numTracks() const { return numTracks_; }
 			void setNumTracks(int newtracks)
 			{
@@ -285,11 +266,9 @@ namespace psycle { namespace core {
 			}
 
 			std::string toXml() const;
-
 			void Add(Pattern* pattern);
 			void Remove(Pattern* pattern);
 			Pattern* FindPattern(int id);
-
 			void set_last_worked_entry(SequenceEntry* entry) { last_entry_  = entry; }
 			SequenceEntry* last_worked_entry() {
 				return last_entry_;
@@ -301,18 +280,14 @@ namespace psycle { namespace core {
 			std::vector<SequenceLine*> lines_;
 			// pattern pool
 			std::vector<Pattern*> patterns_;
-
 			int numTracks_;
 			std::vector<bool> mutedTrack_;
 			/// The number of tracks Armed (enabled for record)
 			int trackArmedCount_;
 			/// Wether each of the tracks is armed (selected for recording data in)
 			std::vector<bool> armedTrack_;
-
 			GlobalMap globalEvents_;
-
 			std::multimap<double, std::multimap< int, PatternEvent > > events_;
-
 			SequenceEntry* last_entry_;
 	};
 	typedef Sequence PatternSequence;

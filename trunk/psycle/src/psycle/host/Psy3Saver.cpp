@@ -4,46 +4,23 @@
 #include "ProgressDialog.hpp"
 #include "Zap.hpp"
 
-#include <psycle/core/machine.h>
-#include <psycle/core/song.h>
-#include <psycle/core/xmsampler.h>
 #include <psycle/core/fileio.h>
+#include <psycle/core/machine.h>
+#include <psycle/core/machinekey.hpp>
+#include <psycle/core/song.h>
 #include <psycle/core/patternevent.h>
+#include <psycle/core/xmsampler.h>
 #include <psycle/helpers/datacompression.hpp>
-
 
 namespace psycle  {
 	namespace host {
 
 		Psy3Saver::Psy3Saver(psycle::core::Song& song)
-			: song_(&song)
-		{
+			: song_(&song) {
 			InitTranslationList();
 		}
-
-		Psy3Saver::~Psy3Saver()
-		{
-		}
-
-
-		std::string Psy3Saver::ModifyDllNameWithIndex(const std::string& name, int index)
-		{
-			std::string new_name = name;
-			if (index != 0)
-			{
-				std::ostringstream buffer;
-				buffer.setf(std::ios::uppercase);
-				buffer.str("");
-				buffer << std::setfill('0') << std::hex << std::setw(4);
-				buffer << static_cast<int>(index);
-				new_name += buffer.str();
-			}
-			return new_name;
-		}
-
-
-		void Psy3Saver::InitTranslationList()
-		{
+	
+		void Psy3Saver::InitTranslationList() {
 			underscore_plugins_.push_back("dw-eq.dll");
 			underscore_plugins_.push_back("dw-granulizer.dll");
 			underscore_plugins_.push_back("dw-iopan.dll");
@@ -52,6 +29,18 @@ namespace psycle  {
 			underscore_plugins_.push_back("fs-sf2-player.dll");
 			underscore_plugins_.push_back("legasynth-303.dll");
 			underscore_plugins_.push_back("ring-modulator.dll");
+		}
+
+		std::string Psy3Saver::ModifyDllNameWithIndex(const std::string& name, int index) {
+			std::string new_name = name;
+			if (index != 0) {
+				std::ostringstream buffer;
+				buffer.setf(std::ios::uppercase);
+				buffer.str("");
+				buffer << std::setfill('0') << std::hex << std::setw(4) << index;
+				new_name += buffer.str();
+			}
+			return new_name;
 		}
 
 		// maybe we have some method like this already ?
@@ -65,8 +54,7 @@ namespace psycle  {
 				return replaced;
 		}
 
-		std::string Psy3Saver::ConvertName(const std::string& name) const
-		{
+		std::string Psy3Saver::ConvertName(const std::string& name) const {
 			std::string new_name;
 			std::vector<std::string>::const_iterator it;
 			it = std::find(underscore_plugins_.begin(), underscore_plugins_.end(), name);
@@ -80,8 +68,7 @@ namespace psycle  {
 			return new_name;
 		}
 
-		int Psy3Saver::ConvertType(const psycle::core::MachineKey& key) const
-		{
+		int Psy3Saver::ConvertType(const psycle::core::MachineKey& key) const {
 			int old_type = OldMachineType::MACH_DUMMY; // default
 			if (key == MachineKey::dummy()) {
 				old_type = OldMachineType::MACH_DUMMY;
@@ -98,14 +85,10 @@ namespace psycle  {
 							if (key.host() == Hosts::NATIVE) {
 								old_type = OldMachineType::MACH_PLUGIN;
 							}
-
-
-							return old_type;
+			return old_type;
 		}
 
-
-		bool Psy3Saver::Save(psycle::core::RiffFile* pFile,bool autosave)
-		{
+		bool Psy3Saver::Save(psycle::core::RiffFile* pFile,bool autosave) {
 			// NEW FILE FORMAT!!!
 			// this is much more flexible, making maintenance a breeze compared to that old hell.
 			// now you can just update one module without breaking the whole thing.
@@ -113,7 +96,7 @@ namespace psycle  {
 			// header, this has to be at the top of the file
 
 			CProgressDialog Progress;
-			if ( !autosave ) 
+			if ( !autosave )
 			{
 				Progress.Create();
 				Progress.SetWindowText("Saving...");
@@ -512,8 +495,7 @@ namespace psycle  {
 			return true;
 		}
 
-		unsigned char* Psy3Saver::CreateNewPattern(int ps)
-		{			
+		unsigned char* Psy3Saver::CreateNewPattern(int ps) {			
 			ppPatternData[ps] = new unsigned char[MULTIPLY2];
 			PatternEvent blank;
 			unsigned char * pData = ppPatternData[ps];
@@ -553,6 +535,6 @@ namespace psycle  {
 
 
 	}	// namespace host
-}  // // namespace psycle
+}  // namespace psycle
 
 #endif
