@@ -74,8 +74,8 @@ void Psy3Filter::preparePatternSequence(CoreSong & song) {
 }
 
 bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
-	//progress.emit(1,0,"");
-	//progress.emit(2,0,"Loading... psycle song fileformat version 3...");
+	song.progress(1,0,"");
+	song.progress(2,0,"Loading... psycle song fileformat version 3...");
 	std::cout << "psycle: core: psy3 loader: loading psycle song fileformat version 3: " << fileName << '\n';
 
 	RiffFile file;
@@ -99,12 +99,13 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	header[4]=0;
 	uint32_t chunkcount = LoadSONGv0(&file,song);
 	/* chunk_loop: */
+	unsigned int filesize = file.FileSize();
 
 	while(file.ReadArray(header, 4) && chunkcount) {
-		//song.progress.emit(4, static_cast<int>(file.GetPos() * 16384.0f / filesize), "");
+		song.progress(4, static_cast<int>(file.GetPos() * 16384.0f / filesize), "");
 
 		if(!std::strcmp(header,"INFO")) {
-			//song.progress.emit(2, 0, "Loading... Song authorship information...");
+			song.progress(2, 0, "Loading... Song authorship information...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -117,7 +118,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"SNGI")) {
-			//song.progress.emit(2, 0, "Loading... Song properties information...");
+			song.progress(2, 0, "Loading... Song properties information...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -130,7 +131,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"SEQD")) {
-			//song.progress.emit(2, 0, "Loading... Song sequence...");
+			song.progress(2, 0, "Loading... Song sequence...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -141,7 +142,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"PATD")) {
-			//progress.emit(2, 0, "Loading... Song patterns...");
+			song.progress(2, 0, "Loading... Song patterns...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -154,7 +155,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"MACD")) {
-			//song.progress.emit(2, 0, "Loading... Song machines...");
+			song.progress(2, 0, "Loading... Song machines...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -174,7 +175,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100 ) //and so on
 		} else if(!std::strcmp(header,"INSD")) {
-			//song.progress.emit(2, 0, "Loading... Song instruments...");
+			song.progress(2, 0, "Loading... Song instruments...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -185,7 +186,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"EINS")) {
-			//song.progress.emit(2, 0, "Loading... Extended Song instruments...");
+			song.progress(2, 0, "Loading... Extended Song instruments...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -277,13 +278,13 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		s << "some chunks were missing in the file";
 		//loggers::trace(s.str());
 		std::cerr << "psycle: core: psy3 loader: " << s << '\n';
-		//report.emit(s.str(), "Song Load Error.");
+		song.report(s.str(), "Song Load Error.");
 	}
 	///\todo:
 	return true;
 }
 
-int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/) {
+int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& song) {
 	int32_t fileversion = 0;
 	uint32_t size = 0;
 	uint32_t chunkcount = 0;
@@ -291,7 +292,7 @@ int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/) {
 	file->Read(fileversion);
 	file->Read(size);
 	if(fileversion > CURRENT_FILE_VERSION) {
-		//report.emit("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
+		song.report("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
 	}
 
 	file->Read(chunkcount);

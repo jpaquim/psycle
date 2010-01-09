@@ -42,6 +42,9 @@ class PSYCLE__CORE__DECL CoreSong {
 		public:
 			bool load(std::string const & filename);
 			bool save(std::string const & filename, int version = 4);
+
+			boost::signal<void (std::string, std::string)> report;
+			boost::signal<void (int, int, std::string)> progress;
 		private:
 			static SongSerializer serializer;
 	///\}
