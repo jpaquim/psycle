@@ -20,9 +20,6 @@ class CoreSong;
 class PsyFilterBase {
 	public:
 		virtual ~PsyFilterBase() {}
-		//signals
-		//sigslot::signal2<const std::string &, const std::string &> report;
-		//sigslot::signal3<const std::int32_t& , const std::int32_t& , const std::string& > progress;
 
 	public:
 		virtual int version() const = 0;
