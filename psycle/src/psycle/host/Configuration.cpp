@@ -68,13 +68,13 @@ namespace psycle { namespace host {
 			{				
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				_numOutputDrivers = 4;
-				_ppOutputDrivers = new psycle::core::AudioDriver*[_numOutputDrivers];
-				_ppOutputDrivers[0] = new psycle::core::DummyDriver();
-				_ppOutputDrivers[1] = new psycle::core::MsWaveOut(); // this driver is broken
+				_ppOutputDrivers = new psycle::audiodrivers::AudioDriver*[_numOutputDrivers];
+				_ppOutputDrivers[0] = new psycle::audiodrivers::DummyDriver();
+				_ppOutputDrivers[1] = new psycle::audiodrivers::MsWaveOut(); // this driver is broken
 				dsound_ui_ = new DSoundUi();
-				_ppOutputDrivers[2] = new psycle::core::MsDirectSound(dsound_ui_);
+				_ppOutputDrivers[2] = new psycle::audiodrivers::MsDirectSound(dsound_ui_);
 				asio_ui_ = new AsioUi();
-				_ppOutputDrivers[3] = new psycle::core::ASIOInterface(asio_ui_);
+				_ppOutputDrivers[3] = new psycle::audiodrivers::ASIOInterface(asio_ui_);
 				_outputDriverIndex = 2; // use direct sound so far as default;				
 #else
 				_numOutputDrivers = 4;

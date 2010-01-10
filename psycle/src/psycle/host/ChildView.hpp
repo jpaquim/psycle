@@ -4,21 +4,23 @@
 #include "Psycle.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psycle {
-	namespace core {
-		class AudioDriver;
-		class Song;
+	namespace psycle {
+		namespace core {
+			class Song;
+		}
+		namespace audiodrivers {
+			class AudioDriver;
+		}
 	}
-}
-using namespace psycle::core;
+	using namespace psycle::core;
+	using namespace psycle::audiodrivers;
 #else
-namespace psycle {
-	namespace host {
-		class Song;
+	namespace psycle {
+		namespace host {
+			class Song;
+		}
 	}
-}
 #endif
-
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
@@ -174,7 +176,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int FLATSIZES[256];
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::AudioDriver* output_driver_;
+			psycle::audiodrivers::AudioDriver* output_driver_;
 			int last_pos_;			
 #endif
 

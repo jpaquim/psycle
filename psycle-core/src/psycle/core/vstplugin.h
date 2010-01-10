@@ -20,13 +20,13 @@
 #ifndef PSYCLE__CORE__VSTPLUGIN__INCLUDED
 #define PSYCLE__CORE__VSTPLUGIN__INCLUDED
 
-#if !defined DIVERSALIS__OS__MICROSOFT
-	#if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+#ifndef DIVERSALIS__OS__MICROSOFT
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
 		#warning ################# UNIMPLEMENTED #################
 	#endif
 #else
 	#include "machine.h"
-	#include <seib-vsthost/CVSTHost.Seib.hpp>
+	#include <seib/vst/CVSTHost.Seib.hpp>
 	#include <psycle/helpers/math.hpp>
 
 	namespace psycle { namespace core { namespace vst {

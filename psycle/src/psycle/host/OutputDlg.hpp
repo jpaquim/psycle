@@ -32,7 +32,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int _numMidiDrivers;
 			int m_midiHeadroom;	
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::AudioDriver** m_ppDrivers;
+			psycle::audiodrivers::AudioDriver** m_ppDrivers;
 #else
 			AudioDriver** m_ppDrivers;
 #endif

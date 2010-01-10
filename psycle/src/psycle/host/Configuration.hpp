@@ -6,33 +6,27 @@
 #include <cstddef>
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 	#include <psycle/audiodrivers/audiodriver.h>
-
-namespace psycle { 
-	namespace core { 
-		class DSoundUiInterface; 
-		class AsioUiInterface; 
+	namespace psycle { 
+		namespace audiodrivers { 
+			class DSoundUiInterface; 
+			class AsioUiInterface; 
+		}
 	}
-}
-
 #else
 	#include "AudioDriver.hpp"
 #endif
 
+namespace psycle { namespace host {
 
-namespace psycle
-{
-	namespace host
-	{
-		#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
-		#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR)
-		#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
-		#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
+	#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
+	#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR)
+	#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
+	#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
 
-		class CMidiInput; // MIDI IMPLEMENTATION 
+	class CMidiInput; // MIDI IMPLEMENTATION 
 
-		/// configuration.
-		class Configuration
-		{
+	/// configuration.
+	class Configuration {
 		public:
 			Configuration();
 			virtual ~Configuration() throw();
@@ -145,20 +139,19 @@ namespace psycle
 			CFont effectFont;
 
 		public:
-			class midi_type
-			{
+			class midi_type {
 				public:
-					midi_type() : groups_(16), velocity_(0x0c), pitch_(1), raw_()
-					{
-						for(std::size_t i(0) ; i < groups().size() ; ++i) group(i).message() = group(i).command() = static_cast<int>(i + 1);
+					midi_type() : groups_(16), velocity_(0x0c), pitch_(1), raw_() {
+						for(std::size_t i(0) ; i < groups().size() ; ++i)
+							group(i).message() = group(i).command() = static_cast<int>(i + 1);
 					}
 
 				public:
 					class group_with_message;
-					class group_type
-					{
+					class group_type {
 						public:
-							group_type(int const & command = 0) : record_(), type_(), command_(command), from_(), to_(0xff) {}
+							group_type(int const & command = 0)
+								: record_(), type_(), command_(command), from_(), to_(0xff) {}
 
 						public:
 							bool const inline & record() const throw() { return record_; }
@@ -193,8 +186,8 @@ namespace psycle
 						public:
 							typedef group_with_message with_message;
 					};
-					class group_with_message : public group_type
-					{
+
+					class group_with_message : public group_type {
 						public:
 							group_with_message() : message_() {}
 
@@ -246,7 +239,7 @@ namespace psycle
 			bool _followSong;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::AudioDriver** _ppOutputDrivers;
+			psycle::audiodrivers::AudioDriver** _ppOutputDrivers;
 #else
 			AudioDriver** _ppOutputDrivers;
 #endif
@@ -271,10 +264,10 @@ namespace psycle
 			bool autoStopMachines;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::AudioDriver* _pOutputDriver;
+			psycle::audiodrivers::AudioDriver* _pOutputDriver;
 		private:
-			psycle::core::DSoundUiInterface* dsound_ui_;
-			psycle::core::AsioUiInterface* asio_ui_;
+			psycle::audiodrivers::DSoundUiInterface* dsound_ui_;
+			psycle::audiodrivers::AsioUiInterface* asio_ui_;
 		public:
 #else
 			AudioDriver* _pOutputDriver;
@@ -306,7 +299,7 @@ namespace psycle
 			inline void SetSamplesPerSec(int samplerate) const throw()
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				psycle::core::AudioDriverSettings settings = _pOutputDriver->playbackSettings();
+				psycle::audiodrivers::AudioDriverSettings settings = _pOutputDriver->playbackSettings();
 				settings.setSamplesPerSec(samplerate);
 				_pOutputDriver->setPlaybackSettings(settings); 				
 #else

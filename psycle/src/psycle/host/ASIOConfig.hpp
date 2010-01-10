@@ -4,11 +4,11 @@
 #include "Psycle.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/audiodrivers/asiointerface.h>
-#include "Registry.hpp"
-#include "configuration.hpp"
+	#include <psycle/audiodrivers/asiointerface.h>
+	#include "Registry.hpp"
+	#include "configuration.hpp"
 #else
-#include "ASIOInterface.hpp"
+	#include "ASIOInterface.hpp"
 #endif
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
@@ -21,7 +21,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int	m_bufferSize;
 			CASIOConfig(CWnd* pParent = 0);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::ASIOInterface* pASIO;
+			psycle::audiodrivers::ASIOInterface* pASIO;
 #else
 			ASIOInterface* pASIO;
 #endif
@@ -61,7 +61,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		class AsioUi : public psycle::core::AsioUiInterface {
+		class AsioUi : public psycle::audiodrivers::AsioUiInterface {
 		public:
 			AsioUi() {}
 			~AsioUi() {}

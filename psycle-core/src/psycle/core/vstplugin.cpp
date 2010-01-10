@@ -15,7 +15,7 @@
 
 	#include <sstream>
 
-	#if defined DIVERSALIS__OS__MICROSOFT
+	#ifdef DIVERSALIS__OS__MICROSOFT
 		#include <windows.h>
 	#else
 		#include <dlfcn.h>
