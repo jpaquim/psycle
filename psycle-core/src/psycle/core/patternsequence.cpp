@@ -10,60 +10,6 @@
 namespace psycle { namespace core {
 
 		/**************************************************************************/
-		// GlobalEvent
-
-		GlobalEvent::GlobalEvent( )
-		:
-			parameter_(0),
-			target_(-1),
-			target2_(-1),
-			type_(NONE)
-		{}
-
-		GlobalEvent::GlobalEvent(float parameter)
-		:
-			parameter_(parameter),
-			target_(-1),
-			target2_(-1),
-			type_(NONE)
-		{}
-
-		GlobalEvent::~GlobalEvent() {}
-
-		void GlobalEvent::setParameter(float parameter) {
-			parameter_ = parameter;
-		}
-
-		float GlobalEvent::parameter() const {
-			return parameter_;
-		}
-
-		void GlobalEvent::setTarget(int target) {
-			target_ = target;
-		}
-
-		int GlobalEvent::target() const {
-			return target_;
-		}
-
-		void GlobalEvent::setTarget2(int target) {
-			target2_ = target;
-		}
-
-		int GlobalEvent::target2() const {
-			return target2_;
-		}
-
-		void GlobalEvent::setType(GlobalType type) {
-			type_ = type;
-		}
-
-		GlobalEvent::GlobalType GlobalEvent::type() const {
-			return type_;
-		}
-
-
-		/**************************************************************************/
 		// SequenceEntry
 		// pattern Entry contains one ptr to a Pattern and the tickPosition for the absolute Sequencer pos
 
@@ -325,17 +271,25 @@ namespace psycle { namespace core {
 		/**************************************************************************/
 		// Sequence
 
-		Sequence::Sequence() {
+		Sequence::Sequence() 
+			: last_entry_(0)
+		{
 			setNumTracks(16);
-			last_entry_ = 0;
+			// create global master line with an entry that keeps the master pattern
+			SequenceLine* master_line_ = createNewLine();
+			master_pattern_ = new Pattern();
+			// make pattern length endless
+			master_pattern_->timeSignatures().clear();
+			master_pattern_->timeSignatures().push_back(TimeSignature(std::numeric_limits<double>::max()));
+			master_pattern_->setName("master");
+			Add(master_pattern_);
+			master_line_->createEntry(master_pattern_, 0);
 		}
 
 		Sequence::~Sequence() {
-			for(iterator it = begin(); it != end(); ++it)
+			for (iterator it = begin(); it != end(); ++it) {
 				delete *it;
-			GlobalIter it = globalEvents_.begin();
-			for (; it != globalEvents_.end(); it++)
-				delete it->second;
+			}
 			std::vector<Pattern*>::iterator pat_it = patterns_.begin();
 			for(; pat_it != patterns_.end(); ++pat_it) {
 				delete *pat_it;
@@ -386,8 +340,9 @@ namespace psycle { namespace core {
 		void Sequence::GetEventsInRange(double start, double length, std::vector<PatternEvent*>& events)  {
 			events_.clear();
 			int seqlineidx = 1; // index zero reserved for live events (midi in, or pc keyb)
-			// Iterate over each timeline of the sequence,
-			for( iterator seqIt = begin(); seqIt != end(); ++seqIt ) {
+			// Iterate over each timeline of the sequence
+			iterator seqIt = begin();
+			for( ; seqIt != end(); ++seqIt ) {
 				SequenceLine *pSLine = *seqIt;
 				// locate the "sequenceEntry"s which starts nearer to "start+length"
 				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(start+length) );
@@ -471,6 +426,9 @@ namespace psycle { namespace core {
 
 		int Sequence::priority(const PatternEvent& cmd, int count) const {
 			int p = 8;
+			if (cmd.IsGlobal()) {
+				p = 0;
+			} else
 			if (cmd.note() == notetypes::tweak_slide) {
 				p = 1;
 			} else if (cmd.note() == notetypes::tweak) {
@@ -536,62 +494,6 @@ namespace psycle { namespace core {
 			return false;
 		}
 
-		double Sequence::GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive) {
-			GlobalIter firstIt = ( bInclusive ?
-						globalEvents_.lower_bound(start) :
-						globalEvents_.upper_bound(start) );
-			if(firstIt != globalEvents_.end() && firstIt->first < start+length) {
-				double pos = firstIt->first;
-				GlobalIter lastIt = globalEvents_.upper_bound(pos);
-				for(; firstIt != lastIt; ++firstIt)
-					globals.push_back(firstIt->second);
-				return pos;
-			}
-			return start+length;
-		}
-
-		GlobalEvent* Sequence::createBpmChangeEntry(double position, float bpm) {
-			GlobalEvent* bpmEvent = new GlobalEvent(bpm);
-			bpmEvent->setType(GlobalEvent::BPM_CHANGE);
-			globalEvents_.insert(GlobalMap::value_type(position, bpmEvent));
-	
-			return bpmEvent;
-		}
-
-		void Sequence::moveGlobalEvent(GlobalEvent* entry, double newpos) {
-			GlobalIter iter = globalEvents_.begin();
-			for(; iter!= globalEvents_.end(); ++iter)
-			{
-				if(iter->second==entry)
-				break;
-			}
-			if(iter!=globalEvents_.end())
-			{
-				globalEvents_.erase(iter);
-				globalEvents_.insert(GlobalMap::value_type(newpos, entry) );
-			}
-		}
-
-		double Sequence::globalTickPosition(GlobalEvent* event) const {
-			// O(n) runtime here (multiplies from gui resize to O(n^2)!!!!
-			// this is worse and could be avoided if Global Events have a tickPosition and we avoid instead that map
-			GlobalMap::const_iterator iter = globalEvents_.begin();
-			for(; iter!= globalEvents_.end(); ++iter)
-			{
-				if(iter->second==event)
-				break;
-			}
-			if(iter!=globalEvents_.end())
-			{
-				return iter->first;
-			}
-			return 0;
-		}
-
-		const Sequence::GlobalMap& Sequence::globalEvents() {
-			return globalEvents_;
-		}
-
 		void Sequence::removePattern(Pattern* pattern) {
 			for(iterator it = begin(); it != end(); ++it) {
 				(*it)->removePatternEntries(pattern);
@@ -611,6 +513,16 @@ namespace psycle { namespace core {
 			}
 			patterns_.clear();
 			last_entry_ = 0;
+
+			// create global master line with an entry that keeps the master pattern
+			SequenceLine* master_line_ = createNewLine();
+			master_pattern_ = new Pattern();
+			// make pattern length endless
+			master_pattern_->timeSignatures().clear();
+			master_pattern_->timeSignatures().push_back(TimeSignature(std::numeric_limits<double>::max()));
+			master_pattern_->setName("master");
+			Add(master_pattern_);
+			master_line_->createEntry(master_pattern_, 0);
 		}
 
 		double Sequence::tickLength() const {

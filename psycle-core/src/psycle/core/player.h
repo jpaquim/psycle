@@ -213,9 +213,11 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 #if 0
 		//replaced by sequencer
 		void execute_notes(double beat_offset, PatternEvent& line);
-#endif
-		void process_global_event(const GlobalEvent & event);
+#endif		
+	public:
 		void process(int samples);
+
+	private:
 
 		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 		Machine::id_type prev_machines_[MAX_TRACKS];

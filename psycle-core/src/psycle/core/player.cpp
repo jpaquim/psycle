@@ -423,62 +423,6 @@ void Player::samples_per_second(int samples_per_second) {
 	for(int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(samples_per_second);
 }
 
-void Player::process_global_event(GlobalEvent const & event) {
-	Machine::id_type mIndex;
-	switch(event.type()) {
-		case GlobalEvent::BPM_CHANGE:
-			setBpm(event.parameter());
-			if(loggers::trace()) {
-				std::ostringstream s;
-				s << "psycle: core: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter();
-				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			break;
-		case GlobalEvent::JUMP_TO:
-			//todo: fix this. parameter indicates the pattern, not the beat!
-			timeInfo_.setPlayBeatPos(event.parameter());
-			break;
-		case GlobalEvent::SET_BYPASS:
-			mIndex = event.target();
-			if(mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) //i.e. Effect
-				song().machine(mIndex)->_bypass = true;
-			break;
-		case GlobalEvent::UNSET_BYPASS:
-			mIndex = event.target();
-			if(mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) // i.e. Effect
-				song().machine(mIndex)->_bypass = false;
-			break;
-		case GlobalEvent::SET_MUTE:
-			mIndex = event.target();
-			if(mIndex < MAX_MACHINES && song().machine(mIndex))
-				song().machine(mIndex)->_mute = true;
-			break;
-		case GlobalEvent::UNSET_MUTE:
-			mIndex = event.target();
-			if(mIndex < MAX_MACHINES && song().machine(mIndex))
-				song().machine(mIndex)->_mute = false;
-			break;
-		case GlobalEvent::SET_VOLUME:
-			if(event.target() == 255) {
-				Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
-				master._outDry = static_cast<int>(event.parameter());
-			} else {
-				mIndex = event.target();
-				if(mIndex < MAX_MACHINES && song().machine(mIndex)) {
-					Wire::id_type wire(event.target2());
-					song().machine(mIndex)->SetDestWireVolume(mIndex, wire,
-						value_mapper::map_255_1(static_cast<int>(event.parameter()))
-					);
-				}
-			}
-		case GlobalEvent::SET_PANNING:
-			mIndex = event.target();
-			if(mIndex < MAX_MACHINES && song().machine(mIndex))
-				song().machine(mIndex)->SetPan(static_cast<int>( event.parameter()));
-			break;
-		default: ;
-	}
-}
 
 /// Final Loop. Read new line for notes to send to the Machines
 #if 0
@@ -642,7 +586,6 @@ float * Player::Work(int numSamples) {
 	// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
 	///\todo: The buffer has to be served by the audiodriver, since the audiodriver knows the size it needs to have.
 	((Master*)song().machine(MASTER_INDEX))->_pMasterSamples = buffer_;
-	double beatsToWork = numSamples / static_cast<double>(timeInfo_.samplesPerBeat());
 	
 	if(autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence().tickLength()) stopRecording();
 
@@ -658,61 +601,10 @@ float * Player::Work(int numSamples) {
 				timeInfo_.playBeatPos() >= timeInfo_.cycleEndPos() ||
 				timeInfo_.playBeatPos() < timeInfo_.cycleStartPos()
 			) setPlayPos(timeInfo_.cycleStartPos());
-		}
-		
-		std::vector<GlobalEvent*> globals;
-
-		// processing of each buffer is subdivided into chunks, determined by the placement of any global events.
-		
-		// end beat position of the current chunk-- i.e., the next global event's position.
-		double chunkBeatEnd;
-		// number of beats in the chunk.
-		double chunkBeatSize;
-		// number of samples needed to process for this chunk.
-		int chunkSampleSize;
-		// this is used to counter rounding errors of sample/beat conversions
-		int processedSamples(0);
-		// whether this is the first time through the loop.  this is passed to GetNextGlobalEvents()
-		// to specify that we're including events at exactly playPos -only- on the first iteration--
-		// otherwise we'll get the first event over and over again.
-		bool bFirst(true);
-		do {
-			// get the next round of global events.  we need to repopulate the list of globals and patternlines
-			// each time through the loop because global events can potentially move the song's beatposition elsewhere.
-			globals.clear();
-			chunkBeatEnd = song().patternSequence().GetNextGlobalEvents(timeInfo_.playBeatPos(), beatsToWork, globals, bFirst);
-			if(loopEnabled()) {
-				// Don't go further than the sequenceEnd.
-				if(chunkBeatEnd >= timeInfo_.cycleEndPos())
-					chunkBeatEnd = timeInfo_.cycleEndPos();
-			}
-
-			// determine chunk length in beats and samples.
-			chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
-			if(globals.empty())
-				chunkSampleSize = numSamples - processedSamples;
-			else
-				chunkSampleSize = static_cast<int>(chunkBeatSize * timeInfo_.samplesPerBeat());
-
-			// get all patternlines occuring before the next global event, execute them, and process
-			sequencer_.set_time_info(&timeInfo_);
-			sequencer_.Work(numSamples);
-			if(chunkSampleSize > 0) {
-				process(chunkSampleSize);
-				processedSamples += chunkSampleSize;
-			}
-			
-			beatsToWork -= chunkBeatSize;
-
-			// execute this batch of global events
-			for(
-				std::vector<GlobalEvent*>::iterator globIt = globals.begin();
-				globIt!=globals.end();
-				++globIt
-			) process_global_event(**globIt);
-
-			bFirst = false;
-		} while(!globals.empty()); // if globals is empty, then we've processed through to the end of the buffer.
+		}	
+		sequencer_.set_player(*this); // for a callback to process()
+		sequencer_.set_time_info(&timeInfo_);
+		sequencer_.Work(numSamples);
 	}
 	return buffer_;
 }

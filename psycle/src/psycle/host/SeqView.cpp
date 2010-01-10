@@ -78,9 +78,9 @@ using namespace psycle::helpers::math;
 
 		void SequencerView::SwitchToSelBlockPlay() {
 			psycle::core::PatternSequence& seq = project_->song().patternSequence();
-			seq_main_play_line_ = *seq.begin();
+			seq_main_play_line_ = *seq.begin()+1;
 			seq_sel_play_line_ = ComputeSelblockLine();
-			*seq.begin() = seq_sel_play_line_;
+			*(seq.begin()+1) = seq_sel_play_line_;
 			seq_sel_play_line_->SetSequence(&project_->song().patternSequence());
 			selblock_play_= true;
 		}
@@ -88,7 +88,7 @@ using namespace psycle::helpers::math;
 		void SequencerView::SwitchToNormalPlay() {
 			if (selblock_play_) {
 				psycle::core::PatternSequence& seq = project_->song().patternSequence();
-				*seq.begin() = seq_main_play_line_;
+				*(seq.begin()+1) = seq_main_play_line_;
 				selblock_play_= false;
 			}
 		}
@@ -164,7 +164,7 @@ using namespace psycle::helpers::math;
 				return;
 			pos_map_.clear();
 			psycle::core::Sequence* sequence = &project_->song().patternSequence();
-			psycle::core::SequenceLine* line = *(sequence->begin());	
+			psycle::core::SequenceLine* line = *(sequence->begin()+1);	
 			psycle::core::SequenceLine::iterator sit = line->begin();
 			for (int pos = 0; sit != line->end(); ++sit, ++pos) {
 				pos_map_[pos] = sit->second;
@@ -231,7 +231,7 @@ using namespace psycle::helpers::math;
 			PatternView* pat_view = project_->pat_view();
 			Song* _pSong = &project_->song();
 			Sequence* sequence = &_pSong->patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
 			pat_view->AddUndoSequence(len,
 									  pat_view->editcur.track,
@@ -256,7 +256,7 @@ using namespace psycle::helpers::math;
 				return;
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
 			pat_view->AddUndoSequence(len,
 									  pat_view->editcur.track,
@@ -281,7 +281,7 @@ using namespace psycle::helpers::math;
 
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
 			pat_view->AddUndoSequence(len,
 									  pat_view->editcur.track,
@@ -313,7 +313,7 @@ using namespace psycle::helpers::math;
 				return;
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
 			pat_view->AddUndoSequence(len,
 									  pat_view->editcur.track,
@@ -347,7 +347,7 @@ using namespace psycle::helpers::math;
 				return;
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
 			pat_view->AddUndoSequence(len,
 									  pat_view->editcur.track,
@@ -379,7 +379,7 @@ using namespace psycle::helpers::math;
 				return;
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
 			pat_view->AddUndoSequence(len,
 									  pat_view->editcur.track,
@@ -413,7 +413,7 @@ using namespace psycle::helpers::math;
 				return;
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 			int id = 0;
 			for ( ; sequence->FindPattern(id) !=0 ; ++id);
 			psycle::core::Pattern* pattern = new psycle::core::Pattern();
@@ -444,7 +444,7 @@ using namespace psycle::helpers::math;
 				return;
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());			
+			SequenceLine* line = *(sequence->begin()+1);			
 			psycle::core::SequenceEntry* entry = new psycle::core::SequenceEntry(line);			
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			int sel_idx = cc->GetCurSel();
@@ -469,7 +469,7 @@ using namespace psycle::helpers::math;
 				return;
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());			
+			SequenceLine* line = *(sequence->begin()+1);			
 			std::sort(selection_.begin(), selection_.end());
 			if (selection_.size() == 0)
 				return;
@@ -509,7 +509,7 @@ using namespace psycle::helpers::math;
 	
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 
 			CListBox *cc=(CListBox *)GetDlgItem(IDC_SEQLIST);
 			if (GetEntry(cc->GetCurSel())->pattern()->id() == 0 && line->size() == 1)
@@ -561,7 +561,7 @@ using namespace psycle::helpers::math;
 
 			PatternView* pat_view = project_->pat_view();
 			Sequence* sequence = &project_->song().patternSequence();
-			SequenceLine* line = *(sequence->begin());
+			SequenceLine* line = *(sequence->begin()+1);
 
 			std::vector<psycle::core::Pattern*>::iterator it = copy_list_.begin();
 			for ( ; it != copy_list_.end(); ++it ) {					
@@ -607,7 +607,7 @@ using namespace psycle::helpers::math;
 		{
 			// todo
 
-			/*SequenceLine* line = *_pSong->patternSequence().begin();
+			/*SequenceLine* line = *_pSong->patternSequence().begin()+1;
 			SequenceLine::iterator ite = line->begin();
 			for(int i(0) ; ite != line->end(); ++ite, ++i)
 			{
@@ -1401,7 +1401,7 @@ using namespace psycle::helpers::math;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Sequence& sequence = _pSong->patternSequence();
-			SequenceLine* line = *(sequence.begin());
+			SequenceLine* line = *(sequence.begin()+1);
 			int ll = line->size();
 #else
 			int ll = _pSong->playLength;
@@ -1563,7 +1563,7 @@ using namespace psycle::helpers::math;
 						pat_view->SetPattern(selected_entry_->pattern());	
 					} else {
 						Sequence* sequence = &project_->song().patternSequence();
-						SequenceLine* line = *(sequence->begin());						
+						SequenceLine* line = *(sequence->begin()+1);						
 						psycle::core::Pattern* pattern = new psycle::core::Pattern();
 						pattern->setID((*it)+1);
 						sequence->Add(pattern);

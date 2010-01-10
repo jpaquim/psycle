@@ -46,7 +46,7 @@ void CoreSong::clear() {
 	DeleteAllMachines();
 	// Cleaning instruments
 	DeleteInstruments();
-	// Clear patterns
+	// Clear patterns and creates a new master_pattern
 	patternSequence().removeAll();
 }
 

@@ -70,7 +70,10 @@ namespace commandtypes {
 		SET_MUTE           = 0x30,
 		PATTERN_LOOP       = 0xB0, // Loops the current pattern x times. 0xFEB0 sets the loop start point.
 		PATTERN_DELAY      = 0xD0, // causes a "pause" of x rows ( i.e. the current row becomes x rows longer)
-		FINE_PATTERN_DELAY = 0xF0  // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
+		FINE_PATTERN_DELAY = 0xF0, // causes a "pause" of x ticks ( i.e. the current row becomes x ticks longer)
+
+		BPM_CHANGE         = 0xFF
+		// LOOP_TO TODO
 	};
 }
 

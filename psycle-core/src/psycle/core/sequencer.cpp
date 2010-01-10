@@ -8,6 +8,7 @@
 #include "playertimeinfo.h"
 #include "patternevent.h"
 #include "patternsequence.h"
+#include "player.h"
 #include "song.h"
 
 namespace psycle { namespace core {
@@ -20,18 +21,85 @@ Sequencer::~Sequencer()
 {
 }
 
+void Sequencer::set_player(Player& player)
+{
+	player_ = &player;
+}
+
 void Sequencer::Work(unsigned int nframes)
 {
 	///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-	std::vector<PatternEvent*> events;
+	///\todo this will not work frame correct for BPM changes for now
+	std::vector<PatternEvent*> global_events;
 	double beats = nframes / ((time_info()->sampleRate() * 60) / time_info()->bpm());
+	std::vector<PatternEvent*> events;
 	song_->patternSequence().GetEventsInRange(time_info()->playBeatPos(), beats, events);
-	std::vector<PatternEvent*>::iterator ev_it = events.begin();
-	for( ; ev_it!= events.end(); ++ev_it ) {
+	unsigned int rest_frames = nframes;
+	double last_pos = 0;
+	for (std::vector<PatternEvent*>::iterator ev_it = events.begin();
+		ev_it!= events.end() ; ++ev_it) {
 		PatternEvent* ev = *ev_it;
-		execute_notes(ev->time_offset() - time_info()->playBeatPos(), *ev);
+		if (ev->IsGlobal()) {
+			double pos = ev->time_offset();
+			unsigned int num = static_cast<int>((pos -last_pos) * time_info()->samplesPerBeat());
+			player_->process(num);
+			rest_frames -= num;
+			last_pos = pos;
+			process_global_event(*ev);			
+		}
+		execute_notes(ev->time_offset() - last_pos - time_info()->playBeatPos(), *ev);
+	}
+	player_->process(rest_frames);
+}
+
+void Sequencer::process_global_event(const PatternEvent& event) {
+	Machine::id_type mIndex;
+	switch(event.command()) {
+		case commandtypes::BPM_CHANGE:
+/*			setBpm(event.parameter());
+			if(loggers::trace()) {
+				std::ostringstream s;
+				s << "psycle: core: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter();
+				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}*/
+			break;
+/*		case commandtypes::JUMP_TO:
+			//todo: fix this. parameter indicates the pattern, not the beat!
+			timeInfo_.setPlayBeatPos(event.parameter());
+			break;*/ // todo
+		case commandtypes::SET_BYPASS:
+/*			mIndex = event.target();
+			if(mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) //i.e. Effect
+				song().machine(mIndex)->_bypass = event.parameter() != 0;*/
+			break;
+		case commandtypes::SET_MUTE:
+/*			mIndex = event.target();
+			if(mIndex < MAX_MACHINES && song().machine(mIndex))
+				song().machine(mIndex)->_mute = event.parameter() != 0;*/
+			break;
+		case commandtypes::SET_VOLUME:
+/*			if(event.machine() == 255) {
+				Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
+				master._outDry = static_cast<int>(event.parameter());
+			} else {
+				mIndex = event.machine();
+				if(mIndex < MAX_MACHINES && song().machine(mIndex)) {
+					Wire::id_type wire(event.target2());
+					song().machine(mIndex)->SetDestWireVolume(mIndex, wire,
+						value_mapper::map_255_1(static_cast<int>(event.parameter()))
+					);
+				}
+			}*/
+		break;
+		case commandtypes::SET_PANNING:
+/*			mIndex = event.target();
+			if(mIndex < MAX_MACHINES && song().machine(mIndex))
+				song().machine(mIndex)->SetPan(static_cast<int>( event.parameter()));
+			break;*/
+		default: ;
 	}
 }
+
 
 void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 	// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modifiable)

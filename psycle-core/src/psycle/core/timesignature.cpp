@@ -71,6 +71,7 @@ float TimeSignature::beats() const {
 }
 
 void TimeSignature::set_beats(float beats) {
+	ownerDefined_ = true;
 	ownerDefinedBeats_ = beats;
 }
 
