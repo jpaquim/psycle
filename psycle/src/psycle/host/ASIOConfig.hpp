@@ -66,7 +66,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			AsioUi() {}
 			~AsioUi() {}
 
-			int DoModal(ASIOInterface* asio) {
+			int DoModal(psycle::audiodrivers::ASIOInterface* asio) {
 				dlg_.pASIO = asio;
 				return dlg_.DoModal();
 			}

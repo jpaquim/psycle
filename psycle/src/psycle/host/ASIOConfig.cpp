@@ -155,7 +155,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int prefindex = 0;
 			char buf[8];
 			m_bufferSizeCombo.ResetContent();
-			ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
+			psycle::audiodrivers::ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
 			int g = driver.granularity;
 			if (g < 0)
 			{
