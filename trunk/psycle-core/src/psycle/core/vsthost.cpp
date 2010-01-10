@@ -13,7 +13,7 @@
 	#include <iostream>
 	#include <sstream>
 
-	#if DIVERSALIS__OS__MICROSOFT
+	#ifdef DIVERSALIS__OS__MICROSOFT
 		#include <windows.h>
 	#else
 		#include <dlfcn.h>

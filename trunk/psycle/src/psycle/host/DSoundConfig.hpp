@@ -57,7 +57,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		};
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		class DSoundUi : public psycle::core::DSoundUiInterface {
+		class DSoundUi : public psycle::audiodrivers::DSoundUiInterface {
 		public:
 			DSoundUi() {}
 			~DSoundUi() {}

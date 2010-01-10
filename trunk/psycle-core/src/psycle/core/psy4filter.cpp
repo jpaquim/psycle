@@ -17,7 +17,7 @@
 #include "signalslib.h"
 
 #include <diversalis/diversalis.hpp>
-#ifdef defined DIVERSALIS__OS__MICROSOFT
+#ifdef DIVERSALIS__OS__MICROSOFT
 	#include <io.h>
 #else
 	#include <unistd.h>
@@ -123,11 +123,9 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 	PatternCategory* lastCategory = 0;
 	Pattern* lastPattern  = 0;
 	SequenceLine* lastSeqLine  = 0;
-	std::log << "psy4filter detected for load\n";
+	std::clog << "psy4filter detected for load\n";
 
-#ifndef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
-	#error phew
-#else
+#ifdef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
 	if(!parser) return false;

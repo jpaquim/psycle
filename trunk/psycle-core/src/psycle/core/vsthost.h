@@ -23,8 +23,8 @@
 #include <psycle/core/config.hpp>
 #include <diversalis/diversalis.hpp>
 
-#if !defined DIVERSALIS__OS__MICROSOFT
-	#if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+#ifndef DIVERSALIS__OS__MICROSOFT
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
 		#warning ################# UNIMPLEMENTED #################
 	#endif
 	namespace psycle { namespace core { namespace vst {
@@ -33,7 +33,7 @@
 	}}}
 #else
 	#include "machinehost.hpp"
-	#include <seib-vsthost/CVSTHost.Seib.hpp>
+	#include <seib/vst/CVSTHost.Seib.hpp>
 	#include <map>
 
 	using namespace seib::vst;
