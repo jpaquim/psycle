@@ -1,7 +1,4 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/config.private.hpp>
@@ -11,6 +8,8 @@
 
 namespace psycle { namespace core {
 
+using namespace universalis::stdlib;
+
 void InstPreview::Work(float * pInSamplesL, float * pInSamplesR, int numSamples) {
 	if(!m_pInstrument) return;
 
@@ -19,8 +18,8 @@ void InstPreview::Work(float * pInSamplesL, float * pInSamplesR, int numSamples)
 	--pSamplesL;
 	--pSamplesR;
 	
-	std::int16_t * wl = m_pInstrument->waveDataL;
-	std::int16_t * wr = m_pInstrument->waveDataR;
+	int16_t * wl = m_pInstrument->waveDataL;
+	int16_t * wr = m_pInstrument->waveDataR;
 	float ld = 0;
 	float rd = 0;
 	

@@ -1,7 +1,4 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/config.private.hpp>
@@ -11,7 +8,7 @@
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
-#include "SinglePattern.h"
+#include "singlepattern.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
@@ -19,24 +16,22 @@
 
 #include "signalslib.h"
 
-#if defined __unix__ || defined __APPLE__
+#include <diversalis/diversalis.hpp>
+#ifdef defined DIVERSALIS__OS__MICROSOFT
+	#include <io.h>
+#else
 	#include <unistd.h>
 	#include <sys/types.h>
-#elif defined _WIN64 || defined _WIN32
-	#include <io.h>
-	#if defined _MSC_VER
-#ifdef no_xml_available
-#else
-		#pragma comment(lib, "xml++-2.6.lib")
-		#pragma comment(lib, "xml2")
-		#pragma comment(lib, "glibmm-2.4.lib")
-		#pragma comment(lib, "gobject-2.0.lib")
-		#pragma comment(lib, "sigc-2.0.lib")
-		#pragma comment(lib, "glib-2.0.lib")
-		#pragma comment(lib, "intl")
-		#pragma comment(lib, "iconv")
 #endif
-	#endif
+#if defined PSYCLE_CORE__CONFIG__LIBXMLPP_AVAILABLE && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#pragma comment(lib, "xml++-2.6.lib")
+	#pragma comment(lib, "xml2")
+	#pragma comment(lib, "glibmm-2.4.lib")
+	#pragma comment(lib, "gobject-2.0.lib")
+	#pragma comment(lib, "sigc-2.0.lib")
+	#pragma comment(lib, "glib-2.0.lib")
+	#pragma comment(lib, "intl")
+	#pragma comment(lib, "iconv")
 #endif
 
 #include <fcntl.h>
@@ -103,7 +98,7 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	//close( fd );
 	fclose(file1);
 
-#ifdef no_xml_available
+#ifndef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
 	return false;
 #else
 	xmlpp::DomParser parser;
@@ -128,9 +123,10 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 	PatternCategory* lastCategory = 0;
 	Pattern* lastPattern  = 0;
 	SequenceLine* lastSeqLine  = 0;
-	std::cout << "psy4filter detected for load" << std::endl;
+	std::log << "psy4filter detected for load\n";
 
-#ifdef no_xml_available
+#ifndef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
+	#error phew
 #else
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
@@ -429,12 +425,12 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		file.Skip(8);
 		///\todo:
 		size_t filesize = file.FileSize();
-		std::uint32_t version = 0;
-		std::uint32_t size = 0;
+		uint32_t version = 0;
+		uint32_t size = 0;
 		char header[5];
 		header[4]=0;
-		std::uint32_t chunkcount = LoadSONGv0(&file,song);
-		std::cout << chunkcount << std::endl;
+		uint32_t chunkcount = LoadSONGv0(&file,song);
+		std::clog << chunkcount << std::endl;
 
 		/* chunk_loop: */
 		while(file.ReadArray(header, 4) && chunkcount)
@@ -625,7 +621,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	file.WriteArray("PSY4",4);
 	saveSONGv0(&file,song);
 
-	for(std::int32_t index(0) ; index < MAX_MACHINES; ++index)
+	for(int32_t index(0) ; index < MAX_MACHINES; ++index)
 	{
 		if (song.machine(index))
 		{
@@ -668,9 +664,9 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 
 int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 {
-	std::int32_t fileversion = 0;
-	std::uint32_t size = 0;
-	std::uint32_t chunkcount = 0;
+	int32_t fileversion = 0;
+	uint32_t size = 0;
+	uint32_t chunkcount = 0;
 	file->Read(fileversion);
 	file->Read(size);
 	if(fileversion > CURRENT_FILE_VERSION)
@@ -688,8 +684,8 @@ int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 
 bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong& song )
 {
-	std::uint32_t chunkcount;
-	std::uint32_t version, size;
+	uint32_t chunkcount;
+	uint32_t version, size;
 	// chunk header;
 
 	file->WriteArray("SONG",4);
@@ -712,7 +708,7 @@ bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong& song )
 bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 {
 	MachineFactory& factory = MachineFactory::getInstance();
-	std::uint32_t index=0, host=0, keyindex=0;
+	uint32_t index=0, host=0, keyindex=0;
 	char sDllName[256];
 
 	// chunk data
@@ -736,7 +732,7 @@ bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 
 bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 {
-	std::uint32_t version, size;
+	uint32_t version, size;
 	std::size_t pos;
 
 	// chunk header
@@ -751,10 +747,10 @@ bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 	// chunk data
 
 	MachineKey key = song.machine(index)->getMachineKey();
-	file->Write(std::uint32_t(index));
-	file->Write(std::uint32_t(key.host()));
+	file->Write(uint32_t(index));
+	file->Write(uint32_t(key.host()));
 	file->WriteString(key.dllName());
-	// file->Write(std::uint32_t(key.index())); ?
+	// file->Write(uint32_t(key.index())); ?
 	
 	song.machine(index)->SaveFileChunk(file);
 
@@ -772,7 +768,7 @@ bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 
 bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong& song, int index )
 {
-	std::uint32_t version, size;
+	uint32_t version, size;
 	std::size_t pos;
 
 	// chunk header
@@ -786,7 +782,7 @@ bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong& song, int index )
 
 	// chunk data
 
-	file->Write(std::uint32_t(index));
+	file->Write(uint32_t(index));
 	song._pInstrument[index]->SaveFileChunk(file);
 
 	// chunk size in header

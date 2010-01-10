@@ -1,7 +1,4 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/config.private.hpp>
@@ -444,9 +441,9 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 
 ///\todo mfc+winapi->std
 bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/) {
-#if defined DIVERSALIS__COMPILER__GNU
-	#warning ###########################- UNIMPLEMENTED ###################
-#endif
+	#if defined DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning ################### UNIMPLEMENTED ###################
+	#endif
 	// src has to be occupied and dst must be empty
 	#if 0
 		if(!Gloxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty() && !Gloxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())

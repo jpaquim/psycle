@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
+#ifndef PSYCLE__AUDIODRIVERS__GSTREAMER_OUT__INCLUDED
+#define PSYCLE__AUDIODRIVERS__GSTREAMER_OUT__INCLUDED
 #pragma once
 
 #if defined PSYCLE__GSTREAMER_AVAILABLE
@@ -9,7 +11,7 @@
 #include <gst/gstelement.h>
 #include <universalis/stdlib/cstdint.hpp>
 
-namespace psycle { namespace core {
+namespace psycle { namespace audiodrivers {
 
 using namespace universalis::stdlib;
 
@@ -36,3 +38,4 @@ class GStreamerOut : public AudioDriver {
 }}
 
 #endif // defined PSYCLE__GSTREAMER_AVAILABLE
+#endif

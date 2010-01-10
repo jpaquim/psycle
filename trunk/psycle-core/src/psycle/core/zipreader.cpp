@@ -18,17 +18,13 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/config.private.hpp>
 #include "zipreader.h"
 
 #include <zlib.h>
-#if defined __unix__ || defined __APPLE__
-	#include <unistd.h>
-	#include <sys/types.h>
-#elif defined _WIN64 || defined _WIN32
-	#include <io.h>
-#endif
+
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <cerrno>
@@ -36,20 +32,29 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <diversalis/diversalis.hpp>
+
+#if defined DIVERSALIS__OS__MICROSOFT
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <sys/types.h>
+#endif
+
 // case-insensitive string comparison function
-// todo: strcasecmp is not part of the iso std lib
-#if defined _MSC_VER
+// TODO BAD: strcasecmp is not part of the iso std lib (hence the __STRICT_ANSI__ check below)
+#if defined DIVERSALIS__COMPILER__MICROSOFT
 	#define strcasecmp stricmp 
-#elif defined __GNUC__
-	#if defined __CYGWIN__ && defined __STRICT_ANSI__
+#elif defined DIVERSALIS__COMPILER__GNU
+	#if defined DIVERSALIS__OS__CYGWIN__ && defined __STRICT_ANSI__
 		// copied from cygwin's <string.h> header
 		_BEGIN_STD_C
 		int _EXFUN(strcasecmp,(const char *, const char *));
 		_END_STD_C
-	#else
-		// todo check the implementation on other systems
 	#endif
 #endif
+
+namespace psycle { namespace core {
 
 static int _load(int fd, char *buf, size_t bufsize)
 {
@@ -398,3 +403,5 @@ int zipreader_extract(zipreader_file *f, int outfd)
 	};
 	return 0;
 }
+
+}}
