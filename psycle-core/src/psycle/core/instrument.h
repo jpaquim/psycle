@@ -1,7 +1,4 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 ///\interface psycle::core::Instrument
@@ -15,6 +12,8 @@
 #include <string>
 
 namespace psycle { namespace core {
+
+using namespace universalis::stdlib;
 
 class RiffFile;
 
@@ -35,7 +34,7 @@ class PSYCLE__CORE__DECL Instrument {
 		///\name Loop stuff
 		///\{
 			bool _loop;
-			std::int32_t _lines;
+			int32_t _lines;
 		///\}
 
 		///\verbatim
@@ -57,37 +56,37 @@ class PSYCLE__CORE__DECL Instrument {
 		///\name Amplitude Envelope overview:
 		///\{
 			/// Attack Time [in Samples at 44.1Khz]
-			std::int32_t ENV_AT;
+			int32_t ENV_AT;
 			/// Decay Time [in Samples at 44.1Khz]
-			std::int32_t ENV_DT;
+			int32_t ENV_DT;
 			/// Sustain Level [in %]
-			std::int32_t ENV_SL;
+			int32_t ENV_SL;
 			/// Release Time [in Samples at 44.1Khz]
-			std::int32_t ENV_RT;
+			int32_t ENV_RT;
 		///\}
 		
 		///\name Filter 
 		///\{
 			/// Attack Time [in Samples at 44.1Khz]
-			std::int32_t ENV_F_AT;
+			int32_t ENV_F_AT;
 			/// Decay Time [in Samples at 44.1Khz]
-			std::int32_t ENV_F_DT;
+			int32_t ENV_F_DT;
 			/// Sustain Level [0..128]
-			std::int32_t ENV_F_SL;
+			int32_t ENV_F_SL;
 			/// Release Time [in Samples at 44.1Khz]
-			std::int32_t ENV_F_RT;
+			int32_t ENV_F_RT;
 
 			/// Cutoff Frequency [0-127]
-			std::int32_t ENV_F_CO;
+			int32_t ENV_F_CO;
 			/// Resonance [0-127]
-			std::int32_t ENV_F_RQ;
+			int32_t ENV_F_RQ;
 			/// EnvAmount [-128,128]
-			std::int32_t ENV_F_EA;
+			int32_t ENV_F_EA;
 			/// Filter Type [0-4]
-			std::int32_t ENV_F_TP;
+			int32_t ENV_F_TP;
 		///\}
 
-		std::int32_t _pan;
+		int32_t _pan;
 		bool _RPAN;
 		bool _RCUT;
 		bool _RRES;
@@ -96,17 +95,17 @@ class PSYCLE__CORE__DECL Instrument {
 
 		///\name wave stuff
 		///\{
-			std::uint32_t waveLength;
-			std::uint16_t waveVolume;
-			std::uint32_t waveLoopStart;
-			std::uint32_t waveLoopEnd;
-			std::int32_t waveTune;
-			std::int32_t waveFinetune;
+			uint32_t waveLength;
+			uint16_t waveVolume;
+			uint32_t waveLoopStart;
+			uint32_t waveLoopEnd;
+			int32_t waveTune;
+			int32_t waveFinetune;
 			bool waveLoopType;
 			bool waveStereo;
 			char waveName[32];
-			std::int16_t *waveDataL;
-			std::int16_t *waveDataR;
+			int16_t *waveDataL;
+			int16_t *waveDataR;
 
 			// xml copy paste methods
 			std::string toXml() const;

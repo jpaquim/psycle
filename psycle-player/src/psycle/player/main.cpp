@@ -1,3 +1,6 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #include "configuration.hpp"
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/song.h>
@@ -17,7 +20,10 @@
 	#define PSYCLE__PLAYER__EOF "d" // ctrl+d == EOF
 #endif
 
-using namespace psycle::core;
+namespace psycle { namespace player {
+
+using namespace core;
+using namespace audiodrivers;
 using namespace universalis::stdlib;
 namespace loggers = universalis::os::loggers;
 
@@ -188,7 +194,7 @@ int main(int argument_count, char * arguments[]) {
 		}
 		configuration.set_driver_by_name(output_driver_name);
 	}
-	psycle::core::AudioDriver & output_driver(configuration.output_driver());
+	AudioDriver & output_driver(configuration.output_driver());
 
 	player.setDriver(output_driver);
 
@@ -199,7 +205,7 @@ int main(int argument_count, char * arguments[]) {
 			s << "psycle: player: setting output driver device name to: " << output_device_name;
 			loggers::information()(s.str());
 		}
-		psycle::core::AudioDriverSettings settings(player.driver().playbackSettings());
+		AudioDriverSettings settings(player.driver().playbackSettings());
 		settings.setDeviceName(output_device_name);
 		player.driver().setPlaybackSettings(settings);
 	}
@@ -280,4 +286,10 @@ int main(int argument_count, char * arguments[]) {
 	factory.Finalize();
 
 	return 0;
+}
+
+}}
+
+int main(int argument_count, char * arguments[]) {
+	return psycle::player::main(argument_count, arguments);
 }

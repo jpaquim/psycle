@@ -1,5 +1,5 @@
-///\file
-///\brief implementation file for psycle::host::ASIOInterface.
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #include "asiointerface.h"
 #include <universalis/cpu/exception.hpp>
@@ -7,7 +7,7 @@
 #include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/math/clip.hpp>
 
-namespace psycle { namespace core {
+namespace psycle { namespace audiodrivers {
 
 using helpers::math::clipped_lrint;
 

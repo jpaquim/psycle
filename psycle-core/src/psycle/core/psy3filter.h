@@ -1,7 +1,4 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef PSYCLE__CORE__PSY3FILTER__INCLUDED
@@ -21,9 +18,6 @@ class PatternCategory;
 class SequenceLine;
 class PatternEvent;
 
-/**
-@author  Psycledelics
-*/
 class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 {
 	protected:
@@ -53,11 +47,11 @@ class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 				_parameter(0)
 			{}
 
-			std::uint8_t _note;
-			std::uint8_t _inst;
-			std::uint8_t _mach;
-			std::uint8_t _cmd;
-			std::uint8_t _parameter;
+			uint8_t _note;
+			uint8_t _inst;
+			uint8_t _mach;
+			uint8_t _cmd;
+			uint8_t _parameter;
 		};
 
 	///\name Singleton Pattern
@@ -87,19 +81,19 @@ class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 		virtual bool LoadPATDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual Machine* LoadMACDv0(RiffFile* file,CoreSong& song,int minorversion);
 		virtual bool LoadINSDv0(RiffFile* file,CoreSong& song,int minorversion);
-		virtual bool LoadEINSv1(RiffFile* file,CoreSong& song,int minorversion, std::uint32_t size);
+		virtual bool LoadEINSv1(RiffFile* file,CoreSong& song,int minorversion, uint32_t size);
 
 	protected:
 		static std::string const FILE_FOURCC;
-		static std::uint32_t const VERSION_INFO;
-		static std::uint32_t const VERSION_SNGI;
-		static std::uint32_t const VERSION_SEQD;
-		static std::uint32_t const VERSION_PATD;
-		static std::uint32_t const VERSION_MACD;
-		static std::uint32_t const VERSION_INSD;
-		static std::uint32_t const VERSION_WAVE;
+		static uint32_t const VERSION_INFO;
+		static uint32_t const VERSION_SNGI;
+		static uint32_t const VERSION_SEQD;
+		static uint32_t const VERSION_PATD;
+		static uint32_t const VERSION_MACD;
+		static uint32_t const VERSION_INSD;
+		static uint32_t const VERSION_WAVE;
 
-		static std::uint32_t const FILE_VERSION;
+		static uint32_t const FILE_VERSION;
 
 	private:
 		void RestoreMixerSendFlags(CoreSong& song);

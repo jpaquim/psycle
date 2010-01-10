@@ -1,22 +1,14 @@
-
-/**********************************************************************************************
-	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
-
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-**********************************************************************************************/
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #include "configuration.hpp"
-#include <psycle/core/file.h>
-
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/audiodrivers/wavefileout.h>
-
+#include <psycle/core/file.h>
 #include <universalis/os/loggers.hpp>
 
 #if defined PSYCLE__SYDNEY_AVAILABLE
-	#include <psycle/audiodrivers/sydney_out.hpp>
+	#include <psycle/audiodrivers/sydneyout.hpp>
 #endif
 #if defined PSYCLE__GSTREAMER_AVAILABLE
 	#include <psycle/audiodrivers/gstreamerout.h>
@@ -55,14 +47,15 @@
 	//no need to error. #error none of the supported xml parser libs appear to be available
 #endif
 
+namespace psycle { namespace player {
+
+using namespace audiodrivers;
 namespace loggers = universalis::os::loggers;
 
 Configuration::Configuration()
 :
 	enable_sound_()
 {
-	using namespace psycle::core;
-	
 	add_driver(*(dummy_driver_ = new DummyDriver));
 	set_driver_by_name("dummy");
 
@@ -108,7 +101,7 @@ Configuration::Configuration()
 }
 
 Configuration::~Configuration() {
-	for(std::map<std::string, psycle::core::AudioDriver*>::iterator i(driver_map_.begin()), e(driver_map_.end()); i != e; ++i)
+	for(std::map<std::string, AudioDriver*>::iterator i(driver_map_.begin()), e(driver_map_.end()); i != e; ++i)
 		delete i->second;
 }
 
@@ -245,8 +238,8 @@ void Configuration::loadConfig(std::string const & path) {
 								std::string device(device_attribute->get_value());
 								std::map<std::string, AudioDriver*>::iterator i(driver_map_.find("alsa"));
 								if(i != driver_map_.end()) {
-									psycle::core::AudioDriver & audiodriver(*i->second);
-									psycle::core::AudioDriverSettings settings(audiodriver.playbackSettings()); ///\todo why do we do a copy?
+									AudioDriver & audiodriver(*i->second);
+									AudioDriverSettings settings(audiodriver.playbackSettings()); ///\todo why do we do a copy?
 									settings.setDeviceName(device);
 									audiodriver.setPlaybackSettings(settings); ///\todo why do we copy?
 								}
@@ -275,3 +268,5 @@ void Configuration::loadConfig(std::string const & path) {
 		}
 	}
 }
+
+}}

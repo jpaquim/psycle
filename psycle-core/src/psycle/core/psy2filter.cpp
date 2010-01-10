@@ -1,7 +1,4 @@
-// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-//
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/config.private.hpp>
@@ -20,6 +17,7 @@
 #include "vsthost.h"
 #include "vstplugin.h"
 
+#include <diversalis/diversalis.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <sstream>
 #include <iostream>
@@ -415,7 +413,9 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 						}
 						delete key;
 				#else
-					#warning "Temporary hack for songs with VSTs"
+					#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+						#warning ################ Temporary hack for songs with VSTs ################
+					#endif
 					Dummy* dummy;
 					pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(MachineKey::dummy(),i));
 					if (type == MACH_VST ) dummy->setGenerator(true);
@@ -532,7 +532,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 #if 0 
 				//Now we don't have an indicator of crashed vst so this cannot be done.
 				if(pMac[i]->getMachineKey() == MachineKey::dummy()) {
-					if(((Dummy*)pMac[i])->ºwasVST && chunkpresent) {
+					if(((Dummy*)pMac[i])->ï¿½wasVST && chunkpresent) {
 						// Since we don't know if the plugin saved it or not, 
 						// we're stuck on letting the loading crash/behave incorrectly.
 						// There should be a flag, like in the VST loading Section to be correct.
