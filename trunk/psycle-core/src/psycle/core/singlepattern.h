@@ -40,7 +40,7 @@ namespace psycle { namespace core {
 			const TimeSignature & playPosTimeSignature(double pos) const;
 
 			void setName(const std::string & name);
-			const std::string & name() const;
+			const std::string& name() const;
 
 			void setCategory(const std::string& category);
 			const std::string& category() const { return category_; };

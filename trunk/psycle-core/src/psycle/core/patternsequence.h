@@ -10,42 +10,7 @@
 namespace psycle { namespace core {
 
 		const int PatternEnd = -1;
-
-		class GlobalEvent {
-			public:
-					enum GlobalType {
-					BPM_CHANGE,
-					SET_VOLUME,
-					SET_PANNING,
-					JUMP_TO,
-					SET_BYPASS,
-					UNSET_BYPASS,
-					SET_MUTE,
-					UNSET_MUTE,
-					LOOP_TO,
-					NONE,
-				};
-
-				GlobalEvent();
-				GlobalEvent(float parameter_);
-				virtual ~GlobalEvent();
 	
-				void setType(GlobalType type);
-				GlobalType type() const;
-				void setParameter(float parameter);
-				float parameter() const;
-				void setTarget(int target);
-				int target() const;
-				void setTarget2(int target);
-				int target2() const;
-
-			private:
-				float parameter_;
-				int target_, target2_;
-				GlobalType type_;
-		};
-
-
 		class SequenceLine;
 
 		class SequenceEntry {
@@ -64,11 +29,11 @@ namespace psycle { namespace core {
 			float patternBeats() const;
 			SequenceLine* track() {return line_;}
 			void setSequenceLine( SequenceLine *newLine );
-			void setStartPos( float pos );
+			void setStartPos(float pos);
 			float startPos() const;
-			void setEndPos( float pos );
+			void setEndPos(float pos);
 			float endPos() const;
-			void setTranspose( int offset );
+			void setTranspose(int offset);
 			int transpose() const;
 			std::string toXml(double pos) const;
 
@@ -205,7 +170,7 @@ namespace psycle { namespace core {
 			const_reverse_patterniterator patternrend() const { return patterns_.rend(); }
 			int numpatterns() { return patterns_.size(); }
 
-			typedef std::multimap<double, GlobalEvent*> GlobalMap;
+			typedef std::multimap<double, PatternEvent*> GlobalMap;
 			typedef GlobalMap::iterator GlobalIter;
 
 			SequenceLine* createNewLine();
@@ -218,7 +183,7 @@ namespace psycle { namespace core {
 			void removeAll();
 
 			// heart of patternsequence
-			void GetEventsInRange( double start, double length, std::vector<PatternEvent*>& events );
+			void GetEventsInRange(double start, double length, std::vector<PatternEvent*>& events);
 			void GetOrderedEvents(std::vector<PatternEvent*>& event_list);
 			SequenceEntry* GetEntryOnPosition(SequenceLine* line, double tickPosition);
 			void CollectEvent(const PatternEvent& command);
@@ -228,14 +193,6 @@ namespace psycle { namespace core {
 			bool getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const;
 			void removePattern(Pattern* pattern);
 
-			///populates globals with a list of the first row of global events between beatpositions start and start+length.
-			///\param bInclusive whether to include events with positions of exactly start.
-			///\return the beat position of the global events, or if there are none, start+length.
-			double GetNextGlobalEvents(double start, double length, std::vector<GlobalEvent*>& globals, bool bInclusive);
-			GlobalEvent* createBpmChangeEntry(double position, float bpm);
-			void moveGlobalEvent(GlobalEvent* entry, double newpos);
-			double globalTickPosition( GlobalEvent * event) const;
-			const GlobalMap & globalEvents();
 			double tickLength() const;
 			void moveDownLine(SequenceLine* line);
 			void moveUpLine(SequenceLine* line);
@@ -283,9 +240,11 @@ namespace psycle { namespace core {
 			int trackArmedCount_;
 			/// Wether each of the tracks is armed (selected for recording data in)
 			std::vector<bool> armedTrack_;
-			GlobalMap globalEvents_;
+
 			std::multimap<double, std::multimap< int, PatternEvent > > events_;
 			SequenceEntry* last_entry_;
+			// masterPattern
+			Pattern* master_pattern_;
 	};
 	typedef Sequence PatternSequence;
 

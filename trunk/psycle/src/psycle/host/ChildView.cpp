@@ -336,12 +336,7 @@ namespace psycle {
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					Sequence& sequence = pattern_view()->song()->patternSequence();
-					psycle::core::SequenceEntry* entry =  sequence.last_worked_entry();						
-					if (!entry)
-						entry = sequence.GetEntryOnPosition(*sequence.begin(), Player::singleton().playPos());
-					else
-					if (main_frame_->m_wndSeq.selected_entry() != entry)
-						entry = sequence.GetEntryOnPosition(*sequence.begin(), Player::singleton().playPos());
+					psycle::core::SequenceEntry* entry = sequence.GetEntryOnPosition(*(sequence.begin()+1), Player::singleton().playPos());
 					int pos = (entry) ? (Player::singleton().playPos() - entry->tickPosition())	* static_cast<int>(projects_->active_project()->beat_zoom())
 									  : 0;
 					if ( last_pos_!= pos ) {

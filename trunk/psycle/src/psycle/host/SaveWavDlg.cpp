@@ -696,7 +696,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				lastpostick=pstart;
 				#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					int findPattern=0;
-					SequenceLine* patternline = *pSong.patternSequence().begin();
+					SequenceLine* patternline = *pSong.patternSequence().begin()+1;
 					SequenceLine::iterator iter = patternline->begin();
 					for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
 					if (iter != patternline->end()) {
@@ -720,7 +720,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				lastpostick=pstart;
 				#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					int findPattern=0;
-					SequenceLine* patternline = *pSong.patternSequence().begin();
+					SequenceLine* patternline = *pSong.patternSequence().begin()+1;
 					SequenceLine::iterator iter = patternline->begin();
 					for(; iter != patternline->end() && findPattern < pstart; iter++ , findPattern++);
 

@@ -253,7 +253,7 @@ namespace psycle  {
 			//
 
 			// we use only the first track in mfc
-			psycle::core::SequenceLine* line = *song_->patternSequence().begin();
+			psycle::core::SequenceLine* line = *song_->patternSequence().begin()+1;
 			int playLength = line->size();
 			index = 0; // index
 			for (index=0;index<MAX_SEQUENCES;index++)

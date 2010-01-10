@@ -5,6 +5,8 @@
 #define PSYCLE__CORE__PATTERN_EVENT__INCLUDED
 #pragma once
 
+#include "commands.h"
+
 #include <psycle/core/config.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <vector>
@@ -60,6 +62,14 @@ class PSYCLE__CORE__DECL PatternEvent {
 			offset_ = offset;
 		}
 		double time_offset() const { return offset_; }
+
+
+		bool IsGlobal() const {
+			if (cmd_ == commandtypes::SET_VOLUME)
+				return true;
+			else
+				return false;
+		}
 
 
 	private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.

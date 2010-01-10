@@ -8451,7 +8451,7 @@ using namespace helpers::math;
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				double old_len = pattern()->beats();
-				psycle::core::SequenceLine* line = *song()->patternSequence().begin();
+				psycle::core::SequenceLine* line = *song()->patternSequence().begin()+1;
 				psycle::core::SequenceLine::iterator it = line->find(main()->m_wndSeq.selected_entry());
 				if ( it != line->end()) {
 					++it;

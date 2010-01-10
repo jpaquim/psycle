@@ -14,7 +14,7 @@ SeqHelperCommand::~SeqHelperCommand() {
 void SeqHelperCommand::PrepareUndoStorage() {
 	// Undo store
 	#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		psycle::core::SequenceLine* line = (*seq_view_->project()->song().patternSequence().begin());
+		psycle::core::SequenceLine* line = (*seq_view_->project()->song().patternSequence().begin()+1);
 		prev_line_.clear();
 		psycle::core::SequenceLine::iterator it = line->begin();
 		for ( ; it != line->end(); ++it) {
@@ -28,7 +28,7 @@ void SeqHelperCommand::PrepareUndoStorage() {
 void SeqHelperCommand::PrepareRedoStorage() {
 	// Redo store
 	#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	psycle::core::SequenceLine* line = (*seq_view_->project()->song().patternSequence().begin());
+	psycle::core::SequenceLine* line = (*seq_view_->project()->song().patternSequence().begin()+1);
 	line = (*seq_view_->project()->song().patternSequence().begin());
 	next_line_.clear();
 	psycle::core::SequenceLine::iterator it = line->begin();
@@ -42,7 +42,7 @@ void SeqHelperCommand::PrepareRedoStorage() {
 
 void SeqHelperCommand::Undo() {
 	#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		psycle::core::SequenceLine* line = (*seq_view_->project()->song().patternSequence().begin());
+		psycle::core::SequenceLine* line = (*seq_view_->project()->song().patternSequence().begin()+1);
 		line->clear();
 		psycle::core::SequenceLine::iterator it = prev_line_.begin();
 		for ( ; it != prev_line_.end(); ++it) {
@@ -56,7 +56,7 @@ void SeqHelperCommand::Undo() {
 
 void SeqHelperCommand::Redo() {
 	#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		psycle::core::SequenceLine* line = (*seq_view_->project()->song().patternSequence().begin());
+		psycle::core::SequenceLine* line = (*seq_view_->project()->song().patternSequence().begin()+1);
 		line->clear();
 		psycle::core::SequenceLine::iterator it = next_line_.begin();
 		for ( ; it != next_line_.end(); ++it) {
