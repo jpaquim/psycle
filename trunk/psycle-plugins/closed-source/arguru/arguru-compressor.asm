@@ -114,22 +114,12 @@
 ;------------------------------------------------------------------------------
   		Align	16
  Work:
+;		ebp:  numsamples
 ;		ecx : Mostly the this pointer, except at the end
 ; 		ecx+04h = Vals
 ; 		ecx+08h = pCB
 ; 		ecx+0Ch = currentGain
-
-;		ebx: psamplesleft pointer
-;		ebp:  numsamples
-;		eax: used for Vals array and for psamplesleft and right in form or difference (eax=psamplesleft, eax+ecx=psamplesright)
-;		esp+10h  (Vals[paramGain]*0.015625000f+1.0f)*0.5		
-;		esp+14h = Vals[paramThreshold]
-; 		esp+18h = Vals[paramRatio]
-; 		esp+1Ch = Vals[paramAttack]
-;		esp+20h = Vals[paramRelease]
-;		esp+24h = Vals[paramClip]
-;
-; esp+34h = Vals[paramThreshold]*0.0078125000F
+;		ebx: psamplesright pointer
 
   		sub	esp,00000018h
   		mov	eax,[ecx+04h]
@@ -148,7 +138,7 @@
   		mov	[esp+14h],edx
   		mov	edx,[eax+10h]
   		push	esi
-  		fmul	qword ptr [0.5Float]
+  		fmul	qword ptr [1div32768Double]
   		push	edi
   		mov	edi,[eax+08h]
   		mov	[esp+20h],edx
@@ -156,7 +146,18 @@
   		mov	edx,[eax+14h]
   		mov	[esp+18h],edi
   		mov	[esp+24h],edx
-  		jle	NoSamplesToGain
+;		After here, esp has:
+;		esp+10h  (Vals[paramGain]*0.015625000f+1.0f)*0.5		
+;		esp+14h = Vals[paramThreshold] (the corrected value is stored later into esp+34h)
+; 		esp+18h = Vals[paramRatio] (the corrected value is stored in the FP stack. Referenced later by ST(2)))
+; 		esp+1Ch = Vals[paramAttack] (later it is modified)
+;		esp+20h = Vals[paramRelease] (later it is modified)
+;		esp+24h = Vals[paramClip]
+;		esp+2Ch = psamplesleft
+;		esp+30h = psamplesright
+;		esp+34h	= numsamples (later it is modified)
+;		esp+38h = tracks		
+  		jle	CalculateTrhesholdAndRatio
   		mov	edx,[esp+2Ch]
   		mov	eax,ebx
   		sub	edx,ebx
@@ -171,12 +172,14 @@
   		fmul	dword ptr [eax-04h]
   		fstp	dword ptr [eax-04h]
   		jnz	ApplyInputGain
- NoSamplesToGain:
+ CalculateTrhesholdAndRatio:
  ; 		test Vals[paramRatio]
   		test	edi,edi
   		jz 	paramRatio_Zero
   		fild	dword ptr [esp+14h]
   		fmul	dword ptr [0.0078125000Float]
+;		changing esp+34
+; 		esp+34h = Vals[paramThreshold]*0.0078125000F
   		fstp	dword ptr [esp+34h]
   		fild	dword ptr [esp+18h]
   		fcom	dword ptr [16Float]
@@ -184,23 +187,29 @@
   		test	ah,01h
   		jnz	Ratiolessthan16
   		fstp	ST(0)
+;		Putting 0.0f at ST0		
   		fld	dword ptr [0Float]
   		jmp	CalcAttackAndRelease
  Ratiolessthan16:
   		fadd	dword ptr [1.0Float]
+;		Putting 1.0f/(Vals[paramRatio]+1.0f) at ST0
   		fdivr	dword ptr [1.0Float]
  CalcAttackAndRelease:
  ;		test numsamples		
  		test	ebp,ebp
   		fild	dword ptr [esp+1Ch]
   		fadd	dword ptr [1.0Float]
-  		fmul	qword ptr [44.1Float]
-  		fdivr	qword ptr [1.8750000Float]
+  		fmul	qword ptr [44.1Double]
+  		fdivr	qword ptr [1.0Double]
+;		changing esp+1Ch
+; 		esp+1Ch = 1.0/((Vals[paramAttack]+1.0)*44.1)
   		fstp	dword ptr [esp+1Ch]
   		fild	dword ptr [esp+20h]
   		fadd	dword ptr [1.0Float]
-  		fmul	qword ptr [44.1Float]
-  		fdivr	qword ptr [1.8750000Float]
+  		fmul	qword ptr [44.1Double]
+  		fdivr	qword ptr [1.0Double]
+;		changing esp+20h
+; 		esp+20h = 1.0/((Vals[paramRelease]+1.0)*44.1)
   		fstp	dword ptr [esp+20h]
   		jle	NothingToCalculate
   		mov	esi,[esp+2Ch]
@@ -208,33 +217,43 @@
   		sub	esi,ebx
   		mov	edi,ebp
  CompressLoop:
- ;		input signal
+ ;		input signal. the +esi one is psamplesleft
   		fld	dword ptr [edx+esi]
   		fabs
   		fld	dword ptr [edx]
   		fabs
+;		changing esp+30h
+;		esp+30h = fabs(*psamplesright)
   		fstp	dword ptr [esp+30h]
+;		Compare fabs(*psamplesleft) with fabs(*psamplesright)		
   		fcom	dword ptr [esp+30h]
   		fnstsw	ax
   		test	ah,41h
   		jz 	LeftBiggerThanRight
   		fstp	ST(0)
+;		Put fabs(*psamplesleft) into st(0). Else there is fabs(*psamplesright)
   		fld	dword ptr [esp+30h]
  LeftBiggerThanRight:
+ ;		Compares max with threshold.
   		fcom	dword ptr [esp+34h]
   		fnstsw	ax
   		test	ah,41h
-  		jnz	ValueSmallerThanThreshold
+  		jnz	ValueSmallerorEqualThanThreshold
+;		Copies st(0) into ST(1) (by adding top value on top of top)
   		fld	ST(0)
   		fsub	dword ptr [esp+34h]
+;		ST(2) here contains the corrected_ratio
   		fmul	ST,ST(2)
   		fadd	dword ptr [esp+34h]
+;		((analyzedvalue - correctedthreshold)*correctedRatio+corrected_threshold)/analyzedvalue
   		fdivrp	ST(1),ST
   		jmp	CalculateCurrentGain
- ValueSmallerThanThreshold:
+ ValueSmallerorEqualThanThreshold:
   		fstp	ST(0)
+;		just put 1.0 into floating point stack
   		fld	dword ptr [1.0Float]
  CalculateCurrentGain:
+ ;		compare target gain with currentGain
   		fcom	dword ptr [ecx+0Ch]
   		fsub	dword ptr [ecx+0Ch]
   		fnstsw	ax
@@ -246,6 +265,7 @@
  ApplyRelease:
   		fmul	dword ptr [esp+20h]
  ApplyCurrentGain:
+ ;		edi contains the number of samples here
   		fadd	dword ptr [ecx+0Ch]
   		add	edx,00000004h
   		dec	edi
@@ -316,7 +336,7 @@ paramRatio_Zero:
   		mov	eax,[esp+04h]
   		sub	esp,00000008h
   		fmul	dword ptr [0.015625000Float]
-  		fadd	qword ptr [1.8750000Float]
+  		fadd	qword ptr [1.0Double]
   		fldlg2
   		fxch	ST(1)
   		fyl2x
@@ -896,9 +916,9 @@ paramRatio_Zero:
  		db	00h;
  32768.0Float:
   		dq	40E0000000000000h
- 1.8750000Float:
+ 1.0Double:
   		dq	3FF0000000000000h
- 44.1Float:
+ 44.1Double:
   		dq	40460CCCCCCCCCCDh
  0Float:
   		dd	00000000h
@@ -910,7 +930,7 @@ paramRatio_Zero:
  		db	00h;
  		db	00h;
  		db	00h;
- 0.5Float:
+ 1div32768Double:
   		dq	3F00000000000000h
  1.0Float:
   		dd	3F800000h

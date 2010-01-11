@@ -1,5 +1,7 @@
 ///\file
 ///\brief Arguru compressor plugin for PSYCLE
+/// Reverse engineered by JosepMa from the dissasembled sources
+
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math.hpp>
 #include <cstdio> // for std::sprintf
@@ -99,32 +101,35 @@ void mi::ParameterTweak(int par, int val) {
 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
 #if 1
-	///\todo: arguru's implementation multiplies gain for 0.5f but does not divide by 32768 :?
-	float const corrected_gain =  (Vals[0]*0.015625000f+1.0f)*0.000030517578125f;
+	float const corrected_gain =  (Vals[paramGain]*0.015625000f+1.0f)*0.000030517578125f;
+	float* pleft = psamplesleft;
+	float* pright = psamplesright;
 
-	for (int cont = 0; cont < numsamples; cont++) {
-		psamplesleft[cont] *= corrected_gain;
-		psamplesright[cont] *= corrected_gain;
+	for (int cont = numsamples; cont > 0; cont--) {
+		*(pleft++) *= corrected_gain;
+		*(pright++) *= corrected_gain;
 	}
+
 	if (Vals[paramRatio] != 0) {
 		float const correctedthreshold = Vals[paramThreshold]*0.0078125000f;
-		float const corrected_ratio = (Vals[paramRatio] <16)? 1.0f/(1.0f + Vals[paramRatio]) : 0.0f;
-		float const attackconst = 1.875/((1.0+Vals[paramAttack])*currentSR*0.001f);
-		float const releaseconst = 1.875/((1.0+Vals[paramRelease])*currentSR*0.001f);
+		double const corrected_ratio = (Vals[paramRatio] <16)? 1.0f/(1.0f + Vals[paramRatio]) : 0.0f;
+		double const attackconst = 1.0/((1.0+Vals[paramAttack])*currentSR*0.001);
+		double const releaseconst = 1.0/((1.0+Vals[paramRelease])*currentSR*0.001);
+		
+		float* pleft = psamplesleft;
+		float* pright = psamplesright;
 
-		for (int cont = 0; cont < numsamples; cont++) {
-			float const sl = *psamplesleft;
-			float const sr = *psamplesright;
-			float targetGain;
-			float const analyzedValue = std::max(fabs(sl),fabs(sr));
-			if(analyzedValue < correctedthreshold) {
+		for (int cont = numsamples; cont > 0; cont--) {
+			double targetGain;
+			double const analyzedValue = std::max(fabs(*pleft),fabs(*pright));
+			if(analyzedValue <= correctedthreshold) {
 				targetGain = 1.0f;
 			}
 			else {
 				targetGain = ((analyzedValue - correctedthreshold)*corrected_ratio+correctedthreshold)/analyzedValue;
 			}
-			float newgain = (targetGain - currentGain);
-			if (targetGain <currentGain) {
+			double newgain = (targetGain - currentGain);
+			if (targetGain < currentGain) {
 				newgain*=attackconst;
 			}
 			else {
@@ -132,20 +137,24 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			}
 
 			currentGain += newgain;
-			psamplesleft[cont] *= currentGain;
-			psamplesright[cont] *= currentGain;
+			*(pleft++) *= currentGain;
+			*(pright++) *= currentGain;
 		}
 	}
 
 	if (Vals[paramClip] != 0) {
-		for (int cont = 0; cont < numsamples; cont++) {
-			psamplesleft[cont]=tan(psamplesleft[cont]);
-			psamplesright[cont]=tan(psamplesright[cont]);
+		float* pleft = psamplesleft;
+		float* pright = psamplesright;
+		for (int cont = numsamples; cont > 0; cont--) {
+			*pleft =tanh(*pleft);
+			*pright =tanh(*pright);
+			pleft++;
+			pright++;
 		}
 	}
-	for (int cont = 0; cont < numsamples; cont++) {
-		psamplesleft[cont] *= 32768.0f;
-		psamplesright[cont] *= 32768.0f;
+	for (int cont = numsamples; cont > 0; cont--) {
+		*(psamplesleft++) *= 32768.0f;
+		*(psamplesright++) *= 32768.0f;
 	}
 #elif 0
 	float const makeUpGain = 1 + Vals[paramGain] * 0.015625f;
