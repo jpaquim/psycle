@@ -140,7 +140,7 @@ void ASIOInterface::Init() {
 
 void ASIOInterface::do_open() {
 	if(!_configured) ReadConfig();
-	if(ui_) {
+	if(!ui_) {
 		ui_->SetValues(GetidxFromOutPort(_selectedout), playbackSettings_.samplesPerSec(), _ASIObufferSize);
 		if(ui_->DoModal(this) != IDOK) return;
 		int oldbs = _ASIObufferSize;

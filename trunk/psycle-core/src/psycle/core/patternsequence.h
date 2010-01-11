@@ -15,7 +15,6 @@ namespace psycle { namespace core {
 
 		class SequenceEntry {
 		public:
-
 			SequenceEntry();
 			SequenceEntry(SequenceLine* line);
 			~SequenceEntry();
@@ -26,15 +25,15 @@ namespace psycle { namespace core {
 			void setPattern(Pattern* pattern);
 			Pattern* pattern() { return pattern_; }
 			Pattern* pattern() const { return pattern_; }
-			float patternBeats() const;
+			float patternBeats() const { return pattern_->beats(); }
 			SequenceLine* track() {return line_;}
 			void setSequenceLine( SequenceLine *newLine );
-			void setStartPos(float pos);
-			float startPos() const;
-			void setEndPos(float pos);
-			float endPos() const;
-			void setTranspose(int offset);
-			int transpose() const;
+			void setStartPos(float pos) { startPos_ = pos; }
+			float startPos() const { return startPos_; }
+			void setEndPos(float pos) { endPos_ = pos; }
+			float endPos() const { return endPos_; }
+			void setTranspose(int offset) { transpose_ = offset; }
+			int transpose() const { return transpose_; }
 			std::string toXml(double pos) const;
 
 		private:
@@ -68,19 +67,14 @@ namespace psycle { namespace core {
 			void moveEntries(SequenceEntry* start_entry, double delta);
 			void removeSpaces(); // removes spaces between entries
 			void clear();
-
 			double tickLength() const;
-
 			Sequence* patternSequence() { return sequence_; }
-
 			void MoveEntry(SequenceEntry* entry, double newpos);
 			void removeEntry(SequenceEntry* entry);
-
 			const std::string& name() const { return name_; }
 			void set_name(const std::string& name) {
 				name_ = name;
 			}
-
 			std::string toXml() const;
 
 			typedef std::multimap<double, SequenceEntry*>::iterator iterator;
@@ -92,7 +86,6 @@ namespace psycle { namespace core {
 			const_iterator begin() const { return line_.begin(); }
 			iterator end() { return line_.end(); }
 			const_iterator end() const { return line_.end(); }
-
 			reverse_iterator rbegin() { return line_.rbegin(); }
 			const_reverse_iterator rbegin() const { return line_.rbegin(); }
 			reverse_iterator rend() { return line_.rend(); }
@@ -104,33 +97,21 @@ namespace psycle { namespace core {
 			}
 
 			iterator find(SequenceEntry* entry);
-
-			void erase(iterator it) {
-				line_.erase(it);
-			}
-
-			iterator lower_bound(double pos) {
-				return line_.lower_bound(pos);
-			}
-
-			iterator upper_bound(double pos) {
-				return line_.upper_bound(pos);
-			}
+			void erase(iterator it) { line_.erase(it); }
+			iterator lower_bound(double pos) { return line_.lower_bound(pos); }
+			iterator upper_bound(double pos) { return line_.upper_bound(pos); }
 
 			std::multimap<double, SequenceEntry*>::size_type size() const {
 				return line_.size();
 			}
 
 			bool empty() const { return line_.empty(); }
-
 			void SetSequence(Sequence* sequence) { sequence_ = sequence; }
 
 		private:
-
 			std::multimap<double, SequenceEntry*> line_;
 			std::string name_;
 			Sequence* sequence_;
-
 	};
 
 	class PSYCLE__CORE__DECL Sequence {
@@ -223,11 +204,6 @@ namespace psycle { namespace core {
 			void Add(Pattern* pattern);
 			void Remove(Pattern* pattern);
 			Pattern* FindPattern(int id);
-			void set_last_worked_entry(SequenceEntry* entry) { last_entry_  = entry; }
-			SequenceEntry* last_worked_entry() {
-				return last_entry_;
-			}
-
 
 		private:
 			// sequencer structure
@@ -242,7 +218,6 @@ namespace psycle { namespace core {
 			std::vector<bool> armedTrack_;
 
 			std::multimap<double, std::multimap< int, PatternEvent > > events_;
-			SequenceEntry* last_entry_;
 			// masterPattern
 			Pattern* master_pattern_;
 	};

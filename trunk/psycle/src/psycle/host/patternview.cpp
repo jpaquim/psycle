@@ -553,12 +553,11 @@ using namespace helpers::math;
 			case draw_modes::playback:
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Pattern* pat = pattern();
 				psycle::core::Player & player(psycle::core::Player::singleton());
 				int ticks = static_cast<int>(project()->beat_zoom());
 				int pos = 0;
-				if (project()->song().patternSequence().last_worked_entry())
-					pos = (player.playPos() - project()->song().patternSequence().last_worked_entry()->tickPosition()) * ticks;
+				psycle::core::SequenceEntry* entry = this->main()->m_wndSeq.selected_entry();
+				pos = (player.playPos() - entry->tickPosition()) * ticks;
 				if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) )
 #else
 				int pos = Global::pPlayer->_lineCounter;
@@ -2562,7 +2561,6 @@ using namespace helpers::math;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			//todo: Use editPositionEntry when it is ready.
-			Song* song = this->song();
 			Pattern* patt = pattern();
 			
 			double beat_zoom = static_cast<int>(project()->beat_zoom());		
