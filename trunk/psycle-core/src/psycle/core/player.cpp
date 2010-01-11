@@ -601,7 +601,7 @@ float * Player::Work(int numSamples) {
 				timeInfo_.playBeatPos() >= timeInfo_.cycleEndPos() ||
 				timeInfo_.playBeatPos() < timeInfo_.cycleStartPos()
 			) setPlayPos(timeInfo_.cycleStartPos());
-		}	
+		}
 		sequencer_.set_player(*this); // for a callback to process()
 		sequencer_.set_time_info(&timeInfo_);
 		sequencer_.Work(numSamples);

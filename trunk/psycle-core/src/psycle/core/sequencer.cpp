@@ -45,7 +45,7 @@ void Sequencer::Work(unsigned int nframes)
 			player_->process(num);
 			rest_frames -= num;
 			last_pos = pos;
-			process_global_event(*ev);			
+			process_global_event(*ev);
 		}
 		execute_notes(ev->time_offset() - last_pos - time_info()->playBeatPos(), *ev);
 	}
@@ -56,29 +56,29 @@ void Sequencer::process_global_event(const PatternEvent& event) {
 	Machine::id_type mIndex;
 	switch(event.command()) {
 		case commandtypes::BPM_CHANGE:
-/*			setBpm(event.parameter());
+			/*setBpm(event.parameter());
 			if(loggers::trace()) {
 				std::ostringstream s;
 				s << "psycle: core: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}*/
 			break;
-/*		case commandtypes::JUMP_TO:
+		/*case commandtypes::JUMP_TO:
 			//todo: fix this. parameter indicates the pattern, not the beat!
 			timeInfo_.setPlayBeatPos(event.parameter());
 			break;*/ // todo
 		case commandtypes::SET_BYPASS:
-/*			mIndex = event.target();
+			/*mIndex = event.target();
 			if(mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) //i.e. Effect
 				song().machine(mIndex)->_bypass = event.parameter() != 0;*/
 			break;
 		case commandtypes::SET_MUTE:
-/*			mIndex = event.target();
+			/*mIndex = event.target();
 			if(mIndex < MAX_MACHINES && song().machine(mIndex))
 				song().machine(mIndex)->_mute = event.parameter() != 0;*/
 			break;
 		case commandtypes::SET_VOLUME:
-/*			if(event.machine() == 255) {
+			/*if(event.machine() == 255) {
 				Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
 				master._outDry = static_cast<int>(event.parameter());
 			} else {
@@ -92,7 +92,7 @@ void Sequencer::process_global_event(const PatternEvent& event) {
 			}*/
 		break;
 		case commandtypes::SET_PANNING:
-/*			mIndex = event.target();
+			/*mIndex = event.target();
 			if(mIndex < MAX_MACHINES && song().machine(mIndex))
 				song().machine(mIndex)->SetPan(static_cast<int>( event.parameter()));
 			break;*/
