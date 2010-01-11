@@ -213,7 +213,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 #if 0
 		//replaced by sequencer
 		void execute_notes(double beat_offset, PatternEvent& line);
-#endif		
+#endif
 	public:
 		void process(int samples);
 
