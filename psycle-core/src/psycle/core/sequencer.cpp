@@ -30,7 +30,6 @@ void Sequencer::Work(unsigned int nframes)
 {
 	///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
 	///\todo this will not work frame correct for BPM changes for now
-	std::vector<PatternEvent*> global_events;
 	double beats = nframes / ((time_info()->sampleRate() * 60) / time_info()->bpm());
 	std::vector<PatternEvent*> events;
 	song_->patternSequence().GetEventsInRange(time_info()->playBeatPos(), beats, events);

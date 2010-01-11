@@ -14,35 +14,29 @@ namespace psycle { namespace core {
 		// pattern Entry contains one ptr to a Pattern and the tickPosition for the absolute Sequencer pos
 
 		SequenceEntry::SequenceEntry() 
-		:
-			line_(0),
-			pattern_(0),
-			startPos_(0),
-			endPos_(PatternEnd),
-			transpose_(0)
+			: line_(0),
+			  pattern_(0),
+			  startPos_(0),
+			  endPos_(PatternEnd),
+			  transpose_(0)
 		{}
 
-		SequenceEntry::SequenceEntry(SequenceLine * line)
-		:
-			line_(line),
-			pattern_(0),
-			startPos_(0),
-			endPos_(PatternEnd),
-			transpose_(0)
+		SequenceEntry::SequenceEntry(SequenceLine* line)
+			: line_(line),
+			  pattern_(0),
+			  startPos_(0),
+			  endPos_(PatternEnd),
+			  transpose_(0)
 		{}
 
 		SequenceEntry::~SequenceEntry() {
 			// wasDeleted(this);
 		}
 
-		void SequenceEntry::setPattern(Pattern * pattern) {
+		void SequenceEntry::setPattern(Pattern* pattern) {
 			pattern_ = pattern;
 			startPos_ = 0;
 			endPos_   = pattern->beats();
-		}
-
-		float SequenceEntry::patternBeats() const {
-			return pattern_->beats();
 		}
 
 		double SequenceEntry::tickPosition() const {
@@ -61,30 +55,6 @@ namespace psycle { namespace core {
 			return tickPosition() + patternBeats();
 		}
 
-		void SequenceEntry::setTranspose(int offset) {
-			transpose_ = offset;
-		}
-	
-		int SequenceEntry::transpose() const {
-			return transpose_;
-		}
-
-		void SequenceEntry::setStartPos(float pos) {
-			startPos_ = pos;
-		}
-
-		float SequenceEntry::startPos() const {
-			return startPos_;
-		}
-
-		void SequenceEntry::setEndPos(float pos) {
-			endPos_ = pos;
-		}
-
-		float SequenceEntry::endPos() const {
-			return endPos_;
-		}
-
 		std::string SequenceEntry::toXml(double pos) const {
 			std::ostringstream xml;
 			xml << "<seqentry pos='" << pos << "' patid='" << pattern()->id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' " << "transpose='" << transpose() << std::hex << "' />" << std::endl;
@@ -92,7 +62,7 @@ namespace psycle { namespace core {
 		}
 
 		void SequenceEntry::setSequenceLine(SequenceLine* newLine) {
-			line_->moveEntryToNewLine( this, newLine );
+			line_->moveEntryToNewLine(this, newLine);
 			line_ = newLine;
 		}
 
@@ -101,10 +71,10 @@ namespace psycle { namespace core {
 		// represents one track/line in the sequencer
 
 		SequenceLine::SequenceLine()
-		: sequence_()
+			: sequence_()
 		{}
 
-		SequenceLine::SequenceLine(Sequence * sequence)
+		SequenceLine::SequenceLine(Sequence* sequence)
 		: sequence_(sequence)
 		{}
 
@@ -116,23 +86,22 @@ namespace psycle { namespace core {
 			//wasDeleted(this);
 		}
 
-		SequenceEntry* SequenceLine::createEntry(Pattern * pattern, double position) {
+		SequenceEntry* SequenceLine::createEntry(Pattern* pattern, double position) {
 			SequenceEntry* entry = new SequenceEntry(this);
 			entry->setPattern(pattern);
 			line_.insert(std::pair<double, SequenceEntry*>(position, entry));
 			return entry;
 		}
 
-		void SequenceLine::insertEntry(SequenceEntry *entry) {
+		void SequenceLine::insertEntry(SequenceEntry* entry) {
 			line_.insert(std::pair<double, SequenceEntry*>(entry->startPos(), entry));
 		}
 
-		void SequenceLine::insertEntryAndMoveRest(SequenceEntry *entry, double pos) {
+		void SequenceLine::insertEntryAndMoveRest(SequenceEntry* entry, double pos) {
 			std::multimap<double, SequenceEntry*> old_line_ = line_;
 			line_.clear();
 			std::multimap<double, SequenceEntry*>::iterator it = old_line_.begin();
 			bool inserted = false;
-			double last_pos = 0;
 			for ( ; it != old_line_.end(); ++it ) {
 				if ( it->first < pos ) {
 					line_.insert(std::pair<double, SequenceEntry*>(it->first, it->second));
@@ -193,7 +162,7 @@ namespace psycle { namespace core {
 			}
 		}
 
-		void SequenceLine::moveEntryToNewLine(SequenceEntry *entry, SequenceLine *newLine) {
+		void SequenceLine::moveEntryToNewLine(SequenceEntry* entry, SequenceLine* newLine) {
 			newLine->insertEntry(entry);
 			iterator it = begin();
 			for(; it!= end(); ++it) {
@@ -203,7 +172,7 @@ namespace psycle { namespace core {
 			line_.erase(it); // Removes entry from this SequenceLine, but doesn't delete it.
 		}
 
-		void SequenceLine::removePatternEntries( Pattern* pattern ) {
+		void SequenceLine::removePatternEntries(Pattern* pattern ) {
 			iterator it = begin();
 			while ( it != end() ) {
 				SequenceEntry* entry = it->second;
@@ -243,14 +212,11 @@ namespace psycle { namespace core {
 			if(iter!=end()) {
 				SequenceEntry* entry = iter->second;
 				line_.erase(iter);
-				sequence_->last_entry_ = 0;
 				delete entry;
 			}
 		}
 
 		void SequenceLine::clear() {
-			if (sequence_)
-				sequence_->last_entry_ = 0;
 			iterator it = begin();
 			for (it; it != end(); ++it)
 				delete it->second;
@@ -271,9 +237,7 @@ namespace psycle { namespace core {
 		/**************************************************************************/
 		// Sequence
 
-		Sequence::Sequence() 
-			: last_entry_(0)
-		{
+		Sequence::Sequence() {
 			setNumTracks(16);
 			// create global master line with an entry that keeps the master pattern
 			SequenceLine* master_line_ = createNewLine();
@@ -323,12 +287,11 @@ namespace psycle { namespace core {
 			return 0;
 		}
 
-		void Sequence::removeLine(SequenceLine * line) {
+		void Sequence::removeLine(SequenceLine* line) {
 			iterator it = find(begin(), end(), line);
 			if ( it != end() ) {
 				lines_.erase(it);
 				lineRemoved(line);
-				last_entry_ = 0;
 				delete line;
 			}
 		}
@@ -354,7 +317,6 @@ namespace psycle { namespace core {
 					// take the pattern,
 					Pattern* pPat = sLineIt->second->pattern();
 					worked = true;
-					last_entry_ = sLineIt->second;
 					double entryStart = sLineIt->first;
 					float entryStartOffset  = sLineIt->second->startPos();
 					float entryEndOffset  = sLineIt->second->endPos();
@@ -387,8 +349,6 @@ namespace psycle { namespace core {
 						#endif
 						}
 				}
-				if (!worked)
-					last_entry_ = 0;
 				++seqlineidx;
 			}
 			GetOrderedEvents(events);
@@ -512,8 +472,6 @@ namespace psycle { namespace core {
 				delete *pat_it;
 			}
 			patterns_.clear();
-			last_entry_ = 0;
-
 			// create global master line with an entry that keeps the master pattern
 			SequenceLine* master_line_ = createNewLine();
 			master_pattern_ = new Pattern();
