@@ -46,7 +46,7 @@ void Sequencer::Work(unsigned int nframes)
 			last_pos = pos;
 			process_global_event(*ev);
 		}
-		execute_notes(ev->time_offset() - last_pos - time_info()->playBeatPos(), *ev);
+		execute_notes(ev->time_offset() - time_info()->playBeatPos(), *ev);
 	}
 	player_->process(rest_frames);
 }

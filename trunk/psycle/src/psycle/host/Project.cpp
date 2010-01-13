@@ -142,6 +142,7 @@ namespace psycle {
 		void Project::OnProgress(int a, int b, std::string c) {
 			progress_.SetWindowText(c.c_str());
 			progress_.m_Progress.SetPos(b);
+			::Sleep(1); ///< Allow screen refresh.
 		}
 
 		void Project::OnReport(std::string a, std::string b) {

@@ -99,10 +99,11 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	unsigned int filesize = file.FileSize();
 
 	while(file.ReadArray(header, 4) && chunkcount) {
-		song.progress(4, static_cast<int>(file.GetPos() * 16384.0f / filesize), "");
+        int progress_number =  static_cast<int>(file.GetPos() * 16384.0f / filesize);                                  
+		song.progress(4, progress_number, "");
 
 		if(!std::strcmp(header,"INFO")) {
-			song.progress(2, 0, "Loading... Song authorship information...");
+			song.progress(2, progress_number, "Loading... Song authorship information...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -115,7 +116,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"SNGI")) {
-			song.progress(2, 0, "Loading... Song properties information...");
+			song.progress(2, progress_number, "Loading... Song properties information...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -128,7 +129,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"SEQD")) {
-			song.progress(2, 0, "Loading... Song sequence...");
+			song.progress(2, progress_number, "Loading... Song sequence...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -139,7 +140,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"PATD")) {
-			song.progress(2, 0, "Loading... Song patterns...");
+			song.progress(2, progress_number, "Loading... Song patterns...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -152,7 +153,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"MACD")) {
-			song.progress(2, 0, "Loading... Song machines...");
+			song.progress(2, progress_number, "Loading... Song machines...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -172,7 +173,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100 ) //and so on
 		} else if(!std::strcmp(header,"INSD")) {
-			song.progress(2, 0, "Loading... Song instruments...");
+			song.progress(2, progress_number, "Loading... Song instruments...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -183,7 +184,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else if(!std::strcmp(header,"EINS")) {
-			song.progress(2, 0, "Loading... Extended Song instruments...");
+			song.progress(2, progress_number, "Loading... Extended Song instruments...");
 			--chunkcount;
 			problemfound=false;
 			file.Read(version);
@@ -216,7 +217,8 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		}
 	}
 
-	//song.progress.emit(4,16384,"");
+	
+	song.progress(4,16384,"");
 
 	///\todo: Move this to something like "song.validate()"
 
