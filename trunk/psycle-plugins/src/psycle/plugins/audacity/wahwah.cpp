@@ -34,59 +34,13 @@ std::uint32_t const LFO_SKIP_SAMPLES = 30;
 
 #define NUMPARAMETERS 5
 
-CMachineParameter const paraLFOFreq = 
-{ 
-	"LFO Freq",
-	"LFOFreq",																								// description
-	1,																																																// MinValue				
-	100,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	15,
-};
+CMachineParameter const paraLFOFreq = {"LFO Freq","LFOFreq", 1 , 100 ,MPF_STATE,15};
+CMachineParameter const paraLFOStartPhase = {"LFO start phase","LFOStartPhase", 0 , 359 ,MPF_STATE, 0 };
+CMachineParameter const paraDepth = {"Depth","Depth", 0 , 100 ,MPF_STATE,70};
+CMachineParameter const paraResonance = {"Resonance","Resonance", 1 , 100 ,MPF_STATE, 25 };
+CMachineParameter const paraWahFreqOff = {"Wah freq offset","WahFreqOff", 0 , 100 ,MPF_STATE, 30 };
 
-CMachineParameter const paraLFOStartPhase = 
-{ 
-	"LFO start phase",
-	"LFOStartPhase",																								// description
-	0,																																																// MinValue				
-	359,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-CMachineParameter const paraDepth = 
-{ 
-	"Depth",
-	"Depth",																								// description
-	0,																																																// MinValue				
-	100,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	70,
-};
-
-CMachineParameter const paraResonance = 
-{ 
-	"Resonance",
-	"Resonance",																																												// description
-	1,																																																// MinValue				
-	100,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	25,
-};
-
-CMachineParameter const paraWahFreqOff = 
-{ 
-	"Wah freq offset",
-	"WahFreqOff",																																												// description
-	0,																																																// MinValue				
-	100,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	30,
-};
-
-CMachineParameter const *pParameters[] = 
-{ 
-	// global
+CMachineParameter const *pParameters[] = { 
 	&paraLFOFreq,
 	&paraLFOStartPhase,
 	&paraDepth,
@@ -95,18 +49,18 @@ CMachineParameter const *pParameters[] =
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	EFFECT,																																								// flags
-	NUMPARAMETERS,																																// numParameters
-	pParameters,																																// Pointer to parameters
+	MI_VERSION,
+	EFFECT,
+	NUMPARAMETERS,
+	pParameters,
 #ifdef _DEBUG
-	"Audacity WahWah (Debug build)",								// name
+	"Audacity WahWah (Debug build)",
 #else
-	"Audacity WahWah",																								// name
+	"Audacity WahWah",
 #endif
-	"WahWah",																												// short name
-	"Nasca Octavian Paul/Sartorius",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	"WahWah",
+	"Nasca Octavian Paul/Sartorius",
+	"About",
 	1
 );
 
@@ -136,25 +90,21 @@ private:
 	float b0_r, b1_r, b2_r, a0_r, a1_r, a2_r;
 	float freq;
 	float depth, freqofs, res;
+	float sample_rate_factor;
 
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
-mi::mi()
-{
-	// The constructor zone
+mi::mi() {
 	Vals = new int[NUMPARAMETERS];
 }
 
-mi::~mi()
-{
+mi::~mi() {
 	delete[] Vals;
 }
 
-void mi::Init()
-{
-// Initialize your stuff here
+void mi::Init() {
 	freq = 1.5f;
 	phase = 0;
 	depth = .7f;
@@ -186,20 +136,16 @@ void mi::Init()
 	a0_r = 0;
 	a1_r = 0;
 	a2_r = 0;
+	sample_rate_factor = 44100.0f/pCB->GetSamplingRate();
 }
 
-void mi::SequencerTick()
-{
-// Called on each tick while sequencer is playing
+void mi::SequencerTick(){
 	lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate();
+	sample_rate_factor = 44100.0f/pCB->GetSamplingRate();
 }
 
-void mi::Command()
-{
-// Called when user presses editor button
-// Probably you want to show your custom window here
-// or an about button
-pCB->MessBox("Audacity WahWah","WahWah",0);
+void mi::Command(){
+	pCB->MessBox("Audacity WahWah","WahWah",0);
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -240,7 +186,7 @@ inline void mi::RecalcFilter( const float depth_mul_1_minus_freqofs )
 		frequency = 1.f + costime; // Left channel
 		frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 		frequency = exp((frequency - 1.f) * 6.f);
-		omega = M_PI * frequency;
+		omega = M_PI * frequency * sample_rate_factor;
 #if 0
 		if (omega > 2*M_PI) do {
 			omega = omega - 2*M_PI;
@@ -258,10 +204,10 @@ inline void mi::RecalcFilter( const float depth_mul_1_minus_freqofs )
 	}
 	{
 		float frequency, omega, sn, cs, alpha;
-		frequency = 1.f + sintime; // Right channel
+		frequency = 1.f - sintime; // Right channel
 		frequency = frequency * depth_mul_1_minus_freqofs + freqofs;
 		frequency = exp((frequency - 1.f) * 6.f);
-		omega = M_PI * frequency;
+		omega = M_PI * frequency * sample_rate_factor;
 #if 0
 		if (omega > 2*M_PI) do {
 			omega = omega - 2*M_PI;
@@ -299,16 +245,14 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples_in, int
 			const float in_l = *psamplesleft;
 			const float in_r = *psamplesright;
 			
-			// reverted the multiplier (recip) to left and right instead of inverted.
-			// There doesn't seem to be much of a difference.
-			float out_l = (b0_l * in_l + b1_l * xn1_l + b2_l * xn2_l - a1_l * yn1_l - a2_l * yn2_l) * recip_l;
+			float out_l = (b0_l * in_l + b1_l * xn1_l + b2_l * xn2_l - a1_l * yn1_l - a2_l * yn2_l) * recip_r;
 			erase_all_nans_infinities_and_denormals(out_l);
 			xn2_l = xn1_l;
 			xn1_l = in_l;
 			yn2_l = yn1_l;
 			yn1_l = out_l;
 
-			float out_r = (b0_r * in_r + b1_r * xn1_r + b2_r * xn2_r - a1_r * yn1_r - a2_r * yn2_r) * recip_r;
+			float out_r = (b0_r * in_r + b1_r * xn1_r + b2_r * xn2_r - a1_r * yn1_r - a2_r * yn2_r) * recip_l;
 			erase_all_nans_infinities_and_denormals(out_r); 
 			xn2_r = xn1_r;
 			xn1_r = in_r;
@@ -343,7 +287,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			std::sprintf(txt,"%.1f",(float)value*.1f);
 			return true;
 		case 4:
-			std::sprintf(txt,"%i%%",value);
+			std::sprintf(txt,"%.0f Hz",exp((value*0.01f - 1.f) * 6.f)*22050);
 			return true;
 		default:
 			return false;
