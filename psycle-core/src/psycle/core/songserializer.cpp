@@ -3,6 +3,7 @@
 
 #include <psycle/core/config.private.hpp>
 #include "songserializer.h"
+#include "song.h"
 
 #include "file.h"
 #include "psy2filter.h"
@@ -10,11 +11,12 @@
 #include "psy4filter.h"
 #include <iostream>
 
-namespace psycle { namespace core {
+namespace psycle { 
+	namespace core {
 
 		SongSerializer::SongSerializer() {
-			filters.push_back( Psy2Filter::getInstance() );
-			filters.push_back( Psy3Filter::getInstance() );
+			filters.push_back(Psy2Filter::getInstance());
+			filters.push_back(Psy3Filter::getInstance());
 			///\todo Psy4Filter doesn't build currently
 			//filters.push_back( Psy4Filter::getInstance() );
 		}
@@ -23,10 +25,12 @@ namespace psycle { namespace core {
 		}
 		
 		bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song) {
-			if ( File::fileIsReadable( fileName ) ) {
+			if (File::fileIsReadable( fileName ) ) {				
 				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 					PsyFilterBase* filter = *it;
 					if ( filter->testFormat(fileName) ) {
+						song.DeleteAllMachines();
+						song.DeleteInstruments();
 						return filter->load(fileName,song);
 					}
 				}
@@ -35,7 +39,7 @@ namespace psycle { namespace core {
 			return false;
 		}
 
-		bool SongSerializer::saveSong( const std::string & fileName, const CoreSong& song, int version ) {
+		bool SongSerializer::saveSong(const std::string& fileName, const CoreSong& song, int version) {
 			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); it++) {
 				PsyFilterBase* filter = *it;
 				if ( filter->version() == version ) {
@@ -51,4 +55,6 @@ namespace psycle { namespace core {
 			std::cerr << "SongSerializer::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
 			return false;
 		}
-}}
+
+	}	// namespace core
+}	// namespace psycle

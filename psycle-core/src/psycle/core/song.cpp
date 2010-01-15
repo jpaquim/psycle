@@ -52,8 +52,6 @@ void CoreSong::clear() {
 
 bool CoreSong::load(std::string const & filename) {
 	SetReady(false);
-	DeleteAllMachines();
-	DeleteInstruments();
 	const bool result = serializer.loadSong(filename, *this);
 	///\todo: setReady true or setReady result? what would be better?
 	SetReady(true);
