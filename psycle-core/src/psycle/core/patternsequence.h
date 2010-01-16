@@ -205,6 +205,8 @@ namespace psycle { namespace core {
 			void Remove(Pattern* pattern);
 			Pattern* FindPattern(int id);
 
+			Pattern* master_pattern() { return master_pattern_; }
+
 		private:
 			// sequencer structure
 			std::vector<SequenceLine*> lines_;

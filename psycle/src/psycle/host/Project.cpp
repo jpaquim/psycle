@@ -774,7 +774,7 @@ namespace psycle {
 							return FALSE;
 						}
 						Psy3Saver saver(song());
-						if (!saver.Save(&file1, true))
+						if (!saver.Save(&file1, false))
 						{
 							mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
 							bResult = FALSE;
