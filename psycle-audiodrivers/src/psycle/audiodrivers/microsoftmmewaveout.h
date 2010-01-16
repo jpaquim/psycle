@@ -30,10 +30,13 @@ class MsWaveOut : public AudioDriver {
 		/*override*/ AudioDriverInfo info() const;
 
 	protected:
-		/*override*/ void do_open() {}
+		/*override*/ void do_open();
 		/*override*/ void do_start();
 		/*override*/ void do_stop();
-		/*override*/ void do_close() {}
+		/*override*/ void do_close();
+
+		/*override*/ bool opened() const { return hWaveOut != 0; }
+		/*override*/ bool started() const { return _running; }
 
 	private:
 		std::int16_t *buf;
@@ -65,6 +68,7 @@ class MsWaveOut : public AudioDriver {
 		void fillBuffer();
 
 		bool _dither;
+
 };
 
 }}
