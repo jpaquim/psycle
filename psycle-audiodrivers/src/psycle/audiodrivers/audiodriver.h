@@ -208,6 +208,8 @@ class AudioDriver {
 	///\{
 		public:
 			void set_opened(bool);
+		    // todo, should be pure virtual and opened_ removed, modify some drivers, 
+			// if not already happened
 			virtual bool opened() const { return opened_; }
 		protected:
 			virtual void do_open() = 0;
@@ -220,7 +222,10 @@ class AudioDriver {
 	///\{
 		public:
 			void set_started(bool);
-			virtual bool started() const { return started_; }
+			// todo, should be pure virtual and started_ removed, modify some drivers, 
+			// if not already happened
+			virtual bool started() const { return started_; }  
+		
 			virtual void Configure() {}
 		protected:
 			virtual void do_start() = 0;

@@ -24,8 +24,8 @@ class ESoundOut : public AudioDriver {
 		/*override*/ void do_stop();
 		/*override*/ void do_close();
 
-		virtual bool opened() const { return output_ >= 0;  }
-		virtual bool started() const { return threadRunning_; }
+		/*override*/ bool opened() const { return output_ >= 0;  }
+		/*override*/ bool started() const { return threadRunning_; }
 
 	private:
 		unsigned int channels_;
