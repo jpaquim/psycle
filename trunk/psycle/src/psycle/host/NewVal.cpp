@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CNewVal.
 
 #include "NewVal.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		CNewVal::CNewVal(int mindex,int pindex, int vval, int vmin, int vmax,char* title, CWnd* pParent)
 			: CDialog(CNewVal::IDD, pParent)
@@ -57,5 +57,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_text.SetWindowText(buffer);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

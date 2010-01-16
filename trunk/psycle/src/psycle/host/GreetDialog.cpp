@@ -3,31 +3,23 @@
 
 #include "GreetDialog.hpp"
 #include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		CGreetDialog::CGreetDialog(CWnd* pParent /* = 0 */) : CDialog(CGreetDialog::IDD, pParent)
-		{
-			//{{AFX_DATA_INIT(CGreetDialog)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
+namespace psycle {
+	namespace host {
+
+		CGreetDialog::CGreetDialog(CWnd* pParent /* = 0 */) 
+			: CDialog(CGreetDialog::IDD, pParent){
 		}
 
-		void CGreetDialog::DoDataExchange(CDataExchange* pDX)
-		{
+		void CGreetDialog::DoDataExchange(CDataExchange* pDX) {
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CGreetDialog)
 			DDX_Control(pDX, IDC_LIST1, m_greetz);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CGreetDialog, CDialog)
-			//{{AFX_MSG_MAP(CGreetDialog)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
-		BOOL CGreetDialog::OnInitDialog() 
-		{
+		BOOL CGreetDialog::OnInitDialog() {
 			CDialog::OnInitDialog();
 		/*
 			//Original Arguru's Greetings.
@@ -92,5 +84,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			return TRUE;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}	// namespace host
+} // namespace psycle

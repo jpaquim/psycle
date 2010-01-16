@@ -35,7 +35,6 @@ namespace psycle {
 			assert(mac_view_);
 			song_ = new Song();
 			song_->New();
-			progress_.Create();
 			// modules of project
 			mac_view_ = new MachineView(this);
 			pat_view_ = new PatternView(this);
@@ -142,7 +141,7 @@ namespace psycle {
 
 		void Project::OnProgress(int a, int b, std::string c) {
 			progress_.SetWindowText(c.c_str());
-			progress_.m_Progress.SetPos(b);
+			progress_.SetPos(b);
 			::Sleep(1); ///< Allow screen refresh.
 		}
 
@@ -158,7 +157,7 @@ namespace psycle {
 			player.stop();
 			player.song(*song_);
 			pat_view()->editPosition = 0;
-			progress_.m_Progress.SetPos(0);
+			progress_.SetPos(0);
 			progress_.ShowWindow(SW_SHOW);		
 			psycle::core::Song* song = new Song();
 			song->progress.connect(boost::bind(&Project::OnProgress, this, _1, _2, _3));

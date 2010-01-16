@@ -17,8 +17,8 @@ using namespace psycle::core;
 #include "MachineView.hpp"
 #include "MachineGui.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		extern CPsycleApp theApp;
 
@@ -183,5 +183,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			OnCancel();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

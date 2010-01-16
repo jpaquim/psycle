@@ -1,8 +1,8 @@
 ///\file
 ///\brief pointer handler for psycle::host::CChildView, private header
 #include "Psycle.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
@@ -185,5 +185,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

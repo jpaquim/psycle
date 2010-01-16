@@ -28,8 +28,8 @@ using namespace psycle::core;
 	# pragma comment(lib, "wbemuuid")
 #endif
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
@@ -483,5 +483,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else Global::pConfig->_showAboutAtStart=false;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

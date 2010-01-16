@@ -4,8 +4,8 @@
 #include "Psycle.hpp"
 #include "AudioDriver.hpp"
 #include <vector>
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		/// midi input config window.
 		class CMidiInputDlg : public CPropertyPage
@@ -45,5 +45,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CButton raw;
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

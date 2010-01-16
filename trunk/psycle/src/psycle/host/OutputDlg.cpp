@@ -12,8 +12,8 @@ using namespace psycle::core;
 #include "Player.hpp"
 #include "Song.hpp"
 #endif
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 
@@ -154,5 +154,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #endif
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

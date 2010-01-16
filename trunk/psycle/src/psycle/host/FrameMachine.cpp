@@ -25,8 +25,8 @@ using namespace psycle::core;
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		extern CPsycleApp theApp;
 
@@ -729,5 +729,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			dlg.DoModal();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

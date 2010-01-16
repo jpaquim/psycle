@@ -17,8 +17,8 @@ using namespace psycle::core;
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		extern CPsycleApp theApp;
 
@@ -520,5 +520,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

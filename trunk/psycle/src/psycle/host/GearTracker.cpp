@@ -13,8 +13,8 @@ using namespace psycle::core;
 #endif
 #include <psycle/helpers/dsp.hpp>
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		CGearTracker::CGearTracker(CChildView* pParent)
 			: CDialog(CGearTracker::IDD, pParent)
@@ -115,5 +115,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			delete this;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

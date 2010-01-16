@@ -1218,7 +1218,6 @@ using namespace helpers::math;
 			if (strcmp(Header,"PSY3SONG")==0)
 			{
 				CProgressDialog Progress;
-				Progress.Create();
 				Progress.SetWindowText("Loading...");
 				Progress.ShowWindow(SW_SHOW);
 				UINT version = 0;
@@ -1576,7 +1575,6 @@ using namespace helpers::math;
 					#endif //!defined WINAMP_PLUGIN
 					machineSoloed = solo;
 				} // end of scoped_lock
-				Progress.OnCancel();
 				if((!pFile->Close()) || (chunkcount))
 				{
 					if (!_pMachine[MASTER_INDEX] )
@@ -1596,7 +1594,6 @@ using namespace helpers::math;
 			else if(std::strcmp(Header, "PSY2SONG") == 0)
 			{
 				CProgressDialog Progress;
-				Progress.Create();
 				Progress.SetWindowText("Loading old format...");
 				Progress.ShowWindow(SW_SHOW);
 				int num,sampR;
@@ -2241,7 +2238,6 @@ using namespace helpers::math;
 						zapObject(vstL[i].pars);
 					}
 				}
-				Progress.OnCancel();
 				if (!pFile->Close())
 				{
 					std::ostringstream s;
@@ -2270,7 +2266,6 @@ using namespace helpers::math;
 			CProgressDialog Progress;
 			if ( !autosave ) 
 			{
-				Progress.Create();
 				Progress.SetWindowText("Saving...");
 				Progress.ShowWindow(SW_SHOW);
 			}
@@ -2635,8 +2630,6 @@ using namespace helpers::math;
 			{
 				Progress.m_Progress.SetPos(chunkcount);
 				::Sleep(1);
-
-				Progress.OnCancel();
 			}
 
 			if (!pFile->Close())

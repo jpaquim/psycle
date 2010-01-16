@@ -4,8 +4,8 @@
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "InstPreview.hpp"
 #include "Instrument.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		void InstPreview::Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
 		{
@@ -67,6 +67,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_bLoop = false;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace
 #endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

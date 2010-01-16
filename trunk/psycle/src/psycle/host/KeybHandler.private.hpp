@@ -1,8 +1,8 @@
 ///\file
 ///\brief keyboard handler for psycle::host::CChildView, private header
 #include "Psycle.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
@@ -146,5 +146,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pattern_view()->MousePatternTweakSlide(machine, command, value);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

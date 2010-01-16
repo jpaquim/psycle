@@ -10,8 +10,8 @@ namespace psycle {
 using namespace psycle::core;
 #endif
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+namespace host {
 
 // Cuadro de diálogo de XMSamplerMixerPage
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -122,5 +122,5 @@ public:
 private:
 };
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

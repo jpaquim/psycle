@@ -2,48 +2,30 @@
 ///\brief implementation file for psycle::host::CProgressDialog.
 
 #include "ProgressDialog.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
-		CProgressDialog::CProgressDialog(CWnd* pParent) : CDialog(CProgressDialog::IDD, pParent)
-		{
-			//{{AFX_DATA_INIT(CProgressDialog)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
-			m_pParent = pParent;
-		}
-
-		void CProgressDialog::DoDataExchange(CDataExchange* pDX)
-		{
-			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CProgressDialog)
-			DDX_Control(pDX, IDC_PROGRESS1, m_Progress);
-			//}}AFX_DATA_MAP
-		}
+namespace psycle {
+	namespace host {
 
 		BEGIN_MESSAGE_MAP(CProgressDialog, CDialog)
-			//{{AFX_MSG_MAP(CProgressDialog)
-				// NOTE: the ClassWizard will add message map macros here
-			//}}AFX_MSG_MAP
+			 ON_WM_SHOWWINDOW()
 		END_MESSAGE_MAP()
 
-		BOOL CProgressDialog::OnInitDialog() 
-		{
-			CDialog::OnInitDialog();
-			m_Progress.SetPos(0);
-			m_Progress.SetRange(0,16384);
-			AfxGetApp()->DoWaitCursor(1);
-			return true;
+		CProgressDialog::CProgressDialog(CWnd* pParent) 
+			: CDialog(IDD_PROGRESS_DIALOG, pParent) {
+			CDialog::Create(IDD_PROGRESS_DIALOG, pParent);
+			progress_ctrl_.SetPos(0);
+			progress_ctrl_.SetRange(0,16384);
 		}
 
-		BOOL CProgressDialog::Create()
-		{
-			return CDialog::Create(IDD, m_pParent);
+		void CProgressDialog::DoDataExchange(CDataExchange* pDX) {
+			CDialog::DoDataExchange(pDX);
+			DDX_Control(pDX, IDC_PROGRESS1, progress_ctrl_);
 		}
 
-		void CProgressDialog::OnCancel()
-		{
-			DestroyWindow();
-			AfxGetApp()->DoWaitCursor(-1); 
+		void CProgressDialog::OnShowWindow(BOOL bShow, UINT nStatus) {
+			CDialog::OnShowWindow(bShow, nStatus);
+			AfxGetApp()->DoWaitCursor(bShow ? 1 : -1);
+			::Sleep(1);
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+
+	}   // namespace
+}   // namespace

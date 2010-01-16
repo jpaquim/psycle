@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CNewVal.
 #pragma once
 #include "Psycle.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		/// parameter value window.
 		class CNewVal : public CDialog
@@ -30,5 +30,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DECLARE_MESSAGE_MAP()
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

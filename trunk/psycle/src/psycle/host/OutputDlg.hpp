@@ -8,8 +8,8 @@
 #else
 	#include "AudioDriver.hpp"
 #endif
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		/// audio device output config window.
 		class COutputDlg : public CPropertyPage
@@ -52,5 +52,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnConfig();
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

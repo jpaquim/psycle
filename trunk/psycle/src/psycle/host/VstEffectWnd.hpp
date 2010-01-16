@@ -19,8 +19,8 @@ using namespace psycle::core;
 
 
 #include "NativeGui.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		class CVstParamList;
 
@@ -128,6 +128,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI);
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace
 

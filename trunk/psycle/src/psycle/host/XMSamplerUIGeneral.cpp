@@ -9,8 +9,8 @@ using namespace psycle::core;
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #endif
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+namespace host {
 
 	IMPLEMENT_DYNCREATE(XMSamplerUIGeneral, CPropertyPage)
 
@@ -176,5 +176,5 @@ Ex: Pitch slide down");
 		_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
 	}
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

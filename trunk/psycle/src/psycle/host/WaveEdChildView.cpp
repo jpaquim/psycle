@@ -17,7 +17,7 @@ using namespace psycle::core;
 #include <mmreg.h>
 #include <psycle/helpers/math.hpp>
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle) PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 using namespace psycle::helpers;
 using namespace psycle::helpers::math;
@@ -2867,4 +2867,5 @@ CWaveEdChildView::~CWaveEdChildView()
 			}
 		}
 	
-PSYCLE__MFC__NAMESPACE__END PSYCLE__MFC__NAMESPACE__END
+	}   // namespace host
+}   // namespace psycle

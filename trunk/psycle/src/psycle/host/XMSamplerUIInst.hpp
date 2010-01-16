@@ -14,8 +14,8 @@ using namespace psycle::core;
 
 #include <afxwin.h>
 #include <afxcmn.h>
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+namespace host {
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 class XMSampler;
@@ -258,5 +258,5 @@ protected:
 
 };
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace
