@@ -9,6 +9,7 @@
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <string>
+#include <exception>
 
 namespace psycle { namespace audiodrivers {
 

@@ -78,7 +78,7 @@ std::string ESoundOut::hostPort() {
 	return nrv;
 }
 
-void ESoundOut::do_open() {
+void ESoundOut::do_open() throw(std::exception) {
 	esd_format_t format = ESD_STREAM | ESD_PLAY;
 	format |= channelsFlag();
 	format |= bitsFlag();
@@ -98,7 +98,7 @@ void ESoundOut::do_open() {
 	}
 }
 
-void ESoundOut::do_start() {
+void ESoundOut::do_start() throw(std::exception) {
 	killThread_ = false;
 	pthread_create(&threadId_, NULL, (void*(*)(void*))audioOutThreadStatic, (void*) this);
 }
@@ -158,12 +158,12 @@ void ESoundOut::audioOutThread() {
 	pthread_exit(0);
 }
 
-void ESoundOut::do_stop() {
+void ESoundOut::do_stop() throw(std::exception) {
 	killThread_ = true;
 	while(threadRunning_) usleep(500); ///\todo use proper synchronisation
 }
 
-void ESoundOut::do_close() {
+void ESoundOut::do_close() throw(std::exception) {
 	int i = esd_close(output_);
 	output_ = -1;
 }

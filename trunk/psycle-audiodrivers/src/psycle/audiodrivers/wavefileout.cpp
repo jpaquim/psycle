@@ -14,7 +14,7 @@ AudioDriverInfo WaveFileOut::info( ) const {
 WaveFileOut::WaveFileOut()
 {}
 
-void WaveFileOut::do_start() {
+void WaveFileOut::do_start() throw(std::exception) {
 	stop_requested_ = false;
 	thread_ = new std::thread(boost::bind(&WaveFileOut::thread_function, this));
 }
@@ -29,7 +29,7 @@ void WaveFileOut::thread_function() {
 	}
 }
 
-void WaveFileOut::do_stop() {
+void WaveFileOut::do_stop() throw(std::exception) {
 	{ scoped_lock lock(mutex_);
 		stop_requested_ = true;
 	}
