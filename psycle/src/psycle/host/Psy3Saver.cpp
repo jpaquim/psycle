@@ -105,7 +105,7 @@ namespace psycle  {
 
 			int chunkcount = 3; // 3 chunks plus:	
 
-			chunkcount += song_->patternSequence().numpatterns(); // limit to MAXPATTERNS ..
+			chunkcount += song_->patternSequence().numpatterns()-1; // limit to MAXPATTERNS ..
 
 			for (int i = 0; i < MAX_MACHINES; i++)
 			{
