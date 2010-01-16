@@ -107,8 +107,8 @@ void JackOut::do_stop() {
 	jack_client_close(client);
 }
 
-JackOut::~JackOut() {
-	set_opened(false);
+JackOut::~JackOut() throw() {
+	before_destruction();
 }
 
 }}

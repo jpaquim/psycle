@@ -15,7 +15,7 @@ namespace psycle { namespace audiodrivers {
 class ESoundOut : public AudioDriver {
 	public:
 		ESoundOut();
-		~ESoundOut();
+		~ESoundOut() throw();
 		/*override*/ AudioDriverInfo info() const;
 
 	protected:
@@ -24,8 +24,8 @@ class ESoundOut : public AudioDriver {
 		/*override*/ void do_stop();
 		/*override*/ void do_close();
 
-		/*override*/ bool opened() const { return output_ >= 0;  }
-		/*override*/ bool started() const { return threadRunning_; }
+		/*override*/ bool opened() const throw() { return output_ >= 0;  }
+		/*override*/ bool started() const throw() { return threadRunning_; }
 
 	private:
 		unsigned int channels_;

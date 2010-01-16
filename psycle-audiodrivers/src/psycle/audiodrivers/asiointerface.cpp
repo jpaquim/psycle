@@ -13,8 +13,7 @@ using helpers::math::clipped_lrint;
 
 
 ASIOInterface::~ASIOInterface() throw() {
-	set_opened(false);
-	//ASIOExit();
+	before_destruction();
 	asioDrivers.removeCurrentDriver();
 }
 
@@ -148,13 +147,13 @@ void ASIOInterface::Init() {
 
 void ASIOInterface::do_open() {
 	if(!_configured) ReadConfig();
-	//CSingleLock lock(&_lock, TRUE);
+
 	scoped_lock lock(mutex_);
 
 	_firstrun = true;
-	if(_running) return;
 
-	// BEGIN -  Code
+	if(_running) return; // useless, can't happen
+
 	asioDrivers.removeCurrentDriver();
 	char bla[128]; strcpy(bla,_selectedout.driver->_name.c_str());
 	if(!asioDrivers.loadDriver(bla)) {
@@ -164,14 +163,12 @@ void ASIOInterface::do_open() {
 	ASIODriverInfo driverInfo;
 	driverInfo.sysRef = 0;
 	if (ASIOInit(&driverInfo) != ASE_OK) {
-		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
 		throw std::runtime_error("..........");
 	}
 	if(ASIOSetSampleRate(playbackSettings_.samplesPerSec()) != ASE_OK) {
 		playbackSettings_.setSamplesPerSec(44100);
 		if(ASIOSetSampleRate(playbackSettings_.samplesPerSec()) != ASE_OK) {
-			//ASIOExit();
 			asioDrivers.removeCurrentDriver();
 			throw std::runtime_error("..........");
 		}
@@ -202,7 +199,6 @@ void ASIOInterface::do_open() {
 	info_[counter].buffers[0] = info_[counter].buffers[1] = info_[counter+1].buffers[0] = info_[counter+1].buffers[1] = 0;
 	// create and activate buffers
 	if(ASIOCreateBuffers(info_,numbuffers,_ASIObufferSize,&asioCallbacks) != ASE_OK) {
-		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
 		throw std::runtime_error("..........");
 	}
@@ -225,20 +221,17 @@ void ASIOInterface::do_open() {
 void ASIOInterface::do_start() {
 	if(ASIOStart() != ASE_OK) {
 		ASIODisposeBuffers();
-		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
 		throw std::runtime_error("..........");
 	}
-	// END -  CODE
 	_running = true;
 	//CMidiInput::Instance()->ReSync(); // MIDI IMPLEMENTATION
 }
 
 void ASIOInterface::do_stop() {
-	//CSingleLock lock(&_lock, TRUE); todo
 	scoped_lock lock(mutex_);
 
-	if(!_running) return;
+	if(!_running) return; // useless, can't happen
 	_running = false;
 	ASIOStop();
 }
@@ -251,7 +244,6 @@ void ASIOInterface::do_close() {
 		universalis::os::aligned_memory_dealloc(_selectedins[i].pright);
 	}
 	delete[] ASIObuffers;
-	//ASIOExit();
 	asioDrivers.removeCurrentDriver();
 }
 
@@ -444,7 +436,7 @@ void ASIOInterface::ControlPanel(int driverID) {
 ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow) {
 	// the actual processing callback.
 	// Beware that this is normally in a seperate thread, hence be sure that you take care
-	// about thread synchronization. This is omitted here for simplicity.
+	// about thread synchronization.
 	if(_firstrun) {
 		universalis::cpu::exception::install_handler_in_thread();
 		SetThreadAffinityMask(GetCurrentThread(), 1);
@@ -1011,33 +1003,59 @@ long ASIOInterface::asioMessages(long selector, long value, void* message, doubl
 	return ret;
 }
 
-void ASIOInterface::Configure() { 	 
-	if(!_configured) ReadConfig(); 	 
-	if(ui_) {
-	   bool _initialized = true;
-	   ui_->SetValues(GetidxFromOutPort(_selectedout), playbackSettings_.samplesPerSec(), _ASIObufferSize); 	 
-	   if(ui_->DoModal(this) != IDOK) return; 	 
-	   int oldbs = _ASIObufferSize; 	 
-	   PortOut oldout = _selectedout; 	 
-	   int oldsps = playbackSettings_.samplesPerSec(); 	 
-	   if(_initialized) do_stop(); 	 
-	   int tmp_driver_id, tmp_sample_rate, tmp_buffer_size; 	 
-	   ui_->GetValues(tmp_driver_id, tmp_sample_rate, tmp_buffer_size); 	 
-	   _ASIObufferSize = tmp_buffer_size; 	 
-	   _selectedout = GetOutPortFromidx(tmp_driver_id); 	 
-	   playbackSettings_.setSamplesPerSec(tmp_sample_rate); 	 
-	   _configured = true; 	 					
-	   set_started(true);
-	   if (started()) {
-		 WriteConfig(); 	 
-	   } else { 	 
-	    _ASIObufferSize = oldbs; 	 
-	    _selectedout = oldout; 	 
-	    playbackSettings_.setSamplesPerSec(oldsps); 	 
-	    set_started(true);
-	   }
-	 } 	 	 
-  } 	 
-	  	 	 
+void ASIOInterface::Configure() {
+	if(!_configured) ReadConfig();
+	if(!ui_) return;
+
+	ui_->SetValues(GetidxFromOutPort(_selectedout), playbackSettings_.samplesPerSec(), _ASIObufferSize);
+	if(ui_->DoModal(this) != IDOK) return;
+	int oldbs = _ASIObufferSize;
+	PortOut oldout = _selectedout;
+	int oldsps = playbackSettings_.samplesPerSec();
+	
+	try {
+		set_started(false);
+	} catch(std::exception e) {
+		std::ostringstream s;
+		s << "failed to stop driver: " << e.what();
+		/*ui_->*/Error(s.str().c_str());
+		return;
+	}
+
+	int tmp_driver_id, tmp_sample_rate, tmp_buffer_size;
+	ui_->GetValues(tmp_driver_id, tmp_sample_rate, tmp_buffer_size);
+
+	_ASIObufferSize = tmp_buffer_size;
+	_selectedout = GetOutPortFromidx(tmp_driver_id);
+	playbackSettings_.setSamplesPerSec(tmp_sample_rate);
+	_configured = true;
+	
+	// try the settings
+	bool failed(false);
+	try {
+		set_started(true);
+	} catch(std::exception e) {
+		failed = true;
+		std::ostringstream s;
+		s << "settings failed: " << e.what();
+		/*ui_->*/Error(s.str().c_str());
+	}
+	if(failed) {
+		// rollback settings
+		_ASIObufferSize = oldbs;
+		_selectedout = oldout;
+		playbackSettings_.setSamplesPerSec(oldsps);
+		try {
+			set_started(true);
+		} catch(std::exception e) {
+			std::ostringstream s;
+			s << "failed to rollback driver settings: " << e.what();
+			s << "\nDriver is totally screwed, in an inconsistent state. Restart the app!";
+			/*ui_->*/Error(s.str().c_str());
+			return;
+		}
+	}
+	WriteConfig();
+}
 
 }}

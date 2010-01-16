@@ -382,7 +382,7 @@ void AlsaOut::set_swparams(snd_pcm_sw_params_t *swparams) {
 }
 
 AlsaOut::~AlsaOut() {
-	set_opened(false);
+	before_destruction();
 	///\todo free memory here
 }
 

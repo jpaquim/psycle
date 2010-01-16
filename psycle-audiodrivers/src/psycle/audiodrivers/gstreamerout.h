@@ -18,7 +18,7 @@ using namespace universalis::stdlib;
 class GStreamerOut : public AudioDriver {
 	public:
 		GStreamerOut();
-		~GStreamerOut();
+		~GStreamerOut() throw();
 		/*override*/ AudioDriverInfo info() const;
 
 	protected:

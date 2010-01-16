@@ -26,8 +26,8 @@ MsWaveOut::MsWaveOut() {
 	buf = 0;
 }
 
-MsWaveOut::~MsWaveOut() {
-	set_opened(false);
+MsWaveOut::~MsWaveOut() throw() {
+	before_destruction();
 }
 
 WAVEHDR* MsWaveOut::allocateBlocks( ) {

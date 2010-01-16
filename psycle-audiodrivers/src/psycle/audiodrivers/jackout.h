@@ -15,7 +15,7 @@ namespace psycle { namespace audiodrivers {
 class JackOut : public AudioDriver {
 	public:
 		JackOut();
-		~JackOut();
+		~JackOut() throw();
 		/*override*/ AudioDriverInfo info() const;
 
 	protected:
