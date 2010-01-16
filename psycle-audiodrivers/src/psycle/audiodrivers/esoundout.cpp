@@ -32,7 +32,8 @@ ESoundOut::ESoundOut()
 	threadRunning_(false),
 	killThread_(false),
 	host_(""),
-	port_(0)
+	port_(0),
+	output_(-1)
 {}
 
 int ESoundOut::bitsFlag() {
@@ -164,6 +165,7 @@ void ESoundOut::do_stop() {
 
 void ESoundOut::do_close() {
 	int i = esd_close(output_);
+	output_ = -1;
 }
 
 ESoundOut::~ESoundOut() {
