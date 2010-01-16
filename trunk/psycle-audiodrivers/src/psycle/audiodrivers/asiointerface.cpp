@@ -1052,8 +1052,8 @@ void ASIOInterface::Configure() {
 			s << "failed to rollback driver settings: " << e.what();
 			s << "\nDriver is totally screwed, in an inconsistent state. Restart the app!";
 			/*ui_->*/Error(s.str().c_str());
-			return;
 		}
+		return;
 	}
 	WriteConfig();
 }
