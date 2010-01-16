@@ -60,8 +60,8 @@ MsDirectSound::MsDirectSound(DSoundUiInterface* ui)
 	_capPorts.resize(0);
 }
 
-MsDirectSound::~MsDirectSound() {
-	set_opened(false);
+MsDirectSound::~MsDirectSound() throw() {
+	before_destruction();
 }
 
 void MsDirectSound::do_start() {

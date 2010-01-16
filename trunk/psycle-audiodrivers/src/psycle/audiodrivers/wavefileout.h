@@ -18,7 +18,7 @@ class WaveFileOut : public AudioDriver {
 	public:
 		/*override*/ AudioDriverInfo info() const;
 		WaveFileOut();
-		~WaveFileOut();
+		~WaveFileOut() throw();
 
 	protected:
 		/*override*/ void do_open() {}

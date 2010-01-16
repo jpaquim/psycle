@@ -9,11 +9,24 @@
 #include "audiodriver.h"
 #include <universalis/stdlib/cstdint.hpp>
 #include <iostream>
+
+#include <diversalis/compiler.hpp>
+
 #include <windows.h>
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+#endif
+
 #include <mmsystem.h>
-#pragma comment(lib, "winmm")
-#undef min
-#undef max
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#pragma comment(lib, "winmm")
+#endif
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(pop)
+#endif
 
 namespace psycle { namespace audiodrivers {
 
@@ -25,7 +38,7 @@ using namespace universalis::stdlib;
 class MsWaveOut : public AudioDriver {
 	public:
 		MsWaveOut();
-		~MsWaveOut();
+		~MsWaveOut() throw();
 
 		/*override*/ AudioDriverInfo info() const;
 
@@ -35,8 +48,8 @@ class MsWaveOut : public AudioDriver {
 		/*override*/ void do_stop();
 		/*override*/ void do_close();
 
-		/*override*/ bool opened() const { return hWaveOut != 0; }
-		/*override*/ bool started() const { return _running; }
+		/*override*/ bool opened() const throw() { return hWaveOut != 0; }
+		/*override*/ bool started() const throw() { return _running; }
 
 	private:
 		std::int16_t *buf;

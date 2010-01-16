@@ -6,6 +6,7 @@
 #pragma once
 
 #include "audiodriver.h"
+#include <universalis/stdlib/condition.hpp>
 #include <asiodrivers.h>
 #include <asio.h>
 #include <map>
@@ -133,24 +134,24 @@ class ASIOInterface : public AudioDriver {
 	public:
 		ASIOInterface();
 		ASIOInterface(AsioUiInterface* ui);
-		virtual ~ASIOInterface() throw();
+		~ASIOInterface() throw();
 
-		virtual AudioDriverInfo info() const;
+		/*override*/ AudioDriverInfo info() const;
 
-		virtual void Configure();
+		/*override*/ void Configure();
 
 	protected:
-		virtual void do_open();
-		virtual void do_start();
-		virtual void do_stop();
-		virtual void do_close();
+		/*override*/ void do_open();
+		/*override*/ void do_start();
+		/*override*/ void do_stop();
+		/*override*/ void do_close();
 
-		virtual bool opened() const { return !(ASE_NotPresent == ASIOOutputReady()); }
-		virtual bool started() const { return _running; }
+		/*override*/ bool opened() const throw() { return !(ASE_NotPresent == ASIOOutputReady()); }
+		/*override*/ bool started() const throw() { return _running; }
 
 	public:
-		virtual int GetInputLatency() { return _inlatency; }
-		virtual int GetOutputLatency() { return _outlatency; }
+		/*override*/ int GetInputLatency() { return _inlatency; }
+		/*override*/ int GetOutputLatency() { return _outlatency; }
 
 	public: ///\todo all that public!?
 		int GetBufferSize();
@@ -199,10 +200,8 @@ class ASIOInterface : public AudioDriver {
 		int currentSamples[MAX_ASIO_DRIVERS];
 		#endif
 	private:
-		// static ::CCriticalSection _lock;
 		mutex mutex_;
 		typedef class scoped_lock<mutex> scoped_lock;
-		/// a condition variable to wait until notified that the value of running_ has changed
 		condition<scoped_lock> condition_;
 
 		bool _configured;

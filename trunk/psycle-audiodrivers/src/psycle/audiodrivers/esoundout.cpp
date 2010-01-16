@@ -160,7 +160,7 @@ void ESoundOut::audioOutThread() {
 
 void ESoundOut::do_stop() {
 	killThread_ = true;
-	while(threadRunning_) usleep(500); // give thread time to close
+	while(threadRunning_) usleep(500); ///\todo use proper synchronisation
 }
 
 void ESoundOut::do_close() {
@@ -168,8 +168,8 @@ void ESoundOut::do_close() {
 	output_ = -1;
 }
 
-ESoundOut::~ESoundOut() {
-	set_opened(false);
+ESoundOut::~ESoundOut() throw() {
+	before_destruction();
 }
 
 }}

@@ -12,12 +12,10 @@ AudioDriverInfo WaveFileOut::info( ) const {
 }
 
 WaveFileOut::WaveFileOut()
-:
-	thread_(),
-	stop_requested_()
 {}
 
 void WaveFileOut::do_start() {
+	stop_requested_ = false;
 	thread_ = new std::thread(boost::bind(&WaveFileOut::thread_function, this));
 }
 
@@ -39,8 +37,8 @@ void WaveFileOut::do_stop() {
 	delete thread_;
 }
 
-WaveFileOut::~WaveFileOut() {
-	set_opened(false);
+WaveFileOut::~WaveFileOut() throw() {
+	before_destruction();
 }
 
 }}

@@ -10,9 +10,15 @@
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
 #include <universalis/stdlib/cstdint.hpp>
+
+#include <diversalis/compiler.hpp>
+
 #include <windows.h>
-#include <mmsystem.h>
 #include <dsound.h>
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#pragma comment(lib, "dsound")
+#endif
+
 #include <map>
 
 namespace psycle { namespace audiodrivers {
@@ -69,12 +75,13 @@ class MsDirectSound : public AudioDriver {
 	public:
 		MsDirectSound();
 		MsDirectSound(DSoundUiInterface* ui);
-		virtual ~MsDirectSound();
-		/*override*/ AudioDriverInfo info() const;
-		virtual void Configure();
+		~MsDirectSound() throw();
 
-		/*override*/ bool opened() const { return _pDs != 0;  }
-		/*override*/ bool started() const { return threadRunning_; }
+		/*override*/ AudioDriverInfo info() const;
+		/*override*/ void Configure();
+
+		/*override*/ bool opened() const throw() { return _pDs != 0;  }
+		/*override*/ bool started() const throw() { return threadRunning_; }
 
 	protected:
 		/*override*/ void do_open();

@@ -330,8 +330,8 @@ void GStreamerOut::do_close() {
 	}
 }
 
-GStreamerOut::~GStreamerOut() {
-	set_opened(false);
+GStreamerOut::~GStreamerOut() throw() {
+	before_destruction();
 }
 
 }}

@@ -24,7 +24,7 @@ NetAudioOut::NetAudioOut()
 	setDefaults();
 }
 
-NetAudioOut::~NetAudioOut() {
+NetAudioOut::~NetAudioOut() throw() {
 	Enable(false);
 }
 

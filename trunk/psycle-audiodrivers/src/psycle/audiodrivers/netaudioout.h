@@ -162,7 +162,7 @@ namespace psycle { namespace audiodrivers {
 class NetAudioOut : public AudioDriver {
 	public:
 		NetAudioOut();
-		~NetAudioOut();
+		~NetAudioOut() throw();
 		/*override*/ AudioDriverInfo info() const;
 		/*override*/ void Configure();
 		/*override*/ bool Enable(bool e);

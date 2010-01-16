@@ -3,12 +3,14 @@
 
 #include "audiodriver.h"
 #include <diversalis/cpu.hpp>
-#include <boost/bind.hpp>
+#include <universalis/os/loggers.hpp>
 #include <universalis/stdlib/thread.hpp>
+#include <boost/bind.hpp>
 #include <psycle/helpers/math/clip.hpp>
 
 namespace psycle { namespace audiodrivers {
 
+namespace loggers = universalis::os::loggers;
 using namespace psycle::helpers::math;
 
 /// number of samples that the dummy driver reads at a time
@@ -57,12 +59,26 @@ AudioDriver::AudioDriver()
 	started_()
 {}
 
+void AudioDriver::before_destruction() throw() {
+	try {
+		set_opened(false);
+	} catch(std::exception e) {
+		std::ostringstream s;
+		s << "could not close driver: " << e.what();
+		loggers::exception()(s.str());
+	} catch(...) {
+		std::ostringstream s;
+		s << "could not close driver: " << universalis::compiler::exceptions::ellipsis();
+		loggers::exception()(s.str());
+	}
+}
+
 void AudioDriver::set_callback(AUDIODRIVERWORKFN callback, void * context) {
 	callback_ = callback;
 	callback_context_ = context;
 }
 
-void AudioDriver::set_opened(bool b) {
+void AudioDriver::set_opened(bool b) throw(std::exception) {
 	if(b) {
 		if(!opened()) do_open();
 	} else if(opened()) {
@@ -72,7 +88,7 @@ void AudioDriver::set_opened(bool b) {
 	opened_ = b;
 }
 
-void AudioDriver::set_started(bool b) {
+void AudioDriver::set_started(bool b) throw(std::exception) {
 	if(b) {
 		if(!started()) {
 			set_opened(true);
@@ -204,66 +220,31 @@ AudioDriverInfo DummyDriver::info() const {
 	return AudioDriverInfo("dummy", "Dummy Driver", "Dummy silent driver", true);
 }
 
-DummyDriver::DummyDriver()
-:
-	opened_(false),
-	running_(false),
-	stop_requested_()
-{}
-
-DummyDriver::~DummyDriver() {
-	set_opened(false);
+DummyDriver::~DummyDriver() throw() {
+	before_destruction();
 }
 	
-void DummyDriver::do_start() {
-	// return immediatly if the thread is already running
-	if(running_) return;
-	
-	thread t(boost::bind(&DummyDriver::thread_function, this));
-	// wait for the thread to be running
-	{ scoped_lock lock(mutex_);
-		while(!running_) condition_.wait(lock);
-	}
+void DummyDriver::do_start() throw(std::exception) {
+	stop_requested_ = false;
+	thread_ = new thread(boost::bind(&DummyDriver::thread_function, this));
 }
 
 void DummyDriver::thread_function() {
-	// notify that the thread is now running
-	{ scoped_lock lock(mutex_);
-		running_ = true;
-	}
-	condition_.notify_one();
-
 	while(true) {
-		// check whether the thread has been asked to terminate
 		{ scoped_lock lock(mutex_);
-			if(stop_requested_) goto notify_termination;
+			// check whether the thread has been asked to terminate
+			if(stop_requested_) break;
 		}
 		callback(DUMMYDRIVERWORKFN_MAX_BUFFER_LENGTH);
 	}
-
-	// notify that the thread is not running anymore
-	notify_termination:
-		{ scoped_lock lock(mutex_);
-			running_ = false;
-		}
-		condition_.notify_one();
 }
 
-void DummyDriver::do_stop() {
-	// return immediatly if the thread is not running
-	if(!running_) return;
-
-	// ask the thread to terminate
+void DummyDriver::do_stop() throw() {
 	{ scoped_lock lock(mutex_);
-		stop_requested_ = true;
+		stop_requested_ = true; // ask the thread to terminate
 	}
-	condition_.notify_one();
-	
-	/// join the thread
-	{ scoped_lock lock(mutex_);
-		while(running_) condition_.wait(lock);
-		stop_requested_ = false;
-	}
+	thread_->join();
+	delete thread_;
 }
 
 }}

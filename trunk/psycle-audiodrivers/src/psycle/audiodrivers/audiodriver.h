@@ -5,8 +5,8 @@
 #define PSYCLE__AUDIODRIVERS__AUDIODRIVER__INCLUDED
 #pragma once
 
+#include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <string>
 
@@ -153,11 +153,21 @@ class AudioDriverSettings {
 /// base class for all audio drivers
 class AudioDriver {
 	public:
-		AudioDriver();
-		virtual ~AudioDriver() {}
-
 		/// gives the driver information
 		virtual AudioDriverInfo info() const = 0;
+
+	///\name ctor/dtor
+	///\{
+		public:
+			AudioDriver();
+			virtual ~AudioDriver() throw() {}
+		protected:
+			/// derived classes must call this in their destructor.
+			/// this ensures the driver is closed.
+			/// Exceptions are handled internally in this function,
+			/// so it's suitable for being called inside a destructor.
+			void before_destruction() throw();
+	///\}
 
 	///\name callback to the player work function that generates audio
 	///\{
@@ -204,16 +214,30 @@ class AudioDriver {
 			AudioDriverSettings captureSettings_; 
 	///\}
 
+	public:
+		///\todo specification.. what does Configure do?
+		virtual void Configure() {}
+
 	///\name open/close the device (allocate/deallocate resources)
 	///\{
 		public:
-			void set_opened(bool);
-		    // todo, should be pure virtual and opened_ removed, modify some drivers, 
-			// if not already happened
-			virtual bool opened() const { return opened_; }
+			/// opens/closes the driver, allocating resources and setting it up according to the settings or deallocating them.
+			///\throws std::exception in case of failure to open/close the driver
+			///\post opened() == b
+			void set_opened(bool b) throw(std::exception);
+
+			/// virtual because some drivers want to override it ([bohan] it's not needed)
+			virtual bool opened() const throw() { return opened_; }
 		protected:
-			virtual void do_open() = 0;
-			virtual void do_close() = 0;
+			/// opens the driver, allocating resources and setting it up according to the settings.
+			///\pre !opened()
+			///\throws std::exception in case of failure to open the driver or setting up settings
+			virtual void do_open() throw(std::exception) = 0;
+
+			/// closes the driver, deallocating resources.
+			///\pre opened()
+			///\throws std::exception in case of failure to close the driver
+			virtual void do_close() throw(std::exception) = 0;
 		private:
 			bool opened_;
 	///\}
@@ -221,15 +245,23 @@ class AudioDriver {
 	///\name start/stop the device (enable/disable processing)
 	///\{
 		public:
-			void set_started(bool);
-			// todo, should be pure virtual and started_ removed, modify some drivers, 
-			// if not already happened
-			virtual bool started() const { return started_; }  
-		
-			virtual void Configure() {}
+			/// starts/stops processing.
+			///\throws std::exception in case of failure to start/stop the driver
+			///\post started() == b
+			void set_started(bool b) throw(std::exception);
+
+			/// virtual because some drivers want to override it ([bohan] it's not needed)
+			virtual bool started() const throw() { return started_; }  
 		protected:
-			virtual void do_start() = 0;
-			virtual void do_stop() = 0;
+			/// starts processing
+			///\pre !started()
+			///\throws std::exception in case of failure to start the driver
+			virtual void do_start() throw(std::exception) = 0;
+
+			/// stops processing
+			///\pre started()
+			///\throws std::exception in case of failure to stop the driver
+			virtual void do_stop() throw(std::exception) = 0;
 		private:
 			bool started_;
 	///\}
@@ -252,34 +284,25 @@ class AudioDriver {
 /// a dummy, silent driver
 class DummyDriver : public AudioDriver {
 	public:
-		DummyDriver();
-		~DummyDriver();
+		~DummyDriver() throw();
 		/*override*/ AudioDriverInfo info() const;
 
 	protected:
-		/*override*/ void do_open() { opened_ = true; }
-		/*override*/ void do_start();
-		/*override*/ void do_stop();
-		/*override*/ void do_close() { opened_ = false; }
-
-		/*override*/ bool opened() const { return opened_; }
-		/*override*/ bool started() const { return running_; }
+		/*override*/ void do_open() throw(std::exception) {}
+		/*override*/ void do_start() throw(std::exception);
+		/*override*/ void do_stop() throw(std::exception);
+		/*override*/ void do_close() throw(std::exception) {}
 
 	private:
-			bool opened_;
 		///\name thread
 		///\{
-			/// the function executed by the alsa thread
+			thread * thread_;
+			/// the function executed by the thread
 			void thread_function();
-			/// whether the thread is running
-			bool running_;
 			/// whether the thread is asked to terminate
 			bool stop_requested_;
-			/// a mutex to synchronise accesses to running_ and stop_requested_
 			mutex mutex_;
 			typedef class scoped_lock<mutex> scoped_lock;
-			/// a condition variable to wait until notified that the value of running_ has changed
-			condition<scoped_lock> condition_;
 		///\}
 };
 
