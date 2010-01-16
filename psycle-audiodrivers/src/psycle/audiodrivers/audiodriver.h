@@ -257,12 +257,16 @@ class DummyDriver : public AudioDriver {
 		/*override*/ AudioDriverInfo info() const;
 
 	protected:
-		/*override*/ void do_open() {}
+		/*override*/ void do_open() { opened_ = true; }
 		/*override*/ void do_start();
 		/*override*/ void do_stop();
-		/*override*/ void do_close() {}
+		/*override*/ void do_close() { opened_ = false; }
+
+		/*override*/ bool opened() const { return opened_; }
+		/*override*/ bool started() const { return running_; }
 
 	private:
+			bool opened_;
 		///\name thread
 		///\{
 			/// the function executed by the alsa thread

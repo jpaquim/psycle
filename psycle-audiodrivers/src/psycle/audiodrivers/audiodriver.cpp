@@ -206,9 +206,14 @@ AudioDriverInfo DummyDriver::info() const {
 
 DummyDriver::DummyDriver()
 :
-	running_(),
+	opened_(false),
+	running_(false),
 	stop_requested_()
 {}
+
+DummyDriver::~DummyDriver() {
+	set_opened(false);
+}
 	
 void DummyDriver::do_start() {
 	// return immediatly if the thread is already running
@@ -259,10 +264,6 @@ void DummyDriver::do_stop() {
 		while(running_) condition_.wait(lock);
 		stop_requested_ = false;
 	}
-}
-
-DummyDriver::~DummyDriver() {
-	set_opened(false);
 }
 
 }}
