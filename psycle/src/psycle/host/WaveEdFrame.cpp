@@ -14,6 +14,7 @@ using namespace psycle::core;
 #endif
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
+#include "ProjectData.hpp"
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
@@ -53,9 +54,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		CWaveEdFrame::CWaveEdFrame()
 		{
 		}
-		CWaveEdFrame::CWaveEdFrame(Song* _sng, CMainFrame* pframe)
+		CWaveEdFrame::CWaveEdFrame(ProjectData* projects, CMainFrame* pframe)
+			: projects_(projects)
 		{
-			SetSong(_sng);
 			wavview.SetParent(pframe);
 		}
 
@@ -63,10 +64,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 
 		}
-		void CWaveEdFrame::SetSong(Song* _sng) {
-			this->_pSong=_sng;
-			wavview.SetSong(this->_pSong);
-		}
+
 		void CWaveEdFrame::OnClose() 
 		{
 			ShowWindow(SW_HIDE);
@@ -135,7 +133,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if (wavview.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
 			{
-				this->AdjustStatusBar(_pSong->instSelected());
+				this->AdjustStatusBar(projects_->active_project()->song().instSelected());
 				return true;	
 			}
 			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
@@ -167,7 +165,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			char buff[48];
 			int sl=wavview.GetSelectionLength();
-			if(sl==0 || _pSong->_pInstrument[_pSong->instSelected()]==NULL)
+			if(sl==0 || projects_->active_project()->song()._pInstrument[projects_->active_project()->song().instSelected()]==NULL)
 				sprintf(buff, "No Data in Selection.");
 			else
 			{
@@ -180,14 +178,14 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CWaveEdFrame::AdjustStatusBar(int ins)
 		{
 			char buff[48];
-			int	wl=_pSong->_pInstrument[ins]->waveLength;
+			int	wl=projects_->active_project()->song()._pInstrument[ins]->waveLength;
 			float wlInSecs = wl / float(Global::configuration().GetSamplesPerSec());
 			sprintf(buff, "Size: %u (%0.3f secs.)", wl, wlInSecs);
 			statusbar.SetPaneText(2, buff, true);
 
 			if (wl)
 			{
-				if (_pSong->_pInstrument[ins]->waveStereo) statusbar.SetPaneText(3, "Mode: Stereo", true);
+				if (projects_->active_project()->song()._pInstrument[ins]->waveStereo) statusbar.SetPaneText(3, "Mode: Stereo", true);
 				else statusbar.SetPaneText(3, "Mode: Mono", true);
 			}
 			else statusbar.SetPaneText(3, "Mode: Empty", true);
@@ -198,15 +196,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnShowWindow(bShow, nStatus);
 
 			Notify();
-		//	AdjustStatusBar(_pSong->instSelected(), _pSong->waveSelected);
+		//	AdjustStatusBar(projects_->active_project()->song().instSelected(), projects_->active_project()->song().waveSelected);
 			UpdateWindow();
 		}
 
 		void CWaveEdFrame::Notify(void)
 		{
-			wavview.SetViewData(_pSong->instSelected());
-			AdjustStatusBar(_pSong->instSelected());
-			wsInstrument = _pSong->instSelected();
+			wavview.SetViewData(projects_->active_project()->song().instSelected());
+			AdjustStatusBar(projects_->active_project()->song().instSelected());
+			wsInstrument = projects_->active_project()->song().instSelected();
 		}
 
 		void CWaveEdFrame::OnPlay() {PlayFrom(wavview.GetCursorPos());}
@@ -222,12 +220,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdFrame::PlayFrom(unsigned long startPos)
 		{
-			if( startPos<0 || startPos >= _pSong->_pInstrument[wsInstrument]->waveLength )
+			if( startPos<0 || startPos >= projects_->active_project()->song()._pInstrument[wsInstrument]->waveLength )
 				return;
 
 			OnStop();
 
-			Sampler::waved.SetInstrument( _pSong->_pInstrument[wsInstrument] );
+			Sampler::waved.SetInstrument( projects_->active_project()->song()._pInstrument[wsInstrument] );
 			Sampler::waved.Play(startPos);
 		}
 		void CWaveEdFrame::OnUpdateFFandRWButtons(CCmdUI* pCmdUI)
@@ -237,7 +235,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CWaveEdFrame::OnFastForward()
 		{
-			unsigned long wl = _pSong->_pInstrument[wsInstrument]->waveLength;
+			unsigned long wl = projects_->active_project()->song()._pInstrument[wsInstrument]->waveLength;
 			wavview.SetCursorPos( wl-1 );
 		}
 		void CWaveEdFrame::OnRewind()

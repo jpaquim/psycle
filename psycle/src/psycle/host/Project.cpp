@@ -27,22 +27,25 @@ using namespace psycle::core;
 namespace psycle {
 	namespace host {
 
-		Project::Project(ProjectData* parent, PatternView* pat_view, MachineView* mac_view)
+		Project::Project(ProjectData* parent)
 			: parent_(parent),
-			  pat_view_(pat_view),
-			  mac_view_(mac_view),
 			  beat_zoom_(4)
 		{
 			assert(pat_view_);
 			assert(mac_view_);
-			song_.New();
-			song_.progress.connect(boost::bind(&Project::OnProgress, this, _1, _2, _3));
-			song_.report.connect(boost::bind(&Project::OnReport, this, _1, _2));
+			song_ = new Song();
+			song_->New();
 			progress_.Create();
+			// modules of project
+			mac_view_ = new MachineView(this);
+			pat_view_ = new PatternView(this);
 		}
 
 		Project::~Project()
 		{
+			delete song_;
+			delete mac_view_;
+			delete pat_view_;
 		}
 
 		PatternView* Project::pat_view()
@@ -60,9 +63,7 @@ namespace psycle {
 			return parent_;
 		}
 
-		void Project::SetActive() {
-			pat_view()->SetSong(&song());
-			mac_view()->SetSong(&song());
+		void Project::SetActive() {			
 		}
 
 		void Project::Clear()
@@ -155,29 +156,37 @@ namespace psycle {
 			mac_view()->LockVu();
 			Player & player(Player::singleton());
 			player.stop();
-			player.song(song());
+			player.song(*song_);
 			pat_view()->editPosition = 0;
 			progress_.m_Progress.SetPos(0);
-			progress_.ShowWindow(SW_SHOW);
-			if(!song().load(fName.c_str())) {
+			progress_.ShowWindow(SW_SHOW);		
+			psycle::core::Song* song = new Song();
+			song->progress.connect(boost::bind(&Project::OnProgress, this, _1, _2, _3));
+			song->report.connect(boost::bind(&Project::OnReport, this, _1, _2));
+			if(!song->load(fName.c_str())) {
 				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 				progress_.ShowWindow(SW_HIDE);
+				mac_view()->UnlockVu();
+				delete song;
 				return;			
 			}	
 			progress_.ShowWindow(SW_HIDE);
+			player.song(*song);
+			delete song_; 
+			song_ = song;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)
 			{
 				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
-				song().fileName = fName.substr(index+1);
+				song->fileName = fName.substr(index+1);
 			}
 			else
 			{
-				song().fileName = fName;
+				song_->fileName = fName;
 			}
 		//	set_lines_per_beat(song().ticksSpeed());
-			set_beat_zoom(song().ticksSpeed());
+			set_beat_zoom(song_->ticksSpeed());
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
 			pat_view()->RecalculateColourGrid();
@@ -248,7 +257,7 @@ namespace psycle {
 #endif
 			if (Global::pConfig->bShowSongInfoOnLoad)
 			{
-				CSongpDlg dlg(&song());
+				CSongpDlg dlg(song_);
 				dlg.SetReadOnly();
 				dlg.DoModal();
 /*				std::ostringstream songLoaded;

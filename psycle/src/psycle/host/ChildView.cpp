@@ -64,10 +64,7 @@ namespace psycle {
 			  ,output_driver_(0),
 			  last_pos_(-1)
 #endif
-		{
-			machine_view_ = new MachineView(this, main_frame);
-			pattern_view_ = new PatternView(this, main_frame);
-
+		{			
 			for (int c=0; c<256; c++) { 
 				FLATSIZES[c]=8;
 			}	
@@ -76,6 +73,13 @@ namespace psycle {
 			//Global::song().New();
 			// machine_view_->Rebuild();
 			// its done in psycle.cpp, todo check config load order
+		}
+
+		void CChildView::AddModules(Project* project) {
+			machine_view_ = project->mac_view();
+			machine_view_->SetParent(this, main_frame_);
+			pattern_view_ = project->pat_view();
+			pattern_view_->SetParent(this, main_frame_);
 		}
 
 		CChildView::~CChildView()
@@ -88,9 +92,7 @@ namespace psycle {
 				TRACE(buf);
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
-			}
-			delete machine_view_;
-			delete pattern_view_;
+			}		
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -271,7 +273,7 @@ namespace psycle {
 					master->vuupdated = true;
 				}
 #else
-				CSingleLock lock(&_pSong->door,TRUE);
+				CSingleLock lock(&projects_->active_project()->song().door,TRUE);
 				if (Global::song().machine(MASTER_INDEX))
 				{
 					main_frame_->UpdateVumeters
@@ -307,22 +309,22 @@ namespace psycle {
 
 				for(int c=0; c<MAX_MACHINES; c++)
 				{
-					if (_pSong->machine(c))
+					if (projects_->active_project()->song().machine(c))
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						if(_pSong->machine(c)->getMachineKey().host() == Hosts::VST) {
-							((vst::plugin*)_pSong->machine(c))->Idle();
+						if(projects_->active_project()->song().machine(c)->getMachineKey().host() == Hosts::VST) {
+							((vst::plugin*)projects_->active_project()->song().machine(c))->Idle();
 						}
 #else
-						if ( _pSong->machine(c)->_type == MACH_PLUGIN )
+						if ( projects_->active_project()->song().machine(c)->_type == MACH_PLUGIN )
 						{
 							//if (main_frame_->isguiopen[c] && Global::pPlayer->Tweaker) maybe a todo
 							//	main_frame_->m_pWndMac[c]->Invalidate(false);
 						}
-						else if ( _pSong->machine(c)->_type == MACH_VST ||
-								_pSong->machine(c)->_type == MACH_VSTFX )
+						else if ( projects_->active_project()->song().machine(c)->_type == MACH_VST ||
+								projects_->active_project()->song().machine(c)->_type == MACH_VSTFX )
 						{
-							((vst::plugin*)_pSong->machine(c))->Idle();
+							((vst::plugin*)projects_->active_project()->song().machine(c))->Idle();
 //							if (main_frame_->isguiopen[c] && Global::pPlayer->Tweaker)
 //								((CVstEditorDlg*)main_frame_->m_pWndMac[c])->Refresh(-1,0);
 						}
@@ -409,12 +411,12 @@ namespace psycle {
 				CString filepath = Global::pConfig->GetSongDir().c_str();
 				filepath += "\\autosave.psy";
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->save(filepath.GetBuffer(1),3);
+				projects_->active_project()->song().save(filepath.GetBuffer(1),3);
 #else
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
-				_pSong->Save(&file,true);
-				/// \todo _pSong->Save() should not close a file which doesn't open. Add the following
+				projects_->active_project()->song().Save(&file,true);
+				/// \todo projects_->active_project()->song().Save() should not close a file which doesn't open. Add the following
 				// line when fixed. There are other places which need this too.
 				//file.Close();
 #endif
@@ -590,8 +592,8 @@ namespace psycle {
 			CW = cx;
 			CH = cy;
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
-			_pSong->viewSize.y=cy;
+			projects_->active_project()->song().viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
+			projects_->active_project()->song().viewSize.y=cy;
 #endif
 			if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
 			{
@@ -1110,12 +1112,12 @@ namespace psycle {
 
 		void CChildView::OnPopChangegenerator() {
 			projects_->active_project()->cmd_manager()->ExecuteCommand(
-				new ChangeGenCommand(pattern_view(), _pSong->seqBus));
+				new ChangeGenCommand(pattern_view(), projects_->active_project()->song().seqBus));
 		}
 
 		void CChildView::OnPopChangeinstrument() { 
 			projects_->active_project()->cmd_manager()->ExecuteCommand(
-				new ChangeInsCommand(pattern_view(), _pSong->auxcolSelected));
+				new ChangeInsCommand(pattern_view(), projects_->active_project()->song().auxcolSelected));
 		}
 
 		void CChildView::OnPopTranspose1() {
@@ -1280,7 +1282,7 @@ namespace psycle {
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				_pSong->_trackMuted[pattern_view()->editcur.track] = !_pSong->_trackMuted[pattern_view()->editcur.track];
+				projects_->active_project()->song()._trackMuted[pattern_view()->editcur.track] = !projects_->active_project()->song()._trackMuted[pattern_view()->editcur.track];
 				Repaint(draw_modes::track_header);
 			}
 		}
@@ -1289,22 +1291,22 @@ namespace psycle {
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				if (_pSong->_trackSoloed == pattern_view()->editcur.track)
+				if (projects_->active_project()->song()._trackSoloed == pattern_view()->editcur.track)
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						_pSong->_trackMuted[i] = FALSE;
+						projects_->active_project()->song()._trackMuted[i] = FALSE;
 					}
-					_pSong->_trackSoloed = -1;
+					projects_->active_project()->song()._trackSoloed = -1;
 				}
 				else
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						_pSong->_trackMuted[i] = TRUE;
+						projects_->active_project()->song()._trackMuted[i] = TRUE;
 					}
-					_pSong->_trackMuted[pattern_view()->editcur.track] = FALSE;
-					_pSong->_trackSoloed = pattern_view()->editcur.track;
+					projects_->active_project()->song()._trackMuted[pattern_view()->editcur.track] = FALSE;
+					projects_->active_project()->song()._trackSoloed = pattern_view()->editcur.track;
 				}
 				Repaint(draw_modes::track_header);
 			}
@@ -1314,13 +1316,13 @@ namespace psycle {
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				_pSong->_trackArmed[pattern_view()->editcur.track] = !_pSong->_trackArmed[pattern_view()->editcur.track];
-				_pSong->_trackArmedCount = 0;
+				projects_->active_project()->song()._trackArmed[pattern_view()->editcur.track] = !projects_->active_project()->song()._trackArmed[pattern_view()->editcur.track];
+				projects_->active_project()->song()._trackArmedCount = 0;
 				for ( int i=0;i<MAX_TRACKS;i++ )
 				{
-					if (_pSong->_trackArmed[i])
+					if (projects_->active_project()->song()._trackArmed[i])
 					{
-						_pSong->_trackArmedCount++;
+						projects_->active_project()->song()._trackArmedCount++;
 					}
 				}
 				Repaint(draw_modes::track_header);

@@ -13,7 +13,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			DECLARE_DYNAMIC(CWaveEdFrame)
 		public:
-			CWaveEdFrame(Song* _sng, CMainFrame* pframe);
+			CWaveEdFrame(class ProjectData* projects_, CMainFrame* pframe);
 			virtual ~CWaveEdFrame() throw();
 		protected: 
 			CWaveEdFrame();
@@ -22,8 +22,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
 			void GenerateView();
 			void Notify(void);
-			void SetSong(Song* song);
-			Song *_pSong;
 			CMainFrame *_pFrame;
 		// Overrides
 			// ClassWizard generated virtual function overrides
@@ -38,11 +36,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void PlayFrom(unsigned long startpos);
 			CStatusBar statusbar;
 			CToolBar ToolBar;
-
 			CWaveEdChildView wavview;
-
 			int wsInstrument;
 			bool bPlaying;
+			ProjectData* projects_;
 		// Implementation
 		protected:
 			// Generated message map functions

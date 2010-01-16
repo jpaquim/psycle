@@ -12,9 +12,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				#if 0
 					///\todo what was that ? Were we cancelling the mouse click in case of thread race?
-					if (_pSong->_machineLock) return;
+					if (projects_->active_project()->song()._machineLock) return;
 				#else
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(projects_->active_project()->song().Mutex());
 				#endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
@@ -60,9 +60,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if( viewMode == view_modes::machine) {
 				#if 0
 					///\todo what was that ? Were we cancelling the mouse click in case of thread race?
-					if (_pSong->_machineLock) return;
+					if (projects_->active_project()->song()._machineLock) return;
 				#else
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(projects_->active_project()->song().Mutex());
 				#endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
@@ -143,7 +143,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					if (( point.y >= pattern_view()->YOFFSET ) && (point.x >= pattern_view()->XOFFSET))
 					{
 						const int ttm = pattern_view()->tOff + (point.x-pattern_view()->XOFFSET)/pattern_view()->ROWWIDTH;
-						const int nl = _pSong->patternLines[_pSong->playOrder[pattern_view()->editPosition]];
+						const int nl = projects_->active_project()->song().patternLines[projects_->active_project()->song().playOrder[pattern_view()->editPosition]];
 
 						pattern_view()->StartBlock(ttm,0,0);
 						pattern_view()->EndBlock(ttm,nl-1,8);

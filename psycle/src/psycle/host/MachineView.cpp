@@ -49,28 +49,19 @@ namespace psycle {
 			}
 		}
 
-		MachineView::MachineView(CChildView* parent, CMainFrame* main)
-			: PsycleCanvas::Canvas(parent),
-			  parent_(parent),
-			  main_(main),
-			  song_(0),
+		MachineView::MachineView(Project* project)
+			: PsycleCanvas::Canvas(),
+			  project_(project),
 			  del_line_(0),
 			  rewire_line_(0),
 			  del_machine_(0),
 			  is_locked_(false),
-			  del_in_engine_(false)  			
-		{
+			  del_in_engine_(false)  {
 			// set_bg_color(Global::pConfig->mv_colour);
 			// InitSkin();
 		}
 
-		void MachineView::SetSong(class Song* song)
-		{
-			song_ = song;
-		}
-
-		MachineView::~MachineView()
-		{
+		MachineView::~MachineView() {
 			machineskin.DeleteObject();
 			DeleteObject(hbmMachineSkin);
 			machineskinmask.DeleteObject();
@@ -83,13 +74,15 @@ namespace psycle {
 			return main_;
 		}
 
-		void MachineView::WriteStatusBar(const std::string& text)
-		{
+		Song* MachineView::song() { 
+			return &project_->song(); 
+		}
+
+		void MachineView::WriteStatusBar(const std::string& text) {
 			main()->StatusBarText(text.c_str());
 		}
 
-		void MachineView::DeleteMachineGui(Machine* mac)
-		{
+		void MachineView::DeleteMachineGui(Machine* mac) {
 			std::map<Machine*, MachineGui*>::iterator it;
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
@@ -101,8 +94,7 @@ namespace psycle {
 			parent_->Invalidate();
 		}
 
-		void MachineView::SetDeleteMachineGui(Machine* mac, bool in_engine)
-		{
+		void MachineView::SetDeleteMachineGui(Machine* mac, bool in_engine) {
 			std::map<Machine*, MachineGui*>::iterator it;
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
@@ -110,8 +102,7 @@ namespace psycle {
 			del_in_engine_ = in_engine;
 		}
 
-		void MachineView::DoMacPropDialog(Machine* mac, bool from_event)
-		{
+		void MachineView::DoMacPropDialog(Machine* mac, bool from_event) {
 			std::map<Machine*, MachineGui*>::iterator it;
 			int propMac = mac->id();
 			it = gui_map_.find(mac);
@@ -165,16 +156,14 @@ namespace psycle {
 			child_view()->Invalidate(1);
 		}
 
-		void MachineView::ShowDialog(Machine* mac, double x, double y)
-		{
+		void MachineView::ShowDialog(Machine* mac, double x, double y) {
 			std::map<Machine*, MachineGui*>::iterator it;
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
 			it->second->ShowDialog(x, y);
 		}
 
-		void MachineView::SetSolo(Machine* tmac)
-		{
+		void MachineView::SetSolo(Machine* tmac) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 ///\todo
 
@@ -243,8 +232,7 @@ namespace psycle {
 			parent_->Invalidate();
 		}
 
-		void MachineView::UpdateSoloMuteBypass()
-		{
+		void MachineView::UpdateSoloMuteBypass() {
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
 			for ( ; it != gui_map_.end(); ++it ) {
 				MachineGui* mac_gui = (*it).second;
@@ -254,8 +242,7 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::UpdateVUs(CDC* devc)
-		{
+		void MachineView::UpdateVUs(CDC* devc) {
 		  if (!is_locked_) {
 		    SetSave(true);
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
@@ -267,18 +254,15 @@ namespace psycle {
 			SetSave(false);
 		}
 
-		void MachineView::LockVu()
-		{
+		void MachineView::LockVu() {
 			is_locked_ = true;
 		}
 
-		void MachineView::UnlockVu()
-		{
+		void MachineView::UnlockVu() {
 			is_locked_ = false;
 		}
 
-		void MachineView::OnEvent(PsycleCanvas::Event* ev)
-		{
+		void MachineView::OnEvent(PsycleCanvas::Event* ev) {
 			PsycleCanvas::Canvas::OnEvent(ev);
 			if ( ev->type == PsycleCanvas::Event::BUTTON_2PRESS ) {
 				if ( !root()->intersect(ev->x, ev->y) ) {
@@ -316,8 +300,7 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::ShowNewMachineDlg(double x, double y, Machine* mac, bool from_event)
-		{
+		void MachineView::ShowNewMachineDlg(double x, double y, Machine* mac, bool from_event) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CNewMachine dlg;
 
@@ -487,8 +470,7 @@ namespace psycle {
 			main()->UpdateComboGen();	
 		}
 
-		void MachineView::Rebuild()
-		{			
+		void MachineView::Rebuild() {			
 			LockVu();
 			root()->Clear();
 			gui_map_.clear();
@@ -513,16 +495,14 @@ namespace psycle {
 			main()->UpdateComboGen();	
 		}
 
-		void MachineView::SelectMachine(MachineGui* gui)
-		{
+		void MachineView::SelectMachine(MachineGui* gui) {
 			std::map<Machine*, MachineGui*>::iterator it = gui_map_.begin();
 			for ( ; it != gui_map_.end(); ++it ) {
 			   (*it).second->SetSelected(gui == (*it).second);
 			}			
 		}
 
-		void MachineView::UpdatePosition(Machine* mac)
-		{
+		void MachineView::UpdatePosition(Machine* mac) {
 			assert(mac);
 			std::map<Machine*, MachineGui*>::iterator it;
 			it = gui_map_.find(mac);
@@ -531,8 +511,7 @@ namespace psycle {
 			gui->SetXY(mac->GetPosX(), mac->GetPosY());
 		}
 
-		MachineGui* MachineView::CreateMachineGui(Machine* mac)
-		{
+		MachineGui* MachineView::CreateMachineGui(Machine* mac) {
 			assert(mac);
 			MachineGui* gui;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -625,7 +604,7 @@ namespace psycle {
 			}
 			if ( mac->_mute )
 				gui->SetMute(true);
-			else if (song_->machineSoloed == mac->id())
+			else if (project_->song().machineSoloed == mac->id())
 				gui->SetSolo(true);
 #else
 			switch ( mac->_type ) {
@@ -702,15 +681,14 @@ namespace psycle {
 			}
 			if ( mac->_mute )
 				gui->SetMute(true);
-			else if (song_->machineSoloed == mac->id())
+			else if (project_->song().machineSoloed == mac->id())
 				gui->SetSolo(true);
 #endif
 			gui->set_manage(true);
 			return gui;
 		}
 
-		void MachineView::BuildWires()
-		{
+		void MachineView::BuildWires() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
 			psycle::core::Machine* mac = (song()->machine(idx));
@@ -742,11 +720,11 @@ namespace psycle {
 
 #else
 			for ( int idx = 0; idx < MAX_MACHINES; ++idx ) {
-				Machine* mac = (song_->machine(idx));
+				Machine* mac = (project_->song().machine(idx));
 				if (mac) {
 					for (int w=0; w<MAX_CONNECTIONS; w++) {
 						if (mac->_connection[w]) {
-							Machine* pout = song_->machine(mac->_outputMachines[w]);
+							Machine* pout = project_->song().machine(mac->_outputMachines[w]);
 							if (pout)
 							{
 								std::map<Machine*, MachineGui*>::iterator fromIt = 
@@ -771,8 +749,7 @@ namespace psycle {
 #endif
 		}
 
-		void MachineView::OnNewConnection(MachineGui* sender)
-		{
+		void MachineView::OnNewConnection(MachineGui* sender) {
 			WireGui* line = new WireGui(this);
 			root()->Add(line);
 			line->SetStart(sender);
@@ -799,8 +776,7 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::OnWireRewire(WireGui* sender, int pick_point)
-		{
+		void MachineView::OnWireRewire(WireGui* sender, int pick_point) {
 			rewire_line_ = sender;
 			if (pick_point == 0) {
 				OnNewConnection(sender->fromGUI());
@@ -812,8 +788,7 @@ namespace psycle {
 		void MachineView::OnRewireEnd(WireGui* sender,
 									  double x,
 									  double y,
-									  int picker)
-		{
+									  int picker) {
 			MachineGui* connect_to_gui = 0;
 			std::map<Machine*,MachineGui*>::iterator it = gui_map_.begin();
 			for ( ; it != gui_map_.end(); ++it ) {
@@ -827,8 +802,7 @@ namespace psycle {
 			RaiseMachinesToTop();
 		}
 
-		void MachineView::RaiseMachinesToTop()
-		{
+		void MachineView::RaiseMachinesToTop() {
 			std::map<Machine*,MachineGui*>::iterator it = gui_map_.begin();
 			for ( ; it != gui_map_.end(); ++it ) {
 				MachineGui* gui = (*it).second;
@@ -840,8 +814,7 @@ namespace psycle {
 								 MachineGui* connect_to_gui,
 								 double x,
 								 double y,
-								 int picker)
-		{
+								 int picker) {
 			if ( connect_to_gui ) {
 				MachineGui* connect_from_gui = sender->start();
 				Machine* tmac = connect_from_gui->mac();
@@ -901,8 +874,7 @@ namespace psycle {
 		}
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		bool MachineView::RewireSrc(Machine* tmac, Machine* dmac)
-		{
+		bool MachineView::RewireSrc(Machine* tmac, Machine* dmac) {
 			///\todo: hardcoded. This needs to be extended with multi-io.
 			psycle::core::InPort::id_type portin=psycle::core::InPort::id_type(0);
 			psycle::core::OutPort::id_type portout=psycle::core::OutPort::id_type(0);
@@ -928,8 +900,7 @@ namespace psycle {
 #endif
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		bool MachineView::RewireDest(Machine* tmac, Machine* dmac)
-		{
+		bool MachineView::RewireDest(Machine* tmac, Machine* dmac) {
 			///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
 			psycle::core::InPort::id_type portin=psycle::core::InPort::id_type(0);
 			psycle::core::OutPort::id_type portout=psycle::core::OutPort::id_type(0);
@@ -970,8 +941,7 @@ namespace psycle {
 		}
 #endif
 
-		void MachineView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
-		{
+		void MachineView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans) {
 			BITMAP bm;
 			// Get the dimensions of the source bitmap
 			pBmpSource->GetObject(sizeof(BITMAP), &bm);
@@ -1013,8 +983,7 @@ namespace psycle {
 			hdcDst.DeleteDC();
 		}
 
-		void MachineView::LoadMachineBackground()
-		{
+		void MachineView::LoadMachineBackground() {
 			machinebkg.DeleteObject();
 			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
 			if (Global::pConfig->bBmpBkg)
@@ -1040,8 +1009,7 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::InitSkin()
-		{
+		void MachineView::InitSkin() {
 			LoadMachineBackground();
 			bool has_skin = false;
 			std::string szOld;
@@ -1247,8 +1215,7 @@ namespace psycle {
 			}
 		}
 
-		void MachineView::FindMachineSkin(CString findDir, CString findName, BOOL *result)
-		{
+		void MachineView::FindMachineSkin(CString findDir, CString findName, BOOL *result) {
 			CFileFind finder;
 			int loop = finder.FindFile(findDir + "\\*"); // check for subfolders.
 			while (loop) 
@@ -1789,15 +1756,13 @@ namespace psycle {
 			finder.Close();
 		}
 
-		void MachineView::CenterMaster()
-		{
+		void MachineView::CenterMaster() {
 			song()->machine(MASTER_INDEX)->SetPosX((child_view()->CW - MachineCoords.sMaster.width) / 2);			
 			song()->machine(MASTER_INDEX)->SetPosY((child_view()->CH - MachineCoords.sMaster.width) / 2);
 			UpdatePosition(song()->machine(MASTER_INDEX));				
 		}
 
-		bool MachineView::CheckUnsavedSong()
-		{
+		bool MachineView::CheckUnsavedSong() {
 			return (child_view()->UndoMacSaved == child_view()->UndoMacCounter);
 		}
 		

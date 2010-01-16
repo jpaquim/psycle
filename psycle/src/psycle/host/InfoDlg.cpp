@@ -3,6 +3,7 @@
 
 #include "InfoDlg.hpp"
 #include "Configuration.hpp"
+#include "projectdata.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
@@ -15,8 +16,9 @@ using namespace psycle::core;
 
 PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 	PSYCLE__MFC__NAMESPACE__BEGIN(host)
-		CInfoDlg::CInfoDlg(CWnd* pParent)
-		: CDialog(CInfoDlg::IDD, pParent)
+		CInfoDlg::CInfoDlg(ProjectData* projects, CWnd* pParent)
+			: CDialog(CInfoDlg::IDD, pParent),
+			  projects_(projects)
 		{
 			//{{AFX_DATA_INIT(CInfoDlg)
 			// NOTE: the ClassWizard will add member initialization here
@@ -79,7 +81,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CInfoDlg::OnTimer(UINT nIDEvent) 
 		{
 			if(nIDEvent==1) {
-				Song::scoped_lock lock(_pSong->Mutex());
+				Song::scoped_lock lock(projects_->active_project()->song().Mutex());
 				char buffer[128];
 				
 				float totalCPU=0;
@@ -97,7 +99,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				int n=0;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					Machine *tmac = _pSong->machine(c);
+					Machine *tmac = projects_->active_project()->song().machine(c);
 					if(tmac)
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -191,7 +193,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int n=0;
 			for(int c=0; c<MAX_MACHINES; c++)
 			{
-				Machine *tmac = _pSong->machine(c);
+				Machine *tmac = projects_->active_project()->song().machine(c);
 				if(tmac)
 				{
 					char buffer[128];

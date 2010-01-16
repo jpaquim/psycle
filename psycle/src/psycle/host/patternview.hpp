@@ -159,8 +159,13 @@ namespace psycle {
 				};		
 			};
 
-			PatternView(CChildView* parent, CMainFrame* main);
+			PatternView(class Project* project);
 			~PatternView();
+
+			void SetParent(CChildView* parent, CMainFrame* main) {
+				parent_ = parent;
+				main_ = main;
+			}
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern* pattern();
@@ -257,8 +262,7 @@ namespace psycle {
 
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main() { return main_; }
-			void SetSong(Song* song) { song_ = song; }
-			Song* song() { return song_; }
+			Song* song();
 
 			void LoadPatternHeaderSkin();
 			void FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result);
@@ -310,7 +314,6 @@ namespace psycle {
 
 			CChildView* parent_;
 			CMainFrame* main_;			
-			Song* song_;
 
 			bool bFT2HomeBehaviour;
 			bool bShiftArrowsDoSelect;
@@ -393,6 +396,7 @@ public:
 public:
 			bool isBlockCopied;
 private:
+			Project* project_;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern block_buffer_pattern_;

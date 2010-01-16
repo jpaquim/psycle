@@ -53,10 +53,8 @@ using namespace helpers::math;
 		#define TWOPI_F (2.0f*3.141592665f)
 	
 
-		PatternView::PatternView(CChildView* parent, CMainFrame* main)						
-			:  parent_(parent),
-			   main_(main),
-			   blockSelected(false),
+		PatternView::PatternView(Project* project)						
+			:  blockSelected(false),
 			   blockStart(false),
 			   blockswitch(false),
 			   blockSelectBarState(1),
@@ -93,7 +91,8 @@ using namespace helpers::math;
 			   bFT2HomeBehaviour(true),
 			   bShiftArrowsDoSelect(false),
 			   bDoingSelection(false),
-			   maxView(false)
+			   maxView(false),
+			   project_(project)
 #ifdef use_psycore
 			   ,pattern_(0)
 #endif
@@ -112,6 +111,10 @@ using namespace helpers::math;
 			KillUndo();
 		}
 
+		Song* PatternView::song() { 
+			return &main_->projects()->active_project()->song(); 
+		}
+		
 		Project* PatternView::project()
 		{
 			return main_->projects()->active_project();

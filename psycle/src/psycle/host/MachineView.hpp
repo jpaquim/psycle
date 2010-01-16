@@ -29,9 +29,14 @@ namespace psycle {
 		class MachineView : public PsycleCanvas::Canvas
 		{
 		public:
-			MachineView(CChildView* parent, CMainFrame* main);
-			void SetSong(Song* song);
+			MachineView(class Project* project);
 			~MachineView();
+
+			void SetParent(CChildView* parent, CMainFrame* main) {
+				parent_ = parent;
+				main_ = main;
+				PsycleCanvas::Canvas::SetParent((CWnd*)parent_);
+			}
 
 			void Rebuild();
 			void SetSolo(Machine* mac);
@@ -47,14 +52,11 @@ namespace psycle {
 			void DoMacPropDialog(Machine* mac, bool from_event);
 			void ShowDialog(Machine* mac, double x, double y);
 			void UpdatePosition(Machine* mac);
-
 			void UpdateVUs(CDC* devc);			
 			void SelectMachine(MachineGui* gui);
 			virtual void OnEvent(PsycleCanvas::Event* ev);
 			CChildView* child_view() { return parent_; }
 			CMainFrame* main();
-
-			Song* song() { return song_; }
 
 			void OnNewConnection(MachineGui* sender);
 			void OnRewireEnd(WireGui* sender,
@@ -75,8 +77,9 @@ namespace psycle {
 			void AddMacViewUndo(); // place holder
 			void CenterMaster();
 			bool CheckUnsavedSong();
+			Song* song();
 
-			SMachineCoords	MachineCoords;
+			SMachineCoords	MachineCoords;			
 
 		private:			
 			void BuildWires();
@@ -95,7 +98,7 @@ namespace psycle {
 			
 			CChildView* parent_;
 			CMainFrame* main_;
-			Song* song_;
+			Project* project_;
 			std::map<Machine*, MachineGui*> gui_map_;
 			WireGui* del_line_;
 			WireGui* rewire_line_;

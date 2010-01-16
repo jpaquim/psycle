@@ -166,14 +166,15 @@ using namespace psycle::helpers::math;
 		CMainFrame::CMainFrame()
 			: m_wndView(this, &projects_),
 			  m_wndSeq(this),
+			  m_wndInfo(&projects_, this),
 			  vuprevR(0),
 			  vuprevL(0),
-			  _pSong(0),
 			  pGearRackDialog(0)
 		{
 			Global::pInputHandler->SetMainFrame(this);						
-			m_pWndWed = new CWaveEdFrame(this->_pSong,this);
 			SetUpStartProject();
+			m_wndView.AddModules(projects_.active_project());
+			m_pWndWed = new CWaveEdFrame(&projects_,this);
 		}
 
 		CMainFrame::~CMainFrame()
@@ -235,14 +236,13 @@ using namespace psycle::helpers::math;
 			}
 
 			// CPU info Window
-			m_wndInfo._pSong=_pSong;
 			m_wndInfo.Create(IDD_INFO,this);
 
 			// MIDI monitor Dialog
 			m_midiMonitorDlg.Create(IDD_MIDI_MONITOR,this);
 			
 			// Instrument editor
-			m_wndInst._pSong=_pSong;
+			m_wndInst._pSong= &projects_.active_project()->song();
 			m_wndInst.pParentMain=this;
 			m_wndInst.Create(IDD_INSTRUMENT,this);
 			m_wndInst.Validate();
@@ -322,11 +322,7 @@ using namespace psycle::helpers::math;
 				_snprintf(s,4,"%i",i);
 				cc2->AddString(s);
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE			
 			cc2->SetCurSel(projects_.active_project()->song().tracks()-4);
-#else
-			cc2->SetCurSel(_pSong->tracks()-4);			
-#endif
 
 		//	SetAppSongBpm(0);
 		//	SetAppSongTpb(0);
@@ -429,20 +425,12 @@ using namespace psycle::helpers::math;
 			cs.lpszClass = AfxRegisterWndClass(0);
 			return TRUE;
 		}
-		void CMainFrame::SetSong(Song* song) {
-			this->_pSong = song;
-			m_pWndWed->SetSong(song);
 
-		}
 		void CMainFrame::SetUpStartProject()
 		{
-			Project* prj = new Project(&projects_,
-									   m_wndView.pattern_view(),
-									   m_wndView.machine_view());
-			// This operations sets prj as the active project, and assings the
-			// active song to mainframe, pattern view, machine view, sequencer view
-			// and editwnd
+			Project* prj = new Project(&projects_);
 			projects_.Add(prj);
+			m_wndSeq.SetProject(prj);
 		}
 
 		#if !defined NDEBUG
@@ -555,43 +543,25 @@ using namespace psycle::helpers::math;
 		{
 			SetAppSongBpm(0);
 			SetAppSongTpb(0);
-
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_SSCOMBO2);
-			cc2->SetCurSel(m_wndView.pattern_view()->patStep);
-			
+			cc2->SetCurSel(m_wndView.pattern_view()->patStep);		
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			cc2->SetCurSel(projects_.active_project()->song().tracks()-4);
-#else
-			cc2->SetCurSel(_pSong->tracks()-4);
-#endif
-
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
-			cc2->SetCurSel(_pSong->currentOctave);
-			
+			cc2->SetCurSel(projects_.active_project()->song().currentOctave);		
 			UpdateComboGen();
-			UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);
-			
+			UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);			
 		}
 
 		/////////////////
 		///////////////// PSY Bar 1
 		/////////////////
 
-		void CMainFrame::OnSelchangeTrackcombo() 
-		{
+		void CMainFrame::OnSelchangeTrackcombo() {
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			projects_.active_project()->song().setTracks(cc2->GetCurSel()+4);
-			if (m_wndView.pattern_view()->editcur.track >= projects_.active_project()->song().tracks() )
-			m_wndView.pattern_view()->editcur.track = projects_.active_project()->song().tracks()-1;
-
-#else
-			_pSong->setTracks(cc2->GetCurSel()+4);
-		if (m_wndView.pattern_view()->editcur.track >= _pSong->tracks() )
-		m_wndView.pattern_view()->editcur.track= _pSong->tracks()-1;
-#endif
-
+			if (m_wndView.pattern_view()->editcur.track >= projects_.active_project()->song().tracks())
+				m_wndView.pattern_view()->editcur.track = projects_.active_project()->song().tracks()-1;
 			m_wndView.pattern_view()->RecalculateColourGrid();
 			m_wndView.Repaint();
 			m_wndView.SetFocus();
@@ -695,11 +665,9 @@ using namespace psycle::helpers::math;
 			m_wndView.SetFocus();
 		}
 
-		void CMainFrame::OnSelchangeCombooctave() 
-		{
+		void CMainFrame::OnSelchangeCombooctave() {
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
-			_pSong->currentOctave=cc2->GetCurSel();
-			
+			projects_.active_project()->song().currentOctave=cc2->GetCurSel();			
 			m_wndView.Repaint();
 			m_wndView.SetFocus();
 		}
@@ -708,13 +676,16 @@ using namespace psycle::helpers::math;
 		// Function that shift the current editing octave
 
 		void CMainFrame::ShiftOctave(int x)
-		{
-			_pSong->currentOctave += x;
-			if ( _pSong->currentOctave < 0 )	 { _pSong->currentOctave = 0; }
-			else if ( _pSong->currentOctave > 8 ){ _pSong->currentOctave = 8; }
-
+		{			
+			projects_.active_project()->song().currentOctave += x;
+			if (projects_.active_project()->song().currentOctave < 0) { 
+				projects_.active_project()->song().currentOctave = 0;
+			}
+			else if (projects_.active_project()->song().currentOctave > 8) { 
+				projects_.active_project()->song().currentOctave = 8;
+			}
 			CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
-			cc2->SetCurSel(_pSong->currentOctave);
+			cc2->SetCurSel(projects_.active_project()->song().currentOctave);
 		}
 		void CMainFrame::UpdateMasterValue(int newvalue)
 		{
@@ -722,7 +693,7 @@ using namespace psycle::helpers::math;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( projects_.active_project()->song().machine(MASTER_INDEX))
 #else
-			if ( _pSong->machine(MASTER_INDEX) != NULL)
+			if ( projects_.active_project()->song().machine(MASTER_INDEX) != NULL)
 #endif
 			{
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
@@ -738,11 +709,11 @@ using namespace psycle::helpers::math;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if ( projects_.active_project()->song().machine(MASTER_INDEX))
 #else
-			if ( _pSong->machine(MASTER_INDEX) != NULL)
+			if ( projects_.active_project()->song().machine(MASTER_INDEX) != NULL)
 #endif
 			{
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
-				//((Master*)_pSong->machine(MASTER_INDEX))->_outDry = cs->GetPos()*cs->GetPos()/1024;
+				//((Master*)projects_.active_project()->song().machine(MASTER_INDEX))->_outDry = cs->GetPos()*cs->GetPos()/1024;
 				///\todo: this causes problems sometimes when loading songs.
 				// customdraw happening before updatemastervalue, so invalid value get set.
 				// Added call to UpdateMasterValue() in PsybarsUpdate() in order to fix this.
@@ -750,7 +721,7 @@ using namespace psycle::helpers::math;
 				psycle::core::Master* master = (psycle::core::Master*)projects_.active_project()->song().machine(MASTER_INDEX);
 				master->_outDry = cs->GetPos();
 #else
-				((Master*)_pSong->machine(MASTER_INDEX))->_outDry = cs->GetPos();
+				((Master*)projects_.active_project()->song().machine(MASTER_INDEX))->_outDry = cs->GetPos();
 #endif
 				m_wndView.SetFocus();
 			}
@@ -905,7 +876,7 @@ using namespace psycle::helpers::math;
 
 		void CMainFrame::OnBDecgen() // called by Button and Hotkey.
 		{
-			//	ChangeGen(_pSong->seqBus-1);
+			//	ChangeGen(projects_.active_project()->song().seqBus-1);
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 			const int val = cc->GetCurSel();
 			if ( val > 0 ) cc->SetCurSel(val-1);
@@ -921,7 +892,7 @@ using namespace psycle::helpers::math;
 
 		void CMainFrame::OnBIncgen() // called by Button and Hotkey.
 		{
-			//	ChangeGen(_pSong->seqBus+1);
+			//	ChangeGen(projects_.active_project()->song().seqBus+1);
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 			const int val = cc->GetCurSel();
 			if ( val < cc->GetCount()-1 ) cc->SetCurSel(val+1);
@@ -941,12 +912,7 @@ using namespace psycle::helpers::math;
 			bool found=false;
 			int selected = -1;
 			int line = -1;
-			char buffer[64];
-			
-			if (_pSong == NULL) 
-			{
-				return; // why should this happen?
-			}
+			char buffer[64];		
 			CComboBox *cb=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 			CComboBox *cb2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 			
@@ -982,11 +948,11 @@ using namespace psycle::helpers::math;
 #else
 			for (int b=0; b<MAX_BUSES; b++) // Check Generators
 			{
-				if( _pSong->machine(b))
+				if( projects_.active_project()->song().machine(b))
 				{
 					if (updatelist)
 					{	
-						sprintf(buffer,"%.2X: %s",b,_pSong->machine(b)->_editName);
+						sprintf(buffer,"%.2X: %s",b,projects_.active_project()->song().machine(b)->_editName);
 						cb->AddString(buffer);
 						cb->SetItemData(cb->GetCount()-1,b);
 					}
@@ -994,7 +960,7 @@ using namespace psycle::helpers::math;
 					{
 						selected++;
 					}
-					if (_pSong->seqBus == b) 
+					if (projects_.active_project()->song().seqBus == b) 
 					{
 						found = true;
 					}
@@ -1040,11 +1006,11 @@ using namespace psycle::helpers::math;
 #else
 			for (int b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 			{
-				if(_pSong->machine(b))
+				if(projects_.active_project()->song().machine(b))
 				{
 					if (updatelist)
 					{	
-						sprintf(buffer,"%.2X: %s",b,_pSong->machine(b)->_editName);
+						sprintf(buffer,"%.2X: %s",b,projects_.active_project()->song().machine(b)->_editName);
 						cb->AddString(buffer);
 						cb->SetItemData(cb->GetCount()-1,b);
 					}
@@ -1052,7 +1018,7 @@ using namespace psycle::helpers::math;
 					{
 						selected++;
 					}
-					if (_pSong->seqBus == b) 
+					if (projects_.active_project()->song().seqBus == b) 
 					{
 						found = true;
 					}
@@ -1118,40 +1084,40 @@ using namespace psycle::helpers::math;
 			// Select the appropiate Option in Aux Combobox.
 			if (found) // If found (which also means, if it exists)
 			{
-				if (_pSong->machine(_pSong->seqBus))
+				if (projects_.active_project()->song().machine(projects_.active_project()->song().seqBus))
 				{
-					if ( _pSong->seqBus < MAX_BUSES ) // it's a Generator
+					if ( projects_.active_project()->song().seqBus < MAX_BUSES ) // it's a Generator
 					{
-						if (_pSong->machine(_pSong->seqBus)->_type == MACH_SAMPLER ||_pSong->machine(_pSong->seqBus)->_type == MACH_XMSAMPLER  )
+						if (projects_.active_project()->song().machine(projects_.active_project()->song().seqBus)->_type == MACH_SAMPLER ||projects_.active_project()->song().machine(projects_.active_project()->song().seqBus)->_type == MACH_XMSAMPLER  )
 						{
 							cb2->SetCurSel(AUX_WAVES);
-							_pSong->auxcolSelected = _pSong->instSelected();
+							projects_.active_project()->song().auxcolSelected = projects_.active_project()->song().instSelected();
 						}
-						else if (_pSong->machine(_pSong->seqBus)->_type == MACH_VST)
+						else if (projects_.active_project()->song().machine(projects_.active_project()->song().seqBus)->_type == MACH_VST)
 						{
 							if ( cb2->GetCurSel() == AUX_WAVES)
 							{
 								cb2->SetCurSel(AUX_MIDI);
-								_pSong->auxcolSelected = _pSong->midiSelected;
+								projects_.active_project()->song().auxcolSelected = projects_.active_project()->song().midiSelected;
 							}
 						}
 						else
 						{
 							cb2->SetCurSel(AUX_PARAMS);
-							_pSong->auxcolSelected = 0;
+							projects_.active_project()->song().auxcolSelected = 0;
 						}
 					}
 					else
 					{
 						cb2->SetCurSel(AUX_PARAMS);
-						_pSong->auxcolSelected = 0;
+						projects_.active_project()->song().auxcolSelected = 0;
 					}
 				}
 			}
 			else
 			{
 				cb2->SetCurSel(AUX_WAVES); // WAVES
-				_pSong->auxcolSelected = _pSong->instSelected();
+				projects_.active_project()->song().auxcolSelected = projects_.active_project()->song().instSelected();
 			}
 #endif
 			UpdateComboIns();
@@ -1165,9 +1131,9 @@ using namespace psycle::helpers::math;
 				CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOGEN);
 				int nsb = GetNumFromCombo(cc);
 
-				if(_pSong->seqBus!=nsb)
+				if(projects_.active_project()->song().seqBus!=nsb)
 				{
-					_pSong->seqBus=nsb;
+					projects_.active_project()->song().seqBus=nsb;
 					UpdateComboGen(false);
 				}
 				RedrawGearRackList();
@@ -1187,14 +1153,14 @@ using namespace psycle::helpers::math;
 		{
 			if(i>=0 && i <(MAX_BUSES*2))
 			{
-				if ( (_pSong->seqBus & MAX_BUSES) == (i & MAX_BUSES))
+				if ( (projects_.active_project()->song().seqBus & MAX_BUSES) == (i & MAX_BUSES))
 				{
-					_pSong->seqBus=i;
+					projects_.active_project()->song().seqBus=i;
 					UpdateComboGen(false);
 				}
 				else
 				{
-					_pSong->seqBus=i;
+					projects_.active_project()->song().seqBus=i;
 					UpdateComboGen(true);
 				}
 			}
@@ -1211,23 +1177,23 @@ using namespace psycle::helpers::math;
 
 			if ( cc2->GetCurSel() == AUX_MIDI )	// MIDI
 			{
-				_pSong->auxcolSelected=_pSong->midiSelected;
+				projects_.active_project()->song().auxcolSelected=projects_.active_project()->song().midiSelected;
 			}
 			else if ( cc2->GetCurSel() == AUX_WAVES )	// WAVES
 			{
-				_pSong->auxcolSelected=_pSong->instSelected();
+				projects_.active_project()->song().auxcolSelected=projects_.active_project()->song().instSelected();
 			}
 			UpdateComboIns();
 		}
 		void CMainFrame::OnBDecwav() 
 		{
-			ChangeIns(_pSong->auxcolSelected-1);
+			ChangeIns(projects_.active_project()->song().auxcolSelected-1);
 			m_wndView.SetFocus();
 		}
 
 		void CMainFrame::OnBIncwav() 
 		{
-			ChangeIns(_pSong->auxcolSelected+1);
+			ChangeIns(projects_.active_project()->song().auxcolSelected+1);
 			m_wndView.SetFocus();
 		}
 
@@ -1235,11 +1201,6 @@ using namespace psycle::helpers::math;
 		{
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOINS);
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::Song* _pSong = &projects_.active_project()->song();
-#endif
-
 
 			int listlen = 0;
 			
@@ -1260,12 +1221,12 @@ using namespace psycle::helpers::math;
 					}
 				}
 				listlen = 16;
-		//		_pSong->midiSelected=_pSong->auxcolSelected;
+		//		projects_.active_project()->song().midiSelected=projects_.active_project()->song().auxcolSelected;
 			}
 			else if ( cc2->GetCurSel() == AUX_PARAMS)	// Params
 			{
-				int nmac = _pSong->seqBus;
-				Machine *tmac = _pSong->machine(nmac);
+				int nmac = projects_.active_project()->song().seqBus;
+				Machine *tmac = projects_.active_project()->song().machine(nmac);
 				if (tmac) 
 				{
 					int i=0;
@@ -1318,8 +1279,8 @@ using namespace psycle::helpers::math;
 				char buffer[64];
 				if (updatelist) 
 				{
-					int nmac = _pSong->seqBus;
-					Machine *tmac = _pSong->machine(nmac);
+					int nmac = projects_.active_project()->song().seqBus;
+					Machine *tmac = projects_.active_project()->song().machine(nmac);
 					if (tmac) 
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -1330,7 +1291,7 @@ using namespace psycle::helpers::math;
 						{
 							for (int i(0); i<XMSampler::MAX_INSTRUMENT; i++)
 							{
-								sprintf(buffer, "%.2X: %s", i, _pSong->rInstrument(i).Name().c_str());
+								sprintf(buffer, "%.2X: %s", i, projects_.active_project()->song().rInstrument(i).Name().c_str());
 								cc->AddString(buffer);
 								listlen++;
 		
@@ -1339,7 +1300,7 @@ using namespace psycle::helpers::math;
 
 						else for (int i=0;i<PREV_WAV_INS;i++)
 						{
-							sprintf(buffer, "%.2X: %s", i, _pSong->_pInstrument[i]->_sName);
+							sprintf(buffer, "%.2X: %s", i, projects_.active_project()->song()._pInstrument[i]->_sName);
 							cc->AddString(buffer);
 							listlen++;
 						}
@@ -1349,16 +1310,16 @@ using namespace psycle::helpers::math;
 				{
 					listlen = cc->GetCount();
 				}
-		//		_pSong->instSelected(_pSong->auxcolSelected);
+		//		projects_.active_project()->song().instSelected(projects_.active_project()->song().auxcolSelected);
 		//		WaveEditorBackUpdate();
 		//		m_wndInst.WaveUpdate();
 		//		RedrawGearRackList();
 			}
-			if (_pSong->auxcolSelected >= listlen)
+			if (projects_.active_project()->song().auxcolSelected >= listlen)
 			{
-				_pSong->auxcolSelected = 0;
+				projects_.active_project()->song().auxcolSelected = 0;
 			}
-			cc->SetCurSel(_pSong->auxcolSelected);
+			cc->SetCurSel(projects_.active_project()->song().auxcolSelected);
 		}
 
 		void CMainFrame::OnSelchangeBarComboins() 
@@ -1368,17 +1329,17 @@ using namespace psycle::helpers::math;
 
 			if ( cc2->GetCurSel() == AUX_MIDI ) 
 			{
-				_pSong->midiSelected=cc->GetCurSel();
+				projects_.active_project()->song().midiSelected=cc->GetCurSel();
 			}
 			else if ( cc2->GetCurSel() == AUX_WAVES ) 
 			{
-				_pSong->instSelected(cc->GetCurSel());
+				projects_.active_project()->song().instSelected(cc->GetCurSel());
 				WaveEditorBackUpdate();
 				m_wndInst.WaveUpdate();
 				RedrawGearRackList();
 			}
 
-			_pSong->auxcolSelected=cc->GetCurSel();
+			projects_.active_project()->song().auxcolSelected=cc->GetCurSel();
 		}
 
 		void CMainFrame::OnCloseupBarComboins()
@@ -1397,35 +1358,35 @@ using namespace psycle::helpers::math;
 			{
 				if (i>=0 && i <16)
 				{
-					_pSong->midiSelected=i;
-					_pSong->auxcolSelected=i;
+					projects_.active_project()->song().midiSelected=i;
+					projects_.active_project()->song().auxcolSelected=i;
 				}
 			}
 			else if ( cc2->GetCurSel() == AUX_PARAMS )
 			{
 				if (i>=0 && i < cc->GetCount() )
 				{
-					_pSong->auxcolSelected=i;
+					projects_.active_project()->song().auxcolSelected=i;
 				}
 			}
 			else
 			{
 				if(i>=0 && i <(PREV_WAV_INS))
 				{
-					_pSong->instSelected(i);
-					_pSong->auxcolSelected=i;
+					projects_.active_project()->song().instSelected(i);
+					projects_.active_project()->song().auxcolSelected=i;
 					WaveEditorBackUpdate();
 					m_wndInst.WaveUpdate();
 					RedrawGearRackList();
 				}
 			}
-			cc->SetCurSel(_pSong->auxcolSelected);
+			cc->SetCurSel(projects_.active_project()->song().auxcolSelected);
 		}
 
 		void CMainFrame::OnLoadwave() 
 		{
-			int nmac = _pSong->seqBus;
-			Machine *tmac = _pSong->machine(nmac);
+			int nmac = projects_.active_project()->song().seqBus;
+			Machine *tmac = projects_.active_project()->song().machine(nmac);
 			if (tmac) 
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -1443,17 +1404,17 @@ using namespace psycle::helpers::math;
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|IFF Samples (*.iff)|*.iff|All Files (*.*)|*.*||";
 			
 			CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
-			dlg._pSong = _pSong;
+			dlg._pSong = &projects_.active_project()->song();
 			std::string tmpstr = Global::pConfig->GetCurrentInstrumentDir();
 			dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 			if (dlg.DoModal() == IDOK)
 			{
 				m_wndView.AddMacViewUndo();
 
-				int si = _pSong->instSelected();
+				int si = projects_.active_project()->song().instSelected();
 				
 				//added by sampler
-				if ( _pSong->_pInstrument[si]->waveLength != 0)
+				if ( projects_.active_project()->song()._pInstrument[si]->waveLength != 0)
 				{
 					if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;					
 				}
@@ -1464,7 +1425,7 @@ using namespace psycle::helpers::math;
 				
 				if ( CurrExt == "wav" )
 				{
-					if (_pSong->WavAlloc(si,dlg.GetFileName()))
+					if (projects_.active_project()->song().WavAlloc(si,dlg.GetFileName()))
 					{
 						UpdateComboIns();
 						m_wndStatusBar.SetWindowText("New wave loaded");
@@ -1474,7 +1435,7 @@ using namespace psycle::helpers::math;
 				}
 				else if ( CurrExt == "iff" )
 				{
-					if (_pSong->IffAlloc(si,dlg.GetFileName()))
+					if (projects_.active_project()->song().IffAlloc(si,dlg.GetFileName()))
 					{
 						UpdateComboIns();
 						m_wndStatusBar.SetWindowText("New wave loaded");
@@ -1490,18 +1451,18 @@ using namespace psycle::helpers::math;
 					Global::pConfig->SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 				}
 			}
-			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
+			if ( projects_.active_project()->song()._pInstrument[PREV_WAV_INS]->waveLength > 0)
 			{
 				// Stopping wavepreview if not stopped.
 				Sampler::wavprev.Stop();
 				//Delete it.
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->DeleteInstrument(PREV_WAV_INS);
+				projects_.active_project()->song().DeleteInstrument(PREV_WAV_INS);
 #else
-				_pSong->IsInvalided(true);
+				projects_.active_project()->song().IsInvalided(true);
 				Sleep(LOCK_LATENCY);
-				_pSong->DeleteLayer(PREV_WAV_INS);
-				_pSong->IsInvalided(false);
+				projects_.active_project()->song().DeleteLayer(PREV_WAV_INS);
+				projects_.active_project()->song().IsInvalided(false);
 #endif
 			}
 
@@ -1514,22 +1475,22 @@ using namespace psycle::helpers::math;
 			WaveFile output;
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 			
-			if (_pSong->_pInstrument[_pSong->instSelected()]->waveLength)
+			if (projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveLength)
 			{
-				CFileDialog dlg(FALSE, "wav", _pSong->_pInstrument[_pSong->instSelected()]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+				CFileDialog dlg(FALSE, "wav", projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 				if (dlg.DoModal() == IDOK)
 				{
-					output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected()]->waveStereo) ? (2) : (1) );
-					if (_pSong->_pInstrument[_pSong->instSelected()]->waveStereo)
+					output.OpenForWrite(dlg.GetFileName(), 44100, 16, (projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveStereo) ? (2) : (1) );
+					if (projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveStereo)
 					{
-						for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected()]->waveLength; c++)
+						for ( unsigned int c=0; c < projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveLength; c++)
 						{
-							output.WriteStereoSample( *(_pSong->_pInstrument[_pSong->instSelected()]->waveDataL + c), *(_pSong->_pInstrument[_pSong->instSelected()]->waveDataR + c) );
+							output.WriteStereoSample( *(projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveDataL + c), *(projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveDataR + c) );
 						}
 					}
 					else
 					{
-						output.WriteData(_pSong->_pInstrument[_pSong->instSelected()]->waveDataL, _pSong->_pInstrument[_pSong->instSelected()]->waveLength);
+						output.WriteData(projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveDataL, projects_.active_project()->song()._pInstrument[projects_.active_project()->song().instSelected()]->waveLength);
 					}
 
 					output.Close();
@@ -1551,8 +1512,8 @@ using namespace psycle::helpers::math;
 
 		void CMainFrame::OnEditwave() 
 		{
-			int nmac = _pSong->seqBus;
-			Machine *tmac = _pSong->machine(nmac);
+			int nmac = projects_.active_project()->song().seqBus;
+			Machine *tmac = projects_.active_project()->song().machine(nmac);
 			if (tmac) 
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -1586,7 +1547,7 @@ using namespace psycle::helpers::math;
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 			cc2->SetCurSel(AUX_WAVES);
-			_pSong->auxcolSelected=_pSong->instSelected();
+			projects_.active_project()->song().auxcolSelected=projects_.active_project()->song().instSelected();
 			UpdateComboIns();
 			m_wndView.AddMacViewUndo();
 			m_wndInst.WaveUpdate();
@@ -1755,7 +1716,7 @@ using namespace psycle::helpers::math;
 					pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
 					for (int i=0;i<MAX_SONG_POSITIONS;i++ )
 					{
-						if (_pSong->playOrderSel[i]) pSeqList->SetSel(i,true);
+						if (projects_.active_project()->song().playOrderSel[i]) pSeqList->SetSel(i,true);
 					}
 					int top = m_wndView.pattern_view()->editPosition - 0xC;
 					if (top < 0) top = 0;
@@ -1883,7 +1844,7 @@ using namespace psycle::helpers::math;
 		{
 			pCmdUI->Enable(); 
 			CString str;
-			str.Format("Oct %u", _pSong->currentOctave); 
+			str.Format("Oct %u", projects_.active_project()->song().currentOctave); 
 			pCmdUI->SetText(str); 
 
 		}
@@ -1920,44 +1881,43 @@ using namespace psycle::helpers::math;
 
 		BOOL CMainFrame::StatusBarIdleText()
 		{
-			if (_pSong)
 			{
 				std::ostringstream oss;
-				oss << _pSong->name()
-					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.pattern_view()->editPosition]];
+				oss << projects_.active_project()->song().name()
+					<< " - " << projects_.active_project()->song().patternName[projects_.active_project()->song().playOrder[m_wndView.pattern_view()->editPosition]];
 
 				if ((m_wndView.viewMode==view_modes::pattern)	&& (!Global::pPlayer->playing()))
 				{
-					unsigned char *toffset=_pSong->_ptrackline(m_wndView.pattern_view()->editPosition,m_wndView.pattern_view()->editcur.track,m_wndView.pattern_view()->editcur.line);
+					unsigned char *toffset=projects_.active_project()->song()._ptrackline(m_wndView.pattern_view()->editPosition,m_wndView.pattern_view()->editcur.track,m_wndView.pattern_view()->editcur.line);
 					int machine = toffset[2];
 					if (machine<MAX_MACHINES)
 					{
-						if (_pSong->machine(machine))
+						if (projects_.active_project()->song().machine(machine))
 						{
-							oss << " - " << _pSong->machine(machine)->GetEditName();
+							oss << " - " << projects_.active_project()->song().machine(machine)->GetEditName();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-							if (_pSong->machine(machine)->getMachineKey() == MachineKey::sampler())
+							if (projects_.active_project()->song().machine(machine)->getMachineKey() == MachineKey::sampler())
 #else
-							if (_pSong->machine(machine)->_type == MACH_SAMPLER)
+							if (projects_.active_project()->song().machine(machine)->_type == MACH_SAMPLER)
 #endif
 							{
-								if (_pSong->_pInstrument[toffset[1]]->_sName[0])
-									oss <<  " - " << _pSong->_pInstrument[toffset[1]]->_sName;
+								if (projects_.active_project()->song()._pInstrument[toffset[1]]->_sName[0])
+									oss <<  " - " << projects_.active_project()->song()._pInstrument[toffset[1]]->_sName;
 							}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-							else if (_pSong->machine(machine)->getMachineKey() == MachineKey::sampulse())
+							else if (projects_.active_project()->song().machine(machine)->getMachineKey() == MachineKey::sampulse())
 #else
-							else if (_pSong->machine(machine)->_type == MACH_XMSAMPLER)
+							else if (projects_.active_project()->song().machine(machine)->_type == MACH_XMSAMPLER)
 #endif
 							{
-								if (_pSong->rInstrument(toffset[1]).IsEnabled())
-									oss <<  " - " << _pSong->rInstrument(toffset[1]).Name();
+								if (projects_.active_project()->song().rInstrument(toffset[1]).IsEnabled())
+									oss <<  " - " << projects_.active_project()->song().rInstrument(toffset[1]).Name();
 							}
 							else
 							{
 								char buf[64];
 								buf[0]=0;
-								_pSong->machine(machine)->GetParamName(toffset[1],buf);
+								projects_.active_project()->song().machine(machine)->GetParamName(toffset[1],buf);
 								if(buf[0])
 									oss <<  " - " << buf;
 							}
