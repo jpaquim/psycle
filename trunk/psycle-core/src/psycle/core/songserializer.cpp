@@ -29,8 +29,6 @@ namespace psycle {
 				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
 					PsyFilterBase* filter = *it;
 					if ( filter->testFormat(fileName) ) {
-						song.DeleteAllMachines();
-						song.DeleteInstruments();
 						return filter->load(fileName,song);
 					}
 				}

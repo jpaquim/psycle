@@ -14,9 +14,15 @@ using namespace psycle::core;
 #endif
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 #include "ProjectData.hpp"
 namespace psycle {
 	namespace host {
+
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)
@@ -58,6 +64,7 @@ namespace psycle {
 			: projects_(projects)
 		{
 			wavview.SetParent(pframe);
+			wavview.SetSong(&projects->active_project()->song());
 		}
 
 		CWaveEdFrame::~CWaveEdFrame() throw()

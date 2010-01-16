@@ -392,7 +392,7 @@ class PSYCLE__CORE__DECL Machine {
 			virtual bool MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype, Machine& oldSrc);
 		public:
 			virtual bool Disconnect(Machine & dst);
-			virtual void DeleteWires();
+			virtual void DeleteWires(CoreSong& song);
 
 		///\warning: This should be protected, but the class Mixer needs to call them. Do not use them from Song or "Outside World".
 		public:

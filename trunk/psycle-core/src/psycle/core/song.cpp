@@ -106,7 +106,7 @@ void CoreSong::DeleteAllMachines() {
 }
 void CoreSong::DeleteMachine(Machine * mac) {
 	scoped_lock lock(mutex_);
-	mac->DeleteWires();
+	mac->DeleteWires(*this);
 	// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 	try {
 		Machine::id_type id = mac->id();
@@ -313,7 +313,12 @@ bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesP
 	char fileName[255]; 
 	//char slash = File::slash().c_str()[0]; // note: a single forward slash seems to work on both windows and linux.
 	char const *ptr = std::strrchr(pathToWav, '/'); // locate filename part of path.
-	std::strcpy(fileName, ptr + 1); // copy remainder of string
+	if (ptr) {
+		std::strcpy(fileName, ptr + 1); // copy remainder of string
+	}
+	else {
+		std::strcpy(fileName, pathToWav); // copy remainder of string
+	}
 	ptr = std::strchr(fileName, '.'); // strip file extension
 	if(ptr) *const_cast<char*>(ptr) = 0; // if the extension exists, truncate it
 
