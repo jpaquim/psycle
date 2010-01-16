@@ -252,7 +252,7 @@ namespace psycle  {
 			//
 
 			// we use only the first track in mfc
-			psycle::core::SequenceLine* line = *song_->patternSequence().begin()+1;
+			psycle::core::SequenceLine* line = *(song_->patternSequence().begin()+1);
 			int playLength = line->size();
 			index = 0; // index
 			for (index=0;index<MAX_SEQUENCES;index++)
@@ -296,6 +296,8 @@ namespace psycle  {
 			psycle::core::Sequence::patterniterator  it = song_->patternSequence().patternbegin();
 			for ( ; it != song_->patternSequence().patternend(); ++it ) {
 				psycle::core::Pattern* pattern = *it;
+				if (pattern == song_->patternSequence().master_pattern())
+					continue;
 				unsigned char* data = CreateNewPattern(pattern->id());
 				psycle::core::Pattern::iterator ev_it = pattern->begin();
 				int num_lines = pattern->beats() * lines_per_beat;
