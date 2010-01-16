@@ -64,7 +64,7 @@ MsDirectSound::~MsDirectSound() throw() {
 	before_destruction();
 }
 
-void MsDirectSound::do_start() {
+void MsDirectSound::do_start() throw(std::exception) {
 	//should be devided in do_open and do_start 
 	// return immediatly if the thread is already running
 	if(threadRunning_) return;
@@ -172,7 +172,7 @@ void MsDirectSound::do_start() {
 	}
 }
 
-void MsDirectSound::do_stop() {
+void MsDirectSound::do_stop() throw(std::exception) {
 	if(!threadRunning_) return;
 	// ask the thread to terminate
 	{
@@ -615,7 +615,7 @@ void MsDirectSound::WriteConfig() {
 	}
 }
 
-void MsDirectSound::do_open() {
+void MsDirectSound::do_open() throw(std::exception) {
 	// 1. reads the config from persistent storage
 	// 2. opens the gui to let the user edit the settings
 	// 3. writes the config to persistent storage
@@ -626,7 +626,7 @@ void MsDirectSound::do_open() {
 	//TODO
 }
 
-void MsDirectSound::do_close() {
+void MsDirectSound::do_close() throw(std::exception) {
 	///\todo YES, TODO!
 }
 

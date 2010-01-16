@@ -55,7 +55,7 @@ AlsaOut::AlsaOut()
 	output = 0;
 }
 	
-void AlsaOut::do_start() {
+void AlsaOut::do_start() throw(std::exception) {
 	// return immediatly if the thread is already running
 	if(running_) return;
 	
@@ -186,7 +186,7 @@ int AlsaOut::xrun_recovery(int err) {
 	return err;
 }
 
-void AlsaOut::do_stop() {
+void AlsaOut::do_stop() throw(std::exception) {
 	// return immediatly if the thread is not running
 	if(!running_) return;
 
@@ -381,7 +381,7 @@ void AlsaOut::set_swparams(snd_pcm_sw_params_t *swparams) {
 	}
 }
 
-AlsaOut::~AlsaOut() {
+AlsaOut::~AlsaOut() throw() {
 	before_destruction();
 	///\todo free memory here
 }

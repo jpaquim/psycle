@@ -17,7 +17,7 @@ JackOut::JackOut() {
 	running_ = 0;
 }
 
-void JackOut::do_start() {
+void JackOut::do_start() throw(std::exception) {
 	//jack_options_t options = JackNullOption;
 	//jack_status_t status;
 	// try to become a client of the JACK server
@@ -103,7 +103,7 @@ int JackOut::fillBuffer( jack_nframes_t nframes ) {
 	return 0;
 }
 
-void JackOut::do_stop() {
+void JackOut::do_stop() throw(std::exception) {
 	jack_client_close(client);
 }
 

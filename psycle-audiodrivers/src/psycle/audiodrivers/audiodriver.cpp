@@ -239,7 +239,7 @@ void DummyDriver::thread_function() {
 	}
 }
 
-void DummyDriver::do_stop() throw() {
+void DummyDriver::do_stop() throw(std::exception) {
 	{ scoped_lock lock(mutex_);
 		stop_requested_ = true; // ask the thread to terminate
 	}

@@ -19,14 +19,14 @@ using namespace universalis::stdlib;
 class AlsaOut : public AudioDriver {
 	public:
 		AlsaOut();
-		~AlsaOut();
+		~AlsaOut() throw();
 		/*override*/ AudioDriverInfo info() const;
 
 	protected:
-		/*override*/ void do_open() {}
-		/*override*/ void do_start();
-		/*override*/ void do_stop();
-		/*override*/ void do_close() {}
+		/*override*/ void do_open() throw(std::exception) {}
+		/*override*/ void do_start() throw(std::exception);
+		/*override*/ void do_stop() throw(std::exception);
+		/*override*/ void do_close() throw(std::exception) {}
 
 	private:
 		/// stream rate

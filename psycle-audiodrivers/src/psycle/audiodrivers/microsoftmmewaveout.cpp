@@ -159,8 +159,7 @@ DWORD WINAPI MsWaveOut::audioOutThread( void *pWaveOut ) {
 	return 0;
 }
 
-void MsWaveOut::do_open()
-{
+void MsWaveOut::do_open() throw(std::exception) {
 	if(hWaveOut) throw std::runtime_error("............");
 	// WAVEFORMATEX is defined in mmsystem.h
 	// this structure is used, to define the sampling rate, sampling resolution
@@ -188,7 +187,7 @@ void MsWaveOut::do_open()
 	universalis::os::aligned_memory_alloc(16, buf, playbackSettings().blockSamples()*playbackSettings().numChannels());
 }
 
-void MsWaveOut::do_close() {
+void MsWaveOut::do_close() throw(std::exception) {
 	if(waveOutClose(hWaveOut) != MMSYSERR_NOERROR) {
 		hWaveOut=0;
 		throw std::runtime_error("waveOutClose() failed");
@@ -198,13 +197,13 @@ void MsWaveOut::do_close() {
 	buf=0;
 }
 
-void MsWaveOut::do_start() {
+void MsWaveOut::do_start() throw(std::exception) {
 	_running = true;
 	DWORD dwThreadId;
 	_hThread = CreateThread( NULL, 0, audioOutThread, this, 0, &dwThreadId );
 }
 
-void MsWaveOut::do_stop() {
+void MsWaveOut::do_stop() throw(std::exception) {
 	if(!_running) return;
 	_running=false;
 	///\todo: some threadlocking mechanism. For now adding these sleeps

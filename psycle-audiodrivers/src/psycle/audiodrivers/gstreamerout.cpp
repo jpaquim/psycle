@@ -167,7 +167,7 @@ GStreamerOut::GStreamerOut()
 	caps_()
 {}
 
-void GStreamerOut::do_open() {
+void GStreamerOut::do_open() throw(std::exception) {
 	{ // initialize gstreamer
 		universalis::stdlib::call_once(global_client_count_init_once_flag, global_client_count_init);
 		scoped_lock<mutex> lock(global_client_count_mutex);
@@ -283,7 +283,7 @@ void GStreamerOut::do_open() {
 	set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
 }
 
-void GStreamerOut::do_start() {
+void GStreamerOut::do_start() throw(std::exception) {
 	// register our callback to the handoff signal of the fakesrc element
 	if(!::g_signal_connect(G_OBJECT(source_), "handoff", G_CALLBACK(handoff_static), this)) throw runtime_error("could not connect handoff signal", UNIVERSALIS__COMPILER__LOCATION);
 	// set the pipeline state to playing
@@ -305,11 +305,11 @@ void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 	Quantize16WithDither(in, out, frames);
 }
 
-void GStreamerOut::do_stop() {
+void GStreamerOut::do_stop() throw(std::exception) {
 	if(pipeline_) set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_READY);
 }
 
-void GStreamerOut::do_close() {
+void GStreamerOut::do_close() throw(std::exception) {
 	if(pipeline_) {
 		set_state_synchronously(*GST_ELEMENT(pipeline_), ::GST_STATE_NULL);
 		::gst_object_unref(GST_OBJECT(pipeline_)); pipeline_ = 0;
