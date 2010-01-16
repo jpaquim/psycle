@@ -308,9 +308,11 @@ class Canvas
 {
 	friend class Item;
 	public:
+		Canvas();
 		Canvas(CWnd* parent);
 		~Canvas();
 
+		void SetParent(CWnd* parent) {parent_ = parent;}
 		Group* root() { return &root_; } 
 
 		void Draw(CDC *devc, const CRgn& rgn);

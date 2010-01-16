@@ -22,12 +22,10 @@ namespace psycle {
 		class Project : private boost::noncopyable
 		{
 		public:
-			Project(ProjectData* parent,
-					PatternView* pat_view,
-					MachineView* mac_view);
+			Project(ProjectData* parent);
 			~Project();
 
-			Song& song() { return song_; }
+			Song& song() { return *song_; }
 
 			// modules
 			PatternView* pat_view();
@@ -41,7 +39,6 @@ namespace psycle {
 			void OnFileLoadsongNamed(const std::string& fName, int fType);
 			void FileLoadsongNamed(const std::string& fName);
 			bool CheckUnsavedSong(const std::string& title);
-
 			bool OnFileSave(UINT id);
 			bool OnFileSaveAs(UINT id);
 
@@ -53,21 +50,16 @@ namespace psycle {
 			CommandManager* cmd_manager() { return &cmd_manager_; }
 
 		private:
-
 			void AppendToRecent(const std::string& fName);
 			void OnProgress(int a, int b, std::string c);
 			void OnReport(std::string a, std::string b);
-
-			//todo make this both owner of this project
+			
 			PatternView* pat_view_;
 			MachineView* mac_view_;
 			ProjectData* parent_;
-
 			int beat_zoom_;
-
-			Song song_;
+			Song* song_;
 			CommandManager cmd_manager_;
-
 			CProgressDialog progress_;
 		};
 	}

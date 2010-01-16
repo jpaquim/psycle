@@ -10,8 +10,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 		public:
 			void UpdateInfo();
-			CInfoDlg(CWnd* pParent = 0);
-			Song* _pSong;
+			CInfoDlg(class ProjectData* projects, CWnd* pParent = 0);
 			void InitTimer();
 			int itemcount;
 		// Dialog Data
@@ -30,18 +29,17 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		// Overrides
 			// ClassWizard generated virtual function overrides
 			//{{AFX_VIRTUAL(CInfoDlg)
-			protected:
+		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			//}}AFX_VIRTUAL
-		// Implementation
-		protected:
 			// Generated message map functions
 			//{{AFX_MSG(CInfoDlg)
 			virtual BOOL OnInitDialog();
 			afx_msg void OnTimer(UINT nIDEvent);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
-		public:
+		private:
+			ProjectData* projects_;
 		};
 
 		//{{AFX_INSERT_LOCATION}}

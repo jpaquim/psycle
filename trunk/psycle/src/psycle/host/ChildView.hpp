@@ -127,6 +127,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			MachineView* machine_view() { return machine_view_; }
 			PatternView* pattern_view() { return pattern_view_; }
+
+			// addModules,creates mac and pattern view so far.
+			// TODO for multisong case.
+			void AddModules(class Project* project);
+
 			
 		public:
 			//RECENT!!!//
@@ -136,7 +141,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			class CMainFrame* main_frame_;
 			ProjectData* projects_;
-			Song* _pSong;
 			//bool multiPattern;			
 			CGearTracker * SamplerMachineDialog;
 			XMSamplerUI* XMSamplerMachineDialog;

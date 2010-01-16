@@ -63,8 +63,11 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 	  rgn.OffsetRgn(parent()->absx(), parent()->absy());
 	  if (canvas->IsSaving() ) {
 		  canvas->save_rgn_.CombineRgn(&canvas->save_rgn_,&rgn,RGN_OR);
-	  } else
-	  canvas->parent_->InvalidateRgn(&rgn,0);
+	  } else {
+		  if (canvas->parent()) {
+			canvas->parent_->InvalidateRgn(&rgn,0);
+		  }
+	  }
 	}
   }
 
@@ -77,7 +80,8 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 		if (canvas->IsSaving() ) {
 			canvas->save_rgn_.CombineRgn(&canvas->save_rgn_,region,RGN_OR);
 		} else {
-		  canvas->parent_->InvalidateRgn(region, 0);
+			if (canvas->parent())
+				canvas->parent_->InvalidateRgn(region, 0);
 		}
 	}
   } 
@@ -893,6 +897,23 @@ Item::Item() : parent_(0), managed_(0), visible_(1)  { }
   }
 
 
+Canvas::Canvas() :
+    parent_(0),
+	root_(this),
+	save_(false),
+	has_draw_(true),
+    button_press_item_(0),
+    steal_focus_(0),
+	bg_image_(0),
+	bg_width_(0),
+	bg_height_(0),
+	cw_(300),
+	ch_(200)
+{
+	save_rgn_.CreateRectRgn(0, 0, 0, 0);
+}
+
+
 Canvas::Canvas(CWnd* parent) :
     parent_(parent),
 	root_(this),
@@ -1022,7 +1043,8 @@ bool Canvas::DelegateEvent(Event* ev, Item* item) {
 
 void Canvas::Flush()
 {
-	parent_->InvalidateRgn(&save_rgn_,0);
+	if (parent_)
+		parent_->InvalidateRgn(&save_rgn_,0);
 	save_rgn_.DeleteObject();
 	save_rgn_.CreateRectRgn(0, 0, 0, 0);
 }

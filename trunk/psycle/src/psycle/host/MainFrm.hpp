@@ -45,7 +45,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DECLARE_DYNAMIC(CMainFrame)
 		// Attributes
 		public:
-			Song* _pSong;
 			int vuprevL;
 			int vuprevR;
 
@@ -95,8 +94,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			void ChangeGen(int i);
 
 			ProjectData* projects() { return &projects_; }
-
-			void SetSong(Song* song);
 
 			afx_msg void OnLoadwave();
 			
