@@ -208,7 +208,7 @@ class AudioDriver {
 	///\{
 		public:
 			void set_opened(bool);
-			bool opened() const { return opened_; }
+			virtual bool opened() const { return opened_; }
 		protected:
 			virtual void do_open() = 0;
 			virtual void do_close() = 0;
@@ -220,7 +220,8 @@ class AudioDriver {
 	///\{
 		public:
 			void set_started(bool);
-			bool started() const { return started_; }
+			virtual bool started() const { return started_; }
+			virtual void Configure() {}
 		protected:
 			virtual void do_start() = 0;
 			virtual void do_stop() = 0;
