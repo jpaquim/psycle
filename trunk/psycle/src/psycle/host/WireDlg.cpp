@@ -18,6 +18,7 @@
 #include "VolumeDlg.hpp"
 #include "Zap.hpp"
 #include "WireGui.hpp"
+#include "MachineGui.hpp"
 
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/fft.hpp>
@@ -28,18 +29,38 @@ using namespace psycle::helpers::math;
 
 namespace psycle {
 	namespace host {
-		CWireDlg::CWireDlg(CChildView* pParent)
-			: CDialog(CWireDlg::IDD, pParent),
-			  m_pParent(pParent),
-			  wire_gui_(0)
-		{
-		}
 
+		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
+			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
+			ON_WM_TIMER()
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlider)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
+			ON_BN_CLICKED(IDC_BUTTON, OnMode)
+			ON_BN_CLICKED(IDC_BUTTON2, OnHold)
+			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
+			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
+		END_MESSAGE_MAP()
+		
 		CWireDlg::CWireDlg(CChildView* pParent, WireGui* wire_gui)
 			: CDialog(CWireDlg::IDD, pParent),
 			  m_pParent(pParent),
-			  wire_gui_(wire_gui)
-		{
+			  wire_gui_(wire_gui),
+			  this_index(0), 
+			  wireIndex(0),
+			  _pSrcMachine(wire_gui_->fromGUI()->mac()),
+			  _pDstMachine(wire_gui_->toGUI()->mac()),
+			  scope_mode(0),
+			  scope_peak_rate(20),
+			  scope_osc_freq(5),
+			  scope_osc_rate(20),
+			  scope_spec_bands(128),
+			  scope_spec_rate(20),
+			  scope_spec_mode(1),
+			  scope_phase_rate(20),
+			  Inval(false)	{
+			CDialog::Create(IDD, m_pParent);
+			Init();
 		}
 
 		void CWireDlg::DoDataExchange(CDataExchange* pDX)
@@ -53,43 +74,20 @@ namespace psycle {
 			DDX_Control(pDX, IDC_BUTTON, m_mode);
 		}
 
-		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
-			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
-			ON_WM_TIMER()
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlider)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
-			ON_BN_CLICKED(IDC_BUTTON, OnMode)
-			ON_BN_CLICKED(IDC_BUTTON2, OnHold)
-			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
-			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
-		END_MESSAGE_MAP()
 
-		BOOL CWireDlg::OnInitDialog() 
+
+		void CWireDlg::Init()
 		{
-			CDialog::OnInitDialog();
 			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
 			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
 			//universalis::os::aligned_memory_alloc(16, inl, SCOPE_SPEC_SAMPLES);
 			//universalis::os::aligned_memory_alloc(16, inr, SCOPE_SPEC_SAMPLES);
 			helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
 			helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
-
-			scope_mode = 0;
-			scope_peak_rate = 20;
-			scope_osc_freq = 5;
-			scope_osc_rate = 20;
-			scope_spec_bands = 128;
-			scope_spec_rate = 20;
-			scope_spec_mode = 1;
-			scope_phase_rate = 20;
 			InitSpectrum();
-
-			Inval = false;
 			m_volslider.SetRange(0,256*4);
 			m_volslider.SetTicFreq(16*4);
-			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
-
+			_dstWireIndex = wire_gui_->wiredest();
 			float val;
 			_pDstMachine->GetWireVolume(_dstWireIndex,val);
 			invol = val;
@@ -126,11 +124,6 @@ namespace psycle {
 					mult = 1.0f; // native to native, no need to convert.
 			#endif
 
-			return TRUE;
-		}
-
-		BOOL CWireDlg::Create() {
-			return CDialog::Create(IDD, m_pParent);
 		}
 
 		void CWireDlg::OnCancel() {

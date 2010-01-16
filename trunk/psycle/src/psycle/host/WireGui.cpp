@@ -354,12 +354,7 @@ using namespace helpers::math;
 		{
 			if (!wire_dlg_) {			
 				wire_dlg_ = new CWireDlg(fromGUI_->view()->child_view(), this);
-				wire_dlg_->this_index = 0;
-				wire_dlg_->wireIndex = 0;
-				wire_dlg_->isrcMac = fromGUI_->mac()->id();
-				wire_dlg_->_pSrcMachine = fromGUI_->mac();
-				wire_dlg_->_pDstMachine = toGUI_->mac();
-				wire_dlg_->Create();
+				
 				//pParentMain->CenterWindowOnPoint(wdlg, point);
 				wire_dlg_->ShowWindow(SW_SHOW);
 			}
