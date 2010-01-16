@@ -71,6 +71,10 @@ class MsDirectSound : public AudioDriver {
 		MsDirectSound(DSoundUiInterface* ui);
 		virtual ~MsDirectSound();
 		/*override*/ AudioDriverInfo info() const;
+		virtual void Configure();
+
+		/*override*/ bool opened() const { return _pDs != 0;  }
+		/*override*/ bool started() const { return threadRunning_; }
 
 	protected:
 		/*override*/ void do_open();

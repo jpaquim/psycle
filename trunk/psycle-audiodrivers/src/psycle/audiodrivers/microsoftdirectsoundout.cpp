@@ -38,7 +38,7 @@ MsDirectSound::MsDirectSound()
 	dsBufferPlaying_(),
 	threadRunning_(),
 	stopRequested_(),
-	_pDs(),
+	_pDs(0),
 	_pBuffer(),
 	ui_(0)
 {
@@ -53,15 +53,19 @@ MsDirectSound::MsDirectSound(DSoundUiInterface* ui)
 	dsBufferPlaying_(),
 	threadRunning_(),
 	stopRequested_(),
-	_pDs(),
+	_pDs(0),
 	_pBuffer(),
-	ui_(ui)
-{
+	ui_(ui) {
 	_capEnums.resize(0);
 	_capPorts.resize(0);
 }
 
+MsDirectSound::~MsDirectSound() {
+	set_opened(false);
+}
+
 void MsDirectSound::do_start() {
+	//should be devided in do_open and do_start 
 	// return immediatly if the thread is already running
 	if(threadRunning_) return;
 	if( FAILED( ::CoInitialize(NULL) ) ) {
@@ -615,68 +619,11 @@ void MsDirectSound::do_open() {
 	// 1. reads the config from persistent storage
 	// 2. opens the gui to let the user edit the settings
 	// 3. writes the config to persistent storage
-
-	//_hwnd = NApp::mainWindow()->win();
-
 	ReadConfig();
-
 	_capEnums.resize(0);
 	_capPorts.resize(0);
 	DirectSoundCaptureEnumerate(DSEnumCallback,&_capEnums);
-
-	if (ui_) {
-		ui_->SetValues(
-			device_guid,
-			_exclusive,
-			_dither,
-			playbackSettings_.samplesPerSec(),
-			playbackSettings_.blockBytes(),
-			playbackSettings_.blockCount());
-		if (ui_->DoModal() != IDOK) return;
-		_configured = true;
-
-		// save the settings to be able to rollback if it doesn't work
-		GUID device_guid = this->device_guid;
-		bool exclusive = _exclusive;
-		bool dither = _dither;
-		int samplesPerSec = playbackSettings_.samplesPerSec();
-		int bufferSize = playbackSettings_.blockBytes();
-		int numBuffers = playbackSettings_.blockCount();
-
-		bool was_started = started();
-		if(was_started) do_stop();
-
-		int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
-		ui_->GetValues(
-			this->device_guid,
-			_exclusive,
-			_dither,
-			tmp_samplespersec,
-			tmp_blockbytes,
-			tmp_block_count);
-		playbackSettings_.setSamplesPerSec(tmp_samplespersec);
-		playbackSettings_.setBlockBytes(tmp_blockbytes);
-		playbackSettings_.setBlockCount(tmp_block_count);
-
-		bool write_config = true;
-		if(was_started) {
-			try {
-				do_start();
-			}
-			catch(...) {
-				// rollback
-				this->device_guid = device_guid;
-				_exclusive = exclusive;
-				_dither = dither;
-				playbackSettings_.setSamplesPerSec(samplesPerSec);
-				playbackSettings_.setBlockBytes(bufferSize);
-				playbackSettings_.setBlockCount(numBuffers);
-				write_config = false;
-				do_start();
-			}
-		}
-		if(write_config) WriteConfig();
-	}
+	//TODO
 }
 
 void MsDirectSound::do_close() {
@@ -707,9 +654,66 @@ int MsDirectSound::GetWritePos()
 	return writePos;
 }
 
-MsDirectSound::~MsDirectSound() {
-	set_opened(false);
-}
+void MsDirectSound::Configure()
+		{
+			// 1. reads the config from persistent storage
+			// 2. opens the gui to let the user edit the settings
+			// 3. writes the config to persistent storage
+
+			ReadConfig();
+			if (ui_) {
+				ui_->SetValues(device_guid,
+							   _exclusive,
+							   _dither, 
+							   playbackSettings_.samplesPerSec(),
+							   playbackSettings_.blockBytes(),
+							   playbackSettings_.blockCount());
+				if (ui_->DoModal() != IDOK) return;
+				_configured = true;
+
+				// save the settings to be able to rollback if it doesn't work
+				GUID device_guid = this->device_guid;
+				bool exclusive = _exclusive;
+				bool dither = _dither;
+				int samplesPerSec = playbackSettings_.samplesPerSec();
+				int bufferSize = playbackSettings_.blockBytes();
+				int numBuffers = playbackSettings_.blockCount();
+
+				bool _initialized = true;
+				if(_initialized) set_started(false);
+
+				int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
+				ui_->GetValues(this->device_guid,
+							   _exclusive,
+							   _dither,
+							   tmp_samplespersec,
+							   tmp_blockbytes, 
+							   tmp_block_count);
+				playbackSettings_.setSamplesPerSec(tmp_samplespersec);
+				playbackSettings_.setBlockBytes(tmp_blockbytes);
+				playbackSettings_.setBlockCount(tmp_block_count);
+
+				if(_initialized)
+				{
+					set_started(true);
+					if(started()) {
+						WriteConfig();
+					}
+					else {
+						// rollback
+						this->device_guid = device_guid;
+						_exclusive = exclusive;
+						_dither = dither;
+						playbackSettings_.setSamplesPerSec(samplesPerSec);
+						playbackSettings_.setBlockBytes(bufferSize);
+						playbackSettings_.setBlockCount(numBuffers);
+						set_started(true);
+					}
+				}
+				else WriteConfig();
+			}
+		}
+
 
 }}
 #endif // defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
