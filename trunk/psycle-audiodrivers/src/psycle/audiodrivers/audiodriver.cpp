@@ -69,6 +69,7 @@ void AudioDriver::set_opened(bool b) {
 		set_started(false);
 		do_close();
 	}
+	opened_ = b;
 }
 
 void AudioDriver::set_started(bool b) {
@@ -78,6 +79,7 @@ void AudioDriver::set_started(bool b) {
 			do_start();
 		}
 	} else if(started()) do_stop();
+	started_ = b;
 }
 
 void AudioDriver::setPlaybackSettings(AudioDriverSettings const & settings ) {
