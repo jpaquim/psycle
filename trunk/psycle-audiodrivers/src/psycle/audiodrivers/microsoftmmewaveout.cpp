@@ -26,6 +26,10 @@ MsWaveOut::MsWaveOut() {
 	buf = 0;
 }
 
+MsWaveOut::~MsWaveOut() {
+	set_opened(false);
+}
+
 WAVEHDR* MsWaveOut::allocateBlocks( ) {
 	unsigned char* buffer;
 	std::uint32_t i;
@@ -155,7 +159,8 @@ DWORD WINAPI MsWaveOut::audioOutThread( void *pWaveOut ) {
 	return 0;
 }
 
-void MsWaveOut::do_start() {
+void MsWaveOut::do_open()
+{
 	if(hWaveOut) throw std::runtime_error("............");
 	// WAVEFORMATEX is defined in mmsystem.h
 	// this structure is used, to define the sampling rate, sampling resolution
@@ -171,23 +176,31 @@ void MsWaveOut::do_start() {
 	format.cbSize = 0;
 
 	_dither = 0;
-
 	// the buffer block variables
 	if(!(waveBlocks = allocateBlocks())) throw std::runtime_error("............");
 	waveFreeBlockCount = playbackSettings().blockCount();
 	waveCurrentBlock = 0;
-
 	// this will protect the monitor buffer counter variable
-
 	if( waveOutOpen( &hWaveOut, WAVE_MAPPER, &format, (DWORD_PTR)waveOutProc,
 		(DWORD_PTR)&waveFreeBlockCount,
 		CALLBACK_FUNCTION ) != MMSYSERR_NOERROR
 	) throw std::runtime_error("waveOutOpen() failed");
+	universalis::os::aligned_memory_alloc(16, buf, playbackSettings().blockSamples()*playbackSettings().numChannels());
+}
 
+void MsWaveOut::do_close() {
+	if(waveOutClose(hWaveOut) != MMSYSERR_NOERROR) {
+		hWaveOut=0;
+		throw std::runtime_error("waveOutClose() failed");
+	}
+	hWaveOut=0;
+	universalis::os::aligned_memory_dealloc(buf);
+	buf=0;
+}
+
+void MsWaveOut::do_start() {
 	_running = true;
 	DWORD dwThreadId;
-	universalis::os::aligned_memory_alloc(16, buf, playbackSettings().blockSamples()*playbackSettings().numChannels());
-
 	_hThread = CreateThread( NULL, 0, audioOutThread, this, 0, &dwThreadId );
 }
 
@@ -200,25 +213,13 @@ void MsWaveOut::do_stop() {
 #else
 	sleep(1);
 #endif
-
 	TerminateThread( _hThread, 0 ); // just in case
 	if(::waveOutReset(hWaveOut) != MMSYSERR_NOERROR) {
 		hWaveOut=0;
 		throw std::runtime_error("waveOutReset() failed");
 	}
-
-	if(waveOutClose(hWaveOut) != MMSYSERR_NOERROR) {
-		hWaveOut=0;
-		throw std::runtime_error("waveOutClose() failed");
-	}
-	hWaveOut=0;
-	universalis::os::aligned_memory_dealloc(buf);
-	buf=0;
 }
 
-MsWaveOut::~MsWaveOut() {
-	set_opened(false);
-}
 
 }}
 #endif
