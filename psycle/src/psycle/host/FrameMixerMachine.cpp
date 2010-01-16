@@ -16,8 +16,8 @@ using namespace psycle::core;
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "ChildView.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+namespace host {
 
 
 	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameMachine)
@@ -1029,5 +1029,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CFrameMachine::OnSetFocus(pOldWnd);
 	}
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

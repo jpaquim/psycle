@@ -23,8 +23,8 @@ using namespace psycle::core;
 #include <algorithm> // for std::transform
 #include <cctype> // for std::tolower
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		int CNewMachine::machineGrouping = groupRole;
 		int CNewMachine::displayName = displayName;
@@ -849,8 +849,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				loggers::info("Saving scan cache file ...");
 				SaveCacheFile();
 
-				Progress.OnCancel();
-				::AfxGetApp()->DoWaitCursor(-1); 
 				loggers::info("Done.");
 			}
 		}
@@ -1390,5 +1388,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			return false;
 		}
 #endif
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

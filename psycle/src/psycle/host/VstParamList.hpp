@@ -15,8 +15,8 @@ using namespace psycle::core;
 #endif
 
 #include <afxext.h>
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		namespace vst
@@ -74,5 +74,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnDeltaposSpin(NMHDR* pNMHDR, LRESULT* pResult);
 			DECLARE_MESSAGE_MAP()
 		};
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

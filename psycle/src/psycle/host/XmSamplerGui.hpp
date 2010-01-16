@@ -15,12 +15,12 @@ namespace psycle {
 			virtual void BeforeDeleteDlg();
 			virtual void UpdateVU(CDC* devc);
 
-
 		protected:
 			virtual void ShowDialog(double x, double y);
-		private:
 
+		private:
 			class XMSamplerUI* dialog_;
 		};
-	}
-}
+
+	}	// namespace psycle
+}	// namespace host

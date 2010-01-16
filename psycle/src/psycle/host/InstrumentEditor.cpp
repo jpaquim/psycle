@@ -16,8 +16,8 @@ using namespace psycle::core;
 
 using psycle::helpers::hexstring_to_integer;
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		CInstrumentEditor::CInstrumentEditor(CWnd* pParent)
 			: CDialog(CInstrumentEditor::IDD, pParent)
@@ -503,5 +503,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_notelabel.SetWindowText(buffer);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

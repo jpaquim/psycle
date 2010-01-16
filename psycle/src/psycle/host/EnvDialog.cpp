@@ -7,8 +7,8 @@ using namespace psycle::core;
 #else
 #include "Song.hpp"
 #endif
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		CEnvDialog::CEnvDialog(CWnd* pParent)
 			: CDialog(CEnvDialog::IDD, pParent)
@@ -394,5 +394,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			*pResult = 0;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

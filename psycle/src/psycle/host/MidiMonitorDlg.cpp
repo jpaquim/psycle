@@ -11,8 +11,8 @@ using namespace psycle::core;
 #include "Song.hpp"
 #include "Machine.hpp"
 #endif
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
 			, m_clearCounter( 0 )
@@ -435,5 +435,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_channelMap.InsertItem( ch, txtBuffer, NULL );
 			}
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

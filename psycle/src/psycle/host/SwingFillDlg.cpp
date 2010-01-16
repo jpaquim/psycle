@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CSwingFillDlg.
 
 #include "SwingFillDlg.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 		CSwingFillDlg::CSwingFillDlg(CWnd* pParent) : CDialog(CSwingFillDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CSwingFillDlg)
@@ -101,5 +101,5 @@ The beat is always at the same place if not using the LFO with special values
 
 			CDialog::OnOK();
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

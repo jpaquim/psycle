@@ -15,8 +15,8 @@ using namespace psycle::core;
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
 #include "ProjectData.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)
@@ -243,5 +243,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			wavview.SetCursorPos( 0 );
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

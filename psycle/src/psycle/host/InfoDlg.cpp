@@ -14,72 +14,59 @@ using namespace psycle::core;
 #include "Machine.hpp"
 #endif
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 		CInfoDlg::CInfoDlg(ProjectData* projects, CWnd* pParent)
 			: CDialog(CInfoDlg::IDD, pParent),
-			  projects_(projects)
-		{
-			//{{AFX_DATA_INIT(CInfoDlg)
-			// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
+			  projects_(projects) {
 		}
 
-		void CInfoDlg::DoDataExchange(CDataExchange* pDX)
-		{
+		void CInfoDlg::DoDataExchange(CDataExchange* pDX) {
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CInfoDlg)
-			DDX_Control(pDX, IDC_MEM_RESO4, m_mem_virtual);
-			DDX_Control(pDX, IDC_MEM_RESO3, m_mem_pagefile);
-			DDX_Control(pDX, IDC_MEM_RESO2, m_mem_phy);
-			DDX_Control(pDX, IDC_MEM_RESO, m_mem_reso);
-			DDX_Control(pDX, IDC_MCPULABEL2, m_cpurout);
-			DDX_Control(pDX, IDC_MCPULABEL, m_machscpu);
-			DDX_Control(pDX, IDC_CPUL, m_processor_label);
-			DDX_Control(pDX, IDC_CPUIDLE_LABEL, m_cpuidlelabel);
-			DDX_Control(pDX, IDC_MACHINELIST, m_machlist);
-			//}}AFX_DATA_MAP
+			DDX_Control(pDX, IDC_MEM_RESO4, mem_virtual_);
+			DDX_Control(pDX, IDC_MEM_RESO3, mem_pagefile_);
+			DDX_Control(pDX, IDC_MEM_RESO2, mem_phy_);
+			DDX_Control(pDX, IDC_MEM_RESO, mem_reso_);
+			DDX_Control(pDX, IDC_MCPULABEL2, cpurout_);
+			DDX_Control(pDX, IDC_MCPULABEL, machscpu_);
+			DDX_Control(pDX, IDC_CPUL, processor_label_);
+			DDX_Control(pDX, IDC_CPUIDLE_LABEL, cpuidlelabel_);
+			DDX_Control(pDX, IDC_MACHINELIST, machlist_);
 		}
 
 		BEGIN_MESSAGE_MAP(CInfoDlg, CDialog)
-		//{{AFX_MSG_MAP(CInfoDlg)
-		ON_WM_TIMER()
-		//}}AFX_MSG_MAP
+			ON_WM_TIMER()
 		END_MESSAGE_MAP()
 
-		BOOL CInfoDlg::OnInitDialog() 
-		{
-			CDialog::OnInitDialog();
-			
-			m_machlist.InsertColumn(0,"Name",LVCFMT_LEFT,120,0);
-			m_machlist.InsertColumn(1,"Machine",LVCFMT_LEFT,90,1);
-			m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
-			m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
-			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
-			m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
+		BOOL CInfoDlg::OnInitDialog() {
+			CDialog::OnInitDialog();			
+			machlist_.InsertColumn(0,"Name",LVCFMT_LEFT,120,0);
+			machlist_.InsertColumn(1,"Machine",LVCFMT_LEFT,90,1);
+			machlist_.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
+			machlist_.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
+			machlist_.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
+			machlist_.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
 			
 			char buffer[128];
 			///\todo:  Using the Windows API to get clicks/CPU frequency doesn't give
 			// the real frequency in some cases. This has to be worked out.
-			if ( Global::_cpuHz/1000000 < 10 ) strcpy(buffer,"Unknown");
-			else sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
-			m_processor_label.SetWindowText(buffer);
+			if ( Global::_cpuHz/1000000 < 10 )
+				strcpy(buffer,"Unknown");
+			else 
+				sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
+			processor_label_.SetWindowText(buffer);
 			
-			UpdateInfo();
-			
-			InitTimer();
-			
-			return TRUE;
+			UpdateInfo();		
+			InitTimer();			
+			return true;
 		}
 
-		void CInfoDlg::InitTimer()
-		{
+		void CInfoDlg::InitTimer() {
 			if(!SetTimer(1,500,NULL))
 				MessageBox("Error! Couldn't initialize timer","CPU Perfomance Dialog", MB_OK | MB_ICONERROR);
 		}
 
-		void CInfoDlg::OnTimer(UINT nIDEvent) 
-		{
+		void CInfoDlg::OnTimer(UINT nIDEvent) {
 			if(nIDEvent==1) {
 				Song::scoped_lock lock(projects_->active_project()->song().Mutex());
 				char buffer[128];
@@ -105,19 +92,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 						// Input numbers
 						sprintf(buffer,"%d",tmac->_connectedInputs);
-						m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+						machlist_.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
 
 						// OutPut numbers
 						sprintf(buffer,"%d",tmac->_connectedOutputs);
-						m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+						machlist_.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 #else
 						// Input numbers
 						sprintf(buffer,"%d",tmac->_numInputs);
-						m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+						machlist_.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
 
 						// OutPut numbers
 						sprintf(buffer,"%d",tmac->_numOutputs);
-						m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+						machlist_.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 #endif
 
 						float machCPU=0;
@@ -134,7 +121,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							masterCPU = machCPU;
 						}*/
 						sprintf(buffer,"%.1f%%",machCPU);
-						m_machlist.SetItem(n,5,LVIF_TEXT,buffer,0,0,0,NULL);
+						machlist_.SetItem(n,5,LVIF_TEXT,buffer,0,0,0,NULL);
 						n++;
 						machsCPU += machCPU;
 		//				wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz)*100;
@@ -145,7 +132,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #endif
 					}
 				}
-				if (itemcount != n)
+				if (item_count_ != n)
 				{
 					UpdateInfo();
 				}
@@ -157,15 +144,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				totalCPU = machsCPU + wiresCPU;
 
 				sprintf(buffer,"%.1f%%",totalCPU);
-				m_cpuidlelabel.SetWindowText(buffer);
+				cpuidlelabel_.SetWindowText(buffer);
 				
 				sprintf(buffer,"%.1f%%",machsCPU);
-				m_machscpu.SetWindowText(buffer);
+				machscpu_.SetWindowText(buffer);
 				
 		//		sprintf(buffer,"%.1f%%",((float)_pSong->cpuIdle/Global::_cpuHz)*100);
 		//		sprintf(buffer,"%.1f%%",((float)_pSong->_pMachines[MASTER_INDEX]->_wireCost/Global::_cpuHz)*100);
 				sprintf(buffer,"%.1f%%",wiresCPU);
-				m_cpurout.SetWindowText(buffer);
+				cpurout_.SetWindowText(buffer);
 				
 				// Memory status -------------------------------------------------
 				
@@ -173,22 +160,22 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				GlobalMemoryStatus(&lpBuffer);
 				
 				sprintf(buffer,"%d%%",100-lpBuffer.dwMemoryLoad);
-				m_mem_reso.SetWindowText(buffer);
+				mem_reso_.SetWindowText(buffer);
 				
 				sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailPhys/1048576.0f,lpBuffer.dwTotalPhys/1048576.0f);
-				m_mem_phy.SetWindowText(buffer);
+				mem_phy_.SetWindowText(buffer);
 				
 				sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailPageFile/1048576.0f,lpBuffer.dwTotalPageFile/1048576.0f);
-				m_mem_pagefile.SetWindowText(buffer);
+				mem_pagefile_.SetWindowText(buffer);
 				
 				sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailVirtual/1048576.0f,lpBuffer.dwTotalVirtual/1048576.0f);
-				m_mem_virtual.SetWindowText(buffer);
+				mem_virtual_.SetWindowText(buffer);
 			}
 		}
 
 		void CInfoDlg::UpdateInfo()
 		{
-			m_machlist.DeleteAllItems();
+			machlist_.DeleteAllItems();
 			
 			int n=0;
 			for(int c=0; c<MAX_MACHINES; c++)
@@ -200,7 +187,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					
 					// Name [Machine view editor custom name]
 					sprintf(buffer,"%.3d: %s",n+1,tmac->GetEditName().c_str());
-					m_machlist.InsertItem(n,buffer);
+					machlist_.InsertItem(n,buffer);
 					
 					// Gear [Gear type]
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -208,7 +195,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 #else
 					strcpy(buffer, tmac->GetName());
 #endif
-					m_machlist.SetItem(n,1,LVIF_TEXT,buffer,0,0,0,NULL);
+					machlist_.SetItem(n,1,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// Type [Set is generator/effect/master]
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -219,15 +206,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						strcpy(buffer,"Generator");
 					}
 					else { strcpy(buffer,"Effect"); }
-					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
+					machlist_.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
 
 					// Input numbers
 					sprintf(buffer,"%d",tmac->_connectedInputs);
-					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+					machlist_.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// OutPut numbers
 					sprintf(buffer,"%d",tmac->_connectedOutputs);
-					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+					machlist_.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 #else
 					switch(tmac->_mode)
 					{
@@ -235,20 +222,20 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					case MACHMODE_FX: strcpy(buffer,"Effect");break;
 					case MACHMODE_MASTER: strcpy(buffer,"Master");break;
 					}
-					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
+					machlist_.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
 
 					// Input numbers
 					sprintf(buffer,"%d",tmac->_numInputs);
-					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+					machlist_.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// OutPut numbers
 					sprintf(buffer,"%d",tmac->_numOutputs);
-					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+					machlist_.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 #endif
-					n++;
+					++n;
 				}
 			}
-			itemcount = n;
+			item_count_ = n;
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CWaveEdCrossfadeDialog.
 #include "WaveEdCrossfadeDialog.hpp"
 #include <iomanip>
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+namespace host {
 		CWaveEdCrossfadeDialog::CWaveEdCrossfadeDialog(CWnd* pParent)
 			: CDialog(CWaveEdCrossfadeDialog::IDD, pParent)
 		{
@@ -121,5 +121,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 			*pResult = 0;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

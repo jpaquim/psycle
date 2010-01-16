@@ -1589,11 +1589,9 @@ using namespace psycle::helpers::math;
 			m_midiMonitorDlg.ShowWindow(SW_HIDE);
 		}
 
-		void CMainFrame::UpdateEnvInfo()
-		{
+		void CMainFrame::UpdateEnvInfo() {
 			m_wndInfo.UpdateInfo();
 		}
-
 
 		void CMainFrame::OnPsyhelp() 
 		{

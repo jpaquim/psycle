@@ -16,8 +16,8 @@
 
 #include <psycle/helpers/dsp.hpp>
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+namespace host {
 
 CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent)
 	: CDialog(CWaveInMacDlg::IDD, pParent),
@@ -142,5 +142,5 @@ void CWaveInMacDlg::centerWindowOnPoint(int x, int y) {
 }
 
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

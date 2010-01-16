@@ -98,7 +98,6 @@ namespace psycle  {
 			CProgressDialog Progress;
 			if ( !autosave )
 			{
-				Progress.Create();
 				Progress.SetWindowText("Saving...");
 				Progress.ShowWindow(SW_SHOW);
 			}
@@ -139,8 +138,8 @@ namespace psycle  {
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.SetRange(0,chunkcount);
-				Progress.m_Progress.SetStep(1);
+				Progress.SetRange(0,chunkcount);
+				Progress.SetStep(1);
 			}
 
 			//
@@ -163,7 +162,7 @@ namespace psycle  {
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -189,7 +188,7 @@ namespace psycle  {
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -241,7 +240,7 @@ namespace psycle  {
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -280,7 +279,7 @@ namespace psycle  {
 			}
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -343,7 +342,7 @@ namespace psycle  {
 
 				if ( !autosave ) 
 				{
-					Progress.m_Progress.StepIt();
+					Progress.StepIt();
 					::Sleep(1);
 				}
 			}
@@ -386,7 +385,7 @@ namespace psycle  {
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
+						Progress.StepIt();
 						::Sleep(1);
 					}
 				}
@@ -421,7 +420,7 @@ namespace psycle  {
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
+						Progress.StepIt();
 						::Sleep(1);
 					}
 				}
@@ -479,10 +478,8 @@ namespace psycle  {
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.SetPos(chunkcount);
+				Progress.SetPos(chunkcount);
 				::Sleep(1);
-
-				Progress.OnCancel();
 			}
 
 			if (!pFile->Close())

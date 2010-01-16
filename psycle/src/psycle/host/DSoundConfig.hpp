@@ -11,8 +11,8 @@
 #include "Configuration.hpp"
 #endif
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
   		/// direct sound config window.
 		class CDSoundConfig : public CDialog
 		{
@@ -162,5 +162,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		};
 #endif
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

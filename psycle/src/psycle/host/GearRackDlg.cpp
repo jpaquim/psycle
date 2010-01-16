@@ -16,8 +16,8 @@ using namespace psycle::core;
 #include "PatternView.hpp"
 #include "MachineView.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		int CGearRackDlg::DisplayMode = 0;
 
@@ -585,5 +585,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pParentMain->RedrawGearRackList();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

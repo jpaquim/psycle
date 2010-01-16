@@ -19,8 +19,8 @@
 
 using namespace psycle::helpers::math;
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		using namespace seib::vst;
 
@@ -960,5 +960,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			presets[i2]=preset;;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

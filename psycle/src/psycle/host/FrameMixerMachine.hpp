@@ -11,8 +11,8 @@ namespace psycle {
 }
 using namespace psycle::core;
 #endif
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+namespace host {
 
 
 	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -218,5 +218,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		DECLARE_MESSAGE_MAP()
 	};
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

@@ -29,8 +29,8 @@ using namespace psycle::helpers;
 using namespace psycle::helpers::math;
 using namespace psycle::helpers::dsp;
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		extern CPsycleApp theApp;
 		DWORD WINAPI __stdcall RecordThread(void *b);
@@ -1217,5 +1217,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

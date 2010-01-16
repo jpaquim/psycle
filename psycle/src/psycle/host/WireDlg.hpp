@@ -20,8 +20,8 @@ namespace psycle {
 }
 #endif
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		class CChildView;
 		class WireGui;
@@ -123,5 +123,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DECLARE_MESSAGE_MAP()
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

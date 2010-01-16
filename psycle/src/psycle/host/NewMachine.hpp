@@ -15,8 +15,8 @@ using namespace psycle::core;
 #include <iostream>
 #include <typeinfo>
 #include <map>
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		const int MAX_BROWSER_NODES = 64;
@@ -179,5 +179,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnBnClickedButton1();
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

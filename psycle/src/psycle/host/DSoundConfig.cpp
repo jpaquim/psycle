@@ -25,8 +25,8 @@
 
 #include <iomanip>
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 
 		CDSoundConfig::CDSoundConfig(CWnd* pParent)
 		:
@@ -220,5 +220,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnDestroy();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

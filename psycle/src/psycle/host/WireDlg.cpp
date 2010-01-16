@@ -26,8 +26,8 @@
 
 using namespace psycle::helpers::math;
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+	namespace host {
 		CWireDlg::CWireDlg(CChildView* pParent)
 			: CDialog(CWireDlg::IDD, pParent),
 			  m_pParent(pParent),
@@ -1386,7 +1386,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_volslider.SetPos(256*4-t);
 			}
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace
 
 
