@@ -11,6 +11,13 @@ namespace psycle { namespace audiodrivers {
 
 using helpers::math::clipped_lrint;
 
+
+ASIOInterface::~ASIOInterface() throw() {
+	set_opened(false);
+	//ASIOExit();
+	asioDrivers.removeCurrentDriver();
+}
+
 // note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 #define ALLOW_NON_ASIO
 
@@ -138,41 +145,9 @@ void ASIOInterface::Init() {
 	}
 }
 
+
 void ASIOInterface::do_open() {
 	if(!_configured) ReadConfig();
-	if(!ui_) {
-		ui_->SetValues(GetidxFromOutPort(_selectedout), playbackSettings_.samplesPerSec(), _ASIObufferSize);
-		if(ui_->DoModal(this) != IDOK) return;
-		int oldbs = _ASIObufferSize;
-		PortOut oldout = _selectedout;
-		int oldsps = playbackSettings_.samplesPerSec();
-		bool was_started = started();
-		if(was_started) do_stop();
-		int tmp_driver_id, tmp_sample_rate, tmp_buffer_size;
-		ui_->GetValues(tmp_driver_id, tmp_sample_rate, tmp_buffer_size);
-		_ASIObufferSize = tmp_buffer_size;
-		_selectedout = GetOutPortFromidx(tmp_driver_id);
-		playbackSettings_.setSamplesPerSec(tmp_sample_rate);
-		_configured = true;
-		bool write_config = true;
-		if(was_started) {
-			try {
-				do_start();
-			}
-			catch(...) {
-				// rollback
-				_ASIObufferSize = oldbs;
-				_selectedout = oldout;
-				playbackSettings_.setSamplesPerSec(oldsps);
-				write_config = false;
-				do_start();
-			}
-		}
-		if(write_config) WriteConfig();
-	}
-}
-
-void ASIOInterface::do_start() {
 	//CSingleLock lock(&_lock, TRUE);
 	scoped_lock lock(mutex_);
 
@@ -212,21 +187,21 @@ void ASIOInterface::do_start() {
 	//////////////////////////////////////////////////////////////////////////
 	// Create the buffers to play and record.
 	int numbuffers = (1 + _selectedins.size()) * 2;
-	ASIOBufferInfo *info = new ASIOBufferInfo[numbuffers];
+	info_ = new ASIOBufferInfo[numbuffers];
 	int counter=0;
 	for (unsigned int i(0); i < _selectedins.size() ; ++i) {
-		info[counter].isInput = info[counter+1].isInput = _selectedins[i].port->_info.isInput;
-		info[counter].channelNum = _selectedins[i].port->_idx;
-		info[counter+1].channelNum = _selectedins[i].port->_idx + 1;
-		info[counter].buffers[0] = info[counter].buffers[1] = info[counter+1].buffers[0] = info[counter+1].buffers[1] = 0;
+		info_[counter].isInput = info_[counter+1].isInput = _selectedins[i].port->_info.isInput;
+		info_[counter].channelNum = _selectedins[i].port->_idx;
+		info_[counter+1].channelNum = _selectedins[i].port->_idx + 1;
+		info_[counter].buffers[0] = info_[counter].buffers[1] = info_[counter+1].buffers[0] = info_[counter+1].buffers[1] = 0;
 		counter += 2;
 	}
-	info[counter].isInput = info[counter+1].isInput = _selectedout.port->_info.isInput;
-	info[counter].channelNum = _selectedout.port->_idx;
-	info[counter + 1].channelNum = _selectedout.port->_idx + 1;
-	info[counter].buffers[0] = info[counter].buffers[1] = info[counter+1].buffers[0] = info[counter+1].buffers[1] = 0;
+	info_[counter].isInput = info_[counter+1].isInput = _selectedout.port->_info.isInput;
+	info_[counter].channelNum = _selectedout.port->_idx;
+	info_[counter + 1].channelNum = _selectedout.port->_idx + 1;
+	info_[counter].buffers[0] = info_[counter].buffers[1] = info_[counter+1].buffers[0] = info_[counter+1].buffers[1] = 0;
 	// create and activate buffers
-	if(ASIOCreateBuffers(info,numbuffers,_ASIObufferSize,&asioCallbacks) != ASE_OK) {
+	if(ASIOCreateBuffers(info_,numbuffers,_ASIObufferSize,&asioCallbacks) != ASE_OK) {
 		//ASIOExit();
 		asioDrivers.removeCurrentDriver();
 		throw std::runtime_error("..........");
@@ -235,16 +210,19 @@ void ASIOInterface::do_start() {
 	counter=0;
 	unsigned int i(0);
 	for (; i < _selectedins.size() ; ++i) {
-		AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedins[i].port->_info.type);
+		AsioStereoBuffer buffer(info_[counter].buffers,info_[counter+1].buffers,_selectedins[i].port->_info.type);
 		ASIObuffers[i] = buffer;
 		universalis::os::aligned_memory_alloc(16, _selectedins[i].pleft, _ASIObufferSize);
 		universalis::os::aligned_memory_alloc(16, _selectedins[i].pright, _ASIObufferSize);
 		counter += 2;
 	}
-	AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedout.port->_info.type);
+	AsioStereoBuffer buffer(info_[counter].buffers,info_[counter+1].buffers,_selectedout.port->_info.type);
 	ASIObuffers[i] = buffer;
 
 	ASIOGetLatencies(&_inlatency,&_outlatency);
+}
+
+void ASIOInterface::do_start() {
 	if(ASIOStart() != ASE_OK) {
 		ASIODisposeBuffers();
 		//ASIOExit();
@@ -254,7 +232,6 @@ void ASIOInterface::do_start() {
 	// END -  CODE
 	_running = true;
 	//CMidiInput::Instance()->ReSync(); // MIDI IMPLEMENTATION
-	delete[] info;
 }
 
 void ASIOInterface::do_stop() {
@@ -264,6 +241,10 @@ void ASIOInterface::do_stop() {
 	if(!_running) return;
 	_running = false;
 	ASIOStop();
+}
+
+void ASIOInterface::do_close() {
+	delete[] info_;
 	ASIODisposeBuffers();
 	for (unsigned int i(0); i < _selectedins.size() ; ++i) {
 		universalis::os::aligned_memory_dealloc(_selectedins[i].pleft);
@@ -1030,10 +1011,33 @@ long ASIOInterface::asioMessages(long selector, long value, void* message, doubl
 	return ret;
 }
 
-ASIOInterface::~ASIOInterface() throw() {
-	set_opened(false);
-	//ASIOExit();
-	asioDrivers.removeCurrentDriver();
-}
+void ASIOInterface::Configure() { 	 
+	if(!_configured) ReadConfig(); 	 
+	if(ui_) {
+	   bool _initialized = true;
+	   ui_->SetValues(GetidxFromOutPort(_selectedout), playbackSettings_.samplesPerSec(), _ASIObufferSize); 	 
+	   if(ui_->DoModal(this) != IDOK) return; 	 
+	   int oldbs = _ASIObufferSize; 	 
+	   PortOut oldout = _selectedout; 	 
+	   int oldsps = playbackSettings_.samplesPerSec(); 	 
+	   if(_initialized) do_stop(); 	 
+	   int tmp_driver_id, tmp_sample_rate, tmp_buffer_size; 	 
+	   ui_->GetValues(tmp_driver_id, tmp_sample_rate, tmp_buffer_size); 	 
+	   _ASIObufferSize = tmp_buffer_size; 	 
+	   _selectedout = GetOutPortFromidx(tmp_driver_id); 	 
+	   playbackSettings_.setSamplesPerSec(tmp_sample_rate); 	 
+	   _configured = true; 	 					
+	   set_started(true);
+	   if (started()) {
+		 WriteConfig(); 	 
+	   } else { 	 
+	    _ASIObufferSize = oldbs; 	 
+	    _selectedout = oldout; 	 
+	    playbackSettings_.setSamplesPerSec(oldsps); 	 
+	    set_started(true);
+	   }
+	 } 	 	 
+  } 	 
+	  	 	 
 
 }}

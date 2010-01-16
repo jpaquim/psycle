@@ -64,22 +64,20 @@ void AudioDriver::set_callback(AUDIODRIVERWORKFN callback, void * context) {
 
 void AudioDriver::set_opened(bool b) {
 	if(b) {
-		if(!opened_) do_open();
-	} else if(opened_) {
+		if(!opened()) do_open();
+	} else if(opened()) {
 		set_started(false);
 		do_close();
 	}
-	opened_ = b;
 }
 
 void AudioDriver::set_started(bool b) {
 	if(b) {
-		if(!started_) {
+		if(!started()) {
 			set_opened(true);
 			do_start();
 		}
-	} else if(started_) do_stop();
-	started_ = b;
+	} else if(started()) do_stop();
 }
 
 void AudioDriver::setPlaybackSettings(AudioDriverSettings const & settings ) {

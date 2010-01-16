@@ -135,16 +135,22 @@ class ASIOInterface : public AudioDriver {
 		ASIOInterface(AsioUiInterface* ui);
 		virtual ~ASIOInterface() throw();
 
-		/*override*/ AudioDriverInfo info() const;
+		virtual AudioDriverInfo info() const;
+
+		virtual void Configure();
+
 	protected:
-		/*override*/ void do_open();
-		/*override*/ void do_start();
-		/*override*/ void do_stop();
-		/*override*/ void do_close() {}
+		virtual void do_open();
+		virtual void do_start();
+		virtual void do_stop();
+		virtual void do_close();
+
+		virtual bool opened() const { return !(ASE_NotPresent == ASIOOutputReady()); }
+		virtual bool started() const { return _running; }
 
 	public:
-		/*override*/ int GetInputLatency() { return _inlatency; }
-		/*override*/ int GetOutputLatency() { return _outlatency; }
+		virtual int GetInputLatency() { return _inlatency; }
+		virtual int GetOutputLatency() { return _outlatency; }
 
 	public: ///\todo all that public!?
 		int GetBufferSize();
@@ -212,6 +218,8 @@ class ASIOInterface : public AudioDriver {
 		std::vector<int> _portMapping;
 
 		AsioUiInterface* ui_;
+		ASIOBufferInfo* info_;
+
 		void Init();
 };
 	

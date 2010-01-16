@@ -2,6 +2,7 @@
 ///\interface file for psycle::host::COutputDlg.
 #pragma once
 #include "Psycle.hpp"
+#include "configuration_options.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 	#include <psycle/audiodrivers/audiodriver.h>
 #else
