@@ -391,9 +391,9 @@ using namespace helpers;
 		}
 
 
-		void Mixer::DeleteWires()
+		void Mixer::DeleteWires(CoreSong &song)
 		{
-			Machine::DeleteWires();
+			Machine::DeleteWires(song);
 			Machine *iMac;
 			for(int w=0; w<numreturns(); w++)
 			{

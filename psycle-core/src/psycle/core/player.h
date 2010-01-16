@@ -93,7 +93,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			CoreSong const & song() const { return *song_; }
 			CoreSong & song() { return *song_; }
 			void song(CoreSong & song) { 
-				if (song_) {
+				if (song_ && &song != song_) {
 					scoped_lock lock(song_->Mutex());
 					scoped_lock lock2(song.Mutex());
 					song_ = &song;

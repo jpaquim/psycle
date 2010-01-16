@@ -23,6 +23,11 @@ using namespace psycle::core;
 #include "XMSongExport.hpp"
 #include "XMSongLoader.hpp"
 #include "ITModule2.h"
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 
 namespace psycle {
 	namespace host {
@@ -63,6 +68,8 @@ namespace psycle {
 		}
 
 		void Project::SetActive() {			
+			psycle::core::Player & player(psycle::core::Player::singleton());
+			player.song(*song_);
 		}
 
 		void Project::Clear()
@@ -153,13 +160,16 @@ namespace psycle {
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			mac_view()->LockVu();
+			psycle::core::Song* song = new Song();
+			song->SetReady(false);
 			Player & player(Player::singleton());
 			player.stop();
-			player.song(*song_);
+			//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
+			//Ideally, this should be handled with a player callback specific for loading.
+			player.song(*song);
 			pat_view()->editPosition = 0;
 			progress_.SetPos(0);
 			progress_.ShowWindow(SW_SHOW);		
-			psycle::core::Song* song = new Song();
 			song->progress.connect(boost::bind(&Project::OnProgress, this, _1, _2, _3));
 			song->report.connect(boost::bind(&Project::OnReport, this, _1, _2));
 			if(!song->load(fName.c_str())) {
@@ -167,10 +177,10 @@ namespace psycle {
 				progress_.ShowWindow(SW_HIDE);
 				mac_view()->UnlockVu();
 				delete song;
+				player.song(*song_);
 				return;			
 			}	
 			progress_.ShowWindow(SW_HIDE);
-			player.song(*song);
 			delete song_; 
 			song_ = song;
 			AppendToRecent(fName);
@@ -178,7 +188,7 @@ namespace psycle {
 			if (index != std::string::npos)
 			{
 				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
-				song->fileName = fName.substr(index+1);
+				song_->fileName = fName.substr(index+1);
 			}
 			else
 			{

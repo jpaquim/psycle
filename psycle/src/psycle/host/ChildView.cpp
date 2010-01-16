@@ -40,6 +40,11 @@ using namespace psycle::core;
 #include "PatDeleteCommand.hpp"
 #include "ChangeGenCommand.hpp"
 #include "ChangeInsCommand.hpp"
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 
 namespace psycle {
 	namespace host {
@@ -427,7 +432,6 @@ namespace psycle {
 		{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE			
 			psycle::core::Player & player(psycle::core::Player::singleton());
-			player.song(projects_->active_project()->song());
 			output_driver_ =  Global::pConfig->_pOutputDriver;
 			if (&player.driver() == output_driver_) {
 				if (output_driver_->started())

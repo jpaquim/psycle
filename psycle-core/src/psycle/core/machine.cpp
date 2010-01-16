@@ -415,14 +415,14 @@ bool Machine::Disconnect(Machine & dstMac) {
 	return true; 
 }
 
-void Machine::DeleteWires() {
+void Machine::DeleteWires(CoreSong& song) {
 	Machine * iMac;
 	// Deleting the connections to/from other machines
 	for(Wire::id_type w = 0; w < MAX_CONNECTIONS; ++w) {
 		// Checking In-Wires
 		if(_inputCon[w]) {
 			if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES)) {
-				iMac = callbacks->song().machine(_inputMachines[w]);
+				iMac = song.machine(_inputMachines[w]);
 				if(iMac) {
 					Wire::id_type wix = iMac->FindOutputWire(id());
 					if(wix >= 0) iMac->DeleteOutputWire(wix,0);
@@ -433,7 +433,7 @@ void Machine::DeleteWires() {
 		// Checking Out-Wires
 		if(_connection[w]) {
 			if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES)) {
-				iMac = callbacks->song().machine(_outputMachines[w]);
+				iMac = song.machine(_outputMachines[w]);
 				if(iMac) {
 					Wire::id_type wix = iMac->FindInputWire(id());
 					if(wix >= 0) iMac->DeleteInputWire(wix,0);
