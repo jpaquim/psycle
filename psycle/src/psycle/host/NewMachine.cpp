@@ -772,7 +772,6 @@ namespace psycle {
 				loggers::info("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
 				loggers::info("Scanning plugins ... Listing ...");
 
-				Progress.Create();
 				Progress.SetWindowText("Scanning plugins ... Listing ...");
 				Progress.ShowWindow(SW_SHOW);
 

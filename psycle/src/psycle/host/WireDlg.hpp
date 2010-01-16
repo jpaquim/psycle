@@ -7,7 +7,6 @@
 namespace psycle {
 	namespace core {
 		class Machine;
-		class Song;
 	}
 }
 using namespace psycle::core;
@@ -15,7 +14,6 @@ using namespace psycle::core;
 namespace psycle {
 	namespace host {
 		class Machine;
-		class Song;
 	}
 }
 #endif
@@ -34,27 +32,39 @@ namespace psycle {
 		class CWireDlg : public CDialog
 		{
 		public:
-			CWireDlg(CChildView* pParent);
-			CWireDlg(CChildView* pParent, class WireGui* wire_gui);
-		private:
-			WireGui* wire_gui_;
+			CWireDlg(CChildView* pParent, WireGui* wire_gui);
 
-		public:
-	
-			BOOL Create();
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support			
+			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnButton1();
+			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnMode();
+			afx_msg void OnHold();
+			afx_msg void OnVolumeDb();
+			afx_msg void OnVolumePer();
 			afx_msg void OnCancel();
-			UINT this_index;
+			DECLARE_MESSAGE_MAP()
+
+		private:
+			virtual BOOL PreTranslateMessage(MSG* pMsg);
+			inline int GetY(float f);
+			void SetMode();
+			void InitSpectrum();
+			void Init();
+
+			WireGui* wire_gui_;
 			int wireIndex;
 			int isrcMac;
+			UINT this_index;
 			bool Inval;
-
 			Machine* _pSrcMachine;
 			Machine* _pDstMachine;
-
 			int _dstWireIndex;
 			float invol;
 			float mult;
-
 			int scope_mode;
 			int scope_peak_rate;
 			int scope_osc_freq;
@@ -63,36 +73,22 @@ namespace psycle {
 			int scope_spec_rate;
 			int scope_spec_mode;
 			int scope_phase_rate;
-
 			float peakL,peakR;
 			float peak2L,peak2R;
 			int peakLifeL,peakLifeR;
-
 			float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
-
 			float *pSamplesL;
 			float *pSamplesR;
 			float *inl;
 			float *inr;
-
-		// Dialog Data
+			// Dialog Data
 			enum { IDD = IDD_WIREDIALOG };
 			CSliderCtrl	m_slider;
 			CSliderCtrl	m_slider2;
 			CStatic	m_volabel_per;
 			CStatic	m_volabel_db;
 			CButton m_mode;
-			CSliderCtrl	m_volslider;
-		// Overrides
-		public:
-			virtual BOOL PreTranslateMessage(MSG* pMsg);
-		protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		// Implementation
-		protected:
-			inline int GetY(float f);
-			void SetMode();
-			void InitSpectrum();
+			CSliderCtrl	m_volslider;						
 			CChildView* m_pParent;
 			CBitmap* bufBM;
 			CBitmap* clearBM;
@@ -109,18 +105,6 @@ namespace psycle {
 			int bar_heightsr[MAX_SCOPE_BANDS];
 			float sth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
 			float cth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
-			// Generated message map functions
-			virtual BOOL OnInitDialog();
-			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnButton1();
-			afx_msg void OnTimer(UINT nIDEvent);
-			afx_msg void OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnMode();
-			afx_msg void OnHold();
-			afx_msg void OnVolumeDb();
-			afx_msg void OnVolumePer();
-			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace
