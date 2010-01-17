@@ -9,6 +9,7 @@
 #include <universalis/stdlib/thread.hpp>
 #include <sstream>
 namespace psycle { namespace plugins { namespace outputs {
+	using namespace universalis::stdlib;
 	using stream::formats::riff_wave::format;
 
 	PSYCLE__PLUGINS__NODE_INSTANTIATOR(direct_sound)
@@ -58,7 +59,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			::DSBUFFERDESC description;
 			std::memset(&description, 0, sizeof description);
 			description.dwSize = sizeof description;
-			description.dwFlags = DSBCAPS_LOCSOFTWARE | DSBCAPS_GETCURRENTPOSITION2;
+			description.dwFlags = DSBCAPS_LOCSOFTWARE | DSBCAPS_GETCURRENTPOSITION2; // | DSBCAPS_TRUEPLAYPOSITION valid only in vista
 			total_buffer_size_ = 0;
 			if(write_primary_) {
 				description.dwFlags |= DSBCAPS_PRIMARYBUFFER;
@@ -67,7 +68,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				description.lpwfxFormat = &format.wave_format_ex();
 				description.dwBufferBytes = total_buffer_size_ = buffers_ * samples_per_buffer_ * static_cast<unsigned long int>(format.bytes_per_sample());
 			}
-			if(FAILED(error = direct_sound_implementation().CreateSoundBuffer(&description, &buffer_, 0))) throw universalis::os::exceptions::runtime_error("direct sound create sound buffer: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
+			if(error = direct_sound_implementation().CreateSoundBuffer(&description, &buffer_, 0)) throw universalis::os::exceptions::runtime_error("direct sound create sound buffer: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 			if(error && loggers::warning()()) {
 				std::ostringstream s;
 				s << "warning: create sound buffer: " << universalis::os::exceptions::code_description(error);
@@ -110,7 +111,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		catch(std::exception const & e) {
 			std::ostringstream s;
 			s << e.what();
-			if(FAILED(error)) s << ": " << universalis::os::exceptions::code_description(error);
+			if(error) s << ": " << universalis::os::exceptions::code_description(error);
 			throw universalis::os::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	}
@@ -143,8 +144,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(position <  current_position_ * buffer_size_) break;
 			if(position >= current_position_ * buffer_size_ + buffer_size_) break;
 			// beware: using a sleep time of 0 will freeze the system if process has real time priority class and thread has time critical priority!
-			//std::this_thread::sleep(std::milliseconds(1));
-			std::this_thread::yield();
+			this_thread::sleep(milliseconds(1)); //this_thread::yield();
 		}
 		if(!loggers::trace()()) {
 			static const char c [] = { '-', '\\', '|', '/' };
