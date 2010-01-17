@@ -11,12 +11,6 @@ namespace psycle { namespace audiodrivers {
 
 using helpers::math::clipped_lrint;
 
-
-ASIOInterface::~ASIOInterface() throw() {
-	before_destruction();
-	asioDrivers.removeCurrentDriver();
-}
-
 // note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 #define ALLOW_NON_ASIO
 
@@ -32,6 +26,23 @@ bool ASIOInterface::_firstrun(true);
 bool ASIOInterface::_supportsOutputReady(false);
 ASIOInterface::PortOut ASIOInterface::_selectedout;
 std::vector<ASIOInterface::PortCapt> ASIOInterface::_selectedins;
+
+
+ASIOInterface::ASIOInterface()
+	: ui_(0){
+	Init();
+}
+
+ASIOInterface::ASIOInterface(AsioUiInterface* ui)
+	: ui_(ui) {
+	Init();
+}
+
+ASIOInterface::~ASIOInterface() throw() {
+	before_destruction();
+	if (opened())
+		do_close();
+}
 
 std::string ASIOInterface::PortEnum::GetName() {
 	std::string fullname = _info.name;
@@ -73,22 +84,6 @@ std::string ASIOInterface::PortEnum::GetName() {
 			break;
 	}
 	return fullname;
-}
-
-void ASIOInterface::Error(const char msg[]) {
-	MessageBox(0, msg, "ASIO 2.0 Output driver", MB_OK | MB_ICONERROR);
-}
-
-ASIOInterface::ASIOInterface()
-: ui_(0)
-{
-	Init();
-}
-
-ASIOInterface::ASIOInterface(AsioUiInterface* ui)
-: ui_(ui)
-{
-	Init();
 }
 
 void ASIOInterface::Init() {
@@ -230,8 +225,6 @@ void ASIOInterface::do_start() {
 
 void ASIOInterface::do_stop() {
 	scoped_lock lock(mutex_);
-
-	if(!_running) return; // useless, can't happen
 	_running = false;
 	ASIOStop();
 }
@@ -1018,7 +1011,7 @@ void ASIOInterface::Configure() {
 	} catch(std::exception e) {
 		std::ostringstream s;
 		s << "failed to stop driver: " << e.what();
-		/*ui_->*/Error(s.str().c_str());
+		ui_->Error(s.str().c_str());
 		return;
 	}
 
@@ -1038,7 +1031,7 @@ void ASIOInterface::Configure() {
 		failed = true;
 		std::ostringstream s;
 		s << "settings failed: " << e.what();
-		/*ui_->*/Error(s.str().c_str());
+		ui_->Error(s.str().c_str());
 	}
 	if(failed) {
 		// rollback settings
@@ -1051,7 +1044,7 @@ void ASIOInterface::Configure() {
 			std::ostringstream s;
 			s << "failed to rollback driver settings: " << e.what();
 			s << "\nDriver is totally screwed, in an inconsistent state. Restart the app!";
-			/*ui_->*/Error(s.str().c_str());
+			ui_->Error(s.str().c_str());
 		}
 		return;
 	}

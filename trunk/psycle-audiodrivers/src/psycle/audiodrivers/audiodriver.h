@@ -216,7 +216,7 @@ class AudioDriver {
 	///\}
 
 	public:
-		///\todo specification.. what does Configure do?
+		/// ask the driver to config itself (e.g with a gui, config read)		
 		virtual void Configure() {}
 
 	///\name open/close the device (allocate/deallocate resources)
@@ -226,9 +226,8 @@ class AudioDriver {
 			///\throws std::exception in case of failure to open/close the driver
 			///\post opened() == b
 			void set_opened(bool b) throw(std::exception);
-
-			/// virtual because some drivers want to override it ([bohan] it's not needed)
-			virtual bool opened() const throw() { return opened_; }
+			/// status, if driver is opened (e.g. a driver handle could be created)
+			bool opened() const throw() { return opened_; }
 		protected:
 			/// opens the driver, allocating resources and setting it up according to the settings.
 			///\pre !opened()
@@ -250,9 +249,9 @@ class AudioDriver {
 			///\throws std::exception in case of failure to start/stop the driver
 			///\post started() == b
 			void set_started(bool b) throw(std::exception);
+			/// status, if driver started (e.g. audiothread is running)
+			bool started() const throw() { return started_; }  
 
-			/// virtual because some drivers want to override it ([bohan] it's not needed)
-			virtual bool started() const throw() { return started_; }  
 		protected:
 			/// starts processing
 			///\pre !started()

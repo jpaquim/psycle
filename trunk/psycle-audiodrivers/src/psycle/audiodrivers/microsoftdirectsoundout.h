@@ -80,9 +80,6 @@ class MsDirectSound : public AudioDriver {
 		/*override*/ AudioDriverInfo info() const;
 		/*override*/ void Configure();
 
-		/*override*/ bool opened() const throw() { return _pDs != 0;  }
-		/*override*/ bool started() const throw() { return threadRunning_; }
-
 	protected:
 		/*override*/ void do_open() throw(std::exception);
 		/*override*/ void do_start() throw(std::exception);

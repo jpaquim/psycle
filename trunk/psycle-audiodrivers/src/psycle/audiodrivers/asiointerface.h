@@ -28,6 +28,7 @@ class AsioUiInterface {
 		virtual void GetValues(int& device_id, int& sample_rate, int& buffer_size) = 0;
 		virtual void WriteConfig(int device_id_guid, int sample_rate, int buffer_size) = 0;
 		virtual void ReadConfig(int& device_id, int& sample_rate, int& buffer_size) = 0;
+		virtual void Error(const std::string& error_msg) = 0;
 };
 
 /// output device interface implemented by asio.
@@ -137,8 +138,15 @@ class ASIOInterface : public AudioDriver {
 		~ASIOInterface() throw();
 
 		/*override*/ AudioDriverInfo info() const;
-
 		/*override*/ void Configure();
+
+		/*override*/ int GetInputLatency() { return _inlatency; }
+		/*override*/ int GetOutputLatency() { return _outlatency; }
+
+		DriverEnum GetDriverFromidx(int driverID);
+		void ControlPanel(int driverID);
+		std::vector<DriverEnum> _drivEnum;
+		static int _ASIObufferSize;
 
 	protected:
 		/*override*/ void do_open();
@@ -146,25 +154,16 @@ class ASIOInterface : public AudioDriver {
 		/*override*/ void do_stop();
 		/*override*/ void do_close();
 
-		/*override*/ bool opened() const throw() { return !(ASE_NotPresent == ASIOOutputReady()); }
-		/*override*/ bool started() const throw() { return _running; }
-
-	public:
-		/*override*/ int GetInputLatency() { return _inlatency; }
-		/*override*/ int GetOutputLatency() { return _outlatency; }
-
-	public: ///\todo all that public!?
+	private:
 		int GetBufferSize();
 		void GetCapturePorts(std::vector<std::string>&ports);
 		void AddCapturePort(int idx);
 		void RemoveCapturePort(int idx);
 		void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 		int GetWritePos();
-		int GetPlayPos();
-		DriverEnum GetDriverFromidx(int driverID);
+		int GetPlayPos();		
 		PortOut GetOutPortFromidx(int driverID);
-		int GetidxFromOutPort(PortOut&port);
-		void ControlPanel(int driverID);
+		int GetidxFromOutPort(PortOut&port);		
 
 		static void bufferSwitch(long index, ASIOBool processNow);
 		static ASIOInterface * instance_;
@@ -172,15 +171,10 @@ class ASIOInterface : public AudioDriver {
 		static void sampleRateChanged(ASIOSampleRate sRate);
 		static long asioMessages(long selector, long value, void* message, double* opt);
 
-		std::vector<DriverEnum> _drivEnum;
-
-		static int _ASIObufferSize;
 		static AsioStereoBuffer *ASIObuffers;
 		static bool _firstrun;
 		static bool _supportsOutputReady;
 
-	protected:
-		void Error(const char msg[]);
 		void ReadConfig();
 		void WriteConfig();
 
@@ -199,7 +193,7 @@ class ASIOInterface : public AudioDriver {
 		long Granularity[MAX_ASIO_DRIVERS];
 		int currentSamples[MAX_ASIO_DRIVERS];
 		#endif
-	private:
+
 		mutex mutex_;
 		typedef class scoped_lock<mutex> scoped_lock;
 		condition<scoped_lock> condition_;

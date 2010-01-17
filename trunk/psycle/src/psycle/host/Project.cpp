@@ -181,7 +181,7 @@ namespace psycle {
 				return;			
 			}	
 			progress_.ShowWindow(SW_HIDE);
-			delete song_; 
+			delete song_;
 			song_ = song;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
@@ -194,6 +194,7 @@ namespace psycle {
 			{
 				song_->fileName = fName;
 			}
+
 		//	set_lines_per_beat(song().ticksSpeed());
 			set_beat_zoom(song_->ticksSpeed());
 			CMainFrame* pParentMain = mac_view()->main();

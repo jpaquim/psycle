@@ -246,6 +246,7 @@ namespace psycle { namespace core {
 			master_pattern_->timeSignatures().clear();
 			master_pattern_->timeSignatures().push_back(TimeSignature(std::numeric_limits<double>::max()));
 			master_pattern_->setName("master");
+			master_pattern_->setID(-1);
 			Add(master_pattern_);
 			master_line_->createEntry(master_pattern_, 0);
 		}
@@ -479,6 +480,7 @@ namespace psycle { namespace core {
 			master_pattern_->timeSignatures().clear();
 			master_pattern_->timeSignatures().push_back(TimeSignature(std::numeric_limits<double>::max()));
 			master_pattern_->setName("master");
+			master_pattern_->setID(-1);
 			Add(master_pattern_);
 			master_line_->createEntry(master_pattern_, 0);
 		}
