@@ -18,7 +18,7 @@ using namespace universalis::stdlib;
 /// typedef for work callback
 typedef float * (*AUDIODRIVERWORKFN) (void * context, int numSamples);
 
-/// max number of samples (per channel) that the Work function may ask to return
+/// max number of samples (frames comprising all channels) that the Work function may ask to return
 int const MAX_SAMPLES_WORKFN = 65536;
 
 
