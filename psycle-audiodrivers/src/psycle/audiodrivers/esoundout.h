@@ -24,31 +24,24 @@ class ESoundOut : public AudioDriver {
 		/*override*/ void do_stop() throw(std::exception);
 		/*override*/ void do_close() throw(std::exception);
 
-		/*override*/ bool opened() const throw() { return output_ >= 0;  }
-		/*override*/ bool started() const throw() { return threadRunning_; }
-
 	private:
+		static void audioOutThreadStatic(void*);
+		void audioOutThread();
+		int writeBuffer(char * buffer, long size);
+
 		unsigned int channels_;
 		int channelsFlag();
-
 		unsigned int bits_;
 		int bitsFlag();
-
 		unsigned int rate_;
-
 		std::string host_;
 		int port_;
 		std::string hostPort();
 		int output_;
 		int fd_;
-
 		pthread_t threadId_;
-		static void audioOutThreadStatic(void*);
-		void audioOutThread();
 		bool threadRunning_;
-		bool killThread_;
-
-		int writeBuffer(char * buffer, long size);
+		bool killThread_;	
 		long deviceBuffer_;
 };
 

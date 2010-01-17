@@ -60,28 +60,22 @@ class MsWaveOut : public AudioDriver {
 		// that points to a block buffer
 		static volatile /* why volatile ? */ int waveFreeBlockCount;
 		static int waveCurrentBlock;
-
 		// mme functions
-
 		// waveOut interface notifies about device is opened, closed, 
 		// and what we handle here, when a block finishes.
 		static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
 		WAVEHDR* allocateBlocks();
 		static void freeBlocks( WAVEHDR* blockArray );
-
 		// writes a intermediate buffer into a ring buffer to the sound card
-		void writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size );
-
+		void writeAudio(HWAVEOUT hWaveOut, LPSTR data, int size);
 		// thread , the writeAudio loop is in
 		// note : waveOutproc is a different, thread, too, but we cant
 		// use all winapi calls there we need due to restrictions of the winapi
 		HANDLE _hThread;
-		static DWORD WINAPI audioOutThread( void *pWaveOut );
+		static DWORD WINAPI audioOutThread(void *pWaveOut);
 		static bool _running; // check, if thread loop should be left
 		void fillBuffer();
-
 		bool _dither;
-
 };
 
 }}

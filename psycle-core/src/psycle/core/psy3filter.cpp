@@ -236,6 +236,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	}
 
 	// test all connections for invalid machines. disconnect invalid machines.
+	
 	for(int i(0) ; i < MAX_MACHINES ; ++i) if(song.machine(i)) {
 		Machine* mac = song.machine(i);
 		mac->_connectedInputs = 0;

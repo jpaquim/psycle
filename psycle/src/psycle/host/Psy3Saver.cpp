@@ -126,8 +126,8 @@ namespace psycle  {
 
 			// Instrument Data Save
 			int numInstruments = 0;	
-			for(int i = 0;i < psycle::core::XMSampler::MAX_INSTRUMENT;i++){
-				if(song_->rInstrument(i).IsEnabled()){
+			for (int i = 0; i < psycle::core::XMSampler::MAX_INSTRUMENT; i++) {
+				if (song_->rInstrument(i).IsEnabled()) {
 					numInstruments++;
 				}
 			}
@@ -136,7 +136,7 @@ namespace psycle  {
 				chunkcount++;
 			}
 
-			if ( !autosave ) 
+			if (!autosave)
 			{
 				Progress.SetRange(0,chunkcount);
 				Progress.SetStep(1);
@@ -160,7 +160,7 @@ namespace psycle  {
 			pFile->Write(size);
 			pFile->Write(chunkcount);
 
-			if ( !autosave ) 
+			if (!autosave)
 			{
 				Progress.StepIt();
 				::Sleep(1);
@@ -186,8 +186,7 @@ namespace psycle  {
 			pFile->WriteArray(song_->author().c_str(), song_->author().length()+1);
 			pFile->WriteArray(song_->comment().c_str(), song_->comment().length()+1);
 
-			if ( !autosave ) 
-			{
+			if (!autosave) {
 				Progress.StepIt();
 				::Sleep(1);
 			}
