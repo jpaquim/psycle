@@ -9,17 +9,18 @@
 #include "mixer.h"
 #include "vstplugin.h"
 #include <psycle/helpers/datacompression.hpp>
+#include <universalis/os/loggers.hpp>
 #include <diversalis/os.hpp>
 #include <sstream>
-#include <iostream>
 
 namespace psycle { namespace core {
 
+namespace loggers = universalis::os::loggers;
 using namespace helpers;
 
 std::string const Psy3Filter::FILE_FOURCC = "PSY3";
 /// Current version of the Song file and its chunks.
-/// format: 0xAABB
+/// format: 0x0000AABB
 /// A = Major version. It can't be loaded, skip the whole chunk. (Right now the loader does it, so simply do nothing)
 /// B = minor version. It can be loaded with the existing loader, but not all information will be available.
 uint32_t const Psy3Filter::VERSION_INFO = 0x0000;
@@ -73,7 +74,11 @@ void Psy3Filter::preparePatternSequence(CoreSong & song) {
 bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	song.progress(1,0,"");
 	song.progress(2,0,"Loading... psycle song fileformat version 3...");
-	std::cout << "psycle: core: psy3 loader: loading psycle song fileformat version 3: " << fileName << '\n';
+	if(loggers::trace()) {
+		std::ostringstream s;
+		s << "psycle: core: psy3 loader: loading psycle song fileformat version 3: " << fileName;
+		loggers::trace()(s.str());
+	}
 
 	RiffFile file;
 	file.Open(fileName);
@@ -196,12 +201,12 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			//else if((version & 0xff00) == 0x0100) // and so on
 		} else {
 			if (!problemfound) {
-				//loggers::warning("invalid position or unknown chunk found. skipping it.");
 				//song.progress.emit(2, 0, "Loading... invalid position or unknown chunk found. skipping it...");
-				std::ostringstream s;
-				s << "invalid position or unknown chunk found:" << header << ", position:" << file.GetPos();
-				//loggers::trace(s.str());
-				std::cerr << "psycle: core: psy3 loader: " << s << '\n';
+				if(loggers::warning()) {
+					std::ostringstream s;
+					s << "psycle: core: psy3 loader: skipping invalid position or unknown chunk found:" << header << ", position:" << file.GetPos();
+					loggers::warning()(s.str());
+				}
 			}
 			problemfound = true;
 			// shift back 3 bytes and try again
@@ -211,8 +216,8 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		// For invalid version chunks, or chunks that haven't been read correctly/completely.
 		if(file.GetPos() != fileposition+size) {
 			///\todo: verify how it works with invalid data.
-			//if (file.GetPos() > fileposition+size) loggers::trace("Cursor ahead of size! resyncing with chunk size.");
-			//else loggers::trace("Cursor still inside chunk, resyncing with chunk size.");
+			//if (file.GetPos() > fileposition+size) loggers::trace()("Cursor ahead of size! resyncing with chunk size.");
+			//else loggers::trace()("Cursor still inside chunk, resyncing with chunk size.");
 			file.Seek(fileposition+size);
 		}
 	}
@@ -274,10 +279,9 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			song.AddMachine(mac);
 		}
 		std::ostringstream s;
-		s << "Error reading from file '" << file.file_name() << "'\n";
-		s << "some chunks were missing in the file";
-		//loggers::trace(s.str());
-		std::cerr << "psycle: core: psy3 loader: " << s << '\n';
+		s << "psycle: core: psy3 loader: error reading from file '" << file.file_name()
+		<< "'. Some chunks were missing in the file.";
+		loggers::warning()(s.str());
 		song.report(s.str(), "Song Load Error.");
 	}
 	///\todo:
@@ -292,7 +296,10 @@ int Psy3Filter::LoadSONGv0(RiffFile* file,CoreSong& song) {
 	file->Read(fileversion);
 	file->Read(size);
 	if(fileversion > CURRENT_FILE_VERSION) {
-		song.report("This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning");
+		std::ostringstream s;
+		s << "This file is from a newer version of Psycle! This process will try to load it anyway.";
+		loggers::warning()(s.str());
+		song.report(s.str(), "Load Warning");
 	}
 
 	file->Read(chunkcount);
@@ -530,9 +537,11 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 			default: ;
 		}
 		if(!mac) {
-			std::ostringstream s;
-			s << "Problem loading machine!\ntype: " << type << ", dllName: " << sDllName;
-			//MessageBox(0, s.str().c_str(), "Loading old song", MB_ICONERROR);
+			if(loggers::warning()) {
+				std::ostringstream s;
+				s << "Problem loading machine!\ntype: " << type << ", dllName: " << sDllName;
+				loggers::warning()(s.str());
+			}
 			mac = factory.CreateMachine(MachineKey::dummy(),id);
 			failedLoad = true;
 		}

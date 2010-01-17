@@ -10,6 +10,7 @@
 #include <universalis/stdlib/cstdint.hpp>
 #include <string>
 #include <exception>
+#include <cassert>
 
 namespace psycle { namespace audiodrivers {
 
@@ -84,70 +85,97 @@ class AudioDriverSettings {
 	///\name getter/setter for sample rate
 	///\{
 		public:
-			uint32_t samplesPerSec() const { return samplesPerSec_; }
-			void setSamplesPerSec(uint32_t samples) { samplesPerSec_ = samples; }
+			unsigned int samplesPerSec() const { return samplesPerSec_; }
+			void setSamplesPerSec(unsigned int value) { samplesPerSec_ = value; }
 		private:
-			uint32_t samplesPerSec_;
+			unsigned int samplesPerSec_;
 	///\}
 
-	///\name getter/setter for bit depth ( 8, 16, 24. what about ASIO that offers more modes? 
+	///\name getter/setter for sample bit depth, per-channel (8, 16, 24. what about ASIO that offers more modes? )
 	///\{
 		public:
-			uint32_t bitDepth() const { return bitDepth_; }
-			void setBitDepth(uint32_t depth) { bitDepth_ = depth; }
+			unsigned int bitDepth() const { return bitDepth_; }
+			void setBitDepth(unsigned int value) {
+				bitDepth_ = value;
+				frameBytes_ = channelMode_ == 3 ? bitDepth_ / 4 : bitDepth_ / 8;
+				blockBytes_ = blockFrames_ * frameBytes_;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+			}
 		private:
-		uint32_t bitDepth_;
+		unsigned int bitDepth_;
 	///\}
 
 	///\name getter/setter for channel mode (mode 3 == stereo, 1 == mono left, 2 == mono right, 0 = mono both channels)
 	///\{
 		public:
-			uint32_t channelMode() const { return channelMode_; }
-			void setChannelMode(uint32_t mode) { channelMode_ = mode; }
-			uint32_t numChannels() const { return (channelMode_ == 3) ? 2 : 1; }
+			unsigned int numChannels() const { return channelMode_ == 3 ? 2 : 1; }
+			unsigned int channelMode() const { return channelMode_; }
+			void setChannelMode(unsigned int value) {
+				channelMode_ = value;
+				frameBytes_ = channelMode_ == 3 ? bitDepth_ / 4 : bitDepth_ / 8;
+				blockBytes_ = blockFrames_ * frameBytes_;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+			}
 		private:
-			uint32_t channelMode_;
+			unsigned int channelMode_;
 	///\}
 
-	/// getter for number of bytes per sample. (should verify if this is valid for 24bits)
-		public:
-			int sampleSize() const {
-			return (channelMode_ == 3) ? bitDepth_ / 4 : bitDepth_ / 8;
-		}
-
-
-	///\name getter/setter for the whole buffer size (in bytes).
+	///\name number of bytes per sample, comprising all channels. (should verify if this is valid for 24bits)
 	///\{
 		public:
-			uint32_t totalBufferBytes() const { return totalBufferBytes_; }
-			void setTotalBufferBytes(uint32_t size) { totalBufferBytes_ = size; }
+			/// getter for number of bytes per sample. (should verify if this is valid for 24bits)
+			unsigned int frameBytes() const { return frameBytes_; }
 		private:
-			uint32_t totalBufferBytes_;
+			unsigned int frameBytes_;
+	///\}
+
+	///\name getter for the whole buffer size (in bytes).
+	///\{
+		public:
+			/// getter for the whole buffer size (in bytes).
+			unsigned int totalBufferBytes() const { return totalBufferBytes_; }
+		private:
+			unsigned int totalBufferBytes_;
 	///\}
 
 	///\name getter/setter for the audio block size (in bytes)
 	///\{
 		public:
-			uint32_t blockBytes() const { return blockSize_ * sampleSize(); }
-			void setBlockBytes(uint32_t size) { blockSize_ = size / sampleSize(); }
+			unsigned int blockBytes() const { return blockBytes_; }
+			void setBlockBytes(unsigned int value) {
+				blockBytes_ = value;
+				blockFrames_ = blockBytes_ / frameBytes_;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+				assert(blockFrames_ < MAX_SAMPLES_WORKFN);
+			}
+		private:
+			unsigned int blockBytes_;
 	///\}
 
-	///\name getter/setter for the audio block size (in samples)
+	///\name getter/setter for the audio block size (in samples comprising all channels)
 	///\{
 		public:
-			uint32_t blockSamples() const { return blockSize_; }
-			void setBlockSamples(uint32_t size) { blockSize_ = size; }
+			unsigned int blockFrames() const { return blockFrames_; }
+			void setBlockFrames(unsigned int value) {
+				blockFrames_ = value;
+				blockBytes_ = blockFrames_ * frameBytes_;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+				assert(blockFrames_ < MAX_SAMPLES_WORKFN);
+			}
 		private:
-			uint32_t blockSize_;
+			unsigned int blockFrames_;
 	///\}
 
 	///\name getter/setter for number of blocks.
 	///\{
 		public:
-			uint32_t blockCount() const { return blockCount_; }
-			void setBlockCount(uint32_t count) { blockCount_ = count; }
+			unsigned int blockCount() const { return blockCount_; }
+			void setBlockCount(unsigned int value) {
+				blockCount_ = value;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+			}
 		private:
-			uint32_t blockCount_;
+			unsigned int blockCount_;
 	///\}
 };
 
@@ -293,9 +321,9 @@ class DummyDriver : public AudioDriver {
 		/*override*/ void do_stop() throw(std::exception);
 		/*override*/ void do_close() throw(std::exception) {}
 
-	private:
-		///\name thread
-		///\{
+	///\name thread
+	///\{
+		private:
 			thread * thread_;
 			/// the function executed by the thread
 			void thread_function();
@@ -303,7 +331,7 @@ class DummyDriver : public AudioDriver {
 			bool stop_requested_;
 			mutex mutex_;
 			typedef class scoped_lock<mutex> scoped_lock;
-		///\}
+	///\}
 };
 
 }}

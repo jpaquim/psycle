@@ -145,10 +145,10 @@ void MsWaveOut::fillBuffer() {
 	// this protects freeBlockCounter, that is manipulated from two threads.
 	// the waveOut interface callback WM_Done thread in waveOutProc and in writeAudio
 	InitializeCriticalSection( &waveCriticalSection );
-	while ( _running ) {
-		float const * input(callback(playbackSettings().blockSamples()));
-		Quantize16(input,buf,playbackSettings().blockSamples());
-		writeAudio(hWaveOut, (CHAR*) buf, playbackSettings().blockSamples()*playbackSettings().numChannels()*sizeof(std::int16_t));
+	while(_running) {
+		float const * input(callback(playbackSettings().blockFrames()));
+		Quantize16(input, buf, playbackSettings().blockFrames());
+		writeAudio(hWaveOut, reinterpret_cast<char*>(buf), playbackSettings().blockBytes());
 	}
 }
 
@@ -169,8 +169,8 @@ void MsWaveOut::do_open() throw(std::exception) {
 	format.wFormatTag = WAVE_FORMAT_PCM;
 	format.wBitsPerSample = playbackSettings().bitDepth();
 	format.nSamplesPerSec = playbackSettings().samplesPerSec();
-	format.nChannels = 2;
-	format.nBlockAlign = ( format.nChannels * format.wBitsPerSample ) >> 3;
+	format.nChannels = playbackSettings().numChannels();
+	format.nBlockAlign = playbackSettings().frameBytes();
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 	format.cbSize = 0;
 
@@ -180,11 +180,10 @@ void MsWaveOut::do_open() throw(std::exception) {
 	waveFreeBlockCount = playbackSettings().blockCount();
 	waveCurrentBlock = 0;
 	// this will protect the monitor buffer counter variable
-	if( waveOutOpen( &hWaveOut, WAVE_MAPPER, &format, (DWORD_PTR)waveOutProc,
-		(DWORD_PTR)&waveFreeBlockCount,
-		CALLBACK_FUNCTION ) != MMSYSERR_NOERROR
+	if(waveOutOpen(&hWaveOut, WAVE_MAPPER, &format, (DWORD_PTR) waveOutProc, (DWORD_PTR) &waveFreeBlockCount,
+		CALLBACK_FUNCTION) != MMSYSERR_NOERROR
 	) throw std::runtime_error("waveOutOpen() failed");
-	universalis::os::aligned_memory_alloc(16, buf, playbackSettings().blockSamples()*playbackSettings().numChannels());
+	universalis::os::aligned_memory_alloc(16, buf, playbackSettings().blockFrames() * playbackSettings().numChannels());
 }
 
 void MsWaveOut::do_close() throw(std::exception) {

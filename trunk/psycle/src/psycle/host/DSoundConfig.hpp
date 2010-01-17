@@ -127,34 +127,38 @@ namespace psycle {
 				// read from registry
 				Registry reg;
 				reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS) // settings in version 1.8
-			{
-				reg.CloseRootKey();
-				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
-				if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
+				if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS) // settings in version 1.8
 				{
 					reg.CloseRootKey();
-					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
-					if(reg.OpenKey("DirectSound") != ERROR_SUCCESS)
+					reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
+					if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
 					{
 						reg.CloseRootKey();
-						return;
+						reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
+						if(reg.OpenKey("DirectSound") != ERROR_SUCCESS)
+						{
+							reg.CloseRootKey();
+							return;
+						}
 					}
+					saveatend=true;
 				}
-				saveatend=true;
-			}
-			bool configured(true);
-			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceGuid", device_guid);
-			configured &= ERROR_SUCCESS == reg.QueryValue("Exclusive", exclusive);
-			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", dither);
-			//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
-			configured &= ERROR_SUCCESS == reg.QueryValue("NumBuffers", buffer_count);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", buffer_size);
-			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", sample_rate);
+				bool configured(true);
+				configured &= ERROR_SUCCESS == reg.QueryValue("DeviceGuid", device_guid);
+				configured &= ERROR_SUCCESS == reg.QueryValue("Exclusive", exclusive);
+				configured &= ERROR_SUCCESS == reg.QueryValue("Dither", dither);
+				//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
+				configured &= ERROR_SUCCESS == reg.QueryValue("NumBuffers", buffer_count);
+				configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", buffer_size);
+				configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", sample_rate);
 
-			reg.CloseKey();
-			reg.CloseRootKey();
-			if(saveatend) WriteConfig(device_guid, exclusive, dither, sample_rate, buffer_size, buffer_count);
+				reg.CloseKey();
+				reg.CloseRootKey();
+				if(saveatend) WriteConfig(device_guid, exclusive, dither, sample_rate, buffer_size, buffer_count);
+			}
+
+			/*override*/ void Error(std::string const & msg) {
+				MessageBox(0, msg.c_str(), "Error in DirectSound audiodriver", MB_OK | MB_ICONERROR);
 			}
 
 		private:

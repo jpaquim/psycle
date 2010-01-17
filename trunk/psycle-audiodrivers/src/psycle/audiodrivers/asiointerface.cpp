@@ -27,68 +27,12 @@ bool ASIOInterface::_supportsOutputReady(false);
 ASIOInterface::PortOut ASIOInterface::_selectedout;
 std::vector<ASIOInterface::PortCapt> ASIOInterface::_selectedins;
 
-
-ASIOInterface::ASIOInterface()
-	: ui_(0){
-	Init();
-}
-
-ASIOInterface::ASIOInterface(AsioUiInterface* ui)
-	: ui_(ui) {
-	Init();
-}
-
-ASIOInterface::~ASIOInterface() throw() {
-	before_destruction();
-	if (opened())
-		do_close();
-}
-
-std::string ASIOInterface::PortEnum::GetName() {
-	std::string fullname = _info.name;
-	switch(_info.type) {
-		case ASIOSTInt16LSB:
-		case ASIOSTInt32LSB16: // 32 bit data with 16 bit alignment
-		case ASIOSTInt16MSB:
-		case ASIOSTInt32MSB16: // 32 bit data with 16 bit alignment
-			fullname = fullname + " : 16 bit";
-			break;
-		case ASIOSTInt32LSB18: // 32 bit data with 18 bit alignment
-		case ASIOSTInt32MSB18: // 32 bit data with 18 bit alignment
-			fullname = fullname + " : 18 bit";
-			break;
-
-		case ASIOSTInt32LSB20: // 32 bit data with 20 bit alignment
-		case ASIOSTInt32MSB20: // 32 bit data with 20 bit alignment
-			fullname = fullname + " : 20 bit";
-			break;
-		case ASIOSTInt24LSB:   // used for 20 bits as well
-		case ASIOSTInt32LSB24: // 32 bit data with 24 bit alignment
-		case ASIOSTInt24MSB:   // used for 20 bits as well
-		case ASIOSTInt32MSB24: // 32 bit data with 24 bit alignment
-			fullname = fullname + " : 24 bit";
-			break;
-		case ASIOSTInt32LSB:
-		case ASIOSTInt32MSB:
-			fullname = fullname + ": 32 bit";
-			break;
-		case ASIOSTFloat32LSB: // IEEE 754 32 bit float, as found on Intel x86 architecture
-			fullname = fullname + ": 32 bit float";
-			break;
-		case ASIOSTFloat64LSB: // IEEE 754 64 bit double float, as found on Intel x86 architecture
-			fullname = fullname + ": 64 bit float";
-			break;
-		case ASIOSTFloat32MSB: // IEEE 754 32 bit float, Big Endian architecture
-		case ASIOSTFloat64MSB: // IEEE 754 64 bit double float, Big Endian architecture
-			fullname = fullname + ": unsupported!";
-			break;
-	}
-	return fullname;
-}
-
-void ASIOInterface::Init() {
-	_configured = false;
-	_running = false;
+ASIOInterface::ASIOInterface(AsioUiInterface * ui)
+:
+	ui_(ui),
+	_configured(),
+	_running()
+{
 	_firstrun = true;
 	char szNameBuf[MAX_ASIO_DRIVERS][33];
 	char* pNameBuf[MAX_ASIO_DRIVERS];
@@ -139,6 +83,52 @@ void ASIOInterface::Init() {
 	}
 }
 
+ASIOInterface::~ASIOInterface() throw() {
+	before_destruction();
+	//asioDrivers.removeCurrentDriver();
+}
+
+std::string ASIOInterface::PortEnum::GetName() {
+	std::string fullname = _info.name;
+	switch(_info.type) {
+		case ASIOSTInt16LSB:
+		case ASIOSTInt32LSB16: // 32 bit data with 16 bit alignment
+		case ASIOSTInt16MSB:
+		case ASIOSTInt32MSB16: // 32 bit data with 16 bit alignment
+			fullname = fullname + " : 16 bit";
+			break;
+		case ASIOSTInt32LSB18: // 32 bit data with 18 bit alignment
+		case ASIOSTInt32MSB18: // 32 bit data with 18 bit alignment
+			fullname = fullname + " : 18 bit";
+			break;
+
+		case ASIOSTInt32LSB20: // 32 bit data with 20 bit alignment
+		case ASIOSTInt32MSB20: // 32 bit data with 20 bit alignment
+			fullname = fullname + " : 20 bit";
+			break;
+		case ASIOSTInt24LSB:   // used for 20 bits as well
+		case ASIOSTInt32LSB24: // 32 bit data with 24 bit alignment
+		case ASIOSTInt24MSB:   // used for 20 bits as well
+		case ASIOSTInt32MSB24: // 32 bit data with 24 bit alignment
+			fullname = fullname + " : 24 bit";
+			break;
+		case ASIOSTInt32LSB:
+		case ASIOSTInt32MSB:
+			fullname = fullname + ": 32 bit";
+			break;
+		case ASIOSTFloat32LSB: // IEEE 754 32 bit float, as found on Intel x86 architecture
+			fullname = fullname + ": 32 bit float";
+			break;
+		case ASIOSTFloat64LSB: // IEEE 754 64 bit double float, as found on Intel x86 architecture
+			fullname = fullname + ": 64 bit float";
+			break;
+		case ASIOSTFloat32MSB: // IEEE 754 32 bit float, Big Endian architecture
+		case ASIOSTFloat64MSB: // IEEE 754 64 bit double float, Big Endian architecture
+			fullname = fullname + ": unsupported!";
+			break;
+	}
+	return fullname;
+}
 
 void ASIOInterface::do_open() {
 	if(!_configured) ReadConfig();
@@ -997,7 +987,12 @@ long ASIOInterface::asioMessages(long selector, long value, void* message, doubl
 }
 
 void ASIOInterface::Configure() {
-	if(!_configured) ReadConfig();
+	// 1. reads the config from persistent storage
+	// 2. opens the gui to let the user edit the settings
+	// 3. writes the config to persistent storage
+
+	ReadConfig();
+
 	if(!ui_) return;
 
 	ui_->SetValues(GetidxFromOutPort(_selectedout), playbackSettings_.samplesPerSec(), _ASIObufferSize);
@@ -1006,12 +1001,15 @@ void ASIOInterface::Configure() {
 	PortOut oldout = _selectedout;
 	int oldsps = playbackSettings_.samplesPerSec();
 	
+	bool was_opened(opened());
+	bool was_started(started());
+
 	try {
-		set_started(false);
+		set_opened(false);
 	} catch(std::exception e) {
 		std::ostringstream s;
-		s << "failed to stop driver: " << e.what();
-		ui_->Error(s.str().c_str());
+		s << "failed to close driver: " << e.what();
+		ui_->Error(s.str());
 		return;
 	}
 
@@ -1031,23 +1029,38 @@ void ASIOInterface::Configure() {
 		failed = true;
 		std::ostringstream s;
 		s << "settings failed: " << e.what();
-		ui_->Error(s.str().c_str());
+		ui_->Error(s.str());
 	}
+
 	if(failed) {
 		// rollback settings
-		_ASIObufferSize = oldbs;
-		_selectedout = oldout;
-		playbackSettings_.setSamplesPerSec(oldsps);
+
 		try {
-			set_started(true);
+			set_opened(false);
 		} catch(std::exception e) {
 			std::ostringstream s;
 			s << "failed to rollback driver settings: " << e.what();
 			s << "\nDriver is totally screwed, in an inconsistent state. Restart the app!";
-			ui_->Error(s.str().c_str());
+			ui_->Error(s.str());
+			return;
+		}
+
+		_ASIObufferSize = oldbs;
+		_selectedout = oldout;
+		playbackSettings_.setSamplesPerSec(oldsps);
+
+		try {
+			set_opened(was_opened);
+			set_started(was_started);
+		} catch(std::exception e) {
+			std::ostringstream s;
+			s << "failed to rollback driver settings: " << e.what();
+			s << "\nDriver is totally screwed, in an inconsistent state. Restart the app!";
+			ui_->Error(s.str());
 		}
 		return;
 	}
+
 	WriteConfig();
 }
 

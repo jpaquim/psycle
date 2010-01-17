@@ -128,6 +128,8 @@ void Player::start(double pos) {
 	playing_ = true;
 	timeInfo_.setPlayBeatPos(pos);
 	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
+
+	driver_->set_started(true);
 }
 
 void Player::skip(double beats) {
@@ -575,6 +577,8 @@ void Player::execute_notes(double beat_offset, PatternEvent& entry) {
 #endif
 
 float * Player::Work(int numSamples) {
+	assert(numSamples < MAX_SAMPLES_WORKFN);
+
 	if(!song_) return buffer_;
 
 	scoped_lock lock(song().Mutex());
@@ -616,6 +620,9 @@ void Player::setDriver(AudioDriver & driver) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
+	bool was_opened(driver_ ? driver_->opened() : false);
+	bool was_started(driver_ ? driver_->started() : false);
+
 	if(&driver == driver_) {
 		// same driver instance
 		driver.set_started(false);
@@ -627,12 +634,13 @@ void Player::setDriver(AudioDriver & driver) {
 
 	driver.set_callback(Work, this);
 	
-	if(loggers::trace()) {
+	if(was_started && loggers::trace()) {
 		std::ostringstream s;
 		s << "psycle: core: player: starting audio driver: " << driver.info().name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	driver.set_started(true);
+	driver.set_opened(was_opened);
+	driver.set_started(was_started);
 
 	samples_per_second(driver.playbackSettings().samplesPerSec());
 }

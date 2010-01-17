@@ -1282,7 +1282,7 @@ using namespace helpers::math;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				// todo
 				int writePos = 0;
-				int blockSamples = Global::pConfig->_pOutputDriver->playbackSettings().blockSamples();
+				int blockSamples = Global::pConfig->_pOutputDriver->playbackSettings().blockFrames();
 				int blocks = Global::pConfig->_pOutputDriver->playbackSettings().blockCount();
 #else
 				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();				

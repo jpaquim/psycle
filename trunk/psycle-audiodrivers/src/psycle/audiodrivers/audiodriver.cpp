@@ -32,20 +32,23 @@ AudioDriverSettings::AudioDriverSettings()
 	samplesPerSec_(44100),
 	bitDepth_(16),
 	channelMode_(3),
-	totalBufferBytes_(24576),
-	blockSize_(1024),
-	blockCount_(6)
-{}
+	blockFrames_(2048),
+	blockCount_(4)
+{
+	frameBytes_ = channelMode_ == 3 ? bitDepth_ / 4 : bitDepth_ / 8;
+	blockBytes_ = blockFrames_ * frameBytes_;
+	totalBufferBytes_ = blockBytes_ * blockCount_;
+	assert(blockFrames_ < MAX_SAMPLES_WORKFN);
+}
 
 bool AudioDriverSettings::operator!=(AudioDriverSettings const & other) {
 	return
+		deviceName_ != other.deviceName_ ||
 		samplesPerSec_ != other.samplesPerSec_ ||
 		bitDepth_ != other.bitDepth_ ||
 		channelMode_ != other.channelMode_ ||
-		totalBufferBytes_ != other.totalBufferBytes_ ||
-		blockSize_ != other.blockSize_ ||
-		blockCount_ != other.blockCount_ ||
-		deviceName_ != other.deviceName_;
+		blockFrames_ != other.blockFrames_ ||
+		blockCount_ != other.blockCount_;
 }
 
 /*******************************************************************************************/
