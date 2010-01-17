@@ -58,18 +58,19 @@ namespace psycle {
 		};
 
 		CWaveEdFrame::CWaveEdFrame()
-		{
+			: wavview(this, 0) {
 		}
+
 		CWaveEdFrame::CWaveEdFrame(ProjectData* projects, CMainFrame* pframe)
-			: projects_(projects)
-		{
-			wavview.SetParent(pframe);
-			wavview.SetSong(&projects->active_project()->song());
+			: projects_(projects),
+			  wavview(this, pframe) {
 		}
 
-		CWaveEdFrame::~CWaveEdFrame() throw()
-		{
+		CWaveEdFrame::~CWaveEdFrame() throw() {
+		}
 
+		Song* CWaveEdFrame::song() {
+			return &projects_->active_project()->song();
 		}
 
 		void CWaveEdFrame::OnClose() 

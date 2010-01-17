@@ -22,6 +22,8 @@ namespace psycle {
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
 			void GenerateView();
 			void Notify(void);
+
+			Song* song();
 			CMainFrame *_pFrame;
 		// Overrides
 			// ClassWizard generated virtual function overrides
