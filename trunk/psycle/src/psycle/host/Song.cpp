@@ -1256,7 +1256,7 @@ using namespace helpers::math;
 					Reset(); //added by sampler mainly to reset current pattern showed.
 					while(pFile->Read(&Header, 4) && chunkcount)
 					{
-						Progress.m_Progress.SetPos(lround<int>((pFile->GetPos()*16384.0f)/filesize));
+						Progress.SetPos(lround<int>((pFile->GetPos()*16384.0f)/filesize));
 						::Sleep(1); ///< Allow screen refresh.
 						// we should use the size to update the index, but for now we will skip it
 						if(std::strcmp(Header,"INFO") == 0)
@@ -1509,7 +1509,7 @@ using namespace helpers::math;
 						}
 					}
 					// now that we have loaded all the modules, time to prepare them.
-					Progress.m_Progress.SetPos(16384);
+					Progress.SetPos(16384);
 					::Sleep(1); ///< ???
 					// test all connections for invalid machines. disconnect invalid machines.
 					for(int i(0) ; i < MAX_MACHINES ; ++i)
@@ -1658,7 +1658,7 @@ using namespace helpers::math;
 						RemovePattern(i);
 					}
 				}
-				Progress.m_Progress.SetPos(2048);
+				Progress.SetPos(2048);
 				::Sleep(1); ///< ???
 				// Instruments
 				pFile->Read(&_instSelected, sizeof _instSelected);
@@ -1699,7 +1699,7 @@ using namespace helpers::math;
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 					pFile->Read(&_pInstrument[i]->_RRES, sizeof(_pInstrument[0]->_RRES));
 				
-				Progress.m_Progress.SetPos(4096);
+				Progress.SetPos(4096);
 				::Sleep(1);
 				// Waves
 				//
@@ -1744,7 +1744,7 @@ using namespace helpers::math;
 					}
 				}
 				
-				Progress.m_Progress.SetPos(4096+2048);
+				Progress.SetPos(4096+2048);
 				::Sleep(1);
 				// VST DLLs
 				//
@@ -1763,7 +1763,7 @@ using namespace helpers::math;
 					}
 				}
 				
-				Progress.m_Progress.SetPos(8192);
+				Progress.SetPos(8192);
 				::Sleep(1);
 				// Machines
 				//
@@ -1782,7 +1782,7 @@ using namespace helpers::math;
 						vst::plugin * pVstPlugin(0);
 						int x,y,type;
 						if (_machineActive[i]) {
-							Progress.m_Progress.SetPos(8192+i*(4096/128));
+							Progress.SetPos(8192+i*(4096/128));
 							::Sleep(1);
 
 							pFile->Read(&x, sizeof(x));
@@ -1967,7 +1967,7 @@ using namespace helpers::math;
 					}
 
 					// Patch 1: BusEffects (twf). Try to read it, and if it doesn't exist, generate it.
-					Progress.m_Progress.SetPos(8192+4096);
+					Progress.SetPos(8192+4096);
 					::Sleep(1);
 					if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false ) {
 						int j = 0;
@@ -2057,7 +2057,7 @@ using namespace helpers::math;
 					}
 
 					 // Patch 2: VST Chunks.
-					Progress.m_Progress.SetPos(8192+4096+1024);
+					Progress.SetPos(8192+4096+1024);
 					::Sleep(1);
 					bool chunkpresent=false;
 					pFile->Read(&chunkpresent,sizeof(chunkpresent));
@@ -2099,7 +2099,7 @@ using namespace helpers::math;
 					// The old fileformat stored the volumes on each output, 
 					// so what we have in inputConVol is really the output
 					// and we have to convert it.
-					Progress.m_Progress.SetPos(8192+4096+2048);
+					Progress.SetPos(8192+4096+2048);
 					::Sleep(1);
 					for (int i=0; i<128; i++) // we go to fix this for each
 					{
@@ -2141,7 +2141,7 @@ using namespace helpers::math;
 					// Due to this, we have to move machines to where they really are, 
 					// and remap the inputs and outputs indexes again... ouch
 					// At the same time, we validate each wire, and the number count.
-					Progress.m_Progress.SetPos(8192+4096+2048+1024);
+					Progress.SetPos(8192+4096+2048+1024);
 					::Sleep(1);
 					unsigned char invmach[128];
 					memset(invmach,255,sizeof(invmach));
@@ -2224,7 +2224,7 @@ using namespace helpers::math;
 						}
 					}
 
-					Progress.m_Progress.SetPos(16384);
+					Progress.SetPos(16384);
 					::Sleep(1);
 					if(fullopen) converter.retweak(*this);
 					for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
@@ -2310,8 +2310,8 @@ using namespace helpers::math;
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.SetRange(0,chunkcount);
-				Progress.m_Progress.SetStep(1);
+				Progress.SetRange(0,chunkcount);
+				Progress.SetStep(1);
 			}
 
 			/*
@@ -2334,7 +2334,7 @@ using namespace helpers::math;
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -2360,7 +2360,7 @@ using namespace helpers::math;
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -2411,7 +2411,7 @@ using namespace helpers::math;
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -2446,7 +2446,7 @@ using namespace helpers::math;
 			}
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -2498,7 +2498,7 @@ using namespace helpers::math;
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
+						Progress.StepIt();
 						::Sleep(1);
 					}
 				}
@@ -2535,7 +2535,7 @@ using namespace helpers::math;
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
+						Progress.StepIt();
 						::Sleep(1);
 					}
 				}
@@ -2570,7 +2570,7 @@ using namespace helpers::math;
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
+						Progress.StepIt();
 						::Sleep(1);
 					}
 				}
@@ -2628,7 +2628,7 @@ using namespace helpers::math;
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.SetPos(chunkcount);
+				Progress.SetPos(chunkcount);
 				::Sleep(1);
 			}
 

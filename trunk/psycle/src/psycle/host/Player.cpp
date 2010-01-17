@@ -63,7 +63,7 @@ using namespace seib::vst;
 			if (initialize)
 			{
 				stop(); // This causes all machines to reset, and samplesperRow to init.				
-				Work(this,MAX_BUFFER_LENGTH);
+				Work(this,psycle::plugin_interface::MAX_BUFFER_LENGTH);
 				((Master*)(Global::song().machine(MASTER_INDEX)))->_clip = false;
 				((Master*)(Global::song().machine(MASTER_INDEX)))->sampleCount = 0;
 			}

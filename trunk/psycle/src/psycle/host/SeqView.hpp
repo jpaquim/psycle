@@ -102,9 +102,8 @@ namespace psycle {
 			bool sel_block_play() const { return selblock_play_; }
 
 		private:
-
 			SequenceEntry* selected_entry_;
-			std::map<int,SequenceEntry*> pos_map_; // Relation between the list position and the patterns
+			std::map<int,SequenceEntry*> pos_map_; // Relation between the list position and the patterns			
 			std::vector<psycle::core::Pattern*> copy_list_; // list to store copy/cut/paste entries
 			psycle::core::SequenceLine* seq_sel_play_line_;
 			psycle::core::SequenceLine* seq_main_play_line_; // mainline between normal play and bar selblock play
