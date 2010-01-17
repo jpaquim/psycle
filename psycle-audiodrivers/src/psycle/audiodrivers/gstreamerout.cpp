@@ -253,9 +253,9 @@ void GStreamerOut::do_open() throw(std::exception) {
 
 	// buffer settings
 
-	unsigned int const period_size(static_cast<unsigned int>(playbackSettings().blockSamples() * bytes_per_sample));
+	unsigned int const period_size(static_cast<unsigned int>(playbackSettings().blockFrames() * bytes_per_sample));
 	if(loggers::information()) {
-		float const latency(float(playbackSettings().blockSamples()) / playbackSettings().samplesPerSec());
+		float const latency(float(playbackSettings().blockFrames()) / playbackSettings().samplesPerSec());
 		std::ostringstream s;
 		s <<
 			"psycle: audiodrivers: gstreamer: "
