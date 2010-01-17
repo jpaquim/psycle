@@ -12,6 +12,7 @@ using namespace psycle::core;
 #endif
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
+#include "WaveEdFrame.hpp"
 
 #include "Zap.hpp"
 #include <mmreg.h>
@@ -24,11 +25,17 @@ using namespace psycle::helpers::math;
 
 float const CWaveEdChildView::zoomBase = 1.06f;
 
-CWaveEdChildView::CWaveEdChildView()
+CWaveEdChildView::CWaveEdChildView(CWaveEdFrame* frame, CMainFrame* parent)
+	: frame_(frame),
+	  pParent(parent)
 {}
 
 CWaveEdChildView::~CWaveEdChildView()
 {}
+
+Song* CWaveEdChildView::song() {
+  return frame_->song();
+}
 
 		BEGIN_MESSAGE_MAP(CWaveEdChildView, CWnd)
 			//{{AFX_MSG_MAP(CWaveEdChildView)
@@ -598,7 +605,7 @@ CWaveEdChildView::~CWaveEdChildView()
 
 		void  CWaveEdChildView::SetViewData(int ins)
 		{
-			int wl=_pSong->_pInstrument[ins]->waveLength;
+			int wl=song()->_pInstrument[ins]->waveLength;
 
 			wsInstrument=ins;	// Do not put inside of "if(wl)". Pasting needs this.
 
@@ -607,12 +614,12 @@ CWaveEdChildView::~CWaveEdChildView()
 				wdWave=true;
 					
 				wdLength=wl;
-				wdLeft=_pSong->_pInstrument[ins]->waveDataL;
-				wdRight=_pSong->_pInstrument[ins]->waveDataR;
-				wdStereo=_pSong->_pInstrument[ins]->waveStereo;
-				wdLoop=_pSong->_pInstrument[ins]->waveLoopType;
-				wdLoopS=_pSong->_pInstrument[ins]->waveLoopStart;
-				wdLoopE=_pSong->_pInstrument[ins]->waveLoopEnd;
+				wdLeft=song()->_pInstrument[ins]->waveDataL;
+				wdRight=song()->_pInstrument[ins]->waveDataR;
+				wdStereo=song()->_pInstrument[ins]->waveStereo;
+				wdLoop=song()->_pInstrument[ins]->waveLoopType;
+				wdLoopS=song()->_pInstrument[ins]->waveLoopStart;
+				wdLoopE=song()->_pInstrument[ins]->waveLoopEnd;
 
 				diStart=0;
 				diLength=wl;
@@ -815,28 +822,28 @@ CWaveEdChildView::~CWaveEdChildView()
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					{
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #else
-					_pSong->IsInvalided(true);
+					song()->IsInvalided(true);
 					///\todo lock/unlock
 					Sleep(LOCK_LATENCY);
 #endif
 					wdLoopE = diStart+((x*diLength)/rect.Width());
-					_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-					if (_pSong->_pInstrument[wsInstrument]->waveLoopStart> wdLoopE )
+					song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+					if (song()->_pInstrument[wsInstrument]->waveLoopStart> wdLoopE )
 					{
-						_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopE;
+						song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopE;
 					}
-					wdLoopS = _pSong->_pInstrument[wsInstrument]->waveLoopStart;
+					wdLoopS = song()->_pInstrument[wsInstrument]->waveLoopStart;
 					if (!wdLoop) 
 					{
 						wdLoop=true;
-						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+						song()->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					}
 #else
-					_pSong->IsInvalided(false);
+					song()->IsInvalided(false);
 #endif
 					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -869,28 +876,28 @@ CWaveEdChildView::~CWaveEdChildView()
 					GetClientRect(&rect);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					{
-						Song::scoped_lock lock(_pSong->Mutex());
-#else					_pSong->IsInvalided(true);
+						Song::scoped_lock lock(song()->Mutex());
+#else					song()->IsInvalided(true);
 					///\todo lock/unlock
 					Sleep(LOCK_LATENCY);
 #endif
 					wdLoopS = diStart+((x*diLength)/rect.Width());
-					_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-					if (_pSong->_pInstrument[wsInstrument]->waveLoopEnd < wdLoopS )
+					song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+					if (song()->_pInstrument[wsInstrument]->waveLoopEnd < wdLoopS )
 					{
-						_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopS;
+						song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopS;
 					}
-					wdLoopE = _pSong->_pInstrument[wsInstrument]->waveLoopEnd;
+					wdLoopE = song()->_pInstrument[wsInstrument]->waveLoopEnd;
 
 					if (!wdLoop) 
 					{
 						wdLoop=true;
-						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+						song()->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					}
 #else
-					_pSong->IsInvalided(false);
+					song()->IsInvalided(false);
 #endif
 					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -1000,13 +1007,13 @@ CWaveEdChildView::~CWaveEdChildView()
 					if(bDragLoopStart)
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song::scoped_lock lock(_pSong->Mutex());
+						Song::scoped_lock lock(song()->Mutex());
 #endif
 						if(newpos > wdLoopE)		wdLoopS = wdLoopE;
 						else						wdLoopS = newpos;
-						_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+						song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-						_pSong->IsInvalided(false);
+						song()->IsInvalided(false);
 #endif
 						pParent->m_wndInst.WaveUpdate();
 
@@ -1021,14 +1028,14 @@ CWaveEdChildView::~CWaveEdChildView()
 					else if(bDragLoopEnd)
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song::scoped_lock lock(_pSong->Mutex());
+						Song::scoped_lock lock(song()->Mutex());
 #endif
 						if(newpos >= wdLength)		wdLoopE = wdLength-1;
 						else if(newpos >= wdLoopS)	wdLoopE = newpos;
 						else						wdLoopE = wdLoopS;
-						_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+						song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-						_pSong->IsInvalided(false);
+						song()->IsInvalided(false);
 #endif
 						pParent->m_wndInst.WaveUpdate();
 
@@ -1172,7 +1179,7 @@ CWaveEdChildView::~CWaveEdChildView()
 			{
 				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Song::scoped_lock lock(_pSong->Mutex());
+				Song::scoped_lock lock(song()->Mutex());
 #endif
 				Fade(wdLeft+startPoint, length, 0, 1.0f);
 				if(wdStereo)
@@ -1181,7 +1188,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				RefreshDisplayData(true);
 				Invalidate(true);
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 			}
 		}
@@ -1195,7 +1202,7 @@ CWaveEdChildView::~CWaveEdChildView()
 			{
 				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Song::scoped_lock lock(_pSong->Mutex());
+				Song::scoped_lock lock(song()->Mutex());
 #endif
 
 				Fade(wdLeft+startPoint, length, 1.0f, 0);
@@ -1205,7 +1212,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				RefreshDisplayData(true);
 				Invalidate(true);
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 			}
 		}
@@ -1224,9 +1231,9 @@ CWaveEdChildView::~CWaveEdChildView()
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
-				Song::scoped_lock lock(_pSong->Mutex());
+				Song::scoped_lock lock(song()->Mutex());
 #else
-				_pSong->IsInvalided(true);
+				song()->IsInvalided(true);
 				///\todo lock/unlock
 				Sleep(LOCK_LATENCY);
 #endif
@@ -1271,7 +1278,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				}
 #else
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 
 				RefreshDisplayData(true);
@@ -1293,9 +1300,9 @@ CWaveEdChildView::~CWaveEdChildView()
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #else
-				_pSong->IsInvalided(true);
+				song()->IsInvalided(true);
 				///\todo lock/unlock
 				Sleep(LOCK_LATENCY);
 #endif
@@ -1348,7 +1355,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				}
 #else
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1371,9 +1378,9 @@ CWaveEdChildView::~CWaveEdChildView()
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					{
-						Song::scoped_lock lock(_pSong->Mutex());
+						Song::scoped_lock lock(song()->Mutex());
 #else
-					_pSong->IsInvalided(true);
+					song()->IsInvalided(true);
 					///\todo lock/unlock
 					Sleep(LOCK_LATENCY);
 #endif
@@ -1385,7 +1392,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					}
 #else
-					_pSong->IsInvalided(false);
+					song()->IsInvalided(false);
 #endif
 					RefreshDisplayData(true);
 					Invalidate(true);
@@ -1405,9 +1412,9 @@ CWaveEdChildView::~CWaveEdChildView()
 				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #else
-				_pSong->IsInvalided(true);
+				song()->IsInvalided(true);
 				///\todo lock/unlock
 				Sleep(LOCK_LATENCY);
 #endif
@@ -1432,7 +1439,7 @@ CWaveEdChildView::~CWaveEdChildView()
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				}
 #else
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1446,13 +1453,13 @@ CWaveEdChildView::~CWaveEdChildView()
 				unsigned long timeInSamps = Global::configuration().GetSamplesPerSec() * SilenceDlg.timeInSecs;
 				if(!wdWave)
 				{
-					_pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
+					song()->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #endif
 					short *pTmp= new signed short[timeInSamps];
 					std::memset(pTmp, 0, timeInSamps*2 );
-					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
+					wdLeft = zapArray(song()->_pInstrument[wsInstrument]->waveDataL, pTmp);
 					wdLength=timeInSamps;
 					wdStereo=false;
 					wdWave=true;
@@ -1461,7 +1468,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				else
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #endif
 					unsigned long insertPos;
 					switch(SilenceDlg.insertPos)
@@ -1483,7 +1490,7 @@ CWaveEdChildView::~CWaveEdChildView()
 					memcpy(pTmp, wdLeft, insertPos*2);							//copy pre-insert data
 					memset(pTmp + insertPos, 0, timeInSamps*2);					//insert silence
 					memcpy((unsigned char*)pTmp + 2*(insertPos+timeInSamps), wdLeft + insertPos, 2*(wdLength - insertPos));	//copy post-insert data
-					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
+					wdLeft = zapArray(song()->_pInstrument[wsInstrument]->waveDataL,pTmp);
 
 					if(wdStereo)
 					{
@@ -1491,32 +1498,32 @@ CWaveEdChildView::~CWaveEdChildView()
 						memcpy(pTmpR,wdRight,insertPos*2);
 						memset(pTmpR+insertPos, 0, timeInSamps*2);
 						memcpy((unsigned char*)pTmpR+ 2*(insertPos+timeInSamps), wdRight + insertPos, 2*(wdLength - insertPos));
-						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+						wdRight = zapArray(song()->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 					}
 
-					_pSong->_pInstrument[wsInstrument]->waveLength = wdLength = wdLength + timeInSamps;
+					song()->_pInstrument[wsInstrument]->waveLength = wdLength = wdLength + timeInSamps;
 
 					if(wdLoop)		//update loop points if necessary
 					{
 						if(insertPos<wdLoopS)
 						{
 							wdLoopS += timeInSamps;
-							_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+							song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
 						}
 						if(insertPos<wdLoopE)
 						{
 							wdLoopE += timeInSamps;
-							_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+							song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
 						}
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-						_pSong->IsInvalided(false);
+						song()->IsInvalided(false);
 #endif
 						pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					}
 				}
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				RefreshDisplayData(true);
@@ -1531,9 +1538,9 @@ CWaveEdChildView::~CWaveEdChildView()
 				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #else
-				_pSong->IsInvalided(true);
+				song()->IsInvalided(true);
 				///\todo lock/unlock
 				Sleep(LOCK_LATENCY);
 #endif
@@ -1543,13 +1550,13 @@ CWaveEdChildView::~CWaveEdChildView()
 					*(wdLeft + c) = ( *(wdLeft + c) + *(wdRight + c) ) / 2;
 				}
 
-				_pSong->_pInstrument[wsInstrument]->waveStereo = false;
+				song()->_pInstrument[wsInstrument]->waveStereo = false;
 				wdStereo = false;
-				zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR);
+				zapArray(song()->_pInstrument[wsInstrument]->waveDataR);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			}
 #else
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1701,7 +1708,7 @@ CWaveEdChildView::~CWaveEdChildView()
 			{
 				pParent->m_wndView.AddMacViewUndo();
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(true);
+				song()->IsInvalided(true);
 				///\todo lock/unlock
 				Sleep(LOCK_LATENCY);
 #endif
@@ -1711,7 +1718,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				if (datalen)
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #endif
 					pTmp = new signed short[datalen];
 					
@@ -1720,15 +1727,15 @@ CWaveEdChildView::~CWaveEdChildView()
 						pTmpR= new signed short[datalen];
 						CopyMemory(pTmpR, wdRight, blStart*sizeof(short));
 						CopyMemory( (pTmpR+blStart), (wdRight + blStart + length), (wdLength - blStart - length)*sizeof(short) );
-						zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+						zapArray(song()->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 						wdRight = pTmpR;
 					}
 
 					CopyMemory( pTmp, wdLeft, blStart*sizeof(short) );
 					CopyMemory( (pTmp+blStart), (wdLeft + blStart + length), (wdLength - blStart - length)*sizeof(short) );
-					zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
+					zapArray(song()->_pInstrument[wsInstrument]->waveDataL,pTmp);
 					wdLeft = pTmp;
-					_pSong->_pInstrument[wsInstrument]->waveLength = datalen;
+					song()->_pInstrument[wsInstrument]->waveLength = datalen;
 					wdLength = datalen;
 					//	adjust loop points if necessary
 					if(wdLoop)
@@ -1736,12 +1743,12 @@ CWaveEdChildView::~CWaveEdChildView()
 						if(blStart+length<wdLoopS)
 						{
 							wdLoopS -= length;
-							_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+							song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
 						}
 						if(blStart+length<wdLoopE)
 						{
 							wdLoopE -= length;
-							_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+							song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
 						}
 					}
 
@@ -1749,9 +1756,9 @@ CWaveEdChildView::~CWaveEdChildView()
 				else
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					_pSong->DeleteInstrument(wsInstrument);
+					song()->DeleteInstrument(wsInstrument);
 #else
-					_pSong->DeleteLayer(wsInstrument);
+					song()->DeleteLayer(wsInstrument);
 #endif
 					wdLength = 0;
 					wdWave   = false;
@@ -1780,7 +1787,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				RefreshDisplayData(true);
 				Invalidate(true);
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 			}
 		}
@@ -1893,7 +1900,7 @@ CWaveEdChildView::~CWaveEdChildView()
 			unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 			int bytesPerSamp = (int)(pFmt->nBlockAlign/pFmt->nChannels);
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			_pSong->IsInvalided(true);
+			song()->IsInvalided(true);
 			///\todo lock/unlock
 			Sleep(LOCK_LATENCY);
 #endif
@@ -1901,25 +1908,25 @@ CWaveEdChildView::~CWaveEdChildView()
 			{
 				if (pFmt->wBitsPerSample == 16)
 				{
-					_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
+					song()->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #endif
 					wdLength = lDataSamps;
-					wdLeft  = _pSong->_pInstrument[wsInstrument]->waveDataL;
+					wdLeft  = song()->_pInstrument[wsInstrument]->waveDataL;
 					if (pFmt->nChannels == 1)
 					{
-						memcpy(_pSong->_pInstrument[wsInstrument]->waveDataL, pData, lData);
+						memcpy(song()->_pInstrument[wsInstrument]->waveDataL, pData, lData);
 						wdStereo = false;
 					}
 					else if (pFmt->nChannels == 2)
 					{
 						for (c = 0; c < lDataSamps; ++c)
 						{
-							*(_pSong->_pInstrument[wsInstrument]->waveDataL + c) = *(signed short*)(pData + c*pFmt->nBlockAlign);
-							*(_pSong->_pInstrument[wsInstrument]->waveDataR + c) = *(signed short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign/2));
+							*(song()->_pInstrument[wsInstrument]->waveDataL + c) = *(signed short*)(pData + c*pFmt->nBlockAlign);
+							*(song()->_pInstrument[wsInstrument]->waveDataR + c) = *(signed short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign/2));
 						}
-						wdRight = _pSong->_pInstrument[wsInstrument]->waveDataR;
+						wdRight = song()->_pInstrument[wsInstrument]->waveDataR;
 						wdStereo = true;
 					}
 					wdWave = true;
@@ -1935,7 +1942,7 @@ CWaveEdChildView::~CWaveEdChildView()
 						 return;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song::scoped_lock lock(_pSong->Mutex());
+						Song::scoped_lock lock(song()->Mutex());
 #endif
 					//paste left channel
 					pTmp = new signed short[lDataSamps + wdLength];
@@ -1945,7 +1952,7 @@ CWaveEdChildView::~CWaveEdChildView()
 						*(pTmp + cursorPos + c) = *(short*)(pData + c*pFmt->nBlockAlign);
 
 					memcpy((unsigned char*)pTmp + bytesPerSamp*(cursorPos+lDataSamps), wdLeft+cursorPos, bytesPerSamp*(wdLength-cursorPos));
-					wdLeft  = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
+					wdLeft  = zapArray(song()->_pInstrument[wsInstrument]->waveDataL, pTmp);
 
 					if(pFmt->nChannels==2)	//if stereo, paste right channel
 					{
@@ -1956,11 +1963,11 @@ CWaveEdChildView::~CWaveEdChildView()
 							*(pTmpR+ cursorPos + c) = *(short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign/2));
 
 						memcpy((unsigned char*)pTmpR+ bytesPerSamp*(cursorPos+lDataSamps), wdRight + cursorPos, bytesPerSamp*(wdLength - cursorPos));
-						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+						wdRight = zapArray(song()->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 					}
 
 					//update length
-					_pSong->_pInstrument[wsInstrument]->waveLength = wdLength + lDataSamps;
+					song()->_pInstrument[wsInstrument]->waveLength = wdLength + lDataSamps;
 					wdLength = wdLength + lDataSamps;
 
 					//	adjust loop points if necessary
@@ -1969,12 +1976,12 @@ CWaveEdChildView::~CWaveEdChildView()
 						if(cursorPos<wdLoopS)
 						{
 							wdLoopS += lDataSamps;
-							_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+							song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
 						}
 						if(cursorPos<wdLoopE)
 						{
 							wdLoopE += lDataSamps;
-							_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+							song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
 						}
 					}
 				}
@@ -1990,7 +1997,7 @@ CWaveEdChildView::~CWaveEdChildView()
 			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate(true);
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			_pSong->IsInvalided(false);
+			song()->IsInvalided(false);
 #endif
 		}
 
@@ -2021,7 +2028,7 @@ CWaveEdChildView::~CWaveEdChildView()
 			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			_pSong->IsInvalided(true);
+			song()->IsInvalided(true);
 			///\todo lock/unlock
 			Sleep(LOCK_LATENCY);
 #endif
@@ -2054,7 +2061,7 @@ CWaveEdChildView::~CWaveEdChildView()
 					startPoint=cursorPos;
 				}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Song::scoped_lock lock(_pSong->Mutex());
+				Song::scoped_lock lock(song()->Mutex());
 #endif
 				//do left channel
 				pTmp = new signed short[wdLength];
@@ -2062,7 +2069,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				for (c = 0; c < lDataSamps; c++)
 					*(pTmp + startPoint + c) = *(short*)(pData + c*pFmt->nBlockAlign);
 				memcpy((unsigned char*)pTmp + 2*(startPoint+lDataSamps), wdLeft  + startPoint+lDataSamps, 2*(wdLength-startPoint-lDataSamps));
-				wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
+				wdLeft = zapArray(song()->_pInstrument[wsInstrument]->waveDataL, pTmp);
 				
 				if(pFmt->nChannels==2)	//do right channel if stereo
 				{
@@ -2071,7 +2078,7 @@ CWaveEdChildView::~CWaveEdChildView()
 					for (c = 0; c < lDataSamps; c++)
 						*(pTmpR+ startPoint + c) = *(short*)(pData + c*pFmt->nBlockAlign + int(pFmt->nBlockAlign*0.5));
 					memcpy((unsigned char*)pTmpR+ 2*(startPoint+lDataSamps), wdRight + startPoint+lDataSamps, 2*(wdLength-startPoint-lDataSamps));
-					wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+					wdRight = zapArray(song()->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 				}
 			}
 			GlobalUnlock(hPasteData);
@@ -2084,7 +2091,7 @@ CWaveEdChildView::~CWaveEdChildView()
 			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate(true);
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			_pSong->IsInvalided(false);
+			song()->IsInvalided(false);
 #endif
 		}
 
@@ -2127,7 +2134,7 @@ CWaveEdChildView::~CWaveEdChildView()
 					fadeOutSamps= Global::configuration().GetSamplesPerSec() * MixDlg.fadeOutTime;
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(true);
+				song()->IsInvalided(true);
 				///\todo lock/unlock
 				Sleep(LOCK_LATENCY);
 #endif
@@ -2137,7 +2144,7 @@ CWaveEdChildView::~CWaveEdChildView()
 							((pFmt->nChannels == 2) && (wdStereo == false)) )
 							return;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(_pSong->Mutex());
+					Song::scoped_lock lock(song()->Mutex());
 #endif
 					if(blSelection)	//overwrite selected block
 					{
@@ -2182,7 +2189,7 @@ CWaveEdChildView::~CWaveEdChildView()
 						Amplify(wdLeft +startPoint+destFadeIn, wdLength-startPoint-destFadeIn, MixDlg.destVol);	//amplify wave data
 
 					Mix(pTmp, wdLeft, newLength, wdLength);		//mix into pTmp
-					wdLeft =zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
+					wdLeft =zapArray(song()->_pInstrument[wsInstrument]->waveDataL,pTmp);
 
 					if( pFmt->nChannels == 2 )
 					{
@@ -2205,11 +2212,11 @@ CWaveEdChildView::~CWaveEdChildView()
 							Amplify(wdRight+startPoint+destFadeIn, wdLength-startPoint-destFadeIn, MixDlg.destVol);
 
 						Mix(pTmpR, wdRight, newLength, wdLength);		//mix into pTmpR
-						wdRight=zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+						wdRight=zapArray(song()->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 					}
 
 					if(newLength>wdLength)
-						_pSong->_pInstrument[wsInstrument]->waveLength = wdLength = startPoint + lDataSamps;
+						song()->_pInstrument[wsInstrument]->waveLength = wdLength = startPoint + lDataSamps;
 
 				}
 
@@ -2223,7 +2230,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				Invalidate(true);
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 			}
 
@@ -2261,7 +2268,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(true);
+				song()->IsInvalided(true);
 				///\todo lock/unlock
 				Sleep(LOCK_LATENCY);
 #endif
@@ -2271,7 +2278,7 @@ CWaveEdChildView::~CWaveEdChildView()
 							((pFmt->nChannels == 2) && (wdStereo == false)) )
 							return;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song::scoped_lock lock(_pSong->Mutex());
+						Song::scoped_lock lock(song()->Mutex());
 #endif
 					if(blSelection)	//overwrite selected block
 					{
@@ -2305,7 +2312,7 @@ CWaveEdChildView::~CWaveEdChildView()
 					Fade(pTmp +startPoint, endPoint-startPoint, XFadeDlg.srcStartVol, XFadeDlg.srcEndVol);			//fade clipboard data
 					Fade(wdLeft +startPoint, endPoint-startPoint, XFadeDlg.destStartVol, XFadeDlg.destEndVol);		//fade wave data
 					Mix(pTmp, wdLeft, newLength, wdLength);															//mix clipboard with wave
-					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
+					wdLeft = zapArray(song()->_pInstrument[wsInstrument]->waveDataL, pTmp);
 
 					if(pFmt->nChannels==2)	//process right channel
 					{
@@ -2316,10 +2323,10 @@ CWaveEdChildView::~CWaveEdChildView()
 						Fade(pTmpR+startPoint, endPoint-startPoint, XFadeDlg.srcStartVol, XFadeDlg.srcEndVol);
 						Fade(wdRight+startPoint, endPoint-startPoint, XFadeDlg.destStartVol, XFadeDlg.destEndVol);
 						Mix(pTmpR, wdRight, newLength, wdLength);
-						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+						wdRight = zapArray(song()->_pInstrument[wsInstrument]->waveDataR,pTmpR);
 					}
 					if(newLength > wdLength)
-						_pSong->_pInstrument[wsInstrument]->waveLength = wdLength = newLength;
+						song()->_pInstrument[wsInstrument]->waveLength = wdLength = newLength;
 				}
 
 
@@ -2332,7 +2339,7 @@ CWaveEdChildView::~CWaveEdChildView()
 				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				Invalidate(true);
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				_pSong->IsInvalided(false);
+				song()->IsInvalided(false);
 #endif
 			}
 
@@ -2374,28 +2381,28 @@ CWaveEdChildView::~CWaveEdChildView()
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			{
-				Song::scoped_lock lock(_pSong->Mutex());
-#else			_pSong->IsInvalided(true);
+				Song::scoped_lock lock(song()->Mutex());
+#else			song()->IsInvalided(true);
 			///\todo lock/unlock
 			Sleep(LOCK_LATENCY);
 #endif
 			int nWidth = rect.Width();
 			wdLoopS = diStart + rbX * diLength/nWidth;
-			_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-			if (_pSong->_pInstrument[wsInstrument]->waveLoopEnd< wdLoopS )
+			song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+			if (song()->_pInstrument[wsInstrument]->waveLoopEnd< wdLoopS )
 			{
-				_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopS;
+				song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopS;
 			}
-			wdLoopE = _pSong->_pInstrument[wsInstrument]->waveLoopEnd;
+			wdLoopE = song()->_pInstrument[wsInstrument]->waveLoopEnd;
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+				song()->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			}
 #else
-			_pSong->IsInvalided(false);
+			song()->IsInvalided(false);
 #endif
 			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -2408,29 +2415,29 @@ CWaveEdChildView::~CWaveEdChildView()
 			GetClientRect(&rect);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			{
-				Song::scoped_lock lock(_pSong->Mutex());
+				Song::scoped_lock lock(song()->Mutex());
 #else
-			_pSong->IsInvalided(true);
+			song()->IsInvalided(true);
 			///\todo lock/unlock
 			Sleep(LOCK_LATENCY);
 #endif
 			int nWidth = rect.Width();
 			wdLoopE = diStart + rbX * diLength/nWidth;
-			_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-			if (_pSong->_pInstrument[wsInstrument]->waveLoopStart> wdLoopE )
+			song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+			if (song()->_pInstrument[wsInstrument]->waveLoopStart> wdLoopE )
 			{
-				_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopE;
+				song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopE;
 			}
-			wdLoopS = _pSong->_pInstrument[wsInstrument]->waveLoopStart;
+			wdLoopS = song()->_pInstrument[wsInstrument]->waveLoopStart;
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+				song()->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			}
 #else
-			_pSong->IsInvalided(false);
+			song()->IsInvalided(false);
 #endif
 			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -2442,21 +2449,21 @@ CWaveEdChildView::~CWaveEdChildView()
 			if(!blSelection) return;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			{
-				Song::scoped_lock lock(_pSong->Mutex());
+				Song::scoped_lock lock(song()->Mutex());
 #endif
 			wdLoopS = blStart;
 			wdLoopE = blStart+blLength;
-			_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-			_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+			song()->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+			song()->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+				song()->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			}
 #else
-			_pSong->IsInvalided(false);
+			song()->IsInvalided(false);
 #endif
 			pParent->m_wndInst.WaveUpdate();
 			CRect rect;
@@ -2465,15 +2472,6 @@ CWaveEdChildView::~CWaveEdChildView()
 			InvalidateRect(&rect, false);
 		}
 
-
-		void CWaveEdChildView::SetSong(Song* _sng)
-		{
-			_pSong = _sng;
-		}
-		void CWaveEdChildView::SetParent(CMainFrame* parent)
-		{
-			pParent = parent;
-		}
 		unsigned long CWaveEdChildView::GetWaveLength()
 		{
 			if(wdWave)

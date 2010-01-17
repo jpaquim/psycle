@@ -21,10 +21,9 @@ namespace psycle {
 		class CWaveEdChildView : public CWnd
 		{
 		public:
-			CWaveEdChildView();
-			void SetSong(Song*);
-			void SetParent(CMainFrame*);
+			CWaveEdChildView(class CWaveEdFrame* frame, CMainFrame* parent);			
 			virtual ~CWaveEdChildView();
+
 			void GenerateAndShow();
 			void SetViewData(int ins);
 			void SetSpecificZoom(int factor);
@@ -125,7 +124,6 @@ namespace psycle {
 			void Mix(short* lhs, short *rhs, int lhsSize, int rhsSize, float lhsVol=1.0f, float rhsVol=1.0f);
 			void Fade(short* data, int length, float startVol, float endVol);
 			void Amplify(short* data, int length, float vol);
-			Song *_pSong;
 			
 			// Painting pens
 			CPen cpen_lo;
@@ -191,11 +189,16 @@ namespace psycle {
 
 			CScrollableDlgBar zoombar;
 
-			CMainFrame* pParent;
+			
 		public:
 			afx_msg void OnTimer(UINT nIDEvent);
 			afx_msg void OnDestroy();
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+
+			CWaveEdFrame* frame_;
+			CMainFrame* pParent;
+
+			inline Song* song();
 		};
 
 		//{{AFX_INSERT_LOCATION}}
