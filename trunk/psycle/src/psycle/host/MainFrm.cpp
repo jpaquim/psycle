@@ -550,7 +550,7 @@ using namespace psycle::helpers::math;
 			cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_COMBOOCTAVE);
 			cc2->SetCurSel(projects_.active_project()->song().currentOctave);		
 			UpdateComboGen();
-			UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);			
+			UpdateMasterValue(((Master*)projects_.active_project()->song().machine(MASTER_INDEX))->_outDry);			
 		}
 
 		/////////////////
@@ -617,15 +617,15 @@ using namespace psycle::helpers::math;
 			{
 				if (Global::pPlayer->playing() ) 
 				{
-					Global::song().BeatsPerMin(Global::pPlayer->bpm()+x);
+					projects_.active_project()->song().BeatsPerMin(Global::pPlayer->bpm()+x);
 				}
-				else Global::song().BeatsPerMin(Global::song().BeatsPerMin()+x);
+				else projects_.active_project()->song().BeatsPerMin(projects_.active_project()->song().BeatsPerMin()+x);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Global::player().setBpm(Global::song().bpm());
+				Global::player().setBpm(projects_.active_project()->song().bpm());
 #else
-				Global::pPlayer->SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
+				Global::pPlayer->SetBPM(projects_.active_project()->song().BeatsPerMin(),projects_.active_project()->song().LinesPerBeat());
 #endif
-				sprintf(buffer,"%d",Global::song().BeatsPerMin());
+				sprintf(buffer,"%d",projects_.active_project()->song().BeatsPerMin());
 			}
 			else sprintf(buffer,"%d",static_cast<int>(Global::pPlayer->bpm()));
 			
@@ -648,11 +648,11 @@ using namespace psycle::helpers::math;
 			{
 				if (Global::pPlayer->playing() ) 
 				{
-					Global::song().LinesPerBeat(Global::pPlayer->tpb()+x);
+					projects_.active_project()->song().LinesPerBeat(Global::pPlayer->tpb()+x);
 				}
-				else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
-				Global::pPlayer->SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
-				sprintf(buffer,"%d",Global::song().LinesPerBeat());
+				else projects_.active_project()->song().LinesPerBeat(projects_.active_project()->song().LinesPerBeat()+x);
+				Global::pPlayer->SetBPM(projects_.active_project()->song().BeatsPerMin(), projects_.active_project()->song().LinesPerBeat());
+				sprintf(buffer,"%d",projects_.active_project()->song().LinesPerBeat());
 			}
 			else sprintf(buffer, "%d", Global::pPlayer->tpb());
 #endif
@@ -736,7 +736,7 @@ using namespace psycle::helpers::math;
 			Master* master = (Master*)projects_.active_project()->song().machine(MASTER_INDEX);
 			master->_clip = false;
 #else
-			((Master*)(Global::song().machine(MASTER_INDEX)))->_clip = false;
+			((Master*)(projects_.active_project()->song().machine(MASTER_INDEX)))->_clip = false;
 #endif
 			m_wndView.SetFocus();
 		}
@@ -1732,7 +1732,7 @@ using namespace psycle::helpers::math;
 			if (Global::pPlayer->playing())
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-//				SequenceLine *pSLine = *Global::song().patternSequence().begin();
+//				SequenceLine *pSLine = *projects_.active_project()->song().patternSequence().begin();
 //				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(Player::singleton().playPos()) );
 //				str.Format("B %.2f", );
 #else
@@ -1753,7 +1753,7 @@ using namespace psycle::helpers::math;
 			if (Global::pPlayer->playing())
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				SequenceLine *pSLine = *Global::song().patternSequence().begin();
+				SequenceLine *pSLine = *projects_.active_project()->song().patternSequence().begin();
 				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(Player::singleton().playPos()) );
 				if (sLineIt != pSLine->rend()) {
 					Pattern* pPat = sLineIt->second->pattern();
@@ -1768,7 +1768,7 @@ using namespace psycle::helpers::math;
 			}
 			else
 			{
-				str.Format("Pat %.2X", Global::song().playOrder[m_wndView.pattern_view()->editPosition]); 
+				str.Format("Pat %.2X", projects_.active_project()->song().playOrder[m_wndView.pattern_view()->editPosition]); 
 			}
 			pCmdUI->SetText(str); 
 		}
