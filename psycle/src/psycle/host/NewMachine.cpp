@@ -783,7 +783,7 @@ namespace psycle {
 				{
 					std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
 					loggers::info(s.str());
-					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
+					Progress.SetStep(16384 / std::max(1,plugin_count));
 					Progress.SetWindowText(s.str().c_str());
 				}
 				std::ofstream out;
@@ -842,7 +842,7 @@ namespace psycle {
 				out.close();
 				_numPlugins = plugsCount;
 
-				Progress.m_Progress.SetPos(16384);
+				Progress.SetPos(16384);
 				Progress.SetWindowText("Saving scan cache file ...");
 
 				loggers::info("Saving scan cache file ...");
@@ -858,7 +858,7 @@ namespace psycle {
 			{
 				if(pProgress)
 				{
-					pProgress->m_Progress.StepIt();
+					pProgress->StepIt();
 					::Sleep(1);
 				}
 				std::string fileName = list[fileIdx];

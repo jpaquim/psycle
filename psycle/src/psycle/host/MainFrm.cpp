@@ -1812,7 +1812,7 @@ using namespace psycle::helpers::math;
 					Global::pPlayer->_playTimem % 60,
 					static_cast<unsigned int>(Global::pPlayer->_playTime),
 					static_cast<unsigned int>(Global::pPlayer->_playTime * 100) -
-					static_cast<unsigned int>(Global::pPlayer->_playTime) * 100;
+					static_cast<unsigned int>(Global::pPlayer->_playTime) * 100);
 #endif
 				pCmdUI->SetText(str); 
 			}

@@ -68,7 +68,9 @@ namespace psycle {
 
 		void CInfoDlg::OnTimer(UINT nIDEvent) {
 			if(nIDEvent==1) {
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				Song::scoped_lock lock(projects_->active_project()->song().Mutex());
+#endif
 				char buffer[128];
 				
 				float totalCPU=0;
@@ -79,7 +81,7 @@ namespace psycle {
 				//todo
 				unsigned tempSampCount = 1;
 #else
-				unsigned tempSampCount = _pSong->_sampCount;
+				unsigned tempSampCount = projects_->active_project()->song()._sampCount;
 				if( !tempSampCount ) tempSampCount=1;
 #endif
 				

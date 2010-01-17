@@ -67,9 +67,11 @@ namespace psycle {
 			return parent_;
 		}
 
-		void Project::SetActive() {			
+		void Project::SetActive() {
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.song(*song_);
+#endif
 		}
 
 		void Project::Clear()
@@ -429,7 +431,7 @@ namespace psycle {
 				///\todo lock/unlock
 				Sleep(LOCK_LATENCY);
 				mac_view()->child_view()->_outputActive = false;
-				Global::pConfig->_pOutputDriver->set_started(false);
+				Global::pConfig->_pOutputDriver->Enable(false);
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Close();
 				///\todo lock/unlock
