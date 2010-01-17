@@ -19,7 +19,7 @@ using namespace universalis::stdlib;
 typedef float * (*AUDIODRIVERWORKFN) (void * context, int numSamples);
 
 /// max number of samples (per channel) that the Work function may ask to return
-int const MAX_SAMPLES_WORKFN = 256; ///\todo breaks if set to 65536;
+int const MAX_SAMPLES_WORKFN = 65536;
 
 
 /// provides some text info about the driver
