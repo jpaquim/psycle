@@ -11,7 +11,10 @@
 #include <asio.h>
 #include <map>
 #include <windows.h>
-#pragma comment(lib, "asio")
+#include <diversalis/compiler.hpp>
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#pragma comment(lib, "asio")
+#endif
 
 namespace psycle { namespace audiodrivers {
 
@@ -28,7 +31,7 @@ class AsioUiInterface {
 		virtual void GetValues(int& device_id, int& sample_rate, int& buffer_size) = 0;
 		virtual void WriteConfig(int device_id_guid, int sample_rate, int buffer_size) = 0;
 		virtual void ReadConfig(int& device_id, int& sample_rate, int& buffer_size) = 0;
-		virtual void Error(const std::string& error_msg) = 0;
+		virtual void Error(std::string const & msg) = 0;
 };
 
 /// output device interface implemented by asio.
@@ -133,8 +136,7 @@ class ASIOInterface : public AudioDriver {
 		};
 
 	public:
-		ASIOInterface();
-		ASIOInterface(AsioUiInterface* ui);
+		ASIOInterface(AsioUiInterface * ui = 0);
 		~ASIOInterface() throw();
 
 		/*override*/ AudioDriverInfo info() const;
@@ -212,8 +214,6 @@ class ASIOInterface : public AudioDriver {
 
 		AsioUiInterface* ui_;
 		ASIOBufferInfo* info_;
-
-		void Init();
 };
 	
 }}

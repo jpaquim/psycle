@@ -134,10 +134,9 @@ namespace psycle {
 				if ( saveatend ) WriteConfig(buffer_size, device_id, sample_rate);
 			}
 
-			virtual void Error(const std::string& error_msg) {
-				MessageBox(0, error_msg.c_str(), _T("Asio Output driver"), MB_OK | MB_ICONERROR);
+			/*override*/ void Error(std::string const & msg) {
+				MessageBox(0, msg.c_str(), "Error in ASIO audiodriver", MB_OK | MB_ICONERROR);
 			}
-
 		private:
 			CASIOConfig dlg_;
 		};
