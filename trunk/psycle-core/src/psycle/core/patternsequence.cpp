@@ -6,6 +6,7 @@
 
 #include "commands.h"
 #include <sstream>
+#include <limits>
 
 namespace psycle { namespace core {
 
