@@ -6,12 +6,12 @@
 #include <map>
 /// configuration for the user interface
 namespace psycle {
-	namespace core {
+	namespace audiodrivers {
 		class AudioDriver;
 	}
 }
 
-using psycle::core::AudioDriver;
+using psycle::audiodrivers::AudioDriver;
 
 namespace qpsycle {
 

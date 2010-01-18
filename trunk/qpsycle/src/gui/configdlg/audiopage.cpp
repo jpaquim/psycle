@@ -103,8 +103,8 @@ AudioPage::AudioPage(QWidget * parent)
 }
 
 void AudioPage::initDriverList() {
-	std::map<std::string, psycle::core::AudioDriver*> & driverMap =  config_->driverMap();
-	for(std::map<std::string, psycle::core::AudioDriver*>::iterator i(driverMap.begin()), e(driverMap.end()); i != e; ++i) {
+	std::map<std::string, psycle::audiodrivers::AudioDriver*> & driverMap =  config_->driverMap();
+	for(std::map<std::string, psycle::audiodrivers::AudioDriver*>::iterator i(driverMap.begin()), e(driverMap.end()); i != e; ++i) {
 		if(!i->second->info().show()) continue;
 		QString driverName = QString::fromStdString(i->first);
 		audio_driverCbx_->addItem(driverName);
@@ -117,10 +117,10 @@ void AudioPage::initDriverList() {
 }
 
 void AudioPage::onDriverSelected(QString const & text) {
-	std::map<std::string, psycle::core::AudioDriver*> & driverMap =  config_->driverMap();
-	std::map<std::string, psycle::core::AudioDriver*>::iterator i(driverMap.find(text.toStdString()));
+	std::map<std::string, psycle::audiodrivers::AudioDriver*> & driverMap =  config_->driverMap();
+	std::map<std::string, psycle::audiodrivers::AudioDriver*>::iterator i(driverMap.find(text.toStdString()));
 	if(i != driverMap.end()) {
-		psycle::core::AudioDriver* driver = i->second;
+		psycle::audiodrivers::AudioDriver* driver = i->second;
 		selectedDriver_ = driver;
 		if(text == "alsa") {
 			audio_deviceBox_->setText(i->second->playbackSettings().deviceName().c_str());
@@ -138,7 +138,7 @@ void AudioPage::onRestartDriver() {
 	if(selectedDriver_) {
 		// set the device
 		if(!audio_deviceBox_->text().isEmpty()) {
-			psycle::core::AudioDriverSettings settings = selectedDriver_->playbackSettings();
+			psycle::audiodrivers::AudioDriverSettings settings = selectedDriver_->playbackSettings();
 			settings.setDeviceName( audio_deviceBox_->text().toStdString() );
 			selectedDriver_->setPlaybackSettings(settings);
 		}

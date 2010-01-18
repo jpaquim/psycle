@@ -58,41 +58,41 @@ namespace qpsycle {
 		_RecordTweaks(),
 		_RecordUnarmed()
 	{
-		psycle::core::AudioDriver* driver = new psycle::core::DummyDriver;
+		psycle::audiodrivers::AudioDriver* driver = new psycle::audiodrivers::DummyDriver;
 		_pSilentDriver = driver;
 		addAudioDriver(driver);
 
 		setDriverByName("silent");
 		enableSound_ = false;
 
-		addAudioDriver(new psycle::core::WaveFileOut);
+		addAudioDriver(new psycle::audiodrivers::WaveFileOut);
 
 		#if defined PSYCLE__ALSA_AVAILABLE
-			addAudioDriver(new psycle::core::AlsaOut);
+			addAudioDriver(new psycle::audiodrivers::AlsaOut);
 			// use alsa by default
 			setDriverByName("alsa");
 			enableSound_ = true;
 		#endif
 		#if defined PSYCLE__JACK_AVAILABLE
-			addAudioDriver(new psycle::core::JackOut);
+			addAudioDriver(new psycle::audiodrivers::JackOut);
 		#endif
 		#if defined PSYCLE__ESOUND_AVAILABLE
-			addAudioDriver(new psycle::core::ESoundOut);
+			addAudioDriver(new psycle::audiodrivers::ESoundOut);
 		#endif
 		#if defined PSYCLE__GSTREAMER_AVAILABLE
-			addAudioDriver(new psycle::core::GStreamerOut);
+			addAudioDriver(new psycle::audiodrivers::GStreamerOut);
 		#endif
 		#if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
-			addAudioDriver(new psycle::core::MsDirectSound);
+			addAudioDriver(new psycle::audiodrivers::MsDirectSound);
 			// use dsound by default
 			setDriverByName("dsound");
 			enableSound_ = true;
 		#endif
 		#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
-			addAudioDriver(new psycle::core::MsWaveOut);
+			addAudioDriver(new psycle::audiodrivers::MsWaveOut);
 		#endif
 		#if defined PSYCLE__NET_AUDIO_AVAILABLE
-			addAudioDriver(new psycle::core::NetAudioOut);
+			addAudioDriver(new psycle::audiodrivers::NetAudioOut);
 		#endif
 
 		#if 0 // where are these paths stored?
@@ -110,7 +110,7 @@ namespace qpsycle {
 	}
 
 	Configuration::~Configuration() {
-		for(std::map<std::string, psycle::core::AudioDriver*>::iterator i(driverMap().begin()), e(driverMap().end()); i != e; ++i)
+		for(std::map<std::string, psycle::audiodrivers::AudioDriver*>::iterator i(driverMap().begin()), e(driverMap().end()); i != e; ++i)
 			delete i->second;
 	}
 	
@@ -199,7 +199,7 @@ namespace qpsycle {
 					std::string deviceName = alsaElm.attribute("device").toStdString();
 					std::map< std::string, AudioDriver*>::iterator it = driverMap_.begin();
 					if((it = driverMap_.find("alsa")) != driverMap_.end()) {
-						psycle::core::AudioDriverSettings settings = it->second->playbackSettings(); ///\todo why do we do a copy?
+						psycle::audiodrivers::AudioDriverSettings settings = it->second->playbackSettings(); ///\todo why do we do a copy?
 						if(deviceName.length()) {
 							settings.setDeviceName(deviceName);
 						} else {
