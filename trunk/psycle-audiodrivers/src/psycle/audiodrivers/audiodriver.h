@@ -222,6 +222,8 @@ class AudioDriver {
 			virtual/*?*/ int GetOutputLatency() { return playbackSettings_.totalBufferBytes(); }
 			virtual int GetWritePos() { return 0; }
 			virtual int GetPlayPos() { return 0; }
+			virtual void ReadConfig() { }
+			virtual void WriteConfig() {}
 		protected:
 			/// holds the sample rate, bit depth, etc
 			AudioDriverSettings playbackSettings_; 

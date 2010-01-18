@@ -12,8 +12,15 @@ using namespace psycle::core;
 #include "Player.hpp"
 #include "Song.hpp"
 #endif
+
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle {
 	namespace host {
+
 
 		IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 
@@ -145,8 +152,9 @@ namespace psycle {
 
 			int index = m_driverComboBox.GetCurSel();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			///\todo Implement audio drivers
+			Player &player = Player::singleton();
 			m_ppDrivers[index]->Configure();
+			player.samples_per_second(m_ppDrivers[index]->playbackSettings().samplesPerSec());
 			//Global::pPlayer->samples_per_second()
 #else
 			m_ppDrivers[index]->Configure();

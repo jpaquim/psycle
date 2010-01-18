@@ -7,9 +7,6 @@
 
 namespace psycle { namespace audiodrivers {
 
-int const SHORT_MIN = -32768;
-int const SHORT_MAX =  32767;
-
 bool MsWaveOut::_running = 0;
 CRITICAL_SECTION MsWaveOut::waveCriticalSection;
 WAVEHDR*         MsWaveOut::waveBlocks;

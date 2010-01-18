@@ -9,8 +9,14 @@
 
 using namespace psycle::helpers;
 
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle {
 	namespace host {
+
 
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
 
@@ -24,6 +30,7 @@ namespace psycle {
 
 		CMidiInputDlg::~CMidiInputDlg()
 		{
+			for(groups_type::iterator i(groups.begin()) ; i != groups.end() ; ++i) delete *i;
 		}
 
 		void CMidiInputDlg::DoDataExchange(CDataExchange* pDX)

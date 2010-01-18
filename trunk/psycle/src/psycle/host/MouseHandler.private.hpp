@@ -11,9 +11,9 @@ namespace psycle {
   			if(viewMode == view_modes::machine) // User is in machine view mode
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE	
-				///\todo what was that ? Were we cancelling the mouse click in case of thread race?
-				///	if (projects_->active_project()->song()._machineLock) return;
 				Song::scoped_lock lock(projects_->active_project()->song().Mutex());
+#else
+				if (projects_->active_project()->song()._machineLock) return;
 #endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
@@ -57,14 +57,11 @@ namespace psycle {
 		{
 			SetCapture();
 			if( viewMode == view_modes::machine) {
-				#if 0
-					///\todo what was that ? Were we cancelling the mouse click in case of thread race?
-					if (projects_->active_project()->song()._machineLock) return;
-				#else
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					Song::scoped_lock lock(projects_->active_project()->song().Mutex());
+#else
+					if (projects_->active_project()->song()._machineLock) return;
 #endif
-				#endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
 				ev.x = point.x;
