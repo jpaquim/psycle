@@ -21,6 +21,11 @@ using namespace psycle::core;
 #undef min
 #undef max
 #endif
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 
 namespace psycle { namespace host {
 
@@ -78,7 +83,7 @@ using namespace psycle::helpers::math;
 
 		void SequencerView::SwitchToSelBlockPlay() {
 			psycle::core::PatternSequence& seq = project_->song().patternSequence();
-			seq_main_play_line_ = *seq.begin()+1;
+			seq_main_play_line_ = *(seq.begin()+1);
 			seq_sel_play_line_ = ComputeSelblockLine();
 			*(seq.begin()+1) = seq_sel_play_line_;
 			seq_sel_play_line_->SetSequence(&project_->song().patternSequence());

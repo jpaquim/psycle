@@ -596,7 +596,7 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 						float val = volMatrix[pMac[i]->_inputMachines[c]][d];
 						if(val > 4.1f) val *= 0.000030517578125f; // BugFix
 						else if(val < 0.00004f) val *= 32768.0f; // BugFix
-						pMac[i]->InsertInputWire(*pOrigMachine,c,val);
+						pMac[i]->InsertInputWire(*pOrigMachine,c,0,val);
 					}
 				}
 				else {

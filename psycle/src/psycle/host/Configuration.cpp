@@ -28,6 +28,12 @@
 	#include "NewMachine.hpp"
 #endif // !defined WINAMP_PLUGIN
 
+
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle { namespace host {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -69,8 +75,10 @@ namespace psycle { namespace host {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				_numOutputDrivers = 4;
 				_ppOutputDrivers = new psycle::audiodrivers::AudioDriver*[_numOutputDrivers];
+				///\todo: DummyDriver is an experimental "use all cpu" driver. The old AudioDriver was
+				/// a "do nothing" driver instead.
 				_ppOutputDrivers[0] = new psycle::audiodrivers::DummyDriver();
-				_ppOutputDrivers[1] = new psycle::audiodrivers::MsWaveOut(); // this driver is broken
+				_ppOutputDrivers[1] = new psycle::audiodrivers::MsWaveOut();
 				dsound_ui_ = new DSoundUi();
 				_ppOutputDrivers[2] = new psycle::audiodrivers::MsDirectSound(dsound_ui_);
 				asio_ui_ = new AsioUi();
@@ -109,6 +117,7 @@ namespace psycle { namespace host {
 					midi().velocity().from()    = 0;
 					midi().velocity().to()      = 0xff;
 				}
+
 			}
 #endif // !defined WINAMP_PLUGIN
 			// pattern height
@@ -354,6 +363,11 @@ namespace psycle { namespace host {
 				reg.QueryValue("OutputDriver", _outputDriverIndex);
 				if(0 > _outputDriverIndex || _outputDriverIndex >= _numOutputDrivers) _outputDriverIndex = 1;
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
+				for (int i(0);i<_numOutputDrivers;++i)
+				{
+					_ppOutputDrivers[i]->ReadConfig();
+				}
+
 			}
 			// midi
 			{
@@ -445,6 +459,10 @@ namespace psycle { namespace host {
 			reg.SetValue("NavigationIgnoresStep", _NavigationIgnoresStep);
 			reg.SetValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
 			reg.SetValue("OutputDriver", _outputDriverIndex);
+			for (int i(0);i<_numOutputDrivers;++i)
+			{
+				_ppOutputDrivers[i]->WriteConfig();
+			}
 			reg.SetValue("MidiInputDriver", _midiDriverIndex);
 			reg.SetValue("MidiSyncDriver", _syncDriverIndex);
 			reg.SetValue("MidiInputHeadroom", _midiHeadroom);

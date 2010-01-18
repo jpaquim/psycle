@@ -1474,8 +1474,9 @@ using namespace helpers::math;
 								pFile->Read(numInstruments);
 								int idx;
 								for(int i = 0;i < numInstruments && filepos < begins+size;i++)
-								{
-									pFile->Read(idx);
+							{
+								pFile->Read(idx);
+								filepos=pFile->GetPos();
 									int sizeIns = rInstrument(idx).Load(*pFile);
 									if ((version&0xFFFF) > 0) {
 										//Version 0 doesn't write the chunk size correctly

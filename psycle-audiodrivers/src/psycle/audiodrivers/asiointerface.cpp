@@ -137,8 +137,6 @@ void ASIOInterface::do_open() {
 
 	_firstrun = true;
 
-	if(_running) return; // useless, can't happen
-
 	asioDrivers.removeCurrentDriver();
 	char bla[128]; strcpy(bla,_selectedout.driver->_name.c_str());
 	if(!asioDrivers.loadDriver(bla)) {
@@ -379,7 +377,7 @@ void ASIOInterface::ControlPanel(int driverID) {
 	PortOut pout = GetOutPortFromidx(driverID);
 	DriverEnum* newdriver = pout.driver;
 	if(_selectedout.driver != newdriver) {
-		if(_running) {
+		if(started()) {
 			do_stop();
 			// load it
 			if(asioDrivers.loadDriver(const_cast<char*>(newdriver->_name.c_str()))) {

@@ -103,7 +103,6 @@ class MsDirectSound : public AudioDriver {
 		void DoBlocksRecording(PortCapt & port);
 		bool WantsMoreBlocksRecording(PortCapt & port);
 
-		bool configured_;
 		static AudioDriverInfo info_;
 
 		GUID device_guid_;
