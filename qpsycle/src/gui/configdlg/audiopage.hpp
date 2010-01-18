@@ -21,7 +21,7 @@
 #ifndef AUDIOPAGE_H
 #define AUDIOPAGE_H
 
-namespace psycle { namespace core {
+namespace psycle { namespace audiodrivers {
 class AudioDriver;}}
 
 #include <QWidget>
@@ -48,7 +48,7 @@ private:
 	void initDriverList();
 
 	Configuration* config_;
-	psycle::core::AudioDriver *selectedDriver_;
+	psycle::audiodrivers::AudioDriver *selectedDriver_;
 
 	QLabel *audio_driverLbl_;
 	QLabel *audio_deviceLbl_;
