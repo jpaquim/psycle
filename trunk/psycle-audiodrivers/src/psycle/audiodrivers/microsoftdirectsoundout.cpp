@@ -75,7 +75,6 @@ void MsDirectSound::do_open() throw(std::exception) {
 
 		if(exclusive_) {
 			if(DS_OK != (result = direct_sound_->SetCooperativeLevel(hwnd, DSSCL_WRITEPRIMARY))) {
-				// todo we may simply have lost focus
 				direct_sound_->Release();
 				direct_sound_ = 0;
 				throw runtime_error("Failed to set DirectSound cooperative level: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
