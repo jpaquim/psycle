@@ -50,9 +50,7 @@ namespace psycle { namespace plugins { namespace outputs {
 			if(write_primary_) {
 				if(error = direct_sound_implementation().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_WRITEPRIMARY)) {
 					buffer_ = 0;
-					//throw universalis::os::exceptions::runtime_error("direct sound set write primary cooperative level: " + os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
-					// actually, we should not report this, since we may simply do not have the focus
-					return; ///\todo that sux.. we're just going to crash latter
+					throw universalis::os::exceptions::runtime_error("direct sound set write primary cooperative level: " + os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 				}
 			}
 			else if(error = direct_sound_implementation().SetCooperativeLevel(::GetDesktopWindow(), DSSCL_PRIORITY)) throw universalis::os::exceptions::runtime_error("direct sound set priority cooperative level: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
