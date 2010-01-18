@@ -85,9 +85,13 @@ Configuration::Configuration()
 	#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 		add_driver(*new MsWaveOut);
 	#endif
+	#if defined PSYCLE__STEINBERG_ASIO_AVAILABLE
+		add_driver(*new ASIOInterface);
+	#endif
 	#if defined PSYCLE__NET_AUDIO_AVAILABLE
 		add_driver(*new NetAudioOut);
 	#endif
+
 
 	{ char const * const env(std::getenv("PSYCLE_PATH"));
 		if(env) pluginPath_ = env;
@@ -139,7 +143,7 @@ void Configuration::loadConfig() {
 	std::string path = psycle::core::File::replaceTilde("~" + psycle::core::File::slash() + ".xpsycle.xml");
 	if(path.length()!=0) {
 		try {
-			loadConfig( psycle::core::File::replaceTilde( "~" + psycle::core::File::slash() + ".xpsycle.xml") );
+			loadConfig( path );
 		} catch( std::exception const & e ) {
 			if(loggers::exception()()) {
 				std::ostringstream s;

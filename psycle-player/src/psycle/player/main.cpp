@@ -59,7 +59,7 @@ void usage() {
 					", mmewaveout"
 				#endif
 				#if defined PSYCLE__STEINBERG_ASIO_AVAILABLE
-					", asio"
+					", asio2"
 				#endif
 			"\n\n"
 			" -odev, --output-device <name>   name of the output device the driver should use.\n"
