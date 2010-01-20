@@ -11,56 +11,32 @@
 #include "MidiMonitorDlg.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psycle {
-	namespace core {
-		class Song;
-	}
-}
 using namespace psycle::core;
 #endif
 
 namespace psycle {
 	namespace host {
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Song;
-#endif
-
 		class CWaveEdFrame;
 		class CGearRackDlg;
 
-		enum
-		{
-			AUX_MIDI = 0,
-			AUX_PARAMS,
-			AUX_WAVES
-		};
+		enum { AUX_MIDI = 0, AUX_PARAMS, AUX_WAVES };
 
 		/// main frame window.
 		class CMainFrame : public CFrameWnd
 		{
+		friend class InputHandler;
 		public:
 			CMainFrame();
-		protected: 
-			DECLARE_DYNAMIC(CMainFrame)
-		// Attributes
-		public:
-			int vuprevL;
-			int vuprevR;
+			virtual ~CMainFrame();
 
-		// Operations
-		public:
-			void SetAppSongBpm(int x);
-			void SetAppSongTpb(int x);			
-			
-		// Overrides
+			ProjectData* projects() { return &projects_; }
+
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
-			friend class InputHandler;
-		// Implementation
-		public:			
-			bool macComboInitialized;
 
+			void SetAppSongBpm(int x);
+			void SetAppSongTpb(int x);
 			void ClosePsycle();
 			void CheckForAutosave();
 			void WaveEditorBackUpdate();									
@@ -71,71 +47,39 @@ namespace psycle {
 			void ShowMidiMonitorDlg();
 			void HideInstrumentEditor();
 			void ShowInstrumentEditor();
-			void StatusBarText(std::string txt);
+			void StatusBarText(const std::string& txt);
 			void UpdateComboIns(bool updatelist=true);
 			void UpdateComboGen(bool updatelist=true);
 			void PsybarsUpdate();
 			void UpdateVumeters(float l, float r, COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip);
-			LRESULT OnSetMessageString (WPARAM wParam, LPARAM lParam);
 			BOOL StatusBarIdleText();
 			void StatusBarIdle();
 			void RedrawGearRackList();
+			void EditQuantizeChange(int diff);
+			void ShiftOctave(int x);
+			void UpdateMasterValue(int newvalue);
+			int GetNumFromCombo(CComboBox* cb);
+			void ChangeIns(int i);
+			void ChangeGen(int i);
+			afx_msg void OnFollowSong();
+			afx_msg void OnLoadwave();
+			///\ todo should be private
+			ProjectData	projects_;
+			CDialogBar m_wndControl2;
+			CChildView m_wndView;
+			SequencerView m_wndSeq;
+			CGearRackDlg*	pGearRackDialog;
+			CInstrumentEditor	m_wndInst;
+			CWaveEdFrame*	m_pWndWed;	
 
-			virtual ~CMainFrame();
 		private:
+			void SetUpStartProject();
 			void SaveRecent();
 			#if !defined NDEBUG
 				virtual void AssertValid() const;
 				virtual void Dump(CDumpContext& dc) const;
 			#endif
-		public:  // control bar embedded members
-			int GetNumFromCombo(CComboBox* cb);
-			void ChangeIns(int i);
-			void ChangeGen(int i);
-
-			ProjectData* projects() { return &projects_; }
-
-			afx_msg void OnLoadwave();
-			
-			void EditQuantizeChange(int diff);
-			void ShiftOctave(int x);
-			void UpdateMasterValue(int newvalue);
-			void SetUpStartProject();
-			
-			CStatusBar  m_wndStatusBar;
-			CReBar      m_wndReBar;
-			CToolBar    m_wndToolBar;
-			CDialogBar	m_wndControl;
-			CDialogBar	m_wndControl2;
-			std::string	szStatusIdle;
-
-			CChildView		m_wndView;
-			SequencerView	m_wndSeq;
-			CExListBox		m_seqListbox;
-			ProjectData		projects_;
-			
-			CInstrumentEditor	m_wndInst;
-			CInfoDlg		m_wndInfo;
-			CMidiMonitorDlg	m_midiMonitorDlg;	// MIDI_21st
-			CWaveEdFrame*	m_pWndWed;
-			CGearRackDlg*	pGearRackDialog;
-
-			CBitmap blessless;
-			CBitmap bless;
-			CBitmap bmore;
-			CBitmap bmoremore;
-			CBitmap bplus;
-			CBitmap bminus;
-			CBitmap bplusplus;
-			CBitmap bminusminus;
-			CBitmap blittleleft;
-			CBitmap blittleright;
-
-//			Gdiplus::GdiplusStartupInput gdiplusStartupInput; // GDI+ stuff
-//			ULONG_PTR gdiplusToken; // GDI+ stuff
-		
-
-		public:
+			LRESULT OnSetMessageString (WPARAM wParam, LPARAM lParam);
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnSetFocus(CWnd *pOldWnd);
 			afx_msg void OnBarButton1();
@@ -177,8 +121,7 @@ namespace psycle {
 			afx_msg void OnSeqduplicate();
 			afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 			afx_msg void OnDecTPB();
-			afx_msg void OnIncTPB();			
-			afx_msg void OnFollowSong();			
+			afx_msg void OnIncTPB();					
 			afx_msg void OnSeqclr();
 			afx_msg void OnSeqsort();
 			afx_msg void OnMultichannelAudition();
@@ -218,7 +161,29 @@ namespace psycle {
 			afx_msg void OnMoveCursorPaste();
 			afx_msg void OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult);
 			DECLARE_MESSAGE_MAP()
-};
 
-	}   // namespace
-}   // namespace
+			CExListBox		m_seqListbox;						
+			CInfoDlg		m_wndInfo;
+			CMidiMonitorDlg	m_midiMonitorDlg; // MIDI_21st		
+			int vuprevL;
+			int vuprevR;
+			bool macComboInitialized;
+			CStatusBar  m_wndStatusBar;
+			CReBar      m_wndReBar;
+			CToolBar    m_wndToolBar;
+			CDialogBar	m_wndControl;
+			std::string	szStatusIdle;
+			CBitmap blessless;
+			CBitmap bless;
+			CBitmap bmore;
+			CBitmap bmoremore;
+			CBitmap bplus;
+			CBitmap bminus;
+			CBitmap bplusplus;
+			CBitmap bminusminus;
+			CBitmap blittleleft;
+			CBitmap blittleright;
+		};
+
+	}   // namespace host
+}   // namespace psycle
