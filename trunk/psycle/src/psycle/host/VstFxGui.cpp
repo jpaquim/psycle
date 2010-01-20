@@ -21,8 +21,9 @@ namespace psycle {
 		}
 
 		VstFxGui::~VstFxGui() {		
-			if (dialog_);
+			if (dialog_) {
 				dialog_->DestroyWindow();
+			}
 		}
 
 		void VstFxGui::BeforeDeleteDlg() {

@@ -183,8 +183,10 @@ namespace psycle {
 				return;			
 			}	
 			progress_.ShowWindow(SW_HIDE);
-			delete song_;
+			Song* old_song = song_;
 			song_ = song;
+			mac_view()->Rebuild();
+			delete old_song;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)
@@ -202,7 +204,7 @@ namespace psycle {
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
 			pat_view()->RecalculateColourGrid();
-			mac_view()->Rebuild();
+			mac_view()->child_view()->SetTitleBarText();
 			mac_view()->UnlockVu();
 #else
 			CMainFrame* pParentMain = mac_view()->main();
