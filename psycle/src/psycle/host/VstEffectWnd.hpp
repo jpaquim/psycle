@@ -80,6 +80,8 @@ namespace psycle {
 			virtual bool CloseFileSelector (VstFileSelect *ptr);
 			virtual void* OpenSecondaryWnd(VstWindow& window);
 			virtual bool CloseSecondaryWnd(VstWindow& window);
+			void CenterWindowOnPoint(int x, int y);
+
 		protected:
 			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); }
 			virtual CBaseGui* CreateView();

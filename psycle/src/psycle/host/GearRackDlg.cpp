@@ -333,8 +333,8 @@ namespace psycle {
 					pParentMain->m_wndInst.WaveUpdate();
 				}
 
-				pParentMain->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
-				pParentMain->m_pWndWed->SetActiveWindow();
+				pParentMain->wave_ed_->ShowWindow(SW_SHOWNORMAL);
+				pParentMain->wave_ed_->SetActiveWindow();
 				break;
 			}
 			RedrawList();

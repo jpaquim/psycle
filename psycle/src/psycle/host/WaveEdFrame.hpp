@@ -14,8 +14,6 @@ namespace psycle {
 			DECLARE_DYNAMIC(CWaveEdFrame)
 		public:
 			CWaveEdFrame(class ProjectData* projects_, CMainFrame* pframe);
-			virtual ~CWaveEdFrame() throw();
-		protected: 
 			CWaveEdFrame();
 
 		public:

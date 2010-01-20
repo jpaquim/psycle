@@ -30,8 +30,6 @@ using namespace psycle::core;
 #include "WavFileDlg.hpp"
 #include "KeyConfigDlg.hpp"
 #include "GearRackDlg.hpp"
-#include "WaveEdFrame.hpp"
-
 #include "MasterDlg.hpp"
 #include "GearTracker.hpp"
 #include "XMSamplerUI.hpp"
@@ -173,7 +171,7 @@ using namespace psycle::helpers::math;
 			Global::pInputHandler->SetMainFrame(this);						
 			SetUpStartProject();
 			m_wndView.AddModules(projects_.active_project());
-			m_pWndWed = new CWaveEdFrame(&projects_,this);
+			wave_ed_ = new CWaveEdFrame(&projects_,this);
 		}
 
 		CMainFrame::~CMainFrame()
@@ -240,8 +238,8 @@ using namespace psycle::helpers::math;
 			// MIDI monitor Dialog
 			m_midiMonitorDlg.Create(IDD_MIDI_MONITOR,this);			
 			// Wave Editor Window
-			m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this);
-			m_pWndWed->GenerateView();
+			wave_ed_->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this);
+			wave_ed_->GenerateView();
 
 			// Init Bars Content.
 			m_wndToolBar.SetWindowText("Psycle tool bar");
@@ -518,7 +516,7 @@ using namespace psycle::helpers::math;
 			m_wndToolBar.DestroyWindow();
 			m_wndControl.DestroyWindow();
 			m_wndControl2.DestroyWindow();
-			// m_pWndWed->DestroyWindow(); is called by the default CFrameWnd::OnClose() function, and the memory freed (no idea how...)
+			// wave_ed_->DestroyWindow();// is called by the default CFrameWnd::OnClose() function, and the memory freed (no idea how...)
 			m_wndView.DestroyWindow();
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
@@ -1502,16 +1500,14 @@ using namespace psycle::helpers::math;
 
 		void CMainFrame::OnWavebut() 
 		{
-			m_pWndWed->ShowWindow(SW_SHOWNORMAL);
-			m_pWndWed->SetActiveWindow();
+			wave_ed_->ShowWindow(SW_SHOWNORMAL);
+			wave_ed_->SetActiveWindow();
 		}
 
 		void CMainFrame::WaveEditorBackUpdate()
 		{
-			m_pWndWed->Notify();
+			wave_ed_->Notify();
 		}
-
-
 
 		void CMainFrame::ShowInstrumentEditor()
 		{
@@ -1941,53 +1937,35 @@ using namespace psycle::helpers::math;
 
 		// void CMainFrame::LoadFonts() - removed, use Configuration::CreateFonts
 
-		void CMainFrame::OnViewSongbar() 
-		{
-			if (m_wndControl.IsWindowVisible()) {
-				ShowControlBar(&m_wndControl,FALSE,FALSE);
-			} else {
-				ShowControlBar(&m_wndControl,TRUE,FALSE);
-			}
+		void CMainFrame::OnViewSongbar() {
+			ShowControlBar(&m_wndControl,!m_wndControl.IsWindowVisible(),FALSE);
 		}
 
-		void CMainFrame::OnViewMachinebar() 
-		{
-			if (m_wndControl2.IsWindowVisible()) {
-				ShowControlBar(&m_wndControl2,FALSE,FALSE);
-			}  else { 
-				ShowControlBar(&m_wndControl2,TRUE,FALSE);
-			}
+		void CMainFrame::OnViewMachinebar() {
+			ShowControlBar(&m_wndControl2,!m_wndControl2.IsWindowVisible(),FALSE);
 		}
 
-		void CMainFrame::OnViewSequencerbar() 
-		{
-			if (m_wndSeq.IsWindowVisible())
-			{
-				ShowControlBar(&m_wndSeq,FALSE,FALSE);
-			}
-			else {	ShowControlBar(&m_wndSeq,TRUE,FALSE);	}	
+		void CMainFrame::OnViewSequencerbar()  {
+			ShowControlBar(&m_wndSeq,!m_wndSeq.IsWindowVisible(),FALSE);
 		}
 
-		void CMainFrame::OnUpdateViewSongbar(CCmdUI* pCmdUI) 
-		{
+		void CMainFrame::OnUpdateViewSongbar(CCmdUI* pCmdUI)  {
 			pCmdUI->SetCheck(m_wndControl.IsWindowVisible());			
 		}
 
-		void CMainFrame::OnUpdateViewMachinebar(CCmdUI* pCmdUI) 
-		{
+		void CMainFrame::OnUpdateViewMachinebar(CCmdUI* pCmdUI)  {
 			pCmdUI->SetCheck(m_wndControl2.IsWindowVisible());			
 		}
 
-		void CMainFrame::OnUpdateViewSequencerbar(CCmdUI* pCmdUI) 
-		{
+		void CMainFrame::OnUpdateViewSequencerbar(CCmdUI* pCmdUI)  {
 			pCmdUI->SetCheck(m_wndSeq.IsWindowVisible());			
 		}
 
-
-		void CMainFrame::RedrawGearRackList()
-		{
+		void CMainFrame::RedrawGearRackList() {
 			if (pGearRackDialog) {
 				pGearRackDialog->RedrawList();
 			}
 		}
-}}
+
+	}  // namespace host
+}  // namespace psycle

@@ -9,6 +9,7 @@
 #include "InstrumentEditor.hpp"
 #include "InfoDlg.hpp"
 #include "MidiMonitorDlg.hpp"
+#include "WaveEdFrame.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 using namespace psycle::core;
@@ -70,7 +71,7 @@ namespace psycle {
 			SequencerView m_wndSeq;
 			CGearRackDlg*	pGearRackDialog;
 			CInstrumentEditor	m_wndInst;
-			CWaveEdFrame*	m_pWndWed;	
+			CWaveEdFrame* wave_ed_;
 
 		private:
 			void SetUpStartProject();

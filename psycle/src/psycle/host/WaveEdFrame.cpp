@@ -66,9 +66,6 @@ namespace psycle {
 			  wavview(this, pframe) {
 		}
 
-		CWaveEdFrame::~CWaveEdFrame() throw() {
-		}
-
 		Song* CWaveEdFrame::song() {
 			return &projects_->active_project()->song();
 		}

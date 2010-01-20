@@ -259,7 +259,7 @@ namespace psycle {
 
 		bool EffectGui::OnEvent(PsycleCanvas::Event* ev)
 		{		
-			if ( ev->type == PsycleCanvas::Event::BUTTON_2PRESS) {
+			if (ev->type == PsycleCanvas::Event::BUTTON_2PRESS) {
 				if (InMute(ev->x, ev->y)) {					
 					return true;
 				} else if (InBypass(ev->x, ev->y)) {
@@ -267,8 +267,8 @@ namespace psycle {
 				}
 				// else, fallback to machineGui:OnEvent.
 			} else
-			if ( ev->type == PsycleCanvas::Event::BUTTON_PRESS ) {
-				if ( ev->button == 1 && ev->shift & MK_CONTROL )
+			if (ev->type == PsycleCanvas::Event::BUTTON_PRESS) {
+				if (ev->button == 1 && ev->shift & MK_CONTROL)
 					view()->SelectMachine(this);
 				//if ( !TestMute(ev->x, ev->y) )
 				if (InMute(ev->x, ev->y)) {
@@ -283,13 +283,13 @@ namespace psycle {
 				else
 					TestPan(ev->x, ev->y);
 			} else
-			if ( ev->type == PsycleCanvas::Event::MOTION_NOTIFY ) {
-				if ( pan_dragging_ ) {
+			if (ev->type == PsycleCanvas::Event::MOTION_NOTIFY) {
+				if (pan_dragging_) {
 					DoPanDragging(ev->x, ev->y);
 					return true;
 				}
 			} else
-			if ( ev->type == PsycleCanvas::Event::BUTTON_RELEASE ) {
+			if (ev->type == PsycleCanvas::Event::BUTTON_RELEASE) {
 				pan_dragging_ = false;
 			}
 			return MachineGui::OnEvent(ev);
@@ -304,7 +304,7 @@ namespace psycle {
 		{
 			CRect rc;
 			view()->parent()->GetWindowRect(rc);
-			if ( !dialog_ ) {
+			if (!dialog_) {
 				dialog_ = new CFrameMachine(this);
 				dialog_->Init(x, y);
 			}
@@ -317,7 +317,7 @@ namespace psycle {
 
 		int EffectGui::preferred_height() const
 		{
-			 return pixbuf_.height();
+			return pixbuf_.height();
 		}
 
 	}  // namespace host
