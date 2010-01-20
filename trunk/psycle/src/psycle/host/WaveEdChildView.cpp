@@ -822,7 +822,7 @@ Song* CWaveEdChildView::song() {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					{
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #else
 					song()->IsInvalided(true);
 					///\todo lock/unlock
@@ -876,7 +876,7 @@ Song* CWaveEdChildView::song() {
 					GetClientRect(&rect);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					{
-						Song::scoped_lock lock(song()->Mutex());
+						Song::scoped_lock lock(*song());
 #else					song()->IsInvalided(true);
 					///\todo lock/unlock
 					Sleep(LOCK_LATENCY);
@@ -1007,7 +1007,7 @@ Song* CWaveEdChildView::song() {
 					if(bDragLoopStart)
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song::scoped_lock lock(song()->Mutex());
+						Song::scoped_lock lock(*song());
 #endif
 						if(newpos > wdLoopE)		wdLoopS = wdLoopE;
 						else						wdLoopS = newpos;
@@ -1028,7 +1028,7 @@ Song* CWaveEdChildView::song() {
 					else if(bDragLoopEnd)
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song::scoped_lock lock(song()->Mutex());
+						Song::scoped_lock lock(*song());
 #endif
 						if(newpos >= wdLength)		wdLoopE = wdLength-1;
 						else if(newpos >= wdLoopS)	wdLoopE = newpos;
@@ -1179,7 +1179,7 @@ Song* CWaveEdChildView::song() {
 			{
 				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Song::scoped_lock lock(song()->Mutex());
+				Song::scoped_lock lock(*song());
 #endif
 				Fade(wdLeft+startPoint, length, 0, 1.0f);
 				if(wdStereo)
@@ -1202,7 +1202,7 @@ Song* CWaveEdChildView::song() {
 			{
 				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Song::scoped_lock lock(song()->Mutex());
+				Song::scoped_lock lock(*song());
 #endif
 
 				Fade(wdLeft+startPoint, length, 1.0f, 0);
@@ -1231,7 +1231,7 @@ Song* CWaveEdChildView::song() {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
-				Song::scoped_lock lock(song()->Mutex());
+				Song::scoped_lock lock(*song());
 #else
 				song()->IsInvalided(true);
 				///\todo lock/unlock
@@ -1300,7 +1300,7 @@ Song* CWaveEdChildView::song() {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #else
 				song()->IsInvalided(true);
 				///\todo lock/unlock
@@ -1378,7 +1378,7 @@ Song* CWaveEdChildView::song() {
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					{
-						Song::scoped_lock lock(song()->Mutex());
+						Song::scoped_lock lock(*song());
 #else
 					song()->IsInvalided(true);
 					///\todo lock/unlock
@@ -1412,7 +1412,7 @@ Song* CWaveEdChildView::song() {
 				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #else
 				song()->IsInvalided(true);
 				///\todo lock/unlock
@@ -1455,7 +1455,7 @@ Song* CWaveEdChildView::song() {
 				{
 					song()->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #endif
 					short *pTmp= new signed short[timeInSamps];
 					std::memset(pTmp, 0, timeInSamps*2 );
@@ -1468,7 +1468,7 @@ Song* CWaveEdChildView::song() {
 				else
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #endif
 					unsigned long insertPos;
 					switch(SilenceDlg.insertPos)
@@ -1538,7 +1538,7 @@ Song* CWaveEdChildView::song() {
 				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #else
 				song()->IsInvalided(true);
 				///\todo lock/unlock
@@ -1718,7 +1718,7 @@ Song* CWaveEdChildView::song() {
 				if (datalen)
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #endif
 					pTmp = new signed short[datalen];
 					
@@ -1910,7 +1910,7 @@ Song* CWaveEdChildView::song() {
 				{
 					song()->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #endif
 					wdLength = lDataSamps;
 					wdLeft  = song()->_pInstrument[wsInstrument]->waveDataL;
@@ -1942,7 +1942,7 @@ Song* CWaveEdChildView::song() {
 						 return;
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song::scoped_lock lock(song()->Mutex());
+						Song::scoped_lock lock(*song());
 #endif
 					//paste left channel
 					pTmp = new signed short[lDataSamps + wdLength];
@@ -2061,7 +2061,7 @@ Song* CWaveEdChildView::song() {
 					startPoint=cursorPos;
 				}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Song::scoped_lock lock(song()->Mutex());
+				Song::scoped_lock lock(*song());
 #endif
 				//do left channel
 				pTmp = new signed short[wdLength];
@@ -2144,7 +2144,7 @@ Song* CWaveEdChildView::song() {
 							((pFmt->nChannels == 2) && (wdStereo == false)) )
 							return;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(song()->Mutex());
+					Song::scoped_lock lock(*song());
 #endif
 					if(blSelection)	//overwrite selected block
 					{
@@ -2278,7 +2278,7 @@ Song* CWaveEdChildView::song() {
 							((pFmt->nChannels == 2) && (wdStereo == false)) )
 							return;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						Song::scoped_lock lock(song()->Mutex());
+						Song::scoped_lock lock(*song());
 #endif
 					if(blSelection)	//overwrite selected block
 					{
@@ -2381,7 +2381,7 @@ Song* CWaveEdChildView::song() {
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			{
-				Song::scoped_lock lock(song()->Mutex());
+				Song::scoped_lock lock(*song());
 #else			song()->IsInvalided(true);
 			///\todo lock/unlock
 			Sleep(LOCK_LATENCY);
@@ -2415,7 +2415,7 @@ Song* CWaveEdChildView::song() {
 			GetClientRect(&rect);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			{
-				Song::scoped_lock lock(song()->Mutex());
+				Song::scoped_lock lock(*song());
 #else
 			song()->IsInvalided(true);
 			///\todo lock/unlock
@@ -2449,7 +2449,7 @@ Song* CWaveEdChildView::song() {
 			if(!blSelection) return;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			{
-				Song::scoped_lock lock(song()->Mutex());
+				Song::scoped_lock lock(*song());
 #endif
 			wdLoopS = blStart;
 			wdLoopE = blStart+blLength;
