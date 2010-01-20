@@ -289,7 +289,7 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\{
 		public:
 			typedef class scoped_lock<mutex> scoped_lock;
-			mutex & Mutex() const { return mutex_; }
+			operator mutex & () const { return mutex_; }
 		private:
 			mutex mutable mutex_;
 	///\}
