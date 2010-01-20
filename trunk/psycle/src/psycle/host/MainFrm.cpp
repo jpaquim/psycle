@@ -68,8 +68,6 @@ using namespace psycle::helpers::math;
 
 		#define WM_SETMESSAGESTRING 0x0362
 
-		IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
-
 		BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 			ON_WM_CREATE()
 			ON_WM_SETFOCUS()
@@ -169,7 +167,8 @@ using namespace psycle::helpers::math;
 			  m_wndInfo(&projects_, this),
 			  vuprevR(0),
 			  vuprevL(0),
-			  pGearRackDialog(0)
+			  pGearRackDialog(0),
+			  m_wndInst(&projects_, this)
 		{
 			Global::pInputHandler->SetMainFrame(this);						
 			SetUpStartProject();
@@ -239,14 +238,7 @@ using namespace psycle::helpers::math;
 			m_wndInfo.Create(IDD_INFO,this);
 
 			// MIDI monitor Dialog
-			m_midiMonitorDlg.Create(IDD_MIDI_MONITOR,this);
-			
-			// Instrument editor
-			m_wndInst._pSong= &projects_.active_project()->song();
-			m_wndInst.pParentMain=this;
-			m_wndInst.Create(IDD_INSTRUMENT,this);
-			m_wndInst.Validate();
-
+			m_midiMonitorDlg.Create(IDD_MIDI_MONITOR,this);			
 			// Wave Editor Window
 			m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW,this);
 			m_pWndWed->GenerateView();
@@ -534,7 +526,7 @@ using namespace psycle::helpers::math;
 			CFrameWnd::OnDestroy();
 		}
 
-		void CMainFrame::StatusBarText(std::string txt)
+		void CMainFrame::StatusBarText(const std::string& txt)
 		{
 			m_wndStatusBar.SetWindowText(txt.c_str());
 		}
@@ -690,12 +682,7 @@ using namespace psycle::helpers::math;
 		void CMainFrame::UpdateMasterValue(int newvalue)
 		{
 			CSliderCtrl *cs;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( projects_.active_project()->song().machine(MASTER_INDEX))
-#else
-			if ( projects_.active_project()->song().machine(MASTER_INDEX) != NULL)
-#endif
-			{
+			if (projects_.active_project()->song().machine(MASTER_INDEX)) {
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
 				if (cs->GetPos() != newvalue) {
 					cs->SetPos(newvalue);
@@ -706,38 +693,21 @@ using namespace psycle::helpers::math;
 		void CMainFrame::OnCustomdrawMasterslider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			CSliderCtrl *cs;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( projects_.active_project()->song().machine(MASTER_INDEX))
-#else
-			if ( projects_.active_project()->song().machine(MASTER_INDEX) != NULL)
-#endif
-			{
+			if ( projects_.active_project()->song().machine(MASTER_INDEX)) {
 				cs=(CSliderCtrl*)m_wndControl.GetDlgItem(IDC_MASTERSLIDER);
 				//((Master*)projects_.active_project()->song().machine(MASTER_INDEX))->_outDry = cs->GetPos()*cs->GetPos()/1024;
 				///\todo: this causes problems sometimes when loading songs.
 				// customdraw happening before updatemastervalue, so invalid value get set.
 				// Added call to UpdateMasterValue() in PsybarsUpdate() in order to fix this.
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				psycle::core::Master* master = (psycle::core::Master*)projects_.active_project()->song().machine(MASTER_INDEX);
-				master->_outDry = cs->GetPos();
-#else
 				((Master*)projects_.active_project()->song().machine(MASTER_INDEX))->_outDry = cs->GetPos();
-#endif
 				m_wndView.SetFocus();
-			}
-			
+			}			
 			*pResult = 0;
 		}
 
 		void CMainFrame::OnClipbut() 
 		{
-			// Stefan: what is this ??
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Master* master = (Master*)projects_.active_project()->song().machine(MASTER_INDEX);
-			master->_clip = false;
-#else
 			((Master*)(projects_.active_project()->song().machine(MASTER_INDEX)))->_clip = false;
-#endif
 			m_wndView.SetFocus();
 		}
 

@@ -12,52 +12,16 @@ namespace psycle {
 		class CInstrumentEditor : public CDialog
 		{
 		public:
-			CInstrumentEditor(CWnd* pParent = 0);
-			void UpdateNoteLabel();
-			void Validate();
-			
+			CInstrumentEditor(class ProjectData* projects, CMainFrame* parent);
+
 			void WaveUpdate();
+
+		private:
+			void Init();
+			void UpdateNoteLabel();	
 			void UpdateCombo();
-			Song* _pSong;
-			bool cando;
-			bool initializingDialog;
-			CMainFrame* pParentMain;
-		// Dialog Data
-			//{{AFX_DATA(CInstrumentEditor)
-			enum { IDD = IDD_INSTRUMENT };
-			CStatic	m_notelabel;
-			CStatic	m_panlabel;
-			CStatic	m_finelabel;
-			CSliderCtrl	m_finetune;
-			CEdit	m_loopedit;
-			CButton	m_loopcheck;
-			CButton	m_rres_check;
-			CSliderCtrl	m_panslider;
-			CButton m_lockinst;
-			CButton	m_rpan_check;
-			CButton	m_rcut_check;
-			CComboBox	m_nna_combo;
-			CEdit m_lockinstnumber;
-			CEdit	m_instname;
-			CStatic	m_volabel;
-			CSliderCtrl	m_volumebar;
-			CStatic	m_wlen;
-			CStatic	m_loopstart;
-			CStatic	m_loopend;
-			CStatic	m_looptype;
-			CStatic	m_instlabel;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CInstrumentEditor)
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
-		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CInstrumentEditor)
-			virtual BOOL OnInitDialog();
+			inline Song* song();				
+			virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support			
 			afx_msg void OnLoopoff();
 			afx_msg void OnLoopforward();
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
@@ -80,11 +44,35 @@ namespace psycle {
 			afx_msg void OnInsDecnote();
 			afx_msg void OnInsIncnote();
 			afx_msg void OnInsIncoctave();
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
+
+			enum { IDD = IDD_INSTRUMENT };
+			ProjectData* projects_;
+			bool cando;
+			bool initializingDialog;
+			CMainFrame* pParentMain;
+			CStatic	m_notelabel;
+			CStatic	m_panlabel;
+			CStatic	m_finelabel;
+			CSliderCtrl	m_finetune;
+			CEdit	m_loopedit;
+			CButton	m_loopcheck;
+			CButton	m_rres_check;
+			CSliderCtrl	m_panslider;
+			CButton m_lockinst;
+			CButton	m_rpan_check;
+			CButton	m_rcut_check;
+			CComboBox	m_nna_combo;
+			CEdit m_lockinstnumber;
+			CEdit	m_instname;
+			CStatic	m_volabel;
+			CSliderCtrl	m_volumebar;
+			CStatic	m_wlen;
+			CStatic	m_loopstart;
+			CStatic	m_loopend;
+			CStatic	m_looptype;
+			CStatic	m_instlabel;
 		};
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	}   // namespace
 }   // namespace
