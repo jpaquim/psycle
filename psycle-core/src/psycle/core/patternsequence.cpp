@@ -15,19 +15,21 @@ namespace psycle { namespace core {
 		// pattern Entry contains one ptr to a Pattern and the tickPosition for the absolute Sequencer pos
 
 		SequenceEntry::SequenceEntry() 
-			: line_(0),
-			  pattern_(0),
-			  startPos_(0),
-			  endPos_(PatternEnd),
-			  transpose_(0)
+		:
+			line_(0),
+			pattern_(0),
+			startPos_(0),
+			endPos_(PatternEnd),
+			transpose_(0)
 		{}
 
 		SequenceEntry::SequenceEntry(SequenceLine* line)
-			: line_(line),
-			  pattern_(0),
-			  startPos_(0),
-			  endPos_(PatternEnd),
-			  transpose_(0)
+		:
+			line_(line),
+			pattern_(0),
+			startPos_(0),
+			endPos_(PatternEnd),
+			transpose_(0)
 		{}
 
 		SequenceEntry::~SequenceEntry() {
@@ -37,16 +39,16 @@ namespace psycle { namespace core {
 		void SequenceEntry::setPattern(Pattern* pattern) {
 			pattern_ = pattern;
 			startPos_ = 0;
-			endPos_   = pattern->beats();
+			endPos_ = pattern->beats();
 		}
 
 		double SequenceEntry::tickPosition() const {
 			SequenceLine::iterator iter = line_->begin();
 			for(; iter!= line_->end(); ++iter) {
-				if(iter->second==this)
+				if(iter->second == this)
 				break;
 			}
-			if(iter!=line_->end()) {
+			if(iter != line_->end()) {
 				return iter->first;
 			}
 			return 0;

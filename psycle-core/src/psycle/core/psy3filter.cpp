@@ -104,7 +104,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	unsigned int filesize = file.FileSize();
 
 	while(file.ReadArray(header, 4) && chunkcount) {
-        int progress_number =  static_cast<int>(file.GetPos() * 16384.0f / filesize);                                  
+		int progress_number =  static_cast<int>(file.GetPos() * 16384.0f / filesize);
 		song.progress(4, progress_number, "");
 
 		if(!std::strcmp(header,"INFO")) {
