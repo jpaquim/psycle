@@ -136,19 +136,16 @@ void Player::start(double pos) {
 }
 
 void Player::skip(double beats) {
-	if (!playing_) return;
-
-	scoped_lock lock(song());
-	skipTo(timeInfo_.playBeatPos()+beats);
+	skipTo(timeInfo_.playBeatPos() + beats);
 }
 void Player::skipTo(double beatpos) {
 	if (!playing_) return;
 
-	scoped_lock lock(song());
 	timeInfo_.setPlayBeatPos(beatpos);
+
+	scoped_lock lock(song());
 	Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
 	master.sampleCount = 60 * beatpos / bpm();
-
 }
 
 void Player::suspend_and_compute_plan() {
