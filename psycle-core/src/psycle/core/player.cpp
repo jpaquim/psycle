@@ -117,18 +117,19 @@ void Player::start(double pos) {
 		return;
 	}
 
-	scoped_lock lock(song().Mutex());
-	if(autoRecord_) startRecording();
+	{
+		scoped_lock lock(song().Mutex());
+		if(autoRecord_) startRecording();
 
-	Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
-	master._clip = false;
-	master.sampleCount = 0;
-	
-	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
-	playing_ = true;
-	timeInfo_.setPlayBeatPos(pos);
-	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
+		Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
+		master._clip = false;
+		master.sampleCount = 0;
 
+		for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
+		playing_ = true;
+		timeInfo_.setPlayBeatPos(pos);
+		timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
+	}
 	driver_->set_started(true);
 }
 
