@@ -246,7 +246,7 @@ class AudioDriver {
 	///\}
 
 	public:
-		/// ask the driver to config itself (e.g with a gui, config read)		
+		/// ask the driver to config itself (e.g with a gui, config read)
 		virtual void Configure() {}
 
 	///\name open/close the device (allocate/deallocate resources)

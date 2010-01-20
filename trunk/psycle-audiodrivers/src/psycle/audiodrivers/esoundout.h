@@ -41,7 +41,7 @@ class ESoundOut : public AudioDriver {
 		int fd_;
 		pthread_t threadId_;
 		bool threadRunning_;
-		bool killThread_;	
+		bool killThread_;
 		long deviceBuffer_;
 };
 
