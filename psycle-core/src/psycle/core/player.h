@@ -113,9 +113,11 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			/// starts the recording output device.
-			void startRecording(bool dodither=false , 
-				dsp::Dither::Pdf::type ditherpdf=dsp::Dither::Pdf::triangular,
-				dsp::Dither::NoiseShape::type noiseshaping=dsp::Dither::NoiseShape::none);
+			void startRecording(
+				bool do_dither = false,
+				dsp::Dither::Pdf::type ditherpdf = dsp::Dither::Pdf::triangular,
+				dsp::Dither::NoiseShape::type noiseshaping = dsp::Dither::NoiseShape::none
+			);
 			/// stops the recording output device.
 			void stopRecording( );
 			/// wether the recording device has been started.
@@ -132,7 +134,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			/// wave render filename
 			std::string fileName_;
 			/// file to which to output signal.
-			WaveFile _outputWaveFile;
+			WaveFile outputWaveFile_;
 			void writeSamplesToFile(int amount);
 	///\}
 
@@ -224,7 +226,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		float * buffer_;
 
 		/// dither handler
-		dsp::Dither dither;
+		dsp::Dither dither_;
 
 	///\name multithreaded scheduler
 	///\{

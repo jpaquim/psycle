@@ -501,42 +501,42 @@ void Player::writeSamplesToFile(int amount) {
 	float * pL(song().machine(MASTER_INDEX)->_pSamplesL);
 	float * pR(song().machine(MASTER_INDEX)->_pSamplesR);
 	if(recording_with_dither_) {
-		dither.Process(pL, amount);
-		dither.Process(pR, amount);
+		dither_.Process(pL, amount);
+		dither_.Process(pR, amount);
 	}
 	switch(driver_->playbackSettings().channelMode()) {
 		case 0: // mono mix
 			for(int i(0); i < amount; ++i)
 				//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-				if(_outputWaveFile.WriteMonoSample((*pL++ + *pR++) / 2) != DDC_SUCCESS) stopRecording();
+				if(outputWaveFile_.WriteMonoSample((*pL++ + *pR++) / 2) != DDC_SUCCESS) stopRecording();
 			break;
 		case 1: // mono L
 			for(int i(0); i < amount; ++i)
-				if(_outputWaveFile.WriteMonoSample(*pL++) != DDC_SUCCESS) stopRecording();
+				if(outputWaveFile_.WriteMonoSample(*pL++) != DDC_SUCCESS) stopRecording();
 			break;
 		case 2: // mono R
 			for(int i(0); i < amount; ++i)
-				if(_outputWaveFile.WriteMonoSample(*pR++) != DDC_SUCCESS) stopRecording();
+				if(outputWaveFile_.WriteMonoSample(*pR++) != DDC_SUCCESS) stopRecording();
 			break;
 		default: // stereo
 			for(int i(0); i < amount; ++i)
-				if(_outputWaveFile.WriteStereoSample(*pL++, *pR++) != DDC_SUCCESS) stopRecording();
+				if(outputWaveFile_.WriteStereoSample(*pL++, *pR++) != DDC_SUCCESS) stopRecording();
 			break;
 	}
 }
 
-void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, dsp::Dither::NoiseShape::type noiseshaping) {
+void Player::startRecording(bool do_dither, dsp::Dither::Pdf::type ditherpdf, dsp::Dither::NoiseShape::type noiseshaping) {
 	if(recording_) return;
 	if(!song_ || !driver_) return;
 
 	scoped_lock lock(song());
 	int channels(driver_->playbackSettings().numChannels());
-	recording_ =( DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->playbackSettings().samplesPerSec(), driver_->playbackSettings().bitDepth(), channels));
-	recording_with_dither_ = dodither;
-	if (dodither) {
-		dither.SetBitDepth(driver_->playbackSettings().bitDepth());
-		dither.SetPdf(ditherpdf);
-		dither.SetNoiseShaping(noiseshaping);
+	recording_ = DDC_SUCCESS == outputWaveFile_.OpenForWrite(fileName().c_str(), driver_->playbackSettings().samplesPerSec(), driver_->playbackSettings().bitDepth(), channels);
+	recording_with_dither_ = do_dither;
+	if(do_dither) {
+		dither_.SetBitDepth(driver_->playbackSettings().bitDepth());
+		dither_.SetPdf(ditherpdf);
+		dither_.SetNoiseShaping(noiseshaping);
 	}
 }
 
@@ -544,7 +544,7 @@ void Player::stopRecording() {
 	if(!recording_) return;
 
 	scoped_lock lock(song());
-	_outputWaveFile.Close();
+	outputWaveFile_.Close();
 	recording_ = false;
 }
 
