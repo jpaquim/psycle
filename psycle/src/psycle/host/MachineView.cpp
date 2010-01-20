@@ -104,18 +104,13 @@ namespace psycle {
 
 		void MachineView::DoMacPropDialog(Machine* mac, bool from_event) {
 			std::map<Machine*, MachineGui*>::iterator it;
-			int propMac = mac->id();
 			it = gui_map_.find(mac);
 			assert(it != gui_map_.end());
 			MachineGui* gui = it->second;
-
 			CMacProp dlg(gui);			
-			dlg.pMachine = mac;
-			dlg.pSong = song();
-			dlg.thisMac = propMac;
 			if(dlg.DoModal() == IDOK)
 			{
-				dlg.pMachine->SetEditName(dlg.txt);
+				gui->mac()->SetEditName(dlg.txt);
 				main()->StatusBarText(dlg.txt);
 				main()->UpdateEnvInfo();
 				main()->UpdateComboGen();
@@ -126,7 +121,7 @@ namespace psycle {
 				gui->UpdateText();
 			}
 			if (dlg.deleted) {
-				if ( from_event) {
+				if (from_event) {
 					SetDeleteMachineGui(gui, true);				
 				} else {
 					int mac_prop = gui->mac()->id();

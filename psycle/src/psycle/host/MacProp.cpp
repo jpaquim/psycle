@@ -24,9 +24,7 @@ namespace psycle {
 
 		CMacProp::CMacProp(MachineGui* gui)
 			: CDialog(CMacProp::IDD, 0),
-			  gui_(gui)
-		{
-			m_view=NULL;
+			  gui_(gui) {
 		}
 
 		void CMacProp::DoDataExchange(CDataExchange* pDX)
@@ -57,18 +55,14 @@ namespace psycle {
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
-			sprintf(buffer,"%.2X : %s Properties",Global::song().FindBusFromIndex(thisMac),pMachine->GetEditName().c_str());
-			m_macname.SetWindowText(pMachine->GetEditName().c_str());
-
+			sprintf(buffer,"%.2X : %s Properties",Global::song().FindBusFromIndex(gui_->mac()->id()), gui_->mac()->GetEditName().c_str());
+			m_macname.SetWindowText(gui_->mac()->GetEditName().c_str());
 			SetWindowText(buffer);
+			m_muteCheck.SetCheck(gui_->mac()->_mute);			
+			m_soloCheck.SetCheck(gui_->view()->song()->machineSoloed == gui_->mac()->id());
+			m_bypassCheck.SetCheck(gui_->mac()->Bypass());
 
-
-
-			m_muteCheck.SetCheck(pMachine->_mute);
-			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
-			m_bypassCheck.SetCheck(pMachine->Bypass());
-
-			if (pMachine->IsGenerator() )
+			if (gui_->mac()->IsGenerator() )
 			{
 				m_bypassCheck.ShowWindow(SW_HIDE);
 			}
@@ -91,11 +85,6 @@ namespace psycle {
 			// Delete MACHINE!
 			if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 			{
-				if ( m_view != NULL )
-				{
-					m_view->AddMacViewUndo();
-				}
-
 				deleted = true;
 				OnCancel();
 			}
@@ -103,37 +92,30 @@ namespace psycle {
 
 		void CMacProp::OnMute() 
 		{
-			pMachine->_mute = (m_muteCheck.GetCheck() == 1);
-			pMachine->_volumeCounter=0.0f;
-			pMachine->_volumeDisplay = 0;
-			if ( m_view != NULL )
-			{
-				m_view->AddMacViewUndo();
-				m_view->updatePar=thisMac;				
-			}
-			gui_->SetMute(pMachine->_mute);
+			gui_->mac()->_mute = (m_muteCheck.GetCheck() == 1);
+			gui_->mac()->_volumeCounter=0.0f;
+			gui_->mac()->_volumeDisplay = 0;
+			gui_->view()->child_view()->updatePar=gui_->mac()->id();
+			gui_->SetMute(gui_->mac()->_mute);
 			gui_->QueueDraw();
 		}
+
 		void CMacProp::OnBypass() 
 		{
-			pMachine->Bypass(m_bypassCheck.GetCheck() == 1);
-			if ( m_view != NULL )
-			{
-				m_view->AddMacViewUndo();
-				m_view->updatePar=thisMac;				
-				gui_->QueueDraw();
-			}
+			gui_->mac()->Bypass(m_bypassCheck.GetCheck() == 1);
+			gui_->view()->child_view()->updatePar=gui_->mac()->id();				
+			gui_->QueueDraw();
 		}
 
 		void CMacProp::OnSolo() 
 		{
-			gui_->view()->SetSolo(pMachine);
+			gui_->view()->SetSolo(gui_->mac());
 			gui_->QueueDraw();
 		}
 
 		void CMacProp::OnClone() 
 		{
-			int src = pMachine->id();
+			int src = gui_->mac()->id();
 			int dst = -1;
 
 			if ((src < MAX_BUSES) && (src >=0))
@@ -147,7 +129,7 @@ namespace psycle {
 			if (dst >= 0)
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Machine * newMac = MachineFactory::getInstance().CloneMachine(*pMachine);
+				Machine * newMac = MachineFactory::getInstance().CloneMachine(*gui_->mac());
 				if(!newMac)
 				{
 					MessageBox("Cloning failed","Cloning failed");
@@ -166,17 +148,15 @@ namespace psycle {
 				}
 #endif
 
-				if ( m_view != NULL )
+				((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
+				if (gui_->view()->child_view()->viewMode==view_modes::machine)
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
-					if (m_view->viewMode==view_modes::machine)
-					{
-						m_view->Invalidate();
-					}
+					gui_->view()->child_view()->Invalidate();
 				}
 			}
 			OnCancel();
 		}
+
 		void CMacProp::OnBnClickedReplacemac()
 		{
 			replaced = true;
