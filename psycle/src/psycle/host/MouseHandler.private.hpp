@@ -11,7 +11,7 @@ namespace psycle {
   			if(viewMode == view_modes::machine) // User is in machine view mode
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE	
-				Song::scoped_lock lock(projects_->active_project()->song().Mutex());
+				Song::scoped_lock lock(projects_->active_project()->song());
 #else
 				// if (projects_->active_project()->song()._machineLock) return;
 #endif
@@ -58,7 +58,7 @@ namespace psycle {
 			SetCapture();
 			if( viewMode == view_modes::machine) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(projects_->active_project()->song().Mutex());
+					Song::scoped_lock lock(projects_->active_project()->song());
 #else
 					// if (projects_->active_project()->song()._machineLock) return;
 #endif

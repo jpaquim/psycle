@@ -69,7 +69,7 @@ namespace psycle {
 		void CInfoDlg::OnTimer(UINT nIDEvent) {
 			if(nIDEvent==1) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Song::scoped_lock lock(projects_->active_project()->song().Mutex());
+				Song::scoped_lock lock(projects_->active_project()->song());
 #endif
 				char buffer[128];
 				
