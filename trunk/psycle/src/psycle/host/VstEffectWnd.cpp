@@ -22,6 +22,11 @@ using namespace psycle::core;
 #include "ChildView.hpp"
 
 #include <psycle/helpers/math.hpp>
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 
 using namespace psycle::helpers::math;
 
@@ -185,19 +190,7 @@ namespace psycle {
 		}
 		void CVstEffectWnd::OnClose()
 		{
-//			machine().EnterCritical();             /* make sure we're not processing    */
-			machine().EditClose();              /* tell effect edit window's closed  */
-//			machine().LeaveCritical();             /* re-enable processing              */
-			pView->DestroyWindow();
-			if (pParamGui) pParamGui->DestroyWindow();
-			std::list<HWND>::iterator it = secwinlist.begin();
-			while ( it != secwinlist.end() )
-			{
-				::SendMessage(*it, WM_CLOSE, 0, 0);
-				++it;
-			}
-			if (gui_)
-				gui_->BeforeDeleteDlg();
+			//It is enough to do it in OnDestroy
 			CFrameWnd::OnClose();
 		}
 
