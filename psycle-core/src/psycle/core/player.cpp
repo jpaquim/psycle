@@ -118,7 +118,7 @@ void Player::start(double pos) {
 	}
 
 	{
-		scoped_lock lock(song().Mutex());
+		scoped_lock lock(song());
 		if(autoRecord_) startRecording();
 
 		Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
@@ -134,7 +134,7 @@ void Player::start(double pos) {
 }
 
 void Player::skip(double beats) {
-	scoped_lock lock(song().Mutex());
+	scoped_lock lock(song());
 	if (!playing_) 
 		return;
 
@@ -142,7 +142,7 @@ void Player::skip(double beats) {
 	
 }
 void Player::skipTo(double beatpos) {
-	scoped_lock lock(song().Mutex());
+	scoped_lock lock(song());
 	if (!playing_) 
 		return;
 
@@ -380,7 +380,7 @@ void Player::stop() {
 	if(loggers::information()) loggers::information()("psycle: core: player: stopping");
 	if(!song_ || !driver_) return;
 	
-	scoped_lock lock(song().Mutex());
+	scoped_lock lock(song());
 	playing_ = false;
 	for(int i(0); i < MAX_MACHINES; ++i) if(song().machine(i)) {
 		song().machine(i)->Stop();
@@ -582,7 +582,7 @@ float * Player::Work(int numSamples) {
 
 	if(!song_) return buffer_;
 
-	scoped_lock lock(song().Mutex());
+	scoped_lock lock(song());
 	if (!song().IsReady()) {
 		dsp::Clear(buffer_, numSamples);
 		return buffer_;
@@ -608,7 +608,7 @@ float * Player::Work(int numSamples) {
 			) setPlayPos(timeInfo_.cycleStartPos());
 		}
 		sequencer_.set_player(*this); // for a callback to process()
-		sequencer_.set_time_info(&timeInfo_);
+		sequencer_.set_time_info(timeInfo_);
 		sequencer_.Work(numSamples);
 	}
 	return buffer_;
@@ -682,7 +682,7 @@ void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, ds
 {
 	if(!song_ && !driver_) return;
 	
-	scoped_lock lock(song().Mutex());
+	scoped_lock lock(song());
 	if(recording_) return;
 	int channels(driver_->playbackSettings().numChannels());
 	recording_ =( DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->playbackSettings().samplesPerSec(), driver_->playbackSettings().bitDepth(), channels));
@@ -696,7 +696,7 @@ void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, ds
 
 void Player::stopRecording() {
 
-	scoped_lock lock(song().Mutex());
+	scoped_lock lock(song());
 	if(!recording_) return;
 	_outputWaveFile.Close();
 	recording_ = false;

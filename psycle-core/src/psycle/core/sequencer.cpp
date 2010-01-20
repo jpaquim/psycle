@@ -13,21 +13,7 @@
 
 namespace psycle { namespace core {
 
-Sequencer::Sequencer()
-{
-}
-
-Sequencer::~Sequencer()
-{
-}
-
-void Sequencer::set_player(Player& player)
-{
-	player_ = &player;
-}
-
-void Sequencer::Work(unsigned int nframes)
-{
+void Sequencer::Work(unsigned int nframes) {
 	///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
 	///\todo this will not work frame correct for BPM changes for now
 	double beats = nframes / ((time_info()->sampleRate() * 60) / time_info()->bpm());

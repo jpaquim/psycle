@@ -11,18 +11,17 @@ namespace psycle { namespace core {
 
 class Sequencer {
 	public:
-		Sequencer();
-		~Sequencer();
+		Sequencer() : time_info_(), song_(), player_() {}
 			
 		CoreSong* song() { return song_; }
-		void set_song(class CoreSong* song) { song_ = song; }
+		void set_song(class CoreSong & song) { song_ = &song; }
 
-		void set_player(class Player& player);
+		void set_player(class Player & player) { player_ = &player; }
 
 		void Work(unsigned int nframes);
 
 		PlayerTimeInfo* time_info() { return time_info_; }
-		void set_time_info(class PlayerTimeInfo* info) { time_info_ = info; }
+		void set_time_info(class PlayerTimeInfo & info) { time_info_ = &info; }
 
 	private:
 		void process_global_event(const PatternEvent& event);
