@@ -2,23 +2,14 @@
 ///\brief interface file for psycle::host::CMacProp.
 #pragma once
 #include "Psycle.hpp"
+
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-namespace psycle {
-	namespace core {
-		class Machine;
-		class Song;
-	}
-}
 using namespace psycle::core;
 #endif
 
 namespace psycle {
 	namespace host {
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Machine;
-		class Song;
-#endif
 		class CChildView;
 		class MachineGui;
 
@@ -26,36 +17,15 @@ namespace psycle {
 		class CMacProp : public CDialog
 		{
 		public:
-			CChildView *m_view;
 			CMacProp(class MachineGui* gui);
-		private:
-			MachineGui* gui_;
-		public:
-			Machine *pMachine;
-			Song* pSong;
 
-			int thisMac;
+			///\ todo should be private
 			char txt[32];
 			bool deleted;
 			bool replaced;
-		// Dialog Data
-			//{{AFX_DATA(CMacProp)
-			enum { IDD = IDD_MACPROP };
-			CButton	m_soloCheck;
-			CButton	m_bypassCheck;
-			CButton	m_muteCheck;
-			CEdit	m_macname;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CMacProp)
-			protected:
+
+		private:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
-		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CMacProp)
 			virtual BOOL OnInitDialog();
 			afx_msg void OnChangeEdit1();
 			afx_msg void OnButton1();
@@ -63,14 +33,16 @@ namespace psycle {
 			afx_msg void OnBypass();
 			afx_msg void OnSolo();
 			afx_msg void OnClone();
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
-		public:
 			afx_msg void OnBnClickedReplacemac();
+
+			MachineGui* gui_;			
+			enum { IDD = IDD_MACPROP };
+			CButton	m_soloCheck;
+			CButton	m_bypassCheck;
+			CButton	m_muteCheck;
+			CEdit	m_macname;
 		};
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-	}   // namespace
-}   // namespace
+	}   // namespace host
+}   // namespace psycle

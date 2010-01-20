@@ -13,7 +13,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE	
 				Song::scoped_lock lock(projects_->active_project()->song().Mutex());
 #else
-				if (projects_->active_project()->song()._machineLock) return;
+				// if (projects_->active_project()->song()._machineLock) return;
 #endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
@@ -60,7 +60,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					Song::scoped_lock lock(projects_->active_project()->song().Mutex());
 #else
-					if (projects_->active_project()->song()._machineLock) return;
+					// if (projects_->active_project()->song()._machineLock) return;
 #endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;

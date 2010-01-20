@@ -363,11 +363,12 @@ namespace psycle { namespace host {
 				reg.QueryValue("OutputDriver", _outputDriverIndex);
 				if(0 > _outputDriverIndex || _outputDriverIndex >= _numOutputDrivers) _outputDriverIndex = 1;
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				for (int i(0);i<_numOutputDrivers;++i)
 				{
 					_ppOutputDrivers[i]->ReadConfig();
 				}
-
+#endif
 			}
 			// midi
 			{
@@ -459,10 +460,12 @@ namespace psycle { namespace host {
 			reg.SetValue("NavigationIgnoresStep", _NavigationIgnoresStep);
 			reg.SetValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
 			reg.SetValue("OutputDriver", _outputDriverIndex);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			for (int i(0);i<_numOutputDrivers;++i)
 			{
 				_ppOutputDrivers[i]->WriteConfig();
 			}
+#endif
 			reg.SetValue("MidiInputDriver", _midiDriverIndex);
 			reg.SetValue("MidiSyncDriver", _syncDriverIndex);
 			reg.SetValue("MidiInputHeadroom", _midiHeadroom);
