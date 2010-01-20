@@ -16,11 +16,9 @@ class PsyFilterBase;
 class CoreSong;
 class MachineFactory;
 
-class PSYCLE__CORE__DECL SongSerializer
-{
+class PSYCLE__CORE__DECL SongSerializer {
 	public:
 		SongSerializer();
-		~SongSerializer();
 
 		bool loadSong(const std::string & fileName, CoreSong& song);
 		bool saveSong(const std::string & fileName, const CoreSong& song, int version);

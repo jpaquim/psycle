@@ -11,48 +11,43 @@
 #include "psy4filter.h"
 #include <iostream>
 
-namespace psycle { 
-	namespace core {
+namespace psycle {  namespace core {
 
-		SongSerializer::SongSerializer() {
-			filters.push_back(Psy2Filter::getInstance());
-			filters.push_back(Psy3Filter::getInstance());
-			///\todo Psy4Filter doesn't build currently
-			//filters.push_back( Psy4Filter::getInstance() );
-		}
+SongSerializer::SongSerializer() {
+	filters.push_back(Psy2Filter::getInstance());
+	filters.push_back(Psy3Filter::getInstance());
+	///\todo Psy4Filter doesn't build currently
+	//filters.push_back( Psy4Filter::getInstance() );
+}
 
-		SongSerializer::~SongSerializer() {
-		}
-		
-		bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song) {
-			if (File::fileIsReadable( fileName ) ) {				
-				for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
-					PsyFilterBase* filter = *it;
-					if ( filter->testFormat(fileName) ) {
-						return filter->load(fileName,song);
-					}
-				}
+bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song) {
+	if (File::fileIsReadable( fileName ) ) {
+		for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+			PsyFilterBase* filter = *it;
+			if ( filter->testFormat(fileName) ) {
+				return filter->load(fileName,song);
 			}
-			std::cerr << "SongSerializer::loadSong(): Couldn't find appropriate filter for file: " << fileName << std::endl;
-			return false;
 		}
+	}
+	std::cerr << "SongSerializer::loadSong(): Couldn't find appropriate filter for file: " << fileName << std::endl;
+	return false;
+}
 
-		bool SongSerializer::saveSong(const std::string& fileName, const CoreSong& song, int version) {
-			for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); it++) {
-				PsyFilterBase* filter = *it;
-				if ( filter->version() == version ) {
-					// check postfix
-					std::string newFileName = fileName;
-					std::string::size_type dotPos = fileName.rfind(".");
-					if ( dotPos == std::string::npos ) 
-						// append postfix
-						newFileName = fileName + "." + filter->filePostfix();
-					return filter->save(newFileName,song);
-				}
-			}
-			std::cerr << "SongSerializer::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
-			return false;
+bool SongSerializer::saveSong(const std::string& fileName, const CoreSong& song, int version) {
+	for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); it++) {
+		PsyFilterBase* filter = *it;
+		if ( filter->version() == version ) {
+			// check postfix
+			std::string newFileName = fileName;
+			std::string::size_type dotPos = fileName.rfind(".");
+			if ( dotPos == std::string::npos ) 
+				// append postfix
+				newFileName = fileName + "." + filter->filePostfix();
+			return filter->save(newFileName,song);
 		}
+	}
+	std::cerr << "SongSerializer::saveSong(): Couldn't find appropriate filter for file format version " << version << std::endl;
+	return false;
+}
 
-	}	// namespace core
-}	// namespace psycle
+}}
