@@ -108,6 +108,7 @@ void Player::start(double pos) {
 	stop(); // This causes all machines to reset, and samplesperRow to init.
 
 	if(loggers::information()) loggers::information()("psycle: core: player: starting");
+
 	if(!song_) {
 		if(loggers::warning()) loggers::warning()("psycle: core: player: no song to play");
 		return;
@@ -130,22 +131,20 @@ void Player::start(double pos) {
 		timeInfo_.setPlayBeatPos(pos);
 		timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
 	}
+
 	driver_->set_started(true);
 }
 
 void Player::skip(double beats) {
-	scoped_lock lock(song());
-	if (!playing_) 
-		return;
+	if (!playing_) return;
 
+	scoped_lock lock(song());
 	skipTo(timeInfo_.playBeatPos()+beats);
-	
 }
 void Player::skipTo(double beatpos) {
-	scoped_lock lock(song());
-	if (!playing_) 
-		return;
+	if (!playing_) return;
 
+	scoped_lock lock(song());
 	timeInfo_.setPlayBeatPos(beatpos);
 	Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
 	master.sampleCount = 60 * beatpos / bpm();
@@ -377,8 +376,9 @@ void Player::process(Player::node & node) throw(std::exception) {
 }
 
 void Player::stop() {
-	if(loggers::information()) loggers::information()("psycle: core: player: stopping");
 	if(!song_ || !driver_) return;
+
+	if(loggers::information()) loggers::information()("psycle: core: player: stopping");
 	
 	scoped_lock lock(song());
 	playing_ = false;
@@ -500,6 +500,7 @@ void Player::setDriver(AudioDriver & driver) {
 
 void Player::writeSamplesToFile(int amount) {
 	if(!song_ || !driver_) return;
+
 	float * pL(song().machine(MASTER_INDEX)->_pSamplesL);
 	float * pR(song().machine(MASTER_INDEX)->_pSamplesR);
 	if(recording_with_dither_) {
@@ -527,12 +528,11 @@ void Player::writeSamplesToFile(int amount) {
 	}
 }
 
-void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, dsp::Dither::NoiseShape::type noiseshaping)
-{
-	if(!song_ && !driver_) return;
-	
-	scoped_lock lock(song());
+void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, dsp::Dither::NoiseShape::type noiseshaping) {
 	if(recording_) return;
+	if(!song_ || !driver_) return;
+
+	scoped_lock lock(song());
 	int channels(driver_->playbackSettings().numChannels());
 	recording_ =( DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->playbackSettings().samplesPerSec(), driver_->playbackSettings().bitDepth(), channels));
 	recording_with_dither_ = dodither;
@@ -544,9 +544,9 @@ void Player::startRecording(bool dodither , dsp::Dither::Pdf::type ditherpdf, ds
 }
 
 void Player::stopRecording() {
+	if(!recording_) return;
 
 	scoped_lock lock(song());
-	if(!recording_) return;
 	_outputWaveFile.Close();
 	recording_ = false;
 }
