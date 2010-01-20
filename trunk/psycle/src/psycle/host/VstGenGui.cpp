@@ -19,25 +19,21 @@ namespace psycle {
 		VstGenGui::VstGenGui(MachineView* view,
 							 Machine* mac)
 			: GeneratorGui(view, mac),
-			  dialog_(0)
-		{
+			  dialog_(0) {
 		}
 
-		VstGenGui::~VstGenGui()
-		{
+		VstGenGui::~VstGenGui() {
 			if (dialog_) {
 				dialog_->DestroyWindow();
 			}
 		}
 
-		void VstGenGui::BeforeDeleteDlg()
-		{
+		void VstGenGui::BeforeDeleteDlg() {
 			dialog_ = 0;
 		}
 
-		void VstGenGui::ShowDialog(double x, double y)
-		{
-			if ( !dialog_ ) {
+		void VstGenGui::ShowDialog(double x, double y) {
+			if (!dialog_) {
 				dialog_ = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(mac()), this);
 				// newwin->_pActive = &isguiopen[tmac];
 				dialog_->LoadFrame(IDR_VSTFRAME, 
@@ -53,7 +49,7 @@ namespace psycle {
 //							newwin->ResizeWindow(0);*/
 				dialog_->ShowWindow(SW_SHOWNORMAL);
 				dialog_->PostOpenWnd();
-//				CenterWindowOnPoint(m_pWndMac[tmac], point);
+				dialog_->CenterWindowOnPoint(x, y);
 			}
 		}
 

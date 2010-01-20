@@ -71,7 +71,7 @@ namespace psycle {
 
 		void MasterGui::ShowDialog(double x, double y)
 		{
-			if ( !dialog_ ) {
+			if (!dialog_) {
 				dialog_ = new CMasterDlg(view()->child_view());
 				dialog_->_pMachine = (Master*)mac();
 
@@ -87,12 +87,12 @@ namespace psycle {
 				}
 				dialog_->Create();
 //				CPoint point(-1,-1);
-				dialog_->CenterWindowOnPoint( x,  y);
+				dialog_->CenterWindowOnPoint(x, y);
 
 				dialog_->ShowWindow(SW_SHOW);
 			} else {
 				dialog_->ShowWindow(SW_SHOW);
-				dialog_->CenterWindowOnPoint( x, y);
+				dialog_->CenterWindowOnPoint(x, y);
 			}
 		}
 		void MasterGui::UpdateVU(CDC* devc)

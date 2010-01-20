@@ -16,8 +16,8 @@ namespace psycle {
 
 		protected:
 			virtual void ShowDialog(double x, double y);
-		private:
 
+		private:
 			class CVstEffectWnd* dialog_;
 		};
 	}

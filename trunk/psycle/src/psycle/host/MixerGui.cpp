@@ -34,7 +34,7 @@ namespace psycle {
 
 		void MixerGui::ShowDialog(double x, double y)
 		{
-			if ( !dialog_ ) {
+			if (!dialog_) {
 				CRect rc;
 				view()->parent()->GetWindowRect(rc);
 				dialog_ = new CFrameMixerMachine(this);
@@ -44,7 +44,7 @@ namespace psycle {
 								view()->child_view());
 				dialog_->SelectMachine(mac());
 				dialog_->Generate(x, y);			
-				dialog_->centerWindowOnPoint( x, y);
+				dialog_->centerWindowOnPoint(x, y);
 			}
 		}
 

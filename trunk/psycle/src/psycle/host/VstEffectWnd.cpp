@@ -752,27 +752,9 @@ namespace psycle {
 		{
 			pCmdUI->SetText("Activated");
 			if (machine().IsSynth())
-			{
-				if (machine()._mute)
-				{
-					pCmdUI->SetCheck(false);
-				}
-				else 
-				{
-					pCmdUI->SetCheck(true);
-				}
-			}
+				pCmdUI->SetCheck(!machine()._mute);
 			else
-			{
-				if (machine()._mute || machine().Bypass())
-				{
-					pCmdUI->SetCheck(false);
-				}
-				else
-				{
-					pCmdUI->SetCheck(true);
-				}
-			}
+				pCmdUI->SetCheck(!(machine()._mute || machine().Bypass()));
 		}
 
 		void CVstEffectWnd::OnProgramsOpenpreset()
@@ -918,13 +900,8 @@ namespace psycle {
 
 		void CVstEffectWnd::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
 		{
-			if ( pParamGui )
-			{
-				if (pParamGui->IsWindowVisible())
-					pCmdUI->SetCheck(true);
-				else
-					pCmdUI->SetCheck(false);
-			}
+			if (pParamGui)
+				pCmdUI->SetCheck(pParamGui->IsWindowVisible());
 			else
 				pCmdUI->SetCheck(false);
 		}
@@ -970,6 +947,22 @@ namespace psycle {
 			std::string message;
 			(message = "Vst Plugin by " )+ machine().GetVendorName();
 			MessageBox(message.c_str(),"About");
+		}
+
+		void CVstEffectWnd::CenterWindowOnPoint(int x, int y) {
+			CRect r;
+			GetWindowRect(&r);
+
+			x -= ((r.right-r.left)/2);
+			y -= ((r.bottom-r.top)/2);
+
+			if (x < 0) {
+				x = 0;
+			}
+			if (y < 0) {
+				y = 0;
+			}
+			SetWindowPos(0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 		}
 
 	}   // namespace

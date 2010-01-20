@@ -124,6 +124,9 @@ namespace psycle {
 			} else
 			if (ev->type == PsycleCanvas::Event::MOTION_NOTIFY) {
 				if (dragging_) {
+					if (ev->button != 1) {
+						StopDragging();
+					} else
 					DoDragging(ev->x, ev->y);
 				} else
 				if (ev->button == 3 || (ev->button == 1 && (ev->shift & MK_SHIFT))) {
@@ -132,7 +135,7 @@ namespace psycle {
 						new_con_ = true;
 					}
 				} else
-				if ( ev->button == 1) {
+				if (ev->button == 1) {
 					StartDragging(ev->x, ev->y);
 				}
 			} else
