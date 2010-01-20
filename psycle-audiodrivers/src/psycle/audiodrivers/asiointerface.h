@@ -163,9 +163,9 @@ class ASIOInterface : public AudioDriver {
 		void RemoveCapturePort(int idx);
 		void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 		int GetWritePos();
-		int GetPlayPos();		
+		int GetPlayPos();
 		PortOut GetOutPortFromidx(int driverID);
-		int GetidxFromOutPort(PortOut&port);		
+		int GetidxFromOutPort(PortOut&port);
 
 		static void bufferSwitch(long index, ASIOBool processNow);
 		static ASIOInterface * instance_;
