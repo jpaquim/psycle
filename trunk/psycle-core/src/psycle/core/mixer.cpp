@@ -362,7 +362,9 @@ using namespace helpers;
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				callbacks->song().machine(Return(wireIndex).Wire().machine_)->ClearMixerSendFlag();
+				Machine* returnMac = callbacks->song().machine(Return(wireIndex).Wire().machine_);
+				//"if" added to prevent crashes on song deletion.
+				if (returnMac) returnMac->ClearMixerSendFlag();
 				Return(wireIndex).Wire().machine_=-1;
 				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
