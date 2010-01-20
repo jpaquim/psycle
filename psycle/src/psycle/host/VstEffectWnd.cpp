@@ -62,7 +62,7 @@ namespace psycle {
 		BEGIN_MESSAGE_MAP(CVstEffectWnd, CFrameWnd)
 			ON_WM_CREATE()
 			ON_WM_CLOSE()
-//			ON_WM_DESTROY()
+			ON_WM_DESTROY()
 			ON_WM_TIMER()
 			ON_WM_SETFOCUS()
 			ON_WM_KEYDOWN()
@@ -199,6 +199,24 @@ namespace psycle {
 			if (gui_)
 				gui_->BeforeDeleteDlg();
 			CFrameWnd::OnClose();
+		}
+
+		void CVstEffectWnd::OnDestroy() 
+		{
+//			machine().EnterCritical();             /* make sure we're not processing    */
+			machine().EditClose();              /* tell effect edit window's closed  */
+//			machine().LeaveCritical();             /* re-enable processing              */
+			pView->DestroyWindow();
+			if (pParamGui) pParamGui->DestroyWindow();
+			std::list<HWND>::iterator it = secwinlist.begin();
+			while ( it != secwinlist.end() )
+			{
+				::SendMessage(*it, WM_CLOSE, 0, 0);
+				++it;
+			}
+			assert(gui_);
+			gui_->BeforeDeleteDlg();
+			CFrameWnd::OnDestroy();
 		}
 
 		void CVstEffectWnd::OnTimer(UINT nIDEvent)
