@@ -72,23 +72,15 @@ namespace psycle {
 		void MasterGui::ShowDialog(double x, double y)
 		{
 			if (!dialog_) {
-				dialog_ = new CMasterDlg(view()->child_view());
-				dialog_->_pMachine = (Master*)mac();
-
-				for (int i=0;i<MAX_CONNECTIONS; i++)
-				{
-					if (mac()->_inputCon[i])
-					{
-						if (view()->song()->machine(mac()->_inputMachines[i]))
-						{
+				dialog_ = new CMasterDlg((Master*)mac(), view()->child_view());
+				for (int i=0;i<MAX_CONNECTIONS; ++i) {
+					if (mac()->_inputCon[i]) {
+						if (view()->song()->machine(mac()->_inputMachines[i])) {
 							strcpy(dialog_->macname[i],view()->song()->machine(mac()->_inputMachines[i])->GetEditName().c_str());
 						}
 					}
 				}
-				dialog_->Create();
-//				CPoint point(-1,-1);
 				dialog_->CenterWindowOnPoint(x, y);
-
 				dialog_->ShowWindow(SW_SHOW);
 			} else {
 				dialog_->ShowWindow(SW_SHOW);

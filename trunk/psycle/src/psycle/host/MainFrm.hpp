@@ -1,13 +1,13 @@
 ///\file
 ///\brief interface file for psycle::host::CMainFrame.
 #pragma once
+#include "ChildView.hpp"
+#include "ExListBox.h"
+#include "InfoDlg.hpp"
+#include "InstrumentEditor.hpp"
 #include "Psycle.hpp"
 #include "ProjectData.hpp"
-#include "ChildView.hpp"
 #include "SeqView.hpp"
-#include "ExListBox.h"
-#include "InstrumentEditor.hpp"
-#include "InfoDlg.hpp"
 #include "MidiMonitorDlg.hpp"
 #include "WaveEdFrame.hpp"
 

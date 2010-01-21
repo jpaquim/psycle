@@ -34,10 +34,7 @@ namespace psycle {
 
 		Project::Project(ProjectData* parent)
 			: parent_(parent),
-			  beat_zoom_(4)
-		{
-			assert(pat_view_);
-			assert(mac_view_);
+			  beat_zoom_(4) {
 			song_ = new Song();
 			song_->New();
 			// modules of project
@@ -45,26 +42,10 @@ namespace psycle {
 			pat_view_ = new PatternView(this);
 		}
 
-		Project::~Project()
-		{
-			delete song_;
+		Project::~Project() {
 			delete mac_view_;
 			delete pat_view_;
-		}
-
-		PatternView* Project::pat_view()
-		{
-			return pat_view_;
-		}
-
-		MachineView* Project::mac_view()
-		{
-			return mac_view_;
-		}
-
-		ProjectData* Project::parent()
-		{
-			return parent_;
+			delete song_;
 		}
 
 		void Project::SetActive() {
@@ -74,8 +55,7 @@ namespace psycle {
 #endif
 		}
 
-		void Project::Clear()
-		{
+		void Project::Clear() {
 			pat_view()->KillUndo();
 			pat_view()->KillRedo();
 			mac_view()->LockVu();
@@ -131,18 +111,13 @@ namespace psycle {
 #endif
 		}
 
-		void Project::OnFileLoadsongNamed(const std::string& fName, int fType)
-		{
-			if( fType == 2 )
-			{
+		void Project::OnFileLoadsongNamed(const std::string& fName, int fType) {
+			if (fType == 2 ) {
 				FILE* hFile=fopen(fName.c_str(),"rb");
 				pat_view()->LoadBlock(hFile);
 				fclose(hFile);
-			}
-			else
-			{
-				if (CheckUnsavedSong("Load Song"))
-				{
+			} else {
+				if (CheckUnsavedSong("Load Song")) {
 					FileLoadsongNamed(fName);
 				}
 			}
@@ -158,13 +133,12 @@ namespace psycle {
 			MessageBox(0, a.c_str(), b.c_str(), MB_OK | MB_ICONERROR);
 		}
 
-		void Project::FileLoadsongNamed(const std::string& fName)
-		{
+		void Project::FileLoadsongNamed(const std::string& fName) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			mac_view()->LockVu();
 			psycle::core::Song* song = new Song();
 			song->SetReady(false);
-			Player & player(Player::singleton());
+			Player& player(Player::singleton());
 			player.stop();
 			//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
 			//Ideally, this should be handled with a player callback specific for loading.
@@ -174,7 +148,7 @@ namespace psycle {
 			progress_.ShowWindow(SW_SHOW);		
 			song->progress.connect(boost::bind(&Project::OnProgress, this, _1, _2, _3));
 			song->report.connect(boost::bind(&Project::OnReport, this, _1, _2));
-			if(!song->load(fName.c_str())) {
+			if (!song->load(fName.c_str())) {
 				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 				progress_.ShowWindow(SW_HIDE);
 				mac_view()->UnlockVu();
@@ -189,13 +163,10 @@ namespace psycle {
 			delete old_song;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
-			if (index != std::string::npos)
-			{
+			if (index != std::string::npos) {
 				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
 				song_->fileName = fName.substr(index+1);
-			}
-			else
-			{
+			} else {
 				song_->fileName = fName;
 			}
 
@@ -269,8 +240,7 @@ namespace psycle {
 			mac_view()->Rebuild();
 			mac_view()->UnlockVu();
 #endif
-			if (Global::pConfig->bShowSongInfoOnLoad)
-			{
+			if (Global::pConfig->bShowSongInfoOnLoad) {
 				CSongpDlg dlg(song_);
 				dlg.SetReadOnly();
 				dlg.DoModal();
@@ -832,5 +802,6 @@ namespace psycle {
 			}
 			return bResult;
 		}
-	}
-}
+
+	}  // namespace host
+}  // namespace psycle

@@ -28,10 +28,10 @@ namespace psycle {
 			Song& song() { return *song_; }
 
 			// modules
-			PatternView* pat_view();
-			MachineView* mac_view();
+			PatternView* pat_view() { return pat_view_; }
+			MachineView* mac_view() { return mac_view_; }
+			ProjectData* parent() {return parent_; }
 
-			ProjectData* parent();
 			void SetActive();
 
 			void FileImportModulefile();
