@@ -24,18 +24,15 @@ namespace psycle {
 			  vu_bg_pixbuf_(this),
 			  vu_peak_pixbuf_(this),
 			  vu_led_pixbuf_(this),
-			  text_(this)			  
-		{
+			  text_(this) {
 		}
 
-		MasterGui::~MasterGui()
-		{
+		MasterGui::~MasterGui() {
 			if (dialog_)
 				delete dialog_;
 		}
 
-		bool MasterGui::OnEvent(PsycleCanvas::Event* ev)
-		{
+		bool MasterGui::OnEvent(PsycleCanvas::Event* ev) {
 			if ( ev->type == PsycleCanvas::Event::BUTTON_RELEASE ) {
 				if (ev->button == 3) {
 					// do not allow for master to be deleted etc..

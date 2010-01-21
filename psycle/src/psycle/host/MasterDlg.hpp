@@ -26,14 +26,17 @@ namespace psycle {
 		class CVolumeCtrl: public CSliderCtrl
 		{
 		public:
-			CVolumeCtrl() : editing_(false) {}
+			CVolumeCtrl() : editing_(false), index_(-1) {}
+			CVolumeCtrl(int index) : editing_(false), index_(index) {}
 
 			bool editing() const { return editing_; }
+			int index() const { return index_; }
 
 		private:
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 			bool editing_;
+			int index_;
 			DECLARE_MESSAGE_MAP()
 		};
 
@@ -61,18 +64,7 @@ namespace psycle {
 			virtual BOOL OnInitDialog();
 			afx_msg void OnAutodec();
 			afx_msg void OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm2(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm3(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm4(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm5(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnCustomdrawSliderm(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnPaint();
 			afx_msg void OnCancel();
 			DECLARE_MESSAGE_MAP()
@@ -80,19 +72,8 @@ namespace psycle {
 
 			enum { IDD = IDD_MASTERDLG };
 			CStatic	m_masterpeak;
-			CVolumeCtrl	m_slidermaster;
-			CVolumeCtrl	m_sliderm9;
-			CVolumeCtrl	m_sliderm8;
-			CVolumeCtrl	m_sliderm7;
-			CVolumeCtrl	m_sliderm6;
-			CVolumeCtrl	m_sliderm5;
-			CVolumeCtrl	m_sliderm4;
-			CVolumeCtrl	m_sliderm3;
-			CVolumeCtrl	m_sliderm2;
-			CVolumeCtrl	m_sliderm12;
-			CVolumeCtrl	m_sliderm11;
-			CVolumeCtrl	m_sliderm10;
-			CVolumeCtrl	m_sliderm1;
+			CVolumeCtrl m_slidermaster;
+			std::vector<CVolumeCtrl*> sliders_;
 			CStatic	m_mixerview;
 			CButton	m_autodec;
 			CBitmap m_numbers;
