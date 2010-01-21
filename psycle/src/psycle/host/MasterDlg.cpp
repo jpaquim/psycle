@@ -14,8 +14,14 @@
 
 #include <psycle/helpers/dsp.hpp>
 
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle {
 	namespace host {
+
 
 		BEGIN_MESSAGE_MAP(CVolumeCtrl, CSliderCtrl)
 			ON_WM_LBUTTONDOWN()
@@ -263,7 +269,7 @@ namespace psycle {
 		{
 			CVolumeCtrl* slider =(CVolumeCtrl*) GetDlgItem(pNMHDR->idFrom);
 			float db = ((832-slider->GetPos())/16.0f)-40.0f;
-			if (slider->editing())_pMachine->SetWireVolume(9,helpers::dsp::dB2Amp(db));
+			if (slider->editing())_pMachine->SetWireVolume(slider->index(),helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,112 + slider->index() *24,171);
 			
 			if (slider->index() == 10) {
