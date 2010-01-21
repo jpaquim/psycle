@@ -22,35 +22,29 @@ namespace psycle {
 			ON_WM_LBUTTONUP()
 		END_MESSAGE_MAP()
 
-		void CVolumeCtrl::OnLButtonDown(UINT nFlags, CPoint point)
-		{
-			editing=true;
+		void CVolumeCtrl::OnLButtonDown(UINT nFlags, CPoint point) {
+			editing_ = true;
 			CSliderCtrl::OnLButtonDown(nFlags, point);
 		}
-		void CVolumeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
-		{
-			editing=false;
+		void CVolumeCtrl::OnLButtonUp(UINT nFlags, CPoint point) {
+			editing_ = false;
 			CSliderCtrl::OnLButtonUp(nFlags, point);
 		}
 
-		CMasterDlg::CMasterDlg(CChildView* pParent) : CDialog(CMasterDlg::IDD, pParent)
-		{
-			m_pParent = pParent;
-			//{{AFX_DATA_INIT(CMasterDlg)
-			//}}AFX_DATA_INIT
+		/// master dialog
+		CMasterDlg::CMasterDlg(Master* master, CChildView* pParent) 
+			: CDialog(CMasterDlg::IDD, pParent),
+			  _pMachine(master),
+			  m_pParent(pParent) {
 			memset(macname,0,sizeof(macname));
+			CDialog::Create(IDD, m_pParent);
 		}
 
-
-		CMasterDlg::~CMasterDlg()
-		{		
+		CMasterDlg::~CMasterDlg() {		
 			m_back.DeleteObject();
 			m_numbers.DeleteObject();
 			m_sliderknob.DeleteObject();
 		}
-
-
-
 
 		void CMasterDlg::DoDataExchange(CDataExchange* pDX)
 		{
@@ -306,12 +300,6 @@ namespace psycle {
 			}
 		}
 
-
-		BOOL CMasterDlg::Create()
-		{
-			return CDialog::Create(IDD, m_pParent);
-		}
-
 		void CMasterDlg::OnCancel()
 		{
 			CDialog::OnCancel();
@@ -320,7 +308,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_slidermaster.GetPos())/16.0f)-40.0f;
-			if (m_slidermaster.editing)_pMachine->_outDry = int(helpers::dsp::dB2Amp(db)*256.0f);
+			if (m_slidermaster.editing())_pMachine->_outDry = int(helpers::dsp::dB2Amp(db)*256.0f);
 
 			PaintNumbers(db,40,171);
 
@@ -376,7 +364,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm1.GetPos())/16.0f)-40.0f;
-			if (m_sliderm1.editing)_pMachine->SetWireVolume(0,helpers::dsp::dB2Amp(db));
+			if (m_sliderm1.editing())_pMachine->SetWireVolume(0,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,112,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -385,7 +373,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm10(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm10.GetPos())/16.0f)-40.0f;
-			if (m_sliderm10.editing)_pMachine->SetWireVolume(9,helpers::dsp::dB2Amp(db));
+			if (m_sliderm10.editing())_pMachine->SetWireVolume(9,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,328,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -394,7 +382,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm11(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm11.GetPos())/16.0f)-40.0f;
-			if (m_sliderm11.editing)_pMachine->SetWireVolume(10,helpers::dsp::dB2Amp(db));
+			if (m_sliderm11.editing())_pMachine->SetWireVolume(10,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,352,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -403,7 +391,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm12(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm12.GetPos())/16.0f)-40.0f;
-			if (m_sliderm12.editing)_pMachine->SetWireVolume(11,helpers::dsp::dB2Amp(db));
+			if (m_sliderm12.editing())_pMachine->SetWireVolume(11,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,376,171);
 
 		// I know the following is Ugly, but it is the only solution I've found, because first,
@@ -431,7 +419,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm2(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm2.GetPos())/16.0f)-40.0f;
-			if (m_sliderm2.editing)_pMachine->SetWireVolume(1,helpers::dsp::dB2Amp(db));
+			if (m_sliderm2.editing())_pMachine->SetWireVolume(1,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,136,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -440,7 +428,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm3(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm3.GetPos())/16.0f)-40.0f;
-			if (m_sliderm3.editing)_pMachine->SetWireVolume(2,helpers::dsp::dB2Amp(db));
+			if (m_sliderm3.editing())_pMachine->SetWireVolume(2,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,160,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -449,7 +437,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm4(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm4.GetPos())/16.0f)-40.0f;
-			if (m_sliderm4.editing)_pMachine->SetWireVolume(3,helpers::dsp::dB2Amp(db));
+			if (m_sliderm4.editing())_pMachine->SetWireVolume(3,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,184,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -458,7 +446,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm5(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm5.GetPos())/16.0f)-40.0f;
-			if (m_sliderm5.editing)_pMachine->SetWireVolume(4,helpers::dsp::dB2Amp(db));
+			if (m_sliderm5.editing())_pMachine->SetWireVolume(4,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,208,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -467,7 +455,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm6(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm6.GetPos())/16.0f)-40.0f;
-			if (m_sliderm6.editing)_pMachine->SetWireVolume(5,helpers::dsp::dB2Amp(db));
+			if (m_sliderm6.editing())_pMachine->SetWireVolume(5,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,232,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -476,7 +464,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm7(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm7.GetPos())/16.0f)-40.0f;
-			if (m_sliderm7.editing)_pMachine->SetWireVolume(6,helpers::dsp::dB2Amp(db));
+			if (m_sliderm7.editing())_pMachine->SetWireVolume(6,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,256,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -485,7 +473,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm8(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm8.GetPos())/16.0f)-40.0f;
-			if (m_sliderm8.editing)_pMachine->SetWireVolume(7,helpers::dsp::dB2Amp(db));
+			if (m_sliderm8.editing())_pMachine->SetWireVolume(7,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,280,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
@@ -494,7 +482,7 @@ namespace psycle {
 		void CMasterDlg::OnCustomdrawSliderm9(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			float db = ((832-m_sliderm9.GetPos())/16.0f)-40.0f;
-			if (m_sliderm9.editing)_pMachine->SetWireVolume(8,helpers::dsp::dB2Amp(db));
+			if (m_sliderm9.editing())_pMachine->SetWireVolume(8,helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,304,171);
 			
 			*pResult = DrawSliderGraphics(pNMHDR);
