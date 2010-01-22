@@ -71,12 +71,12 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::ba
 	///\{
 		public:
 			/// assigns a buffer to this port (or unassigns if 0).
-			void buffer(typenames::buffer * const);
+			void buffer(class buffer * const);
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
-			typenames::buffer & buffer() const throw() { return *buffer_; }
+			class buffer & buffer() const throw() { return *buffer_; }
 		private:
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
-			typenames::buffer * buffer_;
+			class buffer * buffer_;
 	///\}
 
 	///\name channels
@@ -182,12 +182,12 @@ namespace ports {
 			virtual ~input();
 
 		public:
-			void    connect(typenames::ports::output &) throw(exception);
-			void disconnect(typenames::ports::output &);
+			void    connect(ports::output &) throw(exception);
+			void disconnect(ports::output &);
 
 		public:
 			operator bool() const {
-				engine::buffer const & b(this->buffer());
+				class buffer const & b(this->buffer());
 				for(std::size_t i(0), e(channels()); i < e; ++i) {
 					channel const & c(b[i]);
 					if(c.size() && c.size() > c[0].index()) return true;
@@ -264,10 +264,10 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 	friend class ports::inputs::multiple;
 	
 	protected: friend class virtual_factory_access;
-		node(typenames::plugin_library_reference &, parent_type &, name_type const &);
+		node(class plugin_library_reference &, parent_type &, name_type const &);
 
 		void before_destruction() /*override*/ {
-			typenames::typenames::bases::node::before_destruction();
+			typenames::bases::node::before_destruction();
 			close();
 		}
 
@@ -276,7 +276,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 	///\name types
 	///\{
 		public:
-			typedef typenames::graph graph;
+			typedef class graph graph;
 			class ports {
 				public:
 					typedef typenames::ports::output output;
@@ -287,17 +287,17 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 							typedef typenames::ports::inputs::multiple multiple;
 					};
 			};
-			typedef typenames::buffer buffer;
-			typedef typenames::channel channel;
-			typedef typenames::event event;
+			typedef class buffer buffer;
+			typedef class channel channel;
+			typedef class event event;
 	///\}
 		
 	///\name reference to plugin library
 	///\{
 		public:
-			engine::plugin_library_reference & plugin_library_reference() const throw() { return plugin_library_reference_; }
+			class plugin_library_reference & plugin_library_reference() const throw() { return plugin_library_reference_; }
 		private:
-			engine::plugin_library_reference & plugin_library_reference_;
+			class plugin_library_reference & plugin_library_reference_;
 	///\}
 
 	///\name output ports
@@ -352,8 +352,8 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, 
 			void io_ready(bool io_ready);
 		private:
 			bool io_ready_;
-			typedef std::scoped_lock<std::mutex> scoped_lock;
-			std::mutex mutable mutex_;
+			typedef class scoped_lock<mutex> scoped_lock;
+			mutex mutable mutex_;
 
 		public:
 			/// signal to be emitted when the underlying device (if any) becomes ready to process
