@@ -670,6 +670,20 @@ Machine::sched_deps Machine::sched_outputs() const {
 	return result;
 }
 
+/// tells the scheduler which machines may be processed after this one
+void Machine::sched_process(unsigned int frames) {
+	if(_connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
+		Machine & input_node(*callbacks->song().machine(_inputMachines[i]));
+		if(!input_node.Standby()) Standby(false);
+		if(!_mute && !Standby()) {
+			dsp::Add(input_node._pSamplesL, _pSamplesL, frames, input_node.lVol() * _inputConVol[i]);
+			dsp::Add(input_node._pSamplesR, _pSamplesR, frames, input_node.rVol() * _inputConVol[i]);
+		}
+	}
+	dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+	GenerateAudio(frames);
+}
+
 void Machine::defineInputAsStereo(int numports) {
 	numInPorts = numports;
 	#if 0

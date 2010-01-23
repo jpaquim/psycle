@@ -387,17 +387,20 @@ void Player::process(Machine & node) throw(std::exception) {
 		s << "psycle: core: player: processing node: " << node.GetEditName();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-
-	if(node._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(node._inputCon[i]) {
-		Machine & input_node(*song().machine(node._inputMachines[i]));
-		if(!input_node.Standby()) node.Standby(false);
-		if(!node._mute && !node.Standby()) { ///\todo && node.input_buffer_mix_by_player()) {
-			dsp::Add(input_node._pSamplesL, node._pSamplesL, samples_to_process_, input_node.lVol() * node._inputConVol[i]);
-			dsp::Add(input_node._pSamplesR, node._pSamplesR, samples_to_process_, input_node.rVol() * node._inputConVol[i]);
+	#if 0 // too concrete
+		if(node._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(node._inputCon[i]) {
+			Machine & input_node(*song().machine(node._inputMachines[i]));
+			if(!input_node.Standby()) node.Standby(false);
+			if(!node._mute && !node.Standby()) { ///\todo && node.input_buffer_mix_by_player()) {
+				dsp::Add(input_node._pSamplesL, node._pSamplesL, samples_to_process_, input_node.lVol() * node._inputConVol[i]);
+				dsp::Add(input_node._pSamplesR, node._pSamplesR, samples_to_process_, input_node.rVol() * node._inputConVol[i]);
+			}
 		}
-	}
-	dsp::Undenormalize(node._pSamplesL, node._pSamplesR, samples_to_process_);
-	node.GenerateAudio(samples_to_process_);
+		dsp::Undenormalize(node._pSamplesL, node._pSamplesR, samples_to_process_);
+		node.GenerateAudio(samples_to_process_);
+	#else // mode abstract
+		node.sched_process(samples_to_process_);
+	#endif
 }
 
 void Player::stop() {
