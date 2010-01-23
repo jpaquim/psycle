@@ -67,6 +67,7 @@ namespace psycle {
 			player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
 			CMainFrame* pParentMain = mac_view()->main();
 			pParentMain->m_wndSeq.UpdateSequencer();
+			mac_view()->child_view()->SetTitleBarText();
 			mac_view()->Rebuild();
 			mac_view()->UnlockVu();
 #else

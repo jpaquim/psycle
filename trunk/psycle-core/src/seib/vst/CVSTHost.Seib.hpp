@@ -564,7 +564,7 @@ namespace seib {
 			// 2nd check that it is a valid VST. (appart from kEffectMagic )
 			inline bool DECLARE_VST_DEPRECATED(Identify)() { return (Dispatch(effIdentify) == CCONST ('N', 'v', 'E', 'f')); }
 			// returns "byteSize".
-			inline long GetChunk(void **ptr, bool onlyCurrentProgram = false) { return Dispatch(effGetChunk, onlyCurrentProgram, 0, ptr); }
+			inline long GetChunk(void **ptr, bool onlyCurrentProgram = false) const { return Dispatch(effGetChunk, onlyCurrentProgram, 0, ptr); }
 			// return value is not specified in the VST SDK. Don't assume anything.
 			inline long SetChunk(const void *data, long byteSize, bool onlyCurrentProgram = false) { return Dispatch(effSetChunk, onlyCurrentProgram, byteSize, const_cast<void*>(data)); }
 		// VST 2.0

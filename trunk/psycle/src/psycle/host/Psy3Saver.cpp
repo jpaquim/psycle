@@ -68,7 +68,7 @@ namespace psycle  {
 			return new_name;
 		}
 
-		int Psy3Saver::ConvertType(const psycle::core::MachineKey& key,bool isGenerator) const {
+		std::uint32_t Psy3Saver::ConvertType(const psycle::core::MachineKey& key,bool isGenerator) const {
 			OldMachineType old_type = MACH_DUMMY; // default
 			if (key.host() == Hosts::INTERNAL ) {
 				if (key == MachineKey::master() ) {
@@ -99,7 +99,7 @@ namespace psycle  {
 				else
 					old_type = MACH_VSTFX;
 			}
-			return (int)old_type;
+			return (std::uint32_t)old_type;
 		}
 
 		bool Psy3Saver::Save(psycle::core::RiffFile* pFile,bool autosave) {
@@ -196,9 +196,9 @@ namespace psycle  {
 			pFile->Write(version);
 			pFile->Write(size);
 
-			pFile->WriteArray(song_->name().c_str(), song_->name().length()+1);
-			pFile->WriteArray(song_->author().c_str(), song_->author().length()+1);
-			pFile->WriteArray(song_->comment().c_str(), song_->comment().length()+1);
+			pFile->WriteString(song_->name());
+			pFile->WriteString(song_->author());
+			pFile->WriteString(song_->comment());
 
 			if (!autosave) {
 				Progress.StepIt();
@@ -322,12 +322,13 @@ namespace psycle  {
 					ConvertEvent(ev, data_ptr);
 				}		
 				// ok save it
+				index = pattern->id(); // index
 				byte* pSource=new byte[song_->tracks()*num_lines*EVENT_SIZE];
 				byte* pCopy = pSource;
 
 				for (int y = 0; y < num_lines; y++)
 				{
-					unsigned char* pData = ppPatternData[pattern->id()]+(y*MULTIPLY);
+					unsigned char* pData = ppPatternData[index]+(y*MULTIPLY);
 					memcpy(pCopy,pData,EVENT_SIZE*song_->tracks());
 					pCopy+=EVENT_SIZE*song_->tracks();
 				}
@@ -339,17 +340,16 @@ namespace psycle  {
 				version = CURRENT_FILE_VERSION_PATD;
 
 				pFile->Write(version);
-				size = sizez77+(4*sizeof(temp))+strlen(pattern->name().c_str())+1;
+				size = sizez77+(4*sizeof(temp))+pattern->name().length()+1;
 				pFile->Write(size);
 
-				index = pattern->id(); // index
 				pFile->Write(index);
 				temp = num_lines;
 				pFile->Write(temp);
 				temp = song_->tracks(); // eventually this may be variable per pattern
 				pFile->Write(temp);
 
-				pFile->WriteArray((pattern->name().c_str()),strlen(pattern->name().c_str())+1);
+				pFile->WriteString(pattern->name());
 
 				pFile->Write(sizez77);
 				pFile->WriteArray(pCopy,sizez77);
@@ -375,21 +375,29 @@ namespace psycle  {
 				if (song_->machine(i))
 				{
 					pFile->WriteArray("MACD",4);
-					version = 0; // CURRENT_FILE_VERSION_MACD; Why is it 256 ??
+					version = CURRENT_FILE_VERSION_MACD;
 					pFile->Write(version);
 					long pos = pFile->GetPos();
 					size = 0;
 					pFile->Write(size);
-
-					index = i; // index					
 					// chunk data
+					index = i; // index					
+					pFile->Write(std::uint32_t(index));
 
 					MachineKey key = song_->machine(i)->getMachineKey();
-					pFile->Write(std::uint32_t(index));
-					pFile->Write(std::uint32_t(ConvertType(key,song_->machine(i)->IsGenerator())));
-					std::string dllName = ModifyDllNameWithIndex(ConvertName(key.dllName())+".dll", key.index());
-					pFile->WriteArray(dllName.c_str(),dllName.length()+1);
-					// pFile->Write(std::uint32_t(key.index())); // is saved in the dllName
+					pFile->Write(ConvertType(key,song_->machine(i)->IsGenerator()));
+					#if (CURRENT_FILE_VERSION_MACD&0xFF00) == 0x0000
+						if (key.host() != Hosts::INTERNAL) {
+							std::string dllName = ModifyDllNameWithIndex(ConvertName(key.dllName())+".dll", key.index());
+							pFile->WriteString(dllName);
+						}
+						else {
+							pFile->WriteString("");
+						}
+					#elif (CURRENT_FILE_VERSION_MACD&0xFF00) == 0x0100
+						pFile->WriteString(ConvertName(key.dllName())+".dll"));
+						pFile->Write(std::uint32_t(key.index())); // is saved in the dllName
+					#endif
 					song_->machine(i)->SaveFileChunk(pFile);
 
 					long pos2 = pFile->GetPos(); 
@@ -452,7 +460,7 @@ namespace psycle  {
 			if (numInstruments >0)
 			{
 				pFile->WriteArray("EINS",4);
-				version = CURRENT_FILE_VERSION_XMSAMPLER;
+				version = CURRENT_FILE_VERSION_EINS;
 				pFile->Write(version);
 				long pos = pFile->GetPos();
 				size = 0;

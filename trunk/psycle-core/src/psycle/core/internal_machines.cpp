@@ -548,7 +548,7 @@ bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
 	pFile->Read(_gainvol);
 	return true;
 }
-void AudioRecorder::SaveSpecificChunk(RiffFile * pFile)
+void AudioRecorder::SaveSpecificChunk(RiffFile * pFile) const
 {
 	std::uint32_t size = sizeof _captureidx+ sizeof _gainvol;
 	pFile->Write(size); // size of this part params to save

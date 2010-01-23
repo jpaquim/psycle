@@ -107,7 +107,7 @@ class PSYCLE__CORE__DECL AudioRecorder : public Machine
 		virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
 		virtual void Init(void);
 		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-		virtual void SaveSpecificChunk(RiffFile * pFile);
+		virtual void SaveSpecificChunk(RiffFile * pFile) const;
 		virtual int GenerateAudio(int numSamples);
 		virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
 		virtual std::string GetName() const { return _psName; }

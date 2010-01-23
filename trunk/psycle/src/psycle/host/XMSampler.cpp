@@ -2669,7 +2669,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		{
 			int temp;
 			bool wrongState=false;
-			std::uint32_t filevers;
+			std::uint32_t filevers = 0;
 			unsigned long filepos;
 			int size=0;
 			riffFile->Read(&size,sizeof(size));
@@ -2678,7 +2678,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			
 			// Check higher bits of version (AAAABBBB). 
 			// different A, incompatible, different B, compatible
- 			if ( (filevers&0x11110000) == (VERSION&0x11110000) )
+			if ( (filevers&0xFFFF0000) == VERSION_ONE )
 			{
 				riffFile->Read(_numVoices); // numSubtracks
 				riffFile->Read(temp); // quality

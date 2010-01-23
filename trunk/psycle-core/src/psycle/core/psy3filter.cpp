@@ -195,7 +195,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 			file.Read(version);
 			file.Read(size);
 			fileposition = file.GetPos();
-			if((version & 0xffff0000) == FILE_VERSION_XMSAMPLER_ONE) {// chunkformat v1
+			if((version & 0xffff0000) == EINS_VERSION_ONE) {// chunkformat v1
 				LoadEINSv1(&file,song,version&0xFFFF, size);
 			}
 			//else if((version & 0xff00) == 0x0100) // and so on

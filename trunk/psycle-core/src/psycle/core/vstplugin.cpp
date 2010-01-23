@@ -792,7 +792,7 @@
 		return true;
 	}
 
-	void plugin::SaveSpecificChunk(RiffFile * pFile)
+	void plugin::SaveSpecificChunk(RiffFile * pFile) const
 	{
 		try {
 			UINT count(numParams());
