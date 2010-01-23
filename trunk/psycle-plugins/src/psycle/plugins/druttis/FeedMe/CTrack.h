@@ -188,19 +188,19 @@ public:
 	{
 		//
 		//
-		static float vca_out;
-		static float osc1_spd;
-		static float osc2_spd;
-		static float osc2_tme;
-		static int amount;
+		float vca_out;
+		float osc1_spd;
+		float osc2_spd;
+		float osc2_tme;
+		int amount;
 		register int nsamples;
-		static float dist;
-		static float dist2;
-		static float ndis;
+		float dist;
+		float dist2;
+		float ndis;
 		register float *pleft;
 		register float *pright;
-		static float out1[256]; //GLOBAL_TICKS];
-		static float out2[256]; //GLOBAL_TICKS];
+		float out1[256];
+		float out2[256];
 		//
 		//				Waveform
 		float *pwaveform = wavetable[globals->waveform];
