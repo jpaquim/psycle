@@ -3,6 +3,8 @@
 #pragma once
 #include "Psycle.hpp"
 #include <mmreg.h>
+#include <psycle/helpers/riff.hpp>
+
 namespace psycle {
 	namespace host {
 
@@ -67,7 +69,9 @@ namespace psycle {
 
 			static int rate;
 			static int bits;
+		public:
 			static int channelmode;
+
 			static int ditherpdf;
 			static int noiseshape;
 
@@ -128,10 +132,11 @@ namespace psycle {
 			afx_msg void OnOutputsample();
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()						
+
+		public:
+			psycle::helpers::WaveFile wav_file_;
 };
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-	}   // namespace
-}   // namespace
+		
+	}   // namespace host
+}   // namespace psycle
