@@ -13,6 +13,8 @@
 
 namespace psycle { namespace plugins { namespace outputs {
 
+using namespace universalis::stdlib;
+
 /// outputs to a soundcard device via gstreamer output implementation.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 	protected: friend class virtual_factory_access;
@@ -37,9 +39,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 		void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
 		void        handoff(::GstBuffer &, ::GstPad &);
 
-		typedef std::scoped_lock<std::mutex> scoped_lock;
-		std::mutex mutable mutex_;
-		std::condition<scoped_lock> mutable condition_;
+		typedef ::scoped_lock<mutex> scoped_lock;
+		mutex mutable mutex_;
+		condition<scoped_lock> mutable condition_;
 
 		bool wait_for_state_to_become_playing_;
 		bool handoff_called_;

@@ -241,6 +241,10 @@ void scheduler::start() throw(engine::exception) {
 			delete *i;
 		}
 		threads_.clear();
+		// ensure the nodes are stopped
+		// iterate over all the nodes in the graph
+		for(graph_type::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i)
+			(**i).underlying().stop();
 		clear_plan();
 		throw;
 	}
@@ -298,6 +302,10 @@ void scheduler::stop() {
 	}
 	if(loggers::information()()) loggers::information()("scheduler threads joined", UNIVERSALIS__COMPILER__LOCATION);
 	threads_.clear();
+	// ensure the nodes are stopped
+	// iterate over all the nodes in the graph
+	for(graph_type::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i)
+		(**i).underlying().stop();
 	clear_plan();
 
 	// dump time measurements
