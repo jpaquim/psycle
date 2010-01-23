@@ -45,7 +45,7 @@ Player::Player()
 	recording_with_dither_(),
 	playing_(),
 	autoStopMachines_(),
-	work_suspended_(false)
+	work_suspended_()
 {
 	universalis::os::aligned_memory_alloc(16, null_buffer, 2*MAX_BUFFER_LENGTH);
 	dsp::Clear(null_buffer,2*MAX_BUFFER_LENGTH);
