@@ -18,7 +18,6 @@ namespace psycle { namespace host { namespace schedulers {
 namespace multi_threaded {
 
 using namespace universalis::stdlib;
-
 namespace underlying = host::underlying;
 
 class graph;
@@ -191,14 +190,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	///\{
 		public:  void reset_time_measurement();
 
-		public:  std::nanoseconds accumulated_processing_time() throw() { return accumulated_processing_time_; }
-		private: std::nanoseconds accumulated_processing_time_;
+		public:  nanoseconds accumulated_processing_time() throw() { return accumulated_processing_time_; }
+		private: nanoseconds accumulated_processing_time_;
 
-		public:  std::uint64_t processing_count() throw() { return processing_count_; }
-		private: std::uint64_t processing_count_;
+		public:  uint64_t processing_count() throw() { return processing_count_; }
+		private: uint64_t processing_count_;
 
-		public:  std::uint64_t processing_count_no_zeroes() throw() { return processing_count_no_zeroes_; }
-		private: std::uint64_t processing_count_no_zeroes_;
+		public:  uint64_t processing_count_no_zeroes() throw() { return processing_count_no_zeroes_; }
+		private: uint64_t processing_count_no_zeroes_;
 	///\}
 };
 
@@ -272,14 +271,13 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 				}
 			private:
 				std::size_t channels_, events_;
-				typedef std::scoped_lock<std::mutex> scoped_lock;
-				std::mutex mutable mutex_;
+				typedef class scoped_lock<mutex> scoped_lock;
+				mutex mutable mutex_;
 
-		} * buffer_pool_instance_;
-		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
+		} * buffer_pool_;
 		
 		std::size_t thread_count_;
-		typedef std::list<std::thread *> threads_type;
+		typedef std::list<thread *> threads_type;
 		threads_type threads_;
 		void thread_function(std::size_t thread_number);
 
