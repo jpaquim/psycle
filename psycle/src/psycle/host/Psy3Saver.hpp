@@ -50,7 +50,7 @@ namespace psycle {
                                       const std::string& old_substr,
                                       const std::string& new_substr) const;
 			std::string ConvertName(const std::string& name) const;
-			int ConvertType(const psycle::core::MachineKey& key) const;
+			int ConvertType(const psycle::core::MachineKey& key, bool isGenerator) const;
 			void ConvertEvent(const psycle::core::PatternEvent& ev, unsigned char* data) const;
 			unsigned char* CreateNewPattern(int ps);
 			int ComputeLinesPerBeat();

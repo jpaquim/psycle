@@ -127,12 +127,47 @@ void DuplicatorMac::Stop() {
 	}
 }
 
-void DuplicatorMac::Tick( int /*channel*/, const PatternEvent & /*pData*/ ) {
+void DuplicatorMac::Tick( int channel, const PatternEvent & data ) {
 	//const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
+
+
+	if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
+	{
+		bisTicking=true;
+		for (int i=0;i<NUM_MACHINES;i++)
+		{
+			if (macOutput[i] != -1 && callbacks->song().machine(macOutput[i]) != NULL )
+			{
+				AllocateVoice(channel,i);
+				PatternEvent pTemp = data;
+				if ( pTemp.note() < notetypes::release )
+				{
+					int note = pTemp.note()+noteOffset[i];
+					if ( note>=notetypes::release) note=notetypes::b9;
+					else if (note<0 ) note=0;
+					pTemp.setNote(static_cast<std::uint8_t>(note));
+				}
+				// this can happen if the parameter is the machine itself.
+				if (callbacks->song().machine(macOutput[i]) != this) 
+				{
+					callbacks->song().machine(macOutput[i])->Tick(allocatedchans[channel][i],pTemp);
+					if (pTemp.note() >= notetypes::release )
+					{
+						DeallocateVoice(channel,i);
+					}
+				}
+				else
+				{
+					DeallocateVoice(channel,i);
+				}
+			}
+		}
+	}
+	bisTicking=false;
 }
 
-void DuplicatorMac::PreWork(int numSamples) {
-	Machine::PreWork(numSamples);
+void DuplicatorMac::PreWork(int numSamples, bool clear) {
+	Machine::PreWork(numSamples, clear);
 	for(; !workEvents.empty(); workEvents.pop_front()) {
 		WorkEvent & workEvent = workEvents.front();
 		if(!_mute && !bisTicking) {
@@ -783,9 +818,9 @@ bool LFO::SetParameter(int numparam, int value)
 	else return false;
 }
 
-void LFO::PreWork(int numSamples)
+void LFO::PreWork(int numSamples, bool clear)
 {
-	Machine::PreWork(numSamples);
+	Machine::PreWork(numSamples, clear);
 	//cpu::cycles_type cost(cpu::cycles());
 
 	int maxVal=0, minVal=0;

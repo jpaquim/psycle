@@ -39,7 +39,7 @@ class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
 		virtual void Init(void);
 		virtual void Tick( int channel, const PatternEvent & pData );
 		virtual void Stop();
-		virtual void PreWork(int numSamples);
+		virtual void PreWork(int numSamples, bool clear = true);
 		virtual int GenerateAudio( int numSamples );
 		virtual MachineKey getMachineKey() const { return MachineKey::duplicator(); }
 		virtual std::string GetName() const { return _psName; }
@@ -136,7 +136,7 @@ class PSYCLE__CORE__DECL LFO : public Machine {
 		virtual ~LFO() throw();
 		virtual void Init(void);
 		virtual void Tick( int channel, const PatternEvent & pData );
-		virtual void PreWork(int numSamples);
+		virtual void PreWork(int numSamples, bool clear = true);
 		virtual int GenerateAudio( int numSamples );
 		virtual MachineKey getMachineKey() const { return MachineKey::lfo(); }
 		virtual std::string GetName() const { return _psName; }
