@@ -22,9 +22,9 @@ using namespace helpers::math;
 
 		std::string Mixer::_psName = "Mixer";
 
-		Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id )
+		Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id)
 		:
-			Machine(callbacks, id, /*input_buffer_mix_by_player*/ false)
+			Machine(callbacks, id)
 		{
 			defineInputAsStereo(2);
 			defineOutputAsStereo();

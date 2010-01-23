@@ -178,7 +178,7 @@ void Player::compute_plan() {
 	// iterate over all the nodes
 	for(int m(0); m < MAX_MACHINES; ++m) if(song().machine(m)) {
 		++graph_size_;
-		node & n(*song().machine(m));
+		Machine & n(*song().machine(m));
 		// find the terminal nodes in the graph (nodes with no connected input ports)
 		if(!n._connectedInputs) terminal_nodes_.push_back(&n);
 	}
@@ -278,7 +278,7 @@ void Player::thread_function(std::size_t thread_number) {
 
 void Player::process_loop() throw(std::exception) {
 	while(true) {
-		Player::node * node_;
+		Machine * node_;
 		{ scoped_lock lock(mutex_);
 			while(
 				!nodes_queue_.size() &&
@@ -304,35 +304,63 @@ void Player::process_loop() throw(std::exception) {
 			node_ = nodes_queue_.front();
 			nodes_queue_.pop_front();
 		}
-		Player::node & node(*node_);
+		Machine & node(*node_);
 
 		process(node);
 	
 		int notify(0);
 		{ scoped_lock lock(mutex_);
-			node.processed_by_multithreaded_scheduler_ = true;
+			node.sched_processed_ = true;
 			// check whether all nodes have been processed
 			if(++processed_node_count_ == graph_size_) notify = -1; // wake up the main processing loop
-			else // check whether successors of the node we processed are now ready.
-				// iterate over all the outputs of the node we processed
-				if(node._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(node._connection[c]) {
-					Player::node & output_node(*song().machine(node._outputMachines[c]));
-					bool output_node_ready(true);
-					// iterate over all the inputs connected to our output
-					if(output_node._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(output_node._inputCon[c]) {
-						Player::node & input_node(*song().machine(output_node._inputMachines[c]));
-						if(!input_node.processed_by_multithreaded_scheduler_) {
-							output_node_ready = false;
-							break;
+			else {
+				#if 0 // too concrete
+					// check whether successors of the node we processed are now ready.
+					// iterate over all the outputs of the node we processed
+					if(node._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(node._connection[c]) {
+						Machine & output_node(*song().machine(node._outputMachines[c]));
+						bool output_node_ready(true);
+						// iterate over all the inputs connected to our output
+						if(output_node._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(output_node._inputCon[c]) {
+							Machine & input_node(*song().machine(output_node._inputMachines[c]));
+							if(!input_node.sched_processed_) {
+								output_node_ready = false;
+								break;
+							}
+						}
+						if(output_node_ready) {
+							// All the dependencies of the node have been processed.
+							// We add the node to the processing queue.
+							nodes_queue_.push_back(&output_node);
+							++notify;
 						}
 					}
-					if(output_node_ready) {
-						// All the dependencies of the node have been processed.
-						// We add the node to the processing queue.
-						nodes_queue_.push_back(&output_node);
-						++notify;
+				#else // more abstract
+					// check whether successors of the node we processed are now ready.
+					// iterate over all the outputs of the node we processed
+					Machine::sched_deps output_nodes(node.sched_outputs());
+					for(Machine::sched_deps::const_iterator i(output_nodes.begin()), e(output_nodes.end()); i != e; ++i) {
+						Machine & output_node(**i);
+						bool output_node_ready(true);
+						// iterate over all the inputs connected to our output
+						Machine::sched_deps input_nodes(output_node.sched_inputs());
+						for(Machine::sched_deps::const_iterator i(input_nodes.begin()), e(input_nodes.end()); i != e; ++i) {
+							Machine & input_node(**i);
+							if(!input_node.sched_processed_) {
+								output_node_ready = false;
+								break;
+							}
+
+						}
+						if(output_node_ready) {
+							// All the dependencies of the node have been processed.
+							// We add the node to the processing queue.
+							nodes_queue_.push_back(&output_node);
+							++notify;
+						}
 					}
-				}
+				#endif
+			}
 		}
 		switch(notify) {
 			case -1:
@@ -352,7 +380,7 @@ void Player::process_loop() throw(std::exception) {
 	}
 }
 
-void Player::process(Player::node & node) throw(std::exception) {
+void Player::process(Machine & node) throw(std::exception) {
 	if(loggers::trace()) {
 		scoped_lock lock(mutex_);
 		std::ostringstream s;
@@ -361,9 +389,9 @@ void Player::process(Player::node & node) throw(std::exception) {
 	}
 
 	if(node._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(node._inputCon[i]) {
-		Player::node & input_node(*song().machine(node._inputMachines[i]));
+		Machine & input_node(*song().machine(node._inputMachines[i]));
 		if(!input_node.Standby()) node.Standby(false);
-		if(!node._mute && !node.Standby() && node.input_buffer_mix_by_player()) {
+		if(!node._mute && !node.Standby()) { ///\todo && node.input_buffer_mix_by_player()) {
 			dsp::Add(input_node._pSamplesL, node._pSamplesL, samples_to_process_, input_node.lVol() * node._inputConVol[i]);
 			dsp::Add(input_node._pSamplesR, node._pSamplesR, samples_to_process_, input_node.rVol() * node._inputConVol[i]);
 		}

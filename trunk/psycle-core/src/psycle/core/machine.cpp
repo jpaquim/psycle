@@ -190,14 +190,13 @@ void Machine::crashed(std::exception const & e) throw() {
 	///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 }
 
-Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id, bool input_buffer_mix_by_player)
+Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 :
 	crashed_(),
 	//fpu_exception_mask_(),
 	id_(id),
 	callbacks(callbacks),
 	playColIndex(0),
-	input_buffer_mix_by_player_(input_buffer_mix_by_player),
 	_bypass(false),
 	_standby(false),
 	_mute(false),
@@ -584,7 +583,7 @@ bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireInd
 }
 
 void Machine::PreWork(int numSamples, bool clear) {
-	processed_by_multithreaded_scheduler_ = false;
+	sched_processed_ = false;
 	_worked = false;
 	_waitingForSound = false;
 	//PSYCLE__CPU_COST__INIT(cost);
@@ -649,6 +648,26 @@ void Machine::WorkWires(int numSamples, bool mix) {
 	dsp::Undenormalize(_pSamplesL, _pSamplesR, numSamples);
 	//PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
 	//wire_cpu_cost(wire_cpu_cost() + wcost);
+}
+
+/// tells the scheduler which machines to process before this one
+Machine::sched_deps Machine::sched_inputs() const {
+	sched_deps result;
+	if(_connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(_inputCon[c]) {
+		Machine & input(*callbacks->song().machine(_inputMachines[c]));
+		result.push_back(&input);
+	}
+	return result;
+}
+
+/// tells the scheduler which machines may be processed after this one
+Machine::sched_deps Machine::sched_outputs() const {
+	sched_deps result;
+	if(_connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(_connection[c]) {
+		Machine & output(*callbacks->song().machine(_outputMachines[c]));
+		result.push_back(&output);
+	}
+	return result;
 }
 
 void Machine::defineInputAsStereo(int numports) {

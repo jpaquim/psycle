@@ -302,7 +302,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\name ctor/dtor
 	///\{
 		protected:
-			Machine(MachineCallbacks* callbacks, Machine::id_type id, bool input_buffer_mix_by_player = true);
+			Machine(MachineCallbacks* callbacks, Machine::id_type id);
 		public:
 			virtual ~Machine();
 			virtual void CloneFrom(Machine& src);
@@ -390,19 +390,7 @@ class PSYCLE__CORE__DECL Machine {
 			virtual Wire::id_type GetFreeOutputWire(OutPort::id_type slottype=OutPort::id_type(0)) const;
 	///\}
 
-
-	//////////////////////////////////////////////////////////////////////////
-	// Properties
-
-	///\name input buffer mix
-	/// indicates whether the player should mix the input buffers.
-	/// For, e.g., the mixer machine it's false because it does it by itself.
-	///\{
-		public: bool input_buffer_mix_by_player() const { return input_buffer_mix_by_player_; }
-		protected: bool input_buffer_mix_by_player_;
-	///\}
-
-	///\name states
+	///\name states and scheduling related functions
 	///\{
 		public:
 			virtual bool Bypass() const { return _bypass; }
@@ -422,13 +410,21 @@ class PSYCLE__CORE__DECL Machine {
 		public:///\todo private:
 			bool _mute;
 
+		public:///\todo private:
 			bool _waitingForSound;
 			bool _worked;
+
+		private: friend class Player;
 			/// [bohan] the multi-threaded scheduler cannot use _worked because it's not thread-synchronised,
 			///         so, we define another boolean that's modified only by the multi-threaded scheduler,
 			///         with proper thread synchronisations.
 			///         the multi-threaded scheduler doesn't use _worked nor _waitingForSound.
-			bool processed_by_multithreaded_scheduler_;
+			bool sched_processed_;
+			typedef std::list<Machine*> sched_deps;
+			/// tells the scheduler which machines to process before this one
+			virtual sched_deps sched_inputs() const;
+			/// tells the scheduler which machines may be processed after this one
+			virtual sched_deps sched_outputs() const;
 	///\}
 
 	protected:
