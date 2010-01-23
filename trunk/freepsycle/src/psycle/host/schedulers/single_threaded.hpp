@@ -18,7 +18,6 @@ namespace psycle { namespace host { namespace schedulers {
 namespace single_threaded {
 
 using namespace universalis::stdlib;
-
 namespace underlying = host::underlying;
 
 class graph;
@@ -242,8 +241,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 				}
 			private:
 				std::size_t channels_, events_;
-		} * buffer_pool_instance_;
-		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
+		} * buffer_pool_;
 		
 		thread * thread_;
 		void thread_function();

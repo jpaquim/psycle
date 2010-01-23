@@ -170,7 +170,7 @@ scheduler::scheduler(underlying::graph & graph, std::size_t threads) throw(std::
 	on_delete_connection_signal_connection(graph.delete_connection_signal().connect(
 		boost::bind(&scheduler::on_delete_connection, this, _1, _2))
 	),
-	buffer_pool_instance_(),
+	buffer_pool_(),
 	thread_count_(threads)
 {}
 
@@ -271,12 +271,12 @@ void scheduler::compute_plan() {
 	// copy the initial processing queue
 	nodes_queue_ = graph().terminal_nodes();
 
-	delete buffer_pool_instance_;
-	buffer_pool_instance_ = new buffer_pool(graph().channels(), graph().underlying().events_per_buffer());
+	delete buffer_pool_;
+	buffer_pool_ = new buffer_pool(graph().channels(), graph().underlying().events_per_buffer());
 }
 
 void scheduler::clear_plan() {
-	delete buffer_pool_instance_; buffer_pool_instance_ = 0;
+	delete buffer_pool_; buffer_pool_ = 0;
 	nodes_queue_.clear();
 	graph().clear_plan();
 }
@@ -515,7 +515,7 @@ void scheduler::process(class node & node) throw(std::exception) {
 					set_buffer_for_output_port(output_port, node.multiple_input_port()->buffer());
 				} else { // we have several inputs, so, this cannot be the identity transform, i.e., the buffer would be modified. but its content must be preserved for further reading
 					// get buffer for output port
-					set_buffer_for_output_port(output_port, buffer_pool_instance()());
+					set_buffer_for_output_port(output_port, (*buffer_pool_)());
 					// copy content of input buffer to output buffer
 					if(false && loggers::trace()()) {
 						std::ostringstream s;
@@ -580,7 +580,7 @@ void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool
 	) {
 		ports::output & output_port(**i);
 		if(output_port.input_ports().size())
-			set_buffer_for_output_port(output_port, buffer_pool_instance()());
+			set_buffer_for_output_port(output_port, (*buffer_pool_)());
 	}
 }
 
@@ -598,7 +598,7 @@ void inline scheduler::check_whether_to_recycle_buffer_in_the_pool(buffer & buff
 		s << "buffer: " << &buffer << ": " << buffer.reference_count() << " to go";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	if(!buffer.reference_count()) (*buffer_pool_instance_)(buffer); // recycle the buffer in the pool
+	if(!buffer.reference_count()) (*buffer_pool_)(buffer); // recycle the buffer in the pool
 }
 
 /**********************************************************************************************************************/

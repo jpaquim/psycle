@@ -33,7 +33,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 		typedef engine::event event;
 
 		/// creates a new zero-sized channel.
-		channel() throw(std::exception) : std::vector<event>(), flag_(flags::empty) {}
+		channel() throw(std::exception) : flag_(flags::empty) {}
 
 		/// creates a new channel with the given number of events.
 		///\param events the number of events
@@ -41,7 +41,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 };
 
 /// a vector of channels.
-///\todo rename to polybuffer as suggested by JosepMa.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer : public std::vector<channel> {
 	public:
 		typedef engine::channel channel;
