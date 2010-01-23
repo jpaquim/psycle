@@ -21,6 +21,8 @@ class PSYCLE__CORE__DECL XMSampler : public Machine {
 public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony
 	static const int MAX_INSTRUMENT = 255;///< max instrument
+	static const std::uint32_t VERSION = 0x00010001;
+	static const std::uint32_t VERSION_ONE = 0x00010000;
 	static const float SURROUND_THRESHOLD;
 
 /*
@@ -707,7 +709,7 @@ XMSampler::Channel::PerformFX().
 			Init();
 		}
 		bool Load(RiffFile& riffFile);
-		void Save(RiffFile& riffFile);
+		void Save(RiffFile& riffFile) const;
 		void Init();
 		void EffectInit();
 		void Restore();
@@ -1000,7 +1002,7 @@ XMSampler::Channel::PerformFX().
 
 	virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
-	virtual void SaveSpecificChunk(RiffFile* riffFile);
+	virtual void SaveSpecificChunk(RiffFile* riffFile) const;
 
 	MachineCallbacks* const pCallbacks() const { return callbacks; }
 

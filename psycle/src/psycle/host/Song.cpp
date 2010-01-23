@@ -2588,7 +2588,7 @@ using namespace helpers::math;
 			if (numInstruments >0)
 			{
 				pFile->Write("EINS",4);
-				version = XMSampler::VERSION;
+				version = CURRENT_FILE_VERSION_EINS;
 				pFile->Write(&version,sizeof(version));
 				long pos = pFile->GetPos();
 				size = 0;

@@ -83,7 +83,7 @@
 		virtual void Stop();
 
 		virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-		virtual void SaveSpecificChunk(RiffFile * pFile);
+		virtual void SaveSpecificChunk(RiffFile * pFile) const;
 		// old fileformat {
 		virtual bool PreLoadPsy2FileFormat(RiffFile * pFile, unsigned char &_program, int &_instance);
 		virtual bool LoadFromMac(vst::plugin *pMac, unsigned char program, int numPars, float* pars);
