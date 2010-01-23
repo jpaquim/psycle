@@ -43,7 +43,7 @@ namespace psycle { namespace core {
 			public:
 				virtual ~LADSPAMachine() throw();
 				virtual void Init();
-				virtual void PreWork(int numSamples);
+				virtual void PreWork(int numSamples, bool clear = true);
 				virtual int GenerateAudio(int numSamples );
 				virtual void Tick(int channel, const PatternEvent & pEntry );
 				virtual void Stop(){}

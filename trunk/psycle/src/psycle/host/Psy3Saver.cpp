@@ -68,24 +68,38 @@ namespace psycle  {
 			return new_name;
 		}
 
-		int Psy3Saver::ConvertType(const psycle::core::MachineKey& key) const {
-			int old_type = OldMachineType::MACH_DUMMY; // default
-			if (key == MachineKey::dummy()) {
-				old_type = OldMachineType::MACH_DUMMY;
-			} else
+		int Psy3Saver::ConvertType(const psycle::core::MachineKey& key,bool isGenerator) const {
+			OldMachineType old_type = MACH_DUMMY; // default
+			if (key.host() == Hosts::INTERNAL ) {
 				if (key == MachineKey::master() ) {
-					old_type = OldMachineType::MACH_MASTER;
-				} else
-					if (key == MachineKey::duplicator() ) {
-						old_type = OldMachineType::MACH_DUPLICATOR;
-					} else
-						if (key == MachineKey::sampler()) {
-							old_type = OldMachineType::MACH_SAMPLER;
-						} else
-							if (key.host() == Hosts::NATIVE) {
-								old_type = OldMachineType::MACH_PLUGIN;
-							}
-			return old_type;
+					old_type = MACH_MASTER;
+				}
+				else if (key == MachineKey::sampler()) {
+					old_type = MACH_SAMPLER;
+				}
+				else if (key == MachineKey::sampulse()) {
+					old_type = MACH_XMSAMPLER;
+				}
+				else if (key == MachineKey::duplicator() ) {
+					old_type = MACH_DUPLICATOR;
+				}
+				else if (key == MachineKey::mixer() ) {
+					old_type = MACH_MIXER;
+				}
+				else if (key == MachineKey::audioinput() ) {
+					old_type = MACH_RECORDER;
+				}
+			}
+			else if (key.host() == Hosts::NATIVE ) {
+				old_type = MACH_PLUGIN;
+			}
+			else if (key.host() == Hosts::VST ) {
+				if (isGenerator)
+					old_type = MACH_VST;
+				else
+					old_type = MACH_VSTFX;
+			}
+			return (int)old_type;
 		}
 
 		bool Psy3Saver::Save(psycle::core::RiffFile* pFile,bool autosave) {
@@ -372,7 +386,7 @@ namespace psycle  {
 
 					MachineKey key = song_->machine(i)->getMachineKey();
 					pFile->Write(std::uint32_t(index));
-					pFile->Write(std::uint32_t(ConvertType(key)));
+					pFile->Write(std::uint32_t(ConvertType(key,song_->machine(i)->IsGenerator())));
 					std::string dllName = ModifyDllNameWithIndex(ConvertName(key.dllName())+".dll", key.index());
 					pFile->WriteArray(dllName.c_str(),dllName.length()+1);
 					// pFile->Write(std::uint32_t(key.index())); // is saved in the dllName

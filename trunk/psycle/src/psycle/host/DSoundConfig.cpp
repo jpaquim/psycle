@@ -25,8 +25,14 @@
 
 #include <iomanip>
 
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle {
 	namespace host {
+
 
 		CDSoundConfig::CDSoundConfig(CWnd* pParent)
 		:
@@ -132,6 +138,11 @@ namespace psycle {
 					m_bufferSizeSpin.SetAccel(1, &accel);
 				}
 			}
+			m_numBuffersEdit.SetReadOnly(exclusive);
+			m_numBuffersSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
+			m_bufferSizeEdit.SetReadOnly(exclusive);
+			m_bufferSizeSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
+
 			return TRUE;
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE
@@ -177,6 +188,10 @@ namespace psycle {
 		void CDSoundConfig::OnExclusive()
 		{
 			exclusive = m_exclusiveCheck.GetState() & 1;
+			m_numBuffersEdit.SetReadOnly(exclusive);
+			m_numBuffersSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
+			m_bufferSizeEdit.SetReadOnly(exclusive);
+			m_bufferSizeSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
 		}
 
 		void CDSoundConfig::OnDither()

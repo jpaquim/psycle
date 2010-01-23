@@ -176,14 +176,7 @@ class Machine {
 	}
 }
 */
-/*
-enum MachineMode {
-	MACHMODE_UNDEFINED = -1, //< :-(
-	MACHMODE_GENERATOR = 0,
-	MACHMODE_FX = 1,
-	MACHMODE_MASTER = 2,
-};
-*/
+
 class WorkEvent {
 	public:
 		WorkEvent() {}
@@ -291,29 +284,6 @@ class PSYCLE__CORE__DECL Machine {
 	// bool IsStandBy()
 	//////////////////////////////////////////////////////////////////////////
 
-#if 0
-	///\name each machine has a type attribute so that we can make yummy switch statements
-	///\{
-		public:
-			///\see enum MachineType which defined somewhere outside
-			typedef int32_t type_type; // Was: MachineType type_type
-			type_type inline type() const throw() { return type_; }
-		private:
-			void type(type_type type) { type_ = type; } friend class CoreSong;
-			type_type type_;
-	///\}
-
-	///\name each machine has a mode attribute so that we can make yummy switch statements
-	///\{
-		public:
-			///\see enum MachineMode which is defined somewhere outside
-			typedef MachineMode mode_type;
-			mode_type inline mode() const throw() { return mode_; }
-		private:
-			void mode(mode_type mode) { mode_ = mode; } friend class Plugin;
-			mode_type mode_;
-	///\}
-#endif
 
 	///\name machine's numeric identifier. It is required for pattern events<->machine association, gui, and obviusly, in file load/save.
 	///\{
@@ -501,33 +471,6 @@ class PSYCLE__CORE__DECL Machine {
 			// Subclass tells, if the component is a generator in opposite to an effect
 			virtual bool IsGenerator() const;
 
-			// this is introduced only for compatibility and will
-			// later solved different
-			// avoid using it and use it only for compatibility issues
-			#if 0
-			typedef enum MachineType_t
-			{
-				MACH_UNDEFINED = -1,
-				MACH_MASTER = 0,
-					MACH_SINE = 1, ///< now a plugin
-					MACH_DIST = 2, ///< now a plugin
-				MACH_SAMPLER = 3,
-					MACH_DELAY = 4, ///< now a plugin
-					MACH_2PFILTER = 5, ///< now a plugin
-					MACH_GAIN = 6, ///< now a plugin
-					MACH_FLANGER = 7, ///< now a plugin
-				MACH_PLUGIN = 8,
-				MACH_VST = 9,
-				MACH_VSTFX = 10,
-				MACH_SCOPE = 11,
-				MACH_XMSAMPLER = 12,
-				MACH_DUPLICATOR = 13,
-				MACH_MIXER = 14,
-				MACH_RECORDER = 15,
-				MACH_DUMMY = 255
-			} MachineType;
-			MachineType _type;
-			#endif
 		protected:
 			int numInPorts;
 			int numOutPorts;

@@ -7,12 +7,15 @@
 ///\todo: These two includes need to be replaced by a "host" callback which gives such information.
 #include "player.h"
 #include "song.h"
+#include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include "fileio.h"
 
 namespace psycle { namespace core {
 
 using namespace helpers;
+using namespace helpers::math;
+
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Mixer
@@ -867,11 +870,13 @@ using namespace helpers;
 		{
 			if ( _inputCon[idx] ) 
 			{
+				//Note that since volumeDisplay is integer, when using positive gain,
+				//the result can visually differ from the calculated one
 				float vol;
 				GetWireVolume(idx,vol);
 				vol*=Channel(idx).Volume();
-				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
-				return (callbacks->song().machine(_inputMachines[idx])->_volumeDisplay/97.0f)*vol;
+				int temp(lround<int>(50.0f * std::log10(vol)));
+				return (callbacks->song().machine(_inputMachines[idx])->_volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;
 		}
@@ -880,11 +885,13 @@ using namespace helpers;
 		{
 			if ( SendValid(idx) )
 			{
+				//Note that since volumeDisplay is integer, when using positive gain,
+				// the result can visually differ from the calculated one
 				float vol;
 				GetWireVolume(idx+MAX_CONNECTIONS,vol);
 				vol *= Return(idx).Volume();
-				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
-				return (callbacks->song().machine(Return(idx).Wire().machine_)->_volumeDisplay/97.0f)*vol;
+				int temp(lround<int>(50.0f * std::log10(vol)));
+				return (callbacks->song().machine(Return(idx).Wire().machine_)->_volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;
 		}

@@ -240,11 +240,11 @@ using namespace helpers;
 			}
 		}
 		
-		void LADSPAMachine::PreWork(int numSamples)
+		void LADSPAMachine::PreWork(int numSamples, bool clear)
 		{
 			//std::swap(_pSamplesL,pOutSamplesL);
 			//std::swap(_pSamplesR,pOutSamplesR);
-			Machine::PreWork(numSamples);
+			Machine::PreWork(numSamples,clear);
 		}
 		
 		int LADSPAMachine::GenerateAudio(int numSamples )

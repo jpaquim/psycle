@@ -105,8 +105,11 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 		mac->getMachineKey() != MachineKey::wrapperVst() &&
 		mac->getMachineKey() != MachineKey::invalid()) {
 		//Workaround for some where the first work call initializes some variables.
-		mac->PreWork(MAX_BUFFER_LENGTH, true);
-		mac->GenerateAudio(MAX_BUFFER_LENGTH);
+		if (key != MachineKey::wrapperVst()) 
+		{
+			mac->PreWork(MAX_BUFFER_LENGTH, true);
+			mac->GenerateAudio(MAX_BUFFER_LENGTH);
+		}
 	}
 	return mac;
 #if 0
