@@ -21,6 +21,8 @@
 #include <iostream>
 namespace psycle { namespace tests { namespace random_notes {
 
+using namespace universalis::stdlib;
+
 void paths() {
 	#if defined $
 		#error "macro clash"
@@ -153,7 +155,7 @@ void stuff() {
 			#endif
 				
 			if(loggers::information()()) loggers::information()("generating input ...");
-			std::seconds const seconds(10);
+			seconds const seconds(1);
 			{
 				unsigned int const notes(100000);
 				engine::real beat(0);
@@ -201,7 +203,7 @@ void stuff() {
 				loggers::information()(s.str());
 			}
 			scheduler.start();
-			std::this_thread::sleep(seconds);
+			this_thread::sleep(seconds);
 			scheduler.stop();
 		}
 		loggers::information()("############################################# clean up ######################################################");
