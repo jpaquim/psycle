@@ -464,7 +464,7 @@ scheduler::buffer_pool::buffer_pool(std::size_t channels, std::size_t events) th
 {}
 
 scheduler::buffer_pool::~buffer_pool() throw() {
-	for(const_iterator i(begin()), e(end()); i != e; ++i) delete *i;
+	for(list_type::const_iterator i(list_.begin()), e(list_.end()); i != e; ++i) delete *i;
 }
 
 /**********************************************************************************************************************/

@@ -46,11 +46,11 @@ class buffer : public underlying::buffer {
 		virtual ~buffer() throw();
 		/// convertible to std::size_t
 		///\returns the reference count.
-		std::size_t reference_count() const throw() { return reference_count_; }
+		std::size_t reference_count() const { return reference_count_; }
 		/// increments the reference count.
-		buffer & operator+=(std::size_t more) throw() { reference_count_ += more; return *this; }
+		buffer & operator+=(std::size_t more) { reference_count_ += more; return *this; }
 		/// decrements the reference count by 1.
-		buffer & operator--() throw() { assert(this->reference_count() > 0); --reference_count_; return *this; }
+		buffer & operator--() { assert(this->reference_count() > 0); --reference_count_; return *this; }
 	private:
 		std::size_t reference_count_;
 };
@@ -207,42 +207,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 	///\}
 
 	private:
-		/// Flyweight pattern [Gamma95].
-		/// a pool of buffers that can be used for input and output ports of the nodes of the graph.
-		class buffer_pool : protected std::list<buffer*> {
-			public:
-				buffer_pool(std::size_t channels, std::size_t events) throw(std::exception);
-				virtual ~buffer_pool() throw();
-				/// gets a buffer from the pool.
-				buffer & operator()() {
-					if(false && loggers::trace()()) {
-						std::ostringstream s;
-						s << "buffer requested, pool size before: " << size();
-						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-					if(empty()) return *new buffer(channels_, events_);
-					buffer & result(*back());
-					assert("reference count is zero: " && !result.reference_count());
-					pop_back(); // note: on most implementations, this will not realloc memory, so it's realtime-safe.
-					return result;
-				}
-				/// recycles a buffer in the pool.
-				void operator()(buffer & buffer) {
-					assert(&buffer);
-					assert("reference count is zero: " && !buffer.reference_count());
-					assert(buffer.channels() >= this->channels_);
-					assert(buffer.events() >= this->events_);
-					if(false && loggers::trace()()) {
-						std::ostringstream s;
-						s << "buffer " << &buffer << " given back, pool size before: " << size();
-						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-					}
-					push_back(&buffer); // note: does non-realtime realloc
-				}
-			private:
-				std::size_t channels_, events_;
-		} * buffer_pool_;
-		
+		class buffer_pool;
+		buffer_pool * buffer_pool_;
+
 		thread * thread_;
 		void thread_function();
 		
@@ -264,6 +231,44 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		void set_buffer_for_output_port(ports::output &, buffer &);
 		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
 		void check_whether_to_recycle_buffer_in_the_pool(buffer &);
+};
+
+/// Flyweight pattern [Gamma95].
+/// a pool of buffers that can be used for input and output ports of the nodes of the graph.
+class scheduler::buffer_pool {
+	public:
+		buffer_pool(std::size_t channels, std::size_t events) throw(std::exception);
+		virtual ~buffer_pool() throw();
+		/// gets a buffer from the pool.
+		buffer & operator()() {
+			if(false && loggers::trace()()) {
+				std::ostringstream s;
+				s << "buffer requested, pool size before: " << list_.size();
+				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			if(list_.empty()) return *new buffer(channels_, events_);
+			buffer & result(*list_.back());
+			assert("reference count is zero: " && !result.reference_count());
+			list_.pop_back(); // note: on most implementations, this will not realloc memory, so it's realtime-safe.
+			return result;
+		}
+		/// recycles a buffer in the pool.
+		void operator()(buffer & buffer) {
+			assert(&buffer);
+			assert("reference count is zero: " && !buffer.reference_count());
+			assert(buffer.channels() >= this->channels_);
+			assert(buffer.events() >= this->events_);
+			if(false && loggers::trace()()) {
+				std::ostringstream s;
+				s << "buffer " << &buffer << " given back, pool size before: " << list_.size();
+				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+			list_.push_back(&buffer); // note: does non-realtime realloc
+		}
+	private:
+		typedef std::list<buffer*> list_type;
+		list_type list_;
+		std::size_t channels_, events_;
 };
 
 }}}}

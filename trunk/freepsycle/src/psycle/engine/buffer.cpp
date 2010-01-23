@@ -30,10 +30,10 @@ void buffer::resize(std::size_t channels, std::size_t events) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	//assert(channels != 0 || events == 0 && "channels == 0 implies events == 0"); // why enforcing this ?
-	std::vector<channel>::resize(channels);
+	channels_.resize(channels);
 	events_ = events;
-	for(iterator i(begin()) ; i != end() ; ++i) i->resize(events);
-	clear(size());
+	for(iterator i(begin()), e(end()); i != e; ++i) i->resize(events);
+	clear(channels);
 }
 
 }}
