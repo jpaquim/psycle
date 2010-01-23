@@ -6,20 +6,21 @@
 #include "forward_declarations.hpp"
 #include "event.hpp"
 #include <vector>
+#include <cassert>
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace engine {
 
 /// a vector of events.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel {
 	///\name flags to give hint to process loops
 	///\{
 		public:
 			struct flags {
 				enum type {
-					continuous, ///< indicates there is an event for every sample
+					empty, ///< indicates there is no event
 					discrete, ///< indicates there are events, but not one for every sample
-					empty ///< indicates there is no event
+					continuous ///< indicates there is an event for every sample
 				};
 			};
 			
@@ -30,21 +31,39 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel : public std::vector<event> {
 	///\}
 
 	public:
-		typedef engine::event event;
+		typedef class event event;
 
 		/// creates a new zero-sized channel.
-		channel() throw(std::exception) : flag_(flags::empty) {}
+		channel() throw(std::exception) : flag_() {}
 
 		/// creates a new channel with the given number of events.
 		///\param events the number of events
-		channel(std::size_t events) throw(std::exception) : std::vector<event>(events), flag_(flags::empty) {}
+		channel(std::size_t events) throw(std::exception) : flag_(), events_(events) {}
+
+	///\name vector of events
+	///\{
+		private:
+			typedef std::vector<event> events_type;
+			events_type events_;
+		public:
+			events_type::size_type size() const { return events_.size(); }
+			void resize(events_type::size_type events) { events_.resize(events); }
+			typedef events_type::const_iterator const_iterator;
+			typedef events_type::iterator iterator;
+			const_iterator begin() const { return events_.begin(); }
+			iterator begin() { return events_.begin(); }
+			const_iterator end() const { return events_.end(); }
+			iterator end() { return events_.end(); }
+			events_type::const_reference operator[](events_type::size_type event) const { assert(event < size()); return events_[event]; }
+			events_type::reference operator[](events_type::size_type event) { assert(event < size()); return events_[event]; }
+	///\}
 };
 
 /// a vector of channels.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer : public std::vector<channel> {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer {
 	public:
-		typedef engine::channel channel;
-		typedef engine::event event;
+		typedef class channel channel;
+		typedef class event event;
 
 		/// creates a new buffer with the given number of channels and the given number of events in each channel.
 		///\param channels the number of channels
@@ -56,24 +75,24 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer : public std::vector<channel> {
 
 		/// the number of channels (size of the vector of channels).
 		///\return the number of channels
-		std::size_t channels() const throw() { return std::vector<channel>::size(); }
+		std::size_t channels() const { return channels_.size(); }
 
 		/// sets the number of channels.
 		///\param the number of channels
 		void channels(std::size_t channels) { resize(channels, events()); }
 
-		/// sets the number of channels and number of events in each channel.
-		///\param channels the number of channels
-		///\param events the number of events in each channel
-		void resize(std::size_t channels, std::size_t events);
-
 		/// the number of events in each channels.
 		///\return the number of events in each channel
-		std::size_t events() const throw() { return events_; }
+		std::size_t events() const { return events_; }
 
 		/// sets the number of events in each channel.
 		///\param the number of events in each channel
 		void events(std::size_t events) { resize(channels(), events); }
+
+		/// sets the number of channels and number of events in each channel.
+		///\param channels the number of channels
+		///\param events the number of events in each channel
+		void resize(std::size_t channels, std::size_t events);
 
 		/// clears all events.
 		/// A complexity of o(channels) is achieved by simply setting the index of the first event.
@@ -87,13 +106,21 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer : public std::vector<channel> {
 	private:
 		std::size_t events_;
 
-		/// size is ambiguous because we have two dimensions: channels() and events().
-		/// so we hide it by making it private.
-		std::size_t size() const { return std::vector<channel>::size(); }
-
-		/// resize is ambiguous because we have two dimensions: channels() and events().
-		/// so we hide it by making it private.
-		void resize(std::size_t channels) { resize(channels, events()); }
+	///\name vector of channels
+	///\{
+		private:
+			typedef std::vector<channel> channels_type;
+			channels_type channels_;
+		public:
+			typedef channels_type::const_iterator const_iterator;
+			typedef channels_type::iterator iterator;
+			const_iterator begin() const { return channels_.begin(); }
+			iterator begin() { return channels_.begin(); }
+			const_iterator end() const { return channels_.end(); }
+			iterator end() { return channels_.end(); }
+			channels_type::const_reference operator[](channels_type::size_type channel) const { assert(channel < channels()); return channels_[channel]; }
+			channels_type::reference operator[](channels_type::size_type channel) { assert(channel < channels()); return channels_[channel]; }
+	///\}
 };
 
 }}

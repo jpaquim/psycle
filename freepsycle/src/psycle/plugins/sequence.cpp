@@ -48,15 +48,17 @@ void sequence::do_process() throw(engine::exception) {
 	for(; i_ != events_.end() && i_->first < last_beat; ++i_) {
 		real const b(i_->first), s(i_->second);
 		std::size_t const i(static_cast<std::size_t>(b * samples_per_beat - initial_sample));
-		if(i < out.events()) {
+		if(i < out.events() && last_index < out.events()) {
 			for(std::size_t c(0); c < channels; ++c) out[c][last_index](i, s);
 			++last_index;
 		} else { // event lost! should never happen.
 			if(loggers::warning()) {
-				std::ostringstream s;
-				s << "event lost: " << b << ' ' << s;
-				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				std::ostringstream oss;
+				oss << "event lost: " << b << ' ' << s;
+				loggers::warning()(oss.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
+			--i_;
+			break;
 		}
 	}
 	if(last_index) for(std::size_t c(0); c < channels; ++c) out[c].flag(channel::flags::discrete);

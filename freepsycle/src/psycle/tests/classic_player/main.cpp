@@ -57,7 +57,7 @@ void stuff() {
 
 		std::string output_plugin_name("output");
 		{ // output env var
-			char const * const env(std::getenv("PSYCLE__OUTPUT"));
+			char const * const env(std::getenv("PSYCLE_OUTPUT"));
 			if(env) {
 				std::stringstream s;
 				s << env;
@@ -140,7 +140,7 @@ void stuff() {
 				host::schedulers::multi_threaded::scheduler scheduler(graph);
 				std::size_t threads(universalis::os::cpu_affinity::cpu_count());
 				{ // thread count env var
-					char const * const env(std::getenv("PSYCLE__THREADS"));
+					char const * const env(std::getenv("PSYCLE_THREADS"));
 					if(env) {
 						std::stringstream s;
 						s << env;
