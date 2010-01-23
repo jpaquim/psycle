@@ -670,7 +670,7 @@ Machine::sched_deps Machine::sched_outputs() const {
 	return result;
 }
 
-/// tells the scheduler which machines may be processed after this one
+/// called by the scheduler to ask for the actual processing of the machine
 void Machine::sched_process(unsigned int frames) {
 	if(_connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
 		Machine & input_node(*callbacks->song().machine(_inputMachines[i]));
