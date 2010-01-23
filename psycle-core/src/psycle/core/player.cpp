@@ -44,8 +44,12 @@ Player::Player()
 	recording_(),
 	recording_with_dither_(),
 	playing_(),
-	autoStopMachines_()
+	autoStopMachines_(),
+	work_suspended_(false)
 {
+	universalis::os::aligned_memory_alloc(16, null_buffer, 2*MAX_BUFFER_LENGTH);
+	dsp::Clear(null_buffer,2*MAX_BUFFER_LENGTH);
+
 	universalis::os::aligned_memory_alloc(16, buffer_, MAX_SAMPLES_WORKFN);
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
 	start_threads();

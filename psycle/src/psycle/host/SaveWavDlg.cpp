@@ -139,7 +139,7 @@ namespace psycle {
 			m_linestart.EnableWindow(false);
 			m_patnumber2.EnableWindow(false);
 
-			char num[3];
+			char num[10];
 			sprintf(num,"%02x",pSong.playOrder[mainFrame->m_wndView.pattern_view()->editPosition]);
 			m_patnumber.SetWindowText(num);
 			sprintf(num,"%02x",0);
@@ -396,17 +396,34 @@ namespace psycle {
 			m_recmode=3;
 		}
 
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void CSaveWavDlg::OnSavewave() 
+		{
+			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
+			const int real_bits[]={8,16,24,32,32};
+
+			Player::singleton().stop();
+			Player::singleton().set_work_suspend(true);
+			Player::singleton().start(0);
+
+			CString name;
+			m_filename.GetWindowText(name);
+			std::string file_name = name;
+			wav_file_.OpenForWrite(file_name.c_str(), real_rate[rate], real_bits[bits], 2); // 2 hardcoded atm
+			kill_thread = 0;
+			unsigned long tmp;
+			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp);
+		}
+
+#else
 		void CSaveWavDlg::OnSavewave() 
 		{
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 			const int real_bits[]={8,16,24,32,32};
 			bool isFloat = (bits == 4);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 			Song& pSong = mainFrame->projects()->active_project()->song();
-#else
-			Song& pSong = Global::song();
-#endif
 			Player *pPlayer = Global::pPlayer;
 
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
@@ -443,14 +460,10 @@ namespace psycle {
 					}
 				}
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			//todo: keep previous values
-#else
 			playblock = pPlayer->_playBlock;
 			loopsong = pPlayer->_loopSong;
 			memcpy(sel,pSong.playOrderSel,MAX_SONG_POSITIONS);
 			memset(pSong.playOrderSel,0,MAX_SONG_POSITIONS);
-#endif
 			CString name;
 			m_filename.GetWindowText(name);
 
@@ -611,6 +624,7 @@ namespace psycle {
 				SaveWav("",real_bits[bits],real_rate[rate],channelmode,isFloat);
 			}
 		}
+#endif
 
 		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
 		{
@@ -786,6 +800,68 @@ namespace psycle {
 			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
 		}
 
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		DWORD WINAPI __stdcall RecordThread(void *b) {
+			CSaveWavDlg* sender = (CSaveWavDlg*)b;
+			while(!sender->kill_thread) {				
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+				Song& song = mainFrame->projects()->active_project()->song();
+				int frames = 8192;
+				Player::singleton().Work(frames);
+
+				float * pL(song.machine(MASTER_INDEX)->_pSamplesL);
+				float * pR(song.machine(MASTER_INDEX)->_pSamplesR);
+				//
+				// if(recording_with_dither_) {
+				//  dither_.Process(pL, amount);
+				//  dither_.Process(pR, amount);
+				// }
+				int channelmode = 3;
+				switch(channelmode) {
+					case 0: // mono mix
+						for(int i(0); i < frames; ++i) {
+						//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
+							if (sender->wav_file_.WriteMonoSample((*pL++ + *pR++) / 2) != DDC_SUCCESS) {
+								sender->kill_thread = 1;
+								break;
+							}
+						}
+					break;
+					case 1: // mono L
+						for(int i(0); i < frames; ++i) {
+							if (sender->wav_file_.WriteMonoSample(*pL++) != DDC_SUCCESS) {
+								sender->kill_thread = 1;
+								break;
+							}
+						}
+					break;
+					case 2: // mono R
+						for(int i(0); i < frames; ++i) {
+							if (sender->wav_file_.WriteMonoSample(*pR++) != DDC_SUCCESS) {
+								sender->kill_thread = 1;
+								break;
+							}
+						}
+					break;
+					default: // stereo
+						for(int i(0); i < frames; ++i) {
+							if (sender->wav_file_.WriteStereoSample(*pL++, *pR++) != DDC_SUCCESS) {
+								sender->kill_thread = 1;
+								break;
+							}
+						}
+				}
+			}
+			sender->wav_file_.Close();
+			Player::singleton().stop();
+			Player::singleton().set_work_suspend(false);
+			ExitThread(0);
+			return 0;
+		}
+#else
+
+
 		DWORD WINAPI __stdcall RecordThread(void *b) {
 			((CSaveWavDlg*)b)->threadopen++;
 			Player* pPlayer = Global::pPlayer;
@@ -812,6 +888,7 @@ namespace psycle {
 			ExitThread(0);
 			//return 0;
 		}
+#endif
 
 		void CSaveWavDlg::OnCancel() 
 		{
