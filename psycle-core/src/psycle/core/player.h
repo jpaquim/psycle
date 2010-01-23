@@ -82,16 +82,15 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		public:
 			/// entrance for the callback function (audiodriver)
 			static float * Work(void * context, int samples) {
-				Player* player = reinterpret_cast<Player*>(context);
+				Player & player = *reinterpret_cast<Player*>(context);
 				float* buffer = 0;
-				player->Lock();
-				if (!player->work_suspended()) {
-					buffer = player->Work(samples);
+				scoped_lock lock(player.work_mutex_);
+				if (!player.work_suspended_) {
+					buffer = player.Work(samples);
 				} else {
-					buffer = player->null_buffer;
-					memset(buffer, 0, 2 * samples * sizeof(float));
+					buffer = player.null_buffer;
+					std::memset(buffer, 0, 2 * samples * sizeof(float));
 				}
-				player->Unlock();
 				return buffer;
 			}
 		public:
@@ -221,25 +220,22 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\}
 
 
-	private:
-		/// Final Loop. Read new line for notes to send to the Machines
-#if 0
-		//replaced by sequencer
-		void execute_notes(double beat_offset, PatternEvent& line);
-#endif
 	public:
 		void process(int samples);
-		void set_work_suspend(bool on) { 
-			Lock();
-			work_suspended_ = on;
-			Unlock();
-		}
-		bool work_suspended() { return work_suspended_; }
 
-		void Lock() { scoped_lock lock(work_mutex_); }
-		void Unlock() { scoped_lock unlock(work_mutex_); }
+	///\name work_suspended
+	///\{
+		public:
+			bool work_suspended() const { scoped_lock lock(work_mutex_); return work_suspended_; }
+			void set_work_suspend(bool on) { scoped_lock lock(work_mutex_); work_suspended_ = on; }
+		private:
+			bool work_suspended_;
+			mutable mutex work_mutex_;
+			float * null_buffer;
+	///\}
 
 	private:
+		Sequencer sequencer_;
 
 		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 		Machine::id_type prev_machines_[MAX_TRACKS];
@@ -286,12 +282,6 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void process_loop() throw(std::exception);
 			void process(node &) throw(std::exception);
 			int samples_to_process_;
-
-			bool work_suspended_;
-			mutable mutex work_mutex_;
-			float * null_buffer;
-
-			Sequencer sequencer_;
 	///\}
 };
 
