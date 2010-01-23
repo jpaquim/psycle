@@ -41,7 +41,7 @@ void sequence::do_process() throw(engine::exception) {
 	if(!*output_ports()[0]) return;
 	engine::buffer & out(output_ports()[0]->buffer());
 	real const samples_per_beat = output_ports()[0]->events_per_second() / beats_per_second_;
-	std::uint64_t const initial_sample(static_cast<std::size_t>(beat_ * samples_per_beat));
+	uint64_t const initial_sample(static_cast<std::size_t>(beat_ * samples_per_beat));
 	real last_beat(beat_ + (out.events() - 1) / samples_per_beat);
 	std::size_t const channels(output_ports()[0]->channels());
 	std::size_t last_index(0);

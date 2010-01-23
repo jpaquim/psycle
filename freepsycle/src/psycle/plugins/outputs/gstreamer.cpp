@@ -276,7 +276,7 @@ void gstreamer::do_open() throw(engine::exception) {
 	unsigned int const period_frames(1024); ///\todo parametrable
 	unsigned int const period_size(static_cast<unsigned int>(period_frames * format.bytes_per_sample()));
 	if(loggers::information()) {
-		real const latency(static_cast<real>(parent().events_per_buffer()) / format.samples_per_second());
+		real const latency(static_cast<real>(graph().events_per_buffer()) / format.samples_per_second());
 		std::ostringstream s;
 		s <<
 			"period size: " << period_size << " bytes; "
@@ -300,8 +300,8 @@ void gstreamer::do_open() throw(engine::exception) {
 
 	{ // allocate the intermediate buffer
 		///\todo use gstreamer's lock-free ringbuffer
-		// note: period_frames may be different from parent().events_per_buffer()
-		std::size_t const bytes(static_cast<std::size_t>(parent().events_per_buffer() * format.bytes_per_sample()));
+		// note: period_frames may be different from graph().events_per_buffer()
+		std::size_t const bytes(static_cast<std::size_t>(graph().events_per_buffer() * format.bytes_per_sample()));
 		if(!(intermediate_buffer_ = new char[bytes])) {
 			std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
 			throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -409,7 +409,7 @@ void gstreamer::do_process() throw(engine::exception) {
 	}
 	{ // fill the intermediate buffer
 		unsigned int const channels(in_port().channels());
-		unsigned int const samples_per_buffer(parent().events_per_buffer());
+		unsigned int const samples_per_buffer(graph().events_per_buffer());
 		assert(last_samples_.size() == channels);
 		for(unsigned int c(0); c < channels; ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);

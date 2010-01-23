@@ -38,11 +38,6 @@ graph::~graph() {
 		loggers::information()(s.str());
 	}
 
-	//for(reverse_iterator i(rbegin()) ; i != rend() ; ++i) /// maybe without ++i, or using a if(i == end()) break; else ++i; {
-
-	//while(!empty()) {
-	//node & node(*--end());
-
 	while(!empty()) {
 		node & node(**begin());
 		erase(*begin()); // work around to bypass the compiler's no-aliasing optimisation
@@ -74,9 +69,9 @@ std::ostream & operator<<(std::ostream & out, graph const & graph) {
 /**********************************************************************************************************************/
 // node
 
-node::node(engine::plugin_library_reference & plugin_library_reference, node::parent_type & parent, node::name_type const & name)
+node::node(class plugin_library_reference & plugin_library_reference, class graph & graph, node::name_type const & name)
 :
-	node_type(parent),
+	bases::node(graph),
 	named(name),
 	plugin_library_reference_(plugin_library_reference),
 	opened_(),
@@ -101,7 +96,7 @@ node::~node() {
 }
 
 node::name_type node::qualified_name() const {
-	return parent().qualified_name() + '.' + name();
+	return graph().qualified_name() + '.' + name();
 }
 
 void node::io_ready(bool io_ready) {
@@ -199,57 +194,45 @@ void node::quaquaversal_propagation_of_seconds_per_event_change_notification_fro
 			if(&port != output_port) output_port->propagate_seconds_per_event(port.seconds_per_event());
 	}
 #else
-	for(
-		single_input_ports_type::const_iterator i(single_input_ports().begin()),
-		e(single_input_ports().end()); i != e; ++i
+	for(single_input_ports_type::const_iterator
+		i(single_input_ports().begin()), e(single_input_ports().end()); i != e; ++i
 	) if(&port == *i) {
-		for(
-			single_input_ports_type::const_iterator j(single_input_ports().begin()),
-			e(single_input_ports().end()); j != e; ++j
+		for(single_input_ports_type::const_iterator
+			j(single_input_ports().begin()), e(single_input_ports().end()); j != e; ++j
 		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
-		for(
-			output_ports_type::const_iterator j(output_ports().begin()),
-			e(output_ports().end()); j != e; ++j
+		for(output_ports_type::const_iterator
+			j(output_ports().begin()), e(output_ports().end()); j != e; ++j
 		) (**j).propagate_seconds_per_event(port.seconds_per_event());
-		if(multiple_input_port()) for(
-			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
-			j != multiple_input_port()->output_ports().end() ; ++j
+		if(multiple_input_port()) for(ports::inputs::multiple::output_ports_type::const_iterator
+			j(multiple_input_port()->output_ports().begin()), e(multiple_input_port()->output_ports().end()); j != e; ++j
 		) (**j).propagate_seconds_per_event(port.seconds_per_event());
 		return;
 	}
-	for(
-		output_ports_type::const_iterator i(output_ports().begin()),
-		e(output_ports().end()); i != e; ++i
+	for(output_ports_type::const_iterator
+		i(output_ports().begin()), e(output_ports().end()); i != e; ++i
 	) if(&port == *i) {
-		for(
-			single_input_ports_type::const_iterator j(single_input_ports().begin()),
-			e(single_input_ports().end()); j != e; ++j
+		for(single_input_ports_type::const_iterator
+			j(single_input_ports().begin()), e(single_input_ports().end()); j != e; ++j
 		) (**j).propagate_seconds_per_event(port.seconds_per_event());
-		for(
-			output_ports_type::const_iterator j(output_ports().begin()),
-			e(output_ports().end()); j != e; ++j
+		for(output_ports_type::const_iterator
+			j(output_ports().begin()), e(output_ports().end()); j != e; ++j
 		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
-		if(multiple_input_port()) for(
-			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
-			j != multiple_input_port()->output_ports().end() ; ++j
+		if(multiple_input_port()) for(ports::inputs::multiple::output_ports_type::const_iterator
+			j(multiple_input_port()->output_ports().begin()), e(multiple_input_port()->output_ports().end()); j != e; ++j
 		) (**j).propagate_seconds_per_event(port.seconds_per_event());
 		return;
 	}
-	if(multiple_input_port()) for(
-		ports::inputs::multiple::output_ports_type::const_iterator i(multiple_input_port()->output_ports().begin());
-		i != multiple_input_port()->output_ports().end() ; ++i
+	if(multiple_input_port()) for(ports::inputs::multiple::output_ports_type::const_iterator
+		i(multiple_input_port()->output_ports().begin()), e(multiple_input_port()->output_ports().end()); i != e; ++i
 	) if(&port == *i) {
-		for(
-			single_input_ports_type::const_iterator j(single_input_ports().begin()),
-			e(single_input_ports().end()); j != e; ++j
+		for(single_input_ports_type::const_iterator
+			j(single_input_ports().begin()), e(single_input_ports().end()); j != e; ++j
 		) (**j).propagate_seconds_per_event(port.seconds_per_event());
-		for(
-			output_ports_type::const_iterator j(output_ports().begin()),
-			e(output_ports().end()); j != e; ++j
+		for(output_ports_type::const_iterator
+			j(output_ports().begin()), e(output_ports().end()); j != e; ++j
 		) (**j).propagate_seconds_per_event(port.seconds_per_event());
-		for(
-			ports::inputs::multiple::output_ports_type::const_iterator j(multiple_input_port()->output_ports().begin());
-			j != multiple_input_port()->output_ports().end() ; ++j
+		for(ports::inputs::multiple::output_ports_type::const_iterator
+			j(multiple_input_port()->output_ports().begin()), e(multiple_input_port()->output_ports().end()); j != e; ++j
 		) if(j != i) (**j).propagate_seconds_per_event(port.seconds_per_event());
 	}
 #endif
@@ -263,8 +246,12 @@ void node::dump(std::ostream & out, std::size_t tabulations) const {
 		<< ", lib " << plugin_library_reference().name()
 		<< ")\n";
 	if(multiple_input_port()) multiple_input_port()->dump(out, tabulations + 1);
-	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) (**i).dump(out, tabulations + 1);
-	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) (**i).dump(out, tabulations + 1);;
+	for(single_input_ports_type::const_iterator
+		i(single_input_ports().begin()), e(single_input_ports().end()); i != e; ++i
+	) (**i).dump(out, tabulations + 1);
+	for(output_ports_type::const_iterator
+		i(output_ports().begin()), e(output_ports().end()); i != e; ++i
+	) (**i).dump(out, tabulations + 1);;
 }
 
 std::ostream & operator<<(std::ostream & out, const node & node) {
@@ -275,9 +262,9 @@ std::ostream & operator<<(std::ostream & out, const node & node) {
 /**********************************************************************************************************************/
 // port
 
-port::port(parent_type & parent, name_type const & name, std::size_t channels)
+port::port(class node & node, name_type const & name, std::size_t channels)
 :
-	port_type(parent),
+	bases::port(node),
 	named(name),
 	buffer_(0),
 	seconds_per_event_(0)
@@ -311,14 +298,14 @@ port::~port() {
 }
 
 port::name_type port::qualified_name() const {
-	return parent().qualified_name() + '.' + name();
+	return node().qualified_name() + '.' + name();
 }
 
 port::name_type port::semi_qualified_name() const {
-	return parent().name() + '.' + name();
+	return node().name() + '.' + name();
 }
 
-void port::buffer(typenames::buffer * const buffer) {
+void port::buffer(class buffer * const buffer) {
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
 		s << "assigning buffer " << buffer << " to port " << qualified_name();
@@ -395,12 +382,12 @@ void port::connect(port & port) throw(exception) {
 
 void port::propagate_channels_to_node(std::size_t channels) throw(exception) {
 	channels_transaction(channels);
-	parent().channel_change_notification_from_port(*this);
+	node().channel_change_notification_from_port(*this);
 }
 
 void port::propagate_seconds_per_event_to_node(real const & seconds_per_event) {
 	this->seconds_per_event_ = seconds_per_event;
-	parent().seconds_per_event_change_notification_from_port(*this);
+	node().seconds_per_event_change_notification_from_port(*this);
 }
 
 void port::channels_transaction(std::size_t channels) throw(exception) {
@@ -447,9 +434,9 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// output
 
-	output::output(output::parent_type & parent, name_type const & name, std::size_t channels)
+	output::output(class node & node, name_type const & name, std::size_t channels)
 	:
-		output_type(parent, name, channels)
+		bases::ports::output(node, name, channels)
 	{
 		if(loggers::trace()()) {
 			std::ostringstream s;
@@ -486,9 +473,9 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// input
 	
-	input::input(input::parent_type & parent, name_type const & name, std::size_t channels)
+	input::input(class node & node, name_type const & name, std::size_t channels)
 	:
-		input_type(parent, name, channels)
+		bases::ports::input(node, name, channels)
 	{
 		if(loggers::trace()()) {
 			std::ostringstream s;
@@ -506,22 +493,22 @@ namespace ports {
 		//disconnect_all();
 	}
 
-	void input::connect(typenames::ports::output & output_port) throw(exception) {
+	void input::connect(ports::output & output_port) throw(exception) {
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << output_port.qualified_name() << " output port connecting to input port " << this->qualified_name();
 			loggers::information()(s.str());
 		}
-		input_type::connect(output_port);
+		bases::ports::input::connect(output_port);
 	}
 
-	void input::disconnect(typenames::ports::output & output_port) {
+	void input::disconnect(ports::output & output_port) {
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << output_port.qualified_name() << " output port disconnecting from input port " << this->qualified_name();
 			loggers::information()(s.str());
 		}
-		input_type::disconnect(output_port);
+		bases::ports::input::disconnect(output_port);
 	}
 	
 	namespace inputs {
@@ -529,9 +516,9 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// single
 		
-		single::single(single::parent_type & parent, name_type const & name, std::size_t channels)
+		single::single(class node & node, name_type const & name, std::size_t channels)
 		:
-			single_type(parent, name, channels)
+			bases::ports::inputs::single(node, name, channels)
 		{
 			if(loggers::trace()()) {
 				std::ostringstream s;
@@ -565,9 +552,9 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// multiple
 
-		multiple::multiple(multiple::parent_type & parent, name_type const & name, bool single_connection_is_identity_transform, std::size_t channels)
+		multiple::multiple(class node & node, name_type const & name, bool single_connection_is_identity_transform, std::size_t channels)
 		:
-			multiple_type(parent, name, channels),
+			bases::ports::inputs::multiple(node, name, channels),
 			single_connection_is_identity_transform_(single_connection_is_identity_transform)
 		{
 			if(loggers::trace()()) {

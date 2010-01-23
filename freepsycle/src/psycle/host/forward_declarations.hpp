@@ -26,11 +26,8 @@ namespace host {
 	}
 
 	namespace underlying = engine;
-
-	namespace typenames {
-		using namespace host;
-		class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
-	}
+	class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames> {};
+	typedef typenames::bases bases;
 }
 
 }

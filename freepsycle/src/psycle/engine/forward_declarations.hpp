@@ -35,10 +35,7 @@ namespace psycle {
 		class event;
 		class sequence;
 		
-		namespace typenames {
-			using namespace engine;
-			class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple> {};
-			typedef typenames::bases bases;
-		}
+		class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple> {};
+		typedef typenames::bases bases;
 	}
 }

@@ -17,7 +17,7 @@ namespace psycle { namespace front_ends { namespace gui {
 
 graph::graph(underlying_type & underlying, host::plugin_resolver & resolver)
 :
-	graph_type(underlying),
+	bases::graph(underlying),
 	resolver_(resolver),
 	scheduler_(*this),
 	start_("play"),
@@ -36,7 +36,7 @@ graph::graph(underlying_type & underlying, host::plugin_resolver & resolver)
 }
 
 void graph::after_construction() {
-	graph_type::after_construction();
+	bases::graph::after_construction();
 	resolver()("output", *this, "output");
 }
 
@@ -59,10 +59,10 @@ void graph::on_zoom() {
 /**********************************************************************************************************************/
 // node
 
-node::node(node::parent_type & parent, node::underlying_type & underlying, real const & x, real const & y)
+node::node(class graph & graph, node::underlying_type & underlying, real const & x, real const & y)
 :
-	node_type(parent, underlying),
-	Gnome::Canvas::Group(parent, x, y),
+	bases::node(graph, underlying),
+	Gnome::Canvas::Group(graph, x, y),
 	contraption_(*this, 0, 0, 0x60606000, underlying.name() + "\n" + underlying.plugin_library_reference().name())
 {
 	loggers::trace()("node::new (gui)");
@@ -77,13 +77,13 @@ node::node(node::parent_type & parent, node::underlying_type & underlying, real 
 
 void node::after_construction() {
 	loggers::trace()("node::after_construction (gui)");
-	node_type::after_construction();
+	bases::node::after_construction();
 	int const ports(single_input_ports().size() + output_ports().size() + (multiple_input_port() ? 1 : 0));
 	real const angle_step(engine::math::pi * 2 / ports);
 	real const radius(60);
 	real angle(0);
-	for(output_ports_type::const_iterator i(output_ports().begin()); i != output_ports().end(); ++i) {
-		typenames::ports::output & output_port(**i);
+	for(output_ports_type::const_iterator i(output_ports().begin()), e(output_ports().end()); i != e; ++i) {
+		ports::output & output_port(**i);
 		Gtk::manage(&output_port);
 		real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
 		output_port.contraption().property_parent().get_value()->move(x, y);
@@ -91,15 +91,15 @@ void node::after_construction() {
 		angle += angle_step;
 	}
 	if(multiple_input_port()) {
-		typenames::ports::inputs::multiple & multiple_input_port(*this->multiple_input_port());
+		ports::inputs::multiple & multiple_input_port(*this->multiple_input_port());
 		Gtk::manage(&multiple_input_port);
 		real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
 		multiple_input_port.contraption().property_parent().get_value()->move(x, y);
 		multiple_input_port.contraption().signal_move()(multiple_input_port.contraption());
 		angle += angle_step;
 	}
-	for(single_input_ports_type::const_iterator i(single_input_ports().begin()); i != single_input_ports().end(); ++i) {
-		typenames::ports::inputs::single & single_input_port(**i);
+	for(single_input_ports_type::const_iterator i(single_input_ports().begin()), e(single_input_ports().end()); i != e; ++i) {
+		ports::inputs::single & single_input_port(**i);
 		Gtk::manage(&single_input_port);
 		real const x(radius * std::cos(angle)), y(radius * std::sin(angle));
 		single_input_port.contraption().property_parent().get_value()->move(x, y);
@@ -164,10 +164,10 @@ bool node::on_canvas_event(GdkEvent * event) {
 /**********************************************************************************************************************/
 //port
 
-port::port(port::parent_type & parent, port::underlying_type & underlying, real const & x, real const & y, color const & color)
+port::port(class node & node, port::underlying_type & underlying, real const & x, real const & y, color const & color)
 :
-	port_type(parent, underlying),
-	Gnome::Canvas::Group(parent, x, y),
+	bases::port(node, underlying),
+	Gnome::Canvas::Group(node, x, y),
 	contraption_(*this, 0, 0, color, underlying.name()),
 	line_(contraption())
 {
@@ -181,14 +181,14 @@ port::port(port::parent_type & parent, port::underlying_type & underlying, real 
 	on_move(contraption());
 }
 
-void port::on_select(typenames::contraption & contraption) {
-	parent().parent().canvas().selected_port(*this);
+void port::on_select(class contraption & contraption) {
+	node().graph().canvas().selected_port(*this);
 }
 
-void port::on_move(typenames::contraption & contraption) {
+void port::on_move(class contraption & contraption) {
 	Gnome::Canvas::Points points(2);
 	points[0] = Gnome::Art::Point(0, 0);
-	real node_x(parent().property_x()), node_y(parent().property_y());
+	real node_x(node().property_x()), node_y(node().property_y());
 	w2i(node_x, node_y);
 	points[1] = Gnome::Art::Point(node_x, node_y);
 	line().property_points() = points;
@@ -243,9 +243,9 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// output
 	
-	output::output(output::parent_type & parent, output::underlying_type & underlying, real const & x, real const & y)
+	output::output(class node & node, output::underlying_type & underlying, real const & x, real const & y)
 	:
-		output_type(parent, underlying, x, y, boost::cref(color(0xa0600000)))
+		bases::ports::output(node, underlying, x, y, boost::cref(color(0xa0600000)))
 	{
 		Gnome::Canvas::Line & line = *new Gnome::Canvas::Line(contraption());
 		Gtk::manage(&line);
@@ -263,9 +263,9 @@ namespace ports {
 		lines_.push_back(&line);
 	}
 
-	input::input(input::parent_type & parent, input::underlying_type & underlying, real const & x, real const & y, color const & color)
+	input::input(class node & node, input::underlying_type & underlying, real const & x, real const & y, color const & color)
 	:
-		input_type(parent, underlying, x, y, color)
+		bases::ports::input(node, underlying, x, y, color)
 	{}
 	
 	namespace inputs {
@@ -273,17 +273,17 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// single
 		
-		single::single(single::parent_type & parent, single::underlying_type & underlying, real const & x, real const & y)
+		single::single(class node & node, single::underlying_type & underlying, real const & x, real const & y)
 		:
-			single_type(parent, underlying, x, y, boost::cref(color(0x00a00000)))
+			bases::ports::inputs::single(node, underlying, x, y, boost::cref(color(0x00a00000)))
 		{}
 
 		/**********************************************************************************************************************/
 		// multiple
 		
-		multiple::multiple(multiple::parent_type & parent, multiple::underlying_type & underlying, real const & x, real const & y)
+		multiple::multiple(class node & node, multiple::underlying_type & underlying, real const & x, real const & y)
 		:
-			multiple_type(parent, underlying, x, y, boost::cref(color(0x0060a000)))
+			bases::ports::inputs::multiple(node, underlying, x, y, boost::cref(color(0x0060a000)))
 		{}
 	}
 }
@@ -291,7 +291,7 @@ namespace ports {
 /**********************************************************************************************************************/
 // canvas
 
-canvas::canvas(typenames::graph & graph)
+canvas::canvas(class graph & graph)
 :
 	group_(*root()),
 	graph_(graph),

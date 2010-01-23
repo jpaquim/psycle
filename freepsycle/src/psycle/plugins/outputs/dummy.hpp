@@ -11,36 +11,39 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
-	/// dummy, null silent output.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK dummy : public resource {
-		protected: friend class virtual_factory_access;
-			dummy(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
-			virtual ~dummy() throw();
-		public:
-			engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
-			bool opened()  const /*override*/;
-			bool started() const /*override*/;
-		protected:
-			void do_open()    throw(engine::exception) /*override*/;
-			void do_start()   throw(engine::exception) /*override*/;
-			void do_process() throw(engine::exception) /*override*/;
-			void do_stop()    throw(engine::exception) /*override*/;
-			void do_close()   throw(engine::exception) /*override*/;
-		private:
-			bool free_wheeling_;
-			std::nanoseconds sleep_;
-			
-			bool opened_;
-			
-			std::thread * thread_;
-			void thread_function();
-			void thread_loop() throw(engine::exception);
-			
-			typedef std::scoped_lock<std::mutex> scoped_lock;
-			std::mutex mutable mutex_;
-			std::condition<scoped_lock> mutable condition_;
+using namespace universalis::stdlib;
 
-			bool stop_requested_;
-	};
+/// dummy, null silent output.
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK dummy : public resource {
+	protected: friend class virtual_factory_access;
+		dummy(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
+		virtual ~dummy() throw();
+	public:
+		engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
+		bool opened()  const /*override*/;
+		bool started() const /*override*/;
+	protected:
+		void do_open()    throw(engine::exception) /*override*/;
+		void do_start()   throw(engine::exception) /*override*/;
+		void do_process() throw(engine::exception) /*override*/;
+		void do_stop()    throw(engine::exception) /*override*/;
+		void do_close()   throw(engine::exception) /*override*/;
+	private:
+		bool free_wheeling_;
+		std::nanoseconds sleep_;
+
+		bool opened_;
+
+		thread * thread_;
+		void thread_function();
+		void thread_loop() throw(engine::exception);
+
+		typedef outputs::scoped_lock<mutex> scoped_lock;
+		mutex mutable mutex_;
+		condition<scoped_lock> mutable condition_;
+
+		bool stop_requested_;
+};
+
 }}}
 #include <universalis/compiler/dynamic_link/end.hpp>

@@ -14,9 +14,9 @@
 namespace psycle { namespace host { namespace schedulers { namespace single_threaded {
 
 namespace {
-	std::nanoseconds cpu_time_clock() {
+	nanoseconds cpu_time_clock() {
 		#if 0
-			return std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch();
+			return hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch();
 		#elif 0
 			return universalis::os::clocks::thread_cpu_time::current();
 		#elif 0
@@ -40,14 +40,14 @@ void graph::compute_plan() {
 
 	// iterate over all the nodes
 	for(const_iterator i(begin()), e(end()); i != e; ++i) {
-		typenames::node & node(**i);
+		class node & node(**i);
 
 		node.compute_plan();
 
 		// find the terminal nodes in the graph (nodes with no connected output ports)
 		// determine whether the node is a terminal one (i.e. whether some output ports are connected).
 		bool has_connected_output_ports(false);
-		for(typenames::node::output_ports_type::const_iterator
+		for(node::output_ports_type::const_iterator
 			i(node.output_ports().begin()),
 			e(node.output_ports().end()); i != e; ++i
 		) if((**i).input_ports().size()) {
@@ -79,9 +79,9 @@ void graph::compute_plan() {
 /**********************************************************************************************************************/
 // node
 
-node::node(node::parent_type & parent, underlying_type & underlying)
+node::node(class graph & graph, underlying_type & underlying)
 :
-	node_base(parent, underlying),
+	node_base(graph, underlying),
 	multiple_input_port_first_output_port_to_process_(),
 	accumulated_processing_time_(),
 	processing_count_(),
@@ -303,7 +303,7 @@ void scheduler::process_loop() throw(std::exception) {
 				}
 				suspended_ = false;
 			}
-			std::scoped_lock<std::mutex> lock(graph().underlying().mutex());
+			graph::underlying_type::scoped_lock lock(graph().underlying());
 			for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i) {
 				node & node(**i);
 				if(node.processed()) node.reset();
@@ -415,7 +415,7 @@ void scheduler::process_recursively(node & node) throw(std::exception) {
 
 /// processes the node of the output port connected to the input port and sets the buffer for the input port
 void inline scheduler::process_node_of_output_port_and_set_buffer_for_input_port(ports::output & output_port, ports::input & input_port) {
-	process_recursively(output_port.parent());
+	process_recursively(output_port.node());
 	assert(&output_port.buffer());
 	if(false && loggers::trace()()) {
 		std::ostringstream s;

@@ -358,8 +358,8 @@ void alsa::do_open() throw(engine::exception) {
 		/**************************************************************/
 		// allocate the intermediate buffer
 		{ 
-			// note: period_frames may be different from parent().events_per_buffer()
-			std::size_t const bytes(parent().events_per_buffer() * in_port().channels() * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
+			// note: period_frames may be different from graph().events_per_buffer()
+			std::size_t const bytes(graph().events_per_buffer() * in_port().channels() * bits_per_channel_sample_ / std::numeric_limits<unsigned char>::digits);
 			if(!(intermediate_buffer_ = new char[bytes])) {
 				std::ostringstream s; s << "not enough memory to allocate " << bytes << " bytes on heap";
 				throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -535,7 +535,7 @@ void alsa::poll_loop() throw(engine::exception) {
 			if(stop_requested_) return; 
 			{ // copy the intermediate buffer to the alsa buffer
 				unsigned int const channels(in_port().channels());
-				::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
+				::snd_pcm_uframes_t const samples_per_buffer(graph().events_per_buffer());
 	
 				output_sample_type * in(reinterpret_cast<output_sample_type*>(intermediate_buffer_));
 	
@@ -633,7 +633,7 @@ void alsa::do_process() throw(engine::exception) {
 	}
 	{ // fill the intermediate buffer
 		unsigned int const channels(in_port().channels());
-		::snd_pcm_uframes_t const samples_per_buffer(parent().events_per_buffer());
+		::snd_pcm_uframes_t const samples_per_buffer(graph().events_per_buffer());
 		//assert(last_samples_.size() == channels); ///\todo last_samples_
 		for(unsigned int c(0); c < channels; ++c) {
 			engine::buffer::channel & in(in_port().buffer()[c]);

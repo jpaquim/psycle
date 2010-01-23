@@ -15,9 +15,9 @@ namespace psycle { namespace host { namespace schedulers { namespace multi_threa
 using engine::exceptions::runtime_error;
 
 namespace {
-	std::nanoseconds cpu_time_clock() {
+	nanoseconds cpu_time_clock() {
 		#if 0
-			return std::hiresolution_clock<std::utc_time>::universal_time().nanoseconds_since_epoch();
+			return hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch();
 		#elif 0
 			return universalis::os::clocks::thread_cpu_time::current();
 		#elif 0
@@ -43,7 +43,7 @@ void graph::compute_plan() {
 
 	// iterate over all the nodes
 	for(const_iterator i(begin()), e(end()); i != e; ++i) {
-		typenames::node & node(**i);
+		class node & node(**i);
 
 		node.compute_plan();
 
@@ -59,7 +59,7 @@ void graph::compute_plan() {
 
 		// find the maximum number of channels needed for buffers
 		// iterate over all output ports of the node
-		for(typenames::node::output_ports_type::const_iterator
+		for(node::output_ports_type::const_iterator
 			i(node.output_ports().begin()),
 			e(node.output_ports().end()); i != e; ++i
 		) channels_ = std::max(channels(), (**i).underlying().channels());
@@ -75,11 +75,13 @@ void graph::compute_plan() {
 /**********************************************************************************************************************/
 // node
 
-node::node(node::parent_type & parent, underlying_type & underlying)
+node::node(class graph & graph, underlying_type & underlying)
 :
-	node_base(parent, underlying),
+	node_base(graph, underlying),
 	multiple_input_port_first_output_port_to_process_(),
-	on_underlying_io_ready_signal_connection(underlying.io_ready_signal().connect(boost::bind(&node::on_underlying_io_ready, this, _1))),
+	on_underlying_io_ready_signal_connection(underlying.io_ready_signal().connect(
+		boost::bind(&node::on_underlying_io_ready, this, _1))
+	),
 	waiting_for_io_ready_signal_(),
 	accumulated_processing_time_(),
 	processing_count_(),
@@ -101,7 +103,7 @@ void node::compute_plan() {
 	// count the number of predecessor nodes
 	if(multiple_input_port()) predecessor_node_count_ = multiple_input_port()->output_ports().size();
 	else predecessor_node_count_ = 0;
-	for(typenames::node::single_input_ports_type::const_iterator
+	for(node::single_input_ports_type::const_iterator
 		i(single_input_ports().begin()),
 		e(single_input_ports().end()); i != e; ++i
 	) if((**i).output_port()) ++predecessor_node_count_;
@@ -138,9 +140,9 @@ void node::reset() throw() {
 }
 
 void node::process(bool first) {
-	std::nanoseconds const t0(cpu_time_clock());
+	nanoseconds const t0(cpu_time_clock());
 	if(first) underlying().process_first(); else underlying().process();
-	std::nanoseconds const t1(cpu_time_clock());
+	nanoseconds const t1(cpu_time_clock());
 	if(t1 != t0) {
 		accumulated_processing_time_ += t1 - t0;
 		++processing_count_no_zeroes_;
@@ -154,12 +156,20 @@ void node::process(bool first) {
 
 scheduler::scheduler(underlying::graph & graph, std::size_t threads) throw(std::exception)
 :
-	host::scheduler<graph_type>(graph),
+	host::scheduler<class graph>(graph),
 	// register to the graph signals
-	on_new_node_signal_connection         (graph.         new_node_signal().connect(boost::bind(&scheduler::on_new_node         , this, _1    ))),
-	on_delete_node_signal_connection      (graph.      delete_node_signal().connect(boost::bind(&scheduler::on_delete_node      , this, _1    ))),
-	on_new_connection_signal_connection   (graph.   new_connection_signal().connect(boost::bind(&scheduler::on_new_connection   , this, _1, _2))),
-	on_delete_connection_signal_connection(graph.delete_connection_signal().connect(boost::bind(&scheduler::on_delete_connection, this, _1, _2))),
+	on_new_node_signal_connection(graph.new_node_signal().connect(
+		boost::bind(&scheduler::on_new_node, this, _1))
+	),
+	on_delete_node_signal_connection(graph.delete_node_signal().connect(
+		boost::bind(&scheduler::on_delete_node, this, _1))
+	),
+	on_new_connection_signal_connection(graph.new_connection_signal().connect(
+		boost::bind(&scheduler::on_new_connection, this, _1, _2))
+	),
+	on_delete_connection_signal_connection(graph.delete_connection_signal().connect(
+		boost::bind(&scheduler::on_delete_connection, this, _1, _2))
+	),
 	buffer_pool_instance_(),
 	thread_count_(threads)
 {}
@@ -292,7 +302,7 @@ void scheduler::stop() {
 
 	// dump time measurements
 	std::cout << "time measurements: \n";
-	std::nanoseconds total;
+	nanoseconds total;
 	for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i) {
 		node & node(**i);
 		std::cout
@@ -364,7 +374,7 @@ void scheduler::on_io_ready(node & node) {
 
 void scheduler::process_loop() throw(std::exception) {
 	while(true) {
-		typenames::node * node_;
+		class node * node_;
 		{ scoped_lock lock(mutex_);
 			while(
 				!nodes_queue_.size() &&
@@ -391,7 +401,7 @@ void scheduler::process_loop() throw(std::exception) {
 			node_ = nodes_queue_.front();
 			nodes_queue_.pop_front();
 
-			typenames::node & node(*node_);
+			class node & node(*node_);
 
 			// If the node drives an underlying device that is not ready,
 			// we just wait for its io_ready_signal to be emitted and handled by the scheduler's on_io_ready slot.
@@ -409,7 +419,7 @@ void scheduler::process_loop() throw(std::exception) {
 				std::cout << ' ' << c[++i %= sizeof c] << '\r' << std::flush;
 			}
 		}
-		typenames::node & node(*node_);
+		class node & node(*node_);
 
 		//if(node.processed()) throw /*logic_error*/runtime_error("bug: node already processed: " + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
 
@@ -425,7 +435,7 @@ void scheduler::process_loop() throw(std::exception) {
 				notify = 2;
 			} else // check whether successors of the node we processed are now ready.
 				// iterate over all the output ports of the node we processed
-				for(typenames::node::output_ports_type::const_iterator
+				for(node::output_ports_type::const_iterator
 					i(node.output_ports().begin()),
 					e(node.output_ports().end()); i != e; ++i
 				) {
@@ -436,7 +446,7 @@ void scheduler::process_loop() throw(std::exception) {
 						ie(output_port.input_ports().end()); ii != ie; ++ii
 					) {
 						// get the node of the input port
-						typenames::node & node((**ii).parent());
+						class node & node((**ii).node());
 						node.predecessor_node_processed();
 						if(node.is_ready_to_process()) {
 							// All the dependencies of the node have been processed.
@@ -463,7 +473,7 @@ void scheduler::process_loop() throw(std::exception) {
 	}
 }
 
-void scheduler::process(typenames::node & node) throw(std::exception) {
+void scheduler::process(class node & node) throw(std::exception) {
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
 		s << "scheduling " << node.underlying().qualified_name();
@@ -538,7 +548,7 @@ void scheduler::process(typenames::node & node) throw(std::exception) {
 	}
 	{ scoped_lock lock(mutex_);
 		// check if the content of the node input ports buffers must be preserved for further reading
-		for(typenames::node::single_input_ports_type::const_iterator
+		for(node::single_input_ports_type::const_iterator
 			i(node.single_input_ports().begin()),
 			e(node.single_input_ports().end()); i != e; ++i
 		) {
@@ -547,7 +557,7 @@ void scheduler::process(typenames::node & node) throw(std::exception) {
 				check_whether_to_recycle_buffer_in_the_pool(--single_input_port.output_port()->buffer());
 		}
 		// check if the content of the node output ports buffers must be preserved for further reading
-		for(typenames::node::output_ports_type::const_iterator
+		for(node::output_ports_type::const_iterator
 			i(node.output_ports().begin()),
 			e(node.output_ports().end()); i != e; ++i
 		) {
@@ -564,7 +574,7 @@ void scheduler::process(typenames::node & node) throw(std::exception) {
 
 /// set buffers for all output ports of the node from the buffer pool.
 void inline scheduler::set_buffers_for_all_output_ports_of_node_from_buffer_pool(node & node) {
-	for(typenames::node::output_ports_type::const_iterator
+	for(node::output_ports_type::const_iterator
 		i(node.output_ports().begin()),
 		e(node.output_ports().end()); i != e; ++i
 	) {
