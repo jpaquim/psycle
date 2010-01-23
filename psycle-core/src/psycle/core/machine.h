@@ -302,7 +302,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\name ctor/dtor
 	///\{
 		protected:
-			Machine(MachineCallbacks* callbacks, Machine::id_type id);
+			Machine(MachineCallbacks* callbacks, Machine::id_type id, bool input_buffer_mix_by_player = true);
 		public:
 			virtual ~Machine();
 			virtual void CloneFrom(Machine& src);
@@ -393,6 +393,14 @@ class PSYCLE__CORE__DECL Machine {
 
 	//////////////////////////////////////////////////////////////////////////
 	// Properties
+
+	///\name input buffer mix
+	/// indicates whether the player should mix the input buffers.
+	/// For, e.g., the mixer machine it's false because it does it by itself.
+	///\{
+		public: bool input_buffer_mix_by_player() const { return input_buffer_mix_by_player_; }
+		protected: bool input_buffer_mix_by_player_;
+	///\}
 
 	///\name states
 	///\{

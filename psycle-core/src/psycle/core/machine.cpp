@@ -190,13 +190,14 @@ void Machine::crashed(std::exception const & e) throw() {
 	///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
 }
 
-Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
+Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id, bool input_buffer_mix_by_player)
 :
 	crashed_(),
 	//fpu_exception_mask_(),
 	id_(id),
 	callbacks(callbacks),
 	playColIndex(0),
+	input_buffer_mix_by_player_(input_buffer_mix_by_player),
 	_bypass(false),
 	_standby(false),
 	_mute(false),

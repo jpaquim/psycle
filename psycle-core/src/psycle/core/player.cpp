@@ -67,7 +67,6 @@ void Player::start_threads() {
 	processed_node_count_ = suspended_ = 0;
 
 	thread_count_ = universalis::os::cpu_affinity::cpu_count();
-	thread_count_ = 0; // multithreading disabled by default
 	{ // thread count env var
 		char const * const env(std::getenv("PSYCLE_THREADS"));
 		if(env) {
@@ -357,13 +356,10 @@ void Player::process(Player::node & node) throw(std::exception) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
-	///\todo the mixer machine needs this to be set to false
-	bool const mix(true);
-
 	if(node._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(node._inputCon[i]) {
 		Player::node & input_node(*song().machine(node._inputMachines[i]));
 		if(!input_node.Standby()) node.Standby(false);
-		if(!node._mute && !node.Standby() && mix) {
+		if(!node._mute && !node.Standby() && node.input_buffer_mix_by_player()) {
 			dsp::Add(input_node._pSamplesL, node._pSamplesL, samples_to_process_, input_node.lVol() * node._inputConVol[i]);
 			dsp::Add(input_node._pSamplesR, node._pSamplesR, samples_to_process_, input_node.rVol() * node._inputConVol[i]);
 		}
