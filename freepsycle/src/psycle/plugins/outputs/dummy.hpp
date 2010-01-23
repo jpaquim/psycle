@@ -30,7 +30,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK dummy : public resource {
 		void do_close()   throw(engine::exception) /*override*/;
 	private:
 		bool free_wheeling_;
-		std::nanoseconds sleep_;
+		nanoseconds sleep_;
 
 		bool opened_;
 
@@ -38,7 +38,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK dummy : public resource {
 		void thread_function();
 		void thread_loop() throw(engine::exception);
 
-		typedef outputs::scoped_lock<mutex> scoped_lock;
+		typedef ::scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
 		condition<scoped_lock> mutable condition_;
 

@@ -171,12 +171,12 @@ namespace {
 }
 
 namespace {
-	unsigned int   global_client_count;
-	std::mutex     global_client_count_mutex;
-	std::once_flag global_client_count_init_once_flag = STD_ONCE_INIT;
-	void           global_client_count_init() {
+	unsigned int global_client_count;
+	mutex global_client_count_mutex;
+	once_flag global_client_count_init_once_flag = STD_ONCE_INIT;
+	void global_client_count_init() {
 		// note: we do not need to lock here, but this is a way to ensure it is initialised.
-		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+		scoped_lock<mutex> lock(global_client_count_mutex);
 		global_client_count = 0;
 	}
 }
@@ -185,8 +185,8 @@ void gstreamer::do_open() throw(engine::exception) {
 	resource::do_open();
 
 	{ // initialize gstreamer
-		std::call_once(global_client_count_init_once_flag, global_client_count_init);
-		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+		call_once(global_client_count_init_once_flag, global_client_count_init);
+		::scoped_lock<mutex> lock(global_client_count_mutex);
 		if(!global_client_count++) {
 			int * argument_count(0);
 			char *** arguments(0);
@@ -348,9 +348,6 @@ void gstreamer::do_start() throw(engine::exception) {
 bool gstreamer::started() const {
 	if(!opened()) return false;
 	if(state(*pipeline_) == ::GST_STATE_PLAYING) return true;
-	{ scoped_lock lock(mutex_);
-		return wait_for_state_to_become_playing_;
-	}
 }
 
 /// this is called from within gstreamer's processing thread.
@@ -458,8 +455,8 @@ void gstreamer::do_close() throw(engine::exception) {
 	sink_ = caps_filter_ = source_ = 0; caps_ = 0;
 
 	{ // deinitialize gstreamer
-		std::call_once(global_client_count_init_once_flag, global_client_count_init);
-		std::scoped_lock<std::mutex> lock(global_client_count_mutex);
+		call_once(global_client_count_init_once_flag, global_client_count_init);
+		::scoped_lock<mutex> lock(global_client_count_mutex);
 		if(!--global_client_count) {
 			#if 0  // gst_deinit must not be called because gst_init won't work afterwards
 				::gst_deinit();
