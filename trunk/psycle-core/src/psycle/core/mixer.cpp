@@ -24,7 +24,7 @@ using namespace helpers::math;
 
 		Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id )
 		:
-			Machine(callbacks, id)
+			Machine(callbacks, id, /*input_buffer_mix_by_player*/ false)
 		{
 			defineInputAsStereo(2);
 			defineOutputAsStereo();
