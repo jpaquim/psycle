@@ -289,7 +289,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 
 			bool work_suspended_;
 			mutable mutex work_mutex_;
-			float* 	null_buffer;
+			float * null_buffer;
 
 			Sequencer sequencer_;
 	///\}
