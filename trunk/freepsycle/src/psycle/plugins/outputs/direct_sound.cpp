@@ -44,7 +44,7 @@ namespace psycle { namespace plugins { namespace outputs {
 				s << "format: " << format.description();
 				loggers::information()(s.str());
 			}
-			samples_per_buffer_ = parent().events_per_buffer();
+			samples_per_buffer_ = graph().events_per_buffer();
 			buffers_ = 4; /// \todo parametrable
 			write_primary_ = false; /// \todo parametrable
 			if(write_primary_) {

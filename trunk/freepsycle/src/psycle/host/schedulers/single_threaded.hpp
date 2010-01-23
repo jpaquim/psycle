@@ -17,6 +17,8 @@ namespace psycle { namespace host { namespace schedulers {
 /// a scheduler using only one thread
 namespace single_threaded {
 
+using namespace universalis::stdlib;
+
 namespace underlying = host::underlying;
 
 class graph;
@@ -32,10 +34,7 @@ namespace ports {
 }
 class scheduler;
 
-namespace typenames {
-	using namespace single_threaded;
-	class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames::typenames> {};
-}
+class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames> {};
 
 /**********************************************************************************************************************/
 /// underlying::buffer with a reference counter.
@@ -59,7 +58,7 @@ class buffer : public underlying::buffer {
 
 /**********************************************************************************************************************/
 // graph
-typedef generic::wrappers::graph<typenames::typenames> graph_base;
+typedef generic::wrappers::graph<typenames> graph_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 	protected: friend class virtual_factory_access;
 		graph(underlying_type & underlying) : graph_base(underlying) {}
@@ -87,18 +86,18 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 
 /**********************************************************************************************************************/
 // port
-typedef generic::wrappers::port<typenames::typenames> port_base;
+typedef generic::wrappers::port<typenames> port_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base {
 	protected: friend class virtual_factory_access;
-		port(parent_type & parent, underlying_type & underlying) : port_base(parent, underlying) {}
+		port(class node & node, underlying_type & underlying) : port_base(node, underlying) {}
 
 	///\name buffer
 	///\{
 		public:
 			/// assigns a buffer to this port (or unassigns if 0) only if the given buffer is different.
-			void buffer(typenames::buffer * const buffer) { underlying().buffer(buffer); }
+			void buffer(class buffer * const buffer) { underlying().buffer(buffer); }
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
-			typenames::buffer & buffer() const throw() { return static_cast<typenames::buffer &>(underlying().buffer()); }
+			class buffer & buffer() const throw() { return static_cast<class buffer &>(underlying().buffer()); }
 	///\}
 };
 
@@ -106,46 +105,46 @@ namespace ports {
 
 	/**********************************************************************************************************************/
 	// output
-	typedef generic::wrappers::ports::output<typenames::typenames> output_base;
+	typedef generic::wrappers::ports::output<typenames> output_base;
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 		protected: friend class virtual_factory_access;
-			output(parent_type & parent, underlying_type & underlying) : output_base(parent, underlying) {}
+			output(class node & node, underlying_type & underlying) : output_base(node, underlying) {}
 	};
 
 	/**********************************************************************************************************************/
 	// input
-	typedef generic::wrappers::ports::input<typenames::typenames> input_base;
+	typedef generic::wrappers::ports::input<typenames> input_base;
 	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base {
 		protected: friend class virtual_factory_access;
-			input(parent_type & parent, underlying_type & underlying) : input_base(parent, underlying) {}
+			input(class node & node, underlying_type & underlying) : input_base(node, underlying) {}
 	};
 
 	namespace inputs {
 
 		/**********************************************************************************************************************/
 		// single
-		typedef generic::wrappers::ports::inputs::single<typenames::typenames> single_base;
+		typedef generic::wrappers::ports::inputs::single<typenames> single_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base {
 			protected: friend class virtual_factory_access;
-				single(parent_type & parent, underlying_type & underlying) : single_base(parent, underlying) {}
+				single(class node & node, underlying_type & underlying) : single_base(node, underlying) {}
 		};
 
 		/**********************************************************************************************************************/
 		// multiple
-		typedef generic::wrappers::ports::inputs::multiple<typenames::typenames> multiple_base;
+		typedef generic::wrappers::ports::inputs::multiple<typenames> multiple_base;
 		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base {
 			protected: friend class virtual_factory_access;
-				multiple(parent_type & parent, underlying_type & underlying) : multiple_base(parent, underlying) {}
+				multiple(class node & node, underlying_type & underlying) : multiple_base(node, underlying) {}
 		};
 	}
 }
 
 /**********************************************************************************************************************/
 // node
-typedef generic::wrappers::node<typenames::typenames> node_base;
+typedef generic::wrappers::node<typenames> node_base;
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	protected: friend class virtual_factory_access;
-		node(parent_type &, underlying_type &);
+		node(class graph &, underlying_type &);
 		
 	///\name schedule
 	///\{
@@ -170,14 +169,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 	///\{
 		public:  void reset_time_measurement();
 
-		public:  std::nanoseconds accumulated_processing_time() throw() { return accumulated_processing_time_; }
-		private: std::nanoseconds accumulated_processing_time_;
+		public:  nanoseconds accumulated_processing_time() throw() { return accumulated_processing_time_; }
+		private: nanoseconds accumulated_processing_time_;
 
-		public:  std::uint64_t processing_count() throw() { return processing_count_; }
-		private: std::uint64_t processing_count_;
+		public:  uint64_t processing_count() throw() { return processing_count_; }
+		private: uint64_t processing_count_;
 
-		public:  std::uint64_t processing_count_no_zeroes() throw() { return processing_count_no_zeroes_; }
-		private: std::uint64_t processing_count_no_zeroes_;
+		public:  uint64_t processing_count_no_zeroes() throw() { return processing_count_no_zeroes_; }
+		private: uint64_t processing_count_no_zeroes_;
 	///\}
 };
 
@@ -189,7 +188,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		virtual ~scheduler() throw();
 		void start() throw(underlying::exception) /*override*/;
 		bool started() /*override*/ { return thread_; }
-		void started(bool value) { host::scheduler<typenames::graph>::started(value); }
+		void started(bool value) { host::scheduler<class graph>::started(value); }
 		void stop() /*override*/;
 
 	///\name signal slots and connections
@@ -246,12 +245,12 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<gra
 		} * buffer_pool_instance_;
 		buffer_pool & buffer_pool_instance() throw() { return *buffer_pool_instance_; }
 		
-		std::thread * thread_;
+		thread * thread_;
 		void thread_function();
 		
-		typedef std::scoped_lock<std::mutex> scoped_lock;
-		std::mutex mutable mutex_;
-		std::condition<scoped_lock> mutable condition_;
+		typedef class scoped_lock<mutex> scoped_lock;
+		mutex mutable mutex_;
+		condition<scoped_lock> mutable condition_;
 		
 		bool stop_requested_;
 		bool suspend_requested_;

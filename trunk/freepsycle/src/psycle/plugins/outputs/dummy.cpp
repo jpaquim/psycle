@@ -37,11 +37,11 @@ bool dummy::opened() const {
 
 void dummy::do_start() throw(engine::exception) {
 	resource::do_start();
-	sleep_ = static_cast<std::nanoseconds::tick_type>(1e9 * parent().events_per_buffer() / in_port().events_per_second());
+	sleep_ = static_cast<nanoseconds::tick_type>(1e9 * graph().events_per_buffer() / in_port().events_per_second());
 	io_ready(false);
 	stop_requested_ = false;
 	// start the thread
-	thread_ = new std::thread(boost::bind(&dummy::thread_function, this));
+	thread_ = new thread(boost::bind(&dummy::thread_function, this));
 }
 
 bool dummy::started() const {

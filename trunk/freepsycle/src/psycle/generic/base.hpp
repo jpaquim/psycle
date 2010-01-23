@@ -36,7 +36,6 @@ class graph
 	public std::set<typename Typenames::node*>
 {
 	protected: friend class graph::virtual_factory_access;
-		typedef graph graph_type;
 
 	///\name signals
 	/// Signals are used to propagate changes from an underlying layer to the layers wrapping it.
@@ -73,19 +72,6 @@ class graph
 };
 
 /***********************************************************************/
-template<typename Parent>
-class child_of {
-	protected:
-		child_of(Parent & parent) : parent_(parent) {}
-	public:
-		typedef Parent parent_type;
-		Parent const & parent() const throw() { return parent_; }
-		Parent       & parent()       throw() { return parent_; }
-	private:
-		Parent & parent_;
-};
-
-/***********************************************************************/
 /// This template declares a class convertible to its derived type Typenames::node.
 /// The virtual factory pattern is needed to be able to emit the signals only
 /// once the objects are fully constructed (see note about the signals in the graph class).
@@ -94,53 +80,62 @@ class node
 :
 	// makes the class convertible to its derived type Typenames::node
 	public cast::derived<typename Typenames::node>,
-	public virtual_factory<typename Typenames::node>,
-	public child_of<typename Typenames::graph>
+	public virtual_factory<typename Typenames::node>
 {
-	private:
-	#if 0
-		BOOST_STATIC_ASSERT((boost::is_base_and_derived<child_of<typename Typenames::graph>, typename Typenames::node                   >::value));
-		BOOST_STATIC_ASSERT((boost::is_base_and_derived<child_of<typename Typenames::node >, typename Typenames::port                   >::value));
-	#endif
-		BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::port           , typename Typenames::ports::output          >::value));
-		BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::port           , typename Typenames::ports::input           >::value));
-		BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::ports::input   , typename Typenames::ports::inputs::single  >::value));
-		BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::ports::input   , typename Typenames::ports::inputs::multiple>::value));
-		
-	protected: friend class node::virtual_factory_access;
-		typedef node node_type;
+	///\name type checking
+	///\{
+		private:
+			BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::port           , typename Typenames::ports::output          >::value));
+			BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::port           , typename Typenames::ports::input           >::value));
+			BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::ports::input   , typename Typenames::ports::inputs::single  >::value));
+			BOOST_STATIC_ASSERT((boost::is_base_and_derived<typename Typenames::ports::input   , typename Typenames::ports::inputs::multiple>::value));
+	///\}
 
-		node(typename Typenames::graph & graph)
-		:
-			child_of<typename Typenames::graph>(graph),
-			multiple_input_port_()
-		{
-			if(loggers::trace()()) loggers::trace()("new generic node", UNIVERSALIS__COMPILER__LOCATION);
-		}
+	///\name factory
+	///\{
+		protected: friend class node::virtual_factory_access;
 
-		void after_construction() /*override*/ {
-			if(loggers::trace()()) loggers::trace()("generic node init", UNIVERSALIS__COMPILER__LOCATION);
-			this->parent().insert(&this->derived_this());
-			// emit the new_node signal to the wrappers
-			this->parent().new_node_signal()(*this);
-			
-		}
+			node(typename Typenames::graph & graph)
+			:
+				graph_(graph),
+				multiple_input_port_()
+			{
+				if(loggers::trace()()) loggers::trace()("new generic node", UNIVERSALIS__COMPILER__LOCATION);
+			}
 
-		void before_destruction() /*override*/ {
-			this->parent().erase(&this->derived_this());
-			// emit the delete_node signal to the wrappers
-			this->parent().delete_node_signal()(*this);
-			// emit the delete signal to the wrappers
-			this->delete_signal()(*this);
-		}
+			void after_construction() /*override*/ {
+				if(loggers::trace()()) loggers::trace()("generic node init", UNIVERSALIS__COMPILER__LOCATION);
+				this->graph().insert(&this->derived_this());
+				// emit the new_node signal to the wrappers
+				this->graph().new_node_signal()(*this);
 
-		/// virtual destructor
-		virtual ~node() {}
+			}
 
-	///\name destruction
+			void before_destruction() /*override*/ {
+				this->graph().erase(&this->derived_this());
+				// emit the delete_node signal to the wrappers
+				this->graph().delete_node_signal()(*this);
+				// emit the delete signal to the wrappers
+				this->delete_signal()(*this);
+			}
+
+			/// virtual destructor
+			virtual ~node() {}
+	///\}
+
+	///\name destruction signal
 	///\{
 		public:  boost::signal<void (node &)> & delete_signal() throw() { return delete_signal_; }
 		private: boost::signal<void (node &)>   delete_signal_;
+	///\}
+
+	///\name graph
+	///\{
+		public:
+			typename Typenames::graph & graph() { return graph_; }
+			typename Typenames::graph const & graph() const { return graph_; }
+		private:
+			typename Typenames::graph & graph_;
 	///\}
 
 	///\name ports: outputs
@@ -209,13 +204,20 @@ class port
 :
 	// makes the class convertible to its derived type Typenames::port
 	public cast::derived<typename Typenames::port>,
-	public virtual_factory<typename Typenames::port>,
-	public child_of<typename Typenames::node>
+	public virtual_factory<typename Typenames::port>
 {
 	protected: friend class port::virtual_factory_access;
-		typedef port port_type;
-		port(typename Typenames::node & node) : child_of<typename Typenames::node>(node) {}
+		port(typename Typenames::node & node) : node_(node) {}
 		void connect(typename Typenames::port &) {} ///\todo any useful? redefined in derived classes?
+
+	///\name node
+	///\{
+		public:
+			typename Typenames::node & node() { return node_; }
+			typename Typenames::node const & node() const { return node_; }
+		private:
+			typename Typenames::node & node_;
+	///\}
 };
 
 namespace ports {
@@ -231,24 +233,28 @@ namespace ports {
 		public cast::derived<typename Typenames::ports::output>,
 		public virtual_factory<typename Typenames::ports::output, typename Typenames::port>
 	{
-		protected: friend class output::virtual_factory_access;
-			typedef output output_type;
+		///\name factory
+		///\{
+			protected: friend class output::virtual_factory_access;
 
-			/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
-			/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
-			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(output, output::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
+				/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
+				/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
+				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
+					output, output::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+				)
 
-			void after_construction() /*override*/ {
-				this->parent().output_ports_.push_back(static_cast<typename Typenames::ports::output*>(this));
-				// emit the new_output_port signal to the wrappers
-				this->parent().new_output_port_signal()(*this);
-			}
+				void after_construction() /*override*/ {
+					this->node().output_ports_.push_back(static_cast<typename Typenames::ports::output*>(this));
+					// emit the new_output_port signal to the wrappers
+					this->node().new_output_port_signal()(*this);
+				}
 
-			void before_destruction() /*override*/ {
-				disconnect_all();
-				// Note that in the case of a wrapper, the underlying layer is already disconnected,
-				// but since there is no polymorphic virtual call, this will only disconnect the wrapping layer.
-			}
+				void before_destruction() /*override*/ {
+					disconnect_all();
+					// Note that in the case of a wrapper, the underlying layer is already disconnected,
+					// but since there is no polymorphic virtual call, this will only disconnect the wrapping layer.
+				}
+		///\}
 
 		///\name connected input ports
 		///\{
@@ -323,28 +329,32 @@ namespace ports {
 		public cast::derived<typename Typenames::ports::input>,
 		public virtual_factory<typename Typenames::ports::input, typename Typenames::port>
 	{
-		protected: friend class input::virtual_factory_access;
-			typedef input input_type;
+		///\name factory
+		///\{
+			protected: friend class input::virtual_factory_access;
 
-			/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
-			/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
-			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(input, input::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY)
+				/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
+				/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
+				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
+					input, input::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+				)
 
-			void before_destruction() /*override*/ {
-				disconnect_all();
-				// Note that in the case of a wrapper, the underlying layer is already disconnected,
-				// but since there is no polymorphic virtual call, this will only disconnect the wrapping layer.
-			}
+				void before_destruction() /*override*/ {
+					disconnect_all();
+					// Note that in the case of a wrapper, the underlying layer is already disconnected,
+					// but since there is no polymorphic virtual call, this will only disconnect the wrapping layer.
+				}
+		///\}
 
 		///\name (dis)connection functions
 		///\{
 			public:
 				void connect(typename Typenames::ports::output & output_port) throw(exception) {
 					assert("ports must belong to different nodes:" &&
-						&output_port.parent() != &this->parent()
+						&output_port.node() != &this->node()
 					);
 					assert("nodes of both ports must belong to the same graph:" &&
-						&output_port.parent().parent() == &this->parent().parent()
+						&output_port.node().graph() == &this->node().graph()
 					);
 					// connect the output port internal side to this input port
 					output_port.connect_internal_side(*this);
@@ -352,8 +362,8 @@ namespace ports {
 					Typenames::port::connect(output_port);
 					// connect this input port internal side to the output port
 					this->connect_internal_side(output_port);
-					// signal grand parent graph wrappers of the new connection
-					this->parent().parent().new_connection_signal()(*this, output_port);
+					// signal graph wrappers of the new connection
+					this->node().graph().new_connection_signal()(*this, output_port);
 				}
 			protected:
 				virtual void connect_internal_side(typename Typenames::ports::output &) = 0;
@@ -365,8 +375,8 @@ namespace ports {
 					this->disconnect_internal_side(output_port);
 					// disconnect the output port internal side from this input port
 					output_port.disconnect_internal_side(*this);
-					// signal grand parent graph wrappers of the disconnection
-					this->parent().parent().delete_connection_signal()(*this, output_port);
+					// signal graph wrappers of the disconnection
+					this->node().graph().delete_connection_signal()(*this, output_port);
 				}
 			protected:
 				virtual void disconnect_internal_side(typename Typenames::ports::output &) = 0;
@@ -386,34 +396,36 @@ namespace ports {
 			public cast::derived<typename Typenames::ports::inputs::single>,
 			public virtual_factory<typename Typenames::ports::inputs::single, typename Typenames::ports::input>
 		{
-			protected: friend class single::virtual_factory_access;
-				typedef single single_type;
+			///\name factory
+			///\{
+				protected: friend class single::virtual_factory_access;
 
-				/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
-				/// Note that Typenames::ports::input, which is the base class, is in this case derived from wrappers::ports::input<Typenames>.
-				#define constructor(_, count, __) \
-					BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
-					single(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
-					: \
-						single::virtual_factory_type(BOOST_PP_ENUM_PARAMS(count, xtra)), \
-						output_port_() \
-					{}
-					BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
-				#undef constructor
+					/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
+					/// Note that Typenames::ports::input, which is the base class, is in this case derived from wrappers::ports::input<Typenames>.
+					#define constructor(_, count, __) \
+						BOOST_PP_EXPR_IF(count, template<) BOOST_PP_ENUM_PARAMS(count, typename Xtra) BOOST_PP_EXPR_IF(count, >) \
+						single(BOOST_PP_ENUM_BINARY_PARAMS(count, Xtra, & xtra)) \
+						: \
+							single::virtual_factory_type(BOOST_PP_ENUM_PARAMS(count, xtra)), \
+							output_port_() \
+						{}
+						BOOST_PP_REPEAT(PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY, constructor, ~)
+					#undef constructor
 
-				#if 0
-				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__WITH_BODY(
-					single, single::virtual_factory_type,
-					(BOOST_PP_COMMA output_port_() {}),
-					PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
-				)
-				#endif
+					#if 0
+					PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__WITH_BODY(
+						single, single::virtual_factory_type,
+						(BOOST_PP_COMMA output_port_() {}),
+						PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+					)
+					#endif
 
-				void after_construction() /*override*/ {
-					this->parent().single_input_ports_.push_back(static_cast<typename Typenames::ports::inputs::single*>(this));
-					// emit the new_single_input_port signal to the wrappers
-					this->parent().new_single_input_port_signal()(*this);
-				}
+					void after_construction() /*override*/ {
+						this->node().single_input_ports_.push_back(static_cast<typename Typenames::ports::inputs::single*>(this));
+						// emit the new_single_input_port signal to the wrappers
+						this->node().new_single_input_port_signal()(*this);
+					}
+			///\}
 
 			///\name connected output port
 			///\{
@@ -470,22 +482,23 @@ namespace ports {
 			public cast::derived<typename Typenames::ports::inputs::multiple>,
 			public virtual_factory<typename Typenames::ports::inputs::multiple, typename Typenames::ports::input>
 		{
-			protected: friend class multiple::virtual_factory_access;
+			///\name factory
+			///\{
+				protected: friend class multiple::virtual_factory_access;
 
-				typedef multiple multiple_type;
+					/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
+					/// Note that Typenames::ports::input, which is the base class, is in this case derived from wrappers::ports::input<Typenames>.
+					PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
+						multiple, multiple::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
+					)
 
-				/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
-				/// Note that Typenames::ports::input, which is the base class, is in this case derived from wrappers::ports::input<Typenames>.
-				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
-					multiple, multiple::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
-				)
-
-				void after_construction() /*override*/ {
-					assert(!this->parent().multiple_input_port_);
-					this->parent().multiple_input_port_ = static_cast<typename Typenames::ports::inputs::multiple*>(this);
-					// emit the new_single_input_port signal to the wrappers
-					this->parent().new_multiple_input_port_signal()(*this);
-				}
+					void after_construction() /*override*/ {
+						assert(!this->node().multiple_input_port_);
+						this->node().multiple_input_port_ = static_cast<typename Typenames::ports::inputs::multiple*>(this);
+						// emit the new_single_input_port signal to the wrappers
+						this->node().new_multiple_input_port_signal()(*this);
+					}
+			///\}
 				
 			///\name connected output ports
 			///\{

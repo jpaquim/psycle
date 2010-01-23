@@ -17,7 +17,9 @@ namespace psycle {
 /// Place your plugins in this namespace.
 namespace plugins {
 
-typedef engine::real real;
+using engine::real;
+using engine::channel;
+namespace ports = engine::ports;
 
 #define PSYCLE__PLUGINS__CALLING_CONVENTION  UNIVERSALIS__COMPILER__CALLING_CONVENTION__C
 

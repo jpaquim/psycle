@@ -13,22 +13,23 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace engine {
 
+using namespace universalis::stdlib;
 class plugin_library_reference;
 
 /**********************************************************************************************************************/
 // graph
 /// a set of nodes
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::bases::graph, public named {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public bases::graph, public named {
 	protected: friend class virtual_factory_access;
 		graph(name_type const &);
 		virtual ~graph();
 
 	///\name thread synchronisation
 		public:
-			typedef universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
-			universalis::stdlib::mutex & mutex() const { return mutex_; }
+			typedef class scoped_lock<mutex> scoped_lock;
+			operator mutex & () const { return mutex_; }
 		private:
-			universalis::stdlib::mutex mutable mutex_;
+			mutex mutable mutex_;
 	///\}
 
 	public:
@@ -52,15 +53,15 @@ UNIVERSALIS__COMPILER__DYNAMIC_LINK std::ostream & operator<<(std::ostream & out
 
 /**********************************************************************************************************************/
 // port
-/// handles a stream of signal coming to or parting from a engine::node
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::bases::port, public named {
+/// handles a stream of signal coming to or parting from an engine::node
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public bases::port, public named {
 	friend class ports::output;
 	friend class ports::input;
 	friend class ports::inputs::single;
 	friend class ports::inputs::multiple;
 	
 	protected: friend class virtual_factory_access;
-		port(parent_type &, name_type const &, std::size_t channels = 0);
+		port(class node &, name_type const &, std::size_t channels = 0);
 		virtual ~port();
 
 	protected:
@@ -132,7 +133,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::ba
 	///\{
 		public:
 			/// the full path of the node (within its node and graph).
-			name_type      qualified_name() const;
+			name_type qualified_name() const;
 			/// the      path of the node (within its node).
 			name_type semi_qualified_name() const;
 	///\}
@@ -151,7 +152,7 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// output
 	/// handles an output stream of signal parting from a node
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output {
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public bases::ports::output {
 		friend class graph;
 		friend class node;
 		friend class input;
@@ -159,7 +160,7 @@ namespace ports {
 		friend class inputs::multiple;
 			
 		protected: friend class virtual_factory_access;
-			output(parent_type &, name_type const &, std::size_t channels = 0);
+			output(class node &, name_type const &, std::size_t channels = 0);
 			virtual ~output();
 
 		protected:
@@ -174,15 +175,15 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// input
 	/// handles an input stream of signal coming to a node.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input {
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public bases::ports::input {
 		friend class node;
 		
 		protected: friend class virtual_factory_access;
-			input(parent_type &, name_type const &, std::size_t channels = 0);
+			input(class node &, name_type const &, std::size_t channels = 0);
 			virtual ~input();
 
 		public:
-			void    connect(ports::output &) throw(exception);
+			void connect(ports::output &) throw(exception);
 			void disconnect(ports::output &);
 
 		public:
@@ -204,11 +205,11 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// single
 		/// handles a single input stream of signal coming to a node.
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single {
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public bases::ports::inputs::single {
 			friend class node;
 
 			protected: friend class virtual_factory_access;
-				single(parent_type &, name_type const &, std::size_t channels = 0);
+				single(class node &, name_type const &, std::size_t channels = 0);
 				virtual ~single();
 
 			protected:
@@ -226,11 +227,11 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// multiple
 		/// handles multiple input streams of signal coming to a node.
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple {
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public bases::ports::inputs::multiple {
 			friend class node;
 
 			protected: friend class virtual_factory_access;
-				multiple(parent_type &, name_type const &, bool single_connection_is_identity_transform, std::size_t channels = 0);
+				multiple(class node &, name_type const &, bool single_connection_is_identity_transform, std::size_t channels = 0);
 				virtual ~multiple();
 
 			protected:
@@ -255,43 +256,27 @@ namespace ports {
 /**********************************************************************************************************************/
 // node
 /// node of a graph, placeholder for a dsp, aka "plugin machine".
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::bases::node, public named {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public bases::node, public named {
 	friend class graph;
 	friend class port;
 	friend class ports::output;
 	friend class ports::input;
 	friend class ports::inputs::single;
 	friend class ports::inputs::multiple;
-	
-	protected: friend class virtual_factory_access;
-		node(class plugin_library_reference &, parent_type &, name_type const &);
 
-		void before_destruction() /*override*/ {
-			typenames::bases::node::before_destruction();
-			close();
-		}
-
-		virtual ~node();
-
-	///\name types
+	///\name factory
 	///\{
-		public:
-			typedef class graph graph;
-			class ports {
-				public:
-					typedef typenames::ports::output output;
-					typedef typenames::ports::input input;
-					class inputs {
-						public:
-							typedef typenames::ports::inputs::single single;
-							typedef typenames::ports::inputs::multiple multiple;
-					};
-			};
-			typedef class buffer buffer;
-			typedef class channel channel;
-			typedef class event event;
+		protected: friend class virtual_factory_access;
+			node(class plugin_library_reference &, class graph &, name_type const &);
+
+			void before_destruction() /*override*/ {
+				bases::node::before_destruction();
+				close();
+			}
+
+			virtual ~node();
 	///\}
-		
+
 	///\name reference to plugin library
 	///\{
 		public:

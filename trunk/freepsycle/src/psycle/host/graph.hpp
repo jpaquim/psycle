@@ -12,7 +12,7 @@
 #include <universalis/compiler/dynamic_link/begin.hpp>
 namespace psycle { namespace host {
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public typenames::typenames::bases::graph {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public bases::graph {
 	protected: friend class virtual_factory_access;
 		graph(underlying_type &);
 };
@@ -45,38 +45,38 @@ class coordinates {
 		boost::signal<void (coordinates &)>   signal_move_;
 };
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public typenames::typenames::bases::port, public coordinates {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public bases::port, public coordinates {
 	protected: friend class virtual_factory_access;
-		port(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
+		port(class node &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 };
 
 namespace ports {
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public typenames::typenames::bases::ports::output {
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public bases::ports::output {
 		protected: friend class virtual_factory_access;
-			output(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
+			output(class node &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 	};
 
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public typenames::typenames::bases::ports::input {
+	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public bases::ports::input {
 		protected: friend class virtual_factory_access;
-			input(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
+			input(class node &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 	};
 	
 	namespace inputs {
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public typenames::typenames::bases::ports::inputs::single {
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public bases::ports::inputs::single {
 			protected: friend class virtual_factory_access;
-				single(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
+				single(class node &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 		};
 
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public typenames::typenames::bases::ports::inputs::multiple {
+		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public bases::ports::inputs::multiple {
 			protected: friend class virtual_factory_access;
-				multiple(parent_type &, underlying_type &, real const /*const*/ x = 0, real /*const*/ y = 0);
+				multiple(class node &, underlying_type &, real const /*const*/ x = 0, real /*const*/ y = 0);
 		};
 	}
 }
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public typenames::typenames::bases::node, public coordinates {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public bases::node, public coordinates {
 	protected: friend class virtual_factory_access;
-		node(parent_type &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
+		node(class graph &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 		void after_construction() /*override*/;
 		
 	/*

@@ -34,15 +34,13 @@ class graph
 	public cast::underlying_wrapper<typename Typenames::underlying::graph>
 {
 	protected:
-		typedef graph graph_type;
-
 		graph(typename graph::underlying_type & underlying)
 		:
 			graph::underlying_wrapper_type(underlying),
 			// register to the underlying signals
-			on_new_node_signal_connection         (underlying.         new_node_signal().connect(boost::bind(&graph::on_new_node         , this, _1    ))),
-			//on_delete_node_signal_connection      (underlying.      delete_node_signal().connect(boost::bind(&graph::on_delete_node      , this, _1    ))),
-			on_new_connection_signal_connection   (underlying.   new_connection_signal().connect(boost::bind(&graph::on_new_connection   , this, _1, _2))),
+			on_new_node_signal_connection(underlying.new_node_signal().connect(boost::bind(&graph::on_new_node, this, _1))),
+			//on_delete_node_signal_connection(underlying.delete_node_signal().connect(boost::bind(&graph::on_delete_node, this, _1))),
+			on_new_connection_signal_connection(underlying.new_connection_signal().connect(boost::bind(&graph::on_new_connection, this, _1, _2))),
 			on_delete_connection_signal_connection(underlying.delete_connection_signal().connect(boost::bind(&graph::on_delete_connection, this, _1, _2)))
 		{}
 
@@ -51,20 +49,20 @@ class graph
 			basic::graph<Typenames>::after_construction();
 			
 			// Iterate over all the nodes of the underlying graph to create wrapping nodes.
-			for(typename graph::underlying_type::const_iterator i(this->underlying().begin());
-				i != this->underlying().end(); ++i
+			for(typename graph::underlying_type::const_iterator
+				i(this->underlying().begin()), e(this->underlying().end()); i != e; ++i
 			) on_new_node(**i);
 			
 			// Iterate over all the nodes of the graph to connect the wrapping ports.
-			for(typename graph::const_iterator i(this->begin()) ; i != this->end() ; ++i) {
+			for(typename graph::const_iterator i(this->begin()), e(this->end()) ; i != e ; ++i) {
 				typename Typenames::node & node(**i);
-				for(typename Typenames::node::output_ports_type::const_iterator i(node.output_ports().begin());
-					i != node.output_ports().end(); ++i
+				for(typename Typenames::node::output_ports_type::const_iterator
+					i(node.output_ports().begin()), e(node.output_ports().end()); i != e; ++i
 				) {
 					typename Typenames::ports::output & output_port(**i);
-					for(typename Typenames::ports::output::underlying_type::
-						input_ports_type::const_iterator i(output_port.underlying().input_ports().begin());
-						i != output_port.underlying().input_ports().end() ; ++i
+					for(typename Typenames::ports::output::underlying_type::input_ports_type::const_iterator
+						i(output_port.underlying().input_ports().begin()),
+						e(output_port.underlying().input_ports().end()); i != e ; ++i
 					)
 						// The underlying layer is already connected, we only have to connect this wrapping layer.
 						static_cast<basic::ports::input<Typenames> &>(underlying_wrapper(**i)).connect(output_port);
@@ -117,7 +115,7 @@ class graph
 		/// returns the node wrapper corresponding to the given underlying node
 		typename Typenames::node & underlying_wrapper(typename Typenames::underlying::node & underlying_node) {
 			assert("the underlying node must belong to the underlying graph" &&
-				&underlying_node.parent() == &this->underlying()
+				&underlying_node.graph() == &this->underlying()
 			);
 			typename graph::const_iterator i(std::find_if(
 				this->begin(), this->end(),
@@ -132,14 +130,14 @@ class graph
 		typename Typenames::ports::output & underlying_wrapper(
 			typename Typenames::underlying::ports::output & underlying_output_port
 		) {
-			return underlying_wrapper(underlying_output_port.parent()).underlying_wrapper(underlying_output_port);
+			return underlying_wrapper(underlying_output_port.node()).underlying_wrapper(underlying_output_port);
 		}
 
 		/// returns the input port wrapper corresponding to the given underlying input port
 		typename Typenames::ports::input & underlying_wrapper(
 			typename Typenames::underlying::ports::input & underlying_input_port
 		) {
-			return underlying_wrapper(underlying_input_port.parent()).underlying_wrapper(underlying_input_port);
+			return underlying_wrapper(underlying_input_port.node()).underlying_wrapper(underlying_input_port);
 		}
 };
 
@@ -152,18 +150,24 @@ class node
 	public cast::underlying_wrapper<typename Typenames::underlying::node>
 {
 	protected:
-		typedef node node_type;
-
-		node(typename node::parent_type & parent, typename node::underlying_type & underlying)
+		node(typename Typenames::graph & graph, typename node::underlying_type & underlying)
 		:
-			basic::node<Typenames>(parent),
+			basic::node<Typenames>(graph),
 			node::underlying_wrapper_type(underlying),
 			// register to the underlying signals
 			#if 1
-				on_delete_signal_connection                 (underlying.                 delete_signal().connect(boost::bind(&node::on_delete                 , this, _1))),
-				on_new_output_port_signal_connection        (underlying.        new_output_port_signal().connect(boost::bind(&node::on_new_output_port        , this, _1))),
-				on_new_single_input_port_signal_connection  (underlying.  new_single_input_port_signal().connect(boost::bind(&node::on_new_single_input_port  , this, _1))),
-				on_new_multiple_input_port_signal_connection(underlying.new_multiple_input_port_signal().connect(boost::bind(&node::on_new_multiple_input_port, this, _1)))
+				on_delete_signal_connection(underlying.delete_signal().connect(
+					boost::bind(&node::on_delete, this, _1))
+				),
+				on_new_output_port_signal_connection(underlying.new_output_port_signal().connect(
+					boost::bind(&node::on_new_output_port, this, _1))
+				),
+				on_new_single_input_port_signal_connection(underlying.new_single_input_port_signal().connect(
+					boost::bind(&node::on_new_single_input_port, this, _1))
+				),
+				on_new_multiple_input_port_signal_connection(underlying.new_multiple_input_port_signal().connect(
+					boost::bind(&node::on_new_multiple_input_port, this, _1))
+				)
 			#else
 				// connect to the derived class (untested)
 				on_delete_signal_connection(underlying.delete_signal().connect(
@@ -244,7 +248,7 @@ class node
 		/// returns the the output port wrapper corresponding to the given underlying output port
 		typename Typenames::ports::output & underlying_wrapper(typename Typenames::underlying::ports::output & underlying_output_port) {
 			assert("the underlying port must belong to the underlying node" &&
-				&underlying_output_port.parent() == &this->underlying()
+				&underlying_output_port.node() == &this->underlying()
 			);
 			typename node::output_ports_type::const_iterator i(std::find_if(
 				this->output_ports().begin(), this->output_ports().end(),
@@ -257,7 +261,7 @@ class node
 		/// returns the the input port wrapper corresponding to the given underlying input port
 		typename Typenames::ports::input & underlying_wrapper(typename Typenames::underlying::ports::input & underlying_input_port) {
 			assert("the underlying port must belong to the underlying node" &&
-				&underlying_input_port.parent() == &this->underlying()
+				&underlying_input_port.node() == &this->underlying()
 			);
 			if(
 				this->multiple_input_port() &&
@@ -282,11 +286,9 @@ class port
 	public cast::underlying_wrapper<typename Typenames::underlying::port>
 {
 	protected:
-		typedef port port_type;
-
-		port(typename port::parent_type & parent, typename port::underlying_type & underlying)
+		port(typename Typenames::node & node, typename port::underlying_type & underlying)
 		:
-			basic::port<Typenames>(parent),
+			basic::port<Typenames>(node),
 			port::underlying_wrapper_type(underlying)
 		{}
 };
@@ -310,7 +312,6 @@ namespace ports {
 			> >
 	{
 		protected:
-			typedef output output_type;
 			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 				output, output::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 			)
@@ -333,7 +334,6 @@ namespace ports {
 			> >
 	{
 		protected:
-			typedef input input_type;
 			PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 				input, input::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 			)
@@ -379,7 +379,6 @@ namespace ports {
 				> >
 		{
 			protected:
-				typedef single single_type;
 				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 					single, single::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 				)
@@ -402,7 +401,6 @@ namespace ports {
 				> >
 		{
 			protected:
-				typedef multiple multiple_type;
 				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
 					multiple, multiple::underlying_wrapper_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
 				)
