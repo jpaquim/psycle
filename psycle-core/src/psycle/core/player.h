@@ -251,10 +251,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void start_threads();
 			void stop_threads();
 
-			typedef Machine node;
-
 			std::size_t thread_count_;
-			typedef std::list<std::thread *> threads_type;
+			typedef std::list<thread*> threads_type;
 			threads_type threads_;
 			void thread_function(std::size_t thread_number);
 
@@ -267,7 +265,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			bool suspend_requested_;
 			std::size_t suspended_;
 
-			typedef std::list<node*> nodes_queue_type;
+			typedef std::list<Machine*> nodes_queue_type;
 			/// nodes with no dependency.
 			nodes_queue_type terminal_nodes_;
 			/// nodes ready to be processed, just waiting for a free thread
@@ -280,7 +278,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void clear_plan();
 
 			void process_loop() throw(std::exception);
-			void process(node &) throw(std::exception);
+			void process(Machine &) throw(std::exception);
 			int samples_to_process_;
 	///\}
 };
