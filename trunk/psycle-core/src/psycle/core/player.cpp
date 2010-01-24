@@ -180,7 +180,8 @@ void Player::compute_plan() {
 		++graph_size_;
 		Machine & n(*song().machine(m));
 		// find the terminal nodes in the graph (nodes with no connected input ports)
-		if(!n._connectedInputs) terminal_nodes_.push_back(&n);
+		if(n.sched_inputs().empty()) terminal_nodes_.push_back(&n);
+		if(n.getMachineKey() == MachineKey::mixer) ++graph_size_;
 	}
 
 	// copy the initial processing queue
@@ -340,12 +341,12 @@ void Player::process_loop() throw(std::exception) {
 					// iterate over all the outputs of the node we processed
 					Machine::sched_deps output_nodes(node.sched_outputs());
 					for(Machine::sched_deps::const_iterator i(output_nodes.begin()), e(output_nodes.end()); i != e; ++i) {
-						Machine & output_node(**i);
+						Machine & output_node(*const_cast<Machine*>(*i));
 						bool output_node_ready(true);
 						// iterate over all the inputs connected to our output
 						Machine::sched_deps input_nodes(output_node.sched_inputs());
 						for(Machine::sched_deps::const_iterator i(input_nodes.begin()), e(input_nodes.end()); i != e; ++i) {
-							Machine & input_node(**i);
+							const Machine & input_node(**i);
 							if(!input_node.sched_processed_) {
 								output_node_ready = false;
 								break;

@@ -17,6 +17,11 @@ using namespace psycle::core;
 //#include <algorithm>
 //#include <cstring>
 
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle {
 namespace host{
 
@@ -50,7 +55,7 @@ namespace host{
 		for (int i=0; i<lastMachine; i++) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if (song.machine(i) != 0 && 
-				song.machine(i)->getMachineKey() == MachineKey::sampler() ) {
+				song.machine(i)->getMachineKey() == MachineKey::sampler ) {
 					isSampler[i] = 1;
 			}
 #else

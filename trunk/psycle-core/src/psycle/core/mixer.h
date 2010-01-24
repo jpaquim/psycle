@@ -171,7 +171,6 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 				float drywetmix_;
 				float gain_;
 		};
-
 		enum
 		{
 			chan1 = 0,
@@ -206,7 +205,7 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 		virtual std::string GetPortInputName(InPort::id_type port) const;
 		virtual unsigned int GetInPorts() const { return 2; }
 		virtual int GetAudioInputs() const{ return GetInPorts() * MAX_CONNECTIONS; }
-		virtual MachineKey getMachineKey() const { return MachineKey::mixer(); }
+		virtual MachineKey getMachineKey() const { return MachineKey::mixer; }
 		virtual std::string GetName() const { return _psName; }
 		virtual int GetNumCols() const;
 		virtual void GetParamName(int numparam,char *name) const;
@@ -265,6 +264,7 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 
 	protected:
 		static std::string _psName;
+		bool mixed;
 
 		int solocolumn_;
 		std::vector<InputChannel> inputs_;

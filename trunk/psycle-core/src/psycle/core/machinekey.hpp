@@ -33,18 +33,18 @@ class PSYCLE__CORE__DECL MachineKey {
 		MachineKey(const MachineKey& key);
 		~MachineKey();
 
-		static const MachineKey invalid();
-		static const MachineKey master();
-		static const MachineKey dummy();
-		static const MachineKey sampler();
-		static const MachineKey sampulse();
-		static const MachineKey duplicator();
-		static const MachineKey mixer();
-		static const MachineKey audioinput();
-		static const MachineKey lfo();
+		static const MachineKey invalid;
+		static const MachineKey master;
+		static const MachineKey dummy;
+		static const MachineKey sampler;
+		static const MachineKey sampulse;
+		static const MachineKey duplicator;
+		static const MachineKey mixer;
+		static const MachineKey audioinput;
+		static const MachineKey lfo;
 		//Used by the psy2loader to parse the plugin part of the loader for a plugin that couldn't be loaded.
-		static const MachineKey failednative();
-		static const MachineKey wrapperVst();
+		static const MachineKey failednative;
+		static const MachineKey wrapperVst;
 		static const std::string preprocessName(std::string dllName);
 
 		const std::string & dllName() const;

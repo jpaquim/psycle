@@ -7,13 +7,14 @@
 namespace psycle { namespace core {
 
 PluginInfo::PluginInfo(){}
-PluginInfo::PluginInfo(MachineRole::type role, std::string name, std::string author, std::string desc, std::string version, std::string libname, std::string categ)
+PluginInfo::PluginInfo(MachineRole::type role, std::string name, std::string author, std::string desc, std::string api_version, std::string plug_version, std::string libname, std::string categ)
 :
 	role_(role),
 	name_(name),
 	author_(author),
 	desc_(desc),
-	version_(version),
+	api_version_(api_version),
+	plug_version_(plug_version),
 	libName_(libname),
 	fileTime_( 0 ),
 	allow_( true ),
@@ -56,12 +57,20 @@ const std::string & PluginInfo::desc() const {
 	return desc_;
 }
 
-void PluginInfo::setVersion( const std::string & version ) {
-	version_ = version;
+void PluginInfo::setApiVersion( const std::string & api_version ) {
+	api_version_ = api_version;
 }
 
-const std::string & PluginInfo::version() const {
-	return version_;
+const std::string & PluginInfo::apiVersion() const {
+	return api_version_;
+}
+
+void PluginInfo::setPlugVersion( const std::string & plug_version ) {
+	plug_version_ = plug_version;
+}
+
+const std::string & PluginInfo::plugVersion() const {
+	return plug_version_;
 }
 
 void PluginInfo::setLibName( const std::string & libName ) {

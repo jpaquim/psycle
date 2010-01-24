@@ -19,6 +19,12 @@ using namespace psycle::core;
 
 
 #include "ChildView.hpp"
+
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle
 {
 	namespace host
@@ -700,7 +706,7 @@ namespace psycle
 				// if current sample is locked to a machine.
 				// if so, switch entry._mach to that machine number
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if (pMachine->getMachineKey() == MachineKey::sampler())
+				if (pMachine->getMachineKey() == MachineKey::sampler)
 #else
 				if (pMachine->_type == MACH_SAMPLER)
 #endif

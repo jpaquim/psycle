@@ -23,7 +23,13 @@ using namespace psycle::core;
 #include <algorithm>
 #include <cstring>
 
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle {
+
 namespace host{
 	
 	const short MODSongLoader::BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine
@@ -161,7 +167,7 @@ namespace host{
 		m_pSong = &song;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.SetReady(false);
-		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
+		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 		song.AddMachine(m_pSampler);
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,0.35f);
 		song.seqBus=m_pSampler->id();
@@ -1109,7 +1115,7 @@ namespace host{
 		m_pSong = &song;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.SetReady(false);
-		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
+		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 		song.AddMachine(m_pSampler);
 		//song.InsertConnection(*m_pSampler,*s->machine(MASTER_INDEX),0,0,0.75f); // This is done later, when determining the number of channels.
 		song.seqBus=m_pSampler->id();
