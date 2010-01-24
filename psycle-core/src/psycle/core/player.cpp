@@ -363,19 +363,11 @@ void Player::process_loop() throw(std::exception) {
 			}
 		}
 		switch(notify) {
-			case -1:
-				main_condition_.notify_one(); // wake up the main processing loop
-			case 0:
-				// no successor ready
-			break;
-			case 1:
-				// If there's only one successor ready, we don't notify since it can be processed in the same thread.
-			break;
-			case 2:
-				condition_.notify_one(); // notify one thread that we added nodes to the queue
-			break;
-			default:
-				condition_.notify_all(); // notify all threads that we added nodes to the queue
+			case -1: main_condition_.notify_one(); break; // wake up the main processing loop
+			case 0: break; // no successor ready
+			case 1: break; // If there's only one successor ready, we don't notify since it can be processed in the same thread.
+			case 2: condition_.notify_one(); break; // notify one thread that we added nodes to the queue
+			default: condition_.notify_all(); // notify all threads that we added nodes to the queue
 		}
 	}
 }
