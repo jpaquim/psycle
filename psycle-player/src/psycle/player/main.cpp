@@ -199,6 +199,7 @@ int main(int argument_count, char * arguments[]) {
 	player.setDriver(output_driver);
 
 	///\todo it seems player.setDriver resets the settings to their default, so we need to set the settings after.
+	///\todo not sure that's the case anymore
 	if(output_device_name.length()) {
 		if(loggers::information()()) {
 			std::ostringstream s;
@@ -239,7 +240,6 @@ int main(int argument_count, char * arguments[]) {
 		}
 
 		///\todo since we don't have a way to wait until the song is finished with the sequence, we may as well just loop it
-		///\todo doesn't work anymore
 		player.setLoopSong();
 
 		if(output_file_name.length()) {
