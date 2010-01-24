@@ -261,9 +261,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void suspend_and_compute_plan();
 			void compute_plan();
 			void clear_plan();
-
 			void process_loop() throw(std::exception);
-			void process(Machine &) throw(std::exception);
 			int samples_to_process_;
 	///\}
 };

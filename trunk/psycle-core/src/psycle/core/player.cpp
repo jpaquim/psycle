@@ -27,6 +27,8 @@ namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
 }
 
+namespace { bool const ultra_trace(true); }
+
 Player & Player::singleton() {
 	// note: keep sure a player instance is created from the gui
 	// before starting audiothread
@@ -185,6 +187,15 @@ void Player::compute_plan() {
 		if(n.sched_inputs().empty()) terminal_nodes_.push_back(&n);
 		if(n.getMachineKey() == MachineKey::mixer) ++graph_size_;
 	}
+	if(ultra_trace && loggers::trace()) {
+		std::ostringstream s;
+		s << "psycle: core: player: terminal nodes:";
+		for(nodes_queue_type::const_iterator i(terminal_nodes_.begin()), e(terminal_nodes_.end()); i != e; ++i) {
+			Machine & node(**i);
+			s << "\n\t" << node.GetEditName();
+		}
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
 
 	// copy the initial processing queue
 	nodes_queue_ = terminal_nodes_;
@@ -303,66 +314,72 @@ void Player::process_loop() throw(std::exception) {
 				this_thread_suspended_ = false;
 				--suspended_;
 			}
+
 			// There are nodes waiting in the queue. We pop the first one.
 			node_ = nodes_queue_.front();
 			nodes_queue_.pop_front();
 		}
 		Machine & node(*node_);
 
-		process(node);
+		if(ultra_trace && loggers::trace()) {
+			scoped_lock lock(mutex_);
+			std::ostringstream s;
+			s << "psycle: core: player: processing node: " << node.GetEditName();
+			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+
+		bool const done = node.sched_process(samples_to_process_);
 	
+		if(ultra_trace && loggers::trace()) {
+			scoped_lock lock(mutex_);
+			std::ostringstream s;
+			s << "psycle: core: player: processed node: " << node.GetEditName() << ", done: " << done;
+			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+
 		int notify(0);
 		{ scoped_lock lock(mutex_);
-			node.sched_processed_ = true;
+			node.sched_processed_ = done;
 			// check whether all nodes have been processed
 			if(++processed_node_count_ == graph_size_) notify = -1; // wake up the main processing loop
 			else {
-				#if 0 // too concrete
-					// check whether successors of the node we processed are now ready.
-					// iterate over all the outputs of the node we processed
-					if(node._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(node._connection[c]) {
-						Machine & output_node(*song().machine(node._outputMachines[c]));
-						bool output_node_ready(true);
-						// iterate over all the inputs connected to our output
-						if(output_node._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(output_node._inputCon[c]) {
-							Machine & input_node(*song().machine(output_node._inputMachines[c]));
-							if(!input_node.sched_processed_) {
-								output_node_ready = false;
-								break;
-							}
+				// check whether successors of the node we processed are now ready.
+				// iterate over all the outputs of the node we processed
+				Machine::sched_deps output_nodes(node.sched_outputs());
+				for(Machine::sched_deps::const_iterator i(output_nodes.begin()), e(output_nodes.end()); i != e; ++i) {
+					Machine & output_node(*const_cast<Machine*>(*i));
+					bool output_node_ready(true);
+					// iterate over all the inputs connected to our output
+					Machine::sched_deps input_nodes(output_node.sched_inputs());
+					for(Machine::sched_deps::const_iterator i(input_nodes.begin()), e(input_nodes.end()); i != e; ++i) {
+						const Machine & input_node(**i);
+						if(&input_node == &node) continue;
+						if(ultra_trace && loggers::trace()) {
+							std::ostringstream s;
+							s << "psycle: core: player: node: " << node.GetEditName()
+								<< ", output: " << output_node.GetEditName()
+								<< ", input: " << input_node.GetEditName()
+								<< ", ready: " << input_node.sched_processed_;
+							loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 						}
-						if(output_node_ready) {
-							// All the dependencies of the node have been processed.
-							// We add the node to the processing queue.
-							nodes_queue_.push_back(&output_node);
-							++notify;
-						}
-					}
-				#else // more abstract
-					// check whether successors of the node we processed are now ready.
-					// iterate over all the outputs of the node we processed
-					Machine::sched_deps output_nodes(node.sched_outputs());
-					for(Machine::sched_deps::const_iterator i(output_nodes.begin()), e(output_nodes.end()); i != e; ++i) {
-						Machine & output_node(*const_cast<Machine*>(*i));
-						bool output_node_ready(true);
-						// iterate over all the inputs connected to our output
-						Machine::sched_deps input_nodes(output_node.sched_inputs());
-						for(Machine::sched_deps::const_iterator i(input_nodes.begin()), e(input_nodes.end()); i != e; ++i) {
-							const Machine & input_node(**i);
-							if(!input_node.sched_processed_) {
-								output_node_ready = false;
-								break;
-							}
-
-						}
-						if(output_node_ready) {
-							// All the dependencies of the node have been processed.
-							// We add the node to the processing queue.
-							nodes_queue_.push_back(&output_node);
-							++notify;
+						if(!input_node.sched_processed_) {
+							output_node_ready = false;
+							break;
 						}
 					}
-				#endif
+					if(ultra_trace && loggers::trace()) {
+						std::ostringstream s;
+						s << "psycle: core: player: node: " << node.GetEditName()
+							<< ", output: " << output_node.GetEditName() << ", ready: " << output_node_ready;
+						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
+					if(output_node_ready) {
+						// All the dependencies of the node have been processed.
+						// We add the node to the processing queue.
+						nodes_queue_.push_back(&output_node);
+						++notify;
+					}
+				}
 			}
 		}
 		switch(notify) {
@@ -373,29 +390,6 @@ void Player::process_loop() throw(std::exception) {
 			default: condition_.notify_all(); // notify all threads that we added nodes to the queue
 		}
 	}
-}
-
-void Player::process(Machine & node) throw(std::exception) {
-	if(loggers::trace()) {
-		scoped_lock lock(mutex_);
-		std::ostringstream s;
-		s << "psycle: core: player: processing node: " << node.GetEditName();
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	#if 0 // too concrete
-		if(node._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(node._inputCon[i]) {
-			Machine & input_node(*song().machine(node._inputMachines[i]));
-			if(!input_node.Standby()) node.Standby(false);
-			if(!node._mute && !node.Standby()) { ///\todo && node.input_buffer_mix_by_player()) {
-				dsp::Add(input_node._pSamplesL, node._pSamplesL, samples_to_process_, input_node.lVol() * node._inputConVol[i]);
-				dsp::Add(input_node._pSamplesR, node._pSamplesR, samples_to_process_, input_node.rVol() * node._inputConVol[i]);
-			}
-		}
-		dsp::Undenormalize(node._pSamplesL, node._pSamplesR, samples_to_process_);
-		node.GenerateAudio(samples_to_process_);
-	#else // mode abstract
-		node.sched_process(samples_to_process_);
-	#endif
 }
 
 void Player::stop() {
