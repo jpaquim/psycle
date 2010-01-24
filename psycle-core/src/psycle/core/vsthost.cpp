@@ -36,6 +36,9 @@
 		static host instance(callb);
 		return instance;
 	}
+	void host::ChangeSampleRate(int sample_rate) {
+		master->SetSampleRate(sample_rate);
+	}
 
 	Machine* host::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id)  {
 		if (key == MachineKey::wrapperVst ) {
@@ -231,10 +234,20 @@
 		kVstAutomationReading    = 1 << 7,
 		*/
 
-		//kVstCyclePosValid = 1 << 12, // start and end
-		// cyclestart // locator positions in quarter notes.
-		// cycleend   // locator positions in quarter notes.
 		const PlayerTimeInfo &info = pCallbacks->timeInfo();
+		vstTimeInfo.samplePos = info.samplePos();
+		vstTimeInfo.tempo = info.bpm();
+		vstTimeInfo.flags |= kVstTempoValid;
+		
+		if( pCallbacks->timeInfo().cycleEnabled() ) {
+			vstTimeInfo.flags |= kVstTransportCycleActive;
+		}
+
+		if (lMask & kVstCyclePosValid && pCallbacks->timeInfo().cycleEnabled()) {
+			vstTimeInfo.cycleStartPos = info.cycleStartPos();
+			vstTimeInfo.cycleEndPos = info.cycleEndPos();
+			vstTimeInfo.flags |= kVstCyclePosValid;
+		}
 
 		if(lMask & kVstPpqPosValid)
 		{
@@ -243,6 +256,10 @@
 			// Disable default handling.
 			lMask &= ~kVstPpqPosValid;
 		}
+
+		//timeSigNumerator } Via SetTimeSignature() function
+		//timeSigDenominator } "" ""
+		//smpteFrameRate (See VstSmpteFrameRate in aeffectx.h)
 
 		CVSTHost::CalcTimeInfo(lMask);
 	}

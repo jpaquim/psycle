@@ -8,6 +8,11 @@
 #include "machine.h"
 #include "sampler.h"
 #include "song.h"
+#if defined _WIN32 || defined _WIN64 
+	#include "vsthost.h"
+	#include "machinefactory.h"
+#endif
+
 
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/helpers/value_mapper.hpp>
@@ -435,6 +440,11 @@ void Player::stop_threads() {
 
 void Player::samples_per_second(int samples_per_second) {
 	timeInfo_.setSampleRate(samples_per_second);
+#if defined _WIN32 || defined _WIN64 
+	//this updates the vstTimeInfo. The plugins themselves are still informed via the setsamplerate call
+	((vst::host*)MachineFactory::getInstance().getHosts()[Hosts::VST])->ChangeSampleRate(samples_per_second);
+#endif
+
 	if(!song_) return;
 	///\todo update the source code of the plugins...
 	for(int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(samples_per_second);
