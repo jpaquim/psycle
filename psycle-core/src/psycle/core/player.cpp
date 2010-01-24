@@ -45,15 +45,17 @@ Player::Player()
 	recording_with_dither_(),
 	playing_(),
 	autoStopMachines_(),
-	work_suspended_()
-{
-	universalis::os::aligned_memory_alloc(16, null_buffer, 2*MAX_BUFFER_LENGTH);
-	dsp::Clear(null_buffer,2*MAX_BUFFER_LENGTH);
-
+	autostop_(true) {
 	universalis::os::aligned_memory_alloc(16, buffer_, MAX_SAMPLES_WORKFN);
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
 	start_threads();
 }
+
+Player::~Player() {
+	stop_threads();
+	universalis::os::aligned_memory_dealloc(buffer_);
+}
+
 
 void Player::start_threads() {
 	if(loggers::trace()) loggers::trace()("psycle: core: player: starting scheduler threads", UNIVERSALIS__COMPILER__LOCATION);
@@ -416,11 +418,6 @@ void Player::stop() {
 	//if(autoRecord_) stopRecording();
 }
 
-Player::~Player() {
-	stop_threads();
-	universalis::os::aligned_memory_dealloc(buffer_);
-}
-
 void Player::stop_threads() {
 	if(loggers::trace()) loggers::trace()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(!threads_.size()) {
@@ -476,6 +473,11 @@ float * Player::Work(int numSamples) {
 				timeInfo_.playBeatPos() >= timeInfo_.cycleEndPos() ||
 				timeInfo_.playBeatPos() < timeInfo_.cycleStartPos()
 			) setPlayPos(timeInfo_.cycleStartPos());
+		} else {
+			// autostop
+			if (timeInfo_.playBeatPos() >= song().patternSequence().max_beats()) {
+				stop();
+			}
 		}
 		sequencer_.set_player(*this); // for a callback to process()
 		sequencer_.set_time_info(timeInfo_);

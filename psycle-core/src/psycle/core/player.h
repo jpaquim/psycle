@@ -81,17 +81,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			/// entrance for the callback function (audiodriver)
-			static float * Work(void * context, int samples) {
-				Player & player = *reinterpret_cast<Player*>(context);
-				float* buffer = 0;
-				scoped_lock lock(player.work_mutex_);
-				if (!player.work_suspended_) {
-					buffer = player.Work(samples);
-				} else {
-					buffer = player.null_buffer;
-					std::memset(buffer, 0, 2 * samples * sizeof(float));
-				}
-				return buffer;
+			static float* Work(void* context, int samples) {
+				return reinterpret_cast<Player*>(context)->Work(samples);
 			}
 		public:
 			/// entrance for the callback function (audiodriver)
@@ -185,8 +176,12 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void skipTo(double beatpos);
 			/// is the player in playmode.
 			bool playing() const { return playing_; }
+			/// maybe autostop should be always used ?
+			void set_auto_stop(bool on) { autostop_ = on; }
+			bool autostop(bool on) const { return autostop_; }
 		private:
 			bool playing_;
+			bool autostop_;
 	///\}
 
 	///\name loop
@@ -223,17 +218,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	public:
 		void process(int samples);
 
-	///\name work_suspended
-	///\{
-		public:
-			bool work_suspended() const { scoped_lock lock(work_mutex_); return work_suspended_; }
-			void set_work_suspend(bool on) { scoped_lock lock(work_mutex_); work_suspended_ = on; }
-		private:
-			bool work_suspended_;
-			mutable mutex work_mutex_;
-			float * null_buffer;
-	///\}
-
+	
 	private:
 		Sequencer sequencer_;
 
