@@ -417,7 +417,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 						#warning ################ Temporary hack for songs with VSTs ################
 					#endif
 					Dummy* dummy;
-					pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(MachineKey::dummy(),i));
+					pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(MachineKey::dummy,i));
 					if (type == MACH_VST ) dummy->setGenerator(true);
 					else dummy->setGenerator(false);
 					pMac[i]->LoadPsy2FileFormat(file);
