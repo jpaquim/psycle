@@ -224,7 +224,7 @@ class MachineCallbacks {
 
 /// Base class for "Machines", the audio producing elements.
 class PSYCLE__CORE__DECL Machine {
-	friend class CoreSong; friend class Psy2Filter; friend class player;
+	friend class CoreSong; friend class Psy2Filter; friend class Player;
 	///\name crash handling
 	///\{
 		public:
