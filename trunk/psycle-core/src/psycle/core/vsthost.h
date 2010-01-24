@@ -60,6 +60,7 @@
 			virtual std::string const & getPluginPath(int) const { return plugin_path_; }
 			virtual int getNumPluginPaths() const { return 1; }
 			virtual void setPluginPath(std::string path) { plugin_path_ = path; }
+			void ChangeSampleRate(int sample_rate);
 
 		protected:
 			virtual void FillPluginInfo(const std::string&, const std::string&, PluginFinder&);
