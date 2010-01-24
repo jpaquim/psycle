@@ -27,7 +27,7 @@ namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
 }
 
-namespace { bool const ultra_trace(true); }
+namespace { bool const ultra_trace(false); }
 
 Player & Player::singleton() {
 	// note: keep sure a player instance is created from the gui
