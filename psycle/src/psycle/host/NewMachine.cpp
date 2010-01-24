@@ -121,7 +121,7 @@ namespace psycle {
 		CNewMachine::CNewMachine(CWnd* pParent)
 			: CDialog(CNewMachine::IDD, pParent)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			, outputMachine(MachineKey::invalid())
+			, outputMachine(MachineKey::invalid)
 #else
 			, Outputmachine(-1)
 			, shellIdx(0)
@@ -203,19 +203,19 @@ namespace psycle {
 					hNodes[i] = m_browser.InsertItem(hosts[i]->hostName().c_str() ,i*2, i*2 , TVI_ROOT, TVI_LAST);
 					gen[i] = hNodes[i];
 					fx[i] = hNodes[i];
-					treeToInfo[hNodes[i]] = MachineKey::invalid();
+					treeToInfo[hNodes[i]] = MachineKey::invalid;
 				}
 				crashedNode = m_browser.InsertItem("Crashed or invalid plugins", 6, 6, TVI_ROOT,TVI_LAST);
-				treeToInfo[crashedNode] = MachineKey::invalid();
+				treeToInfo[crashedNode] = MachineKey::invalid;
 			}
 			else {
 				hNodes = new HTREEITEM[2];
 				hNodes[0] = m_browser.InsertItem("Generators",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Effects",1,1,TVI_ROOT,TVI_LAST);
 				crashedNode = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
-				treeToInfo[hNodes[0]] = MachineKey::invalid();
-				treeToInfo[hNodes[1]] = MachineKey::invalid();
-				treeToInfo[crashedNode] = MachineKey::invalid();
+				treeToInfo[hNodes[0]] = MachineKey::invalid;
+				treeToInfo[hNodes[1]] = MachineKey::invalid;
+				treeToInfo[crashedNode] = MachineKey::invalid;
 				for (unsigned int i=0; i < Hosts::NUM_HOSTS; i++ ) {
 					gen[i] = hNodes[0];
 					fx[i] = hNodes[1];
@@ -246,7 +246,7 @@ namespace psycle {
 
 			if(machineGrouping == groupHost ) { m_browser.Select(hNodes[selectedGroup],TVGN_CARET); }
 			else { m_browser.Select(hNodes[selectedRole],TVGN_CARET); }
-			outputMachine = MachineKey::failednative();
+			outputMachine = MachineKey::failednative;
 			delete[] hNodes;
 		}
 
@@ -255,9 +255,9 @@ namespace psycle {
 			//NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 			tHand = m_browser.GetSelectedItem();
 			//Do not do. OnSelchangedBrowser is called when destroying the elements, so the selection is lost
-			//outputMachine = MachineKey::failednative();
+			//outputMachine = MachineKey::failednative;
 			MachineKey key = treeToInfo[tHand];
-			if (key == MachineKey::invalid() ) {
+			if (key == MachineKey::invalid ) {
 				return;
 			}
 			const PluginInfo& info = MachineFactory::getInstance().getFinder().info(key);
@@ -286,8 +286,8 @@ namespace psycle {
 
 				m_descLabel.SetWindowText(str.c_str());
 			}
-			m_versionLabel.SetWindowText(info.version().c_str());
-			m_APIversionLabel.SetWindowText("");
+			m_versionLabel.SetWindowText(info.plugVersion().c_str());
+			m_APIversionLabel.SetWindowText(info.apiVersion().c_str());
 			selectedGroup = key.host();
 			if ( info.role() == MachineRole::EFFECT ) {
 				selectedRole = MachineRole::EFFECT;
@@ -324,7 +324,7 @@ namespace psycle {
 				int currdir = numDirs;
 				while (i>=0)
 				{
-					if ( strcpy(_pPlugsInfo[i]->_pPlugsInfo[i]->dllname,dirArray[currdir]) != 0 )
+					if ( strcpy(_pPlugsInfo[i]->dllname,dirArray[currdir]) != 0 )
 					{
 						currdir--:
 						// check if you need to create a new node or what.
@@ -555,7 +555,7 @@ namespace psycle {
 
 						m_descLabel.SetWindowText(str.c_str());
 					}
-					m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
+					m_versionLabel.SetWindowText(_pPlugsInfo[i]->APIversion.c_str());
 					{	// convert integer to string.
 						std::ostringstream s; s << _pPlugsInfo[i]->APIversion;
 						m_APIversionLabel.SetWindowText(s.str().c_str());
@@ -661,7 +661,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		void CNewMachine::OnOK() 
 		{
-			if (outputMachine != MachineKey::invalid() ) // Necessary so that you cannot doubleclick a Node
+			if (outputMachine != MachineKey::invalid ) // Necessary so that you cannot doubleclick a Node
 			{
 				CDialog::OnOK();
 			}
@@ -670,7 +670,7 @@ namespace psycle {
 		void CNewMachine::OnCheckAllow() 
 		{
 			MachineKey key = treeToInfo[tHand];
-			if (key != MachineKey::invalid() ) {
+			if (key != MachineKey::invalid ) {
 				PluginFinder& finder = MachineFactory::getInstance().getFinder();
 				const PluginInfo& info = MachineFactory::getInstance().getFinder().info(key);
 				finder.EnablePlugin(key, !info.allow());
@@ -969,14 +969,10 @@ namespace psycle {
 									_pPlugsInfo[currentPlugsCount]->desc = s.str();
 								}
 								{
-									std::ostringstream s; s << "0";
+									std::ostringstream s; s << plug.GetInfo()->PlugVersion;;
 									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
-								_pPlugsInfo[currentPlugsCount]->APIversion = plug.GetInfo()->Version;
-								{
-									std::ostringstream s; s << "0";
-									_pPlugsInfo[currentPlugsCount]->version = s.str();
-								}
+								_pPlugsInfo[currentPlugsCount]->APIversion = plug.GetInfo()->APIVersion;
 								out << plug.GetName() << " - successfully instanciated";
 								out.flush();
 							}

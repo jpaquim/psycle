@@ -721,7 +721,7 @@ bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 		song.AddMachine(mac);
 		return song.machine(index)->LoadFileChunk(file,minorversion);
 	} else {
-		mac = factory.CreateMachine(MachineKey::dummy(),index);
+		mac = factory.CreateMachine(MachineKey::dummy,index);
 		mac->SetEditName(mac->GetEditName() + " (replaced)");
 		song.AddMachine(mac);
 		return false;

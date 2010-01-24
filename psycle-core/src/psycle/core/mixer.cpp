@@ -24,7 +24,8 @@ std::string Mixer::_psName = "Mixer";
 
 Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id)
 :
-	Machine(callbacks, id)
+	Machine(callbacks, id),
+	mixed()
 {
 	defineInputAsStereo(2);
 	defineOutputAsStereo();
@@ -81,7 +82,7 @@ void Mixer::Work( int numSamples )
 	// Step One, do the usual work, except mixing all the inputs to a single stream.
 	WorkWires( numSamples, false );
 	// Step Two, prepare input signals for the Send Fx, and make them work
-	FxSend( numSamples );
+			FxSend( numSamples, true );
 	// Step Three, Mix the returns of the Send Fx's with the leveled input signal
 	//cpu::cycles_type cost(cpu::cycles());
 	Mix(numSamples);
@@ -235,11 +236,8 @@ void Mixer::Mix(int numSamples)
 
 /// tells the scheduler which machines to process before this one
 Mixer::sched_deps Mixer::sched_inputs() const {
-	sched_deps result;
-	if(!sched_processed_) {
-		result = Machine::sched_inputs();
-	} else {
-		///\todo uncomplete .. see the Mix function for the full code
+	sched_deps result = Machine::sched_inputs();
+	if(sched_processed_) {
 		for(unsigned int i = 0; i < numreturns(); ++i) {
 			if(
 				Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() &&
@@ -256,26 +254,28 @@ Mixer::sched_deps Mixer::sched_inputs() const {
 /// tells the scheduler which machines may be processed after this one
 Mixer::sched_deps Mixer::sched_outputs() const {
 	sched_deps result;
-	if(!sched_processed_) {
-		///\todo uncomplete .. see the SendFx function for the full code
-		for(unsigned int i = 0; i < numsends(); ++i) if(sends_[i].IsValid()) {
-			Machine & send(*callbacks->song().machine(sends_[i].machine_));
-			result.push_back(&send);
-		}
-	} else {
+	if(mixed) {
 		result = Machine::sched_outputs();
+	} else {
+		for (int i=0; i<numsends(); i++) if (Send(i).IsValid()) {
+			Machine & input(*callbacks->song().machine(Send(i).machine_));
+			result.push_back(&input);
+		}
+		result.push_back(this);
 	}
 	return result;
 }
 
 /// called by the scheduler to ask for the actual processing of the machine
 void Mixer::sched_process(unsigned int frames) {
-	if(!sched_processed_) {
-		FxSend(frames, /* recurse = */ false);
-	} else {
+	if (sched_processed_) {
 		Mix(frames);
 		dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 		Machine::UpdateVuAndStanbyFlag(frames);
+		mixed = true;
+	} else {
+		FxSend(frames,false);
+		mixed = false;
 	}
 }
 

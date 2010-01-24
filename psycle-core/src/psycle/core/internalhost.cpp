@@ -17,24 +17,24 @@ namespace psycle {namespace core {
 namespace InternalMacs {
 
 	static const MachineKey keys[]={
-		MachineKey::master(),
-		MachineKey::dummy(),
-		MachineKey::sampler(),
-		MachineKey::sampulse(),
-		MachineKey::duplicator(),
-		MachineKey::mixer(),
-		MachineKey::audioinput(),
-		MachineKey::lfo()
+		MachineKey::master,
+		MachineKey::dummy,
+		MachineKey::sampler,
+		MachineKey::sampulse,
+		MachineKey::duplicator,
+		MachineKey::mixer,
+		MachineKey::audioinput,
+		MachineKey::lfo
 	};
 	static const PluginInfo infos[]={
-		PluginInfo(MachineRole::MASTER,"Master","Psycledelics","Outputs audio to soundcard","1.1","","Master"),
-		PluginInfo(MachineRole::EFFECT,"Dummy Machine","Psycledelics","lets audio pass through","1.1","","Mixer"),
-		PluginInfo(MachineRole::GENERATOR,"Sampler","Psycledelics","Plays .wav audio samples","1.3","","Sampler"),
-		PluginInfo(MachineRole::GENERATOR,"Sampulse","JosepMa [JAZ]","Tracker oriented sampler","0.9","","Sampler"),
-		PluginInfo(MachineRole::CONTROLLER,"Note Duplicator","JosepMa [JAZ]","Forwards events to other machines","1.0","","Controller"),
-		PluginInfo(MachineRole::EFFECT,"Send/Return Mixer","JosepMa [JAZ]","Mixes audio with send/returns","1.0","","Mixer"),
-		PluginInfo(MachineRole::GENERATOR,"AudioInput","JosepMa [JAZ]","Receives audio from the soundcard","0.7","","Capture"),
-		PluginInfo(MachineRole::CONTROLLER,"LFO Machine","dw","Controls parameters of other machines","0.5","","Controller")
+		PluginInfo(MachineRole::MASTER,"Master","Psycledelics","Outputs audio to soundcard","","1.1","","Master"),
+		PluginInfo(MachineRole::EFFECT,"Dummy Machine","Psycledelics","lets audio pass through","","1.1","","Mixer"),
+		PluginInfo(MachineRole::GENERATOR,"Sampler","Psycledelics","Plays .wav audio samples","","1.3","","Sampler"),
+		PluginInfo(MachineRole::GENERATOR,"Sampulse","JosepMa [JAZ]","Tracker oriented sampler","","0.9","","Sampler"),
+		PluginInfo(MachineRole::CONTROLLER,"Note Duplicator","JosepMa [JAZ]","Forwards events to other machines","","1.0","","Controller"),
+		PluginInfo(MachineRole::EFFECT,"Send/Return Mixer","JosepMa [JAZ]","Mixes audio with send/returns","","1.0","","Mixer"),
+		PluginInfo(MachineRole::GENERATOR,"AudioInput","JosepMa [JAZ]","Receives audio from the soundcard","","0.7","","Capture"),
+		PluginInfo(MachineRole::CONTROLLER,"LFO Machine","dw","Controls parameters of other machines","","0.5","","Controller")
 	};
 }
 

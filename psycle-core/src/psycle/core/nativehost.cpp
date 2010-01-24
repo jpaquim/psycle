@@ -35,7 +35,7 @@ NativeHost& NativeHost::getInstance(MachineCallbacks* callb)
 
 Machine* NativeHost::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id) 
 {
-	if (key == MachineKey::failednative()) 
+	if (key == MachineKey::failednative) 
 	{
 		Plugin *p = new Plugin(mcallback_, key, id, 0, 0, 0);
 		return p;
@@ -83,10 +83,24 @@ void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& 
 		bool _isSynth = (minfo->Flags == 3);
 		pinfo.setRole( _isSynth?MachineRole::GENERATOR : MachineRole::EFFECT );
 		pinfo.setLibName(fullName);
-		std::ostringstream o;
-		std::string version;
+#if 0 //not ready yet
+		{
+			std::ostringstream o;
+			o << minfo->APIVersion;
+			pinfo.setApiVersion(  o.str() );
+		}
+#endif
+		{
+			std::ostringstream o;
+			std::string version;
+#if 0 //not ready yet
+			o << minfo->PlugVersion;
+			pinfo.setPlugVersion(  o.str() );
+#else
 		if (!(o << minfo->Version )) version = o.str();
-		pinfo.setVersion( version );
+		pinfo.setPlugVersion( version );
+#endif
+		}
 		pinfo.setAuthor( minfo->Author );
 		pinfo.setAllow(true);
 		MachineKey key( hostCode(), fileName, 0);
@@ -141,8 +155,13 @@ CMachineInfo* NativeHost::LoadDescriptor(void* hInstance)
 		}
 	#endif
 		CMachineInfo* info_ = GetInfo();
+#if 0 //not ready yet
+		if(info_->APIVersion < MI_VERSION) {
+			std::cerr << "plugin format is too old" << info_->APIVersion << "\n";
+#else
 		if(info_->Version < MI_VERSION) {
 			std::cerr << "plugin format is too old" << info_->Version << "\n";
+#endif
 			info_ = 0;
 		}
 		return info_;

@@ -11,8 +11,14 @@ using namespace psycle::core;
 #include "Song.hpp"
 #include "Machine.hpp"
 #endif
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle {
 	namespace host {
+
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
 			, m_clearCounter( 0 )
@@ -367,11 +373,11 @@ namespace psycle {
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						if (pMachine->getMachineKey() == MachineKey::sampler()) {
+						if (pMachine->getMachineKey() == MachineKey::sampler) {
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[instrument]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
-						else if ( pMachine->getMachineKey() == MachineKey::sampulse()) {
+						else if ( pMachine->getMachineKey() == MachineKey::sampulse) {
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song().rInstrument(instrument).Name() );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}

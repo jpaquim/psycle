@@ -71,22 +71,22 @@ namespace psycle  {
 		std::uint32_t Psy3Saver::ConvertType(const psycle::core::MachineKey& key,bool isGenerator) const {
 			OldMachineType old_type = MACH_DUMMY; // default
 			if (key.host() == Hosts::INTERNAL ) {
-				if (key == MachineKey::master() ) {
+				if (key == MachineKey::master ) {
 					old_type = MACH_MASTER;
 				}
-				else if (key == MachineKey::sampler()) {
+				else if (key == MachineKey::sampler) {
 					old_type = MACH_SAMPLER;
 				}
-				else if (key == MachineKey::sampulse()) {
+				else if (key == MachineKey::sampulse) {
 					old_type = MACH_XMSAMPLER;
 				}
-				else if (key == MachineKey::duplicator() ) {
+				else if (key == MachineKey::duplicator ) {
 					old_type = MACH_DUPLICATOR;
 				}
-				else if (key == MachineKey::mixer() ) {
+				else if (key == MachineKey::mixer ) {
 					old_type = MACH_MIXER;
 				}
-				else if (key == MachineKey::audioinput() ) {
+				else if (key == MachineKey::audioinput ) {
 					old_type = MACH_RECORDER;
 				}
 			}
@@ -309,16 +309,17 @@ namespace psycle  {
 			psycle::core::Sequence::patterniterator  it = song_->patternSequence().patternbegin();
 			for ( ; it != song_->patternSequence().patternend(); ++it ) {
 				psycle::core::Pattern* pattern = *it;
+				///\todo: need to do something with it?
 				if (pattern == song_->patternSequence().master_pattern())
 					continue;
-				unsigned char* data = CreateNewPattern(pattern->id());
-				psycle::core::Pattern::iterator ev_it = pattern->begin();
 				int num_lines = pattern->beats() * lines_per_beat;
+				unsigned char* data = CreateNewPattern(pattern->id(), song_->tracks(), num_lines);
+				psycle::core::Pattern::iterator ev_it = pattern->begin();
 				for ( ; ev_it != pattern->end(); ++ev_it ) {
 					psycle::core::PatternEvent& ev = ev_it->second;
 					double pos = ev_it->first;
 					int line = pos * lines_per_beat;
-					unsigned char* data_ptr = data + line * EVENT_SIZE * song_->tracks();
+					unsigned char* data_ptr = data + (line * song_->tracks() + ev.track()) * EVENT_SIZE;
 					ConvertEvent(ev, data_ptr);
 				}		
 				// ok save it
@@ -328,7 +329,7 @@ namespace psycle  {
 
 				for (int y = 0; y < num_lines; y++)
 				{
-					unsigned char* pData = ppPatternData[index]+(y*MULTIPLY);
+					unsigned char* pData = ppPatternData[index]+(y*song_->tracks()*EVENT_SIZE);
 					memcpy(pCopy,pData,EVENT_SIZE*song_->tracks());
 					pCopy+=EVENT_SIZE*song_->tracks();
 				}
@@ -515,11 +516,11 @@ namespace psycle  {
 			return true;
 		}
 
-		unsigned char* Psy3Saver::CreateNewPattern(int ps) {			
-			ppPatternData[ps] = new unsigned char[MULTIPLY2];
+		unsigned char* Psy3Saver::CreateNewPattern(int ps, int tracks, int lines) {			
+			ppPatternData[ps] = new unsigned char[EVENT_SIZE*tracks*lines];
 			PatternEvent blank;
 			unsigned char * pData = ppPatternData[ps];
-			for(int i = 0; i < MULTIPLY2; i+= EVENT_SIZE)
+			for(int i = 0; i < tracks*lines; i++)
 			{
 				memcpy(pData,&blank,EVENT_SIZE);
 				pData+= EVENT_SIZE;

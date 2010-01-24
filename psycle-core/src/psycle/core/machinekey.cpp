@@ -13,6 +13,19 @@ namespace psycle { namespace core {
 			char operator() (char c) const  { return std::tolower(c); }
 		};
 
+		const MachineKey MachineKey::invalid(Hosts::INTERNAL,"<invalid>", -1);
+		const MachineKey MachineKey::master(Hosts::INTERNAL,"<master>", InternalMacs::MASTER);
+		const MachineKey MachineKey::dummy(Hosts::INTERNAL,"<dummy>", InternalMacs::DUMMY);
+		const MachineKey MachineKey::sampler(Hosts::INTERNAL,"<sampler>", InternalMacs::SAMPLER );
+		const MachineKey MachineKey::sampulse(Hosts::INTERNAL,"<xm-sampler>", InternalMacs::XMSAMPLER );
+		const MachineKey MachineKey::duplicator(Hosts::INTERNAL,"<duplicator>", InternalMacs::DUPLICATOR);
+		const MachineKey MachineKey::mixer(Hosts::INTERNAL,"<mixer>", InternalMacs::MIXER );
+		const MachineKey MachineKey::audioinput(Hosts::INTERNAL,"<audio-input>", InternalMacs::AUDIOINPUT );
+		const MachineKey MachineKey::lfo(Hosts::INTERNAL,"<lfo>", InternalMacs::LFO );
+		const MachineKey MachineKey::failednative(Hosts::NATIVE,"<failed-native>", 0);
+		const MachineKey MachineKey::wrapperVst(Hosts::VST,"<vst-wrapper>", 0);
+
+
 		MachineKey::MachineKey( )
 		:
 			dllName_(),
@@ -37,39 +50,6 @@ namespace psycle { namespace core {
 		MachineKey::~MachineKey() {
 		}
 
-		const MachineKey MachineKey::invalid() {
-			return MachineKey(Hosts::INTERNAL,"<invalid>", -1);
-		}
-		const MachineKey MachineKey::master() {
-			return MachineKey(Hosts::INTERNAL,"<master>", InternalMacs::MASTER);
-		}
-		const MachineKey MachineKey::dummy() {
-			return MachineKey(Hosts::INTERNAL,"<dummy>", InternalMacs::DUMMY);
-		}
-		const MachineKey MachineKey::sampler() {
-			return MachineKey(Hosts::INTERNAL,"<sampler>", InternalMacs::SAMPLER );
-		}
-		const MachineKey MachineKey::sampulse() {
-			return MachineKey(Hosts::INTERNAL,"<xm-sampler>", InternalMacs::XMSAMPLER );
-		}
-		const MachineKey MachineKey::duplicator() {
-			return MachineKey(Hosts::INTERNAL,"<duplicator>", InternalMacs::DUPLICATOR);
-		}
-		const MachineKey MachineKey::mixer() {
-			return MachineKey(Hosts::INTERNAL,"<mixer>", InternalMacs::MIXER );
-		}
-		const MachineKey MachineKey::audioinput() {
-			return MachineKey(Hosts::INTERNAL,"<audio-input>", InternalMacs::AUDIOINPUT );
-		}
-		const MachineKey MachineKey::lfo() {
-			return MachineKey(Hosts::INTERNAL,"<lfo>", InternalMacs::LFO );
-		}
-		const MachineKey MachineKey::failednative() {
-			return MachineKey(Hosts::NATIVE,"<failed-native>", 0);
-		}
-		const MachineKey MachineKey::wrapperVst() {
-			return MachineKey(Hosts::VST,"<vst-wrapper>", 0);
-		}
 
 		const std::string MachineKey::preprocessName(std::string dllName) {
 			#if 0

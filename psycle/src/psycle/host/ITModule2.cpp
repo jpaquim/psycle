@@ -14,6 +14,12 @@ using namespace psycle::core;
 #endif
 
 #include <algorithm>
+
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 namespace psycle
 {
 	namespace host
@@ -122,7 +128,7 @@ namespace psycle
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			song->SetReady(false);
-			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
+			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
 			s->seqBus=sampler->id();
@@ -1177,7 +1183,7 @@ Special:  Bit 0: On = song message attached.
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			song->SetReady(false);
-			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse());
+			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(s3mFileH.mVol&0x7F)/128.0f);
 			s->seqBus=sampler->id();

@@ -36,6 +36,11 @@ using namespace psycle::core;
 #undef min
 #undef max
 #endif
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 
 namespace psycle {
 	namespace host {
@@ -303,7 +308,7 @@ namespace psycle {
 			{
 				dlg.selectedRole = (mac->IsGenerator() ? MachineRole::GENERATOR : MachineRole::EFFECT);
 			}
-			if (dlg.DoModal() == IDOK && dlg.outputMachine != MachineKey::invalid() ) {
+			if (dlg.DoModal() == IDOK && dlg.outputMachine != MachineKey::invalid ) {
 				if (!mac) {
 					if (dlg.selectedRole == MachineRole::GENERATOR)  {
 						x -= (MachineCoords.sGenerator.width/2);
@@ -510,19 +515,19 @@ namespace psycle {
 			assert(mac);
 			MachineGui* gui;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if( mac->getMachineKey() == MachineKey::master()) {
+			if( mac->getMachineKey() == MachineKey::master) {
 				gui = new MasterGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::sampler() ) {
+			} else if( mac->getMachineKey() == MachineKey::sampler ) {
 				gui = new SamplerGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::sampulse() ) {
+			} else if( mac->getMachineKey() == MachineKey::sampulse ) {
 				gui = new XmSamplerGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::audioinput() ) {
+			} else if( mac->getMachineKey() == MachineKey::audioinput ) {
 				gui = new RecorderGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::mixer() ) {
+			} else if( mac->getMachineKey() == MachineKey::mixer ) {
 				gui = new MixerGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::duplicator() ) {
+			} else if( mac->getMachineKey() == MachineKey::duplicator ) {
 				gui = new GeneratorGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::lfo() ) {
+			} else if( mac->getMachineKey() == MachineKey::lfo ) {
 				gui = new GeneratorGui(this, mac);
 			}
 			else if (mac->getMachineKey().host() == Hosts::NATIVE ) {
@@ -538,7 +543,7 @@ namespace psycle {
 					gui = new VstFxGui(this, mac);
 			
 			}
-			else /*if (mac->getMachineKey() == MachineKey::dummy() )*/ {
+			else /*if (mac->getMachineKey() == MachineKey::dummy )*/ {
 				if (mac->IsGenerator())
 					gui = new DummyGenGui(this, mac);
 				else

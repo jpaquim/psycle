@@ -657,6 +657,24 @@ Machine::sched_deps Machine::sched_inputs() const {
 		Machine & input(*callbacks->song().machine(_inputMachines[c]));
 		result.push_back(&input);
 	}
+	if (_isMixerSend && result.empty()) {
+		//Work down the connection wires until finding the mixer.
+		const Machine* nmac = this;
+		while(true) {
+			for(int i(0); i < MAX_CONNECTIONS; ++i) if(nmac->_connection[i]) {
+				nmac = callbacks->song().machine(nmac->_outputMachines[i]);
+				break;
+			}
+			if (nmac->getMachineKey() == MachineKey::mixer) {
+				break;
+			}
+			if (nmac->_connectedOutputs == 0) {
+				//we are on the wrong machine, better return
+				return result;
+			}
+		}
+		result.push_back(nmac);
+	}
 	return result;
 }
 
@@ -672,10 +690,11 @@ Machine::sched_deps Machine::sched_outputs() const {
 
 /// called by the scheduler to ask for the actual processing of the machine
 void Machine::sched_process(unsigned int frames) {
-	if(_connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
+	if(_connectedInputs && !_mute) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
 		Machine & input_node(*callbacks->song().machine(_inputMachines[i]));
 		if(!input_node.Standby()) Standby(false);
-		if(!_mute && !Standby()) {
+		//Mixer already prepares the buffers onto the sends.
+		if( !Standby()  && (input_node.getMachineKey() != MachineKey::mixer || !_isMixerSend)) {
 			dsp::Add(input_node._pSamplesL, _pSamplesL, frames, input_node.lVol() * _inputConVol[i]);
 			dsp::Add(input_node._pSamplesR, _pSamplesR, frames, input_node.rVol() * _inputConVol[i]);
 		}

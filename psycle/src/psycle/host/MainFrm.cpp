@@ -58,6 +58,11 @@ using namespace psycle::core;
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 
 namespace psycle { namespace host {
 
@@ -1015,8 +1020,8 @@ using namespace psycle::helpers::math;
 				{
 					if ( song->seqBus < psycle::core::MAX_BUSES ) // it's a Generator
 					{
-						if (song->machine(song->seqBus)->getMachineKey() == MachineKey::sampler()
-							|| song->machine(song->seqBus)->getMachineKey() == MachineKey::sampulse() )
+						if (song->machine(song->seqBus)->getMachineKey() == MachineKey::sampler
+							|| song->machine(song->seqBus)->getMachineKey() == MachineKey::sampulse )
 						{
 							cb2->SetCurSel(AUX_WAVES);
 							song->auxcolSelected = song->instSelected();
@@ -1252,7 +1257,7 @@ using namespace psycle::helpers::math;
 					if (tmac) 
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						if ( tmac->getMachineKey() == MachineKey::sampulse())
+						if ( tmac->getMachineKey() == MachineKey::sampulse)
 #else
 						if ( tmac->_type == MACH_XMSAMPLER)
 #endif
@@ -1358,7 +1363,7 @@ using namespace psycle::helpers::math;
 			if (tmac) 
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if ( tmac->getMachineKey() == MachineKey::sampulse())
+				if ( tmac->getMachineKey() == MachineKey::sampulse)
 #else
 				if ( tmac->_type == MACH_XMSAMPLER)
 #endif
@@ -1485,7 +1490,7 @@ using namespace psycle::helpers::math;
 			if (tmac) 
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if ( tmac->getMachineKey() == MachineKey::sampulse())
+				if ( tmac->getMachineKey() == MachineKey::sampulse)
 #else
 				if ( tmac->_type == MACH_XMSAMPLER)
 #endif
@@ -1860,7 +1865,7 @@ using namespace psycle::helpers::math;
 						{
 							oss << " - " << projects_.active_project()->song().machine(machine)->GetEditName();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-							if (projects_.active_project()->song().machine(machine)->getMachineKey() == MachineKey::sampler())
+							if (projects_.active_project()->song().machine(machine)->getMachineKey() == MachineKey::sampler)
 #else
 							if (projects_.active_project()->song().machine(machine)->_type == MACH_SAMPLER)
 #endif
@@ -1869,7 +1874,7 @@ using namespace psycle::helpers::math;
 									oss <<  " - " << projects_.active_project()->song()._pInstrument[toffset[1]]->_sName;
 							}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-							else if (projects_.active_project()->song().machine(machine)->getMachineKey() == MachineKey::sampulse())
+							else if (projects_.active_project()->song().machine(machine)->getMachineKey() == MachineKey::sampulse)
 #else
 							else if (projects_.active_project()->song().machine(machine)->_type == MACH_XMSAMPLER)
 #endif
@@ -1896,7 +1901,6 @@ using namespace psycle::helpers::math;
 				szStatusIdle=oss.str();
 				return TRUE;
 			}
-			return FALSE;
 		}
 
 		void CMainFrame::OnDropFiles(HDROP hDropInfo)

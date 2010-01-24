@@ -997,7 +997,7 @@ XMSampler::Channel::PerformFX().
 	virtual void SetSampleRate(int sr);
 	virtual void Stop(void);
 	virtual void Tick(int channel, const PatternEvent & data );
-	virtual MachineKey getMachineKey() const { return MachineKey::sampulse(); }
+	virtual MachineKey getMachineKey() const { return MachineKey::sampulse; }
 	virtual std::string GetName(void) const { return _psName; }
 
 	virtual bool LoadPsy2FileFormat(RiffFile* pFile);

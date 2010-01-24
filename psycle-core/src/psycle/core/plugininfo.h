@@ -23,7 +23,7 @@ namespace psycle { namespace core {
 		class PluginInfo {
 			public:
 				PluginInfo();
-				PluginInfo(MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string);
+				PluginInfo(MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string, std::string);
 
 				virtual ~PluginInfo();
 
@@ -39,8 +39,11 @@ namespace psycle { namespace core {
 				void setDesc( const std::string & desc );
 				const std::string & desc() const;
 
-				void setVersion( const std::string & version );
-				const std::string & version() const;
+				void setApiVersion( const std::string & api_version );
+				const std::string & apiVersion() const;
+
+				void setPlugVersion( const std::string & plug_version );
+				const std::string & plugVersion() const;
 
 				void setLibName( const std::string & libName );
 				const std::string & libName() const;
@@ -62,7 +65,8 @@ namespace psycle { namespace core {
 				std::string name_;
 				std::string author_;
 				std::string desc_;
-				std::string version_;
+				std::string api_version_;
+				std::string plug_version_;
 				std::string libName_;
 				time_t fileTime_;
 				std::string error_;

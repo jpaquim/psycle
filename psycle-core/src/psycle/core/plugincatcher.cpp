@@ -91,7 +91,8 @@ bool PluginFinderCache::loadCache(){
 			file.ReadString(s_temp); p.setName(s_temp);
 			file.ReadString(s_temp); p.setAuthor(s_temp);
 			file.ReadString(s_temp); p.setDesc(s_temp);
-			file.ReadString(s_temp); p.setVersion(s_temp);
+			file.ReadString(s_temp); p.setApiVersion(s_temp);
+			file.ReadString(s_temp); p.setPlugVersion(s_temp);
 		}
 
 		// Temp here contains the full path to the .dll
@@ -155,7 +156,8 @@ bool PluginFinderCache::saveCache(){
 			file.WriteString(info.name());
 			file.WriteString(info.author());
 			file.WriteString(info.desc());
-			file.WriteString(info.version());
+			file.WriteString(info.apiVersion());
+			file.WriteString(info.plugVersion());
 			iter++;
 		}
 	}

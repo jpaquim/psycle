@@ -13,6 +13,11 @@ using namespace psycle::core;
 #include "Song.hpp"
 #include "Machine.hpp"
 #endif
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 
 namespace psycle {
 	namespace host {
@@ -201,7 +206,7 @@ namespace psycle {
 					
 					// Type [Set is generator/effect/master]
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-					if (tmac->getMachineKey() == MachineKey::master()) {
+					if (tmac->getMachineKey() == MachineKey::master) {
 						strcpy(buffer,"Master");
 					}
 					else if (tmac->IsGenerator() ) {

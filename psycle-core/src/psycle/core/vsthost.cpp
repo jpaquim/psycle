@@ -38,7 +38,7 @@
 	}
 
 	Machine* host::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id)  {
-		if (key == MachineKey::wrapperVst() ) {
+		if (key == MachineKey::wrapperVst ) {
 			return static_cast<vst::plugin*>(master->CreateWrapper(0));
 		}
 		//FIXME: This is a good place where to use exceptions. (task for a later date)
@@ -89,7 +89,8 @@
 			pinfo.setAuthor("???");
 			pinfo.setDesc("???");
 			pinfo.setLibName(fullName);
-			pinfo.setVersion("???");
+			pinfo.setApiVersion("???");
+			pinfo.setPlugVersion("???");
 			MachineKey key( hostCode(), fileName, 0);
 			finder.AddInfo( key, pinfo);
 			if (vstPlug) delete vstPlug;
@@ -121,7 +122,12 @@
 						{
 							std::ostringstream s;
 							s << std::hex << vstPlug->GetVersion();
-							pinfo.setVersion(s.str());
+							pinfo.setPlugVersion(s.str());
+						}
+						{
+							std::ostringstream s;
+							s << std::hex << vstPlug->GetVstVersion();
+							pinfo.setApiVersion(s.str());
 						}
 						MachineKey keysubPlugin( hostCode(), fileName, plugUniqueID);
 						finder.AddInfo( keysubPlugin, pinfo);
@@ -144,8 +150,13 @@
 				}
 				{
 					std::ostringstream s;
-					s << vstPlug->GetVersion();
-					pinfo.setVersion(s.str());
+					s << std::hex << vstPlug->GetVersion();
+					pinfo.setPlugVersion(s.str());
+				}
+				{
+					std::ostringstream s;
+					s << std::hex << vstPlug->GetVstVersion();
+					pinfo.setApiVersion(s.str());
 				}
 				MachineKey key( hostCode(), fileName, 0);
 				finder.AddInfo( key, pinfo);

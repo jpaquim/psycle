@@ -20,7 +20,7 @@ class PSYCLE__CORE__DECL Dummy : public Machine {
 		void CopyFrom(Machine* mac);
 		virtual bool LoadSpecificChunk(RiffFile*,int version);
 		virtual int GenerateAudio(int numSamples);
-		virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
+		virtual MachineKey getMachineKey() const { return MachineKey::dummy; }
 		virtual std::string GetName() const { return _psName; }
 		virtual bool isGenerator() const { return generator; }
 		void setGenerator(bool gen) { generator = gen; }
@@ -41,7 +41,7 @@ class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
 		virtual void Stop();
 		virtual void PreWork(int numSamples, bool clear = true);
 		virtual int GenerateAudio( int numSamples );
-		virtual MachineKey getMachineKey() const { return MachineKey::duplicator(); }
+		virtual MachineKey getMachineKey() const { return MachineKey::duplicator; }
 		virtual std::string GetName() const { return _psName; }
 		virtual void GetParamName(int numparam,char *name) const;
 		virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
@@ -76,7 +76,7 @@ class PSYCLE__CORE__DECL Master : public Machine {
 		virtual void Stop();
 		virtual void Tick(int channel, const PatternEvent & data );
 		virtual int GenerateAudio( int numSamples );
-		virtual MachineKey getMachineKey() const { return MachineKey::master(); }
+		virtual MachineKey getMachineKey() const { return MachineKey::master; }
 		virtual std::string GetName() const { return _psName; }
 		/// Loader for psycle fileformat version 2.
 		virtual bool LoadPsy2FileFormat(RiffFile* pFile);
@@ -109,7 +109,7 @@ class PSYCLE__CORE__DECL AudioRecorder : public Machine
 		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 		virtual void SaveSpecificChunk(RiffFile * pFile) const;
 		virtual int GenerateAudio(int numSamples);
-		virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
+		virtual MachineKey getMachineKey() const { return MachineKey::audioinput; }
 		virtual std::string GetName() const { return _psName; }
 
 		virtual void ChangePort(int newport);
@@ -138,7 +138,7 @@ class PSYCLE__CORE__DECL LFO : public Machine {
 		virtual void Tick( int channel, const PatternEvent & pData );
 		virtual void PreWork(int numSamples, bool clear = true);
 		virtual int GenerateAudio( int numSamples );
-		virtual MachineKey getMachineKey() const { return MachineKey::lfo(); }
+		virtual MachineKey getMachineKey() const { return MachineKey::lfo; }
 		virtual std::string GetName() const { return _psName; }
 		virtual void GetParamName(int numparam,char *name) const;
 		virtual void GetParamRange(int numparam,int &minval,int &maxval) const;

@@ -224,6 +224,7 @@ class MachineCallbacks {
 
 /// Base class for "Machines", the audio producing elements.
 class PSYCLE__CORE__DECL Machine {
+	friend class CoreSong; friend class Psy2Filter; friend class player;
 	///\name crash handling
 	///\{
 		public:
@@ -293,7 +294,7 @@ class PSYCLE__CORE__DECL Machine {
 			id_type id() const throw() { return id_; }
 		private:
 			id_type id_;
-			void id(id_type id) { id_ = id; } friend class CoreSong; friend class Psy2Filter;
+			void id(id_type id) { id_ = id; } 
 	///\}
 
 	public:
@@ -415,13 +416,13 @@ class PSYCLE__CORE__DECL Machine {
 
 	///\name used by the multi-threaded scheduler
 	///\{
-		protected: friend class Player;
+		protected:
 			/// The multi-threaded scheduler cannot use _worked because it's not thread-synchronised.
 			/// So, we define another boolean that's modified only by the multi-threaded scheduler,
 			/// with proper thread synchronisations.
 			/// The multi-threaded scheduler doesn't use _worked nor _waitingForSound.
 			bool sched_processed_;
-			typedef std::list<Machine*> sched_deps;
+			typedef std::list<Machine const*> sched_deps;
 			/// tells the scheduler which machines to process before this one
 			virtual sched_deps sched_inputs() const;
 			/// tells the scheduler which machines may be processed after this one

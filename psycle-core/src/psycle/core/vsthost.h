@@ -74,7 +74,7 @@
 			friend class host;
 			AudioMaster(MachineCallbacks* callbacks)
 				: pCallbacks(callbacks)
-				, currentKey(MachineKey::invalid())
+				, currentKey(MachineKey::invalid)
 			{
 				quantization = quantize;
 				SetBlockSize(MAX_BUFFER_LENGTH); SetTimeSignature(4,4);
