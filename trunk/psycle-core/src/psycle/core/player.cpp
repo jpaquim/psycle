@@ -185,7 +185,6 @@ void Player::compute_plan() {
 		Machine & n(*song().machine(m));
 		// find the terminal nodes in the graph (nodes with no connected input ports)
 		if(n.sched_inputs().empty()) terminal_nodes_.push_back(&n);
-		if(n.getMachineKey() == MachineKey::mixer) ++graph_size_;
 	}
 	if(ultra_trace && loggers::trace()) {
 		std::ostringstream s;
@@ -340,6 +339,9 @@ void Player::process_loop() throw(std::exception) {
 		int notify(0);
 		{ scoped_lock lock(mutex_);
 			node.sched_processed_ = done;
+			//If not done, it means it needs to be reprocessed somewhere.
+			if (!done) ++graph_size_;
+
 			// check whether all nodes have been processed
 			if(++processed_node_count_ == graph_size_) notify = -1; // wake up the main processing loop
 			else {

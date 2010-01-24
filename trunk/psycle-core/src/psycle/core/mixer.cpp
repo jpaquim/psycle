@@ -82,7 +82,7 @@ void Mixer::Work( int numSamples )
 	// Step One, do the usual work, except mixing all the inputs to a single stream.
 	WorkWires( numSamples, false );
 	// Step Two, prepare input signals for the Send Fx, and make them work
-			FxSend( numSamples, true );
+	FxSend( numSamples, true );
 	// Step Three, Mix the returns of the Send Fx's with the leveled input signal
 	//cpu::cycles_type cost(cpu::cycles());
 	Mix(numSamples);
@@ -248,7 +248,6 @@ Mixer::sched_deps Mixer::sched_inputs() const {
 				result.push_back(&returned);
 			}
 		}
-		//result.push_back(this);
 	}
 	return result;
 }
@@ -262,7 +261,6 @@ Mixer::sched_deps Mixer::sched_outputs() const {
 			Machine & input(*callbacks->song().machine(Send(i).machine_));
 			result.push_back(&input);
 		}
-		//result.push_back(this);
 	} else {
 		// step 2: mix with return fx
 		result = Machine::sched_outputs();
@@ -272,7 +270,7 @@ Mixer::sched_deps Mixer::sched_outputs() const {
 
 /// called by the scheduler to ask for the actual processing of the machine
 bool Mixer::sched_process(unsigned int frames) {
-	if(mixed) {
+	if(mixed && numsends()) {
 		mixed = false;
 		// step 1: send signal to fx
 		FxSend(frames, false);
