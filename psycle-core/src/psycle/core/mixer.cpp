@@ -237,17 +237,18 @@ void Mixer::Mix(int numSamples)
 /// tells the scheduler which machines to process before this one
 Mixer::sched_deps Mixer::sched_inputs() const {
 	sched_deps result;
-	if(sched_processed_) {
+	if(mixed) {
+		// step 1: send signal to fx
+		result = Machine::sched_inputs();
+	} else {
+		// step 2: mix with return fx
 		for(unsigned int i = 0; i < numreturns(); ++i) {
 			if(	Return(i).IsValid()	) {
 				Machine & returned(*callbacks->song().machine(Return(i).Wire().machine_));
 				result.push_back(&returned);
 			}
 		}
-		result.push_back(this);
-	}
-	else {
-		result = Machine::sched_inputs();
+		//result.push_back(this);
 	}
 	return result;
 }
@@ -255,29 +256,34 @@ Mixer::sched_deps Mixer::sched_inputs() const {
 /// tells the scheduler which machines may be processed after this one
 Mixer::sched_deps Mixer::sched_outputs() const {
 	sched_deps result;
-	if(mixed) {
-		result = Machine::sched_outputs();
-	} else {
+	if(!mixed) {
+		// step 1: send signal to fx
 		for (int i=0; i<numsends(); i++) if (Send(i).IsValid()) {
 			Machine & input(*callbacks->song().machine(Send(i).machine_));
 			result.push_back(&input);
 		}
-		result.push_back(this);
+		//result.push_back(this);
+	} else {
+		// step 2: mix with return fx
+		result = Machine::sched_outputs();
 	}
 	return result;
 }
 
 /// called by the scheduler to ask for the actual processing of the machine
-void Mixer::sched_process(unsigned int frames) {
-	if (sched_processed_) {
+bool Mixer::sched_process(unsigned int frames) {
+	if(mixed) {
+		mixed = false;
+		// step 1: send signal to fx
+		FxSend(frames, false);
+	} else {
+		// step 2: mix with return fx
 		Mix(frames);
 		dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 		Machine::UpdateVuAndStanbyFlag(frames);
 		mixed = true;
-	} else {
-		FxSend(frames,false);
-		mixed = false;
 	}
+	return mixed;
 }
 
 void Mixer::InsertInputWire(Machine& srcMac, Wire::id_type dstWire,InPort::id_type dstType, float initialVol) 
