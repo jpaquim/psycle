@@ -311,32 +311,24 @@ class PSYCLE__CORE__DECL Machine {
 	protected:
 		MachineCallbacks * callbacks;
 
-
-	///\name the life cycle of a machine
-	///\{
-		public:
-			virtual void Init();
+	public:
+		virtual void Init();
 			
-			/// virtual because the mixer machine has its own implementation
-			virtual void Work(int numSamples);
-
-			/// [bohan] this used to be protected, but it needs to be public for flat (non-recursive) processing (and Work() will disappear)
-			virtual int GenerateAudio(int numsamples);
+		virtual void PreWork(int numSamples, bool clear = true);
+		/// [bohan] this used to be protected, but it needs to be public for flat (non-recursive) processing (and Work() will disappear)
+		virtual int GenerateAudio(int numsamples);
 			
-			virtual void PreWork(int numSamples, bool clear = true);
-			virtual void AddEvent(double offset, int track, const PatternEvent & event);
-			virtual void Tick() {}
-			virtual void Tick(int /*channel*/, const PatternEvent &) {}
-			virtual void Stop() { playCol.clear(); playColIndex =0; }
-		protected:
-			virtual void WorkWires(int numSamples, bool mix = true);
-			virtual int GenerateAudioInTicks(int startSample, int numsamples);
-			virtual void reallocateRemainingEvents(double beatOffset);
-		protected:
-			std::deque<WorkEvent> workEvents;
-			std::map<int /* track */, int /* channel */> playCol;
-			int playColIndex;
-	///\}
+		virtual void AddEvent(double offset, int track, const PatternEvent & event);
+		virtual void Tick() {}
+		virtual void Tick(int /*channel*/, const PatternEvent &) {}
+		virtual void Stop() { playCol.clear(); playColIndex =0; }
+
+	protected:
+		virtual int GenerateAudioInTicks(int startSample, int numsamples);
+		virtual void reallocateRemainingEvents(double beatOffset);
+		std::deque<WorkEvent> workEvents;
+		std::map<int /* track */, int /* channel */> playCol;
+		int playColIndex;
 
 	///\name (de)serialization
 	///\{
@@ -390,7 +382,7 @@ class PSYCLE__CORE__DECL Machine {
 			virtual Wire::id_type GetFreeOutputWire(OutPort::id_type slottype=OutPort::id_type(0)) const;
 	///\}
 
-	///\name states and scheduling related functions
+	///\name states used by the schedulers
 	///\{
 		public:
 			virtual bool Bypass() const { return _bypass; }
@@ -410,15 +402,24 @@ class PSYCLE__CORE__DECL Machine {
 		public:///\todo private:
 			bool _mute;
 
+	///\name used by the single-threaded, recursive scheduler
+	///\{
+		public:
+			/// virtual because the mixer machine has its own implementation
+			virtual void Work(int numSamples);
+			virtual void WorkWires(int numSamples, bool mix = true);
 		public:///\todo private:
 			bool _waitingForSound;
 			bool _worked;
+	///\}
 
-		private: friend class Player;
-			/// [bohan] the multi-threaded scheduler cannot use _worked because it's not thread-synchronised,
-			///         so, we define another boolean that's modified only by the multi-threaded scheduler,
-			///         with proper thread synchronisations.
-			///         the multi-threaded scheduler doesn't use _worked nor _waitingForSound.
+	///\name used by the multi-threaded scheduler
+	///\{
+		protected: friend class Player;
+			/// The multi-threaded scheduler cannot use _worked because it's not thread-synchronised.
+			/// So, we define another boolean that's modified only by the multi-threaded scheduler,
+			/// with proper thread synchronisations.
+			/// The multi-threaded scheduler doesn't use _worked nor _waitingForSound.
 			bool sched_processed_;
 			typedef std::list<Machine*> sched_deps;
 			/// tells the scheduler which machines to process before this one
