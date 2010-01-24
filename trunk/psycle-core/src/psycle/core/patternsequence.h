@@ -204,8 +204,9 @@ namespace psycle { namespace core {
 			void Add(Pattern* pattern);
 			void Remove(Pattern* pattern);
 			Pattern* FindPattern(int id);
-
 			Pattern* master_pattern() { return master_pattern_; }
+
+			double max_beats() const;
 
 		private:
 			// sequencer structure

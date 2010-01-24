@@ -9,6 +9,7 @@
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/core/machine.h>
+
 using namespace psycle::core;
 #else
 #include "Song.hpp"
@@ -169,42 +170,31 @@ namespace psycle {
 			m_progress.SetRange(0,1);
 			m_progress.SetPos(0);
 
-			if ((rate < 0) || (rate >5))
-			{
-				if (Global::pConfig->GetSamplesPerSec() <= 8000)
-				{
+			if ((rate < 0) || (rate >5)) {
+				if (Global::pConfig->GetSamplesPerSec() <= 8000) {
 					rate = 0;
 				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 11025)
-				{
+				else if (Global::pConfig->GetSamplesPerSec() <= 11025) {
 					rate = 1;
 				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 16000)
-				{
+				else if (Global::pConfig->GetSamplesPerSec() <= 16000) {
 					rate = 2;
 				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 22050)
-				{
+				else if (Global::pConfig->GetSamplesPerSec() <= 22050) {
 					rate = 3;
 				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 32000)
-				{
+				else if (Global::pConfig->GetSamplesPerSec() <= 32000) {
 					rate = 4;
 				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 44100)
-				{
+				else if (Global::pConfig->GetSamplesPerSec() <= 44100) {
 					rate = 5;
 				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 48000)
-				{
+				else if (Global::pConfig->GetSamplesPerSec() <= 48000) {
 					rate = 6;
 				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 88200)
-				{
+				else if (Global::pConfig->GetSamplesPerSec() <= 88200) {
 					rate = 7;
-				}
-				else 
-				{
+				} else  {
 					rate = 8;
 				}
 			}
@@ -220,22 +210,17 @@ namespace psycle {
 			m_rate.AddString("96000 hz");
 			m_rate.SetCurSel(rate);
 
-			if ((bits < 0) || (bits > 3))
-			{
-				if (Global::pConfig->GetBitDepth() <= 8)
-				{
+			if ((bits < 0) || (bits > 3)) {
+				if (Global::pConfig->GetBitDepth() <= 8) {
 					bits = 0;
 				}
-				else if (Global::pConfig->GetBitDepth() <= 16)
-				{
+				else if (Global::pConfig->GetBitDepth() <= 16) {
 					bits = 1;
 				}
-				else if (Global::pConfig->GetBitDepth() <= 24)
-				{
+				else if (Global::pConfig->GetBitDepth() <= 24) {
 					bits = 2;
-				}
-				else if (Global::pConfig->GetBitDepth() <= 32)
-				{
+				} 
+				else if (Global::pConfig->GetBitDepth() <= 32) {
 					bits = 4;
 				}
 			}
@@ -253,8 +238,7 @@ namespace psycle {
 			m_channelmode.AddString("Mono (Right)");
 			m_channelmode.AddString("Stereo");
 
-			if ((channelmode < 0) || (channelmode > 3))
-			{
+			if ((channelmode < 0) || (channelmode > 3)) {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				channelmode = Global::pConfig->_pOutputDriver->playbackSettings().channelMode();
 #else
@@ -402,11 +386,37 @@ namespace psycle {
 		{
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 			const int real_bits[]={8,16,24,32,32};
-
+			// set gui to recmode
+			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
+			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
+			GetDlgItem(IDC_RECRANGE)->EnableWindow(false);
+			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(false);
+			m_savewave.EnableWindow(false);
+			m_cancel.SetWindowText("Stop");
+			m_filename.EnableWindow(false);
+			m_savetracks.EnableWindow(false);
+			m_savegens.EnableWindow(false);
+			m_savewires.EnableWindow(false);
+			m_rate.EnableWindow(false);
+			m_bits.EnableWindow(false);
+			m_channelmode.EnableWindow(false);
+			m_pdf.EnableWindow(false);
+			m_noiseshaping.EnableWindow(false);
+			m_dither.EnableWindow(false);
+			m_rangeend.EnableWindow(false);
+			m_rangestart.EnableWindow(false);
+			m_patnumber.EnableWindow(false);
+			// prepare progressbar
+			if (m_recmode == 0) {
+				// record entire song
+				m_progress.SetRange(0, Player::singleton().song().patternSequence().max_beats());
+			}
+			// prepare player for recording
 			Player::singleton().stop();
-			Player::singleton().set_work_suspend(true);
+			Player::singleton().driver().set_started(false);
+			Sleep(1000);
 			Player::singleton().start(0);
-
+			// create a WaveFile and a thread for writing the audio data
 			CString name;
 			m_filename.GetWindowText(name);
 			std::string file_name = name;
@@ -804,19 +814,23 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		DWORD WINAPI __stdcall RecordThread(void *b) {
 			CSaveWavDlg* sender = (CSaveWavDlg*)b;
-			while(!sender->kill_thread) {				
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-				Song& song = mainFrame->projects()->active_project()->song();
-				int frames = 8192;
-				Player::singleton().Work(frames);
+			Player* player = &Player::singleton();
+			CoreSong& song = player->song();
+			const int frames = 256;
+
+			while(!sender->kill_thread && player->playing()) {
+				player->Work(frames);
+				sender->m_progress.SetPos(static_cast<short>(player->playPos()));
 
 				float * pL(song.machine(MASTER_INDEX)->_pSamplesL);
 				float * pR(song.machine(MASTER_INDEX)->_pSamplesR);
-				//
-				// if(recording_with_dither_) {
-				//  dither_.Process(pL, amount);
-				//  dither_.Process(pR, amount);
-				// }
+				
+//pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, Dither::Pdf::type(ditherpdf), Dither::NoiseShape::type(noiseshape));
+
+				if (sender->m_dither.GetCheck()) {
+				  sender->dither_.Process(pL, frames);
+				  sender->dither_.Process(pR, frames);
+				}
 				int channelmode = 3;
 				switch(channelmode) {
 					case 0: // mono mix
@@ -855,7 +869,7 @@ namespace psycle {
 			}
 			sender->wav_file_.Close();
 			Player::singleton().stop();
-			Player::singleton().set_work_suspend(false);
+			sender->SaveEnd();
 			ExitThread(0);
 			return 0;
 		}

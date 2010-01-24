@@ -3,7 +3,11 @@
 #pragma once
 #include "Psycle.hpp"
 #include <mmreg.h>
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/helpers/riff.hpp>
+#include <psycle/helpers/dither.hpp>
+#endif
 
 namespace psycle {
 	namespace host {
@@ -134,7 +138,10 @@ namespace psycle {
 			DECLARE_MESSAGE_MAP()						
 
 		public:
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::helpers::WaveFile wav_file_;
+			dsp::Dither dither_;
+#endif
 };
 
 		

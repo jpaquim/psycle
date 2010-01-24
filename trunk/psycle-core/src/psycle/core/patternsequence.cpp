@@ -539,4 +539,19 @@ namespace psycle { namespace core {
 			///\todo
 		}
 
-}}
+  	    double Sequence::max_beats() const {
+			double max_ = 0;
+			const_iterator seq_track_it = begin()+1;
+			// iterate over the sequenceitems inside a sequencer track
+			for ( seq_track_it = begin()+1; seq_track_it != end(); ++seq_track_it ) {
+				SequenceLine::reverse_iterator rev_item_it = (*seq_track_it)->rbegin();
+				if ( rev_item_it != (*seq_track_it)->rend() ) {
+					max_ = std::max(max_, rev_item_it->first + rev_item_it->second->patternBeats() );
+				}
+			}
+			return max_;
+		}
+
+
+	}	// namespace core
+}	// namespace psycle
