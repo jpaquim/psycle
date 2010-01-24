@@ -51,7 +51,10 @@ namespace psycle {
 			m_outputtype = 0;
 			//}}AFX_DATA_INIT
 			this->pChildView = pChildView;
-			this->pBlockSel = pBlockSel;
+			this->pBlockSel = pBlockSel;					
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			seq_tmp_play_line_ = new psycle::core::SequenceLine();
+#endif
 		}
 
 		void CSaveWavDlg::DoDataExchange(CDataExchange* pDX)
@@ -382,6 +385,23 @@ namespace psycle {
 
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
+
+		void CSaveWavDlg::SwitchToTmpPlay() {
+			Player* player = &Player::singleton();
+			CoreSong& song = player->song();
+			psycle::core::PatternSequence& seq = song.patternSequence();
+			seq_main_play_line_ = *(seq.begin()+1);
+			*(seq.begin()+1) = seq_tmp_play_line_;
+			seq_tmp_play_line_->SetSequence(&song.patternSequence());
+		}
+
+		void CSaveWavDlg::SwitchToNormalPlay() {
+			Player* player = &Player::singleton();
+			CoreSong& song = player->song();
+			psycle::core::PatternSequence& seq = song.patternSequence();
+			*(seq.begin()+1) = seq_main_play_line_;
+		}
+
 		void CSaveWavDlg::OnSavewave() 
 		{
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
@@ -406,16 +426,46 @@ namespace psycle {
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
-			// prepare progressbar
-			if (m_recmode == 0) {
-				// record entire song
-				m_progress.SetRange(0, Player::singleton().song().patternSequence().max_beats());
-			}
-			// prepare player for recording
 			Player::singleton().stop();
 			Player::singleton().driver().set_started(false);
 			Sleep(1000);
-			Player::singleton().start(0);
+			// prepare recmodes
+			if (m_recmode == 0) {
+				// record entire song
+				Player::singleton().start(0);
+				m_progress.SetRange(0, Player::singleton().song().patternSequence().max_beats());
+			} else
+			if (m_recmode == 1) {
+				CString name;
+				int pstart;
+				m_patnumber.GetWindowText(name);
+				hexstring_to_integer(name.GetBuffer(2), pstart);
+				SwitchToTmpPlay();
+				seq_tmp_play_line_->clear();
+				Player* player = &Player::singleton();
+				CoreSong& song = player->song();
+				psycle::core::Pattern* pattern = song.patternSequence().FindPattern(pstart);
+				SequenceEntry* entry = new SequenceEntry(seq_tmp_play_line_);
+				entry->setPattern(pattern);
+				seq_tmp_play_line_->insert(0, entry);	
+				Player::singleton().start(0);
+				m_progress.SetRange(0, static_cast<short>(pattern->beats()));
+			} else
+			if (m_recmode == 2) {
+				CString name;
+				int seq_start, seq_end;
+				m_rangestart.GetWindowText(name);
+				hexstring_to_integer(name.GetBuffer(2), seq_start);
+				m_rangeend.GetWindowText(name);
+				hexstring_to_integer(name.GetBuffer(2), seq_end);
+				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+				SequenceEntry* start_entry = mainFrame->m_wndSeq.GetEntry(seq_start);
+				seq_end_entry_ = mainFrame->m_wndSeq.GetEntry(seq_end);
+				Player::singleton().start(start_entry->tickPosition());
+				m_progress.SetRange(static_cast<short>(start_entry->tickPosition()),
+								    static_cast<short>(start_entry->tickEndPosition()));
+			}
+			// prepare player for recording			
 			// create a WaveFile and a thread for writing the audio data
 			CString name;
 			m_filename.GetWindowText(name);
@@ -819,20 +869,23 @@ namespace psycle {
 			const int frames = 256;
 
 			while(!sender->kill_thread && player->playing()) {
+				 if ((sender->m_recmode == 2) && (player->playPos() >=
+					   sender->seq_end_entry_->tickPosition() + 
+					   sender->seq_end_entry_->pattern()->beats() 
+				     )) break;
+
 				player->Work(frames);
 				sender->m_progress.SetPos(static_cast<short>(player->playPos()));
 
 				float * pL(song.machine(MASTER_INDEX)->_pSamplesL);
 				float * pR(song.machine(MASTER_INDEX)->_pSamplesR);
 				
-//pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, Dither::Pdf::type(ditherpdf), Dither::NoiseShape::type(noiseshape));
-
 				if (sender->m_dither.GetCheck()) {
 				  sender->dither_.Process(pL, frames);
 				  sender->dither_.Process(pR, frames);
 				}
-				int channelmode = 3;
-				switch(channelmode) {
+				
+				switch(sender->channelmode) {
 					case 0: // mono mix
 						for(int i(0); i < frames; ++i) {
 						//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
@@ -869,6 +922,9 @@ namespace psycle {
 			}
 			sender->wav_file_.Close();
 			Player::singleton().stop();
+			if (sender->m_recmode == 1) {
+				sender->SwitchToNormalPlay();
+			}
 			sender->SaveEnd();
 			ExitThread(0);
 			return 0;
@@ -906,6 +962,7 @@ namespace psycle {
 
 		void CSaveWavDlg::OnCancel() 
 		{
+			delete seq_tmp_play_line_;
 			if (saving || (threadopen > 0))
 			{
 				//while(threadopen > 0) 
@@ -1265,10 +1322,38 @@ namespace psycle {
 		void CSaveWavDlg::OnSelchangeComboPdf()
 		{
 			ditherpdf = m_pdf.GetCurSel();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE		
+			switch (m_pdf.GetCurSel()) {
+				case 0:
+					dither_.SetPdf(dsp::Dither::Pdf::triangular);
+				break;
+				case 1:
+					dither_.SetPdf(dsp::Dither::Pdf::rectangular);
+				break;
+				case 2:
+					dither_.SetPdf(dsp::Dither::Pdf::gaussian);
+				break;
+				default:
+					dither_.SetPdf(dsp::Dither::Pdf::triangular);
+			}
+#endif
 		}
 		void CSaveWavDlg::OnSelchangeComboNoiseShaping()
 		{
 			noiseshape = m_noiseshaping.GetCurSel();
+#if PSYCLE__CONFIGURATION__USE_PSYCORE		
+			switch (m_noiseshaping.GetCurSel()) {
+				case 0:
+					dither_.SetNoiseShaping(dsp::Dither::NoiseShape::none);
+				break;
+				case 1:
+					dither_.SetNoiseShaping(dsp::Dither::NoiseShape::highpass);
+				break;
+				default:
+					dither_.SetPdf(dsp::Dither::Pdf::triangular);
+			}
+#endif
+
 		}
 		void CSaveWavDlg::OnToggleDither()
 		{

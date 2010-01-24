@@ -85,12 +85,12 @@ namespace psycle {
 
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE       
+		public:
 			SequenceEntry* GetEntry(int list_position);
 		public:
 			SequenceEntry* selected_entry() { return selected_entry_; } 
 			// this entry is currently used by the patternview
 
-		public:
 			void BuildPositionMap();
 			void BuildListBox();
 			void SelectItems();
