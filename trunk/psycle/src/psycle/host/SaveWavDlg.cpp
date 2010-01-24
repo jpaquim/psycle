@@ -426,7 +426,7 @@ namespace psycle {
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
-			Player::singleton().stop();
+			Player::singleton().stop();			
 			Player::singleton().driver().set_started(false);
 			Sleep(1000);
 			// prepare recmodes
@@ -874,7 +874,7 @@ namespace psycle {
 					   sender->seq_end_entry_->pattern()->beats() 
 				     )) break;
 
-				player->Work(frames);
+				float* p = player->Work(frames);
 				sender->m_progress.SetPos(static_cast<short>(player->playPos()));
 
 				float * pL(song.machine(MASTER_INDEX)->_pSamplesL);
@@ -913,7 +913,7 @@ namespace psycle {
 					break;
 					default: // stereo
 						for(int i(0); i < frames; ++i) {
-							if (sender->wav_file_.WriteStereoSample(*pL++, *pR++) != DDC_SUCCESS) {
+							if (sender->wav_file_.WriteStereoSample(*p++, *p++) != DDC_SUCCESS) {
 								sender->kill_thread = 1;
 								break;
 							}

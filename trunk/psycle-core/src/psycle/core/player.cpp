@@ -53,6 +53,7 @@ Player::Player()
 	playing_(),
 	autoStopMachines_(),
 	autostop_(true) {
+	driver_ = default_driver_ = new DummyDriver();
 	universalis::os::aligned_memory_alloc(16, buffer_, MAX_SAMPLES_WORKFN);
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
 	start_threads();
@@ -60,6 +61,7 @@ Player::Player()
 
 Player::~Player() {
 	stop_threads();
+	delete default_driver_;
 	universalis::os::aligned_memory_dealloc(buffer_);
 }
 
@@ -118,18 +120,11 @@ void Player::start_threads() {
 
 void Player::start(double pos) {
 	stop(); // This causes all machines to reset, and samplesperRow to init.
-
 	if(loggers::information()) loggers::information()("psycle: core: player: starting");
-
 	if(!song_) {
 		if(loggers::warning()) loggers::warning()("psycle: core: player: no song to play");
 		return;
 	}
-	if(!driver_) {
-		if(loggers::warning()) loggers::warning()("psycle: core: player: no audio driver to output the song to");
-		return;
-	}
-
 	{
 		scoped_lock lock(song());
 		if(autoRecord_) startRecording();
@@ -143,8 +138,6 @@ void Player::start(double pos) {
 		timeInfo_.setPlayBeatPos(pos);
 		timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
 	}
-
-	driver_->set_started(true);
 }
 
 void Player::skip(double beats) {
@@ -400,7 +393,7 @@ void Player::process_loop() throw(std::exception) {
 }
 
 void Player::stop() {
-	if(!song_ || !driver_) return;
+	if(!song_) return;
 
 	if(loggers::information()) loggers::information()("psycle: core: player: stopping");
 	
@@ -499,15 +492,15 @@ void Player::setDriver(AudioDriver & driver) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
-	bool was_opened(driver_ ? driver_->opened() : false);
-	bool was_started(driver_ ? driver_->started() : false);
+	bool was_opened = driver_->opened();
+	bool was_started = driver_->started();
 
 	if(&driver == driver_) {
 		// same driver instance
 		driver.set_started(false);
 	} else {
 		// different driver instance
-		if(driver_) driver_->set_opened(false);
+		driver_->set_opened(false);
 		driver_ = &driver;
 	}
 
@@ -528,7 +521,7 @@ void Player::setDriver(AudioDriver & driver) {
 // buffer to riff wav file methods
 
 void Player::writeSamplesToFile(int amount) {
-	if(!song_ || !driver_) return;
+	if(!song_) return;
 
 	float * pL(song().machine(MASTER_INDEX)->_pSamplesL);
 	float * pR(song().machine(MASTER_INDEX)->_pSamplesR);
@@ -559,7 +552,7 @@ void Player::writeSamplesToFile(int amount) {
 
 void Player::startRecording(bool do_dither, dsp::Dither::Pdf::type ditherpdf, dsp::Dither::NoiseShape::type noiseshaping) {
 	if(recording_) return;
-	if(!song_ || !driver_) return;
+	if(!song_) return;
 
 	scoped_lock lock(song());
 	int channels(driver_->playbackSettings().numChannels());

@@ -24,6 +24,7 @@ namespace psycle {
 
 namespace audiodrivers {
 	class AudioDriver;
+	class DummyDriver;
 }
 
 namespace core {
@@ -59,6 +60,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		private:
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
 			AudioDriver * driver_;
+			DummyDriver* default_driver_; // todo replace with a silent driver
 	///\}
 
 	///\name sample rate
