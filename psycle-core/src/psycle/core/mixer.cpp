@@ -25,7 +25,7 @@ std::string Mixer::_psName = "Mixer";
 Mixer::Mixer(MachineCallbacks* callbacks, Machine::id_type id)
 :
 	Machine(callbacks, id),
-	mixed()
+	mixed(true)
 {
 	defineInputAsStereo(2);
 	defineOutputAsStereo();
@@ -236,17 +236,18 @@ void Mixer::Mix(int numSamples)
 
 /// tells the scheduler which machines to process before this one
 Mixer::sched_deps Mixer::sched_inputs() const {
-	sched_deps result = Machine::sched_inputs();
+	sched_deps result;
 	if(sched_processed_) {
 		for(unsigned int i = 0; i < numreturns(); ++i) {
-			if(
-				Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() &&
-				(mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f)
-			) {
+			if(	Return(i).IsValid()	) {
 				Machine & returned(*callbacks->song().machine(Return(i).Wire().machine_));
 				result.push_back(&returned);
 			}
 		}
+		result.push_back(this);
+	}
+	else {
+		result = Machine::sched_inputs();
 	}
 	return result;
 }
