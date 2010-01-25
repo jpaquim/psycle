@@ -7,12 +7,15 @@
 
 namespace psycle { namespace audiodrivers {
 
+	using namespace psycle::helpers;
+
 AudioDriverInfo WaveFileOut::info( ) const {
 	return AudioDriverInfo("wavefileout", "Wave to File Driver", "Recording a wav to a file", false);
 }
 
 WaveFileOut::WaveFileOut()
-{}
+	: dither_enabled_(true) {
+}
 
 void WaveFileOut::do_start() throw(std::exception) {
 	stop_requested_ = false;
@@ -21,12 +24,59 @@ void WaveFileOut::do_start() throw(std::exception) {
 
 void WaveFileOut::thread_function() {
 	while(true) {
-		{ scoped_lock lock(mutex_);
-			if(stop_requested_) return;
-		}
-		float const * input(callback(MAX_SAMPLES_WORKFN));
-		///\todo well, the real job, i.e. output to a file
+		scoped_lock lock(mutex_);
+		if(stop_requested_)
+			return;
+		Write(callback(256),256);		
 	}
+}
+
+void WaveFileOut::Write(float* data, unsigned int frames)
+{
+	for (unsigned i = 0; i < frames; ++i) {
+		left[i] = *data++;
+		right[i] = *data++;
+	}
+
+	if(dither_enabled_) {
+		dither_.Process(left, frames);
+		dither_.Process(right, frames);
+	}
+	switch(playbackSettings().channelMode()) {
+		case 0: // mono mix
+			for(int i(0); i < frames; ++i)
+				//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
+				if(wav_file_.WriteMonoSample((left[i] + right[i]) / 2) != DDC_SUCCESS) {
+					set_opened(false);
+				}
+			break;
+		case 1: // mono L
+			for(int i(0); i < frames; ++i)
+				if(wav_file_.WriteMonoSample(left[i]) != DDC_SUCCESS) {
+					set_opened(false);
+				}
+			break;
+		case 2: // mono R
+			for(int i(0); i < frames; ++i)
+				if(wav_file_.WriteMonoSample(right[i]) != DDC_SUCCESS) {
+					set_opened(false);
+				}
+			break;
+		default: // stereo
+			for(int i(0); i < frames; ++i)
+				if(wav_file_.WriteStereoSample(left[i], right[i]) != DDC_SUCCESS) {
+					set_opened(false);
+				}
+			break;
+	}
+}
+
+void WaveFileOut::do_open() throw(std::exception)
+{
+}
+
+void WaveFileOut::do_close() throw(std::exception)
+{
 }
 
 void WaveFileOut::do_stop() throw(std::exception) {
