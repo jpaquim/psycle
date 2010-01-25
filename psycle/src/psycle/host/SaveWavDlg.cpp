@@ -2,16 +2,19 @@
 ///\brief implementation file for psycle::host::CSaveWavDlg.
 
 #include "SaveWavDlg.hpp"
-#include "Configuration.hpp"
-#include "MidiInput.hpp"
 
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/core/machine.h>
 
+#include <boost/bind.hpp>
+
+#include "Configuration.hpp"
+#include "MidiInput.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 #include "PatternView.hpp"
+#include "SeqView.hpp"
 #include <iostream>
 #include <iomanip>
 #include <psycle/helpers/math.hpp>
@@ -26,33 +29,22 @@ using namespace psycle::core;
 namespace psycle {
 	namespace host {
 
+		const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
+		const int real_bits[]={8,16,24,32,32};
 
 		extern CPsycleApp theApp;
-		DWORD WINAPI __stdcall RecordThread(void *b);
-		int CSaveWavDlg::channelmode = -1;
-		int CSaveWavDlg::rate = -1;
-		int CSaveWavDlg::bits = -1;
-		BOOL CSaveWavDlg::savewires = false;
-		BOOL CSaveWavDlg::savetracks = false;
-		BOOL CSaveWavDlg::savegens = false;
 
-		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent /* = 0 */) : CDialog(CSaveWavDlg::IDD, pParent)
-		{
-			//{{AFX_DATA_INIT(CSaveWavDlg)
-			m_recmode = 0;		
-			m_outputtype = 0;
-			//}}AFX_DATA_INIT
+		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent) 
+			: CDialog(CSaveWavDlg::IDD, pParent),
+			  m_recmode(0),
+			  m_outputtype(0) {
 			this->pChildView = pChildView;
 			this->pBlockSel = pBlockSel;					
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			seq_tmp_play_line_ = new psycle::core::SequenceLine();
-#endif
 		}
 
-		void CSaveWavDlg::DoDataExchange(CDataExchange* pDX)
-		{
+		void CSaveWavDlg::DoDataExchange(CDataExchange* pDX) {
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CSaveWavDlg)
 			DDX_Control(pDX, IDC_FILEBROWSE, m_browse);
 			DDX_Control(pDX, IDCANCEL, m_cancel);
 			DDX_Control(pDX, IDC_SAVEWAVE, m_savewave);
@@ -76,11 +68,9 @@ namespace psycle {
 			DDX_Control(pDX, IDC_COMBO_NOISESHAPING, m_noiseshaping);
 			DDX_Radio(pDX, IDC_RECSONG, m_recmode);
 			DDX_Radio(pDX, IDC_OUTPUTFILE, m_outputtype);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CSaveWavDlg, CDialog)
-			//{{AFX_MSG_MAP(CSaveWavDlg)
 			ON_BN_CLICKED(IDC_FILEBROWSE, OnFilebrowse)
 			ON_BN_CLICKED(IDC_RECSONG, OnSelAllSong)
 			ON_BN_CLICKED(IDC_RECRANGE, OnSelRange)
@@ -98,24 +88,15 @@ namespace psycle {
 			ON_BN_CLICKED(IDC_CHECK_DITHER,	OnToggleDither)
 			ON_BN_CLICKED(IDC_OUTPUTFILE, OnOutputfile)
 			ON_BN_CLICKED(IDC_OUTPUTCLIPBOARD, OnOutputclipboard)
-			ON_BN_CLICKED(IDC_OUTPUTSAMPLE, OnOutputsample)
-			//}}AFX_MSG_MAP			
-			
+			ON_BN_CLICKED(IDC_OUTPUTSAMPLE, OnOutputsample)			
 		END_MESSAGE_MAP()
 
-		BOOL CSaveWavDlg::OnInitDialog() 
-		{
+		BOOL CSaveWavDlg::OnInitDialog() {
 			CDialog::OnInitDialog();
 
-			threadopen = 0;
 			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 			Song& pSong = mainFrame->projects()->active_project()->song();
-			thread_handle=INVALID_HANDLE_VALUE;
 			kill_thread=1;
-			lastpostick=0;
-			lastlinetick=0;
-			saving=false;
-
 			std::string name = Global::pConfig->GetCurrentWaveRecDir().c_str();
 			name+='\\';
 			name+=pSong.fileName;
@@ -132,28 +113,24 @@ namespace psycle {
 			m_patnumber2.EnableWindow(false);
 
 			char num[10];
-/*			// TODO
-			sprintf(num,"%02x",pSong.playOrder[mainFrame->m_wndView.pattern_view()->editPosition]);
+			int pattern_id = pChildView->pattern_view()->main()->m_wndSeq.selected_entry()->pattern()->id();
+			sprintf(num,"%02x",pattern_id);
 			m_patnumber.SetWindowText(num);
 			sprintf(num,"%02x",0);
 			m_rangestart.SetWindowText(num);
-			sprintf(num,"%02x",pSong.playLength-1);
+			int len = static_cast<int>(pChildView->pattern_view()->main()->m_wndSeq.pos_map().size());
+			sprintf(num,"%02x",len-1);
 			m_rangeend.SetWindowText(num);			
 
-			sprintf(num,"%02x",pSong.playOrder[mainFrame->m_wndView.pattern_view()->editPosition]);
+			sprintf(num,"%02x",pattern_id);
 			m_patnumber2.SetWindowText(num);
-*/
 
-
-			if (pChildView->pattern_view()->blockSelected)
-			{
+			if (pChildView->pattern_view()->blockSelected) {
 				sprintf(num,"%02x",pBlockSel->start.line);
 				m_linestart.SetWindowText(num);
 				sprintf(num,"%02x",pBlockSel->end.line+1);
 				m_lineend.SetWindowText(num);
-			}
-			else
-			{
+			} else {
 				sprintf(num,"%02x",0);
 				m_linestart.SetWindowText(num);
 				sprintf(num,"%02x",1);
@@ -163,35 +140,26 @@ namespace psycle {
 			m_progress.SetRange(0,1);
 			m_progress.SetPos(0);
 
-			if ((rate < 0) || (rate >5)) {
-				if (Global::pConfig->GetSamplesPerSec() <= 8000) {
-					rate = 0;
-				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 11025) {
-					rate = 1;
-				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 16000) {
-					rate = 2;
-				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 22050) {
-					rate = 3;
-				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 32000) {
-					rate = 4;
-				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 44100) {
-					rate = 5;
-				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 48000) {
-					rate = 6;
-				}
-				else if (Global::pConfig->GetSamplesPerSec() <= 88200) {
-					rate = 7;
-				} else  {
-					rate = 8;
-				}
+			int rate;
+			if (Global::pConfig->GetSamplesPerSec() <= 8000) {
+				rate = 0;
+			} else if (Global::pConfig->GetSamplesPerSec() <= 11025) {
+				rate = 1;
+			} else if (Global::pConfig->GetSamplesPerSec() <= 16000) {
+				rate = 2;
+			} else if (Global::pConfig->GetSamplesPerSec() <= 22050) {
+				rate = 3;
+			} else if (Global::pConfig->GetSamplesPerSec() <= 32000) {
+				rate = 4;
+			} else if (Global::pConfig->GetSamplesPerSec() <= 44100) {
+				rate = 5;
+			} else if (Global::pConfig->GetSamplesPerSec() <= 48000) {
+				rate = 6;
+			} else if (Global::pConfig->GetSamplesPerSec() <= 88200) {
+				rate = 7;
+			} else  {
+				rate = 8;
 			}
-
 			m_rate.AddString("8000 hz");
 			m_rate.AddString("11025 hz");
 			m_rate.AddString("16000 hz");
@@ -203,65 +171,53 @@ namespace psycle {
 			m_rate.AddString("96000 hz");
 			m_rate.SetCurSel(rate);
 
-			if ((bits < 0) || (bits > 3)) {
-				if (Global::pConfig->GetBitDepth() <= 8) {
-					bits = 0;
-				}
-				else if (Global::pConfig->GetBitDepth() <= 16) {
-					bits = 1;
-				}
-				else if (Global::pConfig->GetBitDepth() <= 24) {
-					bits = 2;
-				} 
-				else if (Global::pConfig->GetBitDepth() <= 32) {
-					bits = 4;
-				}
-			}
-
+			int bits;
+			if (Global::pConfig->GetBitDepth() <= 8) {
+				bits = 0;
+			} else if (Global::pConfig->GetBitDepth() <= 16) {
+				bits = 1;
+			} else if (Global::pConfig->GetBitDepth() <= 24) {
+				bits = 2;
+			}  else if (Global::pConfig->GetBitDepth() <= 32) {
+				bits = 4;
+			}			
 			m_bits.AddString("8 bit");
 			m_bits.AddString("16 bit");
 			m_bits.AddString("24 bit");
 			m_bits.AddString("32 bit (int)");
 			m_bits.AddString("32 bit (float)");
-
 			m_bits.SetCurSel(bits);
 
 			m_channelmode.AddString("Mono (Mix)");
 			m_channelmode.AddString("Mono (Left)");
 			m_channelmode.AddString("Mono (Right)");
 			m_channelmode.AddString("Stereo");
-
-			if ((channelmode < 0) || (channelmode > 3)) {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				channelmode = Global::pConfig->_pOutputDriver->playbackSettings().channelMode();
-#else
-				channelmode = Global::pConfig->_pOutputDriver->_channelmode;
-#endif
-
-			}
-			m_channelmode.SetCurSel(channelmode);
+			m_channelmode.SetCurSel(Global::pConfig->_pOutputDriver->playbackSettings().channelMode());
 
 			m_dither.SetCheck(BST_CHECKED);
-
 			m_pdf.AddString("Triangular");
 			m_pdf.AddString("Rectangular");
 			m_pdf.AddString("Gaussian");			
 			m_pdf.SetCurSel(0);
-
 			m_noiseshaping.AddString("None");
 			m_noiseshaping.AddString("High-Pass Contour");
 			m_noiseshaping.SetCurSel(0);
 
-			if (bits == 3 )
-			{
+			if (bits == 3 ) {
 				m_dither.EnableWindow(false);
 				m_pdf.EnableWindow(false);
 				m_noiseshaping.EnableWindow(false);
 			}
 
-			m_savetracks.SetCheck(savetracks);
-			m_savegens.SetCheck(savegens);
-			m_savewires.SetCheck(savewires);
+			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+			settings.setSamplesPerSec(real_rate[rate]);
+			settings.setBitDepth(real_bits[bits]);
+			settings.setChannelMode(Global::pConfig->_pOutputDriver->playbackSettings().channelMode());
+			file_out_.setPlaybackSettings(settings);
+
+			m_savetracks.SetCheck(false);
+			m_savegens.SetCheck(false);
+			m_savewires.SetCheck(false);
 
 			m_text.SetWindowText("");		
 
@@ -327,52 +283,45 @@ namespace psycle {
 			}
 		}
 
-		void CSaveWavDlg::OnSelAllSong() 
-		{
+		void CSaveWavDlg::OnSelAllSong()  {
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
 			m_lineend.EnableWindow(false);
 			m_linestart.EnableWindow(false);
 			m_patnumber2.EnableWindow(false);
-			m_recmode=0;
+			m_recmode = 0;
 		}
 
-		void CSaveWavDlg::OnSelPattern() 
-		{
+		void CSaveWavDlg::OnSelPattern() {
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(true);
 			m_lineend.EnableWindow(false);
 			m_linestart.EnableWindow(false);
 			m_patnumber2.EnableWindow(false);
-			m_recmode=1;
+			m_recmode = 1;
 		}
 
-		void CSaveWavDlg::OnSelRange() 
-		{
+		void CSaveWavDlg::OnSelRange() {
 			m_rangeend.EnableWindow(true);
 			m_rangestart.EnableWindow(true);
 			m_patnumber.EnableWindow(false);
 			m_lineend.EnableWindow(false);
 			m_linestart.EnableWindow(false);
 			m_patnumber2.EnableWindow(false);
-			m_recmode=2;
+			m_recmode = 2;
 		}
 
-		void CSaveWavDlg::OnRecblock()
-		{
+		void CSaveWavDlg::OnRecblock() {
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
 			m_lineend.EnableWindow(true);
 			m_linestart.EnableWindow(true);
 			m_patnumber2.EnableWindow(true);
-			m_recmode=3;
+			m_recmode = 3;
 		}
-
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 
 		void CSaveWavDlg::SwitchToTmpPlay() {
 			Player* player = &Player::singleton();
@@ -390,10 +339,7 @@ namespace psycle {
 			*(seq.begin()+1) = seq_main_play_line_;
 		}
 
-		void CSaveWavDlg::OnSavewave() 
-		{
-			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-			const int real_bits[]={8,16,24,32,32};
+		void CSaveWavDlg::OnSavewave() {
 			// set gui to recmode
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
@@ -460,17 +406,35 @@ namespace psycle {
 			std::string file_name = name;
 			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
 			settings.setDeviceName(file_name);
-			settings.setSamplesPerSec(real_rate[rate]);
-			settings.setBitDepth(real_bits[bits]);
-			settings.setChannelMode(channelmode);
 			file_out_.setPlaybackSettings(settings);
 			file_out_.set_opened(true);
 			kill_thread = 0;
-			unsigned long tmp;
-			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp);
+			unsigned long tmp;			
+			thread_ = new std::thread(boost::bind(&CSaveWavDlg::thread_function, this));			
 		}
 
-#else
+		void CSaveWavDlg::thread_function() {
+			Player* player = &Player::singleton();
+			const int frames = 256;
+			while(!kill_thread && player->playing()) {
+				 if ((m_recmode == 2) && (player->playPos() >=
+					  seq_end_entry_->tickPosition() + 
+					  seq_end_entry_->pattern()->beats() 
+				     )) break;
+ 			    file_out_.Write(player->Work(frames), frames);
+				m_progress.SetPos(static_cast<short>(player->playPos()));
+			}
+			file_out_.set_opened(false);
+			Player::singleton().stop();
+			if (m_recmode == 1) {
+				SwitchToNormalPlay();
+			}
+			SaveEnd();
+		}
+
+
+
+/*
 		void CSaveWavDlg::OnSavewave() 
 		{
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
@@ -678,55 +642,21 @@ namespace psycle {
 				SaveWav("",real_bits[bits],real_rate[rate],channelmode,isFloat);
 			}
 		}
-#endif
-
-		DWORD WINAPI __stdcall RecordThread(void *b) {
-			CSaveWavDlg* sender = (CSaveWavDlg*)b;
-			Player* player = &Player::singleton();
-			CoreSong& song = player->song();
-			const int frames = 256;
-
-			while(!sender->kill_thread && player->playing()) {
-				 if ((sender->m_recmode == 2) && (player->playPos() >=
-					   sender->seq_end_entry_->tickPosition() + 
-					   sender->seq_end_entry_->pattern()->beats() 
-				     )) break;
- 			    sender->file_out_.Write(player->Work(frames), frames);
-				sender->m_progress.SetPos(static_cast<short>(player->playPos()));
-
-			}
-			sender->file_out_.set_opened(false);
-			Player::singleton().stop();
-			if (sender->m_recmode == 1) {
-				sender->SwitchToNormalPlay();
-			}
-			sender->SaveEnd();
-			ExitThread(0);
-			return 0;
-		}
+*/
 
 		void CSaveWavDlg::OnCancel() 
 		{
-			delete seq_tmp_play_line_;
-			if (saving || (threadopen > 0))
-			{
-				//while(threadopen > 0) 
-				{
-					current = 256;
-					kill_thread=1;
-					Sleep(100);
-				}
-			}
-			else if (threadopen <= 0)
-			{
-				CDialog::OnCancel();
-			}
+			kill_thread = 1;
+			Sleep(100);
+			delete seq_tmp_play_line_;			
+			CDialog::OnCancel();
 		}
 
 		void CSaveWavDlg::SaveEnd()
 		{
-			saving=false;
 			kill_thread=1;
+			delete thread_;
+/*
 			if (autostop) {
 				Global::pConfig->autoStopMachines=true;
 			}
@@ -899,6 +829,7 @@ namespace psycle {
 					}
 				}
 			}
+			*/
 
 			m_text.SetWindowText("");
 
@@ -937,7 +868,6 @@ namespace psycle {
 				m_patnumber.EnableWindow(false);
 				break;
 			}
-
 			m_progress.SetPos(0);
 			m_savewave.EnableWindow(true);
 			m_cancel.SetWindowText("Close");
@@ -957,9 +887,9 @@ namespace psycle {
 			clipboardwavheader.fmthead = ' tmf';
 			clipboardwavheader.fmtsize = sizeof(WAVEFORMATEX) + 2; // !!!!!!!!!!!!!!!!????????? - works...
 			clipboardwavheader.fmtcontent.wFormatTag = WAVE_FORMAT_PCM;
-			clipboardwavheader.fmtcontent.nChannels = (channelmode == 3) ? 2 : 1;
-			clipboardwavheader.fmtcontent.nSamplesPerSec = real_rate[rate];
-			clipboardwavheader.fmtcontent.wBitsPerSample = real_bits[bits];
+			clipboardwavheader.fmtcontent.nChannels = (m_channelmode.GetCurSel() == 3) ? 2 : 1;
+			clipboardwavheader.fmtcontent.nSamplesPerSec = real_rate[m_rate.GetCurSel()];
+			clipboardwavheader.fmtcontent.wBitsPerSample = real_bits[m_bits.GetCurSel()];
 			clipboardwavheader.fmtcontent.nBlockAlign = clipboardwavheader.fmtcontent.wBitsPerSample/8*clipboardwavheader.fmtcontent.nChannels;
 			clipboardwavheader.fmtcontent.nAvgBytesPerSec =clipboardwavheader.fmtcontent.nBlockAlign*clipboardwavheader.fmtcontent.nSamplesPerSec;
 			clipboardwavheader.fmtcontent.cbSize = 0;
@@ -1000,10 +930,8 @@ namespace psycle {
 
 		}
 
-		void CSaveWavDlg::OnSelchangeComboBits() 
-		{
-			bits = m_bits.GetCurSel();
-			if (bits == 3) {
+		void CSaveWavDlg::OnSelchangeComboBits() {
+			if (m_bits.GetCurSel() == 3) {
 				m_dither.EnableWindow(false);
 				m_pdf.EnableWindow(false);
 				m_noiseshaping.EnableWindow(false);
@@ -1012,14 +940,21 @@ namespace psycle {
 				m_pdf.EnableWindow(true);
 				m_noiseshaping.EnableWindow(true);
 			}
+			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+			settings.setBitDepth(real_bits[m_bits.GetCurSel()]);
+			file_out_.setPlaybackSettings(settings);
 		}
 
 		void CSaveWavDlg::OnSelchangeComboChannels() {
-			channelmode = m_channelmode.GetCurSel();
+			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+			settings.setChannelMode(this->m_channelmode.GetCurSel());
+			file_out_.setPlaybackSettings(settings);
 		}
 
 		void CSaveWavDlg::OnSelchangeComboRate() {
-			rate = m_rate.GetCurSel();
+			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+			settings.setSamplesPerSec(real_rate[m_rate.GetCurSel()]);
+			file_out_.setPlaybackSettings(settings);
 		}
 
 		void CSaveWavDlg::OnSelchangeComboPdf() {			
@@ -1058,31 +993,23 @@ namespace psycle {
 		}
 
 		void CSaveWavDlg::OnSavetracksseparated() {
-			if (savetracks = m_savetracks.GetCheck()) {
+			if (m_savetracks.GetCheck()) {
 				m_savewires.SetCheck(false);
-				savewires = false;
 				m_savegens.SetCheck(false);
-				savegens = false;
 			}
 		}
 
-		void CSaveWavDlg::OnSavewiresseparated() 
-		{
-			if (savewires = m_savewires.GetCheck()) {
+		void CSaveWavDlg::OnSavewiresseparated()  {
+			if (m_savewires.GetCheck()) {
 				m_savetracks.SetCheck(false);
-				savetracks = false;
 				m_savegens.SetCheck(false);
-				savegens = false;
 			}
 		}
 
-		void CSaveWavDlg::OnSavegensseparated() 
-		{
-			if (savewires = m_savegens.GetCheck()) {
+		void CSaveWavDlg::OnSavegensseparated() {
+			if (m_savegens.GetCheck()) {
 				m_savetracks.SetCheck(false);
-				savetracks = false;
 				m_savewires.SetCheck(false);
-				savewires = false;
 			}
 		}
 

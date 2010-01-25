@@ -26,16 +26,9 @@ namespace psycle {
 			Project* project() { return project_; }
 			/// To be used when changing the selected entry from outside of SequencerView.
 			/// Example: from playback, or via hotkey.
-#if PSYCLE__CONFIGURATION__USE_PSYCORE	
 			void SetEntry(psycle::core::SequenceEntry* entry);
-
 			SequenceLine* ComputeSelblockLine();
 			std::map<int,SequenceEntry*>& pos_map() { return pos_map_; }
-#else
-			void SetSelectedEntry(int entry);
-			int selecteEntry();
-#endif
-
 			/// Change pattern under current position
 			void OnDeclong();
 			void OnInclong();			
@@ -53,12 +46,10 @@ namespace psycle {
 			void OnSeqnew();
 			// Add cloned from selection, after selection
 			void OnSeqduplicate();
-
 			void OnSeqcut();
 			void OnSeqcopy();
 			void OnSeqpaste();
 			void OnSeqdelete();
-
 			/// Remove the whole sequence. Does not delete the patterns, just the sequence.
 			void OnSeqclr();
 			/// Changes the indexes of the patterns, so that the sequence indexes become ordered.
@@ -70,10 +61,8 @@ namespace psycle {
 			/// mode = false sets the selection to playOrderSel.
 			/// mode = true sets selection to editPosition and refreshes the name of that position.
 			void UpdatePlayOrder(bool mode);
-
 			void DecCurPattern();
 			void IncCurPattern();
-
 			void DecPosition();
 			void IncPosition(bool bRepeat=false);
 
@@ -83,8 +72,6 @@ namespace psycle {
 			int seqcopybuffer[MAX_SONG_POSITIONS];
 			int seqcopybufferlength;
 
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE       
 		public:
 			SequenceEntry* GetEntry(int list_position);
 		public:
@@ -98,7 +85,6 @@ namespace psycle {
 			void BuildCopyList();
 			void SwitchToSelBlockPlay();
 			void SwitchToNormalPlay();
-
 			bool sel_block_play() const { return selblock_play_; }
 
 		private:
@@ -109,10 +95,6 @@ namespace psycle {
 			psycle::core::SequenceLine* seq_main_play_line_; // mainline between normal play and bar selblock play
 			bool selblock_play_;
 			std::map<SequenceEntry*, int> sel_pos_map_;
-#else
-			int selected_entry_;
-			std::map<int,int> pos_map_; // Relation between the list position and the patterns
-#endif
 			std::vector<int> selection_; // Vector of the selected indexes
 		};
 
