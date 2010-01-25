@@ -463,7 +463,13 @@ namespace psycle {
 			CString name;
 			m_filename.GetWindowText(name);
 			std::string file_name = name;
-			wav_file_.OpenForWrite(file_name.c_str(), real_rate[rate], real_bits[bits], 2); // 2 hardcoded atm
+			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+			settings.setDeviceName(file_name);
+			settings.setSamplesPerSec(real_rate[rate]);
+			settings.setBitDepth(real_bits[bits]);
+			settings.setChannelMode(channelmode);
+			file_out_.setPlaybackSettings(settings);
+			file_out_.set_opened(true);
 			kill_thread = 0;
 			unsigned long tmp;
 			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp);
@@ -869,54 +875,11 @@ namespace psycle {
 					   sender->seq_end_entry_->tickPosition() + 
 					   sender->seq_end_entry_->pattern()->beats() 
 				     )) break;
-
-				float* p = player->Work(frames);
+ 			    sender->file_out_.Write(player->Work(frames), frames);
 				sender->m_progress.SetPos(static_cast<short>(player->playPos()));
 
-				float * pL(song.machine(MASTER_INDEX)->_pSamplesL);
-				float * pR(song.machine(MASTER_INDEX)->_pSamplesR);
-				
-				if (sender->m_dither.GetCheck()) {
-				  sender->dither_.Process(pL, frames);
-				  sender->dither_.Process(pR, frames);
-				}
-				
-				switch(sender->channelmode) {
-					case 0: // mono mix
-						for(int i(0); i < frames; ++i) {
-						//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-							if (sender->wav_file_.WriteMonoSample((*pL++ + *pR++) / 2) != DDC_SUCCESS) {
-								sender->kill_thread = 1;
-								break;
-							}
-						}
-					break;
-					case 1: // mono L
-						for(int i(0); i < frames; ++i) {
-							if (sender->wav_file_.WriteMonoSample(*pL++) != DDC_SUCCESS) {
-								sender->kill_thread = 1;
-								break;
-							}
-						}
-					break;
-					case 2: // mono R
-						for(int i(0); i < frames; ++i) {
-							if (sender->wav_file_.WriteMonoSample(*pR++) != DDC_SUCCESS) {
-								sender->kill_thread = 1;
-								break;
-							}
-						}
-					break;
-					default: // stereo
-						for(int i(0); i < frames; ++i) {
-							if (sender->wav_file_.WriteStereoSample(*p++, *p++) != DDC_SUCCESS) {
-								sender->kill_thread = 1;
-								break;
-							}
-						}
-				}
 			}
-			sender->wav_file_.Close();
+			sender->file_out_.set_opened(false);
 			Player::singleton().stop();
 			if (sender->m_recmode == 1) {
 				sender->SwitchToNormalPlay();
@@ -1316,45 +1279,41 @@ namespace psycle {
 		}
 
 		void CSaveWavDlg::OnSelchangeComboPdf()
-		{
-			ditherpdf = m_pdf.GetCurSel();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE		
+		{			
 			switch (m_pdf.GetCurSel()) {
 				case 0:
-					dither_.SetPdf(dsp::Dither::Pdf::triangular);
+					file_out_.set_pdf(dsp::Dither::Pdf::triangular);
 				break;
 				case 1:
-					dither_.SetPdf(dsp::Dither::Pdf::rectangular);
+					file_out_.set_pdf(dsp::Dither::Pdf::rectangular);
 				break;
 				case 2:
-					dither_.SetPdf(dsp::Dither::Pdf::gaussian);
+					file_out_.set_pdf(dsp::Dither::Pdf::gaussian);
 				break;
 				default:
-					dither_.SetPdf(dsp::Dither::Pdf::triangular);
+					file_out_.set_pdf(dsp::Dither::Pdf::triangular);
 			}
-#endif
 		}
+
 		void CSaveWavDlg::OnSelchangeComboNoiseShaping()
-		{
-			noiseshape = m_noiseshaping.GetCurSel();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE		
+		{			
 			switch (m_noiseshaping.GetCurSel()) {
 				case 0:
-					dither_.SetNoiseShaping(dsp::Dither::NoiseShape::none);
+					file_out_.set_noiseshaping(dsp::Dither::NoiseShape::none);
 				break;
 				case 1:
-					dither_.SetNoiseShaping(dsp::Dither::NoiseShape::highpass);
+					file_out_.set_noiseshaping(dsp::Dither::NoiseShape::highpass);
 				break;
 				default:
-					dither_.SetPdf(dsp::Dither::Pdf::triangular);
+					file_out_.set_noiseshaping(dsp::Dither::NoiseShape::none);
 			}
-#endif
-
 		}
+
 		void CSaveWavDlg::OnToggleDither()
 		{
 			m_noiseshaping.EnableWindow(m_dither.GetCheck());
 			m_pdf.EnableWindow(m_dither.GetCheck());
+			file_out_.set_dither_enabled(m_dither.GetCheck());
 		}
 		void CSaveWavDlg::OnSavetracksseparated() 
 		{

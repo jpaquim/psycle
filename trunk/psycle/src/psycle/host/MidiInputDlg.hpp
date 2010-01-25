@@ -2,7 +2,6 @@
 ///\interface psycle::host::CMidiInputDlg.
 #pragma once
 #include "Psycle.hpp"
-#include "AudioDriver.hpp"
 #include <vector>
 namespace psycle {
 	namespace host {
