@@ -3,24 +3,18 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	namespace psycle {
-		namespace core {
-			class Song;
-		}
-		namespace audiodrivers {
-			class AudioDriver;
-		}
+namespace psycle {
+	namespace core {
+		class Song;
 	}
-	using namespace psycle::core;
-	using namespace psycle::audiodrivers;
-#else
-	namespace psycle {
-		namespace host {
-			class Song;
-		}
+
+	namespace audiodrivers {
+		class AudioDriver;
 	}
-#endif
+}
+
+using namespace psycle::core;
+using namespace psycle::audiodrivers;
 
 namespace psycle {
 	namespace host {
@@ -115,9 +109,7 @@ namespace psycle {
 			void MidiPatternInstrument(int value); // called by midi to insert pattern commands
 			void MousePatternTweak(int machine, int command, int value);
 			void MousePatternTweakSlide(int machine, int command, int value);													
-		
-			void AddMacViewUndo(); // place holder
-			
+				
 			void SetTitleBarText();
 			void patTrackMute();
 			void patTrackSolo();
@@ -166,7 +158,6 @@ namespace psycle {
 		// Private operations
 
 		private:
-
 			//Recent Files!!!!//
 			void CallOpenRecent(int pos);
 			//Recent Files!!!!//
@@ -174,20 +165,13 @@ namespace psycle {
 				
 			MachineView* machine_view_;
 			PatternView* pattern_view_;
-
 			// GDI Stuff		
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::audiodrivers::AudioDriver* output_driver_;
 			int last_pos_;			
-#endif
 
 		public:			
-			int UndoMacCounter; // todo transfer this two variables into machineview and modify
-			int UndoMacSaved;	// the OnEditUndo/Redo operations.
-
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 			afx_msg void OnRButtonDown( UINT nFlags, CPoint point );

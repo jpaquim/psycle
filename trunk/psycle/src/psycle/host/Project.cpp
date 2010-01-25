@@ -56,8 +56,7 @@ namespace psycle {
 		}
 
 		void Project::Clear() {
-			pat_view()->KillUndo();
-			pat_view()->KillRedo();
+			cmd_manager_.Clear();
 			mac_view()->LockVu();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Player & player(Player::singleton());
@@ -396,8 +395,7 @@ namespace psycle {
 			// Display the Open dialog box. 
 			if (GetOpenFileName(&ofn)==TRUE)
 			{
-				pat_view()->KillUndo();
-				pat_view()->KillRedo();
+				cmd_manager_.Clear();
 				mac_view()->LockVu();
 				Global::pPlayer->stop();
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -623,7 +621,6 @@ namespace psycle {
 					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
 					filepath += song().fileName;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					//todo: fileformat version
 					// if (!song().save(filepath,3) ) {
 					//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
@@ -641,31 +638,9 @@ namespace psycle {
 						mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
 						bResult = FALSE;
 					}					
-#else
-					OldPsyFile file;
-					if (!file.Create((char*)filepath.c_str(), true))
-					{
-						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
-					}
-					if (!song().Save(&file))
-					{
-						mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
-					}
-#endif
 					else 
 					{
 						song()._saved=true;
-						if (pat_view()->pUndoList)
-						{
-							pat_view()->UndoSaved = pat_view()->pUndoList->counter;
-						}
-						else
-						{
-							pat_view()->UndoSaved = 0;
-						}
-						mac_view()->child_view()->UndoMacSaved = mac_view()->child_view()->UndoMacCounter;
 						mac_view()->child_view()->SetTitleBarText();
 					}				
 					//file.Close();  <- save handles this 
@@ -746,7 +721,6 @@ namespace psycle {
 					{
 						song().fileName = str;
 					}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					//todo: fileformat version
 					// if ( ! song().save(str.GetBuffer(1),3)){
 					//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
@@ -764,34 +738,11 @@ namespace psycle {
 						{
 							mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
 							bResult = FALSE;
-						}		
-								
-#else
-					if (!file.Create(str.GetBuffer(1), true))
-					{
-						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
-					}
-					if (!song().Save(&file))
-					{
-						mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
-					}
-#endif
+						}									
 					else 
 					{
 						song()._saved=true;
-						AppendToRecent(str.GetBuffer(1));
-						
-						if (pat_view()->pUndoList)
-						{
-							pat_view()->UndoSaved = pat_view()->pUndoList->counter;
-						}
-						else
-						{
-							pat_view()->UndoSaved = 0;
-						}
-						mac_view()->child_view()->UndoMacSaved = mac_view()->child_view()->UndoMacCounter;
+						AppendToRecent(str.GetBuffer(1));						
 						mac_view()->child_view()->SetTitleBarText();
 					}
 					//file.Close(); <- save handles this

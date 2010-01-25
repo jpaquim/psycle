@@ -816,7 +816,6 @@ Song* CWaveEdChildView::song() {
 
 				if ( nFlags & MK_CONTROL )
 				{
-					pParent->m_wndView.AddMacViewUndo();
 					CRect rect;
 					GetClientRect(&rect);
 
@@ -871,7 +870,6 @@ Song* CWaveEdChildView::song() {
 
 				if ( nFlags & MK_CONTROL )
 				{
-					pParent->m_wndView.AddMacViewUndo();
 					CRect rect;
 					GetClientRect(&rect);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -1177,7 +1175,6 @@ Song* CWaveEdChildView::song() {
 			unsigned long length = (blSelection? blLength+1: wdLength);
 			if(wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				Song::scoped_lock lock(*song());
 #endif
@@ -1200,7 +1197,6 @@ Song* CWaveEdChildView::song() {
 			unsigned long length = (blSelection? blLength+1: wdLength);
 			if(wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				Song::scoped_lock lock(*song());
 #endif
@@ -1227,8 +1223,6 @@ Song* CWaveEdChildView::song() {
 
 			if (wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
-
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
 				Song::scoped_lock lock(*song());
@@ -1296,8 +1290,6 @@ Song* CWaveEdChildView::song() {
 
 			if (wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
-
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
 					Song::scoped_lock lock(*song());
@@ -1371,8 +1363,6 @@ Song* CWaveEdChildView::song() {
 
 			if (wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
-
 				pos = AmpDialog.DoModal();
 				if (pos != AMP_DIALOG_CANCEL)
 				{
@@ -1409,7 +1399,6 @@ Song* CWaveEdChildView::song() {
 
 			if (wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
 					Song::scoped_lock lock(*song());
@@ -1535,7 +1524,6 @@ Song* CWaveEdChildView::song() {
 		{
 			if (wdWave && wdStereo)
 			{
-				pParent->m_wndView.AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				{
 					Song::scoped_lock lock(*song());
@@ -1706,7 +1694,6 @@ Song* CWaveEdChildView::song() {
 
 			if (wdWave && blSelection)
 			{
-				pParent->m_wndView.AddMacViewUndo();
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				song()->IsInvalided(true);
 				///\todo lock/unlock
@@ -1876,9 +1863,6 @@ Song* CWaveEdChildView::song() {
 		void CWaveEdChildView::OnEditPaste() 
 		{
 			unsigned long c = 0;
-
-			pParent->m_wndView.AddMacViewUndo();
-
 			char *pData;
 			std::uint32_t lFmt, lData;
 			
@@ -2004,9 +1988,6 @@ Song* CWaveEdChildView::song() {
 		void CWaveEdChildView::OnPasteOverwrite()
 		{
 			unsigned long startPoint;
-
-			pParent->m_wndView.AddMacViewUndo();
-
 			char *pData;
 			std::uint32_t lFmt, lData;
 			
@@ -2102,9 +2083,6 @@ Song* CWaveEdChildView::song() {
 
 			if(MixDlg.DoModal() != IDCANCEL)
 			{
-
-				pParent->m_wndView.AddMacViewUndo();
-
 				char *pData;
 				std::uint32_t lFmt, lData;
 				
@@ -2245,8 +2223,6 @@ Song* CWaveEdChildView::song() {
 				unsigned long c = 0;
 				unsigned long startPoint, endPoint;
 
-				pParent->m_wndView.AddMacViewUndo();
-
 				char *pData;
 				std::uint32_t lFmt, lData;
 				
@@ -2375,7 +2351,6 @@ Song* CWaveEdChildView::song() {
 
 		void CWaveEdChildView::OnPopupSetLoopStart()
 		{
-			pParent->m_wndView.AddMacViewUndo();
 			CRect rect;
 			GetClientRect(&rect);
 
@@ -2410,7 +2385,6 @@ Song* CWaveEdChildView::song() {
 		}
 		void CWaveEdChildView::OnPopupSetLoopEnd()
 		{
-			pParent->m_wndView.AddMacViewUndo();
 			CRect rect;
 			GetClientRect(&rect);
 #if PSYCLE__CONFIGURATION__USE_PSYCORE

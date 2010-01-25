@@ -27,57 +27,20 @@ namespace psycle {
 	
 		class CMainFrame;
 		class CChildView;
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		//class Song;
-#endif
 
-		class CCursor
-		{
-		public:
+		struct CCursor {
+			CCursor() : line(0), col(0), track(0) {}
 			int line;
 			char col;
 			char track;
-
-			CCursor() { line=0; col=0; track=0; }
 		};
 
-		class CSelection
-		{
-		public:
+		struct CSelection {
 			CCursor start;	// Column not used. (It was harder to select!!!)
 			CCursor end;	//
 		};
 
-		class SPatternUndo
-		{
-		public:
-			int type;
-			SPatternUndo* pPrev;
-			unsigned char* pData;
-			int pattern;
-			int x;
-			int y;
-			int	tracks;
-			int	lines;
-			// store positional data plz
-			int edittrack;
-			int editline;
-			int editcol;
-			int seqpos;
-			// counter for tracking, works like ID
-			int counter;
-		};
-
-		enum {
-			UNDO_PATTERN,
-			UNDO_LENGTH,
-			UNDO_SEQUENCE,
-			UNDO_SONG,
-		};
-
-		class SPatternDraw
-		{
-		public:
+		struct SPatternDraw {
 			int drawTrackStart;
 			int drawTrackEnd;
 			int drawLineStart;
@@ -160,14 +123,13 @@ namespace psycle {
 			};
 
 			PatternView(class Project* project);
-			~PatternView();
+			~PatternView() {}
 
 			void SetParent(CChildView* parent, CMainFrame* main) {
 				parent_ = parent;
 				main_ = main;
 			}
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern* pattern();
 		private:
 			Pattern* pattern_;
@@ -178,7 +140,6 @@ namespace psycle {
 
 			psycle::core::Pattern::iterator GetEventOnCursor();
 			psycle::core::Pattern::iterator GetEventOnPos(double pos, int track);
-#endif
 
 			class Project* project();
 			class Project* project() const;
@@ -200,8 +161,7 @@ namespace psycle {
 			void OnContextMenu(CWnd* pWnd, CPoint point);
 			void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 			void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-			
-			
+						
 
 			void ShowTransformPatternDlg(void);
 			void ShowPatternDlg(void);
@@ -279,19 +239,6 @@ namespace psycle {
 			void PlaySong();
 			void PlayFromCur();
 
-			void OnEditUndo();
-			void OnEditRedo();
-			void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter);
-			void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void KillRedo();
-			void KillUndo();
-			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-			void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-
 			void OnUpdateUndo(CCmdUI* pCmdUI);
 			void OnUpdateRedo(CCmdUI* pCmdUI);
 
@@ -328,13 +275,9 @@ public:
 			CCursor detatchpoint;
 			bool bEditMode;		// in edit mode?
 			int patStep;
-
 			int editPosition;	// Position in the Sequence!
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			SequenceEntry* editPositionEntry;
-#endif
 			int prevEditPosition;
-
 			int ChordModeOffs;
 			int ChordModeLine;
 			int ChordModeTrack;
@@ -397,26 +340,14 @@ public:
 			bool isBlockCopied;
 private:
 			Project* project_;
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern block_buffer_pattern_;
 			double line_pos(int line, bool nearest) const;
-#endif
-			unsigned char blockBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int	blockNTracks;
 			int	blockNLines;
-			CSelection blockLastOrigin;
-			
-			unsigned char patBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
+			CSelection blockLastOrigin;		
 			int patBufferLines;
 public:
 			bool patBufferCopy;
-
-			SPatternUndo * pUndoList;
-			SPatternUndo * pRedoList;
-
-			int UndoCounter;
-			int UndoSaved;
 
 			COLORREF pvc_separator[MAX_TRACKS+1];
 			COLORREF pvc_background[MAX_TRACKS+1];
@@ -673,10 +604,7 @@ public:
 		}
 
 
-		inline void BOX(CDC *devc,CRect rect)
-		{
-			devc->Rectangle(rect);
-		}
+		inline void BOX(CDC *devc,CRect rect) { devc->Rectangle(rect); }
 
 		inline void BOX(CDC *devc,int x,int y, int w, int h)
 		{
@@ -728,65 +656,7 @@ public:
 				(_y >= _src.y) && (_y < _src.y+_src2.height);
 		}
 
-
-
-
-
-
-		// song data
-
-		int _ps()
-		{
-			// retrieves the pattern index
-			return song()->playOrder[editPosition];
-		}
-
-		// ALWAYS USE THESE MACROS BECAUSE THEY TEST TO SEE IF THE PATTERN HAS BEEN ALLOCATED!
-		// if you don't you might get an exception!
-
-		unsigned char* _ptrack(int ps, int track)
-		{
-			return song()->_ptrack(ps,track);
-		}	
-
-		unsigned char* _ptrack(int ps)
-		{
-			return song()->_ptrack(ps,editcur.track);
-		}	
-
-		unsigned char* _ptrack()
-		{
-			return song()->_ptrack(_ps(),editcur.track);
-		}	
-
-		unsigned char* _ptrackline(int ps, int track, int line)
-		{
-			return song()->_ptrackline(ps,track,line);
-		}
-
-		unsigned char* _ptrackline(int ps)
-		{
-			return song()->_ptrackline(ps,editcur.track,editcur.line);
-		}
-
-		unsigned char* _ptrackline()
-		{
-			return song()->_ptrackline(_ps(),editcur.track,editcur.line);
-		}
-
-		//_ppattern think it either returns a requested pattern or creates one
-		//if none exists and returns that (as an unsigned char pointer?)
-
-		unsigned char* _ppattern(int ps)
-		{
-			return song()->_ppattern(ps);
-		}
-
-		unsigned char* _ppattern()
-		{
-			return song()->_ppattern(_ps());
-		}
-
+	
 		};
 
 	}  //namespace host

@@ -253,7 +253,6 @@ namespace psycle {
 		void CGearRackDlg::OnDelete() 
 		{
 			int tmac = m_list.GetCurSel();
-			m_pParent->AddMacViewUndo();
 			switch (DisplayMode)
 			{
 			case 1:
@@ -421,7 +420,6 @@ namespace psycle {
 				sel[1]+=MAX_BUSES;
 				//fallthrough
 			case 0:
-				m_pParent->AddMacViewUndo();
 				Global::song().ExchangeMachines(sel[0],sel[1]);
 				pParentMain->UpdateComboGen(true);
 				view_->Rebuild();				
@@ -431,7 +429,6 @@ namespace psycle {
 				}
 				break;
 			case 2:
-				m_pParent->AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				Global::song().ExchangeInstruments(sel[0],sel[1]);
 #else

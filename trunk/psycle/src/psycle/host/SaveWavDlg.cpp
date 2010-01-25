@@ -5,17 +5,11 @@
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/core/machine.h>
 
 using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Player.hpp"
-#include "Machine.hpp"
-#endif
 
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
@@ -32,6 +26,7 @@ using namespace psycle::helpers::dsp;
 
 namespace psycle {
 	namespace host {
+
 
 		extern CPsycleApp theApp;
 		DWORD WINAPI __stdcall RecordThread(void *b);
@@ -117,11 +112,7 @@ namespace psycle {
 
 			threadopen = 0;
 			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Song& pSong = mainFrame->projects()->active_project()->song();
-#else
-			Song& pSong = Global::song();
-#endif
 			thread_handle=INVALID_HANDLE_VALUE;
 			kill_thread=1;
 			lastpostick=0;
@@ -144,6 +135,7 @@ namespace psycle {
 			m_patnumber2.EnableWindow(false);
 
 			char num[10];
+/*			// TODO
 			sprintf(num,"%02x",pSong.playOrder[mainFrame->m_wndView.pattern_view()->editPosition]);
 			m_patnumber.SetWindowText(num);
 			sprintf(num,"%02x",0);
@@ -153,6 +145,7 @@ namespace psycle {
 
 			sprintf(num,"%02x",pSong.playOrder[mainFrame->m_wndView.pattern_view()->editPosition]);
 			m_patnumber2.SetWindowText(num);
+*/
 
 
 			if (pChildView->pattern_view()->blockSelected)
@@ -686,8 +679,10 @@ namespace psycle {
 		}
 #endif
 
+
 		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
 		{
+/*
 			Player *pPlayer = Global::pPlayer;
 			#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
@@ -858,6 +853,7 @@ namespace psycle {
 			}
 			unsigned long tmp2;
 			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
+*/
 		}
 
 

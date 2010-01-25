@@ -184,7 +184,6 @@ namespace psycle {
 			_pDstMachine->GetWireVolume(_dstWireIndex, f);
 			if (f != invol)
 			{
-				m_pParent->AddMacViewUndo();
 				_pDstMachine->SetWireVolume(_dstWireIndex, invol );
 			}
 
@@ -1358,8 +1357,6 @@ namespace psycle {
 			dlg.edit_type = 0;
 			if (dlg.DoModal() == IDOK)
 			{
-				m_pParent->AddMacViewUndo();
-
 				// update from dialog
 				int t = (int)sqrtf(dlg.volume*16384*4*4);
 				m_volslider.SetPos(256*4-t);
@@ -1373,7 +1370,6 @@ namespace psycle {
 			dlg.edit_type = 1;
 			if (dlg.DoModal() == IDOK)
 			{
-				m_pParent->AddMacViewUndo();
 				// update from dialog
 				int t = (int)sqrtf(dlg.volume*16384*4*4);
 				m_volslider.SetPos(256*4-t);

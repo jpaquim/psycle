@@ -4,7 +4,6 @@
 #include "MainFrm.hpp"
 #include "Project.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/core/plugin.h>
 #include <psycle/core/sampler.h>
@@ -14,14 +13,6 @@
 ///\todo: change for core's one when replacing OldPsyFile
 #include "FileIO.hpp"
 using namespace psycle::core;
-#else
-#include "Player.hpp"
-#include "Plugin.hpp"
-#include "VstHost24.hpp"
-#include "Sampler.hpp"
-#include "XMSampler.hpp"
-#include "Song.hpp"
-#endif
 
 #include "PatternView.hpp"
 #include "Configuration.hpp"
@@ -1382,7 +1373,6 @@ using namespace psycle::helpers::math;
 			dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 			if (dlg.DoModal() == IDOK)
 			{
-				m_wndView.AddMacViewUndo();
 
 				int si = projects_.active_project()->song().instSelected();
 				
@@ -1520,7 +1510,6 @@ using namespace psycle::helpers::math;
 			cc2->SetCurSel(AUX_WAVES);
 			projects_.active_project()->song().auxcolSelected=projects_.active_project()->song().instSelected();
 			UpdateComboIns();
-			m_wndView.AddMacViewUndo();
 			m_wndInst.WaveUpdate();
 			m_wndInst.ShowWindow(SW_SHOWNORMAL);
 			m_wndInst.SetActiveWindow();
@@ -1682,6 +1671,9 @@ using namespace psycle::helpers::math;
 				}
 				else
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		// TODO
+#else
 					pSeqList->SelItemRange(false,0,pSeqList->GetCount()-1);
 					for (int i=0;i<MAX_SONG_POSITIONS;i++ )
 					{
@@ -1690,6 +1682,7 @@ using namespace psycle::helpers::math;
 					int top = m_wndView.pattern_view()->editPosition - 0xC;
 					if (top < 0) top = 0;
 					pSeqList->SetTopIndex(top);
+#endif
 				}
 			}
 			m_wndView.SetFocus();
@@ -1739,7 +1732,11 @@ using namespace psycle::helpers::math;
 			}
 			else
 			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		// TODO
+#else
 				str.Format("Pat %.2X", projects_.active_project()->song().playOrder[m_wndView.pattern_view()->editPosition]); 
+#endif
 			}
 			pCmdUI->SetText(str); 
 		}
@@ -1850,34 +1847,27 @@ using namespace psycle::helpers::math;
 
 		BOOL CMainFrame::StatusBarIdleText()
 		{
-			{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				// todo
+#else
 				std::ostringstream oss;
 				oss << projects_.active_project()->song().name()
 					<< " - " << projects_.active_project()->song().patternName[projects_.active_project()->song().playOrder[m_wndView.pattern_view()->editPosition]];
 
 				if ((m_wndView.viewMode==view_modes::pattern)	&& (!Global::pPlayer->playing()))
 				{
-					unsigned char *toffset=projects_.active_project()->song()._ptrackline(m_wndView.pattern_view()->editPosition,m_wndView.pattern_view()->editcur.track,m_wndView.pattern_view()->editcur.line);
 					int machine = toffset[2];
 					if (machine<MAX_MACHINES)
 					{
 						if (projects_.active_project()->song().machine(machine))
 						{
 							oss << " - " << projects_.active_project()->song().machine(machine)->GetEditName();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							if (projects_.active_project()->song().machine(machine)->getMachineKey() == MachineKey::sampler)
-#else
-							if (projects_.active_project()->song().machine(machine)->_type == MACH_SAMPLER)
-#endif
 							{
 								if (projects_.active_project()->song()._pInstrument[toffset[1]]->_sName[0])
 									oss <<  " - " << projects_.active_project()->song()._pInstrument[toffset[1]]->_sName;
 							}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							else if (projects_.active_project()->song().machine(machine)->getMachineKey() == MachineKey::sampulse)
-#else
-							else if (projects_.active_project()->song().machine(machine)->_type == MACH_XMSAMPLER)
-#endif
 							{
 								if (projects_.active_project()->song().rInstrument(toffset[1]).IsEnabled())
 									oss <<  " - " << projects_.active_project()->song().rInstrument(toffset[1]).Name();
@@ -1901,6 +1891,8 @@ using namespace psycle::helpers::math;
 				szStatusIdle=oss.str();
 				return TRUE;
 			}
+#endif
+			return true;
 		}
 
 		void CMainFrame::OnDropFiles(HDROP hDropInfo)

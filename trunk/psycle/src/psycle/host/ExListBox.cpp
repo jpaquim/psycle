@@ -82,7 +82,12 @@ void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
 	myedit.DestroyWindow();
 	myedit.Create(WS_CHILD|WS_BORDER,cellrect,this,IDC_SEQEDITBOX);
 	myedit.SetFont(&font);
+
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		// TODO
+#else
 	myedit.SetWindowText(Global::song().patternName[Global::song().playOrder[row]]);
+#endif
 	myedit.ShowWindow(SW_SHOWNORMAL);
 	myedit.SetFocus();
 }
@@ -96,7 +101,11 @@ void CExListBox::OnChangePatternName()
 {
 	CString string;
 	myedit.GetWindowText(string);
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		// TODO
+#else
 	strncpy(Global::song().patternName[Global::song().playOrder[GetCurSel()]],string,32);
+#endif
 }
 int CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
@@ -128,7 +137,11 @@ BOOL CExListBox::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult )
 	// need to handle both ANSI and UNICODE versions of the message
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		// TODO
+#else
 	CString strTipText = Global::song().patternName[Global::song().playOrder[pNMHDR->idFrom]];
+
 //	UINT nID = pNMHDR->idFrom;
 //	GetText( nID ,strTipText);
 
@@ -145,6 +158,7 @@ BOOL CExListBox::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult )
 #endif
 	*pResult = 0;
 
+#endif
 	return TRUE;    
 }
 

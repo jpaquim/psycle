@@ -116,6 +116,9 @@ namespace psycle
 		}
 		bool ITModule2::LoadITModule(Song *song)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+#else
 			s=song;
 			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
@@ -126,18 +129,11 @@ namespace psycle
 			imported.append(szName);
 			s->setComment(imported);
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			song->SetReady(false);
 			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
 			s->seqBus=sampler->id();
-#else
-			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			s->InsertConnection(0,MASTER_INDEX,0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
-			s->seqBus=0;
-			XMSampler* sampler = ((XMSampler*)s->machine(0));
-#endif
 
 			song->BeatsPerMin(itFileH.iTempo);
 			song->LinesPerBeat(sampler->Speed2LPB(itFileH.iSpeed));
@@ -322,14 +318,10 @@ Special:  Bit 0: On = song message attached.
 			{
 				if (pointersp[i]==0)
 				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					Pattern* pat = new Pattern();
 					pat->setName("unnamed");
 					pat->setID(i);
 					s->patternSequence().Add(pat);
-#else
-					s->AllocNewPattern(i,"unnamed",64,false);
-#endif
 				} else {
 					Seek(pointersp[i]);
 					LoadITPattern(i,numchans);
@@ -340,9 +332,8 @@ Special:  Bit 0: On = song message attached.
 			delete[] pointersi;
 			delete[] pointerss;
 			delete[] pointersp;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			song->SetReady(true);
-#endif			
+#endif
 			return true;
 		}
 
@@ -989,12 +980,15 @@ Special:  Bit 0: On = song message attached.
 						pent.setParameter(lasteff[channel]);
 					}
 
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 					PatternEvent* pData = (PatternEvent*) s->_ptrackline(patIdx,channel,row);
 
 					*pData = pent;
 					pent=pempty;
 
 					numchans = std::max(static_cast<int>(channel),numchans);
+#endif
 
 					Read(&newEntry,1);
 				}
@@ -1170,6 +1164,8 @@ Special:  Bit 0: On = song message attached.
 
 		bool ITModule2::LoadS3MModuleX(Song *song)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 			s=song;
 			if (Read(&s3mFileH,sizeof(s3mFileH))==0 ) return 0;
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;
@@ -1181,18 +1177,11 @@ Special:  Bit 0: On = song message attached.
 			imported.append(szName);
 			s->setComment(imported);
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			song->SetReady(false);
 			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(s3mFileH.mVol&0x7F)/128.0f);
 			s->seqBus=sampler->id();
-#else
-			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			s->InsertConnection(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
-			s->seqBus=0;
-			XMSampler* sampler = ((XMSampler*)s->machine(0));
-#endif
 
 
 
@@ -1278,7 +1267,6 @@ Special:  Bit 0: On = song message attached.
 			}
 			delete [] pointersi; pointersi = 0;
 			delete [] pointersp; pointersp = 0;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			song->SetReady(true);
 #endif
 			return true;
@@ -1575,11 +1563,13 @@ OFFSET              Count TYPE   Description
 							}
 						}
 					}
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 					PatternEvent* pData = (PatternEvent*) s->_ptrackline(patIdx,channel,row);
 
 					*pData = pent;
 					pent=pempty;
-
+#endif
 					Read(&newEntry,1);
 				}
 			}
