@@ -225,41 +225,31 @@ namespace psycle {
 			// EXCEPTION: OCX Property Pages should return false
 		}
 
-		void CSaveWavDlg::OnOutputfile()
-		{
-			m_savewave.EnableWindow(true);
-			m_outputtype=0;
-			m_savewires.EnableWindow(true);
-			m_savetracks.EnableWindow(true);
-			m_savegens.EnableWindow(true);
-			m_filename.EnableWindow(true);
-			m_browse.EnableWindow(true);
+		void CSaveWavDlg::ActivateOutputs(bool on) {
+			m_savewave.EnableWindow(on);
+			m_savewires.EnableWindow(on);
+			m_savetracks.EnableWindow(on);
+			m_savegens.EnableWindow(on);
+			m_filename.EnableWindow(on);
+			m_browse.EnableWindow(on);
 		}
 
-		void CSaveWavDlg::OnOutputclipboard()
-		{
-//			m_savewave.EnableWindow(false);
+		void CSaveWavDlg::OnOutputfile() {			
+			m_outputtype=0;
+			ActivateOutputs(true);
+		}
+
+		void CSaveWavDlg::OnOutputclipboard() {
 			m_outputtype=1;
-			m_savewires.EnableWindow(false);
-			m_savetracks.EnableWindow(false);
-			m_savegens.EnableWindow(false);
-			m_filename.EnableWindow(false);
-			m_browse.EnableWindow(false);
+			ActivateOutputs(false);
 		}
 		
-		void CSaveWavDlg::OnOutputsample()
-		{
-			m_savewave.EnableWindow(false);
+		void CSaveWavDlg::OnOutputsample() {
 			m_outputtype=2;
-			m_savewires.EnableWindow(false);
-			m_savetracks.EnableWindow(false);
-			m_savegens.EnableWindow(false);
-			m_filename.EnableWindow(false);
-			m_browse.EnableWindow(false);
+			ActivateOutputs(false);
 		}
 
-		void CSaveWavDlg::OnFilebrowse() 
-		{
+		void CSaveWavDlg::OnFilebrowse()  {
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 			CString direct;
 			m_filename.GetWindowText(direct);
@@ -365,8 +355,11 @@ namespace psycle {
 			Sleep(1000);	
 			// create a WaveFile and a thread for writing the audio data
 			kill_thread = 0;
-			if (m_savewires.GetCheck()) {				
+			if (m_savewires.GetCheck()) {
 				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveWires, this));
+			} else 
+			if (this->m_savegens.GetCheck()) {
+				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveGenerators, this));
 			} else {
 				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveNormal, this));
 			}
@@ -426,9 +419,8 @@ namespace psycle {
 			}
 		}
 
-		void CSaveWavDlg::SaveWires() {
-			Player* player = &Player::singleton();
-			CoreSong& song = player->song();
+		void CSaveWavDlg::SaveWires() {			
+			CoreSong& song = Player::singleton().song();
 			// back up our connections first
 			for (int i = 0; i < MAX_CONNECTIONS; ++i) {
 				if (song.machine(MASTER_INDEX)->_inputCon[i]) {
@@ -468,6 +460,47 @@ namespace psycle {
 			SaveEnd();
 		}
 
+		void CSaveWavDlg::SaveGenerators() {
+			CoreSong& song = Player::singleton().song();
+			// back up mute state of machines
+			for (int i = 0; i < MAX_BUSES; ++i) {
+				if (song.machine(i)) {
+					muted_[i] = song.machine(i)->_mute;
+				} else {
+					muted_[i] = true;
+				}
+			}
+			CString name;
+			m_filename.GetWindowText(name); 
+			std::string rootname = name;
+			rootname = rootname.substr(0, std::max(std::string::size_type(0),rootname.length()-4));
+			// save			
+			for (int i = 0; (i < MAX_BUSES) && !kill_thread; ++i) {
+				if (!muted_[i]) {
+					for (int j = 0; j < MAX_BUSES; j++) {
+						if (song.machine(j)) {							
+							song.machine(j)->_mute = (j != i);
+						}
+					}
+					// now save the song
+					char filename[MAX_PATH];
+					sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,
+						song.machine(i)->GetEditName().c_str());
+					psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+					settings.setDeviceName(filename);
+					file_out_.setPlaybackSettings(settings);
+					SaveFile();
+				}
+			}
+			// restore the mute status of the machines
+			for (int i = 0; i < MAX_BUSES; ++i) {
+				if (song.machine(i)) {
+					song.machine(i)->_mute = muted_[i];
+				}
+			}
+			SaveEnd();				
+		}
+
 		void CSaveWavDlg::SaveNormal() {
 			CString name;
 			m_filename.GetWindowText(name);
@@ -482,36 +515,6 @@ namespace psycle {
 
 
 /*
-		void CSaveWavDlg::OnSavewave() 
-		{
-			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-			const int real_bits[]={8,16,24,32,32};
-			bool isFloat = (bits == 4);
-			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-			Song& pSong = mainFrame->projects()->active_project()->song();
-			Player *pPlayer = Global::pPlayer;
-
-			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
-			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
-			GetDlgItem(IDC_RECRANGE)->EnableWindow(false);
-			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(false);
-
-			m_savewave.EnableWindow(false);
-			m_cancel.SetWindowText("Stop");
-			m_filename.EnableWindow(false);
-			m_savetracks.EnableWindow(false);
-			m_savegens.EnableWindow(false);
-			m_savewires.EnableWindow(false);
-			m_rate.EnableWindow(false);
-			m_bits.EnableWindow(false);
-			m_channelmode.EnableWindow(false);
-			m_pdf.EnableWindow(false);
-			m_noiseshaping.EnableWindow(false);
-			m_dither.EnableWindow(false);
-
-			m_rangeend.EnableWindow(false);
-			m_rangestart.EnableWindow(false);
-			m_patnumber.EnableWindow(false);
 			
 			autostop = Global::pConfig->autoStopMachines;
 			if ( Global::pConfig->autoStopMachines )
@@ -525,18 +528,6 @@ namespace psycle {
 					}
 				}
 			}
-			playblock = pPlayer->_playBlock;
-			loopsong = pPlayer->_loopSong;
-			memcpy(sel,pSong.playOrderSel,MAX_SONG_POSITIONS);
-			memset(pSong.playOrderSel,0,MAX_SONG_POSITIONS);
-			CString name;
-			m_filename.GetWindowText(name);
-
-			rootname=name;
-			rootname=rootname.substr(0,
-				std::max(std::string::size_type(0),rootname.length()-4));
-
-
 			if (m_outputtype == 0)
 			{	//record to file
 				if (m_savetracks.GetCheck())
@@ -574,102 +565,6 @@ namespace psycle {
 					current = 256;
 					SaveEnd();
 				}
-				else if (m_savewires.GetCheck())
-				{
-					// this is tricky - sort of
-					// back up our connections first
-					for (int i = 0; i < MAX_CONNECTIONS; i++)
-					{
-						if (pSong.machine(MASTER_INDEX)->_inputCon[i])
-						{
-							_Muted[i] = pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->_mute;
-						}
-						else
-						{
-							_Muted[i] = true;
-						}
-					}
-
-					for (int i = 0; i < MAX_CONNECTIONS; i++)
-					{
-						if (!_Muted[i])
-						{
-							current = i;
-							for (int j = 0; j < MAX_CONNECTIONS; j++)
-							{
-								if (pSong.machine(MASTER_INDEX)->_inputCon[j])
-								{
-									if (j != i)
-									{
-										pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[j])->_mute = true;
-									}
-									else
-									{
-										pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[j])->_mute = false;
-									}
-								}
-							}
-							// now save the song
-							char filename[MAX_PATH];
-							sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->GetEditName().c_str());
-							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
-							return;
-						}
-					}
-					current = 256;
-					SaveEnd();
-				}
-				else if (m_savegens.GetCheck())
-				{
-					// this is tricky - sort of
-					// back up our connections first
-
-					for (int i = 0; i < MAX_BUSES; i++)
-					{
-						if (pSong.machine(i))
-						{
-							_Muted[i] = pSong.machine(i)->_mute;
-						}
-						else
-						{
-							_Muted[i] = true;
-						}
-					}
-
-					for (int i = 0; i < MAX_BUSES; i++)
-					{
-						if (!_Muted[i])
-						{
-							current = i;
-							for (int j = 0; j < MAX_BUSES; j++)
-							{
-								if (pSong.machine(j))
-								{
-									if (j != i)
-									{
-										pSong.machine(j)->_mute = true;
-									}
-									else
-									{
-										pSong.machine(j)->_mute = false;
-									}
-								}
-							}
-							// now save the song
-							char filename[MAX_PATH];
-							sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong.machine(i)->GetEditName().c_str());
-							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
-							return;
-						}
-					}
-					current = 256;
-					SaveEnd();
-				}
-				else
-				{
-					SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode,isFloat);
-				}
-			}
 			else if (m_outputtype == 1 || m_outputtype == 2)
 			{
 				// Clear clipboardmem if needed (should not. it's a safety measure)
@@ -707,16 +602,6 @@ namespace psycle {
 			if (autostop) {
 				Global::pConfig->autoStopMachines=true;
 			}
-			#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				///todo: restore the previous values
-				Global::pConfig->_pOutputDriver->set_started(true);
-			#else
-				Global::pPlayer->_playBlock=playblock;
-				Global::pPlayer->_loopSong=loopsong;
-				std::memcpy(Global::song().playOrderSel,sel,MAX_SONG_POSITIONS);
-				Global::pConfig->_pOutputDriver->Enable(true);
-			#endif
-			Global::pConfig->_pMidiInput->Open();
 
 			if (m_outputtype == 1) {
 				SaveToClipboard();
@@ -778,105 +663,7 @@ namespace psycle {
 				}
 				memcpy(pSong._trackMuted,_Muted,sizeof(pSong._trackMuted));
 			}
-
-			else if (m_savewires.GetCheck())
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-				Song& pSong = mainFrame->projects()->active_project()->song();
-#else
-				Song& pSong = Global::song();
-#endif
-
-				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-				const int real_bits[]={8,16,24,32,32};
-				const bool isFloat = (bits == 4);
-
-				for (int i = current+1; i < MAX_CONNECTIONS; i++)
-				{
-					if (!_Muted[i])
-					{
-						current = i;
-						for (int j = 0; j < MAX_CONNECTIONS; j++)
-						{
-							if (pSong.machine(MASTER_INDEX)->_inputCon[j])
-							{
-								if (j != i)
-								{
-									pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[j])->_mute = true;
-								}
-								else
-								{
-									pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[j])->_mute = false;
-								}
-							}
-						}
-						// now save the song
-						char filename[MAX_PATH];
-						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->GetEditName().c_str());
-//						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
-						return;
-					}
-				}
-
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					if (pSong.machine(MASTER_INDEX)->_inputCon[i])
-					{
-						pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->_mute = _Muted[i];
-					}
-				}
-			}
-
-			else if (m_savegens.GetCheck())
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-				Song& pSong = mainFrame->projects()->active_project()->song();
-#else
-				Song& pSong = Global::song();
-#endif
-
-				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-				const int real_bits[]={8,16,24,32,32};
-				const bool isFloat = (bits == 4);
-
-				for (int i = current+1; i < MAX_BUSES; i++)
-				{
-					if (!_Muted[i])
-					{
-						current = i;
-						for (int j = 0; j < MAX_BUSES; j++)
-						{
-							if (pSong.machine(j))
-							{
-								if (j != i)
-								{
-									pSong.machine(j)->_mute = true;
-								}
-								else
-								{
-									pSong.machine(j)->_mute = false;
-								}
-							}
-						}
-						// now save the song
-						char filename[MAX_PATH];
-						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong.machine(i)->GetEditName().c_str());
-//						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
-						return;
-					}
-				}
-
-				for (int i = 0; i < MAX_BUSES; i++)
-				{
-					if (pSong.machine(i))
-					{
-						pSong.machine(i)->_mute = _Muted[i];
-					}
-				}
-			}
-			*/
+*/
 
 			m_text.SetWindowText("");
 
@@ -994,7 +781,7 @@ namespace psycle {
 
 		void CSaveWavDlg::OnSelchangeComboChannels() {
 			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
-			settings.setChannelMode(this->m_channelmode.GetCurSel());
+			settings.setChannelMode(m_channelmode.GetCurSel());
 			file_out_.setPlaybackSettings(settings);
 		}
 
@@ -1060,5 +847,5 @@ namespace psycle {
 			}
 		}
 
-	}   // namespace
-}   // namespace
+	}   // namespace host
+}   // namespace psycle
