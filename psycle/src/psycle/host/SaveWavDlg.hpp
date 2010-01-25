@@ -27,12 +27,15 @@ namespace psycle {
 			CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent = 0);
 
 		private:
-			void SaveEnd(void);
-			void SaveToClipboard();
-			virtual void DoDataExchange(CDataExchange* pDX);
+			void SaveEnd();
+			void SaveToClipboard();			
 			void SwitchToTmpPlay();
 			void SwitchToNormalPlay();
-			void thread_function();
+			void SaveNormal();
+			void SaveWires();
+			void BackUpWires();
+			void SaveFile();
+			virtual void DoDataExchange(CDataExchange* pDX);
 			virtual BOOL OnInitDialog();
 			afx_msg void OnFilebrowse();
 			afx_msg void OnSelAllSong();
@@ -96,7 +99,7 @@ namespace psycle {
 			std::vector<char*> clipboardmem;
 			int current;
 			std::string rootname;
-			bool _Muted[MAX_BUSES];
+			bool muted_[MAX_BUSES];
 			bool sel[MAX_SONG_POSITIONS];
 			psycle::audiodrivers::WaveFileOut file_out_;			
 			psycle::core::SequenceLine* seq_tmp_play_line_;

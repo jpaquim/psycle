@@ -73,10 +73,20 @@ void WaveFileOut::Write(float* data, unsigned int frames)
 
 void WaveFileOut::do_open() throw(std::exception)
 {
+	int channel_num ;
+	if (playbackSettings().channelMode() < 3)
+		channel_num = 1;
+	else
+		channel_num = 2;
+	wav_file_.OpenForWrite(playbackSettings().deviceName().c_str(), 
+						   playbackSettings().samplesPerSec(), 
+						   playbackSettings().bitDepth(), 
+						   channel_num);
 }
 
 void WaveFileOut::do_close() throw(std::exception)
 {
+	wav_file_.Close();
 }
 
 void WaveFileOut::do_stop() throw(std::exception) {

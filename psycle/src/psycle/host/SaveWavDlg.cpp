@@ -362,7 +362,19 @@ namespace psycle {
 			m_patnumber.EnableWindow(false);
 			Player::singleton().stop();			
 			Player::singleton().driver().set_started(false);
-			Sleep(1000);
+			Sleep(1000);	
+			// create a WaveFile and a thread for writing the audio data
+			kill_thread = 0;
+			if (m_savewires.GetCheck()) {				
+				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveWires, this));
+			} else {
+				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveNormal, this));
+			}
+		}
+
+		void CSaveWavDlg::SaveFile() {
+			Player* player = &Player::singleton();
+			CoreSong& song = player->song();
 			// prepare recmodes
 			if (m_recmode == 0) {
 				// record entire song
@@ -376,8 +388,6 @@ namespace psycle {
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				SwitchToTmpPlay();
 				seq_tmp_play_line_->clear();
-				Player* player = &Player::singleton();
-				CoreSong& song = player->song();
 				psycle::core::Pattern* pattern = song.patternSequence().FindPattern(pstart);
 				SequenceEntry* entry = new SequenceEntry(seq_tmp_play_line_);
 				entry->setPattern(pattern);
@@ -399,29 +409,14 @@ namespace psycle {
 				m_progress.SetRange(static_cast<short>(start_entry->tickPosition()),
 								    static_cast<short>(start_entry->tickEndPosition()));
 			}
-			// prepare player for recording			
-			// create a WaveFile and a thread for writing the audio data
-			CString name;
-			m_filename.GetWindowText(name);
-			std::string file_name = name;
-			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
-			settings.setDeviceName(file_name);
-			file_out_.setPlaybackSettings(settings);
-			file_out_.set_opened(true);
-			kill_thread = 0;
-			unsigned long tmp;			
-			thread_ = new std::thread(boost::bind(&CSaveWavDlg::thread_function, this));			
-		}
-
-		void CSaveWavDlg::thread_function() {
-			Player* player = &Player::singleton();
+ 			file_out_.set_opened(true);
 			const int frames = 256;
 			while(!kill_thread && player->playing()) {
 				 if ((m_recmode == 2) && (player->playPos() >=
 					  seq_end_entry_->tickPosition() + 
-					  seq_end_entry_->pattern()->beats() 
-				     )) break;
- 			    file_out_.Write(player->Work(frames), frames);
+					seq_end_entry_->pattern()->beats() 
+				)) break;
+ 				file_out_.Write(player->Work(frames), frames);
 				m_progress.SetPos(static_cast<short>(player->playPos()));
 			}
 			file_out_.set_opened(false);
@@ -429,6 +424,58 @@ namespace psycle {
 			if (m_recmode == 1) {
 				SwitchToNormalPlay();
 			}
+		}
+
+		void CSaveWavDlg::SaveWires() {
+			Player* player = &Player::singleton();
+			CoreSong& song = player->song();
+			// back up our connections first
+			for (int i = 0; i < MAX_CONNECTIONS; ++i) {
+				if (song.machine(MASTER_INDEX)->_inputCon[i]) {
+					muted_[i] = song.machine(song.machine(MASTER_INDEX)->_inputMachines[i])->_mute;
+				} else {
+					muted_[i] = true;
+				}
+			}
+			CString name;
+			m_filename.GetWindowText(name); 
+			std::string rootname = name;
+			rootname = rootname.substr(0, std::max(std::string::size_type(0),rootname.length()-4));
+			// save			
+			for (int i = 0; (i < MAX_CONNECTIONS) && !kill_thread; ++i) {
+				if (!muted_[i]) {
+					for (int j = 0; j < MAX_CONNECTIONS; j++) {
+						if (song.machine(MASTER_INDEX)->_inputCon[j]) {							
+							song.machine(song.machine(MASTER_INDEX)->_inputMachines[j])->_mute = (j != i);
+						}
+					}
+					// now save the song
+					char filename[MAX_PATH];
+					sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,
+						song.machine(song.machine(MASTER_INDEX)->_inputMachines[i])->GetEditName().c_str());
+					psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+					settings.setDeviceName(filename);
+					file_out_.setPlaybackSettings(settings);
+					SaveFile();
+				}
+			}
+			// restore our connections
+			for (int i = 0; i < MAX_CONNECTIONS; ++i) {
+				if (song.machine(MASTER_INDEX)->_inputCon[i]) {
+					song.machine(song.machine(MASTER_INDEX)->_inputMachines[i])->_mute = muted_[i];
+				}
+			}
+			SaveEnd();
+		}
+
+		void CSaveWavDlg::SaveNormal() {
+			CString name;
+			m_filename.GetWindowText(name);
+			std::string file_name = name;
+			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+			settings.setDeviceName(file_name);
+			file_out_.setPlaybackSettings(settings);						
+			SaveFile();
 			SaveEnd();
 		}
 
