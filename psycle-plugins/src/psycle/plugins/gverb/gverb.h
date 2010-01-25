@@ -29,43 +29,46 @@
 
 #define FDNORDER 4
 
-struct ty_gverb {
-	int rate;
-	float inputbandwidth;
-	float taillevel;
-	float earlylevel;
-	ty_damper *inputdamper;
-	float maxroomsize;
-	float roomsize;
-	float revtime;
-	float maxdelay;
-	float largestdelay;
-	ty_fixeddelay **fdndels;
-	float *fdngains;
-	int *fdnlens;
-	ty_damper **fdndamps; 
-	float fdndamping;
-	ty_diffuser **ldifs;
-	ty_diffuser **rdifs;
-	ty_fixeddelay *tapdelay;
-	int *taps;
-	float *tapgains;
-	float *d;
-	float *u;
-	float *f;
-	double alpha;
+class gverb {
+	public:
+		gverb(int, float, float, float, float, float, float, float, float);
+		~gverb();
+		void flush();
+		inline void process(float, float *, float *);
+		inline void set_roomsize(float);
+		inline void set_revtime(float);
+		inline void set_damping(float);
+		inline void set_inputbandwidth(float);
+		void set_earlylevel(float a) { earlylevel_ = a; }
+		void set_taillevel(float a) { taillevel_ = a; }
+	private:
+		inline void fdnmatrix(float *a, float *b);
+	private:
+		int rate_;
+		float inputbandwidth_;
+		float taillevel_;
+		float earlylevel_;
+		damper inputdamper_;
+		float maxroomsize_;
+		float roomsize_;
+		float revtime_;
+		float maxdelay_;
+		float largestdelay_;
+		fixeddelay ** fdndels_;
+		float * fdngains_;
+		int * fdnlens_;
+		damper ** fdndamps_;
+		float fdndamping_;
+		diffuser ** ldifs_;
+		diffuser ** rdifs_;
+		fixeddelay * tapdelay_;
+		int * taps_;
+		float * tapgains_;
+		float * d_;
+		float * u_;
+		float * f_;
+		double alpha_;
 };
-
-ty_gverb *gverb_new(int, float, float, float, float, float, float, float, float);
-void gverb_free(ty_gverb *);
-void gverb_flush(ty_gverb *);
-static void gverb_do(ty_gverb *, float, float *, float *);
-static void gverb_set_roomsize(ty_gverb *, float);
-static void gverb_set_revtime(ty_gverb *, float);
-static void gverb_set_damping(ty_gverb *, float);
-static void gverb_set_inputbandwidth(ty_gverb *, float);
-static void gverb_set_earlylevel(ty_gverb *, float);
-static void gverb_set_taillevel(ty_gverb *, float);
 
 /*
 	* This FDN reverb can be made smoother by setting matrix elements at the
@@ -90,7 +93,7 @@ static void gverb_set_taillevel(ty_gverb *, float);
 	* be 0.5, say.
 	*/
 
-inline void gverb_fdnmatrix(float *a, float *b) {
+inline void gverb::fdnmatrix(float *a, float *b) {
 	const float dl0 = a[0], dl1 = a[1], dl2 = a[2], dl3 = a[3];
 
 	b[0] = 0.5f * (+dl0 + dl1 - dl2 - dl3);
@@ -99,115 +102,103 @@ inline void gverb_fdnmatrix(float *a, float *b) {
 	b[3] = 0.5f * (+dl0 + dl1 + dl2 + dl3);
 }
 
-inline void gverb_do(ty_gverb *p, float x, float *yl, float *yr) {
+inline void gverb::process(float x, float *yl, float *yr) {
 	if (/*isnan(x) ||*/ std::abs(x) > 100000.0f) {
 		x = 0.0f;
 	}
 
-	float z = damper_do(p->inputdamper, x);
+	float z = inputdamper_.process(x);
 
-	z = diffuser_do(p->ldifs[0], z);
+	z = ldifs_[0]->process(z);
 
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		p->u[i] = p->tapgains[i] * fixeddelay_read(p->tapdelay, p->taps[i]);
+		u_[i] = tapgains_[i] * tapdelay_->read(taps_[i]);
 	}
-	fixeddelay_write(p->tapdelay,z);
+	tapdelay_->write(z);
 
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		p->d[i] = damper_do(
-			p->fdndamps[i],
-			p->fdngains[i] * fixeddelay_read(p->fdndels[i],
-			p->fdnlens[i])
-		);
+		d_[i] = fdndamps_[i]->process(fdngains_[i] * fdndels_[i]->read(fdnlens_[i]));
 	}
 
 	float sum = 0.0f;
 	float sign = 1.0f;
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		sum += sign * (p->taillevel*p->d[i] + p->earlylevel*p->u[i]);
+		sum += sign * (taillevel_ * d_[i] + earlylevel_ * u_[i]);
 		sign = -sign;
 	}
-	sum += x * p->earlylevel;
+	sum += x * earlylevel_;
 	float lsum = sum;
 	float rsum = sum;
 
-	gverb_fdnmatrix(p->d, p->f);
+	fdnmatrix(d_, f_);
 
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		fixeddelay_write(p->fdndels[i], p->u[i] + p->f[i]);
+		fdndels_[i]->write(u_[i] + f_[i]);
 	}
 
-	lsum = diffuser_do(p->ldifs[1], lsum);
-	lsum = diffuser_do(p->ldifs[2], lsum);
-	lsum = diffuser_do(p->ldifs[3], lsum);
-	rsum = diffuser_do(p->rdifs[1], rsum);
-	rsum = diffuser_do(p->rdifs[2], rsum);
-	rsum = diffuser_do(p->rdifs[3], rsum);
+	lsum = ldifs_[1]->process(lsum);
+	lsum = ldifs_[2]->process(lsum);
+	lsum = ldifs_[3]->process(lsum);
+	rsum = rdifs_[1]->process(rsum);
+	rsum = rdifs_[2]->process(rsum);
+	rsum = rdifs_[3]->process(rsum);
 
 	*yl = lsum;
 	*yr = rsum;
 }
 
-inline void gverb_set_roomsize(ty_gverb *p, const float a) {
+inline void gverb::set_roomsize(const float a) {
 	if (a <= 1.0 /*|| isnan(a)*/) {
-		p->roomsize = 1.0;
+		roomsize_ = 1.0;
 	} else {
-		p->roomsize = a;
+		roomsize_ = a;
 	}
-	p->largestdelay = p->rate * p->roomsize * 0.00294f;
+	largestdelay_ = rate_ * roomsize_ * 0.00294f;
 
-	p->fdnlens[0] = std::floor(1.000000f * p->largestdelay);
-	p->fdnlens[1] = std::floor(0.816490f * p->largestdelay);
-	p->fdnlens[2] = std::floor(0.707100f * p->largestdelay);
-	p->fdnlens[3] = std::floor(0.632450f * p->largestdelay);
+	fdnlens_[0] = std::floor(1.000000f * largestdelay_);
+	fdnlens_[1] = std::floor(0.816490f * largestdelay_);
+	fdnlens_[2] = std::floor(0.707100f * largestdelay_);
+	fdnlens_[3] = std::floor(0.632450f * largestdelay_);
 
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		p->fdngains[i] = -std::pow((float)p->alpha, p->fdnlens[i]);
+		fdngains_[i] = -std::pow(alpha_, fdnlens_[i]);
 	}
 
-	p->taps[0] = 5+std::floor(0.410f*p->largestdelay);
-	p->taps[1] = 5+std::floor(0.300f*p->largestdelay);
-	p->taps[2] = 5+std::floor(0.155f*p->largestdelay);
-	p->taps[3] = 5+std::floor(0.000f*p->largestdelay);
+	taps_[0] = 5 + std::floor(0.410f * largestdelay_);
+	taps_[1] = 5 + std::floor(0.300f * largestdelay_);
+	taps_[2] = 5 + std::floor(0.155f * largestdelay_);
+	taps_[3] = 5 + std::floor(0.000f * largestdelay_);
 
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		p->tapgains[i] = std::pow((float)p->alpha, p->taps[i]);
+		tapgains_[i] = std::pow(alpha_, taps_[i]);
 	}
 }
 
-inline void gverb_set_revtime(ty_gverb *p, float a) {
-	p->revtime = a;
+inline void gverb::set_revtime(float a) {
+	revtime_ = a;
 
 	float ga = 60.0f;
-	float gt = p->revtime;
+	float gt = revtime_;
 
 	ga = std::pow(10.0f, -ga / 20.0f);
-	double n = p->rate * gt;
-	p->alpha = std::pow((double)ga, 1.0 / n);
+	double n = rate_ * gt;
+	alpha_ = std::pow((double)ga, 1.0 / n);
 
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		p->fdngains[i] = -std::pow((float)p->alpha, p->fdnlens[i]);
+		fdngains_[i] = -std::pow(alpha_, fdnlens_[i]);
 	}
 }
 
-inline void gverb_set_damping(ty_gverb *p,float a) {
-	p->fdndamping = a;
+inline void gverb::set_damping(float a) {
+	fdndamping_ = a;
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		damper_set(p->fdndamps[i], p->fdndamping);
+		fdndamps_[i]->set(fdndamping_);
 	}
 }
 
-inline void gverb_set_inputbandwidth(ty_gverb *p, float a) {
-	p->inputbandwidth = a;
-	damper_set(p->inputdamper, 1.0 - p->inputbandwidth);
-}
-
-inline void gverb_set_earlylevel(ty_gverb *p, float a) {
-	p->earlylevel = a;
-}
-
-inline void gverb_set_taillevel(ty_gverb *p, float a) {
-	p->taillevel = a;
+inline void gverb::set_inputbandwidth(float a) {
+	inputbandwidth_ = a;
+	inputdamper_.set(1 - a);
 }
 
 #endif

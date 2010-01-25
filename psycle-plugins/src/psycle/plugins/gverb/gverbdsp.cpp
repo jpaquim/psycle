@@ -25,56 +25,45 @@
 #include <cstdlib>
 #include <cstring>
 
-ty_diffuser *diffuser_make(int size, float coeff) {
-	ty_diffuser *p = (ty_diffuser *) std::malloc(sizeof(ty_diffuser));
-	p->size = size;
-	p->coeff = coeff;
-	p->idx = 0;
-	p->buf = (float *) std::malloc(size * sizeof(float));
-	for(int i = 0; i < size; ++i) p->buf[i] = 0.0;
-	return p;
+/**********************************************************/
+// diffuser
+
+diffuser::diffuser(int size, float coeff)
+:
+	size_(size),
+	coeff_(coeff),
+	idx_(),
+	buf_(new float[size])
+{
+	flush();
 }
 
-void diffuser_free(ty_diffuser *p) {
-	std::free(p->buf);
-	std::free(p);
+diffuser::~diffuser() {
+	delete[] buf_;
 }
 
-void diffuser_flush(ty_diffuser *p) {
-	std::memset(p->buf, 0, p->size * sizeof(float));
+void diffuser::flush() {
+	std::memset(buf_, 0, size_ * sizeof *buf_);
 }
 
-ty_damper *damper_make(float damping) {
-	ty_damper *p = (ty_damper *) std::malloc(sizeof(ty_damper));
-	p->damping = damping;
-	p->delay = 0.0f;
-	return p;
+/**********************************************************/
+// fixeddelay
+
+fixeddelay::fixeddelay(int size)
+:
+	size_(size),
+	idx_(),
+	buf_(new float[size])
+{
+	flush();
 }
 
-void damper_free(ty_damper *p) {
-	std::free(p);
+fixeddelay::~fixeddelay() {
+	delete[] buf_;
 }
 
-void damper_flush(ty_damper *p) {
-	p->delay = 0.0f;
-}
-
-ty_fixeddelay *fixeddelay_make(int size) {
-	ty_fixeddelay *p = (ty_fixeddelay *) std::malloc(sizeof(ty_fixeddelay));
-	p->size = size;
-	p->idx = 0;
-	p->buf = (float *) std::malloc(size * sizeof(float));
-	for(int i = 0; i < size; ++i) p->buf[i] = 0.0;
-	return p;
-}
-
-void fixeddelay_free(ty_fixeddelay *p) {
-	std::free(p->buf);
-	std::free(p);
-}
-
-void fixeddelay_flush(ty_fixeddelay *p) {
-	std::memset(p->buf, 0, p->size * sizeof(float));
+void fixeddelay::flush() {
+	std::memset(buf_, 0, size_ * sizeof *buf_);
 }
 
 #if 0
