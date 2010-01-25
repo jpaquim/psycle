@@ -9,8 +9,6 @@
 #include <psycle/core/player.h>
 #include <psycle/core/machine.h>
 
-using namespace psycle::core;
-
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 #include "PatternView.hpp"
@@ -23,6 +21,7 @@ using namespace psycle::core;
 using namespace psycle::helpers;
 using namespace psycle::helpers::math;
 using namespace psycle::helpers::dsp;
+using namespace psycle::core;
 
 namespace psycle {
 	namespace host {
@@ -33,8 +32,6 @@ namespace psycle {
 		int CSaveWavDlg::channelmode = -1;
 		int CSaveWavDlg::rate = -1;
 		int CSaveWavDlg::bits = -1;
-		int CSaveWavDlg::noiseshape = 0;
-		int CSaveWavDlg::ditherpdf = (int)Dither::Pdf::triangular;
 		BOOL CSaveWavDlg::savewires = false;
 		BOOL CSaveWavDlg::savetracks = false;
 		BOOL CSaveWavDlg::savegens = false;
@@ -248,14 +245,12 @@ namespace psycle {
 
 			m_pdf.AddString("Triangular");
 			m_pdf.AddString("Rectangular");
-			m_pdf.AddString("Gaussian");
-			ditherpdf = (int)Dither::Pdf::triangular;
-			m_pdf.SetCurSel(ditherpdf);
+			m_pdf.AddString("Gaussian");			
+			m_pdf.SetCurSel(0);
 
 			m_noiseshaping.AddString("None");
 			m_noiseshaping.AddString("High-Pass Contour");
-			noiseshape=0;
-			m_noiseshaping.SetCurSel(noiseshape);
+			m_noiseshaping.SetCurSel(0);
 
 			if (bits == 3 )
 			{
@@ -685,185 +680,6 @@ namespace psycle {
 		}
 #endif
 
-
-		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
-		{
-/*
-			Player *pPlayer = Global::pPlayer;
-			#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-				Song& pSong = mainFrame->projects()->active_project()->song();
-			#else
-				Song& pSong = Global::song();
-			#endif
-			saving=true;
-			pPlayer->stopRecording();
-			#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				Global::pConfig->_pOutputDriver->set_started(false);
-			#else
-				Global::pConfig->_pOutputDriver->Enable(false);
-			#endif
-			///\todo: for zealan, this call is not closing the midi driver, and when doing the Open again, it crashes.
-			Global::pConfig->_pMidiInput->Close();
-
-			std::string::size_type pos = file.rfind('\\');
-			if (pos == std::string::npos)
-			{
-				m_text.SetWindowText(file.c_str());
-			}
-			else
-			{
-				m_text.SetWindowText(file.substr(pos+1).c_str());
-			}
-			#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				///todo: recording in psycore doesn't support other mediums, except via audio drivers.
-				// so for clipboard, we need an audio driver.
-				if (!file.empty()) {
-					pPlayer->setFileName(file);
-					pPlayer->startRecording(m_dither.GetCheck()==BST_CHECKED && bits!=32, Dither::Pdf::type(ditherpdf), Dither::NoiseShape::type(noiseshape));
-				}
-			#else
-				pPlayer->StartRecording(file,bits,rate,channelmode,isFloat,
-										m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape,&clipboardmem);
-			#endif
-			int tmp;
-			int cont;
-			CString name;
-
-			int pstart;
-			kill_thread = 0;
-			tickcont=0;
-			lastlinetick=0;
-			int i,j;
-			
-			int blockSLine;
-			int blockELine;
-
-			switch (m_recmode) {
-			case 0: {
-				j=0; // Calculate progress bar range.
-				for (i=0;i<pSong.playLength;i++)
-				{
-					j+=pSong.patternLines[pSong.playOrder[i]];
-				}
-				m_progress.SetRange(0,j);
-				lastpostick=0;
-				
-				#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					pPlayer->setLoopSong();
-					pPlayer->start();
-				#else
-					pPlayer->_playBlock=false;
-					pPlayer->Start(0,0);
-				#endif
-			}
-			break;
-			case 1: {
-				m_patnumber.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), pstart);
-				m_progress.SetRange(0,pSong.patternLines[pstart]);
-				for (cont=0;cont<pSong.playLength;cont++) {
-					if ( (int)pSong.playOrder[cont] == pstart) {
-						pstart= cont;
-						break;
-					}
-				}
-				lastpostick=pstart;
-				#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					int findPattern=0;
-					SequenceLine* patternline = *pSong.patternSequence().begin()+1;
-					SequenceLine::iterator iter = patternline->begin();
-					for(; iter != patternline->end() && findPattern < cont; iter++ , findPattern++);
-					if (iter != patternline->end()) {
-						pPlayer->setLoopSequenceEntry(iter->second);
-						pPlayer->start(iter->second->tickPosition());
-					}
-				#else
-					pSong.playOrderSel[cont]=true;
-					pPlayer->Start(pstart,0);
-					pPlayer->_playBlock=true;
-					pPlayer->_loopSong=false;
-				#endif
-			}
-			break;
-			case 2: {
-				m_rangestart.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), pstart);
-				m_rangeend.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), tmp);
-
-				lastpostick=pstart;
-				#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					int findPattern=0;
-					SequenceLine* patternline = *pSong.patternSequence().begin()+1;
-					SequenceLine::iterator iter = patternline->begin();
-					for(; iter != patternline->end() && findPattern < pstart; iter++ , findPattern++);
-
-					SequenceLine::iterator iterend = iter;
-					for(; iterend != patternline->end() && findPattern < tmp; iterend++ , findPattern++);
-
-					if (iter != patternline->end() && iterend != patternline->end()) {
-						pPlayer->setLoopRange(iter->second->tickPosition(), iterend->second->tickEndPosition());
-						pPlayer->start(iter->second->tickPosition());
-					}
-					m_progress.SetRange(
-						lround<int32_t>(iter->second->tickPosition()),
-						lround<int32_t>(iterend->second->tickEndPosition())
-					);
-				#else
-					j=0;
-					for (cont=pstart;cont<=tmp;cont++)
-					{
-						pSong.playOrderSel[cont]=true;
-						j+=pSong.patternLines[pSong.playOrder[cont]];
-					}
-					m_progress.SetRange(0,j);
-					pPlayer->Start(pstart,0);
-					pPlayer->_playBlock=true;
-					pPlayer->_loopSong=false;
-				#endif
-			}
-			break;
-			case 3: {
-				m_patnumber.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), pstart);
-				m_linestart.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), blockSLine);
-				m_lineend.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), blockELine);
-
-				lastpostick=pstart;
-				#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					///\todo: this uses the indexes as beat positions, instead of lines. It should be noted in the GUI.
-					pPlayer->setLoopRange(blockSLine, blockELine);
-					pPlayer->start(blockSLine);
-				#else
-					m_progress.SetRange(blockSLine,blockELine);
-					// find the position in the sequence where the pstart pattern is located.
-					for (cont=0;cont<pSong.playLength;cont++) {
-						if ( (int)pSong.playOrder[cont] == pstart) {
-							pstart= cont;
-							break;
-						}
-					}
-					pSong.playOrderSel[cont]=true;
-					pPlayer->Start(pstart,blockSLine, blockELine);
-					pPlayer->_playBlock=true;
-					pPlayer->_loopSong=false;
-				#endif
-			}
-			break;
-			default:
-				SaveEnd();
-				return;
-			}
-			unsigned long tmp2;
-			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
-*/
-		}
-
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		DWORD WINAPI __stdcall RecordThread(void *b) {
 			CSaveWavDlg* sender = (CSaveWavDlg*)b;
 			Player* player = &Player::singleton();
@@ -888,36 +704,6 @@ namespace psycle {
 			ExitThread(0);
 			return 0;
 		}
-#else
-
-
-		DWORD WINAPI __stdcall RecordThread(void *b) {
-			((CSaveWavDlg*)b)->threadopen++;
-			Player* pPlayer = Global::pPlayer;
-			int stream_size = 8192; // Player has just a single buffer of 65535 samples to allocate both channels
-			//int stream_buffer[65535];
-			while(!((CSaveWavDlg*)b)->kill_thread)
-			{
-				if (!pPlayer->recording()) // the player automatically closes the wav recording when looping.
-				{
-					pPlayer->stop();
-					((CSaveWavDlg*)b)->SaveEnd();
-					((CSaveWavDlg*)b)->threadopen--;
-					ExitThread(0);
-					//return 0;
-				}
-				pPlayer->Work(pPlayer,stream_size);
-				((CSaveWavDlg*)b)->SaveTick();
-			}
-
-			pPlayer->stop();
-			pPlayer->stopRecording();
-			((CSaveWavDlg*)b)->SaveEnd();
-			((CSaveWavDlg*)b)->threadopen--;
-			ExitThread(0);
-			//return 0;
-		}
-#endif
 
 		void CSaveWavDlg::OnCancel() 
 		{
@@ -941,8 +727,7 @@ namespace psycle {
 		{
 			saving=false;
 			kill_thread=1;
-			if ( autostop ) 
-			{
+			if (autostop) {
 				Global::pConfig->autoStopMachines=true;
 			}
 			#if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -956,8 +741,7 @@ namespace psycle {
 			#endif
 			Global::pConfig->_pMidiInput->Open();
 
-			if (m_outputtype == 1)
-			{
+			if (m_outputtype == 1) {
 				SaveToClipboard();
 			}
 
@@ -985,12 +769,8 @@ namespace psycle {
 			}
 			else if (m_savetracks.GetCheck())
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
 				Song& pSong = mainFrame->projects()->active_project()->song();
-#else
-				Song& pSong = Global::song();
-#endif
 
 				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 				const int real_bits[]={8,16,24,32,32};
@@ -1015,7 +795,7 @@ namespace psycle {
 						// now save the song
 						char filename[MAX_PATH];
 						sprintf(filename,"%s-track %.2u.wav",rootname.c_str(),i);
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
+//						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
 				}
@@ -1057,7 +837,7 @@ namespace psycle {
 						// now save the song
 						char filename[MAX_PATH];
 						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,pSong.machine(pSong.machine(MASTER_INDEX)->_inputMachines[i])->GetEditName().c_str());
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
+//						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
 				}
@@ -1106,7 +886,7 @@ namespace psycle {
 						// now save the song
 						char filename[MAX_PATH];
 						sprintf(filename,"%s-generator %.2u %s.wav",rootname.c_str(),i,pSong.machine(i)->GetEditName().c_str());
-						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
+//						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
 				}
@@ -1220,66 +1000,29 @@ namespace psycle {
 
 		}
 
-		void CSaveWavDlg::SaveTick()
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-			Song& pSong = mainFrame->projects()->active_project()->song();
-#else
-			Song& pSong = Global::song();
-#endif
-			Player* pPlayer = Global::pPlayer;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			///todo: bar positioning.
-#else
-			for (int i=lastpostick+1;i<pPlayer->_sequencePosition;i++)
-			{
-				tickcont+=pSong.patternLines[pSong.playOrder[i]];
-			}
-			if (lastpostick!= pPlayer->_sequencePosition ) 
-			{
-				tickcont+=pSong.patternLines[pSong.playOrder[lastpostick]]-(lastlinetick+1)+pPlayer->_lineCounter;
-			}
-			else tickcont+=pPlayer->_lineCounter-lastlinetick;
-
-			lastlinetick = pPlayer->_lineCounter;
-			lastpostick = pPlayer->_sequencePosition;
-#endif
-			if (!kill_thread ) 
-			{
-				m_progress.SetPos(tickcont);
-			}
-		}
-
 		void CSaveWavDlg::OnSelchangeComboBits() 
 		{
 			bits = m_bits.GetCurSel();
-			if (bits == 3 )
-			{
+			if (bits == 3) {
 				m_dither.EnableWindow(false);
 				m_pdf.EnableWindow(false);
 				m_noiseshaping.EnableWindow(false);
-			}
-			else
-			{
+			} else {
 				m_dither.EnableWindow(true);
 				m_pdf.EnableWindow(true);
 				m_noiseshaping.EnableWindow(true);
 			}
 		}
 
-		void CSaveWavDlg::OnSelchangeComboChannels() 
-		{
+		void CSaveWavDlg::OnSelchangeComboChannels() {
 			channelmode = m_channelmode.GetCurSel();
 		}
 
-		void CSaveWavDlg::OnSelchangeComboRate() 
-		{
+		void CSaveWavDlg::OnSelchangeComboRate() {
 			rate = m_rate.GetCurSel();
 		}
 
-		void CSaveWavDlg::OnSelchangeComboPdf()
-		{			
+		void CSaveWavDlg::OnSelchangeComboPdf() {			
 			switch (m_pdf.GetCurSel()) {
 				case 0:
 					file_out_.set_pdf(dsp::Dither::Pdf::triangular);
@@ -1295,8 +1038,7 @@ namespace psycle {
 			}
 		}
 
-		void CSaveWavDlg::OnSelchangeComboNoiseShaping()
-		{			
+		void CSaveWavDlg::OnSelchangeComboNoiseShaping() {			
 			switch (m_noiseshaping.GetCurSel()) {
 				case 0:
 					file_out_.set_noiseshaping(dsp::Dither::NoiseShape::none);
@@ -1309,16 +1051,14 @@ namespace psycle {
 			}
 		}
 
-		void CSaveWavDlg::OnToggleDither()
-		{
+		void CSaveWavDlg::OnToggleDither() {
 			m_noiseshaping.EnableWindow(m_dither.GetCheck());
 			m_pdf.EnableWindow(m_dither.GetCheck());
 			file_out_.set_dither_enabled(m_dither.GetCheck());
 		}
-		void CSaveWavDlg::OnSavetracksseparated() 
-		{
-			if (savetracks = m_savetracks.GetCheck())
-			{
+
+		void CSaveWavDlg::OnSavetracksseparated() {
+			if (savetracks = m_savetracks.GetCheck()) {
 				m_savewires.SetCheck(false);
 				savewires = false;
 				m_savegens.SetCheck(false);
@@ -1328,8 +1068,7 @@ namespace psycle {
 
 		void CSaveWavDlg::OnSavewiresseparated() 
 		{
-			if (savewires = m_savewires.GetCheck())
-			{
+			if (savewires = m_savewires.GetCheck()) {
 				m_savetracks.SetCheck(false);
 				savetracks = false;
 				m_savegens.SetCheck(false);
@@ -1339,8 +1078,7 @@ namespace psycle {
 
 		void CSaveWavDlg::OnSavegensseparated() 
 		{
-			if (savewires = m_savegens.GetCheck())
-			{
+			if (savewires = m_savegens.GetCheck()) {
 				m_savetracks.SetCheck(false);
 				savetracks = false;
 				m_savewires.SetCheck(false);

@@ -30,7 +30,6 @@ namespace psycle {
 			/// mfc compliant constructor
 			CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent = 0);
 
-			void SaveTick(void);
 			void SaveEnd(void);
 			void SaveToClipboard();
 			int kill_thread;
@@ -82,10 +81,6 @@ namespace psycle {
 			static int bits;
 		public:
 			static int channelmode;
-
-			static int ditherpdf;
-			static int noiseshape;
-
 			struct fullheader
 			{
 				std::uint32_t	head;
@@ -116,9 +111,7 @@ namespace psycle {
 			bool sel[MAX_SONG_POSITIONS];
 			bool saving;
 			bool dither;
-
-			void SaveWav(std::string file, int bits, int rate, int channelmode, bool isFloat);
-			
+		
 			// Generated message map functions
 			//{{AFX_MSG(CSaveWavDlg)
 			virtual BOOL OnInitDialog();
