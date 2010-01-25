@@ -61,7 +61,7 @@ class gverb {
 		float fdndamping_;
 		diffuser ** ldifs_;
 		diffuser ** rdifs_;
-		fixeddelay * tapdelay_;
+		fixeddelay tapdelay_;
 		int * taps_;
 		float * tapgains_;
 		float * d_;
@@ -112,9 +112,9 @@ inline void gverb::process(float x, float *yl, float *yr) {
 	z = ldifs_[0]->process(z);
 
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
-		u_[i] = tapgains_[i] * tapdelay_->read(taps_[i]);
+		u_[i] = tapgains_[i] * tapdelay_.read(taps_[i]);
 	}
-	tapdelay_->write(z);
+	tapdelay_.write(z);
 
 	for(unsigned int i = 0; i < FDNORDER; ++i) {
 		d_[i] = fdndamps_[i]->process(fdngains_[i] * fdndels_[i]->read(fdnlens_[i]));
