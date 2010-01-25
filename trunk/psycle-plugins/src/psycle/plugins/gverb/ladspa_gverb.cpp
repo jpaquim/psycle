@@ -68,7 +68,7 @@ class mi : public CMachineInterface {
 		virtual void Command();
 		virtual void ParameterTweak(int par, int val);
 	private:
-		ty_gverb *gv_l,*gv_r;
+		gverb *gv_l, *gv_r;
 		int samplerate;
 };
 
@@ -88,43 +88,43 @@ mi::mi() {
 
 mi::~mi() {
 	delete[] Vals;
-	gverb_free(gv_l);
-	gverb_free(gv_r);
+	delete gv_l;
+	delete gv_r;
 }
 
 void mi::Init() {
 	samplerate = pCB->GetSamplingRate();
-	gv_l = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
-	gv_r = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+	gv_l = new gverb(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+	gv_r = new gverb(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
 }
 
 void mi::SequencerTick() {
 	if(samplerate != pCB->GetSamplingRate()) {
 		samplerate = pCB->GetSamplingRate();
 
-		gverb_free(gv_l);
-		gverb_free(gv_r);
+		delete gv_l;
+		delete gv_r;
 		
-		gv_l = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
-		gv_r = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+		gv_l = new gverb(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+		gv_r = new gverb(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
 
-		gverb_set_roomsize(gv_l,(float)Vals[0]);
-		gverb_set_roomsize(gv_r,(float)Vals[0]);
+		gv_l->set_roomsize(Vals[0]);
+		gv_r->set_roomsize(Vals[0]);
 
-		gverb_set_revtime(gv_l,(float)Vals[1]*.01f);
-		gverb_set_revtime(gv_r,(float)Vals[1]*.01f);
+		gv_l->set_revtime(Vals[1] * .01f);
+		gv_r->set_revtime(Vals[1] * .01f);
 
-		gverb_set_damping(gv_l,(float)Vals[2] * .001f);
-		gverb_set_damping(gv_r,(float)Vals[2] * .001f);
+		gv_l->set_damping(Vals[2] * .001f);
+		gv_r->set_damping(Vals[2] * .001f);
 
-		gverb_set_inputbandwidth(gv_l,(float)Vals[3] * .001f);
-		gverb_set_inputbandwidth(gv_r,(float)Vals[3] * .001f);
+		gv_l->set_inputbandwidth(Vals[3] * .001f);
+		gv_r->set_inputbandwidth(Vals[3] * .001f);
 
-		gverb_set_earlylevel(gv_l,DB_CO((float)Vals[5]*.001f));
-		gverb_set_earlylevel(gv_r,DB_CO((float)Vals[5]*.001f));
+		gv_l->set_earlylevel(DB_CO(Vals[5] * .001f));
+		gv_r->set_earlylevel(DB_CO(Vals[5] * .001f));
 
-		gverb_set_taillevel(gv_l,DB_CO((float)Vals[6]*.001f));
-		gverb_set_taillevel(gv_r,DB_CO((float)Vals[6]*.001f));
+		gv_l->set_taillevel(DB_CO(Vals[6] * .001f));
+		gv_r->set_taillevel(DB_CO(Vals[6] * .001f));
 	}
 }
 
@@ -133,36 +133,36 @@ void mi::Command() {
 }
 
 void mi::ParameterTweak(int par, int val) {
-	Vals[par]=val;
+	Vals[par] = val;
 	switch(par) {
 		case 0:
-			gverb_set_roomsize(gv_l,(float)val);
-			gverb_set_roomsize(gv_r,(float)val);
+			gv_l->set_roomsize(val);
+			gv_r->set_roomsize(val);
 			break;
 		case 1:
-			gverb_set_revtime(gv_l,(float)val*.01f);
-			gverb_set_revtime(gv_r,(float)val*.01f);
+			gv_l->set_revtime(val * .01f);
+			gv_r->set_revtime(val * .01f);
 			break;
 		case 2:
-			gverb_set_damping(gv_l,(float)val * .001f);
-			gverb_set_damping(gv_r,(float)val * .001f);
+			gv_l->set_damping(val * .001f);
+			gv_r->set_damping(val * .001f);
 			break;
 		case 3:
-			gverb_set_inputbandwidth(gv_l,(float)val * .001f);
-			gverb_set_inputbandwidth(gv_r,(float)val * .001f);
+			gv_l->set_inputbandwidth(val * .001f);
+			gv_r->set_inputbandwidth(val * .001f);
 			break;
 		case 4: break;
 		case 5:
-			gverb_set_earlylevel(gv_l,DB_CO((float)val*.001f));
-			gverb_set_earlylevel(gv_r,DB_CO((float)val*.001f));
+			gv_l->set_earlylevel(DB_CO(val * .001f));
+			gv_r->set_earlylevel(DB_CO(val * .001f));
 			break;
 		case 6:
-			gverb_set_taillevel(gv_l,DB_CO((float)val*.001f));
-			gverb_set_taillevel(gv_r,DB_CO((float)val*.001f));
+			gv_l->set_taillevel(DB_CO(val * .001f));
+			gv_r->set_taillevel(DB_CO(val * .001f));
 			break;
 		case 7:
-			gverb_flush(gv_l);
-			gverb_flush(gv_r);
+			gv_l->flush();
+			gv_r->flush();
 			break;
 		default:
 			break;
@@ -170,32 +170,32 @@ void mi::ParameterTweak(int par, int val) {
 }
 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
-	float const dry = DB_CO((float)Vals[4]*.001f);
+	float const dry = DB_CO(Vals[4] * .001f);
 	
 	float outl = 0;
 	float outr = 0;
 
 	if(Vals[7]) {
 		do {
-			float inl = *psamplesleft;// * 0.000030517578125f;
-			float inr = *psamplesright;// * 0.000030517578125f;
-			gverb_do(gv_l,inl,&outl,&outr);
-			*psamplesleft = inl*dry + outl;//*32767.f;
-			*psamplesright = inr*dry + outr;//*32767.f;
-			gverb_do(gv_r,inr,&outl,&outr);
-			*psamplesleft += outl;//*32767.f;
-			*psamplesright += outr;//*32767.f;
+			float inl = *psamplesleft; // * 0.000030517578125f;
+			float inr = *psamplesright; // * 0.000030517578125f;
+			gv_l->process(inl, &outl, &outr);
+			*psamplesleft = inl * dry + outl; //*32767.f;
+			*psamplesright = inr*dry + outr; //*32767.f;
+			gv_r->process(inr, &outl, &outr);
+			*psamplesleft += outl; //*32767.f;
+			*psamplesright += outr; //*32767.f;
 
 			++psamplesleft;
 			++psamplesright;
 		} while(--numsamples);
 	} else {
 		do {
-			float sm = (*psamplesleft + *psamplesright) * 0.5f;// * 0.000030517578125f;
-			gverb_do(gv_l,sm,&outl,&outr);
+			float sm = (*psamplesleft + *psamplesright) * 0.5f; // * 0.000030517578125f;
+			gv_l->process(sm, &outl, &outr);
 
-			*psamplesleft = *psamplesleft * dry + outl;//*32767.f;
-			*psamplesright = *psamplesright * dry + outr;//*32767.f;
+			*psamplesleft = *psamplesleft * dry + outl; //*32767.f;
+			*psamplesright = *psamplesright * dry + outr; //*32767.f;
 
 			++psamplesleft;
 			++psamplesright;
@@ -207,19 +207,19 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 bool mi::DescribeValue(char* txt,int const param, int const value) {
 	switch(param) {
 		case 0:
-			std::sprintf(txt,"%i m",value);
+			std::sprintf(txt, "%i m", value);
 			return true;
 		case 1:
-			std::sprintf(txt,"%.2f s",(float)value*.01f);
+			std::sprintf(txt, "%.2f s", value * .01f);
 			return true;
 		case 2: case 3:
-			std::sprintf(txt,"%.01f",(float)value*.001f);
+			std::sprintf(txt, "%.01f", value * .001f);
 			return true;
 		case 4: case 5: case 6:
-			std::sprintf(txt,"%i dB",value/1000);
+			std::sprintf(txt, "%i dB", value / 1000);
 			return true;
 		case 7:
-			std::sprintf(txt,value?"stereo":"mono");
+			std::sprintf(txt, value ? "stereo" : "mono");
 			return true;
 		default:
 			return false;

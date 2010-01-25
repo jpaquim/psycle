@@ -7,66 +7,63 @@
 /**********************************************************/
 // diffuser
 
-struct ty_diffuser {
-	int size;
-	float coeff;
-	int idx;
-	float *buf;
+class diffuser {
+	public:
+		diffuser(int size, float coeff);
+		~diffuser();
+		void flush();
+		float process(float x) {
+			float & buf(buf_[idx_]);
+			float w = x - buf * coeff_;
+			psycle::helpers::math::erase_all_nans_infinities_and_denormals(w);
+			float y = buf + w * coeff_;
+			buf = w;
+			++idx_;
+			idx_ %= size_;
+			///\todo: denormal check on y too?
+			return y;
+		}
+	private:
+		int size_;
+		float coeff_;
+		int idx_;
+		float * buf_;
 };
-ty_diffuser * diffuser_make(int, float);
-void diffuser_free(ty_diffuser *);
-void diffuser_flush(ty_diffuser *);
-inline float diffuser_do(ty_diffuser *p, float x) {
-	float y,w;
-	float* buf = &p->buf[p->idx];
-	w = x - (*buf)*p->coeff;
-	psycle::helpers::math::erase_all_nans_infinities_and_denormals(w);
-	y = (*buf) + w*p->coeff;
-	*buf = w;
-	p->idx = (p->idx + 1) % p->size;
-	///\todo: denormal check on y too?
-	return y;
-}
 
 /**********************************************************/
 // damper
 
-struct ty_damper {
-	float damping;
-	float delay;
+class damper {
+	public:
+		damper(float damping) : damping_(damping), delay_() {}
+		void flush() { delay_ = 0.0f; }
+		void set(float damping) { damping_ = damping; }
+		inline float process(float x) {
+			float y = x * (1 - damping_) + delay_ * damping_;
+			psycle::helpers::math::erase_all_nans_infinities_and_denormals(y);
+			delay_ = y;
+			return y;
+		}
+	private:
+		float damping_;
+		float delay_;
 };
-ty_damper * damper_make(float);
-void damper_free(ty_damper *);
-void damper_flush(ty_damper *);
-inline void damper_set(ty_damper *p, float damping) {
-	p->damping = damping;
-}
-inline float damper_do(ty_damper *p, float x) {
-	float y = x*(1.0-p->damping) + p->delay*p->damping;
-	psycle::helpers::math::erase_all_nans_infinities_and_denormals(y);
-	p->delay = y;
-	return(y);
-}
 
 /**********************************************************/
 // fixeddelay
 
-struct ty_fixeddelay {
-	int size;
-	int idx;
-	float *buf;
+class fixeddelay {
+	public:
+		fixeddelay(int size);
+		~fixeddelay();
+		void flush();
+		float read(int n) { return buf_[(idx_ - n + size_) % size_]; }
+		void write(float x) { buf_[idx_] = x; ++idx_; idx_ %= size_; }
+	private:
+		int size_;
+		int idx_;
+		float * buf_;
 };
-ty_fixeddelay * fixeddelay_make(int);
-void fixeddelay_free(ty_fixeddelay *);
-void fixeddelay_flush(ty_fixeddelay *);
-inline float fixeddelay_read(ty_fixeddelay *p, int n) {
-	int i = (p->idx - n + p->size) % p->size;
-	return(p->buf[i]);
-}
-inline void fixeddelay_write(ty_fixeddelay *p, float x) {
-	p->buf[p->idx] = x;
-	p->idx = (p->idx + 1) % p->size;
-}
 
 /**********************************************************/
 //int isprime(int);
