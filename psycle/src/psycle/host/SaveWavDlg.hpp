@@ -33,8 +33,10 @@ namespace psycle {
 			void SwitchToNormalPlay();
 			void SaveNormal();
 			void SaveWires();
+			void SaveGenerators();
 			void BackUpWires();
 			void SaveFile();
+			void ActivateOutputs(bool on);
 			virtual void DoDataExchange(CDataExchange* pDX);
 			virtual BOOL OnInitDialog();
 			afx_msg void OnFilebrowse();
@@ -96,16 +98,14 @@ namespace psycle {
 				std::uint32_t datahead;
 				std::uint32_t datasize;
 			} clipboardwavheader;
-			std::vector<char*> clipboardmem;
-			int current;
-			std::string rootname;
+			std::vector<char*> clipboardmem;			
 			bool muted_[MAX_BUSES];
 			bool sel[MAX_SONG_POSITIONS];
 			psycle::audiodrivers::WaveFileOut file_out_;			
 			psycle::core::SequenceLine* seq_tmp_play_line_;
 			psycle::core::SequenceLine* seq_main_play_line_; // mainline between normal play
 			psycle::core::SequenceEntry* seq_end_entry_;		
-			thread * thread_;			
+			thread* thread_;			
 		};
 
 		
