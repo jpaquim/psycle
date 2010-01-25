@@ -80,9 +80,8 @@ void WaveFileOut::do_close() throw(std::exception)
 }
 
 void WaveFileOut::do_stop() throw(std::exception) {
-	{ scoped_lock lock(mutex_);
-		stop_requested_ = true;
-	}
+	scoped_lock lock(mutex_);
+	stop_requested_ = true;	
 	thread_->join();
 	delete thread_;
 }
