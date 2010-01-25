@@ -42,8 +42,9 @@ gverb::gverb(
 	revtime_(revtime),
 	maxdelay_(rate * maxroomsize / 340.0),
 	largestdelay_(rate * roomsize / 340.0),
-	fdndamping_(fdndamping)
- {
+	fdndamping_(fdndamping),
+	tapdelay_(44000)
+{
 	// FDN section
 	{
 		fdndels_ = new fixeddelay*[FDNORDER];
@@ -130,7 +131,6 @@ gverb::gverb(
 
 	// Tapped delay section
 
-	tapdelay_ = new fixeddelay(44000);
 	taps_ = new int[FDNORDER];
 	tapgains_ = new float[FDNORDER];
 
@@ -162,7 +162,6 @@ gverb::~gverb() {
 	delete[] rdifs_;
 	delete[] taps_;
 	delete[] tapgains_;
-	delete tapdelay_;
 }
 
 void gverb::flush() {
@@ -176,5 +175,5 @@ void gverb::flush() {
 	std::memset(d_, 0, FDNORDER * sizeof *d_);
 	std::memset(u_, 0, FDNORDER * sizeof *u_);
 	std::memset(f_, 0, FDNORDER * sizeof *f_);
-	tapdelay_->flush();
+	tapdelay_.flush();
 }
