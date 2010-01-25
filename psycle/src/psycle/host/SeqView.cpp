@@ -238,11 +238,6 @@ using namespace psycle::helpers::math;
 			Sequence* sequence = &_pSong->patternSequence();
 			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
-			pat_view->AddUndoSequence(len,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);
 			// if(len<(MAX_SONG_POSITIONS-1)) limit it or not ?
 			{
 				Pattern* pattern = sequence->FindPattern(0);
@@ -263,11 +258,6 @@ using namespace psycle::helpers::math;
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
-			pat_view->AddUndoSequence(len,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);			
 			if(len>1) {
 				SequenceLine::reverse_iterator r = line->rbegin();
 				++r;
@@ -288,11 +278,6 @@ using namespace psycle::helpers::math;
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
-			pat_view->AddUndoSequence(len,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);		
 			std::vector<int>::iterator it = selection_.begin();
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];
@@ -320,11 +305,6 @@ using namespace psycle::helpers::math;
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
-			pat_view->AddUndoSequence(len,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);
 			std::vector<int>::iterator it = selection_.begin();
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];			
@@ -354,11 +334,6 @@ using namespace psycle::helpers::math;
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
-			pat_view->AddUndoSequence(len,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);		
 			std::vector<int>::iterator it = selection_.begin();
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];
@@ -386,11 +361,6 @@ using namespace psycle::helpers::math;
 			Sequence* sequence = &project_->song().patternSequence();
 			SequenceLine* line = *(sequence->begin()+1);
 			int len = line->size(); // Length, in patterns, of the sequence.
-			pat_view->AddUndoSequence(len,
-									  pat_view->editcur.track,
-									  pat_view->editcur.line,
-									  pat_view->editcur.col,
-									  pat_view->editPosition);
 			std::vector<int>::iterator it = selection_.begin();
 			for ( ; it != selection_.end(); ++it) {
 			  SequenceEntry* item = pos_map_[*it];

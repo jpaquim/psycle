@@ -427,7 +427,6 @@ namespace psycle {
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
 				visualtweakvalue = tweakbase;
-				wndView->AddMacViewUndo();
 				SetCapture();
 			}
 			else
@@ -449,7 +448,6 @@ namespace psycle {
 				int par = ConvertXYtoParam(point.x,point.y);
 				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
 				{
-					wndView->AddMacViewUndo();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo().Parameters[par]->DefValue);
 #else
@@ -505,7 +503,6 @@ namespace psycle {
 				visualtweakvalue = nv;
 				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
 				prevval=(int)(nv+0.5f);
-				wndView->AddMacViewUndo();
 				if (Global::pConfig->_RecordTweaks)
 				{
 					if (Global::pConfig->_RecordMouseTweaksSmooth)
@@ -565,7 +562,6 @@ namespace psycle {
 					CNewVal dlg(MachineIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
-						wndView->AddMacViewUndo();
 						_pMachine->SetParameter(tweakpar,(int)dlg.m_Value);
 					}
 					Invalidate(false);
@@ -641,7 +637,6 @@ namespace psycle {
 
 					float roffset = randsem*(float)dif;
 
-					wndView->AddMacViewUndo();
 				_pMachine->SetParameter(c,minran+int(roffset));
 			}
 			Invalidate(false);
@@ -663,7 +658,6 @@ namespace psycle {
 #else
 					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
 #endif
-					wndView->AddMacViewUndo();
 					_pMachine->SetParameter(c,dv);
 				}
 			}

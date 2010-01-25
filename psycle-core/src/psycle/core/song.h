@@ -365,18 +365,9 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 
 	//Fake. Just to compile. They need to go out
 	//{
-		unsigned char asdf[5];
-		unsigned char * _ppattern(int ps){ return asdf; }
-		unsigned char * _ptrack(int ps, int track){ return asdf; }
-		unsigned char * _ptrackline(int ps, int track, int line) { return asdf; }
-
 		bool _trackArmed[MAX_TRACKS];
 		bool _trackMuted[MAX_TRACKS];
 		int _trackArmedCount;
-
-		int playOrder[MAX_SONG_POSITIONS];
-		int playOrderSel[MAX_SONG_POSITIONS];
-		int playLength;
 
 		int patternLines[MAX_PATTERNS];
 		char patternName[MAX_PATTERNS][32];

@@ -653,11 +653,6 @@ void Song::clearMyData() {
 		_trackMuted[i]=false;
 	}
 	_trackArmedCount=0;
-	for (int i=0; i < MAX_SONG_POSITIONS; i++) {
-		playOrder[i]=0;
-		playOrderSel[i]=0;
-	}
-	playLength = 0;
 	for (int i=0; i < MAX_PATTERNS; i++ ){
 		patternLines[i]=64;
 		memset(patternName[i],0,32);

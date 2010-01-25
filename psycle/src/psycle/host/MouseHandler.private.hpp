@@ -141,7 +141,7 @@ namespace psycle {
 					if (( point.y >= pattern_view()->YOFFSET ) && (point.x >= pattern_view()->XOFFSET))
 					{
 						const int ttm = pattern_view()->tOff + (point.x-pattern_view()->XOFFSET)/pattern_view()->ROWWIDTH;
-						const int nl = projects_->active_project()->song().patternLines[projects_->active_project()->song().playOrder[pattern_view()->editPosition]];
+						const int nl = pattern_view()->pattern()->beats() * projects_->active_project()->beat_zoom();
 
 						pattern_view()->StartBlock(ttm,0,0);
 						pattern_view()->EndBlock(ttm,nl-1,8);

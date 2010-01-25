@@ -63,13 +63,8 @@ namespace psycle {
 			  CH(200),
 			  textLeftEdge(2),
 			  bmpDC(NULL),
-			  UndoMacCounter(0),
-			  UndoMacSaved(0)
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			  ,output_driver_(0),
-			  last_pos_(-1)
-#endif
-		{			
+			  output_driver_(0),
+			  last_pos_(-1) {			
 			for (int c=0; c<256; c++) { 
 				FLATSIZES[c]=8;
 			}	
@@ -946,9 +941,13 @@ namespace psycle {
 				}
 				else
 				{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+					// TODO
+#else
 					memset(Global::song().playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 					Global::song().playOrderSel[pattern_view()->editPosition] = true;
 					Repaint(draw_modes::cursor); 
+#endif
 				}
 			}
 		}
@@ -1224,30 +1223,8 @@ namespace psycle {
 		void CChildView::SetTitleBarText()
 		{
 			std::string titlename = "[" + Global::song().fileName;
-			/*
-			if(!(Global::song()._saved))
-			{
-				titlename+=" *";
-			}
-			else
-			*/ 
-			if(pattern_view()->pUndoList)
-			{
-				if (pattern_view()->UndoSaved != pattern_view()->pUndoList->counter)
-				{
-					titlename+=" *";
-				}
-			}
-			else if (UndoMacSaved != UndoMacCounter)
-			{
-				titlename+=" *";
-			}
-			else
-			{
-				if (pattern_view()->UndoSaved != 0)
-				{
-					titlename+=" *";
-				}
+			if (projects_->active_project()->cmd_manager()->UndoSize() != 0) {
+				titlename+=" *";			
 			}
 			// don't know how to access to the IDR_MAINFRAME String Title.
 			titlename += "] Psycle Modular Music Creation Studio (" PSYCLE__VERSION ")";
@@ -1335,25 +1312,15 @@ namespace psycle {
 		
 		void CChildView::OnConfigurationLoopplayback() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if (Player::singleton().loopEnabled()) {
 				Player::singleton().UnsetLoop();
-			}
-			else {
+			} else {
 				Player::singleton().setLoopSong();
 			}
-#else
-			Global::pPlayer->_loopSong = !Global::pPlayer->_loopSong;
-#endif
 		}
 
-		void CChildView::OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI) 
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void CChildView::OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI) {
 			pCmdUI->SetCheck(Player::singleton().loopEnabled());
-#else
-			pCmdUI->SetCheck(Global::pPlayer->_loopSong);
-#endif
 		}
 
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
@@ -1362,19 +1329,10 @@ namespace psycle {
 				machine_view_->UpdateVUs(devc);
 		}
 
-		void CChildView::AddMacViewUndo()
-		{
-			// i have not written the undo code yet for machine and instruments
-			// however, for now it at least tracks changes for save/new/open/close warnings
-			UndoMacCounter++;
-			SetTitleBarText();
-		}
-
 		//////////////////////////////////////////////////////////////////////
 		// Pattern Modifier functions ( Copy&paste , Transpose, ... )
 
-		void CChildView::OnPatCut()
-		{
+		void CChildView::OnPatCut() {
 			if (viewMode == view_modes::pattern) {
 				pattern_view()->patCut();
 			}
@@ -1387,41 +1345,31 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::OnPatPaste()
-		{
-			projects_->active_project()->cmd_manager()->ExecuteCommand(new PatPasteCommand(pattern_view()));
+		void CChildView::OnPatPaste() {
+			projects_->active_project()->cmd_manager()->ExecuteCommand(
+				new PatPasteCommand(pattern_view()));
 		}
 
-		void CChildView::OnPatMixPaste()
-		{
-			projects_->active_project()->cmd_manager()->ExecuteCommand(new PatPasteCommand(pattern_view(), true));
+		void CChildView::OnPatMixPaste() {
+			projects_->active_project()->cmd_manager()->ExecuteCommand(
+				new PatPasteCommand(pattern_view(), true));
 		}
 
-		void CChildView::OnPatDelete()
-		{
+		void CChildView::OnPatDelete() {
 			if (viewMode == view_modes::pattern) {
-				projects_->active_project()->cmd_manager()->ExecuteCommand(new PatDeleteCommand(pattern_view()));
+				projects_->active_project()->cmd_manager()->ExecuteCommand(
+					new PatDeleteCommand(pattern_view()));
 			}
 		}	
 
-		void CChildView::OnEditUndo() 
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void CChildView::OnEditUndo() {
 			if (projects_->active_project())
 				projects_->active_project()->cmd_manager()->Undo();
-#else
-			pattern_view()->OnEditUndo();
-#endif
 		}
 
-		void CChildView::OnEditRedo() 
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void CChildView::OnEditRedo() {
 			if (projects_->active_project())
 				projects_->active_project()->cmd_manager()->Redo();
-#else
-			pattern_view()->OnEditRedo();
-#endif
 		}
 
 	}	// namespace host

@@ -1,16 +1,12 @@
 #include "patternview.hpp"
 #include "MainFrm.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/core/player.h>
-	#include <psycle/core/song.h>
-	#include <psycle/core/machine.h>
-	using namespace psycle::core;
-#else
-	#include "Player.hpp"
-	#include "Song.hpp"
-	#include "Machine.hpp"
-#endif
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+#include <psycle/core/machine.h>
+
+using namespace psycle::core;
+
 #include "InputHandler.hpp"
 #include "Configuration.hpp"
 #include "SwingFillDlg.hpp"
@@ -82,10 +78,6 @@ using namespace helpers::math;
 			   isBlockCopied(false),
 			   blockNTracks(0),
 			   blockNLines(0),
-			   pUndoList(NULL),
-			   pRedoList(NULL),
-			   UndoCounter(0),
-			   UndoSaved(0),			
 			   patBufferLines(0),
 			   patBufferCopy(false),
 			   bFT2HomeBehaviour(true),
@@ -104,13 +96,7 @@ using namespace helpers::math;
 			MBStart.x=0;
 			MBStart.y=0;
 		}
-
-		PatternView::~PatternView()
-		{
-			KillRedo();
-			KillUndo();
-		}
-
+		
 		Song* PatternView::song() { 
 			return &main_->projects()->active_project()->song(); 
 		}
@@ -3736,8 +3722,7 @@ using namespace helpers::math;
 
 			if(bEditMode)
 			{ 
-				// write effect
-				const int ps = _ps();
+				// write effect				
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: Add line positioning code
 				int line = 0;
@@ -3768,12 +3753,10 @@ using namespace helpers::math;
 						}
 						return;
 					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
 				}
 				else
 				{
 					line = editcur.line;
-					toffset = _ptrackline(ps);
 				}
 
 				// build entry
@@ -3790,7 +3773,6 @@ using namespace helpers::math;
 						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweakeffect) && (pentry->note() != notecommands::tweakslide)))
 #endif
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->setMachine(entry.machine());
 						pentry->setCommand(entry.command());
 						pentry->setParameter(entry.parameter());
@@ -3840,7 +3822,6 @@ using namespace helpers::math;
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
-				const int ps = _ps();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: Add line positioning code
 				int line = 0;
@@ -3870,12 +3851,10 @@ using namespace helpers::math;
 						}
 						return;
 					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
 				}
 				else
 				{
 					line = editcur.line;
-					toffset = _ptrackline(ps);
 				}
 
 				// build entry
@@ -3892,7 +3871,6 @@ using namespace helpers::math;
 						|| ((pentry->note() != notecommands::tweak) && (pentry->note() != notecommands::tweakeffect) && (pentry->note() != notecommands::tweakslide)))
 #endif
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->setMachine(entry.machine());
 						pentry->setCommand(entry.command());
 						pentry->setParameter(entry.parameter());
@@ -3937,7 +3915,6 @@ using namespace helpers::math;
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
-				const int ps = _ps();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: Add line positioning code
 				int line = 0;
@@ -3967,12 +3944,10 @@ using namespace helpers::math;
 						}
 						return;
 					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
 				}
 				else
 				{
 					line = editcur.line;
-					toffset = _ptrackline(ps);
 				}
 
 				// build entry
@@ -3982,7 +3957,6 @@ using namespace helpers::math;
 					|| (pentry->command() != entry.command()) 
 					|| (pentry->parameter() != entry.parameter()))
 				{
-					AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 					pentry->setMachine(entry.machine());
 					pentry->setCommand(entry.command());
 					pentry->setParameter(entry.parameter());
@@ -4026,7 +4000,6 @@ using namespace helpers::math;
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
-				const int ps = _ps();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: Add line positioning code
 				int line = 0;
@@ -4048,20 +4021,14 @@ using namespace helpers::math;
 						if (pMachine)
 						{
 							// play
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							pMachine->Tick(editcur.track,entry);
-#else
-							pMachine->Tick(editcur.track,&entry);
-#endif
 						}
 						return;
 					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
 				}
 				else
 				{
 					line = editcur.line;
-					toffset = _ptrackline(ps);
 				}
 
 				// build entry
@@ -4078,7 +4045,6 @@ using namespace helpers::math;
 						|| (pentry->note() != notecommands::midicc))
 #endif
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->setMachine(entry.machine());
 						pentry->setCommand(entry.command());
 						pentry->setParameter(entry.parameter());
@@ -4123,7 +4089,6 @@ using namespace helpers::math;
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
-				const int ps = _ps();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: Add line positioning code
 				int line = 0;
@@ -4153,12 +4118,10 @@ using namespace helpers::math;
 						}
 						return;
 					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
 				}
 				else
 				{
 					line = editcur.line;
-					toffset = _ptrackline(ps);
 				}
 
 				// build entry
@@ -4166,7 +4129,6 @@ using namespace helpers::math;
 				if ((pentry->machine() != entry.machine()) 
 					|| (pentry->instrument() != entry.instrument()))
 				{
-					AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 					pentry->setMachine(entry.machine());
 					pentry->setInstrument(entry.instrument());
 
@@ -4199,7 +4161,6 @@ using namespace helpers::math;
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
-				const int ps = _ps();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: Add line positioning code
 				int line = 0;
@@ -4217,11 +4178,9 @@ using namespace helpers::math;
 					{	
 						return;
 					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
 				}
 				else
 				{
-					toffset = _ptrackline(ps);
 					line = editcur.line;
 				}
 
@@ -4235,7 +4194,6 @@ using namespace helpers::math;
 					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweakeffect) && (entry->note() != notecommands::tweakslide)))
 #endif
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->setMachine(machine);
 						entry->setCommand((value>>8)&255);
 						entry->setParameter(value&255);
@@ -4257,7 +4215,6 @@ using namespace helpers::math;
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
-				const int ps = _ps();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: Add line positioning code
 				int line = 0;
@@ -4275,11 +4232,9 @@ using namespace helpers::math;
 					{	
 						return;
 					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
 				}
 				else
 				{
-					toffset = _ptrackline(ps);
 					line = editcur.line;
 				}
 
@@ -4293,7 +4248,6 @@ using namespace helpers::math;
 					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweakeffect) && (entry->note() != notecommands::tweakslide)))
 #endif
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->setMachine(machine);
 						entry->setCommand((value>>8)&255);
 						entry->setParameter(value&255);
@@ -4876,29 +4830,25 @@ using namespace helpers::math;
 
 		void PatternView::EnterNoteoffAny()
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 			if (child_view()->viewMode == view_modes::pattern)
-			{
-				const int ps = _ps();
-				unsigned char * toffset;
-				
+			{			
 				// realtime note entering
 				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
 				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 					//todo: Add line positioning code
-					toffset = _ptrack(ps)+(0*MULTIPLY);
-#else
+					// toffset = _ptrack(ps)+(0*MULTIPLY);
 					toffset = _ptrack(ps)+(Global::pPlayer->_lineCounter*MULTIPLY);
-#endif
 				}
 				else
 				{
-					toffset = _ptrackline(ps);
+					// toffset = _ptrackline(ps);
 				}
 
 				// build entry
-				PatternEvent *entry = (PatternEvent*) toffset;
-				AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				// PatternEvent *entry = (PatternEvent*) toffset; 
 				entry->setNote(notecommands::release);
 
 				Global::pInputHandler->notetrack[editcur.track]=notecommands::release;
@@ -4914,19 +4864,16 @@ using namespace helpers::math;
 				Global::pInputHandler->bDoingSelection = false;
 				Repaint(draw_modes::data);
 			}
+#endif
 		}
 
 		bool PatternView::MSBPut(int nChar)
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-
 			int sValue = -1;
 			if	(	nChar>='0'		&&	nChar<='9')			{ sValue = nChar - '0'; }
 			else if(nChar>=VK_NUMPAD0&&nChar<=VK_NUMPAD9)	{ sValue = nChar - VK_NUMPAD0; }
 			else if(nChar>='A'		&&	nChar<='F')			{ sValue = nChar - 'A' + 10; }
 			else											{ return false; }
-
-// 			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 			int line = editcur.line;
 			psycle::core::Pattern::iterator it = GetEventOnCursor();
@@ -4998,39 +4945,7 @@ using namespace helpers::math;
 				ev.set_track(editcur.track);				
 			}
 
-#else
-			// UNDO CODE MSB PUT
-			// init
-			const int ps = _ps();
-			unsigned char * toffset = _ptrackline(ps) + (editcur.col+1)/2;
-
-			int oldValue = *toffset;	
-			int sValue = -1;
-
-			if	(	nChar>='0'		&&	nChar<='9')			{ sValue = nChar - '0'; }
-			else if(nChar>=VK_NUMPAD0&&nChar<=VK_NUMPAD9)	{ sValue = nChar - VK_NUMPAD0; }
-			else if(nChar>='A'		&&	nChar<='F')			{ sValue = nChar - 'A' + 10; }
-			else											{ return false; }
-
-			if (editcur.col < 5 && oldValue == 255)	{ oldValue = 0; }
-
-			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-
-			switch ((editcur.col+1)%2)
-			{
-			case 0:	
-				*toffset = (oldValue&0xF)+(sValue<<4); 
-				break;
-			
-			case 1:	
-				*toffset = (oldValue&0xF0)+(sValue); 
-				break;
-			}
-
-#endif
-
-			if (Global::pConfig->_cursorAlwaysDown)
-			{
+			if (Global::pConfig->_cursorAlwaysDown) {
 				AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
 			}
 			else
@@ -5263,6 +5178,8 @@ using namespace helpers::math;
 
 		void PatternView::PlayCurrentRow(void)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 			if (Global::pConfig->_followSong)
 			{
 				bScrollDetatch=false;
@@ -5277,20 +5194,19 @@ using namespace helpers::math;
 					{
 						if ( !pMachine->_mute)	
 						{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 							pMachine->Tick(i,*pEntry);
-#else
-							pMachine->Tick(i,pEntry);
-#endif
 						}
 					}
 				}
 				pEntry++;
 			}
+#endif
 		}
 
 		void PatternView::PlayCurrentNote(void)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 			if (Global::pConfig->_followSong)
 			{
 				bScrollDetatch=false;
@@ -5304,14 +5220,11 @@ using namespace helpers::math;
 				{
 					if ( !pMachine->_mute)	
 					{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						pMachine->Tick(editcur.track,*pEntry);
-#else
-						pMachine->Tick(editcur.track,pEntry);
-#endif
 					}
 				}
 			}
+#endif
 		}
 
 
@@ -5921,6 +5834,8 @@ using namespace helpers::math;
 
 		void PatternView::SwitchBlock(int destt, int destl)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 			if(blockSelected || isBlockCopied)// With shift+arrows, moving the cursor unselects the block, so in this case it is a three step
 			{									// operation: select, copy, switch, instead of select, switch.
 				int ps=song()->playOrder[editPosition];
@@ -5942,8 +5857,6 @@ using namespace helpers::math;
 				int stopL=destl+blockNLines;
 
 				// We backup the data of the whole block.
-				AddUndo(ps,0,0,song()->tracks(),nl,editcur.track,editcur.line,editcur.col,editPosition);
-
 				// Do the blocks overlap? Then take care of moving the appropiate data.
 				if (abs(blockLastOrigin.start.track-destt) < blockNTracks	&& abs(blockLastOrigin.start.line-destl) < blockNLines )
 				{
@@ -6072,12 +5985,15 @@ using namespace helpers::math;
 				NewPatternDraw(0,song()->tracks()-1,0,nl-1);
 				Repaint(draw_modes::data);
 			}
+#endif
 		}
 
 
 		void PatternView::SaveBlock(FILE* file)
 		{
-
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+#else
 			int ps = _ps();
 			int nlines = song()->patternLines[ps];
 			int ntracks = song()->tracks();
@@ -6093,10 +6009,14 @@ using namespace helpers::math;
 					fwrite(offset_source,sizeof(char),EVENT_SIZE,file);
 				}
 			}
+#endif
 		}
 
 		void PatternView::LoadBlock(FILE* file)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+#else
 			int nt, nl;
 			fread(&nt,sizeof(int),1,file);
 			fread(&nl,sizeof(int),1,file);
@@ -6136,10 +6056,14 @@ using namespace helpers::math;
 				}
 				Repaint(draw_modes::pattern);
 			}
+#endif
 		}
 
 		void PatternView::DoubleLength()
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+#else
 			// UNDO CODE DOUBLE LENGTH
 			unsigned char *toffset;
 			PatternEvent blank;
@@ -6179,10 +6103,14 @@ using namespace helpers::math;
 
 			NewPatternDraw(st,et,sl,el);
 			Repaint(draw_modes::data);
+#endif
 		}
 
 		void PatternView::HalveLength()
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+#else
 			// UNDO CODE HALF LENGTH
 			unsigned char *toffset;
 			int st, et, sl, el,nl;
@@ -6226,43 +6154,18 @@ using namespace helpers::math;
 
 			NewPatternDraw(st,et,sl,nl+sl);
 			Repaint(draw_modes::data);
+#endif
 		}
 
 
 		void PatternView::BlockTranspose(int trp)
 		{
-
-			// UNDO CODE TRANSPOSE
-			if ( blockSelected == true ) 
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (blockSelected == true) {
 				pattern()->Transpose(trp, 
 									 line_pos(blockSel.start.line, true),
 								     line_pos(blockSel.end.line+1, true),
 								     blockSel.start.track,
 								     blockSel.end.track+1);
-#else
-				int ps = _ps();
-
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
-
-				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
-				{
-					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
-					{
-						unsigned char *toffset=_ptrackline(ps,t,l);
-						
-						int note=*(toffset);
-					
-						if(note<notecommands::release)
-						{
-							note+=trp;
-							if(note<0) note=0; else if(note>119) note=119;
-							*toffset=static_cast<unsigned char>(note);
-						}
-					}
-				}
-#endif
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 				Repaint(draw_modes::data);
 			}
@@ -6271,37 +6174,12 @@ using namespace helpers::math;
 
 		void PatternView::BlockGenChange(int x)
 		{
-			// UNDO CODE BLOCK GENERATOR CHANGE
-			if ( blockSelected == true ) 
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (blockSelected == true) {
 				pattern()->ChangeMac(x, 
 									 line_pos(blockSel.start.line, true),
 								     line_pos(blockSel.end.line+1, true),
 								     blockSel.start.track,
 								     blockSel.end.track+1);
-#else
-				int ps = _ps();
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
-
-				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
-				{
-					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
-					{
-						unsigned char *toffset=_ptrackline(ps,t,l)+2;
-						
-						unsigned char gen=*(toffset);
-						
-						if ( gen != 255 )
-						{
-							gen=x;
-							if(gen<0)gen=0;
-							if(gen>=MAX_MACHINES)gen=MAX_MACHINES-1;
-							*toffset=gen;
-						}
-					}
-				}
-#endif
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 				Repaint(draw_modes::data);
 			}
@@ -6309,39 +6187,12 @@ using namespace helpers::math;
 
 		void PatternView::BlockInsChange(int x)
 		{
-			// UNDO CODE BLOCK INS CHANGE
-			if ( blockSelected == true ) 
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (blockSelected == true) {
 				pattern()->ChangeInst(x, 
 									  line_pos(blockSel.start.line, true),
 								      line_pos(blockSel.end.line+1, true),
 								      blockSel.start.track,
 								      blockSel.end.track+1);
-#else
-
-				const int ps=_ps();
-
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
-
-				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
-				{
-					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
-					{
-						unsigned char *toffset=_ptrackline(ps,t,l);
-						unsigned char ins=*(toffset+1);
-						unsigned char mac=*(toffset+2);
-					
-						if (mac != 255 )
-						{
-							ins=x;
-							if(ins<0)ins=0;
-							if(ins>255)ins=255;
-							*(toffset+1)=ins;
-						}
-					}
-				}
-#endif
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 				Repaint(draw_modes::data);
 			}
@@ -6349,6 +6200,9 @@ using namespace helpers::math;
 
 		void PatternView::BlockParamInterpolate(int *points, int twktype)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+#else
 			if (blockSelected)
 			{
 				const int ps = _ps();
@@ -6366,11 +6220,7 @@ using namespace helpers::math;
 				const float addvalue = float(endvalue - initvalue) / (blockSel.end.line - blockSel.start.line);
 				const int firstrow = (blockSel.start.track*EVENT_SIZE)+(blockSel.start.line*MULTIPLY);
 				int displace = firstrow;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweak_slide || toffset[firstrow] == notecommands::midi_cc || twktype != notecommands::empty)
-#else
-				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide || toffset[firstrow] == notecommands::midicc || twktype != notecommands::empty)
-#endif
 				{
 					unsigned char note = (twktype != notecommands::empty)?twktype:toffset[firstrow];
 					unsigned char aux = (twktype != notecommands::empty)?song()->auxcolSelected:toffset[firstrow+1];
@@ -6400,156 +6250,17 @@ using namespace helpers::math;
 						displace+=MULTIPLY;
 					}
 				}
-				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
-				Repaint(draw_modes::data);
-			}
+#endif
+			NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
+			Repaint(draw_modes::data);
 		}
 	
-		void PatternView::KillRedo()
-		{
-			while (pRedoList)
-			{
-				SPatternUndo* pTemp = pRedoList->pPrev;
-				delete (pRedoList->pData);
-				delete (pRedoList);
-				pRedoList = pTemp;
-			}
-		}
-
-		void PatternView::KillUndo()
-		{
-			while (pUndoList)
-			{
-				SPatternUndo* pTemp = pUndoList->pPrev;
-				delete (pUndoList->pData);
-				delete (pUndoList);
-				pUndoList = pTemp;
-			}
-			UndoCounter = 0;
-			UndoSaved = 0;
-
-		//	SetTitleBarText();
-		}
-
-		void PatternView::AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-			// fill data
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
-			memcpy(pNew->pData, song()->playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_SEQUENCE;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-
-			if (bWipeRedo)
-			{
-				KillRedo();
-				UndoCounter++;
-				pNew->counter = UndoCounter;
-			}
-			else
-			{
-				pNew->counter = counter;
-			}
-			child_view()->SetTitleBarText();
-		}
-
-		void PatternView::AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-
-			// fill data
-			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
-			pNew->pData = pData;
-			pNew->pattern = pattern;
-			pNew->x = x;
-			pNew->y = y;
-			if (tracks+x > song()->tracks())
-			{
-				tracks = song()->tracks()-x;
-			}
-			pNew->tracks = tracks;
-						
-			const int nl = song()->patternLines[pattern];
-			
-			if (lines+y > nl)
-			{
-				lines = nl-y;
-			}
-			pNew->lines = lines;
-			pNew->type = UNDO_PATTERN;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-
-			for (int t=x;t<x+tracks;t++)
-			{
-				for (int l=y;l<y+lines;l++)
-				{
-					unsigned char *offset_source=_ptrackline(pattern,t,l);
-					
-					memcpy(pData,offset_source,EVENT_SIZE);
-					pData+=EVENT_SIZE;
-				}
-			}
-			if (bWipeRedo)
-			{
-				KillRedo();
-				UndoCounter++;
-				pNew->counter = UndoCounter;
-			}
-			else
-			{
-				pNew->counter = counter;
-			}
-			child_view()->SetTitleBarText();
-		}
-
-		void PatternView::AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-			// fill data
-			pNew->pData = NULL;
-			pNew->pattern = pattern;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_LENGTH;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-
-			if (bWipeRedo)
-			{
-				KillRedo();
-				UndoCounter++;
-				pNew->counter = UndoCounter;
-			}
-			else
-			{
-				pNew->counter = counter;
-			}
-			child_view()->SetTitleBarText();
-		}
 
 		void PatternView::SelectMachineUnderCursor()
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+#else
 			unsigned char *toffset=_ptrackline();
 
 			PatternEvent *entry = (PatternEvent*) toffset;
@@ -6558,7 +6269,7 @@ using namespace helpers::math;
 			main()->ChangeGen(song()->seqBus);
 			if ( entry->instrument() != 255 ) song()->auxcolSelected = entry->instrument();
 			main()->ChangeIns(song()->auxcolSelected);
-
+#endif
 		}
 
 		void PatternView::SelectNextTrack()
@@ -6720,7 +6431,7 @@ using namespace helpers::math;
 				{
 					oldm.track=ttm;
 
-					int plines = song()->patternLines[_ps()];
+					const int plines = pattern()->beats() * project()->beat_zoom();
 					oldm.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
 					if ( oldm.line >= plines ) { oldm.line = plines - 1; }
 					else if ( oldm.line < 0 ) oldm.line = 0;
@@ -6939,7 +6650,7 @@ using namespace helpers::math;
 					// scrolling
 					if (abs(point.y - MBStart.y) > ROWHEIGHT)
 					{
-						int nlines = song()->patternLines[_ps()];
+						const int nlines = pattern()->beats() * project()->beat_zoom();
 						int delta = (point.y - MBStart.y)/ROWHEIGHT;
 						int nPos = lOff - delta;
 						if (nPos > lOff )
@@ -7545,7 +7256,7 @@ using namespace helpers::math;
 				}
 				if(bFT2HomeBehaviour)
 				{
-					editcur.line=song()->patternLines[song()->playOrder[editPosition]]-1;
+					editcur.line= pattern()->beats() * project()->beat_zoom() -1;
 				}
 				else
 				{		
@@ -7554,7 +7265,7 @@ using namespace helpers::math;
 					else if ( editcur.track != song()->tracks()-1 ) 
 						editcur.track = song()->tracks()-1;
 					else 
-						editcur.line = song()->patternLines[song()->playOrder[editPosition]]-1;
+						editcur.line= pattern()->beats() * project()->beat_zoom() -1;
 				}
 				if ( bDoingSelection )
 				{
@@ -7612,7 +7323,7 @@ using namespace helpers::math;
 
 			case cdefSelectAll:
 				{
-					const int nl = song()->patternLines[song()->playOrder[editPosition]];
+					const int nl = pattern()->beats() * project()->beat_zoom();
 					StartBlock(0,0,0);
 					EndBlock(song()->tracks()-1,nl-1,8);
 				}
@@ -7620,7 +7331,7 @@ using namespace helpers::math;
 				
 			case cdefSelectCol:
 				{
-					const int nl = song()->patternLines[song()->playOrder[editPosition]];
+					const int nl = pattern()->beats() * project()->beat_zoom();
 					StartBlock(editcur.track,0,0);
 					EndBlock(editcur.track,nl-1,8);
 				}
@@ -7629,7 +7340,7 @@ using namespace helpers::math;
 			case cdefSelectBar:
 			//selects 4*tpb lines, 8*tpb lines 16*tpb lines, etc. up to number of lines in pattern
 				{
-					const int nl = song()->patternLines[song()->playOrder[editPosition]];			
+					const int nl = pattern()->beats() * project()->beat_zoom();		
 								
 					bScrollDetatch=false;
 					ChordModeOffs = 0;
@@ -7774,13 +7485,13 @@ using namespace helpers::math;
 			case cdefUndo:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;
-				OnEditUndo();
+				project()->cmd_manager()->Undo();
 				break;
 
 			case cdefRedo:
 				bScrollDetatch=false;
 				ChordModeOffs = 0;
-				OnEditRedo();
+				project()->cmd_manager()->Redo();
 				break;
 			}
 		}
@@ -7806,547 +7517,23 @@ using namespace helpers::math;
 			main()->StatusBarIdle();
 		}
 
-		void PatternView::OnEditRedo() 
-		{
-			if (pRedoList)
-			{
-				switch (pRedoList->type)
-				{
-				case UNDO_PATTERN:
-					if(child_view()->viewMode == view_modes::pattern)// && bEditMode)
-					{
-						AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
-						// do redo
-						unsigned char* pData = pRedoList->pData;
-
-						for (int t=pRedoList->x;t<pRedoList->x+pRedoList->tracks;t++)
-						{
-							for (int l=pRedoList->y;l<pRedoList->y+pRedoList->lines;l++)
-							{
-								unsigned char *offset_source=_ptrackline(pRedoList->pattern,t,l);
-
-								
-								memcpy(offset_source,pData,EVENT_SIZE);
-								pData+=EVENT_SIZE;
-							}
-						}
-						// set up cursor
-						editcur.track = pRedoList->edittrack;
-						editcur.line = pRedoList->editline;
-						editcur.col = pRedoList->editcol;
-						if (pRedoList->seqpos == editPosition)
-						{
-							// display changes
-							NewPatternDraw(pRedoList->x,pRedoList->x+pRedoList->tracks,pRedoList->y,pRedoList->y+pRedoList->lines);
-							Repaint(draw_modes::data);
-						}
-						else
-						{
-							editPosition = pRedoList->seqpos;
-							main()->m_wndSeq.UpdatePlayOrder(true);
-							Repaint(draw_modes::pattern);
-							
-						}
-						// delete redo from list
-						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete (pRedoList->pData);
-						delete (pRedoList);
-						pRedoList = pTemp;
-					}
-					break;
-				case UNDO_LENGTH:
-					if(child_view()->viewMode == view_modes::pattern)// && bEditMode)
-					{
-						AddUndoLength(pRedoList->pattern,song()->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
-						// do undo
-						song()->patternLines[pRedoList->pattern]=pRedoList->lines;
-						// set up cursor
-						editcur.track = pRedoList->edittrack;
-						editcur.line = pRedoList->editline;
-						editcur.col = pRedoList->editcol;
-						if (pRedoList->seqpos != editPosition)
-						{
-							editPosition = pRedoList->seqpos;
-							main()->m_wndSeq.UpdatePlayOrder(true);
-						}
-						// display changes
-						Repaint(draw_modes::pattern);
-						
-						// delete redo from list
-						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete (pRedoList->pData);
-						delete (pRedoList);
-						pRedoList = pTemp;
-						break;
-					}
-				case UNDO_SEQUENCE:
-					AddUndoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
-					// do undo
-					memcpy(song()->playOrder, pRedoList->pData, MAX_SONG_POSITIONS*sizeof(char));
-					song()->playLength = pRedoList->lines;
-					// set up cursor
-					editcur.track = pRedoList->edittrack;
-					editcur.line = pRedoList->editline;
-					editcur.col = pRedoList->editcol;
-					editPosition = pRedoList->seqpos;
-					main()->m_wndSeq.UpdatePlayOrder(true);
-					main()->m_wndSeq.UpdateSequencer();
-					// display changes
-					Repaint(draw_modes::pattern);
-					
-					{
-						// delete redo from list
-						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete (pRedoList->pData);
-						delete (pRedoList);
-						pRedoList = pTemp;
-					}
-					break;
-				case UNDO_SONG:
-					AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
-					// do undo
-					unsigned char * pData = pRedoList->pData;
-					memcpy(song()->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
-					pData += MAX_SONG_POSITIONS;
-					unsigned char count = *pData;
-					pData += sizeof(count);
-					for (int i = 0; i < count; i++)
-					{
-						unsigned char index = *pData;
-						pData += sizeof(index);
-						unsigned char* pWrite = _ppattern(index);
-
-						memcpy(pWrite,pData,MULTIPLY2);
-						pData+= MULTIPLY2;
-					}
-
-					// set up cursor
-					editcur.track = pRedoList->edittrack;
-					editcur.line = pRedoList->editline;
-					editcur.col = pRedoList->editcol;
-					editPosition = pRedoList->seqpos;
-					main()->m_wndSeq.UpdatePlayOrder(true);
-					main()->m_wndSeq.UpdateSequencer();
-					// display changes
-					Repaint(draw_modes::pattern);
-					
-					{
-						// delete redo from list
-						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete (pRedoList->pData);
-						delete (pRedoList);
-						pRedoList = pTemp;
-					}
-					break;
-				}
-				child_view()->SetTitleBarText();
-			}
-		}
-
-		void PatternView::AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-			// fill data
-			// count used patterns
-			unsigned short count = 0;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			//todo: add proper undo code
-#else
-			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
-			{
-				if (song()->ppPatternData[i])
-				{
-					count++;
-				}
-			}
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2];
-			unsigned char *pWrite=pNew->pData;
-			memcpy(pWrite, song()->playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pWrite+=MAX_SONG_POSITIONS*sizeof(char);
-
-			memcpy(pWrite, &count, sizeof(count));
-			pWrite+=sizeof(count);
-
-			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
-			{
-				if (song()->ppPatternData[i])
-				{
-					memcpy(pWrite, &i, sizeof(i));
-					pWrite+=sizeof(i);
-					memcpy(pWrite, song()->ppPatternData[i], MULTIPLY2);
-					pWrite+=MULTIPLY2;
-				}
-			}
-#endif
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = song()->playLength;
-			pNew->type = UNDO_SONG;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-
-			if (bWipeRedo)
-			{
-				KillRedo();
-				UndoCounter++;
-				pNew->counter = UndoCounter;
-			}
-			else
-			{
-				pNew->counter = counter;
-			}
-			child_view()->SetTitleBarText();
-		}
-
-		void PatternView::OnEditUndo() 
-		{
-			if (pUndoList)
-			{
-				switch (pUndoList->type)
-				{
-				case UNDO_PATTERN:
-					if(child_view()->viewMode == view_modes::pattern)// && bEditMode)
-					{
-						AddRedo(pUndoList->pattern,pUndoList->x,pUndoList->y,pUndoList->tracks,pUndoList->lines,editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
-						// do undo
-						unsigned char* pData = pUndoList->pData;
-
-						for (int t=pUndoList->x;t<pUndoList->x+pUndoList->tracks;t++)
-						{
-							for (int l=pUndoList->y;l<pUndoList->y+pUndoList->lines;l++)
-							{
-								unsigned char *offset_source=_ptrackline(pUndoList->pattern,t,l);
-								
-								memcpy(offset_source,pData,EVENT_SIZE);
-								pData+=EVENT_SIZE;
-							}
-						}
-						// set up cursor
-						editcur.track = pUndoList->edittrack;
-						editcur.line = pUndoList->editline;
-						editcur.col = pUndoList->editcol;
-						if (pUndoList->seqpos == editPosition)
-						{
-							// display changes
-							NewPatternDraw(pUndoList->x,pUndoList->x+pUndoList->tracks,pUndoList->y,pUndoList->y+pUndoList->lines);
-							Repaint(draw_modes::data);
-						}
-						else
-						{
-							editPosition = pUndoList->seqpos;
-							main()->m_wndSeq.UpdatePlayOrder(true);
-							Repaint(draw_modes::pattern);
-							
-						}
-						// delete undo from list
-						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete (pUndoList->pData);
-						delete (pUndoList);
-						pUndoList = pTemp;
-					}
-					break;
-				case UNDO_LENGTH:
-					if(child_view()->viewMode == view_modes::pattern)// && bEditMode)
-					{
-						AddRedoLength(pUndoList->pattern, song()->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
-						// do undo
-						song()->patternLines[pUndoList->pattern]=pUndoList->lines;
-						// set up cursor
-						editcur.track = pUndoList->edittrack;
-						editcur.line = pUndoList->editline;
-						editcur.col = pUndoList->editcol;
-						if (pUndoList->seqpos != editPosition)
-						{
-							editPosition = pUndoList->seqpos;
-							main()->m_wndSeq.UpdatePlayOrder(true);
-						}
-						// display changes
-						Repaint(draw_modes::pattern);
-						
-						// delete undo from list
-						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete (pUndoList->pData);
-						delete (pUndoList);
-						pUndoList = pTemp;
-						break;
-					}
-				case UNDO_SEQUENCE:
-					AddRedoSequence(song()->playLength,editcur.track,editcur.line,editcur.col,editPosition,pUndoList->counter);
-					// do undo
-					memcpy(song()->playOrder, pUndoList->pData, MAX_SONG_POSITIONS*sizeof(char));
-					song()->playLength = pUndoList->lines;
-					// set up cursor
-					editcur.track = pUndoList->edittrack;
-					editcur.line = pUndoList->editline;
-					editcur.col = pUndoList->editcol;
-					editPosition = pUndoList->seqpos;
-					main()->m_wndSeq.UpdatePlayOrder(true);
-					main()->m_wndSeq.UpdateSequencer();
-					// display changes
-					Repaint(draw_modes::pattern);
-					
-					// delete undo from list
-					{
-						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete (pUndoList->pData);
-						delete (pUndoList);
-						pUndoList = pTemp;
-					}
-					break;
-				case UNDO_SONG:
-					AddRedoSong(editcur.track,editcur.line,editcur.col,editPosition,pUndoList->counter);
-					// do undo
-					unsigned char * pData = pUndoList->pData;
-					memcpy(song()->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
-					pData += MAX_SONG_POSITIONS;
-					unsigned char count = *pData;
-					pData += sizeof(count);
-					for (int i = 0; i < count; i++)
-					{
-						unsigned char index = *pData;
-						pData += sizeof(index);
-						unsigned char* pWrite = _ppattern(index);
-
-						memcpy(pWrite,pData,MULTIPLY2);
-						pData+= MULTIPLY2;
-					}
-					song()->playLength = pUndoList->lines;
-					// set up cursor
-					editcur.track = pUndoList->edittrack;
-					editcur.line = pUndoList->editline;
-					editcur.col = pUndoList->editcol;
-					editPosition = pUndoList->seqpos;
-					main()->m_wndSeq.UpdatePlayOrder(true);
-					main()->m_wndSeq.UpdateSequencer();
-					// display changes
-					Repaint(draw_modes::pattern);
-					
-					// delete undo from list
-					{
-						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete (pUndoList->pData);
-						delete (pUndoList);
-						pUndoList = pTemp;
-					}
-					break;
-
-				}
-				child_view()->SetTitleBarText();
-			}
-		}
-
-		void PatternView::AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			// count used patterns
-			unsigned char count = 0;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			///todo: add proper redo code
-#else
-			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
-			{
-				if (song()->ppPatternData[i])
-				{
-					count++;
-				}
-			}
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2];
-			unsigned char *pWrite=pNew->pData;
-			memcpy(pWrite, song()->playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pWrite+=MAX_SONG_POSITIONS*sizeof(char);
-
-			memcpy(pWrite, &count, sizeof(count));
-			pWrite+=sizeof(count);
-
-			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
-			{
-				if (song()->ppPatternData[i])
-				{
-					memcpy(pWrite, &i, sizeof(i));
-					pWrite+=sizeof(i);
-					memcpy(pWrite, song()->ppPatternData[i], MULTIPLY2);
-					pWrite+=MULTIPLY2;
-				}
-			}
-#endif
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = song()->playLength;
-			pNew->type = UNDO_SONG;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
-		}
-
-		void PatternView::AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
-			memcpy(pNew->pData, song()->playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_SEQUENCE;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
-		}
-
-
-		void PatternView::AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
-			pNew->pData = pData;
-			pNew->pattern = pattern;
-			pNew->x = x;
-			pNew->y = y;
-			if (tracks+x > song()->tracks())
-			{
-				tracks = song()->tracks()-x;
-			}
-			pNew->tracks = tracks;
-			const int nl = song()->patternLines[pattern];
-			if (lines+y > nl)
-			{
-				lines = nl-y;
-			}
-			pNew->tracks = tracks;
-			pNew->lines = lines;
-			pNew->type = UNDO_PATTERN;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
-
-			for (int t=x;t<x+tracks;t++)
-			{
-				for (int l=y;l<y+lines;l++)
-				{
-					unsigned char *offset_source=_ptrackline(pattern,t,l);
-					
-					memcpy(pData,offset_source,EVENT_SIZE);
-					pData+=EVENT_SIZE;
-				}
-			}
-		}
-
-		void PatternView::AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			pNew->pData = NULL;
-			pNew->pattern = pattern;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_LENGTH;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
-		}
 
 		void PatternView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo shouldnt be with a timer ..
 			pCmdUI->Enable(project()->cmd_manager()->UndoSize() != 0);
-#else
-			if(pUndoList) 
-			{
-				switch (pUndoList->type)
-				{
-				case UNDO_SEQUENCE:
-					pCmdUI->Enable(TRUE);
-					pCmdUI->SetText("Undo");
-					break;
-				default:
-					if(child_view()->viewMode == view_modes::pattern)// && bEditMode)
-					{
-						pCmdUI->Enable(TRUE);
-						pCmdUI->SetText("Undo");
-					}
-					else
-					{
-						pCmdUI->Enable(FALSE);
-						pCmdUI->SetText("Undo in Pattern View");
-					}
-					break;
-				}
-			}
-			else
-			{
-				pCmdUI->SetText("Undo");
-				pCmdUI->Enable(FALSE);
-			}
-#endif
 		}
 
 		void PatternView::OnUpdateRedo(CCmdUI* pCmdUI)
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo shouldnt be with a timer ..
 			pCmdUI->Enable(project()->cmd_manager()->RedoSize() != 0);
-#else
-			if(pRedoList) 
-			{
-				switch (pRedoList->type)
-				{
-				case UNDO_SEQUENCE:
-					pCmdUI->Enable(TRUE);
-					pCmdUI->SetText("Redo");
-					break;
-				default:
-					if(child_view()->viewMode == view_modes::pattern)// && bEditMode)
-					{
-						pCmdUI->Enable(TRUE);
-						pCmdUI->SetText("Redo");
-					}
-					else
-					{
-						pCmdUI->Enable(FALSE);
-						pCmdUI->SetText("Redo in Pattern View");
-					}
-					break;
-				}
-			}
-			else
-			{
-				pCmdUI->Enable(FALSE);
-				pCmdUI->SetText("Redo");
-			}
-#endif
 		}
 
 		void PatternView::ShowSwingFillDlg(bool bTrackMode)
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#else
 			int st = song()->BeatsPerMin();
 			static int sw = 2;
 			static float sv = 13.0f;
@@ -8430,19 +7617,15 @@ using namespace helpers::math;
 					Repaint(draw_modes::data);
 				}
 			}
+#endif
 		}
 
 		void PatternView::ShowPatternDlg(void)
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CPatDlg dlg(parent_, pattern());
-#else
-			CPatDlg dlg(parent_);
-#endif
-			int patNum = song()->playOrder[editPosition];
-			int nlines = song()->patternLines[patNum];
+			int nlines = pattern()->beats() * project()->beat_zoom();
 			char name[32];
-			std::strcpy(name,song()->patternName[patNum]);
+			std::strcpy(name,pattern()->name().c_str());
 
 			dlg.patLines= nlines;
 			std::strcpy(dlg.patName,name);
@@ -8450,7 +7633,6 @@ using namespace helpers::math;
 			
 			if (dlg.DoModal() == IDOK)
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				double old_len = pattern()->beats();
 				psycle::core::SequenceLine* line = *song()->patternSequence().begin()+1;
 				psycle::core::SequenceLine::iterator it = line->find(main()->m_wndSeq.selected_entry());
@@ -8460,8 +7642,6 @@ using namespace helpers::math;
 						line->moveEntries(it->second, pattern()->beats() - old_len);
 					}
 				}
-#endif
-
 				if ( nlines != dlg.patLines )
 				{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -8480,7 +7660,7 @@ using namespace helpers::math;
 				}
 				else if ( strcmp(name,dlg.patName) != 0 )
 				{
-					std::strcpy(song()->patternName[patNum],dlg.patName);
+					// std::strcpy(song()->patternName[patNum],dlg.patName);
 					main()->m_wndSeq.UpdatePlayOrder(true);
 					main()->m_wndSeq.UpdateSequencer();
 					//Repaint(draw_modes::patternHeader);
@@ -8488,33 +7668,31 @@ using namespace helpers::math;
 			}
 		}
 
-		void PatternView::ShowTransformPatternDlg(void)
-		{
+		void PatternView::ShowTransformPatternDlg() {
 			CTransformPatternDlg dlg(this);
-
-			if (dlg.DoModal() == IDOK)
-			{
-
+			if (dlg.DoModal() == IDOK){
 			}
 		}
 
-		void PatternView::OnPopMixpaste()
-		{
-			project()->cmd_manager()->ExecuteCommand(new PasteBlockCommand(this, editcur.track, editcur.line, false));
+		void PatternView::OnPopMixpaste() {
+			project()->cmd_manager()->ExecuteCommand(
+				new PasteBlockCommand(this, editcur.track, editcur.line, false));
 		}
 
-		void PatternView::OnPopBlockswitch()
-		{
+		void PatternView::OnPopBlockswitch() {
 			SwitchBlock(editcur.track,editcur.line);
 		}
 
-		void PatternView::OnPopPaste()
-		{
-			project()->cmd_manager()->ExecuteCommand(new PasteBlockCommand(this, editcur.track, editcur.line, false));
+		void PatternView::OnPopPaste() {
+			project()->cmd_manager()->ExecuteCommand(
+				new PasteBlockCommand(this, editcur.track, editcur.line, false));
 		}
 
 		void PatternView::OnPopInterpolateCurve()
 		{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			// todo
+#else
 			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,song()->LinesPerBeat());
 			
 			int *valuearray = new int[blockSel.end.line-blockSel.start.line+1];
@@ -8531,29 +7709,21 @@ using namespace helpers::math;
 			}
 			unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,blockSel.start.line);
 			if ( *offset_target == notecommands::tweak ) dlg.AssignInitialValues(valuearray,0);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 			else if ( *offset_target == notecommands::tweak_slide ) dlg.AssignInitialValues(valuearray,1);
 			else if ( *offset_target == notecommands::midi_cc ) dlg.AssignInitialValues(valuearray,2);
-#else
-			else if ( *offset_target == notecommands::tweakslide ) dlg.AssignInitialValues(valuearray,1);
-			else if ( *offset_target == notecommands::midicc ) dlg.AssignInitialValues(valuearray,2);
-#endif
 			else dlg.AssignInitialValues(valuearray,-1);
 			
 			if (dlg.DoModal() == IDOK )
 			{
 				int twktype(notecommands::empty);
 				if ( dlg.kftwk == 0 ) twktype = notecommands::tweak;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweak_slide;
 				else if ( dlg.kftwk == 2 ) twktype = notecommands::midi_cc;
-#else
-				else if ( dlg.kftwk == 1 ) twktype = notecommands::tweakslide;
-				else if ( dlg.kftwk == 2 ) twktype = notecommands::midicc;
-#endif
 				BlockParamInterpolate(dlg.kfresult,twktype);
 			}
 			delete valuearray;
+#endif
 		}
 
 		/*

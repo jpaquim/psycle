@@ -232,6 +232,9 @@ namespace host{
 
 	const long XMSongLoader::LoadPatterns(Song & song)
 	{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		//TODO
+#else
 		// get data
 		Seek(60);
 		Read(&m_Header,sizeof(XMFILEHEADER));
@@ -266,6 +269,8 @@ namespace host{
 		}
 		
 		return nextPatStart;
+#endif
+		return 0;
 	}
 
 	// Load instruments
@@ -759,13 +764,16 @@ namespace host{
 	const BOOL XMSongLoader::WritePatternEntry(Song & song,
 		const int patIdx, const int row, const int col,PatternEvent &e)
 	{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		// todo
+#else
 		// don't overflow song buffer 
 		if(patIdx>=MAX_PATTERNS) return false;
 
 		PatternEvent* pData = (PatternEvent*) song._ptrackline(patIdx,col,row);
 
 		*pData = e;
-
+#endif
 		return true;
 	}	
 
@@ -1197,6 +1205,9 @@ namespace host{
 
 	const void MODSongLoader::LoadPatterns(Song & song)
 	{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		//TODO
+#else
 		int npatterns=0;
 		for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.songlength;i++)
 		{
@@ -1220,6 +1231,7 @@ namespace host{
 		for(int j = 0;j < npatterns ;j++){
 			LoadPattern(song,j,song.tracks() );
 		}
+#endif
 	}
 
 	char * MODSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start)
@@ -1445,12 +1457,16 @@ namespace host{
 	const BOOL MODSongLoader::WritePatternEntry(Song & song,
 		const int patIdx, const int row, const int col,PatternEvent &e)
 	{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		// todo
+#else
 		// don't overflow song buffer 
 		if(patIdx>=MAX_PATTERNS) return false;
 
 		PatternEvent* pData = (PatternEvent*) song._ptrackline(patIdx,col,row);
 
 		*pData = e;
+#endif
 
 		return true;
 	}	

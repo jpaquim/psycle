@@ -47,23 +47,19 @@ namespace host{
 
 	void XMSongExport::writeSongHeader(Song &song)
 	{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		// TODO
+#else
 		//We find the last index of machine, to use as first index of instruments
 		lastMachine=63;
 		while (lastMachine >= 0 && song.machine(lastMachine) == 0) lastMachine--;
 		lastMachine++;
 
 		for (int i=0; i<lastMachine; i++) {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if (song.machine(i) != 0 && 
 				song.machine(i)->getMachineKey() == MachineKey::sampler ) {
 					isSampler[i] = 1;
 			}
-#else
-			if (song.machine(i) != 0 && 
-				song.machine(i)->_type == MACH_SAMPLER ) {
-					isSampler[i] = 1;
-			}
-#endif
 			else {
 				isSampler[i] = 0;
 			}
@@ -83,16 +79,12 @@ namespace host{
 		m_Header.norder = song.playLength;
 		m_Header.restartpos = 0;
 		m_Header.channels = song.tracks();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		int highest = 0;
 		for (PatternSequence::patterniterator pite = song.patternSequence().patternbegin(); pite != song.patternSequence().patternend(); pite++)
 		{
 			if ((*pite)->id() > highest) highest = (*pite)->id();
 		}
 		m_Header.patterns = highest;
-#else
-		m_Header.patterns = song.GetHighestPatternIndexInSequence()+1;
-#endif
 		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
 		m_Header.flags = 0x0001; //Linear frequency.
 		m_Header.speed = 24/song.LinesPerBeat();
@@ -103,6 +95,7 @@ namespace host{
 			m_Header.order[i] =  song.playOrder[i];
 		}
 		Write(&m_Header,sizeof(m_Header));
+#endif
 	}
 
 	void XMSongExport::SavePatterns(Song & song)

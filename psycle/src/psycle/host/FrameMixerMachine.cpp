@@ -925,7 +925,6 @@ namespace host {
 				}
 			}
 			prevval = tweakbase;
-			wndView->AddMacViewUndo();
 		}
 		CFrameWnd::OnLButtonDown(nFlags, point);
 	}
