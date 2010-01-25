@@ -7,6 +7,7 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/helpers/riff.hpp>
 #include <psycle/helpers/dither.hpp>
+#include <psycle/audiodrivers/wavefileout.h>
 namespace psycle {
 	namespace core {
 		class SequenceLine;
@@ -144,17 +145,15 @@ namespace psycle {
 			DECLARE_MESSAGE_MAP()						
 
 		public:
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			void SwitchToTmpPlay();
 			void SwitchToNormalPlay();
 
-			psycle::helpers::WaveFile wav_file_;
-			dsp::Dither dither_;
+			psycle::audiodrivers::WaveFileOut file_out_;			
 			psycle::core::SequenceLine* seq_tmp_play_line_;
 			psycle::core::SequenceLine* seq_main_play_line_; // mainline between normal play
 			psycle::core::SequenceEntry* seq_end_entry_;
-#endif
-};
+
+		};
 
 		
 	}   // namespace host
