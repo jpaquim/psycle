@@ -8,7 +8,7 @@
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
-#include "singlepattern.h"
+#include "pattern.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
@@ -116,7 +116,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 
 	std::map<int, Pattern*> patMap;
 	patMap.clear();
-	song.patternSequence().removeAll();
+	song.sequence().removeAll();
 	song.clear();
 	
 	float lastPatternPos = 0;
@@ -184,7 +184,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 				(dynamic_cast<xmlpp::Element const &>(**i));
 			
 			try {
-				lastCategory = song.patternSequence().patternPool()->createNewCategory(get_attribute(category,"name").get_value());
+				lastCategory = song.sequence().patternPool()->createNewCategory(get_attribute(category,"name").get_value());
 			}
 			catch(...) {
 				std::cerr << "expected name attribute in category element\n";
@@ -359,7 +359,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		xmlpp::Node::NodeList const & sequencer_lines(sequence.get_children("seqline"));
 		for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i) {
 			xmlpp::Element const & sequencer_line(dynamic_cast<xmlpp::Element const &>(**i));
-			lastSeqLine = song.patternSequence().createNewLine();
+			lastSeqLine = song.sequence().createNewLine();
 			xmlpp::Node::NodeList const & sequencer_entries(sequencer_line.get_children("seqentry"));
 			for(xmlpp::Node::NodeList::const_iterator i = sequencer_entries.begin(); i != sequencer_entries.end(); ++i) {
 				xmlpp::Element const & sequencer_entry(dynamic_cast<xmlpp::Element const &>(**i));
@@ -590,8 +590,8 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
 	xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 	xml << "</info>" << std::endl;
-	// xml << song.patternSequence().patternPool().toXml(); todo
-	xml << song.patternSequence().toXml();
+	// xml << song.sequence().patternPool().toXml(); todo
+	xml << song.sequence().toXml();
 	xml << "</psy4>" << std::endl;
 
 	xmlFile << xml.str();

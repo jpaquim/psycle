@@ -1,26 +1,24 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
 
 #include "ChildView.hpp"
-#include "Configuration.hpp"
-#include "MachineView.hpp"
-#include "PatternView.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#include <cderr.h>
+#include <cmath>
+
 #include <psycle/core/internal_machines.h>
 #include <psycle/core/vstplugin.h>
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Player.hpp"
-#include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
-#endif
 
 //todo: check if these file are really needed.
+#include "Configuration.hpp"
+#include "MachineView.hpp"
+#include "PatternView.hpp"
 #include "NativeGui.hpp"
 #include "XMSamplerUI.hpp"
-
 #include "MainFrm.hpp"
 #include "MidiInput.hpp"
 #include "ConfigDlg.hpp"
@@ -31,8 +29,6 @@ using namespace psycle::core;
 #include "XMSongLoader.hpp"
 #include "XMSongExport.hpp"
 #include "ITModule2.h"
-#include <cmath>
-#include <cderr.h>
 #include "DeleteBlockCommand.hpp"
 #include "BlockTransposeCommand.hpp"
 #include "PatTransposeCommand.hpp"
@@ -70,7 +66,7 @@ namespace psycle {
 			}	
 			Global::pInputHandler->SetChildView(this);
 			// Creates a new song object. The application Song.
-			//Global::song().New();
+			//projects_->active_project()->song().New();
 			// machine_view_->Rebuild();
 			// its done in psycle.cpp, todo check config load order
 		}
@@ -82,11 +78,9 @@ namespace psycle {
 			pattern_view_->SetParent(this, main_frame_);
 		}
 
-		CChildView::~CChildView()
-		{
+		CChildView::~CChildView() {
 			Global::pInputHandler->SetChildView(NULL);
-			if ( bmpDC != NULL )
-			{
+			if (bmpDC) {
 				char buf[100];
 				sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
 				TRACE(buf);
@@ -253,7 +247,6 @@ namespace psycle {
 				///\todo : IMPORTANT! change this lock to a more flexible one
 				// It is causing skips on sound when there is a pattern change because
 				// it is not allowing the player to work. Do the same in the one inside Player::Work()
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				//todo: we need that lock sincronization
 				psycle::core::Song* song = &projects_->active_project()->song();
 				if (song->machine(MASTER_INDEX))
@@ -272,26 +265,7 @@ namespace psycle {
 					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
 					master->vuupdated = true;
 				}
-#else
-				CSingleLock lock(&projects_->active_project()->song().door,TRUE);
-				if (Global::song().machine(MASTER_INDEX))
-				{
-					main_frame_->UpdateVumeters
-						(
-							//((Master*)Global::song().machine(MASTER_INDEX))->_LMAX,
-							//((Master*)Global::song().machine(MASTER_INDEX))->_RMAX,
-							((Master*)Global::song().machine(MASTER_INDEX))->_lMax,
-							((Master*)Global::song().machine(MASTER_INDEX))->_rMax,
-							Global::pConfig->vu1,
-							Global::pConfig->vu2,
-							Global::pConfig->vu3,
-							((Master*)Global::song().machine(MASTER_INDEX))->_clip
-						);
-					main_frame_->UpdateMasterValue(((Master*)Global::song().machine(MASTER_INDEX))->_outDry);
-					//if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI(); maybe a todo
-					((Master*)Global::song().machine(MASTER_INDEX))->vuupdated = true;
-				}
-#endif
+
 				if (viewMode == view_modes::machine)
 				{
 					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::pPlayer->Tweaker"
@@ -311,33 +285,18 @@ namespace psycle {
 				{
 					if (projects_->active_project()->song().machine(c))
 					{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						if(projects_->active_project()->song().machine(c)->getMachineKey().host() == Hosts::VST) {
 							((vst::plugin*)projects_->active_project()->song().machine(c))->Idle();
 						}
-#else
-						if ( projects_->active_project()->song().machine(c)->_type == MACH_PLUGIN )
-						{
-							//if (main_frame_->isguiopen[c] && Global::pPlayer->Tweaker) maybe a todo
-							//	main_frame_->m_pWndMac[c]->Invalidate(false);
-						}
-						else if ( projects_->active_project()->song().machine(c)->_type == MACH_VST ||
-								projects_->active_project()->song().machine(c)->_type == MACH_VSTFX )
-						{
-							((vst::plugin*)projects_->active_project()->song().machine(c))->Idle();
-//							if (main_frame_->isguiopen[c] && Global::pPlayer->Tweaker)
-//								((CVstEditorDlg*)main_frame_->m_pWndMac[c])->Refresh(-1,0);
-						}
-#endif
 					}
 				}
 				Global::pPlayer->Tweaker = false;
 
-				if (XMSamplerMachineDialog != NULL ) XMSamplerMachineDialog->UpdateUI();
+				if (XMSamplerMachineDialog != NULL )
+					XMSamplerMachineDialog->UpdateUI();
 				if (Global::pPlayer->playing())
 				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Sequence& sequence = pattern_view()->song()->patternSequence();
+					Sequence& sequence = pattern_view()->song()->sequence();
 					psycle::core::SequenceEntry* entry = sequence.GetEntryOnPosition(*(sequence.begin()+1), Player::singleton().playPos());
 					int pos = (entry) ? (Player::singleton().playPos() - entry->tickPosition())	* static_cast<int>(projects_->active_project()->beat_zoom())
 									  : 0;
@@ -362,39 +321,7 @@ namespace psycle {
 //                    if (viewMode == view_modes::pattern) {
 //						Repaint(draw_modes::playback);
 					}
-#else
-					if (Global::pPlayer->_lineChanged)
-					{
-						Global::pPlayer->_lineChanged = false;
-						main_frame_->SetAppSongBpm(0);
-						main_frame_->SetAppSongTpb(0);
 
-						if (Global::pConfig->_followSong)
-						{
-							CListBox* pSeqList = (CListBox*)main_frame_->m_wndSeq.GetDlgItem(IDC_SEQLIST);
-							pattern_view()->editcur.line=Global::pPlayer->_lineCounter;
-							if (pattern_view()->editPosition != Global::pPlayer->_sequencePosition)
-							//if (pSeqList->GetCurSel() != Global::pPlayer->_sequencePosition)
-							{
-								pSeqList->SelItemRange(false,0,pSeqList->GetCount());
-								pSeqList->SetSel(Global::pPlayer->_sequencePosition,true);
-								int top = Global::pPlayer->_sequencePosition - 0xC;
-								if (top < 0) top = 0;
-								pSeqList->SetTopIndex(top);
-								pattern_view()->editPosition=Global::pPlayer->_sequencePosition;
-								if ( viewMode == view_modes::pattern ) 
-								{ 
-									Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
-									Repaint(draw_modes::playback);
-								}
-							}
-							else if( viewMode == view_modes::pattern ) Repaint(draw_modes::playback);
-						}
-						else if ( viewMode == view_modes::pattern ) Repaint(draw_modes::playback);
-
-						if ( viewMode == view_modes::sequence ) Repaint(draw_modes::playback);
-					}
-#endif
 				} else {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					if (pattern_view()->main()->m_wndSeq.sel_block_play() ) {
@@ -410,16 +337,7 @@ namespace psycle {
 				//return;
 				CString filepath = Global::pConfig->GetSongDir().c_str();
 				filepath += "\\autosave.psy";
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				projects_->active_project()->song().save(filepath.GetBuffer(1),3);
-#else
-				OldPsyFile file;
-				if(!file.Create(filepath.GetBuffer(1), true)) return;
-				projects_->active_project()->song().Save(&file,true);
-				/// \todo projects_->active_project()->song().Save() should not close a file which doesn't open. Add the following
-				// line when fixed. There are other places which need this too.
-				//file.Close();
-#endif
 			}
 		}
 
@@ -466,7 +384,7 @@ namespace psycle {
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
 
 				Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
-				Global::pPlayer->SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
+				Global::pPlayer->SetBPM(projects_->active_project()->song().BeatsPerMin(),projects_->active_project()->song().LinesPerBeat());
 			}
 #endif
 		}
@@ -475,15 +393,8 @@ namespace psycle {
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.driver().set_started(false);
-#else
-			if (Global::pConfig->_pOutputDriver->Initialized())
-			{
-				Global::pConfig->_pOutputDriver->Reset();
-			}
-#endif
 			KillTimer(31);
 			KillTimer(159);
 		}
@@ -590,26 +501,19 @@ namespace psycle {
 			machine_view_->OnSize(cx, cy);
 			CW = cx;
 			CH = cy;
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			projects_->active_project()->song().viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
-			projects_->active_project()->song().viewSize.y=cy;
-#endif
-			if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
-			{
+			if (bmpDC != NULL && Global::pConfig->useDoubleBuffer) { // remove old buffer to force recreating it with new size
 				TRACE("CChildView::OnResize(). Deleted bmpDC");
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-			if (viewMode == view_modes::pattern)
-			{
+			if (viewMode == view_modes::pattern) {
 				pattern_view()->OnSize(nType, cx, cy);				
 			}
 			Repaint();
 		}
 
 		// "Save Song" Function
-		BOOL CChildView::OnExport(UINT id) 
-		{
+		BOOL CChildView::OnExport(UINT id)  {
 			return projects_->active_project()->Export(id);
 		}
 
@@ -699,8 +603,7 @@ namespace psycle {
 			main_frame_->StatusBarIdle();
 		}
 
-		void CChildView::OnFileNew() 
-		{			
+		void CChildView::OnFileNew() {			
 			projects_->FileNew();
 		}
 
@@ -719,11 +622,11 @@ namespace psycle {
 		{
 			if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 			{
-				if (Global::song()._saved)
+				if (projects_->active_project()->song()._saved)
 				{
 					std::ostringstream fullpath;
 					fullpath << Global::pConfig->GetCurrentSongDir().c_str()
-						<< '\\' << Global::song().fileName.c_str();
+						<< '\\' << projects_->active_project()->song().fileName.c_str();
 					projects_->active_project()->FileLoadsongNamed(fullpath.str());
 				}
 			}
@@ -891,7 +794,7 @@ namespace psycle {
 #else
  			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			int i=0;
-			for ( ; Global::song().playOrderSel[i] == false ; ++i);
+			for ( ; projects_->active_project()->song().playOrderSel[i] == false ; ++i);
 
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
 			if(!Global::pPlayer->playing())
@@ -907,7 +810,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			PlayerTimeInfo tinfo = Player::singleton().timeInfo();
 			int check = Player::singleton().loopEnabled() && 
-				(tinfo.cycleStartPos() > 0.0f || tinfo.cycleEndPos() < projects_->active_project()->song().patternSequence().tickLength());
+				(tinfo.cycleStartPos() > 0.0f || tinfo.cycleEndPos() < projects_->active_project()->song().sequence().tickLength());
 #else
 			int check = Global::pPlayer->_playBlock;
 #endif
@@ -921,7 +824,7 @@ namespace psycle {
 			PlayerTimeInfo tinfo = player.timeInfo();
 			bool pl = player.playing();
 			bool blk = player.loopEnabled()  && 
-				(tinfo.cycleStartPos() > 0.0f || tinfo.cycleEndPos() < projects_->active_project()->song().patternSequence().tickLength());
+				(tinfo.cycleStartPos() > 0.0f || tinfo.cycleEndPos() < projects_->active_project()->song().sequence().tickLength());
 			player.stop();
 #else
 			bool pl = Global::pPlayer->playing();
@@ -944,8 +847,8 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 					// TODO
 #else
-					memset(Global::song().playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-					Global::song().playOrderSel[pattern_view()->editPosition] = true;
+					memset(projects_->active_project()->song().playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+					projects_->active_project()->song().playOrderSel[pattern_view()->editPosition] = true;
 					Repaint(draw_modes::cursor); 
 #endif
 				}
@@ -954,27 +857,17 @@ namespace psycle {
 
 		void CChildView::OnRecordWav() 
 		{
-			if (!Global::pPlayer->recording())
-			{
-				static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
-				
+			if (!Global::pPlayer->recording()) {
+				static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";				
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
-				if ( dlg.DoModal() == IDOK ) 
-				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				if ( dlg.DoModal() == IDOK ) {
 					Player::singleton().setFileName(dlg.GetFileName().GetBuffer(4));
 					Player::singleton().startRecording();
-#else
-					Global::pPlayer->StartRecording(dlg.GetFileName().GetBuffer(4));
-#endif
 				}
-				if ( Global::pConfig->autoStopMachines ) 
-				{
+				if ( Global::pConfig->autoStopMachines ) {
 					OnAutostop();
 				}
-			}
-			else
-			{
+			} else {
 				Global::pPlayer->stopRecording();
 			}
 		}
@@ -991,9 +884,9 @@ namespace psycle {
 				Global::pConfig->autoStopMachines = false;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					if (Global::song().machine(c))
+					if (projects_->active_project()->song().machine(c))
 					{
-						Global::song().machine(c)->Standby(false);
+						projects_->active_project()->song().machine(c)->Standby(false);
 					}
 				}
 			}
@@ -1007,11 +900,7 @@ namespace psycle {
 
 		void CChildView::OnFileSongproperties() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			CSongpDlg dlg(&projects_->active_project()->song());
-#else
-			CSongpDlg dlg(&Global::song());
-#endif
 			dlg.DoModal();
 			main_frame_->StatusBarIdle();
 			//Repaint();
@@ -1069,9 +958,9 @@ namespace psycle {
 			pattern_view()->CopyBlock(true);
 		}
 
-		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) 
-		{
-			pCmdUI->Enable(pattern_view()->blockSelected && (viewMode == view_modes::pattern));
+		void CChildView::OnUpdateCutCopy(CCmdUI* pCmdUI) {
+			pCmdUI->Enable(pattern_view()->blockSelected
+						   && (viewMode == view_modes::pattern));
 		}
 
 		void CChildView::OnPopCopy() {
@@ -1083,21 +972,21 @@ namespace psycle {
 		}
 		void CChildView::OnUpdatePaste(CCmdUI* pCmdUI) 
 		{
-			pCmdUI->Enable(pattern_view()->isBlockCopied  && (viewMode == view_modes::pattern));
+			pCmdUI->Enable(pattern_view()->isBlockCopied  
+						   && (viewMode == view_modes::pattern));
 		}
 
 		void CChildView::OnPopMixpaste() { 
 			pattern_view()->OnPopMixpaste();
 		}
 
-		void CChildView::OnPopBlockswitch()
-		{
+		void CChildView::OnPopBlockswitch() {
 			pattern_view()->OnPopBlockswitch();
 		}
 
-		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
-		{
-			pCmdUI->Enable(pattern_view()->isBlockCopied && (viewMode == view_modes::pattern));
+		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI) {
+			pCmdUI->Enable(pattern_view()->isBlockCopied
+						   && (viewMode == view_modes::pattern));
 		}
 
 		void CChildView::OnPopDelete() {
@@ -1108,8 +997,7 @@ namespace psycle {
 			pattern_view()->BlockParamInterpolate();
 		}
 
-		void CChildView::OnPopInterpolateCurve()
-		{
+		void CChildView::OnPopInterpolateCurve() {
 			pattern_view()->OnPopInterpolateCurve();
 		}
 
@@ -1143,75 +1031,61 @@ namespace psycle {
 				new BlockTransposeCommand(pattern_view(), -12));
 		}
 
-		void CChildView::OnPopTransformpattern() 
-		{
+		void CChildView::OnPopTransformpattern() {
 			pattern_view()->ShowTransformPatternDlg();			
 		}
 
-		void CChildView::OnPopPattenproperties() 
-		{
+		void CChildView::OnPopPattenproperties() {
 			pattern_view()->ShowPatternDlg();
 		}
 
 		/// fill block
-		void CChildView::OnPopBlockSwingfill()
-		{
+		void CChildView::OnPopBlockSwingfill() {
 			pattern_view()->ShowSwingFillDlg(FALSE);
 		}
 
 		/// fill track
-		void CChildView::OnPopTrackSwingfill()
-		{
+		void CChildView::OnPopTrackSwingfill() {
 			pattern_view()->ShowSwingFillDlg(TRUE);
 		}
 
-		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
-		{
+		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI) {
 			pattern_view()->OnUpdateUndo(pCmdUI);
 		}
 
-		void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
-		{
+		void CChildView::OnUpdateRedo(CCmdUI* pCmdUI) {
 			pattern_view()->OnUpdateRedo(pCmdUI);
 		}
 
-		void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdatePatternCutCopy(CCmdUI* pCmdUI) {
 			pCmdUI->Enable(viewMode == view_modes::pattern);
 		}
 
-		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdatePatternPaste(CCmdUI* pCmdUI) {
 			pCmdUI->Enable(pattern_view()->patBufferCopy&&(viewMode == view_modes::pattern));			
 		}
 
-		void CChildView::OnFileImportModulefile() 
-		{
+		void CChildView::OnFileImportModulefile() {
 			projects_->active_project()->FileImportModulefile();
 		}
 
-		void CChildView::OnFileRecent_01()
-		{
+		void CChildView::OnFileRecent_01() {
 			CallOpenRecent(0);
 		}
 
-		void CChildView::OnFileRecent_02()
-		{
+		void CChildView::OnFileRecent_02() {
 			CallOpenRecent(1);
 		}
 
-		void CChildView::OnFileRecent_03()
-		{
+		void CChildView::OnFileRecent_03() {
 			CallOpenRecent(2);
 		}
 
-		void CChildView::OnFileRecent_04()
-		{
+		void CChildView::OnFileRecent_04() {
 			CallOpenRecent(3);
 		}
 
-		void CChildView::CallOpenRecent(int pos)
-		{
+		void CChildView::CallOpenRecent(int pos) {
 			UINT nameSize;
 			nameSize = GetMenuString(hRecentMenu, pos, 0, 0, MF_BYPOSITION) + 1;
 			char* nameBuff = new char[nameSize];
@@ -1220,9 +1094,8 @@ namespace psycle {
 			delete [] nameBuff; nameBuff = 0;
 		}
 
-		void CChildView::SetTitleBarText()
-		{
-			std::string titlename = "[" + Global::song().fileName;
+		void CChildView::SetTitleBarText() {
+			std::string titlename = "[" + projects_->active_project()->song().fileName;
 			if (projects_->active_project()->cmd_manager()->UndoSize() != 0) {
 				titlename+=" *";			
 			}
@@ -1231,36 +1104,31 @@ namespace psycle {
 			main_frame_->SetWindowText(titlename.c_str());
 		}
 
-		void CChildView::OnHelpKeybtxt() 
-		{
+		void CChildView::OnHelpKeybtxt() {
 			char path[MAX_PATH];
 			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(main_frame_->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
-		void CChildView::OnHelpReadme() 
-		{
+		void CChildView::OnHelpReadme() {
 			char path[MAX_PATH];
 			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(main_frame_->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
-		void CChildView::OnHelpTweaking() 
-		{
+		void CChildView::OnHelpTweaking() {
 			char path[MAX_PATH];
 			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(main_frame_->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
-		void CChildView::OnHelpWhatsnew() 
-		{
+		void CChildView::OnHelpWhatsnew() {
 			char path[MAX_PATH];
 			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath().c_str());
 			ShellExecute(main_frame_->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
-		void CChildView::patTrackMute()
-		{
+		void CChildView::patTrackMute() {
 			if (viewMode == view_modes::pattern)
 			{
 				projects_->active_project()->song()._trackMuted[pattern_view()->editcur.track] = !projects_->active_project()->song()._trackMuted[pattern_view()->editcur.track];
@@ -1268,8 +1136,7 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::patTrackSolo()
-		{
+		void CChildView::patTrackSolo() {
 			if (viewMode == view_modes::pattern)
 			{
 				if (projects_->active_project()->song()._trackSoloed == pattern_view()->editcur.track)
@@ -1293,8 +1160,7 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::patTrackRecord()
-		{
+		void CChildView::patTrackRecord() {
 			if (viewMode == view_modes::pattern)
 			{
 				projects_->active_project()->song()._trackArmed[pattern_view()->editcur.track] = !projects_->active_project()->song()._trackArmed[pattern_view()->editcur.track];
@@ -1310,8 +1176,7 @@ namespace psycle {
 			}
 		}
 		
-		void CChildView::OnConfigurationLoopplayback() 
-		{
+		void CChildView::OnConfigurationLoopplayback() {
 			if (Player::singleton().loopEnabled()) {
 				Player::singleton().UnsetLoop();
 			} else {
@@ -1323,8 +1188,7 @@ namespace psycle {
 			pCmdUI->SetCheck(Player::singleton().loopEnabled());
 		}
 
-		void CChildView::DrawAllMachineVumeters(CDC *devc)
-		{
+		void CChildView::DrawAllMachineVumeters(CDC *devc) {
 			if (Global::pConfig->draw_vus)
 				machine_view_->UpdateVUs(devc);
 		}
@@ -1338,8 +1202,7 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::OnPatCopy()
-		{
+		void CChildView::OnPatCopy() {
 			if (viewMode == view_modes::pattern) {	
 				pattern_view()->patCopy();
 			}

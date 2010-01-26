@@ -143,8 +143,8 @@ namespace psycle {
 				int matchCount;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 
-				PatternSequence::patterniterator patite = pSong->patternSequence().patternbegin();
-				for ( ; patite != pSong->patternSequence().patternend(); ++patite) {
+				Sequence::patterniterator patite = pSong->sequence().patternbegin();
+				for ( ; patite != pSong->sequence().patternend(); ++patite) {
 					Pattern::iterator eventite = (*patite)->begin();
 					PatternEvent pevent = eventite->second;
 

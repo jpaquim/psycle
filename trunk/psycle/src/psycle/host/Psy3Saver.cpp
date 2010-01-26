@@ -119,7 +119,7 @@ namespace psycle  {
 
 			int chunkcount = 3; // 3 chunks plus:	
 
-			chunkcount += song_->patternSequence().numpatterns()-1; // limit to MAXPATTERNS ..
+			chunkcount += song_->sequence().numpatterns()-1; // limit to MAXPATTERNS ..
 
 			for (int i = 0; i < MAX_MACHINES; i++)
 			{
@@ -265,7 +265,7 @@ namespace psycle  {
 			//
 
 			// we use only the first track in mfc
-			psycle::core::SequenceLine* line = *(song_->patternSequence().begin()+1);
+			psycle::core::SequenceLine* line = *(song_->sequence().begin()+1);
 			int playLength = line->size();
 			index = 0; // index
 			for (index=0;index<MAX_SEQUENCES;index++)
@@ -306,11 +306,11 @@ namespace psycle  {
 			// a first test version
 
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
-			psycle::core::Sequence::patterniterator  it = song_->patternSequence().patternbegin();
-			for ( ; it != song_->patternSequence().patternend(); ++it ) {
+			psycle::core::Sequence::patterniterator  it = song_->sequence().patternbegin();
+			for ( ; it != song_->sequence().patternend(); ++it ) {
 				psycle::core::Pattern* pattern = *it;
 				///\todo: need to do something with it?
-				if (pattern == song_->patternSequence().master_pattern())
+				if (pattern == song_->sequence().master_pattern())
 					continue;
 				int num_lines = pattern->beats() * lines_per_beat;
 				unsigned char* data = CreateNewPattern(pattern->id(), song_->tracks(), num_lines);
@@ -537,7 +537,7 @@ namespace psycle  {
 		}
 
 		int Psy3Saver::ComputeLinesPerBeat() {
-			psycle::core::Sequence& seq = song_->patternSequence();
+			psycle::core::Sequence& seq = song_->sequence();
 			psycle::core::Sequence::patterniterator it = seq.patternbegin();
 			double min = 1.0;
 			for ( ; it != seq.patternend(); ++it) {

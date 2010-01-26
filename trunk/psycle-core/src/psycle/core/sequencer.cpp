@@ -7,7 +7,7 @@
 #include "machine.h"
 #include "playertimeinfo.h"
 #include "patternevent.h"
-#include "patternsequence.h"
+#include "sequence.h"
 #include "player.h"
 #include "song.h"
 
@@ -18,7 +18,7 @@ void Sequencer::Work(unsigned int nframes) {
 	///\todo this will not work frame correct for BPM changes for now
 	double beats = nframes / ((time_info()->sampleRate() * 60) / time_info()->bpm());
 	std::vector<PatternEvent*> events;
-	song_->patternSequence().GetEventsInRange(time_info()->playBeatPos(), beats, events);
+	song_->sequence().GetEventsInRange(time_info()->playBeatPos(), beats, events);
 	unsigned int rest_frames = nframes;
 	double last_pos = 0;
 	for (std::vector<PatternEvent*>::iterator ev_it = events.begin();
@@ -146,7 +146,7 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 	// step 2: collect note
 	{
 		// track muted?
-		if(song()->patternSequence().trackMuted(track)) return;
+		if(song()->sequence().trackMuted(track)) return;
 
 		// not a note ?
 		if(entry.note() > notetypes::release && entry.note() != notetypes::empty) return;

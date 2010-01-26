@@ -80,7 +80,7 @@ namespace host{
 		m_Header.restartpos = 0;
 		m_Header.channels = song.tracks();
 		int highest = 0;
-		for (PatternSequence::patterniterator pite = song.patternSequence().patternbegin(); pite != song.patternSequence().patternend(); pite++)
+		for (PatternSequence::patterniterator pite = song.sequence().patternbegin(); pite != song.sequence().patternend(); pite++)
 		{
 			if ((*pite)->id() > highest) highest = (*pite)->id();
 		}
@@ -127,6 +127,9 @@ namespace host{
 	// return address of next pattern, 0 for invalid
 	void XMSongExport::SavePattern(Song & song, const int patIdx)
 	{
+#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		///todo: redo all the pattern saving
+#else
 		XMPATTERNHEADER ptHeader;
 		memset(&ptHeader,0,sizeof(ptHeader));
 		ptHeader.size = sizeof(ptHeader);
@@ -137,9 +140,7 @@ namespace host{
 		Write(&ptHeader,sizeof(ptHeader));
 		std::size_t currentpos = GetPos();
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		///todo: redo all the pattern saving
-#else
+
 		// check every pattern for validity
 		if (song.IsPatternUsed(patIdx))
 		{
@@ -277,10 +278,11 @@ namespace host{
 			Skip(ptHeader.packedsize);
 		}
 		else
-#endif
+
 		{
 			Write(&ptHeader,sizeof(ptHeader));
 		}
+#endif
 	}
 	void XMSongExport::SaveEmptyInstrument(std::string name)
 	{

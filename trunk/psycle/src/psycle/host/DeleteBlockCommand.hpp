@@ -1,9 +1,7 @@
 #include "Command.hpp"
 #include "configuration_options.hpp"
+#include <psycle/core/pattern.h>
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/singlepattern.h>
-#endif
 
 namespace psycle {
 	namespace host {

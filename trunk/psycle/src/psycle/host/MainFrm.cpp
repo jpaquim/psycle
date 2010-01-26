@@ -1696,7 +1696,7 @@ using namespace psycle::helpers::math;
 			if (Global::pPlayer->playing())
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-//				SequenceLine *pSLine = *projects_.active_project()->song().patternSequence().begin();
+//				SequenceLine *pSLine = *projects_.active_project()->song().sequence().begin();
 //				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(Player::singleton().playPos()) );
 //				str.Format("B %.2f", );
 #else
@@ -1717,7 +1717,7 @@ using namespace psycle::helpers::math;
 			if (Global::pPlayer->playing())
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				SequenceLine *pSLine = *projects_.active_project()->song().patternSequence().begin();
+				SequenceLine *pSLine = *projects_.active_project()->song().sequence().begin();
 				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(Player::singleton().playPos()) );
 				if (sLineIt != pSLine->rend()) {
 					Pattern* pPat = sLineIt->second->pattern();

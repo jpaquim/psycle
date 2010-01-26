@@ -197,8 +197,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void setLoopSong() { 
 				timeInfo_.setCycleStartPos(0.0);
 				///\todo please someone check this
-				//timeInfo_.setCycleEndPos(song().patternSequence().tickLength());
-				timeInfo_.setCycleEndPos(song().patternSequence().max_beats());
+				//timeInfo_.setCycleEndPos(song().sequence().tickLength());
+				timeInfo_.setCycleEndPos(song().sequence().max_beats());
 			}
 			void setLoopSequenceEntry(SequenceEntry * seqEntry ) {
 				timeInfo_.setCycleStartPos(seqEntry->tickPosition());
