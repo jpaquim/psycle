@@ -648,10 +648,6 @@ void Song::clearMyData() {
 	_instSelected = 0;
 	midiSelected = 0;
 	auxcolSelected = 0;
-	for (int i =0; i < MAX_TRACKS; i++) {
-		_trackArmed[i]=false;
-		_trackMuted[i]=false;
-	}
 	_trackArmedCount=0;	
 	currentOctave=4;
 }

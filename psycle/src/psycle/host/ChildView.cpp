@@ -1129,50 +1129,21 @@ namespace psycle {
 		}
 
 		void CChildView::patTrackMute() {
-			if (viewMode == view_modes::pattern)
-			{
-				projects_->active_project()->song()._trackMuted[pattern_view()->editcur.track] = !projects_->active_project()->song()._trackMuted[pattern_view()->editcur.track];
+			if (viewMode == view_modes::pattern) {
+				pattern_view()->patTrackMute();
 				Repaint(draw_modes::track_header);
 			}
 		}
 
 		void CChildView::patTrackSolo() {
-			if (viewMode == view_modes::pattern)
-			{
-				if (projects_->active_project()->song()._trackSoloed == pattern_view()->editcur.track)
-				{
-					for (int i = 0; i < MAX_TRACKS; i++)
-					{
-						projects_->active_project()->song()._trackMuted[i] = FALSE;
-					}
-					projects_->active_project()->song()._trackSoloed = -1;
-				}
-				else
-				{
-					for (int i = 0; i < MAX_TRACKS; i++)
-					{
-						projects_->active_project()->song()._trackMuted[i] = TRUE;
-					}
-					projects_->active_project()->song()._trackMuted[pattern_view()->editcur.track] = FALSE;
-					projects_->active_project()->song()._trackSoloed = pattern_view()->editcur.track;
-				}
-				Repaint(draw_modes::track_header);
+			if (viewMode == view_modes::pattern) {
+				pattern_view()->patTrackSolo();
 			}
 		}
 
 		void CChildView::patTrackRecord() {
-			if (viewMode == view_modes::pattern)
-			{
-				projects_->active_project()->song()._trackArmed[pattern_view()->editcur.track] = !projects_->active_project()->song()._trackArmed[pattern_view()->editcur.track];
-				projects_->active_project()->song()._trackArmedCount = 0;
-				for ( int i=0;i<MAX_TRACKS;i++ )
-				{
-					if (projects_->active_project()->song()._trackArmed[i])
-					{
-						projects_->active_project()->song()._trackArmedCount++;
-					}
-				}
-				Repaint(draw_modes::track_header);
+			if (viewMode == view_modes::pattern) {
+				pattern_view()->patTrackRecord();
 			}
 		}
 		

@@ -214,7 +214,7 @@ namespace psycle  {
 
 			pFile->WriteArray("SNGI",4);
 			version = CURRENT_FILE_VERSION_SNGI;
-			size = (11*sizeof(temp))+(song_->tracks()*(sizeof(song_->_trackMuted[0])+sizeof(song_->_trackArmed[0])));
+			size = (11*sizeof(temp))+(song_->tracks()*(sizeof(bool)+sizeof(bool)));
 			pFile->Write(version);
 			pFile->Write(size);
 
@@ -245,10 +245,10 @@ namespace psycle  {
 			temp = 1; // sequence width
 			pFile->Write(temp);
 
-			for (int i = 0; i < song_->tracks(); i++)
+			for (int i = 0; i < song_->tracks(); ++i)
 			{
-				pFile->Write(song_->_trackMuted[i]);
-				pFile->Write(song_->_trackArmed[i]); // remember to count them
+				pFile->Write(static_cast<bool>(song_->sequence().trackMuted(i)));
+				pFile->Write(static_cast<bool>(song_->sequence().trackArmed(i))); // remember to count them
 			}
 
 			if ( !autosave ) 

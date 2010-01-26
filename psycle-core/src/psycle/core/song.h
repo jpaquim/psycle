@@ -379,8 +379,6 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 
 	//Fake. Just to compile. They need to go out
 	//{
-		bool _trackArmed[MAX_TRACKS];
-		bool _trackMuted[MAX_TRACKS];
 		int _trackArmedCount;
 
 		unsigned char currentOctave;

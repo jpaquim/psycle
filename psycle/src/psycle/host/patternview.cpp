@@ -1,43 +1,45 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #include "patternview.hpp"
-#include "MainFrm.hpp"
-
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-
-using namespace psycle::core;
-
-#include "InputHandler.hpp"
-#include "Configuration.hpp"
-#include "SwingFillDlg.hpp"
-#include "TransformPatternDlg.hpp"
-#include "InterpolateCurveDlg.hpp"
-#include "PatDlg.hpp"
-#include "EnterDataCommand.hpp"
-#include "DeleteBlockCommand.hpp"
-#include "PasteBlockCommand.hpp"
-#include "DeleteCurrCommand.hpp"
-#include "ClearCurrCommand.hpp"
-#include "InsertCurrCommand.hpp"
-#include "BlockTransposeCommand.hpp"
-#include "PatTransposeCommand.hpp"
-#include "PatPasteCommand.hpp"
-#include "PatDeleteCommand.hpp"
-#include "ChangeGenCommand.hpp"
-#include "ChangeInsCommand.hpp"
 
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/hexstring_to_integer.hpp>
+
+#include <psycle/core/machine.h>
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+
+#include "BlockTransposeCommand.hpp"
+#include "ChangeGenCommand.hpp"
+#include "ChangeInsCommand.hpp"
+#include "ClearCurrCommand.hpp"
+#include "Configuration.hpp"
+#include "EnterDataCommand.hpp"
+#include "DeleteBlockCommand.hpp"
+#include "DeleteCurrCommand.hpp"
+#include "InputHandler.hpp"
+#include "InterpolateCurveDlg.hpp"
+#include "InsertCurrCommand.hpp"
+#include "MainFrm.hpp"
+#include "PasteBlockCommand.hpp"
+#include "PatDeleteCommand.hpp"
+#include "PatDlg.hpp"
+#include "PatPasteCommand.hpp"
+#include "PatTransposeCommand.hpp"
+#include "SwingFillDlg.hpp"
+#include "TransformPatternDlg.hpp"
 
 #ifdef _MSC_VER
 #undef min
 #undef max
 #endif
 
-namespace psycle { namespace host {
+namespace psycle { 
+	namespace host {
 
-using namespace helpers;
-using namespace helpers::math;
+		using namespace helpers;
+		using namespace helpers::math;
 
 		#define DRAW_DATA		1
 		#define DRAW_HSCROLL	2
@@ -84,11 +86,8 @@ using namespace helpers::math;
 			   bShiftArrowsDoSelect(false),
 			   bDoingSelection(false),
 			   maxView(false),
-			   project_(project)
-#ifdef use_psycore
-			   ,pattern_(0)
-#endif
-		{
+			   project_(project),
+			   pattern_(0) {
 			selpos.bottom=0;
 			newselpos.bottom=0;
 			szBlankParam[0]='\0';
@@ -101,23 +100,19 @@ using namespace helpers::math;
 			return &main_->projects()->active_project()->song(); 
 		}
 		
-		Project* PatternView::project()
-		{
+		Project* PatternView::project() {
 			return main_->projects()->active_project();
 		}
 
-		Project* PatternView::project() const
-		{
+		Project* PatternView::project() const {
 			return main_->projects()->active_project();
 		}
 
-		void PatternView::Draw(CDC *devc, const CRgn& rgn)
-		{
+		void PatternView::Draw(CDC *devc, const CRgn& rgn) {
 			DrawPatEditor(devc);
 		}
 
-		void PatternView::OnSize(UINT nType, int cx, int cy)
-		{
+		void PatternView::OnSize(UINT nType, int cx, int cy) {
 			CW = cx;
 			CH = cy;
 			RecalcMetrics();
@@ -1225,7 +1220,7 @@ using namespace helpers::math;
 							PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
 							PatHeaderCoords.sNumber0.y);
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (song()->_trackMuted[i])
+						if (song()->sequence().trackMuted(i))
 							TransparentBlt(devc,
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 								1+PatHeaderCoords.dMuteOn.y, 
@@ -1236,7 +1231,7 @@ using namespace helpers::math;
 								PatHeaderCoords.sMuteOn.x, 
 								PatHeaderCoords.sMuteOn.y);
 
-						if (song()->_trackArmed[i])
+						if (song()->sequence().trackArmed(i))
 							TransparentBlt(devc,
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 								1+PatHeaderCoords.dRecordOn.y, 
@@ -1304,7 +1299,7 @@ using namespace helpers::math;
 							SRCCOPY);
 
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (song()->_trackMuted[i])
+						if (song()->sequence().trackMuted(i))
 							devc->BitBlt(
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 								1+PatHeaderCoords.dMuteOn.y, 
@@ -1315,7 +1310,7 @@ using namespace helpers::math;
 								PatHeaderCoords.sMuteOn.y, 
 								SRCCOPY);
 
-						if (song()->_trackArmed[i])
+						if (song()->sequence().trackArmed(i))
 							devc->BitBlt(
 								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 								1+PatHeaderCoords.dRecordOn.y, 
@@ -2099,7 +2094,7 @@ using namespace helpers::math;
 											PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
 											PatHeaderCoords.sNumber0.y);
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (song()->_trackMuted[i])
+										if (song()->sequence().trackMuted(i))
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 												1+PatHeaderCoords.dMuteOn.y, 
@@ -2110,7 +2105,7 @@ using namespace helpers::math;
 												PatHeaderCoords.sMuteOn.x, 
 												PatHeaderCoords.sMuteOn.y);
 
-										if (song()->_trackArmed[i])
+										if (song()->sequence().trackArmed(i))
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 												1+PatHeaderCoords.dRecordOn.y, 
@@ -2171,7 +2166,7 @@ using namespace helpers::math;
 											SRCCOPY);
 
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (song()->_trackMuted[i])
+										if (song()->sequence().trackMuted(i))
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 												1+PatHeaderCoords.dMuteOn.y, 
@@ -2182,7 +2177,7 @@ using namespace helpers::math;
 												PatHeaderCoords.sMuteOn.y, 
 												SRCCOPY);
 
-										if (song()->_trackArmed[i])
+										if (song()->sequence().trackArmed(i))
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 												1+PatHeaderCoords.dRecordOn.y, 
@@ -2272,7 +2267,7 @@ using namespace helpers::math;
 											PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
 											PatHeaderCoords.sNumber0.y);
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (song()->_trackMuted[i])
+										if (song()->sequence().trackMuted(i))
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 												1+PatHeaderCoords.dMuteOn.y, 
@@ -2283,7 +2278,7 @@ using namespace helpers::math;
 												PatHeaderCoords.sMuteOn.x, 
 												PatHeaderCoords.sMuteOn.y);
 
-										if (song()->_trackArmed[i])
+										if (song()->sequence().trackArmed(i))
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 												1+PatHeaderCoords.dRecordOn.y, 
@@ -2344,7 +2339,7 @@ using namespace helpers::math;
 											SRCCOPY);
 
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (song()->_trackMuted[i])
+										if (song()->sequence().trackMuted(i))
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
 												1+PatHeaderCoords.dMuteOn.y, 
@@ -2355,7 +2350,7 @@ using namespace helpers::math;
 												PatHeaderCoords.sMuteOn.y, 
 												SRCCOPY);
 
-										if (song()->_trackArmed[i])
+										if (song()->sequence().trackArmed(i))
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
 												1+PatHeaderCoords.dRecordOn.y, 
@@ -6252,9 +6247,9 @@ using namespace helpers::math;
 		void PatternView::SelectNextTrack()
 		{
 			int i;
-			for (i = editcur.track+1; i < song()->tracks(); i++)
+			for (i = editcur.track+1; i < song()->tracks(); ++i)
 			{
-				if (song()->_trackArmed[i])
+				if (song()->sequence().trackArmed(i))
 				{
 					if (Global::pInputHandler->notetrack[i] == notecommands::release)
 					{
@@ -6264,9 +6259,9 @@ using namespace helpers::math;
 			}
 			if (i >= song()->tracks())
 			{
-				for (i = 0; i <= editcur.track; i++)
+				for (i = 0; i <= editcur.track; ++i)
 				{
-					if (song()->_trackArmed[i])
+					if (song()->sequence().trackArmed(i))
 					{
 						if (Global::pInputHandler->notetrack[i] == notecommands::release)
 						{
@@ -6276,7 +6271,7 @@ using namespace helpers::math;
 				}
 			}
 			editcur.track = i;
-			while(song()->_trackArmed[editcur.track] == 0)
+			while(song()->sequence().trackArmed(editcur.track) == 0)
 			{
 				if(++editcur.track >= song()->tracks())
 					editcur.track=0;
@@ -6286,64 +6281,52 @@ using namespace helpers::math;
 
 		void PatternView::patTrackMute()
 		{
-			if (child_view()->viewMode == view_modes::pattern)
-			{
-				song()->_trackMuted[editcur.track] = !song()->_trackMuted[editcur.track];
+			if (child_view()->viewMode == view_modes::pattern) {
+				song()->sequence().setMutedTrack(editcur.track, 
+					!song()->sequence().trackMuted(editcur.track));
 				Repaint(draw_modes::track_header);
 			}
 		}
 
 		void PatternView::patTrackSolo()
-		{
+		{			
 			if (child_view()->viewMode == view_modes::pattern)
 			{
 				if (song()->_trackSoloed == editcur.track)
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						song()->_trackMuted[i] = FALSE;
+						song()->sequence().setMutedTrack(i, false);
 					}
 					song()->_trackSoloed = -1;
 				}
 				else
 				{
-					for (int i = 0; i < MAX_TRACKS; i++)
-					{
-						song()->_trackMuted[i] = TRUE;
+					for (int i = 0; i < MAX_TRACKS; ++i) {
+						song()->sequence().setMutedTrack(i, true);
 					}
-					song()->_trackMuted[editcur.track] = FALSE;
+					song()->sequence().setMutedTrack(editcur.track, false);
 					song()->_trackSoloed = editcur.track;
 				}
 				Repaint(draw_modes::track_header);
 			}
 		}
 
-		void PatternView::patTrackRecord()
-		{
-			if (child_view()->viewMode == view_modes::pattern)
-			{
-				song()->_trackArmed[editcur.track] = !song()->_trackArmed[editcur.track];
-				song()->_trackArmedCount = 0;
-				for ( int i=0;i<MAX_TRACKS;i++ )
-				{
-					if (song()->_trackArmed[i])
-					{
-						song()->_trackArmedCount++;
-					}
-				}
+		void PatternView::patTrackRecord() {
+			if (child_view()->viewMode == view_modes::pattern) {
+				song()->sequence().setArmedTrack(editcur.track,
+					!song()->sequence().trackArmed(editcur.track));				
 				Repaint(draw_modes::track_header);
 			}
 		}
 
-		void PatternView::OnRButtonDown(UINT nFlags, CPoint point)
-		{	
+		void PatternView::OnRButtonDown(UINT nFlags, CPoint point) {	
 		}
 		
-		void PatternView::OnRButtonUp( UINT nFlags, CPoint point )
-		{
+		void PatternView::OnRButtonUp( UINT nFlags, CPoint point ) {
 		}
-		void PatternView::OnContextMenu(CWnd* pWnd, CPoint point) 
-		{
+
+		void PatternView::OnContextMenu(CWnd* pWnd, CPoint point) {
 				CMenu menu;
 				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
 				CMenu* pPopup = menu.GetSubMenu(0);
@@ -6367,11 +6350,12 @@ using namespace helpers::math;
 
 					if (InRect(pointpos,point.y,PatHeaderCoords.dRecordOn,PatHeaderCoords.sRecordOn))
 					{
-						song()->_trackArmed[ttm] = !song()->_trackArmed[ttm];
+						song()->sequence().setArmedTrack(ttm,
+							!song()->sequence().trackArmed(ttm));
 						song()->_trackArmedCount = 0;
 						for ( int i=0;i<MAX_TRACKS;i++ )
 						{
-							if (song()->_trackArmed[i])
+							if (song()->sequence().trackArmed(i))
 							{
 								song()->_trackArmedCount++;
 							}
@@ -6379,7 +6363,8 @@ using namespace helpers::math;
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords.dMuteOn,PatHeaderCoords.sMuteOn))
 					{
-						song()->_trackMuted[ttm] = !song()->_trackMuted[ttm];
+						song()->sequence().setMutedTrack(ttm,
+							!song()->sequence().trackMuted(ttm));
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords.dSoloOn,PatHeaderCoords.sSoloOn))
 					{
@@ -6387,16 +6372,16 @@ using namespace helpers::math;
 						{
 							for ( int i=0;i<MAX_TRACKS;i++ )
 							{
-								song()->_trackMuted[i] = true;
+								song()->sequence().setMutedTrack(i, true);
 							}
-							song()->_trackMuted[ttm] = false;
+							song()->sequence().setMutedTrack(ttm, false);
 							song()->_trackSoloed = ttm;
 						}
 						else
 						{
 							for ( int i=0;i<MAX_TRACKS;i++ )
 							{
-								song()->_trackMuted[i] = false;
+								song()->sequence().setMutedTrack(i, false);
 							}
 							song()->_trackSoloed = -1;
 						}
