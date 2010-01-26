@@ -66,9 +66,9 @@ bool Psy3Filter::testFormat(const std::string & fileName) {
 
 void Psy3Filter::preparePatternSequence(CoreSong & song) {
 	seqList.clear();
-	song.patternSequence().removeAll();
+	song.sequence().removeAll();
 	// here we add in one single Line the patterns
-	singleLine = song.patternSequence().createNewLine();
+	singleLine = song.sequence().createNewLine();
 }
 
 bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
@@ -232,9 +232,9 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	std::vector<int>::iterator it = seqList.begin();
 	for(; it < seqList.end(); ++it) {
 		#if 0
-			Pattern* pat = song.patternSequence().PatternPool()->findById(*it);
+			Pattern* pat = song.sequence().PatternPool()->findById(*it);
 		#else
-			Pattern* pat = song.patternSequence().FindPattern(*it);
+			Pattern* pat = song.sequence().FindPattern(*it);
 		#endif
 		singleLine->createEntry(pat, pos);
 		pos += pat->beats();
@@ -370,9 +370,9 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 	for(unsigned int i(0) ; i < song.tracks(); ++i) {
 		bool tmp=0;
 		file->Read(tmp);
-		song.patternSequence().setMutedTrack(i,tmp);
+		song.sequence().setMutedTrack(i,tmp);
 		fileread = file->Read(tmp);
-		song.patternSequence().setArmedTrack(i,tmp);
+		song.sequence().setArmedTrack(i,tmp);
 	}
 	callbacks->timeInfo().setBpm(song.bpm());
 	callbacks->timeInfo().setTicksSpeed(song.ticksSpeed(),song.isTicks());
@@ -444,7 +444,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 		Pattern* pat = new Pattern();
 		pat->setName(patternName+indexStr);
 		pat->setID(index);
-		song.patternSequence().Add(pat);
+		song.sequence().Add(pat);
 		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) { // lines
 			for (unsigned int x = 0; x < song.tracks(); ++x) {

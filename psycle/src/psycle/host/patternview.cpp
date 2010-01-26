@@ -123,32 +123,9 @@ using namespace helpers::math;
 			RecalcMetrics();
 		}
 
-		bool PatternView::CheckUnsavedSong()
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		bool PatternView::CheckUnsavedSong() {
 			return (project()->cmd_manager()->UndoSize() == 0);
-#else
-			bool checked = true;
-			if (pUndoList)
-			{
-				if (UndoSaved != pUndoList->counter)
-				{
-					checked = false;
-				}
-			} else
-			if (UndoSaved != 0)
-			{
-				checked = false;
-			}
-			return checked;
-#endif
 		}
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		psycle::core::Pattern* PatternView::pattern() {
-			return pattern_;
-		}
-#endif
 
 		void PatternView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 		{
@@ -7634,7 +7611,7 @@ using namespace helpers::math;
 			if (dlg.DoModal() == IDOK)
 			{
 				double old_len = pattern()->beats();
-				psycle::core::SequenceLine* line = *song()->patternSequence().begin()+1;
+				psycle::core::SequenceLine* line = *song()->sequence().begin()+1;
 				psycle::core::SequenceLine::iterator it = line->find(main()->m_wndSeq.selected_entry());
 				if ( it != line->end()) {
 					++it;

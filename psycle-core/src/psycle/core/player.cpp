@@ -458,7 +458,8 @@ float * Player::Work(int numSamples) {
 	///\todo: The buffer has to be served by the audiodriver, since the audiodriver knows the size it needs to have.
 	((Master*)song().machine(MASTER_INDEX))->_pMasterSamples = buffer_;
 	
-	if(autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence().tickLength()) stopRecording();
+	if(autoRecord_ && timeInfo_.playBeatPos() >= song().sequence().tickLength())
+		stopRecording();
 
 	if(!playing_) {
 		///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
@@ -474,7 +475,7 @@ float * Player::Work(int numSamples) {
 			) setPlayPos(timeInfo_.cycleStartPos());
 		} else {
 			// autostop
-			if (timeInfo_.playBeatPos() >= song().patternSequence().max_beats()) {
+			if (timeInfo_.playBeatPos() >= song().sequence().max_beats()) {
 				stop();
 			}
 		}

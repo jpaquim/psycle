@@ -1,36 +1,32 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include "MachineView.hpp"
-#include "Configuration.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/plugininfo.h>
 #include <psycle/core/player.h>
 #include <psycle/core/file.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Machine.hpp"
-#endif
 
-#include "MainFrm.hpp"
-#include "NewMachine.hpp"
-#include "NativeGui.hpp"
-#include "WireGui.hpp"
-#include "Mastergui.hpp"
+#include "Configuration.hpp"
+#include "DummyGui.hpp"
 #include "EffectGui.hpp"
 #include "GeneratorGui.hpp"
-#include "DummyGui.hpp"
+#include "NativeGui.hpp"
+#include "NewMachine.hpp"
+#include "Mastergui.hpp"
+#include "MacProp.hpp"
+#include "MainFrm.hpp"
 #include "MixerGui.hpp"
-#include "VstGenGui.hpp"
-#include "VstFxGui.hpp"
 #include "RecorderGui.hpp"
 #include "SamplerGui.hpp"
+#include "VstGenGui.hpp"
+#include "VstFxGui.hpp"
+#include "WireGui.hpp"
 #include "XmSamplerGui.hpp"
-#include "MacProp.hpp"
-
-#include <psycle/helpers/hexstring_to_integer.hpp>
 
 #ifdef _MSC_VER
 #undef min

@@ -7,7 +7,7 @@
 #define PSYCLE__CORE__SONG__INCLUDED
 #pragma once
 
-#include "patternsequence.h"
+#include "sequence.h"
 #include "songserializer.h"
 #include "machine.h"
 #include "instrument.h"
@@ -37,8 +37,8 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\name serialization
 	///\{
 		public:
-			bool load(std::string const & filename);
-			bool save(std::string const & filename, int version = 4);
+			bool load(const std::string& filename);
+			bool save(const std::string& filename, int version = 4);
 
 			boost::signal<void (std::string, std::string)> report;
 			boost::signal<void (int, int, std::string)> progress;
@@ -58,30 +58,24 @@ class PSYCLE__CORE__DECL CoreSong {
 		public:
 			///\name IsReady
 			/// Checks the ready state of song (if it can be played). Always call it after acquiring the lock.
-			bool IsReady(){ return ready; };
+			bool IsReady(){ return ready; }
 			///\name SetReady
 			/// Sets song to ready state (it can be played).
-			void SetReady(const bool value) { scoped_lock lock(mutex_); ready = value; }
+			void SetReady(const bool value) { 
+				scoped_lock lock(mutex_);
+				ready = value;
+			}
 		private:
 			bool ready;
 	///\}
-
-
-	#if defined PSYCLE__CORE__SIGNALS
-		///\name signals
-		///\{
-			boost::signal<void (std::string const &, std::string const &)> report;
-			boost::signal<void (std::uint32_t const &, std::uint32_t const &, std::string const &)> progress;
-		///\}
-	#endif
-
+	
 	///\name name of the song
 	///\{
 		public:
 			/// the name of the song
-			std::string const & name() const { return name_; }
+			const std::string& name() const { return name_; }
 			/// sets the name of the song
-			void setName(std::string const & name) { name_ = name; }
+			void setName(const std::string& name) { name_ = name; }
 		private:
 			std::string name_;
 	///\}
@@ -90,9 +84,9 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\{
 		public:
 			/// the author of the song
-			std::string const & author() const { return author_; }
+			const std::string& author() const { return author_; }
 			/// sets the author of the song
-			void setAuthor(std::string const & author) { author_ = author; }
+			void setAuthor(const std::string& author) { author_ = author; }
 		private:
 			std::string author_;
 	///\}
@@ -101,9 +95,9 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\{
 		public:
 			/// the comment on the song
-			std::string const & comment() const { return comment_; }
+			const std::string& comment() const { return comment_; }
 			/// sets the comment on the song
-			void setComment(std::string const & comment) { comment_ = comment; }
+			void setComment(const std::string& comment) { comment_ = comment; }
 		private:
 			std::string comment_;
 	///\}
@@ -145,45 +139,53 @@ class PSYCLE__CORE__DECL CoreSong {
 	/// legacy. maps to the value from pattternSequence.
 	///\{
 		public:
-			unsigned int tracks() const { return patternSequence_.numTracks(); }
-			void setTracks( unsigned int tracks) { patternSequence_.setNumTracks(tracks); }
+			unsigned int tracks() const { return sequence_.numTracks(); }
+			void setTracks( unsigned int tracks) { 
+				sequence_.setNumTracks(tracks);
+			}
 	///\}
 
 	///\name pattern sequence
 	///\{
 		public:
 			/// pattern sequence
-			Sequence const& patternSequence() const throw() { return patternSequence_; }
+			const Sequence& sequence() const throw() { return sequence_; }
 			/// pattern sequence
-			Sequence& patternSequence() throw() { return patternSequence_; }
+			Sequence& sequence() throw() { return sequence_; }
 		private:
-			Sequence patternSequence_;
+			Sequence sequence_;
 	///\}
 
 	///\name machines
 	///\{
 		public:
 			/// access to the machines of the song
-			Machine * machine(Machine::id_type id) { return machine_[id]; }
+			Machine* machine(Machine::id_type id) { return machine_[id]; }
 			/// access to the machines of the song
-			Machine const * const machine(Machine::id_type id) const { return machine_[id]; }
+			const Machine* const machine(Machine::id_type id) const {
+				return machine_[id];
+			}
 		private:
-			void machine(Machine::id_type id, Machine * machine) {
+			void machine(Machine::id_type id, Machine* machine) {
 				assert(id >= 0 && id < MAX_MACHINES);
 				machine_[id] = machine;
 				machine->id(id);
 			}
-			Machine * machine_[MAX_MACHINES];
+			Machine* machine_[MAX_MACHINES];
 	///\}
 
 	///\name instruments
 	///\{
 		public:
-			XMInstrument & rInstrument(const int index){return m_Instruments[index];}
-			XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];}
+			XMInstrument& rInstrument(const int index) {
+				return m_Instruments[index];
+			}
+			XMInstrument::WaveData& SampleData(const int index) {
+				return m_rWaveLayer[index];
+			}
 			///\todo doc
 			///\todo hardcoded limits and wastes
-			Instrument * _pInstrument[MAX_INSTRUMENTS];
+			Instrument* _pInstrument[MAX_INSTRUMENTS];
 		private:
 			XMInstrument m_Instruments[MAX_INSTRUMENTS];
 			XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENTS];
@@ -239,14 +241,21 @@ class PSYCLE__CORE__DECL CoreSong {
 		public:
 			/// creates a new connection between two machines.
 			/// This funcion is to be used over the Machine's ConnectTo(). This one verifies the validity of the connections, and uses Machine's function
-			Wire::id_type InsertConnection(Machine &srcMac, Machine &dstMac, InPort::id_type srctype=0, OutPort::id_type dsttype=0, float volume = 1.0f);
-
+			Wire::id_type InsertConnection(Machine& srcMac,
+				                           Machine& dstMac,
+										   InPort::id_type srctype=0,
+										   OutPort::id_type dsttype=0,
+										   float volume = 1.0f);
 			/// Changes the destination of a wire connection.
 			///\param wiresource source mac index
 
 			//\param wiredest new dest mac index
 			///\param wireindex index of the wire in wiresource to change
-			bool ChangeWireDestMac(Machine& srcMac, Machine &newDstMac, OutPort::id_type srctype, Wire::id_type wiretochange, InPort::id_type dsttype);
+			bool ChangeWireDestMac(Machine& srcMac,
+								   Machine& newDstMac,
+								   OutPort::id_type srctype,
+								   Wire::id_type wiretochange,
+								   InPort::id_type dsttype);
 			/// Changes the destination of a wire connection.
 			///\param wiredest dest mac index
 			///\param wiresource new source mac index
@@ -261,11 +270,11 @@ class PSYCLE__CORE__DECL CoreSong {
 		public:
 			///\todo: The loading code should not be inside the song class, only the assignation of the loaded one
 			/// ???
-			bool WavAlloc(Instrument::id_type, const char * str);
+			bool WavAlloc(Instrument::id_type, const char* str);
 			/// ???
-			bool WavAlloc(Instrument::id_type, bool bStereo, long int iSamplesPerChan, const char * sName);
+			bool WavAlloc(Instrument::id_type, bool bStereo, long int iSamplesPerChan, const char* sName);
 			/// ???
-			bool IffAlloc(Instrument::id_type, const char * str);
+			bool IffAlloc(Instrument::id_type, const char* str);
 			///\}
 			/// clones an instrument.
 			bool CloneIns(Instrument::id_type src, Instrument::id_type dst);
@@ -283,13 +292,18 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\}
 
 	public:
-		void patternTweakSlide(int machine, int command, int value, int patternPosition, int track, int line);
+		void patternTweakSlide(int machine,
+							   int command,
+							   int value, 
+							   int patternPosition,
+							   int track,
+							   int line);
 
 	///\name thread synchronisation
 	///\{
 		public:
 			typedef class scoped_lock<mutex> scoped_lock;
-			operator mutex & () const { return mutex_; }
+			operator mutex& () const { return mutex_; }
 		private:
 			mutex mutable mutex_;
 	///\}
@@ -368,9 +382,6 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 		bool _trackArmed[MAX_TRACKS];
 		bool _trackMuted[MAX_TRACKS];
 		int _trackArmedCount;
-
-		int patternLines[MAX_PATTERNS];
-		char patternName[MAX_PATTERNS][32];
 
 		unsigned char currentOctave;
 	//}

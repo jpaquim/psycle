@@ -7,9 +7,7 @@
 // Operations, that could be more memory efficient implemented,
 // should use their own undo/redo prepare
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/patternsequence.h>
-#endif
+#include <psycle/core/sequence.h>
 
 namespace psycle {
 	namespace host {

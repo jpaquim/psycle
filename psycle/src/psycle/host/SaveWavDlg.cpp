@@ -1,74 +1,27 @@
-///\file
-///\brief implementation file for psycle::host::CSaveWavDlg.
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #include "SaveWavDlg.hpp"
 
-#include <psycle/core/song.h>
-#include <psycle/core/player.h>
-#include <psycle/core/machine.h>
+#include <iomanip>
+#include <iostream>
 
 #include <boost/bind.hpp>
 
-#include "Configuration.hpp"
-#include "MidiInput.hpp"
-#include "MainFrm.hpp"
-#include "ChildView.hpp"
-#include "PatternView.hpp"
-#include "SeqView.hpp"
-#include <iostream>
-#include <iomanip>
-#include <psycle/helpers/math.hpp>
 #include <psycle/helpers/hexstring_to_integer.hpp>
-#include <psycle/helpers/dither.hpp>
 
-using namespace psycle::helpers;
-using namespace psycle::helpers::math;
-using namespace psycle::helpers::dsp;
-using namespace psycle::core;
+#include <psycle/core/machine.h>
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+
+#include "ChildView.hpp"
+#include "Configuration.hpp"
+#include "MainFrm.hpp"
+#include "MidiInput.hpp"
+#include "PatternView.hpp"
 
 namespace psycle {
 	namespace host {
-
-		const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-		const int real_bits[]={8,16,24,32,32};
-
-		extern CPsycleApp theApp;
-
-		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent) 
-			: CDialog(CSaveWavDlg::IDD, pParent),
-			  m_recmode(0),
-			  m_outputtype(0) {
-			this->pChildView = pChildView;
-			this->pBlockSel = pBlockSel;					
-			seq_tmp_play_line_ = new psycle::core::SequenceLine();
-		}
-
-		void CSaveWavDlg::DoDataExchange(CDataExchange* pDX) {
-			CDialog::DoDataExchange(pDX);
-			DDX_Control(pDX, IDC_FILEBROWSE, m_browse);
-			DDX_Control(pDX, IDCANCEL, m_cancel);
-			DDX_Control(pDX, IDC_SAVEWAVE, m_savewave);
-			DDX_Control(pDX, IDC_SAVEWIRESSEPARATED, m_savewires);
-			DDX_Control(pDX, IDC_SAVETRACKSSEPARATED, m_savetracks);
-			DDX_Control(pDX, IDC_SAVEGENERATORSEPARATED, m_savegens);
-			DDX_Control(pDX, IDC_RANGESTART, m_rangestart);
-			DDX_Control(pDX, IDC_RANGEEND, m_rangeend);
-			DDX_Control(pDX, IDC_LINESTART, m_linestart);
-			DDX_Control(pDX, IDC_LINEEND, m_lineend);
-			DDX_Control(pDX, IDC_PROGRESS, m_progress);
-			DDX_Control(pDX, IDC_PATNUMBER, m_patnumber);
-			DDX_Control(pDX, IDC_PATNUMBER2, m_patnumber2);
-			DDX_Control(pDX, IDC_FILENAME, m_filename);
-			DDX_Control(pDX, IDC_COMBO_RATE, m_rate);
-			DDX_Control(pDX, IDC_COMBO_BITS, m_bits);
-			DDX_Control(pDX, IDC_COMBO_CHANNELS, m_channelmode);
-			DDX_Control(pDX, IDC_TEXT, m_text);
-			DDX_Control(pDX, IDC_CHECK_DITHER, m_dither);
-			DDX_Control(pDX, IDC_COMBO_PDF, m_pdf);
-			DDX_Control(pDX, IDC_COMBO_NOISESHAPING, m_noiseshaping);
-			DDX_Radio(pDX, IDC_RECSONG, m_recmode);
-			DDX_Radio(pDX, IDC_OUTPUTFILE, m_outputtype);
-		}
 
 		BEGIN_MESSAGE_MAP(CSaveWavDlg, CDialog)
 			ON_BN_CLICKED(IDC_FILEBROWSE, OnFilebrowse)
@@ -91,12 +44,50 @@ namespace psycle {
 			ON_BN_CLICKED(IDC_OUTPUTSAMPLE, OnOutputsample)			
 		END_MESSAGE_MAP()
 
+
+		const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
+		const int real_bits[]={8,16,24,32,32};
+
+		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent) 
+			: CDialog(CSaveWavDlg::IDD, pParent),
+			  m_recmode(0),
+			  m_outputtype(0) {
+			this->pChildView = pChildView;
+			this->pBlockSel = pBlockSel;					
+			seq_tmp_play_line_ = new psycle::core::SequenceLine();
+		}
+
+		void CSaveWavDlg::DoDataExchange(CDataExchange* pDX) {
+			CDialog::DoDataExchange(pDX);
+			DDX_Control(pDX, IDC_FILEBROWSE, browse_btn_);
+			DDX_Control(pDX, IDCANCEL, cancel_btn_);
+			DDX_Control(pDX, IDC_SAVEWAVE, savewave_btn_);
+			DDX_Control(pDX, IDC_SAVEWIRESSEPARATED, savewires_btn_);
+			DDX_Control(pDX, IDC_SAVETRACKSSEPARATED, savetracks_btn_);
+			DDX_Control(pDX, IDC_SAVEGENERATORSEPARATED, savegens_btn_);
+			DDX_Control(pDX, IDC_RANGESTART, m_rangestart);
+			DDX_Control(pDX, IDC_RANGEEND, m_rangeend);
+			DDX_Control(pDX, IDC_LINESTART, m_linestart);
+			DDX_Control(pDX, IDC_LINEEND, m_lineend);
+			DDX_Control(pDX, IDC_PROGRESS, m_progress);
+			DDX_Control(pDX, IDC_PATNUMBER, m_patnumber);
+			DDX_Control(pDX, IDC_PATNUMBER2, m_patnumber2);
+			DDX_Control(pDX, IDC_FILENAME, m_filename);
+			DDX_Control(pDX, IDC_COMBO_RATE, m_rate);
+			DDX_Control(pDX, IDC_COMBO_BITS, m_bits);
+			DDX_Control(pDX, IDC_COMBO_CHANNELS, m_channelmode);
+			DDX_Control(pDX, IDC_TEXT, m_text);
+			DDX_Control(pDX, IDC_CHECK_DITHER, dither_btn_);
+			DDX_Control(pDX, IDC_COMBO_PDF, m_pdf);
+			DDX_Control(pDX, IDC_COMBO_NOISESHAPING, m_noiseshaping);
+			DDX_Radio(pDX, IDC_RECSONG, m_recmode);
+			DDX_Radio(pDX, IDC_OUTPUTFILE, m_outputtype);
+		}
+
 		BOOL CSaveWavDlg::OnInitDialog() {
 			CDialog::OnInitDialog();
 
-			CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-			Song& pSong = mainFrame->projects()->active_project()->song();
-			kill_thread=1;
+			Song& pSong = *pChildView->pattern_view()->song();
 			std::string name = Global::pConfig->GetCurrentWaveRecDir().c_str();
 			name+='\\';
 			name+=pSong.fileName;
@@ -194,7 +185,7 @@ namespace psycle {
 			m_channelmode.AddString("Stereo");
 			m_channelmode.SetCurSel(Global::pConfig->_pOutputDriver->playbackSettings().channelMode());
 
-			m_dither.SetCheck(BST_CHECKED);
+			dither_btn_.SetCheck(BST_CHECKED);
 			m_pdf.AddString("Triangular");
 			m_pdf.AddString("Rectangular");
 			m_pdf.AddString("Gaussian");			
@@ -204,21 +195,18 @@ namespace psycle {
 			m_noiseshaping.SetCurSel(0);
 
 			if (bits == 3 ) {
-				m_dither.EnableWindow(false);
+				dither_btn_.EnableWindow(false);
 				m_pdf.EnableWindow(false);
 				m_noiseshaping.EnableWindow(false);
 			}
-
 			psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
 			settings.setSamplesPerSec(real_rate[rate]);
 			settings.setBitDepth(real_bits[bits]);
 			settings.setChannelMode(Global::pConfig->_pOutputDriver->playbackSettings().channelMode());
 			file_out_.setPlaybackSettings(settings);
-
-			m_savetracks.SetCheck(false);
-			m_savegens.SetCheck(false);
-			m_savewires.SetCheck(false);
-
+			savetracks_btn_.SetCheck(false);
+			savegens_btn_.SetCheck(false);
+			savewires_btn_.SetCheck(false);
 			m_text.SetWindowText("");		
 
 			return true;  // return true unless you set the focus to a control
@@ -226,12 +214,12 @@ namespace psycle {
 		}
 
 		void CSaveWavDlg::ActivateOutputs(bool on) {
-			m_savewave.EnableWindow(on);
-			m_savewires.EnableWindow(on);
-			m_savetracks.EnableWindow(on);
-			m_savegens.EnableWindow(on);
+			savewave_btn_.EnableWindow(on);
+			savewires_btn_.EnableWindow(on);
+			savetracks_btn_.EnableWindow(on);
+			savegens_btn_.EnableWindow(on);
 			m_filename.EnableWindow(on);
-			m_browse.EnableWindow(on);
+			browse_btn_.EnableWindow(on);
 		}
 
 		void CSaveWavDlg::OnOutputfile() {			
@@ -316,16 +304,16 @@ namespace psycle {
 		void CSaveWavDlg::SwitchToTmpPlay() {
 			Player* player = &Player::singleton();
 			CoreSong& song = player->song();
-			psycle::core::PatternSequence& seq = song.patternSequence();
+			psycle::core::Sequence& seq = song.sequence();
 			seq_main_play_line_ = *(seq.begin()+1);
 			*(seq.begin()+1) = seq_tmp_play_line_;
-			seq_tmp_play_line_->SetSequence(&song.patternSequence());
+			seq_tmp_play_line_->SetSequence(&song.sequence());
 		}
 
 		void CSaveWavDlg::SwitchToNormalPlay() {
 			Player* player = &Player::singleton();
 			CoreSong& song = player->song();
-			psycle::core::PatternSequence& seq = song.patternSequence();
+			psycle::core::Sequence& seq = song.sequence();
 			*(seq.begin()+1) = seq_main_play_line_;
 		}
 
@@ -335,18 +323,18 @@ namespace psycle {
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
 			GetDlgItem(IDC_RECRANGE)->EnableWindow(false);
 			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(false);
-			m_savewave.EnableWindow(false);
-			m_cancel.SetWindowText("Stop");
+			savewave_btn_.EnableWindow(false);
+			cancel_btn_.SetWindowText("Stop");
 			m_filename.EnableWindow(false);
-			m_savetracks.EnableWindow(false);
-			m_savegens.EnableWindow(false);
-			m_savewires.EnableWindow(false);
+			savetracks_btn_.EnableWindow(false);
+			savegens_btn_.EnableWindow(false);
+			savewires_btn_.EnableWindow(false);
 			m_rate.EnableWindow(false);
 			m_bits.EnableWindow(false);
 			m_channelmode.EnableWindow(false);
 			m_pdf.EnableWindow(false);
 			m_noiseshaping.EnableWindow(false);
-			m_dither.EnableWindow(false);
+			dither_btn_.EnableWindow(false);
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
@@ -354,11 +342,11 @@ namespace psycle {
 			Player::singleton().driver().set_started(false);
 			Sleep(1000);	
 			// create a WaveFile and a thread for writing the audio data
-			kill_thread = 0;
-			if (m_savewires.GetCheck()) {
+			kill_thread_ = 0;
+			if (savewires_btn_.GetCheck()) {
 				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveWires, this));
 			} else 
-			if (this->m_savegens.GetCheck()) {
+			if (savegens_btn_.GetCheck()) {
 				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveGenerators, this));
 			} else {
 				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveNormal, this));
@@ -372,7 +360,7 @@ namespace psycle {
 			if (m_recmode == 0) {
 				// record entire song
 				Player::singleton().start(0);
-				m_progress.SetRange(0, Player::singleton().song().patternSequence().max_beats());
+				m_progress.SetRange(0, Player::singleton().song().sequence().max_beats());
 			} else
 			if (m_recmode == 1) {
 				CString name;
@@ -381,7 +369,7 @@ namespace psycle {
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				SwitchToTmpPlay();
 				seq_tmp_play_line_->clear();
-				psycle::core::Pattern* pattern = song.patternSequence().FindPattern(pstart);
+				psycle::core::Pattern* pattern = song.sequence().FindPattern(pstart);
 				SequenceEntry* entry = new SequenceEntry(seq_tmp_play_line_);
 				entry->setPattern(pattern);
 				seq_tmp_play_line_->insert(0, entry);	
@@ -395,7 +383,7 @@ namespace psycle {
 				hexstring_to_integer(name.GetBuffer(2), seq_start);
 				m_rangeend.GetWindowText(name);
 				hexstring_to_integer(name.GetBuffer(2), seq_end);
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
+				CMainFrame * mainFrame = pChildView->pattern_view()->main();
 				SequenceEntry* start_entry = mainFrame->m_wndSeq.GetEntry(seq_start);
 				seq_end_entry_ = mainFrame->m_wndSeq.GetEntry(seq_end);
 				Player::singleton().start(start_entry->tickPosition());
@@ -404,7 +392,7 @@ namespace psycle {
 			}
  			file_out_.set_opened(true);
 			const int frames = 256;
-			while(!kill_thread && player->playing()) {
+			while(!kill_thread_ && player->playing()) {
 				 if ((m_recmode == 2) && (player->playPos() >=
 					  seq_end_entry_->tickPosition() + 
 					seq_end_entry_->pattern()->beats() 
@@ -434,7 +422,7 @@ namespace psycle {
 			std::string rootname = name;
 			rootname = rootname.substr(0, std::max(std::string::size_type(0),rootname.length()-4));
 			// save			
-			for (int i = 0; (i < MAX_CONNECTIONS) && !kill_thread; ++i) {
+			for (int i = 0; (i < MAX_CONNECTIONS) && !kill_thread_; ++i) {
 				if (!muted_[i]) {
 					for (int j = 0; j < MAX_CONNECTIONS; j++) {
 						if (song.machine(MASTER_INDEX)->_inputCon[j]) {							
@@ -475,7 +463,7 @@ namespace psycle {
 			std::string rootname = name;
 			rootname = rootname.substr(0, std::max(std::string::size_type(0),rootname.length()-4));
 			// save			
-			for (int i = 0; (i < MAX_BUSES) && !kill_thread; ++i) {
+			for (int i = 0; (i < MAX_BUSES) && !kill_thread_; ++i) {
 				if (!muted_[i]) {
 					for (int j = 0; j < MAX_BUSES; j++) {
 						if (song.machine(j)) {							
@@ -586,9 +574,8 @@ namespace psycle {
 		}
 */
 
-		void CSaveWavDlg::OnCancel() 
-		{
-			kill_thread = 1;
+		void CSaveWavDlg::OnCancel() {
+			kill_thread_ = 1;
 			Sleep(100);
 			delete seq_tmp_play_line_;			
 			CDialog::OnCancel();
@@ -596,7 +583,7 @@ namespace psycle {
 
 		void CSaveWavDlg::SaveEnd()
 		{
-			kill_thread=1;
+			kill_thread_ = 1;
 			delete thread_;
 /*
 			if (autostop) {
@@ -664,7 +651,6 @@ namespace psycle {
 				memcpy(pSong._trackMuted,_Muted,sizeof(pSong._trackMuted));
 			}
 */
-
 			m_text.SetWindowText("");
 
 			GetDlgItem(IDC_RECSONG)->EnableWindow(true);
@@ -674,18 +660,16 @@ namespace psycle {
 			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(true);
 
 			m_filename.EnableWindow(true);
-			m_savetracks.EnableWindow(true);
-			m_savegens.EnableWindow(true);
-			m_savewires.EnableWindow(true);
+			savetracks_btn_.EnableWindow(true);
+			savegens_btn_.EnableWindow(true);
+			savewires_btn_.EnableWindow(true);
 			m_rate.EnableWindow(true);
 			m_bits.EnableWindow(true);
 			m_channelmode.EnableWindow(true);
-			m_pdf.EnableWindow(m_dither.GetCheck());
-			m_noiseshaping.EnableWindow(m_dither.GetCheck());
-			m_dither.EnableWindow(true);
-
-			switch (m_recmode)
-			{
+			m_pdf.EnableWindow(dither_btn_.GetCheck());
+			m_noiseshaping.EnableWindow(dither_btn_.GetCheck());
+			dither_btn_.EnableWindow(true);
+			switch (m_recmode) {
 			case 0:
 				m_rangeend.EnableWindow(false);
 				m_rangestart.EnableWindow(false);
@@ -703,18 +687,13 @@ namespace psycle {
 				break;
 			}
 			m_progress.SetPos(0);
-			m_savewave.EnableWindow(true);
-			m_cancel.SetWindowText("Close");
+			savewave_btn_.EnableWindow(true);
+			cancel_btn_.SetWindowText("Close");
 		}
 
-		void CSaveWavDlg::SaveToClipboard()
-		{
+		void CSaveWavDlg::SaveToClipboard() {
 			OpenClipboard();
 			EmptyClipboard();
-
-			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-			const int real_bits[]={8,16,24,32};
-
 			///\todo: Investigate why i can't paste to audacity (psycle's fault?)
 			clipboardwavheader.head = 'FFIR';
 			clipboardwavheader.head2= 'EVAW';
@@ -766,11 +745,11 @@ namespace psycle {
 
 		void CSaveWavDlg::OnSelchangeComboBits() {
 			if (m_bits.GetCurSel() == 3) {
-				m_dither.EnableWindow(false);
+				dither_btn_.EnableWindow(false);
 				m_pdf.EnableWindow(false);
 				m_noiseshaping.EnableWindow(false);
 			} else {
-				m_dither.EnableWindow(true);
+				dither_btn_.EnableWindow(true);
 				m_pdf.EnableWindow(true);
 				m_noiseshaping.EnableWindow(true);
 			}
@@ -821,30 +800,24 @@ namespace psycle {
 		}
 
 		void CSaveWavDlg::OnToggleDither() {
-			m_noiseshaping.EnableWindow(m_dither.GetCheck());
-			m_pdf.EnableWindow(m_dither.GetCheck());
-			file_out_.set_dither_enabled(m_dither.GetCheck());
+			m_noiseshaping.EnableWindow(dither_btn_.GetCheck());
+			m_pdf.EnableWindow(dither_btn_.GetCheck());
+			file_out_.set_dither_enabled(dither_btn_.GetCheck());
 		}
 
 		void CSaveWavDlg::OnSavetracksseparated() {
-			if (m_savetracks.GetCheck()) {
-				m_savewires.SetCheck(false);
-				m_savegens.SetCheck(false);
-			}
+			savewires_btn_.SetCheck(!savetracks_btn_.GetCheck());
+			savegens_btn_.SetCheck(!savetracks_btn_.GetCheck());
 		}
 
 		void CSaveWavDlg::OnSavewiresseparated()  {
-			if (m_savewires.GetCheck()) {
-				m_savetracks.SetCheck(false);
-				m_savegens.SetCheck(false);
-			}
+			savetracks_btn_.SetCheck(!savewires_btn_.GetCheck());
+			savegens_btn_.SetCheck(!savewires_btn_.GetCheck());
 		}
 
 		void CSaveWavDlg::OnSavegensseparated() {
-			if (m_savegens.GetCheck()) {
-				m_savetracks.SetCheck(false);
-				m_savewires.SetCheck(false);
-			}
+			savetracks_btn_.SetCheck(!savegens_btn_.GetCheck());
+			savewires_btn_.SetCheck(!savegens_btn_.GetCheck());
 		}
 
 	}   // namespace host

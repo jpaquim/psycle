@@ -60,9 +60,9 @@ bool Psy2Filter::testFormat(const std::string & fileName) {
 
 void Psy2Filter::preparePatternSequence( CoreSong & song) {
 	seqList.clear();
-	song.patternSequence().removeAll();
+	song.sequence().removeAll();
 	// here we add in one single Line the patterns
-	singleLine = song.patternSequence().createNewLine();
+	singleLine = song.sequence().createNewLine();
 }
 
 bool Psy2Filter::load(const std::string & fileName, CoreSong & song) {
@@ -170,7 +170,7 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		Pattern* pat = new Pattern();
 		pat->setName(patternName+indexStr);
 		pat->setID(index);
-		song.patternSequence().Add(pat);
+		song.sequence().Add(pat);
 		float beatpos = 0;
 		for(int y(0) ; y < numLines ; ++y) { // lines
 			for(unsigned int x = 0; x < song.tracks(); x++) {
@@ -212,7 +212,7 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		Pattern* pat = new Pattern();
 		pat->setName(patternName);
 		pat->setID(index);
-		song.patternSequence().Add(pat);
+		song.sequence().Add(pat);
 	}
 	return true;
 }
@@ -575,7 +575,7 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	double pos = 0;
 	std::vector<int>::iterator it = seqList.begin();
 	for(; it < seqList.end(); ++it) {
-		Pattern* pat = song.patternSequence().FindPattern(*it);
+		Pattern* pat = song.sequence().FindPattern(*it);
 		singleLine->createEntry(pat, pos);
 		pos += pat->beats();
 	}

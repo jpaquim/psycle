@@ -130,7 +130,7 @@ namespace psycle {
 				main_ = main;
 			}
 
-			Pattern* pattern();
+			Pattern* pattern() { return pattern_; }
 		private:
 			Pattern* pattern_;
 		public:

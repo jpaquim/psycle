@@ -321,7 +321,7 @@ Special:  Bit 0: On = song message attached.
 					Pattern* pat = new Pattern();
 					pat->setName("unnamed");
 					pat->setID(i);
-					s->patternSequence().Add(pat);
+					s->sequence().Add(pat);
 				} else {
 					Seek(pointersp[i]);
 					LoadITPattern(i,numchans);
@@ -861,7 +861,7 @@ Special:  Bit 0: On = song message attached.
 			Pattern* pat = new Pattern();
 			pat->setName("unnamed");
 			pat->setID(patIdx);
-			s->patternSequence().Add(pat);
+			s->sequence().Add(pat);
 #else
 			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
 #endif
@@ -1493,7 +1493,7 @@ OFFSET              Count TYPE   Description
 			Pattern* pat = new Pattern();
 			pat->setName("unnamed");
 			pat->setID(patIdx);
-			s->patternSequence().Add(pat);
+			s->sequence().Add(pat);
 #else
 			s->AllocNewPattern(patIdx,"unnamed",64,false);
 #endif

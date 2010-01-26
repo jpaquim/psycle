@@ -47,7 +47,7 @@ void CoreSong::clear() {
 	// Cleaning instruments
 	DeleteInstruments();
 	// Clear patterns and creates a new master_pattern
-	patternSequence().removeAll();
+	sequence().removeAll();
 }
 
 bool CoreSong::load(std::string const & filename) {
@@ -626,13 +626,13 @@ void Song::New() {
 	_saved=false;
 	fileName = "Untitled.psy";
 	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master,MASTER_INDEX));
-	SequenceLine* line = patternSequence().createNewLine();
+	SequenceLine* line = sequence().createNewLine();
 	Pattern* pattern= new Pattern();
 	pattern->timeSignatures().clear();
 	pattern->timeSignatures().push_back(psycle::core::TimeSignature(16.0));
 	pattern->setID(0);
 	pattern->setName("Untitled");
-	patternSequence().Add(pattern);
+	sequence().Add(pattern);
 	line->createEntry(pattern,0);
 	SetReady(true);
 }
@@ -652,11 +652,7 @@ void Song::clearMyData() {
 		_trackArmed[i]=false;
 		_trackMuted[i]=false;
 	}
-	_trackArmedCount=0;
-	for (int i=0; i < MAX_PATTERNS; i++ ){
-		patternLines[i]=64;
-		memset(patternName[i],0,32);
-	}
+	_trackArmedCount=0;	
 	currentOctave=4;
 }
 

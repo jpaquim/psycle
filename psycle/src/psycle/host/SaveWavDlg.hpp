@@ -1,5 +1,5 @@
-///\file
-///\brief interface file for psycle::host::CSaveWavDlg.
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #pragma once
 #include "Psycle.hpp"
 #include <mmreg.h>
@@ -60,15 +60,15 @@ namespace psycle {
 			afx_msg void OnOutputsample();			
 			DECLARE_MESSAGE_MAP()						
 
-			int kill_thread;
+			int kill_thread_;
 			enum { IDD = IDD_SAVEWAVDLG };
-			CButton	m_browse;
-			CButton	m_cancel;
-			CButton	m_savewave;
-			CButton	m_savewires;
-			CButton	m_savegens;
-			CButton	m_savetracks;
-			CButton m_dither;
+			CButton	browse_btn_;
+			CButton	cancel_btn_;
+			CButton	savewave_btn_;
+			CButton	savewires_btn_;
+			CButton	savegens_btn_;
+			CButton	savetracks_btn_;
+			CButton dither_btn_;
 			CEdit	m_rangestart;
 			CEdit	m_rangeend;
 			CEdit	m_linestart;

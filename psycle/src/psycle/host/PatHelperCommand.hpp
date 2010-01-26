@@ -3,7 +3,7 @@
 #include "configuration_options.hpp"
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 #endif
 
 // This class offers help to prepare undo/redo storage for patternview commands

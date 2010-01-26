@@ -324,7 +324,7 @@ namespace host{
 		Pattern* pat = new Pattern();
 		pat->setName("unnamed");
 		pat->setID(patIdx);
-		song.patternSequence().Add(pat);
+		song.sequence().Add(pat);
 #else
 		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
 #endif
@@ -1270,7 +1270,7 @@ namespace host{
 		Pattern* pat = new Pattern();
 		pat->setName("unnamed");
 		pat->setID(patIdx);
-		song.patternSequence().Add(pat);
+		song.sequence().Add(pat);
 #else
 		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
 #endif
