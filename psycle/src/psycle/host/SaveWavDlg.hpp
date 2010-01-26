@@ -33,6 +33,7 @@ namespace psycle {
 			void SwitchToNormalPlay();
 			void SaveNormal();
 			void SaveWires();
+			void SaveTracks();
 			void SaveGenerators();
 			void BackUpWires();
 			void SaveFile();

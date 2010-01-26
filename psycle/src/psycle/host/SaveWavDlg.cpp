@@ -341,13 +341,16 @@ namespace psycle {
 			Player::singleton().stop();			
 			Player::singleton().driver().set_started(false);
 			Sleep(1000);	
-			// create a WaveFile and a thread for writing the audio data
+			// create a thread for writing the audio data
 			kill_thread_ = 0;
 			if (savewires_btn_.GetCheck()) {
 				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveWires, this));
 			} else 
 			if (savegens_btn_.GetCheck()) {
 				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveGenerators, this));
+			} else
+			if (this->savetracks_btn_.GetCheck()) {
+				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveTracks, this));
 			} else {
 				thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveNormal, this));
 			}
@@ -489,6 +492,37 @@ namespace psycle {
 			SaveEnd();				
 		}
 
+		void CSaveWavDlg::SaveTracks() {
+			// backup track mute status
+			CoreSong& song = Player::singleton().song();
+			std::vector<bool> backup_tracks = song.sequence().muted_tracks();
+			// build rootname
+			CString name;
+			m_filename.GetWindowText(name); 
+			std::string rootname = name;
+			rootname = rootname.substr(0, std::max(std::string::size_type(0),rootname.length()-4));
+			// save			
+			for (int i = 0; i < song.sequence().numTracks(); ++i) {
+				if (!backup_tracks[i]) {					
+					for (int j = 0; j < song.sequence().numTracks(); ++j) {
+						song.sequence().setMutedTrack(j, j != i);
+					}
+					// now save the song
+					std::ostringstream filename;
+					filename << rootname;
+					filename << "-track "
+								<< std::setprecision(2) << (unsigned)i << " .wav";
+					psycle::audiodrivers::AudioDriverSettings settings = file_out_.playbackSettings();
+					settings.setDeviceName(filename.str());
+					file_out_.setPlaybackSettings(settings);
+					SaveFile();
+				}
+			}
+			// restore track mute status			
+			song.sequence().muted_tracks() = backup_tracks;
+			SaveEnd();
+		}
+
 		void CSaveWavDlg::SaveNormal() {
 			CString name;
 			m_filename.GetWindowText(name);
@@ -503,57 +537,7 @@ namespace psycle {
 
 
 /*
-			
-			autostop = Global::pConfig->autoStopMachines;
-			if ( Global::pConfig->autoStopMachines )
-			{
-				Global::pConfig->autoStopMachines = false;
-				for (int c=0; c<MAX_MACHINES; c++)
-				{
-					if (pSong.machine(c))
-					{
-						pSong.machine(c)->Standby(false);
-					}
-				}
-			}
-			if (m_outputtype == 0)
-			{	//record to file
-				if (m_savetracks.GetCheck())
-				{
-					memcpy(_Muted,pSong._trackMuted,sizeof(pSong._trackMuted));
-
-					int count = 0;
-
-					for (int i = 0; i < pSong.tracks(); i++)
-					{
-						if (!_Muted[i])
-						{
-							count++;
-							current = i;
-							for (int j = 0; j < pSong.tracks(); j++)
-							{
-								if (j != i)
-								{
-									pSong._trackMuted[j] = true;
-								}
-								else
-								{
-									pSong._trackMuted[j] = false;
-								}
-							}
-							// now save the song
-							std::ostringstream filename;
-							filename << rootname;
-							filename << "-track "
-								<< std::setprecision(2) << (unsigned)i;
-							SaveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode,isFloat);
-							return;
-						}
-					}
-					current = 256;
-					SaveEnd();
-				}
-			else if (m_outputtype == 1 || m_outputtype == 2)
+					else if (m_outputtype == 1 || m_outputtype == 2)
 			{
 				// Clear clipboardmem if needed (should not. it's a safety measure)
 				if ( clipboardmem.size() > 0)
@@ -615,41 +599,6 @@ namespace psycle {
 				}
 				clipboardmem.clear();
 
-			}
-			else if (m_savetracks.GetCheck())
-			{
-				CMainFrame * mainFrame = ((CMainFrame *)theApp.m_pMainWnd);
-				Song& pSong = mainFrame->projects()->active_project()->song();
-
-				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-				const int real_bits[]={8,16,24,32,32};
-				const bool isFloat = (bits == 4);
-
-				for (int i = current+1; i < pSong.tracks(); i++)
-				{
-					if (!_Muted[i])
-					{
-						current = i;
-						for (int j = 0; j < pSong.tracks(); j++)
-						{
-							if (j != i)
-							{
-								pSong._trackMuted[j] = true;
-							}
-							else
-							{
-								pSong._trackMuted[j] = false;
-							}
-						}
-						// now save the song
-						char filename[MAX_PATH];
-						sprintf(filename,"%s-track %.2u.wav",rootname.c_str(),i);
-//						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
-						return;
-					}
-				}
-				memcpy(pSong._trackMuted,_Muted,sizeof(pSong._trackMuted));
-			}
 */
 			m_text.SetWindowText("");
 
