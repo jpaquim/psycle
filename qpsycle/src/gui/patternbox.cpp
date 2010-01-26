@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/song.h>
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 
 #include "patternbox.hpp"
 #include "mainwindow.hpp"
@@ -81,9 +81,9 @@ namespace qpsycle {
 
 		bool isFirst = true;
 
-		psycle::core::Sequence::patterniterator it = song_->patternSequence().patternbegin();
+		psycle::core::Sequence::patterniterator it = song_->sequence().patternbegin();
 		std::map<std::string, CategoryItem *> categoryMap;
-		for ( ; it < song_->patternSequence().patternend(); ++it) {
+		for ( ; it < song_->sequence().patternend(); ++it) {
 		  psycle::core::Pattern *pattern = *it;
 		  const std::string& categoryName = pattern->category();
 		  CategoryItem *categoryItem = categoryMap[categoryName];
@@ -235,7 +235,7 @@ when the pattern selected changes.
 				psycle::core::Pattern* pattern = patItr->second;
 				patternMap.erase( patItr );
 
-				song()->patternSequence().removePattern( pattern );
+				song()->sequence().removePattern( pattern );
 				emit patternDeleted();
 
 				CategoryItem* parentCatItem = (CategoryItem*)patItem->parent();

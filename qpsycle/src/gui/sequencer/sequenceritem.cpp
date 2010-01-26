@@ -17,7 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <psycle/core/patternsequence.h>
+#include <psycle/core/pattern.h>
 #include <psycle/core/player.h>
 
 #include "sequencerview.hpp"
@@ -150,18 +150,18 @@ namespace qpsycle {
 
 	void SequencerItem::onReplaceWithCloneActionTriggered()
 	{
-		psycle::core::SinglePattern* pattern = sequenceEntry()->pattern();
+		psycle::core::Pattern* pattern = sequenceEntry()->pattern();
 		std::string clonedPatName = pattern->name()+" Clone";
 
 		// Clone the pattern in the song.
-		psycle::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
+		psycle::core::Pattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
 		setNewPattern( clonedPat );
 		update();
 
 		emit newPatternCreated( clonedPat );
 	}
 
-	void SequencerItem::setNewPattern( psycle::core::SinglePattern *newPattern )
+	void SequencerItem::setNewPattern( psycle::core::Pattern *newPattern )
 	{
 		sequenceEntry_->setPattern( newPattern );
 	}

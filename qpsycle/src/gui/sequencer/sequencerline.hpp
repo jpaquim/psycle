@@ -23,7 +23,7 @@
 namespace psycle { namespace core {
 	class SequenceLine;
 	class SequenceEntry; 
-	class SinglePattern;
+	class Pattern;
 }}
 
 #include <psycle/core/signalslib.h>
@@ -49,7 +49,7 @@ namespace qpsycle {
 		void setSequenceLine( psycle::core::SequenceLine * line );
 		psycle::core::SequenceLine *sequenceLine() const; 
 
-		void addItem( psycle::core::SinglePattern* pattern );
+		void addItem( psycle::core::Pattern* pattern );
 		void insertItem( SequencerItem *item );
 		void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
 

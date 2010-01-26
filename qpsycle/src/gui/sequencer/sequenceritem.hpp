@@ -21,8 +21,8 @@
 #define SEQUENCERITEM_H
 
 namespace psycle { namespace core {
-class SequenceEntry;
-class SinglePattern;
+	class SequenceEntry;
+	class Pattern;
 }}
 
 #include <QGraphicsItem>
@@ -31,7 +31,6 @@ class SinglePattern;
 
 class QKeyEvent;
 class QGraphicsSceneMouseEvent;
-
 
 namespace qpsycle {
 
@@ -74,10 +73,10 @@ namespace qpsycle {
 		void deleteRequest( SequencerItem* );
 		void moved( SequencerItem*, QPointF diff );
 		void changedLine( SequencerItem*, int );
-		void newPatternCreated( psycle::core::SinglePattern * );
+		void newPatternCreated( psycle::core::Pattern * );
 
 	private:
-		void setNewPattern( psycle::core::SinglePattern *newPattern );
+		void setNewPattern( psycle::core::Pattern *newPattern );
 
 		psycle::core::SequenceEntry *sequenceEntry_;
 

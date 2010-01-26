@@ -18,9 +18,9 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/audiodrivers/audiodriver.h>
-#include <psycle/core/patternsequence.h>
+#include <psycle/core/sequence.h>
 #include <psycle/core/player.h>
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 #include <psycle/core/song.h>
 #include <psycle/core/machinefactory.h>
 
@@ -597,7 +597,7 @@ namespace qpsycle {
 		psycle::core::Pattern* pattern0 = new psycle::core::Pattern();
 		pattern0->setCategory("New Category");
 
-		psycle::core::SequenceLine *seqLine = blankSong->patternSequence().createNewLine();
+		psycle::core::SequenceLine *seqLine = blankSong->sequence().createNewLine();
 		seqLine->createEntry( pattern0, 0 );
 
 		return blankSong;
@@ -1071,7 +1071,7 @@ namespace qpsycle {
 			visiblePattern = patView_->pattern();
 			if ( visiblePattern ) {
 				double entryStart = 0;
-				bool isPlayPattern = song_->patternSequence().getPlayInfo( visiblePattern, psycle::core::Player::singleton().playPos() , 4 , entryStart );
+				bool isPlayPattern = song_->sequence().getPlayInfo( visiblePattern, psycle::core::Player::singleton().playPos() , 4 , entryStart );
 
 				if ( isPlayPattern )
 					patView_->onTick( psycle::core::Player::singleton().playPos() - entryStart ) ;

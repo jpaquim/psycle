@@ -58,7 +58,7 @@ bool Psy2Filter::testFormat(const std::string & fileName) {
 	return !std::strcmp(Header,"PSY2SONG");
 }
 
-void Psy2Filter::preparePatternSequence( CoreSong & song) {
+void Psy2Filter::prepareSequence( CoreSong & song) {
 	seqList.clear();
 	song.sequence().removeAll();
 	// here we add in one single Line the patterns
@@ -74,7 +74,7 @@ bool Psy2Filter::load(const std::string & fileName, CoreSong & song) {
 	std::cout << "PSY2 format"<< std::endl;
 
 	song.clear();
-	preparePatternSequence(song);
+	prepareSequence(song);
 
 	// skip header
 	file.Skip(8);

@@ -98,7 +98,7 @@ class PSYCLE__CORE__DECL Psy3Filter : public PsyFilterBase
 	private:
 		void RestoreMixerSendFlags(CoreSong& song);
 		PatternEvent convertEntry( unsigned char* data) const;
-		void preparePatternSequence(CoreSong& song);
+		void prepareSequence(CoreSong& song);
 
 		std::vector<int> seqList;
 		PatternCategory* singleCat;

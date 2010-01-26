@@ -23,7 +23,7 @@
 namespace psycle { namespace core {
 	class Song;
 	class SequenceLine;
-	class SinglePattern;
+	class Pattern;
 }}
 
 #include <psycle/core/signalslib.h>
@@ -50,7 +50,7 @@ class SequencerDraw : public QGraphicsView, public boost::signalslib::trackable
 public:
 	SequencerDraw( SequencerView *seqView );
 
-	void addPattern( psycle::core::SinglePattern *pattern );
+	void addPattern( psycle::core::Pattern *pattern );
 
 	SequencerView *sequencerView() const { return seqView_; }
 	PlayLine *pLine() const { return pLine_; }
@@ -76,10 +76,10 @@ public slots:
 	void onPlayLineMoved( double newXPos );
 	void onItemMoved( SequencerItem* item, QPointF diff );
 	void onItemChangedLine( SequencerItem *item, int direction );
-	void onNewPatternCreated( psycle::core::SinglePattern *newPattern );
+	void onNewPatternCreated( psycle::core::Pattern *newPattern );
 
 signals:
-	void newPatternCreated( psycle::core::SinglePattern * );
+	void newPatternCreated( psycle::core::Pattern * );
 
 protected:
 	virtual void keyPressEvent( QKeyEvent *event );

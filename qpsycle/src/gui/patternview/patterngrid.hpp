@@ -20,7 +20,7 @@
 #ifndef PATTERNGRID_H
 #define PATTERNGRID_H
 
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 
 #include <map>
 
@@ -121,7 +121,7 @@ public:
 	~PatternGrid();
 
 	void addEvent( const ColumnEvent & event );
-	psycle::core::SinglePattern *pattern();
+	psycle::core::Pattern *pattern();
 	enum SelDirection { nodir = 0, north = 1, west = 2, east = 4, south = 8};
 	PatternDraw *patDraw() { return patDraw_; }
 	void patDraw( PatternDraw *pd ) { patDraw_ = pd; }

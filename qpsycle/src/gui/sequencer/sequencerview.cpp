@@ -113,7 +113,7 @@ namespace qpsycle {
 		toolBar_->addWidget( snapCheckbox_ );
 	}
 
-	void SequencerView::addPattern( psycle::core::SinglePattern *pattern )
+	void SequencerView::addPattern( psycle::core::Pattern *pattern )
 	{
 		if ( seqDraw_->selectedLine() ) {
 			seqDraw_->selectedLine()->addItem( pattern );
@@ -123,8 +123,8 @@ namespace qpsycle {
 	void SequencerView::updatePlayPos()
 	{
 		int beatPxLength = seqDraw_->beatPxLength();
-		int  xPos = std::min(song()->patternSequence().tickLength()* beatPxLength, psycle::core::Player::singleton().playPos() * beatPxLength);
-		int oxPos = std::min(song()->patternSequence().tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
+		int  xPos = std::min(song()->sequence().tickLength()* beatPxLength, psycle::core::Player::singleton().playPos() * beatPxLength);
+		int oxPos = std::min(song()->sequence().tickLength()* beatPxLength, oldPlayPos_ * beatPxLength);
 		if (oxPos != xPos) {
 			seqDraw_->pLine()->setPos( xPos, 0 );
 		}
