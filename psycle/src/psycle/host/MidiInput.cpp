@@ -5,18 +5,11 @@
 #include "MidiInput.hpp"
 #include "InputHandler.hpp"
 #include "Configuration.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/core/plugin.h>
 #include <psycle/core/vstplugin.h>
 using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Player.hpp"
-#include "Plugin.hpp"
-#include "VstHost24.hpp"
-#endif
 #include "ChildView.hpp"
 #include "MainFrm.hpp"
 #include <psycle/helpers/math.hpp>
@@ -37,16 +30,16 @@ using namespace helpers::math;
 		CMidiInput * CMidiInput::s_Instance(0);	// the current instance
 
 		CMidiInput::CMidiInput() : 
-			m_midiInHandlesTried( 0 ),
-			m_patIn( 0 ),
-			m_patOut( 0 ),
-			m_patCount( 0 ),
-			m_timingCounter( 0 ),
-			m_timingAccumulator( 0 ),
-			m_baseStampTime( 0 ),
-			m_reSync( false ),
-			m_synced( false ),
-			m_syncing( false )
+			m_midiInHandlesTried(0),
+			m_patIn(0),
+			m_patOut(0),
+			m_patCount(0),
+			m_timingCounter(0),
+			m_timingAccumulator(0),
+			m_baseStampTime(0),
+			m_reSync(false),
+			m_synced(false),
+			m_syncing(false)
 		{
 			assert(!Instance());
 
@@ -639,7 +632,7 @@ using namespace helpers::math;
 							// machine active?
 							if( program < MAX_MACHINES )
 							{  
-								if (Global::song().machine( program ) )
+								if (Player::singleton().song().machine(program) )
 								{
 									// ok, map
 									SetGenMap( channel, program );
@@ -891,7 +884,7 @@ using namespace helpers::math;
 					}
 
 					// invalid machine/channel?
-					if( !Global::song().machine( busMachine ) && note != 254 )
+					if( !Player::singleton().song().machine( busMachine ) && note != 254 )
 					{
 						return;
 					}
@@ -1064,11 +1057,11 @@ using namespace helpers::math;
 					else
 					{
 						// midi controllers pass-through
-						int mgn = Global::song().seqBus;
+						int mgn = Player::singleton().song().seqBus;
 
 						if (mgn < MAX_MACHINES)
 						{
-							Machine* pMachine = Global::song().machine(mgn);
+							Machine* pMachine = Player::singleton().song().machine(mgn);
 							if (pMachine)
 							{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -1364,7 +1357,7 @@ using namespace helpers::math;
 				int data1 = m_midiBuffer[ m_patOut ].entry.command();
 				int data2 = m_midiBuffer[ m_patOut ].entry.parameter();
 				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Global::song().machine( machine );
+				Plugin * pMachine = (Plugin*) Player::singleton().song().machine( machine );
 				// make sure machine is still valid
 				if( pMachine || note == 254 )
 				{
@@ -1446,9 +1439,9 @@ using namespace helpers::math;
 							// simulate a tracker 'tick' (i.e. a line change for all machines)
 							for (int tc=0; tc<MAX_MACHINES; tc++)
 							{
-								if( Global::song().machine(tc))
+								if( Player::singleton().song().machine(tc))
 								{
-									Global::song().machine(tc)->Tick();
+									Player::singleton().song().machine(tc)->Tick();
 								}
 							}
 
@@ -1479,7 +1472,7 @@ using namespace helpers::math;
 
 			// Master machine initiates work
 			//
-			Global::song().machine(MASTER_INDEX)->Work( amount );
+			Player::singleton().song().machine(MASTER_INDEX)->Work(amount);
 			return true;
 		}
 	}

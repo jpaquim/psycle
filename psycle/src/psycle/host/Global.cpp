@@ -49,6 +49,7 @@ Global::~Global() {
 
 extern CPsycleApp theApp;
 
+
 Song& Global::song() {
 	return ((CMainFrame*) theApp.m_pMainWnd)->projects()->active_project()->song();
 }
