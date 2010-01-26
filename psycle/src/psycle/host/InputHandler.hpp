@@ -463,10 +463,18 @@ namespace psycle
 		/// input handler, keyboard configuration.
 		class InputHandler  
 		{
-		public:
+		private:
 			/// constructor.
 			InputHandler();
 			virtual ~InputHandler();
+
+		public:
+			static InputHandler& instance() {	
+				static InputHandler handler;
+				return handler; 
+			}
+
+
 			void BuildCmdLUT();
 		private:
 			/// get key modifier index.

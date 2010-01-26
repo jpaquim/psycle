@@ -175,11 +175,11 @@ namespace psycle {
 				return false;
 		}
 
-		void PatternView::EnterData(UINT nChar,UINT nFlags)
+		void PatternView::EnterData(UINT nChar, UINT nFlags)
 		{
-			if ( editcur.col == 0 ) {
+			if (editcur.col == 0) {
 				// get command
-				CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
+				CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar, nFlags);
 				EnterNote(cmd.GetNote());
 			} else {
 				MSBPut(nChar);
@@ -191,17 +191,11 @@ namespace psycle {
 		#ifdef _DEBUG_PATVIEW
 			TRACE("PreparePatternRefresh\n");
 		#endif
-
 			Song* song = this->song();
 			CRect rect;	
-			updateMode=drawMode;					// this is ununsed for patterns
-			
-#if PSYCLE__CONFIGURATION__USE_PSYCORE			
+			updateMode=drawMode;					// this is ununsed for patterns		
 			int beat_zoom = project()->beat_zoom();
 			const int plines = pattern()->beats() * beat_zoom;
-#else
-			const int plines = song->patternLines[song->playOrder[editPosition]];
-#endif
 			const int snt = song->tracks();
 			if ( editcur.track >= snt ) // This should only happen when changing the song tracks.
 			{							// Else, there is a problem.
@@ -513,20 +507,12 @@ namespace psycle {
 				break;
 			case draw_modes::playback:
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				psycle::core::Player & player(psycle::core::Player::singleton());
 				int ticks = static_cast<int>(project()->beat_zoom());
 				int pos = 0;
 				psycle::core::SequenceEntry* entry = this->main()->m_wndSeq.selected_entry();
 				pos = (player.playPos() - entry->tickPosition()) * ticks;
-				if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) )
-#else
-				int pos = Global::pPlayer->_lineCounter;
-				if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
-					(song->playOrder[editPosition] == song->playOrder[Global::pPlayer->_sequencePosition]))
-#endif
-
-					{
+				if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) ) {
 						if (pos != playpos)
 						{
 							newplaypos = pos;
@@ -675,7 +661,7 @@ namespace psycle {
 						{
 							if (newselpos.left < selpos.left)
 							{
-								rect.left = newselpos.left;
+								rect.left = newselpos.left;								
 								if (newselpos.right > selpos.right)
 								{
 									rect.right = newselpos.right;
@@ -7151,13 +7137,11 @@ namespace psycle {
 			}
 		}
 
-		void PatternView::Stop()
-		{			
+		void PatternView::Stop() {			
 			parent_->OnBarstop();
 		}
 
-		void PatternView::PlaySong() 
-		{
+		void PatternView::PlaySong()  {
 			child_view()->OnBarplay();
 		}
 

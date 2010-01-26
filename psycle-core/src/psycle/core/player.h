@@ -40,7 +40,10 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		~Player();
 
 	public:
-		Player static & singleton();
+		static Player& singleton() {			
+			static Player player;
+			return player; 
+		}
 
 	public:
 		/// used by the plugins to indicate that they need redraw.
@@ -52,14 +55,14 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			AudioDriver & driver() { return *driver_; }
+			AudioDriver& driver() { return *driver_; }
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			AudioDriver const & driver() const { return *driver_; }
+			const AudioDriver& driver() const { return *driver_; }
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			void setDriver(AudioDriver & driver);
+			void setDriver(AudioDriver& driver);
 		private:
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			AudioDriver * driver_;
+			AudioDriver* driver_;
 			DummyDriver* default_driver_; // todo replace with a silent driver
 	///\}
 
@@ -86,16 +89,15 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			static float* Work(void* context, int samples) {
 				return reinterpret_cast<Player*>(context)->Work(samples);
 			}
-		public:
 			/// entrance for the callback function (audiodriver)
-			float * Work(int samples);
+			float* Work(int samples);
 	///\}
 
 	///\name song
 	///\{
 		public:
-			CoreSong const & song() const { return *song_; }
-			CoreSong & song() { return *song_; }
+			const CoreSong& song() const { return *song_; }
+			CoreSong& song() { return *song_; }
 			void song(CoreSong & song) {
 				if(song_ && &song != song_) {
 					scoped_lock lock(*song_);
@@ -109,7 +111,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 				}
 			}
 		private:
-			CoreSong * song_;
+			CoreSong* song_;
 	///\}
 
 	///\name secondary output device, write to a file
@@ -127,9 +129,11 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			/// wether the recording device has been started.
 			bool recording() const { return recording_; }
 			/// for wave render set the filename
-			void setFileName(std::string const & fileName) { fileName_ = fileName; }
+			void setFileName(const std::string& fileName) { 
+				fileName_ = fileName;
+			}
 			/// gets the wave to render filename
-			const std::string fileName() const { return fileName_; }
+			const std::string& fileName() const { return fileName_; }
 		private:
 			/// wether the recording device has been started.
 			bool recording_;
@@ -145,8 +149,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\name time info
 	///\{
 		public:
-			PlayerTimeInfo & timeInfo() throw() { return timeInfo_; }
-			PlayerTimeInfo const & timeInfo() const throw() { return timeInfo_; }
+			PlayerTimeInfo& timeInfo() throw() { return timeInfo_; }
+			const PlayerTimeInfo& timeInfo() const throw() { return timeInfo_; }
 		private:
 			PlayerTimeInfo timeInfo_;
 	///\}
@@ -225,12 +229,10 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	
 	private:
 		Sequencer sequencer_;
-
 		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 		Machine::id_type prev_machines_[MAX_TRACKS];
 		/// temporary buffer to get all the audio from master (which work in small chunks), and send it to the soundcard after converting it to float.
 		float * buffer_;
-
 		/// dither handler
 		dsp::Dither dither_;
 
