@@ -34,14 +34,6 @@ namespace {
 
 namespace { bool const ultra_trace(false); }
 
-Player & Player::singleton() {
-	// note: keep sure a player instance is created from the gui
-	// before starting audiothread
-	// or use single threaded only
-	static Player player;
-	return player; 
-}
-
 Player::Player()
 :
 	Tweaker(),
