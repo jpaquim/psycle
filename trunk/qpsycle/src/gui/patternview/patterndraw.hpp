@@ -22,7 +22,7 @@
 
 namespace psycle { namespace core {
 class Song;
-class SinglePattern;
+class Pattern;
 }}
 
 #include <map>
@@ -123,7 +123,7 @@ private:
 	LineNumberColumn *lineNumCol_;
 	TrackHeader *trackHeader_;
 
-	psycle::core::SinglePattern *pattern_;
+	psycle::core::Pattern *pattern_;
 };
 
 } // namespace qpsycle

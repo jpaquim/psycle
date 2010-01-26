@@ -123,7 +123,7 @@ class PSYCLE__CORE__DECL Psy2Filter : public PsyFilterBase {
 		unsigned char octave;
 		int instSelected; //-> map to auxcolselected
 
-		void preparePatternSequence(CoreSong& song);
+		void prepareSequence(CoreSong& song);
 		PatternEvent convertEntry( unsigned char * data ) const;
 };
 

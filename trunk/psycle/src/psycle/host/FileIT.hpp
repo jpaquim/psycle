@@ -20,7 +20,7 @@ namespace psycle
 			bool IsValid();
 
 			LONG ImportPatterns(Song * s);
-			LONG ImportSinglePattern(Song * s, int patIdx,int iTracks);	
+			LONG ImportPattern(Song * s, int patIdx,int iTracks);	
 
 			bool ImportInstruments(Song * s, LONG iInstrStart);
 			LONG ImportInstrument(Song *s, LONG iStart, int idx);

@@ -80,7 +80,7 @@ namespace host{
 		m_Header.restartpos = 0;
 		m_Header.channels = song.tracks();
 		int highest = 0;
-		for (PatternSequence::patterniterator pite = song.sequence().patternbegin(); pite != song.sequence().patternend(); pite++)
+		for (Sequence::patterniterator pite = song.sequence().patternbegin(); pite != song.sequence().patternend(); pite++)
 		{
 			if ((*pite)->id() > highest) highest = (*pite)->id();
 		}

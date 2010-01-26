@@ -17,7 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <psycle/core/patternsequence.h>
+#include <psycle/core/pattern.h>
 
 #include "sequencerview.hpp"
 #include "sequencerdraw.hpp"
@@ -76,7 +76,7 @@ psycle::core::SequenceLine *SequencerLine::sequenceLine() const
 	return seqLine_;
 }
 
-	void SequencerLine::addItem( psycle::core::SinglePattern* pattern )
+	void SequencerLine::addItem( psycle::core::Pattern* pattern )
 {
 	qDebug( "SequencerLine::addItem called\n" );
 	double endTick = sequenceLine()->tickLength();
@@ -101,7 +101,7 @@ void SequencerLine::addEntry( psycle::core::SequenceEntry* entry )
 	connect( item, SIGNAL( moved( SequencerItem*, QPointF ) ),
 			sDraw_, SLOT( onItemMoved( SequencerItem*, QPointF ) ) );
 	connect( item, SIGNAL( changedLine( SequencerItem*, int ) ), sDraw_, SLOT( onItemChangedLine( SequencerItem*, int ) ) );
-	connect( item, SIGNAL( newPatternCreated( psycle::core::SinglePattern* ) ), sDraw_, SLOT( onNewPatternCreated( psycle::core::SinglePattern* ) ) );
+	connect( item, SIGNAL( newPatternCreated( psycle::core::Pattern* ) ), sDraw_, SLOT( onNewPatternCreated( psycle::core::Pattern* ) ) );
 
 	item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
 

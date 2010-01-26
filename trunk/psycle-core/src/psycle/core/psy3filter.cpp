@@ -64,7 +64,7 @@ bool Psy3Filter::testFormat(const std::string & fileName) {
 }
 
 
-void Psy3Filter::preparePatternSequence(CoreSong & song) {
+void Psy3Filter::prepareSequence(CoreSong & song) {
 	seqList.clear();
 	song.sequence().removeAll();
 	// here we add in one single Line the patterns
@@ -91,7 +91,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 
 	///\todo:
 	song.clear();
-	preparePatternSequence(song);
+	prepareSequence(song);
 	//size_t filesize = file.FileSize();
 	uint32_t version = 0;
 	uint32_t size = 0;

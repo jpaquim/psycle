@@ -111,7 +111,7 @@ namespace psycle
 			// get pattern data
 			int nextPatStart = iHeaderLen+60;
 			for(int j=0;j<iNoPatterns&&nextPatStart>0;j++)
-				nextPatStart = ImportSinglePattern(s,nextPatStart,j,iNoChannels);
+				nextPatStart = ImportPattern(s,nextPatStart,j,iNoChannels);
 
 			return nextPatStart;
 		}
@@ -152,7 +152,7 @@ namespace psycle
 
 
 		// return address of next pattern, 0 for invalid
-		LONG CFileXM::ImportSinglePattern(Song *s, LONG start, int patIdx, int iTracks)
+		LONG CFileXM::ImportPattern(Song *s, LONG start, int patIdx, int iTracks)
 		{
 
 			int iHeaderLen = ReadInt4(start);

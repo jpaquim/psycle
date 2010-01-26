@@ -40,7 +40,7 @@
 #include <psycle/core/machinekey.hpp>
 #include <psycle/core/patternpool.h>
 #include <psycle/core/plugininfo.h>
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/audiodrivers/wavefileout.h>

@@ -60,10 +60,10 @@ namespace qpsycle {
 		scene_->addItem( seqArea_ );
 		seqArea_->setPos( 0, 0 );
 
-		psycle::core::PatternSequence & patternSequence = sequencerView()->song()->patternSequence();
+		psycle::core::Sequence & sequence = sequencerView()->song()->sequence();
 
-		std::vector<psycle::core::SequenceLine*>::iterator it = patternSequence.begin();
-		for ( ; it < patternSequence.end(); it++) {
+		std::vector<psycle::core::SequenceLine*>::iterator it = sequence.begin();
+		for ( ; it < sequence.end(); it++) {
 			psycle::core::SequenceLine* seqLine = *it;
 			onNewLineCreated(seqLine);
 		}
@@ -71,9 +71,9 @@ namespace qpsycle {
 		if(!lines_.empty()) {
 			setSelectedLine(lines_[0]);
 
-			patternSequence.newLineCreated.connect
+			sequence.newLineCreated.connect
 				(boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
-			patternSequence.newLineInserted.connect
+			sequence.newLineInserted.connect
 				(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
 			#if 0
 				/*
@@ -83,10 +83,10 @@ namespace qpsycle {
 					makeSequencerLine instead.
 					/ Magnus
 				*/
-				patternSequence.lineRemoved.connect
+				sequence.lineRemoved.connect
 				(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 			#endif
-			patternSequence.linesSwapped.connect
+			sequence.linesSwapped.connect
 				(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
 		}
 
@@ -99,7 +99,7 @@ namespace qpsycle {
 	}
 
 
-	void SequencerDraw::addPattern( psycle::core::SinglePattern *pattern )
+	void SequencerDraw::addPattern( psycle::core::Pattern *pattern )
 	{
 		if ( selectedLine() ) {
 			selectedLine()->addItem( pattern );
@@ -112,27 +112,27 @@ namespace qpsycle {
 			//    addSequencerLine();
 		} else if ( selectedLine() ) {
 			// will cause onNewLineInserted to be fired:
-			seqView_->song()->patternSequence().insertNewLine( selectedLine()->sequenceLine() );
+			seqView_->song()->sequence().insertNewLine( selectedLine()->sequenceLine() );
 		}
 	}
 
 	void SequencerDraw::deleteTrack() {
 		if(selectedLine()) {
 			// will trigger onLineRemoved
-			seqView_->song()->patternSequence().removeLine(selectedLine()->sequenceLine());
+			seqView_->song()->sequence().removeLine(selectedLine()->sequenceLine());
 		}
 	}
 
 	void SequencerDraw::moveDownTrack() {
 		if(selectedLine()) {
 			// will trigger onLinesSwapped
-			seqView_->song()->patternSequence().moveDownLine(selectedLine()->sequenceLine());
+			seqView_->song()->sequence().moveDownLine(selectedLine()->sequenceLine());
 		}
 	}
 	void SequencerDraw::moveUpTrack() {
 		if(selectedLine()) {
 			// will trigger onLinesSwapped
-			seqView_->song()->patternSequence().moveUpLine(selectedLine()->sequenceLine());
+			seqView_->song()->sequence().moveUpLine(selectedLine()->sequenceLine());
 		}
 	}
 
@@ -339,7 +339,7 @@ namespace qpsycle {
 	}
 
 
-	void SequencerDraw::onNewPatternCreated( psycle::core::SinglePattern *newPattern )
+	void SequencerDraw::onNewPatternCreated( psycle::core::Pattern *newPattern )
 	{
 		emit newPatternCreated( newPattern );
 	}

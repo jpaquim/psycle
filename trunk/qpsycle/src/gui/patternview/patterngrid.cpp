@@ -166,7 +166,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 {
 	if ( pattern() ) {
 		// find start iterator
-		psycle::core::SinglePattern::iterator it = pattern()->find_lower_nearest(startLine);
+		psycle::core::Pattern::iterator it = pattern()->find_lower_nearest(startLine);
 		psycle::core::TimeSignature signature;
 
 		int lastLinenum = -1;
@@ -1245,7 +1245,7 @@ unsigned char PatternGrid::convertDigit( int defaultValue, int scanCode, unsigne
 	return newByte;
 }
 
-psycle::core::SinglePattern* PatternGrid::pattern() {
+psycle::core::Pattern* PatternGrid::pattern() {
 	return patDraw_->patternView()->pattern();
 }
 
@@ -1292,7 +1292,7 @@ void PatternGrid::copyBlock( bool cutit )
 {  
 	isBlockCopied_=true;
 	pasteBuffer.clear();
-	std::auto_ptr<psycle::core::SinglePattern> copyPattern(pattern()->block( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 ));
+	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 ));
 
 	float start = selection().top()    / static_cast<float>( pattern()->beatZoom() );
 	float end   = ( selection().bottom()+1 ) / static_cast<float>( pattern()->beatZoom() );
@@ -1375,7 +1375,7 @@ void PatternGrid::deleteBlock( )
 
 void PatternGrid::insertRow() 
 {
-	std::auto_ptr<psycle::core::SinglePattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
+	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
 
 	float start = cursor().line() / static_cast<float>( pattern()->beatZoom() );
 	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
@@ -1388,7 +1388,7 @@ void PatternGrid::insertRow()
 
 void PatternGrid::deleteRow() 
 {
-	std::auto_ptr<psycle::core::SinglePattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
+	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
 
 	float start = cursor().line()    / static_cast<float>( pattern()->beatZoom() );
 	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );

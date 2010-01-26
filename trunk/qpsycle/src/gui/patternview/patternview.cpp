@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/song.h>
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 #include <psycle/core/player.h>
 
 #include "../global.hpp"
@@ -243,7 +243,7 @@ void PatternView::setNumberOfTracks( int numTracks )
 		patternGrid()->update();
 }
 
-void PatternView::setPattern( psycle::core::SinglePattern *pattern )
+void PatternView::setPattern( psycle::core::Pattern *pattern )
 {
 	qDebug( "PatternView::setPattern(%p)\n", pattern );
 	pattern_ = pattern;
