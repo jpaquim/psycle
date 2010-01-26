@@ -4127,21 +4127,20 @@ namespace psycle {
 		void PatternView::MousePatternTweak(int machine, int command, int value)
 		{
 			// UNDO CODE MIDI PATTERN TWEAK
-			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
-			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+			// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+			if (value < 0) value = 0x8000-value;
+			// no else incase of neg overflow
+			if (value > 0xffff) value = 0xffff;
 
 			if(child_view()->viewMode == view_modes::pattern && bEditMode)
 			{ 
-				// write effect
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				//todo: Add line positioning code
-				int line = 0;
-#else
-				int line = Global::pPlayer->_lineCounter;
-#endif
-				unsigned char * toffset;
-				if (Global::pPlayer->playing()&&Global::pConfig->_followSong)
-				{
+				//todo: Add line positioning code				
+				psycle::core::Player& player(psycle::core::Player::singleton());
+				int ticks = static_cast<int>(project()->beat_zoom());				
+				psycle::core::SequenceEntry* entry = this->main()->m_wndSeq.selected_entry();
+				int line = (player.playPos() - entry->tickPosition()) * ticks;			
+
+				if (player.playing() && Global::pConfig->_followSong) {
 					if(song()->_trackArmedCount)
 					{
 						SelectNextTrack();
@@ -4150,29 +4149,25 @@ namespace psycle {
 					{	
 						return;
 					}
-				}
-				else
-				{
+				} else {
 					line = editcur.line;
 				}
-
 				// build entry
-				PatternEvent *entry = (PatternEvent*) toffset;
-				if (entry->note() >= notecommands::release)
-				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweak_slide)))
-#else
-					if ((entry->machine() != machine) || (entry->command() != ((value>>8)&255)) || (entry->parameter() != (value&255)) || (entry->instrument() != command) || ((entry->note() != notecommands::tweak) && (entry->note() != notecommands::tweakeffect) && (entry->note() != notecommands::tweakslide)))
-#endif
-					{
-						entry->setMachine(machine);
-						entry->setCommand((value>>8)&255);
-						entry->setParameter(value&255);
-						entry->setInstrument(command);
-						entry->setNote(notecommands::tweak);
-
-						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+				PatternEvent ev;
+				if (ev.note() >= notecommands::release) {
+					if ((ev.machine() != machine) || 
+						(ev.command() != ((value>>8)&255)) || 
+						(ev.parameter() != (value&255)) || 
+						(ev.instrument() != command) || 
+						((ev.note() != notecommands::tweak) && (ev.note() != notecommands::tweak_slide))) {
+						ev.setMachine(machine);
+						ev.setCommand((value>>8)&255);
+						ev.setParameter(value&255);
+						ev.setInstrument(command);
+						ev.setNote(notecommands::tweak);
+						ev.set_track(editcur.track);				
+						pattern()->insert(line_pos(line,true), ev);
+						NewPatternDraw(editcur.track, editcur.track, editcur.line, editcur.line);
 						Repaint(draw_modes::data);
 					}
 				}
@@ -4951,12 +4946,9 @@ namespace psycle {
 			return true;
 		}
 
-		void PatternView::ClearCurr() // delete content at Cursor pos.
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void PatternView::ClearCurr() { // delete content at Cursor pos.
 			psycle::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
-			// todo AddUndo		
 			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
@@ -4994,23 +4986,6 @@ namespace psycle {
 					}
 				}
 			} 
-#else
-			// UNDO CODE CLEAR
-			const int ps = _ps();
-			unsigned char * offset = _ptrack(ps);
-			unsigned char * toffset = _ptrackline(ps);
-
-			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-
-			// &&&&& hardcoded # of bytes per event
-			if ( editcur.col == 0 )
-			{
-				memset(offset+(editcur.line*MULTIPLY),255,3*sizeof(char));
-				memset(offset+(editcur.line*MULTIPLY)+3,0,2*sizeof(char));
-			}
-			else if (editcur.col < 5 )	{	*(toffset+(editcur.col+1)/2)= 255; }
-			else						{	*(toffset+(editcur.col+1)/2)= 0; }
-#endif
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
 			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
@@ -5020,9 +4995,7 @@ namespace psycle {
 			Repaint(draw_modes::data);
 		}
 
-		void PatternView::DeleteCurr()
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void PatternView::DeleteCurr() {
 			psycle::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
 			int patlines = static_cast<int>(beat_zoom * pat->beats());
@@ -5033,7 +5006,6 @@ namespace psycle {
 				else
 					editcur.line--;
 			}
-			// todo AddUndo		
 			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
@@ -5060,29 +5032,6 @@ namespace psycle {
 					}
 				}
 			} 
-#else
-			// UNDO CODE DELETE
-			const int ps = _ps();
-			unsigned char * offset = _ptrack(ps);
-			int patlines = song()->patternLines[ps];
-
-			if ( Global::pInputHandler->bFT2DelBehaviour )
-			{
-				if(editcur.line==0)
-					return;
-				else
-					editcur.line--;
-			}
-
-			AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
-
-			int i;
-			for (i=editcur.line; i < patlines-1; i++)
-				memcpy(offset+(i*MULTIPLY), offset+((i+1)*MULTIPLY), EVENT_SIZE);
-
-			PatternEvent blank;
-			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
-#endif
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
@@ -5090,16 +5039,10 @@ namespace psycle {
 			Repaint(draw_modes::data);
 		}
 
-		void PatternView::InsertCurr()
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void PatternView::InsertCurr() {
 			psycle::core::Pattern* pat = pattern();
 			double beat_zoom = project()->beat_zoom();
-
-			int patlines = static_cast<int>(beat_zoom * pat->beats());
-			
-			// todo AddUndo
-			
+			int patlines = static_cast<int>(beat_zoom * pat->beats());				
 			psycle::core::Pattern::iterator it;
 			double low = (editcur.line - 0.5) / beat_zoom;
 			double up  = (editcur.line + 0.5) / beat_zoom;
@@ -5120,22 +5063,6 @@ namespace psycle {
 						it = pat->insert(new_pos, old_event);
 					}
 			}
-
-#else
-			// UNDO CODE INSERT
-			const int ps = _ps();
-			unsigned char * offset = _ptrack(ps);
-			int patlines = song()->patternLines[ps];
-
-			AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
-
-			int i;
-			for (i=patlines-1; i > editcur.line; i--)
-				memcpy(offset+(i*MULTIPLY), offset+((i-1)*MULTIPLY), EVENT_SIZE);
-
-			PatternEvent blank;
-			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);			
-#endif
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
@@ -5256,11 +5183,7 @@ namespace psycle {
 		{
 			//reinitialise the select bar state
 			blockSelectBarState = 1;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE		
 			const int nl = static_cast<int>(project()->beat_zoom() * pattern()->beats());
-#else
-			const int nl = song()->patternLines[_ps()];
-#endif
 
 			editcur.line -= x;
 
@@ -5284,13 +5207,7 @@ namespace psycle {
 		{
 			//reinitialise the select bar state
 			blockSelectBarState = 1;
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE		
 			const int nl = static_cast<int>(project()->beat_zoom() * pattern()->beats());
-#else
-			const int nl = song()->patternLines[_ps()];
-#endif
-
 			// <sampler> a bit recoded. 
 			if (x<0) //kind of trick used to advance track (related to chord mode).
 			{
@@ -5362,174 +5279,55 @@ namespace psycle {
 		//////////////////////////////////////////////////////////////////////
 		// Pattern Modifier functions ( Copy&paste , Transpose, ... )
 
-		void PatternView::patCut()
-		{
-			if(child_view()->viewMode == view_modes::pattern)
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void PatternView::patCut() {
+			if (child_view()->viewMode == view_modes::pattern) {
 				patBufferLines = project()->beat_zoom() * pattern()->beats();
 				block_buffer_pattern_ = *pattern();
 				project()->cmd_manager()->ExecuteCommand(new PatDeleteCommand(this));
-#else
-				// UNDO CODE PATT CUT
-				const int ps = _ps();
-				unsigned char *soffset = _ppattern(ps);
-				PatternEvent blank;
-
-				patBufferLines = song()->patternLines[ps];
-				AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
-
-				int length = patBufferLines*EVENT_SIZE*MAX_TRACKS;
-				
-				memcpy(patBufferData,soffset,length);
-				for	(int c=0; c<length; c+=EVENT_SIZE)
-				{
-					memcpy(soffset,&blank,EVENT_SIZE);
-					soffset+=EVENT_SIZE;
-				}
-#endif
 				patBufferCopy = true;
 				NewPatternDraw(0,song()->tracks(),0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
 		}
 
-		void PatternView::patCopy()
-		{
-			if(child_view()->viewMode == view_modes::pattern)
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void PatternView::patCopy() {
+			if(child_view()->viewMode == view_modes::pattern) {
 				block_buffer_pattern_ = *pattern();
-#else
-				const int ps = _ps();
-				unsigned char *soffset = _ppattern(ps);
-				
-				patBufferLines=song()->patternLines[ps];
-				int length=patBufferLines*EVENT_SIZE*MAX_TRACKS;
-				
-				memcpy(patBufferData,soffset,length);
-#endif				
-				patBufferCopy=true;
 			}
 		}
 
-		void PatternView::patPaste()
-		{
+		void PatternView::patPaste() {
 			// UNDO CODE PATT PASTE
-			if(patBufferCopy && child_view()->viewMode == view_modes::pattern)
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if(patBufferCopy && child_view()->viewMode == view_modes::pattern) {
 				pattern()->erase(0, pattern()->beats());
 				pattern()->insert(block_buffer_pattern_, 0, 0);
-#else
-			    const int ps = _ps();
-				unsigned char *soffset = _ppattern(ps);
-				// **************** funky shit goin on here yo with the pattern resize or some shit
-				AddUndo(ps,0,0,MAX_TRACKS,song()->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
-				if ( patBufferLines != song()->patternLines[ps] )
-				{
-					AddUndoLength(ps,song()->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
-					song()->AllocNewPattern(ps,"",patBufferLines,false);
-				}
-				memcpy(soffset,patBufferData,patBufferLines*EVENT_SIZE*MAX_TRACKS);
-#endif
 				Repaint(draw_modes::pattern);
 			}
 		}
 
-		void PatternView::patMixPaste()
-		{
+		void PatternView::patMixPaste() {
 			// UNDO CODE PATT PASTE
-			if(patBufferCopy && child_view()->viewMode == view_modes::pattern)
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if(patBufferCopy && child_view()->viewMode == view_modes::pattern) {
 				pattern()->insert(block_buffer_pattern_, 0, 0);
-#else
-				const int ps = _ps();
-				unsigned char* offset_target = _ppattern(ps);
-				unsigned char* offset_source = patBufferData;
-				// **************** funky shit goin on here yo with the pattern resize or some shit
-				AddUndo(ps,0,0,MAX_TRACKS,song()->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
-				if ( patBufferLines != song()->patternLines[ps] )
-				{
-					AddUndoLength(ps,song()->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
-					song()->AllocNewPattern(ps,"",patBufferLines,false);
-				}
-
-				for (int i = 0; i < MAX_TRACKS*patBufferLines; i++)
-				{
-					if (*offset_target == 0xFF) *(offset_target)=*offset_source;
-					if (*(offset_target+1)== 0xFF) *(offset_target+1)=*(offset_source+1);
-					if (*(offset_target+2)== 0xFF) *(offset_target+2)=*(offset_source+2);
-					if (*(offset_target+3)== 0) *(offset_target+3)=*(offset_source+3);
-					if (*(offset_target+4)== 0) *(offset_target+4)=*(offset_source+4);
-					offset_target+= EVENT_SIZE;
-					offset_source+= EVENT_SIZE;
-				}
-#endif
 				Repaint(draw_modes::pattern);
 			}
 		}
 
-		void PatternView::patDelete()
-		{
-			if(child_view()->viewMode == view_modes::pattern)
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void PatternView::patDelete() {
+			if(child_view()->viewMode == view_modes::pattern) {
 				patBufferLines = pattern()->beats() * project()->beat_zoom();
 				pattern()->erase(0, pattern()->beats());
-#else
-				// UNDO CODE PATT CUT
-				const int ps = _ps();
-				unsigned char *soffset = _ppattern(ps);
-				PatternEvent blank;
-
-				patBufferLines = song()->patternLines[ps];
-				AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
-
-				int length = patBufferLines*EVENT_SIZE*MAX_TRACKS;
-				
-				for	(int c=0; c<length; c+=EVENT_SIZE)
-				{
-					memcpy(soffset,&blank,EVENT_SIZE);
-					soffset+=EVENT_SIZE;
-				}
-#endif
 				NewPatternDraw(0,song()->tracks(),0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
 		}
 
-		void PatternView::patTranspose(int trp)
-		{
-			if(child_view()->viewMode == view_modes::pattern)
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+		void PatternView::patTranspose(int trp) {
+			if(child_view()->viewMode == view_modes::pattern) {
 				// pattern()->Transpose(trp, 
 				const int pLines = pattern()->beats() * project()->beat_zoom();
 				double pos = line_pos(editcur.line, true);
 				pattern()->Transpose(trp, pos, pattern()->beats());
-#else
-				// UNDO CODE PATT TRANSPOSE
-				const int ps = _ps();
-				unsigned char *soffset = _ppattern(ps);
-				int pLines=song()->patternLines[ps];
-				int length=pLines*EVENT_SIZE*MAX_TRACKS;
-
-				AddUndo(ps,0,0,MAX_TRACKS,pLines,editcur.track,editcur.line,editcur.col,editPosition);
-
-				for	(int c=editcur.line*EVENT_SIZE*MAX_TRACKS;c<length;c+=EVENT_SIZE)
-				{
-					int note=*(soffset+c);
-					
-					if(note<notecommands::release)
-					{
-						note+=trp;
-						if(note<0) note=0; else if(note>119) note=119;
-						soffset[c]=static_cast<unsigned char>(note);
-					}
-				}
-#endif
 				NewPatternDraw(0,song()->tracks(),editcur.line,pLines-1);
 				Repaint(draw_modes::data);
 			}
@@ -5559,9 +5357,9 @@ namespace psycle {
 				blockSel.end.track=track;
 			}
 			blockSelected=true;
-
 			Repaint(draw_modes::selection);
 		}
+
 		void PatternView::ChangeBlock(int track,int line, int col)
 		{
 			if ( blockSelected )
@@ -5637,71 +5435,30 @@ namespace psycle {
 			Repaint(draw_modes::selection);
 		}
 
-		void PatternView::BlockUnmark()
-		{
+		void PatternView::BlockUnmark() {
 			blockSelected=false;
-
 			//reinitialise the select bar state
 			blockSelectBarState = 1;
-
 			Repaint(draw_modes::selection);
 		}
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		double PatternView::line_pos(int line, bool nearest) const {
 			double pos = (line - (nearest ? 0.4999 : 0)) / static_cast<double>(project()->beat_zoom());
 			return pos;
 		}
-#endif
 
-		void PatternView::CopyBlock(bool cutit)
-		{
+		void PatternView::CopyBlock(bool cutit) {
 			// UNDO CODE HERE CUT
-			if(blockSelected)
-			{
+			if(blockSelected) {
 				isBlockCopied=true;
 				blockNTracks=(blockSel.end.track-blockSel.start.track)+1;
 				blockNLines=(blockSel.end.line-blockSel.start.line)+1;
-
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				block_buffer_pattern_ = pattern()->Clone(line_pos(blockSel.start.line, true),
 														 line_pos(blockSel.end.line+1, true),
 														 blockSel.start.track,
 														 blockSel.end.track+1);
-				if (cutit)
-					project()->cmd_manager()->ExecuteCommand(new DeleteBlockCommand(this));
-#else
-				int ps=song()->playOrder[editPosition];
-				
-				int ls=0;
-				int ts=0;
-				PatternEvent blank;
-
-				if (cutit)
-				{
-					AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
-				}
-				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
-				{
-					ls=0;
-					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
-					{
-						unsigned char *offset_target=blockBufferData+(ts*EVENT_SIZE+ls*MULTIPLY);				
-						unsigned char *offset_source=_ptrackline(ps,t,l);
-						
-						memcpy(offset_target,offset_source,EVENT_SIZE);
-						
-						if(cutit)
-							memcpy(offset_source,&blank,EVENT_SIZE);
-						
-						++ls;
-					}
-					++ts;
-				}
-#endif
-				if(cutit)
-				{
+				if (cutit) {
+					project()->cmd_manager()->ExecuteCommand(new DeleteBlockCommand(this));				
 					NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 					Repaint(draw_modes::data);
 				}
@@ -5710,28 +5467,11 @@ namespace psycle {
 
 		void PatternView::DeleteBlock()
 		{
-			if(blockSelected)
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (blockSelected) {
 				pattern()->erase(line_pos(blockSel.start.line, true),
 								 line_pos(blockSel.end.line+1, true),
 								 blockSel.start.track,
 								 blockSel.end.track+1);
-#else
-				int ps=song()->playOrder[editPosition];
-				
-				PatternEvent blank;
-
-				// UNDO CODE HERE CUT
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
-				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
-				{
-					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
-					{
-						memcpy(_ptrackline(ps,t,l),&blank,EVENT_SIZE);
-					}
-				}
-#endif
 				NewPatternDraw(blockSel.start.track,blockSel.end.track,blockSel.start.line,blockSel.end.line);
 				Repaint(draw_modes::data);
 			}
@@ -5740,64 +5480,17 @@ namespace psycle {
 		void PatternView::PasteBlock(int tx,int lx,bool mix,bool save)
 		{
 			if (isBlockCopied) {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				if (!mix) {
 					pattern()->erase(line_pos(lx, true), line_pos(lx + blockNLines+1, true) + 1,
 									 tx, tx + blockNTracks);
 				}
 				pattern()->insert(block_buffer_pattern_, line_pos(lx, true), tx);
-#else
-				int ps=song()->playOrder[editPosition];
-				int nl = song()->patternLines[ps];
-
-				// UNDO CODE PASTE AND MIX PASTE
-				if (save) AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
-
-				int ls=0;
-				int ts=0;
-				
-				//added by sampler. There is a problem. The paste action can be undo but the lines are not reverted back.
-				if (blockNLines > nl) 
-					if (child_view()->MessageBox("Do you want to autoincrease this pattern lines?","Block doesn't fit in current pattern",MB_YESNO) == IDYES)
-					{
-						song()->patternLines[ps] = blockNLines;
-						nl = blockNLines;
-					}
-				//end of added by sampler
-
-				for (int t=tx;t<tx+blockNTracks && t<song()->tracks();t++)
-				{
-					ls=0;
-					for (int l=lx;l<lx+blockNLines && l<nl;l++)
-						{
-							unsigned char* offset_source=blockBufferData+(ts*EVENT_SIZE+ls*MULTIPLY);
-							unsigned char* offset_target=_ptrackline(ps,t,l);
-							if ( mix )
-							{
-								if (*offset_target == 0xFF) *(offset_target)=*offset_source;
-								if (*(offset_target+1)== 0xFF) *(offset_target+1)=*(offset_source+1);
-								if (*(offset_target+2)== 0xFF) *(offset_target+2)=*(offset_source+2);
-								if (*(offset_target+3)== 0) *(offset_target+3)=*(offset_source+3);
-								if (*(offset_target+4)== 0) *(offset_target+4)=*(offset_source+4);
-							}
-							else
-							{
-								memcpy(offset_target,offset_source,EVENT_SIZE);
-							}
-						++ls;
-					}
-					++ts;
-				}
-#endif				
 				if (Global::pInputHandler->bMoveCursorPaste)
 				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					const int nl = pattern()->beats() * project()->beat_zoom();
-#endif
 					if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 					else editcur.line = nl-1;
 				}
-
 				bScrollDetatch=false;
 				NewPatternDraw(tx,tx+blockNTracks-1,lx,lx+blockNLines-1);
 				Repaint(draw_modes::data);
