@@ -1,3 +1,6 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+
 #pragma once
 
 #include "Psycle.hpp"
@@ -22,11 +25,14 @@ namespace psycle {
 			SequencerView(CMainFrame* main_frame);
 			~SequencerView();
 
-			void SetProject(Project* project);
+			void SetProject(Project* project) { project_ = project; }
 			Project* project() { return project_; }
 			/// To be used when changing the selected entry from outside of SequencerView.
 			/// Example: from playback, or via hotkey.
 			void SetEntry(psycle::core::SequenceEntry* entry);
+			SequenceEntry* GetEntry(int list_position);		
+			SequenceEntry* selected_entry() { return selected_entry_; } 
+			// this entry is currently used by the patternview
 			SequenceLine* ComputeSelblockLine();
 			std::map<int,SequenceEntry*>& pos_map() { return pos_map_; }
 			/// Change pattern under current position
@@ -66,18 +72,6 @@ namespace psycle {
 			void DecPosition();
 			void IncPosition(bool bRepeat=false);
 
-		private:
-			CMainFrame* main_frame_;
-			Project* project_;
-			int seqcopybuffer[MAX_SONG_POSITIONS];
-			int seqcopybufferlength;
-
-		public:
-			SequenceEntry* GetEntry(int list_position);
-		public:
-			SequenceEntry* selected_entry() { return selected_entry_; } 
-			// this entry is currently used by the patternview
-
 			void BuildPositionMap();
 			void BuildListBox();
 			void SelectItems();
@@ -88,6 +82,10 @@ namespace psycle {
 			bool sel_block_play() const { return selblock_play_; }
 
 		private:
+			CMainFrame* main_frame_;
+			Project* project_;
+			int seqcopybuffer[MAX_SONG_POSITIONS];
+			int seqcopybufferlength;
 			SequenceEntry* selected_entry_;
 			std::map<int,SequenceEntry*> pos_map_; // Relation between the list position and the patterns			
 			std::vector<psycle::core::Pattern*> copy_list_; // list to store copy/cut/paste entries

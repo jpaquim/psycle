@@ -1,24 +1,16 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #pragma once
 #include "Psycle.hpp"
+
 // this shouldn't be here, it is for SSkin..
 #include "MachineGui.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
-///todo: remove this include when removing the _pstrack() and related functions
-#include <psycle/core/song.h>
-namespace psycle {
-	namespace core {
-		class Pattern;
-		//class Song;
-	}
-}
+#include <psycle/core/pattern.h>
+
 
 using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#include "Song.hpp"
-#endif
 
 #define MAX_DRAW_MESSAGES 32
 
@@ -276,7 +268,6 @@ public:
 			bool bEditMode;		// in edit mode?
 			int patStep;
 			int editPosition;	// Position in the Sequence!
-			SequenceEntry* editPositionEntry;
 			int prevEditPosition;
 			int ChordModeOffs;
 			int ChordModeLine;
