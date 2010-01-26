@@ -98,8 +98,8 @@ namespace psycle {
 					static inline vst::AudioMaster	 & vsthost(){ return *pVstHost; }
 				#endif
 
-				static Song & song();
-				static Player & player() { return *pPlayer; }
+				static Song& song();
+				static Player& player() { return *pPlayer; }
 				static Configuration & configuration() { return *pConfig; }
 				static dsp::Resampler & resampler() { return *pResampler; }
 				static cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }

@@ -55,7 +55,7 @@ namespace psycle {
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
-			sprintf(buffer,"%.2X : %s Properties",Global::song().FindBusFromIndex(gui_->mac()->id()), gui_->mac()->GetEditName().c_str());
+			sprintf(buffer,"%.2X : %s Properties",gui_->view()->song()->FindBusFromIndex(gui_->mac()->id()), gui_->mac()->GetEditName().c_str());
 			m_macname.SetWindowText(gui_->mac()->GetEditName().c_str());
 			SetWindowText(buffer);
 			m_muteCheck.SetCheck(gui_->mac()->_mute);			

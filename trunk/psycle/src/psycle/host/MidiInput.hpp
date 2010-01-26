@@ -146,8 +146,7 @@ namespace psycle
 			CMidiInput();
 			virtual ~CMidiInput();
 
-			/// returns the current instance
-			static CMidiInput * Instance() { return s_Instance; }
+			static CMidiInput* Instance() { return s_Instance; }
 
 			/// set MIDI input device identifier
 			void SetDeviceId(unsigned int driver, int devId);	
@@ -159,46 +158,36 @@ namespace psycle
 			void ReSync();			
 			/// close the midi input device
 			bool Close( );				
-
 			/// find out if we are open
 			bool Active() { return m_midiInHandle!=NULL; }
-
 			/// for external access
 			MIDI_STATS * GetStatsPtr() { return &m_stats; }		
 			/// for external access
 			MIDI_CONFIG * GetConfigPtr() { return &m_config; }
-
 			/// returns the number of midi devices on the system
 			int GetNumDevices( void );	
 			/// convert a name identifier into a index identifier (or -1 if fail)
 			int FindDevByName( CString nameString );	
 			/// fill a listbox with a list of the available input devices
 			std::uint32_t PopulateListbox( CComboBox * listbox , bool issync );	
-
 			/// return the current device handle
 			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
-
 			/// set a instrument map
 			void SetInstMap( int machine, int inst );	
 			/// get the mapped instrument for the given machine
 			int GetInstMap( int machine );	
-
 			/// set a instrument map
 			void SetGenMap( int channel, int generator );	
 			/// get the mapped instrument for the given machine
 			int GetGenMap( int channel );	
-
 			/// set a controller map
 			void SetControllerMap( int channel, int controller, int parameter );	
 			/// get a controller map
 			int GetControllerMap( int channel, int controller );	
-
 			/// get the channel's note off status
 			bool GetNoteOffStatus( int channel );	
-
 			/// called to inject MIDI data
 			bool InjectMIDI( int amount );	
-
 			/// the master MIDI handler mode (see enum MODES), external objects can change this at will
 			int m_midiMode;	
 
@@ -291,6 +280,7 @@ namespace psycle
 				/// adjusted play position
 				int m_adjustedPlayPos;	
 			///\}
+
 		};
 	}
 }

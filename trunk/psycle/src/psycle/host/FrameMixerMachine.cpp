@@ -2,16 +2,12 @@
 #include "FrameMixerMachine.hpp"
 #include "Configuration.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/mixer.h>
 using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "internal_machines.hpp"
-#endif
 
 #include "MachineGui.hpp"
+#include "MachineView.hpp"
 #include "NativeGui.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "ChildView.hpp"
@@ -281,7 +277,7 @@ namespace host {
 		for (int i=0; i<_pMixer->numreturns(); i++)
 		{
 			if (_pMixer->Return(i).IsValid()) {
-				sendNames[i]=Global::song().machine(_pMixer->Return(i).Wire().machine_)->GetEditName();
+				sendNames[i]=gen_gui_->view()->song()->machine(_pMixer->Return(i).Wire().machine_)->GetEditName();
 				//sends++;
 			}
 			else sendNames[i]="";
@@ -384,7 +380,8 @@ namespace host {
 			std::string chantxt = _pMixer->GetAudioInputName(int(i+Mixer::chan1));
 			if (_pMixer->ChannelValid(i))
 			{
-				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,Global::song().machine(_pMixer->_inputMachines[i])->GetEditName());
+				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,
+					gen_gui_->view()->song()->machine(_pMixer->_inputMachines[i])->GetEditName());
 			}
 			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,"");
 			yoffset+=InfoLabel::height;
@@ -530,9 +527,9 @@ namespace host {
 				if (_pMixer->ChannelValid(i))
 				{
 					if ( _swapend == i+chan1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,Global::song().machine(_pMixer->_inputMachines[i])->GetEditName());
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,gen_gui_->view()->song()->machine(_pMixer->_inputMachines[i])->GetEditName());
 					else 
-						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,Global::song().machine(_pMixer->_inputMachines[i])->GetEditName());
+						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,gen_gui_->view()->song()->machine(_pMixer->_inputMachines[i])->GetEditName());
 				}
 				else
 				{

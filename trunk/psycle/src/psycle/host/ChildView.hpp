@@ -9,7 +9,6 @@ namespace psycle {
 	namespace core {
 		class Song;
 	}
-
 	namespace audiodrivers {
 		class AudioDriver;
 	}

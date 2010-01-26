@@ -307,6 +307,12 @@ class PSYCLE__CORE__DECL CoreSong {
 		private:
 			mutex mutable mutex_;
 	///\}
+
+	
+	public:
+	// just here till i find in the host another solution
+	/// Current selected machine number in the GUI
+	Machine::id_type seqBus;
 };
 
 /// Song extends CoreSong with UI-related stuff
@@ -333,8 +339,7 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 	///\name various ui-related stuff
 	///\{
 		public:
-			/// Current selected machine number in the GUI
-			Machine::id_type seqBus;
+			
 
 		private:
 			/// Current selected instrument number in the GUI

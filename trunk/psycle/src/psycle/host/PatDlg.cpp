@@ -5,21 +5,14 @@
 
 #include <sstream>
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/core/SinglePattern.h>
-#endif
+#include <psycle/core/pattern.h>
 
 namespace psycle {
 	namespace host {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		CPatDlg::CPatDlg(CWnd* pParent, psycle::core::Pattern* pattern) : 
-			CDialog(CPatDlg::IDD, pParent),
-		    pattern_(pattern)
-#else
-		CPatDlg::CPatDlg(CWnd* pParent) : 
-			CDialog(CPatDlg::IDD, pParent)
-#endif
-		{
+
+		CPatDlg::CPatDlg(CWnd* pParent, psycle::core::Pattern* pattern)
+			:  CDialog(CPatDlg::IDD, pParent),
+			   pattern_(pattern) {
 			//{{AFX_DATA_INIT(CPatDlg)
 			m_adaptsize = FALSE;
 			//}}AFX_DATA_INIT
@@ -61,17 +54,11 @@ namespace psycle {
 			m_spinlines.SetRange(1,MAX_LINES);
 			m_patname.SetWindowText(patName);
 			m_patname.SetLimitText(30);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			m_numlines.SetWindowText(asString(pattern_->timeSignatures().front().beats()).c_str());
 			CStatic* cc =(CStatic*)GetDlgItem(IDC_STATIC1);
 			cc->SetWindowText("Beats");
 			GetDlgItem(IDC_CHECK1)->ShowWindow(SW_HIDE);			
 			GetDlgItem(IDC_TEXT)->ShowWindow(SW_HIDE);			
-#else
-			char buffer[16];
-			itoa(patLines,buffer,10);
-			m_numlines.SetWindowText(buffer);
-#endif
 			UDACCEL acc;
 			acc.nSec = 4;
 			acc.nInc = 16;
