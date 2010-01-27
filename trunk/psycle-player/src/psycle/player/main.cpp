@@ -255,6 +255,7 @@ int main(int argument_count, char * arguments[]) {
 		//player.driver().Enable(true);
 
 		if(loggers::information()()) loggers::information()("psycle: player: playing...");
+		output_driver.set_started(true);
 		player.start(0);
 
 		if(wait) {
