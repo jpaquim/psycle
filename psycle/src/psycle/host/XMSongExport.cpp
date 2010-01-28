@@ -5,14 +5,8 @@
  */
 #include "XMSongExport.hpp"
 //#include "ProgressDialog.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Machine.hpp"
-#endif
 //#include "SongStructs.hpp"
 //#include <algorithm>
 //#include <cstring>
@@ -26,32 +20,22 @@ namespace psycle {
 namespace host{
 
 
-	XMSongExport::XMSongExport(void)
-	{
+	XMSongExport::XMSongExport(void) {
 	}
 
-	XMSongExport::~XMSongExport(void)
-	{
-
+	XMSongExport::~XMSongExport(void) {
 	}
 
-	void XMSongExport::exportsong(Song& song)
-	{
-
+	void XMSongExport::exportsong(Song& song) {
 		writeSongHeader(song);
-
 		SavePatterns(song);
 		SaveInstruments(song);
-
 	}
 
 	void XMSongExport::writeSongHeader(Song &song)
 	{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		// TODO
-#else
 		//We find the last index of machine, to use as first index of instruments
-		lastMachine=63;
+/*		lastMachine=63;
 		while (lastMachine >= 0 && song.machine(lastMachine) == 0) lastMachine--;
 		lastMachine++;
 
@@ -82,20 +66,20 @@ namespace host{
 		int highest = 0;
 		for (Sequence::patterniterator pite = song.sequence().patternbegin(); pite != song.sequence().patternend(); pite++)
 		{
-			if ((*pite)->id() > highest) highest = (*pite)->id();
+			if ((*pite)->id() > highest)
+				highest = (*pite)->id();
 		}
 		m_Header.patterns = highest;
 		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
 		m_Header.flags = 0x0001; //Linear frequency.
 		m_Header.speed = 24/song.LinesPerBeat();
-		m_Header.tempo =  song.BeatsPerMin();
+		m_Header.tempo = song.BeatsPerMin();
 
 		//Pattern order table
 		for (int i = 0; i < song.playLength; i++) {
 			m_Header.order[i] =  song.playOrder[i];
 		}
-		Write(&m_Header,sizeof(m_Header));
-#endif
+		Write(&m_Header,sizeof(m_Header)); */
 	}
 
 	void XMSongExport::SavePatterns(Song & song)

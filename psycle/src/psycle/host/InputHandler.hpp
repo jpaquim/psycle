@@ -3,14 +3,13 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psycle {
 	namespace core {
 		class Machine;
 	}
 }
+
 using namespace psycle::core;
-#endif
 
 namespace psycle
 {
@@ -567,5 +566,6 @@ namespace psycle
 			/// LUT for command data
 			CmdDef cmdLUT[MOD_MAX][256];		
 		};
-	}
-}
+
+	}	// namespace host
+}	// namespace psycle
