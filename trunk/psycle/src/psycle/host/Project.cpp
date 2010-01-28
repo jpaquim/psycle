@@ -56,6 +56,7 @@ namespace psycle {
 			mac_view()->LockVu();
 			Player& player(Player::singleton());
 			player.stop();
+			song().clear();
 			player.setBpm(song().BeatsPerMin());
 			player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
 			CMainFrame* pParentMain = mac_view()->main();

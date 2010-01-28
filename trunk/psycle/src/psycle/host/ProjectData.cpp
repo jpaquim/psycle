@@ -48,10 +48,9 @@ namespace psycle {
 		void ProjectData::FileNew()
 		{
 			assert(active_project_);
-			if (active_project_->CheckUnsavedSong("New Song"))
-			{
+		//	if (active_project_->CheckUnsavedSong("New Song")) {
 				active_project_->Clear();
-			}
+		//	}
 			active_project_->mac_view()->main()->StatusBarIdle();
 		}
 

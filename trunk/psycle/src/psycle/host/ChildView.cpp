@@ -45,49 +45,7 @@
 namespace psycle {
 	namespace host {
 
-		CChildView::CChildView(CMainFrame* main_frame, ProjectData* projects)
-			: main_frame_(main_frame),
-			  projects_(projects),
-			  SamplerMachineDialog(NULL),
-			  XMSamplerMachineDialog(NULL),
-			  WaveInMachineDialog(NULL),
-			  updateMode(0),
-			  updatePar(0),
-			  viewMode(view_modes::machine),
-			  _outputActive(false),
-			  CW(300),
-			  CH(200),
-			  textLeftEdge(2),
-			  bmpDC(NULL),
-			  output_driver_(0),
-			  last_pos_(-1) {			
-			for (int c=0; c<256; c++) { 
-				FLATSIZES[c]=8;
-			}	
-			Global::pInputHandler->SetChildView(this);			
-			// machine_view_->Rebuild();
-			// its done in psycle.cpp, todo check config load order
-		}
-
-		void CChildView::AddModules(Project* project) {
-			machine_view_ = project->mac_view();
-			machine_view_->SetParent(this, main_frame_);
-			pattern_view_ = project->pat_view();
-			pattern_view_->SetParent(this, main_frame_);
-		}
-
-		CChildView::~CChildView() {
-			Global::pInputHandler->SetChildView(NULL);
-			if (bmpDC) {
-				char buf[100];
-				sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
-				TRACE(buf);
-				bmpDC->DeleteObject();
-				delete bmpDC; bmpDC = 0;
-			}		
-		}
-
-		BEGIN_MESSAGE_MAP(CChildView,CWnd )
+		BEGIN_MESSAGE_MAP(CChildView,CWnd)
 			ON_WM_PAINT()
 			ON_WM_LBUTTONDOWN()
 			ON_WM_RBUTTONDOWN()
@@ -198,7 +156,51 @@ namespace psycle {
 			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
 			ON_COMMAND(ID_POP_BLOCKSWITCH, OnPopBlockswitch)
 			ON_UPDATE_COMMAND_UI(ID_POP_BLOCKSWITCH, OnUpdatePopBlockswitch)
-			END_MESSAGE_MAP()
+		END_MESSAGE_MAP()
+
+
+		CChildView::CChildView(CMainFrame* main_frame, ProjectData* projects)
+			: main_frame_(main_frame),
+			  projects_(projects),
+			  SamplerMachineDialog(NULL),
+			  XMSamplerMachineDialog(NULL),
+			  WaveInMachineDialog(NULL),
+			  updateMode(0),
+			  updatePar(0),
+			  viewMode(view_modes::machine),
+			  _outputActive(false),
+			  CW(300),
+			  CH(200),
+			  textLeftEdge(2),
+			  bmpDC(NULL),
+			  output_driver_(0),
+			  last_pos_(-1) {			
+			for (int c=0; c<256; c++) { 
+				FLATSIZES[c]=8;
+			}	
+			Global::pInputHandler->SetChildView(this);			
+			// machine_view_->Rebuild();
+			// its done in psycle.cpp, todo check config load order
+		}
+
+		void CChildView::AddModules(Project* project) {
+			machine_view_ = project->mac_view();
+			machine_view_->SetParent(this, main_frame_);
+			pattern_view_ = project->pat_view();
+			pattern_view_->SetParent(this, main_frame_);
+		}
+
+		CChildView::~CChildView() {
+			Global::pInputHandler->SetChildView(NULL);
+			if (bmpDC) {
+				char buf[100];
+				sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
+				TRACE(buf);
+				bmpDC->DeleteObject();
+				delete bmpDC; bmpDC = 0;
+			}		
+		}
+
 
 		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) {
 			if (!CWnd::PreCreateWindow(cs))

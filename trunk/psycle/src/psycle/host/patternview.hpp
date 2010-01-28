@@ -10,8 +10,6 @@
 #include <psycle/core/pattern.h>
 
 
-using namespace psycle::core;
-
 #define MAX_DRAW_MESSAGES 32
 
 namespace psycle {
@@ -38,11 +36,8 @@ namespace psycle {
 			int drawLineStart;
 			int drawLineEnd;
 		};
-	
 
-		class SPatternHeaderCoords
-		{
-		public:
+		struct SPatternHeaderCoords {		
 			SSkinSource sBackground;
 			SSkinSource sNumber0;
 			SSkinSource sRecordOn;
@@ -123,18 +118,18 @@ namespace psycle {
 			}
 
 			Pattern* pattern() { return pattern_; }
-		private:
-			Pattern* pattern_;
-		public:
 			void SetPattern(Pattern* pattern) {
 				pattern_ = pattern;
 			}
 
+			class Project* project();
+			class Project* project() const;			
+			CChildView* child_view() { return parent_; }
+			CMainFrame* main() { return main_; }
+			Song* song();
+
 			psycle::core::Pattern::iterator GetEventOnCursor();
 			psycle::core::Pattern::iterator GetEventOnPos(double pos, int track);
-
-			class Project* project();
-			class Project* project() const;
 
 			void Draw(CDC *devc, const CRgn& rgn);
 			void OnSize(UINT nType, int cx, int cy);
@@ -211,11 +206,6 @@ namespace psycle {
 			void EnterData(UINT nChar,UINT nFlags);
 
 			bool CheckUnsavedSong();
-
-			CChildView* child_view() { return parent_; }
-			CMainFrame* main() { return main_; }
-			Song* song();
-
 			void LoadPatternHeaderSkin();
 			void FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result);
 			void RecalcMetrics();
@@ -233,13 +223,17 @@ namespace psycle {
 
 			void OnUpdateUndo(CCmdUI* pCmdUI);
 			void OnUpdateRedo(CCmdUI* pCmdUI);
-
 			void OnPopMixpaste();
 			void OnPopBlockswitch();
 			void OnPopPaste();
 			void OnPopInterpolateCurve();
 
 			void Repaint(draw_modes::draw_mode drawMode);
+
+			//todo should be private
+			bool isBlockCopied;
+			bool patBufferCopy;
+			int tOff;		// Track Offset (first track shown)
 
 		private:
 			void DrawPatEditor(CDC *devc);
@@ -257,6 +251,19 @@ namespace psycle {
 			bool bFT2HomeBehaviour;
 			bool bShiftArrowsDoSelect;
 			bool bDoingSelection;
+			int maxt;		// num of tracks shown
+			int maxl;		// num of lines shown
+			int lOff;		// Line Offset (first line shown)
+			int ntOff;		// These two variables are used for the DMScroll functino
+			int nlOff;
+			int rntOff;
+			int rnlOff;
+			// GDI Stuff
+			CBitmap patternheader;
+			CBitmap patternheadermask;
+			HBITMAP hbmPatHeader;						
+			int FLATSIZES[256];
+
 public:
 			bool blockSelected;
 			bool blockStart;
@@ -296,11 +303,6 @@ public:
 			int textLeftEdge;
 
 
-			// GDI Stuff
-			CBitmap patternheader;
-			CBitmap patternheadermask;
-			HBITMAP hbmPatHeader;						
-			int FLATSIZES[256];
 	
 			int playpos;		// Play Cursor Position in Screen // left and right are unused
 			int newplaypos;		// Play Cursor Position in Screen that is gonna be drawn.
@@ -311,14 +313,6 @@ public:
 			SPatternDraw pPatternDraw[MAX_DRAW_MESSAGES];
 			int numPatternDraw;
 
-			int maxt;		// num of tracks shown
-			int maxl;		// num of lines shown
-			int tOff;		// Track Offset (first track shown)
-			int lOff;		// Line Offset (first line shown)
-			int ntOff;		// These two variables are used for the DMScroll functino
-			int nlOff;
-			int rntOff;
-			int rnlOff;
 
 			char szBlankParam[2];
 			char szBlankNote[4];
@@ -327,18 +321,16 @@ public:
 			CSelection blockSel;
 			CCursor oldm;	// Indicates the previous track/line/col when selecting (used for mouse)
 			CPoint MBStart; 
-public:
-			bool isBlockCopied;
+
 private:
 			Project* project_;
 			Pattern block_buffer_pattern_;
+			Pattern* pattern_;
 			double line_pos(int line, bool nearest) const;
 			int	blockNTracks;
 			int	blockNLines;
 			CSelection blockLastOrigin;		
 			int patBufferLines;
-public:
-			bool patBufferCopy;
 
 			COLORREF pvc_separator[MAX_TRACKS+1];
 			COLORREF pvc_background[MAX_TRACKS+1];
@@ -487,14 +479,8 @@ public:
 			case 119: TXTFLAT(devc,"B-9",x,y,srx,sry);break;
 			case notecommands::release: TXTFLAT(devc,"off",x,y,srx,sry);break;
 			case notecommands::tweak: TXTFLAT(devc,"twk",x,y,srx,sry);break;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			case notecommands::midi_cc: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
 			case notecommands::tweak_slide: TXTFLAT(devc,"tws",x,y,srx,sry);break;
-#else
-			case notecommands::tweakeffect: TXTFLAT(devc,"twf",x,y,srx,sry);break;
-			case notecommands::midicc: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
-			case notecommands::tweakslide: TXTFLAT(devc,"tws",x,y,srx,sry);break;
-#endif
 			}
 		}
 
