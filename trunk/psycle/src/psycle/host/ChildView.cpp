@@ -64,9 +64,7 @@ namespace psycle {
 			for (int c=0; c<256; c++) { 
 				FLATSIZES[c]=8;
 			}	
-			Global::pInputHandler->SetChildView(this);
-			// Creates a new song object. The application Song.
-			//projects_->active_project()->song().New();
+			Global::pInputHandler->SetChildView(this);			
 			// machine_view_->Rebuild();
 			// its done in psycle.cpp, todo check config load order
 		}
@@ -202,8 +200,7 @@ namespace psycle {
 			ON_UPDATE_COMMAND_UI(ID_POP_BLOCKSWITCH, OnUpdatePopBlockswitch)
 			END_MESSAGE_MAP()
 
-		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
-		{
+		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) {
 			if (!CWnd::PreCreateWindow(cs))
 				return FALSE;
 			
@@ -221,8 +218,7 @@ namespace psycle {
 		}		
 
 		/// Timer initialization
-		void CChildView::InitTimer()
-		{
+		void CChildView::InitTimer() {
 			KillTimer(31);
 			KillTimer(159);
 			if (!SetTimer(31,30,NULL)) // GUI update. 
@@ -240,8 +236,7 @@ namespace psycle {
 		}
 
 		/// Timer handler
-		void CChildView::OnTimer( UINT nIDEvent )
-		{
+		void CChildView::OnTimer(UINT nIDEvent) {
 			if (nIDEvent == 31)
 			{
 				///\todo : IMPORTANT! change this lock to a more flexible one
@@ -341,8 +336,7 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::EnableSound()
-		{
+		void CChildView::EnableSound() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE			
 			psycle::core::Player & player(psycle::core::Player::singleton());
 			output_driver_ =  Global::pConfig->_pOutputDriver;
@@ -391,21 +385,18 @@ namespace psycle {
 
 
 		/// Put exit destroying code here...
-		void CChildView::OnDestroy()
-		{
+		void CChildView::OnDestroy() {
 			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.driver().set_started(false);
 			KillTimer(31);
 			KillTimer(159);
 		}
 
-		void CChildView::OnAppExit() 
-		{
+		void CChildView::OnAppExit() {
 			main_frame_->ClosePsycle();
 		}
 
-		void CChildView::OnPaint() 
-		{		
+		void CChildView::OnPaint() {		
 			if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.	
 			CRgn pRgn;
 			pRgn.CreateRectRgn(0, 0, 0, 0);
@@ -472,8 +463,7 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::Repaint(draw_modes::draw_mode drawMode)
-		{
+		void CChildView::Repaint(draw_modes::draw_mode drawMode) {
 			if ( viewMode == view_modes::machine )
 			{
 				if ( drawMode <= draw_modes::machine )
@@ -495,8 +485,7 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::OnSize(UINT nType, int cx, int cy) 
-		{
+		void CChildView::OnSize(UINT nType, int cx, int cy) {
 			CWnd ::OnSize(nType, cx, cy);
 			machine_view_->OnSize(cx, cy);
 			CW = cx;
@@ -518,19 +507,16 @@ namespace psycle {
 		}
 
 		// "Save Song" Function
-		BOOL CChildView::OnFileSave(UINT id) 
-		{
+		BOOL CChildView::OnFileSave(UINT id) {
 			return projects_->active_project()->OnFileSave(id);
 		}
 
 		// "Save Song As" Function
-		BOOL CChildView::OnFileSaveAs(UINT id) 
-		{
+		BOOL CChildView::OnFileSaveAs(UINT id) {
 			return projects_->active_project()->OnFileSaveAs(id);
 		}
 
-		void CChildView::OnFileLoadsong()
-		{
+		void CChildView::OnFileLoadsong() {
 			OPENFILENAME ofn; // common dialog box structure
 			char szFile[_MAX_PATH]; // buffer for file name
 			
@@ -607,8 +593,7 @@ namespace psycle {
 			projects_->FileNew();
 		}
 
-		void CChildView::OnFileSaveaudio() 
-		{
+		void CChildView::OnFileSaveaudio() {
 			OnBarstop();
 			KillTimer(31);
 			KillTimer(159);
@@ -618,8 +603,7 @@ namespace psycle {
 			InitTimer();
 		}
 
-		void CChildView::OnFileRevert()
-		{
+		void CChildView::OnFileRevert() {
 			if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES) {
 				if (projects_->active_project()->song()._saved) {
 					std::ostringstream fullpath;
@@ -632,8 +616,7 @@ namespace psycle {
 		}
 
 		/// Tool bar buttons and View Commands
-		void CChildView::OnMachineview() 
-		{
+		void CChildView::OnMachineview() {
 			if (viewMode != view_modes::machine)
 			{
 				viewMode = view_modes::machine;
@@ -651,13 +634,11 @@ namespace psycle {
 			SetFocus();
 		}
 
-		void CChildView::OnUpdateMachineview(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdateMachineview(CCmdUI* pCmdUI) {
 			pCmdUI->SetCheck(viewMode==view_modes::machine);
 		}
 
-		void CChildView::OnPatternView() 
-		{
+		void CChildView::OnPatternView() {
 			if (viewMode != view_modes::pattern)
 			{
 				pattern_view()->RecalcMetrics();
@@ -690,8 +671,7 @@ namespace psycle {
 			pCmdUI->SetCheck(viewMode == view_modes::pattern);		
 		}
 
-		void CChildView::OnShowPatternSeq() 
-		{
+		void CChildView::OnShowPatternSeq() {
 			/*
 			if (viewMode != view_modes::sequence)
 			{
@@ -741,8 +721,7 @@ namespace psycle {
 			pCmdUI->SetCheck(0);
 		}
 
-		void CChildView::OnBarrec() 
-		{
+		void CChildView::OnBarrec() {
 			if (Global::pConfig->_followSong && pattern_view()->bEditMode)
 			{
 				pattern_view()->bEditMode = FALSE;
@@ -867,43 +846,36 @@ namespace psycle {
 			else Global::pConfig->autoStopMachines = true;
 		}
 
-		void CChildView::OnUpdateAutostop(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdateAutostop(CCmdUI* pCmdUI) {
 			pCmdUI->SetCheck(Global::pConfig->autoStopMachines);			
 		}
 
-		void CChildView::OnFileSongproperties() 
-		{
+		void CChildView::OnFileSongproperties() {
 			CSongpDlg dlg(&projects_->active_project()->song());
 			dlg.DoModal();
 			main_frame_->StatusBarIdle();
 			//Repaint();
 		}
 
-		void CChildView::OnViewInstrumenteditor()
-		{
+		void CChildView::OnViewInstrumenteditor() {
 			main_frame_->ShowInstrumentEditor();
 		}
 
 		/// Show the CPU Performance dialog
-		void CChildView::OnHelpPsycleenviromentinfo() 
-		{
+		void CChildView::OnHelpPsycleenviromentinfo() {
 			main_frame_->ShowPerformanceDlg();
 		}
 
 		/// Show the MIDI monitor dialog
-		void CChildView::OnMidiMonitorDlg() 
-		{
+		void CChildView::OnMidiMonitorDlg() {
 			main_frame_->ShowMidiMonitorDlg();
 		}
 		
-		void CChildView::OnNewmachine() 
-		{
+		void CChildView::OnNewmachine() {
 			machine_view()->ShowNewMachineDlg(-1, -1, 0, false);
 		}	
 
-		void CChildView::OnConfigurationSettings() 
-		{
+		void CChildView::OnConfigurationSettings() {
 			CConfigDlg dlg("Psycle Settings");
 			_outputActive = false;
 			dlg.Init(Global::pConfig);
@@ -920,8 +892,7 @@ namespace psycle {
 			//Repaint();
 		}
 
-		void CChildView::OnHelpSaludos() 
-		{
+		void CChildView::OnHelpSaludos() {
 			CGreetDialog dlg;
 			dlg.DoModal();
 			//Repaint();

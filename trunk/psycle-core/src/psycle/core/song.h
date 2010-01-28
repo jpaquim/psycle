@@ -17,9 +17,7 @@
 
 namespace psycle { namespace core {
 
-using namespace universalis::stdlib;
 
-// forward declarations.
 class PluginFinderKey;
 class MachineFactory;
 
