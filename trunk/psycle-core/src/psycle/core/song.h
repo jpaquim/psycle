@@ -379,7 +379,6 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 			const int LinesPerBeat(){return ticksSpeed();}
 			void LinesPerBeat(const int value) { setTicksSpeed(value); }
 			
-			void New();
 	///\}
 
 	//Fake. Just to compile. They need to go out

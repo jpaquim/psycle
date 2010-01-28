@@ -19,12 +19,12 @@ using namespace helpers;
 SongSerializer CoreSong::serializer;
 
 CoreSong::CoreSong()
-:
-	ready()
-{
-	for(int i(0); i < MAX_MACHINES; ++i) machine_[i] = 0;
-	for(int i(0); i < MAX_INSTRUMENTS; ++i) _pInstrument[i] = new Instrument;
-	clear(); // Warning! Due to C++ semantics, CoreSong::clear() will be called, even in a derived class that implements clear().
+	  : ready() {
+	for(int i(0); i < MAX_MACHINES; ++i)
+		machine_[i] = 0;
+	for(int i(0); i < MAX_INSTRUMENTS; ++i) 
+		_pInstrument[i] = new Instrument;	
+	clear();
 }
 
 CoreSong::~CoreSong() {
@@ -48,6 +48,16 @@ void CoreSong::clear() {
 	DeleteInstruments();
 	// Clear patterns and creates a new master_pattern
 	sequence().removeAll();
+	// Add a first line
+	SequenceLine* line = sequence().createNewLine();
+	Pattern* pattern= new Pattern();
+	pattern->timeSignatures().clear();
+	pattern->timeSignatures().push_back(psycle::core::TimeSignature(16.0));
+	pattern->setID(0);
+	pattern->setName("Untitled");
+	sequence().Add(pattern);
+	line->createEntry(pattern,0);
+	SetReady(true);
 }
 
 bool CoreSong::load(std::string const & filename) {
@@ -612,29 +622,15 @@ void CoreSong::patternTweakSlide(int /*machine*/, int /*command*/, int /*value*/
 // Song
 
 Song::Song() {
+	SetReady(false);
 	clearMyData();
+	_saved=false;
+	fileName = "Untitled.psy";
+	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master,MASTER_INDEX));	
 };
 
 void Song::clear() {
-	CoreSong::clear();
 	clearMyData();
-}
-
-void Song::New() {
-	SetReady(false);
-	clear();
-	_saved=false;
-	fileName = "Untitled.psy";
-	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master,MASTER_INDEX));
-	SequenceLine* line = sequence().createNewLine();
-	Pattern* pattern= new Pattern();
-	pattern->timeSignatures().clear();
-	pattern->timeSignatures().push_back(psycle::core::TimeSignature(16.0));
-	pattern->setID(0);
-	pattern->setName("Untitled");
-	sequence().Add(pattern);
-	line->createEntry(pattern,0);
-	SetReady(true);
 }
 
 void SetDefaultPatternLines(int defaultPatLines)

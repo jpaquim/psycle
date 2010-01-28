@@ -36,7 +36,6 @@ namespace psycle {
 			: parent_(parent),
 			  beat_zoom_(4) {
 			song_ = new Song();
-			song_->New();
 			// modules of project
 			mac_view_ = new MachineView(this);
 			pat_view_ = new PatternView(this);
@@ -61,7 +60,6 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Player & player(Player::singleton());
 			player.stop();
-			song().New();
 			player.setBpm(song().BeatsPerMin());
 			player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
 			CMainFrame* pParentMain = mac_view()->main();
@@ -417,7 +415,6 @@ namespace psycle {
 					{
 						XMSongLoader xmfile;
 						xmfile.Open(ofn.lpstrFile);
-						song().New();
 						pat_view()->editPosition=0;
 						xmfile.Load(song());
 						xmfile.Close();
@@ -439,12 +436,10 @@ namespace psycle {
 					{
 						ITModule2 it;
 						it.Open(ofn.lpstrFile);
-						song().New();
 						pat_view()->editPosition=0;
 						if(!it.LoadITModule(&song()))
 						{			
 							mac_view()->child_view()->MessageBox("Load failed");
-							song().New();
 							it.Close();
 							return;
 						}
@@ -467,12 +462,10 @@ namespace psycle {
 					{
 						ITModule2 s3m;
 						s3m.Open(ofn.lpstrFile);
-						song().New();
 						pat_view()->editPosition=0;
 						if(!s3m.LoadS3MModuleX(&song()))
 						{			
 							mac_view()->child_view()->MessageBox("Load failed");
-							song().New();
 							s3m.Close();
 							return;
 						}
@@ -495,7 +488,6 @@ namespace psycle {
 					{
 						MODSongLoader modfile;
 						modfile.Open(ofn.lpstrFile);
-						song().New();
 						pat_view()->editPosition=0;
 						modfile.Load(song());
 						modfile.Close();
