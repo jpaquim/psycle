@@ -1,16 +1,12 @@
 #include "EffectGui.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#include "Song.hpp"
-#endif
 
-#include "MachineView.hpp"
 #include "FrameMachine.hpp"
+#include "MachineView.hpp"
+
+using namespace psycle::core;
 
 namespace psycle {
 	namespace host {
@@ -26,19 +22,16 @@ namespace psycle {
 			  vu_bg_pixbuf_(this),
 			  vu_peak_pixbuf_(this),
 			  vu_led_pixbuf_(this),
-			  text_(this)
-		{
+			  text_(this) {
 			UpdateText();
 		}
 
-		EffectGui::~EffectGui()
-		{
-			if ( dialog_ )
+		EffectGui::~EffectGui() {
+			if (dialog_)
 				dialog_->DestroyWindow();
 		}
 
-		bool EffectGui::TestPan(double x, double y)
-		{				
+		bool EffectGui::TestPan(double x, double y) {				
 			int panning = mac()->Pan()*MachineCoords_.dEffectPan.width;
 			panning /= 128;
 			if (InRect(x,
@@ -56,8 +49,7 @@ namespace psycle {
 			return false;
 		}
 
-		bool EffectGui::InBypass(double x, double y)
-		{
+		bool EffectGui::InBypass(double x, double y) {
 			return (InRect(x,
 						   y,
 						   MachineCoords_.dEffectBypass.x,
@@ -68,8 +60,7 @@ namespace psycle {
 					       MachineCoords_.sEffectBypass.height));
 		}
 
-		void EffectGui::SetBypass(bool on)
-		{
+		void EffectGui::SetBypass(bool on) {
 			mac()->Bypass(on);
 			if (mac()->Bypass()) {
 				mac()->_volumeCounter=0.0f;
@@ -78,8 +69,7 @@ namespace psycle {
 			bypass_pixbuf_.SetVisible(on);
 		}
 
-		void EffectGui::SetMute(bool on)
-		{
+		void EffectGui::SetMute(bool on) {
 			mac()->_mute = on;
 			if (mac()->_mute) {
 				mac()->_volumeCounter=0.0f;
@@ -91,8 +81,7 @@ namespace psycle {
 			mute_pixbuf_.SetVisible(on);
 		}
 
-		bool EffectGui::InMute(double x, double y)
-		{			
+		bool EffectGui::InMute(double x, double y) {			
 			return (InRect(x,
 						   y,
 						   MachineCoords_.dEffectMute.x,
@@ -103,8 +92,7 @@ namespace psycle {
 					       MachineCoords_.sEffectMute.height));
 		}
 
-		void EffectGui::DoPanDragging(double x, double y)
-		{
+		void EffectGui::DoPanDragging(double x, double y) {
 			int newpan = (x  - MachineCoords_.dGeneratorPan.x - (MachineCoords_.sGeneratorPan.width/2))*128;
 			if (MachineCoords_.dGeneratorPan.width) {
 				newpan /= MachineCoords_.dGeneratorPan.width;
@@ -124,8 +112,7 @@ namespace psycle {
 			}
 		}
 
-		void EffectGui::UpdateVU(CDC* devc) 
-		{
+		void EffectGui::UpdateVU(CDC* devc) {
 			MachineGui::UpdateVU(devc);
 			int vol = mac()->_volumeDisplay;
 			int max = mac()->_volumeMaxDisplay;
@@ -178,15 +165,13 @@ namespace psycle {
 			devc->SetWorldTransform(&rXform);
 		}
 
-		void EffectGui::UpdateText()
-		{
+		void EffectGui::UpdateText() {
 			std::ostringstream str;
 			str << std::hex << std::setfill('0') << std::setw(2) << mac()->id() << ":" << mac()->GetEditName();		
 			text_.SetText(str.str());
 		}
 
-		void EffectGui::UpdatePan()
-		{
+		void EffectGui::UpdatePan() {
 			int panning = mac()->Pan()*MachineCoords_.dEffectPan.width;
 			panning /= 128;
 			pan_pixbuf_.SetXY(panning+MachineCoords_.dEffectPan.x, 
@@ -201,8 +186,7 @@ namespace psycle {
 								HBITMAP hbmMachineBkg,
 								HBITMAP hbmMachineDial,
 								const CFont& font,
-								COLORREF font_color)
-		{
+								COLORREF font_color) {
 			MachineCoords_ = MachineCoords;
 			pixbuf_.SetImage(machineskin);
 			pixbuf_.SetTransparent(MachineCoords.bHasTransparency);
@@ -257,8 +241,7 @@ namespace psycle {
 						   1.0);
 		}
 
-		bool EffectGui::OnEvent(PsycleCanvas::Event* ev)
-		{		
+		bool EffectGui::OnEvent(PsycleCanvas::Event* ev) {		
 			if (ev->type == PsycleCanvas::Event::BUTTON_2PRESS) {
 				if (InMute(ev->x, ev->y)) {					
 					return true;
@@ -295,13 +278,11 @@ namespace psycle {
 			return MachineGui::OnEvent(ev);
 		}
 
-		void EffectGui::BeforeDeleteDlg()
-		{
+		void EffectGui::BeforeDeleteDlg() {
 			dialog_ = 0;
 		}
 
-		void EffectGui::ShowDialog(double x, double y)
-		{
+		void EffectGui::ShowDialog(double x, double y) {
 			CRect rc;
 			view()->parent()->GetWindowRect(rc);
 			if (!dialog_) {
@@ -310,13 +291,11 @@ namespace psycle {
 			}
 		}
 
-		int EffectGui::preferred_width() const
-		{
+		int EffectGui::preferred_width() const {
 			return pixbuf_.width();
 		}
 
-		int EffectGui::preferred_height() const
-		{
+		int EffectGui::preferred_height() const {
 			return pixbuf_.height();
 		}
 

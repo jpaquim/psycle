@@ -1,39 +1,33 @@
 #include "MixerGui.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#include "Song.hpp"
-#endif
-#include "MachineView.hpp"
+
 #include "ChildView.hpp"
 #include "FrameMixerMachine.hpp"
-//#include "ChildView.hpp"
+#include "MachineView.hpp"
+
+
+using namespace psycle::core;
 
 namespace psycle {
 	namespace host {
 
 		MixerGui::MixerGui(MachineView* view, Machine* mac)
 			: EffectGui(view, mac),
-			  dialog_(0)
-		{
+			  dialog_(0) {
 		}
 
-		MixerGui::~MixerGui()
-		{
+		MixerGui::~MixerGui() {
 			if (dialog_)
 				dialog_->DestroyWindow();
 		}
 
-		void MixerGui::BeforeDeleteDlg()
-		{
+		void MixerGui::BeforeDeleteDlg() {
 			dialog_ = 0;
 		}
 
-		void MixerGui::ShowDialog(double x, double y)
-		{
+		void MixerGui::ShowDialog(double x, double y) {
 			if (!dialog_) {
 				CRect rc;
 				view()->parent()->GetWindowRect(rc);
@@ -48,8 +42,7 @@ namespace psycle {
 			}
 		}
 
-		void MixerGui::UpdateVU(CDC* devc)
-		{
+		void MixerGui::UpdateVU(CDC* devc) {
 			EffectGui::UpdateVU(devc);
 			if ( dialog_ ) {
 				dialog_->UpdateUI();

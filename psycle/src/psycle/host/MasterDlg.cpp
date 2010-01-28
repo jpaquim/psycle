@@ -2,23 +2,19 @@
 ///\brief implementation file for psycle::host::CMasterDlg.
 
 #include "MasterDlg.hpp"
-
 #include "ChildView.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/core/internal_machines.h>
-	using namespace psycle::core;
-#else
-	#include "Machine.hpp"
-#endif
-
+#include <psycle/core/internal_machines.h>
 #include <psycle/helpers/dsp.hpp>
+
+using namespace psycle::core;
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
+
 namespace psycle {
 	namespace host {
 
@@ -32,6 +28,7 @@ namespace psycle {
 			editing_ = true;
 			CSliderCtrl::OnLButtonDown(nFlags, point);
 		}
+
 		void CVolumeCtrl::OnLButtonUp(UINT nFlags, CPoint point) {
 			editing_ = false;
 			CSliderCtrl::OnLButtonUp(nFlags, point);
@@ -393,18 +390,14 @@ namespace psycle {
 		}
 
 
-		BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg) 
-		{
-			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
-			{
+		BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg) {
+			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
 				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-			}
-			
+			}			
 			return CDialog::PreTranslateMessage(pMsg);
 		}
 
-		void CMasterDlg::OnStnClickedMixerview()
-		{
+		void CMasterDlg::OnStnClickedMixerview() {
 		}
 
 	}   // namespace

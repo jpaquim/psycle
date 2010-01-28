@@ -8,13 +8,8 @@ namespace psycle {
 		{	
 			//Right mouse button behaviour (OnRButtonDown() and OnRButtonUp()) extended by sampler.
 			SetCapture();			
-  			if(viewMode == view_modes::machine) // User is in machine view mode
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE	
+			if(viewMode == view_modes::machine) { // User is in machine view mode
 				Song::scoped_lock lock(projects_->active_project()->song());
-#else
-				// if (projects_->active_project()->song()._machineLock) return;
-#endif
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
 				ev.x = point.x;
@@ -27,11 +22,9 @@ namespace psycle {
 			CWnd::OnRButtonDown(nFlags,point);
 		}
 		
-		void CChildView::OnRButtonUp(UINT nFlags, CPoint point)
-		{
+		void CChildView::OnRButtonUp(UINT nFlags, CPoint point) {
 			ReleaseCapture();
-			if (viewMode == view_modes::machine)
-			{
+			if (viewMode == view_modes::machine) {
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_RELEASE;
 				ev.x = point.x;
@@ -45,8 +38,7 @@ namespace psycle {
 			CWnd::OnRButtonUp(nFlags,point);
 		}
 
-		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
-		{			
+		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) {			
 			if (viewMode == view_modes::pattern) {
 				pattern_view_->OnContextMenu(pWnd, point);
 			}
@@ -57,11 +49,7 @@ namespace psycle {
 		{
 			SetCapture();
 			if( viewMode == view_modes::machine) {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					Song::scoped_lock lock(projects_->active_project()->song());
-#else
-					// if (projects_->active_project()->song()._machineLock) return;
-#endif
+				Song::scoped_lock lock(projects_->active_project()->song());
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_PRESS;
 				ev.x = point.x;
@@ -77,11 +65,9 @@ namespace psycle {
 			CWnd::OnLButtonDown(nFlags,point);
 		}
 
-		void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
-		{
+		void CChildView::OnLButtonUp(UINT nFlags, CPoint point) {
 			ReleaseCapture();			
-			if (viewMode == view_modes::machine )
-			{
+			if (viewMode == view_modes::machine) {
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::BUTTON_RELEASE;
 				ev.x = point.x;
@@ -90,18 +76,16 @@ namespace psycle {
 				ev.shift = nFlags;
 				machine_view_->OnEvent(&ev);
 				return;
-			}
-			else if (viewMode == view_modes::pattern)
-			{
+			} else 
+			if (viewMode == view_modes::pattern) {
 				pattern_view_->OnLButtonUp(nFlags, point);
-			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
+			}
 			CWnd::OnLButtonUp(nFlags,point);
 		}
 
 		void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 		{
-			if (viewMode == view_modes::machine)
-			{
+			if (viewMode == view_modes::machine) {
 				PsycleCanvas::Event ev;
 				ev.type = PsycleCanvas::Event::MOTION_NOTIFY;
 				ev.x = point.x;
@@ -115,19 +99,16 @@ namespace psycle {
 				ev.shift = nFlags;
 				machine_view_->OnEvent(&ev);
 				return;
-			}
-
-			else if (viewMode == view_modes::pattern)
-			{
+			}  else 
+			if (viewMode == view_modes::pattern) {
 				pattern_view_->OnMouseMove(nFlags, point);
-			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
+			}
 			CWnd::OnMouseMove(nFlags,point);
 		}
 
 		void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 		{	
-			switch (viewMode)
-			{
+			switch (viewMode) {
 				case view_modes::machine: // User is in machine view mode
 					PsycleCanvas::Event ev;
 					ev.type = PsycleCanvas::Event::BUTTON_2PRESS;
@@ -148,25 +129,22 @@ namespace psycle {
 						pattern_view()->blockStart = false;
 					}
 					break;
-			} // <-- End switch(viewMode)
+			}
 			CWnd::OnLButtonDblClk(nFlags,point);
 		}
 
-		BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) 
-		{
+		BOOL CChildView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
 			if (viewMode == view_modes::pattern) {
 				pattern_view_->OnMouseWheel(nFlags, zDelta, pt);
 			}
 			return CWnd ::OnMouseWheel(nFlags, zDelta, pt);
 		}
 
-		void CChildView::OnMButtonDown(UINT nFlags, CPoint point)
-		{
+		void CChildView::OnMButtonDown(UINT nFlags, CPoint point) {
 			pattern_view_->OnMButtonDown(nFlags, point);
 		}
 
-		void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-		{
+		void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar){
 			if (viewMode == view_modes::pattern) {
 				pattern_view_->OnVScroll(nSBCode, nPos, pScrollBar);
 			}
@@ -174,12 +152,10 @@ namespace psycle {
 		}
 
 
-		void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-		{
+		void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
 			if (viewMode == view_modes::pattern) {
 				pattern_view_->OnHScroll(nSBCode, nPos, pScrollBar);
 			}
-
 			CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 		}
 

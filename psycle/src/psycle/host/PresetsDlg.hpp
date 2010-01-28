@@ -3,25 +3,20 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#include <cstring>
+
 namespace psycle {
 	namespace core {
 		class Machine;
 	}
 }
-using namespace psycle::core;
-#endif
 
-#include <cstring>
 
 namespace psycle {
 	namespace host {
 
 		#define MAX_PRESETS 256
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Machine;
-#endif
 		class CFrameMachine;
 
 		/// machine parameter preset \todo should we move it outside of gui classes?
@@ -104,5 +99,5 @@ namespace psycle {
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-	}   // namespace
-}   // namespace
+	}   // namespace host
+}   // namespace psycle

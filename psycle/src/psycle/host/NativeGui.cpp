@@ -3,19 +3,17 @@
 
 #include "NativeGui.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#endif
 
+#include "ChildView.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
 #include "NewVal.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "MainFrm.hpp"
-#include "ChildView.hpp"
+
+
+using namespace psycle::core;
 
 namespace psycle {
 	namespace host {

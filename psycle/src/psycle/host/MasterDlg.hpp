@@ -4,24 +4,18 @@
 
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 namespace psycle {
 	namespace core {
 		class Master;
 	}
 }
-using namespace psycle::core;
-#endif
-
 
 
 namespace psycle {
 	namespace host {
 
 		class CChildView;
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Master;
-#endif
 
 		class CVolumeCtrl: public CSliderCtrl
 		{

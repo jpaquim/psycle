@@ -1,25 +1,20 @@
 #include "GeneratorGui.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#include "Song.hpp"
-#endif
 
-#include "MachineView.hpp"
 #include "FrameMachine.hpp"
+#include "MachineView.hpp"
 #include "MainFrm.hpp"
+
+using namespace psycle::core;
 
 namespace psycle {
 	namespace host {
 
 		class MachineView;
 
-		GeneratorGui::GeneratorGui(MachineView* view, Machine* mac)
-
+		GeneratorGui::GeneratorGui(MachineView* view, psycle::core::Machine* mac)
 			: MachineGui(view, mac),
 			  dialog_(0),
 			  pixbuf_(this),
@@ -30,8 +25,7 @@ namespace psycle {
 			  vu_peak_pixbuf_(this),
 			  vu_led_pixbuf_(this),
 			  text_(this),
-			  pan_dragging_(false)
-		{			
+			  pan_dragging_(false) {	
 			UpdateText();
 		}
 

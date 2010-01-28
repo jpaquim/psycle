@@ -3,14 +3,11 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psycle {
 	namespace core {
 		class Machine;
 	}
 }
-using namespace psycle::core;
-#endif
 
 namespace psycle {
 	namespace host {
@@ -19,10 +16,6 @@ namespace psycle {
 		#define K_YSIZE     28
 		#define K_NUMFRAMES 63
 		#define W_ROWWIDTH  150
-
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Machine;
-#endif
 
 		class NativeGUISettings
 		{
@@ -96,7 +89,7 @@ namespace psycle {
 			DECLARE_MESSAGE_MAP()
 
 		protected:
-			Machine* _pMachine;
+			psycle::core::Machine* _pMachine;
 
 			int ncol;
 			int numParameters;
@@ -116,5 +109,5 @@ namespace psycle {
 
 		};
 
-	}   // namespace
-}   // namespace
+	}   // namespace host
+}   // namespace psycle
