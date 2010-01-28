@@ -19,7 +19,8 @@ using namespace helpers;
 SongSerializer CoreSong::serializer;
 
 CoreSong::CoreSong()
-	  : ready() {
+	  : ready(),
+		filename_("Untitled.psy") {
 	for(int i(0); i < MAX_MACHINES; ++i)
 		machine_[i] = 0;
 	for(int i(0); i < MAX_INSTRUMENTS; ++i) 
@@ -625,7 +626,6 @@ Song::Song() {
 	SetReady(false);
 	clearMyData();
 	_saved=false;
-	fileName = "Untitled.psy";
 	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master,MASTER_INDEX));	
 };
 

@@ -1,17 +1,13 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include "project.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/core/signalslib.h>
 #include <boost/bind.hpp>
 
 #include "Psy3Saver.hpp"
-using namespace psycle::core;
-#else
-#include "Player.hpp"
-#endif
-
 #include "ChildView.hpp"
 #include "Configuration.hpp"
 #include "PatternView.hpp"
@@ -28,6 +24,9 @@ using namespace psycle::core;
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
+
+
+using namespace psycle::core;
 
 namespace psycle {
 	namespace host {
@@ -48,17 +47,14 @@ namespace psycle {
 		}
 
 		void Project::SetActive() {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::Player & player(psycle::core::Player::singleton());
+			psycle::core::Player& player(psycle::core::Player::singleton());
 			player.song(*song_);
-#endif
 		}
 
 		void Project::Clear() {
 			cmd_manager_.Clear();
 			mac_view()->LockVu();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Player & player(Player::singleton());
+			Player& player(Player::singleton());
 			player.stop();
 			player.setBpm(song().BeatsPerMin());
 			player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
@@ -67,46 +63,6 @@ namespace psycle {
 			mac_view()->child_view()->SetTitleBarText();
 			mac_view()->Rebuild();
 			mac_view()->UnlockVu();
-#else
-			Global::pPlayer->stop();
-			///\todo lock/unlock
-			Sleep(LOCK_LATENCY);
-			mac_view()->child_view()->_outputActive = false;
-			Global::pConfig->_pOutputDriver->Enable(false);
-			// midi implementation
-			Global::pConfig->_pMidiInput->Close();
-			///\todo lock/unlock
-			Sleep(LOCK_LATENCY);
-
-			song().New();
-
-			mac_view()->child_view()->_outputActive = true;
-			if (!Global::pConfig->_pOutputDriver->Enable(true))
-			{
-				mac_view()->child_view()->_outputActive = false;
-			}
-			else
-			{
-				// midi implementation
-				Global::pConfig->_pMidiInput->Open();
-			}
-			Global::pPlayer->SetBPM(song().BeatsPerMin(),song().LinesPerBeat());
-			mac_view()->child_view()->SetTitleBarText();
-			pat_view()->editPosition=0;
-			song().seqBus=0;
-			CMainFrame* pParentMain = mac_view()->main();
-			pParentMain->PsybarsUpdate(); // Updates all values of the bars
-			pParentMain->WaveEditorBackUpdate();
-			pParentMain->m_wndInst.WaveUpdate();
-			pParentMain->RedrawGearRackList();
-			pParentMain->m_wndSeq.UpdateSequencer();
-			pParentMain->m_wndSeq.UpdatePlayOrder(false); // should be done always after updatesequencer
-			//pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
-			pat_view()->RecalculateColourGrid();
-			mac_view()->child_view()->Repaint();
-			mac_view()->Rebuild();
-			mac_view()->UnlockVu();
-#endif
 		}
 
 		void Project::OnFileLoadsongNamed(const std::string& fName, int fType) {
@@ -127,12 +83,11 @@ namespace psycle {
 			::Sleep(1); ///< Allow screen refresh.
 		}
 
-		void Project::OnReport(std::string a, std::string b) {
+		void Project::OnReport(const std::string& a, const std::string& b) {
 			MessageBox(0, a.c_str(), b.c_str(), MB_OK | MB_ICONERROR);
 		}
 
 		void Project::FileLoadsongNamed(const std::string& fName) {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			mac_view()->LockVu();
 			psycle::core::Song* song = new Song();
 			song->SetReady(false);
@@ -163,9 +118,9 @@ namespace psycle {
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos) {
 				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
-				song_->fileName = fName.substr(index+1);
+				song_->set_filename(fName.substr(index+1));
 			} else {
-				song_->fileName = fName;
+				song_->set_filename(fName);
 			}
 
 		//	set_lines_per_beat(song().ticksSpeed());
@@ -175,82 +130,6 @@ namespace psycle {
 			pat_view()->RecalculateColourGrid();
 			mac_view()->child_view()->SetTitleBarText();
 			mac_view()->UnlockVu();
-#else
-			CMainFrame* pParentMain = mac_view()->main();
-
-			mac_view()->LockVu();
-			Global::pPlayer->stop();			
-			///\todo lock/unlock
-			Sleep(LOCK_LATENCY);
-			mac_view()->child_view()->_outputActive = false;
-			Global::pConfig->_pOutputDriver->Enable(false);
-			// MIDI IMPLEMENTATION
-			Global::pConfig->_pMidiInput->Close();
-			///\todo lock/unlock
-			Sleep(LOCK_LATENCY);
-			
-			OldPsyFile file;
-			if (!file.Open(fName.c_str()))
-			{
-				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
-				return;
-			}
-			pat_view()->editPosition = 0;
-			song().Load(&file);
-			//file.Close(); <- load handles this
-			song()._saved=true;
-			AppendToRecent(fName);
-			std::string::size_type index = fName.rfind('\\');
-			if (index != std::string::npos)
-			{
-				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
-				song().fileName = fName.substr(index+1);
-			}
-			else
-			{
-				song().fileName = fName;
-			}
-			Global::pPlayer->SetBPM(song().BeatsPerMin(), song().LinesPerBeat());
-			mac_view()->child_view()->_outputActive = true;
-			if (!Global::pConfig->_pOutputDriver->Enable(true))
-			{
-				mac_view()->child_view()->_outputActive = false;
-			}
-			else
-			{
-				// MIDI IMPLEMENTATION
-				
-				Global::pConfig->_pMidiInput->Open();
-			}
-
-			pParentMain->PsybarsUpdate();
-			pParentMain->WaveEditorBackUpdate();
-			pParentMain->m_wndInst.WaveUpdate();
-			pParentMain->RedrawGearRackList();
-			pParentMain->m_wndSeq.UpdateSequencer();
-			pParentMain->m_wndSeq.UpdatePlayOrder(false);
-			//pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
-			pat_view()->RecalculateColourGrid();
-			mac_view()->child_view()->Repaint();
-			pat_view()->KillUndo();
-			pat_view()->KillRedo();
-			mac_view()->child_view()->SetTitleBarText();
-			mac_view()->Rebuild();
-			mac_view()->UnlockVu();
-#endif
-			if (Global::pConfig->bShowSongInfoOnLoad) {
-				CSongpDlg dlg(song_);
-				dlg.SetReadOnly();
-				dlg.DoModal();
-/*				std::ostringstream songLoaded;
-				songLoaded << '\'' << _pSong->name << '\'' << std::endl
-					<< std::endl
-					<< _pSong->author << std::endl
-					<< std::endl
-					<< _pSong->comments;
-				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
-*/
-			}
 		}
 
 		void Project::AppendToRecent(const std::string& fName)
@@ -322,10 +201,10 @@ namespace psycle {
 				{
 					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
-					filepath += song().fileName;
+					filepath += song().filename();
 					OldPsyFile file;
 					std::ostringstream szText;
-					szText << "Save changes to \"" << song().fileName
+					szText << "Save changes to \"" << song().filename()
 						<< "\"?";
 					int result = mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 					switch (result)
@@ -513,11 +392,11 @@ namespace psycle {
 				if (index != -1)
 				{
 					Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
-					song().fileName = str.Mid(index+1)+".psy";
+					song().set_filename(std::string(str.Mid(index+1)+".psy"));
 				}
 				else
 				{
-					song().fileName = str+".psy";
+					song().set_filename(std::string(str+".psy"));
 				}
 				mac_view()->child_view()->_outputActive = true;
 				#if !PSYCLE__CONFIGURATION__USE_PSYCORE
@@ -547,7 +426,7 @@ namespace psycle {
 		bool Project::Export(UINT id)
 		{
 			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = song().fileName.substr(0,song().fileName.length()-4) + ".xm";
+			std::string ifile = song().filename().substr(0,song().filename().length()-4) + ".xm";
 			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
@@ -612,7 +491,7 @@ namespace psycle {
 				{
 					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
-					filepath += song().fileName;
+					filepath += song().filename();
 					//todo: fileformat version
 					// if (!song().save(filepath,3) ) {
 					//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
@@ -658,7 +537,7 @@ namespace psycle {
 			//MessageBox("Saving Disabled");
 			//return false;
 			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = song().fileName;
+			std::string ifile = song().filename();
 			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
@@ -704,14 +583,12 @@ namespace psycle {
 					int index = str.ReverseFind('\\');
 					OldPsyFile file;
 
-					if (index != -1)
-					{
-						Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
-						song().fileName = str.Mid(index+1);
-					}
-					else
-					{
-						song().fileName = str;
+					if (index != -1) {
+						Global::pConfig->SetCurrentSongDir(
+							std::string(static_cast<char const *>(str.Left(index))));
+						song().set_filename(std::string(str.Mid(index+1))); }
+					else {
+						song().set_filename(std::string(str));
 					}
 					//todo: fileformat version
 					// if ( ! song().save(str.GetBuffer(1),3)){

@@ -620,13 +620,11 @@ namespace psycle {
 
 		void CChildView::OnFileRevert()
 		{
-			if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
-			{
-				if (projects_->active_project()->song()._saved)
-				{
+			if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES) {
+				if (projects_->active_project()->song()._saved) {
 					std::ostringstream fullpath;
 					fullpath << Global::pConfig->GetCurrentSongDir().c_str()
-						<< '\\' << projects_->active_project()->song().fileName.c_str();
+						<< '\\' << projects_->active_project()->song().filename().c_str();
 					projects_->active_project()->FileLoadsongNamed(fullpath.str());
 				}
 			}
@@ -688,8 +686,7 @@ namespace psycle {
 			SetFocus();
 		}
 
-		void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI) 
-		{			
+		void CChildView::OnUpdatePatternView(CCmdUI* pCmdUI) {			
 			pCmdUI->SetCheck(viewMode == view_modes::pattern);		
 		}
 
@@ -712,51 +709,35 @@ namespace psycle {
 			SetFocus();
 		}
 
-		void CChildView::OnUpdatePatternSeq(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdatePatternSeq(CCmdUI* pCmdUI) {
 			pCmdUI->SetCheck(viewMode==view_modes::sequence);
 		}
 
-		void CChildView::OnBarplay() 
-		{
-			if (Global::pConfig->_followSong)
-			{
+		void CChildView::OnBarplay() {
+			if (Global::pConfig->_followSong) {
 				pattern_view()->bScrollDetatch=false;
 			}
 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Player & player(psycle::core::Player::singleton());			
 			psycle::core::SequenceEntry* entry = pattern_view()->main()->m_wndSeq.selected_entry();				    
 			player.start(entry->tickPosition());			
-#else			
-			Global::pPlayer->Start(pattern_view()->editPosition,0);
-#endif
 			main_frame_->StatusBarIdle();
 		}
 
-		void CChildView::OnBarplayFromStart() 
-		{
-			if (Global::pConfig->_followSong)
-			{
+		void CChildView::OnBarplayFromStart() {
+			if (Global::pConfig->_followSong) {
 				pattern_view()->bScrollDetatch=false;
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Player & player(psycle::core::Player::singleton());
 			player.start(0);		
-#else			
-			pattern_view()->prevEditPosition=pattern_view()->editPosition;
-			Global::pPlayer->Start(0,0);
-#endif			
 			main_frame_->StatusBarIdle();
 		}
 
-		void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) {
 			pCmdUI->SetCheck(Global::pPlayer->playing());		
 		}
 
-		void CChildView::OnUpdateBarplayFromStart(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdateBarplayFromStart(CCmdUI* pCmdUI) {
 			pCmdUI->SetCheck(0);
 		}
 
@@ -776,13 +757,11 @@ namespace psycle {
 			main_frame_->StatusBarIdle();
 		}
 
-		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
-		{			
+		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI)  {			
 			pCmdUI->SetCheck(Global::pConfig->_followSong && pattern_view()->bEditMode);			
 		}
 
-		void CChildView::OnButtonplayseqblock() 
-		{
+		void CChildView::OnButtonplayseqblock()  {
 			if (Global::pConfig->_followSong)
 			{
 				pattern_view()->bScrollDetatch=false;
@@ -805,8 +784,7 @@ namespace psycle {
 			if ( viewMode == view_modes::pattern ) Repaint(draw_modes::pattern);
 		}
 
-		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI)  {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			PlayerTimeInfo tinfo = Player::singleton().timeInfo();
 			int check = Player::singleton().loopEnabled() && 
@@ -817,8 +795,7 @@ namespace psycle {
 			pCmdUI->SetCheck(check);			
 		}
 
-		void CChildView::OnBarstop()
-		{
+		void CChildView::OnBarstop() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			psycle::core::Player & player(psycle::core::Player::singleton());
 			PlayerTimeInfo tinfo = player.timeInfo();
@@ -855,8 +832,7 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::OnRecordWav() 
-		{
+		void CChildView::OnRecordWav()  {
 			if (!Global::pPlayer->recording()) {
 				static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";				
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
@@ -872,13 +848,11 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::OnUpdateRecordWav(CCmdUI* pCmdUI) 
-		{
+		void CChildView::OnUpdateRecordWav(CCmdUI* pCmdUI) {
 			pCmdUI->SetCheck(Global::pPlayer->recording());
 		}
 
-		void CChildView::OnAutostop() 
-		{
+		void CChildView::OnAutostop()  {
 			if ( Global::pConfig->autoStopMachines )
 			{
 				Global::pConfig->autoStopMachines = false;
@@ -1091,13 +1065,13 @@ namespace psycle {
 			char* nameBuff = new char[nameSize];
 			GetMenuString(hRecentMenu, pos, nameBuff, nameSize, MF_BYPOSITION);
 			projects_->active_project()->OnFileLoadsongNamed(nameBuff, 1);
-			delete [] nameBuff; nameBuff = 0;
+			delete[] nameBuff; nameBuff = 0;
 		}
 
 		void CChildView::SetTitleBarText() {
-			std::string titlename = "[" + projects_->active_project()->song().fileName;
+			std::string titlename = "[" + projects_->active_project()->song().filename();
 			if (projects_->active_project()->cmd_manager()->UndoSize() != 0) {
-				titlename+=" *";			
+				titlename += " *";			
 			}
 			// don't know how to access to the IDR_MAINFRAME String Title.
 			titlename += "] Psycle Modular Music Creation Studio (" PSYCLE__VERSION ")";
