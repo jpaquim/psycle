@@ -5,33 +5,30 @@
 #define PSYCLE__CORE__PLAYER__INCLUDED
 #pragma once
 
-#include "song.h"
-#include "machine.h"
-#include "sequencer.h"
+#include <list>
+#include <stdexcept>
+
+#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/cstdint.hpp>
+#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/thread.hpp>
 
 #include <psycle/helpers/dither.hpp>
 #include <psycle/helpers/riff.hpp>
 
-#include <universalis/stdlib/thread.hpp>
-#include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
-#include <universalis/stdlib/date_time.hpp>
-#include <universalis/stdlib/cstdint.hpp>
-#include <list>
-#include <stdexcept>
+#include "machine.h"
+#include "sequencer.h"
+#include "song.h"
+
 
 namespace psycle {
-
-namespace audiodrivers {
-	class AudioDriver;
-	class DummyDriver;
-}
+	namespace audiodrivers {
+		class AudioDriver;
+		class DummyDriver;
+	}
 
 namespace core {
-
-using namespace universalis::stdlib;
-using namespace helpers;
-using namespace audiodrivers;
 
 /// schedules the processing of machines, sends signal buffers and sequence events to them, ...
 class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncopyable {
@@ -55,15 +52,15 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			AudioDriver& driver() { return *driver_; }
+			psycle::audiodrivers::AudioDriver& driver() { return *driver_; }
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			const AudioDriver& driver() const { return *driver_; }
+			const psycle::audiodrivers::AudioDriver& driver() const { return *driver_; }
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			void setDriver(AudioDriver& driver);
+			void setDriver(psycle::audiodrivers::AudioDriver& driver);
 		private:
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			AudioDriver* driver_;
-			DummyDriver* default_driver_; // todo replace with a silent driver
+			psycle::audiodrivers::AudioDriver* driver_;
+			psycle::audiodrivers::DummyDriver* default_driver_; // todo replace with a silent driver
 	///\}
 
 	///\name sample rate
@@ -121,8 +118,10 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			/// starts the recording output device.
 			void startRecording(
 				bool do_dither = false,
-				dsp::Dither::Pdf::type ditherpdf = dsp::Dither::Pdf::triangular,
-				dsp::Dither::NoiseShape::type noiseshaping = dsp::Dither::NoiseShape::none
+				psycle::helpers::dsp::Dither::Pdf::type ditherpdf = 
+					psycle::helpers::dsp::Dither::Pdf::triangular,
+				psycle::helpers::dsp::Dither::NoiseShape::type noiseshaping = 
+					psycle::helpers::dsp::Dither::NoiseShape::none
 			);
 			/// stops the recording output device.
 			void stopRecording( );
@@ -142,7 +141,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			/// wave render filename
 			std::string fileName_;
 			/// file to which to output signal.
-			WaveFile outputWaveFile_;
+			psycle::helpers::WaveFile outputWaveFile_;
 			void writeSamplesToFile(int amount);
 	///\}
 
@@ -234,7 +233,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		/// temporary buffer to get all the audio from master (which work in small chunks), and send it to the soundcard after converting it to float.
 		float * buffer_;
 		/// dither handler
-		dsp::Dither dither_;
+		psycle::helpers::dsp::Dither dither_;
 
 	///\name multithreaded scheduler
 	///\{
