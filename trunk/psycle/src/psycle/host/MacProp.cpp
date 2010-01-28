@@ -3,39 +3,19 @@
 
 #include "MacProp.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/machinefactory.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#include "Song.hpp"
-#endif
+#include <psycle/core/song.h>
 
-#include "MainFrm.hpp"
-#include "MachineView.hpp"
 #include "MachineGui.hpp"
+#include "MachineView.hpp"
+#include "MainFrm.hpp"
+
+using namespace psycle::core;
 
 namespace psycle {
 	namespace host {
-
-		extern CPsycleApp theApp;
-
-		CMacProp::CMacProp(MachineGui* gui)
-			: CDialog(CMacProp::IDD, 0),
-			  gui_(gui) {
-		}
-
-		void CMacProp::DoDataExchange(CDataExchange* pDX)
-		{
-			CDialog::DoDataExchange(pDX);
-			DDX_Control(pDX, IDC_SOLO, m_soloCheck);
-			DDX_Control(pDX, IDC_BYPASS, m_bypassCheck);
-			DDX_Control(pDX, IDC_MUTE, m_muteCheck);
-			DDX_Control(pDX, IDC_EDIT1, m_macname);
-		}
-
+		
 		BEGIN_MESSAGE_MAP(CMacProp, CDialog)
 			ON_EN_CHANGE(IDC_EDIT1, OnChangeEdit1)
 			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
@@ -46,8 +26,20 @@ namespace psycle {
 			ON_BN_CLICKED(IDC_REPLACEMAC, OnBnClickedReplacemac)
 		END_MESSAGE_MAP()
 
-		BOOL CMacProp::OnInitDialog() 
-		{
+		CMacProp::CMacProp(MachineGui* gui)
+			: CDialog(CMacProp::IDD, 0),
+			  gui_(gui) {
+		}
+
+		void CMacProp::DoDataExchange(CDataExchange* pDX) {
+			CDialog::DoDataExchange(pDX);
+			DDX_Control(pDX, IDC_SOLO, m_soloCheck);
+			DDX_Control(pDX, IDC_BYPASS, m_bypassCheck);
+			DDX_Control(pDX, IDC_MUTE, m_muteCheck);
+			DDX_Control(pDX, IDC_EDIT1, m_macname);
+		}
+
+		BOOL CMacProp::OnInitDialog() {
 			CDialog::OnInitDialog();
 
 			deleted=false;
@@ -62,12 +54,10 @@ namespace psycle {
 			m_soloCheck.SetCheck(gui_->view()->song()->machineSoloed == gui_->mac()->id());
 			m_bypassCheck.SetCheck(gui_->mac()->Bypass());
 
-			if (gui_->mac()->IsGenerator() )
-			{
+			if (gui_->mac()->IsGenerator()) {
 				m_bypassCheck.ShowWindow(SW_HIDE);
 			}
-			else 
-			{
+			else {
 				m_soloCheck.ShowWindow(SW_HIDE);
 			}
 			return TRUE;
@@ -75,23 +65,19 @@ namespace psycle {
 			// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
-		void CMacProp::OnChangeEdit1() 
-		{
+		void CMacProp::OnChangeEdit1() {
 			m_macname.GetWindowText(txt, 32);
 		}
 
-		void CMacProp::OnButton1() 
-		{
+		void CMacProp::OnButton1() {
 			// Delete MACHINE!
-			if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
-			{
+			if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES) {
 				deleted = true;
 				OnCancel();
 			}
 		}
 
-		void CMacProp::OnMute() 
-		{
+		void CMacProp::OnMute() {
 			gui_->mac()->_mute = (m_muteCheck.GetCheck() == 1);
 			gui_->mac()->_volumeCounter=0.0f;
 			gui_->mac()->_volumeDisplay = 0;
@@ -100,35 +86,28 @@ namespace psycle {
 			gui_->QueueDraw();
 		}
 
-		void CMacProp::OnBypass() 
-		{
+		void CMacProp::OnBypass() {
 			gui_->mac()->Bypass(m_bypassCheck.GetCheck() == 1);
 			gui_->view()->child_view()->updatePar=gui_->mac()->id();				
 			gui_->QueueDraw();
 		}
 
-		void CMacProp::OnSolo() 
-		{
+		void CMacProp::OnSolo() {
 			gui_->view()->SetSolo(gui_->mac());
 			gui_->QueueDraw();
 		}
 
-		void CMacProp::OnClone() 
-		{
+		void CMacProp::OnClone() {
 			int src = gui_->mac()->id();
 			int dst = -1;
 
-			if ((src < MAX_BUSES) && (src >=0))
-			{
+			if ((src < MAX_BUSES) && (src >=0)) {
 				dst = gui_->view()->song()->GetFreeBus();
 			}
-			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
-			{
+			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES)) {
 				dst = gui_->view()->song()->GetFreeFxBus();
 			}
-			if (dst >= 0)
-			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			if (dst >= 0) {
 				Machine * newMac = MachineFactory::getInstance().CloneMachine(*gui_->mac());
 				if(!newMac)
 				{
@@ -138,27 +117,15 @@ namespace psycle {
 					gui_->view()->song()->AddMachine(newMac);
 					gui_->view()->CreateMachineGui(newMac);
 				}
-#else
-				if (!gui_->view()->song()->CloneMac(src,dst))
-				{
-					MessageBox("Cloning failed","Cloning failed");
-				}
-				else {
-					gui_->view()->CreateMachineGui(gui_->view()->song()->machine(dst));
-				}
-#endif
-
-				((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
-				if (gui_->view()->child_view()->viewMode==view_modes::machine)
-				{
+				gui_->view()->main()->UpdateComboGen(true);
+				if (gui_->view()->child_view()->viewMode==view_modes::machine) {
 					gui_->view()->child_view()->Invalidate();
 				}
 			}
 			OnCancel();
 		}
 
-		void CMacProp::OnBnClickedReplacemac()
-		{
+		void CMacProp::OnBnClickedReplacemac() {
 			replaced = true;
 			OnCancel();
 		}

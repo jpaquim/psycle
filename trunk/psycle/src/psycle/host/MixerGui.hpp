@@ -21,5 +21,6 @@ namespace psycle {
 
 			class CFrameMixerMachine* dialog_;
 		};
-	}
-}
+
+	}	// namespace host
+}	// namespace psycle

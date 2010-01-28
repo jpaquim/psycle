@@ -3,23 +3,17 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 namespace psycle {
 	namespace core {
 		class Sampler;
 	}
 }
-using namespace psycle::core;
-
-#endif
 
 namespace psycle {
 	namespace host {
 
 		class CChildView;
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Sampler;
-#endif
 
 		/// gear tracker window.
 		class CGearTracker : public CDialog

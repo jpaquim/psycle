@@ -320,16 +320,13 @@ namespace psycle {
 					}
 
 				} else {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					if (pattern_view()->main()->m_wndSeq.sel_block_play() ) {
 						SequencerView& s_view = pattern_view()->main()->m_wndSeq;
 						s_view.SwitchToNormalPlay();
 					}
-#endif
 				}
 			}
-			if (nIDEvent == 159 && !Global::pPlayer->recording())
-			{
+			if (nIDEvent == 159 && !Global::pPlayer->recording()) {
 				//MessageBox("Saving Disabled");
 				//return;
 				CString filepath = Global::pConfig->GetSongDir().c_str();
@@ -340,7 +337,7 @@ namespace psycle {
 
 		void CChildView::EnableSound() {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE			
-			psycle::core::Player & player(psycle::core::Player::singleton());
+			psycle::core::Player& player(psycle::core::Player::singleton());
 			output_driver_ =  Global::pConfig->_pOutputDriver;
 			if (&player.driver() == output_driver_) {
 				if (output_driver_->started())
@@ -388,7 +385,7 @@ namespace psycle {
 
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy() {
-			psycle::core::Player & player(psycle::core::Player::singleton());
+			psycle::core::Player& player(psycle::core::Player::singleton());
 			player.driver().set_started(false);
 			KillTimer(31);
 			KillTimer(159);
@@ -405,7 +402,7 @@ namespace psycle {
 			GetUpdateRgn(&pRgn, FALSE);
 			CPaintDC dc(this);		
 
-			if ( bmpDC == NULL && Global::pConfig->useDoubleBuffer ) // buffer creation
+			if (bmpDC == NULL && Global::pConfig->useDoubleBuffer ) // buffer creation
 			{
 				CRect rc;
 				GetClientRect(&rc);
@@ -415,7 +412,7 @@ namespace psycle {
 				sprintf(buf,"CChildView::OnPaint(). Initialized bmpDC to 0x%.8X\n",(int)bmpDC);
 				TRACE(buf);
 			}
-			else if ( bmpDC != NULL && !Global::pConfig->useDoubleBuffer ) // buffer deletion
+			else if (bmpDC != NULL && !Global::pConfig->useDoubleBuffer) // buffer deletion
 			{
 				char buf[100];
 				sprintf(buf,"CChildView::OnPaint(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
@@ -466,23 +463,19 @@ namespace psycle {
 		}
 
 		void CChildView::Repaint(draw_modes::draw_mode drawMode) {
-			if ( viewMode == view_modes::machine )
-			{
-				if ( drawMode <= draw_modes::machine )
-				{
+			if ( viewMode == view_modes::machine ) {
+				if ( drawMode <= draw_modes::machine ) {
 					updateMode = drawMode;
 					Invalidate(false);
 				}
 			}
 			else if ( viewMode == view_modes::pattern )
 			{
-				if (drawMode >= draw_modes::pattern || drawMode == draw_modes::all )	
-				{
+				if (drawMode >= draw_modes::pattern || drawMode == draw_modes::all ){
 					pattern_view()->PreparePatternRefresh(drawMode);
 				}
 			}
-			if ( viewMode == view_modes::sequence )
-			{
+			if ( viewMode == view_modes::sequence ) {
 				Invalidate(false);
 			}
 		}
@@ -724,12 +717,9 @@ namespace psycle {
 		}
 
 		void CChildView::OnBarrec() {
-			if (Global::pConfig->_followSong && pattern_view()->bEditMode)
-			{
+			if (Global::pConfig->_followSong && pattern_view()->bEditMode) {
 				pattern_view()->bEditMode = FALSE;
-			}
-			else
-			{
+			} else {
 				Global::pConfig->_followSong = TRUE;
 				pattern_view()->bEditMode = TRUE;
 				CButton*cb=(CButton*)main_frame_->m_wndSeq.GetDlgItem(IDC_FOLLOW);
@@ -743,36 +733,20 @@ namespace psycle {
 		}
 
 		void CChildView::OnButtonplayseqblock()  {
-			if (Global::pConfig->_followSong)
-			{
+			if (Global::pConfig->_followSong) {
 				pattern_view()->bScrollDetatch=false;
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			SequencerView& s_view = pattern_view()->main()->m_wndSeq;
 			s_view.SwitchToSelBlockPlay();
 			Global::pPlayer->start(0);			
-#else
- 			pattern_view()->prevEditPosition=pattern_view()->editPosition;
-			int i=0;
-			for ( ; projects_->active_project()->song().playOrderSel[i] == false ; ++i);
-
-			pattern_view()->prevEditPosition=pattern_view()->editPosition;
-			if(!Global::pPlayer->playing())
-			Global::pPlayer->Start(i,0);
-			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
-#endif
 			main_frame_->StatusBarIdle();
 			if ( viewMode == view_modes::pattern ) Repaint(draw_modes::pattern);
 		}
 
 		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI)  {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			PlayerTimeInfo tinfo = Player::singleton().timeInfo();
 			int check = Player::singleton().loopEnabled() && 
 				(tinfo.cycleStartPos() > 0.0f || tinfo.cycleEndPos() < projects_->active_project()->song().sequence().tickLength());
-#else
-			int check = Global::pPlayer->_playBlock;
-#endif
 			pCmdUI->SetCheck(check);			
 		}
 

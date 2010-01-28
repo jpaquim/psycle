@@ -1,59 +1,41 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
 #include "GearTracker.hpp"
-#include "ChildView.hpp"
-#include "MachineView.hpp"
-#include "MachineGui.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/sampler.h>
-using namespace psycle::core;
-#else
-#include "Sampler.hpp"
-#endif
 #include <psycle/helpers/dsp.hpp>
+#include <psycle/core/sampler.h>
+
+#include "ChildView.hpp"
+#include "MachineGui.hpp"
+#include "MachineView.hpp"
 
 namespace psycle {
 	namespace host {
 
+		BEGIN_MESSAGE_MAP(CGearTracker, CDialog)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawTrackslider2)
+			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
+		END_MESSAGE_MAP()
+
 		CGearTracker::CGearTracker(CChildView* pParent)
-			: CDialog(CGearTracker::IDD, pParent)
-		{
-			m_pParent = pParent;
-			//{{AFX_DATA_INIT(CGearTracker)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
+			: CDialog(CGearTracker::IDD, pParent),
+			  m_pParent(pParent) {
 		}
 
 		CGearTracker::CGearTracker(MachineGui* gui)
 			: CDialog(CGearTracker::IDD, gui->view()->child_view()),
 			  gui_(gui),
 			  m_pParent(gui->view()->child_view()),
-				_pMachine((Sampler*)gui->mac())
+				_pMachine((Sampler*)gui->mac()) {
 
-		{
-
-			//{{AFX_DATA_INIT(CGearTracker)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
 		}
 
-		void CGearTracker::DoDataExchange(CDataExchange* pDX)
-		{
+		void CGearTracker::DoDataExchange(CDataExchange* pDX) {
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CGearTracker)
 			DDX_Control(pDX, IDC_COMBO1, m_interpol);
 			DDX_Control(pDX, IDC_TRACKSLIDER2, m_polyslider);
 			DDX_Control(pDX, IDC_TRACKLABEL2, m_polylabel);
-			//}}AFX_DATA_MAP
 		}
-
-		BEGIN_MESSAGE_MAP(CGearTracker, CDialog)
-			//{{AFX_MSG_MAP(CGearTracker)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawTrackslider2)
-			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
-			//}}AFX_MSG_MAP
-		END_MESSAGE_MAP()
 
 		BOOL CGearTracker::OnInitDialog() 
 		{
@@ -115,5 +97,5 @@ namespace psycle {
 			delete this;
 		}
 
-	}   // namespace
-}   // namespace
+	}   // namespace host
+}   // namespace psycle

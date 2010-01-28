@@ -1,17 +1,12 @@
 #include "VstGenGui.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Machine.hpp"
-#endif
 
+#include <psycle/core/song.h>
 
 #include "ChildView.hpp"
 #include "MachineView.hpp"
-
 #include "VstEffectWnd.hpp"
+
+using namespace psycle::core;
 
 namespace psycle {
 	namespace host {

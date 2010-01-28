@@ -4,20 +4,17 @@
 namespace psycle {
 	namespace host {
 
-		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
+		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
 			pattern_view_->OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
-		void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
+		void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
 			// undo code not required, enter note handles it
 			KeyUp(nChar, nRepCnt, nFlags);
 			CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
-		void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
-		{
+		void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
 			// undo code not required, enter not and msbput handle it
 			BOOL bRepeat = nFlags&0x4000;
 			if(viewMode == view_modes::pattern && pattern_view()->bEditMode)
@@ -28,8 +25,7 @@ namespace psycle {
 					return;
 				}
 			}
-			else if (viewMode == view_modes::sequence && pattern_view()->bEditMode)
-			{
+			else if (viewMode == view_modes::sequence && pattern_view()->bEditMode) {
 				bool success;
 				// add data
 		//		success = Global::pInputHandler->EnterDataSeq(nChar,nFlags);
@@ -39,9 +35,7 @@ namespace psycle {
 					CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 					return;
 				}
-			}
-			else
-			{
+			} else {
 				pattern_view()->ChordModeOffs = 0;
 			}
 
@@ -55,11 +49,7 @@ namespace psycle {
 				{			
 					Global::pInputHandler->PerformCmd(cmd,bRepeat);
 					if ( cmd == cdefInfoMachine) {
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						Song& song = projects_->active_project()->song();
-#else
-						Song& song = Global::song();
-#endif
 						// maybe this should handeld in the machine view
 						if (song.seqBus < MAX_MACHINES)
 						{
@@ -77,8 +67,7 @@ namespace psycle {
 				}
 				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
 				{
-					if(!bRepeat) 
-					{	
+					if(!bRepeat) {	
 						const int outnote = cmd.GetNote();
 						// play note
 						Global::pInputHandler->PlayNote(outnote); 
@@ -87,8 +76,7 @@ namespace psycle {
 			}
 		}
 
-		void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
-		{
+		void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
 			KeyDown(nChar, nRepCnt, nFlags);
 			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
 		}
@@ -106,45 +94,37 @@ namespace psycle {
 		// NoteOff. And check if "if(outnote >= 0 && outnote <= 120)" is necessary.
 		//
 
-		void CChildView::MidiPatternNote(int outnote, int velocity)
-		{
+		void CChildView::MidiPatternNote(int outnote, int velocity) {
 			pattern_view()->MidiPatternNote(outnote, velocity);
 		}
 
-		void CChildView::MidiPatternTweak(int command, int value)
-		{
+		void CChildView::MidiPatternTweak(int command, int value) {
 			pattern_view()->MidiPatternTweak(command, value);
 		}
 
-		void CChildView::MidiPatternTweakSlide(int command, int value)
-		{
+		void CChildView::MidiPatternTweakSlide(int command, int value) {
 			pattern_view()->MidiPatternTweakSlide(command, value);
 		}
 
-		void CChildView::MidiPatternCommand(int command, int value)
-		{
+		void CChildView::MidiPatternCommand(int command, int value) {
 			pattern_view()->MidiPatternCommand(command, value);
 		}
 
-		void CChildView::MidiPatternMidiCommand(int command, int value)
-		{
+		void CChildView::MidiPatternMidiCommand(int command, int value) {
 			pattern_view()->MidiPatternMidiCommand(command, value);
 		}
 
-		void CChildView::MidiPatternInstrument(int value)
-		{
+		void CChildView::MidiPatternInstrument(int value) {
 			pattern_view()->MidiPatternInstrument(value);
 		}
 
-		void CChildView::MousePatternTweak(int machine, int command, int value)
-		{
+		void CChildView::MousePatternTweak(int machine, int command, int value) {
 			pattern_view()->MousePatternTweak(machine, command, value);
 		}
 
-		void CChildView::MousePatternTweakSlide(int machine, int command, int value)
-		{
+		void CChildView::MousePatternTweakSlide(int machine, int command, int value) {
 			pattern_view()->MousePatternTweakSlide(machine, command, value);
 		}
 
-	}   // namespace
-}   // namespace
+	}   // namespace host
+}   // namespace psycle

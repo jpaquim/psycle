@@ -1,13 +1,13 @@
 #pragma once
-#include "Psycle.hpp"
 #include "MachineGui.hpp"
+#include "Psycle.hpp"
 
 namespace psycle {
 	namespace host {
 
 		class EffectGui : public MachineGui {
 		public:
-			EffectGui(MachineView* view, Machine* mac);
+			EffectGui(MachineView* view, psycle::core::Machine* mac);
 			~EffectGui();
 
 			virtual void SetSkin(const SMachineCoords&	MachineCoords,
