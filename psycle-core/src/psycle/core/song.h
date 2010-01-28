@@ -40,8 +40,9 @@ class PSYCLE__CORE__DECL CoreSong {
 			bool load(const std::string& filename);
 			bool save(const std::string& filename, int version = 4);
 
-			boost::signal<void (std::string, std::string)> report;
-			boost::signal<void (int, int, std::string)> progress;
+			///\todo should be made as a getter ..
+			boost::signal<void (const std::string&, const std::string&)> report;
+			boost::signal<void (int, int, const std::string&)> progress;
 		private:
 			static SongSerializer serializer;
 	///\}
@@ -49,7 +50,13 @@ class PSYCLE__CORE__DECL CoreSong {
 	///\{
 		public:
 			/// The file name this song was loaded from.
-			std::string fileName;
+			void set_filename(const std::string& filename) {
+				filename_ = filename;
+			}
+			const std::string& filename() const { return filename_; }
+
+		private:
+			std::string filename_;
 	///\}
 
 	///\name IsReady

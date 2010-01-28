@@ -90,7 +90,7 @@ namespace psycle {
 			Song& pSong = *pChildView->pattern_view()->song();
 			std::string name = Global::pConfig->GetCurrentWaveRecDir().c_str();
 			name+='\\';
-			name+=pSong.fileName;
+			name+=pSong.filename();
 			name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
 			name+=".wav";
 			m_filename.SetWindowText(name.c_str());
