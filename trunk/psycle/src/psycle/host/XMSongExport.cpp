@@ -15,6 +15,12 @@
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
+
+#ifdef _MSC_VER
+#undef min
+#undef max
+#endif
+
 namespace psycle {
 namespace host{
 
@@ -26,6 +32,7 @@ namespace host{
 	}
 
 	void XMSongExport::exportsong(Song& song) {
+		lines_per_beat_ = ComputeLinesPerBeat(song);
 		writeSongHeader(song);
 		SavePatterns(song);
 		SaveInstruments(song);
@@ -49,8 +56,10 @@ namespace host{
 		}
 
 		Write(XM_HEADER, 17);//ID text
-		std::string name = "PE:" + song.name().substr(0,17);
-		Write(name.c_str(), 20);//Module name
+
+		std::ostringstream buf;
+		buf << "PE:" << std::setw(20) <<  std::left << song.name().substr(0,17);		
+		Write(buf.str().c_str(), 20);//Module name
 		std::uint16_t temp = 0x1A;
 		Write(&temp, 1);							
 		Write("FastTracker v2.00   ", 20);//Tracker name
@@ -63,7 +72,7 @@ namespace host{
 		int playLength = line->size();
 		m_Header.norder = playLength;
 		m_Header.restartpos = 0;
-		m_Header.channels = song.tracks();
+		m_Header.channels = std::min(static_cast<int>(song.tracks()),32);
 		int highest = 0;
 		for (Sequence::patterniterator pite = song.sequence().patternbegin(); pite != song.sequence().patternend(); pite++)
 		{
@@ -73,7 +82,7 @@ namespace host{
 		m_Header.patterns = highest+1;
 		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
 		m_Header.flags = 0x0001; //Linear frequency.
-		m_Header.speed = 24/song.LinesPerBeat();
+		m_Header.speed = 24/lines_per_beat_;
 		m_Header.tempo = song.BeatsPerMin();
 
 		//Pattern order table
@@ -85,11 +94,11 @@ namespace host{
 	}
 
 	void XMSongExport::SavePatterns(Song & song) {
-		int lines_per_beat = ComputeLinesPerBeat(song);
+		// todo sort after id
 		Sequence::patterniterator pite = song.sequence().patternbegin();
 		for ( ; pite != song.sequence().patternend(); ++pite) {
 			if ( (*pite) != song.sequence().master_pattern() ) {
-				SavePattern(song, *pite, lines_per_beat);
+				SavePattern(song, *pite);
 			}
 		}		
 	}
@@ -111,20 +120,18 @@ namespace host{
 		}
 	}
 
-	void XMSongExport::SavePattern(Song& song, psycle::core::Pattern* pattern, int lines_per_beat) {
+	void XMSongExport::SavePattern(Song& song, psycle::core::Pattern* pattern) {
 		XMPATTERNHEADER ptHeader;
 		memset(&ptHeader,0,sizeof(ptHeader));
 		ptHeader.size = sizeof(ptHeader);
 		//ptHeader.packingtype = 0; implicit from memset.
-		ptHeader.rows = std::min(256,static_cast<int>(pattern->beats()*lines_per_beat));
+		ptHeader.rows = std::min(256,static_cast<int>(pattern->beats()*lines_per_beat_));
 		//ptHeader.packedsize = 0; implicit from memset.
 
 		Write(&ptHeader,sizeof(ptHeader));
-		std::size_t currentpos = GetPos();
-
-		psycle::core::SequenceLine* line = *(song.sequence().begin()+1);
+		std::size_t currentpos = GetPos();	
 		// check every pattern for validity
-		if (line->IsPatternUsed(pattern)) {	
+		if (pattern->size() != 0) {	
 			int len = (ptHeader.rows * song.tracks());
 			std::vector<PatternEvent> events(len);
 
@@ -132,16 +139,16 @@ namespace host{
 			psycle::core::Pattern::iterator it = pattern->begin();
 			for ( ; it != pattern->end(); ++it) {
 				PatternEvent& ev = it->second;
-				int j = static_cast<int>(it->first * lines_per_beat);
+				int j = static_cast<int>(it->first * lines_per_beat_);
 				int i = ev.track();
-				int pos = (i%song.tracks())*(j+1);
+				int pos = (i%m_Header.channels) + j*m_Header.channels;
 				events[pos] = ev;
 			}
 
 			// write the matrix to the file
 			for (int j = 0; j < ptHeader.rows && j < 256; ++j) {
-				for (int i = 0; i < song.tracks(); ++i) {
-					int pos = (i%song.tracks())*(j+1);
+				for (int i = 0; i < m_Header.channels; ++i) {
+					int pos = (i%m_Header.channels) + j*m_Header.channels;
 					PatternEvent& ev = events[pos];
 					unsigned char note;
 					if (ev.note() <= notecommands::b9) {
