@@ -7,7 +7,6 @@
 //#include "ProgressDialog.hpp"
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
-//#include "SongStructs.hpp"
 //#include <algorithm>
 //#include <cstring>
 
@@ -35,7 +34,7 @@ namespace host{
 	void XMSongExport::writeSongHeader(Song &song)
 	{
 		//We find the last index of machine, to use as first index of instruments
-/*		lastMachine=63;
+		lastMachine=63;
 		while (lastMachine >= 0 && song.machine(lastMachine) == 0) lastMachine--;
 		lastMachine++;
 
@@ -60,7 +59,9 @@ namespace host{
 
 		memset(&m_Header,0,sizeof(m_Header));
 		m_Header.size = sizeof(m_Header);
-		m_Header.norder = song.playLength;
+		psycle::core::SequenceLine* line = *(song.sequence().begin()+1);
+		int playLength = line->size();
+		m_Header.norder = playLength;
 		m_Header.restartpos = 0;
 		m_Header.channels = song.tracks();
 		int highest = 0;
@@ -76,18 +77,21 @@ namespace host{
 		m_Header.tempo = song.BeatsPerMin();
 
 		//Pattern order table
-		for (int i = 0; i < song.playLength; i++) {
-			m_Header.order[i] =  song.playOrder[i];
+		SequenceLine::iterator it = line->begin();
+		for (int i=0; it != line->end(); ++it, ++i) {
+			m_Header.order[i] = (*it).second->pattern()->id();
 		}
-		Write(&m_Header,sizeof(m_Header)); */
+		Write(&m_Header,sizeof(m_Header));
 	}
 
-	void XMSongExport::SavePatterns(Song & song)
-	{
-		for (int i = 0; i < m_Header.patterns ; i++)
-		{
-			SavePattern(song,i);
-		}
+	void XMSongExport::SavePatterns(Song & song) {
+		int lines_per_beat = ComputeLinesPerBeat(song);
+		Sequence::patterniterator pite = song.sequence().patternbegin();
+		for ( ; pite != song.sequence().patternend(); ++pite) {
+			if ( (*pite) != song.sequence().master_pattern() ) {
+				SavePattern(song, *pite, lines_per_beat);
+			}
+		}		
 	}
 
 	// Load instruments
@@ -107,6 +111,184 @@ namespace host{
 		}
 	}
 
+	void XMSongExport::SavePattern(Song& song, psycle::core::Pattern* pattern, int lines_per_beat) {
+		XMPATTERNHEADER ptHeader;
+		memset(&ptHeader,0,sizeof(ptHeader));
+		ptHeader.size = sizeof(ptHeader);
+		//ptHeader.packingtype = 0; implicit from memset.
+		ptHeader.rows = std::min(256,static_cast<int>(pattern->beats()*lines_per_beat));
+		//ptHeader.packedsize = 0; implicit from memset.
+
+		Write(&ptHeader,sizeof(ptHeader));
+		std::size_t currentpos = GetPos();
+
+		psycle::core::SequenceLine* line = *(song.sequence().begin()+1);
+		// check every pattern for validity
+		if (line->IsPatternUsed(pattern)) {	
+			int len = (ptHeader.rows * song.tracks());
+			std::vector<unsigned char> write_note(len,0);
+			std::vector<unsigned char> write_instr(len,0);
+			std::vector<unsigned char> write_vol(len,0);
+			std::vector<unsigned char> write_type(len,0);
+			std::vector<unsigned char> write_param(len,0);
+
+			psycle::core::Pattern::iterator it = pattern->begin();
+			for ( ; it != pattern->end(); ++it) {
+				PatternEvent& ev = it->second;
+				unsigned char note;
+					if (ev.note() <= notecommands::b9) {
+						if (ev.note() >= 12 && ev.note() < 108 ) {
+							if (ev.machine() < MAX_MACHINES && song.machine(ev.machine()) != 0 
+								&& isSampler[ev.machine()] != 0)
+							{ // The sampler machine uses C-4 as middle C.
+								note = ev.note() +1;
+							} else {
+								note = ev.note() - 11;
+							}
+						} else {
+							note = 0x00;
+						}
+					}
+					else if (ev.note() == notecommands::release) {
+						note = 0x61;
+					} else {
+						note = 0x00;
+					}
+					
+					unsigned char instr=0;
+					
+					//Very simple method for now:
+					if (ev.machine() < MAX_MACHINES) {
+						if ( song.machine(ev.machine()) != 0 && isSampler[ev.machine()] != 0)
+						{
+							if (ev.instrument() != 0xFF) instr = lastMachine +  ev.instrument() +1;
+						}
+						else instr = ev.machine() + 1;
+					}
+
+					unsigned char vol=0;
+					unsigned char type=0;
+					unsigned char param=0;
+
+
+				//Putting just a few commands for now.
+			
+					bool foundEffect = true;
+					int singleEffectCharacter = (ev.command() & 0xF0);					
+
+					if (singleEffectCharacter == 0xE0) { //slide up
+						int slideAmount = (ev.command() & 0x0F);
+						type = XMCMD::PORTAUP;
+						param = ev.parameter();
+					}
+					else if (singleEffectCharacter == 0xD0) { //slide down
+						int slideAmount = (ev.command() & 0x0F);
+						type = XMCMD::PORTADOWN;
+						param = ev.parameter();
+					}
+					else {
+						switch(ev.command()) {
+							case 0xC3:
+								type = XMCMD::PORTA2NOTE;
+								param = ev.parameter();
+								break;
+							case 0x0C:
+								vol = 0x10 + (ev.parameter()/4);
+								break;
+							case PatternCmd::SET_TEMPO:
+								if (ev.parameter() > 32) {
+									type = XMCMD::SETSPEED;
+									param = ev.parameter();
+								}
+								break;
+							case PatternCmd::EXTENDED:
+								switch(ev.parameter()&0xF0) {
+								case PatternCmd::SET_LINESPERBEAT0:
+								case PatternCmd::SET_LINESPERBEAT1:
+									type = XMCMD::SETSPEED;
+									param = ev.parameter();
+									break;
+								case PatternCmd::PATTERN_LOOP:
+									type = XMCMD::EXTENDED;
+									param = XMCMD_E::E_PATTERN_LOOP + (ev.parameter() & 0x0F);
+									break;
+								case PatternCmd::PATTERN_DELAY:
+									type = XMCMD::EXTENDED;
+									param = XMCMD_E::E_PATTERN_DELAY + (ev.parameter() & 0x0F);
+									break;
+								default:
+									break;
+								}
+								break;							
+							case PatternCmd::BREAK_TO_LINE:
+								type = XMCMD::PATTERN_BREAK;
+								param = (ev.parameter()/10)<<4 + (ev.parameter()%10);
+								break;
+							case PatternCmd::SET_VOLUME:
+								type = XMCMD::SET_GLOBAL_VOLUME;
+								param = ev.parameter()/2;
+								break;
+							default:
+								foundEffect = false;
+								break;
+						}
+					}
+
+					if ((foundEffect == false) & (ev.command() > 0)) {
+						type = XMCMD::ARPEGGIO;
+						param = ev.command();
+					}
+
+					
+					bool bWriteNote = (note != 0);
+					bool bWriteInstr = (instr != 0);
+					bool bWriteVol = (vol != 0);
+					bool bWriteType = (type != 0);
+					bool bWriteParam  = (param !=0);
+
+					int j = static_cast<int>(it->first * lines_per_beat);
+					int i = ev.track();
+					int pos = (i%song.tracks())*(j+1);
+					write_note[pos] = note;
+					write_instr[pos] = instr;
+					write_vol[pos] = vol;
+					write_type[pos] = type;
+					write_param[pos] = param;				
+			}
+
+			for (int j = 0; j < ptHeader.rows && j < 256; ++j) {
+				for (int i = 0; i < song.tracks(); ++i) {
+					int pos = (i%song.tracks())*(j+1);
+					unsigned char note = write_note[pos];
+					unsigned char instr = write_instr[pos];
+					unsigned char vol = write_vol[pos];
+					unsigned char type = write_type[pos];
+					unsigned char param = write_param[pos];
+					bool bWriteNote = (note != 0);
+					bool bWriteInstr = (instr != 0);
+					bool bWriteVol = (vol != 0);
+					bool bWriteType = (type != 0);
+					bool bWriteParam  = (param !=0);
+					char is_compressed = 0x80 + bWriteNote + (bWriteInstr << 1) + (bWriteVol << 2)
+									+ (bWriteType << 3) + ( bWriteParam << 4);
+
+					if (is_compressed !=  0x9F ) Write(&is_compressed,1); // 0x9F means to write everything.
+					if (bWriteNote) Write(&note,1);
+					if (bWriteInstr) Write(&instr,1);
+					if (bWriteVol) Write(&vol,1);
+					if (bWriteType) Write(&type,1);
+					if (bWriteParam) Write(&param,1);
+				}
+			}
+			ptHeader.packedsize = static_cast<std::uint16_t>((GetPos() - currentpos) & 0xFFFF);
+			Seek(currentpos-sizeof(ptHeader));
+			Write(&ptHeader,sizeof(ptHeader));
+			Skip(ptHeader.packedsize);
+		} else {
+			Write(&ptHeader,sizeof(ptHeader));
+		}
+
+	}
 
 	// return address of next pattern, 0 for invalid
 	void XMSongExport::SavePattern(Song & song, const int patIdx)
@@ -268,6 +450,25 @@ namespace host{
 		}
 #endif
 	}
+
+	int XMSongExport::ComputeLinesPerBeat(Song& song) {
+			psycle::core::Sequence& seq = song.sequence();
+			psycle::core::Sequence::patterniterator it = seq.patternbegin();
+			double min = 1.0;
+			for ( ; it != seq.patternend(); ++it) {
+				psycle::core::Pattern* pattern = *it;
+				psycle::core::Pattern::iterator pat_it = pattern->begin();
+				double old_pos = 0;
+				for ( ; pat_it != pattern->end(); ++pat_it ) {
+					double pos = pat_it->first;
+					double delta = pos - old_pos;
+					if ( delta != 0 && delta < min)
+						min = delta;
+				}
+			}
+			return static_cast<int>(1 / min);
+		}
+
 	void XMSongExport::SaveEmptyInstrument(std::string name)
 	{
 		XMINSTRUMENTHEADER insHeader;
@@ -310,10 +511,7 @@ namespace host{
 		Write(&_samph,sizeof(_samph));
 
 		SaveSampleHeader(song, instIdx);
-
-
 		SaveSampleData(song, instIdx);
-
 	}
 
 	void XMSongExport::SaveSampleHeader(Song& song, int instIdx)
