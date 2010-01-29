@@ -221,9 +221,17 @@ namespace psycle { namespace core {
 
 		void SequenceLine::clear() {
 			iterator it = begin();
-			for (it; it != end(); ++it)
+			for ( ; it != end(); ++it)
 				delete it->second;
 			line_.clear();
+		}
+
+		bool SequenceLine::IsPatternUsed(Pattern* pattern) const {
+			const_iterator it = begin();
+			for ( ; it != end(); ++it)
+				if (it->second->pattern() == pattern)
+					return true;
+			return false;
 		}
 
 		std::string SequenceLine::toXml() const {

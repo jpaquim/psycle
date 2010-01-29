@@ -108,6 +108,8 @@ namespace psycle { namespace core {
 			bool empty() const { return line_.empty(); }
 			void SetSequence(Sequence* sequence) { sequence_ = sequence; }
 
+			bool IsPatternUsed(Pattern* pattern) const;
+
 		private:
 			std::multimap<double, SequenceEntry*> line_;
 			std::string name_;

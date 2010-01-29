@@ -1,23 +1,22 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include "WireGui.hpp"
+
+#include <psycle/helpers/math.hpp>
+
+#include <psycle/core/machine.h>
+
+#include "Configuration.hpp"
 #include "MachineGui.hpp"
 #include "MachineView.hpp"
 #include "WireDlg.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machine.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#endif 
+namespace psycle { 
+	namespace host {
 
-#include "Configuration.hpp"
-
-#include <psycle/helpers/math.hpp>
-
-namespace psycle { namespace host {
-
-using namespace helpers;
-using namespace helpers::math;
+		using namespace helpers;
+		using namespace helpers::math;
+		using namespace psycle::core;
 
 		WireGui::WireGui(MachineView* view)	:
 			view_(view),
@@ -50,8 +49,7 @@ using namespace helpers::math;
 			triangle_size_indent = triangle_size_tall/6;			
 		}
 
-		WireGui::~WireGui()
-		{			
+		WireGui::~WireGui() {			
 			if (wire_dlg_) {
 				wire_dlg_->DestroyWindow();
 			}			
@@ -63,8 +61,7 @@ using namespace helpers::math;
 			}
 		}
 
-		void WireGui::StartDragging(int pickpoint)
-		{
+		void WireGui::StartDragging(int pickpoint) {
 			dragging_ = true;
 			drag_picker_ = pickpoint;
 			GetFocus();
@@ -83,22 +80,17 @@ using namespace helpers::math;
 			SetPoints(points);
 		}
 
-		void WireGui::StopDragging()
-		{
+		void WireGui::StopDragging() {
 			dragging_ = false;
 		}
 
-		void WireGui::BeforeWireDlgDeletion()
-		{
+		void WireGui::BeforeWireDlgDeletion() {
 			wire_dlg_ = 0;
 		}
 
-		void WireGui::RemoveWire()
-		{
+		void WireGui::RemoveWire() {
 			set_manage(false); // this causes an unparent
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			fromGUI_->mac()->Disconnect(*toGUI_->mac()) ;
-#endif
 			wire_dlg_ = 0;
 			delete this;			
 		}
@@ -232,8 +224,7 @@ using namespace helpers::math;
 			}
 		}
 
-		void WireGui::AmosDraw(CDC *devc, int oX, int oY, int dX, int dY)
-		{
+		void WireGui::AmosDraw(CDC *devc, int oX, int oY, int dX, int dY) {
 			if (oX == dX) {
 				++oX;
 			}
@@ -244,8 +235,7 @@ using namespace helpers::math;
 			devc->LineTo(dX, dY);	
 		}
 
-		const CRgn& WireGui::region() const
-		{
+		const CRgn& WireGui::region() const {
 			if ( !points().size() )
 				return rgn_;
 			double distance_ = 20;
@@ -281,8 +271,7 @@ using namespace helpers::math;
 			return rgn_;
 		}
 
-     	bool WireGui::OnEvent(PsycleCanvas::Event* ev)
-		{
+     	bool WireGui::OnEvent(PsycleCanvas::Event* ev) {
 			switch(ev->type) {
 				case PsycleCanvas::Event::BUTTON_PRESS:
 					if ((ev->button == 1 || ev->button == 3) && (ev->shift & MK_SHIFT)) {
@@ -350,8 +339,7 @@ using namespace helpers::math;
 			return rgn.PtInRegion(x,y) ? this : 0;
 		}
 */
-		void WireGui::ShowDialog(double x, double y)
-		{
+		void WireGui::ShowDialog(double x, double y) {
 			if (!wire_dlg_) {			
 				wire_dlg_ = new CWireDlg(fromGUI_->view()->child_view(), this);
 				
@@ -360,8 +348,7 @@ using namespace helpers::math;
 			}
 		}
 
-		void WireGui::UpdatePosition()
-		{
+		void WireGui::UpdatePosition() {
 			//PsycleCanvas::Group* parentGroup = parent();
 			double xp1, xp2;
 			xp1 = 0;

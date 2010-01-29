@@ -7,6 +7,7 @@ namespace psycle {
 	namespace core {
 		class Song;
 		class XMSampler;
+		class Pattern;
 	}
 }
 using namespace psycle::core;
@@ -31,16 +32,19 @@ namespace psycle { namespace host {
 		/// RIFF 
 		virtual void exportsong(Song& song);
 	private:
-		void writeSongHeader(Song &song);
-		void SavePatterns(Song & song);
-		void SavePattern(Song & song, const int patIdx);
+		void writeSongHeader(Song& song);
+		void SavePatterns(Song& song);
+		void SavePattern(Song& song, const int patIdx);
+		void SavePattern(Song& song, psycle::core::Pattern* pattern, int lines_per_beat);
 		
 		void SaveInstruments(Song & song);
 		void SaveEmptyInstrument(std::string name);
 		void SaveInstrument(Song& song, int instIdx);
 		void SaveSampleHeader(Song & song, const int instrIdx);
 		void SaveSampleData(Song & song, const int instrIdx);
-		void SetEnvelopes(Song & song, int instIdx, XMSAMPLEHEADER & sampleHeader);		
+		void SetEnvelopes(Song & song, int instIdx, XMSAMPLEHEADER & sampleHeader);
+
+		int ComputeLinesPerBeat(Song& song);
 		
 		XMFILEHEADER m_Header;
 		int lastMachine;
