@@ -126,16 +126,24 @@ namespace host{
 		// check every pattern for validity
 		if (line->IsPatternUsed(pattern)) {	
 			int len = (ptHeader.rows * song.tracks());
-			std::vector<unsigned char> write_note(len,0);
-			std::vector<unsigned char> write_instr(len,0);
-			std::vector<unsigned char> write_vol(len,0);
-			std::vector<unsigned char> write_type(len,0);
-			std::vector<unsigned char> write_param(len,0);
+			std::vector<PatternEvent> events(len);
 
+			// Build pattern matrix
 			psycle::core::Pattern::iterator it = pattern->begin();
 			for ( ; it != pattern->end(); ++it) {
 				PatternEvent& ev = it->second;
-				unsigned char note;
+				int j = static_cast<int>(it->first * lines_per_beat);
+				int i = ev.track();
+				int pos = (i%song.tracks())*(j+1);
+				events[pos] = ev;
+			}
+
+			// write the matrix to the file
+			for (int j = 0; j < ptHeader.rows && j < 256; ++j) {
+				for (int i = 0; i < song.tracks(); ++i) {
+					int pos = (i%song.tracks())*(j+1);
+					PatternEvent ev = events[pos];
+					unsigned char note;
 					if (ev.note() <= notecommands::b9) {
 						if (ev.note() >= 12 && ev.note() < 108 ) {
 							if (ev.machine() < MAX_MACHINES && song.machine(ev.machine()) != 0 
@@ -238,32 +246,7 @@ namespace host{
 						type = XMCMD::ARPEGGIO;
 						param = ev.command();
 					}
-
 					
-					bool bWriteNote = (note != 0);
-					bool bWriteInstr = (instr != 0);
-					bool bWriteVol = (vol != 0);
-					bool bWriteType = (type != 0);
-					bool bWriteParam  = (param !=0);
-
-					int j = static_cast<int>(it->first * lines_per_beat);
-					int i = ev.track();
-					int pos = (i%song.tracks())*(j+1);
-					write_note[pos] = note;
-					write_instr[pos] = instr;
-					write_vol[pos] = vol;
-					write_type[pos] = type;
-					write_param[pos] = param;				
-			}
-
-			for (int j = 0; j < ptHeader.rows && j < 256; ++j) {
-				for (int i = 0; i < song.tracks(); ++i) {
-					int pos = (i%song.tracks())*(j+1);
-					unsigned char note = write_note[pos];
-					unsigned char instr = write_instr[pos];
-					unsigned char vol = write_vol[pos];
-					unsigned char type = write_type[pos];
-					unsigned char param = write_param[pos];
 					bool bWriteNote = (note != 0);
 					bool bWriteInstr = (instr != 0);
 					bool bWriteVol = (vol != 0);
