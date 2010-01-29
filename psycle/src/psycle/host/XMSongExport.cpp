@@ -70,7 +70,7 @@ namespace host{
 			if ((*pite)->id() > highest)
 				highest = (*pite)->id();
 		}
-		m_Header.patterns = highest;
+		m_Header.patterns = highest+1;
 		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
 		m_Header.flags = 0x0001; //Linear frequency.
 		m_Header.speed = 24/song.LinesPerBeat();
@@ -142,7 +142,7 @@ namespace host{
 			for (int j = 0; j < ptHeader.rows && j < 256; ++j) {
 				for (int i = 0; i < song.tracks(); ++i) {
 					int pos = (i%song.tracks())*(j+1);
-					PatternEvent ev = events[pos];
+					PatternEvent& ev = events[pos];
 					unsigned char note;
 					if (ev.note() <= notecommands::b9) {
 						if (ev.note() >= 12 && ev.note() < 108 ) {
