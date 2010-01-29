@@ -35,7 +35,7 @@ namespace psycle { namespace host {
 		void writeSongHeader(Song& song);
 		void SavePatterns(Song& song);
 		void SavePattern(Song& song, const int patIdx);
-		void SavePattern(Song& song, psycle::core::Pattern* pattern, int lines_per_beat);
+		void SavePattern(Song& song, psycle::core::Pattern* pattern);
 		
 		void SaveInstruments(Song & song);
 		void SaveEmptyInstrument(std::string name);
@@ -49,5 +49,6 @@ namespace psycle { namespace host {
 		XMFILEHEADER m_Header;
 		int lastMachine;
 		std::map<int,int> isSampler;
+		int lines_per_beat_;
 	};
 }}
