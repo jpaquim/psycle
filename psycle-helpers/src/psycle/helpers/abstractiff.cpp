@@ -346,7 +346,7 @@ namespace psycle
 			Write(x2.signedValue());
 		}
 		void AbstractIff::Write(const IffChunkId id) {
-			Write((const char*)id);
+			WriteArray(id, sizeof(id));
 		}
 		void AbstractIff::Write(const ULongBE& ulong) {
 			Write(ulong.unsignedValue());
