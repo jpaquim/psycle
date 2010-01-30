@@ -22,6 +22,12 @@ namespace universalis { namespace stdlib {
 class thread {
 	public:
 		typedef boost::thread native_handle_type;
+		typedef enum {
+			REALTIME,
+			HIGH,
+			NORMAL,
+			IDLE
+		} Priorities;
 	private:
 		native_handle_type native_handle_;
 
@@ -49,6 +55,34 @@ class thread {
 			///\todo unimplemented in boost version 1.34
 			//native_handle_.detach();
 		}
+		void applyPriority(enum Priorities priority)
+		{
+
+		#if defined DIVERSALIS__OS__MICROSOFT
+			HANDLE th = native_handle_.native_handle();
+			switch (priority)
+			{
+			case REALTIME  : SetThreadPriority(th, THREAD_PRIORITY_TIME_CRITICAL);  break;
+			case HIGH      : SetThreadPriority(th, THREAD_PRIORITY_HIGHEST);        break;
+			case NORMAL    : SetThreadPriority(th, THREAD_PRIORITY_NORMAL);         break;
+			case IDLE      : SetThreadPriority(th, THREAD_PRIORITY_LOWEST);         break;
+			}
+		#elif DIVERSALIS__OS__POSIX
+			struct sched_param param;
+			int policy;
+			switch (priority)
+			{
+			case REALTIME  : param.sched_priority = 19;  policy = SCHED_RR;    break;
+			case HIGH      : param.sched_priority = 10;  policy = ScHED_RR;    break;
+			case IDLE      : param.sched_priority = 0;   policy = SCHED_OTHER; break; /*can't set SCHED_IDLE*/
+			case NORMAL    : //fallthrough
+			default		   : param.sched_priority = 0;   policy = SCHED_OTHER; break;
+			}
+			pthread_attr_setschedpolicy(native_handle_.native_handle(), policy);
+			pthread_attr_setschedparam(native_handle_.native_handle(), &param);
+		#endif
+		}
+
 
 	///\name id
 	///\todo

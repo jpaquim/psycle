@@ -95,8 +95,11 @@ void Player::start_threads() {
 
 	try {
 		// start the scheduling threads
-		for(std::size_t i(0); i < thread_count_; ++i)
-			threads_.push_back(new std::thread(boost::bind(&Player::thread_function, this, i)));
+		for(std::size_t i(0); i < thread_count_; ++i) {
+			std::thread* newthread = new std::thread(boost::bind(&Player::thread_function, this, i));
+			newthread->applyPriority(std::thread::HIGH);
+			threads_.push_back(newthread);
+		}
 	} catch(...) {
 		{ scoped_lock lock(mutex_);
 			stop_requested_ = true;
