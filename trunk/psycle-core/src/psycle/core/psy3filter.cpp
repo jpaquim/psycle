@@ -89,8 +89,8 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	//file.ReadChunk(&Header, 8);
 	//Header[8]=0;
 
-	///\todo:
-	song.clear();
+	//Disabled since now we load a song in a new Song object *and* song.clear() sets setReady to true.
+	//song.clear();
 	prepareSequence(song);
 	//size_t filesize = file.FileSize();
 	uint32_t version = 0;

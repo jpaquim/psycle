@@ -66,6 +66,10 @@ void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float srCorr
 	srCorrection = 44100.0f / (float)sampleRate;
 	waveTableSize = wavetableSize_;
 	wavetableCorrection = srCorrection_;
+	if (AmpEnvStage) {
+		AmpEnvStage = 0;
+	}
+
 }
 
 void CSynthTrack::setGlobalPar(SYNPAR* globalPar) {
