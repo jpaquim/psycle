@@ -238,7 +238,7 @@ Mixer::sched_deps Mixer::sched_inputs() const {
 	} else {
 		// step 2: mix with return fx
 		for(unsigned int i = 0; i < numreturns(); ++i) {
-			if(	Return(i).IsValid()	) {
+			if(Return(i).IsValid()) {
 				Machine & returned(*callbacks->song().machine(Return(i).Wire().machine_));
 				result.push_back(&returned);
 			}

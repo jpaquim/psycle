@@ -199,7 +199,7 @@ void DuplicatorMac::PreWork(int numSamples, bool clear) {
 						#else
 							callbacks->song().machine(macOutput[i])->AddEvent(workEvent.beatOffset(), workEvent.track(), thenote);
 							///\todo some songs have workEvent.track() >= MAX_TRACKS ... added check to avoid crash
-							if(	thenote.note() >= notetypes::release && workEvent.track() < MAX_TRACKS)
+							if(thenote.note() >= notetypes::release && workEvent.track() < MAX_TRACKS)
 								DeallocateVoice(workEvent.track(), i);
 						#endif
 					}

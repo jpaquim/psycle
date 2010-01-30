@@ -27,7 +27,7 @@ void WaveFileOut::thread_function() {
 		scoped_lock lock(mutex_);
 		if(stop_requested_)
 			return;
-		Write(callback(256),256);		
+		Write(callback(256),256);
 	}
 }
 
@@ -78,10 +78,11 @@ void WaveFileOut::do_open() throw(std::exception)
 		channel_num = 1;
 	else
 		channel_num = 2;
-	wav_file_.OpenForWrite(playbackSettings().deviceName().c_str(), 
-						   playbackSettings().samplesPerSec(), 
-						   playbackSettings().bitDepth(), 
-						   channel_num);
+	wav_file_.OpenForWrite(
+		playbackSettings().deviceName().c_str(),
+		playbackSettings().samplesPerSec(),
+		playbackSettings().bitDepth(),
+		channel_num);
 }
 
 void WaveFileOut::do_close() throw(std::exception)
@@ -91,7 +92,7 @@ void WaveFileOut::do_close() throw(std::exception)
 
 void WaveFileOut::do_stop() throw(std::exception) {
 	scoped_lock lock(mutex_);
-	stop_requested_ = true;	
+	stop_requested_ = true;
 	thread_->join();
 	delete thread_;
 }
