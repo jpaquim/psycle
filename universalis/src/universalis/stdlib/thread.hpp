@@ -21,7 +21,6 @@ namespace universalis { namespace stdlib {
 
 class thread {
 	public:
-		typedef boost::thread native_handle_type;
 		typedef enum {
 			REALTIME,
 			HIGH,
@@ -29,37 +28,30 @@ class thread {
 			IDLE
 		} Priorities;
 	private:
-		native_handle_type native_handle_;
-
+		boost::thread impl_;
 	public:
 		template<typename Callable>
-		explicit thread(Callable callable) : native_handle_(callable) {}
+		explicit thread(Callable callable) : impl_(callable) {}
 		
-		void join() { native_handle_.join(); }
+		void join() { impl_.join(); }
 		
 		template<typename Elapsed_Time>
-		bool timed_join(Elapsed_Time const & /*elapsed_time*/) {
-			///\todo unimplemented in boost version 1.34
-			//return native_handle_.timed_join(elapsed_time);
-			native_handle_.join();
-			return true;
+		bool timed_join(Elapsed_Time const & elapsed_time) {
+			return impl_.timed_join(elapsed_time);
 		}
 
 		bool joinable() const {
-			///\todo unimplemented in boost version 1.34
-			//return native_handle_.joinable();
-			return true;
+			return impl_.joinable();
 		}
 		
 		void detach() {
-			///\todo unimplemented in boost version 1.34
-			//native_handle_.detach();
+			impl_.detach();
 		}
-		void applyPriority(enum Priorities priority)
-		{
 
-		#if defined DIVERSALIS__OS__MICROSOFT
-			HANDLE th = native_handle_.native_handle();
+		#ifdef DIVERSALIS__OS__MICROSOFT
+		void applyPriorityWindows(Priorities priority)
+		{
+			HANDLE th = impl_.native_handle();
 			switch (priority)
 			{
 			case REALTIME  : SetThreadPriority(th, THREAD_PRIORITY_TIME_CRITICAL);  break;
@@ -67,22 +59,9 @@ class thread {
 			case NORMAL    : SetThreadPriority(th, THREAD_PRIORITY_NORMAL);         break;
 			case IDLE      : SetThreadPriority(th, THREAD_PRIORITY_LOWEST);         break;
 			}
-		#elif DIVERSALIS__OS__POSIX
-			struct sched_param param;
-			int policy;
-			switch (priority)
-			{
-			case REALTIME  : param.sched_priority = 19;  policy = SCHED_RR;    break;
-			case HIGH      : param.sched_priority = 10;  policy = ScHED_RR;    break;
-			case IDLE      : param.sched_priority = 0;   policy = SCHED_OTHER; break; /*can't set SCHED_IDLE*/
-			case NORMAL    : //fallthrough
-			default		   : param.sched_priority = 0;   policy = SCHED_OTHER; break;
-			}
-			pthread_attr_setschedpolicy(native_handle_.native_handle(), policy);
-			pthread_attr_setschedparam(native_handle_.native_handle(), &param);
-		#endif
 		}
-
+		#endif
+		
 
 	///\name id
 	///\todo
@@ -178,6 +157,22 @@ namespace this_thread {
 		#endif
 	#endif
 
+	#if defined DIVERSALIS__OS__POSIX
+	void inline applyPriority(thread::Priorities priority)
+	{
+		struct sched_param param;
+		int policy;
+		switch (priority)
+		{
+		case thread::REALTIME  : param.sched_priority = 25;  policy = SCHED_RR;    break;
+		case thread::HIGH      : param.sched_priority = 20;  policy = SCHED_RR;    break;
+		case thread::IDLE      : param.sched_priority = 0;   policy = SCHED_OTHER; break; /*can't set SCHED_IDLE*/
+		case thread::NORMAL    : //fallthrough
+		default		   : param.sched_priority = 0;   policy = SCHED_OTHER; break;
+		}
+		pthread_setschedparam(this_thread::id(), policy, &param);
+	}
+	#endif
 	void inline yield() { boost::thread::yield(); }
 
 	/// see the standard header date_time for duration types implementing the Elapsed_Time concept

@@ -91,13 +91,15 @@ void Player::start_threads() {
 		loggers::information()(s.str());
 	}
 
-	if(!thread_count_) return; // don't create any thread, will use a single-threaded, recursive processing
+	if(thread_count_ < 2) return; // don't create any thread, will use a single-threaded, recursive processing
 
 	try {
 		// start the scheduling threads
 		for(std::size_t i(0); i < thread_count_; ++i) {
 			std::thread* newthread = new std::thread(boost::bind(&Player::thread_function, this, i));
-			newthread->applyPriority(std::thread::HIGH);
+#ifdef DIVERSALIS__OS__MICROSOFT
+			newthread->applyPriorities(std::thread::HIGH);
+#endif
 			threads_.push_back(newthread);
 		}
 	} catch(...) {
@@ -241,7 +243,9 @@ void Player::thread_function(std::size_t thread_number) {
 		s << "psycle: core: player: scheduler thread #" << thread_number << " started";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-
+#ifdef DIVERSALIS__OS__POSIX
+	this_thread::applyPriority(std::thread::HIGH);
+#endif
 	universalis::os::thread_name thread_name;
 	{ // set thread name
 		std::ostringstream s;
@@ -260,7 +264,6 @@ void Player::thread_function(std::size_t thread_number) {
 			throw;
 		}
 	} catch(std::exception const & e) {
-		e;
 		if(loggers::exception()) {
 			std::ostringstream s;
 			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
