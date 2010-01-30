@@ -35,7 +35,7 @@ class PSYCLE__CORE__DECL CoreSong {
 		XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENTS];
 
 		const Sequence& sequence() const throw() { return sequence_; }
-		Sequence& sequence() throw() { return sequence_; }	
+		Sequence& sequence() throw() { return sequence_; }
 		virtual void clear();
 		// serialization
 		bool load(const std::string& filename);
@@ -46,19 +46,19 @@ class PSYCLE__CORE__DECL CoreSong {
 		void set_filename(const std::string& filename) {
 			filename_ = filename;
 		}
-		const std::string& filename() const { return filename_; }		
+		const std::string& filename() const { return filename_; }
 		const std::string& name() const { return name_; } // song name
 		void setName(const std::string& name) { name_ = name; }
-		const std::string& comment() const { return comment_; }		
-		void setComment(const std::string& comment) { comment_ = comment; }		
+		const std::string& comment() const { return comment_; }
+		void setComment(const std::string& comment) { comment_ = comment; }
 		// initial bpm for the song
-		float bpm() const { return bpm_; }		
+		float bpm() const { return bpm_; }
 		void setBpm(float bpm) { if(bpm > 0 && bpm < 1000) bpm_ = bpm; }
-		// Identifies if the song is operational or in a loading/saving state. 
+		// Identifies if the song is operational or in a loading/saving state.
 		// It serves as a non-locking synchronization
-		bool IsReady(){ return ready; }		
+		bool IsReady(){ return ready; }
 		// Sets song to ready state (it can be played).
-		void SetReady(const bool value) { 
+		void SetReady(const bool value) {
 			scoped_lock lock(mutex_);
 			ready = value;
 		}
@@ -70,12 +70,12 @@ class PSYCLE__CORE__DECL CoreSong {
 			sequence_.setNumTracks(tracks);
 		}
 		// name the initial ticks per beat (TPB) when the song starts to play.
-	    // With multisequence, ticksSpeed helps on syncronization and timing.
-	    // Concretely, it helps to send the legacy "SequencerTick()" events to native plugins,
-	    // helps in knowing for how much a command is going to be tick'ed ( tws, as well as
-	    // retrigger code need to know how much they last ) as well as helping Sampulse
-	    // to get ticks according to legacy speed command of Modules.
-	    // isTicks is used to identify if the value in ticksPerBeat_ means ticks, or speed.
+		// With multisequence, ticksSpeed helps on syncronization and timing.
+		// Concretely, it helps to send the legacy "SequencerTick()" events to native plugins,
+		// helps in knowing for how much a command is going to be tick'ed ( tws, as well as
+		// retrigger code need to know how much they last ) as well as helping Sampulse
+		// to get ticks according to legacy speed command of Modules.
+		// isTicks is used to identify if the value in ticksPerBeat_ means ticks, or speed.
 		unsigned int ticksSpeed() const { return ticks_; }
 		bool isTicks() const { return isTicks_; }
 		void setTicksSpeed(unsigned int const value, bool const isticks = true) {
@@ -119,10 +119,10 @@ class PSYCLE__CORE__DECL CoreSong {
 			if (machine(mac)) DeleteMachine(machine(mac));
 		}
 		// destroys all the machines of this song.
-		virtual void DeleteAllMachines();		
+		virtual void DeleteAllMachines();
 		// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 		Machine::id_type GetFreeBus();
-		// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
+		// Gets the first free slot in the Effects' bus (slots MAX_BUSES to 2*MAX_BUSES-1)
 		Machine::id_type GetFreeFxBus();
 		// Returns the Bus index out of a machine id.
 		Machine::id_type FindBusFromIndex(Machine::id_type);
@@ -130,29 +130,32 @@ class PSYCLE__CORE__DECL CoreSong {
 		//name machine connections
 		// creates a new connection between two machines.
 		// This funcion is to be used over the Machine's ConnectTo(). This one verifies the validity of the connections, and uses Machine's function
-		Wire::id_type InsertConnection(Machine& srcMac,
-			                           Machine& dstMac,
-									   InPort::id_type srctype=0,
-									   OutPort::id_type dsttype=0,
-									   float volume = 1.0f);
+		Wire::id_type InsertConnection(
+			Machine& srcMac,
+			Machine& dstMac,
+			InPort::id_type srctype=0,
+			OutPort::id_type dsttype=0,
+			float volume = 1.0f);
 		// Changes the destination of a wire connection.
 		// param wiresource source mac index
 		// param wiredest new dest mac index
 		// param wireindex index of the wire in wiresource to change
-		bool ChangeWireDestMac(Machine& srcMac,
-							   Machine& newDstMac,
-							   OutPort::id_type srctype,
-							   Wire::id_type wiretochange,
-							   InPort::id_type dsttype);
+		bool ChangeWireDestMac(
+			Machine& srcMac,
+			Machine& newDstMac,
+			OutPort::id_type srctype,
+			Wire::id_type wiretochange,
+			InPort::id_type dsttype);
 		// Changes the destination of a wire connection.
 		// param wiredest dest mac index
 		//param wiresource new source mac index
 		//param wireindex index of the wire in wiredest to change
-		bool ChangeWireSourceMac(Machine& newSrcMac,
-								 Machine &dstMac,
-								 InPort::id_type dsttype,
-								 Wire::id_type wiretochange,
-								 OutPort::id_type srctype);
+		bool ChangeWireSourceMac(
+			Machine& newSrcMac,
+			Machine &dstMac,
+			InPort::id_type dsttype,
+			Wire::id_type wiretochange,
+			OutPort::id_type srctype);
 	
 		//thread synchronisation
 		typedef class scoped_lock<mutex> scoped_lock;
@@ -171,12 +174,13 @@ class PSYCLE__CORE__DECL CoreSong {
 		void /*Reset*/DeleteInstrument(Instrument::id_type id);
 		// resets the instrument and delete each sample/layer that it uses. (all instruments)
 		void /*Reset*/DeleteInstruments();
-		void patternTweakSlide(int machine,
-							   int command,
-							   int value, 
-							   int patternPosition,
-							   int track,
-							   int line);
+		void patternTweakSlide(
+			int machine,
+			int command,
+			int value, 
+			int patternPosition,
+			int track,
+			int line);
 
 		// just here till i find in the host another solution
 		// Current selected machine number in the GUI
@@ -195,15 +199,15 @@ class PSYCLE__CORE__DECL CoreSong {
 		static SongSerializer serializer;
 		std::string filename_;
 		bool ready;
-		std::string name_;		
+		std::string name_;
 		std::string author_;
 		std::string comment_;
-		float bpm_;	
+		float bpm_;
 		unsigned int ticks_;
 		bool isTicks_;
 		Sequence sequence_;
 		Machine* machine_[MAX_MACHINES];
-		mutable mutex  mutex_;
+		mutable mutex mutex_;
 		#if 0 ///\todo Rethink about cpu measurements, and reenable/recode what's needed
 		///\name cpu cost measurement
 		///\{

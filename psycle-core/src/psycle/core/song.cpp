@@ -86,8 +86,7 @@ void CoreSong::ReplaceMachine(Machine * pmac, Machine::id_type idx) {
 			//if (pOrig->copOrig->getdest
 		//}
 
-
-		 DeleteMachine(machine(idx));
+		DeleteMachine(machine(idx));
 	}
 	machine(idx, pmac);
 }
@@ -637,7 +636,7 @@ void Song::clearMyData() {
 	_instSelected = 0;
 	midiSelected = 0;
 	auxcolSelected = 0;
-	_trackArmedCount=0;	
+	_trackArmedCount=0;
 	currentOctave=4;
 	_saved=false;
 	set_filename("Untitled.psy");

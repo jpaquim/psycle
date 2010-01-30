@@ -37,7 +37,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		~Player();
 
 	public:
-		static Player& singleton() {			
+		static Player& singleton() {
 			static Player player;
 			return player; 
 		}
