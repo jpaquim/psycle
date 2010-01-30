@@ -53,22 +53,17 @@ void Mixer::Init()
 
 void Mixer::Tick( int /*channel*/, const PatternEvent & pData )
 {
-
-	///FIXME: The tweak information is needed
-#if 0
-	if( thetweaktype  == notetypes::tweak)
+///\todo: Tick is never called since mixer doesn't use Machine::GenerateAudio.
+	if( pData.note()  == notetypes::tweak)
 	{
-		SetParameter(thetweakparameter, pData.tweak(0).value());
-		Player::singleton().Tweaker = true;
+		SetParameter(pData.instrument(), pData.command());
 	}
-	else if( thetweaktype == notetypes::tweak_slide)
+	else if( pData.note() == notetypes::tweak_slide)
 	{
 		///\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 		// doing simply "tweak" for now..
-		SetParameter(thetweakparameter, pData.tweak(0).value());
-		Player::singleton().Tweaker = true;
+		SetParameter(pData.instrument(), pData.command());
 	}
-#endif
 }
 
 void Mixer::Work( int numSamples )

@@ -105,6 +105,8 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 		mac->getMachineKey() != MachineKey::wrapperVst &&
 		mac->getMachineKey() != MachineKey::invalid) {
 		//Workaround for some where the first work call initializes some variables.
+		///\todo: Should better be done inside the host, since it may be enough to do it
+		// for VST and fix whichever native or internal that needed it. 
 		if (key != MachineKey::wrapperVst) 
 		{
 			mac->PreWork(MAX_BUFFER_LENGTH, true);

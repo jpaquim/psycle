@@ -73,7 +73,8 @@ bool Psy2Filter::load(const std::string & fileName, CoreSong & song) {
 	//progress.emit(2,0,"Loading... psycle song fileformat version 2...");
 	std::cout << "PSY2 format"<< std::endl;
 
-	song.clear();
+	//Disabled since now we load a song in a new Song object *and* song.clear() sets setReady to true.
+	//song.clear();
 	prepareSequence(song);
 
 	// skip header

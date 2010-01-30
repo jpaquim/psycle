@@ -34,6 +34,11 @@
 #undef min
 #undef max
 #endif
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
+#endif
 
 namespace psycle { 
 	namespace host {
@@ -7273,7 +7278,7 @@ namespace psycle {
 			if (dlg.DoModal() == IDOK)
 			{
 				double old_len = pattern()->beats();
-				psycle::core::SequenceLine* line = *song()->sequence().begin()+1;
+				psycle::core::SequenceLine* line = *(song()->sequence().begin()+1);
 				psycle::core::SequenceLine::iterator it = line->find(main()->m_wndSeq.selected_entry());
 				if ( it != line->end()) {
 					++it;

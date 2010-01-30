@@ -542,7 +542,7 @@ namespace psycle {
 		void SequencerView::OnSeqsort() {
 			// todo
 
-			/*SequenceLine* line = *_pSong->sequence().begin()+1;
+			/*SequenceLine* line = *(_pSong->sequence().begin()+1);
 			SequenceLine::iterator ite = line->begin();
 			for(int i(0) ; ite != line->end(); ++ite, ++i)
 			{

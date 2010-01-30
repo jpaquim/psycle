@@ -156,7 +156,7 @@ void Filter_2_Poles::Work(Sample l[], Sample r[], int samples, int)
 	}
 
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
-	{
+	{	///\todo: for some reason, this is acting as a square-based modulation when it should be sinusoidal.
 		modulation_phase_ = std::fmod(modulation_phase_ + modulation_radians_per_sample_ * samples, pi * 2);
 		update_coefficients();
 	}

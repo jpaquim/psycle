@@ -117,7 +117,8 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 	std::map<int, Pattern*> patMap;
 	patMap.clear();
 	song.sequence().removeAll();
-	song.clear();
+	//Disabled since now we load a song in a new Song object *and* song.clear() sets setReady to true.
+	//song.clear();
 	
 	float lastPatternPos = 0;
 	PatternCategory* lastCategory = 0;
