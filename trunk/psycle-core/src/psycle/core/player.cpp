@@ -62,7 +62,7 @@ Player::~Player() {
 
 void Player::start_threads() {
 	if(loggers::trace()) loggers::trace()("psycle: core: player: starting scheduler threads", UNIVERSALIS__COMPILER__LOCATION);
-	if(threads_.size()) {
+	if(!threads_.empty()) {
 		if(loggers::trace()) loggers::trace()("psycle: core: player: scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
@@ -98,7 +98,7 @@ void Player::start_threads() {
 		for(std::size_t i(0); i < thread_count_; ++i) {
 			std::thread* newthread = new std::thread(boost::bind(&Player::thread_function, this, i));
 #ifdef DIVERSALIS__OS__MICROSOFT
-			newthread->applyPriorities(std::thread::HIGH);
+			newthread->applyPriorityWindows(std::thread::HIGH);
 #endif
 			threads_.push_back(newthread);
 		}
@@ -209,7 +209,7 @@ void Player::process(int samples) {
 		// reset all machine buffers
 		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
 		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
-		if(!threads_.size()) // single-threaded, recursive processing
+		if(threads_.empty()) // single-threaded, recursive processing
 			song().machine(MASTER_INDEX)->Work(amount);
 		else { // multi-threaded scheduling
 			// we push all the terminal nodes to the processing queue
@@ -414,7 +414,7 @@ void Player::stop() {
 
 void Player::stop_threads() {
 	if(loggers::trace()) loggers::trace()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
-	if(!threads_.size()) {
+	if(threads_.empty()) {
 		if(loggers::trace()) loggers::trace()("scheduler threads were not running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
