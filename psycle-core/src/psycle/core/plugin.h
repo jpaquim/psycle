@@ -20,7 +20,7 @@ namespace psycle { namespace core {
 		/* implement */ int GetSamplingRate() const;
 		/* implement */ int GetBPM() const;
 		/* implement */ int GetTPB() const;
-		/* implement */ int CallbackFunc(int, int, int, int) const;
+		/* implement */ int CallbackFunc(int, int, int, void*) const;
 		/* implement */ float * unused0(int, int) const;
 		/* implement */ float * unused1(int, int) const;
 };
@@ -57,14 +57,11 @@ class Proxy {
 		void GetData(void * pData) const throw(); //exceptions::function_error);
 		int GetDataSize() const throw(); //exceptions::function_error);
 		void Command() throw(); //exceptions::function_error);
-		void MuteTrack(const int i) throw(); //exceptions::function_error);
-		bool IsTrackMuted(const int i) throw(); //exceptions::function_error);
-		void MidiNote(const int channel, const int value, const int velocity) throw(); //exceptions::function_error);
-		void Event(const std::uint32_t data) throw(); //exceptions::function_error);
+		void MidiEvent(const int channel, const int value, const int velocity) throw(); //exceptions::function_error);
 		bool DescribeValue(char * txt, const int param, const int value) const throw(); //exceptions::function_error);
-		bool PlayWave(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
+		//todo:
+		//bool HostEvent(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
 		void SeqTick(int channel, int note, int ins, int cmd, int val) throw(); //exceptions::function_error);
-		void StopWave() throw(); //exceptions::function_error);
 		int const * const Vals() const throw(); //exceptions::function_error);
 		int * const Vals() throw(); //exceptions::function_error);
 		void callback() throw(); //exceptions::function_error);
@@ -145,7 +142,6 @@ inline void Proxy::operator()(psycle::plugin_interface::CMachineInterface * plug
 	}
 }
 inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw() { assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }
-inline void Proxy::StopWave() throw() { assert((*this)());plugin().StopWave(); }
 inline void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw() { assert((*this)()); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
 inline int * const Proxy::Vals() throw() { assert((*this)()); return plugin().Vals; }
 inline int const * const Proxy::Vals() const throw() { assert((*this)()); return plugin().Vals; }

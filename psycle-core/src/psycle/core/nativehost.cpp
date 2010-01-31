@@ -2,6 +2,9 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/config.private.hpp>
+#include <diversalis/os.hpp>
+#include <universalis/os/exceptions/code_description.hpp>
+#include <universalis/os/loggers.hpp>
 #include "nativehost.hpp"
 
 #include "pluginfinder.h"
@@ -19,6 +22,8 @@
 
 namespace psycle { namespace core {
 	using namespace psycle::plugin_interface;
+
+	namespace loggers = universalis::os::loggers;
 
 NativeHost::NativeHost(MachineCallbacks*calls)
 :MachineHost(calls){
@@ -83,30 +88,29 @@ void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& 
 		bool _isSynth = (minfo->Flags == 3);
 		pinfo.setRole( _isSynth?MachineRole::GENERATOR : MachineRole::EFFECT );
 		pinfo.setLibName(fullName);
-#if 0 //not ready yet
 		{
 			std::ostringstream o;
-			o << minfo->APIVersion;
+			if ( minfo->APIVersion < 0x10) {
+				o << minfo->APIVersion;
+			}
+			else {
+				o << std::hex << minfo->APIVersion;
+			}
 			pinfo.setApiVersion(  o.str() );
 		}
-#endif
 		{
 			std::ostringstream o;
 			std::string version;
-#if 0 //not ready yet
-			o << minfo->PlugVersion;
+			o << std::hex << minfo->PlugVersion;
 			pinfo.setPlugVersion(  o.str() );
-#else
-		if (!(o << minfo->Version )) version = o.str();
-		pinfo.setPlugVersion( version );
-#endif
 		}
 		pinfo.setAuthor( minfo->Author );
 		pinfo.setAllow(true);
 		MachineKey key( hostCode(), fileName, 0);
 		finder.AddInfo( key, pinfo);
 	}
-	//\todo: Add the else, so that the plugin can be added as bad.
+	///\todo: Implement the bad cases, so that the plugin can be added to 
+	/// the finder as bad.
 	UnloadDll(hInstance);
 }
 
@@ -118,8 +122,12 @@ void* NativeHost::LoadDll( std::string const & file_name )
 
 #if defined __unix__ || defined __APPLE__
 	hInstance = ::dlopen(file_name.c_str(), RTLD_LAZY /*RTLD_NOW*/);
-	if (!hInstance) {
-		std::cerr << "Cannot load library: " << dlerror() << '\n';
+	if (!hInstance && loggers::exception()) {
+		std::ostringstream s;
+		s << "psycle: core: nativehost: LoadDll:" << std::endl
+			<< "could not load library: " << file_name << std::endl
+			<<  dlerror();
+		loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 #else
 	// Set error mode to disable system error pop-ups (for LoadLibrary)
@@ -127,8 +135,12 @@ void* NativeHost::LoadDll( std::string const & file_name )
 	hInstance = LoadLibraryA( file_name.c_str() );
 	// Restore previous error mode
 	SetErrorMode( uOldErrorMode );
-	if (!hInstance) {
-		///\todo
+	if (!hInstance && loggers::exception()) {
+		std::ostringstream s;
+		s << "psycle: core: nativehost: LoadDll:" << std::endl
+			<< "could not load library: " << file_name
+			<< universalis::os::exceptions::code_description();
+		loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 #endif
 
@@ -143,30 +155,45 @@ CMachineInfo* NativeHost::LoadDescriptor(void* hInstance)
 	try {
 	#if defined __unix__ || defined __APPLE__
 		GETINFO GetInfo = (GETINFO) dlsym( hInstance, "GetInfo");
-		if (!GetInfo) {
-			std::cerr << "Cannot load symbols: " << dlerror() << '\n';
+		if (!GetInfo && loggers::exception()) {
+			std::ostringstream s;
+			s << "psycle: core: nativehost: LoadDescriptor:" << std::endl
+			 << "Cannot load symbols: " << dlerror();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			return 0;
 		}
 	#else
 		GETINFO GetInfo = (GETINFO) GetProcAddress( static_cast<HINSTANCE>( hInstance ), "GetInfo" );
 		if (!GetInfo) {
 			///\todo readd the original code here!
-			return 0;
+			if (!GetInfo && loggers::exception()) {
+				std::ostringstream s;
+				s << "psycle: core: nativehost: LoadDescriptor:" << std::endl
+				 << "Cannot load symbols: " 
+				 << universalis::os::exceptions::code_description();
+				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				return 0;
+			}
 		}
 	#endif
 		CMachineInfo* info_ = GetInfo();
-#if 0 //not ready yet
-		if(info_->APIVersion < MI_VERSION) {
-			std::cerr << "plugin format is too old" << info_->APIVersion << "\n";
-#else
-		if(info_->Version < MI_VERSION) {
-			std::cerr << "plugin format is too old" << info_->Version << "\n";
-#endif
+		// version 10 and 11 didn't use HEX representation.
+		// Also, verify for 32 or 64bits.
+		if(!(info_->APIVersion == 11 && (MI_VERSION&0xFFF0) == 0x0010)
+			&& !((info_->APIVersion&0xFFF0) == (MI_VERSION&0xFFF0)) && loggers::exception()) {
+
+			std::ostringstream s;
+			s << "plugin version not supported" << info_->APIVersion;
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			info_ = 0;
 		}
 		return info_;
 	} catch (...) {
-		std::cerr << "exception while getting plugin info handler\n";
+		if(loggers::exception()) {
+			std::ostringstream s;
+			s << "exception while getting plugin info handler";
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
 		return 0;
 	}
 }
@@ -181,16 +208,29 @@ CMachineInterface* NativeHost::Instantiate(void * hInstance)
 	#endif
 		if(!GetInterface) {
 		#if defined __unix__ || defined __APPLE__
-			std::cerr << "Cannot load symbol: " << dlerror() << "\n";
+			if(loggers::exception()) {
+				std::ostringstream s;
+				s << "Cannot load symbol: " << dlerror();
+				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
 		#else
-			///\todo
+			if(loggers::exception()) {
+				std::ostringstream s;
+				s << "Cannot load symbol: "
+				<< universalis::os::exceptions::code_description();
+				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
 		#endif
 			return 0;
 		} else {
 			return GetInterface();
 		}
 	} catch (...) {
-		std::cerr << "exception while creating interface instance\n";
+		if(loggers::exception()) {
+			std::ostringstream s;
+			s << "exception while creating interface instance";
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
 		return 0;
 	}
 }
