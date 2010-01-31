@@ -11,7 +11,6 @@
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/os/cpu_affinity.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <universalis/stdlib/thread.hpp>
@@ -138,7 +137,7 @@ void stuff() {
 		{
 			#if 1
 				host::schedulers::multi_threaded::scheduler scheduler(graph);
-				std::size_t threads(universalis::os::cpu_affinity::cpu_count());
+				std::size_t threads(thread::hardware_concurrency());
 				{ // thread count env var
 					char const * const env(std::getenv("PSYCLE_THREADS"));
 					if(env) {

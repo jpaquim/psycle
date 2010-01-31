@@ -9,10 +9,16 @@
 #pragma once
 
 #include <diversalis/os.hpp>
-#include "detail/boost_xtime.hpp"
+#include <universalis/os/sched.hpp>
 #include <boost/version.hpp>
-#include <boost/thread.hpp>
-#include <boost/operators.hpp>
+#if BOOST_VERSION >= 103500 && defined BOOST_DATE_TIME_HAS_NANOSECONDS
+	#include <boost/thread/thread_time.hpp> // boost::get_system_time()
+	#include <boost/date_time/posix_time/posix_time_duration.hpp>
+#else
+	#include "detail/boost_xtime.hpp" // boost_xtime_get_and_add
+#endif
+#include <boost/thread/thread.hpp>
+#include <boost/thread/once.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #endif
@@ -20,16 +26,21 @@
 namespace universalis { namespace stdlib {
 
 class thread {
-	public:
-		typedef enum {
-			REALTIME,
-			HIGH,
-			NORMAL,
-			IDLE
-		} Priorities;
 	private:
-		boost::thread impl_;
+		typedef boost::thread impl_type;
+		impl_type impl_;
+
 	public:
+		#if BOOST_VERSION >= 103500
+			typedef impl_type::native_handle_type native_handle_type;
+			native_handle_type native_handle() { return impl_.native_handle(); }
+		#elif defined BOOST_HAS_PTHREADS
+			typedef ::pthread_t native_handle_type;
+			native_handle_type native_handle() { return reinterpret_cast< ::pthread_t>(this); }
+		#else
+			#error unsupported operating system, please install boost 1.35 or higher
+		#endif
+
 		template<typename Callable>
 		explicit thread(Callable callable) : impl_(callable) {}
 		
@@ -37,70 +48,35 @@ class thread {
 		
 		template<typename Elapsed_Time>
 		bool timed_join(Elapsed_Time const & elapsed_time) {
-			return impl_.timed_join(elapsed_time);
+			#if BOOST_VERSION >= 103500
+				return impl_.timed_join(elapsed_time);
+			#else
+				impl_.join();
+				return true;
+			#endif
 		}
 
 		bool joinable() const {
-			return impl_.joinable();
+			#if BOOST_VERSION >= 103500
+				return impl_.joinable();
+			#else
+				return true;
+			#endif
 		}
 		
 		void detach() {
-			impl_.detach();
+			#if BOOST_VERSION >= 103500
+				impl_.detach();
+			#endif
 		}
 
-		#ifdef DIVERSALIS__OS__MICROSOFT
-		void applyPriorityWindows(Priorities priority)
-		{
-			HANDLE th = impl_.native_handle();
-			switch (priority)
-			{
-			case REALTIME  : SetThreadPriority(th, THREAD_PRIORITY_TIME_CRITICAL);  break;
-			case HIGH      : SetThreadPriority(th, THREAD_PRIORITY_HIGHEST);        break;
-			case NORMAL    : SetThreadPriority(th, THREAD_PRIORITY_NORMAL);         break;
-			case IDLE      : SetThreadPriority(th, THREAD_PRIORITY_LOWEST);         break;
-			}
+		static unsigned int hardware_concurrency() {
+			#if BOOST_VERSION >= 103500
+				return impl_type::hardware_concurrency();
+			#else
+				return os::sched::hardware_concurrency();
+			#endif
 		}
-		#endif
-		
-
-	///\name id
-	///\todo
-	///\{
-	#if 0
-		public:
-			class id
-			: private
-				boost::equality_comparable< id,
-				boost::less_than_comparable< id
-				> >
-			{
-				public:
-					id() : implementation_() {}
-					bool operator==(id const & that) const { return this->implementation_ == that.implementation_; }
-					bool operator< (id const & that) const { return this->implementation_ <  that.implementation_; }
-				private:
-					typedef
-						// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
-						// so we need to know the OS type
-						#if defined DIVERSALIS__OS__POSIX
-							::pthread_t *
-						#elif defined DIVERSALIS__OS__MICROSOFT
-							::DWORD
-						#else
-							#error unsupported operating system
-						#endif
-						implementation_type;
-
-					implementation_type implementation_;
-
-					friend id this_thread::id();
-					id(implementation_type implementation) : implementation_(implementation) {}
-			};
-			id get_id() const { return id_; }
-		private:
-			id id_; ///\todo set it
-	#endif
-	///\}
 };
 
 typedef boost::once_flag once_flag;
@@ -123,56 +99,13 @@ void inline call_once(once_flag & flag, Callable callable /*, Arguments... argum
 	#if BOOST_VERSION >= 103800
 		boost::call_once(flag, callable);
 	#else
-		// olf boost versions want a function pointer and arguments in reversed order
+		// older boost versions want a function pointer and arguments in reversed order
 		boost::call_once(callable, flag);
 	#endif
 }
 
 namespace this_thread {
 
-	#if 0 ///\todo
-	thread::id inline id() {
-		thread::id id(
-			// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
-			// so we need to know the OS type
-			#if defined DIVERSALIS__OS__POSIX
-				::pthread_self()
-			#elif defined DIVERSALIS__OS__MICROSOFT
-				::GetCurrentThreadId()
-			#else
-				#error unsupported operating system
-			#endif
-		);
-		return id;
-	}
-	#else
-		// unlike glibmm's gthread, boost's thread gives no way to retrieve the current thread (actually, yes, boost::thread's default constructor represents the current thread)
-		// so we need to know the OS type
-		#if defined DIVERSALIS__OS__POSIX
-			::pthread_t inline id() { return ::pthread_self(); }
-		#elif defined DIVERSALIS__OS__MICROSOFT
-			::DWORD     inline id() { return ::GetCurrentThreadId(); }
-		#else
-			#error unsupported operating system
-		#endif
-	#endif
-
-	#if defined DIVERSALIS__OS__POSIX
-	void inline applyPriority(thread::Priorities priority)
-	{
-		struct sched_param param;
-		int policy;
-		switch (priority)
-		{
-		case thread::REALTIME  : param.sched_priority = 25;  policy = SCHED_RR;    break;
-		case thread::HIGH      : param.sched_priority = 20;  policy = SCHED_RR;    break;
-		case thread::IDLE      : param.sched_priority = 0;   policy = SCHED_OTHER; break; /*can't set SCHED_IDLE*/
-		case thread::NORMAL    : //fallthrough
-		default		   : param.sched_priority = 0;   policy = SCHED_OTHER; break;
-		}
-		pthread_setschedparam(this_thread::id(), policy, &param);
-	}
-	#endif
 	void inline yield() { boost::thread::yield(); }
 
 	/// see the standard header date_time for duration types implementing the Elapsed_Time concept
@@ -181,7 +114,14 @@ namespace this_thread {
 		// boost::thread::sleep sleeps until the given absolute event date.
 		// So, we compute the event date by getting the current date and adding the delta to it.
 		// Note: boost::thread::sleep returns on interruptions (at least on posix)
-		boost::thread::sleep(universalis::stdlib::detail::boost_xtime_get_and_add(elapsed_time));
+		boost::thread::sleep(
+			#if BOOST_VERSION >= 103500 && defined BOOST_DATE_TIME_HAS_NANOSECONDS
+				boost::get_system_time() +
+				boost::posix_time::seconds(elapsed_time.get_count())
+			#else
+				detail::boost_xtime_get_and_add(elapsed_time)
+			#endif
+		);
 	}
 }
 
