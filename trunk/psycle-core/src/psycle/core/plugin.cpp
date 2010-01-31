@@ -39,7 +39,7 @@ int PluginFxCallback::GetBPM() const { return static_cast<int>(Player::singleton
 int PluginFxCallback::GetTPB() const { return Player::singleton().timeInfo().ticksSpeed(); }
 
 // dummy body
-int PluginFxCallback::CallbackFunc(int, int, int, int) const { return 0; }
+int PluginFxCallback::CallbackFunc(int, int, int, void*) const { return 0; }
 float * PluginFxCallback::unused0(int, int) const { return 0; }
 float * PluginFxCallback::unused1(int, int) const { return 0; }
 

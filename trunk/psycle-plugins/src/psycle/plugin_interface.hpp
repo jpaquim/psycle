@@ -9,10 +9,23 @@
 // we should not introduce any dependency by including
 // anything that is not part of the c++ standard library.
 
+/** Define for 64 Bit Platform. */
+#ifndef IS_64BIT_PLATFORM
+	#if defined _WIN64 || defined __LP64__
+	#define IS_64BIT_PLATFORM
+	#endif
+#endif
+
 namespace psycle { namespace plugin_interface {
 
-/// machine interface version
-int const MI_VERSION = 11;
+/// machine interface version. If highest bit is set, then it is a 64bit compile.
+/// Note: Psycle 1.8.6 and older will not detect the 64bit difference, since it uses int and checks
+/// for higher or equal version.
+#if defined IS_64BIT_PLATFORM
+	short const MI_VERSION = 0x8012;
+#else
+	short const MI_VERSION = 0x0012;
+#endif
 
 /// max number of pattern tracks
 int const MAX_TRACKS = 64;
@@ -68,12 +81,18 @@ class CMachineParameter {
 /// class defining the machine properties
 class CMachineInfo {
 	public:
-		CMachineInfo(int version, int flags, int numParameters, CMachineParameter const * const * parameters,
+		CMachineInfo(short APIVersion, int flags, int numParameters, CMachineParameter const * const * parameters,
 			char const * name, char const * shortName, char const * author, char const * command, int numCols)
-		: Version(version), Flags(flags), numParameters(numParameters), Parameters(parameters),
+		: APIVersion(APIVersion), PlugVersion(0), Flags(flags), numParameters(numParameters), Parameters(parameters),
+		Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
+		CMachineInfo(short APIVersion, short PlugVersion, int flags, int numParameters, CMachineParameter const * const * parameters,
+			char const * name, char const * shortName, char const * author, char const * command, int numCols)
+		: APIVersion(APIVersion), PlugVersion(PlugVersion), Flags(flags), numParameters(numParameters), Parameters(parameters),
 		Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
 		/// API version. Use MI_VERSION
-		int const Version;
+		short const APIVersion;
+		/// plug version. Your machine version. Shown in Hexadecimal.
+		short const PlugVersion;
 		/// Machine flags. Defines the type of machine
 		int const Flags;
 		/// number of parameters.
@@ -110,18 +129,18 @@ class CMachineInfo {
 /// DO NOT CHANGE the order of the functions. This is an exported class!
 class CFxCallback {
 	public:
-		virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) const {}
-		virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, int /*par3*/) const { return 0; }
+		virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) const = 0;
+		///\todo: doc
+		virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/) const = 0;
 		/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-		virtual float * unused0(int, int) const { return 0; }
+		virtual float * unused0(int, int) const = 0;
 		/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-		virtual float * unused1(int, int) const { return 0; }
-		virtual int GetTickLength() const { return 2048; }
-		virtual int GetSamplingRate() const { return 44100; }
-		virtual int GetBPM() const { return 125; }
-		virtual int GetTPB() const { return 4; }
-		// Don't get fooled by the above return values.
-		// You get a pointer to a subclass of this one that returns the correct ones.
+		virtual float * unused1(int, int) const = 0;
+		virtual int GetTickLength() const = 0;
+		virtual int GetSamplingRate() const = 0;
+		virtual int GetBPM() const = 0;
+		virtual int GetTPB() const = 0;
+		/// do not move this destructor from here. Since this is an interface, the position matters.
 		virtual ~CFxCallback() throw() {}
 };
 
@@ -170,25 +189,25 @@ class CMachineInterface {
 		/// Called by the host when the user selects the command menu option. Commonly used to show a help box,
 		/// but can be used to show a specific editor,a configuration or other similar things.
 		virtual void Command() {}
-		///\todo doc. not used (yet?)
-		virtual void MuteTrack(int /*track*/) {}
-		///\todo doc. not used (yet?)
-		virtual bool IsTrackMuted(int /*track*/) const { return false; }
-		///\todo doc. not used (yet?)
-		virtual void MidiNote(int /*channel*/, int /*value*/, int /*velocity*/) {}
-		///\todo doc. not used (yet?)
-		virtual void Event(unsigned int const /*data*/) {}
+		//
+		virtual void unused0(int /*track*/) {}
+		//
+		virtual bool unused1(int /*track*/) const { return false; }
+		///\todo: doc (Unimplement right now)
+		virtual void MidiEvent(int /*channel*/, int /*value*/, int /*value23*/) {}
+		//
+		virtual void unused2(unsigned int const /*data*/) {}
 		/// Called by the host when it requires to show a description of the value of a parameter.
 		/// return false to tell the host to show the numerical value. Return true and fill txt with
 		/// some text to show that text to the user.
 		virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/) { return false; }
-		///\todo doc. not used (prolly never)
-		virtual bool PlayWave(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
+		///\todo: doc (Unimplemented right now)
+		virtual bool HostEvent(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
 		/// Called by the host when there is some data to play. Only notes and pattern commands will be informed
 		/// this way. Tweaks call ParameterTweak
 		virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
-		///\todo doc. not used (prolly never)
-		virtual void StopWave() {}
+		//
+		virtual void unused3() {}
 
 	public:
 		/// initialize this member in the constructor with the size of parameters.

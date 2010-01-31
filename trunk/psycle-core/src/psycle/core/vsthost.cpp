@@ -124,12 +124,12 @@
 						}
 						{
 							std::ostringstream s;
-							s << std::hex << vstPlug->GetVersion();
+							s << vstPlug->GetVersion() << " or " << std::hex << vstPlug->GetVersion();
 							pinfo.setPlugVersion(s.str());
 						}
 						{
 							std::ostringstream s;
-							s << std::hex << vstPlug->GetVstVersion();
+							s << vstPlug->GetVstVersion();
 							pinfo.setApiVersion(s.str());
 						}
 						MachineKey keysubPlugin( hostCode(), fileName, plugUniqueID);
@@ -153,12 +153,12 @@
 				}
 				{
 					std::ostringstream s;
-					s << std::hex << vstPlug->GetVersion();
+					s << vstPlug->GetVersion() << " or " << std::hex << vstPlug->GetVersion();
 					pinfo.setPlugVersion(s.str());
 				}
 				{
 					std::ostringstream s;
-					s << std::hex << vstPlug->GetVstVersion();
+					s << vstPlug->GetVstVersion();
 					pinfo.setApiVersion(s.str());
 				}
 				MachineKey key( hostCode(), fileName, 0);

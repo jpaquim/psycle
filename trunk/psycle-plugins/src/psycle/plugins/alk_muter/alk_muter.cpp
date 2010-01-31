@@ -14,12 +14,13 @@ CMachineParameter const static * const parameters[] = {
 };
 
 CMachineInfo const static machine_info (
-	MI_VERSION,				
+	MI_VERSION,
+	120,
 	EFFECT,
 	sizeof parameters / sizeof *parameters,
 	parameters,
 
-	"Alk Muter 1.2"
+	"Alk Muter"
 	#ifndef NDEBUG
 		" (debug build)"
 	#endif

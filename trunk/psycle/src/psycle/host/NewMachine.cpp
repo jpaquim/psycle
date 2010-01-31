@@ -246,7 +246,7 @@ namespace psycle {
 
 			if(machineGrouping == groupHost ) { m_browser.Select(hNodes[selectedGroup],TVGN_CARET); }
 			else { m_browser.Select(hNodes[selectedRole],TVGN_CARET); }
-			outputMachine = MachineKey::failednative;
+			outputMachine = MachineKey::invalid;
 			delete[] hNodes;
 		}
 
@@ -255,7 +255,7 @@ namespace psycle {
 			//NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 			tHand = m_browser.GetSelectedItem();
 			//Do not do. OnSelchangedBrowser is called when destroying the elements, so the selection is lost
-			//outputMachine = MachineKey::failednative;
+			//outputMachine = MachineKey::invalid;
 			MachineKey key = treeToInfo[tHand];
 			if (key == MachineKey::invalid ) {
 				return;
