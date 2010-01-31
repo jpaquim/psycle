@@ -96,10 +96,11 @@ void Player::start_threads() {
 		// start the scheduling threads
 		for(std::size_t i(0); i < thread_count_; ++i) {
 			std::thread* newthread = new std::thread(boost::bind(&Player::thread_function, this, i));
-			{
-				using namespace universalis::os::sched::thread::priority;
-				set(newthread->native_handle(), highest);
-			}
+			#if BOOST_VERSION >= 103500
+				{ using namespace universalis::os::sched::thread::priority;
+					set(newthread->native_handle(), highest);
+				}
+			#endif
 			threads_.push_back(newthread);
 		}
 	} catch(...) {
@@ -244,11 +245,6 @@ void Player::thread_function(std::size_t thread_number) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
-	{
-		using namespace universalis::os::sched::thread::priority;
-		set(highest);
-	}
-
 	universalis::os::thread_name thread_name;
 	{ // set thread name
 		std::ostringstream s;
@@ -258,6 +254,12 @@ void Player::thread_function(std::size_t thread_number) {
 
 	// install cpu/os exception handler/translator
 	universalis::cpu::exception::install_handler_in_thread();
+
+	#if BOOST_VERSION < 103500 // for old boost versions, alternate way to set the priority
+		{ using namespace universalis::os::sched::thread::priority;
+			set(highest);
+		}
+	#endif
 
 	try {
 		try {
