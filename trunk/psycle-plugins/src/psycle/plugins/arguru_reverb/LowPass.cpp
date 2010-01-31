@@ -1,8 +1,7 @@
 #include "LowPass.hpp"
 
-CLowpass::CLowpass()
+CLowpass::CLowpass(): o1(0.0f), cutoff(1.0f)
 {
-	o1=0.0f;
 }
 
 CLowpass::~CLowpass() throw()
@@ -10,3 +9,6 @@ CLowpass::~CLowpass() throw()
 
 }
 
+void CLowpass::setCutoff(float c) {
+	cutoff = (c < 1.0f) ? c : 1.0f;
+}

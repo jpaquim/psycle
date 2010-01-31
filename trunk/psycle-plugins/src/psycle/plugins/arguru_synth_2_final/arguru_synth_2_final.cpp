@@ -319,11 +319,12 @@ CMachineParameter const *pParameters[] = {
 
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
+	MI_VERSION,
+	0x0250
 	GENERATOR,
 	NUMPARAMETERS,
 	pParameters,
-	"Arguru Synth 2.5"
+	"Arguru Synth 2"
 		#ifndef NDEBUG
 		" (debug build)"
 		#endif

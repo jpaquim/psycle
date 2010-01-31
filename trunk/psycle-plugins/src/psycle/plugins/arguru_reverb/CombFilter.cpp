@@ -1,29 +1,38 @@
 #include "CombFilter.hpp"
 #include <universalis/os/aligned_memory_alloc.hpp>
+#include <psycle/helpers/dsp.hpp>
 
-CCombFilter::CCombFilter() {
-	universalis::os::aligned_memory_alloc(16, leftBuffer, MAX_COMB_DELAY);
-	universalis::os::aligned_memory_alloc(16, rightBuffer, MAX_COMB_DELAY);
-	Counter = MAX_COMB_DELAY - 4;
+CCombFilter::CCombFilter():	l_delayedCounter(0), r_delayedCounter(0),
+	Counter(0), leftBuffer(0), rightBuffer(0), bufferSize(0) {
 }
 
 CCombFilter::~CCombFilter() throw() {
-	universalis::os::aligned_memory_dealloc(leftBuffer);
-	universalis::os::aligned_memory_dealloc(rightBuffer);
+	DeleteBuffer();
 }
 
 void CCombFilter::Clear() {
-	for(int c = 0; c < MAX_COMB_DELAY; ++c) {
-		leftBuffer[c] = 0;
-		rightBuffer[c] = 0;
-	}
-	left_output = 0;
-	right_output = 0;
+	psycle::helpers::dsp::Clear(leftBuffer, bufferSize);
+	psycle::helpers::dsp::Clear(rightBuffer, bufferSize);
 }
 
-void CCombFilter::Initialize(int time, int stph) {
-	l_delayedCounter = Counter - time;
-	r_delayedCounter = l_delayedCounter - stph;
-	if(l_delayedCounter < 0) l_delayedCounter = 0;
-	if(r_delayedCounter < 0) r_delayedCounter = 0;
+void CCombFilter::SetDelay(int time, int stph) {
+	l_delayedCounter = Counter - std::min(time, bufferSize);
+	r_delayedCounter = l_delayedCounter - std::min(stph, bufferSize);
+	if(l_delayedCounter < 0) l_delayedCounter += bufferSize;
+	if(r_delayedCounter < 0) r_delayedCounter += bufferSize;
+}
+void CCombFilter::Initialize(int new_rate, int time, int stph){
+	DeleteBuffer();
+	//Allow up to 0.75 seconds of delay, properly aligned.
+	bufferSize = (int(new_rate*0.75)+3)&0xFFFFFF00;
+	universalis::os::aligned_memory_alloc(16, leftBuffer, bufferSize);
+	universalis::os::aligned_memory_alloc(16, rightBuffer, bufferSize);
+	Clear();
+	SetDelay(time, stph);
+}
+void CCombFilter::DeleteBuffer() {
+	if (bufferSize) {
+		universalis::os::aligned_memory_dealloc(leftBuffer);
+		universalis::os::aligned_memory_dealloc(rightBuffer);
+	}
 }

@@ -18,10 +18,11 @@ CMachineParameter const *pParameters[] = {
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	0x0120,
 	EFFECT,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
-	"Arguru Goaslicer 1.2"
+	"Arguru Goaslicer"
 	#ifndef NDEBUG
 		" (Debug build)"
 	#endif
