@@ -5,8 +5,6 @@
 #include <universalis/detail/project.private.hpp>
 #include "exception.hpp"
 #include "os/loggers.hpp"
-#include "compiler/typenameof.hpp"
-#include "stdlib/thread.hpp"
 namespace universalis { namespace exceptions {
 
 runtime_error::runtime_error(std::string const & what, compiler::location const & location, void const * cause) throw()
@@ -14,9 +12,7 @@ runtime_error::runtime_error(std::string const & what, compiler::location const 
 {
 	if(os::loggers::trace()()) {
 		std::ostringstream s;
-		s 
-			<< "exception: thread id: " << stdlib::this_thread::id() << ", "
-			<< compiler::typenameof(*this) << ": " << this->what();
+		s  << "exception: " << this->what();
 		os::loggers::exception()(s.str(), location);
 	}
 }

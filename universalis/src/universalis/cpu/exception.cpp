@@ -6,8 +6,6 @@
 #include "exception.hpp"
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/compiler/typenameof.hpp>
-#include <universalis/stdlib/thread.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #endif
@@ -27,11 +25,8 @@ namespace universalis { namespace cpu {
 		// So, we automatically log them as soon as they are created, that is, even before they are thrown.
 		if(os::loggers::crash()()) {
 			std::ostringstream s;
-			s
-				<< "cpu/os exception: "
-				"thread: name: " << os::thread_name::get() << ", id: " << stdlib::this_thread::id() << '\n'
-				<< compiler::typenameof(*this) << ": " << what();
-			os::loggers::crash()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			s << "cpu/os exception: " << what();
+			os::loggers::crash()(s.str(), location);
 		}
 	}
 #endif
@@ -109,7 +104,7 @@ namespace {
 void exception::install_handler_in_thread() {
 	if(os::loggers::trace()()) {
 		std::ostringstream s;
-		s << "installing cpu/os exception handler in thread: name: " << os::thread_name::get() << ", id: " << stdlib::this_thread::id();
+		s << "installing cpu/os exception handler in thread: name: " << os::thread_name::get();
 		os::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 	}
 	#if defined DIVERSALIS__OS__MICROSOFT

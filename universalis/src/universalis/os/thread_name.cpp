@@ -3,7 +3,6 @@
 
 ///\implementation universalis::os::thread_name
 #include <universalis/detail/project.private.hpp>
-#include <universalis/stdlib/thread.hpp>
 #include "thread_name.hpp"
 #include "loggers.hpp"
 #include <cassert>
@@ -15,6 +14,18 @@ using namespace universalis::stdlib;
 namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
 	std::string const * tls_thread_name_(0);
+
+	void dump_current_thread_id(std::ostream & out) {
+		out <<
+			#if defined DIVERSALIS__OS__POSIX
+				::pthread_self()
+			#elif defined DIVERSALIS__OS__MICROSOFT
+				::GetCurrentThreadId()
+			#else
+				#error unsupported operating system
+			#endif
+		;
+	}
 }
 
 std::string thread_name::get() {
@@ -22,7 +33,8 @@ std::string thread_name::get() {
 	if(tls_thread_name_) nvr = *tls_thread_name_;
 	else {
 		std::ostringstream s;
-		s << "thread-id-" << this_thread::id();
+		s << "thread-id-";
+		dump_current_thread_id(s);
 		nvr = s.str();
 	}
 	return nvr;
@@ -37,7 +49,9 @@ void thread_name::set(std::string const & name) {
 void thread_name::set_tls() {
 	if(os::loggers::trace()) {
 		std::ostringstream s;
-		s << "setting name for thread: id: " << this_thread::id() << ", name: " << thread_name_;
+		s << "setting name for thread: id: ";
+		dump_current_thread_id(s);
+		s << ", name: " << thread_name_;
 		os::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	tls_thread_name_ = &thread_name_;

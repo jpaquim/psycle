@@ -17,7 +17,6 @@
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/helpers/value_mapper.hpp>
 #include <universalis/os/loggers.hpp>
-#include <universalis/os/cpu_affinity.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
@@ -75,7 +74,7 @@ void Player::start_threads() {
 	stop_requested_ = suspend_requested_ = false;
 	processed_node_count_ = suspended_ = 0;
 
-	thread_count_ = universalis::os::cpu_affinity::cpu_count();
+	thread_count_ = thread::hardware_concurrency();
 	{ // thread count env var
 		char const * const env(std::getenv("PSYCLE_THREADS"));
 		if(env) {
@@ -243,9 +242,12 @@ void Player::thread_function(std::size_t thread_number) {
 		s << "psycle: core: player: scheduler thread #" << thread_number << " started";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-#ifdef DIVERSALIS__OS__POSIX
-	this_thread::applyPriority(std::thread::HIGH);
-#endif
+
+	{
+		using namespace universalis::os::sched::thread::priority;
+		set(highest);
+	}
+
 	universalis::os::thread_name thread_name;
 	{ // set thread name
 		std::ostringstream s;
