@@ -158,7 +158,7 @@ CMachineInfo* NativeHost::LoadDescriptor(void* hInstance)
 		if (!GetInfo && loggers::exception()) {
 			std::ostringstream s;
 			s << "psycle: core: nativehost: LoadDescriptor:" << std::endl
-			 << "Cannot load symbols: " << dlerror();
+				<< "Cannot load symbols: " << dlerror();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			return 0;
 		}
@@ -169,8 +169,8 @@ CMachineInfo* NativeHost::LoadDescriptor(void* hInstance)
 			if (!GetInfo && loggers::exception()) {
 				std::ostringstream s;
 				s << "psycle: core: nativehost: LoadDescriptor:" << std::endl
-				 << "Cannot load symbols: " 
-				 << universalis::os::exceptions::code_description();
+					<< "Cannot load symbols: " 
+					<< universalis::os::exceptions::code_description();
 				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 				return 0;
 			}
