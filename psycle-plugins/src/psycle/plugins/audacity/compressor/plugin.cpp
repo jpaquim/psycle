@@ -29,56 +29,12 @@ using namespace psycle::plugin_interface;
 	#define M_PI 3.14159265359f
 #endif
 
-#define NUMPARAMETERS 5
-
-CMachineParameter const paraThreshold = {
-	"Threshold",
-	"Threshold", // description
-	-36, // MinValue
-	-1, // MaxValue
-	MPF_STATE, // Flags
-	-12,
-};
-
-CMachineParameter const paraRatio = {
-	"Ratio",
-	"Ratio", // description
-	100, // MinValue
-	10000, // MaxValue
-	MPF_STATE, // Flags
-	200,
-};
-
-CMachineParameter const paraAttackTime = {
-	"Attack",
-	"Attack", // description
-	100, // MinValue
-	10000, // MaxValue
-	MPF_STATE, // Flags
-	200,
-};
-
-CMachineParameter const paraDecayTime = {
-	"Decay",
-	"Decay", // description
-	100, // MinValue
-	10000, // MaxValue
-	MPF_STATE, // Flags
-	1000,
-};
-
-
-CMachineParameter const paraUseGain = {
-	"Use gain",
-	"Use gain", // description
-	0, // MinValue
-	1, // MaxValue
-	MPF_STATE, // Flags
-	0,
-};
-
+CMachineParameter const paraThreshold = {"Threshold","Threshold", -36 , -1 ,MPF_STATE, -12 };
+CMachineParameter const paraRatio = {"Ratio","Ratio", 100 , 10000 ,MPF_STATE, 200 };
+CMachineParameter const paraAttackTime = {"Attack","Attack", 100 , 10000 ,MPF_STATE, 200 };
+CMachineParameter const paraDecayTime = {"Decay","Decay", 100 ,	10000 ,MPF_STATE, 1000 };
+CMachineParameter const paraUseGain = {"Use gain","Use gain", 0 , 1 ,MPF_STATE, 0 };
 CMachineParameter const *pParameters[] = {
-	// global
 	&paraThreshold,
 	&paraRatio,
 	&paraAttackTime,
@@ -87,18 +43,18 @@ CMachineParameter const *pParameters[] = {
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	EFFECT, // flags
-	NUMPARAMETERS, // numParameters
-	pParameters, // Pointer to parameters
-	"Audacity Compressor" // name
+	MI_VERSION,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	"Audacity Compressor"
 		#ifndef NDEBUG
 		" (Debug build)"
 		#endif
 		,
-	"ACompressor", // short name
-	"Dominic Mazzoni/Sartorius", // author
-	"About", // A command, that could be use for open an editor, etc...
+	"ACompressor",
+	"Dominic Mazzoni/Sartorius",
+	"About",
 	1
 );
 
@@ -122,8 +78,7 @@ class mi : public CMachineInterface {
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-	// The constructor zone
-	Vals = new int[NUMPARAMETERS];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi() {
@@ -131,21 +86,16 @@ mi::~mi() {
 }
 
 void mi::Init() {
-	// Initialize your stuff here
 	samplerate = pCB->GetSamplingRate();
 	sl.setSampleRate(samplerate);
 	sr.setSampleRate(samplerate);
 }
 
 void mi::SequencerTick() {
-	// Called on each tick while sequencer is playing
 	if(samplerate!=pCB->GetSamplingRate()) Init();
 }
 
 void mi::Command() {
-	// Called when user presses editor button
-	// Probably you want to show your custom window here
-	// or an about button
 	pCB->MessBox("Audacity Compressor","ACompressor",0);
 }
 

@@ -15,7 +15,7 @@ CMachineParameter const static * const parameters[] = {
 
 CMachineInfo const static machine_info (
 	MI_VERSION,
-	120,
+	0x0120,
 	EFFECT,
 	sizeof parameters / sizeof *parameters,
 	parameters,

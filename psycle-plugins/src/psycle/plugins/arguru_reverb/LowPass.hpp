@@ -5,16 +5,17 @@ class CLowpass
 public:
 	CLowpass();
 	virtual ~CLowpass() throw();
-	inline float Process(float i,float c);
+	void setCutoff(float c);
+	inline float Process(float i);
 
 private:
+	float cutoff;
 	float o1;
 };
 
-inline float CLowpass::Process(float i,float c)
+inline float CLowpass::Process(float i)
 {
-	float output= o1 + c * (i-o1);
+	const float output= o1 + cutoff * (i-o1);
 	o1=output;
-
 	return output;
 }

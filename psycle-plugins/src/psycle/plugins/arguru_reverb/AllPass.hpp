@@ -2,53 +2,46 @@
 
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 
-#define MAX_ALLPASS_DELAY 8192
-
 class CAllPass
 {
 public:
 	CAllPass();
 	virtual ~CAllPass() throw();
-	void Initialize(int time, int stph);
 	void Clear();
+	void Initialize(int max_size, int time, int spth);
+	void SetDelay(int time, int stph);
 	inline void Work(float l_input,float r_input,float g);
-	float left_output;
-	float right_output;
+	inline float left_output() const { return left_output_; }
+	inline float right_output() const { return left_output_; }
 
 private:
+	void DeleteBuffer();
+
+	float left_output_;
+	float right_output_;
 	float *leftBuffer;
 	float *rightBuffer;
 	int l_delayedCounter;
 	int r_delayedCounter;
 	int Counter;
-	//float tmpleft;
-	//float tmpright;
-	//unsigned int *smpleft;
-	//unsigned int *smpright;
-
+	int bufferSize;
 };
 
 inline void CAllPass::Work(float l_input,float r_input,float g)
 {
-	left_output=(l_input*-g)+leftBuffer[l_delayedCounter];
-	right_output=(r_input*-g)+rightBuffer[r_delayedCounter];
+	left_output_=(l_input*-g)+leftBuffer[l_delayedCounter];
+	right_output_=(r_input*-g)+rightBuffer[r_delayedCounter];
 
-	float tmpleft = l_input+left_output*g;
-	float tmpright = r_input+right_output*g;
+	float tmpleft = l_input+left_output_*g;
+	float tmpright = r_input+right_output_*g;
 
-	#if 0
-		//  Added following code to correct denormals.
-		*smpleft *= ((*smpleft < 0x7F800000) & ((*smpleft & 0x7F800000) > 0));
-		*smpright *= ((*smpright < 0x7F800000) & ((*smpright & 0x7F800000) > 0));
-	#else
-		psycle::helpers::math::erase_all_nans_infinities_and_denormals(tmpleft);
-		psycle::helpers::math::erase_all_nans_infinities_and_denormals(tmpright);
-	#endif
+	psycle::helpers::math::erase_all_nans_infinities_and_denormals(tmpleft);
+	psycle::helpers::math::erase_all_nans_infinities_and_denormals(tmpright);
 	
 	leftBuffer[Counter] = tmpleft;
 	rightBuffer[Counter] = tmpright;
 
-	if(++Counter>=MAX_ALLPASS_DELAY) Counter = 0;
-	if(++l_delayedCounter>=MAX_ALLPASS_DELAY) l_delayedCounter = 0;
-	if(++r_delayedCounter>=MAX_ALLPASS_DELAY) r_delayedCounter = 0;
+	if(++Counter>=bufferSize) Counter = 0;
+	if(++l_delayedCounter>=bufferSize) l_delayedCounter = 0;
+	if(++r_delayedCounter>=bufferSize) r_delayedCounter = 0;
 }

@@ -50,14 +50,15 @@ CMachineParameter const *pParameters[] = {
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	0x0120,
 	EFFECT,
 	NUMPARAMETERS,
 	pParameters,
-#ifdef _DEBUG
-	"Audacity WahWah (Debug build)",
-#else
-	"Audacity WahWah",
-#endif
+	"Audacity WahWah"
+	#ifndef NDEBUG
+		" (Debug build)"
+	#endif
+	,
 	"WahWah",
 	"Nasca Octavian Paul/Sartorius",
 	"About",

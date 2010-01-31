@@ -48,7 +48,7 @@ CMachineInfo const audacity_phaser_info (
 	EFFECT,
 	sizeof audacity_phaser_parameters / sizeof *audacity_phaser_parameters,
 	audacity_phaser_parameters,
-	"Audacity Phaser" // long name
+	"Audacity Phaser 1.2" // long name
 		#ifndef NDEBUG
 			" (debug build)"
 		#endif
@@ -101,7 +101,7 @@ float const audacity_phaser::phaser_lfo_shape = 4.0f;
 unsigned int const audacity_phaser::lfo_skip_samples = 20;
 
 audacity_phaser::audacity_phaser() {
-	Vals = new int[sizeof audacity_phaser_parameters / sizeof *audacity_phaser_parameters];
+	Vals = new int[audacity_phaser_info.numParameters];
 }
 
 audacity_phaser::~audacity_phaser() {
@@ -127,11 +127,10 @@ void audacity_phaser::Init() {
 }
 
 void audacity_phaser::SequencerTick() {
-	// called on each tick while sequencer is playing
+	lfoskip = freq * 2 * M_PI / pCB->GetSamplingRate();
 }
 
 void audacity_phaser::Command() {
-	// called when user presses editor button
 	pCB->MessBox("Audacity Phaser", "APhaser", 0);
 }
 

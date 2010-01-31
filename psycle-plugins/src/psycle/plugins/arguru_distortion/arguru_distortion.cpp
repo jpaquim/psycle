@@ -19,11 +19,12 @@ CMachineParameter const *pParameters[] =
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
+	MI_VERSION,
+	0x0120,
 	EFFECT,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
-	"Arguru Distortion 1.2"
+	"Arguru Distortion"
 #ifndef NDEBUG
 	" (debug build)"
 #endif

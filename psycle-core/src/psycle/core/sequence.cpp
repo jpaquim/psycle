@@ -489,7 +489,7 @@ void Sequence::removeAll( ) {
 	master_pattern_ = new Pattern();
 	// make pattern length endless
 	master_pattern_->timeSignatures().clear();
-	master_pattern_->timeSignatures().push_back(TimeSignature(std::numeric_limits<double>::max()));
+	master_pattern_->timeSignatures().push_back(TimeSignature(std::numeric_limits<float>::max()));
 	master_pattern_->setName("master");
 	master_pattern_->setID(-1);
 	Add(master_pattern_);
