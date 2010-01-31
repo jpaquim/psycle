@@ -63,6 +63,7 @@ bool CoreSong::save(std::string const & filename, int version) {
 }
 
 void CoreSong::AddMachine(Machine * pmac, Machine::id_type newIdx) {
+	assert("not null" and mac); ///\todo if it can't be null, then pass a reference, not a pointer!
 	if ( newIdx != -1) {
 		if (!machine(newIdx) ){
 			pmac->id(newIdx);
@@ -113,6 +114,7 @@ void CoreSong::DeleteAllMachines() {
 	}
 }
 void CoreSong::DeleteMachine(Machine * mac) {
+	assert("not null" and mac); ///\todo if it can't be null, then pass a reference, not a pointer!
 	scoped_lock lock(mutex_);
 	mac->DeleteWires(*this);
 	// If it's a (Vst)Plugin, the destructor calls to release the underlying library
