@@ -64,7 +64,7 @@ int get(native_handle_type native_handle) {
 			case THREAD_PRIORITY_ERROR_RETURN: {
 				std::ostringstream s;
 				s << "could not get thread priority: " << os::exceptions::code_description();
-				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				return normal;
 			}
 			default: return priority;
@@ -114,19 +114,19 @@ void set(native_handle_type native_handle, int priority) {
 			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		if(!::SetThreadPriority(native_handle,
-			// We can't choose values between the predefined constants,
-			// so we have to "snap" the value to one of those constants.
+		// We can't choose values between the predefined constants,
+		// so we have to "snap" the value to one of those constants.
+		int const native_priority =
 			priority <  lowest  ? idle    :
 			priority <  low     ? lowest  :
 			priority <  normal  ? low     :
 			priority == normal  ? normal  :
 			priority <= high    ? high    :
 			priority <= highest ? highest : realtime;
-		) {
+		if(!::SetThreadPriority(native_handle, native_priority)) {
 			std::ostringstream s;
 			s << "could not set thread priority to: " << native_priority << ": " << os::exceptions::code_description();
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		}
 	#endif
 }

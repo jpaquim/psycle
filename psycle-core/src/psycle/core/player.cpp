@@ -96,9 +96,10 @@ void Player::start_threads() {
 		// start the scheduling threads
 		for(std::size_t i(0); i < thread_count_; ++i) {
 			std::thread* newthread = new std::thread(boost::bind(&Player::thread_function, this, i));
-#ifdef DIVERSALIS__OS__MICROSOFT
-			newthread->applyPriorityWindows(std::thread::HIGH);
-#endif
+			{
+				using namespace universalis::os::sched::thread::priority;
+				set(newthread->native_handle(), highest);
+			}
 			threads_.push_back(newthread);
 		}
 	} catch(...) {
