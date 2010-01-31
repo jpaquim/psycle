@@ -30,6 +30,8 @@ namespace psycle {
 
 namespace core {
 
+using helpers::dsp::Dither;
+
 /// schedules the processing of machines, sends signal buffers and sequence events to them, ...
 class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncopyable {
 	private:
@@ -118,10 +120,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			/// starts the recording output device.
 			void startRecording(
 				bool do_dither = false,
-				psycle::helpers::dsp::Dither::Pdf::type ditherpdf = 
-					psycle::helpers::dsp::Dither::Pdf::triangular,
-				psycle::helpers::dsp::Dither::NoiseShape::type noiseshaping = 
-					psycle::helpers::dsp::Dither::NoiseShape::none
+				Dither::Pdf::type ditherpdf = Dither::Pdf::triangular,
+				Dither::NoiseShape::type noiseshaping = Dither::NoiseShape::none
 			);
 			/// stops the recording output device.
 			void stopRecording( );
@@ -233,7 +233,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		/// temporary buffer to get all the audio from master (which work in small chunks), and send it to the soundcard after converting it to float.
 		float * buffer_;
 		/// dither handler
-		psycle::helpers::dsp::Dither dither_;
+		Dither dither_;
 
 	///\name multithreaded scheduler
 	///\{
