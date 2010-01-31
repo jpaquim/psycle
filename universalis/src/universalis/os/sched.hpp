@@ -24,6 +24,9 @@
 #endif
 #include <stdexcept>
 
+#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
+#include <universalis/compiler/dynamic_link/begin.hpp>
+
 namespace universalis { namespace os { namespace sched {
 
 namespace thread {
@@ -53,10 +56,14 @@ namespace thread {
 
 	namespace priority {
 
+		UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		int get(native_handle_type native_handle);
+
 		int inline get() { return get(native_handle()); }
 
+		UNIVERSALIS__COMPILER__DYNAMIC_LINK
 		void set(native_handle_type native_handle, int priority);
+
 		void inline set(int priority) { set(native_handle(), priority); }
 
 		#if defined DIVERSALIS__OS__MICROSOFT
@@ -90,6 +97,7 @@ namespace thread {
 }
 
 /// returns the number of cpus available to the current process
+UNIVERSALIS__COMPILER__DYNAMIC_LINK
 unsigned int hardware_concurrency() throw(std::runtime_error);
 
 #if defined BOOST_AUTO_TEST_CASE
@@ -128,5 +136,7 @@ unsigned int hardware_concurrency() throw(std::runtime_error);
 #endif
 
 }}}
+
+#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif
