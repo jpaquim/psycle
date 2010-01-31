@@ -320,7 +320,7 @@ CMachineParameter const *pParameters[] = {
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
-	0x0250
+	0x0250,
 	GENERATOR,
 	NUMPARAMETERS,
 	pParameters,
