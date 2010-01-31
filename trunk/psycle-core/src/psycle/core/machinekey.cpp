@@ -25,7 +25,6 @@ namespace psycle { namespace core {
 		const MachineKey MachineKey::failednative(Hosts::NATIVE,"<failed-native>", 0);
 		const MachineKey MachineKey::wrapperVst(Hosts::VST,"<vst-wrapper>", 0);
 
-
 		MachineKey::MachineKey( )
 		:
 			dllName_(),
@@ -89,12 +88,10 @@ namespace psycle { namespace core {
 			return index() < key.index();
 		}
 
-		bool MachineKey::operator ==( const MachineKey & rhs ) const {
+		bool MachineKey::operator==( const MachineKey & rhs ) const {
 			return host() == rhs.host() && dllName() == rhs.dllName() && index() == rhs.index();
 		}
-		bool MachineKey::operator !=( const MachineKey & rhs ) const {
-			return host() != rhs.host() || dllName() != rhs.dllName() || index() != rhs.index();
-		}
+
 		MachineKey& MachineKey::operator=( const MachineKey & key ) {
 			host_ = key.host();
 			dllName_ = key.dllName();
