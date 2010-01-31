@@ -34,11 +34,12 @@ class thread {
 		#if BOOST_VERSION >= 103500
 			typedef impl_type::native_handle_type native_handle_type;
 			native_handle_type native_handle() { return impl_.native_handle(); }
-		#elif defined BOOST_HAS_PTHREADS
-			typedef ::pthread_t native_handle_type;
-			native_handle_type native_handle() { return reinterpret_cast< ::pthread_t>(this); }
 		#else
-			#error unsupported operating system, please install boost 1.35 or higher
+			typedef void* native_handle_type;
+			native_handle_type native_handle() {
+				assert(false);
+				return 0;
+			}
 		#endif
 
 		template<typename Callable>
