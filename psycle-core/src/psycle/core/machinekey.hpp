@@ -8,6 +8,7 @@
 #include <psycle/core/config.hpp>
 
 #include <universalis/stdlib/cstdint.hpp>
+#include <boost/operators.hpp>
 #include <string>
 
 namespace psycle { namespace core {
@@ -26,13 +27,33 @@ namespace Hosts {
 	};
 }
 
-class PSYCLE__CORE__DECL MachineKey {
+class PSYCLE__CORE__DECL MachineKey
+: private
+	boost::equality_comparable<MachineKey,
+	boost::less_than_comparable<MachineKey
+	> >
+{
 	public:
 		MachineKey();
 		MachineKey(const Hosts::type host, const std::string & dllName, const uint32_t index = 0 );
 		MachineKey(const MachineKey& key);
 		~MachineKey();
 
+		static const std::string preprocessName(std::string dllName);
+
+		const std::string & dllName() const;
+		const Hosts::type host() const;
+		uint32_t index() const;
+
+		bool operator<( const MachineKey & key) const;
+		bool operator==( const MachineKey & rhs ) const;
+		MachineKey& operator=( const MachineKey & key );
+	private:
+		std::string dllName_;
+		Hosts::type host_;
+		uint32_t index_;
+
+	public:
 		static const MachineKey invalid;
 		static const MachineKey master;
 		static const MachineKey dummy;
@@ -45,20 +66,6 @@ class PSYCLE__CORE__DECL MachineKey {
 		//Used by the psy2loader to parse the plugin part of the loader for a plugin that couldn't be loaded.
 		static const MachineKey failednative;
 		static const MachineKey wrapperVst;
-		static const std::string preprocessName(std::string dllName);
-
-		const std::string & dllName() const;
-		const Hosts::type host() const;
-		uint32_t index() const;
-
-		bool operator<( const MachineKey & key) const;
-		bool operator==( const MachineKey & rhs ) const;
-		bool operator!=( const MachineKey & rhs ) const;
-		MachineKey& operator=( const MachineKey & key );
-	private:
-		std::string dllName_;
-		Hosts::type host_;
-		uint32_t index_;
 };
 
 }}

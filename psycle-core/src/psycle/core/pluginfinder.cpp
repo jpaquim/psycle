@@ -79,7 +79,7 @@ std::string PluginFinder::lookupDllName( const MachineKey & key ) const {
 
 bool PluginFinder::hasKey( const MachineKey& key ) const {
 	if(!hasHost(key.host())) return false;
-	std::map<MachineKey, PluginInfo> thisMap = maps_[key.host()];
+	std::map<MachineKey, PluginInfo> const & thisMap = maps_[key.host()];
 
 	std::map< MachineKey, PluginInfo >::const_iterator it = thisMap.find(key);
 	if(it != thisMap.end()) return true;
