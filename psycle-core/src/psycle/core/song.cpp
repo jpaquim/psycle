@@ -63,7 +63,7 @@ bool CoreSong::save(std::string const & filename, int version) {
 }
 
 void CoreSong::AddMachine(Machine * pmac, Machine::id_type newIdx) {
-	assert("not null" and mac); ///\todo if it can't be null, then pass a reference, not a pointer!
+	assert("not null" and pmac); ///\todo if it can't be null, then pass a reference, not a pointer!
 	if ( newIdx != -1) {
 		if (!machine(newIdx) ){
 			pmac->id(newIdx);
