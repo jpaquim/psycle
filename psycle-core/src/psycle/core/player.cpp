@@ -448,41 +448,49 @@ float * Player::Work(int numSamples) {
 
 	if(!song_) return buffer_;
 
-	scoped_lock lock(song());
-	if (!song().IsReady()) {
-		dsp::Clear(buffer_, numSamples);
-		return buffer_;
-	}
+	bool autostop = false;
 
-	// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
-	///\todo: The buffer has to be served by the audiodriver, since the audiodriver knows the size it needs to have.
-	((Master*)song().machine(MASTER_INDEX))->_pMasterSamples = buffer_;
-	
-	if(autoRecord_ && timeInfo_.playBeatPos() >= song().sequence().tickLength())
-		stopRecording();
+	{ scoped_lock lock(song());
 
-	if(!playing_) {
-		///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-		process(numSamples);
-		//playPos += beatLength;
-		//if(playPos > "signumerator") playPos -= signumerator;
-	} else {
-		if(loopEnabled()) {
-			// Maintain the cursor inside the loop sequence
-			if(
-				timeInfo_.playBeatPos() >= timeInfo_.cycleEndPos() ||
-				timeInfo_.playBeatPos() < timeInfo_.cycleStartPos()
-			) setPlayPos(timeInfo_.cycleStartPos());
-		} else {
-			// autostop
-			if (timeInfo_.playBeatPos() >= song().sequence().max_beats()) {
-				stop();
-			}
+		if (!song().IsReady()) {
+			dsp::Clear(buffer_, numSamples);
+			return buffer_;
 		}
-		sequencer_.set_player(*this); // for a callback to process()
-		sequencer_.set_time_info(timeInfo_);
-		sequencer_.Work(numSamples);
+
+		// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
+		///\todo: The buffer has to be served by the audiodriver, since the audiodriver knows the size it needs to have.
+		((Master*)song().machine(MASTER_INDEX))->_pMasterSamples = buffer_;
+		
+		if(autoRecord_ && timeInfo_.playBeatPos() >= song().sequence().tickLength())
+			stopRecording();
+
+		if(!playing_) {
+			///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
+			process(numSamples);
+			//playPos += beatLength;
+			//if(playPos > "signumerator") playPos -= signumerator;
+		} else {
+			if(loopEnabled()) {
+				// Maintain the cursor inside the loop sequence
+				if(
+					timeInfo_.playBeatPos() >= timeInfo_.cycleEndPos() ||
+					timeInfo_.playBeatPos() < timeInfo_.cycleStartPos()
+				) setPlayPos(timeInfo_.cycleStartPos());
+			} else {
+				// autostop
+				if (timeInfo_.playBeatPos() >= song().sequence().max_beats()) {
+					autostop = true;
+				}
+			}
+			sequencer_.set_player(*this); // for a callback to process()
+			sequencer_.set_time_info(timeInfo_);
+			sequencer_.Work(numSamples);
+		}
 	}
+
+	// the song's mutex isn't a recursive mutex, so we need to call stop() outside of the scoped_lock
+	if(autostop) stop();
+
 	return buffer_;
 }
 
