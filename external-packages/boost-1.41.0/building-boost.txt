@@ -1,0 +1,17 @@
+The folowing commands can be used to build boost on mingw.
+---------------------------------------------------------
+
+pushd .
+
+%~d0%
+cd %~p0
+
+set bjam=%cd%\boost-jam-3.1.17-1-ntx86\bjam.exe
+set  src=%cd%\boost_1_41_0
+set  bld=%cd%\boost_1_41_0.build
+set  dst=%cd%\boost_1_41_0.install
+
+cd %src%
+%bjam% --debug-configuration --build-dir=%bld% --prefix=%dst% --with-python link=shared runtime-link=shared threading=multi variant=release,debug toolset=gcc install
+
+popd
