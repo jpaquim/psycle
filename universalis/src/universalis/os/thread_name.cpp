@@ -11,6 +11,8 @@ namespace universalis { namespace os {
 
 using namespace universalis::stdlib;
 
+///\todo use pthread_setname_np() on posix if available.
+
 namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE
 	std::string const * tls_thread_name_(0);
