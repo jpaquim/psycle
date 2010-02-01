@@ -22,6 +22,9 @@
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #endif
+#if defined BOOST_AUTO_TEST_CASE
+	#include <sstream>
+#endif
 
 namespace universalis { namespace stdlib {
 
@@ -75,9 +78,19 @@ class thread {
 			#if BOOST_VERSION >= 103500
 				return impl_type::hardware_concurrency();
 			#else
-				return os::sched::hardware_concurrency();
+				using namespace os::sched;
+				process p;
+				return p.affinity_mask().active_count();
 			#endif
 		}
+
+		/// access to operations that are not part of the standard
+		typedef os::sched::thread non_std_extra_type;
+		#if BOOST_VERSION >= 103500
+			#define UNIVERSALIS__STDLIB__THREAD__INSTANCE_HAS_NON_STD_EXTRA
+			/// access to operations that are not part of the standard
+			non_std_extra_type non_std_extra() { non_std_extra_type result(native_handle()); return result; }
+		#endif
 };
 
 typedef boost::once_flag once_flag;
@@ -111,7 +124,7 @@ namespace this_thread {
 
 	/// see the standard header date_time for duration types implementing the Elapsed_Time concept
 	template<typename Elapsed_Time>
-	void sleep(Elapsed_Time const & elapsed_time) {
+	void inline sleep(Elapsed_Time const & elapsed_time) {
 		// boost::thread::sleep sleeps until the given absolute event date.
 		// So, we compute the event date by getting the current date and adding the delta to it.
 		// Note: boost::thread::sleep returns on interruptions (at least on posix)
@@ -124,7 +137,19 @@ namespace this_thread {
 			#endif
 		);
 	}
+
+	/// access to operations that are not part of the standard
+	typedef thread::non_std_extra_type non_std_extra_type;
+	/// access to operations that are not part of the standard
+	non_std_extra_type inline non_std_extra() { non_std_extra_type result; return result; }
 }
+
+#if defined BOOST_AUTO_TEST_CASE
+	BOOST_AUTO_TEST_CASE(hardware_concurrency_test) {
+		std::ostringstream s; s << "hardware concurrency: " << thread::hardware_concurrency();
+		BOOST_MESSAGE(s.str());
+	}
+#endif
 
 }}
 
