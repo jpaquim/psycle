@@ -6,14 +6,13 @@
 #include <universalis/detail/project.private.hpp>
 #include "sched.hpp"
 
-#include <diversalis/os.hpp>
+#include "exceptions/code_description.hpp"
+#include "loggers.hpp"
 #if defined DIVERSALIS__OS__POSIX
 	#include <sys/time.h>
 	#include <sys/resource.h>
 	#include <cerrno>
 #endif
-#include "exceptions/code_description.hpp"
-#include "loggers.hpp"
 #include <cassert>
 
 namespace universalis { namespace os { namespace sched {
@@ -57,25 +56,31 @@ affinity_mask process::affinity_mask() const throw(std::runtime_error) {
 	#endif
 }
 
-void process::affinity_mask(class affinity_mask const & affinity_mask) throw(std::runtime_error) {
-	#if defined DIVERSALIS__OS__POSIX
-		#if defined DIVERSALIS__OS__CYGWIN
-			///\todo sysconf
-		#else
-			if(sched_setaffinity(native_handle_, sizeof affinity_mask.native_mask_, &affinity_mask.native_mask_) == -1) {
+#if defined DIVERSALIS__OS__MICROSOFT
+	/// special case for windows, this must be done inline!
+	/// The doc says:
+	/// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
+#else
+	void process::affinity_mask(class affinity_mask const & affinity_mask) throw(std::runtime_error) {
+		#if defined DIVERSALIS__OS__POSIX
+			#if defined DIVERSALIS__OS__CYGWIN
+				///\todo sysconf
+			#else
+				if(sched_setaffinity(native_handle_, sizeof affinity_mask.native_mask_, &affinity_mask.native_mask_) == -1) {
+					std::ostringstream s; s << exceptions::code_description();
+					throw std::runtime_error(s.str().c_str());
+				}
+			#endif
+		#elif defined DIVERSALIS__OS__MICROSOFT
+			if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_)) {
 				std::ostringstream s; s << exceptions::code_description();
 				throw std::runtime_error(s.str().c_str());
 			}
+		#else
+			#error unsupported operating system
 		#endif
-	#elif defined DIVERSALIS__OS__MICROSOFT
-		if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_)) {
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
-	#else
-		#error unsupported operating system
-	#endif
-}
+	}
+#endif
 
 process::priority_type process::priority() throw(std::runtime_error) {
 	#if defined DIVERSALIS__OS__POSIX
@@ -121,7 +126,7 @@ thread::thread() : native_handle_(
 	#if defined DIVERSALIS__OS__POSIX
 		::pthread_self()
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		::GetCurrentThread();
+		::GetCurrentThread()
 	#else
 		#error unsupported operating system
 	#endif
@@ -214,13 +219,13 @@ thread::priority_type thread::priority() throw(std::runtime_error) {
 				param.sched_priority;
 			#endif
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		int const priority = ::GetThreadPriority(native_handle);
+		int const priority = ::GetThreadPriority(native_handle_);
 		switch(priority) {
 			case THREAD_PRIORITY_ERROR_RETURN: {
 				std::ostringstream s;
 				s << "could not get thread priority: " << os::exceptions::code_description();
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-				return normal;
+				return priorities::normal;
 			}
 			default: return priority;
 		}
@@ -291,7 +296,7 @@ void thread::priority(thread::priority_type priority) throw(std::runtime_error) 
 
 affinity_mask::affinity_mask()
 	#if defined DIVERSALIS__OS__MICROSOFT
-		: mask_()
+		: native_mask_()
 	#endif
 {
 	#if defined DIVERSALIS__OS__POSIX
@@ -310,7 +315,7 @@ unsigned int affinity_mask::size() const {
 		#if defined DIVERSALIS__OS__POSIX
 			CPU_SETSIZE;
 		#elif defined DIVERSALIS__OS__MICROSOFT
-			sizeof native_mask_ >> 3;
+			sizeof native_mask_ << 3;
 		#else
 			#error unsupported operating system
 		#endif

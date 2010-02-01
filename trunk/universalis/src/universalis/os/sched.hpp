@@ -9,10 +9,10 @@
 
 #include <diversalis/os.hpp>
 #if defined DIVERSALIS__OS__POSIX
-	#include <sched.h>
 	#include <pthread.h>
 #elif defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
+	#include "exceptions/code_description.hpp"
 #else
 	#error unsupported operating system
 #endif
@@ -82,6 +82,12 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
 		/// gets the affinity mask against the set of cpu available to the process.
 		class affinity_mask affinity_mask() const throw(std::runtime_error);
 		/// sets the affinity mask against the set of cpu available to the process.
+			#if defined DIVERSALIS__OS__MICROSOFT
+				/// special case for windows, this must be done inline!
+				/// The doc says:
+				/// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
+				inline
+			#endif
 		void affinity_mask(class affinity_mask const &) throw(std::runtime_error);
 
 		typedef
@@ -184,6 +190,24 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 			#endif
 		};
 };
+
+/****************************************************/
+// inline implementation
+
+#if defined DIVERSALIS__OS__MICROSOFT
+	// special case for windows, this must be done inline!
+	// The doc says:
+	// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
+	void inline process::affinity_mask(class affinity_mask const & affinity_mask) throw(std::runtime_error) {
+		if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_)) {
+			std::ostringstream s; s << exceptions::code_description();
+			throw std::runtime_error(s.str().c_str());
+		}
+	}
+#endif
+
+/****************************************************/
+// test cases
 
 #if defined BOOST_AUTO_TEST_CASE
 	BOOST_AUTO_TEST_CASE(affinity_test) {
