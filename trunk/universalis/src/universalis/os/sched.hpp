@@ -9,15 +9,12 @@
 
 #include <diversalis/os.hpp>
 #if defined DIVERSALIS__OS__POSIX
+	#include <sched.h>
 	#include <pthread.h>
 #elif defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #else
 	#error unsupported operating system
-#endif
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 103500
-	#include <boost/thread/thread.hpp>
 #endif
 #if defined BOOST_AUTO_TEST_CASE
 	#include <sstream>
@@ -29,109 +26,202 @@
 
 namespace universalis { namespace os { namespace sched {
 
-namespace thread {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK affinity_mask {
+	public:
+		/// initialises a zeroed-out mask
+		affinity_mask();
 
-	typedef 
-		#if BOOST_VERSION >= 103500
-			boost::thread::native_handle_type
-		#elif defined DIVERSALIS__OS__POSIX
-			::pthread_t 
-		#elif defined DIVERSALIS__OS__MICROSOFT
-			HANDLE
-		#else
-			#error unsupported operating system
-		#endif
-		native_handle_type;
-	
-	native_handle_type inline native_handle() {
-		return
+		/// returns the number active cpus in the mask
+		///\seealso std::thread::hardware_concurrency (which is supposed to be process-independent)
+		unsigned int active_count() const;
+
+		/// returns the max cpu index
+		unsigned int size() const;
+
+		/// returns whether cpu at index is active; the index range is [0, size()[.
+		bool operator()(unsigned int cpu_index) const;
+		/// sets whether cpu at index is active; the index range is [0, size()[.
+		void operator()(unsigned int cpu_index, bool);
+
+	private:
+		typedef
 			#if defined DIVERSALIS__OS__POSIX
-				::pthread_self();
+				cpu_set_t
 			#elif defined DIVERSALIS__OS__MICROSOFT
-				::GetCurrentThread();
+				DWORD
 			#else
 				#error unsupported operating system
 			#endif
-	}
+			native_mask_type;
+		native_mask_type native_mask_;
+		friend class thread;
+		friend class process;
+};
 
-	namespace priority {
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
+	public:
+		/// native handle type
+		typedef
+			#if defined DIVERSALIS__OS__POSIX
+				pid_t
+			#elif defined DIVERSALIS__OS__MICROSOFT
+				HANDLE
+			#else
+				#error unsupported operating system
+			#endif
+			native_handle_type;
+	private:
+		native_handle_type native_handle_;
+		
+	public:
+		/// initialises an instance that represents the current process
+		process();
+		/// initialises an instance that represents the given process
+		process(native_handle_type native_handle) : native_handle_(native_handle) {}
 
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK
-		int get(native_handle_type native_handle);
+		/// gets the affinity mask against the set of cpu available to the process.
+		class affinity_mask affinity_mask() const throw(std::runtime_error);
+		/// sets the affinity mask against the set of cpu available to the process.
+		void affinity_mask(class affinity_mask const &) throw(std::runtime_error);
 
-		int inline get() { return get(native_handle()); }
+		typedef
+			#if defined DIVERSALIS__OS__POSIX
+				int
+			#elif defined DIVERSALIS__OS__MICROSOFT
+				DWORD
+			#else
+				#error unsupported operating system
+			#endif
+			priority_type;
 
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK
-		void set(native_handle_type native_handle, int priority);
+		/// gets the process priority level
+		priority_type priority() throw(std::runtime_error);
+		/// sets the process priority level
+		void priority(priority_type priority) throw(std::runtime_error);
 
-		void inline set(int priority) { set(native_handle(), priority); }
+		struct priorities {
+			#if defined DIVERSALIS__OS__MICROSOFT
+				static priority_type const idle     = IDLE_PRIORITY_CLASS;
+				static priority_type const lowest   = IDLE_PRIORITY_CLASS;
+				static priority_type const low      = BELOW_NORMAL_PRIORITY_CLASS;
+				static priority_type const normal   = NORMAL_PRIORITY_CLASS;
+				static priority_type const high     = ABOVE_NORMAL_PRIORITY_CLASS;
+				static priority_type const highest  = HIGH_PRIORITY_CLASS;
+				static priority_type const realtime = REALTIME_PRIORITY_CLASS;
+			#else
+				// Note: These are nice values. Some systems may accept +20.
+				static priority_type const idle     = -20;
+				static priority_type const lowest   = -10;
+				static priority_type const low      = -5;
+				static priority_type const normal   =  0;
+				static priority_type const high     = +5;
+				static priority_type const highest  = +10;
+				static priority_type const realtime = +19;
+			#endif
+		};
+};
 
-		#if defined DIVERSALIS__OS__MICROSOFT
-			int const idle         = THREAD_PRIORITY_IDLE;
-			int const lowest       = THREAD_PRIORITY_LOWEST;
-			int const low          = THREAD_PRIORITY_BELOW_NORMAL;
-			int const normal       = THREAD_PRIORITY_NORMAL;
-			int const high         = THREAD_PRIORITY_ABOVE_NORMAL;
-			int const highest      = THREAD_PRIORITY_HIGHEST;
-			int const realtime     = THREAD_PRIORITY_TIME_CRITICAL;
-			// Note: If the thread (actually, the process) has the REALTIME_PRIORITY_CLASS base class,
-			//       then this can also be -7, -6, -5, -4, -3, 3, 4, 5, or 6.
-		#else
-			// Note: These are not the actual native values but an arbitrary scale.
-			//       The native values depends on the scheduling policy,
-			//       and the sched_get_priority_min(policy) and sched_get_priority_max(policy) functions
-			//       are used to rescale to native values.
-			//       The policy is chosen this way:
-			//           - value >  normal: if min == max, the policy is set to SCHED_RR,
-			//           - value == normal: SCHED_OTHER (the default policy of the os),
-			//           - value <  normal: SCHED_BATCH on linux, SCHED_OTHER on other posix systems.
-			int const idle         = -300;
-			int const lowest       = -200;
-			int const low          = -100;
-			int const normal       =    0;
-			int const high         = +100;
-			int const highest      = +200;
-			int const realtime     = +300;
-		#endif
-	}
-}
+class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
+	public:
+		/// native handle type
+		typedef
+			#if defined DIVERSALIS__OS__POSIX
+				::pthread_t
+			#elif defined DIVERSALIS__OS__MICROSOFT
+				HANDLE
+			#else
+				#error unsupported operating system
+			#endif
+			native_handle_type;
+	private:
+		native_handle_type native_handle_;
 
-/// returns the number of cpus available to the current process
-UNIVERSALIS__COMPILER__DYNAMIC_LINK
-unsigned int hardware_concurrency() throw(std::runtime_error);
+	public:
+		/// initialises an instance that represents the current thread
+		thread();
+		/// initialises an instance that represents the given thread
+		thread(native_handle_type native_handle) : native_handle_(native_handle) {}
+
+		/// gets the affinity mask against the set of cpu available to the process.
+		class affinity_mask affinity_mask() const throw(std::runtime_error);
+		/// sets the affinity mask against the set of cpu available to the process.
+		void affinity_mask(class affinity_mask const &) throw(std::runtime_error);
+
+		typedef int priority_type;
+
+		/// gets the thread priority level
+		priority_type priority() throw(std::runtime_error);
+		/// sets the thread priority level
+		void priority(priority_type priority) throw(std::runtime_error);
+
+		struct priorities {
+			#if defined DIVERSALIS__OS__MICROSOFT
+				static priority_type const idle     = THREAD_PRIORITY_IDLE;
+				static priority_type const lowest   = THREAD_PRIORITY_LOWEST;
+				static priority_type const low      = THREAD_PRIORITY_BELOW_NORMAL;
+				static priority_type const normal   = THREAD_PRIORITY_NORMAL;
+				static priority_type const high     = THREAD_PRIORITY_ABOVE_NORMAL;
+				static priority_type const highest  = THREAD_PRIORITY_HIGHEST;
+				static priority_type const realtime = THREAD_PRIORITY_TIME_CRITICAL;
+				// Note: If the thread (actually, the process) has the REALTIME_PRIORITY_CLASS base class,
+				//       then this can also be -7, -6, -5, -4, -3, 3, 4, 5, or 6.
+			#else
+				// Note: These are not the actual native values but an arbitrary scale.
+				//       The native values depends on the scheduling policy,
+				//       and the sched_get_priority_min(policy) and sched_get_priority_max(policy) functions
+				//       are used to rescale to native values.
+				//       The policy is chosen this way:
+				//           - value >  normal: if min == max, the policy is set to SCHED_RR,
+				//           - value == normal: SCHED_OTHER (the default policy of the os),
+				//           - value <  normal: SCHED_BATCH if defined, otherwise SCHED_OTHER.
+				static priority_type const idle     = -300;
+				static priority_type const lowest   = -200;
+				static priority_type const low      = -100;
+				static priority_type const normal   =    0;
+				static priority_type const high     = +100;
+				static priority_type const highest  = +200;
+				static priority_type const realtime = +300;
+			#endif
+		};
+};
 
 #if defined BOOST_AUTO_TEST_CASE
-	BOOST_AUTO_TEST_CASE(hardware_concurrency_test) {
-		std::ostringstream s; s << "hardware concurrency: " << hardware_concurrency();
-		BOOST_MESSAGE(s.str());
+	BOOST_AUTO_TEST_CASE(affinity_test) {
+		{
+			process p;
+			std::ostringstream s; s << "process affinity mask active count: " << p.affinity_mask().active_count();
+			BOOST_MESSAGE(s.str());
+		}
+		{
+			thread t;
+			std::ostringstream s; s << "thread affinity mask active count: " << t.affinity_mask().active_count();
+			BOOST_MESSAGE(s.str());
+		}
 	}
 	
 	void thread_priority_test_one(int p) {
-		using namespace thread;
-		int p0 = priority::get(native_handle());
-		{
-			std::ostringstream s; s << "setting thread priority to: " << p;
+		thread t;
+		int p0 = t.priority(); // save previous
+		{ std::ostringstream s; s << "setting thread priority to: " << p;
 			BOOST_MESSAGE(s.str());
 		}
-		priority::set(native_handle(), p);
-		p = priority::get(native_handle());
-		{
-			std::ostringstream s; s << "thread priority is: " << p;
+		t.priority(p);
+		p = t.priority();
+		{ std::ostringstream s; s << "thread priority is: " << p;
 			BOOST_MESSAGE(s.str());
 		}
-		// reset to previous
-		priority::set(native_handle(), p0);
+		t.priority(p0); // reset to previous
 	}
 	
 	BOOST_AUTO_TEST_CASE(thread_priority_test) {
-		using namespace thread::priority;
-		thread_priority_test_one(idle);
-		thread_priority_test_one(lowest);
-		thread_priority_test_one(low);
-		thread_priority_test_one(normal);
-		thread_priority_test_one(high);
-		thread_priority_test_one(highest);
-		thread_priority_test_one(realtime);
+		typedef thread::priorities priorities;
+		thread_priority_test_one(priorities::idle);
+		thread_priority_test_one(priorities::lowest);
+		thread_priority_test_one(priorities::low);
+		thread_priority_test_one(priorities::normal);
+		thread_priority_test_one(priorities::high);
+		thread_priority_test_one(priorities::highest);
+		thread_priority_test_one(priorities::realtime);
 	}
 #endif
 
