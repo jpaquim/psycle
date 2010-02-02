@@ -180,13 +180,13 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 				//           - value >  normal: if min == max, the policy is set to SCHED_RR,
 				//           - value == normal: SCHED_OTHER (the default policy of the os),
 				//           - value <  normal: SCHED_BATCH if defined, otherwise SCHED_OTHER.
-				static priority_type const idle     = -300;
-				static priority_type const lowest   = -200;
-				static priority_type const low      = -100;
-				static priority_type const normal   =    0;
-				static priority_type const high     = +100;
-				static priority_type const highest  = +200;
-				static priority_type const realtime = +300;
+				static priority_type const idle     = -300; // min
+				static priority_type const lowest   = -200; // (max + min) * 1 / 6
+				static priority_type const low      = -100; // (max + min) * 2 / 6
+				static priority_type const normal   =    0; // (max + min) / 2
+				static priority_type const high     = +100; // (max + min) * 4 / 6
+				static priority_type const highest  = +200; // (max + min) * 5 / 6
+				static priority_type const realtime = +300; // max
 			#endif
 		};
 };
