@@ -4,33 +4,27 @@
  *  $Revision$
  */
 #include "XMSongLoader.hpp"
-#include "ProgressDialog.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
+#include <algorithm>
+#include <cstring>
+
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/xminstrument.h>
 #include <psycle/core/xmsampler.h>
 #include <psycle/core/player.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Machine.hpp"
-#include "XMInstrument.hpp"
-#include "XMSampler.hpp"
-#include "Player.hpp"
-#endif
-#include <algorithm>
-#include <cstring>
+
+#include "ProgressDialog.hpp"
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
-namespace psycle {
 
-namespace host{
+namespace psycle {
+	namespace host{
 	
 	const short MODSongLoader::BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine
 	{
@@ -165,26 +159,16 @@ namespace host{
 			return;
 		}
 		m_pSong = &song;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.SetReady(false);
+		// song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 		song.AddMachine(m_pSampler);
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,0.35f);
 		song.seqBus=m_pSampler->id();
-#else
-		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-		song.InsertConnection(0,MASTER_INDEX,0,0,0.35f);
-		song.seqBus=0;
-		// build sampler
-		m_pSampler = (XMSampler *)(song.machine(0));
-#endif
 		// get song name
-
 		char * pSongName = AllocReadStr(20,17);
-
 		if(pSongName==NULL)
 			return;
-
 		song.setName(pSongName);
 		song.setAuthor("");
 		std::string imported = "Imported from FastTracker Module: ";
@@ -194,9 +178,7 @@ namespace host{
 
 		std::int32_t iInstrStart = LoadPatterns(song);
 		LoadInstruments(*m_pSampler,iInstrStart);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.SetReady(true);
-#endif
 	}
 
 	const bool XMSongLoader::IsValid()
@@ -232,13 +214,9 @@ namespace host{
 
 	const long XMSongLoader::LoadPatterns(Song & song)
 	{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		//TODO
-#else
 		// get data
 		Seek(60);
 		Read(&m_Header,sizeof(XMFILEHEADER));
-
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 		//using std::max;
@@ -246,31 +224,22 @@ namespace host{
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
 		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
-
-		for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.norder;i++)
-		{
-			if ( m_Header.order[i] < MAX_PATTERNS ){
-				song.playOrder[i]=m_Header.order[i];
-			} else { 
-				song.playOrder[i]=0;
-			}
-		}
-
-		if ( m_Header.norder > MAX_SONG_POSITIONS ){
-			song.playLength=MAX_SONG_POSITIONS;
-		} else {
-			song.playLength=m_Header.norder;
-		}
+		double pos = 0;
+		song.sequence().removeAll();
+		// here we add in one single Line the patterns
+		SequenceLine* line = song.sequence().createNewLine();
 
 		// get pattern data
 		int nextPatStart = m_Header.size + 60;
 		for(int j = 0;j < m_Header.patterns && nextPatStart > 0;j++){
 			nextPatStart = LoadPattern(song,nextPatStart,j,m_Header.channels);
 		}
-		
+		for (int i = 0; i != m_Header.norder; ++i) {
+			Pattern* pat = song.sequence().FindPattern(m_Header.order[i]);
+			line->createEntry(pat, pos);
+			pos += pat->beats();
+		}	
 		return nextPatStart;
-#endif
-		return 0;
 	}
 
 	// Load instruments
@@ -281,7 +250,6 @@ namespace host{
 			iInstrStart = LoadInstrument(sampler,iInstrStart,i,currentSample);
 			TRACE2("%d %s\n",i,m_pSong->rInstrument(i).Name().c_str());
 		}
-
 		return true;
 	}
 
@@ -314,20 +282,16 @@ namespace host{
 	// return address of next pattern, 0 for invalid
 	const std::int32_t XMSongLoader::LoadPattern(Song & song, const std::int32_t start,const int patIdx,const int iTracks)
 	{
-
 		int iHeaderLen = ReadInt4(start);
 		Skip(1); //char iPackingType = ReadInt1();
 		short iNumRows = ReadInt2();
 		short iPackedSize = ReadInt2();
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		Pattern* pat = new Pattern();
 		pat->setName("unnamed");
 		pat->setID(patIdx);
 		song.sequence().Add(pat);
-#else
-		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
-#endif
+
 		PatternEvent e;
 
 		if(iPackedSize == 0)
@@ -750,7 +714,9 @@ namespace host{
 					{
 						e.setMachine(255);
 					}
-					WritePatternEntry(song,patIdx,row,col,e);	
+					e.set_track(col);
+					double beat = row / static_cast<float>(m_pSampler->Speed2LPB(m_Header.speed));
+					pat->insert(beat,e);
 				}
 			}
 		}
@@ -759,23 +725,6 @@ namespace host{
 		return start + iPackedSize + iHeaderLen;
 
 	}
-
-
-	const BOOL XMSongLoader::WritePatternEntry(Song & song,
-		const int patIdx, const int row, const int col,PatternEvent &e)
-	{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		// todo
-#else
-		// don't overflow song buffer 
-		if(patIdx>=MAX_PATTERNS) return false;
-
-		PatternEvent* pData = (PatternEvent*) song._ptrackline(patIdx,col,row);
-
-		*pData = e;
-#endif
-		return true;
-	}	
 
 	const std::int32_t XMSongLoader::LoadInstrument(XMSampler & sampler, std::int32_t iStart, const int idx,int &curSample)
 	{

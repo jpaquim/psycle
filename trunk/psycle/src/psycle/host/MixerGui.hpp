@@ -1,6 +1,9 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #pragma once
-#include "Psycle.hpp"
 #include "EffectGui.hpp"
+#include "Psycle.hpp"
+
 
 namespace psycle {
 	namespace host {
@@ -9,7 +12,7 @@ namespace psycle {
 
 		class MixerGui : public EffectGui {
 		public:
-			MixerGui(class MachineView* view, Machine* mac);
+			MixerGui(class MachineView* view, psycle::core::Machine* mac);
 			~MixerGui();
 
 			virtual void BeforeDeleteDlg();
@@ -17,8 +20,8 @@ namespace psycle {
 
 		protected:
 			virtual void ShowDialog(double x, double y);
-		private:
 
+		private:
 			class CFrameMixerMachine* dialog_;
 		};
 

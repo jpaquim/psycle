@@ -1,8 +1,15 @@
 #pragma once
 #include "Global.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
+#include <universalis/stdlib/cstdint.hpp>
+
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
+
+#include "FileIO.hpp"
+#include "XMFile.hpp"
+
+
 namespace psycle {
 	namespace core {
 		class Song;
@@ -11,19 +18,10 @@ namespace psycle {
 	}
 }
 using namespace psycle::core;
-#else
-#include "SongStructs.hpp"
-#endif
-#include "FileIO.hpp"
-#include "XMFile.hpp"
-#include <universalis/stdlib/cstdint.hpp>
 
-namespace psycle { namespace host {
-	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Song;
-		class XMSampler;
-		class XMInstrument;
-	#endif
+
+namespace psycle { 
+	namespace host {
 
 	class XMSongLoader : public OldPsyFile
 	{
@@ -36,14 +34,13 @@ namespace psycle { namespace host {
 	private:
 		const bool IsValid();
 
-		const LONG LoadPatterns(Song & song);
-		const LONG LoadPattern(Song & song, const LONG start, const int patIdx,const int iTracks);	
-		const bool LoadInstruments(XMSampler & sampler, LONG iInstrStart);
-		const LONG LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
-		const LONG LoadSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
-		const LONG LoadSampleData(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
-		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEvent & e);
-		void SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader);		
+		const LONG LoadPatterns(Song& song);
+		const LONG LoadPattern(Song& song, const LONG start, const int patIdx,const int iTracks);	
+		const bool LoadInstruments(XMSampler& sampler, LONG iInstrStart);
+		const LONG LoadInstrument(XMSampler& sampler, LONG iStart, const int idx,int& curSample);
+		const LONG LoadSampleHeader(XMSampler& sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
+		const LONG LoadSampleData(XMSampler& sampler, LONG iStart, const int InstrIdx, const int SampleIdx);		
+		void SetEnvelopes(XMInstrument& inst,const XMSAMPLEHEADER & sampleHeader);		
 		char * AllocReadStr(const LONG size, const LONG start=-1);
 
 		// inlines
@@ -84,8 +81,6 @@ namespace psycle { namespace host {
 		XMSampler* m_pSampler;
 	};
 
-
-
 	struct MODHEADER
 	{
 		unsigned char songlength;
@@ -116,10 +111,10 @@ namespace psycle { namespace host {
 		const void LoadPatterns(Song & song);
 		const void LoadPattern(Song & song, const int patIdx,const int iTracks);	
 		const unsigned char ConvertPeriodtoNote(const unsigned short period);
-		const void LoadInstrument(XMSampler & sampler, const int idx);
-		const void LoadSampleHeader(XMSampler & sampler, const int InstrIdx);
-		const void LoadSampleData(XMSampler & sampler, const int InstrIdx);
-		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEvent & e);
+		const void LoadInstrument(XMSampler& sampler, const int idx);
+		const void LoadSampleHeader(XMSampler& sampler, const int InstrIdx);
+		const void LoadSampleData(XMSampler& sampler, const int InstrIdx);
+		const BOOL WritePatternEntry(Song& song,const int patIdx,const int row, const int col, PatternEvent & e);
 		char * AllocReadStr(const LONG size, const LONG start=-1);
 
 		// inlines
