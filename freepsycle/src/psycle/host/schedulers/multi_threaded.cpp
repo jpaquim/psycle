@@ -149,7 +149,7 @@ void node::process(bool first) {
 	} else if(loggers::warning() && t1 < t0) {
 		std::ostringstream s;
 		s << "time went backward: "
-			<< t0.get_count() * 1e-9 << "s, ",
+			<< t0.get_count() * 1e-9 << "s, "
 			<< t1.get_count() * 1e-9 << 's';
 		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
