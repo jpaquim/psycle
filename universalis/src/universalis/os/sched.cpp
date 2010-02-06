@@ -6,8 +6,6 @@
 #include <universalis/detail/project.private.hpp>
 #include "sched.hpp"
 
-#include "exceptions/code_description.hpp"
-#include "loggers.hpp"
 #if defined DIVERSALIS__OS__POSIX
 	#include <sys/time.h>
 	#include <sys/resource.h>
@@ -28,7 +26,7 @@ process::process()
 )
 {}
 
-affinity_mask process::affinity_mask() const throw(std::runtime_error) {
+affinity_mask process::affinity_mask() const throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		///\todo also try using os.sysconf('SC_NPROCESSORS_ONLN') // SC_NPROCESSORS_CONF
 		#if defined DIVERSALIS__OS__CYGWIN
@@ -38,18 +36,14 @@ affinity_mask process::affinity_mask() const throw(std::runtime_error) {
 			return result;
 		#else
 			class affinity_mask result;
-			if(sched_getaffinity(native_handle_, sizeof result.native_mask_, &result.native_mask_) == -1) {
-				std::ostringstream s; s << exceptions::code_description();
-				throw std::runtime_error(s.str().c_str());
-			}
+			if(sched_getaffinity(native_handle_, sizeof result.native_mask_, &result.native_mask_) == -1)
+				throw exception(UNIVERSALIS__COMPILER__LOCATION);
 			return result;
 		#endif
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		class affinity_mask process, system;
-		if(!GetProcessAffinityMask(native_handle_, &process.native_mask_, &system.native_mask_)) {
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+		if(!GetProcessAffinityMask(native_handle_, &process.native_mask_, &system.native_mask_))
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 		return process;
 	#else
 		#error unsupported operating system
@@ -61,59 +55,45 @@ affinity_mask process::affinity_mask() const throw(std::runtime_error) {
 	/// The doc says:
 	/// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
 #else
-	void process::affinity_mask(class affinity_mask const & affinity_mask) throw(std::runtime_error) {
+	void process::affinity_mask(class affinity_mask const & affinity_mask) throw(exception) {
 		#if defined DIVERSALIS__OS__POSIX
 			#if defined DIVERSALIS__OS__CYGWIN
 				///\todo sysconf
 			#else
-				if(sched_setaffinity(native_handle_, sizeof affinity_mask.native_mask_, &affinity_mask.native_mask_) == -1) {
-					std::ostringstream s; s << exceptions::code_description();
-					throw std::runtime_error(s.str().c_str());
-				}
+				if(sched_setaffinity(native_handle_, sizeof affinity_mask.native_mask_, &affinity_mask.native_mask_) == -1)
+					throw exception(UNIVERSALIS__COMPILER__LOCATION);
 			#endif
 		#elif defined DIVERSALIS__OS__MICROSOFT
-			if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_)) {
-				std::ostringstream s; s << exceptions::code_description();
-				throw std::runtime_error(s.str().c_str());
-			}
+			if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_))
+				throw exception(UNIVERSALIS__COMPILER__LOCATION);
 		#else
 			#error unsupported operating system
 		#endif
 	}
 #endif
 
-process::priority_type process::priority() throw(std::runtime_error) {
+process::priority_type process::priority() throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		errno = 0;
 		priority_type result(getpriority(PRIO_PROCESS, native_handle_));
-		if(result == -1 && errno) {
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+		if(result == -1 && errno) throw exception(UNIVERSALIS__COMPILER__LOCATION);
 		return result;
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		priority_type result(GetPriorityClass(native_handle_));
-		if(!result) {
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+		if(!result) throw exception(UNIVERSALIS__COMPILER__LOCATION);
 		return result;
 	#else
 		#error unsupported operating system
 	#endif
 }
 
-void process::priority(process::priority_type priority) throw(std::runtime_error) {
+void process::priority(process::priority_type priority) throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
-		if(setpriority(PRIO_PROCESS, native_handle_, priority)) {
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+		if(setpriority(PRIO_PROCESS, native_handle_, priority))
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		if(!SetPriorityClass(native_handle_, priority)) {
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+		if(!SetPriorityClass(native_handle_, priority))
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	#else
 		#error unsupported operating system
 	#endif
@@ -132,7 +112,7 @@ thread::thread() : native_handle_(
 	#endif
 ) {}
 
-affinity_mask thread::affinity_mask() const throw(std::runtime_error) {
+affinity_mask thread::affinity_mask() const throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		#if defined DIVERSALIS__OS__CYGWIN
 			///\todo sysconf
@@ -141,10 +121,8 @@ affinity_mask thread::affinity_mask() const throw(std::runtime_error) {
 			return result;
 		#else
 			class affinity_mask result;
-			if(int error = pthread_getaffinity_np(native_handle_, sizeof result.native_mask_, &result.native_mask_)) {
-				std::ostringstream s; s << exceptions::code_description(error);
-				throw std::runtime_error(s.str().c_str());
-			}
+			if(int error = pthread_getaffinity_np(native_handle_, sizeof result.native_mask_, &result.native_mask_))
+				throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
 			return result;
 		#endif
 	#elif defined DIVERSALIS__OS__MICROSOFT
@@ -159,50 +137,42 @@ affinity_mask thread::affinity_mask() const throw(std::runtime_error) {
 	#endif
 }
 
-void thread::affinity_mask(class affinity_mask const & affinity_mask) throw(std::runtime_error) {
+void thread::affinity_mask(class affinity_mask const & affinity_mask) throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		#if defined DIVERSALIS__OS__CYGWIN
 			///\todo sysconf
 		#else
-			if(int error = pthread_setaffinity_np(native_handle_, sizeof affinity_mask.native_mask_, &affinity_mask.native_mask_)) {
-				std::ostringstream s; s << exceptions::code_description(error);
-				throw std::runtime_error(s.str().c_str());
-			}
+			if(int error = pthread_setaffinity_np(native_handle_, sizeof affinity_mask.native_mask_, &affinity_mask.native_mask_))
+				throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
 		#endif
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		if(!SetThreadAffinityMask(native_handle_, affinity_mask.native_mask_)) {
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+		if(!SetThreadAffinityMask(native_handle_, affinity_mask.native_mask_))
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	#else
 		#error unsupported operating system
 	#endif
 }
 
-thread::priority_type thread::priority() throw(std::runtime_error) {
+#if defined DIVERSALIS__OS__POSIX
+namespace {
+	// returns the min and max priorities for a policy
+	void priority_min_max(int policy, int & min, int & max) {
+		if((min = sched_get_priority_min(policy)) == -1)
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
+		if((max = sched_get_priority_max(policy)) == -1)
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
+	}
+}
+#endif
+
+thread::priority_type thread::priority() throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		int policy;
 		sched_param param;
-		if(int error = pthread_getschedparam(native_handle_, &policy, &param)) {
-			std::ostringstream s;
-			s << "could not get thread policy and priority: " << os::exceptions::code_description(error);
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			return priorities::normal;
-		}
-		int min_native_priority;
-		if((min_native_priority = sched_get_priority_min(policy)) == -1) {
-			std::ostringstream s;
-			s << "could not get min priority for policy: " << policy << ": " << os::exceptions::code_description();
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			return priorities::normal;
-		}
-		int max_native_priority;
-		if((max_native_priority = sched_get_priority_max(policy)) == -1) {
-			std::ostringstream s;
-			s << "could not get max priority for policy: " << policy << ": " << os::exceptions::code_description();
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			return priorities::normal;
-		}
+		if(int error = pthread_getschedparam(native_handle_, &policy, &param))
+			throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
+		int min_native_priority, max_native_priority;
+		priority_min_max(policy, min_native_priority, max_native_priority);
 		if(min_native_priority == max_native_priority) {
 			switch(policy) {
 				#if defined SCHED_BATCH
@@ -219,22 +189,16 @@ thread::priority_type thread::priority() throw(std::runtime_error) {
 				param.sched_priority;
 			#endif
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		int const priority = ::GetThreadPriority(native_handle_);
-		switch(priority) {
-			case THREAD_PRIORITY_ERROR_RETURN: {
-				std::ostringstream s;
-				s << "could not get thread priority: " << os::exceptions::code_description();
-				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-				return priorities::normal;
-			}
-			default: return priority;
-		}
+		int priority;
+		if((priority = ::GetThreadPriority(native_handle_)) == THREAD_PRIORITY_ERROR_RETURN)
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
+		return priority;
 	#else
 		return priorities::normal;
 	#endif
 }
 
-void thread::priority(thread::priority_type priority) throw(std::runtime_error) {
+void thread::priority(thread::priority_type priority) throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		int const policy =
 			priority > priorities::normal ? SCHED_RR :
@@ -242,20 +206,8 @@ void thread::priority(thread::priority_type priority) throw(std::runtime_error) 
 				priority < priorities::normal ? SCHED_BATCH :
 			#endif
 			SCHED_OTHER;
-		int min_native_priority;
-		if((min_native_priority = sched_get_priority_min(policy)) == -1) {
-			std::ostringstream s;
-			s << "could not get min priority for policy: " << policy << ": " << os::exceptions::code_description();
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			return;
-		}
-		int max_native_priority;
-		if((max_native_priority = sched_get_priority_max(policy)) == -1) {
-			std::ostringstream s;
-			s << "could not get max priority for policy: " << policy << ": " << os::exceptions::code_description();
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			return;
-		}
+		int min_native_priority, max_native_priority;
+		priority_min_max(policy, min_native_priority, max_native_priority);
 		sched_param param;
 		#if 0 ///\todo boggus formula
 			param.sched_priority = min_native_priority + (max_native_priority - min_native_priority) * priority / (realtime - idle);
@@ -268,11 +220,11 @@ void thread::priority(thread::priority_type priority) throw(std::runtime_error) 
 				priority <= priorities::high    ? std::min(1, max_native_priority) :
 				priority <= priorities::highest ? std::min(2, max_native_priority) : max_native_priority;
 		#endif
-		if(int error = pthread_setschedparam(native_handle_, policy, &param)) {
-			std::ostringstream s;
-			s << "could not set thread policy to: " << policy << ", and priority to: " << param.sched_priority << ": " << os::exceptions::code_description(error);
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
+		if(int error = pthread_setschedparam(native_handle_, policy, &param))
+			switch(error) {
+				case EPERM: throw exceptions::operation_not_permitted(UNIVERSALIS__COMPILER__LOCATION);
+				default: throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
+			}
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		// We can't choose values between the predefined constants,
 		// so we have to "snap" the value to one of those constants.
@@ -283,11 +235,8 @@ void thread::priority(thread::priority_type priority) throw(std::runtime_error) 
 			priority == priorities::normal  ? priorities::normal  :
 			priority <= priorities::high    ? priorities::high    :
 			priority <= priorities::highest ? priorities::highest : priorities::realtime;
-		if(!::SetThreadPriority(native_handle_, native_priority)) {
-			std::ostringstream s;
-			s << "could not set thread priority to: " << native_priority << ": " << os::exceptions::code_description();
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-		}
+		if(!::SetThreadPriority(native_handle_, native_priority))
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	#endif
 }
 

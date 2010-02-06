@@ -97,7 +97,15 @@ void Player::start_threads() {
 		for(std::size_t i(0); i < thread_count_; ++i) {
 			thread & t = *new thread(boost::bind(&Player::thread_function, this, i));
 			#if defined UNIVERSALIS__STDLIB__THREAD__INSTANCE_HAS_NON_STD_EXTRA
-				t.non_std_extra().priority(thread::non_std_extra_type::priorities::highest);
+				try {
+					t.non_std_extra().priority(thread::non_std_extra_type::priorities::highest);
+				} catch(universalis::os::exceptions::operation_not_permitted e) {
+					if(loggers::warning()) {
+						std::ostringstream s;
+						s << "could not set thread priority: " << e.what();
+						loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
+				}
 			#endif
 			threads_.push_back(&t);
 		}
@@ -254,7 +262,15 @@ void Player::thread_function(std::size_t thread_number) {
 	universalis::cpu::exception::install_handler_in_thread();
 
 	#if !defined UNIVERSALIS__STDLIB__THREAD__INSTANCE_HAS_NON_STD_EXTRA
-		this_thread::non_std_extra().priority(this_thread::non_std_extra_type::priorities::highest);
+		try {
+			this_thread::non_std_extra().priority(this_thread::non_std_extra_type::priorities::highest);
+		} catch(universalis::os::exceptions::operation_not_permitted e) {
+			if(loggers::warning()) {
+				std::ostringstream s;
+				s << "could not set thread priority: " << e.what();
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+		}
 	#endif
 
 	try {
