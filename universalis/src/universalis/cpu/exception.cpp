@@ -18,7 +18,7 @@
 namespace universalis { namespace cpu {
 
 #if !defined NDEBUG
-	exception::exception(unsigned int const & code, compiler::location const & location) throw()
+	exception::exception(code_type code, compiler::location const & location) throw()
 	: os::exception(code, location)
 	{
 		// This type of exception is usually likely followed by an abrupt termination of the whole process.

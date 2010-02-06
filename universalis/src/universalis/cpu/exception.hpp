@@ -28,7 +28,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::os::ex
 		#if defined NBEBUG
 			inline
 		#endif
-			exception(unsigned int const & code, compiler::location const & location) throw()
+			exception(code_type code, compiler::location const & location) throw()
 				#if defined NDEBUG
 					: universalis::os::exception(code, location) {}
 				#else
