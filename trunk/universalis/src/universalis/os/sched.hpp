@@ -7,19 +7,17 @@
 #define UNIVERSALIS__OS__SCHED__INCLUDED
 #pragma once
 
-#include <diversalis/os.hpp>
+#include "exception.hpp"
 #if defined DIVERSALIS__OS__POSIX
 	#include <pthread.h>
 #elif defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
-	#include "exceptions/code_description.hpp"
 #else
 	#error unsupported operating system
 #endif
 #if defined BOOST_AUTO_TEST_CASE
 	#include <sstream>
 #endif
-#include <stdexcept>
 
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
 #include <universalis/compiler/dynamic_link/begin.hpp>
@@ -80,7 +78,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
 		process(native_handle_type native_handle) : native_handle_(native_handle) {}
 
 		/// gets the affinity mask against the set of cpu available to the process.
-		class affinity_mask affinity_mask() const throw(std::runtime_error);
+		class affinity_mask affinity_mask() const throw(exception);
 		/// sets the affinity mask against the set of cpu available to the process.
 			#if defined DIVERSALIS__OS__MICROSOFT
 				/// special case for windows, this must be done inline!
@@ -88,7 +86,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
 				/// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
 				inline
 			#endif
-		void affinity_mask(class affinity_mask const &) throw(std::runtime_error);
+		void affinity_mask(class affinity_mask const &) throw(exception);
 
 		typedef
 			#if defined DIVERSALIS__OS__POSIX
@@ -101,9 +99,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
 			priority_type;
 
 		/// gets the process priority level
-		priority_type priority() throw(std::runtime_error);
+		priority_type priority() throw(exception);
 		/// sets the process priority level
-		void priority(priority_type priority) throw(std::runtime_error);
+		void priority(priority_type priority) throw(exception);
 
 		struct priorities {
 			#if defined DIVERSALIS__OS__MICROSOFT
@@ -149,16 +147,16 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 		thread(native_handle_type native_handle) : native_handle_(native_handle) {}
 
 		/// gets the affinity mask against the set of cpu available to the process.
-		class affinity_mask affinity_mask() const throw(std::runtime_error);
+		class affinity_mask affinity_mask() const throw(exception);
 		/// sets the affinity mask against the set of cpu available to the process.
-		void affinity_mask(class affinity_mask const &) throw(std::runtime_error);
+		void affinity_mask(class affinity_mask const &) throw(exception);
 
 		typedef int priority_type;
 
 		/// gets the thread priority level
-		priority_type priority() throw(std::runtime_error);
+		priority_type priority() throw(exception);
 		/// sets the thread priority level
-		void priority(priority_type priority) throw(std::runtime_error);
+		void priority(priority_type priority) throw(exception);
 
 		struct priorities {
 			#if defined DIVERSALIS__OS__MICROSOFT
@@ -198,11 +196,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 	// special case for windows, this must be done inline!
 	// The doc says:
 	// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
-	void inline process::affinity_mask(class affinity_mask const & affinity_mask) throw(std::runtime_error) {
-		if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_)) {
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+	void inline process::affinity_mask(class affinity_mask const & affinity_mask) throw(exception) {
+		if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_))
+			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	}
 #endif
 
