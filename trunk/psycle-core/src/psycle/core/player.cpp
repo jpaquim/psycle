@@ -449,6 +449,7 @@ void Player::stop() {
 			std::cout << '\n';
 		}
 		total += node.accumulated_processing_time();
+		node.reset_time_measurement();
 	}
 	std::cout << "total: " << 1e-9 * total.get_count() << "s\n";
 }
