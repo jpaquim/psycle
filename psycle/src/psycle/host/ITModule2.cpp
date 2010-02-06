@@ -987,6 +987,7 @@ Special:  Bit 0: On = song message attached.
 					pent.set_track(channel);
 					double beat = row / static_cast<float>(sampler->Speed2LPB(itFileH.iSpeed));
 					pat->insert(beat, pent);
+					pent=pempty;
 					numchans = std::max(static_cast<int>(channel),numchans);
 					Read(&newEntry,1);
 				}
@@ -1581,6 +1582,7 @@ OFFSET              Count TYPE   Description
 					pent.set_track(channel);
 					double beat = row / static_cast<float>(sampler->Speed2LPB(s3mFileH.iSpeed));
 					pat->insert(beat, pent);
+					pent=pempty;
 					Read(&newEntry,1);
 				}
 			}
