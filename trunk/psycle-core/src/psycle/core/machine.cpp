@@ -10,6 +10,7 @@
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/loggers.hpp>
 #include <cstddef>
 #include <iostream> // only for debug output
 #include <sstream>
@@ -18,6 +19,7 @@ namespace psycle { namespace core {
 
 using namespace helpers;
 using namespace helpers::math;
+namespace loggers = universalis::os::loggers;
 
 /********************************************************************************************/
 // AudioBuffer
@@ -192,8 +194,6 @@ void Machine::crashed(std::exception const & e) throw() {
 
 Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 :
-	crashed_(),
-	//fpu_exception_mask_(),
 	id_(id),
 	callbacks(callbacks),
 	playColIndex(0),
@@ -202,6 +202,10 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 	_mute(false),
 	_waitingForSound(false),
 	_worked(false),
+	accumulated_processing_time_(),
+	processing_count_(),
+	processing_count_no_zeroes_(),
+	crashed_(),
 	audio_range_(1.0f),
 	numInPorts(0),
 	numOutPorts(0),
@@ -690,6 +694,8 @@ Machine::sched_deps Machine::sched_outputs() const {
 
 /// called by the scheduler to ask for the actual processing of the machine
 bool Machine::sched_process(unsigned int frames) {
+	nanoseconds const t0(cpu_time_clock());
+
 	if(_connectedInputs && !_mute) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
 		Machine & input_node(*callbacks->song().machine(_inputMachines[i]));
 		if(!input_node.Standby()) Standby(false);
@@ -701,7 +707,26 @@ bool Machine::sched_process(unsigned int frames) {
 	}
 	dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 	GenerateAudio(frames);
+
+	nanoseconds const t1(cpu_time_clock());
+	if(t1 > t0) {
+		accumulated_processing_time_ += t1 - t0;
+		++processing_count_no_zeroes_;
+	} else if(loggers::warning() && t1 < t0) {
+		std::ostringstream s;
+		s << "time went backward: "
+			<< t0.get_count() * 1e-9 << "s, "
+			<< t1.get_count() * 1e-9 << 's';
+		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	++processing_count_;
+
 	return true;
+}
+
+void Machine::reset_time_measurement() {
+	accumulated_processing_time_ = 0;
+	processing_count_ = processing_count_no_zeroes_ = 0;
 }
 
 void Machine::defineInputAsStereo(int numports) {

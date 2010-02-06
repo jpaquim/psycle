@@ -16,6 +16,7 @@
 
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/helpers/value_mapper.hpp>
+#include <universalis/compiler/typenameof.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/cpu/exception.hpp>
@@ -31,9 +32,8 @@ namespace loggers = universalis::os::loggers;
 
 namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
+	bool const ultra_trace(false);
 }
-
-namespace { bool const ultra_trace(false); }
 
 Player::Player()
 :
@@ -342,7 +342,7 @@ void Player::process_loop() throw(std::exception) {
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 
-		bool const done = node.sched_process(samples_to_process_);
+		bool const done(node.sched_process(samples_to_process_));
 	
 		if(ultra_trace && loggers::trace()) {
 			scoped_lock lock(mutex_);
@@ -427,6 +427,30 @@ void Player::stop() {
 	// is a way to make autorecording ignore the song length and keep recording until intentionally stopping
 	// the recording (not the playback)
 	//if(autoRecord_) stopRecording();
+
+	// dump time measurements
+	std::cout << "time measurements: \n";
+	nanoseconds total;
+	for(int m(0); m < MAX_MACHINES; ++m) if(song().machine(m)) {
+		Machine & node(*song().machine(m));
+		std::cout
+			<< node.GetEditName()
+			<< " (" << universalis::compiler::typenameof(node)
+			<< ", lib " << node.GetDllName()
+			<< "): ";
+		if(!node.processing_count()) std::cout << "not processed\n";
+		else {
+			std::cout
+				<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
+				<< node.processing_count() << " = "
+				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << 's';
+			if(node.processing_count() > node.processing_count_no_zeroes())
+				std::cout << ", zeroes: " << node.processing_count() - node.processing_count_no_zeroes();
+			std::cout << '\n';
+		}
+		total += node.accumulated_processing_time();
+	}
+	std::cout << "total: " << 1e-9 * total.get_count() << "s\n";
 }
 
 void Player::stop_threads() {

@@ -4,18 +4,18 @@
 #include <psycle/core/config.private.hpp>
 #include "mixer.h"
 
-///\todo: These two includes need to be replaced by a "host" callback which gives such information.
 #include "player.h"
 #include "song.h"
+#include "fileio.h"
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
-#include "fileio.h"
+#include <universalis/os/loggers.hpp>
 
 namespace psycle { namespace core {
 
 using namespace helpers;
 using namespace helpers::math;
-
+namespace loggers = universalis::os::loggers;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Mixer
@@ -265,6 +265,8 @@ Mixer::sched_deps Mixer::sched_outputs() const {
 
 /// called by the scheduler to ask for the actual processing of the machine
 bool Mixer::sched_process(unsigned int frames) {
+	nanoseconds const t0(cpu_time_clock());
+
 	if(mixed && numsends()) {
 		mixed = false;
 		// step 1: send signal to fx
@@ -276,6 +278,20 @@ bool Mixer::sched_process(unsigned int frames) {
 		Machine::UpdateVuAndStanbyFlag(frames);
 		mixed = true;
 	}
+
+	nanoseconds const t1(cpu_time_clock());
+	if(t1 > t0) {
+		accumulated_processing_time_ += t1 - t0;
+		if(mixed) ++processing_count_no_zeroes_;
+	} else if(loggers::warning() && t1 < t0) {
+		std::ostringstream s;
+		s << "time went backward: "
+			<< t0.get_count() * 1e-9 << "s, "
+			<< t1.get_count() * 1e-9 << 's';
+		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	if(mixed) ++processing_count_;
+	
 	return mixed;
 }
 
