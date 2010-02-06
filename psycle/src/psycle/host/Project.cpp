@@ -275,17 +275,14 @@ namespace psycle {
 			{
 				cmd_manager_.Clear();
 				mac_view()->LockVu();
-				Global::pPlayer->stop();
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				///\todo lock/unlock
-				Sleep(LOCK_LATENCY);
-				mac_view()->child_view()->_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Close();
-				///\todo lock/unlock
-				Sleep(LOCK_LATENCY);
-#endif
+				psycle::core::Player& player(psycle::core::Player::singleton());
+				psycle::core::Song* song = new Song();
+				song->SetReady(false);
+				player.stop();
+				player.driver().set_started(false);
+				//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
+				//Ideally, this should be handled with a player callback specific for loading.
+				player.song(*song);
 				CString str = ofn.lpstrFile;
 				int index = str.ReverseFind('.');
 				if (index != -1)
@@ -296,12 +293,12 @@ namespace psycle {
 						XMSongLoader xmfile;
 						xmfile.Open(ofn.lpstrFile);
 						pat_view()->editPosition=0;
-						xmfile.Load(song());
+						xmfile.Load(*song);
 						xmfile.Close();
+						Song* old_song = song_;
+						song_ = song;
 						mac_view()->Rebuild();
-						CSongpDlg dlg(&song());
-						dlg.SetReadOnly();
-						dlg.DoModal();
+						delete old_song;						
 /*						char buffer[512];		
 						std::sprintf
 							(
@@ -317,17 +314,19 @@ namespace psycle {
 						ITModule2 it;
 						it.Open(ofn.lpstrFile);
 						pat_view()->editPosition=0;
-						if(!it.LoadITModule(&song()))
+						if(!it.LoadITModule(song))
 						{			
 							mac_view()->child_view()->MessageBox("Load failed");
 							it.Close();
+							delete song;
+							player.song(*song_);
 							return;
 						}
 						it.Close();
+						Song* old_song = song_;
+						song_ = song;
 						mac_view()->Rebuild();
-						CSongpDlg dlg(&song());
-						dlg.SetReadOnly();
-						dlg.DoModal();
+						delete old_song;						
 /*						char buffer[512];		
 						std::sprintf
 							(
@@ -343,17 +342,19 @@ namespace psycle {
 						ITModule2 s3m;
 						s3m.Open(ofn.lpstrFile);
 						pat_view()->editPosition=0;
-						if(!s3m.LoadS3MModuleX(&song()))
+						if(!s3m.LoadS3MModuleX(song))
 						{			
 							mac_view()->child_view()->MessageBox("Load failed");
 							s3m.Close();
+							delete song;
+							player.song(*song_);
 							return;
 						}
 						s3m.Close();
+						Song* old_song = song_;
+						song_ = song;
 						mac_view()->Rebuild();
-						CSongpDlg dlg(&song());
-						dlg.SetReadOnly();
-						dlg.DoModal();
+						delete old_song;						
 /*						char buffer[512];
 						std::sprintf
 							(
@@ -369,12 +370,13 @@ namespace psycle {
 						MODSongLoader modfile;
 						modfile.Open(ofn.lpstrFile);
 						pat_view()->editPosition=0;
-						modfile.Load(song());
+						modfile.Load(*song);
 						modfile.Close();
+						Song* old_song = song_;
+						song_ = song;
 						mac_view()->Rebuild();
-						CSongpDlg dlg(&song());
-						dlg.SetReadOnly();
-						dlg.DoModal();
+						delete old_song;
+						
 /*						char buffer[512];		
 						std::sprintf
 							(
@@ -393,24 +395,13 @@ namespace psycle {
 				if (index != -1)
 				{
 					Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
-					song().set_filename(std::string(str.Mid(index+1)+".psy"));
+					song_->set_filename(std::string(str.Mid(index+1)+".psy"));
 				}
 				else
 				{
-					song().set_filename(std::string(str+".psy"));
+					song_->set_filename(std::string(str+".psy"));
 				}
 				mac_view()->child_view()->_outputActive = true;
-				#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-					if (!Global::pConfig->_pOutputDriver->Enable(true))
-					{
-						mac_view()->child_view()->_outputActive = false;
-					}
-					else
-					{
-						// MIDI IMPLEMENTATION
-						Global::pConfig->_pMidiInput->Open();
-					}
-				#endif
 				pParentMain->PsybarsUpdate();
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();
@@ -420,6 +411,10 @@ namespace psycle {
 				pat_view()->RecalculateColourGrid();
 				mac_view()->child_view()->Repaint();
 				mac_view()->UnlockVu();
+				CSongpDlg dlg(song_);
+				dlg.SetReadOnly();
+				dlg.DoModal();
+				player.driver().set_started(true);
 			}
 			mac_view()->child_view()->SetTitleBarText();
 		}

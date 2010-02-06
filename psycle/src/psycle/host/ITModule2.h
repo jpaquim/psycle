@@ -1,32 +1,29 @@
 #pragma once
 #include "Global.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
+#include "FileIO.hpp"
+#include <universalis/stdlib/cstdint.hpp>
+
 namespace psycle {
 	namespace core {
 		class Song;
 		class XMSampler;
 	}
 }
+
 using namespace psycle::core;
-#else
-#include "SongStructs.hpp"
-#endif
-#include "FileIO.hpp"
-#include <universalis/stdlib/cstdint.hpp>
+
 
 namespace psycle {
 	namespace host {
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Song;
-		class XMSampler;
-#endif
 
 		class ITModule2 : public OldPsyFile
 		{
 		private:
-			Song * s;
+			Song* s;
+			XMSampler* sampler;
 
 		public:
 			ITModule2();
@@ -42,11 +39,11 @@ namespace psycle {
 				unsigned long ReadBits(unsigned char bitwidth);
 			private:
 				/// pointer to data
-				unsigned char * pdata;
+				unsigned char* pdata;
 				/// read position
-				unsigned char * rpos;
+				unsigned char* rpos;
 				/// read end
-				unsigned char * rend;
+				unsigned char* rend;
 				/// remaining bits in current pos
 				unsigned char rembits;
 			};
@@ -503,6 +500,7 @@ namespace psycle {
 			bool LoadS3MPatternX(int patIdx);
 		private:
 			s3mHeader  s3mFileH;
+			
 		};
 	}
 }

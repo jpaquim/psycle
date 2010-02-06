@@ -1,25 +1,22 @@
 #include "ITModule2.h"
 #include "Configuration.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#include <algorithm>
+
 #include <psycle/core/machinefactory.h>
+#include <psycle/core/player.h>
+#include <psycle/core/sequence.h>
 #include <psycle/core/song.h>
 #include <psycle/core/xmsampler.h>
-#include <psycle/core/player.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Player.hpp"
-#include "XMSampler.hpp"
-#endif
 
-#include <algorithm>
+using namespace psycle::core;
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
+
 namespace psycle
 {
 	namespace host
@@ -114,11 +111,8 @@ namespace psycle
 			delete[] sRemap;
 
 		}
-		bool ITModule2::LoadITModule(Song *song)
+		bool ITModule2::LoadITModule(Song* song)
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			// todo
-#else
 			s=song;
 			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
@@ -130,7 +124,7 @@ namespace psycle
 			s->setComment(imported);
 
 			song->SetReady(false);
-			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
+			sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
 			s->seqBus=sampler->id();
@@ -208,12 +202,16 @@ Special:  Bit 0: On = song message attached.
 				sampler->rChannel(i).DefaultFilterType(dsp::F_LOWPASS12);
 			}
 
-
+			song->sequence().removeAll();
+			// here we add in one single Line the patterns
+			SequenceLine* line = song->sequence().createNewLine();
+			std::vector<int> seq_list;
 			i=0;
 			for (j=0;j<itFileH.ordNum && i<MAX_SONG_POSITIONS;j++)
 			{
-				s->playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
-				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
+				seq_list.push_back(ReadUInt8());
+/*				s->playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
+				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;*/
 			}
 			Skip(itFileH.ordNum-j);
 /*
@@ -223,12 +221,12 @@ Special:  Bit 0: On = song message attached.
 				j++;
 			}
 */
-			s->playLength=i;
+			/*s->playLength=i;
 			if ( s->playLength == 0) // Add at least one pattern to the sequence.
 			{
 				s->playLength = 1;
 				s->playOrder[0]=0;
-			}
+			}*/
 
 			unsigned long *pointersi = new unsigned long[itFileH.insNum];
 			Read(pointersi,itFileH.insNum*sizeof(unsigned long));
@@ -329,11 +327,21 @@ Special:  Bit 0: On = song message attached.
 			}
 			song->setTracks(std::max(numchans+1,4));
 
+			// now that we have loaded all the patterns, time to prepare them.
+			double pos = 0;
+			std::vector<int>::iterator it = seq_list.begin();
+			for(; it < seq_list.end(); ++it) {
+				Pattern* pat = song->sequence().FindPattern(*it);			
+				if (pat) {
+					line->createEntry(pat, pos);
+					pos += pat->beats();
+				}
+			}
+
 			delete[] pointersi;
 			delete[] pointerss;
 			delete[] pointersp;
 			song->SetReady(true);
-#endif
 			return true;
 		}
 
@@ -857,14 +865,10 @@ Special:  Bit 0: On = song message attached.
 			std::int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern* pat = new Pattern();
 			pat->setName("unnamed");
 			pat->setID(patIdx);
 			s->sequence().Add(pat);
-#else
-			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
-#endif
 			//char* packedpattern = new char[packedSize];
 			//Read(packedpattern, packedSize);
 			for (int row=0;row<rowCount;row++)
@@ -980,16 +984,10 @@ Special:  Bit 0: On = song message attached.
 						pent.setParameter(lasteff[channel]);
 					}
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
-					PatternEvent* pData = (PatternEvent*) s->_ptrackline(patIdx,channel,row);
-
-					*pData = pent;
-					pent=pempty;
-
+					pent.set_track(channel);
+					double beat = row / static_cast<float>(sampler->Speed2LPB(itFileH.iSpeed));
+					pat->insert(beat, pent);
 					numchans = std::max(static_cast<int>(channel),numchans);
-#endif
-
 					Read(&newEntry,1);
 				}
 			}
@@ -1164,8 +1162,6 @@ Special:  Bit 0: On = song message attached.
 
 		bool ITModule2::LoadS3MModuleX(Song *song)
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
 			s=song;
 			if (Read(&s3mFileH,sizeof(s3mFileH))==0 ) return 0;
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;
@@ -1178,7 +1174,7 @@ Special:  Bit 0: On = song message attached.
 			s->setComment(imported);
 
 			song->SetReady(false);
-			XMSampler* sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
+			sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(s3mFileH.mVol&0x7F)/128.0f);
 			s->seqBus=sampler->id();
@@ -1190,7 +1186,19 @@ Special:  Bit 0: On = song message attached.
 			sampler->IsAmigaSlides(true);
 			sampler->GlobalVolume((s3mFileH.gVol&0x7F)*2);
 			
-			int j,i=0;
+			song->sequence().removeAll();
+			// here we add in one single Line the patterns
+			SequenceLine* line = song->sequence().createNewLine();
+			std::vector<int> seq_list;
+			int i=0;
+			for (int j=0;j<s3mFileH.ordNum ;j++)
+			{
+				seq_list.push_back(ReadUInt8());
+/*				s->playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
+				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;*/
+			}
+
+/*			int j,i=0;
 			for (j=0;j<s3mFileH.ordNum;j++)
 			{
 				s->playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
@@ -1201,7 +1209,7 @@ Special:  Bit 0: On = song message attached.
 			{
 				s->playLength = 1;
 				s->playOrder[0]=0;
-			}
+			}`*/
 
 			unsigned short *pointersi = new unsigned short[s3mFileH.insNum];
 			Read(pointersi,s3mFileH.insNum*sizeof(unsigned short));
@@ -1265,10 +1273,21 @@ Special:  Bit 0: On = song message attached.
 				Seek(pointersp[i]<<4);
 				LoadS3MPatternX(i);
 			}
+
+			// now that we have loaded all the patterns, time to prepare them.
+			double pos = 0;
+			std::vector<int>::iterator it = seq_list.begin();
+			for(; it < seq_list.end(); ++it) {
+				Pattern* pat = song->sequence().FindPattern(*it);			
+				if (pat) {
+					line->createEntry(pat, pos);
+					pos += pat->beats();
+				}
+			}
+
 			delete [] pointersi; pointersi = 0;
 			delete [] pointersp; pointersp = 0;
 			song->SetReady(true);
-#endif
 			return true;
 		}
 
@@ -1489,14 +1508,10 @@ OFFSET              Count TYPE   Description
 			PatternEvent pent=pempty;
 
 			Skip(2);//int packedSize=ReadInt(2);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Pattern* pat = new Pattern();
 			pat->setName("unnamed");
 			pat->setID(patIdx);
 			s->sequence().Add(pat);
-#else
-			s->AllocNewPattern(patIdx,"unnamed",64,false);
-#endif
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
@@ -1563,13 +1578,9 @@ OFFSET              Count TYPE   Description
 							}
 						}
 					}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
-					PatternEvent* pData = (PatternEvent*) s->_ptrackline(patIdx,channel,row);
-
-					*pData = pent;
-					pent=pempty;
-#endif
+					pent.set_track(channel);
+					double beat = row / static_cast<float>(sampler->Speed2LPB(s3mFileH.iSpeed));
+					pat->insert(beat, pent);
 					Read(&newEntry,1);
 				}
 			}
