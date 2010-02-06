@@ -62,7 +62,7 @@ namespace exceptions {
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK posix : public exception {
 				public:
 					posix(compiler::location const & location) throw() : exception(errno, location) {}
-					posix(code_type code, compiler::location const & location) throw() : exception(code, location) {}
+					posix(int code, compiler::location const & location) throw() : exception(code, location) {}
 					char const * what() const throw() /*override*/;
 			};
 		#else
