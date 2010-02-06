@@ -22,6 +22,14 @@ namespace universalis { namespace os {
 /// generic exception thrown by functions of the namespace universalis::os.
 class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::exception {
 	public:
+		typedef
+			#if !defined DIVERSALIS__OS__MICROSOFT
+				int
+			#else
+				DWORD
+			#endif
+			code_type;
+
 		exception(compiler::location const & location) throw()
 			: universalis::exception(location), code_(
 					#if !defined DIVERSALIS__OS__MICROSOFT
@@ -30,18 +38,13 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::except
 						::GetLastError()
 					#endif
 				), what_() {}
-		exception(int const & code, compiler::location const & location) throw() : universalis::exception(location), code_(code), what_() {}
+		exception(code_type code, compiler::location const & location) throw() : universalis::exception(location), code_(code), what_() {}
 		~exception() throw() { delete what_; }
 
 	public:
-		int code() const throw() { return code_; }
+		code_type code() const throw() { return code_; }
 	private:
-		int const code_;
-		#if defined DIVERSALIS__OS__MICROSOFT
-			// indicates that code() is not a winapi error one, but a posix one.
-			// This makes the what() function use the standard lib strerror() function.
-			bool const code_is_posix_;
-		#endif
+		code_type const code_;
 
 	public:
 		char const * what() const throw() /*override*/;
@@ -59,7 +62,7 @@ namespace exceptions {
 			class UNIVERSALIS__COMPILER__DYNAMIC_LINK posix : public exception {
 				public:
 					posix(compiler::location const & location) throw() : exception(errno, location) {}
-					posix(int const & code, compiler::location const & location) throw() : exception(code, location) {}
+					posix(code_type code, compiler::location const & location) throw() : exception(code, location) {}
 					char const * what() const throw() /*override*/;
 			};
 		#else
