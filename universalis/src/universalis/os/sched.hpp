@@ -234,14 +234,20 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 	}
 	
 	BOOST_AUTO_TEST_CASE(thread_priority_test) {
-		typedef thread::priorities priorities;
-		thread_priority_test_one(priorities::idle);
-		thread_priority_test_one(priorities::lowest);
-		thread_priority_test_one(priorities::low);
-		thread_priority_test_one(priorities::normal);
-		thread_priority_test_one(priorities::high);
-		thread_priority_test_one(priorities::highest);
-		thread_priority_test_one(priorities::realtime);
+		try {
+			typedef thread::priorities priorities;
+			thread_priority_test_one(priorities::idle);
+			thread_priority_test_one(priorities::lowest);
+			thread_priority_test_one(priorities::low);
+			thread_priority_test_one(priorities::normal);
+			thread_priority_test_one(priorities::high);
+			thread_priority_test_one(priorities::highest);
+			thread_priority_test_one(priorities::realtime);
+		} catch(exceptions::operation_not_permitted e) {
+			std::ostringstream s;
+			s << "could not set thread priority: " << e.what();
+			BOOST_MESSAGE(s.str());
+		}
 	}
 #endif
 
