@@ -186,17 +186,17 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 		private: bool       processed_;
 	///\}
 		
-	///\name schedule ... time measurement (to be used for heuristics)
+	///\name schedule ... time measurement
 	///\{
 		public:  void reset_time_measurement();
 
-		public:  nanoseconds accumulated_processing_time() throw() { return accumulated_processing_time_; }
+		public:  nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
 		private: nanoseconds accumulated_processing_time_;
 
-		public:  uint64_t processing_count() throw() { return processing_count_; }
+		public:  uint64_t processing_count() const throw() { return processing_count_; }
 		private: uint64_t processing_count_;
 
-		public:  uint64_t processing_count_no_zeroes() throw() { return processing_count_no_zeroes_; }
+		public:  uint64_t processing_count_no_zeroes() const throw() { return processing_count_no_zeroes_; }
 		private: uint64_t processing_count_no_zeroes_;
 	///\}
 };

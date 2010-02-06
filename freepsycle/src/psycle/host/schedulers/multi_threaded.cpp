@@ -143,9 +143,15 @@ void node::process(bool first) {
 	nanoseconds const t0(cpu_time_clock());
 	if(first) underlying().process_first(); else underlying().process();
 	nanoseconds const t1(cpu_time_clock());
-	if(t1 != t0) {
+	if(t1 > t0) {
 		accumulated_processing_time_ += t1 - t0;
 		++processing_count_no_zeroes_;
+	} else if(loggers::warning() && t1 < t0) {
+		std::ostringstream s;
+		s << "time went backward: "
+			<< t0.get_count() * 1e-9 << "s, ",
+			<< t1.get_count() * 1e-9 << 's';
+		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	++processing_count_;
 	processed_ = true;

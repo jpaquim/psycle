@@ -18,8 +18,11 @@
 #include <deque>
 #include <map>
 #include <stdexcept>
+#include <universalis/stdlib/date_time.hpp>
 
 namespace psycle { namespace core {
+
+using namespace universalis::stdlib;
 
 class RiffFile;
 
@@ -225,40 +228,6 @@ class MachineCallbacks {
 /// Base class for "Machines", the audio producing elements.
 class PSYCLE__CORE__DECL Machine {
 	friend class CoreSong; friend class Psy2Filter; friend class Player;
-	///\name crash handling
-	///\{
-		public:
-			/// This function should be called when an exception was thrown from the machine.
-			/// This will mark the machine as crashed, i.e. crashed() will return true,
-			/// and it will be disabled.
-			///\param e the exception that occured, converted to a std::exception if needed.
-			void crashed(std::exception const & e) throw();
-		public:
-			/// Tells wether this machine has crashed.
-			bool const inline & crashed() const throw() { return crashed_; }
-		private:
-			bool                crashed_;
-	///\}
-
-	#if 0
-	///\name cpu cost measurement ... for the time spent in the machine's processing function
-	///\{
-		public:
-			void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
-			cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
-		private:
-			cpu::cycles_type        work_cpu_cost_;
-	///\}
-
-	///\name cpu cost measurement ... for the time spent routing audio
-	///\{
-		public:
-			void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
-			cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
-		private:
-			cpu::cycles_type        wire_cpu_cost_;
-	///\}
-	#endif
 
 	//////////////////////////////////////////////////////////////////////////
 	// Draft for a new Machine Specification.
@@ -429,6 +398,47 @@ class PSYCLE__CORE__DECL Machine {
 			virtual sched_deps sched_outputs() const;
 			/// called by the scheduler to ask for the actual processing of the machine
 			virtual bool sched_process(unsigned int frames);
+	///\}
+
+	///\name schedule ... time measurement
+	///\{
+		public: void reset_time_measurement();
+
+		public:    nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		protected: nanoseconds accumulated_processing_time_;
+
+		public:    uint64_t processing_count() const throw() { return processing_count_; }
+		protected: uint64_t processing_count_;
+
+		public:    uint64_t processing_count_no_zeroes() const throw() { return processing_count_no_zeroes_; }
+		protected: uint64_t processing_count_no_zeroes_;
+
+		protected: nanoseconds cpu_time_clock() {
+			#if 0
+				return hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch();
+			#elif 0
+				return universalis::os::clocks::thread_cpu_time::current();
+			#elif 0
+				return universalis::os::clocks::process_cpu_time::current();
+			#else
+				return universalis::os::clocks::monotonic::current();
+			#endif
+		}
+	///\}
+
+	///\name crash handling
+	///\{
+		public:
+			/// This function should be called when an exception was thrown from the machine.
+			/// This will mark the machine as crashed, i.e. crashed() will return true,
+			/// and it will be disabled.
+			///\param e the exception that occured, converted to a std::exception if needed.
+			void crashed(std::exception const & e) throw();
+		public:
+			/// Tells wether this machine has crashed.
+			bool crashed() const throw() { return crashed_; }
+		private:
+			bool crashed_;
 	///\}
 
 	protected:
