@@ -8,7 +8,7 @@
 
 #include "fileio.h"
 #include "song.h"
-
+#include "cpu_time_clock.hpp"
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/value_mapper.hpp>
 
@@ -77,8 +77,8 @@ void Sampler::Init()
 int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 {
 	assert(numSamples >= 0);
+	nanoseconds const t0(cpu_time_clock());
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-	//cpu::cycles_type cost = cpu::cycles();
 	if (!_mute)
 	{
 		Standby(false);
@@ -190,8 +190,10 @@ int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 	}
 	else Standby(true);
 
-	//_cpuCost += cpu::cycles() - cost;
-	_worked = true;
+	nanoseconds const t1(cpu_time_clock());
+	accumulate_processing_time(t1 - t0);
+
+	recursive_processed_ = true;
 	return numSamples;
 }
 

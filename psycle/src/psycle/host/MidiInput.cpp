@@ -1450,19 +1450,9 @@ using namespace helpers::math;
 						break;
 						
 						// NORMAL NOTE
-						default:
-						{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry );
-#else
-							// normal note tick
-							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
-#endif
-						}
-						break;
-
-					}	// end of note switch
-				}	// end of if 'is machine still active?'
+						default: pMachine->Tick(m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry);
+					} // end of note switch
+				} // end of if 'is machine still active?'
 
 				// advance OUT pointer
 				m_patCount--;
@@ -1472,7 +1462,7 @@ using namespace helpers::math;
 
 			// Master machine initiates work
 			//
-			Player::singleton().song().machine(MASTER_INDEX)->Work(amount);
+			Player::singleton().song().machine(MASTER_INDEX)->recursive_process(amount);
 			return true;
 		}
 	}

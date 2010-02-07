@@ -6,14 +6,14 @@
 
 #include "player.h"
 #include "fileio.h"
-
+#include "cpu_time_clock.hpp"
 #include <sstream>
 #include <iostream>
 
-#if defined __unix__ || defined __APPLE__
-	#include <dlfcn.h>
-#elif defined _WIN32
+#if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
+#else
+	#include <dlfcn.h>
 #endif
 
 // *** ms-windows note ***
@@ -118,19 +118,22 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples) {
 		else Standby(true);
 	}
 
+	nanoseconds const t0(cpu_time_clock());
+
 	if (!_mute) {
 		if((_isSynth) || (!_bypass && !Standby())) {
 			proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, callbacks->song().tracks());
 		}
 	}
-	///\todo cpu cost measurement
-	//CPUCOST_CALC(cost, numSamples);
-	//_cpuCost += cost;
 	Machine::UpdateVuAndStanbyFlag(numSamples);
-	_worked = true;
+
+	nanoseconds const t1(cpu_time_clock());
+	accumulate_processing_time(t1 - t0);
+
+	recursive_processed_ = true;
 	return numSamples;
 
-	#if 0 ///\todo HUGE CODE CHUNK DISABLE!
+	#if 0 ///\todo HUGE CODE CHUNK DISABLED!
 	if (!_mute) {
 		if ((mode() == MACHMODE_GENERATOR) || (!_bypass && !Standby())) {
 			int ns = numSamples;
@@ -288,10 +291,6 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples) {
 			Machine::UpdateVuAndStanbyFlag(numSamples);
 		}
 	}
-	///\todo cpu cost measurement
-	//CPUCOST_CALC(cost, numSamples);
-	//_cpuCost += cost;
-	_worked = true;
 	#endif // 0
 }
 

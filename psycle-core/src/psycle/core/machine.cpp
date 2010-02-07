@@ -7,6 +7,7 @@
 #include "machine.h"
 #include "song.h"
 #include "fileio.h"
+#include "cpu_time_clock.hpp"
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
@@ -200,11 +201,9 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 	_bypass(false),
 	_standby(false),
 	_mute(false),
-	_waitingForSound(false),
-	_worked(false),
-	accumulated_processing_time_(),
+	recursive_is_processing_(),
+	recursive_processed_(),
 	processing_count_(),
-	processing_count_no_zeroes_(),
 	crashed_(),
 	audio_range_(1.0f),
 	numInPorts(0),
@@ -326,12 +325,12 @@ void Machine::CloneFrom(Machine & src) {
 
 void Machine::Init() {
 	// Standard gear initalization
-	//work_cpu_cost(0);
-	//wire_cpu_cost(0);
+	processing_count_ = 0;
+	accumulated_processing_time_ = 0;
 	_mute = false;
 	Standby(false);
 	_bypass = false;
-	_waitingForSound = false;
+	recursive_is_processing_ = false;
 	// Centering volume and panning
 	SetPan(64);
 	// Clearing connections
@@ -587,10 +586,8 @@ bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireInd
 }
 
 void Machine::PreWork(int numSamples, bool clear) {
-	sched_processed_ = false;
-	_worked = false;
-	_waitingForSound = false;
-	//PSYCLE__CPU_COST__INIT(cost);
+	nanoseconds const t0(cpu_time_clock());
+	sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;
 	if(_pScopeBufferL && _pScopeBufferR) {
 		float *pSamplesL = _pSamplesL;   
 		float *pSamplesR = _pSamplesR;   
@@ -616,42 +613,43 @@ void Machine::PreWork(int numSamples, bool clear) {
 		dsp::Clear(_pSamplesL, numSamples);
 		dsp::Clear(_pSamplesR, numSamples);
 	}
-	//PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
-	//wire_cpu_cost(wire_cpu_cost() + cost);
+	nanoseconds const t1(cpu_time_clock());
+	callbacks->song().accumulate_routing_time(t1 - t0);
 }
 
-// Low level Work function of machines. Takes care of audio generation and routing.
+// Low level process function of machines. Takes care of audio generation and routing.
 // Each machine is expected to produce its output in its own _pSamplesX buffers.
-void Machine::Work(int numSamples) {
-	WorkWires(numSamples);
-	GenerateAudio(numSamples);
+void Machine::recursive_process(unsigned int frames) {
+	recursive_process_deps(frames);
+	GenerateAudio(frames);
 }
 
-void Machine::WorkWires(int numSamples, bool mix) {
-	// Variable to avoid feedback loops.
-	_waitingForSound = true;
+void Machine::recursive_process_deps(unsigned int frames, bool mix) {
+	recursive_is_processing_ = true;
 	for(int i(0); i < MAX_CONNECTIONS; ++i) {
 		if(_inputCon[i]) {
 			Machine * pInMachine = callbacks->song().machine(_inputMachines[i]);
 			if(pInMachine) {
-				if(!pInMachine->_worked && !pInMachine->_waitingForSound) pInMachine->Work(numSamples);
+				if(!pInMachine->recursive_processed_ && !pInMachine->recursive_is_processing_)
+					pInMachine->recursive_process(frames);
 				if(!pInMachine->Standby()) Standby(false);
 				if(!_mute && !Standby() && mix) {
-					//PSYCLE__CPU_COST__INIT(wcost);
-					dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol * _inputConVol[i]);
-					dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol * _inputConVol[i]);
-					//PSYCLE__CPU_COST__CALCULATE(wcost, numSamples);
-					//wire_cpu_cost(wire_cpu_cost() + wcost);
+					nanoseconds const t0(cpu_time_clock());
+					dsp::Add(pInMachine->_pSamplesL, _pSamplesL, frames, pInMachine->_lVol * _inputConVol[i]);
+					dsp::Add(pInMachine->_pSamplesR, _pSamplesR, frames, pInMachine->_rVol * _inputConVol[i]);
+					nanoseconds const t1(cpu_time_clock());
+					callbacks->song().accumulate_routing_time(t1 - t0);
 				}
 			}
 		}
 	}
-	_waitingForSound = false;
-	
-	//PSYCLE__CPU_COST__INIT(wcost);
-	dsp::Undenormalize(_pSamplesL, _pSamplesR, numSamples);
-	//PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
-	//wire_cpu_cost(wire_cpu_cost() + wcost);
+	recursive_is_processing_ = false;
+	{ // undernormalise
+		nanoseconds const t0(cpu_time_clock());
+		dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+		nanoseconds const t1(cpu_time_clock());
+		callbacks->song().accumulate_routing_time(t1 - t0);
+	}
 }
 
 /// tells the scheduler which machines to process before this one
@@ -699,34 +697,25 @@ bool Machine::sched_process(unsigned int frames) {
 	if(_connectedInputs && !_mute) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
 		Machine & input_node(*callbacks->song().machine(_inputMachines[i]));
 		if(!input_node.Standby()) Standby(false);
-		//Mixer already prepares the buffers onto the sends.
-		if( !Standby()  && (input_node.getMachineKey() != MachineKey::mixer || !_isMixerSend)) {
+		// Mixer already prepares the buffers onto the sends.
+		if(!Standby() && (input_node.getMachineKey() != MachineKey::mixer || !_isMixerSend)) {
 			dsp::Add(input_node._pSamplesL, _pSamplesL, frames, input_node.lVol() * _inputConVol[i]);
 			dsp::Add(input_node._pSamplesR, _pSamplesR, frames, input_node.rVol() * _inputConVol[i]);
 		}
 	}
 	dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-	GenerateAudio(frames);
 
 	nanoseconds const t1(cpu_time_clock());
-	if(t1 > t0) {
-		accumulated_processing_time_ += t1 - t0;
-		++processing_count_no_zeroes_;
-	} else if(loggers::warning() && t1 < t0) {
-		std::ostringstream s;
-		s << "time went backward: "
-			<< t0.get_count() * 1e-9 << "s, "
-			<< t1.get_count() * 1e-9 << 's';
-		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
+	callbacks->song().accumulate_routing_time(t1 - t0);
+
+	GenerateAudio(frames);
+
+	nanoseconds const t2(cpu_time_clock());
+	accumulate_processing_time(t2 - t1);
+
 	++processing_count_;
 
 	return true;
-}
-
-void Machine::reset_time_measurement() {
-	accumulated_processing_time_ = 0;
-	processing_count_ = processing_count_no_zeroes_ = 0;
 }
 
 void Machine::defineInputAsStereo(int numports) {
