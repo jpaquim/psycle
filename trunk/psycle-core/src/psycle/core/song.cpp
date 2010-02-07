@@ -9,7 +9,7 @@
 #include "fileio.h"
 #include "machine.h"
 #include "machinefactory.h"
-#include "internalKeys.hpp"
+#include "internalkeys.hpp"
 #include <sstream>
 #include <iostream> // only for debug output
 
