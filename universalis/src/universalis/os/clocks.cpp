@@ -288,11 +288,11 @@ namespace detail {
 				#if 1
 					// for systems where the frequency may change over time, we need to remember the last counter and time values
 					///\todo make them per-thread variables (need to upgrade mingw)
-					int64_t static last_counter(0);
-					nanoseconds static last_time;
+					int64_t static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_counter(0);
+					nanoseconds::tick_type static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_time(0);
 					nanoseconds ns((counter.QuadPart - last_counter) * 1000 * 1000 * 1000 / frequency.QuadPart);
-					ns += last_time;
-					last_time = ns;
+					ns += nanoseconds(last_time);
+					last_time = ns.get_count();
 					last_counter = counter.QuadPart;
 				#else
 					nanoseconds ns(counter.QuadPart * 1000 * 1000 * 1000 / frequency.QuadPart);
