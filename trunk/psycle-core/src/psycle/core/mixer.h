@@ -287,9 +287,9 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 	///\{
 		protected:
 			/// tells the scheduler which machines to process before this one
-			/*override*/ sched_deps sched_inputs() const;
+			/*override*/ void sched_inputs(sched_deps&) const;
 			/// tells the scheduler which machines may be processed after this one
-			/*override*/ sched_deps sched_outputs() const;
+			/*override*/ void sched_outputs(sched_deps&) const;
 			/// called by the scheduler to ask for the actual processing of the machine
 			/*override*/ bool sched_process(unsigned int frames);
 	///\}

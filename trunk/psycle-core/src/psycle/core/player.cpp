@@ -176,7 +176,8 @@ void Player::compute_plan() {
 		++graph_size_;
 		Machine & n(*song().machine(m));
 		// find the terminal nodes in the graph (nodes with no connected input ports)
-		if(n.sched_inputs().empty()) terminal_nodes_.push_back(&n);
+		input_nodes_.clear(); n.sched_inputs(input_nodes_);
+		if(input_nodes_.empty()) terminal_nodes_.push_back(&n);
 	}
 	if(ultra_trace && loggers::trace()) {
 		std::ostringstream s;
@@ -360,13 +361,13 @@ void Player::process_loop() throw(std::exception) {
 			else {
 				// check whether successors of the node we processed are now ready.
 				// iterate over all the outputs of the node we processed
-				Machine::sched_deps output_nodes(node.sched_outputs());
-				for(Machine::sched_deps::const_iterator i(output_nodes.begin()), e(output_nodes.end()); i != e; ++i) {
+				output_nodes_.clear(); node.sched_outputs(output_nodes_);
+				for(Machine::sched_deps::const_iterator i(output_nodes_.begin()), e(output_nodes_.end()); i != e; ++i) {
 					Machine & output_node(*const_cast<Machine*>(*i));
 					bool output_node_ready(true);
 					// iterate over all the inputs connected to our output
-					Machine::sched_deps input_nodes(output_node.sched_inputs());
-					for(Machine::sched_deps::const_iterator i(input_nodes.begin()), e(input_nodes.end()); i != e; ++i) {
+					input_nodes_.clear(); output_node.sched_inputs(input_nodes_);
+					for(Machine::sched_deps::const_iterator i(input_nodes_.begin()), e(input_nodes_.end()); i != e; ++i) {
 						const Machine & input_node(**i);
 						if(&input_node == &node) continue;
 						if(ultra_trace && loggers::trace()) {

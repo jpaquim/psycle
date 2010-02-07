@@ -654,8 +654,7 @@ void Machine::recursive_process_deps(unsigned int frames, bool mix) {
 }
 
 /// tells the scheduler which machines to process before this one
-Machine::sched_deps Machine::sched_inputs() const {
-	sched_deps result;
+void Machine::sched_inputs(sched_deps & result) const {
 	if(_connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(_inputCon[c]) {
 		Machine & input(*callbacks->song().machine(_inputMachines[c]));
 		result.push_back(&input);
@@ -672,23 +671,20 @@ Machine::sched_deps Machine::sched_inputs() const {
 				break;
 			}
 			if (nmac->_connectedOutputs == 0) {
-				//we are on the wrong machine, better return
-				return result;
+				// we are on the wrong machine, better return
+				return;
 			}
 		}
 		result.push_back(nmac);
 	}
-	return result;
 }
 
 /// tells the scheduler which machines may be processed after this one
-Machine::sched_deps Machine::sched_outputs() const {
-	sched_deps result;
+void Machine::sched_outputs(sched_deps & result) const {
 	if(_connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(_connection[c]) {
 		Machine & output(*callbacks->song().machine(_outputMachines[c]));
 		result.push_back(&output);
 	}
-	return result;
 }
 
 /// called by the scheduler to ask for the actual processing of the machine
