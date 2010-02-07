@@ -4,6 +4,7 @@
 #include <psycle/core/config.private.hpp>
 #include "convert_internal_machines.private.hpp"
 #include "machinefactory.h"
+#include "internalkeys.hpp"
 #include "fileio.h"
 #include "plugin.h"
 #include "player.h"
@@ -28,7 +29,7 @@ Converter::~Converter() throw() {
 
 Machine & Converter::redirect(MachineFactory & factory, int index, int type, RiffFile & riff) {
 	Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::NATIVE,(plugin_names()(type).c_str()),0),index);
-	if(!pointer_to_machine) pointer_to_machine = factory.CreateMachine(MachineKey::dummy,index);
+	if(!pointer_to_machine) pointer_to_machine = factory.CreateMachine(InternalKeys::dummy,index);
 	try {
 		Machine & machine = *pointer_to_machine;
 		machine_converted_from[&machine] = new int(type);

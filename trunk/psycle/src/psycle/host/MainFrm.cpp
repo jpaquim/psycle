@@ -1011,8 +1011,8 @@ using namespace psycle::helpers::math;
 				{
 					if ( song->seqBus < psycle::core::MAX_BUSES ) // it's a Generator
 					{
-						if (song->machine(song->seqBus)->getMachineKey() == MachineKey::sampler
-							|| song->machine(song->seqBus)->getMachineKey() == MachineKey::sampulse )
+						if (song->machine(song->seqBus)->getMachineKey() == InternalKeys::sampler
+							|| song->machine(song->seqBus)->getMachineKey() == InternalKeys::sampulse )
 						{
 							cb2->SetCurSel(AUX_WAVES);
 							song->auxcolSelected = song->instSelected();
@@ -1248,7 +1248,7 @@ using namespace psycle::helpers::math;
 					if (tmac) 
 					{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						if ( tmac->getMachineKey() == MachineKey::sampulse)
+						if ( tmac->getMachineKey() == InternalKeys::sampulse)
 #else
 						if ( tmac->_type == MACH_XMSAMPLER)
 #endif
@@ -1354,7 +1354,7 @@ using namespace psycle::helpers::math;
 			if (tmac) 
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if ( tmac->getMachineKey() == MachineKey::sampulse)
+				if ( tmac->getMachineKey() == InternalKeys::sampulse)
 #else
 				if ( tmac->_type == MACH_XMSAMPLER)
 #endif
@@ -1480,7 +1480,7 @@ using namespace psycle::helpers::math;
 			if (tmac) 
 			{
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if ( tmac->getMachineKey() == MachineKey::sampulse)
+				if ( tmac->getMachineKey() == InternalKeys::sampulse)
 #else
 				if ( tmac->_type == MACH_XMSAMPLER)
 #endif

@@ -17,14 +17,14 @@ namespace psycle {namespace core {
 namespace InternalMacs {
 
 	static const MachineKey keys[]={
-		MachineKey::master,
-		MachineKey::dummy,
-		MachineKey::sampler,
-		MachineKey::sampulse,
-		MachineKey::duplicator,
-		MachineKey::mixer,
-		MachineKey::audioinput,
-		MachineKey::lfo
+		InternalKeys::master,
+		InternalKeys::dummy,
+		InternalKeys::sampler,
+		InternalKeys::sampulse,
+		InternalKeys::duplicator,
+		InternalKeys::mixer,
+		InternalKeys::audioinput,
+		InternalKeys::lfo
 	};
 	static const PluginInfo infos[]={
 		PluginInfo(MachineRole::MASTER,"Master","Psycledelics","Outputs audio to soundcard","","1.1","","Master"),

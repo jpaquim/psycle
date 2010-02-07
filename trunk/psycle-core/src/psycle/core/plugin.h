@@ -103,7 +103,7 @@ class PSYCLE__CORE__DECL Plugin : public Machine {
 			virtual void SaveSpecificChunk(RiffFile * pFile) const;
 		///\}
 		inline virtual std::string GetDllName() const { return key_.dllName(); }
-		virtual MachineKey getMachineKey() const { return key_; }
+		virtual const MachineKey& getMachineKey() const { return key_; }
 		virtual std::string GetName() const { return _psName; }
 		virtual int GetNumParams() const { return GetInfo().numParameters; }
 		virtual int GetNumCols() const { return GetInfo().numCols; }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "machine.h"
+#include "internalkeys.hpp"
 
 namespace psycle { namespace core {
 
@@ -207,7 +208,7 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 		virtual std::string GetPortInputName(InPort::id_type port) const;
 		virtual unsigned int GetInPorts() const { return 2; }
 		virtual int GetAudioInputs() const{ return GetInPorts() * MAX_CONNECTIONS; }
-		virtual MachineKey getMachineKey() const { return MachineKey::mixer; }
+		virtual const MachineKey& getMachineKey() const { return InternalKeys::mixer; }
 		virtual std::string GetName() const { return _psName; }
 		virtual int GetNumCols() const;
 		virtual void GetParamName(int numparam,char *name) const;

@@ -117,7 +117,7 @@
 		// Properties
 		//////////////////////////////////////////////////////////////////////////
 		inline virtual std::string GetDllName() const { return key_.dllName(); }
-		virtual MachineKey getMachineKey() const { return key_; }
+		virtual const MachineKey& getMachineKey() const { return key_; }
 		virtual std::string GetName() const { return _psName; }
 		virtual std::string GetVendorName() const {
 			char temp[kVstMaxVendorStrLen];

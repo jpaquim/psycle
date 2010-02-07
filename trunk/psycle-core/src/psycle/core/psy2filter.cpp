@@ -357,9 +357,9 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 					else {
 						pMac[i] = factory.CreateMachine(MachineKey(Hosts::NATIVE, dllName,0),i);
 						if(pMac[i] == 0) {
-							Plugin *p = ((Plugin*)factory.CreateMachine(MachineKey::failednative,i));
+							Plugin *p = ((Plugin*)factory.CreateMachine(InternalKeys::failednative,i));
 							p->LoadPsy2FileFormat(file);
-							pMac[i] = factory.CreateMachine(MachineKey::dummy,i);
+							pMac[i] = factory.CreateMachine(InternalKeys::dummy,i);
 							((Dummy*)pMac[i])->CopyFrom(p);
 							delete p;
 						} else pMac[i]->LoadPsy2FileFormat(file);
@@ -373,7 +373,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 						char sError[128];
 						bool berror=false;
 						vst::plugin* pVstPlugin;
-						vst::plugin* pTempMac = static_cast<vst::plugin*>(factory.CreateMachine(MachineKey::wrapperVst,i));
+						vst::plugin* pTempMac = static_cast<vst::plugin*>(factory.CreateMachine(InternalKeys::wrapperVst,i));
 						// The trick: We need to load the information from the file in order to know the "instance" number
 						// and be able to create a plugin from the corresponding dll. Later, we will set the loaded settings to
 						// the newly created plugin.
@@ -406,7 +406,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 						{
 							//MessageBox(NULL,sError, "Loading Error", MB_OK);
 							Dummy* dummy;
-							pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(MachineKey::dummy,i));
+							pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(InternalKeys::dummy,i));
 							dummy->CopyFrom(pTempMac);
 							delete pTempMac;
 							if (type == MACH_VST ) dummy->setGenerator(true);
@@ -418,7 +418,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 						#warning ################ Temporary hack for songs with VSTs ################
 					#endif
 					Dummy* dummy;
-					pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(MachineKey::dummy,i));
+					pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(InternalKeys::dummy,i));
 					if (type == MACH_VST ) dummy->setGenerator(true);
 					else dummy->setGenerator(false);
 					pMac[i]->LoadPsy2FileFormat(file);
@@ -435,14 +435,14 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 				default: {
 					switch(type) {
 						case MACH_MASTER:
-							pMac[i] = factory.CreateMachine(MachineKey::master,i);
+							pMac[i] = factory.CreateMachine(InternalKeys::master,i);
 							break;
 						case MACH_SAMPLER:
-							pMac[i] = factory.CreateMachine(MachineKey::sampler,i);
+							pMac[i] = factory.CreateMachine(InternalKeys::sampler,i);
 							break;
 						case MACH_SCOPE:
 						case MACH_DUMMY:
-							pMac[i] = factory.CreateMachine(MachineKey::dummy,i);
+							pMac[i] = factory.CreateMachine(InternalKeys::dummy,i);
 							break;
 						default: {
 								std::ostringstream s;
@@ -452,7 +452,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 						}
 					}
 					if(!pMac[i]) {
-						pMac[i] = factory.CreateMachine(MachineKey::dummy,i);
+						pMac[i] = factory.CreateMachine(InternalKeys::dummy,i);
 	
 						std::ostringstream s;
 						s << "Couldnt create machine index: " << i << ", type: " << type << std::endl;
@@ -520,7 +520,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 			if(busMachine[i] > 128 || !_machineActive[busMachine[i]])
 				busMachine[i] = 255;
 			// If there's a dummy, force it to be a Generator
-			else if(pMac[busMachine[i]]->getMachineKey() == MachineKey::dummy)
+			else if(pMac[busMachine[i]]->getMachineKey() == InternalKeys::dummy)
 				pMac[busMachine[i]]->defineInputAsStereo(0);
 		}
 	}
@@ -532,7 +532,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 			if(_machineActive[i]) {
 #if 0 
 				//Now we don't have an indicator of crashed vst so this cannot be done.
-				if(pMac[i]->getMachineKey() == MachineKey::dummy()) {
+				if(pMac[i]->getMachineKey() == InternalKeys::dummy()) {
 					if(((Dummy*)pMac[i])->�wasVST && chunkpresent) {
 						// Since we don't know if the plugin saved it or not, 
 						// we're stuck on letting the loading crash/behave incorrectly.

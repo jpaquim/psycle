@@ -9,6 +9,7 @@
 #include <psycle/core/machinehost.hpp>
 #include <psycle/core/plugincatcher.h>
 #include <psycle/core/machinekey.hpp>
+#include <psycle/core/internalkeys.hpp>
 using namespace psycle::core;
 #else
 #include "Plugin.hpp"
@@ -121,7 +122,7 @@ namespace psycle {
 		CNewMachine::CNewMachine(CWnd* pParent)
 			: CDialog(CNewMachine::IDD, pParent)
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-			, outputMachine(MachineKey::invalid)
+			, outputMachine(InternalKeys::invalid)
 #else
 			, Outputmachine(-1)
 			, shellIdx(0)
@@ -203,19 +204,19 @@ namespace psycle {
 					hNodes[i] = m_browser.InsertItem(hosts[i]->hostName().c_str() ,i*2, i*2 , TVI_ROOT, TVI_LAST);
 					gen[i] = hNodes[i];
 					fx[i] = hNodes[i];
-					treeToInfo[hNodes[i]] = MachineKey::invalid;
+					treeToInfo[hNodes[i]] = InternalKeys::invalid;
 				}
 				crashedNode = m_browser.InsertItem("Crashed or invalid plugins", 6, 6, TVI_ROOT,TVI_LAST);
-				treeToInfo[crashedNode] = MachineKey::invalid;
+				treeToInfo[crashedNode] = InternalKeys::invalid;
 			}
 			else {
 				hNodes = new HTREEITEM[2];
 				hNodes[0] = m_browser.InsertItem("Generators",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Effects",1,1,TVI_ROOT,TVI_LAST);
 				crashedNode = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
-				treeToInfo[hNodes[0]] = MachineKey::invalid;
-				treeToInfo[hNodes[1]] = MachineKey::invalid;
-				treeToInfo[crashedNode] = MachineKey::invalid;
+				treeToInfo[hNodes[0]] = InternalKeys::invalid;
+				treeToInfo[hNodes[1]] = InternalKeys::invalid;
+				treeToInfo[crashedNode] = InternalKeys::invalid;
 				for (unsigned int i=0; i < Hosts::NUM_HOSTS; i++ ) {
 					gen[i] = hNodes[0];
 					fx[i] = hNodes[1];
@@ -246,7 +247,7 @@ namespace psycle {
 
 			if(machineGrouping == groupHost ) { m_browser.Select(hNodes[selectedGroup],TVGN_CARET); }
 			else { m_browser.Select(hNodes[selectedRole],TVGN_CARET); }
-			outputMachine = MachineKey::invalid;
+			outputMachine = InternalKeys::invalid;
 			delete[] hNodes;
 		}
 
@@ -255,9 +256,9 @@ namespace psycle {
 			//NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 			tHand = m_browser.GetSelectedItem();
 			//Do not do. OnSelchangedBrowser is called when destroying the elements, so the selection is lost
-			//outputMachine = MachineKey::invalid;
+			//outputMachine = InternalKeys::invalid;
 			MachineKey key = treeToInfo[tHand];
-			if (key == MachineKey::invalid ) {
+			if (key == InternalKeys::invalid ) {
 				return;
 			}
 			const PluginInfo& info = MachineFactory::getInstance().getFinder().info(key);
@@ -661,7 +662,7 @@ namespace psycle {
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		void CNewMachine::OnOK() 
 		{
-			if (outputMachine != MachineKey::invalid ) // Necessary so that you cannot doubleclick a Node
+			if (outputMachine != InternalKeys::invalid ) // Necessary so that you cannot doubleclick a Node
 			{
 				CDialog::OnOK();
 			}
@@ -670,7 +671,7 @@ namespace psycle {
 		void CNewMachine::OnCheckAllow() 
 		{
 			MachineKey key = treeToInfo[tHand];
-			if (key != MachineKey::invalid ) {
+			if (key != InternalKeys::invalid ) {
 				PluginFinder& finder = MachineFactory::getInstance().getFinder();
 				const PluginInfo& info = MachineFactory::getInstance().getFinder().info(key);
 				finder.EnablePlugin(key, !info.allow());

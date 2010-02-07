@@ -45,7 +45,7 @@ void PluginFinder::AddInfo(const MachineKey & key, const PluginInfo& info) {
 	std::cout << "pluginfinder::addinfo: " << key.dllName() << " host:" << key.host() << std::endl;
 	#endif
 	assert(key.host() < maps_.size());
-	maps_[key.host()][key]= info;
+	maps_[key.host()].insert(std::pair<MachineKey, PluginInfo>(key,info));
 }
 
 const PluginInfo & PluginFinder::info ( const MachineKey & key ) const {

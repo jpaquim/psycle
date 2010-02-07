@@ -10,6 +10,7 @@
 #include <psycle/core/machine.h>
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
+#include <psycle/core/internalkeys.hpp>
 using namespace psycle::core;
 #else
 #include "Machine.hpp"
@@ -708,7 +709,7 @@ namespace psycle
 				// if current sample is locked to a machine.
 				// if so, switch entry._mach to that machine number
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-				if (pMachine->getMachineKey() == MachineKey::sampler)
+				if (pMachine->getMachineKey() == InternalKeys::sampler)
 #else
 				if (pMachine->_type == MACH_SAMPLER)
 #endif

@@ -6,6 +6,7 @@
 #include <universalis/os/exceptions/code_description.hpp>
 #include <universalis/os/loggers.hpp>
 #include "nativehost.hpp"
+#include "internalkeys.hpp"
 
 #include "pluginfinder.h"
 #include "plugin.h"
@@ -40,7 +41,7 @@ NativeHost& NativeHost::getInstance(MachineCallbacks* callb)
 
 Machine* NativeHost::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id) 
 {
-	if (key == MachineKey::failednative) 
+	if (key == InternalKeys::failednative) 
 	{
 		Plugin *p = new Plugin(mcallback_, key, id, 0, 0, 0);
 		return p;

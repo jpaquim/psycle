@@ -47,7 +47,7 @@ namespace psycle { namespace core {
 				virtual void Tick(int channel, const PatternEvent & pEntry );
 				virtual void Stop(){}
 				inline virtual std::string GetDllName() const throw() { return key_.dllName(); }
-				virtual MachineKey getMachineKey() const {  return key_; }
+				virtual const MachineKey& getMachineKey() const {  return key_; }
 				virtual std::string GetName() const { return (char *) psDescriptor ? psDescriptor->Name : ""; }
 				virtual void GetParamName(int numparam, char * name) const;
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) const;

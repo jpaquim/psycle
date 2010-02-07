@@ -71,22 +71,22 @@ namespace psycle  {
 		std::uint32_t Psy3Saver::ConvertType(const psycle::core::MachineKey& key,bool isGenerator) const {
 			OldMachineType old_type = MACH_DUMMY; // default
 			if (key.host() == Hosts::INTERNAL ) {
-				if (key == MachineKey::master ) {
+				if (key == InternalKeys::master ) {
 					old_type = MACH_MASTER;
 				}
-				else if (key == MachineKey::sampler) {
+				else if (key == InternalKeys::sampler) {
 					old_type = MACH_SAMPLER;
 				}
-				else if (key == MachineKey::sampulse) {
+				else if (key == InternalKeys::sampulse) {
 					old_type = MACH_XMSAMPLER;
 				}
-				else if (key == MachineKey::duplicator ) {
+				else if (key == InternalKeys::duplicator ) {
 					old_type = MACH_DUPLICATOR;
 				}
-				else if (key == MachineKey::mixer ) {
+				else if (key == InternalKeys::mixer ) {
 					old_type = MACH_MIXER;
 				}
-				else if (key == MachineKey::audioinput ) {
+				else if (key == InternalKeys::audioinput ) {
 					old_type = MACH_RECORDER;
 				}
 			}

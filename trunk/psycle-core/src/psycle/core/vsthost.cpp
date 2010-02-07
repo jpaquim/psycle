@@ -41,7 +41,7 @@
 	}
 
 	Machine* host::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id)  {
-		if (key == MachineKey::wrapperVst ) {
+		if (key == InternalKeys::wrapperVst ) {
 			return static_cast<vst::plugin*>(master->CreateWrapper(0));
 		}
 		//FIXME: This is a good place where to use exceptions. (task for a later date)

@@ -3723,6 +3723,7 @@ namespace psycle {
 				}
 
 				// build entry
+				//\todo: Bug. toffset uninitialized.
 				PatternEvent *pentry = (PatternEvent*) toffset;
 				if (pentry->note() >= notecommands::release)
 				{
@@ -3821,6 +3822,7 @@ namespace psycle {
 				}
 
 				// build entry
+				//\todo: Bug. toffset uninitialized.
 				PatternEvent *pentry = (PatternEvent*) toffset;
 				if (pentry->note() >= notecommands::release)
 				{
@@ -3914,6 +3916,7 @@ namespace psycle {
 				}
 
 				// build entry
+				//\todo: Bug. toffset uninitialized.
 				PatternEvent *pentry = (PatternEvent*) toffset;
 				if ((pentry->machine() != entry.machine()) 
 					|| (pentry->instrument() != entry.instrument()) 
@@ -3995,6 +3998,7 @@ namespace psycle {
 				}
 
 				// build entry
+				//\todo: Bug. toffset uninitialized.
 				PatternEvent *pentry = (PatternEvent*) toffset;
 				if (pentry->note() >= notecommands::release)
 				{
@@ -4088,6 +4092,7 @@ namespace psycle {
 				}
 
 				// build entry
+				//\todo: Bug. toffset uninitialized.
 				PatternEvent *pentry = (PatternEvent*) toffset;
 				if ((pentry->machine() != entry.machine()) 
 					|| (pentry->instrument() != entry.instrument()))
@@ -4197,6 +4202,7 @@ namespace psycle {
 				}
 
 				// build entry
+				//\todo: Bug. toffset uninitialized.
 				PatternEvent *entry = (PatternEvent*) toffset;
 				if (entry->note() >= notecommands::release)
 				{

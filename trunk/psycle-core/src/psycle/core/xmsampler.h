@@ -7,6 +7,7 @@
 
 #include "xminstrument.h"
 #include "machine.h"
+#include "internalkeys.hpp"
 
 #include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/filter.hpp>
@@ -997,7 +998,7 @@ XMSampler::Channel::PerformFX().
 	virtual void SetSampleRate(int sr);
 	virtual void Stop(void);
 	virtual void Tick(int channel, const PatternEvent & data );
-	virtual MachineKey getMachineKey() const { return MachineKey::sampulse; }
+	virtual const MachineKey& getMachineKey() const { return InternalKeys::sampulse; }
 	virtual std::string GetName(void) const { return _psName; }
 
 	virtual bool LoadPsy2FileFormat(RiffFile* pFile);
@@ -1018,9 +1019,9 @@ XMSampler::Channel::PerformFX().
 		/// BPM Speed
 		void CalcBPMAndTick();
 	#endif
-	
-	int Speed2LPB(const int speed) const { return 24/((speed==0)?6:speed); }
-	int LPB2Speed(const int lpb) const { return 24/lpb; }
+
+	static int Speed2LPB(const int speed) { return 24/((speed==0)?6:speed); }
+	static int LPB2Speed(const int lpb) { return 24/lpb; }
 	Voice* GetCurrentVoice(const int channelNum)
 	{
 		for(int current = 0;current < _numVoices;current++)

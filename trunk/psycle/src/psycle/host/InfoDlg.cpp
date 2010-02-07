@@ -7,6 +7,7 @@
 
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
+#include <psycle/core/internalkeys.hpp>
 #include <psycle/core/cpu_time_clock.hpp>
 #include <universalis/stdlib/thread.hpp>
 
@@ -168,7 +169,7 @@ void CInfoDlg::UpdateInfo() {
 		machlist_.SetItem(i, 1, LVIF_TEXT, buffer, 0, 0, 0, 0);
 			
 		// Type [Set is generator/effect/master]
-		if(machine.getMachineKey() == MachineKey::master) strcpy(buffer, "Master");
+		if(machine.getMachineKey() == InternalKeys::master) strcpy(buffer, "Master");
 		else if(machine.IsGenerator()) strcpy(buffer, "Generator");
 		else strcpy(buffer, "Effect");
 

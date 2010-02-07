@@ -7,6 +7,7 @@
 //#include "ProgressDialog.hpp"
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
+#include <psycle/core/internalkeys.hpp>
 //#include <algorithm>
 //#include <cstring>
 
@@ -47,7 +48,7 @@ namespace host{
 
 		for (int i=0; i<lastMachine; i++) {
 			if (song.machine(i) != 0 && 
-				song.machine(i)->getMachineKey() == MachineKey::sampler ) {
+				song.machine(i)->getMachineKey() == InternalKeys::sampler ) {
 					isSampler[i] = 1;
 			}
 			else {

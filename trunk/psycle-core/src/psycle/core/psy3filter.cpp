@@ -6,6 +6,7 @@
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
+#include "internalkeys.hpp"
 #include "mixer.h"
 #include "vstplugin.h"
 #include <psycle/helpers/datacompression.hpp>
@@ -275,7 +276,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	//song.progress.emit(5,0,"");
 	if(chunkcount) {
 		if(!song.machine(MASTER_INDEX)) {
-			Machine* mac = MachineFactory::getInstance().CreateMachine(MachineKey::master, MASTER_INDEX);
+			Machine* mac = MachineFactory::getInstance().CreateMachine(InternalKeys::master, MASTER_INDEX);
 			song.AddMachine(mac);
 		}
 		std::ostringstream s;
@@ -499,29 +500,29 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 		bool failedLoad = false;
 		switch(type) {
 			case MACH_MASTER:
-				mac = factory.CreateMachine(MachineKey::master, MASTER_INDEX);
+				mac = factory.CreateMachine(InternalKeys::master, MASTER_INDEX);
 				break;
 			case MACH_SAMPLER:
-				mac = factory.CreateMachine(MachineKey::sampler, id);
+				mac = factory.CreateMachine(InternalKeys::sampler, id);
 				break;
 			case MACH_MIXER:
-				mac = factory.CreateMachine(MachineKey::mixer, id);
+				mac = factory.CreateMachine(InternalKeys::mixer, id);
 				break;
 			case MACH_XMSAMPLER:
-				mac = factory.CreateMachine(MachineKey::sampulse, id);
+				mac = factory.CreateMachine(InternalKeys::sampulse, id);
 				break;
 			case MACH_DUPLICATOR:
-				mac = factory.CreateMachine(MachineKey::duplicator, id);
+				mac = factory.CreateMachine(InternalKeys::duplicator, id);
 				break;
 			case MACH_AUDIOINPUT:
-				mac = factory.CreateMachine(MachineKey::audioinput, id);
+				mac = factory.CreateMachine(InternalKeys::audioinput, id);
 				break;
 			//case MACH_LFO:
-				//mac = factory.CreateMachine(MachineKey::lfo, id);
+				//mac = factory.CreateMachine(InternalKeys::lfo, id);
 				//break;
 			//case MACH_SCOPE:
 			case MACH_DUMMY:
-				mac = factory.CreateMachine(MachineKey::dummy, id);
+				mac = factory.CreateMachine(InternalKeys::dummy, id);
 				break;
 			case MACH_PLUGIN:
 			{
@@ -542,7 +543,7 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 				s << "Problem loading machine!\ntype: " << type << ", dllName: " << sDllName;
 				loggers::warning()(s.str());
 			}
-			mac = factory.CreateMachine(MachineKey::dummy,id);
+			mac = factory.CreateMachine(InternalKeys::dummy,id);
 			failedLoad = true;
 		}
 		song.AddMachine(mac);
@@ -600,7 +601,7 @@ bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, ui
 }
 
 void Psy3Filter::RestoreMixerSendFlags(CoreSong& song) {
-	for(int i(0);i < MAX_MACHINES; ++i) if(song.machine(i) && song.machine(i)->getMachineKey() == MachineKey::mixer) {
+	for(int i(0);i < MAX_MACHINES; ++i) if(song.machine(i) && song.machine(i)->getMachineKey() == InternalKeys::mixer) {
 		Mixer & mac = static_cast<Mixer&>(*song.machine(i));
 		for(int j(0); j < mac.numreturns(); ++j) if(mac.Return(j).IsValid())
 			song.machine(mac.Return(j).Wire().machine_)->SetMixerSendFlag(&song);

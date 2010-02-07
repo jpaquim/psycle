@@ -33,6 +33,7 @@
 	}}}
 #else
 	#include "machinehost.hpp"
+	#include "internalkeys.hpp"
 	#include <seib/vst/CVSTHost.Seib.hpp>
 	#include <map>
 
@@ -75,7 +76,7 @@
 			friend class host;
 			AudioMaster(MachineCallbacks* callbacks)
 				: pCallbacks(callbacks)
-				, currentKey(MachineKey::invalid)
+				, currentKey(InternalKeys::invalid)
 			{
 				quantization = quantize;
 				SetBlockSize(MAX_BUFFER_LENGTH); SetTimeSignature(4,4);

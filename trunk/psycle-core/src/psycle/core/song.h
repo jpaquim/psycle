@@ -298,7 +298,7 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 			
 	///\}
 
-	//Fake. Just to compile. They need to go out
+	///\todo Fake. Just to compile. They need to go out
 	//{
 		int _trackArmedCount;
 
