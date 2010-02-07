@@ -9,6 +9,7 @@
 #include "fileio.h"
 #include "machine.h"
 #include "machinefactory.h"
+#include "internalKeys.hpp"
 #include <sstream>
 #include <iostream> // only for debug output
 
@@ -159,11 +160,11 @@ Wire::id_type CoreSong::InsertConnection(Machine & srcMac, Machine & dstMac, InP
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if(srcMac.FindOutputWire(dstMac.id()) > -1 || dstMac.FindOutputWire(srcMac.id()) > -1) return -1;
 	// disallow mixer as a sender of another mixer
-	if(srcMac.getMachineKey() == MachineKey::mixer && dstMac.getMachineKey() == MachineKey::mixer && dsttype != 0) return -1;
+	if(srcMac.getMachineKey() == InternalKeys::mixer && dstMac.getMachineKey() == InternalKeys::mixer && dsttype != 0) return -1;
 	// If source is in a mixer chain, dissallow the new connection.
 	if(srcMac._isMixerSend) return -1;
 	// If destination is in a mixer chain (or the mixer itself), validate the sender first
-	if(dstMac._isMixerSend || (dstMac.getMachineKey() == MachineKey::mixer && dsttype == 1))
+	if(dstMac._isMixerSend || (dstMac.getMachineKey() == InternalKeys::mixer && dsttype == 1))
 		if(!ValidateMixerSendCandidate(srcMac)) return -1;
 	///\todo: srctype not being used right now.
 	return srcMac.ConnectTo(dstMac,dsttype,srctype,volume);
@@ -175,10 +176,10 @@ bool CoreSong::ChangeWireDestMac(Machine & srcMac, Machine & newDstMac, OutPort:
 	if(!newDstMac.acceptsConnections()) return false;
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if(srcMac.FindOutputWire(newDstMac.id()) > -1 || newDstMac.FindOutputWire(srcMac.id()) > -1) return false;
-	if(srcMac.getMachineKey() == MachineKey::mixer && newDstMac.getMachineKey() == MachineKey::mixer && wiretochange >=MAX_CONNECTIONS) return false;
+	if(srcMac.getMachineKey() == InternalKeys::mixer && newDstMac.getMachineKey() == InternalKeys::mixer && wiretochange >=MAX_CONNECTIONS) return false;
 	// If source is in a mixer chain, dissallow the new connection.
 	// If destination is in a mixer chain (or the mixer itself), validate the sender first
-	if(newDstMac._isMixerSend || (newDstMac.getMachineKey() == MachineKey::mixer && wiretochange >= MAX_CONNECTIONS))
+	if(newDstMac._isMixerSend || (newDstMac.getMachineKey() == InternalKeys::mixer && wiretochange >= MAX_CONNECTIONS))
 		///\todo: validate for the case whre srcMac->_isMixerSend
 		if(!ValidateMixerSendCandidate(srcMac,true)) return false;
 	return srcMac.MoveWireDestTo(newDstMac,srctype,wiretochange,dsttype);
@@ -190,11 +191,11 @@ bool CoreSong::ChangeWireSourceMac(Machine & newSrcMac, Machine & dstMac, InPort
 	// Verify that src is not connected to dst already, and that destination is not connected to source.
 	if(newSrcMac.FindOutputWire(dstMac.id()) > -1 || dstMac.FindOutputWire(newSrcMac.id()) > -1) return false;
 	// disallow mixer as a sender of another mixer
-	if(newSrcMac.getMachineKey() == MachineKey::mixer && dstMac.getMachineKey() == MachineKey::mixer && wiretochange >= MAX_CONNECTIONS) return false;
+	if(newSrcMac.getMachineKey() == InternalKeys::mixer && dstMac.getMachineKey() == InternalKeys::mixer && wiretochange >= MAX_CONNECTIONS) return false;
 	// If source is in a mixer chain, dissallow the new connection.
 	if(newSrcMac._isMixerSend ) return false;
 	// If destination is in a mixer chain (or the mixer itself), validate the sender first
-	if(dstMac._isMixerSend || (dstMac.getMachineKey() == MachineKey::mixer && wiretochange >= MAX_CONNECTIONS))
+	if(dstMac._isMixerSend || (dstMac.getMachineKey() == InternalKeys::mixer && wiretochange >= MAX_CONNECTIONS))
 		if(!ValidateMixerSendCandidate(newSrcMac,false)) return false;
 	return dstMac.MoveWireSourceTo(newSrcMac,dsttype,wiretochange,srctype);
 }
@@ -642,7 +643,7 @@ void Song::clearMyData() {
 	currentOctave=4;
 	_saved=false;
 	set_filename("Untitled.psy");
-	AddMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master,MASTER_INDEX));
+	AddMachine(MachineFactory::getInstance().CreateMachine(InternalKeys::master,MASTER_INDEX));
 	SequenceLine* line = sequence().createNewLine();
 	Pattern* pattern= new Pattern();
 	pattern->timeSignatures().clear();

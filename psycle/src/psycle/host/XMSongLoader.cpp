@@ -161,7 +161,7 @@ namespace psycle {
 		m_pSong = &song;
 		song.SetReady(false);
 		// song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
+		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 		song.AddMachine(m_pSampler);
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,0.35f);
 		song.seqBus=m_pSampler->id();
@@ -715,7 +715,7 @@ namespace psycle {
 						e.setMachine(255);
 					}
 					e.set_track(col);
-					double beat = row / static_cast<float>(m_pSampler->Speed2LPB(m_Header.speed));
+					double beat = row / static_cast<float>(XMSampler::Speed2LPB(m_Header.speed));
 					pat->insert(beat,e);
 				}
 			}
@@ -1072,7 +1072,7 @@ namespace psycle {
 		m_pSong = &song;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.SetReady(false);
-		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
+		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 		song.AddMachine(m_pSampler);
 		//song.InsertConnection(*m_pSampler,*s->machine(MASTER_INDEX),0,0,0.75f); // This is done later, when determining the number of channels.
 		song.seqBus=m_pSampler->id();

@@ -124,7 +124,7 @@ namespace psycle
 			s->setComment(imported);
 
 			song->SetReady(false);
-			sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
+			sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
 			s->seqBus=sampler->id();
@@ -1175,7 +1175,7 @@ Special:  Bit 0: On = song message attached.
 			s->setComment(imported);
 
 			song->SetReady(false);
-			sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(MachineKey::sampulse);
+			sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(s3mFileH.mVol&0x7F)/128.0f);
 			s->seqBus=sampler->id();

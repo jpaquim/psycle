@@ -8,6 +8,7 @@
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
+#include "internalkeys.hpp"
 #include "pattern.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
@@ -548,7 +549,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		{
 			if (!song.machine(MASTER_INDEX) )
 			{
-				song.addMachine(MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX));
+				song.addMachine(MachineFactory::getInstance().CreateMachine(InternalKeys::master(),MASTER_INDEX));
 			}
 			std::ostringstream s;
 			s << "Error reading from file '" << file.file_name() << "'" << std::endl;
@@ -722,7 +723,7 @@ bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 		song.AddMachine(mac);
 		return song.machine(index)->LoadFileChunk(file,minorversion);
 	} else {
-		mac = factory.CreateMachine(MachineKey::dummy,index);
+		mac = factory.CreateMachine(InternalKeys::dummy,index);
 		mac->SetEditName(mac->GetEditName() + " (replaced)");
 		song.AddMachine(mac);
 		return false;
@@ -745,7 +746,7 @@ bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 
 	// chunk data
 
-	MachineKey key = song.machine(index)->getMachineKey();
+	const MachineKey& key = song.machine(index)->getMachineKey();
 	file->Write(uint32_t(index));
 	file->Write(uint32_t(key.host()));
 	file->WriteString(key.dllName());

@@ -7,6 +7,7 @@
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/machinefactory.h>
+#include <psycle/core/internalkeys.hpp>
 #include <psycle/core/plugininfo.h>
 #include <psycle/core/player.h>
 #include <psycle/core/file.h>
@@ -283,7 +284,7 @@ namespace psycle {
 			{
 				dlg.selectedRole = (mac->IsGenerator() ? MachineRole::GENERATOR : MachineRole::EFFECT);
 			}
-			if (dlg.DoModal() == IDOK && dlg.outputMachine != MachineKey::invalid ) {
+			if (dlg.DoModal() == IDOK && dlg.outputMachine != InternalKeys::invalid ) {
 				if (!mac) {
 					if (dlg.selectedRole == MachineRole::GENERATOR)  {
 						x -= (MachineCoords.sGenerator.width/2);
@@ -377,19 +378,19 @@ namespace psycle {
 		MachineGui* MachineView::CreateMachineGui(Machine* mac) {
 			assert(mac);
 			MachineGui* gui;
-			if( mac->getMachineKey() == MachineKey::master) {
+			if( mac->getMachineKey() == InternalKeys::master) {
 				gui = new MasterGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::sampler ) {
+			} else if( mac->getMachineKey() == InternalKeys::sampler ) {
 				gui = new SamplerGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::sampulse ) {
+			} else if( mac->getMachineKey() == InternalKeys::sampulse ) {
 				gui = new XmSamplerGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::audioinput ) {
+			} else if( mac->getMachineKey() == InternalKeys::audioinput ) {
 				gui = new RecorderGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::mixer ) {
+			} else if( mac->getMachineKey() == InternalKeys::mixer ) {
 				gui = new MixerGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::duplicator ) {
+			} else if( mac->getMachineKey() == InternalKeys::duplicator ) {
 				gui = new GeneratorGui(this, mac);
-			} else if( mac->getMachineKey() == MachineKey::lfo ) {
+			} else if( mac->getMachineKey() == InternalKeys::lfo ) {
 				gui = new GeneratorGui(this, mac);
 			}
 			else if (mac->getMachineKey().host() == Hosts::NATIVE ) {
@@ -405,7 +406,7 @@ namespace psycle {
 					gui = new VstFxGui(this, mac);
 			
 			}
-			else /*if (mac->getMachineKey() == MachineKey::dummy )*/ {
+			else /*if (mac->getMachineKey() == InternalKeys::dummy )*/ {
 				if (mac->IsGenerator())
 					gui = new DummyGenGui(this, mac);
 				else

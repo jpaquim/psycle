@@ -5,6 +5,7 @@
 #include "machinefactory.h"
 
 #include "pluginfinder.h"
+#include "internalkeys.hpp"
 #include "internalhost.hpp"
 #include "nativehost.hpp"
 #include "vsthost.h"
@@ -72,8 +73,8 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 
 	// a check for these machines is done, because we don't add it into the finder,
 	// to prevent a user to create them manually.
-	if ( key != MachineKey::master && 
-		key != MachineKey::failednative && key != MachineKey::wrapperVst) {
+	if ( key != InternalKeys::master && 
+		key != InternalKeys::failednative && key != InternalKeys::wrapperVst) {
 		if (!finder_->hasKey(key)) {
 			if(loggers::warning()()) {
 				std::ostringstream s;
@@ -88,7 +89,7 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 				s << "psycle: core: machine factory: create machine: plugin not allowed to run: " << key.dllName();
 				loggers::warning()(s.str());
 			}
-			return hosts_[Hosts::INTERNAL]->CreateMachine(*finder_,MachineKey::dummy,id);
+			return hosts_[Hosts::INTERNAL]->CreateMachine(*finder_,InternalKeys::dummy,id);
 		}
 	}
 	if(loggers::information()()) {
@@ -100,14 +101,14 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 		loggers::information()(s.str());
 	}
 	Machine* mac = hosts_[key.host()]->CreateMachine(*finder_, key, id);
-	if (mac && mac->getMachineKey() != MachineKey::master && 
-		mac->getMachineKey() != MachineKey::failednative &&
-		mac->getMachineKey() != MachineKey::wrapperVst &&
-		mac->getMachineKey() != MachineKey::invalid) {
+	if (mac && mac->getMachineKey() != InternalKeys::master && 
+		mac->getMachineKey() != InternalKeys::failednative &&
+		mac->getMachineKey() != InternalKeys::wrapperVst &&
+		mac->getMachineKey() != InternalKeys::invalid) {
 		//Workaround for some where the first work call initializes some variables.
 		///\todo: Should better be done inside the host, since it may be enough to do it
 		// for VST and fix whichever native or internal that needed it. 
-		if (key != MachineKey::wrapperVst) 
+		if (key != InternalKeys::wrapperVst) 
 		{
 			mac->PreWork(MAX_BUFFER_LENGTH, true);
 			mac->GenerateAudio(MAX_BUFFER_LENGTH);

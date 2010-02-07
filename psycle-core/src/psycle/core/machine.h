@@ -269,7 +269,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\}
 
 	public:
-		virtual MachineKey getMachineKey() const = 0;
+		virtual const MachineKey& getMachineKey() const = 0;
 
 	///\name ctor/dtor
 	///\{

@@ -8,6 +8,7 @@
 #include "song.h"
 #include "fileio.h"
 #include "cpu_time_clock.hpp"
+#include "internalkeys.hpp"
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
@@ -667,7 +668,7 @@ Machine::sched_deps Machine::sched_inputs() const {
 				nmac = callbacks->song().machine(nmac->_outputMachines[i]);
 				break;
 			}
-			if (nmac->getMachineKey() == MachineKey::mixer) {
+			if (nmac->getMachineKey() == InternalKeys::mixer) {
 				break;
 			}
 			if (nmac->_connectedOutputs == 0) {
@@ -698,7 +699,7 @@ bool Machine::sched_process(unsigned int frames) {
 		Machine & input_node(*callbacks->song().machine(_inputMachines[i]));
 		if(!input_node.Standby()) Standby(false);
 		// Mixer already prepares the buffers onto the sends.
-		if(!Standby() && (input_node.getMachineKey() != MachineKey::mixer || !_isMixerSend)) {
+		if(!Standby() && (input_node.getMachineKey() != InternalKeys::mixer || !_isMixerSend)) {
 			dsp::Add(input_node._pSamplesL, _pSamplesL, frames, input_node.lVol() * _inputConVol[i]);
 			dsp::Add(input_node._pSamplesR, _pSamplesR, frames, input_node.rVol() * _inputConVol[i]);
 		}

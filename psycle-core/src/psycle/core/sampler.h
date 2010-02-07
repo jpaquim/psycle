@@ -10,6 +10,7 @@
 #include "instrument.h"
 #include "instpreview.h"
 #include "machine.h"
+#include "internalkeys.hpp"
 
 #include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/filter.hpp>
@@ -106,7 +107,7 @@ namespace psycle { namespace core {
 			virtual void SetSampleRate(int sr);
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
-			virtual MachineKey getMachineKey() const { return MachineKey::sampler; }
+			virtual const MachineKey& getMachineKey() const { return InternalKeys::sampler; }
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);

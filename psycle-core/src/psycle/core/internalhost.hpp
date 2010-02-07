@@ -9,23 +9,6 @@
 
 namespace psycle { namespace core {
 
-// type InternalMacs::type
-// Allows to differentiate between internal machines.
-// They are not intended to be used from outside. Use MachineKey for that.
-namespace InternalMacs {
-	enum type_t {
-		MASTER = 0,
-		DUMMY,
-		SAMPLER,
-		XMSAMPLER,
-		DUPLICATOR,
-		MIXER,
-		AUDIOINPUT,
-		LFO,
-		//Keep at Last position.
-		NUM_MACS
-	};
-}
 
 class PSYCLE__CORE__DECL InternalHost : public MachineHost {
 	protected:

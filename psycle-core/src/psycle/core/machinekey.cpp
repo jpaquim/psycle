@@ -8,28 +8,17 @@
 #include <algorithm>
 
 namespace psycle { namespace core {
-	
+
 		struct ToLower {
 			char operator() (char c) const  { return std::tolower(c); }
 		};
 
-		const MachineKey MachineKey::invalid(Hosts::INTERNAL,"<invalid>", -1);
-		const MachineKey MachineKey::master(Hosts::INTERNAL,"<master>", InternalMacs::MASTER);
-		const MachineKey MachineKey::dummy(Hosts::INTERNAL,"<dummy>", InternalMacs::DUMMY);
-		const MachineKey MachineKey::sampler(Hosts::INTERNAL,"<sampler>", InternalMacs::SAMPLER );
-		const MachineKey MachineKey::sampulse(Hosts::INTERNAL,"<xm-sampler>", InternalMacs::XMSAMPLER );
-		const MachineKey MachineKey::duplicator(Hosts::INTERNAL,"<duplicator>", InternalMacs::DUPLICATOR);
-		const MachineKey MachineKey::mixer(Hosts::INTERNAL,"<mixer>", InternalMacs::MIXER );
-		const MachineKey MachineKey::audioinput(Hosts::INTERNAL,"<audio-input>", InternalMacs::AUDIOINPUT );
-		const MachineKey MachineKey::lfo(Hosts::INTERNAL,"<lfo>", InternalMacs::LFO );
-		const MachineKey MachineKey::failednative(Hosts::NATIVE,"<failed-native>", 0);
-		const MachineKey MachineKey::wrapperVst(Hosts::VST,"<vst-wrapper>", 0);
 
 		MachineKey::MachineKey( )
 		:
 			dllName_(),
 			host_(Hosts::INTERNAL),
-			index_(-1)
+			index_(uint32_t(-1))
 		{}
 		MachineKey::MachineKey( const MachineKey & key)
 		:

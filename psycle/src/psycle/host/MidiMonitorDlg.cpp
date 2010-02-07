@@ -6,6 +6,7 @@
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
+#include <psycle/core/internalkeys.hpp>
 using namespace psycle::core;
 #else
 #include "Song.hpp"
@@ -373,11 +374,11 @@ namespace psycle {
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						if (pMachine->getMachineKey() == MachineKey::sampler) {
+						if (pMachine->getMachineKey() == InternalKeys::sampler) {
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[instrument]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
-						else if ( pMachine->getMachineKey() == MachineKey::sampulse) {
+						else if ( pMachine->getMachineKey() == InternalKeys::sampulse) {
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song().rInstrument(instrument).Name() );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
