@@ -229,11 +229,10 @@ void Mixer::Mix(int numSamples)
 }
 
 /// tells the scheduler which machines to process before this one
-Mixer::sched_deps Mixer::sched_inputs() const {
-	sched_deps result;
+void Mixer::sched_inputs(sched_deps & result) const {
 	if(mixed) {
 		// step 1: send signal to fx
-		result = Machine::sched_inputs();
+		Machine::sched_inputs(result);
 	} else {
 		// step 2: mix with return fx
 		for(unsigned int i = 0; i < numreturns(); ++i) {
@@ -243,12 +242,10 @@ Mixer::sched_deps Mixer::sched_inputs() const {
 			}
 		}
 	}
-	return result;
 }
 
 /// tells the scheduler which machines may be processed after this one
-Mixer::sched_deps Mixer::sched_outputs() const {
-	sched_deps result;
+void Mixer::sched_outputs(sched_deps & result) const {
 	if(!mixed) {
 		// step 1: send signal to fx
 		for (int i=0; i<numsends(); i++) if (Send(i).IsValid()) {
@@ -257,9 +254,8 @@ Mixer::sched_deps Mixer::sched_outputs() const {
 		}
 	} else {
 		// step 2: mix with return fx
-		result = Machine::sched_outputs();
+		Machine::sched_outputs(result);
 	}
-	return result;
 }
 
 /// called by the scheduler to ask for the actual processing of the machine

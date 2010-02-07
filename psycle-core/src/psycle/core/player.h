@@ -261,6 +261,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			/// nodes ready to be processed, just waiting for a free thread
 			nodes_queue_type nodes_queue_;
 
+			Machine::sched_deps input_nodes_, output_nodes_;
+
 			std::size_t graph_size_, processed_node_count_;
 
 			void suspend_and_compute_plan();

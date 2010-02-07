@@ -395,9 +395,9 @@ class PSYCLE__CORE__DECL Machine {
 			bool sched_processed_;
 			typedef std::list<Machine const*> sched_deps;
 			/// tells the scheduler which machines to process before this one
-			virtual sched_deps sched_inputs() const;
+			virtual void sched_inputs(sched_deps&) const;
 			/// tells the scheduler which machines may be processed after this one
-			virtual sched_deps sched_outputs() const;
+			virtual void sched_outputs(sched_deps&) const;
 			/// called by the scheduler to ask for the actual processing of the machine
 			virtual bool sched_process(unsigned int frames);
 	///\}
