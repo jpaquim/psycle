@@ -8,6 +8,7 @@
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/cpu_time_clock.hpp>
+#include <universalis/stdlib/thread.hpp>
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
@@ -18,6 +19,7 @@
 namespace psycle { namespace host {
 
 using namespace core;
+using namespace universalis::stdlib;
 
 CInfoDlg::CInfoDlg(ProjectData* projects, CWnd* pParent)
 : CDialog(CInfoDlg::IDD, pParent), projects_(projects) {}
@@ -122,7 +124,7 @@ void CInfoDlg::OnTimer(UINT nIDEvent) {
 		LARGE_INTEGER frequency;
 		if(!::QueryPerformanceFrequency(&frequency)) strcpy(buffer, "unsupported");
 		if(frequency.QuadPart / 1000000 < 10) strcpy(buffer, "unknown");
-		else sprintf(buffer, "%d MHz", frequency.QuadPart / 1000000);
+		else sprintf(buffer, "%dx%d MHz", thread::hardware_concurrency(), frequency.QuadPart / 1000000);
 		processor_label_.SetWindowText(buffer);
 	}
 
