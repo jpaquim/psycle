@@ -1,3 +1,7 @@
 TEMPLATE = subdirs
-CONFIG *= ordered
-SUBDIRS *= qmake
+
+# include the base stuff shared amongst all qmake projects.
+include(../build-systems/qmake/common.pri)
+
+addSubdirs(qmake)
+
