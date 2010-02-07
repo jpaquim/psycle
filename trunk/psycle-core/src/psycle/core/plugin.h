@@ -8,12 +8,22 @@
 #include "machine.h"
 #include <psycle/plugin_interface.hpp>
 
-namespace psycle { namespace core {
-	typedef psycle::plugin_interface::CMachineInfo * (* GETINFO) ();
-	typedef psycle::plugin_interface::CMachineInterface * (* CREATEMACHINE) ();
-	typedef void (* DELETEMACHINE) (psycle::plugin_interface::CMachineInterface &);
 
-	class PluginFxCallback : public psycle::plugin_interface::CFxCallback {
+/*************************************************************************
+**************************************************************************
+**************************************************************************
+*                 TODO proxy protection destroyed!
+**************************************************************************
+**************************************************************************
+*************************************************************************/
+
+namespace psycle { namespace core {
+
+typedef psycle::plugin_interface::CMachineInfo * (* GETINFO) ();
+typedef psycle::plugin_interface::CMachineInterface * (* CREATEMACHINE) ();
+typedef void (* DELETEMACHINE) (psycle::plugin_interface::CMachineInterface &);
+
+class PluginFxCallback : public psycle::plugin_interface::CFxCallback {
 	public:
 		/* implement */ void MessBox(char const * ptxt, char const * caption, unsigned int type) const;
 		/* implement */ int GetTickLength() const;

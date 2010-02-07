@@ -13,16 +13,18 @@
 #include "playertimeinfo.h"
 #include "machinekey.hpp"
 
+#include <universalis/os/loggers.hpp>
 #include <universalis/stdlib/cstdint.hpp>
+#include <universalis/stdlib/date_time.hpp>
 #include <cassert>
 #include <deque>
 #include <map>
 #include <stdexcept>
-#include <universalis/stdlib/date_time.hpp>
 
 namespace psycle { namespace core {
 
 using namespace universalis::stdlib;
+namespace loggers = universalis::os::loggers;
 
 class RiffFile;
 
@@ -285,7 +287,6 @@ class PSYCLE__CORE__DECL Machine {
 		virtual void Init();
 			
 		virtual void PreWork(int numSamples, bool clear = true);
-		/// [bohan] this used to be protected, but it needs to be public for flat (non-recursive) processing (and Work() will disappear)
 		virtual int GenerateAudio(int numsamples);
 			
 		virtual void AddEvent(double offset, int track, const PatternEvent & event);
@@ -376,11 +377,12 @@ class PSYCLE__CORE__DECL Machine {
 	///\{
 		public:
 			/// virtual because the mixer machine has its own implementation
-			virtual void Work(int numSamples);
-			virtual void WorkWires(int numSamples, bool mix = true);
+			virtual void recursive_process(unsigned int frames);
+			void recursive_process_deps(unsigned int frames, bool mix = true);
 		public:///\todo private:
-			bool _waitingForSound;
-			bool _worked;
+			/// guard to avoid feedback loops
+			bool recursive_is_processing_;
+			bool recursive_processed_;
 	///\}
 
 	///\name used by the multi-threaded scheduler
@@ -400,30 +402,22 @@ class PSYCLE__CORE__DECL Machine {
 			virtual bool sched_process(unsigned int frames);
 	///\}
 
-	///\name schedule ... time measurement
+	///\name cpu time usage measurement
 	///\{
-		public: void reset_time_measurement();
+		public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
 
-		public:    nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
-		protected: nanoseconds accumulated_processing_time_;
+		public:  nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		private: nanoseconds accumulated_processing_time_;
+		protected: void accumulate_processing_time(nanoseconds ns) throw() {
+				if(loggers::warning() && ns.get_count() < 0) {
+					std::ostringstream s;
+					s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				} else accumulated_processing_time_ += ns;
+			}
 
-		public:    uint64_t processing_count() const throw() { return processing_count_; }
+		public:  uint64_t processing_count() const throw() { return processing_count_; }
 		protected: uint64_t processing_count_;
-
-		public:    uint64_t processing_count_no_zeroes() const throw() { return processing_count_no_zeroes_; }
-		protected: uint64_t processing_count_no_zeroes_;
-
-		protected: nanoseconds cpu_time_clock() {
-			#if 0
-				return hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch();
-			#elif 0
-				return universalis::os::clocks::thread_cpu_time::current();
-			#elif 0
-				return universalis::os::clocks::process_cpu_time::current();
-			#else
-				return universalis::os::clocks::monotonic::current();
-			#endif
-		}
 	///\}
 
 	///\name crash handling

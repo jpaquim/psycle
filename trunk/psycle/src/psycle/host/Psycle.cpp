@@ -74,8 +74,6 @@ namespace psycle {
 			
 			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 			
-			Global::_cpuHz = cpu::cycles_per_second();
-
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
 			CMainFrame* pFrame = new CMainFrame();

@@ -7,15 +7,14 @@
 #include "player.h"
 #include "song.h"
 #include "fileio.h"
+#include "cpu_time_clock.hpp"
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
-#include <universalis/os/loggers.hpp>
 
 namespace psycle { namespace core {
 
 using namespace helpers;
 using namespace helpers::math;
-namespace loggers = universalis::os::loggers;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Mixer
@@ -66,26 +65,26 @@ void Mixer::Tick( int /*channel*/, const PatternEvent & pData )
 	}
 }
 
-void Mixer::Work( int numSamples )
-{
-	if ( _mute || Bypass())
-	{
-		WorkWires(numSamples);
+void Mixer::recursive_process(unsigned int frames) {
+	if(_mute || Bypass()) {
+		recursive_process_deps(frames);
 		return;
 	}
 
 	// Step One, do the usual work, except mixing all the inputs to a single stream.
-	WorkWires( numSamples, false );
+	recursive_process_deps(frames, false);
 	// Step Two, prepare input signals for the Send Fx, and make them work
-	FxSend( numSamples, true );
-	// Step Three, Mix the returns of the Send Fx's with the leveled input signal
-	//cpu::cycles_type cost(cpu::cycles());
-	Mix(numSamples);
-	dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-	Machine::UpdateVuAndStanbyFlag(numSamples);
-	//cost = cpu::cycles() - cost;
+	FxSend(frames, true);
+	{ // Step Three, Mix the returns of the Send Fx's with the leveled input signal
+		nanoseconds const t0(cpu_time_clock());
+		Mix(frames);
+		dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+		Machine::UpdateVuAndStanbyFlag(frames);
+		nanoseconds const t1(cpu_time_clock());
+		accumulate_processing_time(t1 - t0);
+	}
 
-	_worked = true;
+	recursive_processed_ = true;
 	return;
 }
 
@@ -99,7 +98,7 @@ void Mixer::FxSend(int numSamples, bool recurse)
 		{
 			Machine* pSendMachine = callbacks->song().machine(sends_[i].machine_);
 			assert(pSendMachine);
-			if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
+			if (!pSendMachine->recursive_processed_ && !pSendMachine->recursive_is_processing_)
 			{
 				bool soundready=false;
 				// Mix all the inputs and route them to the send fx.
@@ -156,9 +155,9 @@ void Mixer::FxSend(int numSamples, bool recurse)
 				// tell the FX to work, now that the input is ready.
 				if(recurse) {
 					Machine* pRetMachine = callbacks->song().machine(Return(i).Wire().machine_);
-					pRetMachine->Work(numSamples);
+					pRetMachine->recursive_process(numSamples);
 					/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
-					if(!pRetMachine->Standby())Standby(false);
+					if(!pRetMachine->Standby()) Standby(false);
 				}
 			}
 		}
@@ -280,16 +279,7 @@ bool Mixer::sched_process(unsigned int frames) {
 	}
 
 	nanoseconds const t1(cpu_time_clock());
-	if(t1 > t0) {
-		accumulated_processing_time_ += t1 - t0;
-		if(mixed) ++processing_count_no_zeroes_;
-	} else if(loggers::warning() && t1 < t0) {
-		std::ostringstream s;
-		s << "time went backward: "
-			<< t0.get_count() * 1e-9 << "s, "
-			<< t1.get_count() * 1e-9 << 's';
-		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
+	accumulate_processing_time(t1 - t0);
 	if(mixed) ++processing_count_;
 	
 	return mixed;

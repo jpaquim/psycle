@@ -8,7 +8,8 @@
 #include "machine.h"
 #include "sampler.h"
 #include "song.h"
-#if defined _WIN32 || defined _WIN64 
+#include "cpu_time_clock.hpp"
+#if defined DIVERSALIS__OS__MICROSOFT
 	#include "vsthost.h"
 	#include "machinefactory.h"
 #endif
@@ -210,14 +211,23 @@ void Player::clear_plan() {
 }
 
 void Player::process(int samples) {
+	nanoseconds const t0(cpu_time_clock());
 	int remaining_samples = samples;
 	while(remaining_samples) {
 		int const amount(std::min(remaining_samples, MAX_BUFFER_LENGTH));
-		// reset all machine buffers
-		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
+		{ // reset all machine buffers
+			#if 0 // currently, routing time is already counted in each machine's PreWork function.. not sure it's a good thing.
+				nanoseconds const t0(cpu_time_clock());
+			#endif
+			for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
+			#if 0 // currently, routing time is already counted in each machine's PreWork function.. not sure it's a good thing.
+				nanoseconds const t1(cpu_time_clock());
+				song().accumulate_routing_time(t1 - t0);
+			#endif
+		}
 		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
 		if(threads_.empty()) // single-threaded, recursive processing
-			song().machine(MASTER_INDEX)->Work(amount);
+			song().machine(MASTER_INDEX)->recursive_process(amount);
 		else { // multi-threaded scheduling
 			// we push all the terminal nodes to the processing queue
 			{ scoped_lock lock(mutex_);
@@ -241,6 +251,8 @@ void Player::process(int samples) {
 		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
 		timeInfo_.setSamplePos(((Master*)song().machine(MASTER_INDEX))->sampleCount);
 	}
+	nanoseconds const t1(cpu_time_clock());
+	song().accumulate_processing_time(t1 - t0);
 }
 
 void Player::thread_function(std::size_t thread_number) {
@@ -427,31 +439,6 @@ void Player::stop() {
 	// is a way to make autorecording ignore the song length and keep recording until intentionally stopping
 	// the recording (not the playback)
 	//if(autoRecord_) stopRecording();
-
-	// dump time measurements
-	std::cout << "time measurements: \n";
-	nanoseconds total;
-	for(int m(0); m < MAX_MACHINES; ++m) if(song().machine(m)) {
-		Machine & node(*song().machine(m));
-		std::cout
-			<< node.GetEditName()
-			<< " (" << universalis::compiler::typenameof(node)
-			<< ", lib " << node.GetDllName()
-			<< "): ";
-		if(!node.processing_count()) std::cout << "not processed\n";
-		else {
-			std::cout
-				<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
-				<< node.processing_count() << " = "
-				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << 's';
-			if(node.processing_count() > node.processing_count_no_zeroes())
-				std::cout << ", zeroes: " << node.processing_count() - node.processing_count_no_zeroes();
-			std::cout << '\n';
-		}
-		total += node.accumulated_processing_time();
-		node.reset_time_measurement();
-	}
-	std::cout << "total: " << 1e-9 * total.get_count() << "s\n";
 }
 
 void Player::stop_threads() {
@@ -475,14 +462,13 @@ void Player::stop_threads() {
 
 void Player::samples_per_second(int samples_per_second) {
 	timeInfo_.setSampleRate(samples_per_second);
-#if defined _WIN32 || defined _WIN64 
-	//this updates the vstTimeInfo. The plugins themselves are still informed via the setsamplerate call
-	((vst::host*)MachineFactory::getInstance().getHosts()[Hosts::VST])->ChangeSampleRate(samples_per_second);
-#endif
-
+	#if defined DIVERSALIS__OS__MICROSOFT
+		// update the vstTimeInfo. The plugins themselves are still informed via the setSampleRate call
+		static_cast<vst::host&>(*MachineFactory::getInstance().getHosts()[Hosts::VST]).ChangeSampleRate(samples_per_second);
+	#endif
 	if(!song_) return;
 	///\todo update the source code of the plugins...
-	for(int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(samples_per_second);
+	for(unsigned int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(samples_per_second);
 }
 
 float * Player::Work(int numSamples) {

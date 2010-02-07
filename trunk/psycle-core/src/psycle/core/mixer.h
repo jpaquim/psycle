@@ -187,7 +187,9 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 		virtual ~Mixer() throw();
 		virtual void Init(void);
 		virtual void Tick( int channel, const PatternEvent & pData );
-		virtual void Work(int numSamples );
+
+		virtual void recursive_process(unsigned int frames);
+
 		void FxSend(int numSamples, bool recurse = true);
 		void Mix(int numSamples);
 		virtual void InsertInputWire(Machine& srcMac, Wire::id_type dstWire,InPort::id_type dstType, float initialVol=1.0f);

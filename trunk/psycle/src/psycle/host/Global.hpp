@@ -44,39 +44,6 @@ namespace psycle {
 		class Configuration;
 		class InputHandler;
 
-		#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			class Song;
-			class Player;
-			namespace vst {
-				class AudioMaster;
-			}
-		#endif
-
-		//\todo: move this source to a better place.
-		namespace cpu {
-			typedef std::uint64_t cycles_type;
-
-			cycles_type inline cycles() {
-				#if defined DIVERSALIS__OS__MICROSOFT
-					LARGE_INTEGER result;
-					QueryPerformanceCounter(&result);
-					return result.QuadPart;
-				#else
-					return universalis::os::clocks::realtime::current();
-				#endif
-			}
-
-			cycles_type inline cycles_per_second() {
-				#if defined DIVERSALIS__OS__MICROSOFT
-					LARGE_INTEGER result;
-					QueryPerformanceFrequency(&result);
-					return result.QuadPart;
-				#else
-					return universalis::os::clocks::realtime::frequency();
-				#endif
-			}
-		}
-
 		class Global {
 			public:
 				Global();
@@ -85,9 +52,6 @@ namespace psycle {
 				static Player * pPlayer;
 				static Configuration * pConfig;
 				static dsp::Resampler * pResampler;
-
-				///\todo shouldn't we update this value regularly?
-				static cpu::cycles_type _cpuHz;
 
 				#if !defined WINAMP_PLUGIN
 					static InputHandler* pInputHandler;
@@ -102,8 +66,6 @@ namespace psycle {
 				static Player& player() { return *pPlayer; }
 				static Configuration & configuration() { return *pConfig; }
 				static dsp::Resampler & resampler() { return *pResampler; }
-				static cpu::cycles_type cpu_frequency() /*const*/ throw() { return _cpuHz; }
-				//void cpu_frequency(cpu::cycles_type const & value) throw() { cpu_frequency_ = value; }
 		};
 	}
 }

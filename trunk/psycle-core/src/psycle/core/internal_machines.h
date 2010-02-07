@@ -104,10 +104,10 @@ class PSYCLE__CORE__DECL AudioRecorder : public Machine
 		AudioRecorder(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
 		virtual ~AudioRecorder() throw();
-		virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
 		virtual void Init(void);
 		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 		virtual void SaveSpecificChunk(RiffFile * pFile) const;
+		virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
 		virtual int GenerateAudio(int numSamples);
 		virtual MachineKey getMachineKey() const { return MachineKey::audioinput; }
 		virtual std::string GetName() const { return _psName; }

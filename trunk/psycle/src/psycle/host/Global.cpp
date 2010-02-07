@@ -25,14 +25,12 @@ namespace psycle { namespace host {
 Player * Global::pPlayer(0);
 helpers::dsp::Resampler * Global::pResampler(0);
 Configuration * Global::pConfig(0);
-cpu::cycles_type Global::_cpuHz(cpu::cycles_per_second());
 
 #if !defined WINAMP_PLUGIN
 	InputHandler * Global::pInputHandler(0);
 #endif //!defined WINAMP_PLUGIN
 
 Global::Global() {
-	_cpuHz = cpu::cycles_per_second();
 	pConfig = new Configuration();
 	pResampler = new helpers::dsp::Cubic();
 	pResampler->SetQuality(helpers::dsp::R_LINEAR);

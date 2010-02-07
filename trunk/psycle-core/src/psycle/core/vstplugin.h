@@ -20,11 +20,8 @@
 #ifndef PSYCLE__CORE__VSTPLUGIN__INCLUDED
 #define PSYCLE__CORE__VSTPLUGIN__INCLUDED
 
-#ifndef DIVERSALIS__OS__MICROSOFT
-	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning ################# UNIMPLEMENTED #################
-	#endif
-#else
+#include <diversalis/os.hpp>
+#ifdef DIVERSALIS__OS__MICROSOFT
 	#include "machine.h"
 	#include <seib/vst/CVSTHost.Seib.hpp>
 	#include <psycle/helpers/math.hpp>

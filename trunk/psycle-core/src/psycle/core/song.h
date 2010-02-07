@@ -186,6 +186,32 @@ class PSYCLE__CORE__DECL CoreSong {
 		// Current selected machine number in the GUI
 		Machine::id_type seqBus;
 
+		/// cpu time usage measurement
+		void reset_time_measurement() { accumulated_processing_time_ = accumulated_routing_time_ = 0; }
+
+		/// total processing cpu time usage measurement
+		nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+
+		/// total processing cpu time usage measurement
+		void accumulate_processing_time(nanoseconds ns) throw() {
+			if(loggers::warning() && ns.get_count() < 0) {
+				std::ostringstream s;
+				s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			} else accumulated_processing_time_ += ns;
+		}
+
+		/// routing cpu time usage measurement
+		nanoseconds accumulated_routing_time() const throw() { return accumulated_routing_time_; }
+		/// routing cpu time usage measurement
+		void accumulate_routing_time(nanoseconds ns) throw() {
+			if(loggers::warning() && ns.get_count() < 0) {
+				std::ostringstream s;
+				s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			} else accumulated_routing_time_ += ns;
+		}
+
 	protected:
 		bool ValidateMixerSendCandidate(Machine& mac,bool rewiring=false);
 		protected:
@@ -193,7 +219,6 @@ class PSYCLE__CORE__DECL CoreSong {
 		void /*Delete*/FreeInstrumentsMemory();
 		// removes the sample/layer of the instrument
 		void DeleteLayer(Instrument::id_type id);
-
 
 	private:
 		static SongSerializer serializer;
@@ -208,16 +233,7 @@ class PSYCLE__CORE__DECL CoreSong {
 		Sequence sequence_;
 		Machine* machine_[MAX_MACHINES];
 		mutable mutex mutex_;
-		#if 0 ///\todo Rethink about cpu measurements, and reenable/recode what's needed
-		///\name cpu cost measurement
-		///\{
-			public:
-				void inline cpu_idle(cpu::cycles_type const & value) throw() { cpu_idle_ = value; }
-				cpu::cycles_type inline cpu_idle() const throw() { return cpu_idle_; }
-			private:
-				cpu::cycles_type cpu_idle_;
-		///\}
-	#endif
+		nanoseconds accumulated_processing_time_, accumulated_routing_time_;
 };
 
 /// Song extends CoreSong with UI-related stuff

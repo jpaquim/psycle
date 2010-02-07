@@ -2,39 +2,44 @@
 ///\brief interface file for psycle::host::CInfoDlg.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+#include <universalis/stdlib/date_time.hpp>
 
-		/// info window.
-		class CInfoDlg : public CDialog {
-		public:
-			CInfoDlg(class ProjectData* projects, CWnd* pParent = 0);
-			~CInfoDlg() {}
+namespace psycle { namespace host {
 
-			void UpdateInfo();
+using namespace universalis::stdlib;
 
-		protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			virtual BOOL OnInitDialog();
-			afx_msg void OnTimer(UINT nIDEvent);		
-			DECLARE_MESSAGE_MAP()
+/// info window.
+class CInfoDlg : public CDialog {
+	public:
+		CInfoDlg(class ProjectData* projects, CWnd* pParent = 0);
+		~CInfoDlg() {}
 
-		private:
-			void InitTimer();			
+		void UpdateInfo();
 
-			enum { IDD = IDD_INFO };
-			int item_count_;
-			CStatic	mem_virtual_;
-			CStatic	mem_pagefile_;
-			CStatic	mem_phy_;
-			CStatic	mem_reso_;
-			CStatic	cpurout_;
-			CStatic	machscpu_;
-			CStatic	processor_label_;
-			CStatic	cpuidlelabel_;
-			CListCtrl machlist_;
-			ProjectData* projects_;
-		};
+	protected:
+		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+		virtual BOOL OnInitDialog();
+		afx_msg void OnTimer(UINT nIDEvent);		
+		DECLARE_MESSAGE_MAP()
 
-	}   // namespace host
-}   // namespace psycle
+	private:
+		void InitTimer();			
+
+		enum { IDD = IDD_INFO };
+
+		CStatic	mem_virtual_;
+		CStatic	mem_pagefile_;
+		CStatic	mem_phy_;
+		CStatic	mem_reso_;
+		CStatic	cpurout_;
+		CStatic	machscpu_;
+		CStatic	processor_label_;
+		CStatic	cpuidlelabel_;
+		CListCtrl machlist_;
+
+		unsigned int item_count_;
+		nanoseconds last_update_time_;
+		ProjectData* projects_;
+};
+
+}}

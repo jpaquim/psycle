@@ -5,6 +5,7 @@
 #include "xmsampler.h"
 #include "xminstrument.h"
 #include "song.h"
+#include "cpu_time_clock.hpp"
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <universalis/stdlib/cstdint.hpp>
@@ -2307,9 +2308,10 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 {
 	scoped_lock lock(*this);
-	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
-	//cpu::cycles_type cost = cpu::cycles();
+	nanoseconds const t0(cpu_time_clock());
+
+	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
 	if (!_mute)
 	{
@@ -2443,10 +2445,13 @@ int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 	}
 
 	else Standby(true);
-	//_cpuCost += cpu::cycles() - cost;
-	_worked = true;
+
+	nanoseconds const t1(cpu_time_clock());
+	accumulate_processing_time(t1 - t0);
+
+	recursive_processed_ = true;
 	return numSamples;
-}// XMSampler::Work()
+}
 
 void XMSampler::WorkVoices(int startSample, int numsamples)
 {

@@ -2,12 +2,15 @@
 ///\interface psycle::host::Registry.
 #pragma once
 #include "Psycle.hpp"
-#include <string>
+#include <universalis/os/loggers.hpp>
 #include <boost/static_assert.hpp>
+#include <string>
 namespace psycle
 {
 	namespace host
 	{
+		namespace loggers = universalis::os::loggers;
+
 		/// the evil microsoft windows registry.
 		class Registry
 		{
@@ -62,7 +65,7 @@ namespace psycle
 				result SetValue(name const & name, x const & data, type const & type = REG_BINARY)
 				{
 					result const error(::RegSetValueEx(current, name.c_str(), 0, type , reinterpret_cast<unsigned char const *>(&data), sizeof data));
-					if(error != ERROR_SUCCESS) loggers::warning("could not write " + name + "to registry.");
+					if(error != ERROR_SUCCESS) loggers::warning()("could not write " + name + "to registry.");
 					return error;
 				}
 				result SetValue(name const &,              bool const & b);

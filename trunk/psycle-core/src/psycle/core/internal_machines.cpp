@@ -4,11 +4,10 @@
 #include <psycle/core/config.private.hpp>
 #include "internal_machines.h"
 
-///\todo: These two (two?!) includes need to be replaced by a "host" callback which gives such information.
 #include "player.h"
-
 #include "song.h"
 #include "fileio.h"
+#include "cpu_time_clock.hpp"
 
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
@@ -43,11 +42,8 @@ Dummy::~Dummy() throw() {
 }
 
 int Dummy::GenerateAudio(int numSamples) {
-	//cpu::cycles_type cost(cpu::cycles());
 	Machine::UpdateVuAndStanbyFlag(numSamples);
-	//cost = cpu::cycles() - cost;
-	//work_cpu_cost(work_cpu_cost() + cost);
-	_worked = true;
+	recursive_processed_ = true;
 	return numSamples;
 }
 
@@ -168,6 +164,9 @@ void DuplicatorMac::Tick( int channel, const PatternEvent & data ) {
 
 void DuplicatorMac::PreWork(int numSamples, bool clear) {
 	Machine::PreWork(numSamples, clear);
+	#if 0 // should do we count this in the processing time?
+		nanoseconds const t0(cpu_time_clock());
+	#endif
 	for(; !workEvents.empty(); workEvents.pop_front()) {
 		WorkEvent & workEvent = workEvents.front();
 		if(!_mute && !bisTicking) {
@@ -208,6 +207,10 @@ void DuplicatorMac::PreWork(int numSamples, bool clear) {
 		}
 		bisTicking = false;
 	}
+	#if 0 // should do we count this in the processing time?
+		nanoseconds const t1(cpu_time_clock());
+		accumulate_processing_time(t1 - t0);
+	#endif
 }
 
 void DuplicatorMac::AllocateVoice(int channel,int machine) {
@@ -280,7 +283,7 @@ bool DuplicatorMac::SetParameter(int numparam, int value) {
 }
 
 int DuplicatorMac::GenerateAudio( int numSamples ) {
-	_worked = true;
+	recursive_processed_ = true;
 	Standby(true);
 	return numSamples;
 }
@@ -355,8 +358,6 @@ void Master::Tick(int /*channel*/, const PatternEvent & data ) {
 }
 
 int Master::GenerateAudio( int numSamples ) {
-	//cpu::cycles_type cost(cpu::cycles());
-	
 	//if(!_mute) {
 	
 	float mv = value_mapper::map_255_1(_outDry);
@@ -439,10 +440,7 @@ int Master::GenerateAudio( int numSamples ) {
 	
 	sampleCount += numSamples;
 	
-	//cost = cpu::cycles() - cost;
-	//work_cpu_cost(work_cpu_cost() + cost);
-	
-	_worked = true;
+	recursive_processed_ = true;
 	return numSamples;
 }
 
@@ -524,7 +522,7 @@ int AudioRecorder::GenerateAudio(int numSamples)
 {
 	if (!_mute &&_initialized)
 	{
-		/*
+		/* ??? TODO ???
 		AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 		mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
 		// prevent crashing if the audio driver is not working.
@@ -536,8 +534,7 @@ int AudioRecorder::GenerateAudio(int numSamples)
 		UpdateVuAndStanbyFlag(numSamples);
 	}
 	else Standby(true);
-	//_cpuCost = 1;
-	_worked = true;
+	recursive_processed_ = true;
 	return numSamples;
 }
 
@@ -822,7 +819,8 @@ bool LFO::SetParameter(int numparam, int value)
 void LFO::PreWork(int numSamples, bool clear)
 {
 	Machine::PreWork(numSamples, clear);
-	//cpu::cycles_type cost(cpu::cycles());
+
+	nanoseconds const t0(cpu_time_clock());
 
 	int maxVal=0, minVal=0;
 	int curVal=0, newVal=0;
@@ -861,13 +859,13 @@ void LFO::PreWork(int numSamples, bool clear)
 	lfoPos += (lSpeed/ float(MAX_SPEED)) * (LFO_SIZE/float(minms/float(numSamples)));
 	if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
 
-	//cost = cpu::cycles() - cost;
-	//work_cpu_cost(work_cpu_cost() + cost);
+	nanoseconds const t1(cpu_time_clock());
+	accumulate_processing_time(t1 - t0);
 }
 
 int LFO::GenerateAudio( int numSamples )
 {
-	_worked=true;
+	recursive_processed_ = true;
 	return numSamples;
 }
 

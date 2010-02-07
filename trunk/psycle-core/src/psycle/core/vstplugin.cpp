@@ -3,16 +3,21 @@
 
 #include <psycle/core/config.private.hpp>
 
-#include "vstplugin.h"
+#include <diversalis/os.hpp>
+#ifndef DIVERSALIS__OS__MICROSOFT
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning ################# UNIMPLEMENTED #################
+	#endif
+#else
+	#include "vstplugin.h"
 
-#if defined DIVERSALIS__OS__MICROSOFT
+	#include "cpu_time_clock.hpp"
 	#include "player.h"
 	#include "playertimeinfo.h"
 	#include "fileio.h"
+
 	#include <psycle/helpers/dsp.hpp>
-
 	#include <universalis/os/aligned_memory_alloc.hpp>
-
 	#include <sstream>
 
 	#ifdef DIVERSALIS__OS__MICROSOFT
@@ -99,31 +104,27 @@
 
 
 		char temp[kVstMaxVendorStrLen];
-		memset(temp,0,sizeof(temp));
-		try
-		{
-			if ( GetPlugCategory() != kPlugCategShell )
-			{
+		std::memset(temp, 0, sizeof temp);
+		try {
+			if(GetPlugCategory() != kPlugCategShell) {
 				// GetEffectName is the better option to GetProductString.
 				// To the few that they show different values in these,
 				// synthedit plugins show only "SyntheditVST" in GetProductString()
 				// and others like battery 1 or psp-nitro, don't have GetProductString(),
 				// so it's almost a no-go.
-				if (GetEffectName(temp) && temp[0])_psName=temp;
-				else if(GetProductString(temp) && temp[0]) _psName=temp;
+				if(GetEffectName(temp) && temp[0]) _psName = temp;
+				else if(GetProductString(temp) && temp[0]) _psName = temp;
 				// This is a safe measure against some plugins that have noise at its output for some
 				// unexplained reason ( example : mda piano.dll )
-				Work(MAX_BUFFER_LENGTH);
+				recursive_process(MAX_BUFFER_LENGTH);
 			}
-			if (_psName.empty())
-			{
-				_psName=key.dllName();
-			}
+
+			if(_psName.empty()) _psName = key.dllName();
 
 			if(GetVendorString(temp) && temp[0]) _psAuthor = temp;
 			else _psAuthor = "Unknown vendor";
 			SetEditName(_psName);
-		}PSYCLE__HOST__CATCH_ALL(crashclass);
+		} PSYCLE__HOST__CATCH_ALL(crashclass);
 	}
 
 	plugin::~plugin( ) throw() {
@@ -541,7 +542,7 @@
 
 	int plugin::GenerateAudioInTicks(int startSample, int numsamples)
 	{
-		//cpu::cycles_type cost = cpu::cycles();
+		nanoseconds const t0(cpu_time_clock());
 		if(!Mute())
 		{
 			if (IsGenerator() || (!Standby() && !Bypass()) || bCanBypass)
@@ -725,14 +726,21 @@
 					std::memcpy(inputs[1],outputs[1],numsamples*sizeof(float));
 				}
 				UpdateVuAndStanbyFlag(numsamples);
-				//_cpuCost += cpu::cycles() - cost;
-				_worked = true;
+
+				nanoseconds const t1(cpu_time_clock());
+				accumulate_processing_time(t1 - t0);
+
+				recursive_processed_ = true;
 				return true;
 			}
 		}
-		//_cpuCost += cpu::cycles() - cost;
+
 		Machine::UpdateVuAndStanbyFlag(numsamples);
-		_worked = true;
+
+		nanoseconds const t1(cpu_time_clock());
+		accumulate_processing_time(t1 - t0);
+
+		recursive_processed_ = true;
 		return false;
 	}
 
@@ -837,4 +845,3 @@
 
 	}}}
 #endif
-
