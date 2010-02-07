@@ -83,7 +83,6 @@ node::node(class graph & graph, underlying_type & underlying)
 :
 	node_base(graph, underlying),
 	multiple_input_port_first_output_port_to_process_(),
-	accumulated_processing_time_(),
 	processing_count_(),
 	processing_count_no_zeroes_()
 {}

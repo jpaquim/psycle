@@ -83,7 +83,6 @@ node::node(class graph & graph, underlying_type & underlying)
 		boost::bind(&node::on_underlying_io_ready, this, _1))
 	),
 	waiting_for_io_ready_signal_(),
-	accumulated_processing_time_(),
 	processing_count_(),
 	processing_count_no_zeroes_()
 {}
