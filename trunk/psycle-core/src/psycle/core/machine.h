@@ -19,6 +19,7 @@
 #include <cassert>
 #include <deque>
 #include <map>
+#include <list>
 #include <stdexcept>
 
 namespace psycle { namespace core {
@@ -388,10 +389,10 @@ class PSYCLE__CORE__DECL Machine {
 	///\name used by the multi-threaded scheduler
 	///\{
 		protected:
-			/// The multi-threaded scheduler cannot use _worked because it's not thread-synchronised.
+			/// The multi-threaded scheduler cannot use recursive_processed_ because it's not thread-synchronised.
 			/// So, we define another boolean that's modified only by the multi-threaded scheduler,
 			/// with proper thread synchronisations.
-			/// The multi-threaded scheduler doesn't use _worked nor _waitingForSound.
+			/// The multi-threaded scheduler doesn't use recursive_processed_ nor recursive_is_processing_.
 			bool sched_processed_;
 			typedef std::list<Machine const*> sched_deps;
 			/// tells the scheduler which machines to process before this one
