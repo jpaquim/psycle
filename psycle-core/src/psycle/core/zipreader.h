@@ -41,7 +41,7 @@ struct zipreader_file {
 	unsigned int crc32;
 	unsigned int method;
 
-	unsigned char *filename_ptr;
+	char *filename_ptr;
 
 	zipreader *top;
 };
