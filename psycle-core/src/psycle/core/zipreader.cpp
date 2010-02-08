@@ -127,11 +127,11 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 		ldset[i] = lh;
 
 		/* next central directory header */
-		b += 46 + (n + m);
+		b += 46 + n + m;
 		names += n + 1;
 	}
-	zu.z = (zipreader *)malloc(sizeof(zipreader) + (sizeof(zipreader_file) * y) + names);
-	if (!zu.z) goto FAIL;
+	zu.raw = (char*)malloc(sizeof(zipreader) + (sizeof(zipreader_file) * y) + names);
+	if (!zu.raw) goto FAIL;
 	zu.z->fd = fd;
 	zu.z->headers = ldset;
 	zu.z->_fnp = zu.z->files = y;
@@ -171,7 +171,7 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 	return zu.z;
 
 FAIL:
-	free(zu.z);
+	free(zu.raw);
 	free(ldset);
 	return 0;
 }
