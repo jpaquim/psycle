@@ -241,7 +241,6 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void start_threads();
 			void stop_threads();
 
-			std::size_t thread_count_;
 			typedef std::list<thread*> threads_type;
 			threads_type threads_;
 			void thread_function(std::size_t thread_number);

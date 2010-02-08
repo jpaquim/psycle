@@ -8,9 +8,10 @@
 #define UNIVERSALIS__STDLIB__THREAD__INCLUDED
 #pragma once
 
-#include <diversalis/os.hpp>
-#include <universalis/os/sched.hpp>
 #include <boost/version.hpp>
+#if BOOST_VERSION < 103500
+	#include <universalis/os/sched.hpp>
+#endif
 #if BOOST_VERSION >= 103500 && defined BOOST_DATE_TIME_HAS_NANOSECONDS
 	#include <boost/thread/thread_time.hpp> // boost::get_system_time()
 	#include <boost/date_time/posix_time/posix_time_duration.hpp>
@@ -19,6 +20,7 @@
 #endif
 #include <boost/thread/thread.hpp>
 #include <boost/thread/once.hpp>
+#include <diversalis/os.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <windows.h>
 #endif
@@ -78,19 +80,9 @@ class thread {
 			#if BOOST_VERSION >= 103500
 				return impl_type::hardware_concurrency();
 			#else
-				using namespace os::sched;
-				process p;
-				return p.affinity_mask().active_count();
+				return os::sched::process().affinity_mask().active_count();
 			#endif
 		}
-
-		/// access to operations that are not part of the standard
-		typedef os::sched::thread non_std_extra_type;
-		#if BOOST_VERSION >= 103500
-			#define UNIVERSALIS__STDLIB__THREAD__INSTANCE_HAS_NON_STD_EXTRA
-			/// access to operations that are not part of the standard
-			non_std_extra_type non_std_extra() { non_std_extra_type result(native_handle()); return result; }
-		#endif
 };
 
 typedef boost::once_flag once_flag;
@@ -137,11 +129,6 @@ namespace this_thread {
 			#endif
 		);
 	}
-
-	/// access to operations that are not part of the standard
-	typedef thread::non_std_extra_type non_std_extra_type;
-	/// access to operations that are not part of the standard
-	non_std_extra_type inline non_std_extra() { non_std_extra_type result; return result; }
 }
 
 #if defined BOOST_AUTO_TEST_CASE

@@ -20,6 +20,7 @@
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
+#include <universalis/os/sched.hpp>
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <boost/bind.hpp>
@@ -75,27 +76,27 @@ void Player::start_threads() {
 	stop_requested_ = suspend_requested_ = false;
 	processed_node_count_ = suspended_ = 0;
 
-	thread_count_ = thread::hardware_concurrency();
+	unsigned int thread_count = thread::hardware_concurrency();
 	{ // thread count env var
 		char const * const env(std::getenv("PSYCLE_THREADS"));
 		if(env) {
 			std::stringstream s;
 			s << env;
-			s >> thread_count_;
+			s >> thread_count;
 		}
 	}
 	
 	if(loggers::information()) {
 		std::ostringstream s;
-		s << "psycle: core: player: using " << thread_count_ << " threads";
+		s << "psycle: core: player: using " << thread_count << " threads";
 		loggers::information()(s.str());
 	}
 
-	if(thread_count_ < 2) return; // don't create any thread, will use a single-threaded, recursive processing
+	if(thread_count < 2) return; // don't create any thread, will use a single-threaded, recursive processing
 
 	try {
 		// start the scheduling threads
-		for(std::size_t i(0); i < thread_count_; ++i)
+		for(std::size_t i(0); i < thread_count; ++i)
 			threads_.push_back(new thread(boost::bind(&Player::thread_function, this, i)));
 	} catch(...) {
 		{ scoped_lock lock(mutex_);
@@ -251,8 +252,9 @@ void Player::thread_function(std::size_t thread_number) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
+	// set thread name
 	universalis::os::thread_name thread_name;
-	{ // set thread name
+	{
 		std::ostringstream s;
 		s << universalis::compiler::typenameof(*this) << '#' << thread_number;
 		thread_name.set(s.str());
@@ -261,14 +263,34 @@ void Player::thread_function(std::size_t thread_number) {
 	// install cpu/os exception handler/translator
 	universalis::cpu::exception::install_handler_in_thread();
 
-	// set thread priority
-	try {
-		this_thread::non_std_extra().priority(this_thread::non_std_extra_type::priorities::highest);
-	} catch(universalis::os::exceptions::operation_not_permitted e) {
-		if(loggers::warning()) {
-			std::ostringstream s;
-			s << "could not set thread priority: " << e.what();
-			loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	{ // set thread priority and cpu affinity
+		using universalis::os::exceptions::operation_not_permitted;
+		using universalis::os::sched::thread;
+		thread t;
+
+		// set thread priority
+		try {
+			t.priority(thread::priorities::highest);
+		} catch(operation_not_permitted e) {
+			if(loggers::warning()) {
+				std::ostringstream s; s << "no permission to set thread priority: " << e.what();
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+		}
+
+		// set thread cpu affinity
+		try {
+			thread::affinity_mask_type af(t.affinity_mask());
+			if(af.active_count()) {
+				unsigned int rotated = 0, cpu_index = 0;
+				while(!af(cpu_index) || rotated++ != thread_number) ++cpu_index %= af.size();
+				thread::affinity_mask_type new_af; new_af(cpu_index, true); t.affinity_mask(new_af);
+			}
+		} catch(operation_not_permitted e) {
+			if(loggers::warning()) {
+				std::ostringstream s; s << "no permission to set thread cpu affinity: " << e.what();
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
 		}
 	}
 
