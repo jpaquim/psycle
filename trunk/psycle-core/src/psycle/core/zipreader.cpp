@@ -87,7 +87,11 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 	unsigned int n, m, lh;
 	unsigned int names;
 	unsigned int tail;
-	zipreader *z = 0;
+	union u {
+		char * raw;
+		zipreader * z;
+	} zu;
+	zu.z = 0;
 
 	ldset = (off_t*)malloc(y * sizeof(off_t));
 	if (!ldset) return 0;
@@ -113,7 +117,7 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 
 		n = (head2[28] | (((unsigned int)head2[29]) << 8));/* file name length */
 		m = (head2[30] | (((unsigned int)head2[31]) << 8)) /* extra field length */
-		+ (head2[31] | (((unsigned int)head2[32]) << 8)); /* file comment length */
+			+ (head2[31] | (((unsigned int)head2[32]) << 8)); /* file comment length */
 
 		/* local header offset */
 		lh = head2[42]
@@ -123,15 +127,14 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 		ldset[i] = lh;
 
 		/* next central directory header */
-		b += (46 + (n + m));
-		names += (n+1);
+		b += 46 + (n + m);
+		names += n + 1;
 	}
-	z = (zipreader *)malloc(sizeof(zipreader) + (sizeof(zipreader_file) * y)
-			+ names);
-	if (!z) goto FAIL;
-	z->fd = fd;
-	z->headers = ldset;
-	z->_fnp = z->files = y;
+	zu.z = (zipreader *)malloc(sizeof(zipreader) + (sizeof(zipreader_file) * y) + names);
+	if (!zu.z) goto FAIL;
+	zu.z->fd = fd;
+	zu.z->headers = ldset;
+	zu.z->_fnp = zu.z->files = y;
 	tail = names;
 	names = sizeof(zipreader) + (sizeof(zipreader_file) * y);
 	tail += names;
@@ -141,34 +144,34 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 		if (memcmp(head1, "PK\3\4", 4) != 0) goto FAIL;
 		n = (head1[26] | (((unsigned int)head1[27]) << 8));/* file name length */
 		m = (head1[28] | (((unsigned int)head1[29]) << 8));/* extra field length */
-		z->file[i].gpbits = head1[6] | (((unsigned int)head1[7]) << 8);
-		z->file[i].method = head1[8] | (((unsigned int)head1[9]) << 8);
-		z->file[i].crc32 = head1[14] | (((unsigned int)head1[15]) << 8)
+		zu.z->file[i].gpbits = head1[6] | (((unsigned int)head1[7]) << 8);
+		zu.z->file[i].method = head1[8] | (((unsigned int)head1[9]) << 8);
+		zu.z->file[i].crc32 = head1[14] | (((unsigned int)head1[15]) << 8)
 			| (((unsigned int)head1[16]) << 16)
 			| (((unsigned int)head1[17]) << 24);
-		z->file[i].csize = head1[18] | (((unsigned int)head1[19]) << 8)
+		zu.z->file[i].csize = head1[18] | (((unsigned int)head1[19]) << 8)
 			| (((unsigned int)head1[20]) << 16)
 			| (((unsigned int)head1[21]) << 24);
-		z->file[i].esize = head1[22] | (((unsigned int)head1[23]) << 8)
+		zu.z->file[i].esize = head1[22] | (((unsigned int)head1[23]) << 8)
 			| (((unsigned int)head1[24]) << 16)
 			| (((unsigned int)head1[25]) << 24);
-		z->file[i].filename_ptr = ((unsigned char *)z) + names;
+		zu.z->file[i].filename_ptr = zu.raw + names;
 
-		_zr_fix_name((char**)&z->file[i].filename_ptr);
+		_zr_fix_name(&zu.z->file[i].filename_ptr);
 
-		names += n+1;
+		names += n + 1;
 		if (names > tail) goto FAIL;
-		if (!_load(fd, (char*)z->file[i].filename_ptr, n)) goto FAIL;
-		z->file[i].filename_ptr[n] = 0; /* null terminate */
-		z->file[i].pos = (ldset[i] + n + m)+30;
-		z->file[i].top = z;
+		if (!_load(fd, zu.z->file[i].filename_ptr, n)) goto FAIL;
+		zu.z->file[i].filename_ptr[n] = 0; /* null terminate */
+		zu.z->file[i].pos = (ldset[i] + n + m) + 30;
+		zu.z->file[i].top = zu.z;
 	}
 
 	/* are we still here?!? i think we're done... */
-	return z;
+	return zu.z;
 
 FAIL:
-	free(z);
+	free(zu.z);
 	free(ldset);
 	return 0;
 }
