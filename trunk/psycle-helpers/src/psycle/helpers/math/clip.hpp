@@ -17,7 +17,7 @@ namespace psycle { namespace helpers { namespace math {
 
 /// ensures a value stays between two bounds
 template<typename X> UNIVERSALIS__COMPILER__CONST
-X inline clipped(X const & minimum, X const & value, X const & maximum) {
+X inline clipped(X minimum, X value, X maximum) {
 	// it looks a bit dumb to write a function to do that code,
 	// but maybe someone will find an optimised way to do this.
 	return value < minimum ? minimum : value > maximum ? maximum : value;
@@ -41,54 +41,50 @@ SignedIntegralResult inline clipped_lrint(Real x) {
 	return clipped_lrint<SignedIntegralResult, (sizeof(SignedIntegralResult) << 3)>(x);
 }
 
-
-
 /// combines float to signed integer conversion with clipping.
 // amount has to be a multiple of 8. and both in and out be 16byte aligned.
 inline void clip16_lrint(const float in[], std::int16_t out[], int amount) {
-#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
-	__m128 *psrc = (__m128*)in;
-	__m128i *pdst = (__m128i*)out;
-	do
-	{
-		__m128i tmpps1 = _mm_cvttps_epi32(*psrc++);
-		__m128i tmpps2 = _mm_cvttps_epi32(*psrc++);
-		*pdst = _mm_packs_epi32(tmpps1,tmpps2);
-		pdst++;
-		amount-=8;
-	} while(amount>0);
-#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
-	__asm
-	{
-		mov esi, pSrcSamples
-		mov edi, pDstSamples
-		mov eax, [amount]
-LOOPSTART:
-		CVTTPS2DQ xmm0, [esi]
-		add esi, 10H
-		CVTTPS2DQ xmm1, [esi]
-		add esi, 10H
-		PACKSSDW xmm1, xmm0
-		movaps [edi], xmm1
+	#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		__m128 *psrc = (__m128*)in;
+		__m128i *pdst = (__m128i*)out;
+		do
+		{
+			__m128i tmpps1 = _mm_cvttps_epi32(*psrc++);
+			__m128i tmpps2 = _mm_cvttps_epi32(*psrc++);
+			*pdst = _mm_packs_epi32(tmpps1,tmpps2);
+			pdst++;
+			amount-=8;
+		} while(amount>0);
+	#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		__asm
+		{
+			mov esi, pSrcSamples
+			mov edi, pDstSamples
+			mov eax, [amount]
+		LOOPSTART:
+			CVTTPS2DQ xmm0, [esi]
+			add esi, 10H
+			CVTTPS2DQ xmm1, [esi]
+			add esi, 10H
+			PACKSSDW xmm1, xmm0
+			movaps [edi], xmm1
 
-		add edi, 10H
-		sub eax, 8
-		cmp eax, 0
-		jle END
-		jmp LOOPSTART
-END:
-	}
+			add edi, 10H
+			sub eax, 8
+			cmp eax, 0
+			jle END
+			jmp LOOPSTART
+		END:
+		}
+	#else
+		int const max((1u << (16 - 1)) - 1); // The compiler is able to compute this statically.
+		int const min(-max - 1);
+		do {
+			*out++ = lrint<std::int16_t>(clipped(float(min), *in++, float(max)));
+		} while(--amount);
 
-#else
-	int const max((1u << (16 - 1)) - 1); // The compiler is able to compute this statically.
-	int const min(-max - 1);
-	do {
-		*out++ = lrint<std::int16_t>(clipped(float(min), *in++, float(max)));
-	} while(--amount);
-
-#endif
+	#endif
 }
-
 
 }}}
 

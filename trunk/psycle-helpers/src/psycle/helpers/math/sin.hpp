@@ -6,6 +6,7 @@
 #pragma once
 
 #include "constants.hpp"
+#include <universalis/compiler.hpp>
 #include <cmath>
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/os/clocks.hpp>
@@ -26,8 +27,8 @@ namespace psycle { namespace helpers { namespace math {
 /// worth reading:
 /// http://www.audiomulch.com/~rossb/code/sinusoids/
 /// http://www.devmaster.net/forums/showthread.php?t=5784
-template<unsigned int Polynomial_Degree, typename Real>
-Real fast_sin(Real const & radians) {
+template<unsigned int Polynomial_Degree, typename Real> UNIVERSALIS__COMPILER__CONST
+Real inline fast_sin(Real radians) {
 	//assert(-pi <= radians && radians <= pi);
 	// we solve:
 	// y(x) = a + b x + c x^2

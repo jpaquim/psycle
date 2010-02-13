@@ -49,7 +49,7 @@ namespace psycle { namespace helpers { namespace math {
 
 /// compares two floating point numbers for rough equality (difference less than epsilon by default).
 template<typename Real> UNIVERSALIS__COMPILER__CONST
-bool roughly_equals(Real const & a, Real const & b, Real const & tolerance = std::numeric_limits<Real>::epsilon()) {
+bool inline roughly_equals(Real a, Real b, Real tolerance = std::numeric_limits<Real>::epsilon()) {
 	return std::abs(a - b) < tolerance;
 }
 
@@ -63,12 +63,12 @@ struct compile_time_factorial {
 template<> struct compile_time_factorial<0u> { unsigned int const static value = 1; };
 
 template<typename Real> UNIVERSALIS__COMPILER__CONST
-Real inline deci_bell_to_linear(Real const & deci_bell) {
+Real inline deci_bell_to_linear(Real deci_bell) {
 	return std::pow(10u, deci_bell / 20);
 }
 
 template<typename Real> UNIVERSALIS__COMPILER__CONST
-Real inline linear_to_deci_bell(Real const & linear) {
+Real inline linear_to_deci_bell(Real linear) {
 	return 20 * std::log10(linear);
 }
 
