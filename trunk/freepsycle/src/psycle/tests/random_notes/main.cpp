@@ -46,16 +46,8 @@ void play() {
 		loggers::information()("########################################### instanciations ##################################################");
 		using engine::graph;
 		using engine::node;
-		//#define PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
-		#if !defined PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
-			// on stack
-			host::plugin_resolver resolver;
-			graph::create_on_stack stack_graph("graph"); graph & graph(stack_graph);
-		#else
-			// on heap
-			host::plugin_resolver & resolver(*new host::plugin_resolver);
-			graph & graph(engine::graph::create_on_heap("graph"));
-		#endif
+		host::plugin_resolver resolver;
+		graph::create_on_stack stack_graph("graph"); graph & graph(stack_graph);
 
 		std::string output_plugin_name("output");
 		{ // output env var
@@ -127,12 +119,6 @@ void play() {
 			scheduler.stop();
 		}
 		loggers::information()("############################################# clean up ######################################################");
-		#if defined PSYCLE__FRONT_ENDS__TEXT__MANUAL_CLEANING
-			loggers::information()("############################################# manual clean up ######################################################");
-			graph.free_heap();
-			delete &resolver;
-			loggers::information()("############################################# manual clean up done ######################################################");
-		#endif
 	} catch(...) {
 		loggers::exception()("############################################# exception #####################################################", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		throw;
