@@ -154,7 +154,7 @@ void stuff() {
 			#endif
 				
 			if(loggers::information()()) loggers::information()("generating input ...");
-			seconds const seconds(1);
+			seconds const seconds(10);
 			{
 				unsigned int const notes(100000);
 				engine::real beat(0);
