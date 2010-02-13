@@ -156,7 +156,7 @@ namespace ports = engine::ports;
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__6(template, evaluated_flags, flags_to_evaluate) \
 	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \
-			PSYCLE__PLUGINS__TEMPLATE_SWITCH__5(template, evaluated_flags \
+			PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__5(template, evaluated_flags \
 				(psycle::engine::channel::flags::continuous), BOOST_PP_SEQ_TAIL(flags_to_evaluate) \
 			); \
 		break; \
