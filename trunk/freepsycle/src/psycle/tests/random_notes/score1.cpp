@@ -6,11 +6,10 @@
 #include "score1.hpp"
 namespace psycle { namespace tests { namespace random_notes {
 
-score1::score1(host::plugin_resolver & resolver, engine::graph & graph, engine::node & out)
+score1::score1(host::plugin_resolver & resolver, engine::graph & graph)
 :
 	resolver_(resolver),
 	graph_(graph),
-	out_(out),
 	additioner_(resolver("additioner", graph, "+")),
 	sine1_(resolver("sine", graph, "sine1")),
 	sine2_(resolver("sine", graph, "sine2")),
@@ -29,8 +28,8 @@ score1::score1(host::plugin_resolver & resolver, engine::graph & graph, engine::
 	decay_seq3_(static_cast<plugins::sequence&>(resolver("sequence", graph, "decay_seq3").node()))
 {}
 
-void score1::connect() {
-	additioner_.output_port("out")->connect(*out_.input_port("in"));
+void score1::connect(engine::node & out) {
+	additioner_.output_port("out")->connect(*out.input_port("in"));
 
 	sine1_.output_port("out")->connect(*additioner_.input_port("in"));
 	sine2_.output_port("out")->connect(*additioner_.input_port("in"));
