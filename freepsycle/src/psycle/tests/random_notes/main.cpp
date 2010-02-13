@@ -67,7 +67,7 @@ void play() {
 			}
 		}
 		node & out(resolver(output_plugin_name, graph, "out"));
-		score_type score(resolver, graph, out);
+		score_type score(resolver, graph);
 
 		engine::real const events_per_second(44100), beats_per_second(1);
 
@@ -85,7 +85,7 @@ void play() {
 		}
 		loggers::information()("############################################## connections ##################################################");
 		{
-			score.connect();
+			score.connect(out);
 		}
 		if(loggers::information()()) {
 			std::ostringstream s;

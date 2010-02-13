@@ -12,13 +12,12 @@ namespace psycle { namespace tests { namespace random_notes {
 
 class score1 {
 	public:
-		score1(host::plugin_resolver &, engine::graph &, engine::node & out);
-		void connect();
+		score1(host::plugin_resolver &, engine::graph &);
+		void connect(engine::node & out);
 		void generate();
 	private:
 		host::plugin_resolver & resolver_;
 		engine::graph & graph_;
-		engine::node & out_;
 
 		engine::node & additioner_;
 		engine::node & sine1_, & sine2_, & sine3_;
