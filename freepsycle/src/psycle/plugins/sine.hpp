@@ -15,6 +15,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 		void frequency(real const & frequency) { step_ = std::abs(frequency) * frequency_to_step_; if(frequency < 0) phase_ = engine::math::pi - phase_; }
 		real frequency() const { return frequency_to_step_ ? step_ / frequency_to_step_ : 0; }
 
+		void amplitude(real const & amplitude) { amplitude_ = amplitude; }
+		real amplitude() const { return amplitude_; }
+
 	protected: friend class virtual_factory_access;
 		sine(engine::plugin_library_reference &, engine::graph &, std::string const & name);
 	protected:
