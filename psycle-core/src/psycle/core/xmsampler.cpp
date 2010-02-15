@@ -2088,7 +2088,6 @@ void XMSampler::SetSampleRate(int sr)
 
 void XMSampler::Tick()
 {
-	scoped_lock lock(*this);
 	SampleCounter(0);
 	m_TickCount=0;
 
@@ -2111,7 +2110,6 @@ void XMSampler::Tick()
 
 void XMSampler::Tick(int channelNum, const PatternEvent & event)
 {
-	scoped_lock lock(*this);
 
 	// don't process twk , twf, Mcm Commands, or empty lines.
 	if ( event.note() > notetypes::release )
@@ -2307,8 +2305,6 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 
 int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 {
-	scoped_lock lock(*this);
-
 	nanoseconds const t0(cpu_time_clock());
 
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();

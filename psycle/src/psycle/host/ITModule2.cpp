@@ -31,14 +31,14 @@ namespace psycle
 		{
 			delete embeddedData;
 		}
-		bool ITModule2::BitsBlock::ReadBlock(OldPsyFile *pFile)
+		bool ITModule2::BitsBlock::ReadBlock(RiffFile *pFile)
 		{
 			// block layout : uint16 size, <size> bytes data
 			std::uint16_t size;
-			pFile->Read(&size,2);
+			pFile->Read(size);
 			pdata = new unsigned char[size];
 			if (!pdata) return false;
-			if (!pFile->Read(pdata,size))
+			if (!pFile->ReadArray(pdata,size))
 			{
 				delete[] pdata;
 				return false;
@@ -83,7 +83,7 @@ namespace psycle
 		{
 			itFileH.flags=0;
 			itInsHeader2x inshead;
-			Read(&inshead,sizeof(inshead));
+			ReadHeader(inshead);
 			Seek(0);
 			s->rInstrument(idx).Init();
 			LoadITInst(&sampler,idx);
@@ -114,13 +114,13 @@ namespace psycle
 		bool ITModule2::LoadITModule(Song* song)
 		{
 			s=song;
-			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
+			if (ReadHeader(itFileH)==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
 
 			s->setName(itFileH.songName);
 			s->setAuthor("");
 			std::string imported = "Imported from Impulse Tracker Module: ";
-			imported.append(szName);
+			imported.append(file_name());
 			s->setComment(imported);
 
 			song->SetReady(false);
@@ -229,21 +229,21 @@ Special:  Bit 0: On = song message attached.
 			}*/
 
 			unsigned long *pointersi = new unsigned long[itFileH.insNum];
-			Read(pointersi,itFileH.insNum*sizeof(unsigned long));
+			ReadArray(pointersi,itFileH.insNum);
 			unsigned long * pointerss = new unsigned long[itFileH.sampNum];
-			Read(pointerss,itFileH.sampNum*sizeof(unsigned long));
+			ReadArray(pointerss,itFileH.sampNum);
 			unsigned long * pointersp = new unsigned long[itFileH.patNum];
-			Read(pointersp,itFileH.patNum*sizeof(unsigned long));
+			ReadArray(pointersp,itFileH.patNum);
 
 			if ( itFileH.special&SpecialFlags::MIDIEMBEDDED)
 			{
 				embeddedData = new EmbeddedMIDIData;
 				EmbeddedMIDIData mdata;
 				short skipnum;
-				Read(&skipnum,sizeof(short));
+				Read(skipnum);
 				Skip(skipnum*8); // This is some strange data. It is not documented.
 
-				Read(&mdata,sizeof(mdata));
+				ReadHeader(mdata);
 
 				for ( int i=0; i<128; i++ )
 				{
@@ -349,7 +349,7 @@ Special:  Bit 0: On = song message attached.
 		{
 			itInsHeader1x curH;
 			XMInstrument &xins = s->rInstrument(iInstIdx);
-			Read(&curH,sizeof(curH));
+			Read(curH);
 
 			std::string itname(curH.sName);
 			xins.Name(itname);
@@ -418,7 +418,7 @@ Special:  Bit 0: On = song message attached.
 			itInsHeader2x curH;
 			XMInstrument &xins = s->rInstrument(iInstIdx);
 
-            Read(&curH,sizeof(curH));
+            Read(curH);
 			std::string itname(curH.sName);
 			xins.Name(itname);
 
@@ -586,7 +586,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadITSample(XMSampler *sampler,int iSampleIdx)
 		{
 			itSampleHeader curH;
-			Read(&curH,sizeof(curH));
+			Read(curH);
 			XMInstrument::WaveData& _wave = s->SampleData(iSampleIdx);
 
 /*		      Flg:      Bit 0. On = sample associated with header.
@@ -696,7 +696,8 @@ Special:  Bit 0: On = song message attached.
 
 			if (b16Bit) iLen*=2;
 			unsigned char * smpbuf = new unsigned char[iLen];
-			Read(smpbuf,iLen);
+			//Array read raw. Later it is interpreted as little endian if needed.
+			ReadArray(smpbuf,iLen);
 
 			out=0;wNew=0;
 			if (b16Bit) {
@@ -707,7 +708,7 @@ Special:  Bit 0: On = song message attached.
 					out++;
 				}
 				if (bstereo) {
-					Read(smpbuf,iLen);
+					ReadArray(smpbuf,iLen);
 					out=0;
 					for (j = 0; j < iLen; j+=2) {
 						wTmp= ((smpbuf[j]<<lobit) | (smpbuf[j+1]<<hibit))+offset;
@@ -722,7 +723,7 @@ Special:  Bit 0: On = song message attached.
 					*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset)  ^65535;
 				}
 				if (bstereo) {
-					Read(smpbuf,iLen);
+					ReadArray(smpbuf,iLen);
 					for (j = 0; j < iLen; j++) {
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
 						*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset) ^65535;
@@ -873,7 +874,7 @@ Special:  Bit 0: On = song message attached.
 			//Read(packedpattern, packedSize);
 			for (int row=0;row<rowCount;row++)
 			{
-				Read(&newEntry,1);
+				Read(newEntry);
 				while ( newEntry )
 				{
 					unsigned char channel=(newEntry-1)&0x3F;
@@ -989,7 +990,7 @@ Special:  Bit 0: On = song message attached.
 					pat->insert(beat, pent);
 					pent=pempty;
 					numchans = std::max(static_cast<int>(channel),numchans);
-					Read(&newEntry,1);
+					Read(newEntry);
 				}
 			}
 			return true;
@@ -1156,6 +1157,86 @@ Special:  Bit 0: On = song message attached.
 					break;
 			}
 		}
+		bool ITModule2::ReadHeader(itHeader& header) {
+			Read(header.tag);
+			ReadArray(header.songName,sizeof(header.songName));
+			Read(header.pHiligt);
+			Read(header.ordNum);
+			Read(header.insNum);
+			Read(header.sampNum);
+			Read(header.patNum);
+			Read(header.trackerV);
+			Read(header.ffv);
+			Read(header.flags);
+			Read(header.special);
+			Read(header.gVol);
+			Read(header.mVol);
+			Read(header.iSpeed);
+			Read(header.iTempo);
+			Read(header.panSep);
+			Read(header.PWD);
+			Read(header.msgLen);
+			Read(header.msgOffset);
+			Read(header.reserved);
+			ReadArray(header.chanPan, sizeof(header.chanPan));
+			return ReadArray(header.chanVol, sizeof(header.chanVol));
+		}
+		bool ITModule2::ReadHeader(EmbeddedMIDIData& header) {
+			ReadArray(header.Start, sizeof(header.Start));
+			ReadArray(header.Stop, sizeof(header.Stop));
+			ReadArray(header.Tick, sizeof(header.Tick));
+			ReadArray(header.NoteOn, sizeof(header.NoteOn));
+			ReadArray(header.NoteOff, sizeof(header.NoteOff));
+			ReadArray(header.Volume, sizeof(header.Volume));
+			ReadArray(header.Pan, sizeof(header.Pan));
+			ReadArray(header.BankChange, sizeof(header.BankChange));
+			ReadArray(header.ProgramChange, sizeof(header.ProgramChange));
+			for(int i=0; i < 16; i++) ReadArray(header.SFx[i], sizeof(header.SFx[i]));
+			for(int i=0; i < 128; i++) ReadArray(header.Zxx[i], sizeof(header.Zxx[i]));
+			return true;
+		}
+		bool ITModule2::ReadHeader(itInsHeader2x& header) {
+			Read(header.tag);
+			ReadArray(header.fileName,sizeof(header.fileName));
+			Read(header.NNA);
+			Read(header.DCT);
+			Read(header.DCA);
+			Read(header.fadeout);
+			Read(header.pPanSep);
+			Read(header.pPanCenter);
+			Read(header.gVol);
+			Read(header.defPan);
+			Read(header.randVol);
+			Read(header.randPan);
+			Read(header.trackerV);
+			Read(header.noS);
+			Read(header.unused);
+			ReadArray(header.sName,sizeof(header.sName));
+			Read(header.inFC);
+			Read(header.inFR);
+			Read(header.mChn);
+			Read(header.mPrg);
+			Read(header.mBnk);
+			for (int i=0; i < 120; i++) Read(header.notes[i]);
+			ReadHeader(header.volEnv);
+			ReadHeader(header.panEnv);
+			return ReadHeader(header.pitchEnv);
+		}
+		bool ITModule2::ReadHeader(ITEnvStruct& header) {
+			Read(header.flg);
+			Read(header.numP);
+			Read(header.loopS);
+			Read(header.loopE);
+			Read(header.sustainS);
+			Read(header.sustainE);
+			for (int i=0; i < 25; i++) Read(header.nodes[i]);
+			return Read(header.unused);
+		}
+
+		bool ITModule2::ReadHeader(ITNotePair& header) {
+			Read(header.first);
+			return Read(header.second);
+		}
 
 //////////////////////////////////////////////////////////////////////////
 //     S3M Module Members
@@ -1164,14 +1245,14 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadS3MModuleX(Song *song)
 		{
 			s=song;
-			if (Read(&s3mFileH,sizeof(s3mFileH))==0 ) return 0;
+			if (ReadHeader(s3mFileH)==0 ) return 0;
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;
 
 			s3mFileH.songName[28]='\0';
 			s->setName(s3mFileH.songName);
 			s->setAuthor("");
 			std::string imported = "Imported from Scream Tracker 3 Module: ";
-			imported.append(szName);
+			imported.append(file_name());
 			s->setComment(imported);
 
 			song->SetReady(false);
@@ -1213,9 +1294,9 @@ Special:  Bit 0: On = song message attached.
 			}`*/
 
 			unsigned short *pointersi = new unsigned short[s3mFileH.insNum];
-			Read(pointersi,s3mFileH.insNum*sizeof(unsigned short));
+			ReadArray(pointersi,s3mFileH.insNum);
 			unsigned short * pointersp = new unsigned short[s3mFileH.patNum];
-			Read(pointersp,s3mFileH.patNum*sizeof(unsigned short));
+			ReadArray(pointersp,s3mFileH.patNum);
 
 			bool stereo=s3mFileH.mVol&0x80;
 			int numchans=0;
@@ -1250,7 +1331,7 @@ Special:  Bit 0: On = song message attached.
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )
 			{
-				Read(chansettings,sizeof(chansettings));
+				ReadArray(chansettings,32);
 				if (stereo)
 				{
 					for (i=0;i<32;i++)
@@ -1295,7 +1376,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadS3MInstX(XMSampler *sampler,int iInstIdx)
 		{
 			s3mInstHeader curH;
-			Read(&curH,sizeof(curH));
+			ReadHeader(curH);
 
 			s->rInstrument(iInstIdx).Name(curH.sName);
 
@@ -1430,10 +1511,10 @@ OFFSET              Count TYPE   Description
 				if(b16Bit)
 				{
 					smpbuf = new char[iLen*2];
-					Read(smpbuf,iLen*2);
+					ReadArray(smpbuf,iLen*2);
 				} else 	{
 					smpbuf = new char[iLen];
-					Read(smpbuf,iLen);
+					ReadArray(smpbuf,iLen);
 				}
 				std::int16_t wNew;
 				std::int16_t offset;
@@ -1451,7 +1532,7 @@ OFFSET              Count TYPE   Description
 							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 						}
 						out=0;
-						Read(smpbuf,iLen*2);
+						ReadArray(smpbuf,iLen*2);
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
@@ -1477,7 +1558,7 @@ OFFSET              Count TYPE   Description
 							wNew = (smpbuf[j]<<8)+offset;
 							*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
-						Read(smpbuf,iLen);
+						ReadArray(smpbuf,iLen);
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
@@ -1517,7 +1598,7 @@ OFFSET              Count TYPE   Description
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
 			{
-				Read(&newEntry,1);
+				Read(newEntry);
 				while ( newEntry )
 				{
 					char channel=newEntry&31;
@@ -1583,10 +1664,40 @@ OFFSET              Count TYPE   Description
 					double beat = row / static_cast<float>(sampler->Speed2LPB(s3mFileH.iSpeed));
 					pat->insert(beat, pent);
 					pent=pempty;
-					Read(&newEntry,1);
+					Read(newEntry);
 				}
 			}
 			return true;
 		}
+		bool ITModule2::ReadHeader(s3mHeader& header) {
+			ReadArray(header.songName,sizeof(header.songName));
+			Read(header.end);
+			Read(header.type);
+			Read(header.unused1);
+			Read(header.ordNum);
+			Read(header.insNum);
+			Read(header.patNum);
+			Read(header.flags);
+			Read(header.trackerV);
+			Read(header.trackerInf);
+			Read(header.tag);
+			Read(header.gVol);
+			Read(header.iSpeed);
+			Read(header.iTempo);
+			Read(header.mVol);
+			Read(header.uClick);
+			Read(header.defPan);
+			ReadArray(header.unused2,sizeof(header.unused2));
+			Read(header.pSpecial);
+			return ReadArray(header.chanSet, sizeof(header.chanSet));
+		}
+		bool ITModule2::ReadHeader(s3mInstHeader& header) {
+			Read(header.type);
+			ReadArray(header.fileName,sizeof(header.fileName));
+			ReadArray(header.data, sizeof(header.data));
+			ReadArray(header.sName,sizeof(header.sName));
+			return Read(header.tag);
+		}
+
 	}
 }

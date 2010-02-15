@@ -162,7 +162,7 @@ namespace psycle {
 			m_rate.AddString("96000 hz");
 			m_rate.SetCurSel(rate);
 
-			int bits;
+			int bits=2;
 			if (Global::pConfig->GetBitDepth() <= 8) {
 				bits = 0;
 			} else if (Global::pConfig->GetBitDepth() <= 16) {

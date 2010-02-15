@@ -14,7 +14,7 @@ using namespace psycle::core;
 #else
 #include "SongStructs.hpp"
 #endif
-#include "FileIO.hpp"
+#include <psycle/core/fileio.h>
 #include "XMFile.hpp"
 #include <universalis/stdlib/cstdint.hpp>
 #include <map>
@@ -24,7 +24,7 @@ namespace psycle { namespace host {
 		class Song;
 	#endif
 
-	class XMSongExport : public OldPsyFile
+	class XMSongExport : public RiffFile
 	{
 	public:
 		XMSongExport(void);
@@ -46,9 +46,17 @@ namespace psycle { namespace host {
 
 		int ComputeLinesPerBeat(Song& song);
 		
+		bool WriteHeader(XMFILEHEADER header);
+		bool WriteHeader(XMPATTERNHEADER header);
+		bool WriteHeader(XMINSTRUMENTHEADER header);
+		bool WriteHeader(XMSAMPLEHEADER header);
+		bool WriteHeader(XMSAMPLESTRUCT header);
+
+
 		XMFILEHEADER m_Header;
 		int lastMachine;
 		std::map<int,int> isSampler;
 		int lines_per_beat_;
 	};
+
 }}

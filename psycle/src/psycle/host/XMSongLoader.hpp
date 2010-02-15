@@ -5,8 +5,8 @@
 
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
+#include <psycle/corE/fileio.h>
 
-#include "FileIO.hpp"
 #include "XMFile.hpp"
 
 
@@ -23,7 +23,7 @@ using namespace psycle::core;
 namespace psycle { 
 	namespace host {
 
-	class XMSongLoader : public OldPsyFile
+	class XMSongLoader : public RiffFile
 	{
 	public:
 		XMSongLoader(void);
@@ -48,22 +48,30 @@ namespace psycle {
 		{	
 			char i;
 			if(start>=0) Seek(start);
-			return Read(&i,1)?i:0;
+			return Read(i)?i:0;
 		}
 
 		const short ReadInt2(LONG start=-1)
 		{
 			short i;
 			if(start>=0) Seek(start);
-			return Read(&i,2)?i:0;
+			return Read(i)?i:0;
 		}
 
 		const int ReadInt4(LONG start=-1)
 		{
-			int i;
+			int32_t i;
 			if(start>=0) Seek(start);
-			return Read(&i,4)?i:0;
+			return Read(i)?i:0;
 		}
+
+		bool ReadHeader(XMFILEHEADER& header);
+		bool ReadHeader(XMPATTERNHEADER& header);
+		bool ReadHeader(XMINSTRUMENTHEADER& header);
+		bool ReadHeader(XMSAMPLEHEADER& header);
+		bool ReadHeader(XMSAMPLESTRUCT& header);
+		bool ReadHeader(XMSAMPLEFILEHEADER& header);
+		bool ReadHeader(XMINSTRUMENTFILEHEADER& header);
 
 		int m_iInstrCnt;
 		int smpLen[256];
@@ -98,7 +106,7 @@ namespace psycle {
 		unsigned short loopLength;
 	};
 
-	class MODSongLoader : public OldPsyFile
+	class MODSongLoader : public RiffFile
 	{
 	public:
 		MODSongLoader(void);
@@ -117,26 +125,30 @@ namespace psycle {
 		const BOOL WritePatternEntry(Song& song,const int patIdx,const int row, const int col, PatternEvent & e);
 		char * AllocReadStr(const LONG size, const LONG start=-1);
 
+		bool ReadHeader(MODHEADER& header);
+		bool ReadHeader(MODSAMPLEHEADER& header);
+
+
 		// inlines
 		const unsigned char ReadUInt1(LONG start=-1)
 		{	
 			std::uint8_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,1)?i:0;
+			return Read(i)?i:0;
 		}
 
 		const unsigned short ReadUInt2(LONG start=-1)
 		{
 			std::uint16_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,2)?i:0;
+			return Read(i)?i:0;
 		}
 
 		const unsigned int ReadUInt4(LONG start=-1)
 		{
 			std::uint32_t i(0);
 			if(start>=0) Seek(start);
-			return Read(&i,4)?i:0;
+			return Read(i)?i:0;
 		}
 		static const short BIGMODPERIODTABLE[37*8];
 		Song* m_pSong;

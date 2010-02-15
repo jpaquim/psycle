@@ -19,7 +19,7 @@ namespace psycle {
 	namespace host {
 
 		class CChildView;
-		class CSelection;
+		struct CSelection;
 		
 		class CSaveWavDlg : public CDialog
 		{

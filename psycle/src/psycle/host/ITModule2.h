@@ -3,7 +3,7 @@
 
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
-#include "FileIO.hpp"
+#include <psycle/core/fileio.h>
 #include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle {
@@ -19,7 +19,7 @@ using namespace psycle::core;
 namespace psycle {
 	namespace host {
 
-		class ITModule2 : public OldPsyFile
+		class ITModule2 : public RiffFile
 		{
 		private:
 			Song* s;
@@ -35,7 +35,7 @@ namespace psycle {
 			public:
 				BitsBlock() : pdata(0), rpos(0), rend(0), rembits(0) {}
 				~BitsBlock() throw() { delete[] pdata; }
-				bool ReadBlock(OldPsyFile* pFile);
+				bool ReadBlock(RiffFile* pFile);
 				unsigned long ReadBits(unsigned char bitwidth);
 			private:
 				/// pointer to data
@@ -383,6 +383,20 @@ namespace psycle {
 			bool LoadITPattern(int patIdx,int &numchans);
 			void ParseEffect(PatternEvent&pent, int command,int param,int channel);
 		private:
+			double        ReadDouble() { double        t; Read(t); return t; }
+			float         ReadFloat()  { float         t; Read(t); return t; }
+			std:: int32_t ReadInt32()  { std:: int32_t t; Read(t); return t; }
+			std::uint32_t ReadUInt32() { std::uint32_t t; Read(t); return t; }
+			std:: int16_t ReadInt16()  { std:: int16_t t; Read(t); return t; }
+			std::uint16_t ReadUInt16() { std::uint16_t t; Read(t); return t; }
+			std::  int8_t ReadInt8()   { std::  int8_t t; Read(t); return t; }
+			std:: uint8_t ReadUInt8()  { std:: uint8_t t; Read(t); return t; }
+			bool ReadHeader(itHeader& header);
+			bool ReadHeader(EmbeddedMIDIData& header);
+			bool ReadHeader(itInsHeader2x& header);
+			bool ReadHeader(ITEnvStruct& header);
+			bool ReadHeader(ITNotePair& header);
+
 			unsigned char highOffset[64];
 			EmbeddedMIDIData* embeddedData;
 			itHeader itFileH;
@@ -499,6 +513,8 @@ namespace psycle {
 			bool LoadS3MSampleDataX(XMSampler *sampler,int iInstIdx,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit,bool packed);
 			bool LoadS3MPatternX(int patIdx);
 		private:
+			bool ReadHeader(s3mHeader& header);
+			bool ReadHeader(s3mInstHeader& header);
 			s3mHeader  s3mFileH;
 			
 		};
