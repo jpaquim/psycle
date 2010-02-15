@@ -1,6 +1,5 @@
 #include "Psy3Saver.hpp"
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include "FileIO.hpp"
 #include "ProgressDialog.hpp"
 #include "Zap.hpp"
 

@@ -10,8 +10,7 @@
 #include <psycle/core/xmsampler.h>
 #include <psycle/core/song.h>
 #include <psycle/core/internal_machines.h>
-///\todo: change for core's one when replacing OldPsyFile
-#include "FileIO.hpp"
+#include <psycle/core/fileio.h>
 using namespace psycle::core;
 
 #include "PatternView.hpp"
@@ -488,7 +487,7 @@ using namespace psycle::helpers::math;
 			CString filepath = Global::pConfig->GetSongDir().c_str();
 			filepath += "\\autosave.psy";
 
-			OldPsyFile file;
+			RiffFile file;
 			if(file.Open(filepath.GetBuffer(1)))
 			{
 				file.Close();

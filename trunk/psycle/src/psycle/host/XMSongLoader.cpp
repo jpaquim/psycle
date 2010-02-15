@@ -75,14 +75,14 @@ namespace psycle {
 	{
 		XMINSTRUMENTFILEHEADER fileheader;
 
-		Read(&fileheader,sizeof(XMINSTRUMENTFILEHEADER));
+		ReadHeader(fileheader);
 		if ( !strcmp(fileheader.name,"Extended Instrument")) return;
 		m_pSong->rInstrument(idx).Init();
 		fileheader.name[22] = 0;
 		m_pSong->rInstrument(idx).Name(fileheader.name);
 
 		XMSAMPLEFILEHEADER _insheader;
-		Read(&_insheader,sizeof(XMSAMPLEFILEHEADER));
+		ReadHeader(_insheader);
 		int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
 			XMInstrument::WaveData::WaveForms::SQUARE,
 			XMInstrument::WaveData::WaveForms::SAWDOWN,
@@ -172,7 +172,7 @@ namespace psycle {
 		song.setName(pSongName);
 		song.setAuthor("");
 		std::string imported = "Imported from FastTracker Module: ";
-		imported.append(szName);
+		imported.append(file_name());
 		song.setComment(imported);
 		delete [] pSongName; pSongName = 0;
 
@@ -216,7 +216,7 @@ namespace psycle {
 	{
 		// get data
 		Seek(60);
-		Read(&m_Header,sizeof(XMFILEHEADER));
+		Read(m_Header);
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 		//using std::max;
@@ -268,7 +268,7 @@ namespace psycle {
 			Seek(start);
 
 		// read data
-		if(Read(pData,size))
+		if(ReadArray(pData,size))
 			return pData;
 
 		delete[] pData;
@@ -734,7 +734,7 @@ namespace psycle {
 		int iInstrSize = ReadInt4();
 		//assert(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
 		char sInstrName[23] = {0}; ///\todo it's probably useless to zero-initialise the array content
-		Read(sInstrName,22);
+		ReadArray(sInstrName,22);
 		sInstrName[22]= 0;
 
 		Skip(1); //int iInstrType = ReadInt1();
@@ -752,7 +752,7 @@ namespace psycle {
         
 		XMSAMPLEHEADER _samph;
 		std::memset(&_samph, 0, sizeof _samph);
-		Read(&_samph,sizeof(XMSAMPLEHEADER));
+		ReadHeader(_samph);
 		
 		int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
 			XMInstrument::WaveData::WaveForms::SQUARE,
@@ -906,7 +906,7 @@ namespace psycle {
 		Seek(iStart);
 		char * smpbuf = new char[smpLen[iSampleIdx]];
 		memset(smpbuf,0,smpLen[iSampleIdx]);
-		Read(smpbuf,smpLen[iSampleIdx]);
+		ReadArray(smpbuf,smpLen[iSampleIdx]);
 
 		int sampleCnt = smpLen[iSampleIdx];
 
@@ -1093,7 +1093,7 @@ namespace psycle {
 		song.setName(pSongName);
 		song.setAuthor("");
 		std::string imported = "Imported from MOD Module: ";
-		imported.append(szName);
+		imported.append(file_name());
 		song.setComment(imported);
 		delete [] pSongName; pSongName = 0;
 
@@ -1101,7 +1101,7 @@ namespace psycle {
 		Seek(20);
 		for (int i=0;i<31;i++) LoadSampleHeader(*m_pSampler,i);
 		Seek(950);
-		Read(&m_Header,sizeof(m_Header));
+		Read(m_Header);
 		
 		char pID[5];
 		pID[0]=m_Header.pID[0];pID[1]=m_Header.pID[1];pID[2]=m_Header.pID[2];pID[3]=m_Header.pID[3];pID[4]=0;
@@ -1154,33 +1154,28 @@ namespace psycle {
 
 	const void MODSongLoader::LoadPatterns(Song & song)
 	{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		//TODO
-#else
+
+		double pos = 0;
+		song.sequence().removeAll();
+		// here we add in one single Line the patterns
+		SequenceLine* line = song.sequence().createNewLine();
+
 		int npatterns=0;
-		for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.songlength;i++)
-		{
-			if ( m_Header.order[i] < MAX_PATTERNS ){
-				song.playOrder[i]=m_Header.order[i];
-				if ( m_Header.order[i] > npatterns) npatterns=m_Header.order[i];
-			} else { 
-				song.playOrder[i]=0;
-				if ( m_Header.order[i] > npatterns) npatterns=m_Header.order[i];
-			}
+		for(int i = 0; i < m_Header.songlength;++i) {
+			if ( m_Header.order[i] > npatterns) npatterns=m_Header.order[i];
 		}
 		npatterns++;
-		if ( m_Header.songlength > MAX_SONG_POSITIONS ){
-			song.playLength=MAX_SONG_POSITIONS;
-		} else {
-			song.playLength=m_Header.songlength;
-		}
 
 		// get pattern data
 		Seek(1084);
 		for(int j = 0;j < npatterns ;j++){
 			LoadPattern(song,j,song.tracks() );
 		}
-#endif
+		for (int i = 0; i < m_Header.songlength; ++i) {
+			Pattern* pat = song.sequence().FindPattern(m_Header.order[i]);
+			line->createEntry(pat, pos);
+			pos += pat->beats();
+		}	
 	}
 
 	char * MODSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start)
@@ -1198,7 +1193,7 @@ namespace psycle {
 			Seek(start);
 
 		// read data
-		if(Read(pData,size))
+		if(ReadArray(pData,size))
 			return pData;
 
 		delete[] pData;
@@ -1215,14 +1210,11 @@ namespace psycle {
 
 		short iNumRows = 64;
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		Pattern* pat = new Pattern();
 		pat->setName("unnamed");
 		pat->setID(patIdx);
 		song.sequence().Add(pat);
-#else
-		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
-#endif
+
 		PatternEvent e;
 		unsigned char mentry[4];
 
@@ -1389,7 +1381,9 @@ namespace psycle {
 					{
 						e.setMachine(255);
 					}
-					WritePatternEntry(song,patIdx,row,col,e);	
+					e.set_track(col);
+					double beat = row *0.25;
+					pat->insert(beat,e);
 				}
 			}
 	}
@@ -1403,22 +1397,6 @@ namespace psycle {
 		return 255;
 	}
 
-	const BOOL MODSongLoader::WritePatternEntry(Song & song,
-		const int patIdx, const int row, const int col,PatternEvent &e)
-	{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		// todo
-#else
-		// don't overflow song buffer 
-		if(patIdx>=MAX_PATTERNS) return false;
-
-		PatternEvent* pData = (PatternEvent*) song._ptrackline(patIdx,col,row);
-
-		*pData = e;
-#endif
-
-		return true;
-	}	
 
 	const void MODSongLoader::LoadInstrument(XMSampler & sampler, const int idx)
 	{
@@ -1442,7 +1420,7 @@ namespace psycle {
 
 	const void MODSongLoader::LoadSampleHeader(XMSampler & sampler, const int iInstrIdx)
 	{
-		Read(m_Samples[iInstrIdx].sampleName,22);	m_Samples[iInstrIdx].sampleName[21]='\0';
+		ReadArray(m_Samples[iInstrIdx].sampleName,22);	m_Samples[iInstrIdx].sampleName[21]='\0';
 
 		smpLen[iInstrIdx] = (ReadUInt1()*0x100+ReadUInt1())*2; 
 		m_Samples[iInstrIdx].sampleLength = smpLen[iInstrIdx];
@@ -1494,7 +1472,7 @@ namespace psycle {
 
 		// cache sample data
 		unsigned char * smpbuf = new unsigned char[smpLen[iInstrIdx]];
-		Read(smpbuf,smpLen[iInstrIdx]);
+		ReadArray(smpbuf,smpLen[iInstrIdx]);
 
 		int sampleCnt = smpLen[iInstrIdx];
 
@@ -1513,5 +1491,109 @@ namespace psycle {
 	}
 
 
+		///\todo: Actually, these methods should always write in Little endian mode.
+	bool XMSongLoader::ReadHeader(XMFILEHEADER& header) {
+		Read(header.size);
+		Read(header.norder);
+		Read(header.restartpos);
+		Read(header.channels);
+		Read(header.patterns);
+		Read(header.instruments);
+		Read(header.flags);
+		Read(header.speed);
+		Read(header.tempo);
+		return ReadArray(header.order,sizeof(header.order));
+	}
+	bool XMSongLoader::ReadHeader(XMPATTERNHEADER& header) {
+		Read(header.size);
+		Read(header.packingtype);
+		Read(header.rows);
+		return Read(header.packedsize);
+	}
+	bool XMSongLoader::ReadHeader(XMINSTRUMENTHEADER& header) {
+		Read(header.size);
+		ReadArray(header.name, sizeof(header.name));
+		Read(header.type);
+		return Read(header.samples);
+	}
+	bool XMSongLoader::ReadHeader(XMSAMPLEHEADER& header) {
+		Read(header.shsize);
+		ReadArray(header.snum, sizeof(header.snum));
+		ReadArray(header.venv, 24);
+		ReadArray(header.penv, 24);
+		Read(header.vnum);
+		Read(header.pnum);
+		Read(header.vsustain);
+		Read(header.vloops);
+		Read(header.vloope);
+		Read(header.psustain);
+		Read(header.ploops);
+		Read(header.ploope);
+		Read(header.vtype);
+		Read(header.ptype);
+		Read(header.vibtype);
+		Read(header.vibsweep);
+		Read(header.vibdepth);
+		Read(header.vibrate);
+		Read(header.volfade);
+		return ReadArray(header.reserved, 11);
+	}
+	bool XMSongLoader::ReadHeader(XMSAMPLESTRUCT& header) {
+		Read(header.samplen);
+		Read(header.loopstart);
+		Read(header.looplen);
+		Read(header.vol);
+		Read(header.finetune);
+		Read(header.type);
+		Read(header.pan);
+		Read(header.relnote);
+		Read(header.res);
+		return ReadArray(header.name, sizeof(header.name));
+	}
+
+	bool XMSongLoader::ReadHeader(XMSAMPLEFILEHEADER& header) {
+		ReadArray(header.snum, sizeof(header.snum));
+		ReadArray(header.venv, 24);
+		ReadArray(header.penv, 24);
+		Read(header.vnum);
+		Read(header.pnum);
+		Read(header.vsustain);
+		Read(header.vloops);
+		Read(header.vloope);
+		Read(header.psustain);
+		Read(header.ploops);
+		Read(header.ploope);
+		Read(header.vtype);
+		Read(header.ptype);
+		Read(header.vibtype);
+		Read(header.vibsweep);
+		Read(header.vibdepth);
+		Read(header.vibrate);
+		Read(header.volfade);
+		ReadArray(header.reserved, 11);
+		return Read(header.reserved2);
+
+	}
+	bool XMSongLoader::ReadHeader(XMINSTRUMENTFILEHEADER& header) {
+		ReadArray(header.extxi, sizeof(header.extxi));
+		ReadArray(header.name, sizeof(header.name));
+		ReadArray(header.trkname, sizeof(header.trkname));
+		return Read(header.shsize);
+	}
+
+	bool MODSongLoader::ReadHeader(MODHEADER& header) {
+		Read(header.songlength);
+		Read(header.unused);
+		ReadArray(header.order, sizeof(header.order));
+		return ReadArray(header.pID, sizeof(header.pID));
+	}
+	bool MODSongLoader::ReadHeader(MODSAMPLEHEADER& header) {
+		ReadArray(header.sampleName, sizeof(header.sampleName));
+		Read(header.sampleLength);
+		Read(header.finetune);
+		Read(header.volume);
+		Read(header.loopStart);
+		return Read(header.loopLength);
+	}
 }
 }

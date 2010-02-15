@@ -203,7 +203,6 @@ namespace psycle {
 					std::string filepath = Global::pConfig->GetCurrentSongDir();
 					filepath += '\\';
 					filepath += song().filename();
-					OldPsyFile file;
 					std::ostringstream szText;
 					szText << "Save changes to \"" << song().filename()
 						<< "\"?";
@@ -220,6 +219,7 @@ namespace psycle {
 							return FALSE;
 						}
 #else
+						OldPsyFile file;
 						if (!file.Create((char*)filepath.c_str(), true))
 						{
 							std::ostringstream szText;
@@ -577,7 +577,6 @@ namespace psycle {
 					if ( str2.CompareNoCase(".psy") != 0 )
 						str.Insert(str.GetLength(),".psy");
 					int index = str.ReverseFind('\\');
-					OldPsyFile file;
 
 					if (index != -1) {
 						Global::pConfig->SetCurrentSongDir(

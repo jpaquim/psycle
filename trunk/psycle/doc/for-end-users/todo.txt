@@ -32,6 +32,9 @@ item count
 New and unsorted and untested
 ##############################
 
++ There's a new option in the instrument editor, to chain an instrument to a specific sampler.
+  It would be handy that this option works not only as an editing help, but also internally, as so forcing
+  the playback engine to use that sampler instead of the one in the pattern.
 
 
 + ghost note : http://psycle.pastnotecut.org/thread.php?threadid=1894&boardid=2&styleid=1

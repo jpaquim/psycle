@@ -56,16 +56,16 @@ namespace host{
 			}
 		}
 
-		Write(XM_HEADER, 17);//ID text
+		WriteArray(XM_HEADER, 17);//ID text
 
 		std::ostringstream buf;
 		buf << "PE:" << std::setw(20) <<  std::left << song.name().substr(0,17);		
-		Write(buf.str().c_str(), 20);//Module name
-		std::uint16_t temp = 0x1A;
-		Write(&temp, 1);							
-		Write("FastTracker v2.00   ", 20);//Tracker name
-		temp = 0x0104;
-		Write(&temp, 2);//Version number
+		WriteArray(buf.str().c_str(), 20);//Module name
+		std::uint8_t temp = 0x1A;
+		Write(temp);							
+		WriteArray("FastTracker v2.00   ", 20);//Tracker name
+		std::uint16_t temp2 = 0x0104;
+		Write(temp2);//Version number
 
 		memset(&m_Header,0,sizeof(m_Header));
 		m_Header.size = sizeof(m_Header);
@@ -91,7 +91,7 @@ namespace host{
 		for (int i=0; it != line->end(); ++it, ++i) {
 			m_Header.order[i] = (*it).second->pattern()->id();
 		}
-		Write(&m_Header,sizeof(m_Header));
+		WriteHeader(m_Header);
 	}
 
 	void XMSongExport::SavePatterns(Song & song) {
@@ -129,7 +129,7 @@ namespace host{
 		ptHeader.rows = std::min(256,static_cast<int>(pattern->beats()*lines_per_beat_));
 		//ptHeader.packedsize = 0; implicit from memset.
 
-		Write(&ptHeader,sizeof(ptHeader));
+		WriteHeader(ptHeader);
 		std::size_t currentpos = GetPos();	
 		// check every pattern for validity
 		if (pattern->size() != 0) {	
@@ -263,20 +263,20 @@ namespace host{
 					char is_compressed = 0x80 + bWriteNote + (bWriteInstr << 1) + (bWriteVol << 2)
 									+ (bWriteType << 3) + ( bWriteParam << 4);
 
-					if (is_compressed !=  0x9F ) Write(&is_compressed,1); // 0x9F means to write everything.
-					if (bWriteNote) Write(&note,1);
-					if (bWriteInstr) Write(&instr,1);
-					if (bWriteVol) Write(&vol,1);
-					if (bWriteType) Write(&type,1);
-					if (bWriteParam) Write(&param,1);
+					if (is_compressed !=  0x9F ) Write(is_compressed); // 0x9F means to write everything.
+					if (bWriteNote) Write(note);
+					if (bWriteInstr) Write(instr);
+					if (bWriteVol) Write(vol);
+					if (bWriteType) Write(type);
+					if (bWriteParam) Write(param);
 				}
 			}
 			ptHeader.packedsize = static_cast<std::uint16_t>((GetPos() - currentpos) & 0xFFFF);
 			Seek(currentpos-sizeof(ptHeader));
-			Write(&ptHeader,sizeof(ptHeader));
+			WriteHeader(ptHeader);
 			Skip(ptHeader.packedsize);
 		} else {
-			Write(&ptHeader,sizeof(ptHeader));
+			WriteHeader(ptHeader);
 		}
 
 	}
@@ -468,7 +468,7 @@ namespace host{
 		insHeader.size = sizeof(insHeader);
 		strncpy(insHeader.name,name.c_str(),21);
 		//insHeader.samples = 0; Implicit by memset
-		Write(&insHeader,sizeof(insHeader));
+		WriteHeader(insHeader);
 	}
 
 
@@ -483,14 +483,14 @@ namespace host{
 		if (song._pInstrument[instIdx]->Empty()) {
 			insHeader.size = sizeof(insHeader);
 			//insHeader.samples = 0; Implicit by memset
-			Write(&insHeader,sizeof(insHeader));
+			WriteHeader(insHeader);
 			return;
 		}
 		
 		insHeader.size = sizeof(insHeader) + sizeof(XMSAMPLEHEADER);
 		// sampler just has one sample per instrument.
 		insHeader.samples = 1;
-		Write(&insHeader,sizeof(insHeader));
+		WriteHeader(insHeader);
 
 		XMSAMPLEHEADER _samph;
 		std::memset(&_samph, 0, sizeof(_samph));
@@ -499,7 +499,7 @@ namespace host{
 		_samph.volfade=0x400;
 		int filepos = GetPos();
 		_samph.shsize = sizeof(XMSAMPLESTRUCT);
-		Write(&_samph,sizeof(_samph));
+		WriteHeader(_samph);
 
 		SaveSampleHeader(song, instIdx);
 		SaveSampleData(song, instIdx);
@@ -524,7 +524,7 @@ namespace host{
 		stheader.pan = instr._pan &0xFF;
 		stheader.relnote = instr.waveTune + 29;
 
-		Write(&stheader,sizeof(stheader));
+		WriteHeader(stheader);
 	}
 	
 	void XMSongExport::SaveSampleData(Song& song,const int instrIdx)
@@ -536,7 +536,7 @@ namespace host{
 		for(int j=0;j<length;j++)
 		{
 			short delta =  samples[j] - prev;
-			Write(&delta,sizeof(short));
+			Write(delta);
 			prev = samples[j];
 		} 
 	}
@@ -644,6 +644,65 @@ namespace host{
 	}	
 
 
+	///\todo: Actually, these methods should always write in Little endian mode.
+	bool XMSongExport::WriteHeader(XMFILEHEADER header) {
+		Write(header.size);
+		Write(header.norder);
+		Write(header.restartpos);
+		Write(header.channels);
+		Write(header.patterns);
+		Write(header.instruments);
+		Write(header.flags);
+		Write(header.speed);
+		Write(header.tempo);
+		return WriteArray(header.order,sizeof(header.order));
+	}
+	bool XMSongExport::WriteHeader(XMPATTERNHEADER header) {
+		Write(header.size);
+		Write(header.packingtype);
+		Write(header.rows);
+		return Write(header.packedsize);
+	}
+	bool XMSongExport::WriteHeader(XMINSTRUMENTHEADER header) {
+		Write(header.size);
+		WriteArray(header.name, sizeof(header.name));
+		Write(header.type);
+		return Write(header.samples);
+	}
+	bool XMSongExport::WriteHeader(XMSAMPLEHEADER header) {
+		Write(header.shsize);
+		WriteArray(header.snum, sizeof(header.snum));
+		WriteArray(header.venv, sizeof(header.venv));
+		WriteArray(header.penv, sizeof(header.penv));
+		Write(header.vnum);
+		Write(header.pnum);
+		Write(header.vsustain);
+		Write(header.vloops);
+		Write(header.vloope);
+		Write(header.psustain);
+		Write(header.ploops);
+		Write(header.ploope);
+		Write(header.vtype);
+		Write(header.ptype);
+		Write(header.vibtype);
+		Write(header.vibsweep);
+		Write(header.vibdepth);
+		Write(header.vibrate);
+		Write(header.volfade);
+		return WriteArray(header.reserved, sizeof(header.reserved));
+	}
+	bool XMSongExport::WriteHeader(XMSAMPLESTRUCT header) {
+		Write(header.samplen);
+		Write(header.loopstart);
+		Write(header.looplen);
+		Write(header.vol);
+		Write(header.finetune);
+		Write(header.type);
+		Write(header.pan);
+		Write(header.relnote);
+		Write(header.res);
+		return WriteArray(header.name, sizeof(header.name));
+	}
 
 }
 }

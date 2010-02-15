@@ -2,17 +2,11 @@
 ///\brief implementation file for psycle::host::CPresetsDlg.
 
 #include "PresetsDlg.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/core/plugin.h>
-	#include <psycle/core/file.h>
-	#include <psycle/core/vsthost.h>
-	#include <psycle/core/vstplugin.h>
-	using namespace psycle::core;
-#else
-	#include "Plugin.hpp"
-	#include "VstHost24.hpp"
-	#include "FileIO.hpp"
-#endif
+#include <psycle/core/plugin.h>
+#include <psycle/core/file.h>
+#include <psycle/core/vsthost.h>
+#include <psycle/core/vstplugin.h>
+using namespace psycle::core;
 #include "Configuration.hpp"
 #include <psycle/helpers/math.hpp>
 #include <cstring>
