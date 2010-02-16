@@ -716,7 +716,8 @@ namespace psycle {
 					}
 					e.set_track(col);
 					double beat = row / static_cast<float>(XMSampler::Speed2LPB(m_Header.speed));
-					pat->insert(beat,e);
+					if (!e.empty())
+						pat->insert(beat,e);
 				}
 			}
 		}
@@ -1383,7 +1384,8 @@ namespace psycle {
 					}
 					e.set_track(col);
 					double beat = row *0.25;
-					pat->insert(beat,e);
+					if(!e.empty()) 
+						pat->insert(beat,e);
 				}
 			}
 	}
