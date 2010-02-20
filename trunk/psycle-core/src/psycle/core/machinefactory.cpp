@@ -172,7 +172,7 @@ void MachineFactory::RegenerateFinderData(bool clear)  {
 	if (clear) {
 		finder_->Initialize(clear);
 	}
-	for(std::size_t i = 0; i < hosts_.size(); ++i) hosts_[i]->FillFinderData(*finder_, true);
+	for(std::size_t i = 0; i < hosts_.size(); ++i) hosts_[i]->FillFinderData(*finder_, clear);
 	finder_->PostInitialization();
 }
 

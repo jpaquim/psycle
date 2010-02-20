@@ -284,7 +284,7 @@ void Player::thread_function(std::size_t thread_number) {
 			if(af.active_count()) {
 				unsigned int rotated = 0, cpu_index = 0;
 				while(!af(cpu_index) || rotated++ != thread_number) cpu_index = (cpu_index + 1) % af.size();
-				thread::affinity_mask_type new_af; new_af(cpu_index, true); t.affinity_mask(new_af);
+				af(cpu_index, true); t.affinity_mask(af);
 			}
 		} catch(operation_not_permitted e) {
 			if(loggers::warning()) {
