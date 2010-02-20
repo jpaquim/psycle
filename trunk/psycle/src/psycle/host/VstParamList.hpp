@@ -3,27 +3,17 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#include <afxext.h>
+
 namespace psycle {
 	namespace core {
 		namespace vst {
 			class plugin;
 		}
 	}
-}
-using namespace psycle::core;
-#endif
 
-#include <afxext.h>
-namespace psycle {
 	namespace host {
-
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		namespace vst
-		{
-			class plugin;
-		}
-#endif
+		using namespace core;
 
 		class CVstParamList : public CDialog
 		{

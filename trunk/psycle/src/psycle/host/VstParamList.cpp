@@ -1,24 +1,20 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstParamList.
 #include "VstParamList.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/vsthost.h>
-#include <psycle/core/vstplugin.h>
-using namespace psycle::core;
-#else
-#include "VstHost24.hpp"
-#endif
-//#include "Helpers.hpp"
+
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
+
+#include <psycle/core/vsthost.h>
+#include <psycle/core/vstplugin.h>
 #include <psycle/helpers/math.hpp>
 
-using namespace psycle::helpers::math;
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
+using namespace core;
+using namespace helpers::math;
 
 	extern CPsycleApp theApp;
 

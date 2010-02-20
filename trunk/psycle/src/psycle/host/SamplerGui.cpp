@@ -1,16 +1,14 @@
 #include "SamplerGui.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/sampler.h>
-using namespace psycle::core;
-#else
-#include "Sampler.hpp"
-#endif
+
 #include "ChildView.hpp"
 #include "MachineView.hpp"
 #include "GearTracker.hpp"
 
-namespace psycle {
-	namespace host {
+#include <psycle/core/sampler.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		SamplerGui::SamplerGui(MachineView* view,
 							   Machine* mac)

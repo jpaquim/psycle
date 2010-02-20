@@ -3,13 +3,6 @@
 
 #include "patternview.hpp"
 
-#include <psycle/helpers/math.hpp>
-#include <psycle/helpers/hexstring_to_integer.hpp>
-
-#include <psycle/core/machine.h>
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-
 #include "BlockTransposeCommand.hpp"
 #include "ChangeGenCommand.hpp"
 #include "ChangeInsCommand.hpp"
@@ -30,10 +23,13 @@
 #include "SwingFillDlg.hpp"
 #include "TransformPatternDlg.hpp"
 
-#ifdef _MSC_VER
-#undef min
-#undef max
-#endif
+#include <psycle/core/machine.h>
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+
+#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
@@ -42,7 +38,6 @@
 
 namespace psycle { 
 	namespace host {
-
 		using namespace helpers;
 		using namespace helpers::math;
 

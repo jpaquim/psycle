@@ -1,27 +1,21 @@
 #pragma once
 #include "Global.hpp"
-
-#include <universalis/stdlib/cstdint.hpp>
+#include "XMFile.hpp"
 
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
-#include <psycle/corE/fileio.h>
+#include <psycle/core/fileio.h>
+#include <universalis/stdlib/cstdint.hpp>
 
-#include "XMFile.hpp"
-
-
-namespace psycle {
+namespace psycle { 
 	namespace core {
 		class Song;
 		class XMSampler;
 		class XMInstrument;
 	}
-}
-using namespace psycle::core;
 
-
-namespace psycle { 
 	namespace host {
+		using namespace core;
 
 	class XMSongLoader : public RiffFile
 	{

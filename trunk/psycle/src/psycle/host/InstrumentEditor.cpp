@@ -2,23 +2,18 @@
 ///\brief implementation file for psycle::host::CInstrumentEditor.
 
 #include "InstrumentEditor.hpp"
+
 #include "MainFrm.hpp"
 #include "EnvDialog.hpp"
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#endif
-
-#include <psycle/helpers/hexstring_to_integer.hpp>
 #include "ProjectData.hpp"
 
-using psycle::helpers::hexstring_to_integer;
+#include <psycle/core/song.h>
+#include <psycle/helpers/hexstring_to_integer.hpp>
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
+
+using helpers::hexstring_to_integer;
+using namespace core;
 
 		CInstrumentEditor::CInstrumentEditor(ProjectData* projects, CMainFrame* parent)
 			: CDialog(CInstrumentEditor::IDD, 0),

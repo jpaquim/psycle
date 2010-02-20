@@ -11,25 +11,27 @@
 #include "MidiInput.hpp"
 #include "NewMachine.hpp"
 #include "SInstance.h"
-#include <universalis/cpu/exception.hpp>
-#include <diversalis/compiler.hpp>
-#include <sstream>
-#include <comdef.h>
-#include <wbemidl.h>
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/plugincatcher.h>
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/player.h>
-using namespace psycle::core;
-#endif
+#include <universalis/cpu/exception.hpp>
+#include <universalis/os/loggers.hpp>
+#include <diversalis/compiler.hpp>
 
+#include <sstream>
+
+#include <comdef.h>
+
+#include <wbemidl.h>
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	# pragma comment(lib, "wbemuuid")
 #endif
 
 namespace psycle {
 	namespace host {
+		using namespace core;
+		namespace loggers = universalis::os::loggers;
 
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
@@ -37,34 +39,15 @@ namespace psycle {
 
 		CPsycleApp theApp; /// The one and only CPsycleApp object
 
-		CPsycleApp::CPsycleApp()
-		:m_uUserMessage(0)
-		{
+		CPsycleApp::CPsycleApp() : m_uUserMessage(0) {
 			universalis::cpu::exception::install_handler_in_thread();
-			// support for unicode characters on mswin98
-			{
-				#if 0
-					if(!::LoadLibrary("unicows"))
-					{
-						std::runtime_error e("could not load library unicows: " + universalis::os::exceptions::code_description());
-						MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
-						throw e;
-					}
-				#endif // 0
-			}
-		}
-
-		CPsycleApp::~CPsycleApp()
-		{
 		}
 
 		BOOL CPsycleApp::InitInstance()
 		{		
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			MachineFactory & factory(MachineFactory::getInstance());
 			//TODO: Use the pluginCatcher when it's ready.
 			factory.Initialize(&Player::singleton(), new PluginFinderCache(true));
-#endif
 
 			// Allow only one instance of the program
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
@@ -79,43 +62,29 @@ namespace psycle {
 			CMainFrame* pFrame = new CMainFrame();
 			m_pMainWnd = pFrame;
 
-			loggers::info("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
+			loggers::information()("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
 
-			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
-			{
+			if(!Global::pConfig->Read()) { // problem reading registry info. missing or damaged
 				Global::pConfig->_initialized = false;
 				CConfigDlg dlg("Psycle Settings");
 				dlg.Init(Global::pConfig);
-				if (dlg.DoModal() == IDOK)
-				{
+				if(dlg.DoModal() == IDOK) {
 					pFrame->m_wndView._outputActive = true;
 					Global::pConfig->_initialized = true;
 				}
-			}
-			else
-			{
+			} else {
 				pFrame->m_wndView._outputActive = true;
 			}
-			if (instanceChecker.PreviousInstanceRunning() && !Global::pConfig->_allowMultipleInstances)
-			{
-//				AfxMessageBox(_T("Previous version detected, will now restore it"), MB_OK);
+			if(instanceChecker.PreviousInstanceRunning() && !Global::pConfig->_allowMultipleInstances) {
+				//AfxMessageBox(_T("Previous version detected, will now restore it"), MB_OK);
 				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
-				if(*(m_lpCmdLine) != 0)
-				{
+				if(*(m_lpCmdLine) != 0) {
 					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
 				}
-				#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					_global.pConfig->_pOutputDriver->set_started(false);
-				#else
-					_global.pConfig->_pOutputDriver->Enable(false);
-					///\todo lock/unlock
-					Sleep(LOCK_LATENCY);
-				#endif
+				_global.pConfig->_pOutputDriver->set_started(false);
 				_global.pConfig->_pMidiInput->Close();
-
 				return FALSE;
 			}
-
 
 			// create and load the frame with its resources
 			pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, 0, 0);

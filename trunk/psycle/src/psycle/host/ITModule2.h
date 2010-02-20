@@ -11,13 +11,9 @@ namespace psycle {
 		class Song;
 		class XMSampler;
 	}
-}
 
-using namespace psycle::core;
-
-
-namespace psycle {
 	namespace host {
+		using namespace core;
 
 		class ITModule2 : public RiffFile
 		{

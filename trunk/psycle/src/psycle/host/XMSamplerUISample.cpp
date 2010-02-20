@@ -1,15 +1,11 @@
 #include "XMSamplerUISample.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/xmsampler.h>
 #include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "XMSampler.hpp"
-#endif
 
-namespace psycle {
-namespace host {
+namespace psycle { namespace host {
+
+using namespace core;
 
 // CWaveScopeCtrl
 CWaveScopeCtrl::CWaveScopeCtrl()

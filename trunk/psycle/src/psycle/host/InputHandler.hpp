@@ -7,14 +7,10 @@ namespace psycle {
 	namespace core {
 		class Machine;
 	}
-}
 
-using namespace psycle::core;
+	namespace host {
+		using namespace core;
 
-namespace psycle
-{
-	namespace host
-	{
 		///\name key modifiers
 		///\{
 		/// shift
@@ -30,15 +26,11 @@ namespace psycle
 		/// ???
 		const int max_cmds = 1024;
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Machine;
-#endif
 		class CChildView;
 		class CMainFrame;
 
 		/// command types
-		enum CmdType
-		{
+		enum CmdType {
 			CT_Null,
 			CT_Note,
 			CT_Editor,

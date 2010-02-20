@@ -1,5 +1,5 @@
+#pragma once
 #include "Command.hpp"
-#include "configuration_options.hpp"
 #include <psycle/core/pattern.h>
 
 

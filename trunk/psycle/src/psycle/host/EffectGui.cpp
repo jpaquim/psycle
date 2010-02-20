@@ -1,15 +1,14 @@
 #include "EffectGui.hpp"
 
-#include <psycle/core/machine.h>
-#include <psycle/core/song.h>
-
 #include "FrameMachine.hpp"
 #include "MachineView.hpp"
 
-using namespace psycle::core;
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
+
+using namespace core;
 
 		EffectGui::EffectGui(MachineView* view, Machine* mac)
 			: MachineGui(view, mac),

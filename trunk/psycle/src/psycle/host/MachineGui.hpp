@@ -2,25 +2,17 @@
 ///\brief interface file for psycle::host::MachineGui.
 #pragma once
 #include "Psycle.hpp"
+#include "canvas.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psycle {
 	namespace core {
 		class Machine;
 	}
-}
-using namespace psycle::core;
-#endif
 
-#include "canvas.hpp"
-
-namespace psycle {
 	namespace host {
+		using namespace core;
 		
 		class MachineView;
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Machine;
-#endif
 
 		class SSkinSource
 		{

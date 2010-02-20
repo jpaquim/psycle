@@ -2,21 +2,19 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include "WireGui.hpp"
 
-#include <psycle/helpers/math.hpp>
-
-#include <psycle/core/machine.h>
-
 #include "Configuration.hpp"
 #include "MachineGui.hpp"
 #include "MachineView.hpp"
 #include "WireDlg.hpp"
 
+#include <psycle/core/machine.h>
+#include <psycle/helpers/math.hpp>
+
 namespace psycle { 
 	namespace host {
-
 		using namespace helpers;
 		using namespace helpers::math;
-		using namespace psycle::core;
+		using namespace core;
 
 		WireGui::WireGui(MachineView* view)	:
 			view_(view),

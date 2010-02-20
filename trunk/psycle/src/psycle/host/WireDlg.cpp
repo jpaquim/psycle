@@ -3,15 +3,6 @@
 
 #include "WireDlg.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/core/machine.h>
-	#include <psycle/core/song.h>
-	using namespace psycle::core;
-#else
-	#include "Machine.hpp"
-	#include "Song.hpp"
-#endif
-
 #include "Configuration.hpp"
 #include "ChildView.hpp"
 #include "InputHandler.hpp"
@@ -20,15 +11,17 @@
 #include "WireGui.hpp"
 #include "MachineGui.hpp"
 
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/fft.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 
-using namespace psycle::helpers::math;
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
+using namespace core;
+using namespace helpers::math;
 
 		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)

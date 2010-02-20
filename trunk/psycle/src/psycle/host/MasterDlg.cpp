@@ -7,17 +7,15 @@
 #include <psycle/core/internal_machines.h>
 #include <psycle/helpers/dsp.hpp>
 
-using namespace psycle::core;
-
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
+using namespace core;
 
 		BEGIN_MESSAGE_MAP(CVolumeCtrl, CSliderCtrl)
 			ON_WM_LBUTTONDOWN()

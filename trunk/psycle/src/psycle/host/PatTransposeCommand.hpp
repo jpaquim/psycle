@@ -1,6 +1,5 @@
 #pragma once
 #include "PatHelperCommand.hpp"
-#include "configuration_options.hpp"
 
 namespace psycle {
 	namespace host {

@@ -2,11 +2,6 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include "project.hpp"
 
-#include <psycle/core/player.h>
-#include <psycle/audiodrivers/audiodriver.h>
-#include <psycle/core/signalslib.h>
-#include <boost/bind.hpp>
-
 #include "Psy3Saver.hpp"
 #include "ChildView.hpp"
 #include "Configuration.hpp"
@@ -19,17 +14,22 @@
 #include "XMSongExport.hpp"
 #include "XMSongLoader.hpp"
 #include "ITModule2.h"
+
+#include <psycle/core/player.h>
+#include <psycle/core/signalslib.h>
+#include <psycle/audiodrivers/audiodriver.h>
+
+#include <boost/bind.hpp>
+
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
 
-
-using namespace psycle::core;
-
 namespace psycle {
 	namespace host {
+		using namespace core;
 
 		Project::Project(ProjectData* parent)
 			: parent_(parent),

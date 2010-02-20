@@ -5,19 +5,13 @@
 #include "ChildView.hpp"
 #include "RecorderGui.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/audiodrivers/audiodriver.h>
-	#include <psycle/core/internal_machines.h>
-	using namespace psycle::core;
-#else
-	#include "AudioDriver.hpp"
-	#include "internal_machines.hpp"
-#endif
-
+#include <psycle/core/internal_machines.h>
+#include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/helpers/dsp.hpp>
 
-namespace psycle {
-namespace host {
+namespace psycle { namespace host {
+
+using namespace core;
 
 CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent)
 	: CDialog(CWaveInMacDlg::IDD, pParent),

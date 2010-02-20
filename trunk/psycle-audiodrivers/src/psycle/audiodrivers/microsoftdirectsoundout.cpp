@@ -1,8 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-#include <stdexcept>
-
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "microsoftdirectsoundout.h"
 #include <psycle/helpers/math.hpp>
@@ -14,7 +12,7 @@
 #include <universalis/os/loggers.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <boost/bind.hpp>
-#include <psycle/helpers/math.hpp>
+#include <stdexcept>
 
 namespace psycle { namespace audiodrivers {
 

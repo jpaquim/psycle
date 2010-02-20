@@ -1,25 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::CWireDlg.
 #pragma once
-
 #include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 namespace psycle {
 	namespace core {
 		class Machine;
 	}
-}
-using namespace psycle::core;
-#else
-namespace psycle {
-	namespace host {
-		class Machine;
-	}
-}
-#endif
 
-namespace psycle {
 	namespace host {
+		using namespace core;
 
 		class CChildView;
 		class WireGui;

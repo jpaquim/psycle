@@ -1,17 +1,15 @@
 #include "MixerGui.hpp"
 
-#include <psycle/core/machine.h>
-#include <psycle/core/song.h>
-
 #include "ChildView.hpp"
 #include "FrameMixerMachine.hpp"
 #include "MachineView.hpp"
 
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
 
-using namespace psycle::core;
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
+using namespace core;
 
 		MixerGui::MixerGui(MachineView* view, Machine* mac)
 			: EffectGui(view, mac),

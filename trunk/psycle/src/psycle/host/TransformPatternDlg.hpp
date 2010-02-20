@@ -1,16 +1,14 @@
 #pragma once
 #include "Psycle.hpp"
 #include "ChildView.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#endif
 
-// CTransformPatternDlg dialog
-namespace psycle {
-	namespace host {
+#include <psycle/core/song.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
+
+		/// CTransformPatternDlg dialog
 		class CTransformPatternDlg : public CDialog
 		{
 			DECLARE_DYNAMIC(CTransformPatternDlg)

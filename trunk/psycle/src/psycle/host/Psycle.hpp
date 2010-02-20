@@ -17,7 +17,7 @@ namespace psycle {
 			DECLARE_MESSAGE_MAP()
 		public:
 			CPsycleApp();
-			virtual ~CPsycleApp() throw();
+			virtual ~CPsycleApp() throw() {}
 		public:
 			virtual BOOL InitInstance();
 			virtual int ExitInstance();

@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CMidiLearn.
 #pragma once
+#include "configuration_options.hpp"
 #include <diversalis/compiler.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT

@@ -1,19 +1,17 @@
-
 #include "XMSamplerUI.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/xmsampler.h>
-using namespace psycle::core;
-#else
-#include "XMSampler.hpp"
-#endif
+
 #include "ChildView.hpp"
 #include "MachineGui.hpp"
+
+#include <psycle/core/xmsampler.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
 
-namespace psycle {
-namespace host {
+namespace psycle { namespace host {
+
+using namespace core;
+
 extern CPsycleApp theApp;
 
 IMPLEMENT_DYNAMIC(XMSamplerUI, CPropertySheet)

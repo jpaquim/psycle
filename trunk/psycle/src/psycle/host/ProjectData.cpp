@@ -1,6 +1,4 @@
 #include "ProjectData.hpp"
-//#include "Global.hpp"
-//#include "Configuration.hpp"
 
 #include "PatternView.hpp"
 #include "MachineView.hpp"

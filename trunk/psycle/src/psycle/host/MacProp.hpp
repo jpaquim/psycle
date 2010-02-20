@@ -3,12 +3,9 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-using namespace psycle::core;
-#endif
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
+using namespace core;
 
 		class CChildView;
 		class MachineGui;

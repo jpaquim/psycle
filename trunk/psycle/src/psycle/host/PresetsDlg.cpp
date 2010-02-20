@@ -2,21 +2,22 @@
 ///\brief implementation file for psycle::host::CPresetsDlg.
 
 #include "PresetsDlg.hpp"
+
+#include "Configuration.hpp"
+
 #include <psycle/core/plugin.h>
 #include <psycle/core/file.h>
 #include <psycle/core/vsthost.h>
 #include <psycle/core/vstplugin.h>
-using namespace psycle::core;
-#include "Configuration.hpp"
 #include <psycle/helpers/math.hpp>
+
 #include <cstring>
 
-using namespace psycle::helpers::math;
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
-
-		using namespace seib::vst;
+using namespace core;
+using namespace helpers::math;
+using namespace seib::vst;
 
 		CPreset::CPreset()
 		:

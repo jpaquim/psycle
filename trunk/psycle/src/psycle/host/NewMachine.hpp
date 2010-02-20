@@ -2,21 +2,21 @@
 ///\brief interface file for psycle::host::CNewMachine.
 #pragma once
 #include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machinekey.hpp>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#endif
 #include "ProgressDialog.hpp"
+
+#include <psycle/core/machinekey.hpp>
 #include <universalis/stdlib/cstdint.hpp>
-#include <afxwin.h>
-#include <afxcoll.h>
+
 #include <iostream>
 #include <typeinfo>
 #include <map>
-namespace psycle {
-	namespace host {
+
+#include <afxwin.h>
+#include <afxcoll.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		const int MAX_BROWSER_NODES = 64;

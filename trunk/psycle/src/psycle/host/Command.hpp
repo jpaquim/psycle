@@ -1,4 +1,5 @@
 #pragma once
+#include "configuration_options.hpp"
 
 namespace psycle {
 	namespace host {

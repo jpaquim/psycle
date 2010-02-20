@@ -1,23 +1,15 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psycle {
 	namespace core {
 		class XMSampler;
 	}
-}
-using namespace psycle::core;
-#endif
 
-namespace psycle {
-namespace host {
+	namespace host {
+		using namespace core;
 
 // Cuadro de diálogo de XMSamplerMixerPage
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-class XMSampler;
-#endif
-
 class XMSamplerMixerPage : public CPropertyPage
 {
 	DECLARE_DYNAMIC(XMSamplerMixerPage)

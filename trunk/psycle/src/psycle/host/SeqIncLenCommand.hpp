@@ -1,6 +1,4 @@
-#include "Command.hpp"
 #pragma once
-#include "configuration_options.hpp"
 #include "SeqHelperCommand.hpp"
 
 namespace psycle {

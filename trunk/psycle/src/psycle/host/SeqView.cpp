@@ -3,21 +3,17 @@
 
 #include "seqview.hpp"
 
-#include <psycle/helpers/math.hpp>
-
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
 #include "PatternView.hpp"
 #include "Project.hpp"
 #include "SeqDeleteCommand.hpp"
 
-#ifdef _MSC_VER
-#undef min
-#undef max
-#endif
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+
+#include <psycle/helpers/math.hpp>
+
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE

@@ -2,22 +2,19 @@
 ///\brief implementation file for psycle::host::CGearRackDlg.
 
 #include "GearRackDlg.hpp"
+
 #include "WaveEdFrame.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-#include <psycle/core/machinefactory.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Machine.hpp"
-#endif
 #include "MainFrm.hpp"
 #include "PatternView.hpp"
 #include "MachineView.hpp"
 
-namespace psycle {
-	namespace host {
+#include <psycle/core/song.h>
+#include <psycle/core/machine.h>
+#include <psycle/core/machinefactory.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		int CGearRackDlg::DisplayMode = 0;
 

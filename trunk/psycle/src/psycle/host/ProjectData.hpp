@@ -2,8 +2,8 @@
 
 #include "Psycle.hpp"
 #include "project.hpp"
-#include <vector>
 
+#include <vector>
 
 namespace psycle {
 	namespace host {

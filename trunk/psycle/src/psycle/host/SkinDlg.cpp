@@ -2,13 +2,14 @@
 ///\brief implementation file for psycle::host::CSkinDlg.
 
 #include "SkinDlg.hpp"
+
 #include "Configuration.hpp"
+
 #include <psycle/helpers/hexstring_to_integer.hpp>
 
-using namespace psycle::helpers;
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
+using namespace helpers;
 
 		#define MAX_FONTS 256
 

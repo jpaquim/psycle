@@ -2,26 +2,22 @@
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 #include "WaveEdChildView.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/sampler.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Sampler.hpp"
-#endif
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
 #include "WaveEdFrame.hpp"
-
 #include "Zap.hpp"
-#include <mmreg.h>
+
+#include <psycle/core/song.h>
+#include <psycle/core/sampler.h>
 #include <psycle/helpers/math.hpp>
+
+#include <mmreg.h>
 
 namespace psycle { namespace host {
 
-using namespace psycle::helpers;
-using namespace psycle::helpers::math;
+using namespace core;
+using namespace helpers;
+using namespace helpers::math;
 
 float const CWaveEdChildView::zoomBase = 1.06f;
 

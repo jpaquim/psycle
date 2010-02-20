@@ -1,17 +1,14 @@
 #include "RecorderGui.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machine.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#endif
 
 #include "MachineView.hpp"
 #include "WaveInMacDlg.hpp"
 #include "ChildView.hpp"
 
-namespace psycle {
-	namespace host {
+#include <psycle/core/machine.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		RecorderGui::RecorderGui(class MachineView* view, Machine* mac)
 			: GeneratorGui(view, mac),

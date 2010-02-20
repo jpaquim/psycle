@@ -1,24 +1,17 @@
 #pragma once
 #include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
+#include <afxwin.h>
+
 namespace psycle {
 	namespace core {
 		class XMSampler;
 	}
-}
-using namespace psycle::core;
-#endif
-#include <afxwin.h>
-
-namespace psycle {
-namespace host {
+	namespace host {
+		using namespace core;
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUIGeneral dialog
-
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-class XMSampler;
-#endif
 
 class XMSamplerUIGeneral : public CPropertyPage
 {

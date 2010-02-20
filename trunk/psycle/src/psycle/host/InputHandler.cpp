@@ -1,35 +1,27 @@
 ///\file
 ///\brief implementation file for psycle::host::InputHandler.
 #include "InputHandler.hpp"
+
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 #include "PatternView.hpp"
 #include "Configuration.hpp"
+#include "ChildView.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/machine.h>
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
 #include <psycle/core/internalkeys.hpp>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#include "Player.hpp"
-#include "Song.hpp"
-#endif
-
-
-#include "ChildView.hpp"
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
-namespace psycle
-{
-	namespace host
-	{
+
+namespace psycle { namespace host {
+	using namespace core;
+
 		const char * sDefaultCfgName = "PsycleKeys.INI";
 
 		InputHandler::InputHandler()

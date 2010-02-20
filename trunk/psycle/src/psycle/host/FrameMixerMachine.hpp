@@ -3,21 +3,16 @@
 #pragma once
 #include "Psycle.hpp"
 #include "FrameMachine.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 namespace psycle {
-	namespace core {
-		class Mixer;
-	}
+
+namespace core {
+	class Mixer;
 }
-using namespace psycle::core;
-#endif
-namespace psycle {
+
 namespace host {
+	using namespace core;
 
-
-	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Mixer;
-	#endif
 
 	/// mixer window.
 	class CFrameMixerMachine : public CFrameMachine

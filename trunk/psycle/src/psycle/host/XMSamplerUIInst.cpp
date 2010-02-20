@@ -6,24 +6,19 @@
  */
 
 #include "XMSamplerUIInst.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/player.h>
-#include <psycle/core/xminstrument.h>
-#include <psycle/core/xmsampler.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Player.hpp"
-#include "XMInstrument.hpp"
-#include "XMSampler.hpp"
-#endif
+
 #include "XMSongLoader.hpp"
 #include "ITModule2.h"
 #include "Configuration.hpp"
-//using namespace Gdiplus;
 
-namespace psycle {
-namespace host {
+#include <psycle/core/player.h>
+#include <psycle/core/xminstrument.h>
+#include <psycle/core/xmsampler.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
+
 // XMSamplerUIInst
 IMPLEMENT_DYNAMIC(XMSamplerUIInst, CPropertyPage)
 XMSamplerUIInst::XMSamplerUIInst()
