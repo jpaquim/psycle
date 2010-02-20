@@ -2,11 +2,11 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #pragma once
 
-#include <psycle/core/song.h>
-
 #include "CommandManager.hpp"
 #include "ProgressDialog.hpp"
 #include "Psycle.hpp"
+
+#include <psycle/core/song.h>
 
 namespace psycle {
 	namespace host {
