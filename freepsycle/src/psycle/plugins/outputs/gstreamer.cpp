@@ -346,8 +346,7 @@ void gstreamer::do_start() throw(engine::exception) {
 }
 
 bool gstreamer::started() const {
-	if(!opened()) return false;
-	if(state(*pipeline_) == ::GST_STATE_PLAYING) return true;
+	return opened() && state(*pipeline_) == ::GST_STATE_PLAYING;
 }
 
 /// this is called from within gstreamer's processing thread.
