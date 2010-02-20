@@ -32,7 +32,7 @@ affinity_mask process::affinity_mask() const throw(exception) {
 		#if defined DIVERSALIS__OS__CYGWIN
 			///\todo sysconf
 			class affinity_mask result;
-			result[0] = true;
+			result(0, true);
 			return result;
 		#else
 			class affinity_mask result;
@@ -271,7 +271,6 @@ unsigned int affinity_mask::size() const {
 }
 
 bool affinity_mask::operator()(unsigned int cpu_index) const {
-	assert(0 <= cpu_index);
 	assert(cpu_index < size());
 	return
 		#if defined DIVERSALIS__OS__POSIX
@@ -284,7 +283,6 @@ bool affinity_mask::operator()(unsigned int cpu_index) const {
 }
 
 void affinity_mask::operator()(unsigned int cpu_index, bool active) {
-	assert(0 <= cpu_index);
 	assert(cpu_index < size());
 	#if defined DIVERSALIS__OS__POSIX
 		if(active)
@@ -292,7 +290,7 @@ void affinity_mask::operator()(unsigned int cpu_index, bool active) {
 		else
 			CPU_CLR(cpu_index, &native_mask_);
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		native_mask_ &= 1 << cpu_index;
+		native_mask_ |= 1 << cpu_index;
 	#else
 		#error unsupported operating system
 	#endif
