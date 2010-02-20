@@ -68,6 +68,16 @@ class PSYCLE__CORE__DECL RiffFile {
 		virtual bool Expect    (void       *, std::size_t const &);
 
 	public:
+		#if defined PSYCLE__CORE__FILEIO__WANT_DEPRECATED_RAW_ACCESS
+			/// workaround for msvc8 which fails to determine which overload to call
+			template<typename X> UNIVERSALIS__COMPILER__DEPRECATED("TODO...")
+			bool DeprecatedRawRead(X & x) { return ReadChunk(&x, sizeof x); }
+
+			/// workaround for msvc8 which fails to determine which overload to call
+			template<typename X> UNIVERSALIS__COMPILER__DEPRECATED("TODO...")
+			bool DeprecatedRawWrite(X & x) { return WriteChunk(&x, sizeof x); }
+		#endif
+
 		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
 			/// workaround for msvc8 which fails to determine which overload to call
 			template<typename X>

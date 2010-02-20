@@ -418,7 +418,7 @@ Special:  Bit 0: On = song message attached.
 			itInsHeader2x curH;
 			XMInstrument &xins = s->rInstrument(iInstIdx);
 
-            Read(curH);
+            DeprecatedRawRead(curH);
 			std::string itname(curH.sName);
 			xins.Name(itname);
 
@@ -586,7 +586,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadITSample(XMSampler *sampler,int iSampleIdx)
 		{
 			itSampleHeader curH;
-			Read(curH);
+			DeprecatedRawRead(curH);
 			XMInstrument::WaveData& _wave = s->SampleData(iSampleIdx);
 
 /*		      Flg:      Bit 0. On = sample associated with header.
@@ -1248,7 +1248,7 @@ Special:  Bit 0: On = song message attached.
 			Read(header.loopE);
 			Read(header.sustainS);
 			Read(header.sustainE);
-			for (int i=0; i < 25; i++) Read(header.nodes[i]);
+			for (int i=0; i < 25; i++) DeprecatedRawRead(header.nodes[i]);
 			return Read(header.unused);
 		}
 

@@ -27,6 +27,9 @@
 /// Define to 1 to use RMS Vu's, 0 otherwise
 #define PSYCLE__CONFIGURATION__RMS_VUS 0
 
+///\todo that won't work on big-endian machines (this is for IT and XM module loaders)
+#define PSYCLE__CORE__FILEIO__WANT_DEPRECATED_RAW_ACCESS
+
 /**************************************************************************************************/
 /// string describing the configuration of the build.
 #define PSYCLE__CONFIGURATION(EOL) \
