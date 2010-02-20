@@ -23,6 +23,7 @@ class score2 {
 		engine::graph & graph_;
 
 		plugins::sine & sine_;
+		plugins::sequence & freq_;
 };
 
 }}}

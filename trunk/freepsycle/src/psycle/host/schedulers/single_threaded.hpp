@@ -241,7 +241,7 @@ class scheduler::buffer_pool {
 		virtual ~buffer_pool() throw();
 		/// gets a buffer from the pool.
 		buffer & operator()() {
-			if(false && loggers::trace()()) {
+			if(false && loggers::trace()) {
 				std::ostringstream s;
 				s << "buffer requested, pool size before: " << list_.size();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -258,7 +258,7 @@ class scheduler::buffer_pool {
 			assert("reference count is zero: " && !buffer.reference_count());
 			assert(buffer.channels() >= this->channels_);
 			assert(buffer.events() >= this->events_);
-			if(false && loggers::trace()()) {
+			if(false && loggers::trace()) {
 				std::ostringstream s;
 				s << "buffer " << &buffer << " given back, pool size before: " << list_.size();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);

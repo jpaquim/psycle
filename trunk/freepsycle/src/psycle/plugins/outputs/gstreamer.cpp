@@ -18,6 +18,10 @@ namespace psycle { namespace plugins { namespace outputs {
 using engine::exceptions::runtime_error;
 using stream::formats::riff_wave::format;
 
+namespace {
+	bool const ultra_trace = false;
+}
+
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(gstreamer)
 
 gstreamer::gstreamer(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(engine::exception)
@@ -66,8 +70,8 @@ namespace {
 				std::ostringstream s;
 				s
 					<< "The element type " << ::gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory))
-					<< " is a member of the group " << ::gst_element_factory_get_klass(factory) << "." << std::endl
-					<< "Description:" << std::endl
+					<< " is a member of the group " << ::gst_element_factory_get_klass(factory)
+					<< ". Description: "
 					<< ::gst_element_factory_get_description(factory);
 				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
@@ -356,7 +360,7 @@ void gstreamer::handoff_static(::GstElement * source, ::GstBuffer * buffer, ::Gs
 
 /// this is called from within gstreamer's processing thread.
 void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
-	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
+	if(ultra_trace && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
 	{ scoped_lock lock(mutex_);
 		while(io_ready() && !stop_requested_ && !wait_for_state_to_become_playing_) condition_.wait(lock);
 		if(stop_requested_) return;
@@ -397,7 +401,7 @@ void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 
 /// this is called from within psycle's host's processing thread(s).
 void gstreamer::do_process() throw(engine::exception) {
-	if(false && loggers::trace()) loggers::trace()("process", UNIVERSALIS__COMPILER__LOCATION);
+	if(ultra_trace && loggers::trace()) loggers::trace()("process", UNIVERSALIS__COMPILER__LOCATION);
 	if(!in_port()) return;
 	{ scoped_lock lock(mutex_);
 		if(false && loggers::warning() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
