@@ -2,18 +2,15 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #pragma once
-
 #include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 namespace psycle {
 	namespace core {
 		class SequenceEntry;
 		class SequenceLine;
 		class Pattern;
 	}
-}
-#endif
-namespace psycle {
+
 	namespace host {
 
 		class CMainFrame;

@@ -2,13 +2,14 @@
 //
 
 #include "TransformPatternDlg.hpp"
+
 #include "PatternView.hpp"
+
 #include <psycle/helpers/hexstring_to_integer.hpp>
 
-using namespace psycle::helpers;
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
+using namespace helpers;
 
 		// CTransformPatternDlg dialog
 

@@ -2,17 +2,8 @@
 ///\brief implementation file for psycle::host::CMainFrame.
 
 #include "MainFrm.hpp"
+
 #include "Project.hpp"
-
-#include <psycle/core/player.h>
-#include <psycle/core/plugin.h>
-#include <psycle/core/sampler.h>
-#include <psycle/core/xmsampler.h>
-#include <psycle/core/song.h>
-#include <psycle/core/internal_machines.h>
-#include <psycle/core/fileio.h>
-using namespace psycle::core;
-
 #include "PatternView.hpp"
 #include "Configuration.hpp"
 #include "InputHandler.hpp"
@@ -42,12 +33,22 @@ using namespace psycle::core;
 #include "SeqIncLongCommand.hpp"
 #include "SeqDecLongCommand.hpp"
 
+#include <psycle/core/player.h>
+#include <psycle/core/plugin.h>
+#include <psycle/core/sampler.h>
+#include <psycle/core/xmsampler.h>
+#include <psycle/core/song.h>
+#include <psycle/core/internal_machines.h>
+#include <psycle/core/fileio.h>
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/hexstring_to_integer.hpp>
-#include <HtmlHelp.h>
+
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+
+#include <HtmlHelp.h>
+
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
@@ -56,8 +57,9 @@ using namespace psycle::core;
 
 namespace psycle { namespace host {
 
-using namespace psycle::helpers;
-using namespace psycle::helpers::math;
+using namespace core;
+using namespace helpers;
+using namespace helpers::math;
 
 		#define WM_SETMESSAGESTRING 0x0362
 

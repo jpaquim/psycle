@@ -3,23 +3,18 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psycle {
-	namespace core {
-		class Machine;
-	}
-}
-using namespace psycle::core;
-#endif
 
-namespace psycle {
-	namespace host {
+namespace core {
+	class Machine;
+}
+
+namespace host {
+
+using namespace core;
 
 class CChildView;
 class MachineGui;
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-	class Machine;
-#endif
 
 #define K_XSIZE     28
 #define K_YSIZE     28

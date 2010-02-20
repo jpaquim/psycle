@@ -1,21 +1,15 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psycle {
-	namespace core {
-		class AudioRecorder;
-	}
-}
-using namespace psycle::core;
-#endif
 
-namespace psycle {
+namespace core {
+	class AudioRecorder;
+}
+
 namespace host {
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-	class AudioRecorder;
-#endif
+using namespace core;
 
 class CChildView;
 

@@ -1,9 +1,7 @@
 #include "DummyGui.hpp"
 
-using namespace psycle::core;
-
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
+	using namespace core;
 
 		DummyGenGui::DummyGenGui(MachineView* view, Machine* mac)
 			: GeneratorGui(view, mac) {

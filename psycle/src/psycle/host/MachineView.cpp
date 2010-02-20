@@ -2,16 +2,6 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include "MachineView.hpp"
 
-#include <psycle/helpers/hexstring_to_integer.hpp>
-
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-#include <psycle/core/machinefactory.h>
-#include <psycle/core/internalkeys.hpp>
-#include <psycle/core/plugininfo.h>
-#include <psycle/core/player.h>
-#include <psycle/core/file.h>
-
 #include "Configuration.hpp"
 #include "DummyGui.hpp"
 #include "EffectGui.hpp"
@@ -29,10 +19,16 @@
 #include "WireGui.hpp"
 #include "XmSamplerGui.hpp"
 
-#ifdef _MSC_VER
-#undef min
-#undef max
-#endif
+#include <psycle/core/song.h>
+#include <psycle/core/machine.h>
+#include <psycle/core/machinefactory.h>
+#include <psycle/core/internalkeys.hpp>
+#include <psycle/core/plugininfo.h>
+#include <psycle/core/player.h>
+#include <psycle/core/file.h>
+
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE

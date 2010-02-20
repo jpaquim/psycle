@@ -11,9 +11,7 @@ namespace psycle {
 		class Song;
 		class Machine;
 	}
-}
 
-namespace psycle {
 	namespace host {
 
 		class CChildView;

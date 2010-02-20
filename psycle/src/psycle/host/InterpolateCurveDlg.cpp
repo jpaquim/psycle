@@ -2,12 +2,12 @@
 ///\brief implementation file for psycle::host::CInterpolateCurve.
 
 #include "InterpolateCurveDlg.hpp"
+
 #include <psycle/helpers/hexstring_to_integer.hpp>
 
-using namespace psycle::helpers;
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
+using namespace helpers;
 
 		CInterpolateCurve::CInterpolateCurve(int startsel, int endsel,int _linesperbeat,CWnd* pParent)
 			: CDialog(CInterpolateCurve::IDD, pParent)

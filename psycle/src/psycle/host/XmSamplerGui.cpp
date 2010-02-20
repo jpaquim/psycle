@@ -2,17 +2,16 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include "XmSamplerGui.hpp"
 
-#include <psycle/core/song.h>
-#include <psycle/core/xmsampler.h>
-
 #include "ChildView.hpp"
 #include "MachineView.hpp"
 #include "XMSamplerUI.hpp"
 
-using namespace psycle::core;
+#include <psycle/core/song.h>
+#include <psycle/core/xmsampler.h>
 
 namespace psycle {
 	namespace host {
+		using namespace core;
 
 		XmSamplerGui::XmSamplerGui(MachineView* view,
 								   Machine* mac)

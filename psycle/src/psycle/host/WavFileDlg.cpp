@@ -1,16 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::CWavFileDlg.
 #include "WavFileDlg.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/song.h>
 #include <psycle/core/sampler.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Sampler.hpp"
-#endif
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
+using namespace core;
+
 IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 		CWavFileDlg::CWavFileDlg(

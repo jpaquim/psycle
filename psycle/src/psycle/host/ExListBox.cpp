@@ -5,12 +5,8 @@
 
 #include "ExListBox.h"
 #include "MainFrm.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#endif
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,10 +14,11 @@ using namespace psycle::core;
 static char THIS_FILE[] = __FILE__;
 #endif
 
+using namespace psycle::host;
+using namespace psycle::core;
 
 /////////////////////////////////////////////////////////////////////////////
 // CExListBox
-using namespace psycle::host;
 CThisEdit::CThisEdit()
 {
 }

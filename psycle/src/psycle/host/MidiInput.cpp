@@ -3,16 +3,18 @@
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 
 #include "MidiInput.hpp"
+
 #include "InputHandler.hpp"
 #include "Configuration.hpp"
+#include "ChildView.hpp"
+#include "MainFrm.hpp"
+
 #include <psycle/core/song.h>
 #include <psycle/core/player.h>
 #include <psycle/core/plugin.h>
 #include <psycle/core/vstplugin.h>
-using namespace psycle::core;
-#include "ChildView.hpp"
-#include "MainFrm.hpp"
 #include <psycle/helpers/math.hpp>
+
 #include <cassert>
 
 #if !defined NDEBUG
@@ -23,6 +25,7 @@ using namespace psycle::core;
 
 namespace psycle { namespace host {
 
+using namespace core;
 using namespace helpers::math;
 
 		extern CPsycleApp theApp;

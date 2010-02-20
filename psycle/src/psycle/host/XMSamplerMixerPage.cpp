@@ -2,12 +2,13 @@
 //
 
 #include "XMSamplerMixerPage.hpp"
+
 #include <psycle/core/song.h>
 #include <psycle/core/xmsampler.h>
-using namespace psycle::core;
 
-namespace psycle {
-namespace host {
+namespace psycle { namespace host {
+using namespace core;
+
 // Cuadro de diálogo de XMSamplerMixerPage
 
 const int XMSamplerMixerPage::dlgName[8] = {

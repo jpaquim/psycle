@@ -4,11 +4,10 @@
 #pragma once
 #include "Psycle.hpp"
 
-// this shouldn't be here, it is for SSkin..
-#include "MachineGui.hpp"
+#include "MachineGui.hpp" ///\todo this shouldn't be here, it is for SSkin.
+
 #include <psycle/core/machine.h>
 #include <psycle/core/pattern.h>
-
 
 #define MAX_DRAW_MESSAGES 32
 

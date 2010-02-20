@@ -4,7 +4,6 @@
 #include "EffectGui.hpp"
 #include "Psycle.hpp"
 
-
 namespace psycle {
 	namespace host {
 		

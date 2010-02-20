@@ -1,23 +1,16 @@
 #pragma once
 #include "Psycle.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/xminstrument.h>
+
+#include <afxwin.h>
+
 namespace psycle {
 	namespace core {
 		class XMSampler;
 	}
-}
-using namespace psycle::core;
-#else
-#include "XMInstrument.hpp"
-#endif
-#include <afxwin.h>
-namespace psycle {
-namespace host {
-
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-class XMSampler;
-#endif
+	namespace host {
+		using namespace core;
 
 class CWaveScopeCtrl : public CStatic
 {

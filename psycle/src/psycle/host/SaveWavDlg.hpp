@@ -2,20 +2,20 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #pragma once
 #include "Psycle.hpp"
-#include <mmreg.h>
+
 #include <psycle/helpers/riff.hpp>
 #include <psycle/helpers/dither.hpp>
 #include <psycle/audiodrivers/wavefileout.h>
 #include <universalis/stdlib/thread.hpp>
+
+#include <mmreg.h>
 
 namespace psycle {
 	namespace core {
 		class SequenceLine;
 		class SequenceEntry;
 	}
-}
 
-namespace psycle {
 	namespace host {
 
 		class CChildView;

@@ -2,25 +2,22 @@
 ///\brief implementation file for psycle::host::COutputDlg.
 
 #include "OutputDlg.hpp"
+
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/player.h>
 #include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Player.hpp"
-#include "Song.hpp"
-#endif
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
-namespace psycle {
-	namespace host {
 
+namespace psycle { namespace host {
+
+using namespace core;
 
 		IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 

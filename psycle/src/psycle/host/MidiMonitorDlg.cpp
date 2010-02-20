@@ -3,22 +3,20 @@
 
 #include "MidiMonitorDlg.hpp"
 #include "MidiInput.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/internalkeys.hpp>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Machine.hpp"
-#endif
+
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)

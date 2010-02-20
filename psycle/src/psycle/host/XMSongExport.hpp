@@ -1,28 +1,23 @@
 #pragma once
 #include "Global.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#include "XMFile.hpp"
+
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
+#include <psycle/core/fileio.h>
+#include <universalis/stdlib/cstdint.hpp>
+
+#include <map>
+
 namespace psycle {
 	namespace core {
 		class Song;
 		class XMSampler;
 		class Pattern;
 	}
-}
-using namespace psycle::core;
-#else
-#include "SongStructs.hpp"
-#endif
-#include <psycle/core/fileio.h>
-#include "XMFile.hpp"
-#include <universalis/stdlib/cstdint.hpp>
-#include <map>
 
-namespace psycle { namespace host {
-	#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-		class Song;
-	#endif
+	namespace host {
+		using namespace core;
 
 	class XMSongExport : public RiffFile
 	{

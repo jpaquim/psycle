@@ -2,30 +2,28 @@
 ///\brief implementation file for psycle::host::CNewMachine.
 
 #include "NewMachine.hpp"
-#include "Configuration.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+#include "Configuration.hpp"
+#include "ProgressDialog.hpp"
+
 #include <psycle/core/machinefactory.h>
 #include <psycle/core/machinehost.hpp>
 #include <psycle/core/plugincatcher.h>
 #include <psycle/core/machinekey.hpp>
 #include <psycle/core/internalkeys.hpp>
-using namespace psycle::core;
-#else
-#include "Plugin.hpp"
-#include "VstHost24.hpp"
-#endif
-#include "ProgressDialog.hpp"
 #include <universalis/os/paths.hpp>
-#include <direct.h>
+
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <algorithm> // for std::transform
 #include <cctype> // for std::tolower
 
-namespace psycle {
-	namespace host {
+#include <direct.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		int CNewMachine::machineGrouping = groupRole;
 		int CNewMachine::displayName = displayName;

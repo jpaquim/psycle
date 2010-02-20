@@ -3,6 +3,7 @@
 ///\file
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
+
 #include "Psycle.hpp"
 
 namespace psycle {
@@ -12,13 +13,10 @@ namespace psycle {
 	namespace audiodrivers {
 		class AudioDriver;
 	}
-}
 
-using namespace psycle::core;
-using namespace psycle::audiodrivers;
-
-namespace psycle {
 	namespace host {
+		using namespace core;
+		using namespace audiodrivers;
 
 		class CGearTracker;
 		class XMSamplerUI;

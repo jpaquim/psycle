@@ -2,17 +2,6 @@
 ///\brief implementation file for psycle::host::CFrameMachine.
 
 #include "FrameMachine.hpp"
-///\todo Replace the drawing code with NativeGui
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machine.h>
-#include <psycle/core/plugin.h>
-#include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#include "Plugin.hpp"
-#include "Song.hpp"
-#endif
 
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
@@ -21,12 +10,17 @@ using namespace psycle::core;
 #include "Configuration.hpp"
 
 #include "MachineGui.hpp"
-#include "NativeGui.hpp"
+#include "NativeGui.hpp" ///\todo Replace the drawing code with NativeGui
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
 
-namespace psycle {
-	namespace host {
+#include <psycle/core/machine.h>
+#include <psycle/core/plugin.h>
+#include <psycle/core/song.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		extern CPsycleApp theApp;
 

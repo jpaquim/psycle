@@ -9,18 +9,15 @@
 #include <psycle/core/song.h>
 #include <psycle/core/xmsampler.h>
 
-using namespace psycle::core;
-
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
 
-namespace psycle
-{
-	namespace host
-	{
+namespace psycle { namespace host {
+	using namespace core;
+
 		ITModule2::ITModule2(void)
 		{
 			embeddedData = NULL;

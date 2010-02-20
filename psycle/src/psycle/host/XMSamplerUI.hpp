@@ -4,23 +4,16 @@
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 namespace psycle {
 	namespace core {
 		class XMSampler;
 	}
-}
-using namespace psycle::core;
-#endif
-
-namespace psycle {
 	namespace host {
+		using namespace core;
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-class XMSampler;
-#endif
 
 class XMSamplerUI : public CPropertySheet
 	{

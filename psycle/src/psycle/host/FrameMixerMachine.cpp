@@ -1,20 +1,18 @@
-
 #include "FrameMixerMachine.hpp"
+
 #include "Configuration.hpp"
-
-#include <psycle/core/song.h>
-#include <psycle/core/mixer.h>
-using namespace psycle::core;
-
 #include "MachineGui.hpp"
 #include "MachineView.hpp"
 #include "NativeGui.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "ChildView.hpp"
 
-namespace psycle {
-namespace host {
+#include <psycle/core/song.h>
+#include <psycle/core/mixer.h>
 
+namespace psycle { namespace host {
+
+using namespace core;
 
 	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameMachine)
 

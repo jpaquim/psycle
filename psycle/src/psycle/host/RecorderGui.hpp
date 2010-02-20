@@ -2,10 +2,9 @@
 #include "Psycle.hpp"
 #include "GeneratorGui.hpp"
 
-
 namespace psycle {
 	namespace host {
-		
+
 		class CWaveInMacDlg;
 
 		class RecorderGui : public GeneratorGui {

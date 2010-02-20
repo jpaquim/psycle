@@ -2,21 +2,22 @@
 ///\implementation psycle::host::CMidiInputDlg.
 
 #include "MidiInputDlg.hpp"
+
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
-#include <psycle/helpers/hexstring_to_integer.hpp>
 
-using namespace psycle::helpers;
+#include <psycle/helpers/hexstring_to_integer.hpp>
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
-namespace psycle {
-	namespace host {
 
+namespace psycle { namespace host {
+
+using namespace helpers;
 
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
 

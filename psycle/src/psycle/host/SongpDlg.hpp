@@ -3,22 +3,12 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psycle {
 	namespace core {
 		class Song;
 	}
-}
-using namespace psycle::core;
-#endif
 
-
-namespace psycle {
 	namespace host {
-
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-	class Song; // forward declaration
-#endif
 
 		/// song dialog window.
 		class CSongpDlg : public CDialog

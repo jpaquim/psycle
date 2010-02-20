@@ -3,22 +3,22 @@
 
 #include "SaveWavDlg.hpp"
 
-#include <iomanip>
-#include <iostream>
-
-#include <boost/bind.hpp>
-
-#include <psycle/helpers/hexstring_to_integer.hpp>
-
-#include <psycle/core/machine.h>
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-
 #include "ChildView.hpp"
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
 #include "MidiInput.hpp"
 #include "PatternView.hpp"
+
+#include <psycle/core/machine.h>
+#include <psycle/core/player.h>
+#include <psycle/core/song.h>
+
+#include <psycle/helpers/hexstring_to_integer.hpp>
+
+#include <boost/bind.hpp>
+
+#include <iomanip>
+#include <iostream>
 
 namespace psycle {
 	namespace host {

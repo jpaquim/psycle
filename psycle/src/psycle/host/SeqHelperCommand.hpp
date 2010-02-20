@@ -3,7 +3,6 @@
 
 #pragma once
 #include "Command.hpp"
-#include "configuration_options.hpp"
 
 // This class offers help to prepare undo/redo storage for SeqView commands
 // It prepares the un(re)do doing a copy of the SequenceLine

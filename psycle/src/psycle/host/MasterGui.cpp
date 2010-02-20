@@ -1,19 +1,14 @@
 #include "MasterGui.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/machine.h>
-#include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Machine.hpp"
-#include "Song.hpp"
-#endif
-
 #include "MasterDlg.hpp"
 #include "MachineView.hpp"
 
-namespace psycle {
-	namespace host {
+#include <psycle/core/machine.h>
+#include <psycle/core/song.h>
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		MasterGui::MasterGui(MachineView* view, Machine* mac)
 			: MachineGui(view, mac),

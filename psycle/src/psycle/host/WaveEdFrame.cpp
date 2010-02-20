@@ -4,24 +4,23 @@
 ///\todo The use of song class could be removed. It only needs to have the current selected sample
 // and in psycore, the InstPreview has been moved to the Sampler class.
 #include "WaveEdFrame.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#include <psycle/core/song.h>
-#include <psycle/core/sampler.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#include "Sampler.hpp"
-#endif
+
+#include "ProjectData.hpp"
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
+
+#include <psycle/core/song.h>
+#include <psycle/core/sampler.h>
+
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
-#include "ProjectData.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 

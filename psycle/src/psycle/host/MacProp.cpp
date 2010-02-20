@@ -3,18 +3,17 @@
 
 #include "MacProp.hpp"
 
-#include <psycle/core/machine.h>
-#include <psycle/core/machinefactory.h>
-#include <psycle/core/song.h>
-
 #include "MachineGui.hpp"
 #include "MachineView.hpp"
 #include "MainFrm.hpp"
 
-using namespace psycle::core;
+#include <psycle/core/machine.h>
+#include <psycle/core/machinefactory.h>
+#include <psycle/core/song.h>
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
+
+using namespace core;
 		
 		BEGIN_MESSAGE_MAP(CMacProp, CDialog)
 			ON_EN_CHANGE(IDC_EDIT1, OnChangeEdit1)

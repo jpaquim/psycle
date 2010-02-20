@@ -1,14 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CEnvDialog.
 #include "EnvDialog.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+
 #include <psycle/core/song.h>
-using namespace psycle::core;
-#else
-#include "Song.hpp"
-#endif
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
+using namespace core;
 
 		CEnvDialog::CEnvDialog(CWnd* pParent)
 			: CDialog(CEnvDialog::IDD, pParent)

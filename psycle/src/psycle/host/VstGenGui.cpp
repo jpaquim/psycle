@@ -1,15 +1,14 @@
 #include "VstGenGui.hpp"
 
-#include <psycle/core/song.h>
-
 #include "ChildView.hpp"
 #include "MachineView.hpp"
 #include "VstEffectWnd.hpp"
 
-using namespace psycle::core;
+#include <psycle/core/song.h>
 
 namespace psycle {
 	namespace host {
+		using namespace core;
 
 		VstGenGui::VstGenGui(MachineView* view,
 							 Machine* mac)
