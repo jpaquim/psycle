@@ -393,6 +393,7 @@ namespace psycle {
 			std:: uint8_t ReadUInt8()  { std:: uint8_t t; Read(t); return t; }
 			bool ReadHeader(itHeader& header);
 			bool ReadHeader(EmbeddedMIDIData& header);
+			bool ReadHeader(itInsHeader1x& header);
 			bool ReadHeader(itInsHeader2x& header);
 			bool ReadHeader(ITEnvStruct& header);
 			bool ReadHeader(ITNotePair& header);

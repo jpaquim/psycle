@@ -349,7 +349,7 @@ Special:  Bit 0: On = song message attached.
 		{
 			itInsHeader1x curH;
 			XMInstrument &xins = s->rInstrument(iInstIdx);
-			Read(curH);
+			ReadHeader(curH);
 
 			std::string itname(curH.sName);
 			xins.Name(itname);
@@ -1196,6 +1196,24 @@ Special:  Bit 0: On = song message attached.
 			for(int i=0; i < 128; i++) ReadArray(header.Zxx[i], sizeof(header.Zxx[i]));
 			return true;
 		}
+		bool ITModule2::ReadHeader(itInsHeader1x& header) {
+			Read(header.tag);
+			ReadArray(header.fileName,sizeof(header.fileName));
+			Read(header.flg);
+			Read(header.loopS);
+			Read(header.loopE);
+			Read(header.sustainS);
+			Read(header.sustainE);
+			Read(header.fadeout);
+			Read(header.NNA);
+			Read(header.DNC);
+			Read(header.trackerV);
+			Read(header.noS);
+			for (int i=0; i < 120; i++) ReadHeader(header.notes[i]);
+			ReadArray(header.volEnv,sizeof(header.volEnv));
+			for (int i=0; i < 25; i++) ReadHeader(header.nodepair[i]);
+			return true;
+		}
 		bool ITModule2::ReadHeader(itInsHeader2x& header) {
 			Read(header.tag);
 			ReadArray(header.fileName,sizeof(header.fileName));
@@ -1218,7 +1236,7 @@ Special:  Bit 0: On = song message attached.
 			Read(header.mChn);
 			Read(header.mPrg);
 			Read(header.mBnk);
-			for (int i=0; i < 120; i++) Read(header.notes[i]);
+			for (int i=0; i < 120; i++) ReadHeader(header.notes[i]);
 			ReadHeader(header.volEnv);
 			ReadHeader(header.panEnv);
 			return ReadHeader(header.pitchEnv);
