@@ -25,6 +25,8 @@ namespace {
 			return universalis::os::clocks::monotonic::current();
 		#endif
 	}
+
+	bool const ultra_trace = false;
 }
 
 /**********************************************************************************************************************/
@@ -51,15 +53,17 @@ void graph::compute_plan() {
 			i(node.output_ports().begin()),
 			e(node.output_ports().end()); i != e; ++i
 		) if((**i).input_ports().size()) {
-			if(loggers::trace()()) {
+			has_connected_output_ports = true;
+			break;
+		}
+		if(!has_connected_output_ports) {
+			if(loggers::trace()) {
 				std::ostringstream s;
 				s << "terminal node: " << node.underlying().name();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
-			has_connected_output_ports = true;
-			break;
+			terminal_nodes_.push_back(&node);
 		}
-		if(!has_connected_output_ports) terminal_nodes_.push_back(&node);
 
 		// find the maximum number of channels needed for buffers
 		// iterate over all output ports of the node
@@ -69,7 +73,7 @@ void graph::compute_plan() {
 		) channels_ = std::max(channels(), (**i).underlying().channels());
 	}
 
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << "channels: " << channels();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -323,7 +327,7 @@ void scheduler::process_recursively(node & node) throw(std::exception) {
 	if(node.processed()) return;
 	node.mark_as_processed();
 
-	if(false && loggers::trace()()) {
+	if(ultra_trace && loggers::trace()) {
 		std::ostringstream s;
 		s << "scheduling " << node.underlying().qualified_name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -353,7 +357,7 @@ void scheduler::process_recursively(node & node) throw(std::exception) {
 					node.multiple_input_port()->buffer().reference_count() == 1 || // We are the last input port to read the buffer of the output port, so, we can take over its buffer.
 					node.multiple_input_port()->output_ports().size() == 1 // We have a single input, so, this is the identity transform, i.e., the buffer will not be modified.
 				) {
-					if(false && loggers::trace()()) {
+					if(ultra_trace && loggers::trace()) {
 						std::ostringstream s;
 						s << node.underlying().qualified_name() << ": copying pointer of input buffer to pointer of output buffer";
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -364,7 +368,7 @@ void scheduler::process_recursively(node & node) throw(std::exception) {
 					// get buffer for output port
 					set_buffer_for_output_port(output_port, (*buffer_pool_)());
 					// copy content of input buffer to output buffer
-					if(false && loggers::trace()()) {
+					if(ultra_trace && loggers::trace()) {
 						std::ostringstream s;
 						s << node.underlying().qualified_name() << ": copying content of input buffer to output buffer";
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -405,7 +409,7 @@ void scheduler::process_recursively(node & node) throw(std::exception) {
 		ports::output & output_port(**i);
 		check_whether_to_recycle_buffer_in_the_pool(output_port.buffer());
 	}
-	if(false && loggers::trace()()) {
+	if(ultra_trace && loggers::trace()) {
 		std::ostringstream s;
 		s << "scheduling of " << node.underlying().qualified_name() << " done";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -416,7 +420,7 @@ void scheduler::process_recursively(node & node) throw(std::exception) {
 void inline scheduler::process_node_of_output_port_and_set_buffer_for_input_port(ports::output & output_port, ports::input & input_port) {
 	process_recursively(output_port.node());
 	assert(&output_port.buffer());
-	if(false && loggers::trace()()) {
+	if(ultra_trace && loggers::trace()) {
 		std::ostringstream s;
 		s << "back to scheduling of input port " << input_port.underlying().qualified_name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -445,7 +449,7 @@ void inline scheduler::set_buffer_for_output_port(ports::output & output_port, b
 /// checks if the content of the buffer must be preserved for further reading and
 /// if not recycles it in the pool.
 void inline scheduler::check_whether_to_recycle_buffer_in_the_pool(buffer & buffer) {
-	if(false && loggers::trace()()) {
+	if(ultra_trace && loggers::trace()) {
 		std::ostringstream s;
 		s << "buffer: " << &buffer << ": " << buffer.reference_count() << " to go";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);

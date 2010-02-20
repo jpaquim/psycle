@@ -277,7 +277,7 @@ class scheduler::buffer_pool {
 		/// gets a buffer from the pool.
 		buffer & operator()() {
 			scoped_lock lock(mutex_);
-			if(false && loggers::trace()()) {
+			if(false && loggers::trace()) {
 				std::ostringstream s;
 				s << "buffer requested, pool size before: " << list_.size();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -295,7 +295,7 @@ class scheduler::buffer_pool {
 			assert(buffer.channels() >= this->channels_);
 			assert(buffer.events() >= this->events_);
 			scoped_lock lock(mutex_);
-			if(false && loggers::trace()()) {
+			if(false && loggers::trace()) {
 				std::ostringstream s;
 				s << "buffer " << &buffer << " given back, pool size before: " << list_.size();
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
