@@ -216,7 +216,7 @@ namespace psycle {
 	{
 		// get data
 		Seek(60);
-		DeprecatedRawRead(m_Header);
+		ReadHeader(m_Header);
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 		//using std::max;
@@ -1102,7 +1102,7 @@ namespace psycle {
 		Seek(20);
 		for (int i=0;i<31;i++) LoadSampleHeader(*m_pSampler,i);
 		Seek(950);
-		DeprecatedRawRead(m_Header);
+		ReadHeader(m_Header);
 		
 		char pID[5];
 		pID[0]=m_Header.pID[0];pID[1]=m_Header.pID[1];pID[2]=m_Header.pID[2];pID[3]=m_Header.pID[3];pID[4]=0;
