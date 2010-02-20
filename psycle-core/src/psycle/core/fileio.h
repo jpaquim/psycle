@@ -69,11 +69,9 @@ class PSYCLE__CORE__DECL RiffFile {
 
 	public:
 		#if defined PSYCLE__CORE__FILEIO__WANT_DEPRECATED_RAW_ACCESS
-			/// workaround for msvc8 which fails to determine which overload to call
 			template<typename X> UNIVERSALIS__COMPILER__DEPRECATED("TODO...")
 			bool DeprecatedRawRead(X & x) { return ReadChunk(&x, sizeof x); }
 
-			/// workaround for msvc8 which fails to determine which overload to call
 			template<typename X> UNIVERSALIS__COMPILER__DEPRECATED("TODO...")
 			bool DeprecatedRawWrite(X & x) { return WriteChunk(&x, sizeof x); }
 		#endif
