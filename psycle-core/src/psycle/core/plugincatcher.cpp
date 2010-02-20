@@ -97,19 +97,15 @@ bool PluginFinderCache::loadCache(){
 
 		// Temp here contains the full path to the .dll
 		if(File::fileIsReadable(fullPath)) {
-			///\todo: implement modification time checking.
-			#if 0
-				time_t t_time;
-				finder.FindNextFile();
-				if(finder.GetLastWriteTime(&t_time)) {
-					// Only add the information to the cache if the dll hasn't been modified (say, a new version)
-					// Else, we want to get the new information, and that will happen in the plugins scan.
-					if(p.fileTime() == t_time) {
-						MachineKey key( host, File::extractFileNameFromPath(fullPath) , index);
-						AddInfo( key, p);
-					}
+			time_t t_time = boost::filesystem::last_write_time(boost::filesystem::path(fullPath));
+			if(t_time != (std::time_t)(-1)) {
+				// Only add the information to the cache if the dll hasn't been modified (say, a new version)
+				// Else, we want to get the new information, and that will happen in the plugins scan.
+				if(p.fileTime() == t_time) {
+					MachineKey key( host, File::extractFileNameFromPath(fullPath) , index);
+					AddInfo( key, p);
 				}
-			#endif
+			}
 			MachineKey key(host, File::extractFileNameFromPath(fullPath), index);
 			if(!hasHost(host)) addHost(host);
 			AddInfo(key, p);

@@ -65,6 +65,9 @@ void CInfoDlg::OnTimer(UINT nIDEvent) {
 	if(nIDEvent != 1) return;
 
 	Song & song = projects_->active_project()->song();
+
+	if (!song.IsReady()) return;
+
 	Song::scoped_lock lock(song);
 
 	char buffer[128];
