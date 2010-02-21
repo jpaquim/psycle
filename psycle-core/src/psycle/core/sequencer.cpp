@@ -21,18 +21,27 @@ void Sequencer::Work(unsigned int nframes) {
 	song_->sequence().GetEventsInRange(time_info()->playBeatPos(), beats, events);
 	unsigned int rest_frames = nframes;
 	double last_pos = 0;
-	for (std::vector<PatternEvent*>::iterator ev_it = events.begin();
+	for(std::vector<PatternEvent*>::iterator ev_it = events.begin();
 		ev_it!= events.end() ; ++ev_it) {
-		PatternEvent* ev = *ev_it;
-		if (ev->IsGlobal()) {
-			double pos = ev->time_offset();
-			unsigned int num = static_cast<int>((pos -last_pos) * time_info()->samplesPerBeat());
-			player_->process(num);
-			rest_frames -= num;
+		PatternEvent & ev = **ev_it;
+		if(ev.IsGlobal()) {
+			double pos = ev.time_offset();
+			unsigned int num = static_cast<int>((pos - last_pos) * time_info()->samplesPerBeat());
+			if(rest_frames < num) {
+				if(loggers::warning()) {
+					std::ostringstream s;
+					s << "wrong global event time offset: " << pos << " beats, exceeds: " << beats << " beats";
+					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				}
+				rest_frames = 0;
+			} else {
+				player_->process(num);
+				rest_frames -= num;
+			}
 			last_pos = pos;
-			process_global_event(*ev);
+			process_global_event(ev);
 		}
-		execute_notes(ev->time_offset() - time_info()->playBeatPos(), *ev);
+		execute_notes(ev.time_offset() - time_info()->playBeatPos(), ev);
 	}
 	player_->process(rest_frames);
 }
