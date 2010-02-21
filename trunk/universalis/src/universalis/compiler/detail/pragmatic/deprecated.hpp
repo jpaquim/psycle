@@ -23,7 +23,7 @@
 		#define UNIVERSALIS__COMPILER__DEPRECATED(message) UNIVERSALIS__COMPILER__ATTRIBUTE(deprecated(message))
 	#endif
 #else
-	#define UNIVERSALIS__COMPILER__DEPRECATED
+	#define UNIVERSALIS__COMPILER__DEPRECATED(message)
 #endif
 
 #endif
