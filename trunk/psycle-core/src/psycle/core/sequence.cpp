@@ -69,9 +69,7 @@ void SequenceEntry::setSequenceLine(SequenceLine & newLine) {
 // represents one track/line in the sequencer
 
 SequenceLine::~SequenceLine() {
-	iterator it = begin();
-	for (it; it != end(); ++it)
-		delete it->second;
+	for(iterator it = begin(); it != end(); ++it) delete it->second;
 	//wasDeleted(*this);
 }
 
@@ -296,50 +294,53 @@ void Sequence::GetEventsInRange(double start, double length, std::vector<Pattern
 	events_.clear();
 	int seqlineidx = 1; // index zero reserved for live events (midi in, or pc keyb)
 	// Iterate over each timeline of the sequence
-	iterator seqIt = begin();
-	for( ; seqIt != end(); ++seqIt ) {
-		SequenceLine *pSLine = *seqIt;
-		// locate the "sequenceEntry"s which starts nearer to "start+length"
-		SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(start+length) );
+	for(iterator seqIt = begin(); seqIt != end(); ++seqIt) {
+		SequenceLine & line = **seqIt;
+		// locate the "sequenceEntry"s which starts nearer to "start + length"
+		SequenceLine::reverse_iterator lineIt(line.lower_bound(start + length));
 		// and iterate backwards to include any other that is inside the range [start,start+length)
 		// (The UI won't allow more than one pattern for the same range in the same timeline, but 
 		// this was left open in the player code)
 		bool worked = false;
-		for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt ) {
+		for(; lineIt != line.rend() && lineIt->first + lineIt->second->patternBeats() >= start; ++lineIt) {
 			// take the pattern,
-			Pattern & pat = sLineIt->second->pattern();
+			Pattern & pat = lineIt->second->pattern();
 			worked = true;
-			double entryStart = sLineIt->first;
-			double entryStartOffset  = sLineIt->second->startPos();
-			double entryEndOffset  = sLineIt->second->endPos();
+			double entryStart = lineIt->first;
+			double entryStartOffset  = lineIt->second->startPos();
+			double entryEndOffset  = lineIt->second->endPos();
 			double relativeStart = start - entryStart + entryStartOffset;
 	
-			Pattern::iterator patIt = pat.lower_bound(std::min(relativeStart, entryEndOffset)),
-			patEnd = pat.lower_bound(std::min(relativeStart + length, entryEndOffset));
-
 			// and iterate through the lines that are inside the range
-			for( ; patIt != patEnd; ++patIt) {
+			for(Pattern::iterator
+				patIt  = pat.lower_bound(std::min(relativeStart, entryEndOffset)),
+				patEnd = pat.lower_bound(std::min(relativeStart + length, entryEndOffset));
+				patIt != patEnd; ++patIt
+			) {
 				PatternEvent & ev = patIt->second;
 				ev.set_sequence(seqlineidx);
 				ev.set_time_offset(entryStart + patIt->first - entryStartOffset);
 				CollectEvent(ev);
 				#if 0 ///\todo
-					PatternLine tmpline;
-					std::map<int, PatternEvent>::iterator lineIt = thisline->notes().begin();
-					// Since the player needs to differentiate between tracks of different SequenceEntrys, 
+					// Since the player needs to differentiate between tracks of different SequenceEntrys,
 					// we generate a temporary PatternLine with a special column value.
-					for( ;lineIt != thisline->notes().end() ;lineIt++)
+					PatternLine tmpline;
+					for(std::map<int, PatternEvent>::iterator lineIt = line.notes().begin();
+						lineIt != line.notes().end(); ++lineIt)
 					{
-						tmpline.notes()[lineIt->first]=lineIt->second;
-						tmpline.notes()[lineIt->first].setNote(tmpline.notes()[lineIt->first].note()+sLineIt->second->transpose() );
+						tmpline.notes()[lineIt->first] = lineIt->second;
+						tmpline.notes()[lineIt->first].setNote(
+							tmpline.notes()[lineIt->first].note() +
+							lineIt->second->transpose()
+						);
 					}
-	
+
 					// finally add the PatternLine to the event map. The beat position is in absolute values from the playback start.
 					tmpline.setSequenceTrack(seqlineidx);
-					tmpline.tweaks()=thisline->tweaks();
-					events.insert( Pattern::value_type( entryStart + patIt->first - entryStartOffset, tmpline ) );
+					tmpline.tweaks() = line.tweaks();
+					events.insert(Pattern::value_type(entryStart + patIt->first - entryStartOffset, tmpline));
 				#endif
-				}
+			}
 		}
 		++seqlineidx;
 	}
@@ -349,73 +350,65 @@ void Sequence::GetEventsInRange(double start, double length, std::vector<Pattern
 	double old_pos = 0;
 	bool has_note = false;
 	for ( ; it != events.end(); ++it ) {
-		PatternEvent* cmd = *it;
-		double pos = cmd->time_offset();
-		if (old_pos != pos)
-			has_note = true;
+		PatternEvent & cmd = **it;
+		double pos = cmd.time_offset();
+		if(old_pos != pos) has_note = true;
 		old_pos = pos;
-		if (cmd->note() == notetypes::tweak_slide) {
-			//assert(!has_note);
-			loggers::warning()("has_note", UNIVERSALIS__COMPILER__LOCATION);
-		} else if (cmd->note() == notetypes::tweak) {
-			//assert(!has_note);
-			loggers::warning()("has_note", UNIVERSALIS__COMPILER__LOCATION);
-		} else {
-			has_note = true;
-			// note
+		switch(cmd.note()) {
+			case notetypes::tweak:
+			case notetypes::tweak_slide:
+				//assert(!has_note);
+				if(loggers::warning() && has_note) loggers::warning()("has note", UNIVERSALIS__COMPILER__LOCATION);
+				break;
+			default:
+				has_note = true;
 		}
 	}
 }
 
 SequenceEntry* Sequence::GetEntryOnPosition(SequenceLine & line, double pos) {
 	for (SequenceLine::iterator it = line.begin(); it != line.end(); ++it) {
-		if (pos >= it->second->tickPosition() && 
+		if(
+			pos >= it->second->tickPosition() &&
 			pos < it->second->tickEndPosition()
-			) {
-			return it->second;
-		}
+		) return it->second;
 	}
 	return 0;
 }
 
 int Sequence::priority(const PatternEvent& cmd, int count) const {
 	int p = 8;
-	if (cmd.IsGlobal()) {
-		p = 0;
-	} else
-	if (cmd.note() == notetypes::tweak_slide) {
-		p = 1;
-	} else if (cmd.note() == notetypes::tweak) {
-		p = 2;
-	} else {
-		p = 3;
-	}
+	if(cmd.IsGlobal()) p = 0;
+	else if(cmd.note() == notetypes::tweak_slide) p = 1;
+	else if(cmd.note() == notetypes::tweak) p = 2;
+	else p = 3;
 	return p;
 }
 
-void Sequence::CollectEvent(const PatternEvent& command) {
+void Sequence::CollectEvent(const PatternEvent & command) {
 	assert(command.time_offset() >= 0);
 	double delta_frames = command.time_offset();
-	std::multimap<double, std::multimap<int, PatternEvent > >::iterator it;
-	it = events_.find(delta_frames);
-	if ( it == events_.end() ) {
+	std::multimap<double, std::multimap<int, PatternEvent > >::iterator it = events_.find(delta_frames);
+	if(it == events_.end()) {
 		std::multimap<int, PatternEvent> map;
-		map.insert(std::pair<int, PatternEvent>(priority(command,0), command))->second.set_time_offset(delta_frames);
-		events_.insert(std::pair<double, std::multimap< int, PatternEvent > >(delta_frames, map ) );
+		map.insert(std::pair<int, PatternEvent>(priority(command, 0), command))->second.set_time_offset(delta_frames);
+		events_.insert(std::pair<double, std::multimap<int, PatternEvent> >(delta_frames, map));
 	} else {
-		std::multimap<int, PatternEvent>& map = it->second;
-		map.insert(std::pair<int, PatternEvent>( priority(command, map.size()), command))->second.set_time_offset(delta_frames);
+		std::multimap<int, PatternEvent> & map = it->second;
+		map.insert(std::pair<int, PatternEvent>(priority(command, map.size()), command))->second.set_time_offset(delta_frames);
 	}
 }
 
-void Sequence::GetOrderedEvents(std::vector<PatternEvent*>& event_list) {
-	std::multimap<double, std::multimap< int, PatternEvent > >::iterator event_it = events_.begin();
-	for ( ; event_it != events_.end(); ++event_it ) {
-		std::multimap< int, PatternEvent>& map = event_it->second;
-		std::multimap< int, PatternEvent>::iterator map_it = map.begin();
-		for ( ; map_it != map.end(); ++map_it ) {
-			PatternEvent& command = map_it->second;
-			event_list.push_back( &command );
+void Sequence::GetOrderedEvents(std::vector<PatternEvent*> & ordered_events) {
+	for(std::multimap<double, std::multimap<int, PatternEvent> >::iterator event_it = events_.begin();
+		event_it != events_.end(); ++event_it
+	) {
+		std::multimap<int, PatternEvent> & map = event_it->second;
+		for(std::multimap<int, PatternEvent>::iterator map_it = map.begin();
+			map_it != map.end(); ++map_it
+		) {
+			PatternEvent & event = map_it->second;
+			ordered_events.push_back(&event);
 		}
 	}
 }
@@ -531,4 +524,3 @@ double Sequence::max_beats() const {
 }
 
 }}
-
