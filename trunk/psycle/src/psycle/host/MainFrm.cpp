@@ -1721,8 +1721,8 @@ using namespace helpers::math;
 				SequenceLine *pSLine = *projects_.active_project()->song().sequence().begin();
 				SequenceLine::reverse_iterator sLineIt( pSLine->lower_bound(Player::singleton().playPos()) );
 				if (sLineIt != pSLine->rend()) {
-					Pattern* pPat = sLineIt->second->pattern();
-					str.Format("Pat %.2X", pPat->id());
+					Pattern & pat = sLineIt->second->pattern();
+					str.Format("Pat %.2X", pat.id());
 				}
 				else {
 					str.Format("Pat ??");

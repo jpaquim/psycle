@@ -644,14 +644,14 @@ void Song::clearMyData() {
 	_saved=false;
 	set_filename("Untitled.psy");
 	AddMachine(MachineFactory::getInstance().CreateMachine(InternalKeys::master,MASTER_INDEX));
-	SequenceLine* line = sequence().createNewLine();
-	Pattern* pattern= new Pattern();
-	pattern->timeSignatures().clear();
-	pattern->timeSignatures().push_back(psycle::core::TimeSignature(16.0));
-	pattern->setID(0);
-	pattern->setName("Untitled");
+	Pattern & pattern = *new Pattern();
+	pattern.timeSignatures().clear();
+	pattern.timeSignatures().push_back(psycle::core::TimeSignature(16.0));
+	pattern.setID(0);
+	pattern.setName("Untitled");
 	sequence().Add(pattern);
-	line->createEntry(pattern,0);
+	SequenceLine & line = sequence().createNewLine();
+	line.createEntry(pattern, 0);
 	SetReady(true);
 }
 

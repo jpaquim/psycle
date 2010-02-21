@@ -294,10 +294,9 @@ namespace psycle {
 				if (Global::pPlayer->playing())
 				{
 					Sequence& sequence = pattern_view()->song()->sequence();
-					psycle::core::SequenceEntry* entry = sequence.GetEntryOnPosition(*(sequence.begin()+1), Player::singleton().playPos());
-					int pos = (entry) ? (Player::singleton().playPos() - entry->tickPosition())	* static_cast<int>(projects_->active_project()->beat_zoom())
-									  : 0;
-					if ( last_pos_!= pos ) {
+					psycle::core::SequenceEntry* entry = sequence.GetEntryOnPosition(**(sequence.begin()+1), Player::singleton().playPos());
+					int pos = !entry ? 0 : (Player::singleton().playPos() - entry->tickPosition()) * static_cast<int>(projects_->active_project()->beat_zoom());
+					if ( last_pos_ != pos ) {
 						last_pos_ = pos;
 						main_frame_->SetAppSongBpm(0);
 						main_frame_->SetAppSongTpb(0);

@@ -62,7 +62,7 @@ void Psy2Filter::prepareSequence( CoreSong & song) {
 	seqList.clear();
 	song.sequence().removeAll();
 	// here we add in one single Line the patterns
-	singleLine = song.sequence().createNewLine();
+	singleLine = &song.sequence().createNewLine();
 }
 
 bool Psy2Filter::load(const std::string & fileName, CoreSong & song) {
@@ -168,9 +168,9 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 		if(!(o << index)) indexStr = "error";
 		else indexStr = o.str();
 
-		Pattern* pat = new Pattern();
-		pat->setName(patternName+indexStr);
-		pat->setID(index);
+		Pattern & pat = *new Pattern();
+		pat.setName(patternName + indexStr);
+		pat.setID(index);
 		song.sequence().Add(pat);
 		float beatpos = 0;
 		for(int y(0) ; y < numLines ; ++y) { // lines
@@ -181,20 +181,20 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 				if(!event.empty()) {
 					if(event.note() == notetypes::tweak) {
 						event.set_track(x);
-						pat->insert(beatpos, event);
+						pat.insert(beatpos, event);
 					} else if(event.note() == notetypes::tweak_slide) {
 						event.set_track(x);
-						pat->insert(beatpos, event);
+						pat.insert(beatpos, event);
 					} else if(event.note() == notetypes::midi_cc) {
 						event.set_track(x);
-						pat->insert(beatpos, event);
+						pat.insert(beatpos, event);
 					}
 					else {
 						if(event.command() == commandtypes::NOTE_DELAY)
 							/// Convert old value (part of line) to new value (part of beat)
 							event.setParameter(event.parameter()/linesPerBeat);
 						event.set_track(x);
-						pat->insert(beatpos, event);
+						pat.insert(beatpos, event);
 					}
 	
 					if(
@@ -206,13 +206,13 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 			beatpos += 1 / (float) linesPerBeat;
 			file->Skip((PSY2_MAX_TRACKS - song.tracks()) * EVENT_SIZE);
 		}
-		pat->timeSignatures().clear();
-		pat->timeSignatures().push_back(TimeSignature(beatpos));
+		pat.timeSignatures().clear();
+		pat.timeSignatures().push_back(TimeSignature(beatpos));
 	}
 	else {
-		Pattern* pat = new Pattern();
-		pat->setName(patternName);
-		pat->setID(index);
+		Pattern & pat = *new Pattern();
+		pat.setName(patternName);
+		pat.setID(index);
 		song.sequence().Add(pat);
 	}
 	return true;
@@ -577,7 +577,8 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	std::vector<int>::iterator it = seqList.begin();
 	for(; it < seqList.end(); ++it) {
 		Pattern* pat = song.sequence().FindPattern(*it);
-		singleLine->createEntry(pat, pos);
+		assert(pat);
+		singleLine->createEntry(*pat, pos);
 		pos += pat->beats();
 	}
 

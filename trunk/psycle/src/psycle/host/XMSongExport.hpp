@@ -33,7 +33,7 @@ namespace psycle {
 		void SavePattern(Song& song, psycle::core::Pattern* pattern);
 		
 		void SaveInstruments(Song & song);
-		void SaveEmptyInstrument(std::string name);
+		void SaveEmptyInstrument(std::string const & name);
 		void SaveInstrument(Song& song, int instIdx);
 		void SaveSampleHeader(Song & song, const int instrIdx);
 		void SaveSampleData(Song & song, const int instrIdx);

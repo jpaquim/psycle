@@ -201,7 +201,7 @@ Special:  Bit 0: On = song message attached.
 
 			song->sequence().removeAll();
 			// here we add in one single Line the patterns
-			SequenceLine* line = song->sequence().createNewLine();
+			SequenceLine & line = song->sequence().createNewLine();
 			std::vector<int> seq_list;
 			i=0;
 			for (j=0;j<itFileH.ordNum && i<MAX_SONG_POSITIONS;j++)
@@ -313,9 +313,9 @@ Special:  Bit 0: On = song message attached.
 			{
 				if (pointersp[i]==0)
 				{
-					Pattern* pat = new Pattern();
-					pat->setName("unnamed");
-					pat->setID(i);
+					Pattern & pat = *new Pattern();
+					pat.setName("unnamed");
+					pat.setID(i);
 					s->sequence().Add(pat);
 				} else {
 					Seek(pointersp[i]);
@@ -328,9 +328,10 @@ Special:  Bit 0: On = song message attached.
 			double pos = 0;
 			std::vector<int>::iterator it = seq_list.begin();
 			for(; it < seq_list.end(); ++it) {
-				Pattern* pat = song->sequence().FindPattern(*it);			
-				if (pat) {
-					line->createEntry(pat, pos);
+				Pattern * pat = song->sequence().FindPattern(*it);
+				if(!pat) loggers::warning()("could not find pattern", UNIVERSALIS__COMPILER__LOCATION);
+				else {
+					line.createEntry(*pat, pos);
 					pos += pat->beats();
 				}
 			}
@@ -863,9 +864,9 @@ Special:  Bit 0: On = song message attached.
 			std::int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
-			Pattern* pat = new Pattern();
-			pat->setName("unnamed");
-			pat->setID(patIdx);
+			Pattern & pat = *new Pattern();
+			pat.setName("unnamed");
+			pat.setID(patIdx);
 			s->sequence().Add(pat);
 			//char* packedpattern = new char[packedSize];
 			//Read(packedpattern, packedSize);
@@ -985,7 +986,7 @@ Special:  Bit 0: On = song message attached.
 					pent.set_track(channel);
 					double beat = row / static_cast<float>(sampler->Speed2LPB(itFileH.iSpeed));
 					if (!pent.empty())
-						pat->insert(beat,pent);
+						pat.insert(beat, pent);
 					pent=pempty;
 					numchans = std::max(static_cast<int>(channel),numchans);
 					Read(newEntry);
@@ -1286,7 +1287,7 @@ Special:  Bit 0: On = song message attached.
 			
 			song->sequence().removeAll();
 			// here we add in one single Line the patterns
-			SequenceLine* line = song->sequence().createNewLine();
+			SequenceLine & line = song->sequence().createNewLine();
 			std::vector<int> seq_list;
 			int i=0;
 			for (int j=0;j<s3mFileH.ordNum ;j++)
@@ -1376,9 +1377,10 @@ Special:  Bit 0: On = song message attached.
 			double pos = 0;
 			std::vector<int>::iterator it = seq_list.begin();
 			for(; it < seq_list.end(); ++it) {
-				Pattern* pat = song->sequence().FindPattern(*it);			
-				if (pat) {
-					line->createEntry(pat, pos);
+				Pattern* pat = song->sequence().FindPattern(*it);
+				if(!pat) loggers::warning()("could not find pattern", UNIVERSALIS__COMPILER__LOCATION);
+				else {
+					line.createEntry(*pat, pos);
 					pos += pat->beats();
 				}
 			}
@@ -1606,9 +1608,9 @@ OFFSET              Count TYPE   Description
 			PatternEvent pent=pempty;
 
 			Skip(2);//int packedSize=ReadInt(2);
-			Pattern* pat = new Pattern();
-			pat->setName("unnamed");
-			pat->setID(patIdx);
+			Pattern & pat = *new Pattern();
+			pat.setName("unnamed");
+			pat.setID(patIdx);
 			s->sequence().Add(pat);
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
@@ -1679,7 +1681,7 @@ OFFSET              Count TYPE   Description
 					pent.set_track(channel);
 					double beat = row / static_cast<float>(sampler->Speed2LPB(s3mFileH.iSpeed));
 					if (!pent.empty())
-						pat->insert(beat, pent);
+						pat.insert(beat, pent);
 					pent=pempty;
 					Read(newEntry);
 				}

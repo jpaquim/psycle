@@ -128,8 +128,7 @@ using namespace helpers;
 				if (filtermac != -1)
 					matchTarget++;
 
-				Song* pSong = 0;
-				pSong = pattern_view_->song();
+				Song & song = *pattern_view_->song();
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
 				int columnCount = MAX_TRACKS;
@@ -144,50 +143,37 @@ using namespace helpers;
 				int matchCount;
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 
-				Sequence::patterniterator patite = pSong->sequence().patternbegin();
-				for ( ; patite != pSong->sequence().patternend(); ++patite) {
-					Pattern::iterator eventite = (*patite)->begin();
-					PatternEvent pevent = eventite->second;
+				Sequence::patterns_type::iterator patite = song.sequence().patterns_begin();
+				for ( ; patite != song.sequence().patterns_end(); ++patite) {
+					Pattern::iterator eventite = (**patite).begin();
+					PatternEvent pat_event = eventite->second;
 
 #else
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
-					if (!pSong->IsPatternEmpty(currentPattern))
+					if (!song.isPatternEmpty(currentPattern))
 					{				
-						PatternEvent* patternEntry = (PatternEvent*) pSong->_ppattern(currentPattern);
+						PatternEvent* patternEntry = (PatternEvent*) song._ppattern(currentPattern);
 						lineCount = pSong->patternLines[currentPattern];
 						
 						for (currentLine = 0; currentLine < lineCount; currentLine++)
 						{
 							for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
 							{
-								PatternEvent pevent = patternEntry[(currentLine*columnCount)+currentColumn];
+								PatternEvent pat_event = patternEntry[(currentLine*columnCount)+currentColumn];
 #endif
-								currentins = pevent.instrument();
-								currentmac = pevent.machine();																																							
+								currentins = pat_event.instrument();
+								currentmac = pat_event.machine();																																							
 
 								matchCount = 0;
 
-								if (currentins == filterins)
-								{
-									matchCount++;
-								}
-
-								if (currentmac == filtermac)
-								{
-									matchCount++;
-								}
-
-								if (matchCount == matchTarget)
-								{
-									if (filterins != -1)
-									{
-										pevent.setInstrument(replaceins);
-									}
-									if (filtermac != -1)
-									{
-										pevent.setMachine(replacemac);
-									}
+								if(currentins == filterins) ++matchCount;
+								if(currentmac == filtermac) ++matchCount;
+								if(matchCount == matchTarget) {
+									if(filterins != -1)
+										pat_event.setInstrument(replaceins);
+									if(filtermac != -1)
+										pat_event.setMachine(replacemac);
 								}
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 							}

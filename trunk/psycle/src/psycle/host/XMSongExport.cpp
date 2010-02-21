@@ -42,11 +42,11 @@ namespace host{
 	void XMSongExport::writeSongHeader(Song &song)
 	{
 		//We find the last index of machine, to use as first index of instruments
-		lastMachine=63;
-		while (lastMachine >= 0 && song.machine(lastMachine) == 0) lastMachine--;
-		lastMachine++;
+		lastMachine = 63;
+		while (lastMachine >= 0 && song.machine(lastMachine) == 0) --lastMachine;
+		++lastMachine;
 
-		for (int i=0; i<lastMachine; i++) {
+		for (int i=0; i<lastMachine; ++i) {
 			if (song.machine(i) != 0 && 
 				song.machine(i)->getMachineKey() == InternalKeys::sampler ) {
 					isSampler[i] = 1;
@@ -67,38 +67,37 @@ namespace host{
 		std::uint16_t temp2 = 0x0104;
 		Write(temp2);//Version number
 
-		memset(&m_Header,0,sizeof(m_Header));
+		std::memset(&m_Header, 0, sizeof m_Header);
 		m_Header.size = sizeof(m_Header);
-		psycle::core::SequenceLine* line = *(song.sequence().begin()+1);
-		int playLength = line->size();
+		psycle::core::SequenceLine & line = **(song.sequence().begin() + 1);
+		int playLength = line.size();
 		m_Header.norder = playLength;
 		m_Header.restartpos = 0;
-		m_Header.channels = std::min(static_cast<int>(song.tracks()),32);
+		m_Header.channels = std::min(static_cast<int>(song.tracks()), 32);
 		int highest = 0;
-		for (Sequence::patterniterator pite = song.sequence().patternbegin(); pite != song.sequence().patternend(); pite++)
-		{
-			if ((*pite)->id() > highest)
-				highest = (*pite)->id();
+		for(Sequence::patterns_type::iterator pite = song.sequence().patterns_begin(); pite != song.sequence().patterns_end(); ++pite) {
+			Pattern & pat(**pite);
+			highest = std::max(highest, pat.id());
 		}
 		m_Header.patterns = highest+1;
-		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
-		m_Header.flags = 0x0001; //Linear frequency.
-		m_Header.speed = 24/lines_per_beat_;
+		m_Header.instruments = std::min(128, lastMachine + song.GetHighestInstrumentIndex() + 1);
+		m_Header.flags = 0x0001; // linear frequency.
+		m_Header.speed = 24 / lines_per_beat_;
 		m_Header.tempo = song.BeatsPerMin();
 
 		//Pattern order table
-		SequenceLine::iterator it = line->begin();
-		for (int i=0; it != line->end(); ++it, ++i) {
-			m_Header.order[i] = (*it).second->pattern()->id();
+		SequenceLine::iterator it = line.begin();
+		for (int i=0; it != line.end(); ++it, ++i) {
+			m_Header.order[i] = (*it).second->pattern().id();
 		}
 		WriteHeader(m_Header);
 	}
 
 	void XMSongExport::SavePatterns(Song & song) {
 		// todo sort after id
-		Sequence::patterniterator pite = song.sequence().patternbegin();
-		for ( ; pite != song.sequence().patternend(); ++pite) {
-			if ( (*pite) != song.sequence().master_pattern() ) {
+		Sequence::patterns_type::iterator pite = song.sequence().patterns_begin();
+		for ( ; pite != song.sequence().patterns_end(); ++pite) {
+			if ( (*pite) != &song.sequence().master_pattern() ) {
 				SavePattern(song, *pite);
 			}
 		}		
@@ -444,13 +443,13 @@ namespace host{
 
 	int XMSongExport::ComputeLinesPerBeat(Song& song) {
 			psycle::core::Sequence& seq = song.sequence();
-			psycle::core::Sequence::patterniterator it = seq.patternbegin();
+			psycle::core::Sequence::patterns_type::iterator it = seq.patterns_begin();
 			double min = 1.0;
-			for ( ; it != seq.patternend(); ++it) {
-				psycle::core::Pattern* pattern = *it;
-				psycle::core::Pattern::iterator pat_it = pattern->begin();
+			for ( ; it != seq.patterns_end(); ++it) {
+				psycle::core::Pattern & pattern = **it;
+				psycle::core::Pattern::iterator pat_it = pattern.begin();
 				double old_pos = 0;
-				for ( ; pat_it != pattern->end(); ++pat_it ) {
+				for ( ; pat_it != pattern.end(); ++pat_it ) {
 					double pos = pat_it->first;
 					double delta = pos - old_pos;
 					if ( delta != 0 && delta < min)
@@ -460,13 +459,13 @@ namespace host{
 			return static_cast<int>(1 / min);
 		}
 
-	void XMSongExport::SaveEmptyInstrument(std::string name)
+	void XMSongExport::SaveEmptyInstrument(std::string const & name)
 	{
 		XMINSTRUMENTHEADER insHeader;
-		memset(&insHeader,0,sizeof(insHeader));
+		memset(&insHeader,0,sizeof insHeader);
 		//insHeader.type = 0; Implicit by memset
-		insHeader.size = sizeof(insHeader);
-		strncpy(insHeader.name,name.c_str(),21);
+		insHeader.size = sizeof insHeader;
+		strncpy(insHeader.name, name.c_str(), 21);
 		//insHeader.samples = 0; Implicit by memset
 		WriteHeader(insHeader);
 	}

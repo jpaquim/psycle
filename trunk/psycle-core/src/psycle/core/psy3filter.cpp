@@ -69,7 +69,7 @@ void Psy3Filter::prepareSequence(CoreSong & song) {
 	seqList.clear();
 	song.sequence().removeAll();
 	// here we add in one single Line the patterns
-	singleLine = song.sequence().createNewLine();
+	singleLine = &song.sequence().createNewLine();
 }
 
 bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
@@ -237,7 +237,8 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 		#else
 			Pattern* pat = song.sequence().FindPattern(*it);
 		#endif
-		singleLine->createEntry(pat, pos);
+		assert(pat);
+		singleLine->createEntry(*pat, pos);
 		pos += pat->beats();
 	}
 
@@ -442,9 +443,9 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 			indexStr = "error";
 		else
 			indexStr = o.str();
-		Pattern* pat = new Pattern();
-		pat->setName(patternName+indexStr);
-		pat->setID(index);
+		Pattern & pat = *new Pattern();
+		pat.setName(patternName+indexStr);
+		pat.setID(index);
 		song.sequence().Add(pat);
 		float beatpos=0;
 		for(int y(0) ; y < numLines ; ++y) { // lines
@@ -455,20 +456,20 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 				if(!event.empty()) {
 					if(event.note() == notetypes::tweak) {
 						event.set_track(x);
-						pat->insert(beatpos, event);
+						pat.insert(beatpos, event);
 					} else if(event.note() == notetypes::tweak_slide) {
 						event.set_track(x);
-						pat->insert(beatpos, event);
+						pat.insert(beatpos, event);
 					} else if(event.note() == notetypes::midi_cc) {
 						event.set_track(x);
-						pat->insert(beatpos, event);
+						pat.insert(beatpos, event);
 					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
 					} else {
 						if(event.command() == commandtypes::NOTE_DELAY)
 							/// Convert old value (part of line) to new value (part of beat)
 							event.setParameter(event.parameter()/linesPerBeat);
 						event.set_track(x);
-						pat->insert(beatpos, event);
+						pat.insert(beatpos, event);
 					}
 					if((event.note() <= notetypes::release || event.note() == notetypes::empty) && event.command() == 0xfe && event.parameter() < 0x20)
 						linesPerBeat= event.parameter() & 0x1f;
@@ -478,8 +479,8 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 			beatpos += 1 / static_cast<float>(linesPerBeat);
 		}
 		delete[] pDest; pDest = 0;
-		pat->timeSignatures().clear();
-		pat->timeSignatures().push_back(TimeSignature(beatpos));
+		pat.timeSignatures().clear();
+		pat.timeSignatures().push_back(TimeSignature(beatpos));
 	}
 	return fileread;
 }

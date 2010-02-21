@@ -19,56 +19,44 @@ namespace psycle {
 
 		void SeqHelperCommand::PrepareUndoStorage() {
 			// Undo store
-			psycle::core::SequenceLine* line = 
-				*(seq_view_->project()->song().sequence().begin()+1);
+			core::SequenceLine & line = **(seq_view_->project()->song().sequence().begin() + 1);
 			prev_line_.clear();
-			psycle::core::SequenceLine::iterator it = line->begin();
-			for ( ; it != line->end(); ++it) {
-				psycle::core::SequenceEntry* entry = 
-					new psycle::core::SequenceEntry(&prev_line_);
-				entry->setPattern(it->second->pattern());
+			core::SequenceLine::iterator it = line.begin();
+			for ( ; it != line.end(); ++it) {
+				core::SequenceEntry & entry = *new core::SequenceEntry(prev_line_, it->second->pattern());
 				prev_line_.insert(it->first, entry);
 			}	
 		}
 
 		void SeqHelperCommand::PrepareRedoStorage() {
 			// Redo store
-			psycle::core::SequenceLine* line = 
-				*(seq_view_->project()->song().sequence().begin()+1);
+			core::SequenceLine & line = **(seq_view_->project()->song().sequence().begin() + 1);
 			next_line_.clear();
-			psycle::core::SequenceLine::iterator it = line->begin();
-			for ( ; it != line->end(); ++it) {
-				psycle::core::SequenceEntry* entry = 
-					new psycle::core::SequenceEntry(&next_line_);
-				entry->setPattern(it->second->pattern());
+			psycle::core::SequenceLine::iterator it = line.begin();
+			for ( ; it != line.end(); ++it) {
+				core::SequenceEntry & entry = *new core::SequenceEntry(next_line_, it->second->pattern());
 				next_line_.insert(it->first, entry);
 			}
 		}
 
 		void SeqHelperCommand::Undo() {
-			psycle::core::SequenceLine* line = 
-				*(seq_view_->project()->song().sequence().begin()+1);
-			line->clear();
-			psycle::core::SequenceLine::iterator it = prev_line_.begin();
+			core::SequenceLine & line = **(seq_view_->project()->song().sequence().begin() + 1);
+			line.clear();
+			core::SequenceLine::iterator it = prev_line_.begin();
 			for (; it != prev_line_.end(); ++it) {
-				psycle::core::SequenceEntry* entry = 
-					new psycle::core::SequenceEntry(line);
-				entry->setPattern(it->second->pattern());
-				line->insert(it->first, entry);
+				psycle::core::SequenceEntry & entry = *new core::SequenceEntry(line, it->second->pattern());
+				line.insert(it->first, entry);
 			}
 			seq_view_->UpdateSequencer();
 		}
 
 		void SeqHelperCommand::Redo() {
-			psycle::core::SequenceLine* line = 
-				*(seq_view_->project()->song().sequence().begin()+1);
-			line->clear();
-			psycle::core::SequenceLine::iterator it = next_line_.begin();
+			core::SequenceLine & line = **(seq_view_->project()->song().sequence().begin() + 1);
+			line.clear();
+			core::SequenceLine::iterator it = next_line_.begin();
 			for ( ; it != next_line_.end(); ++it) {
-				psycle::core::SequenceEntry* entry 
-					= new psycle::core::SequenceEntry(line);
-				entry->setPattern(it->second->pattern());
-				line->insert(it->first, entry);
+				core::SequenceEntry & entry = *new core::SequenceEntry(line, it->second->pattern());
+				line.insert(it->first, entry);
 			}
 			seq_view_->UpdateSequencer();
 		}
