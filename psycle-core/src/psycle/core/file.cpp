@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <boost/filesystem/operations.hpp>
 
 namespace psycle { namespace core {
 	using namespace std;
@@ -160,8 +161,7 @@ namespace psycle { namespace core {
 
 	std::string File::workingDir() {
 		std::string nvr;
-		char buffer[8000];
-		if(getcwd(buffer,sizeof buffer)) nvr = buffer;
+		nvr = boost::filesystem::current_path().native_file_string();
 		return nvr;
 	}
 	
@@ -190,7 +190,7 @@ namespace psycle { namespace core {
 		// On mswindows, only putenv exists (with same memory ownership issue),
 		// so we have to use the winapi instead.
 
-		#if defined _WIN64 || defined _WIN32
+		#if defined DIVERSALIS__OS__MICROSOFT
 			if(!::SetEnvironmentVariableA(path_env_var_name, new_path.c_str())) {
 				int const e(::GetLastError());
 				std::cerr << "psycle: core: warning: could not alter " << path_env_var_name << " env var (winapi error =" << e << ").\n";
@@ -229,10 +229,11 @@ namespace psycle { namespace core {
 	}
 
 	std::string const & File::slash() {
+		///\todo use boost::filesystem::slash()
 		std::string const static once(
-			#if defined __unix__ || defined __APPLE__
+			#if defined DIVERSALIS__OS__POSIX
 				"/"
-			#elif defined _WIN64 || defined _WIN32
+			#elif defined DIVERSALIS__OS__MICROSOFT
 				"\\"
 			#else
 				#error unknown path separator
