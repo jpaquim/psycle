@@ -5,41 +5,36 @@
 #include "sequence.h"
 
 #include "commands.h"
+#include <universalis/os/loggers.hpp>
 #include <sstream>
 #include <limits>
+#include <algorithm>
 
 namespace psycle { namespace core {
+
+namespace loggers = universalis::os::loggers;
 
 /**************************************************************************/
 // SequenceEntry
 // pattern Entry contains one ptr to a Pattern and the tickPosition for the absolute Sequencer pos
 
-SequenceEntry::SequenceEntry() 
+SequenceEntry::SequenceEntry(SequenceLine & line, Pattern & pattern)
 :
-	line_(0),
-	pattern_(0),
+	line_(&line),
+	pattern_(&pattern),
 	startPos_(0),
-	endPos_(PatternEnd),
-	transpose_(0)
-{}
-
-SequenceEntry::SequenceEntry(SequenceLine* line)
-:
-	line_(line),
-	pattern_(0),
-	startPos_(0),
-	endPos_(PatternEnd),
+	endPos_(pattern.beats()),
 	transpose_(0)
 {}
 
 SequenceEntry::~SequenceEntry() {
-	// wasDeleted(this);
+	//wasDeleted(*this);
 }
 
-void SequenceEntry::setPattern(Pattern* pattern) {
-	pattern_ = pattern;
+void SequenceEntry::setPattern(Pattern & pattern) {
+	pattern_ = &pattern;
 	startPos_ = 0;
-	endPos_ = pattern->beats();
+	endPos_ = pattern.beats();
 }
 
 double SequenceEntry::tickPosition() const {
@@ -60,47 +55,37 @@ double SequenceEntry::tickEndPosition() const {
 
 std::string SequenceEntry::toXml(double pos) const {
 	std::ostringstream xml;
-	xml << "<seqentry pos='" << pos << "' patid='" << pattern()->id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' " << "transpose='" << transpose() << std::hex << "' />" << std::endl;
+	xml << "<seqentry pos='" << pos << "' patid='" << pattern().id() << std::hex << "' "  << "start='" << startPos() << "' end='" << endPos() << "' " << "transpose='" << transpose() << std::hex << "' />" << std::endl;
 	return xml.str();
 }
 
-void SequenceEntry::setSequenceLine(SequenceLine* newLine) {
-	line_->moveEntryToNewLine(this, newLine);
-	line_ = newLine;
+void SequenceEntry::setSequenceLine(SequenceLine & newLine) {
+	line_->moveEntryToNewLine(*this, newLine);
+	line_ = &newLine;
 }
 
 /**************************************************************************/
 // SequenceLine
 // represents one track/line in the sequencer
 
-SequenceLine::SequenceLine()
-	: sequence_()
-{}
-
-SequenceLine::SequenceLine(Sequence* sequence)
-: sequence_(sequence)
-{}
-
-
 SequenceLine::~SequenceLine() {
 	iterator it = begin();
 	for (it; it != end(); ++it)
 		delete it->second;
-	//wasDeleted(this);
+	//wasDeleted(*this);
 }
 
-SequenceEntry* SequenceLine::createEntry(Pattern* pattern, double position) {
-	SequenceEntry* entry = new SequenceEntry(this);
-	entry->setPattern(pattern);
-	line_.insert(std::pair<double, SequenceEntry*>(position, entry));
+SequenceEntry & SequenceLine::createEntry(Pattern & pattern, double position) {
+	SequenceEntry & entry = *new SequenceEntry(*this, pattern);
+	line_.insert(std::pair<double, SequenceEntry*>(position, &entry));
 	return entry;
 }
 
-void SequenceLine::insertEntry(SequenceEntry* entry) {
-	line_.insert(std::pair<double, SequenceEntry*>(entry->startPos(), entry));
+void SequenceLine::insertEntry(SequenceEntry & entry) {
+	line_.insert(std::pair<double, SequenceEntry*>(entry.startPos(), &entry));
 }
 
-void SequenceLine::insertEntryAndMoveRest(SequenceEntry* entry, double pos) {
+void SequenceLine::insertEntryAndMoveRest(SequenceEntry & entry, double pos) {
 	std::multimap<double, SequenceEntry*> old_line_ = line_;
 	line_.clear();
 	std::multimap<double, SequenceEntry*>::iterator it = old_line_.begin();
@@ -110,25 +95,25 @@ void SequenceLine::insertEntryAndMoveRest(SequenceEntry* entry, double pos) {
 			line_.insert(std::pair<double, SequenceEntry*>(it->first, it->second));
 		} else  {
 			if ( !inserted ) {
-				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
+				line_.insert(std::pair<double, SequenceEntry*>(pos, &entry));
 				inserted = true;
 			}
-			double move = entry->patternBeats();
+			double move = entry.patternBeats();
 			line_.insert(std::pair<double, SequenceEntry*>(it->first + move, it->second));
 		}
 	}
 	if ( !inserted ) {
-		line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
+		line_.insert(std::pair<double, SequenceEntry*>(pos, &entry));
 	}
 }
 
-void SequenceLine::moveEntries(SequenceEntry* start_entry, double delta) {
+void SequenceLine::moveEntries(SequenceEntry & start_entry, double delta) {
 	std::multimap<double, SequenceEntry*> old_line_ = line_;
 	line_.clear();
 	bool inserted = false;
-	std::multimap<double, SequenceEntry*>::iterator it = old_line_.begin();
+	iterator it = old_line_.begin();
 	for ( ; it != old_line_.end(); ++it ) {
-		if (it->second != start_entry && !inserted) {
+		if (!inserted && it->second != &start_entry) {
 			line_.insert(std::pair<double, SequenceEntry*>(it->first, it->second));
 		} else {
 			line_.insert(std::pair<double, SequenceEntry*>(it->first + delta, it->second));
@@ -137,10 +122,10 @@ void SequenceLine::moveEntries(SequenceEntry* start_entry, double delta) {
 	}
 }
 
-SequenceLine::iterator SequenceLine::find(SequenceEntry* entry) {
-	std::multimap<double, SequenceEntry*>::iterator it = line_.begin();
+SequenceLine::iterator SequenceLine::find(SequenceEntry & entry) {
+	iterator it = line_.begin();
 	for ( ; it != line_.end(); ++it ) {
-		if (it->second == entry)
+		if (it->second == &entry)
 			return it;
 	}
 	return line_.end();
@@ -148,16 +133,16 @@ SequenceLine::iterator SequenceLine::find(SequenceEntry* entry) {
 
 void SequenceLine::removeSpaces()
 {
-	std::multimap<double, SequenceEntry*>::iterator it = begin();
-	std::multimap<double, SequenceEntry*>::iterator next_it;
+	iterator it = begin();
+	iterator next_it;
 	double pos = 0.0;
 	while ( it != end() ) {
 		double diff = it->first - pos;
 		pos = it->second->tickEndPosition() - diff;
 		if (diff > 0) {
 			next_it = it;
-			next_it++;
-			MoveEntry(it->second, it->first - diff);
+			++next_it;
+			MoveEntry(*it->second, it->first - diff);
 			it = next_it;
 		} else {
 			++it;
@@ -165,24 +150,25 @@ void SequenceLine::removeSpaces()
 	}
 }
 
-void SequenceLine::moveEntryToNewLine(SequenceEntry* entry, SequenceLine* newLine) {
-	newLine->insertEntry(entry);
+void SequenceLine::moveEntryToNewLine(SequenceEntry & entry, SequenceLine & newLine) {
+	newLine.insertEntry(entry);
 	iterator it = begin();
 	for(; it!= end(); ++it) {
-		if (it->second==entry)
+		if (it->second == &entry)
 		break;
 	}
 	line_.erase(it); // Removes entry from this SequenceLine, but doesn't delete it.
 }
 
-void SequenceLine::removePatternEntries(Pattern* pattern ) {
+void SequenceLine::removePatternEntries(Pattern & pattern ) {
 	iterator it = begin();
-	while ( it != end() ) {
-		SequenceEntry* entry = it->second;
-		if ( entry->pattern() == pattern) {
-			delete entry;
-			line_.erase(it++);
-		} else it++;
+	while(it != end()) {
+		SequenceEntry & entry = *it->second;
+		if(&entry.pattern() == &pattern) {
+			delete &entry;
+			line_.erase(it);
+		}
+		++it;
 	}
 }
 
@@ -194,29 +180,26 @@ double SequenceLine::tickLength() const {
 	}
 }
 
-void SequenceLine::MoveEntry(SequenceEntry* entry, double newpos) {
+void SequenceLine::MoveEntry(SequenceEntry & entry, double newpos) {
 	iterator iter = begin();
 	for(; iter!= end(); ++iter) {
-		if(iter->second==entry)
+		if(iter->second == &entry)
 		break;
 	}
-	if(iter!=end()) {
-		erase(iter);
-		line_.insert(std::pair<double, SequenceEntry*>(newpos, entry));
-	}
+	assert("entry to move found" && iter != end());
+	erase(iter);
+	line_.insert(std::pair<double, SequenceEntry*>(newpos, &entry));
 }
 
-void SequenceLine::removeEntry(SequenceEntry* entry) {
+void SequenceLine::removeEntry(SequenceEntry & entry) {
 	iterator iter = begin();
 	for(; iter!= end(); ++iter) {
-		if(iter->second==entry)
+		if(iter->second == &entry)
 			break;
 	}
-	if(iter!=end()) {
-		SequenceEntry* entry = iter->second;
-		line_.erase(iter);
-		delete entry;
-	}
+	assert("entry to remove found" && iter != end());
+	line_.erase(iter);
+	delete &entry;
 }
 
 void SequenceLine::clear() {
@@ -226,10 +209,10 @@ void SequenceLine::clear() {
 	line_.clear();
 }
 
-bool SequenceLine::IsPatternUsed(Pattern* pattern) const {
+bool SequenceLine::isPatternUsed(Pattern & pattern) const {
 	const_iterator it = begin();
 	for ( ; it != end(); ++it)
-		if (it->second->pattern() == pattern)
+		if (&it->second->pattern() == &pattern)
 			return true;
 	return false;
 }
@@ -250,48 +233,46 @@ std::string SequenceLine::toXml() const {
 
 Sequence::Sequence() {
 	setNumTracks(16);
-	// create global master line with an entry that keeps the master pattern
-	SequenceLine* master_line_ = createNewLine();
-	master_pattern_ = new Pattern();
-	// make pattern length endless
-	master_pattern_->timeSignatures().clear();
-	master_pattern_->timeSignatures().push_back(TimeSignature(std::numeric_limits<float>::max()));
-	master_pattern_->setName("master");
-	master_pattern_->setID(-1);
-	Add(master_pattern_);
-	master_line_->createEntry(master_pattern_, 0);
+	create_master_pattern();
 }
 
 Sequence::~Sequence() {
-	for (iterator it = begin(); it != end(); ++it) {
-		delete *it;
-	}
-	std::vector<Pattern*>::iterator pat_it = patterns_.begin();
-	for(; pat_it != patterns_.end(); ++pat_it) {
-		delete *pat_it;
-	}
+	for(iterator it = begin(); it != end(); ++it) delete *it;
+	for(patterns_type::iterator it = patterns_.begin(); it != patterns_.end(); ++it) delete *it;
 }
 
-SequenceLine* Sequence::createNewLine() {
-	SequenceLine* line = new SequenceLine(this);
-	lines_.push_back(line);
+void Sequence::create_master_pattern() {
+	// make pattern length endless
+	Pattern & master_pattern = *new Pattern();
+	master_pattern.timeSignatures().clear();
+	master_pattern.timeSignatures().push_back(TimeSignature(std::numeric_limits<float>::max()));
+	master_pattern.setName("master");
+	master_pattern.setID(-1);
+	Add(master_pattern);
+	// create global master line with an entry that keeps the master pattern
+	SequenceLine & master_line = createNewLine();
+	master_line.createEntry(master_pattern, 0);
+	master_pattern_ = &master_pattern;
+}
+
+SequenceLine & Sequence::createNewLine() {
+	SequenceLine & line = *new SequenceLine(*this);
+	lines_.push_back(&line);
 	newLineCreated(line);
 	return line;
 }
 
-SequenceLine* Sequence::insertNewLine(SequenceLine* selectedLine) {
-	SequenceLine* line = 0;
-	iterator it = find(begin(), end(), selectedLine);
-	if ( it != end() ) {
-		line = new SequenceLine(this);
-		lines_.insert( it,  line);
-		newLineInserted(line,selectedLine);
-	}
+SequenceLine & Sequence::insertNewLine(SequenceLine & selectedLine) {
+	iterator it = std::find(begin(), end(), &selectedLine);
+	assert("selected line found" && it != end());
+	SequenceLine & line = *new SequenceLine(*this);
+	lines_.insert(it, &line);
+	newLineInserted(line, selectedLine);
 	return line;
 }
 
 Pattern* Sequence::FindPattern(int id) {
-	patterniterator it = patterns_.begin();
+	patterns_type::iterator it = patterns_.begin();
 	for ( ; it != patterns_.end(); ++it) {
 		if ((*it)->id() == id)
 			return *it;
@@ -299,13 +280,12 @@ Pattern* Sequence::FindPattern(int id) {
 	return 0;
 }
 
-void Sequence::removeLine(SequenceLine* line) {
-	iterator it = find(begin(), end(), line);
-	if ( it != end() ) {
-		lines_.erase(it);
-		lineRemoved(line);
-		delete line;
-	}
+void Sequence::removeLine(SequenceLine & line) {
+	iterator it = std::find(begin(), end(), &line);
+	assert("line to remove found" && it != end());
+	lines_.erase(it);
+	lineRemoved(line);
+	delete &line;
 }
 
 /// returns the PatternEvents that are active in the range [start, start+length).
@@ -327,19 +307,19 @@ void Sequence::GetEventsInRange(double start, double length, std::vector<Pattern
 		bool worked = false;
 		for(; sLineIt != pSLine->rend() && sLineIt->first + sLineIt->second->patternBeats() >= start; ++sLineIt ) {
 			// take the pattern,
-			Pattern* pPat = sLineIt->second->pattern();
+			Pattern & pat = sLineIt->second->pattern();
 			worked = true;
 			double entryStart = sLineIt->first;
-			float entryStartOffset  = sLineIt->second->startPos();
-			float entryEndOffset  = sLineIt->second->endPos();
+			double entryStartOffset  = sLineIt->second->startPos();
+			double entryEndOffset  = sLineIt->second->endPos();
 			double relativeStart = start - entryStart + entryStartOffset;
 	
-			Pattern::iterator patIt = pPat->lower_bound( std::min(relativeStart , (double)entryEndOffset)),
-			patEnd = pPat->lower_bound( std::min(relativeStart+length,(double) entryEndOffset) );
+			Pattern::iterator patIt = pat.lower_bound(std::min(relativeStart, entryEndOffset)),
+			patEnd = pat.lower_bound(std::min(relativeStart + length, entryEndOffset));
 
 			// and iterate through the lines that are inside the range
 			for( ; patIt != patEnd; ++patIt) {
-				PatternEvent& ev= patIt->second;
+				PatternEvent & ev = patIt->second;
 				ev.set_sequence(seqlineidx);
 				ev.set_time_offset(entryStart + patIt->first - entryStartOffset);
 				CollectEvent(ev);
@@ -364,29 +344,31 @@ void Sequence::GetEventsInRange(double start, double length, std::vector<Pattern
 		++seqlineidx;
 	}
 	GetOrderedEvents(events);
-	// assert test if sorted correct
+	// assert test if sorted correctly
 	std::vector<PatternEvent*>::iterator it = events.begin();
 	double old_pos = 0;
-	bool has_note = 0;
+	bool has_note = false;
 	for ( ; it != events.end(); ++it ) {
 		PatternEvent* cmd = *it;
 		double pos = cmd->time_offset();
 		if (old_pos != pos)
-			has_note = 0;
+			has_note = true;
 		old_pos = pos;
 		if (cmd->note() == notetypes::tweak_slide) {
-			assert(!has_note);
+			//assert(!has_note);
+			loggers::warning()("has_note", UNIVERSALIS__COMPILER__LOCATION);
 		} else if (cmd->note() == notetypes::tweak) {
-			assert(!has_note);
+			//assert(!has_note);
+			loggers::warning()("has_note", UNIVERSALIS__COMPILER__LOCATION);
 		} else {
-			has_note = 1;
+			has_note = true;
 			// note
 		}
 	}
 }
 
-SequenceEntry* Sequence::GetEntryOnPosition(SequenceLine* line, double pos) {
-	for (SequenceLine::iterator it = line->begin(); it != line->end(); ++it) {
+SequenceEntry* Sequence::GetEntryOnPosition(SequenceLine & line, double pos) {
+	for (SequenceLine::iterator it = line.begin(); it != line.end(); ++it) {
 		if (pos >= it->second->tickPosition() && 
 			pos < it->second->tickEndPosition()
 			) {
@@ -438,7 +420,7 @@ void Sequence::GetOrderedEvents(std::vector<PatternEvent*>& event_list) {
 	}
 }
 
-bool Sequence::getPlayInfo(Pattern* pattern, double start, double length, double& entryStart) const {
+bool Sequence::getPlayInfo(Pattern & pattern, double start, double length, double& entryStart) const {
 	#if 0 ///\todo
 		entryStart = 0;
 		PatternLine* searchLine = 0;
@@ -466,7 +448,7 @@ bool Sequence::getPlayInfo(Pattern* pattern, double start, double length, double
 	return false;
 }
 
-void Sequence::removePattern(Pattern* pattern) {
+void Sequence::removePattern(Pattern & pattern) {
 	for(iterator it = begin(); it != end(); ++it) {
 		(*it)->removePatternEntries(pattern);
 	}
@@ -475,25 +457,13 @@ void Sequence::removePattern(Pattern* pattern) {
 
 void Sequence::removeAll( ) {
 	for(iterator it = begin(); it != end(); ++it) {
-		lineRemoved(*it);
+		lineRemoved(**it);
 		delete *it;
 	}
 	lines_.clear();
-	std::vector<Pattern*>::iterator pat_it = patterns_.begin();
-	for(; pat_it != patterns_.end(); ++pat_it) {
-		delete *pat_it;
-	}
+	for(patterns_type::iterator it = patterns_.begin(); it != patterns_.end(); ++it) delete *it;
 	patterns_.clear();
-	// create global master line with an entry that keeps the master pattern
-	SequenceLine* master_line_ = createNewLine();
-	master_pattern_ = new Pattern();
-	// make pattern length endless
-	master_pattern_->timeSignatures().clear();
-	master_pattern_->timeSignatures().push_back(TimeSignature(std::numeric_limits<float>::max()));
-	master_pattern_->setName("master");
-	master_pattern_->setID(-1);
-	Add(master_pattern_);
-	master_line_->createEntry(master_pattern_, 0);
+	create_master_pattern();
 }
 
 double Sequence::tickLength() const {
@@ -505,24 +475,24 @@ double Sequence::tickLength() const {
 	return max;
 }
 
-void Sequence::moveUpLine(SequenceLine* line) {
-	iterator it = find( begin(), end(), line);
-	if ( it != begin() ) {
+void Sequence::moveUpLine(SequenceLine & line) {
+	iterator it = find( begin(), end(), &line);
+	if(it != begin()) {
 		iterator prev = it;
 		--prev;
-		std::swap(*prev,*it);
-		linesSwapped(*it,*prev);
+		std::swap(*prev, *it);
+		linesSwapped(**it, **prev);
 	}
 }
 
-void Sequence::moveDownLine(SequenceLine* line) {
-	iterator it = find( begin(), end(), line);
-	if ( it != end() ) {
-		iterator next=it;
+void Sequence::moveDownLine(SequenceLine & line) {
+	iterator it = find( begin(), end(), &line);
+	if(it != end()) {
+		iterator next = it;
 		++next;
-		if ( next != end() ) {
-			std::swap(*it,*next);
-			linesSwapped(*next,*it);
+		if( next != end()) {
+			std::swap(*it, *next);
+			linesSwapped(**next, **it);
 		}
 	}
 }
@@ -538,13 +508,13 @@ std::string Sequence::toXml() const {
 	return xml.str();
 }
 
-void Sequence::Add(Pattern* pattern) {
-	assert(pattern);
-	patterns_.push_back(pattern);
+void Sequence::Add(Pattern & pattern) {
+	patterns_.push_back(&pattern);
 }
 
-void Sequence::Remove(Pattern* pattern) {
-	///\todo
+void Sequence::Remove(Pattern & pattern) {
+	patterns_type::iterator i = std::find(patterns_.begin(), patterns_.end(), &pattern);
+	if(i != patterns_.end()) patterns_.erase(i);
 }
 
 double Sequence::max_beats() const {

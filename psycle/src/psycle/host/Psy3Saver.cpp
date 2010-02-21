@@ -118,7 +118,7 @@ namespace psycle  {
 
 			int chunkcount = 3; // 3 chunks plus:	
 
-			chunkcount += song_->sequence().numpatterns()-1; // limit to MAXPATTERNS ..
+			chunkcount += song_->sequence().patterns_size()-1; // limit to MAXPATTERNS ..
 
 			for (int i = 0; i < MAX_MACHINES; i++)
 			{
@@ -285,7 +285,7 @@ namespace psycle  {
 
 				psycle::core::SequenceLine::iterator sit = line->begin();
 				for ( ; sit != line->end(); ++sit) {
-					temp = sit->second->pattern()->id();
+					temp = sit->second->pattern().id();
 					pFile->Write(temp);	// Sequence data.
 				}
 			}
@@ -305,25 +305,25 @@ namespace psycle  {
 			// a first test version
 
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
-			psycle::core::Sequence::patterniterator  it = song_->sequence().patternbegin();
-			for ( ; it != song_->sequence().patternend(); ++it ) {
-				psycle::core::Pattern* pattern = *it;
+			psycle::core::Sequence::patterns_type::iterator it = song_->sequence().patterns_begin();
+			for ( ; it != song_->sequence().patterns_end(); ++it ) {
+				psycle::core::Pattern & pattern = **it;
 				///\todo: need to do something with it?
-				if (pattern == song_->sequence().master_pattern())
+				if (&pattern == &song_->sequence().master_pattern())
 					continue;
-				int num_lines = pattern->beats() * lines_per_beat;
-				unsigned char* data = CreateNewPattern(pattern->id(), song_->tracks(), num_lines);
-				psycle::core::Pattern::iterator ev_it = pattern->begin();
-				for ( ; ev_it != pattern->end(); ++ev_it ) {
-					psycle::core::PatternEvent& ev = ev_it->second;
+				int num_lines = pattern.beats() * lines_per_beat;
+				unsigned char* data = CreateNewPattern(pattern.id(), song_->tracks(), num_lines);
+				psycle::core::Pattern::iterator ev_it = pattern.begin();
+				for( ; ev_it != pattern.end(); ++ev_it) {
+					psycle::core::PatternEvent & ev = ev_it->second;
 					double pos = ev_it->first;
 					int line = pos * lines_per_beat;
 					unsigned char* data_ptr = data + (line * song_->tracks() + ev.track()) * EVENT_SIZE;
 					ConvertEvent(ev, data_ptr);
 				}		
 				// ok save it
-				index = pattern->id(); // index
-				byte* pSource=new byte[song_->tracks()*num_lines*EVENT_SIZE];
+				index = pattern.id(); // index
+				byte* pSource = new byte[song_->tracks() * num_lines * EVENT_SIZE];
 				byte* pCopy = pSource;
 
 				for (int y = 0; y < num_lines; y++)
@@ -340,7 +340,7 @@ namespace psycle  {
 				version = CURRENT_FILE_VERSION_PATD;
 
 				pFile->Write(version);
-				size = sizez77+(4*sizeof(temp))+pattern->name().length()+1;
+				size = sizez77 + (4 * sizeof temp) + pattern.name().length() + 1;
 				pFile->Write(size);
 
 				pFile->Write(index);
@@ -349,7 +349,7 @@ namespace psycle  {
 				temp = song_->tracks(); // eventually this may be variable per pattern
 				pFile->Write(temp);
 
-				pFile->WriteString(pattern->name());
+				pFile->WriteString(pattern.name());
 
 				pFile->Write(sizez77);
 				pFile->WriteArray(pCopy,sizez77);
@@ -537,13 +537,13 @@ namespace psycle  {
 
 		int Psy3Saver::ComputeLinesPerBeat() {
 			psycle::core::Sequence& seq = song_->sequence();
-			psycle::core::Sequence::patterniterator it = seq.patternbegin();
+			psycle::core::Sequence::patterns_type::iterator it = seq.patterns_begin();
 			double min = 1.0;
-			for ( ; it != seq.patternend(); ++it) {
-				psycle::core::Pattern* pattern = *it;
-				psycle::core::Pattern::iterator pat_it = pattern->begin();
+			for ( ; it != seq.patterns_end(); ++it) {
+				psycle::core::Pattern & pattern = **it;
+				psycle::core::Pattern::iterator pat_it = pattern.begin();
 				double old_pos = 0;
-				for ( ; pat_it != pattern->end(); ++pat_it ) {
+				for( ; pat_it != pattern.end(); ++pat_it) {
 					double pos = pat_it->first;
 					double delta = pos - old_pos;
 					if ( delta != 0 && delta < min)

@@ -7265,46 +7265,46 @@ namespace psycle {
 #endif
 		}
 
-		void PatternView::ShowPatternDlg(void)
-		{
+		void PatternView::ShowPatternDlg(void) {
 			CPatDlg dlg(parent_, pattern());
 			int nlines = pattern()->beats() * project()->beat_zoom();
 			char name[32];
-			std::strcpy(name,pattern()->name().c_str());
+			std::strcpy(name, pattern()->name().c_str());
 
-			dlg.patLines= nlines;
-			std::strcpy(dlg.patName,name);
+			dlg.patLines = nlines;
+			std::strcpy(dlg.patName, name);
 			main()->m_wndSeq.UpdateSequencer();
 			
-			if (dlg.DoModal() == IDOK)
-			{
+			if(dlg.DoModal() == IDOK) {
 				double old_len = pattern()->beats();
-				psycle::core::SequenceLine* line = *(song()->sequence().begin()+1);
-				psycle::core::SequenceLine::iterator it = line->find(main()->m_wndSeq.selected_entry());
-				if ( it != line->end()) {
-					++it;
-					if ( it != line->end()) {
-						line->moveEntries(it->second, pattern()->beats() - old_len);
+				psycle::core::SequenceLine & line = **(song()->sequence().begin() + 1);
+				{ SequenceEntry * const e = main()->m_wndSeq.selected_entry();
+					if(e) {
+						psycle::core::SequenceLine::iterator it = line.find(*e);
+						if(it != line.end()) {
+							++it;
+							if(it != line.end()) {
+								line.moveEntries(*it->second, pattern()->beats() - old_len);
+							}
+						}
 					}
 				}
-				if ( nlines != dlg.patLines )
-				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					///todo: this operation shouldn't be needed with psycore
-#else
-					AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-					AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-					song()->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
-					if ( std::strcmp(name,dlg.patName) != 0 )
-					{
-						std::strcpy(song()->patternName[patNum],dlg.patName);
-						main()->StatusBarIdle();
-					}
-					Repaint(draw_modes::all);
-#endif
+				if(nlines != dlg.patLines) {
+					#if PSYCLE__CONFIGURATION__USE_PSYCORE
+						///todo: this operation shouldn't be needed with psycore
+					#else
+						AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+						AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+						song()->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
+						if ( std::strcmp(name,dlg.patName) != 0 )
+						{
+							std::strcpy(song()->patternName[patNum],dlg.patName);
+							main()->StatusBarIdle();
+						}
+						Repaint(draw_modes::all);
+					#endif
 				}
-				else if ( strcmp(name,dlg.patName) != 0 )
-				{
+				else if(std::strcmp(name, dlg.patName) != 0) {
 					// std::strcpy(song()->patternName[patNum],dlg.patName);
 					main()->m_wndSeq.UpdatePlayOrder(true);
 					main()->m_wndSeq.UpdateSequencer();

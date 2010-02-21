@@ -227,7 +227,7 @@ namespace psycle {
 		double pos = 0;
 		song.sequence().removeAll();
 		// here we add in one single Line the patterns
-		SequenceLine* line = song.sequence().createNewLine();
+		SequenceLine & line = song.sequence().createNewLine();
 
 		// get pattern data
 		int nextPatStart = m_Header.size + 60;
@@ -236,7 +236,8 @@ namespace psycle {
 		}
 		for (int i = 0; i != m_Header.norder; ++i) {
 			Pattern* pat = song.sequence().FindPattern(m_Header.order[i]);
-			line->createEntry(pat, pos);
+			assert(pat);
+			line.createEntry(*pat, pos);
 			pos += pat->beats();
 		}	
 		return nextPatStart;
@@ -287,9 +288,9 @@ namespace psycle {
 		short iNumRows = ReadInt2();
 		short iPackedSize = ReadInt2();
 
-		Pattern* pat = new Pattern();
-		pat->setName("unnamed");
-		pat->setID(patIdx);
+		Pattern & pat = *new Pattern();
+		pat.setName("unnamed");
+		pat.setID(patIdx);
 		song.sequence().Add(pat);
 
 		PatternEvent e;
@@ -717,7 +718,7 @@ namespace psycle {
 					e.set_track(col);
 					double beat = row / static_cast<float>(XMSampler::Speed2LPB(m_Header.speed));
 					if (!e.empty())
-						pat->insert(beat,e);
+						pat.insert(beat, e);
 				}
 			}
 		}
@@ -1159,22 +1160,23 @@ namespace psycle {
 		double pos = 0;
 		song.sequence().removeAll();
 		// here we add in one single Line the patterns
-		SequenceLine* line = song.sequence().createNewLine();
+		SequenceLine & line = song.sequence().createNewLine();
 
-		int npatterns=0;
-		for(int i = 0; i < m_Header.songlength;++i) {
+		int npatterns = 0;
+		for(int i = 0; i < m_Header.songlength; ++i) {
 			if ( m_Header.order[i] > npatterns) npatterns=m_Header.order[i];
 		}
-		npatterns++;
+		++npatterns;
 
 		// get pattern data
 		Seek(1084);
-		for(int j = 0;j < npatterns ;j++){
+		for(int j = 0; j < npatterns; ++j){
 			LoadPattern(song,j,song.tracks() );
 		}
-		for (int i = 0; i < m_Header.songlength; ++i) {
-			Pattern* pat = song.sequence().FindPattern(m_Header.order[i]);
-			line->createEntry(pat, pos);
+		for(int i = 0; i < m_Header.songlength; ++i) {
+			Pattern * pat = song.sequence().FindPattern(m_Header.order[i]);
+			assert(pat);
+			line.createEntry(*pat, pos);
 			pos += pat->beats();
 		}	
 	}
@@ -1211,9 +1213,9 @@ namespace psycle {
 
 		short iNumRows = 64;
 
-		Pattern* pat = new Pattern();
-		pat->setName("unnamed");
-		pat->setID(patIdx);
+		Pattern & pat = *new Pattern();
+		pat.setName("unnamed");
+		pat.setID(patIdx);
 		song.sequence().Add(pat);
 
 		PatternEvent e;
@@ -1385,7 +1387,7 @@ namespace psycle {
 					e.set_track(col);
 					double beat = row *0.25;
 					if(!e.empty()) 
-						pat->insert(beat,e);
+						pat.insert(beat, e);
 				}
 			}
 	}

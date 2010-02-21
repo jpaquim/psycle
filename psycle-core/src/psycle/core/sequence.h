@@ -6,6 +6,7 @@
 #pragma once
 
 #include "pattern.h"
+#include <boost/noncopyable.hpp>
 
 namespace psycle { namespace core {
 
@@ -13,21 +14,20 @@ namespace psycle { namespace core {
 	
 		class SequenceLine;
 
-		class SequenceEntry {
+		class PSYCLE__CORE__DECL SequenceEntry : private boost::noncopyable {
 		public:
-			SequenceEntry();
-			SequenceEntry(SequenceLine* line);
+			SequenceEntry(SequenceLine&, Pattern&);
 			~SequenceEntry();
 
-			// boost::signal<void (SequenceEntry*)> wasDeleted;
+			// boost::signal<void (SequenceEntry&)> wasDeleted;
 			double tickPosition() const;
 			double tickEndPosition( ) const;
-			void setPattern(Pattern* pattern);
-			Pattern* pattern() { return pattern_; }
-			Pattern* pattern() const { return pattern_; }
+			void setPattern(Pattern &);
+			Pattern & pattern() { return *pattern_; }
+			Pattern const & pattern() const { return *pattern_; }
 			float patternBeats() const { return pattern_->beats(); }
-			SequenceLine* track() {return line_;}
-			void setSequenceLine( SequenceLine *newLine );
+			SequenceLine & sequenceLine() {return *line_;}
+			void setSequenceLine(SequenceLine &);
 			void setStartPos(float pos) { startPos_ = pos; }
 			float startPos() const { return startPos_; }
 			void setEndPos(float pos) { endPos_ = pos; }
@@ -38,7 +38,7 @@ namespace psycle { namespace core {
 
 		private:
 			/// the sequence timeline that the sequenceEntry belongs to
-			SequenceLine* line_;
+			SequenceLine * line_;
 			/// the wrapped pattern
 			Pattern* pattern_;
 			/// here we can shrink the pattern of the entry
@@ -51,26 +51,28 @@ namespace psycle { namespace core {
 
 		class Sequence;
 
-	class PSYCLE__CORE__DECL SequenceLine {
+	class PSYCLE__CORE__DECL SequenceLine : private boost::noncopyable {
 		public:
-			SequenceLine();
-			SequenceLine(Sequence* sequence);
+			UNIVERSALIS__COMPILER__DEPRECATED("Is there not a sequence to attach this line to?")
+			SequenceLine() : sequence_() {}
+
+			SequenceLine(Sequence & sequence) : sequence_(&sequence) {}
 			~SequenceLine();
 
-			boost::signal<void (SequenceLine*)> wasDeleted;
+			boost::signal<void (SequenceLine&)> wasDeleted;
 
-			SequenceEntry* createEntry(Pattern* pattern, double position);
-			void insertEntry(SequenceEntry *entry);
-			void moveEntryToNewLine(SequenceEntry* entry, SequenceLine *newLine);
-			void removePatternEntries(Pattern* pattern);
-			void insertEntryAndMoveRest(SequenceEntry* entry, double pos);
-			void moveEntries(SequenceEntry* start_entry, double delta);
+			SequenceEntry & createEntry(Pattern &, double position);
+			void insertEntry(SequenceEntry &);
+			void moveEntryToNewLine(SequenceEntry & entry, SequenceLine & newLine);
+			void removePatternEntries(Pattern &);
+			void insertEntryAndMoveRest(SequenceEntry&, double pos);
+			void moveEntries(SequenceEntry & start_entry, double delta);
 			void removeSpaces(); // removes spaces between entries
 			void clear();
 			double tickLength() const;
-			Sequence* sequence() { return sequence_; }
-			void MoveEntry(SequenceEntry* entry, double newpos);
-			void removeEntry(SequenceEntry* entry);
+			Sequence & sequence() { return *sequence_; }
+			void MoveEntry(SequenceEntry &, double newpos);
+			void removeEntry(SequenceEntry &);
 			const std::string& name() const { return name_; }
 			void set_name(const std::string& name) {
 				name_ = name;
@@ -91,24 +93,22 @@ namespace psycle { namespace core {
 			reverse_iterator rend() { return line_.rend(); }
 			const_reverse_iterator rend() const { return line_.rend(); }
 
-			void insert(double pos, SequenceEntry* entry) {
-				line_.insert(std::pair<double, SequenceEntry*>(pos, entry));
-				entry->setSequenceLine(this);
+			void insert(double pos, SequenceEntry & entry) {
+				line_.insert(std::pair<double, SequenceEntry*>(pos, &entry));
+				entry.setSequenceLine(*this);
 			}
 
-			iterator find(SequenceEntry* entry);
+			iterator find(SequenceEntry & entry);
 			void erase(iterator it) { line_.erase(it); }
 			iterator lower_bound(double pos) { return line_.lower_bound(pos); }
 			iterator upper_bound(double pos) { return line_.upper_bound(pos); }
 
-			std::multimap<double, SequenceEntry*>::size_type size() const {
-				return line_.size();
-			}
+			std::multimap<double, SequenceEntry*>::size_type size() const { return line_.size(); }
 
 			bool empty() const { return line_.empty(); }
-			void SetSequence(Sequence* sequence) { sequence_ = sequence; }
+			void setSequence(Sequence & sequence) { sequence_ = &sequence; }
 
-			bool IsPatternUsed(Pattern* pattern) const;
+			bool isPatternUsed(Pattern & pattern) const;
 
 		private:
 			std::multimap<double, SequenceEntry*> line_;
@@ -116,7 +116,7 @@ namespace psycle { namespace core {
 			Sequence* sequence_;
 	};
 
-	class PSYCLE__CORE__DECL Sequence {
+	class PSYCLE__CORE__DECL Sequence : private boost::noncopyable {
 		friend class SequenceLine;
 		public:
 			Sequence();
@@ -137,52 +137,49 @@ namespace psycle { namespace core {
 			reverse_iterator rend() { return lines_.rend(); }
 			const_reverse_iterator rend() const { return lines_.rend(); }
 
-			typedef std::vector<Pattern*>::iterator patterniterator;
-			typedef std::vector<Pattern*>::const_iterator const_patterniterator;
-			typedef std::vector<Pattern*>::const_reverse_iterator const_reverse_patterniterator;
-			typedef std::vector<Pattern*>::reverse_iterator reverse_patterniterator;
+			typedef std::vector<Pattern*> patterns_type;
 
-			patterniterator patternbegin() { return patterns_.begin(); }
-			const_patterniterator patternbegin() const { return patterns_.begin(); }
-			patterniterator patternend() { return patterns_.end(); }
-			const_patterniterator patternend() const { return patterns_.end(); }
+			patterns_type::iterator patterns_begin() { return patterns_.begin(); }
+			patterns_type::const_iterator patterns_begin() const { return patterns_.begin(); }
+			patterns_type::iterator patterns_end() { return patterns_.end(); }
+			patterns_type::const_iterator patterns_end() const { return patterns_.end(); }
 
-			reverse_patterniterator patternrbegin() { return patterns_.rbegin(); }
-			const_reverse_patterniterator patternrbegin() const { return patterns_.rbegin(); }
-			reverse_patterniterator patternrend() { return patterns_.rend(); }
-			const_reverse_patterniterator patternrend() const { return patterns_.rend(); }
-			int numpatterns() { return patterns_.size(); }
+			patterns_type::reverse_iterator patterns_rbegin() { return patterns_.rbegin(); }
+			patterns_type::const_reverse_iterator patterns_rbegin() const { return patterns_.rbegin(); }
+			patterns_type::reverse_iterator patterns_rend() { return patterns_.rend(); }
+			patterns_type::const_reverse_iterator patterns_rend() const { return patterns_.rend(); }
+
+			patterns_type::size_type patterns_size() { return patterns_.size(); }
 
 			typedef std::multimap<double, PatternEvent*> GlobalMap;
 			typedef GlobalMap::iterator GlobalIter;
 
-			SequenceLine* createNewLine();
-			boost::signal<void (SequenceLine*)> newLineCreated;
-			SequenceLine* insertNewLine( SequenceLine* selectedLine );
-			boost::signal<void (SequenceLine*, SequenceLine*)> newLineInserted; // new line, line it is inserted before
+			SequenceLine & createNewLine();
+			boost::signal<void (SequenceLine&)> newLineCreated;
+			SequenceLine & insertNewLine(SequenceLine & selectedLine);
+			boost::signal<void (SequenceLine&, SequenceLine&)> newLineInserted; // new line, line it is inserted before
 			
-			void removeLine(SequenceLine* line);
-			boost::signal<void (SequenceLine*)> lineRemoved;
+			void removeLine(SequenceLine & line);
+			boost::signal<void (SequenceLine&)> lineRemoved;
 			void removeAll();
 
 			// heart of patternsequence
 			void GetEventsInRange(double start, double length, std::vector<PatternEvent*>& events);
 			void GetOrderedEvents(std::vector<PatternEvent*>& event_list);
-			SequenceEntry* GetEntryOnPosition(SequenceLine* line, double tickPosition);
+			SequenceEntry* GetEntryOnPosition(SequenceLine &, double tickPosition);
 			void CollectEvent(const PatternEvent& command);
 			int priority(const PatternEvent& cmd, int count) const;
 
 			// playpos info
-			bool getPlayInfo( Pattern* pattern, double start, double length, double & entryStart  ) const;
-			void removePattern(Pattern* pattern);
+			bool getPlayInfo(Pattern &, double start, double length, double & entryStart) const;
+			void removePattern(Pattern &);
 
 			double tickLength() const;
-			void moveDownLine(SequenceLine* line);
-			void moveUpLine(SequenceLine* line);
-			boost::signal<void (SequenceLine*, SequenceLine*)> linesSwapped;
-			const int &numTracks() const { return numTracks_; }
-			void setNumTracks(int newtracks)
-			{
+			void moveDownLine(SequenceLine &);
+			void moveUpLine(SequenceLine &);
+			boost::signal<void (SequenceLine&, SequenceLine&)> linesSwapped;
+			int numTracks() const { return numTracks_; }
+			void setNumTracks(int newtracks) {
 				///\todo: might be necessary to initialize mutedTrack and armedTrack after this.
 				/// Also, trackArmedCount_ might need recalculation.
 				numTracks_ = newtracks;
@@ -195,29 +192,29 @@ namespace psycle { namespace core {
 			std::vector<bool>& muted_tracks() { return mutedTrack_; }
 
 			int trackArmed(int track) const { assert(track<numTracks_); return armedTrack_[track]; }
-			void setArmedTrack(int track,bool value)
-			{
-				assert(track<numTracks_);
-				if ( value != armedTrack_[track])
-				{
-					armedTrack_[track]=value;
-					trackArmedCount_+=(value==false)?-1:1;
+			void setArmedTrack(int track, bool value) {
+				assert(track < numTracks_);
+				if(value != armedTrack_[track]) {
+					armedTrack_[track] = value;
+					trackArmedCount_ += value ? 1 : -1;
 				}
 			}
 
 			std::string toXml() const;
-			void Add(Pattern* pattern);
-			void Remove(Pattern* pattern);
+			void Add(Pattern&);
+			void Remove(Pattern&);
 			Pattern* FindPattern(int id);
-			Pattern* master_pattern() { return master_pattern_; }
+			Pattern & master_pattern() { return *master_pattern_; }
 
 			double max_beats() const;
 
 		private:
-			// sequencer structure
+			void create_master_pattern();
+
+			/// sequencer structure
 			std::vector<SequenceLine*> lines_;
-			// pattern pool
-			std::vector<Pattern*> patterns_;
+			/// pattern pool
+			patterns_type patterns_;
 			int numTracks_;
 			std::vector<bool> mutedTrack_;
 			/// The number of tracks Armed (enabled for record)
@@ -226,8 +223,8 @@ namespace psycle { namespace core {
 			std::vector<bool> armedTrack_;
 
 			std::multimap<double, std::multimap< int, PatternEvent > > events_;
-			// masterPattern
-			Pattern* master_pattern_;
+			/// master pattern
+			Pattern * master_pattern_;
 	};
 	
 

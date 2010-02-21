@@ -104,7 +104,7 @@ namespace psycle {
 			m_patnumber2.EnableWindow(false);
 
 			char num[10];
-			int pattern_id = pChildView->pattern_view()->main()->m_wndSeq.selected_entry()->pattern()->id();
+			int pattern_id = pChildView->pattern_view()->main()->m_wndSeq.selected_entry()->pattern().id();
 			sprintf(num,"%02x",pattern_id);
 			m_patnumber.SetWindowText(num);
 			sprintf(num,"%02x",0);
@@ -307,7 +307,7 @@ namespace psycle {
 			psycle::core::Sequence& seq = song.sequence();
 			seq_main_play_line_ = *(seq.begin()+1);
 			*(seq.begin()+1) = seq_tmp_play_line_;
-			seq_tmp_play_line_->SetSequence(&song.sequence());
+			seq_tmp_play_line_->setSequence(song.sequence());
 		}
 
 		void CSaveWavDlg::SwitchToNormalPlay() {
@@ -372,9 +372,9 @@ namespace psycle {
 				hexstring_to_integer(name.GetBuffer(2), pstart);
 				SwitchToTmpPlay();
 				seq_tmp_play_line_->clear();
-				psycle::core::Pattern* pattern = song.sequence().FindPattern(pstart);
-				SequenceEntry* entry = new SequenceEntry(seq_tmp_play_line_);
-				entry->setPattern(pattern);
+				psycle::core::Pattern * pattern = song.sequence().FindPattern(pstart);
+				assert(pattern);
+				SequenceEntry & entry = *new SequenceEntry(*seq_tmp_play_line_, *pattern);
 				seq_tmp_play_line_->insert(0, entry);	
 				Player::singleton().start(0);
 				m_progress.SetRange(0, static_cast<short>(pattern->beats()));
@@ -396,18 +396,16 @@ namespace psycle {
  			file_out_.set_opened(true);
 			const int frames = 256;
 			while(!kill_thread_ && player->playing()) {
-				 if ((m_recmode == 2) && (player->playPos() >=
-					  seq_end_entry_->tickPosition() + 
-					seq_end_entry_->pattern()->beats() 
-				)) break;
+				if(
+					m_recmode == 2 &&
+					player->playPos() >= seq_end_entry_->tickPosition() + seq_end_entry_->pattern().beats()
+				) break;
  				file_out_.Write(player->Work(frames), frames);
 				m_progress.SetPos(static_cast<short>(player->playPos()));
 			}
 			file_out_.set_opened(false);
 			Player::singleton().stop();
-			if (m_recmode == 1) {
-				SwitchToNormalPlay();
-			}
+			if(m_recmode == 1) SwitchToNormalPlay();
 		}
 
 		void CSaveWavDlg::SaveWires() {			

@@ -30,7 +30,7 @@ namespace psycle {
 			SequenceEntry* GetEntry(int list_position);		
 			SequenceEntry* selected_entry() { return selected_entry_; } 
 			// this entry is currently used by the patternview
-			SequenceLine* ComputeSelblockLine();
+			SequenceLine & ComputeSelblockLine();
 			std::map<int,SequenceEntry*>& pos_map() { return pos_map_; }
 			/// Change pattern under current position
 			void OnDeclong();
