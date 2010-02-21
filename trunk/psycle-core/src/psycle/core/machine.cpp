@@ -315,13 +315,14 @@ void Machine::CloneFrom(Machine & src) {
 
 	SetEditName(src.GetEditName());
 
-	///\todo FIXME: Implement MemoryFile.
+	#if 0 ///\todo FIXME: Implement MemoryFile.
 	MemoryFile file;
 	file.OpenMem(1000);
 	///\todo FIXME: Version anyone?! 
 	src.SaveSpecificChunk(&file);
 	LoadSpecificChunk(&file, 0);
 	file.CloseMem();
+	#endif
 }
 
 void Machine::Init() {

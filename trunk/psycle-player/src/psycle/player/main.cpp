@@ -7,6 +7,7 @@
 #include <psycle/core/player.h>
 #include <psycle/audiodrivers/audiodriver.h>
 #include <diversalis/os.hpp>
+#include <universalis/os/paths.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/os/thread_name.hpp>
@@ -88,6 +89,15 @@ void usage() {
 }
 
 int main(int argument_count, char * arguments[]) {
+	boost::filesystem::path const & home = universalis::os::paths::home();
+	std::clog << home << '\n';
+	boost::filesystem::path const & home_app_local = universalis::os::paths::home_app_local("xxx");
+	std::clog << home_app_local << '\n';
+	boost::filesystem::path const & home_app_roaming = universalis::os::paths::home_app_roaming("xxx");
+	std::clog << home_app_roaming << '\n';
+	std::string s; std::getline(std::cin, s);
+	std::exit(1);
+
 	{
 		using namespace universalis::os::loggers;
 		multiplex_logger::singleton().add(stream_logger::default_logger());

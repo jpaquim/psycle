@@ -312,11 +312,11 @@ class PSYCLE__CORE__DECL RiffFile {
 		///\}
 
 	private:
-		bool write_mode;
-		std::fstream _stream;
+		bool is_write_mode_;
+		std::fstream stream_;
 };
 
-
+#if 0 // unfinished
 class PSYCLE__CORE__DECL MemoryFile : public RiffFile {
 	public:
 		MemoryFile();
@@ -338,6 +338,7 @@ class PSYCLE__CORE__DECL MemoryFile : public RiffFile {
 		std::vector<void*> memoryblocks_;
 		int blocksize_;
 };
+#endif
 
 }}
 #endif
