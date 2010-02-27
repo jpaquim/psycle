@@ -47,7 +47,7 @@
 // (64-bit compatibility by johan boule)
 
 #pragma once
-#include <universalis/stdlib/cstdint.hpp>
+#include <universalis.hpp>
 #include <cstddef>
 namespace psycle { namespace helpers { namespace dsp {
 

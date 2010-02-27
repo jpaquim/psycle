@@ -23,9 +23,8 @@
 	calculate a real FFT and a real power spectrum.
 
 **********************************************************************/
-#include <psycle/helpers/fft.hpp>
-#include <universalis/exception.hpp>
-#include <universalis/compiler/location.hpp>
+#include "fft.hpp"
+#include <universalis.hpp>
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>

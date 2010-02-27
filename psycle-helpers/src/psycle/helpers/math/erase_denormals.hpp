@@ -5,7 +5,7 @@
 #define PSYCLE__HELPERS__MATH__ERASE_DENORMALS__INCLUDED
 #pragma once
 
-#include <universalis/compiler.hpp>
+#include <universalis.hpp>
 
 namespace psycle { namespace helpers { namespace math {
 

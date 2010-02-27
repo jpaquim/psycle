@@ -6,11 +6,10 @@
 #pragma once
 
 #include "constants.hpp"
-#include <universalis/compiler.hpp>
+#include <universalis.hpp>
 #include <cmath>
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/os/clocks.hpp>
-	#include <universalis/compiler/typenameof.hpp>
 	#include <sstream>
 #endif
 

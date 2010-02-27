@@ -1,5 +1,5 @@
 #pragma once
-#include <psycle/helpers/eaiff.hpp>
+#include "eaiff.hpp"
 namespace psycle
 {
 	namespace helpers

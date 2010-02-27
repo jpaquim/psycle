@@ -5,11 +5,11 @@
 #define PSYCLE__HELPERS__MATH__SINCOS__INCLUDED
 #pragma once
 
-#include <diversalis/stdlib.hpp>
+#include <universalis.hpp>
 #include <cmath>
 #if defined BOOST_AUTO_TEST_CASE
 	#include "constants.hpp"
-	#include <universalis/compiler/typenameof.hpp>
+	#include <universalis.hpp>
 	#include <sstream>
 #endif
 
@@ -17,7 +17,11 @@ namespace psycle { namespace helpers { namespace math {
 
 /// computes both the sine and the cosine at the same time
 template<typename Real>
-void inline sincos(Real x, Real & restrict sine, Real & restrict cosine) {
+void inline sincos(
+	Real x,
+	Real & UNIVERSALIS__COMPILER__RESTRICT_REF sine,
+	Real & UNIVERSALIS__COMPILER__RESTRICT_REF cosine
+) {
 	// some compilers are able to optimise those two calls into one.
 	sine = std::sin(x);
 	cosine = std::cos(x);
@@ -25,17 +29,29 @@ void inline sincos(Real x, Real & restrict sine, Real & restrict cosine) {
 
 #if DIVERSALIS__STDLIB__MATH >= 199901
 	template<>
-	void inline sincos<>(long double const x, long double & restrict sine, long double & restrict cosine) {
+	void inline sincos<>(
+		long double const x,
+		long double & UNIVERSALIS__COMPILER__RESTRICT_REF sine,
+		long double & UNIVERSALIS__COMPILER__RESTRICT_REF cosine
+	) {
 		::sincosl(x, &sine, &cosine);
 	}
 
 	template<>
-	void inline sincos<>(double const x, double & restrict sine, double & restrict cosine) {
+	void inline sincos<>(
+		double const x,
+		double & UNIVERSALIS__COMPILER__RESTRICT_REF sine,
+		double & UNIVERSALIS__COMPILER__RESTRICT_REF cosine
+	) {
 		::sincos(x, &sine, &cosine);
 	}
 
 	template<>
-	void inline sincos<>(float const x, float & restrict sine, float & restrict cosine) {
+	void inline sincos<>(
+		float const x,
+		float & UNIVERSALIS__COMPILER__RESTRICT_REF sine,
+		float & UNIVERSALIS__COMPILER__RESTRICT_REF cosine
+	) {
 		::sincosf(x, &sine, &cosine);
 	}
 #endif

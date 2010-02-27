@@ -2,11 +2,9 @@
 ///\brief various signal processing utility functions and classes, psycle::helpers::dsp::Cubic amongst others.
 #pragma once
 #include "math/erase_all_nans_infinities_and_denormals.hpp"
-#include <universalis/compiler.hpp>
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
 #endif
-#include <universalis/stdlib/cstdint.hpp>
 #include <cmath>
 #include <cstring>
 namespace psycle { namespace helpers { /** various signal processing utility functions. */ namespace dsp {

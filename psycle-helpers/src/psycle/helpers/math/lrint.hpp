@@ -5,14 +5,7 @@
 #define PSYCLE__HELPERS__MATH__LRINT__INCLUDED
 #pragma once
 
-#include <diversalis/stdlib.hpp>
-#if DIVERSALIS__STDLIB__MATH < 199901
-	#include <diversalis/compiler.hpp>
-	#include <diversalis/cpu.hpp>
-	#include <boost/static_assert.hpp>
-#endif
-#include <universalis/compiler.hpp>
-#include <universalis/stdlib/cstdint.hpp>
+#include <universalis.hpp>
 #include <cmath>
 
 namespace psycle { namespace helpers { namespace math {
@@ -149,7 +142,6 @@ Integer inline lrint(Real x) {
 #endif
 
 #if defined BOOST_AUTO_TEST_CASE && DIVERSALIS__STDLIB__MATH >= 199901 // some test of C1999's features
-	#include <cmath>
 	#include <fenv.h>
 	BOOST_AUTO_TEST_CASE(lrint_test) {
 		int const initial_feround(fegetround());

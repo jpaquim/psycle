@@ -4,7 +4,7 @@
 */
 #pragma once
 
-#include <universalis/stdlib/cstdint.hpp>
+#include <universalis.hpp>
 #include <string>
 #include <fstream>
 

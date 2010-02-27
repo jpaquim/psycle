@@ -1,5 +1,5 @@
 #pragma once
-#include <psycle/helpers/msriff.hpp>
+#include "msriff.hpp"
 namespace psycle
 {
 	namespace helpers
