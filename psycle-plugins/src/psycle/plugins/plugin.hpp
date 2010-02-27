@@ -11,7 +11,7 @@
 #pragma once
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/scale.hpp>
-#include <universalis/compiler.hpp>
+#include <universalis.hpp>
 #include <string>
 #include <sstream>
 #include <iomanip>
