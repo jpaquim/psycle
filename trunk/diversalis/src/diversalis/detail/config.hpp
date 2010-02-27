@@ -1,5 +1,5 @@
-#ifndef DIVERSALIS__DETAIL__CONFIGURATION__INCLUDED
-#define DIVERSALIS__DETAIL__CONFIGURATION__INCLUDED
+#ifndef DIVERSALIS__DETAIL__CONFIG__INCLUDED
+#define DIVERSALIS__DETAIL__CONFIG__INCLUDED
 #pragma once
 
 // This is just an empty file to avoid build failures for people having their own build system.

@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\file \brief project-wide standard library tweaks.
+///\file \brief compiler-independant meta-information about the standard/runtime library.
 
 #ifndef DIVERSALIS__STDLIB__INCLUDED
 #define DIVERSALIS__STDLIB__INCLUDED
@@ -21,11 +21,11 @@
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 
 	#if defined _MT // defined when -MD or -MDd (multithreaded dll) or -MT or -MTd (multithreaded static) is specified.
-		#define DIVERSALIS__STDLIB__RUNTIME__MULTITHREADED
+		#define DIVERSALIS__STDLIB__RUNTIME__MULTI_THREADED
 	#endif
 
 	#if defined _DLL // defined when -MD or -MDd (multithread dll) is specified.
-		#define DIVERSALIS__STDLIB__RUNTIME__DYNAMIC_LINK
+		#define DIVERSALIS__STDLIB__RUNTIME__DYN_LINK
 	#endif
 
 	#if defined _DEBUG // defined when compiling with -LDd, -MDd, or -MTd.
