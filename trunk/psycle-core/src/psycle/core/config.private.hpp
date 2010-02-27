@@ -9,8 +9,11 @@
 #pragma once
 
 #define PSYCLE__CORE__SOURCE // used to dll-export the symbols
+//#define PSYCLE__CORE__SHARED // used to dll-export the symbols
 
 #define UNIVERSALIS__META__MODULE__NAME "psycle-core" // used in universalis::compiler::location
 //#define UNIVERSALIS__META__MODULE__VERSION 0 // optionally used in universalis::compiler::location
+
+#include <universalis.hpp>
 
 #endif

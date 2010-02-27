@@ -17,7 +17,6 @@
 
 #include "signalslib.h"
 
-#include <diversalis/diversalis.hpp>
 #ifdef DIVERSALIS__OS__MICROSOFT
 	#include <io.h>
 #else

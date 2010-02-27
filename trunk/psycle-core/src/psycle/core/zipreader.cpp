@@ -32,7 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <diversalis/diversalis.hpp>
+#include <diversalis.hpp>
 
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <io.h>

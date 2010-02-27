@@ -21,12 +21,10 @@ SongSerializer::SongSerializer() {
 }
 
 bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song) {
-	if (File::fileIsReadable( fileName ) ) {
-		for (std::vector<PsyFilterBase*>::iterator it = filters.begin(); it < filters.end(); ++it) {
+	if(boost::filesystem::exists(fileName)) {
+		for(std::vector<PsyFilterBase*>::iterator it = filters.begin(); it != filters.end(); ++it) {
 			PsyFilterBase* filter = *it;
-			if ( filter->testFormat(fileName) ) {
-				return filter->load(fileName,song);
-			}
+			if(filter->testFormat(fileName)) return filter->load(fileName,song);
 		}
 	}
 	std::cerr << "SongSerializer::loadSong(): Couldn't find appropriate filter for file: " << fileName << std::endl;

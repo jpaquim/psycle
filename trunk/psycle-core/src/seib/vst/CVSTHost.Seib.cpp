@@ -25,20 +25,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ******************************************************************************/
 
 
-#include "CVSTHost.Seib.hpp"                   /* private prototypes                */
+#include "CVSTHost.Seib.hpp" // private prototypes
 
 #include "EffectWnd.hpp"
 
-#if !(defined _WIN64 || defined _WIN32)
+#if !defined _WIN32
 	#error unimplemented
-#endif
-
-#if defined _WIN64 || defined _WIN32
+#else
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#include <MMSystem.h>
 	#pragma warning(pop)
-
 #endif
 
 namespace seib {

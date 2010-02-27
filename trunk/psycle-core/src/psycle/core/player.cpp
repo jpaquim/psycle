@@ -261,7 +261,7 @@ void Player::thread_function(std::size_t thread_number) {
 	}
 
 	// install cpu/os exception handler/translator
-	universalis::cpu::exception::install_handler_in_thread();
+	universalis::cpu::exceptions::install_handler_in_thread();
 
 	{ // set thread priority and cpu affinity
 		using universalis::os::exceptions::operation_not_permitted;
@@ -280,11 +280,11 @@ void Player::thread_function(std::size_t thread_number) {
 
 		// set thread cpu affinity
 		try {
-			thread::affinity_mask_type af(t.affinity_mask());
+			thread::affinity_mask_type const af(t.affinity_mask());
 			if(af.active_count()) {
 				unsigned int rotated = 0, cpu_index = 0;
 				while(!af(cpu_index) || rotated++ != thread_number) cpu_index = (cpu_index + 1) % af.size();
-				af(cpu_index, true); t.affinity_mask(af);
+				thread::affinity_mask_type new_af; new_af(cpu_index, true); t.affinity_mask(new_af);
 			}
 		} catch(operation_not_permitted e) {
 			if(loggers::warning()) {
@@ -311,7 +311,7 @@ void Player::thread_function(std::size_t thread_number) {
 	} catch(...) {
 		if(loggers::exception()) {
 			std::ostringstream s;
-			s << "exception: " << universalis::compiler::exceptions::ellipsis();
+			s << "exception: " << universalis::compiler::exceptions::ellipsis_desc();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		throw;

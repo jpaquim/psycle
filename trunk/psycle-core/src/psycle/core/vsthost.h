@@ -21,7 +21,7 @@
 #define PSYCLE__CORE__VSTHOST__INCLUDED
 
 #include <psycle/core/config.hpp>
-#include <diversalis/diversalis.hpp>
+#include <diversalis.hpp>
 
 #ifndef DIVERSALIS__OS__MICROSOFT
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING

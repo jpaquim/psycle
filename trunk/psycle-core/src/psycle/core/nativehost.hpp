@@ -21,7 +21,6 @@ class PSYCLE__CORE__DECL NativeHost : public MachineHost {
 	protected:
 		NativeHost(MachineCallbacks*);
 	public:
-		virtual ~NativeHost();
 		static NativeHost& getInstance(MachineCallbacks*);
 
 		virtual Machine* CreateMachine(PluginFinder&, const MachineKey &, Machine::id_type);
@@ -34,10 +33,10 @@ class PSYCLE__CORE__DECL NativeHost : public MachineHost {
 
 	protected:
 		virtual void FillPluginInfo(const std::string&, const std::string&, PluginFinder&);
-		void* LoadDll( const std::string& );
-		psycle::plugin_interface::CMachineInfo* LoadDescriptor(void* );
-		psycle::plugin_interface::CMachineInterface* Instantiate(void * );
-		void UnloadDll( void*  );
+		void* LoadDll(const std::string&);
+		psycle::plugin_interface::CMachineInfo* LoadDescriptor(void*);
+		psycle::plugin_interface::CMachineInterface* Instantiate(void*);
+		void UnloadDll(void*);
 		std::string plugin_path_;
 };
 

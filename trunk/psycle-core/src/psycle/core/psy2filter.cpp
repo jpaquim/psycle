@@ -17,7 +17,6 @@
 #include "vsthost.h"
 #include "vstplugin.h"
 
-#include <diversalis/diversalis.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <sstream>
 #include <iostream>

@@ -81,7 +81,7 @@ namespace exceptions {
 								<< "exception type: " << universalis::compiler::typenameof(*e) << '\n'
 								<< universalis::exceptions::string(*e);
 						} else {
-							s << universalis::compiler::exceptions::ellipsis();
+							s << universalis::compiler::exceptions::ellipsis_desc();
 						}
 						function_error const f_error(s.str(), standard);
 						crashable_.crashed(f_error);

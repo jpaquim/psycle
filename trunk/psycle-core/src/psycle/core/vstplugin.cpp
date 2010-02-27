@@ -3,7 +3,6 @@
 
 #include <psycle/core/config.private.hpp>
 
-#include <diversalis/os.hpp>
 #ifndef DIVERSALIS__OS__MICROSOFT
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
 		#warning ################# UNIMPLEMENTED #################
@@ -21,7 +20,7 @@
 	#include <sstream>
 
 	#ifdef DIVERSALIS__OS__MICROSOFT
-		#include <windows.h>
+		#include <universalis/os/include_windows_without_crap.hpp>
 	#else
 		#include <dlfcn.h>
 	#endif
@@ -533,7 +532,7 @@
 						NSActive[midiChannel] = false;
 					}
 					AddMIDI(0xE0 + midiChannel,LSB(NSCurrent[midiChannel]),MSB(NSCurrent[midiChannel]),NSSamples[midiChannel]);
-					NSSamples[midiChannel]+=min(TWEAK_SLIDE_SAMPLES,ns);
+					NSSamples[midiChannel]+= std::min(TWEAK_SLIDE_SAMPLES, ns);
 					ns-=TWEAK_SLIDE_SAMPLES;
 				}
 			}

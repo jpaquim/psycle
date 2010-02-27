@@ -410,9 +410,9 @@ std::cout << "loopStart" << waveLoopStart << std::endl;
 			size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
 		}
 		
-		std::uint32_t index = 0; ///\todo unused?
+		uint32_t index = 0; ///\todo unused?
 		xml << "<wave name='" << waveName << "' bin='";
-		std::uint32_t version = CURRENT_FILE_VERSION_WAVE; ///\todo unused?
+		uint32_t version = CURRENT_FILE_VERSION_WAVE; ///\todo unused?
 		
 		xml << toHex(waveLength);
 		xml << toHex(waveVolume);
@@ -485,7 +485,7 @@ void Instrument::createHeader( const std::string & header )
 	_RCUT = str_hex<int> (header,pos++);
 	_RRES = str_hex<int> (header,pos++);
 
-	int numwaves = str_hex<int> (header,pos++); ///\todo unused?
+	int numwaves = str_hex<int>(header, pos++); ///\todo unused?
 }
 
 void Instrument::setName( const std::string & name )

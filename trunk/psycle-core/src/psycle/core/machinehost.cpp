@@ -5,68 +5,47 @@
 #include "machinehost.hpp"
 
 #include "pluginfinder.h"
-#include "file.h"
 
-#include <iostream>
+#include <boost/filesystem.hpp>
+#include <list>
 
 namespace psycle { namespace core {
 
-MachineHost::MachineHost(MachineCallbacks*calls)
-: mcallback_(calls)
-{}
+MachineHost::MachineHost(MachineCallbacks * calls) : mcallback_(calls) {}
 
 void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) {
-	class populate_plugin_list
-	{
-	public:
-		populate_plugin_list(std::vector<std::string> & result, std::string directory)
-		{
-			std::vector<std::string> intermediate;
-			intermediate = File::fileList(directory, File::list_modes::dirs);
-			for ( std::vector<std::string>::iterator it = intermediate.begin()
-				; it < intermediate.end(); ++it )
-			{
-				if (*it != "." && *it != "..")
-				{
-					populate_plugin_list(result, directory + File::slash() + *it);
+	class populate_plugin_list {
+		public:
+			populate_plugin_list(std::list<boost::filesystem::path> & result, boost::filesystem::path const & directory) {
+				using namespace boost::filesystem;
+				for(directory_iterator i(directory); i != directory_iterator(); ++i) {
+					file_status const status(i->status());
+					if(is_directory(status) && i->path() != "." && i->path() != "..")
+						populate_plugin_list(result, i->path());
+					else if(is_regular_file(status))
+						result.push_back(i->path());
 				}
 			}
-
-			intermediate = File::fileList(directory, File::list_modes::files);
-			for ( std::vector<std::string>::iterator it = intermediate.begin();
-				it < intermediate.end(); ++it )
-			{
-				result.push_back(directory + File::slash() + *it);
-			}
-		}
 	};
 
-	if (clearfirst) {
-		finder.ClearMap(hostCode());
-	}
-	for (int i=0; i < getNumPluginPaths();i++) 
-	{
-		if (getPluginPath(i) == "") continue;
+	if(clearfirst) finder.ClearMap(hostCode());
 
-		//std::string currentPath = getPluginPath(i);
-		std::vector<std::string> fileList;
+	for(int i = 0; i < getNumPluginPaths(); ++i) {
+		if(getPluginPath(i) == "") continue;
+
+		std::list<boost::filesystem::path> fileList;
 		try {
 			populate_plugin_list(fileList, getPluginPath(i));
-			//fileList = File::fileList(currentPath, File::list_modes::files);
 		} catch(std::exception & e) {
 			std::cerr
 				<< "psycle: host: warning: Unable to scan your " << hostName() << " plugin directory with path: " << getPluginPath(i)
 				<< ".\nPlease make sure the directory exists.\nException: " << e.what();
 			return;
 		}
-		//currentPath = currentPath + File::slash();
-		std::vector<std::string>::iterator it = fileList.begin();
-		for ( ; it < fileList.end(); ++it ) {
-			std::string plainName = File::extractFileNameFromPath(*it);
-			MachineKey thekey(hostCode(), plainName, 0);
-			if ( !finder.hasKey(thekey) ) {
-				FillPluginInfo(*it, plainName,finder);
-			}
+		for(std::list<boost::filesystem::path>::const_iterator i = fileList.begin(); i != fileList.end(); ++i) {
+			std::string const base_name(i->filename());
+			MachineKey key(hostCode(), base_name, 0);
+			if(!finder.hasKey(key)) FillPluginInfo(i->file_string(), base_name, finder);
 		}
 	}
 }
