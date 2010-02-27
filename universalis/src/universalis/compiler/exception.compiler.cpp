@@ -1,20 +1,20 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2010 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\implementation gets information from ellipsis exceptions: catch(...)
+///\implementation universalis::compiler::exceptions
+
 #include <universalis/detail/project.private.hpp>
-#include "ellipsis.hpp"
+#include "exception.hpp"
 #include <sstream>
 #if defined DIVERSALIS__COMPILER__GNU
 	#include <cxxabi.h>
 	#include <typeinfo>
-	#include "../typenameof.hpp"
+	#include "typenameof.hpp"
 #endif
+
 namespace universalis { namespace compiler { namespace exceptions {
 
-	std::string ellipsis()
-{
+std::string ellipsis_desc() {
 	#if defined DIVERSALIS__COMPILER__GNU
 		std::type_info * type_info(abi::__cxa_current_exception_type());
 		std::ostringstream s;

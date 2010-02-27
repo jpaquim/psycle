@@ -4,16 +4,13 @@
 
 ///\interface universalis::compiler::detail::demangled
 
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEMANGLE__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__DEMANGLE__INCLUDED
+#ifndef UNIVERSALIS__COMPILER__DEMANGLE__INCLUDED
+#define UNIVERSALIS__COMPILER__DEMANGLE__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
 #include <typeinfo>
 #include <string>
-
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
 
 namespace universalis { namespace compiler {
 
@@ -21,11 +18,9 @@ namespace universalis { namespace compiler {
 namespace detail {
 	///\internal
 	/// demangling of compiler symbols strings.
-	std::string UNIVERSALIS__COMPILER__DYNAMIC_LINK demangled(std::string const & mangled_symbol);
+	std::string UNIVERSALIS__DECL demangled(std::string const & mangled_symbol);
 }
 
 }}
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif
