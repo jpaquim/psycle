@@ -6,14 +6,13 @@
 #include "exception.hpp"
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
+#include <universalis/compiler/thread_local_storage.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
-	#include <windows.h>
+	#include <universalis/os/include_windows_without_crap.hpp>
 #endif
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <eh.h>
 #endif
-
-#include "exceptions/code_description.hpp" // weird, must be included last or mingw 3.4.1 segfaults
 
 namespace universalis { namespace cpu {
 
@@ -41,25 +40,9 @@ namespace {
 				assert(code == exception_record.ExceptionCode);
 			#endif
 			switch(code) {
-				////////////////////
-				// things to ignore
-
-				case STATUS_BREAKPOINT: // [bohan] not sure what to do with break points...
+				case STATUS_BREAKPOINT: ///\todo [bohan] not sure what to do with break points...
 				case STATUS_SINGLE_STEP:
 					return;
-
-				/////////////////////////////
-				// floating point exceptions
-
-				case STATUS_FLOAT_INEXACT_RESULT:
-				case STATUS_FLOAT_DENORMAL_OPERAND:
-				case STATUS_FLOAT_UNDERFLOW:
-					return; // unimportant exception, continue the execution.
-
-				case STATUS_FLOAT_OVERFLOW:
-				case STATUS_FLOAT_STACK_CHECK:
-				case STATUS_FLOAT_DIVIDE_BY_ZERO:
-				case STATUS_FLOAT_INVALID_OPERATION:
 				default:
 					throw exception(code, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
@@ -101,45 +84,56 @@ namespace {
 	#endif
 }
 
-void exception::install_handler_in_thread() {
-	if(os::loggers::trace()()) {
-		std::ostringstream s;
-		s << "installing cpu/os exception handler in thread: name: " << os::thread_name::get();
-		os::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-	}
-	#if defined DIVERSALIS__OS__MICROSOFT
-		// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/seterrormode.asp
-		//::SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-			
-		#if defined DIVERSALIS__COMPILER__MICROSOFT
-			// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_crt__set_se_translator.asp
-			// In a multithreaded environment,
-			// translator functions are maintained separately for each thread.
-			// Each new thread needs to install its own translator function.
-			// Thus, each thread is in charge of its own translation handling.
-			// There is no default translator function.
-			// [bohan] This requires compilation with the asynchronous exception handling model (/EHa)
-			::_set_se_translator(structured_exception_translator);
-		#else
-			static bool once(false);
-			if(!once) {
-				///\todo review and test this
+namespace exceptions {
+	void install_handler_in_thread() {
+		if(os::loggers::trace()()) {
+			std::ostringstream s;
+			s << "installing cpu/os exception handler in thread: name: " << os::thread_name::get();
+			os::loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		}
+		#if defined DIVERSALIS__OS__MICROSOFT
+			// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/seterrormode.asp
+			//::SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+				
+			#if defined DIVERSALIS__COMPILER__MICROSOFT
+				// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vclib/html/_crt__set_se_translator.asp
+				// In a multithreaded environment,
+				// translator functions are maintained separately for each thread.
+				// Each new thread needs to install its own translator function.
+				// Thus, each thread is in charge of its own translation handling.
+				// There is no default translator function.
+				// [bohan] This requires compilation with the asynchronous exception handling model (/EHa)
+				::_set_se_translator(structured_exception_translator);
+			#else
+				static bool once(false);
+				if(!once) {
+					///\todo review and test this
 
-				///\todo why only once?
-				//once = true;
-				// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/setunhandledexceptionfilter.asp
-				thread_unhandled_exception_previous_filter = ::SetUnhandledExceptionFilter(unhandled_exception_filter);
+					///\todo why only once?
+					//once = true;
+					// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/debug/base/setunhandledexceptionfilter.asp
+					thread_unhandled_exception_previous_filter = ::SetUnhandledExceptionFilter(unhandled_exception_filter);
 
-				#if defined DIVERSALIS__COMPILER__GNU
-					// http://jrfonseca.dyndns.org/projects/gnu-win32/software/drmingw/index.html#exchndl
-					// loads dr mingw's unhandled exception handler.
-					// it does not matter if the library fails to load, we just won't have this intermediate handler.
-					if(::LoadLibraryA("exchndl")) os::loggers::information()("unhandled exception filter loaded");
-					else os::loggers::information()("unhandled exception filter has not been loaded");
-				#endif
-			}
+					#if defined DIVERSALIS__COMPILER__GNU
+						// http://jrfonseca.dyndns.org/projects/gnu-win32/software/drmingw/index.html#exchndl
+						// loads dr mingw's unhandled exception handler.
+						// it does not matter if the library fails to load, we just won't have this intermediate handler.
+						if(::LoadLibraryA("exchndl")) os::loggers::information()("unhandled exception filter loaded");
+						else os::loggers::information()("unhandled exception filter has not been loaded");
+					#endif
+				}
+			#endif
 		#endif
-	#endif
+	}
+
+	std::string desc(int const & code) throw() {
+		return os::exceptions::detail::desc(
+			code
+			#if defined DIVERSALIS__OS__MICROSOFT
+				, /* from_cpu */ true
+			#endif
+		);
+	}
 }
 
 }}

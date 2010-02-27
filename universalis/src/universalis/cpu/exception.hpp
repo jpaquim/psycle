@@ -8,23 +8,12 @@
 #pragma once
 
 #include <universalis/os/exception.hpp>
-#include <universalis/compiler/compiler.hpp>
-
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
 
 namespace universalis { namespace cpu {
 
 /// external cpu/os exception translated into a c++ one, with deferred querying of the human-readable message.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::os::exception {
+class UNIVERSALIS__DECL exception : public universalis::os::exception {
 	public:
-		/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
-		void static install_handler_in_thread();
-
-		/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
-		//UNIVERSALIS__COMPILER__DEPRECATED("set the thread name using universalis::os::thread_name");
-		void static inline install_handler_in_thread(std::string const &) { install_handler_in_thread(); }
-
 		#if defined NBEBUG
 			inline
 		#endif
@@ -36,8 +25,13 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception : public universalis::os::ex
 				#endif
 };
 
-}}
+namespace exceptions {
+	/// This should be called for and from any new thread created to enable cpu/os to c++ exception translation for that thread.
+	void UNIVERSALIS__DECL install_handler_in_thread();
 
-#include <universalis/compiler/dynamic_link/end.hpp>
+	std::string UNIVERSALIS__DECL desc(int const &) throw();
+}
+
+}}
 
 #endif
