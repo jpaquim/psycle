@@ -4,7 +4,7 @@
 #include "configuration.hpp"
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/audiodrivers/wavefileout.h>
-#include <psycle/core/file.h>
+#include <universalis/os/fs.hpp>
 #include <universalis/os/loggers.hpp>
 
 #if defined PSYCLE__SYDNEY_AVAILABLE
@@ -140,10 +140,10 @@ void Configuration::set_driver_by_name(std::string const & driver_name) {
 }
 
 void Configuration::loadConfig() {
-	std::string path = psycle::core::File::replaceTilde("~" + psycle::core::File::slash() + ".xpsycle.xml");
-	if(path.length()!=0) {
+	boost::filesystem::path const path(universalis::os::fs::home_app_local("psycle") / "config.xml");
+	if(boost::filesystem::exists(path)) {
 		try {
-			loadConfig( path );
+			loadConfig(path.file_string());
 		} catch( std::exception const & e ) {
 			if(loggers::exception()()) {
 				std::ostringstream s;
@@ -154,11 +154,11 @@ void Configuration::loadConfig() {
 	} else {
 		#if 0
 			#if defined PSYCLE__INSTALL_PATHS__CONFIGURATION
-				path = PSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
+				path = PSYCLE__INSTALL_PATHS__CONFIGURATION "/psycle/config.xml";
 			#endif
-			if(path.length()) {
+			if(boost::filesystem::exists(path)) {
 				try {
-					loadConfig(path);
+					loadConfig(path.file_string());
 				} catch(std::exception const & e) {
 					if(loggers::exception()()) {
 						std::ostringstream s;
