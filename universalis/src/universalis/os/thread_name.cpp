@@ -5,11 +5,10 @@
 #include <universalis/detail/project.private.hpp>
 #include "thread_name.hpp"
 #include "loggers.hpp"
+#include <universalis/compiler/thread_local_storage.hpp>
 #include <cassert>
 
 namespace universalis { namespace os {
-
-using namespace universalis::stdlib;
 
 ///\todo use pthread_setname_np() on posix if available.
 

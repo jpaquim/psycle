@@ -7,16 +7,13 @@
 #define UNIVERSALIS__OS__THREAD_NAME__INCLUDED
 #pragma once
 
-#include <universalis/compiler/compiler.hpp>
+#include <universalis/detail/project.hpp>
 #include <string>
-
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
 
 namespace universalis { namespace os {
 
 /// thread name
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread_name {
+class UNIVERSALIS__DECL thread_name {
 	public:
 		/// create an instance without setting any name yet
 		thread_name() : thread_name_() {}
@@ -42,7 +39,5 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread_name {
 };
 
 }}
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif

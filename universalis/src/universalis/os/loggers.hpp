@@ -8,7 +8,6 @@
 #pragma once
 
 #include "exception.hpp"
-#include <universalis/compiler/compiler.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/location.hpp>
 #include <boost/thread/mutex.hpp>
@@ -18,9 +17,6 @@
 #include <vector>
 #include <algorithm>
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
-
 namespace universalis { namespace os {
 
 namespace loggers {
@@ -28,7 +24,7 @@ namespace loggers {
 }
 		
 /// logger.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger {
+class UNIVERSALIS__DECL logger {
 	public:
 		virtual ~logger() throw() {}
 
@@ -48,7 +44,6 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK logger {
 namespace loggers {
 
 	/// logger which forwards to multiple loggers.
-	/// note: puting UNIVERSALIS__COMPILER__DYNAMIC_LINK at class level does not work for this class on msvc because of the static data member
 	class multiplex_logger : public logger, protected std::vector<logger*> {
 		public:
 			virtual ~multiplex_logger() throw() {}
@@ -56,30 +51,29 @@ namespace loggers {
 		///\name container operations
 		///\{
 			public:
-				UNIVERSALIS__COMPILER__DYNAMIC_LINK bool add   (logger       & logger);
-				UNIVERSALIS__COMPILER__DYNAMIC_LINK bool remove(logger const & logger);
+				UNIVERSALIS__DECL bool add   (logger       & logger);
+				UNIVERSALIS__DECL bool remove(logger const & logger);
 		///\}
 
 		protected:
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK void do_log(int const level, std::string const & message, compiler::location const &) throw() /* override pure */;
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK void do_log(int const level, std::string const &) throw() /* override pure */;
+			/*implement*/ UNIVERSALIS__DECL void do_log(int const level, std::string const & message, compiler::location const &) throw();
+			/*implement*/ UNIVERSALIS__DECL void do_log(int const level, std::string const &) throw();
 
 		///\name singleton
 		///\{
-			public:                                      multiplex_logger static & singleton() throw() { return singleton_; }
-			private: UNIVERSALIS__COMPILER__DYNAMIC_LINK multiplex_logger static   singleton_;
+			public:                    multiplex_logger static & singleton() throw() { return singleton_; }
+			private: UNIVERSALIS__DECL multiplex_logger static   singleton_;
 		///\}
 	};
 
 	/// logger which outputs to a stream.
-	/// note: puting UNIVERSALIS__COMPILER__DYNAMIC_LINK at class level does not work for this class on msvc because of the static data member
 	class stream_logger : public logger {
 		public:
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK stream_logger(std::ostream &);
+			stream_logger(std::ostream & ostream) : ostream_(ostream) {}
 
 		protected:
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK void do_log(int const level, std::string const & message, compiler::location const &) throw() /* override pure */;
-			UNIVERSALIS__COMPILER__DYNAMIC_LINK void do_log(int const level, std::string const &) throw() /* override pure */;
+			/*implement*/ UNIVERSALIS__DECL void do_log(int const level, std::string const & message, compiler::location const &) throw();
+			/*implement*/ UNIVERSALIS__DECL void do_log(int const level, std::string const &) throw();
 
 		///\name underlying stream
 		///\{
@@ -89,8 +83,8 @@ namespace loggers {
 
 		///\name default stream singleton
 		///\{
-			public:                                             logger static & default_logger() throw() { return default_logger_; }
-			private: UNIVERSALIS__COMPILER__DYNAMIC_LINK stream_logger static   default_logger_;
+			public:                           logger static & default_logger() throw() { return default_logger_; }
+			private: UNIVERSALIS__DECL stream_logger static   default_logger_;
 		///\}
 	};
 
@@ -168,7 +162,5 @@ namespace loggers {
 }
 
 }}
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif

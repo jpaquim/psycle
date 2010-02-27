@@ -1,31 +1,39 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net
 
-///\interface universalis::os::dynamic_link::resolver
+///\interface universalis::os::dyn_link::resolver
 
-#ifndef UNIVERSALIS__OS__DYNAMIC_LINK__RESOLVER__INCLUDED
-#define UNIVERSALIS__OS__DYNAMIC_LINK__RESOLVER__INCLUDED
+#ifndef UNIVERSALIS__OS__DYN_LINK__INCLUDED
+#define UNIVERSALIS__OS__DYN_LINK__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
 #include <boost/filesystem/path.hpp>
+#include <list>
 #include <string>
-#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__POSIX
-	//
-#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
-	#include <windows.h>
-#else
-	namespace Glib {
-		class Module;
-	}
-#endif
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__POSIX
+	// no include needed
+#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
+	#include "include_windows_without_crap.hpp"
+#else
+	namespace Glib { class Module; }
+#endif
 
 namespace universalis { namespace os {
 /// handling of dynamic shared libraries.
-namespace dynamic_link {
+namespace dyn_link {
+
+/// a list of paths
+typedef std::list<boost::filesystem::path> path_list_type;
+
+/// gets the library path list from the environment variable
+UNIVERSALIS__DECL
+path_list_type lib_path();
+
+/// sets the library path environment variable to the specified path list
+UNIVERSALIS__DECL
+void lib_path(path_list_type const & new_path);
 
 /// resolves symbol names in a dynamic shared library.
 class resolver {
@@ -40,25 +48,26 @@ class resolver {
 		/// contained in this library before closing (that is, unloading) it.
 		///\throws exception if there is an error trying to open the library file.
 		///\post opened()
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK
+		UNIVERSALIS__DECL
 		resolver(boost::filesystem::path const & path, unsigned int const & version);
 
 		/// wether the underlying library is opened and loaded/mapped.
 		///\returns true if the underlying library is opened and loaded/mapped
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK
-		bool opened() const throw();
+		UNIVERSALIS__DECL
+		bool opened() const;
 
 		/// the full path to the file of the underlying library.
 		///\pre opened()
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK
-		boost::filesystem::path path() const throw();
+		UNIVERSALIS__DECL
+		boost::filesystem::path path() const;
 
 		/// resolves a symbol name in the library to an address in memory.
 		///\name the symbol name in the library to resolve to an address in memory.
 		///\returns the address in memory of the code or data represented by the given symbol name.
 		///\throws exception if there is an error trying to resolve the symbol.
 		///\pre opened()
-		template<typename X> X const inline resolve_symbol(std::string const & name) const {
+		template<typename X>
+		X const resolve_symbol(std::string const & name) const {
 			return reinterpret_cast<X>(resolve_symbol_untyped(name));
 		}
 
@@ -69,11 +78,11 @@ class resolver {
 		/// contained in this library before closing (that is, unloading/unmapping) it.
 		///\throws exception if there is an error trying to unload the library or close the library file.
 		///\post !opened()
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK
+		UNIVERSALIS__DECL
 		void close();
 
 		/// will implicitely close() if opened().
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK
+		UNIVERSALIS__DECL
 		virtual ~resolver() throw();
 
 	private:
@@ -86,6 +95,7 @@ class resolver {
 		boost::filesystem::path static decorated_filename(boost::filesystem::path const & path, unsigned int const & version) throw();
 		/// abi/compiler-specific
 		std::string static decorated_symbol(std::string const & name) throw();
+
 		/// os-specific
 		#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__POSIX
 			boost::filesystem::path const path_;
@@ -99,7 +109,5 @@ class resolver {
 };
 
 }}}
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif

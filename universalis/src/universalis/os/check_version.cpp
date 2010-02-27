@@ -5,11 +5,10 @@
 ///\implementation universalis::os::detail::check_version
 #include <universalis/detail/project.private.hpp>
 #include "check_version.hpp"
-#include "../loggers.hpp"
-#include "../exception.hpp"
-#include "../exceptions/code_description.hpp"
+#include "loggers.hpp"
+#include "exception.hpp"
 #if defined DIVERSALIS__OS__MICROSOFT
-	#include <windows.h>
+	#include "include_windows_without_crap.hpp"
 	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 		#pragma comment(lib, "user32") // for the MessageBox function
 	#endif
@@ -73,7 +72,7 @@ void check_version() throw(universalis::exception) {
 						s << "Your operating system did not want to report its version. Bailing out.";
 						loggers::exception()("error: " + s.str());
 						::MessageBoxA(0, s.str().c_str(), "Operating system version error", MB_ICONERROR);
-						throw exceptions::runtime_error(s.str() + exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+						throw exceptions::runtime_error(s.str() + exceptions::desc(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					}
 					if(loggers::information()()) {
 						std::ostringstream s;

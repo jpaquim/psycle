@@ -1,11 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation universalis::os::paths
-#include "paths.hpp"
-#include <universalis/os/exception.hpp>
-#include <universalis/os/exceptions/code_description.hpp>
-#include <universalis/os/detail/microsoft/max_path.hpp>
+///\implementation universalis::os::fs
+
+#include <universalis/detail/project.private.hpp>
+#include "fs.hpp"
+#include "exception.hpp"
 #include <cstdlib> // std::getenv for user's home dir
 #include <sstream>
 #include <iostream>
@@ -13,7 +13,7 @@
 	#include <shlobj.h> // for SHGetFolderPath
 #endif
 
-namespace universalis { namespace os { namespace paths {
+namespace universalis { namespace os { namespace fs {
 
 path const & process_executable_file_path() {
 	struct once {
@@ -25,7 +25,7 @@ path const & process_executable_file_path() {
 						///\todo the following is making link error on mingw
 						//exceptions::runtime_error(exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 						std::runtime_error("could not get filename of program module");
-				return path(module_file_name, no_check); // native yells when there are spaces
+				return path(module_file_name);
 			#else
 				///\todo use binreloc
 				throw std::runtime_error("unimplemented");
@@ -54,8 +54,10 @@ path const & home() {
 					//exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					std::runtime_error(s.str());
 			}
-			return path(e, no_check); // native yells when there are spaces
-			#if 0
+			return path(e);
+			#if 1
+				///\todo use SHGetFolderPath
+			#elif 0
 				// first check UserProfile
 				char const * const user_profile(std::getenv("UserProfile"));
 				if(user_profile) return user_profile;
@@ -96,16 +98,12 @@ path const & home() {
 }
 
 path const & home_app_local(std::string const & app_name) {
-	path const static once(
-		home() / path("." + app_name, portable_posix_name)
-	);
+	path const static once(home() / path("." + app_name));
 	return once;
 }
 
 path const & home_app_roaming(std::string const & app_name) {
-	path const static once(
-		home() / path("." + app_name, portable_posix_name)
-	);
+	path const static once(home() / path("." + app_name));
 	return once;
 }
 

@@ -13,13 +13,10 @@
 #include <boost/thread/mutex.hpp>
 #include <string>
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
-
 namespace universalis { namespace os {
 
 /// terminal.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK terminal {
+class UNIVERSALIS__DECL terminal {
 	public:
 		terminal() throw(exception);
 		virtual ~terminal() throw();
@@ -32,7 +29,5 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK terminal {
 };
 
 }}
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif

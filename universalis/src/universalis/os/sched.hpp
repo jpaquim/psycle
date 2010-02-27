@@ -11,7 +11,7 @@
 #if defined DIVERSALIS__OS__POSIX
 	#include <pthread.h>
 #elif defined DIVERSALIS__OS__MICROSOFT
-	#include <windows.h>
+	#include "include_windows_without_crap.hpp"
 #else
 	#error unsupported operating system
 #endif
@@ -19,13 +19,10 @@
 	#include <sstream>
 #endif
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
-
 namespace universalis { namespace os { namespace sched {
 
 /// cpu affinity mask
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK affinity_mask {
+class UNIVERSALIS__DECL affinity_mask {
 	public:
 		/// initialises a zeroed-out mask
 		affinity_mask();
@@ -58,7 +55,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK affinity_mask {
 };
 
 /// process
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
+class UNIVERSALIS__DECL process {
 	public:
 		/// native handle type
 		typedef
@@ -141,7 +138,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK process {
 };
 
 /// thread
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
+class UNIVERSALIS__DECL thread {
 	public:
 		/// native handle type
 		typedef
@@ -281,7 +278,5 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK thread {
 #endif
 
 }}}
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif

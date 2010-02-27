@@ -63,8 +63,6 @@ void multiplex_logger::do_log(int const level, std::string const & string) throw
 
 stream_logger stream_logger::default_logger_(std::cout /* std::clog is unbuffered by default, this can be changed at runtime tho */);
 
-stream_logger::stream_logger(std::ostream & ostream) : ostream_(ostream) {}
-
 namespace {
 	// Here we assume we have an ansi terminal if the TERM env var is defined.
 	bool const ansi_terminal(std::getenv("TERM"));

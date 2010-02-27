@@ -8,7 +8,7 @@
 namespace universalis { namespace exceptions {
 
 runtime_error::runtime_error(std::string const & what, compiler::location const & location, void const * cause) throw()
-: std::runtime_error(what), locatable(location), causality(cause)
+: std::runtime_error(what), locatable(location), nested(cause)
 {
 	if(os::loggers::trace()()) {
 		std::ostringstream s;
