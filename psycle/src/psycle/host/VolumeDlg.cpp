@@ -3,8 +3,9 @@
 
 #include "VolumeDlg.hpp"
 #include <cmath>
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
 		CVolumeDlg::CVolumeDlg(CWnd* pParent) : CDialog(CVolumeDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CVolumeDlg)

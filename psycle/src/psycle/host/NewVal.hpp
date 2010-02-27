@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CNewVal.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		/// parameter value window.
 		class CNewVal : public CDialog

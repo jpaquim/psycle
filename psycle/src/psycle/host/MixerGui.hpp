@@ -4,25 +4,23 @@
 #include "EffectGui.hpp"
 #include "Psycle.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 		
-		class CFrameMixerMachine;
+class CFrameMixerMachine;
 
-		class MixerGui : public EffectGui {
-		public:
-			MixerGui(class MachineView* view, psycle::core::Machine* mac);
-			~MixerGui();
+class MixerGui : public EffectGui {
+	public:
+		MixerGui(class MachineView* view, psycle::core::Machine* mac);
+		~MixerGui();
 
-			virtual void BeforeDeleteDlg();
-			void UpdateVU(CDC* devc);
+		virtual void BeforeDeleteDlg();
+		void UpdateVU(CDC* devc);
 
-		protected:
-			virtual void ShowDialog(double x, double y);
+	protected:
+		virtual void ShowDialog(double x, double y);
 
-		private:
-			class CFrameMixerMachine* dialog_;
-		};
+	private:
+		class CFrameMixerMachine* dialog_;
+};
 
-	}	// namespace host
-}	// namespace psycle
+}}

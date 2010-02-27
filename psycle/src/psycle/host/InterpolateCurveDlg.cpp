@@ -7,8 +7,6 @@
 
 namespace psycle { namespace host {
 
-using namespace helpers;
-
 		CInterpolateCurve::CInterpolateCurve(int startsel, int endsel,int _linesperbeat,CWnd* pParent)
 			: CDialog(CInterpolateCurve::IDD, pParent)
 			, startIndex(startsel)

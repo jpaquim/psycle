@@ -1,7 +1,7 @@
 #pragma once
 #include "configuration_options.hpp"
 #include <diversalis/compiler.hpp> // to test whether this is a resource compiler (DIVERSALIS__COMPILER__RESOURCE)
-#include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
+#include <universalis/compiler/stringize.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZE)
 
 ///\file
 ///\brief the version number of the psycle host application.
@@ -24,20 +24,21 @@
 #define PSYCLE__TAR_NAME "psycle"
 #define PSYCLE__NAME "Psycle Modular Music Creation Studio"
 #define PSYCLE__BRANCH "Psycledelics"
-#define PSYCLE__COPYRIGHT "Copyright 2000-2009 Psycledelics ( http://psycle.pastnotecut.org and http://psycle.sourceforge.net )"
-#define PSYCLE__LICENSE "none, public domain"
+#define PSYCLE__COPYRIGHT "Copyright 2000-2010 Psycledelics ( http://psycle.pastnotecut.org and http://psycle.sourceforge.net )"
+#define PSYCLE__LICENSE "Some parts GPL, others public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH 9
 #define PSYCLE__VERSION__QUALITY "alpha"
 #define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$" // $Date$
+#define PSYCLE__VERSION__SOURCE_URL "Subversion $URL$"
 
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
 	PSYCLE__BRANCH " " \
-	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." \
-	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR) "." \
-	UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__PATCH) " " \
+	UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MAJOR) "." \
+	UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MINOR) "." \
+	UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__PATCH) " " \
 	"(" PSYCLE__VERSION__SOURCE_REVISION ") " \
 	PSYCLE__VERSION__QUALITY
 
@@ -57,7 +58,7 @@
 #if defined DIVERSALIS__COMPILER__RESOURCE // if this is a resource compiler
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
 
-	#define RC__CompanyName PSYCLE__BRANCH "\r\n" "Subversion $URL$"
+	#define RC__CompanyName PSYCLE__BRANCH "\r\n" PSYCLE__VERSION__SOURCE_URL
 	#define RC__LegalCopyright PSYCLE__COPYRIGHT
 	#define RC__License PSYCLE__LICENSE
 

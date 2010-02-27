@@ -2,8 +2,9 @@
 ///\brief implementation file for psycle::host::CWaveEdCrossfadeDialog.
 #include "WaveEdCrossfadeDialog.hpp"
 #include <iomanip>
-namespace psycle {
-namespace host {
+
+namespace psycle { namespace host {
+
 		CWaveEdCrossfadeDialog::CWaveEdCrossfadeDialog(CWnd* pParent)
 			: CDialog(CWaveEdCrossfadeDialog::IDD, pParent)
 		{

@@ -5,8 +5,8 @@
 #include "InputHandler.hpp"
 #include "Configuration.hpp"
 #include "SpecialKeys.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
 

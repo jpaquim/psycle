@@ -3,8 +3,8 @@
 #pragma once
 #include "Psycle.hpp"
 #include <afxwin.h>
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 	class CInterpolateCurve : public CDialog
 	{

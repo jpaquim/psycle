@@ -6,8 +6,6 @@
 
 #include <psycle/core/patternevent.h>
 
-#include <diversalis/compiler.hpp>
-
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
@@ -22,13 +20,7 @@
 	#pragma warning(pop)
 #endif
 
-#include <universalis/stdlib/cstdint.hpp>
-
-#include <cassert>
-
 namespace psycle { namespace host {
-
-using namespace core;
 
 		#define MAX_MIDI_CHANNELS 16
 		#define MAX_CONTROLLERS   127

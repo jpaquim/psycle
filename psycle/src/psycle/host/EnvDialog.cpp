@@ -6,8 +6,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		CEnvDialog::CEnvDialog(CWnd* pParent)
 			: CDialog(CEnvDialog::IDD, pParent)
 		{

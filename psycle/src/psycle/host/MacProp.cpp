@@ -13,8 +13,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-		
 		BEGIN_MESSAGE_MAP(CMacProp, CDialog)
 			ON_EN_CHANGE(IDC_EDIT1, OnChangeEdit1)
 			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)

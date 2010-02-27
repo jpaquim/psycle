@@ -12,9 +12,6 @@
 
 namespace psycle { namespace host {
 
-using helpers::hexstring_to_integer;
-using namespace core;
-
 		CInstrumentEditor::CInstrumentEditor(ProjectData* projects, CMainFrame* parent)
 			: CDialog(CInstrumentEditor::IDD, 0),
 			  projects_(projects),

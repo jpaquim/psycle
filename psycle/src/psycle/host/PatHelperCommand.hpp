@@ -4,32 +4,28 @@
 #include "Command.hpp"
 #include <psycle/core/pattern.h>
 
-// This class offers help to prepare undo/redo storage for patternview commands
-// It prepares the undo doing a copy of the pattern
-// Operations, that could be more memory efficient implemented,
-// should use their own undo/redo prepare
+namespace psycle { namespace host {
 
-namespace psycle {
-	namespace host {
+/// This class offers help to prepare undo/redo storage for patternview commands
+/// It prepares the undo doing a copy of the pattern
+/// Operations, that could be more memory efficient implemented,
+/// should use their own undo/redo prepare
+class PatHelperCommand : public CommandUndoable {
+	public:
+		PatHelperCommand(class PatternView* pat_view) : pat_view_(pat_view) {}
 
-		class PatHelperCommand : public CommandUndoable {
-		public:
-			PatHelperCommand(class PatternView* pat_view);
-			~PatHelperCommand();
+		virtual void Undo();
+		virtual void Redo();
 
-			virtual void Undo();
-			virtual void Redo();
+	protected:
+		void PrepareUndoStorage();
+		void PrepareRedoStorage();
+		PatternView* pat_view() { return pat_view_; }
 
-		protected:
-			void PrepareUndoStorage();
-			void PrepareRedoStorage();
-			PatternView* pat_view() { return pat_view_; }
+	private:
+		PatternView* pat_view_;
+		Pattern prev_pattern_;
+		Pattern next_pattern_;
+};
 
-		private:
-			PatternView* pat_view_;
-			psycle::core::Pattern prev_pattern_;
-			psycle::core::Pattern next_pattern_;
-		};
-
-	}	// namespace host
-}	// namespace psycle
+}}

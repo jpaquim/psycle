@@ -11,28 +11,24 @@
 
 #include <psycle/core/sequence.h>
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		class SeqHelperCommand : public CommandUndoable {
-		public:
-			SeqHelperCommand(class SequencerView* pat_view);
-			~SeqHelperCommand();
+class SeqHelperCommand : public CommandUndoable {
+	public:
+		SeqHelperCommand(class SequencerView* pat_view);
 
-			virtual void Undo();
-			virtual void Redo();
+		virtual void Undo();
+		virtual void Redo();
 
-		protected:
-			void PrepareUndoStorage();
-			void PrepareRedoStorage();
-			SequencerView* seq_view() { return seq_view_; }
+	protected:
+		void PrepareUndoStorage();
+		void PrepareRedoStorage();
+		SequencerView* seq_view() { return seq_view_; }
 
-		private:
-			SequencerView* seq_view_;
-			psycle::core::SequenceLine prev_line_;
-			psycle::core::SequenceLine next_line_;
+	private:
+		SequencerView* seq_view_;
+		psycle::core::SequenceLine prev_line_;
+		psycle::core::SequenceLine next_line_;
+};
 
-		};
-
-	}	// namespace host
-}	// namespace psycle
+}}

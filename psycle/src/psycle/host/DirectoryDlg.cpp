@@ -3,8 +3,8 @@
 
 #include "DirectoryDlg.hpp"
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		IMPLEMENT_DYNCREATE(CDirectoryDlg, CPropertyPage)
 

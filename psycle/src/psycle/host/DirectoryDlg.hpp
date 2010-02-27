@@ -4,8 +4,8 @@
 
 #include "Psycle.hpp"
 #include <afxwin.h>
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		/// directory config window.
 		class CDirectoryDlg : public CPropertyPage

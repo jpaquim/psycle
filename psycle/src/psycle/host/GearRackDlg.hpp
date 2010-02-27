@@ -3,8 +3,8 @@
 #pragma once
 #include "Psycle.hpp"
 #include "ChildView.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		/// gear rack window.
 		class CGearRackDlg : public CDialog

@@ -3,13 +3,9 @@
 #pragma once
 #include "Psycle.hpp"
 #include "configuration_options.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/audiodrivers/audiodriver.h>
-#else
-	#include "AudioDriver.hpp"
-#endif
-namespace psycle {
-	namespace host {
+#include <psycle/audiodrivers/audiodriver.h>
+
+namespace psycle { namespace host {
 
 		/// audio device output config window.
 		class COutputDlg : public CPropertyPage
@@ -32,11 +28,7 @@ namespace psycle {
 			int _numDrivers;
 			int _numMidiDrivers;
 			int m_midiHeadroom;	
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::audiodrivers::AudioDriver** m_ppDrivers;
-#else
-			AudioDriver** m_ppDrivers;
-#endif
+			audiodrivers::AudioDriver** m_ppDrivers;
 		private:
 			int m_oldDriverIndex;
 			int m_oldMidiDriverIndex;

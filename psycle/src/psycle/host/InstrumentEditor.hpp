@@ -3,8 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
 		class CMainFrame;
 

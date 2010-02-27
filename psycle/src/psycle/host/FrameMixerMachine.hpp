@@ -5,14 +5,10 @@
 #include "FrameMachine.hpp"
 
 namespace psycle {
-
 namespace core {
 	class Mixer;
 }
-
 namespace host {
-	using namespace core;
-
 
 	/// mixer window.
 	class CFrameMixerMachine : public CFrameMachine

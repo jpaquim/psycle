@@ -2,12 +2,10 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-	namespace core {
-		class XMSampler;
-	}
-
-	namespace host {
-		using namespace core;
+namespace core {
+	class XMSampler;
+}
+namespace host {
 
 // Cuadro de diálogo de XMSamplerMixerPage
 class XMSamplerMixerPage : public CPropertyPage

@@ -7,10 +7,9 @@
 
 #include <psycle/core/pattern.h>
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		CPatDlg::CPatDlg(CWnd* pParent, psycle::core::Pattern* pattern)
+		CPatDlg::CPatDlg(CWnd* pParent, Pattern* pattern)
 			:  CDialog(CPatDlg::IDD, pParent),
 			   pattern_(pattern) {
 			//{{AFX_DATA_INIT(CPatDlg)

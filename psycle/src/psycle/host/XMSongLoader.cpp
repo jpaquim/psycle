@@ -1,8 +1,3 @@
-/** @file 
- *  @brief implementation file
- *  $Date$
- *  $Revision$
- */
 #include "XMSongLoader.hpp"
 
 #include "ProgressDialog.hpp"
@@ -23,56 +18,45 @@
    static char THIS_FILE[] = __FILE__;
 #endif
 
-namespace psycle {
-	namespace host{
+namespace psycle { namespace host {
 	
-	const short MODSongLoader::BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine
-	{
+	int16_t const MODSongLoader::BIGMODPERIODTABLE[37 * 8] = { // (12note * 3oct + 1note) * 8fine
 		907,900,894,887,881,875,868,862,856,850,844,838,832,826,820,814,
-			808,802,796,791,785,779,774,768,762,757,752,746,741,736,730,725,
-			720,715,709,704,699,694,689,684,678,675,670,665,660,655,651,646,
-			640,636,632,628,623,619,614,610,604,601,597,592,588,584,580,575,
-			570,567,563,559,555,551,547,543,538,535,532,528,524,520,516,513,
-			508,505,502,498,494,491,487,484,480,477,474,470,467,463,460,457,
-			453,450,447,444,441,437,434,431,428,425,422,419,416,413,410,407,
-			404,401,398,395,392,390,387,384,381,379,376,373,370,368,365,363,
-			360,357,355,352,350,347,345,342,339,337,335,332,330,328,325,323,
-			320,318,316,314,312,309,307,305,302,300,298,296,294,292,290,288,
-			285,284,282,280,278,276,274,272,269,268,266,264,262,260,258,256,
-			254,253,251,249,247,245,244,242,240,239,237,235,233,232,230,228,
-			226,225,224,222,220,219,217,216,214,212,211,209,208,206,205,203,
-			202,200,199,198,196,195,193,192,190,189,188,187,185,184,183,181,
-			180,179,177,176,175,174,172,171,170,169,167,166,165,164,163,161,
-			160,159,158,157,156,155,154,152,151,150,149,148,147,146,145,144,
-			143,142,141,140,139,138,137,136,135,134,133,132,131,130,129,128,
-			127,126,125,125,123,123,122,121,120,119,118,118,117,116,115,114,
-			113,113,112,111,110,109,109,108
+		808,802,796,791,785,779,774,768,762,757,752,746,741,736,730,725,
+		720,715,709,704,699,694,689,684,678,675,670,665,660,655,651,646,
+		640,636,632,628,623,619,614,610,604,601,597,592,588,584,580,575,
+		570,567,563,559,555,551,547,543,538,535,532,528,524,520,516,513,
+		508,505,502,498,494,491,487,484,480,477,474,470,467,463,460,457,
+		453,450,447,444,441,437,434,431,428,425,422,419,416,413,410,407,
+		404,401,398,395,392,390,387,384,381,379,376,373,370,368,365,363,
+		360,357,355,352,350,347,345,342,339,337,335,332,330,328,325,323,
+		320,318,316,314,312,309,307,305,302,300,298,296,294,292,290,288,
+		285,284,282,280,278,276,274,272,269,268,266,264,262,260,258,256,
+		254,253,251,249,247,245,244,242,240,239,237,235,233,232,230,228,
+		226,225,224,222,220,219,217,216,214,212,211,209,208,206,205,203,
+		202,200,199,198,196,195,193,192,190,189,188,187,185,184,183,181,
+		180,179,177,176,175,174,172,171,170,169,167,166,165,164,163,161,
+		160,159,158,157,156,155,154,152,151,150,149,148,147,146,145,144,
+		143,142,141,140,139,138,137,136,135,134,133,132,131,130,129,128,
+		127,126,125,125,123,123,122,121,120,119,118,118,117,116,115,114,
+		113,113,112,111,110,109,109,108
 	};
 
-
-	XMSongLoader::XMSongLoader(void)
-	{
-		for (int i=0; i<32; i++)
-		{
-			highOffset[i]=0;
-			memPortaUp[i]=0;
-			memPortaDown[i]=0;
-			memPortaNote[i]=0;
-			memPortaPos[i]=0;
+	XMSongLoader::XMSongLoader() {
+		for(int i = 0; i < 32; ++i) {
+			highOffset[i] = 0;
+			memPortaUp[i] = 0;
+			memPortaDown[i] = 0;
+			memPortaNote[i] = 0;
+			memPortaPos[i] = 0;
 		}
-		for (int i=0; i<256; i++)
-		{
-			smpLen[i]=0;
-			smpFlags[i]=0;
+		for(int i = 0; i < 256; ++i) {
+			smpLen[i] = 0;
+			smpFlags[i] = 0;
 		}
 	}
 
-	XMSongLoader::~XMSongLoader(void)
-	{
-
-	}
-	void XMSongLoader::LoadInstrumentFromFile(XMSampler & sampler, const int idx)
-	{
+	void XMSongLoader::LoadInstrumentFromFile(XMSampler & sampler, const int idx) {
 		XMINSTRUMENTFILEHEADER fileheader;
 
 		ReadHeader(fileheader);
@@ -152,8 +136,7 @@ namespace psycle {
 		delete[] sRemap;
 	}
 
-	void XMSongLoader::Load(Song& song,const bool fullopen)
-	{
+	void XMSongLoader::Load(Song& song, const bool fullopen) {
 		// check validity
 		if(!IsValid()){
 			return;
@@ -181,9 +164,7 @@ namespace psycle {
 		song.SetReady(true);
 	}
 
-	const bool XMSongLoader::IsValid()
-	{			
-
+	bool XMSongLoader::IsValid() {			
 		bool bIsValid = false;
 		
 		// get header
@@ -212,8 +193,7 @@ namespace psycle {
 		return bIsValid;
 	}
 
-	const long XMSongLoader::LoadPatterns(Song & song)
-	{
+	int XMSongLoader::LoadPatterns(Song & song) {
 		// get data
 		Seek(60);
 		ReadHeader(m_Header);
@@ -244,8 +224,7 @@ namespace psycle {
 	}
 
 	// Load instruments
-	const bool XMSongLoader::LoadInstruments(XMSampler & sampler, std::int32_t iInstrStart)
-	{	
+	bool XMSongLoader::LoadInstruments(XMSampler & sampler, std::int32_t iInstrStart) {	
 		int currentSample=0;
 		for(int i = 1;i <= m_iInstrCnt;i++){
 			iInstrStart = LoadInstrument(sampler,iInstrStart,i,currentSample);
@@ -254,8 +233,7 @@ namespace psycle {
 		return true;
 	}
 
-	char * XMSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start)
-	{
+	char * XMSongLoader::AllocReadStr(const int32_t size, const int32_t start) {
 		// allocate space
 		char *pData = new char[size + 1];
 		if(pData==NULL)
@@ -276,13 +254,8 @@ namespace psycle {
 		return NULL;
 	}
 
-
-
-
-
 	// return address of next pattern, 0 for invalid
-	const std::int32_t XMSongLoader::LoadPattern(Song & song, const std::int32_t start,const int patIdx,const int iTracks)
-	{
+	int32_t XMSongLoader::LoadPattern(Song & song, const std::int32_t start,const int patIdx,const int iTracks) {
 		int iHeaderLen = ReadInt4(start);
 		Skip(1); //char iPackingType = ReadInt1();
 		short iNumRows = ReadInt2();
@@ -728,8 +701,7 @@ namespace psycle {
 
 	}
 
-	const std::int32_t XMSongLoader::LoadInstrument(XMSampler & sampler, std::int32_t iStart, const int idx,int &curSample)
-	{
+	int32_t XMSongLoader::LoadInstrument(XMSampler & sampler, std::int32_t iStart, const int idx,int &curSample) {
 		Seek(iStart);
 
 		// read header
@@ -812,8 +784,7 @@ namespace psycle {
 		return iStart;
 	}
 
-	const std::int32_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, std::int32_t iStart, const int iInstrIdx, const int iSampleIdx)
-	{
+	int32_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, int32_t iStart, const int iInstrIdx, const int iSampleIdx) {
 		// get sample header
 		Seek(iStart);
 		int iLen = ReadInt4();
@@ -840,43 +811,35 @@ namespace psycle {
 	
 		// alloc wave memory
 
-		ASSERT(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
+		assert(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
 
 		XMInstrument::WaveData& _wave = m_pSong->SampleData(iSampleIdx);
 		
 		_wave.Init();
-		if ( iLen > 0 ) // Sounds Stupid, but it isn't. Some modules save sample header when there is no sample.
-		{
+		if(iLen > 0) { // Sounds Stupid, but it isn't. Some modules save sample header when there is no sample.
 			_wave.AllocWaveData(b16Bit?iLen / 2:iLen,false);
 			_wave.WaveLength(b16Bit?iLen / 2:iLen);
 		}
 		else _wave.WaveLength(0);
 		_wave.PanEnabled(true);
 		_wave.PanFactor(iPanning/255.0f);
-//		XMInstrument::WaveData& _data = sampler.Instrument(iInstrIdx).rWaveData(0).
-//		sampler.Instrument(iInstrIdx).rWaveData()..Name() = sName;
+		//XMInstrument::WaveData& _data = sampler.Instrument(iInstrIdx).rWaveData(0).
+		//sampler.Instrument(iInstrIdx).rWaveData()..Name() = sName;
 		
-		if(bLoop)
-		{
+		if(bLoop) {
 			if(bPingPong){
 				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::BIDI);
-			}else {
+			} else {
 				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
-		
-			if(b16Bit)
-			{
+			if(b16Bit) {
 				_wave.WaveLoopStart(iLoopStart / 2);
 				_wave.WaveLoopEnd((iLoopLength  + iLoopStart )/ 2);
-			}
-			else
-			{
+			} else {
 				_wave.WaveLoopStart(iLoopStart);
 				_wave.WaveLoopEnd(iLoopLength + iLoopStart);
 			}
-			
-//			TRACE2("l:%x s:%x e:%x \n",_wave.WaveLength(),_wave.WaveLoopStart(),_wave.WaveLoopEnd()); 
-
+			//TRACE2("l:%x s:%x e:%x \n",_wave.WaveLength(),_wave.WaveLoopStart(),_wave.WaveLoopEnd()); 
 		} else {
 			_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
 		}
@@ -893,11 +856,9 @@ namespace psycle {
 		smpFlags[iSampleIdx] = iFlags;
 
 		return iStart + 40;
-
 	}
 
-	const std::int32_t XMSongLoader::LoadSampleData(XMSampler & sampler, std::int32_t iStart,const int iInstrIdx,const int iSampleIdx)
-	{
+	int32_t XMSongLoader::LoadSampleData(XMSampler & sampler, std::int32_t iStart,const int iInstrIdx,const int iSampleIdx) {
 		// parse
 		
 		BOOL b16Bit = smpFlags[iSampleIdx] & 0x10;
@@ -913,22 +874,17 @@ namespace psycle {
 		int sampleCnt = smpLen[iSampleIdx];
 
 		// unpack sample data
-		if(b16Bit)
-		{				
+		if(b16Bit) {				
 			// 16 bit mono sample, delta
 			int out=0;
-			for(int j=0;j<sampleCnt;j+=2)
-			{
+			for(int j = 0; j < sampleCnt; j += 2) {
 				wNew += 0xFF & smpbuf[j] | smpbuf[j+1]<<8;				
 				*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
 				out++;
 			}   
-		}
-		else
-		{
+		} else {
 			// 8 bit mono sample
-			for(int j=0;j<sampleCnt;j++)
-			{			
+			for(int j = 0; j < sampleCnt; ++j) {			
 				wNew += (smpbuf[j]<<8);// | char(rand())); // scale + dither
 				*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew;
 			}
@@ -941,10 +897,8 @@ namespace psycle {
 		iStart += smpLen[iSampleIdx];
 		return iStart;
 	}
-
 	
-	void XMSongLoader::SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader)
-	{
+	void XMSongLoader::SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader) {
 		// volume envelope
 		inst.AmpEnvelope()->Init();
 		if(sampleHeader.vtype & 1){// enable volume envelope
@@ -971,13 +925,11 @@ namespace psycle {
 			if(sampleHeader.vtype & 2){
 				inst.AmpEnvelope()->SustainBegin(sampleHeader.vsustain);
 				inst.AmpEnvelope()->SustainEnd(sampleHeader.vsustain);
-			}
-			else
-			{
+			} else {
 				// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
 				// IT also sets the Sustain points to the end of the envelope, but i can't see a reason for this to be needed.
-//				inst.AmpEnvelope()->SustainBegin(inst.AmpEnvelope()->NumOfPoints()-1);
-//				inst.AmpEnvelope()->SustainEnd(inst.AmpEnvelope()->NumOfPoints()-1);
+				//inst.AmpEnvelope()->SustainBegin(inst.AmpEnvelope()->NumOfPoints()-1);
+				//inst.AmpEnvelope()->SustainEnd(inst.AmpEnvelope()->NumOfPoints()-1);
 			}
 
 			
@@ -989,14 +941,12 @@ namespace psycle {
 				// if loopstart >= loopend, Fasttracker ignores the loop!.
 				// We can't ignore them because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
 				else {
-//					inst.AmpEnvelope()->LoopStart(XMInstrument::Envelope::INVALID);
-//					inst.AmpEnvelope()->LoopEnd(XMInstrument::Envelope::INVALID);
+					//inst.AmpEnvelope()->LoopStart(XMInstrument::Envelope::INVALID);
+					//inst.AmpEnvelope()->LoopEnd(XMInstrument::Envelope::INVALID);
 					inst.AmpEnvelope()->LoopStart(inst.AmpEnvelope()->NumOfPoints()-1);
 					inst.AmpEnvelope()->LoopEnd(inst.AmpEnvelope()->NumOfPoints()-1);
 				}
-			}
-			else
-			{
+			} else {
 				// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
 				inst.AmpEnvelope()->LoopStart(inst.AmpEnvelope()->NumOfPoints()-1);
 				inst.AmpEnvelope()->LoopEnd(inst.AmpEnvelope()->NumOfPoints()-1);
@@ -1043,30 +993,11 @@ namespace psycle {
 
 	}	
 
-
-
-
-
-
-
-
-	
-	MODSongLoader::MODSongLoader(void)
-	{
-		for (int i=0; i<32; i++)
-		{
-			smpLen[i]=0;
-		}
+	MODSongLoader::MODSongLoader(void) {
+		for(int i = 0; i < 32; ++i) smpLen[i] = 0;
 	}
 
-	MODSongLoader::~MODSongLoader(void)
-	{
-
-	}
-
-	void MODSongLoader::Load(Song& song,const bool fullopen)
-	{
-
+	void MODSongLoader::Load(Song& song,const bool fullopen) {
 		// check validity
 		if(!IsValid()){
 			return;
@@ -1116,11 +1047,7 @@ namespace psycle {
 		else if ( !stricmp(pID,"M!K!")) { song.setTracks(4); }
 		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.setTracks(atoi(tmp)); volume= 0.5f; }
 		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.setTracks(atoi(tmp)); volume = 0.35f; }
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,volume);
-#else
-		song.InsertConnection(0,MASTER_INDEX,0,0,volume);
-#endif
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
 
@@ -1130,18 +1057,14 @@ namespace psycle {
 			else m_pSampler->rChannel(i).DefaultPanFactorFloat(0.75,true);
 		}
 
-
 		LoadPatterns(song);
 		for(int i = 0;i < 31;i++){
 			LoadInstrument(*m_pSampler,i);
 		}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.SetReady(true);
-#endif
 	}
 
-	const bool MODSongLoader::IsValid()
-	{
+	bool MODSongLoader::IsValid() {
 		bool bIsValid = false;
 		char *pID = AllocReadStr(4,1080);
 
@@ -1154,8 +1077,7 @@ namespace psycle {
 		return bIsValid;
 	}
 
-	const void MODSongLoader::LoadPatterns(Song & song)
-	{
+	void MODSongLoader::LoadPatterns(Song & song) {
 
 		double pos = 0;
 		song.sequence().removeAll();
@@ -1181,8 +1103,7 @@ namespace psycle {
 		}	
 	}
 
-	char * MODSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start)
-	{
+	char * MODSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start) {
 		// allocate space
 		char *pData = new char[size + 1];
 		if(pData==NULL)
@@ -1203,14 +1124,8 @@ namespace psycle {
 		return NULL;
 	}
 
-
-
-
-
 	// return address of next pattern, 0 for invalid
-	const void MODSongLoader::LoadPattern(Song & song,const int patIdx,const int iTracks)
-	{
-
+	void MODSongLoader::LoadPattern(Song & song,const int patIdx,const int iTracks) {
 		short iNumRows = 64;
 
 		Pattern & pat = *new Pattern();
@@ -1391,19 +1306,16 @@ namespace psycle {
 				}
 			}
 	}
-	const unsigned char MODSongLoader::ConvertPeriodtoNote(const unsigned short period)
-	{
-		for (int count2=1;count2<37; count2++)
-		{
+
+	unsigned char MODSongLoader::ConvertPeriodtoNote(const unsigned short period) {
+		for(int count2 = 1; count2 < 37; ++count2) {
 			if (period > BIGMODPERIODTABLE[count2*8]-2 && period < BIGMODPERIODTABLE[count2*8]+2 )
 				return count2-1+36; // three octaves above.
 		}
 		return 255;
 	}
 
-
-	const void MODSongLoader::LoadInstrument(XMSampler & sampler, const int idx)
-	{
+	void MODSongLoader::LoadInstrument(XMSampler & sampler, const int idx) {
 		m_pSong->rInstrument(idx).Init();
 		m_pSong->rInstrument(idx).Name(m_Samples[idx].sampleName);
 
@@ -1422,8 +1334,7 @@ namespace psycle {
 		}
 	}
 
-	const void MODSongLoader::LoadSampleHeader(XMSampler & sampler, const int iInstrIdx)
-	{
+	void MODSongLoader::LoadSampleHeader(XMSampler & sampler, const int iInstrIdx) {
 		ReadArray(m_Samples[iInstrIdx].sampleName,22);	m_Samples[iInstrIdx].sampleName[21]='\0';
 
 		smpLen[iInstrIdx] = (ReadUInt1()*0x100+ReadUInt1())*2; 
@@ -1467,8 +1378,7 @@ namespace psycle {
 
 	}
 
-	const void MODSongLoader::LoadSampleData(XMSampler & sampler, const int iInstrIdx)
-	{
+	void MODSongLoader::LoadSampleData(XMSampler & sampler, const int iInstrIdx) {
 		// parse
 
 		XMInstrument::WaveData& _wave =  m_pSong->SampleData(iInstrIdx);
@@ -1481,10 +1391,9 @@ namespace psycle {
 		int sampleCnt = smpLen[iInstrIdx];
 
 		// 8 bit mono sample
-		for(int j=0;j<sampleCnt;j++)
-		{
-//			if ( smpbuf[j] < 128 ) wNew = (smpbuf[j]<<8);
-//			else wNew = ((256-smpbuf[j])<<8);
+		for(int j = 0; j < sampleCnt; ++j) {
+			//if ( smpbuf[j] < 128 ) wNew = (smpbuf[j]<<8);
+			//else wNew = ((256-smpbuf[j])<<8);
 			wNew = (smpbuf[j]<<8);
 			*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew;
 		}
@@ -1494,8 +1403,7 @@ namespace psycle {
 
 	}
 
-
-		///\todo: Actually, these methods should always write in Little endian mode.
+	///\todo: Actually, these methods should always write in Little endian mode.
 	bool XMSongLoader::ReadHeader(XMFILEHEADER& header) {
 		Read(header.size);
 		Read(header.norder);
@@ -1508,18 +1416,21 @@ namespace psycle {
 		Read(header.tempo);
 		return ReadArray(header.order,sizeof(header.order));
 	}
+
 	bool XMSongLoader::ReadHeader(XMPATTERNHEADER& header) {
 		Read(header.size);
 		Read(header.packingtype);
 		Read(header.rows);
 		return Read(header.packedsize);
 	}
+
 	bool XMSongLoader::ReadHeader(XMINSTRUMENTHEADER& header) {
 		Read(header.size);
 		ReadArray(header.name, sizeof(header.name));
 		Read(header.type);
 		return Read(header.samples);
 	}
+
 	bool XMSongLoader::ReadHeader(XMSAMPLEHEADER& header) {
 		Read(header.shsize);
 		ReadArray(header.snum, sizeof(header.snum));
@@ -1542,6 +1453,7 @@ namespace psycle {
 		Read(header.volfade);
 		return ReadArray(header.reserved, 11);
 	}
+
 	bool XMSongLoader::ReadHeader(XMSAMPLESTRUCT& header) {
 		Read(header.samplen);
 		Read(header.loopstart);
@@ -1578,6 +1490,7 @@ namespace psycle {
 		return Read(header.reserved2);
 
 	}
+
 	bool XMSongLoader::ReadHeader(XMINSTRUMENTFILEHEADER& header) {
 		ReadArray(header.extxi, sizeof(header.extxi));
 		ReadArray(header.name, sizeof(header.name));
@@ -1591,6 +1504,7 @@ namespace psycle {
 		ReadArray(header.order, sizeof(header.order));
 		return ReadArray(header.pID, sizeof(header.pID));
 	}
+
 	bool MODSongLoader::ReadHeader(MODSAMPLEHEADER& header) {
 		ReadArray(header.sampleName, sizeof(header.sampleName));
 		Read(header.sampleLength);
@@ -1599,5 +1513,4 @@ namespace psycle {
 		Read(header.loopStart);
 		return Read(header.loopLength);
 	}
-}
-}
+}}

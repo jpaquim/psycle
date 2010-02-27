@@ -3,16 +3,12 @@
 #pragma once
 #include "Psycle.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/audiodrivers/asiointerface.h>
-	#include "Registry.hpp"
-	#include "configuration.hpp"
-#else
-	#include "ASIOInterface.hpp"
-#endif
+#include <psycle/audiodrivers/asiointerface.h>
+#include "Registry.hpp"
+#include "configuration.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
+
 		/// asio config window.
 		class CASIOConfig : public CDialog
 		{
@@ -20,11 +16,8 @@ namespace psycle {
 			int m_sampleRate;
 			int	m_bufferSize;
 			CASIOConfig(CWnd* pParent = 0);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::audiodrivers::ASIOInterface* pASIO;
-#else
-			ASIOInterface* pASIO;
-#endif
+			audiodrivers::ASIOInterface* pASIO;
+
 		// Dialog Data
 			//{{AFX_DATA(CASIOConfig)
 			enum { IDD = IDD_ASIO_CONFIG };
@@ -61,7 +54,7 @@ namespace psycle {
 
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		class AsioUi : public psycle::audiodrivers::AsioUiInterface {
+		class AsioUi : public audiodrivers::AsioUiInterface {
 		public:
 			AsioUi() {}
 			~AsioUi() {}

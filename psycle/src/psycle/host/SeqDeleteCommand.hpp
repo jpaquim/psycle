@@ -1,17 +1,12 @@
 #pragma once
 #include "SeqHelperCommand.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		class SeqDeleteCommand : public SeqHelperCommand {
-		public:
-			SeqDeleteCommand(class SequencerView* pat_view);
-			~SeqDeleteCommand() {}
+class SeqDeleteCommand : public SeqHelperCommand {
+	public:
+		SeqDeleteCommand(class SequencerView* pat_view);
+		virtual void Execute();
+};
 
-			virtual void Execute();
-
-		};
-
-	}	// namespace host
-}	// namespace psycle
+}}

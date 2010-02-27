@@ -19,9 +19,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-using namespace universalis::stdlib;
-
 CInfoDlg::CInfoDlg(ProjectData* projects, CWnd* pParent)
 : CDialog(CInfoDlg::IDD, pParent), projects_(projects) {}
 

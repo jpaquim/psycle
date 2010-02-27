@@ -1,20 +1,14 @@
 #pragma once
 #include "PatHelperCommand.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		class ChangeGenCommand : public PatHelperCommand {
-		public:
-			ChangeGenCommand(class PatternView* pat_view, int gen);
-			~ChangeGenCommand() {}
+class ChangeGenCommand : public PatHelperCommand {
+	public:
+		ChangeGenCommand(class PatternView* pat_view, int gen);
+		virtual void Execute();
+	private:
+		int gen_;
+};
 
-			virtual void Execute();
-
-		private:
-			int gen_;
-
-		};
-
-	}	// namespace host
-}	// namespace psycle
+}}

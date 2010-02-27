@@ -7,11 +7,10 @@
 #include <afxcmn.h>
 
 namespace psycle {
-	namespace core {
-		class XMSampler;
-	}
-	namespace host {
-		using namespace core;
+namespace core {
+	class XMSampler;
+}
+namespace host {
 
 class XMSamplerUIInst : public CPropertyPage
 {

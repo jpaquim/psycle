@@ -3,8 +3,8 @@
 #pragma once
 #include "Psycle.hpp"
 #include "WaveEdChildView.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		class CMainFrame;
 

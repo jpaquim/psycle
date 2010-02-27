@@ -5,8 +5,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 // CWaveScopeCtrl
 CWaveScopeCtrl::CWaveScopeCtrl()
 : m_pWave(NULL)

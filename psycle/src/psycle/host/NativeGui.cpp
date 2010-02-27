@@ -14,8 +14,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		extern CPsycleApp theApp;
 
 		BEGIN_MESSAGE_MAP(CNativeGui, CWnd)

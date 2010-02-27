@@ -16,8 +16,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
 			, m_clearCounter( 0 )

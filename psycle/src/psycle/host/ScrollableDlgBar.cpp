@@ -2,8 +2,7 @@
 ///\brief implementation file for psycle::host::ScrollableDlgBar.
 #include "ScrollableDlgBar.hpp"
 
-namespace psycle {
-namespace host {
+namespace psycle { namespace host {
 
 	LRESULT CScrollableDlgBar::WindowProc(UINT nMsg, WPARAM wParam, LPARAM lParam)
 	{

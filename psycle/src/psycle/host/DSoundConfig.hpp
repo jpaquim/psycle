@@ -6,13 +6,11 @@
 #include <afxcmn.h> // CSpinButtonCtrl
 #include "Registry.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/audiodrivers/microsoftdirectsoundout.h>
 #include "Configuration.hpp"
-#endif
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
+
   		/// direct sound config window.
 		class CDSoundConfig : public CDialog
 		{
@@ -57,7 +55,7 @@ namespace psycle {
 		};
 
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-		class DSoundUi : public psycle::audiodrivers::DSoundUiInterface {
+		class DSoundUi : public audiodrivers::DSoundUiInterface {
 		public:
 			DSoundUi() {}
 			~DSoundUi() {}

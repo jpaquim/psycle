@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CNewVal.
 
 #include "NewVal.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		CNewVal::CNewVal(int mindex,int pindex, int vval, int vmin, int vmax,char* title, CWnd* pParent)
 			: CDialog(CNewVal::IDD, pParent)

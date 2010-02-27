@@ -1,27 +1,25 @@
 #pragma once
+#include "namespaces.hpp"
 #include "configuration_options.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		class Command {
-		public:
-			Command() {}
-			virtual ~Command() {}
+class Command {
+	public:
+		Command() {}
+		virtual ~Command() {}
 
-			virtual void Execute() = 0;
-		};
+		virtual void Execute() = 0;
+};
 
-		class CommandUndoable  {
-		public:
-			CommandUndoable() {}
-			virtual ~CommandUndoable() {}
+class CommandUndoable  {
+	public:
+		CommandUndoable() {}
+		virtual ~CommandUndoable() {}
 
-			virtual void Execute() = 0;
-			virtual void Undo() {}
-			virtual void Redo() {}
-		};
+		virtual void Execute() = 0;
+		virtual void Undo() {}
+		virtual void Redo() {}
+};
 
-
-	}	// namespace host
-}	// namespace psycle
+}}

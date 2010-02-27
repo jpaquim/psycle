@@ -2,24 +2,18 @@
 ///\interface psycle::host::Configuration.
 #pragma once
 #include "Global.hpp"
-#include <universalis/compiler/stringized.hpp> // to convert a token into a string literal (UNIVERSALIS__COMPILER__STRINGIZED)
 #include <cstddef>
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/audiodrivers/audiodriver.h>
-	namespace psycle { 
-		namespace audiodrivers { 
-			class DSoundUiInterface; 
-			class AsioUiInterface; 
-		}
-	}
-#else
-	#include "AudioDriver.hpp"
-#endif
+#include <psycle/audiodrivers/audiodriver.h>
 
-namespace psycle { namespace host {
+namespace psycle {
+	namespace audiodrivers { 
+		class DSoundUiInterface; 
+		class AsioUiInterface; 
+	}
+	namespace host {
 
 	#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
-	#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__VERSION__MINOR)
+	#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MINOR)
 	#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
 	#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
 

@@ -16,7 +16,6 @@
 #endif
 
 namespace psycle { namespace host {
-	using namespace core;
 
 		ITModule2::ITModule2(void)
 		{

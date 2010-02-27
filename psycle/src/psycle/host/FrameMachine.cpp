@@ -20,8 +20,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		extern CPsycleApp theApp;
 
 		IMPLEMENT_DYNCREATE(CFrameMachine, CFrameWnd)

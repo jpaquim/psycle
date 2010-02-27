@@ -20,8 +20,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)

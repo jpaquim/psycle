@@ -1,6 +1,4 @@
 #pragma once
-#include "configuration_options.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "Global.hpp"
 
 namespace psycle {
@@ -8,10 +6,7 @@ namespace psycle {
 		class PatternEvent;
 		class RiffFile;
 		class MachineKey;
-  }
-}
-
-namespace psycle {
+	}
 	namespace host {
 
 		class Psy3Saver {
@@ -62,5 +57,3 @@ namespace psycle {
 
 	}	// namespace host
 }	// namespace psycle
-
-#endif

@@ -15,8 +15,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		BEGIN_MESSAGE_MAP(CVolumeCtrl, CSliderCtrl)
 			ON_WM_LBUTTONDOWN()
 			ON_WM_LBUTTONUP()

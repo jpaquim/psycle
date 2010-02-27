@@ -2,14 +2,10 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-
 namespace core {
 	class AudioRecorder;
 }
-
 namespace host {
-
-using namespace core;
 
 class CChildView;
 

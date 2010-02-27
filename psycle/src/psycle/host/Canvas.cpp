@@ -2,7 +2,7 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include "Canvas.hpp"
 
-namespace PsycleCanvas {
+namespace psycle { namespace host { namespace canvas {
 
 Item::Item() : parent_(0), managed_(0), visible_(1)  { }
 
@@ -932,10 +932,6 @@ Canvas::Canvas(CWnd* parent) :
 	save_rgn_.CreateRectRgn(0, 0, 0, 0);
 }
 
-Canvas::~Canvas()
-{
-}
-
 void Canvas::OnSize(int cx, int cy) 
 {	
 	cw_ = cx;
@@ -1051,5 +1047,5 @@ void Canvas::Flush()
 	save_rgn_.CreateRectRgn(0, 0, 0, 0);
 }
 
-}
+}}}
 

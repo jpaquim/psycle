@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CProgressDialog.
 
 #include "ProgressDialog.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		BEGIN_MESSAGE_MAP(CProgressDialog, CDialog)
 			 ON_WM_SHOWWINDOW()

@@ -9,8 +9,6 @@
 
 namespace psycle { namespace host {
 
-using namespace helpers;
-
 		#define MAX_FONTS 256
 
 		IMPLEMENT_DYNCREATE(CSkinDlg, CPropertyPage)

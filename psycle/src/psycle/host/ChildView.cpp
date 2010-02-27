@@ -36,14 +36,14 @@
 #include "PatDeleteCommand.hpp"
 #include "ChangeGenCommand.hpp"
 #include "ChangeInsCommand.hpp"
+
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd)
 			ON_WM_PAINT()
@@ -1126,9 +1126,7 @@ namespace psycle {
 				projects_->active_project()->cmd_manager()->Redo();
 		}
 
-	}	// namespace host
-}	// namespace psycle
-
+}}
 
 // User/Mouse Responses, private headers included only by this translation unit
 #include "KeybHandler.private.hpp"

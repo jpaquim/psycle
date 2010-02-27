@@ -2,8 +2,8 @@
 ///\brief implementation file for psycle::host::CWaveEdAmplifyDialog.
 
 #include "WaveEdAmplifyDialog.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		CWaveEdAmplifyDialog::CWaveEdAmplifyDialog(CWnd* pParent)
 			: CDialog(CWaveEdAmplifyDialog::IDD, pParent)

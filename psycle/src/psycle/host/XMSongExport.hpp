@@ -5,7 +5,6 @@
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
 #include <psycle/core/fileio.h>
-#include <universalis/stdlib/cstdint.hpp>
 
 #include <map>
 
@@ -15,15 +14,11 @@ namespace psycle {
 		class XMSampler;
 		class Pattern;
 	}
-
 	namespace host {
-		using namespace core;
 
 	class XMSongExport : public RiffFile
 	{
 	public:
-		XMSongExport(void);
-		virtual ~XMSongExport(void);
 		/// RIFF 
 		virtual void exportsong(Song& song);
 	private:

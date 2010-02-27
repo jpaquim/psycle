@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CWaveEdMixDialog.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-namespace host {
+
+namespace psycle { namespace host {
 
 		class CWaveEdMixDialog : public CDialog
 		{

@@ -6,14 +6,10 @@
 #include <cstring>
 
 namespace psycle {
-	namespace core {
-		class Machine;
-	}
+namespace core {
+	class Machine;
 }
-
-
-namespace psycle {
-	namespace host {
+namespace host {
 
 		#define MAX_PRESETS 256
 

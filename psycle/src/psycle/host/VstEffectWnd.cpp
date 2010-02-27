@@ -24,9 +24,6 @@
 
 namespace psycle { namespace host {
 
-using namespace helpers::math;
-using namespace core;
-
 		extern CPsycleApp theApp;
 
 		//////////////////////////////////////////////////////////////////////////

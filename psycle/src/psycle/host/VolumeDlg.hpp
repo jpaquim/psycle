@@ -2,8 +2,9 @@
 ///\brief interface file for psycle::host::CVolumeDlg.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
 		/// volume window.
 		class CVolumeDlg : public CDialog
 		{

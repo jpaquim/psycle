@@ -3,7 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-namespace PsycleCanvas {	
+namespace psycle { namespace host { namespace canvas {
 
   struct Event {
 	  enum Type {
@@ -312,7 +312,6 @@ class Canvas
 	public:
 		Canvas();
 		Canvas(CWnd* parent);
-		~Canvas();
 
 		void SetParent(CWnd* parent) {parent_ = parent;}
 		Group* root() { return &root_; } 
@@ -369,4 +368,4 @@ class Canvas
 		CRgn save_rgn_;
 };
 
-}  // namespace PsycleCanvas
+}}}

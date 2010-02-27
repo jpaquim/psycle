@@ -17,8 +17,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 
 		COutputDlg::COutputDlg()

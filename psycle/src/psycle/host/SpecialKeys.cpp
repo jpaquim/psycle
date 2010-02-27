@@ -1,7 +1,7 @@
 
 #include "SpecialKeys.hpp"
-namespace psycle {
-namespace host {
+
+namespace psycle { namespace host {
 
 CSpecialKeys::CSpecialKeys(CWnd* pParent /* = 0 */) : CDialog(CSpecialKeys::IDD, pParent)
 ,key(0)

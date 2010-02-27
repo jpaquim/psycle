@@ -8,8 +8,8 @@
 #include "MidiInputDlg.hpp"
 #include "Configuration.hpp"
 #include "KeyConfigDlg.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		/// config window.
 		class CConfigDlg : public CPropertySheet

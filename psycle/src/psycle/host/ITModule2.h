@@ -4,16 +4,13 @@
 #include <psycle/core/commands.h>
 #include <psycle/core/patternevent.h>
 #include <psycle/core/fileio.h>
-#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle {
 	namespace core {
 		class Song;
 		class XMSampler;
 	}
-
 	namespace host {
-		using namespace core;
 
 		class ITModule2 : public RiffFile
 		{

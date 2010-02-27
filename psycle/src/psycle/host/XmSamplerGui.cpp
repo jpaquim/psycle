@@ -9,39 +9,33 @@
 #include <psycle/core/song.h>
 #include <psycle/core/xmsampler.h>
 
-namespace psycle {
-	namespace host {
-		using namespace core;
+namespace psycle { namespace host {
 
-		XmSamplerGui::XmSamplerGui(MachineView* view,
-								   Machine* mac)
-			: GeneratorGui(view, mac),
-			  dialog_(0) {
-		}
+XmSamplerGui::XmSamplerGui(MachineView* view, Machine* mac)
+:
+	GeneratorGui(view, mac),
+	dialog_(0)
+{}
 
-		XmSamplerGui::~XmSamplerGui() {
-			if (dialog_)
-				dialog_->DestroyWindow();
-		}
+XmSamplerGui::~XmSamplerGui() {
+	if(dialog_) dialog_->DestroyWindow();
+}
 
-		void XmSamplerGui::BeforeDeleteDlg() {
-			dialog_ = 0;
-		}
+void XmSamplerGui::BeforeDeleteDlg() {
+	dialog_ = 0;
+}
 
-		void XmSamplerGui::UpdateVU(CDC* devc) {
-			GeneratorGui::UpdateVU(devc);
-			if(dialog_) {
-				dialog_->UpdateUI();
-			}
-		}
+void XmSamplerGui::UpdateVU(CDC* devc) {
+	GeneratorGui::UpdateVU(devc);
+	if(dialog_) dialog_->UpdateUI();
+}
 
-		void XmSamplerGui::ShowDialog(double x, double y) {
-			if (!dialog_) {
-				dialog_ = new XMSamplerUI(mac()->GetEditName().c_str(), this, view()->child_view());
-				dialog_->Init((XMSampler*)mac());
-				dialog_->Create(view()->child_view());
-			}
-		}
+void XmSamplerGui::ShowDialog(double x, double y) {
+	if(!dialog_) {
+		dialog_ = new XMSamplerUI(mac()->GetEditName().c_str(), this, view()->child_view());
+		dialog_->Init((XMSampler*)mac());
+		dialog_->Create(view()->child_view());
+	}
+}
 
-	}  // namespace host
-}  // namespace psycle
+}}

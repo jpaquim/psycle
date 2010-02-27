@@ -12,9 +12,7 @@ namespace psycle {
 			class plugin;
 		}
 	}
-
 	namespace host {
-		using namespace core;
 		using namespace seib::vst;
 
 		class CVstParamList;
