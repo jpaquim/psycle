@@ -24,7 +24,7 @@ void aligned_memory_alloc(std::size_t alignment, X *& x, std::size_t count) {
 	#if defined DIVERSALIS__OS__POSIX
 			void * address;
 			int const err(posix_memalign(&address, alignment, size));
-			if(err) throw exception(err, UNIVERSALIS__COMPILER__LOCATION);
+			if(err) throw exception(err, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			x = static_cast<X*>(address);
 			// note: free with std::free
 	#elif 0///\todo defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU

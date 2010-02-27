@@ -7,14 +7,17 @@
 #define UNIVERSALIS__OS__CLOCKS__INCLUDED
 #pragma once
 
-#include <diversalis/os.hpp>
+#include <universalis/stdlib/cstdint.hpp>
+#include <universalis/stdlib/detail/duration.hpp> // cannot #include <universalis/stdlib/date_time.hpp> due to mutual dependency
+#include "exception.hpp"
+
 #if defined DIVERSALIS__OS__POSIX
 	#include <ctime>
 	#include <cerrno>
 	#include <cstring>
 	#include <unistd.h>
 #elif defined DIVERSALIS__OS__MICROSOFT
-	#include <windows.h>
+	#include "include_windows_without_crap.hpp"
 	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 		#pragma comment(lib, "kernel32") // win64?
 	#endif
@@ -35,17 +38,15 @@
 #else
 	#error unsupported operating system
 #endif
-#include <universalis/stdlib/cstdint.hpp>
-#include <universalis/stdlib/detail/duration.hpp> // cannot #include <universalis/stdlib/date_time.hpp> due to mutual dependency
 
 #include <stdexcept>
 #if defined BOOST_AUTO_TEST_CASE
-	#include <universalis/os/exception.hpp>
 	#include <universalis/stdlib/thread.hpp>
 	#include <sstream>
 #endif
 
 namespace universalis { namespace os { namespace clocks {
+	using namespace stdlib;
 
 // recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
 
@@ -59,7 +60,7 @@ namespace universalis { namespace os { namespace clocks {
 /// The implementation for mswindows is unpsecified on SMP systems.
 class UNIVERSALIS__DECL monotonic {
 	public:
-		std::nanoseconds static current();
+		nanoseconds static current();
 };
 
 /// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
@@ -67,28 +68,28 @@ class UNIVERSALIS__DECL monotonic {
 /// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
 class UNIVERSALIS__DECL utc_since_epoch {
 	public:
-		std::nanoseconds static current();
+		nanoseconds static current();
 };
 
 /// a virtual clock that counts the time spent by the CPU(s) in the current process.
 class UNIVERSALIS__DECL process {
 	public:
-		std::nanoseconds static current();
+		nanoseconds static current();
 };
 
 /// a virtual clock that counts the time spent by the CPU(s) in the current thread.
 class UNIVERSALIS__DECL thread {
 	public:
-		std::nanoseconds static current();
+		nanoseconds static current();
 };
 
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
 	BOOST_AUTO_TEST_CASE(wall_clock_and_sleep_test) {
 		typedef monotonic clock;
-		std::nanoseconds const sleep_nanoseconds(std::milliseconds(250));
-		std::nanoseconds const t0(clock::current());
-		std::this_thread::sleep(sleep_nanoseconds);
+		nanoseconds const sleep_nanoseconds(milliseconds(250));
+		nanoseconds const t0(clock::current());
+		this_thread::sleep(sleep_nanoseconds);
 		double const ratio(double((clock::current() - t0).get_count()) / sleep_nanoseconds.get_count());
 		{
 			std::ostringstream s; s << ratio;
@@ -103,12 +104,12 @@ namespace detail {
 	/// iso std time.
 	/// returns the time since the Epoch (00:00:00 UTC, January 1, 1970), measured in seconds.
 	/// test result: clock: std::time, min: 1s, avg: 1s, max: 1s
-	UNIVERSALIS__DECL std::nanoseconds iso_std_time() throw(std::runtime_error);
+	UNIVERSALIS__DECL nanoseconds iso_std_time() throw(exception);
 
 	/// iso std clock.
 	/// returns an approximation of processor time used by the program
 	/// test result on colinux AMD64: clock: std::clock, min: 0.01s, avg: 0.01511s, max: 0.02s
-	UNIVERSALIS__DECL std::nanoseconds iso_std_clock() throw(std::runtime_error);
+	UNIVERSALIS__DECL nanoseconds iso_std_clock() throw(exception);
 
 	#if defined DIVERSALIS__OS__POSIX
 		namespace posix {
@@ -131,28 +132,28 @@ namespace detail {
 			/// posix CLOCK_REALTIME.
 			/// System-wide realtime clock.
 			/// test result on colinux AMD64: clock: CLOCK_REALTIME, min: 1.3e-05s, avg: 1.6006e-05s, max: 0.001359s
-			UNIVERSALIS__DECL std::nanoseconds realtime() throw(std::runtime_error);
+			UNIVERSALIS__DECL nanoseconds realtime() throw(exception);
 
 			/// posix CLOCK_MONOTONIC.
 			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
 			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.3e-05s, avg: 1.606e-05s, max: 0.001745s
-			UNIVERSALIS__DECL std::nanoseconds monotonic() throw(std::runtime_error);
+			UNIVERSALIS__DECL nanoseconds monotonic() throw(exception);
 
 			/// posix CLOCK_PROCESS_CPUTIME_ID.
 			/// High-resolution per-process timer from the CPU.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on colinux AMD64: clock: CLOCK_PROCESS_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
-			UNIVERSALIS__DECL std::nanoseconds process_cpu_time() throw(std::runtime_error);
+			UNIVERSALIS__DECL nanoseconds process_cpu_time() throw(exception);
 
 			/// posix CLOCK_THREAD_CPUTIME_ID.
 			/// Thread-specific CPU-time clock.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on colinux AMD64: clock: CLOCK_THREAD_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
-			UNIVERSALIS__DECL std::nanoseconds thread_cpu_time() throw(std::runtime_error);
+			UNIVERSALIS__DECL nanoseconds thread_cpu_time() throw(exception);
 
 			/// posix gettimeofday.
 			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.5878e-05s, max: 0.001719s
-			UNIVERSALIS__DECL std::nanoseconds time_of_day() throw(std::runtime_error);
+			UNIVERSALIS__DECL nanoseconds time_of_day() throw(exception);
 		}
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		namespace microsoft {
@@ -160,14 +161,14 @@ namespace detail {
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386,  AR.ITC on Itanium).
 			/// test result on AMD64: clock res: QueryPerformancefrequency: 3579545Hz (3.6MHz)
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
-			UNIVERSALIS__DECL std::nanoseconds performance_counter() throw(std::runtime_error);
+			UNIVERSALIS__DECL nanoseconds performance_counter() throw(exception);
 
 			/// wall clock.
 			/// ::timeGetTime() is equivalent to ::GetTickCount() but Microsoft very loosely tries to express the idea that
 			/// it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: mmsystem timeGetTime, min: 0.001s, avg: 0.0010413s, max: 0.084s.
-			UNIVERSALIS__DECL std::nanoseconds mme_system_time();
+			UNIVERSALIS__DECL nanoseconds mme_system_time() throw(exception);
 
 			/// wall clock.
 			/// ::GetTickCount() returns the uptime (i.e., time elapsed since computer was booted), in milliseconds.
@@ -176,39 +177,39 @@ namespace detail {
 			/// and hence is very inaccurate: it can lag behind the real clock value as much as 15ms, and sometimes more.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: GetTickCount, min: 0.015s, avg: 0.015719s, max: 0.063s.
-			UNIVERSALIS__DECL std::nanoseconds tick_count();
+			UNIVERSALIS__DECL nanoseconds tick_count() throw(exception);
 
 			/// wall clock.
 			/// test result: clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
-			UNIVERSALIS__DECL std::nanoseconds system_time_as_file_time_since_epoch();
+			UNIVERSALIS__DECL nanoseconds system_time_as_file_time_since_epoch() throw(exception);
 
 			/// virtual clock. kernel time not included.
 			/// test result: clock: GetProcessTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			UNIVERSALIS__DECL std::nanoseconds process_time();
+			UNIVERSALIS__DECL nanoseconds process_time() throw(exception);
 
 			/// virtual clock. kernel time not included.
 			/// The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
 			/// test result: clock: GetThreadTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			UNIVERSALIS__DECL std::nanoseconds thread_time();
+			UNIVERSALIS__DECL nanoseconds thread_time() throw(exception);
 		}
 	#endif // defined DIVERSALIS__OS__MICROSOFT
 
 	#if defined BOOST_AUTO_TEST_CASE
 		namespace test {
-			typedef std::nanoseconds (*clock_function) ();
+			typedef nanoseconds (*clock_function) ();
 
 			/// measures the resolution of a clock and displays the result
 			void measure_clock_resolution(std::string const & clock_name, clock_function clock, unsigned int count = 1000000) {
-				std::nanoseconds min(std::days(1)), avg, max;
+				nanoseconds min(std::days(1)), avg, max;
 				for(unsigned int i(0); i < count; ++i) {
 					unsigned long long int timeout(0);
-					std::nanoseconds t;
-					std::nanoseconds const t0(clock());
+					nanoseconds t;
+					nanoseconds const t0(clock());
 					do {
 						t = clock();
 						++timeout;
 					} while(t == t0 && timeout < 1000 * 1000 * 10);
-					if(t == t0) t = t0 + std::days(1); // reports the timeout as a bogus big value
+					if(t == t0) t = t0 + days(1); // reports the timeout as a bogus big value
 					t -= t0;
 					if(t < min) min = t;
 					if(t > max) max = t;
@@ -229,10 +230,10 @@ namespace detail {
 					::timespec t;
 					if(::clock_getres(clock, &t))
 					{
-						std::ostringstream s; s << exceptions::code_description();
+						std::ostringstream s; s << exceptions::desc();
 						throw std::runtime_error(s.str().c_str());
 					}
-					std::nanoseconds const ns(std::nanoseconds(t.tv_nsec) + std::nanoseconds(t.tv_sec));
+					nanoseconds const ns(seconds(t.tv_sec) + nanoseconds(t.tv_nsec));
 					std::ostringstream s;
 					s
 						<< "clock: " << clock_name

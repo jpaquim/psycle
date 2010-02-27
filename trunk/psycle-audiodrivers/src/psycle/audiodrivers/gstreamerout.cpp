@@ -27,7 +27,7 @@ namespace {
 			if(!(factory = ::gst_element_factory_find(type.c_str()))) {
 				std::ostringstream s;
 				s << "could not find element type: " << type;
-				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			if(loggers::information()) {
 				std::ostringstream s;
@@ -42,7 +42,7 @@ namespace {
 			if(!(element = ::gst_element_factory_create(factory, name.c_str()))) {
 				std::ostringstream s;
 				s << "found element type: " << ::gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory)) << ", but could not create element instance: " << name;
-				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			return *element;
 		}
@@ -75,7 +75,7 @@ namespace {
 						if(loggers::trace()) {
 							std::ostringstream s;
 							s << "psycle: audiodrivers: gstreamer: waited for state: " << ::gst_element_state_get_name(current_state);
-							loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+							loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 						}
 						return;
 					} else {

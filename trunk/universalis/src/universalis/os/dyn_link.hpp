@@ -54,12 +54,12 @@ class resolver {
 		/// wether the underlying library is opened and loaded/mapped.
 		///\returns true if the underlying library is opened and loaded/mapped
 		UNIVERSALIS__DECL
-		bool opened() const;
+		bool opened() const throw();
 
 		/// the full path to the file of the underlying library.
 		///\pre opened()
 		UNIVERSALIS__DECL
-		boost::filesystem::path path() const;
+		boost::filesystem::path path() const throw();
 
 		/// resolves a symbol name in the library to an address in memory.
 		///\name the symbol name in the library to resolve to an address in memory.

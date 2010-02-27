@@ -99,11 +99,11 @@ bool PluginFinderCache::loadCache(){
 					// Only add the information to the cache if the dll hasn't been modified (say, a new version)
 					// Else, we want to get the new information, and that will happen in the plugins scan.
 					if(p.fileTime() == t_time) {
-						MachineKey key(host, path.filename(), index);
+						MachineKey key(host, path.leaf(), index);
 						AddInfo(key, p);
 					}
 				}
-				MachineKey key(host, path.filename(), index);
+				MachineKey key(host, path.leaf(), index);
 				if(!hasHost(host)) addHost(host);
 				AddInfo(key, p);
 			}
@@ -119,7 +119,7 @@ bool PluginFinderCache::saveCache(){
 
 	RiffFile file;
 	if(!file.Create(cache_path().file_string().c_str(), true)) {
-		boost::filesystem::create_directory(cache_path().parent_path());
+		boost::filesystem::create_directory(cache_path().branch_path());
 		if(!file.Create(cache_path().file_string().c_str(), true)) return false;
 	}
 	file.WriteArray("PSYCACHE", 8);

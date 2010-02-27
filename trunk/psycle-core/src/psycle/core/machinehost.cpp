@@ -22,7 +22,7 @@ void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) {
 					file_status const status(i->status());
 					if(is_directory(status) && i->path() != "." && i->path() != "..")
 						populate_plugin_list(result, i->path());
-					else if(is_regular_file(status))
+					else if(is_regular(status))
 						result.push_back(i->path());
 				}
 			}
@@ -43,7 +43,7 @@ void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) {
 			return;
 		}
 		for(std::list<boost::filesystem::path>::const_iterator i = fileList.begin(); i != fileList.end(); ++i) {
-			std::string const base_name(i->filename());
+			std::string const base_name(i->leaf());
 			MachineKey key(hostCode(), base_name, 0);
 			if(!finder.hasKey(key)) FillPluginInfo(i->file_string(), base_name, finder);
 		}

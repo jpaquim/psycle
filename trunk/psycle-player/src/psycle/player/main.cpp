@@ -11,6 +11,7 @@
 #include <universalis/os/loggers.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/os/thread_name.hpp>
+#include <universalis/os/dyn_link.hpp>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -89,14 +90,34 @@ void usage() {
 }
 
 int main(int argument_count, char * arguments[]) {
-	boost::filesystem::path const & home = universalis::os::fs::home();
-	std::clog << home << '\n';
-	boost::filesystem::path const & home_app_local = universalis::os::fs::home_app_local("xxx");
-	std::clog << home_app_local << '\n';
-	boost::filesystem::path const & home_app_roaming = universalis::os::fs::home_app_roaming("xxx");
-	std::clog << home_app_roaming << '\n';
-	std::string s; std::getline(std::cin, s);
-	std::exit(1);
+	#if 1
+	{
+		using namespace universalis::os::fs;
+		std::clog << home() << '\n';
+		std::clog << home_app_local("psycle") << '\n';
+		std::clog << home_app_roaming("psycle") << '\n';
+	}
+	#endif
+
+	#if 0
+	{
+		using universalis::os::dyn_link::path_list_type;
+		using universalis::os::dyn_link::lib_path;
+		path_list_type p(lib_path());
+		for(path_list_type::const_iterator i(p.begin()), e(p.end()); i != e; ++i) std::clog << *i << '\n';
+		p.push_back("psycle");
+		lib_path(p);
+		p = lib_path();
+		for(path_list_type::const_iterator i(p.begin()), e(p.end()); i != e; ++i) std::clog << *i << '\n';
+	}
+	#endif
+
+	#if 0
+	{
+		std::string s; std::getline(std::cin, s);
+		std::exit(1);
+	}
+	#endif
 
 	{
 		using namespace universalis::os::loggers;

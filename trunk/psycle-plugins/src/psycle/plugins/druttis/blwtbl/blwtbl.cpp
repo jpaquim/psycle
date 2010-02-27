@@ -420,16 +420,15 @@ bool UpdateWaveforms(int sr) {
 	return true;
 }
 
-#include <universalis.hpp>
 #if defined DIVERSALIS__COMPILER__GNU
 	namespace init {
-		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__DYNAMIC_LINK__HIDDEN;
+		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__DYN_LINK__HIDDEN;
 		void constructor() {
 			InitWaveforms();
 			UpdateWaveforms(44100);
 		}
 		
-		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__DYNAMIC_LINK__HIDDEN;
+		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__DYN_LINK__HIDDEN;
 		void destructor() {
 			CleanupWaveforms();
 		}
@@ -437,11 +436,9 @@ bool UpdateWaveforms(int sr) {
 #elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
 	#include <universalis/os/include_windows_without_crap.hpp>
 	// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/dynamic_link_library_functions.asp
-	::BOOL APIENTRY DllMain(::HMODULE module, ::DWORD reason_for_call, ::LPVOID)
-	{
+	::BOOL APIENTRY DllMain(::HMODULE module, ::DWORD reason_for_call, ::LPVOID) {
 		bool result(true);
-		switch(reason_for_call)
-		{
+		switch(reason_for_call) {
 			case DLL_PROCESS_ATTACH:
 				InitWaveforms();
 				UpdateWaveforms(44100);

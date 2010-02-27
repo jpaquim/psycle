@@ -51,6 +51,8 @@ class UNIVERSALIS__DECL exception : public universalis::exception {
 
 namespace exceptions {
 
+	using universalis::exceptions::runtime_error;
+
 	///\internal
 	namespace detail {
 		#if defined DIVERSALIS__OS__MICROSOFT
@@ -71,13 +73,6 @@ namespace exceptions {
 	class UNIVERSALIS__DECL operation_not_permitted : public detail::posix {
 		public:
 			operation_not_permitted(compiler::location const & location) throw() : detail::posix(EPERM, location) {}
-	};
-
-	class UNIVERSALIS__DECL runtime_error : public universalis::exceptions::runtime_error {
-		public:
-			runtime_error(std::string const & what, compiler::location const & location, void const * cause = 0) throw()
-			: universalis::exceptions::runtime_error(what, location, cause)
-			{}
 	};
 
 	///\internal

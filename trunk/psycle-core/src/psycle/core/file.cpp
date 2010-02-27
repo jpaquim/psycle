@@ -67,7 +67,9 @@ namespace psycle { namespace core {
 			}
 			return "";
 		#else
-			std::string nrv(env("HOME"));
+			std::string nrv;
+			char const * const e(std::getenv("HOME"));
+			if(e) nrv = e;
 			return nrv;
 		#endif
 	}
