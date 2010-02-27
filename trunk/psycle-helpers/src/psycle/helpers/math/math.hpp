@@ -15,7 +15,7 @@
 #include "clip.hpp"
 #include "erase_all_nans_infinities_and_denormals.hpp"
 #include "erase_denormals.hpp"
-#include <universalis/compiler.hpp>
+#include <universalis.hpp>
 #include <cmath>
 
 /*************************************************************************************************

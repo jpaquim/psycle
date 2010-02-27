@@ -6,13 +6,11 @@
 #pragma once
 
 #include "lrint.hpp"
-#include <universalis/compiler.hpp>
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
 	#include <emmintrin.h>
 #endif
 #include <limits>
-#include <boost/static_assert.hpp>
 namespace psycle { namespace helpers { namespace math {
 
 /// ensures a value stays between two bounds

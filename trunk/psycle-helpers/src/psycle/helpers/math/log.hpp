@@ -5,17 +5,10 @@
 #define PSYCLE__HELPERS__MATH__LOG__INCLUDED
 #pragma once
 
-#include <diversalis/cpu.hpp>
-#include <universalis/compiler.hpp>
-#if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
-	#include <universalis/stdlib/cstdint.hpp>
-	#include <boost/static_assert.hpp>
-#else
-	#include <cmath>
-#endif
+#include <universalis.hpp>
+#include <cmath>
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/os/clocks.hpp>
-	#include <cmath>
 	#include <sstream>
 #endif
 

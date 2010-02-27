@@ -5,9 +5,7 @@
 #define PSYCLE__HELPERS__MATH__ERASE_ALL_NANS_INFINITES_AND_DENORMALS__INCLUDED
 #pragma once
 
-#include <diversalis/cpu.hpp>
-#include <universalis/stdlib/cstdint.hpp>
-#include <boost/static_assert.hpp>
+#include <universalis.hpp>
 #if 0 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	//#include <xmmintrin.h>
 #endif

@@ -5,7 +5,7 @@
 #define PSYCLE__HELPERS__MATH__LROUND__INCLUDED
 #pragma once
 
-#include <diversalis/stdlib.hpp>
+#include <diversalis.hpp>
 #include <cmath>
 
 namespace psycle { namespace helpers { namespace math {

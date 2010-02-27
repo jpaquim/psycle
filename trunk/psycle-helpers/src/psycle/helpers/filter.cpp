@@ -4,9 +4,9 @@
 //
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psycle::core::Filter.
+///\implementation psycle::helpers::Filter.
 
-#include <psycle/helpers/filter.hpp>
+#include "filter.hpp"
 
 #include <cmath>
 #include <algorithm>
