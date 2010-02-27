@@ -6,7 +6,7 @@
 #pragma once
 
 #include "pattern.h"
-#include <universalis/compiler.hpp>
+#include <universalis.hpp>
 #include <boost/noncopyable.hpp>
 
 namespace psycle { namespace core {

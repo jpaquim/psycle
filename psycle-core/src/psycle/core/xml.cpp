@@ -6,35 +6,27 @@
 #include <psycle/core/config.private.hpp>
 #include "xml.h"
 
-#ifdef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
-
 namespace psycle { namespace core {
 
-std::string replaceIllegalXmlChr(const std::string & text, bool strict) {
+std::string replaceIllegalXmlChr( const std::string & text, bool strict ) {
 	std::string xml = text;
-	
+	std::string::size_type search_pos = 0;
 	// replace ampersand
-	std::string::size_type search_pos(0);
-	while((search_pos = xml.find("&", search_pos)) != std::string::npos)
-		xml.replace(search_pos++, 1, "&amp;");
-	
+	while((search_pos = xml.find("&", search_pos)) != std::string::npos) xml.replace(search_pos++, 1, "&amp;" );
 	// replace less than
-	while((search_pos = xml.find("<")) != std::string::npos)
-		xml.replace(search_pos, 1, "&lt;");
-	
+	while((search_pos = xml.find("<")) != std::string::npos) xml.replace(search_pos, 1, "&lt;" );
 	if(strict) {
 		// replace greater than
-		while((search_pos = xml.find(">") ) != std::string::npos)
-			xml.replace(search_pos, 1, "&gt;" );
+		while((search_pos = xml.find(">") ) != std::string::npos) xml.replace(search_pos, 1, "&gt;" );
 		// replace apostrophe
-		while((search_pos = xml.find("'")) != std::string::npos)
-			xml.replace(search_pos, 1, "&apos;");
+		while((search_pos = xml.find("'") ) != std::string::npos) xml.replace(search_pos, 1, "&apos;" );
 		// replace quotation mark
-		while((search_pos = xml.find("\"")) != std::string::npos)
-			xml.replace(search_pos, 1, "&quot;");
+		while((search_pos = xml.find("\"") ) != std::string::npos) xml.replace(search_pos, 1, "&quot;" );
 	}
 	return xml;
 }
+
+#ifdef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
 
 xmlpp::Element& get_first_element(xmlpp::Node const & node, std::string tag) {
 	xmlpp::Node::NodeList const & nodes(node.get_children(tag));
@@ -48,5 +40,6 @@ xmlpp::Attribute& get_attribute(xmlpp::Element const & e, std::string attr) {
 	return static_cast<xmlpp::Attribute&>(*a);
 }
 
-}}
 #endif
+
+}}

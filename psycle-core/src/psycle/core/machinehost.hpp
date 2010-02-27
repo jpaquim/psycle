@@ -25,12 +25,12 @@ public:
 	virtual Machine* CreateMachine(PluginFinder&, const MachineKey &, Machine::id_type) = 0;
 	virtual void FillFinderData(PluginFinder&, bool clearfirst=false);
 
-	virtual const Hosts::type hostCode() const = 0;
-	virtual const std::string hostName() const = 0;
+	virtual const/*no const*/ Hosts::type hostCode() const = 0;
+	virtual const/*no const*/ std::string hostName() const = 0;
 
 	virtual std::string const & getPluginPath(int) const { static std::string ret = ""; return ret; };
 	virtual int getNumPluginPaths() const { return 0; }
-	virtual void setPluginPath(std::string ) {};
+	virtual void setPluginPath(std::string /*const &*/) {};
 protected:
 	virtual void FillPluginInfo(const std::string&, const std::string& , PluginFinder& ) = 0;
 

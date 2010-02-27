@@ -5,7 +5,7 @@
 #include "plugincatcher.h"
 #include "file.h"
 #include "fileio.h"
-#include <universalis/os/paths.hpp>
+#include <universalis/os/fs.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <iostream> // only for debug output
 #include <sstream>
@@ -16,7 +16,7 @@ namespace psycle { namespace core {
 namespace {
 	boost::filesystem::path const & cache_path() {
 		boost::filesystem::path const static once(
-			universalis::os::paths::home_app_local("psycle-core") / "plugin-scan-v2.cache"
+			universalis::os::fs::home_app_local("psycle") / "plugin-scan-v2.cache"
 		);
 		return once;
 	}
@@ -44,7 +44,7 @@ bool PluginFinderCache::loadCache(){
 	uint32_t fileNumPlugs(0);
 	RiffFile file;
 
-	if(!file.Open(cache_path().native_file_string().c_str())) {
+	if(!file.Open(cache_path().file_string().c_str())) {
 		return false;
 	}
 
@@ -91,19 +91,22 @@ bool PluginFinderCache::loadCache(){
 		}
 
 		// Temp here contains the full path to the .dll
-		if(File::fileIsReadable(fullPath)) {
-			std::time_t t_time = boost::filesystem::last_write_time(boost::filesystem::path(fullPath));
-			if(t_time != (std::time_t)(-1)) {
-				// Only add the information to the cache if the dll hasn't been modified (say, a new version)
-				// Else, we want to get the new information, and that will happen in the plugins scan.
-				if(p.fileTime() == t_time) {
-					MachineKey key( host, File::extractFileNameFromPath(fullPath) , index);
-					AddInfo( key, p);
+		{
+			boost::filesystem::path const path(fullPath);
+			if(boost::filesystem::exists(path)) {
+				std::time_t t_time = boost::filesystem::last_write_time(path);
+				if(t_time != (std::time_t)(-1)) {
+					// Only add the information to the cache if the dll hasn't been modified (say, a new version)
+					// Else, we want to get the new information, and that will happen in the plugins scan.
+					if(p.fileTime() == t_time) {
+						MachineKey key(host, path.filename(), index);
+						AddInfo(key, p);
+					}
 				}
+				MachineKey key(host, path.filename(), index);
+				if(!hasHost(host)) addHost(host);
+				AddInfo(key, p);
 			}
-			MachineKey key(host, File::extractFileNameFromPath(fullPath), index);
-			if(!hasHost(host)) addHost(host);
-			AddInfo(key, p);
 		}
 	}
 
@@ -115,9 +118,9 @@ bool PluginFinderCache::saveCache(){
 	deleteCache();
 
 	RiffFile file;
-	if(!file.Create(cache_path().native_file_string().c_str(), true)) {
-		boost::filesystem::create_directory(cache_path().branch_path());
-		if(!file.Create(cache_path().native_file_string().c_str(), true)) return false;
+	if(!file.Create(cache_path().file_string().c_str(), true)) {
+		boost::filesystem::create_directory(cache_path().parent_path());
+		if(!file.Create(cache_path().file_string().c_str(), true)) return false;
 	}
 	file.WriteArray("PSYCACHE", 8);
 	uint32_t version = CURRENT_CACHE_MAP_VERSION;

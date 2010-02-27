@@ -4,18 +4,20 @@
 #include <psycle/core/config.private.hpp>
 #include "file.h"
 
-#if defined __unix__ || defined __APPLE__
+#include <diversalis.hpp>
+
+#if defined DIVERSALIS__OS__MICROSOFT
+	#include <universalis/os/include_windows_without_crap.hpp>
+	#include <winreg.h>
+#else
 	#include <sys/types.h>
 	#include <sys/stat.h>
 	#include <unistd.h>
 	#include <cerrno>
-#else
-	#include <windows.h>
-	#include <winreg.h>
 #endif
 
-#ifdef _MSC_VER
-	#include <direct.h> /* Visual C++ */
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#include <direct.h> // Visual C++ specific
 #else
 	#include <dirent.h>
 #endif
@@ -29,92 +31,8 @@
 #include <boost/filesystem/operations.hpp>
 
 namespace psycle { namespace core {
-	using namespace std;
-
-	char const File::path_env_var_name[] =
-	{
-		#if defined _WIN64 || defined _WIN32 || defined __CYGWIN__
-			"PATH"
-		#elif defined __unix__ || defined __APPLE__
-			"LD_LIBRARY_PATH"
-		#else
-			#error unknown dynamic linker
-		#endif
-	};
-	
-	std::string File::readFile(std::string const & path) {
-		std::ifstream is(path.c_str());
-		if(!is) {
-			std::ostringstream s;
-			s << "could not open file: " << path;
-			throw std::runtime_error(s.str().c_str());
-		}
-		std::ostringstream oss;
-		oss << is.rdbuf();
-		std::string nvr(oss.str());
-		return nvr;
-	}
-
-	std::vector<std::string> File::fileList(std::string const & path, int list_mode) {
-		std::vector<std::string> destination;
-		std::string saveCurrentDir(workingDir());
-		#if defined __unix__ || defined __APPLE__
-			///\todo using scandir would be simpler (not in posix yet as of 2007)
-			DIR * dhandle(opendir(path.c_str()));
-			if(!dhandle) {
-				std::ostringstream s;
-				s << "could not open directory: " << path;
-				throw std::runtime_error(s.str());
-			}
-			int x(chdir(path.c_str()));
-			if(x) {
-				std::ostringstream s;
-				s << "could not enter directory: " << path;
-				throw std::runtime_error(s.str());
-			}
-			dirent * drecord;
-			while((drecord = readdir(dhandle)) != 0) {
-				struct stat sbuf;
-				stat(drecord->d_name, &sbuf);
-				std::string name(drecord->d_name);
-				if(
-					((list_mode & list_modes::dirs)
-						&& S_ISDIR(sbuf.st_mode)
-						&& ( name != "." && name != "..")) ||
-					((list_mode & list_modes::files)
-						&& !S_ISDIR(sbuf.st_mode)) 
-				){
-					destination.push_back(name);
-				}
-			}
-			closedir(dhandle);
-		#else
-			WIN32_FIND_DATAA dir;
-			HANDLE fhandle;
-			char directory[8196];
-			// unsecure, better using snprintf
-			sprintf(directory,"%s\\*.*",path.c_str());
-			// Handle to directory
-			if((fhandle=FindFirstFileA(directory,&dir)) != INVALID_HANDLE_VALUE) {
-				do {  // readout directory
-					if(
-						((list_mode & list_modes::dirs) && (dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) || 
-						((list_mode & list_modes::files) && !(dir.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
-					) destination.push_back( dir.cFileName );
-				} while(FindNextFileA(fhandle,&dir));
-			}
-			FindClose(fhandle);
-		#endif
-		sort(destination.begin(),destination.end());
-		cd(saveCurrentDir);
-		return destination;
-	}
-
 	std::string File::home() {
-		#if defined __unix__ || defined __APPLE__
-			std::string nrv(env("HOME"));
-			return nrv;
-		#else
+		#if defined DIVERSALIS__OS__MICROSOFT
 			// first check UserProfile
 			char const * const user_profile(std::getenv("UserProfile"));
 			if(user_profile) return user_profile;
@@ -148,77 +66,10 @@ namespace psycle { namespace core {
 				return sVal;
 			}
 			return "";
-		#endif
-	}
-
-	void File::cdHome() {
-		cd(home());
-	}
-
-	void File::cd(std::string const & path) {
-		chdir(path.c_str());
-	}
-
-	std::string File::workingDir() {
-		std::string nvr;
-		nvr = boost::filesystem::current_path().native_file_string();
-		return nvr;
-	}
-	
-	
-	std::string File::appendDirToEnvPath(std::string const & path) {
-		// append the given path to the path env var
-		std::string const old_path(getEnvPath());
-		std::string new_path(old_path);
-		if(new_path.length()) new_path +=
-			#if defined __unix__ || defined __APPLE__
-				":";
-			#elif defined _WIN64 || defined _WIN32
-				";";
-			#else
-				#error unknown path list separator
-			#endif
-		new_path += path;
-		return setEnvPath(new_path) ? new_path : old_path;
-	}
-	
-	bool File::setEnvPath(std::string const & new_path) {
-		// setenv is better than putenv because putenv
-		// is not well-standardized and has different
-		// memory ownership policies on different systems. / Magnus
-
-		// On mswindows, only putenv exists (with same memory ownership issue),
-		// so we have to use the winapi instead.
-
-		#if defined DIVERSALIS__OS__MICROSOFT
-			if(!::SetEnvironmentVariableA(path_env_var_name, new_path.c_str())) {
-				int const e(::GetLastError());
-				std::cerr << "psycle: core: warning: could not alter " << path_env_var_name << " env var (winapi error =" << e << ").\n";
-				return false;
-			}
 		#else
-			if(::setenv(path_env_var_name, new_path.c_str(), 1 /* overwrite */)) {
-				int const e(errno);
-				std::cerr << "psycle: core: warning: could not alter " << path_env_var_name << " env var (errno =" << e << ").\n";
-				return false;
-			}
+			std::string nrv(env("HOME"));
+			return nrv;
 		#endif
-		return true;
-	}
-	
-	std::string File::getEnvPath() {
-		std::string path; // named-return-value optimisation
-		char const * const env(std::getenv(path_env_var_name));
-		if(env) path = env;
-		return path;
-	}
-
-	std::string File::parentWorkingDir() {
-		string oldDir(workingDir());
-		cd("..");
-		string parentDir(workingDir());
-		cd(oldDir);
-		return parentDir;
 	}
 
 	std::string File::replaceTilde(std::string const & path) {
@@ -226,69 +77,5 @@ namespace psycle { namespace core {
 		if(!path.length() || path[0] != '~') return nvr;
 		nvr.replace(0, 1, home().c_str());
 		return nvr;
-	}
-
-	std::string const & File::slash() {
-		///\todo use boost::filesystem::slash()
-		std::string const static once(
-			#if defined DIVERSALIS__OS__POSIX
-				"/"
-			#elif defined DIVERSALIS__OS__MICROSOFT
-				"\\"
-			#else
-				#error unknown path separator
-			#endif
-		);
-		return once;
-	}
-	
-	void File::ensurePathTerminated(std::string & path) {
-		if(!path.length()) path = slash();
-		if(path[path.length() - 1] != slash()[0]) path += slash();
-	}
-
-	bool File::fileIsReadable(std::string const & file) {
-		std::ifstream stream_(file.c_str(), std::ios_base::in | std::ios_base::binary);
-		return stream_.is_open();
-	}
-
-	std::string File::env(std::string const & envName) {
-		std::string nvr;
-		char const * const value(std::getenv(envName.c_str()));
-		if(value) nvr = value;
-		return nvr;
-	}
-
-	std::string File::extractFileNameFromPath(std::string const & fileName) {
-		std::string nvr;
-		std::string::size_type i(fileName.rfind(slash()));
-		if(i != std::string::npos && i != fileName.length() - 1) nvr = fileName.substr(i + 1);
-		return nvr;
-	}
-
-	/// replaces with xml entities for xml writing.
-	// There are 5 predefined entity references in XML:
-	// &lt;   < less than 
-	// &gt;   > greater than
-	// &amp;  & ampersand 
-	// &apos; ' apostrophe
-	// &quot; " quotation mark
-	// Only the characters "<" and "&" are strictly illegal in XML. Apostrophes, quotation marks and greater than signs are legal. strict = true  replaces all.
-	std::string File::replaceIllegalXmlChr( const std::string & text, bool strict ) {
-		std::string xml = text;
-		std::string::size_type search_pos = 0;
-		// replace ampersand
-		while((search_pos = xml.find("&", search_pos)) != std::string::npos) xml.replace(search_pos++, 1, "&amp;" );
-		// replace less than
-		while((search_pos = xml.find("<")) != std::string::npos) xml.replace(search_pos, 1, "&lt;" );
-		if(strict) {
-			// replace greater than
-			while((search_pos = xml.find(">") ) != std::string::npos) xml.replace(search_pos, 1, "&gt;" );
-			// replace apostrophe
-			while((search_pos = xml.find("'") ) != std::string::npos) xml.replace(search_pos, 1, "&apos;" );
-			// replace quotation mark
-			while((search_pos = xml.find("\"") ) != std::string::npos) xml.replace(search_pos, 1, "&quot;" );
-		}
-		return xml;
 	}
 }}

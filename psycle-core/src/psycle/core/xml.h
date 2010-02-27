@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 ///\todo This file should be moved to the common psycle/helpers
 
@@ -37,17 +37,15 @@ T str_hex(const std::string & value) {
 	return result;
 }
 
-/// helper function for xml writing.
-///
-/// replaces entitys`s for xml writing.
-/// There are 5 predefined entity references in XML:
-/// &lt;                 <                 less than ,
-/// &gt;                 >                 greater than,
-/// &amp;                &                 ampersand,
-/// &apos;               '                 apostrophe,
-/// &quot;               "                 quotation mark.
-/// Only the characters "<" and "&" are strictly illegal in XML. Apostrophes, quotation marks and greater than signs are legal. strict = true replaces all.
-std::string replaceIllegalXmlChr( const std::string & text, bool strict = true );
+/// replaces with xml entities for xml writing.
+// There are 5 predefined entity references in XML:
+// &lt;   < less than 
+// &gt;   > greater than
+// &amp;  & ampersand 
+// &apos; ' apostrophe
+// &quot; " quotation mark
+// Only the characters "<" and "&" are strictly illegal in XML. Apostrophes, quotation marks and greater than signs are legal. strict = true  replaces all.
+std::string replaceIllegalXmlChr( const std::string & text, bool strict = true);
 
 #ifdef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
 	class xml_helper_element_not_found {
