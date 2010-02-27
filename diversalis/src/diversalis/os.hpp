@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\file \brief project-wide operating system specific tweaks.
+///\file \brief compiler-independant meta-information about the operating system.
 
 #ifndef DIVERSALIS__OS__INCLUDED
 #define DIVERSALIS__OS__INCLUDED
@@ -202,7 +202,7 @@
 ///////////////////////
 // microsoft's windows
 
-#elif defined _WIN64 || defined _WIN32
+#elif defined _WIN32 // || defined _WIN64
 	#define DIVERSALIS__OS
 	#define DIVERSALIS__OS__MICROSOFT
 	#define DIVERSALIS__OS__MICROSOFT__VERSION WINVER
@@ -283,6 +283,14 @@
 	defined DIVERSALIS__OS__BSD || \
 	defined DIVERSALIS__OS__MACH
 	#define DIVERSALIS__OS__POSIX
+#endif
+
+// operating systems that emulate posix on windows
+#if \
+	defined DIVERSALIS__OS__CYGWIN || \
+	defined DIVERSALIS__OS__MSYS || \
+	defined DIVERSALIS__OS__UWIN
+	#define DIVERSALIS__OS__MICROSOFT__POSIX_EMULATION
 #endif
 
 // operating systems known to have an X Window System "by default"
