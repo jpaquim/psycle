@@ -3,24 +3,19 @@
 
 ///\file
 
-#ifndef UNIVERSALIS__STDLIB__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
-#define UNIVERSALIS__STDLIB__EXCEPTIONS__CODE_DESCRIPTION__INCLUDED
+#ifndef UNIVERSALIS__STDLIB__EXCEPTION__INCLUDED
+#define UNIVERSALIS__STDLIB__EXCEPTION__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
 #include <string>
 #include <cerrno>
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
-
 namespace universalis { namespace stdlib { namespace exceptions {
 
 	/// returns a string describing a standard error code
-	UNIVERSALIS__COMPILER__DYNAMIC_LINK std::string code_description(int code = errno) throw();
+	UNIVERSALIS__DECL std::string desc(int code = errno) throw();
 
 }}}
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif
