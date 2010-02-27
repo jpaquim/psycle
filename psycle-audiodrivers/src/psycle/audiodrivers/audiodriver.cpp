@@ -71,7 +71,7 @@ void AudioDriver::before_destruction() throw() {
 		loggers::exception()(s.str());
 	} catch(...) {
 		std::ostringstream s;
-		s << "could not close driver: " << universalis::compiler::exceptions::ellipsis();
+		s << "could not close driver: " << universalis::compiler::exceptions::ellipsis_desc();
 		loggers::exception()(s.str());
 	}
 }

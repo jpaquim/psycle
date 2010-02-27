@@ -4,13 +4,9 @@
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 #include "microsoftdirectsoundout.h"
 #include <psycle/helpers/math.hpp>
-#include <universalis/exception.hpp>
-#include <universalis/cpu/exception.hpp>
-#include <universalis/os/exceptions/code_description.hpp>
+#include <universalis.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/os/loggers.hpp>
-#include <universalis/stdlib/cstdint.hpp>
 #include <boost/bind.hpp>
 #include <stdexcept>
 
@@ -18,7 +14,7 @@ namespace psycle { namespace audiodrivers {
 
 namespace loggers = universalis::os::loggers;
 using universalis::exceptions::runtime_error;
-using universalis::os::exceptions::code_description;
+using universalis::os::exceptions::desc;
 using namespace helpers::math;
 
 AudioDriverInfo MsDirectSound::info( ) const {
@@ -56,7 +52,7 @@ void MsDirectSound::do_open() throw(std::exception) {
 	HRESULT result;
 	//S_OK means good. S_FALSE means already initialized, so good too.
 	if(S_OK != (result = ::CoInitialize(NULL)) && S_FALSE != result)
-		throw runtime_error("failed to initialize COM (for DirectSound): " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+		throw runtime_error("failed to initialize COM (for DirectSound): " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 
 	///\todo: The capture ports logic needs to be rethought for the event of changing
 	/// the audiodriver.
@@ -65,7 +61,7 @@ void MsDirectSound::do_open() throw(std::exception) {
 	DirectSoundCaptureEnumerate(DSEnumCallback, &cap_enums_);
 
 	if(DS_OK != (result = ::DirectSoundCreate8(device_guid_ != GUID() ? &device_guid_ : 0, &direct_sound_, 0)))
-		throw runtime_error("failed to create DirectSound object: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+		throw runtime_error("failed to create DirectSound object: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 	try {
 		HWND hwnd = ::GetWindow(0, 0);
 		if(!hwnd) hwnd = ::GetForegroundWindow();
@@ -75,12 +71,12 @@ void MsDirectSound::do_open() throw(std::exception) {
 			if(DS_OK != (result = direct_sound_->SetCooperativeLevel(hwnd, DSSCL_WRITEPRIMARY))) {
 				direct_sound_->Release();
 				direct_sound_ = 0;
-				throw runtime_error("Failed to set DirectSound cooperative level: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+				throw runtime_error("Failed to set DirectSound cooperative level: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		} else if(DS_OK != (result = direct_sound_->SetCooperativeLevel(hwnd, DSSCL_PRIORITY))) {
 			direct_sound_->Release();
 			direct_sound_ = 0;
-			throw runtime_error("failed to set DirectSound cooperative level: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+			throw runtime_error("failed to set DirectSound cooperative level: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 		}
 
 		// Set up wave format structure.
@@ -95,26 +91,26 @@ void MsDirectSound::do_open() throw(std::exception) {
 		format.cbSize = 0;
 
 		// Set up playback buffer structure.
-		DSBUFFERDESC desc;
-		std::memset(&desc, 0, sizeof desc);
-		desc.dwSize = sizeof desc;
-		desc.dwFlags = DSBCAPS_LOCSOFTWARE | DSBCAPS_GETCURRENTPOSITION2; // | DSBCAPS_TRUEPLAYPOSITION valid only in vista
-		desc.dwFlags |= exclusive_ ? DSBCAPS_PRIMARYBUFFER : DSBCAPS_GLOBALFOCUS;
-		desc.dwBufferBytes = exclusive_ ? 0 : playbackSettings().totalBufferBytes();
-		desc.dwReserved = 0;
-		desc.lpwfxFormat = exclusive_ ? 0 : &format;
-		desc.guid3DAlgorithm = GUID_NULL;
+		DSBUFFERDESC buf_desc;
+		std::memset(&buf_desc, 0, sizeof buf_desc);
+		buf_desc.dwSize = sizeof buf_desc;
+		buf_desc.dwFlags = DSBCAPS_LOCSOFTWARE | DSBCAPS_GETCURRENTPOSITION2; // | DSBCAPS_TRUEPLAYPOSITION valid only in vista
+		buf_desc.dwFlags |= exclusive_ ? DSBCAPS_PRIMARYBUFFER : DSBCAPS_GLOBALFOCUS;
+		buf_desc.dwBufferBytes = exclusive_ ? 0 : playbackSettings().totalBufferBytes();
+		buf_desc.dwReserved = 0;
+		buf_desc.lpwfxFormat = exclusive_ ? 0 : &format;
+		buf_desc.guid3DAlgorithm = GUID_NULL;
 
-		if(DS_OK != (result = direct_sound_->CreateSoundBuffer(&desc, reinterpret_cast<LPDIRECTSOUNDBUFFER*>(&buffer_), 0)))
-			throw runtime_error("failed to create DirectSound playback buffer: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+		if(DS_OK != (result = direct_sound_->CreateSoundBuffer(&buf_desc, reinterpret_cast<LPDIRECTSOUNDBUFFER*>(&buffer_), 0)))
+			throw runtime_error("failed to create DirectSound playback buffer: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 		try {
 			if(exclusive_) {
 				if(DS_OK != (result = buffer_->SetFormat(&format)))
-					throw runtime_error("failed to set DirectSound playback buffer format: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+					throw runtime_error("failed to set DirectSound playback buffer format: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 				DSBCAPS caps;
 				caps.dwSize = sizeof caps;
 				if(DS_OK != (result = buffer_->GetCaps(&caps)))
-					throw runtime_error("failed to get DirectSound playback buffer capabilities: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+					throw runtime_error("failed to get DirectSound playback buffer capabilities: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 				if(caps.dwFlags & DSBCAPS_STATIC)
 					throw runtime_error("direct sound buffer get caps, what kind of fancy sound card hardware you got ? it uses on-board memory only !", UNIVERSALIS__COMPILER__LOCATION);
 				playbackSettings_.setBlockCount(2);
@@ -140,7 +136,7 @@ void MsDirectSound::do_start() throw(std::exception) {
 	if( DSERR_BUFFERLOST == (result = buffer_->Play(0, 0, DSBPLAY_LOOPING))) {
 		// ignore
 	} else if(DS_OK != result)
-		throw runtime_error("fatal error while trying to play DirectSound playback buffer: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+		throw runtime_error("fatal error while trying to play DirectSound playback buffer: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 	low_mark_ = 0;
 	high_mark_ = playbackSettings().blockBytes();
 	stop_requested_ = false;
@@ -149,7 +145,7 @@ void MsDirectSound::do_start() throw(std::exception) {
 
 void MsDirectSound::thread_function() {
 	universalis::os::thread_name thread_name("direct sound");
-	universalis::cpu::exception::install_handler_in_thread();
+	universalis::cpu::exceptions::install_handler_in_thread();
 	::SetThreadPriority(::GetCurrentThread(),
 		//THREAD_PRIORITY_NORMAL
 		//THREAD_PRIORITY_ABOVE_NORMAL
@@ -179,7 +175,7 @@ void MsDirectSound::thread_function() {
 			assert(low_mark_ != high_mark_);
 			DWORD pos = 0;
 			if(DS_OK != (result = buffer_->GetCurrentPosition(&pos, 0))) {
-				error("direct sound: failed to get playback buffer position: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+				error("direct sound: failed to get playback buffer position: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 				return;
 			}
 			if(high_mark_ < low_mark_) {
@@ -227,12 +223,12 @@ void MsDirectSound::thread_function() {
 						if(stop_requested_) return;
 					}
 				} else if(DS_OK != result) {
-					error("direct sound: fatal error while trying to restore/play/lock playback buffer: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+					error("direct sound: fatal error while trying to restore/play/lock playback buffer: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 					return;
 				}
 			}
 		} else if(DS_OK != result) {
-			error("direct sound: fatal error while trying to lock playback buffer: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+			error("direct sound: fatal error while trying to lock playback buffer: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 			return;
 		}
 
@@ -300,7 +296,7 @@ void MsDirectSound::thread_function() {
 		
 		// Release the data back to DirectSound.
 		if(DS_OK != (result = buffer_->Unlock(block_1, block_size_1, block_2, block_size_2))) {
-			error("direct sound: failed to unlock playback buffer: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+			error("direct sound: failed to unlock playback buffer: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 			return;
 		}
 
@@ -377,7 +373,7 @@ void MsDirectSound::DoBlocksRecording(PortCapt & port) {
 		
 		// Release the data back to DirectSound.
 		if(DS_OK != (result = port.buffer_->Unlock(block_1, block_size_1, block_2, block_size_2))) {
-			error("direct sound: failed to unlock capture buffer: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+			error("direct sound: failed to unlock capture buffer: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 			return;
 		}
 		
@@ -437,7 +433,7 @@ void MsDirectSound::CreateCapturePort(PortCapt & port) {
 
 	// Create IDirectSoundCapture using the indicated capture device
 	if(DS_OK != (result = DirectSoundCaptureCreate8(port.guid_, &port.capture_, 0)))
-		throw runtime_error("failed to create DirectSound capture object: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+		throw runtime_error("failed to create DirectSound capture object: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 
 	// Set up wave format structure.
 	WAVEFORMATEX format;
@@ -451,25 +447,25 @@ void MsDirectSound::CreateCapturePort(PortCapt & port) {
 	format.cbSize = 0;
 
 	// Set up capture buffer structure.
-	DSCBUFFERDESC desc;
-	std::memset(&desc, 0, sizeof desc);
-	desc.dwSize = sizeof desc;
-	desc.dwBufferBytes = exclusive_ ? 0 : captureSettings().totalBufferBytes();
-	desc.lpwfxFormat = &format;
+	DSCBUFFERDESC buf_desc;
+	std::memset(&buf_desc, 0, sizeof buf_desc);
+	buf_desc.dwSize = sizeof buf_desc;
+	buf_desc.dwBufferBytes = exclusive_ ? 0 : captureSettings().totalBufferBytes();
+	buf_desc.lpwfxFormat = &format;
 
-	if(DS_OK != (result = port.capture_->CreateCaptureBuffer(&desc, reinterpret_cast<LPDIRECTSOUNDCAPTUREBUFFER*>(&port.buffer_), 0)))
-		throw runtime_error("failed to create DirectSound capture buffer: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+	if(DS_OK != (result = port.capture_->CreateCaptureBuffer(&buf_desc, reinterpret_cast<LPDIRECTSOUNDCAPTUREBUFFER*>(&port.buffer_), 0)))
+		throw runtime_error("failed to create DirectSound capture buffer: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 
 	DSCBCAPS caps;
 	caps.dwSize = sizeof caps;
 	if(DS_OK != (result = port.buffer_->GetCaps(&caps)))
-		throw runtime_error("failed to get DirectSound capture buffer capabilities: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+		throw runtime_error("failed to get DirectSound capture buffer capabilities: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 	if(caps.dwFlags & DSCBCAPS_WAVEMAPPED)
 		loggers::warning()("format not supported by device; wave mapper used for conversion", UNIVERSALIS__COMPILER__LOCATION);
 	captureSettings_.setBlockBytes(caps.dwBufferBytes / captureSettings().blockCount());
 
 	if(DS_OK != (result = port.buffer_->Start(DSCBSTART_LOOPING)))
-		throw runtime_error("failed to start DirectSound capture buffer: " + code_description(result), UNIVERSALIS__COMPILER__LOCATION);
+		throw runtime_error("failed to start DirectSound capture buffer: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 
 	universalis::os::aligned_memory_alloc(16, port.left_, captureSettings().totalBufferBytes());
 	universalis::os::aligned_memory_alloc(16, port.right_, captureSettings().totalBufferBytes());

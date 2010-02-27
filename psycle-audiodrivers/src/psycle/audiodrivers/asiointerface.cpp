@@ -419,7 +419,7 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 	// Beware that this is normally in a seperate thread, hence be sure that you take care
 	// about thread synchronization.
 	if(_firstrun) {
-		universalis::cpu::exception::install_handler_in_thread();
+		universalis::cpu::exceptions::install_handler_in_thread();
 		SetThreadAffinityMask(GetCurrentThread(), 1);
 		_firstrun = false;
 	}
