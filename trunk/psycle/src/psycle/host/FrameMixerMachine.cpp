@@ -12,8 +12,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameMachine)
 
 	int CFrameMixerMachine::Knob::height(28);

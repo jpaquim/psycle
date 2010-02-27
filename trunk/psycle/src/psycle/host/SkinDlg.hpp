@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CSkinDlg.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		/// skin config window.
 		class CSkinDlg : public CPropertyPage

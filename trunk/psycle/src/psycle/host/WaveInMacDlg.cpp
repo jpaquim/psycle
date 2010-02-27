@@ -11,8 +11,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent)
 	: CDialog(CWaveInMacDlg::IDD, pParent),
 	  gui_(0)

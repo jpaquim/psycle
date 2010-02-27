@@ -15,8 +15,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-using namespace helpers::math;
 using namespace seib::vst;
 
 		CPreset::CPreset()

@@ -4,16 +4,11 @@
 
 #include "Psycle.hpp"
 
-
 namespace psycle {
-	namespace core {
-		class Master;
-	}
+namespace core {
+	class Master;
 }
-
-
-namespace psycle {
-	namespace host {
+namespace host {
 
 		class CChildView;
 

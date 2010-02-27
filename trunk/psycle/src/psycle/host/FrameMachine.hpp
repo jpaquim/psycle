@@ -4,14 +4,10 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-
 namespace core {
 	class Machine;
 }
-
 namespace host {
-
-using namespace core;
 
 class CChildView;
 class MachineGui;

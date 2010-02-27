@@ -4,13 +4,10 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-	namespace core {
-		class Machine;
-	}
+namespace core {
+	class Machine;
 }
-
-namespace psycle {
-	namespace host {
+namespace host {
 
 		#define K_XSIZE     28
 		#define K_YSIZE     28

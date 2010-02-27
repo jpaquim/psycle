@@ -2,8 +2,9 @@
 ///\brief interface file for psycle::host::CSwingFillDlg.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
 		/// swing fill dialog window.
 		class CSwingFillDlg : public CDialog
 		{

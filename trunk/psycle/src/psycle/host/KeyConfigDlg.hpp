@@ -4,8 +4,8 @@
 #include "Psycle.hpp"
 #include "InputHandler.hpp"
 #include <afxwin.h>
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 		/// key config window.
 		class CKeyConfigDlg : public CPropertyPage
 		{

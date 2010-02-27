@@ -6,8 +6,8 @@
 #include "PatternView.hpp"
 #include "MachineView.hpp"
 #include <psycle/core/machinefactory.h>
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		extern CPsycleApp theApp;
 

@@ -6,8 +6,6 @@
 
 namespace psycle { namespace host {
 
-using namespace universalis::stdlib;
-
 /// info window.
 class CInfoDlg : public CDialog {
 	public:

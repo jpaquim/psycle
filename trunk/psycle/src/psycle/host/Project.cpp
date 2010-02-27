@@ -27,597 +27,594 @@
    static char THIS_FILE[] = __FILE__;
 #endif
 
-namespace psycle {
-	namespace host {
-		using namespace core;
+namespace psycle { namespace host {
 
-		Project::Project(ProjectData* parent)
-			: parent_(parent),
-			  beat_zoom_(4) {
-			song_ = new Song();
-			// modules of project
-			mac_view_ = new MachineView(this);
-			pat_view_ = new PatternView(this);
+Project::Project(ProjectData* parent)
+	: parent_(parent),
+	  beat_zoom_(4) {
+	song_ = new Song();
+	// modules of project
+	mac_view_ = new MachineView(this);
+	pat_view_ = new PatternView(this);
+}
+
+Project::~Project() {
+	delete mac_view_;
+	delete pat_view_;
+	delete song_;
+}
+
+void Project::SetActive() {
+	psycle::core::Player& player(psycle::core::Player::singleton());
+	player.song(*song_);
+}
+
+void Project::Clear() {
+	cmd_manager_.Clear();
+	mac_view()->LockVu();
+	Player& player(Player::singleton());
+	player.stop();
+	song().clear();
+	player.setBpm(song().BeatsPerMin());
+	player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
+	CMainFrame* pParentMain = mac_view()->main();
+	pParentMain->m_wndSeq.UpdateSequencer();
+	mac_view()->child_view()->SetTitleBarText();
+	mac_view()->Rebuild();
+	mac_view()->UnlockVu();
+}
+
+void Project::OnFileLoadsongNamed(const std::string& fName, int fType) {
+	if (fType == 2 ) {
+		FILE* hFile=fopen(fName.c_str(),"rb");
+		pat_view()->LoadBlock(hFile);
+		fclose(hFile);
+	} else {
+		if (CheckUnsavedSong("Load Song")) {
+			FileLoadsongNamed(fName);
 		}
+	}
+}
 
-		Project::~Project() {
-			delete mac_view_;
-			delete pat_view_;
-			delete song_;
-		}
+void Project::OnProgress(int a, int b, std::string c) {
+	progress_.SetWindowText(c.c_str());
+	progress_.SetPos(b);
+	::Sleep(1); ///< Allow screen refresh.
+}
 
-		void Project::SetActive() {
-			psycle::core::Player& player(psycle::core::Player::singleton());
-			player.song(*song_);
-		}
+void Project::OnReport(const std::string& a, const std::string& b) {
+	MessageBox(0, a.c_str(), b.c_str(), MB_OK | MB_ICONERROR);
+}
 
-		void Project::Clear() {
-			cmd_manager_.Clear();
-			mac_view()->LockVu();
-			Player& player(Player::singleton());
-			player.stop();
-			song().clear();
-			player.setBpm(song().BeatsPerMin());
-			player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
-			CMainFrame* pParentMain = mac_view()->main();
-			pParentMain->m_wndSeq.UpdateSequencer();
-			mac_view()->child_view()->SetTitleBarText();
-			mac_view()->Rebuild();
-			mac_view()->UnlockVu();
-		}
+void Project::FileLoadsongNamed(const std::string& fName) {
+	mac_view()->LockVu();
+	psycle::core::Song* song = new Song();
+	song->SetReady(false);
+	Player& player(Player::singleton());
+	player.stop();
+	//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
+	//Ideally, this should be handled with a player callback specific for loading.
+	player.song(*song);
+	pat_view()->editPosition = 0;
+	progress_.SetPos(0);
+	progress_.ShowWindow(SW_SHOW);		
+	song->progress.connect(boost::bind(&Project::OnProgress, this, _1, _2, _3));
+	song->report.connect(boost::bind(&Project::OnReport, this, _1, _2));
+	if (!song->load(fName.c_str())) {
+		mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+		progress_.ShowWindow(SW_HIDE);
+		mac_view()->UnlockVu();
+		delete song;
+		player.song(*song_);
+		return;			
+	}	
+	progress_.ShowWindow(SW_HIDE);
+	Song* old_song = song_;
+	song_ = song;
+	mac_view()->Rebuild();
+	delete old_song;
+	AppendToRecent(fName);
+	std::string::size_type index = fName.rfind('\\');
+	if (index != std::string::npos) {
+		Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
+		song_->set_filename(fName.substr(index+1));
+	} else {
+		song_->set_filename(fName);
+	}
 
-		void Project::OnFileLoadsongNamed(const std::string& fName, int fType) {
-			if (fType == 2 ) {
-				FILE* hFile=fopen(fName.c_str(),"rb");
-				pat_view()->LoadBlock(hFile);
-				fclose(hFile);
-			} else {
-				if (CheckUnsavedSong("Load Song")) {
-					FileLoadsongNamed(fName);
-				}
-			}
-		}
+//	set_lines_per_beat(song().ticksSpeed());
+	set_beat_zoom(song_->ticksSpeed());
+	CMainFrame* pParentMain = mac_view()->main();
+	pParentMain->m_wndSeq.UpdateSequencer();
+	pat_view()->RecalculateColourGrid();
+	mac_view()->child_view()->SetTitleBarText();
+	mac_view()->UnlockVu();
+}
 
-		void Project::OnProgress(int a, int b, std::string c) {
-			progress_.SetWindowText(c.c_str());
-			progress_.SetPos(b);
-			::Sleep(1); ///< Allow screen refresh.
-		}
-
-		void Project::OnReport(const std::string& a, const std::string& b) {
-			MessageBox(0, a.c_str(), b.c_str(), MB_OK | MB_ICONERROR);
-		}
-
-		void Project::FileLoadsongNamed(const std::string& fName) {
-			mac_view()->LockVu();
-			psycle::core::Song* song = new Song();
-			song->SetReady(false);
-			Player& player(Player::singleton());
-			player.stop();
-			//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
-			//Ideally, this should be handled with a player callback specific for loading.
-			player.song(*song);
-			pat_view()->editPosition = 0;
-			progress_.SetPos(0);
-			progress_.ShowWindow(SW_SHOW);		
-			song->progress.connect(boost::bind(&Project::OnProgress, this, _1, _2, _3));
-			song->report.connect(boost::bind(&Project::OnReport, this, _1, _2));
-			if (!song->load(fName.c_str())) {
-				mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
-				progress_.ShowWindow(SW_HIDE);
-				mac_view()->UnlockVu();
-				delete song;
-				player.song(*song_);
-				return;			
-			}	
-			progress_.ShowWindow(SW_HIDE);
-			Song* old_song = song_;
-			song_ = song;
-			mac_view()->Rebuild();
-			delete old_song;
-			AppendToRecent(fName);
-			std::string::size_type index = fName.rfind('\\');
-			if (index != std::string::npos) {
-				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
-				song_->set_filename(fName.substr(index+1));
-			} else {
-				song_->set_filename(fName);
-			}
-
-		//	set_lines_per_beat(song().ticksSpeed());
-			set_beat_zoom(song_->ticksSpeed());
-			CMainFrame* pParentMain = mac_view()->main();
-			pParentMain->m_wndSeq.UpdateSequencer();
-			pat_view()->RecalculateColourGrid();
-			mac_view()->child_view()->SetTitleBarText();
-			mac_view()->UnlockVu();
-		}
-
-		void Project::AppendToRecent(const std::string& fName)
+void Project::AppendToRecent(const std::string& fName)
+{
+	int iCount;
+	char* nameBuff;
+	UINT nameSize;
+	HMENU hFileMenu, hRootMenuBar;
+	UINT ids[] =
 		{
-			int iCount;
-			char* nameBuff;
-			UINT nameSize;
-			HMENU hFileMenu, hRootMenuBar;
-			UINT ids[] =
-				{
-					ID_FILE_RECENT_01,
-					ID_FILE_RECENT_02,
-					ID_FILE_RECENT_03,
-					ID_FILE_RECENT_04
-				};
-			MENUITEMINFO hNewItemInfo, hTempItemInfo;			
-			hRootMenuBar = ::GetMenu(mac_view()->child_view()->GetParent()->m_hWnd);
-			//pRootMenuBar = this->GetParent()->GetMenu();
-			//hRootMenuBar = HMENU (*pRootMenuBar);
-			hFileMenu = GetSubMenu(hRootMenuBar, 0);
-			HMENU hRecentMenu = mac_view()->child_view()->hRecentMenu;
-			hRecentMenu = GetSubMenu(hFileMenu, 11);
-			// Remove initial empty element, if present.
-			if(GetMenuItemID(hRecentMenu, 0) == ID_FILE_RECENT_NONE)
-			{
-				DeleteMenu(hRecentMenu, 0, MF_BYPOSITION);
-			}
-			// Check for duplicates and eventually remove.
-			for(iCount = 0; iCount<GetMenuItemCount(hRecentMenu);iCount++)
-			{
-				nameSize = GetMenuString(hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
-				nameBuff = new char[nameSize];
-				GetMenuString(hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-				if ( !strcmp(nameBuff, fName.c_str()) )
-				{
-					DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
-				}
-				delete[] nameBuff;
-			}
-			// Ensure menu size doesn't exceed 4 positions.
-			if (GetMenuItemCount(hRecentMenu) == 4)
-			{
-				DeleteMenu(hRecentMenu, 4-1, MF_BYPOSITION);
-			}
-			hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);
-			hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
-			hNewItemInfo.fType		= MFT_STRING;
-			hNewItemInfo.wID		= ids[0];
-			hNewItemInfo.cch		= fName.length();
-			hNewItemInfo.dwTypeData = (LPSTR)fName.c_str();
-			InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
-			// Update identifiers.
-			for(iCount = 1;iCount < GetMenuItemCount(hRecentMenu);iCount++)
-			{
-				hTempItemInfo.cbSize	= sizeof(MENUITEMINFO);
-				hTempItemInfo.fMask		= MIIM_ID;
-				hTempItemInfo.wID		= ids[iCount];
-				SetMenuItemInfo(hRecentMenu, iCount, true, &hTempItemInfo);
-			}
-			mac_view()->child_view()->hRecentMenu = hRecentMenu;
-		}
-
-		bool Project::CheckUnsavedSong(const std::string& title)
+			ID_FILE_RECENT_01,
+			ID_FILE_RECENT_02,
+			ID_FILE_RECENT_03,
+			ID_FILE_RECENT_04
+		};
+	MENUITEMINFO hNewItemInfo, hTempItemInfo;			
+	hRootMenuBar = ::GetMenu(mac_view()->child_view()->GetParent()->m_hWnd);
+	//pRootMenuBar = this->GetParent()->GetMenu();
+	//hRootMenuBar = HMENU (*pRootMenuBar);
+	hFileMenu = GetSubMenu(hRootMenuBar, 0);
+	HMENU hRecentMenu = mac_view()->child_view()->hRecentMenu;
+	hRecentMenu = GetSubMenu(hFileMenu, 11);
+	// Remove initial empty element, if present.
+	if(GetMenuItemID(hRecentMenu, 0) == ID_FILE_RECENT_NONE)
+	{
+		DeleteMenu(hRecentMenu, 0, MF_BYPOSITION);
+	}
+	// Check for duplicates and eventually remove.
+	for(iCount = 0; iCount<GetMenuItemCount(hRecentMenu);iCount++)
+	{
+		nameSize = GetMenuString(hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
+		nameBuff = new char[nameSize];
+		GetMenuString(hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
+		if ( !strcmp(nameBuff, fName.c_str()) )
 		{
-			BOOL bChecked = pat_view()->CheckUnsavedSong() && mac_view()->CheckUnsavedSong();
-			if (!bChecked)
+			DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
+		}
+		delete[] nameBuff;
+	}
+	// Ensure menu size doesn't exceed 4 positions.
+	if (GetMenuItemCount(hRecentMenu) == 4)
+	{
+		DeleteMenu(hRecentMenu, 4-1, MF_BYPOSITION);
+	}
+	hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);
+	hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
+	hNewItemInfo.fType		= MFT_STRING;
+	hNewItemInfo.wID		= ids[0];
+	hNewItemInfo.cch		= fName.length();
+	hNewItemInfo.dwTypeData = (LPSTR)fName.c_str();
+	InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
+	// Update identifiers.
+	for(iCount = 1;iCount < GetMenuItemCount(hRecentMenu);iCount++)
+	{
+		hTempItemInfo.cbSize	= sizeof(MENUITEMINFO);
+		hTempItemInfo.fMask		= MIIM_ID;
+		hTempItemInfo.wID		= ids[iCount];
+		SetMenuItemInfo(hRecentMenu, iCount, true, &hTempItemInfo);
+	}
+	mac_view()->child_view()->hRecentMenu = hRecentMenu;
+}
+
+bool Project::CheckUnsavedSong(const std::string& title)
+{
+	BOOL bChecked = pat_view()->CheckUnsavedSong() && mac_view()->CheckUnsavedSong();
+	if (!bChecked)
+	{
+		if (Global::pConfig->bFileSaveReminders)
+		{
+			std::string filepath = Global::pConfig->GetCurrentSongDir();
+			filepath += '\\';
+			filepath += song().filename();
+			std::ostringstream szText;
+			szText << "Save changes to \"" << song().filename()
+				<< "\"?";
+			int result = mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+			switch (result)
 			{
-				if (Global::pConfig->bFileSaveReminders)
-				{
-					std::string filepath = Global::pConfig->GetCurrentSongDir();
-					filepath += '\\';
-					filepath += song().filename();
-					std::ostringstream szText;
-					szText << "Save changes to \"" << song().filename()
-						<< "\"?";
-					int result = mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
-					switch (result)
-					{
-					case IDYES:
+			case IDYES:
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
-						 //todo: fileformat selection in the filter selection.
-						if ( ! song().save(filepath,3)) {
-							std::ostringstream szText;
-							szText << "Error writing to \"" << filepath << "\"!!!";
-							mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_ICONEXCLAMATION);
-							return FALSE;
-						}
+				 //todo: fileformat selection in the filter selection.
+				if ( ! song().save(filepath,3)) {
+					std::ostringstream szText;
+					szText << "Error writing to \"" << filepath << "\"!!!";
+					mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_ICONEXCLAMATION);
+					return FALSE;
+				}
 #else
-						OldPsyFile file;
-						if (!file.Create((char*)filepath.c_str(), true))
-						{
-							std::ostringstream szText;
-							szText << "Error writing to \"" << filepath << "\"!!!";
-							mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_ICONEXCLAMATION);
-							return FALSE;
-						}
-						song().Save(&file);
-						//file.Close(); <- save handles this
+				OldPsyFile file;
+				if (!file.Create((char*)filepath.c_str(), true))
+				{
+					std::ostringstream szText;
+					szText << "Error writing to \"" << filepath << "\"!!!";
+					mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_ICONEXCLAMATION);
+					return FALSE;
+				}
+				song().Save(&file);
+				//file.Close(); <- save handles this
 #endif
-						return TRUE;
-						break;
-					case IDNO:
-						return TRUE;
-						break;
-					case IDCANCEL:
-						return FALSE;
-						break;
-					}
-				}
+				return TRUE;
+				break;
+			case IDNO:
+				return TRUE;
+				break;
+			case IDCANCEL:
+				return FALSE;
+				break;
 			}
-			return TRUE;
 		}
+	}
+	return TRUE;
+}
 
-		void Project::FileImportModulefile()
+void Project::FileImportModulefile()
+{
+	CMainFrame* pParentMain = mac_view()->main();
+	OPENFILENAME ofn; // common dialog box structure
+	char szFile[_MAX_PATH]; // buffer for file name
+	szFile[0]='\0';
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = mac_view()->child_view()->GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter =
+		"All Module Songs (*.xm *.it *.s3m *.mod)" "\0" "*.xm;*.it;*.s3m;*.mod" "\0"
+		"FastTracker II Songs (*.xm)"              "\0" "*.xm"                  "\0"
+		"Impulse Tracker Songs (*.it)"             "\0" "*.it"                  "\0"
+		"Scream Tracker Songs (*.s3m)"             "\0" "*.s3m"                 "\0"
+		"Original Mod Format Songs (*.mod)"        "\0" "*.mod"                 "\0"
+		"All (*)"                                  "\0" "*"                     "\0"
+		;
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	std::string tmpstr = Global::pConfig->GetCurrentSongDir();
+	ofn.lpstrInitialDir = tmpstr.c_str();
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	// Display the Open dialog box. 
+	if (GetOpenFileName(&ofn)==TRUE)
+	{
+		cmd_manager_.Clear();
+		mac_view()->LockVu();
+		psycle::core::Player& player(psycle::core::Player::singleton());
+		psycle::core::Song* song = new Song();
+		song->SetReady(false);
+		player.stop();
+		player.driver().set_started(false);
+		//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
+		//Ideally, this should be handled with a player callback specific for loading.
+		player.song(*song);
+		CString str = ofn.lpstrFile;
+		int index = str.ReverseFind('.');
+		if (index != -1)
 		{
-			CMainFrame* pParentMain = mac_view()->main();
-			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
-			szFile[0]='\0';
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = mac_view()->child_view()->GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter =
-				"All Module Songs (*.xm *.it *.s3m *.mod)" "\0" "*.xm;*.it;*.s3m;*.mod" "\0"
-				"FastTracker II Songs (*.xm)"              "\0" "*.xm"                  "\0"
-				"Impulse Tracker Songs (*.it)"             "\0" "*.it"                  "\0"
-				"Scream Tracker Songs (*.s3m)"             "\0" "*.s3m"                 "\0"
-				"Original Mod Format Songs (*.mod)"        "\0" "*.mod"                 "\0"
-				"All (*)"                                  "\0" "*"                     "\0"
-				;
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			// Display the Open dialog box. 
-			if (GetOpenFileName(&ofn)==TRUE)
+			CString ext = str.Mid(index+1);
+			if (ext.CompareNoCase("XM") == 0)
 			{
-				cmd_manager_.Clear();
-				mac_view()->LockVu();
-				psycle::core::Player& player(psycle::core::Player::singleton());
-				psycle::core::Song* song = new Song();
-				song->SetReady(false);
-				player.stop();
-				player.driver().set_started(false);
-				//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
-				//Ideally, this should be handled with a player callback specific for loading.
-				player.song(*song);
-				CString str = ofn.lpstrFile;
-				int index = str.ReverseFind('.');
-				if (index != -1)
-				{
-					CString ext = str.Mid(index+1);
-					if (ext.CompareNoCase("XM") == 0)
-					{
-						XMSongLoader xmfile;
-						xmfile.Open(ofn.lpstrFile);
-						pat_view()->editPosition=0;
-						xmfile.Load(*song);
-						xmfile.Close();
-						Song* old_song = song_;
-						song_ = song;
-						mac_view()->Rebuild();
-						delete old_song;						
+				XMSongLoader xmfile;
+				xmfile.Open(ofn.lpstrFile);
+				pat_view()->editPosition=0;
+				xmfile.Load(*song);
+				xmfile.Close();
+				Song* old_song = song_;
+				song_ = song;
+				mac_view()->Rebuild();
+				delete old_song;						
 /*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "XM file imported", MB_OK);
+				std::sprintf
+					(
+					buffer,"%s\n\n%s\n\n%s",
+					Global::song().name.c_str(),
+					Global::song().author.c_str(),
+					Global::song().comments.c_str()
+					);
+				MessageBox(buffer, "XM file imported", MB_OK);
 */
-					} else if (ext.CompareNoCase("IT") == 0)
-					{
-						ITModule2 it;
-						it.Open(ofn.lpstrFile);
-						pat_view()->editPosition=0;
-						if(!it.LoadITModule(song))
-						{			
-							mac_view()->child_view()->MessageBox("Load failed");
-							it.Close();
-							delete song;
-							player.song(*song_);
-							return;
-						}
-						it.Close();
-						Song* old_song = song_;
-						song_ = song;
-						mac_view()->Rebuild();
-						delete old_song;						
+			} else if (ext.CompareNoCase("IT") == 0)
+			{
+				ITModule2 it;
+				it.Open(ofn.lpstrFile);
+				pat_view()->editPosition=0;
+				if(!it.LoadITModule(song))
+				{			
+					mac_view()->child_view()->MessageBox("Load failed");
+					it.Close();
+					delete song;
+					player.song(*song_);
+					return;
+				}
+				it.Close();
+				Song* old_song = song_;
+				song_ = song;
+				mac_view()->Rebuild();
+				delete old_song;						
 /*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "IT file imported", MB_OK);
+				std::sprintf
+					(
+					buffer,"%s\n\n%s\n\n%s",
+					Global::song().name.c_str(),
+					Global::song().author.c_str(),
+					Global::song().comments.c_str()
+					);
+				MessageBox(buffer, "IT file imported", MB_OK);
 */
-					} else if (ext.CompareNoCase("S3M") == 0)
-					{
-						ITModule2 s3m;
-						s3m.Open(ofn.lpstrFile);
-						pat_view()->editPosition=0;
-						if(!s3m.LoadS3MModuleX(song))
-						{			
-							mac_view()->child_view()->MessageBox("Load failed");
-							s3m.Close();
-							delete song;
-							player.song(*song_);
-							return;
-						}
-						s3m.Close();
-						Song* old_song = song_;
-						song_ = song;
-						mac_view()->Rebuild();
-						delete old_song;						
+			} else if (ext.CompareNoCase("S3M") == 0)
+			{
+				ITModule2 s3m;
+				s3m.Open(ofn.lpstrFile);
+				pat_view()->editPosition=0;
+				if(!s3m.LoadS3MModuleX(song))
+				{			
+					mac_view()->child_view()->MessageBox("Load failed");
+					s3m.Close();
+					delete song;
+					player.song(*song_);
+					return;
+				}
+				s3m.Close();
+				Song* old_song = song_;
+				song_ = song;
+				mac_view()->Rebuild();
+				delete old_song;						
 /*						char buffer[512];
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "S3M file imported", MB_OK);
+				std::sprintf
+					(
+					buffer,"%s\n\n%s\n\n%s",
+					Global::song().name.c_str(),
+					Global::song().author.c_str(),
+					Global::song().comments.c_str()
+					);
+				MessageBox(buffer, "S3M file imported", MB_OK);
 */
-					} else if (ext.CompareNoCase("MOD") == 0)
-					{
-						MODSongLoader modfile;
-						modfile.Open(ofn.lpstrFile);
-						pat_view()->editPosition=0;
-						modfile.Load(*song);
-						modfile.Close();
-						Song* old_song = song_;
-						song_ = song;
-						mac_view()->Rebuild();
-						delete old_song;
-						
+			} else if (ext.CompareNoCase("MOD") == 0)
+			{
+				MODSongLoader modfile;
+				modfile.Open(ofn.lpstrFile);
+				pat_view()->editPosition=0;
+				modfile.Load(*song);
+				modfile.Close();
+				Song* old_song = song_;
+				song_ = song;
+				mac_view()->Rebuild();
+				delete old_song;
+				
 /*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "MOD file imported", MB_OK);
+				std::sprintf
+					(
+					buffer,"%s\n\n%s\n\n%s",
+					Global::song().name.c_str(),
+					Global::song().author.c_str(),
+					Global::song().comments.c_str()
+					);
+				MessageBox(buffer, "MOD file imported", MB_OK);
 */
-					}
-				}
-
-				str = ofn.lpstrFile;
-				index = str.ReverseFind('\\');
-				if (index != -1)
-				{
-					Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
-					song_->set_filename(std::string(str.Mid(index+1)+".psy"));
-				}
-				else
-				{
-					song_->set_filename(std::string(str+".psy"));
-				}
-				mac_view()->child_view()->_outputActive = true;
-				pParentMain->PsybarsUpdate();
-				pParentMain->WaveEditorBackUpdate();
-				pParentMain->m_wndInst.WaveUpdate();
-				pParentMain->RedrawGearRackList();
-				pParentMain->m_wndSeq.UpdateSequencer();
-				pParentMain->m_wndSeq.UpdatePlayOrder(false);
-				pat_view()->RecalculateColourGrid();
-				mac_view()->child_view()->Repaint();
-				mac_view()->UnlockVu();
-				CSongpDlg dlg(song_);
-				dlg.SetReadOnly();
-				dlg.DoModal();
-				player.driver().set_started(true);
 			}
-			mac_view()->child_view()->SetTitleBarText();
 		}
 
-		bool Project::Export(UINT id)
+		str = ofn.lpstrFile;
+		index = str.ReverseFind('\\');
+		if (index != -1)
 		{
-			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = song().filename().substr(0,song().filename().length()-4) + ".xm";
-			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
-			
-			char szFile[_MAX_PATH];
+			Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
+			song_->set_filename(std::string(str.Mid(index+1)+".psy"));
+		}
+		else
+		{
+			song_->set_filename(std::string(str+".psy"));
+		}
+		mac_view()->child_view()->_outputActive = true;
+		pParentMain->PsybarsUpdate();
+		pParentMain->WaveEditorBackUpdate();
+		pParentMain->m_wndInst.WaveUpdate();
+		pParentMain->RedrawGearRackList();
+		pParentMain->m_wndSeq.UpdateSequencer();
+		pParentMain->m_wndSeq.UpdatePlayOrder(false);
+		pat_view()->RecalculateColourGrid();
+		mac_view()->child_view()->Repaint();
+		mac_view()->UnlockVu();
+		CSongpDlg dlg(song_);
+		dlg.SetReadOnly();
+		dlg.DoModal();
+		player.driver().set_started(true);
+	}
+	mac_view()->child_view()->SetTitleBarText();
+}
 
-			szFile[_MAX_PATH-1]=0;
-			strncpy(szFile,if2.c_str(),_MAX_PATH-1);
-			
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = mac_view()->child_view()->GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "FastTracker 2 Song (*.xm)\0*.xm\0All (*.*)\0*.*\0";
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-			BOOL bResult = TRUE;
-			
-			// Display the Open dialog box. 
-			if (GetSaveFileName(&ofn) == TRUE)
+bool Project::Export(UINT id)
+{
+	OPENFILENAME ofn; // common dialog box structure
+	std::string ifile = song().filename().substr(0,song().filename().length()-4) + ".xm";
+	std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
+	
+	char szFile[_MAX_PATH];
+
+	szFile[_MAX_PATH-1]=0;
+	strncpy(szFile,if2.c_str(),_MAX_PATH-1);
+	
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = mac_view()->child_view()->GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "FastTracker 2 Song (*.xm)\0*.xm\0All (*.*)\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	std::string tmpstr = Global::pConfig->GetCurrentSongDir();
+	ofn.lpstrInitialDir = tmpstr.c_str();
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
+	BOOL bResult = TRUE;
+	
+	// Display the Open dialog box. 
+	if (GetSaveFileName(&ofn) == TRUE)
+	{
+		CString str = ofn.lpstrFile;
+
+		CString str2 = str.Right(3);
+		if ( str2.CompareNoCase(".xm") != 0 ) str.Insert(str.GetLength(),".xm");
+		int index = str.ReverseFind('\\');
+		XMSongExport file;
+
+		if (index != -1)
+		{
+			Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
+		}
+		
+		if (!file.Create(str.GetBuffer(1), true))
+		{
+			mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+			return FALSE;
+		}
+		file.exportsong(song());
+		file.Close();
+	}
+	else
+	{
+		return FALSE;
+	}
+	return bResult;
+}
+
+
+bool Project::OnFileSave(UINT id)
+{
+	//MessageBox("Saving Disabled");
+	//return false;
+	BOOL bResult = TRUE;
+	if ( song()._saved )
+	{
+		if (mac_view()->child_view()->MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
+		{
+			std::string filepath = Global::pConfig->GetCurrentSongDir();
+			filepath += '\\';
+			filepath += song().filename();
+			//todo: fileformat version
+			// if (!song().save(filepath,3) ) {
+			//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+			//	return FALSE;
+			// }
+			psycle::core::RiffFile file;
+			if (!file.Create((char*)filepath.c_str(), true))
 			{
-				CString str = ofn.lpstrFile;
+				mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+				return FALSE;
+			}
+			Psy3Saver saver(song());
+			if (!saver.Save(&file, true))
+			{
+				mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
+				bResult = FALSE;
+			}					
+			else 
+			{
+				song()._saved=true;
+				mac_view()->child_view()->SetTitleBarText();
+			}				
+			//file.Close();  <- save handles this 
+		}
+		else 
+		{
+			return FALSE;
+		}
+	}
+	else 
+	{
+		return OnFileSaveAs(0);
+	}
+	return bResult;
 
-				CString str2 = str.Right(3);
-				if ( str2.CompareNoCase(".xm") != 0 ) str.Insert(str.GetLength(),".xm");
-				int index = str.ReverseFind('\\');
-				XMSongExport file;
+}
 
-				if (index != -1)
-				{
-					Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
-				}
-				
-				if (!file.Create(str.GetBuffer(1), true))
+//////////////////////////////////////////////////////////////////////
+// "Save Song As" Function
+
+bool Project::OnFileSaveAs(UINT id)
+{
+	//MessageBox("Saving Disabled");
+	//return false;
+	OPENFILENAME ofn; // common dialog box structure
+	std::string ifile = song().filename();
+	std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
+	
+	char szFile[_MAX_PATH];
+
+	szFile[_MAX_PATH-1]=0;
+	strncpy(szFile,if2.c_str(),_MAX_PATH-1);
+	
+	// Initialize OPENFILENAME
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = mac_view()->child_view()->GetParent()->m_hWnd;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
+	std::string tmpstr = Global::pConfig->GetCurrentSongDir();
+	ofn.lpstrInitialDir = tmpstr.c_str();
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
+	BOOL bResult = TRUE;
+	
+	// Display the Open dialog box. 
+	if (GetSaveFileName(&ofn) == TRUE)
+	{
+		CString str = ofn.lpstrFile;
+		if ( ofn.nFilterIndex == 2 ) 
+		{
+			CString str2 = str.Right(4);
+			if ( str2.CompareNoCase(".psb") != 0 )
+				str.Insert(str.GetLength(),".psb");
+			sprintf(szFile,str);
+			FILE* hFile=fopen(szFile,"wb");
+			pat_view()->SaveBlock(hFile);
+			fflush(hFile);
+			fclose(hFile);
+		}
+		else 
+		{ 
+			CString str2 = str.Right(4);
+			if ( str2.CompareNoCase(".psy") != 0 )
+				str.Insert(str.GetLength(),".psy");
+			int index = str.ReverseFind('\\');
+
+			if (index != -1) {
+				Global::pConfig->SetCurrentSongDir(
+					std::string(static_cast<char const *>(str.Left(index))));
+				song().set_filename(std::string(str.Mid(index+1))); }
+			else {
+				song().set_filename(std::string(str));
+			}
+			//todo: fileformat version
+			// if ( ! song().save(str.GetBuffer(1),3)){
+			//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
+			//	return FALSE;
+			//}
+			
+				psycle::core::RiffFile file1;
+				if (!file1.Create((char*)str.GetBuffer(1), true))
 				{
 					mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
 					return FALSE;
 				}
-				file.exportsong(song());
-				file.Close();
-			}
-			else
-			{
-				return FALSE;
-			}
-			return bResult;
-		}
-
-
-		bool Project::OnFileSave(UINT id)
-		{
-			//MessageBox("Saving Disabled");
-			//return false;
-			BOOL bResult = TRUE;
-			if ( song()._saved )
-			{
-				if (mac_view()->child_view()->MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
+				Psy3Saver saver(song());
+				if (!saver.Save(&file1, false))
 				{
-					std::string filepath = Global::pConfig->GetCurrentSongDir();
-					filepath += '\\';
-					filepath += song().filename();
-					//todo: fileformat version
-					// if (!song().save(filepath,3) ) {
-					//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
-					//	return FALSE;
-					// }
-					psycle::core::RiffFile file;
-					if (!file.Create((char*)filepath.c_str(), true))
-					{
-						mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
-					}
-					Psy3Saver saver(song());
-					if (!saver.Save(&file, true))
-					{
-						mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
-					}					
-					else 
-					{
-						song()._saved=true;
-						mac_view()->child_view()->SetTitleBarText();
-					}				
-					//file.Close();  <- save handles this 
-				}
-				else 
-				{
-					return FALSE;
-				}
-			}
+					mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
+					bResult = FALSE;
+				}									
 			else 
 			{
-				return OnFileSaveAs(0);
+				song()._saved=true;
+				AppendToRecent(str.GetBuffer(1));						
+				mac_view()->child_view()->SetTitleBarText();
 			}
-			return bResult;
-
+			//file.Close(); <- save handles this
 		}
+	}
+	else
+	{
+		return FALSE;
+	}
+	return bResult;
+}
 
-		//////////////////////////////////////////////////////////////////////
-		// "Save Song As" Function
-
-		bool Project::OnFileSaveAs(UINT id)
-		{
-			//MessageBox("Saving Disabled");
-			//return false;
-			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = song().filename();
-			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
-			
-			char szFile[_MAX_PATH];
-
-			szFile[_MAX_PATH-1]=0;
-			strncpy(szFile,if2.c_str(),_MAX_PATH-1);
-			
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = mac_view()->child_view()->GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-			BOOL bResult = TRUE;
-			
-			// Display the Open dialog box. 
-			if (GetSaveFileName(&ofn) == TRUE)
-			{
-				CString str = ofn.lpstrFile;
-				if ( ofn.nFilterIndex == 2 ) 
-				{
-					CString str2 = str.Right(4);
-					if ( str2.CompareNoCase(".psb") != 0 )
-						str.Insert(str.GetLength(),".psb");
-					sprintf(szFile,str);
-					FILE* hFile=fopen(szFile,"wb");
-					pat_view()->SaveBlock(hFile);
-					fflush(hFile);
-					fclose(hFile);
-				}
-				else 
-				{ 
-					CString str2 = str.Right(4);
-					if ( str2.CompareNoCase(".psy") != 0 )
-						str.Insert(str.GetLength(),".psy");
-					int index = str.ReverseFind('\\');
-
-					if (index != -1) {
-						Global::pConfig->SetCurrentSongDir(
-							std::string(static_cast<char const *>(str.Left(index))));
-						song().set_filename(std::string(str.Mid(index+1))); }
-					else {
-						song().set_filename(std::string(str));
-					}
-					//todo: fileformat version
-					// if ( ! song().save(str.GetBuffer(1),3)){
-					//	mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
-					//	return FALSE;
-					//}
-					
-						psycle::core::RiffFile file1;
-						if (!file1.Create((char*)str.GetBuffer(1), true))
-						{
-							mac_view()->child_view()->MessageBox("Error creating file!", "Error!", MB_OK);
-							return FALSE;
-						}
-						Psy3Saver saver(song());
-						if (!saver.Save(&file1, false))
-						{
-							mac_view()->child_view()->MessageBox("Error saving file!", "Error!", MB_OK);
-							bResult = FALSE;
-						}									
-					else 
-					{
-						song()._saved=true;
-						AppendToRecent(str.GetBuffer(1));						
-						mac_view()->child_view()->SetTitleBarText();
-					}
-					//file.Close(); <- save handles this
-				}
-			}
-			else
-			{
-				return FALSE;
-			}
-			return bResult;
-		}
-
-	}  // namespace host
-}  // namespace psycle
+}}

@@ -9,8 +9,7 @@
 #include "MachineGui.hpp"
 #include "MachineView.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
 		BEGIN_MESSAGE_MAP(CGearTracker, CDialog)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawTrackslider2)

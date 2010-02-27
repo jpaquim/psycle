@@ -1,20 +1,14 @@
 #pragma once
 #include "PatHelperCommand.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		class PatTransposeCommand : public PatHelperCommand {
-		public:
-			PatTransposeCommand(class PatternView* pat_view, int trp);
-			~PatTransposeCommand() {}
+class PatTransposeCommand : public PatHelperCommand {
+	public:
+		PatTransposeCommand(class PatternView* pat_view, int trp);
+		virtual void Execute();
+	private:
+		int trp_;
+};
 
-			virtual void Execute();
-
-		private:
-			int trp_;
-
-		};
-
-	}	// namespace host
-}	// namespace psycle
+}}

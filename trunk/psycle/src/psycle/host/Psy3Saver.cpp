@@ -1,5 +1,4 @@
 #include "Psy3Saver.hpp"
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include "ProgressDialog.hpp"
 #include "Zap.hpp"
 
@@ -556,5 +555,3 @@ namespace psycle  {
 
 	}	// namespace host
 }  // namespace psycle
-
-#endif

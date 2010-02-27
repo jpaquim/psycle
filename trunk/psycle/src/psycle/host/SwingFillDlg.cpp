@@ -2,8 +2,9 @@
 ///\brief implementation file for psycle::host::CSwingFillDlg.
 
 #include "SwingFillDlg.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
 		CSwingFillDlg::CSwingFillDlg(CWnd* pParent) : CDialog(CSwingFillDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CSwingFillDlg)

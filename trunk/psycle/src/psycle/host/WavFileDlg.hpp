@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CWavFileDlg.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		/// wave file dialog window.
 		class CWavFileDlg : public CFileDialog

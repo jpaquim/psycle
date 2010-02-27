@@ -2,8 +2,9 @@
 ///\brief interface file for psycle::host::CWaveOutDialog.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
+
 		/// mme config window.
 		class CWaveOutDialog : public CDialog
 		{

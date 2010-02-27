@@ -1,19 +1,18 @@
 #include "ClearCurrCommand.hpp"
 #include "PatternView.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 		
-		ClearCurrCommand::ClearCurrCommand(PatternView* pat_view) 
-			: PatHelperCommand(pat_view) {
-		}
+ClearCurrCommand::ClearCurrCommand(PatternView* pat_view) 
+:
+	PatHelperCommand(pat_view)
+{}
 		
-		void ClearCurrCommand::Execute() {
-			PatHelperCommand::PrepareUndoStorage();
-			// Execute
-			pat_view()->ClearCurr();
-			PatHelperCommand::PrepareRedoStorage();
-		}
+void ClearCurrCommand::Execute() {
+	PatHelperCommand::PrepareUndoStorage();
+	// Execute
+	pat_view()->ClearCurr();
+	PatHelperCommand::PrepareRedoStorage();
+}
 
-	}	// namespace host
-}	// namespace psycle
+}}

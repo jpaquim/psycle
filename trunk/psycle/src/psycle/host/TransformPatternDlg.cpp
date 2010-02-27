@@ -9,8 +9,6 @@
 
 namespace psycle { namespace host {
 
-using namespace helpers;
-
 		// CTransformPatternDlg dialog
 
 		IMPLEMENT_DYNAMIC(CTransformPatternDlg, CDialog)

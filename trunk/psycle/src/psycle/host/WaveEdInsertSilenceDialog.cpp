@@ -1,8 +1,9 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdInsertSilenceDialog.
 #include "WaveEdInsertSilenceDialog.hpp"
-namespace psycle {
-namespace host {
+
+namespace psycle { namespace host {
+
 		CWaveEdInsertSilenceDialog::CWaveEdInsertSilenceDialog(CWnd* pParent)
 			: CDialog(CWaveEdInsertSilenceDialog::IDD, pParent)
 		{

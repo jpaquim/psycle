@@ -2,15 +2,11 @@
 ///\interface psycle::host::Registry.
 #pragma once
 #include "Psycle.hpp"
-#include <universalis/os/loggers.hpp>
-#include <boost/static_assert.hpp>
 #include <string>
 namespace psycle
 {
 	namespace host
 	{
-		namespace loggers = universalis::os::loggers;
-
 		/// the evil microsoft windows registry.
 		class Registry
 		{

@@ -11,7 +11,7 @@
 #include <psycle/core/plugincatcher.h>
 #include <psycle/core/machinekey.hpp>
 #include <psycle/core/internalkeys.hpp>
-#include <universalis/os/paths.hpp>
+#include <universalis/os/fs.hpp>
 
 #include <string>
 #include <sstream>
@@ -22,8 +22,6 @@
 #include <direct.h>
 
 namespace psycle { namespace host {
-
-using namespace core;
 
 		int CNewMachine::machineGrouping = groupRole;
 		int CNewMachine::displayName = displayName;

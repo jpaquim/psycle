@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CWaveEdCrossfadeDialog.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		class CWaveEdCrossfadeDialog : public CDialog
 		{

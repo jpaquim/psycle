@@ -7,7 +7,6 @@
 #include <psycle/core/xmsampler.h>
 
 namespace psycle { namespace host {
-using namespace core;
 
 // Cuadro de diálogo de XMSamplerMixerPage
 

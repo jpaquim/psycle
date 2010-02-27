@@ -1,16 +1,12 @@
 #pragma once
 #include "SeqHelperCommand.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
-		class SeqInsCommand : public SeqHelperCommand {
-		public:
-			SeqInsCommand(class SequencerView* pat_view);
-			~SeqInsCommand() {}
+class SeqInsCommand : public SeqHelperCommand {
+	public:
+		SeqInsCommand(class SequencerView* pat_view);
+		virtual void Execute();
+};
 
-			virtual void Execute();
-		};
-
-	}	// namespace host
-}	// namespace psycle
+}}

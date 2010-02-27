@@ -7,8 +7,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 		CWavFileDlg::CWavFileDlg(
@@ -38,9 +36,6 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			Sampler::wavprev.SetInstrument(_pSong->_pInstrument[PREV_WAV_INS]);
 			
 			Sampler::wavprev.Stop();
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-			Sleep(LOCK_LATENCY);
-#endif
 			if (CurrExt=="wav" && _lastFile != GetFileName())
 			{
 				_lastFile=GetFileName();

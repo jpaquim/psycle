@@ -1,20 +1,19 @@
 #include "ChangeInsCommand.hpp"
 #include "PatternView.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 		
-		ChangeInsCommand::ChangeInsCommand(PatternView* pat_view, int ins) 
-			: PatHelperCommand(pat_view),
-			  ins_(ins) {
-		}
+ChangeInsCommand::ChangeInsCommand(PatternView* pat_view, int ins) 
+:
+	PatHelperCommand(pat_view),
+	ins_(ins)
+{}
 		
-		void ChangeInsCommand::Execute() {
-			PatHelperCommand::PrepareUndoStorage();
-			// Execute Command
-			pat_view()->BlockInsChange(ins_);
-			PatHelperCommand::PrepareRedoStorage();
-		}
+void ChangeInsCommand::Execute() {
+	PatHelperCommand::PrepareUndoStorage();
+	// Execute Command
+	pat_view()->BlockInsChange(ins_);
+	PatHelperCommand::PrepareRedoStorage();
+}
 		
-	}	// namespace host
-}	// namespace psycle
+}}

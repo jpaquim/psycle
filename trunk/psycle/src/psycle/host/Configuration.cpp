@@ -4,42 +4,26 @@
 #include "Configuration.hpp"
 #include "Registry.hpp"
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-	#include <psycle/core/song.h>
-	#include <psycle/core/patternEvent.h>
-	#include "DSoundConfig.hpp"
-	#include "ASIOConfig.hpp"
-	#include <psycle/audiodrivers/microsoftmmewaveout.h>
-	#include <psycle/audiodrivers/microsoftdirectsoundout.h>
-	#include <psycle/audiodrivers/asiointerface.h>
-#else
-	#include "Song.hpp"
-#endif
+#include <psycle/core/song.h>
+#include <psycle/core/patternEvent.h>
+#include "DSoundConfig.hpp"
+#include "ASIOConfig.hpp"
+#include <psycle/audiodrivers/microsoftmmewaveout.h>
+#include <psycle/audiodrivers/microsoftdirectsoundout.h>
+#include <psycle/audiodrivers/asiointerface.h>
 
 #if !defined WINAMP_PLUGIN
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-#else
-	#include "WaveOut.hpp"
-	#include "DirectSound.hpp"
-	#include "ASIOInterface.hpp"
-#endif
 	#include "MidiInput.hpp"
 	#include "NewMachine.hpp"
 #endif // !defined WINAMP_PLUGIN
-
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
    static char THIS_FILE[] = __FILE__;
 #endif
-namespace psycle { namespace host {
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			using namespace core;
-#else
-#endif
+namespace psycle { namespace host {
 		
 		Configuration::Configuration()
 		{

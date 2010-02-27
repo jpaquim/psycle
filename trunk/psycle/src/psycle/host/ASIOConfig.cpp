@@ -2,8 +2,7 @@
 ///\brief implementation file for psycle::host::CASIOConfig.
 
 #include "ASIOConfig.hpp"
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
 		#define MIN_NUMBUF 1
 		#define MAX_NUMBUF 16

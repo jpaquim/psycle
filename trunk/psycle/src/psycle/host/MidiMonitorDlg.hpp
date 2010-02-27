@@ -3,8 +3,7 @@
 #pragma once
 #include "Psycle.hpp"
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
 		#define	DARK_GREEN	RGB(0, 128, 0)
 		#define	DARK_RED	RGB(128, 0, 0)	

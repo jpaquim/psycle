@@ -6,11 +6,10 @@
 #include "XMSamplerMixerPage.hpp"
 
 namespace psycle {
-	namespace core {
-		class XMSampler;
-	}
-	namespace host {
-		using namespace core;
+namespace core {
+	class XMSampler;
+}
+namespace host {
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog

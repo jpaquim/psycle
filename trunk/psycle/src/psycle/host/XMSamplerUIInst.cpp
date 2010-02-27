@@ -17,8 +17,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 // XMSamplerUIInst
 IMPLEMENT_DYNAMIC(XMSamplerUIInst, CPropertyPage)
 XMSamplerUIInst::XMSamplerUIInst()

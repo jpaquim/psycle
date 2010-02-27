@@ -14,8 +14,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		int CGearRackDlg::DisplayMode = 0;
 
 		CGearRackDlg::CGearRackDlg(MachineView* view)

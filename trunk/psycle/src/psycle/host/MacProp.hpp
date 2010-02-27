@@ -5,8 +5,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		class CChildView;
 		class MachineGui;
 

@@ -16,8 +16,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 #if !PSYCLE__CONFIGURATION__USE_PSYCORE
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;

@@ -5,7 +5,6 @@
  */
 #pragma once
 #include "Global.hpp"
-#include <universalis/stdlib/cstdint.hpp>
 
 #pragma pack(1)
 

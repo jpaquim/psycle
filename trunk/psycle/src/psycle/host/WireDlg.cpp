@@ -20,9 +20,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-using namespace helpers::math;
-
 		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
 			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)

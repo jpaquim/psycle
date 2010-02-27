@@ -3,27 +3,17 @@
 #pragma once
 #include "Psycle.hpp"
 
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 namespace psycle { 
-			namespace core {
-				class Pattern;
-			}
-		}
-#endif
-
-namespace psycle {
-	namespace host {
+namespace core {
+	class Pattern;
+}
+namespace host {
 
 		/// pattern window.
 		class CPatDlg : public CDialog
 		{
 		public:
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			CPatDlg(CWnd* pParent, psycle::core::Pattern* pattern);
-#else
-			CPatDlg(CWnd* pParent);
-#endif
+			CPatDlg(CWnd* pParent, Pattern* pattern);
 			int patLines;
 			char patName[32];
 		// Dialog Data
@@ -45,9 +35,7 @@ namespace psycle {
 		// Implementation
 		protected:
 			BOOL bInit;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::core::Pattern* pattern_;
-#endif
+			Pattern* pattern_;
 			// Generated message map functions
 			//{{AFX_MSG(CPatDlg)
 			virtual BOOL OnInitDialog();
@@ -60,6 +48,4 @@ namespace psycle {
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-	}   // namespace
-}   // namespace
+}}

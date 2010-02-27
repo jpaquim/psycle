@@ -3,14 +3,10 @@
 #pragma once
 #include "Psycle.hpp"
 
-
 namespace psycle {
 	namespace core {
 		class Sampler;
 	}
-}
-
-namespace psycle {
 	namespace host {
 
 		class CChildView;

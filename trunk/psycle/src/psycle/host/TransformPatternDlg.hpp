@@ -6,8 +6,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 		/// CTransformPatternDlg dialog
 		class CTransformPatternDlg : public CDialog
 		{

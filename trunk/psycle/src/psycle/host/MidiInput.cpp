@@ -15,8 +15,6 @@
 #include <psycle/core/vstplugin.h>
 #include <psycle/helpers/math.hpp>
 
-#include <cassert>
-
 #if !defined NDEBUG
    #define new DEBUG_NEW
    #undef THIS_FILE
@@ -24,9 +22,6 @@
 #endif
 
 namespace psycle { namespace host {
-
-using namespace core;
-using namespace helpers::math;
 
 		extern CPsycleApp theApp;
 

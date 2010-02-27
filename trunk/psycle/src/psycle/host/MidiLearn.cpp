@@ -5,8 +5,7 @@
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
 		CMidiLearn::CMidiLearn(CWnd* pParent) : CDialog(CMidiLearn::IDD, pParent)
 		{

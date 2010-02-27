@@ -11,9 +11,7 @@ namespace psycle {
 			class plugin;
 		}
 	}
-
 	namespace host {
-		using namespace core;
 
 		class CVstParamList : public CDialog
 		{

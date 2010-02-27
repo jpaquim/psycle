@@ -2,24 +2,22 @@
 ///\brief implementation file for psycle::host::CWaveOutDialog.
 
 #include "WaveOutDialog.hpp"
-#include <diversalis/compiler.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 #endif
 
-#include <mmsystem.h>
-#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "winmm")
-#endif
+	#include <mmsystem.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "winmm")
+	#endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(pop)
 #endif
 
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 
 		CWaveOutDialog::CWaveOutDialog(CWnd* pParent) : CDialog(CWaveOutDialog::IDD, pParent)
 		{

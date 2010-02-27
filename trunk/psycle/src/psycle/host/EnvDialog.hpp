@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CEnvDialog.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		/// enveloppe window.
 		class CEnvDialog : public CDialog

@@ -7,8 +7,6 @@
 
 namespace psycle { namespace host {
 
-using namespace core;
-
 	IMPLEMENT_DYNCREATE(XMSamplerUIGeneral, CPropertyPage)
 
 	XMSamplerUIGeneral::XMSamplerUIGeneral() : CPropertyPage(XMSamplerUIGeneral::IDD)

@@ -7,13 +7,11 @@
 #include <psycle/host/WaveEdInsertSilenceDialog.hpp>
 #include <psycle/host/WaveEdCrossfadeDialog.hpp>
 #include <psycle/host/ScrollableDlgBar.hpp>
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 #include <psycle/core/instrument.h>
-#endif
 #include <deque>
 #include <utility>
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		class CMainFrame;
 

@@ -2,8 +2,8 @@
 ///\brief interface file for psycle::host::CWaveEdAmplifyDialog.
 #pragma once
 #include "Psycle.hpp"
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		#define AMP_DIALOG_CANCEL -10000
 

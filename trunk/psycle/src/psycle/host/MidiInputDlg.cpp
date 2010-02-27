@@ -17,8 +17,6 @@
 
 namespace psycle { namespace host {
 
-using namespace helpers;
-
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
 
 		CMidiInputDlg::CMidiInputDlg()

@@ -3,8 +3,8 @@
 #pragma once
 #include "Psycle.hpp"
 #include <vector>
-namespace psycle {
-	namespace host {
+
+namespace psycle { namespace host {
 
 		/// midi input config window.
 		class CMidiInputDlg : public CPropertyPage
