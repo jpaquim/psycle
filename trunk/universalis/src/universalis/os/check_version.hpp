@@ -10,16 +10,11 @@
 
 #include <universalis/exception.hpp>
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
-
 namespace universalis { namespace os { namespace detail {
 
 /// excludes poor operating systems
-void UNIVERSALIS__COMPILER__DYNAMIC_LINK check_version() throw(universalis::exception);
+void UNIVERSALIS__DECL check_version() throw(universalis::exception);
 
 }}}
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif

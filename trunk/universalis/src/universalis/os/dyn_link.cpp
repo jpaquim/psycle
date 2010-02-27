@@ -1,13 +1,13 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation universalis::os::dynamic_link::resolver
+///\implementation universalis::os::dyn_link::resolver
 
 #include <universalis/detail/project.private.hpp>
-#include "resolver.hpp"
-#include <universalis/exception.hpp>
-#include <universalis/os/os.hpp>
-#include <universalis/os/loggers.hpp>
+#include "dyn_link.hpp"
+#include "exception.hpp"
+#include "loggers.hpp"
+#include "fs.hpp"
 #include <sstream>
 #include <cassert>
 #include <iostream>
@@ -15,13 +15,82 @@
 	#include <dlfcn.h> // dlopen, dlsym, dlclose, dlerror
 	#include <csignal>
 #elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
-	#include <windows.h>
-	#include <universalis/os/exceptions/code_description.hpp>
+	#include "include_windows_without_crap.hpp"
 #else
 	#include <glibmm/module.h> // Note: it seems glibmm is not honouring $ORIGIN on ELF.
 #endif
 
-namespace universalis { namespace os { namespace dynamic_link {
+namespace universalis { namespace os { namespace dyn_link {
+
+namespace {
+	char const path_list_env_var_name[] = {
+		#if defined DIVERSALIS__OS__MICROSOFT || defined DIVERSALIS__OS__MICROSOFT__POSIX_EMULATION
+			"PATH"
+		#elif defined DIVERSALIS__OS__HPUX
+			"SHLIB_PATH"
+		#elif defined DIVERSALIS__OS__AIX
+			"LIBPATH"
+		#elif defined DIVERSALIS__OS__POSIX
+			"LD_LIBRARY_PATH" // used at least on linux/solaris/macosx
+			// note: macosx also has: "DYLD_LIBRARY_PATH", "DYLD_FALLBACK_LIBRARY_PATH"
+		#else
+			#error unknown dynamic linker
+		#endif
+	};
+
+	path_list_type::value_type::value_type const path_list_sep =
+		#if defined DIVERSALIS__OS__POSIX
+			':';
+		#elif defined DIVERSALIS__OS__MICROSOFT
+			';';
+		#else
+			#error unknown path list separator
+		#endif
+}
+
+/****************************************************************/
+// lib_path
+
+void lib_path(path_list_type const & new_path) {
+	std::ostringstream s;
+	for(path_list_type::const_iterator i(new_path.begin()), e(new_path.end()); i != e; ++i)
+		s << i->directory_string() << path_list_sep;
+
+	// setenv is better than putenv because putenv
+	// is not well-standardized and has different
+	// memory ownership policies on different systems. -- Magnus
+
+	// On mswindows, only putenv exists (with same memory ownership issue),
+	// so we have to use the winapi instead.
+
+	if(
+		#if defined DIVERSALIS__OS__MICROSOFT
+			!::SetEnvironmentVariableA(path_list_env_var_name, s.str().c_str())
+		#else
+			::setenv(path_list_env_var_name, new_path.str().c_str(), 1 /* overwrite */)
+		#endif
+	) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+}
+
+path_list_type lib_path() {
+	path_list_type nvr;
+	char const * const env(std::getenv(path_list_env_var_name));
+	if(env) {
+		std::string s(env);
+		std::string::const_iterator first(s.begin()), last(s.begin());
+		for(std::string::const_iterator i(s.begin()), e(s.end()); i != e; ++i) {
+			if(*i == path_list_sep) {
+				nvr.push_back(path_list_type::value_type(first, last));
+				first = i + 1;
+			}
+			last = i;
+		}
+	}
+	return nvr;
+}
+
+/****************************************************************/
+// resolver
 
 void resolver::open_error(boost::filesystem::path const & path, std::string const & message) {
 	throw exceptions::runtime_error("could not open library " + path.string() + ": " + message, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS /* __NO_CLASS because it is a static member function */);
@@ -47,13 +116,13 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 			#else
 			//"lib" +
 			#endif
-			path.branch_path() / (
-				path.leaf() +
+			path.parent_path() / (
+				path.filename() +
 				#if defined DIVERSALIS__OS__LINUX
 					".so" // "." + version_string.str() // libfoo.so.0
 				#elif defined DIVERSALIS__OS__APPLE
 					".dylib" // libfoo.dylib or libfoo.bundle
-				#elif defined DIVERSALIS__OS__MICROSOFT || defined DIVERSALIS__OS__CYGWIN
+				#elif defined DIVERSALIS__OS__MICROSOFT || defined DIVERSALIS__OS__MICROSOFT__POSIX_EMULATION
 					".dll" // "-" + version_string.str() + ".dll" // libfoo-0.dll or cygfoo-0.dll
 					// [bohan] it is only necessary to append the .dll suffix when the given name itself contains a dot,
 					// [bohan] otherwise, we do not need to explicitly tell the suffix.
@@ -64,13 +133,12 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 		#else
 			boost::filesystem::path(
 				Glib::Module::build_path(
-					path.branch_path().native_directory_string(),
-					path.leaf()
+					path.parent_path().directory_string(),
+					path.filename()
 						#if defined DIVERSALIS__OS__MICROSOFT
 							//+ "-" + version_string.str()
 						#endif
-				),
-				boost::filesystem::no_check // boost::filesystem::native yells when there are spaces
+				)
 			);
 		#endif
 }
@@ -88,8 +156,8 @@ resolver::resolver(boost::filesystem::path const & path, unsigned int const & ve
 	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
 		// we use \ here instead of / because ::LoadLibraryEx will not use the LOAD_WITH_ALTERED_SEARCH_PATH option if it does not see a \ character in the file path:
 		boost::filesystem::path const final_path(decorated_filename(path, version));
-		underlying_ = ::LoadLibraryExA(final_path.native_file_string().c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
-		if(!opened()) open_error(final_path, exceptions::code_description());
+		underlying_ = ::LoadLibraryExA(final_path.file_string().c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
+		if(!opened()) open_error(final_path, exceptions::desc());
 	#else
 		assert(Glib::Module::get_supported());
 		boost::filesystem::path const final_path(decorated_filename(path, version));
@@ -119,7 +187,7 @@ void resolver::close() {
 	#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__POSIX
 		if(::dlclose(underlying_)) close_error(std::string(::dlerror()));
 	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
-		if(!::FreeLibrary(underlying_)) close_error(exceptions::code_description());
+		if(!::FreeLibrary(underlying_)) close_error(exceptions::desc());
 	#else
 		delete underlying_;
 	#endif
@@ -155,7 +223,7 @@ resolver::function_pointer resolver::resolve_symbol_untyped(std::string const & 
 		if(!result.untyped) resolve_symbol_error(name, std::string(::dlerror()));
 	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
 		result.untyped = ::GetProcAddress(underlying_, decorated_symbol(name).c_str());
-		if(!result.untyped) resolve_symbol_error(name, exceptions::code_description());
+		if(!result.untyped) resolve_symbol_error(name, exceptions::desc());
 	#else
 		if(!underlying_->get_symbol(decorated_symbol(name), result.untyped)) resolve_symbol_error(name, Glib::Module::get_last_error());
 	#endif
@@ -169,9 +237,9 @@ boost::filesystem::path resolver::path() const throw() {
 	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
 		char module_file_name[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
 		::GetModuleFileNameA(underlying_, module_file_name, sizeof module_file_name);
-		return boost::filesystem::path(module_file_name, boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
+		return boost::filesystem::path(module_file_name);
 	#else
-		return boost::filesystem::path(underlying_->get_name(), boost::filesystem::no_check); // boost::filesystem::native yells when there are spaces
+		return boost::filesystem::path(underlying_->get_name());
 	#endif
 }
 

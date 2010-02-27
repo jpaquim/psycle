@@ -4,7 +4,8 @@
 ///\implementation universalis::os::clocks
 #include <universalis/detail/project.private.hpp>
 #include "clocks.hpp"
-#include <universalis/os/exceptions/code_description.hpp>
+#include "exception.hpp"
+#include <universalis/compiler/thread_local_storage.hpp>
 #if defined DIVERSALIS__OS__POSIX
 	#include <unistd.h> // for sysconf
 	#include <sys/time.h>
@@ -169,13 +170,9 @@ namespace detail {
 	/// iso std time.
 	/// returns the time since the Epoch (00:00:00 UTC, January 1, 1970), measured in seconds.
 	/// test result: clock: std::time, min: 1s, avg: 1s, max: 1s
-	nanoseconds iso_std_time() throw(std::runtime_error) {
+	nanoseconds iso_std_time() throw(exception) {
 		std::time_t const t(std::time(0));
-		if(t < 0) {
-			//throw exception(UNIVERSALIS__COMPILER__LOCATION);
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+		if(t < 0) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		nanoseconds ns = seconds(t);
 		return ns;
 	}
@@ -183,13 +180,9 @@ namespace detail {
 	/// iso std clock.
 	/// returns an approximation of processor time used by the program
 	/// test result on colinux AMD64: clock: std::clock, min: 0.01s, avg: 0.01511s, max: 0.02s
-	nanoseconds iso_std_clock() throw(std::runtime_error) {
+	nanoseconds iso_std_clock() throw(exception) {
 		std::clock_t const t(std::clock());
-		if(t < 0) {
-			//throw exception(UNIVERSALIS__COMPILER__LOCATION);
-			std::ostringstream s; s << exceptions::code_description();
-			throw std::runtime_error(s.str().c_str());
-		}
+		if(t < 0) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		nanoseconds ns = nanoseconds(1000 * 1000 * 1000LL * t / CLOCKS_PER_SEC);
 		return ns;
 	}
@@ -278,13 +271,10 @@ namespace detail {
 			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386, AR.ITC on Itanium).
 			/// test result on AMD64: clock resolution: QueryPerformancefrequency: 3579545Hz (3.6MHz)
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
-			nanoseconds performance_counter() throw(std::runtime_error) {
+			nanoseconds performance_counter() throw(exception) {
 				::LARGE_INTEGER counter, frequency;
-				if(!::QueryPerformanceCounter(&counter) || !::QueryPerformanceFrequency(&frequency)) {
-					//throw exception(UNIVERSALIS__COMPILER__LOCATION);
-					std::ostringstream s; s << exceptions::code_description();
-					throw std::runtime_error(s.str().c_str());
-				}
+				if(!::QueryPerformanceCounter(&counter) || !::QueryPerformanceFrequency(&frequency))
+					throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				#if 1
 					// for systems where the frequency may change over time, we need to remember the last counter and time values
 					int64_t static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_counter(0);

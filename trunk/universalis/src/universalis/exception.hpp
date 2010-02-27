@@ -7,7 +7,7 @@
 #define UNIVERSALIS__EXCEPTION__INCLUDED
 #pragma once
 
-#include "compiler/exceptions/ellipsis.hpp"
+#include "compiler/exception.hpp"
 #include "compiler/location.hpp"
 #include <stdexcept>
 #include <string>
@@ -15,14 +15,11 @@
 	#include <typeinfo>
 #endif
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  UNIVERSALIS__SOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
-
 namespace universalis {
 
 namespace exceptions {
 	/// holds information about the location from where an exception was triggered.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK locatable {
+	class UNIVERSALIS__DECL locatable {
 		public:
 			locatable(compiler::location const & location) throw() : location_(location) {}
 			operator compiler::location const & () const throw() { return location_; }
@@ -32,33 +29,33 @@ namespace exceptions {
 	};
 
 	/// holds information about nested exceptions
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK causality {
+	class UNIVERSALIS__DECL nested {
 		public:
-			causality(void const * cause = 0) throw() : cause_(cause) {}
+			nested(void const * cause = 0) throw() : cause_(cause) {}
 			void const * cause() const throw() { return this->cause_; }
 		private:
 			void const * cause_;
 	};
 }
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK exception
+class UNIVERSALIS__DECL exception
 :
 	public std::exception,
 	public exceptions::locatable,
-	public exceptions::causality
+	public exceptions::nested
 {
 	public:
 		exception(compiler::location const & location, void const * cause = 0) throw()
-		: exceptions::locatable(location), exceptions::causality(cause) {}
+		: exceptions::locatable(location), exceptions::nested(cause) {}
 		virtual ~exception() throw() {}
 };
 
 namespace exceptions {
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK runtime_error
+	class UNIVERSALIS__DECL runtime_error
 	:
 		public std::runtime_error,
 		public locatable,
-		public causality
+		public nested
 	{
 		public:
 			runtime_error(std::string const & what, compiler::location const & location, void const * cause = 0) throw();
@@ -66,15 +63,15 @@ namespace exceptions {
 	};
 
 	#if !defined NDEBUG
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK bad_cast
+		class UNIVERSALIS__DECL bad_cast
 		:
 			public std::bad_cast,
 			public locatable,
-			public causality
+			public nested
 		{
 			public:
 				bad_cast(std::type_info const & from, std::type_info const & to, compiler::location const & location, void const * cause = 0) throw()
-				: locatable(location), causality(cause), from_(from), to_(to) {}
+				: locatable(location), nested(cause), from_(from), to_(to) {}
 				virtual ~bad_cast() throw() {}
 
 			public:  std::type_info const & from() const throw() { return this->from_; }
@@ -87,7 +84,7 @@ namespace exceptions {
 
 	template<typename E> std::string inline string                (             E const & e) { std::ostringstream s; s << e; return s.str(); }
 	template<          > std::string inline string<std::exception>(std::exception const & e) { return e.what(); }
-	template<          > std::string inline string<void const *  >(  void const * const &  ) { return compiler::exceptions::ellipsis(); }
+	template<          > std::string inline string<void const *  >(  void const * const &  ) { return compiler::exceptions::ellipsis_desc(); }
 
 	///\internal
 	namespace detail {
@@ -128,7 +125,5 @@ namespace exceptions {
 		catch(               ...                ) { rethrow_functor.operator_<void*>(location    ); }
 	}
 }
-
-#include <universalis/compiler/dynamic_link/end.hpp>
 
 #endif
