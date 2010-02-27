@@ -11,8 +11,8 @@
 	// Only gcc is able to include the name of the current class implicitly with __PRETTY_FUNCTION__.
 	// We can use rtti support on other compilers.
 	#include "typenameof.hpp"
-	#include <boost/current_function.hpp>
 #endif
+#include <boost/current_function.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -74,7 +74,7 @@ class location {
 	///\internal
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE \
 		UNIVERSALIS__META__MODULE__NAME " " \
-		UNIVERSALIS__COMPILER__STRINGIZED(UNIVERSALIS__META__MODULE__VERSION)
+		UNIVERSALIS__COMPILER__STRINGIZE(UNIVERSALIS__META__MODULE__VERSION)
 #elif defined UNIVERSALIS__META__MODULE__NAME
 	///\internal
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE UNIVERSALIS__META__MODULE__NAME
@@ -98,11 +98,11 @@ class location {
 	// The dummy "this" usage is just here to ensure the compiler will fail to compile
 	// if this macro was mistakenly used instead of the "NO_CLASS" variant.
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
-		(this, BOOST_CURRENT_FUNCTION)
+		(std::string(this ? "" : "") + BOOST_CURRENT_FUNCTION)
 #else
 	// include the name of the current class explicitly using rtti on the "this" pointer
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
-		universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
+		(universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS)
 #endif
 
 #define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  \

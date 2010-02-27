@@ -158,9 +158,9 @@ namespace {
 	// returns the min and max priorities for a policy
 	void priority_min_max(int policy, int & min, int & max) {
 		if((min = sched_get_priority_min(policy)) == -1)
-			throw exception(UNIVERSALIS__COMPILER__LOCATION);
+			throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		if((max = sched_get_priority_max(policy)) == -1)
-			throw exception(UNIVERSALIS__COMPILER__LOCATION);
+			throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 	}
 }
 #endif

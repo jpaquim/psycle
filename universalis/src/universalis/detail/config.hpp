@@ -5,6 +5,8 @@
 #define UNIVERSALIS__DETAIL__CONFIG__INCLUDED
 #pragma once
 
+#ifndef UNIVERSALIS__SHARED // always a shared lib for now
 #define UNIVERSALIS__SHARED
+#endif
 
 #endif

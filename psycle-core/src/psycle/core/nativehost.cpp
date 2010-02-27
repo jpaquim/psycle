@@ -113,7 +113,7 @@ void* NativeHost::LoadDll(std::string const & file_name) {
 
 	path_list_type const old_path(lib_path());
 	path_list_type new_path(old_path);
-	new_path.push_back(path_list_type::value_type(file_name).parent_path());
+	new_path.push_back(path_list_type::value_type(file_name).branch_path());
 	lib_path(new_path);
 
 	#if defined DIVERSALIS__OS__POSIX

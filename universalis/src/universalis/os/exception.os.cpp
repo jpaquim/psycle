@@ -35,7 +35,7 @@ namespace exceptions { namespace detail {
 		#endif
 	) {
 		#if !defined DIVERSALIS__OS__MICROSOFT
-			std::string nvr = stdlib::exceptions::desc(code)
+			std::string nvr = stdlib::exceptions::desc(code);
 			return nvr;
 		#else
 			std::ostringstream s; s

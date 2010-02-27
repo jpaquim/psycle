@@ -4,7 +4,6 @@
 ///\implementation universalis::os::clocks
 #include <universalis/detail/project.private.hpp>
 #include "clocks.hpp"
-#include "exception.hpp"
 #include <universalis/compiler/thread_local_storage.hpp>
 #if defined DIVERSALIS__OS__POSIX
 	#include <unistd.h> // for sysconf
@@ -172,7 +171,7 @@ namespace detail {
 	/// test result: clock: std::time, min: 1s, avg: 1s, max: 1s
 	nanoseconds iso_std_time() throw(exception) {
 		std::time_t const t(std::time(0));
-		if(t < 0) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		if(t < 0) throw exceptions::detail::posix(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		nanoseconds ns = seconds(t);
 		return ns;
 	}
@@ -182,7 +181,7 @@ namespace detail {
 	/// test result on colinux AMD64: clock: std::clock, min: 0.01s, avg: 0.01511s, max: 0.02s
 	nanoseconds iso_std_clock() throw(exception) {
 		std::clock_t const t(std::clock());
-		if(t < 0) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		if(t < 0) throw exceptions::detail::posix(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		nanoseconds ns = nanoseconds(1000 * 1000 * 1000LL * t / CLOCKS_PER_SEC);
 		return ns;
 	}
@@ -190,14 +189,11 @@ namespace detail {
 	#if defined DIVERSALIS__OS__POSIX
 		namespace posix {
 			namespace {
-				nanoseconds get(::clockid_t clock) throw(std::runtime_error) {
+				nanoseconds get(::clockid_t clock) throw(exception) {
 					#if defined _POSIX_TIMERS > 0 || defined _SC_TIMERS
 						::timespec t;
-						if(::clock_gettime(clock, &t)) {
-							//throw exception(UNIVERSALIS__COMPILER__LOCATION);
-							std::ostringstream s; s << exceptions::code_description();
-							throw std::runtime_error(s.str().c_str());
-						}
+						if(::clock_gettime(clock, &t))
+							throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 						nanoseconds ns(nanoseconds(t.tv_nsec) + seconds(t.tv_sec));
 						return ns;
 					#else
@@ -209,12 +205,12 @@ namespace detail {
 			/// posix CLOCK_REALTIME.
 			/// System-wide realtime clock.
 			/// test result on colinux AMD64: clock: CLOCK_REALTIME, min: 1.3e-05s, avg: 1.6006e-05s, max: 0.001359s
-			nanoseconds realtime() throw(std::runtime_error) { return get(CLOCK_REALTIME); }
+			nanoseconds realtime() throw(exception) { return get(CLOCK_REALTIME); }
 
 			/// posix CLOCK_MONOTONIC.
 			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
 			/// test result on colinux AMD64: clock: CLOCK_MONOTONIC, min: 1.3e-05s, avg: 1.606e-05s, max: 0.001745s
-			nanoseconds monotonic() throw(std::runtime_error) {
+			nanoseconds monotonic() throw(exception) {
 				return get(
 					#if _POSIX_MONOTONIC_CLOCK > 0 || defined _SC_MONOTONIC_CLOCK
 						CLOCK_MONOTONIC
@@ -228,7 +224,7 @@ namespace detail {
 			/// High-resolution per-process timer from the CPU.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386, AR.ITC on Itanium).
 			/// test result on colinux AMD64: clock: CLOCK_PROCESS_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
-			nanoseconds process_cpu_time() throw(std::runtime_error) {
+			nanoseconds process_cpu_time() throw(exception) {
 				return get(
 					#if _POSIX_CPUTIME > 0 || defined _SC_CPUTIME
 						CLOCK_PROCESS_CPUTIME_ID
@@ -242,7 +238,7 @@ namespace detail {
 			/// Thread-specific CPU-time clock.
 			/// Realized on many platforms using timers from the CPUs (TSC on i386, AR.ITC on Itanium).
 			/// test result on colinux AMD64: clock: CLOCK_THREAD_CPUTIME_ID, min: 0.01s, avg: 0.01s, max: 0.01s
-			nanoseconds thread_cpu_time() throw(std::runtime_error) {
+			nanoseconds thread_cpu_time() throw(exception) {
 				return get(
 					#if _POSIX_THREAD_CPUTIME > 0 || defined _SC_THREAD_CPUTIME
 						CLOCK_THREAD_CPUTIME_ID
@@ -254,13 +250,10 @@ namespace detail {
 
 			/// posix gettimeofday.
 			/// test result on colinux AMD64: clock: gettimeofday, min: 1.3e-05s, avg: 1.5878e-05s, max: 0.001719s
-			nanoseconds time_of_day() throw(std::runtime_error) {
+			nanoseconds time_of_day() throw(exception) {
 				::timeval t;
-				if(::gettimeofday(&t, 0)) { // second argument passed is 0 for no timezone
-					//throw exception(UNIVERSALIS__COMPILER__LOCATION);
-					std::ostringstream s; s << exceptions::code_description();
-					throw std::runtime_error(s.str().c_str());
-				}
+				if(::gettimeofday(&t, 0)) // second argument passed is 0 for no timezone
+					throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				nanoseconds ns(microseconds(t.tv_usec) + seconds(t.tv_sec));
 				return ns;
 			}
@@ -294,7 +287,7 @@ namespace detail {
 			/// it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: mmsystem timeGetTime, min: 0.001s, avg: 0.0010413s, max: 0.084s.
-			nanoseconds mme_system_time() {
+			nanoseconds mme_system_time() throw(exception) {
 				class set_timer_resolution {
 					private: ::UINT milliseconds;
 					public:
@@ -311,7 +304,6 @@ namespace detail {
 							if(!milliseconds) return; // was not set
 							if(::timeEndPeriod(milliseconds) == TIMERR_NOCANDO /* looks like microsoft invented LOLCode! */)
 								return; // cannot throw in a destructor
-								//throw std::runtime_error(GetLastErrorString());
 						}
 				} static once;
 				nanoseconds ns(1000LL * 1000 * ::timeGetTime());
@@ -325,14 +317,14 @@ namespace detail {
 			/// and hence is very inaccurate: it can lag behind the real clock value as much as 15ms, and sometimes more.
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: GetTickCount, min: 0.015s, avg: 0.015719s, max: 0.063s.
-			nanoseconds tick_count() {
+			nanoseconds tick_count() throw(exception) {
 				nanoseconds ns(1000LL * 1000 * ::GetTickCount());
 				return ns;
 			}
 
 			/// wall clock.
 			/// test result: clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
-			nanoseconds system_time_as_file_time_since_epoch() {
+			nanoseconds system_time_as_file_time_since_epoch() throw(exception) {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;
@@ -345,7 +337,7 @@ namespace detail {
 
 			/// virtual clock. kernel time not included.
 			/// test result: clock: GetProcessTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			nanoseconds process_time() {
+			nanoseconds process_time() throw(exception) {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;
@@ -358,7 +350,7 @@ namespace detail {
 			/// virtual clock. kernel time not included.
 			/// The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
 			/// test result: clock: GetThreadTimes, min: 0.015625s, avg: 0.015625s, max: 0.015625s.
-			nanoseconds thread_time() {
+			nanoseconds thread_time() throw(exception) {
 				union winapi_is_badly_designed {
 					::FILETIME file_time;
 					::LARGE_INTEGER large_integer;

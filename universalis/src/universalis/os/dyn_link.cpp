@@ -38,7 +38,7 @@ namespace {
 		#endif
 	};
 
-	path_list_type::value_type::value_type const path_list_sep =
+	const path_list_type::value_type::value_type path_list_sep =
 		#if defined DIVERSALIS__OS__POSIX
 			':';
 		#elif defined DIVERSALIS__OS__MICROSOFT
@@ -53,8 +53,10 @@ namespace {
 
 void lib_path(path_list_type const & new_path) {
 	std::ostringstream s;
-	for(path_list_type::const_iterator i(new_path.begin()), e(new_path.end()); i != e; ++i)
-		s << i->directory_string() << path_list_sep;
+	for(path_list_type::const_iterator i(new_path.begin()), e(new_path.end()); i != e;) {
+		s << i->directory_string();
+		if(++i != e) s << path_list_sep;
+	}
 
 	// setenv is better than putenv because putenv
 	// is not well-standardized and has different
@@ -67,7 +69,7 @@ void lib_path(path_list_type const & new_path) {
 		#if defined DIVERSALIS__OS__MICROSOFT
 			!::SetEnvironmentVariableA(path_list_env_var_name, s.str().c_str())
 		#else
-			::setenv(path_list_env_var_name, new_path.str().c_str(), 1 /* overwrite */)
+			::setenv(path_list_env_var_name, s.str().c_str(), 1 /* overwrite */)
 		#endif
 	) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 }
@@ -77,14 +79,14 @@ path_list_type lib_path() {
 	char const * const env(std::getenv(path_list_env_var_name));
 	if(env) {
 		std::string s(env);
-		std::string::const_iterator first(s.begin()), last(s.begin());
-		for(std::string::const_iterator i(s.begin()), e(s.end()); i != e; ++i) {
+		std::string::const_iterator b(s.begin()), e(s.end());
+		for(std::string::const_iterator i(b); i != e; ++i) {
 			if(*i == path_list_sep) {
-				nvr.push_back(path_list_type::value_type(first, last));
-				first = i + 1;
+				nvr.push_back(path_list_type::value_type(b, i));
+				b = i + 1;
 			}
-			last = i;
 		}
+		if(b != e) nvr.push_back(path_list_type::value_type(b, e));
 	}
 	return nvr;
 }
@@ -97,7 +99,7 @@ void resolver::open_error(boost::filesystem::path const & path, std::string cons
 }
 
 void resolver::close_error(std::string const & message) const {
-	throw exceptions::runtime_error("could not close library "+ path().string() + ": " + message, UNIVERSALIS__COMPILER__LOCATION);
+	throw exceptions::runtime_error("could not close library " + path().string() + ": " + message, UNIVERSALIS__COMPILER__LOCATION);
 }
 
 void resolver::resolve_symbol_error(std::string const & name, std::string const & message) const {
@@ -116,8 +118,8 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 			#else
 			//"lib" +
 			#endif
-			path.parent_path() / (
-				path.filename() +
+			path.branch_path() / (
+				path.leaf() +
 				#if defined DIVERSALIS__OS__LINUX
 					".so" // "." + version_string.str() // libfoo.so.0
 				#elif defined DIVERSALIS__OS__APPLE
@@ -151,7 +153,7 @@ resolver::resolver(boost::filesystem::path const & path, unsigned int const & ve
 	underlying_(0)
 {
 	#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__POSIX
-		underlying_ = ::dlopen(path_.native_file_string().c_str(), RTLD_LAZY /*RTLD_NOW*/);
+		underlying_ = ::dlopen(path_.file_string().c_str(), RTLD_LAZY /*RTLD_NOW*/);
 		if(!opened()) open_error(path_, std::string(::dlerror()));
 	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
 		// we use \ here instead of / because ::LoadLibraryEx will not use the LOAD_WITH_ALTERED_SEARCH_PATH option if it does not see a \ character in the file path:
