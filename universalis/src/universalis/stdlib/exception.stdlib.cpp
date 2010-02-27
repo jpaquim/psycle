@@ -3,15 +3,15 @@
 
 ///\file
 #include <universalis/detail/project.private.hpp>
-#include "code_description.hpp"
+#include "exception.hpp"
 #include <universalis/stdlib/mutex.hpp>
 #include <cstring> // iso std::strerror
 #include <sstream>
 namespace universalis { namespace stdlib { namespace exceptions {
 
-std::string code_description(int code) throw() {
+std::string desc(int code) throw() {
 	std::ostringstream s;
-	s << "standard: " << code << " 0x" << std::hex << code << ": ";
+	s << "standard error: " << code << " 0x" << std::hex << code << ": ";
 	{
 		static mutex m;
 		scoped_lock<mutex> lock(m);

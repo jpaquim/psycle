@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief cstdint standard header
 
@@ -17,8 +17,7 @@
 		#include <stdint.h>
 	#endif
 
-	// some unix systems had the equivalent inttypes.h for a long time
-	#include <diversalis/os.hpp>
+	// most unix systems had the equivalent inttypes.h for a long time
 	#if defined DIVERSALIS__OS__UNIX
 		#include <inttypes.h>
 	#endif
@@ -29,45 +28,48 @@
 	// boost takes care of all the mess for us
 	#include <boost/cstdint.hpp>
 	namespace universalis { namespace stdlib {
-		using boost::int8_t;
-		using boost::int_least8_t;
-		using boost::int_fast8_t;
-		using boost::uint8_t;
-		using boost::uint_least8_t;
-		using boost::uint_fast8_t;
-		
-		using boost::int16_t;
-		using boost::int_least16_t;
-		using boost::int_fast16_t;
-		using boost::uint16_t;
-		using boost::uint_least16_t;
-		using boost::uint_fast16_t;
-		
-		using boost::int32_t;
-		using boost::int_least32_t;
-		using boost::int_fast32_t;
-		using boost::uint32_t;
-		using boost::uint_least32_t;
-		using boost::uint_fast32_t;
-		
-		using boost::int64_t;
-		using boost::int_least64_t;
-		using boost::int_fast64_t;
-		using boost::uint64_t;
-		using boost::uint_least64_t;
-		using boost::uint_fast64_t;
-		
-		using boost::intmax_t;
-		using boost::uintmax_t;
+		namespace stdint {
+			using boost::int8_t;
+			using boost::int_least8_t;
+			using boost::int_fast8_t;
+			using boost::uint8_t;
+			using boost::uint_least8_t;
+			using boost::uint_fast8_t;
+			
+			using boost::int16_t;
+			using boost::int_least16_t;
+			using boost::int_fast16_t;
+			using boost::uint16_t;
+			using boost::uint_least16_t;
+			using boost::uint_fast16_t;
+			
+			using boost::int32_t;
+			using boost::int_least32_t;
+			using boost::int_fast32_t;
+			using boost::uint32_t;
+			using boost::uint_least32_t;
+			using boost::uint_fast32_t;
+			
+			using boost::int64_t;
+			using boost::int_least64_t;
+			using boost::int_fast64_t;
+			using boost::uint64_t;
+			using boost::uint_least64_t;
+			using boost::uint_fast64_t;
+			
+			using boost::intmax_t;
+			using boost::uintmax_t;
+		}
+		using namespace stdint;
 	}}
 #endif
 
 /****************************************************************************/
 // injection in std namespace
-namespace std { using namespace universalis::stdlib; }
+namespace std { using namespace universalis::stdlib::stdint; }
 
 /****************************************************************************/
 // injection in root namespace
-using namespace universalis::stdlib;
+using namespace universalis::stdlib::stdint;
 
 #endif
