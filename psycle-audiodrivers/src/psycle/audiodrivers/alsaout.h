@@ -7,10 +7,8 @@
 
 #if defined PSYCLE__ALSA_AVAILABLE
 #include "audiodriver.h"
-#include <alsa/asoundlib.h>
-#include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
-#include <universalis/stdlib/cstdint.hpp>
+#include <alsa/asoundlib.h>
 
 namespace psycle { namespace audiodrivers {
 

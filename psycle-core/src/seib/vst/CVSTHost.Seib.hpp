@@ -27,6 +27,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 /// Tell the SDK that we want to support all the VST specs, not only VST2.4
 #define VST_FORCE_DEPRECATED 0
+
+// steinberg's headers are unable to correctly detect the platform,
+// so we need to detect the platform ourselves,
+// and declare steinberg's unstandard/specific options: WIN32/MAC
+#include <diversalis/os.hpp>
+#if defined DIVERSALIS__OS__MICROSOFT
+	#define WIN32 // steinberg's build option
+#elif defined DIVERSALIS__OS__APPLE
+	#define MAC // steinberg's build option
+#else
+	#error internal steinberg error
+#endif
+
 #include <vst2.x/aeffectx.h>               /* VST header files                  */
 #include <vst2.x/vstfxstore.h>
 

@@ -2,6 +2,7 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #include "Command.hpp"
+#include <deque>
 
 namespace psycle { namespace host {
 

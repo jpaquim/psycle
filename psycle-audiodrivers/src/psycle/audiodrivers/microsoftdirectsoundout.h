@@ -6,19 +6,18 @@
 #pragma once
 
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
+
 #include "audiodriver.h"
-#include <universalis/stdlib/thread.hpp>
-#include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
-#include <universalis/stdlib/cstdint.hpp>
-#include <universalis/compiler/location.hpp>
-#include <map>
-#include <windows.h>
+
+#include <universalis/os/include_windows_without_crap.hpp>
+
 #include <dsound.h>
-#include <diversalis/compiler.hpp>
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "dsound")
 #endif
+
+#include <map>
 
 namespace psycle { namespace audiodrivers {
 

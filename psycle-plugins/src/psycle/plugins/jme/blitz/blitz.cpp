@@ -17,6 +17,7 @@
 */
 
 #include "blitz.h"
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

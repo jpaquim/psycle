@@ -266,19 +266,15 @@ namespace detail {
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
 			nanoseconds performance_counter() throw(exception) {
 				::LARGE_INTEGER counter, frequency;
-				if(!::QueryPerformanceCounter(&counter) || !::QueryPerformanceFrequency(&frequency))
-					throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-				#if 1
-					// for systems where the frequency may change over time, we need to remember the last counter and time values
-					int64_t static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_counter(0);
-					nanoseconds::tick_type static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_time(0);
-					nanoseconds ns((counter.QuadPart - last_counter) * 1000 * 1000 * 1000 / frequency.QuadPart);
-					ns += nanoseconds(last_time);
-					last_time = ns.get_count();
-					last_counter = counter.QuadPart;
-				#else
-					nanoseconds ns(counter.QuadPart * 1000 * 1000 * 1000 / frequency.QuadPart);
-				#endif
+				if(!::QueryPerformanceCounter(&counter)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+				if(!::QueryPerformanceFrequency(&frequency)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+				// for systems where the frequency may change over time, we need to remember the last counter and time values
+				int64_t static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_counter(0);
+				nanoseconds::tick_type static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_time(0);
+				nanoseconds ns((counter.QuadPart - last_counter) * 1000 * 1000 * 1000 / frequency.QuadPart);
+				ns += nanoseconds(last_time);
+				last_time = ns.get_count();
+				last_counter = counter.QuadPart;
 				return ns;
 			}
 

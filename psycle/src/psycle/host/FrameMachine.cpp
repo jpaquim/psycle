@@ -18,6 +18,9 @@
 #include <psycle/core/plugin.h>
 #include <psycle/core/song.h>
 
+#include <sstream>
+#include <iomanip>
+
 namespace psycle { namespace host {
 
 		extern CPsycleApp theApp;

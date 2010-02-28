@@ -5,9 +5,9 @@
 #define PSYCLE__AUDIODRIVERS__AUDIODRIVER__INCLUDED
 #pragma once
 
+#include <universalis.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/cstdint.hpp>
 #include <string>
 #include <exception>
 #include <cassert>

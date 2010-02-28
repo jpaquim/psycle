@@ -7,22 +7,18 @@
 
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "audiodriver.h"
-#include <universalis/stdlib/cstdint.hpp>
-#include <iostream>
 
-#include <diversalis/compiler.hpp>
-
-#include <windows.h>
+#include <universalis/os/include_windows_without_crap.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 #endif
 
-#include <mmsystem.h>
-#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "winmm")
-#endif
+	#include <mmsystem.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "winmm")
+	#endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(pop)

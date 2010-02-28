@@ -2,6 +2,8 @@
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/internalkeys.hpp>
+#include <sstream>
+#include <iomanip>
 
 #if !defined NDEBUG
    #define new DEBUG_NEW

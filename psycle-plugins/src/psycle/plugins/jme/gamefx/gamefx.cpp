@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

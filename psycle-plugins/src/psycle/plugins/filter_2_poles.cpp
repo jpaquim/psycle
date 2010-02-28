@@ -89,7 +89,7 @@ public:
 	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
 	/*override*/ void parameter(const int &);
 protected:
-	/*override*/ void SeqTick(const int, const int, const int, const int command, const int value);
+	/*override*/ void SeqTick(int, int, int, int command, int value);
 	/*override*/ void samples_per_second_changed() { parameter(cutoff_frequency); }
 	/*override*/ void sequencer_ticks_per_second_changed() { parameter(modulation_sequencer_ticks); }
 	static const int poles = 2;

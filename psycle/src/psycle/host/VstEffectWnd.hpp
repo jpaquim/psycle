@@ -6,6 +6,8 @@
 
 #include <seib/vst/EffectWnd.hpp>
 
+#include <list>
+
 namespace psycle {
 	namespace core {
 		namespace vst {

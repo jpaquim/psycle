@@ -4,8 +4,9 @@
 #include "configuration.hpp"
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/audiodrivers/wavefileout.h>
+#include <universalis.hpp>
 #include <universalis/os/fs.hpp>
-#include <universalis/os/loggers.hpp>
+#include <boost/filesystem.hpp>
 
 #if defined PSYCLE__SYDNEY_AVAILABLE
 	#include <psycle/audiodrivers/sydneyout.hpp>

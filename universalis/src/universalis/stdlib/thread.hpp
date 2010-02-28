@@ -8,6 +8,8 @@
 #define UNIVERSALIS__STDLIB__THREAD__INCLUDED
 #pragma once
 
+#include <universalis/detail/project.hpp>
+
 #include <boost/version.hpp>
 #if BOOST_VERSION < 103500
 	#include <universalis/os/sched.hpp>
@@ -18,11 +20,11 @@
 #else
 	#include "detail/boost_xtime.hpp" // boost_xtime_get_and_add
 #endif
+
 #include <boost/thread/thread.hpp>
 #include <boost/thread/once.hpp>
-#include <diversalis/os.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
-	#include <windows.h>
+	#include <universalis/os/include_windows_without_crap.hpp>
 #endif
 #if defined BOOST_AUTO_TEST_CASE
 	#include <sstream>

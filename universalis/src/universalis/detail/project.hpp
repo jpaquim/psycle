@@ -10,20 +10,22 @@
 #include <universalis/detail/config.hpp>
 #include <diversalis.hpp>
 
-#ifdef UNIVERSALIS__SHARED
-	#ifdef UNIVERSALIS__SOURCE
-		#define UNIVERSALIS__DECL UNIVERSALIS__COMPILER__DYN_LINK__EXPORT
+#ifndef DIVERSALIS__COMPILER__RESOURCE
+	#include <universalis/compiler/dyn_link.hpp>
+
+	#ifdef UNIVERSALIS__SHARED
+		#ifdef UNIVERSALIS__SOURCE
+			#define UNIVERSALIS__DECL UNIVERSALIS__COMPILER__DYN_LINK__EXPORT
+		#else
+			#define UNIVERSALIS__DECL UNIVERSALIS__COMPILER__DYN_LINK__IMPORT
+		#endif
 	#else
-		#define UNIVERSALIS__DECL UNIVERSALIS__COMPILER__DYN_LINK__IMPORT
+		#define UNIVERSALIS__DECL //UNIVERSALIS__COMPILER__DYN_LINK__HIDDEN
 	#endif
-#else
-	#define UNIVERSALIS__DECL //UNIVERSALIS__COMPILER__DYN_LINK__HIDDEN
-#endif
 
-#include <universalis/compiler/dyn_link.hpp>
-
-#if !defined UNIVERSALIS__SOURCE && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "universalis")
+	#if !defined UNIVERSALIS__SOURCE && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "universalis")
+	#endif
 #endif
 
 #endif

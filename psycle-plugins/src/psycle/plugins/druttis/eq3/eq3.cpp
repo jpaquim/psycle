@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////
 #include <psycle/plugin_interface.hpp>
 #include "../dsp/Biquad.h"
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

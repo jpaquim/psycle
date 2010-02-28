@@ -23,16 +23,17 @@
 namespace universalis { namespace os { namespace dyn_link {
 
 namespace {
-	char const path_list_env_var_name[] = {
-		#if defined DIVERSALIS__OS__MICROSOFT || defined DIVERSALIS__OS__MICROSOFT__POSIX_EMULATION
+	char const lib_path_env_var_name[] = {
+		#if defined DIVERSALIS__OS__MICROSOFT
 			"PATH"
 		#elif defined DIVERSALIS__OS__HPUX
 			"SHLIB_PATH"
 		#elif defined DIVERSALIS__OS__AIX
 			"LIBPATH"
 		#elif defined DIVERSALIS__OS__POSIX
-			"LD_LIBRARY_PATH" // used at least on linux/solaris/macosx
-			// note: macosx also has: "DYLD_LIBRARY_PATH", "DYLD_FALLBACK_LIBRARY_PATH"
+			"LD_LIBRARY_PATH" // used at least on linux/solaris/macosx/cygwin
+			// note: macosx also has: DYLD_LIBRARY_PATH and DYLD_FALLBACK_LIBRARY_PATH.
+			// note: cygwin's dlopen uses LD_LIBRARY_PATH to locate the absolute dll path, and then calls LoadLibrary with it.
 		#else
 			#error unknown dynamic linker
 		#endif
@@ -51,32 +52,31 @@ namespace {
 /****************************************************************/
 // lib_path
 
-void lib_path(path_list_type const & new_path) {
-	std::ostringstream s;
-	for(path_list_type::const_iterator i(new_path.begin()), e(new_path.end()); i != e;) {
-		s << i->directory_string();
-		if(++i != e) s << path_list_sep;
-	}
-
-	// setenv is better than putenv because putenv
-	// is not well-standardized and has different
-	// memory ownership policies on different systems. -- Magnus
-
-	// On mswindows, only putenv exists (with same memory ownership issue),
-	// so we have to use the winapi instead.
-
-	if(
-		#if defined DIVERSALIS__OS__MICROSOFT
-			!::SetEnvironmentVariableA(path_list_env_var_name, s.str().c_str())
-		#else
-			::setenv(path_list_env_var_name, s.str().c_str(), 1 /* overwrite */)
-		#endif
-	) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-}
-
 path_list_type lib_path() {
 	path_list_type nvr;
-	char const * const env(std::getenv(path_list_env_var_name));
+
+	#if !defined DIVERSALIS__OS__MICROSOFT
+		char const * const env(std::getenv(lib_path_env_var_name));
+	#else
+		// On mswindows, the CRT maintains its own copy of the environment, separate from the Win32API copy.
+		// CRT getenv() retrieves from this copy. CRT putenv() updates this copy,
+		// and then calls SetEnvironmentVariableA() to update the Win32API copy.
+		// Since we bypasses the CRT in the lib_path() setter by calling SetEnvironmentVariableA(),
+		// we need to use GetEnvironmentVariableA() here instead of simply std::getenv().
+		char * env;
+		{
+			::DWORD size = ::GetEnvironmentVariableA(lib_path_env_var_name, 0, 0);
+			if(!size) {
+				if(::GetLastError() == ERROR_ENVVAR_NOT_FOUND) env = 0;
+				else throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+			} else {
+				env = new char[size + 1];
+				size = ::GetEnvironmentVariableA(lib_path_env_var_name, env, size + 1);
+				if(!size) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+			}
+		}
+	#endif
+
 	if(env) {
 		std::string s(env);
 		std::string::const_iterator b(s.begin()), e(s.end());
@@ -89,6 +89,36 @@ path_list_type lib_path() {
 		if(b != e) nvr.push_back(path_list_type::value_type(b, e));
 	}
 	return nvr;
+}
+
+void lib_path(path_list_type const & new_path) {
+	std::ostringstream s;
+	for(path_list_type::const_iterator i(new_path.begin()), e(new_path.end()); i != e;) {
+		s << i->directory_string();
+		if(++i != e) s << path_list_sep;
+	}
+
+	#if !defined DIVERSALIS__OS__MICROSOFT
+		// setenv is better than putenv because putenv is not well-standardized
+		// and has different memory ownership policies on different systems. -- Magnus
+		if(::setenv(lib_path_env_var_name, s.str().c_str(), 1 /* overwrite */))
+			throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+	#else
+		// On mswindows, only putenv exists (with same memory ownership issue), and
+		// the CRT maintains its own copy of the environment, separate from the Win32API copy.
+		// CRT getenv() retrieves from this copy. CRT putenv() updates this copy,
+		// and then calls SetEnvironmentVariableA() to update the Win32API copy.
+		#if 0 // It's simpler to just use GetEnvironmentVariableA() in the lib_path() getter function.
+			std::string static * old_env = 0;
+			std::string & new_env = *new std::string(lib_path_env_var_name + '=' + s.str());
+			putenv(new_env.c_str());
+			delete old_env;
+			old_env = &new_env;
+		#else
+			if(!::SetEnvironmentVariableA(lib_path_env_var_name, s.str().c_str()))
+				throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		#endif
+	#endif
 }
 
 /****************************************************************/

@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
+#include <cstdio>
 
 //////////////////////////////////////////////////////////////////////
 // KarLKoX "Surround" plugin for PSYCLE
@@ -15,19 +16,19 @@ using namespace psycle::plugin_interface;
 CMachineParameter const paraLength = 
 { 
 	"Cutoff Frequency",
-	"Cutoff for HighPass Filter",																				// description
-	0,																																																// MinValue				
-	1000,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Cutoff for HighPass Filter",
+	0,
+	1000,
+	MPF_STATE,
 	400,
 };
 CMachineParameter const paraMode = 
 { 
 	"Work Mode",
-	"Working model for the surround",																// description
-	0,																																																// MinValue				
-	1,																																																// MaxValue
-	MPF_STATE,																																								// Flags
+	"Working model for the surround",
+	0,
+	1,
+	MPF_STATE,
 	0,
 };
 
@@ -39,19 +40,19 @@ CMachineParameter const *pParameters[] =
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	EFFECT,																																				// flags
-	2,																																								// numParameters
-	pParameters,																												// Pointer to parameters
-#ifdef _DEBUG
-	"KarLKoX Surround (Debug build)" VERNUM,								// name
-#else
-	"KarLKoX Surround" VERNUM,																								// name
-#endif
-	"Surround",																																// short name
-	"Saïd Bougribate",																								// author
-	"About",																																// A command, that could be use for open an editor, etc...
-	2																																								// must be 2 else we can't see the knob (??)
+	MI_VERSION,
+	EFFECT,
+	2,
+	pParameters,
+	"KarLKoX Surround " VERNUM
+		#ifndef NDEBUG
+			" (Debug build)"
+		#endif
+		,
+	"Surround",
+	"Saïd Bougribate",
+	"About",
+	2
 );
 
 class mi : public CMachineInterface
@@ -79,7 +80,6 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	// The constructor zone
 	Vals = new int[2];
 	initialized=false;
 }
@@ -87,7 +87,6 @@ mi::mi()
 mi::~mi()
 {
 	delete [] Vals;
-// Destroy dinamically allocated objects/memory here
 }
 
 void mi::Init()
@@ -105,14 +104,15 @@ void mi::Setup()
 		initialized=true;
 		break;
 	case 1:
-/*
-		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,!initialized);
-		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqright,!initialized);
-		initialized=true;
-*/
+		#if 0
+			BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,!initialized);
+			BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqright,!initialized);
+			initialized = true;
+		#endif
 		break;
 	}
 }
+
 void mi::SequencerTick()
 {
 	if (pCB->GetSamplingRate() != smprate ) Setup();
@@ -120,9 +120,6 @@ void mi::SequencerTick()
 
 void mi::Command()
 {
-// Called when user presses editor button
-// Probably you to show your custom window here
-// or an about button
 	pCB->MessBox("Made 14/12/2001 by Saïd Bougribate for Psycl3!\n\n Some modifications made by [JAZ] on Dec 2002\n Version" VERNUM,"-=KarLKoX=- [Surround]",0);
 }
 
@@ -132,11 +129,9 @@ void mi::ParameterTweak(int par, int val)
 	Setup();
 }
 
-// Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
-	//float xlb, xrb, xlt, xrt;
-	if (!initialized) Setup();
+	if(!initialized) Setup();
 	--psamplesleft;
 	--psamplesright;
 	// over all samples 
@@ -152,25 +147,25 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		} while(--numsamples);
 		break;
 	case 1:
-/*								This code was meant to make surround just out of the stereo part of a signal
-		concretely it means that it doesn't affect the mono components of the signal.
-		do
-		{
-			float xl = *++psamplesleft;
-			float xr = *++psamplesright;
-			
-			float xtl = (float)BiQuad(xl, &bqleft); // BQ is a HighPass
-			float xtr = (float)BiQuad(xr, &bqright); // BQ is a HighPass
+		#if 0
+			// This code was meant to make surround just out of the stereo part of a signal
+			// concretely it means that it doesn't affect the mono components of the signal.
+			do
+			{
+				float xl = *++psamplesleft;
+				float xr = *++psamplesright;
+				
+				float xtl = (float)BiQuad(xl, &bqleft); // BQ is a HighPass
+				float xtr = (float)BiQuad(xr, &bqright); // BQ is a HighPass
 
-			*psamplesleft  = xl+xtl*0.5-xtr*0.5;
-			*psamplesright  = xr-xtl*0.5+xtr*0.5;
-		} while(--numsamples);
-*/
+				*psamplesleft  = xl+xtl*0.5-xtr*0.5;
+				*psamplesright  = xr-xtl*0.5+xtr*0.5;
+			} while(--numsamples);
+		#endif
 		break;
 	}
 }
 
-// Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	switch (param)
@@ -192,4 +187,3 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	}
 	return false;
 }
-

@@ -4,10 +4,6 @@
 #if defined PSYCLE__GSTREAMER_AVAILABLE
 
 #include "gstreamerout.h"
-#include <universalis/os/loggers.hpp>
-#include <universalis/exception.hpp>
-#include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/thread.hpp>
 #include <gst/gst.h>
 
 namespace psycle { namespace audiodrivers {

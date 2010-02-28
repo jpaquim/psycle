@@ -6,8 +6,6 @@
 #pragma once
 
 #include "audiodriver.h"
-#include <universalis/stdlib/thread.hpp>
-#include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
 #include <psycle/helpers/dither.hpp>
 #include <psycle/helpers/riff.hpp>

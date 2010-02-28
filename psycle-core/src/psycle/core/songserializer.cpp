@@ -3,12 +3,14 @@
 
 #include <psycle/core/config.private.hpp>
 #include "songserializer.h"
-#include "song.h"
 
+#include "song.h"
 #include "file.h"
 #include "psy2filter.h"
 #include "psy3filter.h"
 #include "psy4filter.h"
+
+#include <boost/filesystem.hpp>
 #include <iostream>
 
 namespace psycle {  namespace core {

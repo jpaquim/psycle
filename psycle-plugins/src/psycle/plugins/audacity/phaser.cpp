@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+#include <cstdio>
 
 #ifndef M_PI
 	#define M_PI 3.14159265359f // note that's supposed to be a double!

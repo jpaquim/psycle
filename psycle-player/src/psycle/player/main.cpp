@@ -90,7 +90,7 @@ void usage() {
 }
 
 int main(int argument_count, char * arguments[]) {
-	#if 1
+	#if 0
 	{
 		using namespace universalis::os::fs;
 		std::clog << home() << '\n';
@@ -104,7 +104,6 @@ int main(int argument_count, char * arguments[]) {
 		using universalis::os::dyn_link::path_list_type;
 		using universalis::os::dyn_link::lib_path;
 		path_list_type p(lib_path());
-		for(path_list_type::const_iterator i(p.begin()), e(p.end()); i != e; ++i) std::clog << *i << '\n';
 		p.push_back("psycle");
 		lib_path(p);
 		p = lib_path();

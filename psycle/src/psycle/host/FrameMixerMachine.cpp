@@ -10,6 +10,9 @@
 #include <psycle/core/song.h>
 #include <psycle/core/mixer.h>
 
+#include <sstream>
+#include <iomanip>
+
 namespace psycle { namespace host {
 
 	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameMachine)

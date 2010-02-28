@@ -9,8 +9,12 @@
 #include <cstdlib> // std::getenv for user's home dir
 #include <sstream>
 #include <iostream>
+
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <shlobj.h> // for SHGetFolderPath
+#endif
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#pragma comment(lib,"shlwapi")
 #endif
 
 namespace universalis { namespace os { namespace fs {
@@ -36,74 +40,54 @@ path const & process_executable_file_path() {
 	return once;
 }
 
-path const & home() {
-	struct once {
-		path const static get_it() {
-			char const env_var[] = {
-				#if defined DIVERSALIS__OS__MICROSOFT
-					"USERPROFILE"
-				#else
-					"HOME"
-				#endif
-			};
-			char const * const e(std::getenv(env_var));
-			if(!e) {
-				std::ostringstream s; s << "The user has no defined home directory: the environment variable " << env_var << " is not set.";
-				throw
-					///\todo the following is making link error on mingw
-					//exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-					std::runtime_error(s.str());
-			}
-			return path(e);
-			#if 1
-				///\todo use SHGetFolderPath
-			#elif 0
-				// first check UserProfile
-				char const * const user_profile(std::getenv("UserProfile"));
-				if(user_profile) return user_profile;
-
-				// next, check HomeDrive and HomePath
-				char const * const home_drive(std::getenv("HomeDrive"));
-				char const * const home_path(std::getenv("HomePath"));
-				if(home_drive && home_path) {
-					std::string home(home_drive);
-					home += home_path;
-					return home;
-				}
-
-				// next, try registry db
-				HKEY hKeyRoot = HKEY_CURRENT_USER;
-				LPCWSTR pszPath = L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
-				HKEY m_hKey(0);
-				LONG ReturnValue = RegOpenKeyExW (hKeyRoot, pszPath, 0L, KEY_ALL_ACCESS, &m_hKey);
-				if(ReturnValue == ERROR_SUCCESS) {
-					LPCWSTR pszKey = L"Personal";
-					DWORD dwType;
-					DWORD dwSize = MAX_PATH - 1;
-					char szString[MAX_PATH + 1];
-					LONG lReturn = RegQueryValueExW (m_hKey, pszKey, 0, &dwType, (BYTE *) szString, &dwSize);
-					std::string sVal;
-					if(lReturn == ERROR_SUCCESS) sVal = szString;
-					if (m_hKey) {
-						RegCloseKey (m_hKey);
-						m_hKey = NULL;
-					}
-					return sVal;
-				}
-			#endif
+#if defined DIVERSALIS__OS__MICROSOFT
+	namespace detail { namespace microsoft {
+		path known_folder(int id) {
+			path nvr;
+			// The ever changing windows mess, changed once again in vista.
+			// In vista the SHGetFolderPath(CSIDL) is compatibility wrapper for SHGetKnownFolderPath(FOLDERID).
+			// CSIDL_APPDATA <==> FOLDERID_RoamingAppData
+			// CSIDL_LOCAL_APPDATA <==> FOLDERID_LocalAppData
+			// CSIDL_MYDOCUMENTS == CSIDL_PERSONAL <==> FOLDERID_Documents
+			// CSIDL_PROFILE <==> FOLDERID_Profile
+			char p[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
+			if(SUCCEEDED(SHGetFolderPath(0, id, 0, 0, p))) nvr = p;
+			else throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+			return nvr;
 		}
-	};
-	path const static once(once::get_it());
+	}}
+#endif
+
+path const & home() {
+	path const static once(
+		#if defined DIVERSALIS__OS__MICROSOFT
+			detail::microsoft::known_folder(CSIDL_PROFILE)
+		#else
+			std::getenv("HOME")
+		#endif
+	);
 	return once;
 }
 
 path const & home_app_local(std::string const & app_name) {
-	path const static once(home() / path("." + app_name));
+	path const static once(
+		#if defined DIVERSALIS__OS__MICROSOFT
+			detail::microsoft::known_folder(CSIDL_LOCAL_APPDATA) / app_name
+		#else
+			home() / ("." + app_name)
+		#endif
+	);
 	return once;
 }
 
 path const & home_app_roaming(std::string const & app_name) {
-	path const static once(home() / path("." + app_name));
+	path const static once(
+		#if defined DIVERSALIS__OS__MICROSOFT
+			detail::microsoft::known_folder(CSIDL_APPDATA) / app_name
+		#else
+			home() / ("." + app_name)
+		#endif
+	);
 	return once;
 }
 

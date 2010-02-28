@@ -1,6 +1,7 @@
 #include <psycle/plugin_interface.hpp>
 #include "drum.hpp"
 #include <cstdlib>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 
@@ -123,7 +124,7 @@ CMachineParameter const prMix = {
 	-100,
 	100,
 	MPF_STATE,
-//				-37
+	// -37
 	-100
 };
 CMachineParameter const prThumpLen = {
@@ -176,11 +177,11 @@ CMachineInfo const MacInfo (
 	GENERATOR,
 	NUMPARAMETERS,
 	pParameters,
-#ifdef _DEBUG
-	"Drum Synth v." DRUM_VERSION " (Debug)",
-#else
-	"Drum Synth v." DRUM_VERSION,
-#endif
+	"Drum Synth v." DRUM_VERSION
+		#ifndef NDEBUG
+			" (Debug)"
+		#endif
+		,
 	"Drum" DRUM_VERSION,
 	"[JAZ] on " __DATE__,
 	"Command Help",
@@ -193,8 +194,6 @@ public:
 	mi();
 	virtual ~mi();
 
-	virtual void Init();
-	virtual void SequencerTick();
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int tracks);
 	virtual bool DescribeValue(char* txt,int const param, int const value);
 	virtual void Command();
@@ -230,15 +229,8 @@ mi::mi()
 mi::~mi()
 {
 	delete[] Vals;
-
-// Destroy dinamically allocated objects/memory here
 }
 
-void mi::Init()
-{
-// Initialize your stuff here
-
-}
 void mi::Stop()
 {
 	for(int c=0;c<numtracks;c++)
@@ -246,14 +238,8 @@ void mi::Stop()
 	for (int i=0;i<MAX_TRACKS;i++) allocatedvoice[i]=-1;
 }
 
-void mi::SequencerTick()
-{
-// Called on each tick while sequencer is playing
-}
-
 void mi::ParameterTweak(int par, int val)
 {
-	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
 	switch (par) {
 		case 0: 
@@ -385,23 +371,20 @@ void mi::ParameterTweak(int par, int val)
 }
 void mi::Command()
 {
-// Called when user presses editor button
-// Probably you want to show your custom window here
-// or an about button
-char buffer[256];
+	char buffer[256];
 
-sprintf(
+	sprintf(
 
-		buffer,"%s%s%s%s",
-		"Pattern commands\n\n",
-		"0Cxx : Set Volume\n\n",
-		"  Compatible 1.x : $00->0 $FF->32767\n",
-		"  Compatible 2.x : $00->0 $FF->OutVol\n\0"
-		);
+			buffer,"%s%s%s%s",
+			"Pattern commands\n\n",
+			"0Cxx : Set Volume\n\n",
+			"  Compatible 1.x : $00->0 $FF->32767\n",
+			"  Compatible 2.x : $00->0 $FF->OutVol\n\0"
+			);
 
-pCB->MessBox(buffer,"·-=<[JAZ]> JMDrum Synth v." DRUM_VERSION "=-·",0);
-
+	pCB->MessBox(buffer,"·-=<[JAZ]> JMDrum Synth v." DRUM_VERSION "=-·",0);
 }
+
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	float sl=0;
@@ -509,7 +492,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 			DTrack[vidx].NoteOn(note,&globalpar);
 		}
 
-		globalpar.OutVol=tmp;				//restore outvol
+		globalpar.OutVol=tmp; // restore outvol
 	}
 	else if (vidx != -1)
 	{
@@ -548,6 +531,7 @@ int mi::GetVoice(int channel,bool getnew)
 	DTrack[j].Chan = channel;
 	return j;
 }
+
 void mi::DeallocateVoice(int voice)
 {
 	if ( DTrack[voice].Chan == -1)
@@ -559,4 +543,3 @@ void mi::DeallocateVoice(int voice)
 	}
 	DTrack[voice].Chan = -1;
 }
-
