@@ -162,8 +162,9 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 					".dylib" // libfoo.dylib or libfoo.bundle
 				#elif defined DIVERSALIS__OS__MICROSOFT || defined DIVERSALIS__OS__MICROSOFT__POSIX_EMULATION
 					".dll" // "-" + version_string.str() + ".dll" // libfoo-0.dll or cygfoo-0.dll
-					// [bohan] it is only necessary to append the .dll suffix when the given name itself contains a dot,
-					// [bohan] otherwise, we do not need to explicitly tell the suffix.
+					// [bohan] we don't need to append the .dll suffix when the given name doesn't contain a dot,
+					// [bohan] otherwise, we have to explicitly add the .dll suffix.
+					// [bohan] note: for cygwin's dlopen, we always need to add the .dll suffix.
 				#else
 					#error bogus preprocessor conditions
 				#endif
@@ -171,8 +172,8 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 		#else
 			boost::filesystem::path(
 				Glib::Module::build_path(
-					path.parent_path().directory_string(),
-					path.filename()
+					path.branch_path().directory_string(),
+					path.leaf()
 						#if defined DIVERSALIS__OS__MICROSOFT
 							//+ "-" + version_string.str()
 						#endif
