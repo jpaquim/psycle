@@ -72,13 +72,19 @@ path_list_type lib_path() {
 			} else {
 				env = new char[size + 1];
 				size = ::GetEnvironmentVariableA(lib_path_env_var_name, env, size + 1);
-				if(!size) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+				if(!size) {
+					delete [] env;
+					throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+				}
 			}
 		}
 	#endif
 
 	if(env) {
-		std::string s(env);
+		std::string const s(env);
+		#if defined DIVERSALIS__OS__MICROSOFT
+			delete [] env;
+		#endif
 		std::string::const_iterator b(s.begin()), e(s.end());
 		for(std::string::const_iterator i(b); i != e; ++i) {
 			if(*i == path_list_sep) {
