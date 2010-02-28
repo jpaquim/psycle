@@ -7,14 +7,16 @@
 
 #include "audiodriver.h"
 #include <universalis/stdlib/condition.hpp>
+
+#include <universalis/os/include_windows_without_crap.hpp>
+
 #include <asiodrivers.h>
 #include <asio.h>
-#include <map>
-#include <windows.h>
-#include <diversalis/compiler.hpp>
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "asio")
 #endif
+
+#include <map>
 
 namespace psycle { namespace audiodrivers {
 

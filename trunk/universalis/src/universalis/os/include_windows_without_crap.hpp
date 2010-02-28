@@ -7,9 +7,7 @@
 #define UNIVERSALIS__INCLUDE_WINDOWS_WITHOUT_CRAP__INCLUDED
 #pragma once
 
-//#include <universalis/detail/project.hpp>
-#include <universalis/compiler/setup_warnings.hpp>
-#include <universalis/compiler/setup_optimizations.hpp>
+#include <diversalis.hpp>
 
 #if defined DIVERSALIS__OS__MICROSOFT
 	#if defined DIVERSALIS__COMPILER__MICROSOFT

@@ -4,10 +4,6 @@
 #if defined PSYCLE__ESOUND_AVAILABLE
 #include "esoundout.h"
 #include <esd.h>
-#include <universalis/stdlib/cstdint.hpp>
-#include <universalis/compiler/location.hpp>
-#include <universalis/os/loggers.hpp>
-#include <universalis/exception.hpp>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>

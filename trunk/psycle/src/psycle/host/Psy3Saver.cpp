@@ -9,6 +9,8 @@
 #include <psycle/core/patternevent.h>
 #include <psycle/core/xmsampler.h>
 #include <psycle/helpers/datacompression.hpp>
+#include <sstream>
+#include <iomanip>
 
 namespace psycle  {
 	namespace host {

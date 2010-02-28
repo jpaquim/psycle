@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 
@@ -22,86 +23,85 @@ using namespace psycle::plugin_interface;
 CMachineParameter const paraDry = 
 { 
 	"Dry",
-	"Dry",																								// description
-	-32768,																																																// MinValue				
-	32768,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Dry",
+	-32768,
+	32768,
+	MPF_STATE,
 	32768,
 };
 
 CMachineParameter const paraWet = 
 { 
 	"Wet",
-	"Wet",																								// description
-	-32768,																																																// MinValue				
-	32768,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Wet",
+	-32768,
+	32768,
+	MPF_STATE,
 	0,
 };
 
 CMachineParameter const paraFBL = 
 { 
 	"Feedback left",
-	"Feedback left",																								// description
-	-32768,																																																// MinValue				
-	32768,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Feedback left",
+	-32768,
+	32768,
+	MPF_STATE,
 	16384,
 };
 
 CMachineParameter const paraFBR = 
 { 
 	"Feedback right",
-	"Feedback right",																								// description
-	-32768,																																																// MinValue				
-	32768,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Feedback right",
+	-32768,
+	32768,
+	MPF_STATE,
 	16384,
 };
 
 CMachineParameter const paraMinD = 
 { 
 	"Min Delay",
-	"Min Delay",																																												// description
-	1,																																																// MinValue				
-	6000,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Min Delay",
+	1,
+	6000,
+	MPF_STATE,
 	1,
 };
 
 CMachineParameter const paraMaxD = 
 { 
 	"Max Delay",
-	"Max Delay",																																												// description
-	1,																																																// MinValue				
-	6000,																																												// MaxValue
-	MPF_STATE,																																								// Flags
+	"Max Delay",
+	1,
+	6000,
+	MPF_STATE,
 	5,
 };
 
 CMachineParameter const paraRate = 
 { 
 	"Rate",
-	"Rate",																																								// description
-	0,																																																// MinValue				
-	1000,																																																// MaxValue
-	MPF_STATE,																																								// Flags
+	"Rate",
+	0,
+	1000,
+	MPF_STATE,
 	1,
 };
 
 CMachineParameter const paraDelay = 
 { 
 	"Delayer",
-	"Delayer",																																								// description
-	1,																																																// MinValue				
-	MAXIMUM_DELAY,																																																// MaxValue
-	MPF_STATE,																																								// Flags
+	"Delayer",
+	1,
+	MAXIMUM_DELAY,
+	MPF_STATE,
 	MAXIMUM_DELAY,
 };
 
 CMachineParameter const *pParameters[] = 
 { 
-	// global
 	&paraDry,
 	&paraWet,
 	&paraFBL,
@@ -114,18 +114,18 @@ CMachineParameter const *pParameters[] =
 
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	EFFECT,																																								// flags
-	NUMPARAMETERS,																																// numParameters
-	pParameters,																																// Pointer to parameters
-#ifdef _DEBUG
-	"SChorus (Debug build)",								// name
-#else
-	"SChorus",																								// name
-#endif
-	"SChorus",																												// short name
-	"Sartorius",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	MI_VERSION,
+	EFFECT,
+	NUMPARAMETERS,
+	pParameters,
+	"SChorus"
+		#ifndef NDEBUG
+			" (Debug build)"
+		#endif
+		,
+	"SChorus",
+	"Sartorius",
+	"About",
 	4
 );
 
@@ -156,7 +156,6 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	// The constructor zone
 	Vals = new int[NUMPARAMETERS];
 	DM_l = new float[MAXIMUM_DELAY];
 	DM_r = new float[MAXIMUM_DELAY];
@@ -171,12 +170,10 @@ mi::~mi()
 	delete[] Vals;
 	delete[] DM_l;
 	delete[] DM_r;
-// Destroy dinamically allocated objects/memory here
 }
 
 void mi::Init()
 {
-// Initialize your stuff here
 	samplerate = pCB->GetSamplingRate();
 	buf_count=0;
 	min_sweep = Vals[4] * .001 * samplerate;
@@ -192,7 +189,6 @@ void mi::Init()
 
 void mi::SequencerTick()
 {
-// Called on each tick while sequencer is playing
 	if(samplerate!=pCB->GetSamplingRate())
 	{
 		samplerate = pCB->GetSamplingRate();
@@ -204,10 +200,7 @@ void mi::SequencerTick()
 
 void mi::Command()
 {
-// Called when user presses editor button
-// Probably you want to show your custom window here
-// or an about button
-pCB->MessBox("Sartorius Chorus\nBe carefull with wet and delayer!!!","SChorus",0);
+	pCB->MessBox("Sartorius Chorus\nBe carefull with wet and delayer!!!","SChorus",0);
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -226,7 +219,6 @@ void mi::ParameterTweak(int par, int val)
 
 }
 
-// Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	float const dry								=(float)(Vals[0])*0.00006103515625f;
@@ -281,7 +273,6 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	
 }
 
-// Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	switch(param)

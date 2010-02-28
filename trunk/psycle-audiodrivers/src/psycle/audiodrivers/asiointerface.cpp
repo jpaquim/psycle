@@ -2,7 +2,6 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #include "asiointerface.h"
-#include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/math/clip.hpp>

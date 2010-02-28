@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 
@@ -37,7 +38,6 @@ class mi : public CMachineInterface {
 	public:
 		mi();
 		virtual ~mi();
-		virtual void Init();
 		virtual void SequencerTick();
 		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
 		virtual bool DescribeValue(char* txt,int const param, int const value);
@@ -63,9 +63,6 @@ m_CurrentVolume(1.0f), m_TargetVolume(1.0f), currentSR(44100), m_Timer(0) {
 
 mi::~mi() {
 	delete[] Vals;
-}
-
-void mi::Init() {
 }
 
 void mi::SequencerTick() {
@@ -139,27 +136,22 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	}
 }
 
-// Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value) {
 	switch(param) {
-	case 0:
-	{
-		int samp = value*44100/currentSR;
-		if (samp < pCB->GetTickLength()) {
-			std::sprintf(txt, "%.02f ticks (%dms)", (float)samp/pCB->GetTickLength(), 1000*samp/currentSR);
+		case 0: {
+			int samp = value*44100/currentSR;
+			if (samp < pCB->GetTickLength()) {
+				std::sprintf(txt, "%.02f ticks (%dms)", (float)samp/pCB->GetTickLength(), 1000*samp/currentSR);
+			} else {
+				std::sprintf(txt, "1 tick (%dms)", 1000*pCB->GetTickLength()/currentSR);
+			}
+			return true;
 		}
-		else {
-			std::sprintf(txt, "1 tick (%dms)", 1000*pCB->GetTickLength()/currentSR);
+		case 1: {
+			int slopms = 1000000/(value*5.38330078125);
+			std::sprintf(txt, "%d mcs", slopms);
+			return true;
 		}
-		return true;
-	}
-	case 1:
-	{
-		int slopms = 1000000/(value*5.38330078125);
-		std::sprintf(txt, "%d mcs", slopms);
-		return true;
-	}
-	default: return false; // returning false will simply show the value as a raw integral number
+		default: return false; // returning false will simply show the value as a raw integral number
 	}
 }
-

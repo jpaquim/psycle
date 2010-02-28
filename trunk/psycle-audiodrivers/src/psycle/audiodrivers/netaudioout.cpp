@@ -3,7 +3,6 @@
 
 #if defined PSYCLE__NET_AUDIO_AVAILABLE
 #include "netaudioout.h"
-#include <universalis/stdlib/cstdint.hpp>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>

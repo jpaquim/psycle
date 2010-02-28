@@ -9,7 +9,6 @@
 
 #include "audiodriver.h"
 #include <gst/gstelement.h>
-#include <universalis/stdlib/cstdint.hpp>
 
 namespace psycle { namespace audiodrivers {
 

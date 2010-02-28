@@ -46,7 +46,8 @@
 #endif
 
 namespace universalis { namespace os { namespace clocks {
-	using namespace stdlib;
+
+using stdlib::nanoseconds;
 
 // recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
 
@@ -87,6 +88,7 @@ class UNIVERSALIS__DECL thread {
 #if defined BOOST_AUTO_TEST_CASE
 	BOOST_AUTO_TEST_CASE(wall_clock_and_sleep_test) {
 		typedef monotonic clock;
+		using namespace stdlib;
 		nanoseconds const sleep_nanoseconds(milliseconds(250));
 		nanoseconds const t0(clock::current());
 		this_thread::sleep(sleep_nanoseconds);
@@ -121,13 +123,13 @@ namespace detail {
 			/// posix CLOCK_REALTIME_HR.
 			/// System-wide realtime clock.
 			/// High resolution version of CLOCK_REALTIME.
-			//UNIVERSALIS__DECL std::nanoseconds realtime_hr() throw(std::runtime_error);
+			//UNIVERSALIS__DECL nanoseconds realtime_hr() throw(exception);
 			
 			///\todo CLOCK_MONOTONIC_HR
 			/// posix CLOCK_MONOTONIC_HR.
 			/// Clock that cannot be set and represents monotonic time since some unspecified starting point.
 			/// High resolution version of CLOCK_MONOTONIC.
-			//UNIVERSALIS__DECL std::nanoseconds monotonic_hr() throw(std::runtime_error);
+			//UNIVERSALIS__DECL nanoseconds monotonic_hr() throw(exception);
 
 			/// posix CLOCK_REALTIME.
 			/// System-wide realtime clock.
@@ -200,6 +202,7 @@ namespace detail {
 
 			/// measures the resolution of a clock and displays the result
 			void measure_clock_resolution(std::string const & clock_name, clock_function clock, unsigned int count = 1000000) {
+				using namespace stdlib;
 				nanoseconds min(std::days(1)), avg, max;
 				for(unsigned int i(0); i < count; ++i) {
 					unsigned long long int timeout(0);
@@ -226,13 +229,10 @@ namespace detail {
 			}
 
 			#if defined DIVERSALIS__OS__POSIX && (_POSIX_TIMERS > 0 || defined _SC_TIMERS )
-				void display_clock_resolution(std::string const & clock_name, ::clockid_t clock) throw(std::runtime_error) {
+				void display_clock_resolution(std::string const & clock_name, ::clockid_t clock) throw(exception) {
+					using stdlib;
 					::timespec t;
-					if(::clock_getres(clock, &t))
-					{
-						std::ostringstream s; s << exceptions::desc();
-						throw std::runtime_error(s.str().c_str());
-					}
+					if(::clock_getres(clock, &t)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
 					nanoseconds const ns(seconds(t.tv_sec) + nanoseconds(t.tv_nsec));
 					std::ostringstream s;
 					s
@@ -285,7 +285,7 @@ namespace detail {
 					}
 					try {
 						measure_clock_resolution("QueryPerformanceCounter", performance_counter, 100000);
-					} catch(std::runtime_error const & e) {
+					} catch(std::exception const & e) {
 						BOOST_MESSAGE(e.what());
 					}
 					measure_clock_resolution("mmsystem timeGetTime", mme_system_time, 1000);

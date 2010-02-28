@@ -5,6 +5,8 @@
 
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
+#include <sstream>
+#include <iomanip>
 
 namespace psycle { namespace host {
 

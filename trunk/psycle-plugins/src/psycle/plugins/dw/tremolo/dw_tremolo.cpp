@@ -1,5 +1,6 @@
 #include <psycle/plugin_interface.hpp>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

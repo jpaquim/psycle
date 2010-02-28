@@ -5,23 +5,13 @@
 // so we need to detect the platform ourselves,
 // and declare steinberg's unstandard/specific options: WIN32/MAC
 #include <diversalis/os.hpp>
-
 #if defined DIVERSALIS__OS__MICROSOFT
-	#if defined _WIN64
-		#error internal steinberg error (actually, it might work)
-	#elif defined _WIN32
-		#define WIN32 // steinberg's asio build option
-	#else
-		#error internal steinberg error
-	#endif
-
+	#define WIN32 // steinberg's build option
 	// steinberg's headers also lack some #include,
 	// so we include the missing headers ourselves
 	#include <objbase.h>
-
 #elif defined DIVERSALIS__OS__APPLE
-	#define MAC // steinberg's asio build option
-
+	#define MAC // steinberg's build option
 #else
 	#error internal steinberg error
 #endif

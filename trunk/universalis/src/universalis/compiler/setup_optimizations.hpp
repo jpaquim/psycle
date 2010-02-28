@@ -7,7 +7,6 @@
 #define UNIVERSALIS__COMPILER__SETUP_OPTIMIZATIONS__INCLUDED
 #pragma once
 
-//#include <universalis/detail/project.hpp>
 #include <diversalis.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT

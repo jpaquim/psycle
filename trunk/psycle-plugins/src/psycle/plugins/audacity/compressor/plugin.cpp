@@ -20,13 +20,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 
 #define MAX_SAMPLES 3000
 
 #ifndef M_PI
-	#define M_PI 3.14159265359f
+	#define M_PI 3.14159265359f // note that's supposed to be a double!
 #endif
 
 CMachineParameter const paraThreshold = {"Threshold","Threshold", -36 , -1 ,MPF_STATE, -12 };

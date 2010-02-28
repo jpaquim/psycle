@@ -12,6 +12,7 @@
 #include "../DspLib/Phaser.h"
 #include <cstring>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

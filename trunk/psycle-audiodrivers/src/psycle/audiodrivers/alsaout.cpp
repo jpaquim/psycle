@@ -4,10 +4,6 @@
 #if defined PSYCLE__ALSA_AVAILABLE
 
 #include "alsaout.h"
-#include <universalis/compiler/location.hpp>
-#include <universalis/exception.hpp>
-#include <universalis/os/loggers.hpp>
-#include <universalis/stdlib/thread.hpp>
 #include <boost/bind.hpp>
 #include <sstream>
 #include <cstring>

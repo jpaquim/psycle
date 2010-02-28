@@ -9,6 +9,7 @@
 #include <cstring>
 #include <cmath>
 #include "../dsp/Inertia.h"
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

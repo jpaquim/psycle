@@ -49,6 +49,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

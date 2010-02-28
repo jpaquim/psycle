@@ -7,18 +7,20 @@
 
 #include <universalis.hpp>
 
-#ifdef PSYCLE__CORE__SHARED
-	#ifdef PSYCLE__CORE__SOURCE
-		#define PSYCLE__CORE__DECL UNIVERSALIS__COMPILER__DYN_LINK__EXPORT
+#ifndef DIVERSALIS__COMPILER__RESOURCE
+	#ifdef PSYCLE__CORE__SHARED
+		#ifdef PSYCLE__CORE__SOURCE
+			#define PSYCLE__CORE__DECL UNIVERSALIS__COMPILER__DYN_LINK__EXPORT
+		#else
+			#define PSYCLE__CORE__DECL UNIVERSALIS__COMPILER__DYN_LINK__IMPORT
+		#endif
 	#else
-		#define PSYCLE__CORE__DECL UNIVERSALIS__COMPILER__DYN_LINK__IMPORT
+		#define PSYCLE__CORE__DECL //UNIVERSALIS__COMPILER__DYN_LINK__HIDDEN
 	#endif
-#else
-	#define PSYCLE__CORE__DECL //UNIVERSALIS__COMPILER__DYN_LINK__HIDDEN
-#endif
 
-#if !defined PSYCLE__CORE__SOURCE && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "psycle-core")
+	#if !defined PSYCLE__CORE__SOURCE && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "psycle-core")
+	#endif
 #endif
 
 #endif

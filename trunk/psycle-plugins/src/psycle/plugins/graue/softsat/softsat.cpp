@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 
@@ -87,48 +88,32 @@ CMachineInfo const MacInfo (
 
 class mi : public CMachineInterface
 {
-public:
-	mi();
-	virtual ~mi();
+	public:
+		mi();
+		virtual ~mi();
 
-	virtual void Init();
-	virtual void SequencerTick();
-	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
-	virtual bool DescribeValue(char* txt,int const param, int const value);
-	virtual void Command();
-	virtual void ParameterTweak(int par, int val);
+		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
+		virtual bool DescribeValue(char* txt,int const param, int const value);
+		virtual void Command();
+		virtual void ParameterTweak(int par, int val);
 
-private:
-};
+	private:
+	};
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	// The constructor zone
 	Vals = new int[2];
 }
 
 mi::~mi()
 {
 	delete[] Vals;
-// Destroy dynamically allocated objects/memory here
-}
-
-void mi::Init()
-{
-// Initialize your stuff here
-}
-
-void mi::SequencerTick()
-{
-// Called on each tick while sequencer is playing
 }
 
 void mi::Command()
 {
-// Called when user presses editor button
-// Show the about box
 	pCB->MessBox("Made September 9, 2005 by Catatonic Porpoise","About SoftSat",0);
 }
 
@@ -137,7 +122,6 @@ void mi::ParameterTweak(int par, int val)
 	Vals[par] = val;
 }
 
-// Work... where all is cooked
 void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int tracks)
 {
 	const float gradation = ((float) Vals[1]) / 2049.0f;       // paraHardness
@@ -207,7 +191,6 @@ void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int tra
 	} while(--numsamples);
 }
 
-// Function that describes value on client's display
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	if (param == 1) // hardness

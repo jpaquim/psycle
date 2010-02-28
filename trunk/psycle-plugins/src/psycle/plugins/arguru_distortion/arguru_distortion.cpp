@@ -1,6 +1,7 @@
 ///\file
 ///\brief Arguru simple distortion/saturator plugin for PSYCLE
 #include <psycle/plugin_interface.hpp>
+#include <cmath>
 #include <cstdio> // for std::sprintf
 
 using namespace psycle::plugin_interface;
@@ -175,7 +176,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	case 0:
 	{
 		if(value > 0)
-			std::sprintf(txt,"%.1f dB",20.0f * log10(value*0.000030517578125f));
+			std::sprintf(txt,"%.1f dB",20.0f * std::log10(value * 0.000030517578125f));
 		else
 			std::sprintf(txt,"-Inf. dB");				
 		return true;
@@ -183,7 +184,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	case 1:
 	{
 		if(value > 0)
-			std::sprintf(txt,"%.1f dB",20.0f * log10(value*0.00390625f));
+			std::sprintf(txt,"%.1f dB",20.0f * std::log10(value * 0.00390625f));
 		else
 			std::sprintf(txt,"-Inf. dB");				
 		return true;

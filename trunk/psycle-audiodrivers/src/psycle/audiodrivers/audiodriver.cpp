@@ -2,11 +2,8 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #include "audiodriver.h"
-#include <diversalis/cpu.hpp>
-#include <universalis/os/loggers.hpp>
-#include <universalis/stdlib/thread.hpp>
-#include <boost/bind.hpp>
 #include <psycle/helpers/math/clip.hpp>
+#include <boost/bind.hpp>
 
 namespace psycle { namespace audiodrivers {
 

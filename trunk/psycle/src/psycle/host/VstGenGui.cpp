@@ -6,6 +6,9 @@
 
 #include <psycle/core/song.h>
 
+#include <sstream>
+#include <iomanip>
+
 namespace psycle { namespace host {
 
 VstGenGui::VstGenGui(MachineView* view, Machine* mac)
