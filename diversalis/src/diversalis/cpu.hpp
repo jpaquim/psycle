@@ -260,14 +260,12 @@
 	#if defined _M_IA64
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__IA 2
-		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif defined _M_X64 // 64-bit x86 amd or intel (but not necessarily _WIN64)
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__X86 9
 		#define DIVERSALIS__CPU__X86__SSE 2 ///\todo detect SSE3
 		///\todo detect 3d-now
 		#define DIVERSALIS__CPU__X86__MMX
-		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif defined _M_IX86 // according to the only doc, it doesn't seem to go above 600 (i686)
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__X86 _M_IX86 / 100
