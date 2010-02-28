@@ -275,10 +275,8 @@ bool affinity_mask::operator()(unsigned int cpu_index) const {
 	return
 		#if defined DIVERSALIS__OS__POSIX
 			CPU_ISSET(cpu_index, &native_mask_);
-		#elif defined _WIN32
-			native_mask_ & 1 << cpu_index;
-		#elif defined _WIN64
-			native_mask_ & 1i64 << cpu_index;
+		#elif defined DIVERSALIS__OS__MICROSOFT
+			native_mask_ & native_mask_type(1) << cpu_index;
 		#else
 			#error unsupported operating system
 		#endif
@@ -291,10 +289,8 @@ void affinity_mask::operator()(unsigned int cpu_index, bool active) {
 			CPU_SET(cpu_index, &native_mask_);
 		else
 			CPU_CLR(cpu_index, &native_mask_);
-	#elif defined _WIN32
-		native_mask_ |= 1 << cpu_index;
-	#elif defined _WIN64
-		native_mask_ |= 1i64 << cpu_index;
+	#elif defined DIVERSALIS__OS__MICROSOFT
+		native_mask_ |= native_mask_type(1) << cpu_index;
 	#else
 		#error unsupported operating system
 	#endif

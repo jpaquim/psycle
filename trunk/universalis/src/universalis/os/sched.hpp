@@ -44,7 +44,7 @@ class UNIVERSALIS__DECL affinity_mask {
 			#if defined DIVERSALIS__OS__POSIX
 				cpu_set_t
 			#elif defined DIVERSALIS__OS__MICROSOFT
-				ULONG_PTR
+				DWORD_PTR
 			#else
 				#error unsupported operating system
 			#endif
