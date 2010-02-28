@@ -99,7 +99,7 @@ Integer inline lrint(Real x) {
 
 	template<> UNIVERSALIS__COMPILER__CONST
 	int32_t inline lrint<>(float f) {
-		#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__ASSEMBLER__INTEL// also intel's compiler?
+		#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL// also intel's compiler?
 			///\todo not always the fastest when using sse(2)
 			///\todo the double "2^51 + 2^52" version might be faster.
 			int32_t i;

@@ -7,14 +7,13 @@
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <psycle/core/pluginfinder.h>
 	#include <psycle/core/vstplugin.h>
-	#include <psycle/core/file.h>
 	#include <psycle/core/playertimeinfo.h>
 
 	#include <iostream>
 	#include <sstream>
 
 	#ifdef DIVERSALIS__OS__MICROSOFT
-		#include <windows.h>
+		#include <universalis/os/include_windows_without_crap.hpp>
 	#else
 		#include <dlfcn.h>
 	#endif
@@ -166,11 +165,6 @@
 			std::cout << vstPlug->GetName() << " - successfully instanciated";
 			std::cout.flush();
 
-			// [bohan] vstPlug is a stack object, so its destructor is called
-			// [bohan] at the end of its scope (this cope actually).
-			// [bohan] The problem with destructors of any object of any class is that
-			// [bohan] they are never allowed to throw any exception.
-			// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
 			try {
 				delete vstPlug;
 				// [bohan] phatmatik crashes here...
@@ -312,6 +306,6 @@
 	///\todo: Get information about this function
 	long AudioMaster::OnGetAutomationState(CEffect &pEffect) const { return kVstAutomationUnsupported; }
 
-}}}
-#endif
+	}}}
 
+#endif

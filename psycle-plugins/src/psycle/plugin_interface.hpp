@@ -22,9 +22,9 @@ namespace psycle { namespace plugin_interface {
 /// Note: Psycle 1.8.6 and older will not detect the 64bit difference, since it uses int and checks
 /// for higher or equal version.
 #if defined IS_64BIT_PLATFORM
-	short const MI_VERSION = 0x8012;
+	unsigned short const MI_VERSION = 0x8012;
 #else
-	short const MI_VERSION = 0x0012;
+	unsigned short const MI_VERSION = 0x0012;
 #endif
 
 /// max number of pattern tracks
