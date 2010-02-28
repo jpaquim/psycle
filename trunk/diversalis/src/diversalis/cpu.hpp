@@ -257,15 +257,11 @@
 		#define DIVERSALIS__CPU__SIZEOF_POINTER 4
 	#endif
 	
-	#if defined _M_X64 // the only doc says "defined for x64 processors." ... not sure what's that supposed to mean :-(
-		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
-	#endif
-
 	#if defined _M_IA64
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__IA 2
 		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
-	#elif defined _M_X64 // 64-bit x86 amd or intel
+	#elif defined _M_X64 // 64-bit x86 amd or intel (but not necessarily _WIN64)
 		#define DIVERSALIS__PROCESSOR
 		#define DIVERSALIS__CPU__X86 9
 		#define DIVERSALIS__CPU__X86__SSE 2 ///\todo detect SSE3

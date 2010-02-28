@@ -6,7 +6,6 @@
 #include "Configuration.hpp"
 
 #include <psycle/core/plugin.h>
-#include <psycle/core/file.h>
 #include <psycle/core/vsthost.h>
 #include <psycle/core/vstplugin.h>
 #include <psycle/helpers/math.hpp>

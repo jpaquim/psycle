@@ -25,7 +25,6 @@
 #include <psycle/core/internalkeys.hpp>
 #include <psycle/core/plugininfo.h>
 #include <psycle/core/player.h>
-#include <psycle/core/file.h>
 
 #include <psycle/helpers/hexstring_to_integer.hpp>
 

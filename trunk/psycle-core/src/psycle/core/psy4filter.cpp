@@ -4,7 +4,6 @@
 #include <psycle/core/config.private.hpp>
 #include "psy4filter.h"
 
-#include "file.h"
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
