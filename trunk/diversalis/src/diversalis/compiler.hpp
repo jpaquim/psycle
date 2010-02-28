@@ -230,7 +230,9 @@
 	#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 	#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
+#ifndef _WIN64
 	#define DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+#endif
 	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	
 	#if defined _OPENMP // defined when compiling with -openmp, returns an integer representing the date of the OpenMP specification implemented

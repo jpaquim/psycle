@@ -82,10 +82,12 @@ void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& 
 		bool isSynth = minfo->Flags == 3;
 		pinfo.setRole(isSynth ? MachineRole::GENERATOR : MachineRole::EFFECT);
 		pinfo.setLibName(fullName);
+		pinfo.setFileTime(boost::filesystem::last_write_time(boost::filesystem::path(fullName)));
 		{
+			///\todo: Fix this. The visual result is not the expected one.
 			std::ostringstream o;
-			if(minfo->APIVersion < 0x10) o << minfo->APIVersion;
-			else o << std::hex << minfo->APIVersion;
+			o << std::hex << (minfo->APIVersion&0x7FFF);
+			o << (minfo->APIVersion&0x8000)?" 64 bits":" 32 bits";
 			pinfo.setApiVersion(o.str());
 		}
 		{

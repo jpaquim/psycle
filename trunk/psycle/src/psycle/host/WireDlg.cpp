@@ -252,7 +252,7 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CWireDlg::OnTimer(UINT nIDEvent) 
+		void CWireDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
 			if ( nIDEvent == 2304+this_index )
 			{

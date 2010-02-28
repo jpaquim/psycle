@@ -317,10 +317,6 @@ namespace psycle { namespace host {
 					// translate
 					e.setInstrument(instr);	
 					e.setMachine( 0);
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
 					e.setVolume(255);
 
 					// volume/command
@@ -374,21 +370,6 @@ namespace psycle { namespace host {
 						XMInstrument::WaveData::WaveForms::SQUARE
 					};
 					switch(type){
-	#else
-					e.setParameter(param);
-					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
-						XMInstrument::WaveData::WaveForms::SAWDOWN,
-						XMInstrument::WaveData::WaveForms::SQUARE
-					};
-					// volume/command
-					if(vol >= 0x10 && vol <= 0x50)
-					{
-						e.setCommand(0x0C);
-						e.setParameter((vol-0x10)*2);
-					}
-					else switch(type){
-	#endif
-#endif
 						case XMCMD::ARPEGGIO:
 							if(param != 0){
 								e.setCommand(XMSampler::CMD::ARPEGGIO);
@@ -676,15 +657,8 @@ namespace psycle { namespace host {
 							break;	// transpose
 					}
 
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
+
 					if ((e.note() == notecommands::empty) && (e.command() == 00) && (e.parameter() == 00) && (e.instrument() == 255) && (e.volume() == 255))
-	#else
-					if ((e.note() == notecommands::empty) && (e.command() == 00) && (e.parameter() == 00) && (e.instrument() == 255))
-	#endif
-#endif
 					{
 						e.setMachine(255);
 					}

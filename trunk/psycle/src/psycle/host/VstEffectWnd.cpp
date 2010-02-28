@@ -203,7 +203,7 @@ namespace psycle { namespace host {
 			CFrameWnd::OnDestroy();
 		}
 
-		void CVstEffectWnd::OnTimer(UINT nIDEvent)
+		void CVstEffectWnd::OnTimer(UINT_PTR nIDEvent)
 		{
 			if ( nIDEvent == 449 )
 			{

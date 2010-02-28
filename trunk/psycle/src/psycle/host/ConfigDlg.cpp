@@ -144,7 +144,7 @@ namespace psycle { namespace host {
 			if(dlgnum == 5 || dlgnum == 0) AddPage(&_midiDlg);
 		}
 
-		int CConfigDlg::DoModal() 
+		INT_PTR CConfigDlg::DoModal() 
 		{
 			int retVal = CPropertySheet::DoModal();
 			if (retVal == IDOK)

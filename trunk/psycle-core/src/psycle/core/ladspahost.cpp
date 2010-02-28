@@ -71,6 +71,7 @@ void LadspaHost::FillPluginInfo(const std::string& fullName, const std::string& 
 			pinfo.setName( psDescriptor->Name );
 			pinfo.setRole( MachineRole::EFFECT );
 			pinfo.setLibName( fullName );
+			pinfo.setFileTime(boost::filesystem::last_write_time(boost::filesystem::path(fullName)));
 			//pinfo.setApiVersion( version );
 			//pinfo.setVersion( version );
 			pinfo.setAuthor( psDescriptor->Maker );

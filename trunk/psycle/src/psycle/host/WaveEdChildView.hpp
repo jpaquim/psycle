@@ -189,7 +189,7 @@ namespace psycle { namespace host {
 
 			
 		public:
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnDestroy();
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 

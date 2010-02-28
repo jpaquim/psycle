@@ -129,7 +129,7 @@ namespace psycle { namespace host {
 			CFrameWnd::OnDestroy();
 		}
 
-		void CFrameMachine::OnTimer(UINT nIDEvent) 
+		void CFrameMachine::OnTimer(UINT_PTR nIDEvent) 
 		{
 			if ( nIDEvent == 2104+MachineIndex )
 			{

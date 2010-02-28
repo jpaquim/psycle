@@ -99,6 +99,7 @@ bool PluginFinderCache::loadCache(){
 					// Else, we want to get the new information, and that will happen in the plugins scan.
 					if(p.fileTime() == t_time) {
 						MachineKey key(host, path.leaf(), index);
+						if(!hasHost(host)) addHost(host);
 						AddInfo(key, p);
 					}
 				}

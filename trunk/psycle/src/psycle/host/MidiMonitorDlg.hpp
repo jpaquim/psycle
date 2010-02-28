@@ -19,7 +19,7 @@ namespace psycle { namespace host {
 			virtual BOOL OnInitDialog();
 			virtual void fnClearEventsLost();
 			virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support
-			virtual void OnTimer(UINT nIDEvent);
+			virtual void OnTimer(UINT_PTR nIDEvent);
 			afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 			DECLARE_MESSAGE_MAP()

@@ -58,7 +58,7 @@ void CInfoDlg::InitTimer() {
 		MessageBox("Error! Could not initialize timer", "CPU Performance Dialog", MB_OK | MB_ICONERROR);
 }
 
-void CInfoDlg::OnTimer(UINT nIDEvent) {
+void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 	if(nIDEvent != 1) return;
 
 	Song & song = projects_->active_project()->song();

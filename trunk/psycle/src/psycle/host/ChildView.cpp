@@ -238,7 +238,7 @@ namespace psycle { namespace host {
 		}
 
 		/// Timer handler
-		void CChildView::OnTimer(UINT nIDEvent) {
+		void CChildView::OnTimer(UINT_PTR nIDEvent) {
 			if (nIDEvent == 31)
 			{
 				///\todo : IMPORTANT! change this lock to a more flexible one

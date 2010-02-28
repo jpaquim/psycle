@@ -32,7 +32,7 @@ namespace psycle { namespace host {
 			// ClassWizard generated virtual function overrides
 			//{{AFX_VIRTUAL(CConfigDlg)
 			public:
-			virtual int DoModal();
+			virtual INT_PTR DoModal();
 			//}}AFX_VIRTUAL
 		// Implementation
 		public:

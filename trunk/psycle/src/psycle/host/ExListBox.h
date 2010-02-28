@@ -22,7 +22,7 @@ class CExListBox : public CListBox {
 		afx_msg void OnRButtonDown( UINT nFlags, CPoint point);
 		afx_msg void OnKillFocusPatternName();
 		afx_msg void OnChangePatternName();
-		int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
+		INT_PTR OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 		UINT ItemFromPoint2(CPoint pt, BOOL& bOutside) const;
 		
 		BOOL OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult);

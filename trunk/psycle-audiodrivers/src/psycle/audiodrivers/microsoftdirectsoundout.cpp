@@ -59,7 +59,7 @@ void MsDirectSound::do_open() throw(std::exception) {
 	cap_enums_.resize(0);
 	DirectSoundCaptureEnumerate(DSEnumCallback, &cap_enums_);
 
-	if(DS_OK != (result = ::DirectSoundCreate8(device_guid_ != GUID() ? &device_guid_ : 0, &direct_sound_, 0)))
+	if(DS_OK != (result = ::DirectSoundCreate(device_guid_ != GUID() ? &device_guid_ : 0, &direct_sound_, 0)))
 		throw runtime_error("failed to create DirectSound object: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 	try {
 		HWND hwnd = ::GetWindow(0, 0);
@@ -431,7 +431,7 @@ void MsDirectSound::CreateCapturePort(PortCapt & port) {
 	if(port.capture_) return;
 
 	// Create IDirectSoundCapture using the indicated capture device
-	if(DS_OK != (result = DirectSoundCaptureCreate8(port.guid_, &port.capture_, 0)))
+	if(DS_OK != (result = DirectSoundCaptureCreate(port.guid_, &port.capture_, 0)))
 		throw runtime_error("failed to create DirectSound capture object: " + desc(result), UNIVERSALIS__COMPILER__LOCATION);
 
 	// Set up wave format structure.

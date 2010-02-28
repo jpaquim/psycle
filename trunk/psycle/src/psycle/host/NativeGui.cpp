@@ -139,7 +139,7 @@ namespace psycle { namespace host {
 			CWnd::OnDestroy();
 		}
 
-		void CNativeGui::OnTimer(UINT nIDEvent) 
+		void CNativeGui::OnTimer(UINT_PTR nIDEvent) 
 		{
 			if ( nIDEvent == 2104+machine().id() )
 			{

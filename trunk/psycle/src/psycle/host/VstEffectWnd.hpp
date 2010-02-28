@@ -87,7 +87,7 @@ namespace psycle {
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnClose();
 			afx_msg void OnDestroy();
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnSetFocus(CWnd* pOldWnd);
 			afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 			afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);

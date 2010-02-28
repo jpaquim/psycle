@@ -26,7 +26,7 @@ namespace host {
 			virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support			
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnButton1();
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnMode();

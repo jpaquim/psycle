@@ -487,7 +487,7 @@ void CWaveEdChildView::OnSize(UINT nType, int cx, int cy)
 }
 
 
-void CWaveEdChildView::OnTimer(UINT nIDEvent)
+void CWaveEdChildView::OnTimer(UINT_PTR nIDEvent)
 {
 	if(nIDEvent==31415)
 	{

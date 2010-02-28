@@ -63,8 +63,8 @@ class MsDirectSound : public AudioDriver {
 		public:
 			PortCapt() : guid_(), capture_(), buffer_(), low_mark_(), high_mark_(), left_(), right_(), machine_pos_() {}
 			LPGUID guid_;
-			LPDIRECTSOUNDCAPTURE8 capture_;
-			LPDIRECTSOUNDCAPTUREBUFFER8 buffer_;
+			LPDIRECTSOUNDCAPTURE capture_;
+			LPDIRECTSOUNDCAPTUREBUFFER buffer_;
 			unsigned int low_mark_, high_mark_;
 			float * left_, * right_;
 			unsigned int machine_pos_;
@@ -111,8 +111,8 @@ class MsDirectSound : public AudioDriver {
 		std::vector<PortEnums> cap_enums_;
 		std::vector<PortCapt> cap_ports_;
 		std::vector<int> port_mapping_;
-		LPDIRECTSOUND8 direct_sound_;
-		LPDIRECTSOUNDBUFFER8 buffer_;
+		LPDIRECTSOUND direct_sound_;
+		LPDIRECTSOUNDBUFFER buffer_;
 
 		DSoundUiInterface * ui_;
 		void error(std::string const & msg, universalis::compiler::location const & location);
