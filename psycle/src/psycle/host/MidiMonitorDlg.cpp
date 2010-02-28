@@ -153,7 +153,7 @@ namespace psycle { namespace host {
 		// PARAMETERS     : UNIT nIDEvent - timer ID
 		// RETURNS		  : <void>
 
-		void CMidiMonitorDlg::OnTimer(UINT nIDEvent) 
+		void CMidiMonitorDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
 			UpdateInfo();
 		}

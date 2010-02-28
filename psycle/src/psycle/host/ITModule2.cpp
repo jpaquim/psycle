@@ -909,10 +909,6 @@ Special:  Bit 0: On = song message attached.
 						//  115->124 = Pitch Slide up
 						//  193->202 = Portamento to
 						//  203->212 = Vibrato
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
 						if ( tmp<=64)
 						{
 							pent.setVolume(tmp<64?tmp:63);
@@ -954,14 +950,6 @@ Special:  Bit 0: On = song message attached.
 						{
 							pent.setVolume(XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 ));
 						}
-	#else
-						if ( tmp<=64)
-						{
-							pent.setCommand(0x0C);
-							pent.setParameter(tmp*2);
-						}
-	#endif
-#endif
 					}
 					if(mask[channel]&8)
 					{
@@ -1631,25 +1619,12 @@ OFFSET              Count TYPE   Description
 					if(newEntry&64)
 					{
 						std::uint8_t tmp=ReadUInt8();
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN || PSYCLE__CONFIGURATION__USE_PSYCORE
+
 						if ( tmp<=64)
 						{
 							pent.setMachine(0);
 							pent.setVolume((tmp<64)?tmp:63);
 						}
-	#else
-						if ( tmp<=64)
-						{
-							pent.setMachine(0);
-							pent.setCommand(0x0C);
-							pent.setParameter(tmp*2);
-						}
-	#endif
-#endif
-
 					}
 					if(newEntry&128)
 					{

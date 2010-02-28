@@ -181,7 +181,7 @@ class CChildView : public CWnd {
 		afx_msg void OnBarrec();
 		afx_msg void OnBarstop();
 		afx_msg void OnRecordWav();
-		afx_msg void OnTimer( UINT nIDEvent );
+		afx_msg void OnTimer( UINT_PTR nIDEvent );
 		afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 		afx_msg void OnFileNew();
 		afx_msg BOOL OnExport(UINT id);

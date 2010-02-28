@@ -94,6 +94,7 @@
 			pinfo.setLibName(fullName);
 			pinfo.setApiVersion("???");
 			pinfo.setPlugVersion("???");
+			pinfo.setFileTime(boost::filesystem::last_write_time(boost::filesystem::path(fullName)));
 			MachineKey key( hostCode(), fileName, 0);
 			finder.AddInfo( key, pinfo);
 			if (vstPlug) delete vstPlug;
@@ -105,8 +106,7 @@
 					if(tempName[0] != 0) {
 						PluginInfo pinfo;
 						pinfo.setLibName(fullName);
-						//todo!
-						//pinfo.setFileTime();
+						pinfo.setFileTime(boost::filesystem::last_write_time(boost::filesystem::path(fullName)));
 
 						pinfo.setAllow(true);
 						{
@@ -140,8 +140,7 @@
 				PluginInfo pinfo;
 				pinfo.setAllow(true);
 				pinfo.setLibName(fullName);
-				//todo!
-				//pinfo.setFileTime();
+				pinfo.setFileTime(boost::filesystem::last_write_time(boost::filesystem::path(fullName)));
 				pinfo.setName(vstPlug->GetName());
 				pinfo.setAuthor(vstPlug->GetVendorName());
 				pinfo.setRole( vstPlug->IsSynth()?MachineRole::GENERATOR : MachineRole::EFFECT );

@@ -726,7 +726,7 @@ namespace psycle { namespace host {
 			CPropertyPage::OnClose();
 		}
 
-		void CSkinDlg::OnTimer(UINT nIDEvent) 
+		void CSkinDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
 			if ( nIDEvent == 2345 )
 			{

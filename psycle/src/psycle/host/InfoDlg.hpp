@@ -17,7 +17,7 @@ class CInfoDlg : public CDialog {
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 		virtual BOOL OnInitDialog();
-		afx_msg void OnTimer(UINT nIDEvent);		
+		afx_msg void OnTimer(UINT_PTR nIDEvent);		
 		DECLARE_MESSAGE_MAP()
 
 	private:

@@ -1,4 +1,10 @@
-The folowing commands can be used to build boost on mingw.
+Index
+======
+- Build with mingw
+- Build 64bits in Visual Studio
+
+
+The following commands can be used to build boost on mingw.
 ---------------------------------------------------------
 
 pushd .
@@ -15,3 +21,12 @@ cd %src%
 %bjam% --debug-configuration --build-dir=%bld% --prefix=%dst% --with-python link=shared runtime-link=shared threading=multi variant=release,debug toolset=gcc install
 
 popd
+
+
+
+The following commands can be used to build boost 64bits on Visual Studio.
+-------------------------------------------------------------------------
+
+
+bootstrap
+jam link=shared runtime-link=shared threading=multi variant=release,debug --toolset=msvc address-model=64 --stagedir=stage64 stage

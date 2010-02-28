@@ -216,7 +216,6 @@ namespace psycle { namespace host {
 		ON_WM_MOUSEMOVE()
 		ON_WM_LBUTTONUP()
 		ON_WM_RBUTTONUP()
-		ON_WM_TIMER()
 		ON_WM_CREATE()
 		ON_WM_DESTROY()
 		ON_WM_SETFOCUS()

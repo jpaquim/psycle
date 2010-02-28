@@ -21,8 +21,6 @@
 #define PSYCLE__CONFIGURATION__USE_PSYCORE 1
 
 /// Define to 1 to enable the volume column for XMSampler, 0 otherwise.
-/// It will also make the machine column in the pattern to show the values of the volume column instead.
-#define PSYCLE__CONFIGURATION__VOLUME_COLUMN 0
 
 /// Define to 1 to use RMS Vu's, 0 otherwise
 #define PSYCLE__CONFIGURATION__RMS_VUS 0
@@ -30,11 +28,15 @@
 ///\todo that won't work on big-endian machines (this is for IT and XM module loaders)
 #define PSYCLE__CORE__FILEIO__WANT_DEPRECATED_RAW_ACCESS
 
+#if _WIN64
+#define BUILD_WITH_BITS " 64 bits"
+#else
+#define BUILD_WITH_BITS " 32 bits"
+#endif
 /**************************************************************************************************/
 /// string describing the configuration of the build.
 #define PSYCLE__CONFIGURATION(EOL) \
-	"compiler build tool chain = " PSYCLE__COMPILER__BUILD EOL \
-	"volume column = " UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__CONFIGURATION__VOLUME_COLUMN) EOL \
+	"compiler build tool chain = " PSYCLE__COMPILER__BUILD BUILD_WITH_BITS EOL \
 	"rms vu = " UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__CONFIGURATION__RMS_VUS) EOL \
 	"psycle-core = " UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__CONFIGURATION__USE_PSYCORE) EOL \
 	"debugging = " PSYCLE__CONFIGURATION__DEBUG

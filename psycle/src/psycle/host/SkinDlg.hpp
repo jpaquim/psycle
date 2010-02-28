@@ -166,7 +166,7 @@ namespace psycle { namespace host {
 			afx_msg void OnLineNumbersHex();
 			afx_msg void OnLineNumbersCursor();
 			afx_msg void OnClose();
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnImportReg();
 			afx_msg void OnExportReg();
 			afx_msg void OnSelchangePatternFontPoint();

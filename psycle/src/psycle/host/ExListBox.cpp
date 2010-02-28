@@ -8,10 +8,10 @@
 
 #include <psycle/core/song.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+#if !defined NDEBUG
+   #define new DEBUG_NEW
+   #undef THIS_FILE
+   static char THIS_FILE[] = __FILE__;
 #endif
 
 namespace psycle { namespace host {
@@ -86,7 +86,7 @@ void CExListBox::OnChangePatternName() {
 	#endif
 }
 
-int CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const {
+INT_PTR CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const {
 	int row;
 	RECT cellrect;   // cellrect		- to hold the bounding rect
 	BOOL tmp = FALSE;

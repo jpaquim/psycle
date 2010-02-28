@@ -52,7 +52,7 @@ protected:
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnParametersShowpreset();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	DECLARE_MESSAGE_MAP()
 
 	// Attributes

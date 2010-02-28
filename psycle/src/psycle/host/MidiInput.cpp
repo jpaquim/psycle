@@ -1078,15 +1078,7 @@ namespace psycle { namespace host {
 								}
 								else
 								{
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-									PatternEvent pentry(notecommands::midicc,status,255,data1,data2,pMachine->id());
-#else
 									PatternEvent pentry(notecommands::midicc,status,pMachine->id(),data1,data2);
-#endif
-#endif
 									pMachine->Tick(0,&pentry);
 								}
 #endif
