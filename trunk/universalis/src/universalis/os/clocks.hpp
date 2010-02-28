@@ -230,9 +230,9 @@ namespace detail {
 
 			#if defined DIVERSALIS__OS__POSIX && (_POSIX_TIMERS > 0 || defined _SC_TIMERS )
 				void display_clock_resolution(std::string const & clock_name, ::clockid_t clock) throw(exception) {
-					using stdlib;
+					using namespace stdlib;
 					::timespec t;
-					if(::clock_getres(clock, &t)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
+					if(::clock_getres(clock, &t)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					nanoseconds const ns(seconds(t.tv_sec) + nanoseconds(t.tv_nsec));
 					std::ostringstream s;
 					s
