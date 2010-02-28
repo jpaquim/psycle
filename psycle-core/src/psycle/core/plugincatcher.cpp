@@ -3,7 +3,6 @@
 
 #include <psycle/core/config.private.hpp>
 #include "plugincatcher.h"
-#include "file.h"
 #include "fileio.h"
 #include <universalis/os/fs.hpp>
 #include <boost/filesystem/operations.hpp>
