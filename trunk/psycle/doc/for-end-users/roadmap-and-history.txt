@@ -37,7 +37,7 @@ On the user side, there were several new native plugins, improvements in the VST
 During the period between that release, and December 2006, a version named 1.9alpha kept being developped, adding Visual Studio 2005 support, new external packages (newer version of boost), many new features, and more native plugins.
 Work on it was halted several times, due to the developers not having time due to different real-life issues.
 
-In the meanwhile, on March 2006, a new Psycle branch saw the light: xpsycle, or Psycle on linux.
+In the meantime, on March 2006, a new Psycle branch saw the light: xpsycle, or Psycle on linux.
 The original sources were based on Psycle 1.8, but later on moved onto Psycle 1.9 to take advantage of the work dedicated already to the 1.9 alpha.
 This new branch also had another new feature: multisequence. In fact, it was designed from the ground up with multisequence in mind.
 
@@ -52,7 +52,7 @@ This new version was based on the stable 1.8 branch (not on the 1.9 nor psycle-c
 
 Between 2008 and 2010, psycle-core continued to be refined and integrated into the Psycle GUI, but the QPsycle GUI stayed dormant.
 
-In the meanwhile, in 2009, [JAZ]/JosepMa released the maintenance version Psycle 1.8.6.1 (not based on psycle-core).
+Meanwhile, in 2009, [JAZ]/JosepMa released the maintenance version Psycle 1.8.6.1 (not based on psycle-core).
 
 Roadmap
 =======
