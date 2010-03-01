@@ -9,6 +9,7 @@
 #include "plugin.h"
 
 #include <universalis/os/dyn_link.hpp>
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <sstream>
 
