@@ -53,11 +53,11 @@ void Sequencer::process_global_event(const PatternEvent& event) {
 			loggers::warning()("psycle: core: unimplemented global event: bpm change");
 			//setBpm(event.parameter());
 			break;
-		case commandtypes::JUMP_TO:
+		/*case commandtypes::JUMP_TO:
 			loggers::warning()("psycle: core: unimplemented global event: jump to");
 			//todo: fix this. parameter indicates the pattern, not the beat!
 			//timeInfo_.setPlayBeatPos(event.parameter());
-			break;
+			break;*/
 		case commandtypes::SET_BYPASS:
 			loggers::warning()("psycle: core: unimplemented global event: set bypass");
 			/*mIndex = event.target();
