@@ -126,7 +126,7 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 		LARGE_INTEGER frequency;
 		if(!::QueryPerformanceFrequency(&frequency)) strcpy(buffer, "unsupported");
 		if(frequency.QuadPart / 1000000 < 10) sprintf(buffer, "%d threads", Player::singleton().num_threads());
-		else sprintf(buffer, "%dx%d MHz", thread::hardware_concurrency(), frequency.QuadPart / 1000000);
+		else sprintf(buffer, "%dx%d MHz", Player::singleton().num_threads(), frequency.QuadPart / 1000000);
 		processor_label_.SetWindowText(buffer);
 	}
 
