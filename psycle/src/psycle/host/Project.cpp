@@ -105,6 +105,8 @@ void Project::FileLoadsongNamed(const std::string& fName) {
 		progress_.ShowWindow(SW_HIDE);
 		mac_view()->UnlockVu();
 		delete song;
+		#pragma message(__FILE__ "(" UNIVERSALIS__COMPILER__STRINGIZE(__LINE__) "): warning: ***** BUG HERE *****")
+		//song_ = new Song();
 		player.song(*song_);
 		return;			
 	}	
