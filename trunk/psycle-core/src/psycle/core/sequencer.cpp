@@ -50,28 +50,28 @@ void Sequencer::process_global_event(const PatternEvent& event) {
 	Machine::id_type mIndex;
 	switch(event.command()) {
 		case commandtypes::BPM_CHANGE:
-			/*setBpm(event.parameter());
-			if(loggers::trace()) {
-				std::ostringstream s;
-				s << "psycle: core: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter();
-				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}*/
+			loggers::warning()("psycle: core: unimplemented global event: bpm change");
+			//setBpm(event.parameter());
 			break;
-		/*case commandtypes::JUMP_TO:
+		case commandtypes::JUMP_TO:
+			loggers::warning()("psycle: core: unimplemented global event: jump to");
 			//todo: fix this. parameter indicates the pattern, not the beat!
-			timeInfo_.setPlayBeatPos(event.parameter());
-			break;*/ // todo
+			//timeInfo_.setPlayBeatPos(event.parameter());
+			break;
 		case commandtypes::SET_BYPASS:
+			loggers::warning()("psycle: core: unimplemented global event: set bypass");
 			/*mIndex = event.target();
 			if(mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) //i.e. Effect
 				song().machine(mIndex)->_bypass = event.parameter() != 0;*/
 			break;
 		case commandtypes::SET_MUTE:
+			loggers::warning()("psycle: core: unimplemented global event: set mute");
 			/*mIndex = event.target();
 			if(mIndex < MAX_MACHINES && song().machine(mIndex))
 				song().machine(mIndex)->_mute = event.parameter() != 0;*/
 			break;
 		case commandtypes::SET_VOLUME:
+			loggers::warning()("psycle: core: unimplemented global event: set volume");
 			/*if(event.machine() == 255) {
 				Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
 				master._outDry = static_cast<int>(event.parameter());
@@ -86,6 +86,7 @@ void Sequencer::process_global_event(const PatternEvent& event) {
 			}*/
 		break;
 		case commandtypes::SET_PANNING:
+			loggers::warning()("psycle: core: unimplemented global event: set panning");
 			/*mIndex = event.target();
 			if(mIndex < MAX_MACHINES && song().machine(mIndex))
 				song().machine(mIndex)->SetPan(static_cast<int>( event.parameter()));
