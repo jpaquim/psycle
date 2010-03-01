@@ -5,12 +5,12 @@
 #define PSYCLE__CORE__PLAYER_TIME_INFO__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 namespace psycle { namespace core {
 
 /// class for play time information
-class PlayerTimeInfo {
+class PSYCLE__CORE__DECL PlayerTimeInfo {
 	public:
 			PlayerTimeInfo();
 			~PlayerTimeInfo();

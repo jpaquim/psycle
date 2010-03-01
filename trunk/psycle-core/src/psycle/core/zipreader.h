@@ -24,7 +24,7 @@
 #define PSYCLE__CORE__ZIP_READER__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 #include <sys/types.h>
 

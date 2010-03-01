@@ -3,7 +3,7 @@
 
 ///\todo This file should be moved to the common psycle/helpers
 
-#include <psycle/core/config.private.hpp>
+#include <psycle/core/detail/project.private.hpp>
 #include "xml.h"
 
 namespace psycle { namespace core {

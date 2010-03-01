@@ -20,7 +20,8 @@
 #ifndef PSYCLE__CORE__VSTPLUGIN__INCLUDED
 #define PSYCLE__CORE__VSTPLUGIN__INCLUDED
 
-#include <diversalis/os.hpp>
+#include <psycle/core/detail/project.hpp>
+
 #ifdef DIVERSALIS__OS__MICROSOFT
 	#include "machine.h"
 	#include <seib/vst/CVSTHost.Seib.hpp>

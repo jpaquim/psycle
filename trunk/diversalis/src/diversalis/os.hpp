@@ -259,7 +259,7 @@
 #endif
 
 #if !defined DIVERSALIS__OS
-	#error "Unkown operating system."
+	#error Unkown operating system.
 #endif
 
 

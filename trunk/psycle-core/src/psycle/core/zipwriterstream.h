@@ -12,7 +12,6 @@
 #include <streambuf>
 #include <cstdio>
 
-#include <diversalis/compiler.hpp>
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "zlib")
 #endif

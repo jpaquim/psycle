@@ -24,12 +24,12 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ******************************************************************************/
 
-
+#include <psycle/core/detail/project.private.hpp>
 #include "EffectWnd.hpp"
-namespace seib {
-	namespace vst{
-VkeysT CEffectWnd::VKeys[] =
-{
+
+namespace seib { namespace vst {
+
+VkeysT CEffectWnd::VKeys[] = {
 	{ VK_BACK,      VKEY_BACK      },
 	{ VK_TAB,       VKEY_TAB       },
 	{ VK_CLEAR,     VKEY_CLEAR     },
@@ -177,6 +177,4 @@ bool CEffectWnd::SaveProgram(std::string sName)
 	else return false;
 }
 
-
-}
-}
+}}

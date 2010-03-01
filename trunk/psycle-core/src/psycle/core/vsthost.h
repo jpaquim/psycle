@@ -20,8 +20,7 @@
 #ifndef PSYCLE__CORE__VSTHOST__INCLUDED
 #define PSYCLE__CORE__VSTHOST__INCLUDED
 
-#include <psycle/core/config.hpp>
-#include <diversalis.hpp>
+#include <psycle/core/detail/project.hpp>
 
 #ifndef DIVERSALIS__OS__MICROSOFT
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING

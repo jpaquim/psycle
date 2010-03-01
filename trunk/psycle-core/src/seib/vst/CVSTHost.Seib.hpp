@@ -25,23 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ******************************************************************************/
 
 #pragma once
-/// Tell the SDK that we want to support all the VST specs, not only VST2.4
-#define VST_FORCE_DEPRECATED 0
 
-// steinberg's headers are unable to correctly detect the platform,
-// so we need to detect the platform ourselves,
-// and declare steinberg's unstandard/specific options: WIN32/MAC
-#include <diversalis/os.hpp>
-#if defined DIVERSALIS__OS__MICROSOFT
-	#define WIN32 // steinberg's build option
-#elif defined DIVERSALIS__OS__APPLE
-	#define MAC // steinberg's build option
-#else
-	#error internal steinberg error
-#endif
-
-#include <vst2.x/aeffectx.h>               /* VST header files                  */
-#include <vst2.x/vstfxstore.h>
+#include <psycle/core/detail/project.hpp>
 
 //////////////////////////////////////////////////////////////////////////
 // This is part of Psycle, to catch the exceptions that happen when interacting
@@ -50,6 +35,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // catch(...) {} 
 #include <psycle/core/exceptions.h> // for throw.
 //////////////////////////////////////////////////////////////////////////
+
+// steinberg's headers are unable to correctly detect the platform,
+// so we need to detect the platform ourselves,
+// and declare steinberg's unstandard/specific options: WIN32/MAC
+#if defined DIVERSALIS__OS__MICROSOFT
+	#define WIN32 // steinberg's build option
+#elif defined DIVERSALIS__OS__APPLE
+	#define MAC // steinberg's build option
+#else
+	#error internal steinberg error
+#endif
+
+/// Tell the SDK that we want to support all the VST specs, not only VST2.4
+#define VST_FORCE_DEPRECATED 0
+
+//VST header files
+#include <vst2.x/aeffectx.h>
+#include <vst2.x/vstfxstore.h>
 
 namespace seib {
 	namespace vst {
@@ -89,7 +92,7 @@ namespace seib {
 		/*****************************************************************************/
 		/* CFxBase : base class for FX Bank / Program Files                          */
 		/*****************************************************************************/
-		class CFxBase
+		class PSYCLE__CORE__DECL CFxBase
 		{
 		protected:
 			CFxBase();
@@ -147,7 +150,7 @@ namespace seib {
 		/*****************************************************************************/
 		/* CFxProgram : class for an .fxp (Program) file                             */
 		/*****************************************************************************/
-		class CFxProgram : public CFxBase
+		class PSYCLE__CORE__DECL CFxProgram : public CFxBase
 		{
 		public:
 			CFxProgram(const char *pszFile = 0):CFxBase(){ Init(); initialized=Load(pszFile); }
@@ -214,7 +217,7 @@ namespace seib {
 		/* CFxBank : class for an .fxb (Bank) file                                   */
 		/*****************************************************************************/
 
-		class CFxBank : public CFxBase
+		class PSYCLE__CORE__DECL CFxBank : public CFxBase
 		{
 		public:
 			CFxBank(const char *pszFile = 0):CFxBase(){ Init(); initialized=Load(pszFile); }
@@ -282,7 +285,7 @@ namespace seib {
 		//-------------------------------------------------------------------------------------------------------
 		typedef AEffect* (*PluginEntryProc) (audioMasterCallback audioMaster);
 
-		struct PluginLoader
+		struct PSYCLE__CORE__DECL PluginLoader
 		{
 			void* module;
 			void* sFileName;
@@ -373,7 +376,7 @@ namespace seib {
 		/*****************************************************************************/
 		class CEffectWnd;
 		class CEffect;
-		class Crashingclass
+		class PSYCLE__CORE__DECL Crashingclass
 		{
 		public:
 			Crashingclass(){};
@@ -381,7 +384,7 @@ namespace seib {
 			void crashed(std::exception const & e) const;
 			CEffect* ef;
 		};
-		class CEffect
+		class PSYCLE__CORE__DECL CEffect
 		{
 		public:
 			// Try to avoid to use the AEffect constructor. It acts as a wrapper then, not as an object.
@@ -688,7 +691,7 @@ namespace seib {
 		/* CVSTHost class declaration                                                */
 		/*****************************************************************************/
 
-		class CVSTHost
+		class PSYCLE__CORE__DECL CVSTHost
 		{
 		public:
 			CVSTHost();

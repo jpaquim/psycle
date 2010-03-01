@@ -149,7 +149,7 @@ XMSampler::Channel::PerformFX().
 //  XMSampler::WaveDataController Declaration
 	//\todo: WaveDateController Needs to update the speed if sampleRate changes (but... would the samplerate change while
 	//       there's a voice playing?)
-	class WaveDataController
+	class PSYCLE__CORE__DECL WaveDataController
 	{
 	public:
 		struct LoopDirection {
@@ -290,7 +290,7 @@ XMSampler::Channel::PerformFX().
 		short* m_pR;
 	};
 /*
-	class XDSPWaveController : public WaveDataController
+	class PSYCLE__CORE__DECL XDSPWaveController : public WaveDataController
 	{
 	public:
 		XDSPWaveController(){};
@@ -307,7 +307,7 @@ XMSampler::Channel::PerformFX().
 //////////////////////////////////////////////////////////////////////////
 //  XMSampler::EnvelopeController Declaration
 	//\todo: Recall "CalcStep" after a SampleRate change, and also after a Tempo Change.
-	class EnvelopeController {
+	class PSYCLE__CORE__DECL EnvelopeController {
 	public:
 		struct EnvelopeStage {
 			enum Type {
@@ -428,7 +428,7 @@ XMSampler::Channel::PerformFX().
 // XMSampler::Voice Declaration
 // (This class could be called XMInstrumentController too, but "Voice" describes better how it is used.)
 
-	class Voice
+	class PSYCLE__CORE__DECL Voice
 	{
 	public:
 		///
@@ -684,7 +684,7 @@ XMSampler::Channel::PerformFX().
 
 	//////////////////////////////////////////////////////////////////////////
 	//  XMSampler::Channel Declaration
-	class Channel {
+	class PSYCLE__CORE__DECL Channel {
 	public:
 		struct EffectFlag
 		{

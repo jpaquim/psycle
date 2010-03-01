@@ -3,7 +3,7 @@
 
 ///\implementation psycle::core::Sampler
 
-#include <psycle/core/config.private.hpp>
+#include <psycle/core/detail/project.private.hpp>
 #include "sampler.h"
 
 #include "fileio.h"

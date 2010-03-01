@@ -5,7 +5,7 @@
 #define PSYCLE__CORE__PLUGIN_INFO
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 #include <string>
 
@@ -20,7 +20,7 @@ namespace psycle { namespace core {
 			};
 		}
 
-		class PluginInfo {
+		class PSYCLE__CORE__DECL PluginInfo {
 			public:
 				PluginInfo();
 				PluginInfo(MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string, std::string);

@@ -5,7 +5,7 @@
 #define PSYCLE__CORE__EXCEPTIONS__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>
 #include <stdexcept>

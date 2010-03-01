@@ -5,22 +5,20 @@
 #define PSYCLE__CORE__PLAYER__INCLUDED
 #pragma once
 
-#include <list>
-#include <stdexcept>
-
-#include <universalis/stdlib/condition.hpp>
-#include <universalis/stdlib/cstdint.hpp>
-#include <universalis/stdlib/date_time.hpp>
-#include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/thread.hpp>
-
-#include <psycle/helpers/dither.hpp>
-#include <psycle/helpers/riff.hpp>
-
 #include "machine.h"
 #include "sequencer.h"
 #include "song.h"
 
+#include <psycle/helpers/dither.hpp>
+#include <psycle/helpers/riff.hpp>
+
+#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/thread.hpp>
+
+#include <list>
+#include <stdexcept>
 
 namespace psycle {
 	namespace audiodrivers {

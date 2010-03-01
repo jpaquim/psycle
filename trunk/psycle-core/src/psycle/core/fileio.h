@@ -7,7 +7,7 @@
 #define PSYCLE__CORE__FILE_IO__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 #include <diversalis/compiler.hpp>
 #include <universalis/stdlib/cstdint.hpp>

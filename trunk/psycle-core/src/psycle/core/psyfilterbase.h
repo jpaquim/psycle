@@ -5,7 +5,7 @@
 #define PSYCLE__CORE__PSY_FILTER_BASE__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 #include <string>
 #include "signalslib.h"

@@ -3,7 +3,7 @@
 
 ///\implementation psycle::core::Instrument.
 
-#include <psycle/core/config.private.hpp>
+#include <psycle/core/detail/project.private.hpp>
 #include "instrument.h"
 
 #include <psycle/helpers/datacompression.hpp>
