@@ -13,7 +13,7 @@
 #include <cstdio>
 
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "zlib")
+	#pragma comment(lib, "zlibwapi")
 #endif
 
 namespace psycle { namespace core {

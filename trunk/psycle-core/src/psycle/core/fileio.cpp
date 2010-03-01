@@ -109,13 +109,13 @@ bool RiffFile::Expect(void * data, std::size_t const & bytes) {
 	return true;
 }
 
-int RiffFile::Seek(std::ptrdiff_t const & bytes) {
+std::size_t RiffFile::Seek(std::ptrdiff_t const & bytes) {
 	if(is_write_mode_) stream_.seekp(bytes, std::ios::beg); else stream_.seekg(bytes, std::ios::beg);
 	if(stream_.eof()) throw std::runtime_error("seek failed");
 	return GetPos();
 }
 
-int RiffFile::Skip(std::ptrdiff_t const & bytes) {
+std::size_t RiffFile::Skip(std::ptrdiff_t const & bytes) {
 	if(is_write_mode_) stream_.seekp(bytes, std::ios::cur); else stream_.seekg(bytes, std::ios::cur);
 	if(stream_.eof()) throw std::runtime_error("seek failed");
 	return GetPos();
@@ -151,8 +151,8 @@ bool MemoryFile::OpenMem(std::ptrdiff_t blocksize) { return false; }
 bool MemoryFile::CloseMem() { return false; }
 std::size_t MemoryFile::FileSize() { return 0; }
 std::size_t MemoryFile::GetPos() { return 0; }
-int MemoryFile::Seek(std::ptrdiff_t const & bytes) { return 0; }
-int MemoryFile::Skip(std::ptrdiff_t const & bytes) { return 0; }
+std::size_t MemoryFile::Seek(std::ptrdiff_t const & bytes) { return 0; }
+std::size_t MemoryFile::Skip(std::ptrdiff_t const & bytes) { return 0; }
 bool MemoryFile::ReadString(char *, std::size_t const & max_length) { return false; }
 bool MemoryFile::WriteChunk(void const *, std::size_t const &){ return false; }
 bool MemoryFile::ReadChunk (void       *, std::size_t const &){ return false; }

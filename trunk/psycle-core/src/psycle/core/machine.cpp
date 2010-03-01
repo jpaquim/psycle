@@ -623,7 +623,13 @@ void Machine::PreWork(int numSamples, bool clear) {
 // Each machine is expected to produce its output in its own _pSamplesX buffers.
 void Machine::recursive_process(unsigned int frames) {
 	recursive_process_deps(frames);
+
+	nanoseconds const t1(cpu_time_clock());
+
 	GenerateAudio(frames);
+
+	nanoseconds const t2(cpu_time_clock());
+	accumulate_processing_time(t2 - t1);
 }
 
 void Machine::recursive_process_deps(unsigned int frames, bool mix) {

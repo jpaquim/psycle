@@ -85,10 +85,11 @@ void NativeHost::FillPluginInfo(const std::string& fullName, const std::string& 
 		pinfo.setLibName(fullName);
 		pinfo.setFileTime(boost::filesystem::last_write_time(boost::filesystem::path(fullName)));
 		{
-			///\todo: Fix this. The visual result is not the expected one.
 			std::ostringstream o;
 			o << std::hex << (minfo->APIVersion&0x7FFF);
-			o << (minfo->APIVersion&0x8000)?" 64 bits":" 32 bits";
+			if(minfo->APIVersion&0x8000) {
+				o << " (64 bits)";
+			} else { o << " (32 bits)"; }
 			pinfo.setApiVersion(o.str());
 		}
 		{

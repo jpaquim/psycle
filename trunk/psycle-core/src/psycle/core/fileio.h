@@ -59,8 +59,8 @@ class PSYCLE__CORE__DECL RiffFile {
 		bool Eof();
 		virtual std::size_t FileSize();
 		virtual std::size_t GetPos();
-		virtual int Seek(std::ptrdiff_t const & bytes);
-		virtual int Skip(std::ptrdiff_t const & bytes);
+		virtual std::size_t Seek(std::ptrdiff_t const & bytes);
+		virtual std::size_t Skip(std::ptrdiff_t const & bytes);
 
 	protected:
 		virtual bool WriteChunk(void const *, std::size_t const &);

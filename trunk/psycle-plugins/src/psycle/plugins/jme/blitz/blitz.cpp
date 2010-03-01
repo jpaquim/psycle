@@ -21,1023 +21,128 @@
 
 using namespace psycle::plugin_interface;
 
-CMachineParameter const paraGlobal =
-{
-	"Global",
-	"Global",
-	0,
-	1,
-	MPF_STATE||MPF_LABEL,
-	0
-};
+CMachineParameter const paraGlobal = {"Global", "Global", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraGlobalVolume = {"Volume", "Volume", 0, 256, MPF_STATE, 128};
+CMachineParameter const paraGlobalCoarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
+CMachineParameter const paraGlobalFine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
+CMachineParameter const paraGlobalGlide = {"Glide", "Glide", 0, 255, MPF_STATE, 0};
+CMachineParameter const paraGlobalStereo = {"Stereo Switching", "Stereo Switching", 0, 256, MPF_STATE, 0};
+
+CMachineParameter const paraArpeggiator = {"Arpeggiator", "Arpeggiator", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraArpPattern = {"Pattern", "Pattern", 0, 11, MPF_STATE, 0};
+CMachineParameter const paraArpSpeed = {"Speed", "Speed", 1, 256, MPF_STATE, 24};
+CMachineParameter const paraArpShuffle = {"Shuffle", "Shuffle", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraArpRetrig = { "Retrig", "Retrig", 0, 2, MPF_STATE, 0};
+
+CMachineParameter const paraLfo = {"LFO", "LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraLfoDelay = {"Delay", "Delay", 0, 999, MPF_STATE, 0};
+CMachineParameter const paraLfoDepth = {"Depth", "Depth", -999, 999, MPF_STATE, 0};
+CMachineParameter const paraLfoSpeed = {"Speed", "Speed", 0, 999, MPF_STATE, 0};
+CMachineParameter const paraLfoDestination = {"Destination Oscillators", "Destination Oscillators", 0, 7, MPF_STATE, 0};
+
+CMachineParameter const paraOsc1 = {"Oscillator 1", "Oscillator 1", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc1Volume = {"Volume", "Volume", 0, 256, MPF_STATE, 128};
+CMachineParameter const paraOsc1Coarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
+CMachineParameter const paraOsc1Fine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc1Waveform = {"Waveform", "Waveform", 0, 37, MPF_STATE, 0};
+CMachineParameter const paraOsc1Feedback = {"Feedback", "Feedback", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc1Options = {"Options", "Options", 0, 13, MPF_STATE, 0};
+CMachineParameter const paraOsc1Func = {"Function", "Function", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc1FuncType = {"Type", "Type", 0, 54, MPF_STATE, 0};
+CMachineParameter const paraOsc1FuncSym = {"Symmetry", "Symmetry", 0, 2047, MPF_STATE, 1024};
+CMachineParameter const paraOsc1SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc1SymDriftRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
+CMachineParameter const paraOsc1SymDriftSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc1SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc1SymLfoRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
+CMachineParameter const paraOsc1SymLfoSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
+
+CMachineParameter const paraOsc2 = {"Oscillator 2", "Oscillator 2", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc2Volume = {"Volume", "Volume", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc2Coarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
+CMachineParameter const paraOsc2Fine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc2Waveform = {"Waveform", "Waveform", 0, 37, MPF_STATE, 0};
+CMachineParameter const paraOsc2Feedback = {"Feedback", "Feedback", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc2Options = {"Options", "Options", 0, 13, MPF_STATE, 0};
+CMachineParameter const paraOsc2Func = {"Function", "Function", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc2FuncType = {"Type", "Type", 0, 54, MPF_STATE, 0};
+CMachineParameter const paraOsc2FuncSym = {"Symmetry", "Symmetry", 0, 2047, MPF_STATE, 1024};
+CMachineParameter const paraOsc2SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc2SymDriftRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
+CMachineParameter const paraOsc2SymDriftSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc2SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc2SymLfoRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
+CMachineParameter const paraOsc2SymLfoSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
+
+CMachineParameter const paraOsc3 = {"Oscillator 3", "Oscillator 3", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc3Volume = {"Volume", "Volume", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc3Coarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
+CMachineParameter const paraOsc3Fine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc3Waveform = {"Waveform", "Waveform", 0, 37, MPF_STATE, 0};
+CMachineParameter const paraOsc3Feedback = {"Feedback", "Feedback", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc3Options = {"Options", "Options", 0, 13, MPF_STATE, 0};
+CMachineParameter const paraOsc3Func = {"Function", "Function", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc3FuncType = {"Type", "Type", 0, 54, MPF_STATE, 0};
+CMachineParameter const paraOsc3FuncSym = {"Symmetry", "Symmetry", 0, 2047, MPF_STATE, 1024};
+CMachineParameter const paraOsc3SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc3SymDriftRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
+CMachineParameter const paraOsc3SymDriftSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc3SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc3SymLfoRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
+CMachineParameter const paraOsc3SymLfoSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
+
+CMachineParameter const paraOsc4 = {"Oscillator 4", "Oscillator 4", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc4Volume = {"Volume", "Volume", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc4Coarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
+CMachineParameter const paraOsc4Fine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc4Waveform = {"Waveform", "Waveform", 0, 37, MPF_STATE, 0};
+CMachineParameter const paraOsc4Feedback = {"Feedback", "Feedback", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc4Options = {"Options", "Options", 0, 13, MPF_STATE, 0};
+CMachineParameter const paraOsc4Func = {"Function", "Function", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc4FuncType = {"Type", "Type", 0, 54, MPF_STATE, 0};
+CMachineParameter const paraOsc4FuncSym = {"Symmetry", "Symmetry", 0, 2047, MPF_STATE, 1024};
+CMachineParameter const paraOsc4SymDrift = {"Symmetry Drift", "Symmetry Drift", -2047, 2047, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc4SymDriftRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
+CMachineParameter const paraOsc4SymDriftSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOsc4SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc4SymLfoRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
+CMachineParameter const paraOsc4SymLfoSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
+
+CMachineParameter const paraRM = {"Ring Modulators", "Ring Modulators", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraRM1 = {"RM 1/2 Volume", "RM 1/2 Volume", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraRM2 = {"RM 3/4 Volume", "RM 3/4 Volume", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraPitch = {"Pitch Mod", "Pitch Mod", 0, 1, MPF_STATE||MPF_LABEL, 0};
+
+CMachineParameter const paraModA = {"Envelope Attack", "Envelope Attack", 1, MAX_ENV_TIME>>3, MPF_STATE, 1};
+CMachineParameter const paraModD = {"Envelope Decay", "Envelope Decay", 1, MAX_ENV_TIME>>3, MPF_STATE, 1};
+CMachineParameter const paraModEnvAmount = {"Envelope Amount", "Envelope Amount", -256, 256, MPF_STATE, 0};
+CMachineParameter const paraAmp = {"Amplifier Envelope", "Amplifier Envelope", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraAmpA = {"Attack", "Attack", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, MIN_ENV_TIME};
+CMachineParameter const paraAmpD = {"Decay", "Decay", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 4096};
+CMachineParameter const paraAmpS = {"Sustain", "Sustain", 0, 255, MPF_STATE, 224};
+CMachineParameter const paraAmpD2 = {"Decay 2", "Decay 2", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 65536};
+CMachineParameter const paraAmpR = {"Release", "Release", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 640};
+CMachineParameter const paraAmpScaling = {"Key Scaling", "Key Scaling", 0, 256, MPF_STATE, 150};
+CMachineParameter const paraAmpVelocity = {"Velocity", "Velocity", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraAmpTrack = {"Soften High Notes", "Soften High Notes", 0, 256, MPF_STATE, 64};
+
+CMachineParameter const paraFlt = {"Filter", "Filter", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraFltType = {"Type", "Type", 0, 17, MPF_STATE, 0};
+CMachineParameter const paraFltCutoff = {"Cutoff", "Cutoff", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraFltResonance = {"Resonance", "Resonance", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraFltTrack = {"Track", "Track", -64, 64, MPF_STATE, 5};
+CMachineParameter const paraFltSweep = {"Sweep", "Sweep", -999, 999, MPF_STATE, 0};
+CMachineParameter const paraFltSpeed = {"Speed", "Speed", 0, 999, MPF_STATE, 0};
+CMachineParameter const paraFltEnv = {"Filter Envelope", "Filter Envelope", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraFltA = {"Attack", "Attack", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, MIN_ENV_TIME};
+CMachineParameter const paraFltD = {"Decay", "Decay", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 4096};
+CMachineParameter const paraFltS = {"Sustain", "Sustain", 0, 255, MPF_STATE, 0};
+CMachineParameter const paraFltD2 = {"Decay 2", "Decay 2", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 65536};
+CMachineParameter const paraFltR = {"Release", "Release", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 3074};
+CMachineParameter const paraFltScaling = {"Key Scaling", "Key Scaling", 0, 256, MPF_STATE, 150};
+CMachineParameter const paraFltVelocity = {"Velocity", "Velocity", 0, 256, MPF_STATE, 32};
+CMachineParameter const paraFltEnvAmount = {"Envelope Amount", "Envelope Amount", -256, 256, MPF_STATE, 150};
 
-CMachineParameter const paraGlobalVolume = {
-	"Volume",
-	"Volume",
-	0,
-	256,
-	MPF_STATE,
-	128
-};
-
-CMachineParameter const paraGlobalCoarse = {
-	"Coarse",
-	"Coarse",
-	-60,
-	60,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraGlobalFine = {
-	"Fine",
-	"Fine",				
-	-256,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraGlobalGlide = {
-	"Glide",
-	"Glide",
-	0,
-	255,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraGlobalStereo = {
-	"Stereo Switching",
-	"Stereo Switching",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraArpeggiator = {
-	"Arpeggiator",
-	"Arpeggiator",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraArpPattern = {
-	"Pattern",
-	"Pattern",
-	0,
-	11,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraArpSpeed = {
-	"Speed",
-	"Speed",
-	1,
-	256,
-	MPF_STATE,
-	24
-};
-
-CMachineParameter const paraArpShuffle = {
-	"Shuffle",
-	"Shuffle",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraArpRetrig = {
-	"Retrig",
-	"Retrig",
-	0,
-	2,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraLfo = {
-	"LFO",
-	"LFO",				
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraLfoDelay = {
-	"Delay",
-	"Delay",
-	0,
-	999,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraLfoDepth = {
-	"Depth",
-	"Depth",
-	-999,
-	999,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraLfoSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	999,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraLfoDestination = {
-	"Destination Oscillators",
-	"Destination Oscillators",
-	0,
-	7,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1 = {
-	"Oscillator 1",
-	"Oscillator 1",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc1Volume = {
-	"Volume",
-	"Volume",
-	0,
-	256,
-	MPF_STATE,
-	128
-};
-
-CMachineParameter const paraOsc1Coarse = {
-	"Coarse",
-	"Coarse",
-	-60,
-	60,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1Fine = 
-{
-	"Fine",
-	"Fine",				
-	-256,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1Waveform = {
-	"Waveform",
-	"Waveform",
-	0,
-	37,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1Feedback = {
-	"Feedback",
-	"Feedback",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1Options = {
-	"Options",
-	"Options",
-	0,
-	13,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1Func = {
-	"Function",
-	"Function",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc1FuncType = {
-	"Type",
-	"Type",				
-	0,
-	54,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1FuncSym = {
-	"Symmetry",
-	"Symmetry",
-	0,
-	2047,
-	MPF_STATE,
-	1024
-};
-
-CMachineParameter const paraOsc1SymDrift = {
-	"Symmetry Drift",
-	"Symmetry Drift",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc1SymDriftRange = {
-	"Range",
-	"Range",
-	-2047,
-	2047,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1SymDriftSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1SymLfo = {
-	"Symmetry LFO",
-	"Symmetry LFO",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc1SymLfoRange = {
-	"Range",
-	"Range",
-	-2047,
-	2047,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc1SymLfoSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2 = {
-	"Oscillator 2",
-	"Oscillator 2",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc2Volume = {
-	"Volume",
-	"Volume",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2Coarse = {
-	"Coarse",
-	"Coarse",
-	-60,
-	60,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2Fine = 
-{
-	"Fine",
-	"Fine",				
-	-256,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2Waveform = {
-	"Waveform",
-	"Waveform",
-	0,
-	37,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2Feedback = {
-	"Feedback",
-	"Feedback",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2Options = {
-	"Options",
-	"Options",
-	0,
-	13,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2Func = {
-	"Function",
-	"Function",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc2FuncType = {
-	"Type",
-	"Type",				
-	0,
-	54,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2FuncSym = {
-	"Symmetry",
-	"Symmetry",
-	0,
-	2047,
-	MPF_STATE,
-	1024
-};
-
-CMachineParameter const paraOsc2SymDrift = {
-	"Symmetry Drift",
-	"Symmetry Drift",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-
-CMachineParameter const paraOsc2SymDriftRange = {
-	"Range",
-	"Range",
-	-2047,
-	2047,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2SymDriftSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2SymLfo = {
-	"Symmetry LFO",
-	"Symmetry LFO",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc2SymLfoRange = {
-	"Range",
-	"Range",
-	-2047,
-	2047,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc2SymLfoSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3 = {
-	"Oscillator 3",
-	"Oscillator 3",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc3Volume = {
-	"Volume",
-	"Volume",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3Coarse = {
-	"Coarse",
-	"Coarse",
-	-60,
-	60,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3Fine = 
-{
-	"Fine",
-	"Fine",				
-	-256,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3Waveform = {
-	"Waveform",
-	"Waveform",
-	0,
-	37,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3Feedback = {
-	"Feedback",
-	"Feedback",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3Options = {
-	"Options",
-	"Options",
-	0,
-	13,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3Func = {
-	"Function",
-	"Function",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc3FuncType = {
-	"Type",
-	"Type",				
-	0,
-	54,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3FuncSym = {
-	"Symmetry",
-	"Symmetry",
-	0,
-	2047,
-	MPF_STATE,
-	1024
-};
-
-CMachineParameter const paraOsc3SymDrift = {
-	"Symmetry Drift",
-	"Symmetry Drift",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc3SymDriftRange = {
-	"Range",
-	"Range",
-	-2047,
-	2047,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3SymDriftSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3SymLfo = {
-	"Symmetry LFO",
-	"Symmetry LFO",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc3SymLfoRange = {
-	"Range",
-	"Range",
-	-2047,
-	2047,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc3SymLfoSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-
-CMachineParameter const paraOsc4 = {
-	"Oscillator 4",
-	"Oscillator 4",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc4Volume = {
-	"Volume",
-	"Volume",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4Coarse = 
-{
-	"Coarse",
-	"Coarse",
-	-60,
-	60,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4Fine = 
-{
-	"Fine",
-	"Fine",				
-	-256,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4Waveform = {
-	"Waveform",
-	"Waveform",
-	0,
-	37,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4Feedback = {
-	"Feedback",
-	"Feedback",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4Options = {
-	"Options",
-	"Options",
-	0,
-	13,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4Func = {
-	"Function",
-	"Function",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc4FuncType = {
-	"Type",
-	"Type",				
-	0,
-	54,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4FuncSym = {
-	"Symmetry",
-	"Symmetry",
-	0,
-	2047,
-	MPF_STATE,
-	1024
-};
-
-CMachineParameter const paraOsc4SymDrift = {
-	"Symmetry Drift",
-	"Symmetry Drift",
-	-2047,
-	2047,
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc4SymDriftRange = {
-	"Range",
-	"Range",
-	-2047,
-	2047,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4SymDriftSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4SymLfo = {
-	"Symmetry LFO",
-	"Symmetry LFO",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraOsc4SymLfoRange = {
-	"Range",
-	"Range",
-	-2047,
-	2047,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOsc4SymLfoSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraRM = {
-	"Ring Modulators",
-	"Ring Modulators",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraRM1 = {
-	"RM 1/2 Volume",
-	"RM 1/2 Volume",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraRM2 = {
-	"RM 3/4 Volume",
-	"RM 3/4 Volume",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraPitch = {
-	"Pitch Mod",
-	"Pitch Mod",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraModA = {
-	"Envelope Attack",
-	"Envelope Attack",
-	1,
-	MAX_ENV_TIME>>3,
-	MPF_STATE,
-	1
-};
-
-CMachineParameter const paraModD = {
-	"Envelope Decay",
-	"Envelope Decay",
-	1,
-	MAX_ENV_TIME>>3,
-	MPF_STATE,
-	1
-};
-
-CMachineParameter const paraModEnvAmount = {
-	"Envelope Amount",
-	"Envelope Amount",
-	-256,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraAmp = {
-	"Amplifier Envelope",
-	"Amplifier Envelope",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraAmpA = {
-	"Attack",
-	"Attack",
-	MIN_ENV_TIME,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	MIN_ENV_TIME
-};
-
-CMachineParameter const paraAmpD = {
-	"Decay",
-	"Decay",
-	MIN_ENV_TIME,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	4096
-};
-
-CMachineParameter const paraAmpS = {
-	"Sustain",
-	"Sustain",
-	0,
-	255,
-	MPF_STATE,
-	224
-};
-
-CMachineParameter const paraAmpD2 = {
-	"Decay 2",
-	"Decay 2",
-	MIN_ENV_TIME,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	65536
-};
-
-CMachineParameter const paraAmpR = {
-	"Release",
-	"Release",
-	MIN_ENV_TIME,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	640
-};
-
-CMachineParameter const paraAmpScaling = {
-	"Key Scaling",
-	"Key Scaling",
-	0,
-	256,
-	MPF_STATE,
-	150
-};
-
-CMachineParameter const paraAmpVelocity = {
-	"Velocity",
-	"Velocity",
-	0,
-	256,
-	MPF_STATE,
-	256
-};
-
-CMachineParameter const paraAmpTrack = {
-	"Soften High Notes",
-	"Soften High Notes",
-	0,
-	256,
-	MPF_STATE,
-	64
-};
-
-CMachineParameter const paraFlt = {
-	"Filter",
-	"Filter",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-CMachineParameter const paraFltType = {
-	"Type",
-	"Type",				
-	0,
-	17,				
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraFltCutoff = {
-	"Cutoff",
-	"Cutoff",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraFltResonance = {
-	"Resonance",
-	"Resonance",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraFltTrack = {
-	"Track",
-	"Track",
-	-64,
-	64,				
-	MPF_STATE,
-	5
-};
-
-CMachineParameter const paraFltSweep = {
-	"Sweep",
-	"Sweep",
-	-999,
-	999,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraFltSpeed = {
-	"Speed",
-	"Speed",
-	0,
-	999,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraFltEnv = {
-	"Filter Envelope",
-	"Filter Envelope",
-	0,
-	1,				
-	MPF_STATE||MPF_LABEL,
-	0
-};
-
-
-
-CMachineParameter const paraFltA = {
-	"Attack",
-	"Attack",
-	MIN_ENV_TIME,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	MIN_ENV_TIME
-};
-
-CMachineParameter const paraFltD = {
-	"Decay",
-	"Decay",
-	MIN_ENV_TIME,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	4096
-};
-
-CMachineParameter const paraFltS = {
-	"Sustain",
-	"Sustain",
-	0,
-	255,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraFltD2 = {
-	"Decay 2",
-	"Decay 2",
-	MIN_ENV_TIME,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	65536
-};
-
-CMachineParameter const paraFltR = {
-	"Release",
-	"Release",
-	MIN_ENV_TIME,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	3074
-};
-
-CMachineParameter const paraFltScaling = {
-	"Key Scaling",
-	"Key Scaling",
-	0,
-	256,
-	MPF_STATE,
-	150
-};
-
-CMachineParameter const paraFltVelocity = {
-	"Velocity",
-	"Velocity",
-	0,
-	256,
-	MPF_STATE,
-	32
-};
-
-CMachineParameter const paraFltEnvAmount = {
-	"Envelope Amount",
-	"Envelope Amount",
-	-256,
-	256,
-	MPF_STATE,
-	150
-};
 
 CMachineParameter const *pParameters[] = {
 	//00
@@ -1183,15 +288,16 @@ CMachineParameter const *pParameters[] = {
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
+	MI_VERSION,
+	0x0150,
 	GENERATOR,								
-	112,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
-	"Blitz 1.5"
-		#ifndef NDEBUG
-			" (Debug build)"
-		#endif
-		,
+	"Blitz"
+	#ifndef NDEBUG
+		" (Debug build)"
+	#endif
+	,
 	"Blitz",
 	"jme",
 	"Help",
@@ -1202,7 +308,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo) // To export DLL functions to host
 
 mi::mi()
 {
-	Vals=new int[112];
+	Vals=new int[MacInfo.numParameters];
 	InitWaveTable();
 }
 

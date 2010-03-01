@@ -87,6 +87,8 @@ void Project::OnReport(const std::string& a, const std::string& b) {
 }
 
 void Project::FileLoadsongNamed(const std::string& fName) {
+	// Song* song = the new song being loaded
+	// Song* song_ = the old song.
 	mac_view()->LockVu();
 	psycle::core::Song* song = new Song();
 	song->SetReady(false);
@@ -105,8 +107,6 @@ void Project::FileLoadsongNamed(const std::string& fName) {
 		progress_.ShowWindow(SW_HIDE);
 		mac_view()->UnlockVu();
 		delete song;
-		#pragma message(__FILE__ "(" UNIVERSALIS__COMPILER__STRINGIZE(__LINE__) "): warning: ***** BUG HERE *****")
-		//song_ = new Song();
 		player.song(*song_);
 		return;			
 	}	

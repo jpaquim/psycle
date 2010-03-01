@@ -241,6 +241,9 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 
 			typedef std::list<thread*> threads_type;
 			threads_type threads_;
+		public:
+			std::size_t num_threads() { return threads_.size(); }
+		private:
 			void thread_function(std::size_t thread_number);
 
 			typedef class scoped_lock<mutex> scoped_lock;
