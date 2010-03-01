@@ -7,12 +7,15 @@
 #include "pluginfinder.h"
 #include "ladspamachine.h"
 #include "playertimeinfo.h"
+#include <boost/filesystem.hpp>
 #include <iostream>
 
-#if defined __unix__ || defined __APPLE__
+#if defined DIVERSALIS__OS__POSIX
 	#include <dlfcn.h>
+#elif defined DIVERSALIS__OS__MICROSOFT
+	#include <universalis/os/include_windows_without_crap.hpp>
 #else
-	#include <windows.h>
+	#error unsupported platform
 #endif
 
 namespace psycle { namespace core {
