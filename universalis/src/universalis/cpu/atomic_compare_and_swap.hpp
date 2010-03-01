@@ -3,8 +3,8 @@
 
 ///\interface universalis::cpu::atomic::compare_and_swap
 
-#ifndef UNIVERSALIS__CPU__EXCEPTIONS__ATOMIC__COMPARE_AND_SWAP__INCLUDED
-#define UNIVERSALIS__CPU__EXCEPTIONS__ATOMIC__COMPARE_AND_SWAP__INCLUDED
+#ifndef UNIVERSALIS__CPU__ATOMIC_COMPARE_AND_SWAP__INCLUDED
+#define UNIVERSALIS__CPU__ATOMIC_COMPARE_AND_SWAP__INCLUDED
 #pragma once
 
 #include <diversalis/compiler.hpp>
@@ -14,7 +14,7 @@
 	#include <glib/gatomic.h>
 #endif
 
-namespace universalis { namespace cpu { namespace atomic {
+namespace universalis { namespace cpu {
 
 // see c++ standard http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2047.html
 // see apache portable runtime http://svn.apache.org/viewvc/apr/apr/trunk/atomic
@@ -32,7 +32,7 @@ namespace universalis { namespace cpu { namespace atomic {
 /// atomic compare and swap with full memory barrier.
 /// does not fail spuriously.
 template<typename Value>
-bool inline compare_and_swap(Value * address, Value old_value, Value new_value) {
+bool inline atomic_compare_and_swap(Value * address, Value old_value, Value new_value) {
 	#if defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION >= 40100 // 4.1.0
 		return __sync_bool_compare_and_swap(address, old_value, new_value);
 	#else
@@ -42,16 +42,16 @@ bool inline compare_and_swap(Value * address, Value old_value, Value new_value) 
 
 #if !defined DIVERSALIS__COMPILER__GNU || DIVERSALIS__COMPILER__VERSION < 40100 // 4.1.0
 	template<>
-	bool inline compare_and_swap< ::gpointer>(::gpointer * address, ::gpointer old_value, ::gpointer new_value) {
+	bool inline atomic_compare_and_swap< ::gpointer>(::gpointer * address, ::gpointer old_value, ::gpointer new_value) {
 		return ::g_atomic_pointer_compare_and_exchange(address, old_value, new_value);
 	}
 
 	template<>
-	bool inline compare_and_swap< ::gint>(::gint * address, ::gint old_value, ::gint new_value) {
+	bool inline atomic_compare_and_swap< ::gint>(::gint * address, ::gint old_value, ::gint new_value) {
 		return ::g_atomic_int_compare_and_exchange(address, old_value, new_value);
 	}
 #endif
 
-}}}
+}}
 
 #endif
