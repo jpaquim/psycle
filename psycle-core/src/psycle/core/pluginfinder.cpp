@@ -38,7 +38,7 @@ PluginFinder::const_iterator PluginFinder::end(Hosts::type host) const {
 
 int PluginFinder::size(Hosts::type host) const {
 	assert(host < maps_.size());
-	return maps_[host].size();
+	return static_cast<int>(maps_[host].size());
 }
 void PluginFinder::AddInfo(const MachineKey & key, const PluginInfo& info) {
 	#if 0

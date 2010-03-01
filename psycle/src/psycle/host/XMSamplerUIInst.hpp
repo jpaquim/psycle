@@ -49,7 +49,7 @@ public:
 		/**  */
 		const int GetEnvelopePointIndexAtPoint(const int x,const int y)
 		{
-			std::size_t const _points = m_pEnvelope->NumOfPoints();
+			int const _points = m_pEnvelope->NumOfPoints();
 			for(unsigned int i = 0;i < _points ;i++)
 			{
 				CPoint _pt_env;

@@ -755,7 +755,7 @@ bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 	// chunk size in header
 
 	std::size_t const pos2 = file->GetPos();
-	size = pos2 - pos - sizeof size;
+	size = static_cast<uint32_t>(pos2 - pos) - sizeof(size);
 	file->Seek(pos);
 	file->Write(size);
 	file->Seek(pos2);
@@ -786,7 +786,7 @@ bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong& song, int index )
 	// chunk size in header
 
 	std::size_t const pos2 = file->GetPos();
-	size = pos2 - pos - sizeof size;
+	size = static_cast<uint32_t>(pos2 - pos) - sizeof(size);
 	file->Seek(pos);
 	file->Write(size);
 	file->Seek(pos2);

@@ -389,7 +389,7 @@ void XMInstrument::Envelope::Save(RiffFile& riffFile, const uint32_t version)
 		i = m_SustainBegin; riffFile.Write(i);
 		i = m_SustainEnd; riffFile.Write(i);
 	}
-	{ uint32_t s = m_Points.size(); riffFile.Write(s); }
+	{ uint32_t s = static_cast<uint32_t>(m_Points.size()); riffFile.Write(s); }
 	for(std::size_t i = 0; i < m_Points.size(); ++i) {
 		riffFile.Write(m_Points[i].first); // point
 		riffFile.Write(m_Points[i].second); // value
@@ -516,9 +516,9 @@ int XMInstrument::Load(RiffFile& riffFile)
 void XMInstrument::Save(RiffFile& riffFile)
 {
 	if ( ! m_bEnabled ) return;
-
+	//size is saved in 32bits.
 	int32_t size = 0;
-	int filepos = riffFile.GetPos();
+	size_t filepos = riffFile.GetPos();
 
 	riffFile.WriteArray("INST",4);
 	riffFile.Write(size);
@@ -566,9 +566,9 @@ void XMInstrument::Save(RiffFile& riffFile)
 	m_PanEnvelope.Save(riffFile,version);
 	m_FilterEnvelope.Save(riffFile,version);
 	m_PitchEnvelope.Save(riffFile,version);
-	int endpos = riffFile.GetPos();
+	size_t endpos = riffFile.GetPos();
 	riffFile.Seek(filepos+4);
-	{ uint32_t i = endpos - filepos; riffFile.Write(i); }
+	{ uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
 	riffFile.Seek(endpos);
 }
 

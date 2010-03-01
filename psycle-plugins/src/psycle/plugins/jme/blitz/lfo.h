@@ -33,7 +33,7 @@ public:
 	void setLevel(int val);
 	void setSpeed(int val);
 	void reset();
-	void next();
+	inline void next();
 private:
 	int delay;
 	int level;
@@ -48,3 +48,24 @@ private:
 	int current;
 	int last;
 };
+
+inline void lfo::next(){
+	if (pause) pause--;
+	else {
+		phaseLo++;
+		if (count < 0){
+			count=speed;
+			phaseHi=(phaseHi+1)&3;
+			phaseLo=0;
+			if (((phaseHi&2)>>1)^(phaseHi&1)) coeff=0-level;
+			else coeff=level;
+			switch(phaseHi){
+				case 1: offset=speed*level; break;
+				case 3: offset=0-speed*level;break;
+				default: offset=0; break;
+			}
+		} count--;
+		last=current;
+		current=phaseLo*coeff+offset;
+	}
+}

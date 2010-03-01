@@ -118,7 +118,7 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples) {
 		else Standby(true);
 	}
 
-	nanoseconds const t0(cpu_time_clock());
+	//nanoseconds const t0(cpu_time_clock());
 
 	if (!_mute) {
 		if((_isSynth) || (!_bypass && !Standby())) {
@@ -127,8 +127,8 @@ int Plugin::GenerateAudioInTicks(int startSample,  int numSamples) {
 	}
 	Machine::UpdateVuAndStanbyFlag(numSamples);
 
-	nanoseconds const t1(cpu_time_clock());
-	accumulate_processing_time(t1 - t0);
+	//nanoseconds const t1(cpu_time_clock());
+	//accumulate_processing_time(t1 - t0);
 
 	recursive_processed_ = true;
 	return numSamples;

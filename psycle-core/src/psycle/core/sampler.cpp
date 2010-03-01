@@ -77,7 +77,7 @@ void Sampler::Init()
 int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 {
 	assert(numSamples >= 0);
-	nanoseconds const t0(cpu_time_clock());
+	//nanoseconds const t0(cpu_time_clock());
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 	if (!_mute)
 	{
@@ -190,8 +190,8 @@ int Sampler::GenerateAudioInTicks( int startSample, int numSamples )
 	}
 	else Standby(true);
 
-	nanoseconds const t1(cpu_time_clock());
-	accumulate_processing_time(t1 - t0);
+	//nanoseconds const t1(cpu_time_clock());
+	//accumulate_processing_time(t1 - t0);
 
 	recursive_processed_ = true;
 	return numSamples;

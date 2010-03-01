@@ -365,21 +365,21 @@ public:
 		/// Set or Get the point Index for Sustain and Loop.
 		int SustainBegin() const { return m_SustainBegin;}
 		/// value has to be an existing point!
-		void SustainBegin(const unsigned int value){m_SustainBegin = value;}
+		void SustainBegin(const int value){m_SustainBegin = value;}
 
 		int SustainEnd() const { return m_SustainEnd;}
 		/// value has to be an existing point!
-		void SustainEnd(const unsigned int value){m_SustainEnd = value;}
+		void SustainEnd(const int value){m_SustainEnd = value;}
 
 		int LoopStart() const {return m_LoopStart;}
 		/// value has to be an existing point!
-		void LoopStart(const unsigned int value){m_LoopStart = value;}
+		void LoopStart(const int value){m_LoopStart = value;}
 
 		int LoopEnd() const {return m_LoopEnd;}
 		/// value has to be an existing point!
-		void LoopEnd(const unsigned int value){m_LoopEnd = value;}
+		void LoopEnd(const int value){m_LoopEnd = value;}
 
-		unsigned int NumOfPoints() const { return m_Points.size();}
+		unsigned int NumOfPoints() const { return static_cast<int>(m_Points.size());}
 
 		void Load(RiffFile& riffFile,const uint32_t version);
 		void Save(RiffFile& riffFile,const uint32_t version);

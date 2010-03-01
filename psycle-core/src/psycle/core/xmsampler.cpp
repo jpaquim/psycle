@@ -2305,7 +2305,7 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 
 int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 {
-	nanoseconds const t0(cpu_time_clock());
+	//nanoseconds const t0(cpu_time_clock());
 
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
@@ -2442,8 +2442,8 @@ int XMSampler::GenerateAudioInTicks( int startSample, int numSamples )
 
 	else Standby(true);
 
-	nanoseconds const t1(cpu_time_clock());
-	accumulate_processing_time(t1 - t0);
+	//nanoseconds const t1(cpu_time_clock());
+	//accumulate_processing_time(t1 - t0);
 
 	recursive_processed_ = true;
 	return numSamples;
@@ -2557,8 +2557,9 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile) const
 	int temp;
 	// we cannot calculate the size previous to save, so we write a placeholder
 	// and seek back to write the correct value.
+	//size is saved in 32bits.
 	unsigned int size = 0;
-	unsigned int filepos = riffFile->GetPos();
+	size_t filepos = riffFile->GetPos();
 	riffFile->Write(size);
 	riffFile->Write(VERSION);
 	riffFile->Write(_numVoices); // numSubtracks
@@ -2621,9 +2622,9 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile) const
 		}
 	#endif
 
-	unsigned int endpos = riffFile->GetPos();
+	size_t endpos = riffFile->GetPos();
 	riffFile->Seek(filepos);
-	size = endpos - filepos -sizeof(size);
+	size = static_cast<uint32_t>(endpos - filepos) -sizeof(size);
 	riffFile->Write(size);
 	riffFile->Seek(endpos);
 
@@ -2634,7 +2635,8 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 	int temp;
 	bool wrongState=false;
 	uint32_t filevers= 0;
-	unsigned long filepos;
+	size_t filepos;
+	//size is read in 32bits;
 	int size=0;
 	riffFile->Read(size);
 	filepos=riffFile->GetPos();

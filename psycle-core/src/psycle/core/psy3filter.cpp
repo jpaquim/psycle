@@ -97,12 +97,12 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	uint32_t version = 0;
 	uint32_t size = 0;
 	bool problemfound = false;
-	int fileposition = 0;
+	size_t fileposition = 0;
 	char header[5];
 	header[4]=0;
 	uint32_t chunkcount = LoadSONGv0(&file,song);
 	/* chunk_loop: */
-	unsigned int filesize = file.FileSize();
+	size_t filesize = file.FileSize();
 
 	while(file.ReadArray(header, 4) && chunkcount) {
 		int progress_number =  static_cast<int>(file.GetPos() * 16384.0f / filesize);
@@ -171,7 +171,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 				#if defined DIVERSALIS__OS__MICROSOFT
 					if (mac->getMachineKey().host() == Hosts::VST
 						&& ((vst::plugin*)mac)->ProgramIsChunk() == false) {
-							size = file.GetPos() - fileposition;
+							size = static_cast<uint32_t>(file.GetPos() - fileposition);
 					}
 				#else
 					///\todo
@@ -566,15 +566,15 @@ bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, ui
 
 	// Instrument Data Load
 	int numInstruments;
-	long begins=file->GetPos();
-	unsigned long filepos=file->GetPos();
+	size_t begins=file->GetPos();
+	size_t filepos=file->GetPos();
 	file->Read(numInstruments);
 	int idx;
 	for(int i = 0;i < numInstruments && filepos < begins+size;i++)
 	{
 		file->Read(idx);
 		filepos = file->GetPos();
-		unsigned int sizeIns = song.rInstrument(idx).Load(*file);
+		size_t sizeIns = song.rInstrument(idx).Load(*file);
 		if ((minorversion&0xFFFF) > 0) {
 			//Version 0 doesn't write the chunk size correctly
 			//so we cannot correct it in case of error
