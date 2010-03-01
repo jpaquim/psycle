@@ -37,22 +37,28 @@ On the user side, there were several new native plugins, improvements in the VST
 During the period between that release, and December 2006, a version named 1.9alpha kept being developped, adding Visual Studio 2005 support, new external packages (newer version of boost), many new features, and more native plugins.
 Work on it was halted several times, due to the developers not having time due to different real-life issues.
 
-Also, on March 2006, a new Psycle branch saw the light: xpsycle, or Psycle on linux.
+In the meanwhile, on March 2006, a new Psycle branch saw the light: xpsycle, or Psycle on linux.
 The original sources were based on Psycle 1.8, but later on moved onto Psycle 1.9 to take advantage of the work dedicated already to the 1.9 alpha.
 This new branch also had another new feature: multisequence. In fact, it was designed from the ground up with multisequence in mind.
 
-At January 2007, xpsycle's developer moved onto his own program, and xpsycle stayed dormant for some months, after which the UI toolkit was changed to QT and continued its steps. These changes were brought mostly by Neil mather/mutilus and Mattias/gravity0, with the help of some other contributors.
+In January 2007, xpsycle's developer moved onto his own program, and xpsycle stayed dormant for some months, after which the UI toolkit was changed to QT and continued its steps. These changes were brought mostly by Neil mather/mutilus and Mattias/gravity0, with the help of some other contributors.
 
-Also, [JAZ]/JosepMa, took again the task of leading the main Psycle and released Psycle 1.8.5 in September 2007.
-This new version is based on the 1.8 branch (not on the 1.9), but several of the features have been added back and extended/finished ( a new wave editor, the new VSThost, a new Mixer machine, improvements on Sampulse), as well as the all time going task of fixing the errors (bugfixs)
+At that point, and since things had calmed down enough, a long task was undergone to merge all the different branches and abandonned forks (psycle 1.9 vs psycle 1.8, xpsycle, qpsycle, some parts of freepsycle), and put all the piece together in a more structured way, with clearly identified software components and layers.
+Psycle-core, psycle-helpers and universalis were settled down as resuable components, and formed the framework upon which front-end applications were based.
+The GUI apps were now separated from the engine, and as a proof of concept, a tiny command line program that plays .psy files was created.
 
+While psycle-core was making slow progress, [JAZ]/JosepMa, took again the task of leading the main Psycle and released Psycle 1.8.5 in September 2007.
+This new version was based on the stable 1.8 branch (not on the 1.9 nor psycle-core), but several of the features have been added back and extended/finished ( a new wave editor, the new VSThost, a new Mixer machine, improvements on Sampulse), as well as the all time going task of fixing the errors (bugfixs)
+
+Between 2008 and 2010, psycle-core continued to be refined and integrated into the Psycle GUI, but the QPsycle GUI stayed dormant.
+
+In the meanwhile, in 2009, [JAZ]/JosepMa released the maintenance version Psycle 1.8.6.1 (not based on psycle-core).
 
 Roadmap
 =======
 There are several works in progress around the Psycle project. This is a brief of what can be expected:
 
+* psycle-core: This is the new audio engine, implemented as a separate library, which the Psycle GUI is now using.
+
 * QPsycle: This project is in alpha state, but it will become in the future as the linux reference for Psycle (aside of psycle in wine, that has worked quite well so far). It will not be like Psycle, but will try to maintain the spirit of it. Also, the source code of QPsycle and Psycle will share many common parts so that the developers can work cooperatively.
 
-* Psycle 1.8: One more Psycle 1.8 could be expected (1.8.6) that would contain bugfixes and finish some incomplete features (most notably, Sampulse).
-
-* Psycle 1.9/2.0: Psycle 1.8.5 has become the new 1.9 branch, from which the development will continue. The first task will be to incorporate QPsycle's psycle-core engine, and improve upon it. Some new features are to be expected, like multi-io audio, new plugin formats ( LADSPA, others?), new Fileformat (PSY4) based on .xml and binary compressed data, and the ability to have a separated library to make again a psycle player.
