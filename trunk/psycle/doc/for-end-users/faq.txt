@@ -134,7 +134,7 @@ A)	put the cursor in a channel's first column, the row you want it to stop and p
 ----------------
 
 Q)	How can I develop a Psycle Machine?
-A)	The recommended way right is to get the source directly of one of 
+A)	The recommended way is to get the source directly of one of 
 	the open source plugins ( arguru synth is a good start ), and use it as a template
 	for your own.
 	You can download them from Psycle's SVN repository at Source Forge Site:
