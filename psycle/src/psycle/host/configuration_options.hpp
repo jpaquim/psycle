@@ -17,28 +17,20 @@
 ///         even if there no value after the equal, otherwise the var is *not* set!
 #define PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS 1
 
-/// Define to 1 to use psycle-core, 0 otherwise
-#define PSYCLE__CONFIGURATION__USE_PSYCORE 1
-
-/// Define to 1 to enable the volume column for XMSampler, 0 otherwise.
-
 /// Define to 1 to use RMS Vu's, 0 otherwise
 #define PSYCLE__CONFIGURATION__RMS_VUS 0
+
+///\todo always 1 now. need to clean up all references
+#define PSYCLE__CONFIGURATION__USE_PSYCORE 1
 
 ///\todo that won't work on big-endian machines (this is for IT and XM module loaders)
 #define PSYCLE__CORE__FILEIO__WANT_DEPRECATED_RAW_ACCESS
 
-#if _WIN64
-#define BUILD_WITH_BITS " 64 bits"
-#else
-#define BUILD_WITH_BITS " 32 bits"
-#endif
 /**************************************************************************************************/
 /// string describing the configuration of the build.
 #define PSYCLE__CONFIGURATION(EOL) \
-	"compiler build tool chain = " PSYCLE__COMPILER__BUILD BUILD_WITH_BITS EOL \
+	"compiler build tool chain = " DIVERSALIS__COMPILER__VERSION__STRING EOL \
 	"rms vu = " UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__CONFIGURATION__RMS_VUS) EOL \
-	"psycle-core = " UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__CONFIGURATION__USE_PSYCORE) EOL \
 	"debugging = " PSYCLE__CONFIGURATION__DEBUG
 
 	/// value to show in the string describing the configuration of the build.
@@ -46,18 +38,6 @@
 		#define PSYCLE__CONFIGURATION__DEBUG "off"
 	#else
 		#define PSYCLE__CONFIGURATION__DEBUG "on"
-	#endif
-
-	/// value to show in the string describing the configuration of the build.
-	/// the compiler used to build.
-	#if defined DIVERSALIS__COMPILER__GNU
-		#define PSYCLE__COMPILER__BUILD "gcc-" UNIVERSALIS__COMPILER__STRINGIZE(DIVERSALIS__COMPILER__VERSION)
-	#elif defined DIVERSALIS__COMPILER__INTEL
-		#define PSYCLE__COMPILER__BUILD "icc-" UNIVERSALIS__COMPILER__STRINGIZE(DIVERSALIS__COMPILER__VERSION)
-	#elif defined DIVERSALIS__COMPILER__MICROSOFT
-		#define PSYCLE__COMPILER__BUILD "msvc-" UNIVERSALIS__COMPILER__STRINGIZE(DIVERSALIS__COMPILER__VERSION)
-	#else
-		#define PSYCLE__COMPILER__BUILD "unknown"
 	#endif
 
 #include <universalis/compiler/stringize.hpp> // for UNIVERSALIS__COMPILER__STRINGIZE

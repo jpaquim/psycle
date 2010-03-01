@@ -5,7 +5,7 @@
 #define PSYCLE__CORE__PRESET__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 #include <vector>
 #include <string>

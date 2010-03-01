@@ -20,7 +20,7 @@
 */
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/config.private.hpp>
+#include <psycle/core/detail/project.private.hpp>
 #include "zipwriter.h"
 
 #include <zlib.h>

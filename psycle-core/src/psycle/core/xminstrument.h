@@ -10,7 +10,6 @@
 
 #include <psycle/helpers/filter.hpp>
 
-#include <universalis/stdlib/cstdint.hpp>
 #include <utility>
 #include <string>
 #include <cstring>
@@ -61,7 +60,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Class declaration
 
-	class WaveData {
+	class PSYCLE__CORE__DECL WaveData {
 	public:
 		/// Wave Loop Types
 		struct LoopType {
@@ -274,7 +273,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::Envelope Class declaration
 
-	class Envelope {
+	class PSYCLE__CORE__DECL Envelope {
 	public:
 		/// Invalid point. Used to indicate that sustain/normal loop is disabled.
 		static const int INVALID = -1;
@@ -623,7 +622,7 @@ private:
 };
 
 ///\todo : implement the following for inter-XMSampler sharing of instruments.
-class SampleList{
+class PSYCLE__CORE__DECL SampleList{
 	public:
 		SampleList(){top=0;}
 		~SampleList(){};
@@ -653,7 +652,7 @@ class SampleList{
 };
 
 ///\todo : implement the following for inter-XMSampler sharing of instruments.
-class InstrumentList {
+class PSYCLE__CORE__DECL InstrumentList {
 	public:
 		InstrumentList(){top=0;}
 		~InstrumentList(){};

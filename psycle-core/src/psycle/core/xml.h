@@ -7,7 +7,8 @@
 #define PSYCLE__CORE__XML__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
+
 #ifdef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
 	#include <libxml++/parsers/domparser.h>
 #endif

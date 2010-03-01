@@ -5,11 +5,11 @@
 #define PSYCLE__CORE__TIME_SIGNATURE__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 namespace psycle { namespace core {
 
-class TimeSignature {
+class PSYCLE__CORE__DECL TimeSignature {
 	public:
 		TimeSignature();
 		TimeSignature(int numerator, int denominator);

@@ -336,11 +336,11 @@
 
 
 #if !defined DIVERSALIS__PROCESSOR && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#error "Unkown processor."
+	#error Unkown processor.
 #endif
 
 #if !defined DIVERSALIS__CPU__ENDIAN && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#error "Unkown byte sex."
+	#error Unkown byte sex.
 #endif
 
 #endif // !defined DIVERSALIS__CPU__INCLUDED

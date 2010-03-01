@@ -15,8 +15,6 @@
 #include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/filter.hpp>
 
-#include <universalis/stdlib/cstdint.hpp>
-
 namespace psycle { namespace core {
 
 	#define SAMPLER_MAX_POLYPHONY          16

@@ -24,7 +24,7 @@
 #define PSYCLE__CORE__ZIP_WRITER__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 #include <sys/types.h>
 #include <ctime>

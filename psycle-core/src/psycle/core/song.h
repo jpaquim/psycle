@@ -12,7 +12,6 @@
 #include "machine.h"
 #include "instrument.h"
 #include "xminstrument.h"
-#include <universalis/stdlib/cstdint.hpp>
 #include <universalis/stdlib/mutex.hpp>
 
 namespace psycle { namespace core {

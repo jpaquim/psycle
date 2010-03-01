@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/config.private.hpp>
+#include <psycle/core/detail/project.private.hpp>
 #include "machinefactory.h"
 
 #include "pluginfinder.h"
@@ -11,11 +11,7 @@
 #include "vsthost.h"
 #include "ladspahost.hpp"
 
-#include <universalis/os/loggers.hpp>
-
 namespace psycle { namespace core {
-
-namespace loggers = universalis::os::loggers;
 
 MachineFactory& MachineFactory::getInstance() {
 	static MachineFactory factory;
@@ -23,30 +19,29 @@ MachineFactory& MachineFactory::getInstance() {
 }
 
 MachineFactory::MachineFactory()
-:callbacks_(0)
-,finder_(0)
+:
+	callbacks_(),
+	finder_()
 {}
 
-void MachineFactory::Initialize(MachineCallbacks* callbacks)
-{
+void MachineFactory::Initialize(MachineCallbacks* callbacks) {
 	callbacks_ = callbacks;
 	//\todo: probably we need a destructor for this
 	finder_= new PluginFinder(false);
 	FillHosts();
 }
-void MachineFactory::Initialize(MachineCallbacks* callbacks,PluginFinder* finder)
-{
+
+void MachineFactory::Initialize(MachineCallbacks* callbacks,PluginFinder* finder) {
 	callbacks_ = callbacks;
 	finder_ = finder;
 	FillHosts();
 }
+
 void MachineFactory::Finalize(bool deleteFinder) {
-	if (deleteFinder) {
-		delete finder_;
-	}
+	if(deleteFinder) delete finder_;
 }
-void MachineFactory::FillHosts()
-{
+
+void MachineFactory::FillHosts() {
 	finder_->Initialize();
 	//Please, keep the same order than with the Hosts::type enum. (machinekey.hpp)
 	hosts_.push_back( &InternalHost::getInstance(callbacks_) );
@@ -67,8 +62,7 @@ void MachineFactory::FillHosts()
 
 }
 
-Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id)
-{
+Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id) {
 	assert(key.host() >= 0 && key.host() < Hosts::NUM_HOSTS);
 
 	// a check for these machines is done, because we don't add it into the finder,
@@ -115,66 +109,56 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 		}
 	}
 	return mac;
-#if 0
-	for (int i=0; i< hosts_.size(); ++i)
-	{
-		if ( hosts_[i]->hostCode() == key.host() ) {
-			return hosts_[i]->CreateMachine(key,id);
-			break;
+	#if 0
+		for(int i = 0; i < hosts_.size(); ++i) {
+			if(hosts_[i]->hostCode() == key.host()) {
+				return hosts_[i]->CreateMachine(key,id);
+				break;
+			}
 		}
-	}
-	return 0;
-#endif
+		return 0;
+	#endif
 }
 
-Machine* MachineFactory::CloneMachine(Machine& mac)
-{
+Machine* MachineFactory::CloneMachine(Machine& mac) {
 	Machine* newmac = CreateMachine(mac.getMachineKey());
 	newmac->CloneFrom(mac);
 	return newmac;
 }
+
 ///\FIXME: This only returns the first path, should regenerate the string
 std::string const & MachineFactory::getPsyclePath() const { return NativeHost::getInstance(0).getPluginPath(0); }
-void MachineFactory::setPsyclePath(std::string path,bool cleardata)
-{
+void MachineFactory::setPsyclePath(std::string path,bool cleardata) {
 	NativeHost::getInstance(callbacks_).setPluginPath(path);
-	if (!finder_->DelayedScan())
-	{
+	if(!finder_->DelayedScan()) {
 		NativeHost::getInstance(callbacks_).FillFinderData(*finder_,cleardata);
 	}
 }
 
 ///\FIXME: This only returns the first path, should regenerate the string
 std::string const & MachineFactory::getLadspaPath() const { return LadspaHost::getInstance(0).getPluginPath(0); }
-void MachineFactory::setLadspaPath(std::string path,bool cleardata)
-{
+void MachineFactory::setLadspaPath(std::string path,bool cleardata) {
 	LadspaHost::getInstance(callbacks_).setPluginPath(path);
-	if (!finder_->DelayedScan())
-	{
+	if(!finder_->DelayedScan()) {
 		LadspaHost::getInstance(callbacks_).FillFinderData(*finder_,cleardata);
 	}
 }
 
-#ifdef _WIN32
+#ifdef DIVERSALIS__OS__MICROSOFT
 	///\FIXME: This only returns the first path, should regenerate the string
 	std::string const & MachineFactory::getVstPath() const { return vst::host::getInstance(0).getPluginPath(0); }
-	void MachineFactory::setVstPath(std::string path,bool cleardata)
-	{
+	void MachineFactory::setVstPath(std::string path,bool cleardata) {
 		vst::host::getInstance(callbacks_).setPluginPath(path);
-		if (!finder_->DelayedScan())
-		{
+		if(!finder_->DelayedScan()) {
 			vst::host::getInstance(callbacks_).FillFinderData(*finder_,cleardata);
 		}
 	}
 #endif
 	
 void MachineFactory::RegenerateFinderData(bool clear)  {
-	if (clear) {
-		finder_->Initialize(clear);
-	}
+	if(clear) finder_->Initialize(clear);
 	for(std::size_t i = 0; i < hosts_.size(); ++i) hosts_[i]->FillFinderData(*finder_, clear);
 	finder_->PostInitialization();
 }
-
 
 }}

@@ -3,7 +3,7 @@
 
 ///\implementation psycle::core::RiffFile
 
-#include <psycle/core/config.private.hpp>
+#include <psycle/core/detail/project.private.hpp>
 #include "fileio.h"
 
 #include <stdexcept>

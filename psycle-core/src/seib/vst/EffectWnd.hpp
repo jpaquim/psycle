@@ -34,7 +34,7 @@ struct VkeysT {
 	unsigned char vstVirt;
 };
 
-class CEffectGui {
+class PSYCLE__CORE__DECL CEffectGui {
 	public:
 		CEffectGui(CEffect* effect): pEffect(effect){};
 		void Open() { 
@@ -47,7 +47,7 @@ class CEffectGui {
 		CEffect* pEffect;
 };
 
-class CEffectWnd {
+class PSYCLE__CORE__DECL CEffectWnd {
 	protected:
 		CEffectWnd(){};
 	public:

@@ -3,7 +3,7 @@
 
 ///\implementation psycle::core::Machine.
 
-#include <psycle/core/config.private.hpp>
+#include <psycle/core/detail/project.private.hpp>
 #include "machine.h"
 #include "song.h"
 #include "fileio.h"

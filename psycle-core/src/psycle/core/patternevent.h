@@ -7,8 +7,6 @@
 
 #include "commands.h"
 
-#include <psycle/core/config.hpp>
-#include <universalis/stdlib/cstdint.hpp>
 #include <vector>
 #include <string>
 

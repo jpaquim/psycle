@@ -7,7 +7,7 @@
 #define PSYCLE__CORE__COMMANDS__INCLUDED
 #pragma once
 
-#include <psycle/core/config.hpp>
+#include <psycle/core/detail/project.hpp>
 
 namespace psycle { namespace core {
 
