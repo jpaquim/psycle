@@ -53,19 +53,19 @@ class PSYCLE__CORE__DECL RiffFile {
 		RiffChunkHeader _header;
 
 		bool Open  (std::string const &);
-		bool Create(std::string const &, bool const & overwrite);
-		bool Close();
+		bool Create(std::string const &, bool overwrite);
+		void Close();
 		bool Error();
 		bool Eof();
 		virtual std::size_t FileSize();
 		virtual std::size_t GetPos();
-		virtual std::size_t Seek(std::ptrdiff_t const & bytes);
-		virtual std::size_t Skip(std::ptrdiff_t const & bytes);
+		virtual std::size_t Seek(std::ptrdiff_t bytes);
+		virtual std::size_t Skip(std::ptrdiff_t bytes);
 
 	protected:
-		virtual bool WriteChunk(void const *, std::size_t const &);
-		virtual bool ReadChunk (void       *, std::size_t const &);
-		virtual bool Expect    (void       *, std::size_t const &);
+		virtual bool WriteChunk(void const *, std::size_t);
+		virtual bool ReadChunk (void       *, std::size_t);
+		virtual bool Expect    (void       *, std::size_t);
 
 	public:
 		#if defined PSYCLE__CORE__FILEIO__WANT_DEPRECATED_RAW_ACCESS
@@ -284,13 +284,13 @@ class PSYCLE__CORE__DECL RiffFile {
 		///\name strings
 		///\{
 			bool ReadString(std::string &);
-			bool ReadString(char *, std::size_t const max_length);
+			bool ReadString(char *, std::size_t max_length);
 			bool WriteString(std::string const &);
 			///\todo : Implement a ReadSizedString() which would do the same as ReadString
 			//         which won't stop on the null, but rather on the size of the array(or else indicated by the second parameter). Finally,
 			//         setting the last char to null.
-			//bool ReadSizedString(std::string &, std::size_t const &numchars);
-			//bool WriteSizedString(std::string const &, std::size_T const &numchars);
+			//bool ReadSizedString(std::string &, std::size_t numchars);
+			//bool WriteSizedString(std::string const &, std::size_t numchars);
 		///\}
 
 		///\name riff four cc
@@ -326,14 +326,14 @@ class PSYCLE__CORE__DECL MemoryFile : public RiffFile {
 		bool CloseMem();
 		virtual std::size_t FileSize();
 		virtual std::size_t GetPos();
-		virtual int Seek(std::ptrdiff_t const & bytes);
-		virtual int Skip(std::ptrdiff_t const & bytes);
-		virtual bool ReadString(char *, std::size_t const & max_length);
+		virtual int Seek(std::ptrdiff_t bytes);
+		virtual int Skip(std::ptrdiff_t bytes);
+		virtual bool ReadString(char *, std::size_t max_length);
 
 	protected:
-		virtual bool WriteChunk(void const *, std::size_t const &);
-		virtual bool ReadChunk (void       *, std::size_t const &);
-		virtual bool Expect    (void       *, std::size_t const &);
+		virtual bool WriteChunk(void const *, std::size_t);
+		virtual bool ReadChunk (void       *, std::size_t);
+		virtual bool Expect    (void       *, std::size_t);
 
 		std::vector<void*> memoryblocks_;
 		int blocksize_;
