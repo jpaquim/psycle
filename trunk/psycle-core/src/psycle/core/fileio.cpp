@@ -11,12 +11,6 @@
 
 namespace psycle { namespace core {
 
-RiffFile::RiffFile() {}
-
-RiffFile::~RiffFile() {
-	if(stream_.is_open()) stream_.close(); // actually that's probably automatically done inside the stream_ dtor
-}
-
 bool RiffFile::ReadString(std::string & result) {
 	result = "";
 	for(;;) {
