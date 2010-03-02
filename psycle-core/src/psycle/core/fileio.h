@@ -45,9 +45,7 @@ class PSYCLE__CORE__DECL RiffFile {
 		std::string file_name_;
 
 	public:
-
-		RiffFile();
-		virtual ~RiffFile();
+		virtual ~RiffFile() {};
 
 		///\todo shouldn't be public
 		RiffChunkHeader _header;
