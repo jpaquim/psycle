@@ -107,6 +107,10 @@ void Project::FileLoadsongNamed(const std::string& fName) {
 		progress_.ShowWindow(SW_HIDE);
 		mac_view()->UnlockVu();
 		delete song;
+		#pragma message(__FILE__ "(" UNIVERSALIS__COMPILER__STRINGIZE(__LINE__) "): warning: ***** BUG HERE *****")
+		// [bohan] some more details about the bug:
+		// We called "player.song(*song);" above, so current player song is now "*song", which we just deleted.
+		// If we call "player.song(*song_);" it will try to lock the deleted "*song" and crash.
 		player.song(*song_);
 		return;			
 	}	
