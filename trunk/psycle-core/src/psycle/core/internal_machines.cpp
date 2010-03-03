@@ -9,6 +9,7 @@
 #include "fileio.h"
 #include "cpu_time_clock.hpp"
 
+#include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
 #include <psycle/helpers/value_mapper.hpp>
@@ -18,6 +19,7 @@ namespace psycle { namespace core {
 
 using namespace helpers;
 using namespace helpers::math;
+using namespace audiodrivers;
 
 /****************************************************************************************************/
 // Dummy
@@ -483,8 +485,8 @@ AudioRecorder::AudioRecorder(MachineCallbacks* callbacks, Machine::id_type id)
 }
 
 AudioRecorder::~AudioRecorder() throw() {
-	//AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-	//if (_initialized) mydriver.RemoveCapturePort(_captureidx);
+	AudioDriver &mydriver = Player::singleton().driver();
+	if (_initialized) mydriver.RemoveCapturePort(_captureidx);
 	_pSamplesL=pleftorig;
 	_pSamplesR=prightorig;
 
@@ -494,43 +496,39 @@ AudioRecorder::~AudioRecorder() throw() {
 
 void AudioRecorder::Init(void) {
 	Machine::Init();
-	/*
 	if(!_initialized) {
-		AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-		_initialized = mydriver.AddCapturePort(_captureidx);
+		AudioDriver &mydriver = Player::singleton().driver();
+		mydriver.AddCapturePort(_captureidx);
+		_initialized = true;
 	}
-	*/
 }
 
 void AudioRecorder::ChangePort(int newport)
 {
-	/*
-	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+	AudioDriver &mydriver = Player::singleton().driver();
 	if(_initialized) {
-		mydriver.Enable(false);
+		mydriver.set_opened(false);
 		mydriver.RemoveCapturePort(_captureidx);
 		_initialized=false;
 		_pSamplesL=pleftorig;
 		_pSamplesR=prightorig;
 	}
-	_initialized = mydriver.AddCapturePort(newport);
+	mydriver.AddCapturePort(newport);
 	_captureidx = newport;
-	mydriver.Enable(true);
-	*/
+	mydriver.set_started(true);
+	_initialized = true;
 }
 int AudioRecorder::GenerateAudio(int numSamples)
 {
 	if (!_mute &&_initialized)
 	{
-		/* ??? TODO ???
-		AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+		AudioDriver &mydriver = Player::singleton().driver();
 		mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
 		// prevent crashing if the audio driver is not working.
 		if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
 		helpers::dsp::Mul(_pSamplesL,numSamples,_gainvol);
 		helpers::dsp::Mul(_pSamplesR,numSamples,_gainvol);
 		helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-		*/
 		UpdateVuAndStanbyFlag(numSamples);
 	}
 	else Standby(true);

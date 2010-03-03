@@ -84,7 +84,7 @@ Integer inline lrint(Real x) {
 #else
 
 	// int32_t
-
+///\todo: this one should be revised. Seemed not to work in x64 (sound was distorted, although audible).
 	template<> UNIVERSALIS__COMPILER__CONST
 	int32_t inline lrint<>(double d) {
 		BOOST_STATIC_ASSERT((sizeof d == 8));
@@ -110,7 +110,7 @@ Integer inline lrint(Real x) {
 			}
 			return i;
 		#else
-			return lrint<int32_t>(double(f));
+			return static_cast<int32_t>(f);
 		#endif
 	}
 

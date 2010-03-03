@@ -1052,7 +1052,6 @@ namespace seib {
 			{
 				return aEffect->dispatcher(aEffect, opCode, index, value, ptr, opt);
 			}PSYCLE__HOST__CATCH_ALL(crashclass);
-			return 0;
 		}
 
 		/*****************************************************************************/
@@ -1125,7 +1124,6 @@ namespace seib {
 			{
 				return aEffect->getParameter(aEffect, index);
 			}PSYCLE__HOST__CATCH_ALL(crashclass);
-			return 0;
 		}
 
 		bool CEffect::OnSizeEditorWindow(long width, long height)

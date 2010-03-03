@@ -506,13 +506,7 @@ namespace psycle  {
 				::Sleep(1);
 			}
 
-			if (!pFile->Close())
-			{
-				std::ostringstream s;
-				s << "Error writing to file '" << pFile->file_name() << "'" << std::endl;
-				MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
-			}
-
+			pFile->Close();
 			return true;
 		}
 
