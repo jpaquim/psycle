@@ -248,6 +248,10 @@ class AudioDriver {
 	public:
 		/// ask the driver to config itself (e.g with a gui, config read)
 		virtual void Configure() {}
+		/// Audio capture Methods
+		virtual void AddCapturePort(int idx) {}
+		virtual void RemoveCapturePort(int idx) {}
+		virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples) {}
 
 	///\name open/close the device (allocate/deallocate resources)
 	///\{

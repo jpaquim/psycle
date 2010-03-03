@@ -243,16 +243,17 @@ void ASIOInterface::AddCapturePort(int idx) {
 	for(unsigned int i = 0; i < _selectedins.size(); ++i) {
 		if(_selectedins[i].port->_idx == pidx) return; // throw exception?
 	}
-
 	bool isplaying = _running;
 	PortCapt port;
 	port.driver = driver;
 	port.port = &driver->_portin[idx];
-	if(isplaying) do_stop();
+	if(isplaying) { set_opened(false); }
 	_portMapping.resize(_portMapping.size()+1);
-	_portMapping[idx]=_selectedins.size();
+	///\todo: need to fix this code. It uses the idx erroneously.
+	//_portMapping[idx]=_selectedins.size();
+	_portMapping[0] = _selectedins.size();
 	_selectedins.push_back(port);
-	if(isplaying) do_start();
+	if(isplaying) set_started(true);
 }
 
 void ASIOInterface::RemoveCapturePort(int idx) {
@@ -265,7 +266,7 @@ void ASIOInterface::RemoveCapturePort(int idx) {
 	for(unsigned int i = 0; i < _selectedins.size(); ++i) {
 		if(_selectedins[i].port->_idx == pidx) {
 			if(_running) {
-				do_stop();
+				set_opened(false);
 				restartplayback = true;
 			}
 		} else {
@@ -275,7 +276,7 @@ void ASIOInterface::RemoveCapturePort(int idx) {
 	}
 	_portMapping.resize(newports.size());
 	_selectedins = newports;
-	if(restartplayback) do_start();
+	if(restartplayback) set_started(true);
 }
 
 void ASIOInterface::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples) {
@@ -400,15 +401,6 @@ void ASIOInterface::ControlPanel(int driverID) {
 		}
 	}
 }
-
-// <bohan> This looks like code copied as is from steinberg's asio sdk
-// conversion from 64 bit ASIOSample/ASIOTimeStamp to double float
-#if NATIVE_INT64
-	#define ASIO64toDouble(a)  (a)
-#else
-	const double twoRaisedTo32 = 4294967296.;
-	#define ASIO64toDouble(a)  ((a).lo + (a).hi * twoRaisedTo32)
-#endif
 
 #define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) ;   
 #define SwapShort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8)) ;        
@@ -705,8 +697,13 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
-					*outr++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
+					// Don't really know why, but the -100 is what made the clipping work correctly.
+					int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
+					int const min(-max - 1);
+					*outl++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
+					*outr++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
+					//*outl++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
+					//*outr++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
 				}
 			}
 			break;

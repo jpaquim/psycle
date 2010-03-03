@@ -75,8 +75,7 @@ Machine* InternalHost::CreateMachine(PluginFinder& /*finder */, const MachineKey
 		mac = new Mixer(mcallback_, id);
 		break;
 	case InternalMacs::AUDIOINPUT:
-		//TODO:
-		//mac = new AudioInput(mcallback_, id);
+		mac = new AudioRecorder(mcallback_, id);
 		break;
 	case InternalMacs::LFO:
 		mac = new LFO(mcallback_, id);

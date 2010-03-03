@@ -161,9 +161,9 @@ class ASIOInterface : public AudioDriver {
 	private:
 		int GetBufferSize();
 		void GetCapturePorts(std::vector<std::string>&ports);
-		void AddCapturePort(int idx);
-		void RemoveCapturePort(int idx);
-		void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
+		/*override*/ void AddCapturePort(int idx);
+		/*override*/ void RemoveCapturePort(int idx);
+		/*override*/ void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 		int GetWritePos();
 		int GetPlayPos();
 		PortOut GetOutPortFromidx(int driverID);
