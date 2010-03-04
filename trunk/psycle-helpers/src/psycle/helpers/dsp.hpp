@@ -35,8 +35,15 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/****************************************************************************/
 
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
+	/// currently it works in 4 byte alignment too via correcting the offset.
 	inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 	{
+		int offset  = 4 - ((reinterpret_cast<int>(pSrcSamples) & 0XF) >> 2);
+		numSamples -=offset;
+		while(offset-->0) {
+			*pDstSamples += *pSrcSamples * vol; 
+			pDstSamples++; pSrcSamples++;
+		} 
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(vol);
 			__m128 *psrc = (__m128*)pSrcSamples;
@@ -48,7 +55,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				psrc++;
 				pdst++;
 				numSamples-=4;
-			} while(numSamples>0);
+			} while(numSamples>3);
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			__asm
 			{
@@ -58,7 +65,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					mov edi, pDstSamples
 					mov eax, [numSamples]
 				LOOPSTART:
-					cmp eax, 0
+					cmp eax, 3
 					jle END
 					movaps xmm0, [esi]
 					movaps xmm1, [edi]
@@ -71,10 +78,11 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					jmp LOOPSTART
 				END:
 			}
-		#else
-			--pSrcSamples; --pDstSamples;
-			do { *++pDstSamples += *++pSrcSamples * vol; } while(--numSamples);
 		#endif
+		while(numSamples-->0) {
+			*pDstSamples += *pSrcSamples * vol; 
+			pDstSamples++; pSrcSamples++;
+		} 
 	}
 
 	/// multiply a signal by a ratio, inplace.

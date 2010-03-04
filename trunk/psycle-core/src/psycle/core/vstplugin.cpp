@@ -58,6 +58,11 @@
 			NSDelta[midiChannel] = 0;
 			oldNote[midiChannel] = -1;
 		}
+		///\todo: for now we only support stereo
+		if(!IsGenerator()) {
+			defineInputAsStereo();
+		}
+		defineOutputAsStereo();
 
 		for(int i(0) ; i < MAX_TRACKS; ++i)
 		{
