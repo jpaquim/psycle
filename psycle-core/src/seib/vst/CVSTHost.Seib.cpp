@@ -30,13 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "EffectWnd.hpp"
 
-#if !defined _WIN32
-	#error unimplemented
-#else
+#if defined DIVERSALIS__OS__MICROSOFT
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#include <MMSystem.h>
 	#pragma warning(pop)
+#else
+	#error unimplemented
 #endif
 
 namespace seib {
@@ -1344,7 +1344,7 @@ namespace seib {
 
 			const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
 			//ppqPos (sample pos in 1ppq units)
-			if((lMask & kVstPpqPosValid) || ((lMask & (kVstBarsValid | kVstClockValid)) && !(vstTimeInfo.flags & kVstBarsValid) ))
+			if( (lMask & (kVstPpqPosValid | kVstBarsValid | kVstClockValid)) && !(vstTimeInfo.flags & kVstBarsValid) )
 			{
 				vstTimeInfo.flags |= kVstPpqPosValid;
 				vstTimeInfo.ppqPos = seconds * vstTimeInfo.tempo / 60.0;
