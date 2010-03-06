@@ -4,12 +4,14 @@
 #include <psycle/core/detail/project.private.hpp>
 #include "song.h"
 
-#include <psycle/helpers/datacompression.hpp>
-#include <psycle/helpers/riff.hpp>
 #include "fileio.h"
 #include "machine.h"
 #include "machinefactory.h"
 #include "internalkeys.hpp"
+
+#include <psycle/helpers/datacompression.hpp>
+#include <psycle/helpers/riff.hpp>
+
 #include <sstream>
 #include <iostream> // only for debug output
 
@@ -255,22 +257,21 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 	char fourCC[4];
 	int bits = 0;
 	// opens the file and reads the "FORM" header.
-	if(!file.Open(const_cast<char*>(str))) {
-		return false;
-	}
+	if(!file.Open(str)) return false;
 	DeleteLayer(instrument);
 	file.ReadArray(fourCC,4);
 	if(file.matchFourCC(fourCC,"16SV")) bits = 16;
 	else if(file.matchFourCC(fourCC,"8SVX")) bits = 8;
 	file.Read(hd);
-	if(file.matchFourCC(hd._id,"NAME")) {
-		file.ReadArray(_pInstrument[instrument]->waveName, 22); _pInstrument[instrument]->waveName[21]=0;///\todo should be hd._size instead of "22", but it is incorrectly read.
+	if(file.matchFourCC(hd.id, "NAME")) {
+		///\todo should be hd.size instead of "22", but it is incorrectly read.
+		file.ReadArray(_pInstrument[instrument]->waveName, 22); _pInstrument[instrument]->waveName[21] = 0;
 		std::strncpy(_pInstrument[instrument]->_sName,str, 31);
 		_pInstrument[instrument]->_sName[31]='\0';
 		file.Read(hd);
 	}
-	if(file.matchFourCC(hd._id,"VHDR")) {
-		std::uint32_t Datalen, ls, le;
+	if(file.matchFourCC(hd.id, "VHDR")) {
+		uint32_t Datalen, ls, le;
 		file.ReadBE(Datalen);
 		file.ReadBE(ls);
 		file.ReadBE(le);
@@ -279,7 +280,7 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 			ls >>= 1;
 			le >>= 1;
 		}
-		_pInstrument[instrument]->waveLength=Datalen;
+		_pInstrument[instrument]->waveLength = Datalen;
 		if(ls != le) {
 			_pInstrument[instrument]->waveLoopStart = ls;
 			_pInstrument[instrument]->waveLoopEnd = ls + le;
@@ -288,9 +289,9 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 		file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
 		file.Read(hd);
 	}
-	if(file.matchFourCC(hd._id,"BODY")) {
-		std::int16_t * csamples;
-		std::uint32_t const Datalen(_pInstrument[instrument]->waveLength);
+	if(file.matchFourCC(hd.id, "BODY")) {
+		int16_t * csamples;
+		uint32_t const Datalen(_pInstrument[instrument]->waveLength);
 		_pInstrument[instrument]->waveStereo = false;
 		_pInstrument[instrument]->waveDataL = new std::int16_t[Datalen];
 		csamples = _pInstrument[instrument]->waveDataL;
