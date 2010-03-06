@@ -9,14 +9,10 @@
 
 #include <psycle/core/detail/project.hpp>
 
-#include <diversalis/compiler.hpp>
-#include <universalis/stdlib/cstdint.hpp>
-#include <boost/static_assert.hpp>
 #include <limits>
 #include <cstdio>
 #include <cstddef>
 #include <fstream>
-#include <cassert>
 #include <vector>
 
 namespace psycle { namespace core {
@@ -24,13 +20,12 @@ namespace psycle { namespace core {
 class RiffChunkHeader {
 	public:
 		/// chunk type identifier.
-		/// 4-character string, hence big-endian.
-		///\todo should be char id[4];
-		char _id[4];
+		/// 4-character code.
+		char id[4];
 
 		/// size of the chunk in bytes.
 		/// little endian for RIFF files ; big endian for RIFX files.
-		uint32_t _size;
+		uint32_t size;
 };
 
 /// riff file format.
@@ -219,7 +214,7 @@ class PSYCLE__CORE__DECL RiffFile {
 
 			bool Write(int64_t x) { return Write(reinterpret_cast<uint64_t&>(x)); }
 
-		///\name floating point
+		///\name 32-bit floating point
 		///\{
 			bool Read(float & x) {
 				union {
@@ -227,18 +222,18 @@ class PSYCLE__CORE__DECL RiffFile {
 					uint8_t data[4];
 				};
 				f = 1.0f;
-				if (data[0] == 63 && data[1] == 128) {
-					if(!ReadChunk(data,4)) return false;
-					std::swap(data[0],data[3]);
-					std::swap(data[1],data[2]);
+				if(data[0] == 63 && data[1] == 128) {
+					if(!ReadChunk(data, 4)) return false;
+					std::swap(data[0], data[3]);
+					std::swap(data[1], data[2]);
 					x = f;
 					return true;
-				} else if (data[3] == 63 && data[2] == 128) {
-					if(!ReadChunk(data,4)) return false;
+				} else if(data[3] == 63 && data[2] == 128) {
+					if(!ReadChunk(data, 4)) return false;
 					x = f;
 					return true;
 				} else {
-					assert(!"Error: Couldn't determine 32 bit float endianness");
+					assert(!"Error: Couldn't determine floating point endianness");
 					return false;
 				}
 			}
@@ -249,18 +244,69 @@ class PSYCLE__CORE__DECL RiffFile {
 					uint8_t data[4];
 				};
 				f = 1.0f;
-				if (data[0] == 63 && data[1]==128) {
+				if(data[0] == 63 && data[1] == 128) {
 					f = x;
-					std::swap(data[0],data[3]);
-					std::swap(data[1],data[2]);
-					return WriteChunk(data,4);
-				} else if (data[3] == 63 && data[2]==128) {
+					std::swap(data[0], data[3]);
+					std::swap(data[1], data[2]);
+					return WriteChunk(data, 4);
+				} else if(data[3] == 63 && data[2] == 128) {
 					f = x;
-					return WriteChunk(data,4);
+					return WriteChunk(data, 4);
 				} else {
-					assert(!"Error: Couldn't determine 32 bit float endianness");
+					assert(!"Error: Couldn't determine floating point endianness");
+					return false;
 				}
-				return false;
+			}
+		///\}
+
+		///\name 64-bit floating point
+		///\{
+			bool Read(double & x) {
+				union {
+					float f;
+					double d;
+					uint8_t data[8];
+				};
+				f = 1.0f;
+				if(data[0] == 63 && data[1] == 128) {
+					if(!ReadChunk(data, 8)) return false;
+					std::swap(data[0], data[7]);
+					std::swap(data[1], data[6]);
+					std::swap(data[2], data[5]);
+					std::swap(data[3], data[4]);
+					x = d;
+					return true;
+				} else if(data[3] == 63 && data[2] == 128) {
+					if(!ReadChunk(data, 8)) return false;
+					x = d;
+					return true;
+				} else {
+					assert(!"Error: Couldn't determine floating point endianness");
+					return false;
+				}
+			}
+
+			bool Write(double x) {
+				union {
+					float f;
+					double d;
+					uint8_t data[8];
+				};
+				f = 1.0f;
+				if(data[0] == 63 && data[1] == 128) {
+					d = x;
+					std::swap(data[0], data[7]);
+					std::swap(data[1], data[6]);
+					std::swap(data[2], data[5]);
+					std::swap(data[3], data[4]);
+					return WriteChunk(data, 8);
+				} else if(data[3] == 63 && data[2] == 128) {
+					d = x;
+					return WriteChunk(data, 8);
+				} else {
+					assert(!"Error: Couldn't determine floating point endianness");
+					return false;
+				}
 			}
 		///\}
 
@@ -301,11 +347,11 @@ class PSYCLE__CORE__DECL RiffFile {
 		///\name riff chunk headers
 		///\{
 			bool Read(RiffChunkHeader &h) {
-				return ReadChunk(h._id,4) && Read(h._size);
+				return ReadChunk(h.id, 4) && Read(h.size);
 			}
 
 			bool Write(RiffChunkHeader &h) {
-				return WriteChunk(h._id,4) && Write(h._size);
+				return WriteChunk(h.id, 4) && Write(h.size);
 			}
 		///\}
 
