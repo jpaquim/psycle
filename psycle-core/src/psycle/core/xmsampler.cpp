@@ -175,60 +175,7 @@ void XMSampler::WaveDataController::NoteOff(void)
 	}
 }
 
-/*
-// Code  for the KaiserSinc Resampler from the XDSP library. It doesn't really work, and it is too slow
-void XMSampler::XDSPWaveController::Init(XMInstrument::WaveData* wave, const int layer)
-{
-	WaveDataController::Init(wave,layer);
-	pResampler=NULL;
-	pFilter=NULL;
-}
 
-void XMSampler::XDSPWaveController::Speed(const double value){
-	WaveDataController::Speed(value); m_Speed1x=value*Global::pPlayer->SampleRate(); RecreateResampler();
-}
-
-void __fastcall ResamplerCB(float *pout, dword const n, void *context)
-{
-	XMSampler::XDSPWaveController* wc = (XMSampler::XDSPWaveController*)context;
-	unsigned long i=0,j=0;;
-
-	while (i<n && wc->Position() < wc->Length()-1)
-	{
-		pout[j++]=float(*(wc->pLeft()+wc->Position()));
-		if ( wc->IsStereo()) pout[j++]=float(*(wc->pRight()+wc->Position()));
-		wc->Position(wc->Position()+1);
-		i++;
-	}
-	if (wc->Position() == wc->Length()-1 )
-	{
-		while ( i<n) pout[i++]=0;
-		wc->Playing(false);
-	}
-	context = wc;
-}
-void XMSampler::XDSPWaveController::Workxdsp(int numSamples)
-{
-	xdsp.ResamplerRun(pResampler,xdspFloatBuffer,numSamples);
-}
-void XMSampler::XDSPWaveController::RecreateResampler(void)
-{
-	delete pResampler;
-	delete pFilter;
-
-	CXResamplerFilter *prf = xdsp.CreateKaiserSincFilter(m_Speed1x,Global::pPlayer->SampleRate(), 32, 0.5f, 1.0f);
-
-	pFilter = xdsp.PrepareResamplerFilter(prf, m_pWave->IsWaveStereo()?2:1);
-	delete prf; // original filter is no longer needed
-
-	pResampler = xdsp.ResamplerCreate(pFilter, ResamplerCB, this, 10480);
-}
-XMSampler::XDSPWaveController::~XDSPWaveController()
-{
-	zapObject(pResampler);
-	zapObject(pFilter);
-}
-*/
 //////////////////////////////////////////////////////////////////////////
 //      XMSampler::EnvelopeController Implementation
 void XMSampler::EnvelopeController::Init(const XMInstrument::Envelope *pEnvelope, const MachineCallbacks * callbacks)

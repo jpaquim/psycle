@@ -184,17 +184,17 @@ namespace psycle { namespace host {
 
 		private:
 			/// the midi callback functions (just a static linker to the instance one)
-			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, std::uint32_t dwInstance, std::uint32_t dwParam1, std::uint32_t dwParam2 );
+			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, std::uint32_t dwInstance, std::uint32_t dwParam1, std::uint32_t dwParam2 );
+			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, std::uint32_t dwInstance, std::uint32_t dwParam1, std::uint32_t dwParam2 );
+			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 
 			/// interal engine resync process
-			void InternalReSync( std::uint32_t dwParam2 );
+			void InternalReSync( DWORD_PTR dwParam2 );
 			/// ???
-			void InternalClock( std::uint32_t dwParam2 );
+			void InternalClock( DWORD_PTR dwParam2 );
 
 			/// the current instance pointer
 			static CMidiInput * s_Instance;	

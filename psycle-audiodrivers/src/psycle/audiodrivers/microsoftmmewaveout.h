@@ -59,7 +59,7 @@ class MsWaveOut : public AudioDriver {
 		// mme functions
 		// waveOut interface notifies about device is opened, closed, 
 		// and what we handle here, when a block finishes.
-		static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
+		static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD_PTR, DWORD_PTR, DWORD_PTR);      
 		WAVEHDR* allocateBlocks();
 		static void freeBlocks( WAVEHDR* blockArray );
 		// writes a intermediate buffer into a ring buffer to the sound card

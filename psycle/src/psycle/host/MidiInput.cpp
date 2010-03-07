@@ -118,7 +118,7 @@ namespace psycle { namespace host {
 			if( !m_midiInHandle[ DRIVER_MIDI ] && m_devId[ DRIVER_MIDI ] != -1 )
 			{
 
-				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
 				if( result != MMSYSERR_NOERROR )
 				{
 					problem |= 0x01;
@@ -134,7 +134,7 @@ namespace psycle { namespace host {
 				!m_midiInHandle[ DRIVER_SYNC ] && m_devId[ DRIVER_SYNC ] != -1 )
 			{
 				// open
-				result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+				result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
 				if( result != MMSYSERR_NOERROR )
 				{
 					problem |= 0x02;
@@ -502,12 +502,12 @@ namespace psycle { namespace host {
 		// DESCRIPTION	  : The MIDI input callback function for our opened device <linker>
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
 		//                : std::uint32_t uMsg - message identifier
-		//                : DWORD dwInstance - user instance data (not used)
-		//                : DWORD dwParam1 - various midi message info
-		//                : DWORD dwParam2 - various midi message info
+		//                : DWORD_PTR dwInstance - user instance data (not used)
+		//                : DWORD_PTR dwParam1 - various midi message info
+		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			CMidiInput * pMidiInput = CMidiInput::Instance();
 
@@ -543,12 +543,12 @@ namespace psycle { namespace host {
 		// DESCRIPTION	  : The MIDI input callback function for our opened device
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
 		//                : std::uint32_t uMsg - message identifier
-		//                : DWORD dwInstance - user instance data (not used)
-		//                : DWORD dwParam1 - various midi message info
-		//                : DWORD dwParam2 - various midi message info
+		//                : DWORD_PTR dwInstance - user instance data (not used)
+		//                : DWORD_PTR dwParam1 - various midi message info
+		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			// branch on type of midi message
 			switch( uMsg )
@@ -924,12 +924,12 @@ namespace psycle { namespace host {
 		// DESCRIPTION	  : The MIDI input callback function for our opened device
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
 		//                : std::uint32_t uMsg - message identifier
-		//                : DWORD dwInstance - user instance data (not used)
-		//                : DWORD dwParam1 - various midi message info
-		//                : DWORD dwParam2 - various midi message info
+		//                : DWORD_PTR dwInstance - user instance data (not used)
+		//                : DWORD_PTR dwParam1 - various midi message info
+		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			// pipe MIDI note on messages into the pattern entry window
 
@@ -1097,10 +1097,10 @@ namespace psycle { namespace host {
 		// InternalClock
 		//
 		// DESCRIPTION	  : Called on a MIDI Clock event to keep Psycle in sync
-		// PARAMETERS     : DWORD dwParam2 - timing stamp
+		// PARAMETERS     : DWORD_PTR dwParam2 - timing stamp
 		// RETURNS		  : <void>
 
-		void CMidiInput::InternalClock( DWORD dwParam2 )
+		void CMidiInput::InternalClock( DWORD_PTR dwParam2 )
 		{
 			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
 
@@ -1172,10 +1172,10 @@ namespace psycle { namespace host {
 		// InternalReSync
 		//
 		// DESCRIPTION	  : Instigates an MIDI->audio resync
-		// PARAMETERS     : DWORD dwParam2 - timing stamp
+		// PARAMETERS     : DWORD_PTR dwParam2 - timing stamp
 		// RETURNS		  : <void>
 
-		void CMidiInput::InternalReSync( DWORD dwParam2 )
+		void CMidiInput::InternalReSync( DWORD_PTR dwParam2 )
 		{
 			// get the current play sample position
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
