@@ -69,49 +69,39 @@ class PSYCLE__CORE__DECL RiffFile {
 			bool DeprecatedRawWrite(X & x) { return WriteChunk(&x, sizeof x); }
 		#endif
 
-		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
-			/// workaround for msvc8 which fails to determine which overload to call
-			template<typename X>
-			bool Read(X & x) { return ReadChunk(&x, sizeof x); }
+		// If int32_t is 'int' and int64_t is 'long long int',
+		// this leaves a hole for the 'long int' type.
+		// The following templates solve this issue.
+		// If there is an overloaded specialized normal function for a given type,
+		// the compiler will prefer it over these non-specialized templates.
+		// So, for example, reading/writing a float will not go through these templates.
 
-			/// workaround for msvc8 which fails to determine which overload to call
-			template<typename X>
-			bool Write(X & x) { return WriteChunk(&x, sizeof x); }
-		#else
-			// If int32_t is 'int' and int64_t is 'long long int',
-			// this leaves a hole for the 'long int' type.
-			// The following templates solve this issue.
-			// If there is an overloaded specialized normal function for a given type,
-			// the compiler will prefer it over these non-specialized templates.
-			// So, for example, reading/writing a float will not go through these templates.
-		
-			template<typename X>
-			bool Read(X & x) {
-				BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
-				BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
-				return sizeof x == 8 ?
-					Read(reinterpret_cast<uint64_t&>(x)) :
-					Read(reinterpret_cast<uint32_t&>(x));
-			}
+		template<typename X>
+		bool Read(X & x) {
+			BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+			BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+			return sizeof x == 8 ?
+				Read(reinterpret_cast<uint64_t&>(x)) :
+				Read(reinterpret_cast<uint32_t&>(x));
+		}
 
-			template<typename X>
-			bool ReadBE(X & x) {
-				BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
-				BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
-				return sizeof x == 8 ?
-					ReadBE(reinterpret_cast<uint64_t&>(x)) :
-					ReadBE(reinterpret_cast<uint32_t&>(x));
-			}
+		template<typename X>
+		bool ReadBE(X & x) {
+			BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+			BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+			return sizeof x == 8 ?
+				ReadBE(reinterpret_cast<uint64_t&>(x)) :
+				ReadBE(reinterpret_cast<uint32_t&>(x));
+		}
 
-			template<typename X>
-			bool Write(X x) {
-				BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
-				BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
-				return sizeof x == 8 ?
-					Write(reinterpret_cast<uint64_t&>(x)) :
-					Write(reinterpret_cast<uint32_t&>(x));
-			}
-		#endif
+		template<typename X>
+		bool Write(X x) {
+			BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+			BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+			return sizeof x == 8 ?
+				Write(reinterpret_cast<uint64_t&>(x)) :
+				Write(reinterpret_cast<uint32_t&>(x));
+		}
 
 		///\name 1 bit
 		///\{
