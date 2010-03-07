@@ -56,7 +56,7 @@ namespace psycle { namespace host {
 		}
 	}
 
-	void XMSongLoader::LoadInstrumentFromFile(XMSampler & sampler, const int idx) {
+	void XMSongLoader::LoadInstrumentFromFile(XMSampler & sampler, int idx) {
 		XMINSTRUMENTFILEHEADER fileheader;
 
 		ReadHeader(fileheader);
@@ -136,7 +136,7 @@ namespace psycle { namespace host {
 		delete[] sRemap;
 	}
 
-	void XMSongLoader::Load(Song& song, const bool fullopen) {
+	void XMSongLoader::Load(Song& song, bool fullopen) {
 		// check validity
 		if(!IsValid()){
 			return;
@@ -224,7 +224,7 @@ namespace psycle { namespace host {
 	}
 
 	// Load instruments
-	bool XMSongLoader::LoadInstruments(XMSampler & sampler, std::int32_t iInstrStart) {	
+	bool XMSongLoader::LoadInstruments(XMSampler & sampler, int32_t iInstrStart) {	
 		int currentSample=0;
 		for(int i = 1;i <= m_iInstrCnt;i++){
 			iInstrStart = LoadInstrument(sampler,iInstrStart,i,currentSample);
@@ -233,7 +233,7 @@ namespace psycle { namespace host {
 		return true;
 	}
 
-	char * XMSongLoader::AllocReadStr(const int32_t size, const int32_t start) {
+	char * XMSongLoader::AllocReadStr(int32_t size, int32_t start) {
 		// allocate space
 		char *pData = new char[size + 1];
 		if(pData==NULL)
@@ -255,7 +255,7 @@ namespace psycle { namespace host {
 	}
 
 	// return address of next pattern, 0 for invalid
-	int32_t XMSongLoader::LoadPattern(Song & song, const std::int32_t start,const int patIdx,const int iTracks) {
+	int32_t XMSongLoader::LoadPattern(Song & song, int32_t start, int patIdx, int iTracks) {
 		int iHeaderLen = ReadInt4(start);
 		Skip(1); //char iPackingType = ReadInt1();
 		short iNumRows = ReadInt2();
@@ -675,7 +675,7 @@ namespace psycle { namespace host {
 
 	}
 
-	int32_t XMSongLoader::LoadInstrument(XMSampler & sampler, std::int32_t iStart, const int idx,int &curSample) {
+	int32_t XMSongLoader::LoadInstrument(XMSampler & sampler, int32_t iStart, int idx, int & curSample) {
 		Seek(iStart);
 
 		// read header
@@ -758,7 +758,7 @@ namespace psycle { namespace host {
 		return iStart;
 	}
 
-	int32_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, int32_t iStart, const int iInstrIdx, const int iSampleIdx) {
+	int32_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, int32_t iStart, int iInstrIdx, int iSampleIdx) {
 		// get sample header
 		Seek(iStart);
 		int iLen = ReadInt4();
@@ -832,7 +832,7 @@ namespace psycle { namespace host {
 		return iStart + 40;
 	}
 
-	int32_t XMSongLoader::LoadSampleData(XMSampler & sampler, std::int32_t iStart,const int iInstrIdx,const int iSampleIdx) {
+	int32_t XMSongLoader::LoadSampleData(XMSampler & sampler, int32_t iStart, int iInstrIdx, int iSampleIdx) {
 		// parse
 		
 		BOOL b16Bit = smpFlags[iSampleIdx] & 0x10;
@@ -872,7 +872,7 @@ namespace psycle { namespace host {
 		return iStart;
 	}
 	
-	void XMSongLoader::SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader) {
+	void XMSongLoader::SetEnvelopes(XMInstrument & inst, const XMSAMPLEHEADER & sampleHeader) {
 		// volume envelope
 		inst.AmpEnvelope()->Init();
 		if(sampleHeader.vtype & 1){// enable volume envelope
@@ -1077,7 +1077,7 @@ namespace psycle { namespace host {
 		}	
 	}
 
-	char * MODSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start) {
+	char * MODSongLoader::AllocReadStr(int32_t size, int32_t start) {
 		// allocate space
 		char *pData = new char[size + 1];
 		if(pData==NULL)
@@ -1099,7 +1099,7 @@ namespace psycle { namespace host {
 	}
 
 	// return address of next pattern, 0 for invalid
-	void MODSongLoader::LoadPattern(Song & song,const int patIdx,const int iTracks) {
+	void MODSongLoader::LoadPattern(Song & song, int patIdx, int iTracks) {
 		short iNumRows = 64;
 
 		Pattern & pat = *new Pattern();
@@ -1281,7 +1281,7 @@ namespace psycle { namespace host {
 			}
 	}
 
-	unsigned char MODSongLoader::ConvertPeriodtoNote(const unsigned short period) {
+	unsigned char MODSongLoader::ConvertPeriodtoNote(unsigned short period) {
 		for(int count2 = 1; count2 < 37; ++count2) {
 			if (period > BIGMODPERIODTABLE[count2*8]-2 && period < BIGMODPERIODTABLE[count2*8]+2 )
 				return count2-1+36; // three octaves above.
@@ -1289,7 +1289,7 @@ namespace psycle { namespace host {
 		return 255;
 	}
 
-	void MODSongLoader::LoadInstrument(XMSampler & sampler, const int idx) {
+	void MODSongLoader::LoadInstrument(XMSampler & sampler, int idx) {
 		m_pSong->rInstrument(idx).Init();
 		m_pSong->rInstrument(idx).Name(m_Samples[idx].sampleName);
 
@@ -1308,7 +1308,7 @@ namespace psycle { namespace host {
 		}
 	}
 
-	void MODSongLoader::LoadSampleHeader(XMSampler & sampler, const int iInstrIdx) {
+	void MODSongLoader::LoadSampleHeader(XMSampler & sampler, int iInstrIdx) {
 		ReadArray(m_Samples[iInstrIdx].sampleName,22);	m_Samples[iInstrIdx].sampleName[21]='\0';
 
 		smpLen[iInstrIdx] = (ReadUInt1()*0x100+ReadUInt1())*2; 
@@ -1352,7 +1352,7 @@ namespace psycle { namespace host {
 
 	}
 
-	void MODSongLoader::LoadSampleData(XMSampler & sampler, const int iInstrIdx) {
+	void MODSongLoader::LoadSampleData(XMSampler & sampler, int iInstrIdx) {
 		// parse
 
 		XMInstrument::WaveData& _wave =  m_pSong->SampleData(iInstrIdx);
