@@ -176,7 +176,7 @@ class PSYCLE__CORE__DECL RiffFile {
 
 		///\name resolving special case for 'long int'
 		///\{
-			#if 1
+			#if defined DIVERSALIS__OS__MICROSOFT
 				// ban 'long int' which is too ambiguous
 
 				UNIVERSALIS__COMPILER__DEPRECATED("ambiguous")
@@ -197,7 +197,7 @@ class PSYCLE__CORE__DECL RiffFile {
 				UNIVERSALIS__COMPILER__DEPRECATED("ambiguous")
 				bool Write(unsigned long int x) { uint32_t i = x; return Write(i); }
 
-			#else
+			#elif 0
 				// If int32_t is 'int' and int64_t is 'long long int',
 				// this leaves a hole for the 'long int' type.
 				// Similarly, if int32_t is 'long int' and int64_t is 'long long int',

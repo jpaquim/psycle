@@ -45,7 +45,8 @@
 			using boost::uint_fast16_t;
 
 			// don't let boost use 'long int'
-			#if UINT_MAX == 0xffffffffu && ULLONG_MAX == 0xffffffffffffffffull
+			#if defined DIVERSALIS__OS__MICROSOFT && \
+				UINT_MAX == 0xffffffffu && ULLONG_MAX == 0xffffffffffffffffull
 				typedef signed int int32_t;
 				typedef unsigned int uint32_t;
 				typedef signed long long int64_t;
