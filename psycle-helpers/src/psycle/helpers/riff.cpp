@@ -96,6 +96,8 @@ DDCRET ExtRiffFile::Close() {
 		case RFM_READ:
 			std::fclose(file);
 			break;
+		default:
+			throw std::runtime_error("bad mode");
 	}
 	file = 0;
 	fmode = RFM_UNKNOWN;

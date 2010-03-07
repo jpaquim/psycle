@@ -27,29 +27,22 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-pwm::pwm() :
-	sym(0)
-	,frange(0)
-	,speed(0)
-	,pos(0)
-	,realpos(0)
-	,last(0)
-	,move(0)
-	,direction(0)
-	,once(false)
-	,twice(false)
-{
-}
+pwm::pwm()
+:
+	once(false),
+	twice(false),
+	sym(0),
+	frange(0),
+	speed(0),
+	pos(0),
+	realpos(0),
+	last(0),
+	move(0),
+	direction(0)
+{}
 
-pwm::~pwm()
-{
-}
-
-int pwm::getPosition(){
-	return realpos;
-}
-
-int pwm::getLast(){ return (int)last; }
-void pwm::setRange(int val) { frange=(float)val*0.000488519785f; }
+int pwm::getPosition() { return realpos; }
+int pwm::getLast(){ return last; }
+void pwm::setRange(int val) { frange = val * 0.000488519785f; }
 void pwm::setSpeed(int val) { speed=val+val; }
 void pwm::reset(){ last=9999; pos=0; direction=0;}

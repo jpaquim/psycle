@@ -22,34 +22,33 @@
 
 #pragma once
 
-class lfo  
-{
-public:
-	lfo();
-	virtual ~lfo();
-	int getPosition();
-	int getLast();
-	void setDelay(int val);
-	void setLevel(int val);
-	void setSpeed(int val);
-	void reset();
-	inline void next();
-private:
-	int delay;
-	int level;
-	int speed;
+class lfo {
+	public:
+		lfo();
+		virtual ~lfo() {}
+		int getPosition();
+		int getLast();
+		void setDelay(int val);
+		void setLevel(int val);
+		void setSpeed(int val);
+		void reset();
+		inline void next();
+	private:
+		int delay;
+		int level;
+		int speed;
 
-	int pause;
-	int phaseHi;
-	int phaseLo;
-	int offset;
-	int coeff;
-	int count;
-	int current;
-	int last;
+		int pause;
+		int phaseHi;
+		int phaseLo;
+		int offset;
+		int coeff;
+		int count;
+		int current;
+		int last;
 };
 
-inline void lfo::next(){
+inline void lfo::next() {
 	if (pause) pause--;
 	else {
 		phaseLo++;
