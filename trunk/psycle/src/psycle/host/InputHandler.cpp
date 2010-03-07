@@ -57,7 +57,7 @@ namespace psycle { namespace host {
 		// in: command def, key, modifiers
 		// out: true if we had to remove another definition
 		///\todo more warnings if we are changing existing defs
-		bool InputHandler::SetCmd(CmdDef &cmd, UINT key, UINT modifiers,bool checkforduplicates)
+		bool InputHandler::SetCmd(CmdDef &cmd, int key, UINT modifiers,bool checkforduplicates)
 		{	
 			// clear note?
 			if(!cmd.IsValid())

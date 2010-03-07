@@ -270,6 +270,7 @@ namespace psycle {
 
 			typedef std::pair<char,char> ITNotePair;
 			typedef std::pair<char,char> ITNodePair1x;
+			///\Should revise this one
 			//		typedef std::pair<short,char> ITNodePair;
 			class ITNodePair { public: std::int8_t first; std::uint8_t secondlo; std::uint8_t secondhi; };
 

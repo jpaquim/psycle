@@ -519,12 +519,12 @@ namespace psycle {
 			///\name store/load
 			///\{
 			/// .
-			inline bool SetCmd(CmdSet cset, UINT key, UINT modifiers,bool checkforduplicates=true)
+			inline bool SetCmd(CmdSet cset, int key, UINT modifiers,bool checkforduplicates=true)
 			{
 				CmdDef cmd(cset);
 				return SetCmd(cmd,key,modifiers,checkforduplicates);
 			}
-			bool SetCmd(CmdDef &cmd, UINT key, UINT modifiers,bool checkforduplicates=true);
+			bool SetCmd(CmdDef &cmd, int key, UINT modifiers,bool checkforduplicates=true);
 			/// .
 			bool ConfigSave();
 			/// .
