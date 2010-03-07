@@ -168,26 +168,22 @@ namespace psycle
 					pSourcePos+=4;
 
 					//ok, now we can start decompressing
-					std::uint8_t* pWindowPos;
-					std::uint8_t* pDestPos = *pDestination = new std::uint8_t[FileSize];
+					uint8_t* pWindowPos;
+					uint8_t* pDestPos = *pDestination = new std::uint8_t[FileSize];
 
-					std::uint16_t Offset;
-					std::uint16_t Length;
+					uint16_t Offset;
+					uint16_t Length;
 
-					while(FileSize > 0)
-					{
+					while(FileSize > 0) {
 						// get our flag
-						if (Length = *pSourcePos++)
-						{
+						if((Length = *pSourcePos++)) {
 							// we have an unique string to copy
 							std::memcpy(pDestPos,pSourcePos,Length);
 
 							pSourcePos += Length;
 							pDestPos += Length;
 							FileSize -= Length;
-						}
-						else
-						{
+						} else {
 							// we have a redundancy
 							// load length and offset
 							Length  = (*pSourcePos++) + MIN_REDUNDANT_BYTES_2;

@@ -2,9 +2,12 @@
 #include <universalis/os/aligned_memory_alloc.hpp>
 #include <psycle/helpers/dsp.hpp>
 
-CCombFilter::CCombFilter():	l_delayedCounter(0), r_delayedCounter(0),
-	Counter(0), leftBuffer(0), rightBuffer(0), bufferSize(0) {
-}
+CCombFilter::CCombFilter()
+:
+	leftBuffer(0), rightBuffer(0),
+	l_delayedCounter(0), r_delayedCounter(0),
+	Counter(0), bufferSize(0)
+{}
 
 CCombFilter::~CCombFilter() throw() {
 	DeleteBuffer();
@@ -21,6 +24,7 @@ void CCombFilter::SetDelay(int time, int stph) {
 	if(l_delayedCounter < 0) l_delayedCounter += bufferSize;
 	if(r_delayedCounter < 0) r_delayedCounter += bufferSize;
 }
+
 void CCombFilter::Initialize(int new_rate, int time, int stph){
 	DeleteBuffer();
 	//Allow up to 0.75 seconds of delay, properly aligned.
@@ -30,6 +34,7 @@ void CCombFilter::Initialize(int new_rate, int time, int stph){
 	Clear();
 	SetDelay(time, stph);
 }
+
 void CCombFilter::DeleteBuffer() {
 	if (bufferSize) {
 		universalis::os::aligned_memory_dealloc(leftBuffer);

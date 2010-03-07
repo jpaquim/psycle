@@ -27,32 +27,21 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-lfo::lfo() : 
-	pause(0)
-	, phaseHi(0)
-	, phaseLo(0)
-	, offset(0)
-	, count(0)
-	, current(0)
-	, last(0)
-	, delay(0)
-{
-}
+lfo::lfo()
+:
+	delay(0),
+	pause(0),
+	phaseHi(0),
+	phaseLo(0),
+	offset(0),
+	count(0),
+	current(0),
+	last(0)
+{}
 
-lfo::~lfo()
-{
-}
-
-int lfo::getPosition(){
-	return current;
-}
-
-int lfo::getLast(){
-	return 0;
-}
-
+int lfo::getPosition() { return current; }
+int lfo::getLast() { return 0; }
 void lfo::setDelay(int val) { delay = val; }
 void lfo::setLevel(int val) { level = val; if (val==0) coeff=0; }
 void lfo::setSpeed(int val) { speed = val; }
-void lfo::reset(){ count=-1; phaseHi=3; pause=delay; current=0; }
-
+void lfo::reset() { count=-1; phaseHi=3; pause=delay; current=0; }

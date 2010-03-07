@@ -22,31 +22,30 @@
 
 #pragma once
 
-class pwm  
-{
-public:
-	pwm();
-	virtual ~pwm();
-	int getPosition();
-	int getLast();
-	void setRange(int val);
-	void setSpeed(int val);
-	void reset();
-	inline void next();
-	bool once;
-	bool twice;
-private:
-	int sym;
-	float frange;
-	int speed;
-	int pos;
-	int realpos;
-	int last;
-	int move;
-	int direction;
+class pwm {
+	public:
+		pwm();
+		virtual ~pwm() {}
+		int getPosition();
+		int getLast();
+		void setRange(int val);
+		void setSpeed(int val);
+		void reset();
+		inline void next();
+		bool once;
+		bool twice;
+	private:
+		int sym;
+		float frange;
+		int speed;
+		int pos;
+		int realpos;
+		int last;
+		int move;
+		int direction;
 };
 
-inline void pwm::next(){
+inline void pwm::next() {
 	if (frange != 0) move = speed; else speed = 0;
 	last=realpos;
 	realpos=(int)((float)pos*frange)&2047;
@@ -67,4 +66,4 @@ inline void pwm::next(){
 			else direction=1;
 		}
 	}
-};
+}
