@@ -69,47 +69,6 @@ class PSYCLE__CORE__DECL RiffFile {
 			bool DeprecatedRawWrite(X & x) { return WriteChunk(&x, sizeof x); }
 		#endif
 
-		#if 0
-			///\name resolving special case for 'long int'
-			///\{
-				// If int32_t is 'int' and int64_t is 'long long int',
-				// this leaves a hole for the 'long int' type.
-				// Similarly, if int32_t is 'long int' and int64_t is 'long long int',
-				// this leaves a hole for the 'int' type.
-				// The following templates solve this issue.
-				// If there is an overloaded specialized normal function for a given type,
-				// the compiler will prefer it over these non-specialized templates.
-				// So, for example, reading/writing a float will not go through these templates.
-
-				template<typename X>
-				bool Read(X & x) {
-					BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
-					BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
-					return sizeof x == 8 ?
-						Read(reinterpret_cast<uint64_t&>(x)) :
-						Read(reinterpret_cast<uint32_t&>(x));
-				}
-
-				template<typename X>
-				bool ReadBE(X & x) {
-					BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
-					BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
-					return sizeof x == 8 ?
-						ReadBE(reinterpret_cast<uint64_t&>(x)) :
-						ReadBE(reinterpret_cast<uint32_t&>(x));
-				}
-
-				template<typename X>
-				bool Write(X x) {
-					BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
-					BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
-					return sizeof x == 8 ?
-						Write(reinterpret_cast<uint64_t&>(x)) :
-						Write(reinterpret_cast<uint32_t&>(x));
-				}
-			///\}
-		#endif
-
 		///\name 1 bit
 		///\{
 			bool Read(bool & x) {
@@ -169,6 +128,8 @@ class PSYCLE__CORE__DECL RiffFile {
 				return true;
 			}
 
+			bool Read(int32_t & x) { return Read(reinterpret_cast<uint32_t&>(x)); }
+
 			bool ReadBE(uint32_t & x) {
 				uint8_t data[4];
 				if(!ReadChunk(data,4)) return false;
@@ -176,7 +137,7 @@ class PSYCLE__CORE__DECL RiffFile {
 				return true;
 			}
 
-			bool Read(int32_t & x) { return Read(reinterpret_cast<uint32_t&>(x)); }
+			bool ReadBE(int32_t & x) { return ReadBE(reinterpret_cast<uint32_t&>(x)); }
 
 			bool Write(uint32_t x) {
 				uint8_t data[4] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF };
@@ -195,6 +156,8 @@ class PSYCLE__CORE__DECL RiffFile {
 				return true;
 			}
 
+			bool Read(int64_t & x) { return Read(reinterpret_cast<uint64_t&>(x)); }
+
 			bool ReadBE(uint64_t & x) {
 				uint8_t data[8];
 				if(!ReadChunk(data,8)) return false;
@@ -202,7 +165,7 @@ class PSYCLE__CORE__DECL RiffFile {
 				return true;
 			}
 
-			bool Read(int64_t & x) { return Read(reinterpret_cast<uint64_t&>(x)); }
+			bool ReadBE(int64_t & x) { return ReadBE(reinterpret_cast<uint64_t&>(x)); }
 
 			bool Write(uint64_t x) {
 				uint8_t data[8] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF, (x>>32) & 0xFF, (x>>40) & 0xFF, (x>>48) & 0xFF, (x>>56) & 0xFF };
@@ -210,6 +173,68 @@ class PSYCLE__CORE__DECL RiffFile {
 			}
 
 			bool Write(int64_t x) { return Write(reinterpret_cast<uint64_t&>(x)); }
+
+		///\name resolving special case for 'long int'
+		///\{
+			#if 1
+				// ban 'long int' which is too ambiguous
+
+				UNIVERSALIS__COMPILER__DEPRECATED("ambiguous")
+				bool Read(long int & x) { int32_t i; if(!Read(i)) return false; x = i; return true; }
+
+				UNIVERSALIS__COMPILER__DEPRECATED("ambiguous")
+				bool Read(unsigned long int & x) { uint32_t i; if(!Read(i)) return false; x = i; return true; }
+
+				UNIVERSALIS__COMPILER__DEPRECATED("ambiguous")
+				bool ReadBE(long int & x) { int32_t i; if(!ReadBE(i)) return false; x = i; return true; }
+
+				UNIVERSALIS__COMPILER__DEPRECATED("ambiguous")
+				bool ReadBE(unsigned long int & x) { uint32_t i; if(!ReadBE(i)) return false; x = i; return true; }
+
+				UNIVERSALIS__COMPILER__DEPRECATED("ambiguous")
+				bool Write(long int x) { int32_t i = x; return Write(i); }
+
+				UNIVERSALIS__COMPILER__DEPRECATED("ambiguous")
+				bool Write(unsigned long int x) { uint32_t i = x; return Write(i); }
+
+			#else
+				// If int32_t is 'int' and int64_t is 'long long int',
+				// this leaves a hole for the 'long int' type.
+				// Similarly, if int32_t is 'long int' and int64_t is 'long long int',
+				// this leaves a hole for the 'int' type.
+				// The following templates solve this issue.
+				// If there is an overloaded specialized normal function for a given type,
+				// the compiler will prefer it over these non-specialized templates.
+				// So, for example, reading/writing a float will not go through these templates.
+
+				template<typename X>
+				bool Read(X & x) {
+					BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+					BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+					return sizeof x == 8 ?
+						Read(reinterpret_cast<uint64_t&>(x)) :
+						Read(reinterpret_cast<uint32_t&>(x));
+				}
+
+				template<typename X>
+				bool ReadBE(X & x) {
+					BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+					BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+					return sizeof x == 8 ?
+						ReadBE(reinterpret_cast<uint64_t&>(x)) :
+						ReadBE(reinterpret_cast<uint32_t&>(x));
+				}
+
+				template<typename X>
+				bool Write(X x) {
+					BOOST_STATIC_ASSERT((std::numeric_limits<X>::is_integer));
+					BOOST_STATIC_ASSERT((sizeof x == 4 || sizeof x == 8));
+					return sizeof x == 8 ?
+						Write(reinterpret_cast<uint64_t&>(x)) :
+						Write(reinterpret_cast<uint32_t&>(x));
+				}
+			#endif
+		///\}
 
 		///\name 32-bit floating point
 		///\{
