@@ -72,7 +72,7 @@ void RiffFile::Close() {
 }
 
 bool RiffFile::Error() {
-	return !stream_.bad();
+	return !stream_.good();
 }
 
 bool RiffFile::ReadChunk(void * data, std::size_t bytes) {
