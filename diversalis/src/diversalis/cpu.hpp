@@ -313,7 +313,7 @@
 	#endif
 #endif
 
-#if !defined DIVERSALIS__CPU__ENDIAN && defined DIVERSALIS__OS__POSIX
+#if !defined DIVERSALIS__CPU__ENDIAN
 	#include <sys/types.h>
 	#if defined BYTE_ORDER && defined BIG_ENDIAN && defined LITTLE_ENDIAN
 		#define DIVERSALIS__CPU__ENDIAN BYTE_ORDER
