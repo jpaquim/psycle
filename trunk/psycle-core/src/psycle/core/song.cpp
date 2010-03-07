@@ -309,7 +309,7 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 	return true;
 }
 
-bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, long iSamplesPerChan, const char * pathToWav) {
+bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, int32_t iSamplesPerChan, const char * pathToWav) {
 	assert(iSamplesPerChan < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
 	DeleteLayer(iInstr);
 	_pInstrument[iInstr]->waveDataL = new std::int16_t[iSamplesPerChan];

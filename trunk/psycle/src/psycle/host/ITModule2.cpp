@@ -583,8 +583,7 @@ Special:  Bit 0: On = song message attached.
 		bool ITModule2::LoadITSample(XMSampler *sampler,int iSampleIdx)
 		{
 			itSampleHeader curH;
-			///\fixme: use ReadHeader
-			DeprecatedRawRead(curH);
+			ReadHeader(curH);
 			XMInstrument::WaveData& _wave = s->SampleData(iSampleIdx);
 
 /*		      Flg:      Bit 0. On = sample associated with header.
@@ -1243,6 +1242,27 @@ Special:  Bit 0: On = song message attached.
 			return Read(header.second);
 		}
 
+		bool ITModule2::ReadHeader(itSampleHeader& header) {
+			Read(header.tag);
+			ReadArray(header.fileName,sizeof(header.fileName));
+			Read(header.gVol);
+			Read(header.flg);
+			Read(header.vol);
+			ReadArray(header.sName,sizeof(header.sName));
+			Read(header.cvt);
+			Read(header.dfp);
+			Read(header.length);
+			Read(header.loopB);
+			Read(header.loopE);
+			Read(header.c5Speed);
+			Read(header.sustainB);
+			Read(header.sustainE);
+			Read(header.smpData);
+			Read(header.vibS);
+			Read(header.vibD);
+			Read(header.vibR);
+			return Read(header.vibT);
+		}
 //////////////////////////////////////////////////////////////////////////
 //     S3M Module Members
 

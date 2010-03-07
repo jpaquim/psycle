@@ -377,7 +377,7 @@ namespace psycle {
 			bool LoadITPattern(int patIdx,int &numchans);
 			void ParseEffect(PatternEvent&pent, int command,int param,int channel);
 		private:
-			double        ReadDouble() { double        t; DeprecatedRawRead(t); return t; }
+			double        ReadDouble() { double        t; Read(t); return t; }
 			float         ReadFloat()  { float         t; Read(t); return t; }
 			std:: int32_t ReadInt32()  { std:: int32_t t; Read(t); return t; }
 			std::uint32_t ReadUInt32() { std::uint32_t t; Read(t); return t; }
@@ -391,6 +391,7 @@ namespace psycle {
 			bool ReadHeader(itInsHeader2x& header);
 			bool ReadHeader(ITEnvStruct& header);
 			bool ReadHeader(ITNotePair& header);
+			bool ReadHeader(itSampleHeader& header);
 
 			unsigned char highOffset[64];
 			EmbeddedMIDIData* embeddedData;

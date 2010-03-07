@@ -121,11 +121,11 @@ void MsWaveOut::writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size ) {
 void CALLBACK MsWaveOut::waveOutProc(
 	HWAVEOUT hWaveOut,
 	UINT uMsg,
-	DWORD dwInstance,
-	DWORD dwParam1,
-	DWORD dwParam2
+	DWORD_PTR dwInstance,
+	DWORD_PTR dwParam1,
+	DWORD_PTR dwParam2
 ) {
-	int* freeBlockCounter = (int*)dwInstance;
+	int* freeBlockCounter = reinterpret_cast<int*>(dwInstance);
 	//
 	// ignore calls that occur due to openining and closing the
 	// device.
@@ -177,7 +177,7 @@ void MsWaveOut::do_open() throw(std::exception) {
 	waveFreeBlockCount = playbackSettings().blockCount();
 	waveCurrentBlock = 0;
 	// this will protect the monitor buffer counter variable
-	if(waveOutOpen(&hWaveOut, WAVE_MAPPER, &format, (DWORD_PTR) waveOutProc, (DWORD_PTR) &waveFreeBlockCount,
+	if(waveOutOpen(&hWaveOut, WAVE_MAPPER, &format, (DWORD_PTR) waveOutProc, (DWORD_PTR)(&waveFreeBlockCount),
 		CALLBACK_FUNCTION) != MMSYSERR_NOERROR
 	) throw std::runtime_error("waveOutOpen() failed");
 	universalis::os::aligned_memory_alloc(16, buf, playbackSettings().blockFrames() * playbackSettings().numChannels());

@@ -296,13 +296,13 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				psrcr++;
 				numSamples-=4;
 			}
-			__m128 highTmp = _mm_movehl_ps(maxVol, highTmp);
+			__m128 highTmp = _mm_movehl_ps(maxVol, maxVol);
 			maxVol =  _mm_max_ps(maxVol,highTmp);
 			highTmp = _mm_move_ss(highTmp,maxVol);
 			maxVol = _mm_shuffle_ps(maxVol, highTmp, 0x11);
 			maxVol =  _mm_max_ps(maxVol,highTmp);
 			
-			__m128 lowTmp = _mm_movehl_ps(minVol, lowTmp);
+			__m128 lowTmp = _mm_movehl_ps(minVol, minVol);
 			minVol =  _mm_max_ps(minVol,lowTmp);
 			lowTmp = _mm_move_ss(lowTmp,minVol);
 			minVol = _mm_shuffle_ps(minVol, lowTmp, 0x11);

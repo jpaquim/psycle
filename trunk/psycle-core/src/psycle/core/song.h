@@ -163,7 +163,7 @@ class PSYCLE__CORE__DECL CoreSong {
 		// instrument actions
 		// todo: The loading code should not be inside the song class, only the assignation of the loaded one
 		bool WavAlloc(Instrument::id_type, const char* str);
-		bool WavAlloc(Instrument::id_type, bool bStereo, long int iSamplesPerChan, const char* sName);
+		bool WavAlloc(Instrument::id_type, bool bStereo, int32_t iSamplesPerChan, const char* sName);
 		bool IffAlloc(Instrument::id_type, const char* str);
 		/// clones an instrument.
 		bool CloneIns(Instrument::id_type src, Instrument::id_type dst);
