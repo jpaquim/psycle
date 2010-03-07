@@ -10,34 +10,30 @@
 #include <vector>
 #include <string>
 
-namespace psycle { namespace helpers {
-	class BinRead;
-}}
-
-namespace psycle { namespace core {
-
+namespace psycle {
+	namespace helpers {
+		class BinRead;
+	}
+	
+	namespace core {
 		class Machine;
 
 		class PSYCLE__CORE__DECL Preset {
-		public:
+			public:
+				Preset(int numpars, int dataSize);
 
-			Preset();
+				bool read(helpers::BinRead& prsIn);
 
-			Preset( int numpars, int dataSize );
+				const std::string& name() const;
+				const std::vector<int>& parameter() const;
 
-			bool read( psycle::helpers::BinRead& prsIn );
+				void tweakMachine(Machine & mac);
 
-			const std::string& name() const;
-			const std::vector<int>& parameter() const;
+			private:
+				std::string name_;
 
-			void tweakMachine( Machine & mac );
-
-		private:
-
-			std::string name_;
-
-			std::vector<int> params_;
-			std::vector<char> data_;
+				std::vector<int> params_;
+				std::vector<char> data_;
 		};
 
 }}
