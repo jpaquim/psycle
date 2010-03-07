@@ -24,34 +24,28 @@ namespace psycle {
 	private:
 		bool IsValid();
 
-		int LoadPatterns(Song& song);
-		int32_t LoadPattern(Song& song, int32_t start, int patIdx, int iTracks);	
-		bool LoadInstruments(XMSampler& sampler, int32_t iInstrStart);
-		int32_t LoadInstrument(XMSampler& sampler, int32_t iStart, int idx, int & curSample);
-		int32_t LoadSampleHeader(XMSampler& sampler, int32_t iStart, int InstrIdx, int SampleIdx);
-		int32_t LoadSampleData(XMSampler& sampler, int32_t iStart, int InstrIdx, int SampleIdx);		
-		void SetEnvelopes(XMInstrument& inst, const XMSAMPLEHEADER & sampleHeader);		
-		char * AllocReadStr(int32_t size, int32_t start=-1);
+		size_t LoadPatterns(Song& song);
+		size_t LoadPattern(Song& song, size_t start, int patIdx, int iTracks);	
+		bool LoadInstruments(XMSampler& sampler, size_t iInstrStart);
+		size_t LoadInstrument(XMSampler& sampler, size_t iStart, int idx,int& curSample);
+		size_t LoadSampleHeader(XMSampler& sampler, size_t iStart, int InstrIdx, int SampleIdx);
+		size_t LoadSampleData(XMSampler& sampler, size_t iStart, int InstrIdx, int SampleIdx);		
+		void SetEnvelopes(XMInstrument& inst,const XMSAMPLEHEADER & sampleHeader);		
+		char * AllocReadStr(int size, size_t start);
 
 		// inlines
-		char ReadInt1(int32_t start=-1)
-		{	
+		inline char ReadInt1() {	
 			char i;
-			if(start>=0) Seek(start);
 			return Read(i)?i:0;
 		}
 
-		short ReadInt2(int32_t start=-1)
-		{
+		inline short ReadInt2() {
 			short i;
-			if(start>=0) Seek(start);
 			return Read(i)?i:0;
 		}
 
-		int ReadInt4(int32_t start=-1)
-		{
+		inline int ReadInt4() {
 			int32_t i;
-			if(start>=0) Seek(start);
 			return Read(i)?i:0;
 		}
 
@@ -64,7 +58,7 @@ namespace psycle {
 		bool ReadHeader(XMINSTRUMENTFILEHEADER& header);
 
 		int m_iInstrCnt;
-		int smpLen[256];
+		uint32_t smpLen[256];
 		char smpFlags[256];
 		unsigned char highOffset[32];
 		unsigned char memPortaUp[32];
@@ -112,32 +106,26 @@ namespace psycle {
 		void LoadInstrument(XMSampler& sampler, int idx);
 		void LoadSampleHeader(XMSampler& sampler, int InstrIdx);
 		void LoadSampleData(XMSampler& sampler, int InstrIdx);
-		BOOL WritePatternEntry(Song& song, int patIdx, int row, int col, PatternEvent & e);
-		char * AllocReadStr(int32_t size, int32_t start=-1);
+		BOOL WritePatternEntry(Song& song,int patIdx,int row, int col, PatternEvent & e);
+		char * AllocReadStr(int size, size_t start);
 
 		bool ReadHeader(MODHEADER& header);
 		bool ReadHeader(MODSAMPLEHEADER& header);
 
 		// inlines
 
-		unsigned char ReadUInt1(int32_t start=-1)
-		{	
+		inline unsigned char ReadUInt1() {	
 			std::uint8_t i(0);
-			if(start>=0) Seek(start);
 			return Read(i)?i:0;
 		}
 
-		unsigned short ReadUInt2(int32_t start=-1)
-		{
+		inline unsigned short ReadUInt2() {
 			std::uint16_t i(0);
-			if(start>=0) Seek(start);
 			return Read(i)?i:0;
 		}
 
-		unsigned int ReadUInt4(int32_t start=-1)
-		{
+		inline unsigned int ReadUInt4() {
 			std::uint32_t i(0);
-			if(start>=0) Seek(start);
 			return Read(i)?i:0;
 		}
 		

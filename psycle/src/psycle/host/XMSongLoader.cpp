@@ -159,7 +159,7 @@ namespace psycle { namespace host {
 		song.setComment(imported);
 		delete [] pSongName; pSongName = 0;
 
-		std::int32_t iInstrStart = LoadPatterns(song);
+		size_t iInstrStart = LoadPatterns(song);
 		LoadInstruments(*m_pSampler,iInstrStart);
 		song.SetReady(true);
 	}
@@ -193,7 +193,7 @@ namespace psycle { namespace host {
 		return bIsValid;
 	}
 
-	int XMSongLoader::LoadPatterns(Song & song) {
+	size_t XMSongLoader::LoadPatterns(Song & song) {
 		// get data
 		Seek(60);
 		ReadHeader(m_Header);
@@ -210,7 +210,7 @@ namespace psycle { namespace host {
 		SequenceLine & line = song.sequence().createNewLine();
 
 		// get pattern data
-		int nextPatStart = m_Header.size + 60;
+		size_t nextPatStart = m_Header.size + 60;
 		for(int j = 0;j < m_Header.patterns && nextPatStart > 0;j++){
 			nextPatStart = LoadPattern(song,nextPatStart,j,m_Header.channels);
 		}
@@ -224,7 +224,7 @@ namespace psycle { namespace host {
 	}
 
 	// Load instruments
-	bool XMSongLoader::LoadInstruments(XMSampler & sampler, int32_t iInstrStart) {	
+	bool XMSongLoader::LoadInstruments(XMSampler & sampler, size_t iInstrStart) {	
 		int currentSample=0;
 		for(int i = 1;i <= m_iInstrCnt;i++){
 			iInstrStart = LoadInstrument(sampler,iInstrStart,i,currentSample);
@@ -233,7 +233,7 @@ namespace psycle { namespace host {
 		return true;
 	}
 
-	char * XMSongLoader::AllocReadStr(int32_t size, int32_t start) {
+	char * XMSongLoader::AllocReadStr(const int32_t size, size_t start) {
 		// allocate space
 		char *pData = new char[size + 1];
 		if(pData==NULL)
@@ -255,8 +255,9 @@ namespace psycle { namespace host {
 	}
 
 	// return address of next pattern, 0 for invalid
-	int32_t XMSongLoader::LoadPattern(Song & song, int32_t start, int patIdx, int iTracks) {
-		int iHeaderLen = ReadInt4(start);
+	size_t XMSongLoader::LoadPattern(Song & song, size_t start, int patIdx, int iTracks) {
+		Seek(start);
+		int iHeaderLen = ReadInt4();
 		Skip(1); //char iPackingType = ReadInt1();
 		short iNumRows = ReadInt2();
 		short iPackedSize = ReadInt2();
@@ -675,7 +676,7 @@ namespace psycle { namespace host {
 
 	}
 
-	int32_t XMSongLoader::LoadInstrument(XMSampler & sampler, int32_t iStart, int idx, int & curSample) {
+	size_t XMSongLoader::LoadInstrument(XMSampler & sampler, size_t iStart, int idx,int &curSample) {
 		Seek(iStart);
 
 		// read header
@@ -758,30 +759,19 @@ namespace psycle { namespace host {
 		return iStart;
 	}
 
-	int32_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, int32_t iStart, int iInstrIdx, int iSampleIdx) {
+	size_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, size_t iStart, int iInstrIdx, int iSampleIdx) {
 		// get sample header
+		XMSAMPLESTRUCT header;
+		std::memset(&header, 0, sizeof header);
 		Seek(iStart);
-		int iLen = ReadInt4();
+		ReadHeader(header);
+		header.name[21]='\0';
 
-		// loop data
-		int iLoopStart = ReadInt4();
-		int iLoopLength = ReadInt4();
-
-		// params
-		char iVol = ReadInt1();
-		char iFineTune = ReadInt1();
-		char iFlags = ReadInt1();
-		unsigned char iPanning = ReadInt1();
-		char iRelativeNote = ReadInt1();
-		Skip(1);//char iReserved = ReadInt1();
-
-		// sample name
-		char * cName = AllocReadStr(22);
-
+		uint32_t iLen = header.samplen;
 		// parse
-		BOOL bLoop = (iFlags & 0x01 || iFlags & 0x02) && (iLoopLength>0);
-		BOOL bPingPong = iFlags & 0x02;
-		BOOL b16Bit = iFlags & 0x10;
+		BOOL bLoop = (header.type & 0x01 || header.type & 0x02) && (header.looplen>0);
+		BOOL bPingPong = header.type & 0x02;
+		BOOL b16Bit = header.type & 0x10;
 	
 		// alloc wave memory
 
@@ -796,7 +786,7 @@ namespace psycle { namespace host {
 		}
 		else _wave.WaveLength(0);
 		_wave.PanEnabled(true);
-		_wave.PanFactor(iPanning/255.0f);
+		_wave.PanFactor(header.pan/255.0f);
 		//XMInstrument::WaveData& _data = sampler.Instrument(iInstrIdx).rWaveData(0).
 		//sampler.Instrument(iInstrIdx).rWaveData()..Name() = sName;
 		
@@ -807,11 +797,11 @@ namespace psycle { namespace host {
 				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
 			if(b16Bit) {
-				_wave.WaveLoopStart(iLoopStart / 2);
-				_wave.WaveLoopEnd((iLoopLength  + iLoopStart )/ 2);
+				_wave.WaveLoopStart(header.loopstart / 2);
+				_wave.WaveLoopEnd((header.looplen  + header.loopstart )/ 2);
 			} else {
-				_wave.WaveLoopStart(iLoopStart);
-				_wave.WaveLoopEnd(iLoopLength + iLoopStart);
+				_wave.WaveLoopStart(header.loopstart);
+				_wave.WaveLoopEnd(header.looplen + header.loopstart);
 			}
 			//TRACE2("l:%x s:%x e:%x \n",_wave.WaveLength(),_wave.WaveLoopStart(),_wave.WaveLoopEnd()); 
 		} else {
@@ -819,20 +809,19 @@ namespace psycle { namespace host {
 		}
 
 
-		_wave.WaveVolume(iVol * 2);
-		_wave.WaveTune(iRelativeNote);
-		_wave.WaveFineTune(iFineTune*2); // WaveFineTune has double range.
-		std::string sName = cName;
+		_wave.WaveVolume(header.vol * 2);
+		_wave.WaveTune(header.relnote);
+		_wave.WaveFineTune(header.finetune*2); // WaveFineTune has double range.
+		std::string sName = header.name;
 		_wave.WaveName(sName);
-		delete[] cName;
 
 		smpLen[iSampleIdx] = iLen;
-		smpFlags[iSampleIdx] = iFlags;
+		smpFlags[iSampleIdx] = header.type;
 
 		return iStart + 40;
 	}
 
-	int32_t XMSongLoader::LoadSampleData(XMSampler & sampler, int32_t iStart, int iInstrIdx, int iSampleIdx) {
+	size_t XMSongLoader::LoadSampleData(XMSampler & sampler, size_t iStart, int iInstrIdx, int iSampleIdx) {
 		// parse
 		
 		BOOL b16Bit = smpFlags[iSampleIdx] & 0x10;
@@ -845,20 +834,20 @@ namespace psycle { namespace host {
 		memset(smpbuf,0,smpLen[iSampleIdx]);
 		ReadArray(smpbuf,smpLen[iSampleIdx]);
 
-		int sampleCnt = smpLen[iSampleIdx];
+		uint32_t sampleCnt = smpLen[iSampleIdx];
 
 		// unpack sample data
 		if(b16Bit) {				
 			// 16 bit mono sample, delta
 			int out=0;
-			for(int j = 0; j < sampleCnt; j += 2) {
-				wNew += 0xFF & smpbuf[j] | smpbuf[j+1]<<8;				
+			for(uint32_t j = 0; j < sampleCnt; j += 2) {
+				wNew += smpbuf[j] | (smpbuf[j+1]<<8);
 				*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
 				out++;
 			}   
 		} else {
 			// 8 bit mono sample
-			for(int j = 0; j < sampleCnt; ++j) {			
+			for(uint32_t j = 0; j < sampleCnt; ++j) {			
 				wNew += (smpbuf[j]<<8);// | char(rand())); // scale + dither
 				*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew;
 			}
@@ -977,22 +966,13 @@ namespace psycle { namespace host {
 			return;
 		}
 		m_pSong = &song;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		song.SetReady(false);
 		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 		song.AddMachine(m_pSampler);
 		//song.InsertConnection(*m_pSampler,*s->machine(MASTER_INDEX),0,0,0.75f); // This is done later, when determining the number of channels.
 		song.seqBus=m_pSampler->id();
-#else
-		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-//		song.InsertConnection(0,MASTER_INDEX,0,0,0.75f); // This is done later, when determining the number of channels.
-		song.seqBus=0;
-		// build sampler
-		m_pSampler = (XMSampler *)(song.machine(0));
-#endif
 
 		// get song name
-
 		char * pSongName = AllocReadStr(20,0);
 		if(pSongName==NULL)
 			return;
@@ -1077,7 +1057,7 @@ namespace psycle { namespace host {
 		}	
 	}
 
-	char * MODSongLoader::AllocReadStr(int32_t size, int32_t start) {
+	char * MODSongLoader::AllocReadStr(int32_t size, size_t start) {
 		// allocate space
 		char *pData = new char[size + 1];
 		if(pData==NULL)
