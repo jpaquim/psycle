@@ -1022,6 +1022,8 @@ XMSampler::Channel::PerformFX().
 
 	static int Speed2LPB(const int speed) { return 24/((speed==0)?6:speed); }
 	static int LPB2Speed(const int lpb) { return 24/lpb; }
+	static float Speed2LPBf(const int speed) { return 24.0f/((speed==0)?6.0f:speed); }
+	static float LPB2Speedf(const int lpb) { return 24.0f/lpb; }
 	Voice* GetCurrentVoice(const int channelNum)
 	{
 		for(int current = 0;current < _numVoices;current++)
