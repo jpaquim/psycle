@@ -148,7 +148,14 @@ namespace psycle { namespace host {
 			int index = m_driverComboBox.GetCurSel();
 #if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Player &player = Player::singleton();
-			m_ppDrivers[index]->Configure();
+			if (player.driver().info().name() != m_ppDrivers[index]->info().name()) {
+				player.driver().set_opened(false);
+				m_ppDrivers[index]->Configure();
+				player.setDriver(*m_ppDrivers[index]);
+			}
+			else {
+				m_ppDrivers[index]->Configure();
+			}
 			player.samples_per_second(m_ppDrivers[index]->playbackSettings().samplesPerSec());
 			//Global::pPlayer->samples_per_second()
 #else
