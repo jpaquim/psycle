@@ -18,24 +18,24 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/detail/project.private.hpp>
 #include "zipwriter.h"
 
-#include <zlib.h>
-
-#include <diversalis/os.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
-	#include <windows.h>
+	#include <universalis/os/include_windows_without_crap.hpp>
 	#include <io.h>
 #else
 	#include <unistd.h>
 	#include <sys/types.h>
 #endif
 
+#include <zlib.h> // include after windows header
+
 #include <sys/stat.h>
 #include <fcntl.h>
+
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
