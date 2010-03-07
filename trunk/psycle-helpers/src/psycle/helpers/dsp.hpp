@@ -38,7 +38,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/// currently it works in 4 byte alignment too via correcting the offset.
 	inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 	{
-		int offset  = 4 - ((reinterpret_cast<int>(pSrcSamples) & 0XF) >> 2);
+		int offset  = 4 - ((reinterpret_cast<std::ptrdiff_t>(pSrcSamples) & 0XF) >> 2);
 		numSamples -=offset;
 		while(offset-->0) {
 			*pDstSamples += *pSrcSamples * vol; 
