@@ -17,17 +17,21 @@
 
 	///\name processor endianess
 	///\{
-		/// indicates the compiler's targer processor uses big endian byte order.
+		/// indicates the compiler's target processor uses big endian byte order.
 		#define DIVERSALIS__CPU__ENDIAN__BIG
 		#undef DIVERSALIS__CPU__ENDIAN__BIG // was just defined to insert documentation.
 
-		/// indicates the compiler's targer processor uses little endian byte order.
+		/// indicates the compiler's target processor uses little endian byte order.
 		#define DIVERSALIS__CPU__ENDIAN__LITTLE
 		#undef DIVERSALIS__CPU__ENDIAN__LITTLE // was just defined to insert documentation.
 
-		/// indicates the compiler's targer processor is able to use both endian byte orders.
-		#define DIVERSALIS__CPU__ENDIAN__BOTH
-		#undef DIVERSALIS__CPU__ENDIAN__BOTH // was just defined to insert documentation.
+		/// indicates the compiler's target processor floating point numbers use big endian byte order.
+		#define DIVERSALIS__CPU__FLOAT_ENDIAN__BIG
+		#undef DIVERSALIS__CPU__FLOAT_ENDIAN__BIG // was just defined to insert documentation.
+
+		/// indicates the compiler's target processor floating point numbers use little endian byte order.
+		#define DIVERSALIS__CPU__FLOAT_ENDIAN__LITTLE
+		#undef DIVERSALIS__CPU__FLOAT_ENDIAN__LITTLE // was just defined to insert documentation.
 	///\}
 
 	/// indicates the compiler's target processor/os address size in bytes.
@@ -171,54 +175,54 @@
 	#endif
 	
 	#if defined __powerpc__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__POWER_PC
 	#elif defined __arm__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__ARM
 	#elif defined __mips__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__MIPS
 	#elif defined __sparc__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__SPARC
 	#elif defined __alpha__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__ALPHA
 	#elif defined __hppa__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__HPPA
 	#elif defined __ia64__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__IA 2
 		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif defined __x86_64__ // amd k8/opteron/athlon64/athlon-fx (sse2), intel nocona/emt64 (sse3)
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 9
 		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif \
 		defined __k8__     /* amd k8/opteron/athlon64/athlon-fx (sse2) */ || \
 		defined __nocona__ /* intel prescott/nocona/emt64 (sse3) */
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 8
 	#elif defined __pentium4__ // <= intel pentium-4 (sse2)
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 7
 	#elif \
 		defined __i686__   /* intel 'pentium-m' (sse2), __pentium3__ (sse1), __pentium2__ (mmx), __pentium_pro__ (no mmx) */ || \
 		defined __athlon__ /* amd althon-4/athlon-xp/athlon-mp (full sse1), athlon/athlon-thunderbird (sse1 prefetch, enhanced 3d-now) */ || \
 		defined __k6__     /* amd __k6_3__/__k6_2__ (3d-now), __k6__ (mmx) */
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 6
 	#elif \
 		defined __i586__ /* intel __pentium_mmx__, __pentium__ */
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 5
 	#elif defined __i486__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 4
 	#elif defined __i386__
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 3
 	#endif
 
@@ -258,16 +262,16 @@
 	#endif
 	
 	#if defined _M_IA64
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__IA 2
 	#elif defined _M_X64 // 64-bit x86 amd or intel (but not necessarily _WIN64)
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 9
 		#define DIVERSALIS__CPU__X86__SSE 2 ///\todo detect SSE3
 		///\todo detect 3d-now
 		#define DIVERSALIS__CPU__X86__MMX
 	#elif defined _M_IX86 // according to the only doc, it doesn't seem to go above 600 (i686)
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 _M_IX86 / 100
 		
 		#if _M_IX86_FP // expands to a value indicating which -arch compiler option was used:
@@ -284,14 +288,14 @@
 			#define DIVERSALIS__CPU__X86__MMX
 		#endif
 	#elif defined _M_ALPHA
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__ALPHA_AXP _M_ALPHA
 	#elif defined _M_MRX000 // mips
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__MIPS
 		#define DIVERSALIS__CPU__MRX _M_MRX000
 	#elif defined _M_PPC // xbox 360?
-		#define DIVERSALIS__PROCESSOR
+		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__POWER_PC _M_PPC
 	#endif
 #endif
@@ -301,30 +305,67 @@
 
 #if defined DIVERSALIS__COMPILER__GNU
 	#if defined __BIG_ENDIAN__
-		#define DIVERSALIS__CPU__ENDIAN
+		#define DIVERSALIS__CPU__ENDIAN 4321
 		#define DIVERSALIS__CPU__ENDIAN__BIG
 	#elif defined __LITTLE_ENDIAN__
-		#define DIVERSALIS__CPU__ENDIAN
+		#define DIVERSALIS__CPU__ENDIAN 1234
+		#define DIVERSALIS__CPU__ENDIAN__LITTLE
+	#endif
+#endif
+
+#if !defined DIVERSALIS__CPU__ENDIAN && defined DIVERSALIS__OS__POSIX
+	#include <sys/types.h>
+	#if defined BYTE_ORDER && defined BIG_ENDIAN && defined LITTLE_ENDIAN
+		#define DIVERSALIS__CPU__ENDIAN BYTE_ORDER
+		#if BYTE_ORDER == BIG_ENDIAN
+			#define DIVERSALIS__CPU__ENDIAN__BIG
+		#elif BYTE_ORDER == LITTLE_ENDIAN
+			#define DIVERSALIS__CPU__ENDIAN__LITTLE
+		#endif
+		#if defined __FLOAT_WORD_ORDER
+			#define DIVERSALIS__CPU__FLOAT_ENDIAN __FLOAT_WORD_ORDER
+			#if __FLOAT_WORD_ORDER == BIG_ENDIAN
+				#define DIVERSALIS__CPU__FLOAT_ENDIAN__BIG
+			#elif __FLOAT_WORD_ORDER == LITTLE_ENDIAN
+				#define DIVERSALIS__CPU__FLOAT_ENDIAN__LITTLE
+			#endif
+		#endif
+	#endif
+#endif
+
+#if !defined DIVERSALIS__CPU__ENDIAN
+	#include <boost/detail/endian.hpp>
+	#define DIVERSALIS__CPU__ENDIAN BOOST_BYTE_ORDER
+	#if defined BOOST_BIG_ENDIAN
+		#define DIVERSALIS__CPU__ENDIAN__BIG
+	#elif  defined BOOST_LITTLE_ENDIAN
 		#define DIVERSALIS__CPU__ENDIAN__LITTLE
 	#endif
 #endif
 
 #if !defined DIVERSALIS__CPU__ENDIAN
 	#if defined DIVERSALIS__CPU__SPARC || defined DIVERSALIS__CPU__POWER_PC || defined DIVERSALIS__CPU__MOTOROLA_68K
-		#define DIVERSALIS__CPU__ENDIAN
+		#define DIVERSALIS__CPU__ENDIAN 4321
 		#define DIVERSALIS__CPU__ENDIAN__BIG
 	#elif defined DIVERSALIS__CPU__X86 || defined DIVERSALIS__CPU__IA
-		#define DIVERSALIS__CPU__ENDIAN
+		#define DIVERSALIS__CPU__ENDIAN 1234
 		#define DIVERSALIS__CPU__ENDIAN__LITTLE
-	#elif defined DIVERSALIS__CPU__MIPS
-		#define DIVERSALIS__CPU__ENDIAN
-		#define DIVERSALIS__CPU__ENDIAN__BOTH
+	//#elif defined DIVERSALIS__CPU__MIPS
+		// mips has both endianess
 	#elif defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 		// choose arbitrarily
-		#define DIVERSALIS__CPU__ENDIAN
+		#define DIVERSALIS__CPU__ENDIAN 4321
 		#define DIVERSALIS__CPU__ENDIAN__BIG
-	#else
-		#error please specify the endianness of your processor
+	#endif
+#endif
+
+#if !defined DIVERSALIS__CPU__FLOAT_ENDIAN
+	#if defined DIVERSALIS__CPU__ENDIAN__BIG
+		#define DIVERSALIS__CPU__FLOAT_ENDIAN DIVERSALIS__CPU__ENDIAN
+		#define DIVERSALIS__CPU__FLOAT_ENDIAN__BIG
+	#elif defined DIVERSALIS__CPU__ENDIAN__LITTLE
+		#define DIVERSALIS__CPU__FLOAT_ENDIAN DIVERSALIS__CPU__ENDIAN
+		#define DIVERSALIS__CPU__FLOAT_ENDIAN__LITTLE
 	#endif
 #endif
 
@@ -335,12 +376,16 @@
 
 
 
-#if !defined DIVERSALIS__PROCESSOR && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#error Unkown processor.
+#if !defined DIVERSALIS__CPU && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+	#error unkown cpu
 #endif
 
 #if !defined DIVERSALIS__CPU__ENDIAN && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#error Unkown byte sex.
+	#error unkown byte sex
+#endif
+
+#if !defined DIVERSALIS__CPU__FLOAT_ENDIAN && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+	#error unkown float byte sex
 #endif
 
 #endif // !defined DIVERSALIS__CPU__INCLUDED
