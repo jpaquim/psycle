@@ -282,7 +282,39 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 	{
 		///\todo: Implementation with Intrinsics. x64 doesn't support this.
-		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+			__m128 minVol = _mm_set_ps1(0.0f);
+			__m128 maxVol = _mm_set_ps1(0.0f);
+			__m128 *psrcl = (__m128*)pSamplesL;
+			__m128 *psrcr = (__m128*)pSamplesR;
+			while(numSamples > 0) {
+				maxVol =  _mm_max_ps(maxVol,*psrcl);
+				maxVol =  _mm_max_ps(maxVol,*psrcr);
+				minVol =  _mm_min_ps(minVol,*psrcl);
+				minVol =  _mm_min_ps(minVol,*psrcr);
+				psrcl++;
+				psrcr++;
+				numSamples-=4;
+			}
+			__m128 highTmp = _mm_movehl_ps(maxVol, highTmp);
+			maxVol =  _mm_max_ps(maxVol,highTmp);
+			highTmp = _mm_move_ss(highTmp,maxVol);
+			maxVol = _mm_shuffle_ps(maxVol, highTmp, 0x11);
+			maxVol =  _mm_max_ps(maxVol,highTmp);
+			
+			__m128 lowTmp = _mm_movehl_ps(minVol, lowTmp);
+			minVol =  _mm_max_ps(minVol,lowTmp);
+			lowTmp = _mm_move_ss(lowTmp,minVol);
+			minVol = _mm_shuffle_ps(minVol, lowTmp, 0x11);
+			minVol =  _mm_max_ps(minVol,lowTmp);
+
+			__m128 minus1 = _mm_set_ps1(-1.0f);
+			minVol = _mm_mul_ss(minVol, minus1);
+			maxVol = _mm_max_ps(maxVol,minVol);
+			float result;
+			_mm_store_ss(&result, maxVol);
+			return result;
+		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// If anyone knows better assembler than me improve this variable utilization:
 			float volmax = 0.0f, volmin = 0.0f;
 			float *volmaxb = &volmax, *volminb = &volmin;
