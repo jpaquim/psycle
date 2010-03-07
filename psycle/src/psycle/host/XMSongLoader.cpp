@@ -276,6 +276,8 @@ namespace psycle { namespace host {
 		else
 		{
 			// get next values
+			float beatpos=0;
+			float linesPerBeat = XMSampler::Speed2LPBf(m_Header.speed);
 			for(int row = 0;row < iNumRows;row++)
 			{
 				for(int col=0;col<iTracks;col++)
@@ -517,8 +519,10 @@ namespace psycle { namespace host {
 						case XMCMD::SETSPEED:
 							if ( param < 32)
 							{
-								e.setCommand(PatternCmd::EXTENDED);
-								e.setParameter(24 / ((param == 0)?6:param));
+								linesPerBeat = XMSampler::Speed2LPBf(param);
+								//e.setCommand(PatternCmd::EXTENDED);
+								//e.setParameter(XMSampler::Speed2LPB(param == 0));
+								e.setParameter(0);
 							}
 							else
 							{
@@ -664,11 +668,13 @@ namespace psycle { namespace host {
 						e.setMachine(255);
 					}
 					e.set_track(col);
-					double beat = row / static_cast<float>(XMSampler::Speed2LPB(m_Header.speed));
 					if (!e.empty())
-						pat.insert(beat, e);
+						pat.insert(beatpos, e);
 				}
+				beatpos += 1 / static_cast<float>(linesPerBeat);
 			}
+			pat.timeSignatures().clear();
+			pat.timeSignatures().push_back(TimeSignature(beatpos));
 		}
 
 		//int z = ftell(_file);
