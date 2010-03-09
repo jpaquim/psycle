@@ -215,11 +215,11 @@ namespace psycle {
 			{
 				std::uint32_t tag;
 				char songName[26];
-				unsigned short pHiligt,ordNum,insNum,sampNum,patNum,trackerV,ffv,flags,special;
-				unsigned char gVol,mVol,iSpeed,iTempo,panSep,PWD;
-				unsigned short msgLen;
-				unsigned long msgOffset,reserved;
-				unsigned char chanPan[64],chanVol[64];
+				uint16_t pHiligt,ordNum,insNum,sampNum,patNum,trackerV,ffv,flags,special;
+				uint8_t gVol,mVol,iSpeed,iTempo,panSep,PWD;
+				uint16_t msgLen;
+				uint32_t msgOffset,reserved;
+				uint8_t chanPan[64],chanVol[64];
 			};
 			struct Flags
 			{
