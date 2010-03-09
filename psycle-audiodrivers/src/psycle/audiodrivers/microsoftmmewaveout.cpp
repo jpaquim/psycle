@@ -7,7 +7,7 @@
 
 namespace psycle { namespace audiodrivers {
 
-bool MsWaveOut::_running = 0;
+bool MsWaveOut::running_ = 0;
 CRITICAL_SECTION MsWaveOut::waveCriticalSection;
 WAVEHDR*         MsWaveOut::waveBlocks;
 volatile int     MsWaveOut::waveFreeBlockCount;
@@ -17,10 +17,13 @@ AudioDriverInfo MsWaveOut::info( ) const {
 	return AudioDriverInfo("mmewaveout","Microsoft MME WaveOut Driver","Microsoft legacy output driver",true);
 }      
 
-MsWaveOut::MsWaveOut() {
+MsWaveOut::MsWaveOut(MMEUiInterface* ui) {
 	hWaveOut = 0; // use this audio handle to detect if the driver is working
-	_running = 0; // running condition for the thread loop
+	running_ = 0; // running condition for the thread loop
 	buf = 0;
+	device_idx_ = WAVE_MAPPER;
+	dither_ = false;
+	ui_ = ui;
 }
 
 MsWaveOut::~MsWaveOut() throw() {
@@ -142,9 +145,14 @@ void MsWaveOut::fillBuffer() {
 	// this protects freeBlockCounter, that is manipulated from two threads.
 	// the waveOut interface callback WM_Done thread in waveOutProc and in writeAudio
 	InitializeCriticalSection( &waveCriticalSection );
-	while(_running) {
+	while(running_) {
 		float const * input(callback(playbackSettings().blockFrames()));
-		Quantize16(input, buf, playbackSettings().blockFrames());
+		if (dither_) {
+			Quantize16WithDither(input, buf, playbackSettings().blockFrames());
+		}
+		else {
+			Quantize16(input, buf, playbackSettings().blockFrames());
+		}
 		writeAudio(hWaveOut, reinterpret_cast<char*>(buf), playbackSettings().blockBytes());
 	}
 }
@@ -171,13 +179,12 @@ void MsWaveOut::do_open() throw(std::exception) {
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 	format.cbSize = 0;
 
-	_dither = 0;
 	// the buffer block variables
 	if(!(waveBlocks = allocateBlocks())) throw std::runtime_error("............");
 	waveFreeBlockCount = playbackSettings().blockCount();
 	waveCurrentBlock = 0;
 	// this will protect the monitor buffer counter variable
-	if(waveOutOpen(&hWaveOut, WAVE_MAPPER, &format, (DWORD_PTR) waveOutProc, (DWORD_PTR)(&waveFreeBlockCount),
+	if(waveOutOpen(&hWaveOut, device_idx_, &format, (DWORD_PTR) waveOutProc, (DWORD_PTR)(&waveFreeBlockCount),
 		CALLBACK_FUNCTION) != MMSYSERR_NOERROR
 	) throw std::runtime_error("waveOutOpen() failed");
 	universalis::os::aligned_memory_alloc(16, buf, playbackSettings().blockFrames() * playbackSettings().numChannels());
@@ -194,14 +201,14 @@ void MsWaveOut::do_close() throw(std::exception) {
 }
 
 void MsWaveOut::do_start() throw(std::exception) {
-	_running = true;
+	running_ = true;
 	DWORD dwThreadId;
 	_hThread = CreateThread( NULL, 0, audioOutThread, this, 0, &dwThreadId );
 }
 
 void MsWaveOut::do_stop() throw(std::exception) {
-	if(!_running) return;
-	_running=false;
+	if(!running_) return;
+	running_=false;
 	///\todo: some threadlocking mechanism. For now adding these sleeps
 #if defined _WIN32
 	Sleep(1000);
@@ -213,6 +220,133 @@ void MsWaveOut::do_stop() throw(std::exception) {
 		hWaveOut=0;
 		throw std::runtime_error("waveOutReset() failed");
 	}
+}
+
+void MsWaveOut::ReadConfig() {
+	// default configuration
+	device_idx_ = WAVE_MAPPER;
+	dither_ = false;
+	playbackSettings_.setBitDepth(16);
+	playbackSettings_.setChannelMode(3);
+	playbackSettings_.setSamplesPerSec(44100);
+	playbackSettings_.setBlockFrames(2048);
+	playbackSettings_.setBlockCount(8);
+	if(ui_) {
+		int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
+		ui_->ReadConfig(
+			device_idx_,
+			dither_,
+			tmp_samplespersec,
+			tmp_blockbytes,
+			tmp_block_count
+		);
+		playbackSettings_.setSamplesPerSec(tmp_samplespersec);
+		playbackSettings_.setBlockBytes(tmp_blockbytes);
+		playbackSettings_.setBlockCount(tmp_block_count);
+	}
+}
+
+void MsWaveOut::WriteConfig() {
+	if(ui_) {
+		ui_->WriteConfig(
+			device_idx_,
+			dither_,
+			playbackSettings().samplesPerSec(),
+			playbackSettings().blockBytes(),
+			playbackSettings().blockCount()
+		);
+	}
+}
+void MsWaveOut::Configure() {
+	// 1. reads the config from persistent storage
+	// 2. opens the gui to let the user edit the settings
+	// 3. writes the config to persistent storage
+
+	ReadConfig();
+
+	if(!ui_) return;
+
+	ui_->SetValues(
+		device_idx_,
+		dither_,
+		playbackSettings().samplesPerSec(),
+		playbackSettings().blockBytes(),
+		playbackSettings().blockCount()
+	);
+	if(ui_->DoModal() != IDOK) return;
+
+	bool was_opened(opened());
+	bool was_started(started());
+
+	try {
+		set_opened(false);
+	} catch(std::exception e) {
+		std::ostringstream s;
+		s << "failed to close driver: " << e.what();
+		ui_->Error(s.str());
+		return;
+	}
+
+	// save the settings to be able to rollback if it doesn't work
+	int device_idx = device_idx_;
+	bool dither = this->dither_;
+	int samplesPerSec = playbackSettings().samplesPerSec();
+	int bufferSize = playbackSettings().blockBytes();
+	int numBuffers = playbackSettings().blockCount();
+
+	int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
+	ui_->GetValues(
+		this->device_idx_,
+		this->dither_,
+		tmp_samplespersec,
+		tmp_blockbytes, 
+		tmp_block_count
+	);
+	playbackSettings_.setSamplesPerSec(tmp_samplespersec);
+	playbackSettings_.setBlockBytes(tmp_blockbytes);
+	playbackSettings_.setBlockCount(tmp_block_count);
+
+	// try the settings
+	bool failed(false);
+	try {
+		set_started(true);
+	} catch(std::exception e) {
+		failed = true;
+		std::ostringstream s;
+		s << "settings failed: " << e.what();
+		ui_->Error(s.str());
+	}
+
+	if(failed) {
+		// rollback settings
+		try {
+			set_opened(false);
+		} catch(std::exception e) {
+			std::ostringstream s;
+			s << "failed to rollback driver settings: " << e.what();
+			s << "\nDriver is totally screwed, in an inconsistent state. Restart the app!";
+			ui_->Error(s.str());
+			return;
+		}
+		this->device_idx_ = device_idx;
+		this->dither_ = dither;
+		playbackSettings_.setSamplesPerSec(samplesPerSec);
+		playbackSettings_.setBlockBytes(bufferSize);
+		playbackSettings_.setBlockCount(numBuffers);
+
+		try {
+			set_opened(was_opened);
+			set_started(was_started);
+		} catch(std::exception e) {
+			std::ostringstream s;
+			s << "failed to rollback driver settings: " << e.what();
+			s << "\nDriver is totally screwed, in an inconsistent state. Restart the app!";
+			ui_->Error(s.str());
+		}
+		return;
+	}
+
+	WriteConfig();
 }
 
 

@@ -6,6 +6,7 @@
 
 #include <psycle/core/song.h>
 #include <psycle/core/patternEvent.h>
+#include "WaveOutDialog.hpp"
 #include "DSoundConfig.hpp"
 #include "ASIOConfig.hpp"
 #include <psycle/audiodrivers/microsoftmmewaveout.h>
@@ -56,32 +57,23 @@ namespace psycle { namespace host {
 			SetSkinDefaults();
 			// soundcard output device
 			{				
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				_numOutputDrivers = 4;
 				_ppOutputDrivers = new psycle::audiodrivers::AudioDriver*[_numOutputDrivers];
 				///\todo: DummyDriver is an experimental "use all cpu" driver. The old AudioDriver was
 				/// a "do nothing" driver instead.
-				_ppOutputDrivers[0] = new psycle::audiodrivers::DummyDriver();
-				_ppOutputDrivers[1] = new psycle::audiodrivers::MsWaveOut();
+				_ppOutputDrivers[0] = new audiodrivers::DummyDriver();
+				mme_ui_ = new MMEUi();
+				_ppOutputDrivers[1] = new audiodrivers::MsWaveOut(mme_ui_);
 				dsound_ui_ = new DSoundUi();
-				_ppOutputDrivers[2] = new psycle::audiodrivers::MsDirectSound(dsound_ui_);
+				_ppOutputDrivers[2] = new audiodrivers::MsDirectSound(dsound_ui_);
 				asio_ui_ = new AsioUi();
-				_ppOutputDrivers[3] = new psycle::audiodrivers::ASIOInterface(asio_ui_);
-				_outputDriverIndex = 2; // use direct sound so far as default;				
-#else
-				_numOutputDrivers = 4;
-				_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
-				_ppOutputDrivers[0] = new AudioDriver;
-				_ppOutputDrivers[1] = new WaveOut;
-				_ppOutputDrivers[2] = new DirectSound;
-				_ppOutputDrivers[3] = new ASIOInterface;
-				if(((ASIOInterface*)(_ppOutputDrivers[3]))->_drivEnum.size() <= 0)
+				_ppOutputDrivers[3] = new audiodrivers::ASIOInterface(asio_ui_);
+				if(((audiodrivers::ASIOInterface*)(_ppOutputDrivers[3]))->_drivEnum.size() <= 0)
 				{
 					_numOutputDrivers--;
 					delete _ppOutputDrivers[3]; _ppOutputDrivers[3] = 0;
 				}
-				_outputDriverIndex = 1;
-#endif
+				_outputDriverIndex = 2; // use direct sound so far as default;				
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 			}
 			// midi
@@ -157,10 +149,9 @@ namespace psycle { namespace host {
 				delete [] _ppOutputDrivers;
 			}
 			delete _pMidiInput;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+			delete mme_ui_;
 			delete dsound_ui_;
 			delete asio_ui_;
-#endif
 #endif // !defined WINAMP_PLUGIN
 		}
 
@@ -347,12 +338,10 @@ namespace psycle { namespace host {
 				reg.QueryValue("OutputDriver", _outputDriverIndex);
 				if(0 > _outputDriverIndex || _outputDriverIndex >= _numOutputDrivers) _outputDriverIndex = 1;
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				for (int i(0);i<_numOutputDrivers;++i)
 				{
 					_ppOutputDrivers[i]->ReadConfig();
 				}
-#endif
 			}
 			// midi
 			{
@@ -444,12 +433,10 @@ namespace psycle { namespace host {
 			reg.SetValue("NavigationIgnoresStep", _NavigationIgnoresStep);
 			reg.SetValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
 			reg.SetValue("OutputDriver", _outputDriverIndex);
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			for (int i(0);i<_numOutputDrivers;++i)
 			{
 				_ppOutputDrivers[i]->WriteConfig();
 			}
-#endif
 			reg.SetValue("MidiInputDriver", _midiDriverIndex);
 			reg.SetValue("MidiSyncDriver", _syncDriverIndex);
 			reg.SetValue("MidiInputHeadroom", _midiHeadroom);

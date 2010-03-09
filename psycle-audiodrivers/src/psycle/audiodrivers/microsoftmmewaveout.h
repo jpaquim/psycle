@@ -28,15 +28,41 @@ namespace psycle { namespace audiodrivers {
 
 using namespace universalis::stdlib;
 
+class MMEUiInterface {
+	public:
+		MMEUiInterface::MMEUiInterface() {}
+		virtual ~MMEUiInterface() {}
+
+		virtual int DoModal() = 0;
+
+		virtual void SetValues(
+			int device_idx, bool dither,
+			int sample_rate, int buffer_size, int buffer_count) = 0;
+
+		virtual void GetValues(
+			int & device_idx, bool & dither,
+			int & sample_rate, int & buffer_size, int & buffer_count) = 0;
+			
+		virtual void WriteConfig(
+			int device_idx, bool dither,
+			int sample_rate, int buffer_size, int buffer_count) = 0;
+
+		virtual void ReadConfig(
+			int & device_idx, bool & dither,
+			int & sample_rate, int & buffer_size, int & buffer_count) = 0;
+
+		virtual void Error(std::string const & msg) = 0;
+};
 ///\todo work in progress
 /// status working, restarting etc not working
 ///\todo freeing and configure    
 class MsWaveOut : public AudioDriver {
 	public:
-		MsWaveOut();
+		MsWaveOut(MMEUiInterface*);
 		~MsWaveOut() throw();
 
 		/*override*/ AudioDriverInfo info() const;
+		/*override*/ void Configure();
 
 	protected:
 		/*override*/ void do_open() throw(std::exception);
@@ -45,7 +71,11 @@ class MsWaveOut : public AudioDriver {
 		/*override*/ void do_close() throw(std::exception);
 
 		/*override*/ bool opened() const throw() { return hWaveOut != 0; }
-		/*override*/ bool started() const throw() { return _running; }
+		/*override*/ bool started() const throw() { return running_; }
+
+	protected:
+		void ReadConfig();
+		void WriteConfig();
 
 	private:
 		std::int16_t *buf;
@@ -69,9 +99,12 @@ class MsWaveOut : public AudioDriver {
 		// use all winapi calls there we need due to restrictions of the winapi
 		HANDLE _hThread;
 		static DWORD WINAPI audioOutThread(void *pWaveOut);
-		static bool _running; // check, if thread loop should be left
+		static bool running_; // check, if thread loop should be left
 		void fillBuffer();
-		bool _dither;
+		int device_idx_;
+		bool dither_;
+
+		MMEUiInterface* ui_;
 };
 
 }}

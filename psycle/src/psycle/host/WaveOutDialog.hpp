@@ -2,6 +2,7 @@
 ///\brief interface file for psycle::host::CWaveOutDialog.
 #pragma once
 #include "Psycle.hpp"
+#include <psycle/audiodrivers/microsoftmmewaveout.h>
 
 namespace psycle { namespace host {
 
@@ -50,6 +51,37 @@ namespace psycle { namespace host {
 
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
+		class MMEUi : public audiodrivers::MMEUiInterface
+		{
+		public:
+			MMEUi() {}
+			~MMEUi() {}
+
+			/*override*/ int DoModal() {
+				return dlg_.DoModal();
+			}
+
+			/*override*/ void SetValues(
+				int device_idx, bool dither,
+				int sample_rate, int buffer_size, int buffer_count);
+
+			/*override*/ void GetValues(
+				int & device_idx, bool & dither,
+				int & sample_rate, int & buffer_size, int & buffer_count);
+				
+			/*override*/ void WriteConfig(
+				int device_idx, bool dither,
+				int sample_rate, int buffer_size, int buffer_count);
+
+			/*override*/ void ReadConfig(
+				int & device_idx, bool & dither,
+				int & sample_rate, int & buffer_size, int & buffer_count);
+
+			/*override*/ void Error(std::string const & msg);
+		protected:
+			CWaveOutDialog dlg_;
+		};
+
 
 	}   // namespace
 }   // namespace
