@@ -270,9 +270,7 @@ namespace psycle {
 
 			typedef std::pair<char,char> ITNotePair;
 			typedef std::pair<char,char> ITNodePair1x;
-			///\Should revise this one
-			//		typedef std::pair<short,char> ITNodePair;
-			class ITNodePair { public: std::int8_t first; std::uint8_t secondlo; std::uint8_t secondhi; };
+			typedef std::pair<char,short> ITNodePair;
 
 			struct itInsHeader1x
 			{
@@ -391,6 +389,7 @@ namespace psycle {
 			bool ReadHeader(itInsHeader2x& header);
 			bool ReadHeader(ITEnvStruct& header);
 			bool ReadHeader(ITNotePair& header);
+			bool ReadHeader(ITNodePair& header);
 			bool ReadHeader(itSampleHeader& header);
 
 			unsigned char highOffset[64];

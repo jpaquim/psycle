@@ -481,10 +481,9 @@ Special:  Bit 0: On = song message attached.
 				}
 
 				for(int i = 0; i < envelope_point_num;i++){
-					short envtmp = curH.volEnv.nodes[i].secondlo | (curH.volEnv.nodes[i].secondhi <<8);
+					short envtmp = curH.volEnv.nodes[i].second;
 					xins.AmpEnvelope()->Append(envtmp ,(float)curH.volEnv.nodes[i].first/ 64.0f);
 				}
-
 			} else {
 				xins.AmpEnvelope()->IsEnabled(false);
 			}
@@ -511,7 +510,7 @@ Special:  Bit 0: On = song message attached.
 				}
 
 				for(int i = 0; i < envelope_point_num;i++){
-					short pantmp = curH.panEnv.nodes[i].secondlo | (curH.panEnv.nodes[i].secondhi <<8);
+					short pantmp = curH.panEnv.nodes[i].second;
 					xins.PanEnvelope()->Append(pantmp,(float)(curH.panEnv.nodes[i].first)/ 32.0f);
 				}
 
@@ -545,7 +544,7 @@ Special:  Bit 0: On = song message attached.
 					}
 
 					for(int i = 0; i < envelope_point_num;i++){
-						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
+						short pitchtmp = curH.pitchEnv.nodes[i].second;
 						xins.FilterEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
 					}
 					if ( xins.FilterCutoff() < 127 )
@@ -567,7 +566,7 @@ Special:  Bit 0: On = song message attached.
 					}
 
 					for(int i = 0; i < envelope_point_num;i++){
-						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
+						short pitchtmp = curH.pitchEnv.nodes[i].second;
 						xins.PitchEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first)/ 32.0f);
 					}
 				}
@@ -869,6 +868,8 @@ Special:  Bit 0: On = song message attached.
 			s->sequence().Add(pat);
 			//char* packedpattern = new char[packedSize];
 			//Read(packedpattern, packedSize);
+			float beatpos=0;
+			float linesPerBeat = XMSampler::Speed2LPBf(itFileH.iSpeed);
 			for (int row=0;row<rowCount;row++)
 			{
 				Read(newEntry);
@@ -971,14 +972,17 @@ Special:  Bit 0: On = song message attached.
 					}
 
 					pent.set_track(channel);
-					double beat = row / static_cast<float>(sampler->Speed2LPB(itFileH.iSpeed));
+					double beat = row / linesPerBeat;
 					if (!pent.empty())
 						pat.insert(beat, pent);
 					pent=pempty;
 					numchans = std::max(static_cast<int>(channel),numchans);
 					Read(newEntry);
 				}
+				beatpos += 1.0f / linesPerBeat;
 			}
+			pat.timeSignatures().clear();
+			pat.timeSignatures().push_back(TimeSignature(beatpos));
 			return true;
 		}
 
@@ -1233,7 +1237,7 @@ Special:  Bit 0: On = song message attached.
 			Read(header.loopE);
 			Read(header.sustainS);
 			Read(header.sustainE);
-			for (int i=0; i < 25; i++) DeprecatedRawRead(header.nodes[i]);
+			for (int i=0; i < 25; i++) ReadHeader(header.nodes[i]);
 			return Read(header.unused);
 		}
 
@@ -1241,7 +1245,10 @@ Special:  Bit 0: On = song message attached.
 			Read(header.first);
 			return Read(header.second);
 		}
-
+		bool ITModule2::ReadHeader(ITNodePair& header) {
+			Read(header.first);
+			return Read(header.second);
+		}
 		bool ITModule2::ReadHeader(itSampleHeader& header) {
 			Read(header.tag);
 			ReadArray(header.fileName,sizeof(header.fileName));
@@ -1622,6 +1629,8 @@ OFFSET              Count TYPE   Description
 			s->sequence().Add(pat);
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
+			float beatpos=0;
+			float linesPerBeat = XMSampler::Speed2LPBf(itFileH.iSpeed);
 			for (int row=0;row<64;row++)
 			{
 				Read(newEntry);
@@ -1680,7 +1689,10 @@ OFFSET              Count TYPE   Description
 					pent=pempty;
 					Read(newEntry);
 				}
+				beatpos += 1.0f / linesPerBeat;
 			}
+			pat.timeSignatures().clear();
+			pat.timeSignatures().push_back(TimeSignature(beatpos));
 			return true;
 		}
 		bool ITModule2::ReadHeader(s3mHeader& header) {
