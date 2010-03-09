@@ -214,7 +214,6 @@ bool Project::CheckUnsavedSong(const std::string& title)
 			switch (result)
 			{
 			case IDYES:
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				 //todo: fileformat selection in the filter selection.
 				if ( ! song().save(filepath,3)) {
 					std::ostringstream szText;
@@ -222,18 +221,6 @@ bool Project::CheckUnsavedSong(const std::string& title)
 					mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_ICONEXCLAMATION);
 					return FALSE;
 				}
-#else
-				OldPsyFile file;
-				if (!file.Create((char*)filepath.c_str(), true))
-				{
-					std::ostringstream szText;
-					szText << "Error writing to \"" << filepath << "\"!!!";
-					mac_view_->child_view()->MessageBox(szText.str().c_str(),title.c_str(),MB_ICONEXCLAMATION);
-					return FALSE;
-				}
-				song().Save(&file);
-				//file.Close(); <- save handles this
-#endif
 				return TRUE;
 				break;
 			case IDNO:

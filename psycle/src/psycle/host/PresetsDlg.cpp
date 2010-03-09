@@ -185,11 +185,7 @@ using namespace seib::vst;
 
 			numParameters = _pMachine->GetNumParams();
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if( _pMachine->getMachineKey().host() == Hosts::NATIVE)
-#else
-			if( _pMachine->_type == MACH_PLUGIN)
-#endif
 			{
 				try
 				{
@@ -233,17 +229,9 @@ using namespace seib::vst;
 						// o_O`
 					}
 				}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				buffer = _pMachine->GetDllName().c_str();
-#else
-				buffer = _pMachine->GetDllName();
-#endif
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			else if( _pMachine->getMachineKey().host() == Hosts::VST)
-#else
-			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
-#endif
 			{ 
 				iniPreset.Init(numParameters);
 				int i(0);
@@ -263,12 +251,7 @@ using namespace seib::vst;
 					}
 					++i;
 				}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				buffer = _pMachine->GetDllName().c_str();
-#else
-				buffer = _pMachine->GetDllName();
-#endif
-
 			}
 			buffer = buffer.Left(buffer.GetLength()-4);
 			buffer += ".prs";
@@ -327,11 +310,8 @@ using namespace seib::vst;
 
 		void CPresetsDlg::OnImport() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if( _pMachine->getMachineKey().host() == Hosts::VST) return;
-#else
-			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
-#endif
+
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 
@@ -343,15 +323,7 @@ using namespace seib::vst;
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof szFile;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if( _pMachine->getMachineKey().host() == Hosts::VST)
-#else
-			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
-#endif
-			{
-				ofn.lpstrFilter = "Presets\0*.prs\0VST Banks\0*.fxb\0All\0*.*\0";
-			}
-			else ofn.lpstrFilter = "Presets\0*.prs\0All\0*.*\0";
+			ofn.lpstrFilter = "Presets\0*.prs\0All\0*.*\0";
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -527,6 +499,8 @@ using namespace seib::vst;
 
 		void CPresetsDlg::OnExport() 
 		{
+			if( _pMachine->getMachineKey().host() == Hosts::VST) return;
+
 			if ( m_preslist.GetCurSel() == CB_ERR )
 			{
 				MessageBox("You have to select a preset first.","File Save Error",MB_OK);
@@ -544,20 +518,8 @@ using namespace seib::vst;
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE)
-#else
-			if ( _pMachine->_type == MACH_PLUGIN )
-#endif
-			{
-				std::string tmpstr = Global::pConfig->GetPluginDir();
-				ofn.lpstrInitialDir = tmpstr.c_str();
-			}
-			else 
-			{
-				std::string tmpstr = Global::pConfig->GetVstDir();
-				ofn.lpstrInitialDir = tmpstr.c_str();
-			}
+			std::string tmpstr = Global::pConfig->GetPluginDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 
 			// Display the Open dialog box. 
@@ -900,11 +862,7 @@ using namespace seib::vst;
 					// o_O`
 				}
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if(preset.GetData() && _pMachine->getMachineKey().host() == Hosts::NATIVE)
-#else
-			if(preset.GetData() && _pMachine->_type == MACH_PLUGIN)
-#endif
 			{
 				try
 				{

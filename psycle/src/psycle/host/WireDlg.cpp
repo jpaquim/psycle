@@ -105,15 +105,7 @@ namespace psycle { namespace host {
 			SetMode();
 			pos = 1;
 
-			#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				mult = 32768.0f / _pSrcMachine->GetAudioRange();
-			#else
-				if(_pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX)
-					mult = 32768.0f; // native to VST, divide.
-				else
-					mult = 1.0f; // native to native, no need to convert.
-			#endif
-
+			mult = 32768.0f / _pSrcMachine->GetAudioRange();
 		}
 
 		void CWireDlg::OnCancel() {
@@ -183,15 +175,6 @@ namespace psycle { namespace host {
 
 		void CWireDlg::OnButton1() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			//Nothing to do. done in wire_gui->RemoveWire()
-#else
-			m_pParent->AddMacViewUndo();
-			Inval = true;
-			CSingleLock lock(&Global::song().door,TRUE);
-			_pSrcMachine->DeleteOutputWireIndex(&Global::song(),wireIndex);
-			_pDstMachine->DeleteInputWireIndex(&Global::song(),_dstWireIndex);
-#endif
 			wire_gui_->RemoveWire();
 			wire_gui_ = 0;
 			OnCancel();
