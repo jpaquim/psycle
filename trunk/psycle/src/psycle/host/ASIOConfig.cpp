@@ -154,11 +154,7 @@ namespace psycle { namespace host {
 			int prefindex = 0;
 			char buf[8];
 			m_bufferSizeCombo.ResetContent();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::audiodrivers::ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
-#else
-			ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
-#endif
+			audiodrivers::ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
 			int g = driver.granularity;
 			if (g < 0)
 			{

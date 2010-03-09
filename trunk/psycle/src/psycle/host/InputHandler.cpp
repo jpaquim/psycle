@@ -629,11 +629,7 @@ namespace psycle { namespace host {
 					entry.setParameter(0);	
 
 					// play it
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 					pMachine->Tick(i,entry);
-#else
-					pMachine->Tick(i,&entry);
-#endif
 				}
 			}
 		}
@@ -700,11 +696,7 @@ namespace psycle { namespace host {
 				// if the current machine is a sampler, check 
 				// if current sample is locked to a machine.
 				// if so, switch entry._mach to that machine number
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				if (pMachine->getMachineKey() == InternalKeys::sampler)
-#else
-				if (pMachine->_type == MACH_SAMPLER)
-#endif
 				{
 					if ((song->_pInstrument[song->auxcolSelected]->_locked_machine_index != -1)
 						&& (song->_pInstrument[song->auxcolSelected]->_locked_to_machine == true))
@@ -749,11 +741,7 @@ namespace psycle { namespace host {
 
 				// play
 				notetrack[outtrack]=note;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				pMachine->Tick(outtrack,entry);
-#else
-				pMachine->Tick(outtrack,&entry);
-#endif
 			}
 		}
 

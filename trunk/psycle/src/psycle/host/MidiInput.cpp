@@ -1062,7 +1062,6 @@ namespace psycle { namespace host {
 							Machine* pMachine = Player::singleton().song().machine(mgn);
 							if (pMachine)
 							{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 								PatternEvent pevent;
 								pevent.setNote(notetypes::midi_cc);
 								pevent.setMachine(pMachine->id());
@@ -1070,18 +1069,6 @@ namespace psycle { namespace host {
 								pevent.setCommand(data1);
 								pevent.setParameter(data2);
 								pMachine->AddEvent(0,0, pevent);
-#else
-								if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
-								{
-									((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
-									return;
-								}
-								else
-								{
-									PatternEvent pentry(notecommands::midicc,status,pMachine->id(),data1,data2);
-									pMachine->Tick(0,&pentry);
-								}
-#endif
 							}
 						}
 					}
@@ -1229,7 +1216,6 @@ namespace psycle { namespace host {
 			// method here in that they differ in the way the MME functions have been
 			// implemented!?  Oh, and the DSound functions are also not working correctly!
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			// midi injection NOT enabled?
 			if( !m_midiInHandle[ DRIVER_MIDI ] || 
 				strcmp( Global::pConfig->_pOutputDriver->info().name().c_str(), "mmewaveout" ) != 0 )	// TODO: need to remove this string compare? (speed)
@@ -1237,17 +1223,6 @@ namespace psycle { namespace host {
 				m_stats.flags &= ~FSTAT_ACTIVE;
 				return false;
 			}
-			
-#else
-			// midi injection NOT enabled?
-			if( !m_midiInHandle[ DRIVER_MIDI ] || 
-				strcmp( Global::pConfig->_pOutputDriver->GetInfo()->_psName, "Windows WaveOut MME" ) != 0 )	// TODO: need to remove this string compare? (speed)
-			{
-				m_stats.flags &= ~FSTAT_ACTIVE;
-				return false;
-			}
-			
-#endif
 
 			m_stats.flags |= FSTAT_ACTIVE;
 
@@ -1354,7 +1329,6 @@ namespace psycle { namespace host {
 					// switch on note code
 					switch( note )
 					{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						// TWEAK
 						case notetypes::tweak_slide:
 							// *********
@@ -1379,49 +1353,6 @@ namespace psycle { namespace host {
 							pMachine->AddEvent(0, m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry);
 						}
 						break;
-#else
-						// TWEAK
-						case notecommands::tweakslide:
-							// *********
-							// midi doesn't get a tweak slide yet
-						case notecommands::tweak:
-
-						{
-							int min, max;
-
-							// any info
-							if( pMachine->_type == MACH_PLUGIN )
-							{
-								// make sure parameter in range of machine
-								if( data1 > (pMachine->GetInfo()->numParameters-1) )
-								{
-									break;
-								}
-
-								// get range
-								min = pMachine->GetInfo()->Parameters[ data1 ]->MinValue;
-								max = pMachine->GetInfo()->Parameters[ data1 ]->MaxValue;
-							}
-							else
-							{
-								// assume 0000..FFFF is the range (VST)
-								min = 0;
-								max = 0xFFFF;
-							}
-
-							// create actual value
-							int value = min + lround<int>( (max-min) * (data2/127.f) );
-
-							// assign
-							m_midiBuffer[ m_patOut ].entry.setInstrument(data1);
-							m_midiBuffer[ m_patOut ].entry.setCommand(value / 256);
-							m_midiBuffer[ m_patOut ].entry.setParameter(value % 256);
-
-							// and tweak!
-							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
-						}
-						break;
-#endif
 
 						// SYNC TICK
 						case 254:

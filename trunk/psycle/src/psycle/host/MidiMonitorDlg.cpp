@@ -369,7 +369,6 @@ namespace psycle { namespace host {
 
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 						if (pMachine->getMachineKey() == InternalKeys::sampler) {
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[instrument]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
@@ -378,16 +377,6 @@ namespace psycle { namespace host {
 							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song().rInstrument(instrument).Name() );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
-#else
-						if( pMachine->_type == MACH_SAMPLER )
-						{
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[ instrument ]->_sName );
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
-						}
-						else if( pMachine->_type == MACH_XMSAMPLER )
-						{
-						}
-#endif
 						else
 						{
 							// n/a

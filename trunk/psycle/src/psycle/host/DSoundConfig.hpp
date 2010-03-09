@@ -54,7 +54,6 @@ namespace psycle { namespace host {
 				void RecalcLatency();
 		};
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		class DSoundUi : public audiodrivers::DSoundUiInterface {
 		public:
 			DSoundUi() {}
@@ -141,14 +140,12 @@ namespace psycle { namespace host {
 					}
 					saveatend=true;
 				}
-				bool configured(true);
-				configured &= ERROR_SUCCESS == reg.QueryValue("DeviceGuid", device_guid);
-				configured &= ERROR_SUCCESS == reg.QueryValue("Exclusive", exclusive);
-				configured &= ERROR_SUCCESS == reg.QueryValue("Dither", dither);
-				//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
-				configured &= ERROR_SUCCESS == reg.QueryValue("NumBuffers", buffer_count);
-				configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", buffer_size);
-				configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", sample_rate);
+				reg.QueryValue("DeviceGuid", device_guid);
+				reg.QueryValue("Exclusive", exclusive);
+				reg.QueryValue("Dither", dither);
+				reg.QueryValue("NumBuffers", buffer_count);
+				reg.QueryValue("BufferSize", buffer_size);
+				reg.QueryValue("SamplesPerSec", sample_rate);
 
 				reg.CloseKey();
 				reg.CloseRootKey();
@@ -162,7 +159,6 @@ namespace psycle { namespace host {
 		private:
 			CDSoundConfig dlg_;
 		};
-#endif
 
 	}   // namespace
 }   // namespace

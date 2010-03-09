@@ -59,8 +59,8 @@ namespace psycle { namespace host {
 			GetDlgItem(IDC_CHECK1)->ShowWindow(SW_HIDE);			
 			GetDlgItem(IDC_TEXT)->ShowWindow(SW_HIDE);			
 			UDACCEL acc;
-			acc.nSec = 4;
-			acc.nInc = 16;
+			acc.nSec = 1;
+			acc.nInc = 4;
 			m_spinlines.SetAccel(1, &acc);
 			// Pass the focus to the texbox
 			m_patname.SetFocus();
@@ -110,7 +110,6 @@ namespace psycle { namespace host {
 
 		void CPatDlg::OnUpdateNumLines() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			if (bInit)
 			{
 				char buffer[256];
@@ -118,25 +117,6 @@ namespace psycle { namespace host {
 				double result = asValue<double>(std::string(buffer));
 				pattern_->timeSignatures().front().set_beats(result);
 			}
-#else
-			char buffer[256];
-			if (bInit)
-			{
-				m_numlines.GetWindowText(buffer,16);
-				int val=atoi(buffer);
-
-				if (val < 0)
-				{
-					val = 0;
-				}
-				else if(val > MAX_LINES)
-				{
-					val = MAX_LINES-1;
-				}
-				sprintf(buffer,"HEX: %x",val);
-				m_text.SetWindowText(buffer);
-			}
-#endif
 		}
 	}   // namespace
 }   // namespace

@@ -55,13 +55,8 @@ namespace psycle { namespace host {
 
 			for (int i=0; i < _numDrivers; i++)
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				std::string name = m_ppDrivers[i]->info().header();
 				m_driverComboBox.AddString(name.c_str());
-#else
-				const char* psDesc = m_ppDrivers[i]->GetInfo()->_psName;
-				m_driverComboBox.AddString(psDesc);
-#endif		
 			}
 
 			if (m_driverIndex >= _numDrivers)
@@ -110,11 +105,7 @@ namespace psycle { namespace host {
 			m_driverIndex = m_driverComboBox.GetCurSel();
 			if (m_driverIndex != m_oldDriverIndex)
 			{
-				#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					m_ppDrivers[m_oldDriverIndex]->set_started(false);
-				#else
-					m_ppDrivers[m_oldDriverIndex]->Enable(false);
-				#endif
+				m_ppDrivers[m_oldDriverIndex]->set_started(false);
 			}
 			m_midiDriverIndex = m_midiDriverComboBox.GetCurSel();
 			if( m_oldMidiDriverIndex != m_midiDriverIndex )
@@ -146,7 +137,6 @@ namespace psycle { namespace host {
 		{
 
 			int index = m_driverComboBox.GetCurSel();
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 			Player &player = Player::singleton();
 			if (player.driver().info().name() != m_ppDrivers[index]->info().name()) {
 				player.driver().set_opened(false);
@@ -157,11 +147,6 @@ namespace psycle { namespace host {
 				m_ppDrivers[index]->Configure();
 			}
 			player.samples_per_second(m_ppDrivers[index]->playbackSettings().samplesPerSec());
-			//Global::pPlayer->samples_per_second()
-#else
-			m_ppDrivers[index]->Configure();
-			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
-#endif
 		}
 
 	}   // namespace

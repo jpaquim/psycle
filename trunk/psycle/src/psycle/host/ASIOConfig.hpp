@@ -53,7 +53,6 @@ namespace psycle { namespace host {
 		};
 
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 		class AsioUi : public audiodrivers::AsioUiInterface {
 		public:
 			AsioUi() {}
@@ -133,7 +132,6 @@ namespace psycle { namespace host {
 		private:
 			CASIOConfig dlg_;
 		};
-#endif
 
 
 		//{{AFX_INSERT_LOCATION}}
