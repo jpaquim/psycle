@@ -61,14 +61,6 @@ class PSYCLE__CORE__DECL RiffFile {
 		virtual bool Expect    (void       *, std::size_t);
 
 	public:
-		#if defined PSYCLE__CORE__FILEIO__WANT_DEPRECATED_RAW_ACCESS
-			template<typename X> UNIVERSALIS__COMPILER__DEPRECATED("TODO...")
-			bool DeprecatedRawRead(X & x) { return ReadChunk(&x, sizeof x); }
-
-			template<typename X> UNIVERSALIS__COMPILER__DEPRECATED("TODO...")
-			bool DeprecatedRawWrite(X & x) { return WriteChunk(&x, sizeof x); }
-		#endif
-
 		///\name 1 bit
 		///\{
 			bool Read(bool & x) {

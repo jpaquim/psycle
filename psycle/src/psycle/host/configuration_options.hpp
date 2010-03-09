@@ -23,9 +23,6 @@
 ///\todo always 1 now. need to clean up all references
 #define PSYCLE__CONFIGURATION__USE_PSYCORE 1
 
-///\todo that won't work on big-endian machines (this is for IT and XM module loaders)
-#define PSYCLE__CORE__FILEIO__WANT_DEPRECATED_RAW_ACCESS
-
 /**************************************************************************************************/
 /// string describing the configuration of the build.
 #define PSYCLE__CONFIGURATION(EOL) \

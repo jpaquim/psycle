@@ -224,11 +224,11 @@ Special:  Bit 0: On = song message attached.
 				s->playOrder[0]=0;
 			}*/
 
-			unsigned long *pointersi = new unsigned long[itFileH.insNum];
+			uint32_t *pointersi = new uint32_t[itFileH.insNum];
 			ReadArray(pointersi,itFileH.insNum);
-			unsigned long * pointerss = new unsigned long[itFileH.sampNum];
+			uint32_t * pointerss = new uint32_t[itFileH.sampNum];
 			ReadArray(pointerss,itFileH.sampNum);
-			unsigned long * pointersp = new unsigned long[itFileH.patNum];
+			uint32_t * pointersp = new uint32_t[itFileH.patNum];
 			ReadArray(pointersp,itFileH.patNum);
 
 			if ( itFileH.special&SpecialFlags::MIDIEMBEDDED)
