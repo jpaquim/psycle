@@ -521,7 +521,7 @@ namespace psycle { namespace host {
 							{
 								linesPerBeat = XMSampler::Speed2LPBf(param);
 								//e.setCommand(PatternCmd::EXTENDED);
-								//e.setParameter(XMSampler::Speed2LPB(param == 0));
+								//e.setParameter(XMSampler::Speed2LPB(param));
 								e.setParameter(0);
 							}
 							else
@@ -1243,7 +1243,7 @@ namespace psycle { namespace host {
 							{
 								linesPerBeat = XMSampler::Speed2LPBf(param);
 								//e.setCommand(PatternCmd::EXTENDED);
-								//e.setParameter(XMSampler::Speed2LPB(param == 0));
+								//e.setParameter(XMSampler::Speed2LPB(param));
 								e.setParameter(0);
 							}
 							else

@@ -259,10 +259,9 @@ void XMSongExport::SavePattern(Song& song, psycle::core::Pattern* pattern) {
 }
 
 // return address of next pattern, 0 for invalid
+#if 0
+//Old method, to check if we've forgot anything
 void XMSongExport::SavePattern(Song & song, const int patIdx) {
-	#if PSYCLE__CONFIGURATION__USE_PSYCORE
-		///todo: redo all the pattern saving
-	#else
 		XMPATTERNHEADER ptHeader;
 		memset(&ptHeader,0,sizeof(ptHeader));
 		ptHeader.size = sizeof(ptHeader);
@@ -410,8 +409,8 @@ void XMSongExport::SavePattern(Song & song, const int patIdx) {
 		} else {
 			Write(&ptHeader,sizeof(ptHeader));
 		}
-	#endif
 }
+#endif
 
 int XMSongExport::ComputeLinesPerBeat(Song& song) {
 	psycle::core::Sequence& seq = song.sequence();
