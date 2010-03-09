@@ -958,7 +958,7 @@ Special:  Bit 0: On = song message attached.
 						std::uint8_t command=ReadUInt8();
 						std::uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent.setParameter(param);
-						ParseEffect(pent,command,param,channel);
+						ParseEffect(pent,linesPerBeat,command,param,channel);
 						lastcom[channel]=pent.command();
 						lasteff[channel]=pent.parameter();
 
@@ -986,7 +986,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		void ITModule2::ParseEffect(PatternEvent&pent, int command,int param,int channel)
+		void ITModule2::ParseEffect(PatternEvent&pent, float& linesPerBeat, int command,int param,int channel)
 		{
 			int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
 				XMInstrument::WaveData::WaveForms::SAWDOWN,
@@ -994,41 +994,43 @@ Special:  Bit 0: On = song message attached.
 				XMInstrument::WaveData::WaveForms::RANDOM
 			};
 			switch(command){
-				case ITModule2::CMD::SET_SPEED:
-					pent.setCommand(PatternCmd::EXTENDED);
-					pent.setParameter(24 / ((param == 0)?6:param));
+				case CMD::SET_SPEED:
+					linesPerBeat = XMSampler::Speed2LPBf(param);
+					//pent.setCommand(PatternCmd::EXTENDED);
+					//pent.setParameter(XMSampler::Speed2LPB(param));
+					pent.setParameter(0);
 					break;
-				case ITModule2::CMD::JUMP_TO_ORDER:
+				case CMD::JUMP_TO_ORDER:
 					pent.setCommand(PatternCmd::JUMP_TO_ORDER);
 					break;
-				case ITModule2::CMD::BREAK_TO_ROW:
+				case CMD::BREAK_TO_ROW:
 					pent.setCommand(PatternCmd::BREAK_TO_LINE);
 					break;
-				case ITModule2::CMD::VOLUME_SLIDE:
+				case CMD::VOLUME_SLIDE:
 					pent.setCommand(XMSampler::CMD::VOLUMESLIDE);
 					break;
-				case ITModule2::CMD::PORTAMENTO_DOWN:
+				case CMD::PORTAMENTO_DOWN:
 					pent.setCommand(XMSampler::CMD::PORTAMENTO_DOWN);
 					break;
-				case ITModule2::CMD::PORTAMENTO_UP:
+				case CMD::PORTAMENTO_UP:
 					pent.setCommand(XMSampler::CMD::PORTAMENTO_UP);
 					break;
-				case ITModule2::CMD::TONE_PORTAMENTO:
+				case CMD::TONE_PORTAMENTO:
 					pent.setCommand(XMSampler::CMD::PORTA2NOTE);
 					break;
-				case ITModule2::CMD::VIBRATO:
+				case CMD::VIBRATO:
 					pent.setCommand(XMSampler::CMD::VIBRATO);
 					break;
-				case ITModule2::CMD::TREMOR:
+				case CMD::TREMOR:
 					pent.setCommand(XMSampler::CMD::TREMOR);
 					break;
-				case ITModule2::CMD::ARPEGGIO:
+				case CMD::ARPEGGIO:
 					pent.setCommand(XMSampler::CMD::ARPEGGIO);
 					break;
-				case ITModule2::CMD::VOLSLIDE_VIBRATO:
+				case CMD::VOLSLIDE_VIBRATO:
 					pent.setCommand(XMSampler::CMD::VIBRATOVOL);
 					break;
-				case ITModule2::CMD::VOLSLIDE_TONEPORTA:
+				case CMD::VOLSLIDE_TONEPORTA:
 					pent.setCommand(XMSampler::CMD::TONEPORTAVOL);
 					break;
 				case CMD::SET_CHANNEL_VOLUME: // IT
@@ -1040,16 +1042,16 @@ Special:  Bit 0: On = song message attached.
 				case CMD::SET_SAMPLE_OFFSET:
 					pent.setCommand(XMSampler::CMD::OFFSET | highOffset[channel]);
 					break;
-				case ITModule2::CMD::PANNING_SLIDE: // IT
+				case CMD::PANNING_SLIDE: // IT
 					pent.setCommand(XMSampler::CMD::PANNINGSLIDE);
 					break;
-				case ITModule2::CMD::RETRIGGER_NOTE:
+				case CMD::RETRIGGER_NOTE:
 					pent.setCommand(XMSampler::CMD::RETRIG);
 					break;
-				case ITModule2::CMD::TREMOLO:
+				case CMD::TREMOLO:
 					pent.setCommand(XMSampler::CMD::TREMOLO);
 					break;
-				case ITModule2::CMD::S:
+				case CMD::S:
 					switch(param & 0xf0){
 						case CMD_S::S_SET_FILTER:
 							pent.setCommand(XMSampler::CMD::NONE);
@@ -1630,7 +1632,7 @@ OFFSET              Count TYPE   Description
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
 			float beatpos=0;
-			float linesPerBeat = XMSampler::Speed2LPBf(itFileH.iSpeed);
+			float linesPerBeat = XMSampler::Speed2LPBf(s3mFileH.iSpeed);
 			for (int row=0;row<64;row++)
 			{
 				Read(newEntry);
@@ -1662,7 +1664,7 @@ OFFSET              Count TYPE   Description
 						std::uint8_t command=ReadUInt8();
 						std::uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent.setParameter(param);
-						ParseEffect(pent,command,param,channel);
+						ParseEffect(pent,linesPerBeat,command,param,channel);
 						if ( pent.command() == PatternCmd::BREAK_TO_LINE )
 						{
 							pent.setParameter(((pent.parameter()&0xF0)>>4)*10 + (pent.parameter()&0x0F));
