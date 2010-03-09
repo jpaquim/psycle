@@ -671,7 +671,7 @@ namespace psycle { namespace host {
 					if (!e.empty())
 						pat.insert(beatpos, e);
 				}
-				beatpos += 1 / static_cast<float>(linesPerBeat);
+				beatpos += 1.0f / linesPerBeat;
 			}
 			pat.timeSignatures().clear();
 			pat.timeSignatures().push_back(TimeSignature(beatpos));
@@ -1097,6 +1097,8 @@ namespace psycle { namespace host {
 		unsigned char mentry[4];
 
 			// get next values
+			float beatpos=0;
+			float linesPerBeat = XMSampler::Speed2LPBf(6);
 			for(int row = 0;row < iNumRows;row++)
 			{
 				for(int col=0;col<iTracks;col++)
@@ -1239,8 +1241,10 @@ namespace psycle { namespace host {
 						case XMCMD::SETSPEED:
 							if ( param < 32)
 							{
-								e.setCommand(PatternCmd::EXTENDED);
-								e.setParameter(24 / ((param == 0)?6:param));
+								linesPerBeat = XMSampler::Speed2LPBf(param);
+								//e.setCommand(PatternCmd::EXTENDED);
+								//e.setParameter(XMSampler::Speed2LPB(param == 0));
+								e.setParameter(0);
 							}
 							else
 							{
@@ -1260,11 +1264,13 @@ namespace psycle { namespace host {
 						e.setMachine(255);
 					}
 					e.set_track(col);
-					double beat = row *0.25;
 					if(!e.empty()) 
-						pat.insert(beat, e);
+						pat.insert(beatpos, e);
 				}
+				beatpos += 1.0f / linesPerBeat;
 			}
+			pat.timeSignatures().clear();
+			pat.timeSignatures().push_back(TimeSignature(beatpos));
 	}
 
 	unsigned char MODSongLoader::ConvertPeriodtoNote(unsigned short period) {
