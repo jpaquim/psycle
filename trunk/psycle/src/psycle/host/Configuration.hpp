@@ -7,6 +7,7 @@
 
 namespace psycle {
 	namespace audiodrivers { 
+		class MMEUiInterface;
 		class DSoundUiInterface; 
 		class AsioUiInterface; 
 	}
@@ -232,11 +233,7 @@ namespace psycle {
 			bool _linenumbersCursor;
 			bool _followSong;
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::audiodrivers::AudioDriver** _ppOutputDrivers;
-#else
-			AudioDriver** _ppOutputDrivers;
-#endif
+			audiodrivers::AudioDriver** _ppOutputDrivers;
 			int _numOutputDrivers;
 			int _outputDriverIndex;
 
@@ -257,15 +254,12 @@ namespace psycle {
 			int defaultPatLines;
 			bool autoStopMachines;
 
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			psycle::audiodrivers::AudioDriver* _pOutputDriver;
+			audiodrivers::AudioDriver* _pOutputDriver;
 		private:
-			psycle::audiodrivers::DSoundUiInterface* dsound_ui_;
-			psycle::audiodrivers::AsioUiInterface* asio_ui_;
+			audiodrivers::MMEUiInterface* mme_ui_;
+			audiodrivers::DSoundUiInterface* dsound_ui_;
+			audiodrivers::AsioUiInterface* asio_ui_;
 		public:
-#else
-			AudioDriver* _pOutputDriver;
-#endif
 
 			bool Initialized() { return _initialized; }
 			bool Read();
@@ -275,32 +269,22 @@ namespace psycle {
 
 			inline int GetBitDepth() const throw()
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				return _pOutputDriver->playbackSettings().bitDepth();
-#else
-				return _pOutputDriver->_samplesPerSec;
-#endif
 			}
 
 			inline int GetSamplesPerSec() const throw()
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				return _pOutputDriver->playbackSettings().samplesPerSec();
-#else
-				return _pOutputDriver->_samplesPerSec;
-#endif
 			}
+#if 0
+			//Method commented because this is set via the audiodriver configuration.
 			inline void SetSamplesPerSec(int samplerate) const throw()
 			{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
 				psycle::audiodrivers::AudioDriverSettings settings = _pOutputDriver->playbackSettings();
 				settings.setSamplesPerSec(samplerate);
 				_pOutputDriver->setPlaybackSettings(settings); 				
-#else
-				_pOutputDriver->_samplesPerSec = samplerate;
-#endif
 			}
-
+#endif
 
 			bool _initialized;
 
