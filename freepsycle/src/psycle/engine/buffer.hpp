@@ -7,12 +7,12 @@
 #include "event.hpp"
 #include <vector>
 #include <cassert>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__ENGINE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
 
 /// a vector of events.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel {
+class PSYCLE__DECL channel {
 	///\name flags to give hint to process loops
 	///\{
 		public:
@@ -60,7 +60,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK channel {
 };
 
 /// a vector of channels.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer {
+class PSYCLE__DECL buffer {
 	public:
 		typedef class channel channel;
 		typedef class event event;
@@ -124,7 +124,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK buffer {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>
 
 /**********************************************************************************************************************/
 // implementation details

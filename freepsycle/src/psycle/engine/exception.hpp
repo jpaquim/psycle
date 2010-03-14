@@ -7,8 +7,8 @@
 #include <psycle/detail/project.hpp>
 #include <universalis/exception.hpp>
 #include <string>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__ENGINE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
 
 /// generic exception thrown by functions of the namespace psycle::engine.
@@ -31,4 +31,4 @@ namespace exceptions {
 			) throw() : universalis::exceptions::runtime_error(what, location, cause) {}
 	};
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

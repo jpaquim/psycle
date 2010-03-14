@@ -9,8 +9,8 @@
 #include <psycle/generic/base.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <set>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__ENGINE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
 
 using namespace universalis::stdlib;
@@ -19,7 +19,7 @@ class plugin_library_reference;
 /**********************************************************************************************************************/
 // graph
 /// a set of nodes
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public bases::graph, public named {
+class PSYCLE__DECL graph : public bases::graph, public named {
 	protected: friend class virtual_factory_access;
 		graph(name_type const &);
 		virtual ~graph();
@@ -49,12 +49,12 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public bases::graph, public na
 /// outputs a textual representation of a graph.
 ///\relates graph
 ///\see graph::dump
-UNIVERSALIS__COMPILER__DYNAMIC_LINK std::ostream & operator<<(std::ostream & out, graph const &);
+PSYCLE__DECL std::ostream & operator<<(std::ostream & out, graph const &);
 
 /**********************************************************************************************************************/
 // port
 /// handles a stream of signal coming to or parting from an engine::node
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public bases::port, public named {
+class PSYCLE__DECL port : public bases::port, public named {
 	friend class ports::output;
 	friend class ports::input;
 	friend class ports::inputs::single;
@@ -145,14 +145,14 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public bases::port, public name
 /// outputs a textual representation of a port.
 ///\relates port
 ///\see port::dump
-UNIVERSALIS__COMPILER__DYNAMIC_LINK std::ostream & operator<<(std::ostream &, port const &);
+PSYCLE__DECL std::ostream & operator<<(std::ostream &, port const &);
 
 namespace ports {
 
 	/**********************************************************************************************************************/
 	// output
 	/// handles an output stream of signal parting from a node
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public bases::ports::output {
+	class PSYCLE__DECL output : public bases::ports::output {
 		friend class graph;
 		friend class node;
 		friend class input;
@@ -175,7 +175,7 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// input
 	/// handles an input stream of signal coming to a node.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public bases::ports::input {
+	class PSYCLE__DECL input : public bases::ports::input {
 		friend class node;
 		
 		protected: friend class virtual_factory_access;
@@ -205,7 +205,7 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// single
 		/// handles a single input stream of signal coming to a node.
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public bases::ports::inputs::single {
+		class PSYCLE__DECL single : public bases::ports::inputs::single {
 			friend class node;
 
 			protected: friend class virtual_factory_access;
@@ -227,7 +227,7 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// multiple
 		/// handles multiple input streams of signal coming to a node.
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public bases::ports::inputs::multiple {
+		class PSYCLE__DECL multiple : public bases::ports::inputs::multiple {
 			friend class node;
 
 			protected: friend class virtual_factory_access;
@@ -256,7 +256,7 @@ namespace ports {
 /**********************************************************************************************************************/
 // node
 /// node of a graph, placeholder for a dsp, aka "plugin machine".
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public bases::node, public named {
+class PSYCLE__DECL node : public bases::node, public named {
 	friend class graph;
 	friend class port;
 	friend class ports::output;
@@ -404,9 +404,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public bases::node, public name
 /// outputs a textual representation of a node.
 ///\relates node
 ///\see node::dump
-UNIVERSALIS__COMPILER__DYNAMIC_LINK std::ostream & operator<<(std::ostream &, node const &);
+PSYCLE__DECL std::ostream & operator<<(std::ostream &, node const &);
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>
 
 /**********************************************************************************************************************/
 // implementation details
