@@ -9,16 +9,15 @@
 #include <libgnomecanvasmm/group.h>
 #include <libgnomecanvasmm/rect.h>
 #include <libgnomecanvasmm/text.h>
-#include <universalis/compiler/numeric.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__FRONT_ENDS__GUI
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL PSYCLE__FRONT_ENDS__GUI
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace front_ends { namespace gui {
 
 typedef ::guint time;
 
-typedef universalis::compiler::numeric<>::floating_point real;
+typedef double real;
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK contraption : public Gnome::Canvas::Group {
+class PSYCLE__DECL contraption : public Gnome::Canvas::Group {
 	public:
 		contraption(Gnome::Canvas::Group & parent, real const & x, real const & y, color const &, std::string const & text);
 		
@@ -74,4 +73,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK contraption : public Gnome::Canvas::Gr
 	///\}
 };
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

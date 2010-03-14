@@ -5,14 +5,9 @@
 #include <psycle/detail/project.private.hpp>
 #include "main.hpp"
 #include "score1.hpp"
-#include <psycle/paths.hpp>
 #include <psycle/engine.hpp>
 #include <psycle/host.hpp>
-#include <universalis/cpu/exception.hpp>
-#include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/compiler/typenameof.hpp>
-#include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/date_time.hpp>
 #include <string>
@@ -22,24 +17,6 @@ namespace psycle { namespace tests { namespace random_notes {
 
 typedef score1 score_type;
 using namespace universalis::stdlib;
-
-void paths() {
-	#if defined $
-		#error "macro clash"
-	#endif
-	#define $($) loggers::trace()(paths::$()./*native_directory_*/string() + " == " UNIVERSALIS__COMPILER__STRINGIZED($), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS)
-	{
-		$(bin);
-		$(package::lib);
-		$(package::share);
-		$(package::pixmaps);
-		$(package::var);
-		$(package::log);
-		$(package::etc);
-		$(package::home);
-	}
-	#undef $
-}
 
 void play() {
 	try {
@@ -130,13 +107,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 		try {
 			universalis::os::loggers::multiplex_logger::singleton().add(universalis::os::loggers::stream_logger::default_logger());
 			universalis::os::thread_name thread_name("main");
-			universalis::cpu::exception::install_handler_in_thread();
-			if(universalis::os::loggers::information()()) {
-				std::ostringstream s;
-				s << paths::package::name() << " " << paths::package::version::string();
-				universalis::os::loggers::information()(s.str());
-			}
-			paths();
+			universalis::cpu::exceptions::install_handler_in_thread();
 			#if 1
 				play();
 			#else // some weird multithreaded test
@@ -171,7 +142,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 		} catch(...) {
 			if(loggers::exception()()) {
 				std::ostringstream s;
-				s << "exception: " << universalis::compiler::exceptions::ellipsis();
+				s << "exception: " << universalis::compiler::exceptions::ellipsis_desc();
 				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			throw;

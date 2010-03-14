@@ -9,8 +9,8 @@
 #include <psycle/plugins/sine.hpp>
 #include <psycle/plugins/decay.hpp>
 #include <psycle/plugins/sequence.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__TESTS__RANDOM_NOTES
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__TESTS__RANDOM_NOTES
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace tests { namespace random_notes {
 
 class score1 {
@@ -31,4 +31,4 @@ class score1 {
 };
 
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

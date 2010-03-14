@@ -6,7 +6,6 @@
 #include "graph.hpp"
 #include "buffer.hpp"
 #include "reference_counter.hpp"
-#include <universalis/compiler/typenameof.hpp>
 //#include <boost/foreach.hpp> // boost foreach is in v 1.34
 #include <map>
 #include <iomanip>

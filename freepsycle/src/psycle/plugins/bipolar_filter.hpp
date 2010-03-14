@@ -4,8 +4,8 @@
 ///\interface psycle::plugins::bipolar_filter - a node with one multiple input port named "in" and one output port named "out".
 #pragma once
 #include "plugin.hpp"
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__BIPOLAR_FILTER
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__BIPOLAR_FILTER
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins {
 
 /// a node with one multiple input port named "in" and one output port named "out".
@@ -14,7 +14,7 @@ namespace psycle { namespace plugins {
 ///
 /// This class is not a plugin. It exists so that code is shared amongst several plugins by
 /// having a class derived from this class and linking against a library containing its implementation.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK bipolar_filter : public engine::node {
+class PSYCLE__DECL bipolar_filter : public engine::node {
 	protected: friend class virtual_factory_access;
 		bipolar_filter(engine::plugin_library_reference &, engine::graph &, std::string const & name, real const & logical_zero);
 	protected:
@@ -27,4 +27,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK bipolar_filter : public engine::node {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

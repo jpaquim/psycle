@@ -11,12 +11,12 @@
 
 #include "../resource.hpp"
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__ASIO
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUTS__ASIO
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
 	/// outputs to a soundcard device via steinberg's asio output implementation.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK asio : public resource {
+	class PSYCLE__DECL asio : public resource {
 		protected: friend class virtual_factory_access;
 			asio(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 		public:
@@ -31,5 +31,4 @@ namespace psycle { namespace plugins { namespace outputs {
 		private:
 	};
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
-
+#include <psycle/detail/decl.hpp>

@@ -4,12 +4,12 @@
 ///\interface psycle::plugins::resource - an abstract plugin for resources.
 #pragma once
 #include "plugin.hpp"
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__RESOURCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__RESOURCE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins {
 
 /// resource plugin
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK resource : public engine::node {
+class PSYCLE__DECL resource : public engine::node {
 	protected: friend class virtual_factory_access;
 		resource(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(std::exception);
 	protected:
@@ -20,5 +20,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK resource : public engine::node {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
-
+#include <psycle/detail/decl.hpp>

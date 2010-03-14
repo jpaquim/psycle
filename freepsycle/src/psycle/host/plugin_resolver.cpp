@@ -4,9 +4,7 @@
 ///\implementation psycle::host::plugin_resolver
 #include <psycle/detail/project.private.hpp>
 #include "plugin_resolver.hpp"
-#include <universalis/os/paths.hpp>
-#include <universalis/compiler/typenameof.hpp>
-#include <universalis/compiler/exceptions/ellipsis.hpp>
+#include <universalis/os/fs.hpp>
 namespace psycle { namespace host {
 
 /***************************************************************/
@@ -65,14 +63,14 @@ try
 		plugin_resolver_(plugin_resolver),
 		///\todo the version number is actually libtool's version info
 		//library_resolver_(*new universalis::os::dynamic_link::resolver("-" + universalis::os::paths::package::name() + ".plugin." + name, universalis::os::paths::package::version::major_number())),
-		library_resolver_(*new universalis::os::dynamic_link::resolver(
+		library_resolver_(*new universalis::os::dyn_link::resolver(
 			#if defined DIVERSALIS__OS__MICROSOFT
 				// currently no prefix, when built with scons at least
 			#else
 				"lib"
 			#endif
 			"freepsycle-plugin-" + name, 0)),
-		node_instanciator_(library_resolver_.resolve_symbol<node_instanciator>(UNIVERSALIS__COMPILER__STRINGIZED(PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new))))
+		node_instanciator_(library_resolver_.resolve_symbol<node_instanciator>(UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new))))
 {
 	if(loggers::information()()) {
 		std::ostringstream s;
@@ -85,7 +83,7 @@ catch(std::exception const & e) {
 	throw;
 }
 catch(...) {
-	loggers::exception()(universalis::compiler::exceptions::ellipsis(), UNIVERSALIS__COMPILER__LOCATION);
+	loggers::exception()(universalis::compiler::exceptions::ellipsis_desc(), UNIVERSALIS__COMPILER__LOCATION);
 	throw;
 }
 

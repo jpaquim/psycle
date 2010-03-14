@@ -5,7 +5,6 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include "../../format.hpp"
-#include <universalis/stdlib/cstdint.hpp>
 #include <string>
 #include <exception>
 #include <cstddef>
@@ -21,11 +20,11 @@
 	#endif
 	//#include <mmreg.h>
 #endif
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__STREAM
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__STREAM
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK format : public stream::format {
+class PSYCLE__DECL format : public stream::format {
 	///\name riff wave fmt chunk
 	///\{
 		public:
@@ -43,7 +42,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK format : public stream::format {
 			#endif
 
 		private:
-			class UNIVERSALIS__COMPILER__ALIGNED(1) chunk_type {
+			class UNIVERSALIS__COMPILER__ALIGN(1) chunk_type {
 				friend class format;
 
 				public:
@@ -161,5 +160,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK format : public stream::format {
 };
 
 }}}}
-#include <universalis/compiler/dynamic_link/end.hpp>
-
+#include <psycle/detail/decl.hpp>

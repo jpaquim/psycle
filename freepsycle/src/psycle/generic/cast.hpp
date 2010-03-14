@@ -9,8 +9,6 @@
 #pragma once
 
 #include <psycle/detail/project.hpp>
-#include <universalis/os/loggers.hpp>
-#include <universalis/compiler/typenameof.hpp>
 #include "template_constructors.hpp"
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>

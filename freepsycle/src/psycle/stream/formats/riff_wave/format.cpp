@@ -4,7 +4,6 @@
 ///\implementation psycle::stream::format::riff_wave
 #include <psycle/detail/project.private.hpp>
 #include "format.hpp"
-#include <universalis/os/exceptions/code_description.hpp>
 #include <cstring>
 #include <sstream>
 #include <climits>

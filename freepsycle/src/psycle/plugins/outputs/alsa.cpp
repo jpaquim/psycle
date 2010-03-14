@@ -4,10 +4,7 @@
 ///\implementation psycle::plugins::outputs::alsa
 #include <psycle/detail/project.private.hpp>
 #include "alsa.hpp"
-#include <diversalis/cpu.hpp>
-#include <universalis/cpu/exception.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/os/exceptions/code_description.hpp>
 #include <poll.h>
 #include <alloca.h> // beware: this is not in posix, but this is available on *bsd and linux.
 #include <cstdio>
@@ -463,7 +460,7 @@ void alsa::thread_function() {
 	universalis::os::thread_name thread_name(universalis::compiler::typenameof(*this) + "#" + qualified_name());
 
 	// install cpu/os exception handler/translator
-	universalis::cpu::exception::install_handler_in_thread();
+	universalis::cpu::exceptions::install_handler_in_thread();
 	
 	try {
 		try {
@@ -482,7 +479,7 @@ void alsa::thread_function() {
 	} catch(...) {
 		if(loggers::exception()) {
 			std::ostringstream s;
-			s << "exception: " << universalis::compiler::exceptions::ellipsis();
+			s << "exception: " << universalis::compiler::exceptions::ellipsis_desc();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		throw;
@@ -512,7 +509,7 @@ void alsa::poll_loop() throw(engine::exception) {
 		// the fds array will be unmodified and the global variable errno will be set to indicate the error.
 		if(0 > (error = ::poll(fds, nfds, timeout_ms)))
 			if(errno == EAGAIN || errno == EINTR) loop = true;
-			else throw engine::exceptions::runtime_error(universalis::os::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
+			else throw  engine::exceptions::runtime_error(universalis::os::exceptions::desc(), UNIVERSALIS__COMPILER__LOCATION);
 		if(!error) {
 			if(loggers::warning()) loggers::warning()("timed out", UNIVERSALIS__COMPILER__LOCATION);
 			loop = true;

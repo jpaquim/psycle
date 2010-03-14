@@ -24,8 +24,8 @@
 #include <libgnomecanvasmm/line.h>
 #include <libgnomecanvasmm/text.h>
 #include <vector>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__FRONT_ENDS__GUI
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL PSYCLE__FRONT_ENDS__GUI
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace front_ends { namespace gui {
 
 typedef
@@ -34,7 +34,7 @@ typedef
 		CanvasAA
 			canvas_base;
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base {
+class PSYCLE__DECL canvas : public canvas_base {
 	public:
 		typedef canvas_base base;
 		canvas(class graph &);
@@ -80,7 +80,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK canvas : public canvas_base {
 		void set_scroll_region_from_bounds();
 };
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
+class PSYCLE__DECL graph
 :
 	public bases::graph,
 	public Gtk::VBox
@@ -127,7 +127,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph
 		Gtk::VBox box_;
 };
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
+class PSYCLE__DECL port
 :
 	public bases::port,
 	public Gnome::Canvas::Group
@@ -154,7 +154,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK port
 };
 
 namespace ports {
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public bases::ports::output {
+	class PSYCLE__DECL output : public bases::ports::output {
 		protected: friend class virtual_factory_access;
 			output(class node &, underlying_type &, real const & x = 0, real const & y = 0);
 		
@@ -163,23 +163,23 @@ namespace ports {
 		private:
 			std::vector<Gnome::Canvas::Line*> lines_;
 	};
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public bases::ports::input {
+	class PSYCLE__DECL input : public bases::ports::input {
 		protected: friend class virtual_factory_access;
 			input(class node &, underlying_type &, real const & x, real const & y, color const &);
 	};
 	namespace inputs {
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public bases::ports::inputs::single {
+		class PSYCLE__DECL single : public bases::ports::inputs::single {
 			protected: friend class virtual_factory_access;
 				single(class node &, underlying_type &, real const & x = 0, real const & y = 0);
 		};
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public bases::ports::inputs::multiple {
+		class PSYCLE__DECL multiple : public bases::ports::inputs::multiple {
 			protected: friend class virtual_factory_access;
 				multiple(class node &, underlying_type &, real const & x = 0, real const & y = 0);
 		};
 	}
 }
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK node
+class PSYCLE__DECL node
 :
 	public bases::node,
 	public Gnome::Canvas::Group
@@ -209,4 +209,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node
 };
 
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

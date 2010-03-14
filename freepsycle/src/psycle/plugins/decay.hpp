@@ -4,12 +4,12 @@
 ///\interface psycle::plugins::decay - a decaying pulse
 #pragma once
 #include "plugin.hpp"
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__DECAY
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__DECAY
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins {
 
 /// a decaying pulse
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK decay : public engine::node {
+class PSYCLE__DECL decay : public engine::node {
 
 	public:
 		void decay_per_second(real const & decay_per_second) {
@@ -44,4 +44,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK decay : public engine::node {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

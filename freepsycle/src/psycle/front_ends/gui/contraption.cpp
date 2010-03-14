@@ -4,7 +4,6 @@
 ///\\implementation psycle::front_ends::gui::contraption
 #include <psycle/detail/project.private.hpp>
 #include "contraption.hpp"
-#include <universalis/os/loggers.hpp>
 #include <gdk/gdkkeysyms.h>
 namespace psycle { namespace front_ends { namespace gui {
 

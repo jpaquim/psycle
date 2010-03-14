@@ -19,8 +19,8 @@
 	#error no default output
 #endif
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUT
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUT
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins {
 
 ///\internal
@@ -71,7 +71,7 @@ typedef outputs::
 	output_base;
 	
 /// default output.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
+class PSYCLE__DECL output : public output_base {
 	public:
 		typedef output_base base;
 	protected: friend class virtual_factory_access;
@@ -81,4 +81,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

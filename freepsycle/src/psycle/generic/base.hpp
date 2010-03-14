@@ -9,7 +9,6 @@
 #include "cast.hpp"
 #include "virtual_factory.hpp"
 #include <psycle/engine/exception.hpp>
-#include <universalis/os/loggers.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
 #include <boost/call_traits.hpp>

@@ -6,8 +6,8 @@
 #include <psycle/engine.hpp>
 #include <boost/preprocessor/seq.hpp>
 #include <cmath>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__PLUGIN
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__PLUGIN
+#include <psycle/detail/decl.hpp>
 
 ///\internal
 /// extensible modular audio frawework.
@@ -25,7 +25,7 @@ namespace ports = engine::ports;
 
 #define PSYCLE__PLUGINS__NODE_INSTANTIATOR(typename) \
 	extern "C" { \
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT \
+		UNIVERSALIS__COMPILER__DYN_LINK__EXPORT \
 		psycle::engine::node &  \
 		PSYCLE__PLUGINS__CALLING_CONVENTION \
 		PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new) ( \
@@ -37,7 +37,7 @@ namespace ports = engine::ports;
 			return psycle::engine::node::virtual_factory_access::create_on_heap<typename>(plugin_library_reference, graph, name); \
 		} \
 		\
-		UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT \
+		UNIVERSALIS__COMPILER__DYN_LINK__EXPORT \
 		void \
 		PSYCLE__PLUGINS__CALLING_CONVENTION \
 		PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(delete)(psycle::engine::node & node) { \
@@ -175,4 +175,4 @@ namespace ports = engine::ports;
 	}
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

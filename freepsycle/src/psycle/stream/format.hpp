@@ -4,14 +4,13 @@
 ///\interface psycle::stream::format
 #pragma once
 #include <psycle/detail/project.hpp>
-#include <universalis/compiler/numeric.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__STREAM
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__STREAM
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace stream {
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK format {
+class PSYCLE__DECL format {
 	public:
-		typedef universalis::compiler::numeric<>::floating_point real;
+		typedef double real;
 
 	public:
 		virtual ~format() throw() {}
@@ -43,5 +42,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK format {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
-
+#include <psycle/detail/decl.hpp>

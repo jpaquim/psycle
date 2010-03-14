@@ -4,9 +4,6 @@
 ///\implementation psycle::host::schedulers::multi_threaded
 #include <psycle/detail/project.private.hpp>
 #include "multi_threaded.hpp"
-#include <universalis/cpu/exception.hpp>
-#include <universalis/compiler/typenameof.hpp>
-#include <universalis/compiler/exceptions/ellipsis.hpp>
 #include <universalis/os/clocks.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <sstream>
@@ -348,7 +345,7 @@ void scheduler::thread_function(std::size_t thread_number) {
 		thread_name.set(s.str());
 	}
 	// install cpu/os exception handler/translator
-	universalis::cpu::exception::install_handler_in_thread();
+	universalis::cpu::exceptions::install_handler_in_thread();
 
 	try {
 		try {
@@ -367,7 +364,7 @@ void scheduler::thread_function(std::size_t thread_number) {
 	} catch(...) {
 		if(loggers::exception()()) {
 			std::ostringstream s;
-			s << "exception: " << universalis::compiler::exceptions::ellipsis();
+			s << "exception: " << universalis::compiler::exceptions::ellipsis_desc();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		throw;

@@ -4,7 +4,6 @@
 ///\implementation psycle::front_ends::gui::root
 #include <psycle/detail/project.private.hpp>
 #include "root.hpp"
-#include <psycle/paths.hpp>
 #include <gdkmm/screen.h>
 namespace psycle { namespace front_ends { namespace gui {
 
@@ -18,9 +17,7 @@ root::root(underlying::graph & g)
 	graph_frame_(g.name())
 {
 	set_size_request(1000, 700);
-	#if !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // parsing problems
-		set_title(paths::package::name() + " " + paths::package::version::string());
-	#endif
+	set_title("freepsycle");
 	set_border_width(4);
 
 	button().signal_clicked().connect(sigc::mem_fun(*this, &root::on_button_clicked));

@@ -4,12 +4,12 @@
 ///\interface psycle::plugins::sine - oscillator with a sinusoidal wave form
 #pragma once
 #include "plugin.hpp"
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__SINE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__SINE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins {
 
 /// oscillator with a sinusoidal wave form
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
+class PSYCLE__DECL sine : public engine::node {
 
 	public:
 		void frequency(real const & frequency) { step_ = std::abs(frequency) * frequency_to_step_; if(frequency < 0) phase_ = engine::math::pi - phase_; }
@@ -44,4 +44,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sine : public engine::node {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

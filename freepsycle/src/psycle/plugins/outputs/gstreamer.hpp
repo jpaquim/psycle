@@ -4,19 +4,18 @@
 ///\interface psycle::plugins::outputs::gstreamer
 #pragma once
 #include "../resource.hpp"
-#include <universalis/compiler/numeric.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
 #include <gst/gstelement.h>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__GSTREAMER
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUTS__GSTREAMER
+#include <psycle/detail/decl.hpp>
 
 namespace psycle { namespace plugins { namespace outputs {
 
 using namespace universalis::stdlib;
 
 /// outputs to a soundcard device via gstreamer output implementation.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
+class PSYCLE__DECL gstreamer : public resource {
 	protected: friend class virtual_factory_access;
 		gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 	public:
@@ -39,7 +38,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 		void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
 		void        handoff(::GstBuffer &, ::GstPad &);
 
-		typedef ::scoped_lock<mutex> scoped_lock;
+		typedef std::scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
 		condition<scoped_lock> mutable condition_;
 
@@ -56,9 +55,9 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK gstreamer : public resource {
 		/// pointer to end of intermediate buffer
 		char * intermediate_buffer_end_;
 		
-		typedef universalis::compiler::numeric</*bits_per_channel_sample*/16>::signed_int output_sample_type;
+		typedef int16_t output_sample_type;
 		std::vector<output_sample_type> last_samples_;
 };
 
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>
