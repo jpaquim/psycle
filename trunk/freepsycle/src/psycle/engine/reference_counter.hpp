@@ -5,8 +5,8 @@
 #pragma once
 #include "named.hpp"
 #include <cassert>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__ENGINE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
 
 	/// reference counter for shared objects.
@@ -69,4 +69,4 @@ namespace psycle { namespace engine {
 			}
 	};
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

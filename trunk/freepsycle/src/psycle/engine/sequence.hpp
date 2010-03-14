@@ -7,12 +7,12 @@
 #include "buffer.hpp"
 #include "exception.hpp"
 #include <map>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__ENGINE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
 
 /// a sequence of events
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public named {
+class PSYCLE__DECL sequence : public named {
 	public:
 		/// constructs a sequence.
 		sequence(std::string const & name) : named(name) {}
@@ -33,7 +33,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public named {
 };
 
 /// an iterator over a sequence
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence_iterator {
+class PSYCLE__DECL sequence_iterator {
 	public:
 		/// constructs a sequence iterator.
 		sequence_iterator(sequence const &);
@@ -89,4 +89,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence_iterator {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

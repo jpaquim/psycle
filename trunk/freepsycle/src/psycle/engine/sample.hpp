@@ -5,8 +5,8 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <psycle/helpers/math.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__ENGINE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
 
 /// double (64-bit ieee-754 format) by default.
@@ -19,4 +19,4 @@ namespace math {
 using namespace helpers::math;
 
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

@@ -5,8 +5,8 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <string>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__ENGINE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__ENGINE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
 
 /// anything which has a name.
@@ -31,4 +31,4 @@ class named {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>
