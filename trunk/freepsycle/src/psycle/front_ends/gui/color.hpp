@@ -4,7 +4,6 @@
 ///\\interface psycle::front_ends:gui:color
 #pragma once
 #include <psycle/detail/project.hpp>
-#include <universalis/stdlib/cstdint.hpp>
 #include <cassert>
 namespace psycle { namespace front_ends { namespace gui {
 	class color {
@@ -25,10 +24,10 @@ namespace psycle { namespace front_ends { namespace gui {
 			color inline   b(channel const & b) const throw() { color copy(*this); copy.b(b); return copy; }
 			color inline   a(channel const & a) const throw() { color copy(*this); copy.a(a); return copy; }
 
-			color inline & r(channel const & r)       throw() { universalis::compiler::numeric<32>::unsigned_int shift(r); shift <<= 24; rgba_ &= 0x00ffffff; rgba_ |= shift; assert(this->r() == r); return *this; }
-			color inline & g(channel const & g)       throw() { universalis::compiler::numeric<32>::unsigned_int shift(g); shift <<= 16; rgba_ &= 0xff00ffff; rgba_ |= shift; assert(this->g() == g); return *this; }
-			color inline & b(channel const & b)       throw() { universalis::compiler::numeric<16>::unsigned_int shift(b); shift <<=  8; rgba_ &= 0xffff00ff; rgba_ |= shift; assert(this->b() == b); return *this; }
-			color inline & a(channel const & a)       throw() {                                                                          rgba_ &= 0xffffff00; rgba_ |= a    ; assert(this->a() == a); return *this; }
+			color inline & r(channel const & r)       throw() { uint32_t shift(r); shift <<= 24; rgba_ &= 0x00ffffff; rgba_ |= shift; assert(this->r() == r); return *this; }
+			color inline & g(channel const & g)       throw() { uint32_t shift(g); shift <<= 16; rgba_ &= 0xff00ffff; rgba_ |= shift; assert(this->g() == g); return *this; }
+			color inline & b(channel const & b)       throw() { uint16_t shift(b); shift <<=  8; rgba_ &= 0xffff00ff; rgba_ |= shift; assert(this->b() == b); return *this; }
+			color inline & a(channel const & a)       throw() {                                  rgba_ &= 0xffffff00; rgba_ |= a    ; assert(this->a() == a); return *this; }
 
 		private:
 			rgba rgba_;

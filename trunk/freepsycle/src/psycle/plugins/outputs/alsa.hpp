@@ -5,16 +5,15 @@
 #pragma once
 #include "../resource.hpp"
 #include <alsa/asoundlib.h>
-#include <universalis/stdlib/cstdint.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__ALSA
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUTS__ALSA
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
 /// outputs to a soundcard device via alsa output implementation.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource {
+class PSYCLE__DECL alsa : public resource {
 	protected: friend class virtual_factory_access;
 		alsa(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 		virtual ~alsa() throw();
@@ -62,4 +61,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK alsa : public resource {
 };
 
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

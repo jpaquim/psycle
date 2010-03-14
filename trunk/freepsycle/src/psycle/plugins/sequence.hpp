@@ -5,12 +5,12 @@
 #pragma once
 #include "plugin.hpp"
 #include <map>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__SEQUENCE
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__SEQUENCE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins {
 
 /// an event scheduler
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public engine::node {
+class PSYCLE__DECL sequence : public engine::node {
 	protected: friend class virtual_factory_access;
 		sequence(engine::plugin_library_reference &, engine::graph &, std::string const & name);
 	protected:
@@ -72,4 +72,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK sequence : public engine::node {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

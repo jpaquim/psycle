@@ -6,8 +6,6 @@
 #include "gstreamer.hpp"
 #include <psycle/stream/formats/riff_wave/format.hpp>
 #include <gst/gst.h>
-#include <universalis/compiler/numeric.hpp>
-#include <universalis/exception.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <limits>
 #include <algorithm>
@@ -58,13 +56,13 @@ namespace {
 		try {
 			if(loggers::information()) {
 				std::ostringstream s; s << "instantiating " << type << " " << name;
-				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			::GstElementFactory * factory;
 			if(!(factory = ::gst_element_factory_find(type.c_str()))) {
 				std::ostringstream s;
 				s << "could not find element type: " << type;
-				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			if(loggers::information()) {
 				std::ostringstream s;
@@ -73,13 +71,13 @@ namespace {
 					<< " is a member of the group " << ::gst_element_factory_get_klass(factory)
 					<< ". Description: "
 					<< ::gst_element_factory_get_description(factory);
-				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			::GstElement * element;
 			if(!(element = ::gst_element_factory_create(factory, name.c_str()))) {
 				std::ostringstream s;
 				s << "found element type: " << ::gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(factory)) << ", but could not create element instance: " << name;
-				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				throw runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			return *element;
 		}
@@ -189,8 +187,8 @@ void gstreamer::do_open() throw(engine::exception) {
 	resource::do_open();
 
 	{ // initialize gstreamer
-		::call_once(global_client_count_init_once_flag, global_client_count_init);
-		::scoped_lock<mutex> lock(global_client_count_mutex);
+		std::call_once(global_client_count_init_once_flag, global_client_count_init);
+		std::scoped_lock<mutex> lock(global_client_count_mutex);
 		if(!global_client_count++) {
 			int * argument_count(0);
 			char *** arguments(0);
@@ -458,8 +456,8 @@ void gstreamer::do_close() throw(engine::exception) {
 	sink_ = caps_filter_ = source_ = 0; caps_ = 0;
 
 	{ // deinitialize gstreamer
-		::call_once(global_client_count_init_once_flag, global_client_count_init);
-		::scoped_lock<mutex> lock(global_client_count_mutex);
+		std::call_once(global_client_count_init_once_flag, global_client_count_init);
+		std::scoped_lock<mutex> lock(global_client_count_mutex);
 		if(!--global_client_count) {
 			#if 0  // gst_deinit must not be called because gst_init won't work afterwards
 				::gst_deinit();

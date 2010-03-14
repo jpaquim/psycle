@@ -4,19 +4,19 @@
 ///\interface psycle::host::plugin_resolver
 #pragma once
 #include <psycle/engine/engine.hpp>
-#include <universalis/os/dynamic_link/resolver.hpp>
+#include <universalis/os/dyn_link.hpp>
 #include <cassert>
 #include <string>
 #include <iostream>
 #include <map>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__HOST
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace host {
 
 /// manages plugins.
 /// resolves libraries, handles their loading and unloading,
 /// instanciates nodes simply from their plugin names.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK plugin_resolver {
+class PSYCLE__DECL plugin_resolver {
 	private:
 		class instanciator : protected engine::plugin_library_reference {
 			friend class plugin_resolver;
@@ -44,7 +44,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK plugin_resolver {
 			private:
 				plugin_resolver & plugin_resolver_;
 				/// note: if aggregated directly without reference, on object destruction, we get "Inconsistency detected by ld.so: dl-close.c: 627: _dl_close: Assertion `map->l_init_called' failed!"
-				universalis::os::dynamic_link::resolver & library_resolver_;
+				universalis::os::dyn_link::resolver & library_resolver_;
 				typedef engine::node & (* const node_instanciator) (engine::reference_counter &, engine::graph &, std::string const & name);
 				node_instanciator const node_instanciator_;
 		};
@@ -64,4 +64,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK plugin_resolver {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

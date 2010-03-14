@@ -8,8 +8,8 @@
 #include "schedulers/single_threaded.hpp"
 #include "schedulers/multi_threaded.hpp"
 #define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__HOST
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace host {
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

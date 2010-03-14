@@ -5,7 +5,6 @@
 
 #pragma once
 #include <psycle/detail/project.hpp>
-#include <universalis/exception.hpp>
 #include <string>
 #define PSYCLE__DECL  PSYCLE__ENGINE
 #include <psycle/detail/decl.hpp>

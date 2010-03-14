@@ -9,7 +9,6 @@
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <psycle/generic/typenames.hpp>
-#include <universalis/os/loggers.hpp>
 #include "sample.hpp"
 namespace psycle {
 	//namespace loggers = universalis::os::loggers;

@@ -6,13 +6,8 @@
 #include "main.hpp"
 #include "lock.hpp"
 #include "root.hpp"
-#include <psycle/paths.hpp>
 #include <psycle/engine/engine.hpp>
-#include <universalis/compiler/typenameof.hpp>
-#include <universalis/compiler/exceptions/ellipsis.hpp>
-#include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/cpu/exception.hpp>
 #include <exception>
 #include <glibmm/exception.h>
 #include <gtkmm/main.h>
@@ -32,14 +27,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 		try {
 			universalis::os::loggers::multiplex_logger::singleton().add(universalis::os::loggers::stream_logger::default_logger());
 			universalis::os::thread_name thread_name("main");
-			universalis::cpu::exception::install_handler_in_thread();
-			if(universalis::os::loggers::information()()) {
-				std::ostringstream s;
-				#if !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // parsing problems
-					s << paths::package::name() << " " << paths::package::version::string();
-				#endif
-				universalis::os::loggers::information()(s.str());
-			}
+			universalis::cpu::exceptions::install_handler_in_thread();
 			// gtk_clutter_init(&argument_count, &arguments); replaces gtk_init(&argument_count, &arguments);
 			lock::init(); // => threads support init
 			Gnome::Canvas::init();
@@ -71,7 +59,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 		} catch(...) {
 			if(loggers::exception()()) {
 				std::ostringstream s;
-				s << "exception: " << universalis::compiler::exceptions::ellipsis();
+				s << "exception: " << universalis::compiler::exceptions::ellipsis_desc();
 				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			}
 			throw;

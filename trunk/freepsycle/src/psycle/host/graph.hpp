@@ -6,20 +6,19 @@
 #include "forward_declarations.hpp"
 #include <psycle/engine.hpp>
 #include "host.hpp"
-#include <universalis/compiler/numeric.hpp>
 #include <boost/signal.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__HOST
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL PSYCLE__HOST
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace host {
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public bases::graph {
+class PSYCLE__DECL graph : public bases::graph {
 	protected: friend class virtual_factory_access;
 		graph(underlying_type &);
 };
 
 class coordinates {
 	public:
-		typedef universalis::compiler::numeric<32>::floating_point real;
+		typedef float real;
 
 		coordinates(real const & x, real const & y) : x_(x), y_(y) { /* signal_move()(*this); */ }
 		
@@ -45,36 +44,36 @@ class coordinates {
 		boost::signal<void (coordinates &)>   signal_move_;
 };
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public bases::port, public coordinates {
+class PSYCLE__DECL port : public bases::port, public coordinates {
 	protected: friend class virtual_factory_access;
 		port(class node &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 };
 
 namespace ports {
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public bases::ports::output {
+	class PSYCLE__DECL output : public bases::ports::output {
 		protected: friend class virtual_factory_access;
 			output(class node &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 	};
 
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public bases::ports::input {
+	class PSYCLE__DECL input : public bases::ports::input {
 		protected: friend class virtual_factory_access;
 			input(class node &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 	};
 	
 	namespace inputs {
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public bases::ports::inputs::single {
+		class PSYCLE__DECL single : public bases::ports::inputs::single {
 			protected: friend class virtual_factory_access;
 				single(class node &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 		};
 
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public bases::ports::inputs::multiple {
+		class PSYCLE__DECL multiple : public bases::ports::inputs::multiple {
 			protected: friend class virtual_factory_access;
 				multiple(class node &, underlying_type &, real const /*const*/ x = 0, real /*const*/ y = 0);
 		};
 	}
 }
 
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public bases::node, public coordinates {
+class PSYCLE__DECL node : public bases::node, public coordinates {
 	protected: friend class virtual_factory_access;
 		node(class graph &, underlying_type &, real /*const*/ x = 0, real /*const*/ y = 0);
 		void after_construction() /*override*/;
@@ -91,4 +90,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public bases::node, public coor
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

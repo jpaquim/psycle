@@ -9,10 +9,9 @@
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
 #include <universalis/stdlib/date_time.hpp>
-#include <universalis/stdlib/cstdint.hpp>
 #include <list>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__HOST
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__HOST
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace host { namespace schedulers {
 /// a scheduler using several threads
 namespace multi_threaded {
@@ -58,7 +57,7 @@ class buffer : public underlying::buffer {
 /**********************************************************************************************************************/
 // graph
 typedef generic::wrappers::graph<typenames> graph_base;
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
+class PSYCLE__DECL graph : public graph_base {
 	protected: friend class virtual_factory_access;
 		graph(underlying_type & underlying) : graph_base(underlying) {}
 
@@ -91,7 +90,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK graph : public graph_base {
 /**********************************************************************************************************************/
 // port
 typedef generic::wrappers::port<typenames> port_base;
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK port : public port_base {
+class PSYCLE__DECL port : public port_base {
 	protected: friend class virtual_factory_access;
 		port(class node & node, underlying_type & underlying) : port_base(node, underlying) {}
 
@@ -110,7 +109,7 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// output
 	typedef generic::wrappers::ports::output<typenames> output_base;
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK output : public output_base {
+	class PSYCLE__DECL output : public output_base {
 		protected: friend class virtual_factory_access;
 			output(class node & node, underlying_type & underlying) : output_base(node, underlying) {}
 	};
@@ -118,7 +117,7 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// input
 	typedef generic::wrappers::ports::input<typenames> input_base;
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK input : public input_base {
+	class PSYCLE__DECL input : public input_base {
 		protected: friend class virtual_factory_access;
 			input(class node & node, underlying_type & underlying) : input_base(node, underlying) {}
 	};
@@ -128,7 +127,7 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// single
 		typedef generic::wrappers::ports::inputs::single<typenames> single_base;
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK single : public single_base {
+		class PSYCLE__DECL single : public single_base {
 			protected: friend class virtual_factory_access;
 				single(class node & node, underlying_type & underlying) : single_base(node, underlying) {}
 		};
@@ -136,7 +135,7 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// multiple
 		typedef generic::wrappers::ports::inputs::multiple<typenames> multiple_base;
-		class UNIVERSALIS__COMPILER__DYNAMIC_LINK multiple : public multiple_base {
+		class PSYCLE__DECL multiple : public multiple_base {
 			protected: friend class virtual_factory_access;
 				multiple(class node & node, underlying_type & underlying) : multiple_base(node, underlying) {}
 		};
@@ -146,7 +145,7 @@ namespace ports {
 /**********************************************************************************************************************/
 // node
 typedef generic::wrappers::node<typenames> node_base;
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
+class PSYCLE__DECL node : public node_base {
 	protected: friend class virtual_factory_access;
 		node(class graph &, underlying_type &);
 		
@@ -203,7 +202,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK node : public node_base {
 
 /**********************************************************************************************************************/
 /// a scheduler using several threads
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler : public host::scheduler<graph> {
+class PSYCLE__DECL scheduler : public host::scheduler<graph> {
 	public:
 		scheduler(graph::underlying_type &, std::size_t threads = 1) throw(std::exception);
 		virtual ~scheduler() throw();
@@ -310,4 +309,4 @@ class scheduler::buffer_pool {
 };
 
 }}}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

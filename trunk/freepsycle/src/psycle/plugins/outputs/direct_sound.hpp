@@ -4,8 +4,6 @@
 ///\interface psycle::plugins::devices::outputs::direct_sound
 #pragma once
 #include "../resource.hpp"
-#include <universalis/os/exception.hpp>
-#include <universalis/compiler/numeric.hpp>
 
 #if !defined DIVERSALIS__OS__MICROSOFT
 	#error "this plugin is specific to microsoft's operating system"
@@ -36,12 +34,12 @@
 	#pragma comment(lib, "dsound")
 #endif
 
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__DIRECT_SOUND
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUTS__DIRECT_SOUND
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
 	/// outputs to a soundcard device via microsoft's direct sound output implementation.
-	class UNIVERSALIS__COMPILER__DYNAMIC_LINK direct_sound : public resource {
+	class PSYCLE__DECL direct_sound : public resource {
 		protected: friend class virtual_factory_access;
 			direct_sound(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(universalis::os::exception);
 		public:
@@ -73,4 +71,4 @@ namespace psycle { namespace plugins { namespace outputs {
 			unsigned int samples_per_buffer_;
 	};
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

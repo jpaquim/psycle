@@ -5,8 +5,8 @@
 #pragma once
 #include "forward_declarations.hpp"
 #include <psycle/engine.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK PSYCLE__HOST
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL PSYCLE__HOST
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace host {
 
 namespace underlying = engine;
@@ -14,7 +14,7 @@ typedef underlying::exception exception;
 
 /// simply, a "player".
 template<typename Graph>
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler {
+class PSYCLE__DECL scheduler {
 	protected:
 		scheduler(typename Graph::underlying_type & graph) throw(std::exception) : graph_(Graph::create_on_heap(graph)) {}
 	public:
@@ -32,4 +32,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK scheduler {
 };
 
 }}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>

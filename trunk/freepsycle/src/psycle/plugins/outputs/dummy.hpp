@@ -7,14 +7,14 @@
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
-#define UNIVERSALIS__COMPILER__DYNAMIC_LINK  PSYCLE__PLUGINS__OUTPUTS__DUMMY
-#include <universalis/compiler/dynamic_link/begin.hpp>
+#define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUTS__DUMMY
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
 using namespace universalis::stdlib;
 
 /// dummy, null silent output.
-class UNIVERSALIS__COMPILER__DYNAMIC_LINK dummy : public resource {
+class PSYCLE__DECL dummy : public resource {
 	protected: friend class virtual_factory_access;
 		dummy(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
 		virtual ~dummy() throw();
@@ -38,7 +38,7 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK dummy : public resource {
 		void thread_function();
 		void thread_loop() throw(engine::exception);
 
-		typedef ::scoped_lock<mutex> scoped_lock;
+		typedef std::scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
 		condition<scoped_lock> mutable condition_;
 
@@ -46,4 +46,4 @@ class UNIVERSALIS__COMPILER__DYNAMIC_LINK dummy : public resource {
 };
 
 }}}
-#include <universalis/compiler/dynamic_link/end.hpp>
+#include <psycle/detail/decl.hpp>
