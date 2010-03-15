@@ -281,7 +281,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/// finds the maximum amplitude in a signal buffer.
 	inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
 	{
-		///\todo: Implementation with Intrinsics. x64 doesn't support this.
+		///\todo: Implementation with Intrinsics.
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 minVol = _mm_set_ps1(0.0f);
 			__m128 maxVol = _mm_set_ps1(0.0f);
