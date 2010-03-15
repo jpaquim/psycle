@@ -232,7 +232,9 @@ void MsWaveOut::ReadConfig() {
 	playbackSettings_.setBlockFrames(2048);
 	playbackSettings_.setBlockCount(8);
 	if(ui_) {
-		int tmp_samplespersec, tmp_blockbytes, tmp_block_count;
+		int tmp_samplespersec(playbackSettings_.samplesPerSec());
+		int tmp_blockbytes(playbackSettings_.blockBytes());
+		int tmp_block_count(playbackSettings_.blockCount());
 		ui_->ReadConfig(
 			device_idx_,
 			dither_,

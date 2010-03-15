@@ -71,7 +71,7 @@ class MsDirectSound : public AudioDriver {
 	};
 
 	public:
-		MsDirectSound(DSoundUiInterface * ui = 0);
+		MsDirectSound(DSoundUiInterface* = 0);
 		~MsDirectSound() throw();
 
 		/*override*/ AudioDriverInfo info() const;
@@ -95,8 +95,8 @@ class MsDirectSound : public AudioDriver {
 		void AddConfigGui(DSoundUiInterface & ui) { ui_ = &ui; }
 
 	protected:
-		void ReadConfig();
-		void WriteConfig();
+		/*override*/ void ReadConfig();
+		/*override*/ void WriteConfig();
 
 	private:
 		void DoBlocksRecording(PortCapt & port);
