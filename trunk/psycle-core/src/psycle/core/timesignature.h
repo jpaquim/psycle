@@ -15,21 +15,20 @@ class PSYCLE__CORE__DECL TimeSignature {
 		TimeSignature(int numerator, int denominator);
 		TimeSignature(float ownerDefinedBeats);
 
-		~TimeSignature();
+		int numerator() const { return ownerDefined_ ? 4 : numerator_; }
+		void setNumerator(int value) { numerator_ = value; }
 
-		void setNumerator(int value);
-		int numerator() const;
+		int denominator() const { return ownerDefined_ ? 4 : denominator_; }
+		void setDenominator(int value) { if(value != 0) denominator_ = value; }
 
-		int denominator() const;
-		void setDenominator(int value);
+		int count() const { return count_; }
+		void incCount() { ++count_; }
+		void setCount(int count) { count_ = count; }
 
-		void setCount(int count);
-		void incCount();
-		int count() const;
+		bool ownerDefined() const { return ownerDefined_; }
 
-		float beats() const;
-		bool ownerDefined() const;
-		void set_beats(float beats); // owner_defined
+		float beats() const { return ownerDefined_ ? ownerDefinedBeats_ : static_cast<float>(numerator_ * count_); }
+		void set_beats(float beats) { ownerDefined_ = true; ownerDefinedBeats_ = beats; }
 
 	private:
 		int numerator_;

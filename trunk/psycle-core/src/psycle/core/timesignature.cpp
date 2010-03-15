@@ -6,77 +6,28 @@
 
 namespace psycle { namespace core {
 
-TimeSignature::TimeSignature() :
+TimeSignature::TimeSignature()
+:
 	numerator_(4),
-	denominator_(4)
-{
-	count_ = 1;
-	ownerDefined_ = false;
-	ownerDefinedBeats_ = 0;
-}
+	denominator_(4),
+	count_(1),
+	ownerDefined_(false),
+	ownerDefinedBeats_(0)
+{}
 
-TimeSignature::TimeSignature(int numerator, int denominator) :
+TimeSignature::TimeSignature(int numerator, int denominator)
+:
 	numerator_(numerator),
-	denominator_(denominator)
-{
-	count_ = 1;
-	ownerDefined_ = false;
-	ownerDefinedBeats_ = 0;
-}
+	denominator_(denominator),
+	count_(1),
+	ownerDefined_(false),
+	ownerDefinedBeats_(0)
+{}
 
-TimeSignature::TimeSignature(float ownerDefinedBeats) {
-	ownerDefined_ = true;
-	ownerDefinedBeats_ = ownerDefinedBeats;
-}
-
-
-TimeSignature::~TimeSignature() {
-}
-
-void TimeSignature::setNumerator(int value) {
-	numerator_ = value;
-}
-
-int TimeSignature::numerator( ) const {
-	if (ownerDefined_) return 4;
-	return numerator_;
-}
-
-void TimeSignature::setDenominator(int value) {
-	if (value != 0) {
-		denominator_ = value;
-	}
-}
-
-int TimeSignature::denominator() const {
-	if (ownerDefined_) return 4;
-	return denominator_;
-}
-
-void TimeSignature::setCount(int count) {
-	count_ = count;
-}
-
-int TimeSignature::count() const {
-	return count_;
-}
-
-void TimeSignature::incCount() {
-	count_++;
-}
-
-float TimeSignature::beats() const {
-	if(ownerDefined_) return ownerDefinedBeats_;
-	else return static_cast< float >(numerator_ * count_);
-}
-
-void TimeSignature::set_beats(float beats) {
-	ownerDefined_ = true;
-	ownerDefinedBeats_ = beats;
-}
-
-bool TimeSignature::ownerDefined() const {
-	return ownerDefined_;
-}
+TimeSignature::TimeSignature(float ownerDefinedBeats)
+:
+	ownerDefined_(true),
+	ownerDefinedBeats_(ownerDefinedBeats)
+{}
 
 }}
