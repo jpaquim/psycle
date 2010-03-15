@@ -27,8 +27,6 @@ public:
 		out << "A third delay can be used for late reflection, giving your brain a hint about the openess of the environement." << std::endl;
 		out << std::endl;
 		out << "Note: The stereo input signal left and right channels are first summed to form a mono input signal." << std::endl;
-		out << std::endl;
-		out << "Beware if you tweak the global (max) delay length with a factor > 2 that the memory buffer gets resized." << std::endl;
 	}
 
 	enum Parameters
@@ -200,7 +198,6 @@ protected:
 
 	inline void Work(Sample & left, Sample & right);
 	void resize();
-	void resize(const Real & delay);
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(Haas)
@@ -284,21 +281,45 @@ void Haas::parameter(const int & parameter)
 
 void Haas::resize()
 {
-	Real max;
-	max = std::max(direct_delay_stereo_delta_abs, (*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs);
-	max = std::max(max, (*this)(late_reflection_delay));
-	resize(max);
-}
+	Real const static max_delta(information().parameter(direct_delay_stereo_delta).scale.output_maximum());
+	Real const max_delay(std::max((*this)(early_reflection_delay) + max_delta, (*this)(late_reflection_delay)));
 
-void Haas::resize(const Real & delay)
-{
 	// resizes the buffer at least to 1, the smallest length possible for the algorithm to work
-	buffer_.resize(1 + static_cast<int>(delay * samples_per_second()), 0);
-	buffer_iterators_[direct_first] = buffer_.end() - 1;
-	buffer_iterators_[direct_last]  = buffer_.end() - 1 - static_cast<int>(direct_delay_stereo_delta_abs * samples_per_second());
-	buffer_iterators_[early_reflection_first] = buffer_.end() - 1 - static_cast<int>((*this)(early_reflection_delay) * samples_per_second());
-	buffer_iterators_[early_reflection_last]  = buffer_.end() - 1 - static_cast<int>(((*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs) * samples_per_second());
-	buffer_iterators_[late_reflection] = buffer_.begin();
+	std::vector<Real>::size_type const new_size(1 + static_cast<int>(max_delay * samples_per_second()));
+
+	std::vector<Real>::difference_type write_pos;
+
+	if(buffer_.size() == 0) {
+		buffer_.resize(new_size, 0);
+		write_pos = buffer_.end() - 1 - buffer_.begin();
+	} else {
+		write_pos = buffer_iterators_[direct_first] - buffer_.begin();
+		if(new_size > buffer_.size())
+			buffer_.insert(buffer_.begin() + write_pos + 1, new_size - buffer_.size(), 0);
+	}
+
+	buffer_iterators_[direct_first] =
+		buffer_.begin() + write_pos;
+
+	buffer_iterators_[direct_last] =
+		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
+		direct_delay_stereo_delta_abs
+		* samples_per_second())) % new_size);
+
+	buffer_iterators_[early_reflection_first] =
+		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
+		(*this)(early_reflection_delay)
+		* samples_per_second())) % new_size);
+
+	buffer_iterators_[early_reflection_last] =
+		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
+		((*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs)
+		* samples_per_second())) % new_size);
+
+	buffer_iterators_[late_reflection] =
+		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
+		(*this)(late_reflection_delay)
+		* samples_per_second())) % new_size);
 }
 
 void Haas::Work(Sample l [], Sample r [], int samples, int)
