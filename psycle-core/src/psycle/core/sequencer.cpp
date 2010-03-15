@@ -47,54 +47,87 @@ void Sequencer::Work(unsigned int nframes) {
 }
 
 void Sequencer::process_global_event(const PatternEvent& event) {
-	Machine::id_type mIndex;
+	Machine::id_type mac_id;
 	switch(event.command()) {
 		case commandtypes::BPM_CHANGE:
 			loggers::warning()("psycle: core: unimplemented global event: bpm change");
-			//setBpm(event.parameter());
-			break;
-		/*case commandtypes::JUMP_TO:
+			#if 0
+			setBpm(event.parameter());
+			#endif
+		break;
+		#if 0
+		case commandtypes::JUMP_TO:
 			loggers::warning()("psycle: core: unimplemented global event: jump to");
+			#if 0
 			//todo: fix this. parameter indicates the pattern, not the beat!
-			//timeInfo_.setPlayBeatPos(event.parameter());
-			break;*/
-		case commandtypes::SET_BYPASS:
-			loggers::warning()("psycle: core: unimplemented global event: set bypass");
-			/*mIndex = event.target();
-			if(mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) //i.e. Effect
-				song().machine(mIndex)->_bypass = event.parameter() != 0;*/
-			break;
-		case commandtypes::SET_MUTE:
-			loggers::warning()("psycle: core: unimplemented global event: set mute");
-			/*mIndex = event.target();
-			if(mIndex < MAX_MACHINES && song().machine(mIndex))
-				song().machine(mIndex)->_mute = event.parameter() != 0;*/
-			break;
+			timeInfo_.setPlayBeatPos(event.parameter());
+			#endif
+		break;
+		#endif
 		case commandtypes::SET_VOLUME:
 			loggers::warning()("psycle: core: unimplemented global event: set volume");
-			/*if(event.machine() == 255) {
+			#if 0
+			if(event.machine() == 255) {
 				Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
 				master._outDry = static_cast<int>(event.parameter());
 			} else {
-				mIndex = event.machine();
-				if(mIndex < MAX_MACHINES && song().machine(mIndex)) {
+				mac_id = event.machine();
+				if(mac_id < MAX_MACHINES && song().machine(mac_id)) {
 					Wire::id_type wire(event.target2());
-					song().machine(mIndex)->SetDestWireVolume(mIndex, wire,
+					song().machine(mac_id)->SetDestWireVolume(mac_id, wire,
 						value_mapper::map_255_1(static_cast<int>(event.parameter()))
 					);
 				}
-			}*/
+			}
+			#endif
 		break;
 		case commandtypes::SET_PANNING:
 			loggers::warning()("psycle: core: unimplemented global event: set panning");
-			/*mIndex = event.target();
-			if(mIndex < MAX_MACHINES && song().machine(mIndex))
-				song().machine(mIndex)->SetPan(static_cast<int>( event.parameter()));
-			break;*/
-		default: ;
+			#if 0
+			mac_id = event.target();
+			if(mac_id < MAX_MACHINES && song().machine(mac_id))
+				song().machine(mac_id)->SetPan(static_cast<int>( event.parameter()));
+			#endif
+		break;
+		case commandtypes::EXTENDED:
+			switch(event.parameter() & 0xf0) {
+				case commandtypes::extended::SET_BYPASS:
+					loggers::warning()("psycle: core: unimplemented global event: set bypass");
+					#if 0
+					mac_id = event.target();
+					if(mac_id < MAX_MACHINES && song().machine(mac_id) && song().machine(mac_id)->acceptsConnections()) //i.e. Effect
+						song().machine(mac_id)->_bypass = event.parameter() != 0;
+					#endif
+				break;
+				case commandtypes::extended::SET_MUTE:
+					loggers::warning()("psycle: core: unimplemented global event: set mute");
+					#if 0
+					mac_id = event.target();
+					if(mac_id < MAX_MACHINES && song().machine(mac_id))
+						song().machine(mac_id)->_mute = event.parameter() != 0;
+					#endif
+				break;
+				default:
+					if(loggers::warning()) {
+						std::ostringstream s;
+						s << "psycle: core: unhandled global event: extended command: "
+								<< std::hex << event.command() << ' '
+								<< std::hex << event.parameter();
+						loggers::warning()(s.str());
+					}
+			}
+		break;
+		default: {
+			if(loggers::warning()) {
+				std::ostringstream s;
+				s << "psycle: core: unhandled global event: "
+						<< std::hex << event.command() << ' '
+						<< std::hex << event.parameter();
+				loggers::warning()(s.str());
+			}
+		}
 	}
 }
-
 
 void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 	// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modifiable)

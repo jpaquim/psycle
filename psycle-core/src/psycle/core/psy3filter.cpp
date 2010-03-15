@@ -469,7 +469,7 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 							(event.note() <= notetypes::release || event.note() == notetypes::empty) &&
 							event.command() == commandtypes::EXTENDED &&
 							event.parameter() < commandtypes::extended::SET_BYPASS
-						) linesPerBeat = event.parameter() & 0x1f;
+						) linesPerBeat = event.parameter();
 					}
 				}
 				beatpos += 1.0f / linesPerBeat;
