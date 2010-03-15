@@ -187,21 +187,45 @@ void bexphase::Command() {
 }
 
 void bexphase::ParameterTweak(int par, int val) {
-	if ( par == pRefresh ) { buflen = val * pCB->GetTickLength(); counter = val; last_dir = 1; }
-	if ( par == pFreq ) { shift = (float)(val/443.396f); shift *= shift; shift = ((shift/(float)Vals[3]) - freq)/256.0f; shiftcount = 256; }
-	if ( par == pDry ) {
-		if ( val < 384 ) {
-			optimal[0] = val / 384.0f;
-			wet = optimal[0] * optimal[1];
-		} else {
-			if ( val < 448 ) wet = optimal[1];
-			else wet = 1;
-		}
-		dry = 1 - wet;
+	swtich(par) {
+		case pRefresh:
+			buflen = val * pCB->GetTickLength();
+			counter = val;
+			last_dir = 1;
+		break;
+		case pFreq:
+			shift = val / 443.396f;
+			shift *= shift;
+			shift = ((shift / float(Vals[pMode])) - freq) / 256.0f;
+			shiftcount = 256;
+		break;
+		case pDry:
+			if(val < 384) {
+				optimal[0] = val / 384.0f;
+				wet = optimal[0] * optimal[1];
+			} else {
+				if(val < 448) wet = optimal[1];
+				else wet = 1;
+			}
+			dry = 1 - wet;
+		break;
+		case pMode:
+			freq *= Vals[pMode] / float(val);
+			if(wet == optimal[1]) {
+				wet = optimal[val];
+				dry = 1 - wet;
+			}
+		break;
+		case pAmount:
+			amntfreq = val / 512.0f;
+			amntlfo = 1 - amntfreq;
+		break;
+		case pDiff:
+			diff = val / 512.0f;
+			undiff = 1 - diff;
+		break;
+		default: ;
 	}
-	if ( par == pMode ) { freq *= Vals[pMode] / (float)val; if ( wet == optimal[1] ) { wet = optimal[val]; dry = 1 - wet; }; }
-	if ( par == pAmount ) { amntfreq = val / 512.0f; amntlfo = 1 - amntfreq; }
-	if ( par == pDiff ) { diff = val / 512.0f; undiff = 1 - diff; }
 	Vals[par] = val;
 }
 
@@ -237,63 +261,63 @@ void bexphase::Work(float *psamplesleft, float *psamplesright , int numsamples, 
 }
 
 bool bexphase::DescribeValue(char* txt,int const param, int const value) {
-	if ( param == pMode ) {
-		switch( value ) {
-			case 1 : *txt++='S'; *txt++='i'; *txt++='n'; *txt++='g'; *txt++='l'; *txt++='e'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0'; break;
-			case 2 : *txt++='D'; *txt++='o'; *txt++='u'; *txt++='b'; *txt++='l'; *txt++='e'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0'; break; break;
-			case 3 : *txt++='T'; *txt++='r'; *txt++='i'; *txt++='p'; *txt++='l'; *txt++='e'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0'; break; break;
-			case 4 : *txt++='Q'; *txt++='u'; *txt++='a'; *txt++='d'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0'; break; break;
-			default:
+	switch(param) {
+		case pMode:
+			switch( value ) {
+				// **********
+				// TODO CRAP!
+				// **********
+				case 1 : *txt++='S'; *txt++='i'; *txt++='n'; *txt++='g'; *txt++='l'; *txt++='e'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0'; break;
+				case 2 : *txt++='D'; *txt++='o'; *txt++='u'; *txt++='b'; *txt++='l'; *txt++='e'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0'; break;
+				case 3 : *txt++='T'; *txt++='r'; *txt++='i'; *txt++='p'; *txt++='l'; *txt++='e'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0'; break;
+				case 4 : *txt++='Q'; *txt++='u'; *txt++='a'; *txt++='d'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0'; break;
+				default:
+					sprintf( txt,"%.00f",(float)value );
+					txt++;
+					if ( value >= 10 ) txt++;
+					*txt++='x'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0';
+			}
+			return true;
+		case pRefresh:
+			if ( value <= 16 ) {
+				*txt++='T'; *txt++='i'; *txt++='c'; *txt++='k'; *txt++=' '; *txt++='x';
 				sprintf( txt,"%.00f",(float)value );
-				txt++;
-				if ( value >= 10 ) txt++;
-				*txt++='x'; *txt++=' '; *txt++='M'; *txt++='o'; *txt++='d'; *txt++='e'; *txt='\0';
-		}
-		return true;
-	}
-	if ( param == pRefresh ) {
-		if ( value <= 16 ) {
-			*txt++='T'; *txt++='i'; *txt++='c'; *txt++='k'; *txt++=' '; *txt++='x';
-			sprintf( txt,"%.00f",(float)value );
-		} else {
-			help_l = buflen / 44.1f;
-			sprintf( txt,"%.02f",help_l );
+			} else {
+				help_l = buflen / 44.1f;
+				sprintf( txt,"%.02f",help_l );
+				txt+=4;
+				if ( help_l > 10 ) txt++;
+				if ( help_l > 100 ) txt++;
+				*txt++=' '; *txt++='m'; *txt++='s'; *txt++='\0';
+			}
+			return true;
+		case pFreq:
+			sprintf( txt,"%.02f",freq * 90 );
 			txt+=4;
-			if ( help_l > 10 ) txt++;
-			if ( help_l > 100 ) txt++;
-			*txt++=' '; *txt++='m'; *txt++='s'; *txt++='\0';
-		}
-		return true;
+			if ( (freq*90) >= 10 ) txt++;
+			if ( (freq*90) >= 100 ) txt++;
+			*txt++=' '; *txt++='ï¿½'; *txt='\0';
+			return true;
+		case pDiff:
+			sprintf( txt,"%.00f",diff*100  );
+			txt++;
+			if ( (diff*100) >= 10 ) txt++;
+			if ( (diff*100) >= 100 ) txt++;
+			*txt++=' '; *txt++='%'; *txt='\0';
+			return true;
+		case pDry:
+			if(value < 384) sprintf(txt, "%.02f", optimal[0]);
+			else {
+				if(value < 448) { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='E'; *txt++='f'; *txt++='f'; *txt++='e'; *txt++='c'; *txt++='t'; *txt='\0'; }
+				else { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='W'; *txt++='e'; *txt++='t'; *txt='\0'; }
+			}
+			return true;
+		case pAmount:
+			sprintf( txt,"%.02f",amntlfo );
+			txt[4] = ' '; txt[5] = '/'; txt[6] = ' ';
+			sprintf( &txt[7],"%.02f",amntfreq );
+			return true;
+		default:
+			return false;
 	}
-	if ( param == pFreq )  {
-		sprintf( txt,"%.02f",freq * 90 ); 
-		txt+=4;
-		if ( (freq*90) >= 10 ) txt++;
-		if ( (freq*90) >= 100 ) txt++;
-		*txt++=' '; *txt++='°'; *txt='\0';
-		return true; 
-	}
-	if ( param == pDiff ) {
-		sprintf( txt,"%.00f",diff*100  ); 
-		txt++;
-		if ( (diff*100) >= 10 ) txt++;
-		if ( (diff*100) >= 100 ) txt++;
-		*txt++=' '; *txt++='%'; *txt='\0';
-		return true; 
-	}
-	if ( param == pDry ) {
-		if ( value < 384 ) sprintf( txt,"%.02f",optimal[0] ); 
-		else {
-			if ( value < 448 ) { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='E'; *txt++='f'; *txt++='f'; *txt++='e'; *txt++='c'; *txt++='t'; *txt='\0';				}
-			else { *txt++='1'; *txt++='0'; *txt++='0'; *txt++='%'; *txt++=' '; *txt++='W'; *txt++='e'; *txt++='t'; *txt='\0'; }
-		}
-		return true; 
-	}
-	if ( param == pAmount ) {
-		sprintf( txt,"%.02f",amntlfo ); 
-		txt[4] = ' '; txt[5] = '/'; txt[6] = ' ';
-		sprintf( &txt[7],"%.02f",amntfreq ); 
-		return true; 
-	}
-	return false;
 }
