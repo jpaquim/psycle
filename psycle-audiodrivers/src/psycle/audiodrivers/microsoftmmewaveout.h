@@ -58,7 +58,7 @@ class MMEUiInterface {
 ///\todo freeing and configure    
 class MsWaveOut : public AudioDriver {
 	public:
-		MsWaveOut(MMEUiInterface*);
+		MsWaveOut(MMEUiInterface* = 0);
 		~MsWaveOut() throw();
 
 		/*override*/ AudioDriverInfo info() const;
@@ -70,12 +70,8 @@ class MsWaveOut : public AudioDriver {
 		/*override*/ void do_stop() throw(std::exception);
 		/*override*/ void do_close() throw(std::exception);
 
-		/*override*/ bool opened() const throw() { return hWaveOut != 0; }
-		/*override*/ bool started() const throw() { return running_; }
-
-	protected:
-		void ReadConfig();
-		void WriteConfig();
+		/*override*/ void ReadConfig();
+		/*override*/ void WriteConfig();
 
 	private:
 		std::int16_t *buf;

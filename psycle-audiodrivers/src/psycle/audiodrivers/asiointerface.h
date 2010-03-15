@@ -158,6 +158,9 @@ class ASIOInterface : public AudioDriver {
 		/*override*/ void do_stop();
 		/*override*/ void do_close();
 
+		/*override*/ void ReadConfig();
+		/*override*/ void WriteConfig();
+
 	private:
 		int GetBufferSize();
 		void GetCapturePorts(std::vector<std::string>&ports);
@@ -178,9 +181,6 @@ class ASIOInterface : public AudioDriver {
 		static AsioStereoBuffer *ASIObuffers;
 		static bool _firstrun;
 		static bool _supportsOutputReady;
-
-		void ReadConfig();
-		void WriteConfig();
 
 		ASIOCallbacks asioCallbacks;
 
