@@ -187,7 +187,7 @@ void bexphase::Command() {
 }
 
 void bexphase::ParameterTweak(int par, int val) {
-	swtich(par) {
+	switch(par) {
 		case pRefresh:
 			buflen = val * pCB->GetTickLength();
 			counter = val;
@@ -296,7 +296,7 @@ bool bexphase::DescribeValue(char* txt,int const param, int const value) {
 			txt+=4;
 			if ( (freq*90) >= 10 ) txt++;
 			if ( (freq*90) >= 100 ) txt++;
-			*txt++=' '; *txt++='�'; *txt='\0';
+			*txt++=' '; *txt++='d'; *txt++='e'; *txt++='g'; *txt='\0';
 			return true;
 		case pDiff:
 			sprintf( txt,"%.00f",diff*100  );
