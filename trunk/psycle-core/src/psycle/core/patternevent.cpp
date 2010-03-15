@@ -9,7 +9,7 @@
 namespace psycle { namespace core {
 		
 PatternEvent::PatternEvent() :
-	note_(255),
+	note_(notetypes::empty),
 	inst_(255),
 	mach_(255),
 	cmd_(0),

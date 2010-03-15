@@ -21,46 +21,12 @@ class PSYCLE__CORE__DECL PatternEvent {
 
 		PatternEvent();
 
-		void setNote(uint8_t value) { note_ = value; }
-		uint8_t note() const { return note_; }
-
-		void setInstrument(uint8_t instrument) { inst_ = instrument; }
-		uint8_t instrument() const { return inst_; }
-
-		void setMachine(uint8_t machine) { mach_ = machine; }
-		uint8_t machine() const { return mach_; }
-
-		void setCommand(uint8_t command) { cmd_ = command; }
-		uint8_t command() const { return cmd_; }
-
-		void setParameter(uint8_t parameter) { param_ = parameter; }
-		uint8_t parameter() const { return param_; }
-
-		void setVolume(uint8_t volume) { volume_ = volume; }
-		uint8_t volume() const { return volume_; }
-
-		bool empty() const { return note_ == 255 && inst_ == 255 && mach_ == 255 && cmd_ == 0 && param_ == 0; }
-
-		std::string toXml(int track) const;
-
-		PcmListType & paraCmdList() { return paraCmdList_; }
-
-		void set_track(int track) {
-			track_ = track;
+		bool empty() const {
+			return
+				note_ == notetypes::empty &&
+				inst_ == 255 && mach_ == 255 &&
+				cmd_ == 0 && param_ == 0;
 		}
-
-		void set_sequence(int seq_track) {
-			seq_track_ = seq_track;
-		}
-
-		int track() const { return track_; }
-		int sequence_track() const { return seq_track_; }
-
-		void set_time_offset(double offset) {
-			offset_ = offset;
-		}
-		double time_offset() const { return offset_; }
-
 
 		bool IsGlobal() const {
 			if (cmd_ == commandtypes::SET_VOLUME)
@@ -69,8 +35,37 @@ class PSYCLE__CORE__DECL PatternEvent {
 				return false;
 		}
 
+		uint8_t note() const { return note_; }
+		void setNote(uint8_t value) { note_ = value; }
 
-	private: ///\todo the compiler/stdlib implementation has a reserved namespace consisting of all names prefixed with an underscore, so we should postfix private data rather than prefix them.
+		uint8_t instrument() const { return inst_; }
+		void setInstrument(uint8_t instrument) { inst_ = instrument; }
+
+		uint8_t machine() const { return mach_; }
+		void setMachine(uint8_t machine) { mach_ = machine; }
+
+		uint8_t command() const { return cmd_; }
+		void setCommand(uint8_t command) { cmd_ = command; }
+
+		uint8_t parameter() const { return param_; }
+		void setParameter(uint8_t parameter) { param_ = parameter; }
+
+		uint8_t volume() const { return volume_; }
+		void setVolume(uint8_t volume) { volume_ = volume; }
+
+		PcmListType & paraCmdList() { return paraCmdList_; }
+
+		int track() const { return track_; }
+		void set_track(int track) { track_ = track; }
+
+		int sequence_track() const { return seq_track_; }
+		void set_sequence(int seq_track) { seq_track_ = seq_track; }
+
+		double time_offset() const { return offset_; }
+		void set_time_offset(double offset) { offset_ = offset; }
+
+		std::string toXml(int track) const;
+	private:
 		uint8_t note_;
 		uint8_t inst_;
 		uint8_t mach_;

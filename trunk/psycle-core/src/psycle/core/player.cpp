@@ -28,7 +28,7 @@
 namespace psycle { namespace core {
 
 using namespace helpers;
-using namespace psycle::audiodrivers;
+using namespace audiodrivers;
 
 namespace loggers = universalis::os::loggers;
 
