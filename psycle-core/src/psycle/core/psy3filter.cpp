@@ -64,14 +64,6 @@ bool Psy3Filter::testFormat(const std::string & fileName) {
 	return !strcmp(header, "PSY3SONG");
 }
 
-
-void Psy3Filter::prepareSequence(CoreSong & song) {
-	seqList.clear();
-	song.sequence().removeAll();
-	// here we add in one single Line the patterns
-	singleLine = &song.sequence().createNewLine();
-}
-
 bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 	song.progress(1,0,"");
 	song.progress(2,0,"Loading... psycle song fileformat version 3...");
@@ -92,7 +84,11 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 
 	//Disabled since now we load a song in a new Song object *and* song.clear() sets setReady to true.
 	//song.clear();
-	prepareSequence(song);
+	seqList.clear();
+	song.sequence().removeAll();
+	// here we add in one single Line the patterns
+	singleLine = &song.sequence().createNewLine();
+	
 	//size_t filesize = file.FileSize();
 	uint32_t version = 0;
 	uint32_t size = 0;
@@ -402,83 +398,84 @@ bool Psy3Filter::LoadSEQDv0(RiffFile* file,CoreSong& /*song*/,int /*minorversion
 	return fileread;
 }
 
-PatternEvent Psy3Filter::convertEntry(unsigned char * data) const {
-	PatternEvent event;
-	event.setNote(*data); data++;
-	event.setInstrument(*data); data++;
-	event.setMachine(*data); data++;
-	event.setCommand(*data); data++;
-	event.setParameter(*data); data++;
-	return event;
-}
-
 bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) {
-	int32_t index = 0;
-	uint32_t temp = 0;
-	uint32_t size = 0;
-	bool fileread=false;
+	bool fileread = false;
 
 	// index
+	int32_t index = 0;
 	file->Read(index);
 	//todo: This loading is quite slow now. Needs an improvement
 	if(index < MAX_PATTERNS) {
 		// num lines
+		uint32_t temp = 0;
 		file->Read(temp);
 		// clear it out if it already exists
-		int numLines = temp;
+		unsigned int numLines = temp;
 		// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
 		file->Read(temp);
 		char patternName[32];
 		file->ReadString(patternName, sizeof patternName);
-		file->Read(size);
-		unsigned char * pSource = new unsigned char[size];
-		fileread = file->ReadArray(pSource, size);
-		unsigned char * pDest;
-		DataCompression::BEERZ77Decomp2(pSource, &pDest);
-		delete[] pSource; pSource = pDest;
+
 		// create a Pattern
-		std::string indexStr;
-		std::ostringstream o;
-		if(!(o << index))
-			indexStr = "error";
-		else
-			indexStr = o.str();
 		Pattern & pat = *new Pattern();
-		pat.setName(patternName+indexStr);
 		pat.setID(index);
-		song.sequence().Add(pat);
-		float beatpos=0;
-		for(int y(0) ; y < numLines ; ++y) { // lines
-			for (unsigned int x = 0; x < song.tracks(); ++x) {
-				unsigned char entry[5] ;
-				std::memcpy( &entry, pSource, 5);
-				PatternEvent event = convertEntry(entry);
-				if(!event.empty()) {
-					if(event.note() == notetypes::tweak) {
-						event.set_track(x);
-						pat.insert(beatpos, event);
-					} else if(event.note() == notetypes::tweak_slide) {
-						event.set_track(x);
-						pat.insert(beatpos, event);
-					} else if(event.note() == notetypes::midi_cc) {
-						event.set_track(x);
-						pat.insert(beatpos, event);
-					///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
-					} else {
-						if(event.command() == commandtypes::NOTE_DELAY)
-							/// Convert old value (part of line) to new value (part of beat)
-							event.setParameter(event.parameter()/linesPerBeat);
-						event.set_track(x);
-						pat.insert(beatpos, event);
-					}
-					if((event.note() <= notetypes::release || event.note() == notetypes::empty) && event.command() == 0xfe && event.parameter() < 0x20)
-						linesPerBeat= event.parameter() & 0x1f;
-				}
-				pSource += EVENT_SIZE;
-			}
-			beatpos += 1 / static_cast<float>(linesPerBeat);
+		{
+			std::ostringstream s;
+			s << index;
+			pat.setName(patternName + s.str());
 		}
-		delete[] pDest; pDest = 0;
+		song.sequence().Add(pat);
+
+		float beatpos = 0;
+
+		{ // read pattern data
+			unsigned char * data_start;
+			{
+				uint32_t size = 0;
+				file->Read(size);
+				unsigned char * compressed = new unsigned char[size];
+				fileread = file->ReadArray(compressed, size);
+				DataCompression::BEERZ77Decomp2(compressed, &data_start);
+				delete[] compressed;
+			}
+			unsigned char * data = data_start;
+			for(unsigned int y = 0; y < numLines ; ++y) { // lines
+				for (unsigned int x = 0; x < song.tracks(); ++x) { // tracks
+					PatternEvent event;
+					event.setNote(*data); ++data;
+					event.setInstrument(*data); ++data;
+					event.setMachine(*data); ++data;
+					event.setCommand(*data); ++data;
+					event.setParameter(*data); ++data;
+					if(!event.empty()) {
+						if(event.note() == notetypes::tweak) {
+							event.set_track(x);
+							pat.insert(beatpos, event);
+						} else if(event.note() == notetypes::tweak_slide) {
+							event.set_track(x);
+							pat.insert(beatpos, event);
+						} else if(event.note() == notetypes::midi_cc) {
+							event.set_track(x);
+							pat.insert(beatpos, event);
+						///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
+						} else {
+							if(event.command() == commandtypes::NOTE_DELAY)
+								/// Convert old value (part of line) to new value (part of beat)
+								event.setParameter(event.parameter() / linesPerBeat);
+							event.set_track(x);
+							pat.insert(beatpos, event);
+						}
+						if(
+							(event.note() <= notetypes::release || event.note() == notetypes::empty) &&
+							event.command() == commandtypes::EXTENDED &&
+							event.parameter() < commandtypes::extended::SET_BYPASS
+						) linesPerBeat = event.parameter() & 0x1f;
+					}
+				}
+				beatpos += 1.0f / linesPerBeat;
+			}
+			delete[] data_start;
+		}
 		pat.timeSignatures().clear();
 		pat.timeSignatures().push_back(TimeSignature(beatpos));
 	}
