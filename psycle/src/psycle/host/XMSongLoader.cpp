@@ -477,7 +477,7 @@ namespace psycle { namespace host {
 								break;
 							case XMCMD_E::E_PATTERN_LOOP:
 								e.setCommand(PatternCmd::EXTENDED);
-								e.setParameter(PatternCmd::PATTERN_LOOP + (param & 0xf));
+								e.setParameter(PatternCmd::extended::PATTERN_LOOP + (param & 0xf));
 								break;
 							case XMCMD_E::E_TREMOLO_WAVE:
 								e.setCommand(XMSampler::CMD::EXTENDED);
@@ -505,7 +505,7 @@ namespace psycle { namespace host {
 								break;
 							case XMCMD_E::E_PATTERN_DELAY:
 								e.setCommand(PatternCmd::EXTENDED);
-								e.setParameter(PatternCmd::PATTERN_DELAY | (param & 0xf));
+								e.setParameter(PatternCmd::extended::PATTERN_DELAY | (param & 0xf));
 								break;
 							case XMCMD_E::E_SET_MIDI_MACRO:
 								e.setCommand(XMSampler::CMD::EXTENDED);
@@ -1202,7 +1202,7 @@ namespace psycle { namespace host {
 							break;
 						case XMCMD_E::E_PATTERN_LOOP:
 							e.setCommand(PatternCmd::EXTENDED);
-							e.setParameter(PatternCmd::PATTERN_LOOP | (param & 0xf));
+							e.setParameter(PatternCmd::extended::PATTERN_LOOP | (param & 0xf));
 							break;
 						case XMCMD_E::E_TREMOLO_WAVE:
 							e.setCommand(XMSampler::CMD::EXTENDED);
@@ -1230,7 +1230,7 @@ namespace psycle { namespace host {
 							break;
 						case XMCMD_E::E_PATTERN_DELAY:
 							e.setCommand(PatternCmd::EXTENDED);
-							e.setParameter(PatternCmd::PATTERN_DELAY | (param & 0xf));
+							e.setParameter(PatternCmd::extended::PATTERN_DELAY | (param & 0xf));
 							break;
 						default:
 							e.setCommand(XMSampler::CMD::NONE);

@@ -118,7 +118,7 @@ void SequencerView::SetEntry(psycle::core::SequenceEntry* entry) {
 	SelectItems();
 	main_frame_->m_wndView.Repaint(draw_modes::pattern);
 	main_frame_->StatusBarIdle();
-	main_frame_->m_wndView.SetFocus();
+//	main_frame_->m_wndView.SetFocus();
 	selected_entry_ = entry;
 } 
 

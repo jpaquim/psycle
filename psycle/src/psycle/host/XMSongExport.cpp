@@ -196,16 +196,16 @@ void XMSongExport::SavePattern(Song& song, psycle::core::Pattern* pattern) {
 							break;
 						case PatternCmd::EXTENDED:
 							switch(ev.parameter()&0xF0) {
-							case PatternCmd::SET_LINESPERBEAT0:
-							case PatternCmd::SET_LINESPERBEAT1:
+							case PatternCmd::extended::SET_LINESPERBEAT0:
+							case PatternCmd::extended::SET_LINESPERBEAT1:
 								type = XMCMD::SETSPEED;
 								param = ev.parameter();
 								break;
-							case PatternCmd::PATTERN_LOOP:
+							case PatternCmd::extended::PATTERN_LOOP:
 								type = XMCMD::EXTENDED;
 								param = XMCMD_E::E_PATTERN_LOOP + (ev.parameter() & 0x0F);
 								break;
-							case PatternCmd::PATTERN_DELAY:
+							case PatternCmd::extended::PATTERN_DELAY:
 								type = XMCMD::EXTENDED;
 								param = XMCMD_E::E_PATTERN_DELAY + (ev.parameter() & 0x0F);
 								break;

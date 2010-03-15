@@ -147,8 +147,8 @@ namespace psycle
 		}
 
 		bool AbstractIff::Eof() const {
-			//_stream.eof ???
-			return !_stream.bad();
+			//good checks whether none of the error flags (eofbit, failbit and badbit) are set
+			return !_stream.good();
 		}
 
 		std::string const inline & AbstractIff::file_name() const throw() {

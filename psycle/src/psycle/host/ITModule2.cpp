@@ -1094,7 +1094,7 @@ Special:  Bit 0: On = song message attached.
 							break;
 						case CMD_S::S_PATTERN_LOOP:
 							pent.setCommand(PatternCmd::EXTENDED);
-							pent.setParameter(PatternCmd::PATTERN_LOOP | (param & 0xf));
+							pent.setParameter(PatternCmd::extended::PATTERN_LOOP | (param & 0xf));
 							break;
 						case CMD_S::S_DELAYED_NOTE_CUT:
 							pent.setCommand(XMSampler::CMD::EXTENDED);
@@ -1106,7 +1106,7 @@ Special:  Bit 0: On = song message attached.
 							break;
 						case CMD_S::S_PATTERN_DELAY:
 							pent.setCommand(PatternCmd::EXTENDED);
-							pent.setParameter(PatternCmd::PATTERN_DELAY | (param & 0xf));
+							pent.setParameter(PatternCmd::extended::PATTERN_DELAY | (param & 0xf));
 							break;
 						case CMD_S::S_SET_MIDI_MACRO:
 							pent.setCommand(XMSampler::CMD::EXTENDED);
