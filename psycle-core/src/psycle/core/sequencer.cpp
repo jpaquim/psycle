@@ -17,13 +17,12 @@ void Sequencer::Work(unsigned int nframes) {
 	///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
 	///\todo this will not work frame correct for BPM changes for now
 	double beats = nframes / ((time_info()->sampleRate() * 60) / time_info()->bpm());
-	std::vector<PatternEvent*> events;
-	song_->sequence().GetEventsInRange(time_info()->playBeatPos(), beats, events);
+	events_.clear();
+	song_->sequence().GetEventsInRange(time_info()->playBeatPos(), beats, events_);
 	unsigned int rest_frames = nframes;
 	double last_pos = 0;
-	for(std::vector<PatternEvent*>::iterator ev_it = events.begin();
-		ev_it!= events.end() ; ++ev_it) {
-		PatternEvent & ev = **ev_it;
+	for(std::vector<PatternEvent*>::const_iterator i(events_.begin()), e(events_.end()); i != e; ++i) {
+		PatternEvent & ev = **i;
 		if(ev.IsGlobal()) {
 			double pos = ev.time_offset();
 			unsigned int num = static_cast<int>((pos - last_pos) * time_info()->samplesPerBeat());
@@ -154,35 +153,34 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 				float increment(origin);
 				int previous(0);
 				float rate = (((entry.command() << 16 ) | entry.parameter()) - origin) / (time_info()->samplesPerTick() / 64.0f);
-					entry.setNote(notetypes::tweak);
-					entry.setCommand(origin >> 8);
-					entry.setParameter(origin & 0xff);
-					machine.AddEvent(
-						beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
-						sequence_track * 1024 + track, entry
-					);
-					previous = origin;
-					delaysamples += delay;
-					while(delaysamples < time_info()->samplesPerTick()) {
-						increment += rate;
-						if(static_cast<int>(increment) != previous) {
-							origin = static_cast<int>(increment);
-							entry.setCommand(origin >> 8);
-							entry.setParameter(origin & 0xff);
-							machine.AddEvent(
-								beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
-								sequence_track * 1024 + track, entry
-							);
-							previous = origin;
-						}
-						delaysamples += delay;
+				entry.setNote(notetypes::tweak);
+				entry.setCommand(origin >> 8);
+				entry.setParameter(origin & 0xff);
+				machine.AddEvent(
+					beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
+					sequence_track * 1024 + track, entry
+				);
+				previous = origin;
+				delaysamples += delay;
+				while(delaysamples < time_info()->samplesPerTick()) {
+					increment += rate;
+					if(static_cast<int>(increment) != previous) {
+						origin = static_cast<int>(increment);
+						entry.setCommand(origin >> 8);
+						entry.setParameter(origin & 0xff);
+						machine.AddEvent(
+							beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
+							sequence_track * 1024 + track, entry
+						);
+						previous = origin;
 					}
+					delaysamples += delay;
+				}
 			} break;
 			case notetypes::tweak:
 				machine.AddEvent(beat_offset, sequence_track * 1024 + track, entry);
 			break;
-			default: 
-			;
+			default: ;
 		}
 	}
 
