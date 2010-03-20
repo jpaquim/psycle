@@ -6,6 +6,7 @@
 #pragma once
 
 #include "machine.h"
+#include <vector>
 
 namespace psycle { namespace core {
 
@@ -29,6 +30,7 @@ class Sequencer {
 		/// stores which machine played last in each track. 
 		/// this allows you to not specify the machine number everytime in the pattern.
 		Machine::id_type prev_machines_[MAX_TRACKS];
+		std::vector<PatternEvent*> events_;
 };
 
 }}
