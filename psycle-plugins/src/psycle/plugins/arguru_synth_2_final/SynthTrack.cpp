@@ -54,6 +54,7 @@ CSynthTrack::CSynthTrack()
 	VcfEnvValue=0.0f;
 	Stage5AmpVal=0.0f;
 	vibrato=false;
+	resampler.SetQuality(dsp::ResamplerQuality::R_SPLINE);
 }
 
 CSynthTrack::~CSynthTrack()

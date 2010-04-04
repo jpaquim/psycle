@@ -1,6 +1,7 @@
 #pragma once
 #include "filter.hpp"
 #include <psycle/helpers/math.hpp>
+#include <psycle/helpers/dsp.hpp>
 ///\file SynthTrack.h
 ///\brief interface for the CSynthTrack class.
 #define FILTER_CALC_TIME 64
@@ -10,8 +11,10 @@ using namespace psycle::helpers;
 
 struct SYNPAR
 {
-	signed short *pWave;
-	signed short *pWave2;
+	float *pWave;
+	bool wave1noise;
+	float *pWave2;
+	bool wave2noise;
 	float osc2detune;
 	float osc2finetune;
 	bool osc2sync;
@@ -79,6 +82,7 @@ private:
 	//in float since it is compared with OSCPosition
 	float waveTableSize;
 	float wavetableCorrection;
+	dsp::Cubic resampler;
 
 	int sp_cmd;
 	int sp_val;
@@ -180,41 +184,37 @@ inline float CSynthTrack::GetSample()
 	{
 		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
 	
-		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
+		if ( syntp->interpolate)  // helper's interpolation method
 		{
-			int wtSizeInt = math::lrint<int,float>(waveTableSize);
-			int iOsc=math::lrint<int,float>(OSC1Position);
-			float fractpart=OSC1Position-iOsc;
-			float d0;
-			float d1=syntp->pWave[iOsc];
-			float d2=syntp->pWave[iOsc+1];
-			float d3=syntp->pWave[iOsc+2];
-			if (iOsc == 0) {
-				d0=syntp->pWave[wtSizeInt - 1];
+			if ( syntp->wave1noise) {
+				//This assumes MAX_RAND is 0x7fff
+				output = (std::rand() - 16384)*OSC1Vol;
+			} else {
+				output=resampler._pWorkFnFloat(syntp->pWave, OSC1Position, math::lrint<int,float>(waveTableSize))*OSC1Vol;
+			}
+			if ( syntp->wave2noise) {
+				//This assumes MAX_RAND is 0x7fff
+				output += (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				d0=syntp->pWave[iOsc-1];
+				output += resampler._pWorkFnFloat(syntp->pWave2, OSC2Position, math::lrint<int,float>(waveTableSize))*OSC2Vol;
 			}
-			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC1Vol;
-			
-			iOsc=math::lrint<int,float>(OSC2Position);
-			fractpart=OSC2Position-iOsc;
-			d1=syntp->pWave2[iOsc];
-			d2=syntp->pWave2[iOsc+1];
-			d3=syntp->pWave2[iOsc+2];
-			if (iOsc == 0) {
-				d0=syntp->pWave2[wtSizeInt - 1];
-			}
-			else {
-				d0=syntp->pWave2[iOsc-1];
-			}
-			output+=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC2Vol;
-
 		}
 		else
 		{
-			output=syntp->pWave[math::lrint<int,float>(OSC1Position)]*OSC1Vol+
-					syntp->pWave2[math::lrint<int,float>(OSC2Position)]*OSC2Vol;
+			if ( syntp->wave1noise) {
+				//This assumes MAX_RAND is 0x7fff
+				output = (std::rand() - 16384)*OSC1Vol;
+			} else {
+				output=syntp->pWave[math::lrint<int,float>(OSC1Position)]*OSC1Vol;
+			}
+			if ( syntp->wave2noise) {
+				//This assumes MAX_RAND is 0x7fff
+				output += (std::rand() - 16384)*OSC2Vol;
+			}
+			else {
+				output += syntp->pWave2[math::lrint<int,float>(OSC2Position)]*OSC2Vol;
+			}
 		}
 
 		if(vibrato)
@@ -256,26 +256,23 @@ inline float CSynthTrack::GetSampleOsc1()
 	{
 		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
 	
-		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
+		if ( syntp->interpolate)  // helper's interpolation method
 		{
-			int wtSizeInt = math::lrint<int,float>(waveTableSize);
-			int iOsc=math::lrint<int,float>(OSC1Position);
-			float fractpart=OSC1Position-iOsc;
-			float d0;
-			float d1=syntp->pWave[iOsc];
-			float d2=syntp->pWave[iOsc+1];
-			float d3=syntp->pWave[iOsc+2];
-			if (iOsc == 0) {
-				d0=syntp->pWave[wtSizeInt - 1];
+			if ( syntp->wave1noise) {
+				//This assumes MAX_RAND is 0x7fff
+				output = (std::rand() - 16384)*OSC1Vol;
+			} else {
+				output=resampler._pWorkFnFloat(syntp->pWave, OSC1Position, math::lrint<int,float>(waveTableSize))*OSC1Vol;
 			}
-			else {
-				d0=syntp->pWave[iOsc-1];
-			}
-			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC1Vol;
 		}
 		else
 		{
-			output=syntp->pWave[math::lrint<int,float>(OSC1Position)]*OSC1Vol;
+			if ( syntp->wave1noise) {
+				//This assumes MAX_RAND is 0x7fff
+				output = (std::rand() - 16384)*OSC1Vol;
+			} else {
+				output=syntp->pWave[math::lrint<int,float>(OSC1Position)]*OSC1Vol;
+			}
 		}
 
 		if(vibrato) OSC1Position+=ROSC1Speed+OSCvib;
@@ -300,26 +297,25 @@ inline float CSynthTrack::GetSampleOsc2()
 	{
 		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
 	
-		if ( syntp->interpolate )  // Quite Pronounced CPU usage increase...
+		if ( syntp->interpolate)  // helper's interpolation method
 		{
-			int wtSizeInt = math::lrint<int,float>(waveTableSize);
-			int iOsc=math::lrint<int,float>(OSC2Position);
-			float fractpart=OSC2Position-iOsc;
-			float d0;
-			float d1=syntp->pWave2[iOsc];
-			float d2=syntp->pWave2[iOsc+1];
-			float d3=syntp->pWave2[iOsc+2];
-			if (iOsc == 0) {
-				d0=syntp->pWave2[wtSizeInt - 1];
+			if ( syntp->wave2noise) {
+				//This assumes MAX_RAND is 0x7fff
+				output = (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				d0=syntp->pWave2[iOsc-1];
+				output = resampler._pWorkFnFloat(syntp->pWave2, OSC2Position, math::lrint<int,float>(waveTableSize))*OSC2Vol;
 			}
-			output=((((((((3*(d1-d2))-d0)+d3)*0.5f*fractpart)+((2*d2)+d0)-(((5*d1)+d3)*0.5f))*fractpart)+((d2-d0)*0.5f))*fractpart+d1)*OSC2Vol;
 		}
 		else
 		{
-			output=syntp->pWave2[math::lrint<int,float>(OSC2Position)]*OSC2Vol;
+			if ( syntp->wave2noise) {
+				//This assumes MAX_RAND is 0x7fff
+				output = (std::rand() - 16384)*OSC2Vol;
+			}
+			else {
+				output = syntp->pWave2[math::lrint<int,float>(OSC2Position)]*OSC2Vol;
+			}
 		}
 
 		if(vibrato) OSC2Position+=ROSC2Speed+OSCvib;

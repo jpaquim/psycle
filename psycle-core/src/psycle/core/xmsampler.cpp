@@ -460,7 +460,6 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	float left_output = 0.0f;
 	float right_output = 0.0f;
 
-	//m_WaveDataController.Workxdsp(numSamples);
 	//int tmpcount=0;
 	while (numSamples)
 	{
@@ -468,8 +467,6 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	//  Step 1 : Get the unprocessed wave data.
 
 		m_WaveDataController.Work(&left_output,&right_output,pResamplerWork);
-		//left_output=xdspFloatBuffer[tmpcount++];
-		//if ( m_WaveDataController.IsStereo()) right_output=xdspFloatBuffer[tmpcount++];
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 2 : Process the Envelopes.
@@ -561,7 +558,7 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 3: Add the processed data to the sampler's buffer.
 		if(!m_WaveDataController.IsStereo()){
-				// Monoaural output� copy left to right output.
+			//Monoaural output. Copy left to right output.
 			right_output = left_output;
 		}
 
@@ -790,7 +787,7 @@ void XMSampler::Voice::Slide2Note()
 		}
 		UpdateSpeed();
 	}
-}// Porta2Note() -------------------------------------------------------
+}
 
 void XMSampler::Voice::VolumeSlide()
 {
@@ -2003,7 +2000,6 @@ XMSampler::XMSampler(MachineCallbacks* callb,Machine::id_type id)
 		zxxMap[i].mode=0;
 		zxxMap[i].value=0;
 	}
-	//xdsp.Init(Global::pPlayer->SampleRate(), 1.0 / (1 << 20));
 }
 
 

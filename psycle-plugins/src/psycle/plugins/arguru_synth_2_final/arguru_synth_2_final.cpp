@@ -1,4 +1,4 @@
-#include <psycle/plugin_interface.hpp>
+F#include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math.hpp>
 #include "SynthTrack.hpp"
 #include <cstdlib>
@@ -7,9 +7,9 @@ using namespace psycle::plugin_interface;
 using namespace psycle::helpers;
 using namespace psycle::helpers::math;
 
+int const WAVETABLES = 4;
 int const MAX_ENV_TIME = 250000;
-int const NUMPARAMETERS = 28;
-#define USE_NEW_WAVETABLES 1
+
 
 CMachineParameter const paraOSC1wave = {
 	"OSC1 Wave",
@@ -278,8 +278,8 @@ CMachineParameter const paraGlide = {
 };
 
 CMachineParameter const paraInterpolation = {
-	"Interpolation",
-	"I",
+	"Resampling",
+	"Resampling method",
 	0,				
 	1,
 	MPF_STATE,
@@ -322,7 +322,7 @@ CMachineInfo const MacInfo (
 	MI_VERSION,
 	0x0250,
 	GENERATOR,
-	NUMPARAMETERS,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"Arguru Synth 2"
 		#ifndef NDEBUG
@@ -351,11 +351,7 @@ class mi : public CMachineInterface {
 	private:
 		void InitWaveTableOrig();
 		void InitWaveTableSR(bool delArray=false);
-#if USE_NEW_WAVETABLES
-		signed short *WaveTable[5];
-#else
-		signed short WaveTable[5][2050];
-#endif
+		float *WaveTable[WAVETABLES];
 		std::uint32_t waveTableSize;
 		float wavetableCorrection;
 		CSynthTrack track[MAX_TRACKS];
@@ -368,18 +364,15 @@ class mi : public CMachineInterface {
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-	Vals = new int[NUMPARAMETERS];
+	Vals = new int[MacInfo.numParameters];
 	//Initialize here only those things that don't depend on
 	//external values (like sampling rate)
-#if !USE_NEW_WAVETABLES
-	InitWaveTableOrig();
-#endif
 	for(int i = 0; i < MAX_TRACKS; ++i) {
 		track[i].setGlobalPar(&globalpar);
 		reinitChannel[i] = false;
 	}
 	//this prevents a warning in valgrind when calling parameterTweak
-	for(int i=0; i < NUMPARAMETERS; i++) {
+	for(int i=0; i < MacInfo.numParameters; i++) {
 		Vals[i]=0;
 	}
 }
@@ -387,19 +380,15 @@ mi::mi() {
 mi::~mi() {
 	delete[] Vals;
 	// Destroy dinamically allocated objects/memory here
-#if USE_NEW_WAVETABLES
-	for (int i=0;i < 5; i++) {
+	for (int i=0;i < WAVETABLES; i++) {
 		delete[] WaveTable[i];
 	}
-#endif
 }
 
 void mi::Init() {
 	currentSR=pCB->GetSamplingRate();
 	// Initialize your stuff here (you can use pCB here without worries)
-#if USE_NEW_WAVETABLES
 	InitWaveTableSR();
-#endif
 	for (int i = 0; i < MAX_TRACKS; ++i) {
 		track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 	}
@@ -414,9 +403,7 @@ void mi::SequencerTick() {
 	if (currentSR != pCB->GetSamplingRate()) {
 		Stop();
 		currentSR = pCB->GetSamplingRate();
-#if USE_NEW_WAVETABLES
 		InitWaveTableSR(true);
-#endif
 		//force an update of all the parameters.
 		ParameterTweak(-1,-1);
 		for (int i = 0; i < MAX_TRACKS; ++i) {
@@ -431,8 +418,21 @@ void mi::ParameterTweak(int par, int val) {
 	if (par >= 0 ) { Vals[par]=val; }
 	float multiplier = currentSR/44100.0f;
 
-	globalpar.pWave=WaveTable[Vals[0]];
-	globalpar.pWave2=WaveTable[Vals[1]];
+	if (Vals[0] == 4) {
+		globalpar.wave1noise=true;
+	}
+	else {
+		globalpar.wave1noise=false;
+		globalpar.pWave=WaveTable[Vals[0]];
+	}
+	if (Vals[1] == 4) {
+		globalpar.wave2noise=true;
+	}
+	else {
+		globalpar.wave2noise=false;
+		globalpar.pWave2=WaveTable[Vals[1]];
+	}
+	
 	globalpar.osc2detune=(float)Vals[2];
 	globalpar.osc2finetune=(float)Vals[3]*0.0038962f;
 	globalpar.osc2sync=(Vals[4]>0);
@@ -461,12 +461,8 @@ void mi::ParameterTweak(int par, int val) {
 	globalpar.arp_bpm=Vals[22];
 	globalpar.arp_cnt=Vals[23];
 	globalpar.globaldetune=Vals[24];
-#if USE_NEW_WAVETABLES
 	//With the new wavetable, we remove the compensation
 	globalpar.globalfinetune=Vals[25]-60;
-#else
-	globalpar.globalfinetune=Vals[25];
-#endif
 	if (par == 26 && val > paraGlide.MaxValue) {
 		Vals[26] = paraGlide.MaxValue;
 	}
@@ -560,7 +556,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 				case 1:std::strcpy(txt,"Sawtooth");return true;
 				case 2:std::strcpy(txt,"Square");return true;
 				case 3:std::strcpy(txt,"Triangle");return true;
-				case 4:std::strcpy(txt,"Random");return true;
+				case 4:std::strcpy(txt,"White noise");return true;
 			}
 			break;
 	case 2:
@@ -569,8 +565,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 	case 3: 
 			std::sprintf(txt,"%.03f cts.",Vals[param]*0.390625f);
 			return true;
-	case 4:	//fallthrough
-	case 27:
+	case 4:	
 			std::strcpy(txt,(value==0)?"Off":"On");
 			return true;
 	case 5: //fallthrough
@@ -705,6 +700,10 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 	case 26:
 			if (value == 0) {std::strcpy(txt, "Off"); return true;}
 			break;
+	case 27:
+			if (value == 0) {std::strcpy(txt, "Off (Sample hold)"); return true;}
+			if (value == 1) {std::strcpy(txt, "Cubic spline"); return true;}
+			break;
 	default:
 			break;
 	}
@@ -747,31 +746,6 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 		track[channel].NoteOff();
 }
 
-void mi::InitWaveTableOrig() {
-	//Two more shorts (2050-2048=2) allocated for the interpolation routine.
-	for(int c=0;c<2050;c++) {
-		double sval=(double)c*0.00306796157577128245943617517898389;
-		WaveTable[0][c]=int(sin(sval)*16384.0f);
-
-		if(c < 2048) WaveTable[1][c]=(c*16)-16384;
-		else WaveTable[1][c]=((c-2048)*16)-16384;
-
-		if(c < 1024 || c >= 2048) WaveTable[2][c]=-16384;
-		else WaveTable[2][c]=16384;
-
-		if(c < 1024) WaveTable[3][c]=(c*32)-16384;
-		else if(c < 2048) WaveTable[3][c]=16384-((c-1024)*32);
-		else WaveTable[3][c]=((c-2048)*32)-16384;
-
-		//This assumes MAX_RAND is 0x7fff
-		WaveTable[4][c]= std::rand() - 16384;
-	}
-
-	waveTableSize = 2048;
-	//wavetableCorrection = 1.0f;
-	wavetableCorrection = pCB->GetSamplingRate()/44100.0f;
-}
-
 //New method to generate the wavetables:
 //
 //Generate a signal of aproximately 22Hz for the current sampling rate.
@@ -787,12 +761,13 @@ void mi::InitWaveTableSR(bool delArray) {
 	const float increase = 32768.0f/(float)amount;
 	const float increase2 = 65536.0f/(float)amount;
 
-	for (std::uint32_t i=0;i < 5; i++) {
+	//Skipping noise wavetable. It is useless.
+	for (std::uint32_t i=0;i < WAVETABLES; i++) {
 		if (delArray) {
 			delete WaveTable[i];
 		}
 		//Two more shorts allocated for the interpolation routine.
-		WaveTable[i]=new signed short[amount+2];
+		WaveTable[i]=new float[amount+2];
 	}
 	for(std::uint32_t c=0;c<half;c++) {
 		double sval=(double)c*sinFraction;
@@ -800,8 +775,6 @@ void mi::InitWaveTableSR(bool delArray) {
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=-16384;
 		WaveTable[3][c]=(c*increase2)-16384;
-		//This assumes MAX_RAND is 0x7fff
-		WaveTable[4][c]= std::rand() - 16384;
 	}
 	for(std::uint32_t c=half;c<amount;c++) {
 		double sval=(double)c*sinFraction;
@@ -809,15 +782,13 @@ void mi::InitWaveTableSR(bool delArray) {
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=16384;
 		WaveTable[3][c]=16384-((c-half)*increase2);
-		//This assumes MAX_RAND is 0x7fff
-		WaveTable[4][c]= std::rand() - 16384;
 	}
 	//Two more shorts allocated for the interpolation routine.
-	for (std::uint32_t i=0;i < 5; i++) {
+	//Skipping noise wavetable. It is useless.
+	for (std::uint32_t i=0;i < WAVETABLES; i++) {
 		WaveTable[i][amount]=WaveTable[i][0];
 		WaveTable[i][amount+1]=WaveTable[i][1];
 	}
-
 
 	waveTableSize = amount;
 	wavetableCorrection = (float)amount*22.0f / (float)currentSR;

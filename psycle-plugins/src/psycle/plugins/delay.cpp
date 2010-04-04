@@ -5,10 +5,11 @@
 /// \file
 /// \brief delay
 #include "plugin.hpp"
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cassert>
 #include <vector>
 namespace psycle { namespace plugin {
-
+	using namespace psycle::helpers::math;
 
 class Delay : public Plugin
 {
@@ -144,7 +145,9 @@ void Delay::Work(Sample l [], Sample r [], int samples, int)
 inline void Delay::Work(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback)
 {
 	const Real read(*buffer_iterator);
-	*buffer_iterator = input + feedback * read;
+	Real newval = input + feedback * read;
+	erase_all_nans_infinities_and_denormals(newval);
+	*buffer_iterator = newval;
 	if(++buffer_iterator == buffer.end()) buffer_iterator = buffer.begin();
 	input = static_cast<Sample>((*this)(dry) * input + (*this)(wet) * read);
 }

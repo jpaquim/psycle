@@ -46,18 +46,19 @@ CMachineParameter const * audacity_phaser_parameters[] = {
 
 CMachineInfo const audacity_phaser_info (
 	MI_VERSION,
+	0x0120,
 	EFFECT,
 	sizeof audacity_phaser_parameters / sizeof *audacity_phaser_parameters,
 	audacity_phaser_parameters,
-	"Audacity Phaser 1.2" // long name
+	"Audacity Phaser"
 		#ifndef NDEBUG
 			" (debug build)"
 		#endif
 	,
-	"APhaser", // short name
-	"Nasca Octavian Paul/Sartorius", // author
-	"About", // A command, that could be use for opening an editor, etc...
-	1 // columns
+	"APhaser",
+	"Nasca Octavian Paul/Sartorius",
+	"About",
+	1
 );
 
 class audacity_phaser : public CMachineInterface {

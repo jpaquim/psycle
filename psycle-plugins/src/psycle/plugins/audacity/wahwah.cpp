@@ -32,13 +32,11 @@ std::uint32_t const LFO_SKIP_SAMPLES = 30;
 	#define M_PI 3.14159265359f
 #endif
 
-#define NUMPARAMETERS 5
-
-CMachineParameter const paraLFOFreq = {"LFO Freq","LFOFreq", 1 , 100 ,MPF_STATE,15};
-CMachineParameter const paraLFOStartPhase = {"LFO start phase","LFOStartPhase", 0 , 359 ,MPF_STATE, 0 };
-CMachineParameter const paraDepth = {"Depth","Depth", 0 , 100 ,MPF_STATE,70};
-CMachineParameter const paraResonance = {"Resonance","Resonance", 1 , 100 ,MPF_STATE, 25 };
-CMachineParameter const paraWahFreqOff = {"Wah freq offset","WahFreqOff", 0 , 100 ,MPF_STATE, 30 };
+CMachineParameter const paraLFOFreq = {"LFO Freq", "LFOFreq", 1, 100, MPF_STATE, 15 };
+CMachineParameter const paraLFOStartPhase = {"LFO start phase", "LFOStartPhase", 0 , 359, MPF_STATE, 0 };
+CMachineParameter const paraDepth = {"Depth", "Depth", 0, 100, MPF_STATE,70};
+CMachineParameter const paraResonance = {"Resonance", "Resonance", 1, 100, MPF_STATE, 25 };
+CMachineParameter const paraWahFreqOff = {"Wah freq offset", "WahFreqOff", 0, 100, MPF_STATE, 30 };
 
 CMachineParameter const *pParameters[] = { 
 	&paraLFOFreq,
@@ -52,7 +50,7 @@ CMachineInfo const MacInfo (
 	MI_VERSION,
 	0x0120,
 	EFFECT,
-	NUMPARAMETERS,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"Audacity WahWah"
 	#ifndef NDEBUG
@@ -98,7 +96,7 @@ private:
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-	Vals = new int[NUMPARAMETERS];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi() {
