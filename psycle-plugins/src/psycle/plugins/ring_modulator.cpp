@@ -30,15 +30,20 @@ public:
 	
 	static const Information & information() throw()
 	{
-		static const Information::Parameter parameters [] =
-		{
-			Information::Parameter::exponential("am frequency", 0.0001 * pi * 2, 0, 22050 * pi * 2),
-			Information::Parameter::exponential("am frequency glide", 0.0001 * pi * 2, 0, 15 * 22050 * pi * 2),
-			Information::Parameter::exponential("fm frequency", 0.0001 * pi * 2, 0, 100 * pi * 2),
-			Information::Parameter::exponential("fm bandwidth", 0.0001 * pi * 2, 0, 22050 * pi * 2)
-		};
-		static const Information information(Information::Types::effect, "ayeternal PsychOsc AM", "PsychOsc AM", "bohan and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
-		return information;
+		static bool initialized = false;
+		static Information *info = NULL;
+		if (!initialized) {
+			static const Information::Parameter parameters [] =
+			{
+				Information::Parameter::exponential("am frequency", 0.0001 * pi * 2, 0, 22050 * pi * 2),
+				Information::Parameter::exponential("am frequency glide", 0.0001 * pi * 2, 0, 15 * 22050 * pi * 2),
+				Information::Parameter::exponential("fm frequency", 0.0001 * pi * 2, 0, 100 * pi * 2),
+				Information::Parameter::exponential("fm bandwidth", 0.0001 * pi * 2, 0, 22050 * pi * 2)
+			};
+			static Information information(0x0110, Information::Types::effect, "ayeternal PsychOsc AM", "PsychOsc AM", "bohan and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
+			info = &information;
+		}
+		return *info;
 	}
 
 	/*override*/ void describe(std::ostream & out, const int & parameter) const
