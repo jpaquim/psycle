@@ -1,19 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 // AudaCity Compressor plugin for PSYCLE by Sartorius
 //
-//   Original
-/**********************************************************************
-
-	Audacity: A Digital Audio Editor
-
-	Compressor.cpp
-
-	Dominic Mazzoni
-
-	Steve Jolly made it inherit from EffectSimpleMono.
-	GUI added and implementation improved by Dominic Mazzoni, 5/11/2003.
-
-**********************************************************************/
+// Using Audacity's Compressor implementation
 
 #include <psycle/plugin_interface.hpp>
 #include "Compressor.h"
@@ -24,27 +12,26 @@
 
 using namespace psycle::plugin_interface;
 
-#define MAX_SAMPLES 3000
-
-#ifndef M_PI
-	#define M_PI 3.14159265359f // note that's supposed to be a double!
-#endif
-
 CMachineParameter const paraThreshold = {"Threshold","Threshold", -36 , -1 ,MPF_STATE, -12 };
-CMachineParameter const paraRatio = {"Ratio","Ratio", 100 , 10000 ,MPF_STATE, 200 };
-CMachineParameter const paraAttackTime = {"Attack","Attack", 100 , 10000 ,MPF_STATE, 200 };
+CMachineParameter const paraRatio = {"Ratio","Ratio", 100 , 2000 ,MPF_STATE, 200 };
+CMachineParameter const paraAttackTime = {"Attack","Attack", 10 , 10000 ,MPF_STATE, 200 };
 CMachineParameter const paraDecayTime = {"Decay","Decay", 100 ,	10000 ,MPF_STATE, 1000 };
-CMachineParameter const paraUseGain = {"Use gain","Use gain", 0 , 1 ,MPF_STATE, 0 };
+CMachineParameter const paraUseGain = {"Old Gain method","Old Gain method", 0 , 1 ,MPF_STATE, 0 };
+CMachineParameter const paraNoiseFloor = {"Noise floor","Noise floor", -61 , -21 ,MPF_STATE, -40 };
+CMachineParameter const paraUsePeak = {"Compressor method","Compressor method", 0 , 1 ,MPF_STATE, 0 };
 CMachineParameter const *pParameters[] = {
 	&paraThreshold,
 	&paraRatio,
 	&paraAttackTime,
 	&paraDecayTime,
-	&paraUseGain
+	&paraUseGain,
+	&paraNoiseFloor,
+	&paraUsePeak
 };
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	0x0120,
 	EFFECT,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
@@ -54,7 +41,7 @@ CMachineInfo const MacInfo (
 		#endif
 		,
 	"ACompressor",
-	"Dominic Mazzoni/Sartorius",
+	"Dominic Mazzoni/Sartorius/JosepMa",
 	"About",
 	1
 );
@@ -89,7 +76,9 @@ mi::~mi() {
 void mi::Init() {
 	samplerate = pCB->GetSamplingRate();
 	sl.setSampleRate(samplerate);
+	sl.Init(MAX_BUFFER_LENGTH);
 	sr.setSampleRate(samplerate);
+	sr.Init(MAX_BUFFER_LENGTH);
 }
 
 void mi::SequencerTick() {
@@ -104,26 +93,36 @@ void mi::ParameterTweak(int par, int val) {
 	Vals[par]=val;
 	switch(par) {
 		case 0:
-			sl.setThreshold(val);
-			sl.setGainDB();
-			sr.setThreshold(val);
-			sr.setGainDB();
+			sl.setThresholddB(val);
+			sr.setThresholddB(val);
 			break;
-		case 1: 
+		case 1:
+			if (val > MacInfo.Parameters[par]->MaxValue) {
+				val = MacInfo.Parameters[par]->MaxValue;
+				Vals[par] = val;
+			}
 			sl.setRatio(val*.01);
 			sr.setRatio(val*.01);
 			break;
 		case 2: 
-			sl.setAttack(val*.001);
-			sr.setAttack(val*.001);
+			sl.setAttackSec(val*.001);
+			sr.setAttackSec(val*.001);
 			break;
 		case 3: 
-			sl.setDecay(val*.001);
-			sr.setDecay(val*.001);
+			sl.setDecaySec(val*.001);
+			sr.setDecaySec(val*.001);
 			break;
 		case 4:
-			sl.setGain(val==1);
-			sr.setGain(val==1);
+			sl.setNormalize(val==1);
+			sr.setNormalize(val==1);
+			break;
+		case 5:
+			sl.setNoiseFloordB(val);
+			sr.setNoiseFloordB(val);
+			break;
+		case 6:
+			sl.setPeakAnalisys(val==1);
+			sr.setPeakAnalisys(val==1);
 			break;
 		default:
 			break;
@@ -132,18 +131,15 @@ void mi::ParameterTweak(int par, int val) {
 
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
-	if (sl.BufferIn(psamplesleft,numsamples)!=0)
-		sl.Process(numsamples);
-	if (sr.BufferIn(psamplesright,numsamples)!=0)
-		sr.Process(numsamples);
-	sl.BufferOut(psamplesleft,numsamples);
-	sr.BufferOut(psamplesright,numsamples);
+	sl.Process(psamplesleft, numsamples);
+	sr.Process(psamplesright, numsamples);
 }
 
 // Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value) {
 	switch(param) {
-		case 0:
+		case 0://fallthrough
+		case 5:
 			std::sprintf(txt,"%i dB",value);
 			return true;
 		case 1:
@@ -151,12 +147,14 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			return true;
 		case 2:
 		case 3:
-			std::sprintf(txt,"%.01f s",(float)value*.001f);
+			std::sprintf(txt,"%.02f s",(float)value*.001f);
 			return true;
 		case 4:
-			std::sprintf(txt,value?"yes":"no");
+			std::sprintf(txt,value?"on":"off");
 			return true;
-
+		case 6:
+			std::sprintf(txt,value?"Upward (to full scale)":"downward (to threshold)");
+			return true;
 		default:
 			return false;
 	}

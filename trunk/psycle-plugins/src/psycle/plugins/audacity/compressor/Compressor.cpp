@@ -1,53 +1,87 @@
 /**********************************************************************
 
-	Audacity: A Digital Audio Editor
+Audacity: A Digital Audio Editor
 
-	Compressor.cpp
+Compressor.cpp
 
-	Dominic Mazzoni
+Dominic Mazzoni
+Martyn Shaw
+Steve Jolly
 
-	Steve Jolly made it inherit from EffectSimpleMono.
-	GUI added and implementation improved by Dominic Mazzoni, 5/11/2003.
+Based on svn revision 10189
+*******************************************************************//**
 
-**********************************************************************/
+\class EffectCompressor
+\brief An Effect derived from EffectTwoPassSimpleMono
+
+- Martyn Shaw made it inherit from EffectTwoPassSimpleMono 10/2005.
+- Steve Jolly made it inherit from EffectSimpleMono.
+- GUI added and implementation improved by Dominic Mazzoni, 5/11/2003.
+
+*//****************************************************************/
+
 
 #include "Compressor.h"
 #include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cmath>
 
-EffectCompressor::EffectCompressor(): mFloor(0.001), mGainDB(0.0), mUseGain(false),mAttackTime(0.2),mDecayTime(1.0)
-{	
-	this->setThreshold(-12.0);
-	this->setRatio(2.0);
-	this->setGain(true);
-	this->setSampleRate(44100.0);
-	this->setAttack(0.2);
-	this->setDecay(1.0);
 
-	buffer = new float[MAX_SAMPLES];
-
-	mCircleSize = 100;
-
-	mCircle = new double[mCircleSize];
-	mLevelCircle = new double[mCircleSize];
-	for(int j=0; j<mCircleSize; j++) {
-		mCircle[j] = 0.0;
-		mLevelCircle[j] = mFloor;
+inline void zapArray(void* thearray) {
+	if(thearray != NULL) {
+		delete thearray;
+		thearray = NULL;
 	}
+}
+EffectCompressor::EffectCompressor(): mCurRate(44100.0), mNormalize(true), mUsePeak(false)
+{
+	setAttackSec(0.2);
+	setDecaySec(1.0);
+	setRatio(2.0);
+	setThresholddB(-12.0);
+	setNoiseFloordB(-40.0);
 
-	mCirclePos = 0;
-	mRMSSum = 0.0;
-	mLastLevel = 0.0;
+	mCircle = NULL;
+	mFollow1 = NULL;
+	mFollowLen = 0;
 }
 
 EffectCompressor::~EffectCompressor()
 {
+	zapArray(mCircle);
+	zapArray(mFollow1);
+}
+
+void EffectCompressor::Init(int max_samples)
+{
+	InitPass1(max_samples);
+	NewTrackPass1();
+}
+
+bool EffectCompressor::NewTrackPass1()
+{
+	mNoiseCounter = 100;
+
+	mLastLevel = mThreshold;
+
 	if (mCircle)
 		delete[] mCircle;
-	if (mLevelCircle)
-		delete[] mLevelCircle;
-	if (buffer)
-		delete[] buffer;
+	mCircleSize = mCurRate * 0.05;
+	mCircle = new double[mCircleSize];
+	for(int j=0; j<mCircleSize; j++) {
+		mCircle[j] = 0.0;
+	}
+	mCirclePos = 0;
+	mRMSSum = 0.0;
+
+	return true;
+}
+bool EffectCompressor::InitPass1(int max_samples)
+{
+	zapArray(mFollow1);
+	mFollow1 = new float[max_samples];
+	mFollowLen = max_samples;
+
+	return true;
 }
 
 void EffectCompressor::setSampleRate(double rate)
@@ -57,21 +91,30 @@ void EffectCompressor::setSampleRate(double rate)
 	this->setDecayFactor();
 }
 
+void EffectCompressor::setThresholddB(double threshold)
+{
+	mThresholdDB = threshold;
+	mThreshold = std::pow(10.0, mThresholdDB/20); // factor of 20 because it's amplitude
+	setGain(mNormalize);
+}
+
+void EffectCompressor::setNoiseFloordB(double noisefloor)
+{
+	mNoiseFloorDB = noisefloor;
+	mNoiseFloor = std::pow(10.0, mNoiseFloorDB/20); // factor of 20 because it's amplitude
+}
+
 void EffectCompressor::setRatio(double ratio)
 {
 	mRatio = ratio;
-	if(mRatio<1.0)mRatio=1.0;
-	
-	this->setGainDB();
+	if(mRatio > 1)
+		mCompression = 1.0-1.0/mRatio;
+	else
+		mCompression = 0.0;
+	setGain(mNormalize);
 }
 
-void EffectCompressor::setThreshold(double threshold)
-{
-	mThresholdDB = threshold;
-	mThreshold = std::pow(10.0, mThresholdDB/10); // factor of 10 because it's power
-}
-
-void EffectCompressor::setAttack(double attack)
+void EffectCompressor::setAttackSec(double attack)
 {
 	mAttackTime = attack;
 	this->setAttackFactor();
@@ -79,10 +122,11 @@ void EffectCompressor::setAttack(double attack)
 
 inline void EffectCompressor::setAttackFactor()
 {
-	mAttackFactor = std::exp(-log(mFloor) / (mCurRate * mAttackTime + 0.5));
+	mAttackInverseFactor = std::exp(log(mThreshold) / (mCurRate * mAttackTime + 0.5));
+	mAttackFactor = 1.0 / mAttackInverseFactor;
 }
 
-void EffectCompressor::setDecay(double decay)
+void EffectCompressor::setDecaySec(double decay)
 {
 	mDecayTime = decay;
 	this->setDecayFactor();
@@ -90,73 +134,66 @@ void EffectCompressor::setDecay(double decay)
 
 inline void EffectCompressor::setDecayFactor()
 {
-	mDecayFactor = std::exp(log(mFloor) / (mCurRate * mDecayTime + 0.5));
+	mDecayFactor = std::exp(log(mThreshold) / (mCurRate * mDecayTime + 0.5));
 }
 
-void EffectCompressor::setGainDB()
+void EffectCompressor::setNormalize(bool normalize)
 {
-	mGainDB = ((mThresholdDB*-0.7) * (1 - 1/mRatio));
-	if (mGainDB < 0)
-		mGainDB = 0;
-	setGain(mUseGain);
+	setGain(normalize);
 }
-
+void EffectCompressor::setPeakAnalisys(bool peak)
+{
+	mUsePeak = peak;
+}
+// Using the old gain method, since the two pass method cannot be used in Psycle.
 void EffectCompressor::setGain(bool gain)
 {
-	mUseGain = gain;
-	if (mUseGain)
-		mGain = std::pow(10.0, mGainDB/20); // factor of 20 because it's amplitude
+	mNormalize = gain;
+	double mGaindB = ((mThresholdDB*-0.7) * (1 - 1/mRatio));
+	if (mGaindB < 0)
+		mGaindB = 0;
+	if (gain)
+		mGain = std::pow(10.0, mGaindB/20); // factor of 20 because it's amplitude
 	else
 		mGain = 1.0;
 }
 
-float EffectCompressor::BufferIn(float *samples, int num)
+
+void EffectCompressor::Process(float *samples, int num)
 {
-	float s = 0;
+	// Adapting from psycle's range
+	float *buffer = samples;
 	for(int i=0;i<num;i++){
-		
-
-		s+=buffer[i]= *samples * 0.000030517578125f; // -1 < buffer[i] < 1
-		++samples;
+		*buffer = *buffer * 0.000030517578125f; // -1 < buffer[i] < 1
+		++buffer;
 	}
-	return s;
+	Follow(samples, mFollow1, num, NULL, 0);
+	for (int i = 0; i < num; i++) {
+		samples[i] = DoCompression(samples[i], mFollow1[i]);
+	}
+
+	ProcessPass2(samples, num);
 }
 
-void EffectCompressor::BufferOut(float *samples, int num)
+bool EffectCompressor::ProcessPass2(float *buffer, int len)
 {
-	for(int i=0;i<num;i++){
-		*samples = buffer[i]* 32767.f; // 
-		++samples;
-	}
+	float invMax = mGain * 32768.0f;
+	for (int i = 0; i < len; i++)
+		buffer[i] *= invMax;
+
+	return true;
 }
 
-void EffectCompressor::Process(int len)
+void EffectCompressor::FreshenCircle()
 {
-	double *follow = new double[len];
-	int i;
-
-	// This makes sure that the initial value is well-chosen
-	if (mLastLevel == 0.0) {
-		int preSeed = mCircleSize;
-		if (preSeed > len)
-			preSeed = len;
-		for(i=0; i<preSeed; i++)
-			this->AvgCircle(buffer[i]);
-	}
-
-	for (i = 0; i < len; i++) {
-		this->Follow(buffer[i], &follow[i], i);
-	}
-
-	for (i = 0; i < len; i++) {
-	buffer[i] = this->DoCompression(buffer[i], follow[i]);
-
-	}
-
-	delete[] follow;
+	// Recompute the RMS sum periodically to prevent accumulation of rounding errors
+	// during long waveforms
+	mRMSSum = 0;
+	for(int i=0; i<mCircleSize; i++)
+		mRMSSum += mCircle[i];
 }
 
-double EffectCompressor::AvgCircle(float value)
+float EffectCompressor::AvgCircle(float value)
 {
 	float level;
 
@@ -166,31 +203,13 @@ double EffectCompressor::AvgCircle(float value)
 	mCircle[mCirclePos] = value*value;
 	mRMSSum += mCircle[mCirclePos];
 	level = std::sqrt(mRMSSum/mCircleSize);
-	#if 0
-		// NaN and Den remover :
-		unsigned int corrected_sample = *((unsigned int*)&level);
-		unsigned int exponent = corrected_sample & 0x7F800000;
-		corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
-		level = *((float*)&corrected_sample);
-	#else
-		psycle::helpers::math::erase_all_nans_infinities_and_denormals(level);
-	#endif
+	psycle::helpers::math::erase_all_nans_infinities_and_denormals(level);
+	mCirclePos = (mCirclePos+1)%mCircleSize;
 
-	mLevelCircle[mCirclePos] = level;
-	mCirclePos = (mCirclePos+1)%mCircleSize;   
-
-#if 0 // Peak instead of RMS
-	int j;
-	level = 0.0;
-	for(j=0; j<mCircleSize; j++)
-		if (mCircle[j] > level)
-			level = mCircle[j];
-#endif
-
-	return double(level);
+	return level;
 }
 
-void EffectCompressor::Follow(float x, double *outEnv, int maxBack)
+void EffectCompressor::Follow(float *buffer, float *env, int len, float *previous, int previous_len)
 {
 	/*
 
@@ -202,7 +221,7 @@ void EffectCompressor::Follow(float x, double *outEnv, int maxBack)
 	the AVG function. The purpose of this function is to
 	generate a smooth envelope that is generally not less
 	than the input signal. In other words, we want to "ride"
-	the peaks of the signal with a smooth function. The 
+	the peaks of the signal with a smooth function. The
 	algorithm is as follows: keep a current output value
 	(called the "value"). The value is allowed to increase
 	by at most rise_factor and decrease by at most fall_factor.
@@ -219,80 +238,69 @@ void EffectCompressor::Follow(float x, double *outEnv, int maxBack)
 	the previously computed values. There is only a limited buffer
 	in which we can work backwards, so if the new envelope does not
 	intersect the old one, then make yet another pass, this time
-	from the oldest buffered value forward, increasing on each 
-	sample by rise_factor to produce a maximal envelope. This will 
+	from the oldest buffered value forward, increasing on each
+	sample by rise_factor to produce a maximal envelope. This will
 	still be less than the input.
-	
-	The value has a lower limit of floor to make sure value has a 
+
+	The value has a lower limit of floor to make sure value has a
 	reasonable positive value from which to begin an attack.
 	*/
+	int i;
+	double level,last;
 
-	double level = AvgCircle(x);
-	double high = mLastLevel * mAttackFactor;
-	double low = mLastLevel * mDecayFactor;
-
-	if (low < mFloor)
-		low = mFloor;
-
-	if (level < low)
-		*outEnv = low;
-	else if (level < high)
-		*outEnv = level;
-	else {
-		// Backtrack
-		double attackInverse = 1.0 / mAttackFactor;
-		double temp = level * attackInverse;
-
-		int backtrack = 50;
-		if (backtrack > maxBack)
-			backtrack = maxBack;
-
-		double *ptr = &outEnv[-1];
-		int i;
-		bool ok = false;
-		for(i=0; i<backtrack-2; i++) {
-			if (*ptr < temp) {
-			*ptr-- = temp;
-			temp *= attackInverse;
-			}
-			else {
-			ok = true;
-			break;
-			}   
-		}
-
-		if (!ok && backtrack>1 && (*ptr < temp)) {
-			temp = *ptr;
-			for (i = 0; i < backtrack-1; i++) {
-			ptr++;
-			temp *= mAttackFactor;
-			*ptr = temp;
-			}
-		}
-		else
-			*outEnv = level;
+	if(!mUsePeak) {
+		// Update RMS sum directly from the circle buffer
+		// to avoid accumulation of rounding errors
+		FreshenCircle();
 	}
+	// First apply a peak detect with the requested decay rate
+	last = mLastLevel;
+	for(i=0; i<len; i++) {
+		if(mUsePeak)
+			level = std::fabs(buffer[i]);
+		else // use RMS
+			level = AvgCircle(buffer[i]);
+		// Don't increase gain when signal is continuously below the noise floor
+		if(level < mNoiseFloor) {
+			mNoiseCounter++;
+		} else {
+			mNoiseCounter = 0;
+		}
+		if(mNoiseCounter < 100) {
+			last *= mDecayFactor;
+			if(last < mThreshold)
+				last = mThreshold;
+			if(level > last)
+				last = level;
+		}
+		env[i] = last;
+	}
+	mLastLevel = last;
 
-	mLastLevel = *outEnv;
+	// Next do the same process in reverse direction to get the requested attack rate
+	last = mLastLevel;
+	for(i=len-1; i>=0; i--) {
+		last *= mAttackInverseFactor;
+		if(last < mThreshold)
+			last = mThreshold;
+		if(env[i] < last)
+			env[i] = last;
+		else
+			last = env[i];
+	}
 }
+
 
 float EffectCompressor::DoCompression(float value, double env)
 {
-	float mult;
 	float out;
-
-	if (env > mThreshold)
-		mult = mGain * std::pow(mThreshold/env, 1.0/mRatio);
-	else
-		mult = mGain;
-
-	out = value * mult;
-
-	if (out > 1.0)
-		out = 1.0;
-
-	if (out < -1.0)
-		out = -1.0;
+	if(mUsePeak) {
+		// Peak values map mThreshold to 1.0 - 'upward' compression
+		out = value * std::pow(1.0/env, mCompression);
+	} else {
+		// With RMS-based compression don't change values below mThreshold - 'downward' compression
+		out = value * std::pow(mThreshold/env, mCompression);
+	}
 
 	return out;
 }

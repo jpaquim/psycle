@@ -20,9 +20,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		// Initialize tables
 		for(int i=0; i<_resolution; i++)
 		{
-			float x = (float)i/(float)_resolution;
+			double x = (double)i/(double)_resolution;
 			_aTable[i] = float(-0.5*x*x*x +     x*x - 0.5*x);
-			_bTable[i] = float( 1.5*x*x*x - 2.5*x*x         + 1);
+			_bTable[i] = float( 1.5*x*x*x - 2.5*x*x         + 1.0);
 			_cTable[i] = float(-1.5*x*x*x + 2.0*x*x + 0.5*x);
 			_dTable[i] = float( 0.5*x*x*x - 0.5*x*x);
 			_lTable[i] = x;

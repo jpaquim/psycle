@@ -28,10 +28,11 @@ CMachineParameter const *pParameters[] = {
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	0x0120,
 	EFFECT,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
-	"Arguru CrossDelay 1.2"
+	"Arguru CrossDelay"
 	#ifndef NDEBUG
 		" (Debug build)"
 	#endif
@@ -111,7 +112,7 @@ void mi::SequencerTick() {
 }
 
 void mi::Command() {
-	pCB->MessBox("Made 18/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","-=<([aRgUrU's Cr0sSdElAy])>=-",0);
+	pCB->MessBox("Originally made 18/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","-=<([aRgUrU's Cr0sSdElAy])>=-",0);
 }
 
 void mi::ParameterTweak(int par, int val) {
@@ -175,8 +176,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 	float const cdry=Vals[2]*0.00390625f;
 	float const cwet=Vals[3]*0.00390625f;
 	do {
-		float const il=++*psamplesleft;
-		float const ir=++*psamplesright;
+		float const il=*psamplesleft;
+		float const ir=*psamplesright;
 
 		dbl[ccl]=il+dbl[dcl]*fbc;
 		dbr[ccr]=ir+dbr[dcr]*fbc;

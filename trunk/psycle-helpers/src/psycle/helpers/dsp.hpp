@@ -392,15 +392,17 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/// interpolator work function.
 	///\todo typdef should be inside the Resampler class itself.
 	typedef float (*PRESAMPLERFN)(int16_t const * pData, uint64_t offset, uint32_t res, uint64_t length);
+	typedef float (*PRESAMPLERFNFLOAT)(float const * pData, float offset, uint64_t length);
 
 	/// sample interpolator.
 	class Resampler
 	{
 		public:
 			/// constructor
-			Resampler() : _pWorkFn(None), _quality(R_NONE) {}
+			Resampler() : _pWorkFn(None), _pWorkFnFloat(None), _quality(R_NONE) {}
 			/// work function corresponding to the selected kind.
 			PRESAMPLERFN _pWorkFn;
+			PRESAMPLERFNFLOAT _pWorkFnFloat;
 			/// sets the kind of interpolation.
 			virtual void SetQuality(ResamplerQuality quality) = 0;
 			virtual ResamplerQuality GetQuality() const = 0;
@@ -412,11 +414,17 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			{
 				return *pData;
 			}
+			static float None(float const * pData, float offset, uint64_t length)
+			{
+				return *pData;
+			}
 	};
 
 	/// cubic sample interpolator.
 	class Cubic : public Resampler
 	{
+		///
+		#define CUBIC_RESOLUTION 2048
 		public:
 			/// constructor.
 			Cubic();
@@ -437,6 +445,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					break;
 				case R_SPLINE:
 					_pWorkFn = Spline;
+					_pWorkFnFloat = SplineFloat;
 					break;
 				case R_BANDLIM:
 					_pWorkFn = Bandlimit;
@@ -465,7 +474,24 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				y2=(offset+2 == length)?0:*(pData+2);
 				return (_aTable[res]*yo+_bTable[res]*y0+_cTable[res]*y1+_dTable[res]*y2);
 			}
-			
+			/// interpolation work function which does spline interpolation.
+			static float SplineFloat(float const * pData, float offset, uint64_t length)
+			{
+				int iOsc=floor(offset);
+				uint32_t fractpart=(offset-iOsc)*CUBIC_RESOLUTION;
+
+				float d0;
+				float d1=pData[iOsc];
+				float d2=pData[iOsc+1];
+				float d3=pData[iOsc+2];
+				if (iOsc == 0) {
+					d0=pData[length - 1];
+				}
+				else {
+					d0=pData[iOsc-1];
+				}
+				return (_aTable[fractpart]*d0+_bTable[fractpart]*d1+_cTable[fractpart]*d2+_dTable[fractpart]*d3);
+			}			
 			// yo = y[-1] [sample at x-1]
 			// y0 = y[0]  [sample at x (input)]
 			// y1 = y[1]  [sample at x+1]
@@ -578,8 +604,6 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 		private:
 			/// Currently is 2048
 			static int _resolution;
-			///
-			#define CUBIC_RESOLUTION 2048
 
 			static float _aTable[CUBIC_RESOLUTION];
 			static float _bTable[CUBIC_RESOLUTION];
