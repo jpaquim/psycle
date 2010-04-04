@@ -32,19 +32,25 @@ class Flanger : public Plugin {
 		enum Interpolation { no, yes };
 		
 		static const Information & information() throw() {
-			static const Information::Parameter parameters [] = {
-				Information::Parameter::linear("central delay", 0, 0, 0.1),
-				Information::Parameter::linear("mod. amplitude", 0, 0, 1),
-				Information::Parameter::exponential("mod. frequency", 0.0001 * pi * 2, 0, 100 * pi * 2),
-				Information::Parameter::linear("mod. stereodephase", 0, 0, pi),
-				Information::Parameter::discrete("interpolation", yes, yes),
-				Information::Parameter::linear("dry", -1, 1, 1),
-				Information::Parameter::linear("wet", -1, 0, 1),
-				Information::Parameter::linear("feedback left", -1, 0, 1),
-				Information::Parameter::linear("feedback right", -1, 0, 1),
-			};
-			static const Information information(Information::Types::effect, "ayeternal Flanger", "Flanger", "jaz, bohan, and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
-			return information;
+			static bool initialized = false;
+			static Information *info = NULL;
+			if (!initialized) {
+				static const Information::Parameter parameters [] = {
+					Information::Parameter::linear("central delay", 0, 0, 0.1),
+					Information::Parameter::linear("mod. amplitude", 0, 0, 1),
+					Information::Parameter::exponential("mod. frequency", 0.0001 * pi * 2, 0, 100 * pi * 2),
+					Information::Parameter::linear("mod. stereodephase", 0, 0, pi),
+					Information::Parameter::discrete("interpolation", yes, yes),
+					Information::Parameter::linear("dry", -1, 1, 1),
+					Information::Parameter::linear("wet", -1, 0, 1),
+					Information::Parameter::linear("feedback left", -1, 0, 1),
+					Information::Parameter::linear("feedback right", -1, 0, 1),
+				};
+				static Information information(0x0110, Information::Types::effect, "ayeternal Flanger", "Flanger", "jaz, bohan, and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
+				info = &information;
+				initialized = true;
+			}
+			return *info;
 		}
 
 		virtual void describe(std::ostream & out, const int & parameter) const {

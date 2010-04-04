@@ -35,17 +35,23 @@ public:
 
 	static const Information & information() throw()
 	{
-		static const Information::Parameter parameters [] =
-		{
-			Information::Parameter::discrete("response", low, high),
-			Information::Parameter::exponential("cutoff frequency", 15 * pi, 22050 * pi, 22050 * pi),
-			Information::Parameter::linear("resonance", 0, 0, 1),
-			Information::Parameter::exponential("mod. frequency", pi * 2 / 10000, 0, pi * 2 * 2 * 3 * 4 * 5 * 7),
-			Information::Parameter::linear("mod. amplitude", 0, 0, 1),
-			Information::Parameter::linear("mod. stereodephase", 0, 0, pi)
-		};
-		static const Information information(Information::Types::effect, "ayeternal 2-Pole Filter", "2-Pole Filter", "bohan", 2, parameters, sizeof parameters / sizeof *parameters);
-		return information;
+		static bool initialized = false;
+		static Information *info = NULL;
+		if (!initialized) {
+			static const Information::Parameter parameters [] =
+			{
+				Information::Parameter::discrete("response", low, high),
+				Information::Parameter::exponential("cutoff frequency", 73, 7276, 7276),
+				Information::Parameter::linear("resonance", 0, 0, 1),
+				Information::Parameter::exponential("mod. frequency", pi * 2 / 10000, 0, pi * 2 * 2 * 3 * 4 * 5 * 7),
+				Information::Parameter::linear("mod. amplitude", 0, 0, 1),
+				Information::Parameter::linear("mod. stereodephase", 0, 0, pi)
+			};
+			static Information information(0x0110, Information::Types::effect, "ayeternal 2-Pole Filter", "2-Pole Filter", "bohan", 2, parameters, sizeof parameters / sizeof *parameters);
+			info = &information;
+			initialized = true;
+		}
+		return *info;
 	}
 
 	/*override*/ void describe(std::ostream & out, const int & parameter) const
@@ -66,7 +72,7 @@ public:
 			}
 			break;
 		case cutoff_frequency:
-			out << (*this)(cutoff_frequency) / pi << " hertz";
+			out << (*this)(cutoff_frequency) << " hertz";
 			break;
 		case modulation_sequencer_ticks:
 			out << pi * 2 / (*this)(modulation_sequencer_ticks) << " ticks (lines)";
@@ -123,7 +129,7 @@ void Filter_2_Poles::parameter(const int & parameter)
 	switch(parameter)
 	{
 	case cutoff_frequency:
-		cutoff_sin_ = static_cast<Sample>(sin((*this)(cutoff_frequency) * seconds_per_sample()));
+		cutoff_sin_ = static_cast<Sample>((*this)(cutoff_frequency)* 6.0 * seconds_per_sample());
 		break;
 	case modulation_sequencer_ticks:
 		modulation_radians_per_sample_ = (*this)(modulation_sequencer_ticks) / samples_per_sequencer_tick();
@@ -156,7 +162,9 @@ void Filter_2_Poles::Work(Sample l[], Sample r[], int samples, int)
 	}
 
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
-	{	///\todo: for some reason, this is acting as a square-based modulation when it should be sinusoidal.
+	{
+		//\fixme: lowpass 11Khz, ressonance 0.9,  mod freq 15Hz, mod amp 0.5. It can be seen that it stays more time at highest value
+		// than at lowest, suggesting that the lfo it topping the range (without being the real top anyway). This is not coherent with the values.
 		modulation_phase_ = std::fmod(modulation_phase_ + modulation_radians_per_sample_ * samples, pi * 2);
 		update_coefficients();
 	}

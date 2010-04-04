@@ -17,8 +17,14 @@ public:
 	}
 	static const Information & information() throw()
 	{
-		static const Information information(Information::Types::effect, "Negative", "Negative", "who cares", 1, 0, 0);
-		return information;
+		static bool initialized = false;
+		static Information *info = NULL;
+		if (!initialized) {
+			static Information information(0x0100, Information::Types::effect, "Negative", "Negative", "who cares", 1, 0, 0);
+			info = &information;
+			initialized = true;
+		}
+		return *info;
 	}
 	Negative() : Plugin(information()) {}
 	/*override*/ void Work(Sample l[], Sample r[], int samples, int);

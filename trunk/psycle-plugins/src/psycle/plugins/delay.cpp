@@ -31,20 +31,26 @@ public:
 
 	static const Information & information() throw()
 	{
-		const int factors(2 * 3 * 4 * 5 * 7);
-		const Real delay_maximum(Information::Parameter::input_maximum_value / factors);
-		static const Information::Parameter parameters [] =
-		{
-			Information::Parameter::linear("dry", -1, 1, 1),
-			Information::Parameter::linear("wet", -1, 0, 1),
-			Information::Parameter::linear("delay left", 0, 0, delay_maximum),
-			Information::Parameter::linear("feedback left", -1, 0, 1),
-			Information::Parameter::linear("delay right", 0, 0, delay_maximum),
-			Information::Parameter::linear("feedback right", -1, 0, 1),
-			Information::Parameter::discrete("snap to", 3, factors - 1)
-		};
-		static const Information information(Information::Types::effect, "ayeternal Dalay Delay", "Dalay Delay", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
-		return information;
+		static bool initialized = false;
+		static Information *info = NULL;
+		if (!initialized) {
+			const int factors(2 * 3 * 4 * 5 * 7);
+			const Real delay_maximum(Information::Parameter::input_maximum_value / factors);
+			static const Information::Parameter parameters [] =
+			{
+				Information::Parameter::linear("dry", -1, 1, 1),
+				Information::Parameter::linear("wet", -1, 0, 1),
+				Information::Parameter::linear("delay left", 0, 0, delay_maximum),
+				Information::Parameter::linear("feedback left", -1, 0, 1),
+				Information::Parameter::linear("delay right", 0, 0, delay_maximum),
+				Information::Parameter::linear("feedback right", -1, 0, 1),
+				Information::Parameter::discrete("snap to", 3, factors - 1)
+			};
+			static Information information(0x0110, Information::Types::effect, "ayeternal Dalay Delay", "Dalay Delay", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
+			info = &information;
+			initialized = true;
+		}
+		return *info;
 	}
 
 	/*override*/ void describe(std::ostream & out, const int & parameter) const

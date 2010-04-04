@@ -41,6 +41,7 @@ class Plugin : protected plugin_interface::CMachineInterface {
 					}
 					/// creates the information object.
 					Information(
+						short const & version,
 						int const & type,
 						char const description[],
 						char const name[],
@@ -51,8 +52,10 @@ class Plugin : protected plugin_interface::CMachineInterface {
 					) :
 						plugin_interface::CMachineInfo(
 							plugin_interface::MI_VERSION,
+							version,
 							type,
 							parameter_count,
+							//This new cannot be deleted. The interface does not support a destructor.
 							new plugin_interface::CMachineParameter const * [parameter_count],
 							description,
 							name,
@@ -61,7 +64,7 @@ class Plugin : protected plugin_interface::CMachineInterface {
 							columns
 						)
 					{
-						for(int i(0) ; i < parameter_count ; ++i) {
+						for(int i(0) ; i < numParameters ; ++i) {
 							plugin_interface::CMachineParameter const *& p = const_cast<plugin_interface::CMachineParameter const *&>(Parameters[i]);
 							p = &parameters[i];
 						}

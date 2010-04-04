@@ -31,18 +31,24 @@ public:
 
 	static const Information & information() throw()
 	{
-		static const Information::Parameter parameters [] =
-		{
-			Information::Parameter::exponential("input gain", ::exp(-4.), 1, ::exp(+4.)),
-			Information::Parameter::exponential("output gain", ::exp(-4.), 1, ::exp(+4.)),
-			Information::Parameter::linear("positive threshold", 0, +amplitude, +amplitude),
-			Information::Parameter::linear("positive clamp", 0, +amplitude, +amplitude),
-			Information::Parameter::linear("negative threshold", 0, +amplitude, +amplitude),
-			Information::Parameter::linear("negative clamp", 0, +amplitude, +amplitude),
-			Information::Parameter::discrete("symmetric", no, yes)
-		};
-		static const Information information(Information::Types::effect, "ayeternal Dist! Distortion", "Dist!ortion", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
-		return information;
+		static bool initialized = false;
+		static Information *info = NULL;
+		if (!initialized) {
+			static const Information::Parameter parameters [] =
+			{
+				Information::Parameter::exponential("input gain", ::exp(-4.), 1, ::exp(+4.)),
+				Information::Parameter::exponential("output gain", ::exp(-4.), 1, ::exp(+4.)),
+				Information::Parameter::linear("positive threshold", 0, +amplitude, +amplitude),
+				Information::Parameter::linear("positive clamp", 0, +amplitude, +amplitude),
+				Information::Parameter::linear("negative threshold", 0, +amplitude, +amplitude),
+				Information::Parameter::linear("negative clamp", 0, +amplitude, +amplitude),
+				Information::Parameter::discrete("symmetric", no, yes)
+			};
+			static Information information(0x0110, Information::Types::effect, "ayeternal Dist! Distortion", "Dist!ortion", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
+			info = &information;
+			initialized = true;
+		}
+		return *info;
 	}
 
 	/*override*/ void describe(std::ostream & out, const int & parameter) const
