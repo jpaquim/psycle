@@ -6,11 +6,18 @@
 
 namespace raytrace {
 
-pixels::pixels(unsigned int width, unsigned int height) {
-	pixbuf_ = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, width, height);
-	assert(pixbuf_->get_n_channels() == 3);
-	data_.bytes = pixbuf_->get_pixels();
-	row_stride_ = pixbuf_->get_rowstride();
+pixels::pixels(unsigned int width, unsigned int height) :
+	width_(width),
+	height_(height),
+	row_stride_(width * sizeof *data_.words)
+{
+	data_.bytes = new char[width * height * sizeof *data_.words];
+}
+
+void pixels::fill(color c) {
+	for(unsigned int x = 0; x < width_; ++x)
+		for(unsigned int y = 0; y < height_; ++y)
+			put(x, y, c);
 }
 
 }

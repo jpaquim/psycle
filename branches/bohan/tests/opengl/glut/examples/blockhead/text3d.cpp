@@ -104,12 +104,12 @@
 
 using namespace std;
 
-T3DLoadException::T3DLoadException(string message1) : message0(message1) {
+T3DLoadException::T3DLoadException(string const & message) : message_(message) {
 	
 }
 
 string T3DLoadException::message() const {
-	return message0;
+	return message_;
 }
 
 namespace {
@@ -519,7 +519,7 @@ void t3dCleanup() {
 	delete font;
 }
 
-void t3dDraw2D(string str, int hAlign, int vAlign, float lineHeight) {
+void t3dDraw2D(string const & str, int hAlign, int vAlign, float lineHeight) {
 	GLboolean wasCulling;
 	glGetBooleanv(GL_CULL_FACE, &wasCulling);
 	glDisable(GL_CULL_FACE);
@@ -531,7 +531,7 @@ void t3dDraw2D(string str, int hAlign, int vAlign, float lineHeight) {
 	}
 }
 
-void t3dDraw3D(string str,
+void t3dDraw3D(string const & str,
 			   int hAlign, int vAlign,
 			   float depth,
 			   float lineHeight) {
@@ -552,7 +552,7 @@ void t3dDraw3D(string str,
 	glFrontFace(frontFace);
 }
 
-float t3dDrawWidth(string str) {
+float t3dDrawWidth(string const & str) {
 	float bestWidth = 0;
 	int i = 0;
 	while (str[i] != '\0') {
@@ -571,7 +571,7 @@ float t3dDrawWidth(string str) {
 	return bestWidth;
 }
 
-float t3dDrawHeight(string str, float lineHeight) {
+float t3dDrawHeight(string const & str, float lineHeight) {
 	int numLines = 1;
 	for(int i = 0; str[i] != '\0'; i++) {
 		if (str[i] == '\n') {
@@ -581,12 +581,4 @@ float t3dDrawHeight(string str, float lineHeight) {
 	
 	return (numLines - 1) * lineHeight + 1;
 }
-
-
-
-
-
-
-
-
 

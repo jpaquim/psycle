@@ -5,7 +5,7 @@
 #define RAYTRACE__REAL
 #pragma once
 
-#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math.hpp>
 
 namespace raytrace {
 

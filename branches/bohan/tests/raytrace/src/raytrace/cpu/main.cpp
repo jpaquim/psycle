@@ -8,7 +8,7 @@
 #include "matrix4.hpp"
 #include <gtkmm/main.h>
 #include <boost/bind.hpp>
-#include <thread>
+#include <universalis/stdlib/thread.hpp>
 #include <limits>
 
 namespace raytrace {
@@ -143,6 +143,7 @@ void animate(scene & scene, view & view, render & render) {
 
 int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	Gtk::Main main(argument_count, arguments);
+	Gtk::GL::init(argument_count, arguments);
 	scene0 scene;
 	view view;
 	view.from(0, 0, 0);

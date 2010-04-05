@@ -2,13 +2,13 @@
 // copyright 2009-2009 psycledelics http://psycle.pastnotecut.org : johan boule
 
 #include "render.hpp"
-#include <universalis/os/cpu_affinity.hpp>
+#include <universalis/stdlib/thread.hpp>
 #include <boost/bind.hpp>
 #include <cstdlib>
 
 namespace raytrace {
 
-render::render(typenames::scene const & scene, typenames::view const & view, typenames::pixels & pixels)
+render::render(class scene const & scene, class view const & view, class pixels & pixels)
 :
 	scene_(scene),
 	view_(view),
@@ -54,7 +54,7 @@ void inline render::trace(unsigned int x, unsigned int y) {
 
 void render::start() {
 	process_requested_ = stop_requested_ = false;
-	thread_count_ = universalis::os::cpu_affinity::cpu_count();
+	thread_count_ = universalis::stdlib::thread::hardware_concurrency();
 	{ // thread count env var
 		char const * const env(std::getenv("RAYTRACE_THREADS"));
 		if(env) {
