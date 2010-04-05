@@ -9,18 +9,34 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/image.h>
+#include <gtkglmm.h>
 
 namespace raytrace {
+
+class gl_scene :
+	public Gtk::DrawingArea,
+	public Gtk::GL::Widget<gl_scene>
+{
+	public:
+  		gl_scene(render &);
+
+	protected:
+  		virtual void on_realize();
+  		virtual bool on_configure_event(GdkEventConfigure* event);
+  		virtual bool on_expose_event(GdkEventExpose* event);
+
+	private:
+		friend class window;
+		render & render_;
+};
 
 class window : public Gtk::Window {
 	public:
 		window(render &);
 		void update();
 	private:
-		render & render_;
+		gl_scene gl_scene_;
 		Gtk::VBox v_box_;
-		Gtk::Image image_;
 		Gtk::Button button_;
 		void on_button_clicked();
 };

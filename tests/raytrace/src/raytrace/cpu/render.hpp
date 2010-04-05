@@ -7,42 +7,41 @@
 
 #include "scene.hpp"
 #include "pixels.hpp"
-#include "typenames.hpp"
 #include <boost/signal.hpp>
-#include <thread>
-#include <mutex>
-#include <condition>
+#include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
 #include <list>
 
 namespace raytrace {
 
 class render {
 	public:
-		render(typenames::scene const & scene, typenames::view const & view, typenames::pixels & pixels);
+		render(class scene const & scene, class view const & view, class pixels & pixels);
 		void start();
 		void process();
 		void wait();
 		void stop();
 
 	public:
-		typenames::scene const & scene() const { return scene_; }
+		class scene const & scene() const { return scene_; }
 	private:
-		typenames::scene const & scene_;
+		class scene const & scene_;
 		
 	public:
-		typenames::view const & view() const { return view_; }
-		void view(typenames::view & view) { view_ = view; }
+		class view const & view() const { return view_; }
+		void view(class view & view) { view_ = view; }
 	private:
-		typenames::view view_;
+		class view view_;
 		void compute_view();
 		real x_offset_, y_offset_, z_offset_;
 		real xx_ratio_, xy_ratio_, xz_ratio_;
 		real yx_ratio_, yy_ratio_, yz_ratio_;
 
 	public:
-		typenames::pixels & pixels() { return pixels_; }
+		class pixels & pixels() { return pixels_; }
 	private:
-		typenames::pixels & pixels_;
+		class pixels & pixels_;
 
 	public:
 		boost::signal<void ()> & update_signal() throw() { return update_signal_; }
