@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2009-2009 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2009-2010 psycledelics http://psycle.pastnotecut.org : johan boule
 
 #include "render.hpp"
 #include <universalis/stdlib/thread.hpp>
@@ -53,6 +53,7 @@ void inline render::trace(unsigned int x, unsigned int y) {
 }
 
 void render::start() {
+	if(!threads_.empty()) return;
 	process_requested_ = stop_requested_ = false;
 	thread_count_ = universalis::stdlib::thread::hardware_concurrency();
 	{ // thread count env var
@@ -76,15 +77,20 @@ void render::start() {
 }
 		
 void render::stop() {
+	if(threads_.empty()) return;
 	{ scoped_lock lock(mutex_);
 		stop_requested_ = true;
 	}
-	condition_.notify_all();
+	condition_.notify_all(); // TODO calling start() and stop() right after may not work
 	for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
 		(**i).join();
 		delete *i;
 	}
 	threads_.clear();
+}
+
+void render::resize(unsigned int width, unsigned int height) {
+	pixels_.resize(width, height);
 }
 
 void render::process() {

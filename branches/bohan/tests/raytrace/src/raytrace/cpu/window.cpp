@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2009-2009 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2009-2010 psycledelics http://psycle.pastnotecut.org : johan boule
 
 #include "window.hpp"
 #include "lock.hpp"
@@ -56,40 +56,13 @@ gl_scene::gl_scene(render & render) :
 }
 
 void gl_scene::on_realize()	{
+	std::clog << "realize\n";
+
 	Gtk::DrawingArea::on_realize();
 	Glib::RefPtr<Gdk::GL::Window> glwindow = get_gl_window();
 
 	if(!glwindow->gl_begin(get_gl_context())) return;
-
-	{ // set orthographic coordinate system with 0,0 in lower-left corner
-		int const width = get_width(), height = get_height();
-		GLint v[2];
-		glGetIntegerv(GL_MAX_VIEWPORT_DIMS, v);
-		glLoadIdentity();
-		glViewport(width - v[0], height - v[1], v[0], v[1]);
-		glOrtho(width - v[0], width, height - v[1], height, -1, 1);
-	}
-
-	glwindow->gl_end();
-}
-
-bool gl_scene::on_configure_event(GdkEventConfigure* event) {
-	Glib::RefPtr<Gdk::GL::Window> glwindow = get_gl_window();
-
-	if(!glwindow->gl_begin(get_gl_context())) return false;
-
-	glViewport(0, 0, get_width(), get_height());
-
-	glwindow->gl_end();
-
-	return true;
-}
-
-bool gl_scene::on_expose_event(GdkEventExpose* event) {
-	Glib::RefPtr<Gdk::GL::Window> glwindow = get_gl_window();
-
-	if(!glwindow->gl_begin(get_gl_context())) return false;
-
+	
 	// Disable stuff that's likely to slow down glDrawPixels.
 	// (Omit as much of	this as possible, when you know in advance that the OpenGL state will already be set correctly.)
 	glDisable(GL_ALPHA_TEST);
@@ -127,7 +100,40 @@ bool gl_scene::on_expose_event(GdkEventExpose* event) {
 	#ifdef GL_EXT_texture3D
 		glDisable(GL_TEXTURE_3D_EXT);
 	#endif
+
+	glwindow->gl_end();
+}
+
+bool gl_scene::on_configure_event(GdkEventConfigure* event) {
+	std::clog << "configure\n";
 	
+	Glib::RefPtr<Gdk::GL::Window> glwindow = get_gl_window();
+
+	if(!glwindow->gl_begin(get_gl_context())) return false;
+
+	int const width = get_width(), height = get_height();
+	{ // set orthographic coordinate system with 0,0 in lower-left corner
+		GLint v[2];
+		glGetIntegerv(GL_MAX_VIEWPORT_DIMS, v);
+		glLoadIdentity();
+		glViewport(width - v[0], height - v[1], v[0], v[1]);
+		glOrtho(width - v[0], width, height - v[1], height, -1, 1);
+	}
+
+	glwindow->gl_end();
+
+	render_.resize(width, height);
+
+	return true;
+}
+
+bool gl_scene::on_expose_event(GdkEventExpose* event) {
+	std::clog << "expose\n";
+
+	Glib::RefPtr<Gdk::GL::Window> glwindow = get_gl_window();
+
+	if(!glwindow->gl_begin(get_gl_context())) return false;
+
 	int const width = render_.pixels().width(), height = render_.pixels().height();
 	char const * const pixels = render_.pixels();
 	GLenum const format = GL_RGBA;

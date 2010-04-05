@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2009-2009 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2009-2010 psycledelics http://psycle.pastnotecut.org : johan boule
 
 #include "main.hpp"
 #include "render.hpp"
@@ -127,17 +127,26 @@ class scene0 : public scene {
 		}
 };
 
-void animate(scene & scene, view & view, render & render) {
-	real z(0);
+void animate(scene0 & scene, view & view, render & render) {
+	std::this_thread::sleep(std::milliseconds(250)); // TODO calling start() and stop() right after may not work
+	real z(0), t(0);
 	while(true) {
 		view.from(0, 0, z);
+		//z -= 0.01;
+		if(z < -1) z = 1;
 		render.view(view);
 		//std::cout << render.view().from.z << '\n';
+
 		render.process();
-		std::this_thread::sleep(std::milliseconds(20));
+		std::this_thread::sleep(std::milliseconds(10));
 		render.wait();
-		z -= 0.01;
-		if(z < -1) z = 1;
+		
+		scene.s2.pos.x = (1 + t / 1000) * std::cos(t);
+		scene.s2.pos.y = (1 + t / 1000) * std::sin(t);
+		scene.s3.pos.x = (1 + t / 2000) * std::cos(t * 1.33);
+		scene.s3.pos.y = (1 + t / 2000) * std::sin(t * 1.33);
+		
+		t += 0.02;
 	}
 }
 
