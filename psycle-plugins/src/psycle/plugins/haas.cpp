@@ -89,7 +89,7 @@ public:
 			/* separator                           = */ Information::Parameter(),
 			/* channel_mix                         = */ Information::Parameter::discrete("channel mix", normal, mono)
 		};
-		static const Information information(Information::Types::effect, "Haas stereo time delay spatial localization", "Haas", "bohan/dilvie collaboration", 1, parameters, sizeof parameters / sizeof *parameters);
+		static const Information information(0x0100, Information::Types::effect, "Haas stereo time delay spatial localization", "Haas", "bohan/dilvie collaboration", 1, parameters, sizeof parameters / sizeof *parameters);
 		return information;
 	}
 

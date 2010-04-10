@@ -45,7 +45,7 @@ public:
 			Information::Parameter::linear("Bandwidth 4", 0,								0,												pi/3.0f)
 		};
 
-		static const Information information(
+		static const Information information(0x0100,
 			Information::Types::effect
 			, "dw eq"
 			, "eq"
