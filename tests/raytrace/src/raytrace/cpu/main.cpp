@@ -141,10 +141,10 @@ void animate(scene0 & scene, view & view, render & render) {
 		std::this_thread::sleep(std::milliseconds(10));
 		render.wait();
 		
-		scene.s2.pos.x = (1 + t / 1000) * std::cos(t);
-		scene.s2.pos.y = (1 + t / 1000) * std::sin(t);
-		scene.s3.pos.x = (1 + t / 2000) * std::cos(t * 1.33);
-		scene.s3.pos.y = (1 + t / 2000) * std::sin(t * 1.33);
+		scene.s2.pos.x = (1 + t / 100) * std::cos(t);
+		scene.s2.pos.y = (1 + t / 100) * std::sin(t);
+		scene.s3.pos.x = (1 + t / 200) * std::cos(t * 1.33);
+		scene.s3.pos.y = (1 + t / 200) * std::sin(t * 1.33);
 		
 		t += 0.02;
 	}
