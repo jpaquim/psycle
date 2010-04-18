@@ -35,7 +35,7 @@ Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id)
 	SetAudioRange(32768.0f);
 	//DefineStereoOutput(1);
 
-	_resampler.SetQuality(dsp::R_LINEAR);
+	resampler_.quality(dsp::resampler::quality::linear);
 	for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 	{
 		_voices[i]._envelope._stage = ENV_OFF;
@@ -224,7 +224,6 @@ void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 {
 	assert(numsamples >= 0);
 	const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-	dsp::PRESAMPLERFN pResamplerWork;
 	Voice* pVoice = &_voices[voice];
 	float* pSamplesL = _pSamplesL+startSample;
 	float* pSamplesR = _pSamplesR+startSample;
@@ -271,7 +270,7 @@ void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 		NoteOff( voice );
 	}
 
-	pResamplerWork = _resampler._pWorkFn;
+	dsp::resampler::work_func_type resampler_work = resampler_.work;
 	while (numsamples)
 	{
 		left_output=0;
@@ -279,13 +278,13 @@ void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 
 		if (pVoice->_envelope._stage != ENV_OFF)
 		{
-			left_output = pResamplerWork(pVoice->_wave._pL + (pVoice->_wave._pos >> 32),
+			left_output = resampler_work(pVoice->_wave._pL + (pVoice->_wave._pos >> 32),
 								pVoice->_wave._pos>>32,
 								pVoice->_wave._pos & 0xFFFFFFFF,
 								pVoice->_wave._length);
 			if (pVoice->_wave._stereo)
 			{
-				right_output = pResamplerWork(pVoice->_wave._pR + (pVoice->_wave._pos >> 32),
+				right_output = resampler_work(pVoice->_wave._pR + (pVoice->_wave._pos >> 32),
 									pVoice->_wave._pos >> 32,
 									pVoice->_wave._pos & 0xFFFFFFFF,
 									pVoice->_wave._length);
@@ -494,17 +493,17 @@ bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 			
 			switch (temp) {
 			case 2:
-				_resampler.SetQuality(dsp::R_SPLINE);
+				resampler_.quality(dsp::resampler::quality::spline);
 				break;
 			case 3:
-				_resampler.SetQuality(dsp::R_BANDLIM);
+				resampler_.quality(dsp::resampler::quality::band_limited);
 				break;
 			case 0:
-				_resampler.SetQuality(dsp::R_NONE);
+				resampler_.quality(dsp::resampler::quality::none);
 				break;
 			default:
 			case 1:
-				_resampler.SetQuality(dsp::R_LINEAR);
+				resampler_.quality(dsp::resampler::quality::linear);
 				break;
 			}
 		}
@@ -519,17 +518,17 @@ void Sampler::SaveSpecificChunk(RiffFile* pFile) const
 	pFile->Write(size);
 	temp = _numVoices;
 	pFile->Write(temp); // numSubtracks
-	switch (_resampler.GetQuality()) {
-	case dsp::R_NONE:
+	switch (resampler_.quality()) {
+	case dsp::resampler::quality::none:
 		temp = 0;
 		break;
-	case dsp::R_LINEAR:
+	case dsp::resampler::quality::linear:
 		temp = 1;
 		break;
-	case dsp::R_SPLINE:
+	case dsp::resampler::quality::spline:
 		temp = 2;
 		break;
-	case dsp::R_BANDLIM:
+	case dsp::resampler::quality::band_limited:
 		temp = 3;
 		break;
 	}

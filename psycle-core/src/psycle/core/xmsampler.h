@@ -161,15 +161,15 @@ XMSampler::Channel::PerformFX().
 
 		virtual void Init(XMInstrument::WaveData* const wave, const int layer);
 		virtual void NoteOff(void);
-		virtual void Work(float * const pLeftw,float * const pRightw, const helpers::dsp::PRESAMPLERFN pResamplerWork)
+		virtual void Work(float * const pLeftw,float * const pRightw, const helpers::dsp::resampler::work_func_type resampler_work)
 		{
 			//Process sample
-			*pLeftw = pResamplerWork(
+			*pLeftw = resampler_work(
 				pLeft() + (m_Position >> 32),
 				m_Position >> 32, m_Position & 0xFFFFFFFF, Length());
 			if (IsStereo())
 			{
-				*pRightw = pResamplerWork(
+				*pRightw = resampler_work(
 					pRight() + (m_Position >> 32),
 					m_Position >> 32, m_Position & 0xFFFFFFFF, Length());
 			}
@@ -443,7 +443,7 @@ XMSampler::Channel::PerformFX().
 		void ResetEffects();
 
 		void VoiceInit(int channelNum,int instrumentNum);
-		void Work(int numSamples,float * const pSamplesL,float * const pSamplesR, const helpers::dsp::Resampler& _resampler);
+		void Work(int numSamples,float * const pSamplesL,float * const pSamplesR, const helpers::dsp::resampler & resampler);
 
 		// This one is Tracker Tick (Mod-tick)
 		void Tick();
@@ -1081,15 +1081,16 @@ XMSampler::Channel::PerformFX().
 	}
 
 	/// set resampler quality
-	void ResamplerQuality(const helpers::dsp::ResamplerQuality value){
-		_resampler.SetQuality(value);
+	void ResamplerQuality(helpers::dsp::resampler::quality::type value){
+		resampler_.quality(value);
 	}
-
-	helpers::dsp::ResamplerQuality ResamplerQuality() const {
-		return _resampler.GetQuality();
+	helpers::dsp::resampler::quality::type ResamplerQuality() const {
+		return resampler_.quality();
 	}
+	
 	bool UseFilters(void) const { return m_UseFilters; }
 	void UseFilters(const bool usefilters) { m_UseFilters = usefilters; }
+	
 	int PanningMode() const { return m_PanningMode;}
 	void PanningMode(const int value) { m_PanningMode= value;}
 
@@ -1115,7 +1116,7 @@ protected:
 
 	Voice m_Voices[MAX_POLYPHONY];
 	XMSampler::Channel m_Channel[MAX_TRACKS];
-	helpers::dsp::Cubic _resampler;
+	helpers::dsp::cubic_resampler resampler_;
 	ZxxMacro zxxMap[128];
 
 

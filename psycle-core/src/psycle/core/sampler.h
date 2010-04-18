@@ -132,7 +132,7 @@ namespace psycle { namespace core {
 		public:
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
-			psycle::helpers::dsp::Cubic _resampler;
+			psycle::helpers::dsp::cubic_resampler resampler_;
 
 			void PerformFx(int voice);
 			void VoiceWork( int startSample, int numsamples, int voice );

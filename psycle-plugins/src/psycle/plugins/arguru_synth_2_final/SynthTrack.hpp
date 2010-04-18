@@ -2,8 +2,10 @@
 #include "filter.hpp"
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/dsp.hpp>
+
 ///\file SynthTrack.h
 ///\brief interface for the CSynthTrack class.
+
 #define FILTER_CALC_TIME 64
 #define TWOPI            2.0*math::pi
 
@@ -82,7 +84,7 @@ private:
 	//in float since it is compared with OSCPosition
 	float waveTableSize;
 	float wavetableCorrection;
-	dsp::Cubic resampler;
+	dsp::cubic_resampler resampler;
 
 	int sp_cmd;
 	int sp_val;
@@ -190,14 +192,14 @@ inline float CSynthTrack::GetSample()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-				output=resampler._pWorkFnFloat(syntp->pWave, OSC1Position, math::lrint<int,float>(waveTableSize))*OSC1Vol;
+				output = resampler.work_float(syntp->pWave, OSC1Position, math::lrint<int,float>(waveTableSize))*OSC1Vol;
 			}
 			if ( syntp->wave2noise) {
 				//This assumes MAX_RAND is 0x7fff
 				output += (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				output += resampler._pWorkFnFloat(syntp->pWave2, OSC2Position, math::lrint<int,float>(waveTableSize))*OSC2Vol;
+				output += resampler.work_float(syntp->pWave2, OSC2Position, math::lrint<int,float>(waveTableSize))*OSC2Vol;
 			}
 		}
 		else
@@ -262,7 +264,7 @@ inline float CSynthTrack::GetSampleOsc1()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-				output=resampler._pWorkFnFloat(syntp->pWave, OSC1Position, math::lrint<int,float>(waveTableSize))*OSC1Vol;
+				output = resampler.work_float(syntp->pWave, OSC1Position, math::lrint<int,float>(waveTableSize))*OSC1Vol;
 			}
 		}
 		else
@@ -304,7 +306,7 @@ inline float CSynthTrack::GetSampleOsc2()
 				output = (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				output = resampler._pWorkFnFloat(syntp->pWave2, OSC2Position, math::lrint<int,float>(waveTableSize))*OSC2Vol;
+				output = resampler.work_float(syntp->pWave2, OSC2Position, math::lrint<int,float>(waveTableSize))*OSC2Vol;
 			}
 		}
 		else

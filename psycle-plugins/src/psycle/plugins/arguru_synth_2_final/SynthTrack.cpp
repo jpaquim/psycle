@@ -1,5 +1,6 @@
 #include "SynthTrack.hpp"
-#include <math.h> ///\todo should be <cmath>
+#include <cmath>
+
 ///\file arguru_synth_2_final/SynthTrack.cpp
 ///\brief implementation of the CSynthTrack class.
 
@@ -54,7 +55,7 @@ CSynthTrack::CSynthTrack()
 	VcfEnvValue=0.0f;
 	Stage5AmpVal=0.0f;
 	vibrato=false;
-	resampler.SetQuality(dsp::ResamplerQuality::R_SPLINE);
+	resampler.quality(dsp::resampler::quality::spline);
 }
 
 CSynthTrack::~CSynthTrack()

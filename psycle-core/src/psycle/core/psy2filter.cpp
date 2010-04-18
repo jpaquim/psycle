@@ -813,14 +813,14 @@ bool Sampler::LoadPsy2FileFormat(RiffFile * pFile) {
 	pFile->Read(i); // interpolation
 	switch (i) {
 		case 2:
-			_resampler.SetQuality(dsp::R_SPLINE);
+			resampler_.quality(dsp::resampler::quality::spline);
 			break;
 		case 0:
-			_resampler.SetQuality(dsp::R_NONE);
+			resampler_.quality(dsp::resampler::quality::none);
 			break;
 		case 1:
 		default:
-			_resampler.SetQuality(dsp::R_LINEAR);
+			resampler_.quality(dsp::resampler::quality::linear);
 			break;
 	}
 

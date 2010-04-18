@@ -452,13 +452,11 @@ void XMSampler::Voice::VoiceInit(int channelNum, int instrumentNum)
 
 }// XMSampler::Voice::VoiceInit)
 
-void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, const dsp::Resampler& _resampler)
-{
-	dsp::PRESAMPLERFN pResamplerWork;
-	pResamplerWork = _resampler._pWorkFn;
-
+void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, const dsp::resampler & resampler) {
 	float left_output = 0.0f;
 	float right_output = 0.0f;
+
+	dsp::resampler::work_func_type resampler_work = resampler.work;
 
 	//int tmpcount=0;
 	while (numSamples)
@@ -466,7 +464,7 @@ void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 1 : Get the unprocessed wave data.
 
-		m_WaveDataController.Work(&left_output,&right_output,pResamplerWork);
+		m_WaveDataController.Work(&left_output, &right_output, resampler_work);
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Step 2 : Process the Envelopes.
@@ -1971,7 +1969,7 @@ XMSampler::XMSampler(MachineCallbacks* callb,Machine::id_type id)
 
 	_numPars = 0;
 	_numVoices=0;
-	_resampler.SetQuality(dsp::R_LINEAR);
+	resampler_.quality(dsp::resampler::quality::linear);
 
 	m_bAmigaSlides = false;
 	m_UseFilters = true;
@@ -2407,7 +2405,7 @@ void XMSampler::WorkVoices(int startSample, int numsamples)
 		{
 			//VoiceWork(ns, voice);
 			if(m_Voices[voice].IsPlaying()){
-				m_Voices[voice].Work(remainingticks, psamL, psamR, _resampler);
+				m_Voices[voice].Work(remainingticks, psamL, psamR, resampler_);
 			}
 		}
 		// Do the Tick jump.
@@ -2429,7 +2427,7 @@ void XMSampler::WorkVoices(int startSample, int numsamples)
 		{
 			//VoiceWork(ns, voice);
 			if(m_Voices[voice].IsPlaying()){
-				m_Voices[voice].Work(numsamples,psamL,psamR,_resampler);
+				m_Voices[voice].Work(numsamples,psamL,psamR, resampler_);
 			}
 		}
 	}
@@ -2506,12 +2504,11 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile) const
 	riffFile->Write(size);
 	riffFile->Write(VERSION);
 	riffFile->Write(_numVoices); // numSubtracks
-	switch (_resampler.GetQuality())
-	{
-		case dsp::R_NONE: temp = 0; break;
-		case dsp::R_SPLINE: temp = 2; break;
-		case dsp::R_BANDLIM: temp = 3; break;
-		case dsp::R_LINEAR:
+	switch(resampler_.quality()) {
+		case dsp::resampler::quality::none: temp = 0; break;
+		case dsp::resampler::quality::spline: temp = 2; break;
+		case dsp::resampler::quality::band_limited: temp = 3; break;
+		case dsp::resampler::quality::linear:
 		default: temp = 1;
 	}
 	riffFile->Write(temp); // quality
@@ -2590,15 +2587,14 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 	if ( (filevers&0xFFFF0000) == VERSION_ONE )
 	{
 		riffFile->Read(_numVoices); // numSubtracks
-		riffFile->Read(temp); // quality
 
-		switch (temp)
-		{
-			case 2:  _resampler.SetQuality(dsp::R_SPLINE); break;
-			case 3:  _resampler.SetQuality(dsp::R_BANDLIM); break;
-			case 0:  _resampler.SetQuality(dsp::R_NONE); break;
+		riffFile->Read(temp); // quality
+		switch(temp) {
+			case 2:  resampler_.quality(dsp::resampler::quality::spline); break;
+			case 3:  resampler_.quality(dsp::resampler::quality::band_limited); break;
+			case 0:  resampler_.quality(dsp::resampler::quality::none); break;
 			case 1:
-			default: _resampler.SetQuality(dsp::R_LINEAR);
+			default: resampler_.quality(dsp::resampler::quality::linear);
 		}
 
 		for (int i=0; i < 128; i++) {
