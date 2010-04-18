@@ -23,7 +23,7 @@
 namespace psycle { namespace host {
 
 Player * Global::pPlayer(0);
-helpers::dsp::Resampler * Global::pResampler(0);
+helpers::dsp::resampler * Global::pResampler(0);
 Configuration * Global::pConfig(0);
 
 #if !defined WINAMP_PLUGIN
@@ -32,8 +32,8 @@ Configuration * Global::pConfig(0);
 
 Global::Global() {
 	pConfig = new Configuration();
-	pResampler = new helpers::dsp::Cubic();
-	pResampler->SetQuality(helpers::dsp::R_LINEAR);
+	pResampler = new helpers::dsp::cubic_resampler;
+	pResampler->quality(helpers::dsp::resampler::quality::linear);
 	#if !defined WINAMP_PLUGIN
 	pInputHandler = &InputHandler::instance();
 	#endif //!defined WINAMP_PLUGIN

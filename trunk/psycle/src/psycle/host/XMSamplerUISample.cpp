@@ -40,8 +40,8 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 		int const my=nHeight/2;
 		if(rWave().IsWaveStereo()) wrHeight=my/2;
 		else wrHeight=my;
-		helpers::dsp::Cubic resampler;
-		resampler.SetQuality(helpers::dsp::R_SPLINE);
+		helpers::dsp::cubic_resampler resampler;
+		resampler.quality(helpers::dsp::resampler::quality::spline);
 
 		dc.FillSolidRect(&rect,RGB(255,255,255));
 		dc.SetBkMode(TRANSPARENT);
@@ -118,7 +118,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 					ULARGE_INTEGER posin;
 					posin.QuadPart = c * OffsetStep* 4294967296.0f;
 					yHi=0;
-					yLow=resampler._pWorkFn(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
+					yLow = resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
 
 					int const ryLow = (wrHeight * yLow)/32768;
 					int const ryHi = (wrHeight * yHi)/32768;
@@ -170,7 +170,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 						ULARGE_INTEGER posin;
 						posin.QuadPart = c * OffsetStep* 4294967296.0f;
 						yHi=0;
-						yLow=resampler._pWorkFn(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
+						yLow = resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
 
 						int const ryLow = (wrHeight * yLow)/32768;
 						int const ryHi = (wrHeight * yHi)/32768;

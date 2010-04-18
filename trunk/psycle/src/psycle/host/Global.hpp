@@ -8,6 +8,7 @@
 #include <psycle/core/constants.h>
 #include <psycle/core/commands.h>
 #include <psycle/helpers/math.hpp>
+#include <psycle/helpers/dsp.hpp>
 
 namespace psycle {
 namespace core {
@@ -28,7 +29,7 @@ class Global {
 
 		static Player * pPlayer;
 		static Configuration * pConfig;
-		static dsp::Resampler * pResampler;
+		static dsp::resampler * pResampler;
 
 		#if !defined WINAMP_PLUGIN
 			static InputHandler* pInputHandler;
@@ -37,7 +38,7 @@ class Global {
 		static Song& song();
 		static Player& player() { return *pPlayer; }
 		static Configuration & configuration() { return *pConfig; }
-		static dsp::Resampler & resampler() { return *pResampler; }
+		static dsp::resampler & resampler() { return *pResampler; }
 };
 
 }}
