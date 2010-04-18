@@ -45,7 +45,7 @@ namespace psycle { namespace host {
 			m_interpol.AddString("Spline [Medium Quality]");
 			m_interpol.AddString("512p Sinc [Highest Quality]");
 
-			m_interpol.SetCurSel(_pMachine->_resampler.GetQuality());
+			m_interpol.SetCurSel(_pMachine->resampler_.quality());
 
 			SetWindowText(_pMachine->GetEditName().c_str());
 
@@ -80,7 +80,7 @@ namespace psycle { namespace host {
 
 		void CGearTracker::OnSelchangeCombo1() 
 		{
-			_pMachine->_resampler.SetQuality((psycle::helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
+			_pMachine->resampler_.quality((psycle::helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 		}
 
 		BOOL CGearTracker::Create()

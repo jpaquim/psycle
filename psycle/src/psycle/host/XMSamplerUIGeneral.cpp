@@ -137,7 +137,7 @@ Ex: Pitch slide down");
 
 	void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
 	{
-		_pMachine->ResamplerQuality((helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
+		_pMachine->ResamplerQuality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 	}
 
 	void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
