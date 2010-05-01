@@ -1,262 +1,280 @@
-/*!
-  \file fliptest.c
-  \author Nafees Bin Zafar <nafees@d2.com>
+/**
 
-  $Id: fliptest.c,v 1.1.1.1 2003/02/20 08:51:07 nafees Exp $
+	\file fliptest.c
+	\author Nafees Bin Zafar <nafees@d2.com>
 
-  \brief Test of OpenGL glDrawPixels speed for use in flipbooks.
+	$Id: fliptest.c,v 1.1.1.1 2003/02/20 08:51:07 nafees Exp $
 
-  This program simulates a flipbook viewer drawing a sequence of
-  images out of memory. It reports the frames per second it achieves
-  on stdout.  Real flipbook programs can be written to reliably get
-  any speed up to the speed this program reports.
+	\brief Test of OpenGL glDrawPixels speed for use in flipbooks.
 
-  To run it you provide it with three arguments: width, height, and
-  'd' for doublebuffer or 's' for singlebuffer:
+**/
 
-  fliptest 640 480 d  # typical video playback
-  fliptest 1024 554 d # typical 1/2 rez film with letterbox
-  fliptest 1024 778 d # typical 1/2 rez full-ap film
-  fliptest 2048 1107 d # typical full-rez film with letterbox
-  fliptest 2048 1556 d # full rez full-ap film
-  fliptest 1828 1371 d # full rez acadamy frame
-  fliptest 1828 685 d  # anamorphic acadamy images, 1/2 rez vertically
+/*
 
-  The vertical refresh is the max achievable performance. It should
-  work no matter where the window is placed or if portions are clipped
-  off by the edges of the screen. Lowest acceptable values are 24 for
-  the large ones and 30 for the video.
+	This program simulates a flipbook viewer drawing a sequence of
+	images out of memory. It reports the frames per second it achieves
+	on stdout.  Real flipbook programs can be written to reliably get
+	any speed up to the speed this program reports.
 
-  This can also be used to detect tearing of the image due to lack of
-  synchronization between the double buffer swaps and the screen. This
-  should never produce these artifacts when double buffering is on, no
-  matter where the window is placed on the screen.  However particular
-  OpenGL implementations often require a driver or environment setting
-  to enable redraw sync.
+	To run it you provide it with three arguments: width, height, and
+	'd' for double buffer or 's' for single buffer:
 
-  For NVidia's OpenGL implementation, under linux, the environment
-  variable __GL_SYNC_TO_VBLANK must be set to 1.
-  
-  If tearing is prevented in single buffer mode that is nice, but not
-  required.
+	fliptest 640 480 d  # typical video playback
+	fliptest 1024 554 d # typical 1/2 rez film with letterbox
+	fliptest 1024 778 d # typical 1/2 rez full-ap film
+	fliptest 2048 1107 d # typical full-rez film with letterbox
+	fliptest 2048 1556 d # full rez full-ap film
+	fliptest 1828 1371 d # full rez acadamy frame
+	fliptest 1828 685 d  # anamorphic acadamy images, 1/2 rez vertically
 
-  Speeds higher than the vertical refresh rate are NOT wanted. For
-  double buffered at least, if this runs faster it is a system error.
-  This is also undesirable because a lot of time will be wasted
-  drawing images the user does not see.
+	The vertical refresh is the max achievable performance. It should
+	work no matter where the window is placed or if portions are clipped
+	off by the edges of the screen. Lowest acceptable values are 24 for
+	the large ones and 30 for the video.
 
-  Compilation instructions:
+	This can also be used to detect tearing of the image due to lack of
+	synchronization between the double buffer swaps and the screen. This
+	should never produce these artifacts when double buffering is on, no
+	matter where the window is placed on the screen.  However particular
+	OpenGL implementations often require a driver or environment setting
+	to enable redraw sync.
 
-  Linux:
-  cc -O2 fliptest.c -o fliptest -L/usr/X11R6/lib -lGL -lX11 -lXext
+	For NVidia's OpenGL implementation, under linux, the environment
+	variable __GL_SYNC_TO_VBLANK must be set to 1.
 
-  Irix:
-  cc -o fliptest fliptest.c -lGL -lX11 -lXext
-  
-  NT:
-  cl -O2 fliptest.c OpenGL32.lib gdi32.lib user32.lib
+	If tearing is prevented in single buffer mode that is nice, but not
+	required.
+
+	Speeds higher than the vertical refresh rate are NOT wanted. For
+	double buffered at least, if this runs faster it is a system error.
+	This is also undesirable because a lot of time will be wasted
+	drawing images the user does not see.
+
+	Compilation instructions:
+
+	Linux:
+	cc -O2 fliptest.c -o fliptest -L/usr/X11R6/lib -lGL -lX11 -lXext
+
+	Irix:
+	cc -o fliptest fliptest.c -lGL -lX11 -lXext
+
+	NT:
+	cl -O2 fliptest.c OpenGL32.lib gdi32.lib user32.lib
+
 */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream>
+#include <sstream>
 
-/*======================================================================*/
 #ifdef _WIN32
+	#include <windows.h>
+#endif
 
-#include <windows.h>
-#include <GL/gl.h>
+#ifdef __APPLE__
+	#include <OpenGL/OpenGL.h>
+	//#include <GLUT/glut.h>
+#else
+	#include <GL/gl.h>
+	//#include <GL/glut.h>
+#endif
 
-double elapsed_time(void) {
-  static long prevclock;
-  long newclock = GetTickCount();
-  double elapsed = (newclock-prevclock)/1000.0;
-  prevclock = newclock;
-  return elapsed;
-}
+void make_window(unsigned int width, unsigned int height, bool double_buf);
+void swap_buffers();
+void do_system_stuff();
+double elapsed_time();
+GLenum format = GL_RGBA;
 
-HWND window;
-HDC dc;
-HGLRC context;
+#ifdef _WIN32
+	/******************************************************************************/
 
-static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-  switch (uMsg) {
-  case WM_QUIT:
-  case WM_CLOSE:
-    exit(0);
-  }
-  return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
+	HWND window;
+	HDC dc;
+	HGLRC context;
 
-void make_window(int width, int height, int doublebuf) {
-  int pixelFormat, i;
-  PIXELFORMATDESCRIPTOR chosen_pfd;
-  const char* class_name = "YUCK";
-  WNDCLASSEX wc;
-  wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_DBLCLKS;
-  wc.lpfnWndProc = (WNDPROC)WndProc;
-  wc.cbClsExtra = wc.cbWndExtra = 0;
-  wc.hInstance = GetModuleHandle(NULL);
-  wc.hIcon = wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-  wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-  wc.hbrBackground = NULL;
-  wc.lpszMenuName = NULL;
-  wc.lpszClassName = class_name;
-  wc.cbSize = sizeof(WNDCLASSEX);
-  RegisterClassEx(&wc);
+	LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+		switch(uMsg) {
+			case WM_QUIT:
+			case WM_CLOSE:
+				std::exit(0);
+		}
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
 
-  window = CreateWindow(class_name, /* class */
+	void make_window(unsigned int width, unsigned int height, bool double_buf) {
+		char const * class_name = "YUCK";
+	
+		WNDCLASSEX wc;
+		wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_DBLCLKS;
+		wc.lpfnWndProc = reinterpret_cast<WNDPROC>(WndProc);
+		wc.cbClsExtra = wc.cbWndExtra = 0;
+		wc.hInstance = GetModuleHandle(0);
+		wc.hIcon = wc.hIconSm = LoadIcon(0, IDI_APPLICATION);
+		wc.hCursor = LoadCursor(0, IDC_ARROW);
+		wc.hbrBackground = 0;
+		wc.lpszMenuName = 0;
+		wc.lpszClassName = class_name;
+		wc.cbSize = sizeof wc;
+		RegisterClassEx(&wc);
+
+		window = CreateWindow(
+			class_name /* class */,
 			"fliptest",
 			WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_BORDER | WS_SYSMENU,
 			CW_USEDEFAULT, CW_USEDEFAULT, width, height,
-			NULL, /* parent */
-			NULL, /* menu */
-			GetModuleHandle(NULL),
-			NULL /* creation parameters */
-			);
-  ShowWindow(window, SW_SHOWNORMAL);
-  dc = GetDC(window);
-  pixelFormat = 0;
-  for (i = 1; ; i++) {
-    PIXELFORMATDESCRIPTOR pfd;
-    if (!DescribePixelFormat(dc, i, sizeof(pfd), &pfd)) break;
-    // continue if it does not satisfy our requirements:
-    if (~pfd.dwFlags & (PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL)) continue;
-    if (pfd.iPixelType != 0) continue;
-    if ((!doublebuf) != (!(pfd.dwFlags & PFD_DOUBLEBUFFER))) continue;
-    // see if better than the one we have already:
-    if (pixelFormat) {
-      // offering overlay is better:
-      if (!(chosen_pfd.bReserved & 15) && (pfd.bReserved & 15)) {}
-      // otherwise more bit planes is better:
-      else if (chosen_pfd.cColorBits < pfd.cColorBits) {}
-      else continue;
-    }
-    pixelFormat = i;
-    chosen_pfd = pfd;
-  }
-  if (!pixelFormat) {
-    printf("No such visual\n");
-    exit(1);
-  }
-  SetPixelFormat(dc, pixelFormat, &chosen_pfd);
-  context = wglCreateContext(dc);
-  wglMakeCurrent(dc, context);
-}
+			0 /* parent */,
+			0 /* menu */,
+			GetModuleHandle(0),
+			0 /* creation parameters */
+		);
+		ShowWindow(window, SW_SHOWNORMAL);
+		dc = GetDC(window);
+		int pixelFormat = 0;
+		PIXELFORMATDESCRIPTOR chosen_pfd;
+		for(int i = 1; ; ++i) {
+			PIXELFORMATDESCRIPTOR pfd;
+			if(!DescribePixelFormat(dc, i, sizeof pfd, &pfd)) break;
+			// continue if it does not satisfy our requirements:
+			if(~pfd.dwFlags & (PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL)) continue;
+			if(pfd.iPixelType != 0) continue;
+			if(!double_buf != !(pfd.dwFlags & PFD_DOUBLEBUFFER)) continue;
+			// see if better than the one we have already:
+			if(pixelFormat) {
+				// offering overlay is better:
+				if(!(chosen_pfd.bReserved & 15) && (pfd.bReserved & 15)) {}
+				// otherwise more bit planes is better:
+				else if(chosen_pfd.cColorBits < pfd.cColorBits) {}
+				else continue;
+			}
+			pixelFormat = i;
+			chosen_pfd = pfd;
+		}
+		if(!pixelFormat) {
+			std::cerr <<  "ms-windows: no such visual\n";
+			std::exit(1);
+		}
+		SetPixelFormat(dc, pixelFormat, &chosen_pfd);
+		context = wglCreateContext(dc);
+		wglMakeCurrent(dc, context);
+	}
 
-void do_system_stuff(void) {
-  MSG msg;
-  while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
-  }
-}
+	void swap_buffers() {
+		SwapBuffers(dc);
+	}
 
-void swap_buffers(void) {
-  SwapBuffers(dc);
-}
+	void do_system_stuff() {
+		MSG msg;
+		while(PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
 
-const GLenum format = GL_RGBA;
+	double elapsed_time(void) {
+		static long int prevclock;
+		long int newclock = GetTickCount();
+		double elapsed = (newclock - prevclock) / 1000.0;
+		prevclock = newclock;
+		return elapsed;
+	}
 
-/*======================================================================*/
-#else /* Unix/X version */
+#elif __APPLE__
+	/******************************************************************************/
+	// TODO
 
-#include <GL/gl.h>
-#include <GL/glx.h>
-#include <sys/time.h>
-#ifdef __sgi
-#include <invent.h>
-#endif
+#elif __unix__ // X-window & unix version
+	/******************************************************************************/
 
-double elapsed_time(void) {
-  static struct timeval prevclock;
-  struct timeval newclock;
-  double elapsed;
-  gettimeofday(&newclock, NULL);
-  elapsed = newclock.tv_sec - prevclock.tv_sec +
-    (newclock.tv_usec - prevclock.tv_usec)/1000000.0;
-  prevclock.tv_sec = newclock.tv_sec;
-  prevclock.tv_usec = newclock.tv_usec;
-  return elapsed;
-}
+	#include <GL/glx.h>
+	#include <sys/time.h>
+	#ifdef __sgi
+		#include <invent.h>
+	#endif
 
-/* color singlebuffer */
+	double elapsed_time(void) {
+		static timeval prevclock;
+		timeval newclock;
+		gettimeofday(&newclock, 0);
+		double elapsed = newclock.tv_sec - prevclock.tv_sec + (newclock.tv_usec - prevclock.tv_usec) / 1000000.0;
+		prevclock.tv_sec = newclock.tv_sec;
+		prevclock.tv_usec = newclock.tv_usec;
+		return elapsed;
+	}
+
+// color single buffer
 int clist[] = {
     GLX_RGBA,
-    GLX_GREEN_SIZE,1,
+    GLX_GREEN_SIZE, 1,
     None
 };
 
-/* color doublebuffer */
+// color double buffer
 int dlist[] = {
     GLX_RGBA,
-    GLX_GREEN_SIZE,1,
+    GLX_GREEN_SIZE, 1,
     GLX_DOUBLEBUFFER,
     None
 };
 
-Display *dpy;
-XVisualInfo *vis;
+Display * dpy;
+XVisualInfo * vis;
 Window window;
-GLenum format = GL_RGBA;
 
-/* This creates the OpenGL window and makes the current OpenGL context
-   draw into it. */
-Window make_window(int width, int height, int doublebuf) {
-  XSetWindowAttributes attr;
-  Colormap cmap;
-  GLXContext context;
+// This creates the OpenGL window and makes the current OpenGL context draw into it.
+void make_window(unsigned int width, unsigned int height, bool double_buf) {
+	dpy = XOpenDisplay(0);
+	if(!dpy) {
+		std::cerr << "x-window: could not open display\n";
+		std::exit(1);
+	}
+	vis = glXChooseVisual(dpy, DefaultScreen(dpy), double_buf ? dlist : clist);
+	if(!vis) {
+		std::cerr << "x-window: no such visual\n";
+		std::exit(1);
+	}
+	std::clog << "x-window: visual depth: " << vis->depth << '\n';
 
-  dpy = XOpenDisplay(0);
-  if (!dpy) {
-    printf("Can't open display\n");
-    exit(1);
-  }
-  vis =  glXChooseVisual(dpy,DefaultScreen(dpy),doublebuf ? dlist : clist);
-  if (!vis) {
-    printf("No such visual\n");
-    exit(1);
-  }
-/*   printf("depth is %d\n",vis->depth); */
+	XSetWindowAttributes attr;
+	attr.border_pixel = 0;
+	attr.colormap = XCreateColormap(dpy, RootWindow(dpy, vis->screen), vis->visual, AllocNone);
+	attr.background_pixel = WhitePixel(dpy, DefaultScreen(dpy));
+	window = XCreateWindow(
+		dpy, RootWindow(dpy, DefaultScreen(dpy)),
+		0, 0, width, height, 0,
+		vis->depth, InputOutput, vis->visual,
+		CWBorderPixel | CWColormap, &attr
+	);
+	XMapRaised(dpy, window);
 
-  cmap = XCreateColormap(dpy,RootWindow(dpy,vis->screen),vis->visual,AllocNone);
-  attr.border_pixel = 0;
-  attr.colormap = cmap;
-  attr.background_pixel = WhitePixel(dpy,DefaultScreen(dpy));
-  window = XCreateWindow(dpy, RootWindow(dpy,DefaultScreen(dpy)),
-			 0, 0, width, height, 0,
-			 vis->depth, InputOutput, vis->visual,
-			 CWBorderPixel|CWColormap, &attr);
-  XMapRaised(dpy,window);
+	GLXContext context = glXCreateContext(dpy, vis, 0, 1);
+	glXMakeCurrent(dpy, window, context);
 
-  context = glXCreateContext(dpy, vis, 0, 1);
-  glXMakeCurrent(dpy, window, context);
-
-#if defined(__sgi) && defined(GL_ABGR_EXT)
-  { /* figure out what pixel order is faster for the graphics card: */
-    for (;;) {
-      struct inventory_s* s = getinvent();
-      if (!s) break;
-      if (s->inv_class == INV_GRAPHICS) {
-	if (s->inv_type < INV_MGRAS) format = GL_ABGR_EXT;
-	break;
-      }
-    }
-  }
-#endif
-  return window;
-}
-
-void do_system_stuff(void) {
-  /* simulate something looking for X events */
-  XEvent event;
-  XCheckWindowEvent(dpy, window, -1, &event);
+	#if defined __sgi && defined GL_ABGR_EXT
+		{ // figure out what pixel order is faster for the graphics card
+			for(;;) {
+				inventory_s * s = getinvent();
+				if(!s) break;
+				if(s->inv_class == INV_GRAPHICS) {
+					if(s->inv_type < INV_MGRAS) format = GL_ABGR_EXT;
+					break;
+				}
+			}
+		}
+	#endif
 }
 
 void swap_buffers(void) {
-  glXSwapBuffers(dpy, window);
+	glXSwapBuffers(dpy, window);
 }
 
+void do_system_stuff(void) {
+	// simulate something looking for X events
+	XEvent event;
+	XCheckWindowEvent(dpy, window, -1, &event);
+}
+
+#else
+	/******************************************************************************/
+	#error unimplemented
 #endif
 
 void disable_for_draw_pixels() {
@@ -299,75 +317,77 @@ void disable_for_draw_pixels() {
 	#endif
 }
 
-/*======================================================================*/
+/******************************************************************************/
 
-#define NUMIMAGES 25
+unsigned int const image_count = 25;
 
-int main(int argc, char **argv) {
+int main(int argc, char ** argv) {
+	unsigned int width;
+	unsigned int height;
+	bool double_buf;
 
-  int width;
-  int height;
-  int doublebuf;
-  int i;
-  unsigned* images;
+	if(argc > 1) { std::stringstream s; s << argv[1]; s >> width; }
+	if(argc > 2) { std::stringstream s; s << argv[2]; s >> height; }
+	if(argc > 3) { std::ostringstream s; s << argv[3]; double_buf = s.str()[0] == 'd'; }
 
-  if (argc > 1) width = atoi(argv[1]);
-  if (argc > 2) height = atoi(argv[2]);
-  if (argc > 3) doublebuf = argv[3][0] == 'd';
+	if(argc != 4 || width < 100 || height < 100) {
+		std::cerr << "usage: " << argv[0] << " <width> <height> <d or s for double or single buffer>\n";
+		std::exit(1);
+	}
+	
+	std::clog <<
+		"arg: width: " << width << "\n"
+		"arg: height: " << height << "\n"
+		"arg: double buffered: " << double_buf << '\n';
 
-  if (argc != 4 || width < 100 || height < 100) {
-    fprintf(stderr,"Usage: %s <width> <height> <d or s for double or single buffer>\n", argv[0]);
-    exit(1);
-  }
-
-  {// build the images
-    int i,x,y;
-    unsigned * p;
-    images = (unsigned*) malloc(width*height*NUMIMAGES*4);
-    p = images;
-    for (i = 0; i < NUMIMAGES; i++) {
-		int bar = width * i / NUMIMAGES;
-		int barw = 3 * width / NUMIMAGES;
-		for (y = 0; y < height; y++) {
-			for (x = 0; x < width; x++) {
-				if (x >= bar && x <= bar+barw) *p++ = 0xffffffff;
-				else *p++ = 0;
+	unsigned int * const images = new unsigned int[width * height * image_count];
+	{ // build the images
+		unsigned int * p = images;
+		for(unsigned int i = 0; i < image_count; ++i) {
+			unsigned int bar = width * i / image_count;
+			unsigned int barw = 3 * width / image_count;
+			for(unsigned int y = 0; y < height; ++y) {
+				for(unsigned int x = 0; x < width; ++x) {
+					unsigned int const color = x >= bar && x <= bar + barw ? 0xffffffff : 0;
+					*p++ = color;
+				}
 			}
 		}
-    }
-  }
+	}
 
-  make_window(width, height, doublebuf);
+	make_window(width, height, double_buf);
 
-  printf( "GL Vendor = %s\n", glGetString(GL_VENDOR));
-  printf( "GL Renderer = %s\n", glGetString(GL_RENDERER));
-  printf( "GL Version = %s\n", glGetString(GL_VERSION));
-  printf( "GL Extensions = %s\n", glGetString(GL_EXTENSIONS));
-  
-  if (doublebuf) glDrawBuffer(GL_BACK);
+	std::cout <<
+		"opengl: vendor: " << glGetString(GL_VENDOR) << "\n"
+		"opengl: renderer: " << glGetString(GL_RENDERER) << "\n"
+		"opengl: version: " << glGetString(GL_VERSION) << "\n"
+		"opengl: extensions: " << glGetString(GL_EXTENSIONS) << '\n';
 
-  { // set orthographic coordinate system with 0,0 in lower-left corner
-    GLint v[2];
-    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, v);
-    glLoadIdentity();
-    glViewport(width-v[0], height-v[1], v[0], v[1]);
-    glOrtho(width-v[0], width, height-v[1], height, -1, 1);
-  }
+	if(double_buf) glDrawBuffer(GL_BACK);
 
-  elapsed_time();
+	{ // set orthographic coordinate system with (0, 0) in lower-left corner
+		GLint v[2];
+		glGetIntegerv(GL_MAX_VIEWPORT_DIMS, v);
+		int const dx = static_cast<int>(width) - v[0];
+		int const dy = static_cast<int>(height) - v[1];
+		glLoadIdentity();
+		glViewport(dx, dy, v[0], v[1]);
+		glOrtho(dx, width, dy, height, -1, 1);
+	}
 
-  for (i = 0; ; i++) {
-    do_system_stuff();
-    if ((i%100)==99) {
-      printf("\rFPS = %g   ", 100.0/elapsed_time());
-      fflush(stdout);
-    }
-    disable_for_draw_pixels();
-    glRasterPos2i(0,0);
-    glDrawPixels(width, height, format, GL_UNSIGNED_BYTE, images + (i % NUMIMAGES) * width * height);
-    if(doublebuf) swap_buffers(); else glFlush();
-  }
+	elapsed_time();
 
-  return 0;
+	for(unsigned int i = 0; ; ++i) {
+		do_system_stuff();
+		if(i % 100 == 99) {
+			std::cout << "\rframes/s: " << 100 / elapsed_time() << '\t' << std::flush;
+		}
+		disable_for_draw_pixels();
+		glRasterPos2i(0, 0);
+		glDrawPixels(width, height, format, GL_UNSIGNED_BYTE, images + (i % image_count) * width * height);
+		if(double_buf) swap_buffers(); else glFlush();
+	}
+	
+	return 0;
 }
 
