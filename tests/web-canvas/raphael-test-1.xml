@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+	<head>
+		<!--meta http-equiv='content-type' content='application/xhtml+xml or application/xml'-->
+		<title>raphael test 1</title>
+		<script type='text/javascript' charset='utf-8' src='raphael.js'></script>
+		<script type='text/javascript' charset='utf-8' src='dot.js'></script>
+		<script type='text/javascript' charset='utf-8'>
+			<![CDATA[
+				window.onload = function() {
+					try {
+						var e = document.getElementById('canvas');
+						var w = 640;
+						var h = 480;
+						var paper = Raphael(e, w, h);
+						var g = new Graph();
+						var va = new Vertex('aaaaa'); g.vertices.push(va);
+						var vb = new Vertex('bb bb'); g.vertices.push(vb);
+						var vc = new Vertex('c c c'); g.vertices.push(vc);
+						var vd = new Vertex('ddddd'); g.vertices.push(vd);
+						var ve = new Vertex('ee\nee'); g.vertices.push(ve);
+						var vf = new Vertex('f\nf\nf'); g.vertices.push(vf);
+						var eac = new Edge(va, vc); g.edges.push(eac);
+						var ebc = new Edge(vb, vc); g.edges.push(ebc);
+						var ecd = new Edge(vc, vd); g.edges.push(ecd);
+						var ede = new Edge(vd, ve); g.edges.push(ede);
+						var eae = new Edge(va, ve); g.edges.push(eae);
+						var eef = new Edge(ve, vf); g.edges.push(eef);
+						g.render(paper, 50, 50);
+					} catch(e) {
+						alert(e);
+						throw e;
+					}
+				}
+			]]>
+		</script>
+	</head>
+	<body>
+		<h1>raphael test 1</h1>
+		<div id='canvas' style='margin-left: 25%; width: 50%; margin-top: 0%; height: 50%; border: 1px solid black; background: #eeeeee'/>
+	</body>
+</html>
+
