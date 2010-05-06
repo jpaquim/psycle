@@ -479,7 +479,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				else
 					d0 = data[iOsc - 1];
 				return a_table_[fractpart] * d0 + b_table_[fractpart] * d1 + c_table_[fractpart] * d2 + d_table_[fractpart] * d3;
-			}			
+			}
 			
 			// yo = y[-1] [sample at x-1]
 			// y0 = y[0]  [sample at x (input)]
