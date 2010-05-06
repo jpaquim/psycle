@@ -76,10 +76,14 @@
 #else
 	#include <GL/gl.h>
 	//#include <GL/glut.h>
+	#define GLX_GLXEXT_PROTOTYPES
+	#include <GL/glx.h>
+	#include <GL/glxext.h>
 #endif
 
 void make_window(unsigned int width, unsigned int height, bool double_buf);
 void swap_buffers();
+void enable_vsync();
 void do_system_stuff();
 double elapsed_time();
 GLenum format = GL_RGBA;
@@ -157,6 +161,11 @@ GLenum format = GL_RGBA;
 		wglMakeCurrent(dc, context);
 	}
 
+	void enable_vsync() {
+		// WGL_EXT_swap_control
+		//wglGetSwapIntervalEXT(1);
+	}
+	
 	void swap_buffers() {
 		SwapBuffers(dc);
 	}
@@ -180,7 +189,23 @@ GLenum format = GL_RGBA;
 #elif __APPLE__
 	/******************************************************************************/
 	// TODO
+	
+	void make_window(unsigned int width, unsigned int height, bool double_buf) {
+	}
+	
+	void enable_vsync() {
+		// NSOpenGLCPSwapInterval
+	}
 
+	void swap_buffers() {
+	}
+	
+	void do_system_stuff() {
+	}
+	
+	double elapsed_time(void) {
+	}
+	
 #elif __unix__ // X-window & unix version
 	/******************************************************************************/
 
@@ -200,77 +225,85 @@ GLenum format = GL_RGBA;
 		return elapsed;
 	}
 
-// color single buffer
-int clist[] = {
-    GLX_RGBA,
-    GLX_GREEN_SIZE, 1,
-    None
-};
+	// color single buffer
+	int clist[] = {
+		GLX_RGBA,
+		GLX_GREEN_SIZE, 1,
+		None
+	};
 
-// color double buffer
-int dlist[] = {
-    GLX_RGBA,
-    GLX_GREEN_SIZE, 1,
-    GLX_DOUBLEBUFFER,
-    None
-};
+	// color double buffer
+	int dlist[] = {
+		GLX_RGBA,
+		GLX_GREEN_SIZE, 1,
+		GLX_DOUBLEBUFFER,
+		None
+	};
 
-Display * dpy;
-XVisualInfo * vis;
-Window window;
+	Display * dpy;
+	XVisualInfo * vis;
+	Window window;
 
-// This creates the OpenGL window and makes the current OpenGL context draw into it.
-void make_window(unsigned int width, unsigned int height, bool double_buf) {
-	dpy = XOpenDisplay(0);
-	if(!dpy) {
-		std::cerr << "x-window: could not open display\n";
-		std::exit(1);
-	}
-	vis = glXChooseVisual(dpy, DefaultScreen(dpy), double_buf ? dlist : clist);
-	if(!vis) {
-		std::cerr << "x-window: no such visual\n";
-		std::exit(1);
-	}
-	std::clog << "x-window: visual depth: " << vis->depth << '\n';
+	// This creates the OpenGL window and makes the current OpenGL context draw into it.
+	void make_window(unsigned int width, unsigned int height, bool double_buf) {
+		dpy = XOpenDisplay(0);
+		if(!dpy) {
+			std::cerr << "x-window: could not open display\n";
+			std::exit(1);
+		}
+		vis = glXChooseVisual(dpy, DefaultScreen(dpy), double_buf ? dlist : clist);
+		if(!vis) {
+			std::cerr << "x-window: no such visual\n";
+			std::exit(1);
+		}
+		std::clog << "x-window: visual depth: " << vis->depth << '\n';
 
-	XSetWindowAttributes attr;
-	attr.border_pixel = 0;
-	attr.colormap = XCreateColormap(dpy, RootWindow(dpy, vis->screen), vis->visual, AllocNone);
-	attr.background_pixel = WhitePixel(dpy, DefaultScreen(dpy));
-	window = XCreateWindow(
-		dpy, RootWindow(dpy, DefaultScreen(dpy)),
-		0, 0, width, height, 0,
-		vis->depth, InputOutput, vis->visual,
-		CWBorderPixel | CWColormap, &attr
-	);
-	XMapRaised(dpy, window);
+		XSetWindowAttributes attr;
+		attr.border_pixel = 0;
+		attr.colormap = XCreateColormap(dpy, RootWindow(dpy, vis->screen), vis->visual, AllocNone);
+		attr.background_pixel = WhitePixel(dpy, DefaultScreen(dpy));
+		window = XCreateWindow(
+			dpy, RootWindow(dpy, DefaultScreen(dpy)),
+			0, 0, width, height, 0,
+			vis->depth, InputOutput, vis->visual,
+			CWBorderPixel | CWColormap, &attr
+		);
+		XMapRaised(dpy, window);
 
-	GLXContext context = glXCreateContext(dpy, vis, 0, 1);
-	glXMakeCurrent(dpy, window, context);
+		GLXContext context = glXCreateContext(dpy, vis, 0, 1);
+		glXMakeCurrent(dpy, window, context);
 
-	#if defined __sgi && defined GL_ABGR_EXT
-		{ // figure out what pixel order is faster for the graphics card
-			for(;;) {
-				inventory_s * s = getinvent();
-				if(!s) break;
-				if(s->inv_class == INV_GRAPHICS) {
-					if(s->inv_type < INV_MGRAS) format = GL_ABGR_EXT;
-					break;
+		#if defined __sgi && defined GL_ABGR_EXT
+			{ // figure out what pixel order is faster for the graphics card
+				for(;;) {
+					inventory_s * s = getinvent();
+					if(!s) break;
+					if(s->inv_class == INV_GRAPHICS) {
+						if(s->inv_type < INV_MGRAS) format = GL_ABGR_EXT;
+						break;
+					}
 				}
 			}
-		}
-	#endif
-}
+		#endif
+	}
 
-void swap_buffers(void) {
-	glXSwapBuffers(dpy, window);
-}
+	void enable_vsync() {
+		#if defined GLX_MESA_swap_control
+			//glXSwapIntervalMESA(1);
+		#elif defined GLX_SGI_swap_control
+			glXSwapIntervalSGI(1);
+		#endif
+	}
 
-void do_system_stuff(void) {
-	// simulate something looking for X events
-	XEvent event;
-	XCheckWindowEvent(dpy, window, -1, &event);
-}
+	void swap_buffers(void) {
+		glXSwapBuffers(dpy, window);
+	}
+
+	void do_system_stuff(void) {
+		// simulate something looking for X events
+		XEvent event;
+		XCheckWindowEvent(dpy, window, -1, &event);
+	}
 
 #else
 	/******************************************************************************/
@@ -362,6 +395,8 @@ int main(int argc, char ** argv) {
 		"opengl: renderer: " << glGetString(GL_RENDERER) << "\n"
 		"opengl: version: " << glGetString(GL_VERSION) << "\n"
 		"opengl: extensions: " << glGetString(GL_EXTENSIONS) << '\n';
+		
+	// TODO glXQueryExtensionsString may provide more extensions
 
 	if(double_buf) glDrawBuffer(GL_BACK);
 
