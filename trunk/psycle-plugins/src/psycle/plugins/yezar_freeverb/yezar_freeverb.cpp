@@ -7,58 +7,16 @@
 
 /////////////////////////////////////////////////////////////////////
 // Arguru's psycle port of Yezar freeverb
-
 using namespace psycle::plugin_interface;
 
 #define NCOMBS				1
 #define NALLS				12
 
-CMachineParameter const paraCombdelay = {
-	"Absortion",
-	"Damp", // description
-	1, // MinValue
-	640, // MaxValue
-	MPF_STATE, // Flags
-	320,
-};
-
-CMachineParameter const paraCombseparator = {
-	"Stereo Width",
-	"Width", // description
-	1, // MinValue
-	640, // MaxValue
-	MPF_STATE, // Flags
-	126,
-};
-
-
-CMachineParameter const paraAPdelay = {
-	"Room size",
-	"Room size", // description
-	1,
-	640,
-	MPF_STATE, // Flags
-	175,
-};
-
-CMachineParameter const paraDry = {
-	"Dry Amount",
-	"Dry", // description
-	0, // MinValue
-	640, // MaxValue
-	MPF_STATE, // Flags
-	256,
-};
-
-
-CMachineParameter const paraWet = {
-	"Wet Amount",
-	"Wet", // description
-	0, // MinValue
-	640, // MaxValue
-	MPF_STATE, // Flags
-	128,
-};
+CMachineParameter const paraCombdelay = {"Absortion", "Damp", 1, 640, MPF_STATE, 320};
+CMachineParameter const paraCombseparator = {"Stereo Width", "Width", 1, 640, MPF_STATE, 126};
+CMachineParameter const paraAPdelay = {"Room size", "Room size", 1, 640, MPF_STATE, 175};
+CMachineParameter const paraDry = {"Dry Amount", "Dry", 0, 640, MPF_STATE, 256};
+CMachineParameter const paraWet = {"Wet Amount", "Wet", 0, 640, MPF_STATE, 128};
 
 CMachineParameter const *pParameters[] = {
 	&paraCombdelay,
@@ -69,18 +27,19 @@ CMachineParameter const *pParameters[] = {
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	0, // flags
-	5, // numParameters
-	pParameters, // Pointer to parameters
-	"Jezar Freeverb" // name
+	MI_VERSION,
+	0x0110,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	"Jezar Freeverb"
 		#ifndef NDEBUG
 		" (Debug build)"
 		#endif
 		,
-	"Freeverb", // short name
-	"Jezar", // author
-	"About", // A command, that could be use for open an editor, etc...
+	"Freeverb",
+	"Jezar",
+	"About",
 	5
 );
 
@@ -96,29 +55,32 @@ class mi : public CMachineInterface {
 		virtual void ParameterTweak(int par, int val);
 	private:
 		revmodel reverb;
+		int currentSR;
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-	Vals = new int[5];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi() {
 	delete[] Vals;
-	// Destroy dinamically allocated objects/memory here
 }
 
 void mi::Init() {
-	// Initialize your stuff here
+	currentSR = pCB->GetSamplingRate();
+	reverb.setdefaultvalues(currentSR);
 }
 
 void mi::SequencerTick() {
-	// Called on each tick while sequencer is playing
+	if (currentSR != pCB->GetSamplingRate()) {
+		currentSR = pCB->GetSamplingRate();
+		reverb.recalculatebuffers(currentSR);
+	}
 }
 
 void mi::ParameterTweak(int par, int val) {
-	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
 
 	// Set damp
@@ -133,13 +95,9 @@ void mi::ParameterTweak(int par, int val) {
 }
 
 void mi::Command() {
-	// Called when user presses editor button
-	// Probably you want to show your custom window here
-	// or an about button
 	pCB->MessBox("Ported in 31/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","·-=<([Freeverb])>=-·",0);
 }
 
-// Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
 	reverb.processreplace(psamplesleft,psamplesright,psamplesleft,psamplesright,numsamples,1);
 }

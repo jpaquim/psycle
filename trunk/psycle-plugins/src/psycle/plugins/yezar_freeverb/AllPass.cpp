@@ -1,26 +1,34 @@
 #include "AllPass.hpp"
+#include <universalis/os/aligned_memory_alloc.hpp>
+#include <psycle/helpers/dsp.hpp>
 
 // Allpass filter implementation
 //
-// Written by Jezar at Dreampoint, June 2000
+// Originally Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
 
 allpass::allpass()
+: buffer(0), feedback(0), bufsize(0), bufidx(0)
+{}
+
+allpass::~allpass()
 {
-	bufidx = 0;
+	deletebuffer();
 }
 
-void allpass::setbuffer(float *buf, int size) 
+void allpass::setbuffer(int samples)
 {
-	buffer = buf; 
-	bufsize = size;
+	if (bufsize) {
+		deletebuffer();
+	}
+	bufsize = samples;
+	universalis::os::aligned_memory_alloc(16, buffer, (bufsize+3)&0xFFFFFFFC);
 }
 
 void allpass::mute()
 {
-	for (int i=0; i<bufsize; i++)
-		buffer[i]=0;
+	psycle::helpers::dsp::Clear(buffer, bufsize);
 }
 
 void allpass::setfeedback(float val) 
@@ -31,4 +39,10 @@ void allpass::setfeedback(float val)
 float allpass::getfeedback() 
 {
 	return feedback;
+}
+
+void allpass::deletebuffer() {
+	if (bufsize) {
+		universalis::os::aligned_memory_dealloc(buffer);
+	}
 }

@@ -11,36 +11,40 @@ class comb
 {
 public:
 					comb();
-			void				setbuffer(float *buf, int size);
-	inline  float				process(float inp);
-			void				mute();
-			void				setdamp(float val);
-			float				getdamp();
-			void				setfeedback(float val);
-			float				getfeedback();
+	virtual			~comb();
+			void	setbuffer(int samples);
+	inline  float	process(float inp);
+			void	mute();
+			void	setdamp(float val);
+			float	getdamp();
+			void	setfeedback(float val);
+			float	getfeedback();
 private:
-	float				feedback;
-	float				filterstore;
-	float				damp1;
-	float				damp2;
-	float				*buffer;
-	int								bufsize;
-	int								bufidx;
+	void deletebuffer();
+
+	float			*buffer;
+	float			feedback;
+	float			filterstore;
+	float			damp1;
+	float			damp2;
+	int				bufsize;
+	int				bufidx;
 };
 
 // Big to inline - but crucial for speed
 
 inline float comb::process(float input)
 {
-	float output;
-
-	output = buffer[bufidx];
-	psycle::helpers::math::fast_erase_denormals_inplace(output);
+	float bufin;
+	float output = buffer[bufidx];
 
 	filterstore = (output*damp2) + (filterstore*damp1);
 	psycle::helpers::math::fast_erase_denormals_inplace(filterstore);
 
-	buffer[bufidx] = input + (filterstore*feedback);
+	bufin = input + (filterstore*feedback);
+
+	psycle::helpers::math::fast_erase_denormals_inplace(bufin);
+	buffer[bufidx] = bufin;
 
 	if(++bufidx>=bufsize) bufidx = 0;
 

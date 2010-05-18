@@ -29,6 +29,9 @@ private:
 
 inline void CAllPass::Work(float l_input,float r_input,float g)
 {
+	///This implementation is strange: at 0 feedback, it acts as a time delay.
+	//Increasing the feedback, increases the gain of the direct output path while
+	//also increasing the feedback of the total output into the delayed buffer.
 	left_output_=(l_input*-g)+leftBuffer[l_delayedCounter];
 	right_output_=(r_input*-g)+rightBuffer[r_delayedCounter];
 

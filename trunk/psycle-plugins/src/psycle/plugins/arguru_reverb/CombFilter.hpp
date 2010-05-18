@@ -26,6 +26,8 @@ private:
 
 inline void CCombFilter::Work(float l_input,float r_input)
 {
+	//This isn't a combfilter. This is only a time delay with different
+	//delay between left and right.
 	leftBuffer[Counter]=l_input;
 	rightBuffer[Counter]=r_input;
 

@@ -2,38 +2,49 @@
 
 // Reverb model implementation
 //
-// Written by Jezar at Dreampoint, June 2000
+// Originally Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
 
 revmodel::revmodel()
+: gain(0), roomsize(0), roomsize1(0), damp(0), damp1(0)
+, wet(0), wet1(0), wet2(0), dry(0), width(0), mode(0)
 {
-	// Tie the components to their buffers
-	combL[0].setbuffer(bufcombL1,combtuningL1);
-	combR[0].setbuffer(bufcombR1,combtuningR1);
-	combL[1].setbuffer(bufcombL2,combtuningL2);
-	combR[1].setbuffer(bufcombR2,combtuningR2);
-	combL[2].setbuffer(bufcombL3,combtuningL3);
-	combR[2].setbuffer(bufcombR3,combtuningR3);
-	combL[3].setbuffer(bufcombL4,combtuningL4);
-	combR[3].setbuffer(bufcombR4,combtuningR4);
-	combL[4].setbuffer(bufcombL5,combtuningL5);
-	combR[4].setbuffer(bufcombR5,combtuningR5);
-	combL[5].setbuffer(bufcombL6,combtuningL6);
-	combR[5].setbuffer(bufcombR6,combtuningR6);
-	combL[6].setbuffer(bufcombL7,combtuningL7);
-	combR[6].setbuffer(bufcombR7,combtuningR7);
-	combL[7].setbuffer(bufcombL8,combtuningL8);
-	combR[7].setbuffer(bufcombR8,combtuningR8);
-	allpassL[0].setbuffer(bufallpassL1,allpasstuningL1);
-	allpassR[0].setbuffer(bufallpassR1,allpasstuningR1);
-	allpassL[1].setbuffer(bufallpassL2,allpasstuningL2);
-	allpassR[1].setbuffer(bufallpassR2,allpasstuningR2);
-	allpassL[2].setbuffer(bufallpassL3,allpasstuningL3);
-	allpassR[2].setbuffer(bufallpassR3,allpasstuningR3);
-	allpassL[3].setbuffer(bufallpassL4,allpasstuningL4);
-	allpassR[3].setbuffer(bufallpassR4,allpasstuningR4);
-
+}
+void revmodel::recalculatebuffers(int samplerate)
+{
+	float srfactor = samplerate/44100.0f;
+	// Set up the buffer sizes
+	combL[0].setbuffer(combtuningL1*srfactor);
+	combR[0].setbuffer(combtuningR1*srfactor);
+	combL[1].setbuffer(combtuningL2*srfactor);
+	combR[1].setbuffer(combtuningR2*srfactor);
+	combL[2].setbuffer(combtuningL3*srfactor);
+	combR[2].setbuffer(combtuningR3*srfactor);
+	combL[3].setbuffer(combtuningL4*srfactor);
+	combR[3].setbuffer(combtuningR4*srfactor);
+	combL[4].setbuffer(combtuningL5*srfactor);
+	combR[4].setbuffer(combtuningR5*srfactor);
+	combL[5].setbuffer(combtuningL6*srfactor);
+	combR[5].setbuffer(combtuningR6*srfactor);
+	combL[6].setbuffer(combtuningL7*srfactor);
+	combR[6].setbuffer(combtuningR7*srfactor);
+	combL[7].setbuffer(combtuningL8*srfactor);
+	combR[7].setbuffer(combtuningR8*srfactor);
+	allpassL[0].setbuffer(allpasstuningL1*srfactor);
+	allpassR[0].setbuffer(allpasstuningR1*srfactor);
+	allpassL[1].setbuffer(allpasstuningL2*srfactor);
+	allpassR[1].setbuffer(allpasstuningR2*srfactor);
+	allpassL[2].setbuffer(allpasstuningL3*srfactor);
+	allpassR[2].setbuffer(allpasstuningR3*srfactor);
+	allpassL[3].setbuffer(allpasstuningL4*srfactor);
+	allpassR[3].setbuffer(allpasstuningR4*srfactor);
+	// Buffer will be full of rubbish - so we MUST mute them
+	mute();
+}
+void revmodel::setdefaultvalues(int samplerate)
+{
+	recalculatebuffers(samplerate);
 	// Set default values
 	allpassL[0].setfeedback(0.5f);
 	allpassR[0].setfeedback(0.5f);
@@ -49,9 +60,6 @@ revmodel::revmodel()
 	setdamp(initialdamp);
 	setwidth(initialwidth);
 	setmode(initialmode);
-
-	// Buffer will be full of rubbish - so we MUST mute them
-	mute();
 }
 
 void revmodel::mute()
