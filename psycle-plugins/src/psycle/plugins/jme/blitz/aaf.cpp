@@ -24,7 +24,7 @@
 #include "aaf.h"
 
 AAF16::AAF16(){
-	for (int c=0; c<5; c++){
+	for (int c=0; c<4; c++){
 		x[c]=0.0f;
 		y[c]=0.0f;
 	}
