@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief universalis::os::clocks
 
@@ -51,7 +51,15 @@ using stdlib::nanoseconds;
 
 // recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
 
-/// a real time clock that counts the time elapsed since some unspecified origin.
+/// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
+///
+/// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
+class UNIVERSALIS__DECL utc_since_epoch {
+	public:
+		nanoseconds static current();
+};
+
+/// a clock that counts the real time elapsed since some unspecified origin.
 ///
 /// The implementation reads, if available, the tick count register of some unspecified CPU.
 /// On most CPU architectures, the register is updated at a rate based on the frequency of the cycles, but often the count value and the tick events are unrelated,
@@ -64,14 +72,6 @@ class UNIVERSALIS__DECL monotonic {
 		nanoseconds static current();
 };
 
-/// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
-///
-/// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
-class UNIVERSALIS__DECL utc_since_epoch {
-	public:
-		nanoseconds static current();
-};
-
 /// a virtual clock that counts the time spent by the CPU(s) in the current process.
 class UNIVERSALIS__DECL process {
 	public:
@@ -80,6 +80,13 @@ class UNIVERSALIS__DECL process {
 
 /// a virtual clock that counts the time spent by the CPU(s) in the current thread.
 class UNIVERSALIS__DECL thread {
+	public:
+		nanoseconds static current();
+};
+
+/// a virtual clock that counts the time spent by the CPU(s) in the current thread
+/// or fallback to process or monotonic clock if the resolution is low.
+class UNIVERSALIS__DECL hires_thread_or_fallback {
 	public:
 		nanoseconds static current();
 };
