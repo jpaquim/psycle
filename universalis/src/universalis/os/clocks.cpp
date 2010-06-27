@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::os::clocks
 #include <universalis/detail/project.private.hpp>
@@ -414,6 +414,21 @@ nanoseconds thread::current() {
 		else return process::current();
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		return detail::microsoft::thread_time();
+	#else
+		return detail::iso_std_clock();
+	#endif
+}
+
+nanoseconds hires_thread_or_fallback::current() {
+	#if defined DIVERSALIS__OS__POSIX
+		detail::posix::config();
+		if(detail::posix::thread_cputime_supported) return detail::posix::thread_cpu_time();
+		else return process::current();
+	#elif defined DIVERSALIS__OS__MICROSOFT
+		// The implementation of mswindows' ::GetThreadTimes() is completly broken: http://blog.kalmbachnet.de/?postid=28
+		// It's also a very low resolution: min: 0.015625s, avg: 0.015625s, max: 0.015625s.
+		// So we use the performance counter instead.
+		return detail::microsoft::performance_counter();
 	#else
 		return detail::iso_std_clock();
 	#endif

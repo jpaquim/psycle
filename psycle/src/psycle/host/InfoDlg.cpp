@@ -71,7 +71,7 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 	char buffer[128];
 	
 	nanoseconds total_machine_processing_time(0);
-	nanoseconds const now = core::cpu_time_clock();
+	nanoseconds const now = core::wall_time_clock();
 	nanoseconds const real_time_duration = now - last_update_time_;
 
 	unsigned int i = 0;
