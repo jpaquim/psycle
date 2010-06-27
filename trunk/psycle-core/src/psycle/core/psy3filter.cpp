@@ -318,11 +318,11 @@ bool Psy3Filter::LoadINFOv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 	char Name[129]; char Author[65]; char Comment[65536];
 
 	file->ReadString(Name, 128);
-	song.setName(Name);
+	song.name(Name);
 	file->ReadString(Author, 64);
-	song.setAuthor(Author);
+	song.author(Author);
 	bool result = file->ReadString(Comment, 65535);
-	song.setComment(Comment);
+	song.comment(Comment);
 	return result;
 }
 
@@ -338,18 +338,18 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 
 	// # of tracks for whole song
 	file->Read(temp);
-	song.setTracks(temp);
+	song.tracks(temp);
 	// bpm
 	{ ///\todo: This was a hack added in 1.9alpha to allow decimal BPM values
 		file->Read(temp16);
 		int BPMCoarse = temp16;
 		file->Read(temp16);
-		song.setBpm(BPMCoarse + temp16 / 100.0f );
+		song.bpm(BPMCoarse + temp16 / 100.0f );
 	}
 	// linesperbeat
 	file->Read(temp);
-	song.setTicksSpeed(temp);
-	linesPerBeat= song.ticksSpeed();
+	song.tick_speed(temp);
+	linesPerBeat = song.tick_speed();
 
 	// current octave
 	file->Read(temp);
@@ -373,7 +373,7 @@ bool Psy3Filter::LoadSNGIv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 		song.sequence().setArmedTrack(i,tmp);
 	}
 	callbacks->timeInfo().setBpm(song.bpm());
-	callbacks->timeInfo().setTicksSpeed(song.ticksSpeed(),song.isTicks());
+	callbacks->timeInfo().setTicksSpeed(song.tick_speed(),song.is_ticks());
 	return fileread;
 }
 

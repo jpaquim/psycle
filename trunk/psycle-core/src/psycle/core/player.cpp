@@ -131,7 +131,7 @@ void Player::start(double pos) {
 		for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
 		playing_ = true;
 		timeInfo_.setPlayBeatPos(pos);
-		timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
+		timeInfo_.setTicksSpeed(song().tick_speed(), song().is_ticks());
 	}
 }
 
@@ -442,7 +442,7 @@ void Player::stop() {
 		for(int c(0); c < MAX_TRACKS; ++c) song().machine(i)->TriggerDelay[c].setCommand(0);
 	}
 	setBpm(song().bpm());
-	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
+	timeInfo_.setTicksSpeed(song().tick_speed(), song().is_ticks());
 	samples_per_second(driver_->playbackSettings().samplesPerSec());
 	// Disabled, because in psyclemfc, autorecording is used sometimes to record live, and pressing stop
 	// is a way to make autorecording ignore the song length and keep recording until intentionally stopping
@@ -489,7 +489,7 @@ float * Player::Work(int numSamples) {
 
 	{ scoped_lock lock(song());
 
-		if (!song().IsReady()) {
+		if (!song().is_ready()) {
 			dsp::Clear(buffer_, numSamples);
 			return buffer_;
 		}
