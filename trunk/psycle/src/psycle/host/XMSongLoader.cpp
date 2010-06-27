@@ -142,26 +142,29 @@ namespace psycle { namespace host {
 			return;
 		}
 		m_pSong = &song;
-		song.SetReady(false);
+		song.is_ready(false);
 		// song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 		song.AddMachine(m_pSampler);
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,0.35f);
 		song.seqBus=m_pSampler->id();
+
 		// get song name
-		char * pSongName = AllocReadStr(20,17);
-		if(pSongName==NULL)
-			return;
-		song.setName(pSongName);
-		song.setAuthor("");
+		{
+			char * const pSongName = AllocReadStr(20, 17);
+			if(!pSongName) return;
+			song.name(pSongName);
+			delete[] pSongName;
+		}
+
+		song.author("");
 		std::string imported = "Imported from FastTracker Module: ";
 		imported.append(file_name());
-		song.setComment(imported);
-		delete [] pSongName; pSongName = 0;
+		song.comment(imported);
 
 		size_t iInstrStart = LoadPatterns(song);
 		LoadInstruments(*m_pSampler,iInstrStart);
-		song.SetReady(true);
+		song.is_ready(true);
 	}
 
 	bool XMSongLoader::IsValid() {			
@@ -200,7 +203,7 @@ namespace psycle { namespace host {
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 		//using std::max;
-		song.setTracks(std::max(m_Header.channels, std::uint16_t(4)));
+		song.tracks(std::max(m_Header.channels, std::uint16_t(4)));
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
 		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
@@ -968,27 +971,30 @@ namespace psycle { namespace host {
 
 	void MODSongLoader::Load(Song& song,const bool fullopen) {
 		// check validity
-		if(!IsValid()){
-			return;
-		}
+		if(!IsValid()) return;
+
 		m_pSong = &song;
-		song.SetReady(false);
+		song.is_ready(false);
 		m_pSampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 		song.AddMachine(m_pSampler);
-		//song.InsertConnection(*m_pSampler,*s->machine(MASTER_INDEX),0,0,0.75f); // This is done later, when determining the number of channels.
-		song.seqBus=m_pSampler->id();
+		
+		// This is done later, when determining the number of channels.
+		//song.InsertConnection(*m_pSampler,*s->machine(MASTER_INDEX),0,0,0.75f);
 
+		song.seqBus = m_pSampler->id();
+		
 		// get song name
-		char * pSongName = AllocReadStr(20,0);
-		if(pSongName==NULL)
-			return;
+		{
+			char * const pSongName = AllocReadStr(20,0);
+			if(!pSongName) return;
+			song.name(pSongName);
+			delete[] pSongName;
+		}
 
-		song.setName(pSongName);
-		song.setAuthor("");
+		song.author("");
 		std::string imported = "Imported from MOD Module: ";
 		imported.append(file_name());
-		song.setComment(imported);
-		delete [] pSongName; pSongName = 0;
+		song.comment(imported);
 
 		// get data
 		Seek(20);
@@ -1003,10 +1009,10 @@ namespace psycle { namespace host {
 		m_pSampler->IsAmigaSlides(true);
 
 		float volume = 0.7f;
-		if ( !stricmp(pID,"M.K.")) { song.setTracks(4); }
-		else if ( !stricmp(pID,"M!K!")) { song.setTracks(4); }
-		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.setTracks(atoi(tmp)); volume= 0.5f; }
-		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.setTracks(atoi(tmp)); volume = 0.35f; }
+		if ( !stricmp(pID,"M.K.")) { song.tracks(4); }
+		else if ( !stricmp(pID,"M!K!")) { song.tracks(4); }
+		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.tracks(atoi(tmp)); volume= 0.5f; }
+		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.tracks(atoi(tmp)); volume = 0.35f; }
 		song.InsertConnection(*m_pSampler,*song.machine(MASTER_INDEX),0,0,volume);
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
@@ -1021,7 +1027,7 @@ namespace psycle { namespace host {
 		for(int i = 0;i < 31;i++){
 			LoadInstrument(*m_pSampler,i);
 		}
-		song.SetReady(true);
+		song.is_ready(true);
 	}
 
 	bool MODSongLoader::IsValid() {

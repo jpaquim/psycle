@@ -64,7 +64,7 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 
 	Song & song = projects_->active_project()->song();
 
-	if (!song.IsReady()) return;
+	if(!song.is_ready()) return;
 
 	Song::scoped_lock lock(song);
 

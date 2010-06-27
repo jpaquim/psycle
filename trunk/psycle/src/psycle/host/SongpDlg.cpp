@@ -57,9 +57,9 @@ void CSongpDlg::OnOk()  {
 		m_songtitle.GetWindowText(name,128);
 		m_songcredits.GetWindowText(author,64);
 		m_songcomments.GetWindowText(comments,65535);
-		_pSong->setName(name);
-		_pSong->setAuthor(author);
-		_pSong->setComment(comments);
+		_pSong->name(name);
+		_pSong->author(author);
+		_pSong->comment(comments);
 		CDialog::OnOK();
 	}
 	else CDialog::OnCancel();
