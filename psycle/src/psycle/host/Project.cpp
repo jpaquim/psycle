@@ -56,7 +56,7 @@ void Project::Clear() {
 	player.stop();
 	song().clear();
 	player.setBpm(song().BeatsPerMin());
-	player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().isTicks());
+	player.timeInfo().setTicksSpeed(song().LinesPerBeat(), song().is_ticks());
 	CMainFrame* pParentMain = mac_view()->main();
 	pParentMain->m_wndSeq.UpdateSequencer();
 	mac_view()->child_view()->SetTitleBarText();
@@ -91,7 +91,7 @@ void Project::FileLoadsongNamed(const std::string& fName) {
 	// Song* song_ = the old song.
 	mac_view()->LockVu();
 	psycle::core::Song* song = new Song();
-	song->SetReady(false);
+	song->is_ready(false);
 	Player& player(Player::singleton());
 	player.stop();
 	//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
@@ -121,15 +121,15 @@ void Project::FileLoadsongNamed(const std::string& fName) {
 	delete old_song;
 	AppendToRecent(fName);
 	std::string::size_type index = fName.rfind('\\');
-	if (index != std::string::npos) {
-		Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
-		song_->set_filename(fName.substr(index+1));
+	if(index != std::string::npos) {
+		Global::pConfig->SetCurrentSongDir(fName.substr(0, index));
+		song_->filename(fName.substr(index + 1));
 	} else {
-		song_->set_filename(fName);
+		song_->filename(fName);
 	}
 
 //	set_lines_per_beat(song().ticksSpeed());
-	set_beat_zoom(song_->ticksSpeed());
+	set_beat_zoom(song_->tick_speed());
 	CMainFrame* pParentMain = mac_view()->main();
 	pParentMain->m_wndSeq.UpdateSequencer();
 	pat_view()->RecalculateColourGrid();
@@ -268,7 +268,7 @@ void Project::FileImportModulefile()
 		mac_view()->LockVu();
 		psycle::core::Player& player(psycle::core::Player::singleton());
 		psycle::core::Song* song = new Song();
-		song->SetReady(false);
+		song->is_ready(false);
 		player.stop();
 		player.driver().set_started(false);
 		//Doing player.song() before song->load because the plugins may ask data from song via the player callback.
@@ -356,8 +356,7 @@ void Project::FileImportModulefile()
 					);
 				MessageBox(buffer, "S3M file imported", MB_OK);
 */
-			} else if (ext.CompareNoCase("MOD") == 0)
-			{
+			} else if (ext.CompareNoCase("MOD") == 0) {
 				MODSongLoader modfile;
 				modfile.Open(ofn.lpstrFile);
 				pat_view()->editPosition=0;
@@ -383,14 +382,11 @@ void Project::FileImportModulefile()
 
 		str = ofn.lpstrFile;
 		index = str.ReverseFind('\\');
-		if (index != -1)
-		{
+		if(index != -1) {
 			Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
-			song_->set_filename(std::string(str.Mid(index+1)+".psy"));
-		}
-		else
-		{
-			song_->set_filename(std::string(str+".psy"));
+			song_->filename(std::string(str.Mid(index + 1) + ".psy"));
+		} else {
+			song_->filename(std::string(str + ".psy"));
 		}
 		mac_view()->child_view()->_outputActive = true;
 		pParentMain->PsybarsUpdate();
@@ -569,12 +565,12 @@ bool Project::OnFileSaveAs(UINT id)
 				str.Insert(str.GetLength(),".psy");
 			int index = str.ReverseFind('\\');
 
-			if (index != -1) {
+			if(index != -1) {
 				Global::pConfig->SetCurrentSongDir(
 					std::string(static_cast<char const *>(str.Left(index))));
-				song().set_filename(std::string(str.Mid(index+1))); }
+				song().filename(std::string(str.Mid(index + 1))); }
 			else {
-				song().set_filename(std::string(str));
+				song().filename(std::string(str));
 			}
 			//todo: fileformat version
 			// if ( ! song().save(str.GetBuffer(1),3)){

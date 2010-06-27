@@ -542,7 +542,7 @@ void CMainFrame::PsybarsUpdate()
 
 void CMainFrame::OnSelchangeTrackcombo() {
 	CComboBox *cc2=(CComboBox *)m_wndControl.GetDlgItem(IDC_TRACKCOMBO);
-	projects_.active_project()->song().setTracks(cc2->GetCurSel()+4);
+	projects_.active_project()->song().tracks(cc2->GetCurSel()+4);
 	if (m_wndView.pattern_view()->editcur.track >= projects_.active_project()->song().tracks())
 		m_wndView.pattern_view()->editcur.track = projects_.active_project()->song().tracks()-1;
 	m_wndView.pattern_view()->RecalculateColourGrid();

@@ -113,13 +113,13 @@ namespace psycle { namespace host {
 			if (ReadHeader(itFileH)==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
 
-			s->setName(itFileH.songName);
-			s->setAuthor("");
+			s->name(itFileH.songName);
+			s->author("");
 			std::string imported = "Imported from Impulse Tracker Module: ";
 			imported.append(file_name());
-			s->setComment(imported);
+			s->comment(imported);
 
-			song->SetReady(false);
+			song->is_ready(false);
 			sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
@@ -321,7 +321,7 @@ Special:  Bit 0: On = song message attached.
 					LoadITPattern(i,numchans);
 				}
 			}
-			song->setTracks(std::max(numchans+1,4));
+			song->tracks(std::max(numchans+1,4));
 
 			// now that we have loaded all the patterns, time to prepare them.
 			double pos = 0;
@@ -338,7 +338,7 @@ Special:  Bit 0: On = song message attached.
 			delete[] pointersi;
 			delete[] pointerss;
 			delete[] pointersp;
-			song->SetReady(true);
+			song->is_ready(true);
 			return true;
 		}
 
@@ -1283,13 +1283,13 @@ Special:  Bit 0: On = song message attached.
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;
 
 			s3mFileH.songName[28]='\0';
-			s->setName(s3mFileH.songName);
-			s->setAuthor("");
+			s->name(s3mFileH.songName);
+			s->author("");
 			std::string imported = "Imported from Scream Tracker 3 Module: ";
 			imported.append(file_name());
-			s->setComment(imported);
+			s->comment(imported);
 
-			song->SetReady(false);
+			song->is_ready(false);
 			sampler = (XMSampler*) MachineFactory::getInstance().CreateMachine(InternalKeys::sampulse);
 			s->AddMachine(sampler);
 			s->InsertConnection(*sampler,*s->machine(MASTER_INDEX),0,0,(s3mFileH.mVol&0x7F)/128.0f);
@@ -1360,7 +1360,7 @@ Special:  Bit 0: On = song message attached.
 					sampler->rChannel(i).DefaultIsMute(true);
 				}
 			}
-			s->setTracks(std::max(numchans,4));
+			s->tracks(std::max(numchans,4));
 
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )
@@ -1404,7 +1404,7 @@ Special:  Bit 0: On = song message attached.
 
 			delete [] pointersi; pointersi = 0;
 			delete [] pointersp; pointersp = 0;
-			song->SetReady(true);
+			song->is_ready(true);
 			return true;
 		}
 
