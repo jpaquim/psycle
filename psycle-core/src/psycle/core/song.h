@@ -35,39 +35,42 @@ class PSYCLE__CORE__DECL CoreSong {
 
 		const Sequence& sequence() const throw() { return sequence_; }
 		Sequence& sequence() throw() { return sequence_; }
+
 		virtual void clear();
+
 		// serialization
 		bool load(const std::string& filename);
 		bool save(const std::string& filename, int version = 4);
 		boost::signal<void (const std::string&, const std::string&)> report;
 		boost::signal<void (int, int, const std::string&)> progress;
-		// The file name this song was loaded from.
-		void set_filename(const std::string& filename) {
-			filename_ = filename;
-		}
+		
+		/// the file name this song was loaded from
 		const std::string& filename() const { return filename_; }
+		void filename(std::string const & filename) { filename_ = filename; }
+
 		const std::string& name() const { return name_; } // song name
-		void setName(const std::string& name) { name_ = name; }
+		void name(std::string const & name) { name_ = name; }
+
+		const std::string& author() const { return author_; }
+		void author(std::string const & author) { author_ = author; }
+
 		const std::string& comment() const { return comment_; }
-		void setComment(const std::string& comment) { comment_ = comment; }
+		void comment(std::string const & comment) { comment_ = comment; }
+
 		// initial bpm for the song
 		float bpm() const { return bpm_; }
-		void setBpm(float bpm) { if(bpm > 0 && bpm < 1000) bpm_ = bpm; }
-		// Identifies if the song is operational or in a loading/saving state.
+		void bpm(float bpm) { if(0 < bpm && bpm < 1000) bpm_ = bpm; }
+
+		// identifies if the song is operational or in a loading/saving state.
 		// It serves as a non-locking synchronization
-		bool IsReady(){ return ready; }
-		// Sets song to ready state (it can be played).
-		void SetReady(const bool value) {
-			scoped_lock lock(mutex_);
-			ready = value;
-		}
-		const std::string& author() const { return author_; }
-		void setAuthor(const std::string& author) { author_ = author; }
+		bool is_ready() { return is_ready_; }
+		// sets song to ready state (it can be played).
+		void is_ready(bool value) { scoped_lock lock(mutex_); is_ready_ = value; }
+
 		// delegation from sequence
 		unsigned int tracks() const { return sequence_.numTracks(); }
-		void setTracks( unsigned int tracks) { 
-			sequence_.setNumTracks(tracks);
-		}
+		void tracks( unsigned int tracks) { sequence_.setNumTracks(tracks); }
+
 		// name the initial ticks per beat (TPB) when the song starts to play.
 		// With multisequence, ticksSpeed helps on syncronization and timing.
 		// Concretely, it helps to send the legacy "SequencerTick()" events to native plugins,
@@ -75,30 +78,28 @@ class PSYCLE__CORE__DECL CoreSong {
 		// retrigger code need to know how much they last ) as well as helping Sampulse
 		// to get ticks according to legacy speed command of Modules.
 		// isTicks is used to identify if the value in ticksPerBeat_ means ticks, or speed.
-		unsigned int ticksSpeed() const { return ticks_; }
-		bool isTicks() const { return isTicks_; }
-		void setTicksSpeed(unsigned int const value, bool const isticks = true) {
+		unsigned int tick_speed() const { return ticks_; }
+		void tick_speed(unsigned int value, bool is_ticks = true) {
 			if(value < 1) ticks_ = 1;
 			else if(value > 31) ticks_ = 31;
 			else ticks_ = value;
-			isTicks_ = isticks;
+			is_ticks_ = is_ticks;
 		}
+		bool is_ticks() const { return is_ticks_; }
+
 		// access to the machines of the song
-		Machine* machine(Machine::id_type id) { return machine_[id]; }
+		Machine * machine(Machine::id_type id) { return machines_[id]; }
 		// access to the machines of the song
-		const Machine* const machine(Machine::id_type id) const {
-			return machine_[id];
-		}
-		void machine(Machine::id_type id, Machine* machine) {
-			assert(id >= 0 && id < MAX_MACHINES);
-			machine_[id] = machine;
+		Machine const * machine(Machine::id_type id) const { return machines_[id]; }
+		void machine(Machine::id_type id, Machine * machine) {
+			assert(0 <= id && id < MAX_MACHINES);
+			machines_[id] = machine;
 			machine->id(id);
 		}
 		
-		XMInstrument& rInstrument(const int index) { return m_Instruments[index]; }
-		XMInstrument::WaveData& SampleData(const int index) {
-			return m_rWaveLayer[index];
-		}
+		XMInstrument & rInstrument(int index) { return m_Instruments[index]; }
+
+		XMInstrument::WaveData & SampleData(int index) { return m_rWaveLayer[index]; }
 
 		// add a new machine. If newIdx is not -1 and a machine
 		// does not exist in that place, it is taken as the new index
@@ -114,9 +115,7 @@ class PSYCLE__CORE__DECL CoreSong {
 		// destroy a machine of this song.
 		virtual void DeleteMachine(Machine * machine);
 		// destroy a machine of this song.
-		virtual void DeleteMachineDeprecated(Machine::id_type mac) {
-			if (machine(mac)) DeleteMachine(machine(mac));
-		}
+		virtual void DeleteMachineDeprecated(Machine::id_type mac) { if (machine(mac)) DeleteMachine(machine(mac)); }
 		// destroys all the machines of this song.
 		virtual void DeleteAllMachines();
 		// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
@@ -190,7 +189,6 @@ class PSYCLE__CORE__DECL CoreSong {
 
 		/// total processing cpu time usage measurement
 		nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
-
 		/// total processing cpu time usage measurement
 		void accumulate_processing_time(nanoseconds ns) throw() {
 			if(loggers::warning() && ns.get_count() < 0) {
@@ -212,25 +210,26 @@ class PSYCLE__CORE__DECL CoreSong {
 		}
 
 	protected:
-		bool ValidateMixerSendCandidate(Machine& mac,bool rewiring=false);
-		protected:
+		bool ValidateMixerSendCandidate(Machine & mac, bool rewiring = false);
+
+	protected:
 		// deletes all instruments in this song.
 		void /*Delete*/FreeInstrumentsMemory();
 		// removes the sample/layer of the instrument
 		void DeleteLayer(Instrument::id_type id);
 
 	private:
-		static SongSerializer serializer;
+		static SongSerializer serializer_;
 		std::string filename_;
-		bool ready;
+		bool is_ready_;
 		std::string name_;
 		std::string author_;
 		std::string comment_;
 		float bpm_;
 		unsigned int ticks_;
-		bool isTicks_;
+		bool is_ticks_;
 		Sequence sequence_;
-		Machine* machine_[MAX_MACHINES];
+		Machine* machines_[MAX_MACHINES];
 		mutable mutex mutex_;
 		nanoseconds accumulated_processing_time_, accumulated_routing_time_;
 };
@@ -289,11 +288,11 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 				return i;
 			}
 
-			const int BeatsPerMin() { return bpm(); }
-			void BeatsPerMin(const int value) { setBpm(value); }
+			int BeatsPerMin() { return bpm(); }
+			void BeatsPerMin(int value) { bpm(value); }
 
-			const int LinesPerBeat(){return ticksSpeed();}
-			void LinesPerBeat(const int value) { setTicksSpeed(value); }
+			int LinesPerBeat() { return tick_speed(); }
+			void LinesPerBeat(int value) { tick_speed(value); }
 			
 	///\}
 

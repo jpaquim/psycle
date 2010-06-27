@@ -100,26 +100,26 @@ bool Psy2Filter::LoadINFO(RiffFile * file, CoreSong & song) {
 	char Comment[128];
 
 	file->ReadArray(Name, 32); Name[31]=0;
-	song.setName(Name);
+	song.name(Name);
 	file->ReadArray(Author, 32); Author[31]=0;
-	song.setAuthor(Author);
+	song.author(Author);
 	bool err = file->ReadArray(Comment, 128); Comment[127]=0;
-	song.setComment(Comment);
+	song.comment(Comment);
 	return err;
 }
 
 bool Psy2Filter::LoadSNGI(RiffFile * file, CoreSong & song) {
 	std::int32_t tmp;
 	file->Read(tmp);
-	song.setBpm(tmp);
+	song.bpm(tmp);
 
 	file->Read(tmp);
 
-	if(tmp <= 0) song.setTicksSpeed(4); // Shouldn't happen but has happened.
-	else song.setTicksSpeed(static_cast<int>( 44100 * 15 * 4 / (tmp * song.bpm())));
+	if(tmp <= 0) song.tick_speed(4); // Shouldn't happen but has happened.
+	else song.tick_speed(static_cast<unsigned int>(44100 * 15 * 4 / (tmp * song.bpm())));
 
-	//Used when parsing the pattern, to adapt to true beats.
-	linesPerBeat=song.ticksSpeed();
+	// used when parsing the pattern, to adapt to true beats.
+	linesPerBeat = song.tick_speed();
 
 	///\todo: pass this with the loadExtra() function
 	file->Read(octave);
@@ -134,7 +134,7 @@ bool Psy2Filter::LoadSEQD(RiffFile * file, CoreSong & song) {
 	file->ReadArray(playOrder,128);
 	file->Read(length);
 	for(int i(0) ; i < length; ++i) seqList.push_back(playOrder[i]);
-	file->Read(tmp); song.setTracks(tmp);
+	file->Read(tmp); song.tracks(tmp);
 	return true;
 }
 

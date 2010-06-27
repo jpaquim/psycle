@@ -19,14 +19,14 @@ namespace psycle { namespace core {
 
 using namespace helpers;
 
-SongSerializer CoreSong::serializer;
+SongSerializer CoreSong::serializer_;
 
 CoreSong::CoreSong()
 :
-	ready()
+	is_ready_()
 {
-	for(int i(0); i < MAX_MACHINES; ++i) machine_[i] = 0;
-	for(int i(0); i < MAX_INSTRUMENTS; ++i) _pInstrument[i] = new Instrument;
+	for(unsigned int i(0); i < MAX_MACHINES; ++i) machines_[i] = 0;
+	for(unsigned int i(0); i < MAX_INSTRUMENTS; ++i) _pInstrument[i] = new Instrument;
 	clear(); // Warning! Due to C++ semantics, CoreSong::clear() will be called, even in a derived class that implements clear().
 }
 
@@ -36,14 +36,14 @@ CoreSong::~CoreSong() {
 }
 
 void CoreSong::clear() {
-	SetReady(false);
-	setTracks(MAX_TRACKS);
-	setName("Untitled");
-	setAuthor("Unnamed");
-	setComment("No Comments");
+	is_ready(false);
+	tracks(MAX_TRACKS);
+	name("Untitled");
+	author("Unnamed");
+	comment("No Comments");
 	{ // General properties
-		setBpm(125.0f);
-		setTicksSpeed(4);
+		bpm(125.0f);
+		tick_speed(4);
 	}
 	// Clean up allocated machines.
 	DeleteAllMachines();
@@ -54,15 +54,15 @@ void CoreSong::clear() {
 }
 
 bool CoreSong::load(std::string const & filename) {
-	SetReady(false);
-	const bool result = serializer.loadSong(filename, *this);
-	///\todo: setReady true or setReady result? what would be better?
-	SetReady(true);
+	is_ready(false);
+	bool const result(serializer_.loadSong(filename, *this));
+	///\todo: set is_ready to true or to result? what would be better?
+	is_ready(true);
 	return result;
 }
 
 bool CoreSong::save(std::string const & filename, int version) {
-	return serializer.saveSong(filename, *this, version);
+	return serializer_.saveSong(filename, *this, version);
 }
 
 void CoreSong::AddMachine(Machine * pmac, Machine::id_type newIdx) {
@@ -96,13 +96,13 @@ void CoreSong::ReplaceMachine(Machine * pmac, Machine::id_type idx) {
 }
 void CoreSong::ExchangeMachines(Machine::id_type macIdx1, Machine::id_type macIdx2) {
 	assert(macIdx1 >= 0 && macIdx2 >= 0 && macIdx1 < MAX_MACHINES && macIdx2 < MAX_MACHINES);
-	Machine* mac1 = machine_[macIdx1];
-	machine_[macIdx1] = machine_[macIdx2];
-	machine_[macIdx2] = mac1;
+	Machine * mac1 = machines_[macIdx1];
+	machines_[macIdx1] = machines_[macIdx2];
+	machines_[macIdx2] = mac1;
 }
 void CoreSong::DeleteAllMachines() {
-	for(Machine::id_type c(0); c < MAX_MACHINES; ++c) if(machine_[c]) {
-		for(Machine::id_type j(c + 1); j < MAX_MACHINES; ++j) if(machine_[c] == machine_[j]) {
+	for(Machine::id_type c(0); c < MAX_MACHINES; ++c) if(machines_[c]) {
+		for(Machine::id_type j(c + 1); j < MAX_MACHINES; ++j) if(machines_[c] == machines_[j]) {
 			{ ///\todo wtf? duplicate machine? could happen if loader messes up?
 				std::ostringstream s;
 				s << c << " and " << j << " have duplicate pointers";
@@ -110,10 +110,10 @@ void CoreSong::DeleteAllMachines() {
 					report.emit(s.str(), "duplicate machine found");
 				#endif
 			}
-			machine_[j] = 0;
+			machines_[j] = 0;
 		}
-		DeleteMachine(machine_[c]);
-		machine_[c] = 0;
+		DeleteMachine(machines_[c]);
+		machines_[c] = 0;
 	}
 }
 void CoreSong::DeleteMachine(Machine * mac) {
@@ -124,24 +124,24 @@ void CoreSong::DeleteMachine(Machine * mac) {
 	try {
 		Machine::id_type id = mac->id();
 		delete mac;
-		machine_[id] = 0;
+		machines_[id] = 0;
 	} catch(...) {
 		///\todo
 	}
 }
 
 Machine::id_type CoreSong::GetFreeBus() {
-	for(int c(0) ; c < MAX_BUSES ; ++c) if(!machine_[c]) return c;
+	for(unsigned int c(0) ; c < MAX_BUSES ; ++c) if(!machines_[c]) return c;
 	return -1; 
 }
 
 Machine::id_type CoreSong::GetFreeFxBus() {
-	for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!machine_[c]) return c;
+	for(unsigned int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!machines_[c]) return c;
 	return -1; 
 }
 
 Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac) {
-	if(!machine_[smac]) return Machine::id_type(255);
+	if(!machines_[smac]) return Machine::id_type(255);
 	return smac;
 }
 
@@ -643,7 +643,7 @@ void Song::clearMyData() {
 	_trackArmedCount=0;
 	currentOctave=4;
 	_saved=false;
-	set_filename("Untitled.psy");
+	filename("Untitled.psy");
 	AddMachine(MachineFactory::getInstance().CreateMachine(InternalKeys::master,MASTER_INDEX));
 	Pattern & pattern = *new Pattern();
 	pattern.timeSignatures().clear();
@@ -653,7 +653,7 @@ void Song::clearMyData() {
 	sequence().Add(pattern);
 	SequenceLine & line = sequence().createNewLine();
 	line.createEntry(pattern, 0);
-	SetReady(true);
+	is_ready(true);
 }
 
 void Song::DeleteMachine(Machine * mac)  {
