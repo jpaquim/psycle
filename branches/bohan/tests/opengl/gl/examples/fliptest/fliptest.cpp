@@ -414,8 +414,9 @@ int main(int argc, char ** argv) {
 
 	for(unsigned int i = 0; ; ++i) {
 		do_system_stuff();
-		if(i % 100 == 99) {
-			std::cout << "\rframes/s: " << 100 / elapsed_time() << '\t' << std::flush;
+		unsigned int const frames = 1000;
+		if(i % frames == frames - 1) {
+			std::cout << "\rframes/s: " << frames / elapsed_time() << "    " << std::flush;
 		}
 		disable_for_draw_pixels();
 		glRasterPos2i(0, 0);
