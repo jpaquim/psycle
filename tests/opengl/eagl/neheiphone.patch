@@ -1,0 +1,98 @@
+Index: neheiphone/NeHe Lesson 03/Classes/NeHe_Lesson_03AppDelegate.h
+===================================================================
+--- neheiphone/NeHe Lesson 03/Classes/NeHe_Lesson_03AppDelegate.h	(revision 4)
++++ neheiphone/NeHe Lesson 03/Classes/NeHe_Lesson_03AppDelegate.h	(working copy)
+@@ -6,6 +6,8 @@
+ //  Copyright Jeff LaMarche Consulting 2008. All rights reserved.
+ //
+ 
++#import <UIKit/UIKit.h>
++
+ @class GLViewController;
+ 
+ @interface NeHe_Lesson_03AppDelegate : NSObject <UIApplicationDelegate>
+Index: neheiphone/NeHe Lesson 04/Classes/NeHe_Lesson_04AppDelegate.h
+===================================================================
+--- neheiphone/NeHe Lesson 04/Classes/NeHe_Lesson_04AppDelegate.h	(revision 4)
++++ neheiphone/NeHe Lesson 04/Classes/NeHe_Lesson_04AppDelegate.h	(working copy)
+@@ -6,6 +6,8 @@
+ //  Copyright Jeff LaMarche Consulting 2008. All rights reserved.
+ //
+ 
++#import <UIKit/UIKit.h>
++
+ @class GLViewController;
+ 
+ @interface NeHe_Lesson_04AppDelegate : NSObject <UIApplicationDelegate>
+Index: neheiphone/NeHe Lesson 05/Classes/NeHe_Lesson_05AppDelegate.h
+===================================================================
+--- neheiphone/NeHe Lesson 05/Classes/NeHe_Lesson_05AppDelegate.h	(revision 4)
++++ neheiphone/NeHe Lesson 05/Classes/NeHe_Lesson_05AppDelegate.h	(working copy)
+@@ -6,6 +6,8 @@
+ //  Copyright Jeff LaMarche Consulting 2008. All rights reserved.
+ //
+ 
++#import <UIKit/UIKit.h>
++
+ @class GLViewController;
+ 
+ @interface NeHe_Lesson_05AppDelegate : NSObject <UIApplicationDelegate>
+Index: neheiphone/NeHe Lesson 05/Classes/GLViewController.m
+===================================================================
+--- neheiphone/NeHe Lesson 05/Classes/GLViewController.m	(revision 4)
++++ neheiphone/NeHe Lesson 05/Classes/GLViewController.m	(working copy)
+@@ -90,7 +90,8 @@
+ 	
+ 	glVertexPointer(3, GL_FLOAT, 0, pyramidVertices); 
+ 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, triVertexColors); 
+-	for(int i = 0; i < triNumberOfIndices; i += 3)
++	int i;
++	for(i = 0; i < triNumberOfIndices; i += 3)
+ 	{ 
+ 		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, &pyramidVertexFaces[i]); 
+ 	}
+@@ -103,7 +104,7 @@
+ 	glRotatef(rquad, 1.0f, 1.0f, 1.0f);	
+ 	glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
+ 	int colorIndex = 0;
+-	for(int i = 0; i < cubeNumberOfIndices; i += 3) 
++	for(i = 0; i < cubeNumberOfIndices; i += 3) 
+ 	{ 
+ 		glColor4ub(cubeFaceColors[colorIndex], cubeFaceColors[colorIndex+1], cubeFaceColors[colorIndex+2], cubeFaceColors[colorIndex+3]);
+ 		int face = (i / 3.0);
+Index: neheiphone/NeHe Lesson 06/GLViewController.m
+===================================================================
+--- neheiphone/NeHe Lesson 06/GLViewController.m	(revision 4)
++++ neheiphone/NeHe Lesson 06/GLViewController.m	(working copy)
+@@ -114,7 +114,8 @@
+ 	glVertexPointer(3, GL_FLOAT, 0, pyramidVertices); 
+ 	glColorPointer(4, GL_UNSIGNED_BYTE, 0, triVertexColors); 
+ 	
+-	for(int i = 0; i < triNumberOfIndices; i += 3)
++	int i;
++	for(i = 0; i < triNumberOfIndices; i += 3)
+ 	{ 
+ 		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, &pyramidVertexFaces[i]); 
+ 	}
+@@ -129,7 +130,7 @@
+ 	glRotatef(rquad, 1.0f, 1.0f, 1.0f);	
+ 	glVertexPointer(3, GL_FLOAT, 0, cubeVertices);
+ 	glTexCoordPointer(2, GL_FLOAT, 0, cubeTextureCoords);
+-	for(int i = 0; i < cubeNumberOfIndices; i += 3) 
++	for(i = 0; i < cubeNumberOfIndices; i += 3) 
+ 	{ 
+ 		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, &cubeVertexFaces[i]);
+ 	} 
+Index: neheiphone/NeHe Lesson 06/Classes/NeHe_Lesson_06AppDelegate.h
+===================================================================
+--- neheiphone/NeHe Lesson 06/Classes/NeHe_Lesson_06AppDelegate.h	(revision 4)
++++ neheiphone/NeHe Lesson 06/Classes/NeHe_Lesson_06AppDelegate.h	(working copy)
+@@ -6,6 +6,8 @@
+ //  Copyright Jeff LaMarche Consulting 2008. All rights reserved.
+ //
+ 
++#import <UIKit/UIKit.h>
++
+ @class GLViewController;
+ 
+ @interface NeHe_Lesson_06AppDelegate : NSObject <UIApplicationDelegate>
