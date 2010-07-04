@@ -13,14 +13,13 @@ build:
 		--bld-dir=$(bld) \
 		--install-prefix-dir=/ \
 		--install-dest-dir=$(install) \
+		--cxx-flags='-g -O0' \
 		--ld-flags=-bind_at_load
 
-bundle:
+bundle: build
 	rm -Rf $(bundle)
 	mkdir -p $(bundle)
 	cp $(install)/bin/$(app) Info.plist icon.png $(bundle)
-	#cp $(install)/bin/$(app) $(bundle)/$(app)_
-	#cp $(app).sh $(bundle)/$(app)
 
 deploy: bundle
 	rsync --archive --delete $(bundle) root@$(iphone):/Applications
