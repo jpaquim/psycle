@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
 	NSAutoreleasePool *pool = [NSAutoreleasePool new];
-    int returnCode = UIApplicationMain(argc, argv, @"Hologram", @"Hologram");
+	/* never returns */ int returnCode = UIApplicationMain(argc, argv, nil, @"HologramAppDelegate");
 	[pool release];
     return returnCode;
 }
