@@ -14,6 +14,9 @@
 
 using namespace psycle::plugin_interface;
 
+// Stk recently got a namespace. We (re)declare it for backward compatibility with older stk versions.
+namespace stk {} using namespace stk;
+
 #define NUMPARAMETERS 5
 
 StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)

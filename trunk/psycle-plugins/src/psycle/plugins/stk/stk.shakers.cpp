@@ -12,6 +12,9 @@
 
 using namespace psycle::plugin_interface;
 
+// Stk recently got a namespace. We (re)declare it for backward compatibility with older stk versions.
+namespace stk {} using namespace stk;
+
 int const NUMPARAMETERS = 6;
 
 CMachineParameter const paraShakeEnergy = 
