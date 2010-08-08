@@ -1,11 +1,10 @@
 
-#include <universalis/os/paths.hpp>
+#include <universalis/os/fs.hpp>
 #include <direct.h>
 #include "shrunk_newmachine.hpp"
 #include "../../Plugin.hpp"
 #include "../../VstHost24.hpp"
 #include "../../ProgressDialog.hpp"
-#include "../../Loggers.hpp"
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -104,7 +103,7 @@ namespace psycle
 		void CNewMachine::Regenerate() 
 		{
 			DestroyPluginInfo();
-			DeleteFile((universalis::os::paths::package::home() / "psycle.plugin-scan.cache").native_file_string().c_str());
+			DeleteFile((universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache").native_file_string().c_str());
 			LoadPluginInfo();
 		}
 
@@ -112,7 +111,7 @@ namespace psycle
 		{
 			if(_numPlugins == -1)
 			{
-				loggers::info("Scanning plugins ...");
+				loggers::information()("Scanning plugins ...");
 
 				int plugsCount(0);
 				int badPlugsCount(0);
@@ -161,11 +160,11 @@ namespace psycle
 					char c[1 << 10];
 					::GetCurrentDirectory(sizeof c, c);
 					std::string s(c);
-					loggers::info("Scanning plugins ... Current Directory: " + s);
+					loggers::information()("Scanning plugins ... Current Directory: " + s);
 				}
-				loggers::info("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
-				loggers::info("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
-				loggers::info("Scanning plugins ... Listing ...");
+				loggers::information()("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
+				loggers::information()("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
+				loggers::information()("Scanning plugins ... Listing ...");
 
 				Progress.Create();
 				Progress.SetWindowText("Scanning plugins ... Listing ...");
@@ -178,13 +177,13 @@ namespace psycle
 
 				{
 					std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
-					loggers::info(s.str());
+					loggers::information()(s.str());
 					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
 					Progress.SetWindowText(s.str().c_str());
 				}
 				std::ofstream out;
 				{
-					boost::filesystem::path log_dir(universalis::os::paths::package::home());
+					boost::filesystem::path log_dir(universalis::os::fs::home_app_local("psycle"));
 					// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
 					mkdir(log_dir.native_directory_string().c_str());
 					out.open((log_dir / "psycle.plugin-scan.log.txt").native_file_string().c_str());
@@ -199,7 +198,7 @@ namespace psycle
 				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
 				Progress.SetWindowText(s.str().c_str());
 
-				loggers::info("Scanning plugins ... Testing Natives ...");
+				loggers::information()("Scanning plugins ... Testing Natives ...");
 				out
 					<< std::endl
 					<< "======================" << std::endl
@@ -217,7 +216,7 @@ namespace psycle
 					Progress.SetWindowText(s.str().c_str());
 				}
 
-				loggers::info("Scanning plugins ... Testing VSTs ...");
+				loggers::information()("Scanning plugins ... Testing VSTs ...");
 				out
 					<< std::endl
 					<< "===================" << std::endl
@@ -232,7 +231,7 @@ namespace psycle
 					std::ostringstream s; s << "Scanned " << plugin_count << " Files." << plugsCount << " plugins found";
 					out << std::endl << s.str() << std::endl;
 					out.flush();
-					loggers::info(s.str().c_str());
+					loggers::information()(s.str().c_str());
 					Progress.SetWindowText(s.str().c_str());
 				}
 				out.close();
@@ -241,12 +240,12 @@ namespace psycle
 				Progress.m_Progress.SetPos(16384);
 				Progress.SetWindowText("Saving scan cache file ...");
 
-				loggers::info("Saving scan cache file ...");
+				loggers::information()("Saving scan cache file ...");
 				SaveCacheFile();
 
 				Progress.OnCancel();
 				::AfxGetApp()->DoWaitCursor(-1); 
-				loggers::info("Done.");
+				loggers::information()("Done.");
 			}
 		}
 
@@ -300,7 +299,7 @@ namespace psycle
 							}
 							out << s.str();
 							out.flush();
-							loggers::info(fileName + '\n' + s.str());
+							loggers::information()(fileName + '\n' + s.str());
 							break;
 						}
 					}
@@ -311,7 +310,7 @@ namespace psycle
 					{
 						out << "new plugin added to cache ; ";
 						out.flush();
-						loggers::info(fileName + "\nnew plugin added to cache.");
+						loggers::information()(fileName + "\nnew plugin added to cache.");
 						_pPlugsInfo[currentPlugsCount]= new PluginInfo;
 						_pPlugsInfo[currentPlugsCount]->dllname = fileName;
 						_pPlugsInfo[currentPlugsCount]->FileTime = time;
@@ -344,7 +343,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
+								loggers::exception()(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								_pPlugsInfo[currentPlugsCount]->name = "???";
 								_pPlugsInfo[currentPlugsCount]->identifier = 0;
@@ -402,7 +401,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								loggers::exception(title.str() + '\n' + s.str());
+								loggers::exception()(title.str() + '\n' + s.str());
 							}
 							catch(...)
 							{
@@ -417,7 +416,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								loggers::exception(title.str() + '\n' + s.str());
+								loggers::exception()(title.str() + '\n' + s.str());
 							}
 						}
 						else if(type == MACH_VST)
@@ -447,7 +446,7 @@ namespace psycle
 								out.flush();
 								std::stringstream title; title
 									<< "Machine crashed: " << fileName;
-								loggers::exception(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
+								loggers::exception()(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
 								_pPlugsInfo[currentPlugsCount]->allow = false;
 								_pPlugsInfo[currentPlugsCount]->identifier = 0;
 								_pPlugsInfo[currentPlugsCount]->name = "???";
@@ -550,7 +549,7 @@ namespace psycle
 									out.flush();
 									std::stringstream title; title
 										<< "Machine crashed: " << fileName;
-									loggers::exception(title.str() + '\n' + s.str());
+									loggers::exception()(title.str() + '\n' + s.str());
 								}
 								catch(...)
 								{
@@ -565,7 +564,7 @@ namespace psycle
 									out.flush();
 									std::stringstream title; title
 										<< "Machine crashed: " << fileName;
-									loggers::exception(title.str() + '\n' + s.str());
+									loggers::exception()(title.str() + '\n' + s.str());
 								}
 							}
 							learnDllName(fileName,type);
@@ -582,7 +581,7 @@ namespace psycle
 						out
 							<< s.str().c_str();
 						out.flush();
-						loggers::crash(s.str());
+						loggers::crash()(s.str());
 					}
 					catch(...)
 					{
@@ -593,7 +592,7 @@ namespace psycle
 						out
 							<< s.str().c_str();
 						out.flush();
-						loggers::crash(s.str());
+						loggers::crash()(s.str());
 					}
 				}
 				out << std::endl;
@@ -616,7 +615,7 @@ namespace psycle
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
-			std::string cache((universalis::os::paths::package::home() / "psycle.plugin-scan.cache").native_file_string());
+			std::string cache((universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache").native_file_string());
 			RiffFile file;
 			CFileFind finder;
 
@@ -739,7 +738,7 @@ namespace psycle
 
 		bool CNewMachine::SaveCacheFile()
 		{
-			boost::filesystem::path cache(universalis::os::paths::package::home() / "psycle.plugin-scan.cache");
+			boost::filesystem::path cache(universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache");
 
 			DeleteFile(cache.native_file_string().c_str());
 			RiffFile file;

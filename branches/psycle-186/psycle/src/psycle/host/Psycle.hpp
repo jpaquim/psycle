@@ -3,7 +3,6 @@
 #pragma once
 #include "resources/resources.hpp" // main symbols
 #include "Global.hpp"
-#include <psycle/helpers/value_mapper.hpp>
 #include <psycle/helpers/hexstring_to_integer.hpp>
 
 namespace psycle { namespace host {

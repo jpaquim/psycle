@@ -16,7 +16,6 @@
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/sched.hpp>
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
-#include "Global.hpp"
 
 namespace psycle
 {
@@ -879,7 +878,21 @@ void Player::stop_threads() {
 						}
 					}
 #else
-					pSong->_pMachine[MASTER_INDEX]->Work(amount);
+					if(threads_.empty()){ // single-threaded, recursive processing
+						pSong->_pMachine[MASTER_INDEX]->recursive_process(amount);
+					} else { // multi-threaded scheduling
+						// we push all the terminal nodes to the processing queue
+						{ scoped_lock lock(mutex_);
+							compute_plan(); // it's overkill, but we haven't yet implemented signals that notifies when connections are changed or nodes added/removed.
+							processed_node_count_ = 0;
+							samples_to_process_ = amount;
+						}
+						condition_.notify_all(); // notify all threads that we added nodes to the queue
+						// wait until all nodes have been processed
+						{ scoped_lock lock(mutex_);
+							while(processed_node_count_ != graph_size_) main_condition_.wait(lock);
+						}
+					}
 					pSong->_sampCount += amount;
 #endif //!defined WINAMP_PLUGIN
 

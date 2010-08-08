@@ -9,6 +9,7 @@
 #include "SongStructs.hpp"
 
 #include <psycle/helpers/math.hpp>
+#include <psycle/helpers/value_mapper.hpp>
 
 namespace psycle
 {

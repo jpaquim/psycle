@@ -17,7 +17,6 @@
 #include "../../Player.hpp"
 #include "../../Machine.hpp"
 #include "../../internal_machines.hpp"
-#include "../../Helpers.hpp"
 #include "shrunk_newmachine.hpp"
 #include "resources.hpp"
 #include "WinampDriver.hpp"
