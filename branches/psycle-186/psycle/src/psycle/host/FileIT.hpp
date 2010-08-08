@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CFileIT.
 #pragma once
 
-#include "SongStructs.hpp"
+#include "Global.hpp"
 #include "FileIO.hpp"
 #include "It.hpp"
 namespace psycle

@@ -1,11 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CProgressDialog.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "ProgressDialog.hpp"
-#include "Psycle.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
+
 		CProgressDialog::CProgressDialog(CWnd* pParent) : CDialog(CProgressDialog::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CProgressDialog)
@@ -47,5 +46,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DestroyWindow();
 			AfxGetApp()->DoWaitCursor(-1); 
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+
+	}   // namespace
+}   // namespace

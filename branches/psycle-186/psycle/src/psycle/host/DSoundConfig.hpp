@@ -1,12 +1,11 @@
 ///\file
 ///\interface psycle::host::CDSoundConfig
 #pragma once
-#include "resources/resources.hpp"
+#include "Psycle.hpp"
 #include <afxwin.h>
 #include <afxcmn.h> // CSpinButtonCtrl
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
+
 		/// direct sound config window.
 		class CDSoundConfig : public CDialog
 		{
@@ -49,5 +48,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			private:
 				void RecalcLatency();
 		};
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace
+

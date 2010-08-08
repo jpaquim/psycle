@@ -1,12 +1,10 @@
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "ITModule2.h"
 #include "Configuration.hpp"
-#include "Song.hpp"
+
 #include "Player.hpp"
-#include "XMSampler.hpp"
 #include "Song.hpp"
-#include "configuration_options.hpp"
+#include "XMSampler.hpp"
+
 #include <algorithm>
 namespace psycle
 {
@@ -104,6 +102,7 @@ namespace psycle
 		}
 		bool ITModule2::LoadITModule(Song *song)
 		{
+			CSingleLock lock(&song->door,TRUE);
 			s=song;
 			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
@@ -1129,6 +1128,7 @@ Special:  Bit 0: On = song message attached.
 
 		bool ITModule2::LoadS3MModuleX(Song *song)
 		{
+			CSingleLock lock(&song->door,TRUE);
 			s=song;
 			if (Read(&s3mFileH,sizeof(s3mFileH))==0 ) return 0;
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;

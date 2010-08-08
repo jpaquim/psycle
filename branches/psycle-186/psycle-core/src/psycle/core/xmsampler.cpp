@@ -2011,7 +2011,7 @@ bool XMSampler::Channel::Load(RiffFile& riffFile)
 	riffFile.Read(m_DefaultPanFactor);
 	riffFile.Read(m_DefaultCutoff);
 	riffFile.Read(m_DefaultRessonance);
-	riffFile.Read((uint32_t&)m_DefaultFilterType);
+	riffFile.Read((unsigned int&)m_DefaultFilterType);
 
 	return true;
 }
@@ -2024,7 +2024,7 @@ void XMSampler::Channel::Save(RiffFile& riffFile)
 	riffFile.Write(m_DefaultPanFactor);
 	riffFile.Write(m_DefaultCutoff);
 	riffFile.Write(m_DefaultRessonance);
-	riffFile.Write((uint32_t&)m_DefaultFilterType);
+	riffFile.Write((unsigned int&)m_DefaultFilterType);
 }
 
 
@@ -2650,7 +2650,7 @@ bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
 {
 	int temp;
 	bool wrongState=false;
-	std::uint32_t filevers= 0;
+	unsigned int filevers= 0;
 	unsigned long filepos;
 	int size=0;
 	riffFile->Read(size);

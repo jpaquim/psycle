@@ -1,18 +1,18 @@
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
-#include <packageneric/pre-compiled.private.hpp>
+
 #define _WIN32_DCOM
 
 #include "Psycle.hpp"
-#include "Version.hpp"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
 #include "MidiInput.hpp"
 #include "NewMachine.hpp"
 #include "SInstance.h"
-#include "Loggers.hpp"
-#include <universalis/processor/exception.hpp>
+#include <universalis/cpu/exception.hpp>
+#include <universalis/os/loggers.hpp>
 #include <diversalis/compiler.hpp>
+
 #include <sstream>
 #include <comdef.h>
 #include <wbemidl.h>
@@ -20,8 +20,7 @@
 	# pragma comment(lib, "wbemuuid")
 #endif
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
@@ -29,21 +28,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		CPsycleApp theApp; /// The one and only CPsycleApp object
 
-		CPsycleApp::CPsycleApp()
-		:m_uUserMessage(0)
+		CPsycleApp::CPsycleApp() :m_uUserMessage(0)
 		{
-			universalis::processor::exception::install_handler_in_thread();
-			// support for unicode characters on mswin98
-			{
-				#if 0
-					if(!::LoadLibrary("unicows"))
-					{
-						std::runtime_error e("could not load library unicows: " + universalis::operating_system::exceptions::code_description());
-						MessageBox(0, e.what(), "exception", MB_OK | MB_ICONERROR);
-						throw e;
-					}
-				#endif // 0
-			}
 		}
 
 		CPsycleApp::~CPsycleApp()
@@ -52,6 +38,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		BOOL CPsycleApp::InitInstance()
 		{
+			CWinApp::InitInstance();
+
 			// Allow only one instance of the program
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
 			CInstanceChecker instanceChecker;
@@ -60,14 +48,12 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			
 			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 			
-			Global::_cpuHz = cpu::cycles_per_second();
-
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
-			CMainFrame* pFrame = new CMainFrame;
+			CMainFrame* pFrame = new CMainFrame();
 			m_pMainWnd = pFrame;
 
-			loggers::info("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
+			loggers::information()("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
 
 			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
 			{
@@ -99,6 +85,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 				return FALSE;
 			}
+
 
 
 			// create and load the frame with its resources
@@ -451,5 +438,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else Global::pConfig->_showAboutAtStart=false;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

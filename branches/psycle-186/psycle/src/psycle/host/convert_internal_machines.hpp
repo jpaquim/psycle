@@ -1,9 +1,10 @@
 #pragma once
+#include "Global.hpp"
+#include "internal_machines.hpp"
+#include <psycle/helpers/scale.hpp>
 #include <string>
 #include <exception>
 #include <map>
-#include <psycle/helpers/scale.hpp>
-#include "internal_machines.hpp"
 namespace psycle
 {
 	namespace host

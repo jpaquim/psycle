@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "Machine.hpp"
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
 // in a different way
@@ -30,12 +30,13 @@
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
 
-#include "Loggers.hpp"
-#include "configuration_options.hpp"
+#include <universalis/os/aligned_memory_alloc.hpp>
+#include "cpu_time_clock.hpp"
+
 #if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
 #elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-	#include <universalis/processor/exception.hpp>
+	#include <universalis.hpp>
 #endif
 namespace psycle
 {
@@ -58,7 +59,7 @@ namespace psycle
 					#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 						#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
 					#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-						universalis::processor::exception const * const translated(dynamic_cast<universalis::processor::exception const * const>(function_error->exception()));
+						universalis::cpu::exception const * const translated(dynamic_cast<universalis::cpu::exception const * const>(function_error->exception()));
 						if(translated)
 						{
 							crash = true;
@@ -92,7 +93,7 @@ namespace psycle
 			if(minor_problem)
 			{
 				s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
-				loggers::warning(s.str());
+				if(loggers::warning()) loggers::warning()(s.str());
 			}
 			else
 			{
@@ -103,11 +104,11 @@ namespace psycle
 				if(crash)
 				{
 					//loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
-					loggers::exception(s.str());
+					if(loggers::exception()) loggers::exception()(s.str());
 				}
 				else
 				{
-					loggers::exception(s.str());
+					if(loggers::exception()) loggers::exception()(s.str());
 				}
 			}
 			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
@@ -133,14 +134,13 @@ namespace psycle
 			, _mode(MACHMODE_UNDEFINED)
 			, _bypass(false)
 			, _mute(false)
-			, _waitingForSound(false)
+			, recursive_is_processing_(false)
 			, _standby(false)
-			, _worked(false)
+			, recursive_processed_(false)
+			, sched_processed_(false)
 			, _isMixerSend(false)
 			, _pSamplesL(0)
 			, _pSamplesR(0)
-			, _cpuCost(0)
-			, _wireCost(0)
 			, _lVol(0)
 			, _rVol(0)
 			, _panning(0)
@@ -162,16 +162,8 @@ namespace psycle
 			, _scopePrevNumSamples(0)
 		{
 			_editName[0] = '\0';
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
-		#else
-			_pSamplesL = new float[STREAM_SIZE];
-			_pSamplesR = new float[STREAM_SIZE];
-		#endif
+			universalis::os::aligned_memory_alloc(16, _pSamplesL, STREAM_SIZE);
+			universalis::os::aligned_memory_alloc(16, _pSamplesR, STREAM_SIZE);
 
 			// Clear machine buffer samples
 			helpers::dsp::Clear(_pSamplesL,STREAM_SIZE);
@@ -210,6 +202,7 @@ namespace psycle
 			rms.previousLeft=0.;
 			rms.previousRight=0.;
 #endif
+			reset_time_measurement();
 		}
 		Machine::Machine(Machine* mac)
 			: crashed_()
@@ -223,14 +216,13 @@ namespace psycle
 			, _mode(mac->_mode)
 			, _bypass(mac->_bypass)
 			, _mute(mac->_mute)
-			, _waitingForSound(false)
+			, recursive_is_processing_(false)
 			, _standby(false)
-			, _worked(false)
+			, recursive_processed_(false)
+			, sched_processed_(false)
 			, _isMixerSend(false)
 			, _pSamplesL(0)
 			, _pSamplesR(0)
-			, _cpuCost(0)
-			, _wireCost(0)
 			, _lVol(mac->_lVol)
 			, _rVol(mac->_rVol)
 			, _panning(mac->_panning)
@@ -252,16 +244,8 @@ namespace psycle
 			, _scopePrevNumSamples(0)
 		{
 			sprintf(_editName,mac->_editName);
-#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_pSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-			_pSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
-#else
-			_pSamplesL = new float[STREAM_SIZE];
-			_pSamplesR = new float[STREAM_SIZE];
-#endif
+			universalis::os::aligned_memory_alloc(16, _pSamplesL, STREAM_SIZE);
+			universalis::os::aligned_memory_alloc(16, _pSamplesR, STREAM_SIZE);
 
 			// Clear machine buffer samples
 			helpers::dsp::Clear(_pSamplesL,STREAM_SIZE);
@@ -301,31 +285,22 @@ namespace psycle
 			rms.previousLeft=0.;
 			rms.previousRight=0.;
 #endif
+			reset_time_measurement();
 		}
 		Machine::~Machine() throw()
 		{
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_aligned_free(_pSamplesL);
-			_aligned_free(_pSamplesR);
-		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-			free(_pSamplesL);
-			free(_pSamplesR);
-		#else
-			delete [] _pSamplesL;
-			delete [] _pSamplesR;
-		#endif
+			universalis::os::aligned_memory_dealloc(_pSamplesL);
+			universalis::os::aligned_memory_dealloc(_pSamplesR);
 			_pSamplesL = _pSamplesR=0;
 		}
 
 		void Machine::Init()
 		{
 			// Standard gear initalization
-			_cpuCost = 0;
-			_wireCost = 0;
 			_mute = false;
 			Standby(false);
 			Bypass(false);
-			_waitingForSound = false;
+			recursive_is_processing_ = false;
 			// Centering volume and panning
 			SetPan(64);
 			// Clearing connections
@@ -347,6 +322,7 @@ namespace psycle
 			rms.previousLeft=0.;
 			rms.previousRight=0.;
 #endif
+			reset_time_measurement();
 		}
 
 		void Machine::SetPan(int newPan)
@@ -457,7 +433,7 @@ namespace psycle
 			if (_pDstMachine)
 			{
 				//if ( value == 255 ) value =256; // FF = 255
-				//const float invol = CValueMapper::Map_255_1(value); // Convert a 0..256 value to a 0..1.0 value
+				//const float invol = value_mapper::map_256_1(value); // Convert a 0..256 value to a 0..1.0 value
 				
 				int c;
 				if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
@@ -482,7 +458,7 @@ namespace psycle
 				{
 					//float val;
 					_pDstMachine->GetWireVolume(c,value);
-					//value = helpers::math::rounded(val*256.0f);
+					//value = helpers::math::lround<int,float>(val*256.0f);
 					return true;
 				}
 			}
@@ -602,9 +578,10 @@ namespace psycle
 
 		void Machine::PreWork(int numSamples,bool clear)
 		{
-			_worked = false;
-			_waitingForSound= false;
-			cpu::cycles_type wcost = cpu::cycles();
+			recursive_processed_ = false;
+			recursive_is_processing_= false;
+			sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;
+			nanoseconds const t0(cpu_time_clock());
 #if !defined WINAMP_PLUGIN
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
@@ -638,111 +615,127 @@ namespace psycle
 				helpers::dsp::Clear(_pSamplesL, numSamples);
 				helpers::dsp::Clear(_pSamplesR, numSamples);
 			}
-			_wireCost += cpu::cycles() - wcost;
+		nanoseconds const t1(cpu_time_clock());
+		Global::song().accumulate_routing_time(t1 - t0);
+
 		}
 
-		/// Each machine is expected to produce its output in its own
-		/// _pSamplesX buffers.
-		void Machine::Work(int numSamples)
-		{
-			_waitingForSound=true;
-			for (int i=0; i<MAX_CONNECTIONS; i++)
-			{
-				if (_inputCon[i])
-				{
-					Machine* pInMachine = Global::_pSong->_pMachine[_inputMachines[i]];
-					if (pInMachine)
-					{
-						/*
-						* todo: Change the sound routing to understand what a feedback loop is,
-						* creating a special type of wire that will have a buffer which will give as output,
-						* and which will be triggered from the master, 
-						* to fill again the buffer once all the other machines have done its job.
-						*/
-						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
-						{ 
-							{
-								#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-									#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-								#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-									universalis::processor::exceptions::fpu::mask::type fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-								#endif
-								pInMachine->Work(numSamples);
-							}
-							{
-								//Disable bad-behaving machines
-								///\todo: add a better approach later on, 
-								/*
-								if (pInMachine->_cpuCost >= Global::_cpuHz && !Global::pPlayer->_recording)
-								{
-									if ( pInMachine->_mode == MACHMODE_GENERATOR) pInMachine->_mute=true;
-									else pInMachine->Bypass(true);
-								}
-								*/
-							}
-							/*
-							This could be a different Undenormalize funtion, using the already calculated
-							"_volumeCounter".Note: It needs that muted&|bypassed machines set the variable
-							correctly.
-							if(pInMachine->_volumeCounter*_inputConVol[i] < 0.004f) // this gives for 24bit depth.
-							{
-								std::memset(pInMachine->_pSamplesL,0,numSamples*sizeof(float));
-								std::memset(pInMachine->_pSamplesR,0,numSamples*sizeof(float));
-							}
-							*/
-						}
-						if(!pInMachine->Standby()) Standby(false);
-						if(!pInMachine->_mute && !_mute && !pInMachine->Standby())
-						{
-							cpu::cycles_type wcost = cpu::cycles();
-							helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*_inputConVol[i]);
-							helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*_inputConVol[i]);
-							_wireCost += cpu::cycles() - wcost;
-						}
-					}
+
+// Low level process function of machines. Takes care of audio generation and routing.
+// Each machine is expected to produce its output in its own _pSamplesX buffers.
+void Machine::recursive_process(unsigned int frames) {
+	recursive_process_deps(frames);
+
+	nanoseconds const t1(cpu_time_clock());
+
+	GenerateAudio(frames);
+
+	nanoseconds const t2(cpu_time_clock());
+	accumulate_processing_time(t2 - t1);
+}
+
+void Machine::recursive_process_deps(unsigned int frames, bool mix) {
+	recursive_is_processing_ = true;
+	for(int i(0); i < MAX_CONNECTIONS; ++i) {
+		if(_inputCon[i]) {
+			Machine * pInMachine = Global::song()._pMachine[_inputMachines[i]];
+			if(pInMachine) {
+				if(!pInMachine->recursive_processed_ && !pInMachine->recursive_is_processing_)
+					pInMachine->recursive_process(frames);
+				if(!pInMachine->Standby()) Standby(false);
+				if(!_mute && !Standby() && mix) {
+					nanoseconds const t0(cpu_time_clock());
+					helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, frames, pInMachine->_lVol * _inputConVol[i]);
+					helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, frames, pInMachine->_rVol * _inputConVol[i]);
+					nanoseconds const t1(cpu_time_clock());
+					Global::song().accumulate_routing_time(t1 - t0);
 				}
 			}
-			_waitingForSound = false;
-			cpu::cycles_type wcost = cpu::cycles();
-			helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			_wireCost += cpu::cycles() - wcost;
 		}
+	}
+	recursive_is_processing_ = false;
+	{ // undernormalise
+		nanoseconds const t0(cpu_time_clock());
+		helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+		nanoseconds const t1(cpu_time_clock());
+		Global::song().accumulate_routing_time(t1 - t0);
+	}
+}
 
-		//Modified version of Machine::Work(). The only change is the removal of mixing inputs into one stream.
-		void Machine::WorkNoMix(int numSamples)
-		{
-			_waitingForSound=true;
-			for (int i=0; i<MAX_CONNECTIONS; i++)
-			{
-				if (_inputCon[i])
-				{
-					Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
-					if (pInMachine)
-					{
-						if (!pInMachine->_worked && !pInMachine->_waitingForSound)
-						{ 
-							{
-								#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-									#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-								#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-									universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-								#endif
-								pInMachine->Work(numSamples);
-							}
-						}
-						if(!pInMachine->Standby()) Standby(false);
-					}
-				}
+/// tells the scheduler which machines to process before this one
+void Machine::sched_inputs(sched_deps & result) const {
+	for(int c(0); c < MAX_CONNECTIONS; ++c) if(_inputCon[c]) {
+		Machine & input(*Global::song()._pMachine[_inputMachines[c]]);
+		result.push_back(&input);
+	}
+	if (_isMixerSend && result.empty()) {
+		//Work down the connection wires until finding the mixer.
+		const Machine* nmac = this;
+		while(true) {
+			for(int i(0); i < MAX_CONNECTIONS; ++i) if(nmac->_connection[i]) {
+				nmac = Global::song()._pMachine[nmac->_outputMachines[i]];
+				break;
 			}
-			_waitingForSound = false;
+			if (nmac->_type == MACH_MIXER) {
+				break;
+			}
+			if (nmac->_outputMachines == 0) {
+				// we are on the wrong machine, better return
+				return;
+			}
 		}
+		result.push_back(nmac);
+	}
+}
 
+/// tells the scheduler which machines may be processed after this one
+void Machine::sched_outputs(sched_deps & result) const {
+	for(int c(0); c < MAX_CONNECTIONS; ++c) if(_connection[c]) {
+		Machine & output(*Global::song()._pMachine[_outputMachines[c]]);
+		result.push_back(&output);
+	}
+}
+
+/// called by the scheduler to ask for the actual processing of the machine
+bool Machine::sched_process(unsigned int frames) {
+	nanoseconds const t0(cpu_time_clock());
+
+	if(!_mute) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
+		Machine & input_node(*Global::song()._pMachine[_inputMachines[i]]);
+		if(!input_node.Standby()) Standby(false);
+		// Mixer already prepares the buffers onto the sends.
+		if(!Standby() && (input_node._type != MACH_MIXER || !_isMixerSend)) {
+			helpers::dsp::Add(input_node._pSamplesL, _pSamplesL, frames, input_node._lVol * _inputConVol[i]);
+			helpers::dsp::Add(input_node._pSamplesR, _pSamplesR, frames, input_node._rVol * _inputConVol[i]);
+		}
+	}
+	helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+
+	nanoseconds const t1(cpu_time_clock());
+	Global::song().accumulate_routing_time(t1 - t0);
+
+	GenerateAudio(frames);
+
+	nanoseconds const t2(cpu_time_clock());
+	accumulate_processing_time(t2 - t1);
+
+	++processing_count_;
+
+	return true;
+}
+int Machine::GenerateAudio(int numsamples) {
+	//Current implementation limited to work in ticks. check psycle-core's in trunk for the other implementation.
+	return GenerateAudioInTicks(0,numsamples);
+}
+int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
+	return 0;
+}
 		void Machine::UpdateVuAndStanbyFlag(int numSamples)
 		{
 #if PSYCLE__CONFIGURATION__RMS_VUS
 			_volumeCounter = helpers::dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(helpers::math::lround<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > 0)
@@ -767,7 +760,7 @@ namespace psycle
 #else
 			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::rounded((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(helpers::math::lround<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
@@ -1096,17 +1089,15 @@ namespace psycle
 			_clip = false;
 		}
 
-		void Master::Work(int numSamples)
+		int Master::GenerateAudio(int numSamples)
 		{
 			#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 				#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
 			#elif PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
-				universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+				universalis::cpu::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 			#endif
-			Machine::Work(numSamples);
-			cpu::cycles_type cost = cpu::cycles();
 
-			float mv = helpers::CValueMapper::Map_255_1(_outDry);
+			float mv = helpers::value_mapper::map_256_1(_outDry);
 				
 			float *pSamples = _pMasterSamples;
 			float *pSamplesL = _pSamplesL;
@@ -1130,14 +1121,14 @@ namespace psycle
 					}
 					if(*pSamples > 32767.0f)
 					{
-						_outDry = helpers::math::rounded((float)_outDry * 32767.0f / (*pSamples));
-						mv = helpers::CValueMapper::Map_255_1(_outDry);
+						_outDry = helpers::math::lround<int,float>((float)_outDry * 32767.0f / (*pSamples));
+						mv = helpers::value_mapper::map_256_1(_outDry);
 						*pSamples = *pSamplesL = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
-						_outDry = helpers::math::rounded((float)_outDry * -32767.0f / (*pSamples));
-						mv = helpers::CValueMapper::Map_255_1(_outDry);
+						_outDry = helpers::math::lround<int,float>((float)_outDry * -32767.0f / (*pSamples));
+						mv = helpers::value_mapper::map_256_1(_outDry);
 						*pSamples = *pSamplesL = -32767.0f; 
 					}
 					pSamples++;
@@ -1149,14 +1140,14 @@ namespace psycle
 					}
 					if(*pSamples > 32767.0f)
 					{
-						_outDry = helpers::math::rounded((float)_outDry * 32767.0f / (*pSamples));
-						mv = helpers::CValueMapper::Map_255_1(_outDry);
+						_outDry = helpers::math::lround<int,float>((float)_outDry * 32767.0f / (*pSamples));
+						mv = helpers::value_mapper::map_256_1(_outDry);
 						*pSamples = *pSamplesR = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
-						_outDry = helpers::math::rounded((float)_outDry * -32767.0f / (*pSamples));
-						mv = helpers::CValueMapper::Map_255_1(_outDry);
+						_outDry = helpers::math::lround<int,float>((float)_outDry * -32767.0f / (*pSamples));
+						mv = helpers::value_mapper::map_256_1(_outDry);
 						*pSamples = *pSamplesR = -32767.0f; 
 					}
 					pSamples++;
@@ -1199,8 +1190,8 @@ namespace psycle
 			if( _rMax > currentpeak ) currentpeak = _rMax;
 
 			sampleCount+=numSamples;
-			_cpuCost += cpu::cycles() - cost;
-			_worked = true;
+			recursive_processed_ = true;
+			return numSamples;
 		}
 
 		bool Master::LoadSpecificChunk(RiffFile* pFile, int version)

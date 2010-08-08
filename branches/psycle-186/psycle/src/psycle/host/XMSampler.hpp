@@ -1,16 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::XMSampler.
 #pragma once
+#include "Global.hpp"
 #include "Machine.hpp"
-#include "Filter.hpp"
 #include "XMInstrument.hpp"
-#include <cstdint>
-//#include "../../../include/xdsp/xdsp.h"
 
-namespace psycle
-{
-	namespace host
-	{
+#include <psycle/helpers/filter.hpp>
+#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/cstdint.hpp>
+
+namespace psycle { namespace host {
 
 class XMSampler : public Machine
 {
@@ -161,15 +160,16 @@ XMSampler::Channel::PerformFX().
 
 		virtual void Init(XMInstrument::WaveData* wave, const int layer);
 		virtual void NoteOff(void);
-		virtual void Work(float *pLeftw,float *pRightw, helpers::dsp::PRESAMPLERFN pResamplerWork)
+		virtual void Work(float *pLeftw,float *pRightw,  const helpers::dsp::resampler::work_func_type resampler_work)
 		{
+
 			//Process sample
-			*pLeftw = pResamplerWork(
+			*pLeftw = resampler_work(
 				pLeft() + m_Position.HighPart,
 				m_Position.HighPart, m_Position.LowPart, Length());
 			if (IsStereo())
 			{
-				*pRightw = pResamplerWork(
+				*pRightw = resampler_work(
 					pRight() + m_Position.HighPart,
 					m_Position.HighPart, m_Position.LowPart, Length());
 			}
@@ -439,7 +439,7 @@ XMSampler::Channel::PerformFX().
 		void ResetEffects();
 
 		void VoiceInit(int channelNum,int instrumentNum);
-		void Work(int numSamples,float * pSampleL,float *pSamlpesR,helpers::dsp::Cubic& _resampler);
+		void Work(int numSamples,float * pSampleL,float *pSamlpesR,helpers::dsp::resampler& _resampler);
 
 		// This one is Tracker Tick (Mod-tick)
 		void Tick();
@@ -981,7 +981,7 @@ XMSampler::Channel::PerformFX().
 	
 	//These Tick() are "NewLine()" and NewEvent(). The API needs to be renamed.
 	void Tick();
-	virtual void Work(int numSamples);
+	virtual int GenerateAudioInTicks(int startSample,  int numSamples);
 	virtual void Stop(void);
 	virtual void Tick(int channel, PatternEntry* pData);
 	virtual float GetAudioRange() { return 32768; }
@@ -1065,12 +1065,12 @@ XMSampler::Channel::PerformFX().
 	}
 
 	/// set resampler quality 
-	void ResamplerQuality(const helpers::dsp::ResamplerQuality value){
-		_resampler.SetQuality(value);
+	void ResamplerQuality(const helpers::dsp::resampler::quality::type value){
+		_resampler.quality(value);
 	}
 
-	const helpers::dsp::ResamplerQuality ResamplerQuality(){
-		return _resampler.GetQuality();
+	const helpers::dsp::resampler::quality::type ResamplerQuality(){
+		return _resampler.quality();
 	}
 	const bool UseFilters(void) { return m_UseFilters; }
 	void UseFilters(bool usefilters) { m_UseFilters = usefilters; }
@@ -1079,8 +1079,6 @@ XMSampler::Channel::PerformFX().
 
 	void SetZxxMacro(int index,int mode, int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; }
 	ZxxMacro GetMap(int index) { return zxxMap[index]; }
-
-	boost::recursive_mutex & Mutex() {  return m_Mutex; }
 
 	const int SampleCounter(){return _sampleCounter;}// Sample pos since last linechange.
 	void SampleCounter(const int value){_sampleCounter = value;}// ""
@@ -1101,7 +1099,7 @@ protected:
 
 	Voice m_Voices[MAX_POLYPHONY];
 	XMSampler::Channel m_Channel[MAX_TRACKS];
-	helpers::dsp::Cubic _resampler;
+	psycle::helpers::dsp::cubic_resampler _resampler;
 	ZxxMacro zxxMap[128];
 
 	
@@ -1123,11 +1121,19 @@ private:
 	int m_NextSampleTick;// The sample position of the next Tracker Tick
 	int _sampleCounter;	// Number of Samples since note start
 
+	///\name thread synchronisation
+	///\{
+		public:
+			typedef class scoped_lock<mutex> scoped_lock;
+			mutex & Mutex() const { return mutex_; }
+			operator mutex & () const { return mutex_; }
+		private:
+			mutex mutable mutex_;
+	///\}
 
 	//\todo : This should not be independant for each xmsampler, but shared.
 	static XMInstrument m_Instruments[MAX_INSTRUMENT+1];
 	static XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENT+1];
-	boost::recursive_mutex m_Mutex;
 };
 }
 }

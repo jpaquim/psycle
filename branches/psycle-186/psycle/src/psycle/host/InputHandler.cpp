@@ -1,14 +1,14 @@
 ///\file
 ///\brief implementation file for psycle::host::InputHandler.
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "InputHandler.hpp"
-#include "Version.hpp"
+
 #include "MainFrm.hpp"
+#include "ChildView.hpp"
+#include "Configuration.hpp"
+
 #include "Machine.hpp"
 #include "Player.hpp"
-#include "ChildView.hpp"
-#include "Global.hpp"
+
 namespace psycle
 {
 	namespace host

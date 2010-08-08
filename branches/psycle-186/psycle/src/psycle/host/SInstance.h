@@ -11,12 +11,14 @@ Copyright (c) 1998 - 2000 by PJ Naughter.
 All rights reserved.
 */
 
-#ifndef __SINSTANCE_H__
-#define __SINSTANCE_H__
+#ifndef PSYCLE__HOST__SINSTANCE__INCLUDED
+#define PSYCLE__HOST__SINSTANCE__INCLUDED
+#pragma once
 
+#include "Psycle.hpp"
 
 #ifndef __AFXMT_H__
-#include <afxmt.h>
+	#include <afxmt.h>
 #endif
 
 class CInstanceChecker : public CObject
@@ -37,5 +39,4 @@ protected:
 	HANDLE m_hPrevInstance;
 };
 
-
-#endif //__SINSTANCE_H__
+#endif // PSYCLE__HOST__SINSTANCE

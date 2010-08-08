@@ -2,19 +2,18 @@
 ///\brief implementation file for psycle::host::CMidiInput.
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "MidiInput.hpp"
-#include "Psycle.hpp"
-#include "Song.hpp"
-#include "Player.hpp"
+
+#include "InputHandler.hpp"
 #include "Configuration.hpp"
-#include "Plugin.hpp"
-#include "VstHost24.hpp"
 #include "ChildView.hpp"
 #include "MainFrm.hpp"
-#include "Helpers.hpp"
-#include "InputHandler.hpp"
-#include <cassert>
+
+#include "Song.hpp"
+#include "Player.hpp"
+#include "Plugin.hpp"
+#include "VstHost24.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -113,7 +112,7 @@ namespace psycle
 			if( !m_midiInHandle[ DRIVER_MIDI ] && m_devId[ DRIVER_MIDI ] != -1 )
 			{
 
-				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
 				if( result != MMSYSERR_NOERROR )
 				{
 					problem |= 0x01;
@@ -129,7 +128,7 @@ namespace psycle
 				!m_midiInHandle[ DRIVER_SYNC ] && m_devId[ DRIVER_SYNC ] != -1 )
 			{
 				// open
-				result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+				result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
 				if( result != MMSYSERR_NOERROR )
 				{
 					problem |= 0x02;
@@ -497,12 +496,12 @@ namespace psycle
 		// DESCRIPTION	  : The MIDI input callback function for our opened device <linker>
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
 		//                : std::uint32_t uMsg - message identifier
-		//                : DWORD dwInstance - user instance data (not used)
-		//                : DWORD dwParam1 - various midi message info
-		//                : DWORD dwParam2 - various midi message info
+		//                : DWORD_PTR dwInstance - user instance data (not used)
+		//                : DWORD_PTR dwParam1 - various midi message info
+		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			CMidiInput * pMidiInput = CMidiInput::Instance();
 
@@ -538,12 +537,12 @@ namespace psycle
 		// DESCRIPTION	  : The MIDI input callback function for our opened device
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
 		//                : std::uint32_t uMsg - message identifier
-		//                : DWORD dwInstance - user instance data (not used)
-		//                : DWORD dwParam1 - various midi message info
-		//                : DWORD dwParam2 - various midi message info
+		//                : DWORD_PTR dwInstance - user instance data (not used)
+		//                : DWORD_PTR dwParam1 - various midi message info
+		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			// branch on type of midi message
 			switch( uMsg )
@@ -920,12 +919,12 @@ namespace psycle
 		// DESCRIPTION	  : The MIDI input callback function for our opened device
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
 		//                : std::uint32_t uMsg - message identifier
-		//                : DWORD dwInstance - user instance data (not used)
-		//                : DWORD dwParam1 - various midi message info
-		//                : DWORD dwParam2 - various midi message info
+		//                : DWORD_PTR dwInstance - user instance data (not used)
+		//                : DWORD_PTR dwParam1 - various midi message info
+		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			// pipe MIDI note on messages into the pattern entry window
 
@@ -1091,10 +1090,10 @@ namespace psycle
 		// InternalClock
 		//
 		// DESCRIPTION	  : Called on a MIDI Clock event to keep Psycle in sync
-		// PARAMETERS     : DWORD dwParam2 - timing stamp
+		// PARAMETERS     : DWORD_PTR dwParam2 - timing stamp
 		// RETURNS		  : <void>
 
-		void CMidiInput::InternalClock( DWORD dwParam2 )
+		void CMidiInput::InternalClock( DWORD_PTR dwParam2 )
 		{
 			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
 
@@ -1107,7 +1106,7 @@ namespace psycle
 			int midiLatencyMs = ( timeGetTime() - m_tickBase ) - dwParam2;
 
 			// adjust the sample position (fix latency)
-			int adjPlayPos = playPos - helpers::math::rounded((midiLatencyMs/1000.f) * samplesPerSecond );
+			int adjPlayPos = playPos - helpers::math::lround<int, float>((midiLatencyMs/1000.f) * samplesPerSecond );
 			
 			// never let the adjusted play pos become negative (this really breaks things - usually
 			// when trying to resync just after the audio engine has restared)
@@ -1162,10 +1161,10 @@ namespace psycle
 		// InternalReSync
 		//
 		// DESCRIPTION	  : Instigates an MIDI->audio resync
-		// PARAMETERS     : DWORD dwParam2 - timing stamp
+		// PARAMETERS     : DWORD_PTR dwParam2 - timing stamp
 		// RETURNS		  : <void>
 
-		void CMidiInput::InternalReSync( DWORD dwParam2 )
+		void CMidiInput::InternalReSync( DWORD_PTR dwParam2 )
 		{
 			// get the current play sample position
 			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
@@ -1176,7 +1175,7 @@ namespace psycle
 			// using our own timer, started at the same time (hopefully!) as the MIDI
 			// input timer.
  			int midiLatency = ( timeGetTime() - m_tickBase ) - dwParam2;
-			int midiLatencySamples = helpers::math::rounded( (midiLatency/1000.f) * samplesPerSecond );
+			int midiLatencySamples = helpers::math::lround<int, float>( (midiLatency/1000.f) * samplesPerSecond );
 			m_stats.syncEventLatency = midiLatencySamples;
 
 			// work out the real play position
@@ -1207,7 +1206,7 @@ namespace psycle
 		// PARAMETERS     : int amount - amount of block samples
 		// RETURNS		  : bool - true if we did some processing, false if nothing was done
 
-		bool CMidiInput::InjectMIDI( int amount )
+		void CMidiInput::InjectMIDI( int amount )
 		{
 			// NOTE: The DirectSound driver is currently in no fit state to be used with
 			// the midi input.  The get write/play functions are not compatible with our
@@ -1219,7 +1218,7 @@ namespace psycle
 				strcmp( Global::pConfig->_pOutputDriver->GetInfo()->_psName, "Windows WaveOut MME" ) != 0 )	// TODO: need to remove this string compare? (speed)
 			{
 				m_stats.flags &= ~FSTAT_ACTIVE;
-				return false;
+				return;
 			}
 
 			m_stats.flags |= FSTAT_ACTIVE;
@@ -1289,7 +1288,7 @@ namespace psycle
 			// NO midi data that need to be injected during this amount block?
 			if( !m_patCount || m_timingCounter < (m_midiBuffer[ m_patOut ].timeStamp - tbaseStampTime ) )
 			{
-				return false;
+				return;
 			}
 
 			// NOTE: because we are inserting all the machine ticks before working the master
@@ -1352,7 +1351,7 @@ namespace psycle
 							}
 
 							// create actual value
-							int value = min + helpers::math::rounded( (max-min) * (data2/127.f) );
+							int value = min + helpers::math::lround<int, float>( (max-min) * (data2/127.f) );
 
 							// assign
 							m_midiBuffer[ m_patOut ].entry._inst = data1;
@@ -1400,9 +1399,6 @@ namespace psycle
 			} while( m_patCount && m_timingCounter >= (m_midiBuffer[ m_patOut ].timeStamp - tbaseStampTime) );
 
 			// Master machine initiates work
-			//
-			Global::_pSong->_pMachine[MASTER_INDEX]->Work( amount );
-			return true;
 		}
 	}
 }

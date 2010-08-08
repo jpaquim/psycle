@@ -1,13 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "SkinDlg.hpp"
-#include "Psycle.hpp"
-#include "Helpers.hpp"
+
 #include "Configuration.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+
+namespace psycle { namespace host {
 
 		#define MAX_FONTS 256
 
@@ -265,7 +264,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(!finder.IsDirectory())
 				{
 					CString sName, tmpPath;
-					sName = finder.GetFileName();
+					sName = finder.GetFilePath();
 					// ok so we have a .psh, does it have a valid matching .bmp?
 					char szBmpName[MAX_PATH];
 					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
@@ -288,7 +287,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(!finder.IsDirectory())
 				{
 					CString sName, tmpPath;
-					sName = finder.GetFileName();
+					sName = finder.GetFilePath();
 					// ok so we have a .psh, does it have a valid matching .bmp?
 					char szBmpName[MAX_PATH];
 					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
@@ -726,7 +725,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CPropertyPage::OnClose();
 		}
 
-		void CSkinDlg::OnTimer(UINT nIDEvent) 
+		void CSkinDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
 			if ( nIDEvent == 2345 )
 			{
@@ -1922,5 +1921,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			_triangle_size=m_triangle_size.GetCurSel()+8;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

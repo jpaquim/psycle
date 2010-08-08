@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SongStructs.hpp"
-#include "FileIO.hpp"
+#include "Global.hpp"
 #include "XMFile.hpp"
-#include <cstdint>
+
+#include "FileIO.hpp"
 
 namespace psycle { namespace host {
 	class Song;
@@ -19,34 +19,34 @@ namespace psycle { namespace host {
 		virtual void Load(Song& song,const bool fullopen = true);
 		void LoadInstrumentFromFile(XMSampler & sampler, const int idx);
 	private:
-		const bool IsValid();
+		bool IsValid();
 
-		const LONG LoadPatterns(Song & song);
-		const LONG LoadSinglePattern(Song & song, const LONG start, const int patIdx,const int iTracks);	
-		const bool LoadInstruments(XMSampler & sampler, LONG iInstrStart);
-		const LONG LoadInstrument(XMSampler & sampler, LONG iStart, const int idx,int& curSample);
-		const LONG LoadSampleHeader(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
-		const LONG LoadSampleData(XMSampler & sampler, LONG iStart, const int InstrIdx, const int SampleIdx);
-		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
-		void SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader);		
-		char * AllocReadStr(const LONG size, const LONG start=-1);
+		size_t LoadPatterns(Song& song);
+		size_t LoadSinglePattern(Song& song, size_t start, int patIdx, int iTracks);	
+		bool LoadInstruments(XMSampler& sampler, size_t iInstrStart);
+		size_t LoadInstrument(XMSampler& sampler, size_t iStart, int idx,int& curSample);
+		size_t LoadSampleHeader(XMSampler& sampler, size_t iStart, int InstrIdx, int SampleIdx);
+		size_t LoadSampleData(XMSampler& sampler, size_t iStart, int InstrIdx, int SampleIdx);
+		BOOL WritePatternEntry(Song& song,int patIdx,int row, int col, PatternEntry & e);
+		void SetEnvelopes(XMInstrument& inst,const XMSAMPLEHEADER & sampleHeader);		
+		char * AllocReadStr(int size, size_t start=-1);
 
 		// inlines
-		const char ReadInt1(LONG start=-1)
+		inline char ReadInt1(size_t start=-1)
 		{	
 			char i;
 			if(start>=0) Seek(start);
 			return Read(&i,1)?i:0;
 		}
 
-		const short ReadInt2(LONG start=-1)
+		inline short ReadInt2(size_t start=-1)
 		{
 			short i;
 			if(start>=0) Seek(start);
 			return Read(&i,2)?i:0;
 		}
 
-		const int ReadInt4(LONG start=-1)
+		inline int ReadInt4(size_t start=-1)
 		{
 			int i;
 			if(start>=0) Seek(start);
@@ -90,38 +90,38 @@ namespace psycle { namespace host {
 	class MODSongLoader : public OldPsyFile
 	{
 	public:
-		MODSongLoader(void);
-		virtual ~MODSongLoader(void);
+		MODSongLoader();
+		virtual ~MODSongLoader();
 		/// RIFF 
 		virtual void Load(Song& song,const bool fullopen = true);
 	private:
-		const bool IsValid();
+		bool IsValid();
 
-		const void LoadPatterns(Song & song);
-		const void LoadSinglePattern(Song & song, const int patIdx,const int iTracks);	
-		const unsigned char ConvertPeriodtoNote(const unsigned short period);
-		const void LoadInstrument(XMSampler & sampler, const int idx);
-		const void LoadSampleHeader(XMSampler & sampler, const int InstrIdx);
-		const void LoadSampleData(XMSampler & sampler, const int InstrIdx);
-		const BOOL WritePatternEntry(Song & song,const int patIdx,const int row, const int col, PatternEntry & e);
-		char * AllocReadStr(const LONG size, const LONG start=-1);
+		void LoadPatterns(Song & song);
+		void LoadSinglePattern(Song & song, int patIdx, int iTracks);	
+		unsigned char ConvertPeriodtoNote(unsigned short period);
+		void LoadInstrument(XMSampler& sampler, int idx);
+		void LoadSampleHeader(XMSampler& sampler, int InstrIdx);
+		void LoadSampleData(XMSampler& sampler, int InstrIdx);
+		BOOL WritePatternEntry(Song& song,int patIdx,int row, int col, PatternEntry & e);
+		char * AllocReadStr(std::int32_t size, size_t start=-1);
 
 		// inlines
-		const unsigned char ReadUInt1(LONG start=-1)
+		inline unsigned char ReadUInt1(std::int32_t start=-1)
 		{	
 			std::uint8_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,1)?i:0;
 		}
 
-		const unsigned short ReadUInt2(LONG start=-1)
+		inline unsigned short ReadUInt2(std::int32_t start=-1)
 		{
 			std::uint16_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,2)?i:0;
 		}
 
-		const unsigned int ReadUInt4(LONG start=-1)
+		inline unsigned int ReadUInt4(std::int32_t start=-1)
 		{
 			std::uint32_t i(0);
 			if(start>=0) Seek(start);

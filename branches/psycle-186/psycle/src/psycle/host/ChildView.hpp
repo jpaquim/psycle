@@ -1,13 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
-#include "Song.hpp"
-#include "Configuration.hpp"
-#include "InputHandler.hpp"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
+#include "Psycle.hpp"
+
+#include "Song.hpp"
+
+
+namespace psycle {
+namespace host {
 		class CMasterDlg;
 		class CWireDlg;
 		class CGearTracker;
@@ -547,7 +548,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnBarrec();
 			afx_msg void OnBarstop();
 			afx_msg void OnRecordWav();
-			afx_msg void OnTimer( UINT nIDEvent );
+			afx_msg void OnTimer( UINT_PTR nIDEvent );
 			afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 			afx_msg void OnFileNew();
 			afx_msg BOOL OnExport(UINT id);
@@ -981,5 +982,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				(_y >= _src.y) && (_y < _src.y+_src2.height);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

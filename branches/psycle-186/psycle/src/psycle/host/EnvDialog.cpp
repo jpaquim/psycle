@@ -1,12 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CEnvDialog.
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "EnvDialog.hpp"
-#include "Psycle.hpp"
+
 #include "Song.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		CEnvDialog::CEnvDialog(CWnd* pParent)
 			: CDialog(CEnvDialog::IDD, pParent)
@@ -392,5 +390,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			*pResult = 0;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

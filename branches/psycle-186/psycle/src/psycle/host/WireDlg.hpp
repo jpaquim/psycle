@@ -1,14 +1,13 @@
 ///\file
 ///\brief interface file for psycle::host::CWireDlg.
 #pragma once
-#include "Machine.hpp"
-#include "Constants.hpp"
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+
+namespace psycle {
+namespace host {
 
 		class CChildView;
+		class Machine;
 
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE = 4096;
@@ -89,7 +88,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			virtual BOOL OnInitDialog();
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnButton1();
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnMode();
@@ -99,5 +98,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DECLARE_MESSAGE_MAP()
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

@@ -2,18 +2,17 @@
 ///\brief interface file for psycle::host::Machine
 #pragma once
 #include "Global.hpp"
-#include "SongStructs.hpp"
-#include "Dsp.hpp"
-#include "Helpers.hpp"
-#include "Constants.hpp"
+#include <psycle/helpers/dsp.hpp>
 #include "FileIO.hpp"
-#include "configuration_options.hpp"
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>
+#include <universalis/stdlib/date_time.hpp>
+#include <universalis/os/loggers.hpp>
+
 #if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
 #elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-	#include <universalis/processor/exceptions/fpu.hpp>
+	#include <universalis/cpuexceptions/fpu.hpp>
 #endif
 #include <stdexcept>
 namespace psycle
@@ -105,7 +104,7 @@ namespace psycle
 										<< "exception type: " << universalis::compiler::typenameof(*e) << '\n'
 										<< universalis::exceptions::string(*e);
 								} else {
-									s << universalis::compiler::exceptions::ellipsis();
+									s << universalis::compiler::exceptions::ellipsis_desc();
 								}
 								function_error const f_error(s.str(), standard);
 								crashable_.crashed(f_error);
@@ -180,10 +179,10 @@ namespace psycle
 					#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
 				#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 					public:
-						universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
-						universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
+						universalis::cpu::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
+						universalis::cpu::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
 					private:
-						universalis::processor::fpu::exceptions::mask::type                fpu_exception_mask_;
+						universalis::cpu::fpu::exceptions::mask::type                fpu_exception_mask_;
 				#endif
 			///\}
 
@@ -205,9 +204,23 @@ namespace psycle
 					cpu::cycles_type        wire_cpu_cost_;
 			///\}
 #else
-			public:///\todo private
-				cpu::cycles_type _cpuCost;
-				cpu::cycles_type _wireCost;
+	///\name cpu time usage measurement
+	///\{
+		public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
+
+		public:  universalis::stdlib::nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		private: universalis::stdlib::nanoseconds accumulated_processing_time_;
+		protected: void accumulate_processing_time(universalis::stdlib::nanoseconds ns) throw() {
+				if(universalis::os::loggers::warning() && ns.get_count() < 0) {
+					std::ostringstream s;
+					s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+					universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				} else accumulated_processing_time_ += ns;
+			}
+
+		public:  uint64_t processing_count() const throw() { return processing_count_; }
+		protected: uint64_t processing_count_;
+	///\}
 #endif
 
 #if 0 // v1.9
@@ -255,11 +268,28 @@ namespace psycle
 				public:
 					virtual void Init();
 					virtual void PreWork(int numSamples,bool clear=true);
-					virtual void Work(int numSamples);
-					virtual void WorkNoMix(int numSamples);
+					virtual int GenerateAudio(int numsamples);
+					virtual int GenerateAudioInTicks(int startSample, int numsamples);
 					virtual void Tick() {}
 					virtual void Tick(int track, PatternEntry * pData) {}
 					virtual void Stop() {}
+			///\}
+			///\name used by the single-threaded, recursive scheduler
+			///\{
+					/// virtual because the mixer machine has its own implementation
+					virtual void recursive_process(unsigned int frames);
+					void recursive_process_deps(unsigned int frames, bool mix = true);
+			///\}
+			///\name used by the multi-threaded scheduler
+			///\{
+					typedef std::list<Machine const*> sched_deps;
+
+					/// tells the scheduler which machines to process before this one
+					virtual void sched_inputs(sched_deps&) const;
+					/// tells the scheduler which machines may be processed after this one
+					virtual void sched_outputs(sched_deps&) const;
+					/// called by the scheduler to ask for the actual processing of the machine
+					virtual bool sched_process(unsigned int frames);
 			///\}
 
 			///\name (de)serialization
@@ -313,7 +343,7 @@ namespace psycle
 				public:
 					///\todo: update this to std::string.
 					virtual void SetEditName(std::string const & newname) { std::strncpy(_editName,newname.c_str(),32); }
-					const char * GetEditName() { return _editName; }
+					const char * GetEditName() const { return _editName; }
 				public:///\todo private:
 					///\todo this was a std::string in v1.9
 					char _editName[32];
@@ -446,10 +476,6 @@ namespace psycle
 
 			///\name misc
 			///\{
-				/// machine has started its work call, and is waiting for inputs to finish generating sound.
-				bool _waitingForSound;
-				/// machine has finished working, and samples are ready in the buffers until next work call.
-				bool _worked;
 				/// this machine is used by a send/return mixer. (Some things cannot be done on these machines)
 				bool _isMixerSend;
 				/// left data
@@ -457,7 +483,21 @@ namespace psycle
 				/// right data
 				float *_pSamplesR;						
 			///\}
+			///\name used by the single-threaded, recursive scheduler
+			///\{
+				/// guard to avoid feedback loops
+				bool recursive_is_processing_;
+				bool recursive_processed_;
+			///\}
 
+			///\name used by the multi-threaded scheduler
+			///\{
+				/// The multi-threaded scheduler cannot use _worked because it's not thread-synchronised.
+				/// So, we define another boolean that's modified only by the multi-threaded scheduler,
+				/// with proper thread synchronisations.
+				/// The multi-threaded scheduler doesn't use recursive_processed_ nor recursive_is_processing_.
+				bool sched_processed_;
+			///\}
 			///\name various player-related states
 			///\todo hardcoded limits and wastes with MAX_TRACKS
 			///\{
@@ -520,7 +560,7 @@ namespace psycle
 			Master();
 			Master(int index);
 			virtual void Init(void);
-			virtual void Work(int numSamples);
+			virtual int GenerateAudio(int numsamples);
 			virtual float GetAudioRange(){ return 32768.0f; }
 			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile * pFile);

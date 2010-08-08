@@ -23,16 +23,15 @@
 	calculate a real FFT and a real power spectrum.
 
 **********************************************************************/
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/helpers/fft.hpp>
+#include "fft.hpp"
+#include <universalis.hpp>
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
 
 namespace psycle
 {
-	namespace host
+	namespace helpers
 	{
 		namespace dsp
 		{
@@ -41,33 +40,20 @@ int **gFFTBitTable = NULL;
 const int MaxFastBits = 16;
 
 /* Declare Static functions */
-static int IsPowerOfTwo(int x);
+static bool IsPowerOfTwo(int x);
 static int NumberOfBitsNeeded(int PowerOfTwo);
 static int ReverseBits(int index, int NumBits);
 static void InitFFT();
 
-int IsPowerOfTwo(int x)
+bool IsPowerOfTwo(int x)
 {
-	if (x < 2)
-		return false;
-
-	if (x & (x - 1))             /* Thanks to 'byang' for this cute trick! */
-		return false;
-
-	return true;
+	return ((x & (x - 1))==0);
 }
 
 int NumberOfBitsNeeded(int PowerOfTwo)
 {
-	int i;
-
-	if (PowerOfTwo < 2) {
-		fprintf(stderr, "Error: FFT called with size %d\n", PowerOfTwo);
-		exit(1);
-	}
-
-	for (i = 0;; i++)
-		if (PowerOfTwo & (1 << i))
+	int i=0;
+	while((PowerOfTwo >>=1)> 0) i++;
 			return i;
 }
 
@@ -123,17 +109,18 @@ void FFT(int NumSamples,
 	double tr, ti;                /* temp real, temp imaginary */
 
 	if (!IsPowerOfTwo(NumSamples)) {
-		fprintf(stderr, "%d is not a power of two\n", NumSamples);
-		exit(1);
+		std::ostringstream s;
+		s << "FFT called with size "<< NumSamples;
+		throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 	}
 
+	NumBits = NumberOfBitsNeeded(NumSamples);
 	if (!gFFTBitTable)
 		InitFFT();
 
 	if (InverseTransform)
 		angle_numerator = -angle_numerator;
 
-	NumBits = NumberOfBitsNeeded(NumSamples);
 
 	/*
 	**   Do simultaneous data copy and bit-reversal ordering into outputs...

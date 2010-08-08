@@ -1,17 +1,17 @@
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "FrameMixerMachine.hpp"
-#include "Psycle.hpp"
-#include "NativeGui.hpp"
+
 #include "Configuration.hpp"
-#include "Song.hpp"
-#include "internal_machines.hpp"
+#include "NativeGui.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "ChildView.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Song.hpp"
+#include "internal_machines.hpp"
 
+#include <sstream>
+#include <iomanip>
+
+namespace psycle { namespace host {
 
 	IMPLEMENT_DYNCREATE(CFrameMixerMachine, CFrameMachine)
 
@@ -416,7 +416,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		}
 	}
 
-	void CFrameMixerMachine::OnTimer(UINT nIDEvent) 
+	void CFrameMixerMachine::OnTimer(UINT_PTR nIDEvent) 
 	{
 		if ( nIDEvent == 2104+MachineIndex )
 		{
@@ -1016,5 +1016,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		CFrameMachine::OnSetFocus(pOldWnd);
 	}
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

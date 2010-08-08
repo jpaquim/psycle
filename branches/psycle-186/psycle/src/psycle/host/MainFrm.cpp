@@ -1,36 +1,39 @@
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "MainFrm.hpp"
-#include "Psycle.hpp"
+
+#include "InputHandler.hpp"
+#include "MidiInput.hpp"
+
 #include "WavFileDlg.hpp"
+#include "KeyConfigDlg.hpp"
+#include "GearRackDlg.hpp"
+
 #include "MasterDlg.hpp"
 #include "GearTracker.hpp"
 #include "XMSamplerUI.hpp"
 #include "FrameMachine.hpp"
-//#include "VstEditorDlg.hpp"
 #include "VstEffectWnd.hpp"
 #include "FrameMixerMachine.hpp"
 #include "WaveInMacDlg.hpp"
-#include "Helpers.hpp"
 #include "WireDlg.hpp"
-#include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
+
 #include "Player.hpp"
-#include "MidiInput.hpp"
-#include "InputHandler.hpp"
-#include "KeyConfigDlg.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
 #include "XMSampler.hpp"
-#include <HtmlHelp.h>
+
+#include <psycle/helpers/math/lrint.hpp>
 #include <cmath>
 #include <sstream>
 #include <iomanip>
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+#include <HtmlHelp.h>
+
+
+namespace psycle { namespace host {
 
 		#define WM_SETMESSAGESTRING 0x0362
 
@@ -203,7 +206,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 
 			// CPU info Window
-			m_wndInfo._pSong=_pSong;
 			m_wndInfo.Create(IDD_INFO,this);
 
 			// MIDI monitor Dialog
@@ -713,8 +715,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CClientDC canvasl(lv);
 //				CClientDC canvasr(rv);
 
-				int log_l=helpers::math::truncated(100*log10f(l));
-				int log_r=helpers::math::truncated(100*log10f(r));
+				int log_l=helpers::math::lrint<int, float>(100*log10f(l));
+				int log_r=helpers::math::lrint<int, float>(100*log10f(r));
 				log_l=log_l-225;
 				if ( log_l < 0 )log_l=0;
 				log_r=log_r-225;
@@ -1246,12 +1248,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				//end of added by sampler
 
+				CSingleLock lock(&_pSong->door,TRUE);
+
 				CString CurrExt=dlg.GetFileExt();
 				CurrExt.MakeLower();
-				
 				if ( CurrExt == "wav" )
 				{
-					if (_pSong->WavAlloc(si,dlg.GetFileName()))
+					if (_pSong->WavAlloc(si,dlg.GetPathName()))
 					{
 						UpdateComboIns();
 						m_wndStatusBar.SetWindowText("New wave loaded");
@@ -1261,7 +1264,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				else if ( CurrExt == "iff" )
 				{
-					if (_pSong->IffAlloc(si,dlg.GetFileName()))
+					if (_pSong->IffAlloc(si,dlg.GetPathName()))
 					{
 						UpdateComboIns();
 						m_wndStatusBar.SetWindowText("New wave loaded");
@@ -1308,7 +1311,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CFileDialog dlg(FALSE, "wav", _pSong->_pInstrument[_pSong->instSelected]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 				if (dlg.DoModal() == IDOK)
 				{
-					output.OpenForWrite(dlg.GetFileName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo) ? (2) : (1) );
+					output.OpenForWrite(dlg.GetPathName(), 44100, 16, (_pSong->_pInstrument[_pSong->instSelected]->waveStereo) ? (2) : (1) );
 					if (_pSong->_pInstrument[_pSong->instSelected]->waveStereo)
 					{
 						for ( unsigned int c=0; c < _pSong->_pInstrument[_pSong->instSelected]->waveLength; c++)
@@ -1447,8 +1450,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					case MACH_MASTER:
 						if (!m_wndView.MasterMachineDialog)
 						{
-							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView);
-							m_wndView.MasterMachineDialog->_pMachine = (Master*)ma;
+							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView, (Master*)ma);
 							for (int i=0;i<MAX_CONNECTIONS; i++)
 							{
 								if ( ma->_inputCon[i])
@@ -1459,7 +1461,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 									}
 								}
 							}
-							m_wndView.MasterMachineDialog->Create();
 							CenterWindowOnPoint(m_wndView.MasterMachineDialog, point);
 							m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
 						}
@@ -2167,18 +2168,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
 			{
 				m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
-				// clear sequence
-				for(int c=0;c<MAX_SONG_POSITIONS;c++)
 				{
-					_pSong->playOrder[c]=0;
-				}
-				// clear pattern data
-				_pSong->DeleteAllPatterns();
-				// init a pattern for #0
-				_pSong->_ppattern(0);
+					CSingleLock lock(&_pSong->door,TRUE);
+					// clear sequence
+					for(int c=0;c<MAX_SONG_POSITIONS;c++)
+					{
+						_pSong->playOrder[c]=0;
+					}
+					// clear pattern data
+					_pSong->DeleteAllPatterns();
+					// init a pattern for #0
+					_pSong->_ppattern(0);
 
-				m_wndView.editPosition=0;
-				_pSong->playLength=1;
+					m_wndView.editPosition=0;
+					_pSong->playLength=1;
+				}
 				UpdatePlayOrder(true);
 				UpdateSequencer();
 				m_wndView.Repaint(draw_modes::pattern);
@@ -2471,7 +2475,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 			}
 			
-			sprintf(buffer, "%02d:%02d", helpers::math::truncated(songLength / 60), helpers::math::truncated(songLength) % 60);
+			sprintf(buffer, "%02d:%02d", helpers::math::lrint<int, float>(songLength / 60), helpers::math::lrint<int, float>(songLength) % 60);
 			pLength->SetWindowText(buffer);
 			
 			// Update sequencer line
@@ -2560,7 +2564,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if (Global::pPlayer->_playing)
 			{
 				CString str;
-				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, helpers::math::truncated(Global::pPlayer->_playTime), helpers::math::truncated(Global::pPlayer->_playTime*100)-(helpers::math::truncated(Global::pPlayer->_playTime)*100)); 
+				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, helpers::math::lrint<int, float>(Global::pPlayer->_playTime), helpers::math::lrint<int, float>(Global::pPlayer->_playTime*100)-(helpers::math::lrint<int, float>(Global::pPlayer->_playTime)*100)); 
 				pCmdUI->SetText(str); 
 			}
 		}
@@ -2796,6 +2800,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				pGearRackDialog->RedrawList();
 			}
 		}
-
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

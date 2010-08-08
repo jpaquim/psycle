@@ -1,9 +1,7 @@
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "SpecialKeys.hpp"
-#include "Psycle.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 CSpecialKeys::CSpecialKeys(CWnd* pParent /* = 0 */) : CDialog(CSpecialKeys::IDD, pParent)
 ,key(0)
@@ -49,5 +47,5 @@ void CSpecialKeys::OnBnClickedOk()
 }
 
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

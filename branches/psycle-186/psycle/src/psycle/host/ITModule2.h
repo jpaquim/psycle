@@ -1,7 +1,8 @@
 #pragma once
-#include "SongStructs.hpp"
+#include "Global.hpp"
+
 #include "FileIO.hpp"
-#include <cstdint>
+
 
 namespace psycle {
 	namespace host {

@@ -1,9 +1,7 @@
 ///\file
 ///\implementation psycle::host::CDSoundConfig.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "DSoundConfig.hpp"
-#include <diversalis/compiler.hpp>
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)
@@ -26,9 +24,7 @@
 
 #include <iomanip>
 
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 		CDSoundConfig::CDSoundConfig(CWnd* pParent)
 		:
@@ -134,6 +130,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					m_bufferSizeSpin.SetAccel(1, &accel);
 				}
 			}
+			m_numBuffersEdit.SetReadOnly(exclusive);
+			m_numBuffersSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
+			m_bufferSizeEdit.SetReadOnly(exclusive);
+			m_bufferSizeSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
+
 			return TRUE;
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE
@@ -179,6 +180,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		void CDSoundConfig::OnExclusive()
 		{
 			exclusive = m_exclusiveCheck.GetState() & 1;
+			m_numBuffersEdit.SetReadOnly(exclusive);
+			m_numBuffersSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
+			m_bufferSizeEdit.SetReadOnly(exclusive);
+			m_bufferSizeSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
 		}
 
 		void CDSoundConfig::OnDither()
@@ -222,5 +227,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CDialog::OnDestroy();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

@@ -1,17 +1,19 @@
 ///\file
 ///\brief interface file for psycle::host::Plugin
 #pragma once
+#include "Global.hpp"
 #include "Machine.hpp"
 #include <psycle/plugin_interface.hpp>
 #include "Configuration.hpp"
 #include "Player.hpp"
 #include "Global.hpp"
 #include <diversalis/compiler.hpp>
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
 namespace psycle
 {
 	namespace host
 	{
+		using namespace psycle::plugin_interface;
 		/// \todo CPresetsDlg code sux big time concerning interface separation :-(
 		class CPresetDlg;
 
@@ -173,7 +175,7 @@ namespace psycle
 			///\name signal/event processing
 			///\{
 				public:
-					virtual void Work(int numSamples);
+					virtual int GenerateAudioInTicks( int startSample, int numSamples );
 					virtual float GetAudioRange(){ return 32768.0f; }
 					virtual void Tick();
 					virtual void Tick(int channel, PatternEntry * pEntry);

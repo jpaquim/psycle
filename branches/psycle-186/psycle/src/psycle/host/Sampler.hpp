@@ -1,8 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::Sampler.
 #pragma once
+#include "Global.hpp"
 #include "Machine.hpp"
-#include "Filter.hpp"
+#include <psycle/helpers/filter.hpp>
 namespace psycle
 {
 	namespace host
@@ -96,7 +97,7 @@ namespace psycle
 			void Tick();
 			Sampler(int index);
 			virtual void Init(void);
-			virtual void Work(int numSamples);
+			virtual int GenerateAudioInTicks(int startSample,  int numSamples);
 			virtual float GetAudioRange(){ return 32768.0f; }
 			virtual void SetSampleRate(int sr)
 			{
@@ -137,19 +138,11 @@ namespace psycle
 
 						switch (temp)
 						{
-						case 2:
-							_resampler.SetQuality(helpers::dsp::R_SPLINE);
-							break;
-						case 3:
-							_resampler.SetQuality(helpers::dsp::R_BANDLIM);
-							break;
-						case 0:
-							_resampler.SetQuality(helpers::dsp::R_NONE);
-							break;
-						default:
-						case 1:
-							_resampler.SetQuality(helpers::dsp::R_LINEAR);
-							break;
+							case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+							case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
+							case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
+							case 1:
+							default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 						}
 					}
 				}
@@ -163,21 +156,13 @@ namespace psycle
 				pFile->Write(&size,sizeof(size));
 				temp = _numVoices;
 				pFile->Write(&temp, sizeof(temp)); // numSubtracks
-				switch (_resampler.GetQuality())
+				switch (_resampler.quality())
 				{
-					case helpers::dsp::R_NONE:
-						temp = 0;
-						break;
-					case helpers::dsp::R_LINEAR:
-						temp = 1;
-						break;
-					case helpers::dsp::R_SPLINE:
-						temp = 2;
-						break;
-					case helpers::dsp::R_BANDLIM:
-						temp = 3;
-						break;
-
+					case helpers::dsp::resampler::quality::none: temp = 0; break;
+					case helpers::dsp::resampler::quality::spline: temp = 2; break;
+					case helpers::dsp::resampler::quality::band_limited: temp = 3; break;
+					case helpers::dsp::resampler::quality::linear: //fallthrough
+					default: temp = 1;
 				}
 				pFile->Write(&temp, sizeof(temp)); // quality
 			}
@@ -190,7 +175,7 @@ namespace psycle
 			static char* _psName;
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
-			helpers::dsp::Cubic _resampler;
+			psycle::helpers::dsp::cubic_resampler _resampler;
 
 			void PerformFx(int voice);
 			void VoiceWork(int numsamples, int voice);

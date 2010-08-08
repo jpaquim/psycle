@@ -1,6 +1,6 @@
 #pragma once
-#include "configuration_options.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
+
 namespace psycle
 {
 	namespace host

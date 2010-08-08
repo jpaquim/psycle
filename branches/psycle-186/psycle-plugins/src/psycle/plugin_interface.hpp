@@ -13,7 +13,7 @@ namespace psycle
 {
 	namespace plugin_interface
 	{
-		///\todo use #include <cstdint> for that!
+		///\todo use  for that!
 		typedef /* std::uint8_t  */ unsigned char      uint8;
 		typedef /* std::uint16_t */ unsigned short int uint16;
 		typedef /* std::uint32_t */ unsigned       int uint32;

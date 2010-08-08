@@ -1,8 +1,8 @@
 #pragma once
-#include "Constants.hpp"
+#include "Global.hpp"
 #include "FileIO.hpp"
-#include "Filter.hpp"
-#include <cstdint>
+#include <psycle/helpers/filter.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstring>
 namespace psycle { namespace host {
 	class XMInstrument
@@ -36,7 +36,7 @@ namespace psycle { namespace host {
 			};
 		};
 /*
-		Using NewNoteAction so that we can convert easily from DCA to NNA.
+	Using NewNoteAction instead so that we can convert easily from DCA to NNA.
 		struct DCAction {
 			enum Type {
 			DCA_STOP=0x0,
@@ -297,7 +297,7 @@ namespace psycle { namespace host {
 				m_SustainEnd = INVALID;
 				m_LoopStart = INVALID;
 				m_LoopEnd = INVALID;
-				m_Points.clear();
+				if (!m_Points.empty()) { m_Points.clear(); }
 			}
 
 			// Object Functions.

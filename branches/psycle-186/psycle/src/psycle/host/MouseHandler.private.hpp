@@ -1,8 +1,7 @@
 ///\file
 ///\brief pointer handler for psycle::host::CChildView, private header
-#include "internal_machines.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
@@ -133,6 +132,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						}
 						else
 						{
+							CSingleLock lock(&_pSong->door,TRUE);
 							int dsttype=0;
 							///\todo: for multi-io.
 							//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
@@ -1346,5 +1346,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

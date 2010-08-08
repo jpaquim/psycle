@@ -1,10 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::CSkinDlg.
 #pragma once
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+
+namespace psycle { namespace host {
 
 		/// skin config window.
 		class CSkinDlg : public CPropertyPage
@@ -167,7 +166,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnLineNumbersHex();
 			afx_msg void OnLineNumbersCursor();
 			afx_msg void OnClose();
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnImportReg();
 			afx_msg void OnExportReg();
 			afx_msg void OnSelchangePatternFontPoint();
@@ -213,5 +212,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

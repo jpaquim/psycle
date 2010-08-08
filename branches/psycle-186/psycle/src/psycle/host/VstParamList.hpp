@@ -1,12 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::CVstParamList.
 #pragma once
-#include "resources/resources.hpp"
+#include "Psycle.hpp"
 #include <afxext.h>
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
+namespace psycle {
+	namespace host {
 		namespace vst
 		{
 			class plugin;
@@ -61,5 +60,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnDeltaposSpin(NMHDR* pNMHDR, LRESULT* pResult);
 			DECLARE_MESSAGE_MAP()
 		};
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

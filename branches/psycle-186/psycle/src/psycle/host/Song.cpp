@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "Psycle.hpp"
 
 #if !defined WINAMP_PLUGIN
@@ -22,11 +22,11 @@
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
 
-#include "DataCompression.hpp"
+#include <psycle/helpers/datacompression.hpp>
 #include "convert_internal_machines.hpp"
-
+namespace loggers = universalis::os::loggers;
 #if !defined WINAMP_PLUGIN
-	#include "Riff.hpp" // for Wave file loading.
+	#include <psycle/helpers/riff.hpp> // for Wave file loading.
 #endif //!defined WINAMP_PLUGIN
 
 #include "Zap.hpp"
@@ -106,7 +106,7 @@ namespace psycle
 					}
 					catch(std::exception const & e)
 					{
-						loggers::exception(e.what());
+						loggers::exception()(e.what());
 						zapObject(pMachine); 
 						return false;
 					}
@@ -134,7 +134,7 @@ namespace psycle
 					}
 					catch(std::exception const & e)
 					{
-						loggers::exception(e.what());
+						loggers::exception()(e.what());
 						zapObject(pMachine); 
 						return false;
 					}
@@ -449,7 +449,6 @@ namespace psycle
 
 		void Song::Reset()
 		{
-			cpuIdle=0;
 			_sampCount=0;
 			// Cleaning pattern allocation info
 			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
@@ -586,7 +585,6 @@ namespace psycle
 
 		int Song::InsertConnection(Machine* srcMac,Machine* dstMac, int srctype, int dsttype,float value)
 		{
-			CSingleLock lock(&door,TRUE);
 			// Assert that we have two machines
 			assert(srcMac); assert(dstMac);
 			// Verify that the destination is not a generator
@@ -704,7 +702,6 @@ namespace psycle
 
 		void Song::DestroyMachine(int mac, bool write_locked)
 		{
-			CSingleLock lock(&door, TRUE);
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
 			{
@@ -759,7 +756,7 @@ namespace psycle
 						int l;
 						for(l = 1 ; l < lines; ++l)
 						{
-							std::memcpy(toffset + l * MULTIPLY, toffset + helpers::math::rounded(l * step) * MULTIPLY,EVENT_SIZE);
+							std::memcpy(toffset + l * MULTIPLY, toffset + helpers::math::lround<int,float>(l * step) * MULTIPLY,EVENT_SIZE);
 						}
 						while(l < patternLines[pattern])
 						{
@@ -779,8 +776,8 @@ namespace psycle
 						toffset=_ptrack(pattern,t);
 						for(int l=nl-1;l>0;l--)
 						{
-							std::memcpy(toffset + helpers::math::rounded(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
-							int tz(helpers::math::rounded(l * step) - 1);
+							std::memcpy(toffset + helpers::math::lround<int,float>(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
+							int tz(helpers::math::lround<int,float>(l * step) - 1);
 							while (tz > (l - 1) * step)
 							{
 								std::memcpy(toffset + tz * MULTIPLY, &blank, EVENT_SIZE);
@@ -1066,14 +1063,14 @@ namespace psycle
 			return true;
 		}
 
-		int Song::WavAlloc(int instrument,const char * Wavfile)
+		int Song::WavAlloc(int instrument,const char * wavfile)
 		{ 
 #if !defined WINAMP_PLUGIN
-			assert(Wavfile != 0);
+			assert(wavfile != 0);
 			WaveFile file;
 			ExtRiffChunkHeader hd;
 			// opens the file and read the format Header.
-			DDCRET retcode(file.OpenForRead((char*)Wavfile));
+			DDCRET retcode(file.OpenForRead((char*)wavfile));
 			if(retcode != DDC_SUCCESS) 
 			{
 				Invalided = false;
@@ -1087,7 +1084,14 @@ namespace psycle
 			int bits(file.BitsPerSample());
 			long Datalen(file.NumSamples());
 			// Initializes the layer.
-			WavAlloc(instrument, st_type == 2, Datalen, Wavfile);
+			char* filename = const_cast<char*>(strrchr(wavfile,'\\'));
+			if (filename == NULL) {
+				filename = const_cast<char*>(strrchr(wavfile,'//'));
+				if (filename == NULL) {
+					filename = const_cast<char*>(wavfile);
+				}
+			}
+			WavAlloc(instrument, st_type == 2, Datalen, filename);
 			// Reading of Wave data.
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
@@ -1206,6 +1210,7 @@ namespace psycle
 
 		bool Song::Load(RiffFile* pFile, bool fullopen)
 		{
+			CSingleLock lock(&door,TRUE);
 			char Header[9];
 			pFile->Read(&Header, 8);
 			Header[8]=0;
@@ -1249,7 +1254,7 @@ namespace psycle
 				Reset(); //added by sampler mainly to reset current pattern showed.
 				while(pFile->Read(&Header, 4) && chunkcount)
 				{
-					Progress.m_Progress.SetPos(helpers::math::rounded((pFile->GetPos()*16384.0f)/filesize));
+					Progress.m_Progress.SetPos(helpers::math::lround<int,float>((pFile->GetPos()*16384.0f)/filesize));
 					::Sleep(1); ///< Allow screen refresh.
 					// we should use the size to update the index, but for now we will skip it
 					if(std::strcmp(Header,"INFO") == 0)
@@ -1395,7 +1400,7 @@ namespace psycle
 								byte* pSource = new byte[sizez77];
 								pFile->Read(pSource, sizez77);
 								byte* pDest;
-								BEERZ77Decomp2(pSource, &pDest);
+								DataCompression::BEERZ77Decomp2(pSource, &pDest);
 								zapArray(pSource,pDest);
 								for(int y(0) ; y < patternLines[index] ; ++y)
 								{
@@ -1425,13 +1430,14 @@ namespace psycle
 								DestroyMachine(index);
 								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
 								//Bugfix.
-								if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
-									&& ((vst::plugin*)_pMachine[index])->ProgramIsChunk() == false) {
-									if (fullopen) {
-										size = pFile->GetPos() - begins;
-									} else if ((version&0xFF) == 0) {
+								if (fullopen) {
+									if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
+										&& ((vst::plugin*)_pMachine[index])->ProgramIsChunk() == false) {
+											size = pFile->GetPos() - begins;
+/*									} else if ((version&0xFF) == 0) {
 										size = (pFile->GetPos() - begins) 
 											 + sizeof(unsigned char) + 2*sizeof(int) + _pMachine[index]->GetNumParams()*sizeof(float);
+*/
 									}
 								}
 							}
@@ -1471,6 +1477,7 @@ namespace psycle
 							for(int i = 0;i < numInstruments && filepos < begins+size;i++)
 							{
 								pFile->Read(idx);
+								filepos=pFile->GetPos();
 								int sizeIns = XMSampler::rInstrument(idx).Load(*pFile);
 								if ((version&0xFFFF) > 0) {
 									//Version 0 doesn't write the chunk size correctly
@@ -1484,6 +1491,7 @@ namespace psycle
 							for(int i = 0;i < numSamples && filepos < begins+size;i++)
 							{
 								pFile->Read(idx);
+								filepos=pFile->GetPos();
 								int sizeSamp = XMSampler::SampleData(idx).Load(*pFile);
 								if ((version&0xFFFF) > 0) {
 									//Version 0 doesn't write the chunk size correctly
@@ -2540,7 +2548,7 @@ namespace psycle
 						pCopy+=EVENT_SIZE*SONGTRACKS;
 					}
 					
-					int sizez77 = BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
+					int sizez77 = DataCompression::BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
 					zapArray(pSource);
 
 					pFile->Write("PATD",4);
@@ -2727,6 +2735,7 @@ namespace psycle
 
 		bool Song::CloneMac(int src,int dst)
 		{
+			CSingleLock lock(&door,TRUE);
 			// src has to be occupied and dst must be empty
 			if (_pMachine[src] && _pMachine[dst])
 			{
@@ -2926,6 +2935,7 @@ namespace psycle
 
 		bool Song::CloneIns(int src,int dst)
 		{
+			CSingleLock lock(&door,TRUE);
 			// src has to be occupied and dst must be empty
 			if (!_pInstrument[src]->Empty() && !_pInstrument[dst]->Empty())
 			{

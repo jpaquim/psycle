@@ -1,13 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "XMSamplerUIGeneral.hpp"
-#include "Psycle.hpp"
+
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 	IMPLEMENT_DYNCREATE(XMSamplerUIGeneral, CPropertyPage)
 
@@ -139,7 +137,7 @@ Ex: Pitch slide down");
 
 	void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
 	{
-		_pMachine->ResamplerQuality((helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
+		_pMachine->ResamplerQuality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 	}
 
 	void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
@@ -173,5 +171,5 @@ Ex: Pitch slide down");
 		_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
 	}
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

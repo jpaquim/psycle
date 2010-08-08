@@ -1,18 +1,16 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstParamList.
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "VstParamList.hpp"
-#include "Psycle.hpp"
-#include "VstHost24.hpp"
-//#include "Helpers.hpp"
-//#include "Configuration.hpp"
+
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+#include "Configuration.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "VstHost24.hpp"
+
+
+namespace psycle { namespace host {
 
 	extern CPsycleApp theApp;
 
@@ -157,7 +155,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			value *= vst::quantization;
 			UpdateText(value);
-			_quantizedvalue = (helpers::math::rounded(value));
+			_quantizedvalue = (helpers::math::lround<int,float>(value));
 			m_slider.SetPos(vst::quantization - _quantizedvalue);
 		}
 		void CVstParamList::OnSelchangeList() 
@@ -218,5 +216,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			*pResult = 0;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

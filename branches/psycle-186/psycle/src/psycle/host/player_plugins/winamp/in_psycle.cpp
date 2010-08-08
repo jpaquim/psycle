@@ -10,7 +10,6 @@
 
 
 //#include "mfc_wrapped_classes.hpp"
-#include <packageneric/pre-compiled.private.hpp>
 #include "../../Version.hpp"
 #include "../../Global.hpp"
 #include "../../Configuration.hpp"
@@ -29,6 +28,7 @@
 
 #define WA_PLUGIN_VERSION "1.3.1"
 
+using namespace psycle::helpers::math;
 using namespace psycle::host;
 
 //
@@ -116,7 +116,7 @@ int CalcSongLength(Song *pSong)
 		}
 	}
 	
-	return psycle::helpers::math::rounded(songLength*1000.0f);
+	return lround<int>(songLength*1000.0f);
 }
 
 void getfileinfo(char *filename, char *title, int *length_in_ms)

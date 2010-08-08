@@ -4,7 +4,7 @@
  *  $Revision$
  */
 #pragma once
-#include <cstdint>
+#include "Global.hpp"
 
 #pragma pack(1)
 

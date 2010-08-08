@@ -4,7 +4,7 @@
  *  $Revision$
  */
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "XMSongLoader.hpp"
 #include "ProgressDialog.hpp"
 #include "Song.hpp"
@@ -12,15 +12,14 @@
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
-#include "configuration_options.hpp"
-#include "resources/resources.hpp"
+
 #include <algorithm>
 #include <cstring>
 
 namespace psycle{
 namespace host{
 	
-	const short MODSongLoader::BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine
+	int16_t const MODSongLoader::BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine
 	{
 		907,900,894,887,881,875,868,862,856,850,844,838,832,826,820,814,
 			808,802,796,791,785,779,774,768,762,757,752,746,741,736,730,725,
@@ -65,7 +64,7 @@ namespace host{
 	{
 
 	}
-	void XMSongLoader::LoadInstrumentFromFile(XMSampler & sampler, const int idx)
+	void XMSongLoader::LoadInstrumentFromFile(XMSampler & sampler, int idx)
 	{
 		XMINSTRUMENTFILEHEADER fileheader;
 
@@ -146,9 +145,9 @@ namespace host{
 		delete[] sRemap;
 	}
 
-	void XMSongLoader::Load(Song& song,const bool fullopen)
+	void XMSongLoader::Load(Song& song, bool fullopen)
 	{
-
+		CSingleLock lock(&song.door,TRUE);
 		// check validity
 		if(!IsValid()){
 			return;
@@ -176,7 +175,7 @@ namespace host{
 
 	}
 
-	const bool XMSongLoader::IsValid()
+	bool XMSongLoader::IsValid()
 	{			
 
 		bool bIsValid = false;
@@ -207,7 +206,7 @@ namespace host{
 		return bIsValid;
 	}
 
-	const long XMSongLoader::LoadPatterns(Song & song)
+	size_t XMSongLoader::LoadPatterns(Song & song)
 	{
 		// get data
 		Seek(60);
@@ -237,7 +236,7 @@ namespace host{
 		}
 
 		// get pattern data
-		int nextPatStart = m_Header.size + 60;
+		size_t nextPatStart = m_Header.size + 60;
 		for(int j = 0;j < m_Header.patterns && nextPatStart > 0;j++){
 			nextPatStart = LoadSinglePattern(song,nextPatStart,j,m_Header.channels);
 		}
@@ -246,7 +245,7 @@ namespace host{
 	}
 
 	// Load instruments
-	const bool XMSongLoader::LoadInstruments(XMSampler & sampler, std::int32_t iInstrStart)
+	bool XMSongLoader::LoadInstruments(XMSampler & sampler, size_t iInstrStart)
 	{	
 		int currentSample=0;
 		for(int i = 1;i <= m_iInstrCnt;i++){
@@ -257,7 +256,7 @@ namespace host{
 		return true;
 	}
 
-	char * XMSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start)
+	char * XMSongLoader::AllocReadStr(std::int32_t size, size_t start)
 	{
 		// allocate space
 		char *pData = new char[size + 1];
@@ -284,7 +283,7 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	const std::int32_t XMSongLoader::LoadSinglePattern(Song & song, const std::int32_t start,const int patIdx,const int iTracks)
+	size_t XMSongLoader::LoadSinglePattern(Song & song, size_t start, int patIdx, int iTracks)
 	{
 
 		int iHeaderLen = ReadInt4(start);
@@ -726,9 +725,8 @@ namespace host{
 
 	}
 
-
-	const BOOL XMSongLoader::WritePatternEntry(Song & song,
-		const int patIdx, const int row, const int col,PatternEntry &e)
+	BOOL XMSongLoader::WritePatternEntry(Song & song,
+		int patIdx, int row, int col,PatternEntry &e)
 	{
 		// don't overflow song buffer 
 		if(patIdx>=MAX_PATTERNS) return false;
@@ -740,7 +738,7 @@ namespace host{
 		return true;
 	}	
 
-	const std::int32_t XMSongLoader::LoadInstrument(XMSampler & sampler, std::int32_t iStart, const int idx,int &curSample)
+	size_t XMSongLoader::LoadInstrument(XMSampler & sampler, size_t iStart,  int idx,int &curSample)
 	{
 		Seek(iStart);
 
@@ -824,7 +822,7 @@ namespace host{
 		return iStart;
 	}
 
-	const std::int32_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, std::int32_t iStart, const int iInstrIdx, const int iSampleIdx)
+	size_t XMSongLoader::LoadSampleHeader(XMSampler & sampler, size_t iStart, int iInstrIdx, int iSampleIdx)
 	{
 		// get sample header
 		Seek(iStart);
@@ -908,7 +906,7 @@ namespace host{
 
 	}
 
-	const std::int32_t XMSongLoader::LoadSampleData(XMSampler & sampler, std::int32_t iStart,const int iInstrIdx,const int iSampleIdx)
+	size_t XMSongLoader::LoadSampleData(XMSampler & sampler, size_t iStart, int iInstrIdx, int iSampleIdx)
 	{
 		// parse
 		
@@ -1078,7 +1076,7 @@ namespace host{
 
 	void MODSongLoader::Load(Song& song,const bool fullopen)
 	{
-
+		CSingleLock lock(&song.door,TRUE);	
 		// check validity
 		if(!IsValid()){
 			return;
@@ -1131,7 +1129,7 @@ namespace host{
 		}
 	}
 
-	const bool MODSongLoader::IsValid()
+	bool MODSongLoader::IsValid()
 	{
 		bool bIsValid = false;
 		char *pID = AllocReadStr(4,1080);
@@ -1145,7 +1143,7 @@ namespace host{
 		return bIsValid;
 	}
 
-	const void MODSongLoader::LoadPatterns(Song & song)
+	void MODSongLoader::LoadPatterns(Song & song)
 	{
 		int npatterns=0;
 		for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.songlength;i++)
@@ -1172,7 +1170,7 @@ namespace host{
 		}
 	}
 
-	char * MODSongLoader::AllocReadStr(const std::int32_t size, const std::int32_t start)
+	char * MODSongLoader::AllocReadStr(std::int32_t size, size_t start)
 	{
 		// allocate space
 		char *pData = new char[size + 1];
@@ -1199,7 +1197,7 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	const void MODSongLoader::LoadSinglePattern(Song & song,const int patIdx,const int iTracks)
+	void MODSongLoader::LoadSinglePattern(Song & song,int patIdx,int iTracks)
 	{
 
 		short iNumRows = 64;
@@ -1376,7 +1374,7 @@ namespace host{
 				}
 			}
 	}
-	const unsigned char MODSongLoader::ConvertPeriodtoNote(const unsigned short period)
+	unsigned char MODSongLoader::ConvertPeriodtoNote(unsigned short period)
 	{
 		for (int count2=1;count2<37; count2++)
 		{
@@ -1386,7 +1384,7 @@ namespace host{
 		return 255;
 	}
 
-	const BOOL MODSongLoader::WritePatternEntry(Song & song,
+	BOOL MODSongLoader::WritePatternEntry(Song & song,
 		const int patIdx, const int row, const int col,PatternEntry &e)
 	{
 		// don't overflow song buffer 
@@ -1399,7 +1397,7 @@ namespace host{
 		return true;
 	}	
 
-	const void MODSongLoader::LoadInstrument(XMSampler & sampler, const int idx)
+	void MODSongLoader::LoadInstrument(XMSampler & sampler, int idx)
 	{
 		sampler.rInstrument(idx).Init();
 		sampler.rInstrument(idx).Name(m_Samples[idx].sampleName);
@@ -1419,7 +1417,7 @@ namespace host{
 		}
 	}
 
-	const void MODSongLoader::LoadSampleHeader(XMSampler & sampler, const int iInstrIdx)
+	void MODSongLoader::LoadSampleHeader(XMSampler & sampler, int iInstrIdx)
 	{
 		Read(m_Samples[iInstrIdx].sampleName,22);	m_Samples[iInstrIdx].sampleName[21]='\0';
 
@@ -1464,7 +1462,7 @@ namespace host{
 
 	}
 
-	const void MODSongLoader::LoadSampleData(XMSampler & sampler, const int iInstrIdx)
+	void MODSongLoader::LoadSampleData(XMSampler & sampler, int iInstrIdx)
 	{
 		// parse
 

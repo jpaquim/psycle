@@ -3,24 +3,15 @@
 // http://www.codeproject.com/combobox/cexlistboc.asp
 //
 
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "ExListBox.h"
-#include "Psycle.hpp"
 #include "MainFrm.hpp"
-#include "Global.hpp"
+
 #include "Song.hpp"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
+namespace psycle { namespace host {
 
 /////////////////////////////////////////////////////////////////////////////
 // CExListBox
-using namespace psycle::host;
 CThisEdit::CThisEdit()
 {
 }
@@ -97,7 +88,7 @@ void CExListBox::OnChangePatternName()
 	myedit.GetWindowText(string);
 	strncpy(Global::_pSong->patternName[Global::_pSong->playOrder[GetCurSel()]],string,32);
 }
-int CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
+INT_PTR CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
 	int row;
 	RECT cellrect;   // cellrect		- to hold the bounding rect
@@ -176,3 +167,4 @@ UINT CExListBox::ItemFromPoint2(CPoint pt, BOOL& bOutside) const
 	return nResult;
 }
 
+}}

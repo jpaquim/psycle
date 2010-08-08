@@ -8,7 +8,7 @@
 **********************************************************************************************/
 
 #include "riff.hpp"
-namespace psycle { namespace host {
+namespace psycle { namespace helpers {
 
 std::uint32_t FourCC(const char * ChunkName) {
 	std::int32_t retbuf = 0x20202020;   // four spaces (padding)
@@ -96,6 +96,8 @@ DDCRET ExtRiffFile::Close() {
 		case RFM_READ:
 			std::fclose(file);
 			break;
+		default:
+			throw std::runtime_error("bad mode");
 	}
 	file = 0;
 	fmode = RFM_UNKNOWN;
@@ -199,14 +201,14 @@ DDCRET WaveFile::OpenForRead(const char * Filename) {
 	return retcode;
 }
 
-DDCRET WaveFile::OpenForWrite(const char * Filename, std::uint32_t SamplingRate, std::uint16_t BitsPerSample, std::uint16_t NumChannels) {
+DDCRET WaveFile::OpenForWrite(const char * Filename, std::uint32_t SamplingRate, std::uint16_t BitsPerSample, std::uint16_t NumChannels, bool isFloat) {
 	// Verify parameters...
 	if(
 		!Filename ||
-		BitsPerSample != 8 && BitsPerSample != 16 && BitsPerSample != 24 && BitsPerSample != 32 ||
+		(BitsPerSample != 8 && BitsPerSample != 16 && BitsPerSample != 24 && BitsPerSample != 32) ||
 		NumChannels < 1 || NumChannels > 2
 	) return DDC_INVALID_CALL;
-	wave_format.data.Config(SamplingRate, BitsPerSample, NumChannels);
+	wave_format.data.Config(SamplingRate, BitsPerSample, NumChannels, isFloat);
 	DDCRET retcode = Open(Filename, RFM_WRITE);
 	if(retcode == DDC_SUCCESS) {
 		retcode = Write("WAVE", 4);
@@ -273,6 +275,10 @@ DDCRET WaveFile::WriteSample(const std::int16_t Sample[MAX_WAVE_CHANNELS]) {
 
 DDCRET WaveFile::WriteMonoSample(float SampleData) {
 	std::int32_t d;
+
+	switch( wave_format.data.wFormatTag )
+	{
+	case 1: // Integer PCM
 	if(SampleData > 32767.0f) SampleData = 32767.0f;
 	else if(SampleData < -32768.0f) SampleData = -32768.0f;
 	switch( wave_format.data.nBitsPerSample) {
@@ -293,6 +299,19 @@ DDCRET WaveFile::WriteMonoSample(float SampleData) {
 			pcm_data.ckSize += 4;
 			d = std::int32_t(SampleData * 65536.0f);
 			return Write(&SampleData, 4);
+		default:
+			break;
+		}
+		break;
+	case 3: // IEEE float PCM
+		if( wave_format.data.nBitsPerSample == 32)
+		{
+			pcm_data.ckSize += 4;
+			const float f = SampleData * 0.000030517578125f;
+			return Write ( &f, 4 );
+		}
+	default:
+		break;
 	}
 	return DDC_INVALID_CALL;
 }
@@ -300,6 +319,10 @@ DDCRET WaveFile::WriteMonoSample(float SampleData) {
 DDCRET WaveFile::WriteStereoSample(float LeftSample, float RightSample) {
 	DDCRET retcode = DDC_SUCCESS;
 	std::int32_t l, r;
+	float f;
+	switch( wave_format.data.wFormatTag )
+	{
+	case 1: // Integer PCM
 	if(LeftSample > 32767.0f) LeftSample = 32767.0f;
 	else if(LeftSample < -32768.0f) LeftSample = -32768.0f;
 	if(RightSample > 32767.0f) RightSample = 32767.0f;
@@ -345,6 +368,23 @@ DDCRET WaveFile::WriteStereoSample(float LeftSample, float RightSample) {
 			break;
 		default:
 			retcode = DDC_INVALID_CALL;
+		}
+		break;
+	case 3: // IEEE float PCM
+		if( wave_format.data.nBitsPerSample == 32)
+		{
+			pcm_data.ckSize += 4;
+			f = LeftSample * 0.000030517578125f;
+			retcode = Write ( &f, 4 );
+			if(retcode == DDC_SUCCESS)
+			{
+				f = RightSample * 0.000030517578125f;
+				retcode = Write ( &f, 4 );
+				if( retcode == DDC_SUCCESS) pcm_data.ckSize += 8;
+			}
+		}
+	default:
+		break;
 	}
 	return retcode;
 }

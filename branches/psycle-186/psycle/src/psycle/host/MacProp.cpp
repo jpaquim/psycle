@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CMacProp.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "MacProp.hpp"
-#include "Psycle.hpp"
+
 #include "MainFrm.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Machine.hpp"
+
+namespace psycle { namespace host {
 
 		extern CPsycleApp theApp;
 
@@ -192,5 +192,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			OnCancel();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

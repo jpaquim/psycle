@@ -1,4 +1,11 @@
-///\implementation beerz77-2 algorithm.
+// This program is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+// copyright 2003-2009 members of the psycle project http://psycle.sourceforge.net ; jeremy evers
+
+///\brief implementation beerz77-2 algorithm.
+///
 /// beerz77-2 algorithm by jeremy evers, loosely based on lz77 
 /// -2 designates the smaller window, faster compression version
 /// designed for decompression on gameboy advance
@@ -8,18 +15,17 @@
 /// designed with speed in mind
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
-#include <packageneric/pre-compiled.private.hpp>
-#include <packageneric/module.private.hpp>
-#include <psycle/helpers/DataCompression.hpp>
+#include "datacompression.hpp"
 #include <cstring>
 
 namespace psycle
 {
-	namespace host
+	namespace helpers
 	{
-		int const MIN_REDUNDANT_BYTES_2 = 3;
+		std::uint8_t const MIN_REDUNDANT_BYTES_2 = 3;
+		#define ReadLittleEndian32(ptr) ((ptr[3]<<24)|(ptr[2]<<16)|(ptr[1]<<8)|(ptr[0]))
 
-		std::ptrdiff_t BEERZ77Comp2(std::uint8_t const * pSource, std::uint8_t ** pDestination, std::size_t const & size)
+		std::ptrdiff_t DataCompression::BEERZ77Comp2(std::uint8_t const * pSource, std::uint8_t ** pDestination, std::size_t const & size)
 		{
 			// remember to delete your destination when done
 			if (pSource)
@@ -95,7 +101,7 @@ namespace psycle
 						}
 					}
 					// now to see what we need to write -
-					// either a new std::uint8_t or an offset/length to a string
+			// either a new byte or an offset/length to a string
 
 					if (BestMatchLength >= MIN_REDUNDANT_BYTES_2)
 					{
@@ -115,7 +121,7 @@ namespace psycle
 					else
 					{
 						BestMatchLength = 1;
-						// we have an uncompressed std::uint8_t
+				// we have an uncompressed byte
 						// add it to our uncompressed string
 						// if we have one
 						if (pUncompressedCounter)
@@ -132,11 +138,11 @@ namespace psycle
 						{
 							// we need to start a new string
 							pUncompressedCounter = pDestPos;
-							// we write a std::uint8_t
+					// we write a byte
 							// write our flag
 							*pDestPos++ = 1;
 						}
-						// now we write our std::uint8_t
+				// now we write our byte
 						// and update the pointer
 						*pDestPos++ = *pCurrentPos++;
 					}
@@ -148,7 +154,7 @@ namespace psycle
 			return -1;
 		}
 
-		bool BEERZ77Decomp2(std::uint8_t const * pSourcePos, std::uint8_t ** pDestination)
+		bool DataCompression::BEERZ77Decomp2(std::uint8_t const * pSourcePos, std::uint8_t ** pDestination)
 		{
 			// remember to delete your destination when done
 			if (pSourcePos) 
@@ -156,34 +162,28 @@ namespace psycle
 				if (*pSourcePos++ == 0x04)
 				{
 					// get file size
-					std::ptrdiff_t FileSize(*reinterpret_cast<std::uint32_t const *>(pSourcePos));
-					#if defined DIVERSALIS__PROCESSOR__ENDIAN__BIG
-						#error ":("
-					#endif
+			// This is done byte by byte to avoid endianness issues
+			int FileSize = ReadLittleEndian32(pSourcePos);
 
 					pSourcePos+=4;
 
 					//ok, now we can start decompressing
-					std::uint8_t* pWindowPos;
-					std::uint8_t* pDestPos = *pDestination = new std::uint8_t[FileSize];
+					uint8_t* pWindowPos;
+					uint8_t* pDestPos = *pDestination = new std::uint8_t[FileSize];
 
-					std::uint16_t Offset;
-					std::uint16_t Length;
+					uint16_t Offset;
+					uint16_t Length;
 
-					while(FileSize > 0)
-					{
+					while(FileSize > 0) {
 						// get our flag
-						if (Length = *pSourcePos++)
-						{
+						if((Length = *pSourcePos++)) {
 							// we have an unique string to copy
 							std::memcpy(pDestPos,pSourcePos,Length);
 
 							pSourcePos += Length;
 							pDestPos += Length;
 							FileSize -= Length;
-						}
-						else
-						{
+						} else {
 							// we have a redundancy
 							// load length and offset
 							Length  = (*pSourcePos++) + MIN_REDUNDANT_BYTES_2;
@@ -206,7 +206,7 @@ namespace psycle
 		//
 		/////////////////////////////
 
-		std::ptrdiff_t SoundSquash(std::int16_t const * pSource, std::uint8_t ** pDestination, std::size_t const & size_)
+		std::ptrdiff_t DataCompression::SoundSquash(std::int16_t const * pSource, std::uint8_t ** pDestination, std::size_t const & size_)
 		{
 			std::size_t size(size_);
 			if (pSource)
@@ -445,12 +445,12 @@ namespace psycle
 					}
 					// calculate what bit to merge at next time
 					bitpos = (8+bits)&0x7;
-					// rewind our pointer if we ended mid-std::uint8_t
+					// rewind our pointer if we ended mid-byte
 					if(bitpos) --pDestPos;
 					// let's do it again, it was fun!
 					--size;
 				}
-				// remember to count that last half-written std::uint8_t
+				// remember to count that last half-written byte
 				if(bitpos) ++pDestPos;
 				return pDestPos - *pDestination;
 			}
@@ -458,7 +458,7 @@ namespace psycle
 			return -1;
 		}
 
-		bool SoundDesquash(std::uint8_t const * pSourcePos, std::int16_t ** pDestination)
+		bool DataCompression::SoundDesquash(std::uint8_t const * pSourcePos, std::int16_t ** pDestination)
 		{
 			// check validity of data
 			if (pSourcePos) 
@@ -484,10 +484,8 @@ namespace psycle
 						0x7fff};
 
 					// get file size
-					std::ptrdiff_t FileSize(*reinterpret_cast<std::uint32_t const *>(pSourcePos));
-					#if defined DIVERSALIS__PROCESSOR__ENDIAN__BIG
-						#error ":("
-					#endif
+			// this is done byte-by-byte to avoid endianness issues
+			int FileSize = ReadLittleEndian32(pSourcePos);
 
 					pSourcePos+=4;
 					//ok, now we can start decompressing
@@ -501,10 +499,11 @@ namespace psycle
 
 					while(FileSize)
 					{
-						// read a full std::uint32_t because that is 32 bits.  in our worst case we will need
+				// read a full uint32_t because that is 32 bits.  in our worst case we will need
 						// 7+5+15 bits, 27, which is easily contained in 32 bits.
 
-						std::uint32_t bits(*reinterpret_cast<std::uint32_t const *>(pSourcePos));
+				std::uint32_t bits = (std::uint32_t)ReadLittleEndian32(pSourcePos);
+				// note, we do not increment pSourcePos.
 
 						// now shift for our bit position to get the next bit we require
 

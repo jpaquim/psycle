@@ -1,8 +1,6 @@
 ///\file
 ///\implementation psycle::host::Configuration.
 
-#include <packageneric/pre-compiled.private.hpp>
-#include "Global.hpp"
 #include "Configuration.hpp"
 #include "Registry.hpp"
 #if !defined WINAMP_PLUGIN
@@ -12,7 +10,9 @@
 	#include "MidiInput.hpp"
 	#include "NewMachine.hpp"
 #endif // !defined WINAMP_PLUGIN
+
 #include "Song.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -59,7 +59,7 @@ namespace psycle
 					_numOutputDrivers--;
 					delete _ppOutputDrivers[3]; _ppOutputDrivers[3] = 0;
 				}
-				_outputDriverIndex = 1;
+				_outputDriverIndex = 2;
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 			}
 			// midi

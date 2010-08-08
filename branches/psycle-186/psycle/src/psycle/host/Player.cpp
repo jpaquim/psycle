@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Player.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "Player.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
@@ -12,13 +12,20 @@
 	#include "InputHandler.hpp"
 #endif //!defined WINAMP_PLUGIN
 
+#include "cpu_time_clock.hpp"
+#include <universalis/os/thread_name.hpp>
+#include <universalis/os/sched.hpp>
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
 #include "Global.hpp"
+
 namespace psycle
 {
 	namespace host
 	{
 		using namespace seib::vst;
+		namespace {
+			static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
+		}
 		Player::Player()
 		{
 			_playing = false;
@@ -38,14 +45,70 @@ namespace psycle
 			m_SampleRate=44100;
 			SetBPM(125,4);
 			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
+			start_threads();
+
 		}
 
 		Player::~Player()
 		{
+			stop_threads();
 #if !defined WINAMP_PLUGIN
 			if(_recording) _outputWaveFile.Close();
 #endif //!defined WINAMP_PLUGIN
 		}
+
+void Player::start_threads() {
+	loggers::trace()("psycle: core: player: starting scheduler threads", UNIVERSALIS__COMPILER__LOCATION);
+	if(!threads_.empty()) {
+		loggers::trace()("psycle: core: player: scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
+		return;
+	}
+
+	// normally, we would compute the scheduling plan here,
+	// but we haven't yet implemented signals that notifies when connections are changed or nodes added/removed.
+	// so it's actually done every time in the processing loop
+	//compute_plan();
+
+	stop_requested_ = suspend_requested_ = false;
+	processed_node_count_ = suspended_ = 0;
+
+	unsigned int thread_count = thread::hardware_concurrency();
+	{ // thread count env var
+		char const * const env(std::getenv("PSYCLE_THREADS"));
+		if(env) {
+			std::stringstream s;
+			s << env;
+			s >> thread_count;
+		}
+	}
+	
+	if(loggers::information()) {
+		std::ostringstream s;
+		s << "psycle: core: player: using " << thread_count << " threads";
+		loggers::information()(s.str());
+	}
+
+	if(thread_count < 2) return; // don't create any thread, will use a single-threaded, recursive processing
+
+	try {
+		// start the scheduling threads
+		for(std::size_t i(0); i < thread_count; ++i)
+			threads_.push_back(new thread(boost::bind(&Player::thread_function, this, i)));
+	} catch(...) {
+		{ scoped_lock lock(mutex_);
+			stop_requested_ = true;
+		}
+		condition_.notify_all();
+		for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
+			(**i).join();
+			delete *i;
+		}
+		threads_.clear();
+		clear_plan();
+		throw;
+	}
+}
+
 
 		void Player::Start(int pos, int lineStart, int lineStop, bool initialize)
 		{
@@ -139,6 +202,50 @@ namespace psycle
 			CVSTHost::vstTimeInfo.flags |= kVstTempoValid;
 			//\todo : Find out if we should notify the plugins of this change.
 		}
+
+void Player::suspend_and_compute_plan() {
+	if(!_playing) {
+		// no threads running, so no nothing to suspend; simply compute the plan and return.
+		compute_plan();
+		return;
+	}
+	// before we compute the plan, we need to suspend all the threads.
+	{ scoped_lock lock(mutex_);
+		suspend_requested_ = true;
+	}
+	condition_.notify_all();  // notify all threads they must suspend
+	{ scoped_lock lock(mutex_);
+		// wait until all threads are suspended
+		while(suspended_ != threads_.size()) main_condition_.wait(lock);
+		compute_plan();
+		suspend_requested_ = false;
+	}
+	condition_.notify_all(); // notify all threads they can resume
+}
+
+void Player::compute_plan() {
+	graph_size_ = 0;
+	terminal_nodes_.clear();
+
+	// iterate over all the nodes
+	Song* pSong = Global::_pSong;
+	for(int m(0); m < MAX_MACHINES; ++m) if(pSong->_pMachine[m]) {
+		++graph_size_;
+		Machine & n(*pSong->_pMachine[m]);
+		// find the terminal nodes in the graph (nodes with no connected input ports)
+		input_nodes_.clear(); n.sched_inputs(input_nodes_);
+		if(input_nodes_.empty()) terminal_nodes_.push_back(&n);
+	}
+
+	// copy the initial processing queue
+	nodes_queue_ = terminal_nodes_;
+}
+
+void Player::clear_plan() {
+	nodes_queue_.clear();
+	terminal_nodes_.clear();
+}
+
 
 		void Player::ExecuteLine(void)
 		{
@@ -254,7 +361,7 @@ namespace psycle
 							int mIndex = pEntry->_mach;
 							if(mIndex < MAX_MACHINES)
 							{
-								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(pSong,mIndex,pEntry->_inst, helpers::CValueMapper::Map_255_1(pEntry->_parameter));
+								if(pSong->_pMachine[mIndex]) pSong->_pMachine[mIndex]->SetDestWireVolume(pSong,mIndex,pEntry->_inst, helpers::value_mapper::map_256_1(pEntry->_parameter));
 							}
 						}
 						break;
@@ -455,53 +562,223 @@ namespace psycle
 			_lineChanged = true;
 		}
 
+void Player::thread_function(std::size_t thread_number) {
+	if(loggers::trace()) {
+		scoped_lock lock(mutex_);
+		std::ostringstream s;
+		s << "psycle: core: player: scheduler thread #" << thread_number << " started";
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+
+	// set thread name
+	universalis::os::thread_name thread_name;
+	{
+		std::ostringstream s;
+		s << universalis::compiler::typenameof(*this) << '#' << thread_number;
+		thread_name.set(s.str());
+	}
+
+	// install cpu/os exception handler/translator
+	universalis::cpu::exceptions::install_handler_in_thread();
+
+	{ // set thread priority and cpu affinity
+		using universalis::os::exceptions::operation_not_permitted;
+		using universalis::os::sched::thread;
+		thread t;
+
+		// set thread priority
+		try {
+			t.priority(thread::priorities::highest);
+		} catch(operation_not_permitted e) {
+			if(loggers::warning()) {
+				std::ostringstream s; s << "no permission to set thread priority: " << e.what();
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+		}
+
+		// set thread cpu affinity
+		try {
+			thread::affinity_mask_type const af(t.affinity_mask());
+			if(af.active_count()) {
+				unsigned int rotated = 0, cpu_index = 0;
+				while(!af(cpu_index) || rotated++ != thread_number) cpu_index = (cpu_index + 1) % af.size();
+				thread::affinity_mask_type new_af; new_af(cpu_index, true); t.affinity_mask(new_af);
+			}
+		} catch(operation_not_permitted e) {
+			if(loggers::warning()) {
+				std::ostringstream s; s << "no permission to set thread cpu affinity: " << e.what();
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
+		}
+	}
+
+	try {
+		try {
+			process_loop();
+		} catch(...) {
+			loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
+			throw;
+		}
+	} catch(std::exception const & e) {
+		if(loggers::exception()) {
+			std::ostringstream s;
+			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		throw;
+	} catch(...) {
+		if(loggers::exception()) {
+			std::ostringstream s;
+			s << "exception: " << universalis::compiler::exceptions::ellipsis_desc();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		throw;
+	}
+
+	if(loggers::trace()) {
+		scoped_lock lock(mutex_);
+		std::ostringstream s;
+		s << "psycle: core: player: scheduler thread #" << thread_number << " terminated";
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+}
+
+void Player::process_loop() throw(std::exception) {
+	while(true) {
+		Machine * node_;
+		{ scoped_lock lock(mutex_);
+			while(
+				!nodes_queue_.size() &&
+				!suspend_requested_ &&
+				!stop_requested_
+			) condition_.wait(lock);
+
+			if(stop_requested_) break;
+
+			if(suspend_requested_) {
+				if(!this_thread_suspended_) {
+					this_thread_suspended_ = true;
+					++suspended_;
+					main_condition_.notify_one();
+				}
+				continue;
+			}
+			if(this_thread_suspended_) {
+				this_thread_suspended_ = false;
+				--suspended_;
+			}
+
+			// There are nodes waiting in the queue. We pop the first one.
+			node_ = nodes_queue_.front();
+			nodes_queue_.pop_front();
+		}
+		Machine & node(*node_);
+
+		bool const done(node.sched_process(samples_to_process_));
+
+		int notify(0);
+		{ scoped_lock lock(mutex_);
+			node.sched_processed_ = done;
+			//If not done, it means it needs to be reprocessed somewhere.
+			if (!done) ++graph_size_;
+
+			// check whether all nodes have been processed
+			if(++processed_node_count_ == graph_size_) notify = -1; // wake up the main processing loop
+			else {
+				// check whether successors of the node we processed are now ready.
+				// iterate over all the outputs of the node we processed
+				output_nodes_.clear(); node.sched_outputs(output_nodes_);
+				for(Machine::sched_deps::const_iterator i(output_nodes_.begin()), e(output_nodes_.end()); i != e; ++i) {
+					Machine & output_node(*const_cast<Machine*>(*i));
+					bool output_node_ready(true);
+					// iterate over all the inputs connected to our output
+					input_nodes_.clear(); output_node.sched_inputs(input_nodes_);
+					for(Machine::sched_deps::const_iterator i(input_nodes_.begin()), e(input_nodes_.end()); i != e; ++i) {
+						const Machine & input_node(**i);
+						if(&input_node == &node) continue;
+						if(!input_node.sched_processed_) {
+							output_node_ready = false;
+							break;
+						}
+					}
+					if(output_node_ready) {
+						// All the dependencies of the node have been processed.
+						// We add the node to the processing queue.
+						nodes_queue_.push_back(&output_node);
+						++notify;
+					}
+				}
+			}
+		}
+		switch(notify) {
+			case -1: main_condition_.notify_one(); break; // wake up the main processing loop
+			case 0: break; // no successor ready
+			case 1: break; // If there's only one successor ready, we don't notify since it can be processed in the same thread.
+			case 2: condition_.notify_one(); break; // notify one thread that we added nodes to the queue
+			default: condition_.notify_all(); // notify all threads that we added nodes to the queue
+		}
+	}
+}
+
+void Player::stop_threads() {
+	if(loggers::trace()) loggers::trace()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(threads_.empty()) {
+		if(loggers::trace()) loggers::trace()("scheduler threads were not running", UNIVERSALIS__COMPILER__LOCATION);
+		return;
+	}
+	{ scoped_lock lock(mutex_);
+		stop_requested_ = true;
+	}
+	condition_.notify_all();
+	for(threads_type::const_iterator i(threads_.begin()), e(threads_.end()); i != e; ++i) {
+		(**i).join();
+		delete *i;
+	}
+	if(loggers::trace()) loggers::trace()("scheduler threads joined", UNIVERSALIS__COMPILER__LOCATION);
+	threads_.clear();
+	clear_plan();
+}
+
 		float * Player::Work(void* context, int numSamples)
 		{
-			int amount;
 			Player* pThis = (Player*)context;
+			return pThis->Work(numSamples);
+		}
+		float * Player::Work(int numSamples)
+		{
+			int amount;
 			Song* pSong = Global::_pSong;
-			Master::_pMasterSamples = pThis->_pBuffer;
+			Master::_pMasterSamples = _pBuffer;
 			CSingleLock crit(&Global::_pSong->door, TRUE);
+			nanoseconds const t0(cpu_time_clock());
 			do
 			{
 				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;
 				// Tick handler function
-				if(amount >= pThis->_samplesRemaining) amount = pThis->_samplesRemaining;
-				//if((pThis->_playing) && (amount >= pThis->_samplesRemaining)) amount = pThis->_samplesRemaining;
+				if(amount >= _samplesRemaining) amount = _samplesRemaining;
+				//if((_playing) && (amount >= _samplesRemaining)) amount = _samplesRemaining;
 				// Song play
-				if((pThis->_samplesRemaining <=0))
+				if((_samplesRemaining <=0))
 				{
-					if (pThis->_playing)
+					if (_playing)
 					{
 						// Advance position in the sequencer
-						pThis->AdvancePosition();
+						AdvancePosition();
 						// Global commands are executed first so that the values for BPM and alike
 						// are up-to-date when "NotifyNewLine()" is called.
-						pThis->ExecuteGlobalCommands();
-						pThis->NotifyNewLine();
-						pThis->ExecuteNotes();
+						ExecuteGlobalCommands();
+						NotifyNewLine();
+						ExecuteNotes();
 					}
 					else
 					{
-						pThis->NotifyNewLine();
+						NotifyNewLine();
 					}
-					pThis->_samplesRemaining = pThis->SamplesPerRow();
+					_samplesRemaining = SamplesPerRow();
 				}
 				// Processing plant
 				if(amount > 0)
 				{
-					if( (int)pSong->_sampCount > Global::pConfig->_pOutputDriver->_samplesPerSec)
-					{
-						pSong->_sampCount =0;
-						for(int c=0; c<MAX_MACHINES; c++)
-						{
-							if(pSong->_pMachine[c])
-							{
-								pSong->_pMachine[c]->_wireCost = 0;
-								pSong->_pMachine[c]->_cpuCost = 0;
-							}
-						}
-					}
 					// Reset all machines
 					for(int c=0; c<MAX_MACHINES; c++)
 					{
@@ -515,50 +792,60 @@ namespace psycle
 
 #if !defined WINAMP_PLUGIN
 					// Inject Midi input data
-					if(!CMidiInput::Instance()->InjectMIDI( amount ))
-					{
-						// if midi not enabled we just do the original tracker thing
-						// Master machine initiates work
-						pSong->_pMachine[MASTER_INDEX]->Work(amount);
+					CMidiInput::Instance()->InjectMIDI( amount );
+					if(threads_.empty()){ // single-threaded, recursive processing
+						pSong->_pMachine[MASTER_INDEX]->recursive_process(amount);
+					} else { // multi-threaded scheduling
+						// we push all the terminal nodes to the processing queue
+						{ scoped_lock lock(mutex_);
+							compute_plan(); // it's overkill, but we haven't yet implemented signals that notifies when connections are changed or nodes added/removed.
+							processed_node_count_ = 0;
+							samples_to_process_ = amount;
+						}
+						condition_.notify_all(); // notify all threads that we added nodes to the queue
+						// wait until all nodes have been processed
+						{ scoped_lock lock(mutex_);
+							while(processed_node_count_ != graph_size_) main_condition_.wait(lock);
+						}
 					}
-
 					pSong->_sampCount += amount;
-					if((pThis->_playing) && (pThis->_recording))
+
+					if((_playing) && (_recording))
 					{
 						float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);
 						float* pR(pSong->_pMachine[MASTER_INDEX]->_pSamplesR);
-						if(pThis->_dodither)
+						if(_dodither)
 						{
-							pThis->dither.Process(pL, amount);
-							pThis->dither.Process(pR, amount);
+							dither.Process(pL, amount);
+							dither.Process(pR, amount);
 						}
 						int i;
-						if ( pThis->_clipboardrecording)
+						if ( _clipboardrecording)
 						{
 							switch(Global::pConfig->_pOutputDriver->_channelmode)
 							{
 							case 0: // mono mix
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(((*pL++)+(*pR++))/2)) pThis->StopRecording(false);
+									if (!ClipboardWriteMono(((*pL++)+(*pR++))/2)) StopRecording(false);
 								}
 								break;
 							case 1: // mono L
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(*pL++)) pThis->StopRecording(false);
+									if (!ClipboardWriteMono(*pL++)) StopRecording(false);
 								}
 								break;
 							case 2: // mono R
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteMono(*pR++)) pThis->StopRecording(false);
+									if (!ClipboardWriteMono(*pR++)) StopRecording(false);
 								}
 								break;
 							default: // stereo
 								for(i=0; i<amount; i++)
 								{
-									if (!pThis->ClipboardWriteStereo(*pL++,*pR++)) pThis->StopRecording(false);
+									if (!ClipboardWriteStereo(*pL++,*pR++)) StopRecording(false);
 								}
 								break;
 							}						}
@@ -568,25 +855,25 @@ namespace psycle
 							for(i=0; i<amount; i++)
 							{
 								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-								if(pThis->_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) pThis->StopRecording(false);
+								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						case 1: // mono L
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) pThis->StopRecording(false);
+								if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						case 2: // mono R
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
+								if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						default: // stereo
 							for(i=0; i<amount; i++)
 							{
-								if(pThis->_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) pThis->StopRecording(false);
+								if(_outputWaveFile.WriteStereoSample((*pL++),(*pR++)) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						}
@@ -599,10 +886,12 @@ namespace psycle
 					Master::_pMasterSamples += amount * 2;
 					numSamples -= amount;
 				}
-				 pThis->_samplesRemaining -= amount;
+				 _samplesRemaining -= amount;
 				 CVSTHost::vstTimeInfo.flags &= ~kVstTransportChanged;
 			} while(numSamples>0);
-			return pThis->_pBuffer;
+			nanoseconds const t1(cpu_time_clock());
+			pSong->accumulate_processing_time(t1 - t0);
+			return _pBuffer;
 		}
 		bool Player::ClipboardWriteMono(float sample)
 		{
@@ -701,8 +990,8 @@ namespace psycle
 				{
 					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
 					else			dither.SetBitDepth(Global::pConfig->_pOutputDriver->_bitDepth);
-					dither.SetPdf((helpers::dsp::Dither::Pdf)ditherpdf);
-					dither.SetNoiseShaping((helpers::dsp::Dither::NoiseShape)noiseshape);
+					dither.SetPdf((helpers::dsp::Dither::Pdf::type)ditherpdf);
+					dither.SetNoiseShaping((helpers::dsp::Dither::NoiseShape::type)noiseshape);
 				}
 				int channels = 2;
 				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;

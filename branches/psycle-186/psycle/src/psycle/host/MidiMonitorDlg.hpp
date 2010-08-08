@@ -1,10 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::CMidiMonitorDlg.
 #pragma once
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+
+namespace psycle { namespace host {
+
 		#define	DARK_GREEN	RGB( 0, 128, 0 )
 		#define	DARK_RED	RGB( 128, 0, 0 )	
 
@@ -63,7 +63,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			//{{AFX_VIRTUAL(CMidiMonitorDlg)
 			protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			virtual void OnTimer(UINT nIDEvent);
+			virtual void OnTimer(UINT_PTR nIDEvent);
 			//}}AFX_VIRTUAL
 		// Implementation
 		protected:
@@ -86,5 +86,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

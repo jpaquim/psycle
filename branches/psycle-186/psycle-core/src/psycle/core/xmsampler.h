@@ -35,7 +35,7 @@ public:
 
 	static const int MAX_POLYPHONY = 64;///< max polyphony
 	static const int MAX_INSTRUMENT = 255;///< max instrument
-	static const std::uint32_t VERSION = 0x00010000;
+	static const unsigned int VERSION = 0x00010000;
 	static const float SURROUND_THRESHOLD;
 
 /*
@@ -251,10 +251,11 @@ XMSampler::Channel::PerformFX().
 		virtual void Playing(bool play){ m_Playing=play; }
 
 		// Current sample position
-		virtual const std::uint32_t  Position(){ return m_Position >>32;}
-		virtual void Position(const std::uint32_t value){
-			if ( value < Length()) m_Position = value << 32;
-			else m_Position = (Length()-1)<<32;
+		virtual const unsigned int  Position(){ return m_Position >>32;}
+		virtual void Position(const unsigned int value){
+			if ( value < Length()) m_Position = value;
+			else m_Position = (Length()-1);
+			m_Position <<= 32;
 		}
 
 		// Current sample Speed

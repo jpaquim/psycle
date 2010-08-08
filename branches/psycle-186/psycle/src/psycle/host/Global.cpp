@@ -1,27 +1,25 @@
 ///\file
 ///\brief implementation file for psycle::host::Global.
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "Global.hpp"
-#include "Song.hpp"
-#include "Player.hpp"
-#include "Configuration.hpp"
 
+#include "Configuration.hpp"
 #if !defined WINAMP_PLUGIN
 	#include "InputHandler.hpp"
 #endif //!defined WINAMP_PLUGIN
 
+#include "Song.hpp"
+#include "Player.hpp"
 #include "VstHost24.hpp"
 #include <psycle/helpers/dsp.hpp>
+
 namespace psycle
 {
 	namespace host
 	{
 		Song * Global::_pSong(0);
 		Player * Global::pPlayer(0);
-		helpers::dsp::Resampler * Global::pResampler(0);
+		helpers::dsp::resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
-		cpu::cycles_type Global::_cpuHz(cpu::cycles_per_second());
 #if !defined WINAMP_PLUGIN
 		InputHandler * Global::pInputHandler(0);
 #endif //!defined WINAMP_PLUGIN
@@ -30,12 +28,11 @@ namespace psycle
 
 		Global::Global()
 		{
-			_cpuHz = cpu::cycles_per_second();
 			_pSong = new Song;
 			pPlayer = new Player;
 			pConfig = new Configuration;
-			pResampler = new helpers::dsp::Cubic;
-			pResampler->SetQuality(helpers::dsp::R_LINEAR);
+			pResampler = new helpers::dsp::cubic_resampler;
+			pResampler->quality(helpers::dsp::resampler::quality::linear);
 #if !defined WINAMP_PLUGIN
 			pInputHandler = new InputHandler;
 #endif //!defined WINAMP_PLUGIN

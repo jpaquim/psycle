@@ -1,7 +1,7 @@
 ///\file
 ///\interface psycle::host::DirectSound.
 #pragma once
-#include <diversalis/compiler.hpp>
+#include "Global.hpp"
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)

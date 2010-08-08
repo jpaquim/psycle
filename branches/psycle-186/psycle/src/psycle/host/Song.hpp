@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Song
 #pragma once
-#include "Constants.hpp"
+#include "Global.hpp"
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
@@ -9,6 +9,8 @@
 #if !defined WINAMP_PLUGIN
 	#include "InstPreview.hpp"
 #endif // WINAMP_PLUGIN
+#include <universalis/stdlib/date_time.hpp>
+#include <universalis/os/loggers.hpp>
 
 class CCriticalSection;
 
@@ -33,8 +35,6 @@ namespace psycle
 			std::string author;
 			/// the comments on the song
 			std::string comments;
-			///\todo: this variable was used in Player, but it didn't store a good value. Either try to fix it or remove.
-			std::uint64_t cpuIdle;
 			unsigned _sampCount;
 			bool Invalided;
 			/// the initial beats per minute (BPM) when the song is started playing.
@@ -111,8 +111,6 @@ namespace psycle
 			bool ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx=0);
 			/// exchanges the position of two machines.
 			bool ExchangeMachines(int one, int two);
-			/// Creates a new machine cloned from an existing one.
-			Machine* CloneMachine(Machine* origmac);
 			/// destroy a machine of this song.
 			void DestroyMachine(int mac, bool write_locked = false);
 			/// destroys all the machines of this song.
@@ -253,6 +251,33 @@ namespace psycle
 			int _trackSoloed;
 
 			CCriticalSection mutable door;
+
+			universalis::stdlib::nanoseconds accumulated_processing_time_, accumulated_routing_time_;
+
+		/// cpu time usage measurement
+		void reset_time_measurement() { accumulated_processing_time_ = accumulated_routing_time_ = 0; }
+
+		/// total processing cpu time usage measurement
+		universalis::stdlib::nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		/// total processing cpu time usage measurement
+		void accumulate_processing_time(universalis::stdlib::nanoseconds ns) throw() {
+			if(universalis::os::loggers::warning() && ns.get_count() < 0) {
+				std::ostringstream s;
+				s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+				universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			} else accumulated_processing_time_ += ns;
+		}
+
+		/// routing cpu time usage measurement
+		universalis::stdlib::nanoseconds accumulated_routing_time() const throw() { return accumulated_routing_time_; }
+		/// routing cpu time usage measurement
+		void accumulate_routing_time(universalis::stdlib::nanoseconds ns) throw() {
+			if(universalis::os::loggers::warning() && ns.get_count() < 0) {
+				std::ostringstream s;
+				s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+				universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			} else accumulated_routing_time_ += ns;
+		}
 		};
 	}
 }

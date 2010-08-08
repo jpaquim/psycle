@@ -1,15 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::CConfigDlg.
 #pragma once
+#include "Psycle.hpp"
 #include "DirectoryDlg.hpp"
 #include "SkinDlg.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInputDlg.hpp"
 #include "Configuration.hpp"
 #include "KeyConfigDlg.hpp"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		/// config window.
 		class CConfigDlg : public CPropertySheet
@@ -32,7 +32,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			// ClassWizard generated virtual function overrides
 			//{{AFX_VIRTUAL(CConfigDlg)
 			public:
-			virtual int DoModal();
+			virtual INT_PTR DoModal();
 			//}}AFX_VIRTUAL
 		// Implementation
 		public:
@@ -49,5 +49,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

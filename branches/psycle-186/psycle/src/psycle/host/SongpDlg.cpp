@@ -1,12 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CSongpDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "SongpDlg.hpp"
-#include "Psycle.hpp"
+
 #include "Song.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		CSongpDlg::CSongpDlg(Song *song, CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)
 		,readonlystate(false)
@@ -70,5 +69,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			else CDialog::OnCancel();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

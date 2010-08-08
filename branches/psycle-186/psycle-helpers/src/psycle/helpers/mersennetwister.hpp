@@ -47,7 +47,8 @@
 // (64-bit compatibility by johan boule)
 
 #pragma once
-#include <cstdint>
+#include <universalis.hpp>
+#include <cstddef>
 namespace psycle { namespace helpers { namespace dsp {
 
 /// Period parameters
@@ -71,7 +72,7 @@ public:
 	void init_genrand(std::uint32_t s);
 
 	/// initialize by an array with array-length
-	void init_by_array(std::uint32_t init_key[], unsigned int key_length);
+	void init_by_array(std::uint32_t init_key[], std::size_t key_length);
 
 	/// generates a random number on [0,0xffffffff]-interval
 	std::uint32_t genrand_int32();

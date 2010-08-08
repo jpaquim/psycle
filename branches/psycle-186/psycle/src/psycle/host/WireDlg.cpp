@@ -1,18 +1,19 @@
 ///\file
 ///\brief implementation file for psycle::host::CWireDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "WireDlg.hpp"
-#include "Psycle.hpp"
-#include "Machine.hpp"
-#include "Helpers.hpp"
-#include <psycle/helpers/math/pi.hpp>
+
 #include "ChildView.hpp"
+#include "Configuration.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
 #include "Zap.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+#include "Machine.hpp"
+#include <psycle/helpers/math/constants.hpp>
+#include <universalis/os/aligned_memory_alloc.hpp>
+
+namespace psycle { namespace host {
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
@@ -44,16 +45,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CWireDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			pSamplesL = static_cast<float*>(_aligned_malloc(SCOPE_BUF_SIZE*sizeof(float),16));
-			pSamplesR = static_cast<float*>(_aligned_malloc(SCOPE_BUF_SIZE*sizeof(float),16));
-		#elif defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__COMPILER__GNU
-			posix_memalign(reinterpret_cast<void**>(pSamplesL),16,SCOPE_BUF_SIZE*sizeof(float));
-			posix_memalign(reinterpret_cast<void**>(pSamplesR),16,SCOPE_BUF_SIZE*sizeof(float));
-		#else
-			pSamplesL = new float[SCOPE_BUF_SIZE];
-			pSamplesR = new float[SCOPE_BUF_SIZE];
-		#endif
+
+			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
+			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
 			psycle::helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
 			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
 			
@@ -132,16 +126,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			linepenbR.DeleteObject();
 			zapObject(bufBM);
 			zapObject(clearBM);
-		#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-			_aligned_free(pSamplesL);
-			_aligned_free(pSamplesR);
-		#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-			free(pSamplesL);
-			free(pSamplesR);
-		#else
-			delete [] pSamplesL;
-			delete [] pSamplesR;
-		#endif
+			universalis::os::aligned_memory_dealloc(pSamplesL);
+			universalis::os::aligned_memory_dealloc(pSamplesR);
 			delete this;
 		}
 
@@ -253,7 +239,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-		void CWireDlg::OnTimer(UINT nIDEvent) 
+		void CWireDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
 			if ( nIDEvent == 2304+this_index )
 			{
@@ -296,8 +282,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							if (awr>curpeakr)	{	curpeakr = awr;	}
 							}
 
-						curpeakl=128-helpers::math::rounded(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
-						curpeakr=128-helpers::math::rounded(sqrtf(curpeakr*vucorrection));
+						curpeakl=128-helpers::math::lround<int,float>(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
+						curpeakr=128-helpers::math::lround<int,float>(sqrtf(curpeakr*vucorrection));
 
 						if (curpeakl<peak2L) //  it is a cardinal value, so smaller means higher peak.
 							{
@@ -508,7 +494,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							int aml = - (psycle::helpers::dsp::dB(ampl[i]+0.0000001f)+6) * 2; // 128dB of range is TOO much. reducing it to 64dB.
 							//int aml = - psycle::helpers::dsp::dB(ampl[(int)((((pow(10.0f,i/(float)scope_spec_bands))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
 
-//							int aml = 128-helpers::math::rounded(sqrtf(ampl[i]));
+//							int aml = 128-helpers::math::lround<int,float>(sqrtf(ampl[i]));
 							if (aml < 0)
 							{
 								aml = 0;
@@ -535,7 +521,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 							//int amr = 128 - (log(1+ampr[i])*heightcompensation[i]);
 							int amr = - (psycle::helpers::dsp::dB(ampr[i]+0.0000001f)+6) * 2; // 128dB of range is TOO much. reducing it to 64dB.
 							//int amr = - psycle::helpers::dsp::dB(ampr[(int)((((pow(10.0f,i/(float)scope_spec_bands))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
-//							int amr = 128-helpers::math::rounded(sqrtf(ampr[i]));
+//							int amr = 128-helpers::math::lround<int,float>(sqrtf(ampr[i]));
 							if (amr < 0)
 							{
 								amr = 0;
@@ -722,67 +708,67 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 						CPen* oldpen = bufDC.SelectObject(&linepenbL);
 
-						x=helpers::math::rounded(sinf(-(helpers::math::pi_f/4.0f)-(o_mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf(-(helpers::math::pi_f/4.0f)-(o_mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpl*(128.0f/32768.0f))+128;
-						y=helpers::math::rounded(-cosf(-(helpers::math::pi_f/4.0f)-(o_mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf(-(helpers::math::pi_f/4.0f)-(o_mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-helpers::math::rounded(o_mvpc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::lround<int,float>(o_mvpc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x=helpers::math::rounded(sinf((helpers::math::pi_f/4.0f)+(o_mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf((helpers::math::pi_f/4.0f)+(o_mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpr*(128.0f/32768.0f))+128;
-						y=helpers::math::rounded(-cosf((helpers::math::pi_f/4.0f)+(o_mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf((helpers::math::pi_f/4.0f)+(o_mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 										
 						// panning data
 						bufDC.SelectObject(&linepenbR);
 
-						x=helpers::math::rounded(sinf(-(o_mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf(-(o_mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvl*(128.0f/32768.0f))+128;
-						y=helpers::math::rounded(-cosf(-(o_mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf(-(o_mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-helpers::math::rounded(o_mvc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::lround<int,float>(o_mvc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x=helpers::math::rounded(sinf((o_mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf((o_mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvr*(128.0f/32768.0f))+128;
-						y=helpers::math::rounded(-cosf((o_mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf((o_mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 
 						bufDC.SelectObject(&linepenL);
 
-						x=helpers::math::rounded(sinf(-(helpers::math::pi_f/4.0f)-(mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf(-(helpers::math::pi_f/4.0f)-(mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpl*(128.0f/32768.0f))+128;
-						y=helpers::math::rounded(-cosf(-(helpers::math::pi_f/4.0f)-(mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf(-(helpers::math::pi_f/4.0f)-(mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-helpers::math::rounded(mvpc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::lround<int,float>(mvpc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x=helpers::math::rounded(sinf((helpers::math::pi_f/4.0f)+(mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf((helpers::math::pi_f/4.0f)+(mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpr*(128.0f/32768.0f))+128;
-						y=helpers::math::rounded(-cosf((helpers::math::pi_f/4.0f)+(mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf((helpers::math::pi_f/4.0f)+(mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 										
 						// panning data
 						bufDC.SelectObject(&linepenR);
 
-						x=helpers::math::rounded(sinf(-(mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf(-(mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvl*(128.0f/32768.0f))+128;
-						y=helpers::math::rounded(-cosf(-(mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf(-(mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-helpers::math::rounded(mvc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::lround<int,float>(mvc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x=helpers::math::rounded(sinf((mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf((mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvr*(128.0f/32768.0f))+128;
-						y=helpers::math::rounded(-cosf((mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf((mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 
@@ -1262,7 +1248,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				m_volslider.SetPos(256*4-t);
 			}
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
-
-
+}}

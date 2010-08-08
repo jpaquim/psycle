@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Plugin
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "Plugin.hpp"
 #include "FileIO.hpp"
 #include "Song.hpp"
@@ -14,10 +14,9 @@
 	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
 
-#include "Loggers.hpp"
 #include "Zap.hpp"
-#include <diversalis/operating_system.hpp>
-#include <universalis/operating_system/exceptions/code_description.hpp>
+#include <diversalis/os.hpp>
+#include <universalis.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdlib> // for environment variables functions
@@ -29,6 +28,7 @@ namespace psycle
 {
 	namespace host
 	{
+		namespace loggers = universalis::os::loggers;
 		typedef CMachineInfo * (* GETINFO) ();
 		typedef CMachineInterface * (* CREATEMACHINE) ();
 
@@ -55,9 +55,7 @@ namespace psycle
 			Free();
 		}
 
-		#if 1 /* <bohan> i'm really not sure about the origin of the problem so i prefer to add the work around unconditionally */ || \
-			defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && \
-			defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT__BRANCH__MSDOS
+		#if 1 /* <bohan> i'm really not sure about the origin of the problem so i prefer to add the work around unconditionally */ 
 			
 			// dos/win9x needs a work around for boost::filesystem::equivalent
 			// Or could that actually simply be due to FAT filesystems?
@@ -84,9 +82,9 @@ namespace psycle
 		{
 			char const static path_env_var_name[] =
 			{
-				#if defined DIVERSALIS__OPERATING_SYSTEM__LINUX
+				#if defined DIVERSALIS__OS__LINUX
 					"LD_LIBRARY_PATH"
-				#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#elif defined DIVERSALIS__OS__MICROSOFT
 					"PATH"
 				#else
 					#error unknown dynamic linker
@@ -121,7 +119,7 @@ namespace psycle
 					{
 						// go to the parent dir (in the first iteration of the loop, it removes the file leaf)
 						path = path.branch_path();
-						loggers::trace("path: " + path.string());
+						loggers::trace()("path: " + path.string());
 						// the following test is necessary in case the user has changed the configured root dir but not rescanned the plugins.
 						// the loop would never exit because boost::filesystem::equivalent returns false if any of the directory doesn't exist.
 						if(path.empty()) throw exceptions::library_errors::loading_error("Directory does not exits.");
@@ -133,7 +131,7 @@ namespace psycle
 					new_path << old_path;
 				}
 				// set the new path env var
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					if(!::SetEnvironmentVariable(path_env_var_name, new_path.str().c_str())) {
 						//int const e(::GetLastError());
 						throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
@@ -145,11 +143,11 @@ namespace psycle
 						throw ...
 					}
 				#endif
-				loggers::trace(path_env_var_name + (" env var: " + new_path.str()));
+				loggers::trace()(path_env_var_name + (" env var: " + new_path.str()));
 				// load the library passing just the base file name and relying on the search path env var
 				_dll = ::LoadLibrary(base_name.c_str());
 				// set the path env var back to its original value
-				#if defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT
+				#if defined DIVERSALIS__OS__MICROSOFT
 					if(!::SetEnvironmentVariable(path_env_var_name, old_path.c_str())) {
 						//int const e(::GetLastError());
 						throw exceptions::library_errors::loading_error("Could not set PATH env var back to its original value.");
@@ -166,7 +164,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not load library: " << file_name << std::endl
-					<< universalis::operating_system::exceptions::code_description();
+					<< universalis::os::exceptions::desc();
 				throw exceptions::library_errors::loading_error(s.str());
 			}
 			GETINFO GetInfo = (GETINFO) GetProcAddress(_dll, "GetInfo");
@@ -175,7 +173,7 @@ namespace psycle
 				std::ostringstream s; s
 					<< "library is not a psycle native plugin:" << std::endl
 					<< "could not resolve symbol 'GetInfo' in library: " << file_name << std::endl
-					<< universalis::operating_system::exceptions::code_description();
+					<< universalis::os::exceptions::desc();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try
@@ -198,7 +196,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
-					<< universalis::operating_system::exceptions::code_description();
+					<< universalis::os::exceptions::desc();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try
@@ -389,14 +387,11 @@ namespace psycle
 			}
 		}
 
-		void Plugin::Work(int numSamples)
+		int Plugin::GenerateAudioInTicks( int /*startSample*/, int numSamples )
 		{
-			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
-			else
-			{
+			if(_mode == MACHMODE_GENERATOR) {
 				Standby(false);
 			}
-			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute) 
 			{
 				if ((_mode == MACHMODE_GENERATOR) || (!Bypass() && !Standby()))
@@ -614,8 +609,8 @@ namespace psycle
 				}
 			}
 			else Standby(true);
-			_cpuCost += cpu::cycles() - cost;
-			_worked = true;
+			recursive_processed_ = true;
+			return numSamples;
 		}
 
 		bool Plugin::SetParameter(int numparam,int value)
@@ -716,14 +711,6 @@ namespace psycle
 
 		void Plugin::Tick(int channel, PatternEntry * pData)
 		{
-			try
-			{
-				proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
-			}
-			catch(const std::exception &)
-			{
-				return;
-			}
 			if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect)
 			{
 				if(pData->_inst < _pInfo->numParameters)
@@ -819,6 +806,16 @@ namespace psycle
 					}
 				}
 				Global::pPlayer->Tweaker = true;
+			}
+			else {
+				try
+				{
+					proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
+				}
+				catch(const std::exception &)
+				{
+					return;
+				}
 			}
 		}
 

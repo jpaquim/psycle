@@ -1,10 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "Instrument.hpp"
-#include "DataCompression.hpp"
-#include "Filter.hpp"
+#include <psycle/helpers/datacompression.hpp>
+#include <psycle/helpers/filter.hpp>
 #include "Zap.hpp"
 namespace psycle
 {
@@ -165,7 +165,7 @@ namespace psycle
 							{
 								pData = new byte[size+4];// +4 to avoid any attempt at buffer overflow by the code
 								pFile->Read(pData,size);
-								SoundDesquash(pData,&waveDataL);
+								DataCompression::SoundDesquash(pData,&waveDataL);
 								zapArray(pData);
 							}
 							else
@@ -181,7 +181,7 @@ namespace psycle
 								{
 									pData = new byte[size+4]; // +4 to avoid any attempt at buffer overflow by the code
 									pFile->Read(pData,size);
-									SoundDesquash(pData,&waveDataR);
+									DataCompression::SoundDesquash(pData,&waveDataR);
 									zapArray(pData);
 								}
 								else
@@ -248,10 +248,10 @@ namespace psycle
 				byte * pData1(0);
 				byte * pData2(0);
 				UINT size1=0,size2=0;
-				size1 = SoundSquash(waveDataL,&pData1,waveLength);
+				size1 = DataCompression::SoundSquash(waveDataL,&pData1,waveLength);
 				if (waveStereo)
 				{
-					size2 = SoundSquash(waveDataR,&pData2,waveLength);
+					size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
 				}
 
 				UINT index = 0;

@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CFileXM.
 #pragma once
-#include "SongStructs.hpp"
+#include "Global.hpp"
 #include "FileIO.hpp"
 namespace psycle
 {

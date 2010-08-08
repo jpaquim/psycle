@@ -1,20 +1,19 @@
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "FrameMachine.hpp"
-#include "Psycle.hpp"
-#include "NativeGui.hpp"
+
+#include "MainFrm.hpp"
+#include "InputHandler.hpp"
 #include "ChildView.hpp"
+#include "Configuration.hpp"
+#include "NativeGui.hpp" ///\todo Replace the drawing code with NativeGui
 #include "NewVal.hpp"
 #include "PresetsDlg.hpp"
 #include "Plugin.hpp"
-#include "InputHandler.hpp"
-#include "Helpers.hpp"
-#include "MainFrm.hpp"
 #include "Machine.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		extern CPsycleApp theApp;
 
@@ -97,7 +96,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnDestroy();
 		}
 
-		void CFrameMachine::OnTimer(UINT nIDEvent) 
+		void CFrameMachine::OnTimer(UINT_PTR nIDEvent) 
 		{
 			if ( nIDEvent == 2104+MachineIndex )
 			{
@@ -643,5 +642,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			dlg.DoModal();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

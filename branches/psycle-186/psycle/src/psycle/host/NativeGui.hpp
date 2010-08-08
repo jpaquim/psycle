@@ -1,16 +1,16 @@
 ///\file
 ///\brief interface file for psycle::host::CNativeGui.
 #pragma once
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
+namespace psycle {
+namespace host {
+
+		class Machine;
 
 		#define K_XSIZE     28
 		#define K_YSIZE     28
 		#define K_NUMFRAMES 63
 		#define W_ROWWIDTH  150
-
-		class Machine;
 
 		class NativeGUISettings
 		{
@@ -72,7 +72,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnDestroy();
 			afx_msg void OnSetFocus(CWnd* pOldWnd);
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
@@ -104,5 +104,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace host
+}   // namespace psycle

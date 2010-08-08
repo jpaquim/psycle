@@ -1,24 +1,19 @@
 //\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "VstEffectWnd.hpp"
-#include "Psycle.hpp"
-#include "VstHost24.hpp"
 
-#include "VstParamList.hpp"
-
-#include "InputHandler.hpp"
 #include "Configuration.hpp"
-
 #include "PresetsDlg.hpp"
-
+#include "VstParamList.hpp"
+#include "InputHandler.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "VstHost24.hpp"
+
+namespace psycle { namespace host {
 
 		extern CPsycleApp theApp;
 
@@ -180,7 +175,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CFrameWnd::OnClose();
 		}
 
-		void CVstEffectWnd::OnTimer(UINT nIDEvent)
+		void CVstEffectWnd::OnTimer(UINT_PTR nIDEvent)
 		{
 			if ( nIDEvent == 449 )
 			{
@@ -700,9 +695,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, index, helpers::math::rounded(value * vst::quantization));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, index, helpers::math::lround<int,float>(value * vst::quantization));
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, helpers::math::rounded(value * vst::quantization));
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, helpers::math::lround<int,float>(value * vst::quantization));
 				}
 				if(pParamGui)
 					pParamGui->UpdateNew(index, value);
@@ -732,25 +727,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pCmdUI->SetText("Activated");
 			if (machine().IsSynth())
 			{
-				if (machine()._mute)
-				{
-					pCmdUI->SetCheck(false);
-				}
-				else 
-				{
-					pCmdUI->SetCheck(true);
-				}
+				pCmdUI->SetCheck(!machine()._mute);
 			}
 			else
 			{
-				if (machine()._mute || machine().Bypass())
-				{
-					pCmdUI->SetCheck(false);
-				}
-				else
-				{
-					pCmdUI->SetCheck(true);
-				}
+				pCmdUI->SetCheck(!(machine()._mute || machine().Bypass()));
 			}
 		}
 
@@ -899,10 +880,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			if ( pParamGui )
 			{
-				if (pParamGui->IsWindowVisible())
-					pCmdUI->SetCheck(true);
-				else
-					pCmdUI->SetCheck(false);
+				pCmdUI->SetCheck(pParamGui->IsWindowVisible());
 			}
 			else
 				pCmdUI->SetCheck(false);
@@ -951,5 +929,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			MessageBox(message.c_str(),"About");
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace
+

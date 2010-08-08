@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SongStructs.hpp"
-#include "FileIO.hpp"
+#include "Global.hpp"
 #include "XMFile.hpp"
-#include <cstdint>
+
+#include "FileIO.hpp"
 #include <map>
 
 namespace psycle { namespace host {
@@ -12,8 +12,8 @@ namespace psycle { namespace host {
 	class XMSongExport : public OldPsyFile
 	{
 	public:
-		XMSongExport(void);
-		virtual ~XMSongExport(void);
+		XMSongExport();
+		virtual ~XMSongExport();
 		/// RIFF 
 		virtual void exportsong(Song& song);
 	private:

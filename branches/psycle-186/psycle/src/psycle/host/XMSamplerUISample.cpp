@@ -1,11 +1,8 @@
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "XMSamplerUISample.hpp"
-#include "Psycle.hpp"
+
 #include "XMSampler.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 // CWaveScopeCtrl
 CWaveScopeCtrl::CWaveScopeCtrl()
@@ -42,8 +39,8 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 		int const my=nHeight/2;
 		if(rWave().IsWaveStereo()) wrHeight=my/2;
 		else wrHeight=my;
-		helpers::dsp::Cubic resampler;
-		resampler.SetQuality(helpers::dsp::R_SPLINE);
+		helpers::dsp::cubic_resampler resampler;
+		resampler.quality(helpers::dsp::resampler::quality::spline);
 
 		dc.FillSolidRect(&rect,RGB(255,255,255));
 		dc.SetBkMode(TRANSPARENT);
@@ -120,7 +117,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 					ULARGE_INTEGER posin;
 					posin.QuadPart = c * OffsetStep* 4294967296.0f;
 					yHi=0;
-					yLow=resampler._pWorkFn(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
+					yLow=resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
 
 					int const ryLow = (wrHeight * yLow)/32768;
 					int const ryHi = (wrHeight * yHi)/32768;
@@ -172,7 +169,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 						ULARGE_INTEGER posin;
 						posin.QuadPart = c * OffsetStep* 4294967296.0f;
 						yHi=0;
-						yLow=resampler._pWorkFn(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
+						yLow=resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
 
 						int const ryLow = (wrHeight * yLow)/32768;
 						int const ryHi = (wrHeight * yHi)/32768;
@@ -416,7 +413,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 
 		if ( CurrExt == "wav" )
 		{
-			if (_pSong->WavAlloc(si,dlg.GetFileName()))
+			if (_pSong->WavAlloc(si,dlg.GetPathName()))
 			{
 				UpdateComboIns();
 				m_wndStatusBar.SetWindowText("New wave loaded");
@@ -426,7 +423,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 		}
 		else if ( CurrExt == "iff" )
 		{
-			if (_pSong->IffAlloc(si,dlg.GetFileName()))
+			if (_pSong->IffAlloc(si,dlg.GetPathName()))
 			{
 				UpdateComboIns();
 				m_wndStatusBar.SetWindowText("New wave loaded");
@@ -619,8 +616,13 @@ void XMSamplerUISample::OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult
 	}
 	char tmp[40], tmp2[40];
 	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+	if (rWave().WaveLength() > 0) {
 	sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
 	sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
+	}
+	else {
+		sprintf(tmp2,"%s%d",notes[0],5);
+	}
 	((CStatic*)GetDlgItem(IDC_LSAMPLENOTE))->SetWindowText(tmp2);
 
 	*pResult = 0;
@@ -760,6 +762,6 @@ void XMSamplerUISample::DrawScope()
 	m_WaveScope.Invalidate();
 }
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace
 

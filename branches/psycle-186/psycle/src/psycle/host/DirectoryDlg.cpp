@@ -1,11 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "DirectoryDlg.hpp"
 #include "Psycle.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		IMPLEMENT_DYNCREATE(CDirectoryDlg, CPropertyPage)
 
@@ -246,7 +245,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace
 
 

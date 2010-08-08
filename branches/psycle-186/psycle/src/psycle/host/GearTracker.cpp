@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "GearTracker.hpp"
-#include "Psycle.hpp"
+
 #include "ChildView.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+#include "Sampler.hpp"
+
+namespace psycle { namespace host {
 
 		CGearTracker::CGearTracker(CChildView* pParent)
 			: CDialog(CGearTracker::IDD, pParent)
@@ -43,7 +43,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_interpol.AddString("Spline [Medium Quality]");
 			m_interpol.AddString("512p Sinc [Highest Quality]");
 
-			m_interpol.SetCurSel(_pMachine->_resampler.GetQuality());
+			m_interpol.SetCurSel(_pMachine->_resampler.quality());
 
 			SetWindowText(_pMachine->_editName);
 
@@ -78,7 +78,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CGearTracker::OnSelchangeCombo1() 
 		{
-			_pMachine->_resampler.SetQuality((helpers::dsp::ResamplerQuality)m_interpol.GetCurSel());
+			_pMachine->_resampler.quality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 		}
 
 		BOOL CGearTracker::Create()
@@ -93,5 +93,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			delete this;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

@@ -1,10 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveOutDialog.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "WaveOutDialog.hpp"
-#include "Psycle.hpp"
-#include <diversalis/compiler.hpp>
+#include "Registry.hpp"
+#include "Configuration.hpp"
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)
@@ -20,8 +20,7 @@
 	#pragma warning(pop)
 #endif
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 		CWaveOutDialog::CWaveOutDialog(CWnd* pParent) : CDialog(CWaveOutDialog::IDD, pParent)
 		{
@@ -197,5 +196,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			RecalcLatency();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+		}   // namespace
+}   // namespace
+

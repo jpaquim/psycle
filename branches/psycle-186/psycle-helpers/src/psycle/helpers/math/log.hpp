@@ -1,31 +1,28 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2009 members of the psycle project http://psycle.sourceforge.net
+
+#ifndef PSYCLE__HELPERS__MATH__LOG__INCLUDED
+#define PSYCLE__HELPERS__MATH__LOG__INCLUDED
 #pragma once
-#include <diversalis/processor.hpp>
-#include <universalis/compiler.hpp>
-#if defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
-	#include <boost/static_assert.hpp>
-	#include <cstdint>
-#else
-	#include <cmath>
-#endif
+
+#include <universalis.hpp>
+#include <cmath>
 #if defined BOOST_AUTO_TEST_CASE
-	#include <universalis/operating_system/clocks.hpp>
-	#include <cmath>
+	#include <universalis/os/clocks.hpp>
 	#include <sstream>
 #endif
-namespace psycle
+
+namespace psycle { namespace helpers { namespace math {
+
+/// an approximate but fast computation of the base-2 logarithm.
+///
+/// The approximation error is:
+/// less than 10% for input values between 0 and 0.6,
+/// maximum 60% for input values between 0.6 and 1.7,
+/// less than 10% for input values above 1.7.
+float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f)
 {
-	namespace helpers
-	{
-		namespace math
-		{
-			/// an approximate but fast computation of the base-2 logarithm.
-			/// the approximation error is:
-			/// less than 10% for input values between 0 and 0.6,
-			/// maximum 60% for input values between 0.6 and 1.7,
-			/// less than 10% for input values above 1.7.
-			float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f)
-			{
-				#if defined DIVERSALIS__PROCESSOR__X86 // we should verify the code for other architectures.
+	#if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
 					BOOST_STATIC_ASSERT((sizeof f == 4));
 					//assert(f > 0); 
 					union result_union {
@@ -73,9 +70,9 @@ namespace psycle
 						return ::log2(f);
 					#endif
 				#endif
-			}
+}
 
-			#if defined BOOST_AUTO_TEST_CASE && !defined PSYCLE__HELPERS__MATH__FAST_LOG2__SKIP_TEST_CASE
+#if defined BOOST_AUTO_TEST_CASE && !defined PSYCLE__HELPERS__MATH__FAST_LOG2__SKIP_TEST_CASE
 				BOOST_AUTO_TEST_CASE(fast_log2_test)
 				{
 					float const input_values[] = {
@@ -141,9 +138,7 @@ namespace psycle
 						//BOOST_MESSAGE(s.str());
 						BOOST_CHECK(1 - tolerance < ratio && ratio < 1 + tolerance);
 					}
-					using namespace universalis::operating_system::clocks;
-					//typedef thread clock;
-					typedef monotonic clock;
+		typedef universalis::os::clocks::monotonic clock;
 					int const iterations(1000000);
 					std::nanoseconds const t1(clock::current());
 					float f1(2);
@@ -173,7 +168,8 @@ namespace psycle
 					}
 					BOOST_CHECK(t2 - t1 < t3 - t2);
 				}
-			#endif
-		}
-	}
-}
+#endif
+
+}}}
+
+#endif

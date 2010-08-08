@@ -1,13 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "Sampler.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
-#include "Global.hpp"
+#include <psycle/helpers/value_mapper.hpp>
 namespace psycle
 {
 	namespace host
@@ -22,7 +22,7 @@ namespace psycle
 			_mode = MACHMODE_GENERATOR;
 			sprintf(_editName, "Sampler");
 
-			_resampler.SetQuality(helpers::dsp::R_LINEAR);
+			_resampler.quality(helpers::dsp::resampler::quality::linear);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 			{
 				_voices[i]._envelope._stage = ENV_OFF;
@@ -64,10 +64,8 @@ namespace psycle
 			}
 		}
 
-		void Sampler::Work(
-			int numSamples)
+		int Sampler::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
 		{
-			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute)
 			{
 				Standby(false);
@@ -179,8 +177,8 @@ namespace psycle
 			}
 
 			else Standby(true);
-			_cpuCost += cpu::cycles() - cost;
-			_worked = true;
+			recursive_processed_ = true;
+			return numSamples;
 		}
 
 		void Sampler::Stop(void)
@@ -223,16 +221,11 @@ namespace psycle
 			pFile->Read(&i, sizeof(int)); // interpol
 			switch (i)
 			{
-			case 2:
-				_resampler.SetQuality(helpers::dsp::R_SPLINE);
-				break;
-			case 0:
-				_resampler.SetQuality(helpers::dsp::R_NONE);
-				break;
-			default:
-			case 1:
-				_resampler.SetQuality(helpers::dsp::R_LINEAR);
-				break;
+				case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+				case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
+				case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
+				case 1:
+				default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 			}
 
 			pFile->Read(&junk[0], sizeof(int)); // outwet
@@ -267,7 +260,7 @@ namespace psycle
 
 		void Sampler::VoiceWork(int numsamples, int voice)
 		{
-			helpers::dsp::PRESAMPLERFN pResamplerWork;
+			helpers::dsp::resampler::work_func_type pResamplerWork;
 			Voice* pVoice = &_voices[voice];
 			float* pSamplesL = _pSamplesL;
 			float* pSamplesR = _pSamplesR;
@@ -319,7 +312,7 @@ namespace psycle
 				NoteOff(voice);
 			}
 
-			pResamplerWork = _resampler._pWorkFn;
+			pResamplerWork = _resampler.work;
 			while (numsamples)
 			{
 				left_output=0;
@@ -342,7 +335,7 @@ namespace psycle
 					if (pVoice->_filter._type < dsp::F_NONE)
 					{
 						TickFilterEnvelope(voice);
-						pVoice->_filter._cutoff = pVoice->_cutoff + helpers::math::rounded(pVoice->_filterEnv._value*pVoice->_coModify);
+						pVoice->_filter._cutoff = pVoice->_cutoff + helpers::math::lround<int, float>(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (pVoice->_filter._cutoff < 0)
 						{
 							pVoice->_filter._cutoff = 0;
@@ -621,7 +614,7 @@ namespace psycle
 				}	
 				else
 				{
-					float const finetune = helpers::CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->waveFinetune);
+					float const finetune = helpers::value_mapper::map_256_1(Global::_pSong->_pInstrument[pVoice->_instrument]->waveFinetune);
 					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer->SampleRate()));
 				}
 				
@@ -644,7 +637,7 @@ namespace psycle
 
 				if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
 				{
-					pVoice->_wave._vol *= helpers::CValueMapper::Map_255_1(pEntry->_parameter);
+					pVoice->_wave._vol *= helpers::value_mapper::map_256_1(pEntry->_parameter);
 				}
 				
 				// Panning calculation -------------------------------------------
@@ -657,10 +650,10 @@ namespace psycle
 				}
 				else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
 				{
-					panFactor = helpers::CValueMapper::Map_255_1(pEntry->_parameter);
+					panFactor = helpers::value_mapper::map_256_1(pEntry->_parameter);
 				}
 				else {
-					panFactor = helpers::CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->_pan);
+					panFactor = helpers::value_mapper::map_256_1(Global::_pSong->_pInstrument[pVoice->_instrument]->_pan);
 				}
 
 				pVoice->_wave._rVolDest = panFactor;
@@ -733,7 +726,7 @@ namespace psycle
 				//
 				pVoice->_wave._vol = (float)Global::_pSong->_pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
-				if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= helpers::CValueMapper::Map_255_1(pEntry->_parameter);
+				if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= helpers::value_mapper::map_256_1(pEntry->_parameter);
 				
 				// Panning calculation -------------------------------------------
 				//
@@ -745,11 +738,11 @@ namespace psycle
 				}
 				else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
 				{
-					panFactor = helpers::CValueMapper::Map_255_1(pEntry->_parameter);
+					panFactor = helpers::value_mapper::map_256_1(pEntry->_parameter);
 				}
 				else
 				{
-					panFactor = helpers::CValueMapper::Map_255_1(Global::_pSong->_pInstrument[pVoice->_instrument]->_pan);
+					panFactor = helpers::value_mapper::map_256_1(Global::_pSong->_pInstrument[pVoice->_instrument]->_pan);
 				}
 
 				pVoice->_wave._rVolDest = panFactor;

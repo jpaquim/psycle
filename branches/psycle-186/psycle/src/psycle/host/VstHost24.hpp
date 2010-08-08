@@ -1,8 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::vsthost
 #pragma once
+#include "Global.hpp"
 #include "Machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
+#include <psycle/helpers/math/lround.hpp>
 #include <cstring>
 /*
 *<@JosepMa> the so-called seib host (which is mine, but based on his), is composed of two classes:
@@ -82,7 +84,7 @@ namespace psycle
 				float * _pOutSamplesR;
 				// Junk is a safe buffer for vst plugins that would want more buffers than
 				// supplied.
-				static float junk[STREAM_SIZE];
+				float* junk;
 				std::string _sDllName;
 				std::string _sProductName;
 				std::string _sVendorName;
@@ -112,7 +114,7 @@ namespace psycle
 				// Actions
 				virtual void Init(){ Machine::Init();}
 				virtual void PreWork(int numSamples,bool clear=true);
-				virtual void Work(int numSamples);
+				virtual int GenerateAudioInTicks(int startSample,  int numSamples);
 				virtual void Tick() { Machine::Tick(); }
 				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop();
@@ -186,7 +188,7 @@ namespace psycle
 					try
 					{
 						if(numparam < numParams())
-							return helpers::math::rounded(GetParameter(numparam) * quantization);
+							return helpers::math::lround<int, float>(GetParameter(numparam) * quantization);
 					}catch(...){}
 					return 0;
 				}

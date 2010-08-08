@@ -1,9 +1,8 @@
 ///\file
 ///\interface psycle::host::Registry.
 #pragma once
+#include "Psycle.hpp"
 #include <string>
-#include <boost/static_assert.hpp>
-#include "Loggers.hpp"
 namespace psycle
 {
 	namespace host
@@ -62,7 +61,7 @@ namespace psycle
 				result SetValue(name const & name, x const & data, type const & type = REG_BINARY)
 				{
 					result const error(::RegSetValueEx(current, name.c_str(), 0, type , reinterpret_cast<unsigned char const *>(&data), sizeof data));
-					if(error != ERROR_SUCCESS) loggers::warning("could not write " + name + "to registry.");
+					if(error != ERROR_SUCCESS) loggers::warning()("could not write " + name + "to registry.");
 					return error;
 				}
 				result SetValue(name const &,              bool const & b);

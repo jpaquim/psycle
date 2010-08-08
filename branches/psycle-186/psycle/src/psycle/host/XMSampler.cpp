@@ -1,5 +1,5 @@
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
@@ -7,7 +7,8 @@
 #include "FileIO.hpp"
 #include "Configuration.hpp"
 #include "Global.hpp"
-#include <cstdint>
+#include <universalis/stdlib/cstdint.hpp>
+
 #include <algorithm>
 namespace psycle
 {
@@ -106,6 +107,7 @@ namespace psycle
 		// being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
 		// so (2*7159090.5/8363) ~ 1712 ( middle C period )
 		// Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
+		// The original middle C period was 856, but it was multiplied by two on PC's to add fine pitch slide.
 		// The original table takes the lower octave values and multiplies them by two. 
 		// This doesn't take care of the roundings of the values.
 
@@ -177,60 +179,6 @@ namespace psycle
 			}
 		}
 
-/*
-		// Code  for the KaiserSinc Resampler from the XDSP library. It doesn't really work, and it is too slow
-		void XMSampler::XDSPWaveController::Init(XMInstrument::WaveData* wave, const int layer)
-		{
-			WaveDataController::Init(wave,layer);
-			pResampler=NULL;
-			pFilter=NULL;
-		}
-
-		void XMSampler::XDSPWaveController::Speed(const double value){
-			WaveDataController::Speed(value); m_Speed1x=value*Global::pPlayer->SampleRate(); RecreateResampler();
-		}
-
-		void __fastcall ResamplerCB(float *pout, dword const n, void *context)
-		{
-			XMSampler::XDSPWaveController* wc = (XMSampler::XDSPWaveController*)context;
-			unsigned long i=0,j=0;;
-
-			while (i<n && wc->Position() < wc->Length()-1)
-			{
-				pout[j++]=float(*(wc->pLeft()+wc->Position()));
-				if ( wc->IsStereo()) pout[j++]=float(*(wc->pRight()+wc->Position()));
-				wc->Position(wc->Position()+1);
-				i++;
-			}
-			if (wc->Position() == wc->Length()-1 ) 
-			{
-				while ( i<n) pout[i++]=0;
-				wc->Playing(false);
-			}
-			context = wc;
-		}
-		void XMSampler::XDSPWaveController::Workxdsp(int numSamples)
-		{
-			xdsp.ResamplerRun(pResampler,xdspFloatBuffer,numSamples);
-		}
-		void XMSampler::XDSPWaveController::RecreateResampler(void)
-		{
-			delete pResampler;
-			delete pFilter;
-
-			CXResamplerFilter *prf = xdsp.CreateKaiserSincFilter(m_Speed1x,Global::pPlayer->SampleRate(), 32, 0.5f, 1.0f);
-
-			pFilter = xdsp.PrepareResamplerFilter(prf, m_pWave->IsWaveStereo()?2:1);
-			delete prf;	// original filter is no longer needed
-
-			pResampler = xdsp.ResamplerCreate(pFilter, ResamplerCB, this, 10480);
-		}
-		XMSampler::XDSPWaveController::~XDSPWaveController()
-		{
-			zapObject(pResampler);
-			zapObject(pFilter);
-		}
-*/
 //////////////////////////////////////////////////////////////////////////
 //      XMSampler::EnvelopeController Implementation
 		void XMSampler::EnvelopeController::Init(XMInstrument::Envelope *pEnvelope)
@@ -500,10 +448,9 @@ namespace psycle
 			
 		}// XMSampler::Voice::VoiceInit) 
 
-		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, helpers::dsp::Cubic& _resampler)
+		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, dsp::resampler& resampler)
 		{
-			helpers::dsp::PRESAMPLERFN pResamplerWork;
-			pResamplerWork = _resampler._pWorkFn;
+			dsp::resampler::work_func_type resampler_work = resampler.work;
 
 			float left_output = 0.0f;
 			float right_output = 0.0f;
@@ -520,7 +467,7 @@ namespace psycle
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 1 : Get the unprocessed wave data.
 
-				m_WaveDataController.Work(&left_output,&right_output,pResamplerWork);
+				m_WaveDataController.Work(&left_output,&right_output,resampler_work);
 /*				left_output=xdspFloatBuffer[tmpcount++];
 				if ( m_WaveDataController.IsStereo()) right_output=xdspFloatBuffer[tmpcount++];
 */				
@@ -659,9 +606,10 @@ namespace psycle
 		void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol,bool reset)
 		{
 			int wavelayer = rInstrument().NoteToSample(note).second;
-			if ( pSampler()->SampleData(wavelayer).WaveLength() == 0 ) return;
+			XMInstrument::WaveData& wave = pSampler()->SampleData(wavelayer);
+			if ( wave.WaveLength() == 0 ) return;
 
-			m_WaveDataController.Init(&(pSampler()->SampleData(wavelayer)),wavelayer);
+			m_WaveDataController.Init(&wave,wavelayer);
 			m_Note = note;
 			m_Period=NoteToPeriod(rInstrument().NoteToSample(note).first);
 			m_NNA = rInstrument().NNA();
@@ -1033,7 +981,7 @@ namespace psycle
 
 		const double XMSampler::Voice::NoteToPeriod(const int note)
 		{
-			XMInstrument::WaveData& _wave = m_pSampler->m_rWaveLayer[rWave().Layer()];
+	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
 			if(m_pSampler->IsAmigaSlides())
 			{
@@ -1050,7 +998,7 @@ namespace psycle
 
 		const int XMSampler::Voice::PeriodToNote(const double period)
 		{
-			XMInstrument::WaveData& _wave = m_pSampler->m_rWaveLayer[rWave().Layer()];
+	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
 			if(m_pSampler->IsAmigaSlides()){
 				// f1
@@ -1366,9 +1314,9 @@ namespace psycle
 					// Portamento to (Gx) affects the memory for Gxx and has the equivalent
 					// slide given by this table:
 					// SlideTable      DB      1, 4, 8, 16, 32, 64, 96, 128, 255
-					if ( volcmd&0x0F == 0 ) slidval=0;
-					else if ( volcmd&0x0F == 1)  slidval=1;
-					else if ( volcmd&0x0F < 9) slidval=powf(2.0f,volcmd&0x0F);
+					if ( (volcmd&0x0F) == 0 ) slidval=0;
+					else if ( (volcmd&0x0F) == 1)  slidval=1;
+					else if ( (volcmd&0x0F) < 9) slidval=powf(2.0f,volcmd&0x0F);
 					else slidval=255;
 					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),slidval,Note());
 					break;
@@ -2028,7 +1976,7 @@ namespace psycle
 			_mode = MACHMODE_GENERATOR;
 
 			_numVoices=0;
-			_resampler.SetQuality(helpers::dsp::R_LINEAR);
+			_resampler.quality(helpers::dsp::resampler::quality::linear);
 
 			m_bAmigaSlides = false;
 			m_UseFilters = true;
@@ -2089,7 +2037,7 @@ namespace psycle
 
 		void XMSampler::Tick()
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
+			scoped_lock lock(*this);
 			SampleCounter(0);
 			m_TickCount=0;
 
@@ -2112,7 +2060,7 @@ namespace psycle
 
 		void XMSampler::Tick(int channelNum,PatternEntry* pData)
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
+			scoped_lock lock(*this);
 
 			if (Global::_pSong->IsInvalided()) { return; }
 
@@ -2333,11 +2281,10 @@ namespace psycle
 #endif
 		}
 
-		void XMSampler::Work(int numSamples)
+		int XMSampler::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_Mutex);
+			scoped_lock lock(*this);
 
-			cpu::cycles_type cost = cpu::cycles();
 			int i;
 
 			if (!_mute)
@@ -2476,8 +2423,8 @@ namespace psycle
 			}
 
 			else Standby(true);
-			_cpuCost += cpu::cycles() - cost;
-			_worked = true;
+			recursive_processed_ = true;
+			return numSamples;
 		}// XMSampler::Work()
 
 		void XMSampler::WorkVoices(int numsamples)
@@ -2593,12 +2540,12 @@ namespace psycle
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Write(VERSION);
 			riffFile->Write(_numVoices); // numSubtracks
-			switch (_resampler.GetQuality())
+			switch (_resampler.quality())
 			{
-				case helpers::dsp::R_NONE: temp = 0; break;
-				case helpers::dsp::R_SPLINE: temp = 2; break;
-				case helpers::dsp::R_BANDLIM: temp = 3; break;
-				case helpers::dsp::R_LINEAR:
+				case helpers::dsp::resampler::quality::none: temp = 0; break;
+				case helpers::dsp::resampler::quality::spline: temp = 2; break;
+				case helpers::dsp::resampler::quality::band_limited: temp = 3; break;
+				case helpers::dsp::resampler::quality::linear: //fallthrough
 				default: temp = 1;
 			}
 			riffFile->Write(temp); // quality
@@ -2677,11 +2624,11 @@ namespace psycle
 
 				switch (temp)
 				{
-					case 2:	_resampler.SetQuality(helpers::dsp::R_SPLINE); break;
-					case 3:	_resampler.SetQuality(helpers::dsp::R_BANDLIM); break;
-					case 0:	_resampler.SetQuality(helpers::dsp::R_NONE); break;
+					case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+					case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
+					case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
 					case 1:
-					default: _resampler.SetQuality(helpers::dsp::R_LINEAR);
+					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 				}
 
 				for (int i=0; i < 128; i++) riffFile->Read(&zxxMap[i],sizeof(ZxxMacro));

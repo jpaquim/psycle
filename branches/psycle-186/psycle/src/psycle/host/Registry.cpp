@@ -1,7 +1,7 @@
 ///\file
 ///\implementation psycle::host::Registry.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "Registry.hpp"
 namespace psycle
 {

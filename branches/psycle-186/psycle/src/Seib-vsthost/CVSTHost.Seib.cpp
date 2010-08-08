@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ******************************************************************************/
 
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "CVSTHost.Seib.hpp"                   /* private prototypes                */
 
 #include "EffectWnd.hpp"

@@ -1,25 +1,24 @@
-///\file
-///\brief implementation file for psycle::host::CSaveWavDlg.
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "SaveWavDlg.hpp"
-#include "Psycle.hpp"
-#include "Song.hpp"
-#include "Configuration.hpp"
-#include "MidiInput.hpp"
-#include "Player.hpp"
-#include "Machine.hpp"
-#include "Helpers.hpp"
-#include "MainFrm.hpp"
+
 #include "ChildView.hpp"
-#include <iostream>
+#include "Configuration.hpp"
+#include "MainFrm.hpp"
+#include "MidiInput.hpp"
+
+#include "Machine.hpp"
+#include "Player.hpp"
+#include "Song.hpp"
+
 #include <iomanip>
-#include "mfc_namespace.hpp"
-#include "SaveWavDlg.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include <iostream>
+
+namespace psycle { namespace host {
 
 		extern CPsycleApp theApp;
+
 		DWORD WINAPI __stdcall RecordThread(void *b);
 		int CSaveWavDlg::channelmode = -1;
 		int CSaveWavDlg::rate = -1;
@@ -1122,5 +1121,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

@@ -1,7 +1,6 @@
 ///\file
 ///\brief pattern view graphic operations for psycle::host::CChildView, private header
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 		#define DRAW_DATA		1
 		#define DRAW_HSCROLL	2
@@ -2615,9 +2614,9 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			for (int i = 0; i < len; i++)
 			{
-				pDest[i] = (helpers::math::rounded(p0*0x10000)&0xff0000)
-							| (helpers::math::rounded(p1*0x100)&0xff00)
-							| (helpers::math::rounded(p2)&0xff);
+				pDest[i] = (helpers::math::lround<int,float>(p0*0x10000)&0xff0000)
+							| (helpers::math::lround<int,float>(p1*0x100)&0xff00)
+							| (helpers::math::lround<int,float>(p2)&0xff);
 				p0+=a0;
 				p1+=a1;
 				p2+=a2;
@@ -2706,5 +2705,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			RecalculateColour(pvc_selection4beat, ColourDiffAdd(Global::pConfig->pvc_row, Global::pConfig->pvc_row4beat, Global::pConfig->pvc_selection), ColourDiffAdd(Global::pConfig->pvc_row2, Global::pConfig->pvc_row4beat2, Global::pConfig->pvc_selection2));
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

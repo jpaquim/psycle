@@ -1,15 +1,13 @@
 ///\file
 ///\implementation psycle::host::CMidiInputDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "MidiInputDlg.hpp"
-#include "Psycle.hpp"
+
 #include "OutputDlg.hpp"
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
-#include "Helpers.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
 
@@ -23,6 +21,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		CMidiInputDlg::~CMidiInputDlg()
 		{
+			for(groups_type::iterator i(groups.begin()) ; i != groups.end() ; ++i) delete *i;
 		}
 
 		void CMidiInputDlg::DoDataExchange(CDataExchange* pDX)
@@ -139,5 +138,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CPropertyPage::OnOK();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

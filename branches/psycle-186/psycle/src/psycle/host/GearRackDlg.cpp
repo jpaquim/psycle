@@ -1,15 +1,16 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearRackDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "GearRackDlg.hpp"
-#include "Psycle.hpp"
+
 #include "WaveEdFrame.hpp"
+#include "MainFrm.hpp"
+#include "ChildView.hpp"
+
 #include "Song.hpp"
 #include "Machine.hpp"
-#include "MainFrm.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		int CGearRackDlg::DisplayMode = 0;
 
@@ -250,29 +251,19 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_pParent->AddMacViewUndo();
 			switch (DisplayMode)
 			{
+			case 1:
+				tmac+=MAX_BUSES;
+				//fallthrough
 			case 0:
 				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
 					if (Global::_pSong->_pMachine[tmac])
 					{
 						pParentMain->CloseMacGui(tmac);
-						Global::_pSong->DestroyMachine(tmac);
-						pParentMain->UpdateEnvInfo();
-						pParentMain->UpdateComboGen();
-						if (m_pParent->viewMode==view_modes::machine)
 						{
-							m_pParent->Repaint();
+							CSingleLock lock(&Global::_pSong->door,TRUE);
+							Global::_pSong->DestroyMachine(tmac);
 						}
-					}
-				}
-				break;
-			case 1:
-				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
-				{
-					if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
-					{
-						pParentMain->CloseMacGui(tmac+MAX_BUSES);
-						Global::_pSong->DestroyMachine(tmac+MAX_BUSES);
 						pParentMain->UpdateEnvInfo();
 						pParentMain->UpdateComboGen();
 						if (m_pParent->viewMode==view_modes::machine)
@@ -283,15 +274,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				}
 				break;
 			case 2:
+				if (MessageBox("Are you sure?","Delete Instruments", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
-					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-					cc->SetCurSel(AUX_WAVES);
-					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+					{
+						CSingleLock lock(&Global::_pSong->door,TRUE);
+						Global::_pSong->DeleteInstrument(Global::_pSong->instSelected);
+					}
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
 				}
-				Global::_pSong->DeleteInstrument(Global::_pSong->instSelected);
-				pParentMain->UpdateComboIns(true);
 				break;
 			}
 			RedrawList();
@@ -419,18 +410,13 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			switch (DisplayMode) // should be necessary to rename opened parameter windows.
 			{
+			case 1:
+				sel[0]+=MAX_BUSES;
+				sel[1]+=MAX_BUSES;
+				//fallthrough
 			case 0:
 				m_pParent->AddMacViewUndo();
 				Global::_pSong->ExchangeMachines(sel[0],sel[1]);
-				pParentMain->UpdateComboGen(true);
-				if (m_pParent->viewMode==view_modes::machine)
-				{
-					m_pParent->Repaint();
-				}
-				break;
-			case 1:
-				m_pParent->AddMacViewUndo();
-				Global::_pSong->ExchangeMachines(sel[0]+MAX_BUSES,sel[1]+MAX_BUSES);
 				pParentMain->UpdateComboGen(true);
 				if (m_pParent->viewMode==view_modes::machine)
 				{
@@ -549,5 +535,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			pParentMain->RedrawGearRackList();
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

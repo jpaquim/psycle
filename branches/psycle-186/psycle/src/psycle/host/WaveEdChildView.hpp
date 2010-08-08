@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdChildView.
 #pragma once
+#include "Psycle.hpp"
 #include "WaveEdAmplifyDialog.hpp"
 #include <psycle/host/WaveEdMixDialog.hpp>
 #include <psycle/host/WaveEdInsertSilenceDialog.hpp>
@@ -8,9 +9,7 @@
 #include <psycle/host/ScrollableDlgBar.hpp>
 #include <deque>
 #include <utility>
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 		class CMainFrame;
 		class Song;
@@ -188,7 +187,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 			CMainFrame* pParent;
 		public:
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnDestroy();
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 		};
@@ -196,5 +195,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

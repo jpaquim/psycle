@@ -1,23 +1,23 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2010 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface universalis::operating_system::location
+///\interface universalis::compiler::location
+#ifndef UNIVERSALIS__COMPILER__LOCATION__INCLUDED
+#define UNIVERSALIS__COMPILER__LOCATION__INCLUDED
 #pragma once
-#include <universalis/compiler/stringized.hpp>
+
+#include "stringize.hpp"
+#if !defined DIVERSALIS__COMPILER__GNU
+	// Only gcc is able to include the name of the current class implicitly with __PRETTY_FUNCTION__.
+	// We can use rtti support on other compilers.
+	#include "typenameof.hpp"
+#endif
+#include <boost/current_function.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <algorithm>
-#if !defined DIVERSALIS__COMPILER__GNU
-	// Only gcc is able to include the name of the current class implicitly with __PRETTY_FUNCTION__.
-	// We can use rtti support on other compilers.
-	#include <universalis/compiler/typenameof.hpp>
-	#include <boost/current_function.hpp>
-#endif
-#if defined PACKAGENERIC
-	#include <packageneric/module.private.hpp>
-#endif
 
 namespace universalis { namespace compiler {
 
@@ -69,17 +69,18 @@ class location {
 // implementation details
 
 #if \
-	defined PACKAGENERIC__MODULE__NAME && \
-	defined PACKAGENERIC__MODULE__VERSION && \
-	defined PACKAGENERIC__PACKAGE__VERSION
+	defined UNIVERSALIS__META__MODULE__NAME && \
+	defined UNIVERSALIS__META__MODULE__VERSION
 	///\internal
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE \
-		PACKAGENERIC__MODULE__NAME " " \
-		PACKAGENERIC__MODULE__VERSION  " " \
-		PACKAGENERIC__PACKAGE__VERSION
+		UNIVERSALIS__META__MODULE__NAME " " \
+		UNIVERSALIS__COMPILER__STRINGIZE(UNIVERSALIS__META__MODULE__VERSION)
+#elif defined UNIVERSALIS__META__MODULE__NAME
+	///\internal
+	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE UNIVERSALIS__META__MODULE__NAME
 #else
 	///\internal
-	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unkown)"
+	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unkown module)"
 #endif
 
 ///\internal
@@ -93,21 +94,18 @@ class location {
 
 ///\internal
 #if defined DIVERSALIS__COMPILER__GNU
-	// gcc is able to include the name of the current class implicitly
-	// so we use the same definition in both cases
-	
+	// Gcc is able to include the name of the current class implicitly, so we don't need to use rtti.
+	// The dummy "this" usage is just here to ensure the compiler will fail to compile
+	// if this macro was mistakenly used instead of the "NO_CLASS" variant.
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
-		__PRETTY_FUNCTION__
-
-	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS \
-		__PRETTY_FUNCTION__
-
+		(std::string(this ? "" : "") + BOOST_CURRENT_FUNCTION)
 #else
 	// include the name of the current class explicitly using rtti on the "this" pointer
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
-		universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS
-
-	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  \
-		BOOST_CURRENT_FUNCTION
+		(universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS)
 #endif
 
+#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  \
+	BOOST_CURRENT_FUNCTION
+
+#endif

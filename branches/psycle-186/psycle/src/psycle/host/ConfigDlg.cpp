@@ -1,12 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CConfigDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "ConfigDlg.hpp"
-#include "Psycle.hpp"
+
 #include "MainFrm.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		extern CPsycleApp theApp;
 
@@ -143,7 +143,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if(dlgnum == 5 || dlgnum == 0) AddPage(&_midiDlg);
 		}
 
-		int CConfigDlg::DoModal() 
+		INT_PTR CConfigDlg::DoModal() 
 		{
 			int retVal = CPropertySheet::DoModal();
 			if (retVal == IDOK)
@@ -293,5 +293,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			return retVal;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

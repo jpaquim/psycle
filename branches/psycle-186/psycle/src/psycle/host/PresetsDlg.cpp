@@ -1,17 +1,16 @@
 ///\file
 ///\brief implementation file for psycle::host::CPresetsDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "PresetsDlg.hpp"
-#include "Psycle.hpp"
+
+#include "Configuration.hpp"
+
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
-#include "FrameMachine.hpp"
-#include "FileIO.hpp"
+
 #include <cstring>
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 		using namespace seib::vst;
 
@@ -92,7 +91,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			{
 				delete [] params; params = new int[num];
 				numPars=num;
-				for(int x=0;x<num;x++) params[x]= helpers::math::rounded(parameters[x]*65535.0f);
+				for(int x=0;x<num;x++) params[x]= helpers::math::lround<int,float>(parameters[x]*65535.0f);
 			}
 			else
 			{
@@ -238,7 +237,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				{
 					try
 					{
-						iniPreset.SetParam(i, helpers::math::rounded(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
+						iniPreset.SetParam(i, helpers::math::lround<int,float>(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
 					}
 					catch(const std::exception &)
 					{
@@ -503,6 +502,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CPresetsDlg::OnExport() 
 		{
+			if( _pMachine->_type == MACH_PLUGIN) return;
 			if ( m_preslist.GetCurSel() == CB_ERR )
 			{
 				MessageBox("You have to select a preset first.","File Save Error",MB_OK);
@@ -520,16 +520,8 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			if ( _pMachine->_type == MACH_PLUGIN )
-			{
-				std::string tmpstr = Global::pConfig->GetPluginDir();
-				ofn.lpstrInitialDir = tmpstr.c_str();
-			}
-			else 
-			{
-				std::string tmpstr = Global::pConfig->GetVstDir();
-				ofn.lpstrInitialDir = tmpstr.c_str();
-			}
+			std::string tmpstr = Global::pConfig->GetPluginDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 
 			// Display the Open dialog box. 
@@ -920,5 +912,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			presets[i2]=preset;;
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

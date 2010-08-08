@@ -1,14 +1,19 @@
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "InfoDlg.hpp"
-#include "Psycle.hpp"
+
 #include "Configuration.hpp"
-#include "Song.hpp"
+
 #include "Machine.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Player.hpp"
+#include "Song.hpp"
+
+#include "cpu_time_clock.hpp"
+
+namespace psycle { namespace host {
+
 		CInfoDlg::CInfoDlg(CWnd* pParent)
 		: CDialog(CInfoDlg::IDD, pParent)
 		{
@@ -42,25 +47,15 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		BOOL CInfoDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			
 			m_machlist.InsertColumn(0,"Name",LVCFMT_LEFT,120,0);
 			m_machlist.InsertColumn(1,"Machine",LVCFMT_LEFT,90,1);
 			m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
 			m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
 			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
 			m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
-			
-			char buffer[128];
-			///\todo:  Using the Windows API to get clicks/CPU frequency doesn't give
-			// the real frequency in some cases. This has to be worked out.
-			if ( Global::_cpuHz/1000000 < 10 ) strcpy(buffer,"Unknown");
-			else sprintf(buffer,"%d MHZ",Global::_cpuHz/1000000);
-			m_processor_label.SetWindowText(buffer);
-			
+		
 			UpdateInfo();
-			
 			InitTimer();
-			
 			return TRUE;
 		}
 
@@ -70,19 +65,18 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				MessageBox("Error! Couldn't initialize timer","CPU Perfomance Dialog", MB_OK | MB_ICONERROR);
 		}
 
-		void CInfoDlg::OnTimer(UINT nIDEvent) 
+		void CInfoDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
+			Song* _pSong = Global::_pSong;
 			if(nIDEvent==1 && !_pSong->_machineLock )
 			{
+				int num_threads_running = Global::pPlayer->num_threads();
 				char buffer[128];
 				
-				float totalCPU=0;
-				float machsCPU=0;
-				float wiresCPU=0;
+				nanoseconds total_machine_processing_time(0);
+				nanoseconds const now = wall_time_clock();
+				nanoseconds const real_time_duration = now - last_update_time_;
 
-				unsigned tempSampCount = _pSong->_sampCount;
-				if( !tempSampCount ) tempSampCount=1;
-				
 				int n=0;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
@@ -97,60 +91,64 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						sprintf(buffer,"%d",tmac->_numOutputs);
 						m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 
-						float machCPU=0;
-		//				float masterCPU=0;
-		//				machCPU = (float)tmac->_cpuCost*0.1f;
-		//				machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * 100;
-						machCPU = ((float)tmac->_cpuCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
-		/*				if (!c)
-						{
-							masterCPU = machCPU;
-						}*/
-						sprintf(buffer,"%.1f%%",machCPU);
-						m_machlist.SetItem(n,5,LVIF_TEXT,buffer,0,0,0,NULL);
+						{ // processing cpu percent
+							float const percent = 100.0f * tmac->accumulated_processing_time().get_count() / (real_time_duration.get_count() *num_threads_running);
+							sprintf(buffer,"%.1f%%",percent);
+							m_machlist.SetItem(n,5,LVIF_TEXT,buffer,0,0,0,NULL);
+						}
+						total_machine_processing_time += tmac->accumulated_processing_time();
+						tmac->reset_time_measurement();
 						n++;
-						machsCPU += machCPU;
-		//				wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz)*100;
-						wiresCPU += ((float)tmac->_wireCost/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
 					}
 				}
-				if (itemcount != n)
-				{
-					UpdateInfo();
+
+				last_update_time_ = now;
+
+				if(item_count_ != n) UpdateInfo();
+
+				{ // total cpu percent (counts everything, not just machine processing + routing)
+					float const percent = 100.0f * _pSong->accumulated_processing_time().get_count() / (real_time_duration.get_count() *num_threads_running);
+					sprintf(buffer, "%.1f%%", percent);
+					m_cpuidlelabel.SetWindowText(buffer);
 				}
 				
-		//		totalCPU = _pSong->cpuIdle*0.1f+masterCPU;
-		//		totalCPU = ((float)_pSong->cpuIdle/Global::_cpuHz)*100+machsCPU;
-		//		totalCPU = machsCPU + wiresCPU+((float)_pSong->cpuIdle/Global::_cpuHz)*100;
-		//		totalCPU = machsCPU + wiresCPU+ ((float)_pSong->cpuIdle/Global::_cpuHz) * ((float)Global::pConfig->_pOutputDriver->_samplesPerSec/tempSampCount)*100;
-				totalCPU = machsCPU + wiresCPU;
+				{ // total machine processing cpu percent
+					float const percent = 100.0f * total_machine_processing_time.get_count() / (real_time_duration.get_count() *num_threads_running);
+					sprintf(buffer, "%.1f%%", percent);
+					m_machscpu.SetWindowText(buffer);
+				}
 
-				sprintf(buffer,"%.1f%%",totalCPU);
-				m_cpuidlelabel.SetWindowText(buffer);
-				
-				sprintf(buffer,"%.1f%%",machsCPU);
-				m_machscpu.SetWindowText(buffer);
-				
-		//		sprintf(buffer,"%.1f%%",((float)_pSong->cpuIdle/Global::_cpuHz)*100);
-		//		sprintf(buffer,"%.1f%%",((float)_pSong->_pMachines[MASTER_INDEX]->_wireCost/Global::_cpuHz)*100);
-				sprintf(buffer,"%.1f%%",wiresCPU);
-				m_cpurout.SetWindowText(buffer);
-				
+				{ // routing cpu percent
+					float const percent = 100.0f * _pSong->accumulated_routing_time().get_count() / (real_time_duration.get_count() *num_threads_running);
+					sprintf(buffer, "%.1f%%", percent);
+					m_cpurout.SetWindowText(buffer);
+				}
+
+
+				{ // threads
+					 sprintf(buffer, "%d threads", num_threads_running);
+					m_processor_label.SetWindowText(buffer);
+				}
+
+				_pSong->reset_time_measurement();	
 				// Memory status -------------------------------------------------
 				
-				MEMORYSTATUS lpBuffer;
-				GlobalMemoryStatus(&lpBuffer);
+				MEMORYSTATUSEX lpBuffer;
+				lpBuffer.dwLength = sizeof(MEMORYSTATUSEX);
+				GlobalMemoryStatusEx(&lpBuffer);
 				
 				sprintf(buffer,"%d%%",100-lpBuffer.dwMemoryLoad);
 				m_mem_reso.SetWindowText(buffer);
 				
-				sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailPhys/1048576.0f,lpBuffer.dwTotalPhys/1048576.0f);
+				sprintf(buffer, "%.0fM (of %.0fM)", lpBuffer.ullAvailPhys/(float)(1<<19), lpBuffer.ullTotalPhys/(float)(1<<19));
+				//wanna see a woooping bug? Uncomment this line:
+				//sprintf(buffer, "%dM %d (of %dM)", lpBuffer.ullAvailPhys>>20), lpBuffer.ullTotalPhys>>20);
 				m_mem_phy.SetWindowText(buffer);
 				
-				sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailPageFile/1048576.0f,lpBuffer.dwTotalPageFile/1048576.0f);
+				sprintf(buffer,"%.0fM (of %.0fM)", (lpBuffer.ullAvailPageFile/(float)(1<<19)) , (lpBuffer.ullTotalPageFile/(float)(1<<19)));
 				m_mem_pagefile.SetWindowText(buffer);
 				
-				sprintf(buffer,"%.1fM (of %.1fM)",lpBuffer.dwAvailVirtual/1048576.0f,lpBuffer.dwTotalVirtual/1048576.0f);
+				sprintf(buffer,"%.0fM (of %.0fM)",(lpBuffer.ullAvailVirtual/(float)(1<<19)), (lpBuffer.ullTotalVirtual/(float)(1<<19)));
 				m_mem_virtual.SetWindowText(buffer);
 			}
 		}
@@ -160,6 +158,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_machlist.DeleteAllItems();
 			
 			int n=0;
+			Song* _pSong = Global::_pSong;
 			for(int c=0; c<MAX_MACHINES; c++)
 			{
 				Machine *tmac = _pSong->_pMachine[c];
@@ -194,7 +193,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 					n++;
 				}
 			}
-			itemcount = n;
+			item_count_ = n;
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

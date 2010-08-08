@@ -1,15 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::CInstrumentEditor.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "InstrumentEditor.hpp"
-#include "Psycle.hpp"
+
 #include "MainFrm.hpp"
 #include "EnvDialog.hpp"
-#include "Constants.hpp"
-#include "Helpers.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+#include "Song.hpp"
+namespace psycle { namespace host {
 
 		CInstrumentEditor::CInstrumentEditor(CWnd* pParent)
 			: CDialog(CInstrumentEditor::IDD, pParent)
@@ -431,7 +429,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 
 		void CInstrumentEditor::OnKillInstrument() 
 		{
-			_pSong->DeleteInstrument(_pSong->instSelected);
+			{
+				CSingleLock lock(&Global::_pSong->door,TRUE);
+				_pSong->DeleteInstrument(_pSong->instSelected);
+			}
 			WaveUpdate();
 			pParentMain->UpdateComboIns();
 			pParentMain->RedrawGearRackList();
@@ -497,5 +498,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			m_notelabel.SetWindowText(buffer);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

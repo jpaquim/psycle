@@ -5,19 +5,18 @@
  *  $Revision$
  */
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "XMSamplerUIInst.hpp"
-#include "Psycle.hpp"
-#include "Player.hpp"
-#include "XMInstrument.hpp"
-#include "XMSampler.hpp"
+
 #include "XMSongLoader.hpp"
 #include "ITModule2.h"
 #include "Configuration.hpp"
-//using namespace Gdiplus;
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Player.hpp"
+#include "XMInstrument.hpp"
+#include "XMSampler.hpp"
+
+namespace psycle { namespace host {
+
 // XMSamplerUIInst
 IMPLEMENT_DYNAMIC(XMSamplerUIInst, CPropertyPage)
 XMSamplerUIInst::XMSamplerUIInst()
@@ -1366,7 +1365,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopAddPoint()
 			_new_point = 0;
 		}
 
-		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 	//\todo : Verify that we aren't trying to add an existing point!!!
 
 	if ( m_pEnvelope->NumOfPoints() == 0 && _new_point != 0 ) m_EditPoint = m_pEnvelope->Insert(0,1.0f);
@@ -1377,7 +1376,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->SustainBegin(m_EditPoint);
 		if (m_pEnvelope->SustainEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainEnd(m_EditPoint);
 		else if (m_pEnvelope->SustainEnd() < m_EditPoint )m_pEnvelope->SustainEnd(m_EditPoint);
@@ -1388,7 +1387,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 		if (m_pEnvelope->SustainBegin()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainBegin(m_EditPoint);
 		else if (m_pEnvelope->SustainBegin() > m_EditPoint )m_pEnvelope->SustainBegin(m_EditPoint);
 		m_pEnvelope->SustainEnd(m_EditPoint);
@@ -1399,7 +1398,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 	{
-		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->LoopStart(m_EditPoint);
 		if (m_pEnvelope->LoopEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopEnd(m_EditPoint);
 		else if (m_pEnvelope->LoopEnd() < m_EditPoint )m_pEnvelope->LoopEnd(m_EditPoint);
@@ -1410,7 +1409,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 		if (m_pEnvelope->LoopStart()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopStart(m_EditPoint);
 		else if (m_pEnvelope->LoopStart() > m_EditPoint )m_pEnvelope->LoopStart(m_EditPoint);
 		m_pEnvelope->LoopEnd(m_EditPoint);
@@ -1431,7 +1430,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
 
 	if(m_EditPoint != _points)
 		{
-			boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->Delete(m_EditPoint);
 		m_EditPoint = _points;
 			Invalidate();
@@ -1439,21 +1438,21 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveSustain()
 { 
-	boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+	XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 	m_pEnvelope->SustainBegin(XMInstrument::Envelope::INVALID);
 	m_pEnvelope->SustainEnd(XMInstrument::Envelope::INVALID);
 	Invalidate();
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveLoop()
 { 
-		boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 		m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
 		m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
 		Invalidate();
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveEnvelope()
 {
-	boost::recursive_mutex::scoped_lock _lock(m_pXMSampler->Mutex());
+	XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
 	m_pEnvelope->Clear();
 	Invalidate();
 }
@@ -1776,6 +1775,6 @@ void XMSamplerUIInst::CSampleAssignEditor::OnHScroll(UINT nSBCode, UINT nPos, CS
 
 	};
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace
 

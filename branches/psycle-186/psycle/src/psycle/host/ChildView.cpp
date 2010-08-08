@@ -1,39 +1,37 @@
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "ChildView.hpp"
-#include "Version.hpp"
-#include "Psycle.hpp"
+
 #include "Configuration.hpp"
-#include "Player.hpp"
-//#include "Helpers.hpp"
 #include "MainFrm.hpp"
-//#include "Bitmap.hpp"
 #include "InputHandler.hpp"
 #include "MidiInput.hpp"
+
 #include "ConfigDlg.hpp"
 #include "GreetDialog.hpp"
 #include "SaveWavDlg.hpp"
 #include "SongpDlg.hpp"
-#include "XMSongLoader.hpp"
-#include "XMSongExport.hpp"
-#include "ITModule2.h"
 #include "MasterDlg.hpp"
 #include "NativeGui.hpp"
 #include "XMSamplerUI.hpp"
-//#include "VstEditorDlg.hpp"
 #include "WireDlg.hpp"
 #include "MacProp.hpp"
 #include "NewMachine.hpp"
 #include "TransformPatternDlg.hpp"
 #include "PatDlg.hpp"
-#include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
-#include <cmath> // SwingFill
 #include "SwingFillDlg.hpp"
 #include "InterpolateCurveDlg.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+#include "ITModule2.h"
+#include "XMSongLoader.hpp"
+#include "XMSongExport.hpp"
+#include "Player.hpp"
+#include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
+
+#include <cmath> // SwingFill
+
+namespace psycle { namespace host {
 
 		CMainFrame		*pParentMain;
 
@@ -293,7 +291,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		{
 			KillTimer(31);
 			KillTimer(159);
-			if (!SetTimer(31,30,NULL)) // GUI update. 
+			if (!SetTimer(31,33,NULL)) // GUI update. 
 			{
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
@@ -308,7 +306,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		}
 
 		/// Timer handler
-		void CChildView::OnTimer( UINT nIDEvent )
+		void CChildView::OnTimer( UINT_PTR nIDEvent )
 		{
 			if (nIDEvent == 31)
 			{
@@ -316,22 +314,21 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				// It is causing skips on sound when there is a pattern change because
 				// it is not allowing the player to work. Do the same in the one inside Player::Work()
 				CSingleLock lock(&_pSong->door,TRUE);
-				if (Global::_pSong->_pMachine[MASTER_INDEX])
+				Master* master = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX]);
+				if (master)
 				{
 					pParentMain->UpdateVumeters
 						(
-							//((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_LMAX,
-							//((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_RMAX,
-							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_lMax,
-							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_rMax,
+							master->_lMax,
+							master->_rMax,
 							Global::pConfig->vu1,
 							Global::pConfig->vu2,
 							Global::pConfig->vu3,
-							((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_clip
+							master->_clip
 						);
-					pParentMain->UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
+					pParentMain->UpdateMasterValue(master->_outDry);
 					if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI();
-					((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->vuupdated = true;
+					master->vuupdated = true;
 				}
 				if (viewMode == view_modes::machine)
 				{
@@ -1252,7 +1249,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 				if ( dlg.DoModal() == IDOK ) 
 				{
-					Global::pPlayer->StartRecording(dlg.GetFileName().GetBuffer(4));
+					Global::pPlayer->StartRecording(dlg.GetPathName().GetBuffer(4));
 				}
 				if ( Global::pConfig->autoStopMachines ) 
 				{
@@ -1654,7 +1651,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 						
 						PatternEntry *entry = (PatternEntry*) offset;
 						entry->_cmd = 0xff;
-						int val = helpers::math::rounded(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+						int val = helpers::math::lround<int,float>(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 						if (val < 1)
 						{
 							val = 1;
@@ -2489,7 +2486,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (!finder.IsDirectory())
 				{
 					CString sName, tmpPath;
-					sName = finder.GetFileName();
+					sName = finder.GetFilePath();
 					// ok so we have a .psm, does it have a valid matching .bmp?
 					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
 					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
@@ -3121,7 +3118,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				if (!finder.IsDirectory())
 				{
 					CString sName, tmpPath;
-					sName = finder.GetFileName();
+					sName = finder.GetFilePath();
 					// ok so we have a .psh, does it have a valid matching .bmp?
 					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
 					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
@@ -3579,7 +3576,10 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			if(dlg.deleted)
 			{
 				pParentMain->CloseMacGui(propMac);
-				Global::_pSong->DestroyMachine(propMac);
+				{
+					CSingleLock lock(&Global::_pSong->door,TRUE);
+					Global::_pSong->DestroyMachine(propMac);
+				}
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 				if (pParentMain->pGearRackDialog)
@@ -3633,8 +3633,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			}
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}
 
 // graphics operations, private headers included only by this translation unit
 #include "MachineView.private.hpp"

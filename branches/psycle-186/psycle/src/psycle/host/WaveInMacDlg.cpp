@@ -1,16 +1,14 @@
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "WaveInMacDlg.hpp"
-#include "Psycle.hpp"
-#include "Global.hpp"
-#include "ChildView.hpp"
-#include "AudioDriver.hpp"
-#include "Configuration.hpp"
-#include "internal_machines.hpp"
-#include "Dsp.hpp"
 
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Configuration.hpp"
+#include "ChildView.hpp"
+
+#include "internal_machines.hpp"
+#include "AudioDriver.hpp"
+#include <psycle/helpers/dsp.hpp>
+
+namespace psycle { namespace host {
 
 CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent)
 : CDialog(CWaveInMacDlg::IDD, pParent)
@@ -93,5 +91,6 @@ void CWaveInMacDlg::OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace
+

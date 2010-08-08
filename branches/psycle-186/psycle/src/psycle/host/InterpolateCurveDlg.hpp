@@ -1,12 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::CNewMachine.
 #pragma once
-#include "Constants.hpp"
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
+#include "Psycle.hpp"
 #include <afxwin.h>
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 	class CInterpolateCurve : public CDialog
 	{
@@ -70,5 +68,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			int kftwk;
 	};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

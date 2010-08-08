@@ -1,12 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CVolumeDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "VolumeDlg.hpp"
-#include "Psycle.hpp"
 #include <cmath>
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 		CVolumeDlg::CVolumeDlg(CWnd* pParent) : CDialog(CVolumeDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CVolumeDlg)
@@ -143,5 +142,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 				DrawDb();
 			}
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

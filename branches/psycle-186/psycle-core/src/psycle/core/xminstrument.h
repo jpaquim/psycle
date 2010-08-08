@@ -197,8 +197,8 @@ public:
 		const std::string WaveName(){ return m_WaveName;}
 		void WaveName(std::string newname){ m_WaveName = newname;}
 
-		const std::uint32_t WaveLength(){ return m_WaveLength;}
-		void WaveLength (const std::uint32_t value){m_WaveLength = value;}
+		const unsigned int WaveLength(){ return m_WaveLength;}
+		void WaveLength (const unsigned int value){m_WaveLength = value;}
 
 		const float WaveGlobVolume()const{ return m_WaveGlobVolume;}
 		void WaveGlobVolume(const float value){m_WaveGlobVolume = value;}
@@ -211,17 +211,17 @@ public:
 		bool PanEnabled(){ return m_PanEnabled;}
 		void PanEnabled(bool pan){ m_PanEnabled=pan;}
 
-		const std::uint32_t WaveLoopStart(){ return m_WaveLoopStart;}
-		void WaveLoopStart(const std::uint32_t value){m_WaveLoopStart = value;}
-		const std::uint32_t WaveLoopEnd(){ return m_WaveLoopEnd;}
-		void WaveLoopEnd(const std::uint32_t value){m_WaveLoopEnd = value;}
+		const unsigned int WaveLoopStart(){ return m_WaveLoopStart;}
+		void WaveLoopStart(const unsigned int value){m_WaveLoopStart = value;}
+		const unsigned int WaveLoopEnd(){ return m_WaveLoopEnd;}
+		void WaveLoopEnd(const unsigned int value){m_WaveLoopEnd = value;}
 		const LoopType::Type WaveLoopType(){ return m_WaveLoopType;}
 		void WaveLoopType(const LoopType::Type value){ m_WaveLoopType = value;}
 
-		const std::uint32_t WaveSusLoopStart(){ return m_WaveSusLoopStart;}
-		void WaveSusLoopStart(const std::uint32_t value){m_WaveSusLoopStart = value;}
-		const std::uint32_t WaveSusLoopEnd(){ return m_WaveSusLoopEnd;}
-		void WaveSusLoopEnd(const std::uint32_t value){m_WaveSusLoopEnd = value;}
+		const unsigned int WaveSusLoopStart(){ return m_WaveSusLoopStart;}
+		void WaveSusLoopStart(const unsigned int value){m_WaveSusLoopStart = value;}
+		const unsigned int WaveSusLoopEnd(){ return m_WaveSusLoopEnd;}
+		void WaveSusLoopEnd(const unsigned int value){m_WaveSusLoopEnd = value;}
 		const LoopType::Type WaveSusLoopType(){ return m_WaveSusLoopType;}
 		void WaveSusLoopType(const LoopType::Type value){ m_WaveSusLoopType = value;}
 
@@ -229,8 +229,8 @@ public:
 		void WaveTune(const std::int16_t value){m_WaveTune = value;}
 		const std::int16_t WaveFineTune(){return m_WaveFineTune;}
 		void WaveFineTune(const std::int16_t value){m_WaveFineTune = value;}
-		const std::uint32_t WaveSampleRate(){return m_WaveSampleRate;}
-		void WaveSampleRate(const std::uint32_t value);
+		const unsigned int WaveSampleRate(){return m_WaveSampleRate;}
+		void WaveSampleRate(const unsigned int value);
 
 		const bool IsWaveStereo(){ return m_WaveStereo;}
 		void IsWaveStereo(const bool value){ m_WaveStereo = value;}
@@ -260,16 +260,16 @@ public:
 
 		std::string m_WaveName;
 		/// Wave length in Samples.
-		std::uint32_t m_WaveLength;
+		unsigned int m_WaveLength;
 		float m_WaveGlobVolume;
 		std::uint16_t m_WaveDefVolume;
-		std::uint32_t m_WaveLoopStart;
-		std::uint32_t m_WaveLoopEnd;
+		unsigned int m_WaveLoopStart;
+		unsigned int m_WaveLoopEnd;
 		LoopType::Type m_WaveLoopType;
-		std::uint32_t m_WaveSusLoopStart;
-		std::uint32_t m_WaveSusLoopEnd;
+		unsigned int m_WaveSusLoopStart;
+		unsigned int m_WaveSusLoopEnd;
 		LoopType::Type m_WaveSusLoopType;
-		std::uint32_t m_WaveSampleRate;
+		unsigned int m_WaveSampleRate;
 		std::int16_t m_WaveTune;
 		/// [ -256 .. 256] full range = -/+ 1 seminote
 		std::int16_t m_WaveFineTune;
@@ -398,8 +398,8 @@ public:
 
 		const unsigned int NumOfPoints(){ return m_Points.size();}
 
-		void Load(RiffFile& riffFile,const std::uint32_t version);
-		void Save(RiffFile& riffFile,const std::uint32_t version);
+		void Load(RiffFile& riffFile,const unsigned int version);
+		void Save(RiffFile& riffFile,const unsigned int version);
 
 		/// overloaded copy function
 		Envelope& operator=(const Envelope& other)

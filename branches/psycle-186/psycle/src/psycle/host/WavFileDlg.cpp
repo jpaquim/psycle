@@ -1,12 +1,11 @@
 ///\file
 ///\brief implementation file for psycle::host::CWavFileDlg.
-
-#include <packageneric/pre-compiled.private.hpp>
 #include "WavFileDlg.hpp"
-#include "Psycle.hpp"
+
 #include "Song.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
+
 IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 		CWavFileDlg::CWavFileDlg(
@@ -42,10 +41,10 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 				Sleep(LOCK_LATENCY);
 			}
 		*/	
-			
-			if (CurrExt=="wav" && _lastFile != GetFileName())
+			CSingleLock lock(&_pSong->door,TRUE);
+			if (CurrExt=="wav" && _lastFile != GetPathName())
 			{
-				_lastFile=GetFileName();
+				_lastFile=GetPathName();
 				
 				if (_pSong->WavAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
@@ -54,9 +53,9 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 					
 				}
 			}
-			else if (CurrExt=="iff" && _lastFile != GetFileName())
+			else if (CurrExt=="iff" && _lastFile != GetPathName())
 			{
-				_lastFile=GetFileName();
+				_lastFile=GetPathName();
 				
 				if (_pSong->IffAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
@@ -67,5 +66,5 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 			CFileDialog::OnFileNameChange();
 		}
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

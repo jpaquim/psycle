@@ -1,11 +1,13 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief compiler-independant meta-information about the compiler
+
 #ifndef DIVERSALIS__COMPILER__INCLUDED
 #define DIVERSALIS__COMPILER__INCLUDED
 #pragma once
-#include <diversalis/detail/project.hpp>
+
+#include "detail/project.hpp"
 
 #if defined DIVERSALIS__COMPILER__DOXYGEN
 
@@ -14,7 +16,10 @@
 
 	///\name meta-information about the compiler's version
 	///\{
-		/// compiler version, as a string.
+		/// compiler name
+		#define DIVERSALIS__COMPILER__NAME <string>
+
+		/// compiler name and version, as a string.
 		#define DIVERSALIS__COMPILER__VERSION__STRING <string>
 
 		/// compiler version, as an integral number.
@@ -101,6 +106,10 @@
 		/// doxygen documentation compiler. This is not autodetected and has to be manually defined.
 		#define DIVERSALIS__COMPILER__DOXYGEN
 
+		/// netbeans c++ indexer. This is not autodetected and has to be manually defined.
+		#define DIVERSALIS__COMPILER__NETBEANS
+		#undef DIVERSALIS__COMPILER__NETBEANS // was just defined to insert documentation.
+
 		/// eclipse cdt c++ indexer. This is not autodetected and has to be manually defined.
 		#define DIVERSALIS__COMPILER__ECLIPSE
 		#undef DIVERSALIS__COMPILER__ECLIPSE // was just defined to insert documentation.
@@ -116,35 +125,32 @@
 /**********************************************************************************/
 // now the real work
 
-//////////////////////////////////////////////////////////////////////
-// resource compilers (only relevant on microsoft's operating system)
-
-// RC_INVOKED is defined by resource compilers (only relevant on microsoft's operating system).
-#if defined RC_INVOKED
-	// don't #define DIVERSALIS__COMPILER ; we can determine the real preprocessor used for parsing.
-	#define DIVERSALIS__COMPILER__RESOURCE
-	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-#endif
-
 //////////////////////////////////
 // doxygen documentation compiler
 
 #if defined DIVERSALIS__COMPILER__DOXYGEN
 	#define DIVERSALIS__COMPILER
+	#define DIVERSALIS__COMPILER__NAME "doxygen"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#if !defined __cplusplus
 		#define __cplusplus
 	#endif
 
 ///////////////////////
-// eclipse c++ indexer
+// netbeans c++ indexer
+
+#elif defined DIVERSALIS__COMPILER__NETBEANS
+	#define DIVERSALIS__COMPILER
+	#define DIVERSALIS__COMPILER__NAME "netbeans"
+	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+
+///////////////////////
+// eclipse cdt c++ indexer
 
 #elif defined DIVERSALIS__COMPILER__ECLIPSE
 	#define DIVERSALIS__COMPILER
+	#define DIVERSALIS__COMPILER__NAME "eclipse"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#if !defined __cplusplus
-		#define __cplusplus
-	#endif
 
 ////////////////
 // gnu compiler
@@ -152,6 +158,12 @@
 #elif defined __GNUC__
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__GNU
+	#if defined __INTEL_COMPILER
+		#define DIVERSALIS__COMPILER__INTEL
+		#define DIVERSALIS__COMPILER__NAME "icc-gcc"
+	#else
+		#define DIVERSALIS__COMPILER__NAME "gcc"
+	#endif
 	#if (!defined __GNUG__ || !defined __cplusplus) && !defined DIVERSALIS__COMPILER__RESOURCE
 		#if defined __GNUG__ || defined __cplusplus
 			#error "weird settings... we should have both __GNUG__ and __cplusplus"
@@ -159,7 +171,7 @@
 			#error "please invoke gcc with the language option set to c++ (or invoke gcc via the g++ driver)"
 		#endif
 	#endif
-	#define DIVERSALIS__COMPILER__VERSION__STRING __VERSION__
+	#define DIVERSALIS__COMPILER__VERSION__STRING DIVERSALIS__COMPILER__NAME "-" __VERSION__
 	#define DIVERSALIS__COMPILER__VERSION  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 	#define DIVERSALIS__COMPILER__VERSION__MAJOR __GNUC__
 	#define DIVERSALIS__COMPILER__VERSION__MINOR __GNUC_MINOR__
@@ -184,6 +196,7 @@
 #elif defined __BORLAND__
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__BORLAND
+	#define DIVERSALIS__COMPILER__NAME "borland"
 	#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 	#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 
@@ -195,23 +208,48 @@
 	
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__MICROSOFT
+	#if defined __INTEL_COMPILER
+		#define DIVERSALIS__COMPILER__INTEL
+		#define DIVERSALIS__COMPILER__NAME "icc-msvc"
+	#else
+		#define DIVERSALIS__COMPILER__NAME "msvc"
+	#endif
 	
 	#define DIVERSALIS__COMPILER__VERSION _MSC_VER // first 2 components, e.g. 15.00.20706.01 -> 1500
 	#define DIVERSALIS__COMPILER__VERSION__MAJOR (_MSC_VER / 100)
 	#define DIVERSALIS__COMPILER__VERSION__MINOR ((_MSC_VER - _MSC_VER / 100 * 100) / 10)
 	#define DIVERSALIS__COMPILER__VERSION__PATCH (_MSC_VER - _MSC_VER / 10 * 10)
 	#if defined _MSC_FULL_VER
-		#define DIVERSALIS__COMPILER__VERSION__FULL  _MSC_FULL_VER // first 3 components, e.g. 15.00.20706.01 -> 150020706
-		#if defined _MSC_BUILD
-			#define DIVERSALIS__COMPILER__VERSION__BUILD _MSC_BUILD // last, 4th, component, e.g. 15.00.20706.01 -> 1
-		#endif
+		#define DIVERSALIS__COMPILER__VERSION__FULL _MSC_FULL_VER // first 3 components, e.g. 15.00.20706.01 -> 150020706
+	#else
+		#define DIVERSALIS__COMPILER__VERSION__FULL DIVERSALIS__COMPILER__VERSION
+	#endif
+	#if defined _MSC_BUILD
+		#define DIVERSALIS__COMPILER__VERSION__BUILD _MSC_BUILD // last, 4th, component, e.g. 15.00.20706.01 -> 1
+	#else
+		#define DIVERSALIS__COMPILER__VERSION__BUILD 0
+	#endif
+	#if defined _WIN64
+		#define DIVERSALIS__COMPILER__VERSION__STRING \
+			DIVERSALIS__COMPILER__NAME \
+			"-" DIVERSALIS__STRINGIZE(DIVERSALIS__COMPILER__VERSION__FULL) \
+			"." DIVERSALIS__STRINGIZE(DIVERSALIS__COMPILER__VERSION__BUILD) \
+			"-64-bit"
+	#else
+		#define DIVERSALIS__COMPILER__VERSION__STRING \
+			DIVERSALIS__COMPILER__NAME \
+			"-" DIVERSALIS__STRINGIZE(DIVERSALIS__COMPILER__VERSION__FULL) \
+			"." DIVERSALIS__STRINGIZE(DIVERSALIS__COMPILER__VERSION__BUILD) \
+			"-32-bit"
 	#endif
 
 	#pragma conform(forScope, on) // ISO conformance of the scope of variables declared inside the parenthesis of a loop instruction.
 	#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 	#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
-	#define DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+	#ifndef _WIN64
+		#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
+		#define DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+	#endif
 	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	
 	#if defined _OPENMP // defined when compiling with -openmp, returns an integer representing the date of the OpenMP specification implemented
@@ -221,25 +259,32 @@
 	#if defined _CPPRTTI // defined for code compiled with -GR (Enable Run-Time Type Information).
 		#define DIVERSALIS__COMPILER__FEATURE__RTTI
 	#else
-		// is _CPPRTTI defined in msvc8?
+		///\todo _CPPRTTI is not defined in msvc8!?
 		//#error please enable rtti
 	#endif
 
 	#if defined _CPPUNWIND // defined for code compiled with -GX (Enable Exception Handling).
 		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
 	#else
-		// is _CPPUNWIND defined in msvc8?
+		///\todo _CPPUNWIND is not defined in msvc8!?
 		//#error please enable exception handling
 	#endif
+#endif
 
-	////////////////////
-	// intel's compiler
-	// they also define _MSC_VER !
-	
-	#if defined __INTEL_COMPILER
-		#define DIVERSALIS__COMPILER__INTEL
+//////////////////////////////////////////////////////////////////////
+// resource compilers (only relevant on microsoft's operating system)
+
+// RC_INVOKED is defined by resource compilers (only relevant on microsoft's operating system).
+#if defined RC_INVOKED
+	#define DIVERSALIS__COMPILER__RESOURCE
+	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+	#if !defined DIVERSALIS__COMPILER
+		#define DIVERSALIS__COMPILER
+		#define DIVERSALIS__COMPILER__NAME "rc"
+		#define DIVERSALIS__COMPILER__VERSION__STRING DIVERSALIS__COMPILER__NAME
 	#endif
 #endif
+
 
 
 
@@ -248,12 +293,12 @@
 
 
 
-#if !defined DIVERSALIS__COMPILER && !defined DIVERSALIS__COMPILER__RESOURCE
-	#error "Unkown compiler."
+#if !defined DIVERSALIS__COMPILER
+	#error Unkown compiler.
 #endif
 	
 #if !defined __cplusplus && !defined DIVERSALIS__COMPILER__RESOURCE
-	#error "Not a c++ compiler. For the gnu compiler, please invoke gcc with the language option set to c++ (or invoke gcc via the g++ driver)."
+	#error Not a c++ compiler. For the gnu compiler, please invoke gcc with the language option set to c++ (or invoke gcc via the g++ driver).
 #endif
 
 #endif // !defined DIVERSALIS__COMPILER__INCLUDED

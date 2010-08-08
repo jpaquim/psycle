@@ -5,15 +5,11 @@
  */
 
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "XMInstrument.hpp"
-#include "Configuration.hpp"
-//#include "IPsySongLoader.h"
-//#include "IPsySongSaver.h"
-#include "Filter.hpp"
-#include "DataCompression.hpp"
+#include <psycle/helpers/filter.hpp>
+#include <psycle/helpers/datacompression.hpp>
 #include "FileIO.hpp"
-#include <cstdint>
 #include <cassert>
 namespace psycle
 {
@@ -71,7 +67,7 @@ namespace psycle
 			riffFile.Read(size1);
 			unsigned char * pData = new unsigned char[size1];
 			riffFile.Read((void*)pData,size1);
-			SoundDesquash(pData, &m_pWaveDataL);
+			DataCompression::SoundDesquash(pData, &m_pWaveDataL);
 			
 			if (m_WaveStereo)
 			{
@@ -79,7 +75,7 @@ namespace psycle
 				riffFile.Read(size2);
 				pData = new unsigned char[size2];
 				riffFile.Read(pData,size2);
-				SoundDesquash(pData, &m_pWaveDataR);
+				DataCompression::SoundDesquash(pData, &m_pWaveDataR);
 			}
 			delete pData;
 			return size;
@@ -89,12 +85,12 @@ namespace psycle
 		{
 			unsigned char * pData1(0);
 			unsigned char * pData2(0);
-			std::uint32_t size1= SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
+			std::uint32_t size1= DataCompression::SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
 			std::uint32_t size2(0);
 
 			if (m_WaveStereo)
 			{
-				size2 = SoundSquash(m_pWaveDataR,&pData2,m_WaveLength);
+				size2 = DataCompression::SoundSquash(m_pWaveDataR,&pData2,m_WaveLength);
 			}
 
 			CT2A _wave_name(m_WaveName.c_str());

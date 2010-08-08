@@ -1,19 +1,21 @@
 ///\file
 ///\brief interface file for psycle::host::CVstEditorDlg.
 #pragma once
-#include <seib-vsthost/EffectWnd.hpp>
+#include "Psycle.hpp"
 #include "NativeGui.hpp"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
 
-		class CVstParamList;
+#include <Seib-Vsthost/EffectWnd.hpp>
+#include <list>
 
-		using namespace seib::vst;
+namespace psycle {
+	namespace host {
 		namespace vst
 		{
 			class plugin;
 		}
+		using namespace seib::vst;
+
+		class CVstParamList;
 
 		class CVstGui : public CBaseGui
 		{
@@ -76,7 +78,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnClose();
 //			afx_msg void OnDestroy();
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnSetFocus(CWnd* pOldWnd);
 			afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 			afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -107,6 +109,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI);
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace
 

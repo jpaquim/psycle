@@ -1,15 +1,16 @@
 ///\file
 ///\brief implementation file for psycle::host::COutputDlg.
 
-#include <packageneric/pre-compiled.private.hpp>
 #include "OutputDlg.hpp"
-#include "Psycle.hpp"
+
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
+
+#include "AudioDriver.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+namespace psycle { namespace host {
 
 		IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 
@@ -135,5 +136,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 		}
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

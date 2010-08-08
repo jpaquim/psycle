@@ -608,20 +608,17 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	
-	if( cmd == 0x0C) track[channel].set_preamp(val * .003921568627450980392156862745098f); // 1/255
+	if( (note < 121 || note == 255 ) && (cmd == 0x0C)) track[channel].set_preamp(val * .003921568627450980392156862745098f); // 1/255
 	
-	if(note!=255)
+	// Note off
+	if(note==120)
 	{
-		// Note off
-		if(note==120)
-		{
-			track[channel].set_note_off(0);
-		}
-		else 
-		// Note on
-		{
-			//track[channel].set_note_off(127);
-			track[channel].set_note(note,Vals[4]);
-		}
+		track[channel].set_note_off(0);
+	}
+	else if (note< 120)
+	// Note on
+	{
+		//track[channel].set_note_off(127);
+		track[channel].set_note(note,Vals[4]);
 	}
 }

@@ -1,18 +1,22 @@
 ///\file
 ///\brief interface file for psycle::host::CNewMachine.
 #pragma once
-#include "resources/resources.hpp"
-#include "Machine.hpp"
+
+#include "Psycle.hpp"
 #include "ProgressDialog.hpp"
-#include <afxwin.h>
-#include <afxcoll.h>
+
+#include "Machine.hpp"
+#include <universalis/stdlib/cstdint.hpp>
+
 #include <iostream>
 #include <typeinfo>
 #include <map>
-#include <cstdint>
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+
+#include <afxwin.h>
+#include <afxcoll.h>
+
+namespace psycle { namespace host {
+
 
 		const int MAX_BROWSER_NODES = 64;
 		const int MAX_BROWSER_PLUGINS = 2048;
@@ -148,5 +152,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnBnClickedButton1();
 		};
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

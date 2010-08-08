@@ -19,7 +19,7 @@ All rights reserved.
 
 /////////////////////////////////  Includes  //////////////////////////////////
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "SInstance.h"
 
 
@@ -53,12 +53,6 @@ All rights reserved.
     }
 */
 
-
-#ifdef _DEBUG
-#undef THIS_FILE
-static char BASED_CODE THIS_FILE[] = __FILE__;
-#define new DEBUG_NEW
-#endif
 
 
 
@@ -133,7 +127,7 @@ BOOL CInstanceChecker::TrackFirstInstanceRunning()
   {
     //Create the MMF
     int nMMFSize = sizeof(CWindowInstance);
-    instanceData.hInstanceData = ::CreateFileMapping((HANDLE)0xFFFFFFFF, NULL, PAGE_READWRITE, 0, nMMFSize, MakeMMFFilename());
+    instanceData.hInstanceData = ::CreateFileMapping((HANDLE)-1, NULL, PAGE_READWRITE, 0, nMMFSize, MakeMMFFilename());
     VERIFY(instanceData.hInstanceData != NULL); //Creating the MMF should work
 
     //Open the MMF

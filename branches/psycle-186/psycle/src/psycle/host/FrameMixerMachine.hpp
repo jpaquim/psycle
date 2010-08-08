@@ -1,11 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::CFrameMachine.
 #pragma once
+#include "Psycle.hpp"
 #include "FrameMachine.hpp"
-#include "Constants.hpp"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle {
+namespace host {
 
 	class Mixer;
 
@@ -202,11 +201,11 @@ PSYCLE__MFC__NAMESPACE__BEGIN(host)
 		afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		afx_msg void OnDestroy();
 		afx_msg void OnSetFocus(CWnd* pOldWnd);
-		afx_msg void OnTimer(UINT nIDEvent);
+		afx_msg void OnTimer(UINT_PTR nIDEvent);
 		afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 		afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 		DECLARE_MESSAGE_MAP()
 	};
 
-PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}   // namespace
+}   // namespace

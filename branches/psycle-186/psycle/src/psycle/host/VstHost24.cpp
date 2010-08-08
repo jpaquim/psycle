@@ -1,13 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "VstHost24.hpp"
 #include "Global.hpp"
 #include "Psycle.hpp"
 #include "Player.hpp"
 #include "Zap.hpp"
-#include "Loggers.hpp"
 
 ///\todo: these are required by the GetIn/OutLatency() functions. They should instead ask the player.
 #include "Configuration.hpp"
@@ -16,8 +15,13 @@
 //This is so wrong. It's needed because of the loop inside the code for retrigger that it's in the Work() function.
 #include "Song.hpp"
 
+#include <universalis/os/loggers.hpp>
+using namespace universalis::os;
+
 ///\todo: When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
 //        (LiveSlice is a good example of what happens if it isn't correct)
+
+#include <universalis/os/aligned_memory_alloc.hpp>
 
 namespace psycle
 {
@@ -25,20 +29,11 @@ namespace psycle
 	{
 		extern CPsycleApp theApp;
 
-		namespace loggers = psycle::loggers;
-
 		namespace vst
 		{
-			float plugin::junk[STREAM_SIZE];
 			using namespace seib::vst;
 			int plugin::pitchWheelCentre(8191);
 
-/*			Machine* host::CreateFromType(int _id, std::string _dllname)
-			{
-				//\todo;
-				//return new;
-			}
-*/
 			void host::CalcTimeInfo(long lMask)
 			{
 				///\todo: cycleactive and recording to a "Start()" function.
@@ -104,7 +99,7 @@ namespace psycle
 			}
 			void host::Log(std::string message)
 			{
-				loggers::info(message);
+				loggers::information()(message);
 			}
 
 			///\todo: Get information about this function
@@ -151,7 +146,8 @@ namespace psycle
 					}
 				}
 
-				std::memset(junk, 0, STREAM_SIZE * sizeof(float));
+				universalis::os::aligned_memory_alloc(16, junk, STREAM_SIZE);
+				helpers::dsp::Clear(junk, STREAM_SIZE);
 				for(int i(2) ; i < vst::max_io ; ++i)
 				{
 					inputs[i]=junk;
@@ -169,16 +165,8 @@ namespace psycle
 					}
 					else
 					{
-					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-						_pOutSamplesL = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-						_pOutSamplesR = static_cast<float*>(_aligned_malloc(STREAM_SIZE*sizeof(float),16));
-					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-						posix_memalign(reinterpret_cast<void**>(_pSamplesL),16,STREAM_SIZE*sizeof(float));
-						posix_memalign(reinterpret_cast<void**>(_pSamplesR),16,STREAM_SIZE*sizeof(float));
-					#else
-						_pOutSamplesL = new float[STREAM_SIZE];
-						_pOutSamplesR = new float[STREAM_SIZE];
-					#endif
+						universalis::os::aligned_memory_alloc(16, _pOutSamplesL, STREAM_SIZE);
+						universalis::os::aligned_memory_alloc(16, _pOutSamplesR, STREAM_SIZE);
 						helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
 						helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
 						outputs[0] = _pOutSamplesL;
@@ -218,7 +206,7 @@ namespace psycle
 						}
 						// This is a safe measure against some plugins that have noise at its output for some
 						// unexplained reason ( example : mda piano.dd )
-						Work(STREAM_SIZE);
+						GenerateAudioInTicks(0,STREAM_SIZE);
 					}
 					else
 					{
@@ -241,19 +229,11 @@ namespace psycle
 			{
 				if (aEffect)
 				{
+					universalis::os::aligned_memory_dealloc(junk);
 					if (!WillProcessReplace())
 					{
-					#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
-						_aligned_free(_pOutSamplesL);
-						_aligned_free(_pOutSamplesR);
-					#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
-						free(_pOutSamplesL);
-						free(_pOutSamplesR);
-					#else
-
-						delete [] _pOutSamplesL;
-						delete [] _pOutSamplesR;
-					#endif
+						universalis::os::aligned_memory_dealloc(_pOutSamplesL);
+						universalis::os::aligned_memory_dealloc(_pOutSamplesR);
 						_pOutSamplesL = _pOutSamplesR=0;
 					}
 				}
@@ -398,7 +378,7 @@ namespace psycle
 			VstMidiEvent* plugin::reserveVstMidiEvent() {
 				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 				if(queue_size >= MAX_VST_EVENTS) {
-					loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
+					loggers::information()("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
 					return NULL;
 				}
 				return &midievent[queue_size++];
@@ -407,7 +387,7 @@ namespace psycle
 			VstMidiEvent* plugin::reserveVstMidiEventAtFront() {
 				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 				if(queue_size >= MAX_VST_EVENTS) {
-					loggers::info("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
+					loggers::information()("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
 					return NULL;
 				}
 				for(int i=queue_size; i > 0 ; --i) midievent[i] = midievent[i - 1];
@@ -761,15 +741,12 @@ namespace psycle
 				for(int i(0) ; i < MAX_TRACKS ; ++i) AddNoteOff(i);
 			}
 
-			void plugin::Work(int numSamples)
+			int plugin::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
 			{
-				if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
-				else
-				{
+				if(_mode == MACHMODE_GENERATOR){
 					if (!_mute) Standby(false);
 					else Standby(true);
 				}
-				cpu::cycles_type cost = cpu::cycles();
 				if(!_mute)
 				{
 					if (_mode == MACHMODE_GENERATOR || (!Standby() && !Bypass()) || bCanBypass)
@@ -956,8 +933,8 @@ namespace psycle
 						UpdateVuAndStanbyFlag(numSamples);
 					}
 				}
-				_cpuCost += cpu::cycles() - cost;
-				_worked = true;
+				recursive_processed_ = true;
+				return numSamples;
 			}
 
 

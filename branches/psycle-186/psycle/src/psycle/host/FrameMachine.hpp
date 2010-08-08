@@ -1,10 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::CFrameMachine.
 #pragma once
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "Psycle.hpp"
 
+namespace psycle {
+namespace host {
 		class CChildView;
 		class Machine;
 
@@ -78,7 +78,7 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 			afx_msg void OnParametersShowpreset();
 			afx_msg void OnSetFocus(CWnd* pOldWnd);
-			afx_msg void OnTimer(UINT nIDEvent);
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		};
@@ -86,5 +86,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace
+

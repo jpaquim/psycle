@@ -1,26 +1,23 @@
 ///\file
 ///\brief interface file for psycle::host::CMidiLearn.
 #pragma once
-#include <diversalis/compiler.hpp>
+#include "Psycle.hpp"
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 #endif
 
-#include <mmsystem.h> // for HMIDIIN
-#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#include <mmsystem.h> // for HMIDIIN
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#pragma comment(lib, "winmm")
-#endif
+	#endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(pop)
 #endif
 
-#include "resources/resources.hpp"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+namespace psycle { namespace host {
 
 		/// midi learn.
 		class CMidiLearn : public CDialog
@@ -54,5 +51,5 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 		//{{AFX_INSERT_LOCATION}}
 		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+	}   // namespace
+}   // namespace

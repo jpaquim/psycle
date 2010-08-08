@@ -1,14 +1,15 @@
 ///\file
 ///\brief interface file for psycle::host::CMainFrame.
 #pragma once
+#include "Psycle.hpp"
 #include "ChildView.hpp"
-#include "InstrumentEditor.hpp"
-#include "InfoDlg.hpp"
-#include "MidiMonitorDlg.hpp"
 #include "ExListBox.h"
-#include "mfc_namespace.hpp"
-PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
-	PSYCLE__MFC__NAMESPACE__BEGIN(host)
+#include "InfoDlg.hpp"
+#include "InstrumentEditor.hpp"
+#include "MidiMonitorDlg.hpp"
+
+namespace psycle { namespace host {
+
 		class Song;
 		class CWaveEdFrame;
 		class CGearRackDlg;
@@ -119,8 +120,6 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			CBitmap blittleleft;
 			CBitmap blittleright;
 
-//			Gdiplus::GdiplusStartupInput gdiplusStartupInput; // GDI+ stuff
-//			ULONG_PTR gdiplusToken; // GDI+ stuff
 
 		protected:
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -207,5 +206,4 @@ PSYCLE__MFC__NAMESPACE__BEGIN(psycle)
 			DECLARE_MESSAGE_MAP()
 };
 
-	PSYCLE__MFC__NAMESPACE__END
-PSYCLE__MFC__NAMESPACE__END
+}}

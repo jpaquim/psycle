@@ -4,26 +4,20 @@
  *  $Revision: 6303 $
  */
 
-#include <packageneric/pre-compiled.private.hpp>
+
 #include "XMSongExport.hpp"
-//#include "ProgressDialog.hpp"
 #include "Song.hpp"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
-//#include "SongStructs.hpp"
-//#include "configuration_options.hpp"
-//#include "resources/resources.hpp"
-//#include <algorithm>
-//#include <cstring>
 
 namespace psycle{
 namespace host{
 
 
-	XMSongExport::XMSongExport(void)
+	XMSongExport::XMSongExport()
 	{
 	}
 
-	XMSongExport::~XMSongExport(void)
+	XMSongExport::~XMSongExport()
 	{
 
 	}
