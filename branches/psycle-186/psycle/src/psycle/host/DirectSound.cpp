@@ -237,7 +237,7 @@ namespace psycle
 			}
 			_capPorts.push_back(port);
 			if ( _portMapping.size() <= idx) _portMapping.resize(idx+1);
-			_portMapping[idx]=_capPorts.size()-1;
+			_portMapping[idx]=(int)(_capPorts.size()-1);
 			if (isplaying)
 			{
 				return Start();

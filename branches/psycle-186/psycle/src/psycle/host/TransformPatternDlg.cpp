@@ -131,11 +131,8 @@ namespace psycle { namespace host {
 				int currentins;
 				int currentmac;
 
-				unsigned char * toffset;
-
 				int matchCount;
 				PatternEntry* patternEntry;
-				int elementIndex;
 
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{

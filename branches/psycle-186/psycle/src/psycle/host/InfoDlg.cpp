@@ -70,7 +70,7 @@ namespace psycle { namespace host {
 			Song* _pSong = Global::_pSong;
 			if(nIDEvent==1 && !_pSong->_machineLock )
 			{
-				int num_threads_running = Global::pPlayer->num_threads();
+				unsigned long num_threads_running = Global::pPlayer->num_threads();
 				char buffer[128];
 				
 				nanoseconds total_machine_processing_time(0);

@@ -2069,7 +2069,7 @@ namespace psycle { namespace host {
 			hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
 			hNewItemInfo.fType		= MFT_STRING;
 			hNewItemInfo.wID		= ids[0];
-			hNewItemInfo.cch		= fName.length();
+			hNewItemInfo.cch		= (UINT)fName.length();
 			hNewItemInfo.dwTypeData = (LPSTR)fName.c_str();
 			InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
 			// Update identifiers.

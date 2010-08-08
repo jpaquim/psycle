@@ -317,8 +317,8 @@ namespace psycle { namespace host {
 					str.Insert(str.GetLength(),".wav");
 				}
 				m_filename.SetWindowText(str);
-				std::string::size_type index = str.ReverseFind('\\');
-				if (index != std::string::npos)
+				int index = str.ReverseFind('\\');
+				if (index != -1)
 				{
 					str.Truncate(index);
 					Global::pConfig->SetCurrentWaveRecDir(str.GetString());

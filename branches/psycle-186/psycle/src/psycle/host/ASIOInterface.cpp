@@ -212,7 +212,7 @@ namespace psycle
 			asioCallbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfo;
 			//////////////////////////////////////////////////////////////////////////
 			// Create the buffers to play and record.
-			int numbuffers = (1+_selectedins.size())*2;
+			int numbuffers = (int)(1+_selectedins.size())*2;
 			ASIOBufferInfo *info = new ASIOBufferInfo[numbuffers];
 			int counter=0;
 			for (unsigned int i(0); i < _selectedins.size() ; ++i)
@@ -311,7 +311,7 @@ namespace psycle
 				Stop();
 			}
 			_portMapping.resize(_portMapping.size()+1);
-			_portMapping[idx]=_selectedins.size();
+			_portMapping[idx]=(int)_selectedins.size();
 			_selectedins.push_back(port);
 			if (isplaying)
 			{
@@ -368,7 +368,7 @@ namespace psycle
 				{
 					return _drivEnum[i];
 				}
-				counter+=_drivEnum[i]._portout.size();
+				counter+=(int)(_drivEnum[i]._portout.size());
 			}
 			DriverEnum driver;
 			return driver;
@@ -385,7 +385,7 @@ namespace psycle
 					port.port = &_drivEnum[i]._portout[driverID-counter];
 					return port;
 				}
-				counter+=_drivEnum[i]._portout.size();
+				counter+=(int)(_drivEnum[i]._portout.size());
 			}
 			return port;
 		}
@@ -399,7 +399,7 @@ namespace psycle
 					return counter+(port.port->_idx/2);
 
 				}
-				counter+=_drivEnum[i]._portout.size();
+				counter+=(int)(_drivEnum[i]._portout.size());
 			}
 			return 0;
 		}

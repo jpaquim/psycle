@@ -368,7 +368,7 @@ namespace psycle { namespace host {
 			/// value has to be an existing point!
 			void LoopEnd(const unsigned int value){m_LoopEnd = value;}
 
-			const unsigned int NumOfPoints(){ return m_Points.size();}
+			const unsigned int NumOfPoints(){ return (unsigned int)m_Points.size();}
 
 			void Load(RiffFile& riffFile,const std::uint32_t version);
 			void Save(RiffFile& riffFile,const std::uint32_t version);

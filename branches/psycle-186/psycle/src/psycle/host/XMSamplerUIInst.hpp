@@ -61,7 +61,7 @@ public:
 				}
 			}
 
-			return _points; // return == _points -> Point not found.
+			return (int)_points; // return == _points -> Point not found.
 		}
 
 		XMInstrument::Envelope* m_pEnvelope;

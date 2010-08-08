@@ -248,7 +248,7 @@ namespace psycle { namespace host {
 						hNewItemInfo.fMask = MIIM_ID | MIIM_TYPE;
 						hNewItemInfo.fType = MFT_STRING;
 						hNewItemInfo.wID = ids[iCount];
-						hNewItemInfo.cch = std::strlen(nameBuff);
+						hNewItemInfo.cch = (UINT)std::strlen(nameBuff);
 						hNewItemInfo.dwTypeData = nameBuff;
 						::InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
 						cntSize = sizeof cntBuff;

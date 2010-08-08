@@ -170,7 +170,7 @@ namespace host{
 		song.comments.append(szName);
 		delete [] pSongName; pSongName = 0;
 
-		std::int32_t iInstrStart = LoadPatterns(song);
+		size_t iInstrStart = LoadPatterns(song);
 		LoadInstruments(*m_pSampler,iInstrStart);
 
 	}

@@ -2535,8 +2535,8 @@ namespace psycle
 			int temp;
 			// we cannot calculate the size previous to save, so we write a placeholder
 			// and seek back to write the correct value.
-			unsigned int size = 0;
-			unsigned int filepos = riffFile->GetPos();
+			unsigned long size = 0;
+			size_t filepos = riffFile->GetPos();
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Write(VERSION);
 			riffFile->Write(_numVoices); // numSubtracks
@@ -2596,7 +2596,7 @@ namespace psycle
 				}
 			#endif
 			
-			unsigned int endpos = riffFile->GetPos();
+			size_t endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
 			size = endpos - filepos -sizeof(size);
 			riffFile->Write(&size,sizeof(size));
@@ -2609,8 +2609,8 @@ namespace psycle
 			int temp;
 			bool wrongState=false;
 			std::uint32_t filevers;
-			unsigned long filepos;
-			int size=0;
+			size_t filepos;
+			long size=0;
 			riffFile->Read(&size,sizeof(size));
 			filepos=riffFile->GetPos();
 			riffFile->Read(filevers);

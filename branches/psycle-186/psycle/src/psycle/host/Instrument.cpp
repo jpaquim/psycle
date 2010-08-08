@@ -265,7 +265,7 @@ namespace psycle
 							+sizeof(waveTune)
 							+sizeof(waveFinetune)
 							+sizeof(waveStereo)
-							+strlen(waveName)+1
+							+(UINT)strlen(waveName)+1
 							+size1
 							+size2;
 

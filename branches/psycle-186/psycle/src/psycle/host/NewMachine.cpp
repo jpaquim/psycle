@@ -579,7 +579,7 @@ namespace psycle { namespace host {
 				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
 				populate_plugin_list(vstPlugs,Global::pConfig->GetVstDir());
 
-				int plugin_count = nativePlugs.size() + vstPlugs.size();
+				int plugin_count = (int)(nativePlugs.size() + vstPlugs.size());
 
 				{
 					std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
@@ -1164,7 +1164,7 @@ namespace psycle { namespace host {
 				file.Write(&_pPlugsInfo[i]->FileTime,sizeof(_pPlugsInfo[i]->FileTime));
 				{
 					const std::string error(_pPlugsInfo[i]->error);
-					UINT size(error.size());
+					UINT size((UINT)error.size());
 					file.Write(&size, sizeof size);
 					if(size) file.Write(error.data(), size);
 				}

@@ -147,7 +147,7 @@ namespace psycle
 			typedef std::list<universalis::stdlib::thread*> threads_type;
 			threads_type threads_;
 		public:
-			std::size_t num_threads() { if(threads_.empty()){return 1;} return threads_.size(); }
+			unsigned long num_threads() { if(threads_.empty()){return 1;} return (unsigned long)threads_.size(); }
 		private:
 			void thread_function(std::size_t thread_number);
 

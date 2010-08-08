@@ -1228,7 +1228,7 @@ namespace psycle
 				int solo(0);
 				int chunkcount=0;
 				Header[4]=0;
-				long filesize = pFile->FileSize();
+				size_t filesize = pFile->FileSize();
 				pFile->Read(&version,sizeof(version));
 				pFile->Read(&size,sizeof(size));
 				if(version > CURRENT_FILE_VERSION)
@@ -1274,7 +1274,7 @@ namespace psycle
 							comments = comments_;
 							//bugfix. There were songs with incorrect size.
 							if(version == 0) {
-								size= pFile->GetPos() - begins;
+								size= (UINT)(pFile->GetPos() - begins);
 							}
 						}
 						pFile->Seek(begins + size);
@@ -1433,7 +1433,7 @@ namespace psycle
 								if (fullopen) {
 									if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
 										&& ((vst::plugin*)_pMachine[index])->ProgramIsChunk() == false) {
-											size = pFile->GetPos() - begins;
+											size = (UINT)(pFile->GetPos() - begins);
 /*									} else if ((version&0xFF) == 0) {
 										size = (pFile->GetPos() - begins) 
 											 + sizeof(unsigned char) + 2*sizeof(int) + _pMachine[index]->GetNumParams()*sizeof(float);
@@ -1466,7 +1466,7 @@ namespace psycle
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
-						long filepos=pFile->GetPos();
+						size_t filepos=pFile->GetPos();
 						//Version zero was the development version. Version one is the published one.
 						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
 						{
@@ -2424,7 +2424,7 @@ namespace psycle
 
 			pFile->Write("INFO",4);
 			version = CURRENT_FILE_VERSION_INFO;
-			size = name.length() + author.length() + comments.length() + 3; // +3 for \0
+			size = (UINT)(name.length() + author.length() + comments.length() + 3); // +3 for \0
 
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
@@ -2503,7 +2503,7 @@ namespace psycle
 
 				pFile->Write("SEQD",4);
 				version = CURRENT_FILE_VERSION_SEQD;
-				size = ((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1;
+				size = (UINT)(((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1);
 				pFile->Write(&version,sizeof(version));
 				pFile->Write(&size,sizeof(size));
 				
@@ -2555,7 +2555,7 @@ namespace psycle
 					version = CURRENT_FILE_VERSION_PATD;
 
 					pFile->Write(&version,sizeof(version));
-					size = sizez77+(4*sizeof(int))+strlen(patternName[i])+1;
+					size = (UINT)(sizez77+(4*sizeof(int))+strlen(patternName[i])+1);
 					pFile->Write(&size,sizeof(size));
 
 					index = i; // index
@@ -2593,7 +2593,7 @@ namespace psycle
 					pFile->Write("MACD",4);
 					version = CURRENT_FILE_VERSION_MACD;
 					pFile->Write(&version,sizeof(version));
-					long pos = pFile->GetPos();
+					size_t pos = pFile->GetPos();
 					size = 0;
 					pFile->Write(&size,sizeof(size));
 
@@ -2602,8 +2602,8 @@ namespace psycle
 
 					_pMachine[i]->SaveFileChunk(pFile);
 
-					long pos2 = pFile->GetPos(); 
-					size = pos2-pos-sizeof(size);
+					size_t pos2 = pFile->GetPos(); 
+					size = (UINT)(pos2-pos-sizeof(size));
 					pFile->Seek(pos);
 					pFile->Write(&size,sizeof(size));
 					pFile->Seek(pos2);
@@ -2628,7 +2628,7 @@ namespace psycle
 					pFile->Write("INSD",4);
 					version = CURRENT_FILE_VERSION_INSD;
 					pFile->Write(&version,sizeof(version));
-					long pos = pFile->GetPos();
+					size_t pos = pFile->GetPos();
 					size = 0;
 					pFile->Write(&size,sizeof(size));
 
@@ -2637,8 +2637,8 @@ namespace psycle
 
 					_pInstrument[i]->SaveFileChunk(pFile);
 
-					long pos2 = pFile->GetPos(); 
-					size = pos2-pos-sizeof(size);
+					size_t pos2 = pFile->GetPos(); 
+					size = (UINT)(pos2-pos-sizeof(size));
 					pFile->Seek(pos);
 					pFile->Write(&size,sizeof(size));
 					pFile->Seek(pos2);
@@ -2664,7 +2664,7 @@ namespace psycle
 				pFile->Write("EINS",4);
 				version = XMSampler::VERSION;
 				pFile->Write(&version,sizeof(version));
-				long pos = pFile->GetPos();
+				size_t pos = pFile->GetPos();
 				size = 0;
 				pFile->Write(&size,sizeof(size));
 
@@ -2693,8 +2693,8 @@ namespace psycle
 						XMSampler::SampleData(i).Save(*pFile);
 					}
 				}
-				long pos2 = pFile->GetPos(); 
-				size = pos2-pos-sizeof(size);
+				size_t pos2 = pFile->GetPos(); 
+				size = (UINT)(pos2-pos-sizeof(size));
 				pFile->Seek(pos);
 				pFile->Write(&size,sizeof(size));
 				pFile->Seek(pos2);
@@ -2781,7 +2781,7 @@ namespace psycle
 			file.Write("MACD",4);
 			UINT version = CURRENT_FILE_VERSION_MACD;
 			file.Write(&version,sizeof(version));
-			long pos = file.GetPos();
+			size_t pos = file.GetPos();
 			UINT size = 0;
 			file.Write(&size,sizeof(size));
 
@@ -2790,8 +2790,8 @@ namespace psycle
 
 			_pMachine[src]->SaveFileChunk(&file);
 
-			long pos2 = file.GetPos(); 
-			size = pos2-pos-sizeof(size);
+			size_t pos2 = file.GetPos(); 
+			size = (UINT)(pos2-pos-sizeof(size));
 			file.Seek(pos);
 			file.Write(&size,sizeof(size));
 			file.Close();
@@ -2971,7 +2971,7 @@ namespace psycle
 			file.Write("INSD",4);
 			UINT version = CURRENT_FILE_VERSION_INSD;
 			file.Write(&version,sizeof(version));
-			long pos = file.GetPos();
+			size_t pos = file.GetPos();
 			UINT size = 0;
 			file.Write(&size,sizeof(size));
 
@@ -2980,8 +2980,8 @@ namespace psycle
 
 			_pInstrument[src]->SaveFileChunk(&file);
 
-			long pos2 = file.GetPos(); 
-			size = pos2-pos-sizeof(size);
+			size_t pos2 = file.GetPos(); 
+			size = (UINT)(pos2-pos-sizeof(size));
 			file.Seek(pos);
 			file.Write(&size,sizeof(size));
 

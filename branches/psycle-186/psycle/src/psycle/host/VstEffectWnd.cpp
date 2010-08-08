@@ -522,7 +522,7 @@ namespace psycle { namespace host {
 						char string[_MAX_PATH], directory[_MAX_PATH];
 						string[0] = '\0'; directory[0] = '\0';
 						char *previous = ofn.lpstrFile;
-						long len;
+						unsigned long len;
 						bool dirFound = false;
 						ptr->returnMultiplePaths = new char*[_MAX_PATH];
 						long i = 0;
@@ -532,7 +532,7 @@ namespace psycle { namespace host {
 							{
 								dirFound = true;
 								strcpy (directory, previous);
-								len = strlen (previous) + 1;  // including 0
+								len = (unsigned long)strlen (previous) + 1;  // including 0
 								previous += len;
 
 								if (*previous == 0)
@@ -549,7 +549,7 @@ namespace psycle { namespace host {
 							else 
 							{
 								sprintf (string, "%s%s", directory, previous);
-								len = strlen (previous) + 1;  // including 0
+								len = (unsigned long)strlen (previous) + 1;  // including 0
 								previous += len;
 
 								ptr->returnMultiplePaths[i] = new char [strlen (string) + 1];
@@ -563,7 +563,7 @@ namespace psycle { namespace host {
 					{
 						ptr->reserved = 1;
 						ptr->returnPath = filePath;
-						ptr->sizeReturnPath = strlen(filePath);
+						ptr->sizeReturnPath = (VstInt32)strlen(filePath);
 						ptr->nbReturnPath = 1;
 					}
 					else 

@@ -517,7 +517,7 @@ namespace psycle
 
 			int i;
 			int size = 0;
-			int filepos = riffFile.GetPos();
+			size_t filepos = riffFile.GetPos();
 
 			riffFile.Write("INST",4);
 			riffFile.Write(size);
@@ -563,9 +563,9 @@ namespace psycle
 			m_PanEnvelope.Save(riffFile,version);
 			m_FilterEnvelope.Save(riffFile,version);
 			m_PitchEnvelope.Save(riffFile,version);
-			int endpos = riffFile.GetPos();
+			size_t endpos = riffFile.GetPos();
 			riffFile.Seek(filepos+4);
-			riffFile.Write(endpos-filepos);
+			riffFile.Write((unsigned int)(endpos-filepos));
 			riffFile.Seek(endpos);
 		}
 
