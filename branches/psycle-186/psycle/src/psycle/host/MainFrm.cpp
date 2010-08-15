@@ -25,7 +25,6 @@
 #include "VstHost24.hpp"
 #include "XMSampler.hpp"
 
-#include <psycle/helpers/math/lrint.hpp>
 #include <cmath>
 #include <sstream>
 #include <iomanip>
@@ -715,8 +714,8 @@ namespace psycle { namespace host {
 				CClientDC canvasl(lv);
 //				CClientDC canvasr(rv);
 
-				int log_l=helpers::math::lrint<int, float>(100*log10f(l));
-				int log_r=helpers::math::lrint<int, float>(100*log10f(r));
+				int log_l=100*log10f(l);
+				int log_r=100*log10f(r);
 				log_l=log_l-225;
 				if ( log_l < 0 )log_l=0;
 				log_r=log_r-225;
@@ -1248,7 +1247,7 @@ namespace psycle { namespace host {
 				}
 				//end of added by sampler
 
-				CSingleLock lock(&_pSong->door,TRUE);
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 
 				CString CurrExt=dlg.GetFileExt();
 				CurrExt.MakeLower();
@@ -1282,21 +1281,12 @@ namespace psycle { namespace host {
 			}
 			if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
 			{
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				// Stopping wavepreview if not stopped.
 				_pSong->wavprev.Stop();
-	/*			if(_pSong->PW_Stage)
-				{
-					_pSong->PW_Stage=0;
-					_pSong->IsInvalided(true);
-					Sleep(LOCK_LATENCY);
-				}
-	*/
-
 				//Delete it.
 				_pSong->DeleteLayer(PREV_WAV_INS);
-				_pSong->IsInvalided(false);
 			}
-
 
 			m_wndView.SetFocus();
 		}
@@ -2169,7 +2159,7 @@ namespace psycle { namespace host {
 			{
 				m_wndView.AddUndoSong(m_wndView.editcur.track,m_wndView.editcur.line,m_wndView.editcur.col,m_wndView.editPosition);
 				{
-					CSingleLock lock(&_pSong->door,TRUE);
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					// clear sequence
 					for(int c=0;c<MAX_SONG_POSITIONS;c++)
 					{
@@ -2475,7 +2465,7 @@ namespace psycle { namespace host {
 				}
 			}
 			
-			sprintf(buffer, "%02d:%02d", helpers::math::lrint<int, float>(songLength / 60), helpers::math::lrint<int, float>(songLength) % 60);
+			sprintf(buffer, "%02d:%02d", ((int)songLength) / 60, ((int)songLength) % 60);
 			pLength->SetWindowText(buffer);
 			
 			// Update sequencer line
@@ -2564,7 +2554,7 @@ namespace psycle { namespace host {
 			if (Global::pPlayer->_playing)
 			{
 				CString str;
-				str.Format( "%.2u:%.2u:%.2u.%.2u", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, helpers::math::lrint<int, float>(Global::pPlayer->_playTime), helpers::math::lrint<int, float>(Global::pPlayer->_playTime*100)-(helpers::math::lrint<int, float>(Global::pPlayer->_playTime)*100)); 
+				str.Format( "%.2u:%.2u:%.2f", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, Global::pPlayer->_playTime);
 				pCmdUI->SetText(str); 
 			}
 		}

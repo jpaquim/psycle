@@ -45,6 +45,7 @@ namespace psycle
 			virtual void Configure(void) {};
 			virtual bool Initialized(void) { return true; }
 			virtual bool Configured(void) { return true; }
+			virtual void RefreshAvailablePorts() {}
 			virtual AudioDriverInfo* GetInfo() { return &_info; }
 			static void QuantizeWithDither(float *pin, int *piout, int c);
 			static void Quantize(float *pin, int *piout, int c);

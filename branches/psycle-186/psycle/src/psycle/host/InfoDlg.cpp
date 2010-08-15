@@ -147,9 +147,13 @@ namespace psycle { namespace host {
 				
 				sprintf(buffer,"%.0fM (of %.0fM)", (lpBuffer.ullAvailPageFile/(float)(1<<19)) , (lpBuffer.ullTotalPageFile/(float)(1<<19)));
 				m_mem_pagefile.SetWindowText(buffer);
-				
+		#if defined _WIN64
+				sprintf(buffer,"%.0fG (of %.0fG)",(lpBuffer.ullAvailVirtual/(float)(1<<29)), (lpBuffer.ullTotalVirtual/(float)(1<<29)));
+				m_mem_virtual.SetWindowText(buffer);
+		#elif defined _WIN32
 				sprintf(buffer,"%.0fM (of %.0fM)",(lpBuffer.ullAvailVirtual/(float)(1<<19)), (lpBuffer.ullTotalVirtual/(float)(1<<19)));
 				m_mem_virtual.SetWindowText(buffer);
+		#endif
 			}
 		}
 

@@ -41,7 +41,7 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 				Sleep(LOCK_LATENCY);
 			}
 		*/	
-			CSingleLock lock(&_pSong->door,TRUE);
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			if (CurrExt=="wav" && _lastFile != GetPathName())
 			{
 				_lastFile=GetPathName();

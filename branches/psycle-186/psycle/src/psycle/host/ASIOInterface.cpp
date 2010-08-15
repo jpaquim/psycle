@@ -20,7 +20,7 @@ namespace psycle
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 		#define ALLOW_NON_ASIO
 
-		AudioDriverInfo ASIOInterface::_info = { "ASIO 2.0 Output" };
+		AudioDriverInfo ASIOInterface::_info = { "ASIO 2.2 Output" };
 		CCriticalSection ASIOInterface::_lock;
 		int ASIOInterface::_ASIObufferSize(1024);
 		ASIOInterface::AsioStereoBuffer *ASIOInterface::ASIObuffers(0);
@@ -565,15 +565,6 @@ namespace psycle
 			}
 		}
 
-		// <bohan> This looks like code copied as is from steinberg's asio sdk
-		// conversion from 64 bit ASIOSample/ASIOTimeStamp to double float
-		#if NATIVE_INT64
-			#define ASIO64toDouble(a)  (a)
-		#else
-			const double twoRaisedTo32 = 4294967296.;
-			#define ASIO64toDouble(a)  ((a).lo + (a).hi * twoRaisedTo32)
-		#endif
-
 		#define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) ;   
 		#define SwapShort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8)) ;        
 
@@ -581,7 +572,7 @@ namespace psycle
 		{
 			// the actual processing callback.
 			// Beware that this is normally in a seperate thread, hence be sure that you take care
-			// about thread synchronization. This is omitted here for simplicity.
+			// about thread synchronization.
 			if(_firstrun)
 			{
 				universalis::cpu::exceptions::install_handler_in_thread();
@@ -844,19 +835,17 @@ namespace psycle
 			//////////////////////////////////////////////////////////////////////////
 			// Outputs
 			float *pBuf = _pCallback(_pCallbackContext, _ASIObufferSize);
-			int i;
 			switch (_selectedout.port->_info.type)
 			{
 			case ASIOSTInt16LSB:
 				{
-					WORD* outl;
-					WORD* outr;
-					outl = (WORD*)ASIObuffers[counter].pleft[index];
-					outr = (WORD*)ASIObuffers[counter].pright[index];
-					for(i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = f2iclip16(*pBuf++);
-						*outr++ = f2iclip16(*pBuf++);
+				int16_t* outl;
+				int16_t* outr;
+				outl = (int16_t*)ASIObuffers[counter].pleft[index];
+				outr = (int16_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = clipped_lrint<int16_t>(*pBuf++);
+					*outr++ = clipped_lrint<int16_t>(*pBuf++);
 					}
 				}
 				break;
@@ -868,14 +857,13 @@ namespace psycle
 					outr = (char*)ASIObuffers[counter].pright[index];
 					int t;
 					char* pt = (char*)&t;
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						t = f2iclip24((*pBuf++)*256.0f);
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
 						*outl++ = pt[0];
 						*outl++ = pt[1];
 						*outl++ = pt[2];
 
-						t = f2iclip24((*pBuf++)*256.0f);
+					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
 						*outr++ = pt[0];
 						*outr++ = pt[1];
 						*outr++ = pt[2];
@@ -885,14 +873,18 @@ namespace psycle
 				break;
 			case ASIOSTInt32LSB:
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = f2iclip32((*pBuf++)*65536.0f);
-						*outr++ = f2iclip32((*pBuf++)*65536.0f);
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					// Don't really know why, but the -100 is what made the clipping work correctly.
+					int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
+					int const min(-max - 1);
+					*outl++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
+					*outr++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
+					//*outl++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
+					//*outr++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
 					}
 				}
 				break;
@@ -902,10 +894,9 @@ namespace psycle
 					float* outr;
 					outl = (float*)ASIObuffers[counter].pleft[index];
 					outr = (float*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = ((*pBuf++)/32768.0f);
-						*outr++ = ((*pBuf++)/32768.0f);
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = (*pBuf++) / 32768.0f;
+					*outr++ = (*pBuf++) / 32768.0f;
 					}
 				}
 				break;
@@ -915,77 +906,71 @@ namespace psycle
 					double* outr;
 					outl = (double*)ASIObuffers[counter].pleft[index];
 					outr = (double*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = ((*pBuf++)/32768.0);
-						*outr++ = ((*pBuf++)/32768.0);
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = (*pBuf++) / 32768.0;
+					*outr++ = (*pBuf++) / 32768.0;
 					}
 				}
 				break;
 				// these are used for 32 bit data buffer, with different alignment of the data inside
 				// 32 bit PCI bus systems can more easily used with these
-			case ASIOSTInt32LSB16:		// 32 bit data with 18 bit alignment
+		case ASIOSTInt32LSB16: // 32 bit data with 16 bit alignment
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = f2iclip16(*pBuf++);
-						*outr++ = f2iclip16(*pBuf++);
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = clipped_lrint<int32_t, 16>(*pBuf++);
+					*outr++ = clipped_lrint<int32_t, 16>(*pBuf++);
 					}
 				}
 				break;
 			case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = f2iclip18((*pBuf++)*4.0f);
-						*outr++ = f2iclip18((*pBuf++)*4.0f);
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
+					*outr++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
 					}
 				}
 				break;
 			case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = f2iclip20((*pBuf++)*16.0f);
-						*outr++ = f2iclip20((*pBuf++)*16.0f);
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
+					*outr++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
 					}
 				}
 				break;
 			case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = f2iclip24((*pBuf++)*256.0f);
-						*outr++ = f2iclip24((*pBuf++)*256.0f);
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
+					*outr++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
 					}
 				}
 				break;
 			case ASIOSTInt16MSB:
 				{
-					WORD* outl;
-					WORD* outr;
-					outl = (WORD*)ASIObuffers[counter].pleft[index];
-					outr = (WORD*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = SwapShort(f2iclip16(*pBuf++));
-						*outr++ = SwapShort(f2iclip16(*pBuf++));
+				int16_t* outl;
+				int16_t* outr;
+				outl = (int16_t*)ASIObuffers[counter].pleft[index];
+				outr = (int16_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; i++) {
+					*outl++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
+					*outr++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
 					}
 				}
 				break;
@@ -997,14 +982,13 @@ namespace psycle
 					outr = (char*)ASIObuffers[counter].pright[index];
 					int t;
 					char* pt = (char*)&t;
-					for(i = 0; i < _ASIObufferSize; i++)
-					{
-						t = f2iclip24((*pBuf++)*256.0f);
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
 						*outl++ = pt[2];
 						*outl++ = pt[1];
 						*outl++ = pt[0];
 
-						t = f2iclip24((*pBuf++)*256.0f);
+					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
 						*outr++ = pt[2];
 						*outr++ = pt[1];
 						*outr++ = pt[0];
@@ -1013,66 +997,61 @@ namespace psycle
 				break;
 			case ASIOSTInt32MSB:
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for(i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = SwapLong(f2iclip32((*pBuf++)*65536.0f));
-						*outr++ = SwapLong(f2iclip32((*pBuf++)*65536.0f));
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
+					*outr++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
 					}
 				}
 				break;
 			case ASIOSTInt32MSB16:		// 32 bit data with 18 bit alignment
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = SwapLong(f2iclip16(*pBuf++));
-						*outr++ = SwapLong(f2iclip16(*pBuf++));
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
+					*outr++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
 					}
 				}
 				break;
 			case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for(i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = SwapLong(f2iclip18((*pBuf++)*4.0f));
-						*outr++ = SwapLong(f2iclip18((*pBuf++)*4.0f));
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
+					*outr++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
 					}
 				}
 				break;
 			case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for (i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = SwapLong(f2iclip20((*pBuf++)*16.0f));
-						*outr++ = SwapLong(f2iclip20((*pBuf++)*16.0f));
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
+					*outr++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
 					}
 				}
 				break;
 			case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
 				{
-					DWORD* outl;
-					DWORD* outr;
-					outl = (DWORD*)ASIObuffers[counter].pleft[index];
-					outr = (DWORD*)ASIObuffers[counter].pright[index];
-					for(i = 0; i < _ASIObufferSize; i++)
-					{
-						*outl++ = SwapLong(f2iclip24((*pBuf++)*256.0f));
-						*outr++ = SwapLong(f2iclip24((*pBuf++)*256.0f));
+				int32_t* outl;
+				int32_t* outr;
+				outl = (int32_t*)ASIObuffers[counter].pleft[index];
+				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSize; ++i) {
+					*outl++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
+					*outr++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
 					}
 				}
 				break;

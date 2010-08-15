@@ -7,7 +7,7 @@
 #include <psycle/helpers/math/lround.hpp>
 #include <cstring>
 /*
-*<@JosepMa> the so-called seib host (which is mine, but based on his), is composed of two classes:
+*<@JosepMa> Psycle's seib-VstHost is a reimplementation of HermannSeib's vsthost composed of two classes:
 *<@JosepMa> CVstHost and CEffect.
 *<@JosepMa> the former maps all the AudioMaster calls, provides a way to create CEffects, and helps
 *           in getting time/position information.
@@ -105,6 +105,7 @@ namespace psycle
 					_nCols=0;
 					_pOutSamplesL = 0;
 					_pOutSamplesR = 0;
+					junk = 0;
 					_type=MACH_VST;
 				}
 				virtual ~plugin();

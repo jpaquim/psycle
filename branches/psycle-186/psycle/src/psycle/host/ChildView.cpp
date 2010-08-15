@@ -310,10 +310,8 @@ namespace psycle { namespace host {
 		{
 			if (nIDEvent == 31)
 			{
-				///\todo : IMPORTANT! change this lock to a more flexible one
-				// It is causing skips on sound when there is a pattern change because
-				// it is not allowing the player to work. Do the same in the one inside Player::Work()
-				CSingleLock lock(&_pSong->door,TRUE);
+				CSingleLock lock(&Global::_pSong->semaphore, FALSE);
+				if (!lock.Lock(50)) return;
 				Master* master = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX]);
 				if (master)
 				{
@@ -3577,7 +3575,7 @@ namespace psycle { namespace host {
 			{
 				pParentMain->CloseMacGui(propMac);
 				{
-					CSingleLock lock(&Global::_pSong->door,TRUE);
+					CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 					Global::_pSong->DestroyMachine(propMac);
 				}
 				pParentMain->UpdateEnvInfo();

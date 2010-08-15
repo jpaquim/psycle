@@ -102,7 +102,7 @@ namespace psycle
 		}
 		bool ITModule2::LoadITModule(Song *song)
 		{
-			CSingleLock lock(&song->door,TRUE);
+			CExclusiveLock lock(&song->semaphore, 2, true);
 			s=song;
 			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
@@ -1128,7 +1128,7 @@ Special:  Bit 0: On = song message attached.
 
 		bool ITModule2::LoadS3MModuleX(Song *song)
 		{
-			CSingleLock lock(&song->door,TRUE);
+			CExclusiveLock lock(&song->semaphore, 2, true);
 			s=song;
 			if (Read(&s3mFileH,sizeof(s3mFileH))==0 ) return 0;
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;

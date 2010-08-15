@@ -5,6 +5,7 @@
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
+#include "ExclusiveLock.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "InstPreview.hpp"
@@ -36,7 +37,6 @@ namespace psycle
 			/// the comments on the song
 			std::string comments;
 			unsigned _sampCount;
-			bool Invalided;
 			/// the initial beats per minute (BPM) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
 			int m_BeatsPerMin;
@@ -99,8 +99,10 @@ namespace psycle
 			/// ???
 			int IffAlloc(int instrument,const char * str);
 			///\}
-			/// Initializes the song to an empty one.
+			/// Initializes the song to an empty one. (thread safe)
 			void New();
+			/// Initializes the song to an empty one. (non thread safe)
+			void DoNew();
 			/// Resets some variables to their default values (used inside New(); )
 			void Reset();
 			/// Gets the first free slot in the pMachine[] Array
@@ -115,7 +117,8 @@ namespace psycle
 			void DestroyMachine(int mac, bool write_locked = false);
 			/// destroys all the machines of this song.
 			void DestroyAllMachines(bool write_locked = false);
-
+			/// Tells all the samplers of this song, that if they play this sample, stop playing it. (I know this isn't exactly a thing to do for a Song Class)
+			void StopInstrument(int instrumentIdx);
 			// the highest index of the instruments used
 			int GetHighestInstrumentIndex();
 			// the highest index of the patterns used
@@ -237,8 +240,6 @@ namespace psycle
 				else m_LinesPerBeat = value;
 			}
 
-			const bool IsInvalided(){return Invalided;}
-			void IsInvalided(const bool value){Invalided = value;}
 			/// The file name this song was loaded from.
 			std::string fileName;
 			/// The index of the machine which plays in solo.
@@ -250,7 +251,7 @@ namespace psycle
 			/// The index of the track which plays in solo.
 			int _trackSoloed;
 
-			CCriticalSection mutable door;
+			CSemaphore mutable semaphore;
 
 			universalis::stdlib::nanoseconds accumulated_processing_time_, accumulated_routing_time_;
 

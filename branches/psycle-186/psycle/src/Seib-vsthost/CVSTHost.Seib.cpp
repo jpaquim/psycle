@@ -30,16 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "EffectWnd.hpp"
 
-#if !(defined _WIN64 || defined _WIN32)
-	#error unimplemented
-#endif
-
 #if defined _WIN64 || defined _WIN32
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#include <MMSystem.h>
 	#pragma warning(pop)
-
+#else
+	#error unimplemented
 #endif
 
 namespace seib {
@@ -1255,6 +1252,8 @@ namespace seib {
 			loadingEffect = false;
 			loadingShellId = 0;
 			isShell = false;
+			useJBridge = false;
+			usePsycleVstBridge = false;
 			pHost = this;                           /* install this instance as the one  */
 		}
 
@@ -1275,33 +1274,57 @@ namespace seib {
 		CEffect* CVSTHost::LoadPlugin(const char * sName,VstInt32 shellIdx)
 		{
 			PluginLoader* loader = new PluginLoader;
-			if (!loader->loadLibrary(sName))
+			AEffect* effect(0);
+			if (loader->loadLibrary(sName))
 			{
+				PluginEntryProc mainEntry = loader->getMainEntry ();
+				if(!mainEntry)
+				{
+					delete loader;
+					std::ostringstream s; s
+						<< "couldn't locate the main entry to VST: " << sName << std::endl;
+						throw psycle::host::exceptions::library_errors::symbol_resolving_error(s.str());
+				}
+
+				loadingEffect = true;
+				loadingShellId = shellIdx;
+				isShell = false;
+				CEffect crashtest(0);
+				try
+				{
+					effect = mainEntry (AudioMasterCallback);
+				}PSYCLE__HOST__CATCH_ALL(crashtest.crashclass);
+			}
+			else if (useJBridge && loader->loadJBridgeLibrary(sName))
+			{
+				PFNBRIDGEMAIN pfnBridgeMain = loader->getJBridgeMainEntry ();
+				if(!pfnBridgeMain)
+				{
+					delete loader;
+					std::ostringstream s; s
+						<< "couldn't locate JBridge Main entry! " << std::endl;
+						throw psycle::host::exceptions::library_errors::symbol_resolving_error(s.str());
+				}
+				loadingEffect = true;
+				loadingShellId = shellIdx;
+				isShell = false;
+				CEffect crashtest(0);
+				try
+				{
+					effect = pfnBridgeMain( AudioMasterCallback, const_cast<char*>(sName) );
+				}PSYCLE__HOST__CATCH_ALL(crashtest.crashclass);
+			}
+			else if (usePsycleVstBridge && loader->loadPsycleBridgeLibrary(sName))
+			{
+				//todo.
+			}
+			else {
 				delete loader;
 				std::ostringstream s; s
 					<< "Couldn't open the library: " << sName << std::endl;
 				throw psycle::host::exceptions::library_errors::loading_error(s.str());
+
 			}
-
-			PluginEntryProc mainEntry = loader->getMainEntry ();
-			if(!mainEntry)
-			{
-				delete loader;
-				std::ostringstream s; s
-					<< "couldn't locate the main entry to VST: " << sName << std::endl;
-					throw psycle::host::exceptions::library_errors::symbol_resolving_error(s.str());
-			}
-
-			loadingEffect = true;
-			loadingShellId = shellIdx;
-			isShell = false;
-			AEffect* effect(0);
-			CEffect crashtest(0);
-			try
-			{
-				effect = mainEntry (AudioMasterCallback);
-			}PSYCLE__HOST__CATCH_ALL(crashtest.crashclass);
-
 			if (effect && (effect->magic != kEffectMagic))
 			{
 				delete effect;

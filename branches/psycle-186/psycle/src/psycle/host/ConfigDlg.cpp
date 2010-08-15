@@ -122,7 +122,10 @@ namespace psycle { namespace host {
 			if(!pConfig->GetInstrumentDir().empty()) _dirDlg._instPathBuf   = pConfig->GetInstrumentDir();
 			if(!pConfig->GetSongDir()      .empty()) _dirDlg._songPathBuf   = pConfig->GetSongDir();
 			if(!pConfig->GetPluginDir()    .empty()) _dirDlg._pluginPathBuf = pConfig->GetPluginDir();
-			if(!pConfig->GetVstDir()       .empty()) _dirDlg._vstPathBuf    = pConfig->GetVstDir();
+			if(!pConfig->GetVst32Dir()     .empty()) _dirDlg._vstPath32Buf  = pConfig->GetVst32Dir();
+			if(!pConfig->GetVst64Dir()     .empty()) _dirDlg._vstPath64Buf  = pConfig->GetVst64Dir();
+			_dirDlg._isJbridged = pConfig->UseJBridge();
+			_dirDlg._isPsycleBridged = pConfig->UsePsycleVstBridge();
 			if(!pConfig->GetWaveRecDir()   .empty()) _dirDlg._waveRecPathBuf= pConfig->GetWaveRecDir();
 			if(!pConfig->GetSkinDir()      .empty())
 			{
@@ -279,7 +282,11 @@ namespace psycle { namespace host {
 				if (_dirDlg._instPathChanged) _pConfig->SetInstrumentDir(_dirDlg._instPathBuf);
 				if (_dirDlg._songPathChanged) _pConfig->SetSongDir(_dirDlg._songPathBuf);
 				if (_dirDlg._pluginPathChanged) _pConfig->SetPluginDir(_dirDlg._pluginPathBuf);
-				if (_dirDlg._vstPathChanged) _pConfig->SetVstDir(_dirDlg._vstPathBuf);
+				if (_dirDlg._vstPath32Changed) _pConfig->SetVst32Dir(_dirDlg._vstPath32Buf);
+				if (_dirDlg._vstPath64Changed) _pConfig->SetVst64Dir(_dirDlg._vstPath64Buf);
+				_pConfig->UseJBridge(_dirDlg._isJbridged);
+				_pConfig->UsePsycleVstBridge(_dirDlg._isPsycleBridged);
+
 				if (_dirDlg._skinPathChanged) _pConfig->SetSkinDir(_dirDlg._skinPathBuf);
 				if (_dirDlg._waveRecPathChanged) _pConfig->SetWaveRecDir(_dirDlg._waveRecPathBuf);
 

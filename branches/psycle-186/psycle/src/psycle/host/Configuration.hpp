@@ -309,10 +309,18 @@ namespace psycle
 			std::string plugin_dir_;
 
 		public:
-			std::string const & GetVstDir              () const throw() { return vst_dir_; }
-			               void SetVstDir              (std::string const &);
+			std::string const & GetVst32Dir              () const throw() { return vst32_dir_; }
+			               void SetVst32Dir              (std::string const &);
+			std::string const & GetVst64Dir              () const throw() { return vst64_dir_; }
+			               void SetVst64Dir              (std::string const &);
 		private:
-			std::string vst_dir_;
+			std::string vst32_dir_;
+			std::string vst64_dir_;
+		public:
+			void UseJBridge(bool use);
+			bool UseJBridge() const;
+			void UsePsycleVstBridge(bool use);
+			bool UsePsycleVstBridge() const;
 
 		public:
 			std::string const & GetWaveRecDir              () const throw() { return wave_rec_dir_; }

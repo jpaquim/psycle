@@ -804,9 +804,8 @@ namespace psycle { namespace host {
 				if ( nFlags & MK_CONTROL )
 				{
 					pParent->m_wndView.AddMacViewUndo();
-					_pSong->IsInvalided(true);
-					///\todo lock/unlock
-					Sleep(256);
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					_pSong->StopInstrument(wsInstrument);
 
 					CRect rect;
 					GetClientRect(&rect);
@@ -822,7 +821,6 @@ namespace psycle { namespace host {
 						wdLoop=true;
 						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
-					_pSong->IsInvalided(false);
 					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 					InvalidateRect(&rect, false);
@@ -850,9 +848,9 @@ namespace psycle { namespace host {
 				if ( nFlags & MK_CONTROL )
 				{
 					pParent->m_wndView.AddMacViewUndo();
-					_pSong->IsInvalided(true);
-					///\todo lock/unlock
-					Sleep(256);
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					_pSong->StopInstrument(wsInstrument);
+
 
 					CRect rect;
 					GetClientRect(&rect);
@@ -869,7 +867,6 @@ namespace psycle { namespace host {
 						wdLoop=true;
 						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
-					_pSong->IsInvalided(false);
 					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 					InvalidateRect(&rect, false);
@@ -979,9 +976,6 @@ namespace psycle { namespace host {
 					{
 						if(newpos > wdLoopE)		wdLoopS = wdLoopE;
 						else						wdLoopS = newpos;
-						_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-						_pSong->IsInvalided(false);
-						pParent->m_wndInst.WaveUpdate();
 
 						//set invalid rects
 						float sampWidth = nWidth/(float)diLength+20;
@@ -996,9 +990,6 @@ namespace psycle { namespace host {
 						if(newpos >= wdLength)		wdLoopE = wdLength-1;
 						else if(newpos >= wdLoopS)	wdLoopE = newpos;
 						else						wdLoopE = wdLoopS;
-						_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-						_pSong->IsInvalided(false);
-						pParent->m_wndInst.WaveUpdate();
 
 						//set invalid rects
 						float sampWidth = nWidth/(float)diLength + 20;
@@ -1118,6 +1109,11 @@ namespace psycle { namespace host {
 				cursorPos = FindNearestZero(cursorPos);
 			}
 			ReleaseCapture();
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			_pSong->StopInstrument(wsInstrument);
+			_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+			_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+			pParent->m_wndInst.WaveUpdate();
 			bDragLoopEnd = bDragLoopStart = false;
 			CRect rect;
 			GetClientRect(&rect);
@@ -1138,6 +1134,7 @@ namespace psycle { namespace host {
 			unsigned long length = (blSelection? blLength+1: wdLength);
 			if(wdWave)
 			{
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				pParent->m_wndView.AddMacViewUndo();
 
 				Fade(wdLeft+startPoint, length, 0, 1.0f);
@@ -1146,7 +1143,6 @@ namespace psycle { namespace host {
 
 				RefreshDisplayData(true);
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -1157,6 +1153,7 @@ namespace psycle { namespace host {
 			unsigned long length = (blSelection? blLength+1: wdLength);
 			if(wdWave)
 			{
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				pParent->m_wndView.AddMacViewUndo();
 
 				Fade(wdLeft+startPoint, length, 1.0f, 0);
@@ -1165,7 +1162,6 @@ namespace psycle { namespace host {
 
 				RefreshDisplayData(true);
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -1181,10 +1177,7 @@ namespace psycle { namespace host {
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->IsInvalided(true);
-				///\todo lock/unlock
-				Sleep(256);
-
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				for (c = startPoint ; c < startPoint+length ; c++)
 				{
 
@@ -1227,7 +1220,6 @@ namespace psycle { namespace host {
 
 				RefreshDisplayData(true);
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -1243,10 +1235,7 @@ namespace psycle { namespace host {
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->IsInvalided(true);
-				///\todo lock/unlock
-				Sleep(256);
-
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				for (c=startPoint; c<startPoint+length; c++)
 				{
 					meanL = meanL + ( (double) *(wdLeft+c) / wdLength);
@@ -1293,7 +1282,6 @@ namespace psycle { namespace host {
 						}
 					}
 				}
-				_pSong->IsInvalided(false);
 				RefreshDisplayData(true);
 				Invalidate(true);
 			}
@@ -1313,16 +1301,13 @@ namespace psycle { namespace host {
 				pos = AmpDialog.DoModal();
 				if (pos != AMP_DIALOG_CANCEL)
 				{
-					_pSong->IsInvalided(true);
-					///\todo lock/unlock
-					Sleep(256);
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					ratio = pow(10.0, (double) pos / (double) 2000.0);
 
 					Amplify(wdLeft+startPoint, length, ratio);
 					if (wdStereo)
 						Amplify(wdRight+startPoint, length, ratio);
 
-					_pSong->IsInvalided(false);
 					RefreshDisplayData(true);
 					Invalidate(true);
 				}
@@ -1340,10 +1325,7 @@ namespace psycle { namespace host {
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->IsInvalided(true);
-				///\todo lock/unlock
-				Sleep(256);
-
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				//halved = (int) floor(length/2.0);	
 				//<dw> if length is odd (even number of samples), middle two samples aren't flipped:
 				halved = (int) ceil(length/2.0f - .1);
@@ -1364,7 +1346,6 @@ namespace psycle { namespace host {
 				}
 				RefreshDisplayData(true);
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -1372,6 +1353,7 @@ namespace psycle { namespace host {
 		{
 			if(SilenceDlg.DoModal()!=IDCANCEL)
 			{
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				unsigned long timeInSamps = Global::configuration().GetSamplesPerSec() * SilenceDlg.timeInSecs;
 				if(!wdWave)
 				{
@@ -1431,7 +1413,6 @@ namespace psycle { namespace host {
 							wdLoopE += timeInSamps;
 							_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
 						}
-						_pSong->IsInvalided(false);
 						pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					}
 				}
@@ -1440,7 +1421,6 @@ namespace psycle { namespace host {
 				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				RefreshDisplayData(true);
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 
 			}
 		}
@@ -1451,10 +1431,7 @@ namespace psycle { namespace host {
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->IsInvalided(true);
-				///\todo lock/unlock
-				Sleep(256);
-
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				//SetUndo(4, wdLeft, wdRight, wdLength); 
 				for (unsigned int c = 0; c < wdLength; c++)
 				{
@@ -1466,7 +1443,6 @@ namespace psycle { namespace host {
 				zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR);
 				RefreshDisplayData(true);
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -1615,9 +1591,9 @@ namespace psycle { namespace host {
 			{
 				pParent->m_wndView.AddMacViewUndo();
 
-				_pSong->IsInvalided(true);
-				///\todo lock/unlock
-				Sleep(256);
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
+				_pSong->StopInstrument(wsInstrument);
+
 				unsigned long length = blLength+1;
 
 				datalen = (wdLength - length);
@@ -1685,7 +1661,6 @@ namespace psycle { namespace host {
 
 				RefreshDisplayData(true);
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 			}
 		}
 
@@ -1796,9 +1771,8 @@ namespace psycle { namespace host {
 
 			unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 			int bytesPerSamp = (int)(pFmt->nBlockAlign/pFmt->nChannels);
-			_pSong->IsInvalided(true);
-			///\todo lock/unlock
-			Sleep(256);
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			_pSong->StopInstrument(wsInstrument);
 
 			if (!wdWave)
 			{
@@ -1886,7 +1860,6 @@ namespace psycle { namespace host {
 
 			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate(true);
-			_pSong->IsInvalided(false);
 		}
 
 		void CWaveEdChildView::OnPasteOverwrite()
@@ -1915,10 +1888,8 @@ namespace psycle { namespace host {
 
 			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
-			_pSong->IsInvalided(true);
-			///\todo lock/unlock
-			Sleep(256);
-
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			_pSong->StopInstrument(wsInstrument);
 			if (pFmt->wBitsPerSample == 16 && pFmt->nChannels==1 || pFmt->nChannels==2)
 			{
 				if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
@@ -1974,7 +1945,6 @@ namespace psycle { namespace host {
 
 			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate(true);
-			_pSong->IsInvalided(false);
 
 		}
 
@@ -2016,10 +1986,8 @@ namespace psycle { namespace host {
 				if(MixDlg.bFadeOut)
 					fadeOutSamps= Global::configuration().GetSamplesPerSec() * MixDlg.fadeOutTime;
 
-				_pSong->IsInvalided(true);
-				///\todo lock/unlock
-				Sleep(256);
-
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
+				_pSong->StopInstrument(wsInstrument);
 				if (pFmt->wBitsPerSample == 16 && ( pFmt->nChannels==1 || pFmt->nChannels==2 ) )
 				{
 					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
@@ -2109,7 +2077,6 @@ namespace psycle { namespace host {
 
 				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 			}
 
 		}
@@ -2145,10 +2112,8 @@ namespace psycle { namespace host {
 
 				unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
 
-				_pSong->IsInvalided(true);
-				///\todo lock/unlock
-				Sleep(256);
-
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
+				_pSong->StopInstrument(wsInstrument);
 				if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels == 1 || pFmt->nChannels == 2))
 				{
 					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
@@ -2213,7 +2178,6 @@ namespace psycle { namespace host {
 
 				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				Invalidate(true);
-				_pSong->IsInvalided(false);
 			}
 
 		}
@@ -2249,9 +2213,8 @@ namespace psycle { namespace host {
 		void CWaveEdChildView::OnPopupSetLoopStart()
 		{
 			pParent->m_wndView.AddMacViewUndo();
-			_pSong->IsInvalided(true);
-			///\todo lock/unlock
-			Sleep(256);
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
 			GetClientRect(&rect);
 			int nWidth = rect.Width();
@@ -2267,8 +2230,6 @@ namespace psycle { namespace host {
 				wdLoop=true;
 				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
-			_pSong->IsInvalided(false);
-
 			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
@@ -2276,10 +2237,8 @@ namespace psycle { namespace host {
 		void CWaveEdChildView::OnPopupSetLoopEnd()
 		{
 			pParent->m_wndView.AddMacViewUndo();
-			_pSong->IsInvalided(true);
-			///\todo lock/unlock
-			Sleep(256);
-
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
 			GetClientRect(&rect);
 			int nWidth = rect.Width();
@@ -2295,7 +2254,6 @@ namespace psycle { namespace host {
 				wdLoop=true;
 				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
-			_pSong->IsInvalided(false);
 			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
@@ -2304,6 +2262,8 @@ namespace psycle { namespace host {
 		void CWaveEdChildView::OnPopupSelectionToLoop()
 		{
 			if(!blSelection) return;
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			_pSong->StopInstrument(wsInstrument);
 
 			wdLoopS = blStart;
 			wdLoopE = blStart+blLength;
@@ -2315,7 +2275,6 @@ namespace psycle { namespace host {
 				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
 
-			_pSong->IsInvalided(false);
 			pParent->m_wndInst.WaveUpdate();
 			CRect rect;
 			GetClientRect(&rect);

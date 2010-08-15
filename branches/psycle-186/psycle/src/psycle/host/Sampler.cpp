@@ -189,6 +189,16 @@ namespace psycle
 			}
 		}
 
+		void Sampler::StopInstrument(int insIdx) {
+			for (int i=0; i<_numVoices; i++)
+			{
+				Voice* pVoice = &_voices[insIdx];
+				if (pVoice->_envelope._stage != ENV_OFF && pVoice->_instrument == insIdx)
+				{
+					pVoice->_envelope._stage = ENV_OFF;
+				}
+			}
+		}
 		bool Sampler::Load(RiffFile* pFile)
 		{
 			int i;
@@ -269,12 +279,7 @@ namespace psycle
 
 			pVoice->_sampleCounter += numsamples;
 
-			if (Global::_pSong->Invalided)
-			{
-				pVoice->_envelope._stage = ENV_OFF;
-				return;
-			}
-			else if ((pVoice->_triggerNoteDelay) && (pVoice->_sampleCounter >= pVoice->_triggerNoteDelay))
+			 if ((pVoice->_triggerNoteDelay) && (pVoice->_sampleCounter >= pVoice->_triggerNoteDelay))
 			{
 				if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
 				{
@@ -310,6 +315,15 @@ namespace psycle
 			{
 				pVoice->_triggerNoteOff = 0;
 				NoteOff(voice);
+			}
+
+			// If the sample has been deleted while playing...
+			if (Global::_pSong->_pInstrument[pVoice->_instrument]->Empty())
+			{
+				pVoice->_envelope._stage = ENV_OFF;
+				pVoice->_wave._lVolCurr = 0;
+				pVoice->_wave._rVolCurr = 0;
+				return;
 			}
 
 			pResamplerWork = _resampler.work;
@@ -517,8 +531,6 @@ namespace psycle
 			Voice* pVoice = &_voices[voice];
 			int triggered = 0;
 			unsigned __int64 w_offset = 0;
-
-			if (Global::_pSong->Invalided) return 0;
 
 			pVoice->_sampleCounter=0;
 			pVoice->effCmd=pEntry->_cmd;

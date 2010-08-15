@@ -132,7 +132,7 @@ namespace psycle { namespace host {
 						}
 						else
 						{
-							CSingleLock lock(&_pSong->door,TRUE);
+							CExclusiveLock lock(&_pSong->semaphore, 2, true);
 							int dsttype=0;
 							///\todo: for multi-io.
 							//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index

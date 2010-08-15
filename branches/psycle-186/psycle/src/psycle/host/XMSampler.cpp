@@ -14,11 +14,6 @@ namespace psycle
 {
 	namespace host
 	{
-/*		__declspec(align(32)) static float xdspFloatBuffer[20960];
-		static CXPreparedResamplerFilter *pFilter = NULL;
-		static CXResampler *pResampler = NULL;
-*/
-
 		TCHAR* XMSampler::_psName = _T("Sampulse");
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
 		XMInstrument XMSampler::m_Instruments[MAX_INSTRUMENT+1];
@@ -455,22 +450,17 @@ namespace psycle
 			float left_output = 0.0f;
 			float right_output = 0.0f;
 
-			if (Global::_pSong->IsInvalided())
+			if (!m_pSampler->m_Instruments[this->InstrumentNum()].IsEnabled())
 			{
 				IsPlaying(false);
 				return;
 			}
-//			m_WaveDataController.Workxdsp(numSamples);
-//			int tmpcount=0;
 			while (numSamples)
 			{
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 1 : Get the unprocessed wave data.
 
 				m_WaveDataController.Work(&left_output,&right_output,resampler_work);
-/*				left_output=xdspFloatBuffer[tmpcount++];
-				if ( m_WaveDataController.IsStereo()) right_output=xdspFloatBuffer[tmpcount++];
-*/				
 
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 2 : Process the Envelopes.
@@ -2062,8 +2052,6 @@ namespace psycle
 		{
 			scoped_lock lock(*this);
 
-			if (Global::_pSong->IsInvalided()) { return; }
-
 			// don't process twk , twf, Mcm Commands, or empty lines.
 			if ( pData->_note > notecommands::release )
 			{
@@ -2598,7 +2586,7 @@ namespace psycle
 			
 			size_t endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
-			size = endpos - filepos -sizeof(size);
+			size = (unsigned long) (endpos - filepos -sizeof(size));
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Seek(endpos);
 

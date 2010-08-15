@@ -108,6 +108,10 @@ namespace psycle { namespace host {
 			afx_msg void OnSize(UINT nType, int cx, int cy);
 			afx_msg void OnCustomdrawVolSlider(NMHDR* pNMHDR, LRESULT* pResult);
 
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
+			afx_msg void OnDestroy();
+			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
@@ -186,10 +190,6 @@ namespace psycle { namespace host {
 			CScrollableDlgBar zoombar;
 
 			CMainFrame* pParent;
-		public:
-			afx_msg void OnTimer(UINT_PTR nIDEvent);
-			afx_msg void OnDestroy();
-			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 		};
 
 		//{{AFX_INSERT_LOCATION}}

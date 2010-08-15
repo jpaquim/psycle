@@ -18,8 +18,12 @@ namespace psycle { namespace host {
 			std::string _songPathBuf;
 			bool _pluginPathChanged;
 			std::string _pluginPathBuf;
-			bool _vstPathChanged;
-			std::string _vstPathBuf;
+			bool _vstPath32Changed;
+			std::string _vstPath32Buf;
+			bool _vstPath64Changed;
+			std::string _vstPath64Buf;
+			bool _isJbridged;
+			bool _isPsycleBridged;
 			bool _skinPathChanged;
 			std::string _skinPathBuf;
 			bool _waveRecPathChanged;
@@ -28,46 +32,46 @@ namespace psycle { namespace host {
 			CDirectoryDlg();
 			virtual ~CDirectoryDlg();
 		// Dialog Data
-			//{{AFX_DATA(CDirectoryDlg)
 			enum { IDD = IDD_DIRECTORIES };
-			CEdit	m_vstEdit;
+			CButton m_bridgeSupport;
+			CButton m_jBridge;
+			CButton m_PsycleVstBridge;
+			CEdit	m_vst32Edit;
+			CEdit	m_vst64Edit;
 			CEdit	m_pluginEdit;
 			CEdit	m_songEdit;
 			CEdit	m_instEdit;
 			CEdit	m_skinEdit;
-			CEdit m_waveRec;
-			//}}AFX_DATA
+			CEdit   m_waveRec;
 		// Overrides
-			// ClassWizard generate virtual function overrides
-			//{{AFX_VIRTUAL(CDirectoryDlg)
 			protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
 		// Implementation
 		protected:
+			void EnableSupportedBridges();
+			void DisableAllBridges();
 			bool BrowseForFolder(std::string& rpath);
-			// Generated message map functions
-			//{{AFX_MSG(CDirectoryDlg)
+			virtual BOOL OnInitDialog();
 			afx_msg void OnBrowseInst();
 			afx_msg void OnBrowseSong();
-			virtual BOOL OnInitDialog();
 			afx_msg void OnBrowsePlugin();
-			afx_msg void OnBrowseVst();
+			afx_msg void OnBrowseVst32();
+			afx_msg void OnBrowseVst64();
 			afx_msg void OnChangeSongedit();
 			afx_msg void OnChangeInstedit();
 			afx_msg void OnChangePluginedit();
-			afx_msg void OnChangeVstedit();
+			afx_msg void OnChangeVst32edit();
+			afx_msg void OnChangeVst64edit();
+			afx_msg void OnEnableBridge();
+			afx_msg void OnEnableJBridge();
+			afx_msg void OnEnablePsycleBridge();
+			afx_msg void OnBridgesupport();
 			afx_msg void OnBrowseSkin();
 			afx_msg void OnChangeSkinedit();
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
-		public:
 			afx_msg void OnBnClickedBrowsewaverec();
 			afx_msg void OnEnChangeWaverecedit();
+			DECLARE_MESSAGE_MAP()
+		public:
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
 	}   // namespace
 }   // namespace

@@ -445,13 +445,10 @@ void XMSamplerUISample::OnBnClickedLoad()
 		if(_pSong->PW_Stage)
 		{
 			_pSong->PW_Stage=0;
-			_pSong->IsInvalided(true);
-			Sleep(LOCK_LATENCY);
 		}
 
 		//Delete it.
 		_pSong->DeleteLayer(PREV_WAV_INS);
-		_pSong->IsInvalided(false);
 	}
 */
 }

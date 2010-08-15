@@ -470,7 +470,13 @@ namespace psycle { namespace host {
 		void CNewMachine::OnRefresh() 
 		{
 			DestroyPluginInfo();
+#if defined _WIN64
+			DeleteFile((universalis::os::fs::home_app_local("psycle") / "psycle64.plugin-scan.cache").native_file_string().c_str());
+#elif defined _WIN32
 			DeleteFile((universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache").native_file_string().c_str());
+#else
+#error unexpected platform
+#endif
 			LoadPluginInfo();
 			UpdateList();
 			m_browser.Invalidate();
@@ -569,7 +575,8 @@ namespace psycle { namespace host {
 					loggers::information()("Scanning plugins ... Current Directory: " + s);
 				}
 				loggers::information()("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
-				loggers::information()("Scanning plugins ... Directory for VSTs: " + Global::pConfig->GetVstDir());
+				loggers::information()("Scanning plugins ... Directory for VSTs (32): " + Global::pConfig->GetVst32Dir());
+				loggers::information()("Scanning plugins ... Directory for VSTs (64): " + Global::pConfig->GetVst64Dir());
 				loggers::information()("Scanning plugins ... Listing ...");
 
 				Progress.Create();
@@ -577,7 +584,19 @@ namespace psycle { namespace host {
 				Progress.ShowWindow(SW_SHOW);
 
 				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
-				populate_plugin_list(vstPlugs,Global::pConfig->GetVstDir());
+#if	defined _WIN64
+				populate_plugin_list(vstPlugs,Global::pConfig->GetVst64Dir());
+				if(Global::pConfig->UseJBridge() || Global::pConfig->UsePsycleVstBridge())
+				{
+					populate_plugin_list(vstPlugs,Global::pConfig->GetVst32Dir());
+				}
+#elif defined _WIN32
+				populate_plugin_list(vstPlugs,Global::pConfig->GetVst32Dir());
+				if(Global::pConfig->UseJBridge() || Global::pConfig->UsePsycleVstBridge())
+				{
+					populate_plugin_list(vstPlugs,Global::pConfig->GetVst64Dir());
+				}
+#endif
 
 				int plugin_count = (int)(nativePlugs.size() + vstPlugs.size());
 
@@ -592,7 +611,13 @@ namespace psycle { namespace host {
 					boost::filesystem::path log_dir(universalis::os::fs::home_app_local("psycle"));
 					// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
 					mkdir(log_dir.native_directory_string().c_str());
+#if defined _WIN64
+					out.open((log_dir / "psycle64.plugin-scan.log.txt").native_file_string().c_str());
+#elif defined _WIN32
 					out.open((log_dir / "psycle.plugin-scan.log.txt").native_file_string().c_str());
+#else
+#error unexpected platform
+#endif
 				}
 				out
 					<< "==========================================" << std::endl
@@ -1021,7 +1046,13 @@ namespace psycle { namespace host {
 
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
+#if defined _WIN64
+			std::string cache((universalis::os::fs::home_app_local("psycle") / "psycle64.plugin-scan.cache").native_file_string());
+#elif defined _WIN32
 			std::string cache((universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache").native_file_string());
+#else
+#error unexpected platform
+#endif
 			RiffFile file;
 			CFileFind finder;
 
@@ -1035,7 +1066,13 @@ namespace psycle { namespace host {
 				std::string::size_type pos=path.rfind('\\');
 				if(pos != std::string::npos)
 					path=path.substr(0,pos);
+#if defined _WIN64
+				std::string cache=path + "\\psycle64.plugin-scan.cache";
+#elif defined _WIN32
 				std::string cache=path + "\\psycle.plugin-scan.cache";
+#else
+#error unexpected platform
+#endif
 
 				if (!file.Open(cache.c_str())) return false;
 			}
@@ -1144,7 +1181,13 @@ namespace psycle { namespace host {
 
 		bool CNewMachine::SaveCacheFile()
 		{
+#if defined _WIN64
+			boost::filesystem::path cache(universalis::os::fs::home_app_local("psycle") / "psycle64.plugin-scan.cache");
+#elif defined _WIN32
 			boost::filesystem::path cache(universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache");
+#else
+	#error unexpected platform
+#endif
 
 			DeleteFile(cache.native_file_string().c_str());
 			RiffFile file;

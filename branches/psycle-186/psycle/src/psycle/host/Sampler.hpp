@@ -114,6 +114,7 @@ namespace psycle
 				}
 			}
 			virtual void Stop(void);
+			void StopInstrument(int insIdx);
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile* pFile);

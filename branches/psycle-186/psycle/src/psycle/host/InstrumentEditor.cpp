@@ -430,11 +430,12 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnKillInstrument() 
 		{
 			{
-				CSingleLock lock(&Global::_pSong->door,TRUE);
+				CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 				_pSong->DeleteInstrument(_pSong->instSelected);
 			}
-			WaveUpdate();
 			pParentMain->UpdateComboIns();
+			pParentMain->WaveEditorBackUpdate();
+			WaveUpdate();
 			pParentMain->RedrawGearRackList();
 		}
 

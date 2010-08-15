@@ -73,8 +73,10 @@ namespace psycle
 			bool _loopSong;
 			/// Indicates if the player is processing audio right now (It is in work function)
 			bool _isWorking;
-			/// stops playing.
+			/// stops playing (thread safe).
 			void Stop();
+			// stops playing (non thread safe)
+			void DoStop(void);
 			/// work function. (Entrance for the callback function (audiodriver)
 			static float * Work(void* context, int nsamples);
 			float * Work(int numSamples);

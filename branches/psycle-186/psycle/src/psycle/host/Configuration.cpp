@@ -12,7 +12,7 @@
 #endif // !defined WINAMP_PLUGIN
 
 #include "Song.hpp"
-
+#include "VstHost24.hpp"
 namespace psycle
 {
 	namespace host
@@ -107,7 +107,8 @@ namespace psycle
 					SetCurrentSongDir(GetSongDir());
 					SetSkinDir(appPath()+"skins");
 					SetPluginDir(appPath()+"PsyclePlugins");
-					SetVstDir(appPath()+"VstPlugins");
+					SetVst32Dir(appPath()+"VstPlugins");
+					SetVst64Dir(appPath()+"VstPlugins64");
 					SetWaveRecDir(appPath()+"songs");
 					SetCurrentWaveRecDir(GetWaveRecDir());
 				}
@@ -350,8 +351,20 @@ namespace psycle
 				reg.QueryValue("SongDir", song_dir_);
 				SetCurrentSongDir(GetSongDir());
 				reg.QueryValue("SkinDir", skin_dir_);
+#if defined _WIN64
+				reg.QueryValue("PluginDir64", plugin_dir_);
+#elif defined _WIN32
 				reg.QueryValue("PluginDir", plugin_dir_);
-				reg.QueryValue("VstDir", vst_dir_);
+#endif
+				reg.QueryValue("VstDir", vst32_dir_);
+				reg.QueryValue("VstDir64", vst64_dir_);
+				bool use=false;
+				reg.QueryValue("jBridge", use);
+				Global::pVstHost->UseJBridge(use);
+				use=false;
+				reg.QueryValue("psycleBridge", use);
+				Global::pVstHost->UsePsycleVstBridge(use);
+
 				reg.QueryValue("WaveRecDir", wave_rec_dir_);
 				SetCurrentWaveRecDir(GetWaveRecDir());
 			}
@@ -501,8 +514,19 @@ namespace psycle
 			reg.SetValue("machine_skin", machine_skin);
 			reg.SetValue("InstrumentDir", GetInstrumentDir());
 			reg.SetValue("SongDir", GetSongDir());
+#if defined _WIN64
+			reg.SetValue("PluginDir64", GetPluginDir());
+#elif defined _WIN32
 			reg.SetValue("PluginDir", GetPluginDir());
-			reg.SetValue("VstDir", GetVstDir());
+#endif
+			reg.SetValue("VstDir", GetVst32Dir());
+			reg.SetValue("VstDir64", GetVst64Dir());
+
+			bool use = Global::pVstHost->UseJBridge();
+			reg.SetValue("jBridge", use);
+			use = Global::pVstHost->UsePsycleVstBridge();
+			reg.SetValue("psycleBridge", use);
+
 			reg.SetValue("SkinDir", GetSkinDir());
 			reg.SetValue("WaveRecDir", GetWaveRecDir());
 			reg.CloseKey();
@@ -541,11 +565,32 @@ namespace psycle
 			plugin_dir_ = s;
 		}
 
-		void Configuration::SetVstDir(std::string const & s)
+		void Configuration::SetVst32Dir(std::string const & s)
 		{
-			vst_dir_ = s;
+			vst32_dir_ = s;
 		}
 
+		void Configuration::SetVst64Dir(std::string const & s)
+		{
+			vst64_dir_ = s;
+		}
+		void Configuration::UseJBridge(bool use) 
+		{
+			Global::vsthost().UseJBridge(use);
+		}
+		bool Configuration::UseJBridge() const 
+		{
+			return Global::vsthost().UseJBridge();
+		}
+		void Configuration::UsePsycleVstBridge(bool use)
+		{
+			Global::vsthost().UsePsycleVstBridge(use);
+		}
+		bool Configuration::UsePsycleVstBridge() const
+		{
+			return Global::vsthost().UsePsycleVstBridge();
+		}
+			
 		void Configuration::SetWaveRecDir(std::string const & s)
 		{
 			wave_rec_dir_ = s;
@@ -893,7 +938,7 @@ namespace psycle
 				SetCurrentSongDir(GetSongDir());
 				reg.QueryValue("SkinDir", skin_dir_);
 				reg.QueryValue("PluginDir", plugin_dir_);
-				reg.QueryValue("VstDir", vst_dir_);
+				reg.QueryValue("VstDir", vst32_dir_);
 				SetWaveRecDir(GetSongDir());
 				SetCurrentWaveRecDir(GetWaveRecDir());
 			}

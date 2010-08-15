@@ -384,6 +384,8 @@ namespace psycle
 			_mode = MACHMODE_FX;
 			sprintf(_editName, _psName);
 			mixed=true;
+			sched_returns_processed_curr=0;
+			sched_returns_processed_prev=0;
 		}
 
 		Mixer::~Mixer() throw()
@@ -438,12 +440,15 @@ namespace psycle
 			}
 
 			recursive_processed_ = true;
-			return;
 		}
 
 		void Mixer::FxSend(int numSamples, bool recurse)
 		{
-			for (int i=0; i<numsends(); i++)
+			// Note: Since mixer allows to route returns to other sends, this needs
+			// to stop in non-recurse mode when the first of such routes is found
+			sched_returns_processed_prev=sched_returns_processed_curr;
+			int i;
+			for (i=sched_returns_processed_curr; i<numsends(); i++)
 			{
 				if (sends_[i].IsValid())
 				{
@@ -490,6 +495,15 @@ namespace psycle
 								{
 									Machine* pRetMachine = Global::song()._pMachine[Return(j).Wire().machine_];
 									assert(pRetMachine);
+									// Note: Since mixer allows to route returns to other sends, this needs
+									// to stop when the first of such routes is found.
+									if(!recurse) 
+									{
+										if(!pRetMachine->sched_processed_) {
+											sched_returns_processed_curr=i;
+											return;
+										}
+									}
 									if(!pRetMachine->_mute && !pRetMachine->Standby())
 									{
 										helpers::dsp::Add(pRetMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[j][i]);
@@ -518,6 +532,7 @@ namespace psycle
 					}
 				}
 			}
+			sched_returns_processed_curr=i;
 		}
 
 		void Mixer::Mix(int numSamples)
@@ -585,57 +600,58 @@ namespace psycle
 		}
 
 		/// tells the scheduler which machines to process before this one
-void Mixer::sched_inputs(sched_deps & result) const {
-	if(mixed) {
-		// step 1: send signal to fx
-		Machine::sched_inputs(result);
-	} else {
-		// step 2: mix with return fx
-		for(unsigned int i = 0; i < numreturns(); ++i) {
-			if(Return(i).IsValid()) {
-				Machine & returned(*Global::_pSong->_pMachine[Return(i).Wire().machine_]);
-				result.push_back(&returned);
+		void Mixer::sched_inputs(sched_deps & result) const {
+			if(mixed) {
+				// step 1: receive all standard inputs
+				Machine::sched_inputs(result);
+			} else {
+				// step 2: get the output from return fx that have been processed
+				for(unsigned int i = sched_returns_processed_prev; i < sched_returns_processed_curr; ++i) {
+					if(Return(i).IsValid()) {
+						Machine & returned(*Global::_pSong->_pMachine[Return(i).Wire().machine_]);
+						result.push_back(&returned);
+					}
+				}
 			}
 		}
-	}
-}
 
-/// tells the scheduler which machines may be processed after this one
-void Mixer::sched_outputs(sched_deps & result) const {
-	if(!mixed) {
-		// step 1: send signal to fx
-		for (int i=0; i<numsends(); i++) if (Send(i).IsValid()) {
-			Machine & input(*Global::_pSong->_pMachine[Send(i).machine_]);
-			result.push_back(&input);
+		/// tells the scheduler which machines may be processed after this one
+		void Mixer::sched_outputs(sched_deps & result) const {
+			if(!mixed) {
+				// step 1: signal sent to sends. Identify them.
+				for (unsigned int i=sched_returns_processed_prev; i<sched_returns_processed_curr; i++) if (Send(i).IsValid()) {
+					Machine & input(*Global::_pSong->_pMachine[Send(i).machine_]);
+					result.push_back(&input);
+				}
+			} else {
+				// step 2: everything done, our outputs will be the next connections
+				Machine::sched_outputs(result);
+			}
 		}
-	} else {
-		// step 2: mix with return fx
-		Machine::sched_outputs(result);
-	}
-}
 
-/// called by the scheduler to ask for the actual processing of the machine
-bool Mixer::sched_process(unsigned int frames) {
-	nanoseconds const t0(cpu_time_clock());
+		/// called by the scheduler to ask for the actual processing of the machine
+		bool Mixer::sched_process(unsigned int frames) {
+			nanoseconds const t0(cpu_time_clock());
 
-	if(mixed && numsends()) {
-		mixed = false;
-		// step 1: send signal to fx
-		FxSend(frames, false);
-	} else {
-		// step 2: mix with return fx
-		Mix(frames);
-		helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-		Machine::UpdateVuAndStanbyFlag(frames);
-		mixed = true;
-	}
+			if( sched_returns_processed_curr < numreturns()) {
+				mixed = false;
+				// step 1: send signal to fx
+				FxSend(frames, false);
+			} else {
+				// step 2: mix with return fx
+				Mix(frames);
+				helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+				Machine::UpdateVuAndStanbyFlag(frames);
+				mixed = true;
+				sched_returns_processed_curr=0;
+			}
 
-	nanoseconds const t1(cpu_time_clock());
-	accumulate_processing_time(t1 - t0);
-	if(mixed) ++processing_count_;
-	
-	return mixed;
-}
+			nanoseconds const t1(cpu_time_clock());
+			accumulate_processing_time(t1 - t0);
+			if(mixed) ++processing_count_;
+			
+			return mixed;
+		}
 
 		float Mixer::GetWireVolume(int wireIndex)
 		{

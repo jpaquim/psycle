@@ -668,6 +668,10 @@ void Machine::sched_inputs(sched_deps & result) const {
 		Machine & input(*Global::song()._pMachine[_inputMachines[c]]);
 		result.push_back(&input);
 	}
+	// Mixer creates virtual connections from itself to the sends/returns.
+	// The following process identifies such a situation.
+	// Also note that a send can be "mixer -(send)> Fx1 -> Fx2 -(return)> mixer".
+	// In this case, Fx2 doesn't depend on mixer, but on Fx1, and result would already have it.
 	if (_isMixerSend && result.empty()) {
 		//Work down the connection wires until finding the mixer.
 		const Machine* nmac = this;

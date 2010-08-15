@@ -147,7 +147,7 @@ namespace host{
 
 	void XMSongLoader::Load(Song& song, bool fullopen)
 	{
-		CSingleLock lock(&song.door,TRUE);
+		CExclusiveLock lock(&song.semaphore, 2, true);
 		// check validity
 		if(!IsValid()){
 			return;
@@ -1076,7 +1076,7 @@ namespace host{
 
 	void MODSongLoader::Load(Song& song,const bool fullopen)
 	{
-		CSingleLock lock(&song.door,TRUE);	
+		CExclusiveLock lock(&song.semaphore, 2, true);
 		// check validity
 		if(!IsValid()){
 			return;

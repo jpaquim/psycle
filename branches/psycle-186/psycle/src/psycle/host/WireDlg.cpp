@@ -178,7 +178,7 @@ namespace psycle { namespace host {
 		{
 			m_pParent->AddMacViewUndo();
 			Inval = true;
-			CSingleLock lock(&Global::_pSong->door,TRUE);
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
 			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
 			OnCancel();

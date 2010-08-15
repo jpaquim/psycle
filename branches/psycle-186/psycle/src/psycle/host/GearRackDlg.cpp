@@ -261,7 +261,7 @@ namespace psycle { namespace host {
 					{
 						pParentMain->CloseMacGui(tmac);
 						{
-							CSingleLock lock(&Global::_pSong->door,TRUE);
+							CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 							Global::_pSong->DestroyMachine(tmac);
 						}
 						pParentMain->UpdateEnvInfo();
@@ -277,7 +277,7 @@ namespace psycle { namespace host {
 				if (MessageBox("Are you sure?","Delete Instruments", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
 					{
-						CSingleLock lock(&Global::_pSong->door,TRUE);
+						CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 						Global::_pSong->DeleteInstrument(Global::_pSong->instSelected);
 					}
 					pParentMain->UpdateComboIns(true);
@@ -425,10 +425,8 @@ namespace psycle { namespace host {
 				break;
 			case 2:
 				m_pParent->AddMacViewUndo();
-				Global::_pSong->Invalided=true;
 				Global::_pSong->ExchangeInstruments(sel[0],sel[1]);
 				
-				Global::_pSong->Invalided=false;
 				pParentMain->UpdateComboIns(true);
 				break;
 			}
@@ -506,7 +504,6 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
-				Global::_pSong->Invalided=true;
 				if (tmac2 < 0)
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)
@@ -527,7 +524,6 @@ namespace psycle { namespace host {
 					}
 				}
 				
-				Global::_pSong->Invalided=false;
 				pParentMain->UpdateComboIns(true);
 				break;
 			}

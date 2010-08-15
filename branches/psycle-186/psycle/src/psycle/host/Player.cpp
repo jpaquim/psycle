@@ -117,11 +117,11 @@ void Player::start_threads() {
 
 		void Player::Start(int pos, int line, bool initialize)
 		{
-			CSingleLock crit(&Global::_pSong->door, TRUE);
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 			if (initialize)
 			{
-				Stop(); // This causes all machines to reset, and samplesperRow to init.				
-				Work(this,256);
+				DoStop(); // This causes all machines to reset, and samplesperRow to init.				
+				Work(256);
 				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
 				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
 			}
@@ -152,8 +152,11 @@ void Player::start_threads() {
 
 		void Player::Stop(void)
 		{
-			CSingleLock crit(&Global::_pSong->door, TRUE);
-
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			DoStop();
+		}
+		void Player::DoStop(void)
+		{
 			if (_playing == true)
 				_lineStop = -1;
 
@@ -740,6 +743,7 @@ void Player::stop_threads() {
 
 		float * Player::Work(void* context, int numSamples)
 		{
+			CSingleLock crit(&Global::_pSong->semaphore, TRUE);
 			Player* pThis = (Player*)context;
 			return pThis->Work(numSamples);
 		}
@@ -748,7 +752,6 @@ void Player::stop_threads() {
 			int amount;
 			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = _pBuffer;
-			CSingleLock crit(&Global::_pSong->door, TRUE);
 			nanoseconds const t0(cpu_time_clock());
 			do
 			{

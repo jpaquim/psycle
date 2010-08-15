@@ -167,9 +167,9 @@ namespace psycle
 		}
 
 		Song::Song()
+			:semaphore(2,2,NULL,NULL)
 		{
 			_machineLock = false;
-			Invalided = false;
 			
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
@@ -187,7 +187,7 @@ namespace psycle
 
 		bool Song::ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
 			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
 			assert(origmac);
 
@@ -246,7 +246,7 @@ namespace psycle
 
 		bool Song::ExchangeMachines(int one, int two)
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
 			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
 			Machine *mac1 = _pMachine[one];
 			Machine *mac2 = _pMachine[two];
@@ -409,10 +409,21 @@ namespace psycle
 			}
 			_machineLock = false;
 		}
+		void Song::StopInstrument(int instrumentIdx)
+		{
+			for(int i=0; i< MAX_MACHINES; i++) {
+				Machine* mac = _pMachine[i];
+				if(mac && mac->_type == MACH_SAMPLER) {
+					Sampler& sam = *((Sampler*)mac);
+					sam.StopInstrument(instrumentIdx);
+				}
+			}
+
+		}
 
 		void Song::ExchangeInstruments(int one, int two)
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
 
 			Instrument * tmpins;
 
@@ -442,9 +453,7 @@ namespace psycle
 
 		void Song::DeleteInstrument(int i)
 		{
-			Invalided=true;
 			_pInstrument[i]->Delete();
-			Invalided=false;
 		}
 
 		void Song::Reset()
@@ -489,7 +498,10 @@ namespace psycle
 
 		void Song::New()
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
+			DoNew();
+		}
+		void Song::DoNew() {
 			seqBus=0;
 			// Song reset
 			name = "Untitled";
@@ -613,7 +625,7 @@ namespace psycle
 		}
 		bool Song::ChangeWireDestMac(Machine* srcMac,Machine* dstMac, int wiresrc,int wiredest)
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
 			// Assert that we have two machines
 			assert(srcMac); assert(dstMac);
 			// Verify that the destination is not a generator
@@ -651,7 +663,7 @@ namespace psycle
 		}
 		bool Song::ChangeWireSourceMac(Machine* srcMac,Machine* dstMac, int wiresrc, int wiredest)
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
 			// Assert that we have two machines
 			assert(srcMac); assert(dstMac);
 			// Verify that the destination is not a generator
@@ -959,12 +971,6 @@ namespace psycle
 
 		int Song::IffAlloc(int instrument,const char * str)
 		{
-			if(instrument != PREV_WAV_INS)
-			{
-				Invalided = true;
-				///\todo lock/unlock
-				::Sleep(256);
-			}
 			RiffFile file;
 			RiffChunkHeader hd;
 			ULONG data;
@@ -973,7 +979,6 @@ namespace psycle
 			// opens the file and reads the "FORM" header.
 			if(!file.Open(const_cast<char*>(str)))
 			{
-				Invalided = false;
 				return 0;
 			}
 			DeleteLayer(instrument);
@@ -1040,7 +1045,6 @@ namespace psycle
 				}
 			}
 			file.Close();
-			Invalided = false;
 			return 1;
 		}
 
@@ -1073,12 +1077,8 @@ namespace psycle
 			DDCRET retcode(file.OpenForRead((char*)wavfile));
 			if(retcode != DDC_SUCCESS) 
 			{
-				Invalided = false;
 				return 0; 
 			}
-			Invalided = true;
-			///\todo lock/unlock
-			::Sleep(256);
 			// sample type	
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());
@@ -1203,14 +1203,13 @@ namespace psycle
 				retcode = file.Read(static_cast<void*>(&hd), 8);
 			}
 			file.Close();
-			Invalided = false;
 #endif //!defined WINAMP_PLUGIN
 			return 1;
 		}
 
 		bool Song::Load(RiffFile* pFile, bool fullopen)
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
 			char Header[9];
 			pFile->Read(&Header, 8);
 			Header[8]=0;
@@ -1607,7 +1606,7 @@ namespace psycle
 				bool _machineActive[128];
 				unsigned char busEffect[64];
 				unsigned char busMachine[64];
-				New();
+				DoNew();
 				char name_[129]; char author_[65]; char comments_[65536];
 				pFile->Read(name_, 32);
 				pFile->Read(author_, 32);
@@ -2735,7 +2734,7 @@ namespace psycle
 
 		bool Song::CloneMac(int src,int dst)
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
 			// src has to be occupied and dst must be empty
 			if (_pMachine[src] && _pMachine[dst])
 			{
@@ -2935,7 +2934,7 @@ namespace psycle
 
 		bool Song::CloneIns(int src,int dst)
 		{
-			CSingleLock lock(&door,TRUE);
+			CExclusiveLock lock(&semaphore, 2, true);
 			// src has to be occupied and dst must be empty
 			if (!_pInstrument[src]->Empty() && !_pInstrument[dst]->Empty())
 			{

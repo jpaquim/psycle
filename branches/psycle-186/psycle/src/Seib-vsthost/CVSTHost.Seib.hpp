@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define VST_FORCE_DEPRECATED 0
 #include <vst2.x/AEffectx.h>               /* VST header files                  */
 #include <vst2.x/vstfxstore.h>
-
+#include "JBridgeEnabler.hpp"
 //////////////////////////////////////////////////////////////////////////
 // This is part of Psycle, to catch the exceptions that happen when interacting
 // with the plugins. To use your own, replace 
@@ -314,6 +314,30 @@ namespace seib {
 				return module != 0;
 			}
 
+			bool loadJBridgeLibrary(const char* fileName)
+			{
+			#if defined _WIN64 || defined _WIN32
+				char szProxyPath[MAX_PATH];
+				JBridge::getJBridgeLibrary(szProxyPath);
+				if ( szProxyPath[0] != '\0' )
+				{
+					module = LoadLibrary(szProxyPath);
+					//we need the original name in sFilename.
+					sFileName = new char[strlen(fileName) + 1];
+					if (sFileName)
+						strcpy((char*)sFileName, fileName);
+				}
+				return module != 0;
+			#else
+				return false;
+			#endif
+			}
+
+			bool loadPsycleBridgeLibrary(const char* fileName)
+			{
+				return false;
+			}
+
 			PluginEntryProc getMainEntry ()
 			{
 				PluginEntryProc mainProc = 0;
@@ -325,6 +349,15 @@ namespace seib {
 				mainProc = (PluginEntryProc)CFBundleGetFunctionPointerForName((CFBundleRef)module, CFSTR("VSTPluginMain"));
 				if (!mainProc)
 					mainProc = (PluginEntryProc)CFBundleGetFunctionPointerForName((CFBundleRef)module, CFSTR("main_macho"));
+			#endif
+				return mainProc;
+			}
+
+			PFNBRIDGEMAIN getJBridgeMainEntry ()
+			{
+				PFNBRIDGEMAIN mainProc = 0;
+			#if defined _WIN64 || defined _WIN32
+				mainProc = JBridge::getBridgeMainEntry((HMODULE)module);
 			#endif
 				return mainProc;
 			}
@@ -680,6 +713,8 @@ namespace seib {
 		protected:
 			long lBlockSize;
 			static int quantization;
+			bool useJBridge;
+			bool usePsycleVstBridge;
 			bool loadingEffect;
 			VstInt32 loadingShellId;
 			bool isShell;
@@ -687,6 +722,11 @@ namespace seib {
 		public:
 			CEffect* LoadPlugin(const char * sName,VstInt32 shellIdx=0);
 			static VstIntPtr VSTCALLBACK AudioMasterCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
+
+			void UseJBridge(bool use) { useJBridge=use; }
+			bool UseJBridge() const { return useJBridge; }
+			void UsePsycleVstBridge(bool use) { usePsycleVstBridge=use; }
+			bool UsePsycleVstBridge() const { return usePsycleVstBridge; }
 
 			// overridable functions
 		protected:

@@ -3,6 +3,7 @@
 
 #include "DirectoryDlg.hpp"
 #include "Psycle.hpp"
+#include <seib-Vsthost/JBridgeEnabler.hpp>
 
 namespace psycle { namespace host {
 
@@ -10,17 +11,18 @@ namespace psycle { namespace host {
 
 		CDirectoryDlg::CDirectoryDlg() : CPropertyPage(CDirectoryDlg::IDD)
 		{
-			//{{AFX_DATA_INIT(CDirectoryDlg)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
 			_instPathChanged = false;
 			_instPathBuf[0] = '\0';
 			_songPathChanged = false;
 			_songPathBuf[0] = '\0';
 			_pluginPathChanged = false;
 			_pluginPathBuf[0] = '\0';
-			_vstPathChanged = false;
-			_vstPathBuf[0] = '\0';
+			_vstPath32Changed = false;
+			_vstPath32Buf[0] = '\0';
+			_vstPath64Changed = false;
+			_vstPath64Buf[0] = '\0';
+			_isJbridged = false;
+			_isPsycleBridged = false;
 			_skinPathChanged = false;
 			_skinPathBuf[0] = '\0';
 			_waveRecPathChanged = false;
@@ -35,32 +37,36 @@ namespace psycle { namespace host {
 		void CDirectoryDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CPropertyPage::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CDirectoryDlg)
-			DDX_Control(pDX, IDC_VSTEDIT, m_vstEdit);
+			DDX_Control(pDX, IDC_VSTEDIT32, m_vst32Edit);
+			DDX_Control(pDX, IDC_VSTEDIT64, m_vst64Edit);
+			DDX_Control(pDX, IDC_ENABLEBRIDGE, m_bridgeSupport);
+			DDX_Control(pDX, IDC_JBRIDGE, m_jBridge);
+			DDX_Control(pDX, IDC_PSYCLEVSTBRIDGE, m_PsycleVstBridge);
 			DDX_Control(pDX, IDC_PLUGINEDIT, m_pluginEdit);
 			DDX_Control(pDX, IDC_SONGEDIT, m_songEdit);
 			DDX_Control(pDX, IDC_INSTEDIT, m_instEdit);
 			DDX_Control(pDX, IDC_SKINEDIT, m_skinEdit);
 			DDX_Control(pDX, IDC_WAVERECEDIT, m_waveRec);
-			//}}AFX_DATA_MAP
 		}
 
-
 		BEGIN_MESSAGE_MAP(CDirectoryDlg, CPropertyPage)
-			//{{AFX_MSG_MAP(CDirectoryDlg)
 			ON_BN_CLICKED(IDC_BROWSEINST, OnBrowseInst)
 			ON_BN_CLICKED(IDC_BROWSESONG, OnBrowseSong)
 			ON_BN_CLICKED(IDC_BROWSEPLUGIN, OnBrowsePlugin)
-			ON_BN_CLICKED(IDC_BROWSEVST, OnBrowseVst)
+			ON_BN_CLICKED(IDC_BROWSEVST32, OnBrowseVst32)
+			ON_BN_CLICKED(IDC_BROWSEVST64, OnBrowseVst64)
+			ON_BN_CLICKED(IDC_ENABLEBRIDGE, OnEnableBridge)
+			ON_BN_CLICKED(IDC_JBRIDGE, OnEnableJBridge)
+			ON_BN_CLICKED(IDC_PSYCLEVSTBRIDGE, OnEnablePsycleBridge)
 			ON_EN_CHANGE(IDC_SONGEDIT, OnChangeSongedit)
 			ON_EN_CHANGE(IDC_INSTEDIT, OnChangeInstedit)
 			ON_EN_CHANGE(IDC_PLUGINEDIT, OnChangePluginedit)
-			ON_EN_CHANGE(IDC_VSTEDIT, OnChangeVstedit)
+			ON_EN_CHANGE(IDC_VSTEDIT32, OnChangeVst32edit)
+			ON_EN_CHANGE(IDC_VSTEDIT64, OnChangeVst64edit)
 			ON_BN_CLICKED(IDC_BROWSESKIN, OnBrowseSkin)
 			ON_EN_CHANGE(IDC_SKINEDIT, OnChangeSkinedit)
 			ON_BN_CLICKED(IDC_BROWSEWAVEREC, OnBnClickedBrowsewaverec)
 			ON_EN_CHANGE(IDC_WAVERECEDIT, OnEnChangeWaverecedit)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -93,12 +99,21 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CDirectoryDlg::OnBrowseVst() 
+		void CDirectoryDlg::OnBrowseVst32() 
 		{
-			if (BrowseForFolder(_vstPathBuf))
+			if (BrowseForFolder(_vstPath32Buf))
 			{
-				_vstPathChanged = true;
-				m_vstEdit.SetWindowText(_vstPathBuf.c_str());
+				_vstPath32Changed = true;
+				m_vst32Edit.SetWindowText(_vstPath32Buf.c_str());
+			}
+		}
+
+		void CDirectoryDlg::OnBrowseVst64() 
+		{
+			if (BrowseForFolder(_vstPath64Buf))
+			{
+				_vstPath64Changed = true;
+				m_vst64Edit.SetWindowText(_vstPath64Buf.c_str());
 			}
 		}
 
@@ -152,7 +167,17 @@ namespace psycle { namespace host {
 			m_instEdit.SetWindowText(_instPathBuf.c_str());
 			m_songEdit.SetWindowText(_songPathBuf.c_str());
 			m_pluginEdit.SetWindowText(_pluginPathBuf.c_str());
-			m_vstEdit.SetWindowText(_vstPathBuf.c_str());
+			m_vst32Edit.SetWindowText(_vstPath32Buf.c_str());
+			m_vst64Edit.SetWindowText(_vstPath64Buf.c_str());
+			EnableSupportedBridges();
+			if(_isJbridged||_isPsycleBridged) {
+				m_bridgeSupport.SetCheck(TRUE);
+			}
+			else {
+				DisableAllBridges();
+			}
+			m_jBridge.SetCheck(_isJbridged);
+			m_PsycleVstBridge.SetCheck(_isPsycleBridged);
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			m_waveRec.SetWindowText(_waveRecPathBuf.c_str());
 			initializingDlg=false;
@@ -160,7 +185,27 @@ namespace psycle { namespace host {
 			return TRUE;  // return TRUE unless you set the focus to a control
 						// EXCEPTION: OCX Property Pages should return FALSE
 		}
-
+		void CDirectoryDlg::EnableSupportedBridges() {
+			char testjBridge[MAX_PATH];
+			JBridge::getJBridgeLibrary(testjBridge);
+			if (testjBridge[0]!='\0') {
+				m_jBridge.EnableWindow();
+			}
+			else {
+				//Since jbridge is the only available bridge so far, disable bridging.
+				m_bridgeSupport.EnableWindow(FALSE);
+			}
+			//todo: not ready yet
+			//m_PsycleVstBridge.EnableWindow();
+		}
+		void CDirectoryDlg::DisableAllBridges() {
+			m_jBridge.EnableWindow(FALSE);
+			m_jBridge.SetCheck(FALSE);
+			_isJbridged=false;
+			m_PsycleVstBridge.EnableWindow(FALSE);
+			m_PsycleVstBridge.SetCheck(FALSE);
+			_isPsycleBridged=false;
+		}
 		void CDirectoryDlg::OnChangeSongedit() 
 		{
 			if (!initializingDlg)
@@ -193,17 +238,44 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CDirectoryDlg::OnChangeVstedit() 
+		void CDirectoryDlg::OnChangeVst32edit() 
 		{
 			if (!initializingDlg)
 			{
-				_vstPathChanged = true;
+				_vstPath32Changed = true;
 				CString temp;
-				m_vstEdit.GetWindowText(temp);
-				_vstPathBuf=temp;
+				m_vst32Edit.GetWindowText(temp);
+				_vstPath32Buf=temp;
 			}
 		}
 
+		void CDirectoryDlg::OnChangeVst64edit() 
+		{
+			if (!initializingDlg)
+			{
+				_vstPath64Changed = true;
+				CString temp;
+				m_vst64Edit.GetWindowText(temp);
+				_vstPath64Buf=temp;
+			}
+		}
+		void CDirectoryDlg::OnEnableBridge() 
+		{
+			if(m_bridgeSupport.GetCheck()) {
+				EnableSupportedBridges();
+			}
+			else {
+				DisableAllBridges();
+			}
+		}
+		void CDirectoryDlg::OnEnableJBridge()
+		{
+			_isJbridged=m_jBridge.GetCheck();
+		}
+		void CDirectoryDlg::OnEnablePsycleBridge()
+		{
+			_isPsycleBridged=m_PsycleVstBridge.GetCheck();
+		}
 		void CDirectoryDlg::OnBrowseSkin() 
 		{
 			if (BrowseForFolder(_skinPathBuf))

@@ -390,6 +390,9 @@ public:
 
 protected:
 	static char* _psName;
+	/// helper variable for scheduled processing: returns can be routed to other returns
+	int sched_returns_processed_curr;
+	int sched_returns_processed_prev;
 	bool mixed;
 
 	int solocolumn_;
