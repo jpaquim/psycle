@@ -84,6 +84,35 @@ inline void clip16_lrint(const float in[], std::int16_t out[], int amount) {
 	#endif
 }
 
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip16(float f) { 
+		return clipped_lrint<int,16,float>(f);
+	}
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip18(float f) { 
+		return clipped_lrint<int,18,float>(f);
+	}
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip20(float f) { 
+		return clipped_lrint<int,20,float>(f);
+	}
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip24(float f) { 
+		return clipped_lrint<int,24,float>(f);
+	}
+
+	/// clipping.
+	inline int  UNIVERSALIS__COMPILER__CONST
+	f2iclip32(float f) { 
+		return clipped_lrint<int,32,float>(f);
+	}
 }}}
 
 #endif

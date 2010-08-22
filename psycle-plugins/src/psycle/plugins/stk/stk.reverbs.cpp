@@ -60,6 +60,7 @@ class mi : public CMachineInterface {
 			virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
 			virtual bool DescribeValue(char* txt,int const param, int const value);
 			virtual void ParameterTweak(int par, int val);
+			virtual void Command();
 
 	private:
 			JCRev   jcrev[2];
@@ -79,6 +80,9 @@ mi::mi() {
 
 mi::~mi() {
 		delete[] Vals;
+}
+void mi::Command() {
+	pCB->MessBox("stk Reverbs\n","stk Reverbs",0);
 }
 
 void mi::Init() {
