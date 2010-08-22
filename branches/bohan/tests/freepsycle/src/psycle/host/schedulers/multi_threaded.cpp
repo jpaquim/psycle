@@ -67,6 +67,7 @@ void graph::compute_plan() {
 		s << "channels: " << channels();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
+	// The buffers in the scheduler's buffer pool are sized according to channels and events in scheduler::compute_plan().
 }
 
 /**********************************************************************************************************************/
@@ -111,6 +112,7 @@ void node::compute_plan() {
 		// note: this is a simplistic heuristic to minimise the number of buffer copy operations,
 		// the best algorithm would be to order the inputs with a recursive evaluation on the graph.
 		{
+			multiple_input_port_first_output_port_to_process_= 0;
 			std::size_t minimum_size(std::numeric_limits<std::size_t>::max());
 			for(ports::inputs::multiple::output_ports_type::const_iterator
 				i(multiple_input_port()->output_ports().begin()),
