@@ -4,12 +4,14 @@
 ///\interface psycle::engine::sequence
 #pragma once
 #include "named.hpp"
-#include "buffer.hpp"
+#include "sample.hpp"
 #include "exception.hpp"
 #include <map>
 #define PSYCLE__DECL  PSYCLE__ENGINE
 #include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
+
+class buffer;
 
 /// a sequence of events
 class PSYCLE__DECL sequence : public named {

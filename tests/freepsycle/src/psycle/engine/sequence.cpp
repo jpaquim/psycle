@@ -4,6 +4,7 @@
 ///\implementation psycle::engine::sequence
 #include <psycle/detail/project.private.hpp>
 #include "sequence.hpp"
+#include "buffer.hpp"
 namespace psycle { namespace engine {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,27 +34,39 @@ void sequence_iterator::beat(real beat) {
 }
 
 void sequence_iterator::process(buffer & out, real events_per_second, std::size_t channels) throw(exception) {
-	real const samples_per_beat = events_per_second / beats_per_second_;
+	real const samples_per_beat = events_per_second * seconds_per_beat_;
 	uint64_t const initial_sample(static_cast<std::size_t>(beat_ * samples_per_beat));
 	real last_beat(beat_ + (out.events() - 1) / samples_per_beat);
-	std::size_t last_index(0);
+	std::size_t last_event(0), last_event_index(0);
 	for(; i_ != sequence_.events_.end() && i_->first < last_beat; ++i_) {
 		real const b(i_->first), s(i_->second);
 		std::size_t const i(static_cast<std::size_t>(b * samples_per_beat - initial_sample));
-		if(i < out.events()) {
-			for(std::size_t c(0); c < channels; ++c) out[c][last_index](i, s);
-			++last_index;
+		if(i < out.events() && last_event < out.events()) {
+			for(std::size_t c(0); c < channels; ++c) out[c][last_event](i, s);
+			if(i != last_event_index) {
+				last_event_index = i;
+				++last_event;
+			}
 		} else { // event lost! should never happen.
 			if(loggers::warning()) {
-				std::ostringstream s;
-				s << "event lost: " << b << ' ' << s;
-				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+				std::ostringstream oss;
+				oss << "event lost: "
+					"beat: " << b <<
+					", last beat: " << last_beat <<
+					", index: " << i <<
+					", last event: " << last_event <<
+					", last event index: " << last_event_index <<
+					", out events: " << out.events() <<
+					", sample: " << s;
+				loggers::warning()(oss.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
+			--i_;
+			break;
 		}
 	}
-	if(last_index) for(std::size_t c(0); c < channels; ++c) out[c].flag(channel::flags::discrete);
+	if(last_event) for(std::size_t c(0); c < channels; ++c) out[c].flag(channel::flags::discrete);
 	else for(std::size_t c(0); c < channels; ++c) out[c].flag(channel::flags::empty);
-	if(last_index < out.events()) for(std::size_t c(0); c < channels; ++c) out[c][last_index].index(out.events());
+	if(last_event < out.events()) for(std::size_t c(0); c < channels; ++c) out[c][last_event].index(out.events());
 	beat_ = last_beat;
 }
 
