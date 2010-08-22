@@ -1,0 +1,47 @@
+Psycle allows the use of plugins to expand its functionality. This file describes the license of those
+included with the software.
+
+
+Closed source, freeware plugins
+---------------------------
+Arguru Compressor (sources lost before making backup)
+Cyanphase Vibrasynth (a ported buzz machine)
+Ninereeds Fractal 7900s port (a ported buzz machine)
+sond plugins (s filter, s phaser, s reverb, s vld, sond synth)
+Filter by j. Hamaide (singlefrequency.dll)
+
+
+Open source, GPL licensed (http://www.gnu.org/licenses/gpl.txt)
+---------------------------------------------------------------
+Audacity plugins (Compressor, Phaser, WahWah)
+jme plugins (blitz and gamefx)
+vizenso demasi plugins (vd's allpass, echo, fastverb and noise gate)
+LADSPA Gverb
+ayeternal plugins
+Haas stereo time delay spatial localization
+Legasynth TB303
+negative.
+
+Open source, Public Domain
+--------------------------------
+Alk Muter
+Arguru plugins (CrossDelay, Distortion, Goaslicer, Reverb, Synth, Zephod SuperFM)
+Jezar Freeverb (Yezar Freeverb)
+drum synth
+YMidi - Midi Out
+KarlKox Surround
+
+Open Source, Unspecified license
+----------------------------
+DocBexter'S Phazar
+dw plugins (eq, granulizer, iopan, tremolo)
+Druttis Plugins ( EQ-3, FeedMe, Koruz, Phantom, Plucked String, Slicit and Sublime)
+Pooplog Plugins ( Autopan, Delay, Filter, FM synth, Lofi Processor and Scratch Master)
+M3 by Makk
+
+Open Source, based on other open source projects
+------------------------------------------
+Fluid Synth SF2 Player (Based on Fluid SF2 Engine http://www.fluidsynth.org/)
+STK plugins ( Plucked, Reverbs, Shakers) (Based on STK Toolkit :http://ccrma.stanford.edu/software/stk/)
+SChorus (http://st.karelia.ru/~smlalx  and http://toby.za.net/dsp/index.htm )
+Moreamp EQ : ( http://sourceforge.net/projects/moreamp/ )

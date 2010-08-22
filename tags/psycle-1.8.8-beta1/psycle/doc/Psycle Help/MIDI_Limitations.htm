@@ -1,0 +1,27 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_Tips.htm">Previous</a></td><td align="right"><a href="MIDI_Chart.htm">Next</a></td>
+</table>
+<p class=head2>Limitations and Known Bugs</P>
+
+There is currently still a random bug that occasionally occurs when creating a new generator/effect. This bug means the MIDI interface fails to resync with the audio engine and the MIDI buffer fills up, without any notes being played. Until this bug is fixed, should this occur, the work around is simply to send a MIDI Sync Start code to Psycle (e.g. restart playback from the start of the song on your MIDI sequencer).
+<P>
+Currently the main limitations of the MIDI input offered by Psycle are relating to the delay in the MIDI getting to Psycle (through Microsoft Windows) and any audio engine drop-outs. Audio engine drop-outs are nothing to do with the MIDI interface, and can usually be rectified (or made much better) by increasing the number of audio buffers and/or the size of these buffers. To account for delays in MIDI messages getting to Psycle, the amount of midi headroom (in milliseconds) is user-configurable. If you are experiencing a lot of lost messages and/or poor syncronisation, then try increasing this value. The default is 100 milliseconds, but on slower systems or systems that are running a lot of heavy-duty applications concurrently with Psycle, it may be wise to increase this value. This will increase the audio latency, but the MIDI will be more stable and predictable.
+<P>
+Psycle's internal .wav recording facility cannot be used to recording MIDI triggered audio - however you can record what is being played externally with a program such as <a href="http://audacity.sourceforge.net" target="_blank">Audacity</a> or <a href="http://www.kreatives.org/kristal/" target="_blank">Krystal</a>.
+<P>
+The current implementation of the DirectSound interface support in Psycle does not provide the necessary information to the MIDI interface in order to enable decent syncronisation between the MIDI and the audio engine. Until the DirectSound code is updated, the MIDI interface will NOT work (in real-time) with DirectX audio.
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_Tips.htm">Previous</a></td><td align="right"><a href="MIDI_Chart.htm">Next</a></td>
+</table>
+</body>
+</html>
