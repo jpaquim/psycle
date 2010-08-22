@@ -639,7 +639,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		}
 		else
 		{
-			float const finetune = value_mapper::map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->waveFinetune);
+			float const finetune = value_mapper::map_256_1(callbacks->song()._pInstrument[pVoice->_instrument]->waveFinetune);
 			pVoice->_wave._speed = (std::int64_t)(pow(2.0f, ((pEntry.note()+callbacks->song()._pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
 		}
 		
@@ -662,7 +662,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 
 		if (pEntry.command() == SAMPLER_CMD_VOLUME)
 		{
-			pVoice->_wave._vol *= value_mapper::map_255_1( pEntry.parameter() );
+			pVoice->_wave._vol *= value_mapper::map_256_1( pEntry.parameter() );
 		}
 		
 		// Panning calculation -------------------------------------------
@@ -675,10 +675,10 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		}
 		else if ( pEntry.command() == SAMPLER_CMD_PANNING )
 		{
-			panFactor = value_mapper::map_255_1( pEntry.parameter() );
+			panFactor = value_mapper::map_256_1( pEntry.parameter() );
 		}
 		else {
-			panFactor = value_mapper::map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
+			panFactor = value_mapper::map_256_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
@@ -751,7 +751,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		//
 		pVoice->_wave._vol = (float)callbacks->song()._pInstrument[pVoice->_instrument]->waveVolume*0.01f;
 
-		if ( pEntry.command() == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= value_mapper::map_255_1(pEntry.parameter() );
+		if ( pEntry.command() == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= value_mapper::map_256_1(pEntry.parameter() );
 		
 		// Panning calculation -------------------------------------------
 		//
@@ -763,11 +763,11 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		}
 		else if ( pEntry.command() == SAMPLER_CMD_PANNING )
 		{
-			panFactor = value_mapper::map_255_1( pEntry.parameter() );
+			panFactor = value_mapper::map_256_1( pEntry.parameter() );
 		}
 		else
 		{
-			panFactor = value_mapper::map_255_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
+			panFactor = value_mapper::map_256_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
