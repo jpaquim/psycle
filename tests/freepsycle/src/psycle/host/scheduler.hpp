@@ -19,10 +19,10 @@ class PSYCLE__DECL scheduler {
 		scheduler(typename Graph::underlying_type & graph) throw(std::exception) : graph_(Graph::create_on_heap(graph)) {}
 	public:
 		virtual ~scheduler() throw() {}
-		bool virtual started() = 0;
+		virtual bool started() = 0;
 		void         started(bool value) throw(exception) { if(value) start(); else stop(); }
-		void virtual start() throw(exception) = 0;
-		void virtual stop() = 0;
+		virtual void start() throw(exception) = 0;
+		virtual void stop() = 0;
 	protected:
 		typedef Graph graph_type;
 		Graph const & graph() const throw() { return graph_; }
