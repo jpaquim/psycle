@@ -7,15 +7,10 @@
 // http://ccrma.stanford.edu/software/stk/
 
 #include <psycle/plugin_interface.hpp>
-#include <stk/Stk.h>
+#include <stk/stk.h>
 #include <stk/Plucked.h>
 #include <stk/ADSR.h>
 #include <cmath>
-
-using namespace psycle::plugin_interface;
-
-// Stk recently got a namespace. We (re)declare it for backward compatibility with older stk versions.
-namespace stk {} using namespace stk;
 
 #define NUMPARAMETERS 5
 
@@ -83,7 +78,7 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -116,7 +111,7 @@ public:
 
 private:
 
-	Plucked * track[MAX_TRACKS];
+	Plucked track[MAX_TRACKS];
 	ADSR				adsr[MAX_TRACKS];
 	float				vol_ctrl[MAX_TRACKS];
 	StkFloat n2f[NOTE_MAX];
@@ -124,7 +119,7 @@ private:
 	StkFloat samplerate;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -134,21 +129,12 @@ mi::mi()
 	{
 		n2f[note]= std::pow(2., (note - offset) / 12);
 	}
-	
-	for(int i = 0; i < MAX_TRACKS; ++i) {
-		track[i] = new Plucked(
-			#if STK_VERSION != -1
-				20 // lowest desired playing frequency
-			#endif
-		);
-	}
 }
 
 mi::~mi()
 {
 	// Destroy dinamically allocated objects/memory here
-	delete[] Vals;
-	for(int i = 0; i < MAX_TRACKS; ++i) delete track[i];
+	delete Vals;
 }
 
 void mi::Init()
@@ -161,8 +147,8 @@ void mi::Init()
 	Stk::setSampleRate(samplerate);
 	for(int i=0;i<MAX_TRACKS;i++)
 	{
-		track[i]->clear();
-		track[i]->noteOff(0.0);
+		track[i].clear();
+		track[i].noteOff(0.0);
 		adsr[i].setAllTimes(StkFloat(Vals[1]*0.000030517578125),
 									StkFloat(Vals[2]*0.000030517578125),
 									StkFloat(Vals[3]*0.000030517578125),
@@ -176,8 +162,8 @@ void mi::Stop()
 	for(int c=0;c<MAX_TRACKS;c++)
 	{
 		adsr[c].keyOff();
-		//track[c]->noteOff(0.0);
-		track[c]->clear();
+		//track[c].noteOff(0.0);
+		track[c].clear();
 	}
 }
 
@@ -237,18 +223,19 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 
 			int xnumsamples=numsamples;
 
-			Plucked & track = *this->track[*w_tracks_iter];
-			ADSR & adsr = this->adsr[*w_tracks_iter];
-			do {
-				sl = float(adsr.tick() * track.tick()) * vol;
-				if(sl < -vol) sl = -vol;
-				if(sl > +vol) sl = vol;
+			Plucked *ptrack=&track[*w_tracks_iter];
+			ADSR				*padsr=&adsr[*w_tracks_iter];								
+			do
+				{
+					sl=float(padsr->tick()*ptrack->tick())*vol;
+					if (sl<-vol)sl=-vol;
+					if (sl>vol)sl=vol;
 
-				sl *= vol_ctrl[*w_tracks_iter];
+					sl*=vol_ctrl[*w_tracks_iter];
 
-				*++xpsamplesleft += sl; // * vol_ctrl[w_tracks_iter];
-				*++xpsamplesright += sl; // * vol_ctrl[w_tracks_iter];
-			} while(--xnumsamples);
+					*++xpsamplesleft+=sl; //*vol_ctrl[w_tracks_iter];
+					*++xpsamplesright+=sl; //*vol_ctrl[w_tracks_iter];
+				} while(--xnumsamples);
 	}
 
 }
@@ -296,10 +283,10 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 			adsr[channel].keyOn();
 			//StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
 			//StkFloat const frequency = std::pow(2., (note - offset) / 12);
-			//track[channel]->noteOff(0.0);
-			track[channel]->noteOn(n2f[note],1.0);
+			//track[channel].noteOff(0.0);
+			track[channel].noteOn(n2f[note],1.0);
 		}
-		//track[channel]->tick();
+		//track[channel].tick();
 	}
 	//adsr[channel].tick();
 	

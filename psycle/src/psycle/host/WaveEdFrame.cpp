@@ -1,22 +1,12 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
 
-///\todo The use of song class could be removed. It only needs to have the current selected sample
-// and in psycore, the InstPreview has been moved to the Sampler class.
 #include "WaveEdFrame.hpp"
 
-#include "ProjectData.hpp"
 #include "Configuration.hpp"
 #include "MainFrm.hpp"
 
-#include <psycle/core/song.h>
-#include <psycle/core/sampler.h>
-
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include "Song.hpp"
 
 namespace psycle { namespace host {
 
@@ -55,16 +45,18 @@ namespace psycle { namespace host {
 		};
 
 		CWaveEdFrame::CWaveEdFrame()
-			: wavview(this, 0) {
+		{
+		}
+		CWaveEdFrame::CWaveEdFrame(Song* _sng, CMainFrame* pframe)
+		{
+			this->_pSong=_sng;
+			wavview.SetSong(this->_pSong);
+			wavview.SetParent(pframe);
 		}
 
-		CWaveEdFrame::CWaveEdFrame(ProjectData* projects, CMainFrame* pframe)
-			: projects_(projects),
-			  wavview(this, pframe) {
-		}
+		CWaveEdFrame::~CWaveEdFrame() throw()
+		{
 
-		Song* CWaveEdFrame::song() {
-			return &projects_->active_project()->song();
 		}
 
 		void CWaveEdFrame::OnClose() 
@@ -135,7 +127,7 @@ namespace psycle { namespace host {
 		{
 			if (wavview.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
 			{
-				this->AdjustStatusBar(projects_->active_project()->song().instSelected());
+				this->AdjustStatusBar(_pSong->instSelected);
 				return true;	
 			}
 			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
@@ -148,17 +140,17 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::OnUpdatePlayButtons(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(!Sampler::waved.IsEnabled());
+			pCmdUI->Enable(!_pSong->waved.IsEnabled());
 		}
 
 		void CWaveEdFrame::OnUpdateStopButton(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(Sampler::waved.IsEnabled());
+			pCmdUI->Enable(_pSong->waved.IsEnabled());
 		}
 
 		void CWaveEdFrame::OnUpdateReleaseButton(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(Sampler::waved.IsEnabled() && Sampler::waved.IsLooping());
+			pCmdUI->Enable(_pSong->waved.IsEnabled() && _pSong->waved.IsLooping());
 		}
 
 		void CWaveEdFrame::OnUpdateSelection(CCmdUI *pCmdUI)
@@ -167,7 +159,7 @@ namespace psycle { namespace host {
 
 			char buff[48];
 			int sl=wavview.GetSelectionLength();
-			if(sl==0 || projects_->active_project()->song()._pInstrument[projects_->active_project()->song().instSelected()]==NULL)
+			if(sl==0 || _pSong->_pInstrument[_pSong->instSelected]==NULL)
 				sprintf(buff, "No Data in Selection.");
 			else
 			{
@@ -180,14 +172,14 @@ namespace psycle { namespace host {
 		void CWaveEdFrame::AdjustStatusBar(int ins)
 		{
 			char buff[48];
-			int	wl=projects_->active_project()->song()._pInstrument[ins]->waveLength;
+			int	wl=_pSong->_pInstrument[ins]->waveLength;
 			float wlInSecs = wl / float(Global::configuration().GetSamplesPerSec());
 			sprintf(buff, "Size: %u (%0.3f secs.)", wl, wlInSecs);
 			statusbar.SetPaneText(2, buff, true);
 
 			if (wl)
 			{
-				if (projects_->active_project()->song()._pInstrument[ins]->waveStereo) statusbar.SetPaneText(3, "Mode: Stereo", true);
+				if (_pSong->_pInstrument[ins]->waveStereo) statusbar.SetPaneText(3, "Mode: Stereo", true);
 				else statusbar.SetPaneText(3, "Mode: Mono", true);
 			}
 			else statusbar.SetPaneText(3, "Mode: Empty", true);
@@ -198,37 +190,37 @@ namespace psycle { namespace host {
 			CFrameWnd::OnShowWindow(bShow, nStatus);
 
 			Notify();
-		//	AdjustStatusBar(projects_->active_project()->song().instSelected(), projects_->active_project()->song().waveSelected);
+		//	AdjustStatusBar(_pSong->instSelected, _pSong->waveSelected);
 			UpdateWindow();
 		}
 
 		void CWaveEdFrame::Notify(void)
 		{
-			wavview.SetViewData(projects_->active_project()->song().instSelected());
-			AdjustStatusBar(projects_->active_project()->song().instSelected());
-			wsInstrument = projects_->active_project()->song().instSelected();
+			wavview.SetViewData(_pSong->instSelected);
+			AdjustStatusBar(_pSong->instSelected);
+			wsInstrument = _pSong->instSelected;
 		}
 
 		void CWaveEdFrame::OnPlay() {PlayFrom(wavview.GetCursorPos());}
 		void CWaveEdFrame::OnPlayFromStart() {PlayFrom(0);}
 		void CWaveEdFrame::OnRelease()
 		{
-			Sampler::waved.Release();
+			_pSong->waved.Release();
 		}
 		void CWaveEdFrame::OnStop()
 		{
-			Sampler::waved.Stop();
+			_pSong->waved.Stop();
 		}
 
 		void CWaveEdFrame::PlayFrom(unsigned long startPos)
 		{
-			if( startPos<0 || startPos >= projects_->active_project()->song()._pInstrument[wsInstrument]->waveLength )
+			if( startPos<0 || startPos >= _pSong->_pInstrument[wsInstrument]->waveLength )
 				return;
 
 			OnStop();
 
-			Sampler::waved.SetInstrument( projects_->active_project()->song()._pInstrument[wsInstrument] );
-			Sampler::waved.Play(startPos);
+			_pSong->waved.SetInstrument( _pSong->_pInstrument[wsInstrument] );
+			_pSong->waved.Play(startPos);
 		}
 		void CWaveEdFrame::OnUpdateFFandRWButtons(CCmdUI* pCmdUI)
 		{
@@ -237,7 +229,7 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::OnFastForward()
 		{
-			unsigned long wl = projects_->active_project()->song()._pInstrument[wsInstrument]->waveLength;
+			unsigned long wl = _pSong->_pInstrument[wsInstrument]->waveLength;
 			wavview.SetCursorPos( wl-1 );
 		}
 		void CWaveEdFrame::OnRewind()

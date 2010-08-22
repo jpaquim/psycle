@@ -8,9 +8,6 @@
 #include "CVoice.h"
 #include <psycle/plugin_interface.hpp>
 #include <memory>
-
-using namespace psycle::plugin_interface;
-
 //============================================================================
 //				Defines
 //============================================================================
@@ -110,7 +107,7 @@ CMachineParameter const *pParams[] = {
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
 	GENERATOR,
 	NUM_PARAMS,
@@ -149,7 +146,7 @@ public:
 	bool				working;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //============================================================================
 //				Constructor
 //============================================================================
@@ -167,7 +164,7 @@ mi::~mi()
 {
 	initialized = false;
 	while (working);
-	delete[] Vals;
+	delete Vals;
 }
 //============================================================================
 //				Init

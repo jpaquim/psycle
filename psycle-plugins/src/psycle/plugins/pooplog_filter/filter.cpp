@@ -4,6 +4,8 @@
 
 #include "filter.h"
 
+#define INTERPOLATE(pos,start,end) ((start)+(pos)*((end)-(start)))
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -11,7 +13,6 @@
 filter::filter()
 {
 	denormal = (float)1.0E-18;
-	_zm1 = 0;
 }
 
 filter::~filter()

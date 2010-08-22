@@ -1,18 +1,14 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-#include <psycle/core/detail/project.private.hpp>
 #include "convert_internal_machines.private.hpp"
 #include "machinefactory.h"
-#include "internalkeys.hpp"
 #include "fileio.h"
 #include "plugin.h"
 #include "player.h"
 #include "song.h"
 #include <psycle/helpers/scale.hpp>
-#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/math/pi.hpp>
 
-namespace psycle { namespace core { namespace convert_internal_machines {
+namespace psy { namespace core { namespace convert_internal_machines {
 
 namespace math = psycle::helpers::math;
 namespace scale = psycle::helpers::scale;
@@ -22,14 +18,14 @@ Converter::Converter() {}
 
 Converter::~Converter() throw() {
 	for(
-		std::map<Machine *, int const *>::const_iterator i = machine_converted_from.begin();
+		std::map<Machine * const, int const *>::const_iterator i = machine_converted_from.begin();
 		i != machine_converted_from.end(); ++i
 	) delete const_cast<int *>(i->second);
 }
 
-Machine & Converter::redirect(MachineFactory & factory, int index, int type, RiffFile & riff) {
+Machine & Converter::redirect(MachineFactory& factory, int const & index, int const & type, RiffFile & riff) {
 	Machine * pointer_to_machine = factory.CreateMachine(MachineKey(Hosts::NATIVE,(plugin_names()(type).c_str()),0),index);
-	if(!pointer_to_machine) pointer_to_machine = factory.CreateMachine(InternalKeys::dummy,index);
+	if(!pointer_to_machine) pointer_to_machine = factory.CreateMachine(MachineKey::dummy(),index);
 	try {
 		Machine & machine = *pointer_to_machine;
 		machine_converted_from[&machine] = new int(type);
@@ -224,11 +220,10 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 }
 
 void Converter::retweak(CoreSong & song) const {
-#if 0 ///\todo
 	// Get the first category (there's only one with imported psy's) and...
-	std::vector<PatternCategory*>::iterator cit  = song.sequence().patternPool()->begin();
+	std::vector<PatternCategory*>::iterator cit  = song.patternSequence().patternPool()->begin();
 	// ... for all the patterns in this category...
-	for(std::vector<Pattern*>::iterator pit  = (*cit)->begin(); pit != (*cit)->end(); ++pit) {
+	for(std::vector<SinglePattern*>::iterator pit  = (*cit)->begin(); pit != (*cit)->end(); ++pit) {
 		// ... check all lines searching...
 		for(std::map<double, PatternLine>::iterator lit = (*pit)->begin(); lit != (*pit)->end() ; ++lit) {
 			PatternLine & line = lit->second;
@@ -249,20 +244,19 @@ void Converter::retweak(CoreSong & song) const {
 			}
 		}
 	}
-#endif
 }
 
 Converter::Plugin_Names::Plugin_Names() {
-	(*this)[ring_modulator] = new std::string("ring-modulator");
+	(*this)[ring_modulator] = new std::string("ring_modulator");
 	(*this)[distortion] = new std::string("distortion");
 	(*this)[delay] = new std::string("delay");
-	(*this)[filter_2_poles] = new std::string("filter-2-poles");
+	(*this)[filter_2_poles] = new std::string("filter_2_poles");
 	(*this)[gainer] = new std::string("gainer");
 	(*this)[flanger] = new std::string("flanger");
-	(*this)[abass] = new std::string("arguru-synth-2f");
-	(*this)[asynth1] = new std::string("arguru-synth-2f");
-	(*this)[asynth2] = new std::string("arguru-synth-2f");
-	(*this)[asynth21] = new std::string("arguru-synth-2f");
+	(*this)[abass] = new std::string("arguru synth 2f");
+	(*this)[asynth1] = new std::string("arguru synth 2f");
+	(*this)[asynth2] = new std::string("arguru synth 2f");
+	(*this)[asynth21] = new std::string("arguru synth 2f");
 }
 
 Converter::Plugin_Names::~Plugin_Names() {
@@ -278,11 +272,11 @@ Converter::Plugin_Names::~Plugin_Names() {
 	delete (*this)[asynth21];
 }
 
-bool Converter::Plugin_Names::exists(int type) const throw() {
+const bool Converter::Plugin_Names::exists(int const & type) const throw() {
 	return find(type) != end();
 }
 
-std::string const & Converter::Plugin_Names::operator()(int type) const {
+const std::string & Converter::Plugin_Names::operator()(int const & type) const {
 	const_iterator i = find(type);
 	//if(i == end()) throw std::exception("internal machine replacement plugin not declared");
 	if(i == end()) throw;
@@ -295,7 +289,7 @@ const Converter::Plugin_Names & Converter::plugin_names() {
 }
 
 template<typename Parameter>
-void Converter::retweak(Machine & machine, int type, Parameter parameters [], int parameter_count, int parameter_offset) {
+void Converter::retweak(Machine & machine, const int & type, Parameter parameters [], const int & parameter_count, const int & parameter_offset) {
 	for(int parameter(0); parameter < parameter_count ; ++parameter) {
 		int new_parameter(parameter_offset + parameter);
 		int new_value(parameters[parameter]);
@@ -304,7 +298,7 @@ void Converter::retweak(Machine & machine, int type, Parameter parameters [], in
 	}
 }
 
-void Converter::retweak(int type, int & parameter, int & integral_value) const {
+void Converter::retweak(const int & type, int & parameter, int & integral_value) const {
 	Real value(integral_value);
 	const Real maximum(0xffff);
 	switch(type) {

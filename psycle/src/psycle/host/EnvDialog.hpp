@@ -4,6 +4,7 @@
 #include "Psycle.hpp"
 
 namespace psycle { namespace host {
+		class Song;
 
 		/// enveloppe window.
 		class CEnvDialog : public CDialog

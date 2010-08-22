@@ -7,20 +7,21 @@
 namespace psycle { namespace host {
 
 /// key config window.
-class CSpecialKeys : public CDialog {
-	public:
-		CSpecialKeys(CWnd* pParent = 0); // standard constructor
-		enum { IDD = IDD_SPECIALKEYS };
+class CSpecialKeys : public CDialog
+{
+public:
+	CSpecialKeys(CWnd* pParent = NULL);   // standard constructor
+	enum { IDD = IDD_SPECIALKEYS };
 
-	protected:
-		virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support
-		virtual BOOL OnInitDialog();
-		DECLARE_MESSAGE_MAP()
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	DECLARE_MESSAGE_MAP()
 
-	public:
-		afx_msg void OnBnClickedOk();
-		int key;
-		int mod;
+public:
+	afx_msg void OnBnClickedOk();
+	int key;
+	int mod;
 };
 
 }}

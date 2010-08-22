@@ -26,19 +26,33 @@ v0.02b
 
 v0.01b
 - initial beta release
-*/
-/////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////
+	*/
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
-
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers::math;
+#include <cmath>
 
 #define PLUGIN_NAME "Pooplog Autopan 0.06b"
+
+inline int f2i(float flt)
+{ 
+	#if defined _MSC_VER && defined _M_IX86
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#else
+		return static_cast<int>(flt - 0.5f);
+	#endif
+}
 
 #define FILEVERSION 2
 #define MAXSYNCMODES 16
@@ -50,7 +64,7 @@ using namespace psycle::helpers::math;
 #define MAXENVTYPE 2
 #define MAX_RATE								8192
 #define MAXWAVE 17
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
 
 float SyncAdd[MAXSYNCMODES+1];
@@ -185,7 +199,7 @@ CMachineParameter const *pParameters[] =
 	&paraOUTmix,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	0,																																								// flags
 	e_numVALS,																																								// numParameters
@@ -253,7 +267,7 @@ private:
 	int oldpan;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //DLL_EXPORTS
 
 mi::mi()
@@ -267,7 +281,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 // Destroy dinamically allocated objects/memory here
 	INERTIA* pI = pInertia;
 	while (pI)
@@ -322,14 +336,14 @@ inline void mi::FilterTick()
 		vcflfophase += ((vcflfospeed-MAXSYNCMODES)*(vcflfospeed-MAXSYNCMODES))*0.000030517f*44100/song_freq;
 	}
 	WRAP_AROUND(vcflfophase);
-	Vals[e_paraVCFlfophase] = lrint<int>(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraVCFlfophase] = f2i(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
 	// vcf
 	int newpan = pan;
 
 	if (panlfoamplitude)
 	{
 		oldpan = pan;
-		newpan += lrint<int>((pvcflfowave[lrint<int>(vcflfophase)])*(panlfoamplitude));
+		newpan += f2i((pvcflfowave[f2i(vcflfophase)])*(panlfoamplitude));
 
 		if (newpan < 0)
 		{
@@ -480,7 +494,7 @@ void mi::UpdateInertia()
 			}
 			else 
 			{
-				*pI->source = lrint<int>(pI->current);
+				*pI->source = f2i(pI->current);
 				pI = pI->next;
 			}
 		}

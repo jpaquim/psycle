@@ -1,7 +1,7 @@
 //\file
 //\brief implementation file for psycle::host::InstPreview.
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+
+
 #include "InstPreview.hpp"
 #include "Instrument.hpp"
 namespace psycle {
@@ -69,4 +69,4 @@ namespace psycle {
 
 	}   // namespace
 }   // namespace
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+

@@ -21,16 +21,29 @@ v0.01b
 /////////////////////////////////////////////////////////////////////
 	*/
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
-
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers::math;
+#include <cmath>
 
 #define PLUGIN_NAME "Pooplog Lofi Processor 0.04b"
 
+inline int f2i(float flt)
+{ 
+	#if defined _MSC_VER && defined _M_IX86
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#else
+		return static_cast<int>(flt - 0.5f);
+	#endif
+}
 
 CMachineParameter const paraFrequency = 
 { 
@@ -92,7 +105,7 @@ CMachineParameter const *pParameters[] =
 	&paraInputGain,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	0,																																								// flags
 	num_params,																																								// numParameters
@@ -133,7 +146,7 @@ private:
 	int song_freq;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //DLL_EXPORTS
 
 mi::mi()
@@ -144,7 +157,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 // Destroy dinamically allocated objects/memory here
 }
 
@@ -341,7 +354,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		// do bits
 		if (fabs(sl) < 16384)
 		{
-			i = abs(lrint<int>(sl*65536*2));
+			i = abs(f2i(sl*65536*2));
 		}
 		else
 		{
@@ -357,7 +370,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		if (fabs(sr) < 16384)
 		{
-			i = abs(lrint<int>(sr*65536*2));
+			i = abs(f2i(sr*65536*2));
 		}
 		else
 		{

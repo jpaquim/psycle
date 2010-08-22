@@ -3,29 +3,22 @@
 
 #include "Configuration.hpp"
 #include "Registry.hpp"
-
-#include <psycle/core/song.h>
-#include <psycle/core/patternEvent.h>
-#include "WaveOutDialog.hpp"
-#include "DSoundConfig.hpp"
-#include "ASIOConfig.hpp"
-#include <psycle/audiodrivers/microsoftmmewaveout.h>
-#include <psycle/audiodrivers/microsoftdirectsoundout.h>
-#include <psycle/audiodrivers/asiointerface.h>
-
 #if !defined WINAMP_PLUGIN
+	#include "WaveOut.hpp"
+	#include "DirectSound.hpp"
+	#include "ASIOInterface.hpp"
 	#include "MidiInput.hpp"
 	#include "NewMachine.hpp"
 #endif // !defined WINAMP_PLUGIN
 
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include "Song.hpp"
+#include "VstHost24.hpp"
 
-namespace psycle { namespace host {
-		
+#include <universalis/os/fs.hpp>
+namespace psycle
+{
+	namespace host
+	{
 		Configuration::Configuration()
 		{
 			_initialized = false;
@@ -56,24 +49,19 @@ namespace psycle { namespace host {
 
 			SetSkinDefaults();
 			// soundcard output device
-			{				
+			{
 				_numOutputDrivers = 4;
-				_ppOutputDrivers = new psycle::audiodrivers::AudioDriver*[_numOutputDrivers];
-				///\todo: DummyDriver is an experimental "use all cpu" driver. The old AudioDriver was
-				/// a "do nothing" driver instead.
-				_ppOutputDrivers[0] = new audiodrivers::DummyDriver();
-				mme_ui_ = new MMEUi();
-				_ppOutputDrivers[1] = new audiodrivers::MsWaveOut(mme_ui_);
-				dsound_ui_ = new DSoundUi();
-				_ppOutputDrivers[2] = new audiodrivers::MsDirectSound(dsound_ui_);
-				asio_ui_ = new AsioUi();
-				_ppOutputDrivers[3] = new audiodrivers::ASIOInterface(asio_ui_);
-				if(((audiodrivers::ASIOInterface*)(_ppOutputDrivers[3]))->_drivEnum.size() <= 0)
+				_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
+				_ppOutputDrivers[0] = new AudioDriver;
+				_ppOutputDrivers[1] = new WaveOut;
+				_ppOutputDrivers[2] = new DirectSound;
+				_ppOutputDrivers[3] = new ASIOInterface;
+				if(((ASIOInterface*)(_ppOutputDrivers[3]))->_drivEnum.size() <= 0)
 				{
 					_numOutputDrivers--;
 					delete _ppOutputDrivers[3]; _ppOutputDrivers[3] = 0;
 				}
-				_outputDriverIndex = 2; // use direct sound so far as default;				
+				_outputDriverIndex = 2;
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
 			}
 			// midi
@@ -93,13 +81,16 @@ namespace psycle { namespace host {
 					midi().velocity().from()    = 0;
 					midi().velocity().to()      = 0xff;
 				}
-
 			}
 #endif // !defined WINAMP_PLUGIN
 			// pattern height
 			{
 				defaultPatLines = 64;
-
+				for(int c(0) ; c < MAX_PATTERNS; ++c)
+				{
+					// All pattern reset
+					Global::_pSong->patternLines[c] = defaultPatLines;
+				}
 			}
 
 			// paths
@@ -112,23 +103,15 @@ namespace psycle { namespace host {
 					program_executable_dir_ = program_executable_dir_.substr(0, program_executable_dir_.rfind('\\')) + '\\';
 				}
 				{
-					SetInstrumentDir(appPath()+"instruments");
+					SetInstrumentDir(appPath()+"Instruments");
 					SetCurrentInstrumentDir(GetInstrumentDir());
-					SetSongDir(appPath()+"songs");
+					SetSongDir((universalis::os::fs::home() / "Songs").native_file_string());
 					SetCurrentSongDir(GetSongDir());
-					SetSkinDir(appPath()+"skins");
-
-					///\todo let's be consistent
-					/// when building the visual-studio solution, plugins are put in the 'psycle-plugins' subdir
-					/// but the install-shield installer put them in a 'PsyclePlugins' subdir.
-					SetPluginDir(appPath() + "PsyclePlugins");
-					#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-						if(std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-							SetPluginDir(appPath() + "psycle-plugins");
-					#endif
-
-					SetVstDir(appPath()+"VstPlugins");
-					SetWaveRecDir(appPath()+"songs");
+					SetSkinDir(appPath()+"Skins");
+					SetPluginDir(appPath()+"PsyclePlugins");
+					SetVst32Dir(appPath()+"VstPlugins");
+					SetVst64Dir(appPath()+"VstPlugins64");
+					SetWaveRecDir((universalis::os::fs::home() / "Songs").native_file_string());
 					SetCurrentWaveRecDir(GetWaveRecDir());
 				}
 			}
@@ -149,9 +132,6 @@ namespace psycle { namespace host {
 				delete [] _ppOutputDrivers;
 			}
 			delete _pMidiInput;
-			delete mme_ui_;
-			delete dsound_ui_;
-			delete asio_ui_;
 #endif // !defined WINAMP_PLUGIN
 		}
 
@@ -191,10 +171,8 @@ namespace psycle { namespace host {
 
 
 #if !defined WINAMP_PLUGIN
-			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::machineGrouping);
-			reg.QueryValue("NewMacDlgdisplayName", CNewMachine::displayName);
-			// Old values was boolean.
-			// reg.QueryValue("NewMacDlgpluginName", CNewMachine::displayName);
+			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
+			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
 			reg.QueryValue("WrapAround", _wrapAround);
 			reg.QueryValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.QueryValue("windowsBlocks", _windowsBlocks);
@@ -251,7 +229,11 @@ namespace psycle { namespace host {
 #endif // !defined WINAMP_PLUGIN
 
 			reg.QueryValue("defaultPatLines", defaultPatLines);
-			// Global::song().SetDefaultPatternLines(defaultPatLines);
+			for(int c(0) ; c < MAX_PATTERNS; ++c)
+			{
+				// All pattern reset
+				Global::_pSong->patternLines[c] = defaultPatLines;
+			}
 #if !defined WINAMP_PLUGIN
 			reg.QueryValue("bShowSongInfoOnLoad", bShowSongInfoOnLoad);
 			reg.QueryValue("bFileSaveReminders", bFileSaveReminders);
@@ -338,10 +320,6 @@ namespace psycle { namespace host {
 				reg.QueryValue("OutputDriver", _outputDriverIndex);
 				if(0 > _outputDriverIndex || _outputDriverIndex >= _numOutputDrivers) _outputDriverIndex = 1;
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
-				for (int i(0);i<_numOutputDrivers;++i)
-				{
-					_ppOutputDrivers[i]->ReadConfig();
-				}
 			}
 			// midi
 			{
@@ -375,13 +353,20 @@ namespace psycle { namespace host {
 				reg.QueryValue("SongDir", song_dir_);
 				SetCurrentSongDir(GetSongDir());
 				reg.QueryValue("SkinDir", skin_dir_);
+#if defined _WIN64
+				reg.QueryValue("PluginDir64", plugin_dir_);
+#elif defined _WIN32
+				reg.QueryValue("PluginDir", plugin_dir_);
+#endif
+				reg.QueryValue("VstDir", vst32_dir_);
+				reg.QueryValue("VstDir64", vst64_dir_);
+				bool use=false;
+				reg.QueryValue("jBridge", use);
+				Global::pVstHost->UseJBridge(use);
+				use=false;
+				reg.QueryValue("psycleBridge", use);
+				Global::pVstHost->UsePsycleVstBridge(use);
 
-				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-					if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-				#endif
-						reg.QueryValue("PluginDir", plugin_dir_);
-
-				reg.QueryValue("VstDir", vst_dir_);
 				reg.QueryValue("WaveRecDir", wave_rec_dir_);
 				SetCurrentWaveRecDir(GetWaveRecDir());
 			}
@@ -407,10 +392,8 @@ namespace psycle { namespace host {
 					return;
 				}
 			}
-			reg.SetValue("NewMacDlgpluginOrder", CNewMachine::machineGrouping);
-			reg.SetValue("NewMacDlgdisplayName", CNewMachine::displayName);
-			// Old values was boolean.
-			//reg.SetValue("NewMacDlgpluginName", CNewMachine::displayName);
+			reg.SetValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
+			reg.SetValue("NewMacDlgpluginName", CNewMachine::pluginName);
 			reg.SetValue("WrapAround", _wrapAround);
 			reg.SetValue("AllowMultipleInstances", _allowMultipleInstances);
 			reg.SetValue("CenterCursor", _centerCursor);
@@ -433,10 +416,6 @@ namespace psycle { namespace host {
 			reg.SetValue("NavigationIgnoresStep", _NavigationIgnoresStep);
 			reg.SetValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
 			reg.SetValue("OutputDriver", _outputDriverIndex);
-			for (int i(0);i<_numOutputDrivers;++i)
-			{
-				_ppOutputDrivers[i]->WriteConfig();
-			}
 			reg.SetValue("MidiInputDriver", _midiDriverIndex);
 			reg.SetValue("MidiSyncDriver", _syncDriverIndex);
 			reg.SetValue("MidiInputHeadroom", _midiHeadroom);
@@ -537,13 +516,19 @@ namespace psycle { namespace host {
 			reg.SetValue("machine_skin", machine_skin);
 			reg.SetValue("InstrumentDir", GetInstrumentDir());
 			reg.SetValue("SongDir", GetSongDir());
+#if defined _WIN64
+			reg.SetValue("PluginDir64", GetPluginDir());
+#elif defined _WIN32
+			reg.SetValue("PluginDir", GetPluginDir());
+#endif
+			reg.SetValue("VstDir", GetVst32Dir());
+			reg.SetValue("VstDir64", GetVst64Dir());
 
-			#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-				if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-			#endif
-					reg.SetValue("PluginDir", GetPluginDir());
+			bool use = Global::pVstHost->UseJBridge();
+			reg.SetValue("jBridge", use);
+			use = Global::pVstHost->UsePsycleVstBridge();
+			reg.SetValue("psycleBridge", use);
 
-			reg.SetValue("VstDir", GetVstDir());
 			reg.SetValue("SkinDir", GetSkinDir());
 			reg.SetValue("WaveRecDir", GetWaveRecDir());
 			reg.CloseKey();
@@ -582,11 +567,32 @@ namespace psycle { namespace host {
 			plugin_dir_ = s;
 		}
 
-		void Configuration::SetVstDir(std::string const & s)
+		void Configuration::SetVst32Dir(std::string const & s)
 		{
-			vst_dir_ = s;
+			vst32_dir_ = s;
 		}
 
+		void Configuration::SetVst64Dir(std::string const & s)
+		{
+			vst64_dir_ = s;
+		}
+		void Configuration::UseJBridge(bool use) 
+		{
+			Global::vsthost().UseJBridge(use);
+		}
+		bool Configuration::UseJBridge() const 
+		{
+			return Global::vsthost().UseJBridge();
+		}
+		void Configuration::UsePsycleVstBridge(bool use)
+		{
+			Global::vsthost().UsePsycleVstBridge(use);
+		}
+		bool Configuration::UsePsycleVstBridge() const
+		{
+			return Global::vsthost().UsePsycleVstBridge();
+		}
+			
 		void Configuration::SetWaveRecDir(std::string const & s)
 		{
 			wave_rec_dir_ = s;
@@ -759,8 +765,8 @@ namespace psycle { namespace host {
 			if ( result != ERROR_SUCCESS) return false;
 
 #if !defined WINAMP_PLUGIN
-			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::machineGrouping);
-			reg.QueryValue("NewMacDlgpluginName", CNewMachine::displayName);
+			reg.QueryValue("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
+			reg.QueryValue("NewMacDlgpluginName", CNewMachine::pluginName);
 			reg.QueryValue("WrapAround", _wrapAround);
 			reg.QueryValue("CenterCursor", _centerCursor);
 			reg.QueryValue("FollowSong", _followSong);
@@ -812,8 +818,11 @@ namespace psycle { namespace host {
 			}
 #endif // !defined WINAMP_PLUGIN
 			reg.QueryValue("defaultPatLines", defaultPatLines);
-//				Global::song().SetDefaultPatternLines(defaultPatLines);
-
+			for(int c(0) ; c < MAX_PATTERNS; ++c)
+			{
+				// All pattern reset
+				Global::_pSong->patternLines[c] = defaultPatLines;
+			}
 #if !defined WINAMP_PLUGIN
 
 			char savedbyte;
@@ -930,13 +939,8 @@ namespace psycle { namespace host {
 				reg.QueryValue("SongDir", song_dir_);
 				SetCurrentSongDir(GetSongDir());
 				reg.QueryValue("SkinDir", skin_dir_);
-
-				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-					if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-				#endif
-						reg.QueryValue("PluginDir", plugin_dir_);
-
-				reg.QueryValue("VstDir", vst_dir_);
+				reg.QueryValue("PluginDir", plugin_dir_);
+				reg.QueryValue("VstDir", vst32_dir_);
 				SetWaveRecDir(GetSongDir());
 				SetCurrentWaveRecDir(GetWaveRecDir());
 			}

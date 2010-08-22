@@ -4,14 +4,11 @@
 #include <afxwin.h>
 
 namespace psycle {
-namespace core {
-	class XMSampler;
-}
 namespace host {
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUIGeneral dialog
-
+class XMSampler;
 class XMSamplerUIGeneral : public CPropertyPage
 {
 	DECLARE_DYNCREATE(XMSamplerUIGeneral)

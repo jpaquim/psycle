@@ -1,4 +1,4 @@
-/*								Blitz (C)2005-2009 by jme
+/*								Blitz (C)2005 by jme
 		Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
 		This plugin is free software; you can redistribute it and/or modify
@@ -27,32 +27,33 @@
 #include "lfo.h"
 #include "pwm.h"
 
-#define MIN_ENV_TIME 1
-#define MAX_ENV_TIME 65536
-#define MAX_TRACKS   64
+#define MIN_ENV_TIME				1
+#define MAX_ENV_TIME				65536
+#define MAX_TRACKS				64
 
-class mi : public psycle::plugin_interface::CMachineInterface {
-	public:
-		void InitWaveTable();
-		void updateOsc(int osc);
-		mi();
-		virtual ~mi();
+class mi : public CMachineInterface
+{
+public:
+	void InitWaveTable();
+	void updateOsc(int osc);
+	mi();
+	virtual ~mi();
 
-		virtual void Init();
-		virtual void SequencerTick();
-		virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int tracks);
-		virtual bool DescribeValue(char* txt,int const param, int const value);
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
-		virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
-		virtual void Stop();
+	virtual void Init();
+	virtual void SequencerTick();
+	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int tracks);
+	virtual bool DescribeValue(char* txt,int const param, int const value);
+	virtual void Command();
+	virtual void ParameterTweak(int par, int val);
+	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
+	virtual void Stop();
 
-	private:
-		CSynthTrack track[MAX_TRACKS];
-		VOICEPAR globals;
-		int InitPos[4];
-		int slomo;
-		pwm InitLoop[4];
-		lfo SyncViber;
-		lfo FiltViber;
+private:
+	CSynthTrack track[MAX_TRACKS];
+	VOICEPAR globals;
+	int InitPos[4];
+	int slomo;
+	pwm InitLoop[4];
+	lfo SyncViber;
+	lfo FiltViber;
 };

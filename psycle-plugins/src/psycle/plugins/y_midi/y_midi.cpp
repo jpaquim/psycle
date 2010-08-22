@@ -60,7 +60,7 @@ void midichannel::StopMidi()
 //////////////////////////////////////////////////////////////////////////
 //  mi machine class.
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -72,7 +72,7 @@ mi::mi()
 	{
 		numChannel[i].Init(handle,i);
 	}
-	for(i=0;i<psycle::plugin_interface::MAX_TRACKS; i++)
+	for(i=0;i<MAX_TRACKS; i++)
 	{
 		numC[i]=0;
 		notes[i]=-1;

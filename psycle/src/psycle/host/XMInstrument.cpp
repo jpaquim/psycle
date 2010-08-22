@@ -3,17 +3,13 @@
  *  $Date$
  *  $Revision$
  */
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+
+
 
 #include "XMInstrument.hpp"
-#include "Configuration.hpp"
-//#include "IPsySongLoader.h"
-//#include "IPsySongSaver.h"
-#include "Filter.hpp"
-#include "DataCompression.hpp"
+#include <psycle/helpers/filter.hpp>
+#include <psycle/helpers/datacompression.hpp>
 #include "FileIO.hpp"
-#include <universalis/stdlib/cstdint.hpp>
 #include <cassert>
 namespace psycle
 {
@@ -71,7 +67,7 @@ namespace psycle
 			riffFile.Read(size1);
 			unsigned char * pData = new unsigned char[size1];
 			riffFile.Read((void*)pData,size1);
-			SoundDesquash(pData, &m_pWaveDataL);
+			DataCompression::SoundDesquash(pData, &m_pWaveDataL);
 			
 			if (m_WaveStereo)
 			{
@@ -79,7 +75,7 @@ namespace psycle
 				riffFile.Read(size2);
 				pData = new unsigned char[size2];
 				riffFile.Read(pData,size2);
-				SoundDesquash(pData, &m_pWaveDataR);
+				DataCompression::SoundDesquash(pData, &m_pWaveDataR);
 			}
 			delete pData;
 			return size;
@@ -89,12 +85,12 @@ namespace psycle
 		{
 			unsigned char * pData1(0);
 			unsigned char * pData2(0);
-			std::uint32_t size1= SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
+			std::uint32_t size1= DataCompression::SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
 			std::uint32_t size2(0);
 
 			if (m_WaveStereo)
 			{
-				size2 = SoundSquash(m_pWaveDataR,&pData2,m_WaveLength);
+				size2 = DataCompression::SoundSquash(m_pWaveDataR,&pData2,m_WaveLength);
 			}
 
 			CT2A _wave_name(m_WaveName.c_str());
@@ -400,6 +396,7 @@ namespace psycle
 			}
 		}
 
+
 //////////////////////////////////////////////////////////////////////////
 //   XMInstrument Implementation
 		XMInstrument::XMInstrument()
@@ -520,7 +517,7 @@ namespace psycle
 
 			int i;
 			int size = 0;
-			int filepos = riffFile.GetPos();
+			size_t filepos = riffFile.GetPos();
 
 			riffFile.Write("INST",4);
 			riffFile.Write(size);
@@ -566,12 +563,11 @@ namespace psycle
 			m_PanEnvelope.Save(riffFile,version);
 			m_FilterEnvelope.Save(riffFile,version);
 			m_PitchEnvelope.Save(riffFile,version);
-			int endpos = riffFile.GetPos();
+			size_t endpos = riffFile.GetPos();
 			riffFile.Seek(filepos+4);
-			riffFile.Write(endpos-filepos);
+			riffFile.Write((unsigned int)(endpos-filepos));
 			riffFile.Seek(endpos);
 		}
 
 	} //namespace host
 }// namespace psycle
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

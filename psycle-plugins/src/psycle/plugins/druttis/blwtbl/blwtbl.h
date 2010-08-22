@@ -1,22 +1,35 @@
-// blwtbl.h
-// druttis@darkface.pp.se
+//////////////////////////////////////////////////////////////////////
+//
+//				blwtbl.h
+//
+//				druttis@darkface.pp.se
+//
+//////////////////////////////////////////////////////////////////////
 #pragma once
 #include "../dsp/Waveform.h"
-#include <universalis.hpp>
-
-#ifdef DRUTTIS__BAND_LIMITED_WAVES_TABLES__SOURCE
-	#define DRUTTIS__BAND_LIMITED_WAVES_TABLES__DECL UNIVERSALIS__COMPILER__DYN_LINK__EXPORT
+//////////////////////////////////////////////////////////////////////
+//
+//				DLL - Macros
+//
+//////////////////////////////////////////////////////////////////////
+#if !defined __unix__ && defined _DLL // Div0, is that for building a static lib?
+  #include <universalis/compiler.hpp>
+  #ifdef DRUTTIS__BAND_LIMITED_WAVES_TABLES__SOURCE
+    #define DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DYNAMIC_LINK__EXPORT
+  #else
+    #define DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK  UNIVERSALIS__COMPILER__DYNAMIC_LINK__IMPORT
+  #endif
 #else
-	#define DRUTTIS__BAND_LIMITED_WAVES_TABLES__DECL UNIVERSALIS__COMPILER__DYN_LINK__IMPORT
+  #define DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK
 #endif
-
-#if !defined DRUTTIS__BAND_LIMITED_WAVES_TABLES__SOURCE && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "blwtbl")
-#endif
-
-DRUTTIS__BAND_LIMITED_WAVES_TABLES__DECL bool EnableWaveform(int index);
-DRUTTIS__BAND_LIMITED_WAVES_TABLES__DECL bool DisableWaveform(int index);
-DRUTTIS__BAND_LIMITED_WAVES_TABLES__DECL bool GetWaveform(int wavenum, WAVEFORM *pwave);
-DRUTTIS__BAND_LIMITED_WAVES_TABLES__DECL bool UpdateWaveforms(int samplingrate);
-DRUTTIS__BAND_LIMITED_WAVES_TABLES__DECL float* GetFMTable();
-DRUTTIS__BAND_LIMITED_WAVES_TABLES__DECL float* GetPMTable();
+//////////////////////////////////////////////////////////////////////
+//
+//				DLL - Functions
+//
+//////////////////////////////////////////////////////////////////////
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK bool EnableWaveform(int index);
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK bool DisableWaveform(int index);
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK bool GetWaveform(int wavenum, WAVEFORM *pwave);
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK bool UpdateWaveforms(int samplingrate);
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK float* GetFMTable();
+DRUTTIS__BAND_LIMITED_WAVES_TABLES__DYNAMIC_LINK float* GetPMTable();

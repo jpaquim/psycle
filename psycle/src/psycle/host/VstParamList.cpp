@@ -7,9 +7,8 @@
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 
-#include <psycle/core/vsthost.h>
-#include <psycle/core/vstplugin.h>
-#include <psycle/helpers/math.hpp>
+#include "VstHost24.hpp"
+
 
 namespace psycle { namespace host {
 
@@ -90,7 +89,7 @@ namespace psycle { namespace host {
 		{
 			UpdateParList();
 			InitializePrograms();
-			m_slider.SetRange(0, vst::AudioMaster::GetQuantization());
+			m_slider.SetRange(0, vst::quantization);
 			UpdateOne();
 		}
 
@@ -146,7 +145,7 @@ namespace psycle { namespace host {
 			int value = machine().GetParamValue(m_parlist.GetCurSel());
 			UpdateText(value);
 			_quantizedvalue = value;
-			m_slider.SetPos(vst::AudioMaster::GetQuantization() - _quantizedvalue);
+			m_slider.SetPos(vst::quantization - _quantizedvalue);
 		}
 
 		void CVstParamList::UpdateNew(int par,float value)
@@ -154,10 +153,10 @@ namespace psycle { namespace host {
 			if (par != m_parlist.GetCurSel() )
 				m_parlist.SetCurSel(par);
 
-			value *= vst::AudioMaster::GetQuantization();
+			value *= vst::quantization;
 			UpdateText(value);
-			_quantizedvalue = lround<int>(value);
-			m_slider.SetPos(vst::AudioMaster::GetQuantization() - _quantizedvalue);
+			_quantizedvalue = (helpers::math::lround<int,float>(value));
+			m_slider.SetPos(vst::quantization - _quantizedvalue);
 		}
 		void CVstParamList::OnSelchangeList() 
 		{
@@ -168,7 +167,7 @@ namespace psycle { namespace host {
 		void CVstParamList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
 
-			const int nVal = vst::AudioMaster::GetQuantization() - m_slider.GetPos();
+			const int nVal = vst::quantization - m_slider.GetPos();
 
 			if(nVal != _quantizedvalue)
 			{
@@ -178,9 +177,9 @@ namespace psycle { namespace host {
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), m_parlist.GetCurSel(), nVal);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, m_parlist.GetCurSel(), nVal);
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), m_parlist.GetCurSel(), nVal);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, m_parlist.GetCurSel(), nVal);
 				}
 			}
 		}

@@ -10,8 +10,6 @@
 #include <vector>
 #include <psycle/plugin_interface.hpp>
 
-using namespace psycle::plugin_interface;
-
 #define NUMPARAMETERS 28
 
 CMachineParameter const paraCoarse = 
@@ -332,7 +330,7 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -372,7 +370,7 @@ private:
 	int samplerate;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -382,7 +380,7 @@ mi::mi()
 mi::~mi()
 {
 	// Destroy dinamically allocated objects/memory here
-	delete[] Vals;
+	delete Vals;
 }
 
 void mi::Init()

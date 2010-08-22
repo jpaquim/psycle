@@ -1,14 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/**************************************************************************
+*   Copyright 2007-2008 Psycledelics http://psycle.sourceforge.net        *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/detail/project.private.hpp>
+
 #include "psy4filter.h"
 
+#include "file.h"
 #include "fileio.h"
 #include "song.h"
 #include "machinefactory.h"
-#include "internalkeys.hpp"
-#include "pattern.h"
+#include "singlepattern.h"
 #include "zipwriter.h"
 #include "zipwriterstream.h"
 #include "zipreader.h"
@@ -16,21 +32,21 @@
 
 #include "signalslib.h"
 
-#ifdef DIVERSALIS__OS__MICROSOFT
-	#include <io.h>
-#else
+#if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 	#include <sys/types.h>
-#endif
-#if defined PSYCLE_CORE__CONFIG__LIBXMLPP_AVAILABLE && defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "xml++-2.6.lib")
-	#pragma comment(lib, "xml2")
-	#pragma comment(lib, "glibmm-2.4.lib")
-	#pragma comment(lib, "gobject-2.0.lib")
-	#pragma comment(lib, "sigc-2.0.lib")
-	#pragma comment(lib, "glib-2.0.lib")
-	#pragma comment(lib, "intl")
-	#pragma comment(lib, "iconv")
+#elif defined _WIN64 || defined _WIN32
+	#include <io.h>
+	#if defined _MSC_VER
+		#pragma comment(lib, "xml++-2.6.lib")
+		#pragma comment(lib, "xml2")
+		#pragma comment(lib, "glibmm-2.4.lib")
+		#pragma comment(lib, "gobject-2.0.lib")
+		#pragma comment(lib, "sigc-2.0.lib")
+		#pragma comment(lib, "glib-2.0.lib")
+		#pragma comment(lib, "intl")
+		#pragma comment(lib, "iconv")
+	#endif
 #endif
 
 #include <fcntl.h>
@@ -41,7 +57,7 @@
 #include <sstream>
 #include <iostream> // only for debug output
 
-namespace psycle { namespace core {
+namespace psy { namespace core {
 
 Psy4Filter* Psy4Filter::getInstance() {
 	// don`t use multithreaded
@@ -59,15 +75,15 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	zipreader *z;
 	zipreader_file *f;
 	//int fd = open( fileName.c_str(), O_RDONLY );
-	FILE* file1 = fopen(fileName.c_str(), "rb");
+	FILE* file1 = fopen( fileName.c_str(), "rb" );
 	int fd = fileno(file1);
-	z = zipreader_open(fd);
+	z = zipreader_open( fd );
 	//int outFd = open(std::string("psytemp.xml").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
 	FILE* file2 = fopen(std::string("psytemp.xml").c_str(), "wb+");
 	int outFd = fileno(file2);
 	f = zipreader_seek(z, "xml/song.xml");
 
-	if (!zipreader_extract(f, outFd)) {
+	if (!zipreader_extract(f, outFd )) {
 		zipreader_close( z );
 		//close( outFd );
 		//close( fd );
@@ -80,7 +96,7 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 
 	f = zipreader_seek(z, "bin/song.bin");
 	//outFd = open(std::string("psytemp.bin").c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
-	file2 = fopen(std::string("psytemp.bin").c_str(), "wb+");
+	file2 = fopen(std::string("psytemp.bin").c_str(), "wb+" );
 	outFd = fileno(file2);
 	if (!zipreader_extract(f, outFd )) {
 		zipreader_close( z );
@@ -97,35 +113,30 @@ bool Psy4Filter::testFormat( const std::string & fileName )
 	//close( fd );
 	fclose(file1);
 
-#ifndef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
-	return false;
-#else
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
 	if(!parser) return false;
 	xmlpp::Element const & root_element(*parser.get_document()->get_root_node());
 	return root_element.get_name() == "psy4";
-#endif
-
 }
 
 bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 {
 	///\todo this creates a temporary file. need to find a way for all operations to be performed in ram
 
-	std::map<int, Pattern*> patMap;
+	std::map<int, SinglePattern*> patMap;
 	patMap.clear();
-	song.sequence().removeAll();
-	//Disabled since now we load a song in a new Song object *and* song.clear() sets setReady to true.
-	//song.clear();
+
+	song.patternSequence().patternPool()->removeAll();
+	song.patternSequence().removeAll();
+	song.clear();
 	
 	float lastPatternPos = 0;
 	PatternCategory* lastCategory = 0;
-	Pattern* lastPattern  = 0;
+	SinglePattern* lastPattern  = 0;
 	SequenceLine* lastSeqLine  = 0;
-	std::clog << "psy4filter detected for load\n";
+	std::cout << "psy4filter detected for load" << std::endl;
 
-#ifdef PSYCLE__CORE__CONFIG__LIBXMLPP_AVAILABLE
 	xmlpp::DomParser parser;
 	parser.parse_file("psytemp.xml");
 	if(!parser) return false;
@@ -184,7 +195,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 				(dynamic_cast<xmlpp::Element const &>(**i));
 			
 			try {
-				lastCategory = song.sequence().patternPool()->createNewCategory(get_attribute(category,"name").get_value());
+				lastCategory = song.patternSequence().patternPool()->createNewCategory(get_attribute(category,"name").get_value());
 			}
 			catch(...) {
 				std::cerr << "expected name attribute in category element\n";
@@ -359,7 +370,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		xmlpp::Node::NodeList const & sequencer_lines(sequence.get_children("seqline"));
 		for(xmlpp::Node::NodeList::const_iterator i = sequencer_lines.begin(); i != sequencer_lines.end(); ++i) {
 			xmlpp::Element const & sequencer_line(dynamic_cast<xmlpp::Element const &>(**i));
-			lastSeqLine = song.sequence().createNewLine();
+			lastSeqLine = song.patternSequence().createNewLine();
 			xmlpp::Node::NodeList const & sequencer_entries(sequencer_line.get_children("seqentry"));
 			for(xmlpp::Node::NodeList::const_iterator i = sequencer_entries.begin(); i != sequencer_entries.end(); ++i) {
 				xmlpp::Element const & sequencer_entry(dynamic_cast<xmlpp::Element const &>(**i));
@@ -371,12 +382,12 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 					std::cerr << "expected patid attribute in seqentry element\n";
 					continue;
 				}
-				std::map<int, Pattern*>::iterator it =
+				std::map<int, SinglePattern*>::iterator it =
 					patMap.find(str<int>(id));
 				if(it == patMap.end())
 					continue;
 				
-				Pattern * pattern(it->second);
+				SinglePattern * pattern(it->second);
 				if (!pattern)
 					continue;
 
@@ -423,12 +434,12 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		file.Skip(8);
 		///\todo:
 		size_t filesize = file.FileSize();
-		uint32_t version = 0;
-		uint32_t size = 0;
+		std::uint32_t version = 0;
+		std::uint32_t size = 0;
 		char header[5];
 		header[4]=0;
-		uint32_t chunkcount = LoadSONGv0(&file,song);
-		std::clog << chunkcount << std::endl;
+		std::uint32_t chunkcount = LoadSONGv0(&file,song);
+		std::cout << chunkcount << std::endl;
 
 		/* chunk_loop: */
 		while(file.ReadArray(header, 4) && chunkcount)
@@ -437,7 +448,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 			file.Read(size);
 
 			int fileposition = file.GetPos();
-			//progress.emit(4,static_cast<int>(fileposition*16384.0f)/filesize),"");
+			//progress.emit(4,f2i((fileposition*16384.0f)/filesize),"");
 
 			if(std::strcmp(header,"MACD") == 0)
 			{
@@ -547,7 +558,7 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		{
 			if (!song.machine(MASTER_INDEX) )
 			{
-				song.addMachine(MachineFactory::getInstance().CreateMachine(InternalKeys::master(),MASTER_INDEX));
+				MachineFactory::getInstance().CreateMachine(MachineKey::master(),MASTER_INDEX);
 			}
 			std::ostringstream s;
 			s << "Error reading from file '" << file.file_name() << "'" << std::endl;
@@ -557,7 +568,6 @@ bool Psy4Filter::load(const std::string & /*fileName*/, CoreSong& song)
 		///\todo:
 	}
 
-	#endif
 	return true;
 } // load
 
@@ -590,8 +600,8 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	xml << "<author text='" << replaceIllegalXmlChr( song.author() ) << "' />" << std::endl;;
 	xml << "<comment text='" << replaceIllegalXmlChr( song.comment() ) << "' />" << std::endl;;
 	xml << "</info>" << std::endl;
-	// xml << song.sequence().patternPool().toXml(); todo
-	xml << song.sequence().toXml();
+	xml << song.patternSequence().patternPool().toXml();
+	xml << song.patternSequence().toXml();
 	xml << "</psy4>" << std::endl;
 
 	xmlFile << xml.str();
@@ -619,7 +629,7 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 	file.WriteArray("PSY4",4);
 	saveSONGv0(&file,song);
 
-	for(int32_t index(0) ; index < MAX_MACHINES; ++index)
+	for(std::int32_t index(0) ; index < MAX_MACHINES; ++index)
 	{
 		if (song.machine(index))
 		{
@@ -662,9 +672,9 @@ bool Psy4Filter::save( const std::string & file_Name, const CoreSong& song )
 
 int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 {
-	int32_t fileversion = 0;
-	uint32_t size = 0;
-	uint32_t chunkcount = 0;
+	std::int32_t fileversion = 0;
+	std::uint32_t size = 0;
+	std::uint32_t chunkcount = 0;
 	file->Read(fileversion);
 	file->Read(size);
 	if(fileversion > CURRENT_FILE_VERSION)
@@ -682,8 +692,8 @@ int Psy4Filter::LoadSONGv0(RiffFile* file,CoreSong& /*song*/)
 
 bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong& song )
 {
-	uint32_t chunkcount;
-	uint32_t version, size;
+	std::uint32_t chunkcount;
+	std::uint32_t version, size;
 	// chunk header;
 
 	file->WriteArray("SONG",4);
@@ -706,7 +716,7 @@ bool Psy4Filter::saveSONGv0( RiffFile * file, const CoreSong& song )
 bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 {
 	MachineFactory& factory = MachineFactory::getInstance();
-	uint32_t index=0, host=0, keyindex=0;
+	std::uint32_t index=0, host=0, keyindex=0;
 	char sDllName[256];
 
 	// chunk data
@@ -721,7 +731,7 @@ bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 		song.AddMachine(mac);
 		return song.machine(index)->LoadFileChunk(file,minorversion);
 	} else {
-		mac = factory.CreateMachine(InternalKeys::dummy,index);
+		mac = factory.CreateMachine(MachineKey::dummy(),index);
 		mac->SetEditName(mac->GetEditName() + " (replaced)");
 		song.AddMachine(mac);
 		return false;
@@ -730,7 +740,7 @@ bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 
 bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 {
-	uint32_t version, size;
+	std::uint32_t version, size;
 	std::size_t pos;
 
 	// chunk header
@@ -744,18 +754,18 @@ bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 
 	// chunk data
 
-	const MachineKey& key = song.machine(index)->getMachineKey();
-	file->Write(uint32_t(index));
-	file->Write(uint32_t(key.host()));
-	file->WriteString(key.dllName());
-	// file->Write(uint32_t(key.index())); ?
+	MachineKey key = song.machine(index)->getMachineKey();
+	file->Write(std::uint32_t(index));
+	file->Write(std::uint32_t(key.host()));
+	file->WriteArray(key.dllName().c_str(),key.dllName().length()+1);
+	file->Write(std::uint32_t(key.index()));
 	
 	song.machine(index)->SaveFileChunk(file);
 
 	// chunk size in header
 
 	std::size_t const pos2 = file->GetPos();
-	size = static_cast<uint32_t>(pos2 - pos) - sizeof(size);
+	size = pos2 - pos - sizeof size;
 	file->Seek(pos);
 	file->Write(size);
 	file->Seek(pos2);
@@ -766,7 +776,7 @@ bool Psy4Filter::saveMACDv1( RiffFile * file, const CoreSong& song, int index )
 
 bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong& song, int index )
 {
-	uint32_t version, size;
+	std::uint32_t version, size;
 	std::size_t pos;
 
 	// chunk header
@@ -780,13 +790,13 @@ bool Psy4Filter::saveINSDv0( RiffFile * file, const CoreSong& song, int index )
 
 	// chunk data
 
-	file->Write(uint32_t(index));
+	file->Write(std::uint32_t(index));
 	song._pInstrument[index]->SaveFileChunk(file);
 
 	// chunk size in header
 
 	std::size_t const pos2 = file->GetPos();
-	size = static_cast<uint32_t>(pos2 - pos) - sizeof(size);
+	size = pos2 - pos - sizeof size;
 	file->Seek(pos);
 	file->Write(size);
 	file->Seek(pos2);
@@ -801,3 +811,4 @@ bool Psy4Filter::saveWAVEv0( RiffFile * /*file*/, const CoreSong& /*song*/, int 
 }
 
 }}
+

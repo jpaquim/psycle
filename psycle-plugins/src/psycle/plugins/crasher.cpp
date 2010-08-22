@@ -11,25 +11,30 @@ namespace psycle { namespace plugin {
 class Crasher : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	virtual void help(std::ostream & out) const throw()
 	{
 		out << "This is a crash on purpose plugin for helping devers make the host crash proof." << std::endl;
 	}
 
 	static const Information & information() throw()
 	{
-		static const Information information(0x0100, Information::Types::effect, "crasher", "crasher", "bohan", 1, 0, 0);
+		static const Information information(Information::Types::effect, "crasher", "crasher", "bohan", 1, 0, 0);
 		return information;
 	}
 
-	Crasher() : Plugin(information()) {}
+	Crasher() : Plugin(information())
+	{
+	}
 
-	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
+	virtual void init()
+	{
+	}
 
+	virtual void process(Sample l[], Sample r[], int samples, int);
 protected:
-	inline void Work(Sample &);
-
-	void crash() {
+	inline void process(Sample &);
+	void crash()
+	{
 		// c++ exception:
 		//throw "crash on purpose!";
 		//throw std::runtime_error("crash on purpose!");
@@ -45,19 +50,19 @@ protected:
 	}
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(Crasher)
+PSYCLE__PLUGIN__INSTANCIATOR(Crasher)
 
-void Crasher::Work(Sample l[], Sample r[], int sample, int)
+void Crasher::process(Sample l[], Sample r[], int sample, int)
 {
 	while(sample--)
 	{
-		Work(l[sample]);
-		Work(r[sample]);
+		process(l[sample]);
+		process(r[sample]);
 	}
 	crash(); ///////////////////////// <--- crash !!!
 }
 
-inline void Crasher::Work(Sample & sample)
+inline void Crasher::process(Sample & sample)
 {
 	sample = -sample;
 }

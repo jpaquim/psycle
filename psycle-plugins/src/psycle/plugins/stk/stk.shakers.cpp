@@ -7,13 +7,8 @@
 // http://ccrma.stanford.edu/software/stk/
 
 #include <psycle/plugin_interface.hpp>
-#include <stk/Stk.h>
+#include <stk/stk.h>
 #include <stk/Shakers.h>
-
-using namespace psycle::plugin_interface;
-
-// Stk recently got a namespace. We (re)declare it for backward compatibility with older stk versions.
-namespace stk {} using namespace stk;
 
 int const NUMPARAMETERS = 6;
 
@@ -89,7 +84,7 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	NUMPARAMETERS,																												// numParameters
@@ -128,7 +123,7 @@ private:
 	StkFloat samplerate;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -137,7 +132,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 
 // Destroy dinamically allocated objects/memory here
 }

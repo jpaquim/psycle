@@ -4,16 +4,13 @@
 #include "Psycle.hpp"
 
 namespace psycle { 
-namespace core {
-	class Pattern;
-}
-namespace host {
+	namespace host {
 
 		/// pattern window.
 		class CPatDlg : public CDialog
 		{
 		public:
-			CPatDlg(CWnd* pParent, Pattern* pattern);
+			CPatDlg(CWnd* pParent = 0);
 			int patLines;
 			char patName[32];
 		// Dialog Data
@@ -35,7 +32,6 @@ namespace host {
 		// Implementation
 		protected:
 			BOOL bInit;
-			Pattern* pattern_;
 			// Generated message map functions
 			//{{AFX_MSG(CPatDlg)
 			virtual BOOL OnInitDialog();

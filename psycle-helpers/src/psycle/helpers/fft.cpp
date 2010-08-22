@@ -54,7 +54,7 @@ int NumberOfBitsNeeded(int PowerOfTwo)
 {
 	int i=0;
 	while((PowerOfTwo >>=1)> 0) i++;
-	return i;
+			return i;
 }
 
 int ReverseBits(int index, int NumBits)
@@ -115,7 +115,6 @@ void FFT(int NumSamples,
 	}
 
 	NumBits = NumberOfBitsNeeded(NumSamples);
-
 	if (!gFFTBitTable)
 		InitFFT();
 

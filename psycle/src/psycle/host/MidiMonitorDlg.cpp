@@ -4,15 +4,8 @@
 #include "MidiMonitorDlg.hpp"
 #include "MidiInput.hpp"
 
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-#include <psycle/core/internalkeys.hpp>
-
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include "Song.hpp"
+#include "Machine.hpp"
 
 namespace psycle { namespace host {
 
@@ -360,22 +353,23 @@ namespace psycle { namespace host {
 				// machine mapped & active?
 				if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES )
 				{
-					if( Global::song().machine( genFxIdx ) )
+					if( Global::_pSong->_pMachine[ genFxIdx ] )
 					{
 						// machine
-						Machine * pMachine = Global::song().machine( genFxIdx );
-						sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->GetEditName().c_str() );
+						Machine * pMachine = Global::_pSong->_pMachine[ genFxIdx ];
+						sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->_editName );
 						m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
 						// instrument
 						int instrument = pMidiInput->GetInstMap( ch );
-						if (pMachine->getMachineKey() == InternalKeys::sampler) {
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[instrument]->_sName );
+						
+						if( pMachine->_type == MACH_SAMPLER )
+						{
+							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::_pSong->_pInstrument[ instrument ]->_sName );
 							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 						}
-						else if ( pMachine->getMachineKey() == InternalKeys::sampulse) {
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song().rInstrument(instrument).Name() );
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
+						else if( pMachine->_type == MACH_XMSAMPLER )
+						{
 						}
 						else
 						{

@@ -45,13 +45,11 @@
 	*   $Id: moreamp_eq.cpp 3616 2006-12-17 20:15:14Z johan-boule $$
 	*/
 #include <psycle/plugin_interface.hpp>
-#include "maEqualizer.h"
 #include <cstdlib>
 #include <cmath>
 #include <cstring>
-#include <cstdio>
 
-using namespace psycle::plugin_interface;
+#include "maEqualizer.h"
 
 #define NUMPARAMETERS 36
 
@@ -181,7 +179,7 @@ CMachineParameter const *pParameters[] =
 		&paraLink
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	EFFECT,																																								// flags
 	NUMPARAMETERS,																																// numParameters
@@ -233,14 +231,14 @@ private:
 
 	float dither[MAX_BUFFER_LENGTH];
 
-	int g_eqi, g_eqj, g_eqk;
+	char g_eqi, g_eqj, g_eqk;
 	short bnds;
 	int di;
 	int srate;
 };
 
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {

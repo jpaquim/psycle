@@ -19,7 +19,7 @@
 
 
 #include "303_voice.h"
-#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
+
 #include <cmath>
 
 Voice::Status TB303_Voice::get_status(){ //obvious function
@@ -160,7 +160,7 @@ void TB303_Voice::recalculate_filters() {
 	vcf_e0*=M_PI/base_freq;
 	vcf_e1*=M_PI/base_freq;
 	vcf_e1 -= vcf_e0;
-	//psycle::helpers::math::erase_all_nans_infinities_and_denormals(vcf_e1);
+	//undenormalise(vcf_e1);
 	vcf_envpos = ENVINC;
 }
 
@@ -174,8 +174,9 @@ void TB303_Voice::set_mix_frequency_internal(int p_mixfreq){ //stuff we need to 
 
 }
 
-//void TB303_Voice::mix_internal(int p_amount,float *p_where_l,float *p_where_r) {
-void TB303_Voice::mix_internal(int p_amount,int *p_where_l,int *p_where_r) {
+//void TB303_Voice::mix_internal(int p_amount,float *p_where_l,float *p_where_r){
+void TB303_Voice::mix_internal(int p_amount,int *p_where_l,int *p_where_r){
+
 	float mix_volume_left;
 	float mix_volume_right;
 	float mix_volume;
@@ -191,49 +192,58 @@ void TB303_Voice::mix_internal(int p_amount,int *p_where_l,int *p_where_r) {
 	--p_where_l;
 	--p_where_r;
 
-	while (p_amount--) { //ok, the amount of SAMPLES to mix (remember, buffer is STEREO
+		while (p_amount--) { //ok, the amount of SAMPLES to mix (remember, buffer is STEREO
+
+
 		float w,k; //,s;
 
-		// update vcf
-		if(vcf_envpos >= ENVINC) {
-			w = vcf_e0 + vcf_c0;
-			k = std::exp(-w/vcf_rescoeff);
-			vcf_c0 *= vcf_envdecay;
-			vcf_a = 2.0*cos(2.0*w) * k;
-			vcf_b = -k*k;
-			vcf_c = 1.0 - vcf_a - vcf_b;
-			vcf_envpos = 0;
-		}
+			// update vcf
+				if(vcf_envpos >= ENVINC) {
+					w = vcf_e0 + vcf_c0;
+					k = std::exp(-w/vcf_rescoeff);
+					vcf_c0 *= vcf_envdecay;
+					vcf_a = 2.0*cos(2.0*w) * k;
+					vcf_b = -k*k;
+					vcf_c = 1.0 - vcf_a - vcf_b;
+					vcf_envpos = 0;
+				}
 
-		// compute sample
-		val=vcf_a*vcf_d1 + vcf_b*vcf_d2 + vcf_c*vco_k*vca_a;
+				// compute sample
+				val=vcf_a*vcf_d1 + vcf_b*vcf_d2 + vcf_c*vco_k*vca_a;
+			//undenormalise(val);
+			//anti-denormal code from Jazz
+			//unsigned int corrected_sample = *((unsigned int*)&val);
+				//corrected_sample *= ((corrected_sample < 0x7F800000) && ((corrected_sample & 0x7F800000) > 0));
+				//val = *((float*)&corrected_sample);
+			unsigned int corrected_sample = *((unsigned int*)&val);
+				unsigned int exponent = corrected_sample & 0x7F800000;
+				corrected_sample *= ((exponent < 0x7F800000) & (exponent > 0));
+				val = *((float*)&corrected_sample);
+			left_c = val * mix_volume_left*REQUESTED_MAX_SAMPLE_VALUE;
+			right_c = val * mix_volume_right*REQUESTED_MAX_SAMPLE_VALUE;
+			//left_c*=REQUESTED_MAX_SAMPLE_VALUE; //this is the max value for the voice, it's actually (1<<29)
+			//right_c*=REQUESTED_MAX_SAMPLE_VALUE;
+			*++p_where_l += left_c; //mix to channel buffer, left sample
+			*++p_where_r += right_c; //mix to channel buffer, right sample
 
-		psycle::helpers::math::erase_all_nans_infinities_and_denormals(val);
-
-		left_c = val * mix_volume_left*REQUESTED_MAX_SAMPLE_VALUE;
-		right_c = val * mix_volume_right*REQUESTED_MAX_SAMPLE_VALUE;
-		//left_c*=REQUESTED_MAX_SAMPLE_VALUE; //this is the max value for the voice, it's actually (1<<29)
-		//right_c*=REQUESTED_MAX_SAMPLE_VALUE;
-		*++p_where_l += left_c; //mix to channel buffer, left sample
-		*++p_where_r += right_c; //mix to channel buffer, right sample
-
-		vcf_d2=vcf_d1;
-		vcf_envpos++;
-		vcf_d1=val; //outbuf[i]
-		// update vco
-		vco_k += vco_inc;
-		if(vco_k > 0.5) vco_k -= 1.0;
-		// update vca
-		if(!vca_mode) {
-			vca_a+=(vca_a0-vca_a)*vca_attack;
-		}
-		else if(vca_mode == 1) {
-			vca_a *= vca_decay;
-			// the following line actually speeds up processing on SGIs
-			if(vca_a < (1/65536.0)) { vca_a = 0; vca_mode = 2; }
-		}
+				vcf_d2=vcf_d1;
+				vcf_envpos++;
+				vcf_d1=val; //outbuf[i]
+				// update vco
+				vco_k += vco_inc;
+				if(vco_k > 0.5) vco_k -= 1.0;
+				// update vca
+			if(!vca_mode){
+				vca_a+=(vca_a0-vca_a)*vca_attack;
+			}
+				else if(vca_mode == 1) {
+					vca_a *= vca_decay;
+					// the following line actually speeds up processing on SGIs
+					if(vca_a < (1/65536.0)) { vca_a = 0; vca_mode = 2; }
+				}
 	}
 	//store_last_values(left_c,right_c); //this goes to the declicker, to try avoid clicking if the voice is abruptly cut
+	
 }
 
 TB303_Voice::TB303_Voice():Voice(){

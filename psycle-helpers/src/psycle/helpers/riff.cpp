@@ -279,9 +279,9 @@ DDCRET WaveFile::WriteMonoSample(float SampleData) {
 	switch( wave_format.data.wFormatTag )
 	{
 	case 1: // Integer PCM
-		if(SampleData > 32767.0f) SampleData = 32767.0f;
-		else if(SampleData < -32768.0f) SampleData = -32768.0f;
-		switch( wave_format.data.nBitsPerSample) {
+	if(SampleData > 32767.0f) SampleData = 32767.0f;
+	else if(SampleData < -32768.0f) SampleData = -32768.0f;
+	switch( wave_format.data.nBitsPerSample) {
 		case 8:
 			pcm_data.ckSize += 1;
 			d = std::int32_t(SampleData / 256.0f);
@@ -323,11 +323,11 @@ DDCRET WaveFile::WriteStereoSample(float LeftSample, float RightSample) {
 	switch( wave_format.data.wFormatTag )
 	{
 	case 1: // Integer PCM
-		if(LeftSample > 32767.0f) LeftSample = 32767.0f;
-		else if(LeftSample < -32768.0f) LeftSample = -32768.0f;
-		if(RightSample > 32767.0f) RightSample = 32767.0f;
-		else if(RightSample < -32768.0f) RightSample = -32768.0f;
-		switch(wave_format.data.nBitsPerSample) {
+	if(LeftSample > 32767.0f) LeftSample = 32767.0f;
+	else if(LeftSample < -32768.0f) LeftSample = -32768.0f;
+	if(RightSample > 32767.0f) RightSample = 32767.0f;
+	else if(RightSample < -32768.0f) RightSample = -32768.0f;
+	switch(wave_format.data.nBitsPerSample) {
 		case 8:
 			l = std::int32_t(LeftSample / 256.0f);
 			r = std::int32_t(RightSample / 256.0f);

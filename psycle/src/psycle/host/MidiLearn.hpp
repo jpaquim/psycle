@@ -10,7 +10,7 @@
 
 	#include <mmsystem.h> // for HMIDIIN
 	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-		#pragma comment(lib, "winmm")
+	#pragma comment(lib, "winmm")
 	#endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT

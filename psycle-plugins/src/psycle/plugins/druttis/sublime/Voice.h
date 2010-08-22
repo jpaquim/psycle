@@ -532,7 +532,7 @@ public:
 				do
 				{
 					incr = m_osc2_incr.Next() * FM(*++posc2_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, idx)
 							* (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, idx));
 					m_osc2_phase += incr;
@@ -549,7 +549,7 @@ public:
 				do
 				{
 					incr = m_osc2_incr.Next() * FM(*++posc2_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, idx)
 							+ (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, idx));
 					m_osc2_phase += incr;
@@ -566,7 +566,7 @@ public:
 				do
 				{
 					incr = m_osc2_incr.Next() * FM(*++posc2_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, idx)
 							- (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, idx));
 					m_osc2_phase += incr;
@@ -583,7 +583,7 @@ public:
 				do
 				{
 					incr = m_osc2_incr.Next() * FM(*++posc2_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, idx);
 					m_osc2_phase += incr;
 				}
@@ -620,7 +620,7 @@ public:
 				do
 				{
 					incr = m_osc1_incr.Next() * FM(*++posc1_fm + *++pout2 * *++posc_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					tmp = m_osc1_phase + *pout2 * *++posc_pm * ppmtable[idx];
 					*++pout1 = m_globals->m_osc1_wave.GetSample(tmp, idx)
 							* (m_globals->m_osc1_wave.GetSample(tmp + *++posc1_pm_amount, idx));
@@ -638,7 +638,7 @@ public:
 				do
 				{
 					incr = m_osc1_incr.Next() * FM(*++posc1_fm + *++pout2 * *++posc_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					tmp = m_osc1_phase + *pout2 * *++posc_pm * ppmtable[idx];
 					*++pout1 = m_globals->m_osc1_wave.GetSample(tmp, idx)
 							+ (m_globals->m_osc1_wave.GetSample(tmp + *++posc1_pm_amount, idx));
@@ -656,7 +656,7 @@ public:
 				do
 				{
 					incr = m_osc1_incr.Next() * FM(*++posc1_fm + *++pout2 * *++posc_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					tmp = m_osc1_phase + *pout2 * *++posc_pm * ppmtable[idx];
 					*++pout1 = m_globals->m_osc1_wave.GetSample(tmp, idx)
 							- (m_globals->m_osc1_wave.GetSample(tmp + *++posc1_pm_amount, idx));
@@ -675,7 +675,7 @@ public:
 				do
 				{
 					incr = m_osc1_incr.Next() * FM(*++posc1_fm + *++pout2 * *++posc_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					tmp = m_osc1_phase + *pout2 * *++posc_pm * ppmtable[idx];
 					*++pout1 = m_globals->m_osc1_wave.GetSample(tmp, idx);
 					m_osc1_phase += incr;

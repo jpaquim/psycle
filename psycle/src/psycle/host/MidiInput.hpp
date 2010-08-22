@@ -4,8 +4,6 @@
 #pragma once
 #include "Global.hpp"
 
-#include <psycle/core/patternevent.h>
-
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
@@ -20,8 +18,10 @@
 	#pragma warning(pop)
 #endif
 
-namespace psycle { namespace host {
-
+namespace psycle
+{
+	namespace host
+	{
 		#define MAX_MIDI_CHANNELS 16
 		#define MAX_CONTROLLERS   127
 		#define MAX_PARAMETERS    127
@@ -77,7 +77,7 @@ namespace psycle { namespace host {
 		public:
 			MIDI_BUFFER() : timeStamp(0), channel(0) {};
 			/// tracker pattern info struct
-			PatternEvent entry;
+			PatternEntry entry;
 			/// MIDI input device's timestamp
 			std::uint32_t timeStamp;
 			/// MIDI channel
@@ -137,7 +137,8 @@ namespace psycle { namespace host {
 			CMidiInput();
 			virtual ~CMidiInput();
 
-			static CMidiInput* Instance() { return s_Instance; }
+			/// returns the current instance
+			static CMidiInput * Instance() { return s_Instance; }
 
 			/// set MIDI input device identifier
 			void SetDeviceId(unsigned int driver, int devId);	
@@ -149,43 +150,52 @@ namespace psycle { namespace host {
 			void ReSync();			
 			/// close the midi input device
 			bool Close( );				
+
 			/// find out if we are open
 			bool Active() { return m_midiInHandle!=NULL; }
+
 			/// for external access
 			MIDI_STATS * GetStatsPtr() { return &m_stats; }		
 			/// for external access
 			MIDI_CONFIG * GetConfigPtr() { return &m_config; }
+
 			/// returns the number of midi devices on the system
 			int GetNumDevices( void );	
 			/// convert a name identifier into a index identifier (or -1 if fail)
 			int FindDevByName( CString nameString );	
 			/// fill a listbox with a list of the available input devices
 			std::uint32_t PopulateListbox( CComboBox * listbox , bool issync );	
+
 			/// return the current device handle
 			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
+
 			/// set a instrument map
 			void SetInstMap( int machine, int inst );	
 			/// get the mapped instrument for the given machine
 			int GetInstMap( int machine );	
+
 			/// set a instrument map
 			void SetGenMap( int channel, int generator );	
 			/// get the mapped instrument for the given machine
 			int GetGenMap( int channel );	
+
 			/// set a controller map
 			void SetControllerMap( int channel, int controller, int parameter );	
 			/// get a controller map
 			int GetControllerMap( int channel, int controller );	
+
 			/// get the channel's note off status
 			bool GetNoteOffStatus( int channel );	
+
 			/// called to inject MIDI data
-			bool InjectMIDI( int amount );	
+			void InjectMIDI( int amount );	
+
 			/// the master MIDI handler mode (see enum MODES), external objects can change this at will
 			int m_midiMode;	
 
 		private:
 			/// the midi callback functions (just a static linker to the instance one)
 			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
-
 			/// the real callbacks
 			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 			/// the real callbacks
@@ -271,7 +281,6 @@ namespace psycle { namespace host {
 				/// adjusted play position
 				int m_adjustedPlayPos;	
 			///\}
-
 		};
 	}
 }

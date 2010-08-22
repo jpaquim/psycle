@@ -23,11 +23,9 @@
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
-#include <cstdio>
-
-using namespace psycle::plugin_interface;
 
 #define MAX_ENV_TIME 65536
+
 
 CMachineParameter const paraVol1 = 
 { 
@@ -1441,7 +1439,7 @@ CMachineParameter const *pParameters[] =
 	&paraFinetune,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	GENERATOR,
 	128,
@@ -1449,7 +1447,7 @@ CMachineInfo const MacInfo (
 	#ifndef NDEBUG
 		"GameFX (Debug build)",
 	#else
-		"GameFX 1.5",
+		"GameFX 1.4",
 	#endif
 	"GameFX",
 	"jme",
@@ -1475,7 +1473,7 @@ private:
 	PERFORMANCE globals;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -1485,7 +1483,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 }
 
 void mi::Init()

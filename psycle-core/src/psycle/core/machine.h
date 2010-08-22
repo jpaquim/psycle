@@ -1,31 +1,29 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\interface psycle::core::Machine
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef PSYCLE__CORE__MACHINE__INCLUDED
-#define PSYCLE__CORE__MACHINE__INCLUDED
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
+///\interface psy::core::Machine
 #pragma once
-
 #include "constants.h"
 #include "commands.h"
+#include "cstdint.h"
+//#include "dsp.h"
+//#include "fileio.h"
+#include "misc.h"
 #include "patternevent.h"
 #include "playertimeinfo.h"
 #include "machinekey.hpp"
-
-#include <universalis/os/loggers.hpp>
-#include <universalis/stdlib/cstdint.hpp>
-#include <universalis/stdlib/date_time.hpp>
 #include <cassert>
 #include <deque>
 #include <map>
-#include <list>
 #include <stdexcept>
 
-namespace psycle { namespace core {
-
-using namespace universalis::stdlib;
-namespace loggers = universalis::os::loggers;
+namespace psy { namespace core {
 
 class RiffFile;
 
@@ -40,7 +38,92 @@ const int SCOPE_SPEC_SAMPLES = 256;
 class Machine; // forward declaration
 class CoreSong; // forward declaration
 
-class PSYCLE__CORE__DECL AudioBuffer {
+/// Base class for exceptions thrown from plugins.
+class exception : public std::runtime_error {
+	public:
+		exception(std::string const & what) : std::runtime_error(what) {}
+};
+
+/// Classes derived from exception.
+namespace exceptions {
+	/// Base class for exceptions caused by errors on library operation.
+	class library_error : public exception {
+		public:
+			library_error(std::string const & what) : exception(what) {}
+	};
+
+	/// Classes derived from library.
+	namespace library_errors {
+		/// Exception caused by library loading failure.
+		class loading_error : public library_error {
+			public:
+				loading_error(std::string const & what) : library_error(what) {}
+		};
+
+		/// Exception caused by symbol resolving failure in a library.
+		class symbol_resolving_error : public library_error {
+			public:
+				symbol_resolving_error(std::string const & what) : library_error(what) {}
+		};
+	}
+
+	/// Base class for exceptions caused by an error in a library function.
+	class function_error : public exception {
+		public:
+			function_error(std::string const & what, std::exception const * const exception = 0) : core::exception(what), exception_(exception) {}
+		public:
+			std::exception const inline * const exception() const throw() { return exception_; }
+		private:
+			std::exception const * const        exception_;
+	};
+		
+	///\relates function_error.
+	namespace function_errors {
+		/// Exception caused by a bad returned value from a library function.
+		class bad_returned_value : public function_error {
+			public:
+				bad_returned_value(std::string const & what) : function_error(what) {}
+		};
+	}
+
+	#if 0
+		///\internal
+		namespace detail {
+			class rethrow_functor {
+				public:
+					rethrow_functor(Machine & machine) : machine_(machine) {}
+					
+					template<typename E>
+					void operator_(universalis::compiler::location const & location, E const * const e = 0) const throw(function_error) {
+						rethrow(location, e, 0);
+					}
+					
+					template<>
+					void operator_<std::exception>(universalis::compiler::location const & location, std::exception const * const e) const throw(function_error) {
+						rethrow(location, e, e);
+					}
+				private:
+					template<typename E>
+					void rethrow(universalis::compiler::location const & location, E const * const e, std::exception const * const standard) const throw(function_error) {
+						std::ostringstream s;
+						s
+							<< "Machine had an exception in function '" << location << "'." << std::endl
+							<< universalis::compiler::typenameof(*e) << std::endl
+							<< universalis::exceptions::string(*e);
+						function_error const function_error(s.str(), standard);
+						machine_.crashed(function_error);
+						throw function_error;
+					}
+					Machine & machine_;
+			};
+		}
+		#define PSYCLE__HOST__CATCH_ALL(machine) \
+			UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psy::core::exceptions::function_errors::detail::rethrow_functor(machine))
+			//UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(boost::bind(&Machine::on_crash, &machine, _1, _2, _3))
+	#endif
+}
+
+class AudioBuffer {
 	public: 
 		AudioBuffer(int numChannels,int numSamples);
 		~AudioBuffer();
@@ -58,9 +141,9 @@ class AudioPort;
 
 // A wire is what interconnects two AudioPorts. Appart from being the graphically representable element,
 // the wire is also responsible of volume changes and even pin reassignation (convert 5.1 to stereo, etc.. not yet)
-class PSYCLE__CORE__DECL Wire {
+class Wire {
 	public:
-		typedef int32_t id_type;
+		typedef std::int32_t id_type;
 
 		Wire(): volume(1.0f), pan(), multiplier(1.0f), rvol(1.0f), lvol(1.0f), index(), senderport(), receiverport() {}
 		virtual ~Wire() {
@@ -99,7 +182,7 @@ class PSYCLE__CORE__DECL Wire {
 // From this definition, we could have one Stereo Audio Port (one channel, two inputs or outputs),
 // a 5.1 Port, or several Stereo Ports (in the case of a mixer table), between others..
 // Note that several wires can be connected to the same AudioPort (automatic mixing in the case of an input port).
-class PSYCLE__CORE__DECL AudioPort {
+class AudioPort {
 	public:
 		///\todo: Port creation, assign buffers to it (passed via ctor? they might be shared/pooled). 
 		///\todo: Also, Multiple buffers or a packed buffer (left/right/left/right...)?
@@ -127,17 +210,17 @@ class PSYCLE__CORE__DECL AudioPort {
 		AudioBuffer *audiobuffer_;
 };
 
-class PSYCLE__CORE__DECL InPort : public AudioPort {
+class InPort : public AudioPort {
 	public:
-		typedef int32_t id_type;
+		typedef std::int32_t id_type;
 		InPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 		virtual ~InPort(){};
 		virtual void CollectData(int numSamples);
 };
 
-class PSYCLE__CORE__DECL OutPort : public AudioPort {
+class OutPort : public AudioPort {
 	public:
-		typedef int32_t id_type;
+		typedef std::int32_t id_type;
 		OutPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 		virtual ~OutPort() {}
 		virtual void CollectData(int numSamples);
@@ -145,7 +228,7 @@ class PSYCLE__CORE__DECL OutPort : public AudioPort {
 
 // Usage of the AudioPorts and Wire classes:
 //
-// the class Machine has zero or more InPorts, as well as zero or more OutPorts.
+// the class Machine has zero ore more InPorts, as well as zero or more OutPorts.
 // Each AudioPort has an AudioBuffer associated. The scheduler supplies these buffers.
 // To connect the AudioPorts, there's a Wire, which connects one AudioPort to another AudioPort
 // There can be several Wires to/from the same AudioPort (either input or output), but not two connecting
@@ -182,6 +265,13 @@ class Machine {
 	}
 }
 */
+
+enum MachineMode {
+	MACHMODE_UNDEFINED = -1, //< :-(
+	MACHMODE_GENERATOR = 0,
+	MACHMODE_FX = 1,
+	MACHMODE_MASTER = 2,
+};
 
 class WorkEvent {
 	public:
@@ -229,9 +319,56 @@ class MachineCallbacks {
 };
 
 /// Base class for "Machines", the audio producing elements.
-class PSYCLE__CORE__DECL Machine {
-	friend class CoreSong; friend class Psy2Filter; friend class Player;
+class Machine {
+	///\name crash handling
+	///\{
+		public:
+			/// This function should be called when an exception was thrown from the machine.
+			/// This will mark the machine as crashed, i.e. crashed() will return true,
+			/// and it will be disabled.
+			///\param e the exception that occured, converted to a std::exception if needed.
+			void crashed(std::exception const & e) throw();
+		public:
+			/// Tells wether this machine has crashed.
+			bool const inline & crashed() const throw() { return crashed_; }
+		private:
+			bool                crashed_;
+	///\}
 
+	#if 0 ///\todo re-enable this
+	///\name crash handling ... fpu exception mask
+	///\{
+		public:
+			universalis::processor::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
+			universalis::processor::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
+		private:
+			universalis::processor::exceptions::fpu::mask::type                fpu_exception_mask_;
+	///\}
+	#endif
+
+
+	#if 0
+	///\name cpu cost measurement ... for the time spent in the machine's processing function
+	///\{
+		public:
+			void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
+			cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
+		private:
+			cpu::cycles_type        work_cpu_cost_;
+	///\}
+
+	///\name cpu cost measurement ... for the time spent routing audio
+	///\{
+		public:
+			void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
+			cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
+		private:
+			cpu::cycles_type        wire_cpu_cost_;*/
+	///\}
+	#endif
+
+	//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////
 	// Draft for a new Machine Specification.
 	// A machine is created using a MachineFactory.
@@ -256,21 +393,46 @@ class PSYCLE__CORE__DECL Machine {
 	// bool IsBypass()
 	// bool IsStandBy()
 	//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////
 
+	///\name each machine has a type attribute so that we can make yummy switch statements
+	/*
+	///\{
+		public:
+			///\see enum MachineType which defined somewhere outside
+			typedef std::int32_t type_type; // Was: MachineType type_type
+			type_type inline type() const throw() { return type_; }
+		private:
+			void type(type_type type) { type_ = type; } friend class CoreSong;
+			type_type type_;
+	///\}
+
+	///\name each machine has a mode attribute so that we can make yummy switch statements
+	///\{
+		public:
+			///\see enum MachineMode which is defined somewhere outside
+			typedef MachineMode mode_type;
+			mode_type inline mode() const throw() { return mode_; }
+		private:
+			void mode(mode_type mode) { mode_ = mode; } friend class Plugin;
+			mode_type mode_;
+	///\}
+	*/
 
 	///\name machine's numeric identifier. It is required for pattern events<->machine association, gui, and obviusly, in file load/save.
 	///\{
 		public:
 			///\todo should be unsigned but some functions return negative values to signal errors instead of throwing an exception
-			typedef int32_t id_type;
+			typedef std::int32_t id_type;
 			id_type id() const throw() { return id_; }
 		private:
 			id_type id_;
-			void id(id_type id) { id_ = id; } 
+			void id(id_type id) { id_ = id; } friend class CoreSong; friend class Psy2Filter;
 	///\}
 
 	public:
-		virtual const MachineKey& getMachineKey() const = 0;
+		virtual MachineKey getMachineKey() const = 0;
 
 	///\name ctor/dtor
 	///\{
@@ -284,23 +446,32 @@ class PSYCLE__CORE__DECL Machine {
 	protected:
 		MachineCallbacks * callbacks;
 
-	public:
-		virtual void Init();
-			
-		virtual void PreWork(int numSamples, bool clear = true);
-		virtual int GenerateAudio(int numsamples);
-			
-		virtual void AddEvent(double offset, int track, const PatternEvent & event);
-		virtual void Tick() {}
-		virtual void Tick(int /*channel*/, const PatternEvent &) {}
-		virtual void Stop() { playCol.clear(); playColIndex =0; }
 
-	protected:
-		virtual int GenerateAudioInTicks(int startSample, int numsamples);
-		virtual void reallocateRemainingEvents(double beatOffset);
-		std::deque<WorkEvent> workEvents;
-		std::map<int /* track */, int /* channel */> playCol;
-		int playColIndex;
+	///\name the life cycle of a machine
+	///\{
+		public:
+			virtual void Init();
+			
+			/// virtual because the mixer machine has its own implementation
+			virtual void Work(int numSamples);
+
+			/// [bohan] this used to be protected, but it needs to be public for flat (non-recursive) processing (and Work() will disappear)
+			virtual int GenerateAudio(int numsamples);
+			
+			virtual void PreWork(int numSamples, bool clear = true);
+			virtual void AddEvent(double offset, int track, const PatternEvent & event);
+			virtual void Tick() {}
+			virtual void Tick(int /*channel*/, const PatternEvent &) {}
+			virtual void Stop() { playCol.clear(); playColIndex =0; }
+		protected:
+			virtual void WorkWires(int numSamples, bool mix = true);
+			virtual int GenerateAudioInTicks(int startSample, int numsamples);
+			virtual void reallocateRemainingEvents(double beatOffset);
+		protected:
+			std::deque<WorkEvent> workEvents;
+			std::map<int /* track */, int /* channel */> playCol;
+			int playColIndex;
+	///\}
 
 	///\name (de)serialization
 	///\{
@@ -326,7 +497,7 @@ class PSYCLE__CORE__DECL Machine {
 			virtual bool MoveWireSourceTo(Machine& srcMac, InPort::id_type dsttype, Wire::id_type dstwire, OutPort::id_type srctype, Machine& oldSrc);
 		public:
 			virtual bool Disconnect(Machine & dst);
-			virtual void DeleteWires(CoreSong& song);
+			virtual void DeleteWires();
 
 		///\warning: This should be protected, but the class Mixer needs to call them. Do not use them from Song or "Outside World".
 		public:
@@ -349,12 +520,16 @@ class PSYCLE__CORE__DECL Machine {
 			virtual void ExchangeOutputWires(Wire::id_type first,Wire::id_type second, OutPort::id_type firstType = OutPort::id_type(0), OutPort::id_type secondType = OutPort::id_type(0));
 			virtual Wire::id_type FindInputWire(id_type) const;
 			virtual Wire::id_type FindOutputWire(id_type) const;
-		
+		protected:
 			virtual Wire::id_type GetFreeInputWire(InPort::id_type slotType=InPort::id_type(0)) const;
 			virtual Wire::id_type GetFreeOutputWire(OutPort::id_type slottype=OutPort::id_type(0)) const;
 	///\}
 
-	///\name states used by the schedulers
+
+	//////////////////////////////////////////////////////////////////////////
+	// Properties
+
+	///\name states
 	///\{
 		public:
 			virtual bool Bypass() const { return _bypass; }
@@ -374,66 +549,13 @@ class PSYCLE__CORE__DECL Machine {
 		public:///\todo private:
 			bool _mute;
 
-	///\name used by the single-threaded, recursive scheduler
-	///\{
-		public:
-			/// virtual because the mixer machine has its own implementation
-			virtual void recursive_process(unsigned int frames);
-			void recursive_process_deps(unsigned int frames, bool mix = true);
-		public:///\todo private:
-			/// guard to avoid feedback loops
-			bool recursive_is_processing_;
-			bool recursive_processed_;
-	///\}
-
-	///\name used by the multi-threaded scheduler
-	///\{
-		protected:
-			/// The multi-threaded scheduler cannot use recursive_processed_ because it's not thread-synchronised.
-			/// So, we define another boolean that's modified only by the multi-threaded scheduler,
-			/// with proper thread synchronisations.
-			/// The multi-threaded scheduler doesn't use recursive_processed_ nor recursive_is_processing_.
-			bool sched_processed_;
-			typedef std::list<Machine const*> sched_deps;
-			/// tells the scheduler which machines to process before this one
-			virtual void sched_inputs(sched_deps&) const;
-			/// tells the scheduler which machines may be processed after this one
-			virtual void sched_outputs(sched_deps&) const;
-			/// called by the scheduler to ask for the actual processing of the machine
-			virtual bool sched_process(unsigned int frames);
-	///\}
-
-	///\name cpu time usage measurement
-	///\{
-		public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
-
-		public:  nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
-		private: nanoseconds accumulated_processing_time_;
-		protected: void accumulate_processing_time(nanoseconds ns) throw() {
-				if(loggers::warning() && ns.get_count() < 0) {
-					std::ostringstream s;
-					s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
-					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				} else accumulated_processing_time_ += ns;
-			}
-
-		public:  uint64_t processing_count() const throw() { return processing_count_; }
-		protected: uint64_t processing_count_;
-	///\}
-
-	///\name crash handling
-	///\{
-		public:
-			/// This function should be called when an exception was thrown from the machine.
-			/// This will mark the machine as crashed, i.e. crashed() will return true,
-			/// and it will be disabled.
-			///\param e the exception that occured, converted to a std::exception if needed.
-			void crashed(std::exception const & e) throw();
-		public:
-			/// Tells wether this machine has crashed.
-			bool crashed() const throw() { return crashed_; }
-		private:
-			bool crashed_;
+			bool _waitingForSound;
+			bool _worked;
+			/// [bohan] the multi-threaded scheduler cannot use _worked because it's not thread-synchronised,
+			///         so, we define another boolean that's modified only by the multi-threaded scheduler,
+			///         with proper thread synchronisations.
+			///         the multi-threaded scheduler doesn't use _worked nor _waitingForSound.
+			bool processed_by_multithreaded_scheduler_;
 	///\}
 
 	protected:
@@ -442,12 +564,11 @@ class PSYCLE__CORE__DECL Machine {
 	public:
 		virtual void SetSampleRate(int /*hertz*/) {
 			#if defined PSYCLE__CONFIGURATION__RMS_VUS
-			// todo broken ..  'rms' : undeclared identifier
-				/*rms.count = 0;
+				rms.count = 0;
 				rms.AccumLeft = 0.;
 				rms.AccumRight = 0.;
 				rms.previousLeft = 0.;
-				rms.previousRight = 0.;*/
+				rms.previousRight = 0.;
 			#endif
 		}
 
@@ -479,11 +600,6 @@ class PSYCLE__CORE__DECL Machine {
 
 			virtual int GetAudioInputs() const { return MAX_CONNECTIONS; }
 			virtual int GetAudioOutputs() const { return MAX_CONNECTIONS; }
-
-
-			// Subclass tells, if the component is a generator in opposite to an effect
-			virtual bool IsGenerator() const;
-
 		protected:
 			int numInPorts;
 			int numOutPorts;
@@ -497,7 +613,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\{
 		public:
 			/// number of Incoming connections
-			int32_t _connectedInputs;
+			std::int32_t _connectedInputs;
 			/// Incoming connections Machine numbers
 			///\todo hardcoded limits and wastes
 			Machine::id_type _inputMachines[MAX_CONNECTIONS];
@@ -516,7 +632,7 @@ class PSYCLE__CORE__DECL Machine {
 	///\{
 		public:
 			/// number of Outgoing connections
-			int32_t _connectedOutputs;
+			std::int32_t _connectedOutputs;
 			/// Outgoing connections Machine numbers
 			///\todo hardcoded limits and wastes
 			Machine::id_type _outputMachines[MAX_CONNECTIONS];
@@ -548,13 +664,13 @@ class PSYCLE__CORE__DECL Machine {
 	public:
 		///\todo 3 dimensional?
 		virtual void SetPan(int newpan);
-		int32_t Pan() const { return _panning; }
+		std::int32_t Pan() const { return _panning; }
 		float lVol() const { return _lVol; }
 		float rVol() const { return _rVol; }
 
 	protected:
 		/// numerical value of panning.
-		int32_t _panning;
+		std::int32_t _panning;
 		/// left chan volume
 		float _lVol;
 		/// right chan volume
@@ -644,4 +760,3 @@ class PSYCLE__CORE__DECL Machine {
 };
 
 }}
-#endif

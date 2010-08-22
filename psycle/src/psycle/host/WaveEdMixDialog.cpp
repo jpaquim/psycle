@@ -1,8 +1,8 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdMixDialog.
 #include "WaveEdMixDialog.hpp"
-#include <iomanip>
 
+#include <iomanip>
 namespace psycle { namespace host {
 
 		CWaveEdMixDialog::CWaveEdMixDialog(CWnd* pParent)

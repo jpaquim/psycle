@@ -13,15 +13,16 @@ namespace psycle { namespace host {
 		{
 			DECLARE_DYNAMIC(CWaveEdFrame)
 		public:
-			CWaveEdFrame(class ProjectData* projects_, CMainFrame* pframe);
+			CWaveEdFrame(Song* _sng, CMainFrame* pframe);
+			virtual ~CWaveEdFrame() throw();
+		protected: 
 			CWaveEdFrame();
 
 		public:
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
 			void GenerateView();
 			void Notify(void);
-
-			Song* song();
+			Song *_pSong;
 			CMainFrame *_pFrame;
 		// Overrides
 			// ClassWizard generated virtual function overrides
@@ -36,10 +37,11 @@ namespace psycle { namespace host {
 			void PlayFrom(unsigned long startpos);
 			CStatusBar statusbar;
 			CToolBar ToolBar;
+
 			CWaveEdChildView wavview;
+
 			int wsInstrument;
 			bool bPlaying;
-			ProjectData* projects_;
 		// Implementation
 		protected:
 			// Generated message map functions

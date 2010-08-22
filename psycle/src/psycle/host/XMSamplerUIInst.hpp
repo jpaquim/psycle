@@ -1,16 +1,14 @@
 #pragma once
 #include "Psycle.hpp"
 
-#include <psycle/core/xminstrument.h>
-
+#include "XMInstrument.hpp"
 #include <afxwin.h>
 #include <afxcmn.h>
 
 namespace psycle {
-namespace core {
-	class XMSampler;
-}
 namespace host {
+
+class XMSampler;
 
 class XMSamplerUIInst : public CPropertyPage
 {
@@ -49,7 +47,7 @@ public:
 		/**  */
 		const int GetEnvelopePointIndexAtPoint(const int x,const int y)
 		{
-			int const _points = m_pEnvelope->NumOfPoints();
+			std::size_t const _points = m_pEnvelope->NumOfPoints();
 			for(unsigned int i = 0;i < _points ;i++)
 			{
 				CPoint _pt_env;
@@ -63,7 +61,7 @@ public:
 				}
 			}
 
-			return _points; // return == _points -> Point not found.
+			return (int)_points; // return == _points -> Point not found.
 		}
 
 		XMInstrument::Envelope* m_pEnvelope;

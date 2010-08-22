@@ -4,12 +4,16 @@
 ///\file
 ///\brief delay modulated by a sine
 #include "plugin.hpp"
-#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/math/round.hpp>
+#include <psycle/helpers/math/sine_sequence.hpp>
+#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math/remainder.hpp>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cassert>
 #include <vector>
 namespace psycle { namespace plugin {
 
-using namespace helpers::math;
+namespace math = helpers::math;
 
 class Flanger : public Plugin {
 	public:
@@ -32,25 +36,19 @@ class Flanger : public Plugin {
 		enum Interpolation { no, yes };
 		
 		static const Information & information() throw() {
-			static bool initialized = false;
-			static Information *info = NULL;
-			if (!initialized) {
-				static const Information::Parameter parameters [] = {
-					Information::Parameter::linear("central delay", 0, 0, 0.1),
-					Information::Parameter::linear("mod. amplitude", 0, 0, 1),
-					Information::Parameter::exponential("mod. frequency", 0.0001 * pi * 2, 0, 100 * pi * 2),
-					Information::Parameter::linear("mod. stereodephase", 0, 0, pi),
-					Information::Parameter::discrete("interpolation", yes, yes),
-					Information::Parameter::linear("dry", -1, 1, 1),
-					Information::Parameter::linear("wet", -1, 0, 1),
-					Information::Parameter::linear("feedback left", -1, 0, 1),
-					Information::Parameter::linear("feedback right", -1, 0, 1),
-				};
-				static Information information(0x0110, Information::Types::effect, "ayeternal Flanger", "Flanger", "jaz, bohan, and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
-				info = &information;
-				initialized = true;
-			}
-			return *info;
+			static const Information::Parameter parameters [] = {
+				Information::Parameter::linear("central delay", 0, 0, 0.1),
+				Information::Parameter::linear("mod. amplitude", 0, 0, 1),
+				Information::Parameter::exponential("mod. frequency", 0.0001 * math::pi * 2, 0, 100 * math::pi * 2),
+				Information::Parameter::linear("mod. stereodephase", 0, 0, math::pi),
+				Information::Parameter::discrete("interpolation", yes, yes),
+				Information::Parameter::linear("dry", -1, 1, 1),
+				Information::Parameter::linear("wet", -1, 0, 1),
+				Information::Parameter::linear("feedback left", -1, 0, 1),
+				Information::Parameter::linear("feedback right", -1, 0, 1),
+			};
+			static const Information information(Information::Types::effect, "ayeternal Flanger", "Flanger", "jaz, bohan, and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
+			return information;
 		}
 
 		virtual void describe(std::ostream & out, const int & parameter) const {
@@ -71,15 +69,15 @@ class Flanger : public Plugin {
 					out << (*this)(delay) << " seconds";
 					break;
 				case modulation_radians_per_second:
-					out << (*this)(modulation_radians_per_second) / pi / 2 << " hertz";
+					out << (*this)(modulation_radians_per_second) / math::pi / 2 << " hertz";
 					break;
 				case modulation_amplitude:
 						out << (*this)(delay) * (*this)(modulation_amplitude) << " seconds";
 						break;
 				case modulation_stereo_dephase:
 					if((*this)(modulation_stereo_dephase) == 0) out << 0;
-					else if((*this)(modulation_stereo_dephase) == Sample(pi)) out << "pi";
-					else out << "pi / " << pi / (*this)(modulation_stereo_dephase);
+					else if((*this)(modulation_stereo_dephase) == Sample(math::pi)) out << "pi";
+					else out << "pi / " << math::pi / (*this)(modulation_stereo_dephase);
 					break;
 				case left_feedback:
 				case right_feedback:
@@ -106,13 +104,13 @@ class Flanger : public Plugin {
 	protected:
 		virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
 		virtual void samples_per_second_changed();
-		inline void process(sinseq<true> &, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
+		inline void process(math::sine_sequence<true> &, std::vector<Real> & buffer, int & write, Sample input [], const int & samples, const Real & feedback) throw();
 		inline void resize(const Real & delay);
 		enum Channels { left, right, channels };
 		std::vector<Real> buffers_[channels];
 		int delay_in_samples_, writes_[channels];
 		Real modulation_amplitude_in_samples_, modulation_radians_per_sample_, modulation_phase_;
-		sinseq<true> sin_sequences_[channels];
+		math::sine_sequence<true> sin_sequences_[channels];
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(Flanger)
@@ -124,7 +122,7 @@ void Flanger::init() {
 void Flanger::sequencer_note_event(const int, const int, const int, const int command, const int value) {
 	switch(command) {
 		case 1:
-			modulation_phase_ = value * pi * 2 / 0x100;
+			modulation_phase_ = value * math::pi * 2 / 0x100;
 			sin_sequences_[left](modulation_phase_, modulation_radians_per_sample_);
 			sin_sequences_[right](modulation_phase_ + (*this)(modulation_stereo_dephase), modulation_radians_per_sample_);
 			break;
@@ -176,22 +174,22 @@ inline void Flanger::resize(const Real & delay) {
 void Flanger::process(Sample l[], Sample r[], int samples, int) {
 	process(sin_sequences_[left], buffers_[left] , writes_[left] , l, samples, (*this)(left_feedback));
 	process(sin_sequences_[right], buffers_[right], writes_[right], r, samples, (*this)(right_feedback));
-	modulation_phase_ = std::fmod(modulation_phase_ + modulation_radians_per_sample_ * samples, pi * 2);
+	modulation_phase_ = math::remainder(modulation_phase_ + modulation_radians_per_sample_ * samples, math::pi * 2);
 }
 
 inline void Flanger::process(
-	sinseq<true> & sinseq, std::vector<Real> & buffer,
+	math::sine_sequence<true> & sine_sequence, std::vector<Real> & buffer,
 	int & write, Sample input [], const int & samples, const Real & feedback
 ) throw() {
 	const int size(static_cast<int>(buffer.size()));
 	switch((*this)[interpolation]) {
 		case yes:
 			for(int sample(0) ; sample < samples ; ++sample) {
-				const Real sin(sinseq()); // [bohan] this uses 64-bit floating point numbers or else accuracy is not sufficient
+				const Real sin(sine_sequence()); // [bohan] this uses 64-bit floating point numbers or else accuracy is not sufficient
 				
 				#if 1
 					Real fraction_part = modulation_amplitude_in_samples_ * sin;
-					int integral_part = static_cast<int>(fraction_part);
+					int integral_part = static_cast<int>(fraction_part); ///\todo use math::truncated?
 					fraction_part = fraction_part - integral_part;
 					if(fraction_part < 0) { fraction_part += 1; integral_part -= 1; }
 				#else				
@@ -220,7 +218,7 @@ inline void Flanger::process(
 					buffer_write-= static_cast<Sample>(1e-9);
 				#else
 					Sample buffer_write = input_sample + feedback * buffer_read;
-					erase_all_nans_infinities_and_denormals(buffer_write);
+					math::erase_all_nans_infinities_and_denormals(buffer_write);
 				#endif
 				
 				buffer[write] = buffer_write;
@@ -228,7 +226,7 @@ inline void Flanger::process(
 				input_sample *= (*this)(dry);
 				input_sample += (*this)(wet) * buffer_read;
 				#if 0
-					erase_all_nans_infinities_and_denormals(input_sample);
+					math::erase_all_nans_infinities_and_denormals(input_sample);
 				#endif
 			}
 			break;
@@ -243,7 +241,7 @@ inline void Flanger::process(
 						else
 							sin = std::sin(modulation_phase_ + (*this)(modulation_stereo_dephase));
 					#else
-						const Real sin(sinseq()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
+						const Real sin(sine_sequence()); // <bohan> this uses 64-bit floating point numbers or else accuracy is not sufficient
 					#endif
 					
 
@@ -279,7 +277,7 @@ inline void Flanger::process(
 						buffer_write -= static_cast<Sample>(1e-9);
 					#else
 						Sample buffer_write = input_sample + feedback * buffer_read;
-						erase_all_nans_infinities_and_denormals(buffer_write);
+						math::erase_all_nans_infinities_and_denormals(buffer_write);
 					#endif
 					
 					buffer[write] = buffer_write;
@@ -287,7 +285,7 @@ inline void Flanger::process(
 					input_sample *= (*this)(dry);
 					input_sample += (*this)(wet) * buffer_read;
 					#if 0
-						erase_all_nans_infinities_and_denormals(input_sample);
+						math::erase_all_nans_infinities_and_denormals(input_sample);
 					#endif
 				}
 	}

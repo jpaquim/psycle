@@ -1,9 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::Canvas.
 #include "Psycle.hpp"
-
-namespace psycle { namespace host {
-
+namespace psycle
+{
+	namespace host
+	{
 		/// Canvas.
 		class Canvas
 		{

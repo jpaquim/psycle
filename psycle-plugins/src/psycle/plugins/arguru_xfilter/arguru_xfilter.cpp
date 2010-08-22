@@ -1,23 +1,77 @@
-///\file
-///\brief Arguru xfilter (crossdelay)
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/dsp.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
-#include <cstdio>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <math.h>
 
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers;
-using namespace universalis::os;
-using namespace universalis::stdlib;
+// Arguru xfilter
 
-CMachineParameter const paraDelay = {"Delay time","Delay time",0,88200,MPF_STATE,11025};
-CMachineParameter const paraFeedback = {"Feedback","Feedback",0,256,MPF_STATE,128};
-CMachineParameter const paraDry = {"Dry","Dry",0,256,MPF_STATE,256};
-CMachineParameter const paraWet = {"Wet","Wet",0,256,MPF_STATE,128};
-CMachineParameter const paraTickmode = {"Tick mode","Tick mode",0,1,MPF_STATE,0};
-CMachineParameter const paraTicktweak = {"Ticks","Ticks",0,8,MPF_STATE,3};
+#define MAX_DELAY_SAMPLES				80000
 
-CMachineParameter const *pParameters[] = {
+CMachineParameter const paraDelay = 
+{ 
+	"Delay time",
+	"Delay time",																																				// description
+	0,																																																// MinValue				
+	88200,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	11025,
+};
+
+CMachineParameter const paraFeedback = 
+{ 
+	"Feedback",
+	"Feedback",																																								// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	128
+};
+
+CMachineParameter const paraDry = 
+{ 
+	"Dry",
+	"Dry",																																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256
+};
+
+
+CMachineParameter const paraWet = 
+{ 
+	"Wet",
+	"Wet",																																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	128
+};
+
+CMachineParameter const paraTickmode = 
+{ 
+	"Tick mode",
+	"Tick mode",																																				// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraTicktweak = 
+{ 
+	"Ticks",
+	"Ticks",																																								// description
+	0,																																																// MinValue				
+	8,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	3
+};
+
+CMachineParameter const *pParameters[] = 
+{ 
+	// global
 	&paraDelay,
 	&paraFeedback,
 	&paraDry,
@@ -26,213 +80,171 @@ CMachineParameter const *pParameters[] = {
 	&paraTicktweak
 };
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	0x0120,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
-	"Arguru CrossDelay"
-	#ifndef NDEBUG
-		" (Debug build)"
-	#endif
-	,
-	"CrossDelay",
-	"J. Arguelles",
-	"About",
+CMachineInfo const MacInfo(
+	MI_VERSION,				
+	0,																																								// flags
+	6,																																								// numParameters
+	pParameters,																												// Pointer to parameters
+#ifdef _DEBUG
+	"Arguru CrossDelay (Debug build)",												// name
+#else
+	"Arguru CrossDelay",																								// name
+#endif
+	"CrossDelay",																																// short name
+	"J. Arguelles",																												// author
+	"About",																																				// A command, that could be use for open an editor, etc...
 	1
 );
 
-class mi : public CMachineInterface {
-	public:
-		mi();
-		virtual ~mi();
+class mi : public CMachineInterface
+{
+public:
+	mi();
+	virtual ~mi();
 
-		virtual void Init();
-		virtual void SequencerTick();
-		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
-		virtual void ParameterTweak(int par, int val);
+	virtual void Init();
+	virtual void SequencerTick();
+	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
+	virtual void ParameterTweak(int par, int val);
 
-		virtual bool DescribeValue(char* txt,int const param, int const value);
-		virtual void Command();
+	virtual bool DescribeValue(char* txt,int const param, int const value);
+	virtual void Command();
+	virtual void SetDelay(int delay,int fdb);
 
-	private:
-		void SetDelay(int delay);
-		void SetDelayTicks(int ticks);
-		void AllocateBuffers()
-		{
-			aligned_memory_alloc(16, dbl, max_delay_samples);
-			aligned_memory_alloc(16, dbr, max_delay_samples);
-			dsp::Clear(dbl, max_delay_samples);
-			dsp::Clear(dbr, max_delay_samples);
-		}
-		void DeallocateBuffers() {
-			aligned_memory_dealloc(dbl);
-			aligned_memory_dealloc(dbr);
-		}
-		float *dbl;
-		float *dbr;
-		std::int32_t dcl,dcr,ccl,ccr;
-		std::int32_t currentSR;
-		std::int32_t currentTL;
-		std::int32_t max_delay_samples;
+private:
+
+	float dbl[MAX_DELAY_SAMPLES];
+	float dbr[MAX_DELAY_SAMPLES];
+	int dcl,dcr,ccl,ccr;
+	
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
-mi::mi(): dcl(0), dcr(0), ccl(0), ccr(0), currentSR(0), currentTL(0), max_delay_samples(32768) {
-	Vals = new int[MacInfo.numParameters];
-	Vals[4]=0;
-	AllocateBuffers();
-}
-
-mi::~mi() {
-	delete[] Vals;
-	DeallocateBuffers();
-}
-
-void mi::Init() {
-	currentSR = pCB->GetSamplingRate();
-	currentTL = pCB->GetTickLength();
-}
-
-void mi::SequencerTick() {
-	if (currentSR != pCB->GetSamplingRate()) {
-		currentSR = pCB->GetSamplingRate();
-		if( !Vals[4]) {
-			SetDelay(Vals[0]);
-		}
+mi::mi()
+{
+	// The constructor zone
+	Vals = new int[6];
+	for(int c=0;c<MAX_DELAY_SAMPLES;c++)
+	{
+		dbl[c]=0;
+		dbr[c]=0;
 	}
-	if (currentTL != pCB->GetTickLength()) {
-		currentTL = pCB->GetTickLength();
-		if( Vals[4]) {
-			SetDelayTicks(Vals[5]);
-		}
-	}
+	ccl=0;
+	ccr=0;
+	dcl=0;
+	dcr=0;
 }
 
-void mi::Command() {
-	pCB->MessBox("Originally made 18/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","-=<([aRgUrU's Cr0sSdElAy])>=-",0);
+mi::~mi()
+{
+	delete Vals;
+
+// Destroy dinamically allocated objects/memory here
 }
 
-void mi::ParameterTweak(int par, int val) {
+void mi::Init()
+{
+// Initialize your stuff here
+}
+
+void mi::SequencerTick()
+{
+// Called on each tick while sequencer is playing
+}
+
+void mi::Command()
+{
+// Called when user presses editor button
+// Probably you want to show your custom window here
+// or an about button
+pCB->MessBox("Made 18/5/2000 by Juan Antonio Arguelles Rius for Psycl3!","-=<([aRgUrU's Cr0sSdElAy])>=-",0);
+}
+
+void mi::ParameterTweak(int par, int val)
+{
 	Vals[par]=val;
 
-	if((par==0 || par == 4 ) && Vals[4]==0) {
-		SetDelay(Vals[0]);
-	}
-	if((par==5 || par == 4) && Vals[4]==1) {
-		SetDelayTicks(Vals[5]);
+	if(par==0 && Vals[4]==0)
+	SetDelay(Vals[0],0);
+
+	if(par==5 && Vals[4]==1)
+	{
+		Vals[0]=Vals[5]*pCB->GetTickLength()*2;
+		SetDelay(Vals[0],0);
 	}
 }
 
-void mi::SetDelay(int delay) {
-	int delaySR = delay*(float)currentSR/44100.0f;
-	if (delaySR > max_delay_samples) {
-		do {
-			max_delay_samples <<=1;
-		} while(delaySR > max_delay_samples);
-		DeallocateBuffers();
-		AllocateBuffers();
-	} else {
-		dsp::Clear(dbl, max_delay_samples);
-		dsp::Clear(dbr, max_delay_samples);
-	}
-	ccl=max_delay_samples-8;
-	ccr=ccl-(delaySR/2);
+void mi::SetDelay(int delay,int fdb)
+{
+	ccl=MAX_DELAY_SAMPLES-8;
+	ccr=ccl-(delay/2);
 	
-	dcl=ccl-delaySR;
-	dcr=ccr-delaySR;
+	dcl=ccl-delay;
+	dcr=ccr-delay;
 
 	if(dcl<0)dcl=0;
 	if(dcr<0)dcr=0;
+
 }
 
-void mi::SetDelayTicks(int ticks) {
-	int delaySR = ticks*pCB->GetTickLength()*2;
-	if (delaySR > max_delay_samples) {
-		do {
-			max_delay_samples <<=1;
-		} while(delaySR > max_delay_samples);
-		DeallocateBuffers();
-		AllocateBuffers();
-	} else {
-		dsp::Clear(dbl, max_delay_samples);
-		dsp::Clear(dbr, max_delay_samples);
-	}
-	ccl=max_delay_samples-8;
-	ccr=ccl-(delaySR/2);
-
-	dcl=ccl-delaySR;
-	dcr=ccr-delaySR;
-
-	if(dcl<0)dcl=0;
-	if(dcr<0)dcr=0;
-}
-
-
-void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
-	float const fbc=Vals[1]*0.00390625f;
+// Work... where all is cooked 
+void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
+{
+	float fbc=(float)Vals[1]*0.00390625f;
 	float const cdry=Vals[2]*0.00390625f;
 	float const cwet=Vals[3]*0.00390625f;
-	do {
-		float const il=*psamplesleft;
-		float const ir=*psamplesright;
+	do
+	{
+		float const il=++*psamplesleft;
+		float const ir=++*psamplesright;
 
 		dbl[ccl]=il+dbl[dcl]*fbc;
 		dbr[ccr]=ir+dbr[dcr]*fbc;
 
-		*psamplesleft =il*cdry+dbl[dcl]*cwet;
-		*psamplesright =ir*cdry+dbr[dcl]*cwet;
+		*psamplesleft				=il*cdry+dbl[dcl]*cwet;
+		*psamplesright				=ir*cdry+dbr[dcl]*cwet;
 		
-		if(++ccl==max_delay_samples)ccl=0;
-		if(++ccr==max_delay_samples)ccr=0;
-		if(++dcl==max_delay_samples)dcl=0;
-		if(++dcr==max_delay_samples)dcr=0;
+		if(++ccl==MAX_DELAY_SAMPLES)ccl=0;
+		if(++ccr==MAX_DELAY_SAMPLES)ccr=0;
+		if(++dcl==MAX_DELAY_SAMPLES)dcl=0;
+		if(++dcr==MAX_DELAY_SAMPLES)dcr=0;
 
 		++psamplesleft;
 		++psamplesright;
 	} while(--numsamples);
 }
 
-bool mi::DescribeValue(char* txt,int const param, int const value) {
-	switch(param) {
-		case 0:
-			{
-				if(Vals[4]) { std::sprintf(txt,"--"); }
-				else {
-					float const spt=(float)pCB->GetTickLength()*2;
-					std::sprintf(txt,"%.3f (%.fms)",(float)value/spt, value/88.2);
-				}
-				return true;
-			}
-		case 1:
-			{
-				std::sprintf(txt,"%.1f%%",(float)value*0.390625f);
-				return true;
-			}
-		case 2: //fallthrough
-		case 3:
-			{
-				float coef=value*0.00390625f;
-				if(coef>0.0f)
-					std::sprintf(txt,"%.1f dB",20.0f * log10(coef));
-				else
-					std::sprintf(txt,"-Inf. dB");				
-				return true;
-			}
-		case 4:
-			{
-				if(value==0)
-					std::sprintf(txt,"Off");
-				else
-					std::sprintf(txt,"On");
-				return true;
-			}
-		case 5:
-			{
-				if(!Vals[4]) { std::sprintf(txt,"--"); return true; }
-			}
-		default: return false;
+// Function that describes value on client's displaying
+bool mi::DescribeValue(char* txt,int const param, int const value)
+{
+	if(param==0)
+	{
+		float const spt=(float)pCB->GetTickLength()*2;
+		sprintf(txt,"%.3f",(float)value/spt);
+		return true;
 	}
+	if(param==1)
+	{
+		sprintf(txt,"%.1f%%",(float)value*0.390625f);
+		return true;
+	}
+	if(param==2 || param==3)
+	{
+		float coef=value*0.00390625f;
+		if(coef>0.0f)
+			sprintf(txt,"%.1f dB",20.0f * log10(coef));
+		else
+			sprintf(txt,"-Inf. dB");				
+		return true;
+	}
+	if(param==4)
+	{
+		if(value==0)
+			sprintf(txt,"Off");
+		else
+			sprintf(txt,"On");
+		return true;
+	}
+	return false;
 }

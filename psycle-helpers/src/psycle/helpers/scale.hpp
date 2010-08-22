@@ -9,9 +9,7 @@
 #ifndef PSYCLE__HELPERS__SCALE__INCLUDED
 #define PSYCLE__HELPERS__SCALE__INCLUDED
 #pragma once
-
 #include <cmath>
-
 namespace psycle { namespace helpers {
 
 class Scale {

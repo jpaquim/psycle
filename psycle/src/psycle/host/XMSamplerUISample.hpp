@@ -1,16 +1,15 @@
 #pragma once
 #include "Psycle.hpp"
 
-#include <psycle/core/xminstrument.h>
+#include "XMInstrument.hpp"
 
 #include <afxwin.h>
 
 namespace psycle {
-namespace core {
-	class XMSampler;
-}
 namespace host {
 
+
+class XMSampler;
 class CWaveScopeCtrl : public CStatic
 {
 public:
@@ -95,5 +94,4 @@ protected:
 };
 
 
-}   // namespace
-}   // namespace
+}}

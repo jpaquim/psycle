@@ -5,16 +5,14 @@
 
 #include "Configuration.hpp"
 
-#include <psycle/core/plugin.h>
-#include <psycle/core/vsthost.h>
-#include <psycle/core/vstplugin.h>
-#include <psycle/helpers/math.hpp>
+#include "Plugin.hpp"
+#include "VstHost24.hpp"
 
 #include <cstring>
 
 namespace psycle { namespace host {
 
-using namespace seib::vst;
+		using namespace seib::vst;
 
 		CPreset::CPreset()
 		:
@@ -93,7 +91,7 @@ using namespace seib::vst;
 			{
 				delete [] params; params = new int[num];
 				numPars=num;
-				for(int x=0;x<num;x++) params[x]= lround<int>(parameters[x]*65535.0f);
+				for(int x=0;x<num;x++) params[x]= helpers::math::lround<int,float>(parameters[x]*65535.0f);
 			}
 			else
 			{
@@ -185,7 +183,7 @@ using namespace seib::vst;
 
 			numParameters = _pMachine->GetNumParams();
 
-			if( _pMachine->getMachineKey().host() == Hosts::NATIVE)
+			if( _pMachine->_type == MACH_PLUGIN)
 			{
 				try
 				{
@@ -229,9 +227,9 @@ using namespace seib::vst;
 						// o_O`
 					}
 				}
-				buffer = _pMachine->GetDllName().c_str();
+				buffer = _pMachine->GetDllName();
 			}
-			else if( _pMachine->getMachineKey().host() == Hosts::VST)
+			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{ 
 				iniPreset.Init(numParameters);
 				int i(0);
@@ -239,7 +237,7 @@ using namespace seib::vst;
 				{
 					try
 					{
-						iniPreset.SetParam(i, lround<int>(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::AudioMaster::GetQuantization()));
+						iniPreset.SetParam(i, helpers::math::lround<int,float>(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
 					}
 					catch(const std::exception &)
 					{
@@ -251,7 +249,8 @@ using namespace seib::vst;
 					}
 					++i;
 				}
-				buffer = _pMachine->GetDllName().c_str();
+				buffer = _pMachine->GetDllName();
+
 			}
 			buffer = buffer.Left(buffer.GetLength()-4);
 			buffer += ".prs";
@@ -310,7 +309,7 @@ using namespace seib::vst;
 
 		void CPresetsDlg::OnImport() 
 		{
-			if( _pMachine->getMachineKey().host() == Hosts::VST) return;
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
 
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
@@ -323,7 +322,11 @@ using namespace seib::vst;
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof szFile;
-			ofn.lpstrFilter = "Presets\0*.prs\0All\0*.*\0";
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			{
+				ofn.lpstrFilter = "Presets\0*.prs\0VST Banks\0*.fxb\0All\0*.*\0";
+			}
+			else ofn.lpstrFilter = "Presets\0*.prs\0All\0*.*\0";
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -499,8 +502,7 @@ using namespace seib::vst;
 
 		void CPresetsDlg::OnExport() 
 		{
-			if( _pMachine->getMachineKey().host() == Hosts::VST) return;
-
+			if( _pMachine->_type == MACH_PLUGIN) return;
 			if ( m_preslist.GetCurSel() == CB_ERR )
 			{
 				MessageBox("You have to select a preset first.","File Save Error",MB_OK);
@@ -862,7 +864,7 @@ using namespace seib::vst;
 					// o_O`
 				}
 			}
-			if(preset.GetData() && _pMachine->getMachineKey().host() == Hosts::NATIVE)
+			if(preset.GetData() && _pMachine->_type == MACH_PLUGIN)
 			{
 				try
 				{

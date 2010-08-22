@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "vdFastVerb.hpp"
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {

@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
+1.8.8   | 2010 | beta						 | [JAZ] & bohan.
 1.8.6.1	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.6	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.5	| 2007 | RC                          | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
@@ -41,10 +42,20 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.8.8 beta1
+------------
++ x86 and x64 builds.
++ Multithreaded audio engine (better performance in multi-core CPUs)
++ Integrated support for JBridge VST bit bridge (use 32bit VSTs in x64 and 64bit in x32). Needs to be activated in the Directories tab of settings. (Native Psycle bit bridging should come for release)
+* Migrated to Visual Studio 2008 (and its runtimes) and boost 1.41.
+* Better Vista/7 support (placement of files).
+! Multiple fixes in the native plugins (better support of other sampling rates than 44Khz). Better UIs in some of them. (Not all native plugins revised yet).
+! Small fixes.
+
 v1.8.6.1
 --------
-Fixed psy loader (songs made with the previous version were showing an error on loading)
-Fixed native plugins not showing the description of their parameters in the parameters window.
+! Fixed psy loader (songs made with the previous version were showing an error on loading)
+! Fixed native plugins not showing the description of their parameters in the parameters window.
 
 
 v1.8.6

@@ -17,11 +17,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <psycle/helpers/math.hpp>
+#include <cmath>
+#include <psycle/helpers/math/fast_unspecified_round_to_integer.hpp>
 
 #include "voice.h"
-
-namespace math = psycle::helpers::math;
 
 #define FILTER_CALC_TIME 64
 #define TWOPI 6.28318530717958647692528676655901f
@@ -207,7 +206,7 @@ float CSynthTrack::GetSample()
 					for (int i = 0; i<16; i++){
 						OSCPosition+=OOSCSpeed;
 						if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
-						pos = math::lrint<std::int32_t>(OSCPosition-0.5f);
+						pos = psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos+cur_pw];
 						output+=aaf1.process((vpar->Wavetable[cur_waveform][((pos+1)&2047)+cur_pw] - sample) * (OSCPosition - (float)pos) + sample);
 					}
@@ -221,7 +220,7 @@ float CSynthTrack::GetSample()
 					for (int i = 0; i<16; i++){
 						OSCPosition+=OOSCSpeed;
 						if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;
-						pos = math::lrint<std::int32_t>(OSCPosition-0.5f);
+						pos = psycle::helpers::math::fast_unspecified_round_to_integer<std::int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos];
 						output+=aaf1.process((vpar->Wavetable[cur_waveform][(pos+1)&2047] - sample) * (OSCPosition - (float)pos) + sample);
 					}
@@ -262,9 +261,9 @@ float CSynthTrack::GetEnvAmp()
 	break;
 
 	case 2: // Decay
-		AmpEnvValue = AmpEnvValue - (AmpEnvValue * AmpEnvCoef * 5.0f);
+		AmpEnvValue-=AmpEnvCoef;
 		
-		if((AmpEnvValue<AmpEnvSustainLevel) || (AmpEnvValue<0.001f))
+		if(AmpEnvValue<AmpEnvSustainLevel)
 		{
 			AmpEnvValue=AmpEnvSustainLevel;
 			AmpEnvStage=3;
@@ -280,9 +279,9 @@ float CSynthTrack::GetEnvAmp()
 	break;
 
 	case 4: // Release
-		AmpEnvValue = AmpEnvValue - (AmpEnvValue * AmpEnvCoef * 5.0f);
+		AmpEnvValue-=AmpEnvCoef;
 
-		if(AmpEnvValue<0.001f)
+		if(AmpEnvValue<0.0f)
 		{
 			AmpEnvValue=0.0f;
 			AmpEnvStage=0;
@@ -294,7 +293,7 @@ float CSynthTrack::GetEnvAmp()
 	case 5: // FastRelease
 		AmpEnvValue-=AmpEnvCoef;
 
-		if(AmpEnvValue<0.001f)
+		if(AmpEnvValue<0.0f)
 		{
 			AmpEnvValue=0.0f;
 			RealNoteOn();

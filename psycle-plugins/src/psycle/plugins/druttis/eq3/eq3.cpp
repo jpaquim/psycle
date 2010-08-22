@@ -7,10 +7,6 @@
 //////////////////////////////////////////////////////////////////////
 #include <psycle/plugin_interface.hpp>
 #include "../dsp/Biquad.h"
-#include <cstdio>
-
-using namespace psycle::plugin_interface;
-
 //////////////////////////////////////////////////////////////////////
 //
 //				Machine Defs
@@ -183,7 +179,7 @@ CMachineParameter const *pParams[] =
 //				Machine Info
 //
 //////////////////////////////////////////////////////////////////////
-CMachineInfo MacInfo (
+CMachineInfo MacInfo(
 	MI_VERSION,
 	EFFECT,
 	NUM_PARAMS,
@@ -268,7 +264,7 @@ public:
 	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int numtracks);
 	// Custom
 };
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //////////////////////////////////////////////////////////////////////
 //
 //				Initialize Static Machine Variables

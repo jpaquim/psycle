@@ -2,10 +2,9 @@
 ///\interface file for psycle::host::COutputDlg.
 #pragma once
 #include "Psycle.hpp"
-#include "configuration_options.hpp"
-#include <psycle/audiodrivers/audiodriver.h>
 
 namespace psycle { namespace host {
+		class AudioDriver;
 
 		/// audio device output config window.
 		class COutputDlg : public CPropertyPage
@@ -27,8 +26,8 @@ namespace psycle { namespace host {
 			int m_syncDriverIndex;
 			int _numDrivers;
 			int _numMidiDrivers;
-			int m_midiHeadroom;	
-			audiodrivers::AudioDriver** m_ppDrivers;
+			int m_midiHeadroom;
+			AudioDriver** m_ppDrivers;
 		private:
 			int m_oldDriverIndex;
 			int m_oldMidiDriverIndex;

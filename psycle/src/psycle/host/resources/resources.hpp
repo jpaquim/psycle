@@ -148,7 +148,9 @@
 #define IDC_BROWSEINST                  1026
 #define IDC_INSTEDIT                    1027
 #define IDC_BROWSEVST                   1028
+#define IDC_BROWSEVST32                 1028
 #define IDC_VSTEDIT                     1029
+#define IDC_VSTEDIT32                   1029
 #define IDC_BROWSEPLUGIN                1030
 #define IDC_PLUGINEDIT                  1031
 #define IDC_FT2_HOME_END                1032
@@ -165,7 +167,10 @@
 #define IDC_ROWC                        1038
 #define IDC_FT2DEL2                     1038
 #define IDC_WINDOWSBLOCKS               1038
+#define IDC_VSTEDIT64                   1038
 #define IDC_BEATC                       1039
+#define IDC_BROWSEVST2                  1039
+#define IDC_BROWSEVST64                 1039
 #define IDC_4BEAT                       1040
 #define IDC_PATTERN_FONTFACE            1041
 #define IDC_DOUBLEBUFFER                1042
@@ -762,7 +767,6 @@
 #define IDC_NOTESTOEFFECTS              1523
 #define IDC_RECORD_UNARMED2             1523
 #define IDC_VOLUME_DB15                 1523
-#define IDC_INPUTTOFOCUS                1523
 #define IDC_RADIO_INS                   1524
 #define IDC_PROGRESS1                   1524
 #define IDC_VOLUME_PER15                1524
@@ -1039,6 +1043,7 @@
 #define IDC_RADIO2                      1791
 #define IDC_OUTPUTCLIPBOARD             1791
 #define IDC_APPLYTOPATTERN              1791
+#define IDC_PSYCLEVSTBRIDGE             1791
 #define IDC_LINESTART                   1792
 #define IDC_OUTPUTCLIPBOARD2            1793
 #define IDC_OUTPUTSAMPLE                1793
@@ -1052,6 +1057,8 @@
 #define IDC_APPLYTOBLOCK                1802
 #define IDC_LOCKINST                    1802
 #define IDC_LIST2                       1804
+#define IDC_JBRIDGE                     1805
+#define IDC_ENABLEBRIDGE                1806
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1223,7 +1230,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        279
 #define _APS_NEXT_COMMAND_VALUE         34212
-#define _APS_NEXT_CONTROL_VALUE         1805
+#define _APS_NEXT_CONTROL_VALUE         1807
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

@@ -16,7 +16,7 @@ public:
 	/// <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
 	typedef double Real;
 
-	/*override*/ void help(std::ostream & out) const throw()
+	virtual void help(std::ostream & out) const throw()
 	{
 		out << "Haas stereo time delay spatial localization" << std::endl;
 		out << std::endl;
@@ -27,6 +27,8 @@ public:
 		out << "A third delay can be used for late reflection, giving your brain a hint about the openess of the environement." << std::endl;
 		out << std::endl;
 		out << "Note: The stereo input signal left and right channels are first summed to form a mono input signal." << std::endl;
+		out << std::endl;
+		out << "Beware if you tweak the global (max) delay length with a factor > 2 that the memory buffer gets resized." << std::endl;
 	}
 
 	enum Parameters
@@ -89,11 +91,11 @@ public:
 			/* separator                           = */ Information::Parameter(),
 			/* channel_mix                         = */ Information::Parameter::discrete("channel mix", normal, mono)
 		};
-		static const Information information(0x0100, Information::Types::effect, "Haas stereo time delay spatial localization", "Haas", "bohan/dilvie collaboration", 1, parameters, sizeof parameters / sizeof *parameters);
+		static const Information information(Information::Types::effect, "Haas stereo time delay spatial localization", "Haas", "bohan/dilvie collaboration", 1, parameters, sizeof parameters / sizeof *parameters);
 		return information;
 	}
 
-	/*override*/ void describe(std::ostream & out, const int & parameter) const
+	virtual void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -156,32 +158,39 @@ public:
 	Haas()
 	:
 		Plugin(information()),
-		direct_left(direct_first),
-		direct_right(direct_first),
-		early_reflection_left(early_reflection_first),
-		early_reflection_right(early_reflection_first),
-		direct_delay_stereo_delta_positive(false),
-		early_reflection_delay_stereo_delta_positive(false),
-		direct_delay_stereo_delta_negative(false),
-		early_reflection_delay_stereo_delta_negative(false),
-		direct_delay_stereo_delta_abs(0),
-		early_reflection_delay_stereo_delta_abs(0),
 		overall_gain_dry(0),
 		overall_gain_wet(1),
+		direct_delay_stereo_delta_abs(0),
+		direct_delay_stereo_delta_positive(false),
+		direct_delay_stereo_delta_negative(false),
+		direct_left(direct_first),
+		direct_right(direct_first),
 		direct_gain_left(1),
 		direct_gain_right(1),
+		early_reflection_delay_stereo_delta_abs(0),
+		early_reflection_delay_stereo_delta_positive(false),
+		early_reflection_delay_stereo_delta_negative(false),
+		early_reflection_left(early_reflection_first),
+		early_reflection_right(early_reflection_first),
 		early_reflection_gain_left(1),
 		early_reflection_gain_right(1),
 		late_reflection_gain_left(1),
 		late_reflection_gain_right(1)
 	{}
-	/*override*/ void init();
-	/*override*/ void Work(Sample l [], Sample r [], int samples, int);
-	/*override*/ void parameter(const int &);
+	virtual inline ~Haas() throw() {}
+	virtual void init();
+	virtual void process(Sample l [], Sample r [], int samples, int);
+	virtual void parameter(const int &);
 
 protected:
 
-	/*override*/ void samples_per_second_changed() { parameter(late_reflection_delay); }
+	virtual void samples_per_second_changed()
+	{
+		parameter(late_reflection_delay);
+	}
+
+	virtual void sequencer_ticks_per_second_changed()
+	{}
 
 	enum Channels { left, right, channels };
 	enum Stages { direct_first, direct_last, early_reflection_first, early_reflection_last, late_reflection, stages };
@@ -196,11 +205,12 @@ protected:
 	Real early_reflection_gain_left, early_reflection_gain_right;
 	Real late_reflection_gain_left, late_reflection_gain_right;
 
-	inline void Work(Sample & left, Sample & right);
+	inline void process(Sample & left, Sample & right);
 	void resize();
+	void resize(const Real & delay);
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(Haas)
+PSYCLE__PLUGIN__INSTANCIATOR(Haas)
 
 void Haas::init()
 {
@@ -281,63 +291,39 @@ void Haas::parameter(const int & parameter)
 
 void Haas::resize()
 {
-	Real const static max_delta(information().parameter(direct_delay_stereo_delta).scale.output_maximum());
-	Real const max_delay(std::max((*this)(early_reflection_delay) + max_delta, (*this)(late_reflection_delay)));
-
-	// resizes the buffer at least to 1, the smallest length possible for the algorithm to work
-	std::vector<Real>::size_type const new_size(1 + static_cast<int>(max_delay * samples_per_second()));
-
-	std::vector<Real>::difference_type write_pos;
-
-	if(buffer_.size() == 0) {
-		buffer_.resize(new_size, 0);
-		write_pos = buffer_.end() - 1 - buffer_.begin();
-	} else {
-		write_pos = buffer_iterators_[direct_first] - buffer_.begin();
-		if(new_size > buffer_.size())
-			buffer_.insert(buffer_.begin() + write_pos + 1, new_size - buffer_.size(), 0);
-	}
-
-	buffer_iterators_[direct_first] =
-		buffer_.begin() + write_pos;
-
-	buffer_iterators_[direct_last] =
-		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
-		direct_delay_stereo_delta_abs
-		* samples_per_second())) % new_size);
-
-	buffer_iterators_[early_reflection_first] =
-		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
-		(*this)(early_reflection_delay)
-		* samples_per_second())) % new_size);
-
-	buffer_iterators_[early_reflection_last] =
-		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
-		((*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs)
-		* samples_per_second())) % new_size);
-
-	buffer_iterators_[late_reflection] =
-		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
-		(*this)(late_reflection_delay)
-		* samples_per_second())) % new_size);
+	Real max;
+	max = std::max(direct_delay_stereo_delta_abs, (*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs);
+	max = std::max(max, (*this)(late_reflection_delay));
+	resize(max);
 }
 
-void Haas::Work(Sample l [], Sample r [], int samples, int)
+void Haas::resize(const Real & delay)
+{
+	// resizes the buffer at least to 1, the smallest length possible for the algorithm to work
+	buffer_.resize(1 + static_cast<int>(delay * samples_per_second()), 0);
+	buffer_iterators_[direct_first] = buffer_.end() - 1;
+	buffer_iterators_[direct_last]  = buffer_.end() - 1 - static_cast<int>(direct_delay_stereo_delta_abs * samples_per_second());
+	buffer_iterators_[early_reflection_first] = buffer_.end() - 1 - static_cast<int>((*this)(early_reflection_delay) * samples_per_second());
+	buffer_iterators_[early_reflection_last]  = buffer_.end() - 1 - static_cast<int>(((*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs) * samples_per_second());
+	buffer_iterators_[late_reflection] = buffer_.begin();
+}
+
+void Haas::process(Sample l [], Sample r [], int samples, int)
 {
 	switch((*this)[channel_mix])
 	{
 		case normal:
 			for(int sample(0) ; sample < samples ; ++sample)
-				Work(l[sample], r[sample]);
+				process(l[sample], r[sample]);
 			break;
 		case swapped:
 			for(int sample(0) ; sample < samples ; ++sample)
-				Work(r[sample], l[sample]);
+				process(r[sample], l[sample]);
 			break;
 		case mono:
 			for(int sample(0) ; sample < samples ; ++sample)
 			{
-				Work(l[sample], r[sample]);
+				process(l[sample], r[sample]);
 				l[sample] = r[sample] = l[sample] + r[sample];
 			}
 			break;
@@ -346,7 +332,7 @@ void Haas::Work(Sample l [], Sample r [], int samples, int)
 	}
 }
 
-inline void Haas::Work(Sample & left, Sample & right)
+inline void Haas::process(Sample & left, Sample & right)
 {
 	const Real mono_input(left + right);
 	*buffer_iterators_[direct_first] = mono_input;

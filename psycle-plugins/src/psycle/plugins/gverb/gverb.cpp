@@ -19,161 +19,190 @@
 
 	*/
 
-#include "gverb.h"
-#include "gverbdsp.h"
+//#include <stdio.h>
 #include <cstdlib>
 #include <malloc.h>
 #include <cmath>
 #include <cstring>
+#include "gverbdsp.h"
+#include "gverb.h"
+//#include "ladspa-util.h"
 
-gverb::gverb(
-	int rate, float maxroomsize, float roomsize,
-	float revtime, float fdndamping, float spread,
-	float inputbandwidth, float earlylevel, float taillevel
-)
-:
-	rate_(rate),
-	inputbandwidth_(inputbandwidth),
-	taillevel_(taillevel),
-	earlylevel_(earlylevel),
-	inputdamper_(1.0 - inputbandwidth),
-	maxroomsize_(maxroomsize),
-	roomsize_(roomsize),
-	revtime_(revtime),
-	maxdelay_(rate * maxroomsize / 340.0),
-	largestdelay_(rate * roomsize / 340.0),
-	fdndamping_(fdndamping),
-	tapdelay_(44000)
+ty_gverb *gverb_new(int srate, float maxroomsize, float roomsize,
+			float revtime,
+			float damping, float spread,
+			float inputbandwidth, float earlylevel,
+			float taillevel)
 {
-	// FDN section
-	{
-		fdndels_ = new fixeddelay*[FDNORDER];
-		for(int i = 0; i < FDNORDER; ++i) {
-			fdndels_[i] = new fixeddelay(maxdelay_ + 1000);
-		}
-		fdngains_ = new float[FDNORDER];
-		fdnlens_ = new int[FDNORDER];
+	ty_gverb *p;
+	float ga,gb,gt;
+	int i,n;
+	float r;
+	float diffscale;
+	int a,b,c,cc,d,dd,e;
+	float spread1,spread2;
 
-		fdndamps_ = new damper*[FDNORDER];
-		for(int i = 0; i < FDNORDER; ++i) {
-			fdndamps_[i] = new damper(fdndamping_);
-		}
+	p = (ty_gverb *)malloc(sizeof(ty_gverb));
+	p->rate = srate;
+	p->fdndamping = damping;
+	p->maxroomsize = maxroomsize;
+	p->roomsize = roomsize;
+	p->revtime = revtime;
+	p->earlylevel = earlylevel;
+	p->taillevel = taillevel;
 
-		float ga = 60;
-		float gt = revtime_;
-		ga = std::pow(10.0f, -ga / 20.0f);
-		int n = rate_ * gt;
-		alpha_ = std::pow((double) ga, 1.0 / n);
+	p->maxdelay = p->rate*p->maxroomsize/340.0;
+	p->largestdelay = p->rate*p->roomsize/340.0;
 
-		float gb = 0;
-		for(int i = 0; i < FDNORDER; ++i) {
-			if (i == 0) gb = 1.000000 * largestdelay_;
-			if (i == 1) gb = 0.816490 * largestdelay_;
-			if (i == 2) gb = 0.707100 * largestdelay_;
-			if (i == 3) gb = 0.632450 * largestdelay_;
 
-			#if 0
-				fdnlens_[i] = nearest_prime(gb, 0.5);
-			#else
-				fdnlens_[i] = std::floor(gb);
-			#endif
+	/* Input damper */
 
-			fdngains_[i] = -std::pow(alpha_, fdnlens_[i]);
-		}
+	p->inputbandwidth = inputbandwidth;
+	p->inputdamper = damper_make(1.0 - p->inputbandwidth);
 
-		d_ = new float[FDNORDER];
-		u_ = new float[FDNORDER];
-		f_ = new float[FDNORDER];
+
+	/* FDN section */
+
+
+	p->fdndels = (ty_fixeddelay **)calloc(FDNORDER, sizeof(ty_fixeddelay *));
+	for(i = 0; i < FDNORDER; i++) {
+	p->fdndels[i] = fixeddelay_make((int)p->maxdelay+1000);
+	}
+	p->fdngains = (float *)calloc(FDNORDER, sizeof(float));
+	p->fdnlens = (int *)calloc(FDNORDER, sizeof(int));
+
+	p->fdndamps = (ty_damper **)calloc(FDNORDER, sizeof(ty_damper *));
+	for(i = 0; i < FDNORDER; i++) {
+	p->fdndamps[i] = damper_make(p->fdndamping);
 	}
 
-	// Diffuser section
-	{
-		float diffscale = (float) fdnlens_[3] / (210 + 159 + 562 + 410);
-		float spread1 = spread;
-		float spread2 = spread * 3.0f;
+	ga = 60.0;
+	gt = p->revtime;
+	ga = powf(10.0f,-ga/20.0f);
+	n = p->rate*gt;
+	p->alpha = pow((double)ga, 1.0/(double)n);
 
-		int a, b, c, cc, d, dd, e;
-		float r;
-		b = 210;
-		r = 0.125541f;
-		a = spread1 * r;
-		c = 210 + 159 + a;
-		cc = c-b;
-		r = 0.854046f;
-		a = spread2 * r;
-		d = 210 + 159 + 562 + a;
-		dd = d - c;
-		e = 1341 - d;
+	gb = 0.0;
+	for(i = 0; i < FDNORDER; i++) {
+	if (i == 0) gb = 1.000000*p->largestdelay;
+	if (i == 1) gb = 0.816490*p->largestdelay;
+	if (i == 2) gb = 0.707100*p->largestdelay;
+	if (i == 3) gb = 0.632450*p->largestdelay;
 
-		ldifs_ = new diffuser*[4];
-		ldifs_[0] = new diffuser(diffscale * b, 0.75);
-		ldifs_[1] = new diffuser(diffscale * cc, 0.75);
-		ldifs_[2] = new diffuser(diffscale * dd, 0.625);
-		ldifs_[3] = new diffuser(diffscale * e, 0.625);
-
-		b = 210;
-		r = -0.568366f;
-		a = spread1 * r;
-		c = 210 + 159 + a;
-		cc = c - b;
-		r = -0.126815f;
-		a = spread2 * r;
-		d = 210 + 159 + 562 + a;
-		dd = d - c;
-		e = 1341 - d;
-
-		rdifs_ = new diffuser*[4];
-		rdifs_[0] = new diffuser(diffscale * b, 0.75);
-		rdifs_[1] = new diffuser(diffscale * cc, 0.75);
-		rdifs_[2] = new diffuser(diffscale * dd, 0.625);
-		rdifs_[3] = new diffuser(diffscale * e, 0.625);
+#if 0
+	p->fdnlens[i] = nearest_prime((int)gb, 0.5);
+#else
+	//p->fdnlens[i] = f_round(gb);
+	p->fdnlens[i] = floorf(gb);
+#endif
+	p->fdngains[i] = -powf((float)p->alpha,p->fdnlens[i]);
 	}
 
-	// Tapped delay section
+	p->d = (float *)calloc(FDNORDER, sizeof(float));
+	p->u = (float *)calloc(FDNORDER, sizeof(float));
+	p->f = (float *)calloc(FDNORDER, sizeof(float));
 
-	taps_ = new int[FDNORDER];
-	tapgains_ = new float[FDNORDER];
+	/* Diffuser section */
 
-	taps_[0] = 5 + 0.410 * largestdelay_;
-	taps_[1] = 5 + 0.300 * largestdelay_;
-	taps_[2] = 5 + 0.155 * largestdelay_;
-	taps_[3] = 5 + 0.000 * largestdelay_;
+	diffscale = (float)p->fdnlens[3]/(210+159+562+410);
+	spread1 = spread;
+	spread2 = 3.0*spread;
 
-	for(int i = 0; i < FDNORDER; ++i) {
-		tapgains_[i] = std::pow(alpha_, taps_[i]);
+	b = 210;
+	r = 0.125541f;
+	a = spread1*r;
+	c = 210+159+a;
+	cc = c-b;
+	r = 0.854046f;
+	a = spread2*r;
+	d = 210+159+562+a;
+	dd = d-c;
+	e = 1341-d;
+
+	p->ldifs = (ty_diffuser **)calloc(4, sizeof(ty_diffuser *));
+	p->ldifs[0] = diffuser_make((int)(diffscale*b),0.75);
+	p->ldifs[1] = diffuser_make((int)(diffscale*cc),0.75);
+	p->ldifs[2] = diffuser_make((int)(diffscale*dd),0.625);
+	p->ldifs[3] = diffuser_make((int)(diffscale*e),0.625);
+
+	b = 210;
+	r = -0.568366f;
+	a = spread1*r;
+	c = 210+159+a;
+	cc = c-b;
+	r = -0.126815f;
+	a = spread2*r;
+	d = 210+159+562+a;
+	dd = d-c;
+	e = 1341-d;
+
+	p->rdifs = (ty_diffuser **)calloc(4, sizeof(ty_diffuser *));
+	p->rdifs[0] = diffuser_make((int)(diffscale*b),0.75);
+	p->rdifs[1] = diffuser_make((int)(diffscale*cc),0.75);
+	p->rdifs[2] = diffuser_make((int)(diffscale*dd),0.625);
+	p->rdifs[3] = diffuser_make((int)(diffscale*e),0.625);
+
+
+
+	/* Tapped delay section */
+
+	p->tapdelay = fixeddelay_make(44000);
+	p->taps = (int *)calloc(FDNORDER, sizeof(int));
+	p->tapgains = (float *)calloc(FDNORDER, sizeof(float));
+
+	p->taps[0] = 5+0.410*p->largestdelay;
+	p->taps[1] = 5+0.300*p->largestdelay;
+	p->taps[2] = 5+0.155*p->largestdelay;
+	p->taps[3] = 5+0.000*p->largestdelay;
+
+	for(i = 0; i < FDNORDER; i++) {
+	p->tapgains[i] = pow(p->alpha,(double)p->taps[i]);
 	}
+
+	return(p);
 }
 
-gverb::~gverb() {
-	for(int i = 0; i < FDNORDER; ++i) {
-		delete fdndels_[i];
-		delete fdndamps_[i];
-		delete ldifs_[i];
-		delete rdifs_[i];
+void gverb_free(ty_gverb *p)
+{
+	int i;
+
+	damper_free(p->inputdamper);
+	for(i = 0; i < FDNORDER; i++) {
+	fixeddelay_free(p->fdndels[i]);
+	damper_free(p->fdndamps[i]);
+	diffuser_free(p->ldifs[i]);
+	diffuser_free(p->rdifs[i]);
 	}
-	delete[] fdndels_;
-	delete[] fdngains_;
-	delete[] fdnlens_;
-	delete[] fdndamps_;
-	delete[] d_;
-	delete[] u_;
-	delete[] f_;
-	delete[] ldifs_;
-	delete[] rdifs_;
-	delete[] taps_;
-	delete[] tapgains_;
+	free(p->fdndels);
+	free(p->fdngains);
+	free(p->fdnlens);
+	free(p->fdndamps);
+	free(p->d);
+	free(p->u);
+	free(p->f);
+	free(p->ldifs);
+	free(p->rdifs);
+	free(p->taps);
+	free(p->tapgains);
+	fixeddelay_free(p->tapdelay);
+	free(p);
 }
 
-void gverb::flush() {
-	inputdamper_.flush();
-	for(int i = 0; i < FDNORDER; ++i) {
-		fdndels_[i]->flush();
-		fdndamps_[i]->flush();
-		ldifs_[i]->flush();
-		rdifs_[i]->flush();
+void gverb_flush(ty_gverb *p)
+{
+	int i;
+
+	damper_flush(p->inputdamper);
+	for(i = 0; i < FDNORDER; i++) {
+	fixeddelay_flush(p->fdndels[i]);
+	damper_flush(p->fdndamps[i]);
+	diffuser_flush(p->ldifs[i]);
+	diffuser_flush(p->rdifs[i]);
 	}
-	std::memset(d_, 0, FDNORDER * sizeof *d_);
-	std::memset(u_, 0, FDNORDER * sizeof *u_);
-	std::memset(f_, 0, FDNORDER * sizeof *f_);
-	tapdelay_.flush();
+	memset(p->d, 0, FDNORDER * sizeof(float));
+	memset(p->u, 0, FDNORDER * sizeof(float));
+	memset(p->f, 0, FDNORDER * sizeof(float));
+	fixeddelay_flush(p->tapdelay);
 }
+
+/* swh: other functions are now in the .h file for inlining */

@@ -11,39 +11,33 @@ namespace psycle { namespace plugin {
 class Negative : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	virtual void help(std::ostream & out) const throw()
 	{
 		out << "just a Negative (out = -in)" << std::endl;
 	}
 	static const Information & information() throw()
 	{
-		static bool initialized = false;
-		static Information *info = NULL;
-		if (!initialized) {
-			static Information information(0x0100, Information::Types::effect, "Negative", "Negative", "who cares", 1, 0, 0);
-			info = &information;
-			initialized = true;
-		}
-		return *info;
+		static const Information information(Information::Types::effect, "Negative", "Negative", "who cares", 1, 0, 0);
+		return information;
 	}
 	Negative() : Plugin(information()) {}
-	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
+	virtual void process(Sample l[], Sample r[], int samples, int);
 protected:
-	inline void Work(Sample &);
+	inline void process(Sample &);
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(Negative)
+PSYCLE__PLUGIN__INSTANCIATOR(Negative)
 
-void Negative::Work(Sample l[], Sample r[], int sample, int)
+void Negative::process(Sample l[], Sample r[], int sample, int)
 {
 	while(sample--)
 	{
-		Work(l[sample]);
-		Work(r[sample]);
+		process(l[sample]);
+		process(r[sample]);
 	}
 }
 
-inline void Negative::Work(Sample & sample)
+inline void Negative::process(Sample & sample)
 {
 	sample = -sample;
 }

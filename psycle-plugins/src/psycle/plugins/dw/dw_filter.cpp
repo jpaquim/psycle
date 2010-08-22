@@ -1,6 +1,5 @@
 ////implementation for dwfilter class
 #include "dw_filter.hpp"
-#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 
 const double dwfilter::PI																= 3.141592653589793238;
 const double dwfilter::TWO_PI												= 2 * dwfilter::PI;
@@ -268,25 +267,17 @@ float dwfilter::Process(const float xn, const int chan)
 	}
 */				
 
-	// it might save a bit on cpu to just pre-init a buffer of random values to add to the input
-	#if 0
-		if(isdenormal(z0[chan]))
-			z0[chan]=0.0f;
-	#else
-		psycle::helpers::math::erase_all_nans_infinities_and_denormals(z0[chan]);
-	#endif
+	if(isdenormal(z0[chan]))
+		z0[chan]=0.0f;
 
 	z2[chan] = z1[chan];
 	z1[chan] = z0[chan];
 	return yn;
 
 }
-
-#if 0
-	bool dwfilter::isdenormal(float num)								
-	{
-		if(  (   ( *(std::uint32_t*) & num) & 0x7f800000) == 0)
-			return true;
-		return false;
-	}
-#endif
+bool dwfilter::isdenormal(float num)								//it might save a bit on cpu to just pre-init a buffer of random values to add to the input
+{
+	if(  (   ( *(std::uint32_t*) & num) & 0x7f800000) == 0)
+		return true;
+	return false;
+}

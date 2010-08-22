@@ -7,6 +7,7 @@
 //============================================================================
 #pragma once
 #include "../CDsp.h"
+#include "../DspMath.h"
 #include "../CEnvelope.h"
 #include "../wtfmlib.h"
 //============================================================================
@@ -188,19 +189,19 @@ public:
 	{
 		//
 		//
-		float vca_out;
-		float osc1_spd;
-		float osc2_spd;
-		float osc2_tme;
-		int amount;
+		static float vca_out;
+		static float osc1_spd;
+		static float osc2_spd;
+		static float osc2_tme;
+		static int amount;
 		register int nsamples;
-		float dist;
-		float dist2;
-		float ndis;
+		static float dist;
+		static float dist2;
+		static float ndis;
 		register float *pleft;
 		register float *pright;
-		float out1[256];
-		float out2[256];
+		static float out1[256]; //GLOBAL_TICKS];
+		static float out2[256]; //GLOBAL_TICKS];
 		//
 		//				Waveform
 		float *pwaveform = wavetable[globals->waveform];

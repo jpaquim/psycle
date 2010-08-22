@@ -1,11 +1,8 @@
 // Here It goes the "mi" declaration. It has been moved to track.hpp due to some compiling requirements.
 #include "track.hpp"
-#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/math/sine_cosine.hpp>
 #include <cstring>
 #include <cmath>
-
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers::math;
 
 // M3 Buzz plugin by MAKK makk@gmx.de
 // released on 04-21-99
@@ -24,10 +21,10 @@ using namespace psycle::helpers::math;
 // Original Author sources are under:
 // http://www.fortunecity.com/skyscraper/rsi/76/plugins.htm
 
-float CTrack::freqTab[120];
-float CTrack::coefsTab[4 * 128 * 128 * 8];
-float CTrack::LFOOscTab[0x10000];
-signed short CTrack::WaveTable[5][2100];
+float freqTab[120];
+float coefsTab[4 * 128 * 128 * 8];
+float LFOOscTab[0x10000];
+signed short WaveTable[5][2100];
 
 /// This value defines the MAX_TRACKS of PSYCLE, not of the Plugin.
 /// Leave it like it is. Your Plugin NEEDS TO support it.
@@ -189,7 +186,7 @@ CMachineParameter const *pParameters[] = {
 	&paraLFO2Amount,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 		MI_VERSION,
 		GENERATOR,
 		NUMPARAMETERS,
@@ -205,14 +202,14 @@ CMachineInfo const MacInfo (
 		5
 );
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi() {
 	Vals =new int[NUMPARAMETERS];
 }
 
 mi::~mi() {
-	delete[] Vals;
+	delete Vals;
 }
 
 void mi::Init() {
@@ -226,34 +223,34 @@ void mi::Init() {
 	// Generate Oscillator tables
 	for(int c = 0; c < 2100; ++c) {
 		double sval = (double) c * 0.00306796157577128245943617517898389;
-		CTrack::WaveTable[0][c] = int(std::sin(sval) * 16384.0f);
+		WaveTable[0][c] = int(std::sin(sval) * 16384.0f);
 
-		if(c < 2048) CTrack::WaveTable[1][c] = (c * 16) - 16384;
-		else CTrack::WaveTable[1][c] = ((c - 2048) * 16) - 16384;
+		if(c < 2048) WaveTable[1][c] = (c * 16) - 16384;
+		else WaveTable[1][c] = ((c - 2048) * 16) - 16384;
 
-		if(c < 1024) CTrack::WaveTable[2][c] = -16384;
-		else CTrack::WaveTable[2][c] = 16384;
+		if(c < 1024) WaveTable[2][c] = -16384;
+		else WaveTable[2][c] = 16384;
 
-		if(c < 1024) CTrack::WaveTable[3][c] = (c * 32) - 16384;
-		else CTrack::WaveTable[3][c] = 16384 - ((c - 1024) * 32);
+		if(c < 1024) WaveTable[3][c] = (c * 32) - 16384;
+		else WaveTable[3][c] = 16384 - ((c - 1024) * 32);
 
-		CTrack::WaveTable[4][c] = std::rand();
+		WaveTable[4][c] = std::rand();
 	}
 
 	// generate frequencyTab
 	double freq = 16.35; // c0 to b9
 	for(int j = 0; j < 10; ++j)
 		for(int i = 0; i < 12; ++i) {
-			CTrack::freqTab[j * 12 + i] = float(freq);
+			freqTab[j * 12 + i] = float(freq);
 			freq *= 1.05946309435929526; // * 2 ^ (1 / 12)
 		}
 	// generate coefsTab
 	for(int t = 0; t < 4; ++t)
 		for(int f = 0; f < 128; ++f)
 			for(int r = 0; r < 128; ++r)
-				ComputeCoefs(CTrack::coefsTab + (t * 128 * 128 + f * 128 + r) * 8, f, r, t);
+				ComputeCoefs(coefsTab + (t * 128 * 128 + f * 128 + r) * 8, f, r, t);
 	// generate LFOOscTab
-	for(int p = 0; p < 0x10000; ++p) CTrack::LFOOscTab[p] = std::pow(1.00004230724139582, p - 0x8000);
+	for(int p = 0; p < 0x10000; ++p) LFOOscTab[p] = std::pow(1.00004230724139582, p - 0x8000);
 }
 
 void mi::Stop() {
@@ -570,7 +567,7 @@ void mi::ComputeCoefs( float *coefs, int freq, int r, int t) {
 	float omega = 2 * psycle::plugin_interface::pi * Cutoff(freq) / pCB->GetSamplingRate();
 
 	float sn, cs;
-	sincos(omega, sn, cs);
+	psycle::helpers::math::sin_cos(omega, sn, cs);
 	//float sn = std::sin(omega);
 	//float cs = std::cos(omega);
 	

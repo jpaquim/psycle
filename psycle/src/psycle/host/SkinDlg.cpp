@@ -5,7 +5,6 @@
 
 #include "Configuration.hpp"
 
-#include <psycle/helpers/hexstring_to_integer.hpp>
 
 namespace psycle { namespace host {
 
@@ -768,6 +767,7 @@ namespace psycle { namespace host {
 				char buf[1 << 10];
 				while(std::fgets(buf, sizeof buf, hfile))
 				{
+					using helpers::hexstring_to_integer;
 					// this is a horror of repetitive code :-(
 					if (std::strstr(buf,"\"pattern_fontface\"=\""))
 					{
@@ -1201,7 +1201,7 @@ namespace psycle { namespace host {
 							hexstring_to_integer(q+1, _wirewidth);
 						}
 					}
-					else if (std::strstr(buf,"\"mv_wireaa\"=hex:"))
+					if (std::strstr(buf,"\"mv_wireaa\"=hex:"))
 					{
 						char *q = std::strchr(buf,58); // :
 						if (q)

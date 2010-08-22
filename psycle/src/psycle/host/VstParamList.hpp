@@ -2,16 +2,14 @@
 ///\brief interface file for psycle::host::CVstParamList.
 #pragma once
 #include "Psycle.hpp"
-
 #include <afxext.h>
 
 namespace psycle {
-	namespace core {
-		namespace vst {
+	namespace host {
+		namespace vst
+		{
 			class plugin;
 		}
-	}
-	namespace host {
 
 		class CVstParamList : public CDialog
 		{

@@ -11,7 +11,7 @@ namespace psycle { namespace plugin {
 class Distortion : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	virtual void help(std::ostream & out) const throw()
 	{
 		out << "distortion ..." << std::endl;
 		out << "compatible with psycle 1 arguru's original distortion" << std::endl;
@@ -31,27 +31,21 @@ public:
 
 	static const Information & information() throw()
 	{
-		static bool initialized = false;
-		static Information *info = NULL;
-		if (!initialized) {
-			static const Information::Parameter parameters [] =
-			{
-				Information::Parameter::exponential("input gain", ::exp(-4.), 1, ::exp(+4.)),
-				Information::Parameter::exponential("output gain", ::exp(-4.), 1, ::exp(+4.)),
-				Information::Parameter::linear("positive threshold", 0, +amplitude, +amplitude),
-				Information::Parameter::linear("positive clamp", 0, +amplitude, +amplitude),
-				Information::Parameter::linear("negative threshold", 0, +amplitude, +amplitude),
-				Information::Parameter::linear("negative clamp", 0, +amplitude, +amplitude),
-				Information::Parameter::discrete("symmetric", no, yes)
-			};
-			static Information information(0x0110, Information::Types::effect, "ayeternal Dist! Distortion", "Dist!ortion", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
-			info = &information;
-			initialized = true;
-		}
-		return *info;
+		static const Information::Parameter parameters [] =
+		{
+			Information::Parameter::exponential("input gain", ::exp(-4.), 1, ::exp(+4.)),
+			Information::Parameter::exponential("output gain", ::exp(-4.), 1, ::exp(+4.)),
+			Information::Parameter::linear("positive threshold", 0, +amplitude, +amplitude),
+			Information::Parameter::linear("positive clamp", 0, +amplitude, +amplitude),
+			Information::Parameter::linear("negative threshold", 0, +amplitude, +amplitude),
+			Information::Parameter::linear("negative clamp", 0, +amplitude, +amplitude),
+			Information::Parameter::discrete("symmetric", no, yes)
+		};
+		static const Information information(Information::Types::effect, "ayeternal Dist! Distortion", "Dist!ortion", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
+		return information;
 	}
 
-	/*override*/ void describe(std::ostream & out, const int & parameter) const
+	virtual void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -87,15 +81,15 @@ public:
 	}
 
 	Distortion() : Plugin(information()) {}
-	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
+	virtual void process(Sample l[], Sample r[], int samples, int);
 protected:
-	inline void Work
+	inline void process
 	(
 		Sample & l, Sample & r,
 		const Sample & positive_threshold, const Sample & positive_clamp,
 		const Sample & negative_threshold, const Sample & negative_clamp
 	);
-	inline void Work
+	inline void process
 	(
 		Sample & sample,
 		const Sample & positive_threshold, const Sample & positive_clamp,
@@ -103,16 +97,16 @@ protected:
 	);
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(Distortion)
+PSYCLE__PLUGIN__INSTANCIATOR(Distortion)
 
-void Distortion::Work(Sample l[], Sample r[], int sample, int)
+void Distortion::process(Sample l[], Sample r[], int sample, int)
 {
 	switch((*this)[symmetric])
 	{
 	case no:
 		while(sample--)
 		{
-			Work
+			process
 				(
 					l[sample], r[sample],
 					(*this)(positive_threshold), (*this)(positive_clamp),
@@ -123,7 +117,7 @@ void Distortion::Work(Sample l[], Sample r[], int sample, int)
 	case yes:
 		while(sample--)
 		{
-			Work
+			process
 				(
 					l[sample], r[sample],
 					(*this)(positive_threshold), (*this)(positive_clamp),
@@ -136,18 +130,18 @@ void Distortion::Work(Sample l[], Sample r[], int sample, int)
 	}
 }
 
-inline void Distortion::Work
+inline void Distortion::process
 (
 	Sample & l, Sample & r,
 	const Sample & positive_threshold, const Sample & positive_clamp,
 	const Sample & negative_threshold, const Sample & negative_clamp
 )
 {
-	Work(l, positive_threshold, positive_clamp, negative_threshold, negative_clamp);
-	Work(r, positive_threshold, positive_clamp, negative_threshold, negative_clamp);
+	process(l, positive_threshold, positive_clamp, negative_threshold, negative_clamp);
+	process(r, positive_threshold, positive_clamp, negative_threshold, negative_clamp);
 }
 
-inline void Distortion::Work
+inline void Distortion::process
 (
 	Sample & sample,
 	const Sample & positive_threshold, const Sample & positive_clamp,

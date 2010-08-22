@@ -4,7 +4,6 @@
 #ifndef PSYCLE__HELPERS__MATH__INCLUDED
 #define PSYCLE__HELPERS__MATH__INCLUDED
 #pragma once
-
 #include "math/math.hpp"
 
 #endif

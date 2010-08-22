@@ -1,36 +1,52 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/***************************************************************************
+*   Copyright (C) 2007 Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#ifndef PSYCLE__CORE__MACHINE_HOST__INCLUDED
-#define PSYCLE__CORE__MACHINE_HOST__INCLUDED
-#pragma once
+#ifndef MACHINEHOST_HPP
+#define MACHINEHOST_HPP
 
 #include "machinekey.hpp"
 #include "plugininfo.h"
 #include "machine.h"
-
 #include <string>
 
-namespace psycle { namespace core {
+namespace psy{namespace core{
 
 class MachineCallbacks;
 class Machine;
 class PluginFinder;
 
-class PSYCLE__CORE__DECL MachineHost {
+class MachineHost
+{
 protected:
 	MachineHost(MachineCallbacks*);
 public:
 	virtual ~MachineHost() {}
-	virtual Machine* CreateMachine(PluginFinder&, const MachineKey &, Machine::id_type) = 0;
+	virtual Machine* CreateMachine(PluginFinder&, MachineKey, Machine::id_type) = 0;
 	virtual void FillFinderData(PluginFinder&, bool clearfirst=false);
 
-	virtual const/*no const*/ Hosts::type hostCode() const = 0;
-	virtual const/*no const*/ std::string hostName() const = 0;
+	virtual const Hosts::type hostCode() const = 0;
+	virtual const std::string hostName() const = 0;
 
 	virtual std::string const & getPluginPath(int) const { static std::string ret = ""; return ret; };
 	virtual int getNumPluginPaths() const { return 0; }
-	virtual void setPluginPath(std::string /*const &*/) {};
+	virtual void setPluginPath(std::string ) {};
 protected:
 	virtual void FillPluginInfo(const std::string&, const std::string& , PluginFinder& ) = 0;
 
@@ -38,4 +54,4 @@ protected:
 };
 
 }}
-#endif
+#endif // MACHINEHOST_HPP

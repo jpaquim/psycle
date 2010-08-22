@@ -3,54 +3,20 @@
 
 #include "WireDlg.hpp"
 
-#include "Configuration.hpp"
 #include "ChildView.hpp"
+#include "Configuration.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
 #include "Zap.hpp"
-#include "WireGui.hpp"
-#include "MachineGui.hpp"
 
-#include <psycle/core/machine.h>
-#include <psycle/core/song.h>
-#include <psycle/helpers/math.hpp>
-#include <psycle/helpers/fft.hpp>
-#include <psycle/helpers/dsp.hpp>
+#include "Machine.hpp"
+#include <psycle/helpers/math/constants.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 
 namespace psycle { namespace host {
-
-		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
-			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
-			ON_WM_TIMER()
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlider)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
-			ON_BN_CLICKED(IDC_BUTTON, OnMode)
-			ON_BN_CLICKED(IDC_BUTTON2, OnHold)
-			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
-			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
-		END_MESSAGE_MAP()
-		
-		CWireDlg::CWireDlg(CChildView* pParent, WireGui* wire_gui)
-			: CDialog(CWireDlg::IDD, pParent),
-			  m_pParent(pParent),
-			  wire_gui_(wire_gui),
-			  this_index(0), 
-			  wireIndex(0),
-			  _pSrcMachine(wire_gui_->fromGUI()->mac()),
-			  _pDstMachine(wire_gui_->toGUI()->mac()),
-			  scope_mode(0),
-			  scope_peak_rate(20),
-			  scope_osc_freq(5),
-			  scope_osc_rate(20),
-			  scope_spec_bands(128),
-			  scope_spec_rate(20),
-			  scope_spec_mode(1),
-			  scope_phase_rate(20),
-			  Inval(false)	{
-			CDialog::Create(IDD, m_pParent);
-			Init();
+		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
+		{
+			m_pParent = pParent;
 		}
 
 		void CWireDlg::DoDataExchange(CDataExchange* pDX)
@@ -64,20 +30,42 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_BUTTON, m_mode);
 		}
 
+		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
+			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
+			ON_WM_TIMER()
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlider)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
+			ON_BN_CLICKED(IDC_BUTTON, OnMode)
+			ON_BN_CLICKED(IDC_BUTTON2, OnHold)
+			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
+			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
+		END_MESSAGE_MAP()
 
-
-		void CWireDlg::Init()
+		BOOL CWireDlg::OnInitDialog() 
 		{
+			CDialog::OnInitDialog();
+
 			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
 			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
-			//universalis::os::aligned_memory_alloc(16, inl, SCOPE_SPEC_SAMPLES);
-			//universalis::os::aligned_memory_alloc(16, inr, SCOPE_SPEC_SAMPLES);
-			helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
-			helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
+			psycle::helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
+			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
+			
+			scope_mode = 0;
+			scope_peak_rate = 20;
+			scope_osc_freq = 5;
+			scope_osc_rate = 20;
+			scope_spec_bands = 128;
+			scope_spec_rate = 20;
+			scope_spec_mode = 1;
+			scope_phase_rate = 20;
 			InitSpectrum();
+
+			Inval = false;
 			m_volslider.SetRange(0,256*4);
 			m_volslider.SetTicFreq(16*4);
-			_dstWireIndex = wire_gui_->wiredest();
+			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
+
 			float val;
 			_pDstMachine->GetWireVolume(_dstWireIndex,val);
 			invol = val;
@@ -85,7 +73,7 @@ namespace psycle { namespace host {
 			m_volslider.SetPos(256*4-t);
 
 			char buf[128];
-			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->GetEditName().c_str(), _pDstMachine->GetEditName().c_str());
+			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
 			SetWindowText(buf);
 
 			hold = FALSE;
@@ -105,16 +93,29 @@ namespace psycle { namespace host {
 			SetMode();
 			pos = 1;
 
-			mult = 32768.0f / _pSrcMachine->GetAudioRange();
+			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
+			{
+				mult = 32768.0f;
+			}
+			else // native to native, no need to convert.
+			{
+				mult = 1.0f;
+			}	
+			return TRUE;
 		}
 
-		void CWireDlg::OnCancel() {
+		BOOL CWireDlg::Create()
+		{
+			return CDialog::Create(IDD, m_pParent);
+		}
+
+		void CWireDlg::OnCancel()
+		{
 			KillTimer(2304+this_index);
 			_pSrcMachine->_pScopeBufferL = NULL;
 			_pSrcMachine->_pScopeBufferR = NULL;
 			_pSrcMachine->_scopeBufferIndex = 0;
-			if (wire_gui_)
-				wire_gui_->BeforeWireDlgDeletion();
+			m_pParent->WireDialog[this_index] = NULL;
 			DestroyWindow();
 			font.DeleteObject();
 			bufBM->DeleteObject();
@@ -127,15 +128,14 @@ namespace psycle { namespace host {
 			zapObject(clearBM);
 			universalis::os::aligned_memory_dealloc(pSamplesL);
 			universalis::os::aligned_memory_dealloc(pSamplesR);
-//			universalis::os::aligned_memory_dealloc(inl);
-//			universalis::os::aligned_memory_dealloc(inr);
 			delete this;
 		}
 
-		void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)  {
+		void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
+		{
 			char bufper[32];
 			char bufdb[32];
-			//invol = (128-m_volslider.GetPos())*0.0078125f;
+		//	invol = (128-m_volslider.GetPos())*0.0078125f;
 			invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
 
 			if (invol > 1.0f)
@@ -166,6 +166,7 @@ namespace psycle { namespace host {
 			_pDstMachine->GetWireVolume(_dstWireIndex, f);
 			if (f != invol)
 			{
+				m_pParent->AddMacViewUndo();
 				_pDstMachine->SetWireVolume(_dstWireIndex, invol );
 			}
 
@@ -175,8 +176,11 @@ namespace psycle { namespace host {
 
 		void CWireDlg::OnButton1() 
 		{
-			wire_gui_->RemoveWire();
-			wire_gui_ = 0;
+			m_pParent->AddMacViewUndo();
+			Inval = true;
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
+			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
 			OnCancel();
 		}
 
@@ -207,8 +211,8 @@ namespace psycle { namespace host {
 			{ 
 				//Linear -pi to pi.
 				const float constant = 2.0f * helpers::math::pi_f * (-0.5f + ((float)i/(SCOPE_SPEC_SAMPLES-1)));
-				//Hann window 
-				const float window = 0.50 - 0.50 * cosf(2.0f * M_PI * i / (SCOPE_SPEC_SAMPLES - 1));
+				//Hanning window 
+				const float window = 0.50 - 0.50 * cosf(2.0f * helpers::math::pi * i / (SCOPE_SPEC_SAMPLES - 1));
 				float j=0.0f;
 				for(int h=0;h<scope_spec_bands;h++)
 				{ 
@@ -271,15 +275,15 @@ namespace psycle { namespace host {
 						{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float awl=fabsf(pSamplesL[index]*_pSrcMachine->lVol());///32768; 
-							float awr=fabsf(pSamplesR[index]*_pSrcMachine->rVol());///32768; 
+							float awl=fabsf(pSamplesL[index]*_pSrcMachine->_lVol);///32768; 
+							float awr=fabsf(pSamplesR[index]*_pSrcMachine->_rVol);///32768; 
 
 							if (awl>curpeakl)	{	curpeakl = awl;	}
 							if (awr>curpeakr)	{	curpeakr = awr;	}
-						}
+							}
 
-						curpeakl=128-lround<long int>(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
-						curpeakr=128-lround<long int>(sqrtf(curpeakr*vucorrection));
+						curpeakl=128-helpers::math::lround<int,float>(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
+						curpeakr=128-helpers::math::lround<int,float>(sqrtf(curpeakr*vucorrection));
 
 						if (curpeakl<peak2L) //  it is a cardinal value, so smaller means higher peak.
 							{
@@ -404,24 +408,24 @@ namespace psycle { namespace host {
 						// buffered and working backwards - it does it this way to minimize chances of drawing 
 						// erroneous data across the buffering point
 
-						float add = (float(Global::pConfig->GetSamplesPerSec())/(float(freq)))/64.0f;
+						float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
 
 						float n = float(_pSrcMachine->_scopeBufferIndex-pos);
-						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->lVol()));
+						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
 							n -= add;
-							bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->lVol()));
+							bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
 		//					bufDC.LineTo(x,GetY(32768/2));
 						}
 						bufDC.SelectObject(&linepenR);
 
 						n = float(_pSrcMachine->_scopeBufferIndex-pos);
-						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->rVol()));
+						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
 							n -= add;
-							bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->rVol()));
+							bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
 						}
 
 						bufDC.SelectObject(oldpen);
@@ -438,114 +442,6 @@ namespace psycle { namespace host {
 
 				case 2: // spectrum analyzer
 					{
-/*						int width = 1;
-						float aal[SCOPE_SPEC_SAMPLES>>1];
-						float aar[SCOPE_SPEC_SAMPLES>>1];
-						memset (aal,0,sizeof(aal));
-						memset (aar,0,sizeof(aar));
-						int amount = SCOPE_BUF_SIZE - _pSrcMachine->_scopeBufferIndex;
-						float vucorrection= invol*mult/6553500.0f;
-						if (amount >= SCOPE_SPEC_SAMPLES) {
-							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, SCOPE_SPEC_SAMPLES, vucorrection*_pSrcMachine->_lVol);
-							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, SCOPE_SPEC_SAMPLES, vucorrection*_pSrcMachine->_rVol);
-						} else {
-							psycle::helpers::dsp::MovMul(pSamplesL+_pSrcMachine->_scopeBufferIndex, inl, amount, vucorrection*_pSrcMachine->_lVol);
-							psycle::helpers::dsp::MovMul(pSamplesL, inl+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection*_pSrcMachine->_rVol);
-							psycle::helpers::dsp::MovMul(pSamplesR+_pSrcMachine->_scopeBufferIndex, inr, amount, vucorrection*_pSrcMachine->_lVol);
-							psycle::helpers::dsp::MovMul(pSamplesR, inr+amount, SCOPE_SPEC_SAMPLES-amount, vucorrection*_pSrcMachine->_rVol);
-						}
-
-						psycle::host::dsp::WindowFunc(3,SCOPE_SPEC_SAMPLES,inl);
-						psycle::host::dsp::WindowFunc(3,SCOPE_SPEC_SAMPLES,inr);
-						psycle::host::dsp::PowerSpectrum(SCOPE_SPEC_SAMPLES,inl,aal);
-						psycle::host::dsp::PowerSpectrum(SCOPE_SPEC_SAMPLES,inr,aar);
-						psycle::helpers::dsp::Undenormalize(aal,aar,SCOPE_SPEC_SAMPLES>>1);
-						
-						COLORREF cl = 0x402020;
-						COLORREF cr = 0x204020;
-
-						RECT rect;
-						rect.left = 0;
-
-						// draw our bands
-
-						for (int i = 0; i < MAX_SCOPE_BANDS; i++)
-						{
-							//TODO: change this code to be logarithmic
-							//((pow(10.0f,i)-1.0f)/9.0f)
-							//(int)((((pow(10.0f,i/(float)MAX_SCOPE_BANDS))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))
-							int aml = - psycle::helpers::dsp::dB(aal[(int)((((pow(10.0f,i/(float)MAX_SCOPE_BANDS))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
-							if (aml < 0)
-							{
-								aml = 0;
-							}
-							if (aml > 128) {
-								aml = 128;
-							}
-							if (aml < bar_heightsl[i])
-							{
-								bar_heightsl[i]=aml;
-							}
-
-							rect.right = rect.left+width;
-							rect.top = bar_heightsl[i];
-							rect.bottom = aml;
-							bufDC.FillSolidRect(&rect,cl);
-
-							rect.top = rect.bottom;
-							rect.bottom = 128;
-							bufDC.FillSolidRect(&rect,cl+0x804040);
-
-							rect.left+=width;
-							//TODO: change this code to be logarithmic
-							int amr = - psycle::helpers::dsp::dB(aar[(int)((((pow(10.0f,i/(float)MAX_SCOPE_BANDS))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
-							if (amr < 0)
-							{
-								amr = 0;
-							}
-							if (amr > 128) {
-								amr = 128;
-							}
-							if (amr < bar_heightsr[i])
-							{
-								bar_heightsr[i]=amr;
-							}
-
-							rect.right = rect.left+width;
-							rect.top = bar_heightsr[i];
-							rect.bottom = amr;
-							bufDC.FillSolidRect(&rect,cr);
-
-							rect.top = rect.bottom;
-							rect.bottom = 128;
-							bufDC.FillSolidRect(&rect,cr+0x408040);
-
-							rect.left+=width;
-
-							if (!hold)
-							{
-								bar_heightsl[i]+=6;
-								if (bar_heightsl[i] > 128)
-								{
-									bar_heightsl[i] = 128;
-								}
-								bar_heightsr[i]+=6;
-								if (bar_heightsr[i] > 128)
-								{
-									bar_heightsr[i] = 128;
-								}
-							}
-						}
-						char buf[64];
-						sprintf(buf,"%d Bands Refresh %.2fhz",scope_spec_bands,1000.0f/scope_spec_rate);
-						CFont* oldFont= bufDC.SelectObject(&font);
-						bufDC.SetBkMode(TRANSPARENT);
-						bufDC.SetTextColor(0x505050);
-						bufDC.TextOut(4, 128-14, buf);
-						bufDC.SelectObject(oldFont);
-*/
-
-
 						float aal[MAX_SCOPE_BANDS]; 
 						float aar[MAX_SCOPE_BANDS]; 
 						float bbl[MAX_SCOPE_BANDS]; 
@@ -558,13 +454,13 @@ namespace psycle { namespace host {
 						memset (bbr,0,sizeof(bbr));
 
 						int width = 128/scope_spec_bands;
-						const float multleft= invol*mult/32768.0f *_pSrcMachine->lVol();
-						const float multright= invol*mult/32768.0f *_pSrcMachine->rVol();
+						const float multleft= invol*mult/32768.0f *_pSrcMachine->_lVol;
+						const float multright= invol*mult/32768.0f *_pSrcMachine->_rVol;
 						const float invSamples = 1.0f/(SCOPE_SPEC_SAMPLES>>1);
-						// calculate our bands using same buffer chasing technique
-						int index = _pSrcMachine->_scopeBufferIndex;
-						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
-						{ 
+					// calculate our bands using same buffer chasing technique
+					int index = _pSrcMachine->_scopeBufferIndex;
+					for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
+					{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
 							const float wl=pSamplesL[index]*multleft;
@@ -598,6 +494,7 @@ namespace psycle { namespace host {
 							int aml = - (psycle::helpers::dsp::dB(ampl[i]+0.0000001f)+6) * 2; // 128dB of range is TOO much. reducing it to 64dB.
 							//int aml = - psycle::helpers::dsp::dB(ampl[(int)((((pow(10.0f,i/(float)scope_spec_bands))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
 
+//							int aml = 128-helpers::math::lround<int,float>(sqrtf(ampl[i]));
 							if (aml < 0)
 							{
 								aml = 0;
@@ -624,6 +521,7 @@ namespace psycle { namespace host {
 							//int amr = 128 - (log(1+ampr[i])*heightcompensation[i]);
 							int amr = - (psycle::helpers::dsp::dB(ampr[i]+0.0000001f)+6) * 2; // 128dB of range is TOO much. reducing it to 64dB.
 							//int amr = - psycle::helpers::dsp::dB(ampr[(int)((((pow(10.0f,i/(float)scope_spec_bands))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
+//							int amr = 128-helpers::math::lround<int,float>(sqrtf(ampr[i]));
 							if (amr < 0)
 							{
 								amr = 0;
@@ -668,7 +566,6 @@ namespace psycle { namespace host {
 						bufDC.SetTextColor(0x505050);
 						bufDC.TextOut(4, 128-14, buf);
 						bufDC.SelectObject(oldFont);
-
 					}
 					break;
 				case 3: // phase scope
@@ -696,8 +593,8 @@ namespace psycle { namespace host {
 					{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->lVol());///32768;
-							float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->rVol());///32768;
+							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
+							float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
 							float awl=fabsf(wl);
 							float awr=fabsf(wr);
 							if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))
@@ -811,67 +708,67 @@ namespace psycle { namespace host {
 
 						CPen* oldpen = bufDC.SelectObject(&linepenbL);
 
-						x = lround<int>(std::sin(-(pi_f/4.0f)-(o_mvdpl*pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf(-(helpers::math::pi_f/4.0f)-(o_mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpl*(128.0f/32768.0f))+128;
-						y = lround<int>(-std::cos(-(pi_f/4.0f)-(o_mvdpl*pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf(-(helpers::math::pi_f/4.0f)-(o_mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-lround<int>(o_mvpc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::lround<int,float>(o_mvpc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x = lround<int>(std::sin((pi_f/4.0f)+(o_mvdpr*pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf((helpers::math::pi_f/4.0f)+(o_mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpr*(128.0f/32768.0f))+128;
-						y = lround<int>(-std::cos((pi_f/4.0f)+(o_mvdpr*pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf((helpers::math::pi_f/4.0f)+(o_mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvpr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 										
 						// panning data
 						bufDC.SelectObject(&linepenbR);
 
-						x = lround<int>(std::sin(-(o_mvdl*pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf(-(o_mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvl*(128.0f/32768.0f))+128;
-						y = lround<int>(-std::cos(-(o_mvdl*pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf(-(o_mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-lround<int>(o_mvc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::lround<int,float>(o_mvc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x = lround<int>(std::sin((o_mvdr*pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf((o_mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvr*(128.0f/32768.0f))+128;
-						y = lround<int>(-std::cos((o_mvdr*pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf((o_mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*o_mvr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 
 						bufDC.SelectObject(&linepenL);
 
-						x = lround<int>(std::sin(-(pi_f/4.0f)-(mvdpl*pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf(-(helpers::math::pi_f/4.0f)-(mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpl*(128.0f/32768.0f))+128;
-						y = lround<int>(-std::cos(-(pi_f/4.0f)-(mvdpl*pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf(-(helpers::math::pi_f/4.0f)-(mvdpl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-lround<int>(mvpc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::lround<int,float>(mvpc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x = lround<int>(std::sin((pi_f/4.0f)+(mvdpr*pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf((helpers::math::pi_f/4.0f)+(mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpr*(128.0f/32768.0f))+128;
-						y = lround<int>(-std::cos((pi_f/4.0f)+(mvdpr*pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf((helpers::math::pi_f/4.0f)+(mvdpr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvpr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 										
 						// panning data
 						bufDC.SelectObject(&linepenR);
 
-						x = lround<int>(std::sin(-(mvdl*pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf(-(mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvl*(128.0f/32768.0f))+128;
-						y = lround<int>(-std::cos(-(mvdl*pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf(-(mvdl*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvl*(128.0f/32768.0f))+128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-						bufDC.LineTo(128,128-lround<int>(mvc*(128.0f/32768.0f)));
+						bufDC.LineTo(128,128-helpers::math::lround<int,float>(mvc*(128.0f/32768.0f)));
 						bufDC.MoveTo(128,128);
-						x = lround<int>(std::sin((mvdr*pi_f/(32768.0f*4.0f)))
+						x=helpers::math::lround<int,float>(sinf((mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvr*(128.0f/32768.0f))+128;
-						y = lround<int>(-std::cos((mvdr*pi_f/(32768.0f*4.0f)))
+						y=helpers::math::lround<int,float>(-cosf((mvdr*helpers::math::pi_f/(32768.0f*4.0f)))
 									*mvr*(128.0f/32768.0f))+128;
 						bufDC.LineTo(x,y);
 
@@ -902,7 +799,7 @@ namespace psycle { namespace host {
 				bufDC.SelectObject(oldbmp);
 				bufDC.DeleteDC();
 			}
-
+			
 			CDialog::OnTimer(nIDEvent);
 		}
 
@@ -914,7 +811,7 @@ namespace psycle { namespace host {
 				scope_osc_freq = m_slider.GetPos();
 				if (hold)
 				{
-					m_slider2.SetRange(1,1+int(Global::pConfig->GetSamplesPerSec()*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_slider2.SetRange(1,1+int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
 				}
 				break;
 			case 2:
@@ -996,7 +893,7 @@ namespace psycle { namespace host {
 			case 1:
 				if (hold)
 				{
-					m_slider2.SetRange(1,1+int(Global::pConfig->GetSamplesPerSec()*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_slider2.SetRange(1,1+int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
 					m_slider2.SetPos(1);
 				}
 				else
@@ -1330,6 +1227,8 @@ namespace psycle { namespace host {
 			dlg.edit_type = 0;
 			if (dlg.DoModal() == IDOK)
 			{
+				m_pParent->AddMacViewUndo();
+
 				// update from dialog
 				int t = (int)sqrtf(dlg.volume*16384*4*4);
 				m_volslider.SetPos(256*4-t);
@@ -1343,12 +1242,10 @@ namespace psycle { namespace host {
 			dlg.edit_type = 1;
 			if (dlg.DoModal() == IDOK)
 			{
+				m_pParent->AddMacViewUndo();
 				// update from dialog
 				int t = (int)sqrtf(dlg.volume*16384*4*4);
 				m_volslider.SetPos(256*4-t);
 			}
 		}
-	}   // namespace
-}   // namespace
-
-
+}}

@@ -1,5 +1,7 @@
 ///\file
 ///\implementation psycle::host::Registry.
+
+
 #include "Registry.hpp"
 namespace psycle
 {
@@ -139,7 +141,7 @@ namespace psycle
 		Registry::result
 		Registry::SetValue(Registry::name const & name,       std::string const & s)
 		{
-			return ::RegSetValueEx(current, name.c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(s.c_str()), s.length() + 1);
+			return ::RegSetValueEx(current, name.c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(s.c_str()), (DWORD)(s.length() + 1));
 		}
 	}
 }

@@ -10,39 +10,39 @@
 namespace psycle { namespace helpers { namespace math {
 
 float inline UNIVERSALIS__COMPILER__CONST erase_denormals(float x) {
-	x += 1.0e-30f;
-	x -= 1.0e-30f;
-	return x;
+				x += 1.0e-30f;
+				x -= 1.0e-30f;
+				return x;
 }
-
+			
 double inline UNIVERSALIS__COMPILER__CONST erase_denormals(double x) {
-	x += 1.0e-291;
-	x -= 1.0e-291;
-	return x;
+				x += 1.0e-291;
+				x -= 1.0e-291;
+				return x;
 }
 
 float inline erase_denormals_inplace(float & x) {
-	return x = erase_denormals(x);
+				return x = erase_denormals(x);
 }
 
 double inline erase_denormals_inplace(double & x) {
-	return x = erase_denormals(x);
+				return x = erase_denormals(x);
 }
 
 float inline UNIVERSALIS__COMPILER__CONST fast_erase_denormals(float x) {
-	return x + 1.0e-30f;
+				return x + 1.0e-30f;
 }
-
+			
 double inline UNIVERSALIS__COMPILER__CONST fast_erase_denormals(double x) {
-	return x + 1.0e-291;
+				return x + 1.0e-291;
 }
 
 float inline fast_erase_denormals_inplace(float & x) {
-	return x += 1.0e-30f;
+				return x += 1.0e-30f;
 }
 
 double inline fast_erase_denormals_inplace(double & x) {
-	return x += 1.0e-291;
+				return x += 1.0e-291;
 }
 
 }}}

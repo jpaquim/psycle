@@ -2,9 +2,6 @@
 ///\brief wave tables
 #pragma once
 #include <algorithm>
-#include <psycle/helpers/math.hpp>
-
-using namespace psycle::helpers::math;
 
 /// wave size
 unsigned int const WAVESIZE = 4096;
@@ -39,23 +36,38 @@ inline void AnimateAFloat(afloat* p, float fac) {
 	if (p->current == p->target) p->source = p->current;
 }
 
+/// Function to replace ordinary float to int operation
+///\todo use psycle::helpers::math
+inline int f2i(double d) {
+#ifdef __BIG_ENDIAN__
+  return lrintf(d - 0.5);
+#else
+	const double magic = 6755399441055744.0;
+	union result_union {
+		double d;
+		int i;
+	} result;
+	result.d = (d - 0.5) + magic;
+	return result.i;
+#endif
+}
 
 /// Clips phase for wavetable
 inline float ClipWTPhase(float phase) {
 	while(phase < 0.0f) phase += (float) WAVESIZE;
 	while(phase >= (float) WAVESIZE) phase -= (float) WAVESIZE;
 	return phase;
-	// return (float) (lrint<int>(phase) & WAVEMASK) + (phase - (float) lrint<int>(phase));
+	// return (float) (f2i(phase) & WAVEMASK) + (phase - (float) f2i(phase));
 }
 
 /// Get wavetable sample
 inline float GetWTSample(float *wavetable, float phase) {
-	return wavetable[lrint<int>(phase) & WAVEMASK];
+	return wavetable[f2i(phase) & WAVEMASK];
 }
 
 /// Get wavetable sample with linear interpolation
 inline float GetWTSampleLinear(float *wavetable, float phase) {
-	int const pos = lrint<int>(phase);
+	int const pos = f2i(phase);
 	float const fraction = phase - (float) pos;
 	float const out = wavetable[pos & WAVEMASK];
 	return out + fraction * (wavetable[(pos + 1) & WAVEMASK] - out);

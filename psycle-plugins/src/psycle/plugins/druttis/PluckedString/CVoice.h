@@ -6,10 +6,10 @@
 //
 //============================================================================
 #pragma once
-#include "AMath.h"
-#include "CEnvelope.h"
-#include "DLineN.h"
-#include "BiQuad.h"
+#include "../Lib/AMath.h"
+#include "../Lib/BiQuad.h"
+#include "../Lib/DLineN.h"
+#include "../Lib/CEnvelope.h"
 
 #define EXCITATION_FILTER_LENGTH 3
 
@@ -74,6 +74,8 @@ public:
 	//				Methods
 	//------------------------------------------------------------------------
 public:
+	CVoice();
+	~CVoice();
 	void Init();
 	void Clear();
 	void SetFreq(float frequency);
@@ -129,7 +131,7 @@ public:
 			}
 			vib_out *= globals->vib_amount * (float) sin(vib_phase * PI2);
 			vib_phase += globals->vib_speed;
-			vib_phase -= (float) lrint<int>(vib_phase);								// Mod! :)
+			vib_phase -= (float) f2i(vib_phase);								// Mod! :)
 			float loopFilterDelay = 0.5f;
 			float freq = currentFreq + vib_out * currentFreq;
 			float length = (globals->srate / freq);

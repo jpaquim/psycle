@@ -9,9 +9,6 @@
 #include <cstring>
 #include <cmath>
 #include "../dsp/Inertia.h"
-#include <cstdio>
-
-using namespace psycle::plugin_interface;
 
 //============================================================================
 //				Defines
@@ -30,7 +27,7 @@ using namespace psycle::plugin_interface;
 #define FTYPE_1P_LP 1
 #define FTYPE_1P_HP 2
 
-char const *FTYPE_STRING[3] = { "off", "1-Pole LP", "1-Pole HP" };
+char *FTYPE_STRING[3] = { "off", "1-Pole LP", "1-Pole HP" };
 
 int SPEED_FACTORS[4] = { 1, 2, 4, 8 };
 
@@ -360,7 +357,7 @@ struct PROG
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
 	EFFECT,
 	NUM_PARAMS,
@@ -477,7 +474,7 @@ public:
 	float				m_out[2][2];
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -501,8 +498,8 @@ mi::mi()
 mi::~mi()
 {
 	Stop();
-	delete[] m_programs;
-	delete[] Vals;
+	delete m_programs;
+	delete Vals;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -3,7 +3,6 @@
 
 #include "InterpolateCurveDlg.hpp"
 
-#include <psycle/helpers/hexstring_to_integer.hpp>
 
 namespace psycle { namespace host {
 
@@ -480,7 +479,7 @@ namespace psycle { namespace host {
 				m_Value.GetWindowText(text);
 				std::string text2 = text;
 				int value=0;
-				hexstring_to_integer(text2,value);
+				helpers::hexstring_to_integer(text2,value);
 				if ( value >=0 && value < 65536)
 				{
 					kf[selectedGPoint].value = value;

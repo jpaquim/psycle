@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CFileXM.
 #pragma once
-#include "SongStructs.hpp"
+#include "Global.hpp"
 #include "FileIO.hpp"
 namespace psycle
 {
@@ -16,7 +16,7 @@ namespace psycle
 		protected:
 			bool IsValid();
 			LONG ImportPatterns(Song * s);
-			LONG ImportPattern(Song * s, LONG start, int patIdx,int iTracks);	
+			LONG ImportSinglePattern(Song * s, LONG start, int patIdx,int iTracks);	
 			bool ImportInstruments(Song * s, LONG iInstrStart);
 			LONG ImportInstrument(Song *s, LONG iStart, int idx);
 			LONG ImportSampleHeader(Song *s, LONG iStart, int InstrIdx, int SampleIdx);

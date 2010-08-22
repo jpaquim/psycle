@@ -9,9 +9,6 @@
 #include <psycle/plugin_interface.hpp>
 #include <memory>
 #include <cstring>
-
-using namespace psycle::plugin_interface;
-
 //============================================================================
 //				Defines
 //============================================================================
@@ -297,7 +294,7 @@ CMachineParameter const *pParams[] = {
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
 	GENERATOR,
 	NUM_PARAMS,
@@ -338,7 +335,7 @@ public:
 	int								global_ticks_remaining;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //============================================================================
 //				Constructor
 //============================================================================
@@ -358,7 +355,7 @@ mi::mi()
 //============================================================================
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 	instances--;
 	if (instances == 0)
 		CTrack::Destroy();

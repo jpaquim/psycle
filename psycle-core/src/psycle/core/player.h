@@ -1,46 +1,39 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef PSYCLE__CORE__PLAYER__INCLUDED
-#define PSYCLE__CORE__PLAYER__INCLUDED
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
+///\file
+///\brief interface file for psy::core::Player.
+
 #pragma once
-
-#include "machine.h"
-#include "sequencer.h"
 #include "song.h"
-
-#include <psycle/helpers/dither.hpp>
-#include <psycle/helpers/riff.hpp>
-
-#include <universalis/stdlib/condition.hpp>
-#include <universalis/stdlib/date_time.hpp>
-#include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/thread.hpp>
-
+#include "dither.h"
+#include "machine.h"
+#include "riff.h"
+#include <thread>
+#include <date_time>
+#include <mutex>
+#include <condition>
 #include <list>
+#include <cstdint>
 #include <stdexcept>
 
-namespace psycle {
-	namespace audiodrivers {
-		class AudioDriver;
-		class DummyDriver;
-	}
-
-namespace core {
-
-using helpers::dsp::Dither;
+namespace psy { namespace core {
+class AudioDriver; ///\todo doesn't belong in psycore
 
 /// schedules the processing of machines, sends signal buffers and sequence events to them, ...
-class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncopyable {
+class Player : public MachineCallbacks, private boost::noncopyable {
 	private:
 		Player();
 		~Player();
 
 	public:
-		static Player& singleton() {
-			static Player player;
-			return player; 
-		}
+		Player static & singleton();
 
 	public:
 		/// used by the plugins to indicate that they need redraw.
@@ -52,15 +45,14 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			psycle::audiodrivers::AudioDriver& driver() { return *driver_; }
+			AudioDriver & driver() { return *driver_; }
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			const psycle::audiodrivers::AudioDriver& driver() const { return *driver_; }
+			AudioDriver const & driver() const { return *driver_; }
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			void setDriver(psycle::audiodrivers::AudioDriver& driver);
+			void setDriver(AudioDriver & driver);
 		private:
 			///\todo player should not need to know about the audio driver, it should export a callback to generate audio instead.
-			psycle::audiodrivers::AudioDriver* driver_;
-			psycle::audiodrivers::DummyDriver* default_driver_; // todo replace with a silent driver
+			AudioDriver * driver_;
 	///\}
 
 	///\name sample rate
@@ -83,32 +75,20 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			/// entrance for the callback function (audiodriver)
-			static float* Work(void* context, int samples) {
-				return reinterpret_cast<Player*>(context)->Work(samples);
-			}
+			static float * Work(void * context, int & samples) { return reinterpret_cast<Player*>(context)->Work(samples); }
+		private:
 			/// entrance for the callback function (audiodriver)
-			float* Work(int samples);
+			float * Work(int samples);
 	///\}
 
 	///\name song
 	///\{
 		public:
-			const CoreSong& song() const { return *song_; }
-			CoreSong& song() { return *song_; }
-			void song(CoreSong & song) {
-				if(song_ && &song != song_) {
-					scoped_lock lock(*song_);
-					scoped_lock lock2(song);
-					song_ = &song;
-					sequencer_.set_song(song);
-				} else {
-					scoped_lock lock(song);
-					song_ = &song;
-					sequencer_.set_song(song);
-				}
-			}
+			CoreSong const & song() const { return *song_; }
+			CoreSong & song() { return *song_; }
+			void song(CoreSong * song) { song_ = song; }
 		private:
-			CoreSong* song_;
+			CoreSong * song_;
 	///\}
 
 	///\name secondary output device, write to a file
@@ -116,21 +96,15 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 	///\{
 		public:
 			/// starts the recording output device.
-			void startRecording(
-				bool do_dither = false,
-				Dither::Pdf::type ditherpdf = Dither::Pdf::triangular,
-				Dither::NoiseShape::type noiseshaping = Dither::NoiseShape::none
-			);
+			void startRecording( );
 			/// stops the recording output device.
 			void stopRecording( );
 			/// wether the recording device has been started.
 			bool recording() const { return recording_; }
 			/// for wave render set the filename
-			void setFileName(const std::string& fileName) { 
-				fileName_ = fileName;
-			}
+			void setFileName(std::string const & fileName) { fileName_ = fileName; }
 			/// gets the wave to render filename
-			const std::string& fileName() const { return fileName_; }
+			const std::string fileName() const { return fileName_; }
 		private:
 			/// wether the recording device has been started.
 			bool recording_;
@@ -139,15 +113,15 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			/// wave render filename
 			std::string fileName_;
 			/// file to which to output signal.
-			psycle::helpers::WaveFile outputWaveFile_;
+			WaveFile _outputWaveFile;
 			void writeSamplesToFile(int amount);
 	///\}
 
 	///\name time info
 	///\{
 		public:
-			PlayerTimeInfo& timeInfo() throw() { return timeInfo_; }
-			const PlayerTimeInfo& timeInfo() const throw() { return timeInfo_; }
+			PlayerTimeInfo & timeInfo() throw() { return timeInfo_; }
+			PlayerTimeInfo const & timeInfo() const throw() { return timeInfo_; }
 		private:
 			PlayerTimeInfo timeInfo_;
 	///\}
@@ -175,40 +149,23 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void start(double pos = 0);
 			/// stops playing.
 			void stop();
-			void skip(double beats);
-			void skipTo(double beatpos);
 			/// is the player in playmode.
 			bool playing() const { return playing_; }
-			/// maybe autostop should be always used ?
-			void set_auto_stop(bool on) { autostop_ = on; }
-			bool autostop(bool on) const { return autostop_; }
 		private:
 			bool playing_;
-			bool autostop_;
 	///\}
 
 	///\name loop
 	///\{
 		public:
-			bool loopEnabled() const { return timeInfo_.cycleEnabled(); }
-			void UnsetLoop() {
-				timeInfo_.setCycleStartPos(0.0);
-				timeInfo_.setCycleEndPos(0.0);
-			}
-			void setLoopSong() { 
-				timeInfo_.setCycleStartPos(0.0);
-				///\todo please someone check this
-				//timeInfo_.setCycleEndPos(song().sequence().tickLength());
-				timeInfo_.setCycleEndPos(song().sequence().max_beats());
-			}
-			void setLoopSequenceEntry(SequenceEntry * seqEntry ) {
-				timeInfo_.setCycleStartPos(seqEntry->tickPosition());
-				timeInfo_.setCycleEndPos(seqEntry->tickEndPosition());
-			}
-			void setLoopRange(double loopStart, double loopEnd) { 
-				timeInfo_.setCycleStartPos(loopStart);
-				timeInfo_.setCycleEndPos(loopEnd);
-			}
+			bool loopSong() const { return loopSong_; }
+			void setLoopSong(bool setit) { loopSong_ = setit; }
+
+			SequenceEntry * loopSequenceEntry() const { return loopSequenceEntry_; }
+			void setLoopSequenceEntry(SequenceEntry * seqEntry ) { loopSequenceEntry_ = seqEntry; }
+		private:
+			bool loopSong_;
+			SequenceEntry * loopSequenceEntry_;
 	///\}
 
 	///\name auto stop
@@ -219,19 +176,28 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			bool autoStopMachines_;
 	///\}
 
+	///\name multithreading locking
+	///\{
+		public:
+			typedef std::scoped_lock<std::mutex> scoped_lock;
+			std::mutex & work_mutex() { return mutex_; }
+		private:
+			std::mutex mutable work_mutex_;
+	///\}
 
-	public:
+	private:
+		/// Final Loop. Read new line for notes to send to the Machines
+		void execute_notes(double beat_offset, PatternLine & line);
+		void process_global_event(const GlobalEvent & event);
 		void process(int samples);
 
-	
-	private:
-		Sequencer sequencer_;
 		/// stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 		Machine::id_type prev_machines_[MAX_TRACKS];
 		/// temporary buffer to get all the audio from master (which work in small chunks), and send it to the soundcard after converting it to float.
-		float * buffer_;
+		float buffer_[MAX_DELAY_BUFFER];
+
 		/// dither handler
-		Dither dither_;
+		dsp::Dither dither;
 
 	///\name multithreaded scheduler
 	///\{
@@ -239,39 +205,36 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			void start_threads();
 			void stop_threads();
 
-			typedef std::list<thread*> threads_type;
+			typedef Machine node;
+
+			std::size_t thread_count_;
+			typedef std::list<std::thread *> threads_type;
 			threads_type threads_;
-		public:
-			std::size_t num_threads() { return threads_.size(); }
-		private:
 			void thread_function(std::size_t thread_number);
 
-			typedef class scoped_lock<mutex> scoped_lock;
-			mutex mutable mutex_;
-			condition<scoped_lock> mutable condition_;
-			condition<scoped_lock> mutable main_condition_;
+			std::mutex mutable mutex_;
+			std::condition<scoped_lock> mutable condition_;
 
 			bool stop_requested_;
 			bool suspend_requested_;
 			std::size_t suspended_;
 
-			typedef std::list<Machine*> nodes_queue_type;
+			typedef std::list<node*> nodes_queue_type;
 			/// nodes with no dependency.
 			nodes_queue_type terminal_nodes_;
 			/// nodes ready to be processed, just waiting for a free thread
 			nodes_queue_type nodes_queue_;
-
-			Machine::sched_deps input_nodes_, output_nodes_;
 
 			std::size_t graph_size_, processed_node_count_;
 
 			void suspend_and_compute_plan();
 			void compute_plan();
 			void clear_plan();
+
 			void process_loop() throw(std::exception);
+			void process(node &) throw(std::exception);
 			int samples_to_process_;
 	///\}
 };
 
 }}
-#endif

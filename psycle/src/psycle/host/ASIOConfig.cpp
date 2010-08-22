@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CASIOConfig.
 
+
 #include "ASIOConfig.hpp"
 namespace psycle { namespace host {
 
@@ -154,7 +155,7 @@ namespace psycle { namespace host {
 			int prefindex = 0;
 			char buf[8];
 			m_bufferSizeCombo.ResetContent();
-			audiodrivers::ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
+			ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
 			int g = driver.granularity;
 			if (g < 0)
 			{

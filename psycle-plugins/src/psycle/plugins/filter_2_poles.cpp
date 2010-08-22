@@ -5,15 +5,18 @@
 /// \file
 /// \brief filter in the frequency domain using 2 poles
 #include "plugin.hpp"
-#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math/clip.hpp>
+#include <psycle/helpers/math/remainder.hpp>
+#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 namespace psycle { namespace plugin {
 
-using namespace helpers::math;
+namespace math = helpers::math;
 
 class Filter_2_Poles : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	virtual void help(std::ostream & out) const throw()
 	{
 		out << "filter in the frequency domain using 2 poles" << std::endl;
 		out << "compatible with original psycle 1 arguru's 2 poles filter" << std::endl;
@@ -35,26 +38,20 @@ public:
 
 	static const Information & information() throw()
 	{
-		static bool initialized = false;
-		static Information *info = NULL;
-		if (!initialized) {
-			static const Information::Parameter parameters [] =
-			{
-				Information::Parameter::discrete("response", low, high),
-				Information::Parameter::exponential("cutoff frequency", 73, 7276, 7276),
-				Information::Parameter::linear("resonance", 0, 0, 1),
-				Information::Parameter::exponential("mod. frequency", pi * 2 / 10000, 0, pi * 2 * 2 * 3 * 4 * 5 * 7),
-				Information::Parameter::linear("mod. amplitude", 0, 0, 1),
-				Information::Parameter::linear("mod. stereodephase", 0, 0, pi)
-			};
-			static Information information(0x0110, Information::Types::effect, "ayeternal 2-Pole Filter", "2-Pole Filter", "bohan", 2, parameters, sizeof parameters / sizeof *parameters);
-			info = &information;
-			initialized = true;
-		}
-		return *info;
+		static const Information::Parameter parameters [] =
+		{
+			Information::Parameter::discrete("response", low, high),
+			Information::Parameter::exponential("cutoff frequency", 15 * math::pi, 22050 * math::pi, 22050 * math::pi),
+			Information::Parameter::linear("resonance", 0, 0, 1),
+			Information::Parameter::exponential("mod. frequency", math::pi * 2 / 10000, 0, math::pi * 2 * 2 * 3 * 4 * 5 * 7),
+			Information::Parameter::linear("mod. amplitude", 0, 0, 1),
+			Information::Parameter::linear("mod. stereodephase", 0, 0, math::pi)
+		};
+		static const Information information(Information::Types::effect, "ayeternal 2-Pole Filter", "2-Pole Filter", "bohan", 2, parameters, sizeof parameters / sizeof *parameters);
+		return information;
 	}
 
-	/*override*/ void describe(std::ostream & out, const int & parameter) const
+	virtual void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -72,49 +69,49 @@ public:
 			}
 			break;
 		case cutoff_frequency:
-			out << (*this)(cutoff_frequency) << " hertz";
+			out << (*this)(cutoff_frequency) / math::pi << " hertz";
 			break;
 		case modulation_sequencer_ticks:
-			out << pi * 2 / (*this)(modulation_sequencer_ticks) << " ticks (lines)";
+			out << math::pi * 2 / (*this)(modulation_sequencer_ticks) << " ticks (lines)";
 			break;
 		case modulation_stereo_dephase:
 			if((*this)(modulation_stereo_dephase) == 0) out << 0;
-			else if((*this)(modulation_stereo_dephase) == Sample(pi)) out << "pi";
-			else out << "pi / " << pi / (*this)(modulation_stereo_dephase);
+			else if((*this)(modulation_stereo_dephase) == Sample(math::pi)) out << "pi";
+			else out << "pi / " << math::pi / (*this)(modulation_stereo_dephase);
 			break;
 		default:
 			Plugin::describe(out, parameter);
 		}
 	}
 
-	Filter_2_Poles() : Plugin(information()), modulation_phase_(0), cutoff_sin_(0)
+	Filter_2_Poles() : Plugin(information()), modulation_phase_(0)
 	{
 		::memset(buffers_, 0, sizeof buffers_);
 	}
 
-	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
-	/*override*/ void parameter(const int &);
+	virtual void process(Sample l[], Sample r[], int samples, int);
+	virtual void parameter(const int &);
 protected:
-	/*override*/ void SeqTick(int, int, int, int command, int value);
-	/*override*/ void samples_per_second_changed() { parameter(cutoff_frequency); }
-	/*override*/ void sequencer_ticks_per_second_changed() { parameter(modulation_sequencer_ticks); }
+	virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
+	virtual void samples_per_second_changed() { parameter(cutoff_frequency); }
+	virtual void sequencer_ticks_per_second_changed() { parameter(modulation_sequencer_ticks); }
 	static const int poles = 2;
 	inline void update_coefficients();
 	inline void update_coefficients(Real coefficients[poles + 1], const Real & modulation_stereo_dephase = 0);
 	enum Channels { left, right, channels };
 	void erase_NaNs_Infinities_And_Denormals( float* inSample );
-	inline const Real Work(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
+	inline const Real process(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
 	Real cutoff_sin_, modulation_radians_per_sample_, modulation_phase_, buffers_ [channels][poles], coefficients_ [channels][poles + 1];
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(Filter_2_Poles)
+PSYCLE__PLUGIN__INSTANCIATOR(Filter_2_Poles)
 
-void Filter_2_Poles::SeqTick(const int note, const int, const int, const int command, const int value)
+void Filter_2_Poles::sequencer_note_event(const int note, const int, const int, const int command, const int value)
 {
 	switch(command)
 	{
 	case 1:
-		modulation_phase_ = pi * 2 * value / 0x100;
+		modulation_phase_ = math::pi * 2 * value / 0x100;
 		break;
 	}
 	if ( note < 120 )
@@ -129,7 +126,7 @@ void Filter_2_Poles::parameter(const int & parameter)
 	switch(parameter)
 	{
 	case cutoff_frequency:
-		cutoff_sin_ = static_cast<Sample>((*this)(cutoff_frequency)* 6.0 * seconds_per_sample());
+		cutoff_sin_ = static_cast<Sample>(sin((*this)(cutoff_frequency) * seconds_per_sample()));
 		break;
 	case modulation_sequencer_ticks:
 		modulation_radians_per_sample_ = (*this)(modulation_sequencer_ticks) / samples_per_sequencer_tick();
@@ -147,43 +144,42 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 {
 	const Real minimum(static_cast<Real>(1e-2));
 	const Real maximum(1 - minimum);
-	coefficients[0] = clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
+	coefficients[0] = math::clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
 	coefficients[1] = 1 - coefficients[0];
 	coefficients[2] = (*this)(resonance) * (1 + 1 / coefficients[1]);
-	erase_all_nans_infinities_and_denormals(coefficients, poles + 1);
+	math::erase_all_nans_infinities_and_denormals(coefficients, poles + 1);
 }
 
-void Filter_2_Poles::Work(Sample l[], Sample r[], int samples, int)
+void Filter_2_Poles::process(Sample l[], Sample r[], int samples, int)
 {
 	for(int sample(0) ; sample < samples ; ++sample)
 	{
-		l[sample] = static_cast<Sample>(Work(l[sample], buffers_[left] , coefficients_[left]));
-		r[sample] = static_cast<Sample>(Work(r[sample], buffers_[right], coefficients_[right]));
+		l[sample] = static_cast<Sample>(process(l[sample], buffers_[left] , coefficients_[left]));
+		r[sample] = static_cast<Sample>(process(r[sample], buffers_[right], coefficients_[right]));
 	}
 
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
 	{
-		//\fixme: lowpass 11Khz, ressonance 0.9,  mod freq 15Hz, mod amp 0.5. It can be seen that it stays more time at highest value
-		// than at lowest, suggesting that the lfo it topping the range (without being the real top anyway). This is not coherent with the values.
-		modulation_phase_ = std::fmod(modulation_phase_ + modulation_radians_per_sample_ * samples, pi * 2);
+		modulation_phase_ = math::remainder(modulation_phase_ + modulation_radians_per_sample_ * samples, math::pi * 2);
 		update_coefficients();
 	}
 }
 
-inline const Filter_2_Poles::Real Filter_2_Poles::Work(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
+inline const Filter_2_Poles::Real Filter_2_Poles::process(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
 	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
-	erase_all_nans_infinities_and_denormals(buffer, channels);
-	switch((*this)[response]) {
-		case low:
-			return buffer[1];
-			break;
-		case high:
-			return input - buffer[1];
-			break;
-		default:
-			throw Exception("unknown response type");
+	math::erase_all_nans_infinities_and_denormals(buffer, channels);
+	switch((*this)[response])
+	{
+	case low:
+		return buffer[1];
+		break;
+	case high:
+		return input - buffer[1];
+		break;
+	default:
+		throw Exception("unknown response type");
 	}
 }
 

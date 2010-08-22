@@ -5,6 +5,8 @@
 
 namespace psycle { namespace host {
 
+		class Song;
+
 		/// wave file dialog window.
 		class CWavFileDlg : public CFileDialog
 		{

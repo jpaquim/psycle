@@ -72,7 +72,7 @@ namespace psycle
 			// get pattern data
 			int nextPatStart = 0;
 			for(int j=0;j<mod.header.numPatterns&&nextPatStart>0;j++)
-				nextPatStart = ImportPattern(s,j,32);
+				nextPatStart = ImportSinglePattern(s,j,32);
 
 			return nextPatStart;
 		}
@@ -114,7 +114,7 @@ namespace psycle
 
 
 		// return address of next pattern, 0 for invalid
-		LONG CFileIT::ImportPattern(Song *s, int patIdx, int iTracks)
+		LONG CFileIT::ImportSinglePattern(Song *s, int patIdx, int iTracks)
 		{
 
 			int iNumRows = mod.Patterns(patIdx).numRows;

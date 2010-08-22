@@ -9,35 +9,30 @@
 #include "ChildView.hpp"
 #include "MainFrm.hpp"
 
-#include <psycle/core/song.h>
-#include <psycle/core/player.h>
-#include <psycle/core/plugin.h>
-#include <psycle/core/vstplugin.h>
-#include <psycle/helpers/math.hpp>
+#include "Song.hpp"
+#include "Player.hpp"
+#include "Plugin.hpp"
+#include "VstHost24.hpp"
 
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
-
-namespace psycle { namespace host {
-
+namespace psycle
+{
+	namespace host
+	{
 		extern CPsycleApp theApp;
 
 		CMidiInput * CMidiInput::s_Instance(0);	// the current instance
 
 		CMidiInput::CMidiInput() : 
-			m_midiInHandlesTried(0),
-			m_patIn(0),
-			m_patOut(0),
-			m_patCount(0),
-			m_timingCounter(0),
-			m_timingAccumulator(0),
-			m_baseStampTime(0),
-			m_reSync(false),
-			m_synced(false),
-			m_syncing(false)
+			m_midiInHandlesTried( 0 ),
+			m_patIn( 0 ),
+			m_patOut( 0 ),
+			m_patCount( 0 ),
+			m_timingCounter( 0 ),
+			m_timingAccumulator( 0 ),
+			m_baseStampTime( 0 ),
+			m_reSync( false ),
+			m_synced( false ),
+			m_syncing( false )
 		{
 			assert(!Instance());
 
@@ -45,14 +40,13 @@ namespace psycle { namespace host {
 			s_Instance = this;
 
 			// clear down buffers
-			// Can't clear this. it's not a basic type!
-			//std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
+			std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
 			std::memset( m_channelSetting, -1, sizeof( int ) * MAX_MIDI_CHANNELS );
 			std::memset( m_channelInstMap, 0, sizeof( std::uint32_t ) * MAX_MACHINES );
 			std::memset( m_channelGeneratorMap, -1, sizeof( std::uint32_t ) * MAX_MIDI_CHANNELS );
 			std::memset( m_channelNoteOff, 0, sizeof( bool ) * MAX_MIDI_CHANNELS );	
 			std::memset( m_channelController, -1, sizeof( int ) * MAX_MIDI_CHANNELS * MAX_CONTROLLERS );	
-			std::memset( m_devId, -1, sizeof( int ) * MAX_DRIVERS );
+			std::memset( m_devId, -1, sizeof( std::uint32_t ) * MAX_DRIVERS );
 			std::memset( m_midiInHandle, 0, sizeof( HMIDIIN ) * MAX_DRIVERS );
 
 			// setup config defaults (override some by registry settings)
@@ -630,7 +624,7 @@ namespace psycle { namespace host {
 							// machine active?
 							if( program < MAX_MACHINES )
 							{  
-								if (Player::singleton().song().machine(program) )
+								if (Global::_pSong->_pMachine[ program ] )
 								{
 									// ok, map
 									SetGenMap( channel, program );
@@ -708,7 +702,7 @@ namespace psycle { namespace host {
 									m_stats.flags |= FSTAT_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->stop();
+									Global::pPlayer->Stop();
 									return;
 								}
 								break;
@@ -796,7 +790,7 @@ namespace psycle { namespace host {
 									m_stats.flags |= FSTAT_EMULATED_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->stop();
+									Global::pPlayer->Stop();
 									return;
 								}
 								break;
@@ -882,19 +876,20 @@ namespace psycle { namespace host {
 					}
 
 					// invalid machine/channel?
-					if( !Player::singleton().song().machine( busMachine ) && note != 254 )
+					if( !Global::_pSong->_pMachine[ busMachine ] && note != 254 )
 					{
 						return;
 					}
 
 					// create a patten entry struct in the midi buffer
 					int patIn = m_patIn;
-					PatternEvent* pEntry = &m_midiBuffer[ patIn ].entry;
-					pEntry->setNote(note);
-					pEntry->setMachine(busMachine);
-					pEntry->setInstrument(GetInstMap(channel));
-					pEntry->setCommand(cmd);
-					pEntry->setParameter(parameter);
+					PatternEntry * pEntry = &m_midiBuffer[ patIn ].entry;
+
+					pEntry->_note = note;
+					pEntry->_mach = busMachine;
+					pEntry->_inst = GetInstMap( channel );
+					pEntry->_cmd = cmd;
+					pEntry->_parameter = parameter;
 
 					// add the other necessary info
 					m_midiBuffer[ patIn ].timeStamp = dwParam2;
@@ -1055,20 +1050,31 @@ namespace psycle { namespace host {
 					else
 					{
 						// midi controllers pass-through
-						int mgn = Player::singleton().song().seqBus;
+						int mgn = Global::_pSong->seqBus;
 
 						if (mgn < MAX_MACHINES)
 						{
-							Machine* pMachine = Player::singleton().song().machine(mgn);
+							Machine* pMachine = Global::_pSong->_pMachine[mgn];
 							if (pMachine)
 							{
-								PatternEvent pevent;
-								pevent.setNote(notetypes::midi_cc);
-								pevent.setMachine(pMachine->id());
-								pevent.setInstrument(status);
-								pevent.setCommand(data1);
-								pevent.setParameter(data2);
-								pMachine->AddEvent(0,0, pevent);
+								if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
+								{
+									((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
+									return;
+								}
+								else
+								{
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+									PatternEntry pentry(notecommands::midicc,status,255,data1,data2,pMachine->_macIndex);
+#else
+									PatternEntry pentry(notecommands::midicc,status,pMachine->_macIndex,data1,data2);
+#endif
+#endif
+									pMachine->Tick(0,&pentry);
+								}
 							}
 						}
 					}
@@ -1089,22 +1095,18 @@ namespace psycle { namespace host {
 
 		void CMidiInput::InternalClock( DWORD_PTR dwParam2 )
 		{
-			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
+			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
 
 			// WARNING! GetPlayPos() has max of 0x7FFFFF
 
 			// get the current play sample position
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			// todo
- 			int playPos = 0;
-#else
-			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
-#endif
+ 			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
+
 			// calc the latency of the clock midi message
 			int midiLatencyMs = ( timeGetTime() - m_tickBase ) - dwParam2;
 
 			// adjust the sample position (fix latency)
-			int adjPlayPos = playPos - lround<int>((midiLatencyMs/1000.f) * samplesPerSecond );
+			int adjPlayPos = playPos - helpers::math::lround<int, float>((midiLatencyMs/1000.f) * samplesPerSecond );
 			
 			// never let the adjusted play pos become negative (this really breaks things - usually
 			// when trying to resync just after the audio engine has restared)
@@ -1165,20 +1167,15 @@ namespace psycle { namespace host {
 		void CMidiInput::InternalReSync( DWORD_PTR dwParam2 )
 		{
 			// get the current play sample position
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			// todo
- 			int playPos = 0;
-#else
 			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
-#endif
 			
-			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
+			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
 
 			// calculate the latency of the MIDI message in samples (delay in getting to us)
 			// using our own timer, started at the same time (hopefully!) as the MIDI
 			// input timer.
  			int midiLatency = ( timeGetTime() - m_tickBase ) - dwParam2;
-			int midiLatencySamples = lround<int>( (midiLatency/1000.f) * samplesPerSecond );
+			int midiLatencySamples = helpers::math::lround<int, float>( (midiLatency/1000.f) * samplesPerSecond );
 			m_stats.syncEventLatency = midiLatencySamples;
 
 			// work out the real play position
@@ -1209,7 +1206,7 @@ namespace psycle { namespace host {
 		// PARAMETERS     : int amount - amount of block samples
 		// RETURNS		  : bool - true if we did some processing, false if nothing was done
 
-		bool CMidiInput::InjectMIDI( int amount )
+		void CMidiInput::InjectMIDI( int amount )
 		{
 			// NOTE: The DirectSound driver is currently in no fit state to be used with
 			// the midi input.  The get write/play functions are not compatible with our
@@ -1218,15 +1215,15 @@ namespace psycle { namespace host {
 
 			// midi injection NOT enabled?
 			if( !m_midiInHandle[ DRIVER_MIDI ] || 
-				strcmp( Global::pConfig->_pOutputDriver->info().name().c_str(), "mmewaveout" ) != 0 )	// TODO: need to remove this string compare? (speed)
+				strcmp( Global::pConfig->_pOutputDriver->GetInfo()->_psName, "Windows WaveOut MME" ) != 0 )	// TODO: need to remove this string compare? (speed)
 			{
 				m_stats.flags &= ~FSTAT_ACTIVE;
-				return false;
+				return;
 			}
 
 			m_stats.flags |= FSTAT_ACTIVE;
 
-			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
+			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
 			m_stats.bufferCount = m_patCount;
 
 			// (waiting until we are sure we will have enough midi data in the buffer
@@ -1237,16 +1234,11 @@ namespace psycle { namespace host {
 
 				// get the write position now and adjust for samples done since the
 				// resync interrupt
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				// todo
-				int writePos = 0;
-				int blockSamples = Global::pConfig->_pOutputDriver->playbackSettings().blockFrames();
-				int blocks = Global::pConfig->_pOutputDriver->playbackSettings().blockCount();
-#else
-				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();				
+				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();
+				
 				int blockSamples = Global::pConfig->_pOutputDriver->GetBufferSize() / Global::pConfig->_pOutputDriver->GetSampleSize();
 				int blocks = Global::pConfig->_pOutputDriver->GetNumBuffers();
-#endif
+
 				// calculate our final adjuster
 				int syncAdjuster = m_adjustedPlayPos - ( writePos - (blockSamples*blocks) );
 				m_stats.syncAdjuster = syncAdjuster;
@@ -1296,7 +1288,7 @@ namespace psycle { namespace host {
 			// NO midi data that need to be injected during this amount block?
 			if( !m_patCount || m_timingCounter < (m_midiBuffer[ m_patOut ].timeStamp - tbaseStampTime ) )
 			{
-				return false;
+				return;
 			}
 
 			// NOTE: because we are inserting all the machine ticks before working the master
@@ -1317,12 +1309,13 @@ namespace psycle { namespace host {
 			// OK, if we get here then there is at least one MIDI message that needs injecting
 			do
 			{
-				int note = m_midiBuffer[ m_patOut ].entry.note();
-				int machine = m_midiBuffer[ m_patOut ].entry.machine();
-				int data1 = m_midiBuffer[ m_patOut ].entry.command();
-				int data2 = m_midiBuffer[ m_patOut ].entry.parameter();
+				int note = m_midiBuffer[ m_patOut ].entry._note;
+				int machine = m_midiBuffer[ m_patOut ].entry._mach;
+				int data1 = m_midiBuffer[ m_patOut ].entry._cmd;
+				int data2 = m_midiBuffer[ m_patOut ].entry._parameter;
+
 				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Player::singleton().song().machine( machine );
+				Plugin * pMachine = (Plugin*) Global::_pSong->_pMachine[ machine ];
 				// make sure machine is still valid
 				if( pMachine || note == 254 )
 				{
@@ -1330,29 +1323,46 @@ namespace psycle { namespace host {
 					switch( note )
 					{
 						// TWEAK
-						case notetypes::tweak_slide:
+						case notecommands::tweakslide:
 							// *********
 							// midi doesn't get a tweak slide yet
-						case notetypes::tweak:
-
+						case notecommands::tweak:
 						{
 							int min, max;
-							if (data1 > pMachine->GetNumParams()-1)
+
+							// any info
+							if( pMachine->_type == MACH_PLUGIN )
 							{
-								break;
+								// make sure parameter in range of machine
+								if( data1 > (pMachine->GetInfo()->numParameters-1) )
+								{
+									break;
+								}
+
+								// get range
+								min = pMachine->GetInfo()->Parameters[ data1 ]->MinValue;
+								max = pMachine->GetInfo()->Parameters[ data1 ]->MaxValue;
 							}
-							pMachine->GetParamRange(data1,min,max);
+							else
+							{
+								// assume 0000..FFFF is the range (VST)
+								min = 0;
+								max = 0xFFFF;
+							}
 
 							// create actual value
-							int value = min + lround<int>( (max-min) * (data2/127.f) );
+							int value = min + helpers::math::lround<int, float>( (max-min) * (data2/127.f) );
 
 							// assign
-							m_midiBuffer[ m_patOut ].entry.setInstrument(data1);
-							m_midiBuffer[ m_patOut ].entry.setCommand(value / 256);
-							m_midiBuffer[ m_patOut ].entry.setParameter(value % 256);
-							pMachine->AddEvent(0, m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry);
+							m_midiBuffer[ m_patOut ].entry._inst = data1;
+							m_midiBuffer[ m_patOut ].entry._cmd = value / 256;
+							m_midiBuffer[ m_patOut ].entry._parameter = value % 256;
+
+							// and tweak!
+							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
 						}
 						break;
+
 
 						// SYNC TICK
 						case 254:
@@ -1360,9 +1370,9 @@ namespace psycle { namespace host {
 							// simulate a tracker 'tick' (i.e. a line change for all machines)
 							for (int tc=0; tc<MAX_MACHINES; tc++)
 							{
-								if( Player::singleton().song().machine(tc))
+								if( Global::_pSong->_pMachine[tc])
 								{
-									Player::singleton().song().machine(tc)->Tick();
+									Global::_pSong->_pMachine[tc]->Tick();
 								}
 							}
 
@@ -1371,20 +1381,24 @@ namespace psycle { namespace host {
 						break;
 						
 						// NORMAL NOTE
-						default: pMachine->Tick(m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry);
-					} // end of note switch
-				} // end of if 'is machine still active?'
+						default:
+						{
+							// normal note tick
+							pMachine->Tick( m_midiBuffer[ m_patOut ].channel, &m_midiBuffer[ m_patOut ].entry );
+						}
+						break;
+
+					}	// end of note switch
+				}	// end of if 'is machine still active?'
 
 				// advance OUT pointer
 				m_patCount--;
 				m_patOut++;
 				if( m_patOut >= MIDI_BUFFER_SIZE ) m_patOut = 0;
+
 			} while( m_patCount && m_timingCounter >= (m_midiBuffer[ m_patOut ].timeStamp - tbaseStampTime) );
 
 			// Master machine initiates work
-			//
-			Player::singleton().song().machine(MASTER_INDEX)->recursive_process(amount);
-			return true;
 		}
 	}
 }

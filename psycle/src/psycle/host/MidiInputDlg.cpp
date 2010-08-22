@@ -7,14 +7,6 @@
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
 
-#include <psycle/helpers/hexstring_to_integer.hpp>
-
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
-
 namespace psycle { namespace host {
 
 		IMPLEMENT_DYNCREATE(CMidiInputDlg, CPropertyPage)
@@ -119,7 +111,7 @@ namespace psycle { namespace host {
 			{
 				CString mfc;
 				gui.GetWindowText(mfc);
-				hexstring_to_integer(static_cast<char const * const>(mfc), model);
+				helpers::hexstring_to_integer(static_cast<char const * const>(mfc), model);
 			}
 			void read_from_gui(CMidiInputDlg::group const & gui, Configuration::midi_type::group_type & model)
 			{

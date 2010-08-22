@@ -1,72 +1,87 @@
-#ifndef PSYCLE__PLUGINS__GVERB__GVERB_DSP__INCLUDED
-#define PSYCLE__PLUGINS__GVERB__GVERB_DSP__INCLUDED
-#pragma once
 
-#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
+#ifndef GVERBDSP_H
+#define GVERBDSP_H
 
-/**********************************************************/
-// diffuser
+//#include "ladspa-util.h"
 
-class diffuser {
-	public:
-		diffuser(int size, float coeff);
-		~diffuser();
-		void flush();
-		float process(float x) {
-			float & buf(buf_[idx_]);
-			float w = x - buf * coeff_;
-			psycle::helpers::math::erase_all_nans_infinities_and_denormals(w);
-			float y = buf + w * coeff_;
-			buf = w;
-			++idx_;
-			idx_ %= size_;
-			///\todo: denormal check on y too?
-			return y;
-		}
-	private:
-		int size_;
-		float coeff_;
-		int idx_;
-		float * buf_;
-};
+typedef struct {
+	int size;
+	int idx;
+	float *buf;
+} ty_fixeddelay;
 
-/**********************************************************/
-// damper
+typedef struct {
+	int size;
+	float coeff;
+	int idx;
+	float *buf;
+} ty_diffuser;
 
-class damper {
-	public:
-		damper(float damping) : damping_(damping), delay_() {}
-		void flush() { delay_ = 0.0f; }
-		void set(float damping) { damping_ = damping; }
-		inline float process(float x) {
-			float y = x * (1 - damping_) + delay_ * damping_;
-			psycle::helpers::math::erase_all_nans_infinities_and_denormals(y);
-			delay_ = y;
-			return y;
-		}
-	private:
-		float damping_;
-		float delay_;
-};
+typedef struct {
+	float damping;
+	float delay;
+} ty_damper;
 
-/**********************************************************/
-// fixeddelay
+ty_diffuser *diffuser_make(int, float);
+void diffuser_free(ty_diffuser *);
+void diffuser_flush(ty_diffuser *);
+//float diffuser_do(ty_diffuser *, float);
 
-class fixeddelay {
-	public:
-		fixeddelay(int size);
-		~fixeddelay();
-		void flush();
-		float read(int n) { return buf_[(idx_ - n + size_) % size_]; }
-		void write(float x) { buf_[idx_] = x; ++idx_; idx_ %= size_; }
-	private:
-		int size_;
-		int idx_;
-		float * buf_;
-};
+ty_damper *damper_make(float);
+void damper_free(ty_damper *);
+void damper_flush(ty_damper *);
+//void damper_set(ty_damper *, float);
+//float damper_do(ty_damper *, float);
 
-/**********************************************************/
-//int isprime(int);
-//int nearest_prime(int, float);
+ty_fixeddelay *fixeddelay_make(int);
+void fixeddelay_free(ty_fixeddelay *);
+void fixeddelay_flush(ty_fixeddelay *);
+//float fixeddelay_read(ty_fixeddelay *, int);
+//void fixeddelay_write(ty_fixeddelay *, float);
+
+int isprime(int);
+int nearest_prime(int, float);
+
+#define flush_to_zero(fv) (((*(unsigned int*)&(fv))&0x7f800000)==0)?0.0f:(fv)
+
+static inline float diffuser_do(ty_diffuser *p, float x)
+{
+	float y,w;
+
+	w = x - p->buf[p->idx]*p->coeff;
+	w = flush_to_zero(w);
+	y = p->buf[p->idx] + w*p->coeff;
+	p->buf[p->idx] = w;
+	p->idx = (p->idx + 1) % p->size;
+	return(y);
+}
+
+static inline float fixeddelay_read(ty_fixeddelay *p, int n)
+{
+	int i;
+
+	i = (p->idx - n + p->size) % p->size;
+	return(p->buf[i]);
+}
+
+static inline void fixeddelay_write(ty_fixeddelay *p, float x)
+{
+	p->buf[p->idx] = x;
+	p->idx = (p->idx + 1) % p->size;
+}
+
+static inline void damper_set(ty_damper *p, float damping)
+{ 
+	p->damping = damping;
+} 
 	
+static inline float damper_do(ty_damper *p, float x)
+{ 
+	float y;
+	
+	y = x*(1.0-p->damping) + p->delay*p->damping;
+	p->delay = y;
+	return(y);
+}
+
 #endif

@@ -2,23 +2,20 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-namespace core {
-	class AudioRecorder;
-}
 namespace host {
 
+/// gear rack window.
+
+class AudioRecorder;
 class CChildView;
 
 class CWaveInMacDlg : public CDialog
 {
 public:
 	CWaveInMacDlg(CChildView* pParent);
-	CWaveInMacDlg(CChildView* pParent, class MachineGui* gui);
-
 	CChildView* m_pParent;
 	void RedrawList();
 	BOOL Create();
-	void Show(int x, int y);
 	afx_msg void OnCancel();
 
 	CComboBox m_listbox;
@@ -36,9 +33,6 @@ public:
 	CStatic m_vollabel;
 	afx_msg void OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult);
 	CSliderCtrl m_volslider;
-private:
-	MachineGui* gui_;
-	void centerWindowOnPoint(int x, int y);
 };
 
 }   // namespace

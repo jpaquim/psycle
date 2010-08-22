@@ -1,7 +1,4 @@
 #include <psycle/plugin_interface.hpp>
-#include <cstdio>
-
-using namespace psycle::plugin_interface;
 
 #define LCHAN 0
 #define RCHAN 2
@@ -14,6 +11,8 @@ using namespace psycle::plugin_interface;
 #define MT_WIDTH 0
 #define MT_NONE 1
 #define MT_CENTER 2
+
+
 
 CMachineParameter const leftExtent = 
 { 
@@ -65,60 +64,67 @@ CMachineParameter const *pParameters[] =
 	&allowFlip
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo( 
 	MI_VERSION,				
-	0,
-	4,
-	pParameters,
-	"dw IoPan"
-		#ifndef NDEBUG
-			" (Debug build)"
-		#endif
-		,
-	"IoPan",
-	"dw",
-	"About",
+	0,																																// flags
+	4,																																// numParameters
+	pParameters,																				// Pointer to parameters
+#ifndef NDEBUG
+	"dw IoPan (Debug build)",								// name
+#else
+	"dw IoPan",																								// name
+#endif
+	"IoPan",																								// short name
+	"dw",																												// author
+	"About",																								// A command, that could be use for open an editor, etc...
 	2
 );
 
 
-class mi : public CMachineInterface {
-	public:
-		mi();
-		virtual ~mi();
-		virtual void Init();
-		virtual void SequencerTick();
-		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
-		virtual bool DescribeValue(char* txt,int const param, int const value);
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
+class mi : public CMachineInterface
+{
+public:
+	mi();
+	virtual ~mi();
+	virtual void Init();
+	virtual void SequencerTick();
+	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
+	virtual bool DescribeValue(char* txt,int const param, int const value);
+	virtual void Command();
+	virtual void ParameterTweak(int par, int val);
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
-mi::mi() {
+mi::mi()
+{
 	Vals = new int[sizeof pParameters];
 }
 
-mi::~mi() {
-	delete[] Vals;
+mi::~mi()
+{
+	delete Vals;
 }
 
-void mi::Init() {
+void mi::Init()
+{
 }
 
-void mi::SequencerTick() {
-	// Called on each tick while sequencer is playing
+void mi::SequencerTick()
+{
+// Called on each tick while sequencer is playing
 }
 
-void mi::Command() {
-	// Called when user presses editor button
+void mi::Command()
+{
+// Called when user presses editor button
 	pCB->MessBox("IoPan v. 0.1b\n\npan scaler for psycle\nby d.w. aley","uNF",0);
 }
 
 
 
-void mi::ParameterTweak(int par, int val) {
+void mi::ParameterTweak(int par, int val)
+{
 
 ////Variable center code
 //

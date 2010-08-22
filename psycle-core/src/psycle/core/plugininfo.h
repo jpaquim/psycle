@@ -1,29 +1,50 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
-
+/***************************************************************************
+*   Copyright (C) 2007 Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef PSYCLE__CORE__PLUGIN_INFO
 #define PSYCLE__CORE__PLUGIN_INFO
-#pragma once
-
-#include <psycle/core/detail/project.hpp>
 
 #include <string>
 
-namespace psycle { namespace core {
-
-		namespace MachineRole {
-			enum type {
+namespace psy
+{
+	namespace core
+	{
+		namespace MachineRole
+		{
+			typedef enum
+			{
 				GENERATOR = 0,
 				EFFECT,
 				MASTER,
 				CONTROLLER
-			};
+			} type;
 		}
 
-		class PSYCLE__CORE__DECL PluginInfo {
+		/**
+		@author  Psycledelics  
+		*/
+		class PluginInfo
+		{
 			public:
 				PluginInfo();
-				PluginInfo(MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string, std::string);
+				PluginInfo(MachineRole::type, std::string, std::string, std::string, std::string, std::string, std::string);
 
 				virtual ~PluginInfo();
 
@@ -39,11 +60,8 @@ namespace psycle { namespace core {
 				void setDesc( const std::string & desc );
 				const std::string & desc() const;
 
-				void setApiVersion( const std::string & api_version );
-				const std::string & apiVersion() const;
-
-				void setPlugVersion( const std::string & plug_version );
-				const std::string & plugVersion() const;
+				void setVersion( const std::string & version );
+				const std::string & version() const;
 
 				void setLibName( const std::string & libName );
 				const std::string & libName() const;
@@ -65,14 +83,14 @@ namespace psycle { namespace core {
 				std::string name_;
 				std::string author_;
 				std::string desc_;
-				std::string api_version_;
-				std::string plug_version_;
+				std::string version_;
 				std::string libName_;
 				time_t fileTime_;
 				std::string error_;
 				bool allow_;
 				std::string category_;
 		};
+	}
+}
 
-}}
 #endif

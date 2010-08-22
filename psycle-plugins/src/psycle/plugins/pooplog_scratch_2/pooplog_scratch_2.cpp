@@ -36,12 +36,11 @@ v0.01b
 	*/
 
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math.hpp>
 #include <cstring>
 #include <cstdlib>
+//#include <cassert>
+#include <cmath>
 
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers::math;
 
 #define PLUGIN_NAME "Pooplog Scratch Master 2 0.06b"
 
@@ -59,11 +58,28 @@ using namespace psycle::helpers::math;
 
 #define FILTER_CALC_TIME				32
 #define MAXWAVE 17
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
 
 float SyncAdd[MAXSYNCMODES+1];
 float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
+
+inline int f2i(float flt)
+{ 
+	#if defined _MSC_VER && defined _M_IX86
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#else
+		return static_cast<int>(flt - 0.5f);
+	#endif
+}
 
 #define NUM_BUFF 89
 const static float buffindex[NUM_BUFF]={
@@ -400,7 +416,7 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	0,																																								// flags
 	num_param,																																								// numParameters
@@ -475,7 +491,7 @@ private:
 	int timetocompute;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //DLL_EXPORTS
 
 mi::mi()
@@ -493,14 +509,14 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 	if (pBufferL)
 	{
-		delete[] pBufferL;
+		delete pBufferL;
 	}
 	if (pBufferR)
 	{
-		delete[] pBufferR;
+		delete pBufferR;
 	}
 // Destroy dinamically allocated objects/memory here
 }
@@ -730,11 +746,11 @@ inline void mi::FilterTick()
 		speedlfophase += ((speedlfospeed-MAXSYNCMODES)*(speedlfospeed-MAXSYNCMODES))*(0.000030517f*44100.0f/song_freq);
 	}
 	WRAP_AROUND(speedlfophase);
-	Vals[e_paraSPEEDlfophase] = lrint<int>(speedlfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraSPEEDlfophase] = f2i(speedlfophase/(SAMPLE_LENGTH*2/65536.0f));
 
 	if (speedlfoamplitude)
 	{
-		float speedmod = (float(pspeedlfowave[lrint<int>(speedlfophase)])*speedlfoamplitude);
+		float speedmod = (float(pspeedlfowave[f2i(speedlfophase)])*speedlfoamplitude);
 		rdelta += (((ddelta*runbal)+(ddelta*runbal*speedmod) - rdelta)*rdrag);
 		ldelta += (((ddelta*lunbal)+(ddelta*lunbal*speedmod) - ldelta)*ldrag);
 	}
@@ -753,10 +769,10 @@ inline void mi::FilterTick()
 		mixlfophase += ((mixlfospeed-MAXSYNCMODES)*(mixlfospeed-MAXSYNCMODES))*(0.000030517f*44100.0f/song_freq);
 	}
 	WRAP_AROUND(mixlfophase);
-	Vals[e_paraMIXlfophase] = lrint<int>(mixlfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraMIXlfophase] = f2i(mixlfophase/(SAMPLE_LENGTH*2/65536.0f));
 	if (mixlfoamplitude)
 	{
-		wmix = Vals[e_paraMix]/256.0f+(float(pmixlfowave[lrint<int>(mixlfophase)])*mixlfoamplitude);
+		wmix = Vals[e_paraMix]/256.0f+(float(pmixlfowave[f2i(mixlfophase)])*mixlfoamplitude);
 		dmix = 1.0f-wmix;
 	}
 	else
@@ -780,7 +796,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 		if (pBufferL)
 		{
-			int i = lrint<int>(rlindex);
+			int i = f2i(rlindex);
 			if (i < (bufsize-1))
 			{
 				sol = (pBufferL[i]*(1.0f-(rlindex-i)))+(pBufferL[i+1]*(rlindex-i))+denormal;
@@ -793,7 +809,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		if (pBufferR)
 		{
-			int i = lrint<int>(rrindex);
+			int i = f2i(rrindex);
 			if (i < (bufsize-1))
 			{
 				sor = (pBufferR[i]*(1.0f-(rrindex-i)))+(pBufferR[i+1]*(rrindex-i))+denormal;

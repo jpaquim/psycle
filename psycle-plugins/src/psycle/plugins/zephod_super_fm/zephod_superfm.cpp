@@ -1,9 +1,6 @@
 #include <psycle/plugin_interface.hpp>
 #include "envelope.hpp"
-#include <universalis/stdlib/cstdint.hpp>
-#include <cmath>
-
-using namespace psycle::plugin_interface;
+#include <math.h> // should be <cmath>
 
 //////////////////////////////////////////////////////////////////////
 // Psycle
@@ -310,7 +307,7 @@ class CTrack
 		float Mot1dv,Mot2dv,Mot3dv;
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	GENERATOR,																																// flags
 	20,																																								// numParameters
@@ -339,15 +336,15 @@ class mi : public CMachineInterface
 		virtual void DSPClear(float *psamplesleft,float *psamplesright, int numsamples);
 		virtual void Stop();
 
-		std::uint8_t wave,ModWave;
+		uint8 wave,ModWave;
 		CTrack Tracks[MAX_TRACKS];
 		int medBreakNote[MAX_TRACKS];
-		std::uint8_t route;
+		uint8 route;
 		int mod1_env,mod2_env,mod3_env;
 		int tickCounter;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 void CTrack::Stop()
 {
@@ -540,7 +537,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 
 	for (int c = 0; c < MAX_TRACKS; c++)
 	{

@@ -7,21 +7,21 @@
 #include <psycle/host/WaveEdInsertSilenceDialog.hpp>
 #include <psycle/host/WaveEdCrossfadeDialog.hpp>
 #include <psycle/host/ScrollableDlgBar.hpp>
-#include <psycle/core/instrument.h>
 #include <deque>
 #include <utility>
-
 namespace psycle { namespace host {
 
 		class CMainFrame;
+		class Song;
 
 		/// wave editor window.
 		class CWaveEdChildView : public CWnd
 		{
 		public:
-			CWaveEdChildView(class CWaveEdFrame* frame, CMainFrame* parent);			
+			CWaveEdChildView();
+			void SetSong(Song*);
+			void SetParent(CMainFrame*);
 			virtual ~CWaveEdChildView();
-
 			void GenerateAndShow();
 			void SetViewData(int ins);
 			void SetSpecificZoom(int factor);
@@ -108,6 +108,10 @@ namespace psycle { namespace host {
 			afx_msg void OnSize(UINT nType, int cx, int cy);
 			afx_msg void OnCustomdrawVolSlider(NMHDR* pNMHDR, LRESULT* pResult);
 
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
+			afx_msg void OnDestroy();
+			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:
@@ -122,6 +126,7 @@ namespace psycle { namespace host {
 			void Mix(short* lhs, short *rhs, int lhsSize, int rhsSize, float lhsVol=1.0f, float rhsVol=1.0f);
 			void Fade(short* data, int length, float startVol, float endVol);
 			void Amplify(short* data, int length, float vol);
+			Song *_pSong;
 			
 			// Painting pens
 			CPen cpen_lo;
@@ -156,11 +161,8 @@ namespace psycle { namespace host {
 			bool blSelection;			//whether data is selected currently
 			bool wdWave;				//whether we have a wave to display
 			bool cursorBlink;			//switched on timer messages.. cursor is visible when true
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Instrument::id_type wsInstrument;
-#else
+
 			int wsInstrument;
-#endif
 			bool drawwave;
 			bool bSnapToZero;
 			bool bDragLoopStart, bDragLoopEnd;	//indicates that the user is dragging the loop start/end
@@ -187,16 +189,7 @@ namespace psycle { namespace host {
 
 			CScrollableDlgBar zoombar;
 
-			
-		public:
-			afx_msg void OnTimer(UINT_PTR nIDEvent);
-			afx_msg void OnDestroy();
-			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-
-			CWaveEdFrame* frame_;
 			CMainFrame* pParent;
-
-			inline Song* song();
 		};
 
 		//{{AFX_INSERT_LOCATION}}

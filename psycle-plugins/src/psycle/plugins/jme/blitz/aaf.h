@@ -22,23 +22,5 @@ public:
 		~AAF16();
 		float y[4]; //output samples
 		float x[4]; //input samples
-		inline float process(float NewSample);
+		float process(float NewSample);
 };
-
-inline float AAF16::process(float NewSample){
-	x[3] = x[2];
-	x[2] = x[1];
-	x[1] = x[0];
-	x[0] = NewSample;
-
-	y[3] = y[2];
-	y[2] = y[1];
-	y[1] = y[0];
-
-	y[0] = 0.00008706096478462893f * x[0];
-	y[0] += 0.00026118289435388679f * x[1] - -2.90004956629741750000f * y[1];
-	y[0] += 0.00026118289435388679f * x[2] - 2.81919480076970650000f * y[2];
-	y[0] += 0.00008706096478462893f * x[3] - -0.91844977163113484000f * y[3];
-
-	return y[0];
-}

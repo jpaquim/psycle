@@ -8,9 +8,6 @@
 #include "CVoice.h"
 #include <psycle/plugin_interface.hpp>
 #include <memory>
-
-using namespace psycle::plugin_interface;
-
 //============================================================================
 //				Defines
 //============================================================================
@@ -26,7 +23,7 @@ using namespace psycle::plugin_interface;
 #define SINE(x) ((float) sin((float) (x) * PI2))
 float				wavetable[NUMWAVEFORMS][WAVESIZE];
 char				wave_str[NUMWAVEFORMS + 5][16];
-char const			*filt_str[4] = { "LP-12", "LP-24", "HP-12", "HP-24" };
+char				*filt_str[4] = { "LP-12", "LP-24", "HP-12", "HP-24" };
 //============================================================================
 //				Parameters
 //============================================================================
@@ -218,7 +215,7 @@ CMachineParameter const *pParams[] = {
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
 	GENERATOR,
 	NUM_PARAMS,
@@ -285,7 +282,7 @@ public:
 	float				inertia_factor;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -301,7 +298,6 @@ mi::mi()
 	globals.filter_freq.current=0.0f;
 	globals.filter_res.current=0.0f;
 
-	globals.samplingrate=0;
 	for (int ti = 0; ti < MAX_TRACKS; ti++) {
 		for (int vi = 0; vi < MAX_VOICES; vi++)
 			voices[ti][vi].globals = &globals;
@@ -371,7 +367,7 @@ mi::mi()
 mi::~mi()
 {
 	Stop();
-	delete[] Vals;
+	delete Vals;
 }
 
 //////////////////////////////////////////////////////////////////////

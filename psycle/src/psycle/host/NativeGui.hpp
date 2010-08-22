@@ -2,12 +2,10 @@
 ///\brief interface file for psycle::host::CNativeGui.
 #pragma once
 #include "Psycle.hpp"
-
 namespace psycle {
-namespace core {
-	class Machine;
-}
 namespace host {
+
+		class Machine;
 
 		#define K_XSIZE     28
 		#define K_YSIZE     28
@@ -86,7 +84,7 @@ namespace host {
 			DECLARE_MESSAGE_MAP()
 
 		protected:
-			psycle::core::Machine* _pMachine;
+			Machine* _pMachine;
 
 			int ncol;
 			int numParameters;

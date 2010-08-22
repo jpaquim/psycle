@@ -1,8 +1,5 @@
 #include <psycle/plugin_interface.hpp>
 #include <cmath>
-#include <cstdio>
-
-using namespace psycle::plugin_interface;
 
 #ifndef M_PI
 	#define M_PI 3.14159265358979323846
@@ -60,7 +57,7 @@ enum
 	grav_inout
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	0,																																// flags
 	8,																																// numParameters
@@ -106,7 +103,7 @@ protected:
 	int disp_counter;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -118,7 +115,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 }
 
 void mi::Init()

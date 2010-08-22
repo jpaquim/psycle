@@ -1,40 +1,68 @@
 #include "AllPass.hpp"
-#include <universalis/os/aligned_memory_alloc.hpp>
-#include <psycle/helpers/dsp.hpp>
+#include <diversalis/diversalis.hpp>
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+	#include <xmmintrin.h>
+#endif
+#include <cstdlib>
+#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	extern "C" int posix_memalign(void **, std::size_t, std::size_t) throw();
+#endif
 
-CAllPass::CAllPass(): l_delayedCounter(0), r_delayedCounter(0),Counter(0),
-left_output_(0.0f), right_output_(0.0f), bufferSize(0) {
-}
+CAllPass::CAllPass()
+{
+#if defined DIVERSALIS__PROCESSOR__X86 &&  defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+	posix_memalign(reinterpret_cast<void**>(&leftBuffer),16,MAX_ALLPASS_DELAY*sizeof(float));
+	posix_memalign(reinterpret_cast<void**>(&rightBuffer),16,MAX_ALLPASS_DELAY*sizeof(float));
+#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+	leftBuffer = static_cast<float*>(_aligned_malloc(MAX_ALLPASS_DELAY*sizeof(float),16));
+	rightBuffer = static_cast<float*>(_aligned_malloc(MAX_ALLPASS_DELAY*sizeof(float),16));
+#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+	///\todo mingw
+	leftBuffer= new float[MAX_ALLPASS_DELAY];
+	rightBuffer = new float[MAX_ALLPASS_DELAY];
+#else
+	leftBuffer= new float[MAX_ALLPASS_DELAY];
+	rightBuffer = new float[MAX_ALLPASS_DELAY];
+#endif
 
-CAllPass::~CAllPass() throw() {
-	DeleteBuffer();
-}
-
-void CAllPass::Clear() {
-	psycle::helpers::dsp::Clear(leftBuffer, bufferSize);
-	psycle::helpers::dsp::Clear(rightBuffer, bufferSize);
-}
-
-void CAllPass::Initialize(int max_size, int time, int stph) {
-	DeleteBuffer();
-	//properly aligned.
-	bufferSize = (max_size+3)&0xFFFFFF00;
-	universalis::os::aligned_memory_alloc(16, leftBuffer, bufferSize);
-	universalis::os::aligned_memory_alloc(16, rightBuffer, bufferSize);
+	smpleft = reinterpret_cast<unsigned int*>(&tmpleft);
+	smpright = reinterpret_cast<unsigned int*>(&tmpright);
+	Counter=MAX_ALLPASS_DELAY-4;
+	l_delayedCounter=0;
+	r_delayedCounter=0;
 	Clear();
-	SetDelay(time,stph);
 }
 
-void CAllPass::SetDelay(int time, int stph) {
-	l_delayedCounter = Counter - std::min(time, bufferSize);
-	r_delayedCounter = l_delayedCounter - std::min(stph, bufferSize);
-	if(l_delayedCounter < 0) l_delayedCounter += bufferSize;
-	if(r_delayedCounter < 0) r_delayedCounter += bufferSize;
+CAllPass::~CAllPass() throw()
+{
+#if defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__MICROSOFT
+	_aligned_free(static_cast<void*>(leftBuffer));
+	_aligned_free(static_cast<void*>(rightBuffer));
+#elif defined DIVERSALIS__PROCESSOR__X86 && defined DIVERSALIS__COMPILER__GNU
+	free(leftBuffer);
+	free(rightBuffer);
+#else
+	delete [] leftBuffer;
+	delete [] rightBuffer;
+#endif
 }
 
-void CAllPass::DeleteBuffer() {
-	if(bufferSize) {
-		universalis::os::aligned_memory_dealloc(leftBuffer);
-		universalis::os::aligned_memory_dealloc(rightBuffer);
+void CAllPass::Clear()
+{
+	for(int c=0;c<MAX_ALLPASS_DELAY;c++)
+	{
+		leftBuffer[c]=0;
+		rightBuffer[c]=0;
 	}
+	left_output=0;
+	right_output=0;
+}
+void CAllPass::Initialize(int time, int stph)
+{
+	l_delayedCounter=Counter-time;
+	r_delayedCounter=l_delayedCounter-stph;
+	
+	if(l_delayedCounter<0)l_delayedCounter+=MAX_ALLPASS_DELAY;
+	if(r_delayedCounter<0)r_delayedCounter+=MAX_ALLPASS_DELAY;
+
 }

@@ -30,7 +30,7 @@ digraph dependencies {
 		//"libsigc++";// [ label = "{ libsigc++ | signals and slots }" ];
 		"glibmm";// [ label = "{ glibmm | platform abstraction }" ];
 		//"gdkmm" [ label = "{ gdkmm | GUI Drawing Kit }" ];
-		//"gtkmm";// [ label = "{ gtkmm | GUI Tool Kit }" ];
+		"gtkmm";// [ label = "{ gtkmm | GUI Tool Kit }" ];
 		//"cairomm";
 		//"gnomecanvasmm";// [ label = "{ gnomecanvasmm | GNOME's canvas }" ];
 		//"pangomm";
@@ -119,8 +119,7 @@ digraph dependencies {
 
 		"psycle-mfc" [ label = "{ psycle MFC | original psycle\nwith MFC GUI front-end }" ];
 		"psycle-mfc" -> "mfc";
-		"psycle-mfc" -> "psycle-core";
-		"psycle-mfc" -> "psycle-audiodrivers";
+		"psycle-mfc" -> "psycle-plugin-interface";
 		"psycle-mfc" -> "psycle-helpers";
 		//"psycle-mfc" -> "universalis";
 		//"psycle-mfc" -> "boost";
@@ -133,12 +132,14 @@ digraph dependencies {
 		//"freepsycle-plugins" -> "boost";
 		"freepsycle-plugins" -> "psycle-helpers";
 		"freepsycle-host" -> "freepsycle-engine";
+		//"freepsycle-text" -> "freepsycle-engine";
+		"freepsycle-text" -> "freepsycle-host";
 		//"freepsycle-gui" -> "freepsycle-engine";
-		//"freepsycle-gui" -> "freepsycle-host";
+		"freepsycle-gui" -> "freepsycle-host";
 		//"freepsycle-gui" -> "universalis";
 		//"freepsycle-gui" -> "boost" ;
 		//"freepsycle-gui" -> "glibmm";
-		//"freepsycle-gui" -> "gtkmm";
+		"freepsycle-gui" -> "gtkmm";
 		//"freepsycle-gui" -> "gnomecanvasmm";
 		//"freepsycle-gui" -> "libsigc++";
 	}

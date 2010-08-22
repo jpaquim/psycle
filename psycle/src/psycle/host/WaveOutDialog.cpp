@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveOutDialog.
 
+
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
@@ -10,10 +11,10 @@
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 #endif
 
-	#include <mmsystem.h>
-	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-		#pragma comment(lib, "winmm")
-	#endif
+#include <mmsystem.h>
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#pragma comment(lib, "winmm")
+#endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
 	#pragma warning(pop)
@@ -195,97 +196,6 @@ namespace psycle { namespace host {
 			RecalcLatency();
 		}
 
-
-
-		void MMEUi::SetValues(
-			int device_idx, bool dither,
-			int sample_rate, int buffer_size, int buffer_count) {
-			dlg_.m_BufNum = buffer_count;
-			dlg_.m_BufSize = buffer_size;
-			dlg_.m_Device = device_idx;
-			dlg_.m_Dither = dither;
-			dlg_.m_SampleRate = sample_rate;
-		}
-
-		void MMEUi::GetValues(
-			int & device_idx, bool & dither,
-			int & sample_rate, int & buffer_size, int & buffer_count) {
-			buffer_count = dlg_.m_BufNum;
-			buffer_size = dlg_.m_BufSize;
-			device_idx = dlg_.m_Device;
-			dither = (bool)dlg_.m_Dither;
-			sample_rate = dlg_.m_SampleRate;
-		}
-			
-		void MMEUi::WriteConfig(
-				int device_idx, bool dither,
-				int sample_rate, int buffer_size, int buffer_count) {
-			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
-			{
-				Error("Unable to write configuration to the registry");
-				return;
-			}
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS)
-			{
-				if (reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS)
-				{
-					Error("Unable to write configuration to the registry");
-					return;
-				}
-			}
-			reg.SetValue("NumBlocks", buffer_count);
-			reg.SetValue("BlockSize", buffer_size);
-			reg.SetValue("DeviceID", device_idx);
-			// Current driver doesn't use polling
-			//reg.SetValue("PollSleep", _pollSleep);
-			int dither_ = dither;
-			reg.SetValue("Dither", dither_);
-			reg.SetValue("SamplesPerSec", sample_rate);
-			//reg.SetValue("BitDepth", _bitDepth);
-			reg.CloseKey();
-			reg.CloseRootKey();
-		}
-
-		void MMEUi::ReadConfig(
-				int & device_idx, bool & dither,
-				int & sample_rate, int & buffer_size, int & buffer_count) {
-			bool saveatend=false;
-			Registry reg;
-			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS) // settings in version 1.8
-			{
-				reg.CloseRootKey();
-				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
-				if(reg.OpenKey("configuration\\devices\\mme") != ERROR_SUCCESS)
-				{
-					reg.CloseRootKey();
-					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
-					if(reg.OpenKey("WaveOut") != ERROR_SUCCESS)
-					{
-						reg.CloseRootKey();
-						return;
-					}
-				}
-				saveatend=true;
-			}
-			reg.QueryValue("NumBlocks", buffer_count);
-			reg.QueryValue("BlockSize", buffer_size);
-			reg.QueryValue("DeviceID", device_idx);
-			// Current driver doesn't use polling
-			//reg.QueryValue("PollSleep", _pollSleep);
-			int dither_;
-			reg.QueryValue("Dither", dither_);
-			dither = dither_;
-			reg.QueryValue("SamplesPerSec", sample_rate);
-			//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
-			reg.CloseKey();
-			reg.CloseRootKey();
-			if(saveatend) WriteConfig(device_idx, dither, sample_rate, buffer_size, buffer_count);
-		}
-
-		void MMEUi::Error(std::string const & msg) {
-			MessageBox(0, msg.c_str(), "Error in MME Waveout audiodriver", MB_OK | MB_ICONERROR);
-		}
-	}   // namespace
+		}   // namespace
 }   // namespace
+

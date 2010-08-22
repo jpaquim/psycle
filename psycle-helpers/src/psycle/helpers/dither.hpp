@@ -14,17 +14,17 @@ class Dither {
 
 		struct Pdf {
 			enum type {
-				triangular = 0,
-				rectangular,
-				gaussian
-			};
+			triangular = 0,
+			rectangular,
+			gaussian
+		};
 		};
 		
 		struct NoiseShape {
 			enum type {
-				none = 0,
-				highpass
-			};
+			none = 0,
+			highpass
+		};
 		};
 
 		void SetBitDepth(unsigned int newdepth) { bitdepth = newdepth; }

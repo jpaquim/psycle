@@ -18,29 +18,21 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/detail/project.private.hpp>
 #include "zipwriter.h"
-
-#if defined DIVERSALIS__OS__MICROSOFT
-	#include <universalis/os/include_windows_without_crap.hpp>
-	#include <io.h>
-#else
+#include <zlib.h>
+#if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 	#include <sys/types.h>
+#elif defined _WIN64 || defined _WIN32
+	#include <windows.h>
+	#include <io.h>
 #endif
-
-#include <zlib.h> // include after windows header
-
 #include <sys/stat.h>
 #include <fcntl.h>
-
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
-
-namespace psycle { namespace core {
 
 static void _zw_tail(zipwriter *d);
 static void _zw_eodr(zipwriter *d, unsigned char *ptr);
@@ -51,19 +43,10 @@ static void _zm_deflate_start(zipwriter_file *f);
 static void _zm_deflate_chunk(zipwriter_file *f, const void *buf, unsigned int len);
 static void _zm_deflate_finish(zipwriter_file *f);
 
-static zipwriter_method zm_store = {
-	ZIPWRITER_STORE,
-	0,
-	_zm_store_chunk,
-	0
-};
+static zipwriter_method zm_store = { ZIPWRITER_STORE, 0, _zm_store_chunk, 0 };
+static zipwriter_method zm_deflate = { ZIPWRITER_DEFLATE,
+		_zm_deflate_start, _zm_deflate_chunk, _zm_deflate_finish };
 
-static zipwriter_method zm_deflate = {
-	ZIPWRITER_DEFLATE,
-	_zm_deflate_start,
-	_zm_deflate_chunk,
-	_zm_deflate_finish
-};
 
 zipwriter *zipwriter_start(int outfd)
 {
@@ -498,5 +481,3 @@ void zipwriter_copy(int in, zipwriter_file *out)
 		zipwriter_write(out, buffer, r);
 	}
 }
-
-}}

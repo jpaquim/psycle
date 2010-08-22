@@ -8,9 +8,6 @@
 //#include <windows.h>
 #include "Voice.h"
 #include "../blwtbl/blwtbl.h"
-
-using namespace psycle::plugin_interface;
-
 //////////////////////////////////////////////////////////////////////
 //
 //				Machine Defs
@@ -57,7 +54,7 @@ int lfowaves[] =
 	WF_REVSAWTOOTH
 };
 
-char const *str_pm_types[] =
+char *str_pm_types[] =
 {
 	"off",
 	"sub",
@@ -65,13 +62,13 @@ char const *str_pm_types[] =
 	"mul"
 };
 
-char const *str_yes_no[] =
+char *str_yes_no[] =
 {
 	"no",
 	"yes"
 };
 
-char const *str_mod_dests[] =
+char *str_mod_dests[] =
 {
 	"off",
 	"OSC 1",
@@ -87,7 +84,7 @@ char const *str_mod_dests[] =
 	"LFO 2 - Freq."
 };
 
-char const *str_lfo1_dests[] =
+char *str_lfo1_dests[] =
 {
 	"off",
 	"OSC 1",
@@ -101,7 +98,7 @@ char const *str_lfo1_dests[] =
 	"FLT 2 - Freq."
 };
 
-char const *str_lfo2_dests[] =
+char *str_lfo2_dests[] =
 {
 	"off",
 	"OSC 1",
@@ -116,7 +113,7 @@ char const *str_lfo2_dests[] =
 	"AMP - Level"
 };
 
-char const *str_flt1_types[] =
+char *str_flt1_types[] =
 {
 	"LP-12",
 	"LP-24",
@@ -128,7 +125,7 @@ char const *str_flt1_types[] =
 	"Moog BP-24"
 };
 
-char const *str_flt2_modes[] =
+char *str_flt2_modes[] =
 {
 	"disabled",
 	"enabled",
@@ -874,7 +871,7 @@ CMachineParameter const *pParams[] =
 //				Machine Info
 //
 //////////////////////////////////////////////////////////////////////
-CMachineInfo MacInfo (
+CMachineInfo MacInfo(
 	MI_VERSION,
 	GENERATOR,
 	NUM_PARAMS,
@@ -931,7 +928,7 @@ public:
 	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int numtracks);
 	// Custom
 };
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //////////////////////////////////////////////////////////////////////
 //
 //				Initialize Static Machine Variables

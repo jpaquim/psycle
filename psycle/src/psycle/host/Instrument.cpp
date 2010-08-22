@@ -1,13 +1,10 @@
 ///\file
 ///\brief interface file for psycle::host::Filter.
-#include "configuration_options.hpp"
 
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
 #include "Instrument.hpp"
-#include "Global.hpp"
-#include "DataCompression.hpp"
-#include "Filter.hpp"
+#include <psycle/helpers/datacompression.hpp>
+#include <psycle/helpers/filter.hpp>
 #include "Zap.hpp"
 namespace psycle
 {
@@ -31,8 +28,8 @@ namespace psycle
 
 		void Instrument::Delete()
 		{
-			_locked_machine_index = -1;
-			_locked_to_machine = false;
+			_lock_instrument_to_machine = -1;
+			_LOCKINST = false;
 
 			// Reset envelope
 			ENV_AT = 1; // 16
@@ -168,7 +165,7 @@ namespace psycle
 							{
 								pData = new byte[size+4];// +4 to avoid any attempt at buffer overflow by the code
 								pFile->Read(pData,size);
-								SoundDesquash(pData,&waveDataL);
+								DataCompression::SoundDesquash(pData,&waveDataL);
 								zapArray(pData);
 							}
 							else
@@ -184,7 +181,7 @@ namespace psycle
 								{
 									pData = new byte[size+4]; // +4 to avoid any attempt at buffer overflow by the code
 									pFile->Read(pData,size);
-									SoundDesquash(pData,&waveDataR);
+									DataCompression::SoundDesquash(pData,&waveDataR);
 									zapArray(pData);
 								}
 								else
@@ -207,8 +204,8 @@ namespace psycle
 
 				if ((version & 0xFF) >= 1) 
 				{ //revision 1 or greater
-					pFile->Read(&_locked_machine_index,sizeof(_locked_machine_index));
-					pFile->Read(&_locked_to_machine,sizeof(_locked_to_machine));
+					pFile->Read(&_lock_instrument_to_machine,sizeof(_lock_instrument_to_machine));
+					pFile->Read(&_LOCKINST,sizeof(_LOCKINST));
 				}
 			}
 		}
@@ -251,10 +248,10 @@ namespace psycle
 				byte * pData1(0);
 				byte * pData2(0);
 				UINT size1=0,size2=0;
-				size1 = SoundSquash(waveDataL,&pData1,waveLength);
+				size1 = DataCompression::SoundSquash(waveDataL,&pData1,waveLength);
 				if (waveStereo)
 				{
-					size2 = SoundSquash(waveDataR,&pData2,waveLength);
+					size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
 				}
 
 				UINT index = 0;
@@ -268,7 +265,7 @@ namespace psycle
 							+sizeof(waveTune)
 							+sizeof(waveFinetune)
 							+sizeof(waveStereo)
-							+strlen(waveName)+1
+							+(UINT)strlen(waveName)+1
 							+size1
 							+size2;
 
@@ -298,10 +295,9 @@ namespace psycle
 				}
 				zapArray(pData2);
 
-				pFile->Write(&_locked_machine_index,sizeof(_locked_machine_index));
-				pFile->Write(&_locked_to_machine,sizeof(_locked_to_machine));
+				pFile->Write(&_lock_instrument_to_machine,sizeof(_lock_instrument_to_machine));
+				pFile->Write(&_LOCKINST,sizeof(_LOCKINST));
 			}
 		}
 	}
 }
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE
