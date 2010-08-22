@@ -35,15 +35,8 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/****************************************************************************/
 
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
-	/// currently it works in 4 byte alignment too via correcting the offset.
 	inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
 	{
-		int offset  = 4 - ((reinterpret_cast<std::ptrdiff_t>(pSrcSamples) & 0XF) >> 2);
-		numSamples -=offset;
-		while(offset-->0) {
-			*pDstSamples += *pSrcSamples * vol; 
-			pDstSamples++; pSrcSamples++;
-		} 
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(vol);
 			__m128 *psrc = (__m128*)pSrcSamples;
@@ -55,7 +48,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				psrc++;
 				pdst++;
 				numSamples-=4;
-			} while(numSamples>3);
+			} while(numSamples>0);
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			__asm
 			{
@@ -65,7 +58,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					mov edi, pDstSamples
 					mov eax, [numSamples]
 				LOOPSTART:
-					cmp eax, 3
+					cmp eax, 0
 					jle END
 					movaps xmm0, [esi]
 					movaps xmm1, [edi]
@@ -78,11 +71,10 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 					jmp LOOPSTART
 				END:
 			}
+		#else
+			--pSrcSamples; --pDstSamples;
+			do { *++pDstSamples += *++pSrcSamples * vol; } while(--numSamples);
 		#endif
-		while(numSamples-->0) {
-			*pDstSamples += *pSrcSamples * vol; 
-			pDstSamples++; pSrcSamples++;
-		} 
 	}
 
 	/// multiply a signal by a ratio, inplace.
@@ -386,17 +378,17 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			typedef float (*work_func_type)(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length);
 			typedef float (*work_float_func_type)(float const * data, float offset, uint64_t length);
 			
-			/// sample interpolator kinds.
+	/// sample interpolator kinds.
 			struct quality { enum type {
 				none,
 				linear,
 				spline,
 				band_limited
 			};};
-			
+
 			/// constructor
 			resampler() : work(none), work_float(none), quality_(quality::none) {}
-			
+
 			/// work function corresponding to the selected kind.
 			work_func_type work;
 			work_float_func_type work_float;

@@ -146,6 +146,7 @@ void EffectCompressor::Process(float *samples, int num) {
 }
 
 bool EffectCompressor::ProcessPass2(float *buffer, int len) {
+	// Adding gain and adapting to psycle's range
 	float invMax = mGain * 32768.0f;
 	for(int i = 0; i < len; ++i) buffer[i] *= invMax;
 	return true;
@@ -169,7 +170,9 @@ float EffectCompressor::AvgCircle(float value) {
 	mCirclePos = (mCirclePos+1)%mCircleSize;
 	return level;
 }
-
+float EffectCompressor::lastLevel() {
+	return mLastLevel;
+}
 void EffectCompressor::Follow(float *buffer, float *env, int len, float *previous, int previous_len) {
 	/*
 		"Follow"ing algorithm by Roger B. Dannenberg, taken from
@@ -214,7 +217,7 @@ void EffectCompressor::Follow(float *buffer, float *env, int len, float *previou
 	double last = mLastLevel;
 	for(int i = 0; i < len; ++i) {
 		double level;
-		if(mUsePeak)
+		if(mUsePeak || mNormalize)
 			level = std::fabs(buffer[i]);
 		else // use RMS
 			level = AvgCircle(buffer[i]);

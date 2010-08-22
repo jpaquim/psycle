@@ -31,6 +31,7 @@ public:
 	void setDecaySec(double decay);
 	void setNormalize(bool normalize);
 	void setPeakAnalisys(bool peak);
+	float lastLevel();
 
 private:
 	inline bool ProcessPass2(float *buffer, int len);

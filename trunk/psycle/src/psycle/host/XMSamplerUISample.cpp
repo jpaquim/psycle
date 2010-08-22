@@ -617,8 +617,13 @@ void XMSamplerUISample::OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult
 	}
 	char tmp[40], tmp2[40];
 	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
-	sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
-	sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
+	if (rWave().WaveLength() > 0) {
+		sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
+		sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
+	}
+	else {
+		sprintf(tmp2,"%s%d",notes[0],5);
+	}
 	((CStatic*)GetDlgItem(IDC_LSAMPLENOTE))->SetWindowText(tmp2);
 
 	*pResult = 0;

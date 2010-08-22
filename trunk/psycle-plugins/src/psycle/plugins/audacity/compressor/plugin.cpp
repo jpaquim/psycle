@@ -138,7 +138,13 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 // Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value) {
 	switch(param) {
-		case 0://fallthrough
+		case 0:
+			{
+				float vall = 20 * std::log10(sl.lastLevel());
+				float valr = 20 * std::log10(sr.lastLevel());
+				std::sprintf(txt,"%i dB (%+05.01f, %+05.01f)",value, vall, valr);
+			}
+			return true;
 		case 5:
 			std::sprintf(txt,"%i dB",value);
 			return true;
