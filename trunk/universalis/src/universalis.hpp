@@ -31,6 +31,7 @@
 	#include "universalis/compiler/calling_convention.hpp"
 	#include "universalis/compiler/asm.hpp"
 	#include "universalis/compiler/dyn_link.hpp"
+	#include "universalis/compiler/auto_link.hpp"
 	#include "universalis/compiler/location.hpp"
 	#include "universalis/compiler/exception.hpp"
 
