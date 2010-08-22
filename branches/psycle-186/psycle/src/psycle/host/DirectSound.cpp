@@ -70,7 +70,7 @@ namespace psycle
 				Error(_T("(DirectSound) Failed to initialize COM"));
 				return false;
 			}
-			if(FAILED(::DirectSoundCreate8(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
+			if(FAILED(::DirectSoundCreate(device_guid != GUID() ? &device_guid : 0, &_pDs, 0)))
 			{
 				Error(_T("Failed to create DirectSound object"));
 				return false;
@@ -278,7 +278,7 @@ namespace psycle
 			if (port._pDs) return true;
 
 			// Create IDirectSoundCapture using the preferred capture device
-			if( FAILED( hr = DirectSoundCaptureCreate8( port._pGuid, &port._pDs, NULL ) ) )
+			if( FAILED( hr = DirectSoundCaptureCreate( port._pGuid, &port._pDs, NULL ) ) )
 			{
 				Error(_T("Failed to create Capture DirectSound Device"));
 				return false;

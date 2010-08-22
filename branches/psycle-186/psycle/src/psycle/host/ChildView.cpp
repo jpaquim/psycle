@@ -2484,7 +2484,7 @@ namespace psycle { namespace host {
 				if (!finder.IsDirectory())
 				{
 					CString sName, tmpPath;
-					sName = finder.GetFilePath();
+					sName = finder.GetFileName();
 					// ok so we have a .psm, does it have a valid matching .bmp?
 					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
 					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
@@ -3116,7 +3116,7 @@ namespace psycle { namespace host {
 				if (!finder.IsDirectory())
 				{
 					CString sName, tmpPath;
-					sName = finder.GetFilePath();
+					sName = finder.GetFileName();
 					// ok so we have a .psh, does it have a valid matching .bmp?
 					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
 					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .

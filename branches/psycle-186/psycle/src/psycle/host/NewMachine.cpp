@@ -420,7 +420,16 @@ namespace psycle { namespace host {
 					}
 					m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
 					{	// convert integer to string.
-						std::ostringstream s; s << _pPlugsInfo[i]->APIversion;
+						std::ostringstream s;
+						if(_pPlugsInfo[i]->type == MACH_PLUGIN) {
+							s << std::hex << (_pPlugsInfo[i]->APIversion&0x7FFF);
+							if(_pPlugsInfo[i]->APIversion&0x8000) {
+								s << " (64 bits)";
+							} else { s << " (32 bits)"; }
+						}
+						else {
+							 s << _pPlugsInfo[i]->APIversion;
+						}
 						m_APIversionLabel.SetWindowText(s.str().c_str());
 					}
 					if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
@@ -796,13 +805,9 @@ namespace psycle { namespace host {
 									std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetAuthor();
 									_pPlugsInfo[currentPlugsCount]->desc = s.str();
 								}
+								_pPlugsInfo[currentPlugsCount]->APIversion = plug.GetInfo()->APIVersion;
 								{
-									std::ostringstream s; s << "0";
-									_pPlugsInfo[currentPlugsCount]->version = s.str();
-								}
-								_pPlugsInfo[currentPlugsCount]->APIversion = plug.GetInfo()->Version;
-								{
-									std::ostringstream s; s << "0";
+									std::ostringstream s; s << std::hex << plug.GetInfo()->PlugVersion;
 									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
 								out << plug.GetName() << " - successfully instanciated";

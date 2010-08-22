@@ -181,7 +181,17 @@ namespace psycle
 				_pInfo = GetInfo();
 			}
 			PSYCLE__HOST__CATCH_ALL(*this)
-			if(_pInfo->Version < MI_VERSION) throw std::runtime_error("plugin format is too old");
+
+			// version 10 and 11 didn't use HEX representation.
+			// Also, verify for 32 or 64bits.
+			if(!(_pInfo->APIVersion == 11 && (MI_VERSION&0xFFF0) == 0x0010)
+				&& !((_pInfo->APIVersion&0xFFF0) == (MI_VERSION&0xFFF0))) {
+
+				std::ostringstream s;
+				s << "plugin version not supported" << _pInfo->APIVersion;
+				throw std::runtime_error(s.str());
+			}
+
 			_isSynth = _pInfo->Flags == 3;
 			if(_isSynth) _mode = MACHMODE_GENERATOR;
 			strncpy(_psShortName,_pInfo->ShortName,15);

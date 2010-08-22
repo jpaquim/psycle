@@ -45,8 +45,8 @@ namespace psycle
 				PortCapt():pleft(0),pright(0),_pGuid(0),_pDs(0),_pBuffer(0),_lowMark(0),_machinepos(0) {};
 
 				LPGUID _pGuid;
-				LPDIRECTSOUNDCAPTURE8 _pDs;
-				LPDIRECTSOUNDCAPTUREBUFFER8  _pBuffer;
+				LPDIRECTSOUNDCAPTURE _pDs;
+				LPDIRECTSOUNDCAPTUREBUFFER  _pBuffer;
 				int _lowMark;
 				float *pleft;
 				float *pright;
@@ -119,8 +119,8 @@ namespace psycle
 			std::vector<PortCapt> _capPorts;
 			std::vector<int> _portMapping;
 
-			LPDIRECTSOUND8 _pDs;
-			LPDIRECTSOUNDBUFFER8 _pBuffer;
+			LPDIRECTSOUND _pDs;
+			LPDIRECTSOUNDBUFFER _pBuffer;
 			void* _callbackContext;
 			AUDIODRIVERWORKFN _pCallback;
 		};

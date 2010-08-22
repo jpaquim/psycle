@@ -13,6 +13,8 @@
 
 #include "Song.hpp"
 #include "VstHost24.hpp"
+
+#include <universalis/os/fs.hpp>
 namespace psycle
 {
 	namespace host
@@ -101,15 +103,15 @@ namespace psycle
 					program_executable_dir_ = program_executable_dir_.substr(0, program_executable_dir_.rfind('\\')) + '\\';
 				}
 				{
-					SetInstrumentDir(appPath()+"instruments");
+					SetInstrumentDir(appPath()+"Instruments");
 					SetCurrentInstrumentDir(GetInstrumentDir());
-					SetSongDir(appPath()+"songs");
+					SetSongDir((universalis::os::fs::home() / "Songs").native_file_string());
 					SetCurrentSongDir(GetSongDir());
-					SetSkinDir(appPath()+"skins");
+					SetSkinDir(appPath()+"Skins");
 					SetPluginDir(appPath()+"PsyclePlugins");
 					SetVst32Dir(appPath()+"VstPlugins");
 					SetVst64Dir(appPath()+"VstPlugins64");
-					SetWaveRecDir(appPath()+"songs");
+					SetWaveRecDir((universalis::os::fs::home() / "Songs").native_file_string());
 					SetCurrentWaveRecDir(GetWaveRecDir());
 				}
 			}

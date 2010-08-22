@@ -115,14 +115,13 @@ namespace psycle { namespace host {
 			
 			pFrame->UpdateWindow();
 			
-			CNewMachine::LoadPluginInfo(false);
-
 			LoadRecent(pFrame); // Import recent files from registry.
 
 			if (*m_lpCmdLine)
 				ProcessCmdLine(m_lpCmdLine); // Process Command Line
 			else
 			{
+				CNewMachine::LoadPluginInfo(false);
 				// Show splash screen
 				if (Global::pConfig->_showAboutAtStart)
 				{
@@ -182,10 +181,13 @@ namespace psycle { namespace host {
 		{
 			if (*(cmdline) != 0)
 			{
-				char tmpName [257];
-				std::strncpy(tmpName, m_lpCmdLine+1, 256 );
-				tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
-				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
+				if(strcmp(cmdline,"/skipscan") != 0) {
+					CNewMachine::LoadPluginInfo(false);
+					char tmpName [MAX_PATH];
+					std::strncpy(tmpName, m_lpCmdLine+1, MAX_PATH-1 );
+					tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
+					reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
+				}
 			}
 		}
 
