@@ -59,7 +59,6 @@ class mi : public CMachineInterface {
 			virtual void SequencerTick();
 			virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
 			virtual bool DescribeValue(char* txt,int const param, int const value);
-			virtual void Command();
 			virtual void ParameterTweak(int par, int val);
 
 	private:
