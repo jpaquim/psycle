@@ -74,7 +74,7 @@ void Sequencer::process_global_event(const PatternEvent& event) {
 				if(mac_id < MAX_MACHINES && song().machine(mac_id)) {
 					Wire::id_type wire(event.target2());
 					song().machine(mac_id)->SetDestWireVolume(mac_id, wire,
-						value_mapper::map_255_1(static_cast<int>(event.parameter()))
+						value_mapper::map_256_1(static_cast<int>(event.parameter()))
 					);
 				}
 			}

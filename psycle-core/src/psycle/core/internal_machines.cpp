@@ -362,7 +362,7 @@ void Master::Tick(int /*channel*/, const PatternEvent & data ) {
 int Master::GenerateAudio( int numSamples ) {
 	//if(!_mute) {
 	
-	float mv = value_mapper::map_255_1(_outDry);
+	float mv = value_mapper::map_256_1(_outDry);
 	float *pSamples = _pMasterSamples;
 	float *pSamplesL = _pSamplesL;
 	float *pSamplesR = _pSamplesR;
@@ -384,11 +384,11 @@ int Master::GenerateAudio( int numSamples ) {
 				_lMax = fabsf(*pSamplesL);
 			if(*pSamples > 32767.0f) {
 				_outDry = lround<int>(_outDry * 32767.0f / (*pSamples));
-				mv = value_mapper::map_255_1(_outDry);
+				mv = value_mapper::map_256_1(_outDry);
 				*pSamples = *pSamplesL = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
 				_outDry = lround<int>(_outDry * -32767.0f / (*pSamples));
-				mv = value_mapper::map_255_1(_outDry);
+				mv = value_mapper::map_256_1(_outDry);
 				*pSamples = *pSamplesL = -32767.0f; 
 			}
 			++pSamples;
@@ -398,11 +398,11 @@ int Master::GenerateAudio( int numSamples ) {
 				_rMax = fabsf(*pSamplesR);
 			if(*pSamples > 32767.0f) {
 					_outDry = lround<int>(_outDry * 32767.0f / (*pSamples));
-				mv = value_mapper::map_255_1(_outDry);
+				mv = value_mapper::map_256_1(_outDry);
 				*pSamples = *pSamplesR = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
 				_outDry = lround<int>(_outDry * -32767.0f / (*pSamples));
-				mv = value_mapper::map_255_1(_outDry);
+				mv = value_mapper::map_256_1(_outDry);
 				*pSamples = *pSamplesR = -32767.0f; 
 			}
 			++pSamples;
