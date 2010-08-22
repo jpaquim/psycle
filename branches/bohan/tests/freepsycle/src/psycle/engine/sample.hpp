@@ -13,7 +13,6 @@ namespace psycle { namespace engine {
 typedef double real;
 
 /// mathematical operations on floating point numbers
-///\todo merge with psycle::helpers
 namespace math {
 
 using namespace helpers::math;

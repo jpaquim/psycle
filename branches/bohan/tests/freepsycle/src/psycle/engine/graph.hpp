@@ -72,7 +72,7 @@ class PSYCLE__DECL port : public bases::port, public named {
 	///\{
 		public:
 			/// assigns a buffer to this port (or unassigns if 0).
-			void buffer(class buffer * const);
+			void buffer(class buffer *);
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
 			class buffer & buffer() const throw() { return *buffer_; }
 		private:

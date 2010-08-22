@@ -265,8 +265,8 @@ port::port(class node & node, name_type const & name, std::size_t channels)
 :
 	bases::port(node),
 	named(name),
-	buffer_(0),
-	seconds_per_event_(0)
+	buffer_(),
+	seconds_per_event_()
 {
 	if(loggers::trace()()) {
 		std::ostringstream s;
@@ -304,7 +304,7 @@ port::name_type port::semi_qualified_name() const {
 	return node().name() + '.' + name();
 }
 
-void port::buffer(class buffer * const buffer) {
+void port::buffer(class buffer * buffer) {
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
 		s << "assigning buffer " << buffer << " to port " << qualified_name();

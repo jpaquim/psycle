@@ -261,7 +261,7 @@ namespace ports {
 				typedef std::vector<typename Typenames::ports::input*> input_ports_type;
 				input_ports_type const & input_ports() const throw() { return input_ports_; }
 			private:
-				input_ports_type         input_ports_;
+				input_ports_type input_ports_;
 		///\}
 
 		///\name (dis)connection functions
