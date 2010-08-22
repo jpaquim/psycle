@@ -1,87 +1,108 @@
-/******************************************************************************
-*  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
-*                                                                             *
-*  This program is free software; you can redistribute it and/or modify       *
-*  it under the terms of the GNU General Public License as published by       *
-*  the Free Software Foundation; either version 2 of the License, or          *
-*  (at your option) any later version.                                        *
-*                                                                             *
-*  This program is distributed in the hope that it will be useful,            *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
-*  GNU General Public License for more details.                               *
-*                                                                             *
-*  You should have received a copy of the GNU General Public License          *
-*  along with this program; if not, write to the                              *
-*  Free Software Foundation, Inc.,                                            *
-*  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
-******************************************************************************/
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
+#ifndef PSYCLE__AUDIODRIVERS__MICROSOFT_MME_WAVE_OUT__INCLUDED
+#define PSYCLE__AUDIODRIVERS__MICROSOFT_MME_WAVE_OUT__INCLUDED
 #pragma once
+
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "audiodriver.h"
-#include <windows.h>
-#include <mmsystem.h>
-#pragma comment(lib, "winmm")
-#undef min
-#undef max
-#include <cstdint>
-#include <iostream>
-namespace psy { namespace core {                                      
 
+#include <universalis/os/include_windows_without_crap.hpp>
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(push)
+	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+#endif
+
+	#include <mmsystem.h>
+	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+		#pragma comment(lib, "winmm")
+	#endif
+
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#pragma warning(pop)
+#endif
+
+namespace psycle { namespace audiodrivers {
+
+using namespace universalis::stdlib;
+
+class MMEUiInterface {
+	public:
+		MMEUiInterface::MMEUiInterface() {}
+		virtual ~MMEUiInterface() {}
+
+		virtual int DoModal() = 0;
+
+		virtual void SetValues(
+			int device_idx, bool dither,
+			int sample_rate, int buffer_size, int buffer_count) = 0;
+
+		virtual void GetValues(
+			int & device_idx, bool & dither,
+			int & sample_rate, int & buffer_size, int & buffer_count) = 0;
+			
+		virtual void WriteConfig(
+			int device_idx, bool dither,
+			int sample_rate, int buffer_size, int buffer_count) = 0;
+
+		virtual void ReadConfig(
+			int & device_idx, bool & dither,
+			int & sample_rate, int & buffer_size, int & buffer_count) = 0;
+
+		virtual void Error(std::string const & msg) = 0;
+};
 ///\todo work in progress
 /// status working, restarting etc not working
 ///\todo freeing and configure    
 class MsWaveOut : public AudioDriver {
 	public:
-		MsWaveOut();
-		~MsWaveOut();
+		MsWaveOut(MMEUiInterface* = 0);
+		~MsWaveOut() throw();
 
-		virtual AudioDriverInfo info() const;
-		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-		bool Initialized( );
-		virtual bool Enable( bool e );
+		/*override*/ AudioDriverInfo info() const;
+		/*override*/ void Configure();
+
+	protected:
+		/*override*/ void do_open() throw(std::exception);
+		/*override*/ void do_start() throw(std::exception);
+		/*override*/ void do_stop() throw(std::exception);
+		/*override*/ void do_close() throw(std::exception);
+
+		/*override*/ void ReadConfig();
+		/*override*/ void WriteConfig();
 
 	private:
-
-		char buffer[1024];   // intermediate buffer for reading
-
-		// pointers for work callback
-		AUDIODRIVERWORKFN _pCallback;
-		void* _callbackContext;
-		bool _initialized;
-
+		std::int16_t *buf;
 		// mme variables
 		HWAVEOUT hWaveOut;   // device handle
 		static CRITICAL_SECTION waveCriticalSection;
 		static WAVEHDR*         waveBlocks; // array of header structure, 
 		// that points to a block buffer
-		static volatile int     waveFreeBlockCount;
-		static int              waveCurrentBlock;
-
+		static volatile /* why volatile ? */ int waveFreeBlockCount;
+		static int waveCurrentBlock;
 		// mme functions
-
 		// waveOut interface notifies about device is opened, closed, 
 		// and what we handle here, when a block finishes.
-		static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD, DWORD, DWORD);      
+		static void CALLBACK waveOutProc(HWAVEOUT, UINT, DWORD_PTR, DWORD_PTR, DWORD_PTR);      
 		WAVEHDR* allocateBlocks();
 		static void freeBlocks( WAVEHDR* blockArray );
-
 		// writes a intermediate buffer into a ring buffer to the sound card
-		void writeAudio( HWAVEOUT hWaveOut, LPSTR data, int size );
-
+		void writeAudio(HWAVEOUT hWaveOut, LPSTR data, int size);
 		// thread , the writeAudio loop is in
 		// note : waveOutproc is a different, thread, too, but we cant
 		// use all winapi calls there we need due to restrictions of the winapi
 		HANDLE _hThread;
-		static DWORD WINAPI audioOutThread( void *pWaveOut );
-		static bool _running; // check, if thread loop should be left
+		static DWORD WINAPI audioOutThread(void *pWaveOut);
+		static bool running_; // check, if thread loop should be left
 		void fillBuffer();
+		int device_idx_;
+		bool dither_;
 
-		bool _dither;
-
-		bool start();
-		bool stop();
+		MMEUiInterface* ui_;
 };
 
 }}
+#endif
 #endif

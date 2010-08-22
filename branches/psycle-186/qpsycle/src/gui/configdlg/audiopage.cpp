@@ -103,27 +103,27 @@ AudioPage::AudioPage(QWidget * parent)
 }
 
 void AudioPage::initDriverList() {
-	std::map<std::string, psy::core::AudioDriver*> & driverMap =  config_->driverMap();
-	for(std::map<std::string, psy::core::AudioDriver*>::iterator i(driverMap.begin()), e(driverMap.end()); i != e; ++i) {
+	std::map<std::string, psycle::audiodrivers::AudioDriver*> & driverMap =  config_->driverMap();
+	for(std::map<std::string, psycle::audiodrivers::AudioDriver*>::iterator i(driverMap.begin()), e(driverMap.end()); i != e; ++i) {
 		if(!i->second->info().show()) continue;
 		QString driverName = QString::fromStdString(i->first);
 		audio_driverCbx_->addItem(driverName);
 		if(i->second == Global::pConfig()->_pOutputDriver) {
 			audio_driverCbx_->setCurrentIndex(audio_driverCbx_->count() - 1);
 			if(driverName == "alsa")
-				audio_deviceBox_->setText(i->second->settings().deviceName().c_str());
+				audio_deviceBox_->setText(i->second->playbackSettings().deviceName().c_str());
 		}
 	}
 }
 
 void AudioPage::onDriverSelected(QString const & text) {
-	std::map<std::string, psy::core::AudioDriver*> & driverMap =  config_->driverMap();
-	std::map<std::string, psy::core::AudioDriver*>::iterator i(driverMap.find(text.toStdString()));
+	std::map<std::string, psycle::audiodrivers::AudioDriver*> & driverMap =  config_->driverMap();
+	std::map<std::string, psycle::audiodrivers::AudioDriver*>::iterator i(driverMap.find(text.toStdString()));
 	if(i != driverMap.end()) {
-		psy::core::AudioDriver* driver = i->second;
+		psycle::audiodrivers::AudioDriver* driver = i->second;
 		selectedDriver_ = driver;
 		if(text == "alsa") {
-			audio_deviceBox_->setText(i->second->settings().deviceName().c_str());
+			audio_deviceBox_->setText(i->second->playbackSettings().deviceName().c_str());
 			audio_deviceBox_->setVisible(true);
 			audio_deviceLbl_->setVisible(true);
 		} else {
@@ -138,17 +138,17 @@ void AudioPage::onRestartDriver() {
 	if(selectedDriver_) {
 		// set the device
 		if(!audio_deviceBox_->text().isEmpty()) {
-			psy::core::AudioDriverSettings settings = selectedDriver_->settings();
+			psycle::audiodrivers::AudioDriverSettings settings = selectedDriver_->playbackSettings();
 			settings.setDeviceName( audio_deviceBox_->text().toStdString() );
-			selectedDriver_->setSettings(settings);
+			selectedDriver_->setPlaybackSettings(settings);
 		}
 		// set new Driver to Player
-		psy::core::Player::singleton().setDriver(*selectedDriver_);
+		psycle::core::Player::singleton().setDriver(*selectedDriver_);
 
 		//check that it worked
 		///\todo find a better/more descriptive way to do this
 		if(
-			psy::core::Player::singleton().driver().info().name() == "silent" &&
+			psycle::core::Player::singleton().driver().info().name() == "silent" &&
 			selectedDriver_->info().name() != "silent"
 		) {
 			std::string drivername = selectedDriver_->info().name();

@@ -279,7 +279,7 @@ void WaveView::indexSpinChanged(int newidx)
 void WaveView::reset()
 {
 	int index = instrumentsModel_->selectedInstrumentIndex();
-	psy::core::Instrument *inst = instrumentsModel_->getInstrument( index );
+	psycle::core::Instrument *inst = instrumentsModel_->getInstrument( index );
 
 	resettingwidgets_ = true;
 
@@ -306,8 +306,8 @@ void WaveView::reset()
 
 	resettingwidgets_ = false;
 
-	psy::core::Sampler::waved.Stop();
-	psy::core::Sampler::waved.SetInstrument(inst);
+	psycle::core::Sampler::waved.Stop();
+	psycle::core::Sampler::waved.SetInstrument(inst);
 }
 
 void WaveView::nameChanged()
@@ -356,11 +356,11 @@ void WaveView::onKillButtonClicked()
 
 void WaveView::onListenPressed()
 {
-	psy::core::Sampler::waved.Play();
+	psycle::core::Sampler::waved.Play();
 }
 void WaveView::onListenReleased()
 {
-	psy::core::Sampler::waved.Release();
+	psycle::core::Sampler::waved.Release();
 }
 
 void WaveView::onVolSliderMoved(int newval)
@@ -446,7 +446,7 @@ void WaveView::onLoopChanged(int newstate)
 	if ( instrumentsModel_->slotIsEmpty(index) )
 		return;
 
-	psy::core::Instrument *inst = instrumentsModel_->getInstrument(index);
+	psycle::core::Instrument *inst = instrumentsModel_->getInstrument(index);
 
 	inst->waveLoopType = (newstate? true: false);
 

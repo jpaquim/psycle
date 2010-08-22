@@ -17,7 +17,9 @@
 #define WITH_FLOAT 1
 
 #define snprintf _snprintf
+#if !defined _MSC_VER || _MSC_VER < 1500 // [bohan] build fix for msvc 9 (2008)
 #define vsnprintf _vsnprintf
+#endif
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2

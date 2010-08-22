@@ -20,9 +20,9 @@
 #ifndef SEQUENCERITEM_H
 #define SEQUENCERITEM_H
 
-namespace psy { namespace core {
-class SequenceEntry;
-class SinglePattern;
+namespace psycle { namespace core {
+	class SequenceEntry;
+	class Pattern;
 }}
 
 #include <QGraphicsItem>
@@ -31,7 +31,6 @@ class SinglePattern;
 
 class QKeyEvent;
 class QGraphicsSceneMouseEvent;
-
 
 namespace qpsycle {
 
@@ -50,8 +49,8 @@ namespace qpsycle {
 		QRectF boundingRect() const;
 		void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-		void setSequenceEntry( psy::core::SequenceEntry *sequenceEntry );
-		psy::core::SequenceEntry *sequenceEntry() const; 
+		void setSequenceEntry( psycle::core::SequenceEntry *sequenceEntry );
+		psycle::core::SequenceEntry *sequenceEntry() const; 
 
 		// Enable the use of qgraphicsitem_cast with this item.
 		enum { Type = UserType + 5 };
@@ -74,12 +73,12 @@ namespace qpsycle {
 		void deleteRequest( SequencerItem* );
 		void moved( SequencerItem*, QPointF diff );
 		void changedLine( SequencerItem*, int );
-		void newPatternCreated( psy::core::SinglePattern * );
+		void newPatternCreated( psycle::core::Pattern * );
 
 	private:
-		void setNewPattern( psy::core::SinglePattern *newPattern );
+		void setNewPattern( psycle::core::Pattern *newPattern );
 
-		psy::core::SequenceEntry *sequenceEntry_;
+		psycle::core::SequenceEntry *sequenceEntry_;
 
 		QAction *replaceWithCloneAction_;
 		QAction *deleteEntryAction_;

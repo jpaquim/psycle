@@ -20,6 +20,7 @@
 #include "newmachinedlg.hpp"
 
 #include <psycle/core/pluginfinder.h>
+#include <psycle/core/machinefactory.h>
 #include "../global.hpp"
 #include "../configuration.hpp"
 
@@ -27,153 +28,154 @@
 #include <QGridLayout>
 
 #include <cassert>
+#include <cstdio>
 
 namespace qpsycle {
 
 NewMachineDlg::NewMachineDlg(QWidget *parent) 
-	:
-	QDialog(parent),
-	selectedItem(NULL)
+:
+QDialog(parent),
+selectedItem(NULL)
 {
-	setWindowTitle(tr("Choose New Machine"));
-	resize(500, 500);
-	
-	QGridLayout *layout = new QGridLayout();
+setWindowTitle(tr("Choose New Machine"));
+resize(500, 500);
 
-	// Should we use a tree layout instead of tabs?
-	QTabWidget *machineTabs = new QTabWidget();
+QGridLayout *layout = new QGridLayout();
 
-	finder_ = &psy::core::PluginFinder::getInstance();
+// Should we use a tree layout instead of tabs?
+QTabWidget *machineTabs = new QTabWidget();
 
-	genList = new QListWidget();
-	efxList = new QListWidget();
-	intList = new QListWidget();
-	ladList = new QListWidget();
+finder_ = &psycle::core::MachineFactory::getInstance().getFinder();
 
-	int i = psy::core::Hosts::INTERNAL;
-	for (; finder_->hasHost(psy::core::Hosts::type(i)); i++) {
-		std::map< psy::core::MachineKey, psy::core::PluginInfo >::const_iterator it = finder_->begin(psy::core::Hosts::type(i));
-		for ( ; it != finder_->end(psy::core::Hosts::type(i)); it++ ) {
-			const psy::core::MachineKey & key = it->first;
-			const psy::core::PluginInfo & info = it->second;
-			QListWidget* list=NULL;
-	
-			switch(key.host()) {
-			case psy::core::Hosts::INTERNAL:
-				list=intList;
-				break;
-			case psy::core::Hosts::NATIVE:
-				switch(info.role()) {
-				case psy::core::MachineRole::EFFECT: list = efxList; break;
-				case psy::core::MachineRole::GENERATOR: list = genList; break;
-				default: break;
-				}
-				break;
-			case psy::core::Hosts::LADSPA: list = ladList; break;
-			default:
-				break;
-			};
-	
-			if (list) {
-				QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
-				list->addItem(item);
-				pluginIdentify_[item] = key;
+genList = new QListWidget();
+efxList = new QListWidget();
+intList = new QListWidget();
+ladList = new QListWidget();
+
+int i = psycle::core::Hosts::INTERNAL;
+for (; finder_->hasHost(psycle::core::Hosts::type(i)); i++) {
+	std::map< psycle::core::MachineKey, psycle::core::PluginInfo >::const_iterator it = finder_->begin(psycle::core::Hosts::type(i));
+	for ( ; it != finder_->end(psycle::core::Hosts::type(i)); it++ ) {
+		const psycle::core::MachineKey & key = it->first;
+		const psycle::core::PluginInfo & info = it->second;
+		QListWidget* list=NULL;
+
+		switch(key.host()) {
+		case psycle::core::Hosts::INTERNAL:
+			list=intList;
+			break;
+		case psycle::core::Hosts::NATIVE:
+			switch(info.role()) {
+			case psycle::core::MachineRole::EFFECT: list = efxList; break;
+			case psycle::core::MachineRole::GENERATOR: list = genList; break;
+			default: break;
 			}
+			break;
+		case psycle::core::Hosts::LADSPA: list = ladList; break;
+		default:
+			break;
+		};
+
+		if (list) {
+			QListWidgetItem *item = new QListWidgetItem( QString::fromStdString( info.name() ) );
+			list->addItem(item);
+			pluginIdentify_[item] = key;
 		}
 	}
+}
 
-	inItemSelectionChanged = false;
+inItemSelectionChanged = false;
 
-	QListWidget* lists[4] = { genList, efxList, intList, ladList };
+QListWidget* lists[4] = { genList, efxList, intList, ladList };
 
-	for(int i=0;i<4;i++) {
-		connect( lists[i], SIGNAL( itemSelectionChanged( ) ), 
-			this, SLOT( itemSelectionChanged( ) ) );
+for(int i=0;i<4;i++) {
+	connect( lists[i], SIGNAL( itemSelectionChanged( ) ), 
+		this, SLOT( itemSelectionChanged( ) ) );
 
-		connect( lists[i], SIGNAL( itemActivated( QListWidgetItem* ) ),
-			this, SLOT( tryAccept() ) );
-	}
+	connect( lists[i], SIGNAL( itemActivated( QListWidgetItem* ) ),
+		this, SLOT( tryAccept() ) );
+}
 
-	buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
-					| QDialogButtonBox::Cancel);
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-		
-	machineTabs->addTab(genList, QIcon(":images/gen-native.png"), "Generators");
-	machineTabs->addTab(efxList, QIcon(":images/efx-native.png"), "Effects");
-	machineTabs->addTab(intList, QIcon(":images/gen-internal.png"), "Internal");
-	machineTabs->addTab(ladList, QIcon(":images/ladspa.png"),"Ladspa");
+buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+				| QDialogButtonBox::Cancel);
+connect(buttonBox, SIGNAL(accepted()), this, SLOT(tryAccept()));
+connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 	
-	layout->addWidget(machineTabs);
-	layout->addWidget(buttonBox);
-	setLayout(layout);
+machineTabs->addTab(genList, QIcon(":images/gen-native.png"), "Generators");
+machineTabs->addTab(efxList, QIcon(":images/efx-native.png"), "Effects");
+machineTabs->addTab(intList, QIcon(":images/gen-internal.png"), "Internal");
+machineTabs->addTab(ladList, QIcon(":images/ladspa.png"),"Ladspa");
+
+layout->addWidget(machineTabs);
+layout->addWidget(buttonBox);
+setLayout(layout);
 }
 
 void NewMachineDlg::keyPressEvent( QKeyEvent *event )
 {
-	if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
-		reject(); // closes the dialog
-	} else if ( event->key() == Qt::Key_Escape ) {
-		reject(); // closes the dialog
-	}
+if ( event->key() == Qt::Key_W && event->modifiers() == Qt::ControlModifier ) {
+	reject(); // closes the dialog
+} else if ( event->key() == Qt::Key_Escape ) {
+	reject(); // closes the dialog
+}
 }
 
 void NewMachineDlg::itemSelectionChanged()
 {
-	// prevent reentry
-	if(inItemSelectionChanged) {
-		return;
-	}
-	inItemSelectionChanged = true;
+// prevent reentry
+if(inItemSelectionChanged) {
+	return;
+}
+inItemSelectionChanged = true;
 
-	QListWidget* lists[4] = { genList, efxList, intList, ladList };
-	QListWidgetItem* newItem=0;
+QListWidget* lists[4] = { genList, efxList, intList, ladList };
+QListWidgetItem* newItem=0;
 
-	for(int i=0;i<4;i++) {
-	QList<QListWidgetItem*> selections = lists[i]->selectedItems();
-	if (selections.count() > 0) {
-		assert(selections.count() <= 1);
-		QListWidgetItem* item=selections.at(0);
-		if (item != selectedItem) {
-		newItem = item;
-		break;
-		}
+for(int i=0;i<4;i++) {
+QList<QListWidgetItem*> selections = lists[i]->selectedItems();
+if (selections.count() > 0) {
+	assert(selections.count() <= 1);
+	QListWidgetItem* item=selections.at(0);
+	if (item != selectedItem) {
+	newItem = item;
+	break;
 	}
-	}
-	if (newItem) {
-	// remove selection from previous listWidget
-	if (selectedItem) {
-		selectedItem->listWidget()->setItemSelected(selectedItem,false);
-	}
-	// remember which item is selected now
-	selectedItem = newItem;
-	setPlugin(selectedItem);
-	}
+}
+}
+if (newItem) {
+// remove selection from previous listWidget
+if (selectedItem) {
+	selectedItem->listWidget()->setItemSelected(selectedItem,false);
+}
+// remember which item is selected now
+selectedItem = newItem;
+setPlugin(selectedItem);
+}
 
-	inItemSelectionChanged = false;
+inItemSelectionChanged = false;
 }
 
 void NewMachineDlg::setPlugin( QListWidgetItem* item ) 
 {
-	std::map< QListWidgetItem*, psy::core::MachineKey >::iterator it;
-	it = pluginIdentify_.find( item );
-	
-	if ( it != pluginIdentify_.end() ) {
-		const psy::core::MachineKey & key = it->second;
-		const psy::core::PluginInfo & info = finder_->info( key );
+std::map< QListWidgetItem*, psycle::core::MachineKey >::iterator it;
+it = pluginIdentify_.find( item );
 
-		#if 0
-		name->setText( info.name() );
-		dllName_ = info.libName();
-		libName->setText( dllName_ );
-		description->setText( "Psycle Instrument by "+ info.author() );
-		apiVersion->setText( info.version() );
-		#endif
+if ( it != pluginIdentify_.end() ) {
+	const psycle::core::MachineKey & key = it->second;
+	const psycle::core::PluginInfo & info = finder_->info( key );
 
-		selectedKey_ = key;
-	}
-	else {
-		std::fprintf(stderr,"Unable to find plugin for QListWidgetItem\n");
+	#if 0
+	name->setText( info.name() );
+	dllName_ = info.libName();
+	libName->setText( dllName_ );
+	description->setText( "Psycle Instrument by "+ info.author() );
+	apiVersion->setText( info.version() );
+	#endif
+
+	selectedKey_ = key;
+}
+else {
+	std::fprintf(stderr,"Unable to find plugin for QListWidgetItem\n");
 	}
 }
 
@@ -184,7 +186,7 @@ void NewMachineDlg::tryAccept() {
 }
 
 
-const psy::core::MachineKey & NewMachineDlg::pluginKey() const {
+const psycle::core::MachineKey & NewMachineDlg::pluginKey() const {
 	return selectedKey_;
 }
 

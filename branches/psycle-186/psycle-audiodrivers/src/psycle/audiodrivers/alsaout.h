@@ -1,42 +1,32 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-/**********************************************************************************************
-	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
-
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-**********************************************************************************************/
-
+#ifndef PSYCLE__AUDIODRIVERS__ALSA_OUT__INCLUDED
+#define PSYCLE__AUDIODRIVERS__ALSA_OUT__INCLUDED
 #pragma once
+
 #if defined PSYCLE__ALSA_AVAILABLE
 #include "audiodriver.h"
+#include <universalis/stdlib/condition.hpp>
 #include <alsa/asoundlib.h>
-#include <mutex>
-#include <condition>
-#include <cstdint>
-namespace psy { namespace core {
+
+namespace psycle { namespace audiodrivers {
+
+using namespace universalis::stdlib;
 
 class AlsaOut : public AudioDriver {
 	public:
 		AlsaOut();
-		~AlsaOut();
-		virtual AudioDriverInfo info() const;
+		~AlsaOut() throw();
+		/*override*/ AudioDriverInfo info() const;
 
-		virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
-		virtual bool Initialized() { return _initialized; }
-		virtual void configure() {}
-		virtual bool Enable(bool e) { return e ? Start() : Stop(); }
+	protected:
+		/*override*/ void do_open() throw(std::exception) {}
+		/*override*/ void do_start() throw(std::exception);
+		/*override*/ void do_stop() throw(std::exception);
+		/*override*/ void do_close() throw(std::exception) {}
 
 	private:
-		void * _callbackContext;
-		AUDIODRIVERWORKFN _pCallback;
-
-		bool _initialized;
-		
-		void setDefault();
-		bool Start();
-		bool Stop();
-
 		/// stream rate
 		unsigned int rate;
 		/// sample format
@@ -58,7 +48,7 @@ class AlsaOut : public AudioDriver {
 		/// 5:direct_noninterleaved 6:DIRECT_WRITE
 		int method;
 		
-		std::int16_t * samples;
+		int16_t * samples;
 		snd_pcm_channel_area_t *areas;
 
 		void FillBuffer(snd_pcm_uframes_t offset, int count);
@@ -66,15 +56,15 @@ class AlsaOut : public AudioDriver {
 		int id;
 
 		/// left out (getSample should change this non-stop if audio was started
-		std::int16_t left;
+		int16_t left;
 
 		/// right out (getSample should change this non-stop if audio was started)
-		std::int16_t right;
+		int16_t right;
 
 		void (*getSample) (void*);
 
-		int set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access);
-		int set_swparams(snd_pcm_sw_params_t *swparams);
+		void set_hwparams(snd_pcm_hw_params_t *params, snd_pcm_access_t access);
+		void set_swparams(snd_pcm_sw_params_t *swparams);
 		int xrun_recovery(int err);
 
 		///\name thread
@@ -86,12 +76,13 @@ class AlsaOut : public AudioDriver {
 			/// whether the thread is asked to terminate
 			bool stop_requested_;
 			/// a mutex to synchronise accesses to running_ and stop_requested_
-			std::mutex mutex_;
-			typedef std::scoped_lock<std::mutex> scoped_lock;
+			mutex mutex_;
+			typedef class scoped_lock<mutex> scoped_lock;
 			/// a condition variable to wait until notified that the value of running_ has changed
-			std::condition<scoped_lock> condition_;
+			condition<scoped_lock> condition_;
 		///\}
 };
 
 }}
 #endif // defined PSYCLE__ALSA_AVAILABLE
+#endif

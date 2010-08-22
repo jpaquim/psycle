@@ -18,10 +18,9 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/audiodrivers/audiodriver.h>
-#include <psycle/core/patternpool.h>
-#include <psycle/core/patternsequence.h>
+#include <psycle/core/sequence.h>
 #include <psycle/core/player.h>
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 #include <psycle/core/song.h>
 #include <psycle/core/machinefactory.h>
 
@@ -114,9 +113,9 @@ namespace qpsycle {
 
 		
 		Global::Instance();
-		psy::core::Player & player = psy::core::Player::singleton();
+		psycle::core::Player & player = psycle::core::Player::singleton();
 		// If you use a derived pluginfinder class, instantiate it before this call, and pass its address to the machinefactory Initialize function.
-		psy::core::MachineFactory& mfactory = psy::core::MachineFactory::getInstance();
+		psycle::core::MachineFactory& mfactory = psycle::core::MachineFactory::getInstance();
 		mfactory.Initialize(&player);
 
 		mfactory.setPsyclePath( settings.value( "paths/pluginsPath", "." ).toString().toStdString() );
@@ -124,7 +123,7 @@ namespace qpsycle {
 
 		song_ = createBlankSong();
 		setupSound();
-		psy::core::Player::singleton().setLoopSong( true ); ///\todo: should this option should perhaps be a GUI setting, not something the player cares about?
+		psycle::core::Player::singleton().setLoopSong();
 
 		instrumentsModel_ = new InstrumentsModel( song_ );
 
@@ -187,8 +186,8 @@ namespace qpsycle {
 	}
 
 	void MainWindow::setupSound() {
-		psy::core::Player::singleton().song(song_);
-		psy::core::Player::singleton().setDriver(*Global::configuration()._pOutputDriver);
+		psycle::core::Player::singleton().song(*song_);
+		psycle::core::Player::singleton().setDriver(*Global::configuration()._pOutputDriver);
 	}
 
 	void MainWindow::setupGui() {
@@ -483,13 +482,13 @@ namespace qpsycle {
 	}
 
 	void MainWindow::setupSignals() {
-		connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psy::core::SinglePattern* ) ), this, SLOT( onPatternSelectedInPatternBox( psy::core::SinglePattern* ) ) );
+		connect( patternBox_, SIGNAL( patternSelectedInPatternBox( psycle::core::Pattern* ) ), this, SLOT( onPatternSelectedInPatternBox( psycle::core::Pattern* ) ) );
 		connect( patternBox_, SIGNAL( patternDeleted() ), this, SLOT( onPatternDeleted() ) );
-		connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psy::core::SinglePattern* ) ), this, SLOT( onAddPatternToSequencerRequest( psy::core::SinglePattern* ) ) );
+		connect( patternBox_, SIGNAL( addPatternToSequencerRequest( psycle::core::Pattern* ) ), this, SLOT( onAddPatternToSequencerRequest( psycle::core::Pattern* ) ) );
 		connect( patternBox_, SIGNAL( patternNameChanged() ), this, SLOT( onPatternNameChanged() ) );
 		connect( patternBox_, SIGNAL( categoryColorChanged() ), this, SLOT( onCategoryColorChanged() ) );
 
-		connect( macView_, SIGNAL( newMachineCreated( psy::core::Machine* ) ), this, SLOT( onNewMachineCreated( psy::core::Machine* ) ) );
+		connect( macView_, SIGNAL( newMachineCreated( psycle::core::Machine* ) ), this, SLOT( onNewMachineCreated( psycle::core::Machine* ) ) );
 		connect( macView_, SIGNAL( machineChosen( MachineGui* ) ), this, SLOT( onMachineChosen( MachineGui* ) ) );
 		connect( macView_, SIGNAL( machineDeleted( int ) ), this, SLOT( onMachineDeleted() ) );
 		connect( macView_, SIGNAL( machineRenamed( ) ), this, SLOT( onMachineRenamed( ) ) );
@@ -498,12 +497,12 @@ namespace qpsycle {
 
 		connect( sampCombo_, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSampleComboBoxIndexChanged( int ) ) );
 
-		connect( seqView_->sequencerDraw(), SIGNAL( newPatternCreated( psy::core::SinglePattern* ) ), patternBox_, SLOT( onNewPatternCreated( psy::core::SinglePattern* ) ) );
+		connect( seqView_->sequencerDraw(), SIGNAL( newPatternCreated( psycle::core::Pattern* ) ), patternBox_, SLOT( onNewPatternCreated( psycle::core::Pattern* ) ) );
 	}
 
 	void MainWindow::onNewSongRequest() {
 		if(okToContinue()) {
-			psy::core::Song *blankSong = createBlankSong();
+			psycle::core::Song *blankSong = createBlankSong();
 			loadSong( blankSong );
 			updateWindowTitleSongName( "Untitled.psy" );
 			curFile.clear();
@@ -552,8 +551,8 @@ namespace qpsycle {
 			
 			if ( !fileName.isEmpty() ) 
 			{
-				psy::core::Player::singleton().stop();
-				psy::core::Song *song = new psy::core::Song();
+				psycle::core::Player::singleton().stop();
+				psycle::core::Song *song = new psycle::core::Song();
 				QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 				if ( song->load( fileName.toStdString() ) )
 				{
@@ -593,12 +592,12 @@ namespace qpsycle {
 		return saveSong( fileName );
 	}
 
-	psy::core::Song *MainWindow::createBlankSong() {
-		psy::core::Song *blankSong = new psy::core::Song( );
-		psy::core::PatternCategory* category0 = blankSong->patternSequence().patternPool()->createNewCategory("New Category");
-		psy::core::SinglePattern* pattern0 = category0->createNewPattern("Pattern0");
+	psycle::core::Song *MainWindow::createBlankSong() {
+		psycle::core::Song *blankSong = new psycle::core::Song( );
+		psycle::core::Pattern* pattern0 = new psycle::core::Pattern();
+		pattern0->setCategory("New Category");
 
-		psy::core::SequenceLine *seqLine = blankSong->patternSequence().createNewLine();
+		psycle::core::SequenceLine *seqLine = blankSong->sequence().createNewLine();
 		seqLine->createEntry( pattern0, 0 );
 
 		return blankSong;
@@ -628,10 +627,10 @@ namespace qpsycle {
 		}
 	}
 
-	void MainWindow::loadSong( psy::core::Song *song ) {
+	void MainWindow::loadSong( psycle::core::Song *song ) {
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 
-		psy::core::Player::singleton().driver().Enable(false);
+		psycle::core::Player::singleton().driver().set_opened(false);
 		if ( song_ ) delete song_;
 		song_ = song;
 		// Update gui to new song 
@@ -646,7 +645,7 @@ namespace qpsycle {
 	
 		logConsole_->Clear();
 
-		psy::core::Player::singleton().song( song_ );
+		psycle::core::Player::singleton().song( *song_ );
 
 		instrumentsModel_ = new InstrumentsModel( song_ );
 		macView_ = new MachineView( song_ );
@@ -671,7 +670,7 @@ namespace qpsycle {
 		createActions();
 		setupSignals();
 		// enable audio driver
-		psy::core::Player::singleton().driver().Enable(true);
+		psycle::core::Player::singleton().driver().set_opened(true);
 
 		statusBar()->showMessage( "Song loaded.", 5000 );
 		logConsole_->AddSuccessText("Song Loaded Successfuly");
@@ -697,8 +696,8 @@ namespace qpsycle {
 			if(action) {
 				QString fileName = action->data().toString();
 				if(!fileName.isEmpty()) {
-					psy::core::Player::singleton().stop();
-					psy::core::Song *song = new psy::core::Song();
+					psycle::core::Player::singleton().stop();
+					psycle::core::Song *song = new psycle::core::Song();
 					QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 					if(song->load(fileName.toStdString())) {
 						loadSong( song );
@@ -785,7 +784,7 @@ namespace qpsycle {
 		std::ostringstream buffer;
 		buffer.setf( std::ios::uppercase );
 
-		for ( int b=0; b<psy::core::MAX_BUSES; b++ ) // Generators.
+		for ( int b=0; b<psycle::core::MAX_BUSES; b++ ) // Generators.
 		{
 			if ( song_->machine(b) ) {
 				buffer.str("");
@@ -799,7 +798,7 @@ namespace qpsycle {
 
 		macCombo_->addItem( "--------------------------");
 
-		for ( int b=psy::core::MAX_BUSES; b<psy::core::MAX_BUSES*2; b++ ) // Effects.
+		for ( int b=psycle::core::MAX_BUSES; b<psycle::core::MAX_BUSES*2; b++ ) // Effects.
 		{
 			if ( song_->machine(b) ) {
 				buffer.str("");
@@ -837,13 +836,13 @@ namespace qpsycle {
 		instrumentsModel_->setSelectedInstrumentIndex( newIndex );
 	}
 
-	void MainWindow::onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern ) {
+	void MainWindow::onPatternSelectedInPatternBox( psycle::core::Pattern* selectedPattern ) {
 		patView_->setPattern( selectedPattern );
 	}
 
-	void MainWindow::onNewMachineCreated( psy::core::Machine *mac ) {
+	void MainWindow::onNewMachineCreated( psycle::core::Machine *mac ) {
 		populateMachineCombo();
-		//if ( mac->mode() == psy::core::MACHMODE_GENERATOR )
+		//if ( mac->mode() == psycle::core::MACHMODE_GENERATOR )
 		//macCombo_->setCurrentIndex( macCombo_->findData( mac->id() ) );
 		logConsole_->AddSuccessText("Machine Created Successfuly");
 	}
@@ -869,7 +868,7 @@ namespace qpsycle {
 		seqView_->onPatternNameChanged();
 	}
 
-	void MainWindow::onAddPatternToSequencerRequest( psy::core::SinglePattern *pattern ) {
+	void MainWindow::onAddPatternToSequencerRequest( psycle::core::Pattern *pattern ) {
 		seqView_->addPattern( pattern );
 	}
 
@@ -886,22 +885,22 @@ namespace qpsycle {
 		playbackTimer_->start( 10 );
 
 		playFromSeqPosAct->setChecked(true);
-		psy::core::Player::singleton().setLoopSequenceEntry( 0 );
-		psy::core::Player::singleton().start( 0.0 );
+		psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
+		psycle::core::Player::singleton().start( 0.0 );
 	}
 
 	void MainWindow::playFromSeqPos() {
 		playbackTimer_->start( 10 );
 
 		playFromSeqPosAct->setChecked(true);
-		psy::core::Player::singleton().start( psy::core::Player::singleton().playPos() );
+		psycle::core::Player::singleton().start( psycle::core::Player::singleton().playPos() );
 	}
 
 	void MainWindow::playStop() {
 		playbackTimer_->stop();
 
 		playFromSeqPosAct->setChecked(false);
-		psy::core::Player::singleton().stop();
+		psycle::core::Player::singleton().stop();
 	}
 
 	void MainWindow::showMachineView() {
@@ -974,7 +973,7 @@ namespace qpsycle {
 	}
 
 	void MainWindow::instrumentIncrement() {
-		sampCombo_->setCurrentIndex( std::min( sampCombo_->currentIndex() + 1, psy::core::MAX_INSTRUMENTS-1 ) );
+		sampCombo_->setCurrentIndex( std::min( sampCombo_->currentIndex() + 1, psycle::core::MAX_INSTRUMENTS-1 ) );
 	}
 
 	void MainWindow::octaveDecrement() {
@@ -1065,17 +1064,17 @@ namespace qpsycle {
 	}
 
 	void MainWindow::updatePlaybackGraphics() {
-		if ( psy::core::Player::singleton().playing() ) {
+		if ( psycle::core::Player::singleton().playing() ) {
 			seqView_->updatePlayPos();
 
-			psy::core::SinglePattern* visiblePattern = 0;
+			psycle::core::Pattern* visiblePattern = 0;
 			visiblePattern = patView_->pattern();
 			if ( visiblePattern ) {
 				double entryStart = 0;
-				bool isPlayPattern = song_->patternSequence().getPlayInfo( visiblePattern, psy::core::Player::singleton().playPos() , 4 , entryStart );
+				bool isPlayPattern = song_->sequence().getPlayInfo( visiblePattern, psycle::core::Player::singleton().playPos() , 4 , entryStart );
 
 				if ( isPlayPattern )
-					patView_->onTick( psy::core::Player::singleton().playPos() - entryStart ) ;
+					patView_->onTick( psycle::core::Player::singleton().playPos() - entryStart ) ;
 			}
 		}
 	}

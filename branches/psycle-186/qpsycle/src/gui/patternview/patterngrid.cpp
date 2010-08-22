@@ -166,12 +166,12 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 {
 	if ( pattern() ) {
 		// find start iterator
-		psy::core::SinglePattern::iterator it = pattern()->find_lower_nearest(startLine);
-		psy::core::TimeSignature signature;
+		psycle::core::Pattern::iterator it = pattern()->find_lower_nearest(startLine);
+		psycle::core::TimeSignature signature;
 
 		int lastLinenum = -1;
-		psy::core::PatternLine* line;
-		psy::core::PatternLine emptyLine;
+		psycle::core::PatternLine* line;
+		psycle::core::PatternLine emptyLine;
 
 		for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
@@ -208,7 +208,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 				// Check if this line is currently being played.
 				///\todo.  might be more sensible to have the playline
 				// as a graphics item that moves over the background.
-				if ((curLinenum == patDraw_->patternView()->playPos() && psy::core::Player::singleton().playing() ) ) {
+				if ((curLinenum == patDraw_->patternView()->playPos() && psycle::core::Player::singleton().playing() ) ) {
 					int trackWidth = patDraw_->xEndByTrack( endTrack );
 					painter->setPen( playBarColor() );
 					painter->setBrush( playBarColor() );
@@ -217,9 +217,9 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
 				QColor stdColor = tColor;
 
-				std::map<int, psy::core::PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
-				psy::core::PatternEvent emptyEvent;
-				psy::core::PatternEvent* event;
+				std::map<int, psycle::core::PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
+				psycle::core::PatternEvent emptyEvent;
+				psycle::core::PatternEvent* event;
 
 				for ( int curTracknum = startTrack; curTracknum <= endTrack; curTracknum++ ) 
 				{
@@ -255,11 +255,11 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 						drawString( painter, curTracknum, curLinenum, 4, "....", tColor );
 					}
 
-					psy::core::PatternEvent::PcmListType & pcList = event->paraCmdList();
-					psy::core::PatternEvent::PcmListType::iterator it = pcList.begin();
+					psycle::core::PatternEvent::PcmListType & pcList = event->paraCmdList();
+					psycle::core::PatternEvent::PcmListType::iterator it = pcList.begin();
 					int count = 0;
 					for ( ; it < pcList.end(); it++, count++ ) {
-						psy::core::PatternEvent::PcmType & pc = *it;
+						psycle::core::PatternEvent::PcmType & pc = *it;
 						int command = pc.first;
 						int parameter = pc.second;
 						if ( command != 0 || parameter != 0) {
@@ -613,12 +613,12 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 		int currentLine = cursor().line();
 		int currentTrack = cursor().track();
 
-		psy::core::PatternEvent currentEvent = pattern()->event( currentLine, currentTrack );
+		psycle::core::PatternEvent currentEvent = pattern()->event( currentLine, currentTrack );
 
 		std::uint8_t machine = currentEvent.machine();
 		std::uint8_t inst = currentEvent.instrument();
 
-		if ( machine < psy::core::MAX_BUSES*2 ) { // check that it's a generator. ///\ todo check better.
+		if ( machine < psycle::core::MAX_BUSES*2 ) { // check that it's a generator. ///\ todo check better.
 			///\ todo update machines combo box.
 			// Seems a bit of a wasted effort to do this until we have a machines model.
 			// (i.e. at present... pass a signal all the way up to MainWindow, make
@@ -693,7 +693,7 @@ void PatternGrid::trackNext()
 void PatternGrid::doInstrumentEvent( int keyChar )
 {
 	// Add the new data.
-	psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+	psycle::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
 	unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.instrument(), cursor().col() );
 	patEvent.setInstrument( newByte );
 	pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -709,7 +709,7 @@ void PatternGrid::doInstrumentEvent( int keyChar )
 
 void PatternGrid::doMachineSelectionEvent( int keyChar )
 {
-	psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+	psycle::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
 	unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.machine(), cursor().col() );
 	patEvent.setMachine( newByte );
 	pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -723,7 +723,7 @@ void PatternGrid::doMachineSelectionEvent( int keyChar )
 
 void PatternGrid::doVolumeEvent( int keyChar )
 {
-	psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+	psycle::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
 	unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.volume(), cursor().col() );
 	patEvent.setVolume( newByte );
 	pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -738,20 +738,20 @@ void PatternGrid::doVolumeEvent( int keyChar )
 void PatternGrid::doCommandOrParameterEvent( int keyChar )
 {
 	// comand or parameter
-	psy::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+	psycle::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
 	if (cursor().col() < 2 ) {
 		int cmdValue;
 		if (cursor().eventNr() == 4) {
 			cmdValue = patEvent.command();
 		} else {
-			psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+			psycle::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
 			cmdValue = pc.first;
 		}
 		unsigned char newByte = convertDigit( 0x00, keyChar, cmdValue, cursor().col() );
 		if (cursor().eventNr() == 4) {
 			patEvent.setCommand( newByte );
 		} else {
-			psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+			psycle::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
 			pc.first = newByte;
 		}
 		pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -761,14 +761,14 @@ void PatternGrid::doCommandOrParameterEvent( int keyChar )
 		if (cursor().eventNr() == 4) {
 			paraValue = patEvent.parameter();
 		} else {
-			psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+			psycle::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
 			paraValue = pc.second;
 		}
 		unsigned char newByte = convertDigit( 0x00, keyChar, paraValue, cursor().col() - 2 );
 		if (cursor().eventNr() == 4) {
 			patEvent.setParameter( newByte );
 		} else {
-			psy::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
+			psycle::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
 			pc.second = newByte;
 		}
 		pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
@@ -1245,7 +1245,7 @@ unsigned char PatternGrid::convertDigit( int defaultValue, int scanCode, unsigne
 	return newByte;
 }
 
-psy::core::SinglePattern* PatternGrid::pattern() {
+psycle::core::Pattern* PatternGrid::pattern() {
 	return patDraw_->patternView()->pattern();
 }
 
@@ -1292,7 +1292,7 @@ void PatternGrid::copyBlock( bool cutit )
 {  
 	isBlockCopied_=true;
 	pasteBuffer.clear();
-	std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 ));
+	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 ));
 
 	float start = selection().top()    / static_cast<float>( pattern()->beatZoom() );
 	float end   = ( selection().bottom()+1 ) / static_cast<float>( pattern()->beatZoom() );
@@ -1341,7 +1341,7 @@ void PatternGrid::pasteBlock( int tx, int lx, bool mix )
 				QDomElement patEventElm = patEvents.item( j ).toElement();
 				int trackNumber = str_hex<int> ( patEventElm.attribute("track").toStdString() );
 
-				psy::core::PatternEvent data;
+				psycle::core::PatternEvent data;
 				data.setMachine( str_hex<int> (patEventElm.attribute("mac").toStdString() ) );
 				data.setInstrument( str_hex<int> (patEventElm.attribute("inst").toStdString() ) );
 				data.setNote( str_hex<int> (patEventElm.attribute("note").toStdString() ) );
@@ -1375,7 +1375,7 @@ void PatternGrid::deleteBlock( )
 
 void PatternGrid::insertRow() 
 {
-	std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
+	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
 
 	float start = cursor().line() / static_cast<float>( pattern()->beatZoom() );
 	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
@@ -1388,7 +1388,7 @@ void PatternGrid::insertRow()
 
 void PatternGrid::deleteRow() 
 {
-	std::auto_ptr<psy::core::SinglePattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
+	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
 
 	float start = cursor().line()    / static_cast<float>( pattern()->beatZoom() );
 	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
@@ -1769,7 +1769,7 @@ void PatternGrid::blockSetMachine()
 	double top = selection().top() / static_cast<double>( beatZoom() );
 	double bottom = ( selection().bottom()+1 ) / static_cast<double>( beatZoom() );
 
-	psy::core::Machine* currentMac = patDraw_->patternView()->song()->machine( patDraw_->patternView()->song()->seqBus );
+	psycle::core::Machine* currentMac = patDraw_->patternView()->song()->machine( patDraw_->patternView()->song()->seqBus );
 	if ( currentMac != 0 ) {
 		std::uint8_t currentMacId = currentMac->id();
 		pattern()->blockSetMachine( left, right, top, bottom, currentMacId );

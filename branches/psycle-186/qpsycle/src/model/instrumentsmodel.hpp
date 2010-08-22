@@ -21,7 +21,7 @@
 #ifndef INSTRUMENTSMODEL_H
 #define INSTRUMENTSMODEL_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 		class Song;
 		class Instrument;
 	}}
@@ -41,7 +41,7 @@ namespace qpsycle {
 class InstrumentsModel : public QAbstractListModel {
 Q_OBJECT
 public:
-	InstrumentsModel( psy::core::Song *song );
+	InstrumentsModel( psycle::core::Song *song );
 	~InstrumentsModel();
 
 	virtual int rowCount( const QModelIndex &parent ) const;
@@ -49,7 +49,7 @@ public:
 
 
 	bool loadInstrument( int instrIndex, QString pathToWavfile );
-	psy::core::Instrument *getInstrument( int instrIndex );
+	psycle::core::Instrument *getInstrument( int instrIndex );
 	void clearInstrument( int instrIndex );
 
 	int selectedInstrumentIndex();
@@ -62,7 +62,7 @@ signals:
 	void selectedInstrumentChanged(int);
 
 private:
-	psy::core::Song *song_;
+	psycle::core::Song *song_;
 };
 
 }

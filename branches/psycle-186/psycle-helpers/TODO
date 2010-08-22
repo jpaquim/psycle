@@ -1,1 +1,5 @@
+*	Boost provides implementation of some C99 functions for msvc,
+	but we need to upgrade the boost version for msvc2005 in the external-packages dir.
+
 *	liboil provides some interesting optimised routines
+

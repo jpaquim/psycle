@@ -17,7 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include <psycle/core/patternsequence.h>
+#include <psycle/core/pattern.h>
 #include <psycle/core/player.h>
 
 #include "sequencerview.hpp"
@@ -74,12 +74,12 @@ namespace qpsycle {
 		return QColor( r, g, b );
 	}
 
-	void SequencerItem::setSequenceEntry( psy::core::SequenceEntry *sequenceEntry )
+	void SequencerItem::setSequenceEntry( psycle::core::SequenceEntry *sequenceEntry )
 	{
 		sequenceEntry_ = sequenceEntry;
 	}
 
-	psy::core::SequenceEntry *SequencerItem::sequenceEntry() const {
+	psycle::core::SequenceEntry *SequencerItem::sequenceEntry() const {
 		return sequenceEntry_;
 	}
 
@@ -131,7 +131,7 @@ namespace qpsycle {
 		QMenu menu;
 
 		replaceWithCloneAction_ = new QAction( "Replace with clone", this );
-		if ( psy::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
+		if ( psycle::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
 			loopEntryAction_ = new QAction( "Unloop Entry", this );
 		} else {
 			loopEntryAction_ = new QAction( "Loop Entry", this );
@@ -150,28 +150,28 @@ namespace qpsycle {
 
 	void SequencerItem::onReplaceWithCloneActionTriggered()
 	{
-		psy::core::SinglePattern* pattern = sequenceEntry()->pattern();
+		psycle::core::Pattern* pattern = sequenceEntry()->pattern();
 		std::string clonedPatName = pattern->name()+" Clone";
 
 		// Clone the pattern in the song.
-		psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
+		psycle::core::Pattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
 		setNewPattern( clonedPat );
 		update();
 
 		emit newPatternCreated( clonedPat );
 	}
 
-	void SequencerItem::setNewPattern( psy::core::SinglePattern *newPattern )
+	void SequencerItem::setNewPattern( psycle::core::Pattern *newPattern )
 	{
 		sequenceEntry_->setPattern( newPattern );
 	}
 
 	void SequencerItem::onLoopEntryActionTriggered()
 	{
-		if ( psy::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
-			psy::core::Player::singleton().setLoopSequenceEntry( 0 );
+		if ( psycle::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
+			psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
 		} else {
-			psy::core::Player::singleton().setLoopSequenceEntry( sequenceEntry() );
+			psycle::core::Player::singleton().setLoopSequenceEntry( sequenceEntry() );
 		}
 	}
 

@@ -20,7 +20,7 @@
 #ifndef MACHINEVIEW_H
 #define MACHINEVIEW_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	class Song;
 	class Machine;
 	class PatternEvent;
@@ -50,24 +50,24 @@ class MachineView : public QGraphicsView {
 	Q_OBJECT
 
 	public:
-		MachineView( psy::core::Song *song_ );
+		MachineView( psycle::core::Song *song_ );
 
-		void addNewMachineGui( psy::core::Machine *mac );
+		void addNewMachineGui( psycle::core::Machine *mac );
 
 		MachineGui* findMachineGuiByCoreMachineIndex( int index ) const;
-		MachineGui* findMachineGuiByCoreMachine( psy::core::Machine *mac ) const;
+		MachineGui* findMachineGuiByCoreMachine( psycle::core::Machine *mac ) const;
 		MachineGui *machineGuiAtPoint( QPointF point ) const;
 
-		void playNote( int note, int velocity, bool bTranspose, psy::core::Machine*pMachine);
-		void stopNote( int note, bool bTranspose=true, psy::core::Machine* pMachine=NULL);
+		void playNote( int note, int velocity, bool bTranspose, psycle::core::Machine*pMachine);
+		void stopNote( int note, bool bTranspose=true, psycle::core::Machine* pMachine=NULL);
 
 	public slots:
-		void onNotePress( int note, psy::core::Machine* mac );
-		void onNoteRelease( int note, psy::core::Machine* mac );
+		void onNotePress( int note, psycle::core::Machine* mac );
+		void onNoteRelease( int note, psycle::core::Machine* mac );
 
 	public:
-		psy::core::Song *song() const { return song_; }
-		void setSong( psy::core::Song *song ) { song_ = song; }
+		psycle::core::Song *song() const { return song_; }
+		void setSong( psycle::core::Song *song ) { song_ = song; }
 		
 		void setChosenMachine( MachineGui* macGui ) { chosenMachine_ = macGui; }
 		MachineGui* chosenMachine() const { return chosenMachine_; }
@@ -94,7 +94,7 @@ class MachineView : public QGraphicsView {
 		void machineChosen( MachineGui *macGui );
 		void machineDeleted( int macIndex );
 		void machineRenamed();
-		void newMachineCreated( psy::core::Machine* mac );
+		void newMachineCreated( psycle::core::Machine* mac );
 
 	private:
 		void createMachineGuis();
@@ -104,11 +104,11 @@ class MachineView : public QGraphicsView {
 
 		void connectMachines(MachineGui *srcMacGui, MachineGui *dstMacGui );
 		WireGui* createWireGui( MachineGui *srcMacGui, MachineGui *dstMacGui );
-		MachineGui * createMachineGui( psy::core::Machine *mac );
+		MachineGui * createMachineGui( psycle::core::Machine *mac );
 
 		MachineGui *chosenMachine_;
 
-		psy::core::Song *song_;
+		psycle::core::Song *song_;
 		std::vector<MachineGui*> machineGuis;
 
 		int octave_;
@@ -119,7 +119,7 @@ class MachineView : public QGraphicsView {
 		bool creatingWire_;
 	
 		/// For multi-key playback state.
-		int notetrack[psy::core::MAX_TRACKS];
+		int notetrack[psycle::core::MAX_TRACKS];
 		int outtrack;
 };
 
@@ -144,8 +144,8 @@ class QPortsDialog : public QDialog {
 	public:
 		QPortsDialog(QWidget *parent = 0);
 
-		psy::core::InPort::id_type GetInPort(psy::core::Machine* mac);
-		psy::core::OutPort::id_type GetOutPort(psy::core::Machine* mac);
+		psycle::core::InPort::id_type GetInPort(psycle::core::Machine* mac);
+		psycle::core::OutPort::id_type GetOutPort(psycle::core::Machine* mac);
 
 	public slots:
 		void buttonClicked(int portidx);

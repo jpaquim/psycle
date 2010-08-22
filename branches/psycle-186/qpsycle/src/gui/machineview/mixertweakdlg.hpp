@@ -21,7 +21,7 @@
 #ifndef MIXERTWEAKDLG_H
 #define MIXERTWEAKDLG_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	class Machine;
 }}
 

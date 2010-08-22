@@ -38,7 +38,7 @@ namespace qpsycle {
 		public:
 		NewMachineDlg(QWidget *parent = 0);
 
-		const psy::core::MachineKey & pluginKey() const;
+		const psycle::core::MachineKey & pluginKey() const;
 
 	protected:
 		void keyPressEvent( QKeyEvent *event );
@@ -49,12 +49,12 @@ namespace qpsycle {
 
 	private:
 		QDialogButtonBox *buttonBox;
-		const psy::core::PluginFinder *finder_;
+		const psycle::core::PluginFinder *finder_;
 
 
 		QListWidgetItem* selectedItem;
-		psy::core::MachineKey selectedKey_;
-		std::map< QListWidgetItem* , psy::core::MachineKey > pluginIdentify_;
+		psycle::core::MachineKey selectedKey_;
+		std::map< QListWidgetItem* , psycle::core::MachineKey > pluginIdentify_;
 
 		void setPlugin( QListWidgetItem* item );
 

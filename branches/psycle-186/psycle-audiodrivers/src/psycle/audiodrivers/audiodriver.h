@@ -1,21 +1,27 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-/**********************************************************************************************
-	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
-
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-**********************************************************************************************/
-
+#ifndef PSYCLE__AUDIODRIVERS__AUDIODRIVER__INCLUDED
+#define PSYCLE__AUDIODRIVERS__AUDIODRIVER__INCLUDED
 #pragma once
+
+#include <universalis.hpp>
+#include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/mutex.hpp>
 #include <string>
-#include <mutex>
-#include <condition>
-#include <cstdint>
-namespace psy { namespace core {
+#include <exception>
+#include <cassert>
+
+namespace psycle { namespace audiodrivers {
+
+using namespace universalis::stdlib;
 
 /// typedef for work callback
-typedef float * (*AUDIODRIVERWORKFN) (void * context, int & numSamples);
+typedef float * (*AUDIODRIVERWORKFN) (void * context, int numSamples);
+
+/// max number of samples (frames comprising all channels) that the Work function may ask to return
+int const MAX_SAMPLES_WORKFN = 65536;
+
 
 /// provides some text info about the driver
 class AudioDriverInfo {
@@ -64,6 +70,8 @@ class AudioDriverInfo {
 class AudioDriverSettings {
 	public:
 		AudioDriverSettings();
+		bool operator!=(AudioDriverSettings const &);
+		bool operator==(AudioDriverSettings const & other) { return !((*this) != other); }
 
 	///\name getter/setter for device name  ( hw:0 and others )
 	///\{
@@ -77,133 +85,260 @@ class AudioDriverSettings {
 	///\name getter/setter for sample rate
 	///\{
 		public:
-			int samplesPerSec() const { return samplesPerSec_; }
-			void setSamplesPerSec(int samples) { samplesPerSec_ = samples; }
+			unsigned int samplesPerSec() const { return samplesPerSec_; }
+			void setSamplesPerSec(unsigned int value) { samplesPerSec_ = value; }
 		private:
-			int samplesPerSec_;
+			unsigned int samplesPerSec_;
 	///\}
 
-	///\name getter/setter for bit depth ( 8, 16, 24. what about ASIO that offers more modes? 
+	///\name getter/setter for sample bit depth, per-channel (8, 16, 24. what about ASIO that offers more modes? )
 	///\{
 		public:
-			int bitDepth() const { return bitDepth_; }
-			void setBitDepth(int depth) { bitDepth_ = depth; }
+			unsigned int bitDepth() const { return bitDepth_; }
+			void setBitDepth(unsigned int value) {
+				bitDepth_ = value;
+				frameBytes_ = channelMode_ == 3 ? bitDepth_ / 4 : bitDepth_ / 8;
+				blockBytes_ = blockFrames_ * frameBytes_;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+			}
 		private:
-		int bitDepth_;
+		unsigned int bitDepth_;
 	///\}
 
 	///\name getter/setter for channel mode (mode 3 == stereo, 1 == mono left, 2 == mono right, 0 = mono both channels)
 	///\{
 		public:
-			int channelMode() const { return channelMode_; }
-			void setChannelMode(int mode) { channelMode_ = mode; }
+			unsigned int numChannels() const { return channelMode_ == 3 ? 2 : 1; }
+			unsigned int channelMode() const { return channelMode_; }
+			void setChannelMode(unsigned int value) {
+				channelMode_ = value;
+				frameBytes_ = channelMode_ == 3 ? bitDepth_ / 4 : bitDepth_ / 8;
+				blockBytes_ = blockFrames_ * frameBytes_;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+			}
 		private:
-			int channelMode_;
+			unsigned int channelMode_;
 	///\}
 
-	/// getter for number of bits per sample
-	public:
-		int sampleSize() const;
-
-	///\todo: Unused????
-	///\name getter/setter for buffer size
+	///\name number of bytes per sample, comprising all channels. (should verify if this is valid for 24bits)
 	///\{
 		public:
-			int bufferSize() const { return bufferSize_; }
-			void setBufferSize(int size) { bufferSize_ = size; }
+			/// getter for number of bytes per sample. (should verify if this is valid for 24bits)
+			unsigned int frameBytes() const { return frameBytes_; }
 		private:
-			int bufferSize_;
+			unsigned int frameBytes_;
 	///\}
 
-	///\todo: Only used by mmewaveout???
-	///\name getter/setter for the audio block size 
+	///\name getter for the whole buffer size (in bytes).
 	///\{
 		public:
-			int blockSize() const { return blockSize_; }
-			void setBlockSize(int size) { blockSize_ = size; }
+			/// getter for the whole buffer size (in bytes).
+			unsigned int totalBufferBytes() const { return totalBufferBytes_; }
 		private:
-			int blockSize_;
+			unsigned int totalBufferBytes_;
 	///\}
 
-	///\todo: Only used by mmewaveout???
+	///\name getter/setter for the audio block size (in bytes)
+	///\{
+		public:
+			unsigned int blockBytes() const { return blockBytes_; }
+			void setBlockBytes(unsigned int value) {
+				blockBytes_ = value;
+				blockFrames_ = blockBytes_ / frameBytes_;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+				assert(blockFrames_ < MAX_SAMPLES_WORKFN);
+			}
+		private:
+			unsigned int blockBytes_;
+	///\}
+
+	///\name getter/setter for the audio block size (in samples comprising all channels)
+	///\{
+		public:
+			unsigned int blockFrames() const { return blockFrames_; }
+			void setBlockFrames(unsigned int value) {
+				blockFrames_ = value;
+				blockBytes_ = blockFrames_ * frameBytes_;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+				assert(blockFrames_ < MAX_SAMPLES_WORKFN);
+			}
+		private:
+			unsigned int blockFrames_;
+	///\}
+
 	///\name getter/setter for number of blocks.
 	///\{
 		public:
-			int blockCount() const { return blockCount_; }
-			void setBlockCount(int count) { blockCount_ = count; }
+			unsigned int blockCount() const { return blockCount_; }
+			void setBlockCount(unsigned int value) {
+				blockCount_ = value;
+				totalBufferBytes_ = blockBytes_ * blockCount_;
+			}
 		private:
-			int blockCount_;
+			unsigned int blockCount_;
 	///\}
 };
 
 /// base class for all audio drivers
 class AudioDriver {
 	public:
-		virtual ~AudioDriver() {}
-
 		/// gives the driver information
-		virtual AudioDriverInfo info() const;
+		virtual AudioDriverInfo info() const = 0;
 
-		virtual void Reset() {}
-		/// enable will start the driver and the calls to the work player function
-		virtual bool Enable(bool /*e*/) { return true; }
-		/// initialize has nothing to do with the driver, it sets only the pointer for a later player work call
-		virtual void Initialize(AUDIODRIVERWORKFN /*pCallback*/, void * /*context*/) {}
-		virtual void Configure() {}
-		virtual bool Initialized() { return true; }
-		virtual bool Configured() { return true; }
-		static double frand();
-		static void Quantize16WithDither(float const * pin, std::int16_t * piout, int c);
-		static void Quantize16(float const * pin, std::int16_t * piout, int c);
-		static void Quantize16AndDeinterlace(float const * pin, std::int16_t * pileft, int strideleft, std::int16_t * piright, int strideright, int c);
-		static void DeQuantize16AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
+	///\name ctor/dtor
+	///\{
+		public:
+			AudioDriver();
+			virtual ~AudioDriver() throw() {}
+		protected:
+			/// derived classes must call this in their destructor.
+			/// this ensures the driver is closed.
+			/// Exceptions are handled internally in this function,
+			/// so it's suitable for being called inside a destructor.
+			void before_destruction() throw();
+	///\}
 
-	///\name settings
+	///\name callback to the player work function that generates audio
+	///\{
+		public:
+			void set_callback(AUDIODRIVERWORKFN callback, void * context);
+		protected:
+			float * callback(int numSamples) { return callback_(callback_context_, numSamples); }
+		private:
+			AUDIODRIVERWORKFN callback_;
+			void * callback_context_;
+	///\}
+
+	///\name playback settings
 	///\{
 		public:
 			/// here you can set the settings of the driver, like samplerate depth etc
-			void virtual setSettings(AudioDriverSettings const & settings ) { settings_ = settings; }
+			void setPlaybackSettings(AudioDriverSettings const &);
 
 			/// here you get the special audio driver settings.
 			/// In case of some drivers like  e.g jack you must prepare, that a driver can set itself.
-			AudioDriverSettings const & settings() const { return settings_; }
-		private:
+			AudioDriverSettings const & playbackSettings() const { return playbackSettings_; }
+
+			virtual/*?*/ int GetOutputLatency() { return playbackSettings_.totalBufferBytes(); }
+			virtual int GetWritePos() { return 0; }
+			virtual int GetPlayPos() { return 0; }
+			virtual void ReadConfig() {}
+			virtual void WriteConfig() {}
+		protected:
 			/// holds the sample rate, bit depth, etc
-			AudioDriverSettings settings_; 
+			AudioDriverSettings playbackSettings_; 
+	///\}
+
+	///\name capture settings
+	///\{
+		public:
+			/// here you can set the settings of the driver, like samplerate depth etc
+			void setCaptureSettings(AudioDriverSettings const &);
+
+			/// here you get the special audio driver settings.
+			/// In case of some drivers like  e.g jack you must prepare, that a driver can set itself.
+			AudioDriverSettings const & captureSettings() const { return captureSettings_; }
+
+			virtual/*?*/ int GetInputLatency() { return captureSettings_.totalBufferBytes(); }
+		protected:
+			/// holds the sample rate, bit depth, etc
+			AudioDriverSettings captureSettings_; 
+	///\}
+
+	public:
+		/// ask the driver to config itself (e.g with a gui, config read)
+		virtual void Configure() {}
+		/// Audio capture Methods
+		virtual void AddCapturePort(int idx) {}
+		virtual void RemoveCapturePort(int idx) {}
+		virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples) {}
+
+	///\name open/close the device (allocate/deallocate resources)
+	///\{
+		public:
+			/// opens/closes the driver, allocating resources and setting it up according to the settings or deallocating them.
+			///\throws std::exception in case of failure to open/close the driver
+			///\post opened() == b
+			void set_opened(bool b) throw(std::exception);
+			/// status, if driver is opened (e.g. a driver handle could be created)
+			bool opened() const throw() { return opened_; }
+		protected:
+			/// opens the driver, allocating resources and setting it up according to the settings.
+			///\pre !opened()
+			///\throws std::exception in case of failure to open the driver or setting up settings
+			virtual void do_open() throw(std::exception) = 0;
+
+			/// closes the driver, deallocating resources.
+			///\pre opened()
+			///\throws std::exception in case of failure to close the driver
+			virtual void do_close() throw(std::exception) = 0;
+		private:
+			bool opened_;
+	///\}
+
+	///\name start/stop the device (enable/disable processing)
+	///\{
+		public:
+			/// starts/stops processing.
+			///\throws std::exception in case of failure to start/stop the driver
+			///\post started() == b
+			void set_started(bool b) throw(std::exception);
+			/// status, if driver started (e.g. audiothread is running)
+			bool started() const throw() { return started_; }  
+
+		protected:
+			/// starts processing
+			///\pre !started()
+			///\throws std::exception in case of failure to start the driver
+			virtual void do_start() throw(std::exception) = 0;
+
+			/// stops processing
+			///\pre started()
+			///\throws std::exception in case of failure to stop the driver
+			virtual void do_stop() throw(std::exception) = 0;
+		private:
+			bool started_;
+	///\}
+
+	///\name utility functions
+	///\{
+		protected:
+			static double frand();
+			static void Quantize16WithDither(float const * pin, int16_t * piout, int c);
+			static void Quantize16(float const * pin, int16_t * piout, int c);
+			static void Quantize16AndDeinterlace(float const * pin, int16_t * pileft, int strideleft, int16_t * piright, int strideright, int c);
+			static void DeQuantize16AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
+			static void Quantize24WithDither(float const * pin, int32_t * piout, int c);
+			static void Quantize24(float const * pin, int32_t * piout, int c);
+			static void Quantize24AndDeinterlace(float const * pin, int32_t * pileft, int32_t * piright, int c);
+			static void DeQuantize24AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c);
 	///\}
 };
 
 /// a dummy, silent driver
 class DummyDriver : public AudioDriver {
 	public:
-		DummyDriver();
-		~DummyDriver();
-		virtual AudioDriverInfo info() const;
-		virtual void Initialize(AUDIODRIVERWORKFN callback_function, void * callback_context);
-		virtual bool Initialized() { return initialized_; }
-		virtual bool Enable(bool e) { if(e) start(); else stop(); return true; }
+		~DummyDriver() throw();
+		/*override*/ AudioDriverInfo info() const;
 
-	private:
-		AUDIODRIVERWORKFN callback_function_;
-		void * callback_context_;
-		bool initialized_;
-		void start();
-		void stop();
+	protected:
+		/*override*/ void do_open() throw(std::exception) {}
+		/*override*/ void do_start() throw(std::exception);
+		/*override*/ void do_stop() throw(std::exception);
+		/*override*/ void do_close() throw(std::exception) {}
 
-		///\name thread
-		///\{
-			/// the function executed by the alsa thread
+	///\name thread
+	///\{
+		private:
+			thread * thread_;
+			/// the function executed by the thread
 			void thread_function();
-			/// whether the thread is running
-			bool running_;
 			/// whether the thread is asked to terminate
 			bool stop_requested_;
-			/// a mutex to synchronise accesses to running_ and stop_requested_
-			std::mutex mutex_;
-			typedef std::scoped_lock<std::mutex> scoped_lock;
-			/// a condition variable to wait until notified that the value of running_ has changed
-			std::condition<scoped_lock> condition_;
-		///\}
+			mutex mutex_;
+			typedef class scoped_lock<mutex> scoped_lock;
+	///\}
 };
 
 }}
+#endif

@@ -21,9 +21,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 class Song;
-class SinglePattern;
+class Pattern;
 class Machine;
 }}
 
@@ -102,8 +102,8 @@ private slots:
 	void onSampleComboBoxIndexChanged( int newIndex );
 	void onOctaveComboBoxIndexChanged( int newIndex );
 
-	void onPatternSelectedInPatternBox( psy::core::SinglePattern* selectedPattern );
-	void onNewMachineCreated( psy::core::Machine *mac );
+	void onPatternSelectedInPatternBox( psycle::core::Pattern* selectedPattern );
+	void onNewMachineCreated( psycle::core::Machine *mac );
 	void onMachineChosen( MachineGui *macGui );
 	void onMachineDeleted();
 	void onMachineRenamed();
@@ -111,7 +111,7 @@ private slots:
 	void onPatternDeleted();
 	void onPatternNameChanged();
 
-	void onAddPatternToSequencerRequest( psy::core::SinglePattern* );
+	void onAddPatternToSequencerRequest( psycle::core::Pattern* );
 	void onCategoryColorChanged();
 
 	void playFromStart();
@@ -135,7 +135,7 @@ private slots:
 	void machineDecrement();
 
 private:
-	psy::core::Song *song_;
+	psycle::core::Song *song_;
 
 	void setupSound();
 	void setupSong();
@@ -144,8 +144,8 @@ private:
 
 	bool okToContinue();
 	bool songHasChanged();
-	psy::core::Song *createBlankSong();
-	void loadSong( psy::core::Song *song );
+	psycle::core::Song *createBlankSong();
+	void loadSong( psycle::core::Song *song );
 	bool saveSong( const QString &fileName );
 
 	void populateMachineCombo();

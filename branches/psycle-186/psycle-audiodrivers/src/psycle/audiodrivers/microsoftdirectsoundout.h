@@ -1,88 +1,135 @@
-/******************************************************************************
-*  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
-*                                                                             *
-*  This program is free software; you can redistribute it and/or modify       *
-*  it under the terms of the GNU General Public License as published by       *
-*  the Free Software Foundation; either version 2 of the License, or          *
-*  (at your option) any later version.                                        *
-*                                                                             *
-*  This program is distributed in the hope that it will be useful,            *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
-*  GNU General Public License for more details.                               *
-*                                                                             *
-*  You should have received a copy of the GNU General Public License          *
-*  along with this program; if not, write to the                              *
-*  Free Software Foundation, Inc.,                                            *
-*  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
-******************************************************************************/
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
+#ifndef PSYCLE__AUDIODRIVERS__MICROSOFT_DIRECT_SOUD_OUT__INCLUDED
+#define PSYCLE__AUDIODRIVERS__MICROSOFT_DIRECT_SOUD_OUT__INCLUDED
 #pragma once
+
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
+
 #include "audiodriver.h"
-#include <windows.h>
-#include <mmsystem.h>
+#include <universalis/stdlib/condition.hpp>
+
+#include <universalis/os/include_windows_without_crap.hpp>
+
 #include <dsound.h>
-namespace psy { namespace core {
+#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+	#pragma comment(lib, "dsound")
+#endif
+
+#include <map>
+
+namespace psycle { namespace audiodrivers {
+
+using namespace universalis::stdlib;
+
+class DSoundUiInterface {
+	public:
+		DSoundUiInterface::DSoundUiInterface() {}
+		virtual ~DSoundUiInterface() {}
+
+		virtual int DoModal() = 0;
+
+		virtual void SetValues(
+			GUID device_guid, bool exclusive, bool dither,
+			int sample_rate, int buffer_size, int buffer_count) = 0;
+
+		virtual void GetValues(
+			GUID & device_guid, bool & exclusive, bool & dither,
+			int & sample_rate, int & buffer_size, int & buffer_count) = 0;
+			
+		virtual void WriteConfig(
+			GUID device_guid, bool exclusive, bool dither,
+			int sample_rate, int buffer_size, int buffer_count) = 0;
+
+		virtual void ReadConfig(
+			GUID & device_guid, bool & exclusive, bool & dither,
+			int & sample_rate, int & buffer_size, int & buffer_count) = 0;
+
+		virtual void Error(std::string const & msg) = 0;
+};
 
 /// output device interface implemented by direct sound.
-///\todo this driver is (over)filling the buffer to fast!
 class MsDirectSound : public AudioDriver {
+	class PortEnums {
+		public:
+			PortEnums() : guid_() {};
+			PortEnums(LPGUID const & guid, std::string const & port_name) : guid_(guid), port_name_(port_name) {}
+			std::string port_name_;
+			LPGUID guid_;
+	};
+
+	class PortCapt {
+		public:
+			PortCapt() : guid_(), capture_(), buffer_(), low_mark_(), high_mark_(), left_(), right_(), machine_pos_() {}
+			LPGUID guid_;
+			LPDIRECTSOUNDCAPTURE capture_;
+			LPDIRECTSOUNDCAPTUREBUFFER buffer_;
+			unsigned int low_mark_, high_mark_;
+			float * left_, * right_;
+			unsigned int machine_pos_;
+	};
+
 	public:
+		MsDirectSound(DSoundUiInterface* = 0);
+		~MsDirectSound() throw();
 
-		MsDirectSound();
-		~MsDirectSound();
+		/*override*/ AudioDriverInfo info() const;
+		/*override*/ void Configure();
 
-		AudioDriverInfo info( ) const;
+	protected:
+		/*override*/ void do_open() throw(std::exception);
+		/*override*/ void do_start() throw(std::exception);
+		/*override*/ void do_stop() throw(std::exception);
+		/*override*/ void do_close() throw(std::exception);
 
-		virtual void Initialize( AUDIODRIVERWORKFN pCallback, void * context );
-		virtual void Reset();
-		virtual bool Enable( bool );
-		virtual int GetWritePos();
-		virtual int GetPlayPos();
-		int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
-		virtual void Configure();
-		virtual bool Initialized() { return _initialized; }
-		virtual bool Configured() { return _configured; }
+	public:
+		void GetCapturePorts(std::vector<std::string> & ports);
+		void AddCapturePort(uint32_t idx);
+		void RemoveCapturePort(uint32_t idx);
+		void CreateCapturePort(PortCapt & port);
+		void GetReadBuffers(uint32_t idx, float ** left, float ** right, int num_samples);
+		static BOOL CALLBACK DSEnumCallback(LPGUID guid, LPCSTR description, LPCSTR module, LPVOID context);
+		int GetWritePos();
+		int GetPlayPos();
+		void AddConfigGui(DSoundUiInterface & ui) { ui_ = &ui; }
+
+	protected:
+		/*override*/ void ReadConfig();
+		/*override*/ void WriteConfig();
 
 	private:
-		bool _initialized;
-		bool _configured;
+		void DoBlocksRecording(PortCapt & port);
+		bool WantsMoreBlocksRecording(PortCapt & port);
 
-		bool _running;
-		bool _playing;
-		bool _timerActive;
-		//static AudioDriverEvent _event;
-		//CCriticalSection _lock;
+		static AudioDriverInfo info_;
 
-		GUID device_guid;
-		bool _exclusive;
-		bool _dither;
-		int _bytesPerSample;
-		int _bufferSize;
-		int _numBuffers;
+		GUID device_guid_;
+		bool exclusive_, dither_;
+		unsigned int low_mark_, high_mark_;
 
-		int _dsBufferSize;
-		int _currentOffset;
-		int _lowMark;
-		int _highMark;
-		int _buffersToDo;
+		std::vector<PortEnums> cap_enums_;
+		std::vector<PortCapt> cap_ports_;
+		std::vector<int> port_mapping_;
+		LPDIRECTSOUND direct_sound_;
+		LPDIRECTSOUNDBUFFER buffer_;
 
-		LPDIRECTSOUND _pDs;
-		LPDIRECTSOUNDBUFFER _pBuffer;
-		void* _callbackContext;
-		AUDIODRIVERWORKFN _pCallback;
+		DSoundUiInterface * ui_;
+		void error(std::string const & msg, universalis::compiler::location const & location);
 
-		static DWORD WINAPI PollerThread(void* pDirectSound);
-		//static void TimerCallback(UINT uTimerID, UINT uMsg, DWORD pDirectSound, DWORD dw1, DWORD dw2);
-		void ReadConfig();
-		void WriteConfig();
-		void Error(const WCHAR msg[]);
-		void DoBlocks();
-		bool Start();
-		bool Stop();
-
-		void quantize(float *pin, int *piout, int c);
+	///\name thread
+	///\{
+		private:
+			thread * thread_;
+			/// the function executed by the thread
+			void thread_function();
+			/// whether the thread is asked to terminate
+			bool stop_requested_;
+			mutex mutex_;
+			typedef class scoped_lock<mutex> scoped_lock;
+	///\}
 };
 
 }}
+#endif
 #endif

@@ -22,9 +22,9 @@
 
 #include <QWidget>
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	class Song;
-	class SinglePattern;
+	class Pattern;
 }}
 
 #include <QtGui/QVBoxLayout>
@@ -40,12 +40,12 @@ class SequencerView : public QWidget
 {
 Q_OBJECT
 public:
-	SequencerView( psy::core::Song *song );
+	SequencerView( psycle::core::Song *song );
 
-	psy::core::Song* song() const { return song_; }
+	psycle::core::Song* song() const { return song_; }
 	SequencerLine *selectedLine() const;
 	void setSelectedLine( SequencerLine *line ) ;
-	void addPattern( psy::core::SinglePattern *pattern );
+	void addPattern( psycle::core::Pattern *pattern );
 	SequencerDraw *sequencerDraw() const { return seqDraw_; }
 	void updatePlayPos();
 	void onPatternNameChanged();
@@ -62,7 +62,7 @@ protected:
 private:
 	void setupToolbar();
 
-	psy::core::Song *song_;
+	psycle::core::Song *song_;
 	QVBoxLayout *layout_;
 	SequencerDraw *seqDraw_;
 

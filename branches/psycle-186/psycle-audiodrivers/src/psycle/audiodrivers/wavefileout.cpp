@@ -1,120 +1,104 @@
-/******************************************************************************
-*  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
-*                                                                             *
-*  This program is free software; you can redistribute it and/or modify       *
-*  it under the terms of the GNU General Public License as published by       *
-*  the Free Software Foundation; either version 2 of the License, or          *
-*  (at your option) any later version.                                        *
-*                                                                             *
-*  This program is distributed in the hope that it will be useful,            *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
-*  GNU General Public License for more details.                               *
-*                                                                             *
-*  You should have received a copy of the GNU General Public License          *
-*  along with this program; if not, write to the                              *
-*  Free Software Foundation, Inc.,                                            *
-*  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
-******************************************************************************/
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #include "wavefileout.h"
+#include <boost/bind.hpp>
 #include <iostream>
-#if defined _WIN64 || defined _WIN32
-	#include <windows.h>
-#endif
-namespace psy { namespace core {
 
-volatile int WaveFileOut::kill_thread = 0;
-volatile int WaveFileOut::threadOpen = 0;
+namespace psycle { namespace audiodrivers {
 
-WaveFileOut::WaveFileOut()
-: AudioDriver()
-{
-	kill_thread = 0;
-	threadOpen = 0;
-	_initialized = false;
-}
-
-WaveFileOut::~WaveFileOut() {
-	///\todo use proper synchronisation mecanisms
-	while ( threadOpen ) {
-		kill_thread = 1;
-		#if defined __unix__ || defined __APPLE__
-			usleep(200);
-		#else
-			Sleep(1);
-		#endif
-	}
-}
+	using namespace psycle::helpers;
 
 AudioDriverInfo WaveFileOut::info( ) const {
-	return AudioDriverInfo("wavefileout","Wave to File Driver","Recording a wav to a file",false);
+	return AudioDriverInfo("wavefileout", "Wave to File Driver", "Recording a wav to a file", false);
 }
 
-void WaveFileOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context ) {
-	_pCallback = pCallback;
-	_callbackContext = context;
-	_initialized = true;
+WaveFileOut::WaveFileOut()
+	: dither_enabled_(true) {
 }
 
-bool WaveFileOut::Initialized(void) {
-	return _initialized;
+void WaveFileOut::do_start() throw(std::exception) {
+	stop_requested_ = false;
+	thread_ = new std::thread(boost::bind(&WaveFileOut::thread_function, this));
 }
 
-bool WaveFileOut::Enable( bool e ) {
-	bool threadStarted = false;
-	if (e && !threadOpen) {
-		kill_thread = 0;
-		///\todo use std::thread
-		#if defined __unix__ || defined __APPLE__
-			pthread_create(&threadid, NULL, (void*(*)(void*))audioOutThread, (void*) this);
-		#else
-			CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)audioOutThread, this, 0, &threadid);
-		#endif
-		threadStarted = true;
-	} else
-		if (!e && threadOpen) {
-			kill_thread = 1;
-			threadStarted = false;
-			while ( threadOpen ) {
-				///\todo bad
-				#if defined __unix__ || defined __APPLE__
-					usleep(10); // give thread time to close
-				#else
-					Sleep(1);
-				#endif
-			}
-		}
-		return threadStarted;
+void WaveFileOut::thread_function() {
+	while(true) {
+		scoped_lock lock(mutex_);
+		if(stop_requested_)
+			return;
+		Write(callback(256),256);
+	}
 }
 
-int WaveFileOut::audioOutThread(void * ptr) {
-	WaveFileOut* waveFileOut = (WaveFileOut*) ptr;
-	waveFileOut->writeBuffer();
-	return 0;
-}
-
-void WaveFileOut::writeBuffer() {
-	threadOpen = 1;
-	int count = 441;
-
-	while(!(kill_thread)) {
-		///\todo bad
-		#if defined __unix__ || defined __APPLE__
-			usleep(50); // give cpu time to breath, and not too much :)
-		#else
-			Sleep(1);
-		#endif
-		float const * input(_pCallback(_callbackContext, count));
-		///\todo well, the real job, i.e. output to a file
+void WaveFileOut::Write(float* data, unsigned int frames)
+{
+	for (unsigned i = 0; i < frames; ++i) {
+		left[i] = *data++;
+		right[i] = *data++;
 	}
 
-	threadOpen = 0;
-	std::cout << "closing thread" << std::endl;
-	///\todo use std::thread.join
-	#if defined __unix__ || defined __APPLE__
-		pthread_exit(0);
-	#else
-		ExitThread(0);
-	#endif
+	if(dither_enabled_) {
+		dither_.Process(left, frames);
+		dither_.Process(right, frames);
+	}
+	switch(playbackSettings().channelMode()) {
+		case 0: // mono mix
+			for(int i(0); i < frames; ++i)
+				//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
+				if(wav_file_.WriteMonoSample((left[i] + right[i]) / 2) != DDC_SUCCESS) {
+					set_opened(false);
+				}
+			break;
+		case 1: // mono L
+			for(int i(0); i < frames; ++i)
+				if(wav_file_.WriteMonoSample(left[i]) != DDC_SUCCESS) {
+					set_opened(false);
+				}
+			break;
+		case 2: // mono R
+			for(int i(0); i < frames; ++i)
+				if(wav_file_.WriteMonoSample(right[i]) != DDC_SUCCESS) {
+					set_opened(false);
+				}
+			break;
+		default: // stereo
+			for(int i(0); i < frames; ++i)
+				if(wav_file_.WriteStereoSample(left[i], right[i]) != DDC_SUCCESS) {
+					set_opened(false);
+				}
+			break;
+	}
 }
+
+void WaveFileOut::do_open() throw(std::exception)
+{
+	int channel_num ;
+	if (playbackSettings().channelMode() < 3)
+		channel_num = 1;
+	else
+		channel_num = 2;
+	wav_file_.OpenForWrite(
+		playbackSettings().deviceName().c_str(),
+		playbackSettings().samplesPerSec(),
+		playbackSettings().bitDepth(),
+		channel_num);
+}
+
+void WaveFileOut::do_close() throw(std::exception)
+{
+	wav_file_.Close();
+}
+
+void WaveFileOut::do_stop() throw(std::exception) {
+	scoped_lock lock(mutex_);
+	stop_requested_ = true;
+	thread_->join();
+	delete thread_;
+}
+
+WaveFileOut::~WaveFileOut() throw() {
+	before_destruction();
+}
+
 }}

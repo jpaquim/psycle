@@ -20,10 +20,9 @@
 #ifndef PATTERNBOX_H
 #define PATTERNBOX_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 class Song;
-class SinglePattern;
-class PatternCategory;
+class Pattern;
 }}
 
 
@@ -65,6 +64,11 @@ namespace qpsycle {
 
 		enum { Type = QTreeWidgetItem::UserType + 2 };
 		int type() const { return Type; }
+
+	  const std::string& name() { return name_; }
+	  void name(const std::string& name) { name_ = name;} 
+	private:
+	  std::string name_;
 	};
 
 	class PatternItem : public QTreeWidgetItem {
@@ -80,12 +84,12 @@ namespace qpsycle {
 	class PatternBox : public QWidget {
 		Q_OBJECT
 		public:
-		PatternBox( psy::core::Song *song, QWidget *parent = 0);
+		PatternBox( psycle::core::Song *song, QWidget *parent = 0);
 
 		void populatePatternTree();
 		PatternTree* patternTree() const { return patternTree_; }
-		psy::core::Song* song() const { return song_; }
-		psy::core::SinglePattern* currentPattern() const { return currentPattern_; }
+		psycle::core::Song* song() const { return song_; }
+		psycle::core::Pattern* currentPattern() const { return currentPattern_; }
 
 	public slots:
 		void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
@@ -97,15 +101,15 @@ namespace qpsycle {
 		void addPatternToSequencer();
 		void onPatternNameEdited( const QString & newText );
 		void onEditCategoryColorActionTriggered();
-		void onNewPatternCreated( psy::core::SinglePattern *newPattern );
+		void onNewPatternCreated( psycle::core::Pattern *newPattern );
 
 	protected:
 		bool event( QEvent *event );
 
 	signals:
-		void patternSelectedInPatternBox( psy::core::SinglePattern *selectedPattern );
+		void patternSelectedInPatternBox( psycle::core::Pattern *selectedPattern );
 		void patternDeleted();
-		void addPatternToSequencerRequest( psy::core::SinglePattern *selectedPattern );
+		void addPatternToSequencerRequest( psycle::core::Pattern *selectedPattern );
 		void patternNameChanged();
 		void categoryColorChanged();
 
@@ -116,11 +120,13 @@ namespace qpsycle {
 		const QColor QColorFromLongColor( long longCol );
 		long QColorToLongColor( const QColor & qCol );
 
-		psy::core::Song *song_;
-		psy::core::SinglePattern* currentPattern_;
-		std::map<CategoryItem*, psy::core::PatternCategory*> categoryMap;
+		psycle::core::Song *song_;
+		psycle::core::Pattern* currentPattern_;
+
 		std::vector<CategoryItem*> catItems;
-		std::map<PatternItem*, psy::core::SinglePattern*> patternMap;
+
+	  // TODO put this pointer in PatternItem instead?
+		std::map<PatternItem*, psycle::core::Pattern*> patternMap;
 
 		QToolBar *toolBar_;
 		PatternTree *patternTree_;

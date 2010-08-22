@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/song.h>
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 #include <psycle/core/player.h>
 
 #include "../global.hpp"
@@ -43,7 +43,7 @@ int d2i(double d)
 	return (int) ( d<0?d-.5:d+.5);
 }
 
-	PatternView::PatternView( psy::core::Song *song, InstrumentsModel *instrumentsModel )
+	PatternView::PatternView( psycle::core::Song *song, InstrumentsModel *instrumentsModel )
 		: 
 		song_(song),
 		instrumentsModel_(instrumentsModel)
@@ -131,11 +131,11 @@ bool PatternView::enterNote( const PatCursor & cursor, int note )
 	if ( recordCb_->isChecked() == true)
 	{
 		if ( pattern() ) {
-			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
-			psy::core::Machine* tmac = song_->machine( song_->seqBus );
+			psycle::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+			psycle::core::Machine* tmac = song_->machine( song_->seqBus );
 			event.setNote( octave() * 12 + note );
 			if (tmac) event.setMachine( tmac->id() );
-			if (tmac && tmac->getMachineKey() == psy::core::MachineKey::sampler() ) {
+			if (tmac && tmac->getMachineKey() == psycle::core::MachineKey::sampler() ) {
 				event.setInstrument( song_->instSelected() );
 			}
 			pattern()->setEvent( cursor.line(), cursor.track(), event );
@@ -151,11 +151,11 @@ bool PatternView::enterNoteOff( const PatCursor & cursor )
 	if ( recordCb_->isChecked() == true)
 	{
 		if ( pattern() ) {
-			psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
-			psy::core::Machine* tmac = song_->machine( song_->seqBus );
+			psycle::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+			psycle::core::Machine* tmac = song_->machine( song_->seqBus );
 			event.setNote( commands::key_stop );
 			if (tmac) event.setMachine( tmac->id() );
-			if (tmac && tmac->getMachineKey() == psy::core::MachineKey::sampler()) {
+			if (tmac && tmac->getMachineKey() == psycle::core::MachineKey::sampler()) {
 				event.setInstrument( song_->instSelected() );
 			}
 			pattern()->setEvent( cursor.line(), cursor.track(), event );
@@ -168,8 +168,8 @@ bool PatternView::enterNoteOff( const PatCursor & cursor )
 
 void PatternView::clearNote( const PatCursor & cursor) {
 	if ( pattern() ) {
-		psy::core::Machine* tmac = song_->machine( song_->seqBus );
-		psy::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
+		psycle::core::Machine* tmac = song_->machine( song_->seqBus );
+		psycle::core::PatternEvent event = pattern()->event( cursor.line(), cursor.track() );
 		event.setNote(255);
 		pattern()->setEvent( cursor.line(), cursor.track(), event );
 		if (tmac) tmac->Tick(cursor.track(),event);
@@ -243,7 +243,7 @@ void PatternView::setNumberOfTracks( int numTracks )
 		patternGrid()->update();
 }
 
-void PatternView::setPattern( psy::core::SinglePattern *pattern )
+void PatternView::setPattern( psycle::core::Pattern *pattern )
 {
 	qDebug( "PatternView::setPattern(%p)\n", pattern );
 	pattern_ = pattern;

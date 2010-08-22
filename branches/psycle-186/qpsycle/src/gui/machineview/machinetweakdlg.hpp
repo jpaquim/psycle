@@ -28,7 +28,7 @@
 #ifndef MACHINETWEAKDLG_H
 #define MACHINETWEAKDLG_H
 
-namespace psy { namespace core {
+namespace psycle { namespace core {
 	class Machine;
 }}
 
@@ -162,8 +162,8 @@ public slots:
 	void onSavePreset();
 
 private:
-	std::map< QListWidgetItem*, psy::core::Preset > presetMap;
-	psy::core::Preset m_selectedPreset;
+	std::map< QListWidgetItem*, psycle::core::Preset > presetMap;
+	psycle::core::Preset m_selectedPreset;
 	QGridLayout *lay;
 	QLabel *label;
 	QLineEdit *lineEdit;
@@ -184,7 +184,7 @@ private:
 
 	int const static MAX_PRESETS = 256;
 
-	psy::core::Preset iniPreset;
+	psycle::core::Preset iniPreset;
 };
 
 
@@ -212,8 +212,8 @@ public slots:
 	void showPresetsDialog();
 
 signals:
-	void notePress( int note, psy::core::Machine *mac );
-	void noteRelease( int note, psy::core::Machine *mac );
+	void notePress( int note, psycle::core::Machine *mac );
+	void noteRelease( int note, psycle::core::Machine *mac );
 
 protected:
 	void createActions();
@@ -231,7 +231,7 @@ protected:
 	QWidget *knobPanel;
 	QVBoxLayout *mainLayout;
 	QGridLayout *knobPanelLayout;
-	psy::core::Machine *pMachine_;
+	psycle::core::Machine *pMachine_;
 	MachineGui *m_macGui;
 
 	PresetsDialog *prsDlg;

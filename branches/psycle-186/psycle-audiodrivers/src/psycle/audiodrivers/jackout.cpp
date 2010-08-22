@@ -1,83 +1,35 @@
-/******************************************************************************
-*  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
-*                                                                             *
-*  This program is free software; you can redistribute it and/or modify       *
-*  it under the terms of the GNU General Public License as published by       *
-*  the Free Software Foundation; either version 2 of the License, or          *
-*  (at your option) any later version.                                        *
-*                                                                             *
-*  This program is distributed in the hope that it will be useful,            *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
-*  GNU General Public License for more details.                               *
-*                                                                             *
-*  You should have received a copy of the GNU General Public License          *
-*  along with this program; if not, write to the                              *
-*  Free Software Foundation, Inc.,                                            *
-*  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
-******************************************************************************/
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #if defined PSYCLE__JACK_AVAILABLE
 #include "jackout.h"
 #include <iostream>
-namespace psy { namespace core {
 
-JackOut::JackOut()
-:
-	_initialized()
-{
-	clientName_ = "xpsycle";
-	serverName_ = ""; // maybe not needed
-	running_ = 0;
-}
-
-JackOut::~JackOut() {
-}
+namespace psycle { namespace audiodrivers {
 
 AudioDriverInfo JackOut::info( ) const {
 	return AudioDriverInfo("jack","Jack Audio Connection Kit Driver","Low Latency audio driver",true);
 }
 
-void JackOut::Initialize( AUDIODRIVERWORKFN pCallback, void * context ) {
-	_pCallback = pCallback;
-	_callbackContext = context;
-	_initialized = true;
+JackOut::JackOut() {
+	clientName_ = "psycle";
+	serverName_ = ""; // maybe not needed
+	running_ = 0;
 }
 
-void JackOut::configure() {
-}
-
-bool JackOut::Initialized() {
-	return _initialized;
-}
-
-bool JackOut::Enable(bool e) {
-	if(e && !running_) {
-		running_ = registerToJackServer();
-	} else if(running_) {
-		jack_client_close(client);
-		running_ = false;
-	}
-	return running_;
-}
-
-/***********************************************************/
-// Jack special functions
-
-bool JackOut::registerToJackServer() {
+void JackOut::do_start() throw(std::exception) {
 	//jack_options_t options = JackNullOption;
 	//jack_status_t status;
 	// try to become a client of the JACK server
 	const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
 
 	if ( (client = jack_client_new ( registerCPtr )) == 0) {
-			std::cerr << "jack server not running?\n" << std::endl;
-		return 0;
-		}
-
-	/*if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL )
-	{
 		std::cerr << "jack server not running?\n" << std::endl;
-		return 0;
+		return;
+	}
+
+	/*if ( (client = jack_client_open( clientName_.c_str(),options,&status,serverName_.c_str())) == NULL ) {
+		std::cerr << "jack server not running?\n" << std::endl;
 	}*/
 
 	// tell the JACK server to call `process()' whenever
@@ -100,39 +52,36 @@ bool JackOut::registerToJackServer() {
 		// tell the JACK server that we are ready to roll
 
 		if (jack_activate (client)) {
-			std::cout << "cannot activate client" << std::endl;
-		return 0;
+			std::cerr << "cannot activate client" << std::endl;
+			return;
 		}
 
-	AudioDriverSettings settings_ = settings();
-		settings_.setSamplesPerSec( jack_get_sample_rate (client) );
-		settings_.setBitDepth( 16 ); // hardcoded so far
-	setSettings( settings_ );
+	playbackSettings_.setSamplesPerSec(jack_get_sample_rate(client));
+	playbackSettings_.setBitDepth(16); // hardcoded so far
+	///\todo inform the player that the sample rate is different
 
 	if ((ports = jack_get_ports (client, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
-		std::cout << "Cannot find any physical playback ports" << std::endl;
-		return 0;
+		std::cerr << "Cannot find any physical playback ports" << std::endl;
+		return;
 	}
 
 	std::cout << "jo1" << std::endl;
 
 	if (jack_connect (client, jack_port_name (output_port_1), ports[0])) {
-		std::cout << "cannot connect output ports" << std::endl;
+		std::cerr << "cannot connect output ports" << std::endl;
 	}
 
 	std::cout << "jo2" << std::endl;
 
 	if (jack_connect (client, jack_port_name (output_port_2), ports[1])) {
-		std::cout << "cannot connect output ports" << std::endl;
+		std::cerr << "cannot connect output ports" << std::endl;
 	}
 
 	std::cout << "jo3" << std::endl;
 
-	free (ports);
+	std::free (ports);
 
 	std::cout << "jack enabled" << std::endl;
-
-	return 1;
 }
 
 int JackOut::process (jack_nframes_t nframes, void *arg) {
@@ -144,17 +93,22 @@ int JackOut::process (jack_nframes_t nframes, void *arg) {
 int JackOut::fillBuffer( jack_nframes_t nframes ) {
 	jack_default_audio_sample_t *out_1 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_1, nframes);
 	jack_default_audio_sample_t *out_2 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_2, nframes);
-
-	int nframesint = nframes;
-	float const * input(_pCallback(_callbackContext, nframesint));
-
-	int count=0;
-	while ( count < nframesint) {
-		out_1[ count ] = *input++  / 32768.0f;
-		out_2[ count ] = *input++  / 32768.0f;
-		count++;
+	float const * input(callback(nframes));
+	int count = 0;
+	while(count < nframes) {
+		out_1[count] = *input++  / 32768.0f;
+		out_2[count] = *input++  / 32768.0f;
+		++count;
 	}
 	return 0;
+}
+
+void JackOut::do_stop() throw(std::exception) {
+	jack_client_close(client);
+}
+
+JackOut::~JackOut() throw() {
+	before_destruction();
 }
 
 }}

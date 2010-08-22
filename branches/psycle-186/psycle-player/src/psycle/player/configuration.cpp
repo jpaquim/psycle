@@ -1,20 +1,15 @@
-
-/**********************************************************************************************
-	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
-
-	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
-	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-**********************************************************************************************/
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #include "configuration.hpp"
-#include <psycle/core/file.h>
-
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/audiodrivers/wavefileout.h>
+#include <universalis.hpp>
+#include <universalis/os/fs.hpp>
+#include <boost/filesystem.hpp>
 
 #if defined PSYCLE__SYDNEY_AVAILABLE
-	#include <psycle/audiodrivers/sydney_out.hpp>
+	#include <psycle/audiodrivers/sydneyout.hpp>
 #endif
 #if defined PSYCLE__GSTREAMER_AVAILABLE
 	#include <psycle/audiodrivers/gstreamerout.h>
@@ -38,7 +33,7 @@
 	#include <psycle/audiodrivers/microsoftmmewaveout.h>
 #endif
 #if defined PSYCLE__STEINBERG_ASIO_AVAILABLE
-	#include <psycle/audiodrivers/steinberg_asio_out.hpp>
+	#include <psycle/audiodrivers/asiointerface.h>
 #endif
 
 #include <cstdlib>
@@ -53,15 +48,18 @@
 	//no need to error. #error none of the supported xml parser libs appear to be available
 #endif
 
-Configuration::Configuration() {
-	using namespace psy::core;
-	
-	add_driver(*(base_driver_ = new AudioDriver));
+namespace psycle { namespace player {
 
-	set_driver_by_name("silent");
-	enable_sound_ = false;
+using namespace audiodrivers;
+namespace loggers = universalis::os::loggers;
 
+Configuration::Configuration()
+:
+	enable_sound_()
+{
 	add_driver(*(dummy_driver_ = new DummyDriver));
+	set_driver_by_name("dummy");
+
 	add_driver(*new WaveFileOut);
 
 	#if defined PSYCLE__ALSA_AVAILABLE
@@ -88,9 +86,13 @@ Configuration::Configuration() {
 	#if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 		add_driver(*new MsWaveOut);
 	#endif
+	#if defined PSYCLE__STEINBERG_ASIO_AVAILABLE
+		add_driver(*new ASIOInterface);
+	#endif
 	#if defined PSYCLE__NET_AUDIO_AVAILABLE
 		add_driver(*new NetAudioOut);
 	#endif
+
 
 	{ char const * const env(std::getenv("PSYCLE_PATH"));
 		if(env) pluginPath_ = env;
@@ -104,12 +106,16 @@ Configuration::Configuration() {
 }
 
 Configuration::~Configuration() {
-	for(std::map<std::string, psy::core::AudioDriver*>::iterator i(driver_map_.begin()), e(driver_map_.end()); i != e; ++i)
+	for(std::map<std::string, AudioDriver*>::iterator i(driver_map_.begin()), e(driver_map_.end()); i != e; ++i)
 		delete i->second;
 }
 
 void Configuration::add_driver(AudioDriver & driver) {
-	std::cout << "psycle: configuration: audio driver registered: " <<  driver.info().name() << std::endl;
+	if(loggers::trace()()) {
+		std::ostringstream s;
+		s << "psycle: player: config: audio driver registered: " <<  driver.info().name();
+		loggers::trace()(s.str());
+	}
 	driver_map_[driver.info().name()] = &driver;
 }
 
@@ -118,32 +124,48 @@ void Configuration::set_driver_by_name(std::string const & driver_name) {
 	if((it = driver_map_.find(driver_name)) != driver_map_.end()) {
 		// driver found
 		output_driver_ = it->second;
-		std::cout << "psycle: configuration: audio driver set to: " << driver_name << "\n";
+		if(loggers::trace()()) {
+			std::ostringstream s;
+			s << "psycle: player: config: audio driver set to: " << driver_name;
+			loggers::trace()(s.str());
+		}
 	} else {
-		std::cerr << "psycle: configuration: audio driver not found: " << driver_name << ", setting fallback: " << base_driver_->info().name() << "\n";
-		// driver not found,  set silent default driver
-		output_driver_ = base_driver_;
+		if(loggers::exception()()) {
+			std::ostringstream s;
+			s << "psycle: player: config: audio driver not found: " << driver_name << ", setting fallback: " << dummy_driver_->info().name();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		// driver not found, set silent default driver
+		output_driver_ = dummy_driver_;
 	}
 }
 
 void Configuration::loadConfig() {
-	std::string path = psy::core::File::replaceTilde("~" + psy::core::File::slash() + ".xpsycle.xml");
-	if(path.length()!=0) {
+	boost::filesystem::path const path(universalis::os::fs::home_app_local("psycle") / "config.xml");
+	if(boost::filesystem::exists(path)) {
 		try {
-			loadConfig( psy::core::File::replaceTilde( "~" + psy::core::File::slash() + ".xpsycle.xml") );
+			loadConfig(path.file_string());
 		} catch( std::exception const & e ) {
-			std::cerr << "psycle: configuration: error: " << e.what() << std::endl;
+			if(loggers::exception()()) {
+				std::ostringstream s;
+				s << "psycle: player: config: error: " << e.what();
+				loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			}
 		}
 	} else {
 		#if 0
 			#if defined PSYCLE__INSTALL_PATHS__CONFIGURATION
-				path = PSYCLE__INSTALL_PATHS__CONFIGURATION "/xpsycle.xml";
+				path = PSYCLE__INSTALL_PATHS__CONFIGURATION "/psycle/config.xml";
 			#endif
-			if(path.length()) {
+			if(boost::filesystem::exists(path)) {
 				try {
-					loadConfig(path);
+					loadConfig(path.file_string());
 				} catch(std::exception const & e) {
-					std::cerr << "psycle: configuration: error: " << e.what() << std::endl;
+					if(loggers::exception()()) {
+						std::ostringstream s;
+						s << "psycle: player: config: error: " << e.what();
+						loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+					}
 				}
 			}
 		#endif
@@ -158,17 +180,18 @@ void Configuration::loadConfig(std::string const & path) {
 			parser.set_substitute_entities(); // We just want the text to be resolved/unescaped automatically.
 			parser.parse_file(path);
 			if(parser) {
+				std::ostringstream msg;
 				xmlpp::Element const & root_element(*parser.get_document()->get_root_node()); // deleted by xmlpp::DomParser
 				{ // paths
 					xmlpp::Node::NodeList const paths(root_element.get_children("path"));
 					for(xmlpp::Node::NodeList::const_iterator i(paths.begin()); i != paths.end(); ++i) {
 						xmlpp::Element const & path(dynamic_cast<xmlpp::Element const &>(**i));
 						xmlpp::Attribute const * const id_attribute(path.get_attribute("id"));
-						if(!id_attribute) std::cerr << "psycle: configuration: expected id attribute in path element\n";
+						if(!id_attribute) msg << "expected id attribute in path element\n";
 						else {
 							std::string id(id_attribute->get_value());
 							xmlpp::Attribute const * const src_attribute(path.get_attribute("src"));
-							if(!src_attribute) std::cerr << "psycle: configuration: expected src attribute in path element\n";
+							if(!src_attribute) msg << "expected src attribute in path element\n";
 							else {
 								std::string src(src_attribute->get_value());
 								if(id == "plugindir") pluginPath_ = src;
@@ -183,7 +206,7 @@ void Configuration::loadConfig(std::string const & path) {
 						if(audio_nodes.begin() != audio_nodes.end()) {
 							xmlpp::Element const & audio(dynamic_cast<xmlpp::Element const &>(**audio_nodes.begin()));
 							xmlpp::Attribute const * const enable_attribute(audio.get_attribute("enable"));
-							if(!enable_attribute) std::cerr << "psycle: configuration: expected enable attribute in audio element\n";
+							if(!enable_attribute) msg << "expected enable attribute in audio element\n";
 							else {
 								std::string enable(enable_attribute->get_value());
 								if(enable != "" && enable != "0") {
@@ -202,7 +225,7 @@ void Configuration::loadConfig(std::string const & path) {
 						if(driver_nodes.begin() != driver_nodes.end()) {
 							xmlpp::Element const & driver(dynamic_cast<xmlpp::Element const &>(**driver_nodes.begin()));
 							xmlpp::Attribute const * const name_attribute(driver.get_attribute("name"));
-							if(!name_attribute) std::cerr << "psycle: configuration: expected name attribute in driver element\n";
+							if(!name_attribute) msg << "expected name attribute in driver element\n";
 							else {
 								std::string name(name_attribute->get_value());
 								if(do_enable_sound_) set_driver_by_name(name);
@@ -215,18 +238,26 @@ void Configuration::loadConfig(std::string const & path) {
 						if(alsa_nodes.begin() != alsa_nodes.end()) {
 							xmlpp::Element const & alsa(dynamic_cast<xmlpp::Element const &>(**alsa_nodes.begin()));
 							xmlpp::Attribute const * const device_attribute(alsa.get_attribute("device"));
-							if(!device_attribute) std::cerr << "psycle: configuration: expected device attribute in alsa element\n";
+							if(!device_attribute) msg << "expected device attribute in alsa element\n";
 							else {
 								std::string device(device_attribute->get_value());
 								std::map<std::string, AudioDriver*>::iterator i(driver_map_.find("alsa"));
 								if(i != driver_map_.end()) {
-									psy::core::AudioDriver & audiodriver(*i->second);
-									psy::core::AudioDriverSettings settings(audiodriver.settings()); ///\todo why do we do a copy?
+									AudioDriver & audiodriver(*i->second);
+									AudioDriverSettings settings(audiodriver.playbackSettings()); ///\todo why do we do a copy?
 									settings.setDeviceName(device);
-									audiodriver.setSettings(settings); ///\todo why do we copy?
+									audiodriver.setPlaybackSettings(settings); ///\todo why do we copy?
 								}
 							}
 						}
+					}
+				}
+				if(loggers::warning()()) {
+					std::string const s = msg.str();
+					if(s.length()) {
+						std::ostringstream oss;
+						oss << "psycle: player: config: nonconforming config file:\n" << s;
+						loggers::warning()(oss.str());
 					}
 				}
 			}
@@ -235,6 +266,12 @@ void Configuration::loadConfig(std::string const & path) {
 		#endif
 		do_enable_sound_ = true;
 	} catch(std::exception const & e) {
-		std::cerr << "psycle: configuration: exception while parsing: " << e.what() << "\n";
+		if(loggers::exception()()) {
+			std::ostringstream s;
+			s << "psycle: player: config: exception while parsing: " << e.what();
+			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
 	}
 }
+
+}}

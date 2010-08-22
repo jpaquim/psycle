@@ -1,21 +1,6 @@
-/******************************************************************************
-*  copyright 2007 members of the psycle project http://psycle.sourceforge.net *
-*                                                                             *
-*  This program is free software; you can redistribute it and/or modify       *
-*  it under the terms of the GNU General Public License as published by       *
-*  the Free Software Foundation; either version 2 of the License, or          *
-*  (at your option) any later version.                                        *
-*                                                                             *
-*  This program is distributed in the hope that it will be useful,            *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
-*  GNU General Public License for more details.                               *
-*                                                                             *
-*  You should have received a copy of the GNU General Public License          *
-*  along with this program; if not, write to the                              *
-*  Free Software Foundation, Inc.,                                            *
-*  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                  *
-******************************************************************************/
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #if defined PSYCLE__NET_AUDIO_AVAILABLE
 #include "netaudioout.h"
 #include <stdexcept>
@@ -23,18 +8,14 @@
 #include <sstream>
 #include <cassert>
 #include <cerrno>
-#include <cstdint>
-namespace psy { namespace core {
+
+namespace psycle { namespace audiodrivers {
 
 NetAudioOut::NetAudioOut()
 :
-	AudioDriver(),
-	initialized_(false),
 	threadRunning_(false),
 	killThread_(false),
 	threadId_(0),
-	callback_(0),
-	callbackContext_(0),
 	host_(),
 	port_(0),
 	latency_(4096)
@@ -42,26 +23,12 @@ NetAudioOut::NetAudioOut()
 	setDefaults();
 }
 
-NetAudioOut::~NetAudioOut() {
+NetAudioOut::~NetAudioOut() throw() {
 	Enable(false);
 }
 
 AudioDriverInfo NetAudioOut::info( ) const {
 	return AudioDriverInfo("netaudio","nas sound system driver","not working",false);
-}
-
-void NetAudioOut::Initialize(AUDIODRIVERWORKFN callback, void * callbackContext) {
-	#if !defined NDEBUG
-		std::cout << "psycle: netaudio: initializing\n";
-	#endif
-	assert(!threadRunning_);
-	callback_ = callback;
-	callbackContext_ = callbackContext;
-	initialized_ = true;
-}
-
-bool NetAudioOut::Initialized() {
-	return initialized_;
 }
 
 void NetAudioOut::Configure() {

@@ -18,7 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/song.h>
-#include <psycle/core/singlepattern.h>
+#include <psycle/core/pattern.h>
 
 #include "patternbox.hpp"
 #include "mainwindow.hpp"
@@ -37,7 +37,7 @@
 
 namespace qpsycle {
 
-	PatternBox::PatternBox( psy::core::Song *song, QWidget *parent ) 
+	PatternBox::PatternBox( psycle::core::Song *song, QWidget *parent ) 
 		: QWidget(parent)
 		, currentPattern_(NULL)
 	{
@@ -76,51 +76,54 @@ namespace qpsycle {
 
 	void PatternBox::populatePatternTree()
 	{
-		categoryMap.clear();
 		catItems.clear();
 		patternMap.clear();
 
 		bool isFirst = true;
 
-		std::vector<psy::core::PatternCategory*>::iterator it = song_->patternSequence().patternPool()->begin();
-		for ( ; it < song_->patternSequence().patternPool()->end(); ++it) {
-			psy::core::PatternCategory* category = *it;
-			CategoryItem *categoryItem = new CategoryItem();
-			patternTree()->addTopLevelItem( categoryItem );
-			categoryItem->setText( 0, QString::fromStdString( category->name() ) );
-			QColor col = QColorFromLongColor( category->color() );
-			categoryItem->setBackground( 0, QBrush( col ) );
-			categoryMap[categoryItem] = category;
+		psycle::core::Sequence::patterniterator it = song_->sequence().patternbegin();
+		std::map<std::string, CategoryItem *> categoryMap;
+		for ( ; it < song_->sequence().patternend(); ++it) {
+		  psycle::core::Pattern *pattern = *it;
+		  const std::string& categoryName = pattern->category();
+		  CategoryItem *categoryItem = categoryMap[categoryName];
+		  if (categoryItem == NULL) {
+		    categoryItem = new CategoryItem();
+		    categoryItem->name(categoryName);
+		    categoryMap[categoryName] = categoryItem;
+		    catItems.push_back(categoryItem);
+		    patternTree()->addTopLevelItem( categoryItem );
+		    categoryItem->setText(0, QString::fromStdString(categoryName));
+		    //QColor col = QColorFromLongColor( category->color() );
+		    //categoryItem->setBackground( 0, QBrush( col ) );
+		  }
 
-			std::vector<psy::core::SinglePattern*>::iterator patIt = category->begin();
-			for ( ; patIt < category->end(); patIt++) {
-				PatternItem *patternItem = new PatternItem();
-				categoryItem->addChild( patternItem );
-				psy::core::SinglePattern *pattern = *patIt;
-				patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
-				patternMap[patternItem] = pattern;
-				if (isFirst) {
-					isFirst = false;
-					patternTree_->setCurrentItem( patternItem );
-					QColor color = QColorFromLongColor( category->color() );
-				}
-			}
+		  PatternItem *patternItem = new PatternItem();
+		  categoryItem->addChild( patternItem );
+		  patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
+		  patternMap[patternItem] = pattern;
+		  if (isFirst) {
+		    isFirst = false;
+		    patternTree_->setCurrentItem( patternItem );
+		    //QColor color = QColorFromLongColor( category->color() );
+		  }
 		}
 	}
 
 	void PatternBox::newCategory() 
 	{ 
-		psy::core::PatternCategory* category = song()->patternSequence().patternPool()->createNewCategory("New Category");
-		long defaultColor = 0x29D6DE;
-		category->setColor( defaultColor );
+	  const char* categoryName = "New Category";
+	  //long defaultColor = 0x29D6DE;
+	  //category->setColor( defaultColor );
 
 		CategoryItem* catItem = new CategoryItem();
+		catItem->name("New Category");
 		patternTree()->addTopLevelItem( catItem );
 		patternTree()->setCurrentItem(catItem);
 		catItem->setText( 0, "New Category" );
-		QColor col = QColorFromLongColor( category->color() );
-		catItem->setBackground( 0, QBrush( col ) );
-		categoryMap[catItem] = category;
+		//QColor col = QColorFromLongColor( category->color() );
+		//catItem->setBackground( 0, QBrush( col ) );
+		//categoryMap[catItem] = category;
 		catItems.push_back( catItem );
 	
 	}
@@ -131,31 +134,25 @@ namespace qpsycle {
 			QTreeWidgetItem *item = patternTree()->currentItem();
 
 			CategoryItem *catItem = 0;
-			if ( item->type() == QTreeWidgetItem::UserType + 1 )
+			if ( item->type() == PatternItem::Type)
 			{
 				PatternItem *currentPatItem = (PatternItem*)item;
 				catItem = (CategoryItem*)currentPatItem->parent();
-			} else if ( item->type() == QTreeWidgetItem::UserType + 2 )
+			} else if ( item->type() == CategoryItem::Type )
 			{
 				catItem = (CategoryItem*)item;
 			}
 
-			std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( catItem );
-			if( itr != categoryMap.end() ) 
-			{
-				CategoryItem* catItem = itr->first;
-				psy::core::PatternCategory* cat = itr->second;
-				psy::core::SinglePattern* pattern = cat->createNewPattern("Pattern");
-				QString patName = QString( "Pattern " + QString::number( pattern->id() ) );
-				pattern->setName( patName.toStdString() );
-				PatternItem *patItem = new PatternItem();
+			psycle::core::Pattern* pattern = new psycle::core::Pattern();
+			QString patName = QString( "Pattern " + QString::number( pattern->id() ) );
+			pattern->setName( patName.toStdString() );
+			PatternItem *patItem = new PatternItem();
 
-				catItem->addChild( patItem );
-				patItem->setText( 0, QString::fromStdString( pattern->name() ) );
-				//item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
-				patternMap[patItem] = pattern;
-				patternTree()->setCurrentItem( patItem );
-			}
+			catItem->addChild( patItem );
+			patItem->setText( 0, QString::fromStdString( pattern->name() ) );
+			//item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
+			patternMap[patItem] = pattern;
+			patternTree()->setCurrentItem( patItem );
 		}
 
 	}
@@ -169,16 +166,16 @@ namespace qpsycle {
 			if ( item->type() == QTreeWidgetItem::UserType + 1 )
 			{
 				PatternItem *patItem = (PatternItem*)item;
-				std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr 
+				std::map<PatternItem*, psycle::core::Pattern*>::iterator itr 
 					= patternMap.find( patItem ); 
 
 				if ( itr!=patternMap.end() ) 
 				{
-					psy::core::SinglePattern* pattern = itr->second;
+					psycle::core::Pattern* pattern = itr->second;
 					std::string clonedPatName = pattern->name()+" Clone";
 
 					// Clone the pattern in the song.
-					psy::core::SinglePattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
+					psycle::core::Pattern* clonedPat = new psycle::core::Pattern(*pattern);
 
 					// Add a clone item to the pattern tree.
 					PatternItem* newItem = new PatternItem();
@@ -197,20 +194,18 @@ when the pattern selected changes.
 		}
 	}
 
-	void PatternBox::onNewPatternCreated( psy::core::SinglePattern *newPattern )
+	void PatternBox::onNewPatternCreated( psycle::core::Pattern *newPattern )
 	{
 		// Add a clone item to the pattern tree.
 		PatternItem* newItem = new PatternItem();
 		newItem->setText( 0, QString::fromStdString( newPattern->name() ) );
 
 		CategoryItem *parentCat = 0;
-		std::map<CategoryItem*, psy::core::PatternCategory*>::const_iterator it;
-		for ( it = categoryMap.begin(); it != categoryMap.end(); it++ )
+		std::vector<CategoryItem*>::const_iterator it;
+		for ( it = catItems.begin(); it != catItems.end(); it++ )
 		{
-			CategoryItem *thisCat = (*it).first;
-			qDebug() << categoryMap[thisCat];
-			qDebug() << newPattern->category();
-			if ( categoryMap[thisCat] == newPattern->category() ) {
+		  CategoryItem *thisCat = *it;
+		  if ( thisCat->name() == newPattern->category() ) {
 
 parentCat = thisCat;
 			}
@@ -233,14 +228,14 @@ when the pattern selected changes.
 		if ( patternTree()->currentItem() )
 		{
 			PatternItem* patItem = (PatternItem*)patternTree()->currentItem();
-			std::map<PatternItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( patItem );
+			std::map<PatternItem*, psycle::core::Pattern*>::iterator patItr = patternMap.find( patItem );
 
 			if ( patItr != patternMap.end() ) // only remove if it is a recognisable pattern item.
 			{
-				psy::core::SinglePattern* pattern = patItr->second;
+				psycle::core::Pattern* pattern = patItr->second;
 				patternMap.erase( patItr );
 
-				song()->patternSequence().removeSinglePattern( pattern );
+				song()->sequence().removePattern( pattern );
 				emit patternDeleted();
 
 				CategoryItem* parentCatItem = (CategoryItem*)patItem->parent();
@@ -259,9 +254,9 @@ when the pattern selected changes.
 	{ 
 		QTreeWidgetItem* item = patternTree()->currentItem();
 		if ( item ) {
-			std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
+			std::map<PatternItem*, psycle::core::Pattern*>::iterator itr = patternMap.find( (PatternItem*)item );
 			if ( itr!=patternMap.end() ) {
-				psy::core::SinglePattern *pattern = itr->second;
+				psycle::core::Pattern *pattern = itr->second;
 				emit addPatternToSequencerRequest( pattern );
 			}
 		}
@@ -298,11 +293,11 @@ when the pattern selected changes.
 		}
 		if ( currItem != 0 ) { 
 			// If new item is a pattern...
-			if ( currItem->type() == QTreeWidgetItem::UserType + 1 )
+		  if ( currItem->type() == PatternItem::Type)
 			{
-				std::map<PatternItem*, psy::core::SinglePattern*>::iterator patItr = patternMap.find( (PatternItem*)currItem );
+				std::map<PatternItem*, psycle::core::Pattern*>::iterator patItr = patternMap.find( (PatternItem*)currItem );
 				if( patItr != patternMap.end() ) {
-					psy::core::SinglePattern *pattern = patItr->second;
+					psycle::core::Pattern *pattern = patItr->second;
 					currentPattern_ = pattern;
 					// emit a signal for main window to tell pat view.
 					emit patternSelectedInPatternBox( pattern );
@@ -313,16 +308,9 @@ when the pattern selected changes.
 			}
 
 			// If new item is a category...
-			if ( currItem->type() == QTreeWidgetItem::UserType + 2 )
+			if ( currItem->type() == CategoryItem::Type)
 			{
-				std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)currItem );
-				if( catItr !=categoryMap.end() ) {
-					//psy::core::PatternCategory *category = catItr->second;
-					// FIXME: this needs to do something?
-				}
-				else {
-					std::cerr << "Warning: " << __FILE__ << ": internal error on line" << __LINE__ << ": An unknown category item was selected." << std::endl;
-				}
+			  // FIXME: this needs to do something?
 			}
 		}
 	}
@@ -331,25 +319,37 @@ when the pattern selected changes.
 		QTreeWidgetItem *item = patternTree_->currentItem();
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		// If current item is a pattern...
-		std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
-		if( itr!=patternMap.end() ) {
-			psy::core::SinglePattern *pattern = itr->second;
-			item->setText( 0, newText );
-			pattern->setName( newText.toStdString() );
-			emit patternNameChanged();
-			return;
+		if (item->type() == PatternItem::Type) {
+		  std::map<PatternItem*, psycle::core::Pattern*>::iterator itr = patternMap.find( (PatternItem*)item );
+		  if( itr!=patternMap.end() ) {
+		    psycle::core::Pattern *pattern = itr->second;
+		    item->setText( 0, newText );
+		    pattern->setName( newText.toStdString() );
+		    emit patternNameChanged();
+		    return;
+		  }
 		}
 
-		// If current item is a category...
-		std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)item );
-		if( catItr!=categoryMap.end() ) {
-			psy::core::PatternCategory *category = catItr->second;
-			item->setText( 0, newText );
-			category->setName( newText.toStdString() );
-			return;
+		if (item->type() == CategoryItem::Type) {
+		  CategoryItem *categoryItem = (CategoryItem *)item;
+		  std::string categoryName(newText.toStdString());
+
+		  categoryItem->setText( 0, newText );
+		  categoryItem->name(categoryName);
+
+		  // Set category name on child patterns as well.
+		  for (int ix = 0; ix < categoryItem->childCount(); ++ix) {
+		    QTreeWidgetItem *childItem = categoryItem->child(ix);
+		    if (childItem->type() == PatternItem::Type) {
+		      PatternItem *patternItem = (PatternItem *)childItem;
+		      patternMap[patternItem]->setCategory(categoryName);
+		    } else {
+		      qDebug() << "Child of CategoryItem is not a PatternItem??";
+		    }
+		  }
 		}
 	}
-
+		
 // FIXME: this is duplicated in SequencerItem.
 	const QColor PatternBox::QColorFromLongColor( long longCol )
 	{
@@ -376,26 +376,34 @@ when the pattern selected changes.
 	void PatternBox::onItemEdited( QTreeWidgetItem *item )
 	{
 		// If current item is a pattern...
-		if ( item->type() == QTreeWidgetItem::UserType + 1 )
+	  if ( item->type() == PatternItem::Type)
 		{
-			std::map<PatternItem*, psy::core::SinglePattern*>::iterator itr = patternMap.find( (PatternItem*)item );
+			std::map<PatternItem*, psycle::core::Pattern*>::iterator itr = patternMap.find( (PatternItem*)item );
 			if( itr!=patternMap.end() ) {
-				psy::core::SinglePattern *pattern = itr->second;
+				psycle::core::Pattern *pattern = itr->second;
 				pattern->setName( item->text( 0 ).toStdString() );
 				emit patternNameChanged();
 				return;
 			}
 		}
 
-		if ( item->type() == QTreeWidgetItem::UserType + 2 )
+	  if ( item->type() == CategoryItem::Type)
 		{
-			// If current item is a category...
-			std::map<CategoryItem*, psy::core::PatternCategory*>::iterator catItr = categoryMap.find( (CategoryItem*)item );
-			if( catItr!=categoryMap.end() ) {
-				psy::core::PatternCategory *category = catItr->second;
-				category->setName( item->text( 0 ).toStdString() );
-				return;
-			}
+		  CategoryItem *categoryItem = (CategoryItem *)item;
+		  const std::string &categoryName = categoryItem->name();
+
+		  // Set category name on child patterns as well.
+		  for (int ix = 0; ix < categoryItem->childCount(); ++ix) {
+		    QTreeWidgetItem *childItem = categoryItem->child(ix);
+		    if (childItem->type() == PatternItem::Type) {
+		      PatternItem *patternItem = (PatternItem *)childItem;
+		      patternMap[patternItem]->setCategory(categoryName);
+		    } else {
+		      qDebug() << "Child of CategoryItem is not a PatternItem??";
+		    }
+		  }
+
+		  return;
 		}
 
 	}
@@ -461,13 +469,15 @@ when the pattern selected changes.
 		if ( color.isValid() )
 		{
 			CategoryItem *item = (CategoryItem*)patternTree_->currentItem();
-			std::map<CategoryItem*, psy::core::PatternCategory*>::iterator itr = categoryMap.find( (CategoryItem*) item );
+			/*
+			std::map<CategoryItem*, psycle::core::PatternCategory*>::iterator itr = categoryMap.find( (CategoryItem*) item );
 			if( itr != categoryMap.end() ) 
 			{
-				psy::core::PatternCategory *category = itr->second;
+				psycle::core::PatternCategory *category = itr->second;
 				category->setColor( QColorToLongColor( color ) );
-				item->setBackground( 0, QBrush( color ) );
 			}
+			*/
+			item->setBackground( 0, QBrush( color ) );
 			emit categoryColorChanged();
 		}
 	}

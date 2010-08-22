@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-# copyright 2006-2007 johan boule <bohan@jabber.org>
-# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
+# copyright 2006-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+
+# This tool checks various policies in the source code (formating ...)
 
 import os, sys, fnmatch
 
@@ -181,7 +182,7 @@ if __name__ == '__main__':
 			exclude_patterns = [
 				os.path.join(os.curdir, 'external-packages', '*'),
 				os.path.join('*', '++*'),
-				os.path.join('*', 'build', '*'),
+				os.path.join('*', 'nbproject', '*'),
 				os.path.join('*', 'moc_*.cpp'),
 				os.path.join('*', 'qrc_*.cpp')
 			])
