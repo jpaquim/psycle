@@ -7,7 +7,7 @@
 #define UNIVERSALIS__COMPILER__AUTO_LINK__INCLUDED
 #pragma once
 
-#include "pragmas.hpp"
+#include "pragma.hpp"
 
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	#define UNIVERSALIS__COMPILER__AUTO_LINK(library) UNIVERSALIS__COMPILER__PRAGMA("comment(lib, \"" #library "\"")
