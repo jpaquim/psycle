@@ -6,7 +6,6 @@
 #include "forward_declarations.hpp"
 #include <psycle/engine.hpp>
 #include "host.hpp"
-#include <boost/signal.hpp>
 #define PSYCLE__DECL PSYCLE__HOST
 #include <psycle/detail/decl.hpp>
 namespace psycle { namespace host {

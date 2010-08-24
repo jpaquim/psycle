@@ -13,7 +13,6 @@
 #include <boost/type_traits/is_base_and_derived.hpp>
 #include <boost/call_traits.hpp>
 #include <boost/signal.hpp>
-#include <boost/bind.hpp>
 #include <set>
 #include <vector>
 #include <algorithm>
