@@ -8,15 +8,18 @@ namespace psycle { namespace tests { namespace random_notes {
 
 score2::score2(host::plugin_resolver & resolver, engine::graph & graph)
 :
+	freq_("freq"),
 	resolver_(resolver),
 	graph_(graph),
 	sine_(static_cast<plugins::sine&>(resolver("sine", graph, "sine").node())),
-	freq_(static_cast<plugins::sequence&>(resolver("sequence", graph, "freq").node()))
+	freq_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, freq_.name()).node()))
 {}
 
 void score2::connect(engine::node & out) {
+	freq_plug_.sequence_iterator() = new engine::sequence_iterator(freq_);
+	
 	sine_.output_port("out")->connect(*out.input_port("in"));
-	sine_.input_port("frequency")->connect(*freq_.output_port("out"));
+	sine_.input_port("frequency")->connect(*freq_plug_.output_port("out"));
 }
 
 void score2::generate() {

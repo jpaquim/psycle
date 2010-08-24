@@ -19,15 +19,19 @@ class score1 {
 		void connect(engine::node & out);
 		void generate();
 	private:
+		engine::sequence freq1_, freq2_, freq3_;
+		engine::sequence seq1_, seq2_, seq3_;
+		engine::sequence decay_seq1_, decay_seq2_, decay_seq3_;
+
 		host::plugin_resolver & resolver_;
 		engine::graph & graph_;
 
 		plugins::additioner &additioner_;
 		plugins::sine &sine1_, &sine2_, &sine3_;
-		plugins::sequence &freq1_, &freq2_, &freq3_;
+		plugins::sequence &freq1_plug_, &freq2_plug_, &freq3_plug_;
 		plugins::decay &decay1_, &decay2_, &decay3_;
-		plugins::sequence &seq1_, &seq2_, &seq3_;
-		plugins::sequence &decay_seq1_, &decay_seq2_, &decay_seq3_;
+		plugins::sequence &seq1_plug_, &seq2_plug_, &seq3_plug_;
+		plugins::sequence &decay_seq1_plug_, &decay_seq2_plug_, &decay_seq3_plug_;
 };
 
 }}}
