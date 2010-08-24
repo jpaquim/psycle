@@ -19,11 +19,13 @@ class score2 {
 		void connect(engine::node & out);
 		void generate();
 	private:
+		engine::sequence freq_;
+
 		host::plugin_resolver & resolver_;
 		engine::graph & graph_;
 
 		plugins::sine & sine_;
-		plugins::sequence & freq_;
+		plugins::sequence & freq_plug_;
 };
 
 }}}

@@ -47,14 +47,16 @@ class PSYCLE__DECL sequence : public named {
 class PSYCLE__DECL sequence_iterator {
 	public:
 		/// constructs a sequence iterator.
-		sequence_iterator(sequence const &);
+		sequence_iterator(class sequence const &);
 
 		/// outputs events to the given buffer and advances the beat position.
 		void process(buffer & out, real events_per_second, std::size_t channels) throw(exception);
 
+	public:
+		class sequence const & sequence() const { return sequence_; }
 	private:
 		/// the sequence on which the iteration is done
-		sequence const & sequence_;
+		class sequence const & sequence_;
 		/// iterator in the events_ container positionned at the current beat_
 		sequence::events_type::const_iterator i_;
 
@@ -78,8 +80,8 @@ class PSYCLE__DECL sequence_iterator {
 		public:
 			real seconds_per_beat() const { return seconds_per_beat_; }
 			void seconds_per_beat(real seconds_per_beat) {
-				this->seconds_per_beat_ =     seconds_per_beat;
-				this->beats_per_second_ = 1 / seconds_per_beat;
+				this->seconds_per_beat_ = seconds_per_beat;
+				this->beats_per_second_ = seconds_per_beat ? 1 / seconds_per_beat : 0;
 			}
 		private:
 			real seconds_per_beat_;

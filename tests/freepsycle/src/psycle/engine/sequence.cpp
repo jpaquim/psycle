@@ -14,25 +14,25 @@ namespace psycle { namespace engine {
 
 void sequence::insert_event(real beat, real sample) {
 	events_[beat] = sample;
-//	changed_signal_(*this, beat, beat);
+	changed_signal_(*this, beat, beat);
 }
 
 void sequence::erase_event(real beat) {
 	events_.erase(beat);
-//	changed_signal_(*this, beat, beat);
+	changed_signal_(*this, beat, beat);
 }
 
 void sequence::erase_events(real begin_beat, real end_beat) {
 	events_type::iterator last(events_.lower_bound(end_beat));
 	if(last != events_.end()) --last; // exclude end_beat from range
 	events_.erase(events_.lower_bound(begin_beat), last);
-//	changed_signal_(*this, begin_beat, end_beat);
+	changed_signal_(*this, begin_beat, end_beat);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // sequence_iterator
 
-sequence_iterator::sequence_iterator(sequence const & s)
+sequence_iterator::sequence_iterator(class sequence const & s)
 :
 	sequence_(s),
 	i_(s.events_.end()),
@@ -53,6 +53,7 @@ void sequence_iterator::beat(real beat) {
 
 void sequence_iterator::process(buffer & out, real events_per_second, std::size_t channels) throw(exception) {
 	real const samples_per_beat = events_per_second * seconds_per_beat_;
+	if(!samples_per_beat) return;
 	uint64_t const initial_sample(static_cast<std::size_t>(beat_ * samples_per_beat));
 	real last_beat(beat_ + (out.events() - 1) / samples_per_beat);
 	std::size_t last_event(0), last_event_index(0);
