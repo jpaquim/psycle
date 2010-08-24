@@ -6,6 +6,7 @@
 #include "named.hpp"
 #include "sample.hpp"
 #include "exception.hpp"
+#include <boost/signal.hpp>
 #include <map>
 #define PSYCLE__DECL  PSYCLE__ENGINE
 #include <psycle/detail/decl.hpp>
@@ -23,14 +24,22 @@ class PSYCLE__DECL sequence : public named {
 	///\{
 		public:
 			/// inserts an event
-			void insert_event(real beat, real sample) { events_[beat] = sample; }
+			void insert_event(real beat, real sample);
 			/// erases an event
-			void erase_event(real beat) { events_.erase(beat); }
+			void erase_event(real beat);
 			/// erases the range [begin_beat, end_beat[
 			void erase_events(real begin_beat, real end_beat);
 		private: friend class sequence_iterator;
 			typedef std::map<real, real> events_type;
 			events_type events_;
+	///\}
+
+	///\name signals
+	///\{
+		public:
+			boost::signal<void (sequence const &, real /*begin_beat*/, real /*end_beat*/)> & changed_signal() const { return changed_signal_; }
+		private:
+			boost::signal<void (sequence const &, real /*begin_beat*/, real /*end_beat*/)> mutable changed_signal_;
 	///\}
 };
 
@@ -48,6 +57,9 @@ class PSYCLE__DECL sequence_iterator {
 		sequence const & sequence_;
 		/// iterator in the events_ container positionned at the current beat_
 		sequence::events_type::const_iterator i_;
+
+		boost::signals::scoped_connection sequence_changed_signal_connection_;
+		void on_sequence_changed();
 
 	///\name beats per second
 	///\{
@@ -76,7 +88,7 @@ class PSYCLE__DECL sequence_iterator {
 	///\name position in beat unit
 	///\{
 		public:
-			real beat() const throw() { return beat_; }
+			real beat() const { return beat_; }
 			void beat(real beat);
 		private:
 			real beat_;
@@ -85,7 +97,7 @@ class PSYCLE__DECL sequence_iterator {
 	///\name position in second unit
 	///\{
 		public:
-			real seconds() const throw() { return beat_ * seconds_per_beat(); }
+			real seconds() const { return beat_ * seconds_per_beat(); }
 			void seconds(real seconds) { beat(seconds * beats_per_second()); }
 	///\}
 };

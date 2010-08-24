@@ -5,15 +5,28 @@
 #include <psycle/detail/project.private.hpp>
 #include "sequence.hpp"
 #include "buffer.hpp"
+#include "psycle/engine/sequence.hpp"
+#include <boost/bind.hpp>
 namespace psycle { namespace engine {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // sequence
 
+void sequence::insert_event(real beat, real sample) {
+	events_[beat] = sample;
+//	changed_signal_(*this, beat, beat);
+}
+
+void sequence::erase_event(real beat) {
+	events_.erase(beat);
+//	changed_signal_(*this, beat, beat);
+}
+
 void sequence::erase_events(real begin_beat, real end_beat) {
 	events_type::iterator last(events_.lower_bound(end_beat));
 	if(last != events_.end()) --last; // exclude end_beat from range
 	events_.erase(events_.lower_bound(begin_beat), last);
+//	changed_signal_(*this, begin_beat, end_beat);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,15 +34,20 @@ void sequence::erase_events(real begin_beat, real end_beat) {
 
 sequence_iterator::sequence_iterator(sequence const & s)
 :
-	i_(s.events_.end()),
 	sequence_(s),
+	i_(s.events_.end()),
+	sequence_changed_signal_connection_(s.changed_signal_.connect(boost::bind(&sequence_iterator::on_sequence_changed, this))),
 	beats_per_second_(1),
 	seconds_per_beat_(1),
 	beat_()
 {}
 
+void sequence_iterator::on_sequence_changed() {
+	i_ = sequence_.events_.lower_bound(beat_);
+}
+
 void sequence_iterator::beat(real beat) {
-	this->beat_ = beat;
+	beat_ = beat;
 	i_ = sequence_.events_.lower_bound(beat);
 }
 

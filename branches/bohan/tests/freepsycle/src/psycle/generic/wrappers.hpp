@@ -6,6 +6,7 @@
 #pragma once
 
 #include "base.hpp"
+#include <boost/bind.hpp>
 #include <algorithm>
 
 namespace psycle { namespace generic { namespace wrappers {
