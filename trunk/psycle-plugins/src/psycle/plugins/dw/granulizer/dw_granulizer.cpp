@@ -227,8 +227,9 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo (
 	MI_VERSION,				
-	0,
-	50,
+	0x0100,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"dw granulizer"
 		#ifndef NDEBUG
@@ -317,7 +318,7 @@ float mi::cTable[CUBIC_RESOLUTION];
 
 mi::mi()
 {
-	Vals = new int[sizeof pParameters];
+	Vals = new int[MacInfo.numParameters];
 	layers.resize(MAX_LAYERS);
 	for(int i = 0; i < MAX_LAYERS; ++i)
 	{
@@ -773,19 +774,21 @@ void mi::StartLayer()
 		layers[next]->decay												= (int)(decay);
 
 		//				generate splines for attack/release envelopes (this function is completely arbitrary, but it sounds much better than linear..)
+		layers[next]->attackBuf.clear();
 		for(i=0;i<(int)(attack);++i)				
 		{
 			splineX = (float)i / attack;																																																// 0 <= x <= 1
-			if(splineX < 0.4)				layers[next]->attackBuf[i] = splineX * splineX;																								// x < .4:								x^2
-			else if(splineX>0.6)layers[next]->attackBuf[i] = 1 - ((splineX - 1) * (splineX - 1));				// x > .6:								1 - (x - 1)^2
-			else																layers[next]->attackBuf[i] = 3.4 * splineX - 1.2;																				// .4<=x<=.6:				3.4x - 1.2
+			if(splineX < 0.4)				layers[next]->attackBuf.push_back(splineX * splineX);																								// x < .4:								x^2
+			else if(splineX>0.6)layers[next]->attackBuf.push_back(1 - ((splineX - 1) * (splineX - 1)));				// x > .6:								1 - (x - 1)^2
+			else	layers[next]->attackBuf.push_back(3.4 * splineX - 1.2);																				// .4<=x<=.6:				3.4x - 1.2
 		}
+		layers[next]->decayBuf.clear();
 		for(i=0;i<(int)(decay);++i)
 		{
 			splineX = (float)i / decay;																																																				// 0 <= x <= 1
-			if(splineX < 0.4)				layers[next]->decayBuf[i] = 1 - ((splineX) * (splineX));				// x < .4:								1-(-x)^2 = 1-x^2
-			else if(splineX>0.6)layers[next]->decayBuf[i] = (1-splineX) * (1-splineX);								// x > .6:								(1-x)^2
-			else																layers[next]->decayBuf[i] = 3.4 * (1-splineX) - 1.2;								// .4<=x<=.6:				3.4(1-x) - 1.2
+			if(splineX < 0.4)				layers[next]->decayBuf.push_back(1 - ((splineX) * (splineX)));				// x < .4:								1-(-x)^2 = 1-x^2
+			else if(splineX>0.6)layers[next]->decayBuf.push_back((1-splineX) * (1-splineX));								// x > .6:								(1-x)^2
+			else	layers[next]->decayBuf.push_back(3.4 * (1-splineX) - 1.2);								// .4<=x<=.6:				3.4(1-x) - 1.2
 		}
 
 		layers[next]->pitchCurrent				= (pstart / (float)MAX_PITCH);

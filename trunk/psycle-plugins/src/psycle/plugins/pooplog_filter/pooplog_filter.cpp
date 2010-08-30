@@ -77,180 +77,23 @@ using namespace psycle::helpers::math;
 float SyncAdd[MAXSYNCMODES+1];
 float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 
-CMachineParameter const paraNULL = 
-{ 
-	" ",
-	" ",																												// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_LABEL,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCFcutoff = 
-{ 
-	"Filter Cutoff",
-	"Filter Cutoff",																																				// description
-	0,																																																// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	MAX_VCF_CUTOFF/2
-};
-
-CMachineParameter const paraVCFresonance = 
-{ 
-	"Filter Resonance",
-	"Filter Resonance",																																// description
-	1,																																																// MinValue				
-	240,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	1
-};
-
-CMachineParameter const paraVCFtype = 
-{ 
-	"Filter Type",
-	"Filter Type",																																								// description
-	0,																																																// MinValue				
-	MAXVCFTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraVCFlfospeed = 
-{ 
-	"LFO Rate",
-	"LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	6
-};
-
-
-CMachineParameter const paraVCFlfoamplitude = 
-{ 
-	"Cutoff LFO Depth",
-	"Cutoff LFO Depth",																												// description
-	0,																																																// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraUnbalancelfoamplitude = 
-{ 
-	"Unbalance LFO Depth",
-	"Unbalance LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraGainlfoamplitude = 
-{ 
-	"Shaper Gain LFO Depth",
-	"Shaper Gain LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-
-CMachineParameter const paraVCFlfowave = 
-{ 
-	"LFO Wave",
-	"LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCFlfophase = 
-{ 
-	"LFO Phase",
-	"LFO Phase",																																				// description
-	0,																																																// MinValue				
-	0xffff,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOUTmix = 
-{ 
-	"Mix",
-	"Mix",																																				// description
-	0,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraOUToverdrive = 
-{ 
-	"Shaper Method",
-	"Shaper Method",																																				// description
-	0,																																												// MinValue				
-	MAXOVERDRIVEMETHOD,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraRoute = 
-{ 
-	"Routing",
-	"Routing",																																// description
-	0,																																																// MinValue				
-	1,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraInputGain = 
-{ 
-	"Input Gain",
-	"Input Gain",																																				// description
-	0,																																												// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraOUToverdrivegain = 
-{ 
-	"Shaper Gain/Param",
-	"Shaper Gain/Param",																																				// description
-	0,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraInertia = 
-{
-	"Tweak Inertia",
-	"Tweak Inertia",																																				// description
-	0,																																																// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraUnbalance = 
-{ 
-	"Cutoff Unbalance",																
-	"Cutoff Unbalance",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
+CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
+CMachineParameter const paraVCFcutoff = {"Filter Cutoff", "Filter Cutoff", 0, MAX_VCF_CUTOFF, MPF_STATE, MAX_VCF_CUTOFF/2};
+CMachineParameter const paraVCFresonance = {"Filter Resonance", "Filter Resonance", 1, 240, MPF_STATE, 1};
+CMachineParameter const paraVCFtype = {"Filter Type", "Filter Type", 0, MAXVCFTYPE, MPF_STATE, 0};
+CMachineParameter const paraVCFlfospeed = {"LFO Rate", "LFO Rate", 0, MAX_RATE, MPF_STATE, 6};
+CMachineParameter const paraVCFlfoamplitude = {"Cutoff LFO Depth", "Cutoff LFO Depth", 0, MAX_VCF_CUTOFF, MPF_STATE, 0};
+CMachineParameter const paraUnbalancelfoamplitude = {"Unbalance LFO Depth", "Unbalance LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraGainlfoamplitude = {"Shaper Gain LFO Depth", "Shaper Gain LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraVCFlfowave = {"LFO Wave", "LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraVCFlfophase = {"LFO Phase", "LFO Phase", 0, 0xffff, MPF_STATE, 0};
+CMachineParameter const paraOUTmix = {"Mix", "Mix", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraOUToverdrive = {"Shaper Method", "Shaper Method", 0, MAXOVERDRIVEMETHOD, MPF_STATE, 0};
+CMachineParameter const paraRoute = {"Routing", "Routing", 0, 1, MPF_STATE, 0};
+CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1024, MPF_STATE, 256};
+CMachineParameter const paraOUToverdrivegain = {"Shaper Gain/Param", "Shaper Gain/Param", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraInertia = {"Tweak Inertia", "Tweak Inertia", 0, 1024, MPF_STATE, 0};
+CMachineParameter const paraUnbalance = {"Cutoff Unbalance", "Cutoff Unbalance", 0, 512, MPF_STATE, 256};
 
 enum {
 	e_paraVCFtype,
@@ -268,8 +111,7 @@ enum {
 	e_paraInputGain,
 	e_paraOUTmix,
 	e_paraInertia,
-	e_paraRoute,
-	e_numVALS
+	e_paraRoute
 };
 
 CMachineParameter const *pParameters[] = 
@@ -294,14 +136,15 @@ CMachineParameter const *pParameters[] =
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	0,																																								// flags
-	e_numVALS,																																								// numParameters
-	pParameters,																												// Pointer to parameters
+	MI_VERSION,
+	0x0006,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 	PLUGIN_NAME,
-	"Pooplog Filter",																												// short name
-	"Jeremy Evers",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	"Pooplog Filter",
+	"Jeremy Evers",
+	"About",
 	4
 );
 
@@ -395,7 +238,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[e_numVALS];
+	Vals = new int[MacInfo.numParameters];
 	InitWaveTable();
 	pvcflfowave=SourceWaveTable[0];
 	pLastInertia = pInertia = NULL;

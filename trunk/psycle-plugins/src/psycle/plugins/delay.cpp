@@ -14,7 +14,7 @@ namespace psycle { namespace plugin {
 class Delay : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) throw()
 	{
 		out << "Delay." << std::endl;
 		out << "Compatible with original psycle 1 arguru's dala delay." << std::endl;

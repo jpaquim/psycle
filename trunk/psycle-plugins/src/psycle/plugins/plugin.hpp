@@ -277,10 +277,10 @@ class Plugin : protected plugin_interface::CMachineInterface {
 			void message(std::string const & message) const throw() { this->message("message", message); }
 			/// event called by the host when the user queries information about your plugin.
 			/// override this virtual function in your plugin to output a help text describing what your plugin does, what tracker commands are available etc.
-			virtual void help(std::ostream & out) const throw() { out << "no help available"; }
+			virtual void help(std::ostream & out) throw() { out << "no help available"; }
 		private:
 			///\internal
-			/*override*/ void Command() const throw() {
+			/*override*/ void Command() throw() {
 				std::ostringstream s;
 				help(s);
 				this->message(information.Command, s.str());

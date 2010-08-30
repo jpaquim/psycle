@@ -4,6 +4,9 @@
 
 using namespace psycle::plugin_interface;
 
+float const scale = (1.0f * 65536.0f);
+float const halfscale = (0.5f * 65536.0f);
+
 CMachineParameter const paraDelay = {"effect","Fractal Effect",0,0xfffe,MPF_STATE,0x80};
 CMachineParameter const paraFeedback = {"depth","Fractal Depth",0,0x20,MPF_STATE,0x01};
 
@@ -15,6 +18,7 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo(
 	MI_VERSION,	
+	0x0002,
 	EFFECT,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
@@ -52,29 +56,22 @@ mi::mi() {
 }
 
 mi::~mi() {
-	delete Vals;
+	delete[] Vals;
 }
 
 void mi::Init() {
-	Effect = (32768.0f * 9.0f) / (65534.0f);
-	EffectB = 3.0f - (3.0f * Effect);
-	EffectA = 1.0f - (Effect + EffectB);
-	Depth  = 1;
 }
 
 void mi::SequencerTick() {
-	Effect = (((float) Vals[0]) * 9.0f) / (65534.0f);
-	EffectB = 3.0f - (3.0f * Effect);
-	EffectA = 1.0f - (Effect + EffectB);
-	Depth = Vals[1];
 }
 
 void mi::Command() {
-	pCB->MessBox("Code: Steve Horne aka Ninereeds\nPsyVsn: Jochem vd. Lubbe aka 7900","Fractal Dist",0);
+	pCB->MessBox("Code: Steve Horne aka Ninereeds\nPsyVsn: Jochem vd. Lubbe aka 7900\nAdvice: Not samplerate aware!","Fractal Dist",0);
 }
 
 void mi::ParameterTweak(int par, int val) {
 	Vals[par]=val;
+	//I don't know if there is a way to convert this algorithm to sample-rate aware.
 	if(par==0)
 	{
 		Effect = (((float) Vals[0]) * 9.0f) / ((float) 65534); //effect
@@ -82,16 +79,13 @@ void mi::ParameterTweak(int par, int val) {
 		EffectA = 1.0f - (Effect + EffectB);
 	}
 	else
-		Depth = Vals[1];//depth;
+		Depth = Vals[1];
 }
-
-float const scale = (1.0f * 65536.0f);
-float const halfscale = (0.5f * 65536.0f);
 
 void mi::Work(float *psamples, float *psamplesright , int numsamples, int tracks)
 {
-		float s, ss;
-		int   n;
+	float s, ss;
+	int   n;
 	do
 	{
 		s = ((*psamples) + halfscale) / scale;
@@ -126,9 +120,9 @@ void mi::Work(float *psamples, float *psamplesright , int numsamples, int tracks
 		else
 		{			*psamplesright = (s * scale) - halfscale;		}
 		
-	psamples++;;
-	psamplesright++;
-	}while(--numsamples);
+		psamples++;;
+		psamplesright++;
+	} while(--numsamples);
 }
 
 bool mi::DescribeValue(char* txt,int const param, int const value)

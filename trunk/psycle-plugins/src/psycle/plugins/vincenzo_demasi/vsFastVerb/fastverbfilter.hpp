@@ -19,35 +19,45 @@
 
 #pragma once
 
-// 250 millis. at 44100 Hz
-#define FASTVERB_FILTER_BUFFER_SIZE 22051
-#define FASTVERB_FILTER_MAX_DELAY   (FASTVERB_FILTER_BUFFER_SIZE - 1)
-
 class FastverbFilter
 {
 
 private:
-	float buffer[FASTVERB_FILTER_BUFFER_SIZE];
+	float* buffer;
+	int size;
 	unsigned int writein, readout;
 	float feedback;
 
 public:
 
-	FastverbFilter()
+	FastverbFilter():buffer(0),size(0),readout(0),writein(0)
 	{
-		readout = writein = 0;
-		for(register int i = 0; i < FASTVERB_FILTER_BUFFER_SIZE; ++i)
-			buffer[i] = 0.0f;
 	}
 
 	~FastverbFilter()
 	{
+		if(buffer) delete[] buffer;
+	}
+
+	inline void changeSamplerate(int newSR)
+	{
+		int const newSize=newSR/2 + 1;
+		if (buffer) delete[] buffer;
+		buffer = new float[newSize];
+		for(int i=0; i<newSize; i++ ) {
+			buffer[i]=0.0f;
+		}
+		size=newSize;
+		if(readout>= size) {
+			readout = 0;
+			writein = 0;
+		}
 	}
 
 	inline void setDelay(unsigned int samples)
 	{
-		if((writein = readout + samples) >= FASTVERB_FILTER_BUFFER_SIZE)
-			writein -= FASTVERB_FILTER_BUFFER_SIZE;
+		if((writein = readout + samples) >= size)
+			writein -= size;
 	}
 
 	inline void setFeedback(float gain)
@@ -61,8 +71,8 @@ public:
 			(ignored for efficiency) */
 		float output = sample + feedback * buffer[readout];
 		buffer[writein] = output;
-		if(++writein == FASTVERB_FILTER_BUFFER_SIZE) writein = 0;
-		if(++readout == FASTVERB_FILTER_BUFFER_SIZE) readout = 0;
+		if(++writein == size) writein = 0;
+		if(++readout == size) readout = 0;
 		return output;
 	};
 };

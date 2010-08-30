@@ -41,7 +41,8 @@ CMachineParameter const *pParameters[] = {
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
+	MI_VERSION,
+	0x0110,
 	EFFECT,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
@@ -83,7 +84,7 @@ template<typename Real> inline Real CO_DB(Real v) {
 }
 
 mi::mi() {
-	Vals = new int[sizeof pParameters / sizeof *pParameters];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi() {

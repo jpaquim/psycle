@@ -32,45 +32,10 @@ using namespace psycle::helpers::math;
 #define PLUGIN_NAME "Pooplog Lofi Processor 0.04b"
 
 
-CMachineParameter const paraFrequency = 
-{ 
-	"Resample Frequency",
-	"Resample Frequency",																								// description
-	0,																																																// MinValue				
-	4096,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-CMachineParameter const paraBits = 
-{ 
-	"Resample Bits",
-	"Resample Bits",																																												// description
-	0,																																																// MinValue				
-	32,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-CMachineParameter const paraInputGain = 
-{ 
-	"Input Gain",
-	"Input Gain",																																				// description
-	0,																																												// MinValue				
-	1408,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraUnbalance = 
-{ 
-	"Frequency Unbalance",																
-	"Frequency Unbalance",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
+CMachineParameter const paraFrequency = {"Resample Frequency", "Resample Frequency", 0, 4096, MPF_STATE, 0};
+CMachineParameter const paraBits = {"Resample Bits", "Resample Bits", 0, 32, MPF_STATE, 0};
+CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1408, MPF_STATE, 256};
+CMachineParameter const paraUnbalance = {"Frequency Unbalance", "Frequency Unbalance", 0, 512, MPF_STATE, 256};
 
 enum
 { 
@@ -78,8 +43,7 @@ enum
 	e_paraFrequency,
 	e_paraBits,
 	e_paraUnbalance,
-	e_paraInputGain,
-	num_params
+	e_paraInputGain
 };
 
 
@@ -93,15 +57,16 @@ CMachineParameter const *pParameters[] =
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	0,																																								// flags
-	num_params,																																								// numParameters
-	pParameters,																												// Pointer to parameters
-	PLUGIN_NAME,																				// name
-	"Pooplog Lofi",																												// short name
-	"Jeremy Evers",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
-	num_params
+	MI_VERSION,
+	0x0004,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	PLUGIN_NAME,
+	"Pooplog Lofi",
+	"Jeremy Evers",
+	"About",
+	4
 );
 
 
@@ -139,7 +104,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[num_params];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi()

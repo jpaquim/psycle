@@ -156,442 +156,52 @@ const static float buffindex[NUM_BUFF]={
 	256.0f};
 
 
-
-
-
-
-
-CMachineParameter const paraLengthL = 
-{ 
-	"Left Delay Length",																
-	"Left Delay Length",																																// description
-	0,																																																// MinValue				
-	NUM_BUFF-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	21,
-};
-
-CMachineParameter const paraDelayPanL = 
-{ 
-	"Left Delay Pan",																
-	"Left Delay Pan",																																// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-CMachineParameter const paraFeedbackL = 
-{ 
-	"Left Feedback",																
-	"Left Feedback",																																// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	64,
-};
-
-CMachineParameter const paraFeedbackPanL = 
-{ 
-	"Left Feedback Pan",																
-	"Left Feedback Pan",																																// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0,
-};
-
-
-
-CMachineParameter const paraLengthR = 
-{ 
-	"Right Delay Length",																
-	"Right Delay Length",																																// description
-	0,																																																// MinValue				
-	NUM_BUFF-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	21,
-};
-
-CMachineParameter const paraDelayPanR = 
-{ 
-	"Right Delay Pan",																
-	"Right Delay Pan",																																// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	512,
-};
-
-CMachineParameter const paraFeedbackR = 
-{ 
-	"Right Feedback",																
-	"Right Feedback",																																// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	64,
-};
-
-CMachineParameter const paraFeedbackPanR = 
-{ 
-	"Right Feedback Pan",																
-	"Right Feedback Pan",																																// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	512,
-};
-
-
-
-
-
-
-
-
-CMachineParameter const paraNULL = 
-{ 
-	" ",
-	" ",																												// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_LABEL,																																								// Flags
-	0
-};
-
-CMachineParameter const paraDLVCFcutoff = 
-{ 
-	"Delay Cutoff",
-	"Delay Cutoff",																																				// description
-	0,																																																// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	MAX_VCF_CUTOFF/2
-};
-
-CMachineParameter const paraDLVCFresonance = 
-{ 
-	"Delay Resonance",
-	"Delay Resonance",																																// description
-	1,																																																// MinValue				
-	240,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	1
-};
-
-CMachineParameter const paraDLVCFtype = 
-{ 
-	"Delay Filter Type",
-	"Delay Filter Type",																																								// description
-	0,																																																// MinValue				
-	MAXVCFTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraDLVCFlfospeed = 
-{ 
-	"Delay LFO Rate",
-	"Delay LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraDLVCFlfoamplitude = 
-{ 
-	"Cutoff LFO Depth",
-	"Cutoff LFO Depth",																												// description
-	0,																																																// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraDLUnbalancelfoamplitude = 
-{ 
-	"Unbalance LFO Depth",
-	"Unbalance LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraDLGainlfoamplitude = 
-{ 
-	"Gain LFO Depth",
-	"Gain LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraDLVCFlfowave = 
-{ 
-	"Delay LFO Wave",
-	"Delay LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraDLVCFlfophase = 
-{ 
-	"Delay LFO Phase",
-	"Delay LFO Phase",																																				// description
-	0,																																																// MinValue				
-	0xffff,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraDLOUToverdrive = 
-{ 
-	"Delay Shaper",
-	"Delay Shaper",																																				// description
-	0,																																												// MinValue				
-	MAXOVERDRIVEMETHOD,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraDLOUToverdrivegain = 
-{ 
-	"Shaper Gain/Param",
-	"Shaper Gain/Param",																																				// description
-	0,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraDLUnbalance = 
-{ 
-	"Cutoff Unbalance",																
-	"Cutoff Unbalance",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-CMachineParameter const paraDLRoute = 
-{ 
-	"Delay Routing",
-	"Delay Routing",																																// description
-	0,																																																// MinValue				
-	1,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
+CMachineParameter const paraLengthL = {"Left Delay Length", "Left Delay Length", 0, NUM_BUFF-1, MPF_STATE, 21};
+CMachineParameter const paraDelayPanL = {"Left Delay Pan", "Left Delay Pan", 0, 512, MPF_STATE, 0};
+CMachineParameter const paraFeedbackL = {"Left Feedback", "Left Feedback", 0, 256, MPF_STATE, 64};
+CMachineParameter const paraFeedbackPanL = {"Left Feedback Pan", "Left Feedback Pan", 0, 512, MPF_STATE, 0};
+CMachineParameter const paraLengthR = {"Right Delay Length", "Right Delay Length", 0, NUM_BUFF-1, MPF_STATE, 21};
+CMachineParameter const paraDelayPanR = {"Right Delay Pan", "Right Delay Pan", 0, 512, MPF_STATE, 512};
+CMachineParameter const paraFeedbackR = {"Right Feedback", "Right Feedback", 0, 256, MPF_STATE, 64};
+CMachineParameter const paraFeedbackPanR = {"Right Feedback Pan", "Right Feedback Pan", 0, 512, MPF_STATE, 512};
+CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
+CMachineParameter const paraDLVCFcutoff = {"Delay Cutoff", "Delay Cutoff", 0, MAX_VCF_CUTOFF, MPF_STATE, MAX_VCF_CUTOFF/2};
+CMachineParameter const paraDLVCFresonance = {"Delay Resonance", "Delay Resonance", 1, 240, MPF_STATE, 1};
+CMachineParameter const paraDLVCFtype = {"Delay Filter Type", "Delay Filter Type", 0, MAXVCFTYPE, MPF_STATE, 0};
+CMachineParameter const paraDLVCFlfospeed = {"Delay LFO Rate", "Delay LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraDLVCFlfoamplitude = {"Cutoff LFO Depth", "Cutoff LFO Depth", 0, MAX_VCF_CUTOFF, MPF_STATE, 0};
+CMachineParameter const paraDLUnbalancelfoamplitude = {"Unbalance LFO Depth", "Unbalance LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraDLGainlfoamplitude = {"Gain LFO Depth", "Gain LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraDLVCFlfowave = {"Delay LFO Wave", "Delay LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraDLVCFlfophase = {"Delay LFO Phase", "Delay LFO Phase", 0, 0xffff, MPF_STATE, 0};
+CMachineParameter const paraDLOUToverdrive = {"Delay Shaper", "Delay Shaper", 0, MAXOVERDRIVEMETHOD, MPF_STATE, 0};
+CMachineParameter const paraDLOUToverdrivegain = {"Shaper Gain/Param", "Shaper Gain/Param", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraDLUnbalance = {"Cutoff Unbalance", "Cutoff Unbalance", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraDLRoute = {"Delay Routing", "Delay Routing", 0, 1, MPF_STATE, 0};
 
 
 #ifndef LIGHT
-
-CMachineParameter const paraFBVCFcutoff = 
-{ 
-	"Feedback Cutoff",
-	"Feedback Cutoff",																																				// description
-	0,																																																// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	MAX_VCF_CUTOFF/2
-};
-
-CMachineParameter const paraFBVCFresonance = 
-{ 
-	"Feedback Resonance",
-	"Feedback Resonance",																																// description
-	1,																																																// MinValue				
-	240,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	1
-};
-
-CMachineParameter const paraFBVCFtype = 
-{ 
-	"Feedback Filter Type",
-	"Feedback Filter Type",																																								// description
-	0,																																																// MinValue				
-	MAXVCFTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraFBVCFlfospeed = 
-{ 
-	"Feedback LFO Rate",
-	"Feedback LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraFBVCFlfoamplitude = 
-{ 
-	"Cutoff LFO Depth",
-	"Cutoff LFO Depth",																												// description
-	0,																																																// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraFBUnbalancelfoamplitude = 
-{ 
-	"Unbalance LFO Depth",
-	"Unbalance LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraFBGainlfoamplitude = 
-{ 
-	"Gain LFO Depth",
-	"Gain LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraFBVCFlfowave = 
-{ 
-	"Feedback LFO Wave",
-	"Feedback LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraFBVCFlfophase = 
-{ 
-	"Feedback LFO Phase",
-	"Feedback LFO Phase",																																				// description
-	0,																																																// MinValue				
-	0xffff,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraFBOUToverdrive = 
-{ 
-	"Feedback Shaper",
-	"Feedback Shaper",																																				// description
-	0,																																												// MinValue				
-	MAXOVERDRIVEMETHOD,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraFBRoute = 
-{ 
-	"Feedback Routing",
-	"Feedback Routing",																																// description
-	0,																																																// MinValue				
-	1,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraFBOUToverdrivegain = 
-{ 
-	"Shaper Gain/Param",
-	"Shaper Gain/Param",																																				// description
-	0,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraFBUnbalance = 
-{ 
-	"Cutoff Unbalance",																
-	"Cutoff Unbalance",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-
-CMachineParameter const paraOUToverdrivegain = 
-{ 
-	"Final Gain/Param",
-	"Final Gain/Param",																																				// description
-	0,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOUToverdrive = 
-{ 
-	"Final Shaper",
-	"Final Shaper",																																				// description
-	0,																																												// MinValue				
-	MAXOVERDRIVEMETHOD,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
+CMachineParameter const paraFBVCFcutoff = {"Feedback Cutoff", "Feedback Cutoff", 0, MAX_VCF_CUTOFF, MPF_STATE, MAX_VCF_CUTOFF/2};
+CMachineParameter const paraFBVCFresonance = {"Feedback Resonance", "Feedback Resonance", 1, 240, MPF_STATE, 1};
+CMachineParameter const paraFBVCFtype = {"Feedback Filter Type", "Feedback Filter Type", 0, MAXVCFTYPE, MPF_STATE, 0};
+CMachineParameter const paraFBVCFlfospeed = {"Feedback LFO Rate", "Feedback LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraFBVCFlfoamplitude = {"Cutoff LFO Depth", "Cutoff LFO Depth", 0, MAX_VCF_CUTOFF, MPF_STATE, 0};
+CMachineParameter const paraFBUnbalancelfoamplitude = {"Unbalance LFO Depth", "Unbalance LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraFBGainlfoamplitude = {"Gain LFO Depth", "Gain LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraFBVCFlfowave = {"Feedback LFO Wave", "Feedback LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraFBVCFlfophase = {"Feedback LFO Phase", "Feedback LFO Phase", 0, 0xffff, MPF_STATE, 0};
+CMachineParameter const paraFBOUToverdrive = {"Feedback Shaper", "Feedback Shaper", 0, MAXOVERDRIVEMETHOD, MPF_STATE, 0};
+CMachineParameter const paraFBRoute = {"Feedback Routing", "Feedback Routing", 0, 1, MPF_STATE, 0};
+CMachineParameter const paraFBOUToverdrivegain = {"Shaper Gain/Param", "Shaper Gain/Param", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraFBUnbalance = {"Cutoff Unbalance", "Cutoff Unbalance", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraOUToverdrivegain = {"Final Gain/Param", "Final Gain/Param", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOUToverdrive = {"Final Shaper", "Final Shaper", 0, MAXOVERDRIVEMETHOD, MPF_STATE, 0};
 #endif
 
-
-CMachineParameter const paraInputGain = 
-{ 
-	"Input Gain",
-	"Input Gain",																																				// description
-	0,																																												// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraOUTmix = 
-{ 
-	"Mix",
-	"Mix",																																				// description
-	0,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-CMachineParameter const paraInertia = 
-{
-	"Tweak Inertia",
-	"Tweak Inertia",																																				// description
-	0,																																																// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraTRACKTempo = 
-{ 
-	"Follow Tempo",
-	"Follow Tempo",																												// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	1
-};
+CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1024, MPF_STATE, 256};
+CMachineParameter const paraOUTmix = {"Mix", "Mix", 0, 256, MPF_STATE, 128};
+CMachineParameter const paraInertia = {"Tweak Inertia", "Tweak Inertia", 0, 1024, MPF_STATE, 0};
+CMachineParameter const paraTRACKTempo = {"Follow Tempo", "Follow Tempo", 0, 1, MPF_STATE, 1};
 
 
 #ifndef LIGHT
@@ -638,8 +248,7 @@ enum {
 	e_paraOUTmix,
 	e_paraInertia,
 	e_paraNULL02,
-	e_paraTRACKTempo,
-	e_numVALS
+	e_paraTRACKTempo
 };
 
 CMachineParameter const *pParameters[] = 
@@ -691,14 +300,15 @@ CMachineParameter const *pParameters[] =
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	0,																																								// flags
-	e_numVALS,																																								// numParameters
-	pParameters,																												// Pointer to parameters
+	MI_VERSION,
+	0x0004,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 	PLUGIN_NAME,
-	"Pooplog Delay",																												// short name
-	"Jeremy Evers",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	"Pooplog Delay",
+	"Jeremy Evers",
+	"About",
 	5
 );
 
@@ -732,8 +342,7 @@ enum {
 	e_paraTRACKTempo,
 	e_paraInputGain,
 	e_paraOUTmix,
-	e_paraInertia,
-	e_numVALS
+	e_paraInertia
 };
 
 CMachineParameter const *pParameters[] = 
@@ -771,8 +380,9 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo (
 	MI_VERSION,				
-	0,																																								// flags
-	e_numVALS,																																								// numParameters
+	0x0004,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,																																							// numParameters
 	pParameters,																												// Pointer to parameters
 	PLUGIN_NAME,
 	"Pooplog Delay L",																												// short name
@@ -953,7 +563,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[e_numVALS];
+	Vals = new int[MacInfo.numParameters];
 	InitWaveTable();
 	pDLvcflfowave=SourceWaveTable[0];
 #ifndef LIGHT

@@ -11,7 +11,7 @@ namespace psycle { namespace plugin {
 class Crasher : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) throw()
 	{
 		out << "This is a crash on purpose plugin for helping devers make the host crash proof." << std::endl;
 	}

@@ -13,7 +13,7 @@ using namespace helpers::math;
 
 class Flanger : public Plugin {
 	public:
-		virtual void help(std::ostream & out) const throw() {
+		virtual void help(std::ostream & out) throw() {
 			out << "delay modulated by a sine" << std::endl;
 			out << "compatible with original psycle 1 arguru's flanger" << std::endl;
 			out << std::endl;
@@ -100,7 +100,7 @@ class Flanger : public Plugin {
 		}
 		virtual inline ~Flanger() throw() {}
 		virtual void init();
-		virtual void process(Sample l [], Sample r [], int samples, int);
+		virtual void Work(Sample l [], Sample r [], int samples, int);
 		virtual void parameter(const int &);
 
 	protected:
@@ -173,7 +173,7 @@ inline void Flanger::resize(const Real & delay) {
 	assert(modulation_amplitude_in_samples_ <= delay_in_samples_);
 }
 
-void Flanger::process(Sample l[], Sample r[], int samples, int) {
+void Flanger::Work(Sample l[], Sample r[], int samples, int) {
 	process(sin_sequences_[left], buffers_[left] , writes_[left] , l, samples, (*this)(left_feedback));
 	process(sin_sequences_[right], buffers_[right], writes_[right], r, samples, (*this)(right_feedback));
 	modulation_phase_ = std::fmod(modulation_phase_ + modulation_radians_per_sample_ * samples, pi * 2);

@@ -22,16 +22,16 @@
 #include <psycle/plugin_interface.hpp>
 #include "../vdabout.hpp"
 #include "lowpassfilter.hpp"
-
-#define LTHRESHOLD    0
-#define RTHRESHOLD    1
-#define LOCKTHRESHOLD 2
-#define PREGAIN       3
-#define CUTOFF        4
-#define RESONANCE     5
-#define LOWPASS       6
-#define GAIN          7
-#define PARNUM        8
+enum {
+	LTHRESHOLD=0,
+	RTHRESHOLD,
+	LOCKTHRESHOLD,
+	PREGAIN,
+	CUTOFF,
+	RESONANCE,
+	LOWPASS,
+	GAIN
+};
 
 #define PARCOLS 2
 
@@ -121,17 +121,17 @@ CMachineParameter const *pParameters[] =
 
 psycle::plugin_interface::CMachineInfo const MacInfo (
 	psycle::plugin_interface::MI_VERSION,
-	psycle::plugin_interface::EFFECT,																																				// flags
-	PARNUM,																																				// numParameters
-	pParameters,																												// Pointer to parameters
+	psycle::plugin_interface::EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 #ifdef _DEBUG
-	VDPLUGINNAME " (Debug Build)",												// name
+	VDPLUGINNAME " (Debug Build)",
 #else
-	VDPLUGINNAME,																												// name
+	VDPLUGINNAME,
 #endif
-	VDSHORTNAME,																												// short name
-	VDAUTHOR,																																// author
-	VDCOMMAND,																																// A command, that could be use for open an editor, etc...
+	VDSHORTNAME,
+	VDAUTHOR,
+	VDCOMMAND,
 	PARCOLS
 );
 
@@ -152,4 +152,5 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 		float pregain, gain;
 		int lastThresholdModified;
 		int lowPassOn;
+		int currentSR;
 };

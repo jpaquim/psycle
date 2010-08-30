@@ -18,90 +18,16 @@ using namespace psycle::plugin_interface;
 
 #define MAXIMUM_DELAY   40000
 
-#define NUMPARAMETERS 8
-
-CMachineParameter const paraDry = 
-{ 
-	"Dry",
-	"Dry",
-	-32768,
-	32768,
-	MPF_STATE,
-	32768,
-};
-
-CMachineParameter const paraWet = 
-{ 
-	"Wet",
-	"Wet",
-	-32768,
-	32768,
-	MPF_STATE,
-	0,
-};
-
-CMachineParameter const paraFBL = 
-{ 
-	"Feedback left",
-	"Feedback left",
-	-32768,
-	32768,
-	MPF_STATE,
-	16384,
-};
-
-CMachineParameter const paraFBR = 
-{ 
-	"Feedback right",
-	"Feedback right",
-	-32768,
-	32768,
-	MPF_STATE,
-	16384,
-};
-
-CMachineParameter const paraMinD = 
-{ 
-	"Min Delay",
-	"Min Delay",
-	1,
-	6000,
-	MPF_STATE,
-	1,
-};
-
-CMachineParameter const paraMaxD = 
-{ 
-	"Max Delay",
-	"Max Delay",
-	1,
-	6000,
-	MPF_STATE,
-	5,
-};
-
-CMachineParameter const paraRate = 
-{ 
-	"Rate",
-	"Rate",
-	0,
-	1000,
-	MPF_STATE,
-	1,
-};
-
-CMachineParameter const paraDelay = 
-{ 
-	"Delayer",
-	"Delayer",
-	1,
-	MAXIMUM_DELAY,
-	MPF_STATE,
-	MAXIMUM_DELAY,
-};
-
+CMachineParameter const paraDry = {"Dry", "Dry", -32768, 32768, MPF_STATE, 32768};
+CMachineParameter const paraWet = {"Wet", "Wet", -32768, 32768, MPF_STATE, 0};
+CMachineParameter const paraFBL = {"Feedback left", "Feedback left", -32768, 32768, MPF_STATE, 16384};
+CMachineParameter const paraFBR = {"Feedback right", "Feedback right", -32768, 32768, MPF_STATE, 16384};
+CMachineParameter const paraMinD = {"Min Delay", "Min Delay", 1, 6000, MPF_STATE, 1};
+CMachineParameter const paraMaxD = {"Max Delay", "Max Delay", 1, 6000, MPF_STATE, 5};
+CMachineParameter const paraRate = {"Rate", "Rate", 0, 1000, MPF_STATE, 1};
+CMachineParameter const paraDelay = {"Delayer", "Delayer", 1, MAXIMUM_DELAY, MPF_STATE, MAXIMUM_DELAY};
 CMachineParameter const *pParameters[] = 
-{ 
+{
 	&paraDry,
 	&paraWet,
 	&paraFBL,
@@ -115,8 +41,9 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	0x100,
 	EFFECT,
-	NUMPARAMETERS,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"SChorus"
 		#ifndef NDEBUG
@@ -156,7 +83,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[NUMPARAMETERS];
+	Vals = new int[MacInfo.numParameters];
 	DM_l = new float[MAXIMUM_DELAY];
 	DM_r = new float[MAXIMUM_DELAY];
 	for (int i=0;i<MAXIMUM_DELAY;i++)
