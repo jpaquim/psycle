@@ -1497,7 +1497,7 @@ void mi::Init()
 void mi::Stop()
 {
 	for(int c=0;c<MAX_TRACKS;c++)
-	track[c].NoteOff();
+		track[c].NoteOff();
 }
 
 void mi::ParameterTweak(int par, int val)

@@ -17,60 +17,13 @@ using namespace psycle::plugin_interface;
 // Stk recently got a namespace. We (re)declare it for backward compatibility with older stk versions.
 namespace stk {} using namespace stk;
 
-#define NUMPARAMETERS 5
-
 StkFloat const offset(-36.3763165623); // 6 * 12 - 3 - 12 * ln(440) / ln(2)
 
-CMachineParameter const paraVolume = 
-{
-	"Volume",
-	"Volume",																																				// description
-	0,																																												// MinValue				
-	32767,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32767
-};
-
-CMachineParameter const paraAttack = 
-{
-	"Attack",
-	"Attack",																																				// description
-	32,																																												// MinValue				
-	32767,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32
-};
-
-CMachineParameter const paraDecay = 
-{
-	"Decay",
-	"Decay",																																				// description
-	32,																																												// MinValue				
-	32767,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32
-};
-
-CMachineParameter const paraSustain = 
-{
-	"Sustain",
-	"Sustain",																																				// description
-	0,																																												// MinValue				
-	32767,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	16768
-};
-
-CMachineParameter const paraRelease = 
-{
-	"Release",
-	"Release",																																				// description
-	32,																																												// MinValue				
-	32767,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	328
-};
-
+CMachineParameter const paraVolume = {"Volume", "Volume", 0, 32767, MPF_STATE, 32767};
+CMachineParameter const paraAttack = {"Attack", "Attack", 32, 32767, MPF_STATE, 32};
+CMachineParameter const paraDecay = {"Decay", "Decay", 32, 32767, MPF_STATE, 32};
+CMachineParameter const paraSustain = {"Sustain", "Sustain", 0, 32767, MPF_STATE, 16768};
+CMachineParameter const paraRelease = {"Release", "Release", 32, 32767, MPF_STATE, 328};
 
 CMachineParameter const *pParameters[] = 
 { 
@@ -79,23 +32,23 @@ CMachineParameter const *pParameters[] =
 	&paraDecay,
 	&paraSustain,
 	&paraRelease
-
 };
 
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	GENERATOR,																																// flags
-	NUMPARAMETERS,																												// numParameters
-	pParameters,																												// Pointer to parameters
+	MI_VERSION,
+	0x0100,
+	GENERATOR,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 #ifdef _DEBUG
-	"stk Plucked (Debug build)",								// name
+	"stk Plucked (Debug build)",
 #else
-	"stk Plucked",																								// name
+	"stk Plucked",
 #endif
-	"stk Plucked",																												// short name
-	"Sartorius, Bohan and STK 4.2.0 developers",																												// author
-	"Help",																																				// A command, that could be use for open an editor, etc...
+	"stk Plucked",
+	"Sartorius, Bohan and STK 4.2.0 developers",
+	"Help",
 	1
 );
 
@@ -115,7 +68,6 @@ public:
 	virtual void Stop();
 
 private:
-
 	Plucked * track[MAX_TRACKS];
 	ADSR				adsr[MAX_TRACKS];
 	float				vol_ctrl[MAX_TRACKS];
@@ -128,7 +80,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals=new int[NUMPARAMETERS];
+	Vals=new int[MacInfo.numParameters];
 
 	for (int note=0;note<NOTE_MAX;note++)
 	{

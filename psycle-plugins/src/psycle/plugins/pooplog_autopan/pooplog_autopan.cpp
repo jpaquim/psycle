@@ -56,107 +56,16 @@ using namespace psycle::helpers::math;
 float SyncAdd[MAXSYNCMODES+1];
 float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 
-CMachineParameter const paraNULL = 
-{ 
-	" ",
-	" ",																												// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_LABEL,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraVCFlfospeed = 
-{ 
-	"LFO Rate",
-	"LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	6
-};
-
-
-CMachineParameter const paraPanlfoamplitude = 
-{ 
-	"Pan LFO Depth",
-	"Pan LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraSmoothing = 
-{ 
-	"Delta Smoothing",
-	"Delta Smoothing",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCFlfowave = 
-{ 
-	"LFO Wave",
-	"LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCFlfophase = 
-{ 
-	"LFO Phase",
-	"LFO Phase",																																				// description
-	0,																																																// MinValue				
-	0xffff,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOUTmix = 
-{ 
-	"Mix",
-	"Mix",																																				// description
-	0,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraInputGain = 
-{ 
-	"Input Gain",
-	"Input Gain",																																				// description
-	0,																																												// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraInertia = 
-{
-	"Tweak Inertia",
-	"Tweak Inertia",																																				// description
-	0,																																																// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraPan = 
-{ 
-	"Panning",																
-	"Panning",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
+CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
+CMachineParameter const paraVCFlfospeed = {"LFO Rate", "LFO Rate", 0, MAX_RATE, MPF_STATE, 6};
+CMachineParameter const paraPanlfoamplitude = {"Pan LFO Depth", "Pan LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraSmoothing = {"Delta Smoothing", "Delta Smoothing", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraVCFlfowave = {"LFO Wave", "LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraVCFlfophase = {"LFO Phase", "LFO Phase", 0, 0xffff, MPF_STATE, 0};
+CMachineParameter const paraOUTmix = {"Mix", "Mix", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1024, MPF_STATE, 256};
+CMachineParameter const paraInertia = {"Tweak Inertia", "Tweak Inertia", 0,	1024, MPF_STATE, 0};
+CMachineParameter const paraPan = {"Panning", "Panning", 0, 512, MPF_STATE, 256};
 
 enum {
 	e_paraPan,
@@ -167,8 +76,7 @@ enum {
 	e_paraVCFlfophase,
 	e_paraInertia,
 	e_paraInputGain,
-	e_paraOUTmix,
-	e_numVALS
+	e_paraOUTmix
 };
 
 CMachineParameter const *pParameters[] = 
@@ -186,14 +94,15 @@ CMachineParameter const *pParameters[] =
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	0,																																								// flags
-	e_numVALS,																																								// numParameters
-	pParameters,																												// Pointer to parameters
-	PLUGIN_NAME,																				// name
-	"Pooplog Autopan",																												// short name
-	"Jeremy Evers",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	MI_VERSION,
+	0x0006,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	PLUGIN_NAME,
+	"Pooplog Autopan",
+	"Jeremy Evers",
+	"About",
 	3
 );
 
@@ -259,7 +168,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[e_numVALS];
+	Vals = new int[MacInfo.numParameters];
 	InitWaveTable();
 	pvcflfowave=SourceWaveTable[0];
 	pLastInertia = pInertia = NULL;

@@ -53,8 +53,6 @@
 
 using namespace psycle::plugin_interface;
 
-#define NUMPARAMETERS 36
-
 static char buffer[] = 
 		"Extra filtering:"\
 		"\nSet this to enable extra-filtering,"\
@@ -182,18 +180,19 @@ CMachineParameter const *pParameters[] =
 };
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	EFFECT,																																								// flags
-	NUMPARAMETERS,																																// numParameters
-	pParameters,																																// Pointer to parameters
+	MI_VERSION,
+	0x0100,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 #ifdef _DEBUG
-	"MoreAmp EQ (Debug build)",								// name
+	"MoreAmp EQ (Debug build)",
 #else
-	"MoreAmp EQ",																								// name
+	"MoreAmp EQ",
 #endif
-	"maEQ",																												// short name
-	"Felipe Rivera/pmisteli/Sartorius",																												// author
-	"Help",																																// A command, that could be use for open an editor, etc...
+	"maEQ",
+	"Felipe Rivera/pmisteli/Sartorius",
+	"Help",
 	3
 );
 
@@ -214,11 +213,19 @@ public:
 private:
 	void maEqualizerReset();
 	void maEqualizerSetLevels();
+	void maEqualizerSetPreamp();
+
+	void worksse(float *psamplesleft, float *psamplesright, int numSamples);
 
 	void calc_coeffs();
 	inline void find_f1_and_f2(double f0, double octave_percent, double *f1, double *f2);
 	inline int find_root(double a, double b, double c, double *x0);
 	void clean_history();
+
+	void load_coeffssse(int);
+	void set_gainsse(int,int,float);
+	void setup_gainsse(int);
+	void clean_historysse();
 
 	sIIRCoefficients *iir_cf;
 	
@@ -230,6 +237,7 @@ private:
 	float gains10[EQBANDS31];
 
 	float *gains;
+	float preamp;
 
 	float dither[MAX_BUFFER_LENGTH];
 
@@ -245,10 +253,11 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[NUMPARAMETERS];
+	Vals = new int[MacInfo.numParameters];
 	gains = this->gains10;
 	//iir_cf = new sIIRCoefficients;
 	iir_cf = NULL;
+	srate= -1;
 }
 
 mi::~mi()
@@ -263,13 +272,13 @@ void mi::Init()
 	bool forceupdate = ( srate != pCB->GetSamplingRate() );
 	srate = pCB->GetSamplingRate();
 
+	bnds = EQBANDS10;
+
 	if (!equalizerInitialized || forceupdate ) {
 		calc_coeffs();
 
 		clean_history();
 	}
-
-	bnds = EQBANDS10;
 
 	maEqualizerSetLevels();
 
@@ -280,21 +289,20 @@ void mi::Init()
 void mi::SequencerTick()
 {
 // Called on each tick while sequencer is playing
-	if(this->srate != pCB->GetSamplingRate())
+	if(srate != pCB->GetSamplingRate())
 	{
-		this->srate = pCB->GetSamplingRate();
-		this->calc_coeffs();
-		this->clean_history();
+		srate = pCB->GetSamplingRate();
+		calc_coeffs();
+		clean_history();
 	}
 }
 
 void mi::Command()
 {
-// Called when user presses editor button
-// Probably you want to show your custom window here
-// or an about button
-
-pCB->MessBox(&buffer[0],"MoreAmp EQ",0);
+	// Called when user presses editor button
+	// Probably you want to show your custom window here
+	// or an about button
+	pCB->MessBox(&buffer[0],"MoreAmp EQ",0);
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -363,7 +371,7 @@ void mi::ParameterTweak(int par, int val)
 		switch(par)
 		{
 			case _DIV: break;
-			case PRE_AMP: this->maEqualizerSetLevels(); break; // set preamp
+			case PRE_AMP: maEqualizerSetPreamp(); break;
 			case BANDS: bnds = (val==0?EQBANDS10:EQBANDS31); this->maEqualizerReset(); break;
 			//case EXTRA: extra = (val==1); break;
 			//case LINK: lnk = val; break;
@@ -401,16 +409,19 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			for(index = 0; index < numsamples; index++)
 			{
 					out_l = out_r = 0;
-					*psamplesleft += dither[di];
-					*psamplesright += dither[di];
 					
+			// denormalization via random noise
+			float const leftsample = (*psamplesleft*preamp); 
+			float const rightsample = (*psamplesright*preamp);
+			float const leftsampledither = leftsample + dither[di];
+			float const rightsampledither = rightsample + dither[di];
 					/* For each band */
 					for(band = 0; band < bnds; band++)
 					{
 						// left ch
 
 						/* Store Xi(n) */
-						data_history[band][0].x[g_eqi] = *psamplesleft;
+				data_history[band][0].x[g_eqi] = leftsampledither;
 						/* Calculate and store Yi(n) */
 			
 						data_history[band][0].y[g_eqi] =
@@ -424,18 +435,12 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						- iir_cf[band].beta * data_history[band][0].y[g_eqk]
 								);
 
-						/* 
-						* The multiplication by 2.0 was 'moved' into the coefficients to save
-						* CPU cycles here */
 						/* Apply the gain  */
-						out_l +=  data_history[band][0].y[g_eqi] * gains[band]; // * 2.0;
-						//denormal = -denormal;
-
+				out_l +=  data_history[band][0].y[g_eqi] * gains[band];
 
 						// right ch
-
 						/* Store Xi(n) */
-						data_history[band][1].x[g_eqi] = *psamplesright;
+				data_history[band][1].x[g_eqi] = rightsampledither;
 						/* Calculate and store Yi(n) */
 			
 						data_history[band][1].y[g_eqi] =
@@ -447,17 +452,12 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 							+ iir_cf[band].gamma * data_history[band][1].y[g_eqj]
 						/* 								- beta * y(n-2) */
 							- iir_cf[band].beta * data_history[band][1].y[g_eqk]
-								);//+ denormal;
+				);
 
-						/* 
-						* The multiplication by 2.0 was 'moved' into the coefficients to save
-						* CPU cycles here */
 						/* Apply the gain  */
-						out_r +=  data_history[band][1].y[g_eqi] * gains[band]; // * 2.0;
-						//denormal = -denormal;
+				out_r +=  data_history[band][1].y[g_eqi] * gains[band];
 
 					} /* For each band */
-
 
 					/* Filter the sample again */
 					for(band = 0; band < bnds; band++)
@@ -465,6 +465,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						// left ch
 						/* Store Xi(n) */
 						data_history2[band][0].x[g_eqi] = out_l;
+
 						/* Calculate and store Yi(n) */
 						data_history2[band][0].y[g_eqi] = 
 						(
@@ -475,16 +476,13 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 								+ iir_cf[band].gamma * data_history2[band][0].y[g_eqj]
 							/* 								- beta * y(n-2) */
 							- iir_cf[band].beta * data_history2[band][0].y[g_eqk]
-								); // + denormal;
-
+								);
 
 						/* Apply the gain */
 						out_l +=  data_history2[band][0].y[g_eqi]*gains[band];
 
 						// right ch
-
 						/* Store Xi(n) */
-
 						data_history2[band][1].x[g_eqi] = out_r;
 
 						/* Calculate and store Yi(n) */
@@ -497,7 +495,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 						+ iir_cf[band].gamma * data_history2[band][1].y[g_eqj]
 						/* 								- beta * y(n-2) */
 								- iir_cf[band].beta * data_history2[band][1].y[g_eqk]
-								); // + denormal;
+								);
 
 						/* Apply the gain */
 						out_r +=  data_history2[band][1].y[g_eqi]*gains[band];
@@ -508,27 +506,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 					output. This substitutes the multiplication by 0.25
 					*/
 
-					out_l += *psamplesleft*.25f; 
-					out_r += *psamplesright*.25f;
-
-					out_l -= dither[di]*.25f; 
-					out_r -= dither[di]*.25f;
-
-					/* Limit the output */
-					if(out_l < -32768.f)
-						out_l = -32768.f;
-					else if(out_l > 32767.f)
-						out_l = 32767.f;
-
-					/* Limit the output */
-					if(out_r < -32768.f)
-						out_r = -32768.f;
-					else if(out_r > 32767.f)
-						out_r = 32767.f;
-
-					*psamplesleft = out_l;
-					*psamplesright = out_r;
-
+			*psamplesleft = out_l + (leftsample*0.25f);
+			*psamplesright = out_r + (rightsample*0.25f);
 
 				g_eqi = (g_eqi + 1) % 3;
 				g_eqj = (g_eqj + 1) % 3;
@@ -544,19 +523,19 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			for(index = 0; index < numsamples; index++)
 			{
 					out_l = out_r = 0;
-
-					*psamplesleft += dither[di];
-					*psamplesright += dither[di];
-
+			// denormalization via random noise
+			float const leftsample = (*psamplesleft*preamp); 
+			float const rightsample = (*psamplesright*preamp);
+			float const leftsampledither = leftsample + dither[di];
+			float const rightsampledither = rightsample + dither[di];
 					/* For each band */
 					for(band = 0; band < bnds; band++)
 					{
 						// left ch
-
 						/* Store Xi(n) */
-						data_history[band][0].x[g_eqi] = *psamplesleft;
+				data_history[band][0].x[g_eqi] = leftsampledither;
+
 						/* Calculate and store Yi(n) */
-			
 						data_history[band][0].y[g_eqi] =
 						(
 						/* 								= alpha * [x(n)-x(n-2)] */
@@ -568,18 +547,12 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 								- iir_cf[band].beta * data_history[band][0].y[g_eqk]
 								);
 
-						/* 
-						* The multiplication by 2.0 was 'moved' into the coefficients to save
-						* CPU cycles here */
 						/* Apply the gain  */
-						out_l +=  data_history[band][0].y[g_eqi] * gains[band]; // * 2.0;
-						//denormal = -denormal;
-
+				out_l +=  data_history[band][0].y[g_eqi] * gains[band];
 
 						// right ch
-
 						/* Store Xi(n) */
-						data_history[band][1].x[g_eqi] = *psamplesright;
+				data_history[band][1].x[g_eqi] = rightsampledither;
 						/* Calculate and store Yi(n) */
 
 						data_history[band][1].y[g_eqi] =
@@ -593,41 +566,13 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 								- iir_cf[band].beta * data_history[band][1].y[g_eqk]
 								);
 
-						/* 
-						* The multiplication by 2.0 was 'moved' into the coefficients to save
-						* CPU cycles here */
 						/* Apply the gain  */
-						out_r +=  data_history[band][1].y[g_eqi] * gains[band]; // * 2.0;
-						//denormal = -denormal;
+				out_r +=  data_history[band][1].y[g_eqi] * gains[band];
 
 					} /* For each band */
 
-					/* Volume stuff
-					Scale down original PCM sample and add it to the filters 
-					output. This substitutes the multiplication by 0.25
-					*/
-
-					out_l += *psamplesleft*.25f; 
-					out_r += *psamplesright*.25f;
-
-					out_l -= dither[di]*.25f; 
-					out_r -= dither[di]*.25f;
-
-					/* Limit the output */
-					if(out_l < -32768.f)
-						out_l = -32768.f;
-					else if(out_l > 32767.f)
-						out_l = 32767.f;
-
-					/* Limit the output */
-					if(out_r < -32768.f)
-						out_r = -32768.f;
-					else if(out_r > 32767.f)
-						out_r = 32767.f;
-
-					*psamplesleft = out_l;
-					*psamplesright = out_r;
-
+			*psamplesleft = out_l + (leftsample*0.25f);
+			*psamplesright = out_r + (rightsample*0.25f);
 
 				g_eqi = (g_eqi + 1) % 3;
 				g_eqj = (g_eqj + 1) % 3;
@@ -637,11 +582,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 				++psamplesleft;
 				++psamplesright;
-				
 			}/* For each pair of samples */
 	}
-
-
 }
 
 // Function that describes value on client's displaying
@@ -718,18 +660,24 @@ void mi::maEqualizerReset()
 	}
 }
 
+void mi::maEqualizerSetPreamp() {
+	preamp = (9.9999946497217584440165E-01 *
+	        exp(6.9314738656671842642609E-02 * (float)(Vals[PRE_AMP]+20))
+	        + 3.7119444716771825623636E-07);
+}
+
 void mi::maEqualizerSetLevels()
 {
-	float const preamp = (float)Vals[PRE_AMP];
+	maEqualizerSetPreamp();
 	for(int i=0;i<EQBANDS31;i++){
-		float factor = std::pow(10.f,(preamp + DBfromScaleGain(Vals[i])) / 20.0f);
-		//this->gains[i] = (factor==1.f)?0.0f:-0.2f + (factor / 5.125903437963185f);
-		gains31[i] = -0.2f + (factor / 5.125903437963185f);
+		gains31[i] = (2.5220207857061455181125E-01 *
+		        exp(8.0178361802353992349168E-02 * DBfromScaleGain(Vals[i]))
+		        - 2.5220207852836562523180E-01);
 	}
 	for(int i=0;i<EQBANDS10;i++){
-		float factor = std::pow(10.f,(preamp + DBfromScaleGain(Vals[3*i+2])) / 20.0f);
-		//this->gains[i] = (factor==1.f)?0.0f:-0.2f + (factor / 5.125903437963185f);
-		gains10[i] = -0.2f + (factor / 5.125903437963185f);
+		gains10[i] = (2.5220207857061455181125E-01 *
+		        exp(8.0178361802353992349168E-02 * DBfromScaleGain(Vals[3*i+2]))
+		        - 2.5220207852836562523180E-01);
 	}
 }
 
@@ -815,7 +763,7 @@ void mi::clean_history()
 	/* this is only needed if we use fpu code and there's no other place for
 	the moment to init the dither array*/
 	for (int n = 0; n < MAX_BUFFER_LENGTH; n++) {
-		dither[n] = (rand() % 4) - 2;
+		dither[n] = (rand() / float(RAND_MAX));
 	}
 	di = 0;
 	g_eqi = 0; g_eqj = 2; g_eqk = 1;

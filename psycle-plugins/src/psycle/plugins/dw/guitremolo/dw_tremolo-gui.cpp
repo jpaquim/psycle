@@ -221,7 +221,7 @@ mi::mi(int index)
 
 mi::~mi()
 {
-	delete Vals;
+	delete[] Vals;
 	bgr->DeleteObject();
 	delete bgr;
 

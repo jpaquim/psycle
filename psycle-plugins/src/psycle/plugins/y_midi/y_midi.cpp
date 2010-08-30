@@ -65,7 +65,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 mi::mi()
 {
 	int i;
-	Vals=new int[NUMPARAMETERS];
+	Vals=new int[MacInfo.numParameters];
 
 	InitMidi();
 	for(i=0;i<MIDI_TRACKS; i++)
@@ -128,8 +128,8 @@ void mi::ParameterTweak(int par, int val)
 	{
 	case 0:
 		{
-			///\todo: finish this.
-			pars.portidx = val;
+			///\todo: finish this. It selects the MIDI output device.
+			pars.portidx = val;break;
 		}
 	case 1: numChannel[0].SetPatch(val); pars.patch1=val; break;
 	case 2: numChannel[1].SetPatch(val); pars.patch2=val; break;
@@ -164,7 +164,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	switch(param)
 	{
 		///\todo: finish this.
-	case 0: strcpy(txt,"unimplemented"); return false;break;
+	case 0: strcpy(txt,"unimplemented"); return true;break;
 	case 1: strcpy(txt,GmNames[pars.patch1]); return true;break;
 	case 2: strcpy(txt,GmNames[pars.patch2]); return true;break;
 	case 3: strcpy(txt,GmNames[pars.patch3]); return true;break;

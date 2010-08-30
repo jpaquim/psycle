@@ -9,20 +9,20 @@
 #include <stdio.h>
 
 #define YMIDI_VERSION "1.1"
-#define NUMPARAMETERS 17
-#define MIDI_TRACKS 16																				// Maximum tracks allowed.
+int const IYMIDI_VERSION =0x0110;
+#define MIDI_TRACKS 16				// Maximum tracks allowed.
 
 //===================================================================
 // TWO BYTE PARAMETER MIDI EVENTS
-#define MIDI_NOTEOFF								0x80        // note-off
-#define MIDI_NOTEON												0x90        // note-on
-#define MIDI_AFTERTOUCH								0xa0        // aftertouch
+#define MIDI_NOTEOFF					0x80        // note-off
+#define MIDI_NOTEON						0x90        // note-on
+#define MIDI_AFTERTOUCH					0xa0        // aftertouch
 #define MIDI_CCONTROLLER				0xb0        // continuous controller
-#define MIDI_PITCHWHEEL								0xe0        // pitch wheel
+#define MIDI_PITCHWHEEL					0xe0        // pitch wheel
 //===================================================================
 // ONE BYTE PARAMETER MIDI EVENTS
 #define MIDI_PATCHCHANGE				0xc0        // patch change
-#define MIDI_CHANPRESSURE				0xd0								// channel pressure
+#define MIDI_CHANPRESSURE				0xd0		// channel pressure
 //===================================================================
 
 
@@ -121,8 +121,9 @@ psycle::plugin_interface::CMachineParameter const *pParameters[] =
 
 psycle::plugin_interface::CMachineInfo const MacInfo (
 	psycle::plugin_interface::MI_VERSION,
+	IYMIDI_VERSION,
 	psycle::plugin_interface::GENERATOR,
-	NUMPARAMETERS,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"YMidi - Midi Out "
 		"v. " YMIDI_VERSION

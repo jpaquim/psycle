@@ -11,7 +11,7 @@ namespace psycle { namespace plugin {
 class Distortion : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) throw()
 	{
 		out << "distortion ..." << std::endl;
 		out << "compatible with psycle 1 arguru's original distortion" << std::endl;

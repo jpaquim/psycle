@@ -144,85 +144,14 @@ const static float buffindex[NUM_BUFF]={
 	248.0f,
 	256.0f};
 
-CMachineParameter const paraLength = 
-{ 
-	"Buffer Length",																
-	"Buffer Length",																																// description
-	0,																																																// MinValue				
-	NUM_BUFF-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	25,
-};
-
-CMachineParameter const paraSpeed = 
-{ 
-	"Scratch Speed",
-	"Scratch Speed",																																// description
-	int(-SPEED_ONE*2),																																																// MinValue				
-	SPEED_MAX,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	int(SPEED_ONE),
-};
-
-CMachineParameter const paraDragL = 
-{ 
-	"Left Drag Delay",																
-	"Left Drag Delay",																																				// description
-	0,																																																// MinValue				
-	DRAG_MAX,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	DRAG_MAX/2,
-};
-
-CMachineParameter const paraDragR = 
-{ 
-	"Right Drag Delay",																
-	"Right Drag Delay",																																				// description
-	0,																																																// MinValue				
-	DRAG_MAX,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	DRAG_MAX/2,
-};
-
-CMachineParameter const paraUnbalance = 
-{ 
-	"Speed Unbalance",																
-	"Speed Unbalance",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-CMachineParameter const paraFeedback = 
-{ 
-	"Feedback",																
-	"Feedback",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-CMachineParameter const paraMix = 
-{ 
-	"Mix",																
-	"Mix",																																				// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-CMachineParameter const paraInputGain = 
-{ 
-	"Input Gain",
-	"Input Gain",																																				// description
-	0,																																												// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
+CMachineParameter const paraLength = {"Buffer Length", "Buffer Length", 0, NUM_BUFF-1, MPF_STATE, 25};
+CMachineParameter const paraSpeed = {"Scratch Speed", "Scratch Speed", int(-SPEED_ONE*2), SPEED_MAX, MPF_STATE, int(SPEED_ONE)};
+CMachineParameter const paraDragL = {"Left Drag Delay", "Left Drag Delay", 0, DRAG_MAX, MPF_STATE, DRAG_MAX/2};
+CMachineParameter const paraDragR = {"Right Drag Delay", "Right Drag Delay", 0, DRAG_MAX, MPF_STATE, DRAG_MAX/2};
+CMachineParameter const paraUnbalance = {"Speed Unbalance", "Speed Unbalance", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraFeedback = {"Feedback", "Feedback", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraMix = {"Mix", "Mix", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1024, MPF_STATE, 256};
 
 enum
 { 
@@ -234,8 +163,7 @@ enum
 	e_paraUnbalance,
 	e_paraFeedback,
 	e_paraInputGain,
-	e_paraMix,
-	num_param
+	e_paraMix
 };
 
 CMachineParameter const *pParameters[] = 
@@ -253,14 +181,15 @@ CMachineParameter const *pParameters[] =
 
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	0,																																								// flags
-	num_param,																																								// numParameters
-	pParameters,																												// Pointer to parameters
-	PLUGIN_NAME,																				// name
-	"Pooplog Scratch",																												// short name
-	"Jeremy Evers",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	MI_VERSION,
+	0x0006,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	PLUGIN_NAME,
+	"Pooplog Scratch",
+	"Jeremy Evers",
+	"About",
 	4
 );
 
@@ -310,7 +239,7 @@ mi::mi()
 {
 	denormal = (float)1.0E-18;
 	// The constructor zone
-	Vals = new int[num_param];
+	Vals = new int[MacInfo.numParameters];
 	Vals[e_paraLength] = 17;
 }
 

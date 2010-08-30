@@ -8,8 +8,8 @@
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cmath>
-#include "../dsp/Inertia.h"
 #include <cstdio>
+#include "../dsp/Inertia.h"
 
 using namespace psycle::plugin_interface;
 
@@ -17,7 +17,7 @@ using namespace psycle::plugin_interface;
 //				Defines
 //============================================================================
 #define MAC_NAME				"Slicit"
-#define MAC_VERSION				"1.0"
+int const MAC_VERSION = 0x0100;
 #define MAC_AUTHOR				"Druttis"
 
 //============================================================================
@@ -362,13 +362,14 @@ struct PROG
 //============================================================================
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	0x0100,
 	EFFECT,
-	NUM_PARAMS,
+	sizeof pParams / sizeof *pParams,
 	pParams,
 #ifdef _DEBUG
-	MAC_NAME " " MAC_VERSION " (Debug)",
+	MAC_NAME " (Debug)",
 #else
-	MAC_NAME " " MAC_VERSION,
+	MAC_NAME,
 #endif
 	MAC_NAME,
 	MAC_AUTHOR " on " __DATE__,
@@ -487,7 +488,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[NUM_PARAMS];
+	Vals = new int[MacInfo.numParameters];
 	m_programs = new PROG[NUM_PROGRAMS];
 	Init();
 }
@@ -631,7 +632,7 @@ void mi::Command()
 		"Greetz to all psycle doods!\n\n"
 		"---------------------------\n"
 		"druttis@darkface.pp.se\n",
-		MAC_AUTHOR " " MAC_NAME " v." MAC_VERSION,
+		MAC_AUTHOR " " MAC_NAME,
 		0
 	);
 }

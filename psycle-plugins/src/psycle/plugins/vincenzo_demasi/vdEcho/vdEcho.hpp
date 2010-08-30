@@ -23,16 +23,18 @@
 #include "../vdabout.hpp"
 #include "combfilter.hpp"
 
-#define LDELAY    0
-#define LDRY      1
-#define LWET      2
-#define RDELAY    3
-#define RDRY      4
-#define RWET      5
-#define LOCKDELAY 6
-#define LOCKDRY   7
-#define LOCKWET   8
-#define PARNUM    9
+enum {
+	LDELAY=0,
+	LDRY,
+	LWET,
+	RDELAY,
+	RDRY,
+	RWET,
+	LOCKDELAY,
+	LOCKDRY,
+	LOCKWET
+};
+
 
 #define PARCOLS 3
 
@@ -40,9 +42,10 @@
 #define VDSHORTNAME  "Echo"
 #define VDAUTHOR     "V. Demasi (Built on "__DATE__")"
 #define VDCOMMAND    "License"
+int const VDVERSION = 0x110;
 
 #define MIN_DELAY  0
-#define MAX_DELAY  COMB_FILTER_MAX_DELAY
+#define MAX_DELAY  22050
 #define MIN_GAIN   0
 #define MAX_GAIN   100
 #define GAIN_NORM  100.0f
@@ -119,17 +122,18 @@ CMachineParameter const *pParameters[] =
 
 psycle::plugin_interface::CMachineInfo const MacInfo (
 	psycle::plugin_interface::MI_VERSION,
-	psycle::plugin_interface::EFFECT,																																				// flags
-	PARNUM,																																				// numParameters
-	pParameters,																												// Pointer to parameters
+	VDVERSION,
+	psycle::plugin_interface::EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 #ifdef _DEBUG
-	VDPLUGINNAME " (Debug Build)",												// name
+	VDPLUGINNAME " (Debug Build)",
 #else
-	VDPLUGINNAME,																												// name
+	VDPLUGINNAME,
 #endif
-	VDSHORTNAME,																												// short name
-	VDAUTHOR,																																// author
-	VDCOMMAND,																																// A command, that could be use for open an editor, etc...
+	VDSHORTNAME,
+	VDAUTHOR,
+	VDCOMMAND,
 	PARCOLS
 );
 
@@ -149,4 +153,5 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 		CombFilter rightFilter;
 		float lDryGain, lWetGain, rDryGain, rWetGain;
 		int lastDelayModified, lastDryModified, lastWetModified;
+		int currentSR;
 	};

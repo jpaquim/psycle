@@ -24,6 +24,7 @@ void comb::setbuffer(int samples)
 	}
 	bufsize = samples;
 	universalis::os::aligned_memory_alloc(16, buffer, (bufsize+3)&0xFFFFFFFC);
+	if(bufidx>=bufsize) bufidx = 0;
 }
 
 void comb::mute()

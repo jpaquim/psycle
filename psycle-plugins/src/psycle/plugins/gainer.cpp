@@ -11,7 +11,7 @@ class Gainer : public Plugin
 {
 	public:
 
-		/*override*/ void help(std::ostream & out) const throw()
+		/*override*/ void help(std::ostream & out) throw()
 		{
 			out << "just a multiplier" << std::endl;
 		}

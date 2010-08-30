@@ -15,46 +15,10 @@ using namespace psycle::plugin_interface;
 #define MT_NONE 1
 #define MT_CENTER 2
 
-CMachineParameter const leftExtent = 
-{ 
-	"Left",
-	"Left pan extent",
-	0,
-	128,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const rightExtent =
-{
-	"Right",
-	"Right pan extent",
-	0,
-	128,
-	MPF_STATE,
-	128
-};
-
-CMachineParameter const maintain = 
-{
-	"Maintain",
-	"Maintain",
-	0,
-	2,
-	MPF_STATE,
-	MT_NONE
-};
-
-CMachineParameter const allowFlip =
-{
-	"Allow Flip",
-	"Allow channel flipping",
-	0,
-	1,
-	MPF_STATE,
-	FL_YES
-};
-
+CMachineParameter const leftExtent = {"Left", "Left pan extent", 0, 128, MPF_STATE, 0};
+CMachineParameter const rightExtent = {"Right", "Right pan extent", 0, 128, MPF_STATE, 128};
+CMachineParameter const maintain = {"Maintain", "Maintain", 0, 2, MPF_STATE, MT_NONE};
+CMachineParameter const allowFlip = {"Allow Flip", "Allow channel flipping", 0, 1, MPF_STATE, FL_YES};
 
 CMachineParameter const *pParameters[] = 
 { 
@@ -67,8 +31,9 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo (
 	MI_VERSION,				
-	0,
-	4,
+	0x0001,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"dw IoPan"
 		#ifndef NDEBUG
@@ -97,7 +62,7 @@ class mi : public CMachineInterface {
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-	Vals = new int[sizeof pParameters];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi() {

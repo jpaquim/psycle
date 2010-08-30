@@ -43,68 +43,54 @@
 
 using namespace psycle::plugin_interface;
 
-CMachineParameter const paraThreshold =
-{
-	"Threshold",
-	"Threshold level", // description
-	16,                // MinValue				
-	32768,             // MaxValue
-	MPF_STATE,         // Flags
-	32768,             // default value
-};
+CMachineParameter const paraThreshold = {"Threshold", "Threshold level", 16, 32768, MPF_STATE, 32768};
+CMachineParameter const paraHardness = {"Hardness", "Hardness", 1, 2048, MPF_STATE, 1024};
 
-CMachineParameter const paraHardness =
-{
-	"Hardness",
-	"Hardness",        // description
-	1,                 // MinValue				
-	2048,              // MaxValue
-	MPF_STATE,         // Flags
-	1024,              // default value
-};
-
-CMachineParameter const *pParameters[] = 
-{ 
+CMachineParameter const *pParameters[] = { 
 	&paraThreshold,
 	&paraHardness
 };
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
-	0,                                     // flags
-	2,                                     // numParameters
-	pParameters,                           // Pointer to parameters
+	0x0100,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 #ifndef NDEBUG
-	"ThunderPalace SoftSat (Debug build)", // name
+	"ThunderPalace SoftSat (Debug build)",
 #else
-	"ThunderPalace SoftSat",               // name
+	"ThunderPalace SoftSat",
 #endif
-	"SoftSat",                             // short name
-	"Catatonic Porpoise",                  // author
-	"About",                 // A command that is used to display an about box
+	"SoftSat",
+	"Catatonic Porpoise",
+	"About",
 	3
 );
 
 
 class mi : public CMachineInterface
 {
-	public:
-		mi();
-		virtual ~mi();
+public:
+	mi();
+	virtual ~mi();
 
-		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
-		virtual bool DescribeValue(char* txt,int const param, int const value);
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
+	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
+	virtual bool DescribeValue(char* txt,int const param, int const value);
+	virtual void Command();
+	virtual void ParameterTweak(int par, int val);
 
-	private:
-	};
+private:
+	inline void ProcessChannel(float& sample);
+	float gradation;
+	float range;
+};
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[2];
+	Vals = new int[MacInfo.numParameters];
 }
 
 mi::~mi()
@@ -120,65 +106,35 @@ void mi::Command()
 void mi::ParameterTweak(int par, int val)
 {
 	Vals[par] = val;
+	switch(par) {
+	case 0: range = ((float) val) / ((gradation+1)/2);
+		break;
+	case 1: gradation = ((float) val) / 2049.0f;
+		break;
+	}
 }
 
 void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int tracks)
 {
-	const float gradation = ((float) Vals[1]) / 2049.0f;       // paraHardness
-	const float range = ((float) Vals[0]) / ((gradation+1)/2); // paraThreshold
-
-	do
-	{
+	do {
 		float sl = *psamplesleft / range;
 		float sr = *psamplesright / range;
 
-		if (sl > 0)
-		{
-			if (sl > gradation)
-			{
-				sl = gradation + (sl-gradation)
-					/ (1+((sl-gradation)/(1-gradation))
-						* ((sl-gradation)/(1-gradation)));
-			}
-			if (sl > 1.0f)
-				sl = (gradation + 1.0f) / 2.0f;
+		if (sl > 0) {
+			ProcessChannel(sl);
 		}
-		else
-		{
+		else {
 			sl = -sl;
-			if (sl > gradation)
-			{
-				sl = gradation + (sl-gradation)
-					/ (1+((sl-gradation)/(1-gradation))
-						* ((sl-gradation)/(1-gradation)));
-			}
-			if (sl > 1.0f)
-				sl = (gradation + 1.0f) / 2.0f;
+			ProcessChannel(sl);
 			sl = -sl;
 		}
 
-		if (sr > 0)
-		{
-			if (sr > gradation)
-			{
-				sr = gradation + (sr-gradation)
-					/ (1+((sr-gradation)/(1-gradation))
-						* ((sr-gradation)/(1-gradation)));
-			}
-			if (sr > 1.0f)
-				sr = (gradation + 1.0f) / 2.0f;
+		if (sr > 0) {
+			ProcessChannel(sr);
 		}
-		else
-		{
+		else {
 			sr = -sr;
-			if (sr > gradation)
-			{
-				sr = gradation + (sr-gradation)
-					/ (1+((sr-gradation)/(1-gradation))
-						* ((sr-gradation)/(1-gradation)));
-			}
-			if (sr > 1.0f)
-				sr = (gradation + 1.0f) / 2.0f;
+			ProcessChannel(sr);
 			sr = -sr;
 		}
 
@@ -200,4 +156,17 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	}
 
 	return false; // use default (integer) display mechanism?
+}
+
+
+inline void mi::ProcessChannel(float& sample)
+{
+	if (sample > gradation)
+	{
+		sample = gradation + (sample-gradation)
+			/ (1+((sample-gradation)/(1-gradation))
+				* ((sample-gradation)/(1-gradation)));
+	}
+	if (sample > 1.0f)
+		sample = (gradation + 1.0f) / 2.0f;
 }

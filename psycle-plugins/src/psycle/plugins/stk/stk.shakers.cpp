@@ -15,68 +15,12 @@ using namespace psycle::plugin_interface;
 // Stk recently got a namespace. We (re)declare it for backward compatibility with older stk versions.
 namespace stk {} using namespace stk;
 
-int const NUMPARAMETERS = 6;
-
-CMachineParameter const paraShakeEnergy = 
-{ 
-	"Shake Energy",
-	"Shake Energy",																																				// description
-	0,																																																// MinValue				
-	128,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	64
-};
-
-CMachineParameter const paraDecay = 
-{ 
-	"Decay",
-	"Decay",																																				// description
-	0,																																																// MinValue				
-	128,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	64
-};
-
-
-CMachineParameter const paraObjects = 
-{ 
-	"Objects",
-	"Objects",																																				// description
-	1,																																												// MinValue				
-	128,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	10
-};
-
-CMachineParameter const paraResonanceFrequency = 
-{ 
-	"Resonance Frequency",
-	"Resonance Frequency",																																// description
-	1,																																																// MinValue				
-	128,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	64
-};
-
-CMachineParameter const paraShakeEnergy2 = 
-{ 
-	"Shake Energy2",
-	"Shake Energy 2",																																				// description
-	1,																																																// MinValue				
-	128,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	64
-};
-
-CMachineParameter const paraVolume = 
-{
-	"Volume",
-	"Volume",																																				// description
-	0,																																												// MinValue				
-	32767,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	32767
-};
+CMachineParameter const paraShakeEnergy = {"Shake Energy", "Shake Energy", 0, 128, MPF_STATE, 64};
+CMachineParameter const paraDecay = {"Decay", "Decay", 0, 128, MPF_STATE, 64};
+CMachineParameter const paraObjects = {"Objects", "Objects", 1, 128, MPF_STATE, 10};
+CMachineParameter const paraResonanceFrequency = {"Resonance Frequency", "Resonance Frequency", 1, 128, MPF_STATE, 64};
+CMachineParameter const paraShakeEnergy2 = {"Shake Energy2", "Shake Energy 2", 1, 128, MPF_STATE, 64};
+CMachineParameter const paraVolume = {"Volume", "Volume", 0, 32767, MPF_STATE, 32767};
 
 CMachineParameter const *pParameters[] = 
 { 
@@ -88,20 +32,20 @@ CMachineParameter const *pParameters[] =
 	&paraVolume
 };
 
-
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	GENERATOR,																																// flags
-	NUMPARAMETERS,																												// numParameters
-	pParameters,																												// Pointer to parameters
+	MI_VERSION,
+	0x0100,
+	GENERATOR,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 #ifdef _DEBUG
-	"stk Shakers (Debug build)",								// name
+	"stk Shakers (Debug build)",
 #else
-	"stk Shakers",																								// name
+	"stk Shakers",
 #endif
-	"Shakers",																												// short name
-	"Sartorius, bohan and STK 4.2.0 developers",																												// author
-	"Help",																																				// A command, that could be use for open an editor, etc...
+	"Shakers",
+	"Sartorius, bohan and STK 4.2.0 developers",
+	"Help",
 	1
 );
 
@@ -132,7 +76,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals=new int[NUMPARAMETERS];
+	Vals=new int[MacInfo.numParameters];
 }
 
 mi::~mi()

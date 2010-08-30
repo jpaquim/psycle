@@ -7,7 +7,7 @@ namespace psycle { namespace plugin {
 class dw_eq : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) throw()
 	{
 		out << "dw eq v0.1" << std::endl;
 		out << "parametric eq plugin by d.w.aley" << std::endl;

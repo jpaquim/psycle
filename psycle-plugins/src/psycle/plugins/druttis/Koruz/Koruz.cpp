@@ -20,7 +20,7 @@ using namespace psycle::plugin_interface;
 //				Defines
 //============================================================================
 #define MAC_NAME				"Koruz"
-#define MAC_VERSION				"1.0"
+int const MAC_VERSION  = 0x0110;
 #define MAC_AUTHOR				"Druttis"
 //============================================================================
 //				Wavetable
@@ -62,7 +62,6 @@ CMachineParameter const paramChorusPhase = { "Chorus Phase", "Chorus Phase", 0, 
 #define PARAM_CHORUS_SWIRL 13
 CMachineParameter const paramChorusSwirl = { "Chorus Swirl", "Chorus Swirl", 0, 256, MPF_STATE, 192 };
 
-#define NUM_PARAMS 14
 //============================================================================
 //				Parameter list
 //============================================================================
@@ -90,13 +89,14 @@ CMachineParameter const *pParams[] =
 //============================================================================
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	MAC_VERSION,
 	EFFECT,
-	NUM_PARAMS,
+	sizeof pParams / sizeof *pParams,
 	pParams,
 #ifdef _DEBUG
-	MAC_NAME " " MAC_VERSION " (Debug)",
+	MAC_NAME " (Debug)",
 #else
-	MAC_NAME " " MAC_VERSION,
+	MAC_NAME,
 #endif
 	MAC_NAME,
 	MAC_AUTHOR " on " __DATE__,
@@ -120,15 +120,8 @@ public:
 	virtual void SequencerTick();
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int numtracks);
-	inline int GetSamplingRate()
-	{
-		return pCB->GetSamplingRate();
-	}
-	inline int GetTickLength()
-	{
-		return pCB->GetTickLength();
-	}
 public:
+	int currentSR;
 
 	//				Phaser
 	float				phaser_min;
@@ -161,9 +154,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[NUM_PARAMS];
-	//
-	Stop();
+	Vals = new int[MacInfo.numParameters];
 	//
 	int i;
 	float t;
@@ -182,7 +173,6 @@ mi::mi()
 
 mi::~mi()
 {
-	Stop();
 	delete[] Vals;
 }
 
@@ -206,6 +196,7 @@ void mi::Init()
 	chorus_right.Init(2047);
 	chorus_left_phase = 0.0f;
 	chorus_right_phase = 0.0f;
+	currentSR = pCB->GetSamplingRate();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -231,7 +222,7 @@ void mi::Command()
 		"Greetz to all psycle doods!\n\n"
 		"---------------------------\n"
 		"druttis@darkface.pp.se\n",
-		MAC_AUTHOR " " MAC_NAME " v." MAC_VERSION,
+		MAC_AUTHOR " " MAC_NAME,
 		0
 	);
 }
@@ -251,13 +242,13 @@ void mi::ParameterTweak(int par, int val)
 	switch (par)
 	{
 		case PARAM_PHASER_MIN:
-			phaser_min = (float) val * 128.0f / (float) pCB->GetSamplingRate();
+			phaser_min = (float) val * 128.0f / (float)currentSR;
 			break;
 		case PARAM_PHASER_MAX:
-			phaser_max = (float) val * 128.0f / (float) pCB->GetSamplingRate();
+			phaser_max = (float) val * 128.0f / (float)currentSR;
 			break;
 		case PARAM_PHASER_RATE:
-			phaser_increment = (float) (val * WAVESIZE) / 51.2f / (float) pCB->GetSamplingRate();
+			phaser_increment = (float) (val * WAVESIZE) / 51.2f / (float)currentSR;
 			break;
 		case PARAM_PHASER_FB:
 			tmp = (float) val / 256.0f;
@@ -276,13 +267,13 @@ void mi::ParameterTweak(int par, int val)
 			phaser_swirl = (float) pow(2.0f, (float) val / 128.0f - 1.0f);
 			break;
 		case PARAM_CHORUS_DELAY:
-			chorus_delay = (float) val * 0.0128f * (float) pCB->GetSamplingRate();
+			chorus_delay = (float) val * 0.0128f * (float)currentSR;
 			break;
 		case PARAM_CHORUS_DEPTH:
 			chorus_depth = (float) val * 4.0f;
 			break;
 		case PARAM_CHORUS_RATE:
-			chorus_increment = (float) (val * WAVESIZE) / 51.2f / (float) pCB->GetSamplingRate();
+			chorus_increment = (float) (val * WAVESIZE) / 51.2f / (float)currentSR;
 			break;
 		case PARAM_CHORUS_FB:
 			tmp = (float) val / 256.0f;
@@ -367,7 +358,15 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 
 void mi::SequencerTick()
 {
-	//				Insert code here for effects.
+	if(currentSR != pCB->GetSamplingRate())
+	{
+		currentSR = pCB->GetSamplingRate();
+		phaser_min = (float) Vals[PARAM_PHASER_MIN] * 128.0f / (float)currentSR;
+		phaser_max = (float) Vals[PARAM_PHASER_MAX] * 128.0f / (float)currentSR;
+		phaser_increment = (float) (Vals[PARAM_PHASER_RATE] * WAVESIZE) / 51.2f / (float)currentSR;
+		chorus_delay = (float) Vals[PARAM_CHORUS_DELAY] * 0.0128f * (float)currentSR;
+		chorus_increment = (float) (Vals[PARAM_CHORUS_RATE] * WAVESIZE) / 51.2f / (float)currentSR;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////

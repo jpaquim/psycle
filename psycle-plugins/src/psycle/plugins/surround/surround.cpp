@@ -11,40 +11,23 @@
 
 using namespace psycle::plugin_interface;
 
-#define VERNUM "v1.2"
+const short VERNUM=0x120;
 
-CMachineParameter const paraLength = 
-{ 
-	"Cutoff Frequency",
-	"Cutoff for HighPass Filter",
-	0,
-	1000,
-	MPF_STATE,
-	400,
-};
-CMachineParameter const paraMode = 
-{ 
-	"Work Mode",
-	"Working model for the surround",
-	0,
-	1,
-	MPF_STATE,
-	0,
-};
-
-CMachineParameter const *pParameters[] = 
-{ 
-	// global
+CMachineParameter const paraLength = {"Cutoff Frequency", "Cutoff for HighPass Filter", 0, 1000, MPF_STATE, 400};
+CMachineParameter const paraMode = {"Work Mode", "Working model for the surround", 0, 1, MPF_STATE, 0};
+CMachineParameter const *pParameters[] =
+{	// global
 	&paraLength,
 	&paraMode
 };
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	VERNUM,
 	EFFECT,
-	2,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
-	"KarLKoX Surround " VERNUM
+	"KarLKoX Surround "
 		#ifndef NDEBUG
 			" (Debug build)"
 		#endif
@@ -80,7 +63,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[2];
+	Vals = new int[MacInfo.numParameters];
 	initialized=false;
 }
 
@@ -120,7 +103,7 @@ void mi::SequencerTick()
 
 void mi::Command()
 {
-	pCB->MessBox("Made 14/12/2001 by Saïd Bougribate for Psycl3!\n\n Some modifications made by [JAZ] on Dec 2002\n Version" VERNUM,"-=KarLKoX=- [Surround]",0);
+	pCB->MessBox("Made 14/12/2001 by Saïd Bougribate for Psycl3!\n\n Some modifications made by [JAZ] on Dec 2002","-=KarLKoX=- [Surround]",0);
 }
 
 void mi::ParameterTweak(int par, int val)

@@ -13,7 +13,7 @@ using namespace helpers::math;
 class Ring_Modulator : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) throw()
 	{
 		out << "ring modulator with frequency modulation of the amplitude modulation" << std::endl;
 		out << "compatible with original psycle 1 arguru's psych-osc" << std::endl;

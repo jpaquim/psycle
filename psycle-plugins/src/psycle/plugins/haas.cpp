@@ -16,7 +16,7 @@ public:
 	/// <bohan> use 64-bit floating point numbers or else accuracy is not sufficient
 	typedef double Real;
 
-	/*override*/ void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out)  throw()
 	{
 		out << "Haas stereo time delay spatial localization" << std::endl;
 		out << std::endl;

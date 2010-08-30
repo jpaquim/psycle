@@ -13,7 +13,7 @@ using namespace helpers::math;
 class Filter_2_Poles : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) const throw()
+	/*override*/ void help(std::ostream & out) throw()
 	{
 		out << "filter in the frequency domain using 2 poles" << std::endl;
 		out << "compatible with original psycle 1 arguru's 2 poles filter" << std::endl;
@@ -129,7 +129,7 @@ void Filter_2_Poles::parameter(const int & parameter)
 	switch(parameter)
 	{
 	case cutoff_frequency:
-		cutoff_sin_ = static_cast<Sample>((*this)(cutoff_frequency)* 6.0 * seconds_per_sample());
+		cutoff_sin_ = static_cast<Sample>((*this)(cutoff_frequency)* 6.283 * seconds_per_sample());
 		break;
 	case modulation_sequencer_ticks:
 		modulation_radians_per_sample_ = (*this)(modulation_sequencer_ticks) / samples_per_sequencer_tick();
@@ -163,8 +163,9 @@ void Filter_2_Poles::Work(Sample l[], Sample r[], int samples, int)
 
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
 	{
-		//\fixme: lowpass 11Khz, ressonance 0.9,  mod freq 15Hz, mod amp 0.5. It can be seen that it stays more time at highest value
-		// than at lowest, suggesting that the lfo it topping the range (without being the real top anyway). This is not coherent with the values.
+		//\fixme: lowpass at half (~800Hz), ressonance 0.9,  mod freq 6Ticks, mod amp 0.5. Use arguru synth with the white noise setting.
+		// The sound is not sinusoidal, because the modulation is not exponential
+		//(i.e. since the parameter is exponential, this change has to be exponential too)
 		modulation_phase_ = std::fmod(modulation_phase_ + modulation_radians_per_sample_ * samples, pi * 2);
 		update_coefficients();
 	}

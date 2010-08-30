@@ -10,240 +10,31 @@ using namespace psycle::helpers::math;
 int const WAVETABLES = 4;
 int const MAX_ENV_TIME = 250000;
 
-
-CMachineParameter const paraOSC1wave = {
-	"OSC1 Wave",
-	"OSC1 Wave",
-	0,				
-	4,
-	MPF_STATE,
-	1
-};
-
-CMachineParameter const paraOSC2wave = {
-	"OSC2 Wave",
-	"OSC2 Wave",
-	0,
-	4,
-	MPF_STATE,
-	1
-};
-
-
-CMachineParameter const paraOSC2detune = {
-	"OSC2 Detune",
-	"OSC2 Detune",
-	-36,
-	36,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraOSC2finetune = {
-	"OSC2 Finetune",
-	"OSC2 Finetune",
-	0,				
-	256,
-	MPF_STATE,
-	27
-};
-
-CMachineParameter const paraOSC2sync = {
-	"OSC2 Sync",
-	"OSC2 Sync",
-	0,
-	1,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraVCAattack = {
-	"VCA Attack",
-	"VCA Attack",
-	32,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	32
-};
-
-
-CMachineParameter const paraVCAdecay = {
-	"VCA Decay",
-	"VCA Decay",
-	32,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	6341
-};
-
-CMachineParameter const paraVCAsustain = {
-	"VCA Sustain",
-	"VCA Sustain level",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-
-CMachineParameter const paraVCArelease = {
-	"VCA Release",
-	"VCA Release",
-	32,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	2630
-};
-
-
-CMachineParameter const paraVCFattack = {
-	"VCF Attack",
-	"VCF Attack",
-	32,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	589
-};
-
-
-CMachineParameter const paraVCFdecay = {
-	"VCF Decay",
-	"VCF Decay",
-	32,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	2630
-};
-
-CMachineParameter const paraVCFsustain = {
-	"VCF Sustain",
-	"VCF Sustain level",
-	0,
-	256,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraVCFrelease = {
-	"VCF Release",
-	"VCF Release",
-	32,
-	MAX_ENV_TIME,
-	MPF_STATE,
-	2630
-};
-
-CMachineParameter const paraVCFlfospeed = {
-	"VCF LFO Speed",
-	"VCF LFO Speed",
-	1,
-	65536,
-	MPF_STATE,
-	32
-};
-
-
-CMachineParameter const paraVCFlfoamplitude = {
-	"VCF LFO Amplitude",
-	"VCF LFO Amplitude",
-	0,				
-	240,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraVCFcutoff = {
-	"VCF Cutoff",
-	"VCF Cutoff",
-	0,				
-	240,
-	MPF_STATE,
-	120
-};
-
-CMachineParameter const paraVCFresonance = {
-	"VCF Resonance",
-	"VCF Resonance",
-	1,
-	240,
-	MPF_STATE,
-	128
-};
-
-CMachineParameter const paraVCFtype = {
-	"VCF Type",
-	"VCF Type",
-	0,
-	19,
-	MPF_STATE,
-	0
-};
-
-
-CMachineParameter const paraVCFenvmod = 
-{ 
-	"VCF Envmod",
-	"VCF Envmod",
-	-240,
-	240,
-	MPF_STATE,
-	80
-};
-
-CMachineParameter const paraOSCmix = {
-	"OSC Mix",
-	"OSC Mix",
-	0,
-	256,
-	MPF_STATE,
-	128
-};
-
-CMachineParameter const paraOUTvol = {
-	"Volume",
-	"Volume",
-	0,				
-	256,
-	MPF_STATE,
-	128
-};
-
-CMachineParameter const paraARPmode = {
-	"Arpeggiator",
-	"Arpeggiator",
-	0,
-	16,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraARPbpm = {
-	"Arp. BPM",
-	"Arp. BPM",
-	32,
-	1024,
-	MPF_STATE,
-	125
-};
-
-
-CMachineParameter const paraARPcount = {
-	"Arp. Steps",
-	"Arp. Steps",
-	0,				
-	16,
-	MPF_STATE,
-	4
-};
-
-CMachineParameter const paraGlobalDetune = {
-	"Glb. Detune",
-	"Global Detune",
-	-36,
-	36,
-	MPF_STATE,
-	1 
-};
+CMachineParameter const paraOSC1wave = {"OSC1 Wave", "OSC1 Wave", 0, 4, MPF_STATE, 1};
+CMachineParameter const paraOSC2wave = {"OSC2 Wave", "OSC2 Wave", 0, 4, MPF_STATE, 1};
+CMachineParameter const paraOSC2detune = {"OSC2 Detune", "OSC2 Detune", -36, 36, MPF_STATE, 0};
+CMachineParameter const paraOSC2finetune = {"OSC2 Finetune", "OSC2 Finetune", 0, 256, MPF_STATE, 27};
+CMachineParameter const paraOSC2sync = {"OSC2 Sync", "OSC2 Sync", 0, 1, MPF_STATE, 0};
+CMachineParameter const paraVCAattack = {"VCA Attack", "VCA Attack", 32, MAX_ENV_TIME, MPF_STATE, 32};
+CMachineParameter const paraVCAdecay = {"VCA Decay", "VCA Decay", 32, MAX_ENV_TIME, MPF_STATE, 6341};
+CMachineParameter const paraVCAsustain = {"VCA Sustain", "VCA Sustain level", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraVCArelease = {"VCA Release", "VCA Release", 32, MAX_ENV_TIME, MPF_STATE, 2630};
+CMachineParameter const paraVCFattack = {"VCF Attack", "VCF Attack", 32, MAX_ENV_TIME, MPF_STATE, 589};
+CMachineParameter const paraVCFdecay = {"VCF Decay", "VCF Decay", 32, MAX_ENV_TIME, MPF_STATE, 2630};
+CMachineParameter const paraVCFsustain = {"VCF Sustain", "VCF Sustain level", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraVCFrelease = {"VCF Release", "VCF Release", 32, MAX_ENV_TIME, MPF_STATE, 2630};
+CMachineParameter const paraVCFlfospeed = {"VCF LFO Speed", "VCF LFO Speed", 1, 65536, MPF_STATE, 32};
+CMachineParameter const paraVCFlfoamplitude = {"VCF LFO Amplitude", "VCF LFO Amplitude", 0, 240, MPF_STATE, 0};
+CMachineParameter const paraVCFcutoff = {"VCF Cutoff", "VCF Cutoff", 0, 240, MPF_STATE, 120};
+CMachineParameter const paraVCFresonance = {"VCF Resonance", "VCF Resonance", 1, 240, MPF_STATE, 128};
+CMachineParameter const paraVCFtype = {"VCF Type", "VCF Type", 0, 19, MPF_STATE, 0};
+CMachineParameter const paraVCFenvmod = {"VCF Envmod", "VCF Envmod", -240, 240, MPF_STATE, 80};
+CMachineParameter const paraOSCmix = {"OSC Mix", "OSC Mix", 0, 256, MPF_STATE, 128};
+CMachineParameter const paraOUTvol = {"Volume", "Volume", 0, 256, MPF_STATE, 128};
+CMachineParameter const paraARPmode = {"Arpeggiator", "Arpeggiator", 0, 16, MPF_STATE, 0};
+CMachineParameter const paraARPbpm = {"Arp. BPM", "Arp. BPM", 32, 1024, MPF_STATE, 125};
+CMachineParameter const paraARPcount = {"Arp. Steps", "Arp. Steps", 0, 16, MPF_STATE, 4};
+CMachineParameter const paraGlobalDetune = {"Glb. Detune", "Global Detune", -36, 36, MPF_STATE, 1};
 // Why is the default tuning +1 +60?
 // Answer:
 // The original implementation generated a wavetable of 2048 samples.
@@ -258,33 +49,9 @@ CMachineParameter const paraGlobalDetune = {
 //
 // With the new implementation where the wavetable is generated depending
 // on the sampling rate, this correction is maintained for compatibility.
-
-CMachineParameter const paraGlobalFinetune = {
-	"Gbl. Finetune",
-	"Global Finetune",
-	-256,
-	256,
-	MPF_STATE,
-	60
-};
-
-CMachineParameter const paraGlide = {
-	"Glide Depth",
-	"Glide Depth",
-	0,				
-	255,
-	MPF_STATE,
-	0
-};
-
-CMachineParameter const paraInterpolation = {
-	"Resampling",
-	"Resampling method",
-	0,				
-	1,
-	MPF_STATE,
-	0
-};
+CMachineParameter const paraGlobalFinetune = {"Gbl. Finetune", "Global Finetune", -256, 256, MPF_STATE, 60};
+CMachineParameter const paraGlide = {"Glide Depth", "Glide Depth", 0, 255, MPF_STATE, 0};
+CMachineParameter const paraInterpolation = {"Resampling", "Resampling method", 0, 1, MPF_STATE, 0};
 
 CMachineParameter const *pParameters[] = {
 	&paraOSC1wave,

@@ -13,8 +13,6 @@
 #include <stk/NRev.h>
 #include <stk/PRCRev.h>
 
-#define NUMPARAMETERS 4
-
 using namespace psycle::plugin_interface;
 
 // Stk recently got a namespace. We (re)declare it for backward compatibility with older stk versions.
@@ -35,9 +33,10 @@ CMachineParameter const *pParameters[] =
 
 
 CMachineInfo const MacInfo(
-		MI_VERSION,     
+		MI_VERSION,
+		0x0110,
 		EFFECT,
-		NUMPARAMETERS,
+		sizeof pParameters / sizeof *pParameters,
 		pParameters,
 		"stk Reverbs"
 			#ifndef NDEBUG
@@ -73,7 +72,7 @@ class mi : public CMachineInterface {
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-		Vals = new int[NUMPARAMETERS];
+	Vals = new int[MacInfo.numParameters];
 		rev_l = &jcrev[0];
 		rev_r = &jcrev[1];
 }

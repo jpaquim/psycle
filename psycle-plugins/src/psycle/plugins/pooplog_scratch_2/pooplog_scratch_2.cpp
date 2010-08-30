@@ -158,195 +158,25 @@ const static float buffindex[NUM_BUFF]={
 	256.0f};
 
 
-CMachineParameter const paraLength = 
-{ 
-	"Buffer Length",																
-	"Buffer Length",																																// description
-	0,																																																// MinValue				
-	NUM_BUFF-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	25,
-};
-
-CMachineParameter const paraSpeed = 
-{ 
-	"Scratch Speed",
-	"Scratch Speed",																																// description
-	int(-SPEED_ONE*2),																																																// MinValue				
-	SPEED_MAX,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	int(SPEED_ONE),
-};
-
-CMachineParameter const paraDragL = 
-{ 
-	"Left Drag Delay",																
-	"Left Drag Delay",																																				// description
-	0,																																																// MinValue				
-	DRAG_MAX,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	DRAG_MAX/2,
-};
-
-CMachineParameter const paraDragR = 
-{ 
-	"Right Drag Delay",																
-	"Right Drag Delay",																																				// description
-	0,																																																// MinValue				
-	DRAG_MAX,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	DRAG_MAX/2,
-};
-
-CMachineParameter const paraUnbalance = 
-{ 
-	"Speed Unbalance",																
-	"Speed Unbalance",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-CMachineParameter const paraFeedback = 
-{ 
-	"Feedback",																
-	"Feedback",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-CMachineParameter const paraBufThru = 
-{ 
-	"Buffer Through",																
-	"Buffer Through",																																				// description
-	0,																																																// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-CMachineParameter const paraMix = 
-{ 
-	"Mix (Xfade)",																
-	"Mix (Xfade)",																																				// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256,
-};
-
-CMachineParameter const paraInputGain = 
-{ 
-	"Input Gain",
-	"Input Gain",																																				// description
-	0,																																												// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraSPEEDlfospeed = 
-{ 
-	"Speed LFO Rate",
-	"Speed LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	6
-};
-
-CMachineParameter const paraSPEEDlfoamplitude = 
-{ 
-	"Speed LFO Depth",
-	"Speed LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraSPEEDlfowave = 
-{ 
-	"Speed LFO Wave",
-	"Speed LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraMIXlfospeed = 
-{ 
-	"Mix LFO Rate",
-	"Mix LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	6
-};
-
-CMachineParameter const paraMIXlfowave = 
-{ 
-	"Mix LFO Wave",
-	"Mix LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraMIXlfoamplitude = 
-{ 
-	"Mix LFO Depth",
-	"Mix LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraSmoothing = 
-{ 
-	"Delta Smoothing",
-	"Delta Smoothing",																												// description
-	0,																																																// MinValue				
-	255,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraSPEEDlfophase = 
-{ 
-	"Speed LFO Phase",
-	"Speed LFO Phase",																																				// description
-	0,																																																// MinValue				
-	0xffff,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraMIXlfophase = 
-{ 
-	"Mix LFO Phase",
-	"Mix LFO Phase",																																				// description
-	0,																																																// MinValue				
-	0xffff,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraNULL = 
-{ 
-	" ",
-	" ",																												// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_LABEL,																																								// Flags
-	0
-};
+CMachineParameter const paraLength = {"Buffer Length", "Buffer Length", 0, NUM_BUFF-1, MPF_STATE, 25};
+CMachineParameter const paraSpeed = {"Scratch Speed", "Scratch Speed", int(-SPEED_ONE*2), SPEED_MAX, MPF_STATE, int(SPEED_ONE)};
+CMachineParameter const paraDragL = {"Left Drag Delay", "Left Drag Delay", 0, DRAG_MAX, MPF_STATE, DRAG_MAX/2};
+CMachineParameter const paraDragR = {"Right Drag Delay", "Right Drag Delay", 0, DRAG_MAX, MPF_STATE, DRAG_MAX/2};
+CMachineParameter const paraUnbalance = {"Speed Unbalance", "Speed Unbalance", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraFeedback = {"Feedback", "Feedback", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraBufThru = {"Buffer Through", "Buffer Through", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraMix = {"Mix (Xfade)", "Mix (Xfade)", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1024, MPF_STATE, 256};
+CMachineParameter const paraSPEEDlfospeed = {"Speed LFO Rate", "Speed LFO Rate", 0, MAX_RATE, MPF_STATE, 6};
+CMachineParameter const paraSPEEDlfoamplitude = {"Speed LFO Depth", "Speed LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraSPEEDlfowave = {"Speed LFO Wave", "Speed LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraMIXlfospeed = {"Mix LFO Rate", "Mix LFO Rate", 0, MAX_RATE, MPF_STATE, 6};
+CMachineParameter const paraMIXlfowave = {"Mix LFO Wave", "Mix LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraMIXlfoamplitude = {"Mix LFO Depth", "Mix LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraSmoothing = {"Delta Smoothing", "Delta Smoothing", 0, 255, MPF_STATE, 0};
+CMachineParameter const paraSPEEDlfophase = {"Speed LFO Phase", "Speed LFO Phase", 0, 0xffff, MPF_STATE, 0};
+CMachineParameter const paraMIXlfophase = {"Mix LFO Phase", "Mix LFO Phase", 0, 0xffff, MPF_STATE, 0};
+CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
 
 enum
 { 
@@ -371,9 +201,7 @@ enum
 
 	e_paraSmoothing,
 	e_paraInputGain,
-	e_paraMix,
-
-	num_param
+	e_paraMix
 };
 
 CMachineParameter const *pParameters[] = 
@@ -401,14 +229,15 @@ CMachineParameter const *pParameters[] =
 
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	0,																																								// flags
-	num_param,																																								// numParameters
-	pParameters,																												// Pointer to parameters
+	MI_VERSION,
+	0x0006,
+	EFFECT,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
 	PLUGIN_NAME,
-	"Scratch 2",																												// short name
-	"Jeremy Evers",																												// author
-	"About",																																// A command, that could be use for open an editor, etc...
+	"Scratch 2",
+	"Jeremy Evers",
+	"About",
 	4
 );
 
@@ -482,7 +311,7 @@ mi::mi()
 {
 	denormal = (float)10E-18;
 	// The constructor zone
-	Vals = new int[num_param];
+	Vals = new int[MacInfo.numParameters];
 	Vals[e_paraLength] = 17;
 	InitWaveTable();
 	pspeedlfowave=SourceWaveTable[0];
