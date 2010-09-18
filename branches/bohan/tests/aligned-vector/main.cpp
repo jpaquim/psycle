@@ -22,8 +22,8 @@ class aligned_alloc {
 		};
 
 		// return address of values
-		pointer address (reference value) const { return &value; }
-		const_pointer address (const_reference value) const { return &value; }
+		pointer address(reference value) const { return &value; }
+		const_pointer address(const_reference value) const { return &value; }
 
 		// constructors and destructor. nothing to do because the allocator has no state
 		aligned_alloc() throw() {}
