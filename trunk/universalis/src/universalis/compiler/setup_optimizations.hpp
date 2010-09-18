@@ -42,6 +42,9 @@
 		//#pragma inline_depth(255)
 		//#pragma inline_recursion(on)
 		//#define inline __forceinline
+		
+		#define _SECURE_SCL 0 // disable checked iterators. see http://msdn.microsoft.com/en-us/library/aa985896.aspx
+		#define _HAS_ITERATOR_DEBUGGING 0 // see http://msdn.microsoft.com/en-us/library/aa985939.aspx
 	#endif
 #endif
 
