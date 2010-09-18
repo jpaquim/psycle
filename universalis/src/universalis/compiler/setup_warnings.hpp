@@ -99,7 +99,7 @@
 
 	// warnings about __STDC_SECURE_LIB__ and others
 	// see http://www.opengroup.org/platform/single_unix_specification/uploads/40/6355/n1093.pdf
-	#define _SCL_SECURE_NO_WARNINGS
+	#define _SCL_SECURE_NO_WARNINGS // see http://msdn.microsoft.com/en-us/library/aa985974.aspx
 	#define _CRT_SECURE_NO_WARNINGS
 	#define _CRT_NONSTDC_NO_WARNINGS // posix is okay
 	//#define _ATL_SECURE_NO_WARNINGS
