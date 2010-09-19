@@ -83,7 +83,7 @@ namespace psycle { namespace host {
 				b_font_bold.CreatePointFont(80,"Tahoma Bold");
 			}
 
-			SetTimer(2104+MachineIndex,100,0);
+			SetTimer(2104+MachineIndex,50,0);
 			return 0;
 		}
 

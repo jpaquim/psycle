@@ -175,7 +175,7 @@ namespace psycle { namespace host {
 			HTREEITEM intFxNode;
 			if(!pluginOrder)
 			{
-				hNodes[0] = m_browser.InsertItem("Internal Plugins",0,0 , TVI_ROOT, TVI_LAST);
+				hNodes[0] = m_browser.InsertItem("Built-in machines",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Native plug-ins",2,2,TVI_ROOT,TVI_LAST);
 				hNodes[2] = m_browser.InsertItem("VST2 plug-ins",4,4,TVI_ROOT,TVI_LAST);
 				hNodes[3] = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
@@ -251,8 +251,8 @@ namespace psycle { namespace host {
 			}
 			else
 			{
-				hNodes[0] = m_browser.InsertItem("Generators",0,0 , TVI_ROOT, TVI_LAST);
-				hNodes[1] = m_browser.InsertItem("Effects",1,1,TVI_ROOT,TVI_LAST);
+				hNodes[0] = m_browser.InsertItem("Sound generators (Instruments)",0,0 , TVI_ROOT, TVI_LAST);
+				hNodes[1] = m_browser.InsertItem("Sound Effects (DSP)",1,1,TVI_ROOT,TVI_LAST);
 				hNodes[2] = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[1];
 				nodeindex=2;
@@ -418,10 +418,19 @@ namespace psycle { namespace host {
 
 						m_descLabel.SetWindowText(str.c_str());
 					}
-					m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
+					if(_pPlugsInfo[i]->type == MACH_PLUGIN)
+					{
+						m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
+					} 
+					else
 					{	// convert integer to string.
 						std::ostringstream s;
-						if(_pPlugsInfo[i]->type == MACH_PLUGIN) {
+						s << _pPlugsInfo[i]->version << " or " << std::hex << _pPlugsInfo[i]->version;
+						m_versionLabel.SetWindowText(s.str().c_str());
+					}
+					{	// convert integer to string.
+						std::ostringstream s;
+						if(_pPlugsInfo[i]->type == MACH_PLUGIN  && _pPlugsInfo[i]->APIversion > 0x10) {
 							s << std::hex << (_pPlugsInfo[i]->APIversion&0x7FFF);
 							if(_pPlugsInfo[i]->APIversion&0x8000) {
 								s << " (64 bits)";

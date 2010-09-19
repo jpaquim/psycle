@@ -169,7 +169,6 @@
 #define IDC_WINDOWSBLOCKS               1038
 #define IDC_VSTEDIT64                   1038
 #define IDC_BEATC                       1039
-#define IDC_BROWSEVST2                  1039
 #define IDC_BROWSEVST64                 1039
 #define IDC_4BEAT                       1040
 #define IDC_PATTERN_FONTFACE            1041
@@ -984,7 +983,10 @@
 #define IDC_VAL                         1731
 #define IDC_CURVE_TYPE                  1732
 #define IDC_POS                         1733
+#define IDC_VAL2                        1734
+#define IDC_INTER_MAX                   1734
 #define IDC_VIEW_CONNECTIONS            1735
+#define IDC_INTER_MIN                   1735
 #define IDC_VIEW_SCOPE                  1736
 #define IDC_SCOPE_PARAM_1               1739
 #define IDC_SCOPE_PARAM_2               1740

@@ -7,6 +7,7 @@
 	#include "WaveOut.hpp"
 	#include "DirectSound.hpp"
 	#include "ASIOInterface.hpp"
+	#include "WasapiDriver.hpp"
 	#include "MidiInput.hpp"
 	#include "NewMachine.hpp"
 #endif // !defined WINAMP_PLUGIN
@@ -53,9 +54,14 @@ namespace psycle
 				_numOutputDrivers = 4;
 				_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
 				_ppOutputDrivers[0] = new AudioDriver;
-				_ppOutputDrivers[1] = new WaveOut;
-				_ppOutputDrivers[2] = new DirectSound;
-				_ppOutputDrivers[3] = new ASIOInterface;
+				if (Is_Vista_or_Later()) {
+					_ppOutputDrivers[1] = new WasapiDriver();
+				}
+				else {
+					_ppOutputDrivers[1] = new WaveOut();
+				}
+				_ppOutputDrivers[2] = new DirectSound();
+				_ppOutputDrivers[3] = new ASIOInterface();
 				if(((ASIOInterface*)(_ppOutputDrivers[3]))->_drivEnum.size() <= 0)
 				{
 					_numOutputDrivers--;

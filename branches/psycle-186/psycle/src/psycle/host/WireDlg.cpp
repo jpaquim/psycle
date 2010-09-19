@@ -10,6 +10,7 @@
 #include "Zap.hpp"
 
 #include "Machine.hpp"
+#include "internal_machines.hpp"
 #include <psycle/helpers/math/constants.hpp>
 #include <universalis/os/aligned_memory_alloc.hpp>
 
@@ -93,7 +94,8 @@ namespace psycle { namespace host {
 			SetMode();
 			pos = 1;
 
-			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX ) // native to VST, divide.
+			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX 
+				|| (_pSrcMachine->_type == MACH_DUMMY && ((Dummy*)_pSrcMachine)->wasVST)) // native to VST, divide.
 			{
 				mult = 32768.0f;
 			}

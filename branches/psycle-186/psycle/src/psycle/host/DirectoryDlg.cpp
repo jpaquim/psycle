@@ -168,16 +168,25 @@ namespace psycle { namespace host {
 			m_songEdit.SetWindowText(_songPathBuf.c_str());
 			m_pluginEdit.SetWindowText(_pluginPathBuf.c_str());
 			m_vst32Edit.SetWindowText(_vstPath32Buf.c_str());
-			m_vst64Edit.SetWindowText(_vstPath64Buf.c_str());
-			EnableSupportedBridges();
-			if(_isJbridged||_isPsycleBridged) {
-				m_bridgeSupport.SetCheck(TRUE);
+			if(IsWin64()) {
+				m_vst64Edit.SetWindowText(_vstPath64Buf.c_str());
+				EnableSupportedBridges();
+				if(_isJbridged||_isPsycleBridged) {
+					m_bridgeSupport.SetCheck(TRUE);
+				}
+				else {
+					DisableAllBridges();
+				}
+				m_jBridge.SetCheck(_isJbridged);
+				m_PsycleVstBridge.SetCheck(_isPsycleBridged);
 			}
 			else {
 				DisableAllBridges();
+				m_bridgeSupport.EnableWindow(FALSE);
+				m_vst64Edit.EnableWindow(FALSE);
+				CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST64);
+				cb->EnableWindow(FALSE);
 			}
-			m_jBridge.SetCheck(_isJbridged);
-			m_PsycleVstBridge.SetCheck(_isPsycleBridged);
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			m_waveRec.SetWindowText(_waveRecPathBuf.c_str());
 			initializingDlg=false;
@@ -190,10 +199,20 @@ namespace psycle { namespace host {
 			JBridge::getJBridgeLibrary(testjBridge);
 			if (testjBridge[0]!='\0') {
 				m_jBridge.EnableWindow();
+				if(IsWow64()) {
+					m_vst64Edit.EnableWindow(TRUE);
+					CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST64);
+					cb->EnableWindow(TRUE);
+				} else if(IsWin64()) {
+					m_vst32Edit.EnableWindow(TRUE);
+					CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST32);
+					cb->EnableWindow(TRUE);
+				}
 			}
 			else {
 				//Since jbridge is the only available bridge so far, disable bridging.
 				m_bridgeSupport.EnableWindow(FALSE);
+				DisableAllBridges();
 			}
 			//todo: not ready yet
 			//m_PsycleVstBridge.EnableWindow();
@@ -205,6 +224,15 @@ namespace psycle { namespace host {
 			m_PsycleVstBridge.EnableWindow(FALSE);
 			m_PsycleVstBridge.SetCheck(FALSE);
 			_isPsycleBridged=false;
+			if(IsWin64() && !IsWow64()) {
+				m_vst32Edit.EnableWindow(FALSE);
+				CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST32);
+				cb->EnableWindow(FALSE);
+			} else {
+				m_vst64Edit.EnableWindow(FALSE);
+				CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST64);
+				cb->EnableWindow(FALSE);
+			}
 		}
 		void CDirectoryDlg::OnChangeSongedit() 
 		{

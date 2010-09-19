@@ -429,6 +429,7 @@ namespace psycle
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
 			recursive_process_deps(frames, false);
 			// Step Two, prepare input signals for the Send Fx, and make them work
+			sched_returns_processed_curr=0;
 			FxSend(frames, true);
 			{ // Step Three, Mix the returns of the Send Fx's with the leveled input signal
 				nanoseconds const t0(cpu_time_clock());

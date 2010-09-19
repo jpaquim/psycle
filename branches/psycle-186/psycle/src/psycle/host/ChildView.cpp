@@ -1708,22 +1708,54 @@ namespace psycle { namespace host {
 			
 			int *valuearray = new int[blockSel.end.line-blockSel.start.line+1];
 			int ps=_pSong->playOrder[editPosition];
+			unsigned char notecommand = notecommands::empty;
+			unsigned char targetmac = 255;
+			unsigned char targettwk = 255;
 			for (int i=0; i<=blockSel.end.line-blockSel.start.line; i++)
 			{
 				unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,i+blockSel.start.line);
 				if (*offset_target <= notecommands::release || *offset_target == notecommands::empty)
 				{
 					if ( *(offset_target+3) == 0 && *(offset_target+4) == 0 ) valuearray[i]=-1;
-					else valuearray[i]= *(offset_target+3)*0x100 + *(offset_target+4);
+					else {
+						targettwk = *(offset_target+3);
+						valuearray[i]= *(offset_target+3)*0x100 + *(offset_target+4);
+					}
 				}
-				else valuearray[i] = *(offset_target+3)*0x100 + *(offset_target+4);
+				else {
+					notecommand = *offset_target;
+					targetmac = *(offset_target+2);
+					targettwk = *(offset_target+1);
+					valuearray[i] = *(offset_target+3)*0x100 + *(offset_target+4);
+				}
 			}
-			unsigned char *offset_target=_ptrackline(ps,blockSel.start.track,blockSel.start.line);
-			if ( *offset_target == notecommands::tweak ) dlg.AssignInitialValues(valuearray,0);
-			else if ( *offset_target == notecommands::tweakslide ) dlg.AssignInitialValues(valuearray,1);
-			else if ( *offset_target == notecommands::midicc ) dlg.AssignInitialValues(valuearray,2);
-			else dlg.AssignInitialValues(valuearray,-1);
-			
+			if ( notecommand == notecommands::tweak ) {
+				int min=0, max=0xFFFF;
+				if(_pSong->_pMachine[targetmac] != NULL) {
+					_pSong->_pMachine[targetmac]->GetParamRange(targettwk,min,max);
+				}
+				//If the parameter uses negative number, the values are shifted up.
+				max-=min;
+				max&=0xFFFF;
+				min=0;
+				dlg.AssignInitialValues(valuearray,0,min,max);
+			}
+			else if ( notecommand == notecommands::tweakslide ) {
+				int min=0, max=0xFFFF;
+				if(_pSong->_pMachine[targetmac] != NULL) {
+					_pSong->_pMachine[targetmac]->GetParamRange(targettwk,min,max);
+				}
+				//If the parameter uses negative number, the values are shifted up.
+				max-=min;
+				max&=0xFFFF;
+				min=0;
+				dlg.AssignInitialValues(valuearray,1,min,max);
+			}
+			else if ( notecommand == notecommands::midicc ) dlg.AssignInitialValues(valuearray,2,0,0x7F);
+			else {
+				dlg.AssignInitialValues(valuearray,-1, targettwk*0x100,targettwk*0x100 +0xFF);
+			}
+
 			if (dlg.DoModal() == IDOK )
 			{
 				int twktype(255);

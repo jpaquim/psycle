@@ -1524,12 +1524,9 @@ namespace psycle
 						{
 							if(_pMachine[i]->_connection[c])
 							{
-								if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES)
-								{
-									_pMachine[i]->_connection[c] = false;
-									_pMachine[i]->_outputMachines[c] = -1;
-								}
-								else if(!_pMachine[_pMachine[i]->_outputMachines[c]])
+								if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES
+									|| !_pMachine[_pMachine[i]->_outputMachines[c]]
+									|| i == _pMachine[i]->_outputMachines[c])
 								{
 									_pMachine[i]->_connection[c] = false;
 									_pMachine[i]->_outputMachines[c] = -1;
@@ -1546,12 +1543,9 @@ namespace psycle
 
 							if (_pMachine[i]->_inputCon[c])
 							{
-								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES)
-								{
-									_pMachine[i]->_inputCon[c] = false;
-									_pMachine[i]->_inputMachines[c] = -1;
-								}
-								else if (!_pMachine[_pMachine[i]->_inputMachines[c]])
+								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES
+									|| !_pMachine[_pMachine[i]->_inputMachines[c]]
+									|| i == _pMachine[i]->_inputMachines[c])
 								{
 									_pMachine[i]->_inputCon[c] = false;
 									_pMachine[i]->_inputMachines[c] = -1;

@@ -576,13 +576,14 @@ void Player::thread_function(std::size_t thread_number) {
 	universalis::os::thread_name thread_name;
 	{
 		std::ostringstream s;
-		s << universalis::compiler::typenameof(*this) << '#' << thread_number;
+		s << universalis::compiler::typenameof(*this) << " Engine thread #" << thread_number;
 		thread_name.set(s.str());
 	}
 
 	// install cpu/os exception handler/translator
 	universalis::cpu::exceptions::install_handler_in_thread();
 
+	HANDLE hTask = NULL;
 	{ // set thread priority and cpu affinity
 		using universalis::os::exceptions::operation_not_permitted;
 		using universalis::os::sched::thread;
@@ -591,6 +592,13 @@ void Player::thread_function(std::size_t thread_number) {
 		// set thread priority
 		try {
 			t.priority(thread::priorities::highest);
+			// Ask MMCSS to temporarily boost the thread priority
+			// to reduce glitches while the low-latency stream plays.
+			if(Is_Vista_or_Later()) 
+			{
+				DWORD taskIndex = 0;
+				hTask = Global::pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
+			}
 		} catch(operation_not_permitted e) {
 			if(loggers::warning()) {
 				std::ostringstream s; s << "no permission to set thread priority: " << e.what();
@@ -636,6 +644,7 @@ void Player::thread_function(std::size_t thread_number) {
 		}
 		throw;
 	}
+	if (hTask != NULL) { Global::pAvRevertMmThreadCharacteristics(hTask); }
 
 	if(loggers::trace()) {
 		scoped_lock lock(mutex_);
