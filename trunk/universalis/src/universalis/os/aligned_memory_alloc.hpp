@@ -120,10 +120,14 @@ class aligned_alloc {
 // return that all specializations of this allocator with the same alignment are interchangeable
 
 template<typename T1, std::size_t Alignment1, typename T2, std::size_t Alignment2>
-bool operator==(const universalis::os::aligned_alloc<T1, Alignment1>&, const aligned_alloc<T2, Alignment2>&) throw() { return Alignment1 == Alignment2; }
+bool operator==(const universalis::os::aligned_alloc<T1, Alignment1>&, const universalis::os::aligned_alloc<T2, Alignment2>&) throw() {
+	return Alignment1 == Alignment2;
+}
 
 template<typename T1, std::size_t Alignment1, typename T2, std::size_t Alignment2>
-bool operator!=(const universalis::os::aligned_alloc<T1, Alignment1>&, const aligned_alloc<T2, Alignment2>&) throw() { return Alignment1 != Alignment2; }
+bool operator!=(const universalis::os::aligned_alloc<T1, Alignment1>&, const universalis::os::aligned_alloc<T2, Alignment2>&) throw() {
+	return Alignment1 != Alignment2;
+}
 
 }}
 
