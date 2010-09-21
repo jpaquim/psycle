@@ -84,7 +84,7 @@ class aligned_alloc {
 		// constructors and destructor. nothing to do because the allocator has no state
 		aligned_alloc() throw() {}
 		aligned_alloc(const aligned_alloc&) throw() {}
-		template<typename T2, std::size_t Alignment2> aligned_alloc(const aligned_alloc<T2, Alignment2>&) throw() {}
+		template<typename T2> aligned_alloc(const aligned_alloc<T2, Alignment>&) throw() {}
 		~aligned_alloc() throw() {}
 
 		// return maximum number of elements that can be allocated
@@ -115,12 +115,15 @@ class aligned_alloc {
 		}
 };
 
-// return that all specializations of this allocator are interchangeable
-template<typename T1, std::size_t Alignment1, typename T2, std::size_t Alignment2>
-bool operator==(const aligned_alloc<T1, Alignment1>&, const aligned_alloc<T2, Alignment2>&) throw() { return true; }
+}}
+
+// return that all specializations of this allocator with the same alignment are interchangeable
 
 template<typename T1, std::size_t Alignment1, typename T2, std::size_t Alignment2>
-bool operator!=(const aligned_alloc<T1, Alignment1>&, const aligned_alloc<T2, Alignment2>&) throw() { return false; }
+bool operator==(const universalis::os::aligned_alloc<T1, Alignment1>&, const aligned_alloc<T2, Alignment2>&) throw() { return Alignment1 == Alignment2; }
+
+template<typename T1, std::size_t Alignment1, typename T2, std::size_t Alignment2>
+bool operator!=(const universalis::os::aligned_alloc<T1, Alignment1>&, const aligned_alloc<T2, Alignment2>&) throw() { return Alignment1 != Alignment2; }
 
 }}
 
