@@ -129,4 +129,23 @@ bool operator!=(const universalis::os::aligned_alloc<T1, Alignment1>&, const uni
 
 }}
 
+#if defined BOOST_AUTO_TEST_CASE
+	#include <vector>
+	namespace universalis { namespace os {
+		BOOST_AUTO_TEST_CASE(aligned_alloc_test) {
+			std::size_t const alignment = 16;
+			std::vector<float, aligned_alloc<float, alignment> > v;
+			for(std::size_t s = 0; s < 100; ++s) {
+				v.push_back(0);
+				union {
+					float * p;
+					unsigned long long int i;
+				} u;
+				u.p = &v[0];
+				BOOST_CHECK(!(u.i % alignment));
+			}
+		}
+	}}
+#endif
+
 #endif
