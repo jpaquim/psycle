@@ -2,6 +2,9 @@
 #include <cstddef>
 #include <limits>
 #include <iostream>
+#include <universalis/os/aligned_memory_alloc.hpp>
+
+std::size_t const Alignment = 16; // todo template param
 
 template<typename T>
 class aligned_alloc {
@@ -38,15 +41,17 @@ class aligned_alloc {
 		pointer allocate(size_type num, const void* = 0) {
 			// print message and allocate memory with global new
 			std::cerr << "allocate " << num << " element(s)" << " of size " << sizeof(T) << std::endl;
-			pointer ret = static_cast<pointer>(::operator new(num * sizeof(T)));
-			std::cerr << " allocated at: " << (void*)ret << std::endl;
+			//pointer ret = static_cast<pointer>(::operator new(num * sizeof(T)));
+			pointer ret;
+			universalis::os::aligned_memory_alloc(Alignment, ret, num);
+			std::cerr << " allocated at: " << ret << std::endl;
 			return ret;
 		}
 
 		// initialize elements of allocated storage p with value value
 		void construct(pointer p, const T& value) {
 			// initialize memory with placement new
-			new((void*) p) T(value);
+			new(p) T(value);
 		}
 
 		// destroy elements of initialized storage p
@@ -58,8 +63,9 @@ class aligned_alloc {
 		// deallocate storage p of deleted elements
 		void deallocate(pointer p, size_type num) {
 			// print message and deallocate memory with global delete
-			std::cerr << "deallocate " << num << " element(s)" << " of size " << sizeof(T) << " at: " << (void*)p << std::endl;
-			::operator delete((void*) p);
+			std::cerr << "deallocate " << num << " element(s)" << " of size " << sizeof(T) << " at: " << p << std::endl;
+			//::operator delete(p);
+			universalis::os::aligned_memory_dealloc(p);
 		}
 };
 
