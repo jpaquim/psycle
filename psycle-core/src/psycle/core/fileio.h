@@ -77,11 +77,11 @@ class PSYCLE__CORE__DECL RiffFile {
 		///\{
 			bool Read(uint8_t & x) { return ReadChunk(&x,1); }
 			bool Read(int8_t & x) { return ReadChunk(&x,1); }
-			bool Read(char & x) { return ReadChunk(&x,1); } // somehow char doesn't match int8_t nor uint8_t
+			bool Read(char & x) { return ReadChunk(&x,1); } // 'char' is equivalent to either 'signed char' or 'unsigned char', but considered as a different type
 
 			bool Write(uint8_t x) { return WriteChunk(&x,1); }
 			bool Write(int8_t x) { return WriteChunk(&x,1);  }
-			bool Write(char x) { return WriteChunk(&x,1);  } // somehow char doesn't match int8_t nor uint8_t
+			bool Write(char x) { return WriteChunk(&x,1);  } // 'char' is equivalent to either 'signed char' or 'unsigned char', but considered as a different type
 		///\}
 
 		///\name 16 bits
