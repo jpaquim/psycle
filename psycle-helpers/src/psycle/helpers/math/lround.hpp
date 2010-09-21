@@ -79,6 +79,12 @@ Integer inline lround(Real x) {
 	template<> UNIVERSALIS__COMPILER__CONST unsigned char inline lround<>(double d) { return ::lround(d); }
 	template<> UNIVERSALIS__COMPILER__CONST unsigned char inline lround<>(float f) { return ::lroundf(f); }
 
+	// char
+
+	template<> UNIVERSALIS__COMPILER__CONST char inline lround<>(long double ld) { return ::lroundl(ld); }
+	template<> UNIVERSALIS__COMPILER__CONST char inline lround<>(double d) { return ::lround(d); }
+	template<> UNIVERSALIS__COMPILER__CONST char inline lround<>(float f) { return ::lroundf(f); }
+
 #endif
 
 #if defined BOOST_AUTO_TEST_CASE
