@@ -92,13 +92,9 @@ class aligned_alloc {
 
 		// allocate but don't initialize num elements of type T
 		pointer allocate(size_type num, const void* = 0) {
-			// print message and allocate memory with global new
-			std::cerr << "allocate " << num << " element(s)" << " of size " << sizeof(T) << std::endl;
-			//pointer ret = static_cast<pointer>(::operator new(num * sizeof(T)));
-			pointer ret;
-			aligned_memory_alloc(Alignment, ret, num);
-			std::cerr << " allocated at: " << ret << std::endl;
-			return ret;
+			pointer p;
+			aligned_memory_alloc(Alignment, p, num);
+			return p;
 		}
 
 		// initialize elements of allocated storage p with value value
@@ -115,9 +111,6 @@ class aligned_alloc {
 
 		// deallocate storage p of deleted elements
 		void deallocate(pointer p, size_type num) {
-			// print message and deallocate memory with global delete
-			std::cerr << "deallocate " << num << " element(s)" << " of size " << sizeof(T) << " at: " << p << std::endl;
-			//::operator delete(p);
 			aligned_memory_dealloc(p);
 		}
 };
