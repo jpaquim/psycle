@@ -115,8 +115,6 @@ class aligned_alloc {
 		}
 };
 
-}}
-
 // return that all specializations of this allocator with the same alignment are interchangeable
 
 template<typename T1, std::size_t Alignment1, typename T2, std::size_t Alignment2>
