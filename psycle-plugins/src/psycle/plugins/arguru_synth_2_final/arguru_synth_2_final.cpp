@@ -32,8 +32,8 @@ CMachineParameter const paraVCFenvmod = {"VCF Envmod", "VCF Envmod", -240, 240, 
 CMachineParameter const paraOSCmix = {"OSC Mix", "OSC Mix", 0, 256, MPF_STATE, 128};
 CMachineParameter const paraOUTvol = {"Volume", "Volume", 0, 256, MPF_STATE, 128};
 CMachineParameter const paraARPmode = {"Arpeggiator", "Arpeggiator", 0, 16, MPF_STATE, 0};
-CMachineParameter const paraARPbpm = {"Arp. BPM", "Arp. BPM", 32, 1024, MPF_STATE, 125};
-CMachineParameter const paraARPcount = {"Arp. Steps", "Arp. Steps", 0, 16, MPF_STATE, 4};
+CMachineParameter const paraARPbpm = {"Arpeggio tempo", "Arp. BPM", 32, 1024, MPF_STATE, 125};
+CMachineParameter const paraARPcount = {"Arpeggio Steps", "Arp. Steps", 0, 16, MPF_STATE, 4};
 CMachineParameter const paraGlobalDetune = {"Glb. Detune", "Global Detune", -36, 36, MPF_STATE, 1};
 // Why is the default tuning +1 +60?
 // Answer:
@@ -344,6 +344,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			std::sprintf(txt,"%.03f ms",Vals[param]*1000.0f/44100.0f);
 			return true;
 	case 7:
+		if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 256.0f));
+		else sprintf(txt, "-inf dB");
+		return true;
 	case 11:
 	case 20:
 			std::sprintf(txt,"%.1f%%",(float)value*0.390625f);
@@ -351,30 +354,62 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 	case 13:
 			std::sprintf(txt,"%.03f Hz",(value*0.000005f)/(2.0f*math::pi_f)*(44100.0f/64.0f));
 			return true;
-	case 15:
+	case 14:
+		{
+			int top = Vals[15]+value;
+			if(top > 240) top = Vals[15]-value;
+			float result;
 			if (Vals[17] < 6) {
-				std::sprintf(txt,"%.03f Hz",264*pow(32.,value/240.));
+					result = 264*pow(32.,top/240.) - 264*pow(32.,Vals[15]/240.);
 			}
 			else if(Vals[17] < 8){
-				std::sprintf(txt,"%.03f Hz",THREESEL((float)value,270.0f,400.0f,800.0f));
+					result = THREESEL((float)top,270.0f,400.0f,800.0f) - THREESEL((float)Vals[15],270.0f,400.0f,800.0f);
 			}
 			else if(Vals[17] < 10){
-				std::sprintf(txt,"%.03f Hz",THREESEL((float)value,270.0f,400.0f,650.0f));
+					result = THREESEL((float)top,270.0f,400.0f,650.0f) -THREESEL((float)Vals[15],270.0f,400.0f,650.0f);
 			}
 			else if (Vals[17] < 12) {
-				std::sprintf(txt,"%.03f Hz x2",264*pow(32.,value/240.)*0.7f);
+					result = 264*pow(32.,top/240.)*0.7f - 264*pow(32.,Vals[15]/240.)*0.7f;
 			}
 			else if (Vals[17] <14) {
-				std::sprintf(txt,"%.03f Hz - %.03f Hz", float(value/(1+Vals[16]/240.0)), 264*pow(32.,value/240.));
+					result = float(top/(1+Vals[16]/240.0)) -float(Vals[15]/(1+Vals[16]/240.0));
 			}
 			else if (Vals[17] <16) {
-				std::sprintf(txt,"%.03f Hz - %.03f Hz", float(value/(3.5-2*Vals[16]/240.0)), 264*pow(32.,value/240.));
+					result = float(top/(3.5-2*Vals[16]/240.0)) - float(Vals[15]/(3.5-2*Vals[16]/240.0));
 			}
 			else if(Vals[17] < 18){
-				std::sprintf(txt,"%.03f Hz + %.03f Hz",THREESEL((float)value,270.0f,400.0f,800.0f), THREESEL((float)value,2140.0f,800.0f,1150.0f));
+					result = THREESEL((float)top,270.0f,400.0f,800.0f) - THREESEL((float)Vals[15],270.0f,400.0f,800.0f);
 			}
 			else {
-				std::sprintf(txt,"%.03f Hz + %.03f Hz",THREESEL((float)value,270.0f,400.0f,650.0f), THREESEL((float)value,2140.0f,1700.0f,1080.0f));
+					result = THREESEL((float)top,270.0f,400.0f,650.0f) - THREESEL((float)Vals[15],270.0f,400.0f,650.0f);
+			}
+			std::sprintf(txt,"%.0f Hz", result);
+			return true;
+		}
+	case 15:
+			if (Vals[17] < 6) {
+				std::sprintf(txt,"%.0f Hz",264*pow(32.,value/240.));
+			}
+			else if(Vals[17] < 8){
+				std::sprintf(txt,"%.0f Hz",THREESEL((float)value,270.0f,400.0f,800.0f));
+			}
+			else if(Vals[17] < 10){
+				std::sprintf(txt,"%.0f Hz",THREESEL((float)value,270.0f,400.0f,650.0f));
+			}
+			else if (Vals[17] < 12) {
+				std::sprintf(txt,"%.0f Hz x2",264*pow(32.,value/240.)*0.7f);
+			}
+			else if (Vals[17] <14) {
+				std::sprintf(txt,"%.0f Hz - %.0f Hz", float(value/(1+Vals[16]/240.0)), 264*pow(32.,value/240.));
+			}
+			else if (Vals[17] <16) {
+				std::sprintf(txt,"%.03f Hz - %.0f Hz", float(value/(3.5-2*Vals[16]/240.0)), 264*pow(32.,value/240.));
+			}
+			else if(Vals[17] < 18){
+				std::sprintf(txt,"%.0f Hz + %.0f Hz",THREESEL((float)value,270.0f,400.0f,800.0f), THREESEL((float)value,2140.0f,800.0f,1150.0f));
+			}
+			else {
+				std::sprintf(txt,"%.0f Hz + %.0f Hz",THREESEL((float)value,270.0f,400.0f,650.0f), THREESEL((float)value,2140.0f,1700.0f,1080.0f));
 			}
 			return true;
 	case 16:
@@ -433,6 +468,39 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			case 19:std::strcpy(txt,"InvParaEQ3 B");return true;
 			}
 			break;
+	case 18:
+		{
+			int top = Vals[15]+value;
+			if(top > 240) top = 240;
+			if(top < 0) top = 0;
+			float result;
+			if (Vals[17] < 6) {
+				result = 264*pow(32.,top/240.);
+			}
+			else if(Vals[17] < 8){
+				result = THREESEL((float)top,270.0f,400.0f,800.0f);
+			}
+			else if(Vals[17] < 10){
+				result = THREESEL((float)top,270.0f,400.0f,650.0f);
+			}
+			else if (Vals[17] < 12) {
+				result = 264*pow(32.,top/240.)*0.7f;
+			}
+			else if (Vals[17] <14) {
+				result = float(top/(1+Vals[16]/240.0));
+			}
+			else if (Vals[17] <16) {
+				result = float(top/(3.5-2*Vals[16]/240.0));
+			}
+			else if(Vals[17] < 18){
+				result = THREESEL((float)top,270.0f,400.0f,800.0f);
+			}
+			else {
+				result = THREESEL((float)top,270.0f,400.0f,650.0f);
+			}
+			std::sprintf(txt,"%.0f Hz", result);
+			return true;
+		}
 	case 19:
 			{
 				float fv=(float)value*0.390625f;
@@ -456,13 +524,16 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			case 9:std::strcpy(txt,"Major Bounce");return true;
 			}
 			break;
+	case 22:
+		std::sprintf(txt,"%d bpm",value);
+		return true;
 	case 24:
 		//Correct the display for finetune
-		std::sprintf(txt,"%d notes",Vals[param]-1);
+		std::sprintf(txt,"%d notes",value-1);
 		return true;
 	case 25:
 		//Correct the display for finetune
-		std::sprintf(txt,"%.03f cts.",(Vals[param]-60)*0.390625f);
+		std::sprintf(txt,"%.03f cts.",(value-60)*0.390625f);
 		return true;
 	case 26:
 			if (value == 0) {std::strcpy(txt, "Off"); return true;}
@@ -477,6 +548,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 	return false;
 }
 
+ 
 //////////////////////////////////////////////////////////////////////
 // The SeqTick function is where your notes and pattern command handlers
 // should be processed.

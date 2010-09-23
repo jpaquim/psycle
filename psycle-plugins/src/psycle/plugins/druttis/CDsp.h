@@ -33,13 +33,16 @@ class CDsp
 {
 public:
 	//------------------------------------------------------------------------
-	//				CreateWavetable
-	//------------------------------------------------------------------------
-	static void CreateWavetable(float *coeffs, int ncoeffs, float *psamples, int nsamples);
-	//------------------------------------------------------------------------
 	//				GetFreq
 	//------------------------------------------------------------------------
-	static inline float GetFreq(float note, int factor, int samplerate)
+	static inline float GetFreq(float note)
+	{
+		return (float) 440.0f * (float) pow(2.0, (note - 69.0) / 12.0);
+	}
+	//------------------------------------------------------------------------
+	//				GetIncrement
+	//------------------------------------------------------------------------
+	static inline float GetIncrement(float note, int factor, int samplerate)
 	{
 		return (float) factor * 440.0f * (float) pow(2.0, (note - 69.0) / 12.0) / (float) samplerate;
 	}

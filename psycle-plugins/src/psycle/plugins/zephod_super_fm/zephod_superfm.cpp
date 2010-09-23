@@ -47,29 +47,29 @@ enum {
 };
 
 
-CMachineParameter const paraWave = {"OSC Wave", "Oscillator waveform", 0, 3, MPF_STATE, 0};
-CMachineParameter const paraModWave = {"MOD Wave", "Modulator waveform", 0, 3, MPF_STATE, 0};
+CMachineParameter const paraWave = {"Osci Wave", "Oscillator waveform", 0, 3, MPF_STATE, 0};
+CMachineParameter const paraModWave = {"Mod Wave", "Modulator waveform", 0, 3, MPF_STATE, 0};
 CMachineParameter const paraAttack = {"VCA Attack", "VCA Attack in smp", 16, 65535, MPF_STATE, 29};
 CMachineParameter const paraDecay = {"VCA Decay", "VCA Decay in smp", 16, 65535, MPF_STATE, 46974};
-CMachineParameter const paraSustain = {"VCA S Length", "VCA Sustain lenght in smp", 16, 65536, MPF_STATE, 944};
-CMachineParameter const paraSustainv = {"VCA S Level", "VCA Sustain level", 1, 256, MPF_STATE, 13};
+CMachineParameter const paraSustain = {"VCA Sustain Length", "VCA Sustain lenght in smp", 16, 65536, MPF_STATE, 944};
+CMachineParameter const paraSustainv = {"VCA Sustain Level", "VCA Sustain level", 1, 256, MPF_STATE, 13};
 CMachineParameter const paraRelease = {"VCA Release", "VCA Release in smp", 1, 65536, MPF_STATE, 2414};
 
 //////////////////////////////////////////////////////////////////////
 // Modulators Enveloper
-CMachineParameter const paraMAttack = {"MOD ENV A", "MOD Envelope attack in smp", 16, 65535, MPF_STATE, 16};
-CMachineParameter const paraMDecay = {"MOD ENV D", "MOD Envelope decay in smp", 16, 65535, MPF_STATE, 15717};
-CMachineParameter const paraMSustain = {"MOD ENV SL", "MOD Envelope sustain lenght in smp", 16, 65536, MPF_STATE, 10967};
-CMachineParameter const paraMSustainv = {"MOD ENV S", "MOD Envelope sustain level", 1, 256, MPF_STATE, 8};
-CMachineParameter const paraMRelease = {"MOD ENV R", "MOD Envelope release in smp", 1, 65536, MPF_STATE, 3714};
-CMachineParameter const paraModNote1D = {"MOD1 Depth", "Modulator 1 depth", 0, 1000, MPF_STATE, 150};
-CMachineParameter const paraModNote2D = {"MOD2 Depth", "Modulator 2 depth", 0, 1000, MPF_STATE, 0};
-CMachineParameter const paraModNote3D = {"MOD3 Depth", "Modulator 3 depth", 0, 1000, MPF_STATE, 51};
-CMachineParameter const paraModEnv1 = {"MOD1 ENV", "Modulator 1 envelope amount", -256, 256, MPF_STATE, 256};
-CMachineParameter const paraModEnv2 = {"MOD2 ENV", "Modulator 2 envelope amount", -256, 256, MPF_STATE, 94};
-CMachineParameter const paraModEnv3 = {"MOD3 ENV", "Modulator 3 envelope amount", -256, 256, MPF_STATE, 110};
+CMachineParameter const paraMAttack = {"MOD Env Attack", "MOD Envelope attack in smp", 16, 65535, MPF_STATE, 16};
+CMachineParameter const paraMDecay = {"MOD Env Decay", "MOD Envelope decay in smp", 16, 65535, MPF_STATE, 15717};
+CMachineParameter const paraMSustain = {"MOD Env Sustain Length", "MOD Envelope sustain lenght in smp", 16, 65536, MPF_STATE, 10967};
+CMachineParameter const paraMSustainv = {"MOD Env Sustain Level", "MOD Envelope sustain level", 1, 256, MPF_STATE, 8};
+CMachineParameter const paraMRelease = {"MOD Env Release", "MOD Envelope release in smp", 1, 65536, MPF_STATE, 3714};
+CMachineParameter const paraModNote1D = {"MOD1 Amount Offset", "Modulator 1 depth", 0, 1000, MPF_STATE, 150};
+CMachineParameter const paraModNote2D = {"MOD2 Amount Offset", "Modulator 2 depth", 0, 1000, MPF_STATE, 0};
+CMachineParameter const paraModNote3D = {"MOD3 Amount Offset", "Modulator 3 depth", 0, 1000, MPF_STATE, 51};
+CMachineParameter const paraModEnv1 = {"MOD1 Env Amount", "Modulator 1 envelope amount", -256, 256, MPF_STATE, 256};
+CMachineParameter const paraModEnv2 = {"MOD2 Env Amount", "Modulator 2 envelope amount", -256, 256, MPF_STATE, 94};
+CMachineParameter const paraModEnv3 = {"MOD3 Env Amount", "Modulator 3 envelope amount", -256, 256, MPF_STATE, 110};
 CMachineParameter const paraRoute = {"FM Rout Mode", "Modulator Routing Mode", 0, 3, MPF_STATE, 0};
-CMachineParameter const paraTune = {"Finetune", "Pitch finetune", -128, 128, MPF_STATE, 0};
+CMachineParameter const paraTune = {"Finetune", "Pitch finetune", -128, 256, MPF_STATE, 128};
 
 CMachineParameter const *pParameters[] =
 {
@@ -155,7 +155,6 @@ class mi : public CMachineInterface
 		virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples,int numtracks);
 		virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/);
-		virtual void DSPClear(float *psamplesleft,float *psamplesright, int numsamples);
 		virtual void Stop();
 
 		std::uint8_t wave,ModWave;
@@ -243,7 +242,7 @@ void CTrack::Tick(int note, int volume, int SamplesPerSec)
 	// Volume [note speed handler]
 
 	if(volume!=255)
-	Volume=float(volume)*0.000976562f;
+		Volume=float(volume)*0.000976562f;
 }
 
 float CTrack::Osc(float phi)
@@ -446,33 +445,20 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 
 	if(cmd==0x0E)
-		medBreakNote[channel]=val*32;
+		medBreakNote[channel]=val*32* (pCB->GetSamplingRate()/44100);
 	
 	Tracks[channel].Tick(note,vol,pCB->GetSamplingRate());
 }
 
-void mi::DSPClear(float *psamplesleft,float *psamplesright, int numsamples)
-{
-	do
-	{
-		*psamplesleft=0;
-		*psamplesright=0;
-		psamplesleft++;
-		psamplesright++;
-	}while(--numsamples);
-}
-
 void mi::Work(float *psamplesleft,float *psamplesright, int numsamples,int numtracks)
 {
-	DSPClear(psamplesleft,psamplesright,numsamples);
-
 	tickCounter+=numsamples;
 	
 	for ( int i=0; i<numtracks; i++) 
 	{
 		if ( Tracks[i].VCA.envstate!=ENV_NONE)
 		{
-		Tracks[i].Work( psamplesleft,psamplesright, numsamples);
+			Tracks[i].Work( psamplesleft,psamplesright, numsamples);
 
 			// Note off check [0x0E] command
 			if(medBreakNote[i])
@@ -497,32 +483,35 @@ bool mi::DescribeValue(char * txt, const int param, const int value)
 {
 	switch(param)
 	{
+	case 3:
+	case 8:
+		if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 255.0f));
+		else sprintf(txt, "-inf dB");
+		return true;
 	case 0:
 	case 1:
 	case 2:
-	case 3:
 	case 4:
 	case 5:
 	case 6:
 	case 7:
-	case 8:
 	case 9:
 		{
-			std::sprintf(txt,"%.fms",value/44.1);return true;
+			std::sprintf(txt,"%.f ms",value/44.1);return true;
 		}
 		break;
 	case 10:
 	case 11:
 	case 12:
 		{
-			std::sprintf(txt,"%.1f%%",(float)value*0.1f);return true;
+			std::sprintf(txt,"%.1f%%",(float)value*0.2f);return true;
 		}
 		break;
 	case 13:
 	case 14:
 	case 15:
 		{
-			std::sprintf(txt,"%.1f%%",(float)value*0.390625f);return true;
+			std::sprintf(txt,"%.1f%%",(float)value*0.19531f);return true;
 		}
 		break;
 	case 16:				
@@ -547,14 +536,14 @@ bool mi::DescribeValue(char * txt, const int param, const int value)
 	case 18:				
 		switch(value)
 		{
-			case 0:sprintf(txt, "O(M(M(M)))");return true;
-			case 1:sprintf(txt, "O(M(M+M))");return true;
-			case 2:sprintf(txt, "O(M+M+M)");return true;
-			case 3:sprintf(txt, "O(M+M(M))");return true;
+			case 0:sprintf(txt, "O(M1(M2(M3)))");return true;
+			case 1:sprintf(txt, "O(M1(M2+M3))");return true;
+			case 2:sprintf(txt, "O(M1+M2+M3)");return true;
+			case 3:sprintf(txt, "O(M1+M2(M3))");return true;
 		}
 		break;
 	case 19:
-		std::sprintf(txt,"%.1f cents",(float)value*0.78125f);return true;
+		std::sprintf(txt,"%.1f cents",(float)(value-128)*0.78125f);return true;
 	default:
 		return false;
 	}

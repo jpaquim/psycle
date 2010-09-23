@@ -6,46 +6,36 @@
 
 using namespace psycle::helpers::math;
 
-/// wave size
+/// wave size (2^n)
 unsigned int const WAVESIZE = 4096;
-/// wave size - 1
+/// wave size (2^n - 1)
 unsigned int const WAVEMASK = 4095;
 
-/// afloat structure (source, target, current) values
+/// afloat structure
 struct afloat {
-	float source;
+	int inertiaSamples;
+	float inertiaAmount;
 	float target;
 	float current;
 };
 
 /// SetAFloat
-inline void SetAFloat(afloat *afloat, float value) {
-	afloat->source = afloat->current;
-	afloat->target = value;
-}
-
-/// AnimateAFloat
-inline void AnimateAFloat(afloat* p, float fac) {
-	if (fac == 0.0f) p->current = p->target;
-	float const dist = p->target - p->source;
-	float const maxdist = dist * fac;
-	if (dist > 0.0f) {
-		p->current += std::min(maxdist, dist);
-		if (p->current > p->target) p->current = p->target;
-	} else if (p->current > p->target) {
-		p->current += std::max(maxdist, dist);
-		if (p->current < p->target) p->current = p->target;
+inline void SetAFloat(afloat& afloat, float value, int inertiaSamples) {
+	if (inertiaSamples > 0) {
+		float const dist = value - afloat.current;
+		afloat.inertiaAmount = dist/inertiaSamples;
+		afloat.inertiaSamples = inertiaSamples;
 	}
-	if (p->current == p->target) p->source = p->current;
+	else {
+		afloat.current = value;
+		afloat.inertiaSamples = 0;
+	}
+	afloat.target = value;
 }
-
-
-/// Clips phase for wavetable
-inline float ClipWTPhase(float phase) {
-	while(phase < 0.0f) phase += (float) WAVESIZE;
-	while(phase >= (float) WAVESIZE) phase -= (float) WAVESIZE;
-	return phase;
-	// return (float) (lrint<int>(phase) & WAVEMASK) + (phase - (float) lrint<int>(phase));
+/// AnimateAFloat
+inline void AnimateAFloat(afloat& p) {
+	if(p.inertiaSamples-- > 0) p.current += p.inertiaAmount;
+	else p.current = p.target;
 }
 
 /// Get wavetable sample
