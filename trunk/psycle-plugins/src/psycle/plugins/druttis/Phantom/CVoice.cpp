@@ -70,7 +70,7 @@ void CVoice::NoteOn(int note, int volume)
 	for (int i = 0; i < 6; i++) {
 		nnote = (float) note + globals->osc_semi[i] + globals->osc_fine[i];
 		osc_phase[i] = globals->osc_phase[i];
-		osc_increment[i] = CDsp::GetFreq(nnote, WAVESIZE, globals->samplingrate);
+		osc_increment[i] = CDsp::GetIncrement(nnote, WAVESIZE, globals->samplingrate);
 	}
 	//
 	vca.SetAttack(globals->vca_attack);

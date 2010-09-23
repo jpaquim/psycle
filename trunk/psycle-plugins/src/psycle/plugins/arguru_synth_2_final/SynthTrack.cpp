@@ -293,11 +293,12 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	sp_val=val;
 
 	// Init glide
-	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f; }
+	///\fixme: Samplerate aware
+	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f*srCorrection; }
 	else 
 	{
 		const float synthglide = 256-syntp->synthglide;
-		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f;
+		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f*srCorrection;
 		else oscglide= 0.0f;
 	}
 

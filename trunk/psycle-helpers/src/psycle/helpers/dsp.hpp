@@ -238,6 +238,8 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 		float * pR = pSamplesR;
 		int ns = numSamples;
 		int count(numRMSSamples - rms.count);
+		// this can happen when changing the samplerate.
+		if (count < 0) { count = 0;}
 		--pL; --pR;
 		if ( ns >= count)
 		{
