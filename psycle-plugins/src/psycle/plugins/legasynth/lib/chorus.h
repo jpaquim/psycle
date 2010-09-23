@@ -48,7 +48,7 @@ public:
 	void set_feedback(float ifeedback_100);
 	void set_width(float iwidth_100);
 private:
-	void Chorus::recalc_delay();
+	void recalc_delay();
 	float mixfreq_hz;
 		
 	float delay_ms;
