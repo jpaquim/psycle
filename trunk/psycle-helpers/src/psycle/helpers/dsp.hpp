@@ -7,6 +7,11 @@
 #endif
 #include <cmath>
 #include <cstring>
+#if defined BOOST_AUTO_TEST_CASE
+	#include <universalis/os/aligned_memory_alloc.hpp>
+	#include <universalis/os/clocks.hpp>
+	#include <sstream>
+#endif
 namespace psycle { namespace helpers { /** various signal processing utility functions. */ namespace dsp {
 
 	/// linear -> deciBell
@@ -26,16 +31,16 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 	/// undenormalize (renormalize) samples in a signal buffer.
 	///\todo make a template version that accept both float and doubles
-	inline void Undenormalize(float *pSamplesL,float *pSamplesR, int numsamples)
+	inline void Undenormalize(float * UNIVERSALIS__COMPILER__RESTRICT pSamplesL,float * UNIVERSALIS__COMPILER__RESTRICT pSamplesR, int numsamples)
 	{
-		math::erase_all_nans_infinities_and_denormals(pSamplesL,numsamples);
-		math::erase_all_nans_infinities_and_denormals(pSamplesR,numsamples);
+		math::erase_all_nans_infinities_and_denormals(pSamplesL, numsamples);
+		math::erase_all_nans_infinities_and_denormals(pSamplesR, numsamples);
 	}
 
 	/****************************************************************************/
 
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
-	inline void Add(float *pSrcSamples, float *pDstSamples, int numSamples, float vol)
+	inline void Add(float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples, float vol)
 	{
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(vol);
@@ -43,12 +48,12 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			__m128 *pdst = (__m128*)pDstSamples;
 			do
 			{
-				__m128 tmpps = _mm_mul_ps(*psrc,volps);
-				*pdst = _mm_add_ps(*pdst,tmpps);
-				psrc++;
-				pdst++;
-				numSamples-=4;
-			} while(numSamples>0);
+				__m128 tmpps = _mm_mul_ps(*psrc, volps);
+				*pdst = _mm_add_ps(*pdst, tmpps);
+				++psrc;
+				++pdst;
+				numSamples -= 4;
+			} while(numSamples > 0);
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			__asm
 			{
@@ -79,7 +84,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 	/// multiply a signal by a ratio, inplace.
 	///\see MovMul()
-	inline void Mul(float *pDstSamples, int numSamples, float multi)
+	inline void Mul(float * pDstSamples, int numSamples, float multi)
 	{
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(multi);
@@ -117,7 +122,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 	/// multiply a signal by a ratio.
 	///\see Mul()
-	inline void MovMul(float *pSrcSamples, float *pDstSamples, int numSamples, float multi)
+	inline void MovMul(float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples, float multi)
 	{
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(multi);
@@ -157,7 +162,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 		#endif
 	}
 
-	inline void Mov(float *pSrcSamples, float *pDstSamples, int numSamples)
+	inline void Mov(float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples)
 	{
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			do
@@ -187,7 +192,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#else
-			memcpy(pDstSamples, pSrcSamples, numSamples * sizeof(float));
+			std::memcpy(pDstSamples, pSrcSamples, numSamples * sizeof *pSrcSamples);
 		#endif
 	}
 
@@ -219,7 +224,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#else
-			memset(pDstSamples, 0, numSamples * sizeof(float));
+			std::memset(pDstSamples, 0, numSamples * sizeof *pDstSamples);
 		#endif
 	}
 
@@ -232,7 +237,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 
 	/// finds the RMS volume value in a signal buffer.
 	/// Note: Values are buffered since the standard calculation requires 50ms or data.
-	inline float GetRMSVol(RMSData &rms,float *pSamplesL, float *pSamplesR, int numSamples)
+	inline float GetRMSVol(RMSData &rms,float * UNIVERSALIS__COMPILER__RESTRICT pSamplesL, float * UNIVERSALIS__COMPILER__RESTRICT pSamplesR, int numSamples)
 	{
 		float * pL = pSamplesL;
 		float * pR = pSamplesR;
@@ -253,8 +258,8 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				rms.AccumLeft = acleft;
 				rms.AccumRight = acright;
 			}
-			rms.previousLeft  = std::sqrt(rms.AccumLeft  / dsp::numRMSSamples);
-			rms.previousRight = std::sqrt(rms.AccumRight / dsp::numRMSSamples);
+			rms.previousLeft  = std::sqrt(rms.AccumLeft  / numRMSSamples);
+			rms.previousRight = std::sqrt(rms.AccumRight / numRMSSamples);
 			rms.AccumLeft = 0;
 			rms.AccumRight = 0;
 			rms.count = 0;
@@ -273,7 +278,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	}
 
 	/// finds the maximum amplitude in a signal buffer.
-	inline float GetMaxVol(float *pSamplesL, float *pSamplesR, int numSamples)
+	inline float GetMaxVol(float * UNIVERSALIS__COMPILER__RESTRICT pSamplesL, float * UNIVERSALIS__COMPILER__RESTRICT pSamplesR, int numSamples)
 	{
 		///\todo: Implementation with Intrinsics.
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
@@ -599,4 +604,40 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			/// used to speed up linear interpolation of sinc table-- this idea stolen from libresampler
 			static float sinc_delta_[SINC_TABLESIZE];
 	};
+
+	#if defined BOOST_AUTO_TEST_CASE
+		BOOST_AUTO_TEST_CASE(dsp_test) {
+			std::size_t const alignment = 16;
+			std::vector<float, universalis::os::aligned_alloc<float, alignment> > v1, v2;
+			for(std::size_t s = 0; s < 10000; ++s) {
+				v1.push_back(s);
+				v2.push_back(s);
+			}
+
+			using namespace universalis::stdlib;
+			typedef universalis::os::clocks::monotonic clock;
+			int const iterations = 10000;
+			float const vol = 0.5;
+
+			{ // add
+				nanoseconds const t1(clock::current());
+				for(int i(0); i < iterations; ++i) Add(&v1[0], &v2[0], v1.size(), vol);
+				nanoseconds const t2(clock::current());
+				for(int i(0); i < iterations; ++i) {
+					float const * in = &v1[0]; --in;
+					float * out = &v2[0]; --out;
+					std::size_t count = v1.size();
+					do { *++out += *++in * vol; } while(--count);
+				}
+				nanoseconds const t3(clock::current());
+				{
+					std::ostringstream s;
+					s << "add: " << (t2 - t1).get_count() * 1e-9 << "s < " << (t3 - t2).get_count() * 1e-9 << "s";
+					BOOST_MESSAGE(s.str());
+				}
+				BOOST_CHECK(t2 - t1 < t3 - t2);
+			}
+		}
+	#endif
+
 }}}
