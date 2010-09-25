@@ -13,3 +13,4 @@
 #include <boost/test/auto_unit_test.hpp>
 
 #include <psycle/helpers/math/math.hpp>
+#include <psycle/helpers/dsp.hpp>
