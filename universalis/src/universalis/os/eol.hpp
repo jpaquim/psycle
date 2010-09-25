@@ -3,8 +3,8 @@
 
 ///\file
 
-#ifndef UNIVERSALIS__OS__OS__INCLUDED
-#define UNIVERSALIS__OS__OS__INCLUDED
+#ifndef UNIVERSALIS__OS__EOL__INCLUDED
+#define UNIVERSALIS__OS__EOL__INCLUDED
 #pragma once
 
 /// end-of-line character sequence on the host platform.
