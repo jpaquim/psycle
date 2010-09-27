@@ -1,0 +1,63 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2002-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+
+///\interface psycle::engine::event
+#pragma once
+#include "sample.hpp"
+#define PSYCLE__DECL  PSYCLE__ENGINE
+#include <psycle/detail/decl.hpp>
+namespace psycle { namespace engine {
+
+/// a sample with an associated, logical, index.
+/// the index corresponds to a logical (i.e., not physical) position in a buffer.
+class event {
+	///\name sample
+	///\{
+		public:
+			/// the immutable value of the sample.
+			///\return immutable the value of the sample
+			real sample() const throw() { return sample_; }
+			/// the mutable value of the sample.
+			///\return mutable the value of the sample
+			real & sample() throw() { return sample_; }
+			/// sets the value of the sample.
+			///\param the value of the sample
+			void sample(real const & sample) throw() { sample_ = sample; }
+		private:
+			real sample_;
+	///\}
+
+	///\name index
+	///\{
+		public:
+			/// the logical index of the sample.
+			///\returns the logical index of the sample
+			std::size_t index() const throw() { return index_; }
+			/// the mutable logical index of the sample.
+			///\returns mutable value of the logical index of the sample
+			std::size_t & index() throw() { return index_; }
+			/// sets the logical index of the sample.
+			///\param the logical index of the sample
+			void index(std::size_t index) throw() { index_ = index; }
+			/// the const value of the sample.
+			///\returns the const value of the sample
+		private:
+			std::size_t index_;
+	///\}
+
+	public:
+		/// sets both the logical index and the sample value.
+		void operator()(std::size_t index, real const & sample) { index_ = index; sample_ = sample; }
+	
+		/// compares the logical indexes of two events.
+		/// The value of the sample is not taken into account.
+		///\return true if this event has a logical index equal to the one of the other event.
+		bool operator==(event const & event) const throw() { return this->index() == event.index(); }
+		/// compares the logical indexes of two events.
+		/// The value of the sample is not taken into account.
+		///\return true if this event has a logical index lower than the one of the other event.
+		bool operator<(event const & event) const throw() { return this->index() < event.index(); }
+};
+
+}}
+#include <psycle/detail/decl.hpp>
