@@ -20,7 +20,7 @@ class PSYCLE__DECL bipolar_filter : public node {
 	public:
 		bipolar_filter(class plugin_library_reference &, name_type const &, real const & logical_zero);
 	protected:
-		void channel_change_notification_from_port(engine::port const &) throw(exception) /*override*/;
+		void channel_change_notification_from_port(port const &) throw(exception) /*override*/;
 		void seconds_per_event_change_notification_from_port(port const &) /*override*/;
 		void do_process_first() throw(exception) /*override*/;
 		void do_process() throw(exception) /*override*/;
