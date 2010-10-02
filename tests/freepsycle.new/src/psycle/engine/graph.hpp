@@ -9,6 +9,7 @@
 #include "named.hpp"
 #include "buffer.hpp"
 #include <universalis/stdlib/mutex.hpp>
+#include <boost/signal.hpp>
 #include <set>
 #define PSYCLE__DECL  PSYCLE__ENGINE
 #include <psycle/detail/decl.hpp>
@@ -124,7 +125,7 @@ class PSYCLE__DECL node : public named {
 			typedef std::vector<ports::output*> output_ports_type;
 			/// the output ports owned by this node
 			output_ports_type const & output_ports() const { return output_ports_; }
-		private: friend class ports::output;
+		private:
 			output_ports_type output_ports_;
 	///\}
 
@@ -150,7 +151,7 @@ class PSYCLE__DECL node : public named {
 			typedef std::vector<ports::inputs::single*> single_input_ports_type;
 			/// the input ports owned by this node
 			single_input_ports_type const & single_input_ports() const { return single_input_ports_; }
-		private: friend class ports::inputs::single;
+		private:
 			single_input_ports_type single_input_ports_;
 	///\}
 
@@ -176,7 +177,7 @@ class PSYCLE__DECL node : public named {
 			/// the multiple input port owned by this node, if any, or else 0
 			ports::inputs::multiple const * multiple_input_port() const { return multiple_input_port_; }
 			ports::inputs::multiple * multiple_input_port() { return multiple_input_port_; }
-		private: friend class ports::inputs::multiple;
+		private:
 			ports::inputs::multiple * multiple_input_port_;
 	///\}
 
