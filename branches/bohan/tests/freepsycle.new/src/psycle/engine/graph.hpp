@@ -28,25 +28,25 @@ class PSYCLE__DECL graph : public std::set<node*>, public named {
 	///\{
 		public:
 			/// signal emitted when a new node is added to the graph
-			boost::signal<void (node &)> & new_node_signal() throw() { return new_node_signal_; }
+			boost::signal<void (node &)> & new_node_signal() { return new_node_signal_; }
 		private:
 			boost::signal<void (node &)> new_node_signal_;
 
 		public:
 			/// signal emitted when a node is deleted from the graph
-			boost::signal<void (node &)> & delete_node_signal() throw() { return delete_node_signal_; }
+			boost::signal<void (node &)> & delete_node_signal() { return delete_node_signal_; }
 		private:
 			boost::signal<void (node &)> delete_node_signal_;
 
 		public:
 			/// signal emitted when two ports (of two different nodes) are connected
-			boost::signal<void (ports::input &, ports::output &)> & new_connection_signal() throw() { return new_connection_signal_; }
+			boost::signal<void (ports::input &, ports::output &)> & new_connection_signal() { return new_connection_signal_; }
 		private:
 			boost::signal<void (ports::input &, ports::output &)> new_connection_signal_;
 
 		public:
 			/// signal emitted when two ports (of two different nodes) are disconnected
-			boost::signal<void (ports::input &, ports::output &)> & delete_connection_signal() throw() { return delete_connection_signal_; }
+			boost::signal<void (ports::input &, ports::output &)> & delete_connection_signal() { return delete_connection_signal_; }
 		private:
 			boost::signal<void (ports::input &, ports::output &)> delete_connection_signal_;
 	///\}
@@ -104,7 +104,7 @@ class PSYCLE__DECL node : public named {
 	///\name reference to plugin library
 	///\{
 		public:
-			class plugin_library_reference & plugin_library_reference() const throw() { return plugin_library_reference_; }
+			class plugin_library_reference & plugin_library_reference() const { return plugin_library_reference_; }
 		private:
 			class plugin_library_reference & plugin_library_reference_;
 	///\}
@@ -123,7 +123,7 @@ class PSYCLE__DECL node : public named {
 		public:
 			typedef std::vector<ports::output*> output_ports_type;
 			/// the output ports owned by this node
-			output_ports_type const & output_ports() const throw() { return output_ports_; }
+			output_ports_type const & output_ports() const { return output_ports_; }
 		private: friend class ports::output;
 			output_ports_type output_ports_;
 	///\}
@@ -132,16 +132,14 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// finds an output port by its name
-			ports::output const * output_port(name_type const &) const;
-			/// finds an output port by its name
-			ports::output * output_port(name_type const &);
+			ports::output * output_port(name_type const &) const;
 	///\}
 
 	///\name ports: outputs: signals
 	///\{
 		public:
 			/// signal emitted when a new output port is created for this node
-			boost::signal<void (ports::output &)> & new_output_port_signal() throw() { return new_output_port_signal_; }
+			boost::signal<void (ports::output &)> & new_output_port_signal() { return new_output_port_signal_; }
 		private:
 			boost::signal<void (ports::output &)>   new_output_port_signal_;
 	///\}
@@ -151,7 +149,7 @@ class PSYCLE__DECL node : public named {
 		public:
 			typedef std::vector<ports::inputs::single*> single_input_ports_type;
 			/// the input ports owned by this node
-			single_input_ports_type const & single_input_ports() const throw() { return single_input_ports_; }
+			single_input_ports_type const & single_input_ports() const { return single_input_ports_; }
 		private: friend class ports::inputs::single;
 			single_input_ports_type single_input_ports_;
 	///\}
@@ -160,16 +158,14 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// finds an input port by its name
-			ports::input const * input_port(name_type const &) const;
-			/// finds an input port by its name
-			ports::input * input_port(name_type const &);
+			ports::input * input_port(name_type const &) const;
 	///\}
 
 	///\name ports: inputs: single: signals
 	///\{
 		public:
 			/// signal emitted when a new single input port is created for this node
-			boost::signal<void (ports::inputs::single &)> & new_single_input_port_signal() throw() { return new_single_input_port_signal_; }
+			boost::signal<void (ports::inputs::single &)> & new_single_input_port_signal() { return new_single_input_port_signal_; }
 		private:
 			boost::signal<void (ports::inputs::single &)>   new_single_input_port_signal_;
 	///\}
@@ -178,8 +174,8 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// the multiple input port owned by this node, if any, or else 0
-			ports::inputs::multiple const * multiple_input_port() const throw() { return multiple_input_port_; }
-			ports::inputs::multiple * multiple_input_port() throw() { return multiple_input_port_; }
+			ports::inputs::multiple const * multiple_input_port() const { return multiple_input_port_; }
+			ports::inputs::multiple * multiple_input_port() { return multiple_input_port_; }
 		private: friend class ports::inputs::multiple;
 			ports::inputs::multiple * multiple_input_port_;
 	///\}
@@ -188,7 +184,7 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// signal emitted when the multiple input port is created for this node
-			boost::signal<void (ports::inputs::multiple &)> & new_multiple_input_port_signal() throw() { return new_multiple_input_port_signal_; }
+			boost::signal<void (ports::inputs::multiple &)> & new_multiple_input_port_signal() { return new_multiple_input_port_signal_; }
 		private:
 			boost::signal<void (ports::inputs::multiple &)>   new_multiple_input_port_signal_;
 	///\}
@@ -224,7 +220,7 @@ class PSYCLE__DECL node : public named {
 		public:
 			/// indicates whether the underlying device (if any) is ready to process.
 			/// called by schedulers
-			bool io_ready() const throw() { scoped_lock lock(mutex_); return io_ready_; }
+			bool io_ready() const { scoped_lock lock(mutex_); return io_ready_; }
 		protected:
 			/// Derived classes that drive an underlying device should call this setter.
 			/// When changed from false to true, the io_ready_signal is emitted.
@@ -237,7 +233,7 @@ class PSYCLE__DECL node : public named {
 		public:
 			/// signal to be emitted when the underlying device (if any) becomes ready to process
 			/// This signal is to be registered by schedulers.
-			boost::signal<void (node &)> & io_ready_signal() throw() { return io_ready_signal_; }
+			boost::signal<void (node &)> & io_ready_signal() { return io_ready_signal_; }
 		private:
 			boost::signal<void (node &)> io_ready_signal_;
 
@@ -313,6 +309,9 @@ class PSYCLE__DECL port : public named {
 		private:
 			class node & node_;
 	///\}
+
+	protected:
+		void connect(port &);
 
 	///\name buffer
 	///\{
@@ -413,7 +412,7 @@ namespace ports {
 		///\{
 			public:
 				typedef std::vector<input*> input_ports_type;
-				input_ports_type const & input_ports() const throw() { return input_ports_; }
+				input_ports_type const & input_ports() const { return input_ports_; }
 			private:
 				input_ports_type input_ports_;
 		///\}
@@ -530,7 +529,7 @@ namespace ports {
 			///\{
 				public:
 					typedef std::vector<output*> output_ports_type;
-					output_ports_type const & output_ports() const throw() { return output_ports_; }
+					output_ports_type const & output_ports() const { return output_ports_; }
 				private:
 					output_ports_type output_ports_;
 			///\}
@@ -549,7 +548,7 @@ namespace ports {
 				void do_propagate_seconds_per_event() /*override*/;
 
 			public:
-				bool single_connection_is_identity_transform() const throw() { return single_connection_is_identity_transform_; }
+				bool single_connection_is_identity_transform() const { return single_connection_is_identity_transform_; }
 			private:
 				bool single_connection_is_identity_transform_;
 
