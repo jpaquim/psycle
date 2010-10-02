@@ -21,3 +21,4 @@ using namespace helpers::math;
 
 }}}
 #include <psycle/detail/decl.hpp>
+#endif

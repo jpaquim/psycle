@@ -1,32 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::host::graph
 #include <psycle/detail/project.private.hpp>
 #include "graph.hpp"
 namespace psycle { namespace host {
-
-graph::graph(graph::underlying_type & underlying)
-:
-	bases::graph(underlying)
-{}
-
-#if 0
-	node::node(
-		class graph & graph,
-		plugin_resolver & resolver,
-		std::string const & type,
-		std::string const & name,
-		coordinates const & coordinates,
-		std::vector<coordinates> & port_coordinates
-	) : try {
-		bases::node(graph, resolver(type, name)),
-		plugin_library_reference_(plugin_library_reference),
-		coordinates(x, y)
-	} {} catch(...) {
-		throw;
-	}
-#endif
 
 node::node(class graph & graph, node::underlying_type & underlying, node::real /*const*/ x, port::real /*const*/ y)
 :
