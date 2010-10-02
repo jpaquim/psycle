@@ -91,7 +91,7 @@ void node::io_ready(bool io_ready) {
 	if(!was_io_ready && io_ready) io_ready_signal_(*this);
 }
 
-ports::input const * node::input_port(name_type const & name) const {
+ports::input * node::input_port(name_type const & name) const {
 	if(multiple_input_port() && multiple_input_port()->name() == name) return multiple_input_port();
 	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) if((**i).name() == name) return *i;
 	if(loggers::warning()()) {
@@ -102,28 +102,7 @@ ports::input const * node::input_port(name_type const & name) const {
 	return 0;
 }
 
-ports::input * node::input_port(name_type const & name) {
-	if(multiple_input_port() && multiple_input_port()->name() == name) return multiple_input_port();
-	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) if((**i).name() == name) return *i;
-	if(loggers::warning()()) {
-		std::ostringstream s;
-		s << qualified_name() << ": input port not found: " << name;
-		loggers::warning()(s.str());
-	}
-	return 0;
-}
-
-ports::output const * node::output_port(name_type const & name) const {
-	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) if((**i).name() == name) return *i;
-	if(loggers::warning()()) {
-		std::ostringstream s;
-		s << qualified_name() << ": output port not found: " << name;
-		loggers::warning()(s.str());
-	}
-	return 0;
-}
-
-ports::output * node::output_port(name_type const & name) {
+ports::output * node::output_port(name_type const & name) const {
 	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) if((**i).name() == name) return *i;
 	if(loggers::warning()()) {
 		std::ostringstream s;
@@ -300,6 +279,37 @@ port::~port() {
 	}
 }
 
+void port::connect(port & port) throw(exception) {
+	if(loggers::trace()()) {
+		std::ostringstream s;
+		s << this->qualified_name() << " port connecting to port " << port.qualified_name();
+		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	}
+	// channels negociation
+	{
+		if(this->channels())
+			if(port.channels())
+				if(this->channels() != port.channels())
+					throw exceptions::runtime_error("the channel counts of the two ports are not the same", UNIVERSALIS__COMPILER__LOCATION);
+				else { /* nothing to do */ }
+			else port.propagate_channels_to_node(this->channels());
+		else if(port.channels()) this->propagate_channels_to_node(port.channels());
+		else { /* nothing can be done for now */ }
+	}
+	// seconds per event negociation
+	{
+		if(this->seconds_per_event())
+			if(port.seconds_per_event())
+				if(this->seconds_per_event() != port.seconds_per_event())
+					throw exceptions::runtime_error("the events per second of the two ports are not the same", UNIVERSALIS__COMPILER__LOCATION);
+				else { /* nothing to do */ }
+			else port.propagate_seconds_per_event_to_node(this->seconds_per_event());
+		else if(port.seconds_per_event())
+			this->propagate_seconds_per_event_to_node(port.seconds_per_event());
+		else { /* nothing can be done for now */ }
+	}
+}
+
 port::name_type port::qualified_name() const {
 	return node().qualified_name() + '.' + name();
 }
@@ -350,37 +360,6 @@ void port::propagate_seconds_per_event(real const & seconds_per_event) {
 	if(this->seconds_per_event() == seconds_per_event) return;
 	this->seconds_per_event(seconds_per_event);
 	do_propagate_seconds_per_event(); // polymorphic virtual call
-}
-
-void port::connect(port & port) throw(exception) {
-	if(loggers::trace()()) {
-		std::ostringstream s;
-		s << this->qualified_name() << " port connecting to port " << port.qualified_name();
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	// channels negociation
-	{
-		if(this->channels())
-			if(port.channels())
-				if(this->channels() != port.channels())
-					throw exceptions::runtime_error("the channel counts of the two ports are not the same", UNIVERSALIS__COMPILER__LOCATION);
-				else { /* nothing to do */ }
-			else port.propagate_channels_to_node(this->channels());
-		else if(port.channels()) this->propagate_channels_to_node(port.channels());
-		else { /* nothing can be done for now */ }
-	}
-	// seconds per event negociation
-	{
-		if(this->seconds_per_event())
-			if(port.seconds_per_event())
-				if(this->seconds_per_event() != port.seconds_per_event())
-					throw exceptions::runtime_error("the events per second of the two ports are not the same", UNIVERSALIS__COMPILER__LOCATION);
-				else { /* nothing to do */ }
-			else port.propagate_seconds_per_event_to_node(this->seconds_per_event());
-		else if(port.seconds_per_event())
-			this->propagate_seconds_per_event_to_node(port.seconds_per_event());
-		else { /* nothing can be done for now */ }
-	}
 }
 
 void port::propagate_channels_to_node(std::size_t channels) throw(exception) {
@@ -555,6 +534,8 @@ namespace ports {
 		);
 		// connect the output port internal side to this input port
 		output_port.connect_internal_side(*this);
+		// call our base port class connection function
+		port::connect(output_port);
 		// connect this input port internal side to the output port
 		connect_internal_side(output_port);
 		// signal graph wrappers of the new connection
