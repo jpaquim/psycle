@@ -12,31 +12,14 @@
 #include <list>
 #define PSYCLE__DECL  PSYCLE__HOST
 #include <psycle/detail/decl.hpp>
-namespace psycle { namespace host { namespace schedulers {
-/// a scheduler using several threads
-namespace multi_threaded {
+namespace psycle { namespace host {
 
 using namespace universalis::stdlib;
-namespace underlying = host::underlying;
-
-class graph;
-class node;
-class port;
-namespace ports {
-	class output;
-	class input;
-	namespace inputs {
-		class single;
-		class multiple;
-	}
-}
-class scheduler;
-
-class typenames : public generic::typenames<graph, node, port, ports::output, ports::input, ports::inputs::single, ports::inputs::multiple, underlying::typenames> {};
+using engine::exception;
 
 /**********************************************************************************************************************/
-/// underlying::buffer with a reference counter.
-class buffer : public underlying::buffer {
+/// buffer with a reference counter.
+class buffer : public engine::buffer {
 	public:
 		/// creates a buffer with an initial reference count set to 0.
 		buffer(std::size_t channels, std::size_t events) throw(std::exception);
@@ -55,180 +38,22 @@ class buffer : public underlying::buffer {
 };
 
 /**********************************************************************************************************************/
-// graph
-typedef generic::wrappers::graph<typenames> graph_base;
-class PSYCLE__DECL graph : public graph_base {
-	protected: friend class virtual_factory_access;
-		graph(underlying_type & underlying) : graph_base(underlying) {}
-
-	///\name schedule
-	///\{
-		public:
-			void compute_plan();
-			void clear_plan();
-			
-		public:
-			/// maximum number of channels needed for buffers
-			std::size_t channels() const throw() { return channels_; }
-		private:
-			std::size_t channels_;
-			
-		public:
-			typedef std::list<node*> terminal_nodes_type;
-			/// nodes with no dependency, that are processed first
-			terminal_nodes_type const & terminal_nodes() const throw() { return terminal_nodes_; }
-		private:
-			terminal_nodes_type terminal_nodes_;
-
-		public:
-			boost::signal<void (node & node)> & io_ready_signal() throw() { return io_ready_signal_; }
-		private:
-			boost::signal<void (node &)> io_ready_signal_;
-	///\}
-};
-
-/**********************************************************************************************************************/
-// port
-typedef generic::wrappers::port<typenames> port_base;
-class PSYCLE__DECL port : public port_base {
-	protected: friend class virtual_factory_access;
-		port(class node & node, underlying_type & underlying) : port_base(node, underlying) {}
-
-	///\name buffer
-	///\{
-		public:
-			/// assigns a buffer to this port (or unassigns if 0) only if the given buffer is different.
-			void buffer(class buffer * const buffer) { underlying().buffer(buffer); }
-			/// the buffer to read or write data from or to (buffers are shared accross several ports).
-			class buffer & buffer() const throw() { return static_cast<class buffer &>(underlying().buffer()); }
-	///\}
-};
-
-namespace ports {
-
-	/**********************************************************************************************************************/
-	// output
-	typedef generic::wrappers::ports::output<typenames> output_base;
-	class PSYCLE__DECL output : public output_base {
-		protected: friend class virtual_factory_access;
-			output(class node & node, underlying_type & underlying) : output_base(node, underlying) {}
-	};
-
-	/**********************************************************************************************************************/
-	// input
-	typedef generic::wrappers::ports::input<typenames> input_base;
-	class PSYCLE__DECL input : public input_base {
-		protected: friend class virtual_factory_access;
-			input(class node & node, underlying_type & underlying) : input_base(node, underlying) {}
-	};
-
-	namespace inputs {
-
-		/**********************************************************************************************************************/
-		// single
-		typedef generic::wrappers::ports::inputs::single<typenames> single_base;
-		class PSYCLE__DECL single : public single_base {
-			protected: friend class virtual_factory_access;
-				single(class node & node, underlying_type & underlying) : single_base(node, underlying) {}
-		};
-
-		/**********************************************************************************************************************/
-		// multiple
-		typedef generic::wrappers::ports::inputs::multiple<typenames> multiple_base;
-		class PSYCLE__DECL multiple : public multiple_base {
-			protected: friend class virtual_factory_access;
-				multiple(class node & node, underlying_type & underlying) : multiple_base(node, underlying) {}
-		};
-	}
-}
-
-/**********************************************************************************************************************/
-// node
-typedef generic::wrappers::node<typenames> node_base;
-class PSYCLE__DECL node : public node_base {
-	protected: friend class virtual_factory_access;
-		node(class graph &, underlying_type &);
-		
-	///\name schedule
-	///\{
-		public:
-			void compute_plan();
-			void reset() throw() /*override*/;
-			/// called each time a direct predecessor node has been processed
-			void predecessor_node_processed() { assert(predecessor_node_remaining_count_); --predecessor_node_remaining_count_; }
-			/// indicates whether all the predecessors of this node have been processed
-			bool is_ready_to_process() { return !predecessor_node_remaining_count_; }
-		private:
-			std::size_t predecessor_node_count_;
-			std::size_t predecessor_node_remaining_count_;
-
-		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
-		private: ports::output * multiple_input_port_first_output_port_to_process_;
-
-		private:
-			/// connection to the underlying signal
-			boost::signals::scoped_connection on_underlying_io_ready_signal_connection;
-			/// signal slot for the underlying signal
-			void on_underlying_io_ready(node::underlying_type & /*underlying_node*/) { graph().io_ready_signal()(*this); }
-			
-		public:
-			bool waiting_for_io_ready_signal() const throw() { return waiting_for_io_ready_signal_; }
-			void waiting_for_io_ready_signal(bool value) throw() { waiting_for_io_ready_signal_ = value; }
-		private:
-			bool waiting_for_io_ready_signal_;
-
-		public:  void process_first() { process(true); }
-		public:  void process() { process(false); }
-		private: void process(bool first);
-
-		public:  bool const processed() const throw() { return processed_; }
-		private: bool       processed_;
-	///\}
-		
-	///\name schedule ... time measurement
-	///\{
-		public:  void reset_time_measurement();
-
-		public:  nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
-		private: nanoseconds accumulated_processing_time_;
-
-		public:  uint64_t processing_count() const throw() { return processing_count_; }
-		private: uint64_t processing_count_;
-
-		public:  uint64_t processing_count_no_zeroes() const throw() { return processing_count_no_zeroes_; }
-		private: uint64_t processing_count_no_zeroes_;
-	///\}
-};
-
-/**********************************************************************************************************************/
-typedef engine::exception exception;
-
-/// simply, a "player".
+/// a scheduler using several threads
 class PSYCLE__DECL scheduler {
-	protected:
-		scheduler(engine::graph & engine) throw(std::exception) : engine_(engine) {}
 	public:
-		virtual ~scheduler() throw() {}
-		virtual bool started() = 0;
-		void started(bool value) throw(exception) { if(value) start(); else stop(); }
-		virtual void start() throw(exception) = 0;
-		virtual void stop() = 0;
+		scheduler(engine::graph &, std::size_t threads = 1) throw(std::exception);
+		virtual ~scheduler() throw();
+
 	protected:
-		engine::graph const & engine() const throw() { return engine_; }
-		engine::graph & engine()       throw() { return engine_; }
+		engine::graph const & engine() const { return engine_; }
+		engine::graph & engine() { return engine_; }
 	private:
 		engine::graph & engine_;
-};
 
-/**********************************************************************************************************************/
-/// a scheduler using several threads
-class PSYCLE__DECL scheduler : public host::scheduler<graph> {
 	public:
-		scheduler(graph::underlying_type &, std::size_t threads = 1) throw(std::exception);
-		virtual ~scheduler() throw();
-		void start() throw(underlying::exception) /*override*/;
+		void start() throw(exception) /*override*/;
 		bool started() /*override*/ { return threads_.size(); }
-		void started(bool value) { host::scheduler<class graph>::started(value); }
+		void started(bool value) throw(exception) { if(value) start(); else stop(); }
 		void stop() /*override*/;
 		
 		std::size_t threads() const throw() { return thread_count_; }
@@ -238,16 +63,16 @@ class PSYCLE__DECL scheduler : public host::scheduler<graph> {
 	///\{
 		private:
 			boost::signals::scoped_connection on_new_node_signal_connection;
-			void on_new_node(node::underlying_type &);
+			void on_new_node(engine::node &);
 			
 			boost::signals::scoped_connection on_delete_node_signal_connection;
-			void on_delete_node(node::underlying_type &);
+			void on_delete_node(engine::node &);
 
 			boost::signals::scoped_connection on_new_connection_signal_connection;
-			void on_new_connection(ports::input::underlying_type &, ports::output::underlying_type &);
+			void on_new_connection(engine::ports::input &, engine::ports::output &);
 
 			boost::signals::scoped_connection on_delete_connection_signal_connection;
-			void on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &);
+			void on_delete_connection(engine::ports::input &, engine::ports::output &);
 
 			boost::signals::scoped_connection on_io_ready_signal_connection;
 			void on_io_ready(node &);
@@ -328,6 +153,6 @@ class scheduler::buffer_pool {
 		mutex mutable mutex_;
 };
 
-}}}}
+}}
 #include <psycle/detail/decl.hpp>
 #endif
