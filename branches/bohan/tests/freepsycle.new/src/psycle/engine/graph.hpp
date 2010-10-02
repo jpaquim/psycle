@@ -1,12 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net : johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::graph
 #pragma once
 #include "forward_declarations.hpp"
 #include "named.hpp"
 #include "buffer.hpp"
-#include <psycle/generic/base.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <set>
 #define PSYCLE__DECL  PSYCLE__ENGINE
@@ -14,15 +13,41 @@
 namespace psycle { namespace engine {
 
 using namespace universalis::stdlib;
-class plugin_library_reference;
 
 /**********************************************************************************************************************/
 // graph
 /// a set of nodes
-class PSYCLE__DECL graph : public bases::graph, public named {
-	protected: friend class virtual_factory_access;
+class PSYCLE__DECL graph : public named {
+	public:
 		graph(name_type const &);
 		virtual ~graph();
+
+	///\name signals
+	///\{
+		public:
+			/// signal emitted when a new node is added to the graph
+			boost::signal<void (node &)> & new_node_signal() throw() { return new_node_signal_; }
+		private:
+			boost::signal<void (node &)> new_node_signal_;
+
+		public:
+			/// signal emitted when a node is deleted from the graph
+			boost::signal<void (node &)> & delete_node_signal() throw() { return delete_node_signal_; }
+		private:
+			boost::signal<void (node &)> delete_node_signal_;
+
+		public:
+			/// signal emitted when two ports (of two different nodes) are connected
+			boost::signal<void (ports::input &, ports::output &)> & new_connection_signal() throw() { return new_connection_signal_; }
+		private:
+			boost::signal<void (ports::input &, ports::output &)> new_connection_signal_;
+
+		public:
+			/// signal emitted when two ports (of two different nodes) are disconnected
+			boost::signal<void (ports::input &, ports::output &)> & delete_connection_signal() throw() { return delete_connection_signal_; }
+		private:
+			boost::signal<void (ports::input &, ports::output &)> delete_connection_signal_;
+	///\}
 
 	///\name thread synchronisation
 		public:
@@ -52,21 +77,245 @@ class PSYCLE__DECL graph : public bases::graph, public named {
 PSYCLE__DECL std::ostream & operator<<(std::ostream & out, graph const &);
 
 /**********************************************************************************************************************/
+// node
+/// node of a graph, placeholder for a dsp, aka "plugin machine".
+class PSYCLE__DECL node : public named {
+	friend class graph;
+	friend class port;
+	friend class ports::output;
+	friend class ports::input;
+	friend class ports::inputs::single;
+	friend class ports::inputs::multiple;
+
+	public:
+		node(class plugin_library_reference &, class graph &, name_type const &);
+		virtual ~node();
+
+	///\name reference to plugin library
+	///\{
+		public:
+			class plugin_library_reference & plugin_library_reference() const throw() { return plugin_library_reference_; }
+		private:
+			class plugin_library_reference & plugin_library_reference_;
+	///\}
+
+	///\name output ports
+	///\{
+		public:
+			/// finds an output port by its name
+			ports::output * const output_port(name_type const &) const;
+	///\}
+
+	///\name input ports
+	///\{
+		public:
+			/// finds an input port by its name
+			ports::input * const input_port(name_type const &) const;
+	///\}
+
+	///\name open
+	///\{
+		public:
+			/// called by schedulers
+			void open() throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
+			void opened(bool value) throw(std::exception) { if(value) open(); else close(); }
+			virtual bool opened() const { return opened_; }
+		protected:
+			virtual void do_open() throw(std::exception);
+		private:
+			bool opened_;
+	///\}
+
+	///\name start
+	///\{
+		public:
+			/// called by schedulers
+			void start() throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
+			void started(bool value) throw(std::exception) { if(value) start(); else stop(); }
+			virtual bool started() const { return started_; }
+		protected:
+			virtual void do_start() throw(std::exception);
+		private:
+			bool started_;
+	///\}
+
+	///\name process
+	///\{
+		public:
+			/// indicates whether the underlying device (if any) is ready to process.
+			/// called by schedulers
+			bool io_ready() const throw() { scoped_lock lock(mutex_); return io_ready_; }
+		protected:
+			/// Derived classes that drive an underlying device should call this setter.
+			/// When changed from false to true, the io_ready_signal is emitted.
+			void io_ready(bool io_ready);
+		private:
+			bool io_ready_;
+			typedef class scoped_lock<mutex> scoped_lock;
+			mutex mutable mutex_;
+
+		public:
+			/// signal to be emitted when the underlying device (if any) becomes ready to process
+			/// This signal is to be registered by schedulers.
+			boost::signal<void (node &)> & io_ready_signal() throw() { return io_ready_signal_; }
+		private:
+			boost::signal<void (node &)> io_ready_signal_;
+
+		public:
+			/// called by schedulers
+			void inline process_first() throw(std::exception);
+		protected:
+			/// this function is the placeholder where to put the dsp algorithm.
+			/// re-implement this function in a derived class and put your own code in it.
+			virtual void do_process_first() throw(std::exception) {}
+
+		public:
+			/// called by schedulers
+			void inline process() throw(std::exception);
+		protected:
+			/// this function is the placeholder where to put the dsp algorithm.
+			/// re-implement this function in a derived class and put your own code in it.
+			virtual void do_process() throw(std::exception) = 0;
+
+		public:
+			/// called by schedulers, reset the state of this node so that it prepares for the next call to process()
+			void inline reset();
+		protected:
+			virtual void do_reset() {}
+	///\}
+
+	///\name stop
+	///\{
+		public:
+			/// called by schedulers
+			void stop() throw(std::exception) { if(started()) do_stop(); }
+		protected:
+			virtual void do_stop() throw(std::exception);
+	///\}
+
+	///\name close
+	///\{
+		public:
+			/// called by schedulers
+			void close() throw(std::exception) { stop(); if(opened()) do_close(); }
+		protected:
+			virtual void do_close() throw(std::exception);
+	///\}
+
+	protected:
+		virtual void channel_change_notification_from_port(port const &) throw(std::exception) {}
+		virtual void seconds_per_event_change_notification_from_port(port const &) {}
+		void quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port const &);
+
+	///\name name
+	///\{
+		public:
+			/// the full path of the node (within its graph)
+			name_type qualified_name() const;
+			virtual void dump(std::ostream &, std::size_t tabulations = 0) const;
+	///\}
+
+	///\name destruction signal
+	///\{
+		public:  boost::signal<void (node &)> & delete_signal() throw() { return delete_signal_; }
+		private: boost::signal<void (node &)>   delete_signal_;
+	///\}
+
+	///\name graph
+	///\{
+		public:
+			class graph & graph() { return graph_; }
+			class graph const & graph() const { return graph_; }
+		private:
+			class graph & graph_;
+	///\}
+
+	///\name ports: outputs
+	///\{
+		public:
+			typedef std::vector<ports::output*> output_ports_type;
+			/// the output ports owned by this node
+			output_ports_type const & output_ports() const throw() { return output_ports_; }
+		private: friend class ports::output;
+			output_ports_type output_ports_;
+	///\}
+
+	///\name ports: outputs: signals
+	///\{
+		public:
+			/// signal emitted when a new output port is created for this node
+			boost::signal<void (ports::output &)> & new_output_port_signal() throw() { return new_output_port_signal_; }
+		private:
+			boost::signal<void (ports::output &)>   new_output_port_signal_;
+	///\}
+
+	///\name ports: inputs
+	///\{
+		public:
+			typedef std::vector<ports::inputs::single*> single_input_ports_type;
+			/// the input ports owned by this node
+			single_input_ports_type const & single_input_ports() const throw() { return single_input_ports_; }
+		private: friend class ports::inputs::single;
+			single_input_ports_type single_input_ports_;
+	///\}
+
+	///\name ports: inputs: single: signals
+	///\{
+		public:
+			/// signal emitted when a new single input port is created for this node
+			boost::signal<void (ports::inputs::single &)> & new_single_input_port_signal() throw() { return new_single_input_port_signal_; }
+		private:
+			boost::signal<void (ports::inputs::single &)>   new_single_input_port_signal_;
+	///\}
+
+	///\name ports: inputs: multiple
+	///\{
+		public:
+			/// the multiple input port owned by this node, if any, or else 0
+			ports::inputs::multiple * const multiple_input_port() const throw() { return multiple_input_port_; }
+		private: friend class ports::inputs::multiple;
+			ports::inputs::multiple * multiple_input_port_;
+	///\}
+
+	///\name ports: inputs: multiple: signals
+	///\{
+		public:
+			/// signal emitted when the multiple input port is created for this node
+			boost::signal<void (ports::inputs::multiple &)> & new_multiple_input_port_signal() throw() { return new_multiple_input_port_signal_; }
+		private:
+			boost::signal<void (ports::inputs::multiple &)>   new_multiple_input_port_signal_;
+	///\}
+};
+/// outputs a textual representation of a node.
+///\relates node
+///\see node::dump
+PSYCLE__DECL std::ostream & operator<<(std::ostream &, node const &);
+
+/**********************************************************************************************************************/
 // port
 /// handles a stream of signal coming to or parting from an engine::node
-class PSYCLE__DECL port : public bases::port, public named {
+class PSYCLE__DECL port : public named {
 	friend class ports::output;
 	friend class ports::input;
 	friend class ports::inputs::single;
 	friend class ports::inputs::multiple;
 	
-	protected: friend class virtual_factory_access;
+	public:
 		port(class node &, name_type const &, std::size_t channels = 0);
 		virtual ~port();
 
 	protected:
 		/// connects this port to another port.
 		void connect(port &) throw(exception);
+
+	///\name node
+	///\{
+		public:
+			class node & node() { return node_; }
+			class node const & node() const { return node_; }
+		private:
+			class node & node_;
+	///\}
 
 	///\name buffer
 	///\{
@@ -152,14 +401,14 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// output
 	/// handles an output stream of signal parting from a node
-	class PSYCLE__DECL output : public bases::ports::output {
+	class PSYCLE__DECL output : public port {
 		friend class graph;
 		friend class node;
 		friend class input;
 		friend class inputs::single;
 		friend class inputs::multiple;
 			
-		protected: friend class virtual_factory_access;
+		public:
 			output(class node &, name_type const &, std::size_t channels = 0);
 			virtual ~output();
 
@@ -175,10 +424,10 @@ namespace ports {
 	/**********************************************************************************************************************/
 	// input
 	/// handles an input stream of signal coming to a node.
-	class PSYCLE__DECL input : public bases::ports::input {
+	class PSYCLE__DECL input : public port {
 		friend class node;
 		
-		protected: friend class virtual_factory_access;
+		public:
 			input(class node &, name_type const &, std::size_t channels = 0);
 			virtual ~input();
 
@@ -205,10 +454,10 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// single
 		/// handles a single input stream of signal coming to a node.
-		class PSYCLE__DECL single : public bases::ports::inputs::single {
+		class PSYCLE__DECL single : public input {
 			friend class node;
 
-			protected: friend class virtual_factory_access;
+			public:
 				single(class node &, name_type const &, std::size_t channels = 0);
 				virtual ~single();
 
@@ -227,10 +476,10 @@ namespace ports {
 		/**********************************************************************************************************************/
 		// multiple
 		/// handles multiple input streams of signal coming to a node.
-		class PSYCLE__DECL multiple : public bases::ports::inputs::multiple {
+		class PSYCLE__DECL multiple : public input {
 			friend class node;
 
-			protected: friend class virtual_factory_access;
+			public:
 				multiple(class node &, name_type const &, bool single_connection_is_identity_transform, std::size_t channels = 0);
 				virtual ~multiple();
 
@@ -252,160 +501,8 @@ namespace ports {
 		};
 	}
 }
-
-/**********************************************************************************************************************/
-// node
-/// node of a graph, placeholder for a dsp, aka "plugin machine".
-class PSYCLE__DECL node : public bases::node, public named {
-	friend class graph;
-	friend class port;
-	friend class ports::output;
-	friend class ports::input;
-	friend class ports::inputs::single;
-	friend class ports::inputs::multiple;
-
-	///\name factory
-	///\{
-		protected: friend class virtual_factory_access;
-			node(class plugin_library_reference &, class graph &, name_type const &);
-
-			void before_destruction() /*override*/ {
-				bases::node::before_destruction();
-				close();
-			}
-
-			virtual ~node();
-	///\}
-
-	///\name reference to plugin library
-	///\{
-		public:
-			class plugin_library_reference & plugin_library_reference() const throw() { return plugin_library_reference_; }
-		private:
-			class plugin_library_reference & plugin_library_reference_;
-	///\}
-
-	///\name output ports
-	///\{
-		public:
-			/// finds an output port by its name
-			ports::output * const output_port(name_type const &) const;
-	///\}
-
-	///\name input ports
-	///\{
-		public:
-			/// finds an input port by its name
-			ports::input * const input_port(name_type const &) const;
-	///\}
-
-	///\name open
-	///\{
-		public:
-			/// called by schedulers
-			void open() throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
-			void opened(bool value) throw(std::exception) { if(value) open(); else close(); }
-			virtual bool opened() const { return opened_; }
-		protected:
-			virtual void do_open() throw(std::exception);
-		private:
-			bool opened_;
-	///\}
-
-	///\name start
-	///\{
-		public:
-			/// called by schedulers
-			void start() throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
-			void started(bool value) throw(std::exception) { if(value) start(); else stop(); }
-			virtual bool started() const { return started_; }
-		protected:
-			virtual void do_start() throw(std::exception);
-		private:
-			bool started_;
-	///\}
-
-	///\name process
-	///\{
-		public:
-			/// indicates whether the underlying device (if any) is ready to process.
-			/// called by schedulers
-			bool io_ready() const throw() { scoped_lock lock(mutex_); return io_ready_; }
-		protected:
-			/// Derived classes that drive an underlying device should call this setter.
-			/// When changed from false to true, the io_ready_signal is emitted.
-			void io_ready(bool io_ready);
-		private:
-			bool io_ready_;
-			typedef class scoped_lock<mutex> scoped_lock;
-			mutex mutable mutex_;
-
-		public:
-			/// signal to be emitted when the underlying device (if any) becomes ready to process
-			/// This signal is to be registered by schedulers.
-			boost::signal<void (node &)> & io_ready_signal() throw() { return io_ready_signal_; }
-		private:
-			boost::signal<void (node &)> io_ready_signal_;
-			
-		public:
-			/// called by schedulers
-			void inline process_first() throw(std::exception);
-		protected:
-			/// this function is the placeholder where to put the dsp algorithm.
-			/// re-implement this function in a derived class and put your own code in it.
-			virtual void do_process_first() throw(std::exception) {}
-
-		public:
-			/// called by schedulers
-			void inline process() throw(std::exception);
-		protected:
-			/// this function is the placeholder where to put the dsp algorithm.
-			/// re-implement this function in a derived class and put your own code in it.
-			virtual void do_process() throw(std::exception) = 0;
-
-		public:
-			/// called by schedulers, reset the state of this node so that it prepares for the next call to process()
-			void inline reset();
-		protected:
-			virtual void do_reset() {}
-	///\}
-
-	///\name stop
-	///\{
-		public:
-			/// called by schedulers
-			void stop() throw(std::exception) { if(started()) do_stop(); }
-		protected:
-			virtual void do_stop() throw(std::exception);
-	///\}
-	
-	///\name close
-	///\{
-		public:
-			/// called by schedulers
-			void close() throw(std::exception) { stop(); if(opened()) do_close(); }
-		protected:
-			virtual void do_close() throw(std::exception);
-	///\}
-
-	protected:
-		virtual void channel_change_notification_from_port(port const &) throw(std::exception) {}
-		virtual void seconds_per_event_change_notification_from_port(port const &) {}
-		void quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port const &);
-
-	///\name name
-	///\{
-		public:
-			/// the full path of the node (within its graph)
-			name_type qualified_name() const;
-			virtual void dump(std::ostream &, std::size_t tabulations = 0) const;
-	///\}
-};
-/// outputs a textual representation of a node.
-///\relates node
-///\see node::dump
-PSYCLE__DECL std::ostream & operator<<(std::ostream &, node const &);
 }}
+
 #include <psycle/detail/decl.hpp>
 
 /**********************************************************************************************************************/

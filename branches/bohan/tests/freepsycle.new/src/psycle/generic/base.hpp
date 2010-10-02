@@ -24,12 +24,7 @@ namespace loggers = universalis::os::loggers;
 /***********************************************************************/
 /// This template declares a class convertible to its derived type Typenames::graph.
 template<typename Typenames>
-class graph
-:
-	// makes the class convertible to its derived type Typenames::graph
-	public cast::derived<typename Typenames::graph>,
-	public std::set<typename Typenames::node*>
-{
+class graph : public std::set<typename Typenames::node*> {
 	///\name signals
 	/// Signals are used to propagate changes from an underlying layer to the layers wrapping it.
 	/// A wrapping layer will register to the signals of the underlying layer,
@@ -69,11 +64,7 @@ class graph
 /// The virtual factory pattern is needed to be able to emit the signals only
 /// once the objects are fully constructed (see note about the signals in the graph class).
 template<typename Typenames>
-class node
-:
-	// makes the class convertible to its derived type Typenames::node
-	public cast::derived<typename Typenames::node>,
-{
+class node {
 	///\name type checking
 	///\{
 		private:
@@ -319,12 +310,6 @@ namespace ports {
 		///\name factory
 		///\{
 			protected:
-
-				/// A wrapper is derived from the basic class, and hence needs at least two arguments in the constructor.
-				/// Note that Typenames::port, which is the base class, is in this case derived from wrappers::port<Typenames>.
-				PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS(
-					input, input::virtual_factory_type, PSYCLE__GENERIC__TEMPLATE_CONSTRUCTORS__ARITY
-				)
 
 				void before_destruction() /*override*/ {
 					disconnect_all();
