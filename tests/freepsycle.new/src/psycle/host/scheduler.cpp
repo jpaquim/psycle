@@ -9,6 +9,7 @@
 #include <sstream>
 #include <limits>
 namespace psycle { namespace host {
+
 using engine::exceptions::runtime_error;
 
 namespace {
@@ -28,139 +29,10 @@ namespace {
 }
 
 /**********************************************************************************************************************/
-// graph
-
-void graph::clear_plan() {
-	terminal_nodes_.clear();
-}
-
-void graph::compute_plan() {
-	terminal_nodes_.clear();
-	channels_ = 0;
-
-	// iterate over all the nodes
-	for(const_iterator i(begin()), e(end()); i != e; ++i) {
-		class node & node(**i);
-
-		node.compute_plan();
-
-		// find the terminal nodes in the graph (nodes with no connected input ports)
-		if(node.is_ready_to_process()) {
-			if(loggers::trace()()) {
-				std::ostringstream s;
-				s << "terminal node: " << node.underlying().name();
-				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			terminal_nodes_.push_back(&node);
-		}
-
-		// find the maximum number of channels needed for buffers
-		// iterate over all output ports of the node
-		for(node::output_ports_type::const_iterator
-			i(node.output_ports().begin()),
-			e(node.output_ports().end()); i != e; ++i
-		) channels_ = std::max(channels(), (**i).underlying().channels());
-	}
-
-	if(loggers::trace()()) {
-		std::ostringstream s;
-		s << "channels: " << channels();
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	// The buffers in the scheduler's buffer pool are sized according to channels and events in scheduler::compute_plan().
-}
-
-/**********************************************************************************************************************/
-// node
-
-node::node(class graph & graph, underlying_type & underlying)
-:
-	node_base(graph, underlying),
-	multiple_input_port_first_output_port_to_process_(),
-	on_underlying_io_ready_signal_connection(underlying.io_ready_signal().connect(
-		boost::bind(&node::on_underlying_io_ready, this, _1))
-	),
-	waiting_for_io_ready_signal_(),
-	processing_count_(),
-	processing_count_no_zeroes_()
-{}
-
-void node::reset_time_measurement() {
-	accumulated_processing_time_ = 0;
-	processing_count_ = processing_count_no_zeroes_ = 0;
-}
-
-void node::compute_plan() {
-	// initialise time measurement
-	reset_time_measurement();
-	
-	processed_ = true; // set to true because reset() is called first in the processing loop
-	waiting_for_io_ready_signal_ = false;
-
-	// count the number of predecessor nodes
-	if(multiple_input_port()) predecessor_node_count_ = multiple_input_port()->output_ports().size();
-	else predecessor_node_count_ = 0;
-	for(node::single_input_ports_type::const_iterator
-		i(single_input_ports().begin()),
-		e(single_input_ports().end()); i != e; ++i
-	) if((**i).output_port()) ++predecessor_node_count_;
-	predecessor_node_remaining_count_ = predecessor_node_count_;
-
-	if(multiple_input_port()) {
-		// If the node has a multiple input port,
-		// find which output port connected to it has the minimum number of connections.
-		// note: this is a simplistic heuristic to minimise the number of buffer copy operations,
-		// the best algorithm would be to order the inputs with a recursive evaluation on the graph.
-		{
-			multiple_input_port_first_output_port_to_process_ = 0;
-			std::size_t minimum_size(std::numeric_limits<std::size_t>::max());
-			for(ports::inputs::multiple::output_ports_type::const_iterator
-				i(multiple_input_port()->output_ports().begin()),
-				e(multiple_input_port()->output_ports().end()); i != e; ++i
-			) {
-				ports::output & output_port(**i);
-				if(output_port.input_ports().size() < minimum_size) {
-					minimum_size = output_port.input_ports().size();
-					multiple_input_port_first_output_port_to_process_ = &output_port;
-					if(minimum_size == 1) break; // it's already an ideal case, we can't find a better one.
-				}
-			}
-		}
-		assert(!multiple_input_port()->output_ports().size() || multiple_input_port_first_output_port_to_process_);
-	}
-}
-
-void node::reset() throw() {
-	assert(processed());
-	processed_ = false;
-	predecessor_node_remaining_count_ = predecessor_node_count_;
-	underlying().reset();
-}
-
-void node::process(bool first) {
-	nanoseconds const t0(cpu_time_clock());
-	if(first) underlying().process_first(); else underlying().process();
-	nanoseconds const t1(cpu_time_clock());
-	if(t1 > t0) {
-		accumulated_processing_time_ += t1 - t0;
-		++processing_count_no_zeroes_;
-	} else if(loggers::warning() && t1 < t0) {
-		std::ostringstream s;
-		s << "time went backward: "
-			<< t0.get_count() * 1e-9 << "s, "
-			<< t1.get_count() * 1e-9 << 's';
-		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-	}
-	++processing_count_;
-	processed_ = true;
-}
-
-/**********************************************************************************************************************/
 // scheduler
 
-scheduler::scheduler(underlying::graph & graph, std::size_t threads) throw(std::exception)
+scheduler::scheduler(engine::graph & graph, std::size_t threads) throw(std::exception)
 :
-	host::scheduler<class graph>(graph),
 	// register to the graph signals
 	on_new_node_signal_connection(graph.new_node_signal().connect(
 		boost::bind(&scheduler::on_new_node, this, _1))
@@ -183,19 +55,19 @@ scheduler::~scheduler() throw() {
 	delete &graph(); // note that this doesn't delete the underying graph, only the scheduler's wrapping layer
 }
 
-void scheduler::on_new_node(node::underlying_type &) {
+void scheduler::on_new_node(engine::node &) {
 	suspend_and_compute_plan();
 }
 
-void scheduler::on_delete_node(node::underlying_type &) {
+void scheduler::on_delete_node(engine::node &) {
 	suspend_and_compute_plan();
 }
 
-void scheduler::on_new_connection(ports::input::underlying_type &, ports::output::underlying_type &) {
+void scheduler::on_new_connection(engine::ports::input &, engine::ports::output &) {
 	suspend_and_compute_plan();
 }
 
-void scheduler::on_delete_connection(ports::input::underlying_type &, ports::output::underlying_type &) {
+void scheduler::on_delete_connection(engine::ports::input &, engine::ports::output &) {
 	suspend_and_compute_plan();
 }
 
@@ -208,7 +80,7 @@ void scheduler::threads(std::size_t threads) {
 }
 
 void scheduler::start() throw(engine::exception) {
-	if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().engine().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(threads_.size()) {
 		if(loggers::information()()) loggers::information()("scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
@@ -218,8 +90,8 @@ void scheduler::start() throw(engine::exception) {
 
 	// ensure the nodes are started
 	// iterate over all the nodes in the graph
-	for(graph_type::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i)
-		(**i).underlying().start();
+	for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i)
+		(**i).engine().start();
 
 	stop_requested_ = suspend_requested_ = false;
 	processed_node_count_ = suspended_ = 0;
@@ -247,8 +119,8 @@ void scheduler::start() throw(engine::exception) {
 		threads_.clear();
 		// ensure the nodes are stopped
 		// iterate over all the nodes in the graph
-		for(graph_type::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i)
-			(**i).underlying().stop();
+		for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i)
+			(**i).engine().stop();
 		clear_plan();
 		throw;
 	}
@@ -280,7 +152,7 @@ void scheduler::compute_plan() {
 	nodes_queue_ = graph().terminal_nodes();
 
 	delete buffer_pool_;
-	buffer_pool_ = new buffer_pool(graph().channels(), graph().underlying().events_per_buffer());
+	buffer_pool_ = new buffer_pool(graph().channels(), graph().engine().events_per_buffer());
 }
 
 void scheduler::clear_plan() {
@@ -308,8 +180,8 @@ void scheduler::stop() {
 	threads_.clear();
 	// ensure the nodes are stopped
 	// iterate over all the nodes in the graph
-	for(graph_type::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i)
-		(**i).underlying().stop();
+	for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i)
+		(**i).engine().stop();
 	clear_plan();
 
 	// dump time measurements
@@ -318,9 +190,9 @@ void scheduler::stop() {
 	for(graph::const_iterator i(graph().begin()), e(graph().end()); i != e; ++i) {
 		node & node(**i);
 		std::cout
-			<< node.underlying().qualified_name()
-			<< " (" << universalis::compiler::typenameof(node.underlying())
-			<< ", lib " << node.underlying().plugin_library_reference().name()
+			<< node.engine().qualified_name()
+			<< " (" << universalis::compiler::typenameof(node.engine())
+			<< ", lib " << node.engine().plugin_library_reference().name()
 			<< "): ";
 		if(!node.processing_count()) std::cout << "not processed\n";
 		else {
@@ -338,12 +210,12 @@ void scheduler::stop() {
 }
 
 void scheduler::thread_function(std::size_t thread_number) {
-	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
+	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().engine().name(), UNIVERSALIS__COMPILER__LOCATION);
 
 	universalis::os::thread_name thread_name;
 	{ // set thread name
 		std::ostringstream s;
-		s << universalis::compiler::typenameof(*this) << '#' << graph().underlying().name() << '#' << thread_number;
+		s << universalis::compiler::typenameof(*this) << '#' << graph().engine().name() << '#' << thread_number;
 		thread_name.set(s.str());
 	}
 	// install cpu/os exception handler/translator
@@ -371,11 +243,11 @@ void scheduler::thread_function(std::size_t thread_number) {
 		}
 		throw;
 	}
-	loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
+	loggers::information()("scheduler thread on graph " + graph().engine().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 }
 
 void scheduler::on_io_ready(node & node) {
-	if(false && loggers::trace()()) loggers::trace()("io ready slot, node: " + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
+	if(false && loggers::trace()()) loggers::trace()("io ready slot, node: " + node.engine().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
 	{ scoped_lock lock(mutex_);
 		if(!node.waiting_for_io_ready_signal()) return;
 		node.waiting_for_io_ready_signal(false);
@@ -418,8 +290,8 @@ void scheduler::process_loop() throw(std::exception) {
 			// If the node drives an underlying device that is not ready,
 			// we just wait for its io_ready_signal to be emitted and handled by the scheduler's on_io_ready slot.
 			// on_io_ready will readd it to the processing queue.
-			if(!node.underlying().io_ready()) {
-				if(!loggers::trace()()) loggers::trace()("node io not ready: "  + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
+			if(!node.engine().io_ready()) {
+				if(!loggers::trace()()) loggers::trace()("node io not ready: "  + node.engine().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
 				// signal the node we want to be notified when it's eventually ready to be processed
 				node.waiting_for_io_ready_signal(true);
 				continue; // continue with other nodes in the queue
@@ -433,7 +305,7 @@ void scheduler::process_loop() throw(std::exception) {
 		}
 		class node & node(*node_);
 
-		//if(node.processed()) throw /*logic_error*/runtime_error("bug: node already processed: " + node.underlying().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
+		//if(node.processed()) throw /*logic_error*/runtime_error("bug: node already processed: " + node.engine().qualified_name(), UNIVERSALIS__COMPILER__LOCATION);
 
 		process(node); // note: the node's do_process() is supposed to wait until io_ready()
 
@@ -488,7 +360,7 @@ void scheduler::process_loop() throw(std::exception) {
 void scheduler::process(class node & node) throw(std::exception) {
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
-		s << "scheduling " << node.underlying().qualified_name();
+		s << "scheduling " << node.engine().qualified_name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 
@@ -512,7 +384,7 @@ void scheduler::process(class node & node) throw(std::exception) {
 		ports::output & first_output_port_to_process(node.multiple_input_port_first_output_port_to_process());
 		{ // process with first input buffer
 			node.multiple_input_port()->buffer(&first_output_port_to_process.buffer());
-			if(node.multiple_input_port()->underlying().single_connection_is_identity_transform()) { // this is the identity transform when we have a single input
+			if(node.multiple_input_port()->engine().single_connection_is_identity_transform()) { // this is the identity transform when we have a single input
 				ports::output & output_port(*node.output_ports().front());
 				if(
 					node.multiple_input_port()->buffer().reference_count() == 1 || // We are the last input port to read the buffer of the output port, so, we can take over its buffer.
@@ -520,7 +392,7 @@ void scheduler::process(class node & node) throw(std::exception) {
 				) {
 					if(false && loggers::trace()()) {
 						std::ostringstream s;
-						s << node.underlying().qualified_name() << ": copying pointer of input buffer to pointer of output buffer";
+						s << node.engine().qualified_name() << ": copying pointer of input buffer to pointer of output buffer";
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					// copy pointer of input buffer to pointer of output buffer
@@ -531,10 +403,10 @@ void scheduler::process(class node & node) throw(std::exception) {
 					// copy content of input buffer to output buffer
 					if(false && loggers::trace()()) {
 						std::ostringstream s;
-						s << node.underlying().qualified_name() << ": copying content of input buffer to output buffer";
+						s << node.engine().qualified_name() << ": copying content of input buffer to output buffer";
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
-					output_port.buffer().copy(node.multiple_input_port()->buffer(), node.multiple_input_port()->underlying().channels());
+					output_port.buffer().copy(node.multiple_input_port()->buffer(), node.multiple_input_port()->engine().channels());
 				}
 			} else { // this is never the identity transform
 				set_buffers_for_all_output_ports_of_node_from_buffer_pool(node);
@@ -579,7 +451,7 @@ void scheduler::process(class node & node) throw(std::exception) {
 	}
 	if(false && loggers::trace()()) {
 		std::ostringstream s;
-		s << "scheduling of " << node.underlying().qualified_name() << " done";
+		s << "scheduling of " << node.engine().qualified_name() << " done";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 }
@@ -631,7 +503,7 @@ scheduler::buffer_pool::~buffer_pool() throw() {
 
 buffer::buffer(std::size_t channels, std::size_t events) throw(std::exception)
 :
-	underlying::buffer(channels, events),
+	engine::buffer(channels, events),
 	reference_count_()
 {}
 
