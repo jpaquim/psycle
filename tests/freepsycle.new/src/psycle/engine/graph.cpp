@@ -36,28 +36,13 @@ graph::~graph() {
 		s << qualified_name() << ": deleting engine graph";
 		loggers::information()(s.str());
 	}
-
-	while(!empty()) {
-		node & node(**begin());
-		erase(*begin()); // work around to bypass the compiler's no-aliasing optimisation
-
-		if(loggers::information()()) {
-			std::ostringstream s;
-			s << node.qualified_name() << ": deleting engine node instance of " << universalis::compiler::typenameof(node) << " from loaded library " << node.plugin_library_reference().name();
-			loggers::information()(s.str());
-		}
-
-		reference_counter & reference_counter(node.plugin_library_reference());
-		node.free_heap();
-		--reference_counter;
-	}
-	assert(empty());
+	for(const_iterator i = begin(), e = end(); i != e; ++i) (**i).graph_ = 0;
 }
 	
 void graph::dump(std::ostream & out, std::size_t tabulations) const {
 	for(std::size_t t(0) ; t < tabulations ; ++t) out << '\t';
 	out << name() << '\n';
-	for(const_iterator i = begin() ; i != end() ; ++i) (**i).dump(out, tabulations + 1);
+	for(const_iterator i = begin(), e = end(); i != e; ++i) (**i).dump(out, tabulations + 1);
 }
 
 std::ostream & operator<<(std::ostream & out, graph const & graph) {
@@ -70,11 +55,11 @@ std::ostream & operator<<(std::ostream & out, graph const & graph) {
 
 node::node(class plugin_library_reference & plugin_library_reference, class graph & graph, node::name_type const & name)
 :
-	bases::node(graph),
 	named(name),
 	plugin_library_reference_(plugin_library_reference),
 	opened_(),
-	started_()
+	started_(),
+	graph_()
 {
 	if(loggers::trace()()) {
 		std::ostringstream s;
@@ -89,13 +74,12 @@ node::~node() {
 		s << qualified_name() << ": deleting engine node";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	if(multiple_input_port()) multiple_input_port()->free_heap();
-	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) (**i).free_heap();
-	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) (**i).free_heap();
+	if(graph_) graph_->erase(this);
 }
 
 node::name_type node::qualified_name() const {
-	return graph().qualified_name() + '.' + name();
+	if(graph_) return graph_->qualified_name() + '.' + name();
+	else return name();
 }
 
 void node::io_ready(bool io_ready) {
@@ -107,7 +91,7 @@ void node::io_ready(bool io_ready) {
 	if(!was_io_ready && io_ready) io_ready_signal_(*this);
 }
 
-ports::input * const node::input_port(name_type const & name) const {
+ports::input const * node::input_port(name_type const & name) const {
 	if(multiple_input_port() && multiple_input_port()->name() == name) return multiple_input_port();
 	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) if((**i).name() == name) return *i;
 	if(loggers::warning()()) {
@@ -118,7 +102,28 @@ ports::input * const node::input_port(name_type const & name) const {
 	return 0;
 }
 
-ports::output * const node::output_port(name_type const & name) const {
+ports::input * node::input_port(name_type const & name) {
+	if(multiple_input_port() && multiple_input_port()->name() == name) return multiple_input_port();
+	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) if((**i).name() == name) return *i;
+	if(loggers::warning()()) {
+		std::ostringstream s;
+		s << qualified_name() << ": input port not found: " << name;
+		loggers::warning()(s.str());
+	}
+	return 0;
+}
+
+ports::output const * node::output_port(name_type const & name) const {
+	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) if((**i).name() == name) return *i;
+	if(loggers::warning()()) {
+		std::ostringstream s;
+		s << qualified_name() << ": output port not found: " << name;
+		loggers::warning()(s.str());
+	}
+	return 0;
+}
+
+ports::output * node::output_port(name_type const & name) {
 	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) if((**i).name() == name) return *i;
 	if(loggers::warning()()) {
 		std::ostringstream s;
@@ -263,7 +268,6 @@ std::ostream & operator<<(std::ostream & out, const node & node) {
 
 port::port(class node & node, name_type const & name, std::size_t channels)
 :
-	bases::port(node),
 	named(name),
 	buffer_(),
 	seconds_per_event_()
@@ -435,7 +439,7 @@ namespace ports {
 
 	output::output(class node & node, name_type const & name, std::size_t channels)
 	:
-		bases::ports::output(node, name, channels)
+		port(node, name, channels)
 	{
 		if(loggers::trace()()) {
 			std::ostringstream s;
@@ -450,6 +454,51 @@ namespace ports {
 			s << qualified_name() << ": deleting engine port output";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+	}
+
+	void output::connect(input & input_port) throw(exception) {
+		// connect the input port to this output port
+		input_port.connect(*this);
+	}
+
+	void output::disconnect(input & input_port) {
+		// disconnect the input port from this output port
+		input_port.disconnect(*this);
+	}
+
+	void output::disconnect_all() {
+		// iterate over all our input ports to disconnect them
+		while(!input_ports_.empty()) disconnect(*input_ports_.back());
+	}
+
+	void output::connect_internal_side(input & input_port) {
+		// find the input port in our container
+		input_ports_type::iterator i(std::find(input_ports_.begin(), input_ports_.end(), &input_port));
+		if(i != input_ports_.end()) {
+			if(loggers::warning()()) {
+				std::ostringstream s;
+				s << "already connected";
+				loggers::warning()(s.str());
+			}
+			return;
+		}
+		// add the newly connected input port to our container
+		input_ports_.push_back(&input_port);
+	}
+
+	void output::disconnect_internal_side(input & input_port) {
+		// find the input port in our container
+		input_ports_type::iterator i(std::find(input_ports_.begin(), input_ports_.end(), &input_port));
+		if(i == input_ports_.end()) {
+			if(loggers::warning()()) {
+				std::ostringstream s;
+				s << "was not connected";
+				loggers::warning()(s.str());
+			}
+			return;
+		}
+		// remove the disconnected input port from our container
+		input_ports_.erase(i);
 	}
 
 	void output::do_propagate_channels() throw(exception) {
@@ -474,7 +523,7 @@ namespace ports {
 	
 	input::input(class node & node, name_type const & name, std::size_t channels)
 	:
-		bases::ports::input(node, name, channels)
+		port(node, name, channels)
 	{
 		if(loggers::trace()()) {
 			std::ostringstream s;
@@ -492,22 +541,38 @@ namespace ports {
 		//disconnect_all();
 	}
 
-	void input::connect(ports::output & output_port) throw(exception) {
+	void input::connect(output & output_port) throw(exception) {
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << output_port.qualified_name() << " output port connecting to input port " << this->qualified_name();
 			loggers::information()(s.str());
 		}
-		bases::ports::input::connect(output_port);
+		assert("ports must belong to different nodes:" &&
+			&output_port.node() != &this->node()
+		);
+		assert("nodes of both ports must belong to the same graph:" &&
+			&output_port.node().graph() == &this->node().graph()
+		);
+		// connect the output port internal side to this input port
+		output_port.connect_internal_side(*this);
+		// connect this input port internal side to the output port
+		connect_internal_side(output_port);
+		// signal graph wrappers of the new connection
+		node().graph().new_connection_signal()(*this, output_port);
 	}
 
-	void input::disconnect(ports::output & output_port) {
+	void input::disconnect(output & output_port) {
 		if(loggers::information()()) {
 			std::ostringstream s;
 			s << output_port.qualified_name() << " output port disconnecting from input port " << this->qualified_name();
 			loggers::information()(s.str());
 		}
-		bases::ports::input::disconnect(output_port);
+		// disconnect this input port internal side from the output port
+		disconnect_internal_side(output_port);
+		// disconnect the output port internal side from this input port
+		output_port.disconnect_internal_side(*this);
+		// signal graph wrappers of the disconnection
+		node().graph().delete_connection_signal()(*this, output_port);
 	}
 	
 	namespace inputs {
@@ -517,7 +582,7 @@ namespace ports {
 		
 		single::single(class node & node, name_type const & name, std::size_t channels)
 		:
-			bases::ports::inputs::single(node, name, channels)
+			input(node, name, channels)
 		{
 			if(loggers::trace()()) {
 				std::ostringstream s;
@@ -532,6 +597,37 @@ namespace ports {
 				s << this->qualified_name() << ": deleting engine port input single";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
+		}
+
+		void single::disconnect_all() /*override pure*/ {
+			// disconnect the connected output port
+			if(output_port_) disconnect(*output_port_);
+		}
+
+		void single::connect_internal_side(output & output_port) /*override pure*/ {
+			if(&output_port == this->output_port_) {
+				if(loggers::warning()()) {
+					std::ostringstream s;
+					s << "already connected";
+					loggers::warning()(s.str());
+				}
+				return;
+			}
+			// store a pointer to the newly connected output port
+			this->output_port_ = &output_port;
+		}
+
+		void single::disconnect_internal_side(output & output_port) /*override pure*/ {
+			if(&output_port != this->output_port_) {
+				if(loggers::warning()()) {
+					std::ostringstream s;
+					s << "was not connected";
+					loggers::warning()(s.str());
+				}
+				return;
+			}
+			// clear the pointer to the disconnected output port
+			this->output_port_ = 0;
 		}
 
 		void single::do_propagate_channels() throw(exception) {
@@ -553,7 +649,7 @@ namespace ports {
 
 		multiple::multiple(class node & node, name_type const & name, bool single_connection_is_identity_transform, std::size_t channels)
 		:
-			bases::ports::inputs::multiple(node, name, channels),
+			input(node, name, channels),
 			single_connection_is_identity_transform_(single_connection_is_identity_transform)
 		{
 			if(loggers::trace()()) {
@@ -569,6 +665,40 @@ namespace ports {
 				s << qualified_name() << ": deleting engine port input multiple";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
+		}
+
+		void multiple::disconnect_all() /*override pure*/ {
+			// iterate over all our connected output ports to disconnect them
+			while(!output_ports_.empty()) disconnect(*output_ports_.back());
+		}
+
+		void multiple::connect_internal_side(output & output_port) /*override pure*/ {
+			// find the output port in our container
+			output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
+			if(i != output_ports_.end()) {
+				if(loggers::warning()()) {
+					std::ostringstream s;
+					s << "already connected";
+					loggers::warning()(s.str());
+				}
+				return;
+			}
+			// add the newly connected output port to our container
+			output_ports_.push_back(&output_port);
+		}
+		void multiple::disconnect_internal_side(output & output_port) /*override pure*/ {
+			// find the output port in our container
+			output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
+			if(i == output_ports_.end()) {
+				if(loggers::warning()()) {
+					std::ostringstream s;
+					s << "was not connected";
+					loggers::warning()(s.str());
+				}
+				return;
+			}
+			// remove the disconnected output port from our container
+			output_ports_.erase(i);
 		}
 
 		void multiple::do_propagate_channels() throw(exception) {

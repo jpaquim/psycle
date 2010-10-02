@@ -19,7 +19,7 @@ using namespace universalis::stdlib;
 /**********************************************************************************************************************/
 // graph
 /// a set of nodes
-class PSYCLE__DECL graph : public named {
+class PSYCLE__DECL graph : public std::set<node*>, public named {
 	public:
 		graph(name_type const &);
 		virtual ~graph();
@@ -90,8 +90,16 @@ class PSYCLE__DECL node : public named {
 	friend class ports::inputs::multiple;
 
 	public:
-		node(class plugin_library_reference &, class graph &, name_type const &);
+		node(class plugin_library_reference &, name_type const &);
 		virtual ~node();
+
+	///\name name
+	///\{
+		public:
+			/// the full path of the node (within its graph)
+			name_type qualified_name() const;
+			virtual void dump(std::ostream &, std::size_t tabulations = 0) const;
+	///\}
 
 	///\name reference to plugin library
 	///\{
@@ -101,18 +109,88 @@ class PSYCLE__DECL node : public named {
 			class plugin_library_reference & plugin_library_reference_;
 	///\}
 
-	///\name output ports
+	///\name graph
+	///\{
+		public:
+			class graph & graph() { return *graph_; }
+			class graph const & graph() const { return *graph_; }
+		private:
+			class graph * graph_;
+	///\}
+
+	///\name ports: outputs
+	///\{
+		public:
+			typedef std::vector<ports::output*> output_ports_type;
+			/// the output ports owned by this node
+			output_ports_type const & output_ports() const throw() { return output_ports_; }
+		private: friend class ports::output;
+			output_ports_type output_ports_;
+	///\}
+
+	///\name ports: outputs: by name
 	///\{
 		public:
 			/// finds an output port by its name
-			ports::output * const output_port(name_type const &) const;
+			ports::output const * output_port(name_type const &) const;
+			/// finds an output port by its name
+			ports::output * output_port(name_type const &);
 	///\}
 
-	///\name input ports
+	///\name ports: outputs: signals
+	///\{
+		public:
+			/// signal emitted when a new output port is created for this node
+			boost::signal<void (ports::output &)> & new_output_port_signal() throw() { return new_output_port_signal_; }
+		private:
+			boost::signal<void (ports::output &)>   new_output_port_signal_;
+	///\}
+
+	///\name ports: inputs
+	///\{
+		public:
+			typedef std::vector<ports::inputs::single*> single_input_ports_type;
+			/// the input ports owned by this node
+			single_input_ports_type const & single_input_ports() const throw() { return single_input_ports_; }
+		private: friend class ports::inputs::single;
+			single_input_ports_type single_input_ports_;
+	///\}
+
+	///\name ports: inputs: by name
 	///\{
 		public:
 			/// finds an input port by its name
-			ports::input * const input_port(name_type const &) const;
+			ports::input const * input_port(name_type const &) const;
+			/// finds an input port by its name
+			ports::input * input_port(name_type const &);
+	///\}
+
+	///\name ports: inputs: single: signals
+	///\{
+		public:
+			/// signal emitted when a new single input port is created for this node
+			boost::signal<void (ports::inputs::single &)> & new_single_input_port_signal() throw() { return new_single_input_port_signal_; }
+		private:
+			boost::signal<void (ports::inputs::single &)>   new_single_input_port_signal_;
+	///\}
+
+	///\name ports: inputs: multiple
+	///\{
+		public:
+			/// the multiple input port owned by this node, if any, or else 0
+			ports::inputs::multiple const * multiple_input_port() const throw() { return multiple_input_port_; }
+			ports::inputs::multiple * multiple_input_port() throw() { return multiple_input_port_; }
+		private: friend class ports::inputs::multiple;
+			ports::inputs::multiple * multiple_input_port_;
+	///\}
+
+	///\name ports: inputs: multiple: signals
+	///\{
+		public:
+			/// signal emitted when the multiple input port is created for this node
+			boost::signal<void (ports::inputs::multiple &)> & new_multiple_input_port_signal() throw() { return new_multiple_input_port_signal_; }
+		private:
+			boost::signal<void (ports::inputs::multiple &)>   new_multiple_input_port_signal_;
 	///\}
 
 	///\name open
@@ -208,85 +286,6 @@ class PSYCLE__DECL node : public named {
 		virtual void channel_change_notification_from_port(port const &) throw(std::exception) {}
 		virtual void seconds_per_event_change_notification_from_port(port const &) {}
 		void quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port const &);
-
-	///\name name
-	///\{
-		public:
-			/// the full path of the node (within its graph)
-			name_type qualified_name() const;
-			virtual void dump(std::ostream &, std::size_t tabulations = 0) const;
-	///\}
-
-	///\name destruction signal
-	///\{
-		public:  boost::signal<void (node &)> & delete_signal() throw() { return delete_signal_; }
-		private: boost::signal<void (node &)>   delete_signal_;
-	///\}
-
-	///\name graph
-	///\{
-		public:
-			class graph & graph() { return graph_; }
-			class graph const & graph() const { return graph_; }
-		private:
-			class graph & graph_;
-	///\}
-
-	///\name ports: outputs
-	///\{
-		public:
-			typedef std::vector<ports::output*> output_ports_type;
-			/// the output ports owned by this node
-			output_ports_type const & output_ports() const throw() { return output_ports_; }
-		private: friend class ports::output;
-			output_ports_type output_ports_;
-	///\}
-
-	///\name ports: outputs: signals
-	///\{
-		public:
-			/// signal emitted when a new output port is created for this node
-			boost::signal<void (ports::output &)> & new_output_port_signal() throw() { return new_output_port_signal_; }
-		private:
-			boost::signal<void (ports::output &)>   new_output_port_signal_;
-	///\}
-
-	///\name ports: inputs
-	///\{
-		public:
-			typedef std::vector<ports::inputs::single*> single_input_ports_type;
-			/// the input ports owned by this node
-			single_input_ports_type const & single_input_ports() const throw() { return single_input_ports_; }
-		private: friend class ports::inputs::single;
-			single_input_ports_type single_input_ports_;
-	///\}
-
-	///\name ports: inputs: single: signals
-	///\{
-		public:
-			/// signal emitted when a new single input port is created for this node
-			boost::signal<void (ports::inputs::single &)> & new_single_input_port_signal() throw() { return new_single_input_port_signal_; }
-		private:
-			boost::signal<void (ports::inputs::single &)>   new_single_input_port_signal_;
-	///\}
-
-	///\name ports: inputs: multiple
-	///\{
-		public:
-			/// the multiple input port owned by this node, if any, or else 0
-			ports::inputs::multiple * const multiple_input_port() const throw() { return multiple_input_port_; }
-		private: friend class ports::inputs::multiple;
-			ports::inputs::multiple * multiple_input_port_;
-	///\}
-
-	///\name ports: inputs: multiple: signals
-	///\{
-		public:
-			/// signal emitted when the multiple input port is created for this node
-			boost::signal<void (ports::inputs::multiple &)> & new_multiple_input_port_signal() throw() { return new_multiple_input_port_signal_; }
-		private:
-			boost::signal<void (ports::inputs::multiple &)>   new_multiple_input_port_signal_;
-	///\}
 };
 /// outputs a textual representation of a node.
 ///\relates node
@@ -302,13 +301,9 @@ class PSYCLE__DECL port : public named {
 	friend class ports::inputs::single;
 	friend class ports::inputs::multiple;
 	
-	public:
+	protected:
 		port(class node &, name_type const &, std::size_t channels = 0);
 		virtual ~port();
-
-	protected:
-		/// connects this port to another port.
-		void connect(port &) throw(exception);
 
 	///\name node
 	///\{
@@ -325,7 +320,7 @@ class PSYCLE__DECL port : public named {
 			/// assigns a buffer to this port (or unassigns if 0).
 			void buffer(class buffer *);
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
-			class buffer & buffer() const throw() { return *buffer_; }
+			class buffer & buffer() const { return *buffer_; }
 		private:
 			/// the buffer to read or write data from or to (buffers are shared accross several ports).
 			class buffer * buffer_;
@@ -414,6 +409,26 @@ namespace ports {
 			output(class node &, name_type const &, std::size_t channels = 0);
 			virtual ~output();
 
+		///\name connected input ports
+		///\{
+			public:
+				typedef std::vector<input*> input_ports_type;
+				input_ports_type const & input_ports() const throw() { return input_ports_; }
+			private:
+				input_ports_type input_ports_;
+		///\}
+
+		///\name (dis)connection functions
+		///\{
+			public:
+				void connect(input &) throw(exception);
+				void disconnect(input &);
+				void disconnect_all();
+			private:
+				void connect_internal_side(input &);
+				void disconnect_internal_side(input &);
+		///\}
+
 		protected:
 			void do_propagate_channels() throw(exception) /*override*/;
 			void do_propagate_seconds_per_event() /*override*/;
@@ -429,13 +444,20 @@ namespace ports {
 	class PSYCLE__DECL input : public port {
 		friend class node;
 		
-		public:
+		protected:
 			input(class node &, name_type const &, std::size_t channels = 0);
 			virtual ~input();
 
-		public:
-			void connect(ports::output &) throw(exception);
-			void disconnect(ports::output &);
+		///\name (dis)connection functions
+		///\{
+			public:
+				void connect(output &) throw(exception);
+				void disconnect(output &);
+				virtual void disconnect_all() = 0;
+			protected:
+				virtual void connect_internal_side(output &) = 0;
+				virtual void disconnect_internal_side(output &) = 0;
+		///\}
 
 		public:
 			operator bool() const {
@@ -463,6 +485,25 @@ namespace ports {
 				single(class node &, name_type const &, std::size_t channels = 0);
 				virtual ~single();
 
+			///\name connected output port
+			///\{
+				public:
+					output const * output_port() const { return output_port_; }
+					output * output_port() { return output_port_; }
+				private:
+					output * output_port_;
+			///\}
+
+			///\name (dis)connection functions
+			///\{
+				public:
+					void disconnect_all() /*override pure*/;
+
+				protected:
+					void connect_internal_side(output & output_port) /*override pure*/;
+					void disconnect_internal_side(output & output_port) /*override pure*/;
+			///\}
+
 			protected:
 				void do_propagate_channels() throw(exception) /*override*/;
 				void do_propagate_seconds_per_event() /*override*/;
@@ -484,6 +525,24 @@ namespace ports {
 			public:
 				multiple(class node &, name_type const &, bool single_connection_is_identity_transform, std::size_t channels = 0);
 				virtual ~multiple();
+
+			///\name connected output ports
+			///\{
+				public:
+					typedef std::vector<output*> output_ports_type;
+					output_ports_type const & output_ports() const throw() { return output_ports_; }
+				private:
+					output_ports_type output_ports_;
+			///\}
+
+			///\name (dis)connection functions
+			///\{
+				public:
+					void disconnect_all() /*override pure*/;
+				protected:
+					void connect_internal_side(output & output_port) /*override pure*/;
+					void disconnect_internal_side(output & output_port) /*override pure*/;
+			///\}
 
 			protected:
 				void do_propagate_channels() throw(exception) /*override*/;
