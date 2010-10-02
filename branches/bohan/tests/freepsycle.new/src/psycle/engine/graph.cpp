@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::engine::graph
 #include <psycle/detail/project.private.hpp>
@@ -14,16 +14,16 @@ namespace psycle { namespace engine {
 /**********************************************************************************************************************/
 // graph
 
-graph::graph(graph::name_type const & name)
+graph::graph(name_type const & name)
 :
-	named(name)
+	named(name),
+	events_per_buffer_(1024)
 {
 	if(loggers::information()) {
 		std::ostringstream s;
 		s << qualified_name() << ": new engine graph";
 		loggers::information()(s.str());
 	}
-	events_per_buffer_ = 1024;
 }
 
 graph::name_type graph::qualified_name() const {
@@ -53,7 +53,7 @@ std::ostream & operator<<(std::ostream & out, graph const & graph) {
 /**********************************************************************************************************************/
 // node
 
-node::node(class plugin_library_reference & plugin_library_reference, class graph & graph, node::name_type const & name)
+node::node(class plugin_library_reference & plugin_library_reference, class graph & graph, name_type const & name)
 :
 	named(name),
 	plugin_library_reference_(plugin_library_reference),
