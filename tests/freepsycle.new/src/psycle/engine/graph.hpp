@@ -573,7 +573,7 @@ namespace psycle { namespace engine {
 // node
 
 void node::process_first() throw(std::exception) {
-	if(false && loggers::trace()()) {
+	if(false && loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << " processing node first input";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -582,7 +582,7 @@ void node::process_first() throw(std::exception) {
 }
 
 void node::process() throw(std::exception) {
-	if(false && loggers::trace()()) {
+	if(false && loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << " processing node";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -591,7 +591,7 @@ void node::process() throw(std::exception) {
 }
 
 void node::reset() {
-	if(false && loggers::trace()()) {
+	if(false && loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << " resetting node";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
