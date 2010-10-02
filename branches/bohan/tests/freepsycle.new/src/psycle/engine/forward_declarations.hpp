@@ -5,7 +5,6 @@
 /// forward declarations for the namespace psycle::engine.
 /// This file is used to avoid mutually recursive dependencies in declarations.
 /// It does not have any real declarations, just forward names.
-///\see file engine.hpp to #include the real declarations
 #ifndef PSYCLE__ENGINE__FORWARD_DECLARATIONS__INCLUDED
 #define PSYCLE__ENGINE__FORWARD_DECLARATIONS__INCLUDED
 #pragma once

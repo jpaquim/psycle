@@ -1,9 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net : johan boule <bohan@jabber.org>
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::host::scheduler
+#ifndef PSYCLE__HOST__SCHEDULER__INCLUDED
+#define PSYCLE__HOST__SCHEDULER__INCLUDED
 #pragma once
-#include <psycle/generic/wrappers.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
@@ -329,3 +330,4 @@ class scheduler::buffer_pool {
 
 }}}}
 #include <psycle/detail/decl.hpp>
+#endif
