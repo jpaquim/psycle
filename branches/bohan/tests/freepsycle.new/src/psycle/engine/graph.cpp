@@ -18,7 +18,7 @@ graph::graph(graph::name_type const & name)
 :
 	named(name)
 {
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		std::ostringstream s;
 		s << qualified_name() << ": new engine graph";
 		loggers::information()(s.str());
@@ -31,7 +31,7 @@ graph::name_type graph::qualified_name() const {
 }
 
 graph::~graph() {
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		std::ostringstream s;
 		s << qualified_name() << ": deleting engine graph";
 		loggers::information()(s.str());
@@ -61,7 +61,7 @@ node::node(class plugin_library_reference & plugin_library_reference, class grap
 	started_(),
 	graph_()
 {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": new engine node";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -69,7 +69,7 @@ node::node(class plugin_library_reference & plugin_library_reference, class grap
 }
 
 node::~node() {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": deleting engine node";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -94,7 +94,7 @@ void node::io_ready(bool io_ready) {
 ports::input * node::input_port(name_type const & name) const {
 	if(multiple_input_port() && multiple_input_port()->name() == name) return multiple_input_port();
 	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) if((**i).name() == name) return *i;
-	if(loggers::warning()()) {
+	if(loggers::warning()) {
 		std::ostringstream s;
 		s << qualified_name() << ": input port not found: " << name;
 		loggers::warning()(s.str());
@@ -104,7 +104,7 @@ ports::input * node::input_port(name_type const & name) const {
 
 ports::output * node::output_port(name_type const & name) const {
 	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) if((**i).name() == name) return *i;
-	if(loggers::warning()()) {
+	if(loggers::warning()) {
 		std::ostringstream s;
 		s << qualified_name() << ": output port not found: " << name;
 		loggers::warning()(s.str());
@@ -113,7 +113,7 @@ ports::output * node::output_port(name_type const & name) const {
 }
 
 void node::do_open() throw(std::exception) {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": opening";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -121,7 +121,7 @@ void node::do_open() throw(std::exception) {
 }
 
 void node::do_start() throw(std::exception) {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": starting";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -130,7 +130,7 @@ void node::do_start() throw(std::exception) {
 }
 
 void node::do_stop() throw(std::exception) {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": stopping";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -138,7 +138,7 @@ void node::do_stop() throw(std::exception) {
 }
 
 void node::do_close() throw(std::exception) {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": closing";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -251,7 +251,7 @@ port::port(class node & node, name_type const & name, std::size_t channels)
 	buffer_(),
 	seconds_per_event_()
 {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << this->qualified_name() << ": new engine port";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -263,7 +263,7 @@ port::port(class node & node, name_type const & name, std::size_t channels)
 		channels_immutable_ = false;
 		this->do_channels(channels);
 		channels_immutable_ = true;
-		if(loggers::information()()) {
+		if(loggers::information()) {
 			std::ostringstream s;
 			s << this->qualified_name() << ": port channels is immutable from now on";
 			loggers::information()(s.str());
@@ -272,7 +272,7 @@ port::port(class node & node, name_type const & name, std::size_t channels)
 }
 
 port::~port() {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << this->qualified_name() << ": deleting engine port";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -280,7 +280,7 @@ port::~port() {
 }
 
 void port::connect(port & port) throw(exception) {
-	if(loggers::trace()()) {
+	if(loggers::trace()) {
 		std::ostringstream s;
 		s << this->qualified_name() << " port connecting to port " << port.qualified_name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -319,13 +319,13 @@ port::name_type port::semi_qualified_name() const {
 }
 
 void port::buffer(class buffer * buffer) {
-	if(false && loggers::trace()()) {
+	if(false && loggers::trace()) {
 		std::ostringstream s;
 		s << "assigning buffer " << buffer << " to port " << qualified_name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(this->buffer_ == buffer) {
-		if(false && loggers::trace()()) {
+		if(false && loggers::trace()) {
 			std::ostringstream s;
 			s << "already assigned the same buffer";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -341,7 +341,7 @@ void port::channels(std::size_t channels) throw(exception) {
 }
 
 void port::seconds_per_event(real const & seconds_per_event) {
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		std::ostringstream s;
 		s << qualified_name() << ": port events per second changing to " << 1 / seconds_per_event;
 		loggers::information()(s.str());
@@ -383,7 +383,7 @@ void port::channels_transaction(std::size_t channels) throw(exception) {
 }
 
 void port::do_channels(std::size_t channels) throw(exception) {
-	if(loggers::information()()) {
+	if(loggers::information()) {
 		std::ostringstream s;
 		s << qualified_name() << ": port channels changing to " << channels;
 		loggers::information()(s.str());
@@ -420,7 +420,7 @@ namespace ports {
 	:
 		port(node, name, channels)
 	{
-		if(loggers::trace()()) {
+		if(loggers::trace()) {
 			std::ostringstream s;
 			s << qualified_name() << ": new engine port output";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -428,7 +428,7 @@ namespace ports {
 	}
 
 	output::~output() {
-		if(loggers::trace()()) {
+		if(loggers::trace()) {
 			std::ostringstream s;
 			s << qualified_name() << ": deleting engine port output";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -454,7 +454,7 @@ namespace ports {
 		// find the input port in our container
 		input_ports_type::iterator i(std::find(input_ports_.begin(), input_ports_.end(), &input_port));
 		if(i != input_ports_.end()) {
-			if(loggers::warning()()) {
+			if(loggers::warning()) {
 				std::ostringstream s;
 				s << "already connected";
 				loggers::warning()(s.str());
@@ -469,7 +469,7 @@ namespace ports {
 		// find the input port in our container
 		input_ports_type::iterator i(std::find(input_ports_.begin(), input_ports_.end(), &input_port));
 		if(i == input_ports_.end()) {
-			if(loggers::warning()()) {
+			if(loggers::warning()) {
 				std::ostringstream s;
 				s << "was not connected";
 				loggers::warning()(s.str());
@@ -504,7 +504,7 @@ namespace ports {
 	:
 		port(node, name, channels)
 	{
-		if(loggers::trace()()) {
+		if(loggers::trace()) {
 			std::ostringstream s;
 			s << qualified_name() << ": new engine port input";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -512,7 +512,7 @@ namespace ports {
 	}
 
 	input::~input() {
-		if(loggers::trace()()) {
+		if(loggers::trace()) {
 			std::ostringstream s;
 			s << qualified_name() << ": deleting engine port input";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -521,7 +521,7 @@ namespace ports {
 	}
 
 	void input::connect(output & output_port) throw(exception) {
-		if(loggers::information()()) {
+		if(loggers::information()) {
 			std::ostringstream s;
 			s << output_port.qualified_name() << " output port connecting to input port " << this->qualified_name();
 			loggers::information()(s.str());
@@ -543,7 +543,7 @@ namespace ports {
 	}
 
 	void input::disconnect(output & output_port) {
-		if(loggers::information()()) {
+		if(loggers::information()) {
 			std::ostringstream s;
 			s << output_port.qualified_name() << " output port disconnecting from input port " << this->qualified_name();
 			loggers::information()(s.str());
@@ -565,7 +565,7 @@ namespace ports {
 		:
 			input(node, name, channels)
 		{
-			if(loggers::trace()()) {
+			if(loggers::trace()) {
 				std::ostringstream s;
 				s << this->qualified_name() << ": new engine port input single";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -573,7 +573,7 @@ namespace ports {
 		}
 
 		single::~single() {
-			if(loggers::trace()()) {
+			if(loggers::trace()) {
 				std::ostringstream s;
 				s << this->qualified_name() << ": deleting engine port input single";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -587,7 +587,7 @@ namespace ports {
 
 		void single::connect_internal_side(output & output_port) /*override pure*/ {
 			if(&output_port == this->output_port_) {
-				if(loggers::warning()()) {
+				if(loggers::warning()) {
 					std::ostringstream s;
 					s << "already connected";
 					loggers::warning()(s.str());
@@ -600,7 +600,7 @@ namespace ports {
 
 		void single::disconnect_internal_side(output & output_port) /*override pure*/ {
 			if(&output_port != this->output_port_) {
-				if(loggers::warning()()) {
+				if(loggers::warning()) {
 					std::ostringstream s;
 					s << "was not connected";
 					loggers::warning()(s.str());
@@ -633,7 +633,7 @@ namespace ports {
 			input(node, name, channels),
 			single_connection_is_identity_transform_(single_connection_is_identity_transform)
 		{
-			if(loggers::trace()()) {
+			if(loggers::trace()) {
 				std::ostringstream s;
 				s << qualified_name() << ": new engine port input multiple";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -641,7 +641,7 @@ namespace ports {
 		}
 
 		multiple::~multiple() {
-			if(loggers::trace()()) {
+			if(loggers::trace()) {
 				std::ostringstream s;
 				s << qualified_name() << ": deleting engine port input multiple";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -657,7 +657,7 @@ namespace ports {
 			// find the output port in our container
 			output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
 			if(i != output_ports_.end()) {
-				if(loggers::warning()()) {
+				if(loggers::warning()) {
 					std::ostringstream s;
 					s << "already connected";
 					loggers::warning()(s.str());
@@ -671,7 +671,7 @@ namespace ports {
 			// find the output port in our container
 			output_ports_type::iterator i(std::find(output_ports_.begin(), output_ports_.end(), &output_port));
 			if(i == output_ports_.end()) {
-				if(loggers::warning()()) {
+				if(loggers::warning()) {
 					std::ostringstream s;
 					s << "was not connected";
 					loggers::warning()(s.str());
