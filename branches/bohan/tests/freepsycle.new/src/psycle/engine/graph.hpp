@@ -145,7 +145,7 @@ class PSYCLE__DECL node : public named {
 			boost::signal<void (ports::output &)>   new_output_port_signal_;
 	///\}
 
-	///\name ports: inputs
+	///\name ports: inputs: single
 	///\{
 		public:
 			typedef std::vector<ports::inputs::single*> single_input_ports_type;
@@ -153,13 +153,6 @@ class PSYCLE__DECL node : public named {
 			single_input_ports_type const & single_input_ports() const { return single_input_ports_; }
 		private:
 			single_input_ports_type single_input_ports_;
-	///\}
-
-	///\name ports: inputs: by name
-	///\{
-		public:
-			/// finds an input port by its name
-			ports::input * input_port(name_type const &) const;
 	///\}
 
 	///\name ports: inputs: single: signals
@@ -190,12 +183,19 @@ class PSYCLE__DECL node : public named {
 			boost::signal<void (ports::inputs::multiple &)>   new_multiple_input_port_signal_;
 	///\}
 
+	///\name ports: inputs: by name
+	///\{
+		public:
+			/// finds an input port by its name
+			ports::input * input_port(name_type const &) const;
+	///\}
+
 	///\name open
 	///\{
 		public:
 			/// called by schedulers
-			void open() throw(std::exception) { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
-			void opened(bool value) throw(std::exception) { if(value) open(); else close(); }
+			void open() { if(!opened()) try { do_open(); } catch(...) { do_close(); throw; } }
+			void opened(bool value) { if(value) open(); else close(); }
 			virtual bool opened() const { return opened_; }
 		protected:
 			virtual void do_open() throw(std::exception);
@@ -207,8 +207,8 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// called by schedulers
-			void start() throw(std::exception) { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
-			void started(bool value) throw(std::exception) { if(value) start(); else stop(); }
+			void start() { open(); if(!started()) try { do_start(); } catch(...) { do_stop(); throw; } }
+			void started(bool value) { if(value) start(); else stop(); }
 			virtual bool started() const { return started_; }
 		protected:
 			virtual void do_start() throw(std::exception);
@@ -240,7 +240,7 @@ class PSYCLE__DECL node : public named {
 
 		public:
 			/// called by schedulers
-			void inline process_first() throw(std::exception);
+			void inline process_first();
 		protected:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
@@ -248,7 +248,7 @@ class PSYCLE__DECL node : public named {
 
 		public:
 			/// called by schedulers
-			void inline process() throw(std::exception);
+			void inline process();
 		protected:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
@@ -265,7 +265,7 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// called by schedulers
-			void stop() throw(std::exception) { if(started()) do_stop(); }
+			void stop() { if(started()) do_stop(); }
 		protected:
 			virtual void do_stop() throw(std::exception);
 	///\}
@@ -274,7 +274,7 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// called by schedulers
-			void close() throw(std::exception) { stop(); if(opened()) do_close(); }
+			void close() { stop(); if(opened()) do_close(); }
 		protected:
 			virtual void do_close() throw(std::exception);
 	///\}
@@ -573,7 +573,7 @@ namespace psycle { namespace engine {
 /**********************************************************************************************************************/
 // node
 
-void node::process_first() throw(std::exception) {
+void node::process_first() {
 	if(false && loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << " processing node first input";
@@ -582,7 +582,7 @@ void node::process_first() throw(std::exception) {
 	do_process_first();
 }
 
-void node::process() throw(std::exception) {
+void node::process() {
 	if(false && loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << " processing node";
