@@ -13,7 +13,7 @@ namespace psycle { namespace engine {
 /// generic exception thrown by functions of the namespace psycle::engine.
 class exception : public universalis::exception {
 	public:
-		inline exception(
+		exception(
 			universalis::compiler::location const & location,
 			void const * cause = 0
 		) throw() : universalis::exception(location, cause) {}

@@ -8,6 +8,7 @@
 #include "forward_declarations.hpp"
 #include "named.hpp"
 #include "buffer.hpp"
+#include "exception.hpp"
 #include <universalis/stdlib/mutex.hpp>
 #include <boost/signal.hpp>
 #include <set>
