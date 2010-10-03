@@ -17,6 +17,135 @@ namespace psycle { namespace host {
 using namespace universalis::stdlib;
 using engine::exception;
 
+class port;
+namespace ports {
+	class output;
+	class input;
+}
+
+class node {
+	public:
+		node(engine::node &);
+
+	///\name engine
+	///\{
+		public:
+			engine::node const & engine() const { return engine_; }
+			engine::node & engine() { return engine_; }
+		private:
+			engine::node & engine_;
+	///\}
+
+	///\name output ports
+	///\{
+		public:
+			typedef std::vector<ports::output*> output_ports_type;
+			/// the output ports owned by this node
+			output_ports_type const & output_ports() const { return output_ports_; }
+		private:
+			output_ports_type output_ports_;
+	///\}
+
+	///\name schedule
+	///\{
+		public:
+			void compute_plan();
+			void reset() throw() /*override*/;
+			/// called each time a direct predecessor node has been processed
+			void predecessor_node_processed() { assert(predecessor_node_remaining_count_); --predecessor_node_remaining_count_; }
+			/// indicates whether all the predecessors of this node have been processed
+			bool is_ready_to_process() { return !predecessor_node_remaining_count_; }
+		private:
+			std::size_t predecessor_node_count_;
+			std::size_t predecessor_node_remaining_count_;
+
+		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
+		private: ports::output * multiple_input_port_first_output_port_to_process_;
+
+		private:
+			/// connection to the underlying signal
+			boost::signals::scoped_connection on_underlying_io_ready_signal_connection;
+			/// signal slot for the underlying signal
+			void on_underlying_io_ready(engine::node &) { graph().io_ready_signal()(*this); }
+
+		public:
+			bool waiting_for_io_ready_signal() const throw() { return waiting_for_io_ready_signal_; }
+			void waiting_for_io_ready_signal(bool value) throw() { waiting_for_io_ready_signal_ = value; }
+		private:
+			bool waiting_for_io_ready_signal_;
+
+		public:  void process_first() { process(true); }
+		public:  void process() { process(false); }
+		private: void process(bool first);
+
+		public:  bool const processed() const throw() { return processed_; }
+		private: bool       processed_;
+	///\}
+
+	///\name schedule ... time measurement
+	///\{
+		public:  void reset_time_measurement();
+
+		public:  nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		private: nanoseconds accumulated_processing_time_;
+
+		public:  uint64_t processing_count() const throw() { return processing_count_; }
+		private: uint64_t processing_count_;
+
+		public:  uint64_t processing_count_no_zeroes() const throw() { return processing_count_no_zeroes_; }
+		private: uint64_t processing_count_no_zeroes_;
+	///\}
+};
+
+namespace ports {
+	class output {
+		public:
+			output(engine::ports::output & engine) : engine_(engine) {}
+
+		///\name engine
+		///\{
+			public:
+				engine::ports::output const & engine() const { return engine_; }
+				engine::ports::output & engine() { return engine_; }
+			private:
+				engine::ports::output & engine_;
+		///\}
+
+		///\name connected input ports
+		///\{
+			public:
+				typedef std::vector<ports::input*> input_ports_type;
+				input_ports_type const & input_ports() const throw() { return input_ports_; }
+			private:
+				input_ports_type input_ports_;
+		///\}
+	};
+
+	class input {
+		public:
+			input(class node & node, engine::ports::input & engine) : node_(node), engine_(engine) {}
+
+		///\name node
+		///\{
+			public:
+				class node const & node() { return node_; }
+				class node & node() { return node_; }
+			private:
+				class node & node_;
+		///\}
+
+		///\name engine
+		///\{
+			public:
+				engine::ports::input const & engine() const { return engine_; }
+				engine::ports::input & engine() { return engine_; }
+			private:
+				engine::ports::input & engine_;
+		///\}
+	};
+
+}
+
 /**********************************************************************************************************************/
 /// buffer with a reference counter.
 class buffer : public engine::buffer {
@@ -44,11 +173,14 @@ class PSYCLE__DECL scheduler {
 		scheduler(engine::graph &, std::size_t threads = 1) throw(std::exception);
 		virtual ~scheduler() throw();
 
-	protected:
-		engine::graph const & engine() const { return engine_; }
-		engine::graph & engine() { return engine_; }
-	private:
-		engine::graph & engine_;
+	///\name engine
+	///\{
+		public:
+			engine::graph const & engine() const { return engine_; }
+			engine::graph & engine() { return engine_; }
+		private:
+			engine::graph & engine_;
+	///\}
 
 	public:
 		void start() throw(exception) /*override*/;
