@@ -5,10 +5,12 @@
 #ifndef PSYCLE__HOST__SCHEDULER__INCLUDED
 #define PSYCLE__HOST__SCHEDULER__INCLUDED
 #pragma once
+#include <psycle/engine/graph.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
 #include <universalis/stdlib/date_time.hpp>
+#include <set>
 #include <list>
 #define PSYCLE__DECL  PSYCLE__HOST
 #include <psycle/detail/decl.hpp>
@@ -17,15 +19,24 @@ namespace psycle { namespace host {
 using namespace universalis::stdlib;
 using engine::exception;
 
-class port;
+class scheduler;
+class node;
 namespace ports {
 	class output;
-	class input;
 }
 
 class node {
 	public:
-		node(engine::node &);
+		node(class scheduler &, engine::node &);
+
+	///\name scheduler
+	///\{
+		public:
+			class scheduler const & scheduler() const { return scheduler_; }
+			class scheduler & scheduler() { return scheduler_; }
+		private:
+			class scheduler & scheduler_;
+	///\}
 
 	///\name engine
 	///\{
@@ -50,49 +61,48 @@ class node {
 	///\{
 		public:
 			void compute_plan();
-			void reset() throw() /*override*/;
+			void reset();
 			/// called each time a direct predecessor node has been processed
 			void predecessor_node_processed() { assert(predecessor_node_remaining_count_); --predecessor_node_remaining_count_; }
 			/// indicates whether all the predecessors of this node have been processed
-			bool is_ready_to_process() { return !predecessor_node_remaining_count_; }
+			bool is_ready_to_process() const { return !predecessor_node_remaining_count_; }
 		private:
 			std::size_t predecessor_node_count_;
 			std::size_t predecessor_node_remaining_count_;
 
-		public:  ports::output & multiple_input_port_first_output_port_to_process() throw() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
-		private: ports::output * multiple_input_port_first_output_port_to_process_;
+		public:  engine::ports::output & multiple_input_port_first_output_port_to_process() { assert(multiple_input_port_first_output_port_to_process_); return *multiple_input_port_first_output_port_to_process_; }
+		private: engine::ports::output * multiple_input_port_first_output_port_to_process_;
 
 		private:
-			/// connection to the underlying signal
-			boost::signals::scoped_connection on_underlying_io_ready_signal_connection;
-			/// signal slot for the underlying signal
-			void on_underlying_io_ready(engine::node &) { graph().io_ready_signal()(*this); }
+			/// connection to the engine signal
+			boost::signals::scoped_connection on_engine_io_ready_signal_connection;
+			/// signal slot for the engine signal
+			void on_engine_io_ready(engine::node &) { scheduler_.io_ready_signal()(*this); }
 
 		public:
-			bool waiting_for_io_ready_signal() const throw() { return waiting_for_io_ready_signal_; }
-			void waiting_for_io_ready_signal(bool value) throw() { waiting_for_io_ready_signal_ = value; }
+			bool waiting_for_io_ready_signal() const { return waiting_for_io_ready_signal_; }
+			void waiting_for_io_ready_signal(bool value) { waiting_for_io_ready_signal_ = value; }
 		private:
 			bool waiting_for_io_ready_signal_;
 
-		public:  void process_first() { process(true); }
-		public:  void process() { process(false); }
-		private: void process(bool first);
-
-		public:  bool const processed() const throw() { return processed_; }
-		private: bool       processed_;
+		public:
+			void process(bool first);
+			bool processed() const { return processed_; }
+		private:
+			bool processed_;
 	///\}
 
 	///\name schedule ... time measurement
 	///\{
 		public:  void reset_time_measurement();
 
-		public:  nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		public:  nanoseconds accumulated_processing_time() const { return accumulated_processing_time_; }
 		private: nanoseconds accumulated_processing_time_;
 
-		public:  uint64_t processing_count() const throw() { return processing_count_; }
+		public:  uint64_t processing_count() const { return processing_count_; }
 		private: uint64_t processing_count_;
 
-		public:  uint64_t processing_count_no_zeroes() const throw() { return processing_count_no_zeroes_; }
+		public:  uint64_t processing_count_no_zeroes() const { return processing_count_no_zeroes_; }
 		private: uint64_t processing_count_no_zeroes_;
 	///\}
 };
@@ -111,39 +121,15 @@ namespace ports {
 				engine::ports::output & engine_;
 		///\}
 
-		///\name connected input ports
+		///\name connected nodes
 		///\{
 			public:
-				typedef std::vector<ports::input*> input_ports_type;
-				input_ports_type const & input_ports() const throw() { return input_ports_; }
+				typedef std::vector<node*> connected_nodes_type;
+				connected_nodes_type const & connected_nodes() const { return connected_nodes_; }
 			private:
-				input_ports_type input_ports_;
+				connected_nodes_type connected_nodes_;
 		///\}
 	};
-
-	class input {
-		public:
-			input(class node & node, engine::ports::input & engine) : node_(node), engine_(engine) {}
-
-		///\name node
-		///\{
-			public:
-				class node const & node() { return node_; }
-				class node & node() { return node_; }
-			private:
-				class node & node_;
-		///\}
-
-		///\name engine
-		///\{
-			public:
-				engine::ports::input const & engine() const { return engine_; }
-				engine::ports::input & engine() { return engine_; }
-			private:
-				engine::ports::input & engine_;
-		///\}
-	};
-
 }
 
 /**********************************************************************************************************************/
@@ -168,10 +154,10 @@ class buffer : public engine::buffer {
 
 /**********************************************************************************************************************/
 /// a scheduler using several threads
-class PSYCLE__DECL scheduler {
+class PSYCLE__DECL scheduler : public std::set<node*> {
 	public:
-		scheduler(engine::graph &, std::size_t threads = 1) throw(std::exception);
-		virtual ~scheduler() throw();
+		scheduler(engine::graph &, std::size_t threads = 1);
+		virtual ~scheduler();
 
 	///\name engine
 	///\{
@@ -183,13 +169,13 @@ class PSYCLE__DECL scheduler {
 	///\}
 
 	public:
-		void start() throw(exception) /*override*/;
-		bool started() /*override*/ { return threads_.size(); }
-		void started(bool value) throw(exception) { if(value) start(); else stop(); }
-		void stop() /*override*/;
+		void start();
+		bool started() { return threads_.size(); }
+		void started(bool value) { if(value) start(); else stop(); }
+		void stop();
 		
-		std::size_t threads() const throw() { return thread_count_; }
-		void        threads(std::size_t threads);
+		std::size_t threads() const { return thread_count_; }
+		void threads(std::size_t threads);
 
 	///\name signal slots and connections
 	///\{
@@ -208,6 +194,31 @@ class PSYCLE__DECL scheduler {
 
 			boost::signals::scoped_connection on_io_ready_signal_connection;
 			void on_io_ready(node &);
+	///\}
+
+	///\name schedule
+	///\{
+		public:
+			void compute_plan();
+			void clear_plan();
+
+		public:
+			/// maximum number of channels needed for buffers
+			std::size_t channels() const throw() { return channels_; }
+		private:
+			std::size_t channels_;
+
+		public:
+			typedef std::list<node*> terminal_nodes_type;
+			/// nodes with no dependency, that are processed first
+			terminal_nodes_type const & terminal_nodes() const throw() { return terminal_nodes_; }
+		private:
+			terminal_nodes_type terminal_nodes_;
+
+		public:
+			boost::signal<void (node &)> & io_ready_signal() throw() { return io_ready_signal_; }
+		private:
+			boost::signal<void (node &)> io_ready_signal_;
 	///\}
 
 	private:
@@ -237,10 +248,10 @@ class PSYCLE__DECL scheduler {
 		void compute_plan();
 		void clear_plan();
 
-		void process_loop() throw(std::exception);
-		void process(node &) throw(std::exception);
-		void set_buffer_for_output_port(ports::output &, buffer &);
-		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(node &);
+		void process_loop();
+		void process(node &);
+		void set_buffer_for_output_port(engine::ports::output &, buffer &);
+		void set_buffers_for_all_output_ports_of_node_from_buffer_pool(engine::node &);
 		void check_whether_to_recycle_buffer_in_the_pool(buffer &);
 };
 
@@ -248,36 +259,12 @@ class PSYCLE__DECL scheduler {
 /// a pool of buffers that can be used for input and output ports of the nodes of the graph.
 class scheduler::buffer_pool {
 	public:
-		buffer_pool(std::size_t channels, std::size_t events) throw(std::exception);
-		~buffer_pool() throw();
+		buffer_pool(std::size_t channels, std::size_t events);
+		~buffer_pool();
 		/// gets a buffer from the pool.
-		buffer & operator()() {
-			scoped_lock lock(mutex_);
-			if(false && loggers::trace()) {
-				std::ostringstream s;
-				s << "buffer requested, pool size before: " << list_.size();
-				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			if(list_.empty()) return *new buffer(channels_, events_);
-			buffer & result(*list_.back());
-			assert("reference count is zero: " && !result.reference_count());
-			list_.pop_back(); // note: on most implementations, this will not realloc memory, so might be realtime-safe. (looks like it's not on gnu libstdc++)
-			return result;
-		}
+		buffer & operator()();
 		/// recycles a buffer in the pool.
-		void operator()(buffer & buffer) {
-			assert(&buffer);
-			assert("reference count is zero: " && !buffer.reference_count());
-			assert(buffer.channels() >= this->channels_);
-			assert(buffer.events() >= this->events_);
-			scoped_lock lock(mutex_);
-			if(false && loggers::trace()) {
-				std::ostringstream s;
-				s << "buffer " << &buffer << " given back, pool size before: " << list_.size();
-				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-			list_.push_back(&buffer); // note: does non-realtime realloc
-		}
+		void operator()(buffer &);
 	private:
 		typedef std::list<buffer*> list_type;
 		list_type list_;
