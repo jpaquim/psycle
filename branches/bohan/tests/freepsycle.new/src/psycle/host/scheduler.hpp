@@ -147,7 +147,7 @@ class buffer : public engine::buffer {
 		/// increments the reference count.
 		buffer & operator+=(std::size_t more) { reference_count_ += more; return *this; }
 		/// decrements the reference count by 1.
-		buffer & operator--() { assert(this->reference_count() > 0); --reference_count_; return *this; }
+		buffer & operator--() { assert(reference_count_); --reference_count_; return *this; }
 	private:
 		std::size_t reference_count_;
 };
