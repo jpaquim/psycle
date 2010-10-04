@@ -425,7 +425,7 @@ namespace psycle { namespace host {
 					else
 					{	// convert integer to string.
 						std::ostringstream s;
-						s << _pPlugsInfo[i]->version << " or " << std::hex << _pPlugsInfo[i]->version;
+						s << _pPlugsInfo[i]->version << " or " << std::hex << atoi(_pPlugsInfo[i]->version.c_str());
 						m_versionLabel.SetWindowText(s.str().c_str());
 					}
 					{	// convert integer to string.
@@ -816,7 +816,7 @@ namespace psycle { namespace host {
 								}
 								_pPlugsInfo[currentPlugsCount]->APIversion = plug.GetInfo()->APIVersion;
 								{
-									std::ostringstream s; s << std::hex << plug.GetInfo()->PlugVersion;
+									std::ostringstream s; s << std::setfill('0') << std::setw(3) << std::hex << plug.GetInfo()->PlugVersion;
 									_pPlugsInfo[currentPlugsCount]->version = s.str();
 								}
 								out << plug.GetName() << " - successfully instanciated";
@@ -824,7 +824,7 @@ namespace psycle { namespace host {
 							}
 							learnDllName(fileName,type);
 							// [bohan] plug is a stack object, so its destructor is called
-							// [bohan] at the end of its scope (this cope actually).
+							// [bohan] at the end of its scope (this scope actually).
 							// [bohan] The problem with destructors of any object of any class is that
 							// [bohan] they are never allowed to throw any exception.
 							// [bohan] So, we catch exceptions here by calling plug.Free(); explicitly.
