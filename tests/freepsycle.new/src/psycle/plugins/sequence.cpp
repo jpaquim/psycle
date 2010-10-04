@@ -9,13 +9,12 @@ namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(sequence)
 
-sequence::sequence(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
+sequence::sequence(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
-	node(plugin_library_reference, graph, name),
-	sequence_iterator_()
-{
-	engine::ports::output::create_on_heap(*this, "out");
-}
+	node(plugin_library_reference, name),
+	sequence_iterator_(),
+	out_port_(*this, "out")
+{}
 
 sequence::~sequence() {
 	delete sequence_iterator_;

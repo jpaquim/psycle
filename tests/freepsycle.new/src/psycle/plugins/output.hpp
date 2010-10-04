@@ -74,8 +74,7 @@ typedef outputs::
 class PSYCLE__DECL output : public output_base {
 	public:
 		typedef output_base base;
-	protected: friend class virtual_factory_access;
-		output(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
+		output(class plugin_library_reference &, name_type const &) throw(exception);
 	public:
 		//engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 };

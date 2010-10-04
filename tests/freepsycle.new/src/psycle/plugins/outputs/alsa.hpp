@@ -12,13 +12,14 @@
 #include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins { namespace outputs {
 
+using namespace universalis::stdlib;
+
 /// outputs to a soundcard device via alsa output implementation.
 class PSYCLE__DECL alsa : public resource {
-	protected: friend class virtual_factory_access;
-		alsa(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
-		virtual ~alsa() throw();
 	public:
-		engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
+		alsa(class plugin_library_reference &, name_type const &) throw(exception);
+		virtual ~alsa() throw();
+		ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;
 	protected:
@@ -49,15 +50,17 @@ class PSYCLE__DECL alsa : public resource {
 		/// bits per channel sample
 		unsigned int bits_per_channel_sample_;
 
-		std::thread * thread_;
+		class thread * thread_;
 		void thread_function();
-		void poll_loop() throw(engine::exception);
+		void poll_loop() throw(exception);
 	
-		typedef std::scoped_lock<std::mutex> scoped_lock;
-		std::mutex mutable mutex_;
-		std::condition<scoped_lock> mutable condition_;
+		typedef outputs::scoped_lock<mutex> scoped_lock;
+		mutex mutable mutex_;
+		condition<scoped_lock> mutable condition_;
 
 		bool stop_requested_;
+
+		ports::inputs::single in_, amp_;
 };
 
 }}}

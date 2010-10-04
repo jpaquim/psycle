@@ -9,7 +9,9 @@
 namespace psycle { namespace plugins {
 
 /// a decaying pulse
-class PSYCLE__DECL decay : public engine::node {
+class PSYCLE__DECL decay : public node {
+	public:
+		decay(class plugin_library_reference &, name_type const &);
 
 	public:
 		void decay_per_second(real const & decay_per_second) {
@@ -19,15 +21,12 @@ class PSYCLE__DECL decay : public engine::node {
 			return std::pow(decay_, events_per_second_);
 		}
 
-	protected: friend class virtual_factory_access;
-		decay(engine::plugin_library_reference &, engine::graph &, std::string const & name);
-
 	protected:
 		void seconds_per_event_change_notification_from_port(engine::port const &) /*override*/;
-		void do_process() throw(engine::exception) /*override*/;
+		void do_process() throw(exception) /*override*/;
 
 	private:
-		typedef engine::buffer::channel channel; // just to make netbeans parser happy
+		typedef buffer::channel channel; // just to make netbeans parser happy
 		template<channel::flags::type, channel::flags::type>
 		void do_process_template() throw(engine::exception);
 		
@@ -41,6 +40,9 @@ class PSYCLE__DECL decay : public engine::node {
 		channel & pulse_channel() { return single_input_ports()[0]->buffer()[0]; }
 		channel & decay_channel() { return single_input_ports()[1]->buffer()[0]; }
 		channel & out_channel()   { return output_ports()[0]->buffer()[0]; }
+
+		ports::output out_port_;
+		ports::inputs::single pulse_port_, decay_port_;
 };
 
 }}

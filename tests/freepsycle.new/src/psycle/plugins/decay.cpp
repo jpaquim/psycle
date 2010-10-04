@@ -8,16 +8,15 @@ namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(decay)
 
-decay::decay(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
+decay::decay(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
-	node(plugin_library_reference, graph, name),
+	node(plugin_library_reference, name),
 	current_(),
-	decay_(), events_per_second_(), seconds_per_event_()
-{
-	engine::ports::output::create_on_heap(*this, "out", boost::cref(1));
-	engine::ports::inputs::single::create_on_heap(*this, "pulse", boost::cref(1));
-	engine::ports::inputs::single::create_on_heap(*this, "decay", boost::cref(1));
-}
+	decay_(), events_per_second_(), seconds_per_event_(),
+	out_port_(*this, "out", 1),
+	pulse_port_(*this, "pulse", 1),
+	decay_port_(*this, "decay", 1)
+{}
 
 void decay::seconds_per_event_change_notification_from_port(engine::port const & port) {
 	quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port);

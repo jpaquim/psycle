@@ -40,10 +40,9 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	/// outputs to a soundcard device via microsoft's direct sound output implementation.
 	class PSYCLE__DECL direct_sound : public resource {
-		protected: friend class virtual_factory_access;
-			direct_sound(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(universalis::os::exception);
 		public:
-			engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
+			direct_sound(class plugin_library_reference &, name_type const &) throw(universalis::os::exception);
+			ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 			bool opened()  const /*override*/;
 			bool started() const /*override*/;
 		protected:

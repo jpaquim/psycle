@@ -134,7 +134,9 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// finds an output port by its name
-			ports::output * output_port(name_type const &) const;
+			ports::output const * output_port(name_type const &) const;
+			/// finds an output port by its name
+			ports::output * output_port(name_type const &);
 	///\}
 
 	///\name ports: outputs: signals
@@ -188,7 +190,9 @@ class PSYCLE__DECL node : public named {
 	///\{
 		public:
 			/// finds an input port by its name
-			ports::input * input_port(name_type const &) const;
+			ports::input const * input_port(name_type const &) const;
+			/// finds an input port by its name
+			ports::input * input_port(name_type const &);
 	///\}
 
 	///\name open

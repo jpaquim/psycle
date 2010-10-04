@@ -8,7 +8,7 @@ namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(additioner)
 
-void additioner::do_process() throw(engine::exception) {
+void additioner::do_process() throw(exception) {
 	if(!*output_ports()[0]) return;
 	if(!*multiple_input_port()) return;
 	bipolar_filter::do_process();
@@ -22,4 +22,3 @@ void additioner::do_process() throw(engine::exception) {
 }
 
 }}
-

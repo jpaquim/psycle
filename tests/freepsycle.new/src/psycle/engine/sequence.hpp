@@ -18,7 +18,7 @@ class buffer;
 class PSYCLE__DECL sequence : public named {
 	public:
 		/// constructs a sequence.
-		sequence(std::string const & name) : named(name) {}
+		sequence(name_type const & name) : named(name) {}
 
 	///\name events
 	///\{
@@ -50,7 +50,7 @@ class PSYCLE__DECL sequence_iterator {
 		sequence_iterator(class sequence const &);
 
 		/// outputs events to the given buffer and advances the beat position.
-		void process(buffer & out, real events_per_second, std::size_t channels) throw(exception);
+		void process(buffer & out, real events_per_second, std::size_t channels);
 
 	public:
 		class sequence const & sequence() const { return sequence_; }

@@ -40,6 +40,9 @@ namespace math { using namespace engine::math; }
 
 #define PSYCLE__PLUGINS__CALLING_CONVENTION  UNIVERSALIS__COMPILER__CALLING_CONVENTION__C
 
+///\todo function signature currently typedefed in host::plugin_resolver
+//typedef engine::node & (* const node_instanciator) (engine::reference_counter &, engine::graph &, std::string const & name);
+
 #define PSYCLE__PLUGINS__NODE_INSTANTIATOR(typename) \
 	extern "C" { \
 		UNIVERSALIS__COMPILER__DYN_LINK__EXPORT \
@@ -47,10 +50,10 @@ namespace math { using namespace engine::math; }
 		PSYCLE__PLUGINS__CALLING_CONVENTION \
 		PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new) ( \
 			psycle::engine::plugin_library_reference & plugin_library_reference, \
-			std::string const & name \
+			psycle::engine::node::name_type const & name \
 		) \
 		throw(psycle::engine::exception) { \
-			return typename(plugin_library_reference, name); \
+			return *new typename(plugin_library_reference, name); \
 		} \
 		\
 		UNIVERSALIS__COMPILER__DYN_LINK__EXPORT \

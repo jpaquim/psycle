@@ -4,7 +4,7 @@
 ///\interface psycle::plugins::sequence
 #pragma once
 #include <psycle/engine.hpp>
-#include <psycle/host.hpp>
+#include <psycle/host/plugin_resolver.hpp>
 #include <psycle/plugins/additioner.hpp>
 #include <psycle/plugins/sine.hpp>
 #include <psycle/plugins/decay.hpp>

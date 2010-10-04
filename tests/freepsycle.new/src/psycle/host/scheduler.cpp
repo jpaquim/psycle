@@ -4,6 +4,7 @@
 ///\implementation psycle::host::scheduler
 #include <psycle/detail/project.private.hpp>
 #include "scheduler.hpp"
+#include <psycle/engine/reference_counter.hpp>
 #include <universalis/os/clocks.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <sstream>
@@ -36,7 +37,7 @@ node::node(class scheduler & scheduler, engine::node & engine)
 	scheduler_(scheduler),
 	engine_(engine),
 	multiple_input_port_first_output_port_to_process_(),
-	on_underlying_io_ready_signal_connection(engine.io_ready_signal().connect(
+	on_engine_io_ready_signal_connection(engine.io_ready_signal().connect(
 		boost::bind(&node::on_engine_io_ready, this, _1))
 	),
 	waiting_for_io_ready_signal_(),
@@ -165,7 +166,7 @@ void scheduler::threads(std::size_t threads) {
 	if(was_started) start();
 }
 
-void scheduler::start() throw(engine::exception) {
+void scheduler::start() {
 	if(loggers::information()) loggers::information()("starting scheduler threads on graph " + engine_.name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(threads_.size()) {
 		if(loggers::information()) loggers::information()("scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
@@ -425,7 +426,7 @@ void scheduler::process_loop() {
 		unsigned int notify(0);
 		{ scoped_lock lock(mutex_);
 			// check whether all nodes have been processed
-			if(++processed_node_count_ == graph().size()) {
+			if(++processed_node_count_ == size()) {
 				processed_node_count_ = 0;
 				// reset the queue to the terminal nodes in the graph (nodes with no connected input ports)
 				nodes_queue_ = terminal_nodes_;
@@ -497,7 +498,7 @@ void scheduler::process(class node & node) {
 		engine::ports::output & first_output_port_to_process = node.multiple_input_port_first_output_port_to_process();
 		{ // process with first input buffer
 			node.engine().multiple_input_port()->buffer(&first_output_port_to_process.buffer());
-			if(node.engine().multiple_input_port().single_connection_is_identity_transform()) { // this is the identity transform when we have a single input
+			if(node.engine().multiple_input_port()->single_connection_is_identity_transform()) { // this is the identity transform when we have a single input
 				engine::ports::output & output_port = *node.engine().output_ports().front();
 				if(
 					static_cast<buffer&>(node.engine().multiple_input_port()->buffer()).reference_count() == 1 || // We are the last input port to read the buffer of the output port, so, we can take over its buffer.
@@ -611,7 +612,7 @@ scheduler::buffer_pool::~buffer_pool() {
 	for(list_type::const_iterator i = list_.begin(), e = list_.end(); i != e; ++i) delete *i;
 }
 
-scheduler::buffer_pool::operator()() {
+buffer & scheduler::buffer_pool::operator()() {
 	scoped_lock lock(mutex_);
 	if(false && loggers::trace()) {
 		std::ostringstream s;
@@ -625,7 +626,7 @@ scheduler::buffer_pool::operator()() {
 	return result;
 }
 
-scheduler::buffer_pool::operator()(buffer & buffer) {
+void scheduler::buffer_pool::operator()(buffer & buffer) {
 	assert(&buffer);
 	assert("reference count is zero: " && !buffer.reference_count());
 	assert(buffer.channels() >= this->channels_);

@@ -10,11 +10,11 @@ namespace psycle { namespace plugins {
 
 /// + operation
 class PSYCLE__DECL additioner : public bipolar_filter {
-	protected: friend class virtual_factory_access;
-		additioner(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
-			: bipolar_filter(plugin_library_reference, graph, name, 0) {}
+	public:
+		additioner(engine::plugin_library_reference & plugin_library_reference, name_type const & name)
+			: bipolar_filter(plugin_library_reference, name, 0) {}
 	protected:
-		void do_process() throw(engine::exception) /*override*/;
+		void do_process() throw(exception) /*override*/;
 };
 
 }}

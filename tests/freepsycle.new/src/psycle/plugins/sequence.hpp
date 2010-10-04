@@ -11,18 +11,19 @@
 namespace psycle { namespace plugins {
 
 /// an event scheduler
-class PSYCLE__DECL sequence : public engine::node {
-	protected: friend class virtual_factory_access;
-		sequence(engine::plugin_library_reference &, engine::graph &, std::string const & name);
+class PSYCLE__DECL sequence : public node {
+	public:
+		sequence(class plugin_library_reference &, name_type const &);
 		~sequence();
 	protected:
-		void do_process() throw(engine::exception) /*override*/;
+		void do_process() throw(exception) /*override*/;
 
 	public:
 		engine::sequence_iterator *& sequence_iterator() { return sequence_iterator_; }
 		engine::sequence_iterator const * sequence_iterator() const { return sequence_iterator_; }
 	private:
 		engine::sequence_iterator * sequence_iterator_;
+		engine::ports::output out_port_;
 };
 
 }}

@@ -8,16 +8,15 @@ namespace psycle { namespace plugins { namespace outputs {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(jack)
 
-jack::jack(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name) throw(engine::exception)
+jack::jack(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(exception)
 :
 	resource(plugin_library_reference, graph, name),
 	client_(),
 	started_(),
-	intermediate_buffer_()
-{
-	engine::ports::inputs::single::create_on_heap(*this, "in");
-	engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
-}
+	intermediate_buffer_(),
+	in_(*this, "in"),
+	amp_(*this, "amplification", 1)
+{}
 
 void jack::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
 	if(&port == &in_port()) {
