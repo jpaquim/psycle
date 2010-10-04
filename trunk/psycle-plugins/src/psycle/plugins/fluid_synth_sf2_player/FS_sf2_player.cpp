@@ -11,7 +11,7 @@
 	#include <universalis/os/include_windows_without_crap.hpp>
 #endif
 
-#include <fluidsynth/fluidsynth.h>
+#include <fluidsynth.h>
 
 #include <string>
 #include <cstring>
@@ -19,7 +19,6 @@
 
 using namespace psycle::plugin_interface;
 
-#define NUMPARAMETERS 24
 #define MAX_PATH_A_LA_CON (1 << 12) // TODO total shit.. paths are loaded/saved with this length!
 #define FILEVERSION 2 // TODO fix endianess and max path and upgrade the version
 #define MAXMIDICHAN MAX_TRACKS
@@ -210,8 +209,9 @@ enum {
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	0x0100,
 	GENERATOR,
-	NUMPARAMETERS,
+	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"FluidSynth SF2 player"
 		#ifndef NDEBUG
@@ -219,7 +219,7 @@ CMachineInfo const MacInfo (
 		#endif
 		,
 	"FluidSynth",
-	"Peter Hanappe and others http://fluidsynth.org\n"
+	"Peter Hanappe and others http://fluidsynth.org Ver." FLUIDSYNTH_VERSION "\n"
 		"\n"
 		"SoundFont(R) is a registered trademark of E-mu Systems, Inc.\n"
 		"\n"
@@ -247,6 +247,7 @@ class mi : public CMachineInterface {
 		virtual bool DescribeValue(char* txt,int const param, int const value);
 		virtual void Command();
 		virtual void ParameterTweak(int par, int val);
+		virtual void SequencerTick();
 		virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 		virtual void Stop();
 
@@ -279,12 +280,13 @@ class mi : public CMachineInterface {
 		double nr, c_level, speed, depth_ms, type;
 
 		bool new_sf;
+		int samplerate;
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-	Vals = new int[NUMPARAMETERS];
+	Vals = new int[MacInfo.numParameters];
 	new_sf = true;
 }
 
@@ -342,11 +344,13 @@ void mi::Init() {
 	#ifndef NDEBUG
 		fluid_settings_setstr(settings, "synth.verbose", "yes");
 	#endif
-	fluid_settings_setint(settings, "synth.sample-rate", pCB->GetSamplingRate());
+	samplerate=pCB->GetSamplingRate();
+	fluid_settings_setnum(settings, "synth.sample-rate", samplerate);
 	fluid_settings_setint(settings, "synth.polyphony", globalpar.polyphony);
 	fluid_settings_setint(settings, "synth.interpolation", globalpar.interpolation);
 	fluid_settings_setint(settings, "synth.midi-channels", MAXMIDICHAN);
-	
+	fluid_settings_setint(settings, "synth.threadsafe-api", 0);
+	fluid_settings_setint(settings, "synth.parallel-render", 0);
 	synth = new_fluid_synth(settings);
 	SetParams();
 }
@@ -370,6 +374,12 @@ void mi::SetParams() {
 			lastnote[i][y]  =255;
 }
 
+void mi::SequencerTick() {
+	if(samplerate!=pCB->GetSamplingRate()) {
+		fluid_settings_setnum(settings, "synth.sample-rate", samplerate);
+		fluid_synth_set_sample_rate(synth, samplerate);
+	}
+}
 void mi::PutData(void* pData) {
 	sf_id = 0;
 	if ((pData == NULL) || (((SYNPAR*)pData)->version != FILEVERSION)) {
@@ -434,10 +444,11 @@ void mi::GetData(void* pData) {
 }
 
 void mi::Stop() {
+	#define ALL_SOUND_OFF 0x78
 	for(int chan = 0; chan < MAXMIDICHAN; ++chan) {
-		fluid_synth_all_sounds_off(synth,chan);
+		fluid_synth_cc(synth,chan,ALL_SOUND_OFF,0);
 		for(int i = 0; i < MAXINSTR; ++i)
-				lastnote[i][chan] = 255;
+			lastnote[i][chan] = 255;
 	}
 }
 
@@ -569,14 +580,22 @@ void mi::ParameterTweak(int par, int val) {
 			fluid_synth_set_polyphony(synth, globalpar.polyphony);
 			break;
 		case e_paraInter:
-			globalpar.interpolation = val;
+			if(val < FLUID_INTERP_LINEAR) {
+				globalpar.interpolation = FLUID_INTERP_NONE;
+			} else if(val < FLUID_INTERP_4THORDER){
+				globalpar.interpolation = FLUID_INTERP_LINEAR;
+			} else if(val < FLUID_INTERP_7THORDER){
+				globalpar.interpolation = FLUID_INTERP_4THORDER;
+			} else {
+				globalpar.interpolation = FLUID_INTERP_7THORDER;
+			}
 			fluid_synth_set_interp_method(synth, -1, globalpar.interpolation);
 			break;
 		}
 }
 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks) {
-	if(sf_id) {
+	if(sf_id > 0) {
 		float *xpl, *xpr;
 		xpl = psamplesleft;
 		xpr = psamplesright;
@@ -643,23 +662,16 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			std::sprintf(txt,"%i",value);
 			return true;
 		case e_paraInter:
-			switch(value) {
-			case FLUID_INTERP_NONE:
+			if(value < FLUID_INTERP_LINEAR) {
 				std::sprintf(txt,"None");
-				return true;
-			case FLUID_INTERP_LINEAR:
+			} else if(value < FLUID_INTERP_4THORDER){
 				std::sprintf(txt,"Linear");
-				return true;
-			case FLUID_INTERP_4THORDER:
+			} else if(value < FLUID_INTERP_7THORDER){
 				std::sprintf(txt,"4th order");
-				return true;
-			case FLUID_INTERP_7THORDER:
+			} else {
 				std::sprintf(txt,"7th order");
-				return true;
-			default:
-				std::sprintf(txt,"%i",value);
-				return true;
 			}
+			return true;
 		default:
 			return false;
 	}
