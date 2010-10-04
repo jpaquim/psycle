@@ -28,8 +28,8 @@ SignedIntegralResult inline clipped_lrint(Real x) {
 	BOOST_STATIC_ASSERT((std::numeric_limits<SignedIntegralResult>::is_signed));
 	BOOST_STATIC_ASSERT((std::numeric_limits<SignedIntegralResult>::is_integer));
 
-	int const max((1u << (bits - 1)) - 1); // The compiler is able to compute this statically.
-	int const min(-max - 1);
+	int const max((1u << (bits - 1u)) - 1u); // The compiler is able to compute this statically.
+	int const min(-max - 1u);
 	return lrint<SignedIntegralResult>(clipped(Real(min), x, Real(max)));
 }
 
