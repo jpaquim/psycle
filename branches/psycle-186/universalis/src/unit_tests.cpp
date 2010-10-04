@@ -14,3 +14,4 @@
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition.hpp>
 #include <universalis/os/sched.hpp>
+#include <universalis/os/aligned_memory_alloc.hpp>
