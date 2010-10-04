@@ -160,10 +160,6 @@ public:
 		direct_right(direct_first),
 		early_reflection_left(early_reflection_first),
 		early_reflection_right(early_reflection_first),
-		direct_delay_stereo_delta_positive(false),
-		early_reflection_delay_stereo_delta_positive(false),
-		direct_delay_stereo_delta_negative(false),
-		early_reflection_delay_stereo_delta_negative(false),
 		direct_delay_stereo_delta_abs(0),
 		early_reflection_delay_stereo_delta_abs(0),
 		overall_gain_dry(0),
@@ -188,8 +184,6 @@ protected:
 	int direct_left, direct_right, early_reflection_left, early_reflection_right;
 	std::vector<Real> buffer_;
 	std::vector<Real>::iterator buffer_iterators_ [stages];
-	bool direct_delay_stereo_delta_positive, early_reflection_delay_stereo_delta_positive;
-	bool direct_delay_stereo_delta_negative, early_reflection_delay_stereo_delta_negative;
 	Real direct_delay_stereo_delta_abs, early_reflection_delay_stereo_delta_abs;
 	Real overall_gain_dry, overall_gain_wet;
 	Real direct_gain_left, direct_gain_right;
@@ -212,42 +206,32 @@ void Haas::parameter(const int & parameter)
 	switch(parameter)
 	{
 		case direct_delay_stereo_delta:
-			direct_delay_stereo_delta_positive = (*this)(parameter) > 0;
-			direct_delay_stereo_delta_negative = !direct_delay_stereo_delta_positive && (*this)(parameter) < 0;
 			direct_delay_stereo_delta_abs = std::fabs((*this)(parameter));
-			if(direct_delay_stereo_delta_positive)
-			{
+			if((*this)(parameter) > 0) {
 				direct_left = direct_last;
 				direct_right = direct_first;
 			}
-			else if(direct_delay_stereo_delta_negative)
-			{
+			else if((*this)(parameter) < 0) {
 				direct_left = direct_first;
 				direct_right = direct_last;
 			}
-			else
-			{
+			else {
 				direct_left = direct_first;
 				direct_right = direct_first;
 			}
 			resize();
 			break;
 		case early_reflection_delay_stereo_delta:
-			early_reflection_delay_stereo_delta_positive =                                                  (*this)(parameter) > 0;
-			early_reflection_delay_stereo_delta_negative = !early_reflection_delay_stereo_delta_positive && (*this)(parameter) < 0;
 			early_reflection_delay_stereo_delta_abs = std::fabs((*this)(parameter));
-			if(early_reflection_delay_stereo_delta_positive)
-			{
+			if((*this)(parameter) > 0) {
 				early_reflection_left = early_reflection_last;
 				early_reflection_right = early_reflection_first;
 			}
-			else if(early_reflection_delay_stereo_delta_negative)
-			{
+			else if((*this)(parameter) < 0) {
 				early_reflection_left = early_reflection_first;
 				early_reflection_right = early_reflection_last;
 			}
-			else
-			{
+			else {
 				early_reflection_left = early_reflection_first;
 				early_reflection_right = early_reflection_first;
 			}
@@ -291,35 +275,35 @@ void Haas::resize()
 
 	if(buffer_.size() == 0) {
 		buffer_.resize(new_size, 0);
-		write_pos = buffer_.end() - 1 - buffer_.begin();
+		write_pos = new_size - 1;
 	} else {
 		write_pos = buffer_iterators_[direct_first] - buffer_.begin();
 		if(new_size > buffer_.size())
-			buffer_.insert(buffer_.begin() + write_pos + 1, new_size - buffer_.size(), 0);
+			buffer_.insert(buffer_.end() - 1, new_size - buffer_.size(), 0);
 	}
 
-	buffer_iterators_[direct_first] =
-		buffer_.begin() + write_pos;
+	buffer_iterators_[direct_first] = buffer_.begin() + write_pos;
 
-	buffer_iterators_[direct_last] =
-		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
-		direct_delay_stereo_delta_abs
-		* samples_per_second())) % new_size);
+	int offset  = write_pos - static_cast<std::vector<Real>::difference_type>(
+		direct_delay_stereo_delta_abs * samples_per_second());
+	if (offset < 0 ) offset += buffer_.size();
+	buffer_iterators_[direct_last] = buffer_.begin() + offset;
 
-	buffer_iterators_[early_reflection_first] =
-		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
-		(*this)(early_reflection_delay)
-		* samples_per_second())) % new_size);
+	offset = write_pos - static_cast<std::vector<Real>::difference_type>(
+		(*this)(early_reflection_delay) * samples_per_second());
+	if(offset < 0) offset += buffer_.size();
+	buffer_iterators_[early_reflection_first] = buffer_.begin() + offset;
 
-	buffer_iterators_[early_reflection_last] =
-		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
+	offset = write_pos - static_cast<std::vector<Real>::difference_type>(
 		((*this)(early_reflection_delay) + early_reflection_delay_stereo_delta_abs)
-		* samples_per_second())) % new_size);
+		* samples_per_second());
+	if(offset < 0) offset += buffer_.size();
+	buffer_iterators_[early_reflection_last] = buffer_.begin() + offset;
 
-	buffer_iterators_[late_reflection] =
-		buffer_.begin() + ((write_pos - static_cast<std::vector<Real>::difference_type>(
-		(*this)(late_reflection_delay)
-		* samples_per_second())) % new_size);
+	offset = write_pos - static_cast<std::vector<Real>::difference_type>(
+		(*this)(late_reflection_delay) * samples_per_second());
+	if(offset < 0) offset += buffer_.size();
+	buffer_iterators_[late_reflection] = buffer_.begin() + offset;
 }
 
 void Haas::Work(Sample l [], Sample r [], int samples, int)

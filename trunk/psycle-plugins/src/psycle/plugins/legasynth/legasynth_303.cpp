@@ -376,8 +376,6 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	
-	if( (note < 121 || note == 255 ) && (cmd == 0x0C)) track[channel].set_velocity(val /2);
-	
 	// Note off
 	if(note==120)
 	{
@@ -388,4 +386,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	{
 		track[channel].set_note(note,Vals[4]);
 	}
+
+	if( (note < 121 || note == 255 ) && (cmd == 0x0C)) track[channel].set_velocity(val /2);
+	
 }
