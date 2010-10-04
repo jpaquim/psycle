@@ -13,9 +13,9 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	PSYCLE__PLUGINS__NODE_INSTANTIATOR(direct_sound)
 
-	direct_sound::direct_sound(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(universalis::os::exception)
+	direct_sound::direct_sound(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(universalis::os::exception)
 	:
-		resource(plugin_library_reference, graph, name),
+		resource(plugin_library_reference, name),
 		direct_sound_(),
 		buffer_(),
 		started_()

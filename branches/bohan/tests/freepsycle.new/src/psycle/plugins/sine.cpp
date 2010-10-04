@@ -9,18 +9,17 @@ namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(sine)
 
-sine::sine(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name)
+sine::sine(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
-	node(plugin_library_reference, graph, name),
+	node(plugin_library_reference, name),
 	phase_(),
 	step_(), frequency_to_step_(),
-	amplitude_()
-{
-	engine::ports::output::create_on_heap(*this, "out", boost::cref(1));
-	engine::ports::inputs::single::create_on_heap(*this, "phase", boost::cref(1));
-	engine::ports::inputs::single::create_on_heap(*this, "frequency", boost::cref(1));
-	engine::ports::inputs::single::create_on_heap(*this, "amplitude", boost::cref(1));
-}
+	amplitude_(),
+	out_port_(*this, "out", 1),
+	phase_port_(*this, "phase", 1),
+	freq_port_(*this, "frequency", 1),
+	amp_port_(*this, "amplitude", 1)
+{}
 
 void sine::seconds_per_event_change_notification_from_port(engine::port const & port) {
 	quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port);

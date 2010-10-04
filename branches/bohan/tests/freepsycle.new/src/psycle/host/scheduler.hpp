@@ -77,7 +77,7 @@ class node {
 			/// connection to the engine signal
 			boost::signals::scoped_connection on_engine_io_ready_signal_connection;
 			/// signal slot for the engine signal
-			void on_engine_io_ready(engine::node &) { scheduler_.io_ready_signal()(*this); }
+			void inline on_engine_io_ready(engine::node &);
 
 		public:
 			bool waiting_for_io_ready_signal() const { return waiting_for_io_ready_signal_; }
@@ -199,10 +199,6 @@ class PSYCLE__DECL scheduler : public std::set<node*> {
 	///\name schedule
 	///\{
 		public:
-			void compute_plan();
-			void clear_plan();
-
-		public:
 			/// maximum number of channels needed for buffers
 			std::size_t channels() const throw() { return channels_; }
 		private:
@@ -271,6 +267,8 @@ class scheduler::buffer_pool {
 		std::size_t channels_, events_;
 		mutex mutable mutex_;
 };
+
+void inline node::on_engine_io_ready(engine::node &) { scheduler_.io_ready_signal()(*this); }
 
 }}
 #include <psycle/detail/decl.hpp>

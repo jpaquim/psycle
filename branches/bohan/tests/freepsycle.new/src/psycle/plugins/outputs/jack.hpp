@@ -15,20 +15,19 @@ namespace psycle { namespace plugins { namespace outputs {
 
 /// outputs to a soundcard device via jackd
 class PSYCLE__DECL jack : public resource {
-	protected: friend class virtual_factory_access;
-		jack(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
-		virtual ~jack() throw();
 	public:
+		jack(class plugin_library_reference &, name_type const &) throw(exception);
+		virtual ~jack() throw();
 		engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;
 	protected:
-		void do_open()    throw(engine::exception) /*override*/;
-		void do_start()   throw(engine::exception) /*override*/;
-		void do_process() throw(engine::exception) /*override*/;
-		void do_stop()    throw(engine::exception) /*override*/;
-		void do_close()   throw(engine::exception) /*override*/;
-		void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
+		void do_open()    throw(exception) /*override*/;
+		void do_start()   throw(exception) /*override*/;
+		void do_process() throw(exception) /*override*/;
+		void do_stop()    throw(exception) /*override*/;
+		void do_close()   throw(exception) /*override*/;
+		void channel_change_notification_from_port(port const &) throw(exception) /*override*/;
 	private:
 		::jack_client_t * client_;
 		std::vector< ::jack_port_t*> output_ports_;

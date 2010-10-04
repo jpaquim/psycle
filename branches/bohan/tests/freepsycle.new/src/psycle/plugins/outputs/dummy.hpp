@@ -15,10 +15,9 @@ using namespace universalis::stdlib;
 
 /// dummy, null silent output.
 class PSYCLE__DECL dummy : public resource {
-	protected: friend class virtual_factory_access;
-		dummy(engine::plugin_library_reference &, engine::graph &, const std::string & name) throw(engine::exception);
-		virtual ~dummy() throw();
 	public:
+		dummy(class plugin_library_reference &, name_type const &) throw(exception);
+		virtual ~dummy() throw();
 		engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;
@@ -43,6 +42,8 @@ class PSYCLE__DECL dummy : public resource {
 		condition<scoped_lock> mutable condition_;
 
 		bool stop_requested_;
+
+		ports::inputs::single in_, amp_;
 };
 
 }}}

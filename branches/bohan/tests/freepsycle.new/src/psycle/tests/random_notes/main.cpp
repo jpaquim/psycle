@@ -6,7 +6,8 @@
 #include "main.hpp"
 #include "score1.hpp"
 #include <psycle/engine.hpp>
-#include <psycle/host.hpp>
+#include <psycle/host/plugin_resolver.hpp>
+#include <psycle/host/scheduler.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/date_time.hpp>
@@ -24,7 +25,7 @@ void play() {
 		using engine::graph;
 		using engine::node;
 		host::plugin_resolver resolver;
-		graph::create_on_stack stack_graph("graph"); graph & graph(stack_graph);
+		class graph graph("graph");
 
 		std::string output_plugin_name("output");
 		{ // output env var
@@ -67,7 +68,7 @@ void play() {
 		loggers::information()("############################################## schedule ########################################################");
 		{
 			#if 1
-				host::schedulers::multi_threaded::scheduler scheduler(graph);
+				host::scheduler scheduler(graph);
 				std::size_t threads(thread::hardware_concurrency());
 				{ // thread count env var
 					char const * const env(std::getenv("PSYCLE_THREADS"));

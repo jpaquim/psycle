@@ -22,19 +22,18 @@ namespace {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(gstreamer)
 
-gstreamer::gstreamer(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, std::string const & name) throw(engine::exception)
+gstreamer::gstreamer(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(exception)
 :
-	resource(plugin_library_reference, graph, name),
+	resource(plugin_library_reference, name),
 	pipeline_(),
 	source_(),
 	caps_filter_(),
 	sink_(),
 	caps_(),
-	intermediate_buffer_()
-{
-	ports::inputs::single::create_on_heap(*this, "in");
-	ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
-}
+	intermediate_buffer_(),
+	in_(*this, "in"),
+	amp_(*this, "amplification", 1)
+{}
 
 void gstreamer::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
 	if(&port == &in_port()) {

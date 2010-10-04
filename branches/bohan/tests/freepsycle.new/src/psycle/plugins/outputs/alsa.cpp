@@ -29,18 +29,17 @@ namespace {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(alsa)
 
-alsa::alsa(engine::plugin_library_reference & plugin_library_reference, engine::graph & graph, const std::string & name) throw(engine::exception)
+alsa::alsa(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(exception)
 :
-	resource(plugin_library_reference, graph, name),
+	resource(plugin_library_reference, name),
 	pcm_(),
 	output_(),
 	intermediate_buffer_(),
 	//areas_(),
-	thread_()
-{
-	engine::ports::inputs::single::create_on_heap(*this, "in");
-	engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
-}
+	thread_(),
+	in_(*this, "in"),
+	amp_(*this, "amplification", 1)
+{}
 
 void alsa::do_open() throw(engine::exception) {
 	resource::do_open();

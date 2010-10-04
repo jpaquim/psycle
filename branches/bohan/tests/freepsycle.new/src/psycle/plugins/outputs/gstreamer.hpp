@@ -16,20 +16,19 @@ using namespace universalis::stdlib;
 
 /// outputs to a soundcard device via gstreamer output implementation.
 class PSYCLE__DECL gstreamer : public resource {
-	protected: friend class virtual_factory_access;
-		gstreamer(engine::plugin_library_reference &, engine::graph &, std::string const & name) throw(engine::exception);
 	public:
-		engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
+		gstreamer(class plugin_library_reference &, name_type const &) throw(exception);
+		ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 		void do_name(std::string const &) /*override*/;
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;
 	protected:
-		void do_open()    throw(engine::exception) /*override*/;
-		void do_start()   throw(engine::exception) /*override*/;
-		void do_process() throw(engine::exception) /*override*/;
-		void do_stop()    throw(engine::exception) /*override*/;
-		void do_close()   throw(engine::exception) /*override*/;
-		void channel_change_notification_from_port(engine::port const &) throw(engine::exception) /*override*/;
+		void do_open()    throw(exception) /*override*/;
+		void do_start()   throw(exception) /*override*/;
+		void do_process() throw(exception) /*override*/;
+		void do_stop()    throw(exception) /*override*/;
+		void do_close()   throw(exception) /*override*/;
+		void channel_change_notification_from_port(port const &) throw(exception) /*override*/;
 	private:
 		::GstElement * pipeline_, * source_, * caps_filter_, * sink_;
 
@@ -38,7 +37,7 @@ class PSYCLE__DECL gstreamer : public resource {
 		void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
 		void        handoff(::GstBuffer &, ::GstPad &);
 
-		typedef std::scoped_lock<mutex> scoped_lock;
+		typedef outputs::scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
 		condition<scoped_lock> mutable condition_;
 
@@ -57,6 +56,8 @@ class PSYCLE__DECL gstreamer : public resource {
 		
 		typedef int16_t output_sample_type;
 		std::vector<output_sample_type> last_samples_;
+
+		ports::inputs::single in_, amp_;
 };
 
 }}}

@@ -53,7 +53,7 @@ std::ostream & operator<<(std::ostream & out, graph const & graph) {
 /**********************************************************************************************************************/
 // node
 
-node::node(class plugin_library_reference & plugin_library_reference, class graph & graph, name_type const & name)
+node::node(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
 	named(name),
 	plugin_library_reference_(plugin_library_reference),
@@ -91,9 +91,12 @@ void node::io_ready(bool io_ready) {
 	if(!was_io_ready && io_ready) io_ready_signal_(*this);
 }
 
-ports::input * node::input_port(name_type const & name) const {
+ports::input const * node::input_port(name_type const & name) const {
 	if(multiple_input_port() && multiple_input_port()->name() == name) return multiple_input_port();
-	for(single_input_ports_type::const_iterator i(single_input_ports().begin()) ; i != single_input_ports().end() ; ++i) if((**i).name() == name) return *i;
+	for(single_input_ports_type::const_iterator
+		i = single_input_ports().begin(),
+		e = single_input_ports().end(); i != e; ++i
+	) if((**i).name() == name) return *i;
 	if(loggers::warning()) {
 		std::ostringstream s;
 		s << qualified_name() << ": input port not found: " << name;
@@ -102,14 +105,25 @@ ports::input * node::input_port(name_type const & name) const {
 	return 0;
 }
 
-ports::output * node::output_port(name_type const & name) const {
-	for(output_ports_type::const_iterator i(output_ports().begin()) ; i != output_ports().end() ; ++i) if((**i).name() == name) return *i;
+ports::input * node::input_port(name_type const & name) {
+	return const_cast<ports::input*>(const_cast<const class node*>(this)->input_port(name));
+}
+
+ports::output const * node::output_port(name_type const & name) const {
+	for(output_ports_type::const_iterator
+		i = output_ports().begin(),
+		e = output_ports().end(); i != e; ++i
+	) if((**i).name() == name) return *i;
 	if(loggers::warning()) {
 		std::ostringstream s;
 		s << qualified_name() << ": output port not found: " << name;
 		loggers::warning()(s.str());
 	}
 	return 0;
+}
+
+ports::output * node::output_port(name_type const & name) {
+	return const_cast<ports::output*>(const_cast<const class node*>(this)->output_port(name));
 }
 
 void node::do_open() throw(std::exception) {
@@ -248,6 +262,7 @@ std::ostream & operator<<(std::ostream & out, const node & node) {
 port::port(class node & node, name_type const & name, std::size_t channels)
 :
 	named(name),
+	node_(node),
 	buffer_(),
 	seconds_per_event_()
 {
@@ -279,7 +294,7 @@ port::~port() {
 	}
 }
 
-void port::connect(port & port) throw(exception) {
+void port::connect(port & port) {
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << this->qualified_name() << " port connecting to port " << port.qualified_name();
