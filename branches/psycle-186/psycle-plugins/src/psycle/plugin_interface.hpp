@@ -75,7 +75,7 @@ class CMachineParameter {
 			/// shows a tweakable knob and text
 			int const MPF_STATE = 2;
 		///\}
-
+		int const CBID_GET_WINDOW  = 1;
 		/*////////////////////////////////////////////////////////////////////////*/
 
 		/// class defining the machine properties

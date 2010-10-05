@@ -26,7 +26,7 @@ namespace psycle
 				inline virtual int GetSamplingRate() const { return Global::pConfig->GetSamplesPerSec(); }
 				inline virtual int GetBPM() const { return Global::pPlayer->bpm; }
 				inline virtual int GetTPB() const { return Global::pPlayer->tpb; }
-				inline virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/) { return 0;};
+				virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/);
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
 				inline virtual float * unused0(int, int) { return NULL;};
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.

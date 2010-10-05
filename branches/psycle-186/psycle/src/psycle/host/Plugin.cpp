@@ -34,6 +34,15 @@ namespace psycle
 
 		PluginFxCallback Plugin::_callback;
 
+		int PluginFxCallback::CallbackFunc(int cbkID, int /*par1*/, int /*par2*/, void* par3) {
+			if (cbkID == CBID_GET_WINDOW) {
+				void** outWnd = (void**)par3;
+				*outWnd = hWnd;
+				return true;
+			}
+			return false;
+		}
+
 		#pragma warning(push)
 			#pragma warning(disable:4355) // 'this' : used in base member initializer list
 			Plugin::Plugin(int index)

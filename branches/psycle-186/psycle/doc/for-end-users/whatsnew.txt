@@ -42,6 +42,16 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.8.8 beta2
+------------
++ Added range to the Interpolate curve dialog, and autodetect range if tweak or command found in selection.
++ In Vista and 7, there's a preliminary WASAPI exclusive mode driver replacing the MME driver. Configuration will come for final release.
+* Fixed installers. Now one for x32 and one for x64. Fixed also the downloading of files from internet.
+* Fixed the mixer in single threaded mode.
+* All effects should now be samplerate aware. Improved some of their visuals. Fixed bugs in some of them (like haas). (Audacity compressor may still change)
+* A greatly improved legasynth tb303, and upgraded fluidsynth sf2 to version 1.1.2. The rest of generators will get revised before final release.
+
+
 v1.8.8 beta1
 ------------
 + x86 and x64 builds.

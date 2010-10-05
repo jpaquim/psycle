@@ -29,7 +29,7 @@
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH 8
-#define PSYCLE__VERSION__QUALITY "beta1"
+#define PSYCLE__VERSION__QUALITY "beta2"
 #define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$" // $Date$
 #define PSYCLE__VERSION__SOURCE_URL "Subversion $URL$"
 
