@@ -1,4 +1,4 @@
-// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.
+// CTrack Declaration file (M3Track.h)
 
 #pragma once
 #include <psycle/plugin_interface.hpp>
@@ -6,64 +6,58 @@
 #include <cstdlib>
 #include <cmath>
 
-// CTrack Declaration file (M3Track.h)
-
-
 #define MAX_SIMUL_TRACKS 8
 
+class mi;
 
-#define EGS_NONE 0
-#define EGS_ATTACK 1
-#define EGS_SUSTAIN 2
-#define EGS_RELEASE 3
-
-
-
-class tvals {
-	public:
-		std::uint8_t Note;
-		std::uint8_t Wave1;
-		std::uint8_t PulseWidth1;
-		std::uint8_t Wave2;
-		std::uint8_t PulseWidth2;
-		std::uint8_t DetuneSemi;
-		std::uint8_t DetuneFine;
-		std::uint8_t Sync;
-		std::uint8_t MixType;
-		std::uint8_t Mix;
-		std::uint8_t SubOscWave;
-		std::uint8_t SubOscVol;
-		std::uint8_t PEGAttackTime;
-		std::uint8_t PEGDecayTime;
-		std::uint8_t PEnvMod;
-		std::uint8_t Glide;
-
-		std::uint8_t Volume;
-		std::uint8_t AEGAttackTime;
-		std::uint8_t AEGSustainTime;
-		std::uint8_t AEGReleaseTime;
-
-		std::uint8_t FilterType;
-		std::uint8_t Cutoff;
-		std::uint8_t Resonance;
-		std::uint8_t FEGAttackTime;
-		std::uint8_t FEGSustainTime;
-		std::uint8_t FEGReleaseTime;
-		std::uint8_t FEnvMod;
-
-		std::uint8_t LFO1Dest;
-		std::uint8_t LFO1Wave;
-		std::uint8_t LFO1Freq;
-		std::uint8_t LFO1Amount;
-		std::uint8_t LFO2Dest;
-		std::uint8_t LFO2Wave;
-		std::uint8_t LFO2Freq;
-		std::uint8_t LFO2Amount;
+enum {
+	EGS_NONE=0,
+	EGS_ATTACK,
+	EGS_SUSTAIN,
+	EGS_RELEASE
 };
 
+class tvals {
+public:
+	std::uint8_t Note;
+	std::uint8_t Wave1;
+	std::uint8_t PulseWidth1;
+	std::uint8_t Wave2;
+	std::uint8_t PulseWidth2;
+	std::uint8_t DetuneSemi;
+	std::uint8_t DetuneFine;
+	std::uint8_t Sync;
+	std::uint8_t MixType;
+	std::uint8_t Mix;
+	std::uint8_t SubOscWave;
+	std::uint8_t SubOscVol;
+	std::uint8_t PEGAttackTime;
+	std::uint8_t PEGDecayTime;
+	std::uint8_t PEnvMod;
+	std::uint8_t Glide;
 
+	std::uint8_t Volume;
+	std::uint8_t AEGAttackTime;
+	std::uint8_t AEGSustainTime;
+	std::uint8_t AEGReleaseTime;
 
-class mi;
+	std::uint8_t FilterType;
+	std::uint8_t Cutoff;
+	std::uint8_t Resonance;
+	std::uint8_t FEGAttackTime;
+	std::uint8_t FEGSustainTime;
+	std::uint8_t FEGReleaseTime;
+	std::uint8_t FEnvMod;
+
+	std::uint8_t LFO1Dest;
+	std::uint8_t LFO1Wave;
+	std::uint8_t LFO1Freq;
+	std::uint8_t LFO1Amount;
+	std::uint8_t LFO2Dest;
+	std::uint8_t LFO2Wave;
+	std::uint8_t LFO2Freq;
+	std::uint8_t LFO2Amount;
+};
 
 class CTrack {
 	public:
@@ -78,7 +72,6 @@ class CTrack {
 		int MSToSamples(double const ms);
 
 	public:
-
 		static float freqTab[120];
 		static float coefsTab[4*128*128*8];
 		static float LFOOscTab[0x10000];
@@ -195,11 +188,11 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 
 		void ComputeCoefs( float *coefs, int f, int r, int t);
 		// skalefuncs
+		inline float Cutoff(int v);
+		inline float Resonance(float v);
+		inline float Bandwidth(int v);
 		inline float LFOFreq( int v);
 		inline float EnvTime( int v);
-		inline float Cutoff( int v);
-		inline float Resonance( float v);
-		inline float Bandwidth( int v);
 
 		float TabSizeDivSampleFreq;
 		
@@ -231,8 +224,6 @@ inline float mi::LFOFreq(int v) {
 inline float mi::EnvTime(int v) {
 	return std::pow((v + 2.0) / (127.0 + 2.0), 3.0) * 10000;
 }
-
-
 ////////////////////////////////
 ////////////////////////////////
 ////////////////////////////////
@@ -474,8 +465,8 @@ inline void CTrack::NewPhases() {
 		// PW1
 		if(LFO_PW1) { // LFO_PW_Mod
 			currentcenter1 = Center1 + (float)pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount / (127.0 * 0x8000);
-			if(currentcenter1 < 0) currentcenter1 = 0;
-			else if(currentcenter1 > 1) currentcenter1 = 1;
+			if(currentcenter1 <= 0) currentcenter1 = 0.00001;
+			else if(currentcenter1 >= 1) currentcenter1 = 0.99999;
 		} else // No LFO
 			currentcenter1 = Center1;
 			PhScale1A = 0.5 / currentcenter1;
@@ -484,8 +475,8 @@ inline void CTrack::NewPhases() {
 			// PW2
 			if(LFO_PW2) { //LFO_PW_Mod
 				currentcenter2 = Center2 + (float)pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount / (127.0 * 0x8000);
-				if(currentcenter2 < 0) currentcenter2 = 0;
-				else if(currentcenter2 > 1) currentcenter2 = 1;
+				if(currentcenter2 <= 0) currentcenter2 = 0.00001;
+				else if(currentcenter2 >= 1) currentcenter2 = 0.99999;
 			} else // No LFO
 				currentcenter2 = Center2;
 				

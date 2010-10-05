@@ -20,7 +20,7 @@
 using namespace psycle::plugin_interface;
 
 #define MAX_PATH_A_LA_CON (1 << 12) // TODO total shit.. paths are loaded/saved with this length!
-#define FILEVERSION 2 // TODO fix endianess and max path and upgrade the version
+#define FILEVERSION 3 // TODO fix endianess and max path and upgrade the version
 #define MAXMIDICHAN MAX_TRACKS
 #define MAXINSTR MAXMIDICHAN
 
@@ -53,6 +53,7 @@ struct SYNPAR {
 
 	int polyphony;
 	int interpolation;
+	int gain;
 };
 
 CMachineParameter const paraInstr = {
@@ -139,6 +140,10 @@ CMachineParameter const paraInter = {
 	"Interpolation", "Interpolation", FLUID_INTERP_NONE, FLUID_INTERP_HIGHEST+3, MPF_STATE, FLUID_INTERP_DEFAULT
 };
 
+CMachineParameter const paraGain = {
+	"Gain", "Gain", 0, 256, MPF_STATE, 64
+};
+
 CMachineParameter const paraNull = {
 	"", "", 0, 0, MPF_STATE, 0
 };
@@ -171,7 +176,7 @@ CMachineParameter const *pParameters[] = {
 	&paraChorusDepth,
 	&paraChorusType,
 
-	&paraNull
+	&paraGain
 };
 
 enum {
@@ -202,7 +207,7 @@ enum {
 	e_paraChorusSpeed,
 	e_paraChorusDepth,
 	e_paraChorusType,
-	e_paraNull3,
+	e_paraGain,
 
 	// NUMPARAMETERS
 };
@@ -338,6 +343,7 @@ void mi::Init() {
 	
 	globalpar.polyphony = 128;
 	globalpar.interpolation = FLUID_INTERP_DEFAULT;
+	globalpar.gain = 64;
 
 	settings = new_fluid_settings();
 	
@@ -382,14 +388,21 @@ void mi::SequencerTick() {
 }
 void mi::PutData(void* pData) {
 	sf_id = 0;
-	if ((pData == NULL) || (((SYNPAR*)pData)->version != FILEVERSION)) {
+	int loadingVersion = ((SYNPAR*)pData)->version;
+	if (pData == NULL || loadingVersion > FILEVERSION) {
 		pCB->MessBox("WARNING!\nThis fileversion does not match current plugin's fileversion.\nYour settings are probably fucked.","FluidSynth",0);
 		return;
 	}
 	#if defined DIVERSALIS__COMPILER__FEATURE__WARNING
 		#warning "TODO ENDIANESS ISSUES HERE"
 	#endif
-	std::memcpy(&globalpar, pData, sizeof SYNPAR);
+	size_t readsize = sizeof SYNPAR;
+	if (loadingVersion == 2) {
+		readsize -= sizeof(globalpar.gain);
+		globalpar.gain = 25;
+		fluid_synth_set_gain(synth,globalpar.gain*(1.0/128.0));
+	}
+	std::memcpy(&globalpar, pData, readsize);
 
 	new_sf = false;
 
@@ -430,6 +443,7 @@ void mi::PutData(void* pData) {
 
 		Vals[e_paraPolyphony] = globalpar.polyphony;
 		Vals[e_paraInter]     = globalpar.interpolation;
+		Vals[e_paraGain]	  = globalpar.gain;
 
 		SetParams();
 	} else {
@@ -591,6 +605,9 @@ void mi::ParameterTweak(int par, int val) {
 			}
 			fluid_synth_set_interp_method(synth, -1, globalpar.interpolation);
 			break;
+		case e_paraGain:
+			fluid_synth_set_gain(synth,val*(1.0/128.0));
+			break;
 		}
 }
 
@@ -672,6 +689,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 				std::sprintf(txt,"7th order");
 			}
 			return true;
+		case e_paraGain:
+			std::sprintf(txt,"%.2f%%",(float)value*(1.0/1.28));
+			return true;
 		default:
 			return false;
 	}
@@ -698,7 +718,6 @@ void mi::Command() {
 	char szFilters[]="SF2 (*.sf2)|*.sf2|All Files (*.*)|*.*||";
 
 	CFileDialog fileDlg (TRUE, "SF2", "*.sf2", OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, NULL);
-	
 	if(fileDlg.DoModal () == IDOK) {
 		std::string sfPathName = fileDlg.GetPathName().GetBuffer(12);
 		const char * sffile = sfPathName.c_str();
