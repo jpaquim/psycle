@@ -75,7 +75,7 @@ class CMachineParameter {
 	/// shows a tweakable knob and text
 	int const MPF_STATE = 2;
 ///\}
-
+int const CBID_GET_WINDOW  = 1;
 /*////////////////////////////////////////////////////////////////////////*/
 
 /// class defining the machine properties
@@ -131,11 +131,11 @@ class CFxCallback {
 	public:
 		virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) const = 0;
 		///\todo: doc
-		virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/) const = 0;
+		virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/) = 0;
 		/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-		virtual float * unused0(int, int) const = 0;
+		virtual float * unused0(int, int) = 0;
 		/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
-		virtual float * unused1(int, int) const = 0;
+		virtual float * unused1(int, int) = 0;
 		virtual int GetTickLength() const = 0;
 		virtual int GetSamplingRate() const = 0;
 		virtual int GetBPM() const = 0;

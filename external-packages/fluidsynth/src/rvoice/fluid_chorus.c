@@ -100,7 +100,7 @@
    alone.  For a demo on aliasing try '1' With '3', the aliasing is
    still quite pronounced for some input frequencies
 */
-#define INTERPOLATION_SAMPLES 5
+#define INTERPOLATION_SAMPLES 7
 
 /* Private data for SKEL file */
 struct _fluid_chorus_t {

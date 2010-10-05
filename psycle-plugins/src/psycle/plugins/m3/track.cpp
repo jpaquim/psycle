@@ -1,111 +1,70 @@
+// CTrack Definition file (M3Track.cpp)
 #include "track.hpp"
 #include <cassert>
 
 using namespace psycle::plugin_interface;
 
-// CTrack Definition file (M3Track.cpp)
-
-/* Since This doesn't work, the values in the "Init()" are hardcoded
-extern CMachineParameter const paraWave1;
-extern CMachineParameter const paraPulseWidth1;
-extern CMachineParameter const paraWave2;
-extern CMachineParameter const paraPulseWidth2;
-extern CMachineParameter const paraDetuneSemi;
-extern CMachineParameter const paraDetuneFine;
-extern CMachineParameter const paraSync;
-extern CMachineParameter const paraMixType;
-extern CMachineParameter const paraMix;
-extern CMachineParameter const paraSubOscWave;
-extern CMachineParameter const paraSubOscVol;
-extern CMachineParameter const paraPEGAttackTime;
-extern CMachineParameter const paraPEGDecayTime;
-extern CMachineParameter const paraPEnvMod;
-extern CMachineParameter const paraGlide;
-
-extern CMachineParameter const paraVolume;
-extern CMachineParameter const paraAEGAttackTime;
-extern CMachineParameter const paraAEGSustainTime;
-extern CMachineParameter const paraAEGReleaseTime;
-
-extern CMachineParameter const paraFilterType;
-extern CMachineParameter const paraCutoff;
-extern CMachineParameter const paraResonance;
-extern CMachineParameter const paraFEGAttackTime;
-extern CMachineParameter const paraFEGSustainTime;
-extern CMachineParameter const paraFEGReleaseTime;
-extern CMachineParameter const paraFEnvMod;
-
-		// LFO 1
-extern CMachineParameter const paraLFO1Dest;
-extern CMachineParameter const paraLFO1Wave;
-extern CMachineParameter const paraLFO1Freq;
-extern CMachineParameter const paraLFO1Amount;
-		// LFO 2
-extern CMachineParameter const paraLFO2Dest;
-extern CMachineParameter const paraLFO2Wave;
-extern CMachineParameter const paraLFO2Freq;
-extern CMachineParameter const paraLFO2Amount;
-
-*/
-
 void CTrack::Stop()
 {
-		AEGState = EGS_NONE;
+	AEGState = EGS_NONE;
 }
 
 void CTrack::Init()
 {
-		_channel = -1;
+	_channel = -1;
 
-		noise1 = noise2 = Sync = false;
-		RandomMixType = false;
-		RandomWave1 = false;
-		RandomWave2 = false;
-		RandomWaveSub = false;
-		LFO1Noise = LFO2Noise = false;
-		LFO1Synced = LFO2Synced = false;
-		AEGState = EGS_NONE;
-		FEGState = EGS_NONE;
-		PEGState = EGS_NONE;
-		Frequency = FrequencyFrom = 0.0;
-		r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
-		noisePhase = Phase1 = Phase2 = PhaseSub = PhaseLFO1 = PhaseLFO2 = 0; // Osc starten neu
-		x1 = x2 = y1 = y2 = 0;
-		pnoise = WaveTable[4];
-		OldOut = 0;
-		pwavetab1=pwavetab2=pwavetabsub=pwavetabLFO1=pwavetabLFO2= WaveTable[0];
-		
-		coefsTabOffs = coefsTab; // lp
-		Cutoff = 127; //paraCutoff.DefValue;
-		Resonance = 32; //paraResonance.DefValue;
-		FEGAttackTime = MSToSamples( pmi->EnvTime( 0/*paraFEGAttackTime.DefValue*/));
-		FEGSustainTime = MSToSamples( pmi->EnvTime( 0/*paraFEGSustainTime.DefValue*/));
-		FEGReleaseTime = MSToSamples( pmi->EnvTime( 0/*paraFEGReleaseTime.DefValue*/));
-		AEGAttackTime = MSToSamples( pmi->EnvTime( 10/*paraAEGAttackTime.DefValue*/));
-		AEGSustainTime = MSToSamples( pmi->EnvTime( 50/*paraAEGSustainTime.DefValue*/));
-		AEGReleaseTime = MSToSamples( pmi->EnvTime( 30/*paraAEGReleaseTime.DefValue*/));
-		FEnvMod = 0;
-		PEGAttackTime = MSToSamples( pmi->EnvTime( 0/*paraPEGAttackTime.DefValue*/));
-		PEGDecayTime = MSToSamples( pmi->EnvTime( 0/*paraPEGDecayTime.DefValue*/));
-		PEnvMod = 0;
-		Bal1 = 63;/*127-paraMix.DefValue*/;
-		Bal2 = 64;/*paraMix.DefValue*/;
-		Glide =  GlideActive = false;
-		RandomWave1 = RandomWave2 = RandomWaveSub = false;
-		SubOscVol = 64;/*paraSubOscVol.DefValue*/;
-		Center1 = 64/127;/*paraPulseWidth1.DefValue/127.0;*/
-		Center2 = 64/127;/*paraPulseWidth2.DefValue/127.0;*/
-		DetuneSemi = DetuneFine = 1;
-		Volume = (float)(64/245.0);/*paraVolume.DefValue/245.0);*/
-		LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;				
-		LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
-		PhaseAddLFO1 = PhaseAddLFO2 = 0;
-		MixType = 0;
+	noise1 = noise2 = Sync = false;
+	RandomMixType = false;
+	RandomWave1 = false;
+	RandomWave2 = false;
+	RandomWaveSub = false;
+	LFO1Noise = LFO2Noise = false;
+	LFO1Synced = LFO2Synced = false;
+	AEGState = EGS_NONE;
+	FEGState = EGS_NONE;
+	PEGState = EGS_NONE;
+	Frequency = FrequencyFrom = 0.0;
+	r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
+	noisePhase = Phase1 = Phase2 = PhaseSub = PhaseLFO1 = PhaseLFO2 = 0; // Osc starten neu
+	x1 = x2 = y1 = y2 = 0;
+	pnoise = WaveTable[4];
+	OldOut = 0;
+	pwavetab1=pwavetab2=pwavetabsub=pwavetabLFO1=pwavetabLFO2= WaveTable[0];
+	
+	coefsTabOffs = coefsTab; // lp
+	Cutoff = 127;
+	Resonance = 32;
+	FEGAttackTime = MSToSamples( pmi->EnvTime( 0));
+	FEGSustainTime = MSToSamples( pmi->EnvTime( 0));
+	FEGReleaseTime = MSToSamples( pmi->EnvTime( 0));
+	AEGAttackTime = MSToSamples( pmi->EnvTime( 10));
+	AEGSustainTime = MSToSamples( pmi->EnvTime( 50));
+	AEGReleaseTime = MSToSamples( pmi->EnvTime( 30));
+	FEnvMod = 0;
+	PEGAttackTime = MSToSamples( pmi->EnvTime( 0));
+	PEGDecayTime = MSToSamples( pmi->EnvTime( 0));
+	PEnvMod = 0;
+	Bal1 = 63;;
+	Bal2 = 64;;
+	Glide =  GlideActive = false;
+	RandomWave1 = RandomWave2 = RandomWaveSub = false;
+	SubOscVol = 64;;
+	Center1 = 64/127;
+	Center2 = 64/127;
+	DetuneSemi = DetuneFine = 1;
+	Volume = (float)(64/245.0);
+	LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;				
+	LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
+	PhaseAddLFO1 = PhaseAddLFO2 = 0;
+	MixType = 0;
+	PhScale2A=1.0;
+	PhScale2B=1.0;
+	Ph1=1.0;
+	Ph2=1.0;
 }
 
 void CTrack::Tick( tvals const &tv)
 {
-
 	// Filter
 	if( tv.FilterType != 0xff)
 	{

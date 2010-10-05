@@ -34,10 +34,6 @@ signed short CTrack::WaveTable[5][2100];
 /// (Or dynamically allocate them. Check JMDrum's Source for an example)
 unsigned int const MAX_PSYCLE_TRACKS = MAX_TRACKS;
 
-/// Change this number to the number of parameters of your machine
-/// Remember that Psycle ONLY have GLOBAL parameters.
-unsigned int const NUMPARAMETERS = 34;
-
 CMachineParameter const paraWave1 = {
 	"Osc1Wav", "Oscillator 1 Waveform", 0, 5, MPF_STATE, 0
 };
@@ -118,7 +114,6 @@ CMachineParameter const paraFEnvMod = {
 };
 
 // LFOs
-
 CMachineParameter const paraLFO1Dest = {
 	"LFO1 Dest", "LFO1 Destination", 0, 15, MPF_STATE, 0
 };
@@ -133,7 +128,6 @@ CMachineParameter const paraLFO1Amount = {
 };
 
 // lfo2
-
 CMachineParameter const paraLFO2Dest = {
 	"LFO2 Dest", "LFO2 Destination", 0, 15, MPF_STATE, 0
 };
@@ -190,25 +184,26 @@ CMachineParameter const *pParameters[] = {
 };
 
 CMachineInfo const MacInfo (
-		MI_VERSION,
-		GENERATOR,
-		NUMPARAMETERS,
-		pParameters,
-		"M3 by Makk"
-		#ifndef NDEBUG
-			 " (debug build)"
-		#endif
-		,
-		"M3",
-		"Makk",
-		"About",
-		5
+	MI_VERSION,
+	0x0120,
+	GENERATOR,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	"M3 by Makk"
+	#ifndef NDEBUG
+		 " (debug build)"
+	#endif
+	,
+	"M3",
+	"Makk",
+	"About",
+	5
 );
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi() {
-	Vals =new int[NUMPARAMETERS];
+	Vals =new int[MacInfo.numParameters];
 }
 
 mi::~mi() {
@@ -311,6 +306,7 @@ void mi::ParameterTweak(int par, int val) {
 
 // Called each tick (i.e.when playing). Note: it goes after ParameterTweak and before SeqTick
 void mi::SequencerTick() {
+
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -562,8 +558,6 @@ void mi::SetNoValue(tvals &tv) {
 	tv.LFO2Freq = 0xff;
 	tv.LFO2Amount = 0xff;
 }
-
-
 
 void mi::ComputeCoefs( float *coefs, int freq, int r, int t) {
 
