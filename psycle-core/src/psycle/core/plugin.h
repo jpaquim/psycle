@@ -30,9 +30,9 @@ class PluginFxCallback : public psycle::plugin_interface::CFxCallback {
 		/* implement */ int GetSamplingRate() const;
 		/* implement */ int GetBPM() const;
 		/* implement */ int GetTPB() const;
-		/* implement */ int CallbackFunc(int, int, int, void*) const;
-		/* implement */ float * unused0(int, int) const;
-		/* implement */ float * unused1(int, int) const;
+		/* implement */ int CallbackFunc(int, int, int, void*);
+		/* implement */ float * unused0(int, int);
+		/* implement */ float * unused1(int, int);
 };
 
 class Plugin; // forward declaration
