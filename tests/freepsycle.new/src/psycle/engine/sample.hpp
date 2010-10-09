@@ -11,14 +11,11 @@
 #include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
 
-/// double (64-bit ieee-754 format) by default.
 typedef double real;
 
-/// mathematical operations on floating point numbers
-namespace math {
+//namespace math = helpers::math;
+namespace math { using namespace helpers::math; }
 
-using namespace helpers::math;
-
-}}}
+}}
 #include <psycle/detail/decl.hpp>
 #endif
