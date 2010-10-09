@@ -12,9 +12,7 @@ PSYCLE__PLUGINS__NODE_INSTANTIATOR(sine)
 sine::sine(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
 	node(plugin_library_reference, name),
-	phase_(),
-	step_(), frequency_to_step_(),
-	amplitude_(),
+	phase_(), step_(), freq_to_step_(), amp_(),
 	out_port_(*this, "out", 1),
 	phase_port_(*this, "phase", 1),
 	freq_port_(*this, "frequency", 1),
@@ -27,59 +25,56 @@ void sine::seconds_per_event_change_notification_from_port(engine::port const & 
 	// no easy way to get the value for old_events_per_second
 	//this->step_ *= old_events_per_second * port.seconds_per_event();
 	
-	real const frequency(this->frequency());
-	frequency_to_step_ = 2 * engine::math::pi * port.seconds_per_event();
-	this->frequency(frequency);
+	real const freq = this->freq();
+	freq_to_step_ = 2 * engine::math::pi * port.seconds_per_event();
+	this->freq(freq);
 }
 
 void sine::do_process() throw(engine::exception) {
-	if(!out_port()) return;
+	if(!out_port_) return;
 	PSYCLE__PLUGINS__TEMPLATE_SWITCH(do_process_template,
-		(phase_port()     ?     phase_channel().flag() : channel::flags::empty)
-		(frequency_port() ? frequency_channel().flag() : channel::flags::empty)
-		(amplitude_port() ? amplitude_channel().flag() : channel::flags::empty)
+		(phase_port_ ? phase_chn().flag() : channel::flags::empty)
+		( freq_port_ ?  freq_chn().flag() : channel::flags::empty)
+		(  amp_port_ ?   amp_chn().flag() : channel::flags::empty)
 	);
 }
 
-template<engine::channel::flags::type phase_flag, engine::channel::flags::type frequency_flag, engine::channel::flags::type amplitude_flag>
-void sine::do_process_template() throw(engine::exception) {
-	for(std::size_t
-		phase_event(0),
-		frequency_event(0),
-		amplitude_event(0),
-		out_event(0); out_event < out_channel().size(); ++out_event
-	) {
-		if(phase_flag == channel::flags::continuous || phase_flag != channel::flags::empty &&
-			phase_event < phase_channel().size() && phase_channel()[phase_event].index() == out_event
-		) this->phase_ = std::fmod(phase_channel()[phase_event++].sample() + engine::math::pi, 2 * engine::math::pi) - engine::math::pi;
+template<engine::channel::flags::type phase_flag, engine::channel::flags::type freq_flag, engine::channel::flags::type amp_flag>
+void sine::do_process_template() {
+	for(std::size_t phase_evt = 0, freq_evt = 0, amp_evt = 0, out_evt = 0; out_evt < out_chn().size(); ++out_evt) {
+		if(phase_flag == channel::flags::continuous || (
+				phase_flag != channel::flags::empty &&
+				phase_evt < phase_chn().size() && phase_chn()[phase_evt].index() == out_evt
+			)
+		) phase_ = std::fmod(phase_chn()[phase_evt++].sample() + engine::math::pi, 2 * engine::math::pi) - engine::math::pi;
 
-		switch(frequency_flag) {
+		switch(freq_flag) {
 			case channel::flags::continuous:
-				this->frequency(frequency_channel()[out_event].sample());
+				freq(freq_chn()[out_evt].sample());
 			break;
 			case channel::flags::discrete:
-				if(frequency_event < frequency_channel().size() && frequency_channel()[frequency_event].index() == out_event)
-					this->frequency(frequency_channel()[frequency_event++].sample());
+				if(freq_evt < freq_chn().size() && freq_chn()[freq_evt].index() == out_evt)
+					freq(freq_chn()[freq_evt++].sample());
 			break;
 			case channel::flags::empty: default: /* nothing */ ;
 		}
 
-		switch(amplitude_flag) {
+		switch(amp_flag) {
 			case channel::flags::continuous:
-				this->amplitude_ = amplitude_channel()[out_event].sample();
+				amp_ = amp_chn()[out_evt].sample();
 			break;
 			case channel::flags::discrete:
-				if(amplitude_event < amplitude_channel().size() && amplitude_channel()[amplitude_event].index() == out_event)
-					this->amplitude_ = amplitude_channel()[amplitude_event++].sample();
+				if(amp_evt < amp_chn().size() && amp_chn()[amp_evt].index() == out_evt)
+					amp_ = amp_chn()[amp_evt++].sample();
 			break;
 			case channel::flags::empty: default: /* nothing */ ;
 		}
 
-		out_channel()[out_event](out_event, amplitude_ * helpers::math::fast_sin<2>(phase_));
+		out_chn()[out_evt](out_evt, amp_ * helpers::math::fast_sin<2>(phase_));
 		phase_ += step_;
 		if(phase_ > engine::math::pi) phase_ -= 2 * engine::math::pi;
 	}
-	out_channel().flag(channel::flags::continuous);
+	out_chn().flag(channel::flags::continuous);
 }
 
 }}
