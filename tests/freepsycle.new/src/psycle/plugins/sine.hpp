@@ -25,7 +25,11 @@ class PSYCLE__DECL sine : public node {
 		void do_process() throw(exception) /*override*/;
 
 	private:
-		template<channel::flags::type, channel::flags::type, channel::flags::type>
+		template<
+			channel::flags::type phase_flag,
+			channel::flags::type  freq_flag,
+			channel::flags::type   amp_flag
+		>
 		void do_process_template();
 	
 		real phase_, step_, freq_to_step_, amp_;
