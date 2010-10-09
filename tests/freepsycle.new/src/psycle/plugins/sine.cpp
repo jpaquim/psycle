@@ -74,7 +74,7 @@ void sine::do_process_template() {
 			case channel::flags::empty: default: /* nothing */ ;
 		}
 
-		out_chn()[out_evt](out_evt, amp_ * helpers::math::fast_sin<2>(phase_));
+		out_chn()[out_evt](out_evt, amp_ * math::fast_sin<2>(phase_));
 		phase_ += step_;
 		if(phase_ > math::pi) phase_ -= 2 * math::pi;
 	}
