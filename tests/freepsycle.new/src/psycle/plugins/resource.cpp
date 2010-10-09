@@ -6,12 +6,12 @@
 #include "resource.hpp"
 namespace psycle { namespace plugins {
 
-resource::resource(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(std::exception)
+resource::resource(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
 	node(plugin_library_reference, name)
 {}
 
-void resource::do_open() throw(std::exception) {
+void resource::do_open() {
 	node::do_open();
 	if(loggers::information()) {
 		std::ostringstream s;
@@ -20,7 +20,7 @@ void resource::do_open() throw(std::exception) {
 	}
 }
 
-void resource::do_start() throw(std::exception) {
+void resource::do_start() {
 	node::do_start();
 	if(loggers::information()) {
 		std::ostringstream s;
@@ -29,7 +29,7 @@ void resource::do_start() throw(std::exception) {
 	}
 }
 
-void resource::do_stop() throw(std::exception) {
+void resource::do_stop() {
 	node::do_stop();
 	if(loggers::information()) {
 		std::ostringstream s;
@@ -38,7 +38,7 @@ void resource::do_stop() throw(std::exception) {
 	}
 }
 
-void resource::do_close() throw(std::exception) {
+void resource::do_close() {
 	node::do_close();
 	if(loggers::information()) {
 		std::ostringstream s;

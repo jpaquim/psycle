@@ -14,7 +14,7 @@ class PSYCLE__DECL multiplier : public bipolar_filter {
 		multiplier(class plugin_library_reference & plugin_library_reference, name_type const & name)
 			: bipolar_filter(plugin_library_reference, name, 1) {}
 	protected: 
-		void do_process() throw(exception) /*override*/;
+		void do_process() /*override*/;
 };
 
 }}

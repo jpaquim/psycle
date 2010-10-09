@@ -20,10 +20,10 @@ sequence::~sequence() {
 	delete sequence_iterator_;
 }
 
-void sequence::do_process() throw(engine::exception) {
+void sequence::do_process() {
 	engine::ports::output & out(*output_ports()[0]);
 	if(!out) return;
-	sequence_iterator()->process(out.buffer(), out.events_per_second(), out.channels());
+	sequence_iterator_->process(out.buffer(), out.events_per_second(), out.channels());
 }
 
 }}

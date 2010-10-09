@@ -2,17 +2,26 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::template_plugin
+#ifndef PSYCLE__PLUGINS__TEMPLATE
+#define PSYCLE__PLUGINS__TEMPLATE
 #pragma once
 #include "plugin.hpp"
 #define PSYCLE__DECL  PSYCLE__PLUGINS__TEMPLATE
-Vnamespace psycle { namespace plugins {
+namespace psycle { namespace plugins {
 
-class PSYCLE__DECL template_plugin : public engine::node {
-	protected: friend class virtual_factory_access;
-		template_plugin(engine::plugin_library_reference &, engine::graph &, std::string const & name);
+class PSYCLE__DECL template_plugin : public node {
+	public:
+		template_plugin(class plugin_library_reference &, name_type const &);
 	protected:
-		void do_process() throw(engine::exception) /*override*/;
+		void channel_change_notification_from_port(port const &) /*override*/;
+		void seconds_per_event_change_notification_from_port(port const &) /*override*/;
+		void do_process() /*override*/;
+	private:
+		ports::inputs::multiple in_port_;
+		ports::inputs::single side_port_;
+		ports::output out_port_;
 };
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif

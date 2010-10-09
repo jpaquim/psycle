@@ -22,12 +22,15 @@ class PSYCLE__DECL decay : public node {
 		}
 
 	protected:
-		void seconds_per_event_change_notification_from_port(engine::port const &) /*override*/;
+		void seconds_per_event_change_notification_from_port(port const &) /*override*/;
 		void do_process() throw(exception) /*override*/;
 
 	private:
-		template<channel::flags::type, channel::flags::type>
-		void do_process_template() throw(engine::exception);
+		template<
+			channel::flags::type pulse_flag,
+			channel::flags::type decay_flag
+		>
+		void do_process_template();
 		
 		real current_;
 		real decay_, events_per_second_, seconds_per_event_;

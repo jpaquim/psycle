@@ -33,8 +33,11 @@ void decay::do_process() throw(engine::exception) {
 	);
 }
 
-template<engine::channel::flags::type pulse_flag, engine::channel::flags::type decay_flag>
-void decay::do_process_template() throw(engine::exception) {
+template<
+	channel::flags::type pulse_flag,
+	channel::flags::type decay_flag
+>
+void decay::do_process_template() {
 	for(std::size_t
 		pulse_event(0),
 		decay_event(0),

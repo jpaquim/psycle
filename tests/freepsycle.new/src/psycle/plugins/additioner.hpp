@@ -14,7 +14,7 @@ class PSYCLE__DECL additioner : public bipolar_filter {
 		additioner(engine::plugin_library_reference & plugin_library_reference, name_type const & name)
 			: bipolar_filter(plugin_library_reference, name, 0) {}
 	protected:
-		void do_process() throw(exception) /*override*/;
+		void do_process() /*override*/;
 };
 
 }}

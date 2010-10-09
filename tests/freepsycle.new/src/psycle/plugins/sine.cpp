@@ -30,7 +30,7 @@ void sine::seconds_per_event_change_notification_from_port(port const & port) {
 	this->freq(freq);
 }
 
-void sine::do_process() throw(exception) {
+void sine::do_process() {
 	if(!out_port_) return;
 	PSYCLE__PLUGINS__TEMPLATE_SWITCH(do_process_template,
 		(phase_port_ ? phase_chn().flag() : channel::flags::empty)

@@ -13,12 +13,12 @@ namespace psycle { namespace plugins {
 /// resource plugin
 class PSYCLE__DECL resource : public node {
 	public:
-		resource(class plugin_library_reference &, name_type const &) throw(std::exception);
+		resource(class plugin_library_reference &, name_type const &);
 	protected:
-		void do_open()  throw(std::exception) /*override*/;
-		void do_start() throw(std::exception) /*override*/;
-		void do_stop()  throw(std::exception) /*override*/;
-		void do_close() throw(std::exception) /*override*/;
+		void do_open() /*override*/;
+		void do_start() /*override*/;
+		void do_stop() /*override*/;
+		void do_close() /*override*/;
 };
 
 }}
