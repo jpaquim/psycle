@@ -53,17 +53,18 @@ void template_plugin::do_process() {
 	assert(&out_port_.buffer());
 	buffer & in = in_port_.buffer();
 	buffer & out = out_port_.buffer();
-	assert(out.size() == in.size())
+	assert(out.size() == in.size());
 	if(single_input_ports()) {
-		buffer & side(side_port_.buffer());
-		assert(out.channels() == side.channels())
+		buffer & side = side_port_.buffer();
+		assert(out.channels() == side.channels());
 		for(std::size_t channel = 0; channel < in.channels() ; ++channel)
-			for(std::size_t event = 0; event < in.events() && in[channel][event].index() < in.events() ; ++event)
+			for(std::size_t event = 0; event < in.events() && in[channel][event].index() < in.events() ; ++event) {
 				out[channel][event].index(event);
 				if(side[channel][event].index() == event)
 					out[channel][event].sample() *= in[channel][event].sample() * side[channel][event].sample();
 				else
 					out[channel][event].sample() *= in[channel][event].sample();
+			}
 	} else {
 		for(std::size_t channel = 0; channel < in.channels() ; ++channel)
 			for(std::size_t event = 0; event < in.events() && in[channel][event].index() < in.events() ; ++event) {
@@ -84,4 +85,3 @@ void template_plugin::do_process() {
 }
 
 }}
-
