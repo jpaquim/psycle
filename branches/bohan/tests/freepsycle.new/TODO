@@ -1,12 +1,5 @@
 # This is a sorted list, top priority at the top!
 
-*	generic::wrappers::node, add functions to find a port by its name
-	This is currently in engine.
-	-- bohan
-
-*	finish merging engine::sample::math with psycle-helpers::math
-	-- bohan
-
 *	PulseAudio, RTAudio, libao.
 	Implement direct support for pulseaudio (currently works only via alsa and gstreamer).
 	-- bohan
