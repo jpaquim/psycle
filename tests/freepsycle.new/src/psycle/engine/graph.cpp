@@ -57,9 +57,10 @@ node::node(class plugin_library_reference & plugin_library_reference, name_type 
 :
 	named(name),
 	plugin_library_reference_(plugin_library_reference),
+	graph_(),
+	multiple_input_port_(),
 	opened_(),
-	started_(),
-	graph_()
+	started_()
 {
 	if(loggers::trace()) {
 		std::ostringstream s;
@@ -75,6 +76,12 @@ node::~node() {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(graph_) graph_->erase(this);
+}
+
+void node::graph(class graph & graph) {
+	graph_ = &graph;
+	graph.insert(this);
+	graph.new_node_signal()(*this);
 }
 
 node::name_type node::qualified_name() const {
@@ -366,33 +373,33 @@ void port::seconds_per_event(real const & seconds_per_event) {
 }
 
 void port::propagate_channels(std::size_t channels) throw(exception) {
-	if(this->channels() == channels) return;
+	if(channels_ == channels) return;
 	channels_transaction(channels);
 	do_propagate_channels(); // polymorphic virtual call
 }
 
 void port::propagate_seconds_per_event(real const & seconds_per_event) {
-	if(this->seconds_per_event() == seconds_per_event) return;
+	if(seconds_per_event_ == seconds_per_event) return;
 	this->seconds_per_event(seconds_per_event);
 	do_propagate_seconds_per_event(); // polymorphic virtual call
 }
 
 void port::propagate_channels_to_node(std::size_t channels) throw(exception) {
 	channels_transaction(channels);
-	node().channel_change_notification_from_port(*this);
+	node_.channel_change_notification_from_port(*this);
 }
 
 void port::propagate_seconds_per_event_to_node(real const & seconds_per_event) {
-	this->seconds_per_event_ = seconds_per_event;
-	node().seconds_per_event_change_notification_from_port(*this);
+	seconds_per_event_ = seconds_per_event;
+	node_.seconds_per_event_change_notification_from_port(*this);
 }
 
 void port::channels_transaction(std::size_t channels) throw(exception) {
-	std::size_t const rollback(this->channels());
+	std::size_t const rollback(channels_);
 	try {
-		this->do_channels(channels);
+		do_channels(channels);
 	} catch(...) {
-		if(!channels_immutable()) this->channels(rollback);
+		if(!channels_immutable_) this->channels(rollback);
 		throw;
 	}
 }
@@ -403,9 +410,9 @@ void port::do_channels(std::size_t channels) throw(exception) {
 		s << qualified_name() << ": port channels changing to " << channels;
 		loggers::information()(s.str());
 	}
-	if(channels_immutable()) throw exceptions::runtime_error("channel count of port " + qualified_name() + " is immutable", UNIVERSALIS__COMPILER__LOCATION);
-	this->channels_ = channels;
-	if(buffer_ && buffer().channels() < channels) buffer().channels(channels);
+	if(channels_immutable_) throw exceptions::runtime_error("channel count of port " + qualified_name() + " is immutable", UNIVERSALIS__COMPILER__LOCATION);
+	channels_ = channels;
+	if(buffer_ && buffer_->channels() < channels) buffer_->channels(channels);
 }
 
 void port::dump(std::ostream & out, /*const std::string & kind,*/ std::size_t tabulations) const {
@@ -416,7 +423,7 @@ void port::dump(std::ostream & out, /*const std::string & kind,*/ std::size_t ta
 	else out << universalis::compiler::typenameof(*this) << ' ';
 	out
 		<< std::setw(16) << name()
-		<< "\tchns: " << channels()
+		<< "\tchns: " << channels_
 		<< "\tevts/s: " << std::setw(6) << events_per_second()
 		<< "\tconns: ";
 }
@@ -440,6 +447,8 @@ namespace ports {
 			s << qualified_name() << ": new engine port output";
 			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+		node_.output_ports_.push_back(this);
+		node_.new_output_port_signal_(*this);
 	}
 
 	output::~output() {
@@ -544,7 +553,9 @@ namespace ports {
 		assert("ports must belong to different nodes:" &&
 			&output_port.node() != &this->node()
 		);
-		assert("nodes of both ports must belong to the same graph:" &&
+		assert("nodes of both ports must belong to a graph:" &&
+			&output_port.node().graph() &&
+			&this->node().graph() &&
 			&output_port.node().graph() == &this->node().graph()
 		);
 		// connect the output port internal side to this input port
@@ -554,7 +565,7 @@ namespace ports {
 		// connect this input port internal side to the output port
 		connect_internal_side(output_port);
 		// signal graph wrappers of the new connection
-		node().graph().new_connection_signal()(*this, output_port);
+		node_.graph().new_connection_signal()(*this, output_port);
 	}
 
 	void input::disconnect(output & output_port) {
@@ -568,7 +579,7 @@ namespace ports {
 		// disconnect the output port internal side from this input port
 		output_port.disconnect_internal_side(*this);
 		// signal graph wrappers of the disconnection
-		node().graph().delete_connection_signal()(*this, output_port);
+		node_.graph().delete_connection_signal()(*this, output_port);
 	}
 	
 	namespace inputs {
@@ -578,13 +589,16 @@ namespace ports {
 		
 		single::single(class node & node, name_type const & name, std::size_t channels)
 		:
-			input(node, name, channels)
+			input(node, name, channels),
+			output_port_()
 		{
 			if(loggers::trace()) {
 				std::ostringstream s;
 				s << this->qualified_name() << ": new engine port input single";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
+			node_.single_input_ports_.push_back(this);
+			node_.new_single_input_port_signal_(*this);
 		}
 
 		single::~single() {
@@ -610,7 +624,7 @@ namespace ports {
 				return;
 			}
 			// store a pointer to the newly connected output port
-			this->output_port_ = &output_port;
+			output_port_ = &output_port;
 		}
 
 		void single::disconnect_internal_side(output & output_port) /*override pure*/ {
@@ -623,20 +637,20 @@ namespace ports {
 				return;
 			}
 			// clear the pointer to the disconnected output port
-			this->output_port_ = 0;
+			output_port_ = 0;
 		}
 
 		void single::do_propagate_channels() throw(exception) {
-			if(output_port()) output_port()->propagate_channels_to_node(this->channels());
+			if(output_port_) output_port_->propagate_channels_to_node(channels_);
 		}
 
 		void single::do_propagate_seconds_per_event() {
-			if(output_port()) output_port()->propagate_seconds_per_event_to_node(this->seconds_per_event());
+			if(output_port_) output_port_->propagate_seconds_per_event_to_node(seconds_per_event_);
 		}
 
 		void single::dump(std::ostream & out, std::size_t tabulations) const {
 			port::dump(out, /*"in",*/ tabulations);
-			if(output_port()) out << ' ' << output_port()->semi_qualified_name();
+			if(output_port_) out << ' ' << output_port_->semi_qualified_name();
 			out << '\n';
 		}
 
@@ -653,6 +667,8 @@ namespace ports {
 				s << qualified_name() << ": new engine port input multiple";
 				loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
+			node_.multiple_input_port_ = this;
+			node_.new_multiple_input_port_signal_(*this);
 		}
 
 		multiple::~multiple() {

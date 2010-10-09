@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::named
 #pragma once
@@ -15,17 +15,17 @@ class named {
 		typedef std::string name_type;
 		/// creates a named object.
 		///\post the given name is copied.
-		inline named(name_type const & name) : name_(name) {}
+		named(name_type const & name) : name_(name) {}
 		///\return a const reference to the name.
-		name_type const inline & name() const { return name_; }
+		name_type const & name() const { return name_; }
 		///\return a mutable reference to the name.
-		name_type inline & name() { return name_; }
+		name_type & name() { return name_; }
 		/// sets a new name.
 		///\post the given name is copied.
-		void inline name(name_type const & name) { do_name(name); }
+		void name(name_type const & name) { do_name(name); }
 		/// overridable virtual setter.
-		virtual void inline do_name(name_type const & name) { this->name_ = name; }
-		virtual inline ~named() {}
+		virtual void do_name(name_type const & name) { this->name_ = name; }
+		virtual ~named() {}
 	private:
 		name_type name_;
 };

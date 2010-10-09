@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2010 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::sequence
 #include <psycle/detail/project.private.hpp>
@@ -19,23 +19,40 @@ score1::score1(host::plugin_resolver & resolver, engine::graph & graph)
 	decay_seq3_("decay_seq3"),
 	resolver_(resolver),
 	graph_(graph),
-	additioner_(static_cast<plugins::additioner&>(resolver("additioner", graph, "+").node())),
-	sine1_(static_cast<plugins::sine&>(resolver("sine", graph, "sine1").node())),
-	sine2_(static_cast<plugins::sine&>(resolver("sine", graph, "sine2").node())),
-	sine3_(static_cast<plugins::sine&>(resolver("sine", graph, "sine3").node())),
-	freq1_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, freq1_.name()).node())),
-	freq2_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, freq2_.name()).node())),
-	freq3_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, freq3_.name()).node())),
-	decay1_(static_cast<plugins::decay&>(resolver("decay", graph, "decay1").node())),
-	decay2_(static_cast<plugins::decay&>(resolver("decay", graph, "decay2").node())),
-	decay3_(static_cast<plugins::decay&>(resolver("decay", graph, "decay3").node())),
-	seq1_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, seq1_.name()).node())),
-	seq2_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, seq2_.name()).node())),
-	seq3_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, seq3_.name()).node())),
-	decay_seq1_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, decay_seq1_.name()).node())),
-	decay_seq2_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, decay_seq2_.name()).node())),
-	decay_seq3_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, decay_seq3_.name()).node()))
-{}
+	additioner_(static_cast<plugins::additioner&>(resolver("additioner", "+").node())),
+	sine1_(static_cast<plugins::sine&>(resolver("sine", "sine1").node())),
+	sine2_(static_cast<plugins::sine&>(resolver("sine", "sine2").node())),
+	sine3_(static_cast<plugins::sine&>(resolver("sine", "sine3").node())),
+	freq1_plug_(static_cast<plugins::sequence&>(resolver("sequence", freq1_.name()).node())),
+	freq2_plug_(static_cast<plugins::sequence&>(resolver("sequence", freq2_.name()).node())),
+	freq3_plug_(static_cast<plugins::sequence&>(resolver("sequence", freq3_.name()).node())),
+	decay1_(static_cast<plugins::decay&>(resolver("decay", "decay1").node())),
+	decay2_(static_cast<plugins::decay&>(resolver("decay", "decay2").node())),
+	decay3_(static_cast<plugins::decay&>(resolver("decay", "decay3").node())),
+	seq1_plug_(static_cast<plugins::sequence&>(resolver("sequence", seq1_.name()).node())),
+	seq2_plug_(static_cast<plugins::sequence&>(resolver("sequence", seq2_.name()).node())),
+	seq3_plug_(static_cast<plugins::sequence&>(resolver("sequence", seq3_.name()).node())),
+	decay_seq1_plug_(static_cast<plugins::sequence&>(resolver("sequence", decay_seq1_.name()).node())),
+	decay_seq2_plug_(static_cast<plugins::sequence&>(resolver("sequence", decay_seq2_.name()).node())),
+	decay_seq3_plug_(static_cast<plugins::sequence&>(resolver("sequence", decay_seq3_.name()).node()))
+{
+	additioner_.graph(graph);
+	sine1_.graph(graph);
+	sine2_.graph(graph);
+	sine3_.graph(graph);
+	freq1_plug_.graph(graph);
+	freq2_plug_.graph(graph);
+	freq3_plug_.graph(graph);
+	decay1_.graph(graph);
+	decay2_.graph(graph);
+	decay3_.graph(graph);
+	seq1_plug_.graph(graph);
+	seq2_plug_.graph(graph);
+	seq3_plug_.graph(graph);
+	decay_seq1_plug_.graph(graph);
+	decay_seq2_plug_.graph(graph);
+	decay_seq3_plug_.graph(graph);
+}
 
 void score1::connect(engine::node & out) {
 	freq1_plug_.sequence_iterator() = new engine::sequence_iterator(freq1_);
