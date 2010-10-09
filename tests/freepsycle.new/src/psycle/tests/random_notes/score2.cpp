@@ -6,6 +6,8 @@
 #include "score2.hpp"
 namespace psycle { namespace tests { namespace random_notes {
 
+using engine::real;
+
 score2::score2(host::plugin_resolver & resolver, engine::graph & graph)
 :
 	freq_("freq"),
@@ -26,29 +28,22 @@ void score2::connect(engine::node & out) {
 }
 
 void score2::generate() {
-	sine_.amplitude(1);
-	//sine_.frequency(440);
+	sine_.amp(1);
+	//sine_.freq(440);
 
-	engine::real const beats_per_second(1);
-	unsigned int const notes(100000);
-	engine::real beat(0);
-	engine::real duration(0.00001 / beats_per_second);
-	float slowdown(0.001);
-	float f1(100), f2(400), f3(1000);
-	float ratio(1.1);
-	for(unsigned int note(0); note < notes; ++note) {
-		//std::clog << beat << ' ' << f1 << ' ' << f2 << ' ' << f3 << '\n';
-
-		engine::real const b1(beat), b2(beat * 1.1), b3(beat * 1.2);
-
+	real const beats_per_second = 1;
+	unsigned int const notes = 100000;
+	real beat = 0;
+	real duration = 0.00001 / beats_per_second;
+	float slowdown = 0.001;
+	float f1 = 100;
+	float ratio = 1.1;
+	for(unsigned int note = 0; note < notes; ++note) {
+		//std::clog << beat << ' ' << f1 << '\n';
+		real const b1 = beat;
 		freq_.insert_event(b1, f1);
-
 		f1 *= ratio;
 		if(f1 > 8000) { f1 /= 150; ratio *= 1.05; }
-		f2 *= ratio * ratio;
-		if(f2 > 8000) f2 /= 150;
-		f3 *= ratio * ratio * ratio;
-		if(f3 > 8000) f3 /= 150;
 		if(ratio > 1.5) ratio -= 0.5;
 		if(ratio < 1.01) ratio += 0.01;
 		beat += duration;

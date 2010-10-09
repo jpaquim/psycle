@@ -14,11 +14,11 @@ class PSYCLE__DECL sine : public node {
 	public:
 		sine(class plugin_library_reference &, name_type const &);
 
-		void frequency(real const & frequency) { step_ = std::abs(frequency) * frequency_to_step_; if(frequency < 0) phase_ = engine::math::pi - phase_; }
-		real frequency() const { return frequency_to_step_ ? step_ / frequency_to_step_ : 0; }
+		void freq(real const & freq) { step_ = std::abs(freq) * freq_to_step_; if(freq < 0) phase_ = engine::math::pi - phase_; }
+		real freq() const { return freq_to_step_ ? step_ / freq_to_step_ : 0; }
 
-		void amplitude(real const & amplitude) { amplitude_ = amplitude; }
-		real amplitude() const { return amplitude_; }
+		void amp(real const & amp) { amp_ = amp; }
+		real amp() const { return amp_; }
 
 	protected:
 		void seconds_per_event_change_notification_from_port(port const &) /*override*/;
@@ -26,24 +26,16 @@ class PSYCLE__DECL sine : public node {
 
 	private:
 		template<channel::flags::type, channel::flags::type, channel::flags::type>
-		void do_process_template() throw(exception);
-		
-		real phase_;
-		real step_, frequency_to_step_;
-		real amplitude_;
-
-		ports::inputs::single & phase_port()     { return *single_input_ports()[0]; }
-		ports::inputs::single & frequency_port() { return *single_input_ports()[1]; }
-		ports::inputs::single & amplitude_port() { return *single_input_ports()[2]; }
-		ports::output         & out_port()       { return *output_ports()[0]; }
-
-		channel & phase_channel()     { return phase_port().buffer()[0]; }
-		channel & frequency_channel() { return frequency_port().buffer()[0]; }
-		channel & amplitude_channel() { return amplitude_port().buffer()[0]; }
-		channel & out_channel()       { return out_port().buffer()[0]; }
-
+		void do_process_template();
+	
+		real phase_, step_, freq_to_step_, amp_;
 		ports::output out_port_;
 		ports::inputs::single phase_port_, freq_port_, amp_port_;
+
+		channel & phase_chn() { return phase_port_.buffer()[0]; }
+		channel &  freq_chn() { return  freq_port_.buffer()[0]; }
+		channel &   amp_chn() { return   amp_port_.buffer()[0]; }
+		channel &   out_chn() { return   out_port_.buffer()[0]; }
 };
 
 }}

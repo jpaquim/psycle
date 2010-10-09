@@ -51,7 +51,7 @@ namespace math { using namespace engine::math; }
 		PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new) ( \
 			psycle::engine::plugin_library_reference & plugin_library_reference, \
 			psycle::engine::node::name_type const & name \
-		) { \
+		) throw(int) { \
 			return *new typename(plugin_library_reference, name); \
 		} \
 		\
