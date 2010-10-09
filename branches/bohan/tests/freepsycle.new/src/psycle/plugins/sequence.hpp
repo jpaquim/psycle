@@ -16,7 +16,7 @@ class PSYCLE__DECL sequence : public node {
 		sequence(class plugin_library_reference &, name_type const &);
 		~sequence();
 	protected:
-		void do_process() throw(exception) /*override*/;
+		void do_process() /*override*/;
 
 	public:
 		engine::sequence_iterator *& sequence_iterator() { return sequence_iterator_; }

@@ -24,7 +24,7 @@ class PSYCLE__DECL sine : public node {
 
 	protected:
 		void seconds_per_event_change_notification_from_port(port const &) /*override*/;
-		void do_process() throw(exception) /*override*/;
+		void do_process() /*override*/;
 
 	private:
 		template<

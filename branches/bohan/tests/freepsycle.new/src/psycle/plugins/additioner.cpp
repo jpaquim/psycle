@@ -8,15 +8,15 @@ namespace psycle { namespace plugins {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(additioner)
 
-void additioner::do_process() throw(exception) {
-	if(!*output_ports()[0]) return;
-	if(!*multiple_input_port()) return;
+void additioner::do_process() {
+	if(!out_port()) return;
+	if(!in_port()) return;
 	bipolar_filter::do_process();
-	engine::buffer & in(multiple_input_port()->buffer());
-	engine::buffer & out(output_ports()[0]->buffer());
+	buffer & in(in_port().buffer());
+	buffer & out(out_port().buffer());
 	assert(out.channels() == in.channels());
-	for(std::size_t channel(0) ; channel < in.channels() ; ++channel)
-		for(std::size_t event(0) ; event < in.events() && in[channel][event].index() < in.events() ; ++event)
+	for(std::size_t channel = 0; channel < in.channels() ; ++channel)
+		for(std::size_t event = 0; event < in.events() && in[channel][event].index() < in.events() ; ++event)
 			out[channel][event].sample() += in[channel][event].sample();
 			// note that we do not need to set the index because in and out have the same buffer.
 }

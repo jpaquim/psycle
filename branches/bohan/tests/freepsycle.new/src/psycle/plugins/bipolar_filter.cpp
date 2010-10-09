@@ -10,29 +10,29 @@ bipolar_filter::bipolar_filter(class plugin_library_reference & plugin_library_r
 :
 	node(plugin_library_reference, name),
 	logical_zero_(logical_zero),
-	multiple_input_port_(*this, "in", /*single_connection_is_identity_transform*/ true),
-	output_port_(*this, "out")
+	in_port_(*this, "in", /*single_connection_is_identity_transform*/ true),
+	out_port_(*this, "out")
 {}
 
-void bipolar_filter::channel_change_notification_from_port(port const & port) throw(exception) {
-	if(&port == &output_port_) multiple_input_port_.propagate_channels(port.channels());
-	else if(&port == &multiple_input_port_) output_port_.propagate_channels(port.channels());
-	assert(multiple_input_port_.channels() == output_port_.channels());
+void bipolar_filter::channel_change_notification_from_port(port const & port) {
+	if(&port == &out_port_) in_port_.propagate_channels(port.channels());
+	else if(&port == &in_port_) out_port_.propagate_channels(port.channels());
+	assert(in_port_.channels() == out_port_.channels());
 }
 
 void bipolar_filter::seconds_per_event_change_notification_from_port(port const & port) {
-	if(&port == &output_port_) multiple_input_port_.propagate_seconds_per_event(port.seconds_per_event());
-	else if(&port == &multiple_input_port_) output_port_.propagate_seconds_per_event(port.seconds_per_event());
-	assert(math::roughly_equals(multiple_input_port_.seconds_per_event(), output_port_.seconds_per_event()));
+	if(&port == &out_port_) in_port_.propagate_seconds_per_event(port.seconds_per_event());
+	else if(&port == &in_port_) out_port_.propagate_seconds_per_event(port.seconds_per_event());
+	assert(math::roughly_equals(in_port_.seconds_per_event(), out_port_.seconds_per_event()));
 }
 
-void bipolar_filter::do_process_first() throw(exception) {
-	if(!output_port_) return;
-	if(!multiple_input_port_) return;
-	assert(&multiple_input_port_.buffer());
-	assert(&output_port_.buffer());
-	buffer & in = multiple_input_port_.buffer();
-	buffer & out = output_port_.buffer();
+void bipolar_filter::do_process_first() {
+	if(!out_port_) return;
+	if(!in_port_) return;
+	assert(&in_port_.buffer());
+	assert(&out_port_.buffer());
+	buffer & in = in_port_.buffer();
+	buffer & out = out_port_.buffer();
 	assert(out.channels() == in.channels());
 	for(std::size_t channel = 0; channel < in.channels(); ++channel)
 		for(std::size_t event = 0; event < in.events() && in[channel][event].index() < in.events(); ++event) {
@@ -42,11 +42,11 @@ void bipolar_filter::do_process_first() throw(exception) {
 	do_process();
 }
 
-void bipolar_filter::do_process() throw(exception) {
-	if(!output_port_) return;
-	if(!multiple_input_port_) return;
-	buffer & in = multiple_input_port_.buffer();
-	buffer & out = output_port_.buffer();
+void bipolar_filter::do_process() {
+	if(!out_port_) return;
+	if(!in_port_) return;
+	buffer & in = in_port_.buffer();
+	buffer & out = out_port_.buffer();
 	for(std::size_t channel = 0; channel < in.channels(); ++channel) out[channel].flag(in[channel].flag());
 }
 
