@@ -19,18 +19,18 @@ sine::sine(class plugin_library_reference & plugin_library_reference, name_type 
 	amp_port_(*this, "amplitude", 1)
 {}
 
-void sine::seconds_per_event_change_notification_from_port(engine::port const & port) {
+void sine::seconds_per_event_change_notification_from_port(port const & port) {
 	quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port);
 		
 	// no easy way to get the value for old_events_per_second
 	//this->step_ *= old_events_per_second * port.seconds_per_event();
 	
 	real const freq = this->freq();
-	freq_to_step_ = 2 * engine::math::pi * port.seconds_per_event();
+	freq_to_step_ = 2 * math::pi * port.seconds_per_event();
 	this->freq(freq);
 }
 
-void sine::do_process() throw(engine::exception) {
+void sine::do_process() throw(exception) {
 	if(!out_port_) return;
 	PSYCLE__PLUGINS__TEMPLATE_SWITCH(do_process_template,
 		(phase_port_ ? phase_chn().flag() : channel::flags::empty)
@@ -39,14 +39,18 @@ void sine::do_process() throw(engine::exception) {
 	);
 }
 
-template<engine::channel::flags::type phase_flag, engine::channel::flags::type freq_flag, engine::channel::flags::type amp_flag>
+template<
+	channel::flags::type phase_flag,
+	channel::flags::type  freq_flag,
+	channel::flags::type   amp_flag
+>
 void sine::do_process_template() {
 	for(std::size_t phase_evt = 0, freq_evt = 0, amp_evt = 0, out_evt = 0; out_evt < out_chn().size(); ++out_evt) {
 		if(phase_flag == channel::flags::continuous || (
 				phase_flag != channel::flags::empty &&
 				phase_evt < phase_chn().size() && phase_chn()[phase_evt].index() == out_evt
 			)
-		) phase_ = std::fmod(phase_chn()[phase_evt++].sample() + engine::math::pi, 2 * engine::math::pi) - engine::math::pi;
+		) phase_ = std::fmod(phase_chn()[phase_evt++].sample() + math::pi, 2 * math::pi) - math::pi;
 
 		switch(freq_flag) {
 			case channel::flags::continuous:
@@ -72,7 +76,7 @@ void sine::do_process_template() {
 
 		out_chn()[out_evt](out_evt, amp_ * helpers::math::fast_sin<2>(phase_));
 		phase_ += step_;
-		if(phase_ > engine::math::pi) phase_ -= 2 * engine::math::pi;
+		if(phase_ > math::pi) phase_ -= 2 * math::pi;
 	}
 	out_chn().flag(channel::flags::continuous);
 }
