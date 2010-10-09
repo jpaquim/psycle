@@ -133,7 +133,7 @@ ports::output * node::output_port(name_type const & name) {
 	return const_cast<ports::output*>(const_cast<const class node*>(this)->output_port(name));
 }
 
-void node::do_open() throw(std::exception) {
+void node::do_open() {
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": opening";
@@ -141,7 +141,7 @@ void node::do_open() throw(std::exception) {
 	}
 }
 
-void node::do_start() throw(std::exception) {
+void node::do_start() {
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": starting";
@@ -150,7 +150,7 @@ void node::do_start() throw(std::exception) {
 	io_ready_ = true;
 }
 
-void node::do_stop() throw(std::exception) {
+void node::do_stop() {
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": stopping";
@@ -158,7 +158,7 @@ void node::do_stop() throw(std::exception) {
 	}
 }
 
-void node::do_close() throw(std::exception) {
+void node::do_close() {
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << qualified_name() << ": closing";
@@ -357,7 +357,7 @@ void port::buffer(class buffer * buffer) {
 	this->buffer_ = buffer;
 }
 
-void port::channels(std::size_t channels) throw(exception) {
+void port::channels(std::size_t channels) {
 	propagate_channels_to_node(channels);
 	do_propagate_channels(); // polymorphic virtual call
 }
@@ -372,7 +372,7 @@ void port::seconds_per_event(real const & seconds_per_event) {
 	do_propagate_seconds_per_event(); // polymorphic virtual call
 }
 
-void port::propagate_channels(std::size_t channels) throw(exception) {
+void port::propagate_channels(std::size_t channels) {
 	if(channels_ == channels) return;
 	channels_transaction(channels);
 	do_propagate_channels(); // polymorphic virtual call
@@ -384,7 +384,7 @@ void port::propagate_seconds_per_event(real const & seconds_per_event) {
 	do_propagate_seconds_per_event(); // polymorphic virtual call
 }
 
-void port::propagate_channels_to_node(std::size_t channels) throw(exception) {
+void port::propagate_channels_to_node(std::size_t channels) {
 	channels_transaction(channels);
 	node_.channel_change_notification_from_port(*this);
 }
@@ -394,7 +394,7 @@ void port::propagate_seconds_per_event_to_node(real const & seconds_per_event) {
 	node_.seconds_per_event_change_notification_from_port(*this);
 }
 
-void port::channels_transaction(std::size_t channels) throw(exception) {
+void port::channels_transaction(std::size_t channels) {
 	std::size_t const rollback(channels_);
 	try {
 		do_channels(channels);
@@ -404,7 +404,7 @@ void port::channels_transaction(std::size_t channels) throw(exception) {
 	}
 }
 
-void port::do_channels(std::size_t channels) throw(exception) {
+void port::do_channels(std::size_t channels) {
 	if(loggers::information()) {
 		std::ostringstream s;
 		s << qualified_name() << ": port channels changing to " << channels;
@@ -459,7 +459,7 @@ namespace ports {
 		}
 	}
 
-	void output::connect(input & input_port) throw(exception) {
+	void output::connect(input & input_port) {
 		// connect the input port to this output port
 		input_port.connect(*this);
 	}
@@ -504,7 +504,7 @@ namespace ports {
 		input_ports_.erase(i);
 	}
 
-	void output::do_propagate_channels() throw(exception) {
+	void output::do_propagate_channels() {
 		for(input_ports_type::const_iterator i(input_ports().begin()) ; i != input_ports().end() ; ++i)
 			(**i).propagate_channels_to_node(this->channels());
 	}
@@ -544,7 +544,7 @@ namespace ports {
 		//disconnect_all();
 	}
 
-	void input::connect(output & output_port) throw(exception) {
+	void input::connect(output & output_port) {
 		if(loggers::information()) {
 			std::ostringstream s;
 			s << output_port.qualified_name() << " output port connecting to input port " << this->qualified_name();
@@ -640,7 +640,7 @@ namespace ports {
 			output_port_ = 0;
 		}
 
-		void single::do_propagate_channels() throw(exception) {
+		void single::do_propagate_channels() {
 			if(output_port_) output_port_->propagate_channels_to_node(channels_);
 		}
 
@@ -713,7 +713,7 @@ namespace ports {
 			output_ports_.erase(i);
 		}
 
-		void multiple::do_propagate_channels() throw(exception) {
+		void multiple::do_propagate_channels() {
 			for(output_ports_type::const_iterator i(output_ports().begin()); i != output_ports().end() ; ++i)
 				(**i).propagate_channels_to_node(this->channels());
 		}

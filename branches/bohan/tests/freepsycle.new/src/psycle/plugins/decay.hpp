@@ -26,7 +26,6 @@ class PSYCLE__DECL decay : public node {
 		void do_process() throw(exception) /*override*/;
 
 	private:
-		typedef buffer::channel channel; // just to make netbeans parser happy
 		template<channel::flags::type, channel::flags::type>
 		void do_process_template() throw(engine::exception);
 		

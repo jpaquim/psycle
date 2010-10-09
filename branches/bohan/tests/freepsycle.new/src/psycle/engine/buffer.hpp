@@ -25,7 +25,7 @@ class PSYCLE__DECL channel {
 			};
 			
 			flags::type flag() const { return flag_; }
-			void flag(flags::type flag) { this->flag_ = flag; }
+			void flag(flags::type flag) { flag_ = flag; }
 		private:
 			flags::type flag_;
 	///\}
@@ -34,11 +34,11 @@ class PSYCLE__DECL channel {
 		typedef class event event;
 
 		/// creates a new zero-sized channel.
-		channel() throw(std::exception) : flag_() {}
+		channel() : flag_() {}
 
 		/// creates a new channel with the given number of events.
 		///\param events the number of events
-		channel(std::size_t events) throw(std::exception) : flag_(), events_(events) {}
+		channel(std::size_t events) : flag_(), events_(events) {}
 
 	///\name vector of events
 	///\{
@@ -145,10 +145,10 @@ void buffer::copy(buffer const & buffer, std::size_t channels) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	assert("not copying itself: " && this != &buffer); // would not cause a bug, but this catches lacks of optimizations.
-	for(std::size_t channel(0) ; channel < channels ; ++channel) {
+	for(std::size_t channel = 0; channel < channels ; ++channel) {
 		(*this)[channel].flag(buffer[channel].flag());
 		///\todo we can even optimise the loop with the flag information
-		for(std::size_t event(0) ; event < events() && buffer[channel][event].index() < events() ; ++event)
+		for(std::size_t event = 0; event < events() && buffer[channel][event].index() < events() ; ++event)
 			(*this)[channel][event] = buffer[channel][event];
 	}
 }

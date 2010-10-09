@@ -204,7 +204,7 @@ class PSYCLE__DECL node : public named {
 			void opened(bool value) { if(value) open(); else close(); }
 			virtual bool opened() const { return opened_; }
 		protected:
-			virtual void do_open() throw(std::exception);
+			virtual void do_open();
 		private:
 			bool opened_;
 	///\}
@@ -217,7 +217,7 @@ class PSYCLE__DECL node : public named {
 			void started(bool value) { if(value) start(); else stop(); }
 			virtual bool started() const { return started_; }
 		protected:
-			virtual void do_start() throw(std::exception);
+			virtual void do_start();
 		private:
 			bool started_;
 	///\}
@@ -250,7 +250,7 @@ class PSYCLE__DECL node : public named {
 		protected:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
-			virtual void do_process_first() throw(std::exception) {}
+			virtual void do_process_first() {}
 
 		public:
 			/// called by schedulers
@@ -258,7 +258,7 @@ class PSYCLE__DECL node : public named {
 		protected:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
-			virtual void do_process() throw(std::exception) = 0;
+			virtual void do_process() = 0;
 
 		public:
 			/// called by schedulers, reset the state of this node so that it prepares for the next call to process()
@@ -273,7 +273,7 @@ class PSYCLE__DECL node : public named {
 			/// called by schedulers
 			void stop() { if(started()) do_stop(); }
 		protected:
-			virtual void do_stop() throw(std::exception);
+			virtual void do_stop();
 	///\}
 
 	///\name close
@@ -282,11 +282,11 @@ class PSYCLE__DECL node : public named {
 			/// called by schedulers
 			void close() { stop(); if(opened()) do_close(); }
 		protected:
-			virtual void do_close() throw(std::exception);
+			virtual void do_close();
 	///\}
 
 	protected:
-		virtual void channel_change_notification_from_port(port const &) throw(std::exception) {}
+		virtual void channel_change_notification_from_port(port const &) {}
 		virtual void seconds_per_event_change_notification_from_port(port const &) {}
 		void quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port const &);
 };
@@ -338,14 +338,14 @@ class PSYCLE__DECL port : public named {
 			std::size_t channels_;
 			bool channels_immutable_;
 			/// tries to set the channel count of this port and rolls back on failure.
-			void channels_transaction(std::size_t) throw(exception);
+			void channels_transaction(std::size_t);
 			/// sets the channel count of this port and propagates it to its node.
-			void propagate_channels_to_node(std::size_t) throw(exception);
+			void propagate_channels_to_node(std::size_t);
 		protected:
 			/// sets the channel count of this port.
-			virtual void do_channels(std::size_t) throw(exception);
+			virtual void do_channels(std::size_t);
 			/// propagates the channel count to its connected ports.
-			virtual void do_propagate_channels() throw(exception) {}
+			virtual void do_propagate_channels() {}
 		public:
 			/// the channel count of this port.
 			std::size_t channels() const { return channels_; }
@@ -353,11 +353,11 @@ class PSYCLE__DECL port : public named {
 			bool channels_immutable() { return channels_immutable_; }
 			/// sets the channel count of this port and propagates it to both its node and its connected ports.
 			///\pre the channel count is not immutable: !channels_immutable()
-			void channels(std::size_t) throw(exception);
+			void channels(std::size_t);
 			/// sets the channel count of this port and propagates it to its connected ports
-			void propagate_channels(std::size_t) throw(exception);
+			void propagate_channels(std::size_t);
 			/// copies the channel count of the given port to this port and propagates it to its connected ports
-			void propagate_channels(port const & port) throw(exception) { propagate_channels(port.channels_); }
+			void propagate_channels(port const & port) { propagate_channels(port.channels_); }
 	///\}
 
 	///\name event rate
@@ -428,7 +428,7 @@ namespace ports {
 		///\name (dis)connection functions
 		///\{
 			public:
-				void connect(input &) throw(exception);
+				void connect(input &);
 				void disconnect(input &);
 				void disconnect_all();
 			private:
@@ -437,7 +437,7 @@ namespace ports {
 		///\}
 
 		protected:
-			void do_propagate_channels() throw(exception) /*override*/;
+			void do_propagate_channels() /*override*/;
 			void do_propagate_seconds_per_event() /*override*/;
 
 		public:
@@ -458,7 +458,7 @@ namespace ports {
 		///\name (dis)connection functions
 		///\{
 			public:
-				void connect(output &) throw(exception);
+				void connect(output &);
 				void disconnect(output &);
 				virtual void disconnect_all() = 0;
 			protected:
@@ -469,8 +469,8 @@ namespace ports {
 		public:
 			operator bool() const {
 				class buffer const & b(this->buffer());
-				for(std::size_t i(0), e(channels()); i < e; ++i) {
-					channel const & c(b[i]);
+				for(std::size_t i = 0, e = channels(); i < e; ++i) {
+					channel const & c = b[i];
 					if(c.size() && c.size() > c[0].index()) return true;
 				}
 				return false;
@@ -512,7 +512,7 @@ namespace ports {
 			///\}
 
 			protected:
-				void do_propagate_channels() throw(exception) /*override*/;
+				void do_propagate_channels() /*override*/;
 				void do_propagate_seconds_per_event() /*override*/;
 
 			public:
@@ -547,12 +547,12 @@ namespace ports {
 				public:
 					void disconnect_all() /*override pure*/;
 				protected:
-					void connect_internal_side(output & output_port) /*override pure*/;
-					void disconnect_internal_side(output & output_port) /*override pure*/;
+					void connect_internal_side(output &) /*override pure*/;
+					void disconnect_internal_side(output &) /*override pure*/;
 			///\}
 
 			protected:
-				void do_propagate_channels() throw(exception) /*override*/;
+				void do_propagate_channels() /*override*/;
 				void do_propagate_seconds_per_event() /*override*/;
 
 			public:
