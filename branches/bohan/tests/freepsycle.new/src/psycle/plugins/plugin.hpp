@@ -41,7 +41,7 @@ namespace math { using namespace engine::math; }
 #define PSYCLE__PLUGINS__CALLING_CONVENTION  UNIVERSALIS__COMPILER__CALLING_CONVENTION__C
 
 ///\todo function signature currently typedefed in host::plugin_resolver
-//typedef engine::node & (* const node_instanciator) (engine::reference_counter &, engine::graph &, std::string const & name);
+//typedef engine::node & (*node_instanciator) (engine::reference_counter &, engine::node::name_type const &);
 
 #define PSYCLE__PLUGINS__NODE_INSTANTIATOR(typename) \
 	extern "C" { \
@@ -51,8 +51,7 @@ namespace math { using namespace engine::math; }
 		PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new) ( \
 			psycle::engine::plugin_library_reference & plugin_library_reference, \
 			psycle::engine::node::name_type const & name \
-		) \
-		throw(psycle::engine::exception) { \
+		) { \
 			return *new typename(plugin_library_reference, name); \
 		} \
 		\
@@ -64,10 +63,11 @@ namespace math { using namespace engine::math; }
 		} \
 	}
 
+/// generates switch statements that evaluate 'flags_to_evaluate' and call 'template' with the result of the evaluation
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH(template, flags_to_evaluate) \
 	BOOST_PP_CAT(PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__, BOOST_PP_SEQ_SIZE(flags_to_evaluate))(template,, flags_to_evaluate)
 
-///\internal
+///\internal implementation for PSYCLE__PLUGINS__TEMPLATE_SWITCH with 1 flag
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__1(template, evaluated_flags, flags_to_evaluate) \
 	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \
@@ -83,7 +83,7 @@ namespace math { using namespace engine::math; }
 			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 	}
 
-///\internal
+///\internal implementation for PSYCLE__PLUGINS__TEMPLATE_SWITCH with 2 flags
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__2(template, evaluated_flags, flags_to_evaluate) \
 	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \
@@ -105,7 +105,7 @@ namespace math { using namespace engine::math; }
 			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 	}
 
-///\internal
+///\internal implementation for PSYCLE__PLUGINS__TEMPLATE_SWITCH with 3 flags
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__3(template, evaluated_flags, flags_to_evaluate) \
 	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \
@@ -127,7 +127,7 @@ namespace math { using namespace engine::math; }
 			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 	}
 
-///\internal
+///\internal implementation for PSYCLE__PLUGINS__TEMPLATE_SWITCH with 4 flags
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__4(template, evaluated_flags, flags_to_evaluate) \
 	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \
@@ -149,7 +149,7 @@ namespace math { using namespace engine::math; }
 			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 	}
 
-///\internal
+///\internal implementation for PSYCLE__PLUGINS__TEMPLATE_SWITCH with 5 flags
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__5(template, evaluated_flags, flags_to_evaluate) \
 	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \
@@ -171,7 +171,7 @@ namespace math { using namespace engine::math; }
 			throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 	}
 
-///\internal
+///\internal implementation for PSYCLE__PLUGINS__TEMPLATE_SWITCH with 6 flags
 #define PSYCLE__PLUGINS__TEMPLATE_SWITCH__DETAIL__6(template, evaluated_flags, flags_to_evaluate) \
 	switch(BOOST_PP_SEQ_HEAD(flags_to_evaluate)) { \
 		case psycle::engine::channel::flags::continuous: \

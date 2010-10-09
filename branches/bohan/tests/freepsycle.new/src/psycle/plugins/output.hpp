@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::output
 #pragma once
@@ -76,7 +76,7 @@ class PSYCLE__DECL output : public output_base {
 		typedef output_base base;
 		output(class plugin_library_reference &, name_type const &) throw(exception);
 	public:
-		//engine::ports::inputs::single & in_port() { return *single_input_ports()[0]; }
+		//ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 };
 
 }}

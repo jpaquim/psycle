@@ -114,6 +114,7 @@ class PSYCLE__DECL node : public named {
 	///\name graph
 	///\{
 		public:
+			void graph(class graph &);
 			class graph & graph() { return *graph_; }
 			class graph const & graph() const { return *graph_; }
 		private:
@@ -356,20 +357,21 @@ class PSYCLE__DECL port : public named {
 			/// sets the channel count of this port and propagates it to its connected ports
 			void propagate_channels(std::size_t) throw(exception);
 			/// copies the channel count of the given port to this port and propagates it to its connected ports
-			void propagate_channels(port const & port) throw(exception) { propagate_channels(port.channels()); }
+			void propagate_channels(port const & port) throw(exception) { propagate_channels(port.channels_); }
 	///\}
 
 	///\name event rate
 	///\{
 		private:
 			real seconds_per_event_;
+		protected:
 			/// sets the seconds per event of this port and propagates it to its node.
 			void propagate_seconds_per_event_to_node(real const &);
 			/// propagates the seconds per event to its connected ports.
 			virtual void do_propagate_seconds_per_event() {}
 		public:
 			/// events per second.
-			real events_per_second() const { return 1 / seconds_per_event(); }
+			real events_per_second() const { return 1 / seconds_per_event_; }
 			/// sets the events per seconds.
 			void events_per_second(real const & events_per_second) { seconds_per_event(1 / events_per_second); }
 			/// seconds per event.

@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation psycle::front_ends::text::main
 #include <psycle/detail/project.private.hpp>
@@ -29,14 +29,15 @@ void play() {
 
 		std::string output_plugin_name("output");
 		{ // output env var
-			char const * const env(std::getenv("PSYCLE_OUTPUT"));
+			char const * const env = std::getenv("PSYCLE_OUTPUT");
 			if(env) {
 				std::stringstream s;
 				s << env;
 				s >> output_plugin_name;
 			}
 		}
-		node & out(resolver(output_plugin_name, graph, "out"));
+		node & out = resolver(output_plugin_name, "out");
+		out.graph(graph);
 		score_type score(resolver, graph);
 
 		engine::real const events_per_second(44100), beats_per_second(1);

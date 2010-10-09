@@ -11,9 +11,12 @@ score2::score2(host::plugin_resolver & resolver, engine::graph & graph)
 	freq_("freq"),
 	resolver_(resolver),
 	graph_(graph),
-	sine_(static_cast<plugins::sine&>(resolver("sine", graph, "sine").node())),
-	freq_plug_(static_cast<plugins::sequence&>(resolver("sequence", graph, freq_.name()).node()))
-{}
+	sine_(static_cast<plugins::sine&>(resolver("sine", "sine").node())),
+	freq_plug_(static_cast<plugins::sequence&>(resolver("sequence", freq_.name()).node()))
+{
+	sine_.graph(graph);
+	freq_plug_.graph(graph);
+}
 
 void score2::connect(engine::node & out) {
 	freq_plug_.sequence_iterator() = new engine::sequence_iterator(freq_);

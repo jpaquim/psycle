@@ -27,13 +27,13 @@ plugin_resolver::~plugin_resolver() throw() {
 	for(map::const_iterator i(map_.begin()) ; i != map_.end() ; ++i) delete i->second;
 }
 
-plugin_resolver::instanciator & plugin_resolver::operator[](const std::string & name) throw(engine::exception) {
+plugin_resolver::instanciator & plugin_resolver::operator[](const std::string & plugin_name) {
 	if(loggers::trace()) {
 		std::ostringstream s;
-		s << "resolving plugin " << name << " ... ";
+		s << "resolving plugin " << plugin_name << " ... ";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	map::const_iterator i(map_.find(name));
+	map::const_iterator i(map_.find(plugin_name));
 	if(i != map_.end()) {
 		if(loggers::trace()) {
 			loggers::trace()("in cache.", UNIVERSALIS__COMPILER__LOCATION);
@@ -43,23 +43,25 @@ plugin_resolver::instanciator & plugin_resolver::operator[](const std::string & 
 		if(loggers::trace()) {
 			loggers::trace()("not in cache, resolving library ...", UNIVERSALIS__COMPILER__LOCATION);
 		}
-		instanciator & instanciator_(*new instanciator(*this, name));
-		map_[name] = &instanciator_;
+		instanciator & instanciator_(*new instanciator(*this, plugin_name));
+		map_[plugin_name] = &instanciator_;
 		return instanciator_;
 	}
 }
 
-plugin_resolver::instanciator::instance & plugin_resolver::operator()(const std::string & plugin_name, engine::graph & graph, const std::string & node_name) throw(engine::exception) {
-	return (*this)[plugin_name](graph, node_name);
+plugin_resolver::instanciator::instance & plugin_resolver::operator()(
+	const std::string & plugin_name, engine::node::name_type const & node_name
+) {
+	return (*this)[plugin_name](node_name);
 }
 
 /***************************************************************/
 // plugin_resolver::instanciator
 
-plugin_resolver::instanciator::instanciator(plugin_resolver & plugin_resolver, const std::string & name) throw(engine::exception)
+plugin_resolver::instanciator::instanciator(plugin_resolver & plugin_resolver, const std::string & plugin_name)
 try
 :
-		plugin_library_reference(name),
+		plugin_library_reference(plugin_name),
 		plugin_resolver_(plugin_resolver),
 		///\todo the version number is actually libtool's version info
 		//library_resolver_(*new universalis::os::dynamic_link::resolver("-" + universalis::os::paths::package::name() + ".plugin." + name, universalis::os::paths::package::version::major_number())),
@@ -69,12 +71,14 @@ try
 			#else
 				"lib"
 			#endif
-			"freepsycle-plugin-" + name, 0)),
-		node_instanciator_(library_resolver_.resolve_symbol<node_instanciator>(UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new))))
+			"freepsycle-plugin-" + plugin_name, 0)),
+		node_instanciator_(library_resolver_.resolve_symbol<node_instanciator>(
+			UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new))
+		))
 {
 	if(loggers::information()) {
 		std::ostringstream s;
-		s << "new plugin instanciator for plugin " << name << ", loaded and resolved library " << this->full_name();
+		s << "new plugin instanciator for plugin " << plugin_name << ", loaded and resolved library " << full_name();
 		loggers::information()(s.str());
 	}
 }
@@ -95,13 +99,13 @@ std::string plugin_resolver::instanciator::full_name() const throw() {
 	return library_resolver_.path().string();
 }
 
-plugin_resolver::instanciator::instance & plugin_resolver::instanciator::operator()(engine::graph & graph, const std::string & name) {
+plugin_resolver::instanciator::instance & plugin_resolver::instanciator::operator()(engine::node::name_type const & name) {
 	if(loggers::trace()) {
 		std::ostringstream s;
-		s << graph.qualified_name() << '.' << name << ": new plugin instance from loaded library " << this->name();
+		s << name << ": new plugin instance from loaded library " << this->name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	instance & result(*new instance(*this, graph, name));
+	instance & result = *new instance(*this, name);
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << "plugin library reference count: " << this->name() << ", incremented, new count: " << *this;
@@ -111,7 +115,7 @@ plugin_resolver::instanciator::instance & plugin_resolver::instanciator::operato
 }
 
 unsigned int plugin_resolver::instanciator::operator--() throw() {
-	int const count(reference_counter::operator--());
+	int const count = reference_counter::operator--();
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << "plugin library reference count " << this->name() << ", decremented, new count: " << count;
@@ -136,27 +140,29 @@ plugin_resolver::instanciator::~instanciator() throw() {
 /***************************************************************/
 // plugin_resolver::instanciator::instance
 
-plugin_resolver::instanciator::instance::instance(plugin_resolver::instanciator & instanciator, engine::graph & graph, const std::string & name) throw(engine::exception)
+plugin_resolver::instanciator::instance::instance(plugin_resolver::instanciator & instanciator, engine::node::name_type const & name)
 :
-	node_(&instanciator.node_instanciator_(instanciator, graph, name))
+	node_(instanciator.node_instanciator_(instanciator, name))
 {
 	if(loggers::information()) {
 		std::ostringstream s;
-		s << node().qualified_name() << ": done creating new node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << instanciator.name();
+		s << node().qualified_name() << ": done creating new node instance of " << universalis::compiler::typenameof(node_)
+			<< " from loaded library " << instanciator.name();
 		loggers::information()(s.str());
 	}
-	++node().plugin_library_reference();
+	++node_.plugin_library_reference();
 }
 
 plugin_resolver::instanciator::instance::~instance() throw() {
 	if(loggers::information()) {
 		std::ostringstream s;
-		s << node().qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(node()) << " from loaded library " << node().plugin_library_reference().name();
+		s << node_.qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(node_)
+			<< " from loaded library " << node_.plugin_library_reference().name();
 		loggers::information()(s.str());
 	}
-	engine::reference_counter & reference_counter(node().plugin_library_reference());
+	engine::reference_counter & reference_counter(node_.plugin_library_reference());
 	///\todo use the plugin's exported deletion function
-	delete &node();
+	delete &node_;
 	--reference_counter;
 }
 
