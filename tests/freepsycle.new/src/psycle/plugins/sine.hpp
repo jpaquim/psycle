@@ -2,6 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::sine - oscillator with a sinusoidal wave form
+#ifndef PSYCLE__PLUGINS__SINE
+#define PSYCLE__PLUGINS__SINE
 #pragma once
 #include "plugin.hpp"
 #define PSYCLE__DECL  PSYCLE__PLUGINS__SINE
@@ -14,7 +16,7 @@ class PSYCLE__DECL sine : public node {
 	public:
 		sine(class plugin_library_reference &, name_type const &);
 
-		void freq(real const & freq) { step_ = std::abs(freq) * freq_to_step_; if(freq < 0) phase_ = engine::math::pi - phase_; }
+		void freq(real const & freq) { step_ = std::abs(freq) * freq_to_step_; if(freq < 0) phase_ = math::pi - phase_; }
 		real freq() const { return freq_to_step_ ? step_ / freq_to_step_ : 0; }
 
 		void amp(real const & amp) { amp_ = amp; }
@@ -44,3 +46,4 @@ class PSYCLE__DECL sine : public node {
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif
