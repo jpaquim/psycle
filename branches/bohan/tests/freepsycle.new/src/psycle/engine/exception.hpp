@@ -2,7 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::exception
-
+#ifndef PSYCLE__ENGINE__EXCEPTION__INCLUDED
+#define PSYCLE__ENGINE__EXCEPTION__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <string>
@@ -31,3 +32,4 @@ namespace exceptions {
 	};
 }}}
 #include <psycle/detail/decl.hpp>
+#endif

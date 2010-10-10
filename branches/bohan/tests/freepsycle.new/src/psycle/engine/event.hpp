@@ -2,6 +2,8 @@
 // copyright 2002-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::event
+#ifndef PSYCLE__ENGINE__EVENT__INCLUDED
+#define PSYCLE__ENGINE__EVENT__INCLUDED
 #pragma once
 #include "sample.hpp"
 #define PSYCLE__DECL  PSYCLE__ENGINE
@@ -61,3 +63,4 @@ class event {
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif

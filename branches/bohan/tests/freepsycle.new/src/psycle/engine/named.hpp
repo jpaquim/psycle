@@ -2,6 +2,8 @@
 // copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::named
+#ifndef PSYCLE__ENGINE__NAMED__INCLUDED
+#define PSYCLE__ENGINE__NAMED__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <string>
@@ -32,3 +34,4 @@ class named {
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif
