@@ -2,6 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::buffer
+#ifndef PSYCLE__ENGINE__BUFFER__INCLUDED
+#define PSYCLE__ENGINE__BUFFER__INCLUDED
 #pragma once
 #include "forward_declarations.hpp"
 #include "event.hpp"
@@ -154,3 +156,4 @@ void buffer::copy(buffer const & buffer, std::size_t channels) {
 }
 
 }}
+#endif
