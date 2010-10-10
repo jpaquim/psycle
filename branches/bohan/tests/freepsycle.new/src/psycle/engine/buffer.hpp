@@ -70,7 +70,7 @@ class PSYCLE__DECL buffer {
 		/// creates a new buffer with the given number of channels and the given number of events in each channel.
 		///\param channels the number of channels
 		///\param events the number of events in each channel
-		buffer(std::size_t channels, std::size_t events) throw(std::exception);
+		buffer(std::size_t channels, std::size_t events);
 
 		/// destructor.
 		virtual ~buffer() throw();

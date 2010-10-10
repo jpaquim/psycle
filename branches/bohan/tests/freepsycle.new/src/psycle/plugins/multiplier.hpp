@@ -2,6 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::multiplier - * operation
+#ifndef PSYCLE__PLUGINS__MULTIPLIER__INCLUDED
+#define PSYCLE__PLUGINS__MULTIPLIER__INCLUDED
 #pragma once
 #include "bipolar_filter.hpp"
 #define PSYCLE__DECL  PSYCLE__PLUGINS__MULTIPLIER
@@ -19,3 +21,4 @@ class PSYCLE__DECL multiplier : public bipolar_filter {
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif

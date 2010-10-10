@@ -3,11 +3,9 @@
 // copyright 2002-2007 psycledelics http://psycle.sourceforge.net
 
 ///\interface psycle::generic::cast
-
 #ifndef PSYCLE__GENERIC__CAST__INCLUDED
 #define PSYCLE__GENERIC__CAST__INCLUDED
 #pragma once
-
 #include <psycle/detail/project.hpp>
 #include "template_constructors.hpp"
 #include <boost/static_assert.hpp>
@@ -15,7 +13,6 @@
 #if !defined NDEBUG
 	#include <typeinfo>
 #endif
-
 namespace psycle { namespace generic { namespace cast {
 
 template<typename Derived, typename Base>

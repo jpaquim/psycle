@@ -2,6 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::additioner - + operation
+#ifndef PSYCLE__PLUGINS__ADDITIONER__INCLUDED
+#define PSYCLE__PLUGINS__ADDITIONER__INCLUDED
 #pragma once
 #include "bipolar_filter.hpp"
 #define PSYCLE__DECL  PSYCLE__PLUGINS__ADDITIONER
@@ -19,3 +21,4 @@ class PSYCLE__DECL additioner : public bipolar_filter {
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif

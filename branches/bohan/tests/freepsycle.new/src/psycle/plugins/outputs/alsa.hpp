@@ -2,6 +2,8 @@
 // copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::outputs::alsa
+#ifndef PSYCLE__PLUGINS__OUTPUTS__ALSA__INCLUDED
+#define PSYCLE__PLUGINS__OUTPUTS__ALSA__INCLUDED
 #pragma once
 #include "../resource.hpp"
 #include <alsa/asoundlib.h>
@@ -17,17 +19,17 @@ using namespace universalis::stdlib;
 /// outputs to a soundcard device via alsa output implementation.
 class PSYCLE__DECL alsa : public resource {
 	public:
-		alsa(class plugin_library_reference &, name_type const &) throw(exception);
+		alsa(class plugin_library_reference &, name_type const &);
 		virtual ~alsa() throw();
 		ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;
 	protected:
-		void do_open()    throw(engine::exception) /*override*/;
-		void do_start()   throw(engine::exception) /*override*/;
-		void do_process() throw(engine::exception) /*override*/;
-		void do_stop()    throw(engine::exception) /*override*/;
-		void do_close()   throw(engine::exception) /*override*/;
+		void do_open() /*override*/;
+		void do_start() /*override*/;
+		void do_process() /*override*/;
+		void do_stop() /*override*/;
+		void do_close() /*override*/;
 	private:
 		/// pcm device handle
 		::snd_pcm_t * pcm_;
@@ -52,7 +54,7 @@ class PSYCLE__DECL alsa : public resource {
 
 		class thread * thread_;
 		void thread_function();
-		void poll_loop() throw(exception);
+		void poll_loop();
 	
 		typedef outputs::scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
@@ -65,3 +67,4 @@ class PSYCLE__DECL alsa : public resource {
 
 }}}
 #include <psycle/detail/decl.hpp>
+#endif

@@ -22,7 +22,7 @@ namespace {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(gstreamer)
 
-gstreamer::gstreamer(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(exception)
+gstreamer::gstreamer(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
 	resource(plugin_library_reference, name),
 	pipeline_(),
@@ -35,7 +35,7 @@ gstreamer::gstreamer(class plugin_library_reference & plugin_library_reference, 
 	amp_(*this, "amplification", 1)
 {}
 
-void gstreamer::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
+void gstreamer::channel_change_notification_from_port(engine::port const & port) {
 	if(&port == &in_port()) {
 		last_samples_.resize(port.channels());
 		for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0;
@@ -51,7 +51,7 @@ void gstreamer::do_name(std::string const & name) {
 }
 
 namespace {
-	::GstElement & instantiate(std::string const & type, std::string const & name) throw(universalis::exception) {
+	::GstElement & instantiate(std::string const & type, std::string const & name) {
 		try {
 			if(loggers::information()) {
 				std::ostringstream s; s << "instantiating " << type << " " << name;
@@ -95,7 +95,7 @@ namespace {
 	
 	::GstClockTime const default_timeout_nanoseconds(static_cast<GstClockTime>(5e9));
 
-	void wait_for_state(::GstElement & element, ::GstState state_wanted, ::GstClockTime timeout_nanoseconds = default_timeout_nanoseconds) throw(universalis::exception) {
+	void wait_for_state(::GstElement & element, ::GstState state_wanted, ::GstClockTime timeout_nanoseconds = default_timeout_nanoseconds) {
 		::GstClockTime intermediate_timeout_nanoseconds(std::min(timeout_nanoseconds, static_cast<GstClockTime>(0.5e9)));
 		::GstClockTime total_nanoseconds_waited(0);
 		for(;;) {
@@ -165,7 +165,7 @@ namespace {
 		}
 	}
 
-	void set_state_synchronously(::GstElement & element, ::GstState state, ::GstClockTime timeout_nanoseconds = default_timeout_nanoseconds) throw(universalis::exception) {
+	void set_state_synchronously(::GstElement & element, ::GstState state, ::GstClockTime timeout_nanoseconds = default_timeout_nanoseconds) {
 		::gst_element_set_state(&element, state);
 		wait_for_state(element, state, timeout_nanoseconds);
 	}
@@ -182,7 +182,7 @@ namespace {
 	}
 }
 
-void gstreamer::do_open() throw(engine::exception) {
+void gstreamer::do_open() {
 	resource::do_open();
 
 	{ // initialize gstreamer
@@ -326,7 +326,7 @@ bool gstreamer::opened() const {
 		s == ::GST_STATE_PLAYING;
 }
 
-void gstreamer::do_start() throw(engine::exception) {
+void gstreamer::do_start() {
 	resource::do_start();
 	intermediate_buffer_current_read_pointer_ = intermediate_buffer_;
 	stop_requested_ = handoff_called_ = false;
@@ -397,7 +397,7 @@ void gstreamer::handoff(::GstBuffer & buffer, ::GstPad & pad) {
 }
 
 /// this is called from within psycle's host's processing thread(s).
-void gstreamer::do_process() throw(engine::exception) {
+void gstreamer::do_process() {
 	if(ultra_trace && loggers::trace()) loggers::trace()("process", UNIVERSALIS__COMPILER__LOCATION);
 	if(!in_port()) return;
 	{ scoped_lock lock(mutex_);
@@ -432,7 +432,7 @@ void gstreamer::do_process() throw(engine::exception) {
 	condition_.notify_one();
 }
 
-void gstreamer::do_stop() throw(engine::exception) {
+void gstreamer::do_stop() {
 	if(pipeline_) {
 		{ scoped_lock lock(mutex_);
 			stop_requested_ = true;
@@ -443,7 +443,7 @@ void gstreamer::do_stop() throw(engine::exception) {
 	resource::do_stop();
 }
 
-void gstreamer::do_close() throw(engine::exception) {
+void gstreamer::do_close() {
 	if(pipeline_) {
 		{ scoped_lock lock(mutex_);
 			stop_requested_ = true;

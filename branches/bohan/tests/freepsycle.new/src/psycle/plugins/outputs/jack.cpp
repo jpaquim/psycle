@@ -8,7 +8,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(jack)
 
-jack::jack(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(exception)
+jack::jack(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
 	resource(plugin_library_reference, graph, name),
 	client_(),
@@ -18,7 +18,7 @@ jack::jack(class plugin_library_reference & plugin_library_reference, name_type 
 	amp_(*this, "amplification", 1)
 {}
 
-void jack::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
+void jack::channel_change_notification_from_port(engine::port const & port) {
 	if(&port == &in_port()) {
 		last_samples_.resize(port.channels());
 		for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0;
@@ -36,7 +36,7 @@ int jack::set_sample_rate_callback(::jack_nframes_t sample_rate) {
 	return 0;
 }
 
-void jack::do_open() throw(engine::exception) {
+void jack::do_open() {
 	resource::do_open();
 	
 	// open a client
@@ -114,7 +114,7 @@ bool jack::opened() const {
 	return client_;
 }
 
-void jack::do_start() throw(engine::exception) {
+void jack::do_start() {
 	resource::do_start();
 	ring_buffer_.reset();
 	ring_buffer_.advance_read_position(ring_buffer_.size() - 1);
@@ -230,7 +230,7 @@ int jack::process_callback(::jack_nframes_t frames) {
 }
 
 /// this is called from within psycle's host's processing thread(s).
-void jack::do_process() throw(engine::exception) {
+void jack::do_process() {
 	if(loggers::trace()) loggers::trace()("process", UNIVERSALIS__COMPILER__LOCATION);
 	if(!in_port()) return;
 	{ scoped_lock lock(mutex_);
@@ -282,7 +282,7 @@ void jack::do_process() throw(engine::exception) {
 	condition_.notify_one();
 }
 
-void jack::do_stop() throw(engine::exception) {
+void jack::do_stop() {
 	if(int error = ::jack_deactivate(client_)) {
 		std::ostringstream s; s << "could not deactivate client: " << error;
 		throw engine::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -291,7 +291,7 @@ void jack::do_stop() throw(engine::exception) {
 	started_ = false;
 }
 
-void jack::do_close() throw(engine::exception) {
+void jack::do_close() {
 	delete[] intermediate_buffer_; intermediate_buffer_ = 0;
 	if(int error = ::jack_client_close(client_)) {
 		std::ostringstream s; s << "could not close client: " << error;

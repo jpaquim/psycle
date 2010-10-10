@@ -17,7 +17,7 @@ class exception : public universalis::exception {
 		exception(
 			universalis::compiler::location const & location,
 			void const * cause = 0
-		) throw() : universalis::exception(location, cause) {}
+		) : universalis::exception(location, cause) {}
 };
 
 namespace exceptions {
@@ -28,7 +28,7 @@ namespace exceptions {
 				std::string const & what,
 				universalis::compiler::location const & location,
 				void const * cause = 0
-			) throw() : universalis::exceptions::runtime_error(what, location, cause) {}
+			) : universalis::exceptions::runtime_error(what, location, cause) {}
 	};
 }}}
 #include <psycle/detail/decl.hpp>

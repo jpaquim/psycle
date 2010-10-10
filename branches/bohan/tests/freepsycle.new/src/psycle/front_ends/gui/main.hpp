@@ -2,6 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::front_ends::gui::main
+#ifndef PSYCLE__FRONT_ENDS__GUI__MAIN__INCLUDED
+#define PSYCLE__FRONT_ENDS__GUI__MAIN__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 namespace psycle { namespace front_ends { namespace gui {
@@ -9,3 +11,4 @@ namespace psycle { namespace front_ends { namespace gui {
 	int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]);
 
 }}}
+#endif

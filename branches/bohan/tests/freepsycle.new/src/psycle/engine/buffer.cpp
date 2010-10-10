@@ -6,7 +6,7 @@
 #include "buffer.hpp"
 namespace psycle { namespace engine {
 
-buffer::buffer(std::size_t channels, std::size_t events) throw(std::exception) {
+buffer::buffer(std::size_t channels, std::size_t events) {
 	if(loggers::trace()()) {
 		std::ostringstream s;
 		s << "new buffer " << this;

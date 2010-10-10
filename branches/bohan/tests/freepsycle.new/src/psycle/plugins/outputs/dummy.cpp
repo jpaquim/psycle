@@ -11,7 +11,7 @@ using engine::exceptions::runtime_error;
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(dummy)
 
-dummy::dummy(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(exception)
+dummy::dummy(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
 	resource(plugin_library_reference, name),
 	free_wheeling_(),
@@ -21,7 +21,7 @@ dummy::dummy(class plugin_library_reference & plugin_library_reference, name_typ
 	amp_(*this, "amplification", 1)
 {}
 
-void dummy::do_open() throw(engine::exception) {
+void dummy::do_open() {
 	resource::do_open();
 	loggers::warning()("This is the dummy output plugin. You will hear no sound.", UNIVERSALIS__COMPILER__LOCATION);
 	opened_ = true;
@@ -31,7 +31,7 @@ bool dummy::opened() const {
 	return opened_;
 }
 
-void dummy::do_start() throw(engine::exception) {
+void dummy::do_start() {
 	resource::do_start();
 	sleep_ = static_cast<nanoseconds::tick_type>(1e9 * graph().events_per_buffer() / in_port().events_per_second());
 	io_ready(false);
@@ -79,7 +79,7 @@ void dummy::thread_function() {
 	loggers::information()("thread " + qualified_name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 }
 
-void dummy::thread_loop() throw(engine::exception) {
+void dummy::thread_loop() {
 	while(true) {
 		{ scoped_lock lock(mutex_);
 			if(stop_requested_) return;
@@ -91,7 +91,7 @@ void dummy::thread_loop() throw(engine::exception) {
 	}
 }
 
-void dummy::do_process() throw(engine::exception) {
+void dummy::do_process() {
 	if(!in_port()) return;
 	{ scoped_lock lock(mutex_);
 		if(false && loggers::warning()() && !io_ready()) loggers::warning()("blocking", UNIVERSALIS__COMPILER__LOCATION);
@@ -101,7 +101,7 @@ void dummy::do_process() throw(engine::exception) {
 	io_ready(false);
 }
 
-void dummy::do_stop() throw(engine::exception) {
+void dummy::do_stop() {
 	if(loggers::information()()) loggers::information()("terminating and joining thread ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(!thread_) {
 		if(loggers::information()()) loggers::information()("thread was not running", UNIVERSALIS__COMPILER__LOCATION);
@@ -117,7 +117,7 @@ void dummy::do_stop() throw(engine::exception) {
 	resource::do_stop();
 }
 
-void dummy::do_close() throw(engine::exception) {
+void dummy::do_close() {
 	opened_ = false;
 	resource::do_close();
 }

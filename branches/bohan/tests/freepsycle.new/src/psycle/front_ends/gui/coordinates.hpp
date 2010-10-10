@@ -10,6 +10,8 @@
 ///\n psycle::front_ends::gui::dimensions
 ///\n psycle::front_ends::gui::position
 ///\n psycle::front_ends::gui::bounds
+#ifndef PSYCLE__FRONT_ENDS__GUI__COORDINATES__INCLUDED
+#define PSYCLE__FRONT_ENDS__GUI__COORDINATES__INCLUDED
 #pragma once
 #include "forward_declarations.hpp"
 namespace psycle { namespace front_ends { namespace gui {
@@ -39,48 +41,48 @@ class cartesian {
 		///\name operators
 		//\{
 			/// assignment operator.
-			Derived & operator= (Derived const & other) throw() { this->x() = other.x(); this->y() = other.y(); return *this; }
+			Derived & operator= (Derived const & other) { this->x() = other.x(); this->y() = other.y(); return *this; }
 			/// addition operator.
-			Derived operator+ (Derived const & other) const throw() { return Derived(this->x() + other.x(), this->y() + other.y()); }
+			Derived operator+ (Derived const & other) const { return Derived(this->x() + other.x(), this->y() + other.y()); }
 			/// assignment addition operator.
-			Derived & operator+=(Derived const & other) throw() { this->x() += other.x(); this->y() += other.y(); return *this; }
+			Derived & operator+=(Derived const & other) { this->x() += other.x(); this->y() += other.y(); return *this; }
 			/// negation operator.
-			Derived operator-() const throw() { return Derived(-x(), -y()); }
+			Derived operator-() const { return Derived(-x(), -y()); }
 			/// substraction operator.
-			Derived operator- (Derived const & other) const throw() { return Derived(this->x() - other.x(), this->y() - other.y()); }
+			Derived operator- (Derived const & other) const { return Derived(this->x() - other.x(), this->y() - other.y()); }
 			/// assignment substraction operator.
-			Derived & operator-=(Derived const & other) throw() { this->x() -= other.x(); this->y() -= other.y(); return *this; }
+			Derived & operator-=(Derived const & other) { this->x() -= other.x(); this->y() -= other.y(); return *this; }
 			/// cartesian product operator.
-			Coordinate operator*(Derived const & other ) const throw() { return this->x() * other.y() - this->y() * other.x(); }
+			Coordinate operator*(Derived const & other ) const { return this->x() * other.y() - this->y() * other.x(); }
 			/// scalar product operator.
-			Derived operator*(Coordinate const & factor) const throw() { return Derived(this->x() * factor, this->y() * factor); }
+			Derived operator*(Coordinate const & factor) const { return Derived(this->x() * factor, this->y() * factor); }
 			/// assignment scalar product operator.
-			Derived & operator*=(Coordinate const & factor) throw() { this->x() *= factor; this->y() *= factor; return *this; }
+			Derived & operator*=(Coordinate const & factor) { this->x() *= factor; this->y() *= factor; return *this; }
 			/// scalar division operator.
-			Coordinate operator/(Coordinate const & factor) const throw() { assert(factor); return (*this) * (1 / factor); }
+			Coordinate operator/(Coordinate const & factor) const { assert(factor); return (*this) * (1 / factor); }
 			/// assignment scalar division operator.
-			Derived & operator/=(Coordinate const & factor) throw() { assert(factor); return (*this) *= (1 / factor); }
+			Derived & operator/=(Coordinate const & factor) { assert(factor); return (*this) *= (1 / factor); }
 		//\}
 
 	protected:
 		///\name x
 		//\{
 			/// returns const x.
-			Coordinate const & x() const throw() { return x_; }
+			Coordinate const & x() const { return x_; }
 			/// returns mutable x.
-			Coordinate & x() throw() { return x_; }
+			Coordinate & x() { return x_; }
 			/// sets x.
-			void x(Coordinate const & x) throw() { this->x_ = x; }
+			void x(Coordinate const & x) { x_ = x; }
 		//\}
 
 		///\name y
 		//\{
 			/// returns const y.
-			Coordinate const & y() const throw() { return y_; }
+			Coordinate const & y() const { return y_; }
 			/// returns mutable y.
-			Coordinate const & y() throw() { return y_; }
+			Coordinate const & y() { return y_; }
 			/// sets y.
-			void y(Coordinate const & y) throw() { this->y_ = y; }
+			void y(Coordinate const & y) { y_ = y; }
 		//\}
 
 	private:
@@ -109,39 +111,39 @@ class dimensions : public coordinates::cartesian<dimensions<Coordinate>, Coordin
 		///\name operators
 		//\{
 			/// assignment operator.
-			dimensions & operator=(dimensions const & other) throw() { coordinates_type::operator=(other); return *this; }
+			dimensions & operator=(dimensions const & other) { coordinates_type::operator=(other); return *this; }
 			/// addition operator.
-			dimensions operator+(dimensions const & other) const throw() { return coordinates_type::operator+(other); }
+			dimensions operator+(dimensions const & other) const { return coordinates_type::operator+(other); }
 			/// assignement addition operator.
-			dimensions & operator+=(dimensions const & other) throw() { coordinates_type::operator+=(other); return *this; }
+			dimensions & operator+=(dimensions const & other) { coordinates_type::operator+=(other); return *this; }
 			/// negation operator.
-			dimensions operator-() const throw() { return coordinates_type::operator-(); }
+			dimensions operator-() const { return coordinates_type::operator-(); }
 			/// substraction operator.
-			dimensions operator-(dimensions const & other) const throw() { return coordinates_type::operator-(other); }
+			dimensions operator-(dimensions const & other) const { return coordinates_type::operator-(other); }
 			/// assignement substraction operator.
-			dimensions & operator-=(dimensions const & other) throw() { coordinates_type::operator-=(other); return *this; }
+			dimensions & operator-=(dimensions const & other) { coordinates_type::operator-=(other); return *this; }
 			/// cartesian product.
-			Coordinate operator* (dimensions const & other) throw() { return coordinates_type::operator*(other); }
+			Coordinate operator* (dimensions const & other) { return coordinates_type::operator*(other); }
 		//\}
 
 		///\name width
 		//\{
 			/// returns the const width.
-			Coordinate const & w() const throw() { return coordinates_type::x(); }
+			Coordinate const & w() const { return coordinates_type::x(); }
 			/// returns the mutable width.
-			Coordinate & w() throw() { return coordinates_type::x(); }
+			Coordinate & w() { return coordinates_type::x(); }
 			/// sets the width.
-			void w(Coordinate const & w) throw() { coordinates_type::x(w); }
+			void w(Coordinate const & w) { coordinates_type::x(w); }
 		//\}
 
 		///\name height
 		//\{
 			/// returns the const height.
-			Coordinate const & h() const throw() { return coordinates_type::y(); }
+			Coordinate const & h() const { return coordinates_type::y(); }
 			/// returns the mutable height.
-			Coordinate & h() throw() { return coordinates_type::y(); }
+			Coordinate & h() { return coordinates_type::y(); }
 			/// sets the height.
-			void h(Coordinate const & h) throw() { coordinates_type::y(h); }
+			void h(Coordinate const & h) { coordinates_type::y(h); }
 		//\}
 };
 
@@ -198,7 +200,7 @@ class position : public coordinates::cartesian<Coordinate> {
 			/// returns mutable y.
 			Coordinate & y() { return coordinates_type::y(); }
 			/// sets y.
-			void y(Coordinate const & y) throw() { coordinates_type::y(y); }
+			void y(Coordinate const & y) { coordinates_type::y(y); }
 		//\}
 };
 
@@ -250,9 +252,9 @@ class bounds : public position<Position_Coordinate>, public dimensions<Dimension
 		///\name position y coordinate
 		//\{
 			/// returns y.
-			Position_Coordinate const & y() const throw() { return position<Position_Coordinate>::y(); }
+			Position_Coordinate const & y() const { return position<Position_Coordinate>::y(); }
 			/// returns mutable y.
-			Position_Coordinate & y() throw() { return position<Position_Coordinate>::y(); }
+			Position_Coordinate & y() { return position<Position_Coordinate>::y(); }
 			/// sets y
 			void y(const Position_Coordinate & y) { position<Position_Coordinate>::y(y); }
 		//\}
@@ -364,3 +366,4 @@ class bounds : public position<Position_Coordinate>, public dimensions<Dimension
 		//\}
 };
 }}}
+#endif

@@ -2,6 +2,8 @@
 // copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::front_ends::gui::root
+#ifndef PSYCLE__FRONT_ENDS__GUI__ROOT__INCLUDED
+#define PSYCLE__FRONT_ENDS__GUI__ROOT__INCLUDED
 #pragma once
 #include <psycle/engine/engine.hpp>
 #include "graph.hpp"
@@ -18,26 +20,26 @@ class root : public Gtk::Window {
 		virtual ~root();
 	
 	protected:
-		host::plugin_resolver & resolver() throw() { return resolver_; }
+		host::plugin_resolver & resolver() { return resolver_; }
 	private:
 		host::plugin_resolver   resolver_;
 
 	protected:
 		virtual void on_button_clicked();
-		Gtk::Button const & button() const throw() { return button_; }
-		Gtk::Button       & button()       throw() { return button_; }
+		Gtk::Button const & button() const { return button_; }
+		Gtk::Button       & button()       { return button_; }
 	private:
 		Gtk::Button         button_;
 	
 	protected:
-		Gtk::Label const & label() const throw() { return label_; }
-		Gtk::Label       & label()       throw() { return label_; }
+		Gtk::Label const & label() const { return label_; }
+		Gtk::Label       & label()       { return label_; }
 	private:
 		Gtk::Label         label_;
 	
 	protected:
-		graph const & graph_instance() const throw() { return graph_; }
-		graph       & graph_instance()       throw() { return graph_; }
+		graph const & graph_instance() const { return graph_; }
+		graph       & graph_instance()       { return graph_; }
 	private:
 		graph       & graph_;
 		
@@ -48,3 +50,4 @@ class root : public Gtk::Window {
 		Gtk::HBox h_box_;
 };
 }}}
+#endif

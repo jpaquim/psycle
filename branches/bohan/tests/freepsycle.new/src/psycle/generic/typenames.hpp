@@ -2,6 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::generic::typenames
+#ifndef PSYCLE__GENERIC__TYPENAMES__INCLUDED
+#define PSYCLE__GENERIC__TYPENAMES__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 #if 0 // checks disabled here because types are incomplete at the time template classes are instanciated.
@@ -118,3 +120,4 @@ namespace psycle { namespace generic {
 		#endif
 	};
 }}
+#endif

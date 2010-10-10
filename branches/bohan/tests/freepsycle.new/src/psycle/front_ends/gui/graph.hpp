@@ -2,6 +2,8 @@
 // copyright 2000-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::front_ends::gui::graph
+#ifndef PSYCLE__FRONT_ENDS__GUI__GRAPH__INCLUDED
+#define PSYCLE__FRONT_ENDS__GUI__GRAPH__INCLUDED
 #pragma once
 #include "forward_declarations.hpp"
 #include "color.hpp"
@@ -210,3 +212,4 @@ class PSYCLE__DECL node
 
 }}}
 #include <psycle/detail/decl.hpp>
+#endif

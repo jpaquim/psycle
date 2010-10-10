@@ -13,7 +13,7 @@ namespace psycle { namespace plugins { namespace outputs {
 
 	PSYCLE__PLUGINS__NODE_INSTANTIATOR(direct_sound)
 
-	direct_sound::direct_sound(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(universalis::os::exception)
+	direct_sound::direct_sound(class plugin_library_reference & plugin_library_reference, name_type const & name)
 	:
 		resource(plugin_library_reference, name),
 		direct_sound_(),
@@ -24,7 +24,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		engine::ports::inputs::single::create_on_heap(*this, "amplification", boost::cref(1));
 	}
 
-	void direct_sound::channel_change_notification_from_port(engine::port const & port) throw(engine::exception) {
+	void direct_sound::channel_change_notification_from_port(engine::port const & port) {
 		if(&port == &in_port()) {
 			last_samples_.resize(port.channels());
 			for(std::size_t i(0); i < last_samples_.size(); ++i) last_samples_[i] = 0;
@@ -32,7 +32,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		resource::channel_change_notification_from_port(port);
 	}
 
-	void direct_sound::do_open() throw(universalis::os::exception) {
+	void direct_sound::do_open() {
 		HRESULT error(0);
 		try {
 			resource::do_open();
@@ -117,7 +117,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		return direct_sound_; //&& buffer_;
 	}
 
-	void direct_sound::do_start() throw(universalis::os::exception) {
+	void direct_sound::do_start() {
 		resource::do_start();
 		current_position_ = 0;
 		buffer().Play(0, 0, DSBPLAY_LOOPING); // may return DSERR_BUFFERLOST
@@ -128,7 +128,7 @@ namespace psycle { namespace plugins { namespace outputs {
 		return started_;
 	}
 
-	void direct_sound::do_process() throw(universalis::os::exception) {
+	void direct_sound::do_process() {
 		bool const ultra_trace(false);
 		while(true) {
 			DWORD position;
@@ -194,13 +194,13 @@ namespace psycle { namespace plugins { namespace outputs {
 		++current_position_ %= buffers_;
 	}
 
-	void direct_sound::do_stop() throw(universalis::os::exception) {
+	void direct_sound::do_stop() {
 		if(HRESULT error = buffer().Stop()) throw universalis::os::exceptions::runtime_error("direct sound buffer stop: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);
 		resource::do_stop();
 		started_ = false;
 	}
 
-	void direct_sound::do_close() throw(universalis::os::exception) {
+	void direct_sound::do_close() {
 		if(buffer_) {
 			try {
 				if(HRESULT error = buffer().Release()) throw universalis::os::exceptions::runtime_error("direct sound buffer release: " + universalis::os::exceptions::code_description(error), UNIVERSALIS__COMPILER__LOCATION);

@@ -3,6 +3,8 @@
 
 ///\interface psycle::generic::wrappers
 
+#ifndef PSYCLE__GENERIC__WRAPPERS__INCLUDED
+#define PSYCLE__GENERIC__WRAPPERS__INCLUDED
 #pragma once
 
 #include "base.hpp"
@@ -409,3 +411,4 @@ namespace ports {
 	}
 }
 }}}
+#endif
