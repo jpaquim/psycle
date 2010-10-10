@@ -4,6 +4,7 @@
 ///\implementation psycle::host::scheduler
 #include <psycle/detail/project.private.hpp>
 #include "scheduler.hpp"
+#include "psycle/host/scheduler.hpp"
 #include <psycle/engine/reference_counter.hpp>
 #include <universalis/os/clocks.hpp>
 #include <universalis/os/thread_name.hpp>
@@ -43,7 +44,12 @@ node::node(class scheduler & scheduler, engine::node & engine)
 	waiting_for_io_ready_signal_(),
 	processing_count_(),
 	processing_count_no_zeroes_()
-{}
+{
+	// Iterate over all the underlying output ports of the underlying node to create wrapping output ports.
+	for(engine::node::output_ports_type::const_iterator
+		i = engine.output_ports().begin(), e = engine.output_ports().end(); i != e; ++i
+	) output_ports_.push_back(new ports::output(**i));
+}
 
 void node::reset_time_measurement() {
 	accumulated_processing_time_ = 0;
@@ -117,6 +123,15 @@ void node::process(bool first) {
 /**********************************************************************************************************************/
 // scheduler
 
+namespace {
+	class predicate {
+		engine::node & engine_;
+		public:
+			predicate(engine::node & engine) : engine_(engine) {}
+			bool operator()(class node const * node) const { return &node->engine() == &engine_; }
+	};
+}
+
 scheduler::scheduler(engine::graph & engine, std::size_t threads)
 :
 	engine_(engine),
@@ -135,7 +150,34 @@ scheduler::scheduler(engine::graph & engine, std::size_t threads)
 		boost::bind(&scheduler::on_delete_connection, this, _1, _2))
 	),
 	buffer_pool_()
-{}
+{
+	// Iterate over all the nodes of the underlying graph to create wrapping nodes.
+	for(engine::graph::const_iterator i = engine.begin(), e = engine.end(); i != e; ++i) {
+		engine::node & engine = **i;
+		insert(new node(*this, engine));
+	}
+
+	// Iterate over all the nodes of the graph to connect the wrapping ports.
+	for(const_iterator i = begin(), e = end(); i != e ; ++i) {
+		node & node = **i;
+		for(node::output_ports_type::const_iterator
+			i = node.output_ports().begin(), e = node.output_ports().end(); i != e; ++i
+		) {
+			ports::output & output_port = **i;
+			for(engine::ports::output::input_ports_type::const_iterator
+				i = output_port.engine().input_ports().begin(),
+				e = output_port.engine().input_ports().end(); i != e ; ++i
+			) {
+				// The underlying layer is already connected, we only have to connect this wrapping layer.
+				engine::ports::input & engine = **i;
+				const_iterator i = std::find_if(begin(), end(), predicate(engine.node())); // or composition with boost::bind
+				assert(i != end());
+				class node & node = **i;
+				output_port.connected_nodes().push_back(&node);
+			}
+		}
+	}
+}
 
 scheduler::~scheduler() {
 	stop();

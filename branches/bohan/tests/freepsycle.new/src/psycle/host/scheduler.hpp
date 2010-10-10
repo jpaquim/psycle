@@ -126,6 +126,7 @@ namespace ports {
 			public:
 				typedef std::vector<node*> connected_nodes_type;
 				connected_nodes_type const & connected_nodes() const { return connected_nodes_; }
+				connected_nodes_type & connected_nodes() { return connected_nodes_; }
 			private:
 				connected_nodes_type connected_nodes_;
 		///\}
