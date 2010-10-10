@@ -54,6 +54,25 @@ score1::score1(host::plugin_resolver & resolver, engine::graph & graph)
 	decay_seq3_plug_.graph(graph);
 }
 
+score1::~score1() {
+	delete &additioner_;
+	delete &sine1_;
+	delete &sine2_;
+	delete &sine3_;
+	delete &freq1_plug_;
+	delete &freq2_plug_;
+	delete &freq3_plug_;
+	delete &decay1_;
+	delete &decay2_;
+	delete &decay3_;
+	delete &seq1_plug_;
+	delete &seq2_plug_;
+	delete &seq3_plug_;
+	delete &decay_seq1_plug_;
+	delete &decay_seq2_plug_;
+	delete &decay_seq3_plug_;
+}
+
 void score1::connect(engine::node & out) {
 	freq1_plug_.sequence_iterator() = new engine::sequence_iterator(freq1_);
 	freq2_plug_.sequence_iterator() = new engine::sequence_iterator(freq2_);

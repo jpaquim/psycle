@@ -23,6 +23,7 @@ class PSYCLE__DECL plugin_resolver {
 		class instanciator : protected engine::plugin_library_reference {
 			friend class plugin_resolver;
 			private:
+				///\todo remove instance class and do all ref counting directly in node
 				class instance {
 					public:
 						instance(instanciator &, engine::node::name_type const &);

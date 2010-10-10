@@ -36,7 +36,7 @@ class plugin_library_reference : public reference_counter {
 		/// creates a reference counter for the library named \param name.
 		plugin_library_reference(std::string const & name) : named_(name) {}
 		/// deletes the plugin library reference counter
-		virtual inline  ~plugin_library_reference() throw() {}
+		virtual inline ~plugin_library_reference() throw() {}
 		/// convertible to a named object.
 		operator named const & () const { return named_; }
 		/// the name of the underlying referenced library.

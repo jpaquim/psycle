@@ -67,6 +67,7 @@ node::node(class plugin_library_reference & plugin_library_reference, name_type 
 		s << qualified_name() << ": new engine node";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
+	//++plugin_library_reference_;
 }
 
 node::~node() {
@@ -76,6 +77,7 @@ node::~node() {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(graph_) graph_->erase(this);
+	--plugin_library_reference_; // This may unload the plugin library but it's okay since the derived dtor code is already finished.
 }
 
 void node::graph(class graph & graph) {

@@ -68,24 +68,20 @@ void play() {
 		}
 		loggers::information()("############################################## schedule ########################################################");
 		{
-			#if 1
-				host::scheduler scheduler(graph);
-				std::size_t threads(thread::hardware_concurrency());
-				{ // thread count env var
-					char const * const env(std::getenv("PSYCLE_THREADS"));
-					if(env) {
-						std::stringstream s;
-						s << env;
-						s >> threads;
-					}
+			host::scheduler scheduler(graph);
+			std::size_t threads(thread::hardware_concurrency());
+			{ // thread count env var
+				char const * const env(std::getenv("PSYCLE_THREADS"));
+				if(env) {
+					std::stringstream s;
+					s << env;
+					s >> threads;
 				}
-				scheduler.threads(threads);
-			#else
-				host::schedulers::single_threaded::scheduler scheduler(graph);
-			#endif
+			}
+			scheduler.threads(threads);
 				
 			if(loggers::information()()) loggers::information()("generating input ...");
-			seconds const seconds(100);
+			seconds const seconds(2);
 			score.generate();
 			if(loggers::information()()) loggers::information()("generating input ... done");
 			if(loggers::information()()) {
@@ -98,6 +94,9 @@ void play() {
 			scheduler.stop();
 		}
 		loggers::information()("############################################# clean up ######################################################");
+		{
+			delete &out;
+		}
 	} catch(...) {
 		loggers::exception()("############################################# exception #####################################################", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		throw;
