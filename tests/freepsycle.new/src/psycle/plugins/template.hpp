@@ -2,11 +2,12 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::template_plugin
-#ifndef PSYCLE__PLUGINS__TEMPLATE
-#define PSYCLE__PLUGINS__TEMPLATE
+#ifndef PSYCLE__PLUGINS__TEMPLATE__INCLUDED
+#define PSYCLE__PLUGINS__TEMPLATE__INCLUDED
 #pragma once
 #include "plugin.hpp"
 #define PSYCLE__DECL  PSYCLE__PLUGINS__TEMPLATE
+#include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins {
 
 class PSYCLE__DECL template_plugin : public node {

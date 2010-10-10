@@ -2,8 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::sine - oscillator with a sinusoidal wave form
-#ifndef PSYCLE__PLUGINS__SINE
-#define PSYCLE__PLUGINS__SINE
+#ifndef PSYCLE__PLUGINS__SINE__INCLUDED
+#define PSYCLE__PLUGINS__SINE__INCLUDED
 #pragma once
 #include "plugin.hpp"
 #define PSYCLE__DECL  PSYCLE__PLUGINS__SINE

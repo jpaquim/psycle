@@ -2,6 +2,8 @@
 // copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net ; erodix ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::outputs::jack
+#ifndef PSYCLE__PLUGINS__OUTPUTS__JACK__INCLUDED
+#define PSYCLE__PLUGINS__OUTPUTS__JACK__INCLUDED
 #pragma once
 #include "../resource.hpp"
 #include <psycle/helpers/ring_buffer.hpp>
@@ -16,18 +18,18 @@ namespace psycle { namespace plugins { namespace outputs {
 /// outputs to a soundcard device via jackd
 class PSYCLE__DECL jack : public resource {
 	public:
-		jack(class plugin_library_reference &, name_type const &) throw(exception);
+		jack(class plugin_library_reference &, name_type const &);
 		virtual ~jack() throw();
 		engine::ports::inputs::single &  in_port() { return *single_input_ports()[0]; }
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;
 	protected:
-		void do_open()    throw(exception) /*override*/;
-		void do_start()   throw(exception) /*override*/;
-		void do_process() throw(exception) /*override*/;
-		void do_stop()    throw(exception) /*override*/;
-		void do_close()   throw(exception) /*override*/;
-		void channel_change_notification_from_port(port const &) throw(exception) /*override*/;
+		void do_open() /*override*/;
+		void do_start() /*override*/;
+		void do_process() /*override*/;
+		void do_stop() /*override*/;
+		void do_close() /*override*/;
+		void channel_change_notification_from_port(port const &) /*override*/;
 	private:
 		::jack_client_t * client_;
 		std::vector< ::jack_port_t*> output_ports_;
@@ -61,3 +63,4 @@ class PSYCLE__DECL jack : public resource {
 
 }}}
 #include <psycle/detail/decl.hpp>
+#endif

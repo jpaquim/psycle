@@ -2,6 +2,8 @@
 // copyright 2008-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::decay - a decaying pulse
+#ifndef PSYCLE__PLUGINS__DECAY__INCLUDED
+#define PSYCLE__PLUGINS__DECAY__INCLUDED
 #pragma once
 #include "plugin.hpp"
 #define PSYCLE__DECL  PSYCLE__PLUGINS__DECAY
@@ -23,7 +25,7 @@ class PSYCLE__DECL decay : public node {
 
 	protected:
 		void seconds_per_event_change_notification_from_port(port const &) /*override*/;
-		void do_process() throw(exception) /*override*/;
+		void do_process() /*override*/;
 
 	private:
 		template<
@@ -49,3 +51,4 @@ class PSYCLE__DECL decay : public node {
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif

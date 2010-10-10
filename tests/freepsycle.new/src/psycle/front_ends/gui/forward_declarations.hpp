@@ -3,6 +3,8 @@
 /// This file is used to avoid mutually recursive dependencies in declarations.
 /// It does not have any real declarations, just forward names.
 ///\see file graph.hpp to #include the real declarations
+#ifndef PSYCLE__FRONT_ENDS__GUI__FORWARD_DECLARATIONS__INCLUDED
+#define PSYCLE__FRONT_ENDS__GUI__FORWARD_DECLARATIONS__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <psycle/engine/forward_declarations.hpp>
@@ -27,3 +29,4 @@ class typenames : public generic::typenames<graph, node, port, ports::output, po
 typedef typenames::bases bases;
 
 }}}
+#endif

@@ -2,9 +2,9 @@
 // copyright 2002-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::generic::basic
-
+#ifndef PSYCLE__GENERIC__BASE__INCLUDED
+#define PSYCLE__GENERIC__BASE__INCLUDED
 #pragma once
-
 #include "typenames.hpp"
 #include "cast.hpp"
 #include <psycle/engine/exception.hpp>
@@ -15,7 +15,6 @@
 #include <set>
 #include <vector>
 #include <algorithm>
-
 namespace psycle { namespace generic { namespace basic {
 
 using engine::exception;
@@ -522,3 +521,4 @@ namespace ports {
 	}
 }
 }}}
+#endif

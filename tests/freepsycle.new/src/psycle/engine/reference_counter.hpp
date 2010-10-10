@@ -52,10 +52,10 @@ class reference {
 	public:
 		reference(X & x) : x_(x), reference_counter_(++*new reference_counter) {}
 		reference(reference const & other) : x_(other.x_), reference_counter_(++other.reference_counter_) {}
-		void operator=(reference const & other) throw() { check_if_last_reference(); x_ = other.x_; reference_counter_ = ++other.reference_counter_; }
+		void operator=(reference const & other) { check_if_last_reference(); x_ = other.x_; reference_counter_ = ++other.reference_counter_; }
 		~reference() throw() { check_if_last_reference(); }
-		operator X const & () const throw() { return *x_; }
-		operator X & () throw() { return *x_; }
+		operator X const & () const { return *x_; }
+		operator X & () { return *x_; }
 	private:
 		X * x_;
 		reference_counter & reference_counter_;

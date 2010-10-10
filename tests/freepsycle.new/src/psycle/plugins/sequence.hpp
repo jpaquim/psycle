@@ -2,6 +2,8 @@
 // copyright 2007-2010 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::sequence
+#ifndef PSYCLE__PLUGINS__SEQUENCE__INCLUDED
+#define PSYCLE__PLUGINS__SEQUENCE__INCLUDED
 #pragma once
 #include "plugin.hpp"
 #include <psycle/engine/sequence.hpp>
@@ -28,3 +30,4 @@ class PSYCLE__DECL sequence : public node {
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif

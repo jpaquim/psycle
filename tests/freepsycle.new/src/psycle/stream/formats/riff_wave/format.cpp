@@ -15,7 +15,7 @@ namespace psycle { namespace stream { namespace formats { namespace riff_wave {
 format::format(unsigned char channels, real samples_per_second, unsigned char significant_bits_per_channel_sample, unsigned char bits_per_channel_sample) {
 	allocate_chunk(0);
 	chunk().tag(tags::pcm);
-	chunk().set(channels, static_cast<std::uint32_t>(samples_per_second), bits_per_channel_sample);
+	chunk().set(channels, static_cast<uint32_t>(samples_per_second), bits_per_channel_sample);
 };
 
 format::format(format const & format)
@@ -73,9 +73,9 @@ std::string format::tag_description() const {
 	#endif
 }
 
-void format::allocate_chunk(std::size_t extra_information_size) throw(std::bad_alloc) {
+void format::allocate_chunk(std::size_t extra_information_size) {
 	if(!(chunk_ = static_cast<chunk_type*>(std::malloc(sizeof(chunk_type) + extra_information_size)))) throw std::bad_alloc();
-	chunk().extra_information_size_ = static_cast<std::uint16_t>(extra_information_size);
+	chunk().extra_information_size_ = static_cast<uint16_t>(extra_information_size);
 }
 
 namespace {
@@ -94,30 +94,30 @@ namespace {
 
 void format::chunk_type::recompute_if_pcm(bool full) {
 	if(tag() == tags::pcm) {
-		if(full) bytes_per_sample_ = static_cast<std::uint16_t>(channels() * bits_to_bytes(bits_per_channel_sample()));
+		if(full) bytes_per_sample_ = static_cast<uint16_t>(channels() * bits_to_bytes(bits_per_channel_sample()));
 		average_bytes_per_second_ = samples_per_second() * bytes_per_sample_;
 	}
 }
 
-void format::chunk_type::set(std::uint16_t channels, std::uint32_t samples_per_second, std::uint16_t bits_per_channel_sample) {
-	this->channels_                = static_cast<std::uint16_t>(channels);
-	this->samples_per_second_      = static_cast<std::uint32_t>(samples_per_second);
-	this->bits_per_channel_sample_ = static_cast<std::uint16_t>(bits_per_channel_sample);
+void format::chunk_type::set(uint16_t channels, uint32_t samples_per_second, uint16_t bits_per_channel_sample) {
+	this->channels_                = static_cast<uint16_t>(channels);
+	this->samples_per_second_      = static_cast<uint32_t>(samples_per_second);
+	this->bits_per_channel_sample_ = static_cast<uint16_t>(bits_per_channel_sample);
 	recompute_if_pcm();
 };
 
-void format::chunk_type::channels(std::uint16_t channels) {
-	this->channels_ = static_cast<std::uint16_t>(channels);
+void format::chunk_type::channels(uint16_t channels) {
+	this->channels_ = static_cast<uint16_t>(channels);
 	recompute_if_pcm();
 }
 
-void format::chunk_type::samples_per_second(std::uint32_t samples_per_second) {
-	this->samples_per_second_ = static_cast<std::uint32_t>(samples_per_second);
+void format::chunk_type::samples_per_second(uint32_t samples_per_second) {
+	this->samples_per_second_ = static_cast<uint32_t>(samples_per_second);
 	recompute_if_pcm(false);
 }
 
-void format::chunk_type::bits_per_channel_sample(std::uint16_t bits_per_channel_sample) {
-	this->bits_per_channel_sample_ = static_cast<std::uint16_t>(bits_per_channel_sample);
+void format::chunk_type::bits_per_channel_sample(uint16_t bits_per_channel_sample) {
+	this->bits_per_channel_sample_ = static_cast<uint16_t>(bits_per_channel_sample);
 	recompute_if_pcm();
 }
 
@@ -131,18 +131,18 @@ unsigned int format::chunk_type::bytes_to_samples(unsigned int bytes) const {
 	else return static_cast<unsigned int>(bytes / bytes_per_sample());
 }
 
-void format::chunk_type::tag(std::uint16_t tag) {
+void format::chunk_type::tag(uint16_t tag) {
 	this->tag_ = tag;
 }
 
 #if 0
 	format::format(riff & riff) throw(exception) {
-		std::uint16_t size;
+		uint16_t size;
 		allocate_chunk(extra_information_size_which_fits_all_tags());
 		if(!riff.read_chunk('fmt ', chunk(), sizeof chunk() - 2) throw exception("bad fmt chunk", UNIVERSALIS__COMPILER__LOCATION);
 		if(riff.current_chunk_data_size() < sizeof chunk() - 2) throw exception("file " + file_name() + " corrupted", UNIVERSALIS__COMPILER__LOCATION);
 		if(tag() != pcm) {
-			std::uint16_t extra_information_size;
+			uint16_t extra_information_size;
 			riff >> extra_information_size;
 			if(riff.current_chunk_data_size() < sizeof chunk() + extra_information_size) throw exception("file: '" + riff.file_name() + "' corrupted: fmt chunk too small to contain the declared extra data", UNIVERSALIS__COMPILER__LOCATION);
 			riff(-2);
@@ -158,7 +158,7 @@ void format::chunk_type::tag(std::uint16_t tag) {
 	format::chunk::write(riff & riff, std::size_t bytes) {
 		write(riff);
 		if(tag() != pcm) {
-			std::uint32_t samples = bytes_to_samples(data_size);
+			uint32_t samples = bytes_to_samples(data_size);
 			riff.update_or_create_chunk('fact', samples, sizeof samples);
 		}
 	}
@@ -166,8 +166,8 @@ void format::chunk_type::tag(std::uint16_t tag) {
 
 #if 0 && defined DIVERSALIS__OS__MICROSOFT
 	namespace {
-		std::uint16_t extra_information_size_which_fits_all_tags() throw(exception) {
-			std::uint16_t static extra_information_size_which_fits_all_tags(0);
+		uint16_t extra_information_size_which_fits_all_tags() throw(exception) {
+			uint16_t static extra_information_size_which_fits_all_tags(0);
 			if(!extra_information_size_which_fits_all_tags) {
 				if(!::acmMetrics(0, ACM_METRIC_MAX_SIZE_FORMAT, &extra_information_size_which_fits_all_tags)) throw exception("acm metrics: " + universalis::os::exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION);
 				chunk_extra_information_size_which_fits_all_tags -= sizeof(chunk_type);

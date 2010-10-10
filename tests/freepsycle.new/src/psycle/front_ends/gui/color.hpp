@@ -2,6 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\\interface psycle::front_ends:gui:color
+#ifndef PSYCLE__FRONT_ENDS__GUI__COLOR__INCLUDED
+#define PSYCLE__FRONT_ENDS__GUI__COLOR__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <cassert>
@@ -11,25 +13,26 @@ namespace psycle { namespace front_ends { namespace gui {
 			typedef uint32_t rgba; // meant to match glib/gdk's ::guint32
 			typedef uint8_t channel;
 			
-			inline color(rgba const & rgba) : rgba_(rgba) {}
-			inline operator rgba const & () const throw() { return rgba_; }
+			color(rgba const & rgba) : rgba_(rgba) {}
+			operator rgba const & () const { return rgba_; }
 
-			channel inline r() const throw() { return (rgba_ & 0xff000000) >> 24; }
-			channel inline g() const throw() { return (rgba_ & 0x00ff0000) >> 16; }
-			channel inline b() const throw() { return (rgba_ & 0x0000ff00) >>  8; }
-			channel inline a() const throw() { return (rgba_ & 0x000000ff) >>  0; }
+			channel r() const { return (rgba_ & 0xff000000) >> 24; }
+			channel g() const { return (rgba_ & 0x00ff0000) >> 16; }
+			channel b() const { return (rgba_ & 0x0000ff00) >>  8; }
+			channel a() const { return (rgba_ & 0x000000ff) >>  0; }
 
-			color inline   r(channel const & r) const throw() { color copy(*this); copy.r(r); return copy; }
-			color inline   g(channel const & g) const throw() { color copy(*this); copy.g(g); return copy; }
-			color inline   b(channel const & b) const throw() { color copy(*this); copy.b(b); return copy; }
-			color inline   a(channel const & a) const throw() { color copy(*this); copy.a(a); return copy; }
+			color   r(channel const & r) const { color copy(*this); copy.r(r); return copy; }
+			color   g(channel const & g) const { color copy(*this); copy.g(g); return copy; }
+			color   b(channel const & b) const { color copy(*this); copy.b(b); return copy; }
+			color   a(channel const & a) const { color copy(*this); copy.a(a); return copy; }
 
-			color inline & r(channel const & r)       throw() { uint32_t shift(r); shift <<= 24; rgba_ &= 0x00ffffff; rgba_ |= shift; assert(this->r() == r); return *this; }
-			color inline & g(channel const & g)       throw() { uint32_t shift(g); shift <<= 16; rgba_ &= 0xff00ffff; rgba_ |= shift; assert(this->g() == g); return *this; }
-			color inline & b(channel const & b)       throw() { uint16_t shift(b); shift <<=  8; rgba_ &= 0xffff00ff; rgba_ |= shift; assert(this->b() == b); return *this; }
-			color inline & a(channel const & a)       throw() {                                  rgba_ &= 0xffffff00; rgba_ |= a    ; assert(this->a() == a); return *this; }
+			color & r(channel const & r)       { uint32_t shift(r); shift <<= 24; rgba_ &= 0x00ffffff; rgba_ |= shift; assert(this->r() == r); return *this; }
+			color & g(channel const & g)       { uint32_t shift(g); shift <<= 16; rgba_ &= 0xff00ffff; rgba_ |= shift; assert(this->g() == g); return *this; }
+			color & b(channel const & b)       { uint16_t shift(b); shift <<=  8; rgba_ &= 0xffff00ff; rgba_ |= shift; assert(this->b() == b); return *this; }
+			color & a(channel const & a)       {                                  rgba_ &= 0xffffff00; rgba_ |= a    ; assert(this->a() == a); return *this; }
 
 		private:
 			rgba rgba_;
 	};
 }}}
+#endif

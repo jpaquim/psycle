@@ -2,6 +2,8 @@
 // copyright 2007-2010 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::sequence
+#ifndef PSYCLE__TESTS__RANDOM_NOTES__SCORE2__INCLUDED
+#define PSYCLE__TESTS__RANDOM_NOTES__SCORE2__INCLUDED
 #pragma once
 #include <psycle/engine.hpp>
 #include <psycle/host/plugin_resolver.hpp>
@@ -30,3 +32,4 @@ class score2 {
 
 }}}
 #include <psycle/detail/decl.hpp>
+#endif

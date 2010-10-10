@@ -29,7 +29,7 @@ namespace {
 
 PSYCLE__PLUGINS__NODE_INSTANTIATOR(alsa)
 
-alsa::alsa(class plugin_library_reference & plugin_library_reference, name_type const & name) throw(exception)
+alsa::alsa(class plugin_library_reference & plugin_library_reference, name_type const & name)
 :
 	resource(plugin_library_reference, name),
 	pcm_(),
@@ -41,7 +41,7 @@ alsa::alsa(class plugin_library_reference & plugin_library_reference, name_type 
 	amp_(*this, "amplification", 1)
 {}
 
-void alsa::do_open() throw(engine::exception) {
+void alsa::do_open() {
 	resource::do_open();
 	
 	int error;
@@ -391,7 +391,7 @@ bool alsa::opened() const {
 	return pcm_;
 }
 
-void alsa::do_start() throw(engine::exception) {
+void alsa::do_start() {
 	resource::do_start();
 
 	// allocate software parameters on the stack
@@ -486,7 +486,7 @@ void alsa::thread_function() {
 	loggers::information()("poller thread " + qualified_name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
 }
 
-void alsa::poll_loop() throw(engine::exception) {
+void alsa::poll_loop() {
 	// get number of file descriptors to poll
 	::nfds_t nfds;
 	if(0 >= (nfds = ::snd_pcm_poll_descriptors_count(pcm_)))
@@ -617,7 +617,7 @@ void alsa::poll_loop() throw(engine::exception) {
 	}
 }
 
-void alsa::do_process() throw(engine::exception) {
+void alsa::do_process() {
 	if(false && loggers::trace()) {
 		std::ostringstream s; s << "process";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -662,7 +662,7 @@ void alsa::do_process() throw(engine::exception) {
 	condition_.notify_one();
 }
 
-void alsa::do_stop() throw(engine::exception) {
+void alsa::do_stop() {
 	if(loggers::information()) loggers::information()("terminating and joining poller thread ...", UNIVERSALIS__COMPILER__LOCATION);
 	if(!thread_) {
 		if(loggers::information()) loggers::information()("poller thread was not running", UNIVERSALIS__COMPILER__LOCATION);
@@ -678,7 +678,7 @@ void alsa::do_stop() throw(engine::exception) {
 	resource::do_stop();
 }
 
-void alsa::do_close() throw(engine::exception) {
+void alsa::do_close() {
 	if(pcm_) ::snd_pcm_close(pcm_); pcm_ = 0;  // or ::snd_pcm_free(pcm_); ?
 	#if 1
 		// nothing needed for write method

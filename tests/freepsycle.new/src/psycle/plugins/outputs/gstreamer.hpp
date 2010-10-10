@@ -2,6 +2,8 @@
 // copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::outputs::gstreamer
+#ifndef PSYCLE__PLUGINS__OUTPUTS__GSTREAMER__INCLUDED
+#define PSYCLE__PLUGINS__OUTPUTS__GSTREAMER__INCLUDED
 #pragma once
 #include "../resource.hpp"
 #include <universalis/stdlib/mutex.hpp>
@@ -17,18 +19,18 @@ using namespace universalis::stdlib;
 /// outputs to a soundcard device via gstreamer output implementation.
 class PSYCLE__DECL gstreamer : public resource {
 	public:
-		gstreamer(class plugin_library_reference &, name_type const &) throw(exception);
+		gstreamer(class plugin_library_reference &, name_type const &);
 		ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 		void do_name(std::string const &) /*override*/;
 		bool opened()  const /*override*/;
 		bool started() const /*override*/;
 	protected:
-		void do_open()    throw(exception) /*override*/;
-		void do_start()   throw(exception) /*override*/;
-		void do_process() throw(exception) /*override*/;
-		void do_stop()    throw(exception) /*override*/;
-		void do_close()   throw(exception) /*override*/;
-		void channel_change_notification_from_port(port const &) throw(exception) /*override*/;
+		void do_open() /*override*/;
+		void do_start() /*override*/;
+		void do_process() /*override*/;
+		void do_stop() /*override*/;
+		void do_close() /*override*/;
+		void channel_change_notification_from_port(port const &) /*override*/;
 	private:
 		::GstElement * pipeline_, * source_, * caps_filter_, * sink_;
 
@@ -62,3 +64,4 @@ class PSYCLE__DECL gstreamer : public resource {
 
 }}}
 #include <psycle/detail/decl.hpp>
+#endif

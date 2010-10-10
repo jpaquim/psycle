@@ -2,6 +2,8 @@
 // copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::stream::format::riff_wave
+#ifndef PSYCLE__STREAM__FORMATS__RIFF_WAVE__FORMAT__INCLUDED
+#define PSYCLE__STREAM__FORMATS__RIFF_WAVE__FORMAT__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 #include "../../format.hpp"
@@ -30,7 +32,7 @@ class PSYCLE__DECL format : public stream::format {
 		public:
 
 			#if 0
-				format(riff &) throw(exception)
+				format(riff &);
 				/// fmt chunk only
 				void write(riff &);
 				/// fmt & fact chunks
@@ -51,41 +53,41 @@ class PSYCLE__DECL format : public stream::format {
 					#endif
 
 				public:
-					void          tag(std::uint16_t);
-					std::uint16_t tag() const throw() { return tag_; }
+					void     tag(uint16_t);
+					uint16_t tag() const { return tag_; }
 				private:
-					std::uint16_t tag_; // tags::type enumerated type, but forced to be 16-bit long
+					uint16_t tag_; // tags::type enumerated type, but forced to be 16-bit long
 
 				public:
-					void          channels(std::uint16_t);
-					std::uint16_t channels() const throw() { return channels_; }
+					void     channels(uint16_t);
+					uint16_t channels() const { return channels_; }
 				private:
-					std::uint16_t channels_;
+					uint16_t channels_;
 
 				public:
-					void          samples_per_second(std::uint32_t);
-					std::uint32_t samples_per_second() const throw() { return samples_per_second_; }
+					void     samples_per_second(uint32_t);
+					uint32_t samples_per_second() const { return samples_per_second_; }
 				private:
-					std::uint32_t samples_per_second_;
+					uint32_t samples_per_second_;
 
 				private:
-					std::uint32_t average_bytes_per_second_;
-
-				public:
-					real          bytes_per_channel_sample() const { return bytes_per_sample() / channels(); }
-					real          bytes_per_sample        () const;
-				private:
-					std::uint16_t bytes_per_sample_;
-					unsigned int  bytes_to_samples(unsigned int) const;
+					uint32_t average_bytes_per_second_;
 
 				public:
-					void          bits_per_channel_sample(std::uint16_t);
-					std::uint16_t bits_per_channel_sample() const throw() { return bits_per_channel_sample_; }
+					real     bytes_per_channel_sample() const { return bytes_per_sample() / channels(); }
+					real     bytes_per_sample        () const;
 				private:
-					std::uint16_t bits_per_channel_sample_;
+					uint16_t bytes_per_sample_;
+					unsigned int bytes_to_samples(unsigned int) const;
 
 				public:
-					void set(std::uint16_t channels = 2, std::uint32_t samples_per_second = 44100, std::uint16_t bits_per_channel_sample = 16);
+					void     bits_per_channel_sample(uint16_t);
+					uint16_t bits_per_channel_sample() const { return bits_per_channel_sample_; }
+				private:
+					uint16_t bits_per_channel_sample_;
+
+				public:
+					void set(uint16_t channels = 2, uint32_t samples_per_second = 44100, uint16_t bits_per_channel_sample = 16);
 
 				void recompute_if_pcm(bool full = true);
 
@@ -93,16 +95,16 @@ class PSYCLE__DECL format : public stream::format {
 					std::size_t size() const { return sizeof *this + extra_information_size(); }
 				private:
 					/// the count in bytes of the size of extra information, after the size itself
-					std::uint16_t extra_information_size() const throw() { return extra_information_size_; }
-					std::uint16_t extra_information_size_;
+					uint16_t extra_information_size() const { return extra_information_size_; }
+					uint16_t extra_information_size_;
 					// variable size ... \todo make a custom allocator by overloading operator new(const size_t &)
-					//std::int8_t extra[];
+					//int8_t extra[];
 			};
 
 			chunk_type * chunk_;
 			chunk_type & chunk() const { return *chunk_; }
 
-			void allocate_chunk(std::size_t extra_information_size) throw(std::bad_alloc);
+			void allocate_chunk(std::size_t extra_information_size);
 
 		public:
 			struct tags { enum type { // not meant to be exhaustive
@@ -114,8 +116,8 @@ class PSYCLE__DECL format : public stream::format {
 				vorbis           = unknown // i do not know what would be the identifier ... actually, i only saw vorbis in a ogg container, never in a riff one
 			}; };
 
-			void       tag(tags::type tag)       throw() { chunk().tag(tag); }
-			tags::type tag(              ) const throw() { return static_cast<tags::type>(chunk().tag()); }
+			void       tag(tags::type tag)       { chunk().tag(tag); }
+			tags::type tag(              ) const { return static_cast<tags::type>(chunk().tag()); }
 
 		private:
 			std::string tag_description() const;
@@ -126,25 +128,25 @@ class PSYCLE__DECL format : public stream::format {
 		format(format const &);
 		virtual ~format() throw();
 
-		void          virtual inline samples_per_second(unsigned int value)       {        chunk().samples_per_second(value); }
-		unsigned int  virtual inline samples_per_second(                  ) const { return chunk().samples_per_second(     ); }
+		virtual inline void          samples_per_second(unsigned int value)       {        chunk().samples_per_second(value); }
+		virtual inline unsigned int  samples_per_second(                  ) const { return chunk().samples_per_second(     ); }
 
-		void          virtual inline channels(unsigned char value)       {        chunk().channels(value); }
-		unsigned char virtual inline channels(                   ) const { return chunk().channels(     ); }
+		virtual inline void          channels(unsigned char value)       {        chunk().channels(value); }
+		virtual inline unsigned char channels(                   ) const { return chunk().channels(     ); }
 
-		void          virtual inline significant_bits_per_channel_sample(unsigned char value)       {        bits_per_channel_sample(value); }
-		unsigned char virtual inline significant_bits_per_channel_sample(                   ) const { return bits_per_channel_sample(     ); }
+		virtual inline void          significant_bits_per_channel_sample(unsigned char value)       {        bits_per_channel_sample(value); }
+		virtual inline unsigned char significant_bits_per_channel_sample(                   ) const { return bits_per_channel_sample(     ); }
 
-		void          virtual inline bits_per_channel_sample(unsigned char value)                         {        chunk().bits_per_channel_sample(value); }
-		unsigned char virtual inline bits_per_channel_sample(                                     ) const { return chunk().bits_per_channel_sample(     ); }
+		virtual inline void          bits_per_channel_sample(unsigned char value)                         {        chunk().bits_per_channel_sample(value); }
+		virtual inline unsigned char bits_per_channel_sample(                                     ) const { return chunk().bits_per_channel_sample(     ); }
 
-		real          virtual inline bytes_per_channel_sample() const { return chunk().bytes_per_sample(); }
-		real          virtual inline bytes_per_sample        () const { return chunk().bytes_per_sample(); }
+		virtual inline real          bytes_per_channel_sample() const { return chunk().bytes_per_sample(); }
+		virtual inline real          bytes_per_sample        () const { return chunk().bytes_per_sample(); }
 		
 		///\todo
-		void virtual inline sample_signed(bool)       {              }
+		virtual inline void sample_signed(bool)       {              }
 		///\todo
-		bool virtual inline sample_signed(    ) const { return true; }
+		virtual inline bool sample_signed(    ) const { return true; }
 
 		#if 0 // it's handled by riff's root chunk header id: either "RIFF" or "RIFX"
 			void virtual sample_endianness(universalis::cpu::endianness::type) {}
@@ -161,3 +163,4 @@ class PSYCLE__DECL format : public stream::format {
 
 }}}}
 #include <psycle/detail/decl.hpp>
+#endif

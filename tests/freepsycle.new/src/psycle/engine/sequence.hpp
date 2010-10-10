@@ -2,6 +2,8 @@
 // copyright 2008-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::sequence
+#ifndef PSYCLE__ENGINE__SEQUENCE__INCLUDED
+#define PSYCLE__ENGINE__SEQUENCE__INCLUDED
 #pragma once
 #include "named.hpp"
 #include "sample.hpp"
@@ -106,3 +108,4 @@ class PSYCLE__DECL sequence_iterator {
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif

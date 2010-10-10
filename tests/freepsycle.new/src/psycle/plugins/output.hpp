@@ -2,6 +2,8 @@
 // copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::output
+#ifndef PSYCLE__PLUGINS__OUTPUT__INCLUDED
+#define PSYCLE__PLUGINS__OUTPUT__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 
@@ -74,10 +76,11 @@ typedef outputs::
 class PSYCLE__DECL output : public output_base {
 	public:
 		typedef output_base base;
-		output(class plugin_library_reference &, name_type const &) throw(exception);
+		output(class plugin_library_reference &, name_type const &);
 	public:
 		//ports::inputs::single & in_port() { return *single_input_ports()[0]; }
 };
 
 }}
 #include <psycle/detail/decl.hpp>
+#endif
