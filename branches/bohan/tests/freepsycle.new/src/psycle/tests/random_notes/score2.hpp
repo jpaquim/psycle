@@ -18,6 +18,7 @@ namespace psycle { namespace tests { namespace random_notes {
 class score2 {
 	public:
 		score2(host::plugin_resolver &, engine::graph &);
+		~score2();
 		void connect(engine::node & out);
 		void generate();
 	private:

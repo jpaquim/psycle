@@ -20,6 +20,11 @@ score2::score2(host::plugin_resolver & resolver, engine::graph & graph)
 	freq_plug_.graph(graph);
 }
 
+score2::~score2() {
+	delete &sine_;
+	delete &freq_plug_;
+}
+
 void score2::connect(engine::node & out) {
 	freq_plug_.sequence_iterator() = new engine::sequence_iterator(freq_);
 	
