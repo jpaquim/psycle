@@ -22,23 +22,10 @@ class PSYCLE__DECL plugin_resolver {
 	private:
 		class instanciator : protected engine::plugin_library_reference {
 			friend class plugin_resolver;
-			private:
-				///\todo remove instance class and do all ref counting directly in node
-				class instance {
-					public:
-						instance(instanciator &, engine::node::name_type const &);
-						virtual ~instance() throw();
-						operator engine::node const & () const { return node_; }
-						operator engine::node & () { return node_; }
-						engine::node const & node() const { return node_; }
-						engine::node & node() { return node_; }
-					private:
-						engine::node & node_;
-				};
 			public:
 				instanciator(plugin_resolver &, std::string const & plugin_name);
 				virtual ~instanciator() throw();
-				instance & operator()(engine::node::name_type const &);
+				engine::node & operator()(engine::node::name_type const &);
 				std::string name() const throw();
 				std::string full_name() const throw();
 				std::string const & short_name() const { return plugin_library_reference::name(); }
@@ -63,8 +50,7 @@ class PSYCLE__DECL plugin_resolver {
 		virtual ~plugin_resolver() throw();
 		/// instanciates a node which is defined in the library plugin_name.
 		/// The loading (and unloading) of the library is transparent.
-		instanciator::instance & operator()(
-			std::string const & plugin_name, engine::node::name_type const &);
+		engine::node & operator()(std::string const & plugin_name, engine::node::name_type const &);
 };
 
 }}

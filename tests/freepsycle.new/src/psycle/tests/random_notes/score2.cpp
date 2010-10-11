@@ -13,8 +13,8 @@ score2::score2(host::plugin_resolver & resolver, engine::graph & graph)
 	freq_("freq"),
 	resolver_(resolver),
 	graph_(graph),
-	sine_(static_cast<plugins::sine&>(resolver("sine", "sine").node())),
-	freq_plug_(static_cast<plugins::sequence&>(resolver("sequence", freq_.name()).node()))
+	sine_(static_cast<plugins::sine&>(resolver("sine", "sine"))),
+	freq_plug_(static_cast<plugins::sequence&>(resolver("sequence", freq_.name())))
 {
 	sine_.graph(graph);
 	freq_plug_.graph(graph);
