@@ -33,8 +33,7 @@ class PSYCLE__DECL plugin_resolver {
 				unsigned int operator--() throw() /*override*/;
 			private:
 				plugin_resolver & plugin_resolver_;
-				/// note: if aggregated directly without reference, on object destruction, we get "Inconsistency detected by ld.so: dl-close.c: 627: _dl_close: Assertion `map->l_init_called' failed!"
-				universalis::os::dyn_link::resolver & library_resolver_;
+				universalis::os::dyn_link::resolver library_resolver_;
 				typedef engine::node & (*node_instanciator) (engine::reference_counter &, engine::node::name_type const &);
 				node_instanciator const node_instanciator_;
 		};
