@@ -63,13 +63,15 @@ try
 		plugin_resolver_(plugin_resolver),
 		///\todo the version number is actually libtool's version info
 		//library_resolver_(*new universalis::os::dynamic_link::resolver("-" + universalis::os::paths::package::name() + ".plugin." + name, universalis::os::paths::package::version::major_number())),
-		library_resolver_(*new universalis::os::dyn_link::resolver(
+		library_resolver_(
 			#if defined DIVERSALIS__OS__MICROSOFT
-				// currently no prefix, when built with scons at least
+				// no prefix
+			#elif defined DIVERSALIS__OS__CYGWIN
+				"cyg"
 			#else
 				"lib"
 			#endif
-			"freepsycle-plugin-" + plugin_name, 0)),
+			"freepsycle-plugin-" + plugin_name, 0),
 		node_instanciator_(library_resolver_.resolve_symbol<node_instanciator>(
 			UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__ENGINE__NODE_INSTANTIATOR__SYMBOL(new))
 		))
@@ -132,7 +134,6 @@ plugin_resolver::instanciator::~instanciator() throw() {
 		s << "deleting plugin instanciator, unloading library " << short_name() << ": " << full_name();
 		loggers::information()(s.str());
 	}
-	delete &library_resolver_;
 }
 
 }}
