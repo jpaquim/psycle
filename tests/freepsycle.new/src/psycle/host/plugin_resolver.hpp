@@ -19,6 +19,17 @@ namespace psycle { namespace host {
 /// resolves libraries, handles their loading and unloading,
 /// instanciates nodes simply from their plugin names.
 class PSYCLE__DECL plugin_resolver {
+	public:
+		/// creates a new plugin resolver.
+		plugin_resolver();
+		/// deletes the plugin resolver.
+		/// To be able to delete the resolver correctly,
+		/// there must be no more node instances of any of the plugins ;
+		/// they must all have been deleted previous to this very object deletion.
+		virtual ~plugin_resolver() throw();
+		/// instanciates a node which is defined in the library plugin_name.
+		/// The loading (and unloading) of the library is transparent.
+		engine::node & operator()(std::string const & plugin_name, engine::node::name_type const &);
 	private:
 		class instanciator : protected engine::plugin_library_reference {
 			friend class plugin_resolver;
@@ -39,17 +50,6 @@ class PSYCLE__DECL plugin_resolver {
 		};
 		instanciator & operator[](std::string const & plugin_name);
 		typedef std::map<std::string, instanciator*> map; map map_;
-	public:
-		/// creates a new plugin resolver.
-		plugin_resolver();
-		/// deletes the plugin resolver.
-		/// To be able to delete the resolver correctly,
-		/// there must be no more node instances of any of the plugins ;
-		/// they must all have been deleted previous to this very object deletion.
-		virtual ~plugin_resolver() throw();
-		/// instanciates a node which is defined in the library plugin_name.
-		/// The loading (and unloading) of the library is transparent.
-		engine::node & operator()(std::string const & plugin_name, engine::node::name_type const &);
 };
 
 }}

@@ -4,7 +4,6 @@
 ///\implementation psycle::host::scheduler
 #include <psycle/detail/project.private.hpp>
 #include "scheduler.hpp"
-#include "psycle/host/scheduler.hpp"
 #include <psycle/engine/reference_counter.hpp>
 #include <universalis/os/clocks.hpp>
 #include <universalis/os/thread_name.hpp>
