@@ -49,9 +49,7 @@ plugin_resolver::instanciator & plugin_resolver::operator[](const std::string & 
 	}
 }
 
-plugin_resolver::instanciator::instance & plugin_resolver::operator()(
-	const std::string & plugin_name, engine::node::name_type const & node_name
-) {
+engine::node & plugin_resolver::operator()(std::string const & plugin_name, engine::node::name_type const & node_name) {
 	return (*this)[plugin_name](node_name);
 }
 
@@ -99,13 +97,13 @@ std::string plugin_resolver::instanciator::full_name() const throw() {
 	return library_resolver_.path().string();
 }
 
-plugin_resolver::instanciator::instance & plugin_resolver::instanciator::operator()(engine::node::name_type const & name) {
+engine::node & plugin_resolver::instanciator::operator()(engine::node::name_type const & name) {
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << name << ": new plugin instance from loaded library " << this->name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	instance & result = *new instance(*this, name);
+	engine::node & result = node_instanciator_(*this, name);
 	if(loggers::trace()) {
 		std::ostringstream s;
 		s << "plugin library reference count: " << this->name() << ", incremented, new count: " << *this;
@@ -135,35 +133,6 @@ plugin_resolver::instanciator::~instanciator() throw() {
 		loggers::information()(s.str());
 	}
 	delete &library_resolver_;
-}
-
-/***************************************************************/
-// plugin_resolver::instanciator::instance
-
-plugin_resolver::instanciator::instance::instance(plugin_resolver::instanciator & instanciator, engine::node::name_type const & name)
-:
-	node_(instanciator.node_instanciator_(instanciator, name))
-{
-	if(loggers::information()) {
-		std::ostringstream s;
-		s << node().qualified_name() << ": done creating new node instance of " << universalis::compiler::typenameof(node_)
-			<< " from loaded library " << instanciator.name();
-		loggers::information()(s.str());
-	}
-	++node_.plugin_library_reference();
-}
-
-plugin_resolver::instanciator::instance::~instance() throw() {
-	if(loggers::information()) {
-		std::ostringstream s;
-		s << node_.qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(node_)
-			<< " from loaded library " << node_.plugin_library_reference().name();
-		loggers::information()(s.str());
-	}
-	engine::reference_counter & reference_counter(node_.plugin_library_reference());
-	///\todo use the plugin's exported deletion function
-	delete &node_;
-	--reference_counter;
 }
 
 }}

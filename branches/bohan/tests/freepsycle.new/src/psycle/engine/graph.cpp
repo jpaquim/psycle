@@ -64,16 +64,18 @@ node::node(class plugin_library_reference & plugin_library_reference, name_type 
 {
 	if(loggers::trace()) {
 		std::ostringstream s;
-		s << qualified_name() << ": new engine node";
+		s << qualified_name() << ": new node instance of " << universalis::compiler::typenameof(*this)
+			<< " from loaded library " << plugin_library_reference_.name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
-	//++plugin_library_reference_;
+	++plugin_library_reference_;
 }
 
 node::~node() {
 	if(loggers::trace()) {
 		std::ostringstream s;
-		s << qualified_name() << ": deleting engine node";
+		s << qualified_name() << ": deleting node instance of " << universalis::compiler::typenameof(*this)
+			<< " from loaded library " << plugin_library_reference_.name();
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	if(graph_) graph_->erase(this);
