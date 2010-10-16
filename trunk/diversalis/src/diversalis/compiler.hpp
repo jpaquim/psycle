@@ -171,7 +171,7 @@
 			#define DIVERSALIS__COMPILER__VERSION__PATCH __clang__patchlevel__
 		#endif
 		#define DIVERSALIS__COMPILER__NAME "clang"
-	#if defined __INTEL_COMPILER
+	#elif defined __INTEL_COMPILER
 		#define DIVERSALIS__COMPILER__INTEL
 		#define DIVERSALIS__COMPILER__NAME "icc"
 	#else
