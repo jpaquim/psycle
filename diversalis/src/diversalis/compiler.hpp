@@ -141,7 +141,7 @@
 		#define __cplusplus
 	#endif
 
-///////////////////////
+////////////////////////
 // netbeans c++ indexer
 
 #elif defined DIVERSALIS__COMPILER__NETBEANS
@@ -149,7 +149,7 @@
 	#define DIVERSALIS__COMPILER__NAME "netbeans"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 
-///////////////////////
+///////////////////////////
 // eclipse cdt c++ indexer
 
 #elif defined DIVERSALIS__COMPILER__ECLIPSE
@@ -157,11 +157,7 @@
 	#define DIVERSALIS__COMPILER__NAME "eclipse"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 
-////////////////
-// clang compiler
-#elif defined __clang__
-
-////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
 // gnu compiler, and other compilers that disguise as gnu gcc (llvm clang, intel icc ...)
 
 #elif defined __GNUC__
