@@ -2,7 +2,7 @@
 ///\brief Arguru xfilter (crossdelay)
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/dsp.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include <cstdio>
 
 using namespace psycle::plugin_interface;

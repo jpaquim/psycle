@@ -16,7 +16,7 @@
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/fft.hpp>
 #include <psycle/helpers/dsp.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 
 namespace psycle { namespace host {
 

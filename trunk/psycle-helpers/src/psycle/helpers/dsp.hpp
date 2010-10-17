@@ -8,7 +8,7 @@
 #include <cmath>
 #include <cstring>
 #if defined BOOST_AUTO_TEST_CASE
-	#include <universalis/os/aligned_memory_alloc.hpp>
+	#include <universalis/os/aligned_alloc.hpp>
 	#include <universalis/os/clocks.hpp>
 	#include <sstream>
 #endif
