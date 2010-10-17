@@ -155,7 +155,7 @@
 
 #if !defined universalis__cpu__memory_barriers__defined
 	#warning Memory barriers are not defined for this system. Will use compare_and_swap to emulate.
-	#include <universalis/cpu/atomic/compare_and_swap.hpp>
+	#include "atomic_compare_and_swap.hpp"
 	namespace universalis { namespace cpu { namespace memory_barriers {
 		void inline  full() { static int dummy; compare_and_swap(&dummy, 0, 1); }
 		void inline  read() {}
