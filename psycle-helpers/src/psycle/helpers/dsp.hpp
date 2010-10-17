@@ -608,7 +608,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	#if defined BOOST_AUTO_TEST_CASE
 		BOOST_AUTO_TEST_CASE(dsp_test) {
 			std::size_t const alignment = 16;
-			std::vector<float, universalis::os::aligned_alloc<float, alignment> > v1, v2;
+			std::vector<float, universalis::os::aligned_allocator<float, alignment> > v1, v2;
 			for(std::size_t s = 0; s < 10000; ++s) {
 				v1.push_back(s);
 				v2.push_back(s);
