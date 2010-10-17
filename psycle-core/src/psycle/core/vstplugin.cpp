@@ -16,7 +16,7 @@
 	#include "fileio.h"
 
 	#include <psycle/helpers/dsp.hpp>
-	#include <universalis/os/aligned_memory_alloc.hpp>
+	#include <universalis/os/aligned_alloc.hpp>
 	#include <sstream>
 
 	#ifdef DIVERSALIS__OS__MICROSOFT

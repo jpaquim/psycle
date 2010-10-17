@@ -22,7 +22,7 @@
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/sched.hpp>
 #include <universalis/cpu/exception.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include <boost/bind.hpp>
 
 namespace psycle { namespace core {

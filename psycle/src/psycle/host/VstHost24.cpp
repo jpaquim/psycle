@@ -19,7 +19,7 @@
 ///\todo: When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
 //        (LiveSlice is a good example of what happens if it isn't correct)
 
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 
 namespace psycle
 {

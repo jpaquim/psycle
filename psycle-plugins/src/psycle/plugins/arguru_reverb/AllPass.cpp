@@ -1,5 +1,5 @@
 #include "AllPass.hpp"
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include <psycle/helpers/dsp.hpp>
 
 CAllPass::CAllPass(): l_delayedCounter(0), r_delayedCounter(0),Counter(0),

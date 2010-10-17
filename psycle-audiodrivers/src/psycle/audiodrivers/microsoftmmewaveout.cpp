@@ -3,7 +3,7 @@
 
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "microsoftmmewaveout.h"
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 
 namespace psycle { namespace audiodrivers {
 

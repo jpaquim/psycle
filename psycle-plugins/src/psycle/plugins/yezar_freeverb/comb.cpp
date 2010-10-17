@@ -1,5 +1,5 @@
 #include "comb.hpp"
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include <psycle/helpers/dsp.hpp>
 
 // Comb filter implementation

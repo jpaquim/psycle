@@ -1,5 +1,5 @@
 #include "CombFilter.hpp"
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include <psycle/helpers/dsp.hpp>
 
 CCombFilter::CCombFilter()
