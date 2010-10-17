@@ -15,3 +15,4 @@
 #include <universalis/stdlib/condition.hpp>
 #include <universalis/os/sched.hpp>
 #include <universalis/os/aligned_alloc.hpp>
+#include <universalis/cpu/atomic_compare_and_swap.hpp>
