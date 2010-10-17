@@ -132,9 +132,9 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 
 			public:
 				void test(unsigned int threads) {
-					inner_loop = 250;
-					start = 50;
-					end = start + 50;
+					inner_loop = 50;
+					start = 10;
+					end = start + 10;
 					shared_start = threads;
 					shared = 0;
 
