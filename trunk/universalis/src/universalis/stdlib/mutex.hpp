@@ -73,6 +73,11 @@ namespace detail {
 				friend class condition<recursive_mutex>;
 				friend class condition<timed_mutex>;
 				friend class condition<recursive_timed_mutex>;
+			#elif defined DIVERSALIS__COMPILER__CLANG
+				template<typename, typename> friend class boost_timed_mutex_wrapper;
+				template<typename> friend class stdlib::scoped_lock;
+				template<typename> friend class stdlib::unique_lock;
+				template<typename> friend class stdlib::condition;
 			#else
 				template<typename, typename> friend class boost_timed_mutex_wrapper;
 				template<typename> friend class scoped_lock;
