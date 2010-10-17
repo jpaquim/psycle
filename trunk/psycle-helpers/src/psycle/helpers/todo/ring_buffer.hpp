@@ -3,6 +3,7 @@
 
 ///\interface psycle::helpers::ring_buffer
 #pragma once
+#include <universalis.hpp>
 #include <universalis/cpu/memory_barriers.hpp>
 #include <cstddef>
 namespace psycle { namespace helpers {
@@ -52,14 +53,23 @@ class ring_buffer {
 	///\name read position
 	///\{
 		public:
-			void wait_for_read_avail(size_type wanted_size, size_type & restrict position, size_type & restrict size1, size_type & restrict size2) {
+			void wait_for_read_avail(
+				size_type wanted_size,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT position,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT size1,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT size2
+			) {
 				do get_read_position_and_sizes(position, size1, size2);
 				while(size1 + size2 < wanted_size);
 			}
 			
-			void get_read_position_and_sizes(size_type & restrict position, size_type & restrict size1, size_type & restrict size2) const {
+			void get_read_position_and_sizes(
+				size_type & UNIVERSALIS__COMPILER__RESTRICT position,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT size1,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT size2
+			) const {
 				universalis::cpu::memory_barriers::read();
-				size_type const r(read_position_), w(write_position_);
+				size_type const r = read_position_, w = write_position_;
 				position = r;
 				if(r < w) {
 					size1 = w - r;
@@ -82,14 +92,23 @@ class ring_buffer {
 	///\name write position
 	///\{
 		public:
-			void wait_for_write_avail(size_type wanted_size, size_type & restrict position, size_type & restrict size1, size_type & restrict size2) {
+			void wait_for_write_avail(
+				size_type wanted_size,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT position,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT size1,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT size2
+			) {
 				do get_write_position_and_sizes(position, size1, size2);
 				while(size1 + size2 < wanted_size);
 			}
 
-			void get_write_position_and_sizes(size_type & restrict position, size_type & restrict size1, size_type & restrict size2) const {
+			void get_write_position_and_sizes(
+				size_type & UNIVERSALIS__COMPILER__RESTRICT position,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT size1,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT size2
+			) const {
 				universalis::cpu::memory_barriers::read();
-				size_type const r(read_position_), w(write_position_);
+				size_type const r = read_position_, w = write_position_;
 				position = w;
 				if(w < r) {
 					size1 = r - w;
