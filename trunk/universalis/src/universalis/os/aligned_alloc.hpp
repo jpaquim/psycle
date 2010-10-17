@@ -60,7 +60,7 @@ void aligned_memory_dealloc(X *& address) {
 }
 
 template<typename T, std::size_t Alignment>
-class aligned_alloc {
+class aligned_allocator {
 	public:
 		// type definitions
 		typedef T value_type;
@@ -74,7 +74,7 @@ class aligned_alloc {
 		// rebind allocator to type U
 		template<typename T2>
 		class rebind {
-			public: typedef aligned_alloc<T2, Alignment> other;
+			public: typedef aligned_allocator<T2, Alignment> other;
 		};
 
 		// return address of values
@@ -82,10 +82,10 @@ class aligned_alloc {
 		const_pointer address(const_reference value) const { return &value; }
 
 		// constructors and destructor. nothing to do because the allocator has no state
-		aligned_alloc() throw() {}
-		aligned_alloc(const aligned_alloc&) throw() {}
-		template<typename T2> aligned_alloc(const aligned_alloc<T2, Alignment>&) throw() {}
-		~aligned_alloc() throw() {}
+		aligned_allocator() throw() {}
+		aligned_allocator(const aligned_allocator&) throw() {}
+		template<typename T2> aligned_allocator(const aligned_allocator<T2, Alignment>&) throw() {}
+		~aligned_allocator() throw() {}
 
 		// return maximum number of elements that can be allocated
 		size_type max_size() const throw() { return std::numeric_limits<std::size_t>::max() / sizeof(T); }
@@ -120,21 +120,21 @@ class aligned_alloc {
 // return that all specializations of this allocator with the same alignment are interchangeable
 
 template<typename T1, std::size_t Alignment1, typename T2, std::size_t Alignment2>
-bool operator==(const universalis::os::aligned_alloc<T1, Alignment1>&, const universalis::os::aligned_alloc<T2, Alignment2>&) throw() {
+bool operator==(const universalis::os::aligned_allocator<T1, Alignment1>&, const universalis::os::aligned_allocator<T2, Alignment2>&) throw() {
 	return Alignment1 == Alignment2;
 }
 
 template<typename T1, std::size_t Alignment1, typename T2, std::size_t Alignment2>
-bool operator!=(const universalis::os::aligned_alloc<T1, Alignment1>&, const universalis::os::aligned_alloc<T2, Alignment2>&) throw() {
+bool operator!=(const universalis::os::aligned_allocator<T1, Alignment1>&, const universalis::os::aligned_allocator<T2, Alignment2>&) throw() {
 	return Alignment1 != Alignment2;
 }
 
 #if defined BOOST_AUTO_TEST_CASE
 	#include <vector>
 	namespace universalis { namespace os {
-		BOOST_AUTO_TEST_CASE(aligned_alloc_test) {
+		BOOST_AUTO_TEST_CASE(aligned_allocator_test) {
 			std::size_t const alignment = 16;
-			std::vector<float, aligned_alloc<float, alignment> > v;
+			std::vector<float, aligned_allocator<float, alignment> > v;
 			for(std::size_t s = 0; s < 100; ++s) {
 				v.push_back(0);
 				union {
