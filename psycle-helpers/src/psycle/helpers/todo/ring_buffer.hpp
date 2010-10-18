@@ -55,18 +55,18 @@ class ring_buffer {
 		public:
 			void wait_for_read_avail(
 				size_type wanted_size,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT position,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT size1,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT size2
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF position,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF size1,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF size2
 			) {
 				do get_read_position_and_sizes(position, size1, size2);
 				while(size1 + size2 < wanted_size);
 			}
 			
 			void get_read_position_and_sizes(
-				size_type & UNIVERSALIS__COMPILER__RESTRICT position,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT size1,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT size2
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF position,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF size1,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF size2
 			) const {
 				universalis::cpu::memory_barriers::read();
 				size_type const r = read_position_, w = write_position_;
@@ -94,18 +94,18 @@ class ring_buffer {
 		public:
 			void wait_for_write_avail(
 				size_type wanted_size,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT position,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT size1,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT size2
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF position,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF size1,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF size2
 			) {
 				do get_write_position_and_sizes(position, size1, size2);
 				while(size1 + size2 < wanted_size);
 			}
 
 			void get_write_position_and_sizes(
-				size_type & UNIVERSALIS__COMPILER__RESTRICT position,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT size1,
-				size_type & UNIVERSALIS__COMPILER__RESTRICT size2
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF position,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF size1,
+				size_type & UNIVERSALIS__COMPILER__RESTRICT_REF size2
 			) const {
 				universalis::cpu::memory_barriers::read();
 				size_type const r = read_position_, w = write_position_;
