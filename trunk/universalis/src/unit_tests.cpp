@@ -3,7 +3,6 @@
 #define BOOST_DYN_LINK
 #include <boost/config/auto_link.hpp>
 
-#include <boost/version.hpp> / ?
 #define BOOST_TEST_DYN_LINK
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
