@@ -130,3 +130,105 @@ class ring_buffer {
 };
 
 }}
+
+	#include <universalis/stdlib/thread.hpp>
+	#include <universalis/os/clocks.hpp>
+	#include <vector>
+	#include <boost/bind.hpp>
+	#include <sstream>
+	namespace {
+		using namespace universalis::stdlib;
+
+		class ring_buffer {
+			std::size_t const size_;
+			std::ptrdiff_t read_, write_;
+			public:
+				ring_buffer(std::size_t size) : size_(size), read_(), write_() {}
+
+				void get_write_avail(std::ptrdiff_t & begin, std::size_t & end1, std::size_t & end2) {
+					begin = write_;
+					std::ptrdiff_t const read = read_;
+					if(read <= write_) {
+						end1 = size_;
+						end2 = read;
+					} else {
+						end1 = read;
+						end2 = 0;
+					}
+					std::clog << "wa: b: " << begin << ", e1: " << end1 << ", e2: " << end2 << '\n';
+				}
+
+				void advance_write(std::ptrdiff_t count) {
+					if(count) write_ = (write_ + count) % size_;
+				}
+
+				void get_read_avail(std::ptrdiff_t & begin, std::size_t & end1, std::size_t & end2) {
+					begin = read_;
+					std::ptrdiff_t const write = write_;
+					if(write < read_) {
+						end1 = size_;
+						end2 = write;
+					} else {
+						end1 = write;
+						end2 = 0;
+					}
+					std::clog << "ra: b: " << begin << ", e1: " << end1 << ", e2: " << end2 << '\n';
+				}
+
+				void advance_read(std::ptrdiff_t count) {
+					if(count) read_ = (read_ + count) % size_;
+				}
+		};
+
+		typedef nanoseconds::tick_type counter;
+
+		void writer_loop(counter buf[], ring_buffer & ring, counter iterations) {
+			counter c = 0;
+			while(c < iterations) {
+				std::ptrdiff_t begin;
+				std::size_t end1, end2;
+				ring.get_write_avail(begin, end1, end2);
+				for(std::ptrdiff_t i = begin; i < end1; ++i) buf[i] = ++c;
+				for(std::ptrdiff_t i = 0; i < end2; ++i) buf[i] = ++c;
+				ring.advance_write(end1 - begin + end2);
+			}
+		}
+
+		void reader_loop(counter buf[], ring_buffer & ring, counter iterations) {
+			counter c = 0;
+			while(c < iterations) {
+				std::ptrdiff_t begin;
+				std::size_t end1, end2;
+				ring.get_read_avail(begin, end1, end2);
+				if(end1) {
+					for(std::ptrdiff_t i = begin; i < end1; ++i) if(buf[i] != ++c) throw 0;
+					if(end2) for(std::ptrdiff_t i = 0; i < end2; ++i) if(buf[i] != ++c) throw 0;
+					ring.advance_read(end1 - begin + end2);
+				}
+			}
+		}
+
+		nanoseconds static inline cpu_time_clock() {
+			return universalis::os::clocks::monotonic::current();
+		}
+
+		BOOST_AUTO_TEST_CASE(x) {
+			counter const iterations = 100000;
+			std::size_t const size = 512;
+			counter buf[size];
+			for(std::size_t i = 0; i < size; ++i) buf[i] = 0;
+			ring_buffer ring(size);
+			thread writer_thread(boost::bind(writer_loop, buf, ring, iterations));
+			thread reader_thread(boost::bind(reader_loop, buf, ring, iterations));
+			nanoseconds const t0 = cpu_time_clock();
+			writer_thread.join();
+			reader_thread.join();
+			nanoseconds const t1 = cpu_time_clock();
+			{
+				std::ostringstream s;
+				s << buf[0] << '\n' << (t1 - t0).get_count() * 1e-9 << 's';
+				BOOST_MESSAGE(s.str());
+			}
+		}
+	}
+#endif
