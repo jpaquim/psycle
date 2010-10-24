@@ -12,7 +12,7 @@
 #include <string>
 #include <iostream>
 
-/// ring buffer interface
+/// ring buffer concept
 class ring {
 	public:
 		ring(std::size_t size) { assert("power of 2" && !(size & (size - 1))); }
