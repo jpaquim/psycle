@@ -273,8 +273,7 @@ class ring_with_compiler_volatile {
 		void test(std::random_device::result_type writer_rand_gen_seed, std::random_device::result_type reader_rand_gen_seed) {
 			std::size_t const size = 256;
 			std::size_t const cpu_avail =
-				// note: std::thread::hardware_concurrency() is not impacted by the taskset command.
-				//       What we want is the process' scheduler affinity mask.
+				// note: std::thread::hardware_concurrency() is not impacted by the process' scheduler affinity mask.
 				universalis::os::sched::process().affinity_mask().active_count();
 			std::size_t const elements_to_process =
 				// note: On single-cpu system, the lock-free ring buffer is very slow
