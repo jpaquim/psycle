@@ -4,17 +4,11 @@
 // compile with g++ --std=c++0x -pthread -Wall -O3
 
 #include <cstddef>
-#include <cstdatomic>
 #include <cassert>
 #include <algorithm>
-#include <thread>
-#include <utility>
-#include <random>
-#include <chrono>
-#include <typeinfo>
-#include <string>
-#include <iostream>
 
+#if 0
+/**********************************************************/
 /// ring buffer concept
 class ring {
 	public:
@@ -25,9 +19,11 @@ class ring {
 		void avail_for_read(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const;
 		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const;
 };
+#endif
 
-#include <sstream>
+#include <cstdatomic>
 
+/**********************************************************/
 /// ring buffer using c++0x atomic types
 class ring_with_atomic_stdlib {
 	std::size_t const size_, size_mask_, size_mask2_;
@@ -79,6 +75,7 @@ class ring_with_atomic_stdlib {
 		}
 };
 
+/**********************************************************/
 /// ring buffer using explict memory barriers
 class ring_with_explicit_memory_barriers {
 	std::size_t const size_, size_mask_, size_mask2_;
@@ -134,6 +131,7 @@ class ring_with_explicit_memory_barriers {
 		}
 };
 
+/**********************************************************/
 /// ring buffer using compiler volatile
 /// WARNING: It doesn't work reliably on cpu archs with weak memory ordering, and it also suffers from undeterministic wakeups which make it slower.
 class ring_with_compiler_volatile {
@@ -180,6 +178,9 @@ class ring_with_compiler_volatile {
 		}
 };
 
+/*********************************************************************/
+// unit test
+
 template<typename Ring, typename RandGen>
 void writer_loop(std::size_t buf[], Ring & ring, RandGen & rand_gen, std::size_t elements_to_process) {
 	std::size_t counter = 0;
@@ -211,6 +212,14 @@ void reader_loop(std::size_t buf[], Ring & ring, RandGen & rand_gen, std::size_t
 		}
 	}
 }
+
+#include <thread>
+#include <utility>
+#include <random>
+#include <chrono>
+#include <typeinfo>
+#include <string>
+#include <iostream>
 
 std::string demangle(std::string const & mangled_symbol);
 
