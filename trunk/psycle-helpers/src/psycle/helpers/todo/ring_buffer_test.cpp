@@ -11,6 +11,7 @@
 #include <utility>
 #include <random>
 #include <chrono>
+#include <typeinfo>
 #include <string>
 #include <iostream>
 
@@ -25,40 +26,56 @@ class ring {
 		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const;
 };
 
+#include <sstream>
+
 /// ring buffer using c++0x atomic types
 class ring_with_atomic_stdlib {
-	std::size_t const size_, size_mask_;
+	std::size_t const size_, size_mask_, size_mask2_;
 	std::atomic<std::size_t> read_, write_;
 	
 	public:
-		ring_with_atomic_stdlib(std::size_t size) : size_(size), size_mask_(size - 1), read_(), write_() {
+		ring_with_atomic_stdlib(std::size_t size) : size_(size), size_mask_(size - 1), size_mask2_(size * 2 - 1), read_(0), write_(0) {
 			assert("power of 2" && !(size & size_mask_));
 		}
 		
 		std::size_t size() const { return size_; }
 		
 		void commit_read(std::size_t count) {
-			read_.fetch_add(count, std::memory_order_release);
+			auto const read = read_.load(std::memory_order_relaxed);
+			read_.store((read + count) & size_mask2_, std::memory_order_release);
 		}
 
 		void commit_write(std::size_t count) {
-			write_.fetch_add(count, std::memory_order_release);
+			auto const write = write_.load(std::memory_order_relaxed);
+			write_.store((write + count) & size_mask2_, std::memory_order_release);
 		}
 
 		void avail_for_read(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			auto const read = read_.load(std::memory_order_relaxed);
 			begin = read & size_mask_;
 			auto const write = write_.load(std::memory_order_acquire);
-			size1 = write - read;
-			size2 = 0;
+			auto const avail = std::min(max, (write - read) & size_mask2_);
+			if(begin + avail > size_) {
+				size1 = size_ - begin;
+				size2 = avail - size1;
+			} else {
+				size1 = avail;
+				size2 = 0;
+			}
 		}
 
 		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			auto const write = write_.load(std::memory_order_relaxed);
 			begin = write & size_mask_;
 			auto const read = read_.load(std::memory_order_acquire);
-			size1 = size_ - (write - read);
-			size2 = 0;
+			auto const avail = std::min(max, size_ - ((write - read) & size_mask2_));
+			if(begin + avail > size_) {
+				size1 = size_ - begin;
+				size2 = avail - size1;
+			} else {
+				size1 = avail;
+				size2 = 0;
+			}
 		}
 };
 
@@ -93,7 +110,7 @@ class ring_with_explicit_memory_barriers {
 		void avail_for_read(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			begin = read_ & size_mask_;
 			memory_barriers::read();
-			auto avail = std::min(max, (write_ - read_) & size_mask2_);
+			auto const avail = std::min(max, (write_ - read_) & size_mask2_);
 			if(begin + avail > size_) {
 				size1 = size_ - begin;
 				size2 = avail - size1;
@@ -106,7 +123,7 @@ class ring_with_explicit_memory_barriers {
 		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			begin = write_ & size_mask_;
 			memory_barriers::read();
-			auto avail = std::min(max, size_ - ((write_ - read_) & size_mask2_));
+			auto const avail = std::min(max, size_ - ((write_ - read_) & size_mask2_));
 			if(begin + avail > size_) {
 				size1 = size_ - begin;
 				size2 = avail - size1;
@@ -140,7 +157,7 @@ class ring_with_compiler_volatile {
 
 		void avail_for_read(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			begin = read_ & size_mask_;
-			auto avail = std::min(max, (write_ - read_) & size_mask2_);
+			auto const avail = std::min(max, (write_ - read_) & size_mask2_);
 			if(begin + avail > size_) {
 				size1 = size_ - begin;
 				size2 = avail - size1;
@@ -152,7 +169,7 @@ class ring_with_compiler_volatile {
 
 		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			begin = write_ & size_mask_;
-			auto avail = std::min(max, size_ - ((write_ - read_) & size_mask2_));
+			auto const avail = std::min(max, size_ - ((write_ - read_) & size_mask2_));
 			if(begin + avail > size_) {
 				size1 = size_ - begin;
 				size2 = avail - size1;
@@ -235,7 +252,7 @@ int main() {
 	std::random_device rand_dev;
 	std::random_device::result_type const writer_rand_gen_seed = rand_dev();
 	std::random_device::result_type const reader_rand_gen_seed = rand_dev();
-	//test<ring_with_atomic_stdlib>(writer_rand_gen_seed, reader_rand_gen_seed);
+	test<ring_with_atomic_stdlib>(writer_rand_gen_seed, reader_rand_gen_seed);
 	test<ring_with_explicit_memory_barriers>(writer_rand_gen_seed, reader_rand_gen_seed);
 	test<ring_with_compiler_volatile>(writer_rand_gen_seed, reader_rand_gen_seed);
 	return 0;
