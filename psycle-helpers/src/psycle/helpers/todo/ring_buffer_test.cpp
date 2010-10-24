@@ -4,10 +4,24 @@
 #include <cstddef>
 #include <cstdatomic>
 #include <cassert>
+#include <algorithm>
 #include <thread>
+#include <utility>
+#include <random>
 #include <chrono>
 #include <string>
 #include <iostream>
+
+/// ring buffer interface
+class ring {
+	public:
+		ring(std::size_t size) { assert("power of 2" && !(size & (size - 1))); }
+		std::size_t size() const;
+		void commit_read(std::size_t count);
+		void commit_write(std::size_t count);
+		void avail_for_read(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const;
+		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const;
+};
 
 /// ring buffer using c++0x atomic types
 class ring_with_atomic_stdlib {
@@ -19,6 +33,8 @@ class ring_with_atomic_stdlib {
 			assert("power of 2" && !(size & size_mask_));
 		}
 		
+		std::size_t size() const { return size_; }
+		
 		void commit_read(std::size_t count) {
 			read_.fetch_add(count, std::memory_order_release);
 		}
@@ -27,7 +43,7 @@ class ring_with_atomic_stdlib {
 			write_.fetch_add(count, std::memory_order_release);
 		}
 
-		void avail_for_read(std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
+		void avail_for_read(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			auto const read = read_.load(std::memory_order_relaxed);
 			begin = read & size_mask_;
 			auto const write = write_.load(std::memory_order_acquire);
@@ -35,7 +51,7 @@ class ring_with_atomic_stdlib {
 			size2 = 0;
 		}
 
-		void avail_for_write(std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
+		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			auto const write = write_.load(std::memory_order_relaxed);
 			begin = write & size_mask_;
 			auto const read = read_.load(std::memory_order_acquire);
@@ -44,122 +60,115 @@ class ring_with_atomic_stdlib {
 		}
 };
 
-#if defined __GNUG__
-	// nothing to include
-#elif defined _MSC_VER
-	#include <intrin.h>
-	#pragma intrinsic(_ReadWriteBarrier)
-	#pragma intrinsic(_ReadBarrier)
-	#pragma intrinsic(_WriteBarrier)
-#elif defined__APPLE__
-	#include <libkern/OSAtomic.h> // for OSMemoryBarrier()
-#endif
-
 /// ring buffer using explict memory barriers
 class ring_with_explicit_memory_barriers {
-	std::size_t const size_, size_mask_;
+	std::size_t const size_, size_mask_, size_mask2_;
 	std::size_t read_, write_;
+	class memory_barriers {
+		public:
+			void inline static  full();
+			void inline static  read();
+			void inline static write();
+	};
 
 	public:
-		ring_with_explicit_memory_barriers(std::size_t size) : size_(size), size_mask_(size - 1), read_(), write_() {
+		ring_with_explicit_memory_barriers(std::size_t size) : size_(size), size_mask_(size - 1), size_mask2_(size * 2 - 1), read_(), write_() {
 			assert("power of 2" && !(size & size_mask_));
 		}
 		
+		std::size_t size() const { return size_; }
+		
 		void commit_read(std::size_t count) {
 			memory_barriers::write();
-			read_ += count;
+			read_ = (read_ + count) & size_mask2_;
 		}
 
 		void commit_write(std::size_t count) {
 			memory_barriers::write();
-			write_ += count;
+			write_ = (write_ + count) & size_mask2_;
 		}
 
-		void avail_for_read(std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
-			memory_barriers::read();
+		void avail_for_read(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			begin = read_ & size_mask_;
-			size1 = write_ - read_;
-			size2 = 0;
+			memory_barriers::read();
+			auto avail = std::min(max, (write_ - read_) & size_mask2_);
+			if(begin + avail > size_) {
+				size1 = size_ - begin;
+				size2 = avail - size1;
+			} else {
+				size1 = avail;
+				size2 = 0;
+			}
 		}
 
-		void avail_for_write(std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
-			memory_barriers::read();
+		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			begin = write_ & size_mask_;
-			size1 = size_ - (write_ - read_);
-			size2 = 0;
+			memory_barriers::read();
+			auto avail = std::min(max, size_ - ((write_ - read_) & size_mask2_));
+			if(begin + avail > size_) {
+				size1 = size_ - begin;
+				size2 = avail - size1;
+			} else {
+				size1 = avail;
+				size2 = 0;
+			}
 		}
-		
-	private:
-		struct memory_barriers {
-			#if defined __GNUG__
-				#if \
-					defined __x86_64__ || defined __k8__ || defined __nocona__ || defined __pentium4__ || \
-					defined __i686__ || defined __i586__ || defined __i486__ || defined __i386__
-					void static  full() { asm volatile ("mfence":::"memory"); }
-					void static  read() { asm volatile ("lfence":::"memory"); }
-					void static write() { asm volatile ("sfence":::"memory"); }
-				#else // defined __ia64__ || defined __hppa__ || defined __alpha__ || defined __sparc__ || defined __mips__ || defined __arm__ || defined __powerpc__
-					void static  full() { __sync_synchronize(); }
-					void static  read() { full(); }
-					void static write() { full(); }
-				#endif
-			#elif defined _MSC_VER
-				void static  full() { _ReadWriteBarrier(); }
-				void static  read() { _ReadBarrier(); }
-				void static write() { _WriteBarrier(); }
-			#elif defined __APPLE__
-				void static  full() { OSMemoryBarrier(); }
-				void static  read() { full(); }
-				void static write() { full(); }
-			#else
-				#error unimplemented
-				void static  full() {}
-				void static  read() {}
-				void static write() {}
-			#endif
-		};
 };
 
 /// ring buffer using compiler volatile
 /// WARNING: It doesn't work reliably on cpu archs with weak memory ordering, and it also suffers from undeterministic wakeups which make it slower.
 class ring_with_compiler_volatile {
-	std::size_t const size_, size_mask_;
+	std::size_t const size_, size_mask_, size_mask2_;
 	std::size_t volatile read_, write_;
 	
 	public:
-		ring_with_compiler_volatile(std::size_t size) : size_(size), size_mask_(size - 1), read_(), write_() {
+		ring_with_compiler_volatile(std::size_t size) : size_(size), size_mask_(size - 1), size_mask2_(size * 2 - 1), read_(), write_() {
 			assert("power of 2" && !(size & size_mask_));
 		}
 		
+		std::size_t size() const { return size_; }
+		
 		void commit_read(std::size_t count) {
-			read_ += count;
+			read_ = (read_ + count) & size_mask2_;
 		}
 
 		void commit_write(std::size_t count) {
-			write_ += count;
+			write_ = (write_ + count) & size_mask2_;
 		}
 
-		void avail_for_read(std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
+		void avail_for_read(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			begin = read_ & size_mask_;
-			size1 = write_ - read_;
-			size2 = 0;
+			auto avail = std::min(max, (write_ - read_) & size_mask2_);
+			if(begin + avail > size_) {
+				size1 = size_ - begin;
+				size2 = avail - size1;
+			} else {
+				size1 = avail;
+				size2 = 0;
+			}
 		}
 
-		void avail_for_write(std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
+		void avail_for_write(std::size_t max, std::size_t & begin, std::size_t & size1, std::size_t & size2) const {
 			begin = write_ & size_mask_;
-			size1 = size_ - (write_ - read_);
-			size2 = 0;
+			auto avail = std::min(max, size_ - ((write_ - read_) & size_mask2_));
+			if(begin + avail > size_) {
+				size1 = size_ - begin;
+				size2 = avail - size1;
+			} else {
+				size1 = avail;
+				size2 = 0;
+			}
 		}
 };
 
-template<typename Ring>
-void writer_loop(std::size_t buf[], Ring & ring, std::size_t elements_to_process) {
+template<typename Ring, typename RandGen>
+void writer_loop(std::size_t buf[], Ring & ring, RandGen & rand_gen, std::size_t elements_to_process) {
 	std::size_t counter = 0;
 	while(counter < elements_to_process) {
 		std::size_t begin, size1, size2;
-		ring.avail_for_write(begin, size1, size2);
+		ring.avail_for_write(rand_gen(), begin, size1, size2);
 		if(size1) {
-			for(std::size_t i = begin; i < size1; ++i) buf[i] = ++counter;
+			for(std::size_t i = begin, e = begin + size1; i < e; ++i) buf[i] = ++counter;
 			if(size2) {
 				for(std::size_t i = 0; i < size2; ++i) buf[i] = ++counter;
 				ring.commit_write(size1 + size2);
@@ -168,14 +177,14 @@ void writer_loop(std::size_t buf[], Ring & ring, std::size_t elements_to_process
 	}
 }
 
-template<typename Ring>
-void reader_loop(std::size_t buf[], Ring & ring, std::size_t elements_to_process) {
+template<typename Ring, typename RandGen>
+void reader_loop(std::size_t buf[], Ring & ring, RandGen & rand_gen, std::size_t elements_to_process) {
 	std::size_t counter = 0;
 	while(counter < elements_to_process) {
 		std::size_t begin, size1, size2;
-		ring.avail_for_read(begin, size1, size2);
+		ring.avail_for_read(rand_gen(), begin, size1, size2);
 		if(size1) {
-			for(std::size_t i = begin; i < size1; ++i) assert(buf[i] == ++counter);
+			for(std::size_t i = begin, e = begin + size1; i < e; ++i) assert(buf[i] == ++counter);
 			if(size2) {
 				for(std::size_t i = 0; i < size2; ++i) assert(buf[i] == ++counter);
 				ring.commit_read(size1 + size2);
@@ -183,6 +192,78 @@ void reader_loop(std::size_t buf[], Ring & ring, std::size_t elements_to_process
 		}
 	}
 }
+
+std::string demangle(std::string const & mangled_symbol);
+
+template<typename Ring>
+void test() {
+	std::size_t const size = 256;
+	std::size_t const elements_to_process = 1000 * 1000 * 1000;
+	std::size_t buf[size];
+	Ring ring(size);
+	std::cout <<
+		"____________________________\n\n"
+		"ring typename: " << demangle(typeid(ring).name()) << "\n"
+		"ring buffer size: " << size << "\n"
+		"elements to process: " << double(elements_to_process) << "\n"
+		"running ... " << std::flush;
+	typedef std::variate_generator<std::mt19937, std::uniform_int<std::size_t>> rand_gen_type;
+	rand_gen_type writer_rand_gen { rand_gen_type::engine_type(), rand_gen_type::distribution_type(ring.size() / 3, ring.size() / 2) };
+	rand_gen_type reader_rand_gen { rand_gen_type::engine_type(), rand_gen_type::distribution_type(ring.size() / 3, ring.size() / 2) };
+	auto const t0 = std::chrono::high_resolution_clock::now();
+	std::thread writer_thread(writer_loop<Ring, rand_gen_type>, buf, std::ref(ring), std::ref(writer_rand_gen), elements_to_process);
+	std::thread reader_thread(reader_loop<Ring, rand_gen_type>, buf, std::ref(ring), std::ref(reader_rand_gen), elements_to_process);
+	writer_thread.join();
+	reader_thread.join();
+	auto const t1 = std::chrono::high_resolution_clock::now();
+	std::cout << "done.\n";
+	auto const duration = std::chrono::nanoseconds(t1 - t0).count() * 1e-9;
+	std::cout <<
+		"duration: " << duration << " seconds\n"
+		"troughput: " << elements_to_process / duration << " elements/second\n";
+}
+
+int main() {
+	//test<ring_with_atomic_stdlib>();
+	test<ring_with_explicit_memory_barriers>();
+	test<ring_with_compiler_volatile>();
+	return 0;
+}
+
+/*********************************************************************/
+// platform-specific code below
+
+#if defined __GNUG__
+	#if \
+		defined __x86_64__ || defined __k8__ || defined __nocona__ || defined __pentium4__ || \
+		defined __i686__ || defined __i586__ || defined __i486__ || defined __i386__
+		void inline ring_with_explicit_memory_barriers::memory_barriers:: full() { asm volatile ("mfence":::"memory"); }
+		void inline ring_with_explicit_memory_barriers::memory_barriers:: read() { asm volatile ("lfence":::"memory"); }
+		void inline ring_with_explicit_memory_barriers::memory_barriers::write() { asm volatile ("sfence":::"memory"); }
+	#else // defined __ia64__ || defined __hppa__ || defined __alpha__ || defined __sparc__ || defined __mips__ || defined __arm__ || defined __powerpc__
+		void inline ring_with_explicit_memory_barriers::memory_barriers:: full() { __sync_synchronize(); }
+		void inline ring_with_explicit_memory_barriers::memory_barriers:: read() { full(); }
+		void inline ring_with_explicit_memory_barriers::memory_barriers::write() { full(); }
+	#endif
+#elif defined _MSC_VER
+	#include <intrin.h>
+	#pragma intrinsic(_ReadWriteBarrier)
+	#pragma intrinsic(_ReadBarrier)
+	#pragma intrinsic(_WriteBarrier)
+	void inline ring_with_explicit_memory_barriers::memory_barriers:: full() { _ReadWriteBarrier(); }
+	void inline ring_with_explicit_memory_barriers::memory_barriers:: read() { _ReadBarrier(); }
+	void inline ring_with_explicit_memory_barriers::memory_barriers::write() { _WriteBarrier(); }
+#elif defined __APPLE__
+	#include <libkern/OSAtomic.h> // for OSMemoryBarrier()
+	void inline ring_with_explicit_memory_barriers::memory_barriers:: full() { OSMemoryBarrier(); }
+	void inline ring_with_explicit_memory_barriers::memory_barriers:: read() { full(); }
+	void inline ring_with_explicit_memory_barriers::memory_barriers::write() { full(); }
+#else
+	#error unimplemented
+	void inline ring_with_explicit_memory_barriers::memory_barriers:: full() {}
+	void inline ring_with_explicit_memory_barriers::memory_barriers:: read() {}
+	void inline ring_with_explicit_memory_barriers::memory_barriers::write() {}
+#endif
 
 #if defined __GNUG__
 	#include <cxxabi.h>
@@ -199,38 +280,5 @@ std::string demangle(std::string const & mangled_symbol) {
 	#else
 		return mangled_symbol;
 	#endif
-}
-
-template<typename Ring>
-void test() {
-	std::size_t const size = 64;
-	std::size_t const elements_to_process = 400 * 1000 * 1000;
-	std::size_t buf[size];
-	Ring ring(size);
-	std::chrono::high_resolution_clock clock;
-	std::cout <<
-		"____________________________\n\n"
-		"ring typename: " << demangle(typeid(ring).name()) << "\n"
-		"ring buffer size: " << size << "\n"
-		"elements to process: " << double(elements_to_process) << "\n"
-		"running ... " << std::flush;
-	auto const t0 = clock.now();
-	std::thread writer_thread(writer_loop<decltype(ring)>, buf, std::ref(ring), elements_to_process);
-	std::thread reader_thread(reader_loop<decltype(ring)>, buf, std::ref(ring), elements_to_process);
-	writer_thread.join();
-	reader_thread.join();
-	auto const t1 = clock.now();
-	std::cout << "done.\n";
-	auto const duration = std::chrono::nanoseconds(t1 - t0).count() * 1e-9;
-	std::cout <<
-		"duration: " << duration << " seconds\n"
-		"troughput: " << elements_to_process / duration << " elements/second\n";
-}
-
-int main() {
-	//test<ring_with_atomic_stdlib>();
-	test<ring_with_explicit_memory_barriers>();
-	test<ring_with_compiler_volatile>();
-	return 0;
 }
 
