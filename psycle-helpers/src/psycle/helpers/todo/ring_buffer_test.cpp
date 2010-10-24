@@ -196,21 +196,26 @@ void reader_loop(std::size_t buf[], Ring & ring, RandGen & rand_gen, std::size_t
 std::string demangle(std::string const & mangled_symbol);
 
 template<typename Ring>
-void test() {
+void test(std::random_device::result_type writer_rand_gen_seed, std::random_device::result_type reader_rand_gen_seed) {
 	std::size_t const size = 256;
 	std::size_t const elements_to_process = 1000 * 1000 * 1000;
 	std::size_t buf[size];
 	Ring ring(size);
+	typedef std::variate_generator<std::mt19937, std::uniform_int<std::size_t>> rand_gen_type;
+	rand_gen_type::result_type const rand_gen_dist_lower = ring.size() / 4;
+	rand_gen_type::result_type const rand_gen_dist_upper = ring.size() / 2;
+	rand_gen_type writer_rand_gen { rand_gen_type::engine_type(reader_rand_gen_seed), rand_gen_type::distribution_type(rand_gen_dist_lower, rand_gen_dist_upper) };
+	rand_gen_type reader_rand_gen { rand_gen_type::engine_type(writer_rand_gen_seed), rand_gen_type::distribution_type(rand_gen_dist_lower, rand_gen_dist_upper) };
 	std::cout <<
 		"____________________________\n\n"
 		"ring typename: " << demangle(typeid(ring).name()) << "\n"
 		"ring buffer size: " << size << "\n"
 		"elements to process: " << double(elements_to_process) << "\n"
+		"rand gen typename: " << demangle(typeid(rand_gen_type).name()) << "\n"
+		"rand gen dist range: " << rand_gen_dist_lower << ' ' << rand_gen_dist_upper << "\n"
+		"writer rand gen seed: " << writer_rand_gen_seed << "\n"
+		"reader rand gen seed: " << reader_rand_gen_seed << "\n"
 		"running ... " << std::flush;
-	typedef std::variate_generator<std::mt19937, std::uniform_int<std::size_t>> rand_gen_type;
-	std::random_device rand_dev;
-	rand_gen_type writer_rand_gen { rand_gen_type::engine_type(rand_dev()), rand_gen_type::distribution_type(ring.size() / 3, ring.size() / 2) };
-	rand_gen_type reader_rand_gen { rand_gen_type::engine_type(rand_dev()), rand_gen_type::distribution_type(ring.size() / 3, ring.size() / 2) };
 	auto const t0 = std::chrono::high_resolution_clock::now();
 	std::thread writer_thread(writer_loop<Ring, rand_gen_type>, buf, std::ref(ring), std::ref(writer_rand_gen), elements_to_process);
 	std::thread reader_thread(reader_loop<Ring, rand_gen_type>, buf, std::ref(ring), std::ref(reader_rand_gen), elements_to_process);
@@ -225,9 +230,12 @@ void test() {
 }
 
 int main() {
-	//test<ring_with_atomic_stdlib>();
-	test<ring_with_explicit_memory_barriers>();
-	test<ring_with_compiler_volatile>();
+	std::random_device rand_dev;
+	std::random_device::result_type const writer_rand_gen_seed = rand_dev();
+	std::random_device::result_type const reader_rand_gen_seed = rand_dev();
+	//test<ring_with_atomic_stdlib>(writer_rand_gen_seed, reader_rand_gen_seed);
+	test<ring_with_explicit_memory_barriers>(writer_rand_gen_seed, reader_rand_gen_seed);
+	test<ring_with_compiler_volatile>(writer_rand_gen_seed, reader_rand_gen_seed);
 	return 0;
 }
 
