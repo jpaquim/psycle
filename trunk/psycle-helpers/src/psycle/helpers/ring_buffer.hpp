@@ -224,6 +224,7 @@ class ring_with_compiler_volatile {
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/compiler/typenameof.hpp>
+	#include <universalis/os/sched.hpp>
 	#include <thread>
 	#include <utility>
 	#include <random>
@@ -271,7 +272,19 @@ class ring_with_compiler_volatile {
 		template<typename Ring>
 		void test(std::random_device::result_type writer_rand_gen_seed, std::random_device::result_type reader_rand_gen_seed) {
 			std::size_t const size = 256;
-			std::size_t const elements_to_process = 100 * 1000 * 1000;
+			std::size_t const cpu_avail =
+				// note: std::thread::hardware_concurrency() is not impacted by the taskset command.
+				//       What we want is the process' scheduler affinity mask.
+				universalis::os::sched::process().affinity_mask().active_count();
+			std::size_t const elements_to_process =
+				// note: On single-cpu system, the lock-free ring buffer is very slow
+				//       because each thread completes its full quantum before the scheduler decides to switch (10 to 15 ms)
+				//       So we shorten it if there's only one cpu available.
+				//       std::thread::hardware_concurrency() is not impacted by the taskset command.
+				//       What we want is the process' scheduler affinity mask.
+				cpu_avail == 1 ?
+				100 * 1000 :
+				100 * 1000 * 1000;
 			std::size_t buf[size];
 			Ring ring(size);
 			typedef std::variate_generator<std::mt19937, std::uniform_int<std::size_t>> rand_gen_type;
@@ -285,6 +298,7 @@ class ring_with_compiler_volatile {
 					"____________________________\n\n"
 					"ring typename: " << universalis::compiler::typenameof(ring) << "\n"
 					"ring buffer size: " << size << "\n"
+					"number of cpu avail: " << cpu_avail << "\n"
 					"elements to process: " << double(elements_to_process) << "\n"
 					"rand gen typename: " << universalis::compiler::typenameof(typeid(rand_gen_type)) << "\n"
 					"rand gen dist range: " << rand_gen_dist_lower << ' ' << rand_gen_dist_upper << "\n"
