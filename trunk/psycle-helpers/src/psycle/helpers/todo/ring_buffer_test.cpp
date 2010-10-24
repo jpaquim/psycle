@@ -208,8 +208,8 @@ void test() {
 		"elements to process: " << double(elements_to_process) << "\n"
 		"running ... " << std::flush;
 	typedef std::variate_generator<std::mt19937, std::uniform_int<std::size_t>> rand_gen_type;
-	rand_gen_type writer_rand_gen { rand_gen_type::engine_type(), rand_gen_type::distribution_type(ring.size() / 3, ring.size() / 2) };
-	rand_gen_type reader_rand_gen { rand_gen_type::engine_type(), rand_gen_type::distribution_type(ring.size() / 3, ring.size() / 2) };
+	rand_gen_type writer_rand_gen { rand_gen_type::engine_type(0), rand_gen_type::distribution_type(ring.size() / 3, ring.size() / 2) };
+	rand_gen_type reader_rand_gen { rand_gen_type::engine_type(1), rand_gen_type::distribution_type(ring.size() / 3, ring.size() / 2) };
 	auto const t0 = std::chrono::high_resolution_clock::now();
 	std::thread writer_thread(writer_loop<Ring, rand_gen_type>, buf, std::ref(ring), std::ref(writer_rand_gen), elements_to_process);
 	std::thread reader_thread(reader_loop<Ring, rand_gen_type>, buf, std::ref(ring), std::ref(reader_rand_gen), elements_to_process);
