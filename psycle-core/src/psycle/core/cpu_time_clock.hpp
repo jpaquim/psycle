@@ -7,7 +7,7 @@
 #define PSYCLE__CORE__CPU_TIME_CLOCK__INCLUDED
 #pragma once
 
-#include <psycle/core/detail/project.private.hpp>
+#include <psycle/core/detail/project.hpp>
 #include <universalis/os/clocks.hpp>
 #include <universalis/stdlib/date_time.hpp>
 
