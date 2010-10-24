@@ -343,15 +343,15 @@ void CSaveWavDlg::OnSavewave() {
 	// create a thread for writing the audio data
 	kill_thread_ = 0;
 	if (savewires_btn_.GetCheck()) {
-		thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveWires, this));
+		thread_ = new thread(boost::bind(&CSaveWavDlg::SaveWires, this));
 	} else 
 	if (savegens_btn_.GetCheck()) {
-		thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveGenerators, this));
+		thread_ = new thread(boost::bind(&CSaveWavDlg::SaveGenerators, this));
 	} else
 	if (this->savetracks_btn_.GetCheck()) {
-		thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveTracks, this));
+		thread_ = new thread(boost::bind(&CSaveWavDlg::SaveTracks, this));
 	} else {
-		thread_ = new std::thread(boost::bind(&CSaveWavDlg::SaveNormal, this));
+		thread_ = new thread(boost::bind(&CSaveWavDlg::SaveNormal, this));
 	}
 }
 

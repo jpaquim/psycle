@@ -20,8 +20,7 @@ namespace psycle { namespace helpers { namespace math {
 /// less than 10% for input values between 0 and 0.6,
 /// maximum 60% for input values between 0.6 and 1.7,
 /// less than 10% for input values above 1.7.
-float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f)
-{
+float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f) {
 	#if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
 		BOOST_STATIC_ASSERT((sizeof f == 4));
 		//assert(f > 0); 
@@ -73,8 +72,7 @@ float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f)
 }
 
 #if defined BOOST_AUTO_TEST_CASE && !defined PSYCLE__HELPERS__MATH__FAST_LOG2__SKIP_TEST_CASE
-	BOOST_AUTO_TEST_CASE(fast_log2_test)
-	{
+	BOOST_AUTO_TEST_CASE(fast_log2_test) {
 		float const input_values[] = {
 			0.0000001f,
 			0.000001f,
@@ -140,10 +138,11 @@ float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f)
 		}
 		typedef universalis::os::clocks::monotonic clock;
 		int const iterations(1000000);
-		std::nanoseconds const t1(clock::current());
+		using namespace universalis::stdlib;
+		nanoseconds const t1(clock::current());
 		float f1(2);
 		for(int i(0); i < iterations; ++i) f1 += fast_log2(f1);
-		std::nanoseconds const t2(clock::current());
+		nanoseconds const t2(clock::current());
 		float f2(2);
 		for(int i(0); i < iterations; ++i) f2 += 
 			#if defined DIVERSALIS__COMPILER__MICROSOFT // lacks log2
@@ -152,7 +151,7 @@ float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f)
 				::log2(f2)
 			#endif
 			;
-		std::nanoseconds const t3(clock::current());
+		nanoseconds const t3(clock::current());
 		{
 			std::ostringstream s; s << "fast_log2: " << f1;
 			BOOST_MESSAGE(s.str());
