@@ -188,8 +188,9 @@ class ring_with_compiler_volatile {
 			std::size_t & UNIVERSALIS__COMPILER__RESTRICT_REF size1,
 			std::size_t & UNIVERSALIS__COMPILER__RESTRICT_REF size2
 		) const {
-			begin = read_ & size_mask_;
-			auto const avail = std::min(max, (write_ - read_) & size_mask2_);
+			auto const read = read_;
+			begin = read & size_mask_;
+			auto const avail = std::min(max, (write_ - read) & size_mask2_);
 			if(begin + avail > size_) {
 				size1 = size_ - begin;
 				size2 = avail - size1;
@@ -205,8 +206,9 @@ class ring_with_compiler_volatile {
 			std::size_t & UNIVERSALIS__COMPILER__RESTRICT_REF size1,
 			std::size_t & UNIVERSALIS__COMPILER__RESTRICT_REF size2
 		) const {
-			begin = write_ & size_mask_;
-			auto const avail = std::min(max, size_ - ((write_ - read_) & size_mask2_));
+			auto const write = write_;
+			begin = write & size_mask_;
+			auto const avail = std::min(max, size_ - ((write - read_) & size_mask2_));
 			if(begin + avail > size_) {
 				size1 = size_ - begin;
 				size2 = avail - size1;
