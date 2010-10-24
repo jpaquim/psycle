@@ -17,6 +17,8 @@ namespace core {
 }
 namespace host {
 
+using namespace universalis::stdlib;
+
 class CChildView;
 struct CSelection;
 		

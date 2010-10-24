@@ -267,7 +267,7 @@ class unique_lock : private boost::noncopyable {
 		typename mutex_type::implementation_lock_type implementation_lock_;
 		#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION < 1500
 			//friend class condition<unique_lock<mutex_type> >;
-			friend class condition<unique_lock<std::mutex> >;
+			friend class condition<unique_lock<mutex> >;
 			friend class condition<unique_lock<recursive_mutex> >;
 			friend class condition<unique_lock<timed_mutex> >;
 			friend class condition<unique_lock<recursive_timed_mutex> >;

@@ -7,7 +7,7 @@
 
 namespace psycle { namespace audiodrivers {
 
-	using namespace psycle::helpers;
+using namespace psycle::helpers;
 
 AudioDriverInfo WaveFileOut::info( ) const {
 	return AudioDriverInfo("wavefileout", "Wave to File Driver", "Recording a wav to a file", false);
@@ -19,7 +19,7 @@ WaveFileOut::WaveFileOut()
 
 void WaveFileOut::do_start() throw(std::exception) {
 	stop_requested_ = false;
-	thread_ = new std::thread(boost::bind(&WaveFileOut::thread_function, this));
+	thread_ = new thread(boost::bind(&WaveFileOut::thread_function, this));
 }
 
 void WaveFileOut::thread_function() {
