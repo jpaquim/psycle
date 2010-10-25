@@ -143,8 +143,8 @@ bool mi::DescribeValue(char *txt,int const param, int const value)
 	{
 	case LDELAY:
 	case RDELAY: sprintf(txt, "%.1f ms",  (float)value / 44.100f); return true;
-	case LGAIN: sprintf(txt, "%.2f", value); return true;
-	case RGAIN: sprintf(txt, "%.2f", value); return true;
+	case LGAIN: sprintf(txt, "%d", value); return true;
+	case RGAIN: sprintf(txt, "%d", value); return true;
 	case LOCKDELAY:
 	case LOCKGAIN: sprintf(txt, "%s", value ? "on" : "off"); return true;
 	}
