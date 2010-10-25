@@ -128,7 +128,7 @@ bool mi::DescribeValue(char *txt,int const param, int const value)
 	case LOWPASS:
 		sprintf(txt, "%s", value ? "on" : "off"); return true;
 	case CUTOFF:
-		sprintf(txt, "%d", value*currentSR*0.01); return true;
+		sprintf(txt, "%f", value*currentSR*0.01); return true;
 	case RESONANCE:
 		sprintf(txt, "0.%d", value); return true;
 	case PREGAIN:
