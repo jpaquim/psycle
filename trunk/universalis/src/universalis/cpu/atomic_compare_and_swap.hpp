@@ -10,6 +10,12 @@
 #include <diversalis/compiler.hpp>
 #if defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION >= 40100 // 4.1.0
 	// gcc's __sync_* built-in functions documented at http://gcc.gnu.org/onlinedocs/gcc-4.1.0/gcc/Atomic-Builtins.html
+#elif defined DIVERSALIS__COMPILER__MICROSOFT
+	#include <intrin.h>
+	#if !defined DIVERSALIS__COMPILER__INTEL
+		#pragma intrinsic(_InterlockedCompareExchange)
+		#pragma intrinsic(_InterlockedCompareExchange64)
+	#endif
 #else
 	#include <glib/gatomic.h>
 #endif
@@ -40,7 +46,24 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 	#endif
 }
 
-#if !defined DIVERSALIS__COMPILER__GNU || DIVERSALIS__COMPILER__VERSION < 40100 // 4.1.0
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	template<>
+	bool inline atomic_compare_and_swap<__int64>(__int64 & address, __int64 old_value, __int64 new_value) {
+		return old_value == _InterlockedCompareExchange64(&address, new_value, old_value);
+	}
+
+	template<>
+	bool inline atomic_compare_and_swap<long int>(long int & address, long int old_value, long int new_value) {
+		return old_value == _InterlockedCompareExchange(&address, new_value, old_value);
+	}
+
+	template<>
+	bool inline atomic_compare_and_swap<int>(int & address, int old_value, int new_value) {
+		long int const long_old_value = old_value;
+		long int const long_new_value = new_value;
+		return long_old_value == _InterlockedCompareExchange(reinterpret_cast<long int*>(&address), long_new_value, long_old_value);
+	}
+#elif !defined DIVERSALIS__COMPILER__GNU || DIVERSALIS__COMPILER__VERSION < 40100 // 4.1.0
 	template<>
 	bool inline atomic_compare_and_swap< ::gpointer>(::gpointer & address, ::gpointer old_value, ::gpointer new_value) {
 		return ::g_atomic_pointer_compare_and_exchange(&address, old_value, new_value);
@@ -57,6 +80,7 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/stdlib/thread.hpp>
+	#include <universalis/os/sched.hpp>
 	#include <universalis/os/clocks.hpp>
 	#include <vector>
 	#include <boost/bind.hpp>
@@ -132,9 +156,23 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 
 			public:
 				void test(unsigned int threads) {
-					inner_loop = 50;
-					start = 10;
-					end = start + 10;
+					unsigned int const cpu_avail =
+						// note: std::thread::hardware_concurrency() is not impacted by the process' scheduler affinity mask.
+						universalis::os::sched::process().affinity_mask().active_count();
+					if(cpu_avail == 1) {
+						// note: On single-cpu system, the lock-free test is very slow
+						//       because each thread completes its full quantum before the scheduler decides to switch (10 to 15 ms)
+						//       So we shorten it if there's only one cpu available.
+						//       std::thread::hardware_concurrency() is not impacted by the taskset command.
+						//       What we want is the process' scheduler affinity mask.
+						inner_loop = 2;
+						start = 2;
+						end = start + 2;
+					} else {
+						inner_loop = 50;
+						start = 10;
+						end = start + 10;
+					}
 					shared_start = threads;
 					shared = 0;
 
