@@ -252,10 +252,10 @@ void CTrack::Tick( tvals const &tv)
 	}
 
 
-	if( tv.Note != NOTE_OFF) // neuer wert
+	if( tv.Note != NOTE_NONE) // neuer wert
 	{
 		Note = tv.Note;
-		if(Note <= 119) // neue note gesetzt
+		if(Note <= NOTE_MAX) // neue note gesetzt
 		{
 			FrequencyFrom = Frequency;
 			Frequency = freqTab[Note];
@@ -322,7 +322,7 @@ void CTrack::Tick( tvals const &tv)
 			NewPhases();
 
 		}
-		else if( tv.Note == NOTE_NO)
+		else if( tv.Note == NOTE_NOTEOFF)
 		{
 			AEGState = EGS_SUSTAIN; // Prepare Amp Osci to enter in Release mode.
 			AEGCount = 0;

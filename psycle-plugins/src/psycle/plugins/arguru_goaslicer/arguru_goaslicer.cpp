@@ -68,7 +68,7 @@ mi::~mi() {
 void mi::SequencerTick() {
 	if (currentSR != pCB->GetSamplingRate()) {
 		currentSR = pCB->GetSamplingRate();
-		timerSamples = Vals[0]*44100/currentSR;
+		timerSamples = Vals[0]*44100.f/currentSR;
 		slopeAmount = Vals[1]*5.38330078125f/currentSR;
 	}
 	m_Timer = 0;
@@ -84,7 +84,7 @@ void mi::Command() {
 
 void mi::ParameterTweak(int par, int val) {
 	Vals[par] = val;
-	timerSamples = Vals[0]*44100/currentSR;
+	timerSamples = Vals[0]*44100.f/currentSR;
 	slopeAmount = Vals[1]*5.38330078125f/currentSR;
 }
 
@@ -139,7 +139,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 bool mi::DescribeValue(char* txt,int const param, int const value) {
 	switch(param) {
 		case 0: {
-			int samp = value*44100/currentSR;
+			int samp = value*44100.f/currentSR;
 			if (samp < pCB->GetTickLength()) {
 				std::sprintf(txt, "%.02f ticks (%dms)", (float)samp/pCB->GetTickLength(), 1000*samp/currentSR);
 			} else {

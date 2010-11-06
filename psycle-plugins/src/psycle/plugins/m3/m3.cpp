@@ -24,7 +24,7 @@ using namespace psycle::helpers::math;
 // Original Author sources are under:
 // http://www.fortunecity.com/skyscraper/rsi/76/plugins.htm
 
-float CTrack::freqTab[120];
+float CTrack::freqTab[12*10];
 float CTrack::coefsTab[4 * 128 * 128 * 8];
 float CTrack::LFOOscTab[0x10000];
 signed short CTrack::WaveTable[5][2100];
@@ -324,7 +324,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 
 	SetNoValue(tmp);
 
-	if(note<120) { // New Note entering.
+	if(note<=NOTE_MAX) { // New Note entering.
 		for(int voice = 0; voice < MAX_SIMUL_TRACKS; ++voice) { // Find a voice to apply the new note
 			switch(Tracks[voice].AEGState) {
 				case EGS_NONE:
@@ -340,7 +340,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 			}
 			if(Tracks[voice]._channel == channel) { // Does exist a Previous note?
 				if(!Tracks[voice].Glide) { // If no Glide , Note Off
-					tmp.Note = 120;
+					tmp.Note = NOTE_NOTEOFF;
 					Tracks[voice].Tick(tmp);
 					Tracks[voice]._channel = -1;
 					if(useVoice == -1) useVoice = voice;
@@ -353,7 +353,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 		Tracks[useVoice]._channel = channel;
 		Tracks[useVoice].Tick(tmp);
 	}
-	else if(note == 120) {
+	else if(note == NOTE_NOTEOFF) {
 		for(int voice = 0; voice < MAX_SIMUL_TRACKS; ++voice) { // Find the...
 			if(
 				Tracks[voice]._channel == channel && // ...playing voice on current channel.

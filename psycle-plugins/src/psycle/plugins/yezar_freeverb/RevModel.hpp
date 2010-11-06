@@ -19,17 +19,17 @@ public:
 		void	setdefaultvalues(int samplerate);
 		void	processmix(float *inputL, float *inputR, float *outputL, float *outputR, long numsamples, int skip);
 		void	processreplace(float *inputL, float *inputR, float *outputL, float *outputR, long numsamples, int skip);
-		void	setroomsize(float value);
+		void	setroomsize(float value, float update=true);
 		float	getroomsize();
-		void	setdamp(float value);
+		void	setdamp(float value, float update=true);
 		float	getdamp();
-		void	setwet(float value);
+		void	setwet(float value, float update=true);
 		float	getwet();
 		void	setdry(float value);
 		float	getdry();
-		void	setwidth(float value);
+		void	setwidth(float value, float update=true);
 		float	getwidth();
-		void	setmode(float value);
+		void	setmode(float value, float update=true);
 		float	getmode();
 private:
 		void	update();

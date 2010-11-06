@@ -47,28 +47,28 @@ enum {
 };
 
 
-CMachineParameter const paraWave = {"Osci Wave", "Oscillator waveform", 0, 3, MPF_STATE, 0};
-CMachineParameter const paraModWave = {"Mod Wave", "Modulator waveform", 0, 3, MPF_STATE, 0};
 CMachineParameter const paraAttack = {"VCA Attack", "VCA Attack in smp", 16, 65535, MPF_STATE, 29};
 CMachineParameter const paraDecay = {"VCA Decay", "VCA Decay in smp", 16, 65535, MPF_STATE, 46974};
-CMachineParameter const paraSustain = {"VCA Sustain Length", "VCA Sustain lenght in smp", 16, 65536, MPF_STATE, 944};
-CMachineParameter const paraSustainv = {"VCA Sustain Level", "VCA Sustain level", 1, 256, MPF_STATE, 13};
-CMachineParameter const paraRelease = {"VCA Release", "VCA Release in smp", 1, 65536, MPF_STATE, 2414};
+CMachineParameter const paraSustain = {"VCA Sustain Length", "VCA Sustain lenght in smp", 0, 65535, MPF_STATE, 944};
+CMachineParameter const paraSustainv = {"VCA Sustain Level", "VCA Sustain level", 1, 255, MPF_STATE, 13};
+CMachineParameter const paraRelease = {"VCA Release", "VCA Release in smp", 1, 65535, MPF_STATE, 2414};
 
 //////////////////////////////////////////////////////////////////////
 // Modulators Enveloper
 CMachineParameter const paraMAttack = {"MOD Env Attack", "MOD Envelope attack in smp", 16, 65535, MPF_STATE, 16};
 CMachineParameter const paraMDecay = {"MOD Env Decay", "MOD Envelope decay in smp", 16, 65535, MPF_STATE, 15717};
-CMachineParameter const paraMSustain = {"MOD Env Sustain Length", "MOD Envelope sustain lenght in smp", 16, 65536, MPF_STATE, 10967};
-CMachineParameter const paraMSustainv = {"MOD Env Sustain Level", "MOD Envelope sustain level", 1, 256, MPF_STATE, 8};
-CMachineParameter const paraMRelease = {"MOD Env Release", "MOD Envelope release in smp", 1, 65536, MPF_STATE, 3714};
+CMachineParameter const paraMSustain = {"MOD Env Sustain Len", "MOD Envelope sustain lenght in smp", 0, 65535, MPF_STATE, 10967};
+CMachineParameter const paraMSustainv = {"MOD Env Sustain Level", "MOD Envelope sustain level", 1, 255, MPF_STATE, 8};
+CMachineParameter const paraMRelease = {"MOD Env Release", "MOD Envelope release in smp", 1, 65535, MPF_STATE, 3714};
 CMachineParameter const paraModNote1D = {"MOD1 Amount Offset", "Modulator 1 depth", 0, 1000, MPF_STATE, 150};
 CMachineParameter const paraModNote2D = {"MOD2 Amount Offset", "Modulator 2 depth", 0, 1000, MPF_STATE, 0};
 CMachineParameter const paraModNote3D = {"MOD3 Amount Offset", "Modulator 3 depth", 0, 1000, MPF_STATE, 51};
 CMachineParameter const paraModEnv1 = {"MOD1 Env Amount", "Modulator 1 envelope amount", -256, 256, MPF_STATE, 256};
 CMachineParameter const paraModEnv2 = {"MOD2 Env Amount", "Modulator 2 envelope amount", -256, 256, MPF_STATE, 94};
 CMachineParameter const paraModEnv3 = {"MOD3 Env Amount", "Modulator 3 envelope amount", -256, 256, MPF_STATE, 110};
-CMachineParameter const paraRoute = {"FM Rout Mode", "Modulator Routing Mode", 0, 3, MPF_STATE, 0};
+CMachineParameter const paraWave = {"Osci Wave", "Oscillator waveform", 0, 3, MPF_STATE, 0};
+CMachineParameter const paraModWave = {"Mod Wave", "Modulator waveform", 0, 3, MPF_STATE, 0};
+CMachineParameter const paraRoute = {"FM Route Mode", "Modulator Routing Mode", 0, 3, MPF_STATE, 0};
 CMachineParameter const paraTune = {"Finetune", "Pitch finetune", -128, 256, MPF_STATE, 128};
 
 CMachineParameter const *pParameters[] =
@@ -224,7 +224,7 @@ void CTrack::clean(void)
 
 void CTrack::Tick(int note, int volume, int SamplesPerSec)
 {
-	if( note <120)
+	if( note <=NOTE_MAX)
 	{
 		Note = note - 70;
 		float Detune = (float)pmi->Vals[19]*0.0078125f;
@@ -233,7 +233,7 @@ void CTrack::Tick(int note, int volume, int SamplesPerSec)
 		ENV.reset();
 
 	}
-	else if(note == 120)
+	else if(note == NOTE_NOTEOFF)
 	{
 		ENV.noteoff();
 		VCA.noteoff();
@@ -388,13 +388,19 @@ void mi::ParameterTweak(int par, int val)
 
 	if(par==0) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].VCA.attack(val*srMult);
 	if(par==1) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].VCA.decay(val*srMult);
-	if(par==2) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].VCA.sustain(val*srMult);
+	if(par==2) for (i=0; i<MAX_TRACKS ; i++) { 
+		if (val<16) Tracks[i].VCA.sustain(0);
+		else Tracks[i].VCA.sustain(val*srMult);
+	}
 	if(par==3) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].VCA.sustainv((float)val/255);
 	if(par==4) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].VCA.release(val*srMult);
 	
 	if(par==5) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.attack(val*srMult);
 	if(par==6) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.decay(val*srMult);
-	if(par==7) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.sustain(val*srMult);
+	if(par==7) for (i=0; i<MAX_TRACKS ; i++) {
+		if(val<16) Tracks[i].ENV.sustain(0);
+		else Tracks[i].ENV.sustain(val*srMult);
+	}
 	if(par==8) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.sustainv((float)val/255);
 	if(par==9) for (i=0; i<MAX_TRACKS ; i++) Tracks[i].ENV.release(val*srMult);
 	
@@ -445,7 +451,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 
 	if(cmd==0x0E)
-		medBreakNote[channel]=val*32* (pCB->GetSamplingRate()/44100);
+		medBreakNote[channel]=val*32.f* (pCB->GetSamplingRate()/44100.f);
 	
 	Tracks[channel].Tick(note,vol,pCB->GetSamplingRate());
 }
@@ -490,14 +496,20 @@ bool mi::DescribeValue(char * txt, const int param, const int value)
 		return true;
 	case 0:
 	case 1:
-	case 2:
 	case 4:
 	case 5:
 	case 6:
-	case 7:
 	case 9:
 		{
 			std::sprintf(txt,"%.f ms",value/44.1);return true;
+		}
+		break;
+	case 2:
+	case 7:
+		{
+			if(value <16) std::sprintf(txt,"Until noteoff");
+			else std::sprintf(txt,"%.f ms",value/44.1);
+			return true;
 		}
 		break;
 	case 10:
