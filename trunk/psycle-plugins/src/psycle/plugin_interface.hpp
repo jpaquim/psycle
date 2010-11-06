@@ -38,9 +38,9 @@ int const MAX_BUFFER_LENGTH = 256;
 	/// value of B-9. NOTE: C-0 is note number 0!
 	int const NOTE_MAX = 119;
 	/// value of the "off" note
-	int const NOTE_NO = 120;
+	int const NOTE_NOTEOFF = 120;
 	/// empty value
-	int const NOTE_OFF = 255;
+	int const NOTE_NONE = 255;
 ///\}
 
 /// the pi constant.
@@ -75,7 +75,17 @@ class CMachineParameter {
 	/// shows a tweakable knob and text
 	int const MPF_STATE = 2;
 ///\}
-int const CBID_GET_WINDOW  = 1;
+
+///\name CFxCallback::CallbackFunc codes
+///\{
+	int const CBID_GET_WINDOW = 0;
+///\}
+///\name CMachineInfo::HostEvent codes
+///\{
+	/// Sent by the host to ask if this plugin uses the auxiliary column. return true or false.
+	int const HE_NEEDS_AUX_COLUMN = 0;
+///\}
+
 /*////////////////////////////////////////////////////////////////////////*/
 
 /// class defining the machine properties
@@ -193,16 +203,16 @@ class CMachineInterface {
 		virtual void unused0(int /*track*/) {}
 		//
 		virtual bool unused1(int /*track*/) const { return false; }
-		///\todo: doc (Unimplement right now)
-		virtual void MidiEvent(int /*channel*/, int /*value*/, int /*value23*/) {}
+		///\todo: called by the host to send a midi event (mcm) to the plugin.
+		virtual void MidiEvent(int /*channel*/, int /*midievent*/, int /*value*/) {}
 		//
 		virtual void unused2(unsigned int const /*data*/) {}
 		/// Called by the host when it requires to show a description of the value of a parameter.
 		/// return false to tell the host to show the numerical value. Return true and fill txt with
 		/// some text to show that text to the user.
-		virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/) { return false; }
-		///\todo: doc (Unimplemented right now)
-		virtual bool HostEvent(int /*wave*/, int /*note*/, float /*volume*/) { return false; }
+		virtual bool DescribeValue(char * /*txt*/, int const /*param*/, int const /*value*/) { return false; }
+		///\todo: called by the host to send a control event or ask for information. See HostEvent codes.
+		virtual bool HostEvent(int const /*eventNr*/, int const /*val1*/, float const /*val2*/) { return false; }
 		/// Called by the host when there is some data to play. Only notes and pattern commands will be informed
 		/// this way. Tweaks call ParameterTweak
 		virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
