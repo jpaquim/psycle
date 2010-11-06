@@ -19,9 +19,14 @@ void inline erase_all_nans_infinities_and_denormals(float & sample) {
 	#if !defined DIVERSALIS__CPU__X86
 		// just do nothing.. not crucial for other archs
 	#else
-		std::uint32_t bits(reinterpret_cast<std::uint32_t&>(sample));
+		union {
+			float sample;
+			std::uint32_t bits;
+		} u;
+		u.sample = sample;
+
 		std::uint32_t const exponent_mask(0x7f800000);
-		std::uint32_t const exponent(bits & exponent_mask);
+		std::uint32_t const exponent(u.bits & exponent_mask);
 
 		// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
 		std::uint32_t const not_nan_nor_infinity(exponent < exponent_mask);
@@ -29,10 +34,8 @@ void inline erase_all_nans_infinities_and_denormals(float & sample) {
 		// exponent > 0 is 0 if denormalized, otherwise 1
 		std::uint32_t const not_denormal(exponent > 0);
 
-		// It does not work for nans!
-		bits *= not_nan_nor_infinity & not_denormal;
-		sample = reinterpret_cast<float&>(bits);
-
+		u.bits *= not_nan_nor_infinity & not_denormal;
+		sample = u.sample;
 	#endif
 }
 
@@ -41,9 +44,14 @@ void inline erase_all_nans_infinities_and_denormals(double & sample) {
 	#if !defined DIVERSALIS__CPU__X86
 		// just do nothing.. not crucial for other archs
 	#else
-		std::uint64_t bits(reinterpret_cast<std::uint64_t&>(sample));
+		union {
+			double sample;
+			std::uint64_t bits;
+		} u;
+		u.sample = sample;
+
 		std::uint64_t const exponent_mask(0x7f80000000000000ULL);
-		std::uint64_t const exponent(bits & exponent_mask);
+		std::uint64_t const exponent(u.bits & exponent_mask);
 
 		// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
 		std::uint64_t const not_nan_nor_infinity(exponent < exponent_mask);
@@ -51,8 +59,8 @@ void inline erase_all_nans_infinities_and_denormals(double & sample) {
 		// exponent > 0 is 0 if denormalized, otherwise 1
 		std::uint64_t const not_denormal(exponent > 0);
 
-		bits *= not_nan_nor_infinity & not_denormal;
-		sample = reinterpret_cast<double&>(bits);
+		u.bits *= not_nan_nor_infinity & not_denormal;
+		sample = u.sample;
 	#endif
 }
 

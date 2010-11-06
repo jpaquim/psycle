@@ -78,6 +78,7 @@ class thread {
 			#endif
 		}
 
+		/// note: std::thread::hardware_concurrency() is not impacted by the process' scheduler affinity mask.
 		static unsigned int hardware_concurrency() {
 			#if BOOST_VERSION >= 103500
 				return impl_type::hardware_concurrency();

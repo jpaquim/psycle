@@ -111,6 +111,9 @@ namespace exceptions {
 		catch(          std::exception const & e) { rethrow_functor.operator_       (location, &e); } \
 		catch(                 wchar_t const e[]) { rethrow_functor.operator_       (location, &e); } \
 		catch(                  char   const e[]) { rethrow_functor.operator_       (location, &e); } \
+		catch(  signed          char   const e[]) { rethrow_functor.operator_       (location, &e); } \
+		catch(unsigned          char   const e[]) { rethrow_functor.operator_       (location, &e); } \
+		catch(                  char   const & e) { rethrow_functor.operator_       (location, &e); } \
 		catch(  signed          char   const & e) { rethrow_functor.operator_       (location, &e); } \
 		catch(unsigned          char   const & e) { rethrow_functor.operator_       (location, &e); } \
 		catch(  signed     short int   const & e) { rethrow_functor.operator_       (location, &e); } \

@@ -94,6 +94,11 @@
 		#define DIVERSALIS__COMPILER__GNU
 		#undef DIVERSALIS__COMPILER__GNU // was just defined to insert documentation.
 
+		/// llvm clang, autodetected via __clang__.
+		/// To see the predefined macros, run: clang++ -xc++ -std=c++98 -dM -E /dev/null
+		#define DIVERSALIS__COMPILER__CLANG
+		#undef DIVERSALIS__COMPILER__CLANG // was just defined to insert documentation.
+
 		/// bcc, autodetected via __BORLAND__.
 		#define DIVERSALIS__COMPILER__BORLAND
 		#undef DIVERSALIS__COMPILER__BORLAND // was just defined to insert documentation.
@@ -136,7 +141,7 @@
 		#define __cplusplus
 	#endif
 
-///////////////////////
+////////////////////////
 // netbeans c++ indexer
 
 #elif defined DIVERSALIS__COMPILER__NETBEANS
@@ -144,7 +149,7 @@
 	#define DIVERSALIS__COMPILER__NAME "netbeans"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 
-///////////////////////
+///////////////////////////
 // eclipse cdt c++ indexer
 
 #elif defined DIVERSALIS__COMPILER__ECLIPSE
@@ -152,15 +157,23 @@
 	#define DIVERSALIS__COMPILER__NAME "eclipse"
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 
-////////////////
-// gnu compiler
+//////////////////////////////////////////////////////////////////////////////////////////
+// gnu compiler, and other compilers that disguise as gnu gcc (llvm clang, intel icc ...)
 
 #elif defined __GNUC__
 	#define DIVERSALIS__COMPILER
 	#define DIVERSALIS__COMPILER__GNU
-	#if defined __INTEL_COMPILER
+	#if defined __clang__
+		#define DIVERSALIS__COMPILER__CLANG
+		#if 0 // use gnu version for now
+			#define DIVERSALIS__COMPILER__VERSION__MAJOR __clang__major__
+			#define DIVERSALIS__COMPILER__VERSION__MINOR __clang__minor__
+			#define DIVERSALIS__COMPILER__VERSION__PATCH __clang__patchlevel__
+		#endif
+		#define DIVERSALIS__COMPILER__NAME "clang"
+	#elif defined __INTEL_COMPILER
 		#define DIVERSALIS__COMPILER__INTEL
-		#define DIVERSALIS__COMPILER__NAME "icc-gcc"
+		#define DIVERSALIS__COMPILER__NAME "icc"
 	#else
 		#define DIVERSALIS__COMPILER__NAME "gcc"
 	#endif

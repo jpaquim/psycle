@@ -100,7 +100,7 @@ namespace loggers {
 		};
 		
 		/// the compile-time threshold level for the loggers
-		int const compiled_threshold(
+		level const compiled_threshold(
 			#if defined UNIVERSALIS__OS__LOGGERS__LEVELS__COMPILED_THRESHOLD
 				UNIVERSALIS__OS__LOGGERS__LEVELS__COMPILED_THRESHOLD
 			#elif defined NDEBUG
@@ -112,16 +112,16 @@ namespace loggers {
 	}
 
 	/// handling of threshold levels for a logger.
-	template<typename Logger, const levels::level Threshold_Level = levels::compiled_threshold>
+	template<typename Logger, levels::level Threshold_Level = levels::compiled_threshold>
 	class logger_threshold_level {
 		public:
 			typedef Logger logger;
 			operator logger & () const throw() { return logger::singleton(); }
 			int threshold_level() const throw() { return Threshold_Level; }
-			operator bool () const throw() { return threshold_level() >= levels::compiled_threshold; }
+			operator bool () const throw() { return Threshold_Level >= levels::compiled_threshold; }
 			bool operator()() const throw() { return *this; }
-			void operator()(std::string const & string) throw() { if(*this) logger::singleton()(threshold_level(), string); }
-			void operator()(std::string const & message, compiler::location const & location) throw() { if(*this) logger::singleton()(threshold_level(), message, location); }
+			void operator()(std::string const & string) throw() { if(*this) logger::singleton()(Threshold_Level, string); }
+			void operator()(std::string const & message, compiler::location const & location) throw() { if(*this) logger::singleton()(Threshold_Level, message, location); }
 	};
 
 	/// very low level, debug, flooding output.
