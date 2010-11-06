@@ -6,10 +6,9 @@
 //
 //============================================================================
 #include <psycle/plugin_interface.hpp>
-#include "../CDsp.h"
-#include "../DspLib/Chorus.h"
-#include "../DspLib/Delay.h"
-#include "../DspLib/Phaser.h"
+#include "../dsp/CDsp.h"
+#include "../dsp/Chorus.h"
+#include "../dsp/Phaser.h"
 #include <cstring>
 #include <cmath>
 #include <cstdio>

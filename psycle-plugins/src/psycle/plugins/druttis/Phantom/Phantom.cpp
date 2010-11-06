@@ -15,18 +15,19 @@ using namespace psycle::plugin_interface;
 //				Defines
 //============================================================================
 #define MAC_NAME				"Phantom"
-#define MAC_VERSION				"1.1"
+#define MAC_VERSION				"1.2"
+int const IMAC_VERSION = 0x0120;
 #define MAC_AUTHOR				"Druttis"
-#define				MAX_TRACKS				64
-#define				MAX_VOICES				2
+#define	MAX_VOICES				2
 #define NUM_TICKS				32
 //============================================================================
 //				Wavetable
 //============================================================================
 #define SINE(x) ((float) sin((float) (x) * PI2))
 float				wavetable[NUMWAVEFORMS][WAVESIZE];
-char				wave_str[NUMWAVEFORMS + 5][16];
-char const			*filt_str[4] = { "LP-12", "LP-24", "HP-12", "HP-24" };
+char const *wave_str[NUMWAVEFORMS] = {"Sine","Triangle","Square", "Saw. up",
+					"Saw. down", "Sine->Saw.", "Square-Sine", "Sine->Blank"};
+char const			*filt_str[5] = { "LP-12", "LP-24", "HP-12", "HP-24", "LP-36" };
 //============================================================================
 //				Parameters
 //============================================================================
@@ -106,7 +107,7 @@ CMachineParameter const paramVcaSustain = { "VCA Sustain", "VCA Sustain", 0, 255
 #define PARAM_VCA_RELEASE (PARAM_VCA_SUSTAIN + PARAM_ROWS)
 CMachineParameter const paramVcaRelease = { "VCA Release", "VCA Release", 1, 255, MPF_STATE, 128 };
 #define PARAM_AMP_LEVEL (PARAM_VCA_RELEASE + PARAM_ROWS)
-CMachineParameter const paramAmpLevel = { "Amp. Level", "Amp. Level", 0, 255, MPF_STATE, 128 };
+CMachineParameter const paramAmpLevel = { "Amp. Level", "Amp. Level", 0, 255, MPF_STATE, 85 };
 
 #define PARAM_VCF_ATTACK 7
 CMachineParameter const paramVcfAttack = { "VCF Attack", "VCF Attack", 1, 255, MPF_STATE, 128 };
@@ -120,7 +121,7 @@ CMachineParameter const paramVcfRelease = { "VCF Release", "VCF Release", 1, 255
 CMachineParameter const paramVcfAmount = { "VCF Amount", "VCF Amount", -127, 127, MPF_STATE, 48 };
 
 #define PARAM_FILTER_TYPE 8
-CMachineParameter const paramFilterType = { "Filter Type", "Filter Type", 0, 3, MPF_STATE, 0 };
+CMachineParameter const paramFilterType = { "Filter Type", "Filter Type", 0, 4, MPF_STATE, 0 };
 #define PARAM_FILTER_FREQ (PARAM_FILTER_TYPE + PARAM_ROWS)
 CMachineParameter const paramFilterFreq = { "Filter Freq.", "Filter Freq.", 0, 255, MPF_STATE, 64 };
 #define PARAM_FILTER_RES (PARAM_FILTER_FREQ + PARAM_ROWS)
@@ -128,14 +129,14 @@ CMachineParameter const paramFilterRes = { "Filter Res.", "Filter Res.", 0, 255,
 #define PARAM_FILTER_RATE (PARAM_FILTER_RES + PARAM_ROWS)
 CMachineParameter const paramFilterRate = { "F. LFO Rate", "F. LFO Rate", 0, 255, MPF_STATE, 0 };
 #define PARAM_FILTER_AMOUNT (PARAM_FILTER_RATE + PARAM_ROWS)
-CMachineParameter const paramFilterAmount = { "F. LFO Amt.", "F. LFO Amt.", 0, 255, MPF_STATE, 0 };
+CMachineParameter const paramFilterAmount = { "F. LFO Amt.", "F. LFO Amt.", 0, 8160, MPF_STATE, 0 };
 
 #define PARAM_PHASER_MIN 9
 CMachineParameter const paramPhaserMin = { "Phaser Min.", "Phaser Min.", 0, 255, MPF_STATE, 0 };
 #define PARAM_PHASER_MAX (PARAM_PHASER_MIN + PARAM_ROWS)
 CMachineParameter const paramPhaserMax = { "Phaser Max.", "Phaser Max.", 0, 255, MPF_STATE, 0 };
 #define PARAM_PHASER_RATE (PARAM_PHASER_MAX + PARAM_ROWS)
-CMachineParameter const paramPhaserRate = { "Phaser Rate", "Phaser Rate", 0, 255, MPF_STATE, 0 };
+CMachineParameter const paramPhaserRate = { "Phaser Rate", "Phaser Rate", 0, 8160, MPF_STATE, 0 };
 #define PARAM_PHASER_FB (PARAM_PHASER_RATE + PARAM_ROWS)
 CMachineParameter const paramPhaserFB = { "Phaser F.B.", "Phaser F.B.", 0, 255, MPF_STATE, 0 };
 #define PARAM_PHASER_DEPTH (PARAM_PHASER_FB + PARAM_ROWS)
@@ -146,13 +147,12 @@ CMachineParameter const paramChorusDelay = { "Chorus Delay", "Chorus Delay", 0, 
 #define PARAM_CHORUS_DEPTH (PARAM_CHORUS_DELAY + PARAM_ROWS)
 CMachineParameter const paramChorusDepth = { "Chorus Depth", "Chorus Depth", 0, 255, MPF_STATE, 0 };
 #define PARAM_CHORUS_RATE (PARAM_CHORUS_DEPTH + PARAM_ROWS)
-CMachineParameter const paramChorusRate = { "Chorus Rate", "Chorus Rate", 0, 255, MPF_STATE, 0 };
+CMachineParameter const paramChorusRate = { "Chorus Rate", "Chorus Rate", 0, 8160, MPF_STATE, 0 };
 #define PARAM_CHORUS_FB (PARAM_CHORUS_RATE + PARAM_ROWS)
 CMachineParameter const paramChorusFB = { "Chorus F.B.", "Chorus F.B.", 0, 255, MPF_STATE, 0 };
 #define PARAM_CHORUS_MIX (PARAM_CHORUS_FB + PARAM_ROWS)
 CMachineParameter const paramChorusMix = { "Chorus Mix", "Chorus Mix", 0, 255, MPF_STATE, 0 };
 
-#define NUM_PARAMS (PARAM_ROWS * 5)
 //============================================================================
 //				Parameter list
 //============================================================================
@@ -220,8 +220,9 @@ CMachineParameter const *pParams[] = {
 //============================================================================
 CMachineInfo const MacInfo (
 	MI_VERSION,
+	IMAC_VERSION,
 	GENERATOR,
-	NUM_PARAMS,
+	sizeof pParams / sizeof *pParams,
 	pParams,
 #ifdef _DEBUG
 	MAC_NAME " " MAC_VERSION " (Debug)",
@@ -250,18 +251,11 @@ public:
 	virtual void SequencerTick();
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int numtracks);
-	inline int GetSamplingRate()
-	{
-		return pCB->GetSamplingRate();
-	}
-	inline int GetTickLength()
-	{
-		return pCB->GetTickLength();
-	}
+
 public:
 	GLOBALS globals;
 	CVoice				voices[MAX_TRACKS][MAX_VOICES];
-	int								ticks_remaining;
+	int					ticks_remaining;
 
 	//				Phaser
 	float				phaser_min;
@@ -282,7 +276,7 @@ public:
 	float				chorus_right_phase;
 
 	//
-	float				inertia_factor;
+	float				inertia_samples;
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
@@ -295,9 +289,9 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[NUM_PARAMS];
+	Vals = new int[MacInfo.numParameters];
 
-	inertia_factor=0.0f;
+	inertia_samples=0.0f;
 	globals.filter_freq.current=0.0f;
 	globals.filter_res.current=0.0f;
 
@@ -311,20 +305,7 @@ mi::mi()
 	//
 	int i;
 	float t;
-	//
-	sprintf(wave_str[0], "Sine");
-	sprintf(wave_str[1], "Triangle");
-	sprintf(wave_str[2], "Square");
-	sprintf(wave_str[3], "Saw. up");
-	sprintf(wave_str[4], "Saw. down");
-	sprintf(wave_str[5], "Sine->Saw.");
-	sprintf(wave_str[6], "Square-Sine");
-	sprintf(wave_str[7], "Sine->Blank");
-	sprintf(wave_str[8], "Vowel A");
-	sprintf(wave_str[9], "Vowel E");
-	sprintf(wave_str[10], "Vowel I");
-	sprintf(wave_str[11], "Vowel O");
-	sprintf(wave_str[12], "Vowel U");
+
 	//				Render
 	for (i = 0; i < WAVESIZE; i++) {
 		t = (float) i / (float) WAVESIZE;
@@ -382,6 +363,9 @@ mi::~mi()
 
 void mi::Init()
 {
+	globals.samplingrate= pCB->GetSamplingRate();
+
+	inertia_samples = (4096.0f/NUM_TICKS)*(globals.samplingrate/44100.f);
 	//
 	//
 	phaser_left.Init();
@@ -390,8 +374,8 @@ void mi::Init()
 	phaser_right_phase = 0.0f;
 	//
 	//
-	chorus_left.Init(2047);
-	chorus_right.Init(2047);
+	chorus_left.Init((paramChorusDelay.MaxValue*8.f+paramChorusDepth.MaxValue*4.f)*(globals.samplingrate/44100.f));
+	chorus_right.Init((paramChorusDelay.MaxValue*8.f+paramChorusDepth.MaxValue*4.f)*(globals.samplingrate/44100.f));
 	chorus_left_phase = 0.0f;
 	chorus_right_phase = 0.0f;
 	//
@@ -488,31 +472,31 @@ void mi::ParameterTweak(int par, int val)
 			globals.osc_level[par - PARAM_OSC1_LEVEL] = (float) val / 255.0f;
 			break;
 		case PARAM_VCA_ATTACK:
-			globals.vca_attack = (float) val * 256.0f;
+			globals.vca_attack = (float) val * 256.0f * (float)globals.samplingrate / 44100.f;
 			break;
 		case PARAM_VCA_DECAY:
-			globals.vca_decay = (float) val * 256.0f;
+			globals.vca_decay = (float) val * 256.0f * (float)globals.samplingrate / 44100.f;
 			break;
 		case PARAM_VCA_SUSTAIN:
 			globals.vca_sustain = (float) val / 255.0f;
 			break;
 		case PARAM_VCA_RELEASE:
-			globals.vca_release = (float) val * 256.0f;
+			globals.vca_release = (float) val * 256.0f * (float)globals.samplingrate / 44100.f;
 			break;
 		case PARAM_AMP_LEVEL:
 			globals.amp_level = (float) val / 255.0f;
 			break;
 		case PARAM_VCF_ATTACK:
-			globals.vcf_attack = (float) val * 8.0f;
+			globals.vcf_attack = (float) val * (256.f/NUM_TICKS) * (float)globals.samplingrate / 44100.f;
 			break;
 		case PARAM_VCF_DECAY:
-			globals.vcf_decay = (float) val * 8.0f;
+			globals.vcf_decay = (float) val * (256.f/NUM_TICKS) * (float)globals.samplingrate / 44100.f;
 			break;
 		case PARAM_VCF_SUSTAIN:
 			globals.vcf_sustain = (float) val / 255.0f;
 			break;
 		case PARAM_VCF_RELEASE:
-			globals.vcf_release = (float) val * 8.0f;
+			globals.vcf_release = (float) val * (256.f/NUM_TICKS) * (float)globals.samplingrate / 44100.f;
 			break;
 		case PARAM_VCF_AMOUNT:
 			globals.vcf_amount = (float) val / 127.0f;
@@ -521,25 +505,25 @@ void mi::ParameterTweak(int par, int val)
 			globals.filter_type = val;
 			break;
 		case PARAM_FILTER_FREQ:
-			SetAFloat(&globals.filter_freq, (float) val / 255.0f);
+			SetAFloat(globals.filter_freq, (float) val / 255.0f * (44100.f/globals.samplingrate), inertia_samples);
 			break;
 		case PARAM_FILTER_RES:
-			SetAFloat(&globals.filter_res, (float) val / 255.0f);
+			SetAFloat(globals.filter_res, (float) val / 255.0f, inertia_samples);
 			break;
 		case PARAM_FILTER_RATE:
-			globals.filter_increment = (float) (val * WAVESIZE) / 12.75f / (float) pCB->GetSamplingRate();
+			globals.filter_increment = (float) (val * WAVESIZE*NUM_TICKS/408.f) /(float) globals.samplingrate;
 			break;
 		case PARAM_FILTER_AMOUNT:
 			globals.filter_amount = (float) val / 255.0f;
 			break;
 		case PARAM_PHASER_MIN:
-			phaser_min = (float) val * 128.0f / (float) pCB->GetSamplingRate();
+			phaser_min = (float) val * 128.0f/globals.samplingrate;
 			break;
 		case PARAM_PHASER_MAX:
-			phaser_max = (float) val * 128.0f / (float) pCB->GetSamplingRate();
+			phaser_max = (float) val *  128.0f/globals.samplingrate;
 			break;
 		case PARAM_PHASER_RATE:
-			phaser_increment = (float) (val * WAVESIZE) / 408.0f /*12.75f*/ / (float) pCB->GetSamplingRate();
+			phaser_increment = (float) (val * WAVESIZE/408.f) /(float) globals.samplingrate;
 			break;
 		case PARAM_PHASER_FB:
 			tmp = (float) val / 255.0f;
@@ -552,13 +536,13 @@ void mi::ParameterTweak(int par, int val)
 			phaser_right.SetDepth(tmp);
 			break;
 		case PARAM_CHORUS_DELAY:
-			chorus_delay = (float) val * 8.0f;
+			chorus_delay = (float) val * 8.0f * (globals.samplingrate/44100.f);
 			break;
 		case PARAM_CHORUS_DEPTH:
-			chorus_depth = (float) val * 4.0f;
+			chorus_depth = (float) val * 4.0f * (globals.samplingrate/44100.f);
 			break;
 		case PARAM_CHORUS_RATE:
-			chorus_increment = (float) (val * WAVESIZE) / 408.0f /*12.75f*/ / (float) pCB->GetSamplingRate();
+			chorus_increment = (float) (val * WAVESIZE/408.f) /(float) globals.samplingrate;
 			break;
 		case PARAM_CHORUS_FB:
 			tmp = (float) val / 255.0f;
@@ -604,7 +588,16 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		case PARAM_OSC4_LEVEL:
 		case PARAM_OSC5_LEVEL:
 		case PARAM_OSC6_LEVEL:
-			sprintf(txt, "%.2f %%", (float) value * 100.0f / 255.0f);
+			if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 255.0f));
+			else sprintf(txt, "-inf dB");
+			break;
+		case PARAM_OSC1_FINE:
+		case PARAM_OSC2_FINE:
+		case PARAM_OSC3_FINE:
+		case PARAM_OSC4_FINE:
+		case PARAM_OSC5_FINE:
+		case PARAM_OSC6_FINE:
+			sprintf(txt, "%.0f cent", (float) value / 1.28f);
 			break;
 		case PARAM_VCA_ATTACK:
 		case PARAM_VCA_DECAY:
@@ -612,29 +605,41 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		case PARAM_VCF_ATTACK:
 		case PARAM_VCF_DECAY:
 		case PARAM_VCF_RELEASE:
-			sprintf(txt, "%.2f ms.", (float) value * 256000.0f / (float) pCB->GetSamplingRate());
+			sprintf(txt, "%.2f ms.", (float) value * 256.0f / 44.1f);
 			break;
 		case PARAM_VCA_SUSTAIN:
 		case PARAM_VCF_SUSTAIN:
-			sprintf(txt, "%.2f %%", (float) value * 100.0f / 255.0f);
+			if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 255.0f));
+			else sprintf(txt, "-inf dB");
 			break;
 		case PARAM_AMP_LEVEL:
-			sprintf(txt, "%.2f %%", (float) value * 100.0f / 255.0f);
+			if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 255.0f));
+			else sprintf(txt, "-inf dB");
 			break;
 		case PARAM_VCF_AMOUNT:
 			sprintf(txt, "%.2f %%", (float) value * 100.0f / 255.0f);
 			break;
 		case PARAM_FILTER_FREQ:
-			sprintf(txt, "%.2f Hz", ((float) value * (float) pCB->GetSamplingRate() / 255.0f));
+			// All them shoud be a bit logarithmic towards the end.
+			if(Vals[PARAM_FILTER_TYPE] == 0 || Vals[PARAM_FILTER_TYPE] == 2) {
+				std::sprintf(txt,"%.0f Hz",4000.f*(float)value/144.f);
+			} else if(Vals[PARAM_FILTER_TYPE] == 1) {
+				std::sprintf(txt,"%.0f Hz",4000.f*(float)value/100.f);
+			} else if(Vals[PARAM_FILTER_TYPE] == 3) {
+				std::sprintf(txt,"%.0f Hz",15000.f*(float)value/203.f);
+			} else {
+				std::sprintf(txt,"%.0f Hz",8000.f*(float)value/158.f);
+			}
 			break;
 		case PARAM_FILTER_RES:
-			sprintf(txt, "%.2f %%", ((float) value * 100.0f / 255.0f));
+			//todo: in Q instead of percentage.
+			sprintf(txt, "%.2f %%", (float) value * 100.0f / 255.0f);
 			break;
 		case PARAM_FILTER_TYPE:
 			sprintf(txt, "%s", filt_str[value]);
 			break;
 		case PARAM_FILTER_RATE:
-			sprintf(txt, "%.2f Hz", ((float) value / 12.75f));
+			sprintf(txt, "%.2f Hz", ((float) value / 408.));
 			break;
 		case PARAM_FILTER_AMOUNT:
 			sprintf(txt, "%.2f", ((float) value * 100.0f / 255.0f));
@@ -644,7 +649,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			sprintf(txt, "%d Hz", (value * 64));
 			break;
 		case PARAM_PHASER_RATE:
-			sprintf(txt, "%.2f Hz", ((float) value / 12.75f));
+			sprintf(txt, "%.2f Hz", ((float) value / 408.f));
 			break;
 		case PARAM_PHASER_FB:
 			sprintf(txt, "%.2f %%", ((float) value * 100.0f / 255.0f));
@@ -653,13 +658,13 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			sprintf(txt, "%.2f %%", ((float) value * 100.0f / 255.0f));
 			break;
 		case PARAM_CHORUS_DELAY:
-			sprintf(txt, "%.2f ms", ((float) value * 8000.0f / (float) pCB->GetSamplingRate()));
+			sprintf(txt, "%.2f ms", ((float) value * 8.0f / 44.1f));
 			break;
 		case PARAM_CHORUS_DEPTH:
 			sprintf(txt, "%.2f %%", ((float) value * 100.0f / 255.0f));
 			break;
 		case PARAM_CHORUS_RATE:
-			sprintf(txt, "%.2f Hz", ((float) value / 12.75f));
+			sprintf(txt, "%.2f Hz", ((float) value / 408.f));
 			break;
 		case PARAM_CHORUS_FB:
 			sprintf(txt, "%.2f %%", ((float) value * 100.0f / 255.0f));
@@ -681,7 +686,38 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 
 void mi::SequencerTick()
 {
-	//				Code here if this machine is an effect
+	//////////////////////////////////////////////////////////////////
+	//				Check SR change.
+	//////////////////////////////////////////////////////////////////
+	if (globals.samplingrate != pCB->GetSamplingRate())
+	{
+		globals.samplingrate = pCB->GetSamplingRate();
+		inertia_samples = (4096.0f/NUM_TICKS)*(globals.samplingrate/44100.f);
+
+		globals.vca_attack = (float) Vals[PARAM_VCA_ATTACK] * 256.0f * (float)globals.samplingrate / 44100.f;
+		globals.vca_decay = (float) Vals[PARAM_VCA_DECAY] * 256.0f * (float)globals.samplingrate / 44100.f;
+		globals.vca_release = (float) Vals[PARAM_VCA_RELEASE] * 256.0f * (float)globals.samplingrate / 44100.f;
+		globals.vcf_attack = (float) Vals[PARAM_VCF_ATTACK] * (256.f/NUM_TICKS) * (float)globals.samplingrate / 44100.f;
+		globals.vcf_decay = (float) Vals[PARAM_VCF_DECAY] * (256.f/NUM_TICKS) * (float)globals.samplingrate / 44100.f;
+		globals.vcf_release = (float) Vals[PARAM_VCF_RELEASE] * (256.f/NUM_TICKS) * (float)globals.samplingrate / 44100.f;
+
+		SetAFloat(globals.filter_freq, (float) Vals[PARAM_FILTER_FREQ] / 255.0f * (44100.f/globals.samplingrate), 0);
+		SetAFloat(globals.filter_res, globals.filter_res.target, inertia_samples);
+		globals.filter_increment = (float) (Vals[PARAM_FILTER_RATE]  * WAVESIZE*NUM_TICKS/408.f) /(float) globals.samplingrate;
+
+		phaser_min = (float) Vals[PARAM_PHASER_MIN] * 128.0f/globals.samplingrate;
+		phaser_max = (float) Vals[PARAM_PHASER_MAX] * 128.0f/globals.samplingrate;
+		phaser_increment = (float) (Vals[PARAM_PHASER_RATE] * WAVESIZE/408.f) /(float) globals.samplingrate;
+
+		chorus_left.Init((paramChorusDelay.MaxValue*8.f+paramChorusDepth.MaxValue*4.f)*(globals.samplingrate/44100.f));
+		chorus_right.Init((paramChorusDelay.MaxValue*8.f+paramChorusDepth.MaxValue*4.f)*(globals.samplingrate/44100.f));
+		chorus_delay = (float) Vals[PARAM_CHORUS_DELAY] * 8.0f * (globals.samplingrate/44100.f);
+		chorus_depth = (float) Vals[PARAM_CHORUS_DEPTH] * 4.0f * (globals.samplingrate/44100.f);
+		chorus_increment = (float) (Vals[PARAM_CHORUS_RATE] * WAVESIZE/408.f) /(float) globals.samplingrate;
+
+
+			
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -692,12 +728,6 @@ void mi::SequencerTick()
 
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	//////////////////////////////////////////////////////////////////
-	//				Compute global stuff
-	//////////////////////////////////////////////////////////////////
-
-	inertia_factor = 512.0f / (float) GetTickLength();
-
 	//////////////////////////////////////////////////////////////////
 	//				Volume
 	//////////////////////////////////////////////////////////////////
@@ -721,9 +751,9 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	//				Route
 	//////////////////////////////////////////////////////////////////
 
-	if (note == 120) {
+	if (note==NOTE_NOTEOFF) {
 		voices[channel][0].NoteOff();
-	} else if (note < 120) {
+	} else if (note<=NOTE_MAX) {
 		voices[channel][0].NoteOff();
 		voices[channel][1] = voices[channel][0];
 		voices[channel][0].NoteOn(note, vol);
@@ -754,13 +784,6 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 	float *psamplesright2 = psamplesright;
 	float rnd;
 	//////////////////////////////////////////////////////////////////
-	//				Check SR change.
-	//////////////////////////////////////////////////////////////////
-	if (globals.samplingrate != GetSamplingRate())
-	{
-		globals.samplingrate = GetSamplingRate();
-	}
-	//////////////////////////////////////////////////////////////////
 	//				Adjust sample pointers
 	//////////////////////////////////////////////////////////////////
 	--psamplesleft2;
@@ -780,8 +803,8 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 			//////////////////////////////////////////////////////////
 			//				Intertia parameters
 			//////////////////////////////////////////////////////////
-			AnimateAFloat(&globals.filter_freq, inertia_factor);
-			AnimateAFloat(&globals.filter_res, inertia_factor);
+			AnimateAFloat(globals.filter_freq);
+			AnimateAFloat(globals.filter_res);
 		}
 		//////////////////////////////////////////////////////////////
 		//				Compute amount of samples to render for all voices

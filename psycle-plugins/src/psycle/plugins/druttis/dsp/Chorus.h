@@ -81,7 +81,8 @@ public:
 
 	inline void SetDelay(float delay)
 	{
-		float tmp = (float) inpos - delay;
+		float tmp = (float) (inpos - delay);
+		tmp += (float) mask + 1.f;
 		outpos = f2i(tmp);
 		frac = tmp - (float) outpos;
 		outpos &= mask;
