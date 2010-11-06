@@ -21,8 +21,7 @@ using namespace psycle::plugin_interface;
 
 #define MAX_PATH_A_LA_CON (1 << 12) // TODO total shit.. paths are loaded/saved with this length!
 #define FILEVERSION 3 // TODO fix endianess and max path and upgrade the version
-#define MAXMIDICHAN MAX_TRACKS
-#define MAXINSTR MAXMIDICHAN
+#define MAXINSTR 64
 
 struct INSTR {
 	int bank;
@@ -61,7 +60,7 @@ CMachineParameter const paraInstr = {
 };
 
 CMachineParameter const paraChannel = {
-	"No.", "Number", 0, MAXMIDICHAN-1, MPF_STATE, 0
+	"Midi Channel (aux col)", "Midi channel. Select with aux column", 0, MAXINSTR-1, MPF_STATE, 0
 };
 
 CMachineParameter const paraBank = {
@@ -73,11 +72,11 @@ CMachineParameter const paraProgram = {
 };
 
 CMachineParameter const paraPitchBend = {
-	"Pitch bend", "Pitch", -32767, 32767, MPF_STATE, 0
+	"Pitch bend amount", "Max Pitch bend", 0, 16384, MPF_STATE, 8192
 };
 
 CMachineParameter const paraWheelSens = {
-	"Wheel sens", "Wheel", 0, 127, MPF_STATE, 0
+	"Pitch bend Range", "Pitch Wheel sensitivity range", 0, 72, MPF_STATE, 2
 };
 
 CMachineParameter const paraReverb = {
@@ -141,7 +140,7 @@ CMachineParameter const paraInter = {
 };
 
 CMachineParameter const paraGain = {
-	"Gain", "Gain", 0, 256, MPF_STATE, 64
+	"Global Gain", "Global Gain", 0, 256, MPF_STATE, 64
 };
 
 CMachineParameter const paraNull = {
@@ -231,11 +230,11 @@ CMachineInfo const MacInfo (
 		"Usage:\n"
 		"\n"
 		"C-4 02 03 0C20\tC4 - note\n"
-		"\t\t02 - instrument number (required!)\n"
+		"\t\t02 - instrument preset (required)\n"
 		"\t\t03 - machine number\n"
 		"\t\t0Cxx - (optional) volume at note on (00-7F)\n"
 		"\n"
-		"off 02 03\t\tnote-off (the instrument number is required!)\n"
+		"off 02 03\t\tnote-off (the instrument preset is required!)\n"
 		"\n"
 		"ported by Sartorius",
 	"Load SoundFont",
@@ -248,19 +247,18 @@ class mi : public CMachineInterface {
 		virtual ~mi();
 
 		virtual void Init();
-		virtual void Work(float *psamplesleft, float* psamplesright, int numsamples,int tracks);
-		virtual bool DescribeValue(char* txt,int const param, int const value);
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
 		virtual void SequencerTick();
-		virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
+		virtual void ParameterTweak(int par, int val);
+		virtual void Work(float *psamplesleft, float* psamplesright, int numsamples,int tracks);
 		virtual void Stop();
-
 		virtual void PutData(void * pData);
 		virtual void GetData(void * pData);
-
 		virtual int GetDataSize() { return sizeof SYNPAR; }
-
+		virtual void Command();
+		virtual void MidiEvent(int channel, int midievent, int value);
+		virtual bool DescribeValue(char* txt,int const param, int const value);
+		virtual bool HostEvent(const int eventNr, int const val1, float const val2);
+		virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 		
 		SYNPAR globalpar;
 
@@ -277,7 +275,7 @@ class mi : public CMachineInterface {
 		
 		int max_bank_index;
 
-		int lastnote[MAXINSTR][MAXMIDICHAN];
+		int lastnote[MAXINSTR][MAX_TRACKS];
 
 		//reverb
 		double roomsize, damping, width, r_level;
@@ -354,7 +352,7 @@ void mi::Init() {
 	fluid_settings_setnum(settings, "synth.sample-rate", samplerate);
 	fluid_settings_setint(settings, "synth.polyphony", globalpar.polyphony);
 	fluid_settings_setint(settings, "synth.interpolation", globalpar.interpolation);
-	fluid_settings_setint(settings, "synth.midi-channels", MAXMIDICHAN);
+	fluid_settings_setint(settings, "synth.midi-channels", MAXINSTR);
 	fluid_settings_setint(settings, "synth.threadsafe-api", 0);
 	fluid_settings_setint(settings, "synth.parallel-render", 0);
 	synth = new_fluid_synth(settings);
@@ -372,11 +370,12 @@ void mi::SetParams() {
 	if(globalpar.chorus_on) {
 		fluid_synth_set_chorus(synth, nr, c_level, speed, depth_ms, type);
 	}
+	fluid_synth_set_gain(synth,globalpar.gain*(1.0/128.0));
 
 	//fluid_synth_system_reset(synth);
 	
 	for(int i = 0; i < MAXINSTR; ++i)
-		for(int y = 0; y < MAXMIDICHAN; ++y)
+		for(int y = 0; y < MAX_TRACKS; ++y)
 			lastnote[i][y]  =255;
 }
 
@@ -400,9 +399,9 @@ void mi::PutData(void* pData) {
 	if (loadingVersion == 2) {
 		readsize -= sizeof(globalpar.gain);
 		globalpar.gain = 25;
-		fluid_synth_set_gain(synth,globalpar.gain*(1.0/128.0));
 	}
 	std::memcpy(&globalpar, pData, readsize);
+	globalpar.version = FILEVERSION;
 
 	new_sf = false;
 
@@ -459,7 +458,7 @@ void mi::GetData(void* pData) {
 
 void mi::Stop() {
 	#define ALL_SOUND_OFF 0x78
-	for(int chan = 0; chan < MAXMIDICHAN; ++chan) {
+	for(int chan = 0; chan < MAX_TRACKS; ++chan) {
 		fluid_synth_cc(synth,chan,ALL_SOUND_OFF,0);
 		for(int i = 0; i < MAXINSTR; ++i)
 			lastnote[i][chan] = 255;
@@ -606,6 +605,7 @@ void mi::ParameterTweak(int par, int val) {
 			fluid_synth_set_interp_method(synth, -1, globalpar.interpolation);
 			break;
 		case e_paraGain:
+			globalpar.gain = val;
 			fluid_synth_set_gain(synth,val*(1.0/128.0));
 			break;
 		}
@@ -631,7 +631,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 bool mi::DescribeValue(char* txt,int const param, int const value) {
 	switch(param) {
 		case e_paraChannel:
-			std::sprintf(txt,"%i (hex %X)",value,value);
+			if (value==9) std::sprintf(txt,"%02X (Drums)",value+1);
+			else std::sprintf(txt,"%02X (Melody)",value+1);
 			return true;
 		case e_paraBank:
 			std::sprintf(txt,"%i",banks[value]);
@@ -639,10 +640,16 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		case e_paraProgram:
 			preset = fluid_synth_get_channel_preset(synth, globalpar.curChannel);
 			if(preset != NULL) {
-				std::sprintf(txt,"%d: %s",(*(preset)->get_num)(preset),(*(preset)->get_name)(preset));
+				std::sprintf(txt,"%d: %s",preset->get_num(preset)+1,preset->get_name(preset));
 			} else {
 				std::sprintf(txt,"(none)");
 			}
+			return true;
+		case e_paraPitchBend:
+			std::sprintf(txt,"%.2f semis", Vals[e_paraWheelSens]*(value-8192)/8192.f);
+			return true;
+		case e_paraWheelSens:
+			std::sprintf(txt,"%.d semis", value);
 			return true;
 		case e_paraReverbOn:
 		case e_paraChorusOn:
@@ -698,7 +705,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 }
 
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
-	if(note < 120) {
+	if(note<=NOTE_MAX) {
 		if(lastnote[ins][channel] != 255) fluid_synth_noteoff(synth, ins, lastnote[ins][channel]);
 		lastnote[ins][channel] = note;
 		if(cmd == 0xC) {
@@ -708,7 +715,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 			fluid_synth_noteon(synth, ins, note, 127);
 		}
 	}
-	if(note == 120) {
+	if(note==NOTE_NOTEOFF) {
 		fluid_synth_noteoff(synth, ins, lastnote[ins][channel]);
 		lastnote[ins][channel] = 255;
 	}
@@ -726,12 +733,28 @@ void mi::Command() {
 }
 
 bool mi::LoadSF(const char * sf_file) {
-	if(fluid_is_soundfont(sf_file)) {
-		if(sf_id) {
-			fluid_synth_sfunload(synth,sf_id, 1);
-			fluid_synth_system_reset(synth);
+	std::string loadfile = sf_file;
+	if(!fluid_is_soundfont(sf_file)) {
+		char txt[1024];
+		std::sprintf(txt, "It's not a SoundFont file or file %s not found! Please, locate it.", sf_file);
+		pCB->MessBox(txt, "SF2 Loader",0);
+
+		char szFilters[]="SF2 (*.sf2)|*.sf2|All Files (*.*)|*.*||";
+		CFileDialog fileDlg (TRUE, "SF2", "*.sf2", OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, NULL);
+		if(fileDlg.DoModal () == IDOK) {
+			std::string sfPathName = fileDlg.GetPathName().GetBuffer(12);
+			loadfile = sfPathName;
 		}
-		sf_id = fluid_synth_sfload(synth, sf_file, 1);
+		else {
+			return false;
+		}
+	}
+	if(fluid_is_soundfont(loadfile.c_str())) {
+		if(sf_id) {
+			Stop();
+			fluid_synth_sfunload(synth,sf_id, 1);
+		}
+		sf_id = fluid_synth_sfload(synth, loadfile.c_str(), 1);
 		if(sf_id == -1) {
 			pCB->MessBox("Error loading!","SF2 Loader",0);
 			sf_id = 0;
@@ -777,14 +800,31 @@ bool mi::LoadSF(const char * sf_file) {
 				}
 			}
 
-		std::sprintf(globalpar.SFPathName, sf_file);
+		std::sprintf(globalpar.SFPathName, loadfile.c_str());
 
 		return true;
-
-	} else {
-		char txt[1024];
-		std::sprintf(txt, "It's not a SoundFont file or file %s not found!", sf_file);
-		pCB->MessBox(txt, "SF2 Loader",0);
+	}
+	else{
+		return false;
+	}
+}
+void mi::MidiEvent(int channel, int midievent, int value) {
+	switch(midievent) {
+		case 0x80: fluid_synth_noteoff(synth, channel, value>>8);break;
+		case 0x90: fluid_synth_noteon(synth, channel, value>>8, value&0xFF);break;
+		case 0xB0: fluid_synth_cc(synth,channel, value>>8,value&0xFF);break;
+		case 0xC0: fluid_synth_program_change(synth, channel, value>>8);break;
+		case 0xD0: fluid_synth_channel_pressure(synth, channel, value>>8);break;
+		case 0xE0: fluid_synth_pitch_bend(synth, channel, 
+					  ((value&0x7F)<<7) + ((value&0x7F00)>>8));break;
+		default:break;
+	}
+}
+bool mi::HostEvent(int const eventNr, int const val1, float const val2) {
+	if (eventNr == HE_NEEDS_AUX_COLUMN) {
+		return true;
+	}
+	else {
 		return false;
 	}
 }

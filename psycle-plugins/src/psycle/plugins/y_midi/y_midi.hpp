@@ -24,7 +24,7 @@ int const IYMIDI_VERSION =0x0110;
 #define MIDI_PATCHCHANGE				0xc0        // patch change
 #define MIDI_CHANPRESSURE				0xd0		// channel pressure
 //===================================================================
-
+#define MAX_MIDI_DEVICES				16
 
 typedef				union
 {
@@ -80,7 +80,7 @@ struct MacParams {
 	int patch16;
 };
 
-psycle::plugin_interface::CMachineParameter const prPort = {"Output Port","Output Port",0,15,psycle::plugin_interface::MPF_STATE,0};
+psycle::plugin_interface::CMachineParameter const prPort = {"Output Port selector","Output Port",0,MAX_MIDI_DEVICES,psycle::plugin_interface::MPF_STATE,0};
 psycle::plugin_interface::CMachineParameter const prPatch1 = {"Program Channel 1","Program Channel 1",0,127,psycle::plugin_interface::MPF_STATE,0};
 psycle::plugin_interface::CMachineParameter const prPatch2 = {"Program Channel 2","Program Channel 2",0,127,psycle::plugin_interface::MPF_STATE,0};
 psycle::plugin_interface::CMachineParameter const prPatch3 = {"Program Channel 3","Program Channel 3",0,127,psycle::plugin_interface::MPF_STATE,0};
@@ -151,24 +151,29 @@ public:
 	virtual void ParameterTweak(int par, int val);
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int tracks);
 	virtual void Stop();
+	virtual void MidiEvent(int channel, int midievent, int value);
 	virtual bool DescribeValue(char* txt,int const param, int const value);
+	virtual bool HostEvent(const int eventNr, int const val1, float const val2);
 	virtual void Command();
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 
 protected:
 	void InitMidi();
 	void FreeMidi();
+	void GetMidiNames();
+	inline midichannel& MidiChannel(int midich) { return numChannel[midich]; };
 	inline midichannel& Channel(int ch) { return numChannel[numC[ch]]; };
 	inline void assignChannel(int ch,int midich) { numC[ch]=midich; };
-	void UpdatePatch(int channel, int patch);
+	void UpdatePatch(int midich, int patch);
 
 private:
-	midichannel numChannel[MIDI_TRACKS]; // List of MAX_TRACKS (16 usually) which hold channel note information
-	int numC[psycle::plugin_interface::MAX_TRACKS]; // Assignation of tracker track to midi channel.
+	midichannel numChannel[MIDI_TRACKS]; // List of MIDI_TRACKS (16 usually) which hold channel note information
+	int numC[psycle::plugin_interface::MAX_TRACKS]; // Assignation from tracker track to midi channel.
 	int notes[psycle::plugin_interface::MAX_TRACKS]; // Last note being played in this track.
+	std::string outputNames[MAX_MIDI_DEVICES];
 	MacParams pars;
 
-	static int midiopencount;
-	static HMIDIOUT handle;
+	static int midiopencount[MAX_MIDI_DEVICES+1];
+	static HMIDIOUT handles[MAX_MIDI_DEVICES+1];
 
 };

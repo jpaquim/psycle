@@ -206,17 +206,16 @@ static const char* GmNames [128] =
 
 static const char* GmDrumSets[11] =
 {
-	"Standard",
-	"Room",
-	"Power",
-	"Electronic",
-	"Analog",
-	"Jazz",
-	"Brush",
-	"Orchestra",
-	"Clavinova",
-	"RX",
-	"C/M"
+	"Standard Drums",// 1 - the only kit specified by General MIDI Level 1
+	"Room", // 9 - more ambient percussive sounds
+	"Power",// 17 - more powerful kick and snare sounds
+	"Electronic",// 25 - emulations of various electronic drum machines
+	"TR-808",// 26 - analog drum kit similar to Roland TR-808
+	"Jazz",// 33 - nearly identical to the Standard kit
+	"Brush",// 41 - many brush sounds added
+	"Orchestra",// 49 - a collection of concert drums and timpani
+	"Sound FX", // 57 - a collection of sound effects
+	"CM-64/CM-32L" // 128 - the standard MT-32 Drum Kit
 };
 
 #endif

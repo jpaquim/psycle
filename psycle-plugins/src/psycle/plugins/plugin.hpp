@@ -215,7 +215,11 @@ class Plugin : protected plugin_interface::CMachineInterface {
 			/// You should rather override the virtual init() function.
 			///\see init()
 			/*override*/ void Init() {
-				Plugin::SequencerTick();
+				samples_per_second_ = static_cast<Real>(pCB->GetSamplingRate());
+				seconds_per_sample_ = 1 / samples_per_second_;
+				sequencer_ticks_per_sequencer_beat_ = pCB->GetTPB();
+				sequencer_beats_per_minute_ = pCB->GetBPM();
+				sequencer_ticks_per_seconds_ = Real(sequencer_ticks_per_sequencer_beat_ * sequencer_beats_per_minute_) / 60;
 				init();
 				initialized_ = true;
 			}
